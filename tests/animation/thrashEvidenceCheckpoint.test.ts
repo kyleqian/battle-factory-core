@@ -99,6 +99,6 @@ describe("MOVE_THRASH source/evidence acceptance", () => {
     const coverage = readFileSync("ANIMATION_COVERAGE.json", "utf8");
     expect(coverage).toContain("\"move\": \"MOVE_THRASH\"");
     expect(coverage).toContain("MOVE_THRASH exact");
-    expect(coverage).toContain("MOVE_DOUBLE_KICK remains independently unsupported");
+    expect(coverage).toContain("MOVE_DOUBLE_KICK now holds a separate 36/36 twice-fresh bilateral exact claim");
   });
 });

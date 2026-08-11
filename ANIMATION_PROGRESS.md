@@ -1,3 +1,11 @@
+# MOVE_DOUBLE_KICK exact — bilateral 36/36 source-body promotion (2026-08-11 worker)
+
+- **State:** Level-50 coverage advances **165→166/276 exact**, 0 partial, 0 staged, and **111→110 unsupported**. Only `MOVE_DOUBLE_KICK` moved; no animation-boundary or unsupported-barrier widening.
+- **Did:** Pinned `Move_DOUBLE_KICK` **0x082d2261..0x082d2293** (`0x32` bytes), both source assets/palettes and callback graph, and lowest legal Level-50 carrier set 146 `FRONTIER_MON_NIDORINA`. Added complete legal bilateral NIDORINA/ONIX parties, a pure source-relative reducer, narrow typed Scene-ON seam, compositor, deterministic asset audit, normalized change maps, and a portable twice-fresh probe/verifier. Caller-supplied Random2 words drive the presentation; the port never advances RNG or owns multi-hit/gameplay state.
+- **Verified:** Player-back and opponent-front oracle frames **227..262** each pass **36/36 reducer/seam/component, software+hardware OAM/matrix/palette/tag/register/audio, immutable-state/raw-RGB/change-map, and production framebuffer** twice fresh. Evidence/raw/map digests are player `e1072af7…` / `435f47a1…` / `46609836…`, opponent `83b37252…` / `9a4ed4ea…` / `8a94f506…`. Fist/child and `AnimTask_ShakeMon(4,0,6,1)` display at RAM+1; source monbg palette transfer is same-display. Independent Thrash, Sleep Powder, and Stun Spore acceptance remains green.
+- **Next:** Supervisor selects the next independent move acceptance unit; do not transfer Double Kick acceptance to another multihit or fist/foot script without its own complete dense proof.
+- **Notes:** No damage, hit-count mechanic, RNG advancement, turn order, controller, round/facility state, canonical recording import, absolute-tick framebuffer lookup, or per-frame pixel/RGB table was added.
+
 # MOVE_POISON_POWDER source/classification checkpoint — assignment mis-scoped (2026-08-11 worker)
 
 - **State:** Coverage remains **165/276 Level-50 exact**, 0 partial, 0 staged, and **111 unsupported**. `MOVE_POISON_POWDER` is not promoted: the source-derived inventory classifies it as `outsideFactory` (**0 Factory carriers**) rather than one of the 276 Level-50 moves, so the assigned **165→166/276** delta and “lowest Level-50 Factory carrier” do not exist without falsifying generated data or widening scope.

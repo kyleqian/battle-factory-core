@@ -1,0 +1,17 @@
+# double-kick-changemap-opponent.txt raw RGB888 — 36 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+227  (first frame)
+  static 228-237
+238  610  35,67-66,98
+  static 239
+240  1297  44,49-103,111
+  static 241
+242  1297  44,49-103,111
+  static 243
+244  1297  44,49-103,111
+  static 245
+246  1297  44,49-103,111
+  static 247-257
+258  610  35,67-66,98
+  static 259-262

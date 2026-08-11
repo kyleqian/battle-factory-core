@@ -880,6 +880,35 @@
    ]
   },
   {
+   "move": "MOVE_DOUBLE_KICK",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-0 three-Pokemon Scene-ON parties stage the lowest Level-50 carrier, set-146 NIDORINA, against legal set-156 ONIX in both player-back and opponent-front orientations; all active NIDORINA choices are constrained to DOUBLE_KICK without injecting damage, hit count, RNG, or turn state",
+    "the exclusive Move_DOUBLE_KICK pointer interval 0x082d2261..0x082d2293 and first inactive cleanup pass 36/36 source reducer, typed seam, task/sprite topology, software and hardware OAM/matrix/palette/tag/register/audio, immutable battle-state, raw-RGB/change-map, and production-framebuffer checks twice fresh at frames 227-262 in both orientations",
+    "the pure reducer ports asynchronous HANDS_AND_FEET and IMPACT loads, target monbg and 12/8 alpha, four caller-supplied Random2 words, gFistFootRandomPosSpriteTemplate with its gBasicHitSplatSpriteTemplate child, AnimTask_ShakeMon(4,0,6,1), target-panned SE_M_VITAL_THROW2, wait, cleanup, and first inactive age without advancing RNG or owning multi-hit mechanics",
+    "the narrow NIDORINA/ONIX compositor reproduces the source component display latches: plain fist/child OAM and ShakeMon target motion at RAM+1, resource palette transfer at RAM+1, and the source monbg OBJ-to-BG palette copy on the transition display; HANDS_AND_FEET and IMPACT assets audit byte-for-byte against pinned source PNGs",
+    "MOVE_THRASH remains independently exact from its own 103/103 bilateral dense acceptance; shared fist/hitsplat source did not transfer either move's acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-double-kick-player-nidorina-opponent-onix.json",
+    "tools/battle-lab/mechanic-double-kick-opponent-nidorina-player-onix.json",
+    "tools/compare/fixtures/double-kick-player-nidorina-opponent-onix.json",
+    "tools/compare/fixtures/double-kick-opponent-nidorina-player-onix.json",
+    "tools/compare/doubleKickProbe.py",
+    "tools/compare/doubleKickPortable.ts",
+    "tools/compare/doubleKickSourceAudit.ts",
+    "tools/compare/doubleKickAssetAudit.ts",
+    "tools/compare/evidence/double-kick-changemap-player.txt",
+    "tools/compare/evidence/double-kick-changemap-opponent.txt",
+    "src/animation/doubleKick.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/doubleKick.test.ts",
+    "tests/animation/doubleKickSource.test.ts",
+    "tests/animation/doubleKickEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DOUBLE_TEAM",
    "status": "exact",
    "covered": [
@@ -4015,7 +4044,7 @@
     "the pure reducer ports async IMPACT/HANDS_AND_FEET resource loads, all three Random2-supplied gFistFootRandomPosSpriteTemplate/basic-hitsplat child pairs, source allocator slots, Thrash horizontal affine loop, vertical motion task, all three target-panned sounds, and cleanup without owning battle state or RNG",
     "the narrow TAUROS/ONIX seam and compositor reproduce source OAM/matrix/palette/tag/register/audio state, raw RGB and normalized change maps, and all production framebuffers; plain fist/hitsplat OAM is RAM+1, the horizontal affine task is RAM+2, and the source-created first ShakeMonInPlace write plus its task cadence are modeled from the script scheduler",
     "each 4/0/7/1 invocation and the 8/0/16/1 invocation independently proves RAM+2 target-outline pixels outside the complete 32x32 fist/hitsplat OAM bounds (94.2-98.1% fit versus 60.5-70.6% at RAM+1), in both orientations",
-    "MOVE_DOUBLE_KICK remains independently unsupported: its wider 11-carrier script has a distinct 20-frame fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup body; shared fist/hitsplat source transfers no acceptance"
+    "MOVE_DOUBLE_KICK now holds a separate 36/36 twice-fresh bilateral exact claim for its distinct fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup body; shared fist/hitsplat source transferred no acceptance in either direction"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-thrash-player-tauros-opponent-onix.json",
@@ -5277,7 +5306,7 @@
     "MOVE_THRASH",
     "MOVE_DOUBLE_KICK"
    ],
-   "goal": "MOVE_THRASH exact: its sole legal Level-50 set-408 TAUROS body passes twice-fresh 103/103 bilateral source reducer, typed seam, task/sprite allocator, software/hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB/change-map, and production framebuffer acceptance through first inactive cleanup. Its own maps retain plain fist/foot and child OAM plus vertical position at RAM+1, the horizontal affine task at RAM+2, and all three ShakeMonInPlace target outlines at RAM+2 (94.2-98.1% target-palette witness fit versus 60.5-70.6% at RAM+1). MOVE_DOUBLE_KICK remains independently unsupported: its 11-carrier body has a distinct 20-frame fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup acceptance unit; shared sprite source transfers no acceptance."
+   "goal": "MOVE_THRASH exact: its sole legal Level-50 set-408 TAUROS body passes twice-fresh 103/103 bilateral source reducer, typed seam, task/sprite allocator, software/hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB/change-map, and production framebuffer acceptance through first inactive cleanup. Its own maps retain plain fist/foot and child OAM plus vertical position at RAM+1, the horizontal affine task at RAM+2, and all three ShakeMonInPlace target outlines at RAM+2 (94.2-98.1% target-palette witness fit versus 60.5-70.6% at RAM+1). MOVE_DOUBLE_KICK independently passes its distinct 36/36 bilateral fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup acceptance unit twice fresh. Shared sprite source transfers no acceptance."
   }
  ],
  "variantAudits": {

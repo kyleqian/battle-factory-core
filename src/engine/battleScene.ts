@@ -1013,6 +1013,7 @@ import {
   sceneOnSlashView,
   sceneOnLickView,
   sceneOnCounterView,
+  sceneOnDoubleKickView,
   sceneOnThrashView,
   sceneOnThrashDisplayedTargetOffset,
   sceneOnCrabHammerView,
@@ -1452,6 +1453,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const nidorinaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NIDORINA!;
 const taurosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).TAUROS!;
 const ninetalesFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NINETALES!;
 const quilavaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).QUILAVA!;
@@ -2650,6 +2652,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const nidorinaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NIDORINA!;
 const taurosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).TAUROS!;
 const ninetalesBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NINETALES!;
 const quilavaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).QUILAVA!;
@@ -39516,6 +39519,110 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
       "COUNTER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DOUBLE_KICK") {
+    const view = sceneOnDoubleKickView(state);
+    const displayed = sceneOnDoubleKickView({ ...state, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "NIDORINA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "NIDORINA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DOUBLE_KICK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const nidorina = playerToOpponent ? nidorinaBackSprite : nidorinaFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // Double Kick's own dense maps confirm the two already-source-proven
+    // component latches from COUNTER: both plain fist/child OAM and
+    // AnimTask_ShakeMon display RAM+1. The task permanently overwrites the
+    // opponent-front idle x2 when it starts, just as Counter does.
+    const targetX2 = state.age - 1 < 10
+      ? targetIdle.x2
+      : displayed.targetX2;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const effectBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      nidorina.tileset,
+      nidorina.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        256,
+        0,
+        0,
+        256,
+        12,
+        8,
+        false,
+      );
+    }
+    if (displayed.fist) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.fist.x - 16,
+        displayed.fist.y - 16,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "NIDORINA",
+        level: 50,
+        gender: profile.opponentGender ?? (playerToOpponent ? "male" : "female"),
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "NIDORINA" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "NIDORINA used" : "Foe NIDORINA used",
+      "DOUBLE KICK!",
       99,
     );
     return;

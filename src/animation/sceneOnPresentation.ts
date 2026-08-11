@@ -583,6 +583,11 @@ import {
   type ThrashState,
 } from "./thrash.ts";
 import {
+  doubleKickAtAge,
+  type DoubleKickRandomWords,
+  type DoubleKickState,
+} from "./doubleKick.ts";
+import {
   crabHammerAtAge,
   type CrabHammerState,
 } from "./crabHammer.ts";
@@ -2473,6 +2478,16 @@ export interface SceneOnThrashConfig {
   ];
 }
 
+/** Narrow Scene-ON seam for Double Kick's presentation-only script body. */
+export interface SceneOnDoubleKickConfig {
+  readonly move: "DOUBLE_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly targetDimensions: Readonly<{ width: number; height: number }>;
+  readonly fistRandom: DoubleKickRandomWords;
+}
+
 /** Typed staging seam only; a later draw case supplies the live target idle x2. */
 export interface SceneOnCrabHammerConfig {
   readonly move: "CRABHAMMER";
@@ -2688,6 +2703,7 @@ export type SceneOnMoveConfig =
   | SceneOnLickConfig
   | SceneOnCounterConfig
   | SceneOnThrashConfig
+  | SceneOnDoubleKickConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
@@ -3381,6 +3397,12 @@ export interface SceneOnThrashView extends ThrashState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnDoubleKickView extends DoubleKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCrabHammerView extends CrabHammerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4049,6 +4071,7 @@ export function createSceneOnMovePresentation<
   | SceneOnLickConfig
   | SceneOnCounterConfig
   | SceneOnThrashConfig
+  | SceneOnDoubleKickConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
@@ -6860,6 +6883,25 @@ export function sceneOnThrashView(
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
       targetDimensions: { width: 56, height: 64 },
+      fistRandom: state.config.fistRandom,
+    }),
+  };
+}
+
+export function sceneOnDoubleKickView(
+  state: SceneOnMovePresentationState<SceneOnDoubleKickConfig>,
+): SceneOnDoubleKickView {
+  if (state.config.move !== "DOUBLE_KICK") {
+    throw new Error(`expected DOUBLE_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...doubleKickAtAge(state.age, {
+      targetSide: state.config.target.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
+      targetDimensions: state.config.targetDimensions,
       fistRandom: state.config.fistRandom,
     }),
   };
