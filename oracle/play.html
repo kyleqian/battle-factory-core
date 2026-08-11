@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>oracle play — pokeemerald</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+         background: #0b0e13; color: #9fb2c8; font: 13px/1.5 ui-monospace, monospace; }
+  main { text-align: center; }
+  canvas { display: block; width: min(84vw, 720px); height: auto; aspect-ratio: 3 / 2;
+           background: #000; image-rendering: pixelated; margin: 0 auto 10px; }
+  button { font: inherit; background: #1b2330; color: inherit; border: 1px solid #2c3a4f;
+           border-radius: 4px; padding: 4px 14px; cursor: pointer; }
+  #status { margin-top: 8px; min-height: 1.2em; }
+  .keys { color: #5c6f88; }
+</style>
+</head>
+<body>
+<main>
+  <canvas id="screen" width="240" height="160"></canvas>
+  <div>
+    <button id="reset">Reset to canonical anchor</button>
+    <span id="status">connecting…</span>
+  </div>
+  <p class="keys">arrows/WASD move · Z=A · X=B · Enter=START · Shift=SELECT · Q=L · E=R<br>
+     this IS the oracle: one live session, deterministic from the canonical anchor</p>
+</main>
+<script>
+  const canvas = document.getElementById("screen");
+  const context = canvas.getContext("2d", { alpha: false });
+  const status = document.getElementById("status");
+  const held = new Set();
+  const FRAME_MS = 1000 / 59.7275;
+  const KEYMAP = {
+    ArrowUp: "UP", ArrowDown: "DOWN", ArrowLeft: "LEFT", ArrowRight: "RIGHT",
+    w: "UP", s: "DOWN", a: "LEFT", d: "RIGHT",
+    z: "A", x: "B", Enter: "START", Shift: "SELECT", q: "L", e: "R",
+  };
+  const keyFor = (event) => KEYMAP[event.key] ?? KEYMAP[event.key.toLowerCase()];
+
+  addEventListener("keydown", (event) => {
+    const key = keyFor(event);
+    if (key) { held.add(key); event.preventDefault(); }
+  });
+  addEventListener("keyup", (event) => {
+    const key = keyFor(event);
+    if (key) held.delete(key);
+  });
+
+  const image = new Image();
+  function draw(payload) {
+    image.onload = () => context.drawImage(image, 0, 0);
+    image.src = "data:image/png;base64," + payload.pngBase64;
+  }
+
+  let busy = false;
+  let last = performance.now();
+  // Fractional-frame accumulator pinned to the GBA's 59.7275 Hz. Advancing a
+  // minimum of one frame per rAF tick would run ~2x fast on 120 Hz displays.
+  let acc = 0;
+  let shownFps = 0, fpsCount = 0, fpsWindow = performance.now();
+
+  async function post(path, body) {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body ?? {}),
+    });
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+    return response.json();
+  }
+
+  async function loop(now) {
+    requestAnimationFrame(loop);
+    if (busy) return;
+    acc = Math.min(acc + (now - last) / FRAME_MS, 12);
+    last = now;
+    const frames = Math.floor(acc);
+    if (frames < 1) return;
+    acc -= frames;
+    busy = true;
+    try {
+      const payload = await post("/v1/play/step", { buttons: [...held], frames });
+      draw(payload);
+      fpsCount += frames;
+      if (now - fpsWindow > 1000) {
+        shownFps = Math.round((fpsCount * 1000) / (now - fpsWindow));
+        fpsCount = 0; fpsWindow = now;
+      }
+      status.textContent = `frame ${payload.frame} · ~${shownFps} fps · held: ${[...held].join("+") || "–"}`;
+    } catch (error) {
+      status.textContent = String(error);
+    } finally {
+      busy = false;
+    }
+  }
+
+  document.getElementById("reset").addEventListener("click", async () => {
+    status.textContent = "resetting…";
+    draw(await post("/v1/play/reset"));
+  });
+
+  post("/v1/play/reset").then((payload) => {
+    draw(payload);
+    requestAnimationFrame(loop);
+  }).catch((error) => (status.textContent = String(error)));
+</script>
+</body>
+</html>

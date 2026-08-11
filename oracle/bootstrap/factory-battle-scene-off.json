@@ -1,0 +1,17 @@
+{
+  "extends": "factory.json",
+  "version": 5,
+  "profile": "battle-scene-off",
+  "description": "Canonical Battle Factory rental-draft anchor, byte-identical at frame 0 to the battle-scene-on profile. This profile sets Options > Battle Scene OFF in canonical RAM after the shared input bootstrap and before the shared 60 settle frames. Move/effect and species front-sprite entrance animations are skipped by the real game; battle rules, input, party generation, and the main battle RNG remain the reference implementation.",
+  "pokes": [
+    {
+      "symbol": "gSaveBlock2Ptr",
+      "deref": true,
+      "offset": 21,
+      "bytes": [
+        7
+      ],
+      "note": "SaveBlock2+0x15 options high byte: 0x03 -> 0x07 sets u16 bit 10 (optionsBattleSceneOff). Applied after the inherited scripted bootstrap with zero frames and zero RNG impact."
+    }
+  ]
+}
