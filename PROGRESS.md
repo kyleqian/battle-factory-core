@@ -7,9 +7,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1104 — [MAIN worker, 2026-08-10] **#55 recurring +18 class censused; reducer not proven**
 
-- **State:** #55 remains open; accessor/dependency `cycles` stay `null` and
-  the construction clock stays unwired. Focused union **38/38** is green;
-  smoke/typecheck/full-suite/build verification is in progress.
+- **State:** evidence commit `87553c2a`; #55 remains open, accessor/dependency
+  `cycles` stay `null`, and the construction clock stays unwired. Focused
+  **38/38**, smoke **375/375**, typecheck, explicit 10-minute-timeout full
+  `npm test` **895 files / 8,491 passed / 1 skipped**, and build are green.
 - **Did:** three wrapper-validated OFF packets census all **85** known +18
   joins by exact source PCs and scalar scheduler/IRQ/DMA/prefetch state:
   nature **11**, Factory tail **1**, accessor **67**, level **3**, divide **1**,
