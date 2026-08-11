@@ -99,6 +99,26 @@ NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/rngEngineParity.test
 POKEBENCH_ENGINE=wasm NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/rngEngineParity.test.ts --no-watch --pool=forks
 ```
 
+## Data tables
+
+`crates/factory-core/src/gen_tables.rs` is **generated, never hand-edited**.
+`tools/gen-data.mjs` (plain Node, no deps) reads the workspace's
+`src/data/gen/*.json` extraction tables — frontier rental sets, held items,
+species/ability ids, natures, and the Level-50 rental-selection policy — and
+emits the minimal Rust tables the initial-rental port needs, formatted via
+`rustfmt` (see `rustfmt.toml`'s `struct_lit_width` bump) so reruns are
+byte-identical. Regenerate and commit the diff whenever those JSON sources
+change:
+
+```sh
+node core-rs/tools/gen-data.mjs
+```
+
+`crates/factory-core/src/rental_data.rs` holds the pure helpers ported from
+`src/engine/factoryRentalGeneration.ts` / `src/engine/opponentGen.ts` that
+consume those tables; its `#[cfg(test)]` pins cite the TS fixture or JSON
+row each expected value came from.
+
 ## Ground rules
 
 - **The vitest suite is the spec gate.** A module counts as ported when
