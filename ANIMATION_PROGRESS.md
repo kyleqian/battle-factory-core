@@ -1,3 +1,11 @@
+# MOVE_SWORDS_DANCE exact — bilateral 70/70 flash/blade promotion (2026-08-11 worker)
+
+- **State:** Level-50 coverage advances **169→170/276 exact**, 0 partial, 0 staged, and **107→106 unsupported**. Only `MOVE_SWORDS_DANCE` moved; no animation-boundary or unsupported-barrier widening.
+- **Did:** Independently pinned exclusive `Move_SWORDS_DANCE` **0x082caaa4..0x082caaea** (`0x46` bytes), the eight-component SWORD/blade/ellipse/flash/monbg/alpha/cleanup graph, and lowest legal Level-50 carrier set **137 `FRONTIER_MON_FARFETCHD`**. Complete legal bilateral LEDIAN/ONIX stages feed a pure 70-age reducer, typed seam, narrow compositor, deterministic source/asset audits, dense receipts, and normalized change maps.
+- **Verified:** Player-back frames **74..143** and opponent-front **78..147** each pass **70/70 reducer/seam/component, software+hardware OAM/matrix/palette/tag/register/audio, immutable-state/raw-RGB/map, and production-framebuffer** gates twice fresh. Agility remains bilateral **87/87** and Comet Punch all **333/333** bilateral frames twice fresh. Animation audit, coverage, typecheck, full `npm test` (**918 files / 8,553 passed / 1 skipped**), and production build (**642 modules**) pass.
+- **Next:** Supervisor may fold only Swords Dance's independent exact claim. `HYPER_BEAM` and `CONVERSION` retain distinct bodies and remain unsupported despite the new exact `flash_anim_tag_with_color` representative.
+- **Notes:** Evidence/raw digests are player `1da50d13…` / `1f7e5238…`, opponent `f067ec78…` / `994d7895…`. No stat-stage outcome, damage, RNG, turn/controller/round/facility state, canonical import, capture/hash lookup, per-frame RGB table, coordinate fitting, or absolute tick was added.
+
 # MOVE_COMET_PUNCH exact — bilateral natural 333/333 promotion (2026-08-11 worker)
 
 - **State:** Level-50 coverage advances **168→169/276 exact**, 0 partial, 0 staged, and **108→107 unsupported**. Only `MOVE_COMET_PUNCH` moved; no animation-boundary or unsupported-barrier widening.

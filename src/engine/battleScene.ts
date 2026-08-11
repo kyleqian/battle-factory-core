@@ -652,6 +652,7 @@ import battleAnimIceCrystalsAsset from "../assets/gen/battle-anim-ice-crystals.j
 import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
 import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
+import battleAnimSwordAsset from "../assets/gen/battle-anim-sword.json" with { type: "json" };
 import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
 import thunderAsset from "../animation/assets/thunder.json" with { type: "json" };
 import surfWaveAsset from "../animation/assets/surf-wave.json" with { type: "json" };
@@ -950,6 +951,7 @@ import {
   sceneOnTailGlowView,
   sceneOnTailWhipView,
   sceneOnAgilityView,
+  sceneOnSwordsDanceView,
   sceneOnDizzyPunchView,
   sceneOnAstonishView,
   sceneOnFakeOutView,
@@ -2011,6 +2013,7 @@ const battleAnimLightning = battleAnimLightningAsset as {
   tileset: Tileset;
   palette: RgbColor[];
 };
+const battleAnimSword = battleAnimSwordAsset as { tileset: Tileset; palette: RgbColor[] };
 const thunderArt = thunderAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
@@ -19978,6 +19981,92 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? "LEDYBA used" : "Foe LEDYBA used",
       "AGILITY!",
       99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SWORDS_DANCE") {
+    const view = sceneOnSwordsDanceView(state);
+    // The ellipse, affine blade, and palette all traverse the ordinary
+    // software-OAM/palette transfer boundary. The reducer remains RAM-age;
+    // this draw path consumes the immediately preceding displayed state.
+    const displayed = sceneOnSwordsDanceView({ ...state, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "LEDIAN"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "LEDIAN"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged SWORDS_DANCE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attacker = playerToOpponent ? ledianBackSprite : ledianFrontSprite;
+    const target = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb, target.tileset, target.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // Ledian is elevated: the enemy shadow is still in the preceding OAM
+    // buffer at source age zero, then SpriteCB_EnemyShadow hides it.
+    if (opponentToPlayer && state.age === 0) {
+      const shadowX = view.attacker.geometry.animationCenter.x - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(fb, shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width), battleEnemyShadow.color);
+      }
+    }
+    const corner = view.attacker.geometry.spriteCorner;
+    // Ledian's own Swords Dance monbg allocation is not terrain-clipped;
+    // its dense opponent-front map retains the pixels below y=59.
+    const clipBottom = 160;
+    drawSpriteSheet(fb, attacker.tileset, attacker.palette, corner.x, corner.y);
+    if (displayed.attackerOffset.x2 !== 0 || displayed.attackerOffset.y2 !== 0) {
+      eraseSpriteFootprint(fb, attacker.tileset, corner, clipBottom);
+      drawSpriteSheetClippedBelow(
+        fb, attacker.tileset, attacker.palette,
+        corner.x + displayed.attackerOffset.x2,
+        corner.y + displayed.attackerOffset.y2,
+        clipBottom,
+      );
+    }
+    if (displayed.blade && view.alpha) {
+      const nonObjTarget2 = fb.slice();
+      const palette = view.swordPalette === "cyan-white"
+        ? battleAnimSword.palette.map(() => ({ r: 148, g: 255, b: 255 }))
+        : battleAnimSword.palette;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb, nonObjTarget2, battleAnimSword.tileset, palette,
+        displayed.blade.x, displayed.blade.y,
+        displayed.blade.pa, 0, 0, 256,
+        view.alpha.eva, view.alpha.evb, false,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "LEDIAN", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "LEDIAN" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "LEDIAN used" : "Foe LEDIAN used",
+      "SWORDS DANCE!", 99,
     );
     return;
   }

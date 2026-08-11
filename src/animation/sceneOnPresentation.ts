@@ -8,6 +8,7 @@ import {
   type FirePunchResolutionProfile,
   type FirePunchResolutionState,
 } from "./firePunch.ts";
+import { swordsDanceAtAge, type SwordsDanceState } from "./swordsDance.ts";
 import {
   biteEffectAtAge,
   type BiteEffect,
@@ -2223,6 +2224,13 @@ export interface SceneOnAgilityConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSwordsDanceConfig {
+  readonly move: "SWORDS_DANCE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSelfDestructConfig {
   readonly move: "SELF_DESTRUCT";
   readonly attacker: SceneOnPresentationBattler;
@@ -2729,6 +2737,7 @@ export type SceneOnMoveConfig =
   | SceneOnTailGlowConfig
   | SceneOnTailWhipConfig
   | SceneOnAgilityConfig
+  | SceneOnSwordsDanceConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -6607,6 +6616,27 @@ export function sceneOnAgilityView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...agilityAnimationAtAge(state.age, state.config.attacker.geometry.side),
+  };
+}
+
+export interface SceneOnSwordsDanceView extends SwordsDanceState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_SWORDS_DANCE's first active source pointer frame. */
+export function sceneOnSwordsDanceView(
+  state: SceneOnMovePresentationState,
+): SceneOnSwordsDanceView {
+  if (state.config.move !== "SWORDS_DANCE") {
+    throw new Error(`expected SWORDS_DANCE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...swordsDanceAtAge(state.age, state.config.attacker.geometry.side, state.config.attacker.geometry.battlePositionCenter),
   };
 }
 

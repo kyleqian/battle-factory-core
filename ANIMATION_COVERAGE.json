@@ -3909,6 +3909,34 @@
    ]
   },
   {
+   "move": "MOVE_SWORDS_DANCE",
+   "status": "exact",
+   "covered": [
+    "complete legal Scene-ON parties naturally stage set-159 LEDIAN against ONIX with all four active choices constrained to SWORDS DANCE/TACKLE; the independent source audit pins exclusive 0x082caaa4..0x082caaea and the true lowest legal Level-50 carrier as set-137 FARFETCHD",
+    "the complete 70-frame source interval through first inactive cleanup passes reducer, typed seam, task/sprite topology, software/hardware OAM and affine matrices, palette/tag/register/audio, immutable battle state, raw RGB, normalized change map, and production framebuffer equality twice fresh at frames 74-143 player-back and 78-147 opponent-front",
+    "the pure source-relative reducer and narrow compositor port ANIM_TAG_SWORD/gSwordsDanceBladeSpriteTemplate, AnimSwordsDanceBlade affine growth/hold/rise, side-respecting TranslateMonEllipticalRespectSide, attacker monbg, 12:8 alpha, flash_anim_tag_with_color's two cyan-white pulses, transfer latches, enemy-shadow handoff, audio topology, blendoff, clearmonbg, and cleanup",
+    "player evidence/raw digests are 1da50d1323400976045892772aa6c1d97a8bc5e89d8af6fc3fe5cc14d1b14489 / 1f7e523841cde8eb33e9eae8b85c58182bd7e843365d0b95c28eb431a0725e90; opponent digests are f067ec78363e4f3ccb12bd6c5a2bff5f93d53014dc2a95346e1796c54e1ed856 / 994d7895d2019441d63a8053765d03eedef31fd5baefc876710cb5d154696436",
+    "AGILITY remains the independent bilateral TranslateMonEllipticalRespectSide control; HYPER BEAM and CONVERSION remain unsupported because shared flash_anim_tag_with_color transfers no move acceptance and their distinct complete bodies lack dense proof"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-swords-dance-player-ledian-opponent-onix.json",
+    "tools/battle-lab/mechanic-swords-dance-opponent-ledian-player-onix.json",
+    "tools/compare/fixtures/swords-dance-receipts.json",
+    "tools/compare/evidence/swords-dance-player.txt",
+    "tools/compare/evidence/swords-dance-opponent.txt",
+    "tools/compare/swordsDanceSourceAudit.ts",
+    "tools/compare/swordsDancePortable.ts",
+    "tools/compare/agilityProbe.py",
+    "tools/extract/extract-swords-dance-assets.ts",
+    "src/assets/gen/battle-anim-sword.json",
+    "src/animation/swordsDance.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/swordsDance.test.ts",
+    "tests/animation/swordsDanceSource.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SYNTHESIS",
    "status": "exact",
    "covered": [

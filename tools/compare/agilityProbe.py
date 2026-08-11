@@ -10,7 +10,8 @@ HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core
 sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request # noqa: E402
 from emerald_core import EmeraldOracle # noqa: E402
-MOVE = 97
+IS_SWORDS_DANCE = "swords-dance" in SCENARIO.name
+MOVE = 14 if IS_SWORDS_DANCE else 97
 
 def main() -> None:
     request = validate_request(json.loads(SCENARIO.read_text()), "battle-scene-on")
@@ -22,7 +23,8 @@ def main() -> None:
     names={n:a for a,n in pairs}; by_address={a:n for a,n in pairs}; sy=oracle.symbols
     sprites,matrices,tasks=sy["gSprites"],sy["gOamMatrices"],sy["gTasks"]
     active,ptr,wait=names["gAnimScriptActive"],names["sBattleAnimScriptPtr"],names["sAnimFramesToWait"]
-    start,end,tags,software=names["Move_AGILITY"],names["Move_QUICK_ATTACK"],names["sSpritePaletteTags"],names["gMain"]+0x38
+    start_symbol,end_symbol=("Move_SWORDS_DANCE","Move_PSYCH_UP") if IS_SWORDS_DANCE else ("Move_AGILITY","Move_QUICK_ATTACK")
+    start,end,tags,tile_tags,software=names[start_symbol],names[end_symbol],names["sSpritePaletteTags"],names["sSpriteTileRangeTags"],names["gMain"]+0x38
     RGB.mkdir(parents=True,exist_ok=True)
     def u16(a): return oracle.read_u8(a)|oracle.read_u8(a+1)<<8
     def u32(a): return u16(a)|u16(a+2)<<16
@@ -47,7 +49,10 @@ def main() -> None:
         rgb=oracle.screen_rgb(); (RGB/f"{frame:05d}.rgb").write_bytes(rgb); script=u32(ptr)
         live=[sprite(i) for i in range(64) if oracle.read_u8(sprites+i*0x44+0x3e)&1]
         live_tasks=[{"slot":slot,"raw":raw(base,0x28),"func":ident(u32(base)),"data":[s16(base+8+i*2) for i in range(16)]} for slot in range(16) if oracle.read_u8((base:=tasks+slot*0x28)+4)]
-        rows.append({"frame":frame,"sha256":hashlib.sha256(rgb).hexdigest(),"gAnimScriptActive":oracle.read_u8(active),"script":ident(script),"scriptOffset":script-start if start<=script<end else None,"scriptWait":s8(wait),"visualTaskCount":oracle.read_u8(sy["gAnimVisualTaskCount"]),"soundTaskCount":oracle.read_u8(sy["gAnimSoundTaskCount"]),"tasks":live_tasks,"sprites":live,"battlers":snap["battlers"],"softwareOam":[raw(software+i*8,8) for i in range(128)],"hardwareOam":[raw(0x07000000+i*8,8) for i in range(128)],"hardwareMatrices":[[s16(0x07000006+i*0x20+j) for j in (0,8,16,24)] for i in range(32)],"fadedPalette":[u16(sy["gPlttBufferFaded"]+i*2) for i in range(512)],"unfadedPalette":[u16(sy["gPlttBufferUnfaded"]+i*2) for i in range(512)],"hardwarePalette":[u16(0x05000000+i*2) for i in range(512)],"paletteTags":[u16(tags+i*2) for i in range(16)],"registers":{n:u16(a) for n,a in regs.items()},"se1":player("SE1"),"se2":player("SE2")})
+        row={"frame":frame,"sha256":hashlib.sha256(rgb).hexdigest(),"gAnimScriptActive":oracle.read_u8(active),"script":ident(script),"scriptOffset":script-start if start<=script<end else None,"scriptWait":s8(wait),"visualTaskCount":oracle.read_u8(sy["gAnimVisualTaskCount"]),"soundTaskCount":oracle.read_u8(sy["gAnimSoundTaskCount"]),"tasks":live_tasks,"sprites":live,"battlers":snap["battlers"],"parties":snap["parties"],"engine":snap["engine"],"immutableState":{key:snap[key] for key in ("battleOutcome","weather","weatherTurns","sideStatuses","sideConditions")},"animationRng":u32(names["gRng2Value"]),"softwareOam":[raw(software+i*8,8) for i in range(128)],"hardwareOam":[raw(0x07000000+i*8,8) for i in range(128)],"softwareMatrices":[[s16(matrices+i*8+j) for j in (0,2,4,6)] for i in range(32)],"hardwareMatrices":[[s16(0x07000006+i*0x20+j) for j in (0,8,16,24)] for i in range(32)],"fadedPalette":[u16(sy["gPlttBufferFaded"]+i*2) for i in range(512)],"unfadedPalette":[u16(sy["gPlttBufferUnfaded"]+i*2) for i in range(512)],"hardwarePalette":[u16(0x05000000+i*2) for i in range(512)],"paletteTags":[u16(tags+i*2) for i in range(16)],"tileTags":[u16(tile_tags+i*2) for i in range(128)],"registers":{n:u16(a) for n,a in regs.items()},"se1":player("SE1"),"se2":player("SE2")}
+        if not IS_SWORDS_DANCE:
+            for key in ("parties","engine","immutableState","animationRng","softwareMatrices","tileTags"): row.pop(key)
+        rows.append(row)
     take()
     for segment in request["trace"]["segments"]:
         for _ in range(segment["frames"]): oracle.advance(segment.get("buttons",[])); frame+=1; take()
@@ -57,9 +62,10 @@ def main() -> None:
     if last is None: raise RuntimeError("Agility inactive cleanup not observed")
     source=rows[first:last+1]
     topology={"tasks":sorted({x["func"]["symbol"] for r in source for x in r["tasks"] if x["func"]["symbol"]}),"templates":sorted({x["template"]["symbol"] for r in source for x in r["sprites"] if x["template"]["symbol"]}),"callbacks":sorted({x["callback"]["symbol"] for r in source for x in r["sprites"] if x["callback"]["symbol"]})}
-    required_tasks={"AnimTask_TranslateMonElliptical_Step","AnimTask_TraceMonBlended_Step"}
+    required_tasks={"AnimTask_TranslateMonElliptical_Step","AnimTask_FlashAnimTagWithColor_Step1","AnimTask_FlashAnimTagWithColor_Step2"} if IS_SWORDS_DANCE else {"AnimTask_TranslateMonElliptical_Step","AnimTask_TraceMonBlended_Step"}
     if not required_tasks<=set(topology["tasks"]): raise RuntimeError(f"Agility topology changed: {topology}")
     if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]: raise RuntimeError("Agility cleanup retained animation")
-    result={"schema":"agility-dense-evidence/v1","setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{"Move_AGILITY":start,"Move_QUICK_ATTACK":end},"topology":topology,"frames":source}
+    schema="swords-dance-dense-evidence/v1" if IS_SWORDS_DANCE else "agility-dense-evidence/v1"
+    result={"schema":schema,"setup":setup,"sourceWindow":{"startFrame":source[0]["frame"],"endFrame":source[-1]["frame"],"frameCount":len(source)},"sourceSymbols":{start_symbol:start,end_symbol:end},"topology":topology,"frames":source}
     OUTPUT.write_text(json.dumps(result,separators=(",",":"))+"\n"); print(f"wrote {OUTPUT}: source {source[0]['frame']}..{source[-1]['frame']} ({len(source)} frames)")
 if __name__ == "__main__": main()
