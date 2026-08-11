@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1149 — [supervisor, 2026-08-11] **LUKAS send-out evidence verified; LEER folded**
+
+- **State:** `master` is green with the legal Battle-6 LUKAS send-out bounded
+  exactly at #55: app 462–469 is **8/8** exact and every pixel in 470–511
+  outside WEEPINBELL's gender glyph is exact. S8 stays closed; #56 and the
+  retired Battle-2 march remain untouched.
+- **Did:** reviewed the acknowledgement/source-clock receipt and independently
+  confirmed the twice-fresh residual bounds. Folded animation-main's LEER
+  Scene-ON acceptance through merge `113015b9`; rust-main was already folded.
+- **Next:** take one source-proven #55 construction-clock increment toward the
+  legal LUKAS set-270 personality, then rerun app 462–511 without party,
+  renderer, or fixture-specific overrides. Do not submit a battle action.
+- **Notes:** merged union full `npm test` **953 files / 9,141 passed / 1
+  skipped**; build **647 modules**. Worker controls remained exact and its
+  focused **4/4**, smoke **375/375**, and typecheck were green.
+
 ## 1148 — [MAIN worker, 2026-08-11] **Battle-6 send-out blocked exactly at #55 gender identity**
 
 - **State:** `master` is green with the legal LUKAS acknowledgement/send-out
@@ -38,23 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** worker controls, smoke **375/375**, typecheck, full `npm test`
   **952 files / 9,137 passed / 1 skipped**, and build **645 modules** are green.
   Both lane branches remain fully folded.
-
-## 1146 — [MAIN worker, 2026-08-11] **Battle-6 LUKAS summary assembly exact**
-
-- **State:** `master` is green with the complete legal challenge-2 Battle-6
-  LUKAS intro through the source-owned status-summary/message boundary. S8
-  remains closed; the retired Battle-2 march and #56 tail remain untouched.
-- **Did:** added the separate OFF trace
-  `factory-round-battle6-lukas-status-summary-message-off`, capturing app
-  frames 188–252 / oracle pre-checkpoint 1339–1403 (source 1228–1292), and
-  proved **65/65 twice fresh** through final summary-sprite settle. The stage
-  reuses ordinary five-win/decline controller construction; receipt is trainer
-  121 LUKAS, sets `267/268/269` vs `270/341/284`, transition index 3.
-- **Next:** supervisor verification/fold only. Do not enter the unbounded
-  `PAUSE_UNTIL_PRESS` hold, post-ack frame 13384, or any Battle-2 action.
-- **Notes:** controls exact: LUKAS reveal **154/154**, canonical reveal
-  **154/154**, canonical summary **65/65**, transition **249/249**, send-out
-  **238/238**, action-ready **3/3**, legacy assembly **256/256**, far-side
-  **115/115**. Focused **13/13**, smoke **375/375**, typecheck, full `npm test`
-  **952 files / 9,137 passed / 1 skipped**, build **645 modules**. No barriers,
-  production recording/framebuffer data, or lane-scope changes.

@@ -1,3 +1,23 @@
+## 1146 — [MAIN worker, 2026-08-11] **Battle-6 LUKAS summary assembly exact**
+
+- **State:** `master` is green with the complete legal challenge-2 Battle-6
+  LUKAS intro through the source-owned status-summary/message boundary. S8
+  remains closed; the retired Battle-2 march and #56 tail remain untouched.
+- **Did:** added the separate OFF trace
+  `factory-round-battle6-lukas-status-summary-message-off`, capturing app
+  frames 188–252 / oracle pre-checkpoint 1339–1403 (source 1228–1292), and
+  proved **65/65 twice fresh** through final summary-sprite settle. The stage
+  reuses ordinary five-win/decline controller construction; receipt is trainer
+  121 LUKAS, sets `267/268/269` vs `270/341/284`, transition index 3.
+- **Next:** supervisor verification/fold only. Do not enter the unbounded
+  `PAUSE_UNTIL_PRESS` hold, post-ack frame 13384, or any Battle-2 action.
+- **Notes:** controls exact: LUKAS reveal **154/154**, canonical reveal
+  **154/154**, canonical summary **65/65**, transition **249/249**, send-out
+  **238/238**, action-ready **3/3**, legacy assembly **256/256**, far-side
+  **115/115**. Focused **13/13**, smoke **375/375**, typecheck, full `npm test`
+  **952 files / 9,137 passed / 1 skipped**, build **645 modules**. No barriers,
+  production recording/framebuffer data, or lane-scope changes.
+
 ## 1145 — [supervisor, 2026-08-11] **Battle-6 intro generalization verified**
 
 - **State:** `master` is green with a legal noncanonical Battle-6 LUKAS reveal
