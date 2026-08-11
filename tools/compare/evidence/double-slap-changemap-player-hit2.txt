@@ -1,0 +1,17 @@
+# double-slap-changemap-player-hit2.txt raw RGB888 — 34 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+0  (first frame)
+  static 1-7
+8  261  157,31-179,53
+  static 9
+10  1769  149,12-206,71
+  static 11
+12  1769  149,12-206,71
+  static 13
+14  1769  149,12-206,71
+  static 15
+16  1769  149,12-206,71
+  static 17
+18  261  157,31-179,53
+  static 19-33

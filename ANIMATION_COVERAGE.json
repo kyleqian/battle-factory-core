@@ -4489,6 +4489,36 @@
     "tests/animation/mistBall.test.ts",
     "tests/animation/mistBallEvidenceCheckpoint.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_DOUBLE_SLAP",
+   "status": "exact",
+   "covered": [
+    "the real controller naturally selects three hits in both complete legal set-155 POLIWHIRL versus set-156 ONIX Scene-ON orientations; moveTurn 0/1/2 exercises left/right/left without presentation ownership of hit count, accuracy, damage, or RNG",
+    "all six complete pointer-bounded 34-frame invocations through first inactive cleanup pass reducer, typed seam, task/sprite topology, software and hardware OAM/matrices/palettes/tags/register/audio, immutable animation-owned battle fields, raw RGB, normalized change maps, and production framebuffer equality twice fresh (102/102 per orientation, 204/204 bilateral)",
+    "the pure reducer and narrow compositor port the exclusive 0x082c93c9..0x082c941c body: both choosetwoturnanim branches, IMPACT/basic hitsplat affine sprite, AnimTask_ShakeMon, monbg, 12:8 alpha, SE_M_DOUBLE_SLAP, continuation chrome and cleanup using source-relative ages only",
+    "Double Kick, Triple Kick, and Counter remain independent regression controls and transfer no acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-double-slap-player-poliwhirl-opponent-onix.json",
+    "tools/battle-lab/mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+    "tools/compare/fixtures/double-slap-natural-receipts.json",
+    "tools/compare/doubleSlapSourceAudit.ts",
+    "tools/compare/doubleSlapAssetAudit.ts",
+    "tools/compare/doubleSlapProbe.py",
+    "tools/compare/doubleSlapPortable.ts",
+    "tools/compare/evidence/double-slap-changemap-player-hit0.txt",
+    "tools/compare/evidence/double-slap-changemap-player-hit1.txt",
+    "tools/compare/evidence/double-slap-changemap-player-hit2.txt",
+    "tools/compare/evidence/double-slap-changemap-opponent-hit0.txt",
+    "tools/compare/evidence/double-slap-changemap-opponent-hit1.txt",
+    "tools/compare/evidence/double-slap-changemap-opponent-hit2.txt",
+    "src/animation/doubleSlap.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/doubleSlap.test.ts",
+    "tests/animation/doubleSlapEvidence.test.ts"
+   ]
   }
  ],
  "queue": [

@@ -1015,6 +1015,7 @@ import {
   sceneOnCounterView,
   sceneOnDoubleKickView,
   sceneOnTripleKickView,
+  sceneOnDoubleSlapView,
   sceneOnThrashView,
   sceneOnThrashDisplayedTargetOffset,
   sceneOnCrabHammerView,
@@ -1464,6 +1465,7 @@ const lickitungFrontSprite = opponentFrontSpritesAsset.LICKITUNG;
 const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
+const poliwhirlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).POLIWHIRL!;
 const swabluFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWABLU!;
 const ponytaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PONYTA!;
 const ledybaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDYBA!;
@@ -2661,6 +2663,7 @@ const medichamBackSprite = (battleBackSpritesAsset as Record<string, BattleBackS
 const poliwrathBackSprite = battleBackSpritesAsset.POLIWRATH;
 const lickitungBackSprite = battleBackSpritesAsset.LICKITUNG;
 const hitmontopBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HITMONTOP!;
+const poliwhirlBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).POLIWHIRL!;
 const swabluBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWABLU!;
 const ponytaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PONYTA!;
 const ledybaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LEDYBA!;
@@ -39522,6 +39525,102 @@ export function renderSceneOnMovePresentation(
       "COUNTER!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "DOUBLE_SLAP") {
+    const view = sceneOnDoubleSlapView(state);
+    const displayed = sceneOnDoubleSlapView({ ...state, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "POLIWHIRL"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "POLIWHIRL"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DOUBLE_SLAP pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const poliwhirl = playerToOpponent ? poliwhirlBackSprite : poliwhirlFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // Double Slap's own complete natural sequence pins basic hitsplat OAM,
+    // its affine matrix, and ShakeMon at RAM+1. Later controller invocations
+    // inherit the prior ShakeMon's zero overwrite, as in Triple Kick.
+    const targetX2 = state.age - 1 < 7
+      ? (view.moveTurn === 0 ? targetIdle.x2 : 0)
+      : displayed.targetX2;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const effectBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      poliwhirl.tileset,
+      poliwhirl.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        displayed.hitsplat.matrix,
+        0,
+        0,
+        displayed.hitsplat.matrix,
+        12,
+        8,
+        false,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "POLIWHIRL",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "POLIWHIRL" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    if (view.moveTurn === 0) {
+      drawMessageTextLines(
+        fb,
+        playerToOpponent ? "POLIWHIRL used" : "Foe POLIWHIRL used",
+        "DOUBLESLAP!",
+        99,
+      );
+    }
     return;
   }
 

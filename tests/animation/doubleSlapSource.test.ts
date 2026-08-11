@@ -8,4 +8,13 @@ describe("MOVE_DOUBLE_SLAP source contract", () => {
     expect(output).toContain("even -> left, odd -> right");
     expect(output).toContain("set 155 FRONTIER_MON_POLIWHIRL");
   });
+
+  it("audits the source-derived IMPACT graphics and palette deterministically", () => {
+    const output = execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/doubleSlapAssetAudit.ts",
+    ], { encoding: "utf8" });
+    expect(output).toContain("MOVE_DOUBLE_SLAP deterministic asset audit exact");
+    expect(output).toContain("37ca40afc9002588e5f62d2d20e5dd37058ba7ad57c9615d1e46282372cc55fc");
+  });
 });
