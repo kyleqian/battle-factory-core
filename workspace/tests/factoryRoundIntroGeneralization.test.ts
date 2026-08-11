@@ -4,8 +4,15 @@ import {
   battleIntroSceneAssemblyDisplayLag,
   selectFrontierTransition,
 } from "../src/engine/battleTransition.ts";
+import { createFactoryBattleStartPresentationCommand } from "../src/engine/factoryBattleStartPresentation.ts";
+import {
+  factoryBattleStartIntroPhase,
+  factoryBattleStartStatusSummaryMessageComplete,
+} from "../src/engine/factoryBattleStartIntro.ts";
+import { generatedBattleIntroSourceClock } from "../src/engine/battleScene.ts";
 import {
   generatedRoundBattle6LukasRevealStage,
+  generatedRoundBattle6LukasStatusSummaryMessageStage,
   generatedRoundRevealProofStage,
 } from "../tools/compare/factoryRoundIntroGeneralizationStage.ts";
 
@@ -91,5 +98,84 @@ describe("noncanonical generated-round intro generalization", () => {
     const before = structuredClone(state);
     expect(render(state)).toEqual(render(state));
     expect(state).toEqual(before);
+  });
+
+  it("pins LUKAS's complete source-relative summary boundary and status/fainted summary identity", () => {
+    let state = generatedRoundBattle6LukasStatusSummaryMessageStage(
+      createInitialState({ appRoute: "generated-orchestrator" }),
+    );
+    const initialIntro = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(generatedBattleIntroSourceClock(
+      initialIntro.elapsed,
+      initialIntro.sceneAssemblyDisplayLag,
+    )).toBe(1040);
+
+    state = advanceFrames(state, 251);
+    const beforeSettle = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(generatedBattleIntroSourceClock(
+      beforeSettle.elapsed,
+      beforeSettle.sceneAssemblyDisplayLag,
+    )).toBe(1291);
+    expect(factoryBattleStartIntroPhase(beforeSettle)).toBe("awaiting-acknowledgement");
+    expect(factoryBattleStartStatusSummaryMessageComplete(beforeSettle)).toBe(false);
+
+    state = advanceFrames(state, 1);
+    const settledIntro = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(generatedBattleIntroSourceClock(
+      settledIntro.elapsed,
+      settledIntro.sceneAssemblyDisplayLag,
+    )).toBe(1292);
+    expect(factoryBattleStartStatusSummaryMessageComplete(settledIntro)).toBe(true);
+    expect(settledIntro.command.battleIndex).toBe(5);
+    expect(settledIntro.command.opponentTrainer).toMatchObject({
+      trainerId: 121,
+      name: "LUKAS",
+    });
+    expect(settledIntro.command.parties.player.map(({ setId }) => setId))
+      .toEqual([267, 268, 269]);
+    expect(settledIntro.command.parties.opponent.map(({ setId }) => setId))
+      .toEqual([270, 341, 284]);
+    expect(settledIntro.command.partySummaries.player).toEqual(ALL_HEALTHY_SUMMARY);
+    expect(settledIntro.command.partySummaries.opponent).toEqual(ALL_HEALTHY_SUMMARY);
+
+    const variedPlayer = [
+      Object.freeze({ ...settledIntro.command.parties.player[0], status1: 0x40 }),
+      Object.freeze({ ...settledIntro.command.parties.player[1], hp: 0, status1: 0 }),
+      settledIntro.command.parties.player[2],
+    ] as unknown as typeof settledIntro.command.parties.player;
+    const variedOpponent = [
+      settledIntro.command.parties.opponent[0],
+      Object.freeze({ ...settledIntro.command.parties.opponent[1], status1: 0x20 }),
+      Object.freeze({ ...settledIntro.command.parties.opponent[2], hp: 0, status1: 0 }),
+    ] as unknown as typeof settledIntro.command.parties.opponent;
+    const variedCommand = createFactoryBattleStartPresentationCommand({
+      commandId: settledIntro.command.commandId,
+      battleIndex: settledIntro.command.battleIndex,
+      opponentTrainer: settledIntro.command.opponentTrainer,
+      playerParty: variedPlayer,
+      opponentParty: variedOpponent,
+    });
+    expect(variedCommand.partySummaries.player).toEqual([
+      "status", "fainted", "healthy", "empty", "empty", "empty",
+    ]);
+    expect(variedCommand.partySummaries.opponent).toEqual([
+      "healthy", "status", "fainted", "empty", "empty", "empty",
+    ]);
+
+    const beforeRender = structuredClone(state);
+    const frameA = render(state);
+    const frameB = render(state);
+    expect(frameB).toEqual(frameA);
+    expect(state).toEqual(beforeRender);
+    expect(state.rngValue).toBe(beforeRender.rngValue);
+    expect(state.factoryRoundBattleOrchestrator!.round.rules)
+      .toEqual(beforeRender.factoryRoundBattleOrchestrator!.round.rules);
+    expect(state.factoryRoundBattleOrchestrator!.round.rules.lastBattle).toBeNull();
+    expect(state.factoryRoundBattleOrchestrator!.round.rules.lastSwap)
+      .toEqual({ type: "decline" });
+    expect(state.factoryRoundBattleOrchestrator!.round.rules.playerParty)
+      .toEqual(beforeRender.factoryRoundBattleOrchestrator!.round.rules.playerParty);
+    expect(state.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party)
+      .toEqual(beforeRender.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party);
   });
 });

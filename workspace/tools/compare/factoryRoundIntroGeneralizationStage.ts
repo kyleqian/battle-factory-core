@@ -140,3 +140,13 @@ export function generatedRoundRevealProofStage(
 export function generatedRoundBattle6LukasRevealStage(state: EngineState): EngineState {
   return generatedRoundRevealProofStage(state, 5);
 }
+
+// The summary/message trace owns the next source-relative phase from the same
+// immutable Battle-6 receipt. Keep its stage name explicit while reusing the
+// exact ordinary-controller construction above; no phase-specific data or
+// absolute trace clock enters production state.
+export function generatedRoundBattle6LukasStatusSummaryMessageStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundRevealProofStage(state, 5);
+}
