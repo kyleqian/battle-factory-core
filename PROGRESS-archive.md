@@ -40925,3 +40925,22 @@ git; the current live ledger keeps the three load-bearing entries only.
   Focused selector/v3/read-contract **8/8**, smoke **375/375**, forced
   typecheck, full `npm test` **922 files / 8,619 passed / 1 skipped**
   (**84.03s**), and build (**631 modules**, Vite **6.23s**) are green.
+## 1130 — [supervisor, 2026-08-11] **#55 exact MPlay selector folded; wind-down green**
+
+- **State:** master is green through `54712feb`. The sixth-player execution
+  selector, command-read bounds, callback routes, and actual mixer-entry target
+  safety are now complete; #55 remains open for source-proven cost composition
+  and its construction clock stays null/unwired.
+- **Did:** independently regenerated the additive selector/v3/read-contract
+  union at **8/8** after the worker joined all **113/113** frozen state/cost
+  rows and classified **108 one-pass / 5 zero-pass** calls. No frozen hash or
+  production module changed.
+- **Next:** source-reduce exact per-call MPlay execution from the banked
+  selector and bounded command reads. Do not fit a duration, assign a service
+  cost, or wire `runFactoryConstructionClock` until composition closes.
+- **Notes:** final worker gates: `npm test` **922 files / 8,619 passed / 1
+  skipped** (**84.03s**) and build **631 modules** (Vite **6.23s**). The
+  engine-identical final soaks remain vanilla **20/20** (**32.2s**) and
+  full-policy **60/60** (**278.9s**), both **0 crash / 0 hang**. Orient folded
+  animation-main through `77e3d325`; later animation work remains with its
+  active supervisor. OFF oracle is healthy; no material decision was deferred.
