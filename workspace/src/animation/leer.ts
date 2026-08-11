@@ -33,9 +33,11 @@ export interface LeerState {
   readonly audio: readonly { readonly age: number; readonly song: "SE_M_LEER"; readonly pan: number }[];
 }
 
-function leerSpriteAtAge(age: number): LeerSpriteState {
+function leerSpriteAtAge(age: number, attackerSide: "player" | "opponent"): LeerSpriteState {
+  const x = attackerSide === "player" ? 96 : 152;
+  const y = attackerSide === "player" ? 76 : 34;
   if (age < LEER_SPRITE_FIRST_AGE || age > LEER_SPRITE_LAST_AGE) {
-    return { active: false, tileOffset: 0, x: 96, y: 76 };
+    return { active: false, tileOffset: 0, x, y };
   }
   // This is the observed software-OAM animation state of AnimLeer: the
   // initial callback row holds cell 0 for two rows and its terminal cell is
@@ -45,7 +47,7 @@ function leerSpriteAtAge(age: number): LeerSpriteState {
       : age <= 14 ? 32
         : age <= 17 ? 48
           : 64;
-  return { active: true, tileOffset, x: 96, y: 76 };
+  return { active: true, tileOffset, x, y };
 }
 
 function scaleAtAge(age: number): number {
@@ -68,14 +70,16 @@ export function leerAtAge(age: number, attackerSide: "player" | "opponent"): Lee
   return {
     age,
     monbg: age >= 4 && age < LEER_CLEANUP_FIRST_AGE,
-    blend: age >= 4 && age < LEER_CLEANUP_FIRST_AGE ? { eva: 8, evb: 8 } : null,
+    blend: age >= LEER_SCALE_FIRST_AGE && age < LEER_CLEANUP_FIRST_AGE ? { eva: 8, evb: 8 } : null,
     attackerScale: scaleAtAge(age),
-    displayedAttackerScale: scaleAtAge(age - 2),
-    targetOffset: targetShakeAtAge(age),
+    displayedAttackerScale: scaleAtAge(age - 1),
+    targetOffset: age < LEER_SHAKE_FIRST_AGE
+      ? { x2: attackerSide === "player" ? 1 : 0, y2: 0 }
+      : targetShakeAtAge(age),
     displayedTargetOffset: age <= LEER_SHAKE_FIRST_AGE
       ? { x2: attackerSide === "player" ? 1 : 0, y2: 0 }
       : shakeMon2DisplayedOffsetAtAge(1, 0, 9, 1, age, LEER_SHAKE_FIRST_AGE),
-    sprite: leerSpriteAtAge(age),
+    sprite: leerSpriteAtAge(age, attackerSide),
     audio: age === 4 ? [{ age, song: "SE_M_LEER", pan }] : [],
   };
 }

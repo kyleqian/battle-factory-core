@@ -19,13 +19,15 @@ describe("MOVE_LEER source-relative reducer", () => {
     expect([7, 8, 16, 25, 26].map((age) => leerAtAge(age, "player").attackerScale))
       .toEqual([251, 246, 206, 251, 256]);
     expect([7, 8, 9].map((age) => leerAtAge(age, "player").displayedAttackerScale))
-      .toEqual([256, 256, 251]);
+      .toEqual([256, 251, 246]);
+    expect(leerAtAge(7, "player").sprite).toMatchObject({ x: 96, y: 76 });
+    expect(leerAtAge(7, "opponent").sprite).toMatchObject({ x: 152, y: 34 });
   });
 
   it("uses the long ShakeMon2 +2 display latch and orientation baseline", () => {
     expect([38, 39, 40, 41, 42, 43, 55, 56].map((age) =>
       leerAtAge(age, "player").targetOffset.x2,
-    )).toEqual([0, -1, -1, 1, 1, -1, 0, 0]);
+    )).toEqual([1, -1, -1, 1, 1, -1, 0, 0]);
     expect([38, 39, 40, 41, 42, 43, 44].map((age) =>
       leerAtAge(age, "player").displayedTargetOffset.x2,
     )).toEqual([1, 1, 1, -1, -1, 1, 1]);

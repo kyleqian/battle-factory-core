@@ -20024,8 +20024,8 @@ export function renderSceneOnMovePresentation(
     }
     const attackerSprite = playerToOpponent ? dragonairBackSprite : dragonairFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const targetX = view.target.geometry.spriteCorner.x + displayed.displayedTargetOffset.x2;
-    const targetY = view.target.geometry.spriteCorner.y + displayed.displayedTargetOffset.y2;
+    const targetX = view.target.geometry.spriteCorner.x + view.displayedTargetOffset.x2;
+    const targetY = view.target.geometry.spriteCorner.y + view.displayedTargetOffset.y2;
     const attackerCorner = view.attacker.geometry.spriteCorner;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     // monbg ANIM_ATTACKER leaves the unscaled attacker as the blend underlay;
@@ -20050,7 +20050,7 @@ export function renderSceneOnMovePresentation(
         displayed.displayedAttackerScale,
         8,
         8,
-        false,
+        true,
         "live",
       );
     }
@@ -20060,10 +20060,15 @@ export function renderSceneOnMovePresentation(
         displayed.sprite.tileOffset / battleAnimLeer.tileset.columns,
         4,
       );
-      const eyeCorner = playerToOpponent
-        ? { x: 80, y: 60 }
-        : { x: 136, y: 18 };
-      drawSpriteSheet(fb, eyeTiles, battleAnimLeer.palette, eyeCorner.x, eyeCorner.y);
+      // gLeerSpriteTemplate stores its OAM center; the decoded 32x32 asset
+      // is drawn from the corresponding top-left corner.
+      drawSpriteSheet(
+        fb,
+        eyeTiles,
+        battleAnimLeer.palette,
+        displayed.sprite.x - 16,
+        displayed.sprite.y - 16,
+      );
     }
     const profile = state.config.fieldProfile;
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
