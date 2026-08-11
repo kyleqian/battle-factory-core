@@ -1448,7 +1448,11 @@ DMA completion. Two fresh compact packets are byte-identical (`a0cdb0c1…`):
 Timer@D (`cyclesLate=1`), DMA1's first callback, Audio@D+1 (`cyclesLate=0`),
 then the remaining DMA1/2 graph; requests and completions are both 1→2 and all
 hardware state is retained at the exact boundaries. The two legal-varied rows
-remain uncaptured. Dispatcher/service cost/clock remain untouched.
+use generalized source-order selectors. Get-nature ordinal 12 is now captured
+twice fresh and byte-identical (`21ea4158…`): Timer@D (`cyclesLate=5`), DMA1,
+Audio@D+1 (`cyclesLate=4`), remaining DMA1/2, completion 1→2 at Timer-entry
++18, with prompt restoration. Nature-attempt ordinal 63 (Video+Audio) remains
+uncaptured. Dispatcher/service cost/clock remain untouched.
 
 **IRQ / Video-DMA reachability audit (2026-08-11):** source plus the finite OFF
 receipts exclude those roots from the selected construction epoch. MP2K starts

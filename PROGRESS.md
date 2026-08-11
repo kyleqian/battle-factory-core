@@ -5,18 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1121 — [MAIN worker, 2026-08-11] **#55 legal-varied adjacent-row selectors pinned**
+## 1121 — [MAIN worker, 2026-08-11] **#55 varied get-nature runtime row closed**
 
-- **State:** both remaining legal-varied rows now have source-order selectors;
-  runtime callback capture is next and #55 stays open/unwired.
+- **State:** get-nature is closed twice fresh; nature-attempt 63 is the sole
+  remaining legal-varied adjacent row and #55 stays open/unwired.
 - **Did:** generalized the LILIANA selector across encrypted-accessor,
   get-nature, and nature-attempt components. Fresh OFF scouts pin get-nature
   ordinal 12's repeated division occurrence **4** and nature-attempt ordinal
-  63's occurrence **0**, with no frame/cycle/identity selection key.
-- **Next:** retain each varied Timer/Audio[/Video]/DMA graph twice fresh,
-  independently; discard only a row that cannot validate.
-- **Notes:** both scouts finished in **11.5/11.7s**; focused selector/runtime
-  **8/8** is green. No service cost, clock, controller, presentation,
+  63's occurrence **0**. Get-nature packets are byte-identical `21ea4158…`:
+  Timer late 5, DMA1, Audio late 4 at D+1, remaining DMA1/2, completion +18.
+- **Next:** retain nature-attempt 63's Video/Timer/Audio/DMA graph twice fresh.
+- **Notes:** captures finished in **12.3/11.6s**; focused selector/runtime
+  **13/13** is green. No service cost, clock, controller, presentation,
   animation, barrier, recording, or side-owned adjacent-audit artifact changed.
 
 ## 1120 — [MAIN worker, 2026-08-11] **#55 LILIANA adjacent-deadline runtime receipt**

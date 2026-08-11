@@ -98,6 +98,30 @@ This is adjacent-deadline evidence, not an exact-equality Audio-before-Timer
 class. It does not price either callback, set `serviceCostMasterCycles`, or
 wire `runFactoryConstructionClock`.
 
+## Selected legal-varied get-nature runtime edge
+
+The same wrapper architecture now closes get-nature ordinal 12 at
+`0x082e7bf2→0x082e7bf4`. A bounded source-order scout pinned the repeated
+division instruction's zero-based occurrence **4** before capture; selection
+uses only the outer `CalculateMonStats` call, direct get-nature ordinal and
+return class, and that occurrence. It has no frame, cycle, party, or identity
+lookup.
+
+Two fresh Battle-Scene-OFF runs completed in **12.3s / 11.6s** and produced
+byte-identical 27,846-byte packets (SHA-256
+`21ea415896100b66283f94b4eb5dc7cbc59c40d06b5e4495040b24a1a7910040`).
+Wrappers install with Timer 0 / Audio Sample **305 / 306** master cycles in
+the future. The retained graph is Timer at D (`cyclesLate=5`), DMA1's first
+callback, Audio at D+1 (`cyclesLate=4`), then the remaining DMA1/2 graph.
+Requests and completions are both 1→2; DMA active order is
+`1,1,1,1,2,1,2,2,2,2`; completion is 18 cycles after Timer entry and all DMA
+work is clear when the wrappers restore at sequence 11. Exact deadlines,
+callback order, and full Timer/Audio/completion hardware are pinned in
+`factoryTimer0SelectedVariedGetNatureRuntime.test.ts`.
+
+This independently validated row remains evidence only. It does not supply a
+service price or construction-clock wiring.
+
 ## Construction-state scope
 
 The already-committed construction reachability receipt records two exact
@@ -107,7 +131,8 @@ runtime windows with audio enabled, no optional mixer, and
 outside the post-boot construction epoch. That excludes the optional HLE and
 external-mixing bypass at the construction-epoch scope.
 
-The three compact FIFO rows do not themselves serialize mixer pointers,
+The remaining uncaptured nature-attempt row's compact FIFO boundary does not
+itself serialize mixer pointers,
 `externalMixing`, PSG/output-route values, stream/sync state, or callback
 duration. This audit deliberately does not promote the two-window observation
 to a per-row runtime graph. It contains no absolute scheduler timestamp or
