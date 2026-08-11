@@ -13,13 +13,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did:** removed fabricated serialized DMA start/completion fields. Ordered
   A/DMA1→B/DMA2 deadline work is 10 each / sum 20; only the receipt-observed
   fresh dual graph exposes makespan 18, while zero/one remain `null`.
-- **Next:** final full-suite and build verification, then continue #55 only
-  with a separately bounded unobserved runtime class; do not fit 18 or wire
-  `runFactoryConstructionClock`.
+- **Next:** continue #55 only with a separately bounded unobserved runtime
+  class; do not fit 18 or wire `runFactoryConstructionClock`.
 - **Notes:** verified exact mGBA 0.10.5 archive SHA and source scheduling;
-  focused Timer0 **34/34**, typecheck, and smoke are green. No clock wiring,
-  service cost, controller, presentation, animation, barrier, or canonical
-  Battle-2 change.
+  focused Timer0 **34/34**, typecheck, smoke, full `npm test`, and build are
+  green. No clock wiring, service cost, controller, presentation, animation,
+  barrier, or canonical Battle-2 change.
 
 ## 1116 — [MAIN worker, 2026-08-11] **#55 absolute Timer 0 callback-entry receipt**
 
