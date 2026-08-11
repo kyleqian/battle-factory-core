@@ -577,6 +577,12 @@ import {
   type CounterState,
 } from "./counter.ts";
 import {
+  thrashAtAge,
+  thrashDisplayedTargetOffsetAtAge,
+  type ThrashRandomWords,
+  type ThrashState,
+} from "./thrash.ts";
+import {
   crabHammerAtAge,
   type CrabHammerState,
 } from "./crabHammer.ts";
@@ -2426,6 +2432,23 @@ export interface SceneOnCounterConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/**
+ * Narrow Scene-ON seam for the complete source-derived Thrash body.  The
+ * callback's three four-word `Random2()` groups are immutable staging input;
+ * this presentation layer neither derives nor advances battle RNG.
+ */
+export interface SceneOnThrashConfig {
+  readonly move: "THRASH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly fistRandom: readonly [
+    ThrashRandomWords,
+    ThrashRandomWords,
+    ThrashRandomWords,
+  ];
+}
+
 /** Typed staging seam only; a later draw case supplies the live target idle x2. */
 export interface SceneOnCrabHammerConfig {
   readonly move: "CRABHAMMER";
@@ -2638,6 +2661,7 @@ export type SceneOnMoveConfig =
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnThrashConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
@@ -3321,6 +3345,12 @@ export interface SceneOnCounterView extends CounterState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnThrashView extends ThrashState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCrabHammerView extends CrabHammerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -3988,6 +4018,7 @@ export function createSceneOnMovePresentation<
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnThrashConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
@@ -6728,6 +6759,46 @@ export function sceneOnCounterView(
       targetCenter: target.geometry.animationCenter,
     }),
   };
+}
+
+export function sceneOnThrashView(
+  state: SceneOnMovePresentationState,
+): SceneOnThrashView {
+  if (state.config.move !== "THRASH") {
+    throw new Error(`expected THRASH presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...thrashAtAge(state.age, {
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+      targetDimensions: { width: 56, height: 64 },
+      fistRandom: state.config.fistRandom,
+    }),
+  };
+}
+
+/** Typed framebuffer seam for Thrash's independently measured ShakeMon latch. */
+export function sceneOnThrashDisplayedTargetOffset(
+  state: SceneOnMovePresentationState,
+): Readonly<{ x2: number; y2: number }> {
+  if (state.config.move !== "THRASH") {
+    throw new Error(`expected THRASH presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return thrashDisplayedTargetOffsetAtAge(state.age, {
+    attackerSide: attacker.geometry.side,
+    targetSide: target.geometry.side,
+    targetCenter: target.geometry.animationCenter,
+    targetDimensions: { width: 56, height: 64 },
+    fistRandom: state.config.fistRandom,
+  });
 }
 
 export function sceneOnCrabHammerView(

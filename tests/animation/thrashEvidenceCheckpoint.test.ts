@@ -10,7 +10,7 @@ interface Mon {
   readonly abilitySlot: number; readonly friendship: number; readonly gender: string; readonly shiny: boolean;
 }
 
-describe("MOVE_THRASH source/evidence checkpoint", () => {
+describe("MOVE_THRASH source/evidence acceptance", () => {
   it("pins the exact script-data interval, six-component graph, sole carrier, and distinct sibling", () => {
     const output = execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/thrashSourceAudit.ts",
@@ -54,7 +54,7 @@ describe("MOVE_THRASH source/evidence checkpoint", () => {
     expect(carriers).toBe(2);
   });
 
-  it("pins bilateral dense receipts, maps, measured latches, and the unsupported verdict", () => {
+  it("pins bilateral dense receipts, maps, measured latches, and exact acceptance", () => {
     for (const [path, window, evidence, raw, mapHash] of [
       ["tools/compare/fixtures/thrash-player-tauros-opponent-onix.json",
         { startFrame: 72, endFrame: 174, frameCount: 103 },
@@ -86,10 +86,19 @@ describe("MOVE_THRASH source/evidence checkpoint", () => {
         expect(schedule.matchesByRamLag[2] / schedule.samples).toBeGreaterThan(0.9);
         expect((schedule.matchesByRamLag[2] - schedule.matchesByRamLag[1]) / schedule.samples).toBeGreaterThan(0.2);
       }
-      expect(fixture.acceptance).toEqual({ status: "evidence-only-unsupported", denseEvidenceFrames: 103 });
+      expect(fixture.schema).toBe("thrash-portable-exact/v2");
+      expect(fixture.move).toBe("THRASH");
+      expect(fixture.acceptance).toEqual({
+        status: "exact",
+        sourceReducerMatching: 103,
+        typedSeamMatching: 103,
+        componentMatching: 103,
+        framebufferMatching: 103,
+      });
     }
     const coverage = readFileSync("ANIMATION_COVERAGE.json", "utf8");
-    expect(coverage).toContain("MOVE_THRASH remains unsupported");
+    expect(coverage).toContain("\"move\": \"MOVE_THRASH\"");
+    expect(coverage).toContain("MOVE_THRASH exact");
     expect(coverage).toContain("MOVE_DOUBLE_KICK remains independently unsupported");
   });
 });

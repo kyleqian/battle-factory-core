@@ -1007,6 +1007,8 @@ import {
   sceneOnSlashView,
   sceneOnLickView,
   sceneOnCounterView,
+  sceneOnThrashView,
+  sceneOnThrashDisplayedTargetOffset,
   sceneOnCrabHammerView,
   sceneOnDoubleEdgeView,
   sceneOnCrushClawView,
@@ -1128,6 +1130,7 @@ import {
   SLIDE_ORIGIN_DURATION,
   SLIDE_ORIGIN_FIRST_AGE,
 } from "../animation/counter.ts";
+import { thrashAffineYOffset } from "../animation/thrash.ts";
 import {
   extremeSpeedBackgroundVariant,
   extremeSpeedImpactAtAge,
@@ -1441,6 +1444,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const taurosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).TAUROS!;
 const ninetalesFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NINETALES!;
 const quilavaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).QUILAVA!;
 const ariadosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARIADOS!;
@@ -2631,6 +2635,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const taurosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).TAUROS!;
 const ninetalesBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NINETALES!;
 const quilavaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).QUILAVA!;
 const medichamBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MEDICHAM!;
@@ -39338,6 +39343,127 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
       "COUNTER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "THRASH") {
+    const view = sceneOnThrashView(state);
+    const playerToOpponent = view.attacker.species === "TAUROS"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "TAUROS"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged THRASH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    // The three latches are independently evidenced in both orientations:
+    // * plain fist + basic-hitsplat OAM and the vertical task: RAM + 1;
+    // * affine horizontal task: RAM + 2;
+    // * each 4/0/7/1 and 8/0/16/1 ShakeMonInPlace target outline: RAM + 2.
+    // Keep them split instead of relying on the generic OAM latch: task
+    // writes are visible a frame later than the script-created plain sprites.
+    const plain = sceneOnThrashView({ ...state, age: state.age - 1 });
+    const task = sceneOnThrashView({ ...state, age: state.age - 2 });
+    const displayedTargetOffset = sceneOnThrashDisplayedTargetOffset(state);
+    const tauros = playerToOpponent ? taurosBackSprite : taurosFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetX2 = targetIdle.x2 + displayedTargetOffset.x2;
+    const black = { r: 0, g: 0, b: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // OAM allocates Tauros (subpriority 30), then the fist (37), basic
+    // hitsplat child (38), and ONIX (40).  The front-most lower slots mean
+    // ONIX is the backdrop, then Tauros, then child, then parent fist.
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    // `PrepareBattlerSpriteForRotScale` uses AFFINE_DOUBLE.  The source task
+    // matrix is direct ObjAffineSet output (a/d, no inversion), while the
+    // separate vertical task changes the source anchor at the +1 latch.
+    drawSpriteSheetAffineStretch(
+      fb,
+      tauros.tileset,
+      tauros.palette,
+      view.attacker.geometry.spriteCorner.x + task.attackerPosition.x,
+      view.attacker.geometry.spriteCorner.y
+        + task.attackerPosition.y
+        + thrashAffineYOffset(task.attackerMatrix.d, playerToOpponent ? 13 : 0),
+      task.attackerMatrix.a,
+      task.attackerMatrix.d,
+      0,
+      black,
+      0,
+      true,
+    );
+    for (const hitsplat of plain.hitsplats) {
+      // The template is affine normal + ObjBlend, but this body leaves
+      // BLDCNT/BLDALPHA at zero; the hardware therefore paints its identity
+      // affine hitsplat as a normal opaque OBJ.
+      drawSpriteSheetAffineRotate(
+        fb,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        hitsplat.x,
+        hitsplat.y,
+        hitsplat.matrix.a,
+        hitsplat.matrix.b,
+        hitsplat.matrix.c,
+        hitsplat.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    for (const fist of plain.fists) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, fist.animation * 4, 4),
+        battleAnimHandsAndFeet.palette,
+        fist.x - 16,
+        fist.y - 16,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "TAUROS",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TAUROS" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TAUROS used" : "Foe TAUROS used",
+      "THRASH!",
       99,
     );
     return;

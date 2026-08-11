@@ -3950,6 +3950,33 @@
    ]
   },
   {
+   "move": "MOVE_THRASH",
+   "status": "exact",
+   "covered": [
+    "the sole legal Level-50 set-408 TAUROS carrier against legal challenge-3 set-394 ONIX passes the complete pointer-bounded Scene-ON body plus first inactive cleanup at 103/103 frames twice fresh in both orientations: player-back frames 72-174 and opponent-front frames 76-178",
+    "the pure reducer ports async IMPACT/HANDS_AND_FEET resource loads, all three Random2-supplied gFistFootRandomPosSpriteTemplate/basic-hitsplat child pairs, source allocator slots, Thrash horizontal affine loop, vertical motion task, all three target-panned sounds, and cleanup without owning battle state or RNG",
+    "the narrow TAUROS/ONIX seam and compositor reproduce source OAM/matrix/palette/tag/register/audio state, raw RGB and normalized change maps, and all production framebuffers; plain fist/hitsplat OAM is RAM+1, the horizontal affine task is RAM+2, and the source-created first ShakeMonInPlace write plus its task cadence are modeled from the script scheduler",
+    "each 4/0/7/1 invocation and the 8/0/16/1 invocation independently proves RAM+2 target-outline pixels outside the complete 32x32 fist/hitsplat OAM bounds (94.2-98.1% fit versus 60.5-70.6% at RAM+1), in both orientations",
+    "MOVE_DOUBLE_KICK remains independently unsupported: its wider 11-carrier script has a distinct 20-frame fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup body; shared fist/hitsplat source transfers no acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-thrash-player-tauros-opponent-onix.json",
+    "tools/battle-lab/mechanic-thrash-opponent-tauros-player-onix.json",
+    "tools/compare/fixtures/thrash-player-tauros-opponent-onix.json",
+    "tools/compare/fixtures/thrash-opponent-tauros-player-onix.json",
+    "tools/compare/thrashProbe.py",
+    "tools/compare/thrashSourceAudit.ts",
+    "tools/compare/thrashPortable.ts",
+    "tools/compare/evidence/thrash-changemap-player.txt",
+    "tools/compare/evidence/thrash-changemap-opponent.txt",
+    "src/animation/thrash.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/thrash.test.ts",
+    "tests/animation/thrashEvidenceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_THUNDER",
    "status": "exact",
    "covered": [
@@ -5192,7 +5219,7 @@
     "MOVE_THRASH",
     "MOVE_DOUBLE_KICK"
    ],
-   "goal": "MOVE_THRASH remains unsupported: its sole legal Level-50 set-408 TAUROS checkpoint banks complete twice-fresh 103-frame bilateral pointer-bounded source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map evidence through first inactive cleanup, but it has no reducer, typed seam, production compositor, or framebuffer acceptance. Its own maps prove plain fist/foot and child OAM plus vertical position at RAM+1 and the horizontal affine task at RAM+2. A focused move-owned target-palette outline verifier excludes each fist/hitsplat's complete 32x32 OAM bounds and independently resolves both 4/0/7/1 ShakeMonInPlace calls plus the 8/0/16/1 call at RAM+2 in both orientations; actual target pixels fit RAM+2 at 94.2-98.1% versus 60.5-70.6% for RAM+1. MOVE_DOUBLE_KICK remains independently unsupported: the source audit pins its broader 11-carrier body with one distinct 20-frame fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup; the shared sprite source transfers no acceptance."
+   "goal": "MOVE_THRASH exact: its sole legal Level-50 set-408 TAUROS body passes twice-fresh 103/103 bilateral source reducer, typed seam, task/sprite allocator, software/hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB/change-map, and production framebuffer acceptance through first inactive cleanup. Its own maps retain plain fist/foot and child OAM plus vertical position at RAM+1, the horizontal affine task at RAM+2, and all three ShakeMonInPlace target outlines at RAM+2 (94.2-98.1% target-palette witness fit versus 60.5-70.6% at RAM+1). MOVE_DOUBLE_KICK remains independently unsupported: its 11-carrier body has a distinct 20-frame fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup acceptance unit; shared sprite source transfers no acceptance."
   }
  ],
  "variantAudits": {
