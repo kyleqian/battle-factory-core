@@ -1388,8 +1388,8 @@ because six clean classes are supplied by another epoch. This correlation
 classifies the observed +18 as conditional on a Direct Sound FIFO refill/DMA
 write, not as an invariant Timer 0 callback cost.
 
-**Pure Timer 0 Direct Sound dispatch (2026-08-11, `649e993d`, corrected after
-the runtime receipt):** the smallest source-general conditional deadline-work
+**Pure Timer 0 Direct Sound dispatch (2026-08-11, `649e993d`, source-graph
+completion `9f13edc7`):** the smallest source-general conditional deadline-work
 reducer is registered alongside the pure cadence. Semantic per-crossing inputs
 cover the FIFO queued-word threshold, Timer/output routing, DMA
 source/custom-timing/enabled eligibility, the global audio-enable gate, and
@@ -1397,18 +1397,18 @@ only fresh four-word IWRAM-to-FIFO work. Every represented DMA requires
 explicit zero pre-Timer-0 `nextCount` work, and the reducer requires a caller
 assertion of no pre-existing, competing, or Video-started DMA work before it
 normalizes the graph. Outputs retain A/DMA1 before B/DMA2 and name the
-independent per-channel scheduled-deadline work (10 each; sum 0/10/20), rather
-than fabricated serialized service start/completion timestamps. The committed
-on-time fresh dual receipt is exposed separately as its observed isolated
-shared-graph makespan **18**; zero/one-refill makespans are `null`. Invalid FIFO
+independent per-channel scheduled-deadline work (10 each; sum 0/10/20). The
+pure scheduler graph now follows fresh callback-time rebasing, 2-cycle word
+edges, pre-terminal overdue coalescing, ascending-channel arbitration, and
+CPU-blocked progression, computing zero/one/dual makespans **0/10/18**. Invalid FIFO
 levels, mappings, regions, modes, counts, pending work, ownership, and
 per-crossing state-list lengths fail loudly. Multiple late crossings require
-one explicit state each and preserve cadence phase. Because a fresh isolated
-A/B pair shares the source deadline `currentTime - cyclesLate`, the common
-absolute translation cancels from the deadline work and stays out of this API;
-it does not claim a deadline or co-due arithmetic. Tier-1 covers 20 work versus
-18 dual elapsed, zero/one boundaries, audio disabled, pending/competing/Video
-DMA rejection, order, repeated crossings, immutability, and validation.
+one explicit state each and preserve cadence phase. A standalone reducer takes
+actual dispatch time and the common `currentTime - cyclesLate` deadline, so
+late isolated graphs translate without a fixture/tick lookup. Tier-1 covers
+the graph order/overlap, 20 work versus 18 dual elapsed, zero/one, lateness,
+audio disabled, pending/competing/Video rejection, immutability, source hashes/
+anchors, repeated crossings, and validation.
 
 This closes the pure conditional dispatcher only. #55 remains open for live
 construction-clock phase/workload composition and complete VBlank/IRQ/audio
@@ -1433,10 +1433,10 @@ Video-started DMA exists. Timer requests A/DMA1 then B/DMA2; callback order is
 The original 20-cycle instruction edge is 2 CPU + 18 blocked scheduler cycles,
 not a Timer callback cost.
 
-#55 remains open beyond this bounded class: nonzero lateness, zero/one refill,
-a present mixer, pending/competing DMA, and Audio/IRQ or Video-started DMA are
-not observed. `serviceCostMasterCycles` remains `null`; the construction clock
-remains unwired. Full facts are in the scheduler audit.
+#55 remains open beyond this bounded class: a present mixer, pending/competing
+DMA, and external Audio/IRQ or Video-started DMA callbacks remain outside the
+reducer. `serviceCostMasterCycles` remains `null`; the construction clock stays
+unwired. Full facts are in the scheduler audit.
 
 **Adjacent Audio/Timer row correction + LILIANA runtime receipt
 (2026-08-11):** the three natural OFF rows cross adjacent deadlines, not an

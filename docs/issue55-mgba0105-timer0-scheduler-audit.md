@@ -138,11 +138,10 @@ after an explicit `audio.enable` gate, zero DMA1/DMA2 `nextCount` work, and
 no-preexisting/no-competing/no-Video-started-DMA assertions. In that narrow
 case, Timer 0 gives each newly requested FIFO DMA the same
 `currentTime - cyclesLate` deadline. The reducer reports ordered per-channel
-deadline work and its sum, so that shared translation cancels; it correctly
-keeps absolute `currentTime` and `cyclesLate` out of its API. It does not
-invent service start/completion timestamps. It labels 18 only as the committed
-receipt's observed isolated dual-refill makespan, leaving zero- and one-refill
-makespans null; it cannot report a general deadline or order any co-due event.
+deadline work and its sum, plus a pure event graph accepting actual Timer
+dispatch time and that common deadline. Fresh rebasing, two-cycle word edges,
+pre-terminal overdue coalescing, and channel arbitration compute zero/one/dual
+makespans **0/10/18**. It cannot order any external co-due event.
 
 A full scheduler reducer would instead need:
 
@@ -196,9 +195,9 @@ then DMA2. Both `nextCount` values are zero and `activeDMA=-1` at
 from live makespan: DMA2's first word runs at +8 while DMA1's terminal +2
 deadline is pending. The observed 20-cycle instruction edge is the 2-cycle CPU
 instruction plus this 18-cycle blocked graph; 18 is not a Timer callback cost.
-The pure dispatch API therefore exposes 20 only as summed channel deadline
-work and labels 18 only as this observed isolated dual-refill makespan; it does
-not synthesize zero- or one-refill completion values.
+The runtime graph independently confirms the pure reducer's computed service
+order and 18-cycle dual makespan; the API keeps the 20-cycle independent-work
+sum distinct and also computes the zero/one paths.
 
 The remaining boundary is explicit: these observations cover on-time fresh
 dual refills with no mixer, pre-existing work, competing DMA, Audio/IRQ co-due

@@ -128,7 +128,8 @@ The committed runtime receipt now supplies this inventory for two on-time,
 fresh dual-refill classes: isolated and Video-co-due-without-Video-DMA. Both
 finish their shared DMA graph at Timer-entry `+18`, while the independent
 channel deadline work remains `10 + 10 = 20`. The public pure dispatcher names
-those facts separately and leaves zero- and one-refill makespans null; it does
-not extrapolate an absolute completion through `cyclesLate` or price Timer 0.
-Neither this audit nor the prior fresh-DMA arithmetic can set
-`serviceCostMasterCycles`.
+that sum separately from the source-reduced zero/one/dual isolated graph
+makespans **0/10/18**. The graph accepts actual Timer dispatch time and the
+common request deadline; fresh callback-time rebasing makes nonzero lateness a
+translation for this isolated class. It still does not price Timer 0 or any
+co-due callback, so `serviceCostMasterCycles` remains unset.
