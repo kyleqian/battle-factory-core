@@ -2,7 +2,10 @@ import {
   linearTranslationDeltaQ8,
   linearTranslationOffsetAfterCallbacks,
 } from "./animLinearTranslation.ts";
-import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
+import {
+  shakeMon2DisplayedOffsetAtAge,
+  shakeMon2OffsetAtTick,
+} from "./shakeMon2.ts";
 
 export type MetalSoundSide = "player" | "opponent";
 
@@ -35,6 +38,7 @@ export interface MetalSoundEffect {
   readonly attackerSide: MetalSoundSide;
   readonly active: boolean;
   readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly displayedAttackerOffset: Readonly<{ x2: number; y2: number }>;
   readonly targetMonbg: boolean;
   readonly shakeTaskActive: boolean;
   readonly waves: readonly MetalSoundWaveSprite[];
@@ -111,6 +115,14 @@ export function metalSoundEffectAtAge(
     attackerOffset: shakeTaskActive
       ? shakeMon2OffsetAtTick(2, 0, 8, 1, shakeTick)
       : { x2: 0, y2: 0 },
+    displayedAttackerOffset: shakeMon2DisplayedOffsetAtAge(
+      2,
+      0,
+      8,
+      1,
+      age,
+      METAL_SOUND_WAVE_FIRST_AGE,
+    ),
     targetMonbg: age >= 5 && age <= METAL_SOUND_WAVE_LAST_AGE + 20,
     shakeTaskActive,
     waves,

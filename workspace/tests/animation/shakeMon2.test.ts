@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { shakeMon2OffsetAtTick, shakeMon2Sequence } from "../../src/animation/shakeMon2.ts";
+import {
+  shakeMon2DisplayedOffsetAtAge,
+  shakeMon2OffsetAtTick,
+  shakeMon2Sequence,
+} from "../../src/animation/shakeMon2.ts";
 
 describe("AnimTask_ShakeMon2 1:1 port", () => {
   it("alternates +/-offset every frameDelay+1 ticks, never touching zero mid-sequence", () => {
@@ -34,6 +38,13 @@ describe("AnimTask_ShakeMon2 1:1 port", () => {
     // Sequence for (2,0,3,1) is 6 ticks long (indices 0-5, self-destroy at 5).
     expect(shakeMon2OffsetAtTick(2, 0, 3, 1, 6)).toEqual({ x2: 0, y2: 0 });
     expect(shakeMon2OffsetAtTick(2, 0, 3, 1, 99)).toEqual({ x2: 0, y2: 0 });
+  });
+
+  it("derives the split creation/body live-battler OAM scanout", () => {
+    const creationAge = 7;
+    expect([7, 8, 9, 10, 11, 20, 21, 22, 23].map((age) =>
+      shakeMon2DisplayedOffsetAtAge(2, 0, 8, 1, age, creationAge).x2
+    )).toEqual([0, 2, -2, -2, 2, 2, -2, -2, 0]);
   });
 
   it(

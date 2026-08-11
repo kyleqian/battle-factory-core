@@ -60,6 +60,12 @@ describe("MOVE_METAL_SOUND source-relative reducer", () => {
     expect(player(51).waves).toEqual([]);
   });
 
+  it("derives the live-battler OAM scanout from the task creation write", () => {
+    expect([7, 8, 9, 10, 11, 20, 21, 22, 23].map((age) =>
+      player(age).displayedAttackerOffset.x2
+    )).toEqual([0, 2, -2, -2, 2, 2, -2, -2, 0]);
+  });
+
   it("exposes only source-relative presentation through the Scene-ON seam", () => {
     const stage = createSceneOnMovePresentation({
       move: "METAL_SOUND",

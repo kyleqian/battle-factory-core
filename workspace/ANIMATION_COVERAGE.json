@@ -2300,6 +2300,30 @@
    ]
   },
   {
+   "move": "MOVE_METAL_SOUND",
+   "status": "exact",
+   "covered": [
+    "complete legal set-122 ARON versus ONIX Scene-ON windows pass player-back frames 291-376 at 86/86 and opponent-front frames 291-375 at 85/85 source/component, typed seam, software and hardware OAM/matrices/palettes/tags/registers/audio, immutable state, raw RGB, and production framebuffer twice fresh",
+    "the source-relative reducer and narrow compositor port all four gMetalSoundSpriteTemplate translations/affine programs, monbg/split priority, four SE_M_SCREECH calls, cleanup, and the attacker AnimTask_ShakeMon2(2,0,8,1) without gameplay or controller ownership",
+    "move-owned hardware evidence resolves the live-battler scanout: the positive creation write displays at creation+1 and the remaining ShakeMon2 sequence body follows RAM+2; hardware OAM order puts player-back ARON in front of the waves and opponent-front ARON behind them",
+    "MOVE_SUPERSONIC remains an independently exact shared splitbgprio_foes/sonic-ring control at 51/51 component and framebuffer frames twice fresh in both orientations"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-metal-sound-player-aron-opponent-onix.json",
+    "tools/battle-lab/mechanic-metal-sound-opponent-aron-player-onix.json",
+    "tools/compare/fixtures/metal-sound-player-aron-opponent-onix.json",
+    "tools/compare/fixtures/metal-sound-opponent-aron-player-onix.json",
+    "tools/compare/fixtures/metal-sound-evidence-checkpoint.json",
+    "tools/compare/metalSoundProbe.py",
+    "tools/compare/metalSoundPortable.ts",
+    "src/animation/metalSound.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/metalSound.test.ts",
+    "tests/animation/metalSoundEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_METRONOME",
    "status": "exact",
    "covered": [

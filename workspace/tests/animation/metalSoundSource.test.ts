@@ -34,17 +34,17 @@ describe("MOVE_METAL_SOUND source checkpoint", () => {
           "visualCommand:monbg",
           "visualCommand:splitbgprio_foes",
         ],
-        independence: "Metal Sound remains unsupported; its 32x64 metal-wave/panse/def-partner body is not inherited from Supersonic.",
+        independence: "Metal Sound is independently exact; its 32x64 metal-wave/panse/def-partner body is not inherited from Supersonic.",
       },
     });
   });
 
-  it("keeps Metal Sound unpromoted while the Level-50 exact count stays 170", () => {
+  it("promotes only Metal Sound while the Level-50 exact count reaches 171", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(170);
+    expect(coverage.entries).toHaveLength(171);
     expect(coverage.entries.find(
       (entry: { move: string }) => entry.move === "MOVE_METAL_SOUND",
-    )).toBeUndefined();
+    )).toMatchObject({ status: "exact" });
     expect(coverage.entries.find(
       (entry: { move: string }) => entry.move === "MOVE_SUPERSONIC",
     )).toMatchObject({ status: "exact" });

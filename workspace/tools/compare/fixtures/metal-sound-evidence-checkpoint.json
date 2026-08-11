@@ -2,7 +2,7 @@
   "schema": "metal-sound-evidence-checkpoint/v1",
   "oracleProfile": "battle-scene-on",
   "move": "METAL_SOUND",
-  "status": "unsupported",
+  "status": "exact",
   "sourceBounds": {
     "start": "0x082d59b7",
     "endExclusive": "0x082d5a07",
@@ -51,7 +51,7 @@
       "latchChecks": {
         "plainWaveOam": "RAM+1 visible motion",
         "freshAffineMatrix": "Metal Sound wave matrix and OAM both display reducer age-1",
-        "shakeMon2": "logical task tick is wave age+1; eight displayed live-battler OAM frames remain unresolved",
+        "shakeMon2": "logical task tick is wave age+1; live OAM displays the positive creation write at age+1, then the source-derived sequence body at RAM+2",
         "palettes": "faded/unfaded RAM+1; hardware palette follows the next display",
         "audio": "four SE_M_SCREECH panse calls; sound-task/audio rows captured"
       }
@@ -72,7 +72,7 @@
       "latchChecks": {
         "plainWaveOam": "RAM+1 visible motion",
         "freshAffineMatrix": "Metal Sound wave matrix and OAM both display reducer age-1",
-        "shakeMon2": "logical task tick is wave age+1; eight displayed live-battler OAM frames remain unresolved",
+        "shakeMon2": "logical task tick is wave age+1; live OAM displays the positive creation write at age+1, then the source-derived sequence body at RAM+2",
         "palettes": "faded/unfaded RAM+1; hardware palette follows the next display",
         "audio": "four SE_M_SCREECH panse calls; sound-task/audio rows captured"
       }
@@ -90,7 +90,7 @@
     "audio": true,
     "immutableBattleState": true,
     "rawRgb": true,
-    "productionFramebuffer": "player 78/86, opponent 77/85 twice fresh; eight ShakeMon2 display frames remain per orientation"
+    "productionFramebuffer": "player 86/86 and opponent 85/85 twice fresh; source/component/seam and framebuffer are exact"
   },
   "control": {
     "move": "SUPERSONIC",
@@ -105,7 +105,7 @@
     }
   },
   "promotion": {
-    "status": "deferred",
-    "reason": "Corrected ARON carrier is component-exact, but eight ShakeMon2 display-latch frames remain mismatched in each orientation."
+    "status": "exact",
+    "reason": "Corrected ARON carrier is exact across complete bilateral dense source, hardware, typed-seam, raw-RGB, and production-framebuffer windows twice fresh."
   }
 }

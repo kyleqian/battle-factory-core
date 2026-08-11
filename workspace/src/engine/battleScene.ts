@@ -31498,9 +31498,11 @@ export function renderSceneOnMovePresentation(
     // their source matrix for the first paint; later matrix writes follow the
     // same displayed row. Removal is likewise driven by the prior OAM row.
     const displayed = sceneOnMetalSoundView({ ...metalSoundState, age: state.age - 1 });
-    const displayedAttackerOffset = state.age <= 0
-      ? { x2: 0, y2: 0 }
-      : displayed.attackerOffset;
+    // ShakeMon2's live battler takes the source scheduler's split transfer:
+    // its initial positive write reaches software OAM before the reducer's
+    // first observable post-callback row, then the ordinary body follows the
+    // same two-stage software-OAM -> hardware-OAM scanout schedule.
+    const displayedAttackerOffset = view.displayedAttackerOffset;
     const playerToOpponent =
       view.attacker.species === "ARON"
       && view.attacker.geometry.side === "player"
@@ -31553,11 +31555,12 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x + displayedAttackerOffset.x2,
       view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
     );
-    // monbg ANIM_DEF_PARTNER moves the target beneath the attacker and the
-    // normal affine wave OBJs. The target is therefore painted first in both
-    // orientations, matching the source compositor's priority split.
+    // monbg ANIM_DEF_PARTNER moves the target beneath the live attacker and
+    // the affine wave OBJs. OAM sort then puts the player-back attacker ahead
+    // of the waves, while the opponent-front attacker follows them. This is
+    // observable where each newly created wave still overlaps ARON.
     drawTarget();
-    drawAttacker();
+    if (opponentToPlayer) drawAttacker();
     const wavePaintOrder = playerToOpponent
       ? displayed.waves
       : Array.from(displayed.waves).reverse();
@@ -31576,6 +31579,7 @@ export function renderSceneOnMovePresentation(
         true,
       );
     }
+    if (playerToOpponent) drawAttacker();
     const opponentSpecies = playerToOpponent ? "ONIX" : "ARON";
     const playerSpecies = playerToOpponent ? "ARON" : "ONIX";
     drawSendOutHealthbox(
