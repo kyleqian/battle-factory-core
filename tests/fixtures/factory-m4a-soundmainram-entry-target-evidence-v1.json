@@ -1,0 +1,98 @@
+{
+  "schema": "factory-m4a-soundmainram-entry-target-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "captureBoundary": "sound-main-ram-entry after six MPlayMain calls and CgbSound, before channel 0",
+  "reproducibility": {
+    "freshRunsPerCase": 2,
+    "entryReceiptSha256": {
+      "anchor": "6b29d708051e0d4422d8f6527e7bd61ffb6bfa408957c017b89b7f2a3c409e1f",
+      "liliana": "780e332632da2fd024c032a831710c1b8b609d627132836612958546d87fdcf1",
+      "factory-varied": "202f18b6d1877ecac55685e51e4f62ec650e2091cb26912ba362efff2c658ad9"
+    },
+    "byteIdenticalCases": 3
+  },
+  "frozenInputs": {
+    "sourceStateV3ReceiptSha256": {
+      "anchor": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+      "liliana": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+      "factory-varied": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+    },
+    "soundMainRamTargetAuditV1Sha256": "3817b1ab6c0e3e488619e3827cfede5d5a3fa82e038dd551e173c6af0effa04e"
+  },
+  "mechanicalJoin": {
+    "key": "sourceStateDigest",
+    "costField": "m4aSoundMainCycles",
+    "exactDigestCostJoins": 113,
+    "unequalCosts": 0,
+    "pointerProducingBranches": 13,
+    "sampleReadRules": 4
+  },
+  "cases": [
+    {
+      "case": "anchor",
+      "observations": 52,
+      "selectedChannels": 260,
+      "mplayReplacedTargets": 7,
+      "entryReceiptSha256": "6b29d708051e0d4422d8f6527e7bd61ffb6bfa408957c017b89b7f2a3c409e1f",
+      "v3ReceiptSha256": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3"
+    },
+    {
+      "case": "liliana",
+      "observations": 31,
+      "selectedChannels": 155,
+      "mplayReplacedTargets": 6,
+      "entryReceiptSha256": "780e332632da2fd024c032a831710c1b8b609d627132836612958546d87fdcf1",
+      "v3ReceiptSha256": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6"
+    },
+    {
+      "case": "factory-varied",
+      "observations": 30,
+      "selectedChannels": 150,
+      "mplayReplacedTargets": 0,
+      "entryReceiptSha256": "202f18b6d1877ecac55685e51e4f62ec650e2091cb26912ba362efff2c658ad9",
+      "v3ReceiptSha256": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+    }
+  ],
+  "coverage": {
+    "observations": 113,
+    "selectedChannels": 565,
+    "active": 462,
+    "inactive": 103,
+    "start": 42,
+    "persistedCurrent": 420,
+    "fixed": 310,
+    "linear": 255,
+    "looping": 255,
+    "completeLogicalRegions": 565,
+    "completePhysicalRegions": 565,
+    "aligned": 565,
+    "completeActiveCurrentRelations": 462,
+    "completeRequiredGuards": 565,
+    "exactV3DigestCostJoins": 113,
+    "unequalV3Costs": 0,
+    "storageRoles": {
+      "gamepak-ws0": 565
+    },
+    "targetProducingRoutes": {
+      "mplay-replaced-before-entry-unclassified-tone-route": 13,
+      "pre-mplay-persisted": 552
+    },
+    "waveSymbols": {
+      "DirectSoundWaveData_drum_and_percussion_kick": 92,
+      "DirectSoundWaveData_sc88pro_flute": 48,
+      "DirectSoundWaveData_sc88pro_synth_bass": 103,
+      "DirectSoundWaveData_sc88pro_tambourine": 218,
+      "DirectSoundWaveData_sc88pro_xylophone": 104
+    },
+    "actualSoundMainRamEntryTargetCoverage": true,
+    "runtimeTargetSafetyComplete": true,
+    "runtimeTargetProvenanceComplete": false
+  },
+  "closure": {
+    "closed": "All 565 selected mixer-entry slots have address-free, complete logical and physical sample regions, aligned readable storage roles, exact effective current routes, bounded loop/current relations, and sufficient fixed/linear guard bytes. The actual SoundMainRAM entry target-safety class is closed for all 113 observed OFF construction VBlanks.",
+    "narrowed": "552/565 targets preserve the pre-MPlay WaveData target. The other 13 are proven MPlay replacements with complete safe entry descriptors, but the compact hook does not distinguish which ply_note tone-selection sub-route produced them.",
+    "exactMissingMutableRouteField": "For the 13 targetProducingRoute='mplay-replaced-before-entry-unclassified-tone-route' rows, capture mplayReplacementRoute at the ply_note SoundChannel.wav write as one of mplay.ply-note.inline-tone-wave, mplay.ply-note.keysplit-tone-wave, or mplay.ply-note.rhythm-tone-wave; for inline, additionally identify whether ply_xwave.command-u32 replaced MusicPlayerTrack.ToneData.wav earlier in the same MPlayMain pass.",
+    "durationLicensed": false,
+    "constructionClockLicensed": false
+  }
+}

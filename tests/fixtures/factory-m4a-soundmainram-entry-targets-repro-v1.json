@@ -1,0 +1,25 @@
+{
+  "schema": "factory-m4a-soundmainram-entry-targets-repro/v1",
+  "oracleProfile": "battle-scene-off",
+  "freshRunsPerCase": 2,
+  "cases": [
+    {
+      "case": "anchor",
+      "firstFreshSha256": "6b29d708051e0d4422d8f6527e7bd61ffb6bfa408957c017b89b7f2a3c409e1f",
+      "secondFreshSha256": "6b29d708051e0d4422d8f6527e7bd61ffb6bfa408957c017b89b7f2a3c409e1f",
+      "byteIdentical": true
+    },
+    {
+      "case": "liliana",
+      "firstFreshSha256": "780e332632da2fd024c032a831710c1b8b609d627132836612958546d87fdcf1",
+      "secondFreshSha256": "780e332632da2fd024c032a831710c1b8b609d627132836612958546d87fdcf1",
+      "byteIdentical": true
+    },
+    {
+      "case": "factory-varied",
+      "firstFreshSha256": "202f18b6d1877ecac55685e51e4f62ec650e2091cb26912ba362efff2c658ad9",
+      "secondFreshSha256": "202f18b6d1877ecac55685e51e4f62ec650e2091cb26912ba362efff2c658ad9",
+      "byteIdentical": true
+    }
+  ]
+}
