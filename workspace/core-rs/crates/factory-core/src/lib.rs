@@ -11,4 +11,6 @@
 //!   (reference/pokeemerald path or a TS module that already carries the
 //!   citation).
 
+pub mod gen_tables;
+pub mod rental_data;
 pub mod rng;
