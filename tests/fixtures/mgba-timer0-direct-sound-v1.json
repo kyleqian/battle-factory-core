@@ -1,0 +1,128 @@
+{
+  "schema": "mgba-timer0-direct-sound/v1",
+  "runtime": {
+    "oracleProfile": "battle-scene-off",
+    "binding": "vendored libmgba-py CFFI",
+    "library": "libmgba.0.10.5.dylib",
+    "version": "0.10.5",
+    "gitRevision": null
+  },
+  "release": {
+    "homebrewFormula": "homebrew/core/Formula/m/mgba.rb",
+    "url": "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
+    "sha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14"
+  },
+  "source": {
+    "version": "0.10.5",
+    "files": [
+      "src/core/timing.c",
+      "src/gba/timer.c",
+      "src/gba/audio.c",
+      "src/gba/dma.c",
+      "src/gba/gba.c",
+      "src/gba/memory.c",
+      "include/mgba/internal/gba/audio.h",
+      "include/mgba/internal/gba/memory.h"
+    ]
+  },
+  "timer0": {
+    "eventName": "GBA Timer 0",
+    "priority": 32,
+    "overflowOrder": [
+      "reschedule normal timer from currentTime minus cyclesLate",
+      "raise timer IRQ only when its IRQ flag is set",
+      "sample routed FIFO A",
+      "sample routed FIFO B",
+      "cascade an enabled count-up successor"
+    ],
+    "dueRule": "mTimingTick invokes a root event when event.when - masterCycles <= 0 and passes cyclesLate = -(event.when - masterCycles)",
+    "sameDueRule": "lower numeric priority is inserted first; equal priority preserves prior insertion order",
+    "rescheduleRule": "normal timer uses currentTime = mTimingCurrentTime - cyclesLate before scheduling its next absolute overflow",
+    "emeraldDefault": {
+      "reload": 64282,
+      "reloadHex": "0xfb1a",
+      "control": 128,
+      "periodMasterCycles": 1254,
+      "routes": [
+        "FIFO A: Timer 0, right output, DMA1",
+        "FIFO B: Timer 0, left output, DMA2"
+      ]
+    }
+  },
+  "fifoRefill": {
+    "capacityWords": 8,
+    "sampleOrder": "test/request refill before loading a FIFO word into internalSample",
+    "requestWhenFreeWordsGreaterThan": 4,
+    "maxQueuedWordsThatCanRequest": 3,
+    "requires": [
+      "the routed channel is enabled by audio.enable and a left or right output bit",
+      "channel dmaSource is positive",
+      "that DMA register timing is CUSTOM",
+      "that DMA remains enabled when GBADMAUpdate chooses active work"
+    ],
+    "requestWords": 4,
+    "requestWhen": "mTimingCurrentTime - cyclesLate",
+    "customDmaChannels": [
+      1,
+      2
+    ],
+    "forcedTransfer": "FIFO scheduling forces fixed destination and 32-bit width"
+  },
+  "scheduler": {
+    "dmaEventName": "GBA DMA",
+    "dmaPriority": 64,
+    "activeSelection": "GBADMAUpdate chooses the enabled DMA with nonzero nextCount and least dma.when - currentTime; equal times retain the lower-numbered first scan result",
+    "blockedCpu": "each GBADMAService sets cpuBlocked; GBAProcessEvents repeatedly calls mTimingTick while blocked, then leaves cpu.cycles at cpu.nextEvent if still blocked",
+    "lateRequest": "the FIFO request starts at currentTime - cyclesLate; an already due DMA event is therefore dispatched through the same <= 0 scheduler rule"
+  },
+  "freshIwrToIoFourWordRefill": {
+    "preconditions": [
+      "one enabled custom DMA1 or DMA2 request has count and nextCount equal to 4",
+      "source is Pokémon Emerald's IWRAM pcmBuffer (region 0x03)",
+      "destination is the FIFO IO register (region 0x04)",
+      "the request is serviced without a prior DMA altering its state"
+    ],
+    "wordCount": 4,
+    "baseCyclesPerWord": 2,
+    "nonSequentialWaitstates": {
+      "source": 0,
+      "destination": 0
+    },
+    "sequentialWaitstates": {
+      "source": 0,
+      "destination": 0
+    },
+    "wordServiceMasterCycles": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "terminalCompletionMasterCycles": 2,
+    "totalScheduledMasterCycles": 10,
+    "formula": "2 + 0 + 0 + (2 + 0 + 0) * 3 + 2"
+  },
+  "conditional18MasterCycleEdge": {
+    "timerServiceCostMasterCycles": null,
+    "status": "conditional-dual-refill-arithmetic-closed",
+    "knownNonMatch": "a single fresh IWRAM-to-IO four-word FIFO refill is exactly 10 scheduled master cycles, not 18",
+    "bothFreshRefillsScheduledMasterCycles": 20,
+    "twoCycleControlMasterCycles": 2,
+    "conditionalIncrementMasterCycles": 18,
+    "formula": "2 * 10 - 2",
+    "requiredBranch": [
+      "both Timer 0 FIFO routing tests are true",
+      "both FIFO threshold/custom-DMA tests request fresh four-word IWRAM-to-IO services",
+      "the compared non-event instruction consumes two master cycles"
+    ],
+    "observedEdgeAttribution": "open: the existing residual receipt records the Timer 0 queue edge and 20-versus-2 window, but not FIFO/DMA internals",
+    "stateStillRequired": [
+      "FIFO read/write and internalRemaining for A and B at the Timer 0 overflow",
+      "DMA1/DMA2 enable, count, nextCount, when, source, destination, and register timing",
+      "whether the Timer 0 callback schedules one or both FIFOs",
+      "already queued DMA, audio, video, IRQ, and same-due timing events",
+      "cyclesLate and any prior DMA serialization that moves dma.when"
+    ],
+    "whyNoFixedTimerCost": "mGBA schedules work statefully: FIFO sampling can enqueue zero, one, or two four-word requests; GBADMAUpdate chooses and serializes active work; mTimingTick supplies lateness rather than charging a Timer callback constant. The 18 is a conditional difference, not a Timer 0 service-cost constant."
+  }
+}
