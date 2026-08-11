@@ -9,15 +9,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** implementation `54368a1e` corrected/pinned by `fd4c79c1`; #55
   remains open, `GetBoxMonData2.cycles` stays `null`, and the construction
-  clock stays unwired. Focused **25/25**, smoke **375/375**, and typecheck are
-  green; final full suite/build are next.
+  clock stays unwired. Focused **25/25**, smoke **375/375**, typecheck, full
+  `npm test` **894 files / 8,486 passed / 1 skipped**, and production build
+  are green.
 - **Did:** source-general aligned EWRAM u8/u16/u32 timing now closes decrypt /
   checksum / encrypt at **448 / 518 / 448** cycles and **528** total bus cycles.
   All **180** dependency rows expose checksum-valid/invalid and species/EXP/
   EV/IV tail widths, counts, exact PCs, bus totals, and component cycles.
-- **Next:** run the required foreground full `npm test` and production build,
-  then commit the final verified ledger. Continue #55 only with the outer
-  accessor shell or async/IRQ state; do not fit residuals or wire the clock.
+- **Next:** continue #55 only with independently source-reduced outer
+  `GetBoxMonData2` prologue/setup/dispatch/common-return instruction and
+  memory work, or async/IRQ state; do not fit residuals or wire the clock.
 - **Notes:** twice-fresh compact Scene-OFF instruction/component receipt is
   byte-identical at `bff98549…`; misaligned u16/u32 behavior is rejected, not
   claimed. No fixture import into production, barrier, controller,
