@@ -3391,6 +3391,34 @@ export interface FactoryTimer0DirectSoundChannelDeadlineWork {
   scheduledDeadlineAdvanceMasterCycles: number;
 }
 
+export interface FactoryFreshDirectSoundDmaGraphInput {
+  /** mGBA timing current time on entry to the already-due Timer 0 callback. */
+  timerDispatchMasterCycle: number;
+  /** Common `currentTime - cyclesLate` deadline assigned by FIFO A/B. */
+  commonRequestedDeadlineMasterCycle: number;
+  /** Fresh FIFO requests in Timer callback order; only DMA1 then DMA2 exist. */
+  dmaChannels: readonly (1 | 2)[];
+}
+
+export interface FactoryFreshDirectSoundDmaGraphEvent {
+  dmaChannel: 1 | 2;
+  kind: "word" | "completion";
+  atMasterCycle: number;
+  freshDeadlineRebased: boolean;
+  remainingWordsAfter: number;
+  scheduledWhenAfterMasterCycle: number;
+  coalescedDmaChannels: readonly (1 | 2)[];
+}
+
+export interface FactoryFreshDirectSoundDmaGraph {
+  timerDispatchMasterCycle: number;
+  commonRequestedDeadlineMasterCycle: number;
+  requestedDmaChannels: readonly (1 | 2)[];
+  events: readonly FactoryFreshDirectSoundDmaGraphEvent[];
+  completionMasterCycle: number;
+  makespanMasterCycles: number;
+}
+
 export interface FactoryTimer0DirectSoundDispatch {
   requestedChannels: readonly FactoryDirectSoundChannel[];
   /** A-before-B source request order, with one 10-cycle deadline advance each. */
@@ -3401,17 +3429,131 @@ export interface FactoryTimer0DirectSoundDispatch {
    */
   summedChannelDeadlineWorkMasterCycles: number;
   /**
-   * The committed runtime receipt's isolated fresh A+B graph elapsed time.
-   * It is observed only for the dual-refill shape (and remains null for zero
-   * or one refill); it is not a generic scheduler completion model.
+   * Source-reduced isolated fresh-DMA graph. Its zero/one/dual makespans are
+   * graph results, never a Timer 0 callback price.
    */
-  observedIsolatedDualRefillMakespanMasterCycles: number | null;
+  freshDmaGraph: FactoryFreshDirectSoundDmaGraph;
 }
 
 const FACTORY_DIRECT_SOUND_FIFO_CAPACITY_WORDS = 8;
 const FACTORY_DIRECT_SOUND_MAX_REFILL_LEVEL_WORDS = 3;
 const FACTORY_DIRECT_SOUND_DMA_SCHEDULED_DEADLINE_ADVANCE_MASTER_CYCLES = 10;
-const FACTORY_DIRECT_SOUND_OBSERVED_ISOLATED_DUAL_REFILL_MAKESPAN_MASTER_CYCLES = 18;
+const FACTORY_DIRECT_SOUND_DMA_WORDS = 4;
+const FACTORY_DIRECT_SOUND_DMA_WORD_MASTER_CYCLES = 2;
+const FACTORY_DIRECT_SOUND_DMA_TERMINAL_MASTER_CYCLES = 2;
+
+type FactoryFreshDmaPhase = "words" | "completion" | "done";
+
+interface MutableFactoryFreshDma {
+  channel: 1 | 2;
+  when: number;
+  remainingWords: number;
+  phase: FactoryFreshDmaPhase;
+}
+
+/**
+ * Replay mGBA 0.10.5's isolated fresh Direct Sound DMA scheduler graph.
+ *
+ * Source anchors are `timing.c:36-59,96-117`, `dma.c:185-241,243-333`,
+ * and `gba.c:293-339`, pinned by `mgba-timer0-scheduler-v1.json`. The reducer
+ * follows fresh callback-time rebasing, two-cycle IWRAM-to-IO word service,
+ * overdue-deadline coalescing before terminal +2, ascending-channel tie
+ * arbitration, and CPU-blocked progression until no DMA remains.
+ */
+export function reduceFactoryFreshDirectSoundDmaGraph(
+  input: FactoryFreshDirectSoundDmaGraphInput,
+): FactoryFreshDirectSoundDmaGraph {
+  const timerDispatchMasterCycle = requireTimer0MasterCycle(
+    input?.timerDispatchMasterCycle,
+    "timerDispatchMasterCycle",
+  );
+  const commonRequestedDeadlineMasterCycle = requireTimer0MasterCycle(
+    input?.commonRequestedDeadlineMasterCycle,
+    "commonRequestedDeadlineMasterCycle",
+  );
+  if (commonRequestedDeadlineMasterCycle > timerDispatchMasterCycle) {
+    throw new Error(
+      "fresh Direct Sound DMA deadline must be due by Timer 0 dispatch time",
+    );
+  }
+  if (!Array.isArray(input?.dmaChannels) || input.dmaChannels.length > 2) {
+    throw new Error("fresh Direct Sound DMA graph supports zero, one, or two channels");
+  }
+  const requestedDmaChannels = [...input.dmaChannels];
+  for (let index = 0; index < requestedDmaChannels.length; index += 1) {
+    const channel = requestedDmaChannels[index];
+    if ((channel !== 1 && channel !== 2)
+      || (index > 0 && requestedDmaChannels[index - 1]! >= channel)) {
+      throw new Error("fresh Direct Sound DMA channels must be unique and ordered DMA1 then DMA2");
+    }
+  }
+
+  const dmas: MutableFactoryFreshDma[] = requestedDmaChannels.map((channel) => ({
+    channel,
+    when: commonRequestedDeadlineMasterCycle,
+    remainingWords: FACTORY_DIRECT_SOUND_DMA_WORDS,
+    phase: "words",
+  }));
+  const events: FactoryFreshDirectSoundDmaGraphEvent[] = [];
+  let currentTime = timerDispatchMasterCycle;
+
+  while (true) {
+    const pending = dmas.filter((dma) => dma.phase !== "done")
+      .sort((left, right) => left.when - right.when || left.channel - right.channel);
+    const active = pending[0];
+    if (active === undefined) break;
+    currentTime = Math.max(currentTime, active.when);
+
+    if (active.phase === "completion") {
+      active.phase = "done";
+      events.push(Object.freeze({
+        dmaChannel: active.channel,
+        kind: "completion",
+        atMasterCycle: currentTime,
+        freshDeadlineRebased: false,
+        remainingWordsAfter: 0,
+        scheduledWhenAfterMasterCycle: active.when,
+        coalescedDmaChannels: Object.freeze([]),
+      }));
+      continue;
+    }
+
+    const freshDeadlineRebased = active.remainingWords === FACTORY_DIRECT_SOUND_DMA_WORDS;
+    if (freshDeadlineRebased) active.when = currentTime;
+    active.when += FACTORY_DIRECT_SOUND_DMA_WORD_MASTER_CYCLES;
+    active.remainingWords -= 1;
+
+    const coalescedDmaChannels: (1 | 2)[] = [];
+    for (const dma of dmas) {
+      if (dma.phase !== "done" && dma.when < active.when) {
+        dma.when = active.when;
+        if (dma !== active) coalescedDmaChannels.push(dma.channel);
+      }
+    }
+    if (active.remainingWords === 0) {
+      active.phase = "completion";
+      active.when += FACTORY_DIRECT_SOUND_DMA_TERMINAL_MASTER_CYCLES;
+    }
+    events.push(Object.freeze({
+      dmaChannel: active.channel,
+      kind: "word",
+      atMasterCycle: currentTime,
+      freshDeadlineRebased,
+      remainingWordsAfter: active.remainingWords,
+      scheduledWhenAfterMasterCycle: active.when,
+      coalescedDmaChannels: Object.freeze(coalescedDmaChannels),
+    }));
+  }
+
+  return Object.freeze({
+    timerDispatchMasterCycle,
+    commonRequestedDeadlineMasterCycle,
+    requestedDmaChannels: Object.freeze(requestedDmaChannels),
+    events: Object.freeze(events),
+    completionMasterCycle: currentTime,
+    makespanMasterCycles: currentTime - timerDispatchMasterCycle,
+  });
+}
 
 function validateFactoryTimer0DirectSoundIsolatedDmaOwnership(
   ownership: FactoryTimer0DirectSoundIsolatedDmaOwnership,
@@ -3488,16 +3630,14 @@ function validateFactoryTimer0DirectSoundChannel(
 
 /**
  * Dispatch the conditional Timer 0 -> Direct Sound request path. This reduces
- * only the independently scheduled-deadline work of an explicitly isolated,
- * fresh four-word IWRAM-to-FIFO DMA graph. It does not price the timer
- * callback itself, invent per-DMA completion timestamps, or absorb other due
- * timing events.
+ * only an explicitly isolated, fresh four-word IWRAM-to-FIFO DMA graph. It
+ * does not price the timer callback itself or absorb other due timing events.
  *
  * `currentTime` and `cyclesLate` are intentionally absent: under the required
  * zero-work and no-competitor assertions, fresh A/B requests share the same
- * `currentTime - cyclesLate` origin. That common absolute translation cancels
- * from the A-before-B deadline work reported here. Supplying either value
- * would imply an absolute scheduler/co-due claim this reducer does not own.
+ * `currentTime - cyclesLate` origin. The dispatcher uses zero as the common
+ * normalized origin; callers that need a translated or late graph can call
+ * `reduceFactoryFreshDirectSoundDmaGraph` directly.
  */
 export function dispatchFactoryTimer0DirectSound(
   state: FactoryTimer0DirectSoundState,
@@ -3519,7 +3659,11 @@ export function dispatchFactoryTimer0DirectSound(
       requestedChannels: Object.freeze(requestedChannels),
       channelDeadlineWork: Object.freeze(channelDeadlineWork),
       summedChannelDeadlineWorkMasterCycles: 0,
-      observedIsolatedDualRefillMakespanMasterCycles: null,
+      freshDmaGraph: reduceFactoryFreshDirectSoundDmaGraph({
+        timerDispatchMasterCycle: 0,
+        commonRequestedDeadlineMasterCycle: 0,
+        dmaChannels: [],
+      }),
     });
   }
   for (const channel of state.channels) {
@@ -3541,13 +3685,16 @@ export function dispatchFactoryTimer0DirectSound(
   }
   const summedChannelDeadlineWorkMasterCycles = channelDeadlineWork.length
     * FACTORY_DIRECT_SOUND_DMA_SCHEDULED_DEADLINE_ADVANCE_MASTER_CYCLES;
+  const freshDmaGraph = reduceFactoryFreshDirectSoundDmaGraph({
+    timerDispatchMasterCycle: 0,
+    commonRequestedDeadlineMasterCycle: 0,
+    dmaChannels: channelDeadlineWork.map((work) => work.dmaChannel),
+  });
   return Object.freeze({
     requestedChannels: Object.freeze(requestedChannels),
     channelDeadlineWork: Object.freeze(channelDeadlineWork),
     summedChannelDeadlineWorkMasterCycles,
-    observedIsolatedDualRefillMakespanMasterCycles: channelDeadlineWork.length === 2
-      ? FACTORY_DIRECT_SOUND_OBSERVED_ISOLATED_DUAL_REFILL_MAKESPAN_MASTER_CYCLES
-      : null,
+    freshDmaGraph,
   });
 }
 
