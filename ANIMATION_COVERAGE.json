@@ -5177,6 +5177,22 @@
     "MOVE_GIGA_DRAIN"
    ],
    "goal": "MOVE_ABSORB is exact at 195/195 complete source/software/typed-seam, hardware OAM/matrix/order, palette/register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh: all eight target-to-attacker arcs, green field lifecycle, impact/shake, HealingEffect, and cleanup. No sibling is promoted: MEGA DRAIN has 16 paired orbs, blend 8, hitsplat animation 1 and Bubble3; GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
+  },
+  {
+   "id": "fist-foot-random-position-thrash",
+   "components": [
+    "asset:ANIM_TAG_HANDS_AND_FEET",
+    "asset:ANIM_TAG_IMPACT",
+    "sprite:gFistFootRandomPosSpriteTemplate",
+    "task:AnimTask_ShakeMonInPlace",
+    "task:AnimTask_ThrashMoveMonHorizontal",
+    "task:AnimTask_ThrashMoveMonVertical"
+   ],
+   "representatives": [
+    "MOVE_THRASH",
+    "MOVE_DOUBLE_KICK"
+   ],
+   "goal": "MOVE_THRASH remains unsupported: its sole legal Level-50 set-408 TAUROS checkpoint banks complete twice-fresh 103-frame bilateral pointer-bounded source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map evidence through first inactive cleanup, but it has no reducer, typed seam, production compositor, or framebuffer acceptance. Its own maps prove plain fist/foot and child OAM plus vertical position at RAM+1 and the horizontal affine task at RAM+2; ShakeMonInPlace remains unknown because all three schedules overlap fist/hitsplat pixels. MOVE_DOUBLE_KICK remains independently unsupported: the source audit pins its broader 11-carrier body with one distinct 20-frame fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup; the shared sprite source transfers no acceptance."
   }
  ],
  "variantAudits": {
