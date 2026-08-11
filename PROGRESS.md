@@ -17,7 +17,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   clean-edge matching is +18 for **83/85**; two same-return-class path gaps
   retain exact PCs and relative queues with null controls rather than a fit.
   Frozen v2 hashes remain pinned. Focused receipt+census **8/8**, smoke
-  **375/375**.
+  **375/375**, typecheck, full `npm test` **899 files / 8,508 passed / 1
+  skipped**, and `npm run build` all pass.
 - **Next:** source-derive Timer 0 reload/service registration and decide the
   scheduler contract from this evidence. Keep production wiring, cost fitting,
   and co-due assumptions out until that source audit is complete.
