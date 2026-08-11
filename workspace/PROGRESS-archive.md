@@ -40944,3 +40944,21 @@ git; the current live ledger keeps the three load-bearing entries only.
   full-policy **60/60** (**278.9s**), both **0 crash / 0 hang**. Orient folded
   animation-main through `77e3d325`; later animation work remains with its
   active supervisor. OFF oracle is healthy; no material decision was deferred.
+## 1132 — [bounded MAIN worker, 2026-08-11] **LILIANA battleStart reaches a real command boundary**
+
+- **State:** the staged generic `battleStart` seam now carries the adopted
+  LILIANA matchup at battle index 1 from her held Battle Room quote through the
+  Scene-OFF intro to the next real player decision request. Production required
+  no battle-, trainer-, or tick-specific change.
+- **Did:** aligned the staged lead's source identity, added four short derived
+  OFF traces, and proved quote dismissal **30/30**, transition black **43/43**,
+  generated sendout **238/238**, and action-ready **3/3** exact twice fresh.
+  Tier 1 pins index 1, trainer 9/adopted-party ownership, one-shot command
+  acknowledgement, and the resulting kernel decision request.
+- **Next:** generalize the RNG-selected Frontier transition owner to close the
+  first remaining dynamic residual at frame 11338 and the legacy scene-assembly
+  spans; keep this independent of #55 and do not resume canonical Battle 2.
+- **Notes:** prior far-side trace remains **115/115** exact twice. Focused
+  **48/48**, smoke **375/375**, typecheck, full `npm test` (**945 files / 8,678
+  passed / 1 skipped**, **95.91s**), and build (**642 modules**, Vite **6.90s**)
+  are green. No production, barrier, RNG, damage, AI, or animation change.

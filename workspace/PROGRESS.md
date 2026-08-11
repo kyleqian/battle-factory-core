@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1135 — [supervisor, 2026-08-11] **Animation tail folded; generic transition seam next**
+
+- **State:** `master` includes `animation-main` through `5123b455`; `rust-main`
+  had no unmatched commit. The union is green and both oracle profiles are
+  fresh. S8 remains closed; the canonical Battle-2 march stays stopped at
+  tick 33331.
+- **Did:** folded the Metal Sound evidence tail (`a95c8e49`) and independently
+  verified the union: `npm test` **947 files / 8,683 passed / 1 skipped** and
+  production build **642 modules**. Restarted both stale post-fold oracle
+  processes; freshness and OFF `bin/oracle info` pass.
+- **Next:** implement and densely prove the generic RNG-selected Frontier
+  transition owner beginning at the staged nonzero-index residual frame 11338.
+  Stop at the already-proven generated intro/command boundary; do not resume a
+  canonical Battle-2 action or change battle logic/RNG.
+- **Notes:** #55's separate construction-clock remainder stays null/unwired.
+  No material decision is deferred.
+
 ## 1134 — [solo session, 2026-08-11] **Repo promoted to pokeemerald-factory-core; rust lane born**
 
 - **State:** this run IS now the canonical standalone repo at
@@ -62,22 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   crash / 0 hang**. OFF oracle is fresh. `animation-main` has newer Metal
   Sound evidence commits not folded at wind-down. No material decision is
   deferred.
-
-## 1132 — [bounded MAIN worker, 2026-08-11] **LILIANA battleStart reaches a real command boundary**
-
-- **State:** the staged generic `battleStart` seam now carries the adopted
-  LILIANA matchup at battle index 1 from her held Battle Room quote through the
-  Scene-OFF intro to the next real player decision request. Production required
-  no battle-, trainer-, or tick-specific change.
-- **Did:** aligned the staged lead's source identity, added four short derived
-  OFF traces, and proved quote dismissal **30/30**, transition black **43/43**,
-  generated sendout **238/238**, and action-ready **3/3** exact twice fresh.
-  Tier 1 pins index 1, trainer 9/adopted-party ownership, one-shot command
-  acknowledgement, and the resulting kernel decision request.
-- **Next:** generalize the RNG-selected Frontier transition owner to close the
-  first remaining dynamic residual at frame 11338 and the legacy scene-assembly
-  spans; keep this independent of #55 and do not resume canonical Battle 2.
-- **Notes:** prior far-side trace remains **115/115** exact twice. Focused
-  **48/48**, smoke **375/375**, typecheck, full `npm test` (**945 files / 8,678
-  passed / 1 skipped**, **95.91s**), and build (**642 modules**, Vite **6.90s**)
-  are green. No production, barrier, RNG, damage, AI, or animation change.
