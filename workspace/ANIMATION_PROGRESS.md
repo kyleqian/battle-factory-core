@@ -1,3 +1,11 @@
+# MOVE_METAL_SOUND implementation checkpoint — component exact, framebuffer blocked (2026-08-11 worker)
+
+- **State:** Coverage intentionally remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported; `MOVE_METAL_SOUND` is not promoted.
+- **Did:** Added the source-relative four-wave reducer, narrow typed Scene-ON seam, source-extracted `ANIM_TAG_METAL_SOUND_WAVES` asset, and ARON/ONIX presentation compositor plus a fresh portable verifier. The reducer preserves the +4 orientation shift, wave/plain OAM RAM+1, fresh affine dual-lag, and Metal Sound's local `ShakeMon2(2,0,8,1)` age+1 anchor without changing gameplay state.
+- **Verified:** Live Scene-ON component gates pass player-back **86/86** at frames **76..161** and opponent-front **85/85** at **80..164**. The committed Supersonic control independently remains **51/51 component + framebuffer** in both orientations. Metal Sound production framebuffer is **0/86** and **0/85**: the committed lab files encode species ID **304 = TAILLOW**, while this assigned compositor is explicitly ARON/ONIX; the oracle RGB/message therefore cannot equal an ARON render without violating the source-derived species seam. Focused **11/11**, animation audit, coverage, and typecheck pass.
+- **Next:** Resolve the canonical ARON scenario/species-ID mismatch (or supply a source window whose live framebuffer is actually ARON/ONIX), then rerun both dense production gates twice fresh before promoting. No coverage or latch ledger change is claimed.
+- **Notes:** Commits `27848457` (reducer/asset/seam) and `91772735` (compositor/verifier). No boundary widening, unsupported barrier, canonical recording import, capture/hash lookup, coordinate/RGB fitting, absolute-tick render, or gameplay/controller/facility change.
+
 # Supervisor wind-down — MOVE_METAL_SOUND bilateral dense evidence checkpoint (2026-08-11)
 
 - **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported. `MOVE_METAL_SOUND` remains unsupported; no production framebuffer claim was made.
