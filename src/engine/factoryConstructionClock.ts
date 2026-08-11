@@ -722,6 +722,116 @@ export interface FactoryGetBoxMonDataDependency {
   unresolved: string;
 }
 
+/**
+ * The bounded SetBoxMonData switch subset needed by Factory EV construction,
+ * plus one representative field from each other compiled storage family.
+ * Unsupported switch arms fail closed instead of inheriting a guessed tail.
+ */
+export type FactorySetBoxMonDataSupportedField =
+  | 10 // MON_DATA_ENCRYPT_SEPARATOR: unencrypted BoxPokemon halfword
+  | 11 // MON_DATA_SPECIES: encrypted substruct 0 + hasSpecies flag
+  | 13 // MON_DATA_MOVE1: encrypted substruct 1 halfword
+  | 17 // MON_DATA_PP1: encrypted substruct 1 byte
+  | 26 | 27 | 28 | 29 | 30 | 31 // all six construction EV writes
+  | 39; // MON_DATA_HP_IV: encrypted substruct 3 bitfield
+
+export interface FactorySetBoxMonDataTimingInput {
+  field: number;
+  /** Naturally word-aligned EWRAM address of the BoxPokemon base. */
+  boxMonAddress: number;
+  /** Required only for encrypted fields; selects every GetSubstruct arm. */
+  personality?: number;
+  /** Required only for encrypted fields; invalid checksum returns before the field arm. */
+  checksumValid?: boolean;
+  /** Required only for a valid MON_DATA_SPECIES write because zero selects a different tail. */
+  fieldValue?: number;
+}
+
+export type FactorySetBoxMonDataFieldRoute =
+  | "encrypt-separator-u16"
+  | "species-zero"
+  | "species-nonzero"
+  | "move-u16"
+  | "pp-u8"
+  | "ev-u8"
+  | "hp-iv-bitfield";
+
+export interface FactorySetBoxMonDataFieldTailTiming {
+  field: FactorySetBoxMonDataSupportedField;
+  route: FactorySetBoxMonDataFieldRoute;
+  entryPc: number;
+  commonTailPc: 0x0806_b3d8;
+  logicalSubstruct: FactoryGetSubstructType | null;
+  secureStorageOffset: number | null;
+  valueWidth: 1 | 2;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  ewramAccesses: readonly FactoryEwramAccessTiming[];
+  ewramDataAccessCycles: number;
+  ewramDataAccessPremiumCycles: 0;
+  cycles: number;
+  unresolved: null;
+}
+
+export interface FactorySetBoxMonDataOuterShellTiming {
+  route: "unencrypted" | "encrypted-valid" | "encrypted-invalid";
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  romLiteralLoads: number;
+  romJumpTableLoads: number;
+  checksumFunctionShellCount: 0 | 1 | 2;
+  checksumFunctionShellCycles: number;
+  ewramAccesses: readonly FactoryEwramAccessTiming[];
+  ewramDataAccessCycles: number;
+  ewramDataAccessPremiumCycles: 0;
+  excludedNestedCalls: Readonly<{
+    getSubstruct: 0 | 8 | 12;
+    decryptBoxMon: 0 | 1;
+    checksumLoop: 0 | 1 | 2;
+    encryptBoxMon: 0 | 1;
+  }>;
+  cycles: number;
+  unresolved: null;
+}
+
+export interface FactorySetBoxMonDataTiming {
+  field: FactorySetBoxMonDataSupportedField;
+  boxMonAddress: number;
+  personality: number | null;
+  checksumRoute: "not-checked" | "valid-rewrites-checksum" | "invalid-returns-before-field";
+  fieldTailTiming: FactorySetBoxMonDataFieldTailTiming | null;
+  getSubstructTimings: readonly FactoryGetSubstructTiming[];
+  getSubstructCalls: 0 | 8 | 12;
+  getSubstructCycles: number;
+  decryptLoopTiming: FactoryEncryptedWordLoopTiming | null;
+  decryptCount: 0 | 1;
+  checksumLoopTiming: FactoryChecksumLoopTiming | null;
+  checksumCount: 0 | 1 | 2;
+  encryptLoopTiming: FactoryEncryptedWordLoopTiming | null;
+  encryptCount: 0 | 1;
+  outerShellTiming: FactorySetBoxMonDataOuterShellTiming;
+  /** Complete synchronous SetBoxMonData component; async service/IRQ is external. */
+  cycles: number;
+  /** The exact 30-cycle pre-delegate and 10-cycle return shell from SetMonData. */
+  setMonDataShellCycles: 40;
+  /** Complete synchronous SetMonData -> SetBoxMonData call composition. */
+  throughSetMonDataCycles: number;
+  boundaries: Readonly<{
+    setMonDataEntryPc: 0x0806_acae;
+    setMonDataCallPc: 0x0806_ad92;
+    symbolEntryPc: 0x0806_ad9c;
+    probeEntryPc: 0x0806_ad9e;
+    firstGetSubstructCallPc: 0x0806_adc0;
+    decryptCallPc: 0x0806_adec;
+    firstChecksumCallPc: 0x0806_adf2;
+    dispatchPc: 0x0806_ae1c;
+    postWriteChecksumCallPc: 0x0806_b3e0;
+    encryptCallPc: 0x0806_b3e8;
+    returnTailPc: 0x0806_b3ec;
+  }>;
+  unresolved: null;
+}
+
 const THUMB_SEQUENTIAL_CYCLES = 2;
 const THUMB_PIPELINE_REFILL_CYCLES = 6;
 const THUMB_TAKEN_CONTROL_CYCLES = THUMB_SEQUENTIAL_CYCLES + THUMB_PIPELINE_REFILL_CYCLES;
@@ -2141,6 +2251,310 @@ export function censusFactoryGetBoxMonDataDependency(
     boundaries: GET_BOX_COMMON_BOUNDARIES,
     cycles: null,
     unresolved: "complete GetBoxMonData2 timing still awaits async +18 service and VBlank/IRQ entry/body/return costs",
+  });
+}
+
+const SET_BOX_MON_DATA_BOUNDARIES = Object.freeze({
+  setMonDataEntryPc: 0x0806_acae,
+  setMonDataCallPc: 0x0806_ad92,
+  symbolEntryPc: 0x0806_ad9c,
+  probeEntryPc: 0x0806_ad9e,
+  firstGetSubstructCallPc: 0x0806_adc0,
+  decryptCallPc: 0x0806_adec,
+  firstChecksumCallPc: 0x0806_adf2,
+  dispatchPc: 0x0806_ae1c,
+  postWriteChecksumCallPc: 0x0806_b3e0,
+  encryptCallPc: 0x0806_b3e8,
+  returnTailPc: 0x0806_b3ec,
+} as const);
+
+const SET_BOX_SUPPORTED_FIELDS = Object.freeze([
+  10, 11, 13, 17, 26, 27, 28, 29, 30, 31, 39,
+] as const satisfies readonly FactorySetBoxMonDataSupportedField[]);
+
+function requireFactoryBoxMonAddress(addressValue: number): number {
+  const address = requireU32(addressValue, "boxMonAddress");
+  if ((address & 3) !== 0) {
+    throw new Error("boxMonAddress must be naturally word-aligned");
+  }
+  // The source reads/writes through the complete 80-byte BoxPokemon object.
+  if (address < 0x0200_0000 || address + 0x50 > 0x0204_0000) {
+    throw new Error("boxMonAddress must contain a complete BoxPokemon in retail EWRAM");
+  }
+  // Reuse the accepted bus reducer as the alignment/region authority.
+  reduceFactoryEwramAccessTiming({ access: "read", width: 4, address });
+  return address;
+}
+
+function reduceFactorySetBoxFieldTailTiming(input: Readonly<{
+  field: FactorySetBoxMonDataSupportedField;
+  boxMonAddress: number;
+  selectedSubstructTiming: FactoryGetSubstructTiming | null;
+  fieldValue: number | undefined;
+}>): FactorySetBoxMonDataFieldTailTiming {
+  const accesses: FactoryEwramAccessTiming[] = [];
+  const write = (width: FactoryEwramAccessWidth, address: number): void => {
+    accesses.push(reduceFactoryEwramAccessTiming({ access: "write", width, address }));
+  };
+  const read = (width: FactoryEwramAccessWidth, address: number): void => {
+    accesses.push(reduceFactoryEwramAccessTiming({ access: "read", width, address }));
+  };
+  const secureStorageOffset = input.selectedSubstructTiming?.secureStorageOffset ?? null;
+  let route: FactorySetBoxMonDataFieldRoute;
+  let entryPc: number;
+  let logicalSubstruct: FactoryGetSubstructType | null = null;
+  let valueWidth: 1 | 2;
+  let sequentialThumbHalfwords: number;
+  let pipelineRefills: number;
+
+  if (input.field === 10) {
+    route = "encrypt-separator-u16";
+    entryPc = 0x0806_b020;
+    valueWidth = 2;
+    sequentialThumbHalfwords = 6;
+    pipelineRefills = 1;
+    write(2, input.boxMonAddress + 0x1e);
+  } else {
+    if (secureStorageOffset === null) {
+      throw new Error("encrypted SetBoxMonData field requires a selected substruct");
+    }
+    if (input.field === 11) {
+      if (input.fieldValue === undefined) {
+        throw new Error("fieldValue is required for a valid MON_DATA_SPECIES write");
+      }
+      const fieldValue = requireNonnegativeInteger(input.fieldValue, "fieldValue");
+      if (fieldValue > 0xffff) throw new Error("MON_DATA_SPECIES fieldValue must fit u16");
+      route = fieldValue === 0 ? "species-zero" : "species-nonzero";
+      entryPc = 0x0806_b02c;
+      logicalSubstruct = 0;
+      valueWidth = 2;
+      sequentialThumbHalfwords = fieldValue === 0 ? 16 : 15;
+      pipelineRefills = fieldValue === 0 ? 3 : 2;
+      write(2, input.boxMonAddress + secureStorageOffset);
+      read(1, input.boxMonAddress + 0x13);
+      write(1, input.boxMonAddress + 0x13);
+    } else if (input.field === 13) {
+      route = "move-u16";
+      entryPc = 0x0806_b084;
+      logicalSubstruct = 1;
+      valueWidth = 2;
+      sequentialThumbHalfwords = 10;
+      pipelineRefills = 1;
+      write(2, input.boxMonAddress + secureStorageOffset);
+    } else if (input.field === 17) {
+      route = "pp-u8";
+      entryPc = 0x0806_b098;
+      logicalSubstruct = 1;
+      valueWidth = 1;
+      sequentialThumbHalfwords = 6;
+      pipelineRefills = 1;
+      write(1, input.boxMonAddress + secureStorageOffset + 8);
+    } else if (input.field >= 26 && input.field <= 31) {
+      route = "ev-u8";
+      entryPc = 0x0806_b0a4 + (input.field - 26) * 6;
+      logicalSubstruct = 2;
+      valueWidth = 1;
+      sequentialThumbHalfwords = 3;
+      pipelineRefills = 1;
+      write(1, input.boxMonAddress + secureStorageOffset + input.field - 26);
+    } else {
+      route = "hp-iv-bitfield";
+      entryPc = 0x0806_b14a;
+      logicalSubstruct = 3;
+      valueWidth = 1;
+      sequentialThumbHalfwords = 10;
+      pipelineRefills = 1;
+      read(1, input.boxMonAddress + secureStorageOffset + 4);
+      write(1, input.boxMonAddress + secureStorageOffset + 4);
+    }
+  }
+
+  const data = sumFactoryEwramAccesses(accesses);
+  // Every supported tail access is byte/halfword-wide and therefore wholly
+  // represented by its ordinary two-cycle Thumb instruction baseline.
+  const ewramDataAccessPremiumCycles = 0 as const;
+  const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    field: input.field,
+    route,
+    entryPc,
+    commonTailPc: 0x0806_b3d8,
+    logicalSubstruct,
+    secureStorageOffset,
+    valueWidth,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    ewramAccesses: Object.freeze(accesses),
+    ewramDataAccessCycles: data.cycles,
+    ewramDataAccessPremiumCycles,
+    cycles,
+    unresolved: null,
+  });
+}
+
+/**
+ * Source-reduce the complete synchronous SetBoxMonData path used by Factory
+ * EV construction (`pokemon.c:4149-4420`, ELF `0x0806ad9c..0x0806b3fa`).
+ *
+ * Valid encrypted writes execute 12 GetSubstruct calls: four before decrypt,
+ * four in the checksum validation, and four in the rewritten checksum. An
+ * invalid checksum marks the bad-egg flags, encrypts, and returns after eight
+ * calls without dispatching the requested field. No asynchronous +18 service,
+ * IRQ/VBlank work, identity key, or observed duration participates here.
+ */
+export function reduceFactorySetBoxMonDataTiming(
+  input: Readonly<FactorySetBoxMonDataTimingInput>,
+): FactorySetBoxMonDataTiming {
+  const fieldValue = requireSigned32(input.field, "field");
+  if (!SET_BOX_SUPPORTED_FIELDS.includes(fieldValue as FactorySetBoxMonDataSupportedField)) {
+    throw new Error(`unsupported SetBoxMonData field ${fieldValue}`);
+  }
+  const field = fieldValue as FactorySetBoxMonDataSupportedField;
+  const boxMonAddress = requireFactoryBoxMonAddress(input.boxMonAddress);
+  const encrypted = field > 10;
+  if (!encrypted) {
+    if (input.personality !== undefined || input.checksumValid !== undefined || input.fieldValue !== undefined) {
+      throw new Error("unencrypted SetBoxMonData fields reject unused personality/checksum/fieldValue inputs");
+    }
+  } else {
+    requireU32(input.personality as number, "personality");
+    if (typeof input.checksumValid !== "boolean") {
+      throw new Error("checksumValid must be boolean for encrypted SetBoxMonData fields");
+    }
+    if (field !== 11 && input.fieldValue !== undefined) {
+      throw new Error("fieldValue is only a timing input for MON_DATA_SPECIES");
+    }
+  }
+
+  const personality = encrypted ? requireU32(input.personality as number, "personality") : null;
+  const checksumValid = encrypted ? input.checksumValid as boolean : null;
+  const checksumRoute = !encrypted
+    ? "not-checked" as const
+    : checksumValid ? "valid-rewrites-checksum" as const : "invalid-returns-before-field" as const;
+  const rounds = !encrypted ? 0 : checksumValid ? 3 : 2;
+  const getSubstructTimings = Object.freeze(Array.from({ length: rounds }, () => (
+    [0, 1, 2, 3].map((substructType) => (
+      reduceFactoryGetSubstructTiming(personality!, substructType)
+    ))
+  )).flat());
+  const getSubstructCalls = getSubstructTimings.length as 0 | 8 | 12;
+  const getSubstructCycles = getSubstructTimings.reduce((total, timing) => total + timing.cycles, 0);
+  const selectedSubstructType = field === 11 ? 0
+    : field === 13 || field === 17 ? 1
+      : field >= 26 && field <= 31 ? 2
+        : field === 39 ? 3 : null;
+  const selectedSubstructTiming = selectedSubstructType === null || !checksumValid
+    ? null
+    : getSubstructTimings[selectedSubstructType];
+  const fieldTailTiming = !encrypted || checksumValid
+    ? reduceFactorySetBoxFieldTailTiming({
+      field,
+      boxMonAddress,
+      selectedSubstructTiming,
+      fieldValue: input.fieldValue,
+    })
+    : null;
+
+  const shellAccesses: FactoryEwramAccessTiming[] = [];
+  const shellRead = (width: FactoryEwramAccessWidth, address: number): void => {
+    shellAccesses.push(reduceFactoryEwramAccessTiming({ access: "read", width, address }));
+  };
+  const shellWrite = (width: FactoryEwramAccessWidth, address: number): void => {
+    shellAccesses.push(reduceFactoryEwramAccessTiming({ access: "write", width, address }));
+  };
+  for (let index = 0; index < getSubstructCalls; index += 1) shellRead(4, boxMonAddress);
+  if (encrypted) shellRead(2, boxMonAddress + 0x1c);
+  if (encrypted && !checksumValid) {
+    shellRead(1, boxMonAddress + 0x13);
+    shellWrite(1, boxMonAddress + 0x13);
+    const substruct3 = getSubstructTimings[3]!;
+    shellRead(1, boxMonAddress + substruct3.secureStorageOffset + 7);
+    shellWrite(1, boxMonAddress + substruct3.secureStorageOffset + 7);
+  } else if (encrypted) {
+    shellWrite(2, boxMonAddress + 0x1c);
+  }
+
+  let sequentialThumbHalfwords: number;
+  let pipelineRefills: number;
+  let checksumFunctionShellCount: 0 | 1 | 2;
+  if (!encrypted) {
+    // Prologue/ble + dispatch + selected arm + post-write ble + epilogue.
+    sequentialThumbHalfwords = 15 + 8 + fieldTailTiming!.sequentialThumbHalfwords + 3 + 7;
+    pipelineRefills = 1 + 2 + fieldTailTiming!.pipelineRefills + 1 + 1;
+    checksumFunctionShellCount = 0;
+  } else if (!checksumValid) {
+    // Prologue, four calls, decrypt/checksum bridges, bad-egg tail, epilogue.
+    sequentialThumbHalfwords = 71;
+    pipelineRefills = 9;
+    checksumFunctionShellCount = 1;
+  } else {
+    // Valid pre-dispatch shell + dispatch + field + post-write checksum/encrypt/return.
+    sequentialThumbHalfwords = 50 + 8 + fieldTailTiming!.sequentialThumbHalfwords + 17;
+    pipelineRefills = 7 + 2 + fieldTailTiming!.pipelineRefills + 3;
+    checksumFunctionShellCount = 2;
+  }
+  const romLiteralLoads = !encrypted || checksumValid ? 1 : 0;
+  const romJumpTableLoads = !encrypted || checksumValid ? 1 : 0;
+  const checksumFunctionShellCycles = checksumFunctionShellCount * 98;
+  const shellData = sumFactoryEwramAccesses(shellAccesses);
+  const outerShellCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+    + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+    + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+    + checksumFunctionShellCycles;
+  const decryptLoopTiming = encrypted ? reduceFactoryDecryptBoxMonTiming() : null;
+  const checksumLoopTiming = encrypted ? reduceFactoryChecksumLoopTiming() : null;
+  const encryptLoopTiming = encrypted ? reduceFactoryEncryptBoxMonTiming() : null;
+  const decryptCount = encrypted ? 1 as const : 0 as const;
+  const checksumCount = !encrypted ? 0 as const : checksumValid ? 2 as const : 1 as const;
+  const encryptCount = encrypted ? 1 as const : 0 as const;
+  const outerShellTiming: FactorySetBoxMonDataOuterShellTiming = Object.freeze({
+    route: !encrypted ? "unencrypted" : checksumValid ? "encrypted-valid" : "encrypted-invalid",
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    romLiteralLoads,
+    romJumpTableLoads,
+    checksumFunctionShellCount,
+    checksumFunctionShellCycles,
+    ewramAccesses: Object.freeze(shellAccesses),
+    ewramDataAccessCycles: shellData.cycles,
+    ewramDataAccessPremiumCycles: 0,
+    excludedNestedCalls: Object.freeze({
+      getSubstruct: getSubstructCalls,
+      decryptBoxMon: decryptCount,
+      checksumLoop: checksumCount,
+      encryptBoxMon: encryptCount,
+    }),
+    cycles: outerShellCycles,
+    unresolved: null,
+  });
+  const cycles = outerShellCycles
+    + getSubstructCycles
+    + (decryptLoopTiming?.cycles ?? 0) * decryptCount
+    + (checksumLoopTiming?.cycles ?? 0) * checksumCount
+    + (encryptLoopTiming?.cycles ?? 0) * encryptCount;
+  return Object.freeze({
+    field,
+    boxMonAddress,
+    personality,
+    checksumRoute,
+    fieldTailTiming,
+    getSubstructTimings,
+    getSubstructCalls,
+    getSubstructCycles,
+    decryptLoopTiming,
+    decryptCount,
+    checksumLoopTiming,
+    checksumCount,
+    encryptLoopTiming,
+    encryptCount,
+    outerShellTiming,
+    cycles,
+    setMonDataShellCycles: 40,
+    throughSetMonDataCycles: cycles + 40,
+    boundaries: SET_BOX_MON_DATA_BOUNDARIES,
+    unresolved: null,
   });
 }
 
