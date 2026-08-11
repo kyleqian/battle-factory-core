@@ -1447,6 +1447,16 @@ produce a validated packet in cap, so no runtime claim or probe change landed.
 Next is LILIANA twice fresh, then both varied rows through the same wrapper;
 dispatcher/service cost/clock remain untouched.
 
+**IRQ / Video-DMA reachability audit (2026-08-11):** source plus the finite OFF
+receipts exclude those roots from the selected construction epoch. MP2K starts
+Timer0 with `TM0CNT_H=0x0080` (enabled, IRQ bit clear), matching all **256/256**
+crossings. The exact Video-co-due window leaves DMA0–3 `nextCount=0`, and all
+**113/113** construction VBlanks have no HBlank callback, inactive scanline
+DMA, and an empty/unlocked DMA3 software queue. DMA3 remains source-reachable
+as CPU-triggered `START_NOW` VBlank work in other states, not as a Video
+callback child here. Full extraction and provenance are in
+`docs/issue55-timer0-irq-video-dma3-reachability-audit.md`.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured
