@@ -133,16 +133,10 @@ export function stunSporeParticleDrawOrderAtAge(age: number): readonly number[] 
   if (age < 4 || age > 191) return [];
   const order: number[] = [];
   for (let sourceAge = 4; sourceAge <= age; sourceAge += 1) {
-    const seedIndex = sourceAge === 4
-      ? 0
-      : sourceAge === 21
-        ? 1
-        : sourceAge === 53
-          ? 2
-          : sourceAge === 75
-            ? 3
-            : -1;
-    if (seedIndex >= 0) order.push(...OAM_SEED_ORDERS[seedIndex]!);
+    if (sourceAge === 4) order.push(...OAM_SEED_ORDERS[0]);
+    else if (sourceAge === 21) order.push(...OAM_SEED_ORDERS[1]);
+    else if (sourceAge === 53) order.push(...OAM_SEED_ORDERS[2]);
+    else if (sourceAge === 75) order.push(...OAM_SEED_ORDERS[3]);
     const active = new Set(
       stunSporeParticlesAtAge(sourceAge, { x: 0, y: 0 }).map(
         (particle) => particle.slot,
