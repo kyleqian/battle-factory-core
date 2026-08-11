@@ -1,3 +1,20 @@
+## 1119 — [supervisor, 2026-08-11] **#55 IRQ/Video-DMA reachability folded**
+
+- **State:** main row selection `361933b1` and side reachability audit
+  `5d66065d` are united through merge `23a5095d`; #55 remains open and the
+  construction clock stays unwired.
+- **Did:** source plus finite OFF receipts exclude Timer0 IRQ, Video-started
+  DMA, and queued VBlank DMA3 work from this construction epoch. Timer0 uses
+  `TM0CNT_H=0x0080` at all **256/256** crossings; the exact Video-co-due window
+  leaves all DMA `nextCount` values zero; all **113/113** VBlank entries have
+  null HBlank callback, inactive scanline DMA, and an empty DMA3 queue.
+- **Next:** optimize the selected-edge runtime receipt enough to retain the
+  LILIANA Audio-only window twice fresh, then the two legal-varied Audio rows.
+  Do not fit a cost or wire the clock.
+- **Notes:** focused union **20/20** is green; each lane independently passed
+  its full suite, typecheck, and build. DMA3 remains source-reachable only as
+  CPU-triggered `START_NOW` VBlank work outside the exact selected window.
+
 ## 1118 — [MAIN worker, 2026-08-11] **#55 Audio-co-due row-selection checkpoint**
 
 - **State:** the three natural Audio-co-due dual-refill rows are exactly

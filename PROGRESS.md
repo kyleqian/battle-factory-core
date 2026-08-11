@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1122 — [MAIN worker, 2026-08-11] **#55 fresh DMA graph source-reduced**
+
+- **State:** isolated fresh Direct Sound DMA makespans are now computed
+  source-generally; #55 remains open and the construction clock stays unwired.
+- **Did:** ported mGBA 0.10.5 fresh rebasing, per-word deadlines, overdue-DMA
+  coalescing, ascending arbitration, completion sentinels, and CPU-blocked
+  progression. Zero/one/dual graphs derive **0/10/18**; dual order is
+  `1,1,1,1,2,1,2,2,2,2`, with DMA2 at +8 and DMA1 completion at +10.
+- **Next:** continue #55 only with another source-general construction or
+  external co-due callback slice. Do not turn 18 into `serviceCostMasterCycles`
+  or wire `runFactoryConstructionClock` before the full workload closes.
+- **Notes:** exact archive hash `91d6fbd…` and timing/Timer/audio/DMA/GBA source
+  hashes/anchors are pinned. Focused **21/21**, smoke **375/375**, typecheck,
+  full `npm test` **916 files / 8,598 passed / 1 skipped** (**77.82s**), and
+  build (**631 modules**, **6.32s**) are green. No generator/controller,
+  presentation, animation, barrier, recording, or side-owned audit changed.
+
 ## 1121 — [MAIN worker, 2026-08-11] **#55 varied adjacent runtime rows closed**
 
 - **State:** both legal-varied adjacent rows are closed twice fresh; #55 stays
@@ -40,20 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   typecheck, full `npm test` **913 files / 8,577 passed / 1 skipped**, and
   build (**631 modules**) are green. No service cost, clock/dispatcher,
   controller, presentation, animation, barrier, or canonical recording changed.
-
-## 1119 — [supervisor, 2026-08-11] **#55 IRQ/Video-DMA reachability folded**
-
-- **State:** main row selection `361933b1` and side reachability audit
-  `5d66065d` are united through merge `23a5095d`; #55 remains open and the
-  construction clock stays unwired.
-- **Did:** source plus finite OFF receipts exclude Timer0 IRQ, Video-started
-  DMA, and queued VBlank DMA3 work from this construction epoch. Timer0 uses
-  `TM0CNT_H=0x0080` at all **256/256** crossings; the exact Video-co-due window
-  leaves all DMA `nextCount` values zero; all **113/113** VBlank entries have
-  null HBlank callback, inactive scanline DMA, and an empty DMA3 queue.
-- **Next:** optimize the selected-edge runtime receipt enough to retain the
-  LILIANA Audio-only window twice fresh, then the two legal-varied Audio rows.
-  Do not fit a cost or wire the clock.
-- **Notes:** focused union **20/20** is green; each lane independently passed
-  its full suite, typecheck, and build. DMA3 remains source-reachable only as
-  CPU-triggered `START_NOW` VBlank work outside the exact selected window.
