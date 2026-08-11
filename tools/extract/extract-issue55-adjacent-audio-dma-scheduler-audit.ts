@@ -107,6 +107,60 @@ type RuntimeWindow = {
   afterCompletion: { scheduler: { currentTime: number } };
 };
 type RuntimeReceipt = { schema: string; oracleProfile: string; windows: RuntimeWindow[] };
+type SelectedTimelineState = {
+  dmaNextCounts: number[];
+  activeDma: number;
+  performingDma: number;
+  cpuBlocked: boolean;
+};
+type SelectedTimelineEvent = {
+  sequence: number;
+  name: string;
+  priority: number;
+  scheduledWhen: number;
+  cyclesLate: number;
+  schedulerCurrentTime: number;
+  entry: SelectedTimelineState;
+  exit: SelectedTimelineState;
+};
+type SelectedHardwareState = {
+  scheduler: { currentTime: number };
+  audio: { enabled: boolean; mixer: { present: boolean; externalMixing: boolean } };
+  fifo: { a: Fifo; b: Fifo };
+  dma: RuntimeDma[];
+  activeDma: number;
+  performingDma: number;
+  cpuBlocked: boolean;
+};
+type SelectedRuntimeReceipt = {
+  schema: string;
+  case: string;
+  oracleProfile: string;
+  sourceFunction: string;
+  selection: {
+    case: string;
+    component: string;
+    ordinal: number;
+    crossedEventNames: string[];
+    deadlineOrder: string[];
+    audioTimerDeadlineDelta: number;
+  };
+  runtime: {
+    deadlineOrder: string[];
+    audioTimerDeadlineDelta: number;
+    requestOrder: Array<{ fifo: string; dmaChannel: number }>;
+    completionOrder: number[];
+    wrappersRestoredAfterSequence: number;
+    timeline: SelectedTimelineEvent[];
+    hardwareStates: {
+      timer0Entry: SelectedHardwareState;
+      timer0Exit: SelectedHardwareState;
+      audioEntry: SelectedHardwareState;
+      audioExit: SelectedHardwareState;
+      afterCompletion: SelectedHardwareState;
+    };
+  };
+};
 
 function readInput(path: string): { path: string; bytes: Buffer; value: unknown } {
   const bytes = readFileSync(join(ROOT, path));
@@ -143,6 +197,56 @@ function freshDualPair(fifo: { a: Fifo; b: Fifo }, dma: readonly RuntimeDma[], l
     pair.every((candidate) => (candidate.source >>> 24) === 3 && (candidate.destination >>> 24) === 4),
     label + ": expected IWRAM-to-IO FIFO pair",
   );
+}
+
+function dmaNextCounts(dma: readonly RuntimeDma[], label: string): number[] {
+  const ordered = [...dma].sort((left, right) => left.channel - right.channel);
+  requireCondition(ordered.map((candidate) => candidate.channel).join(",") === "0,1,2,3", label + ": expected DMA0-DMA3");
+  return ordered.map((candidate) => candidate.nextCount);
+}
+
+function requireNumberArray(actual: readonly number[], expected: readonly number[], label: string): void {
+  requireCondition(
+    actual.length === expected.length && actual.every((value, index) => value === expected[index]),
+    label + ": expected [" + expected.join(",") + "], got [" + actual.join(",") + "]",
+  );
+}
+
+function requireTimelineState(actual: SelectedTimelineState, expected: SelectedTimelineState, label: string): void {
+  requireNumberArray(actual.dmaNextCounts, expected.dmaNextCounts, label + " DMA nextCount");
+  requireCondition(actual.activeDma === expected.activeDma, label + ": active DMA mismatch");
+  requireCondition(actual.performingDma === expected.performingDma, label + ": performing DMA mismatch");
+  requireCondition(actual.cpuBlocked === expected.cpuBlocked, label + ": cpuBlocked mismatch");
+}
+
+function requireHardwareBoundary(
+  boundary: SelectedHardwareState,
+  event: SelectedTimelineEvent,
+  state: "entry" | "exit",
+  label: string,
+): void {
+  requireCondition(boundary.scheduler.currentTime === event.schedulerCurrentTime, label + ": scheduler current time mismatch");
+  requireTimelineState(
+    {
+      dmaNextCounts: dmaNextCounts(boundary.dma, label),
+      activeDma: boundary.activeDma,
+      performingDma: boundary.performingDma,
+      cpuBlocked: boundary.cpuBlocked,
+    },
+    event[state],
+    label,
+  );
+}
+
+function compactHardwareBoundary(boundary: SelectedHardwareState, label: string) {
+  return {
+    fifoWordLevels: [boundary.fifo.a.fifoWordLevel, boundary.fifo.b.fifoWordLevel],
+    internalRemaining: [boundary.fifo.a.internalRemaining, boundary.fifo.b.internalRemaining],
+    dmaNextCounts: dmaNextCounts(boundary.dma, label),
+    activeDma: boundary.activeDma,
+    performingDma: boundary.performingDma,
+    cpuBlocked: boundary.cpuBlocked,
+  } as const;
 }
 
 const sourceArg = argument("--source");
@@ -221,6 +325,7 @@ requireSnippets("src/gba/memory.c", memory, [
 const lilianaInput = readInput("tests/fixtures/factory-construction-timer0-fifo-v1/liliana.json");
 const variedInput = readInput("tests/fixtures/factory-construction-timer0-fifo-v1/factory-varied.json");
 const runtimeInput = readInput("tests/fixtures/factory-timer0-scheduler-runtime-v1.json");
+const selectedLilianaRuntimeInput = readInput("tests/fixtures/factory-timer0-selected-adjacent-runtime-v1.json");
 
 const selectedRows: Array<{ caseName: string; row: Crossing }> = [];
 for (const { caseName, packet } of [
@@ -321,9 +426,161 @@ const priorRuntimeWindows = runtime.windows.map((window) => {
   } as const;
 });
 
+const selectedLilianaRuntime = selectedLilianaRuntimeInput.value as SelectedRuntimeReceipt;
+requireCondition(selectedLilianaRuntime.schema === "factory-timer0-selected-adjacent-runtime/v1", "selected LILIANA runtime: wrong schema");
+requireCondition(selectedLilianaRuntime.case === "liliana", "selected LILIANA runtime: wrong case");
+requireCondition(selectedLilianaRuntime.oracleProfile === "battle-scene-off", "selected LILIANA runtime: wrong profile");
+requireCondition(selectedLilianaRuntime.sourceFunction === "FillFactoryFrontierTrainerParty", "selected LILIANA runtime: wrong source function");
+requireCondition(
+  selectedLilianaRuntime.selection.case === "liliana"
+    && selectedLilianaRuntime.selection.component === "encrypted-accessor"
+    && selectedLilianaRuntime.selection.ordinal === 23,
+  "selected LILIANA runtime: wrong selection",
+);
+requireCondition(
+  selectedLilianaRuntime.selection.crossedEventNames.join(",") === "GBA Timer 0,GBA Audio Sample"
+    && selectedLilianaRuntime.selection.deadlineOrder.join(",") === "GBA Timer 0,GBA Audio Sample"
+    && selectedLilianaRuntime.selection.audioTimerDeadlineDelta === 1,
+  "selected LILIANA runtime: wrong selected deadline boundary",
+);
+
+const selectedTimeline = selectedLilianaRuntime.runtime.timeline;
+const expectedSelectedTimeline = [
+  ["GBA Timer 0", 32],
+  ["GBA DMA", 64],
+  ["GBA Audio Sample", 24],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+  ["GBA DMA", 64],
+] as const;
+requireCondition(selectedTimeline.length === expectedSelectedTimeline.length, "selected LILIANA runtime: wrong callback count");
+for (const [index, event] of selectedTimeline.entries()) {
+  const expected = expectedSelectedTimeline[index]!;
+  requireCondition(event.sequence === index, "selected LILIANA runtime: noncontiguous callback sequence");
+  requireCondition(event.name === expected[0] && event.priority === expected[1], "selected LILIANA runtime: wrong callback graph at sequence " + index);
+  if (index > 0) requireTimelineState(event.entry, selectedTimeline[index - 1]!.exit, "selected LILIANA runtime handoff at sequence " + index);
+}
+
+const [selectedTimer0, selectedFirstDma, selectedAudio, ...selectedRemainingDmas] = selectedTimeline;
+requireCondition(selectedTimer0 !== undefined && selectedFirstDma !== undefined && selectedAudio !== undefined, "selected LILIANA runtime: missing graph prefix");
+requireCondition(selectedTimer0.cyclesLate === 1, "selected LILIANA runtime: Timer 0 must be late one cycle");
+requireCondition(
+  selectedFirstDma.cyclesLate === 1 && selectedFirstDma.entry.activeDma === 1,
+  "selected LILIANA runtime: first DMA must service DMA1 while late one cycle",
+);
+requireCondition(
+  selectedAudio.cyclesLate === 0 && selectedAudio.entry.activeDma === 1 && selectedAudio.entry.cpuBlocked,
+  "selected LILIANA runtime: Audio Sample must be on time during blocked DMA1",
+);
+requireCondition(
+  selectedAudio.scheduledWhen - selectedTimer0.scheduledWhen === 1
+    && selectedAudio.schedulerCurrentTime === selectedTimer0.schedulerCurrentTime,
+  "selected LILIANA runtime: Timer/Audio adjacent deadline correction mismatch",
+);
+requireCondition(selectedRemainingDmas.length === 9 && selectedRemainingDmas.every((event) => event.cyclesLate === 0), "selected LILIANA runtime: wrong remaining DMA graph");
+requireNumberArray(selectedTimer0.entry.dmaNextCounts, [0, 0, 0, 0], "selected LILIANA runtime Timer entry");
+requireNumberArray(selectedTimer0.exit.dmaNextCounts, [0, 4, 4, 0], "selected LILIANA runtime Timer exit");
+requireNumberArray(selectedFirstDma.exit.dmaNextCounts, [0, 3, 4, 0], "selected LILIANA runtime first DMA exit");
+requireNumberArray(selectedAudio.entry.dmaNextCounts, [0, 3, 4, 0], "selected LILIANA runtime Audio entry");
+requireNumberArray(selectedTimeline.at(-1)!.exit.dmaNextCounts, [0, 0, 0, 0], "selected LILIANA runtime completion");
+requireCondition(
+  selectedLilianaRuntime.runtime.deadlineOrder.join(",") === "GBA Timer 0,GBA Audio Sample"
+    && selectedLilianaRuntime.runtime.audioTimerDeadlineDelta === 1,
+  "selected LILIANA runtime: runtime deadline summary mismatch",
+);
+requireCondition(
+  selectedLilianaRuntime.runtime.requestOrder.map((request) => request.fifo + ":" + request.dmaChannel).join(",") === "a:1,b:2",
+  "selected LILIANA runtime: wrong request order",
+);
+requireCondition(selectedLilianaRuntime.runtime.completionOrder.join(",") === "1,2", "selected LILIANA runtime: wrong completion order");
+requireCondition(selectedLilianaRuntime.runtime.wrappersRestoredAfterSequence === 11, "selected LILIANA runtime: wrappers did not restore after completion");
+
+const selectedHardware = selectedLilianaRuntime.runtime.hardwareStates;
+freshDualPair(selectedHardware.timer0Entry.fifo, selectedHardware.timer0Entry.dma, "selected LILIANA runtime Timer entry");
+requireCondition(
+  selectedHardware.timer0Entry.audio.enabled
+    && !selectedHardware.timer0Entry.audio.mixer.present
+    && !selectedHardware.timer0Entry.audio.mixer.externalMixing,
+  "selected LILIANA runtime: wrong Timer-entry audio boundary",
+);
+requireHardwareBoundary(selectedHardware.timer0Entry, selectedTimer0, "entry", "selected LILIANA runtime Timer entry");
+requireHardwareBoundary(selectedHardware.timer0Exit, selectedTimer0, "exit", "selected LILIANA runtime Timer exit");
+requireHardwareBoundary(selectedHardware.audioEntry, selectedAudio, "entry", "selected LILIANA runtime Audio entry");
+requireHardwareBoundary(selectedHardware.audioExit, selectedAudio, "exit", "selected LILIANA runtime Audio exit");
+requireHardwareBoundary(selectedHardware.afterCompletion, selectedTimeline.at(-1)!, "exit", "selected LILIANA runtime completion");
+requireNumberArray(
+  [selectedHardware.timer0Exit.fifo.a.internalRemaining, selectedHardware.timer0Exit.fifo.b.internalRemaining],
+  [2, 2],
+  "selected LILIANA runtime Timer exit FIFO",
+);
+requireNumberArray(
+  [selectedHardware.audioEntry.fifo.a.fifoWordLevel, selectedHardware.audioEntry.fifo.b.fifoWordLevel],
+  [4, 3],
+  "selected LILIANA runtime Audio entry FIFO",
+);
+requireNumberArray(
+  [selectedHardware.afterCompletion.fifo.a.fifoWordLevel, selectedHardware.afterCompletion.fifo.b.fifoWordLevel],
+  [7, 7],
+  "selected LILIANA runtime completion FIFO",
+);
+requireNumberArray(
+  [selectedHardware.afterCompletion.fifo.a.internalRemaining, selectedHardware.afterCompletion.fifo.b.internalRemaining],
+  [2, 2],
+  "selected LILIANA runtime completion internal remaining",
+);
+
+const selectedLilianaRuntimeSummary = {
+  selection: {
+    case: selectedLilianaRuntime.selection.case,
+    component: selectedLilianaRuntime.selection.component,
+    ordinal: selectedLilianaRuntime.selection.ordinal,
+    sourceFunction: selectedLilianaRuntime.sourceFunction,
+    deadlineOrder: selectedLilianaRuntime.runtime.deadlineOrder,
+    audioTimerDeadlineDelta: selectedLilianaRuntime.runtime.audioTimerDeadlineDelta,
+  },
+  observedCallbackGraph: {
+    prefix: [
+      { name: selectedTimer0.name, priority: selectedTimer0.priority, cyclesLate: selectedTimer0.cyclesLate },
+      { name: selectedFirstDma.name, priority: selectedFirstDma.priority, cyclesLate: selectedFirstDma.cyclesLate, activeDma: selectedFirstDma.entry.activeDma },
+      { name: selectedAudio.name, priority: selectedAudio.priority, cyclesLate: selectedAudio.cyclesLate, activeDma: selectedAudio.entry.activeDma, cpuBlocked: selectedAudio.entry.cpuBlocked },
+    ],
+    remainingDmaCallbacks: selectedRemainingDmas.map((event) => ({ cyclesLate: event.cyclesLate, activeDma: event.entry.activeDma })),
+    requestOrder: selectedLilianaRuntime.runtime.requestOrder,
+    completionOrder: selectedLilianaRuntime.runtime.completionOrder,
+    wrappersRestoredAfterSequence: selectedLilianaRuntime.runtime.wrappersRestoredAfterSequence,
+  },
+  hardwareBoundary: {
+    audioAtTimerEntry: selectedHardware.timer0Entry.audio,
+    timer0Entry: compactHardwareBoundary(selectedHardware.timer0Entry, "selected LILIANA runtime summary Timer entry"),
+    timer0Exit: compactHardwareBoundary(selectedHardware.timer0Exit, "selected LILIANA runtime summary Timer exit"),
+    audioEntry: compactHardwareBoundary(selectedHardware.audioEntry, "selected LILIANA runtime summary Audio entry"),
+    afterCompletion: compactHardwareBoundary(selectedHardware.afterCompletion, "selected LILIANA runtime summary completion"),
+  },
+  applicabilityBoundary: "This is the committed selected LILIANA callback graph only. It establishes no callback price, selected-row scheduler span, or construction-clock input, and it does not establish an order for factory-varied rows.",
+} as const;
+
+const remainingFactoryVariedRuntimeRows = rows
+  .filter((row) => row.case === "factory-varied")
+  .map((row) => ({
+    case: row.case,
+    component: row.component,
+    ordinal: row.ordinal,
+    preInstructionDueRootsByDeadlineThenPriority: row.preInstructionDueRootsByDeadlineThenPriority,
+  }));
+requireCondition(
+  remainingFactoryVariedRuntimeRows.map((row) => row.component + "/" + row.ordinal).join(",") === "get-nature/12,nature-attempt/63",
+  "expected only the two legal factory-varied adjacent rows to remain",
+);
+
 const receipt = {
   schema: "issue55-adjacent-audio-dma-scheduler-audit/v1",
-  scope: "mGBA 0.10.5 source mechanics plus the three committed Battle Scene OFF Timer 0=D, Audio Sample=D+1 rows and existing on-time isolated/Video dual-refill runtime receipt; no selected-row callback trace or duration claim",
+  scope: "mGBA 0.10.5 source mechanics plus three committed Battle Scene OFF Timer 0=D, Audio Sample=D+1 row boundaries, prior on-time isolated/Video runtime receipts, and the committed selected LILIANA adjacent-deadline callback graph; no callback price, construction-clock input, or varied-row order claim",
   release: {
     url: "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
     sha256: EXPECTED_ARCHIVE_SHA256,
@@ -334,7 +591,8 @@ const receipt = {
     files: Object.entries(SOURCE_HASHES).map(([path, digest]) => ({ path, sha256: digest })),
     anchors: SOURCE_ANCHORS,
   },
-  inputReceipts: [lilianaInput, variedInput, runtimeInput].map((packet) => ({ path: packet.path, sha256: sha256(packet.bytes) })),
+  inputReceipts: [lilianaInput, variedInput, runtimeInput, selectedLilianaRuntimeInput]
+    .map((packet) => ({ path: packet.path, sha256: sha256(packet.bytes) })),
   dPlusOneSourceMechanics: {
     eventPriorities: { "GBA Audio Sample": 24, "GBA Timer 0": 32, "GBA DMA": 64 },
     rootOrdering: "mTimingSchedule orders absolute deadlines first; lower numeric priority breaks only an equal-deadline tie, and equal priorities preserve insertion order.",
@@ -367,21 +625,17 @@ const receipt = {
     windows: priorRuntimeWindows,
     applicabilityBoundary: "Two committed windows prove fresh on-time dual DMA graph and 18-master-cycle makespan with no Audio Sample due before Timer 0; one has exact prior Video callback. They do not observe Audio Sample at D + 1 and do not supply a LILIANA Audio/DMA order or duration.",
   },
-  smallestRequiredRuntimeObservation: {
-    target: "LILIANA encrypted-accessor ordinal 23, repeated twice fresh",
-    captureInterval: "from Timer 0 callback entry through first Audio Sample callback after it and until both DMA1/DMA2 nextCount values are zero",
-    callbackEntryFields: [
-      "event name, priority, relative scheduled deadline, scheduler current time, and cyclesLate",
-      "activeDMA, cpuBlocked, and DMA1/DMA2 nextCount plus relative deadlines",
-      "FIFO A/B word level and internalRemaining at Timer 0 entry and after interval",
-    ],
-    acceptance: "Two packets must agree on contiguous Timer 0 / GBA DMA / GBA Audio Sample callback-entry sequence and scheduler span from Timer 0 entry to both DMA completions; only then may selected row receive interleaving or duration statement.",
-    prohibitedInference: "Do not borrow isolated/Video 18-cycle makespan, synthesize LILIANA order from aggregate FIFO endpoints, or wire construction-clock cost.",
+  selectedLilianaRuntimeReceipt: selectedLilianaRuntimeSummary,
+  remainingFactoryVariedRuntimeRows: {
+    rows: remainingFactoryVariedRuntimeRows,
+    observationStillNeeded: "Capture a separately selected twice-fresh callback graph for legal factory-varied get-nature ordinal 12 and legal factory-varied nature-attempt ordinal 63. The LILIANA Timer-late/DMA1/Audio-on-time graph is not transferred to either row, including the Video-co-due nature-attempt row.",
   },
   explicitBoundary: [
     "Three committed rows are adjacent deadlines: Audio Sample is exactly one master cycle after Timer 0, not equal-deadline priority observation.",
-    "LILIANA row records only 20-cycle instruction-edge endpoints; it is not a runtime callback trace.",
-    "Source-only zero-late D/D+1 transition is conditional and deliberately not named as LILIANA runtime order.",
+    "The compact LILIANA FIFO row records aggregate instruction-edge endpoints; the separate selected LILIANA runtime input supplies its callback graph.",
+    "The selected LILIANA graph is Timer late one cycle, first DMA1 service, Audio Sample on time, then remaining DMA service; it is not transferred to either factory-varied row.",
+    "Source-only zero-late D/D+1 transition stays conditional and is separate from the observed late-one-cycle LILIANA graph.",
+    "Neither source mechanics nor the selected callback graph imply a callback price, scheduler span cost, or construction-clock input.",
     "This receipt contains no absolute selected-row scheduler timestamp, no pixel lookup, no production import, and no construction-clock behavior.",
   ],
 } as const;
