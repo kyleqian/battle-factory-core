@@ -14,26 +14,29 @@ pokebench_resolve_harness_root() {
     return 1
   fi
 
-  local candidate
-  candidate="$(cd .. && pwd)"
-  if [[ -x "$candidate/run-oracle.sh" ]]; then
-    printf '%s\n' "$candidate"
-    return 0
-  fi
-
-  local common_dir primary_run
+  # Prefer the PRIMARY checkout's repo top: linked worktrees carry their own
+  # copy of run-oracle.sh at the worktree root, but only the primary repo top
+  # sits directly under pokebench/ where ../vendor (mGBA venv, libmgba-py,
+  # pret source) actually resolves.
+  local candidate common_dir primary_run
   common_dir="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   if [[ -n "$common_dir" && -d "$common_dir" ]]; then
     primary_run="$(cd "$common_dir/.." && pwd)"
     # Two-layer layout: the primary checkout root IS the repo top that owns
-    # run-oracle.sh; older flat layouts kept it one level above the run.
-    for candidate in "$primary_run" "$primary_run/.."; do
+    # run-oracle.sh; older flat layouts kept it two levels above the run.
+    for candidate in "$primary_run" "$primary_run/.." "$primary_run/../.."; do
       candidate="$(cd "$candidate" 2>/dev/null && pwd)" || continue
       if [[ -x "$candidate/run-oracle.sh" ]]; then
         printf '%s\n' "$candidate"
         return 0
       fi
     done
+  fi
+
+  candidate="$(cd .. && pwd)"
+  if [[ -x "$candidate/run-oracle.sh" ]]; then
+    printf '%s\n' "$candidate"
+    return 0
   fi
 
   echo "could not locate the pokeemerald-factory harness; set POKEBENCH_HARNESS_ROOT" >&2
