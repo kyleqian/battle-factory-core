@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -57,7 +58,7 @@ describe("MOVE_LEER source/evidence checkpoint", () => {
     }
   });
 
-  it("banks twice-fresh complete dense windows without promoting acceptance", () => {
+  it("pins twice-fresh complete dense windows and exact promotion", () => {
     const receipt = JSON.parse(
       readFileSync(
         "tools/compare/fixtures/leer-evidence-checkpoint.json",
@@ -68,8 +69,12 @@ describe("MOVE_LEER source/evidence checkpoint", () => {
       schema: "leer-evidence-checkpoint/v1",
       oracleProfile: "battle-scene-on",
       move: "LEER",
-      status: "unsupported",
+      status: "exact",
       sourceSymbols: { Move_LEER: 0x082d2d90, Move_DREAM_EATER: 0x082d2de7 },
+      promotion: {
+        status: "exact",
+        coverage: "MOVE_LEER 171->172 exact; unsupported 105->104",
+      },
     });
     expect(
       receipt.orientations.map(
@@ -89,6 +94,14 @@ describe("MOVE_LEER source/evidence checkpoint", () => {
       ["player-back", 212, 281, 70],
       ["opponent-front", 75, 144, 70],
     ]);
+    for (const entry of receipt.orientations) {
+      expect(entry.freshRuns).toBe(2);
+      expect(entry.byteStable).toBe(true);
+      expect(entry.productionFramebuffer).toBe("70/70");
+      const map = readFileSync(entry.changeMap, "utf8");
+      expect(createHash("sha256").update(map).digest("hex")).toBe(entry.changeMapSha256);
+      expect(map).toContain("source-relative ages");
+    }
     expect(readFileSync("tools/compare/agilityProbe.py", "utf8")).toContain(
       'schema="swords-dance-dense-evidence/v1" if IS_SWORDS_DANCE else "leer-dense-evidence/v1"',
     );

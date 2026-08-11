@@ -4605,6 +4605,37 @@
     "tests/animation/cometPunchSource.test.ts",
     "tests/animation/cometPunchEvidence.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_LEER",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-201 FRONTIER_MON_DRAGONAIR_1 versus ONIX Scene-ON parties pass the full 70-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 212-281 and opponent-front frames 75-144",
+    "the pure orientation-aware reducer ports ANIM_TAG_LEER, the five-cell gLeerSpriteTemplate eye program and OAM centers, AnimTask_ScaleMonAndRestore, both long AnimTask_ShakeMon2 schedules, monbg/clearmonbg, splitbgprio, 8:8 setalpha/blendoff, and side-relative SE_M_LEER",
+    "the typed Scene-ON seam and narrow Dragonair/Onix compositor use the extracted LEER sheet plus source-derived battler geometry, doubled live affine scale, target wobble, eye OAM, healthbox, field, and text latches without damage, RNG, controller, turn, round, facility, absolute-tick, recording, or RGB fitting logic",
+    "leerPortable.ts regenerates both normalized change maps and proves 70/70 reducer/component/seam/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable/raw-RGB and 70/70 production framebuffer frames twice fresh in each orientation; stable evidence/raw/map digests are player e9e89adb9d92abb63309308f78d77b0b2700c67c83b8f0922272c52e25601ecd / 7f2420c28511ee57b8b9fae9b78a2c2503fbcaa6d26e4f9b8549d97ab6400a73 / 7738d2fc420e6a288b677065afaa1c292f97904607c8111f4ef900a35cf1a78e and opponent d0cf03af341d96aef901dc9a8710e3171f4983b16d5e38e9625a25ced19615c6 / 0087f64dca23cb75df9fb6c4691808625e852102eec1dfb580588fee46754f6f / 04d8ab47f5343f95c1a2c1eb1b521bbb9ade7a972fdbe32b5468bfedbe66dadf",
+    "the LEER-specific maps measure ordinary eye OAM RAM+1, live ScaleMonAndRestore affine matrix RAM+2, the long target ShakeMon2 RAM+2, the player/opponent pre-shake x2 baselines, and the source-owned monbg/register cleanup split; CONFUSION remains an independent 140/140 shared ScaleMonAndRestore+ShakeMon2 control and SWORDS_DANCE remains independently exact",
+    "no battle calculation, defense-stage outcome, damage, RNG, controller, turn order, round/facility state, animation boundary, unsupported barrier, canonical recording import, per-frame table, absolute tick, coordinate/RGB fit, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-leer-player-dragonair-opponent-onix.json",
+    "tools/battle-lab/mechanic-leer-opponent-dragonair-player-onix.json",
+    "tools/compare/fixtures/leer-evidence-checkpoint.json",
+    "tools/compare/fixtures/leer-player-dragonair-opponent-onix.json",
+    "tools/compare/fixtures/leer-opponent-dragonair-player-onix.json",
+    "tools/compare/agilityProbe.py",
+    "tools/compare/leerPortable.ts",
+    "tools/compare/leerSourceAudit.ts",
+    "tools/compare/evidence/leer-changemap-player.txt",
+    "tools/compare/evidence/leer-changemap-opponent.txt",
+    "tools/extract/extract-leer-assets.ts",
+    "src/assets/gen/battle-anim-leer.json",
+    "src/animation/leer.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/leer.test.ts",
+    "tests/animation/leerSource.test.ts"
+   ]
   }
  ],
  "queue": [
