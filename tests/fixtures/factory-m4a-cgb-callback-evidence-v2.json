@@ -1,0 +1,316 @@
+{
+  "schema": "factory-m4a-cgb-callback-evidence/v2",
+  "oracleProfile": "battle-scene-off",
+  "selectedResidualClass": "CgbSound-callbacks",
+  "sourceReferences": [
+    {
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "810-874,925-1231",
+      "anchors": [
+        "u32 MidiKeyToCgbFreq",
+        "void CgbOscOff",
+        "void CgbSound",
+        "gCgb3Vol[channels->envelopeVolume]"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_tables.c",
+      "lines": "118-165",
+      "anchors": [
+        "const u8 gCgbScaleTable[]",
+        "const s16 gCgbFreqTable[]",
+        "const u8 gNoiseTable[]",
+        "const u8 gCgb3Vol[]"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1130-1466",
+      "anchors": [
+        "MPlayMain:",
+        "o_SoundInfo_MidiKeyToCgbFreq",
+        "call_r3:"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/include/gba/m4a_internal.h",
+      "lines": "272-350,398-400",
+      "anchors": [
+        "struct MusicPlayerTrack",
+        "struct CgbChannel",
+        "extern const u8 gCgbScaleTable[]"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/constants/m4a_constants.inc",
+      "lines": "54-257",
+      "anchors": [
+        "o_SoundInfo_CgbOscOff",
+        "o_SoundInfo_MidiKeyToCgbFreq",
+        "o_CgbChannel_envelopeVolume"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.map",
+      "lines": "sound symbols",
+      "anchors": [
+        "gCgbScaleTable",
+        "gCgbFreqTable",
+        "gNoiseTable",
+        "gCgb3Vol"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.elf",
+      "lines": "defined symbols and sizes",
+      "anchors": [
+        "CgbOscOff",
+        "MidiKeyToCgbFreq",
+        "CgbSound",
+        "gCgbScaleTable",
+        "gCgbFreqTable",
+        "gNoiseTable",
+        "gCgb3Vol"
+      ]
+    }
+  ],
+  "sourceStateReference": {
+    "packetSchema": "factory-m4a-source-state-probe/v3",
+    "digestKey": "sourceSemanticState.stateDigest"
+  },
+  "callbackComponent": {
+    "componentDigest": "aa3af5c7638c9d233164feccf2f1e7b1a7d4eb16fe6c1a19370e22f49839af62",
+    "paths": [
+      {
+        "id": "cgb-sound.cgb-osc-off.channel-1",
+        "source": "m4a.c:1027-1030 switch(ch) case 1",
+        "target": "CgbOscOff",
+        "selector": "channel-1",
+        "reads": [],
+        "writes": [
+          "NR12",
+          "NR14"
+        ]
+      },
+      {
+        "id": "cgb-sound.cgb-osc-off.channel-2",
+        "source": "m4a.c:1031-1034 switch(ch) case 2",
+        "target": "CgbOscOff",
+        "selector": "channel-2",
+        "reads": [],
+        "writes": [
+          "NR22",
+          "NR24"
+        ]
+      },
+      {
+        "id": "cgb-sound.cgb-osc-off.channel-3",
+        "source": "m4a.c:1035-1037 switch(ch) case 3",
+        "target": "CgbOscOff",
+        "selector": "channel-3",
+        "reads": [],
+        "writes": [
+          "NR30"
+        ]
+      },
+      {
+        "id": "cgb-sound.cgb-osc-off.channel-4-default",
+        "source": "m4a.c:1038-1041 switch(ch) default",
+        "target": "CgbOscOff",
+        "selector": "channel-4-default",
+        "reads": [],
+        "writes": [
+          "NR42",
+          "NR44"
+        ]
+      },
+      {
+        "id": "cgb-sound.gCgb3Vol.envelope-volume",
+        "source": "m4a.c:1209-1212 gCgb3Vol[channels->envelopeVolume]",
+        "target": "gCgb3Vol",
+        "selector": "envelopeVolume-0..15",
+        "reads": [
+          "gCgb3Vol[envelopeVolume]"
+        ],
+        "writes": [
+          "NR32"
+        ]
+      },
+      {
+        "id": "mplay-main.midi-key-to-cgb-freq.noise-low-key",
+        "source": "m4a.c:814-822 chanNum == 4; key <= 20",
+        "target": "MidiKeyToCgbFreq",
+        "selector": "channel-4-key-0..20",
+        "reads": [
+          "gNoiseTable[key]"
+        ],
+        "writes": []
+      },
+      {
+        "id": "mplay-main.midi-key-to-cgb-freq.noise-high-key",
+        "source": "m4a.c:814-822 chanNum == 4; 21 <= key <= 80",
+        "target": "MidiKeyToCgbFreq",
+        "selector": "channel-4-key-21..80",
+        "reads": [
+          "gNoiseTable[key - 21]"
+        ],
+        "writes": []
+      },
+      {
+        "id": "mplay-main.midi-key-to-cgb-freq.noise-clamped-key",
+        "source": "m4a.c:819-822 chanNum == 4; key > 80",
+        "target": "MidiKeyToCgbFreq",
+        "selector": "channel-4-key-clamped-59",
+        "reads": [
+          "gNoiseTable[59]"
+        ],
+        "writes": []
+      },
+      {
+        "id": "mplay-main.midi-key-to-cgb-freq.tone-low-key",
+        "source": "m4a.c:830-834 chanNum != 4; key <= 35",
+        "target": "MidiKeyToCgbFreq",
+        "selector": "channel-1..3-key-0..35",
+        "reads": [
+          "gCgbScaleTable[0]",
+          "gCgbScaleTable[1]",
+          "gCgbFreqTable[...]"
+        ],
+        "writes": []
+      },
+      {
+        "id": "mplay-main.midi-key-to-cgb-freq.tone-normal-key",
+        "source": "m4a.c:830-853 chanNum != 4; 36 <= key <= 166",
+        "target": "MidiKeyToCgbFreq",
+        "selector": "channel-1..3-key-36..166",
+        "reads": [
+          "gCgbScaleTable[key]",
+          "gCgbScaleTable[key + 1]",
+          "gCgbFreqTable[...]"
+        ],
+        "writes": []
+      },
+      {
+        "id": "mplay-main.midi-key-to-cgb-freq.tone-clamped-key",
+        "source": "m4a.c:838-841 chanNum != 4; key > 166",
+        "target": "MidiKeyToCgbFreq",
+        "selector": "channel-1..3-key-clamped-130",
+        "reads": [
+          "gCgbScaleTable[130]",
+          "gCgbScaleTable[131]",
+          "gCgbFreqTable[...]"
+        ],
+        "writes": []
+      }
+    ],
+    "tables": {
+      "gCgb3Vol": {
+        "bytes": 16,
+        "sha256": "86480498f3bc57863a295f2c9a9752be09fd91cb28c998650fa2b7ae3bdefd24"
+      },
+      "gCgbScaleTable": {
+        "bytes": 132,
+        "sha256": "2ab14116232b5768777f67dd371a380bd88fdc97858aa050306b132d05faa03e"
+      },
+      "gCgbFreqTable": {
+        "bytes": 24,
+        "sha256": "34e0ae7c2f912add79c2e61ed8347ff085000bc39f0173883ccbaff150205ee5"
+      },
+      "gNoiseTable": {
+        "bytes": 60,
+        "sha256": "197f0679262884d48dd459dcfe690c0a41e8a73cf76cb62838119fc9cb0e7ab6"
+      }
+    },
+    "sourceGeneral": true
+  },
+  "reproducibility": {
+    "schema": "factory-m4a-cgb-callback-repro/v2",
+    "oracleProfile": "battle-scene-off",
+    "freshRunsPerCase": 2,
+    "cases": [
+      {
+        "case": "anchor",
+        "firstFreshSha256": "7172eee8739faa176d389f50672eb7f0127964f290a98e32c1a059a0b7b1b6b2",
+        "secondFreshSha256": "7172eee8739faa176d389f50672eb7f0127964f290a98e32c1a059a0b7b1b6b2",
+        "byteIdentical": true
+      },
+      {
+        "case": "liliana",
+        "firstFreshSha256": "46ac14714f6eb54e78c059164cbb9e3f7831f59f3b1eed98aa295dc0b64a866a",
+        "secondFreshSha256": "46ac14714f6eb54e78c059164cbb9e3f7831f59f3b1eed98aa295dc0b64a866a",
+        "byteIdentical": true
+      },
+      {
+        "case": "factory-varied",
+        "firstFreshSha256": "96a9978df209fe31e7176bd4f8983f00bfc21617db13d85408b77a42eb0ee0ff",
+        "secondFreshSha256": "96a9978df209fe31e7176bd4f8983f00bfc21617db13d85408b77a42eb0ee0ff",
+        "byteIdentical": true
+      }
+    ]
+  },
+  "cases": [
+    {
+      "case": "anchor",
+      "observations": 52,
+      "costs": {
+        "min": 23920,
+        "max": 52083,
+        "distinct": 52
+      },
+      "capturedStateKeys": 52,
+      "repeatedCapturedStateKeys": 0
+    },
+    {
+      "case": "liliana",
+      "observations": 31,
+      "costs": {
+        "min": 24732,
+        "max": 47917,
+        "distinct": 31
+      },
+      "capturedStateKeys": 31,
+      "repeatedCapturedStateKeys": 0
+    },
+    {
+      "case": "factory-varied",
+      "observations": 30,
+      "costs": {
+        "min": 24391,
+        "max": 41682,
+        "distinct": 28
+      },
+      "capturedStateKeys": 30,
+      "repeatedCapturedStateKeys": 0
+    }
+  ],
+  "repeatedCompleteStateEquivalence": {
+    "freshObservationsPerRun": 113,
+    "equalStateEqualCostPairs": 113,
+    "differentCostForEqualState": 0,
+    "proof": "Every compact source-state digest and exact m4a cost repeats in an independently fresh Scene-OFF packet; no cross-state duration reducer is claimed."
+  },
+  "residualDereferences": [
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+      "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+      "captured": "Current command bytes, all three pattern-stack windows, complete track/player scalar state, and dispatch target symbols.",
+      "remainder": "The full handler-dependent command/control-flow read set is not statically bounded by this packet."
+    },
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a.c:1500-1534",
+      "read": "ply_xcmd/ply_xxx and gXcmdTable/gMPlayJumpTable callbacks may dereference callback-specific state.",
+      "captured": "Dispatch table target symbols and the callback-visible player/track/channel graph.",
+      "remainder": "Transitive callback reads are not instruction-traced into a complete memory-read set."
+    },
+    {
+      "stage": "SoundMainRAM-channel-passes",
+      "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+      "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+      "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete 3168-byte PCM buffer, DMA source/destination roles, and VCOUNT.",
+      "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target is reported as incomplete; no such target was observed in this packet."
+    }
+  ],
+  "verdict": "Evidence-only checkpoint: the CgbSound callback/table dereference class is source/ELF-complete and twice-fresh equal-state costs are exact; the three other residual classes remain explicit and no audio cost reducer is licensed."
+}
