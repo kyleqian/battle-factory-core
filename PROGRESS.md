@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1121 — [MAIN worker, 2026-08-11] **#55 legal-varied adjacent-row selectors pinned**
+
+- **State:** both remaining legal-varied rows now have source-order selectors;
+  runtime callback capture is next and #55 stays open/unwired.
+- **Did:** generalized the LILIANA selector across encrypted-accessor,
+  get-nature, and nature-attempt components. Fresh OFF scouts pin get-nature
+  ordinal 12's repeated division occurrence **4** and nature-attempt ordinal
+  63's occurrence **0**, with no frame/cycle/identity selection key.
+- **Next:** retain each varied Timer/Audio[/Video]/DMA graph twice fresh,
+  independently; discard only a row that cannot validate.
+- **Notes:** both scouts finished in **11.5/11.7s**; focused selector/runtime
+  **8/8** is green. No service cost, clock, controller, presentation,
+  animation, barrier, recording, or side-owned adjacent-audit artifact changed.
+
 ## 1120 — [MAIN worker, 2026-08-11] **#55 LILIANA adjacent-deadline runtime receipt**
 
 - **State:** the selected LILIANA runtime graph is closed twice fresh; #55
@@ -38,18 +52,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** focused union **20/20** is green; each lane independently passed
   its full suite, typecheck, and build. DMA3 remains source-reachable only as
   CPU-triggered `START_NOW` VBlank work outside the exact selected window.
-
-## 1118 — [MAIN worker, 2026-08-11] **#55 Audio-co-due row-selection checkpoint**
-
-- **State:** the three natural Audio-co-due dual-refill rows are exactly
-  identified; no new runtime packet is claimed, #55 stays open, and the clock
-  and dispatcher remain unchanged.
-- **Did:** pinned LILIANA encrypted-accessor 23 (Audio), varied get-nature 12
-  (Audio), and varied nature-attempt 63 (Video+Audio), including exact return
-  classes and instruction edges; anchor has none.
-- **Next:** retain LILIANA's selected callback window twice fresh, then the two
-  varied windows through the same wrapper. Do not fit cost or wire the clock.
-- **Notes:** the bounded wrapper attempt did not finish a validated JSON packet
-  in cap, so its probe edits were discarded. Focused Timer0 **40/40**, smoke
-  **375/375**, typecheck, full `npm test` **909 files / 8,558 passed / 1
-  skipped**, and build (**631 modules**) are green.

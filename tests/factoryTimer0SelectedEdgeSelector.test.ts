@@ -43,7 +43,7 @@ describe("Issue #55 selected adjacent-deadline edge selector", () => {
 import json, sys
 sys.path.insert(0, "tools/probe")
 import factory_timer0_selected_edge as module
-s = module.SelectedEncryptedAccessorEdge(module.LILIANA_AUDIO_EDGE)
+s = module.SelectedSourceOrderedEdge(module.LILIANA_AUDIO_EDGE)
 armed = []
 armed.append(s.observe(0x08068D0E, outer_stats_entry=False))
 armed.append(s.observe(0x082E7C3E))
@@ -58,7 +58,7 @@ for ordinal in range(24):
     for _ in range(visits):
         armed.append(s.observe(0x082E7C3E))
 armed.append(s.observe(0x082E7C3E))
-print(json.dumps({"armed": [i for i, value in enumerate(armed) if value], "summary": s.summary(), "ordinal": s.encrypted_accessor_ordinal}))
+print(json.dumps({"armed": [i for i, value in enumerate(armed) if value], "summary": s.summary(), "ordinal": s.component_ordinal}))
 `;
     const value = JSON.parse(execFileSync("python3", ["-c", program], { encoding: "utf8" }));
     expect(value.armed).toEqual([80]);
@@ -72,6 +72,67 @@ print(json.dumps({"armed": [i for i, value in enumerate(armed) if value], "summa
       instructionOccurrence: 27,
       crossedEventNames: ["GBA Timer 0", "GBA Audio Sample"],
       deadlineOrder: ["GBA Timer 0", "GBA Audio Sample"],
+      audioTimerDeadlineDelta: 1,
+    });
+  });
+
+  it("pins both legal-varied source ordinals and repeated division-PC occurrences", () => {
+    const program = String.raw`
+import json, sys
+sys.path.insert(0, "tools/probe")
+import factory_timer0_selected_edge as module
+
+get_nature = module.SelectedSourceOrderedEdge(module.VARIED_GET_NATURE_AUDIO_EDGE)
+get_armed = []
+get_nature.observe(0x08068D0E, outer_stats_entry=True, source_epoch_entry=True)
+for ordinal in range(13):
+    return_pc = 0x08068F03 if ordinal == 12 else 0x08068E77
+    get_nature.observe(0x0806D072, lr=return_pc)
+    for occurrence in range(7):
+        if get_nature.observe(0x082E7BF4):
+            get_armed.append([ordinal, occurrence])
+
+nature_attempt = module.SelectedSourceOrderedEdge(
+    module.VARIED_NATURE_ATTEMPT_VIDEO_AUDIO_EDGE
+)
+attempt_armed = []
+nature_attempt.observe(0x081635D6, source_epoch_entry=True)
+for ordinal in range(64):
+    nature_attempt.observe(0x0806D08A, lr=0x08068675)
+    for occurrence in range(7):
+        if nature_attempt.observe(0x082E7C12):
+            attempt_armed.append([ordinal, occurrence])
+
+print(json.dumps({
+    "getArmed": get_armed,
+    "getSummary": get_nature.summary(),
+    "attemptArmed": attempt_armed,
+    "attemptSummary": nature_attempt.summary(),
+}))
+`;
+    const value = JSON.parse(execFileSync("python3", ["-c", program], { encoding: "utf8" }));
+    expect(value.getArmed).toEqual([[12, 4]]);
+    expect(value.getSummary).toEqual({
+      case: "factory-varied",
+      component: "get-nature",
+      ordinal: 12,
+      returnClass: "0x0806d072->0x08068f02",
+      edge: "0x082e7bf2->0x082e7bf4",
+      instructionOccurrence: 4,
+      crossedEventNames: ["GBA Timer 0", "GBA Audio Sample"],
+      deadlineOrder: ["GBA Timer 0", "GBA Audio Sample"],
+      audioTimerDeadlineDelta: 1,
+    });
+    expect(value.attemptArmed).toEqual([[63, 0]]);
+    expect(value.attemptSummary).toEqual({
+      case: "factory-varied",
+      component: "nature-attempt",
+      ordinal: 63,
+      returnClass: "0x0806d08a->0x0806f5ce",
+      edge: "0x082e7c10->0x082e7c12",
+      instructionOccurrence: 0,
+      crossedEventNames: ["GBA Video", "GBA Timer 0", "GBA Audio Sample"],
+      deadlineOrder: ["GBA Video", "GBA Timer 0", "GBA Audio Sample"],
       audioTimerDeadlineDelta: 1,
     });
   });

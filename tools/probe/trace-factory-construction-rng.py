@@ -56,7 +56,9 @@ from mgba._pylib import ffi as MGBA_FFI  # noqa: E402
 from factory_timer0_selected_edge import (  # noqa: E402
     GET_BOX_MON_DATA2_ENTRY_PC,
     LILIANA_AUDIO_EDGE,
-    SelectedEncryptedAccessorEdge,
+    SELECTED_EDGE_SPECS,
+    SelectedEdgeSpec,
+    SelectedSourceOrderedEdge,
 )
 
 
@@ -155,12 +157,41 @@ TIMER0_FIFO_EVIDENCE = (
 TIMER0_SCHEDULER_RUNTIME_EVIDENCE = (
     os.environ.get("FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE") == "1"
 )
-# One source-selected LILIANA edge only. Native wrappers are installed at the
-# selected accessor entry, delegate without retention until 0x082e7c3e, and
-# restore as soon as Timer@D, Audio@D+1, and both FIFO DMAs are complete.
-TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE = (
-    os.environ.get("FACTORY_TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE") == "1"
+# One source-selected adjacent-deadline edge only. Native wrappers are
+# installed at the selected source component's entry, delegate without
+# retention until its pinned repeated-PC occurrence, and restore as soon as
+# the complete selected Timer/Audio[/Video]/DMA graph finishes. The historical
+# value ``1`` retains the frozen LILIANA contract.
+TIMER0_SELECTED_EDGE_RUNTIME_NAME = os.environ.get(
+    "FACTORY_TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE"
 )
+if TIMER0_SELECTED_EDGE_RUNTIME_NAME == "1":
+    TIMER0_SELECTED_EDGE_RUNTIME_NAME = LILIANA_AUDIO_EDGE.name
+TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE = (
+    TIMER0_SELECTED_EDGE_RUNTIME_NAME is not None
+)
+# Bounded source-order scout. It installs no callback wrapper and retains no
+# packet as acceptance evidence; it only reports every repeated-PC occurrence
+# in the already selected component so a later exact spec can be pinned.
+TIMER0_SELECTED_EDGE_SCOUT_NAME = os.environ.get(
+    "FACTORY_TIMER0_SELECTED_EDGE_SCOUT_EVIDENCE"
+)
+
+
+def selected_edge_spec() -> SelectedEdgeSpec | None:
+    name = TIMER0_SELECTED_EDGE_RUNTIME_NAME or TIMER0_SELECTED_EDGE_SCOUT_NAME
+    if name is None:
+        return None
+    try:
+        return SELECTED_EDGE_SPECS[name]
+    except KeyError as error:
+        raise SystemExit(
+            f"unknown selected edge {name!r}; expected one of "
+            f"{sorted(SELECTED_EDGE_SPECS)}"
+        ) from error
+
+
+SELECTED_EDGE_SPEC = selected_edge_spec()
 # Separate scalar/source-relative packet for the recurring +18-cycle residual
 # audit.  This decorates already-selected source boundaries only; it does not
 # retain a trainer/set/mon identity or turn the observation into a timing key.
@@ -1426,13 +1457,15 @@ class Timer0SchedulerRuntimeCapture:
 
 
 class SelectedAdjacentDeadlineRuntimeCapture:
-    """Transparent wrappers for LILIANA's Timer@D then Audio@D+1 edge."""
+    """Transparent wrappers for one Timer@D then Audio@D+1 source edge."""
 
-    EVENT_NAMES = (TIMER0_EVENT_NAME, "GBA Audio Sample", "GBA DMA")
-
-    def __init__(self, oracle: EmeraldOracle) -> None:
+    def __init__(self, oracle: EmeraldOracle, spec: SelectedEdgeSpec) -> None:
         self.oracle = oracle
+        self.spec = spec
         self.gba = oracle.core._native
+        self.event_names = tuple(dict.fromkeys(
+            (*spec.crossed_event_names, "GBA DMA")
+        ))
         self.originals: list[tuple[Any, Any]] = []
         self.wrappers: list[Any] = []
         self.installed_names: list[str] = []
@@ -1445,17 +1478,18 @@ class SelectedAdjacentDeadlineRuntimeCapture:
         self.timeline: list[dict[str, Any]] = []
         self.timer_record: dict[str, Any] | None = None
         self.audio_record: dict[str, Any] | None = None
+        self.first_record_by_name: dict[str, dict[str, Any]] = {}
         self.completion_order: list[int] = []
         self.final_state: dict[str, Any] | None = None
         self._install()
         due = {
             event["name"]: event["deadlineDelta"]
             for event in self.install_state["queue"]
-            if event["name"] in {TIMER0_EVENT_NAME, "GBA Audio Sample"}
+            if event["name"] in set(spec.crossed_event_names)
         }
-        if set(due) != {TIMER0_EVENT_NAME, "GBA Audio Sample"}:
+        if set(due) != set(spec.crossed_event_names):
             self.restore()
-            raise RuntimeError(f"selected runtime install lacks Timer/Audio roots: {due}")
+            raise RuntimeError(f"selected runtime install lacks selected roots: {due}")
         if any(delta is None or delta <= 0 for delta in due.values()):
             self.restore()
             raise RuntimeError(f"selected runtime wrappers installed after a deadline: {due}")
@@ -1473,17 +1507,17 @@ class SelectedAdjacentDeadlineRuntimeCapture:
         event = self.gba.timing.root
         while event != MGBA_FFI.NULL and len(by_name) < TIMING_QUEUE_EVENT_LIMIT:
             name = self._event_name(event)
-            if name in self.EVENT_NAMES:
+            if name in self.event_names:
                 by_name[name] = event
             event = event.next
         by_name[TIMER0_EVENT_NAME] = MGBA_FFI.addressof(
             self.gba.timers[0], "event"
         )
         by_name["GBA DMA"] = MGBA_FFI.addressof(self.gba.memory, "dmaEvent")
-        missing = set(self.EVENT_NAMES) - set(by_name)
+        missing = set(self.event_names) - set(by_name)
         if missing:
             raise RuntimeError(f"selected runtime wrapper events missing: {sorted(missing)}")
-        for name in self.EVENT_NAMES:
+        for name in self.event_names:
             event = by_name[name]
             original = event.callback
 
@@ -1535,6 +1569,7 @@ class SelectedAdjacentDeadlineRuntimeCapture:
         after = snapshot_runtime_scheduler_hardware(self.oracle, timing)
         record["exit"] = after
         self.timeline.append(record)
+        self.first_record_by_name.setdefault(name, record)
 
         if name == TIMER0_EVENT_NAME:
             if self.timer_record is not None:
@@ -1588,6 +1623,15 @@ class SelectedAdjacentDeadlineRuntimeCapture:
                 "selected runtime deadline/order mismatch: "
                 f"Timer={timer_due}@{timer_index} Audio={audio_due}@{audio_index}"
             )
+        root_indexes = [
+            self.timeline.index(self.first_record_by_name[name])
+            for name in self.spec.deadline_order
+        ]
+        if root_indexes != sorted(root_indexes):
+            raise RuntimeError(
+                "selected runtime root order mismatch: "
+                f"expected={self.spec.deadline_order} indexes={root_indexes}"
+            )
         if requested != [1, 2] or self.completion_order != [1, 2]:
             raise RuntimeError(
                 f"selected runtime DMA mismatch: requested={requested} "
@@ -1619,7 +1663,7 @@ class SelectedAdjacentDeadlineRuntimeCapture:
             })
         return {
             "installState": self.install_state,
-            "deadlineOrder": [TIMER0_EVENT_NAME, "GBA Audio Sample"],
+            "deadlineOrder": list(self.spec.deadline_order),
             "audioTimerDeadlineDelta": audio_due - timer_due,
             "requestOrder": [
                 {"fifo": "a", "dmaChannel": 1},
@@ -1632,6 +1676,10 @@ class SelectedAdjacentDeadlineRuntimeCapture:
                 "timer0Exit": self.timer_record["exit"],
                 "audioEntry": self.audio_record["entry"],
                 "audioExit": self.audio_record["exit"],
+                **({
+                    "videoEntry": self.first_record_by_name["GBA Video"]["entry"],
+                    "videoExit": self.first_record_by_name["GBA Video"]["exit"],
+                } if "GBA Video" in self.spec.crossed_event_names else {}),
                 "afterCompletion": self.final_state,
             },
             "wrappersRestoredAfterSequence": compact_timeline[-1]["sequence"],
@@ -2137,10 +2185,11 @@ def advance_one_instrumented_frame(
     steps = 0
     while True:
         pc = oracle.core.cpu.pc
-        if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
+        if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE or TIMER0_SELECTED_EDGE_SCOUT_NAME:
+            assert SELECTED_EDGE_SPEC is not None
             selector = epoch.setdefault(
                 "timer0SelectedEdgeSelector",
-                SelectedEncryptedAccessorEdge(LILIANA_AUDIO_EDGE),
+                SelectedSourceOrderedEdge(SELECTED_EDGE_SPEC),
             )
             selected_now = selector.observe(
                 pc,
@@ -2155,15 +2204,36 @@ def advance_one_instrumented_frame(
                         "CreateMonWithEVSpreadNatureOTID"
                     )
                 ),
+                source_epoch_entry=(
+                    pc == target_entry and epoch.get("entry") is None
+                ),
             )
             if (
-                pc == GET_BOX_MON_DATA2_ENTRY_PC
-                and selector.selected_accessor_active
+                TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE
+                and pc == SELECTED_EDGE_SPEC.entry_pc
+                and selector.selected_component_active
                 and epoch.get("timer0SelectedEdgeRuntimeCapture") is None
             ):
                 epoch["timer0SelectedEdgeRuntimeCapture"] = (
-                    SelectedAdjacentDeadlineRuntimeCapture(oracle)
+                    SelectedAdjacentDeadlineRuntimeCapture(
+                        oracle, SELECTED_EDGE_SPEC
+                    )
                 )
+            if (
+                TIMER0_SELECTED_EDGE_SCOUT_NAME
+                and pc == SELECTED_EDGE_SPEC.selector_pc
+                and selector.selected_component_active
+            ):
+                scout_state = snapshot_runtime_scheduler_hardware(
+                    oracle, oracle.core._native.timing
+                )
+                epoch.setdefault("timer0SelectedEdgeScoutVisits", []).append({
+                    "instructionOccurrence": selector.selected_instruction_occurrence,
+                    "queue": [{
+                        key: event[key]
+                        for key in ("name", "priority", "deadlineDelta", "due")
+                    } for event in scout_state["queue"]],
+                })
             if selected_now:
                 capture = epoch.get("timer0SelectedEdgeRuntimeCapture")
                 if capture is None:
@@ -2743,6 +2813,18 @@ def run_fixed_fixture(raw: dict[str, Any], first_frame: int, last_frame: int) ->
 def run_liliana() -> dict[str, Any]:
     raw = load_fixture("scratch-win-go-on-swap-offer-no-guide-dismiss-probe.json")
     oracle, _, epoch, calls = run_fixed_fixture(raw, LILIANA_FIRST_FRAME, LILIANA_LAST_FRAME)
+    if TIMER0_SELECTED_EDGE_SCOUT_NAME:
+        selector = epoch.get("timer0SelectedEdgeSelector")
+        if selector is None:
+            raise RuntimeError("selected adjacent-deadline scout edge was not reached")
+        return {
+            "schema": "factory-timer0-selected-edge-scout/v1",
+            "case": "liliana",
+            "oracleProfile": "battle-scene-off",
+            "sourceFunction": "FillFactoryFrontierTrainerParty",
+            "selection": selector.summary(),
+            "visits": epoch.get("timer0SelectedEdgeScoutVisits", []),
+        }
     if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
         selector = epoch.get("timer0SelectedEdgeSelector")
         capture = epoch.get("timer0SelectedEdgeRuntimeCapture")
@@ -2846,6 +2928,31 @@ def run_factory_varied() -> dict[str, Any]:
 
     oracle2.advance = targeted_advance  # type: ignore[method-assign]
     stage_request(oracle2, raw)
+    if TIMER0_SELECTED_EDGE_SCOUT_NAME:
+        selector = epoch.get("timer0SelectedEdgeSelector")
+        if selector is None:
+            raise RuntimeError("selected adjacent-deadline scout edge was not reached")
+        return {
+            "schema": "factory-timer0-selected-edge-scout/v1",
+            "case": "factory-varied",
+            "oracleProfile": "battle-scene-off",
+            "sourceFunction": "FillFactoryFrontierTrainerParty",
+            "selection": selector.summary(),
+            "visits": epoch.get("timer0SelectedEdgeScoutVisits", []),
+        }
+    if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
+        selector = epoch.get("timer0SelectedEdgeSelector")
+        capture = epoch.get("timer0SelectedEdgeRuntimeCapture")
+        if selector is None or capture is None:
+            raise RuntimeError("selected adjacent-deadline runtime edge was not reached")
+        return {
+            "schema": "factory-timer0-selected-adjacent-runtime/v1",
+            "case": "factory-varied",
+            "oracleProfile": "battle-scene-off",
+            "sourceFunction": "FillFactoryFrontierTrainerParty",
+            "selection": selector.summary(),
+            "runtime": capture.finish(),
+        }
     if (
         RESIDUAL_18_INSTRUCTION_EVIDENCE
         or RESIDUAL_18_CLASSIFIER_EVIDENCE
@@ -3676,9 +3783,19 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE=1 is bounded to the anchor case"
         )
-    if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE and CASE != "liliana":
+    if SELECTED_EDGE_SPEC is not None and SELECTED_EDGE_SPEC.case != CASE:
         raise SystemExit(
-            "FACTORY_TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE=1 is bounded to liliana"
+            f"selected edge {SELECTED_EDGE_SPEC.name!r} requires case "
+            f"{SELECTED_EDGE_SPEC.case!r}, not {CASE!r}"
+        )
+    if (
+        TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE
+        and SELECTED_EDGE_SPEC is not None
+        and SELECTED_EDGE_SPEC.instruction_occurrence < 0
+    ):
+        raise SystemExit(
+            f"selected edge {SELECTED_EDGE_SPEC.name!r} has no pinned "
+            "instruction occurrence; run its scout first"
         )
     if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE and TIMER0_SCHEDULER_RUNTIME_EVIDENCE:
         raise SystemExit("selected and census Timer 0 runtime modes are exclusive")
@@ -3688,7 +3805,12 @@ def main() -> None:
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
+    if TIMER0_SELECTED_EDGE_SCOUT_NAME:
+        message = (
+            f"wrote {OUTPUT}: {result['case']} selected edge scout "
+            f"with {len(result['visits'])} repeated-PC visits"
+        )
+    elif TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
         message = (
             f"wrote {OUTPUT}: {result['case']} selected adjacent-deadline "
             "Timer 0 runtime window"
