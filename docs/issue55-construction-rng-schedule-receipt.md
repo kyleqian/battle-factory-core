@@ -129,6 +129,45 @@ does not inspect trainer, set, mon, frame, cursor, or receipt identity.
 CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
 VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
 
+## Recurring +18 source-boundary census (2026-08-10)
+
+The opt-in sibling mode `FACTORY_RESIDUAL_18_EVIDENCE=1` replays all three
+wrapper-validated Battle Scene OFF epochs and snapshots only exact compiled
+boundaries plus scalar CPU scheduler, IRQ, DMA, bus, and ROM-prefetch state.
+Deterministic gzip packets live under
+`tests/fixtures/factory-construction-residual-boundaries-v1/`; they retain no
+trainer/set/mon identity, RNG cursor, app tick, or duration key.
+
+Tier 1 joins them to the existing source receipts by exact master cycle and PC:
+
+| compiled segment | exact boundary PCs | +18 | clean controls |
+| --- | --- | ---: | ---: |
+| nature attempt | `0x0806d08a` → next `0x0806f5ce` or `0x08067b4e` | 11 | 267 |
+| non-final selectable Factory tail | `0x0819b614` → `0x08068636` | 1 | 8 |
+| encrypted stats accessor | `0x0806a51a` → exact caller return | 67 | 77 |
+| level-50 EXP loop only | `0x08069090` → `0x080690ac` | 3 | 8 |
+| signed divide | `0x082e7542` → exact caller return | 1 | 71 |
+| direct `GetNature` | `0x0806d072` → exact caller return | 2 | 57 |
+| **total** | | **85** | **488** |
+
+The accessor histogram remains exactly
+**0×77 / +18×67 / +117×5 / +245×6 / +263×1**. The level audit preserves the
+isolated post-accessor composition **43 + 21 + 2,200 + 18 = 2,282**.
+
+This refutes a missing fixed source instruction/refill/fetch segment: every
+compiled segment has clean siblings at the same entry and source-relative
+return class. It also finds no boundary-visible IRQ/DMA service. All **85**
+members and **488** clean controls have `activeDMA=-1`, `performingDMA=0`,
+`cpuBlocked=false`, `IF=0`, and ROM prefetch enabled. Members occupy more than
+75 distinct cycle phases, and `nextEvent-cpu.cycles` overlaps clean controls.
+
+The exact missing discriminator is therefore the instruction-to-instruction
+scheduler event crossed *inside* each span: its timing-event identity/queue
+state immediately before and after the 18-cycle increment. Endpoint evidence
+cannot yet distinguish (b) prefetch/bus overlap from (c) a non-IRQ
+asynchronous PPU/timer/audio service that completes before return. No reducer
+or +18 constant lands; all accessor/clock cycle contracts stay null/unwired.
+
 ### Non-final outer-loop component (2026-08-10)
 
 `reduceFactoryOuterLoopTiming` covers every non-final

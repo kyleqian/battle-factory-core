@@ -126,6 +126,12 @@ CALCULATE_MON_STATS_EVIDENCE = (
 EWRAM_ACCESS_EVIDENCE = (
     os.environ.get("FACTORY_EWRAM_ACCESS_EVIDENCE") == "1"
 )
+# Separate scalar/source-relative packet for the recurring +18-cycle residual
+# audit.  This decorates already-selected source boundaries only; it does not
+# retain a trainer/set/mon identity or turn the observation into a timing key.
+RESIDUAL_18_EVIDENCE = (
+    os.environ.get("FACTORY_RESIDUAL_18_EVIDENCE") == "1"
+)
 
 # mGBA exposes executing Thumb PC + 2. `nextPc` is the immediately following
 # instruction boundary, so the delta is the selected data instruction alone.
@@ -725,7 +731,7 @@ def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fiel
     frame_cycles = int(oracle.core.frame_cycles)
     cpu_cycles = int(oracle.core.cpu._native.cycles)
     master_cycles = global_cycles + cpu_cycles
-    return {
+    snapshot = {
         "kind": kind,
         "frame": frame,
         "globalCycles": global_cycles,
@@ -734,6 +740,65 @@ def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fiel
         "cyclePhase": master_cycles % frame_cycles,
         "pc": f"0x{pc:08x}",
         **fields,
+    }
+    if RESIDUAL_18_EVIDENCE:
+        snapshot["executionState"] = snapshot_residual_execution_state(oracle)
+    return snapshot
+
+
+def snapshot_residual_execution_state(oracle: EmeraldOracle) -> dict[str, Any]:
+    """Capture scheduler/bus state that can distinguish a non-source stall.
+
+    All values are emulator/GBA scalar state at an exact compiled boundary.
+    No party pointer, RNG cursor, frame identity, or observed duration is kept.
+    """
+    cpu = oracle.core.cpu._native
+    gba = oracle.core._native
+    memory = gba.memory
+    return {
+        "cpu": {
+            "cycles": int(cpu.cycles),
+            "nextEvent": int(cpu.nextEvent),
+            "cpsr": int(cpu.cpsr.packed),
+            "executionMode": int(cpu.executionMode),
+            "privilegeMode": int(cpu.privilegeMode),
+            "halted": int(cpu.halted),
+            "prefetch": [int(cpu.prefetch[0]), int(cpu.prefetch[1])],
+        },
+        "gba": {
+            "performingDma": int(gba.performingDMA),
+            "springIrq": int(gba.springIRQ),
+            "cpuBlocked": bool(gba.cpuBlocked),
+            "dmaPc": int(gba.dmaPC),
+        },
+        "memory": {
+            "activeRegion": int(memory.activeRegion),
+            "prefetchEnabled": bool(memory.prefetch),
+            "lastPrefetchedPc": int(memory.lastPrefetchedPc),
+            "activeDma": int(memory.activeDMA),
+            "dmaTransferRegister": int(memory.dmaTransferRegister),
+            "dma": [
+                {
+                    "control": int(channel.reg),
+                    "source": int(channel.source),
+                    "destination": int(channel.dest),
+                    "count": int(channel.count),
+                    "nextSource": int(channel.nextSource),
+                    "nextDestination": int(channel.nextDest),
+                    "nextCount": int(channel.nextCount),
+                    "when": int(channel.when),
+                }
+                for channel in memory.dma
+            ],
+        },
+        "interrupt": {
+            "ie": oracle.read_u16(0x04000200),
+            "if": oracle.read_u16(0x04000202),
+            "ime": oracle.read_u16(0x04000208),
+            "dispstat": oracle.read_u16(0x04000004),
+            "vcount": oracle.read_u16(0x04000006),
+            "waitcnt": oracle.read_u16(0x04000204),
+        },
     }
 
 
@@ -887,9 +952,13 @@ def observe_calculate_mon_stats_call(
         return_pc = int(active["returnPc"], 16)
         if pc in {return_pc, return_pc + 2}:
             completed = dict(active)
-            completed["returnMasterCycles"] = cycle_snapshot(
+            return_snapshot = cycle_snapshot(
                 oracle, frame, pc, "calculate-mon-stats-direct-return",
-            )["masterCycles"]
+            )
+            completed["returnMasterCycles"] = return_snapshot["masterCycles"]
+            if RESIDUAL_18_EVIDENCE:
+                completed["returnCyclePhase"] = return_snapshot["cyclePhase"]
+                completed["returnExecutionState"] = return_snapshot["executionState"]
             completed["returnPcObserved"] = f"0x{pc:08x}"
             if active["operation"] != "set-mon-data":
                 completed["result"] = cpu_gpr(oracle, 0)
@@ -912,6 +981,9 @@ def observe_calculate_mon_stats_call(
         return
     if epoch.get("calculateMonStatsActiveCall") is not None:
         raise RuntimeError("nested direct CalculateMonStats observation")
+    entry_snapshot = cycle_snapshot(
+        oracle, frame, pc, "calculate-mon-stats-direct-entry",
+    )
     epoch["calculateMonStatsActiveCall"] = {
         "monIndex": epoch.get("calculateMonStatsActiveMonIndex"),
         "operation": operation,
@@ -919,11 +991,12 @@ def observe_calculate_mon_stats_call(
         "callPc": f"0x{call_pc:08x}",
         "entryPc": f"0x{pc:08x}",
         "returnPc": f"0x{(oracle.core.cpu.lr & ~1):08x}",
-        "entryMasterCycles": cycle_snapshot(
-            oracle, frame, pc, "calculate-mon-stats-direct-entry",
-        )["masterCycles"],
+        "entryMasterCycles": entry_snapshot["masterCycles"],
         "arguments": calculate_mon_stats_call_arguments(operation, oracle),
     }
+    if RESIDUAL_18_EVIDENCE:
+        epoch["calculateMonStatsActiveCall"]["entryCyclePhase"] = entry_snapshot["cyclePhase"]
+        epoch["calculateMonStatsActiveCall"]["entryExecutionState"] = entry_snapshot["executionState"]
 
 
 def symbols(elf: Path) -> list[tuple[int, str]]:
@@ -1762,6 +1835,65 @@ def compact_calculate_mon_stats_receipt(result: dict[str, Any]) -> dict[str, Any
     }
 
 
+def compact_residual_18_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Retain only exact source boundaries and hardware execution state."""
+    compact_stats = compact_calculate_mon_stats_receipt(result)
+    def compact_boundary(event: dict[str, Any]) -> dict[str, Any]:
+        return {
+            key: event[key]
+            for key in (
+                "kind", "masterCycles", "cyclePhase", "pc", "returnPc",
+                "interruptIndex", "executionState",
+            )
+            if key in event
+        }
+
+    source_kinds = {
+        "construction-entry",
+        "personality-random",
+        "personality-attempt-check",
+        "create-mon-entry",
+        "factory-post-mon-end",
+        "vblank-entry",
+        "vblank-resume",
+    }
+    boundaries = []
+    for event in result["cycleEvidence"]["events"]:
+        if event["kind"] not in source_kinds:
+            continue
+        boundaries.append(compact_boundary(event))
+    direct_calls = []
+    for call in compact_stats["directCalls"]:
+        row = {
+            key: call[key]
+            for key in (
+                "operation", "callPc", "entryPc", "returnPc",
+                "returnPcObserved", "entryMasterCycles", "returnMasterCycles",
+                "entryCyclePhase", "returnCyclePhase", "entryExecutionState",
+                "returnExecutionState",
+            )
+            if key in call
+        }
+        if "boundaries" in call:
+            row["boundaries"] = {
+                name: compact_boundary(boundary)
+                for name, boundary in call["boundaries"].items()
+            }
+        if "asyncService" in call:
+            row["asyncService"] = [compact_boundary(event) for event in call["asyncService"]]
+        direct_calls.append(row)
+    return {
+        "schema": "factory-construction-residual-boundaries/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "frameCycles": result["cycleEvidence"]["frameCycles"],
+        "sourceBoundaries": boundaries,
+        "interruptPauses": compact_stats["interruptPauses"],
+        "directCalls": direct_calls,
+    }
+
+
 def compact_ewram_access_receipt(result: dict[str, Any]) -> dict[str, Any]:
     """Keep clean minima and scalar/source-relative alignment classes only."""
     grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
@@ -1815,13 +1947,19 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_EWRAM_ACCESS_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
         )
+    if RESIDUAL_18_EVIDENCE and not (CYCLE_EVIDENCE and CALCULATE_MON_STATS_EVIDENCE):
+        raise SystemExit(
+            "FACTORY_RESIDUAL_18_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
+        )
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if EWRAM_ACCESS_EVIDENCE:
+    if RESIDUAL_18_EVIDENCE:
+        result = compact_residual_18_receipt(result)
+    elif EWRAM_ACCESS_EVIDENCE:
         result = compact_ewram_access_receipt(result)
     elif CALCULATE_MON_STATS_EVIDENCE:
         result = compact_calculate_mon_stats_receipt(result)
@@ -1834,6 +1972,9 @@ def main() -> None:
     print(
         (
             f"wrote {OUTPUT}: {result['case']} "
+            f"{len(result['sourceBoundaries'])} residual-audit source boundaries"
+            if RESIDUAL_18_EVIDENCE
+            else f"wrote {OUTPUT}: {result['case']} "
             f"{len(result['rows'])} compact EWRAM boundaries"
             if EWRAM_ACCESS_EVIDENCE
             else f"wrote {OUTPUT}: {result['case']} "

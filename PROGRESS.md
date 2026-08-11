@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1104 — [MAIN worker, 2026-08-10] **#55 recurring +18 class censused; reducer not proven**
+
+- **State:** #55 remains open; accessor/dependency `cycles` stay `null` and
+  the construction clock stays unwired. Focused union **38/38** is green;
+  smoke/typecheck/full-suite/build verification is in progress.
+- **Did:** three wrapper-validated OFF packets census all **85** known +18
+  joins by exact source PCs and scalar scheduler/IRQ/DMA/prefetch state:
+  nature **11**, Factory tail **1**, accessor **67**, level **3**, divide **1**,
+  and `GetNature` **2**, against **488** clean controls. A fixed compiled
+  segment is refuted; endpoint hardware/prefetch state does not discriminate.
+- **Next:** if #55 continues, instrument the exact instruction-to-instruction
+  increment and timing-event queue identity; do not fit +18 or wire the clock.
+- **Notes:** accessor histogram remains **0×77/+18×67/+117×5/+245×6/+263×1**;
+  EXP/IV u32 tails and the isolated level-loop composition are preserved. No
+  production reducer, barrier, controller, presentation, or recording import.
+
 ## 1103 — [MAIN worker, 2026-08-10] **#55 synchronous GetBoxMonData outer shell closed**
 
 - **State:** implementation `8aa00042`, supervisor-corrected by `ca1c73d9`;
@@ -48,24 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   claimed. Supervisor reconciliation passed focused **25/25**, smoke
   **375/375**, typecheck, and build. No fixture import into production,
   barrier, controller, presentation, animation, or canonical Battle-2 change.
-
-## 1101 — [supervisor, 2026-08-10] **#55 MPlayMain callback residual closed**
-
-- **State:** side commits `5ca1367a`/`104a75a5`/`9130f99f` folded by
-  `a56341fb`; #55 remains open and the construction clock stays unwired.
-  Union focused **6/6**, smoke **375/375**, and production build are green;
-  the worker full suite passed **894 files / 8,484 / 1 skipped**.
-- **Did:** source/ELF-audited all **36** `gMPlayJumpTable` and **14**
-  `gXcmdTable` slots, including `ply_xcmd`/`ply_xxx` transitive edges. Two
-  fresh Scene-OFF runs per case reproduce **52/31/30 = 113** exact compact
-  v3-state/cost joins with zero unequal costs; total fixtures are **136 KB**.
-- **Next:** continue #55 with independently proven EWRAM word/halfword bus
-  timing and field tails, or one remaining bounded command-window/
-  SoundMainRAM sample-target class. Do not fit a residual or wire aggregate
-  stats, audio duration, or the live clock.
-- **Notes:** two audio dereference classes remain. No controller,
-  presentation, barrier, recording import, animation, or canonical Battle-2
-  change landed. Orient folded 31 animation commits through `11245f83`;
-  `animation-main` is now four later animation commits ahead under its own
-  supervisor and is intentionally left for the next orient. `DEFERRED.md`
-  has no open entry.

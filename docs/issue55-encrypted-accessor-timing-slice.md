@@ -195,3 +195,9 @@ accessor duration contract.
 Complete accessor `cycles` remains null only for asynchronous +18 service and
 VBlank/IRQ entry/body/return costs. No residual class is fitted or absorbed,
 and the construction clock remains unwired.
+
+The cross-component census in the construction schedule receipt now covers
+all **85** known +18 occurrences, including this accessor's **67**. Exact
+endpoint IRQ/DMA/prefetch state is shared with clean siblings; the missing
+discriminator is the intra-span scheduler-event identity at the individual
+instruction increment, so this component's cycle contract remains null.

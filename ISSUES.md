@@ -1277,6 +1277,18 @@ live construction clock. Complete stats/accessor timing remains null and
 unwired; no identity/duration table or residual fit landed. Detailed
 accounting is in `docs/issue55-encrypted-accessor-timing-slice.md`.
 
+**Recurring +18 census (2026-08-10):** wrapper-validated OFF packets now join
+all **85** occurrences by exact source PCs and scalar scheduler/IRQ/DMA/
+prefetch state: nature **11**, outer tail **1**, encrypted accessor **67**,
+level loop **3**, divide **1**, and `GetNature` **2**, against **488** clean
+same-component controls. A missing fixed compiled segment is refuted. Both
+groups have no active DMA, IF, or CPU block and have ROM prefetch enabled;
+phases vary and scheduler distance overlaps. The exact missing discriminator
+is the intra-span instruction timing-event identity/queue state, needed to
+separate execution-context overlap from non-IRQ asynchronous service. No +18
+reducer landed; the accessor histogram stays
+**0×77/+18×67/+117×5/+245×6/+263×1** and both cycle contracts stay null.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured
