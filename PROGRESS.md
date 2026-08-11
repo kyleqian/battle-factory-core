@@ -21,8 +21,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   separately source-proven clock components; do not aggregate or wire yet.
 - **Notes:** orient folded animation-main through `77e3d325`; later animation
   commits remain owned by the active animation supervisor. Combined focused
-  SetBox/DMA/m4a union **29/29** is green; each lane independently passed
-  smoke, typecheck, full `npm test`, and build. Final union gates follow below.
+  SetBox/DMA/m4a union **29/29** is green. Final union: `npm test` **918 files /
+  8,607 passed / 1 skipped** (**110.25s**), build **631 modules** (**6.58s**),
+  vanilla soak **20/20** (**34.3s**) and full-policy soak **60/60**
+  (**294.3s**), both with **0 crash / 0 hang**. OFF oracle is healthy.
 
 ## 1123 — [MAIN worker, 2026-08-11] **#55 encrypted construction writes reduced**
 
