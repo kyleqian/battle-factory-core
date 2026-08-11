@@ -853,6 +853,7 @@ export interface SceneOnPresentationBattler {
     | "HITMONCHAN"
     | "HITMONTOP"
     | "SPINDA"
+    | "TAUROS"
     | "LINOONE"
     | "DELCATTY"
     | "VIGOROTH"
