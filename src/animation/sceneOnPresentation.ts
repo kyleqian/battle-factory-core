@@ -865,6 +865,7 @@ export interface SceneOnPresentationBattler {
     | "GLALIE"
     | "HITMONCHAN"
     | "HITMONTOP"
+    | "NIDORINA"
     | "SPINDA"
     | "TAUROS"
     | "LINOONE"
@@ -6889,7 +6890,7 @@ export function sceneOnThrashView(
 }
 
 export function sceneOnDoubleKickView(
-  state: SceneOnMovePresentationState<SceneOnDoubleKickConfig>,
+  state: SceneOnMovePresentationState,
 ): SceneOnDoubleKickView {
   if (state.config.move !== "DOUBLE_KICK") {
     throw new Error(`expected DOUBLE_KICK presentation, got ${state.config.move}`);
