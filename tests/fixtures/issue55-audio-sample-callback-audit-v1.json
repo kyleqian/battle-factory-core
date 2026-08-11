@@ -1,0 +1,318 @@
+{
+  "schema": "issue55-audio-sample-callback-audit/v1",
+  "scope": "mGBA 0.10.5 source and three committed Battle Scene OFF Audio-co-due Timer 0 rows; no callback-duration or runtime-graph claim",
+  "release": {
+    "url": "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
+    "sha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14",
+    "archiveRoot": "mgba-0.10.5",
+    "oracleProfile": "battle-scene-off"
+  },
+  "source": {
+    "files": [
+      {
+        "path": "src/core/timing.c",
+        "sha256": "f1290a60ea28cce32ef54c383397b2e2beff852dc02f8d44a69ef78ca7989d51"
+      },
+      {
+        "path": "src/gba/gba.c",
+        "sha256": "92b0fd214bfa563a1694921661c4413ffd96871cd6162cd762542fb5c2a2c098"
+      },
+      {
+        "path": "src/gba/timer.c",
+        "sha256": "318054f31c767090b907fe2a32f65f878a702e339468c727a54c6f2b865b83f2"
+      },
+      {
+        "path": "src/gba/audio.c",
+        "sha256": "32f8067d09c80b3e77bedc16d52f16a3b4ee7ba099a6cd24e8d5cc8579729a7c"
+      },
+      {
+        "path": "src/gba/core.c",
+        "sha256": "57cc9ac807357a5bf27a5e44aec83e3e0696e7be41bddf26ac4f653aa23fc723"
+      },
+      {
+        "path": "src/gba/extra/audio-mixer.c",
+        "sha256": "3bb8ab8b95f07545c6d91cf2a995410b73cb92ab7ccecc677b032c0bc6247f48"
+      }
+    ],
+    "anchors": [
+      {
+        "id": "timing-order",
+        "file": "src/core/timing.c",
+        "lines": "36-59"
+      },
+      {
+        "id": "timing-dispatch",
+        "file": "src/core/timing.c",
+        "lines": "96-117"
+      },
+      {
+        "id": "timer0-registration",
+        "file": "src/gba/timer.c",
+        "lines": "66-84"
+      },
+      {
+        "id": "timer0-fifo-owner",
+        "file": "src/gba/timer.c",
+        "lines": "13-43"
+      },
+      {
+        "id": "audio-registration",
+        "file": "src/gba/audio.c",
+        "lines": "26-38"
+      },
+      {
+        "id": "audio-fifo-helper",
+        "file": "src/gba/audio.c",
+        "lines": "327-374"
+      },
+      {
+        "id": "audio-mixer-branches",
+        "file": "src/gba/audio.c",
+        "lines": "386-437"
+      },
+      {
+        "id": "audio-sample-callback",
+        "file": "src/gba/audio.c",
+        "lines": "439-482"
+      },
+      {
+        "id": "optional-hle-config",
+        "file": "src/gba/core.c",
+        "lines": "634-642"
+      },
+      {
+        "id": "builtin-mixer-registration",
+        "file": "src/gba/extra/audio-mixer.c",
+        "lines": "21-27"
+      },
+      {
+        "id": "builtin-mixer-step",
+        "file": "src/gba/extra/audio-mixer.c",
+        "lines": "256-297"
+      }
+    ]
+  },
+  "inputReceipts": [
+    {
+      "path": "tests/fixtures/factory-construction-timer0-fifo-v1/anchor.json",
+      "sha256": "fec13d6140e667f4389eb29e1a659dc0c807f3b3393b2ce9bf85953a01c31c01"
+    },
+    {
+      "path": "tests/fixtures/factory-construction-timer0-fifo-v1/liliana.json",
+      "sha256": "aa21be0d7b6379a4a0ca0caaca8297dc0f27a9c789f8184b3e61c3bc5e464aff"
+    },
+    {
+      "path": "tests/fixtures/factory-construction-timer0-fifo-v1/factory-varied.json",
+      "sha256": "0228b67250968d4a02f71bc1ad7670642918be9a6d25e8a166c6aa96a90666cf"
+    },
+    {
+      "path": "tests/fixtures/factory-timer0-reachability-audit-v1.json",
+      "sha256": "b8fa71769ea3af15574b0c8b87723dbfbe7af719c6ab298b5c195a907ee1bb72"
+    }
+  ],
+  "exactSourceFacts": {
+    "registration": {
+      "audioSample": {
+        "name": "GBA Audio Sample",
+        "priority": 24,
+        "intervalMasterCycles": 1024
+      },
+      "timer0": {
+        "name": "GBA Timer 0",
+        "priority": 32,
+        "periodMasterCycles": 1254
+      },
+      "equalDeadlineOrder": "lower numeric priority runs first; therefore Audio Sample precedes Timer 0 when their absolute deadlines are equal"
+    },
+    "callback": {
+      "correctedDeadline": "_sample calls GBAAudioSample at mTimingCurrentTime - cyclesLate, the callback's original due time D",
+      "directMutation": [
+        "mixes PSG and current direct-sound staging into currentSamples",
+        "fills both FIFO staging sample arrays from their final current value",
+        "updates blip/output state and may set earlyExit when mCoreSyncProduceAudio reports interruption"
+      ],
+      "directTimingEffect": "_sample directly schedules only its own GBA Audio Sample event with SAMPLE_INTERVAL - cyclesLate, preserving D + 1024",
+      "noDirectFifoDmaOrIrq": "_sample does not directly call GBAAudioSampleFIFO, GBADMASchedule, or GBARaiseIRQ; Timer 0 owns FIFO consumption and custom FIFO-DMA requests"
+    },
+    "mixingBranches": {
+      "mixerPointer": "GBAAudioSample calls mixer->step only when audio->mixer is non-null",
+      "externalMixing": "when externalMixing is false, direct-sound A/B contributions are added subject to their force-disable/output flags; true skips those additions",
+      "optionalBuiltinHle": "mGBA constructs the built-in MP2K mixer only for nonzero gba.audioHle; its _mp2kStep source contains no mTimingSchedule, GBADMASchedule, GBAAudioSampleFIFO, or GBARaiseIRQ call",
+      "indirectBoundary": "mixer->step and stream postAudioFrame/postAudioBuffer are function-pointer paths; this receipt does not claim their transitive behavior for unobserved host configuration"
+    }
+  },
+  "constructionEpochState": {
+    "priorExactRuntimeWindows": {
+      "count": 2,
+      "audioEnabled": true,
+      "mixerPresent": false,
+      "externalMixing": false
+    },
+    "scopedExclusions": {
+      "mixerPresent": "not an oracle game path; optional emulator gba.audioHle component only",
+      "audioDisabled": "not reachable in the audited post-boot Factory construction epoch; SOUNDCNT_X is enabled and runtime receipts agree",
+      "externalMixing": "with the audited oracle mixer absent, the optional external-mixing bypass is excluded for the construction epoch"
+    },
+    "perRowBoundary": "The three compact FIFO rows do not capture audio.mixer, externalMixing, stream, sync, PSG, or output-route fields; their callback duration and those row-specific branch outcomes remain unobserved."
+  },
+  "naturalAudioCoDueRows": [
+    {
+      "case": "liliana",
+      "component": "encrypted-accessor",
+      "ordinal": 23,
+      "coDueEventNames": [
+        "GBA Audio Sample"
+      ],
+      "observedEdgeCycles": 20,
+      "dueOrderByDeadlineThenPriority": [
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "audioTimerDeadlineDelta": 1,
+      "audioReschedule": {
+        "beforeWhenDelta": 0,
+        "afterWhenDelta": 1004,
+        "expectedAfterWhenDelta": 1004
+      },
+      "timerReschedule": {
+        "beforeWhenDelta": -1,
+        "afterWhenDelta": 1233,
+        "expectedAfterWhenDelta": 1233
+      },
+      "fifoAndDma": {
+        "wordLevels": [
+          3,
+          3
+        ],
+        "wordLevelsAfter": [
+          7,
+          7
+        ],
+        "internalRemaining": [
+          3,
+          3
+        ],
+        "internalRemainingAfter": [
+          2,
+          2
+        ],
+        "dmaNextCounts": [
+          0,
+          0
+        ],
+        "dmaNextCountsAfter": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "case": "factory-varied",
+      "component": "get-nature",
+      "ordinal": 12,
+      "coDueEventNames": [
+        "GBA Audio Sample"
+      ],
+      "observedEdgeCycles": 20,
+      "dueOrderByDeadlineThenPriority": [
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "audioTimerDeadlineDelta": 1,
+      "audioReschedule": {
+        "beforeWhenDelta": -4,
+        "afterWhenDelta": 1000,
+        "expectedAfterWhenDelta": 1000
+      },
+      "timerReschedule": {
+        "beforeWhenDelta": -5,
+        "afterWhenDelta": 1229,
+        "expectedAfterWhenDelta": 1229
+      },
+      "fifoAndDma": {
+        "wordLevels": [
+          3,
+          3
+        ],
+        "wordLevelsAfter": [
+          7,
+          7
+        ],
+        "internalRemaining": [
+          3,
+          3
+        ],
+        "internalRemainingAfter": [
+          2,
+          2
+        ],
+        "dmaNextCounts": [
+          0,
+          0
+        ],
+        "dmaNextCountsAfter": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "case": "factory-varied",
+      "component": "nature-attempt",
+      "ordinal": 63,
+      "coDueEventNames": [
+        "GBA Video",
+        "GBA Audio Sample"
+      ],
+      "observedEdgeCycles": 20,
+      "dueOrderByDeadlineThenPriority": [
+        "GBA Video",
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "audioTimerDeadlineDelta": 1,
+      "audioReschedule": {
+        "beforeWhenDelta": -5,
+        "afterWhenDelta": 999,
+        "expectedAfterWhenDelta": 999
+      },
+      "timerReschedule": {
+        "beforeWhenDelta": -6,
+        "afterWhenDelta": 1228,
+        "expectedAfterWhenDelta": 1228
+      },
+      "fifoAndDma": {
+        "wordLevels": [
+          3,
+          3
+        ],
+        "wordLevelsAfter": [
+          7,
+          7
+        ],
+        "internalRemaining": [
+          3,
+          3
+        ],
+        "internalRemainingAfter": [
+          2,
+          2
+        ],
+        "dmaNextCounts": [
+          0,
+          0
+        ],
+        "dmaNextCountsAfter": [
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "explicitBoundary": [
+    "Co-due means the events crossed within one observed instruction edge. In all three rows Audio Sample is due one master cycle after Timer 0, so none is an exact Audio/Timer equal-deadline observation.",
+    "The source equal-deadline priority rule is conditional only: it proves Audio Sample would precede Timer 0 at one exact shared deadline, not that it did so in these three adjacent-deadline rows.",
+    "The before/after receipts validate both periodic reschedules and paired FIFO/DMA end state, but do not expose a per-callback execution graph, callback duration, mixer state per row, or host callback outcome.",
+    "This audit supplies no service-cost constant, does not use an absolute fixture lookup, and must not wire the construction clock."
+  ]
+}
