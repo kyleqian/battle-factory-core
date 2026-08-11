@@ -12,6 +12,9 @@
 //!   citation).
 
 pub mod gen_tables;
+pub mod gender;
+pub mod mon_construction;
 pub mod rental_data;
 pub mod rental_generation;
 pub mod rng;
+pub mod stats;

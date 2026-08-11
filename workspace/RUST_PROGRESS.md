@@ -13,7 +13,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   on as of M1), wasm artifact 40,034 B, parity specs 363/363 both
   default and POKEBENCH_ENGINE=wasm, full npm test 949 files / 9,046
   passed / 1 pre-existing skip (worker-run on identical fold content).
-  M3c (mon-construction data groundwork) dispatched as a bonus step.
+  **M3c (mon-construction data groundwork) is also folded:** codegen
+  extended additively (FRONTIER_MONS moves+ev_flags, MOVE_PP 355,
+  held-item hold effects, SPECIES 376 rows with base
+  stats/gender/abilities/exp@50, NATURE_MODIFIERS) plus stats/gender/
+  shiny/EV helper ports — 52 native tests, idempotent, supervisor
+  re-verified row samples (LUDICOLO species row + entries[400]
+  moves/ev-mask) against the JSON independently. SPECIES is deliberately
+  scoped to the 376 frontier-referenced species (25 SPECIES_OLD_UNOWN_*
+  rows lack exp entries; check verified: 0 referenced species missing).
+  M3d (createFactoryCorpusPartyMember port + boundary + parity)
+  dispatched as the session's last port step.
   - **M3a:** `core-rs/tools/gen-data.mjs` codegen → checked-in
     `gen_tables.rs` (882 frontier mons, 63 held items, 411
     species-second-ability, 25 natures, round policy), deterministic +
