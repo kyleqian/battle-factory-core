@@ -1334,6 +1334,26 @@ JSON outputs were byte-identical. Receipt and exact exception queue distances:
 classification". The source-derived scheduler/cost registration is the next
 step; production clock wiring remains out of this evidence commit.
 
+**Timer 0 cadence phase and pure registration (2026-08-10):** a separate
+wrapper-mediated Battle Scene OFF receipt now snapshots Timer 0 registers,
+`timing.globalCycles + cpu.cycles`, and the named queue event's relative due
+time at **924** source boundaries across anchor/LILIANA/legal varied. All rows
+show `TM0CNT_L=0xFB1A`, `TM0CNT_H=0x0080`, `GBA Timer 0`, priority **32**, and
+deduplicated due times separated by exact **1,254** master-cycle multiples.
+The source-entry first-due distances are **276 / 403 / 1,145**, so phase is
+not source-general and is retained as an explicit seed/unknown rather than a
+fixture fit. Fresh repeats are byte-identical; hashes and the reproduction
+contract are in `docs/issue55-construction-rng-schedule-receipt.md`.
+
+`factoryConstructionClock.ts` now registers the smallest pure cadence state:
+source-derived reload/prescale/period defaults, enabled/unseeded initialization,
+explicit-seed enable, disable/reload guards, late-dispatch phase preservation,
+multiple crossed-period advancement, and `serviceCostMasterCycles: null`.
+Only source-derived m4a reload rates are accepted; unmodeled rates fail
+loudly. This remains deliberately unwired: no `runFactoryConstructionClock`
+change, no accessor/operation `cycles` population, no 18-cycle cost, and no
+co-due Video/Audio collapse.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured

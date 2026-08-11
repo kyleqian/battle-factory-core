@@ -272,6 +272,53 @@ Use `liliana` or `factory-varied` for the other cases. This is evidence for a
 source-derived Timer 0 scheduler/cost registration in the next step; it does
 not wire the construction clock or claim that co-due service is free.
 
+## Timer 0 cadence and construction-entry phase (2026-08-10)
+
+The separate opt-in `FACTORY_TIMER0_CADENCE_EVIDENCE=1` path decorates only
+the source-function entry, each construction/nature/random boundary, the
+CreateMon/EV/stat/post-mon boundaries, and the source-function return. Each
+row records `timing.globalCycles`, `cpu.cycles`, their sum, `TM0CNT_L`,
+`TM0CNT_H`, and the named `GBA Timer 0` queue event as a signed relative due
+distance. It retains no absolute queue `when` or pointer.
+
+The compact packets are committed under
+`tests/fixtures/factory-construction-timer0-cadence-v1/` and are generated
+from the Battle Scene OFF wrapper. Fresh independent repeats are byte-identical
+for all three cases:
+
+| case | source function | boundary rows | SHA-256 | source-entry → first due |
+| --- | --- | ---: | --- | ---: |
+| anchor | `CreateFrontierFactorySelectableMons` | 407 | `89b8e8310de0bf88826befb5f50bc7020bd927a95883ce4ede11ec1ee0510368` | 276 |
+| LILIANA | `FillFactoryFrontierTrainerParty` | 191 | `a6f6ea437379e79cfd80680415c6c1c9dd445e9711cba314d64a228163bd3a82` | 403 |
+| legal varied | `FillFactoryFrontierTrainerParty` | 326 | `fa660a9cdd05b1ec2df579c3d70608737a10d632652cd6b4282c925adc653d3f` | 1,145 |
+
+All **924/924** retained rows show `TM0CNT_L=0xFB1A`, `TM0CNT_H=0x0080`,
+queue name **`GBA Timer 0`**, and priority **32**. Deduplicated absolute due
+times in every packet advance by positive integral multiples of **1,254**
+master cycles. The three first-due distances differ, so the first due phase
+is **not source-general**; it remains a bounded unknown that production must
+receive as an explicit proven seed. No per-fixture phase is promoted into the
+engine.
+
+The pure registration in `src/engine/factoryConstructionClock.ts` therefore
+starts enabled with `nextDueMasterCycle: null` when no seed is proven, accepts
+an explicit seed on enable, advances late dispatches from the due time (not
+from dispatch time), and exposes `serviceCostMasterCycles: null`. It does not
+wire `scheduleFactoryConstruction`, assign the observed 18-cycle service, or
+collapse co-due Video/Audio events.
+
+Reproduce a case with:
+
+```sh
+FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+FACTORY_TIMER0_CADENCE_EVIDENCE=1 \
+  python3 tools/run-mgba-probe.py /tmp/fresh.json -- \
+  python3 tools/probe/trace-factory-construction-rng.py /tmp/fresh.json anchor
+```
+
+Use `liliana` or `factory-varied` for the other two cases. The wrapper accepts
+the known teardown SIGSEGV only after the compact JSON has been written.
+
 ## Recurring +18 source-boundary census (2026-08-10)
 
 The opt-in sibling mode `FACTORY_RESIDUAL_18_EVIDENCE=1` replays all three

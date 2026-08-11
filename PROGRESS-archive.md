@@ -40528,3 +40528,18 @@ both verify scripts/census independently re-verified before this entry.)*
   `animation-main` is now four later animation commits ahead under its own
   supervisor and is intentionally left for the next orient. `DEFERRED.md`
   has no open entry.
+## 1107–1104 — entries moved from the live ledger (2026-08-10)
+
+The former live entries recorded the independent #55 audit/soak verification,
+the failed first queue-walk attempt, the residual census, and the all-85
+instruction/event classification lead-in. Their detailed history remains in
+git; the current live ledger keeps the three load-bearing entries only.
+
+- **1107:** verified full-suite/build and soak gates, audited #55 discipline,
+  and documented the initial `mTiming.root` exit-139 blocker.
+- **1106:** added the bounded matched `__divsi3(9300,100)` / `11300,100`
+  instruction trace; no semantic event identity was claimed at that point.
+- **1105:** verified all 85 +18 members against 488 clean controls without
+  fitting a reducer or wiring the clock.
+- **1104:** censused the source components and refuted a fixed compiled segment;
+  accessor histogram remained `0×77/+18×67/+117×5/+245×6/+263×1`.

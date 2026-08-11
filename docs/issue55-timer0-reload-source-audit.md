@@ -2,8 +2,9 @@
 
 This is a source/ELF checkpoint for the Battle-Scene-OFF Factory
 construction clock. It derives only the cadence of the timing event identified
-by the queue receipt; it does not add a clock, an event queue, an audio model,
-or a Timer 0 service-cost constant.
+by the queue receipt; the pure cadence registration is intentionally separate
+from live construction-clock wiring, event-queue emulation, audio modeling,
+and Timer 0 service-cost pricing.
 
 ## Result
 
@@ -123,6 +124,7 @@ type FactoryTimer0Cadence = {
   prescaleBits: number;           // Factory default: 0
   periodMasterCycles: number;     // Factory default: 1_254
   nextDueMasterCycle: number | null;
+  serviceCostMasterCycles: null;  // unresolved callback/DMA cost
 };
 ```
 
@@ -137,25 +139,24 @@ continuing with 1,254 cycles after an unmodeled m4a frequency change.
 
 This state is sufficient to identify *when* a Timer 0 event is due. It is
 not sufficient to price it. In particular, do not put `18` in the state or
-in a recurrence: the one observed `+18` window establishes event identity
-only. The Timer callback's FIFO and DMA behavior, its host service cost, and
+in a recurrence: the observed `+18` windows establish event identity only.
+The Timer callback's FIFO and DMA behavior, its host service cost, and
 whether that cost is invariant across the 85 joins remain separate evidence
 requirements.
 
 ## Bounded unknown and next observable
 
 Source proves the period but not the Factory epoch's absolute phase. The
-final enable follows a VCOUNT-159 wait, and the construction receipts do not
-yet record the master cycle of that enable or the Timer 0 `when` field at
-construction-clock entry. Do not infer it from the lone `+18` result.
-
-The next admissible observable is a non-mutating timing-queue/register
-snapshot at construction-clock entry that records `TM0CNT_L`, `TM0CNT_H`, and
-the `GBA Timer 0` event's `when` value (or, equivalently, the final-enable
-master cycle). A second snapshot one or more overflows later must differ by
-an integral multiple of 1,254. Only then can a main-lane event registration
-seed `nextDueMasterCycle` without a fitted phase; service cost still remains
-null until independently established.
+bounded opt-in receipt in
+`tests/fixtures/factory-construction-timer0-cadence-v1/` snapshots
+`TM0CNT_L`, `TM0CNT_H`, `timing.globalCycles + cpu.cycles`, and the named
+`GBA Timer 0` event's relative due time at 924 source boundaries across
+anchor/LILIANA/varied. It proves reload `0xFB1A`, control `0x0080`, priority
+32, and exact 1,254-cycle due recurrence. The source-entry → first-due
+distances are **276 / 403 / 1,145**, respectively, so the first phase is not
+source-general and remains an explicit seed/unknown. The pure registration
+keeps `nextDueMasterCycle` null until that seed is supplied; service cost stays
+null.
 
 ## Drift guard
 
