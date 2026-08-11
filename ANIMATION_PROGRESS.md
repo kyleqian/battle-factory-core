@@ -1,3 +1,11 @@
+# MOVE_SLEEP_POWDER exact — bilateral 194/194 promotion (2026-08-11 worker)
+
+- **State:** Level-50 coverage advances **164→165/276 exact**, 0 partial, 0 staged, and **112→111 unsupported**. Only `MOVE_SLEEP_POWDER` moved; `MOVE_POISON_POWDER` remains an independent unsupported move. No boundary or unsupported barrier widened.
+- **Did:** Pinned `Move_SLEEP_POWDER` **0x082c967b..0x082c97a9** (`0x12e` bytes), `gSleepPowderParticleSpriteTemplate -> AnimMovePowderParticle_Step` with `gPowderParticlesAnimCmds`, the distinct tag/palette, and lowest Level-50 carrier set 226 `FRONTIER_MON_VENOMOTH_1`. Added complete legal HOPPIP/ONIX bilateral stages, deterministic Sleep Powder palette extraction, a pure source-identity-preserving reducer/config, narrow typed seam, and a shared Stun/Sleep powder compositor.
+- **Verified:** Twice fresh, player-back frames **380..573** and opponent-front **385..578** pass **194/194** reducer/seam/component, displayed powder latch/order, prior software→hardware OAM/matrix/palette, tags/register/audio, immutable battle state, raw RGB/change-map, and production-framebuffer gates. Player evidence/raw/map: `207ffeb9…` / `e90bba35…` / `642c7ebc…`; opponent: `f353a36c…` / `63ebdc38…` / `bd82e785…`. The independent STUN_SPORE control remains bilateral **194/194** twice fresh under the stricter portable.
+- **Next:** Supervisor selects the next independent acceptance unit. Do not promote Poison Powder from the callback identity.
+- **Notes:** Sleep Powder independently confirms, without changing `ANIMATION_LATCHES.md`, the existing powder rule: `loadspritegfx` visible at window entry, callback position at RAM+1, current displayed animation cell, and source-persistent hardware OAM order. No sleep outcome, damage, accuracy/RNG, turn/controller/round/facility state, canonical import, absolute-tick branch, or framebuffer lookup was added.
+
 # MOVE_STUN_SPORE exact — bilateral 194/194 promotion (2026-08-10 worker)
 
 - **State:** Level-50 coverage advances **163→164/276 exact**, 0 partial, 0 staged, and **113→112 unsupported**. Only `MOVE_STUN_SPORE` moved; `MOVE_SLEEP_POWDER` and `MOVE_POISON_POWDER` remain independent unsupported moves.

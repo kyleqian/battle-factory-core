@@ -614,6 +614,7 @@ import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "j
 import attractAsset from "../animation/assets/attract.json" with { type: "json" };
 import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
 import stunSporeAsset from "../animation/assets/stunSpore.json" with { type: "json" };
+import sleepPowderAsset from "../animation/assets/sleepPowder.json" with { type: "json" };
 import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
@@ -856,6 +857,7 @@ import {
   type FightCommandPresentation,
 } from "./fightCommandPresentation.ts";
 import { stunSporeParticleDrawOrderAtAge } from "../animation/stunSpore.ts";
+import { sleepPowderParticleDrawOrderAtAge } from "../animation/sleepPowder.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -997,6 +999,7 @@ import {
   sceneOnSporeView,
   sceneOnCottonSporeView,
   sceneOnStunSporeView,
+  sceneOnSleepPowderView,
   sceneOnHypnosisView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
@@ -1050,6 +1053,7 @@ import {
   type SceneOnSporePresentationState,
   type SceneOnCottonSporePresentationState,
   type SceneOnStunSporePresentationState,
+  type SceneOnSleepPowderPresentationState,
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
@@ -1924,6 +1928,9 @@ const sporeArt = sporeAsset as {
   spore: { tileset: Tileset; palette: RgbColor[] };
 };
 const stunSporeArt = stunSporeAsset as {
+  powder: { tileset: Tileset; palette: RgbColor[] };
+};
+const sleepPowderArt = sleepPowderAsset as {
   powder: { tileset: Tileset; palette: RgbColor[] };
 };
 const hypnosisArt = hypnosisAsset as {
@@ -28043,16 +28050,29 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
-  if (state.config.move === "STUN_SPORE") {
-    const stunState = state as SceneOnStunSporePresentationState;
-    const view = sceneOnStunSporeView(stunState);
+  if (
+    state.config.move === "STUN_SPORE"
+    || state.config.move === "SLEEP_POWDER"
+  ) {
+    const sleepPowder = state.config.move === "SLEEP_POWDER";
+    const powderState = state as
+      | SceneOnStunSporePresentationState
+      | SceneOnSleepPowderPresentationState;
+    const view = sleepPowder
+      ? sceneOnSleepPowderView(powderState as SceneOnSleepPowderPresentationState)
+      : sceneOnStunSporeView(powderState as SceneOnStunSporePresentationState);
     // Powder sprites are ordinary 8x16 OBJ entries. Their callbacks run
     // after the hardware OAM transfer, so the framebuffer uses the preceding
     // source-relative age while the typed seam exposes the current OAM age.
-    const displayed = sceneOnStunSporeView({
-      ...stunState,
-      age: stunState.age - 1,
-    });
+    const displayed = sleepPowder
+      ? sceneOnSleepPowderView({
+          ...(powderState as SceneOnSleepPowderPresentationState),
+          age: powderState.age - 1,
+        })
+      : sceneOnStunSporeView({
+          ...(powderState as SceneOnStunSporePresentationState),
+          age: powderState.age - 1,
+        });
     const playerToOpponent =
       view.attacker.species === "HOPPIP"
       && view.attacker.geometry.side === "player"
@@ -28065,7 +28085,7 @@ export function renderSceneOnMovePresentation(
       && view.target.geometry.side === "player";
     if (!playerToOpponent && !opponentToPlayer) {
       throw new Error(
-        `unsupported staged STUN_SPORE pair `
+        `unsupported staged ${powderState.config.move} pair `
         + `${view.attacker.species}->${view.target.species}`,
       );
     }
@@ -28086,7 +28106,9 @@ export function renderSceneOnMovePresentation(
     // latched OAM Y, retaining the source's creation order for ties. The
     // displayed reducer state is the previous source age, so its fixed-point
     // y2 is exactly the value that determines this order.
-    const powderOrder = stunSporeParticleDrawOrderAtAge(stunState.age - 1);
+    const powderOrder = (sleepPowder
+      ? sleepPowderParticleDrawOrderAtAge
+      : stunSporeParticleDrawOrderAtAge)(powderState.age - 1);
     const powderRank = new Map(powderOrder.map((slot, rank) => [slot, rank]));
     const powderParticles = displayed.particles.slice().sort(
       (a, b) => powderRank.get(a.slot)! - powderRank.get(b.slot)!,
@@ -28100,11 +28122,11 @@ export function renderSceneOnMovePresentation(
       drawSpriteSheet(
         fb,
         subTileset(
-          stunSporeArt.powder.tileset,
+          (sleepPowder ? sleepPowderArt : stunSporeArt).powder.tileset,
           (current?.animFrame ?? particle.animFrame) * 2,
           2,
         ),
-        stunSporeArt.powder.palette,
+        (sleepPowder ? sleepPowderArt : stunSporeArt).powder.palette,
         particle.x + particle.x2 - 4,
         particle.y + particle.y2 - 8,
       );
@@ -28151,7 +28173,7 @@ export function renderSceneOnMovePresentation(
     drawPlayer();
     drawOpponent();
     for (const particle of powderParticles) drawParticle(particle);
-    const profile = stunState.config.fieldProfile;
+    const profile = powderState.config.fieldProfile;
     drawSendOutHealthbox(
       fb,
       0,
@@ -28179,7 +28201,7 @@ export function renderSceneOnMovePresentation(
     drawMessageTextLines(
       fb,
       playerToOpponent ? "HOPPIP used" : "Foe HOPPIP used",
-      "STUN SPORE!",
+      sleepPowder ? "SLEEP POWDER!" : "STUN SPORE!",
       99,
     );
     return;

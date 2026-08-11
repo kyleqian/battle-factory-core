@@ -15,10 +15,10 @@ describe("MOVE_KARATE_CHOP bounded source checkpoint", () => {
     expect(output).toContain("Set 81 Mankey is below the Level-50 challenge range");
   });
 
-  it("keeps Karate Chop exact after the Stun Spore promotion", () => {
+  it("keeps Karate Chop exact after the Sleep Powder promotion", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
-      .toHaveLength(164);
+      .toHaveLength(165);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_KARATE_CHOP"))
       .toMatchObject({ move: "MOVE_KARATE_CHOP", status: "exact" });
   });

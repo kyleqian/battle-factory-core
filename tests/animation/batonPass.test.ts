@@ -72,8 +72,8 @@ describe("MOVE_BATON_PASS source-relative presentation", () => {
     expect(aipom).toMatchObject({ level: 50, nature: 7, item: 217, moves: [226, 226, 226, 226], ppUps: [0, 0, 0, 0] });
   });
 
-  it("keeps Baton Pass exact after the Stun Spore promotion", () => {
-    expect(coverage.entries).toHaveLength(164);
+  it("keeps Baton Pass exact after the Sleep Powder promotion", () => {
+    expect(coverage.entries).toHaveLength(165);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_BATON_PASS"))
       .toMatchObject([{ status: "exact" }]);
   });

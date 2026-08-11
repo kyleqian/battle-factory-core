@@ -14,13 +14,20 @@ import {
 import {
   STUN_SPORE_FRAME_COUNT,
   stunSporeAtAge,
+  stunSporeParticleDrawOrderAtAge,
   type StunSporeParticle,
 } from "../../src/animation/stunSpore.ts";
+import {
+  SLEEP_POWDER_FRAME_COUNT,
+  sleepPowderAtAge,
+  sleepPowderParticleDrawOrderAtAge,
+} from "../../src/animation/sleepPowder.ts";
 import {
   createSceneOnMovePresentation,
   sceneOnCottonSporeView,
   sceneOnSporeView,
   sceneOnStunSporeView,
+  sceneOnSleepPowderView,
   type SceneOnDragonRageFieldProfile,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
@@ -36,7 +43,8 @@ type Fixture = {
   schema:
     | "spore-portable-evidence/v1"
     | "cotton-spore-portable-evidence/v1"
-    | "stun-spore-portable-evidence/v1";
+    | "stun-spore-portable-evidence/v1"
+    | "sleep-powder-portable-evidence/v1";
   orientation: string;
   scenario: string;
   probe: string;
@@ -96,7 +104,8 @@ type Frame = {
   visualTaskCount: number;
 };
 type Probe = {
-  schema: "spore-dense-evidence/v1" | "cotton-spore-dense-evidence/v1";
+  schema: "spore-dense-evidence/v1" | "cotton-spore-dense-evidence/v1"
+    | "stun-spore-dense-evidence/v1" | "sleep-powder-dense-evidence/v1";
   sourceWindow: Window;
   lifecycleCounts: Record<string, number>;
   topology: {
@@ -174,6 +183,10 @@ function expectedStunParticle(particle: StunSporeParticle) {
   };
 }
 
+function oamU16(raw: string, byteOffset: number): number {
+  return Number.parseInt(raw.slice(byteOffset * 2 + 2, byteOffset * 2 + 4) + raw.slice(byteOffset * 2, byteOffset * 2 + 2), 16);
+}
+
 function verify(fixturePath: string, runNumber: number): void {
   const fixture = JSON.parse(
     readFileSync(resolve(fixturePath), "utf8"),
@@ -200,7 +213,11 @@ function verify(fixturePath: string, runNumber: number): void {
   const probe = JSON.parse(bytes.toString()) as Probe;
   const isCotton = fixture.schema === "cotton-spore-portable-evidence/v1";
   const isStun = fixture.schema === "stun-spore-portable-evidence/v1";
-  const frameCount = isStun
+  const isSleep = fixture.schema === "sleep-powder-portable-evidence/v1";
+  const isPowder = isSleep || isStun;
+  const frameCount = isSleep
+    ? SLEEP_POWDER_FRAME_COUNT
+    : isStun
     ? STUN_SPORE_FRAME_COUNT
     : isCotton
       ? COTTON_SPORE_FRAME_COUNT
@@ -227,9 +244,12 @@ function verify(fixturePath: string, runNumber: number): void {
       fixture.schema === "spore-portable-evidence/v1"
       || fixture.schema === "cotton-spore-portable-evidence/v1"
       || fixture.schema === "stun-spore-portable-evidence/v1"
+      || fixture.schema === "sleep-powder-portable-evidence/v1"
     )
     || probe.schema !== (
-      isStun
+      isSleep
+        ? "sleep-powder-dense-evidence/v1"
+        : isStun
         ? "stun-spore-dense-evidence/v1"
         : isCotton
           ? "cotton-spore-dense-evidence/v1"
@@ -239,25 +259,39 @@ function verify(fixturePath: string, runNumber: number): void {
     || evidence !== fixture.evidenceSha256
     || probe.frames.length !== frameCount
     || probe.lifecycleCounts[
-      isStun ? "gStunSporeParticleSpriteTemplate" : "gSporeParticleSpriteTemplate"
-    ] !== (isStun ? 15 : 9)
+      isSleep ? "gSleepPowderParticleSpriteTemplate"
+        : isStun ? "gStunSporeParticleSpriteTemplate"
+        : "gSporeParticleSpriteTemplate"
+    ] !== (isPowder ? 15 : 9)
     || !probe.topology.tasks.includes("Task_LoopAndPlaySE")
-    || (!isStun && !probe.topology.tasks.includes("Task_UpdateMonBg"))
-    || (!isStun && !probe.topology.tasks.includes("Task_ClearMonBg"))
+    || (!isPowder && !probe.topology.tasks.includes("Task_UpdateMonBg"))
+    || (!isPowder && !probe.topology.tasks.includes("Task_ClearMonBg"))
     || !probe.topology.callbacks.includes(
-      isStun ? "AnimMovePowderParticle_Step" : "AnimSporeParticle_Step",
+      isPowder ? "AnimMovePowderParticle_Step" : "AnimSporeParticle_Step",
     )
     || !fields
   ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
 
   const stage = createSceneOnMovePresentation({
-    move: isStun ? "STUN_SPORE" : isCotton ? "COTTON_SPORE" : "SPORE",
+    move: isSleep ? "SLEEP_POWDER" : isStun ? "STUN_SPORE" : isCotton ? "COTTON_SPORE" : "SPORE",
     attacker: fixture.attacker,
     target: fixture.target,
     fieldProfile: fixture.fieldProfile,
   });
   const failures: string[] = [];
   const raw = createHash("sha256");
+  const powderTemplate = isSleep
+    ? "gSleepPowderParticleSpriteTemplate"
+    : "gStunSporeParticleSpriteTemplate";
+  const powderTileBase = isPowder
+    ? Math.min(...probe.frames.flatMap((frame) => frame.sprites
+        .filter((sprite) => sprite.template.symbol === powderTemplate)
+        .map((sprite) => sprite.attr[2]! & 0x3ff)))
+    : 0;
+  const powderPalette = isPowder
+    ? probe.frames.flatMap((frame) => frame.sprites)
+        .find((sprite) => sprite.template.symbol === powderTemplate)!.attr[2]! >> 12
+    : 0;
   for (const [index, oracle] of probe.frames.entries()) {
     const rgb = readFileSync(
       join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`),
@@ -268,7 +302,13 @@ function verify(fixturePath: string, runNumber: number): void {
       continue;
     }
     const age = fixture.appStage.presentationAge + index;
-    const component = isStun
+    const component = isSleep
+      ? sleepPowderAtAge(
+          age,
+          fixture.target.geometry.side,
+          fixture.target.geometry.animationCenter,
+        )
+      : isStun
       ? stunSporeAtAge(
           age,
           fixture.target.geometry.side,
@@ -285,7 +325,13 @@ function verify(fixturePath: string, runNumber: number): void {
           fixture.target.geometry.side,
           fixture.target.geometry.animationCenter,
         );
-    const seam = isStun
+    const seam = isSleep
+      ? sceneOnSleepPowderView({
+          ...stage,
+          config: { ...stage.config, move: "SLEEP_POWDER" },
+          age,
+        })
+      : isStun
       ? sceneOnStunSporeView({
           ...stage,
           config: { ...stage.config, move: "STUN_SPORE" },
@@ -310,9 +356,11 @@ function verify(fixturePath: string, runNumber: number): void {
     } = seam;
     const sourceParticles = oracle.sprites
       .filter((sprite) => sprite.template.symbol === (
-        isStun ? "gStunSporeParticleSpriteTemplate" : "gSporeParticleSpriteTemplate"
+        isSleep ? "gSleepPowderParticleSpriteTemplate"
+          : isStun ? "gStunSporeParticleSpriteTemplate"
+          : "gSporeParticleSpriteTemplate"
       ))
-      .map((sprite) => isStun
+      .map((sprite) => isPowder
         ? {
             slot: sprite.slot,
             center: observedPowderCenter(sprite),
@@ -330,7 +378,7 @@ function verify(fixturePath: string, runNumber: number): void {
           })
       .sort((a, b) => a.slot - b.slot);
     const particlesMatch = same(
-      (isStun
+      (isPowder
         ? component.particles.map(expectedStunParticle)
         : component.particles.map(expectedParticle)
       ).sort((a, b) => a.slot - b.slot),
@@ -344,27 +392,27 @@ function verify(fixturePath: string, runNumber: number): void {
         && soundTask.data[0] === 169
         && soundTask.data[1]
           === (fixture.target.geometry.side === "opponent" ? 63 : -63)
-        && soundTask.data[2] === (isStun ? 10 : isCotton ? 18 : 16)
+        && soundTask.data[2] === (isPowder ? 10 : isCotton ? 18 : 16)
       : !soundTask;
     const monBgMatch =
-      isStun
+      isPowder
         ? !oracle.tasks.some((task) => task.func.symbol === "Task_UpdateMonBg")
         : oracle.tasks.some((task) => task.func.symbol === "Task_UpdateMonBg")
           === component.targetMonBg
           || age === (isCotton ? 202 : 205);
-    const registerMatch = !isStun && component.alpha
+    const registerMatch = !isPowder && component.alpha
       ? oracle.registers.bldcnt === 16192
         && oracle.registers.bldalpha === 2060
       : oracle.registers.bldcnt === 0;
     const tagsMatch =
-      oracle.tileTags.includes(isStun ? 10068 : 10158)
-        === (isStun ? component.stunSporeLoaded : component.sporeLoaded)
-      && oracle.paletteTags.includes(isStun ? 10068 : 10158)
-        === (isStun ? component.stunSporeLoaded : component.sporeLoaded);
+      oracle.tileTags.includes(isSleep ? 10067 : isStun ? 10068 : 10158)
+        === (isSleep ? component.sleepPowderLoaded : isStun ? component.stunSporeLoaded : component.sporeLoaded)
+      && oracle.paletteTags.includes(isSleep ? 10067 : isStun ? 10068 : 10158)
+        === (isSleep ? component.sleepPowderLoaded : isStun ? component.stunSporeLoaded : component.sporeLoaded);
     const attacker = oracle.battlers[fixture.battleState.attackerSide];
     const target = oracle.battlers[fixture.battleState.targetSide];
     const battleStateMatch =
-      attacker.species === (isStun ? 187 : isCotton ? 179 : 47)
+      attacker.species === (isPowder ? 187 : isCotton ? 179 : 47)
       && attacker.item === fixture.battleState.attackerItem
       && attacker.status1 === 0
       && target.species === 95
@@ -389,16 +437,57 @@ function verify(fixturePath: string, runNumber: number): void {
         && oracle.visualTaskCount === 0);
     const scriptMatch = oracle.scriptOffset === component.scriptOffset;
     const seamMatch = same(seamComponent, component);
+    const displayedPowder = isPowder
+      ? (isSleep ? sleepPowderAtAge : stunSporeAtAge)(
+          age - 1,
+          fixture.target.geometry.side,
+          fixture.target.geometry.animationCenter,
+        )
+      : null;
+    const drawOrder = isPowder
+      ? (isSleep ? sleepPowderParticleDrawOrderAtAge : stunSporeParticleDrawOrderAtAge)(age - 1)
+      : [];
+    const bySlot = new Map(displayedPowder?.particles.map((particle) => [particle.slot, particle]));
+    const expectedHardwarePowder = drawOrder.slice().reverse().map((slot) => {
+      const particle = bySlot.get(slot)!;
+      const current = component.particles.find((value) => value.slot === slot);
+      return {
+        center: { x: (particle.x + particle.x2) & 0x1ff, y: (particle.y + particle.y2) & 0xff },
+        tileOffset: (current?.animFrame ?? particle.animFrame) * 2,
+      };
+    });
+    const actualHardwarePowder = isPowder ? oracle.hardwareOam
+      .map((raw) => ({ attr0: oamU16(raw, 0), attr1: oamU16(raw, 2), attr2: oamU16(raw, 4) }))
+      .filter(({ attr0, attr1, attr2 }) =>
+        (attr0 >> 14) === 2 && (attr1 >> 14) === 0
+        && ((attr2 >> 10) & 3) === 2 && (attr2 >> 12) === powderPalette
+        && (attr2 & 0x3ff) >= powderTileBase && (attr2 & 0x3ff) <= powderTileBase + 14
+      )
+      .map(({ attr0, attr1, attr2 }) => ({
+        center: { x: ((attr1 & 0x1ff) + 4) & 0x1ff, y: ((attr0 & 0xff) + 8) & 0xff },
+        tileOffset: (attr2 & 0x3ff) - powderTileBase,
+      })) : [];
+    const displayLatchMatch = !isPowder || same(actualHardwarePowder, expectedHardwarePowder);
+    const previous = probe.frames[index - 1];
+    const hardwareMatch = !previous || (
+      same(oracle.hardwareOam, previous.softwareOam)
+      && same(oracle.hardwarePalette, previous.fadedPalette)
+      && previous.sprites.every((sprite) =>
+        same(oracle.hardwareMatrices[sprite.matrixNum], sprite.matrix)
+      )
+    );
     if (
       !seamMatch || !particlesMatch || !soundMatch || !monBgMatch
       || !registerMatch || !tagsMatch || !battleStateMatch || !scriptMatch
-      || diff !== 0 || !cleanup
+      || !hardwareMatch || !displayLatchMatch || diff !== 0 || !cleanup
     ) {
       failures.push(
         `frame ${oracle.frame}/age ${age}: seam=${seamMatch} `
         + `particles=${particlesMatch} sound=${soundMatch} monbg=${monBgMatch} `
         + `registers=${registerMatch} tags=${tagsMatch} `
         + `battle=${battleStateMatch} script=${scriptMatch} `
+        + `hardware=${hardwareMatch} `
+        + `displayLatch=${displayLatchMatch} `
         + `framebuffer=${diff === 0} diff=${diff} cleanup=${cleanup}`,
       );
     }

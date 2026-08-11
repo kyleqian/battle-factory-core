@@ -19,26 +19,35 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
+IS_SLEEP = "sleep-powder" in SCENARIO.name
 IS_STUN = "stun-spore" in SCENARIO.name
 IS_COTTON = "cotton-spore" in SCENARIO.name
-MOVE = 78 if IS_STUN else 178 if IS_COTTON else 147
+IS_POWDER = IS_SLEEP or IS_STUN
+MOVE = 79 if IS_SLEEP else 78 if IS_STUN else 178 if IS_COTTON else 147
 MOVE_NAME = (
-    "Move_STUN_SPORE" if IS_STUN
+    "Move_SLEEP_POWDER" if IS_SLEEP
+    else "Move_STUN_SPORE" if IS_STUN
     else "Move_COTTON_SPORE" if IS_COTTON
     else "Move_SPORE"
 )
 END_NAME = (
-    "Move_SLEEP_POWDER" if IS_STUN
+    "Move_SWIFT" if IS_SLEEP
+    else "Move_SLEEP_POWDER" if IS_STUN
     else "Move_SPORE" if IS_COTTON
     else "Move_PETAL_DANCE"
 )
 SCHEMA = (
-    "stun-spore-dense-evidence/v1" if IS_STUN
+    "sleep-powder-dense-evidence/v1" if IS_SLEEP
+    else "stun-spore-dense-evidence/v1" if IS_STUN
     else "cotton-spore-dense-evidence/v1" if IS_COTTON
     else "spore-dense-evidence/v1"
 )
-TEMPLATE = "gStunSporeParticleSpriteTemplate" if IS_STUN else "gSporeParticleSpriteTemplate"
-CALLBACK = "AnimMovePowderParticle_Step" if IS_STUN else "AnimSporeParticle_Step"
+TEMPLATE = (
+    "gSleepPowderParticleSpriteTemplate" if IS_SLEEP
+    else "gStunSporeParticleSpriteTemplate" if IS_STUN
+    else "gSporeParticleSpriteTemplate"
+)
+CALLBACK = "AnimMovePowderParticle_Step" if IS_POWDER else "AnimSporeParticle_Step"
 
 
 def main() -> None:
@@ -276,7 +285,7 @@ def main() -> None:
         }
         starts += len(current - prior)
         prior = current
-    expected_starts = 15 if IS_STUN else 9
+    expected_starts = 15 if IS_POWDER else 9
     if starts != expected_starts:
         raise RuntimeError(f"{MOVE_NAME} lifecycle changed: spores={starts}")
     if source[-1]["gAnimScriptActive"] or source[-1]["visualTaskCount"]:

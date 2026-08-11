@@ -752,6 +752,10 @@ import {
   type StunSporeState,
 } from "./stunSpore.ts";
 import {
+  sleepPowderAtAge,
+  type SleepPowderState,
+} from "./sleepPowder.ts";
+import {
   hypnosisDisplayedRingsAtAge,
   hypnosisAtAge,
   type HypnosisRing,
@@ -2117,6 +2121,13 @@ export interface SceneOnStunSporeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnSleepPowderConfig {
+  readonly move: "SLEEP_POWDER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnHypnosisConfig {
   readonly move: "HYPNOSIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -2648,6 +2659,7 @@ export type SceneOnMoveConfig =
   | SceneOnSporeConfig
   | SceneOnCottonSporeConfig
   | SceneOnStunSporeConfig
+  | SceneOnSleepPowderConfig
   | SceneOnHypnosisConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
@@ -2800,6 +2812,8 @@ export type SceneOnCottonSporePresentationState =
   SceneOnMovePresentationState<SceneOnCottonSporeConfig>;
 export type SceneOnStunSporePresentationState =
   SceneOnMovePresentationState<SceneOnStunSporeConfig>;
+export type SceneOnSleepPowderPresentationState =
+  SceneOnMovePresentationState<SceneOnSleepPowderConfig>;
 export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
@@ -6296,6 +6310,31 @@ export function sceneOnStunSporeView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...stunSporeAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnSleepPowderView extends SleepPowderState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_SLEEP_POWDER's first active source-script frame. */
+export function sceneOnSleepPowderView(
+  state: SceneOnSleepPowderPresentationState,
+): SceneOnSleepPowderView {
+  if (state.config.move !== "SLEEP_POWDER") {
+    throw new Error(`expected SLEEP_POWDER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sleepPowderAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
