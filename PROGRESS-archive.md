@@ -1,3 +1,23 @@
+## 1099 — [MAIN worker, 2026-08-10] **#55 `GetSubstruct` `%24` composition is exact and bounded**
+
+- **State:** implementation `d7820e25`; #55 remains open, accessor/stats
+  totals stay `null`, and the construction clock is unwired. The Scene-OFF v2
+  packets remain at `631bd214…`, `ae1282b7…`, and `3e10197a…`.
+- **Did:** independently pinned the full 192-byte `__umodsi3` ELF symbol,
+  GetSubstruct call/resume/three helper exits, all **24×4** routes, and the
+  exact source order `[0,1,2,3,0,1,2,3]` in GetBoxMonData2/checksum. The
+  narrow source-general `%24` reducer now makes each GetSubstruct complete;
+  the census exposes its eight-call subtotal plus the **1,174** shared fetch
+  cycles (e.g. `0xffffffff`: **6,824 / 7,998**), never an accessor total.
+- **Next:** reduce only independently proven EWRAM word/halfword accesses,
+  field tails, async +18, and VBlank/IRQ boundaries. Do not fit residuals,
+  wire aggregate stats/the clock, or resume canonical Battle 2.
+- **Notes:** all **156** OFF nested stats-accessor boundaries exceed the known
+  source-only subtotal after recorded pauses, with their positive remainder
+  left external. Focused **23/23**, smoke **375/375**, typecheck, full
+  `npm test` **892 files / 8,478 passed / 1 skipped**, and build passed; no
+  fixture/recording import, barrier, m4a, presentation, or clock change.
+
 ## 1098 — [MAIN worker, 2026-08-10] **#55 encrypted accessor instruction/fetch slice landed**
 
 - **State:** commit `eb4ab2c8`; #55 remains open and the construction clock is

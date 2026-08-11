@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1102 — [MAIN worker, 2026-08-10] **#55 encrypted EWRAM loops and receipt field tails closed**
+
+- **State:** implementation `54368a1e` corrected/pinned by `fd4c79c1`; #55
+  remains open, `GetBoxMonData2.cycles` stays `null`, and the construction
+  clock stays unwired. Focused **25/25**, smoke **375/375**, and typecheck are
+  green; final full suite/build are next.
+- **Did:** source-general aligned EWRAM u8/u16/u32 timing now closes decrypt /
+  checksum / encrypt at **448 / 518 / 448** cycles and **528** total bus cycles.
+  All **180** dependency rows expose checksum-valid/invalid and species/EXP/
+  EV/IV tail widths, counts, exact PCs, bus totals, and component cycles.
+- **Next:** run the required foreground full `npm test` and production build,
+  then commit the final verified ledger. Continue #55 only with the outer
+  accessor shell or async/IRQ state; do not fit residuals or wire the clock.
+- **Notes:** twice-fresh compact Scene-OFF instruction/component receipt is
+  byte-identical at `bff98549…`; misaligned u16/u32 behavior is rejected, not
+  claimed. No fixture import into production, barrier, controller,
+  presentation, animation, or canonical Battle-2 change.
+
 ## 1101 — [supervisor, 2026-08-10] **#55 MPlayMain callback residual closed**
 
 - **State:** side commits `5ca1367a`/`104a75a5`/`9130f99f` folded by
@@ -46,23 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   tick 33331, no recording import, barrier, presentation, or controller
   change. `DEFERRED.md` has no open entry. `animation-main` is currently one
   later Heat Wave evidence commit ahead under its separate supervisor.
-
-## 1099 — [MAIN worker, 2026-08-10] **#55 `GetSubstruct` `%24` composition is exact and bounded**
-
-- **State:** implementation `d7820e25`; #55 remains open, accessor/stats
-  totals stay `null`, and the construction clock is unwired. The Scene-OFF v2
-  packets remain at `631bd214…`, `ae1282b7…`, and `3e10197a…`.
-- **Did:** independently pinned the full 192-byte `__umodsi3` ELF symbol,
-  GetSubstruct call/resume/three helper exits, all **24×4** routes, and the
-  exact source order `[0,1,2,3,0,1,2,3]` in GetBoxMonData2/checksum. The
-  narrow source-general `%24` reducer now makes each GetSubstruct complete;
-  the census exposes its eight-call subtotal plus the **1,174** shared fetch
-  cycles (e.g. `0xffffffff`: **6,824 / 7,998**), never an accessor total.
-- **Next:** reduce only independently proven EWRAM word/halfword accesses,
-  field tails, async +18, and VBlank/IRQ boundaries. Do not fit residuals,
-  wire aggregate stats/the clock, or resume canonical Battle 2.
-- **Notes:** all **156** OFF nested stats-accessor boundaries exceed the known
-  source-only subtotal after recorded pauses, with their positive remainder
-  left external. Focused **23/23**, smoke **375/375**, typecheck, full
-  `npm test` **892 files / 8,478 passed / 1 skipped**, and build passed; no
-  fixture/recording import, barrier, m4a, presentation, or clock change.
