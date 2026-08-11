@@ -941,6 +941,26 @@ session-trace-driven pacing fixes).
 5. **S11 audio is OUT OF SCOPE for now** — see the dated note on the S11
    stage heading. The stage entry remains in the roadmap by user
    instruction; nothing schedules it.
+6. **Noland is back IN scope** (reverses the 2026-07-28 ruling going
+   forward; decided after a source fact-check the user requested). The
+   user's rationale: deep-streak RNG-exact sequence testing (the #55
+   program's payoff) reaches his silver/gold battles (final battle of
+   challenge indices 2 and 5). Source facts recorded for the brief:
+   Noland is NOT an invariant — `FillFactoryBrainParty`
+   (`reference/pokeemerald/src/battle_factory.c:759`) RNG-draws his
+   rentals live via the `GetFactoryMonId` rejection loop (no Unown, no
+   species/item duplicates, and **excludes the player's current
+   rentalMons**), constructs them through the same
+   `CreateMonWithEVSpreadNatureOTID` path #55 models, at
+   `GetFactoryMonFixedIV(challengeNum + 2)` — two IV tiers above the
+   round's ordinary opponents. In-scope consequence: his party
+   generation, the battles-21/42 round-loop branch, and a designed
+   Frontier-Brain staging representation for the mechanic lab (the
+   "not an ordinary trainer ID" schema rejection stays correct — the cure
+   is a Brain-specific representation, not pretending). Sequencing: this
+   work rides WITH the #55 sequence-testing program, not ahead of it.
+   Unchanged: the Gate-2 tick and its close-time disposition record stand;
+   symbol/BP/reward bookkeeping keeps its existing scope.
 
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
@@ -967,6 +987,10 @@ weighting + named-barrier cross-reference). Clarified standing scope:
   Scene ON is proven by the animation lane, not exposed as a player toggle.
 - **Noland / Frontier Brain battles are OUT of scope for now** (Gate 2's
   explicit schema rejection stands; not a blocker for Gates 3–6).
+  **UPDATE (user decision 2026-08-10): Noland is back IN scope** — see item
+  6 of the S10-close "User decisions (2026-08-10)" block and the addendum
+  in `docs/gate2-noland-scope-note.md`. The Gate-2 tick is NOT reopened;
+  this is forward scope.
 - **Audio is its own later milestone — S11**; no S10 gate includes it.
 
 **User ordering decision (2026-07-30):** work the remaining program in this

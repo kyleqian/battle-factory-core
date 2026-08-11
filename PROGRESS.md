@@ -19,7 +19,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (3) **#39 stays deferred** until the above are done; (4) **pacing polish
   is user-driven** — the user plays on their own time, recorder traces are
   the input, no pacing slices until traces exist; (5) **S11 audio out of
-  scope for now** — entry kept in the roadmap, nothing schedules it.
+  scope for now** — entry kept in the roadmap, nothing schedules it;
+  (6) **Noland back IN scope** (same-day follow-up) — source fact-check
+  showed he is NOT an invariant (`FillFactoryBrainParty` RNG-draws his
+  rentals live, excludes the player's rentalMons, `challengeNum + 2` IVs),
+  so deep-sequence testing under #55 reaches him at battles 21/42; rides
+  with the #55 program; Gate-2 tick not reopened
+  (`docs/gate2-noland-scope-note.md` addendum).
 - **Next:** main lane continues #55 per its own bounded Next lines. Fold
   `animation-main` at the next orient (it was 30 commits ahead at entry
   1096's 16:04 check). When user play traces arrive, they become the

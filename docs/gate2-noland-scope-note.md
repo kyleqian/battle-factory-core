@@ -72,6 +72,27 @@ generated party during real play. The remainder here is narrowly about the
 authoring, not about whether the commentary is implemented or correct in
 the game itself. It does not block Gates 3–6.
 
+## Addendum — 2026-08-10 evening: Noland returns to scope (forward)
+
+**User decision (2026-08-10, same-day, after S10 close):** Noland /
+Frontier Brain battles are back **IN scope**, reversing the 2026-07-28
+ruling going forward. Rationale: the #55 construction-clock program (user-
+authorized the same evening) exists to make deep RNG sequences hardware-
+exact, and any such sequence reaching the final battle of challenge index
+2 or 5 runs straight through Noland's party generation —
+`FillFactoryBrainParty` (`battle_factory.c:759`) draws his rentals live
+from the same stream via the `GetFactoryMonId` rejection loop, excludes
+the player's current rentals, and constructs at `challengeNum + 2` fixed
+IVs. He is the opposite of an invariant.
+
+This addendum does **not** reopen the Gate-2 tick: the note above remains
+the accurate record of the disposition *at close*. Item 1's schema stance
+also survives — Brains must still not be staged as ordinary trainer IDs;
+the in-scope cure is a designed Frontier-Brain-specific staging
+representation. See ROADMAP's S10-close "User decisions (2026-08-10)"
+item 6 for the full consequence list and sequencing (rides with the #55
+sequence-testing program).
+
 ## Why this note exists
 
 Gate 6 close-out assembly (ROADMAP "Gate-6 evidence granularity +
