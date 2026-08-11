@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1120 — [MAIN worker, 2026-08-11] **#55 adjacent-deadline edge selector checkpoint**
+
+- **State:** a hermetic source-order selector now identifies the LILIANA
+  encrypted-accessor ordinal 23 edge; no runtime packet is claimed, #55 stays
+  open, and the construction clock remains unwired.
+- **Did:** selectively recovered and corrected the stash helper/test. It arms
+  once at `0x082e7c3e` inside the outer `CalculateMonStats` call and pins the
+  actual adjacent timeline **Timer@D → Audio@D+1**, never equal-deadline
+  Audio-first ordering.
+- **Next:** attempt a bounded transparent native-wrapper capture for this one
+  selected edge; accept only twice-fresh byte-identical compact JSON, otherwise
+  discard the integration and retain this tooling checkpoint alone.
+- **Notes:** focused selector/audio/FIFO **13/13**, smoke **375/375**,
+  typecheck, full `npm test` **912 files / 8,572 passed / 1 skipped**, and
+  build (**631 modules**) are green. No service cost, clock/dispatcher,
+  controller, presentation, animation, barrier, or canonical recording changed.
+
 ## 1119 — [supervisor, 2026-08-11] **#55 IRQ/Video-DMA reachability folded**
 
 - **State:** main row selection `361933b1` and side reachability audit
@@ -36,18 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   in cap, so its probe edits were discarded. Focused Timer0 **40/40**, smoke
   **375/375**, typecheck, full `npm test` **909 files / 8,558 passed / 1
   skipped**, and build (**631 modules**) are green.
-
-## 1117 — [MAIN worker, 2026-08-11] **#55 dual-refill deadline-work contract correction**
-
-- **State:** the pure Timer 0 dispatcher now distinguishes work from elapsed
-  time; #55 remains open, the construction clock stays unwired, and
-  `serviceCostMasterCycles` remains `null`.
-- **Did:** removed fabricated serialized DMA start/completion fields. Ordered
-  A/DMA1→B/DMA2 deadline work is 10 each / sum 20; only the receipt-observed
-  fresh dual graph exposes makespan 18, while zero/one remain `null`.
-- **Next:** continue #55 only with a separately bounded unobserved runtime
-  class; do not fit 18 or wire `runFactoryConstructionClock`.
-- **Notes:** verified exact mGBA 0.10.5 archive SHA and source scheduling;
-  focused Timer0 **34/34**, typecheck, smoke, full `npm test`, and build are
-  green. No clock wiring, service cost, controller, presentation, animation,
-  barrier, or canonical Battle-2 change.
