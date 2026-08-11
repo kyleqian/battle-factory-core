@@ -1,0 +1,171 @@
+{
+  "schema": "factory-m4a-mplay-callback-evidence/v2",
+  "oracleProfile": "battle-scene-off",
+  "selectedResidualClass": "sixth-MPlayMain-ply_xcmd-ply_xxx-callback-transitive-reads",
+  "sourceReferences": [
+    {
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "692-810,1437-1646",
+      "anchors": [
+        "void FadeOutBody",
+        "void TrkVolPitSet",
+        "void ply_memacc",
+        "void ply_xcmd",
+        "void ply_xxx",
+        "void ply_xcmd_0D"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_tables.c",
+      "lines": "6-40,291-307",
+      "anchors": [
+        "void *const gMPlayJumpTableTemplate",
+        "const XcmdFunc gXcmdTable",
+        "ply_xcmd_0D"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1130-1466",
+      "anchors": [
+        "MPlayMain:",
+        "call_r3:",
+        "ply_fine",
+        "ply_goto",
+        "ply_endtie"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/include/gba/m4a_internal.h",
+      "lines": "183-221,272-350,387-390",
+      "anchors": [
+        "struct MusicPlayerInfo",
+        "struct MusicPlayerTrack",
+        "extern MPlayFunc gMPlayJumpTable[]",
+        "extern const XcmdFunc gXcmdTable[]"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/constants/m4a_constants.inc",
+      "lines": "54-257",
+      "anchors": [
+        "o_MusicPlayerTrack_cmdPtr",
+        "o_MusicPlayerTrack_chan",
+        "o_SoundChannel_nextChannelPointer"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.map",
+      "lines": "sound symbols",
+      "anchors": [
+        "gMPlayJumpTableTemplate",
+        "gXcmdTable",
+        "gClockTable"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.elf",
+      "lines": "defined symbols and sizes",
+      "anchors": [
+        "MPlayMain",
+        "ply_xcmd",
+        "ply_xxx",
+        "gMPlayJumpTableTemplate",
+        "gXcmdTable"
+      ]
+    }
+  ],
+  "sourceStateReference": {
+    "packetSchema": "factory-m4a-source-state-probe/v3",
+    "digestKey": "sourceSemanticState.stateDigest"
+  },
+  "callbackComponent": {
+    "componentDigest": "bfacdda5b552bd322fb88e18c20d0af4c54fdf8713d3ec0622810115202d87b8",
+    "tableSlots": {
+      "gMPlayJumpTable": 36,
+      "gXcmdTable": 14
+    },
+    "pathCount": 50,
+    "sourceGeneral": true
+  },
+  "reproducibility": {
+    "schema": "factory-m4a-mplay-callback-repro/v2",
+    "oracleProfile": "battle-scene-off",
+    "freshRunsPerCase": 2,
+    "cases": [
+      {
+        "case": "anchor",
+        "firstFreshSha256": "e7d8d162d18541f408380fc1963a1bd16fda5bb4c7b1a1d76562be733185b66e",
+        "secondFreshSha256": "e7d8d162d18541f408380fc1963a1bd16fda5bb4c7b1a1d76562be733185b66e",
+        "byteIdentical": true
+      },
+      {
+        "case": "liliana",
+        "firstFreshSha256": "7220967d2a9f394dfb6aa6400cd9537706e8d0ac0bd22d82eb147547991fcff9",
+        "secondFreshSha256": "7220967d2a9f394dfb6aa6400cd9537706e8d0ac0bd22d82eb147547991fcff9",
+        "byteIdentical": true
+      },
+      {
+        "case": "factory-varied",
+        "firstFreshSha256": "5495157a1382d16f862c5de84e8957bfaf382068197992f68737b215f08e203c",
+        "secondFreshSha256": "5495157a1382d16f862c5de84e8957bfaf382068197992f68737b215f08e203c",
+        "byteIdentical": true
+      }
+    ]
+  },
+  "cases": [
+    {
+      "case": "anchor",
+      "observations": 52,
+      "costs": {
+        "min": 23920,
+        "max": 52083,
+        "distinct": 52
+      },
+      "capturedStateKeys": 52
+    },
+    {
+      "case": "liliana",
+      "observations": 31,
+      "costs": {
+        "min": 24732,
+        "max": 47917,
+        "distinct": 31
+      },
+      "capturedStateKeys": 31
+    },
+    {
+      "case": "factory-varied",
+      "observations": 30,
+      "costs": {
+        "min": 24391,
+        "max": 41682,
+        "distinct": 28
+      },
+      "capturedStateKeys": 30
+    }
+  ],
+  "repeatedCompleteStateEquivalence": {
+    "freshObservationsPerRun": 113,
+    "equalStateEqualCostPairs": 113,
+    "differentCostForEqualState": 0,
+    "proof": "Two independent fresh Scene-OFF runs per case join all 52/31/30 address-free v3 state digests to identical exact m4a call costs; no cross-state duration reducer is claimed."
+  },
+  "residualDereferences": [
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+      "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+      "captured": "Every gMPlayJumpTable/gXcmdTable target reachable in the 113 boundary tables is source/ELF-audited, but arbitrary command bytes and handler control flow remain window-bounded.",
+      "remainder": "The unbounded command/pattern source window remains residual; this packet closes only callback transitive reads."
+    },
+    {
+      "stage": "SoundMainRAM-channel-passes",
+      "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+      "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+      "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete PCM buffer, DMA roles, and VCOUNT remain in the joined v3 receipt.",
+      "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target remains incomplete; no such target was observed."
+    }
+  ],
+  "verdict": "Evidence-only checkpoint: all 50 dispatch-table slots and their source/ELF callback transitive read paths are closed for the 113 boundary states; only the unbounded command/pattern window and SoundMainRAM sample-target classes remain."
+}

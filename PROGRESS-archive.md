@@ -1,3 +1,127 @@
+## 1103 — [MAIN worker, 2026-08-10] **#55 synchronous GetBoxMonData outer shell closed**
+
+- **State:** implementation `8aa00042`, supervisor-corrected by `ca1c73d9`;
+  #55 remains open, `GetBoxMonData2.cycles` stays `null`, and the construction
+  clock stays unwired. Focused **27/27**, smoke **375/375**, typecheck,
+  supervisor full `npm test` **894 files / 8,488 passed / 1 skipped**, and
+  production build are green.
+- **Did:** source/ELF-reduced the complete synchronous outer shell at **314
+  cycles**: GetBoxMonData2 **216** plus checksum setup/return **98**, matching
+  **77/156** clean OFF joins while leaving every residual external.
+- **Next:** continue #55 only with independently closed async +18 service and
+  VBlank/IRQ costs; do not fit residuals or wire the clock.
+- **Notes:** frozen packets were not mutated; no production/controller/
+  presentation/animation or canonical Battle-2 change.
+
+## 1102 — [MAIN worker, 2026-08-10] **#55 encrypted EWRAM loops and receipt field tails closed**
+
+- **State:** implementation `54368a1e` corrected/pinned by `fd4c79c1` and
+  supervisor-reconciled in this entry; #55
+  remains open, `GetBoxMonData2.cycles` stays `null`, and the construction
+  clock stays unwired. Focused **25/25**, smoke **375/375**, typecheck, full
+  `npm test` **894 files / 8,486 passed / 1 skipped**, and production build
+  are green.
+- **Did:** context-composed aligned EWRAM u8/u16/u32 timing now closes decrypt /
+  checksum / encrypt at **448 / 518 / 448** cycles and **528** total bus cycles.
+  All **180** dependency rows expose checksum-valid/invalid and species/EXP/
+  EV/IV tail widths, counts, exact PCs, bus totals, and component cycles.
+- **Next:** continue #55 only with independently source-reduced outer
+  `GetBoxMonData2` prologue/setup/dispatch/common-return instruction and
+  memory work, or async/IRQ state; do not fit residuals or wire the clock.
+- **Notes:** twice-fresh compact Scene-OFF instruction/component receipt is
+  byte-identical at `bff98549…`; misaligned u16/u32 behavior is rejected, not
+  claimed. Supervisor reconciliation passed focused **25/25**, smoke
+  **375/375**, typecheck, and build. No fixture import into production,
+  barrier, controller, presentation, animation, or canonical Battle-2 change.
+
+## 1100 — [supervisor, 2026-08-10] **#55 `%24` composition + compact CgbSound evidence folded**
+
+- **State:** main `d7820e25`/`83513d9b` plus squash-fold `d55da1ac`; #55
+  remains open and the construction clock is unwired. Union focused **26/26**,
+  smoke **375/375**, and production build are green; worker full suites were
+  main **892 files / 8,478 passed / 1 skipped** and side **893 / 8,477 / 1**.
+- **Did:** completed all **24×4** `GetSubstruct` `%24` routes and their exact
+  eight-call ROM-only subtotal while retaining accessor `cycles: null`.
+  Closed the finite CgbSound callback/table dereference class across **11**
+  paths and **113/113** twice-fresh equal-state/equal-cost joins; compacted
+  its evidence to **48,062 bytes** before squash integration.
+- **Next:** continue #55 only with independently proven EWRAM word/halfword
+  bus timing and field tails, or one remaining bounded MPlayMain/SoundMainRAM
+  dereference class. Do not fit a residual or wire aggregate stats/the clock.
+- **Notes:** orient folded **31 animation commits** through `11245f83` and the
+  resulting union passed full test/build before dispatch. S8's generic
+  round/controller reset remains enforced: no canonical Battle-2 work past
+  tick 33331, no recording import, barrier, presentation, or controller
+  change. `DEFERRED.md` has no open entry. `animation-main` is currently one
+  later Heat Wave evidence commit ahead under its separate supervisor.
+
+## 1099 — [MAIN worker, 2026-08-10] **#55 `GetSubstruct` `%24` composition is exact and bounded**
+
+- **State:** implementation `d7820e25`; #55 remains open, accessor/stats
+  totals stay `null`, and the construction clock is unwired. The Scene-OFF v2
+  packets remain at `631bd214…`, `ae1282b7…`, and `3e10197a…`.
+- **Did:** independently pinned the full 192-byte `__umodsi3` ELF symbol,
+  GetSubstruct call/resume/three helper exits, all **24×4** routes, and the
+  exact source order `[0,1,2,3,0,1,2,3]` in GetBoxMonData2/checksum. The
+  narrow source-general `%24` reducer now makes each GetSubstruct complete;
+  the census exposes its eight-call subtotal plus the **1,174** shared fetch
+  cycles (e.g. `0xffffffff`: **6,824 / 7,998**), never an accessor total.
+- **Next:** reduce only independently proven EWRAM word/halfword accesses,
+  field tails, async +18, and VBlank/IRQ boundaries. Do not fit residuals,
+  wire aggregate stats/the clock, or resume canonical Battle 2.
+- **Notes:** all **156** OFF nested stats-accessor boundaries exceed the known
+  source-only subtotal after recorded pauses, with their positive remainder
+  left external. Focused **23/23**, smoke **375/375**, typecheck, full
+  `npm test` **892 files / 8,478 passed / 1 skipped**, and build passed; no
+  fixture/recording import, barrier, m4a, presentation, or clock change.
+
+## 1098 — [MAIN worker, 2026-08-10] **#55 encrypted accessor instruction/fetch slice landed**
+
+- **State:** commit `eb4ab2c8`; #55 remains open and the construction clock is
+  unwired. Scene-OFF v2 receipts remain byte-identical at
+  `631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`,
+  `ae1282b74f74de6a85b8772adfbcd83028fad09f8aa3e3ecd518aafeab17b443`, and
+  `3e10197a34f4ea7a08a23bead04ae5b6113c653304722167095612a9b0626987`.
+- **Did:** reduced all **96** compiled `(personality % 24, substructType)`
+  arms: 68-cycle fixed shell, **5,172** total arm instruction/refill cycles.
+  Reduced shared decrypt/encrypt to **328** instruction-fetch cycles each
+  (128 halfwords/12 refills) and checksum to **518** (199/20), with exact
+  access counts **36/24** word reads/writes and **24** halfword reads. Each
+  census row carries the **1,174**-cycle crypt/checksum/crypt instruction
+  subtotal; complete `cycles` stays `null`.
+- **Next:** close only the `%24` helper composition and source-general EWRAM/
+  async timing boundary. Do not wire aggregate stats or the construction
+  clock, fit residuals, or add canonical Battle-2 windows.
+- **Notes:** receipt construction/ambient totals are **242/52/294**,
+  **112/31/143**, **202/30/232**. +18 service and VBlank/IRQ pauses remain
+  external. Focused **21/21**, smoke **375/375**, full `npm test` **892 files /
+  8,476 passed / 1 skipped**, typecheck, and build passed; no fixture,
+  recording import, barrier, or clock change.
+
+## 1096 — [MAIN worker, 2026-08-10] **#55 shared encrypted accessor dependency bounded**
+
+- **State:** evidence `d53eb54b`, independent audit hardening `2594377b`, and
+  supervisor handoff `e8bf2f6b`; final union focused stats **19/19**, smoke
+  **375/375**, typecheck, full `npm test` **881 files / 8,438 passed / 1
+  skipped**, and production build are green. #55 remains open, accessor totals
+  are `null`, and the clock is unwired.
+- **Did:** bounded all **180** encrypted reads (**156** direct + **24** nested):
+  species/EXP/EV/IV **24/12/72/72**. Tests enumerate all **24** personality
+  permutations, checksum/bad-egg routes, exact field tails, fetch classes, and
+  common **8 GetSubstruct + 12 decrypt + 24 checksum + 12 encrypt** loops.
+- **Next:** reduce only independently source-proven modulo-arm and shared-loop
+  instruction/fetch segments; do not claim a complete accessor/stats total or
+  wire the construction clock until the remaining memory/service model closes.
+- **Notes:** twice-fresh OFF packets remain byte-identical at `92d3feb4…` /
+  `136efa4a…` / `ea323d9e…`; no fixture mutation, decrypted bytes/pointers,
+  duration/identity/residual fit, production recording import, barrier change,
+  canonical Battle-2, animation, aggregate stats, or clock wiring. Independent
+  source/ELF audit passed and its 96-case slot/offset gap is pinned by
+  `2594377b`. The orient animation fold is recorded in archived entry 1077;
+  at 16:04 `animation-main` was 30 commits ahead with its separate supervisor
+  still active, so that later tail is intentionally left for the next orient.
+  `DEFERRED.md` has no open entries.
+
 ## 1091 — [MAIN worker, 2026-08-10] **#55 direct `GetNature` timing reduced**
 
 - **State:** implementation commit `59b13350`; focused stats/clock **25/25**,
@@ -40314,3 +40438,93 @@ both verify scripts/census independently re-verified before this entry.)*
   exposes only its exact 30-cycle entry and 10-cycle return shell. No
   identity/duration lookup, fixture mutation, excluded lane, canonical
   Battle-2, animation, or unsupported-barrier change.
+## 1095 — [MAIN worker, 2026-08-10] **#55 direct level route bounded; complete callee not reducible yet**
+
+- **State:** evidence `b8bb8306` plus docs `0a1ebd4d`; focused stats **17/17**,
+  smoke **375/375**, typecheck, full `npm test` **881 files / 8,436 passed /
+  1 skipped**, and production build are green. #55 remains open and the
+  construction clock remains unwired.
+- **Did:** audited all **12/12** `GetLevelFromMonExp` calls. Twice-fresh OFF
+  packets pin personality/species/growth/EXP and exact post-accessor timing:
+  **43 + 21 + 2,200 + 18 = 2,282** source cycles; **8 exact + 3×(+18
+  service) + 1×(+308 VCount/audio IRQ)**.
+- **Next:** continue #55 only with the source-general encrypted `GetBoxMonData2`
+  body needed by the 156 direct reads and both level accessors; do not wire
+  aggregate stats or the construction clock.
+- **Notes:** complete level calls total **246,922** pause-subtracted cycles;
+  their two encrypted accessors contribute **219,176** observed cycles and
+  remain unreduced. No fitted duration, keyed/identity branch, residual
+  absorption, canonical Battle-2, animation, fixture production import, or
+  barrier change.
+
+## 1094 — [MAIN worker, 2026-08-10] **#55 direct `GetMonData2` party reads reduced**
+
+- **State:** implementation `9a90f094`, shell correction `bf107b02`, and
+  evidence/docs `3b95eb30`; focused
+  stats **16/16**, smoke **375/375**, typecheck, full `npm test` **881 files /
+  8,435 passed / 1 skipped**, and production build are green. #55 remains open
+  and the construction clock remains unwired.
+- **Did:** censused all **180** stats reads by field/compiled route: **24**
+  direct HP/max-HP reads and **156** encrypted EV/IV/species reads. The direct
+  source-general jump-table arms reduce exactly at **80** cycles each:
+  anchor/LILIANA/varied **960/480/480 = 1,920**, zero residual.
+- **Next:** continue #55 only with a bounded source-derived encrypted
+  `GetBoxMonData2` body or level/growth component; do not wire the aggregate
+  stats operation or construction clock.
+- **Notes:** encrypted/default and Deoxys routes retain only exact compiled
+  entry/return shells with `cycles: null`; the correction includes the opening
+  `push` represented by mGBA's pipelined entry PC. All three Scene-OFF packets
+  match committed hashes. Completed direct-call coverage is **312/480** and
+  **100,214/1,768,691 = 5.666%** of source callee cycles. No duration/identity
+  fit, fixture mutation, canonical Battle-2, animation, or barrier change.
+## 1097 — [solo session, 2026-08-10] **User priority decisions recorded: #55 grind authorized; #71 stays faithful; S11 out of scope for now**
+
+- **State:** docs-only commit; no engine, test, or fixture change. Full
+  decision text lives in ROADMAP's S10 block ("User decisions 2026-08-10")
+  plus dated notes on ISSUES #55/#71 and the S11 stage heading.
+- **Did:** relayed the S10-close report to the user and took five decisions:
+  (1) **#55 construction clock: grind it out** — user-authorized to
+  completion, opinion check-in expected after a few more sessions;
+  (2) **#71: no intro-animation divergence** — user was offered a
+  browser-only divergence and chose faithful Scene-OFF behavior (no intros),
+  so #71's remainder is internal cleanup at filler priority;
+  (3) **#39 stays deferred** until the above are done; (4) **pacing polish
+  is user-driven** — the user plays on their own time, recorder traces are
+  the input, no pacing slices until traces exist; (5) **S11 audio out of
+  scope for now** — entry kept in the roadmap, nothing schedules it;
+  (6) **Noland back IN scope** (same-day follow-up) — source fact-check
+  showed he is NOT an invariant (`FillFactoryBrainParty` RNG-draws his
+  rentals live, excludes the player's rentalMons, `challengeNum + 2` IVs),
+  so deep-sequence testing under #55 reaches him at battles 21/42; rides
+  with the #55 program; Gate-2 tick not reopened
+  (`docs/gate2-noland-scope-note.md` addendum).
+- **Next:** main lane continues #55 per its own bounded Next lines. Fold
+  `animation-main` at the next orient (it was 30 commits ahead at entry
+  1096's 16:04 check). When user play traces arrive, they become the
+  pacing-fix worklist.
+- **Notes:** the #71 decision followed a fact-check the user requested:
+  both sides DO animate in the real game, but only under Battle Scene ON;
+  the OFF profile's no-intro behavior is proven faithful (ISSUES #71
+  Slice-D record). Difficulty-tier question also answered from source:
+  challenge scaling is deterministic (`factoryOpponentGeneration.ts:263`,
+  `challengeNum = floor(streak/7)`) and independent of #55's timing model.
+## 1101 — [supervisor, 2026-08-10] **#55 MPlayMain callback residual closed**
+
+- **State:** side commits `5ca1367a`/`104a75a5`/`9130f99f` folded by
+  `a56341fb`; #55 remains open and the construction clock stays unwired.
+  Union focused **6/6**, smoke **375/375**, and production build are green;
+  the worker full suite passed **894 files / 8,484 / 1 skipped**.
+- **Did:** source/ELF-audited all **36** `gMPlayJumpTable` and **14**
+  `gXcmdTable` slots, including `ply_xcmd`/`ply_xxx` transitive edges. Two
+  fresh Scene-OFF runs per case reproduce **52/31/30 = 113** exact compact
+  v3-state/cost joins with zero unequal costs; total fixtures are **136 KB**.
+- **Next:** continue #55 with independently proven EWRAM word/halfword bus
+  timing and field tails, or one remaining bounded command-window/
+  SoundMainRAM sample-target class. Do not fit a residual or wire aggregate
+  stats, audio duration, or the live clock.
+- **Notes:** two audio dereference classes remain. No controller,
+  presentation, barrier, recording import, animation, or canonical Battle-2
+  change landed. Orient folded 31 animation commits through `11245f83`;
+  `animation-main` is now four later animation commits ahead under its own
+  supervisor and is intentionally left for the next orient. `DEFERRED.md`
+  has no open entry.

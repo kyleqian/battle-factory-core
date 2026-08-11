@@ -129,6 +129,121 @@ does not inspect trainer, set, mon, frame, cursor, or receipt identity.
 CreateMon, EV-spread, CalculateMonStats, factory-post-mon, and the live
 VBlank/audio/DMA workload remain unresolved, so the clock remains unwired.
 
+## Instruction-level +18 queue-observable checkpoint (2026-08-10)
+
+The existing construction probe now has a separate opt-in
+`FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE=1` path. It selects the anchor's
+source-reduced `__divsi3(9300, 100)` clean control and nearby
+`__divsi3(11300, 100)` +18 member: both are mon-3 calls through the same
+`0x082e7542` entry / `0x08068f3e` return and both have a 318-cycle compiled
+source budget. The hook records each retired instruction boundary, its local
+cycle delta, and CPU `nextEvent` distance. It does not alter the v1/v2
+construction or residual packets.
+
+The intended semantic queue observation could not be banked in this bounded
+step. Two fresh Battle Scene OFF attempts to dereference libmgba-py's exposed
+`mTiming.root` during that selected window terminated with SIGSEGV (exit 139)
+before writing JSON; `tools/run-mgba-probe.py` rejected both outputs. Walking
+`mTimingEvent.next` and reading the root event's name were tested separately
+and both fail the same wrapper contract. The landed hook therefore leaves
+`eventQueue` empty rather than retaining an unsafe pointer token or pretending
+endpoint distance identifies an event.
+
+This is narrowing evidence, not a timing result: the next missing observable
+is a safe libmgba API/shim that snapshots the due timing-event callback name
+and queue position before/after one `core.step()`. Until that exists, the
+instruction packet cannot expose the responsible event identity, no fresh
+receipt is committed, +18 remains external, and both cycle contracts remain
+null/unwired.
+
+## Instruction-level +18 queue identity BANKED (2026-08-10, late solo session)
+
+The missing observable above now exists and the packet is banked. The
+blocker's premise was wrong in one detail: the vendored libmgba-py ffi
+declares **both** `struct mTiming` and `struct mTimingEvent` in full, so a
+queue walk needs no compiled shim — only guards. `snapshot_timing_queue()`
+(this probe file) never dereferences NULL, caps the link walk at 32 events,
+caps `ffi.string` name reads at 64 bytes, and retains no pointer values.
+Safety validation (scratchpad, 2026-08-10): 20,500 per-instruction walks
+with zero faults; raw savestates byte-identical with walks on vs. off; the
+binding's SIGSEGV reproduces with **zero** walks (one core, steps only,
+no queue access) — it is the known interpreter-teardown crash the wrapper
+already accepts after valid JSON, not a queue-access fault.
+
+Invocation (fresh path each run, per this doc's wrapper contract):
+
+    FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+    FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 \
+    FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE=1 \
+      python3 tools/run-mgba-probe.py <fresh.json> -- \
+      python3 tools/probe/trace-factory-construction-rng.py <fresh.json> anchor
+
+Two fresh runs were wrapper-accepted (exit 0) and byte-identical at SHA-256
+`2e3b089cea13a5e0f52b689330468297fb96be1b52508781014eef2d9e26e673`
+(162,353 bytes; regenerates in ~2.5 min — hash-banked, not committed).
+Frozen-evidence insurance: the standard v2 anchor packet regenerated with
+the edited probe still hashes to the committed
+`631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`.
+
+**The finding.** `matchedIncrements` contains exactly one row. At the
+matched edge `0x082e7572 → 0x082e7574` inside `__divsi3`, the clean control
+spends **2** cycles and the +18 member spends **20**. At that boundary the
+member's due queue head is **`GBA Timer 0`** (`when 1890606559`, priority
+32, due before `GBA Video` at `when 1890606607`); the clean control's
+matched-edge head is `GBA Video`, with Timer 0 second and not due. Both
+queues hold the same four events (`GBA Timer 0`, `GBA Video`,
+`GBA Audio Sample`, `GB Audio Frame Sequencer`). Trace totals: clean
+**318 = 318** source; member **336 = 318 + 18**.
+
+Interpretation boundary: this banks the +18's **event identity** — the
+increment step is the one that crosses the due `GBA Timer 0` timing event
+(the m4a sample timer), whose service costs 18 master cycles here. It is an
+observed identity, not a fitted constant: whether the Timer 0 service cost
+is invariant across all 85 census joins is now measurable per join with
+this same packet mode. Timer 0's reload is source-derivable from the m4a
+sound init, so crossings are schedulable deterministically once its cost
+class is bounded. No cost table was fitted, no residual absorbed, and both
+cycle contracts remain null/unwired.
+
+## Recurring +18 source-boundary census (2026-08-10)
+
+The opt-in sibling mode `FACTORY_RESIDUAL_18_EVIDENCE=1` replays all three
+wrapper-validated Battle Scene OFF epochs and snapshots only exact compiled
+boundaries plus scalar CPU scheduler, IRQ, DMA, bus, and ROM-prefetch state.
+Deterministic gzip packets live under
+`tests/fixtures/factory-construction-residual-boundaries-v1/`; they retain no
+trainer/set/mon identity, RNG cursor, app tick, or duration key.
+
+Tier 1 joins them to the existing source receipts by exact master cycle and PC:
+
+| compiled segment | exact boundary PCs | +18 | clean controls |
+| --- | --- | ---: | ---: |
+| nature attempt | `0x0806d08a` → next `0x0806f5ce` or `0x08067b4e` | 11 | 267 |
+| non-final selectable Factory tail | `0x0819b614` → `0x08068636` | 1 | 8 |
+| encrypted stats accessor | `0x0806a51a` → exact caller return | 67 | 77 |
+| level-50 EXP loop only | `0x08069090` → `0x080690ac` | 3 | 8 |
+| signed divide | `0x082e7542` → exact caller return | 1 | 71 |
+| direct `GetNature` | `0x0806d072` → exact caller return | 2 | 57 |
+| **total** | | **85** | **488** |
+
+The accessor histogram remains exactly
+**0×77 / +18×67 / +117×5 / +245×6 / +263×1**. The level audit preserves the
+isolated post-accessor composition **43 + 21 + 2,200 + 18 = 2,282**.
+
+This refutes a missing fixed source instruction/refill/fetch segment: every
+compiled segment has clean siblings at the same entry and source-relative
+return class. It also finds no boundary-visible IRQ/DMA service. All **85**
+members and **488** clean controls have `activeDMA=-1`, `performingDMA=0`,
+`cpuBlocked=false`, `IF=0`, and ROM prefetch enabled. Members occupy more than
+75 distinct cycle phases, and `nextEvent-cpu.cycles` overlaps clean controls.
+
+The exact missing discriminator is therefore the instruction-to-instruction
+scheduler event crossed *inside* each span: its timing-event identity/queue
+state immediately before and after the 18-cycle increment. Endpoint evidence
+cannot yet distinguish (b) prefetch/bus overlap from (c) a non-IRQ
+asynchronous PPU/timer/audio service that completes before return. No reducer
+or +18 constant lands; all accessor/clock cycle contracts stay null/unwired.
+
 ### Non-final outer-loop component (2026-08-10)
 
 `reduceFactoryOuterLoopTiming` covers every non-final

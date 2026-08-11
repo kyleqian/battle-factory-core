@@ -14,6 +14,15 @@ battles, and the open-level rule set (until the single-battle loop is solid).
 later milestone — stage S11 below (user decision, 2026-07-28). No earlier
 stage's acceptance includes audio.
 
+## Operational notes
+
+- **Log backup (2026-08-10):** Codex/DeepSeek session logs (`.codex-logs/`,
+  `.opencode-logs/`, both gitignored) and Claude's local transcripts live
+  only on this machine's disk. At the end of a milestone or a long session,
+  run `tools/backup-logs-to-r2.sh` to copy them to R2 — it's additive-only
+  (never deletes the remote copy) and safe to re-run any time. Requires an
+  `r2` rclone remote configured locally.
+
 ## Staged plan (authored by the run supervisor, iteration 0, 2026-07-17)
 
 Verification commands used below, all runnable today:

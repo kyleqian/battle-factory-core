@@ -1211,30 +1211,109 @@ Scene-OFF receipts. The source/ELF path from EXP-accessor return is exactly
 observations decompose **8 exact + 3×(+18 external service) + 1×(+308
 VCount→m4aSoundVSync IRQ)**, with no asynchronous cost absorbed. The complete
 callee is not reduced: its two encrypted species/EXP accessors contribute
-**219,176** observed cycles and still require the unresolved personality-%24
+**219,176** observed cycles and still require the unresolved EWRAM
 decrypt/checksum/fetch model. Complete-call net totals are
 anchor/LILIANA/varied **123,879/61,954/61,089 = 246,922**. No duration table,
 identity branch, residual fit, aggregate stats claim, or clock wiring landed.
 
-**Shared encrypted accessor census (2026-08-10):** the **156** direct
-encrypted reads plus **24** level accessors are now bounded as one source-
-general dependency: species **24**, EXP **12**, EV-byte **72**, IV-bitfield
-**72**. The census derives all 24 `personality % 24` substruct permutations,
-their exact non-contiguous ELF jump-arm entries, the valid-vs-corrupt checksum
-route, exact field-tail PCs/fetch widths, and the
-common four-GetSubstruct + 12-word decrypt + four-GetSubstruct/24-halfword
-checksum + 12-word encrypt structure. The 12 observed mons cover nine modulo
-routes; Tier 1 enumerates all 24. Twice-fresh OFF packets remain byte-stable at
-the existing three hashes, so no pointer/decrypted-storage fixture was added.
-The partial shell stays `cycles: null`: modulo-arm instruction/fetch and
-EWRAM loop timing remain unresolved, with no duration/identity/residual fit.
+**Encrypted accessor source composition (2026-08-10, `d7820e25`):** the
+**156** direct encrypted reads plus **24** level accessors remain one
+source-general dependency: species **24**, EXP **12**, EV-byte **72**, and
+IV-bitfield **72**. Tier 1 covers all 24 `personality % 24` routes and all
+four substruct types. It now pins the complete 192-byte ELF `__umodsi3`
+symbol (`0x082e7be1` Thumb-bit), its three return paths, the `GetSubstruct`
+BL/resume shell, and all 96 compiled arms. The narrow `%24` reducer is not
+assumed to be the unsigned-division core: its Loop3/ROR correction body is
+independently hashed and replayed for every u32 personality.
 
-Exact timing for the censused **156** encrypted `%24` box-mon reads and two
-encrypted accessors inside each of the 12 level calls, plus encrypted writes
-and exact memory/fetch timing, remains unresolved, so the
-complete stats operation and live clock stay unwired. No identity/duration
-table or residual fit landed; #55 stays open. See the construction receipt's
-stats section.
+Each census row source-audits the exact GetBoxMonData2 alias/outer sequence
+and CalculateBoxMonChecksum sequence, `[0,1,2,3,0,1,2,3]`, and exposes the
+eight complete function timings plus their source-general subtotal. It adds
+that subtotal to the fixed **1,174**-cycle decrypt/checksum/encrypt
+instruction-fetch segment (328 + 518 + 328), but retains accessor cycles as
+`null`. The full-u32 `0xffffffff` example is **6,824** across the eight calls
+and **7,998** composed ROM-only cycles; it is an input-derived example, not a
+fixture-duration key.
+
+The committed Battle Scene OFF v2 packets remain byte-identical at anchor
+`631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`,
+LILIANA `ae1282b74f74de6a85b8772adfbcd83028fad09f8aa3e3ecd518aafeab17b443`,
+and varied trainer
+`3e10197a34f4ea7a08a23bead04ae5b6113c653304722167095612a9b0626987`
+(**242/52/294**, **112/31/143**, **202/30/232**). Their event stream only
+exposes interrupt/resume points, while all **156** Scene-OFF stat receipt
+boundaries are strictly larger than their known GetMonData shell plus this
+ROM-only subtotal after recorded pauses are removed. No residual is absorbed.
+
+**Encrypted EWRAM/tails increment (2026-08-10):** a retail aligned-access
+reducer now records byte/halfword at **2** occupancy cycles and word at **4**
+occupancy cycles on the 16-bit EWRAM bus; unneeded misalignment is rejected,
+not guessed. Elapsed premium is composed per instruction context. The
+12-word decrypt/encrypt components are independently exact at **448** each,
+and the 24-halfword checksum loop remains **518**; shared bus occupancy is
+**528** with a **240**-cycle premium over already-counted instruction
+baselines. All 180 dependency rows now expose exact input-derived valid/
+invalid checksum tails and species/EXP/EV/IV field tails, including bad-egg
+species, with exact PCs, widths, counts, bus totals, and complete component
+cycles. A fresh compact Scene-OFF sibling receipt pins the clean mGBA
+component joins without pointer/storage data or a production import.
+
+**Synchronous accessor outer-shell increment (2026-08-10, `8aa00042`):** an
+explicit typed reducer now closes the remaining `GetBoxMonData2` prologue,
+four-call setup, decrypt/checksum call bridges, field jump-table dispatch,
+encrypt/common return, plus CalculateBoxMonChecksum's own four-call setup and
+return shell. The source/ELF subtotal is **216 + 98 = 314** cycles and excludes
+all eight GetSubstruct bodies plus the already-exact decrypt/checksum/encrypt
+components, so composed timing has no nested double count. All **180** receipt
+rows and a **24×14×2** personality/field/checksum matrix retain input-derived
+routes. A fresh Scene-OFF mGBA boundary run pins all eight scattered aligned
+personality reads at clean two-cycle instruction joins; the same isolated
+composition applies to the receipt-pinned EXP/IV u32 tails, and **77/156** direct
+encrypted stats boundaries equal the complete synchronous composition, while
+every other observed class remains an unabsorbed boundary/service/IRQ delta.
+
+**Still open:** async +18 service, VBlank/IRQ entry/body/return work, and the
+live construction clock. Complete stats/accessor timing remains null and
+unwired; no identity/duration table or residual fit landed. Detailed
+accounting is in `docs/issue55-encrypted-accessor-timing-slice.md`.
+
+**Recurring +18 census (2026-08-10):** wrapper-validated OFF packets now join
+all **85** occurrences by exact source PCs and scalar scheduler/IRQ/DMA/
+prefetch state: nature **11**, outer tail **1**, encrypted accessor **67**,
+level loop **3**, divide **1**, and `GetNature` **2**, against **488** clean
+same-component controls. A missing fixed compiled segment is refuted. Both
+groups have no active DMA, IF, or CPU block and have ROM prefetch enabled;
+phases vary and scheduler distance overlaps. The exact missing discriminator
+is the intra-span instruction timing-event identity/queue state, needed to
+separate execution-context overlap from non-IRQ asynchronous service. No +18
+reducer landed; the accessor histogram stays
+**0×77/+18×67/+117×5/+245×6/+263×1** and both cycle contracts stay null.
+
+**Instruction-queue observable checkpoint (2026-08-10):** the existing probe
+now has a bounded opt-in instruction trace selecting the anchor's matched
+318-cycle `__divsi3(9300,100)` clean control and `__divsi3(11300,100)` +18
+member. Two fresh OFF attempts to read libmgba-py's `mTiming.root` event/name
+inside that window exited 139 before JSON; the required wrapper rejected both.
+The hook retains no pointer token and leaves its semantic queue field empty.
+The exact next missing observable is a safe libmgba API/shim for the due event's
+callback name and queue position around one `core.step()`; no +18 timing or
+clock wiring is inferred. See the construction schedule receipt.
+
+**Instruction-queue identity BANKED (2026-08-10 late, solo session):** the
+shim premise was refuted — the vendored ffi declares `mTiming`/`mTimingEvent`
+fully, so a guarded walk suffices (`snapshot_timing_queue()` in the probe;
+NULL/link/name-length capped; validated 20,500 walks fault-free and
+savestate-inert; the exit-139 is the known teardown crash and reproduces
+with zero walks). The packet is banked twice-fresh byte-identical
+(`2e3b089c…`, 162,353 bytes, wrapper exit 0) and the frozen v2 anchor still
+regenerates at `631bd214…`. Result: the single matched +18 edge
+(`0x082e7572→0x082e7574`, clean 2 vs member 20 cycles) crosses a due
+**`GBA Timer 0`** event (m4a sample timer) at its queue head; the clean
+control's matched edge crosses none. Next: measure the Timer 0 service-cost
+class across the 85 census joins with this packet mode, then model
+crossings from the source-derivable Timer 0 reload — still no fit, clock
+stays unwired. Full detail: construction schedule receipt, "queue identity
+BANKED" section.
 
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
@@ -1270,12 +1349,35 @@ and relevant audio I/O state. Two fresh Scene-OFF runs per case are byte-
 identical: all **113** captured keys repeat with **0** unequal m4a costs. The
 packet contains no frame, tick, RNG cursor, address, construction identity, or
 absolute-cycle lookup. This remains an evidence boundary, not a reducer:
-`coverage.complete` is false for four residual dereference classes covering
+The v3 packet's `coverage.complete` is false for four residual dereference classes covering
 handler-dependent/unbounded MPlayMain command and callback reads, transitive
 CgbSound callback reads, and malformed/dynamic SoundMainRAM sample targets.
 The next admissible audio step is a complete instruction-traced indirect-read
 contract or controlled repeated cross-state equivalence—not a state-duration
 table. See `docs/issue55-m4a-source-state-receipt-v3.md`.
+
+**CgbSound callback/read closure (2026-08-10, `d55da1ac`):** a direct-emitted
+compact v2 packet closes one of those four classes source-generally: all
+**11** `CgbOscOff`/`MidiKeyToCgbFreq` paths plus complete fixed table sizes and
+digests are mechanically pinned. Two fresh Scene-OFF runs per case reproduce
+**52/31/30 = 113** exact v3-state-digest/m4a-cost joins with **0** unequal
+costs. The committed evidence is **48,062 bytes** total; the provisional
+~26 MB duplicated state packets were squash-excluded from master history.
+This licenses no duration reducer. Three dereference classes remain explicit:
+two `MPlayMain` handler/callback read classes and malformed/dynamic
+`SoundMainRAM` sample targets. See
+`docs/issue55-m4a-cgb-callback-receipt-v2.md`.
+
+**MPlayMain callback/read closure (2026-08-10, `a56341fb`):** a compact v2
+packet closes the callback-transitive class source-generally: all **36**
+`gMPlayJumpTable` slots and **14** `gXcmdTable` slots are pinned to their
+source/ELF targets and read/write audits, including `ply_xcmd` and `ply_xxx`
+edges. Two fresh Scene-OFF runs per case reproduce **52/31/30 = 113** exact
+v3-state-digest/m4a-cost joins with **0** unequal costs. The additive fixtures
+total **136 KB**, contain no duplicate v3 graphs or identity/duration keys,
+and license no duration reducer. Two dereference classes remain: the unbounded
+command/pattern source window and malformed/dynamic `SoundMainRAM` sample
+targets. See `docs/issue55-m4a-mplay-callback-receipt-v2.md`.
 
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.

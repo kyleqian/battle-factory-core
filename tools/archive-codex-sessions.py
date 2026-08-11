@@ -38,24 +38,31 @@ def main() -> int:
     args = parser.parse_args()
 
     codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
-    sessions = codex_home / "sessions"
-    if not sessions.is_dir():
+    # Codex rotates old rollouts from "sessions" into "archived_sessions" on
+    # its own schedule; a rollout can land there before this script ever
+    # gets a chance to see it in "sessions", so both need scanning.
+    session_dirs = [
+        d for d in (codex_home / "sessions", codex_home / "archived_sessions")
+        if d.is_dir()
+    ]
+    if not session_dirs:
         return 0
 
     launch_cwd = args.cwd.resolve()
     matches: list[Path] = []
-    for source in sessions.rglob("*.jsonl"):
-        try:
-            # Leave a small allowance for filesystem timestamp granularity.
-            if source.stat().st_mtime < args.since - 2:
+    for sessions in session_dirs:
+        for source in sessions.rglob("*.jsonl"):
+            try:
+                # Leave a small allowance for filesystem timestamp granularity.
+                if source.stat().st_mtime < args.since - 2:
+                    continue
+            except OSError:
                 continue
-        except OSError:
-            continue
-        cwd, originator = session_metadata(source)
-        if cwd == launch_cwd and (
-            args.originator is None or originator == args.originator
-        ):
-            matches.append(source)
+            cwd, originator = session_metadata(source)
+            if cwd == launch_cwd and (
+                args.originator is None or originator == args.originator
+            ):
+                matches.append(source)
 
     if not matches:
         print("Codex session history remains under ~/.codex/sessions (no new rollout file matched this launch).")

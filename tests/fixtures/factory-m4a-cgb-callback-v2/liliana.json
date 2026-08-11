@@ -1,0 +1,336 @@
+{
+  "schema": "factory-m4a-cgb-callback-probe/v2",
+  "case": "liliana",
+  "oracleProfile": "battle-scene-off",
+  "sourceStateReference": {
+    "packetSchema": "factory-m4a-source-state-probe/v3",
+    "digestKey": "sourceSemanticState.stateDigest"
+  },
+  "cgbCallback": {
+    "component": {
+      "revision": "factory-m4a-cgb-callback/v1",
+      "dispatchTargets": {
+        "cgbOscOff": "CgbOscOff",
+        "midiKeyToCgbFreq": "MidiKeyToCgbFreq"
+      },
+      "readRegions": {
+        "gCgb3Vol": {
+          "requestedBytes": 16,
+          "capturedBytes": 16,
+          "complete": true,
+          "sha256": "86480498f3bc57863a295f2c9a9752be09fd91cb28c998650fa2b7ae3bdefd24"
+        },
+        "gCgbScaleTable": {
+          "requestedBytes": 132,
+          "capturedBytes": 132,
+          "complete": true,
+          "sha256": "2ab14116232b5768777f67dd371a380bd88fdc97858aa050306b132d05faa03e"
+        },
+        "gCgbFreqTable": {
+          "requestedBytes": 24,
+          "capturedBytes": 24,
+          "complete": true,
+          "sha256": "34e0ae7c2f912add79c2e61ed8347ff085000bc39f0173883ccbaff150205ee5"
+        },
+        "gNoiseTable": {
+          "requestedBytes": 60,
+          "capturedBytes": 60,
+          "complete": true,
+          "sha256": "197f0679262884d48dd459dcfe690c0a41e8a73cf76cb62838119fc9cb0e7ab6"
+        }
+      },
+      "paths": [
+        {
+          "id": "cgb-sound.cgb-osc-off.channel-1",
+          "target": "CgbOscOff",
+          "selector": "channel-1",
+          "reads": [],
+          "writes": [
+            "NR12",
+            "NR14"
+          ]
+        },
+        {
+          "id": "cgb-sound.cgb-osc-off.channel-2",
+          "target": "CgbOscOff",
+          "selector": "channel-2",
+          "reads": [],
+          "writes": [
+            "NR22",
+            "NR24"
+          ]
+        },
+        {
+          "id": "cgb-sound.cgb-osc-off.channel-3",
+          "target": "CgbOscOff",
+          "selector": "channel-3",
+          "reads": [],
+          "writes": [
+            "NR30"
+          ]
+        },
+        {
+          "id": "cgb-sound.cgb-osc-off.channel-4-default",
+          "target": "CgbOscOff",
+          "selector": "channel-4-default",
+          "reads": [],
+          "writes": [
+            "NR42",
+            "NR44"
+          ]
+        },
+        {
+          "id": "cgb-sound.gCgb3Vol.envelope-volume",
+          "target": "gCgb3Vol",
+          "selector": "envelopeVolume-0..15",
+          "reads": [
+            "gCgb3Vol[envelopeVolume]"
+          ],
+          "writes": [
+            "NR32"
+          ]
+        },
+        {
+          "id": "mplay-main.midi-key-to-cgb-freq.noise-low-key",
+          "target": "MidiKeyToCgbFreq",
+          "selector": "channel-4-key-0..20",
+          "reads": [
+            "gNoiseTable[key]"
+          ],
+          "writes": []
+        },
+        {
+          "id": "mplay-main.midi-key-to-cgb-freq.noise-high-key",
+          "target": "MidiKeyToCgbFreq",
+          "selector": "channel-4-key-21..80",
+          "reads": [
+            "gNoiseTable[key - 21]"
+          ],
+          "writes": []
+        },
+        {
+          "id": "mplay-main.midi-key-to-cgb-freq.noise-clamped-key",
+          "target": "MidiKeyToCgbFreq",
+          "selector": "channel-4-key-clamped-59",
+          "reads": [
+            "gNoiseTable[59]"
+          ],
+          "writes": []
+        },
+        {
+          "id": "mplay-main.midi-key-to-cgb-freq.tone-low-key",
+          "target": "MidiKeyToCgbFreq",
+          "selector": "channel-1..3-key-0..35",
+          "reads": [
+            "gCgbScaleTable[0]",
+            "gCgbScaleTable[1]",
+            "gCgbFreqTable[...]"
+          ],
+          "writes": []
+        },
+        {
+          "id": "mplay-main.midi-key-to-cgb-freq.tone-normal-key",
+          "target": "MidiKeyToCgbFreq",
+          "selector": "channel-1..3-key-36..166",
+          "reads": [
+            "gCgbScaleTable[key]",
+            "gCgbScaleTable[key + 1]",
+            "gCgbFreqTable[...]"
+          ],
+          "writes": []
+        },
+        {
+          "id": "mplay-main.midi-key-to-cgb-freq.tone-clamped-key",
+          "target": "MidiKeyToCgbFreq",
+          "selector": "channel-1..3-key-clamped-130",
+          "reads": [
+            "gCgbScaleTable[130]",
+            "gCgbScaleTable[131]",
+            "gCgbFreqTable[...]"
+          ],
+          "writes": []
+        }
+      ],
+      "coverage": {
+        "complete": true,
+        "expectedPathIds": [
+          "cgb-sound.cgb-osc-off.channel-1",
+          "cgb-sound.cgb-osc-off.channel-2",
+          "cgb-sound.cgb-osc-off.channel-3",
+          "cgb-sound.cgb-osc-off.channel-4-default",
+          "cgb-sound.gCgb3Vol.envelope-volume",
+          "mplay-main.midi-key-to-cgb-freq.noise-low-key",
+          "mplay-main.midi-key-to-cgb-freq.noise-high-key",
+          "mplay-main.midi-key-to-cgb-freq.noise-clamped-key",
+          "mplay-main.midi-key-to-cgb-freq.tone-low-key",
+          "mplay-main.midi-key-to-cgb-freq.tone-normal-key",
+          "mplay-main.midi-key-to-cgb-freq.tone-clamped-key"
+        ],
+        "observedPathIds": [
+          "cgb-sound.cgb-osc-off.channel-1",
+          "cgb-sound.cgb-osc-off.channel-2",
+          "cgb-sound.cgb-osc-off.channel-3",
+          "cgb-sound.cgb-osc-off.channel-4-default",
+          "cgb-sound.gCgb3Vol.envelope-volume",
+          "mplay-main.midi-key-to-cgb-freq.noise-low-key",
+          "mplay-main.midi-key-to-cgb-freq.noise-high-key",
+          "mplay-main.midi-key-to-cgb-freq.noise-clamped-key",
+          "mplay-main.midi-key-to-cgb-freq.tone-low-key",
+          "mplay-main.midi-key-to-cgb-freq.tone-normal-key",
+          "mplay-main.midi-key-to-cgb-freq.tone-clamped-key"
+        ],
+        "sourceGeneral": true
+      }
+    },
+    "componentDigest": "aa3af5c7638c9d233164feccf2f1e7b1a7d4eb16fe6c1a19370e22f49839af62"
+  },
+  "residualDereferences": [
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+      "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+      "captured": "Current command bytes, all three pattern-stack windows, complete track/player scalar state, and dispatch target symbols.",
+      "remainder": "The full handler-dependent command/control-flow read set is not statically bounded by this packet."
+    },
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a.c:1500-1534",
+      "read": "ply_xcmd/ply_xxx and gXcmdTable/gMPlayJumpTable callbacks may dereference callback-specific state.",
+      "captured": "Dispatch table target symbols and the callback-visible player/track/channel graph.",
+      "remainder": "Transitive callback reads are not instruction-traced into a complete memory-read set."
+    },
+    {
+      "stage": "SoundMainRAM-channel-passes",
+      "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+      "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+      "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete 3168-byte PCM buffer, DMA source/destination roles, and VCOUNT.",
+      "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target is reported as incomplete; no such target was observed in this packet."
+    }
+  ],
+  "observations": [
+    {
+      "sourceStateDigest": "75050563b447f4df6078afc684b2103f401de44e0af83a955615f733e6791f4a",
+      "m4aCost": 28203
+    },
+    {
+      "sourceStateDigest": "de24421aaaa62bc671b7954b161eec35f97343f393722c2bf247ed37d21df6db",
+      "m4aCost": 28069
+    },
+    {
+      "sourceStateDigest": "04e627717fe727b96245a2f4ee30034752d39838a4fe1e4f04c3238087c5f97f",
+      "m4aCost": 33911
+    },
+    {
+      "sourceStateDigest": "c360a4950dfd3a22f12068912a1e1a3937bce17b006ca81d2ca1bc9f2e4b3185",
+      "m4aCost": 24827
+    },
+    {
+      "sourceStateDigest": "67dcf01479ae763df89833827da03bd67ea8c2b2464b1e91acf12fa387454d37",
+      "m4aCost": 24732
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "m4aCost": 40832
+    },
+    {
+      "sourceStateDigest": "7e349fb8f37b31fe407521166341e453e82ec5579cd0df5e735f367e7f8940ff",
+      "m4aCost": 31568
+    },
+    {
+      "sourceStateDigest": "136219c3db5a06a580f1aa93008a8266b67b21f54a53b59af9725013d68478f2",
+      "m4aCost": 31427
+    },
+    {
+      "sourceStateDigest": "254105d0e300044129ce403e43cd0c3e9ef937dc5966e03678aeffd5b4b98e28",
+      "m4aCost": 37552
+    },
+    {
+      "sourceStateDigest": "48e609796c61993b98ce4aed1fa69eb8190f01f114bde9eb392f7cb9c629d981",
+      "m4aCost": 31569
+    },
+    {
+      "sourceStateDigest": "4098a02e3f0a922f3f402061333f5320154be04365649f44ab33db3d406935b6",
+      "m4aCost": 31301
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "m4aCost": 47917
+    },
+    {
+      "sourceStateDigest": "574a5e1547725c9685e4a84569319902188d205a7f3b1c6f3c20c9f25ad33d20",
+      "m4aCost": 33213
+    },
+    {
+      "sourceStateDigest": "6a88a5d761ef2e24daf4c73eb5da29c8413d1066dc261a4878e57a022db33f1a",
+      "m4aCost": 35195
+    },
+    {
+      "sourceStateDigest": "de8497c08457a8bfcd785ac38eb994e6c6ad6146a46e135b95fc9329bffb8f2d",
+      "m4aCost": 35257
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "m4aCost": 34764
+    },
+    {
+      "sourceStateDigest": "0dbdc79bf393698e16fffbb04256067e2193fb6ae71827d5b9451d22dc471808",
+      "m4aCost": 33443
+    },
+    {
+      "sourceStateDigest": "2efd8904f380af9da21b782a50a355dd43c8258ca7005b8b237d84b84a743a3a",
+      "m4aCost": 32531
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "m4aCost": 40609
+    },
+    {
+      "sourceStateDigest": "d4eafd4be04ffbc4a1a5d9a999c46951cf37e4d3455f53d73961e2c4d863c0b4",
+      "m4aCost": 38408
+    },
+    {
+      "sourceStateDigest": "e7fe29bbc43e4e61a49403e7dbb44933dfef2649e6bdcc987b7c658b5e947809",
+      "m4aCost": 37813
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "m4aCost": 39558
+    },
+    {
+      "sourceStateDigest": "22c5d662c36c4bd2b6ba595410f8ba4c148d1bfb6bffaadb74fb52c7517dacd8",
+      "m4aCost": 30214
+    },
+    {
+      "sourceStateDigest": "cec9c411d0fd7a5187232111dfe4f540ea44cc33c6d8892daa58bb056fe45123",
+      "m4aCost": 29571
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "m4aCost": 42318
+    },
+    {
+      "sourceStateDigest": "730d5b961495f425916a9ef802b17018b2256eef4dfc38576f947c2d0ebc239d",
+      "m4aCost": 31777
+    },
+    {
+      "sourceStateDigest": "aa020fe7e7f2649b70633275a7eb7426a5798e75ee67da6606665aeceafd0c4a",
+      "m4aCost": 31737
+    },
+    {
+      "sourceStateDigest": "6854eca211190cad143f165b2c43e6011d7fbba5c910cad932e679c0a933452a",
+      "m4aCost": 36827
+    },
+    {
+      "sourceStateDigest": "898a71ab6287958bf7ee9f5c76a2487e7087dace83615e40ef8bf4ce3fe998bf",
+      "m4aCost": 31550
+    },
+    {
+      "sourceStateDigest": "9808dfff65029cdd2806b77f0c2c5f9617be333e81c3e0c055a4590116a86e3f",
+      "m4aCost": 31415
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "m4aCost": 42275
+    }
+  ]
+}

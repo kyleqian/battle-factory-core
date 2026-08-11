@@ -425,12 +425,229 @@ export type FactoryGetBoxMonDataFetchClass =
   | "ewram-u16-bitfield"
   | "ewram-u32-bitfield";
 
+export type FactoryGetSubstructType = 0 | 1 | 2 | 3;
+
+/**
+ * The source/ELF-reduced, ROM-only part of one GetSubstruct call.
+ *
+ * The separate libgcc `% 24` body, dispatch table, and every one of the 24
+ * compiled arms are fully source/ELF-reduced here. `cycles` is consequently
+ * exact for GetSubstruct itself; the surrounding encrypted accessor's EWRAM
+ * loads, field tail, crypt/checksum data buses, async service, and IRQ remain
+ * deliberately outside this reducer.
+ */
+export interface FactoryGetSubstructTiming {
+  personality: number;
+  personalityModulo24: number;
+  substructType: FactoryGetSubstructType;
+  logicalToPhysicalSlots: readonly number[];
+  selectedPhysicalSlot: number;
+  secureStorageOffset: number;
+  armPc: number;
+  armTargetPc: number;
+  commonSequentialThumbHalfwords: number;
+  commonPipelineRefills: number;
+  commonRomLiteralLoads: number;
+  commonRomTableLoads: number;
+  commonNonModuloCycles: number;
+  armSequentialThumbHalfwords: number;
+  armPipelineRefills: number;
+  armInstructionFetchCycles: number;
+  /** GetSubstruct's Thumb BL into the helper and the caller instruction after it. */
+  moduloCallPc: number;
+  moduloReturnPc: number;
+  /** libgcc's `__umodsi3` symbol entry and its selected `mov pc, lr`. */
+  moduloEntryPc: number;
+  moduloReturnInstructionPc: number;
+  moduloSequentialThumbHalfwords: number;
+  moduloPipelineRefills: number;
+  moduloRorInternalCycles: number;
+  moduloLoop1Iterations: number;
+  moduloLoop2Iterations: number;
+  moduloLoop3Iterations: number;
+  /** Common dispatch shell plus the selected arm, excluding the helper body. */
+  nonModuloCycles: number;
+  /** Exact source-general `__umodsi3(personality, 24)` cost. */
+  moduloCycles: number;
+  /** Complete GetSubstruct instruction/fetch cost; no secure-data load occurs here. */
+  cycles: number;
+  unresolved: null;
+}
+
+export type FactoryEncryptedWordLoopKind = "decrypt" | "encrypt";
+
+export type FactoryEwramAccessKind = "read" | "write";
+export type FactoryEwramAccessWidth = 1 | 2 | 4;
+
+/**
+ * One aligned retail EWRAM data access on the GBA's 16-bit external bus.
+ * Misaligned ARM7TDMI load rotation/alignment behavior is deliberately not
+ * claimed by this slice because none of the pinned BoxPokemon accesses uses it.
+ */
+export interface FactoryEwramAccessTiming {
+  region: "ewram";
+  access: FactoryEwramAccessKind;
+  width: FactoryEwramAccessWidth;
+  address: number;
+  alignment: FactoryEwramAccessWidth;
+  transfers: 1 | 2;
+  busWidth: 2;
+  cycles: 2 | 4;
+  instructionBaselineCycles: 2;
+  busPremiumCycles: 0 | 2;
+  unresolved: null;
+}
+
+export interface FactoryChecksumTailTiming {
+  route: "valid" | "invalid-marks-bad-egg";
+  entryPc: 0x0806_a6d0;
+  dispatchPc: 0x0806_a6f2;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  halfwordReads: 1;
+  byteReads: number;
+  byteWrites: number;
+  dataAccessCycles: number;
+  dataAccessPremiumCycles: number;
+  instructionFetchCycles: number;
+  cycles: number;
+  unresolved: null;
+}
+
+export type FactoryFieldTailRoute =
+  | "species"
+  | "bad-egg-species"
+  | "experience"
+  | "ev-byte"
+  | "iv-bitfield";
+
+export interface FactoryFieldTailTiming {
+  route: FactoryFieldTailRoute;
+  entryPc: number;
+  commonTailPc: 0x0806_ac8c;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  byteReads: number;
+  halfwordReads: number;
+  wordReads: number;
+  dataAccessCycles: number;
+  dataAccessPremiumCycles: number;
+  instructionFetchCycles: number;
+  cycles: number;
+  unresolved: null;
+}
+
+export type FactoryGetBoxMonDataOuterSegmentName =
+  | "accessor-prologue"
+  | "accessor-secure-setup-and-calls"
+  | "checksum-function-setup-and-calls"
+  | "checksum-function-return"
+  | "accessor-field-dispatch"
+  | "accessor-encrypt-and-return";
+
+/**
+ * One synchronous instruction/memory segment owned by the accessor shell.
+ * The interval is half-open. Nested function bodies are never included.
+ */
+export interface FactoryGetBoxMonDataOuterSegmentTiming {
+  name: FactoryGetBoxMonDataOuterSegmentName;
+  entryPc: number;
+  endPc: number;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  romLiteralLoads: number;
+  romJumpTableLoads: number;
+  ewramWordReads: number;
+  ewramDataAccessCycles: number;
+  ewramDataAccessPremiumCycles: number;
+  cycles: number;
+}
+
+/** Source ABI for the receipt-used encrypted GetBoxMonData2 field subset. */
+export interface FactoryGetBoxMonDataOuterShellTimingInput {
+  field: number;
+}
+
+/**
+ * Exact synchronous shell around the separately reduced nested components.
+ * This includes CalculateBoxMonChecksum's own setup/return instructions, but
+ * excludes its four GetSubstruct bodies and its already-exposed checksum loop.
+ */
+export interface FactoryGetBoxMonDataOuterShellTiming {
+  field: number;
+  fieldDispatchTargetPc: number;
+  segments: readonly FactoryGetBoxMonDataOuterSegmentTiming[];
+  mainAccessorCycles: number;
+  checksumFunctionShellCycles: number;
+  ewramWordReads: 8;
+  ewramDataAccessCycles: 32;
+  /** Extra elapsed cycles after instruction scheduling/prefetch overlap. */
+  ewramDataAccessPremiumCycles: 0;
+  excludedNestedCalls: Readonly<{
+    getSubstruct: 8;
+    decryptBoxMon: 1;
+    checksumLoop: 1;
+    encryptBoxMon: 1;
+  }>;
+  cycles: number;
+  unresolved: null;
+}
+
+/**
+ * Fixed instruction/fetch census for DecryptBoxMon or EncryptBoxMon.
+ *
+ * The loops are source-general and always execute 12 word iterations.  The
+ * instruction stream and five aligned 32-bit EWRAM accesses per iteration are
+ * exact. Data-access totals include each load/store's two-cycle instruction
+ * baseline; `dataAccessPremiumCycles` is the part added to the instruction
+ * subtotal when composing complete component cycles.
+ */
+export interface FactoryEncryptedWordLoopTiming {
+  kind: FactoryEncryptedWordLoopKind;
+  entryPc: number;
+  loopPc: number;
+  returnPc: number;
+  iterations: 12;
+  ewramWordReads: 36;
+  ewramWordWrites: 24;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  instructionFetchCycles: number;
+  dataAccessCycles: number;
+  dataAccessPremiumCycles: number;
+  cycles: number;
+  unresolved: null;
+}
+
+/**
+ * Fixed instruction/fetch census for the four six-halfword checksum loops.
+ * The 24 aligned EWRAM halfword reads are reported separately from ROM
+ * instruction accounting; no observed pause or asynchronous service is folded
+ * into this component.
+ */
+export interface FactoryChecksumLoopTiming {
+  entryPc: number;
+  firstLoopSetupPc: number;
+  firstReadPc: number;
+  afterLoopPc: number;
+  substructCount: 4;
+  halfwordsPerSubstruct: 6;
+  checksumHalfwordReads: 24;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  instructionFetchCycles: number;
+  ewramHalfwordReadCycles: number;
+  ewramReadPremiumCycles: number;
+  cycles: number;
+  unresolved: null;
+}
+
 /**
  * Source/ELF dependency census for the encrypted GetBoxMonData2 subset used
- * by CalculateMonStats. This deliberately exposes a partial exact shell and
- * keeps the complete cost null: GetSubstruct's modulo helper and its 24-way
- * compiled arm, ROM fetches, and EWRAM bus accesses have not yet been summed
- * into one independently accepted total.
+ * by CalculateMonStats. It composes every complete ROM-only GetSubstruct call
+ * with the fixed crypt/checksum fetch subtotal, but deliberately keeps the
+ * complete accessor cost null until the EWRAM accesses, field tails, async
+ * service, and VBlank/IRQ boundaries are independently accepted.
  */
 export interface FactoryGetBoxMonDataDependency {
   field: number;
@@ -448,6 +665,36 @@ export interface FactoryGetBoxMonDataDependency {
   commonFetchClasses: readonly string[];
   checksumRoute: "valid" | "invalid-marks-bad-egg";
   speciesTailRoute: "not-applicable" | "species" | "bad-egg-species";
+  /** One field-selected arm; the accessor still performs seven other calls. */
+  selectedSubstructTiming: FactoryGetSubstructTiming;
+  /** Source order: outer encrypted setup [0..3], then checksum [0..3]. */
+  getSubstructTypes: readonly FactoryGetSubstructType[];
+  /** Every source-proven GetSubstruct function call in that exact order. */
+  getSubstructTimings: readonly FactoryGetSubstructTiming[];
+  /** Exact function-only total of the eight calls, not an accessor total. */
+  getSubstructCycles: number;
+  decryptLoopTiming: FactoryEncryptedWordLoopTiming;
+  checksumLoopTiming: FactoryChecksumLoopTiming;
+  encryptLoopTiming: FactoryEncryptedWordLoopTiming;
+  /** Exact ROM instruction/fetch subtotal, not a complete accessor duration. */
+  sharedInstructionFetchCycles: number;
+  /** Shared crypt/checksum fetch work plus the eight complete GetSubstruct calls. */
+  composedInstructionFetchCycles: number;
+  /** Complete bus occupancy of the two crypt loops and checksum read loop. */
+  sharedDataBusCycles: number;
+  /** Part of shared bus occupancy not already in the instruction baseline. */
+  sharedDataBusPremiumCycles: number;
+  checksumTailTiming: FactoryChecksumTailTiming;
+  fieldTailTiming: FactoryFieldTailTiming;
+  /** Checksum-route plus selected-field data bus occupancy. */
+  tailDataBusCycles: number;
+  /** Complete checksum-route plus selected-field tail instruction/data time. */
+  tailCycles: number;
+  /** All independently closed nested components, excluding their outer shell. */
+  composedKnownCycles: number;
+  /** Exact synchronous accessor subtotal, excluding only async service and IRQ. */
+  outerShellTiming: FactoryGetBoxMonDataOuterShellTiming;
+  composedSynchronousKnownCycles: number;
   getSubstructCalls: 8;
   decryptIterations: 12;
   checksumHalfwordReads: 24;
@@ -869,9 +1116,10 @@ export function reduceFactoryGetMonDataTiming(
     const pipelineRefills = 4;
     const romLiteralLoads = 1;
     const romJumpTableLoads = 1;
-    // The 32-bit EWRAM LDR occupies six cycles on the 16-bit bus at this
-    // boundary; byte/halfword reads stay in the ordinary two-cycle class.
-    // The sequential instruction baseline already counts two cycles.
+    // This older direct boundary has its own measured pipeline state: the
+    // 32-bit status LDR occupies six cycles here, while byte/halfword reads
+    // stay in the ordinary two-cycle class. Do not transplant the encrypted
+    // loop/isolated-tail composition across execution contexts.
     const ewramReadCycles = status ? 6 : 2;
     const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
       + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
@@ -993,6 +1241,43 @@ const GET_SUBSTRUCT_MODULO_ARM_PCS = Object.freeze([
   0x0806_a4ac, 0x0806_a4ba, 0x0806_a4cc, 0x0806_a4e0,
 ] as const);
 
+// Counts from the compiled arm entry through the common GetSubstruct return
+// (`0x0806a510`), using 2 cycles per ROM Thumb halfword and +6 for each taken
+// control-flow refill.  Rows are personality % 24; columns are substruct
+// types 0..3.  The non-contiguous arm PCs above and this table are both
+// derived from the pinned ELF, not from an observed duration.
+const GET_SUBSTRUCT_ARM_HALFWORDS = Object.freeze([
+  [14, 14, 16, 18], [14, 12, 16, 18], [14, 12, 16, 19], [14, 12, 16, 19],
+  [14, 12, 16, 18], [14, 12, 16, 19], [16, 10, 16, 18], [16, 10, 17, 19],
+  [16, 10, 16, 19], [16, 10, 16, 19], [16, 10, 17, 19], [15, 10, 15, 19],
+  [16, 11, 13, 19], [16, 11, 13, 19], [16, 11, 13, 19], [15, 11, 13, 19],
+  [16, 11, 13, 19], [15, 11, 13, 19], [16, 11, 15, 16], [17, 11, 15, 17],
+  [16, 11, 16, 17], [15, 11, 15, 17], [17, 11, 15, 17], [15, 11, 15, 15],
+] as const);
+
+const GET_SUBSTRUCT_ARM_PIPELINE_REFILLS = Object.freeze([
+  [3, 4, 4, 7], [4, 3, 4, 6], [4, 3, 4, 7], [4, 3, 4, 7],
+  [4, 3, 4, 6], [4, 3, 4, 7], [4, 2, 5, 7], [5, 2, 5, 7],
+  [4, 2, 5, 8], [5, 2, 5, 8], [5, 2, 5, 7], [5, 2, 4, 6],
+  [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 2, 5],
+  [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 3, 2], [4, 3, 4, 4],
+  [4, 3, 4, 3], [4, 3, 3, 3], [4, 3, 4, 4], [3, 3, 4, 3],
+] as const);
+
+const GET_SUBSTRUCT_ARM_TARGET_PCS = Object.freeze([
+  0x0806_a50e, // physical slot 0: return the box+0x20 base
+  0x0806_a508, // physical slot 1
+  0x0806_a502, // physical slot 2
+  0x0806_a4fc, // physical slot 3
+] as const);
+
+// `GetBoxMonData3` establishes pointers for 0..3 before decrypting, then
+// `CalculateBoxMonChecksum` independently establishes 0..3 again. Both
+// sequences are visible in pokemon.c and in the two pinned ELF call blocks.
+const GET_BOX_MON_DATA_GET_SUBSTRUCT_TYPES = Object.freeze([
+  0, 1, 2, 3, 0, 1, 2, 3,
+] as const satisfies readonly FactoryGetSubstructType[]);
+
 const GET_BOX_COMMON_FETCH_CLASSES = Object.freeze([
   "rom-thumb-sequential",
   "rom-literal-u32",
@@ -1022,6 +1307,712 @@ const GET_BOX_COMMON_BOUNDARIES = Object.freeze({
   encryptLoopPc: 0x0806_a232,
 });
 
+function getFactoryGetBoxReceiptFieldTailPc(fieldValue: number): number {
+  const field = requireSigned32(fieldValue, "field");
+  if (field === 11) return 0x0806_a95e;
+  if (field === 25) return 0x0806_a97c;
+  if (field >= 26 && field <= 31) return 0x0806_a9a4 + (field - 26) * 4;
+  if (field >= 39 && field <= 44) {
+    return [
+      0x0806_a9f6, 0x0806_a9fe, 0x0806_aa06,
+      0x0806_aa0e, 0x0806_aa16, 0x0806_aa1e,
+    ][field - 39]!;
+  }
+  throw new Error("field is outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
+}
+
+/** Exact private result for the one libgcc symbol used by GetSubstruct. */
+interface GetSubstructModulo24Timing {
+  remainder: number;
+  entryPc: number;
+  returnInstructionPc: number;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  rorInternalCycles: number;
+  loop1Iterations: number;
+  loop2Iterations: number;
+  loop3Iterations: number;
+  cycles: number;
+}
+
+/**
+ * Replay the full, pinned `__umodsi3(personality, 24)` libgcc symbol.
+ *
+ * This is intentionally a narrow reducer rather than an assumed alias of
+ * `__udivsi3`: the ELF's `0x082e7be0..0x082e7c9e` body resets the temporary
+ * quotient group in Loop3 and uses register ROR plus a correction tail to
+ * recover a remainder. The only caller-specific work lies outside it in
+ * GetSubstruct's BL at `0x0806a27e` and resume at `0x0806a282`.
+ */
+function reduceGetSubstructModulo24Timing(personalityValue: number): GetSubstructModulo24Timing {
+  const personality = requireU32(personalityValue, "personality");
+  let r0 = personality;
+  let r1 = 24;
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  let rorInternalCycles = 0;
+  let loop1Iterations = 0;
+  let loop2Iterations = 0;
+  let loop3Iterations = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) pipelineRefills += 1;
+  };
+  const returnBranch = (): void => branch(true);
+  const ror = (value: number, amount: number): number => {
+    instruction();
+    // The one-cycle Thumb instruction class omits ARM7TDMI's register-ROR
+    // internal cycle; the mGBA/source timing receipt charges it explicitly.
+    rorInternalCycles += 1;
+    return rotateRight32(value, amount);
+  };
+  const result = (returnInstructionPc: number): GetSubstructModulo24Timing => Object.freeze({
+    remainder: r0,
+    entryPc: 0x082e_7be0,
+    returnInstructionPc,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    rorInternalCycles,
+    loop1Iterations,
+    loop2Iterations,
+    loop3Iterations,
+    cycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+      + rorInternalCycles,
+  });
+
+  instruction(); // cmp r1, #0
+  branch(false); // beq Ldiv0: compiled divisor is the literal 24
+  let r3 = 1;
+  instruction(); // movs r3, #1
+  instruction(); // cmp r0, r1
+  const belowDivisor = r0 < r1;
+  branch(!belowDivisor); // bcs Over1
+  if (belowDivisor) {
+    returnBranch(); // 0x082e7bea: mov pc, lr
+    return result(0x082e_7bea);
+  }
+
+  instruction(); // push {r4}
+  let r4 = 1;
+  instruction();
+  r4 = (r4 << 28) >>> 0;
+  instruction();
+
+  // ELF Loop1 at 0x082e7bf2: normalize four quotient bits at a time.
+  while (true) {
+    loop1Iterations += 1;
+    instruction();
+    const reachedLargeDivisor = r1 >= r4;
+    branch(reachedLargeDivisor);
+    if (reachedLargeDivisor) break;
+    instruction();
+    const reachedDividend = r1 >= r0;
+    branch(reachedDividend);
+    if (reachedDividend) break;
+    r1 = (r1 << 4) >>> 0;
+    r3 = (r3 << 4) >>> 0;
+    instruction(2);
+    branch(true);
+  }
+
+  r4 = (r4 << 3) >>> 0;
+  instruction();
+  // ELF Loop2 at 0x082e7c02: normalize the remaining zero to three bits.
+  while (true) {
+    loop2Iterations += 1;
+    instruction();
+    const reachedLargeDivisor = r1 >= r4;
+    branch(reachedLargeDivisor);
+    if (reachedLargeDivisor) break;
+    instruction();
+    const reachedDividend = r1 >= r0;
+    branch(reachedDividend);
+    if (reachedDividend) break;
+    r1 = (r1 << 1) >>> 0;
+    r3 = (r3 << 1) >>> 0;
+    instruction(2);
+    branch(true);
+  }
+
+  let ip = r3;
+  let r2 = 0;
+  // ELF Loop3 at 0x082e7c10: consume four quotient bits, retaining the
+  // quotient-group bits solely for the tail correction below.
+  while (true) {
+    loop3Iterations += 1;
+    r2 = 0;
+    instruction(); // movs r2, #0
+
+    instruction(); // cmp r0, r1
+    const below0 = r0 < r1;
+    branch(below0);
+    if (!below0) {
+      r0 = (r0 - r1) >>> 0;
+      instruction();
+    }
+
+    r4 = r1 >>> 1;
+    instruction();
+    instruction(); // cmp r0, r4
+    const below1 = r0 < r4;
+    branch(below1);
+    if (!below1) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      ip = r3;
+      instruction();
+      r4 = 1;
+      instruction();
+      r3 = ror(r3, r4);
+      r2 = (r2 | r3) >>> 0;
+      instruction();
+      r3 = ip;
+      instruction();
+    }
+
+    r4 = r1 >>> 2;
+    instruction();
+    instruction(); // cmp r0, r4
+    const below2 = r0 < r4;
+    branch(below2);
+    if (!below2) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      ip = r3;
+      instruction();
+      r4 = 2;
+      instruction();
+      r3 = ror(r3, r4);
+      r2 = (r2 | r3) >>> 0;
+      instruction();
+      r3 = ip;
+      instruction();
+    }
+
+    r4 = r1 >>> 3;
+    instruction();
+    instruction(); // cmp r0, r4
+    const below3 = r0 < r4;
+    branch(below3);
+    if (!below3) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      ip = r3;
+      instruction();
+      r4 = 3;
+      instruction();
+      r3 = ror(r3, r4);
+      r2 = (r2 | r3) >>> 0;
+      instruction();
+      r3 = ip;
+      instruction();
+    }
+
+    ip = r3;
+    instruction(); // mov ip, r3
+    instruction(); // cmp r0, #0
+    const exactRemainder = r0 === 0;
+    branch(exactRemainder);
+    if (exactRemainder) break;
+    r3 >>>= 4;
+    instruction();
+    const quotientDone = r3 === 0;
+    branch(quotientDone);
+    if (quotientDone) break;
+    r1 >>>= 4;
+    instruction();
+    branch(true);
+  }
+
+  r4 = 14;
+  instruction();
+  r4 = (r4 << 28) >>> 0;
+  instruction();
+  r2 = (r2 & r4) >>> 0;
+  instruction();
+  const needsCorrection = r2 !== 0;
+  branch(needsCorrection);
+  if (!needsCorrection) {
+    instruction(); // pop {r4}
+    returnBranch(); // 0x082e7c66: mov pc, lr
+    return result(0x082e_7c66);
+  }
+
+  r3 = ip;
+  instruction();
+  r4 = 3;
+  instruction();
+  r3 = ror(r3, r4);
+  instruction();
+  const skipThird = (r2 & r3) === 0;
+  branch(skipThird);
+  if (!skipThird) {
+    r4 = r1 >>> 3;
+    r0 = (r0 + r4) >>> 0;
+    instruction(2);
+  }
+
+  r3 = ip;
+  instruction();
+  r4 = 2;
+  instruction();
+  r3 = ror(r3, r4);
+  instruction();
+  const skipSecond = (r2 & r3) === 0;
+  branch(skipSecond);
+  if (!skipSecond) {
+    r4 = r1 >>> 2;
+    r0 = (r0 + r4) >>> 0;
+    instruction(2);
+  }
+
+  r3 = ip;
+  instruction();
+  r4 = 1;
+  instruction();
+  r3 = ror(r3, r4);
+  instruction();
+  const skipFirst = (r2 & r3) === 0;
+  branch(skipFirst);
+  if (!skipFirst) {
+    r4 = r1 >>> 1;
+    r0 = (r0 + r4) >>> 0;
+    instruction(2);
+  }
+
+  instruction(); // pop {r4}
+  returnBranch(); // 0x082e7c94: mov pc, lr
+  return result(0x082e_7c94);
+}
+
+/**
+ * Reduce the personality-selected GetSubstruct dispatch arm.
+ *
+ * The fixed shell is `GetSubstruct` `0x0806a270..0x0806a290`: seven ordinary
+ * prologue halfwords, the two-halfword BL, the range check, the dispatch
+ * shift, one PC-relative literal load, one ROM jump-table load, and the
+ * `mov pc` refill.  That shell is 68 cycles excluding the body of
+ * `__umodsi3`.  Each selected arm then performs only ROM instructions and
+ * pointer arithmetic before joining the common return at `0x0806a510`.
+ *
+ * The exact `__umodsi3(personality, 24)` symbol is composed with the fixed
+ * shell and selected arm here. It has no secure-data access of its own, so
+ * `cycles` is complete for GetSubstruct. Async +18 service and VBlank/IRQ
+ * pauses belong to the caller/accessor epoch and remain external.
+ */
+export function reduceFactoryGetSubstructTiming(
+  personalityValue: number,
+  substructTypeValue: number,
+): FactoryGetSubstructTiming {
+  const personality = requireU32(personalityValue, "personality");
+  const substructType = requireNonnegativeInteger(substructTypeValue, "substructType");
+  if (substructType > 3) {
+    throw new Error(`substructType must be a source u8 in [0, 3], got ${substructType}`);
+  }
+
+  // Feed the dispatch from the independently reconstructed `__umodsi3`
+  // result, rather than duplicating the host-language modulo operation.
+  const modulo = reduceGetSubstructModulo24Timing(personality);
+  const personalityModulo24 = modulo.remainder;
+  const logicalToPhysicalSlots = GET_SUBSTRUCT_LOGICAL_TO_PHYSICAL[personalityModulo24]!;
+  const selectedPhysicalSlot = logicalToPhysicalSlots[substructType as FactoryGetSubstructType]!;
+  const armPc = GET_SUBSTRUCT_MODULO_ARM_PCS[personalityModulo24]!;
+  const armSequentialThumbHalfwords = GET_SUBSTRUCT_ARM_HALFWORDS[personalityModulo24]![substructType]!;
+  const armPipelineRefills = GET_SUBSTRUCT_ARM_PIPELINE_REFILLS[personalityModulo24]![substructType]!;
+  const armInstructionFetchCycles = armSequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES;
+  const commonNonModuloCycles = 68;
+  const nonModuloCycles = commonNonModuloCycles
+    + armInstructionFetchCycles
+    + armPipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    personality,
+    personalityModulo24,
+    substructType: substructType as FactoryGetSubstructType,
+    logicalToPhysicalSlots,
+    selectedPhysicalSlot,
+    secureStorageOffset: 0x20 + selectedPhysicalSlot * 12,
+    armPc,
+    armTargetPc: GET_SUBSTRUCT_ARM_TARGET_PCS[selectedPhysicalSlot]!,
+    commonSequentialThumbHalfwords: 16,
+    commonPipelineRefills: 3,
+    commonRomLiteralLoads: 1,
+    commonRomTableLoads: 1,
+    commonNonModuloCycles,
+    armSequentialThumbHalfwords,
+    armPipelineRefills,
+    armInstructionFetchCycles,
+    moduloCallPc: 0x0806_a27e,
+    moduloReturnPc: 0x0806_a282,
+    moduloEntryPc: modulo.entryPc,
+    moduloReturnInstructionPc: modulo.returnInstructionPc,
+    moduloSequentialThumbHalfwords: modulo.sequentialThumbHalfwords,
+    moduloPipelineRefills: modulo.pipelineRefills,
+    moduloRorInternalCycles: modulo.rorInternalCycles,
+    moduloLoop1Iterations: modulo.loop1Iterations,
+    moduloLoop2Iterations: modulo.loop2Iterations,
+    moduloLoop3Iterations: modulo.loop3Iterations,
+    nonModuloCycles,
+    moduloCycles: modulo.cycles,
+    cycles: modulo.cycles + nonModuloCycles,
+    unresolved: null,
+  });
+}
+
+/**
+ * Reduce one aligned retail ARM7TDMI EWRAM load/store.
+ *
+ * Pinned `BoxPokemon` storage is naturally word-aligned. On the retail GBA's
+ * 16-bit EWRAM bus, aligned byte/halfword instructions take two master cycles;
+ * an aligned word instruction performs two bus transfers and takes four. The
+ * instruction census already charges two cycles for the load/store itself, so
+ * callers add only `busPremiumCycles` when composing a component total.
+ *
+ * This reducer intentionally rejects rather than invents misaligned semantics.
+ * No receipt-used crypt/checksum/field access is misaligned.
+ */
+export function reduceFactoryEwramAccessTiming(
+  input: Readonly<{
+    access: FactoryEwramAccessKind;
+    width: FactoryEwramAccessWidth;
+    address: number;
+  }>,
+): FactoryEwramAccessTiming {
+  const address = requireU32(input.address, "address");
+  if (input.access !== "read" && input.access !== "write") {
+    throw new Error("access must be read or write");
+  }
+  if (input.width !== 1 && input.width !== 2 && input.width !== 4) {
+    throw new Error("width must be 1, 2, or 4 bytes");
+  }
+  if (address < 0x0200_0000 || address + input.width > 0x0204_0000) {
+    throw new Error("address must be in retail EWRAM");
+  }
+  if (input.width === 2 && (address & 1) !== 0) {
+    throw new Error("misaligned EWRAM halfword behavior is not claimed");
+  }
+  if (input.width === 4 && (address & 3) !== 0) {
+    throw new Error("misaligned EWRAM word behavior is not claimed");
+  }
+  const word = input.width === 4;
+  return Object.freeze({
+    region: "ewram",
+    access: input.access,
+    width: input.width,
+    address,
+    alignment: input.width,
+    transfers: word ? 2 : 1,
+    busWidth: 2,
+    cycles: word ? 4 : 2,
+    instructionBaselineCycles: 2,
+    busPremiumCycles: word ? 2 : 0,
+    unresolved: null,
+  } as const);
+}
+
+function sumFactoryEwramAccesses(
+  accesses: readonly FactoryEwramAccessTiming[],
+): Readonly<{ cycles: number; premiumCycles: number }> {
+  return Object.freeze({
+    cycles: accesses.reduce((total, access) => total + access.cycles, 0),
+    premiumCycles: accesses.reduce((total, access) => total + access.busPremiumCycles, 0),
+  });
+}
+
+/**
+ * Reduce the complete synchronous instruction/memory shell around the nested
+ * encrypted-accessor components used by the construction receipts.
+ *
+ * `GetBoxMonData2` owns four GetSubstruct calls, DecryptBoxMon, the call to
+ * CalculateBoxMonChecksum, dispatch, EncryptBoxMon, and its return. The
+ * checksum function owns another four GetSubstruct calls around the already
+ * reduced 24-halfword-read loop. This reducer counts each caller BL/refill,
+ * personality read, prologue, dispatch, and epilogue exactly once while
+ * assigning zero cycles to all nested bodies listed in `excludedNestedCalls`.
+ */
+export function reduceFactoryGetBoxMonDataOuterShellTiming(
+  input: Readonly<FactoryGetBoxMonDataOuterShellTimingInput>,
+): FactoryGetBoxMonDataOuterShellTiming {
+  const field = requireSigned32(input.field, "field");
+  const fieldDispatchTargetPc = getFactoryGetBoxReceiptFieldTailPc(field);
+  const wordRead = reduceFactoryEwramAccessTiming({
+    access: "read", width: 4, address: 0x0200_0000,
+  });
+  const segment = (
+    name: FactoryGetBoxMonDataOuterSegmentName,
+    entryPc: number,
+    endPc: number,
+    sequentialThumbHalfwords: number,
+    pipelineRefills: number,
+    romLiteralLoads: number,
+    romJumpTableLoads: number,
+    ewramWordReads: number,
+  ): FactoryGetBoxMonDataOuterSegmentTiming => {
+    const ewramDataAccessCycles = ewramWordReads * wordRead.cycles;
+    // Unlike the tight crypt loops, every personality read is separated from
+    // the next EWRAM access by register setup and a taken BL. Targeted mGBA
+    // instruction boundaries are 2 cycles for all eight aligned reads, and
+    // the complete pause-subtracted accessor joins close only when the second
+    // 16-bit transfer overlaps the scheduled ROM/pipeline work. Preserve the
+    // four-cycle bus occupancy, but do not add a second, double-counted fetch
+    // premium to elapsed time in these outer segments.
+    const ewramDataAccessPremiumCycles = 0;
+    const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+      + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+      + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+      + ewramDataAccessPremiumCycles;
+    return Object.freeze({
+      name,
+      entryPc,
+      endPc,
+      sequentialThumbHalfwords,
+      pipelineRefills,
+      romLiteralLoads,
+      romJumpTableLoads,
+      ewramWordReads,
+      ewramDataAccessCycles,
+      ewramDataAccessPremiumCycles,
+      cycles,
+    });
+  };
+
+  const segments = Object.freeze([
+    segment("accessor-prologue", 0x0806_a674, 0x0806_a694, 16, 0, 0, 0, 0),
+    segment("accessor-secure-setup-and-calls", 0x0806_a694, 0x0806_a6d0, 30, 6, 0, 0, 4),
+    segment("checksum-function-setup-and-calls", 0x0806_8c78, 0x0806_8cb0, 28, 4, 0, 0, 4),
+    segment("checksum-function-return", 0x0806_8cfe, 0x0806_8d0a, 6, 1, 0, 0, 0),
+    segment("accessor-field-dispatch", 0x0806_a6f2, 0x0806_a704, 8, 2, 1, 1, 0),
+    segment("accessor-encrypt-and-return", 0x0806_ac8c, 0x0806_acaa, 15, 2, 0, 0, 0),
+  ]);
+  const mainAccessorCycles = segments
+    .filter((row) => !row.name.startsWith("checksum-function-"))
+    .reduce((total, row) => total + row.cycles, 0);
+  const checksumFunctionShellCycles = segments
+    .filter((row) => row.name.startsWith("checksum-function-"))
+    .reduce((total, row) => total + row.cycles, 0);
+  const cycles = mainAccessorCycles + checksumFunctionShellCycles;
+  return Object.freeze({
+    field,
+    fieldDispatchTargetPc,
+    segments,
+    mainAccessorCycles,
+    checksumFunctionShellCycles,
+    ewramWordReads: 8,
+    ewramDataAccessCycles: 32,
+    ewramDataAccessPremiumCycles: 0,
+    excludedNestedCalls: Object.freeze({
+      getSubstruct: 8,
+      decryptBoxMon: 1,
+      checksumLoop: 1,
+      encryptBoxMon: 1,
+    }),
+    cycles,
+    unresolved: null,
+  });
+}
+
+/**
+ * Reduce the fixed ROM instruction stream of one 12-word crypt loop.
+ *
+ * Both helpers have 5 prologue halfwords, 12 iterations × 10 halfwords, and
+ * 3 epilogue halfwords.  Eleven loop back-edges plus the final `bx` refill
+ * are the 12 taken flows.  Each iteration has three word reads and two word
+ * writes in EWRAM; the aligned word-access reducer supplies their exact bus
+ * occupancy and premium over the already-counted instruction baselines.
+ */
+export function reduceFactoryEncryptedWordLoopTiming(
+  kind: FactoryEncryptedWordLoopKind,
+): FactoryEncryptedWordLoopTiming {
+  const entryPc = kind === "decrypt" ? 0x0806_a24c : 0x0806_a228;
+  const loopPc = kind === "decrypt" ? 0x0806_a256 : 0x0806_a232;
+  const returnPc = kind === "decrypt" ? 0x0806_a26e : 0x0806_a24a;
+  const sequentialThumbHalfwords = 5 + 12 * 10 + 3;
+  const pipelineRefills = 11 + 1;
+  const representativeRead = reduceFactoryEwramAccessTiming({
+    access: "read", width: 4, address: 0x0200_0020,
+  });
+  const representativeWrite = reduceFactoryEwramAccessTiming({
+    access: "write", width: 4, address: 0x0200_0020,
+  });
+  const dataAccessCycles = 36 * representativeRead.cycles + 24 * representativeWrite.cycles;
+  const dataAccessPremiumCycles = 36 * representativeRead.busPremiumCycles
+    + 24 * representativeWrite.busPremiumCycles;
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    kind,
+    entryPc,
+    loopPc,
+    returnPc,
+    iterations: 12,
+    ewramWordReads: 36,
+    ewramWordWrites: 24,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    instructionFetchCycles,
+    dataAccessCycles,
+    dataAccessPremiumCycles,
+    cycles: instructionFetchCycles + dataAccessPremiumCycles,
+    unresolved: null,
+  });
+}
+
+export function reduceFactoryDecryptBoxMonTiming(): FactoryEncryptedWordLoopTiming {
+  return reduceFactoryEncryptedWordLoopTiming("decrypt");
+}
+
+export function reduceFactoryEncryptBoxMonTiming(): FactoryEncryptedWordLoopTiming {
+  return reduceFactoryEncryptedWordLoopTiming("encrypt");
+}
+
+/**
+ * Reduce the four fixed six-halfword checksum loops including their aligned
+ * EWRAM reads. Seven setup/pointer halfwords surround 192 loop-body halfwords;
+ * five of each loop's six `bge` edges are taken.
+ */
+export function reduceFactoryChecksumLoopTiming(): FactoryChecksumLoopTiming {
+  const sequentialThumbHalfwords = 4 * 6 * 8 + 7;
+  const pipelineRefills = 4 * 5;
+  const representativeRead = reduceFactoryEwramAccessTiming({
+    access: "read", width: 2, address: 0x0200_0020,
+  });
+  const ewramHalfwordReadCycles = 24 * representativeRead.cycles;
+  const ewramReadPremiumCycles = 24 * representativeRead.busPremiumCycles;
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    entryPc: 0x0806_8c78,
+    firstLoopSetupPc: 0x0806_8cb0,
+    firstReadPc: 0x0806_8cb2,
+    afterLoopPc: 0x0806_8cfe,
+    substructCount: 4,
+    halfwordsPerSubstruct: 6,
+    checksumHalfwordReads: 24,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    instructionFetchCycles,
+    ewramHalfwordReadCycles,
+    ewramReadPremiumCycles,
+    cycles: instructionFetchCycles + ewramReadPremiumCycles,
+    unresolved: null,
+  });
+}
+
+export function reduceFactoryCalculateBoxMonChecksumTiming(): FactoryChecksumLoopTiming {
+  return reduceFactoryChecksumLoopTiming();
+}
+
+function reduceFactoryChecksumTailTiming(checksumValid: boolean): FactoryChecksumTailTiming {
+  const accesses: FactoryEwramAccessTiming[] = [
+    reduceFactoryEwramAccessTiming({ access: "read", width: 2, address: 0x0200_001c }),
+  ];
+  if (!checksumValid) {
+    accesses.push(
+      reduceFactoryEwramAccessTiming({ access: "read", width: 1, address: 0x0200_0013 }),
+      reduceFactoryEwramAccessTiming({ access: "write", width: 1, address: 0x0200_0013 }),
+      // The physical substruct-3 slot varies, but every 12-byte slot's +7 byte
+      // has the same width/alignment/bus class.
+      reduceFactoryEwramAccessTiming({ access: "read", width: 1, address: 0x0200_0027 }),
+      reduceFactoryEwramAccessTiming({ access: "write", width: 1, address: 0x0200_0027 }),
+    );
+  }
+  const route = checksumValid ? "valid" : "invalid-marks-bad-egg";
+  const sequentialThumbHalfwords = checksumValid ? 6 : 17;
+  const pipelineRefills = checksumValid ? 1 : 0;
+  const data = sumFactoryEwramAccesses(accesses);
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    route,
+    entryPc: 0x0806_a6d0,
+    dispatchPc: 0x0806_a6f2,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    halfwordReads: 1,
+    byteReads: checksumValid ? 0 : 2,
+    byteWrites: checksumValid ? 0 : 2,
+    dataAccessCycles: data.cycles,
+    dataAccessPremiumCycles: data.premiumCycles,
+    instructionFetchCycles,
+    cycles: instructionFetchCycles + data.premiumCycles,
+    unresolved: null,
+  });
+}
+
+function reduceFactoryFieldTailTiming(input: Readonly<{
+  field: number;
+  tailEntryPc: number;
+  secureStorageOffset: number;
+  badEggSpecies: boolean;
+}>): FactoryFieldTailTiming {
+  let route: FactoryFieldTailRoute;
+  let sequentialThumbHalfwords: number;
+  let pipelineRefills = 1;
+  const accesses: FactoryEwramAccessTiming[] = [];
+  const read = (width: FactoryEwramAccessWidth, relativeAddress: number): void => {
+    accesses.push(reduceFactoryEwramAccessTiming({
+      access: "read", width, address: 0x0200_0000 + relativeAddress,
+    }));
+  };
+
+  if (input.field === 11) {
+    read(1, 0x13); // BoxPokemon::isBadEgg bit container.
+    if (input.badEggSpecies) {
+      route = "bad-egg-species";
+      sequentialThumbHalfwords = 9;
+    } else {
+      route = "species";
+      sequentialThumbHalfwords = 11;
+      pipelineRefills = 2;
+      read(2, input.secureStorageOffset);
+    }
+  } else if (input.field === 25) {
+    route = "experience";
+    sequentialThumbHalfwords = 3;
+    read(4, input.secureStorageOffset + 4);
+  } else if (input.field >= 26 && input.field <= 31) {
+    route = "ev-byte";
+    sequentialThumbHalfwords = 2;
+    read(1, input.secureStorageOffset + input.field - 26);
+  } else {
+    route = "iv-bitfield";
+    sequentialThumbHalfwords = 4;
+    const ivWidths: readonly FactoryEwramAccessWidth[] = [1, 2, 1, 4, 2, 1];
+    const ivOffsets = [4, 4, 5, 4, 6, 7] as const;
+    const index = input.field - 39;
+    read(ivWidths[index]!, input.secureStorageOffset + ivOffsets[index]!);
+  }
+
+  const data = sumFactoryEwramAccesses(accesses);
+  // Each selected secure-data read is isolated between dispatch/control work,
+  // unlike the tight crypt loops. The committed Scene-OFF instruction receipt
+  // observes both EXP and IV u32 reads at two elapsed cycles: their second
+  // 16-bit transfer contributes bus occupancy but no additional elapsed
+  // premium over the already-counted Thumb instruction baseline.
+  const elapsedDataPremiumCycles = 0;
+  const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+    + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
+  return Object.freeze({
+    route,
+    entryPc: input.tailEntryPc,
+    commonTailPc: 0x0806_ac8c,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    byteReads: accesses.filter((access) => access.access === "read" && access.width === 1).length,
+    halfwordReads: accesses.filter((access) => access.access === "read" && access.width === 2).length,
+    wordReads: accesses.filter((access) => access.access === "read" && access.width === 4).length,
+    dataAccessCycles: data.cycles,
+    dataAccessPremiumCycles: elapsedDataPremiumCycles,
+    instructionFetchCycles,
+    cycles: instructionFetchCycles + elapsedDataPremiumCycles,
+    unresolved: null,
+  });
+}
+
 /**
  * Census the common encrypted accessor dependency without reducing its total.
  *
@@ -1045,35 +2036,69 @@ export function censusFactoryGetBoxMonDataDependency(
   if (field === 11) {
     fieldGroup = "species";
     logicalSubstruct = 0;
-    tailEntryPc = 0x0806_a95e;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = "ewram-u16-conditional";
   } else if (field === 25) {
     fieldGroup = "experience";
     logicalSubstruct = 0;
-    tailEntryPc = 0x0806_a97c;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = "ewram-u32";
   } else if (field >= 26 && field <= 31) {
     fieldGroup = "ev-byte";
     logicalSubstruct = 2;
-    tailEntryPc = 0x0806_a9a4 + (field - 26) * 4;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = "ewram-u8";
   } else if (field >= 39 && field <= 44) {
-    const tails = [0x0806_a9f6, 0x0806_a9fe, 0x0806_aa06, 0x0806_aa0e, 0x0806_aa16, 0x0806_aa1e];
     const classes: FactoryGetBoxMonDataFetchClass[] = [
       "ewram-u8-bitfield", "ewram-u16-bitfield", "ewram-u8-bitfield",
       "ewram-u32-bitfield", "ewram-u16-bitfield", "ewram-u8-bitfield",
     ];
     fieldGroup = "iv-bitfield";
     logicalSubstruct = 3;
-    tailEntryPc = tails[field - 39]!;
+    tailEntryPc = getFactoryGetBoxReceiptFieldTailPc(field);
     fetchClass = classes[field - 39]!;
   } else {
     throw new Error("field is outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
   }
 
-  const personalityModulo24 = personality % 24;
-  const logicalToPhysicalSlots = GET_SUBSTRUCT_LOGICAL_TO_PHYSICAL[personalityModulo24]!;
-  const selectedPhysicalSlot = logicalToPhysicalSlots[logicalSubstruct]!;
+  const getSubstructTimings = Object.freeze(GET_BOX_MON_DATA_GET_SUBSTRUCT_TYPES.map((substructType) => (
+    reduceFactoryGetSubstructTiming(personality, substructType)
+  )));
+  // The selected field arm is one of the source-proven outer setup calls, so
+  // reuse that exact `% 24` reduction rather than a host-language modulo.
+  const selectedSubstructTiming = getSubstructTimings[logicalSubstruct]!;
+  const personalityModulo24 = selectedSubstructTiming.personalityModulo24;
+  const logicalToPhysicalSlots = selectedSubstructTiming.logicalToPhysicalSlots;
+  const selectedPhysicalSlot = selectedSubstructTiming.selectedPhysicalSlot;
+  const secureStorageOffset = 0x20 + selectedPhysicalSlot * 12;
+  const getSubstructCycles = getSubstructTimings.reduce((total, timing) => total + timing.cycles, 0);
+  const sharedInstructionFetchCycles = 328 + 518 + 328;
+  const decryptLoopTiming = reduceFactoryDecryptBoxMonTiming();
+  const checksumLoopTiming = reduceFactoryChecksumLoopTiming();
+  const encryptLoopTiming = reduceFactoryEncryptBoxMonTiming();
+  const checksumTailTiming = reduceFactoryChecksumTailTiming(input.checksumValid);
+  const badEggSpecies = field === 11 && (input.isBadEgg || !input.checksumValid);
+  const fieldTailTiming = reduceFactoryFieldTailTiming({
+    field,
+    tailEntryPc,
+    secureStorageOffset,
+    badEggSpecies,
+  });
+  const sharedDataBusCycles = decryptLoopTiming.dataAccessCycles
+    + checksumLoopTiming.ewramHalfwordReadCycles
+    + encryptLoopTiming.dataAccessCycles;
+  const sharedDataBusPremiumCycles = decryptLoopTiming.dataAccessPremiumCycles
+    + checksumLoopTiming.ewramReadPremiumCycles
+    + encryptLoopTiming.dataAccessPremiumCycles;
+  const tailDataBusCycles = checksumTailTiming.dataAccessCycles + fieldTailTiming.dataAccessCycles;
+  const tailCycles = checksumTailTiming.cycles + fieldTailTiming.cycles;
+  const composedKnownCycles = getSubstructCycles
+    + decryptLoopTiming.cycles
+    + checksumLoopTiming.cycles
+    + encryptLoopTiming.cycles
+    + tailCycles;
+  const outerShellTiming = reduceFactoryGetBoxMonDataOuterShellTiming({ field });
+  const composedSynchronousKnownCycles = composedKnownCycles + outerShellTiming.cycles;
   return Object.freeze({
     field,
     personality,
@@ -1083,7 +2108,7 @@ export function censusFactoryGetBoxMonDataDependency(
     logicalToPhysicalSlots,
     getSubstructModuloArmPc: GET_SUBSTRUCT_MODULO_ARM_PCS[personalityModulo24]!,
     selectedPhysicalSlot,
-    secureStorageOffset: 0x20 + selectedPhysicalSlot * 12,
+    secureStorageOffset,
     tailEntryPc,
     fetchClass,
     commonFetchClasses: GET_BOX_COMMON_FETCH_CLASSES,
@@ -1091,13 +2116,31 @@ export function censusFactoryGetBoxMonDataDependency(
     speciesTailRoute: field !== 11
       ? "not-applicable"
       : input.isBadEgg || !input.checksumValid ? "bad-egg-species" : "species",
+    selectedSubstructTiming,
+    getSubstructTypes: GET_BOX_MON_DATA_GET_SUBSTRUCT_TYPES,
+    getSubstructTimings,
+    getSubstructCycles,
+    decryptLoopTiming,
+    checksumLoopTiming,
+    encryptLoopTiming,
+    sharedInstructionFetchCycles,
+    composedInstructionFetchCycles: sharedInstructionFetchCycles + getSubstructCycles,
+    sharedDataBusCycles,
+    sharedDataBusPremiumCycles,
+    checksumTailTiming,
+    fieldTailTiming,
+    tailDataBusCycles,
+    tailCycles,
+    composedKnownCycles,
+    outerShellTiming,
+    composedSynchronousKnownCycles,
     getSubstructCalls: 8,
     decryptIterations: 12,
     checksumHalfwordReads: 24,
     encryptIterations: 12,
     boundaries: GET_BOX_COMMON_BOUNDARIES,
     cycles: null,
-    unresolved: "complete GetBoxMonData2 timing awaits instruction/fetch reduction of modulo-24 arms and shared encrypted memory loops",
+    unresolved: "complete GetBoxMonData2 timing still awaits async +18 service and VBlank/IRQ entry/body/return costs",
   });
 }
 
