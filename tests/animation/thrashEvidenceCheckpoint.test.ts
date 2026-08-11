@@ -75,7 +75,17 @@ describe("MOVE_THRASH source/evidence checkpoint", () => {
       expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex")).toBe(mapHash);
       expect(fixture.latches.thrashHorizontalAffine).toBe("RAM+2");
       expect(fixture.latches.thrashVerticalPosition).toBe("RAM+1");
-      expect(fixture.latches.shakeMonInPlace).toContain("unknown");
+      expect(fixture.latches.shakeMonInPlace.rule).toBe(
+        "RAM+2 target-outline pixels outside fist/hitsplat OAM bounds",
+      );
+      expect(fixture.latches.shakeMonInPlace.schedules.map((schedule: { invocation: string }) => schedule.invocation))
+        .toEqual(["4/0/7/1 #1", "4/0/7/1 #2", "8/0/16/1"]);
+      for (const schedule of fixture.latches.shakeMonInPlace.schedules as readonly {
+        matchesByRamLag: readonly [number, number, number]; samples: number;
+      }[]) {
+        expect(schedule.matchesByRamLag[2] / schedule.samples).toBeGreaterThan(0.9);
+        expect((schedule.matchesByRamLag[2] - schedule.matchesByRamLag[1]) / schedule.samples).toBeGreaterThan(0.2);
+      }
       expect(fixture.acceptance).toEqual({ status: "evidence-only-unsupported", denseEvidenceFrames: 103 });
     }
     const coverage = readFileSync("ANIMATION_COVERAGE.json", "utf8");

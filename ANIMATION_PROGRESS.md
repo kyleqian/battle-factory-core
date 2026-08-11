@@ -1,3 +1,11 @@
+# MOVE_THRASH three-schedule display-latch diagnostic — remains unsupported (2026-08-10 worker)
+
+- **State:** Coverage remains **162/276 exact**, 0 partial, 0 staged, **114 unsupported**. THRASH and DOUBLE_KICK remain unsupported; no reducer, typed seam, compositor, production source, boundary, barrier, or gameplay state changed.
+- **Did:** Added a focused move-owned displayed-pixel verifier over the existing complete legal set-408 TAUROS/set-394 ONIX Scene-ON checkpoint. It derives the target's nontransparent OBJ-palette outline from the first dense frame, excludes each invocation's complete source/OAM-derived 32x32 fist/hitsplat painter bounds, and tests RAM+0/+1/+2 independently through each task's terminal display. Both `(4,0,7,1)` calls and the `(8,0,16,1)` call resolve to **RAM+2** in both orientations.
+- **Verified:** Player-back RAM+2 target-pixel agreement is **21,262/22,572**, **17,790/18,853**, and **39,632/40,715**; opponent-front is **20,271/21,130**, **23,365/24,363**, and **44,402/45,251**. RAM+2 spans **94.2-98.1%** versus RAM+1's **60.5-70.6%**. Twice-fresh evidence/raw/change-map hashes remain unchanged: player `16832a54...` / `23f6c807...` / `0a305072...`; opponent `e1317010...` / `eac38716...` / `056021bd...`.
+- **Next:** Implement the pure 103-age THRASH reducer, narrow typed TAUROS/ONIX seam, and production compositor in a later implementation step; require twice-fresh bilateral reducer/seam/hardware/raw-RGB/production-framebuffer equality. DOUBLE_KICK remains an independent acceptance unit.
+- **Notes:** Hardware OAM still equals prior software OAM, but that fact is only supporting evidence: the latch verdict comes from actual target-outline pixels after excluding painter bounds. Existing horizontal affine RAM+2, vertical position RAM+1, plain fist/child RAM+1, and +4 orientation shift remain unchanged.
+
 # Animation supervisor wind-down — Heat Wave + Mist Ball exact; Thrash evidence banked (2026-08-10)
 
 - **State:** This session advances Level-50 coverage **160→162/276 exact**, 0 partial, 0 staged, and **116→114 unsupported**. `MOVE_HEAT_WAVE` and `MOVE_MIST_BALL` are newly exact; `MOVE_THRASH` remains unsupported with a complete bilateral evidence checkpoint. `MOVE_SANDSTORM` and `MOVE_FEATHER_DANCE` remain exact independent controls.

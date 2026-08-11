@@ -16,6 +16,16 @@ interface Fixture {
   readonly rawRgbSha256: string;
   readonly changeMap: string;
   readonly changeMapSha256: string;
+  readonly latches: {
+    readonly shakeMonInPlace: {
+      readonly rule: "RAM+2 target-outline pixels outside fist/hitsplat OAM bounds";
+      readonly schedules: readonly {
+        readonly invocation: "4/0/7/1 #1" | "4/0/7/1 #2" | "8/0/16/1";
+        readonly matchesByRamLag: readonly [number, number, number];
+        readonly samples: number;
+      }[];
+    };
+  };
   readonly acceptance: { readonly status: "evidence-only-unsupported"; readonly denseEvidenceFrames: number };
 }
 interface Ident { readonly address: number; readonly symbol: string | null }
@@ -24,10 +34,11 @@ interface Frame {
   readonly visualTaskCount: number; readonly soundTaskCount: number;
   readonly tasks: readonly { readonly func: Ident; readonly data: readonly number[]; readonly raw: string }[];
   readonly sprites: readonly { readonly slot: number; readonly template: Ident; readonly callback: Ident;
+    readonly attr: readonly number[]; readonly x: number; readonly y: number; readonly x2: number; readonly y2: number;
     readonly data: readonly number[]; readonly raw: string; readonly matrix: readonly number[];
     readonly hardwareMatrix: readonly number[] }[];
-  readonly playerSprite: { readonly x: number; readonly y: number; readonly x2: number; readonly y2: number };
-  readonly opponentSprite: { readonly x: number; readonly y: number; readonly x2: number; readonly y2: number };
+  readonly playerSprite: { readonly attr: readonly number[]; readonly x: number; readonly y: number; readonly x2: number; readonly y2: number };
+  readonly opponentSprite: { readonly attr: readonly number[]; readonly x: number; readonly y: number; readonly x2: number; readonly y2: number };
   readonly battlers: unknown; readonly parties: unknown; readonly immutableState: unknown;
   readonly animationRng: number; readonly softwareOam: readonly string[]; readonly hardwareOam: readonly string[];
   readonly spriteOrder: readonly number[]; readonly softwareMatrices: readonly (readonly number[])[];
@@ -55,6 +66,96 @@ if (!fixturePaths.length) fixturePaths.push(
 );
 const sha = (value: string | Buffer): string => createHash("sha256").update(value).digest("hex");
 const same = (left: unknown, right: unknown): boolean => JSON.stringify(left) === JSON.stringify(right);
+const FRAME_BYTES = 240 * 160 * 3;
+
+function gbaRgb(color: number): string {
+  const channel = (value: number): number => (value << 3) | (value >> 2);
+  return `${channel(color & 31)},${channel((color >> 5) & 31)},${channel((color >> 10) & 31)}`;
+}
+
+function oamDimensions(attr0: number, attr1: number): readonly [number, number] {
+  const shape = (attr0 >> 14) & 3;
+  const size = (attr1 >> 14) & 3;
+  const dimensions = [
+    [[8, 8], [16, 16], [32, 32], [64, 64]],
+    [[16, 8], [32, 8], [32, 16], [64, 32]],
+    [[8, 16], [8, 32], [16, 32], [32, 64]],
+  ] as const;
+  if (shape >= dimensions.length) throw new Error(`prohibited OBJ shape ${shape}`);
+  return dimensions[shape]![size]!;
+}
+
+/**
+ * Proves displayed target motion without treating hardware OAM as pixels.
+ * The witness mask is the target's own nontransparent OBJ-palette pixels on
+ * the first source frame. For each invocation, the complete source-derived
+ * 32x32 fist/hitsplat OAM rectangle is excluded before testing RAM+0/+1/+2.
+ */
+function shakePixelSchedules(probe: Probe, raw: Buffer, fixture: Fixture): Fixture["latches"]["shakeMonInPlace"]["schedules"] {
+  const targetKey = fixture.orientation === "player-back" ? "opponentSprite" : "playerSprite";
+  const initial = probe.frames[0]!;
+  const target = initial[targetKey];
+  const attr = target.attr;
+  const paletteBank = (attr[2]! >> 12) & 15;
+  const colors = new Set(initial.hardwarePalette.slice(256 + paletteBank * 16 + 1, 256 + paletteBank * 16 + 16).map(gbaRgb));
+  const [width, height] = oamDimensions(attr[0]!, attr[1]!);
+  const baseX = target.x + target.x2;
+  const baseY = target.y + target.y2;
+  const firstRgb = raw.subarray(0, FRAME_BYTES);
+  const witness: [number, number, number, number, number][] = [];
+  for (let y = baseY - height / 2; y < baseY + height / 2; y += 1) {
+    for (let x = baseX - width / 2; x < baseX + width / 2; x += 1) {
+      const index = (y * 240 + x) * 3;
+      if (colors.has(`${firstRgb[index]},${firstRgb[index + 1]},${firstRgb[index + 2]}`)) {
+        witness.push([x, y, firstRgb[index]!, firstRgb[index + 1]!, firstRgb[index + 2]!]);
+      }
+    }
+  }
+  if (witness.length < 2_000) throw new Error(`${fixture.orientation}: target-palette witness unexpectedly sparse`);
+
+  const active = probe.frames.map((frame) => frame.tasks.some((task) => task.func.symbol === "AnimTask_ShakeMonInPlace_Step"));
+  const runs: { start: number; end: number }[] = [];
+  for (let age = 0; age < active.length; age += 1) {
+    if (!active[age] || active[age - 1]) continue;
+    let end = age;
+    while (active[end + 1]) end += 1;
+    runs.push({ start: age, end: Math.min(end + 2, probe.frames.length - 1) });
+  }
+  if (runs.length !== 3) throw new Error(`${fixture.orientation}: expected three independent shake invocations`);
+  const names = ["4/0/7/1 #1", "4/0/7/1 #2", "8/0/16/1"] as const;
+  return runs.map((run, runIndex) => {
+    const painter = probe.frames.slice(run.start, run.end + 1).flatMap((frame) => frame.sprites)
+      .find((sprite) => sprite.template.symbol === "gFistFootRandomPosSpriteTemplate");
+    if (!painter) throw new Error(`${fixture.orientation}: invocation ${names[runIndex]} lacks its fist painter`);
+    const painterAttr = painter.attr;
+    const [painterWidth, painterHeight] = oamDimensions(painterAttr[0]!, painterAttr[1]!);
+    const painterLeft = painter.x + painter.x2 - painterWidth / 2;
+    const painterTop = painter.y + painter.y2 - painterHeight / 2;
+    const matches = [0, 0, 0];
+    let samples = 0;
+    for (let age = run.start; age <= run.end; age += 1) {
+      const displayed = raw.subarray(age * FRAME_BYTES, (age + 1) * FRAME_BYTES);
+      for (let lag = 0; lag <= 2; lag += 1) {
+        const source = probe.frames[Math.max(0, age - lag)]![targetKey];
+        const dx = source.x + source.x2 - baseX;
+        const dy = source.y + source.y2 - baseY;
+        for (const [x, y, red, green, blue] of witness) {
+          const displayedX = x + dx;
+          const displayedY = y + dy;
+          if (displayedX >= painterLeft && displayedX < painterLeft + painterWidth
+              && displayedY >= painterTop && displayedY < painterTop + painterHeight) continue;
+          const index = (displayedY * 240 + displayedX) * 3;
+          if (displayed[index] === red && displayed[index + 1] === green && displayed[index + 2] === blue) matches[lag]! += 1;
+          if (lag === 0) samples += 1;
+        }
+      }
+    }
+    if (matches[2]! / samples < 0.9 || matches[2]! - matches[1]! < samples * 0.2) {
+      throw new Error(`${fixture.orientation}: invocation ${names[runIndex]} has no unambiguous RAM+2 displayed-pixel fit`);
+    }
+    return { invocation: names[runIndex]!, matchesByRamLag: matches as [number, number, number], samples };
+  });
+}
 
 function runFresh(fixture: Fixture): { bytes: Buffer; probe: Probe; raw: Buffer; changeMap: string } {
   const scratch = createScratchDir(`pokebench-thrash-${fixture.orientation}-`);
@@ -104,6 +205,13 @@ for (const fixturePath of fixturePaths) {
       || sha(committedMap) !== fixture.changeMapSha256) failures.push("normalized bilateral change map");
   if (fixture.acceptance.status !== "evidence-only-unsupported"
       || fixture.acceptance.denseEvidenceFrames !== fixture.denseWindow.frameCount) failures.push("truthful unsupported status");
+  const displayedShake = shakePixelSchedules(first.probe, first.raw, fixture);
+  const secondDisplayedShake = shakePixelSchedules(second.probe, second.raw, fixture);
+  if (fixture.latches.shakeMonInPlace.rule !== "RAM+2 target-outline pixels outside fist/hitsplat OAM bounds"
+      || !same(displayedShake, secondDisplayedShake)
+      || !same(displayedShake, fixture.latches.shakeMonInPlace.schedules)) {
+    failures.push("three independent displayed-pixel ShakeMonInPlace RAM+2 schedules");
+  }
 
   for (const probe of [first.probe, second.probe]) {
     const requiredTasks = ["AnimTask_ShakeMonInPlace_Step", "AnimTask_ThrashMoveMonHorizontal_Step", "AnimTask_ThrashMoveMonVertical_Step"];

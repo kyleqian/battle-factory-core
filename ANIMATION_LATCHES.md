@@ -46,6 +46,7 @@ cites the move whose ledger entry holds the full evidence.
 | `AnimTask_ShakeMon` | RAM+1 | COUNTER (2026-08-08) — NOT +2 |
 | `AnimTask_ShakeMon(target,5,0,10,0)` and `(target,4,0,70,0)` | RAM+1 independently for both invocations; hardware OAM equals the preceding software buffer | MIST_BALL, both 213-frame orientations (2026-08-10); the two schedules were checked separately against their move-owned maps |
 | `AnimTask_ShakeMonInPlace(target, 3, 0, 11, 1)` | RAM+1 | HI_JUMP_KICK, both orientations, own dense change maps (2026-08-10) |
+| `AnimTask_ShakeMonInPlace(target,4,0,7,1)` twice and `(target,8,0,16,1)` | RAM+2 independently for all three invocations | THRASH, both 103-frame orientations (2026-08-10); move-owned target-palette outline witnesses exclude each fist/hitsplat's complete 32x32 OAM bounds, then actual pixels select RAM+2 at 94.2-98.1% versus 60.5-70.6% for RAM+1 |
 | `AnimTask_ShakeMon2` (usual longer schedules) | RAM+2 | SLASH, LICK, TAKE_DOWN (2026-08-08) |
 | `AnimTask_ShakeMon2(target, 3, 0, 2, 1)` short burst | RAM+1 | PIN_MISSILE, all three bursts in both orientations (2026-08-10); this move-owned script schedule is distinct from the longer RAM+2 cases |
 | `AnimMissileArc_Step` Q8.8 double-advance affine sprite | live arc displays reducer age−1; its terminal destruction preserves one final matrix/OAM display from reducer age−2 | PIN_MISSILE, all three missiles in both orientations (2026-08-10); includes the initial invisible callback and affine allocation/teardown |
@@ -72,8 +73,9 @@ cites the move whose ledger entry holds the full evidence.
 DOUBLE_EDGE's best fit is RAM+1 on its player-back map but is contradicted by
 one opponent-front frame, and that window is fully overlapped by rotation + BG
 blend. HI_JUMP_KICK's own target invocation `(3, 0, 11, 1)` is independently
-resolved at RAM+1 in both orientations; do not generalize it to DOUBLE_EDGE
-without a fresh single-axis probe.
+resolved at RAM+1 in both orientations, while THRASH's two `(4, 0, 7, 1)`
+invocations and one `(8, 0, 16, 1)` invocation are independently RAM+2; do not
+generalize either move to DOUBLE_EDGE without a fresh single-axis probe.
 
 ## Compositor rules
 
