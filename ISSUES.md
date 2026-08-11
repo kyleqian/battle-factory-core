@@ -1388,24 +1388,27 @@ because six clean classes are supplied by another epoch. This correlation
 classifies the observed +18 as conditional on a Direct Sound FIFO refill/DMA
 write, not as an invariant Timer 0 callback cost.
 
-**Pure Timer 0 Direct Sound dispatch (2026-08-11, `649e993d`):** the smallest
-source-general conditional service reducer is now registered alongside the
-pure cadence. Semantic per-crossing inputs cover the FIFO queued-word
-threshold, Timer/output routing, DMA source/custom-timing/enabled eligibility,
-the global audio-enable gate, and only fresh four-word IWRAM-to-FIFO work.
-Every represented DMA requires explicit zero pre-Timer-0 `nextCount` work, and
-the reducer requires a caller assertion of no pre-existing, competing, or
-Video-started DMA work before it normalizes the graph. Outputs retain A/DMA1
-before B/DMA2 and the explicitly relative isolated-fresh progression
-**0/10/20**; invalid FIFO levels, mappings, regions, modes, counts, pending
-work, ownership, and per-crossing state-list lengths fail loudly. Multiple
-late crossings require one explicit state each and preserve cadence phase.
-Because a fresh isolated A/B pair shares the source deadline
-`currentTime - cyclesLate`, the common absolute translation cancels from the
-relative progression and stays out of this API; it does not claim a deadline or
-co-due arithmetic. Tier-1 covers zero/one/two refills, the exact threshold,
-audio disabled, pending/competing/Video DMA rejection, order, repeated
-crossings, immutability, and validation.
+**Pure Timer 0 Direct Sound dispatch (2026-08-11, `649e993d`, corrected after
+the runtime receipt):** the smallest source-general conditional deadline-work
+reducer is registered alongside the pure cadence. Semantic per-crossing inputs
+cover the FIFO queued-word threshold, Timer/output routing, DMA
+source/custom-timing/enabled eligibility, the global audio-enable gate, and
+only fresh four-word IWRAM-to-FIFO work. Every represented DMA requires
+explicit zero pre-Timer-0 `nextCount` work, and the reducer requires a caller
+assertion of no pre-existing, competing, or Video-started DMA work before it
+normalizes the graph. Outputs retain A/DMA1 before B/DMA2 and name the
+independent per-channel scheduled-deadline work (10 each; sum 0/10/20), rather
+than fabricated serialized service start/completion timestamps. The committed
+on-time fresh dual receipt is exposed separately as its observed isolated
+shared-graph makespan **18**; zero/one-refill makespans are `null`. Invalid FIFO
+levels, mappings, regions, modes, counts, pending work, ownership, and
+per-crossing state-list lengths fail loudly. Multiple late crossings require
+one explicit state each and preserve cadence phase. Because a fresh isolated
+A/B pair shares the source deadline `currentTime - cyclesLate`, the common
+absolute translation cancels from the deadline work and stays out of this API;
+it does not claim a deadline or co-due arithmetic. Tier-1 covers 20 work versus
+18 dual elapsed, zero/one boundaries, audio disabled, pending/competing/Video
+DMA rejection, order, repeated crossings, immutability, and validation.
 
 This closes the pure conditional dispatcher only. #55 remains open for live
 construction-clock phase/workload composition and complete VBlank/IRQ/audio
@@ -1413,7 +1416,7 @@ arbitration. `serviceCostMasterCycles` stays `null`; no fitted 18 constant,
 co-due Video/Audio service, operation/accessor duration, or
 `runFactoryConstructionClock` wiring landed. Source/runtime evidence remains
 in `docs/issue55-mgba0105-timer0-direct-sound-audit.md` and
-`docs/issue55-construction-rng-schedule-receipt.md`.
+`docs/issue55-mgba0105-timer0-scheduler-audit.md`.
 
 **Absolute Timer 0 callback-entry boundary (2026-08-11):** the existing mGBA
 probe now transparently wraps and delegates live timing callbacks during the

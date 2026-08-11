@@ -111,9 +111,11 @@ This means that a source-correct absolute Timer 0 receipt may translate the
 Timer 0 event's deadline and each *requested* FIFO DMA deadline, but cannot
 translate an absolute FIFO-service completion from only those fields. Video can
 create DMA deadlines at `D + 3`; queued DMA, deadline ties, late dispatch,
-channel state, and IRQ state alter the actual root sequence.
+channel state, and IRQ state alter the actual root sequence. A pure Timer 0
+dispatcher therefore must not reify its independent 10-cycle channel deadline
+work as DMA service start/completion timestamps or a generic makespan.
 
-## What a future runtime receipt needs
+## Runtime receipt inventory
 
 It must record at least: Timer 0 `event.when`, dispatch current time, and
 `cyclesLate`; the ordered due root list with each event's absolute deadline,
@@ -122,7 +124,11 @@ routing/pointers/internal state; all four DMA registers plus `when`,
 `nextCount`, and active channel; video phase; Audio Sample deadline; and IRQ
 enable/flags/queued-event state.
 
-Until that exists, neither this audit nor the prior fresh-DMA arithmetic can
-set `serviceCostMasterCycles`. The previously derived 10-cycle fresh FIFO
-progression and conditional +18 comparison remain conditional DMA facts, not
-a Timer 0 callback price.
+The committed runtime receipt now supplies this inventory for two on-time,
+fresh dual-refill classes: isolated and Video-co-due-without-Video-DMA. Both
+finish their shared DMA graph at Timer-entry `+18`, while the independent
+channel deadline work remains `10 + 10 = 20`. The public pure dispatcher names
+those facts separately and leaves zero- and one-refill makespans null; it does
+not extrapolate an absolute completion through `cyclesLate` or price Timer 0.
+Neither this audit nor the prior fresh-DMA arithmetic can set
+`serviceCostMasterCycles`.

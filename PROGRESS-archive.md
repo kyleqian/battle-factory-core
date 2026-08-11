@@ -1,3 +1,21 @@
+## 1114 — [MAIN worker, 2026-08-11] **#55 pure conditional Direct Sound dispatcher**
+
+- **State:** implementation `649e993d` plus typed negative-fixture correction
+  `41a65725` and docs checkpoint `2675c77b` are committed; #55 remains open and
+  the live construction clock stays unwired. `serviceCostMasterCycles` remains
+  `null`.
+- **Did:** registered the semantic Timer 0 FIFO A/B dispatcher and composed it
+  with cadence using explicit state per crossing. It returns source-derived
+  A/DMA1→B/DMA2 requests and scheduled progression **0/10/20**, preserves
+  phase across repeated crossings, and rejects unmodeled state.
+- **Next:** this bounded dispatcher step is complete. Continue #55 only in a
+  separately bounded live phase/workload and VBlank/IRQ composition step.
+- **Notes:** focused Timer 0 **20/20**, smoke **375/375**, typecheck, full
+  `npm test` **905 files / 8,534 passed / 1 skipped**, and build (**631
+  modules**) are green. No +18 constant, cadence cost, co-due service, live
+  wiring, controller, presentation, animation, barrier, or recording import
+  changed.
+
 ## 1112 — [MAIN worker, 2026-08-11] **#55 Timer 0 conditional FIFO/DMA refill census**
 
 - **State:** #55 remains open; production construction-clock wiring and every

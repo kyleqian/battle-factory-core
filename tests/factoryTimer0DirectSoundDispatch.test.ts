@@ -51,24 +51,36 @@ function soundState(a: number, b: number): FactoryTimer0DirectSoundState {
 }
 
 describe("source-derived Timer 0 Direct Sound dispatch", () => {
-  it("requests zero, one, or two fresh refills with 0/10/20 progression", () => {
-    expect(dispatchFactoryTimer0DirectSound(soundState(4, 7))).toMatchObject({
+  it("keeps zero and one refill makespans absent", () => {
+    expect(dispatchFactoryTimer0DirectSound(soundState(4, 7))).toEqual({
       requestedChannels: [],
-      isolatedFreshServiceProgressionMasterCycles: [0],
-      isolatedFreshServiceMasterCycles: 0,
+      channelDeadlineWork: [],
+      summedChannelDeadlineWorkMasterCycles: 0,
+      observedIsolatedDualRefillMakespanMasterCycles: null,
     });
-    expect(dispatchFactoryTimer0DirectSound(soundState(3, 4))).toMatchObject({
+    expect(dispatchFactoryTimer0DirectSound(soundState(3, 4))).toEqual({
       requestedChannels: ["A"],
-      isolatedFreshServiceProgressionMasterCycles: [0, 10],
-      isolatedFreshServiceMasterCycles: 10,
+      channelDeadlineWork: [{
+        channel: "A",
+        dmaChannel: 1,
+        scheduledDeadlineAdvanceMasterCycles: 10,
+      }],
+      summedChannelDeadlineWorkMasterCycles: 10,
+      observedIsolatedDualRefillMakespanMasterCycles: null,
     });
+  });
+
+  it("separates dual channel deadline work from the observed shared-graph makespan", () => {
     const both = dispatchFactoryTimer0DirectSound(soundState(3, 0));
     expect(both.requestedChannels).toEqual(["A", "B"]);
-    expect(both.isolatedFreshServiceProgressionMasterCycles).toEqual([0, 10, 20]);
-    expect(both.services).toEqual([
-      { channel: "A", dmaChannel: 1, startMasterCycle: 0, completionMasterCycle: 10 },
-      { channel: "B", dmaChannel: 2, startMasterCycle: 10, completionMasterCycle: 20 },
+    expect(both.channelDeadlineWork).toEqual([
+      { channel: "A", dmaChannel: 1, scheduledDeadlineAdvanceMasterCycles: 10 },
+      { channel: "B", dmaChannel: 2, scheduledDeadlineAdvanceMasterCycles: 10 },
     ]);
+    expect(both.summedChannelDeadlineWorkMasterCycles).toBe(20);
+    expect(both.observedIsolatedDualRefillMakespanMasterCycles).toBe(18);
+    expect(both).not.toHaveProperty("services");
+    expect(both).not.toHaveProperty("isolatedFreshServiceProgressionMasterCycles");
   });
 
   it("uses the exact at-most-three queued-word threshold", () => {
@@ -82,9 +94,9 @@ describe("source-derived Timer 0 Direct Sound dispatch", () => {
       globalAudioEnabled: false,
     });
     expect(result.requestedChannels).toEqual([]);
-    expect(result.services).toEqual([]);
-    expect(result.isolatedFreshServiceProgressionMasterCycles).toEqual([0]);
-    expect(result.isolatedFreshServiceMasterCycles).toBe(0);
+    expect(result.channelDeadlineWork).toEqual([]);
+    expect(result.summedChannelDeadlineWorkMasterCycles).toBe(0);
+    expect(result.observedIsolatedDualRefillMakespanMasterCycles).toBeNull();
   });
 
   it("requires routing, a DMA source, custom eligibility, and enablement", () => {
@@ -145,8 +157,10 @@ describe("source-derived Timer 0 Direct Sound dispatch", () => {
     expect(result.crossedDueMasterCycles).toEqual([100, 1_354, 2_608]);
     expect(result.cadence.nextDueMasterCycle).toBe(3_862);
     expect(result.cadence.serviceCostMasterCycles).toBeNull();
-    expect(result.directSoundByCrossing.map((entry) => entry.isolatedFreshServiceMasterCycles))
+    expect(result.directSoundByCrossing.map((entry) => entry.summedChannelDeadlineWorkMasterCycles))
       .toEqual([0, 10, 20]);
+    expect(result.directSoundByCrossing.map((entry) => entry.observedIsolatedDualRefillMakespanMasterCycles))
+      .toEqual([null, null, 18]);
   });
 
   it("does not mutate inputs and freezes returned collections", () => {
@@ -156,9 +170,8 @@ describe("source-derived Timer 0 Direct Sound dispatch", () => {
     expect(state).toEqual(before);
     expect(Object.isFrozen(result)).toBe(true);
     expect(Object.isFrozen(result.requestedChannels)).toBe(true);
-    expect(Object.isFrozen(result.services)).toBe(true);
-    expect(Object.isFrozen(result.services[0])).toBe(true);
-    expect(Object.isFrozen(result.isolatedFreshServiceProgressionMasterCycles)).toBe(true);
+    expect(Object.isFrozen(result.channelDeadlineWork)).toBe(true);
+    expect(Object.isFrozen(result.channelDeadlineWork[0])).toBe(true);
   });
 
   it("fails loudly for state-list length and unmodeled mappings, modes, regions, and counts", () => {

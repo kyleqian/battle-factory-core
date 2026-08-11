@@ -115,14 +115,17 @@ For the pinned Emerald PCM-buffer shape (IWRAM region `0x3` to FIFO IO region
 first word:  2 + nonseq32[3] + nonseq32[4] = 2
 next words:  3 × (2 + seq32[3] + seq32[4]) = 6
 completion:  +2 because both regions are below REGION_CART0
-total:       2 + 6 + 2 = 10 master cycles
+per-channel scheduled deadline advance: 2 + 6 + 2 = 10 master cycles
 ```
 
-This 10-cycle progression, and the 20-cycle sum for two fresh FIFO refills,
-can be reduced independently as a stateful DMA subgraph. They are not a
-Timer 0 callback cost. In particular, the prior receipt's observed `+18`
-comparison remains only `20 - 2` for its explicitly required branch; this
-audit does not fit 24/26/29 totals or any other edge total.
+This 10-cycle scheduled-deadline advance, and the 20-cycle sum for two fresh
+FIFO refills, can be reduced independently as a stateful DMA subgraph. They
+are not a Timer 0 callback cost, and the sum is not a shared-DMA makespan. The
+runtime receipt below observes that the qualifying fresh dual graph instead
+finishes at Timer-entry `+18`, because DMA2's first word overlaps DMA1's
+terminal bookkeeping. The corresponding instruction edge is 2 CPU cycles plus
+18 blocked scheduler cycles; this audit does not fit 24/26/29 totals or any
+other edge total.
 
 ## Negative boundary and next observable
 
@@ -134,10 +137,12 @@ than a full scheduler: it only normalizes a fresh, isolated direct-sound graph
 after an explicit `audio.enable` gate, zero DMA1/DMA2 `nextCount` work, and
 no-preexisting/no-competing/no-Video-started-DMA assertions. In that narrow
 case, Timer 0 gives each newly requested FIFO DMA the same
-`currentTime - cyclesLate` deadline. The reducer reports only the relative
-fresh-service sequence, so that shared translation cancels; it correctly keeps
-absolute `currentTime` and `cyclesLate` out of its API. It cannot report a
-deadline or order any co-due event.
+`currentTime - cyclesLate` deadline. The reducer reports ordered per-channel
+deadline work and its sum, so that shared translation cancels; it correctly
+keeps absolute `currentTime` and `cyclesLate` out of its API. It does not
+invent service start/completion timestamps. It labels 18 only as the committed
+receipt's observed isolated dual-refill makespan, leaving zero- and one-refill
+makespans null; it cannot report a general deadline or order any co-due event.
 
 A full scheduler reducer would instead need:
 
@@ -148,10 +153,10 @@ A full scheduler reducer would instead need:
 - the active audio mixer mode (the reset path has `mixer = NULL`; a mixer can
   add source-inspection side effects in `GBAAudioScheduleFifoDma`).
 
-The next useful OFF receipt is one Timer 0 overflow window containing those
-fields plus the due event names/priorities and any Audio Sample, Video, IRQ,
-or DMA event co-due with it. Until that exists, keep the construction clock
-and its service cost unwired.
+The runtime receipt directly below supplies that inventory for its selected
+on-time dual-refill windows. It leaves the construction clock and its service
+cost unwired because zero/one refill, late, mixer, pending/competing DMA, and
+Audio/IRQ/Video-started-DMA classes remain outside that receipt.
 
 ## Fresh callback-entry runtime receipt (2026-08-11)
 
@@ -191,6 +196,9 @@ then DMA2. Both `nextCount` values are zero and `activeDMA=-1` at
 from live makespan: DMA2's first word runs at +8 while DMA1's terminal +2
 deadline is pending. The observed 20-cycle instruction edge is the 2-cycle CPU
 instruction plus this 18-cycle blocked graph; 18 is not a Timer callback cost.
+The pure dispatch API therefore exposes 20 only as summed channel deadline
+work and labels 18 only as this observed isolated dual-refill makespan; it does
+not synthesize zero- or one-refill completion values.
 
 The remaining boundary is explicit: these observations cover on-time fresh
 dual refills with no mixer, pre-existing work, competing DMA, Audio/IRQ co-due

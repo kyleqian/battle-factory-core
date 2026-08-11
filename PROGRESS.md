@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1117 — [MAIN worker, 2026-08-11] **#55 dual-refill deadline-work contract correction**
+
+- **State:** the pure Timer 0 dispatcher now distinguishes work from elapsed
+  time; #55 remains open, the construction clock stays unwired, and
+  `serviceCostMasterCycles` remains `null`.
+- **Did:** removed fabricated serialized DMA start/completion fields. Ordered
+  A/DMA1→B/DMA2 deadline work is 10 each / sum 20; only the receipt-observed
+  fresh dual graph exposes makespan 18, while zero/one remain `null`.
+- **Next:** final full-suite and build verification, then continue #55 only
+  with a separately bounded unobserved runtime class; do not fit 18 or wire
+  `runFactoryConstructionClock`.
+- **Notes:** verified exact mGBA 0.10.5 archive SHA and source scheduling;
+  focused Timer0 **34/34**, typecheck, and smoke are green. No clock wiring,
+  service cost, controller, presentation, animation, barrier, or canonical
+  Battle-2 change.
+
 ## 1116 — [MAIN worker, 2026-08-11] **#55 absolute Timer 0 callback-entry receipt**
 
 - **State:** the fresh on-time dual-refill boundary is closed; #55 remains open
@@ -38,21 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **906 files / 8,542 passed / 1 skipped**, and build (**631 modules**) are
   green. No +18 constant, cadence cost, co-due arithmetic, live wiring,
   controller, presentation, animation, barrier, or recording import changed.
-
-## 1114 — [MAIN worker, 2026-08-11] **#55 pure conditional Direct Sound dispatcher**
-
-- **State:** implementation `649e993d` plus typed negative-fixture correction
-  `41a65725` and docs checkpoint `2675c77b` are committed; #55 remains open and
-  the live construction clock stays unwired. `serviceCostMasterCycles` remains
-  `null`.
-- **Did:** registered the semantic Timer 0 FIFO A/B dispatcher and composed it
-  with cadence using explicit state per crossing. It returns source-derived
-  A/DMA1→B/DMA2 requests and scheduled progression **0/10/20**, preserves
-  phase across repeated crossings, and rejects unmodeled state.
-- **Next:** this bounded dispatcher step is complete. Continue #55 only in a
-  separately bounded live phase/workload and VBlank/IRQ composition step.
-- **Notes:** focused Timer 0 **20/20**, smoke **375/375**, typecheck, full
-  `npm test` **905 files / 8,534 passed / 1 skipped**, and build (**631
-  modules**) are green. No +18 constant, cadence cost, co-due service, live
-  wiring, controller, presentation, animation, barrier, or recording import
-  changed.
