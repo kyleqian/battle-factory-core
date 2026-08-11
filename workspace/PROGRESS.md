@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1147 — [supervisor, 2026-08-11] **Battle-6 summary generalization verified**
+
+- **State:** `master` is green with legal Battle-6 LUKAS exact through both
+  reveal and complete status-summary/message assembly. S8 remains closed;
+  Battle-2 actions and #56 are untouched.
+- **Did:** independently reverified the new summary phase **65/65** and focused
+  boundary/receipt/purity coverage **13/13**; reviewed the source clock mapping
+  1228–1292 and the unchanged five-win controller-derived stage.
+- **Next:** use the stock-ROM pre-checkpoint input schedule to prove one
+  complete LUKAS send-out phase with its distinct trainer/species assets,
+  starting after the #56 display-tail seam. Do not submit a battle action.
+- **Notes:** worker controls, smoke **375/375**, typecheck, full `npm test`
+  **952 files / 9,137 passed / 1 skipped**, and build **645 modules** are green.
+  Both lane branches remain fully folded.
+
 ## 1146 — [MAIN worker, 2026-08-11] **Battle-6 LUKAS summary assembly exact**
 
 - **State:** `master` is green with the complete legal challenge-2 Battle-6
@@ -39,17 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** worker gates: controls **154, 65, 249, 238, 3, 256, 115** exact;
   smoke **375/375**, typecheck, full `npm test` **952 files / 9,136 passed / 1
   skipped**, build **645 modules**. No lane branch is ahead.
-
-## 1144 — [MAIN worker, 2026-08-11] **Later-round generated intro reveal exact**
-
-- **State:** the generic round-controller/presentation seam is exact for legal
-  challenge-2 Battle 6 LUKAS; S8 stays closed and canonical Battle 2 remains
-  stopped at tick 33331. The #56 post-ack tail remains outside this proof.
-- **Did:** staged seed-70 five-win/decline progression through public controller
-  interfaces, freezing trainer 121 and sets `267/268/269` vs `270/341/284`.
-  The complete source reveal is **154/154 twice fresh** with transition index 3.
-- **Next:** supervisor verification/fold only. Do not resume the canonical
-  Battle-2 march or reinterpret the untouched 13384 diagnostic.
-- **Notes:** controls held **154/154, 65/65, 249/249, 238/238, 3/3, 256/256,
-  115/115**. Focused **81/81**, smoke **375/375**, typecheck, full `npm test`
-  **952 files / 9,136 passed / 1 skipped**, and build **645 modules** are green.
