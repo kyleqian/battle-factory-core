@@ -599,6 +599,7 @@ import sludgeBombAsset from "../animation/assets/sludgeBomb.json" with { type: "
 import poisonFangAsset from "../animation/assets/poisonFang.json" with { type: "json" };
 import hyperFangAsset from "../animation/assets/hyperFang.json" with { type: "json" };
 import megaPunchAsset from "../animation/assets/megaPunch.json" with { type: "json" };
+import guillotineAsset from "../animation/assets/guillotine.json" with { type: "json" };
 import rollingKickAsset from "../animation/assets/rollingKick.json" with { type: "json" };
 import lowKickAsset from "../animation/assets/lowKick.json" with { type: "json" };
 import swaggerAsset from "../animation/assets/swagger.json" with { type: "json" };
@@ -928,6 +929,7 @@ import {
   sceneOnRolePlayView,
   sceneOnStompView,
   sceneOnViceGripView,
+  sceneOnGuillotineView,
   sceneOnBiteView,
   sceneOnHeadbuttView,
   sceneOnSubmissionView,
@@ -1044,6 +1046,7 @@ import {
   type SceneOnRolePlayConfig,
   type SceneOnStompConfig,
   type SceneOnViceGripConfig,
+  type SceneOnGuillotineConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
@@ -1475,6 +1478,7 @@ const poliwrathFrontSprite = opponentFrontSpritesAsset.POLIWRATH;
 const lickitungFrontSprite = opponentFrontSpritesAsset.LICKITUNG;
 const aipomFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AIPOM!;
 const crawdauntFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
+const gligarFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GLIGAR!;
 const hitmontopFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HITMONTOP!;
 const poliwhirlFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).POLIWHIRL!;
 const ledianFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LEDIAN!;
@@ -1769,6 +1773,14 @@ const megaPunchArt = megaPunchAsset as {
   cacturneBack: { tileset: Tileset; palette: RgbColor[] };
   cacturneFront: { tileset: Tileset; palette: RgbColor[] };
 };
+const guillotineArt = guillotineAsset as {
+  background: {
+    tileset: Tileset;
+    palette: RgbColor[];
+    playerTilemap: Tilemap;
+    opponentTilemap: Tilemap;
+  };
+};
 const rollingKickArt = rollingKickAsset as {
   hitmonleeBack: { tileset: Tileset; palette: RgbColor[] };
   hitmonleeFront: { tileset: Tileset; palette: RgbColor[] };
@@ -2031,6 +2043,7 @@ const thunderArt = thunderAsset as {
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
 const crawdauntBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CRAWDAUNT!;
+const gligarBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GLIGAR!;
 const delibirdBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DELIBIRD!;
 const murkrowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MURKROW!;
 const spoinkBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SPOINK!;
@@ -26196,6 +26209,179 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb, playerToOpponent ? "CRAWDAUNT used" : "Foe CRAWDAUNT used", "VICEGRIP!", 99,
+    );
+    return;
+  }
+
+  if (state.config.move === "GUILLOTINE") {
+    const guillotineState =
+      state as SceneOnMovePresentationState<SceneOnGuillotineConfig>;
+    const view = sceneOnGuillotineView(guillotineState);
+    // Guillotine's plain effect OAM and palette transfer are one display
+    // behind source RAM; both live-target ShakeMon2 schedules are independently
+    // represented by the reducer's source-derived displayedTargetOffset.
+    const displayed = sceneOnGuillotineView({
+      ...guillotineState,
+      age: guillotineState.age - 1,
+    });
+    const paletteDisplayed = sceneOnGuillotineView({
+      ...guillotineState,
+      age: guillotineState.age - 2,
+    });
+    const playerToOpponent =
+      view.attacker.species === "GLIGAR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GLIGAR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged GUILLOTINE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent ? gligarBackSprite : gligarFrontSprite;
+    const attacker = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
+    const targetSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const target = playerToOpponent
+      ? { ...targetSource, tileset: subTileset(targetSource.tileset, 0, 8) }
+      : targetSource;
+    const black = { r: 0, g: 0, b: 0 };
+    const darken = (palette: readonly RgbColor[], coefficient: number) =>
+      blendPaletteToward(palette, black, coefficient);
+    const gpuDarken = (palette: readonly RgbColor[]) => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | (color.g << 8) | (color.b << 16),
+        view.background.bldy,
+      );
+      return {
+        r: packed & 0xff,
+        g: (packed >>> 8) & 0xff,
+        b: (packed >>> 16) & 0xff,
+      };
+    });
+    // Guillotine's fade targets BG3/backdrop. Its replacement art occupies
+    // the orientation-selected BG1/BG2 and stays bright over that underlay.
+    drawExtractedTileBg(fb, {
+      tileset: battleBg.static.tileset,
+      tilemap: battleBg.static.tilemap,
+      subpalettes: battleBg.palette.map(gpuDarken),
+    });
+    if (view.background.kind === "guillotine") {
+      const palette = gpuDarken(darken(
+        guillotineArt.background.palette,
+        displayed.allPaletteBlackCoefficient,
+      ));
+      drawExtractedTileBg(fb, {
+        tileset: guillotineArt.background.tileset,
+        tilemap: view.background.variant === "player"
+          ? guillotineArt.background.playerTilemap
+          : guillotineArt.background.opponentTilemap,
+        subpalettes: [palette],
+      });
+    }
+    const targetPalette = darken(
+      target.palette,
+      guillotineState.age >= 109
+        ? displayed.allPaletteBlackCoefficient
+        : paletteDisplayed.targetBlackCoefficient,
+    );
+    const attackerPalette = darken(
+      attacker.palette,
+      displayed.allPaletteBlackCoefficient,
+    );
+    const idleX2 = playerToOpponent && guillotineState.age <= 60 ? 1 : 0;
+    const targetX2 = idleX2 + view.displayedTargetOffset.x2;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attacker.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      target.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    // GLIGAR is elevated: its pre-animation enemy shadow survives in the
+    // preceding hardware OAM buffer for the pointer-entry display only.
+    if (opponentToPlayer && guillotineState.age === 0) {
+      const shadowX = view.attacker.geometry.animationCenter.x
+        - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
+        - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    if (view.alpha) {
+      if (displayed.hitsplat) {
+        drawSpriteSheet(
+          fb,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          displayed.hitsplat.x - 16,
+          displayed.hitsplat.y - 16,
+        );
+      }
+      for (const pincer of [...displayed.pincers].reverse()) {
+        // The orientation-selected Guillotine BG leaves these OBJ pixels
+        // opaque in mGBA despite the template's ObjBlend mode; BLDCNT still
+        // remains load-bearing for the independently affine hit splat.
+        drawSpriteSheetFlipped(
+          fb,
+          cuttingSliceFrameTileset(pincer.tileOffset / 16),
+          battleAnimCuttingSlice.palette,
+          pincer.x + pincer.x2 - 16,
+          pincer.y + pincer.y2 - 16,
+          pincer.hFlip,
+          pincer.vFlip,
+        );
+      }
+    }
+    const profile = guillotineState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "GLIGAR",
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "GLIGAR" : "ONIX",
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GLIGAR used" : "Foe GLIGAR used",
+      "GUILLOTINE!",
+      99,
     );
     return;
   }

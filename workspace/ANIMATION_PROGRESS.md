@@ -1,3 +1,11 @@
+# MOVE_GUILLOTINE exact — bilateral Scene-ON dense acceptance (2026-08-11 worker)
+
+- **State:** Coverage advances **172→173/276 Level-50 exact**, 0 partial, 0 staged, and **104→103 unsupported**; only `MOVE_GUILLOTINE` moves.
+- **Did:** Ported the complete source-relative Guillotine reducer, typed seam, source-extracted orientation BG, CUT/IMPACT reuse, GLIGAR/ONIX compositor, mirrored pincer programs, target and complex palette tasks, both ShakeMon2 schedules, hitsplat, audio, fade/restore, hardware painter, and cleanup. The move-owned maps establish RAM+1 for both `(2,0,23,1)` and `(4,0,8,1)` live target schedules, including creation and teardown.
+- **Verified:** Player-back frames **74..238** pass **165/165** reducer/seam/component and framebuffer, opponent-front frames **78..241** pass **164/164**, twice fresh with byte-stable evidence/raw/map receipts (`49f55f7f…` / `e52f5331…` / `ab5c9b5a…`; `59054f50…` / `16d58dcb…` / `dc296a41…`). VICE_GRIP remains **42/42** and MEGA_PUNCH **160/160**, twice fresh in both orientations; LEER/SWORDS_DANCE probe modes remain source-pinned.
+- **Next:** Supervisor merges this animation-only promotion; no sibling inherits Guillotine acceptance or its move-owned painter/latch rules.
+- **Notes:** Presentation only: no gameplay/OHKO/accuracy/damage/RNG/controller/turn/round/facility, boundary, or unsupported-branch barrier change; no sibling promotion, canonical recording import, per-frame RGB table, capture/hash lookup, absolute tick, coordinate fit, or framebuffer lookup.
+
 # MOVE_LEER exact — bilateral Scene-ON dense acceptance (2026-08-11 worker)
 
 - **State:** Coverage advances **171→172/276 Level-50 exact**, 0 partial, 0 staged, and **105→104 unsupported**; only `MOVE_LEER` moves.
