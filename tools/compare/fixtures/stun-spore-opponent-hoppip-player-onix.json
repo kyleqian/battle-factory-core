@@ -34,6 +34,9 @@
   "sourceWindow": { "startFrame": 385, "endFrame": 578, "frameCount": 194 },
   "evidenceSha256": "3b7c9ad524337c496e5e2dccc4fc0385a2ad5640e48c4b22bacedef02d503205",
   "rawRgbSha256": "b7dbe0847205266086d5e4ab6da26d50fb77260d92503b2e355c3b5ed5a6ef3b",
+  "changeMap": "tools/compare/evidence/stun-spore-changemap-opponent.txt",
+  "changeMapSha256": "e3ebc54f51986502fa81fa1ac54c26af7bd739fc7e2fc30b912540b89a685ba6",
+  "acceptance": { "status": "exact", "componentMatching": 194, "framebufferMatching": 194 },
   "battleState": {
     "attackerSide": "opponent",
     "targetSide": "player",
