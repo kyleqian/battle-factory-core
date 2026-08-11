@@ -1,3 +1,26 @@
+## 1098 — [MAIN worker, 2026-08-10] **#55 encrypted accessor instruction/fetch slice landed**
+
+- **State:** commit `eb4ab2c8`; #55 remains open and the construction clock is
+  unwired. Scene-OFF v2 receipts remain byte-identical at
+  `631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`,
+  `ae1282b74f74de6a85b8772adfbcd83028fad09f8aa3e3ecd518aafeab17b443`, and
+  `3e10197a34f4ea7a08a23bead04ae5b6113c653304722167095612a9b0626987`.
+- **Did:** reduced all **96** compiled `(personality % 24, substructType)`
+  arms: 68-cycle fixed shell, **5,172** total arm instruction/refill cycles.
+  Reduced shared decrypt/encrypt to **328** instruction-fetch cycles each
+  (128 halfwords/12 refills) and checksum to **518** (199/20), with exact
+  access counts **36/24** word reads/writes and **24** halfword reads. Each
+  census row carries the **1,174**-cycle crypt/checksum/crypt instruction
+  subtotal; complete `cycles` stays `null`.
+- **Next:** close only the `%24` helper composition and source-general EWRAM/
+  async timing boundary. Do not wire aggregate stats or the construction
+  clock, fit residuals, or add canonical Battle-2 windows.
+- **Notes:** receipt construction/ambient totals are **242/52/294**,
+  **112/31/143**, **202/30/232**. +18 service and VBlank/IRQ pauses remain
+  external. Focused **21/21**, smoke **375/375**, full `npm test` **892 files /
+  8,476 passed / 1 skipped**, typecheck, and build passed; no fixture,
+  recording import, barrier, or clock change.
+
 ## 1096 — [MAIN worker, 2026-08-10] **#55 shared encrypted accessor dependency bounded**
 
 - **State:** evidence `d53eb54b`, independent audit hardening `2594377b`, and

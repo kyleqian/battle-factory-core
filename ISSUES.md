@@ -1304,6 +1304,17 @@ two `MPlayMain` handler/callback read classes and malformed/dynamic
 `SoundMainRAM` sample targets. See
 `docs/issue55-m4a-cgb-callback-receipt-v2.md`.
 
+**MPlayMain callback/read closure (2026-08-10, `a56341fb`):** a compact v2
+packet closes the callback-transitive class source-generally: all **36**
+`gMPlayJumpTable` slots and **14** `gXcmdTable` slots are pinned to their
+source/ELF targets and read/write audits, including `ply_xcmd` and `ply_xxx`
+edges. Two fresh Scene-OFF runs per case reproduce **52/31/30 = 113** exact
+v3-state-digest/m4a-cost joins with **0** unequal costs. The additive fixtures
+total **136 KB**, contain no duplicate v3 graphs or identity/duration keys,
+and license no duration reducer. Two dereference classes remain: the unbounded
+command/pattern source window and malformed/dynamic `SoundMainRAM` sample
+targets. See `docs/issue55-m4a-mplay-callback-receipt-v2.md`.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are
