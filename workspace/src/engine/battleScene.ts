@@ -1034,6 +1034,7 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnMetalSoundConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
   type SceneOnBatonPassConfig,
@@ -31487,13 +31488,16 @@ export function renderSceneOnMovePresentation(
   }
 
   if (state.config.move === "METAL_SOUND") {
-    const view = sceneOnMetalSoundView(state);
+    const metalSoundState = {
+      ...state,
+      config: state.config,
+    } satisfies SceneOnMovePresentationState<SceneOnMetalSoundConfig>;
+    const view = sceneOnMetalSoundView(metalSoundState);
     // Plain OAM (including wave position) reaches the displayed framebuffer
     // one VBlank after the source RAM row. Fresh affine allocations retain
     // their source matrix for the first paint; later matrix writes follow the
     // same displayed row. Removal is likewise driven by the prior OAM row.
-    const displayed = sceneOnMetalSoundView({ ...state, age: state.age - 1 });
-    const affineDisplayed = sceneOnMetalSoundView({ ...state, age: state.age - 2 });
+    const displayed = sceneOnMetalSoundView({ ...metalSoundState, age: state.age - 1 });
     const displayedAttackerOffset = state.age <= 0
       ? { x2: 0, y2: 0 }
       : displayed.attackerOffset;
@@ -31554,34 +31558,26 @@ export function renderSceneOnMovePresentation(
     // orientations, matching the source compositor's priority split.
     drawTarget();
     drawAttacker();
-    const affineAtDisplayAge = new Map(
-      affineDisplayed.waves.map((wave) => [wave.spawnIndex, wave]),
-    );
     const wavePaintOrder = playerToOpponent
       ? displayed.waves
       : Array.from(displayed.waves).reverse();
     for (const wave of wavePaintOrder) {
-      const affine = affineAtDisplayAge.get(wave.spawnIndex);
-      const matrix = affine && affine.spawnIndex === wave.spawnIndex &&
-          affine.x === wave.x && affine.y === wave.y
-        ? affine
-        : wave;
       drawSpriteSheetAffineRotate(
         fb,
         metalSoundArt.waves.tileset,
         metalSoundArt.waves.palette,
         wave.x + wave.x2,
         wave.y + wave.y2,
-        matrix.xScale,
+        wave.xScale,
         0,
         0,
-        matrix.yScale,
+        wave.yScale,
         undefined,
         true,
       );
     }
-    const opponentSpecies = "ONIX";
-    const playerSpecies = "ARON";
+    const opponentSpecies = playerToOpponent ? "ONIX" : "ARON";
+    const playerSpecies = playerToOpponent ? "ARON" : "ONIX";
     drawSendOutHealthbox(
       fb,
       0,

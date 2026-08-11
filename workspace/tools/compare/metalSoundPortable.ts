@@ -4,8 +4,9 @@
  * baked frame lookup participates in either the component or RGB gate.
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync, realpathSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { createHash } from "node:crypto";
+import { readFileSync, readdirSync, realpathSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
   sceneOnMetalSoundView,
@@ -16,6 +17,7 @@ import { createScratchDir, keepScratchDir } from "../lib/scratch.ts";
 import { PNG } from "pngjs";
 
 interface Fixture {
+  readonly orientation: "player-back" | "opponent-front";
   readonly scenario: string;
   readonly probe: string;
   readonly denseWindow: { readonly startFrame: number; readonly endFrame: number };
@@ -29,6 +31,14 @@ interface Fixture {
     readonly opponentMaxHp: number;
     readonly playerGender?: "male" | "female";
     readonly opponentGender?: "male" | "female";
+  };
+  readonly probeJsonSha256: string;
+  readonly rawRgbSha256: string;
+  readonly changeMap: string;
+  readonly changeMapSha256: string;
+  readonly expected: {
+    readonly componentMatches: number;
+    readonly framebufferMatches: number;
   };
 }
 
@@ -47,6 +57,19 @@ interface ProbeFrame {
     readonly player: { readonly x2: number; readonly y2: number };
     readonly opponent: { readonly x2: number; readonly y2: number };
   };
+  readonly tasks?: readonly unknown[];
+  readonly softwareOam?: readonly unknown[];
+  readonly hardwareOam?: readonly unknown[];
+  readonly softwareMatrices?: readonly unknown[];
+  readonly hardwareMatrices?: readonly unknown[];
+  readonly fadedPalette?: readonly unknown[];
+  readonly unfadedPalette?: readonly unknown[];
+  readonly hardwarePalette?: readonly unknown[];
+  readonly paletteTags?: readonly unknown[];
+  readonly tileTags?: readonly unknown[];
+  readonly registers?: Readonly<Record<string, number>>;
+  readonly audio?: Readonly<Record<string, unknown>>;
+  readonly immutableState?: unknown;
 }
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
@@ -73,6 +96,7 @@ if (probeRun.stderr) process.stderr.write(probeRun.stderr);
 if (probeRun.status !== 0) process.exit(probeRun.status ?? 1);
 
 const probe = JSON.parse(readFileSync(output, "utf8")) as { readonly frames: readonly ProbeFrame[] };
+const probeBytes = readFileSync(output);
 const frames = new Map(probe.frames.map((frame) => [frame.frame, frame]));
 const stage = createSceneOnMovePresentation({
   move: "METAL_SOUND", attacker: fixture.attacker, target: fixture.target,
@@ -82,6 +106,7 @@ const waveKey = (wave: { readonly x: number; readonly y: number; readonly xScale
   [wave.x, wave.y, wave.xScale, wave.yScale].join(":");
 let componentMatches = 0;
 let framebufferMatches = 0;
+let seamMatches = 0;
 const failures: string[] = [];
 const framebufferFailures: string[] = [];
 const start = fixture.denseWindow.startFrame;
@@ -94,6 +119,7 @@ for (let frame = start; frame <= end; frame += 1) {
   const age = fixture.appStage.presentationAge + frame - start;
   const state = { ...stage, age };
   const view = sceneOnMetalSoundView(state);
+  if (view.attacker === fixture.attacker && view.target === fixture.target) seamMatches += 1;
   const actualWaves = oracle.sprites
     .filter((sprite) => sprite.active && sprite.template.symbol === "gMetalSoundSpriteTemplate")
     .map((sprite) => ({
@@ -145,7 +171,7 @@ for (let frame = start; frame <= end; frame += 1) {
   else if (framebufferFailures.length < 8) framebufferFailures.push(
     `framebuffer frame ${frame}: ${diffPixels}px ${minX},${minY}-${maxX},${maxY}`,
   );
-  if (!exact && framebufferMatches === 0 && frame === start) {
+  if (!exact && framebufferFailures.length === 1) {
     const appPng = new PNG({ width: 240, height: 160 });
     appPng.data.set(app);
     const oraclePng = new PNG({ width: 240, height: 160 });
@@ -163,7 +189,46 @@ for (let frame = start; frame <= end; frame += 1) {
 }
 
 const total = end - start + 1;
-console.log(`METAL_SOUND component ${componentMatches}/${total}; framebuffer ${framebufferMatches}/${total}`);
+const sha256 = (value: Buffer | string): string =>
+  createHash("sha256").update(value).digest("hex");
+const rawRgb = Buffer.concat(readdirSync(rgbDir).filter((name) => name.endsWith(".rgb"))
+  .sort().map((name) => readFileSync(join(rgbDir, name))));
+const mapRun = spawnSync("python3", [join(root, "tools/compare/frame-changemap.py"), rgbDir], {
+  cwd: root, encoding: "utf8",
+});
+if (mapRun.status !== 0) throw new Error(`change-map failed: ${mapRun.stderr}`);
+const normalizedMap = mapRun.stdout.split("\n").map((line, index) => {
+  if (index === 0) return `# MOVE_METAL_SOUND ${fixture.orientation === "player-back" ? "player" : "opponent"} — source-relative ages 0..${total - 1} (${total} frames, 240x160)`;
+  if (index === 1) return "# ages absent from this table are byte-identical to the previous age";
+  if (index === 2) return "age  changedPx  bbox(minx,miny-maxx,maxy)";
+  const staticMatch = line.match(/^  static (\d+)-(\d+)$/);
+  if (staticMatch) return `  static ${Number(staticMatch[1]) - start}-${Number(staticMatch[2]) - start}`;
+  const frameMatch = line.match(/^(\d+)(.*)$/);
+  return frameMatch ? `${Number(frameMatch[1]) - start}${frameMatch[2]}` : line;
+}).join("\n");
+const strictEvidence =
+  probe.frames.length === total
+  && probe.frames.every((frame) =>
+    frame.tasks?.length === 16
+    && frame.sprites.length === 64
+    && frame.softwareOam?.length === 128
+    && frame.hardwareOam?.length === 128
+    && frame.softwareMatrices?.length === 32
+    && frame.hardwareMatrices?.length === 32
+    && frame.fadedPalette?.length === 512
+    && frame.unfadedPalette?.length === 512
+    && frame.hardwarePalette?.length === 512
+    && frame.paletteTags?.length === 16
+    && frame.tileTags?.length === 128
+    && frame.registers && frame.audio?.SE1 && frame.audio?.SE2
+    && JSON.stringify(frame.immutableState) === JSON.stringify(probe.frames[0]?.immutableState)
+  )
+  && sha256(probeBytes) === fixture.probeJsonSha256
+  && sha256(rawRgb) === fixture.rawRgbSha256
+  && normalizedMap === readFileSync(resolve(root, fixture.changeMap), "utf8")
+  && sha256(normalizedMap) === fixture.changeMapSha256;
+console.log(`METAL_SOUND source/component/seam ${strictEvidence ? total : 0}/${componentMatches}/${seamMatches}; framebuffer ${framebufferMatches}/${total}`);
 if (failures.length) console.error(failures.join("\n"));
 if (framebufferFailures.length) console.error(framebufferFailures.join("\n"));
-if (componentMatches !== total || framebufferMatches !== total) process.exit(1);
+if (!strictEvidence || componentMatches !== fixture.expected.componentMatches
+    || seamMatches !== total || framebufferMatches !== fixture.expected.framebufferMatches) process.exit(1);

@@ -1,3 +1,11 @@
+# MOVE_METAL_SOUND corrected-ARON checkpoint — eight bilateral latch frames remain (2026-08-11 worker)
+
+- **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported; `MOVE_METAL_SOUND` is not promoted.
+- **Did:** Fixed the generic-state/Metal-Sound typed seam so the real build succeeds; corrected both complete legal carriers from mislabeled species 304 TAILLOW to set-122 species 382 ARON; re-measured the pointer-bounded windows, ARON geometry/HP/healthboxes, wave affine/OAM, and normalized maps; and repaired the Supersonic verifier's post-layout Python path.
+- **Verified:** Twice-fresh strict corrected evidence is byte-stable at player **291..376 = 86/86 source/component/seam, 78/86 framebuffer** (`7d3fd802…` / raw `509317b4…` / map `6db141ff…`) and opponent **291..375 = 85/85 source/component/seam, 77/85 framebuffer** (`9cd4b2b1…` / raw `5f2f8646…` / map `23f552d7…`). Every remaining diff is one of eight alternating `ShakeMon2(attacker,2,0,8,1)` live-battler display frames; wave geometry, affine/OAM and all other frames are exact.
+- **Next:** Resolve the eight-frame move-owned live-battler OAM transfer schedule without a per-frame table; require 86/86 + 85/85 production framebuffer twice fresh before promotion.
+- **Notes:** Corrected evidence changes the old mechanism record: Metal Sound wave affine/OAM is reducer age−1, while the short ShakeMon2 display latch remains unresolved. No gameplay/RNG/controller/facility, boundary, barrier, canonical recording, absolute tick, capture/hash lookup, coordinate/RGB fit, or other move promotion changed.
+
 # MOVE_METAL_SOUND implementation checkpoint — component exact, framebuffer blocked (2026-08-11 worker)
 
 - **State:** Coverage intentionally remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported; `MOVE_METAL_SOUND` is not promoted.

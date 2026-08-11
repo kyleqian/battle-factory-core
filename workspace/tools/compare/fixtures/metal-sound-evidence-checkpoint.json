@@ -38,20 +38,20 @@
     {
       "orientation": "player-back",
       "scenario": "tools/battle-lab/mechanic-metal-sound-player-aron-opponent-onix.json",
-      "sourceWindow": {"startFrame": 76, "endFrame": 161, "frameCount": 86},
-      "probeJsonSha256": "b368c1aa7583d80f34b713047f3b02a0e3d40c6373f4ebd3bdca7a0b35b6e5d7",
-      "rawRgbSha256": "54ad351bf0b9bde4a4a451ec337acb8747ebf4fb247178eeba2ab9809d3568ef",
+      "sourceWindow": {"startFrame": 291, "endFrame": 376, "frameCount": 86},
+      "probeJsonSha256": "7d3fd802c51de4f61dd41be00fb7ade2e9272fa02353ddcb168c8adc6f48814d",
+      "rawRgbSha256": "509317b424865eafbc23b4809f9db74ce292623a3f65a6bc1101cd575a5d4305",
       "changeMap": "tools/compare/evidence/metal-sound-changemap-player.txt",
-      "changeMapSha256": "72913fba51f2fb38d5a9f6b3da25cdda3584ee9095cf84fdfbf86e274876be30",
+      "changeMapSha256": "6db141ffca4dd8ce6ca2615b728d74b22632f2ae85dda3c0633d3c0809e5aa71",
       "freshRuns": 2,
       "byteStable": true,
-      "pointerBound": {"firstInBoundsFrame": 76, "lastActiveFrame": 160, "firstInactiveCleanupFrame": 161},
+      "pointerBound": {"firstInBoundsFrame": 291, "lastActiveFrame": 375, "firstInactiveCleanupFrame": 376},
       "bgLayer": "BG1",
       "waveLifecycle": {"spawnAges": [7, 11, 15, 19], "lastActiveAge": 49, "cleanupAge": 50, "lastRgbChangeAge": 51, "oamSlots": [3, 4, 5, 7], "matrixSlots": [0, 3, 4, 5]},
       "latchChecks": {
         "plainWaveOam": "RAM+1 visible motion",
-        "freshAffineMatrix": "paint age-2 from allocation and remove age-1; dual-lag class",
-        "shakeMon2": "exact (ANIM_ATTACKER,2,0,8,1) creation-anchor uses task tick age+1",
+        "freshAffineMatrix": "Metal Sound wave matrix and OAM both display reducer age-1",
+        "shakeMon2": "logical task tick is wave age+1; eight displayed live-battler OAM frames remain unresolved",
         "palettes": "faded/unfaded RAM+1; hardware palette follows the next display",
         "audio": "four SE_M_SCREECH panse calls; sound-task/audio rows captured"
       }
@@ -59,26 +59,26 @@
     {
       "orientation": "opponent-front",
       "scenario": "tools/battle-lab/mechanic-metal-sound-opponent-aron-player-onix.json",
-      "sourceWindow": {"startFrame": 80, "endFrame": 164, "frameCount": 85},
-      "probeJsonSha256": "6ce3950259143c31bca0107740e3c15dd352ef9c03d0f6d159c2036f949051ea",
-      "rawRgbSha256": "39a6fab99980d84a6caac761e243f6f9f52c627c8589ff8b41d0a0f8890862e6",
+      "sourceWindow": {"startFrame": 291, "endFrame": 375, "frameCount": 85},
+      "probeJsonSha256": "9cd4b2b19698899a223b0a979af69ac61422c26e1a722c8d7e036a5f7ab4937e",
+      "rawRgbSha256": "5f2f8646478bc84380c3ea4f3d4e7f60a07d0bef0950cdfd50e1322829a609e7",
       "changeMap": "tools/compare/evidence/metal-sound-changemap-opponent.txt",
-      "changeMapSha256": "9b6d338a6c28cb6659babf519063587a91d90c90d7246e45e7d4820687c66c27",
+      "changeMapSha256": "23f552d7c7740d3add1330d0fc77d99aac5ea4d28ac40949b2c63bd5fa933e54",
       "freshRuns": 2,
       "byteStable": true,
-      "pointerBound": {"firstInBoundsFrame": 80, "lastActiveFrame": 163, "firstInactiveCleanupFrame": 164},
+      "pointerBound": {"firstInBoundsFrame": 291, "lastActiveFrame": 374, "firstInactiveCleanupFrame": 375},
       "bgLayer": "BG2",
       "waveLifecycle": {"spawnAges": [7, 11, 15, 19], "lastActiveAge": 49, "cleanupAge": 50, "lastRgbChangeAge": 51, "oamSlots": [3, 4, 5, 7], "matrixSlots": [0, 3, 4, 5]},
       "latchChecks": {
         "plainWaveOam": "RAM+1 visible motion",
-        "freshAffineMatrix": "paint age-2 from allocation and remove age-1; dual-lag class",
-        "shakeMon2": "exact (ANIM_ATTACKER,2,0,8,1) creation-anchor uses task tick age+1",
+        "freshAffineMatrix": "Metal Sound wave matrix and OAM both display reducer age-1",
+        "shakeMon2": "logical task tick is wave age+1; eight displayed live-battler OAM frames remain unresolved",
         "palettes": "faded/unfaded RAM+1; hardware palette follows the next display",
         "audio": "four SE_M_SCREECH panse calls; sound-task/audio rows captured"
       }
     }
   ],
-  "orientationShift": {"opponentFrontMinusPlayerBack": 4, "measured": true},
+  "orientationShift": {"opponentFrontMinusPlayerBack": 0, "measured": true},
   "evidenceScope": {
     "sourcePointer": true,
     "logicalTasks": true,
@@ -90,7 +90,7 @@
     "audio": true,
     "immutableBattleState": true,
     "rawRgb": true,
-    "productionFramebuffer": "not attempted; Metal Sound remains unsupported"
+    "productionFramebuffer": "player 78/86, opponent 77/85 twice fresh; eight ShakeMon2 display frames remain per orientation"
   },
   "control": {
     "move": "SUPERSONIC",
@@ -106,6 +106,6 @@
   },
   "promotion": {
     "status": "deferred",
-    "reason": "Evidence checkpoint only; no Metal Sound reducer, typed seam, compositor, or production framebuffer gate was claimed."
+    "reason": "Corrected ARON carrier is component-exact, but eight ShakeMon2 display-latch frames remain mismatched in each orientation."
   }
 }

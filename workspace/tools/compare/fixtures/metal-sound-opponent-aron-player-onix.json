@@ -4,9 +4,15 @@
   "scenario": "tools/battle-lab/mechanic-metal-sound-opponent-aron-player-onix.json",
   "probe": "tools/compare/metalSoundProbe.py",
   "move": "METAL_SOUND",
-  "denseWindow": {"startFrame": 80, "endFrame": 164},
+  "orientation": "opponent-front",
+  "denseWindow": {"startFrame": 291, "endFrame": 375},
   "appStage": {"presentationAge": 0},
-  "attacker": {"species":"ARON","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":28},"animationCenter":{"x":176,"y":56},"battlePositionCenter":{"x":176,"y":40}}},
+  "attacker": {"species":"ARON","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":28},"animationCenter":{"x":176,"y":60},"battlePositionCenter":{"x":176,"y":40}}},
   "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
-  "fieldProfile": {"playerHp":142,"playerMaxHp":142,"opponentHp":147,"opponentMaxHp":147,"playerGender":"male","opponentGender":"male"}
+  "fieldProfile": {"playerHp":142,"playerMaxHp":142,"opponentHp":156,"opponentMaxHp":157,"playerGender":"male","opponentGender":"male"},
+  "probeJsonSha256": "9cd4b2b19698899a223b0a979af69ac61422c26e1a722c8d7e036a5f7ab4937e",
+  "rawRgbSha256": "5f2f8646478bc84380c3ea4f3d4e7f60a07d0bef0950cdfd50e1322829a609e7",
+  "changeMap": "tools/compare/evidence/metal-sound-changemap-opponent.txt",
+  "changeMapSha256": "23f552d7c7740d3add1330d0fc77d99aac5ea4d28ac40949b2c63bd5fa933e54",
+  "expected": {"componentMatches":85,"framebufferMatches":77}
 }

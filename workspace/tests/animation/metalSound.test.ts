@@ -22,7 +22,7 @@ describe("MOVE_METAL_SOUND source-relative reducer", () => {
   const opponent = (age: number) => metalSoundEffectAtAge(
     age,
     "opponent",
-    { x: 176, y: 56 },
+    { x: 176, y: 60 },
     { x: 72, y: 88 },
   );
 
@@ -49,7 +49,7 @@ describe("MOVE_METAL_SOUND source-relative reducer", () => {
       xScale: 263,
       yScale: 263,
     });
-    expect(opponent(19).waves.at(-1)).toMatchObject({ x: 160, x2: -2, y2: 1 });
+    expect(opponent(19).waves.at(-1)).toMatchObject({ x: 160, x2: -2, y2: 0 });
   });
 
   it("keeps the short move-owned ShakeMon2 creation anchor local", () => {
