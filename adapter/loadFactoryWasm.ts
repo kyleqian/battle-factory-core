@@ -31,6 +31,20 @@ export interface FactoryWasmExports {
     has_construction_rng: number,
     construction_rng_value: number,
   ): number;
+  /**
+   * Runs the mon-construction path and returns an `fw_alloc`'d buffer
+   * pointer; see the doc comment over the Rust export
+   * (`crates/factory-wasm/src/lib.rs`) for the exact layout, and
+   * `adapter/factoryEngine.ts` for the decoder. `ability_slot` must be 0 or
+   * 1 (see that export's caller contract).
+   */
+  fw_create_factory_party_member(
+    set_id: number,
+    personality: number,
+    fixed_iv: number,
+    ability_slot: number,
+    ot_id: number,
+  ): number;
   memory: WebAssembly.Memory;
 }
 
