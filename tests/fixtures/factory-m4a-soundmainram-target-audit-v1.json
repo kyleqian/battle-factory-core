@@ -1,0 +1,558 @@
+{
+  "schema": "factory-m4a-soundmainram-target-audit/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceStateReference": {
+    "packetSchema": "factory-m4a-source-state-probe/v3",
+    "digestKey": "sourceSemanticState.stateDigest",
+    "snapshotBoundary": "m4a-sound-main-call (before the six MPlayMain invocations and SoundMainRAM entry)",
+    "targetBoundaryRequiredForClosure": "sound-main-ram-entry (after MPlayMain/CgbSound, before the first SoundMainRAM channel pass)",
+    "freshRunsPerCase": 2,
+    "receiptSha256": {
+      "anchor": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+      "liliana": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+      "factory-varied": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+    },
+    "observationCount": 113
+  },
+  "sourceAnchors": [
+    {
+      "id": "wave-data-layout",
+      "source": "reference/pokeemerald/include/gba/m4a_internal.h",
+      "lines": "39-47",
+      "sha256": "01d53a958ee3bde6de033eb34e5b00451c3e4c6024bdcd7713c0be6aa8695ec5",
+      "anchors": [
+        "struct WaveData",
+        "u32 loopStart",
+        "u32 size",
+        "s8 data[1]"
+      ]
+    },
+    {
+      "id": "direct-channel-layout",
+      "source": "reference/pokeemerald/include/gba/m4a_internal.h",
+      "lines": "130-165",
+      "sha256": "d00d7b11208fc7b0cd4bcc0dd085efc27f20b1fd6a30fbbaadc8747292db5896",
+      "anchors": [
+        "struct SoundChannel",
+        "u32 count",
+        "struct WaveData *wav",
+        "s8 *currentPointer"
+      ]
+    },
+    {
+      "id": "soundmain-stage-order",
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "20-98",
+      "sha256": "7ffec16e7dbf1b0003a7b411e28a201957b380e3cae4c69f637c240a96572ec9",
+      "anchors": [
+        "SoundMain:",
+        "o_SoundInfo_MPlayMainHead",
+        "o_SoundInfo_CgbSound",
+        "lt_SoundMainRAM_Buffer"
+      ]
+    },
+    {
+      "id": "soundmainram-normal-channel-loop",
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "153-445",
+      "sha256": "051ed839140eae057180475330b6e7523d9bbfc1de9b2779aeac9fd483eb5657",
+      "anchors": [
+        "SoundMainRAM_ChanLoop:",
+        "o_SoundChannel_wav",
+        "o_WaveData_loopStart",
+        "ldrsb r0, [r3], 0x1",
+        "ldrsb r1, [r3, 0x1]!"
+      ]
+    },
+    {
+      "id": "soundmainram-special-and-decoder",
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "469-709",
+      "sha256": "cbdb31bcdc977a5faf19e2f566ae8b42070a976e3cfe8c40534eee0301b20606",
+      "anchors": [
+        "SoundMainRAM_Unk1:",
+        "TONEDATA_TYPE_REV",
+        "SoundMainRAM_Unk2:",
+        "mov r1, 0x21",
+        "and r0, r3, 0x3F"
+      ]
+    },
+    {
+      "id": "mplay-main-note-dispatch",
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1130-1466",
+      "sha256": "7b72931791f2b2840a762c92a9c2a2aaa8f9527ba14382d2ccdd872728bbd96b",
+      "anchors": [
+        "MPlayMain:",
+        "o_SoundInfo_plynote",
+        "bl call_r3",
+        "call_r3:"
+      ]
+    },
+    {
+      "id": "mplay-voice-and-note-producers",
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "945-966",
+      "sha256": "9e3a63b8b56dccfea4d04ebc0c2f360b1a5fed8f21d551d9643d18b1d85cc97b",
+      "anchors": [
+        "ply_voice:",
+        "o_ToneData_wav",
+        "chk_adr_r2"
+      ]
+    },
+    {
+      "id": "mplay-note-channel-write",
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1538-1805",
+      "sha256": "6a3d4db1b60ef6cabdeac37fb737292d922f220fbc257456a38f31b948e7f3a1",
+      "anchors": [
+        "ply_note:",
+        "o_MusicPlayerTrack_ToneData_wav",
+        "o_SoundChannel_wav",
+        "o_SoundChannel_count"
+      ]
+    },
+    {
+      "id": "mplay-start-tone-producer",
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "611-665",
+      "sha256": "c42cd66f85fd315dbc9a12c87da5553aaab1b314779fcea53fbec955b7b37602",
+      "anchors": [
+        "void MPlayStart",
+        "mplayInfo->tone = songHeader->tone",
+        "track->cmdPtr = songHeader->part[i]"
+      ]
+    },
+    {
+      "id": "pokemon-cry-tone-producer",
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "1660-1697",
+      "sha256": "455f32884f5eafc00a891fcd2d4e4bf56dcc8bac6758193e1d218cae474f0a8a",
+      "anchors": [
+        "struct MusicPlayerInfo *SetPokemonCryTone",
+        "gPokemonCrySongs[i].tone = tone",
+        "MPlayStart(mplayInfo"
+      ]
+    },
+    {
+      "id": "mplay-xwave-command-producer",
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "1536-1559",
+      "sha256": "dd44be3b645c836e2fc65cbf2037736dd79151e5479c717ab4bff527c46d4023",
+      "anchors": [
+        "READ_XCMD_BYTE",
+        "void ply_xwave",
+        "track->tone.wav",
+        "track->cmdPtr += 4"
+      ]
+    },
+    {
+      "id": "sound-struct-offsets",
+      "source": "reference/pokeemerald/constants/m4a_constants.inc",
+      "lines": "53-138",
+      "sha256": "9c27e017cca5f623ead2a556c0d535f1666ccf069ffc74fea2a3bd4515bbbbbf",
+      "anchors": [
+        "o_WaveData_data",
+        "o_SoundChannel_count",
+        "o_SoundChannel_wav",
+        "o_SoundChannel_currentPointer"
+      ]
+    }
+  ],
+  "elfAnchors": [
+    {
+      "symbol": "SoundMain",
+      "bytes": 132,
+      "sha256": "2341385f33abe4929c4408a9141d4741f8b914bb5e3b4e30c0835651b1c3d6a0"
+    },
+    {
+      "symbol": "SoundMainRAM",
+      "bytes": 956,
+      "sha256": "ec606fdb6d57db1567f1e99baaa3d1f75ef19db7d38f4582ca4cd58486e504ce"
+    },
+    {
+      "symbol": "SoundMainRAM_Unk1",
+      "bytes": 700,
+      "sha256": "599e036e4d22b7ad34567d880a75506153905085a96dc11f44b7e2fd8e3deb2c"
+    },
+    {
+      "symbol": "SoundMainRAM_Unk2",
+      "bytes": 140,
+      "sha256": "03099efe2617db259718398ff8635eaf574dcc9bd6fba8770a0790d999f49263"
+    },
+    {
+      "symbol": "MPlayMain",
+      "bytes": 616,
+      "sha256": "6332b748c3f7c5acb089174e703b84e1b15c3accfc208c8bbe75dab053051689"
+    },
+    {
+      "symbol": "MPlayStart",
+      "bytes": 228,
+      "sha256": "d003418081c4d12afffdfc759f7c90ee0cd92ea4813b1c54e78ead5737dd3833"
+    },
+    {
+      "symbol": "SetPokemonCryTone",
+      "bytes": 208,
+      "sha256": "95b1fcef011935911068f8f089a898db379e2917012016a291fd6afcd6bf7f0f"
+    },
+    {
+      "symbol": "ply_voice",
+      "bytes": 46,
+      "sha256": "044d0a4560fe47e556e3da12bf7ea87d0dc0188520653647c687b0c04391770e"
+    },
+    {
+      "symbol": "ply_note",
+      "bytes": 516,
+      "sha256": "00679d21a5acf624391ec1891952d6e132a2137677fb7c7056953f41438e19f0"
+    },
+    {
+      "symbol": "ply_xwave",
+      "bytes": 72,
+      "sha256": "5eef43134c3fc0ec9dbd8bede2ed1646674d2223a1c50791b2880100985b7270"
+    },
+    {
+      "symbol": "MidiKeyToFreq",
+      "bytes": 100,
+      "sha256": "f4b55d97c36fac5d7be374404ac125f9a2098753d5c0713f842ef7e55e333a8a"
+    }
+  ],
+  "pointerProducers": [
+    {
+      "id": "mplay-start.song-header-tone",
+      "source": "m4a.c:611-665",
+      "output": "MusicPlayerInfo.tone",
+      "expression": "SongHeader.tone copied when MPlayStart accepts the song",
+      "guard": "The song-header tone pointer is trusted; MPlayStart also installs command pointers that MPlayMain may consume before SoundMainRAM."
+    },
+    {
+      "id": "pokemon-cry.set-tone",
+      "source": "m4a.c:1660-1697",
+      "output": "PokemonCry SongHeader.tone",
+      "expression": "SetPokemonCryTone(tone) assigns caller-provided tone into a mutable cry SongHeader",
+      "guard": "A cry ToneData source can therefore enter the same MPlayStart -> ply_voice -> ply_note chain."
+    },
+    {
+      "id": "mplay.ply-voice.tone-table-wave",
+      "source": "m4a_1.s:945-966",
+      "output": "MusicPlayerTrack.ToneData.wav",
+      "expression": "MusicPlayerInfo.tone + 12 * voice selector -> ToneData.wav",
+      "guard": "chk_adr_r2 checks the ToneData record base, not the copied WaveData target or its length."
+    },
+    {
+      "id": "mplay.ply-xwave.command-u32",
+      "source": "m4a.c:1536-1559",
+      "output": "MusicPlayerTrack.ToneData.wav",
+      "expression": "four cmdPtr bytes assembled into wav",
+      "guard": "No WaveData target/range validation follows the command-byte assembly."
+    },
+    {
+      "id": "mplay.ply-note.inline-tone-wave",
+      "source": "m4a_1.s:1579-1625,1750-1754",
+      "output": "SoundChannel.wav",
+      "expression": "inline MusicPlayerTrack ToneData.wav",
+      "guard": "Selected inline tone is copied directly into the direct-sound channel."
+    },
+    {
+      "id": "mplay.ply-note.keysplit-tone-wave",
+      "source": "m4a_1.s:1581-1607,1750-1754",
+      "output": "SoundChannel.wav",
+      "expression": "ToneData.wav + 12 * keysplit selector -> selected ToneData.wav",
+      "guard": "The keysplit record supplies the direct-sound WaveData word without a WaveData range check."
+    },
+    {
+      "id": "mplay.ply-note.rhythm-tone-wave",
+      "source": "m4a_1.s:1581-1618,1750-1754",
+      "output": "SoundChannel.wav",
+      "expression": "ToneData.wav + 12 * MIDI-key selector -> selected ToneData.wav",
+      "guard": "The rhythm record supplies the direct-sound WaveData word without a WaveData range check."
+    },
+    {
+      "id": "soundmainram.persisted-current",
+      "source": "m4a_1.s:291-295",
+      "output": "mixer sample cursor",
+      "expression": "SoundChannel.currentPointer",
+      "guard": "The non-START path consumes the persisted cursor directly."
+    },
+    {
+      "id": "soundmainram.normal-current-writeback",
+      "source": "m4a_1.s:437-440",
+      "output": "SoundChannel.currentPointer",
+      "expression": "normal fixed/linear mixer cursor r3 written back after the pass",
+      "guard": "The next SoundMainRAM pass can consume this mutable cursor through the non-START path."
+    },
+    {
+      "id": "soundmainram.start-current",
+      "source": "m4a_1.s:177-204",
+      "output": "SoundChannel.currentPointer",
+      "expression": "WaveData.data + SoundChannel.count; remaining = WaveData.size - SoundChannel.count",
+      "guard": "The mixer subtracts unsigned values without checking count < size."
+    },
+    {
+      "id": "soundmainram.loop-rebase",
+      "source": "m4a_1.s:278-289,380-384",
+      "output": "mixer loop cursor",
+      "expression": "WaveData.data + WaveData.loopStart; loop remaining = WaveData.size - WaveData.loopStart",
+      "guard": "The loop flag gates this path, but the mixer does not check loopStart < size."
+    },
+    {
+      "id": "soundmainram.reverse-current",
+      "source": "m4a_1.s:471-491",
+      "output": "SoundChannel.currentPointer",
+      "expression": "WaveData.data + WaveData.size - currentOffset",
+      "guard": "Reverse handling is selected by TONEDATA_TYPE_REV and trusts the incoming cursor relation."
+    },
+    {
+      "id": "soundmainram.compressed-block",
+      "source": "m4a_1.s:670-707",
+      "output": "decoder sample cursor",
+      "expression": "WaveData.data + 33 * floor(decodedOffset / 64)",
+      "guard": "A nonzero WaveData.type selects 33 physical bytes per decoded 64-sample block; WaveData.size alone is not a physical compressed-byte length."
+    }
+  ],
+  "sampleReadRules": [
+    {
+      "id": "normal-fixed",
+      "source": "m4a_1.s:313-395",
+      "selector": "!(channel.type & (CMP | REV)) && (channel.type & FIX)",
+      "reads": "One signed sample byte per source advance from currentOffset; no interpolation lookahead.",
+      "legalRange": "Safety requires 0 <= currentOffset < size and 0 < count <= size - currentOffset; if looping, 0 <= loopStart < size. The retained v3 pre-call states use the stronger count == size - currentOffset invariant.",
+      "loopExtent": "Reads [currentOffset, size) then repeats [loopStart, size) until pcmSamplesPerVBlank output samples are mixed or the channel ends.",
+      "requiredPayloadBytes": "size"
+    },
+    {
+      "id": "normal-linear",
+      "source": "m4a_1.s:396-435",
+      "selector": "!(channel.type & (CMP | REV)) && !(channel.type & FIX)",
+      "reads": "Each interpolation state reads a signed pair at source offsets i and i + 1.",
+      "legalRange": "Safety requires 0 <= currentOffset < size and 0 < count <= size - currentOffset; if looping, 0 <= loopStart < size. The retained v3 pre-call states use the stronger count == size - currentOffset invariant.",
+      "loopExtent": "Uses the same current/loop ranges as normal-fixed, with a one-byte lookahead at the end of each selected range.",
+      "requiredPayloadBytes": "size + 1 readable bytes (declared payload plus one physical guard byte)"
+    },
+    {
+      "id": "special-reverse",
+      "source": "m4a_1.s:471-666",
+      "selector": "channel.type & REV",
+      "reads": "Reverses the cursor around WaveData.data + size; normal reverse reads decrementing adjacent samples, compressed reverse delegates to the decoder.",
+      "legalRange": "Normal reverse requires 0 < currentOffset <= size and a matching remaining-count invariant; compressed reverse additionally requires the decoded-offset rule.",
+      "loopExtent": "Loop rebasing still uses WaveData.loopStart; source has no bound check.",
+      "requiredPayloadBytes": "normal: size plus any interpolation guard; compressed: physical 33-byte blocks"
+    },
+    {
+      "id": "special-compressed",
+      "source": "m4a_1.s:501-614,670-707",
+      "selector": "(channel.type & (CMP | REV)) && WaveData.type != 0",
+      "reads": "SoundMainRAM_Unk2 reads bytes 0..32 of the selected 33-byte block and emits decoded sample offset & 63.",
+      "legalRange": "0 <= decodedOffset < size; physical payload bytes must cover 33 * ceil(size / 64) for arbitrary in-range decoded offsets.",
+      "loopExtent": "The loop counter is in decoded samples; a source-complete audit must retain both decoded size and physical encoded allocation length.",
+      "requiredPayloadBytes": "33 * ceil(size / 64)"
+    }
+  ],
+  "observedCoverage": {
+    "cases": [
+      {
+        "case": "anchor",
+        "observations": 52,
+        "sourceStateDigestSetSha256": "732778b20bee7ec50169d3e0f7d378f84b7fc05fa361fcc49324565891d6f551",
+        "preCallSelectedSlots": 260,
+        "preCallOnSlots": 208,
+        "preCallOffSlots": 52
+      },
+      {
+        "case": "liliana",
+        "observations": 31,
+        "sourceStateDigestSetSha256": "cbda15a9f54f6f7a369f53584c420d7437e2eec0667ac82165fc6b18df77b3bb",
+        "preCallSelectedSlots": 155,
+        "preCallOnSlots": 122,
+        "preCallOffSlots": 33
+      },
+      {
+        "case": "factory-varied",
+        "observations": 30,
+        "sourceStateDigestSetSha256": "8feacd92117747145f7bf17646b95cbcbfe3af995bf8819cca4c2640ae14f1da",
+        "preCallSelectedSlots": 150,
+        "preCallOnSlots": 102,
+        "preCallOffSlots": 48
+      }
+    ],
+    "maxChansValues": [
+      5
+    ],
+    "pcmSamplesPerVBlankValues": [
+      224
+    ],
+    "mplayMainTargetValues": [
+      "MPlayMain"
+    ],
+    "cgbSoundTargetValues": [
+      "CgbSound"
+    ],
+    "plynoteTargetValues": [
+      "ply_note"
+    ],
+    "uniqueLogicalTargets": 5,
+    "selectedPreCallChannelSnapshots": 565,
+    "onPreCallChannelSnapshots": 432,
+    "offPreCallChannelSnapshots": 133,
+    "startPreCallChannelSnapshots": 0,
+    "fixedPreCallChannelSnapshots": 310,
+    "linearPreCallChannelSnapshots": 255,
+    "specialCmpOrRevPreCallChannelSnapshots": 0,
+    "compressedWavePreCallChannelSnapshots": 0,
+    "loopPreCallChannelSnapshots": 255,
+    "nonLoopPreCallChannelSnapshots": 310,
+    "completeSampleRegionPreCallChannelSnapshots": 565,
+    "currentInWavePreCallChannelSnapshots": 565,
+    "strictCurrentRangePreCallChannelSnapshots": 565,
+    "countMatchesRemainingPreCallChannelSnapshots": 565,
+    "completeCurrentRegionPreCallChannelSnapshots": 565,
+    "allPreCallLogicalTargetsHaveCompletePayload": true,
+    "allPreCallLogicalTargetsHaveStrictCurrentRange": true,
+    "allPreCallLogicalTargetsHaveCountRemainingInvariant": true,
+    "allPreCallLogicalTargetsMapToOnePinnedElfWave": true,
+    "actualSoundMainRamEntryTargetCoverage": false,
+    "runtimeTargetProvenanceComplete": false
+  },
+  "targets": [
+    {
+      "elfSymbol": "DirectSoundWaveData_sc88pro_flute",
+      "header": {
+        "type": 0,
+        "status": 16384,
+        "frequency": 3425024,
+        "loopStart": 1312,
+        "size": 1874
+      },
+      "payloadBytes": 1874,
+      "payloadSha256": "0544b78118794c0027c44efbf9a2be5a7b13fee7d63fa36a2e34369ee07713af",
+      "physicalPayloadBytes": 1876,
+      "physicalPayloadSha256": "8e141db762e9e40bbc0d963235d30e8b05a1208fa3a188209b2cd846e58cf89c",
+      "trailingReadableBytes": 2,
+      "trailingReadableSha256": "240fbad97784f181cdf3a859e4bf0b48bb001af6a3731ec58b0fc361f0eb09af",
+      "observed": {
+        "preCallSelectedSlots": 48,
+        "preCallOnSlots": 48,
+        "preCallFixedSlots": 0,
+        "preCallLinearSlots": 48,
+        "preCallLoopSlots": 48,
+        "cases": {
+          "anchor": 48
+        }
+      }
+    },
+    {
+      "elfSymbol": "DirectSoundWaveData_sc88pro_tambourine",
+      "header": {
+        "type": 0,
+        "status": 0,
+        "frequency": 13700096,
+        "loopStart": 0,
+        "size": 2211
+      },
+      "payloadBytes": 2211,
+      "payloadSha256": "147f9817fb1c6672c740bf00b6047f1d2bd9a260a9e30b34472000712d2e9e3d",
+      "physicalPayloadBytes": 2212,
+      "physicalPayloadSha256": "a7cc3335cef34e0fac3c735dfd281e2c235ccfeaa6f08452456b9dd84546c56b",
+      "trailingReadableBytes": 1,
+      "trailingReadableSha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+      "observed": {
+        "preCallSelectedSlots": 218,
+        "preCallOnSlots": 165,
+        "preCallFixedSlots": 218,
+        "preCallLinearSlots": 0,
+        "preCallLoopSlots": 0,
+        "cases": {
+          "factory-varied": 120,
+          "liliana": 98
+        }
+      }
+    },
+    {
+      "elfSymbol": "DirectSoundWaveData_sc88pro_synth_bass",
+      "header": {
+        "type": 0,
+        "status": 16384,
+        "frequency": 22579200,
+        "loopStart": 1818,
+        "size": 3169
+      },
+      "payloadBytes": 3169,
+      "payloadSha256": "85296ae904a4b773f5289a8328f4798e25ec2c3cc5004d2798efcdcfaa01dd47",
+      "physicalPayloadBytes": 3172,
+      "physicalPayloadSha256": "acb750bb1e308e80a8138243316f2efd7547bbb56372ac326a88e24ea204e431",
+      "trailingReadableBytes": 3,
+      "trailingReadableSha256": "3ee0d7c44a58950b18c1e01b912ed0e08549ff905fbf7010318a44d3e2efb8db",
+      "observed": {
+        "preCallSelectedSlots": 103,
+        "preCallOnSlots": 71,
+        "preCallFixedSlots": 0,
+        "preCallLinearSlots": 103,
+        "preCallLoopSlots": 103,
+        "cases": {
+          "anchor": 65,
+          "liliana": 38
+        }
+      }
+    },
+    {
+      "elfSymbol": "DirectSoundWaveData_sc88pro_xylophone",
+      "header": {
+        "type": 0,
+        "status": 16384,
+        "frequency": 3425024,
+        "loopStart": 1457,
+        "size": 2594
+      },
+      "payloadBytes": 2594,
+      "payloadSha256": "a76a0b0e2b25cc08b01f22fac471e5b82f049a0de0bdb4d7a6a3dbfcd2247f12",
+      "physicalPayloadBytes": 2596,
+      "physicalPayloadSha256": "810a3adc9b5661f1c396f854164e05bf82b47276fe1765675b413c4048f8e0d4",
+      "trailingReadableBytes": 2,
+      "trailingReadableSha256": "0a6361b3a802f55cd5ae06101c88a1e216320fe11cc0cfe1d791eed08a1200fd",
+      "observed": {
+        "preCallSelectedSlots": 104,
+        "preCallOnSlots": 93,
+        "preCallFixedSlots": 0,
+        "preCallLinearSlots": 104,
+        "preCallLoopSlots": 104,
+        "cases": {
+          "anchor": 104
+        }
+      }
+    },
+    {
+      "elfSymbol": "DirectSoundWaveData_drum_and_percussion_kick",
+      "header": {
+        "type": 0,
+        "status": 0,
+        "frequency": 13700096,
+        "loopStart": 0,
+        "size": 3846
+      },
+      "payloadBytes": 3846,
+      "payloadSha256": "ea99eb9d0e972ba1aefedcf39aacd401e2b3157bf0c6fc09619cc56fdfdf563b",
+      "physicalPayloadBytes": 3848,
+      "physicalPayloadSha256": "44e2c7a5dcf6a7996892f925e8c9fd846fbc65c35db1b33c351392ba5c6a32bf",
+      "trailingReadableBytes": 2,
+      "trailingReadableSha256": "96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7",
+      "observed": {
+        "preCallSelectedSlots": 92,
+        "preCallOnSlots": 55,
+        "preCallFixedSlots": 92,
+        "preCallLinearSlots": 0,
+        "preCallLoopSlots": 0,
+        "cases": {
+          "anchor": 43,
+          "factory-varied": 30,
+          "liliana": 19
+        }
+      }
+    }
+  ],
+  "closure": {
+    "closed": "The source branch inventory and the logical target/range proof for all 565 selected direct-channel snapshots at the v3 call boundary are complete. Every retained pre-call snapshot is normal WaveData.type=0 PCM, has a strict current/count relation, and content-matches exactly one pinned ELF WaveData payload; every pre-call linear target has a pinned one-byte ELF guard.",
+    "notClosed": "The original SoundMainRAM dereference class is not closed at actual mixer entry. v3 snapshots before six MPlayMain invocations, and ply_note can replace a selected SoundChannel.wav between that snapshot and SoundMainRAM. It also normalizes direct target pointers, so a content match cannot prove the physical storage domain or allocation span of the target actually dereferenced.",
+    "exactMissingRuntimeField": "soundMainRamEntryTargets: Array<{ channelIndex: u8, statusFlags: u8, type: u8, count: u32, currentRelation: { inWaveData: boolean, offset: u32 | null, regionComplete: boolean }, wave: null | { type: u16, status: u16, frequency: u32, loopStart: u32, size: u32, sampleRegion: { requestedBytes: u32, capturedBytes: u32, complete: boolean, sha256: sha256 | null }, directWaveTargetDescriptor: { storageRole: 'gamepak-ws0' | 'gamepak-ws1' | 'gamepak-ws2' | 'ewram' | 'iwram' | 'other-or-unreadable', waveAlignmentMod4: 0 | 1 | 2 | 3, physicalPayloadBytes: u32 | null } } }> captured at sound-main-ram-entry after MPlayMain/CgbSound and before channel 0. Closure accepts an aligned, readable legal storage role plus complete/current-in-range relations; compressed WaveData still requires physicalPayloadBytes because size is decoded sample count.",
+    "nextAdmissibleStep": "If timing closure remains necessary, add that address-free post-MPlay field to a new receipt revision and repeat this static audit. Do not infer a duration, service cost, or construction-clock operation from the pre-call content match."
+  },
+  "verdict": "Evidence-only bounded checkpoint. No oracle/probe was run, no duration reducer or production wiring is created, and no case/frame/tick lookup participates in the result."
+}
