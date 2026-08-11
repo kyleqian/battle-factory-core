@@ -904,6 +904,7 @@ export interface SceneOnPresentationBattler {
     | "PARASECT"
     | "PONYTA"
     | "CHARMANDER"
+    | "LEDIAN"
     | "LEDYBA"
     | "WURMPLE"
     | "AIPOM"
