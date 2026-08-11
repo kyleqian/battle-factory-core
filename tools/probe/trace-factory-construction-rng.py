@@ -178,6 +178,37 @@ RESIDUAL_18_CLASSIFIER_MEMBERS: dict[str, dict[str, tuple[int, ...]]] = {
     },
 }
 
+# The same source-order join, restricted to residual==0 rows.  Keeping these
+# ordinals explicit prevents a +117/+245/+263/+308 sibling from becoming an
+# accidental baseline.  Across the three epochs these are exactly the 488
+# clean controls already derived by FACTORY_RESIDUAL_18_EVIDENCE.
+RESIDUAL_18_CLASSIFIER_CLEAN_CONTROLS: dict[str, dict[str, tuple[int, ...]]] = {
+    "anchor": {
+        "encrypted-accessor": (0, 2, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 24, 26, 28, 30, 31, 33, 35, 37, 40, 41, 45, 47, 49, 51, 52, 54, 56, 57, 59, 61, 63, 65, 67, 69, 70, 72, 77),
+        "level-loop": (0, 1, 3, 4, 5),
+        "signed-divide": tuple(range(36)),
+        "get-nature": (0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29),
+        "nature-attempt": (0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120),
+        "outer-factory-loop": (0, 1, 2, 4),
+    },
+    "liliana": {
+        "encrypted-accessor": (0, 2, 4, 6, 9, 11, 13, 17, 18, 20, 22, 24, 27, 29, 31, 33, 34),
+        "level-loop": (1, 2),
+        "signed-divide": tuple(range(18)),
+        "get-nature": tuple(range(15)),
+        "nature-attempt": (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55),
+        "outer-factory-loop": (0, 1),
+    },
+    "factory-varied": {
+        "encrypted-accessor": (1, 3, 5, 7, 8, 10, 13, 15, 17, 19, 20, 22, 24, 27, 29, 31, 32, 34, 36, 38),
+        "level-loop": (0,),
+        "signed-divide": tuple(range(18)),
+        "get-nature": (0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14),
+        "nature-attempt": (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 96, 97, 98, 99, 100),
+        "outer-factory-loop": (0, 1),
+    },
+}
+
 # First-pass PC/cycle scouts over the 85 known members identify the only
 # instruction starts at which a local source edge is enlarged.  The second
 # pass walks mTiming only at these exact source PCs (and the following edge),
@@ -924,11 +955,7 @@ def classifier_maybe_start_trace(
     member = classifier_member(case, component, ordinal)
     if member:
         label = "member"
-    elif RESIDUAL_18_CLASSIFIER_MEMBERS[case].get(component):
-        # Retain every clean sibling in a component that has a member.  The
-        # compact receipt later deduplicates their edge profiles and chooses
-        # the path-matching clean edge; one arbitrary clean call is not enough
-        # when personality-selected modulo paths differ.
+    elif ordinal in RESIDUAL_18_CLASSIFIER_CLEAN_CONTROLS[case].get(component, ()):
         label = "control"
     else:
         return
@@ -2502,6 +2529,11 @@ def compact_residual_classifier_receipt(result: dict[str, Any]) -> dict[str, Any
                     "nextInstructionPc": edge["nextInstructionPc"],
                     "memberCycles": edge["cycles"],
                     "controlCycles": None if control is None else control["cycles"],
+                    "controlMatch": (
+                        "same-component-return-class-edge"
+                        if control is not None
+                        else "no-identical-clean-edge-in-return-class"
+                    ),
                     "incrementCycles": increment,
                     "eventName": event_name,
                     "crossedEventNames": crossed_events,
@@ -2556,7 +2588,8 @@ def compact_residual_classifier_receipt(result: dict[str, Any]) -> dict[str, Any
         "oracleProfile": result["oracleProfile"],
         "sourceFunction": result["sourceFunction"],
         "memberCount": len(members),
-        "cleanControlCount": len(clean_controls),
+        "cleanControlCount": sum(row["sampleCount"] for row in clean_controls),
+        "cleanControlGroupCount": len(clean_controls),
         "members": members,
         "cleanControls": clean_controls,
     }
