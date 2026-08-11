@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1137 — [supervisor, 2026-08-11] **Transition verified; Rust M1/M2 folded**
+
+- **State:** `master` is green with the generic nonzero-index LOGO_WAVE seam
+  and `rust-main` through `303a8a4a`. S8 remains closed; the canonical
+  Battle-2 march remains stopped at tick 33331.
+- **Did:** independently reverified the new complete OFF transition at
+  **249/249**, focused **72/72**, and smoke **375/375**. Folded Rust M1/M2:
+  hand-rolled ABI v1, WASM loader, and dual-engine RNG adapter/spec.
+- **Next:** close a bounded generated scene-assembly/status-summary window
+  between the exact black handoff and exact generated send-out, using frozen
+  battleStart data rather than trainer/battle/tick branches. Do not submit a
+  Battle-2 action.
+- **Notes:** union gates: WASM differential **73/73**, Cargo **9/9**, full
+  `npm test` **948 files / 8,759 passed / 1 skipped**, production build **643
+  modules**. #55 remains null/unwired; no material decision is deferred.
+
 ## 1136 — [MAIN worker, 2026-08-11] **Generic RNG-selected Frontier transition exact**
 
 - **State:** implementation `422e4e29` owns the live Factory transition draw
@@ -39,38 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   canonical Battle-2 action or change battle logic/RNG.
 - **Notes:** #55's separate construction-clock remainder stays null/unwired.
   No material decision is deferred.
-
-## 1134 — [solo session, 2026-08-11] **Repo promoted to pokeemerald-factory-core; rust lane born**
-
-- **State:** this run IS now the canonical standalone repo at
-  `pokebench/pokeemerald-factory-core` — repo top = human/planning + shared
-  oracle infra; this `workspace/` = the agent layer (contents unchanged, one
-  `git mv`). GitHub origin re-wired as a fast-forward continuation
-  (`kyleqian/pokeemerald-factory-core`); **pushing is the user's step from
-  now on — commit locally, never push.** The old harness and its run copy
-  are FROZEN; never work there.
-- **Did:** user decisions executed: **Rust chosen for the rewrite** —
-  `core-rs/` cargo workspace born (factory-core with the rng.ts port pinned
-  to TS-generated values 4/4, factory-wasm wasm32 build proven; ledger
-  `RUST_PROGRESS.md` R1, charter `RUST_SUPERVISOR.md`); supervisor/worker
-  lane **"main" renamed to "ts"** ("main" stays a silent legacy alias);
-  **rust lane wired** (`./run-supervisor.sh -l rust` → persistent
-  `.worktrees/rust-main`; `./tools/run-subagent.sh --lane rust`). Fixed
-  three restructure seams (lane worktrees check out the whole repo → cd
-  into the `workspace/` subdir; harness root resolves via the git-common-dir
-  primary, not the worktree copy; repo-top `reference/pokeemerald` symlink
-  restored) and end-to-end tested both lane launches with a stub supervisor.
-  **Imported the 4 unfolded animation-main commits** the clone had dropped
-  (Metal Sound probe track/evidence, import `920d5e16`) — this resolves
-  1133's "newer Metal Sound evidence commits not folded" flag. Migrated all
-  gitignored state (node_modules, .codex-logs, .opencode-logs,
-  tools/compare/out evidence, oracle/battle-lab output).
-- **Next:** unchanged from 1133 — #55 post-command MPlay state
-  capture/reduction with costs null and the clock unwired; presentation
-  seam per 1133. Next ts supervisor should fold `animation-main`
-  (import commit) at orient as usual.
-- **Notes:** post-move verification: full `npm test` **946 files / 8,680
-  passed / 1 skipped**, build green, vanilla soak **20/20**, `cargo test`
-  **4/4**, wasm32 artifact builds. Both oracles now serve from the new repo
-  top (:8014 OFF / :8012 ON). TS stays canonical while the rust lane ports;
-  the animation lane continues in TS by user decision.
