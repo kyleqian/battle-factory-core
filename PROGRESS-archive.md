@@ -40748,3 +40748,19 @@ git; the current live ledger keeps the three load-bearing entries only.
   **906 files / 8,542 passed / 1 skipped**, and build (**631 modules**) are
   green. No +18 constant, cadence cost, co-due arithmetic, live wiring,
   controller, presentation, animation, barrier, or recording import changed.
+## 1120 — [MAIN worker, 2026-08-11] **#55 LILIANA adjacent-deadline runtime receipt**
+
+- **State:** the selected LILIANA runtime graph is closed twice fresh; #55
+  stays open for the two legal-varied adjacent rows and broader construction
+  clock, which remains unwired.
+- **Did:** corrected the selector to source-order division occurrence 27 and
+  added a narrow Timer/Audio/DMA wrapper. The compact packet is byte-identical
+  at `a0cdb0c1…`: **Timer@D**, DMA1 first service, **Audio@D+1**, remaining
+  DMA1/2; completion 1→2 and prompt wrapper restoration are full-state pinned.
+- **Next:** capture legal-varied get-nature 12 and nature-attempt 63 only
+  through separately source-selected adjacent-deadline wrappers. Do not fit a
+  cost or wire the construction clock.
+- **Notes:** focused selector/runtime/audio/FIFO **18/18**, smoke **375/375**,
+  typecheck, full `npm test` **913 files / 8,577 passed / 1 skipped**, and
+  build (**631 modules**) are green. No service cost, clock/dispatcher,
+  controller, presentation, animation, barrier, or canonical recording changed.

@@ -201,3 +201,45 @@ all **85** known +18 occurrences, including this accessor's **67**. Exact
 endpoint IRQ/DMA/prefetch state is shared with clean siblings; the missing
 discriminator is the intra-span scheduler-event identity at the individual
 instruction increment, so this component's cycle contract remains null.
+
+## Encrypted construction writes
+
+`reduceFactorySetBoxMonDataTiming` closes the synchronous write sibling used
+by `CreateMonWithEVSpreadNatureOTID`. The committed anchor/LILIANA/varied
+spreads issue **27** writes with field counts
+`26×10, 27×2, 28×6, 29×0, 30×5, 31×4`; the compiled six-bit loop can issue
+every field 26–31, so all six reducers are covered even though SPEED_EV is
+absent from those three receipts. The pinned boundaries are the source call
+at `0x080686D6`, `SetMonData` at `0x0806ACAC..0x0806AD9A`, and
+`SetBoxMonData` at `0x0806AD9C..0x0806B3FA` (ELF body SHA-256
+`c466258a1a60c65cd83c68819205118b4f23088456d7ad054a7b15d0f0f86ee8`).
+
+A valid encrypted EV write performs three `[0,1,2,3]` GetSubstruct rounds,
+one decrypt, two checksum loops, one encrypt, and the exact **448-cycle**
+outer shell. Its complete synchronous component is:
+
+```text
+3 × sum(GetSubstruct(personality, 0..3)) + 2,380 cycles
+```
+
+The **2,380** fixed portion is `448 outer + 448 decrypt + 2×518 checksum +
+448 encrypt`. The delegating `SetMonData` adds its already-pinned 30-cycle
+entry and 10-cycle return shells. Invalid checksum instead returns before
+dispatch after two GetSubstruct rounds, one checksum, and the bad-egg writes:
+
+```text
+2 × sum(GetSubstruct(personality, 0..3)) + 1,708 cycles
+```
+
+No requested field write or second checksum occurs on that path. Tier 1
+checks all 24 personality layouts, valid/invalid routes, immutable results,
+aligned EWRAM validation, and representative compiled switch arms: field 10
+unencrypted halfword (**132** total), species zero/nonzero (fixed portions
+**2,418/2,410**), MOVE1 and HP_IV (**2,394**), and PP1 (**2,386**).
+Unsupported arms and misaligned/out-of-region BoxMon bases fail closed rather
+than sharing a guessed tail.
+
+Only byte/halfword field writes are promoted here; their two-cycle bus cost is
+already the executed instruction baseline. Aggregate EV-spread and
+CalculateMonStats operation cycles remain null, asynchronous +18/IRQ/VBlank
+work remains external, and `runFactoryConstructionClock` is still unwired.

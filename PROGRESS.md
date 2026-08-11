@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1123 — [MAIN worker, 2026-08-11] **#55 encrypted construction writes reduced**
+
+- **State:** the synchronous SetMonData→SetBoxMonData EV-write component is
+  exact and #55 remains open; aggregate operation costs and the live clock
+  stay null/unwired.
+- **Did:** censused **27** committed writes and reduced all source fields
+  26–31. Valid/invalid paths are 12/8 GetSubstruct calls with fixed portions
+  **2,380/1,708**, plus the existing 40-cycle SetMon shell; 24 layouts,
+  representative switch arms, alignment, fail-closed inputs, and immutability
+  are pinned.
+- **Next:** run smoke/full/build verification, then continue #55 only with a
+  separately source-proven construction/VBlank component. Do not aggregate or
+  wire the clock from this component.
+- **Notes:** focused construction suites **41/41** and typecheck are green. No
+  +18/IRQ/VBlank/external service, clock/controller/presentation/animation,
+  barrier, recording, or side-owned SoundMainRAM artifact changed.
+
 ## 1122 — [MAIN worker, 2026-08-11] **#55 fresh DMA graph source-reduced**
 
 - **State:** isolated fresh Direct Sound DMA makespans are now computed
@@ -40,20 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **916 files / 8,594 passed / 1 skipped**, and build (**631 modules**) are
   green. No service cost, clock, controller, presentation, animation, barrier,
   recording, or side-owned adjacent-audit artifact changed.
-
-## 1120 — [MAIN worker, 2026-08-11] **#55 LILIANA adjacent-deadline runtime receipt**
-
-- **State:** the selected LILIANA runtime graph is closed twice fresh; #55
-  stays open for the two legal-varied adjacent rows and broader construction
-  clock, which remains unwired.
-- **Did:** corrected the selector to source-order division occurrence 27 and
-  added a narrow Timer/Audio/DMA wrapper. The compact packet is byte-identical
-  at `a0cdb0c1…`: **Timer@D**, DMA1 first service, **Audio@D+1**, remaining
-  DMA1/2; completion 1→2 and prompt wrapper restoration are full-state pinned.
-- **Next:** capture legal-varied get-nature 12 and nature-attempt 63 only
-  through separately source-selected adjacent-deadline wrappers. Do not fit a
-  cost or wire the construction clock.
-- **Notes:** focused selector/runtime/audio/FIFO **18/18**, smoke **375/375**,
-  typecheck, full `npm test` **913 files / 8,577 passed / 1 skipped**, and
-  build (**631 modules**) are green. No service cost, clock/dispatcher,
-  controller, presentation, animation, barrier, or canonical recording changed.

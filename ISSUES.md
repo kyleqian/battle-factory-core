@@ -1272,6 +1272,21 @@ composition applies to the receipt-pinned EXP/IV u32 tails, and **77/156** direc
 encrypted stats boundaries equal the complete synchronous composition, while
 every other observed class remains an unabsorbed boundary/service/IRQ delta.
 
+**Encrypted construction-write reduction (2026-08-11, `11e20187`):** the
+complete synchronous `SetMonData→SetBoxMonData` path used by EV construction
+is now source-composed from field, aligned EWRAM BoxMon base, accepted
+personality, and checksum result. The three committed cases contain **27** EV
+writes (`26×10/27×2/28×6/29×0/30×5/31×4`); all six source-reachable fields
+26–31 are covered. Valid writes execute **12** GetSubstruct calls, decrypt,
+two checksums, field store, and encrypt: fixed cycles excluding the
+personality-derived calls are **2,380**, plus the exact **40-cycle** SetMonData
+shell. Invalid checksum executes **8** calls and returns before field dispatch
+at fixed **1,708**. Tier 1 covers all personality layouts, representative
+general switch families, immutability, and fail-closed unsupported/misaligned
+inputs. Aggregate EV/stat costs and the live clock remain null/unwired; no
++18/IRQ/VBlank/external work is absorbed. Detailed accounting is in
+`docs/issue55-encrypted-accessor-timing-slice.md`.
+
 **Still open:** async +18 service, VBlank/IRQ entry/body/return work, and the
 live construction clock. Complete stats/accessor timing remains null and
 unwired; no identity/duration table or residual fit landed. Detailed
