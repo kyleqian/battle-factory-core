@@ -1,0 +1,309 @@
+{
+  "schema": "mgba-timer0-scheduler/v1",
+  "scope": "mGBA 0.10.5 source-only Timer 0 co-due scheduler and Direct Sound ownership audit",
+  "runtime": {
+    "oracleProfile": "battle-scene-off",
+    "binding": "vendored libmgba-py CFFI",
+    "library": "libmgba.0.10.5.dylib",
+    "version": "0.10.5",
+    "gitRevision": null
+  },
+  "release": {
+    "homebrewFormula": "homebrew/core/Formula/m/mgba.rb",
+    "url": "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
+    "sha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14"
+  },
+  "source": {
+    "version": "0.10.5",
+    "files": [
+      {
+        "path": "src/core/timing.c",
+        "sha256": "f1290a60ea28cce32ef54c383397b2e2beff852dc02f8d44a69ef78ca7989d51"
+      },
+      {
+        "path": "src/gba/gba.c",
+        "sha256": "92b0fd214bfa563a1694921661c4413ffd96871cd6162cd762542fb5c2a2c098"
+      },
+      {
+        "path": "src/gba/timer.c",
+        "sha256": "318054f31c767090b907fe2a32f65f878a702e339468c727a54c6f2b865b83f2"
+      },
+      {
+        "path": "src/gba/video.c",
+        "sha256": "c99391529cce6729400ae199ca9ddb65fec7c0d7f1945d214b8941c61e1e694c"
+      },
+      {
+        "path": "src/gba/audio.c",
+        "sha256": "32f8067d09c80b3e77bedc16d52f16a3b4ee7ba099a6cd24e8d5cc8579729a7c"
+      },
+      {
+        "path": "src/gba/dma.c",
+        "sha256": "83f1ff180942907d274208284d3d5d9148bbcb9e60ab51302bf59933d1ccdb41"
+      },
+      {
+        "path": "include/mgba/internal/gba/gba.h",
+        "sha256": "853ba5061de8cf4efc8717ada08117525cf2028a4bc00a440fe4a2607130fc20"
+      },
+      {
+        "path": "include/mgba/internal/gba/video.h",
+        "sha256": "c1adf164b0f88680c5dbba2742f48a86caa4b7a9564998507d99e8479c42a328"
+      },
+      {
+        "path": "include/mgba/internal/gba/audio.h",
+        "sha256": "ee435341f9295e643ef871978d2d0abac0216104a78f32b80a6e4496786b3add"
+      },
+      {
+        "path": "include/mgba/internal/gba/dma.h",
+        "sha256": "fe3a72e9613e5d66461dc10e37214beb3b3a5f7dc78bfecc9f8c00b900f68762"
+      },
+      {
+        "path": "include/mgba/internal/gba/memory.h",
+        "sha256": "bc959b786218da4ce1a8215be66fb907aa25d32bd7c76a0493b9def4f9992ad6"
+      },
+      {
+        "path": "src/gba/memory.c",
+        "sha256": "3cb9a1595e36f11cd712407c559064dda781ab85cce7e5e3e3b9883b1f2ba19a"
+      }
+    ],
+    "anchors": [
+      {
+        "id": "timing-insert",
+        "file": "src/core/timing.c",
+        "lines": "36-59"
+      },
+      {
+        "id": "timing-tick",
+        "file": "src/core/timing.c",
+        "lines": "96-117"
+      },
+      {
+        "id": "gba-event-priorities",
+        "file": "src/gba/gba.c",
+        "lines": "126-131"
+      },
+      {
+        "id": "gba-process-events",
+        "file": "src/gba/gba.c",
+        "lines": "293-339"
+      },
+      {
+        "id": "gba-irq-schedule",
+        "file": "src/gba/gba.c",
+        "lines": "550-564"
+      },
+      {
+        "id": "timer0-callback",
+        "file": "src/gba/timer.c",
+        "lines": "13-43"
+      },
+      {
+        "id": "timer0-registration",
+        "file": "src/gba/timer.c",
+        "lines": "66-84"
+      },
+      {
+        "id": "timer0-reschedule",
+        "file": "src/gba/timer.c",
+        "lines": "86-114"
+      },
+      {
+        "id": "video-constants",
+        "file": "include/mgba/internal/gba/video.h",
+        "lines": "19-28"
+      },
+      {
+        "id": "video-registration",
+        "file": "src/gba/video.c",
+        "lines": "55-77"
+      },
+      {
+        "id": "video-callbacks",
+        "file": "src/gba/video.c",
+        "lines": "140-219"
+      },
+      {
+        "id": "audio-registration",
+        "file": "src/gba/audio.c",
+        "lines": "25-38"
+      },
+      {
+        "id": "audio-sample-callback",
+        "file": "src/gba/audio.c",
+        "lines": "386-482"
+      },
+      {
+        "id": "fifo-refill",
+        "file": "src/gba/audio.c",
+        "lines": "327-374"
+      },
+      {
+        "id": "fifo-dma-shape",
+        "file": "src/gba/audio.c",
+        "lines": "120-155"
+      },
+      {
+        "id": "dma-scheduling",
+        "file": "src/gba/dma.c",
+        "lines": "112-137"
+      },
+      {
+        "id": "dma-video-start",
+        "file": "src/gba/dma.c",
+        "lines": "139-183"
+      },
+      {
+        "id": "dma-service",
+        "file": "src/gba/dma.c",
+        "lines": "185-241"
+      },
+      {
+        "id": "dma-arithmetic",
+        "file": "src/gba/dma.c",
+        "lines": "243-333"
+      },
+      {
+        "id": "memory-regions",
+        "file": "include/mgba/internal/gba/memory.h",
+        "lines": "23-49"
+      },
+      {
+        "id": "memory-waitstates",
+        "file": "src/gba/memory.c",
+        "lines": "35-38"
+      }
+    ]
+  },
+  "scheduler": {
+    "eventPriorityOrder": [
+      "GBA IRQ Event",
+      "GBA Video",
+      "GBA Audio Sample",
+      "GBA Timer 0",
+      "GBA DMA"
+    ],
+    "eventPriorities": {
+      "GBA IRQ Event": 0,
+      "GBA Video": 8,
+      "GBA Audio Sample": 24,
+      "GBA Timer 0": 32,
+      "GBA DMA": 64
+    },
+    "dueRule": "mTimingTick dispatches the root while next->when - masterCycles <= 0 and passes cyclesLate = -(next->when - masterCycles)",
+    "insertRule": "mTimingSchedule walks past an existing event unless its due time is later or its equal-time priority is numerically greater than the new event",
+    "equalTimeRule": "lower numeric priority runs first; equal priority retains existing insertion order",
+    "callbackCostRule": "mTimingTick advances masterCycles only by its cycles argument; callbacks do not receive an automatic emulated-cycle charge",
+    "sameDueDispatchRule": "a callback-scheduled due event is reinserted into the root and is consumed by the same mTimingTick due loop"
+  },
+  "video": {
+    "eventName": "GBA Video",
+    "priority": 8,
+    "hdrawMasterCycles": 1008,
+    "hblankMasterCycles": 224,
+    "scanlineMasterCycles": 1232,
+    "frameMasterCycles": 280896,
+    "callbackScheduling": "_startHdraw schedules the next Hblank before scanline/VBlank work; _startHblank schedules the next Hdraw before renderer and DMA work, both with -cyclesLate",
+    "coDuePayload": [
+      "renderer drawScanline or finishFrame",
+      "Hblank, Vblank, or display-start DMA request when its source condition is active",
+      "VCOUNT/HBLANK/VBLANK IRQ request when enabled",
+      "frame hooks and earlyExit at VBlank"
+    ]
+  },
+  "audioSample": {
+    "eventName": "GBA Audio Sample",
+    "priority": 24,
+    "sampleIntervalFormula": "GBA_ARM7TDMI_FREQUENCY / 0x4000",
+    "arm7Frequency": 16777216,
+    "sampleIntervalMasterCycles": 1024,
+    "callbackScheduling": "_sample samples at mTimingCurrentTime - cyclesLate, then schedules SAMPLE_INTERVAL - cyclesLate",
+    "directSoundRelation": "the GBA Audio Sample callback mixes current FIFO samples but does not call GBAAudioSampleFIFO; Timer 0 owns FIFO word consumption/refill requests"
+  },
+  "timer0": {
+    "eventName": "GBA Timer 0",
+    "priority": 32,
+    "reload": 64282,
+    "reloadHex": "0xfb1a",
+    "periodMasterCycles": 1254,
+    "callbackOrder": [
+      "reschedule normal timer from currentTime minus cyclesLate",
+      "raise timer IRQ only if its IRQ flag is set",
+      "sample routed FIFO A",
+      "sample routed FIFO B",
+      "cascade an enabled count-up successor"
+    ],
+    "callbackScheduling": "GBATimerUpdateRegister uses currentTime = mTimingCurrentTime - cyclesLate and schedules the next absolute overflow",
+    "coDueOrderWithDefaultEvents": [
+      "GBA IRQ Event if already due (priority 0)",
+      "GBA Video (priority 8)",
+      "GBA Audio Sample (priority 24)",
+      "GBA Timer 0 (priority 32)",
+      "GBA DMA (priority 64)"
+    ],
+    "emeraldAudioRoutes": [
+      "FIFO A: Timer 0, right output, DMA1",
+      "FIFO B: Timer 0, left output, DMA2"
+    ]
+  },
+  "directSoundDma": {
+    "eventName": "GBA DMA",
+    "priority": 64,
+    "fifoDmaStartDelayMasterCycles": 0,
+    "fifoDmaStartRule": "GBAAudioSampleFIFO writes dma.when = mTimingCurrentTime - cyclesLate before GBADMASchedule; the +3 start delay is only GBADMA TIMING NOW",
+    "forcedTransfer": "FIFO scheduling forces fixed destination and 32-bit width",
+    "activeSelection": "GBADMAUpdate scans DMA0 through DMA3 and retains the first channel on equal dma.when - currentTime; a strictly earlier deadline replaces it",
+    "sameDueDmaOrder": "DMA1 wins a same-time DMA1/DMA2 selection because the scan is ascending and compares with <",
+    "serviceOwnership": "GBADMAService owns cpuBlocked, per-word waitstate progression, overdue-DMA deadline coalescing, and terminal completion adjustment",
+    "freshIwrToIoFourWordRefill": {
+      "preconditions": [
+        "one enabled custom DMA1 or DMA2 has count == nextCount == 4",
+        "source region is REGION_WORKING_IRAM (0x3)",
+        "destination region is REGION_IO (0x4)",
+        "mGBA waitstate tables are the pinned 0.10.5 defaults"
+      ],
+      "widthBytes": 4,
+      "sourceRegion": 3,
+      "destinationRegion": 4,
+      "nonSequentialWaitstates": {
+        "source": 0,
+        "destination": 0
+      },
+      "sequentialWaitstates": {
+        "source": 0,
+        "destination": 0
+      },
+      "wordServiceMasterCycles": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "terminalCompletionMasterCycles": 2,
+      "totalScheduledMasterCycles": 10,
+      "formula": "(2 + 0 + 0) + 3 * (2 + 0 + 0) + 2"
+    },
+    "dualFreshRefills": {
+      "scheduledMasterCycles": 20,
+      "formula": "10 + 10",
+      "notTimer0CallbackCost": true
+    }
+  },
+  "reductionBoundary": {
+    "directSoundFifoProgressionCanReduceIndependently": true,
+    "independentUnit": "the stateful DMA service graph rooted by Timer 0 FIFO A/B requests",
+    "requires": [
+      "FIFO read/write and internalRemaining for A and B at the Timer 0 overflow",
+      "DMA1/DMA2 enable, count, nextCount, when, source, destination, and register timing",
+      "cyclesLate and the exact current mTiming time",
+      "pre-existing DMA deadlines and any DMA started by the co-due Video callback",
+      "whether GBA audio mixer state is null or requires its source-inspection side effect"
+    ],
+    "mustRemainExternal": [
+      "GBA Video callback ordering and renderer/frame hooks",
+      "GBA Audio Sample callback mixing and its own 1024-cycle event cadence",
+      "IRQ scheduling/dispatch and CPU interrupt state",
+      "pre-existing or co-due DMA arbitration and CPU blocking"
+    ],
+    "negativeBoundary": "No source-closed Timer 0 serviceCostMasterCycles exists: mTimingTick does not charge callbacks, while FIFO sampling may enqueue zero, one, or two DMA requests and GBADMAService charges state-dependent progression. Do not wire a fixed callback cost or fit an observed edge total from this audit.",
+    "nextObservable": "A fresh OFF runtime receipt must capture one Timer 0 overflow with event due times/priority order plus FIFO A/B pointers, internalRemaining, DMA1/2 registers/deadlines, activeDMA, cyclesLate, and any Video/Audio/IRQ events due in the same window."
+  }
+}
