@@ -850,6 +850,7 @@ export interface SceneOnPresentationBattler {
     | "WAILMER"
     | "POLITOED"
     | "POLIWRATH"
+    | "POLIWHIRL"
     | "EXEGGCUTE"
     | "CORSOLA"
     | "GLOOM"
@@ -2734,6 +2735,7 @@ export type SceneOnMoveConfig =
   | SceneOnThrashConfig
   | SceneOnDoubleKickConfig
   | SceneOnTripleKickConfig
+  | SceneOnDoubleSlapConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
