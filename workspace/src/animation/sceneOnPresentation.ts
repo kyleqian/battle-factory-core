@@ -790,6 +790,10 @@ import {
   agilityAnimationAtAge,
   type AgilityState,
 } from "./agility.ts";
+import {
+  leerAtAge,
+  type LeerState,
+} from "./leer.ts";
 
 export type SceneOnBattlerSide = "player" | "opponent";
 
@@ -923,7 +927,8 @@ export interface SceneOnPresentationBattler {
      | "YANMA"
      | "SWABLU"
     | "FEAROW"
-    | "HOPPIP";
+    | "HOPPIP"
+    | "DRAGONAIR";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1545,6 +1550,13 @@ export interface SceneOnSupersonicConfig {
 
 export interface SceneOnMetalSoundConfig {
   readonly move: "METAL_SOUND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnLeerConfig {
+  readonly move: "LEER";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2674,6 +2686,7 @@ export type SceneOnMoveConfig =
   | SceneOnRefreshConfig
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
+  | SceneOnLeerConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
   | SceneOnSludgeConfig
@@ -2920,6 +2933,8 @@ export type SceneOnTailWhipPresentationState =
   SceneOnMovePresentationState<SceneOnTailWhipConfig>;
 export type SceneOnAgilityPresentationState =
   SceneOnMovePresentationState<SceneOnAgilityConfig>;
+export type SceneOnLeerPresentationState =
+  SceneOnMovePresentationState<SceneOnLeerConfig>;
 
 export interface SceneOnSupersonicView {
   readonly age: number;
@@ -2943,6 +2958,11 @@ export interface SceneOnMetalSoundView {
     readonly song: "SE_M_SCREECH";
     readonly pan: number;
   }[];
+}
+
+export interface SceneOnLeerView extends LeerState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnWaterGunView {
@@ -5055,6 +5075,20 @@ export function sceneOnMetalSoundView(
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is Move_LEER's first active source-pointer frame. */
+export function sceneOnLeerView(
+  state: SceneOnLeerPresentationState,
+): SceneOnLeerView {
+  if (state.config.move !== "LEER") {
+    throw new Error(`expected LEER presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...leerAtAge(state.age, state.config.attacker.geometry.side),
   };
 }
 

@@ -654,6 +654,7 @@ import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" wit
 import battleAnimLightningAsset from "../assets/gen/battle-anim-lightning.json" with { type: "json" };
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
 import battleAnimSwordAsset from "../assets/gen/battle-anim-sword.json" with { type: "json" };
+import battleAnimLeerAsset from "../assets/gen/battle-anim-leer.json" with { type: "json" };
 import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
 import thunderAsset from "../animation/assets/thunder.json" with { type: "json" };
 import surfWaveAsset from "../animation/assets/surf-wave.json" with { type: "json" };
@@ -909,6 +910,7 @@ import {
   sceneOnRefreshView,
   sceneOnSupersonicView,
   sceneOnMetalSoundView,
+  sceneOnLeerView,
   sceneOnWaterGunView,
   sceneOnAcidView,
   sceneOnSludgeView,
@@ -1035,6 +1037,7 @@ import {
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
   type SceneOnMetalSoundConfig,
+  type SceneOnLeerConfig,
   type SceneOnHiJumpKickConfig,
   type SceneOnKarateChopConfig,
   type SceneOnBatonPassConfig,
@@ -1461,6 +1464,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const dragonairFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DRAGONAIR!;
 const aronFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARON!;
 const nidorinaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NIDORINA!;
 const taurosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).TAUROS!;
@@ -2021,6 +2025,7 @@ const battleAnimLightning = battleAnimLightningAsset as {
   palette: RgbColor[];
 };
 const battleAnimSword = battleAnimSwordAsset as { tileset: Tileset; palette: RgbColor[] };
+const battleAnimLeer = battleAnimLeerAsset as { tileset: Tileset; palette: RgbColor[] };
 const thunderArt = thunderAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
@@ -2667,6 +2672,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const dragonairBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DRAGONAIR!;
 const aronBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARON!;
 const nidorinaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NIDORINA!;
 const taurosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).TAUROS!;
@@ -19988,6 +19994,99 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LEDYBA used" : "Foe LEDYBA used",
       "AGILITY!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "LEER") {
+    const leerState = state as SceneOnMovePresentationState<SceneOnLeerConfig>;
+    const view = sceneOnLeerView(leerState);
+    // LEER has three independently measured scanout latches: the ordinary
+    // eye OAM is one age late, the live affine battler matrix is two ages
+    // late, and the long target ShakeMon2 body is two ages late. Keeping the
+    // latches in the reducer makes this compositor free of absolute frames.
+    const displayed = sceneOnLeerView({ ...leerState, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "DRAGONAIR"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DRAGONAIR"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LEER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? dragonairBackSprite : dragonairFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetX = view.target.geometry.spriteCorner.x + displayed.displayedTargetOffset.x2;
+    const targetY = view.target.geometry.spriteCorner.y + displayed.displayedTargetOffset.y2;
+    const attackerCorner = view.attacker.geometry.spriteCorner;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // monbg ANIM_ATTACKER leaves the unscaled attacker as the blend underlay;
+    // the live scaled OBJ is then composited at the source 8:8 alpha ratio.
+    drawSpriteSheet(
+      fb, targetSprite.tileset, targetSprite.palette,
+      targetX,
+      targetY,
+    );
+    drawSpriteSheet(
+      fb, attackerSprite.tileset, attackerSprite.palette,
+      attackerCorner.x, attackerCorner.y,
+    );
+    if (displayed.displayedAttackerScale !== 256) {
+      drawSpriteSheetAffineStretchBlendedOverFb(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        attackerCorner.x,
+        attackerCorner.y,
+        displayed.displayedAttackerScale,
+        displayed.displayedAttackerScale,
+        8,
+        8,
+        false,
+        "live",
+      );
+    }
+    if (displayed.sprite.active) {
+      const eyeTiles = subTileset(
+        battleAnimLeer.tileset,
+        displayed.sprite.tileOffset / battleAnimLeer.tileset.columns,
+        4,
+      );
+      const eyeCorner = playerToOpponent
+        ? { x: 80, y: 60 }
+        : { x: 136, y: 18 };
+      drawSpriteSheet(fb, eyeTiles, battleAnimLeer.palette, eyeCorner.x, eyeCorner.y);
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "DRAGONAIR",
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "DRAGONAIR" : "ONIX",
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DRAGONAIR used" : "Foe DRAGONAIR used",
+      "LEER!",
       99,
     );
     return;
