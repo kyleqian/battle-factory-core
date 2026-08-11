@@ -4214,6 +4214,37 @@
    ]
   },
   {
+   "move": "MOVE_TRIPLE_KICK",
+   "status": "exact",
+   "covered": [
+    "the sole Level-50 carrier set-236 HITMONTOP is staged in complete legal challenge-1 parties against legal ONIX in both orientations; the real controller supplies independent moveTurn 0/1/2 visual invocations without the presentation port owning hit count, accuracy, damage, rising power, RNG, turn, round, or facility state",
+    "all six complete pointer-bounded Move_TRIPLE_KICK branch windows through first inactive cleanup pass 37/37 reducer, typed seam, branch/task/sprite topology, software and hardware OAM/matrices/palettes/tags/registers/audio, immutable battle state, raw RGB, normalized change map, and production framebuffer twice fresh: player-back frames 225-261, 354-390, and 483-519; opponent-front frames 226-262, 436-472, and 565-601",
+    "the pure source-relative reducer ports all jumpifmoveturn routes, asynchronous HANDS_AND_FEET/IMPACT loads, left/right/center wide-foot and affine basic-hitsplat geometry, branch-specific AnimTask_ShakeMon(4,0,6,1)/(6,0,8,1), target-panned SE_M_VITAL_THROW2, monbg, 12/8 alpha, waits, unloads, and cleanup",
+    "the narrow HITMONTOP/ONIX compositor preserves the source RAM+1 wide-foot, hitsplat, ShakeMon, OAM/matrix, and palette display latches; moveTurn 0 retains ONIX front-idle x2 and the move message while moveTurn 1/2 enter from the prior ShakeMon x2 overwrite and retain blank battle-window chrome, as independently visible in both orientations",
+    "exact MOVE_DOUBLE_KICK remains a separate 36/36 bilateral twice-fresh control for its random-position fist/child body, and exact MOVE_COUNTER remains a separate 88/88 bilateral control for the shared fist/hitsplat/ShakeMon family; no acceptance transfers between moves"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-triple-kick-player-hitmontop-opponent-onix.json",
+    "tools/battle-lab/mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+    "tools/compare/fixtures/triple-kick-branch-receipts.json",
+    "tools/compare/tripleKickProbe.py",
+    "tools/compare/tripleKickPortable.ts",
+    "tools/compare/tripleKickSourceAudit.ts",
+    "tools/compare/evidence/triple-kick-changemap-player-turn0.txt",
+    "tools/compare/evidence/triple-kick-changemap-player-turn1.txt",
+    "tools/compare/evidence/triple-kick-changemap-player-turn2.txt",
+    "tools/compare/evidence/triple-kick-changemap-opponent-turn0.txt",
+    "tools/compare/evidence/triple-kick-changemap-opponent-turn1.txt",
+    "tools/compare/evidence/triple-kick-changemap-opponent-turn2.txt",
+    "src/animation/tripleKick.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/tripleKick.test.ts",
+    "tests/animation/tripleKickSource.test.ts",
+    "tests/animation/tripleKickEvidenceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_TWINEEDLE",
    "status": "exact",
    "covered": [

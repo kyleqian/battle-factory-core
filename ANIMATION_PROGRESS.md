@@ -1,3 +1,11 @@
+# MOVE_TRIPLE_KICK exact — bilateral three-branch 222/222 promotion (2026-08-11 worker)
+
+- **State:** Level-50 coverage advances **166→167/276 exact**, 0 partial, 0 staged, and **110→109 unsupported**. Only `MOVE_TRIPLE_KICK` moved; no animation-boundary or unsupported-barrier widening.
+- **Did:** Added a portable verifier that runs all three controller-supplied `moveTurn` branches twice fresh per orientation and gates reducer/seam, branch/task/sprite topology, software+hardware OAM/matrices/palettes/tags/registers/audio, immutable battle state, raw RGB, normalized maps, and the production framebuffer. Banked six durable maps and exact receipts. The source-derived compositor now preserves the initial message/front-idle x2 only for `moveTurn 0`; continuations retain blank window chrome and the prior ShakeMon x2 overwrite.
+- **Verified:** Player-back **225..261 / 354..390 / 483..519** and opponent-front **226..262 / 436..472 / 565..601** each pass **37/37** on every gate twice fresh: **111/111 per orientation, 222/222 bilateral per run**. Focused **18/18**, coverage **167/276**, and typecheck pass.
+- **Next:** Rerun independent exact Double Kick bilaterally and Counter control, then current audit/coverage, full suite, and build before handoff.
+- **Notes:** No hit count, accuracy, damage/rising power, RNG, controller, turn, round/facility state, canonical import, per-frame RGB table, capture lookup, or absolute battle tick was added.
+
 # MOVE_TRIPLE_KICK bilateral three-branch evidence checkpoint — remains unsupported (2026-08-11 worker)
 
 - **State:** Coverage remains **166/276 Level-50 exact**, 0 partial, 0 staged, and **110 unsupported**. `MOVE_TRIPLE_KICK` is not promoted: all six complete branch windows reproduce twice fresh and the pure reducer/typed seam/compositor are implemented, but production-framebuffer and normalized change-map equality have not yet passed a portable all-frame gate.

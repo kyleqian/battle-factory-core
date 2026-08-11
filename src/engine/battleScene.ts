@@ -39549,7 +39549,12 @@ export function renderSceneOnMovePresentation(
     // Triple Kick's own bilateral maps select RAM+1 for both the plain
     // wide-foot/hitsplat OAM and AnimTask_ShakeMon. Each real controller
     // invocation supplies moveTurn; this draw case only renders that branch.
-    const targetX2 = state.age - 1 < 10 ? targetIdle.x2 : displayed.targetX2;
+    // Only the first controller-owned hit begins from the species idle x2.
+    // The first ShakeMon permanently overwrites ONIX's x2 to zero, so the
+    // later moveTurn branches enter from zero even before their own task.
+    const targetX2 = state.age - 1 < 10
+      ? (view.moveTurn === 0 ? targetIdle.x2 : 0)
+      : displayed.targetX2;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     drawSpriteSheet(
       fb,
@@ -39617,12 +39622,16 @@ export function renderSceneOnMovePresentation(
       }),
     );
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
-    drawMessageTextLines(
-      fb,
-      playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
-      "TRIPLE KICK!",
-      99,
-    );
+    // The multi-hit controller clears the message pixels before dispatching
+    // its second and third visual scripts; the window chrome remains.
+    if (view.moveTurn === 0) {
+      drawMessageTextLines(
+        fb,
+        playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
+        "TRIPLE KICK!",
+        99,
+      );
+    }
     return;
   }
 

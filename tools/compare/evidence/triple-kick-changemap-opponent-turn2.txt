@@ -1,0 +1,21 @@
+# triple-kick-changemap-opponent-turn2.txt raw RGB888 — 37 frames, 240x160
+# frames absent from this table are byte-identical to the previous frame
+frame  changedPx  bbox(minx,miny-maxx,maxy)
+0  (first frame)
+  static 1-10
+11  626  59,67-85,99
+  static 12
+13  1382  44,49-105,111
+  static 14
+15  1382  44,49-105,111
+  static 16
+17  1382  44,49-105,111
+  static 18
+19  1382  44,49-105,111
+  static 20
+21  1450  44,49-105,111
+  static 22
+23  1382  44,49-105,111
+  static 24-31
+32  382  59,75-84,99
+  static 33-36
