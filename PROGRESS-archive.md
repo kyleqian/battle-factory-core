@@ -1,3 +1,27 @@
+## 1096 — [MAIN worker, 2026-08-10] **#55 shared encrypted accessor dependency bounded**
+
+- **State:** evidence `d53eb54b`, independent audit hardening `2594377b`, and
+  supervisor handoff `e8bf2f6b`; final union focused stats **19/19**, smoke
+  **375/375**, typecheck, full `npm test` **881 files / 8,438 passed / 1
+  skipped**, and production build are green. #55 remains open, accessor totals
+  are `null`, and the clock is unwired.
+- **Did:** bounded all **180** encrypted reads (**156** direct + **24** nested):
+  species/EXP/EV/IV **24/12/72/72**. Tests enumerate all **24** personality
+  permutations, checksum/bad-egg routes, exact field tails, fetch classes, and
+  common **8 GetSubstruct + 12 decrypt + 24 checksum + 12 encrypt** loops.
+- **Next:** reduce only independently source-proven modulo-arm and shared-loop
+  instruction/fetch segments; do not claim a complete accessor/stats total or
+  wire the construction clock until the remaining memory/service model closes.
+- **Notes:** twice-fresh OFF packets remain byte-identical at `92d3feb4…` /
+  `136efa4a…` / `ea323d9e…`; no fixture mutation, decrypted bytes/pointers,
+  duration/identity/residual fit, production recording import, barrier change,
+  canonical Battle-2, animation, aggregate stats, or clock wiring. Independent
+  source/ELF audit passed and its 96-case slot/offset gap is pinned by
+  `2594377b`. The orient animation fold is recorded in archived entry 1077;
+  at 16:04 `animation-main` was 30 commits ahead with its separate supervisor
+  still active, so that later tail is intentionally left for the next orient.
+  `DEFERRED.md` has no open entries.
+
 ## 1091 — [MAIN worker, 2026-08-10] **#55 direct `GetNature` timing reduced**
 
 - **State:** implementation commit `59b13350`; focused stats/clock **25/25**,

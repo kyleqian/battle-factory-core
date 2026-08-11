@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1099 — [MAIN worker, 2026-08-10] **#55 `GetSubstruct` `%24` composition is exact and bounded**
+
+- **State:** implementation `d7820e25`; #55 remains open, accessor/stats
+  totals stay `null`, and the construction clock is unwired. The Scene-OFF v2
+  packets remain at `631bd214…`, `ae1282b7…`, and `3e10197a…`.
+- **Did:** independently pinned the full 192-byte `__umodsi3` ELF symbol,
+  GetSubstruct call/resume/three helper exits, all **24×4** routes, and the
+  exact source order `[0,1,2,3,0,1,2,3]` in GetBoxMonData2/checksum. The
+  narrow source-general `%24` reducer now makes each GetSubstruct complete;
+  the census exposes its eight-call subtotal plus the **1,174** shared fetch
+  cycles (e.g. `0xffffffff`: **6,824 / 7,998**), never an accessor total.
+- **Next:** reduce only independently proven EWRAM word/halfword accesses,
+  field tails, async +18, and VBlank/IRQ boundaries. Do not fit residuals,
+  wire aggregate stats/the clock, or resume canonical Battle 2.
+- **Notes:** all **156** OFF nested stats-accessor boundaries exceed the known
+  source-only subtotal after recorded pauses, with their positive remainder
+  left external. Focused **23/23**, smoke **375/375**, typecheck, full
+  `npm test` **892 files / 8,478 passed / 1 skipped**, and build passed; no
+  fixture/recording import, barrier, m4a, presentation, or clock change.
+
 ## 1098 — [MAIN worker, 2026-08-10] **#55 encrypted accessor instruction/fetch slice landed**
 
 - **State:** commit `eb4ab2c8`; #55 remains open and the construction clock is
@@ -59,27 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Slice-D record). Difficulty-tier question also answered from source:
   challenge scaling is deterministic (`factoryOpponentGeneration.ts:263`,
   `challengeNum = floor(streak/7)`) and independent of #55's timing model.
-
-## 1096 — [MAIN worker, 2026-08-10] **#55 shared encrypted accessor dependency bounded**
-
-- **State:** evidence `d53eb54b`, independent audit hardening `2594377b`, and
-  supervisor handoff `e8bf2f6b`; final union focused stats **19/19**, smoke
-  **375/375**, typecheck, full `npm test` **881 files / 8,438 passed / 1
-  skipped**, and production build are green. #55 remains open, accessor totals
-  are `null`, and the clock is unwired.
-- **Did:** bounded all **180** encrypted reads (**156** direct + **24** nested):
-  species/EXP/EV/IV **24/12/72/72**. Tests enumerate all **24** personality
-  permutations, checksum/bad-egg routes, exact field tails, fetch classes, and
-  common **8 GetSubstruct + 12 decrypt + 24 checksum + 12 encrypt** loops.
-- **Next:** reduce only independently source-proven modulo-arm and shared-loop
-  instruction/fetch segments; do not claim a complete accessor/stats total or
-  wire the construction clock until the remaining memory/service model closes.
-- **Notes:** twice-fresh OFF packets remain byte-identical at `92d3feb4…` /
-  `136efa4a…` / `ea323d9e…`; no fixture mutation, decrypted bytes/pointers,
-  duration/identity/residual fit, production recording import, barrier change,
-  canonical Battle-2, animation, aggregate stats, or clock wiring. Independent
-  source/ELF audit passed and its 96-case slot/offset gap is pinned by
-  `2594377b`. The orient animation fold is recorded in archived entry 1077;
-  at 16:04 `animation-main` was 30 commits ahead with its separate supervisor
-  still active, so that later tail is intentionally left for the next orient.
-  `DEFERRED.md` has no open entries.
