@@ -1,0 +1,43 @@
+{
+  "schema": "stun-spore-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "opponent HOPPIP -> player ONIX",
+  "scenario": "tools/battle-lab/mechanic-stun-spore-opponent-hoppip-player-onix.json",
+  "probe": "tools/compare/sporeProbe.py",
+  "appStage": { "presentationAge": 0 },
+  "attacker": {
+    "species": "HOPPIP",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 7 },
+      "animationCenter": { "x": 176, "y": 39 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142,
+    "playerMaxHp": 142,
+    "opponentHp": 64,
+    "opponentMaxHp": 110,
+    "playerGender": "male",
+    "opponentGender": "male"
+  },
+  "sourceWindow": { "startFrame": 385, "endFrame": 578, "frameCount": 194 },
+  "evidenceSha256": "3b7c9ad524337c496e5e2dccc4fc0385a2ad5640e48c4b22bacedef02d503205",
+  "rawRgbSha256": "b7dbe0847205266086d5e4ab6da26d50fb77260d92503b2e355c3b5ed5a6ef3b",
+  "battleState": {
+    "attackerSide": "opponent",
+    "targetSide": "player",
+    "attackerItem": 221,
+    "targetStatus1": 0
+  }
+}

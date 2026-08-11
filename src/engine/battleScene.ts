@@ -855,6 +855,7 @@ import {
   retainedFightCommandResolutionOwner,
   type FightCommandPresentation,
 } from "./fightCommandPresentation.ts";
+import { stunSporeParticleDrawOrderAtAge } from "../animation/stunSpore.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -28078,12 +28079,31 @@ export function renderSceneOnMovePresentation(
     const onix = playerToOpponent
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
-    const powderParticles = displayed.particles.slice().sort((a, b) => a.slot - b.slot);
-    const particleBySlot = new Map(powderParticles.map((particle) => [particle.slot, particle]));
+    const opponentIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : speciesFrontIdleRestOffset("HOPPIP") ?? { x2: 0, y2: 0 };
+    // BuildOamBuffer orders these same-priority OBJ entries by descending
+    // latched OAM Y, retaining the source's creation order for ties. The
+    // displayed reducer state is the previous source age, so its fixed-point
+    // y2 is exactly the value that determines this order.
+    const powderOrder = stunSporeParticleDrawOrderAtAge(stunState.age - 1);
+    const powderRank = new Map(powderOrder.map((slot, rank) => [slot, rank]));
+    const powderParticles = displayed.particles.slice().sort(
+      (a, b) => powderRank.get(a.slot)! - powderRank.get(b.slot)!,
+    );
     const drawParticle = (particle: typeof powderParticles[number]): void => {
+      // The sprite animation command advances its tile index before the
+      // callback's position fields reach the displayed OAM latch. Keep the
+      // displayed position age but take the current source age's cell when
+      // that same particle is still alive.
+      const current = view.particles.find((value) => value.slot === particle.slot);
       drawSpriteSheet(
         fb,
-        subTileset(stunSporeArt.powder.tileset, particle.animFrame * 2, 2),
+        subTileset(
+          stunSporeArt.powder.tileset,
+          (current?.animFrame ?? particle.animFrame) * 2,
+          2,
+        ),
         stunSporeArt.powder.palette,
         particle.x + particle.x2 - 4,
         particle.y + particle.y2 - 8,
@@ -28105,22 +28125,32 @@ export function renderSceneOnMovePresentation(
       playerToOpponent ? onix.tileset : hoppip.tileset,
       playerToOpponent ? onix.palette : hoppip.palette,
       view.target.geometry.side === "opponent"
-        ? view.target.geometry.spriteCorner.x
-        : view.attacker.geometry.spriteCorner.x,
+        ? view.target.geometry.spriteCorner.x + opponentIdle.x2
+        : view.attacker.geometry.spriteCorner.x + opponentIdle.x2,
       view.target.geometry.side === "opponent"
-        ? view.target.geometry.spriteCorner.y
-        : view.attacker.geometry.spriteCorner.y,
+        ? view.target.geometry.spriteCorner.y + opponentIdle.y2
+        : view.attacker.geometry.spriteCorner.y + opponentIdle.y2,
     );
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
-    // Singles OAM reserves slots 6 and 8 for the player and opponent. The
-    // powder creations occupy the gaps around those entries, so preserving
-    // slot order reproduces the source's equal-priority occlusion.
-    for (let slot = 3; slot <= 19; slot += 1) {
-      const particle = particleBySlot.get(slot);
-      if (particle) drawParticle(particle);
-      else if (slot === 6) drawPlayer();
-      else if (slot === 8) drawOpponent();
+    if (opponentToPlayer && view.age === 0
+      && elevatedEnemyShadowSpecies.has("SPECIES_HOPPIP")) {
+      const shadowX = 176 - battleEnemyShadow.width / 2;
+      const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
     }
+    // The source transfers the two battler OAM entries first, then appends
+    // the powder OBJ entries. All powder therefore paints in front of both
+    // battlers despite the gSprites allocation slots used by creation.
+    drawPlayer();
+    drawOpponent();
+    for (const particle of powderParticles) drawParticle(particle);
     const profile = stunState.config.fieldProfile;
     drawSendOutHealthbox(
       fb,

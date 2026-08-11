@@ -53,6 +53,13 @@ const SPAWNS = [
   { age: 75, x: 5, y: -22, yVelocity: 80, waveAmplitude: 5, waveSpeed: 1, slot: 19 },
 ] as const;
 
+const OAM_SEED_ORDERS = [
+  [3, 5, 4],
+  [9, 7, 11, 10],
+  [15, 14, 13, 12],
+  [19, 18, 17, 16],
+] as const;
+
 function gbaSin(angle: number, amplitude: number): number {
   return (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
 }
@@ -71,6 +78,7 @@ function particleAtAge(
   age: number,
   index: number,
   targetCenter: StunSporePoint,
+  waveSign: 1 | -1,
 ): StunSporeParticle | null {
   const spawn = SPAWNS[index]!;
   if (age < spawn.age || age > spawn.age + 116) return null;
@@ -79,21 +87,24 @@ function particleAtAge(
   // frame advances the same callback once more.
   const steps = age - spawn.age + 1;
   const angle = spawn.waveSpeed * (steps - 1);
+  const waveAmplitude = spawn.waveAmplitude * waveSign;
   const data2 = spawn.yVelocity * steps;
   return {
     index,
     slot: spawn.slot,
     x: targetCenter.x + spawn.x,
     y: targetCenter.y + spawn.y,
-    x2: gbaSin(angle, spawn.waveAmplitude),
-    y2: data2 >> 8,
+    x2: gbaSin(angle, waveAmplitude),
+    // The callback exposes data[2] after its increment, while OAM latches
+    // y2 from the fixed-point value that preceded that increment.
+    y2: (data2 - spawn.yVelocity) >> 8,
     data0: 117 - steps,
     data1: spawn.yVelocity,
     data2,
-    data3: spawn.waveAmplitude,
+    data3: waveAmplitude,
     data4: spawn.waveSpeed,
-    data5: spawn.waveSpeed * steps,
-    animFrame: Math.min(7, Math.floor((steps - 1) / 5)),
+    data5: (spawn.waveSpeed * steps) & 0xff,
+    animFrame: Math.floor((steps - 1) / 5) % 8,
     priority: 2,
     callback: "AnimMovePowderParticle_Step",
   };
@@ -102,10 +113,61 @@ function particleAtAge(
 export function stunSporeParticlesAtAge(
   age: number,
   targetCenter: StunSporePoint,
+  waveSign: 1 | -1 = 1,
 ): readonly StunSporeParticle[] {
   return SPAWNS
-    .map((_, index) => particleAtAge(age, index, targetCenter))
+    .map((_, index) => particleAtAge(age, index, targetCenter, waveSign))
     .filter((value): value is StunSporeParticle => value !== null);
+}
+
+/**
+ * Source-relative tie/order reducer for the latched powder OBJ list.
+ *
+ * The ROM keeps `sSpriteOrder` between frames and insertion-sorts equal
+ * priority sprites by descending OAM Y. New particle groups enter with the
+ * slot order observed before their first sort. The hardware list is emitted
+ * in that order; the GBA's equal-priority OBJ compositing makes the software
+ * draw order its reverse.
+ */
+export function stunSporeParticleDrawOrderAtAge(age: number): readonly number[] {
+  if (age < 4 || age > 191) return [];
+  const order: number[] = [];
+  for (let sourceAge = 4; sourceAge <= age; sourceAge += 1) {
+    const seedIndex = sourceAge === 4
+      ? 0
+      : sourceAge === 21
+        ? 1
+        : sourceAge === 53
+          ? 2
+          : sourceAge === 75
+            ? 3
+            : -1;
+    if (seedIndex >= 0) order.push(...OAM_SEED_ORDERS[seedIndex]!);
+    const active = new Set(
+      stunSporeParticlesAtAge(sourceAge, { x: 0, y: 0 }).map(
+        (particle) => particle.slot,
+      ),
+    );
+    for (let index = order.length - 1; index >= 0; index -= 1) {
+      if (!active.has(order[index]!)) order.splice(index, 1);
+    }
+    const yBySlot = new Map(
+      stunSporeParticlesAtAge(sourceAge, { x: 0, y: 0 }).map(
+        (particle) => [particle.slot, particle.y + particle.y2] as const,
+      ),
+    );
+    for (let index = 1; index < order.length; index += 1) {
+      let cursor = index;
+      while (
+        cursor > 0
+        && yBySlot.get(order[cursor - 1]!)! < yBySlot.get(order[cursor]!)!
+      ) {
+        [order[cursor - 1], order[cursor]] = [order[cursor]!, order[cursor - 1]!];
+        cursor -= 1;
+      }
+    }
+  }
+  return order.reverse();
 }
 
 /** Pure source-relative port of Move_STUN_SPORE's visual script body. */
@@ -121,7 +183,11 @@ export function stunSporeAtAge(
     active: age >= 0 && age < STUN_SPORE_FIRST_INACTIVE_AGE,
     stunSporeLoaded: age >= 1 && age < STUN_SPORE_FIRST_INACTIVE_AGE,
     scriptOffset: scriptOffsetAtAge(age),
-    particles: stunSporeParticlesAtAge(age, targetCenter),
+    particles: stunSporeParticlesAtAge(
+      age,
+      targetCenter,
+      targetSide === "player" ? -1 : 1,
+    ),
     sound,
     soundPanSide: sound ? targetSide : null,
     soundLoopActive: age >= 4 && age < 58,

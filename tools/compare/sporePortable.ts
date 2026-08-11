@@ -12,9 +12,15 @@ import {
   cottonSporeAtAge,
 } from "../../src/animation/cottonSpore.ts";
 import {
+  STUN_SPORE_FRAME_COUNT,
+  stunSporeAtAge,
+  type StunSporeParticle,
+} from "../../src/animation/stunSpore.ts";
+import {
   createSceneOnMovePresentation,
   sceneOnCottonSporeView,
   sceneOnSporeView,
+  sceneOnStunSporeView,
   type SceneOnDragonRageFieldProfile,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
@@ -27,7 +33,10 @@ import { createScratchDir } from "../lib/scratch.ts";
 
 type Window = { startFrame: number; endFrame: number; frameCount: number };
 type Fixture = {
-  schema: "spore-portable-evidence/v1" | "cotton-spore-portable-evidence/v1";
+  schema:
+    | "spore-portable-evidence/v1"
+    | "cotton-spore-portable-evidence/v1"
+    | "stun-spore-portable-evidence/v1";
   orientation: string;
   scenario: string;
   probe: string;
@@ -113,6 +122,13 @@ function observedCenter(sprite: Sprite) {
   };
 }
 
+function observedPowderCenter(sprite: Sprite) {
+  return {
+    x: ((sprite.attr[1]! & 0x1ff) + 4) & 0x1ff,
+    y: ((sprite.attr[0]! & 0xff) + 8) & 0xff,
+  };
+}
+
 function expectedParticle(particle: SporeParticle) {
   return {
     slot: particle.slot,
@@ -133,6 +149,28 @@ function expectedParticle(particle: SporeParticle) {
     callback: particle.callback,
     priority: particle.priority,
     blend: particle.blend,
+  };
+}
+
+function expectedStunParticle(particle: StunSporeParticle) {
+  return {
+    slot: particle.slot,
+    center: {
+      x: (particle.x + particle.x2) & 0x1ff,
+      y: (particle.y + particle.y2) & 0xff,
+    },
+    data: [
+      particle.data0,
+      particle.data1,
+      particle.data2,
+      particle.data3,
+      particle.data4,
+      particle.data5,
+      0,
+      0,
+    ],
+    callback: particle.callback,
+    priority: particle.priority,
   };
 }
 
@@ -161,7 +199,12 @@ function verify(fixturePath: string, runNumber: number): void {
   const bytes = readFileSync(output);
   const probe = JSON.parse(bytes.toString()) as Probe;
   const isCotton = fixture.schema === "cotton-spore-portable-evidence/v1";
-  const frameCount = isCotton ? COTTON_SPORE_FRAME_COUNT : SPORE_FRAME_COUNT;
+  const isStun = fixture.schema === "stun-spore-portable-evidence/v1";
+  const frameCount = isStun
+    ? STUN_SPORE_FRAME_COUNT
+    : isCotton
+      ? COTTON_SPORE_FRAME_COUNT
+      : SPORE_FRAME_COUNT;
   const evidence = createHash("sha256").update(bytes).digest("hex");
   const fields = probe.frames.every((frame) =>
     frame.softwareOam.length === 128
@@ -183,25 +226,32 @@ function verify(fixturePath: string, runNumber: number): void {
     !(
       fixture.schema === "spore-portable-evidence/v1"
       || fixture.schema === "cotton-spore-portable-evidence/v1"
+      || fixture.schema === "stun-spore-portable-evidence/v1"
     )
     || probe.schema !== (
-      isCotton
-        ? "cotton-spore-dense-evidence/v1"
-        : "spore-dense-evidence/v1"
+      isStun
+        ? "stun-spore-dense-evidence/v1"
+        : isCotton
+          ? "cotton-spore-dense-evidence/v1"
+          : "spore-dense-evidence/v1"
     )
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || evidence !== fixture.evidenceSha256
     || probe.frames.length !== frameCount
-    || probe.lifecycleCounts.gSporeParticleSpriteTemplate !== 9
+    || probe.lifecycleCounts[
+      isStun ? "gStunSporeParticleSpriteTemplate" : "gSporeParticleSpriteTemplate"
+    ] !== (isStun ? 15 : 9)
     || !probe.topology.tasks.includes("Task_LoopAndPlaySE")
-    || !probe.topology.tasks.includes("Task_UpdateMonBg")
-    || !probe.topology.tasks.includes("Task_ClearMonBg")
-    || !probe.topology.callbacks.includes("AnimSporeParticle_Step")
+    || (!isStun && !probe.topology.tasks.includes("Task_UpdateMonBg"))
+    || (!isStun && !probe.topology.tasks.includes("Task_ClearMonBg"))
+    || !probe.topology.callbacks.includes(
+      isStun ? "AnimMovePowderParticle_Step" : "AnimSporeParticle_Step",
+    )
     || !fields
   ) throw new Error(`${fixture.orientation}: immutable dense receipt changed`);
 
   const stage = createSceneOnMovePresentation({
-    move: isCotton ? "COTTON_SPORE" : "SPORE",
+    move: isStun ? "STUN_SPORE" : isCotton ? "COTTON_SPORE" : "SPORE",
     attacker: fixture.attacker,
     target: fixture.target,
     fieldProfile: fixture.fieldProfile,
@@ -218,7 +268,13 @@ function verify(fixturePath: string, runNumber: number): void {
       continue;
     }
     const age = fixture.appStage.presentationAge + index;
-    const component = isCotton
+    const component = isStun
+      ? stunSporeAtAge(
+          age,
+          fixture.target.geometry.side,
+          fixture.target.geometry.animationCenter,
+        )
+      : isCotton
       ? cottonSporeAtAge(
           age,
           fixture.target.geometry.side,
@@ -229,7 +285,13 @@ function verify(fixturePath: string, runNumber: number): void {
           fixture.target.geometry.side,
           fixture.target.geometry.animationCenter,
         );
-    const seam = isCotton
+    const seam = isStun
+      ? sceneOnStunSporeView({
+          ...stage,
+          config: { ...stage.config, move: "STUN_SPORE" },
+          age,
+        })
+      : isCotton
       ? sceneOnCottonSporeView({
           ...stage,
           config: { ...stage.config, move: "COTTON_SPORE" },
@@ -247,20 +309,31 @@ function verify(fixturePath: string, runNumber: number): void {
       ...seamComponent
     } = seam;
     const sourceParticles = oracle.sprites
-      .filter((sprite) =>
-        sprite.template.symbol === "gSporeParticleSpriteTemplate"
-      )
-      .map((sprite) => ({
-        slot: sprite.slot,
-        center: observedCenter(sprite),
-        data: sprite.data,
-        callback: sprite.callback.symbol,
-        priority: (sprite.attr[2]! >> 10) & 3,
-        blend: ((sprite.attr[0]! >> 10) & 3) === 1,
-      }))
+      .filter((sprite) => sprite.template.symbol === (
+        isStun ? "gStunSporeParticleSpriteTemplate" : "gSporeParticleSpriteTemplate"
+      ))
+      .map((sprite) => isStun
+        ? {
+            slot: sprite.slot,
+            center: observedPowderCenter(sprite),
+            data: sprite.data,
+            callback: sprite.callback.symbol,
+            priority: (sprite.attr[2]! >> 10) & 3,
+          }
+        : {
+            slot: sprite.slot,
+            center: observedCenter(sprite),
+            data: sprite.data,
+            callback: sprite.callback.symbol,
+            priority: (sprite.attr[2]! >> 10) & 3,
+            blend: ((sprite.attr[0]! >> 10) & 3) === 1,
+          })
       .sort((a, b) => a.slot - b.slot);
     const particlesMatch = same(
-      component.particles.map(expectedParticle).sort((a, b) => a.slot - b.slot),
+      (isStun
+        ? component.particles.map(expectedStunParticle)
+        : component.particles.map(expectedParticle)
+      ).sort((a, b) => a.slot - b.slot),
       sourceParticles,
     );
     const soundTask = oracle.tasks.find(
@@ -271,23 +344,27 @@ function verify(fixturePath: string, runNumber: number): void {
         && soundTask.data[0] === 169
         && soundTask.data[1]
           === (fixture.target.geometry.side === "opponent" ? 63 : -63)
-        && soundTask.data[2] === (isCotton ? 18 : 16)
+        && soundTask.data[2] === (isStun ? 10 : isCotton ? 18 : 16)
       : !soundTask;
     const monBgMatch =
-      oracle.tasks.some((task) => task.func.symbol === "Task_UpdateMonBg")
-        === component.targetMonBg
-      || age === (isCotton ? 202 : 205);
-    const registerMatch = component.alpha
+      isStun
+        ? !oracle.tasks.some((task) => task.func.symbol === "Task_UpdateMonBg")
+        : oracle.tasks.some((task) => task.func.symbol === "Task_UpdateMonBg")
+          === component.targetMonBg
+          || age === (isCotton ? 202 : 205);
+    const registerMatch = !isStun && component.alpha
       ? oracle.registers.bldcnt === 16192
         && oracle.registers.bldalpha === 2060
       : oracle.registers.bldcnt === 0;
     const tagsMatch =
-      oracle.tileTags.includes(10158) === component.sporeLoaded
-      && oracle.paletteTags.includes(10158) === component.sporeLoaded;
+      oracle.tileTags.includes(isStun ? 10068 : 10158)
+        === (isStun ? component.stunSporeLoaded : component.sporeLoaded)
+      && oracle.paletteTags.includes(isStun ? 10068 : 10158)
+        === (isStun ? component.stunSporeLoaded : component.sporeLoaded);
     const attacker = oracle.battlers[fixture.battleState.attackerSide];
     const target = oracle.battlers[fixture.battleState.targetSide];
     const battleStateMatch =
-      attacker.species === (isCotton ? 179 : 47)
+      attacker.species === (isStun ? 187 : isCotton ? 179 : 47)
       && attacker.item === fixture.battleState.attackerItem
       && attacker.status1 === 0
       && target.species === 95
