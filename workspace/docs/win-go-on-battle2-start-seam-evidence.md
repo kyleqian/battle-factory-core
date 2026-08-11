@@ -27,6 +27,7 @@ Each command below was run twice fresh after the final fixture and trace edits:
 
 | trace | dense frames | result | boundary |
 | --- | ---: | ---: | --- |
+| `win-go-on-battle2-transition-complete-off` | 11308–11556 | **249/249** | complete quote-dismiss through RNG-selected Frontier transition and black handoff/hold |
 | `win-go-on-battle2-room-dismiss-off` | 11308–11337 | **30/30** | LILIANA quote A edge, box close, and transition onset |
 | `win-go-on-battle2-transition-black-off` | 11514–11556 | **43/43** | transition's black handoff/hold |
 | `win-go-on-battle2-start-off` | 13385–13622 | **238/238** | acknowledged generated intro through LILIANA/KADABRA and player/DUSCLOPS send-out completion |
@@ -55,22 +56,39 @@ The pre-existing index-1/index-5 routing matrix proves this lifecycle is not
 specialized to Battle 2. Neither production behavior nor the new test keys on
 trainer id, battle number, absolute trace tick, or this fixture.
 
-## Honest residual boundary
+## RNG-selected transition closure
 
-This increment does **not** claim every transition frame. The existing room
-renderer selects its Frontier transition from the legacy `encounter` tag;
-the ROM selected its transition from live RNG. The dynamic effect between the
-exact room-dismiss and black-hold windows remains mismatched (first residual
-11338), and the legacy scene-assembly/status-summary spans before the generated
-send-out window also retain known residuals. Fixing those requires a generic
-RNG-selected transition/presentation owner, not a LILIANA or battle-index
-branch. The largest independently exact reusable continuation landed here is
-the complete 238-frame generated send-out plus the independently exact real
-command boundary.
+The complete room-dismiss/transition window is now exact. Source order is
+`FillFactoryTrainerParty()` followed by
+`GetSpecialBattleTransition(B_TRANSITION_GROUP_B_FACTORY)`
+(`battle_tower.c:2093-2099`); the selector is exactly one
+`Random() % ARRAY_COUNT(sBattleTransitionTable_BattleFrontier)` draw
+(`battle_setup.c:864-909`). The live `BattleRoomState` owns that immutable
+draw receipt at its source-relative setup edge. Rendering consumes only the
+receipt and never reads or advances gameplay RNG.
+
+For this fixture the draw selects table index 1,
+`B_TRANSITION_FRONTIER_LOGO_WAVE`, rather than the legacy encounter-tagged
+circle transition. Its presentation is a direct reducer of
+`FrontierLogoWave_Main` and its callbacks (`battle_transition.c:4273-4411`):
+the 48-frame shared gray intro is exact at 11347-11394; the BG0 logo's
+source Q8.8 sine scanline program, 3-tick BLDALPHA updates, amplitude settle,
+and opaque hold are exact at 11397-11497; the alternating BG/OBJ normal
+palette fade is exact at 11498-11513; solid black begins at 11514. HBlank's
+line ownership is retained explicitly: output line `y > 0` reads scanline
+buffer entry `y-1`, while VBlank resets line 0 to `cameraY`.
+
+`tests/battleTransitionFrontier.test.ts` pins two independent selector inputs
+(LOGO_WAVE and CIRCLES_MEET), one-shot live-room consumption, render purity,
+and unchanged round/controller/rental-party state through the seam. No branch
+uses trainer id, battle index, turn number, or an absolute trace tick. The
+legacy scene-assembly/status-summary residuals before the separately exact
+generated send-out window remain outside this transition closure.
 
 Reproduction:
 
 ```sh
+npm run compare -- win-go-on-battle2-transition-complete-off --summary
 npm run compare -- win-go-on-battle2-room-dismiss-off --summary
 npm run compare -- win-go-on-battle2-transition-black-off --summary
 npm run compare -- win-go-on-battle2-start-off --summary

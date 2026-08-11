@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1136 — [MAIN worker, 2026-08-11] **Generic RNG-selected Frontier transition exact**
+
+- **State:** implementation `422e4e29` owns the live Factory transition draw
+  and renders its source-selected LOGO_WAVE; S8 remains closed and Battle 2
+  stays stopped at tick 33331. Final full-suite/build verification is pending.
+- **Did:** committed dense `win-go-on-battle2-transition-complete-off`
+  **249/249** twice fresh (11308–11556). Re-held room-dismiss **30/30**,
+  black **43/43**, generated intro **238/238**, action-ready **3/3**, far-side
+  LILIANA **115/115**, and shared `battle2-transition` **249/249**. Focused
+  **72/72**, smoke **375/375**, and typecheck are green.
+- **Next:** run final full `npm test` and `npm run build`, record exact counts,
+  then hand back the remaining generated scene-assembly/status-summary seam;
+  do not submit a Battle-2 action.
+- **Notes:** selection is one source `Random()%12` call stored as immutable
+  presentation state; rendering is RNG-pure and no trainer/battle/turn/tick
+  production key was added. #55 and its construction clock are untouched.
+
 ## 1135 — [supervisor, 2026-08-11] **Animation tail folded; generic transition seam next**
 
 - **State:** `master` includes `animation-main` through `5123b455`; `rust-main`
@@ -56,26 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **4/4**, wasm32 artifact builds. Both oracles now serve from the new repo
   top (:8014 OFF / :8012 ON). TS stays canonical while the rust lane ports;
   the animation lane continues in TS by user decision.
-
-## 1133 — [supervisor, 2026-08-11] **Generic Battle-2+ start seam proven; wind-down green**
-
-- **State:** master is green through `e55fe305`. A nonzero-index `battleStart`
-  now has staged OFF proof from LILIANA's room quote through the real next
-  command request, without a battle/turn/tick production branch. S8 stays
-  closed and the canonical Battle-2 march remains stopped at tick 33331.
-- **Did:** folded `animation-main` through `77201333`; then banked exact generic
-  Battle-2 room-dismiss **30/30**, black handoff **43/43**, generated intro
-  **238/238**, and action-ready **3/3** windows (each twice fresh; independent
-  intro **238/238** and prior LILIANA **115/115** reruns). The #55 audit joins
-  **113/113** MPlay rows: **5/5** zero-pass calls close at 864 cycles; **108**
-  one-pass rows fail closed on missing post-command `Track.flags`/`chan` state.
-- **Next:** for #55, capture/reduce that post-command MPlay state; keep costs
-  null and the construction clock unwired until all 108 rows compose. For the
-  presentation seam, retire the generic RNG-selected transition residual from
-  frame 11338; do not extend into a Battle-2 action window.
-- **Notes:** final `npm test` **946 files / 8,680 passed / 1 skipped**
-  (**117.75s**), build **642 modules** (Vite **6.47s**), vanilla soak **20/20**
-  (**33.9s**), and full-policy soak **60/60** (**284.4s**) are green with **0
-  crash / 0 hang**. OFF oracle is fresh. `animation-main` has newer Metal
-  Sound evidence commits not folded at wind-down. No material decision is
-  deferred.
