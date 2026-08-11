@@ -1226,8 +1226,41 @@ common four-GetSubstruct + 12-word decrypt + four-GetSubstruct/24-halfword
 checksum + 12-word encrypt structure. The 12 observed mons cover nine modulo
 routes; Tier 1 enumerates all 24. Twice-fresh OFF packets remain byte-stable at
 the existing three hashes, so no pointer/decrypted-storage fixture was added.
-The partial shell stays `cycles: null`: modulo-arm instruction/fetch and
-EWRAM loop timing remain unresolved, with no duration/identity/residual fit.
+The complete accessor shell stays `cycles: null`: the `%24` helper composition
+and EWRAM loop/tail timing remain unresolved, with no duration/identity/
+residual fit.
+
+**Encrypted accessor instruction/fetch slice (2026-08-10, `eb4ab2c8`):** the
+source-general reducer now walks all **96** compiled
+`(personality % 24, substructType)` arm combinations. The fixed
+`GetSubstruct` dispatch shell is **68** non-modulo cycles, and the 96 selected
+arms total **5,172** ROM instruction/refill cycles (**32–86** per arm). The
+reducer exposes the exact non-contiguous arm PC, physical slot, secure offset,
+halfword count, and taken-refill count; it does not claim the `%24`
+`__umodsi3` body or any pointer/duration fixture.
+
+The shared crypt/checksum instruction streams are also reduced as reusable
+subsegments: each 12-word decrypt/encrypt loop is **128** Thumb halfwords,
+**12** refills, and **328** instruction-fetch cycles, with **36** word reads
+and **24** writes; the four checksum loops are **199** halfwords, **20**
+refills, **518** instruction-fetch cycles, and **24** halfword reads. Each
+180-read census row now carries the selected arm plus the **1,174**-cycle
+decrypt/checksum/encrypt instruction-fetch subtotal, while the accessor's
+`cycles` remains `null`.
+
+This slice is checked against the committed Battle Scene OFF v2 packets,
+twice-fresh and byte-identical: anchor
+`631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`,
+LILIANA `ae1282b74f74de6a85b8772adfbcd83028fad09f8aa3e3ecd518aafeab17b443`,
+and varied trainer
+`3e10197a34f4ea7a08a23bead04ae5b6113c653304722167095612a9b0626987`;
+their construction/ambient totals remain **242/52/294**, **112/31/143**,
+and **202/30/232**. The known **+18** service stalls and all VBlank/IRQ
+pauses remain external. The exact remainder is the `%24` helper composition,
+EWRAM word/halfword bus timing (including the checksum/accessor tails), and
+the live async workload, so #55 and the construction clock stay open.
+Detailed source/ELF accounting is in
+`docs/issue55-encrypted-accessor-timing-slice.md`.
 
 Exact timing for the censused **156** encrypted `%24` box-mon reads and two
 encrypted accessors inside each of the 12 level calls, plus encrypted writes

@@ -5,25 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1098 — [supervisor, 2026-08-10] **Animation union folded; #55 encrypted accessor reduction resumes**
+## 1098 — [MAIN worker, 2026-08-10] **#55 encrypted accessor instruction/fetch slice landed**
 
-- **State:** `animation-main` was **31 commits** ahead and is now folded by
-  fast-forward at `11245f83`; both oracle services are fresh. The union passes
-  full `npm test` (**892 files / 8,474 passed / 1 skipped**) and production
-  build. #55 remains open and the construction clock remains unwired.
-- **Did:** enforced S8's authoritative reset: generic round/controller and
-  staged Scene-OFF coverage remain the acceptance surface; no canonical
-  Battle-2 work past tick 33331 is scheduled. Folded Flame Wheel, Hi Jump
-  Kick, Leaf Blade, Night Shade, Pin Missile, Spite, and Heat Wave evidence;
-  animation's handoff reports presentation-only changes with no shared
-  boundary, rules, controller, round, or facility-state change.
-- **Next:** bounded #55 main-lane slice: independently source-reduce only the
-  encrypted `GetBoxMonData2` modulo-arm/shared-loop instruction and fetch
-  segments, preserving `cycles: null` wherever EWRAM/service timing is not
-  proven. Do not wire aggregate stats or the live construction clock.
-- **Notes:** main oracle contract is Battle Scene OFF; `DEFERRED.md` has no
-  open entry. No canonical recording import or unsupported-branch barrier
-  changed in the fold.
+- **State:** commit `eb4ab2c8`; #55 remains open and the construction clock is
+  unwired. Scene-OFF v2 receipts remain byte-identical at
+  `631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`,
+  `ae1282b74f74de6a85b8772adfbcd83028fad09f8aa3e3ecd518aafeab17b443`, and
+  `3e10197a34f4ea7a08a23bead04ae5b6113c653304722167095612a9b0626987`.
+- **Did:** reduced all **96** compiled `(personality % 24, substructType)`
+  arms: 68-cycle fixed shell, **5,172** total arm instruction/refill cycles.
+  Reduced shared decrypt/encrypt to **328** instruction-fetch cycles each
+  (128 halfwords/12 refills) and checksum to **518** (199/20), with exact
+  access counts **36/24** word reads/writes and **24** halfword reads. Each
+  census row carries the **1,174**-cycle crypt/checksum/crypt instruction
+  subtotal; complete `cycles` stays `null`.
+- **Next:** close only the `%24` helper composition and source-general EWRAM/
+  async timing boundary. Do not wire aggregate stats or the construction
+  clock, fit residuals, or add canonical Battle-2 windows.
+- **Notes:** receipt construction/ambient totals are **242/52/294**,
+  **112/31/143**, **202/30/232**. +18 service and VBlank/IRQ pauses remain
+  external. Focused **21/21**, smoke **375/375**, typecheck, full `npm test`,
+  and build passed; no fixture, recording import, barrier, or clock change.
 
 ## 1097 — [solo session, 2026-08-10] **User priority decisions recorded: #55 grind authorized; #71 stays faithful; S11 out of scope for now**
 
