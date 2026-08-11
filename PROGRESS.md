@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1125 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry target safety closed**
+
+- **State:** actual post-six-MPlayMain SoundMainRAM target safety is complete;
+  #55 stays open and the construction clock remains null/unwired.
+- **Did:** captured twice-fresh address-free entry descriptors for
+  anchor/LILIANA/legal-varied: **113/113** v3 digest/cost joins, **0** unequal,
+  **565/565** complete aligned physical target/read extents, joined to the
+  frozen **13-branch / 4-rule** audit. Hashes: `6b29d708…` / `780e3326…` /
+  `202f18b6…`.
+- **Next:** classify the exact `ply_note` inline/keysplit/rhythm writer (and
+  inline `ply_xwave` ancestry) for the **13** MPlay-replaced targets; **552**
+  targets already prove pre-MPlay persistence. Do not infer duration or wire.
+- **Notes:** six wrapper-mediated probes finished in **14.5–18.1s** each;
+  focused prior/v3/entry audit **8/8**, smoke **375/375**, forced typecheck,
+  full `npm test` **919 files / 8,610 passed / 1 skipped** (**72.37s**), and
+  build (**631 modules**, Vite **6.34s**) are green. OFF oracle is healthy.
+
 ## 1124 — [supervisor, 2026-08-11] **#55 SetBox + m4a target audit folded**
 
 - **State:** synchronous construction EV writes and the pre-`MPlayMain`
@@ -43,20 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (**631 modules**, Vite **6.73s**) are green. No +18/IRQ/VBlank/external
   service, clock/controller/presentation/animation, barrier, recording, or
   side-owned SoundMainRAM artifact changed.
-
-## 1122 — [MAIN worker, 2026-08-11] **#55 fresh DMA graph source-reduced**
-
-- **State:** isolated fresh Direct Sound DMA makespans are now computed
-  source-generally; #55 remains open and the construction clock stays unwired.
-- **Did:** ported mGBA 0.10.5 fresh rebasing, per-word deadlines, overdue-DMA
-  coalescing, ascending arbitration, completion sentinels, and CPU-blocked
-  progression. Zero/one/dual graphs derive **0/10/18**; dual order is
-  `1,1,1,1,2,1,2,2,2,2`, with DMA2 at +8 and DMA1 completion at +10.
-- **Next:** continue #55 only with another source-general construction or
-  external co-due callback slice. Do not turn 18 into `serviceCostMasterCycles`
-  or wire `runFactoryConstructionClock` before the full workload closes.
-- **Notes:** exact archive hash `91d6fbd…` and timing/Timer/audio/DMA/GBA source
-  hashes/anchors are pinned. Focused **21/21**, smoke **375/375**, typecheck,
-  full `npm test` **916 files / 8,598 passed / 1 skipped** (**77.82s**), and
-  build (**631 modules**, **6.32s**) are green. No generator/controller,
-  presentation, animation, barrier, recording, or side-owned audit changed.

@@ -40782,3 +40782,19 @@ git; the current live ledger keeps the three load-bearing entries only.
   **916 files / 8,594 passed / 1 skipped**, and build (**631 modules**) are
   green. No service cost, clock, controller, presentation, animation, barrier,
   recording, or side-owned adjacent-audit artifact changed.
+## 1122 — [MAIN worker, 2026-08-11] **#55 fresh DMA graph source-reduced**
+
+- **State:** isolated fresh Direct Sound DMA makespans are now computed
+  source-generally; #55 remains open and the construction clock stays unwired.
+- **Did:** ported mGBA 0.10.5 fresh rebasing, per-word deadlines, overdue-DMA
+  coalescing, ascending arbitration, completion sentinels, and CPU-blocked
+  progression. Zero/one/dual graphs derive **0/10/18**; dual order is
+  `1,1,1,1,2,1,2,2,2,2`, with DMA2 at +8 and DMA1 completion at +10.
+- **Next:** continue #55 only with another source-general construction or
+  external co-due callback slice. Do not turn 18 into `serviceCostMasterCycles`
+  or wire `runFactoryConstructionClock` before the full workload closes.
+- **Notes:** exact archive hash `91d6fbd…` and timing/Timer/audio/DMA/GBA source
+  hashes/anchors are pinned. Focused **21/21**, smoke **375/375**, typecheck,
+  full `npm test` **916 files / 8,598 passed / 1 skipped** (**77.82s**), and
+  build (**631 modules**, **6.32s**) are green. No generator/controller,
+  presentation, animation, barrier, recording, or side-owned audit changed.

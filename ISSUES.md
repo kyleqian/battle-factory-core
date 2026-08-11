@@ -1563,6 +1563,30 @@ bus/storage role, alignment, and physical payload length. No duration reducer
 or production clock wiring is licensed. Full evidence:
 `docs/issue55-m4a-soundmainram-target-audit-v1.md`.
 
+**SoundMainRAM actual-entry target-safety closure (2026-08-11,
+`07a572e8`):** an additive v1 packet now captures the requested address-free
+descriptor at the existing `sound-main-ram-entry` hook, after all six
+`MPlayMain` calls and `CgbSound`, before channel 0. Two fresh serial OFF runs
+per anchor/LILIANA/legal-varied case are byte-identical (receipt hashes
+`6b29d708…` / `780e3326…` / `202f18b6…`) and mechanically join all
+**113/113** v3 state-digest/cost rows with **0** unequal costs plus the frozen
+**13-branch / 4-rule** audit. All **565/565** selected slots have complete
+declared and physical sample-region digests, aligned readable `gamepak-ws0`
+storage, exact START-or-persisted current relations, and sufficient
+fixed/linear guard bytes; no CMP, REV, compressed, unreadable, unaligned, or
+incomplete row occurs. Thus the observed actual-entry target-safety class is
+closed.
+
+Mutable route provenance remains deliberately partial: **552/565** entry
+targets preserve the pre-MPlay target, while **13** (anchor 7, LILIANA 6,
+varied 0) are proven MPlay replacements whose safe final target is complete
+but whose exact `ply_note` selector is not retained. The exact missing field is
+`mplayReplacementRoute` at the `SoundChannel.wav` write — inline, keysplit,
+or rhythm; inline must additionally say whether `ply_xwave.command-u32`
+replaced the track tone earlier in that MPlay pass. This licenses no duration
+reducer or clock wiring. See
+`docs/issue55-m4a-soundmainram-entry-targets-v1.md`.
+
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
 The WIN YES fixture's real first callback cursor/outcomes are
