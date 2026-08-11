@@ -5,6 +5,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1134 — [solo session, 2026-08-11] **Repo promoted to pokeemerald-factory-core; rust lane born**
+
+- **State:** this run IS now the canonical standalone repo at
+  `pokebench/pokeemerald-factory-core` — repo top = human/planning + shared
+  oracle infra; this `workspace/` = the agent layer (contents unchanged, one
+  `git mv`). GitHub origin re-wired as a fast-forward continuation
+  (`kyleqian/pokeemerald-factory-core`); **pushing is the user's step from
+  now on — commit locally, never push.** The old harness and its run copy
+  are FROZEN; never work there.
+- **Did:** user decisions executed: **Rust chosen for the rewrite** —
+  `core-rs/` cargo workspace born (factory-core with the rng.ts port pinned
+  to TS-generated values 4/4, factory-wasm wasm32 build proven; ledger
+  `RUST_PROGRESS.md` R1, charter `RUST_SUPERVISOR.md`); supervisor/worker
+  lane **"main" renamed to "ts"** ("main" stays a silent legacy alias);
+  **rust lane wired** (`./run-supervisor.sh -l rust` → persistent
+  `.worktrees/rust-main`; `./tools/run-subagent.sh --lane rust`). Fixed
+  three restructure seams (lane worktrees check out the whole repo → cd
+  into the `workspace/` subdir; harness root resolves via the git-common-dir
+  primary, not the worktree copy; repo-top `reference/pokeemerald` symlink
+  restored) and end-to-end tested both lane launches with a stub supervisor.
+  **Imported the 4 unfolded animation-main commits** the clone had dropped
+  (Metal Sound probe track/evidence, import `920d5e16`) — this resolves
+  1133's "newer Metal Sound evidence commits not folded" flag. Migrated all
+  gitignored state (node_modules, .codex-logs, .opencode-logs,
+  tools/compare/out evidence, oracle/battle-lab output).
+- **Next:** unchanged from 1133 — #55 post-command MPlay state
+  capture/reduction with costs null and the clock unwired; presentation
+  seam per 1133. Next ts supervisor should fold `animation-main`
+  (import commit) at orient as usual.
+- **Notes:** post-move verification: full `npm test` **946 files / 8,680
+  passed / 1 skipped**, build green, vanilla soak **20/20**, `cargo test`
+  **4/4**, wasm32 artifact builds. Both oracles now serve from the new repo
+  top (:8014 OFF / :8012 ON). TS stays canonical while the rust lane ports;
+  the animation lane continues in TS by user decision.
+
 ## 1133 — [supervisor, 2026-08-11] **Generic Battle-2+ start seam proven; wind-down green**
 
 - **State:** master is green through `e55fe305`. A nonzero-index `battleStart`

@@ -1,3 +1,5 @@
 .DS_Store
 __pycache__/
 /oracle/.symbols-cache.json
+# reference/pokeemerald is a symlink into ../vendor (machine-local, huge).
+/reference/pokeemerald
