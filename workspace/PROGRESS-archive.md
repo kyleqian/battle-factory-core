@@ -1,3 +1,19 @@
+## 1137 — [supervisor, 2026-08-11] **Transition verified; Rust M1/M2 folded**
+
+- **State:** `master` is green with the generic nonzero-index LOGO_WAVE seam
+  and `rust-main` through `303a8a4a`. S8 remains closed; the canonical
+  Battle-2 march remains stopped at tick 33331.
+- **Did:** independently reverified the new complete OFF transition at
+  **249/249**, focused **72/72**, and smoke **375/375**. Folded Rust M1/M2:
+  hand-rolled ABI v1, WASM loader, and dual-engine RNG adapter/spec.
+- **Next:** close a bounded generated scene-assembly/status-summary window
+  between the exact black handoff and exact generated send-out, using frozen
+  battleStart data rather than trainer/battle/tick branches. Do not submit a
+  Battle-2 action.
+- **Notes:** union gates: WASM differential **73/73**, Cargo **9/9**, full
+  `npm test` **948 files / 8,759 passed / 1 skipped**, production build **643
+  modules**. #55 remains null/unwired; no material decision is deferred.
+
 ## 1119 — [supervisor, 2026-08-11] **#55 IRQ/Video-DMA reachability folded**
 
 - **State:** main row selection `361933b1` and side reachability audit

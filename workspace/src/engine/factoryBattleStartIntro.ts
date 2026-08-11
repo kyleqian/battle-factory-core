@@ -12,9 +12,11 @@ import {
   type BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
 import {
+  BALL_WIDGETS_SETTLED_TICK,
   generatedBattleStartCommandReady,
   generatedBattleStartOpponentReleaseStarted,
   generatedBattleStartPlayerReleaseStarted,
+  generatedBattleIntroSourceClock,
   generatedBattleIntroVisualPhase,
   isGeneratedBattleIntroInputReady,
 } from "./battleScene.ts";
@@ -87,6 +89,27 @@ export function factoryBattleStartIntroPhase(
   if (visualPhase !== "trainer-message") return visualPhase;
   if (!isGeneratedBattleIntroInputReady(state)) return "trainer-message";
   return "awaiting-acknowledgement";
+}
+
+/**
+ * Whether the complete post-slide status-summary/message assembly has reached
+ * its last source-owned entrance frame. The text printer becomes input-ready
+ * earlier, at its own string-length-derived cursor edge, while the independent
+ * `CreatePartyStatusSummarySprites` callbacks keep moving. All fourteen
+ * summary sprites first have `x2 == 0` at `BALL_WIDGETS_SETTLED_TICK`; the
+ * following callbacks are the unbounded `PAUSE_UNTIL_PRESS` hold.
+ *
+ * This is deliberately orthogonal to `factoryBattleStartIntroPhase`: input is
+ * accepted as soon as the printer is ready and is never delayed for a visual
+ * sprite callback.
+ */
+export function factoryBattleStartStatusSummaryMessageComplete(
+  state: FactoryBattleStartIntroState,
+): boolean {
+  return generatedBattleIntroSourceClock(
+    state.elapsed,
+    state.sceneAssemblyDisplayLag,
+  ) >= BALL_WIDGETS_SETTLED_TICK;
 }
 
 export function advanceFactoryBattleStartIntro(

@@ -10,9 +10,14 @@ import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty
 import { createFactoryBattleStartPresentationCommand } from "../src/engine/factoryBattleStartPresentation.ts";
 import { getLevel50InitialRentalFixedIv } from "../src/engine/factoryRentalGeneration.ts";
 import {
+  battleIntroSceneAssemblyDisplayLag,
+  selectFrontierTransition,
+} from "../src/engine/battleTransition.ts";
+import {
   advanceFactoryBattleStartIntro,
   createFactoryBattleStartIntro,
   factoryBattleStartIntroPhase,
+  factoryBattleStartStatusSummaryMessageComplete,
   settleFactoryBattleStartCommand,
 } from "../src/engine/factoryBattleStartIntro.ts";
 import {
@@ -128,31 +133,70 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
     expect(secondCommand.partySummaries.player)
       .toEqual(["status", "fainted", "healthy", "empty", "empty", "empty"]);
 
+    const transitionReceipts = [
+      selectFrontierTransition(0).presentation,
+      selectFrontierTransition(4).presentation,
+    ] as const;
+    expect(transitionReceipts.map((receipt) => receipt.tableIndex)).toEqual([0, 5]);
     const roundsBefore = [structuredClone(firstRound), structuredClone(secondRound)];
-    const frames = [firstCommand, secondCommand].map((command) => {
-      let state = createFactoryBattleStartIntro(command, false, 1);
-      while (generatedBattleIntroSourceClock(
-        state.elapsed,
-        state.sceneAssemblyDisplayLag,
-      ) < 1292) {
-        state = advanceFactoryBattleStartIntro(state);
+    const receiptsBefore = structuredClone(transitionReceipts);
+    const frames = [firstCommand, secondCommand].map((command, index) => {
+      const receipt = transitionReceipts[index]!;
+      let state = createFactoryBattleStartIntro(
+        command,
+        false,
+        battleIntroSceneAssemblyDisplayLag(receipt),
+      );
+      const boundaryFrames: Uint8Array[] = [];
+      for (const sourceTick of [1228, 1274, 1291, 1292]) {
+        while (generatedBattleIntroSourceClock(
+          state.elapsed,
+          state.sceneAssemblyDisplayLag,
+        ) < sourceTick) {
+          state = advanceFactoryBattleStartIntro(state);
+        }
+        const before = structuredClone(state);
+        const frameA = new Uint8Array(240 * 160 * 4);
+        const frameB = new Uint8Array(240 * 160 * 4);
+        renderGeneratedBattleStartPreSendOut(frameA, state);
+        renderGeneratedBattleStartPreSendOut(frameB, state);
+        expect(frameB).toEqual(frameA);
+        expect(state).toEqual(before);
+        expect(state.command).toBe(command);
+        boundaryFrames.push(frameA);
       }
-      const before = structuredClone(state);
-      const frameA = new Uint8Array(240 * 160 * 4);
-      const frameB = new Uint8Array(240 * 160 * 4);
-      renderGeneratedBattleStartPreSendOut(frameA, state);
-      renderGeneratedBattleStartPreSendOut(frameB, state);
-      expect(frameB).toEqual(frameA);
-      expect(state).toEqual(before);
-      expect(state.command).toBe(command);
-      return frameA;
+      expect(factoryBattleStartStatusSummaryMessageComplete(state)).toBe(true);
+      return boundaryFrames.at(-1)!;
     });
 
     expect(frames[0]).not.toEqual(frames[1]);
     expect(firstRound).toEqual(roundsBefore[0]);
     expect(secondRound).toEqual(roundsBefore[1]);
+    expect(transitionReceipts).toEqual(receiptsBefore);
     expect(firstRound.round.rules.phase).toBe("presentingBattleStart");
     expect(secondRound.round.rules.phase).toBe("presentingBattleStart");
+  });
+
+  it("ends the complete concurrent status-summary/message assembly at the final source sprite-settle frame", () => {
+    let state = createFactoryBattleStartIntro(
+      factoryBattleStartPresentationForState(orchestrator())!,
+      false,
+      1,
+    );
+    while (generatedBattleIntroSourceClock(
+      state.elapsed,
+      state.sceneAssemblyDisplayLag,
+    ) < 1291) {
+      state = advanceFactoryBattleStartIntro(state);
+    }
+    expect(factoryBattleStartIntroPhase(state)).toBe("awaiting-acknowledgement");
+    expect(factoryBattleStartStatusSummaryMessageComplete(state)).toBe(false);
+    state = advanceFactoryBattleStartIntro(state);
+    expect(generatedBattleIntroSourceClock(
+      state.elapsed,
+      state.sceneAssemblyDisplayLag,
+    )).toBe(1292);
+    expect(factoryBattleStartStatusSummaryMessageComplete(state)).toBe(true);
   });
 
   it("pins the interactive generated-intro summary destroy receipt to its semantic handoff clock (ISSUES #56 item 2)", () => {

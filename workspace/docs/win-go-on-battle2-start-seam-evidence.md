@@ -31,6 +31,7 @@ Each command below was run twice fresh after the final fixture and trace edits:
 | `win-go-on-battle2-room-dismiss-off` | 11308–11337 | **30/30** | LILIANA quote A edge, box close, and transition onset |
 | `win-go-on-battle2-transition-black-off` | 11514–11556 | **43/43** | transition's black handoff/hold |
 | `win-go-on-battle2-scene-assembly-reveal-off` | 11557–11710 | **154/154** | complete retained-black callback through BattleIntroSlide3 reveal/trainer convergence and first settled-scene plateau |
+| `win-go-on-battle2-status-summary-message-off` | 11711–11775 | **65/65** | complete post-slide party-status-summary/message assembly through the final summary-sprite settle frame |
 | `win-go-on-battle2-start-off` | 13385–13622 | **238/238** | acknowledged generated intro through LILIANA/KADABRA and player/DUSCLOPS send-out completion |
 | `win-go-on-battle2-action-ready-off` | 13631–13633 | **3/3** | settled action menu with the ROM at `CONTROLLER_CHOOSEACTION` |
 
@@ -75,10 +76,42 @@ asserts no change to intro state, RNG, round rules/controller, rental parties,
 or outcomes.
 
 This acceptance claims only the complete reveal/trainer-convergence phase
-through 11710. A diagnostic continuation through 11812 is also exact
-(102/102), but it ends mid status-summary/message assembly and is deliberately
-not promoted as a second complete-window claim. The rest of 11711–13384
-remains outside this bounded step.
+through 11710. The following source-bounded assembly is accepted separately
+below. The historical diagnostic continuation through 11812 was exact
+(102/102), but ended inside the unbounded input hold and was deliberately not
+promoted as a complete-window claim.
+
+## Complete status-summary/message assembly
+
+The next complete concurrent presentation phase is source ticks **1228–1292**,
+which map to fixture frames **11711–11775** after LOGO_WAVE's retained callback.
+`BattleIntroDrawPartySummaryScreens` derives all six HP/status entries per side
+from the live parties, emits both `DrawPartyStatusSummary` commands, and then
+hands the independent text printer to `BattleIntroPrintTrainerWantsToBattle`
+(`battle_main.c:3491-3570`). `CreatePartyStatusSummarySprites` selects healthy,
+status, fainted, and empty tiles from those records and starts the source
+`x2`/delay callbacks (`battle_interface.c:1450-1658,1817-1878`). The last of
+the two bars and twelve icons reaches `x2 == 0` on source tick **1292** and
+switches to `SpriteCallbackDummy`; frame 11775 is therefore the final assembly
+frame, not an arbitrary cut through the following hold.
+
+The message printer becomes input-ready earlier, at the trainer-string-derived
+cursor tick **1274**. Production now exposes the orthogonal
+`factoryBattleStartStatusSummaryMessageComplete` boundary without delaying
+that input gate: tick 1291 is incomplete, tick 1292 is complete, and later
+callbacks remain the ordinary `PAUSE_UNTIL_PRESS` phase until the staged A
+edge. The previous 11711–11812 diagnostic crossed this real boundary and then
+ended mid-hold, which is why its 102 exact frames were not a valid acceptance
+unit.
+
+The committed dense trace captures every frame 11711–11775 (**65 captures**)
+and passed **65/65 twice fresh**. Tier-1 exercises two distinct trainer/battle
+identities, source transition table indexes **0 and 5**, healthy/status/fainted
+party summaries, repeated render purity, and unchanged transition receipts,
+RNG-owned round/rules state, parties, and outcomes. No production branch keys
+on trainer identity, battle index, transition index, or absolute trace tick.
+Frames **11776–13384** remain outside this bounded acceptance except for the
+already exact generated send-out window beginning at 13385.
 
 ## Tier-1 controller proof
 
@@ -134,6 +167,7 @@ npm run compare -- win-go-on-battle2-transition-complete-off --summary
 npm run compare -- win-go-on-battle2-room-dismiss-off --summary
 npm run compare -- win-go-on-battle2-transition-black-off --summary
 npm run compare -- win-go-on-battle2-scene-assembly-reveal-off --summary
+npm run compare -- win-go-on-battle2-status-summary-message-off --summary
 npm run compare -- win-go-on-battle2-start-off --summary
 npm run compare -- win-go-on-battle2-action-ready-off --summary
 npm run compare -- win-go-on-swap-offer-no-liliana-far-side-off --summary
