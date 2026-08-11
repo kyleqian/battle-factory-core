@@ -1653,6 +1653,21 @@ post-command `Track.flags`/`chan` state consumed by MPlayMain's volume/pitch
 loop. No duration was fit, no service cost was assigned, and the construction
 clock remains unwired. Next capture/reduce that post-command state.
 
+**2026-08-11 post-command state closure:** additive OFF packets now capture
+the exact sixth-player `_081DD9C4` boundary and join all **113/113** rows by
+`sourceStateDigest`, including **108/108** one-pass calls. Two fresh serial
+runs per anchor/LILIANA/legal-varied case are byte-identical (`8ff491a1…` /
+`d3d29caa…` / `ab887a51…`). Every row has nine `MPT_FLG_EXIST`-only tracks
+(`0x80`) plus one inactive track, so no row selects `TrkVolPitSet` or the
+following channel-chain worker. The mutable post-command `Track.flags`/`chan`
+discriminator is therefore closed source-generally.
+
+Complete costs remain **5 exact / 108 null**. The next discriminator moved
+earlier to source timing for the one-pass tempo track/command loop, including
+channel gate/clear, wait/LFO, and bounded command-callback paths. No observed
+duration was fit, no service cost was assigned, and the construction clock
+remains unwired. Evidence: `docs/issue55-m4a-post-command-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

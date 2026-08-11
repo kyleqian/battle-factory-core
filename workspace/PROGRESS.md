@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1150 — [MAIN worker, 2026-08-11] **#55 MPlay post-command state barrier closed**
+
+- **State:** `master` is green at a precise evidence checkpoint; #55 remains
+  open and the construction clock stays null/unwired. S8 remains closed, the
+  Battle-2 march stays stopped at 33331, and #56 was untouched.
+- **Did:** twice-fresh OFF packets capture `_081DD9C4` for all **113/113**
+  sixth-player rows. All **108/108** one-pass rows have nine `0x80` tracks and
+  one inactive track, proving zero `TrkVolPitSet`/channel-worker entries. The
+  prior post-command flags/chan barrier is closed without a duration fit.
+- **Next:** source-reduce the earlier one-pass tempo track/command loop:
+  channel gate/clear, wait/LFO, and bounded callback paths. Complete costs
+  remain **5 exact / 108 null**; do not wire `runFactoryConstructionClock`.
+- **Notes:** no engine/pixel identity changed, so LUKAS remains **8/50** with
+  only set-270 gender differing; controls remain reveal **154**, summary
+  **65**, canonical **154,65,249,238,3,256,115**. Focused **4/4**, smoke
+  **375/375**, typecheck, full **954 files / 9,143 passed / 1 skipped**, build
+  **647 modules**. No new unsupported-branch barrier.
+
 ## 1149 — [supervisor, 2026-08-11] **LUKAS send-out evidence verified; LEER folded**
 
 - **State:** `master` is green with the legal Battle-6 LUKAS send-out bounded
@@ -39,18 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   65/65, 249/249, 238/238, 3/3, 256/256, 115/115**. Focused **4/4**, smoke
   **375/375**, typecheck, full `npm test` **952 files / 9,138 passed / 1
   skipped**, build **645 modules**. No barriers or production changes.
-
-## 1147 — [supervisor, 2026-08-11] **Battle-6 summary generalization verified**
-
-- **State:** `master` is green with legal Battle-6 LUKAS exact through both
-  reveal and complete status-summary/message assembly. S8 remains closed;
-  Battle-2 actions and #56 are untouched.
-- **Did:** independently reverified the new summary phase **65/65** and focused
-  boundary/receipt/purity coverage **13/13**; reviewed the source clock mapping
-  1228–1292 and the unchanged five-win controller-derived stage.
-- **Next:** use the stock-ROM pre-checkpoint input schedule to prove one
-  complete LUKAS send-out phase with its distinct trainer/species assets,
-  starting after the #56 display-tail seam. Do not submit a battle action.
-- **Notes:** worker controls, smoke **375/375**, typecheck, full `npm test`
-  **952 files / 9,137 passed / 1 skipped**, and build **645 modules** are green.
-  Both lane branches remain fully folded.
