@@ -56,7 +56,11 @@ const run = spawnSync("python3", [
   output,
   rgbDir,
   String(fixture.denseWindow.startFrame),
-], { cwd: root, encoding: "utf8" });
+], {
+  cwd: root,
+  encoding: "utf8",
+  env: { ...process.env, PYTHONPATH: join(vendor, "libmgba-py") },
+});
 if (run.stdout) process.stdout.write(run.stdout);
 if (run.stderr) process.stderr.write(run.stderr);
 if (run.status !== 0) process.exit(run.status ?? 1);

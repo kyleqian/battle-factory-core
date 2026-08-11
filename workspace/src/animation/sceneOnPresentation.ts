@@ -346,6 +346,10 @@ import {
   type SupersonicRingSprite,
 } from "./supersonic.ts";
 import {
+  metalSoundEffectAtAge,
+  type MetalSoundWaveSprite,
+} from "./metalSound.ts";
+import {
   waterGunEffectAtAge,
   type WaterGunSprite,
 } from "./waterGun.ts";
@@ -801,6 +805,7 @@ export interface SceneOnBattlerGeometry {
 
 export interface SceneOnPresentationBattler {
   readonly species:
+    | "ARON"
     | "HOUNDOUR"
     | "NINETALES"
     | "VILEPLUME"
@@ -1533,6 +1538,13 @@ export interface SceneOnRefreshConfig {
 
 export interface SceneOnSupersonicConfig {
   readonly move: "SUPERSONIC";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnMetalSoundConfig {
+  readonly move: "METAL_SOUND";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2661,6 +2673,7 @@ export type SceneOnMoveConfig =
   | SceneOnMilkDrinkConfig
   | SceneOnRefreshConfig
   | SceneOnSupersonicConfig
+  | SceneOnMetalSoundConfig
   | SceneOnWaterGunConfig
   | SceneOnAcidConfig
   | SceneOnSludgeConfig
@@ -2914,6 +2927,21 @@ export interface SceneOnSupersonicView {
   readonly target: SceneOnPresentationBattler;
   readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
   readonly rings: readonly SupersonicRingSprite[];
+}
+
+export interface SceneOnMetalSoundView {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly attackerOffset: Readonly<{ x2: number; y2: number }>;
+  readonly targetMonbg: boolean;
+  readonly shakeTaskActive: boolean;
+  readonly waves: readonly MetalSoundWaveSprite[];
+  readonly soundEvents: readonly {
+    readonly age: number;
+    readonly song: "SE_M_SCREECH";
+    readonly pan: number;
+  }[];
 }
 
 export interface SceneOnWaterGunView {
@@ -5001,6 +5029,26 @@ export function sceneOnSupersonicView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...supersonicEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age` is relative to the first Metal Sound wave callback. */
+export function sceneOnMetalSoundView(
+  state: SceneOnMovePresentationState<SceneOnMetalSoundConfig>,
+): SceneOnMetalSoundView {
+  if (state.config.move !== "METAL_SOUND") {
+    throw new Error(`expected METAL_SOUND presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...metalSoundEffectAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,

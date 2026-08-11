@@ -30,7 +30,7 @@ describe("MOVE_METAL_SOUND bilateral Scene-ON evidence checkpoint", () => {
       const carrier = [
         ...scenario.overrides.parties.player,
         ...scenario.overrides.parties.opponent,
-      ].find((mon: { species: number }) => mon.species === 304);
+      ].find((mon: { species: number }) => mon.species === 382);
       expect(carrier).toMatchObject({
         level: 50,
         moves: [319, 319, 319, 319],
@@ -61,7 +61,7 @@ describe("MOVE_METAL_SOUND bilateral Scene-ON evidence checkpoint", () => {
       },
       carrier: "set 122 FRONTIER_MON_ARON / SPECIES_ARON / MOVE_METAL_SOUND",
       probe: "tools/compare/metalSoundProbe.py",
-      orientationShift: { opponentFrontMinusPlayerBack: 4, measured: true },
+      orientationShift: { opponentFrontMinusPlayerBack: 0, measured: true },
     });
     expect(receipt.orientations.map((entry: {
       orientation: string;
@@ -76,8 +76,8 @@ describe("MOVE_METAL_SOUND bilateral Scene-ON evidence checkpoint", () => {
       entry.freshRuns,
       entry.byteStable,
     ])).toEqual([
-      ["player-back", 76, 161, 86, 2, true],
-      ["opponent-front", 80, 164, 85, 2, true],
+      ["player-back", 291, 376, 86, 2, true],
+      ["opponent-front", 291, 375, 85, 2, true],
     ]);
     for (const entry of receipt.orientations) {
       const map = readFileSync(entry.changeMap, "utf8");
@@ -96,8 +96,8 @@ describe("MOVE_METAL_SOUND bilateral Scene-ON evidence checkpoint", () => {
       });
       expect(entry.latchChecks).toMatchObject({
         plainWaveOam: "RAM+1 visible motion",
-        freshAffineMatrix: expect.stringContaining("dual-lag"),
-        shakeMon2: expect.stringContaining("2,0,8,1"),
+        freshAffineMatrix: expect.stringContaining("reducer age-1"),
+        shakeMon2: expect.stringContaining("eight displayed"),
         palettes: expect.stringContaining("RAM+1"),
       });
     }
