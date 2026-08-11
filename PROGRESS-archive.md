@@ -40909,3 +40909,19 @@ git; the current live ledger keeps the three load-bearing entries only.
   build **631 modules** (Vite **6.29s**), vanilla soak **20/20** (**32.2s**),
   and full-policy soak **60/60** (**278.9s**) are green with **0 crash / 0
   hang**. OFF oracle is healthy; no material decision was deferred.
+
+## 1129 — [bounded MAIN worker, 2026-08-11] **#55 sixth-player selector closed**
+
+- **State:** the exact v3 zero/one-pass selector defect is repaired by an
+  additive packet; #55 remains open for timing composition and its construction
+  clock stays null/unwired.
+- **Did:** captured real sixth-entry `tempoI/tempoC` with `memAccArea`
+  zero-normalized and joined **113/113** frozen v3 state/cost rows: **108 one-
+  pass / 5 zero-pass**. All three v3 hashes are unchanged.
+- **Next:** reduce per-call MPlay execution only from the now-exact selector
+  plus source-proven command reads; do not fit a duration or wire the clock.
+- **Notes:** two serial fresh OFF captures per case are byte-identical; compact
+  hashes anchor `35fe3e32…`, LILIANA `4dbb8aba…`, varied `1e77d465…`.
+  Focused selector/v3/read-contract **8/8**, smoke **375/375**, forced
+  typecheck, full `npm test` **922 files / 8,619 passed / 1 skipped**
+  (**84.03s**), and build (**631 modules**, Vite **6.23s**) are green.
