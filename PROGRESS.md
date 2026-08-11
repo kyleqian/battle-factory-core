@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1113 — [supervisor, 2026-08-11] **#55 Timer 0 conditional refill cause united**
+
+- **State:** runtime receipt `039af5ed` and side source audit `de0270e7` are
+  folded through merge `d08303af`; #55 remains open and the construction
+  clock stays unwired. `serviceCostMasterCycles` remains `null`.
+- **Did:** retained OFF hardware state proves all **85/85** classified members
+  perform one dual-FIFO refill and all **171** retained non-refill crossings
+  do not. Pinned mGBA 0.10.5 source derives **10** scheduled cycles per fresh
+  IWRAM→FIFO DMA, **20** for A+B, and therefore the conditional **+18** over a
+  two-cycle clean edge without fitting a fixture constant.
+- **Next:** implement the smallest pure, source-general conditional FIFO
+  service dispatcher and compose it with the registered Timer 0 cadence. Do
+  not wire the live construction clock until phase/workload composition is
+  closed.
+- **Notes:** union focused **25/25** and smoke **375/375** are green. The main
+  evidence checkpoint also passed typecheck, full `npm test` **903 files /
+  8,524 passed / 1 skipped**, and build (**631 modules**); the side audit
+  independently passed its full suite/build. No production, controller,
+  presentation, animation, canonical Battle-2, barrier, or recording import
+  changed.
+
 ## 1112 — [MAIN worker, 2026-08-11] **#55 Timer 0 conditional FIFO/DMA refill census**
 
 - **State:** #55 remains open; production construction-clock wiring and every
@@ -50,23 +71,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   multiple crossings, and rejects unmodeled rates. No +18 cost, co-due
   collapse, RNG, presentation, controller, recording import, barrier, or
   canonical Battle-2 work.
-
-## 1110 — [supervisor, 2026-08-10] **#55 Timer 0 identity and recurrence evidence united**
-
-- **State:** #55 remains open. Production clock wiring and unresolved
-  `cycles` contracts remain untouched; `DEFERRED.md` has no open entry.
-- **Did:** orient folded **10** presentation-only `animation-main` commits
-  through `77e3d325`; the union passed full `npm test` (**898 files / 8,503
-  passed / 1 skipped**) and build (**631 modules**). Main then classified all
-  **85/85** +18 joins as `GBA Timer 0` crossings against **488** clean
-  controls. Side source/ELF evidence derives reload **`0xFB1A`**, period
-  **1,254 master cycles**, priority **32**, and no Timer-0 IRQ. The merged
-  evidence passes focused **11/11** and smoke **375/375**; both workers passed
-  their full suites and builds.
-- **Next:** snapshot Timer 0 phase at construction entry, prove the 1,254-cycle
-  recurrence, and register a pure cadence state with explicit unknown service
-  cost. Do not wire the live construction clock or fit the two unmatched path
-  controls.
-- **Notes:** stale dual oracles were restarted before evidence work. The side
-  worktree/branch is removed. No controller, presentation, barrier,
-  recording-import, canonical Battle-2, or gameplay-outcome change landed.

@@ -137,7 +137,7 @@ history.
   polling. Don't reach for a workaround (backgrounding, pkill, chunking) on
   the assumption the suite cannot fit — twice now that assumption, not the
   runtime, was the thing that cost the session time.
-- **Hits:** 12 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+- **Hits:** 13 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
   recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,
   ~6 min of foreground-poll waiting. 2026-08-04 R3: two workers same round —
@@ -160,7 +160,9 @@ history.
   green full-suite summary was truncated, leading to redundant reporter and
   redirected-log passes; ~5 min lost. The 2026-08-10 Timer 0 source-audit
   worker also lost a yielded verification exit marker and reconciled it from
-  processes/logs before completion; ~3 min lost.)
+  processes/logs before completion; ~3 min lost. The 2026-08-11 Timer 0
+  Direct Sound source-audit worker again lost the terminal marker and reran
+  the green suite; ~1 min lost.)
 - **2026-08-10:** the MPlay callback worker tried to append a longer
   `--testTimeout` to `npm test`, but the package script already supplies the
   option and Vitest rejects duplicate values. It recovered with a direct
@@ -716,8 +718,8 @@ Per entry:
   probe output; when receipts are banked under `tools/probe/receipts/`,
   ~2 MB untracked logs pile up beside them and need manual relocation
   before committing.
-- **Hits:** 3 (2026-07-29 absorption-reveal; 2026-08-10 #55 internal-m4a and
-  source-state-v3 receipts).
+- **Hits:** 4 (2026-07-29 absorption-reveal; 2026-08-10 #55 internal-m4a,
+  source-state-v3, and Timer 0 FIFO cadence receipts).
 - **Cost each:** ~1 min.
 - **Workaround:** point probe outputs at scratch space and copy only the
   JSON into the repo; or teach the wrapper a `--log-dir`.
