@@ -776,9 +776,9 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect([...new Map(residuals.map((cycles) => [
       cycles, residuals.filter((value) => value === cycles).length,
     ])).entries()].sort((left, right) => left[0] - right[0])).toEqual([
-      [-2, 5], [0, 72], [16, 7], [18, 60], [117, 5], [245, 6], [263, 1],
+      [0, 77], [18, 67], [117, 5], [245, 6], [263, 1],
     ]);
-    expect(residuals.filter((cycles) => cycles === 0)).toHaveLength(72);
+    expect(residuals.filter((cycles) => cycles === 0)).toHaveLength(77);
   });
 
   it("derives all modulo-24 GetSubstruct layouts and receipt field extraction tails", () => {
@@ -851,12 +851,12 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
 
     const expectedFieldTails = new Map<number, [string, number, number, number, number]>([
       [11, ["species", 11, 2, 4, 34]],
-      [25, ["experience", 3, 1, 4, 14]],
+      [25, ["experience", 3, 1, 4, 12]],
       [26, ["ev-byte", 2, 1, 2, 10]], [27, ["ev-byte", 2, 1, 2, 10]],
       [28, ["ev-byte", 2, 1, 2, 10]], [29, ["ev-byte", 2, 1, 2, 10]],
       [30, ["ev-byte", 2, 1, 2, 10]], [31, ["ev-byte", 2, 1, 2, 10]],
       [39, ["iv-bitfield", 4, 1, 2, 14]], [40, ["iv-bitfield", 4, 1, 2, 14]],
-      [41, ["iv-bitfield", 4, 1, 2, 14]], [42, ["iv-bitfield", 4, 1, 4, 16]],
+      [41, ["iv-bitfield", 4, 1, 2, 14]], [42, ["iv-bitfield", 4, 1, 4, 14]],
       [43, ["iv-bitfield", 4, 1, 2, 14]], [44, ["iv-bitfield", 4, 1, 2, 14]],
     ]);
     for (const [field, [route, halfwords, refills, busCycles, cycles]] of expectedFieldTails) {
@@ -864,7 +864,8 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         field, personality: 0xffff_ffff, checksumValid: true, isBadEgg: false,
       }).fieldTailTiming).toMatchObject({
         route, sequentialThumbHalfwords: halfwords, pipelineRefills: refills,
-        dataAccessCycles: busCycles, cycles, unresolved: null,
+        dataAccessCycles: busCycles, dataAccessPremiumCycles: 0,
+        cycles, unresolved: null,
       });
     }
 
@@ -1146,7 +1147,7 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         directPartyRead: true,
         delegatedToGetBoxMonData2: false,
         valueWidth: field === 55 ? 4 : field === 56 || field === 64 ? 1 : 2,
-        cycles: field === 55 ? 78 : 80,
+        cycles: 80,
         unresolved: null,
       });
     }
@@ -1429,7 +1430,7 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       pipelineRefills: 3,
       romLiteralLoads: 1,
       romJumpTableLoads: 1,
-      cycles: 88,
+      cycles: 86,
     });
     expect(reduceFactorySetMonDataTiming({ field: 56 })).toMatchObject({
       route: "party-level-u8",

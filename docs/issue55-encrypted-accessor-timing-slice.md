@@ -60,12 +60,13 @@ loop-back refills plus the return refill:
 
 Each of its 12 iterations has three aligned EWRAM word reads and two aligned
 EWRAM word writes: **36 reads / 24 writes**. Retail EWRAM is a 16-bit bus. The
-source-general reducer charges aligned byte/halfword accesses **2** cycles and
-aligned words two 16-bit transfers, **4** cycles. It rejects u16/u32
-misalignment rather than claiming ARM7TDMI rotation behavior not used by this
-source. The same reducer now backs the older direct-party read/write paths, so
-the module no longer carries a contradictory six-cycle u32 constant. Thus one
-crypt helper has **240** bus cycles, of which **120** exceed
+bus reducer records aligned byte/halfword accesses as **2** cycles of occupancy
+and aligned words as two 16-bit transfers, **4** cycles of occupancy. It rejects
+u16/u32 misalignment rather than claiming ARM7TDMI rotation behavior not used
+by this source. Elapsed premium is composed per execution context: the tight
+crypt loops add two cycles per word, while isolated outer/tail reads overlap
+their second transfer with scheduled fetch/pipeline work. Thus one crypt helper
+has **240** bus cycles, of which **120** exceed
 the load/store instruction baselines already present above, and completes at:
 
 ```text
@@ -115,11 +116,11 @@ Every receipt-used switch arm is also complete through the common tail at
 | --- | --- | --- | --- | ---: | ---: |
 | 11 | `0x0806a95e` | normal species | u8 flag + u16 species | 4 | 34 |
 | 11 | `0x0806a95e` | bad egg (preexisting or checksum-invalid) | u8 flag | 2 | 24 |
-| 25 | `0x0806a97c` | experience | u32 | 4 | 14 |
+| 25 | `0x0806a97c` | experience | u32 | 4 | 12 |
 | 26–31 | `0x0806a9a4..0x0806a9b8` | EV byte | u8 | 2 | 10 |
 | 39/41/44 | `0x0806a9f6`, `0x0806aa06`, `0x0806aa1e` | IV bitfield | u8 | 2 | 14 |
 | 40/43 | `0x0806a9fe`, `0x0806aa16` | IV bitfield | u16 | 2 | 14 |
-| 42 | `0x0806aa0e` | IV bitfield | u32 | 4 | 16 |
+| 42 | `0x0806aa0e` | IV bitfield | u32 | 4 | 14 |
 
 ## Synchronous outer shell
 
@@ -157,11 +158,13 @@ was added.
 Tier 1 pins the source/ELF hashes and opcodes for every segment, all **14**
 receipt field dispatch targets, both checksum outcomes, normal/preexisting/
 checksum-created bad-egg species routes, and all **24** personality layouts.
-Across the **156** direct encrypted stats calls, the composed synchronous
-subtotal matches **72** clean pause-subtracted mGBA joins exactly. The full
-unabsorbed boundary histogram is `-2×5, 0×72, 16×7, 18×60, 117×5, 245×6,
-263×1`; the nonzero classes remain external boundary/service/interrupt
-evidence, not inputs or fitted costs.
+The same isolated-read rule is pinned by the compact receipt's EXP and IV u32
+instruction joins. Their four bus-occupancy cycles add no elapsed premium over
+the selected-tail instruction baseline. Across the **156** direct encrypted
+stats calls, the corrected synchronous subtotal matches **77** clean
+pause-subtracted mGBA joins exactly. The full unabsorbed boundary histogram is
+`0×77, 18×67, 117×5, 245×6, 263×1`; the nonzero classes remain external
+service/interrupt evidence, not inputs or fitted costs.
 
 ## Receipt check and remainder
 

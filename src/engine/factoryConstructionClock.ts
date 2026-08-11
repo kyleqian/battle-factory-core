@@ -1116,11 +1116,11 @@ export function reduceFactoryGetMonDataTiming(
     const pipelineRefills = 4;
     const romLiteralLoads = 1;
     const romJumpTableLoads = 1;
-    const ewramReadCycles = reduceFactoryEwramAccessTiming({
-      access: "read",
-      width: valueWidth,
-      address: 0x0200_0000 + partyOffset,
-    }).cycles;
+    // This older direct boundary has its own measured pipeline state: the
+    // 32-bit status LDR occupies six cycles here, while byte/halfword reads
+    // stay in the ordinary two-cycle class. Do not transplant the encrypted
+    // loop/isolated-tail composition across execution contexts.
+    const ewramReadCycles = status ? 6 : 2;
     const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
       + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
       + (romLiteralLoads + romJumpTableLoads) * (11 - THUMB_SEQUENTIAL_CYCLES)
@@ -1988,6 +1988,12 @@ function reduceFactoryFieldTailTiming(input: Readonly<{
   }
 
   const data = sumFactoryEwramAccesses(accesses);
+  // Each selected secure-data read is isolated between dispatch/control work,
+  // unlike the tight crypt loops. The committed Scene-OFF instruction receipt
+  // observes both EXP and IV u32 reads at two elapsed cycles: their second
+  // 16-bit transfer contributes bus occupancy but no additional elapsed
+  // premium over the already-counted Thumb instruction baseline.
+  const elapsedDataPremiumCycles = 0;
   const instructionFetchCycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
     + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
   return Object.freeze({
@@ -2000,9 +2006,9 @@ function reduceFactoryFieldTailTiming(input: Readonly<{
     halfwordReads: accesses.filter((access) => access.access === "read" && access.width === 2).length,
     wordReads: accesses.filter((access) => access.access === "read" && access.width === 4).length,
     dataAccessCycles: data.cycles,
-    dataAccessPremiumCycles: data.premiumCycles,
+    dataAccessPremiumCycles: elapsedDataPremiumCycles,
     instructionFetchCycles,
-    cycles: instructionFetchCycles + data.premiumCycles,
+    cycles: instructionFetchCycles + elapsedDataPremiumCycles,
     unresolved: null,
   });
 }
@@ -2307,18 +2313,10 @@ export function reduceFactorySetMonDataTiming(
   const sequentialThumbHalfwords = 11 + selectedPathHalfwords + 2;
   const romLiteralLoads = 1;
   const romJumpTableLoads = 1;
-  const ewramWritePremiumCycles = valueWidth === null || valueWidth === 0 || partyOffset === null
-    ? 0
-    : reduceFactoryEwramAccessTiming({
-      access: "write",
-      width: valueWidth,
-      address: 0x0200_0000 + partyOffset,
-    }).busPremiumCycles;
   const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
     + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
     + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
-    + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
-    + ewramWritePremiumCycles;
+    + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES);
 
   return Object.freeze({
     field,

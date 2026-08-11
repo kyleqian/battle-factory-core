@@ -1246,8 +1246,9 @@ boundaries are strictly larger than their known GetMonData shell plus this
 ROM-only subtotal after recorded pauses are removed. No residual is absorbed.
 
 **Encrypted EWRAM/tails increment (2026-08-10):** a retail aligned-access
-reducer now closes byte/halfword at **2** cycles and word at **4** cycles on
-the 16-bit EWRAM bus; unneeded misalignment is rejected, not guessed. The
+reducer now records byte/halfword at **2** occupancy cycles and word at **4**
+occupancy cycles on the 16-bit EWRAM bus; unneeded misalignment is rejected,
+not guessed. Elapsed premium is composed per instruction context. The
 12-word decrypt/encrypt components are independently exact at **448** each,
 and the 24-halfword checksum loop remains **518**; shared bus occupancy is
 **528** with a **240**-cycle premium over already-counted instruction
@@ -1266,7 +1267,8 @@ all eight GetSubstruct bodies plus the already-exact decrypt/checksum/encrypt
 components, so composed timing has no nested double count. All **180** receipt
 rows and a **24×14×2** personality/field/checksum matrix retain input-derived
 routes. A fresh Scene-OFF mGBA boundary run pins all eight scattered aligned
-personality reads at clean two-cycle instruction joins; **72/156** direct
+personality reads at clean two-cycle instruction joins; the same isolated
+composition applies to the receipt-pinned EXP/IV u32 tails, and **77/156** direct
 encrypted stats boundaries equal the complete synchronous composition, while
 every other observed class remains an unabsorbed boundary/service/IRQ delta.
 

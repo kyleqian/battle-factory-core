@@ -15,7 +15,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **314 cycles**: GetBoxMonData2 **216** plus checksum-function setup/return
   **98**. The typed composition excludes all eight GetSubstruct bodies and
   crypt/checksum/crypt components, covers every receipt field/checksum/bad-egg
-  route across all 24 layouts, and matches **72/156** clean OFF direct joins.
+  route across all 24 layouts, and matches **77/156** clean OFF direct joins.
 - **Next:** continue #55 only with independently closed async +18 service and
   VBlank/IRQ entry/body/return costs; do not fit residuals, wire aggregate
   stats/the clock, or resume canonical Battle 2.
@@ -33,12 +33,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   clock stays unwired. Focused **25/25**, smoke **375/375**, typecheck, full
   `npm test` **894 files / 8,486 passed / 1 skipped**, and production build
   are green.
-- **Did:** source-general aligned EWRAM u8/u16/u32 timing now closes decrypt /
+- **Did:** context-composed aligned EWRAM u8/u16/u32 timing now closes decrypt /
   checksum / encrypt at **448 / 518 / 448** cycles and **528** total bus cycles.
   All **180** dependency rows expose checksum-valid/invalid and species/EXP/
-  EV/IV tail widths, counts, exact PCs, bus totals, and component cycles. The
-  older direct-party u32 read/write paths now use that same reducer instead of
-  retaining a contradictory six-cycle constant / missing store premium.
+  EV/IV tail widths, counts, exact PCs, bus totals, and component cycles.
 - **Next:** continue #55 only with independently source-reduced outer
   `GetBoxMonData2` prologue/setup/dispatch/common-return instruction and
   memory work, or async/IRQ state; do not fit residuals or wire the clock.
