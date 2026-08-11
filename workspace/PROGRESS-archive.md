@@ -32,6 +32,21 @@
   typecheck, full `npm test` **950 files / 9,055 passed / 1 skipped**, and
   build **645 modules** are green.
 
+## 1143 — [supervisor, 2026-08-11] **Post-ack checkpoint verified; final lane folds green**
+
+- **State:** `master` is green with the generic hold-clock fix, exact Metal
+  Sound through `7b303713`, and Rust M3d party construction through
+  `169c522b`. The 13384 display tail remains #56, not an accepted frame.
+- **Did:** independently reverified the diagnostic **69/70** with only the
+  known 18-pixel 13384 tail and focused **56/56**. Folded `animation-main`
+  and `rust-main` as merges `fcd928b1` and `325e27ab`.
+- **Next:** bypass #56 and prove a complete already-owned intro phase against
+  a noncanonical legal Factory trainer/round identity through the generic
+  controller and presentation seam. Do not resume the Battle-2 action march.
+- **Notes:** Cargo **62/62**, rebuilt WASM smoke, explicit RNG/rental/party
+  differential **440/440**, full `npm test` **951 files / 9,134 passed / 1
+  skipped**, build **645 modules**. Both lane branches are fully folded.
+
 ## 1140 — [MAIN worker, 2026-08-11] **Generated status-summary/message assembly exact**
 
 - **State:** the generic post-slide presentation owns the complete concurrent
