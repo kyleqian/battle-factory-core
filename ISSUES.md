@@ -1602,15 +1602,26 @@ stacks, recursive control, unknown commands/selectors, unavailable bounds, and
 MEMACC without bounded mutable state fail closed.
 
 This closes the formerly unbounded dereference class as a complete safety/read
-superset, but isolates one exact selector defect in v3: its
+superset, and isolated one exact selector defect in v3: its
 `PLAYER_POINTER_FIELDS` zeroes MusicPlayerInfo bytes `0x20..0x23`
 (`tempoI`/`tempoC`) while leaving the actual `memAccArea` pointer at
 `0x18..0x1b` in `scalarBytes`. The live source invariant and retained
 `tempoD=144`/`tempoU=256` prove at most one pass, so replaying every wait-zero
-candidate covers all reads; v3 cannot choose zero versus one pass for a cost
-reducer. Do not alter the preserved v3 receipt or infer that selector. No
-duration or clock wiring is licensed. Evidence:
+candidate covers all reads; v3 alone cannot choose zero versus one pass for a
+cost reducer. Do not alter the preserved v3 receipt or infer that selector.
+Evidence:
 `docs/issue55-m4a-command-read-contract-v1.md`.
+
+**Sixth-player scalar selector closure (2026-08-11):** an additive v1 OFF
+packet captures `MusicPlayerInfo+0x18..0x23` at the exact sixth `MPlayMain`
+entry, zero-normalizing the real `memAccArea` pointer while preserving live
+`tempoD/U/I/C`. Two serial fresh captures per anchor/LILIANA/legal-varied case
+are byte-identical. The source rule `tempoC + tempoI >= 150` mechanically joins
+all **113/113** frozen v3 state-digest/sixth-cost rows and classifies **108 one-
+pass / 5 zero-pass** calls (anchor **49/3**, LILIANA **30/1**, varied **29/1**).
+All prior v3 hashes remain unchanged. This closes only the exact selector;
+there is still no duration reducer, service cost, or clock wiring. Evidence:
+`docs/issue55-m4a-player-selector-v1.md`.
 
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.

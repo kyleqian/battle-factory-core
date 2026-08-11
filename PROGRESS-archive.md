@@ -40854,3 +40854,19 @@ git; the current live ledger keeps the three load-bearing entries only.
   focused prior/v3/entry audit **8/8**, smoke **375/375**, forced typecheck,
   full `npm test` **919 files / 8,610 passed / 1 skipped** (**72.37s**), and
   build (**631 modules**, Vite **6.34s**) are green. OFF oracle is healthy.
+## 1126 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry provenance closed**
+
+- **State:** actual mixer-entry target safety and provenance are complete for
+  all **565** selected slots; #55 stays open and the construction clock remains
+  null/unwired.
+- **Did:** exact `ply_note` selector/store hooks classify all **13/13** MPlay
+  replacements with **0** ambiguity: **6 inline / 0 keysplit / 7 rhythm**.
+  Inline ancestry is explicit: **0 true / 6 false** for same-pass `ply_xwave`.
+- **Next:** continue #55 only with a separately source-proven construction or
+  VBlank component. Do not aggregate a duration or wire the clock from this
+  provenance packet.
+- **Notes:** anchor/LILIANA two-fresh compact hashes are `afcb8034…` /
+  `b5cda911…` in **16.4–16.8s / 11.5–13.2s**; legal-varied reused its frozen
+  **0-replacement** receipt. Focused prior/v2 audit **6/6**, smoke **375/375**,
+  forced typecheck, full `npm test` **920 files / 8,613 passed / 1 skipped**
+  (**90.92s**), and build (**631 modules**, Vite **7.89s**) are green.

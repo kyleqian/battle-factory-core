@@ -1,0 +1,11 @@
+{
+  "schema": "factory-m4a-player-selector-repro/v1",
+  "oracleProfile": "battle-scene-off",
+  "freshRunsPerCase": 2,
+  "method": "Each case was captured twice serially from a fresh mGBA instance through tools/run-mgba-probe.py; SHA-256 covers the complete compact JSON packet. The second factory-varied process returned signal 10 only after writing valid byte-identical JSON, which the wrapper correctly reported as a non-accepted teardown status.",
+  "cases": [
+    { "case": "anchor", "sha256": "35fe3e32eb893ef7601cc74a15b1f7b5cdf74675f4c5e9397d71acc60343649d", "byteIdentical": true },
+    { "case": "liliana", "sha256": "4dbb8aba89d6621513deddb94d7b627e19f4a20578090d8ac22a894a0827ef4c", "byteIdentical": true },
+    { "case": "factory-varied", "sha256": "1e77d4654401096f62f51d4fbe7fdd1e5760491b3cdbf09e252866c1de05cde7", "byteIdentical": true }
+  ]
+}

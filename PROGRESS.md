@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1129 — [bounded MAIN worker, 2026-08-11] **#55 sixth-player selector closed**
+
+- **State:** the exact v3 zero/one-pass selector defect is repaired by an
+  additive packet; #55 remains open for timing composition and its construction
+  clock stays null/unwired.
+- **Did:** captured real sixth-entry `tempoI/tempoC` with `memAccArea`
+  zero-normalized and joined **113/113** frozen v3 state/cost rows: **108 one-
+  pass / 5 zero-pass**. All three v3 hashes are unchanged.
+- **Next:** reduce per-call MPlay execution only from the now-exact selector
+  plus source-proven command reads; do not fit a duration or wire the clock.
+- **Notes:** two serial fresh OFF captures per case are byte-identical; compact
+  hashes anchor `35fe3e32…`, LILIANA `4dbb8aba…`, varied `1e77d465…`.
+  Focused selector/v3/read-contract tests **8/8** are green.
+
 ## 1128 — [supervisor, 2026-08-11] **#55 audio read closure folded; final union green**
 
 - **State:** master is green through `60d95120`; the actual mixer-entry target,
@@ -43,20 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   animation, barrier, or canonical recording change. Focused **4/4**, smoke,
   forced typecheck, full `npm test` **921 files / 8,617 passed / 1 skipped**
   (**84.06s**), and build (**631 modules**, Vite **6.36s**) are green.
-
-## 1126 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry provenance closed**
-
-- **State:** actual mixer-entry target safety and provenance are complete for
-  all **565** selected slots; #55 stays open and the construction clock remains
-  null/unwired.
-- **Did:** exact `ply_note` selector/store hooks classify all **13/13** MPlay
-  replacements with **0** ambiguity: **6 inline / 0 keysplit / 7 rhythm**.
-  Inline ancestry is explicit: **0 true / 6 false** for same-pass `ply_xwave`.
-- **Next:** continue #55 only with a separately source-proven construction or
-  VBlank component. Do not aggregate a duration or wire the clock from this
-  provenance packet.
-- **Notes:** anchor/LILIANA two-fresh compact hashes are `afcb8034…` /
-  `b5cda911…` in **16.4–16.8s / 11.5–13.2s**; legal-varied reused its frozen
-  **0-replacement** receipt. Focused prior/v2 audit **6/6**, smoke **375/375**,
-  forced typecheck, full `npm test` **920 files / 8,613 passed / 1 skipped**
-  (**90.92s**), and build (**631 modules**, Vite **7.89s**) are green.
