@@ -133,21 +133,51 @@ POKEBENCH_ENGINE=wasm NODE_OPTIONS=--max-old-space-size=8192 npx vitest run test
 
 `crates/factory-core/src/gen_tables.rs` is **generated, never hand-edited**.
 `tools/gen-data.mjs` (plain Node, no deps) reads the workspace's
-`src/data/gen/*.json` extraction tables — frontier rental sets, held items,
-species/ability ids, natures, and the Level-50 rental-selection policy — and
-emits the minimal Rust tables the initial-rental port needs, formatted via
-`rustfmt` (see `rustfmt.toml`'s `struct_lit_width` bump) so reruns are
-byte-identical. Regenerate and commit the diff whenever those JSON sources
-change:
+`src/data/gen/*.json` extraction tables — frontier rental sets (species,
+moves, EV spread), held items, species/ability ids and base stats, moves'
+base PP, natures, Level-50 experience, and the Level-50 rental-selection
+policy — and emits the minimal Rust tables the initial-rental and
+mon-construction ports need, formatted via `rustfmt` (see `rustfmt.toml`'s
+`struct_lit_width` bump) so reruns are byte-identical. Regenerate and commit
+the diff whenever those JSON sources change:
 
 ```sh
 node core-rs/tools/gen-data.mjs
 ```
 
+Tables:
+
+- `FRONTIER_MONS` (882 rows, one per `FRONTIER_MON_*` set): `species_id`,
+  `item_table_id`, `nature`, `moves: [u16; 4]` (move ids), and `ev_flags`
+  (a bitmask over the set's `F_EV_SPREAD_*` flags; bit0..bit5 = HP, ATTACK,
+  DEFENSE, SPEED, SP_ATTACK, SP_DEFENSE — see the struct's doc comment,
+  which is the authoritative bit order `derive_evs` mirrors).
+- `HELD_ITEM_BY_TABLE_ID` / `HELD_ITEM_HOLD_EFFECT_BY_TABLE_ID` /
+  `HELD_ITEM_HOLD_EFFECT_PARAM_BY_TABLE_ID` (63 rows each, dense over
+  `itemTableId`): held item id, hold effect id, and hold effect parameter.
+- `MOVE_PP` (355 rows, dense over move id): base PP.
+- `SPECIES` (376 rows — one per species a `FRONTIER_MONS` set actually
+  references, not all 411 `species-stats.json` rows; see the struct's doc
+  comment for why — sorted by `species_id`, look up via `species_row`):
+  base stats, `gender_ratio`, both `abilities`, and `exp_at_50` (resolved
+  through `exp-tables.json`'s growth-rate indirection down to level 50,
+  the only level this port crosses).
+- `NATURE_MODIFIERS` (25 rows, dense over nature index): the five stat
+  modifiers as `i8` in `{-1, 0, 1}`.
+- `SPECIES_SECOND_ABILITY` / `NUM_NATURES` / `RENTAL_RANGES_LEVEL50` /
+  `RENTAL_RANK_THRESHOLDS` / `MAXIMUM_RENTAL_RANK` / `FIXED_IVS` /
+  `SPECIES_UNOWN_ID`: unchanged, see the struct/const doc comments.
+
 `crates/factory-core/src/rental_data.rs` holds the pure helpers ported from
 `src/engine/factoryRentalGeneration.ts` / `src/engine/opponentGen.ts` that
-consume those tables; its `#[cfg(test)]` pins cite the TS fixture or JSON
-row each expected value came from.
+consume those tables, plus row pins for the tables above; its
+`#[cfg(test)]` pins cite the TS fixture or JSON row each expected value
+came from. `crates/factory-core/src/stats.rs`, `gender.rs`, and
+`mon_construction.rs` hold the mon-construction path's pure helpers ported
+from `src/engine/stats.ts`, `src/engine/monGender.ts`, and
+`src/engine/factoryCorpusParty.ts` respectively (stat formulas, gender
+resolution, shininess, and EV-spread derivation) — groundwork for a future
+port of `createFactoryCorpusPartyMember` itself, which is not yet ported.
 
 ## Ground rules
 
