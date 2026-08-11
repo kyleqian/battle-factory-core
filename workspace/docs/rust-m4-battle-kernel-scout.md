@@ -81,6 +81,11 @@ errors/throws symmetrically (M3b precedent).
 
 ## Suggested step split (M2/M3 pattern; supervisor decides)
 
+Naming caution: "m4a" in `docs/issue55-m4a-*` and related #55 artifacts
+is the GBA m4a audio engine (MPlayMain/ClearChain cost model), not this
+lane's M4a step. Case-insensitive greps for the step label will hit
+those files; they are #55 territory and out of scope for this lane.
+
 1. **M4a** — native port of damageCalc's pure functions + native tests
    pinned to TS-generated vectors (no TS files touched; verifies in
    minutes without the npm suite).
