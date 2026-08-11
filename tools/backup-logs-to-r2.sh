@@ -9,8 +9,8 @@ RUN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLAUDE_PROJECT_DIR="$HOME/.claude/projects/-Users-kyle-Developer-pokebench-pokeemerald-factory-runs-20260717-004950-warm-bison"
 
 RCLONE_REMOTE="${R2_BACKUP_REMOTE:-r2}"
-RCLONE_BUCKET="${R2_BACKUP_BUCKET:-pokebench-agent-logs}"
-DEST="${RCLONE_REMOTE}:${RCLONE_BUCKET}/warm-bison"
+RCLONE_BUCKET="${R2_BACKUP_BUCKET:-pokebench}"
+DEST="${RCLONE_REMOTE}:${RCLONE_BUCKET}/pokeemerald-factory/warm-bison"
 
 log() { echo "[backup-logs-to-r2] $(date '+%Y-%m-%d %H:%M:%S') $*"; }
 
