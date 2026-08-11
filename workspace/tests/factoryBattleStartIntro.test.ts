@@ -17,6 +17,7 @@ import {
   advanceFactoryBattleStartIntro,
   createFactoryBattleStartIntro,
   factoryBattleStartIntroPhase,
+  factoryBattleStartPostAcknowledgementComplete,
   factoryBattleStartStatusSummaryMessageComplete,
   settleFactoryBattleStartCommand,
 } from "../src/engine/factoryBattleStartIntro.ts";
@@ -29,6 +30,7 @@ import {
 import { advanceBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import {
   generatedBattleStartOpponentReleaseStarted,
+  generatedBattleStartAcknowledgementVisibleStarted,
   generatedBattleStartCommandReady,
   generatedBattleStartPlayerReleaseStarted,
   generatedBattleIntroSourceClock,
@@ -166,10 +168,69 @@ describe("generated Factory pre-send-out intro lifecycle", () => {
         boundaryFrames.push(frameA);
       }
       expect(factoryBattleStartStatusSummaryMessageComplete(state)).toBe(true);
-      return boundaryFrames.at(-1)!;
+
+      // The acknowledgement-relative lifecycle must not inherit a huge
+      // absolute clock from the unbounded PAUSE_UNTIL_PRESS hold.
+      for (let hold = 0; hold < 1_500; hold += 1) {
+        state = advanceFactoryBattleStartIntro(state);
+      }
+      state = advanceFactoryBattleStartIntro(state, new Set(["B"]));
+      expect(state.acknowledgedElapsed).toBeNull();
+      const acceptedAt = state.elapsed;
+      state = advanceFactoryBattleStartIntro(state, new Set(["A"]));
+      expect(state.acknowledgedElapsed).toBe(acceptedAt);
+      expect(generatedBattleStartAcknowledgementVisibleStarted(state)).toBe(false);
+      const frozenAcknowledgement = state.acknowledgedElapsed;
+      state = advanceFactoryBattleStartIntro(state, new Set(["A"]));
+      expect(state.acknowledgedElapsed).toBe(frozenAcknowledgement);
+
+      while (!generatedBattleStartAcknowledgementVisibleStarted(state)) {
+        state = advanceFactoryBattleStartIntro(state);
+      }
+      const visibleBefore = structuredClone(state);
+      const visibleA = new Uint8Array(240 * 160 * 4);
+      const visibleB = new Uint8Array(240 * 160 * 4);
+      renderGeneratedBattleStartPreSendOut(visibleA, state);
+      renderGeneratedBattleStartPreSendOut(visibleB, state);
+      expect(visibleB).toEqual(visibleA);
+      expect(state).toEqual(visibleBefore);
+
+      while (!generatedBattleStartOpponentReleaseStarted(state)) {
+        state = advanceFactoryBattleStartIntro(state);
+      }
+      const handoffTick = generatedBattleIntroSourceClock(
+        state.elapsed,
+        state.sceneAssemblyDisplayLag,
+      );
+      let beforeComplete = state;
+      while (!factoryBattleStartPostAcknowledgementComplete(state)) {
+        beforeComplete = state;
+        state = advanceFactoryBattleStartIntro(state);
+      }
+      expect(factoryBattleStartPostAcknowledgementComplete(beforeComplete)).toBe(false);
+      expect(generatedBattleIntroSourceClock(
+        state.elapsed,
+        state.sceneAssemblyDisplayLag,
+      ) - handoffTick).toBe(32);
+      const completeBefore = structuredClone(state);
+      const completeA = new Uint8Array(240 * 160 * 4);
+      const completeB = new Uint8Array(240 * 160 * 4);
+      renderGeneratedBattleStartPreSendOut(completeA, state);
+      renderGeneratedBattleStartPreSendOut(completeB, state);
+      expect(completeB).toEqual(completeA);
+      expect(state).toEqual(completeBefore);
+      expect(state.command).toBe(command);
+
+      return {
+        assembly: boundaryFrames.at(-1)!,
+        visible: visibleA,
+        complete: completeA,
+      };
     });
 
-    expect(frames[0]).not.toEqual(frames[1]);
+    expect(frames[0]!.assembly).not.toEqual(frames[1]!.assembly);
+    expect(frames[0]!.visible).not.toEqual(frames[1]!.visible);
+    expect(frames[0]!.complete).not.toEqual(frames[1]!.complete);
     expect(firstRound).toEqual(roundsBefore[0]);
     expect(secondRound).toEqual(roundsBefore[1]);
     expect(transitionReceipts).toEqual(receiptsBefore);

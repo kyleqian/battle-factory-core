@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1142 — [MAIN worker, 2026-08-11] **Post-ack handoff bounded; display-tail blocker isolated**
+
+- **State:** the complete 13315–13384 acknowledgement-owned phase is
+  **69/70 twice fresh**, not accepted. S8 stays closed; canonical Battle 2
+  remains stopped at tick 33331.
+- **Did:** fixed the unbounded-hold clock leaking into the player-summary
+  fade; typed the A-visible and handoff+32 destroy boundaries. Fresh OFF RAM/
+  OAM evidence pins 13384's sole 18-pixel residual to the settled #56
+  task-destroy/pending-OAM display latch, with no safe generic discriminator.
+- **Next:** close frame 13384 only if a source-derived display-latch receipt
+  becomes available; otherwise retain this evidence checkpoint. Do not
+  promote 13315–13383 alone or submit a Battle-2 action.
+- **Notes:** two trainers, transition indexes 0/5, healthy/status/fainted rows,
+  new-key semantics, render purity, and unchanged receipts/RNG/rules/parties/
+  outcomes are pinned. Controls held twice: **65/65, 154/154, 249/249,
+  238/238, 3/3, 256/256, 115/115**. Focused **56/56**, smoke **375/375**,
+  typecheck, full `npm test` **950 files / 9,055 passed / 1 skipped**, and
+  build **645 modules** are green.
+
 ## 1141 — [supervisor, 2026-08-11] **Summary seam verified; animation/Rust folds green**
 
 - **State:** `master` is green with the generic status-summary/message boundary,
@@ -37,19 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   receipts, RNG, rules/controller, parties, and outcomes. Focused **79/79**;
   smoke **375/375**, typecheck, full `npm test` **949 files / 9,052 passed / 1
   skipped**, and build **643 modules** are green.
-
-## 1139 — [supervisor, 2026-08-11] **Scene reveal verified; Rust M3 folded**
-
-- **State:** `master` is green with the generic LOGO_WAVE→BattleIntroSlide3
-  reveal and `rust-main` through `420eb58d`. S8 remains closed; canonical
-  Battle 2 remains stopped at tick 33331.
-- **Did:** independently reverified the new generated reveal **154/154** and
-  focused **33/33**. Folded Rust M3 rental generation, its ABI/decoder, and
-  full TS↔WASM rental differential matrix.
-- **Next:** take one complete source-owned status-summary/message phase after
-  11710 and before the exact generated send-out at 13385. Diagnostic
-  11711–11812 is already **102/102** but ends mid-phase; do not promote it
-  without the real source boundary or submit a Battle-2 action.
-- **Notes:** union gates: Cargo **28/28**, WASM RNG+rental differential
-  **363/363**, full `npm test` **949 files / 9,051 passed / 1 skipped**, build
-  **643 modules**. #55 remains null/unwired; no material decision is deferred.

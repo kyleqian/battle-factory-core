@@ -113,6 +113,57 @@ on trainer identity, battle index, transition index, or absolute trace tick.
 Frames **11776–13384** remain outside this bounded acceptance except for the
 already exact generated send-out window beginning at 13385.
 
+## Post-acknowledgement handoff checkpoint (not accepted)
+
+The staged acknowledgement edge is now tightly bounded, but the complete
+phase is not yet an exact acceptance unit. The second held `A` occupies
+fixture frames **13310–13311**. The old `PAUSE_UNTIL_PRESS` framebuffer stays
+visible through 13314; `PrepareStringBattle(STRINGID_INTROSENDOUT)` exposes
+the first new glyph at **13315**. The trainer-derived `SCHOOL KID LILIANA
+sent / out KADABRA!` printer completes and
+`BattleIntroOpponent1SendsOutMonAnimation` hands the opponent controller its
+throw command at **13352**.
+
+The newly typed completion boundary is source-relative: `OpponentHandleIntro-
+TrainerBallThrow` starts `Task_HidePartyStatusSummary`, and the opponent task
+reaches its sprite-destroy callback 32 controller callbacks after the handoff,
+at **13384**. A fresh Scene-OFF mGBA probe through
+`tools/run-mgba-probe.py` pinned the exact tail: task `data[11]` reaches 31 at
+13382, the pending bar OAM advances to x `136,104,72,40,8,488` at 13383, and
+13384 has `data[15] = -1`, active-summary count 2→1, destroyed opponent
+bar/icons in `gSprites`, but the same six prior bar rows still retained in
+pending `gMain.oamBuffer`. The task clears `partyStatusSummaryShown` and
+destroys itself at 13386 (`data[15] = -3`). This matches
+`battle_interface.c:1671-1768`; it is not an endpoint inferred from pixels.
+
+Production now freezes the settled party-summary entrance clock once the
+unbounded hold has passed it. Previously, post-ack rendering reused the raw
+clock (over 2800 here), incorrectly activated the later player-send-out fade,
+and lost the entire player bar/icons. The generic clamp uses the source
+`BALL_WIDGETS_SETTLED_TICK`, independent of trainer, battle, transition, or
+hold length. Dense diagnostics over the honest **13315–13384** phase improved
+from **32/70** to **69/70**, identically twice fresh. Frames 13315–13383 are
+exact; the sole remainder is frame **13384**, **18 pixels** in bbox
+`(0,40)–(167,43)`.
+
+Frame 13384 is the already-documented asynchronous summary display-tail class
+from ISSUES #56: source task destruction and pending OAM retention straddle
+the VBlank/framebuffer publication boundary. The banked YOSHI, MAGNETON, and
+interactive-anchor probes prove that identical tick-level task/OAM facts can
+require opposite displayed tails; trainer/species/route/absolute-frame keys
+would only fit the recording. The LILIANA probe materially sharpens that
+inventory but does not supply a generic discriminator. Therefore no new
+compare trace is promoted, and the 69-frame prefix is not claimed as a
+truncated acceptance. The exact remainder is one source destruction/display-
+latch frame at 13384; the separately accepted send-out remains exact from
+13385.
+
+Tier-1 now pins the `A`/new-key latch, first acknowledgement-owned visible
+callback, opponent handoff, and 32-callback completion boundary for two
+trainer identities, transition indexes 0 and 5, and healthy/status/fainted
+summaries. Repeated renders preserve the frozen command, transition receipts,
+RNG-owned round/rules state, parties, and outcomes.
+
 ## Tier-1 controller proof
 
 `tests/factoryRoundBattleOrchestrator.test.ts` now continues the adopted

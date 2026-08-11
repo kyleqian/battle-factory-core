@@ -41085,3 +41085,18 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** selection is one source `Random()%12` call stored as immutable
   presentation state; rendering is RNG-pure and no trainer/battle/turn/tick
   production key was added. #55 and its construction clock are untouched.
+## 1139 — [supervisor, 2026-08-11] **Scene reveal verified; Rust M3 folded**
+
+- **State:** `master` is green with the generic LOGO_WAVE→BattleIntroSlide3
+  reveal and `rust-main` through `420eb58d`. S8 remains closed; canonical
+  Battle 2 remains stopped at tick 33331.
+- **Did:** independently reverified the new generated reveal **154/154** and
+  focused **33/33**. Folded Rust M3 rental generation, its ABI/decoder, and
+  full TS↔WASM rental differential matrix.
+- **Next:** take one complete source-owned status-summary/message phase after
+  11710 and before the exact generated send-out at 13385. Diagnostic
+  11711–11812 is already **102/102** but ends mid-phase; do not promote it
+  without the real source boundary or submit a Battle-2 action.
+- **Notes:** union gates: Cargo **28/28**, WASM RNG+rental differential
+  **363/363**, full `npm test` **949 files / 9,051 passed / 1 skipped**, build
+  **643 modules**. #55 remains null/unwired; no material decision is deferred.

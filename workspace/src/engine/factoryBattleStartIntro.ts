@@ -14,6 +14,7 @@ import {
 import {
   BALL_WIDGETS_SETTLED_TICK,
   generatedBattleStartCommandReady,
+  generatedBattleStartPostAcknowledgementComplete,
   generatedBattleStartOpponentReleaseStarted,
   generatedBattleStartPlayerReleaseStarted,
   generatedBattleIntroSourceClock,
@@ -110,6 +111,13 @@ export function factoryBattleStartStatusSummaryMessageComplete(
     state.elapsed,
     state.sceneAssemblyDisplayLag,
   ) >= BALL_WIDGETS_SETTLED_TICK;
+}
+
+/** Source-complete accepted-A handoff through opponent-summary sprite destroy. */
+export function factoryBattleStartPostAcknowledgementComplete(
+  state: FactoryBattleStartIntroState,
+): boolean {
+  return generatedBattleStartPostAcknowledgementComplete(state);
 }
 
 export function advanceFactoryBattleStartIntro(
