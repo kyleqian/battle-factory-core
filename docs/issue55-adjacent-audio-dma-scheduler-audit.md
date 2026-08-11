@@ -3,13 +3,18 @@
 This side-lane evidence checkpoint answers one narrow question: what exact
 mGBA 0.10.5 source says after a Timer 0 root is due at deadline D while GBA
 Audio Sample is due at D + 1. It does not change the construction clock, add
-a duration constant, or claim the unrecorded LILIANA callback sequence.
+a duration constant, or turn one selected runtime receipt into a general
+construction-clock rule.
 
 The compact generated receipt is
 tests/fixtures/issue55-adjacent-audio-dma-scheduler-audit-v1.json. Its Tier-1
 provenance/semantic guard is
 tests/issue55-adjacent-audio-dma-scheduler-audit.test.ts; its extractor is
 tools/extract/extract-issue55-adjacent-audio-dma-scheduler-audit.ts.
+It consumes the separately committed selected LILIANA runtime packet at
+tests/fixtures/factory-timer0-selected-adjacent-runtime-v1.json
+(SHA-256 `a0cdb0c1952b77580bfe1e3dd4834af98c40d579484931a3bd657061f117e5fc`)
+alongside the older aggregate and on-time runtime receipts.
 
 The exact source is mGBA 0.10.5:
 
@@ -25,6 +30,9 @@ Run:
       --archive /path/to/mgba-0.10.5.tar.gz
 
 ## Source mechanics
+
+This section is source-derived only. It establishes queue and state-transition
+rules, not a callback-entry order for any compact row.
 
 Timing roots are ordered by absolute deadline and then lower numeric priority.
 Thus Audio Sample (24) wins an equal-deadline tie with Timer 0 (32), and
@@ -77,25 +85,44 @@ execution log.
 
 Every row is a 20-cycle instruction edge. Both FIFOs go 3,3 to 7,7, internal
 remaining goes 3,3 to 2,2, and DMA1/DMA2 nextCount is zero before and after.
-Those aggregate endpoints prove a paired refill completed, but not the order
-of Timer, DMA, Audio, or Video callback entries inside the edge.
+Those aggregate endpoints prove a paired refill completed, but do not by
+themselves establish the order of Timer, DMA, Audio, or Video callback entries
+inside the edge.
 
-The existing runtime receipt supplies two different on-time fresh dual-refill
+The older runtime receipt supplies two different on-time fresh dual-refill
 windows: an isolated one and one with exact prior Video. Both have Audio not
 due before Timer 0, request DMA1 then DMA2, observe active DMA sequence
 1,1,1,1,2,1,2,2,2,2, complete DMA1 then DMA2, and reach idle after 18 master
-cycles. That evidence is valid for those windows only; it is not an
-Audio-at-D-plus-1 receipt and cannot be transplanted to LILIANA.
+cycles. That evidence remains valid for those windows only; it is not an
+Audio-at-D-plus-1 receipt and is retained separately from the selected
+LILIANA graph below.
 
-## Smallest remaining runtime observation
+## Selected LILIANA adjacent runtime receipt
 
-Retain LILIANA encrypted-accessor ordinal 23 twice fresh. From Timer 0 entry
-through the first following Audio Sample callback and until DMA1/DMA2 both
-become idle, record each Timer/DMA/Audio callback entry's name, priority,
-relative scheduled deadline, current time, cyclesLate, active DMA, cpuBlocked,
-DMA1/2 counts/deadlines, and FIFO A/B entry/exit state.
+The committed selected packet is byte-identical across two fresh Battle-Scene-
+OFF captures. It selects LILIANA `encrypted-accessor` ordinal 23, precisely the
+Timer=D / Audio=D+1 row above, and retains the full Timer/Audio/DMA hardware
+boundary while wrappers are active only for the selected edge.
 
-The two packets need only agree on that contiguous callback-entry sequence and
-the Timer-entry-to-idle scheduler span. Until then, do not assert a LILIANA
-interleaving or duration, borrow the 18-cycle isolated/Video result, or wire a
-construction-clock cost.
+Its observed callback graph is: **Timer 0 (`cyclesLate=1`) → first DMA1
+service (`cyclesLate=1`) → Audio Sample (`cyclesLate=0`) → the remaining DMA
+service graph**. Timer requests FIFO A/DMA1 then FIFO B/DMA2; DMA1 completes
+before DMA2; all four DMA `nextCount` values are zero after completion, with
+`activeDma=-1` and `cpuBlocked=false`. At Audio entry, DMA1 has three words
+remaining, DMA2 has four, and the CPU remains DMA-blocked.
+
+This is a recorded selected-row order, not a service-cost measurement. It does
+not assign a callback duration, infer a Timer-entry-to-idle cost, borrow the
+older 18-cycle result, or wire `runFactoryConstructionClock`.
+
+## Remaining legal factory-varied observations
+
+The only adjacent-deadline rows still requiring separately selected runtime
+packets are:
+
+- `factory-varied` **get-nature ordinal 12** (Timer=D, Audio=D+1, no Video due)
+- `factory-varied` **nature-attempt ordinal 63** (Video and Timer at D, Audio=D+1)
+
+The LILIANA Timer-late / DMA1 / Audio-on-time order must not be transplanted
+to either row. In particular, the Video-co-due row needs its own callback
+graph; neither source ordering nor its aggregate FIFO endpoints supplies it.

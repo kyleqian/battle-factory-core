@@ -1,6 +1,6 @@
 {
   "schema": "issue55-adjacent-audio-dma-scheduler-audit/v1",
-  "scope": "mGBA 0.10.5 source mechanics plus the three committed Battle Scene OFF Timer 0=D, Audio Sample=D+1 rows and existing on-time isolated/Video dual-refill runtime receipt; no selected-row callback trace or duration claim",
+  "scope": "mGBA 0.10.5 source mechanics plus three committed Battle Scene OFF Timer 0=D, Audio Sample=D+1 row boundaries, prior on-time isolated/Video runtime receipts, and the committed selected LILIANA adjacent-deadline callback graph; no callback price, construction-clock input, or varied-row order claim",
   "release": {
     "url": "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
     "sha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14",
@@ -118,6 +118,10 @@
     {
       "path": "tests/fixtures/factory-timer0-scheduler-runtime-v1.json",
       "sha256": "475f47317b032f6914fceb6d25d625a2dce73fdcbb9f29aed5af982799b1b2c1"
+    },
+    {
+      "path": "tests/fixtures/factory-timer0-selected-adjacent-runtime-v1.json",
+      "sha256": "a0cdb0c1952b77580bfe1e3dd4834af98c40d579484931a3bd657061f117e5fc"
     }
   ],
   "dPlusOneSourceMechanics": {
@@ -440,21 +444,210 @@
     ],
     "applicabilityBoundary": "Two committed windows prove fresh on-time dual DMA graph and 18-master-cycle makespan with no Audio Sample due before Timer 0; one has exact prior Video callback. They do not observe Audio Sample at D + 1 and do not supply a LILIANA Audio/DMA order or duration."
   },
-  "smallestRequiredRuntimeObservation": {
-    "target": "LILIANA encrypted-accessor ordinal 23, repeated twice fresh",
-    "captureInterval": "from Timer 0 callback entry through first Audio Sample callback after it and until both DMA1/DMA2 nextCount values are zero",
-    "callbackEntryFields": [
-      "event name, priority, relative scheduled deadline, scheduler current time, and cyclesLate",
-      "activeDMA, cpuBlocked, and DMA1/DMA2 nextCount plus relative deadlines",
-      "FIFO A/B word level and internalRemaining at Timer 0 entry and after interval"
+  "selectedLilianaRuntimeReceipt": {
+    "selection": {
+      "case": "liliana",
+      "component": "encrypted-accessor",
+      "ordinal": 23,
+      "sourceFunction": "FillFactoryFrontierTrainerParty",
+      "deadlineOrder": [
+        "GBA Timer 0",
+        "GBA Audio Sample"
+      ],
+      "audioTimerDeadlineDelta": 1
+    },
+    "observedCallbackGraph": {
+      "prefix": [
+        {
+          "name": "GBA Timer 0",
+          "priority": 32,
+          "cyclesLate": 1
+        },
+        {
+          "name": "GBA DMA",
+          "priority": 64,
+          "cyclesLate": 1,
+          "activeDma": 1
+        },
+        {
+          "name": "GBA Audio Sample",
+          "priority": 24,
+          "cyclesLate": 0,
+          "activeDma": 1,
+          "cpuBlocked": true
+        }
+      ],
+      "remainingDmaCallbacks": [
+        {
+          "cyclesLate": 0,
+          "activeDma": 1
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 1
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 1
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 2
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 1
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 2
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 2
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 2
+        },
+        {
+          "cyclesLate": 0,
+          "activeDma": 2
+        }
+      ],
+      "requestOrder": [
+        {
+          "fifo": "a",
+          "dmaChannel": 1
+        },
+        {
+          "fifo": "b",
+          "dmaChannel": 2
+        }
+      ],
+      "completionOrder": [
+        1,
+        2
+      ],
+      "wrappersRestoredAfterSequence": 11
+    },
+    "hardwareBoundary": {
+      "audioAtTimerEntry": {
+        "enabled": true,
+        "mixer": {
+          "present": false,
+          "externalMixing": false
+        }
+      },
+      "timer0Entry": {
+        "fifoWordLevels": [
+          3,
+          3
+        ],
+        "internalRemaining": [
+          3,
+          3
+        ],
+        "dmaNextCounts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "activeDma": -1,
+        "performingDma": 0,
+        "cpuBlocked": false
+      },
+      "timer0Exit": {
+        "fifoWordLevels": [
+          3,
+          3
+        ],
+        "internalRemaining": [
+          2,
+          2
+        ],
+        "dmaNextCounts": [
+          0,
+          4,
+          4,
+          0
+        ],
+        "activeDma": 1,
+        "performingDma": 0,
+        "cpuBlocked": false
+      },
+      "audioEntry": {
+        "fifoWordLevels": [
+          4,
+          3
+        ],
+        "internalRemaining": [
+          2,
+          2
+        ],
+        "dmaNextCounts": [
+          0,
+          3,
+          4,
+          0
+        ],
+        "activeDma": 1,
+        "performingDma": 0,
+        "cpuBlocked": true
+      },
+      "afterCompletion": {
+        "fifoWordLevels": [
+          7,
+          7
+        ],
+        "internalRemaining": [
+          2,
+          2
+        ],
+        "dmaNextCounts": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "activeDma": -1,
+        "performingDma": 0,
+        "cpuBlocked": false
+      }
+    },
+    "applicabilityBoundary": "This is the committed selected LILIANA callback graph only. It establishes no callback price, selected-row scheduler span, or construction-clock input, and it does not establish an order for factory-varied rows."
+  },
+  "remainingFactoryVariedRuntimeRows": {
+    "rows": [
+      {
+        "case": "factory-varied",
+        "component": "get-nature",
+        "ordinal": 12,
+        "preInstructionDueRootsByDeadlineThenPriority": [
+          "GBA Timer 0",
+          "GBA Audio Sample"
+        ]
+      },
+      {
+        "case": "factory-varied",
+        "component": "nature-attempt",
+        "ordinal": 63,
+        "preInstructionDueRootsByDeadlineThenPriority": [
+          "GBA Video",
+          "GBA Timer 0",
+          "GBA Audio Sample"
+        ]
+      }
     ],
-    "acceptance": "Two packets must agree on contiguous Timer 0 / GBA DMA / GBA Audio Sample callback-entry sequence and scheduler span from Timer 0 entry to both DMA completions; only then may selected row receive interleaving or duration statement.",
-    "prohibitedInference": "Do not borrow isolated/Video 18-cycle makespan, synthesize LILIANA order from aggregate FIFO endpoints, or wire construction-clock cost."
+    "observationStillNeeded": "Capture a separately selected twice-fresh callback graph for legal factory-varied get-nature ordinal 12 and legal factory-varied nature-attempt ordinal 63. The LILIANA Timer-late/DMA1/Audio-on-time graph is not transferred to either row, including the Video-co-due nature-attempt row."
   },
   "explicitBoundary": [
     "Three committed rows are adjacent deadlines: Audio Sample is exactly one master cycle after Timer 0, not equal-deadline priority observation.",
-    "LILIANA row records only 20-cycle instruction-edge endpoints; it is not a runtime callback trace.",
-    "Source-only zero-late D/D+1 transition is conditional and deliberately not named as LILIANA runtime order.",
+    "The compact LILIANA FIFO row records aggregate instruction-edge endpoints; the separate selected LILIANA runtime input supplies its callback graph.",
+    "The selected LILIANA graph is Timer late one cycle, first DMA1 service, Audio Sample on time, then remaining DMA service; it is not transferred to either factory-varied row.",
+    "Source-only zero-late D/D+1 transition stays conditional and is separate from the observed late-one-cycle LILIANA graph.",
+    "Neither source mechanics nor the selected callback graph imply a callback price, scheduler span cost, or construction-clock input.",
     "This receipt contains no absolute selected-row scheduler timestamp, no pixel lookup, no production import, and no construction-clock behavior."
   ]
 }

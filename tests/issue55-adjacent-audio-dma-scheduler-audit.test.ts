@@ -33,6 +33,39 @@ type RuntimeWindow = {
   completionOrder: number[];
   completionAfterTimerEntryCycles: number;
 };
+type CompactHardwareBoundary = {
+  fifoWordLevels: number[];
+  internalRemaining: number[];
+  dmaNextCounts: number[];
+  activeDma: number;
+  performingDma: number;
+  cpuBlocked: boolean;
+};
+type SelectedLilianaRuntimeReceipt = {
+  selection: {
+    case: string;
+    component: string;
+    ordinal: number;
+    sourceFunction: string;
+    deadlineOrder: string[];
+    audioTimerDeadlineDelta: number;
+  };
+  observedCallbackGraph: {
+    prefix: Array<{ name: string; priority: number; cyclesLate: number; activeDma?: number; cpuBlocked?: boolean }>;
+    remainingDmaCallbacks: Array<{ cyclesLate: number; activeDma: number }>;
+    requestOrder: Array<{ fifo: string; dmaChannel: number }>;
+    completionOrder: number[];
+    wrappersRestoredAfterSequence: number;
+  };
+  hardwareBoundary: {
+    audioAtTimerEntry: { enabled: boolean; mixer: { present: boolean; externalMixing: boolean } };
+    timer0Entry: CompactHardwareBoundary;
+    timer0Exit: CompactHardwareBoundary;
+    audioEntry: CompactHardwareBoundary;
+    afterCompletion: CompactHardwareBoundary;
+  };
+  applicabilityBoundary: string;
+};
 type Receipt = {
   schema: string;
   release: { sha256: string; oracleProfile: string };
@@ -62,7 +95,11 @@ type Receipt = {
   };
   committedAdjacentRows: Row[];
   priorRuntimeReceipt: { windows: RuntimeWindow[]; applicabilityBoundary: string };
-  smallestRequiredRuntimeObservation: { target: string; captureInterval: string; callbackEntryFields: string[]; acceptance: string; prohibitedInference: string };
+  selectedLilianaRuntimeReceipt: SelectedLilianaRuntimeReceipt;
+  remainingFactoryVariedRuntimeRows: {
+    rows: Array<{ case: string; component: string; ordinal: number; preInstructionDueRootsByDeadlineThenPriority: string[] }>;
+    observationStillNeeded: string;
+  };
   explicitBoundary: string[];
 };
 
@@ -71,9 +108,9 @@ const bytes = readFileSync(PATH);
 const receipt = JSON.parse(bytes.toString("utf8")) as Receipt;
 
 describe("Issue #55 adjacent Audio Sample / DMA scheduler source audit", () => {
-  it("pins canonical archive provenance and only committed input receipts", () => {
+  it("pins canonical archive provenance and all committed input receipts", () => {
     expect(bytes.toString("utf8")).toBe(JSON.stringify(receipt, null, 2) + "\n");
-    expect(createHash("sha256").update(bytes).digest("hex")).toBe("7d473cecef1f128b9c8cd81b47a0c229efd2fa4b53d2ab7e7e87473827d4ea0a");
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe("e95efec65846359cff0435843ec2061dcb7bc75fc4eb28d789ac056abd437ff3");
     expect(receipt.schema).toBe("issue55-adjacent-audio-dma-scheduler-audit/v1");
     expect(receipt.release).toEqual({
       url: "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
@@ -90,10 +127,15 @@ describe("Issue #55 adjacent Audio Sample / DMA scheduler source audit", () => {
       "tests/fixtures/factory-construction-timer0-fifo-v1/liliana.json",
       "tests/fixtures/factory-construction-timer0-fifo-v1/factory-varied.json",
       "tests/fixtures/factory-timer0-scheduler-runtime-v1.json",
+      "tests/fixtures/factory-timer0-selected-adjacent-runtime-v1.json",
     ]);
+    expect(receipt.inputReceipts.at(-1)).toEqual({
+      path: "tests/fixtures/factory-timer0-selected-adjacent-runtime-v1.json",
+      sha256: "a0cdb0c1952b77580bfe1e3dd4834af98c40d579484931a3bd657061f117e5fc",
+    });
   });
 
-  it("keeps adjacent D/D+1 facts separate from a LILIANA callback trace", () => {
+  it("keeps adjacent D/D+1 source-row facts separate from the LILIANA callback trace", () => {
     expect(receipt.committedAdjacentRows.map((row) => [row.case, row.component, row.ordinal])).toEqual([
       ["liliana", "encrypted-accessor", 23],
       ["factory-varied", "get-nature", 12],
@@ -119,8 +161,8 @@ describe("Issue #55 adjacent Audio Sample / DMA scheduler source audit", () => {
         dmaNextCountsAfter: [0, 0],
       });
     }
-    expect(receipt.explicitBoundary.join(" ")).toContain("not a runtime callback trace");
-    expect(receipt.explicitBoundary.join(" ")).toContain("not named as LILIANA runtime order");
+    expect(receipt.explicitBoundary.join(" ")).toContain("aggregate instruction-edge endpoints");
+    expect(receipt.explicitBoundary.join(" ")).toContain("not transferred to either factory-varied row");
   });
 
   it("pins deadline-first scheduling, corrected FIFO requests, CPU blocking, and per-word DMA mechanics", () => {
@@ -151,7 +193,7 @@ describe("Issue #55 adjacent Audio Sample / DMA scheduler source audit", () => {
     expect(mechanics.audioInterleavingBoundary).toContain("does not");
   });
 
-  it("uses the isolated/Video receipt narrowly and asks for only the missing selected-row trace", () => {
+  it("uses the isolated/Video receipt narrowly", () => {
     expect(receipt.priorRuntimeReceipt.windows.map((window) => window.kind)).toEqual([
       "isolated-dual-refill",
       "video-co-due-dual-refill",
@@ -173,11 +215,65 @@ describe("Issue #55 adjacent Audio Sample / DMA scheduler source audit", () => {
     }
     expect(receipt.priorRuntimeReceipt.windows[1]!.exactCoDueCallbacksBeforeTimer0).toEqual([{ name: "GBA Video", priority: 8 }]);
     expect(receipt.priorRuntimeReceipt.applicabilityBoundary).toContain("do not supply a LILIANA");
-    expect(receipt.smallestRequiredRuntimeObservation.target).toContain("repeated twice fresh");
-    expect(receipt.smallestRequiredRuntimeObservation.captureInterval).toContain("both DMA1/DMA2");
-    expect(receipt.smallestRequiredRuntimeObservation.callbackEntryFields).toHaveLength(3);
-    expect(receipt.smallestRequiredRuntimeObservation.acceptance).toContain("contiguous");
-    expect(receipt.smallestRequiredRuntimeObservation.prohibitedInference).toContain("18-cycle");
+  });
+
+  it("mechanically carries the selected LILIANA late-Timer/DMA1/Audio graph without pricing it", () => {
+    const selected = receipt.selectedLilianaRuntimeReceipt;
+    expect(selected.selection).toEqual({
+      case: "liliana",
+      component: "encrypted-accessor",
+      ordinal: 23,
+      sourceFunction: "FillFactoryFrontierTrainerParty",
+      deadlineOrder: ["GBA Timer 0", "GBA Audio Sample"],
+      audioTimerDeadlineDelta: 1,
+    });
+    expect(selected.observedCallbackGraph.prefix).toEqual([
+      { name: "GBA Timer 0", priority: 32, cyclesLate: 1 },
+      { name: "GBA DMA", priority: 64, cyclesLate: 1, activeDma: 1 },
+      { name: "GBA Audio Sample", priority: 24, cyclesLate: 0, activeDma: 1, cpuBlocked: true },
+    ]);
+    expect(selected.observedCallbackGraph.remainingDmaCallbacks).toEqual([
+      { cyclesLate: 0, activeDma: 1 },
+      { cyclesLate: 0, activeDma: 1 },
+      { cyclesLate: 0, activeDma: 1 },
+      { cyclesLate: 0, activeDma: 2 },
+      { cyclesLate: 0, activeDma: 1 },
+      { cyclesLate: 0, activeDma: 2 },
+      { cyclesLate: 0, activeDma: 2 },
+      { cyclesLate: 0, activeDma: 2 },
+      { cyclesLate: 0, activeDma: 2 },
+    ]);
+    expect(selected.observedCallbackGraph.requestOrder).toEqual([{ fifo: "a", dmaChannel: 1 }, { fifo: "b", dmaChannel: 2 }]);
+    expect(selected.observedCallbackGraph.completionOrder).toEqual([1, 2]);
+    expect(selected.observedCallbackGraph.wrappersRestoredAfterSequence).toBe(11);
+    expect(selected.hardwareBoundary).toEqual({
+      audioAtTimerEntry: { enabled: true, mixer: { present: false, externalMixing: false } },
+      timer0Entry: { fifoWordLevels: [3, 3], internalRemaining: [3, 3], dmaNextCounts: [0, 0, 0, 0], activeDma: -1, performingDma: 0, cpuBlocked: false },
+      timer0Exit: { fifoWordLevels: [3, 3], internalRemaining: [2, 2], dmaNextCounts: [0, 4, 4, 0], activeDma: 1, performingDma: 0, cpuBlocked: false },
+      audioEntry: { fifoWordLevels: [4, 3], internalRemaining: [2, 2], dmaNextCounts: [0, 3, 4, 0], activeDma: 1, performingDma: 0, cpuBlocked: true },
+      afterCompletion: { fifoWordLevels: [7, 7], internalRemaining: [2, 2], dmaNextCounts: [0, 0, 0, 0], activeDma: -1, performingDma: 0, cpuBlocked: false },
+    });
+    expect(selected.applicabilityBoundary).toContain("no callback price");
+    expect(JSON.stringify(selected)).not.toMatch(/schedulerCurrentTime|scheduledWhen|serviceCostMasterCycles|runFactoryConstructionClock/);
+  });
+
+  it("names only the two legal factory-varied rows as remaining and does not transplant LILIANA order", () => {
+    expect(receipt.remainingFactoryVariedRuntimeRows.rows).toEqual([
+      {
+        case: "factory-varied",
+        component: "get-nature",
+        ordinal: 12,
+        preInstructionDueRootsByDeadlineThenPriority: ["GBA Timer 0", "GBA Audio Sample"],
+      },
+      {
+        case: "factory-varied",
+        component: "nature-attempt",
+        ordinal: 63,
+        preInstructionDueRootsByDeadlineThenPriority: ["GBA Video", "GBA Timer 0", "GBA Audio Sample"],
+      },
+    ]);
+    expect(receipt.remainingFactoryVariedRuntimeRows.observationStillNeeded).toContain("not transferred");
+    expect(receipt.remainingFactoryVariedRuntimeRows.observationStillNeeded).toContain("Video-co-due");
   });
 
   it("contains no absolute selected-row timing or production lookup surface", () => {
