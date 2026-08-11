@@ -413,6 +413,10 @@ import {
   type ViceGripState,
 } from "./viceGrip.ts";
 import {
+  guillotineAtAge,
+  type GuillotineState,
+} from "./guillotine.ts";
+import {
   swaggerAtAge,
   type SwaggerState,
 } from "./swagger.ts";
@@ -928,7 +932,8 @@ export interface SceneOnPresentationBattler {
      | "SWABLU"
     | "FEAROW"
     | "HOPPIP"
-    | "DRAGONAIR";
+    | "DRAGONAIR"
+    | "GLIGAR";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1688,6 +1693,14 @@ export interface SceneOnStompConfig {
 /** Narrow VICE_GRIP presentation seam; battle resolution remains external. */
 export interface SceneOnViceGripConfig {
   readonly move: "VICE_GRIP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Narrow Scene-ON Guillotine seam; OHKO resolution and RNG stay external. */
+export interface SceneOnGuillotineConfig {
+  readonly move: "GUILLOTINE";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2704,6 +2717,7 @@ export type SceneOnMoveConfig =
   | SceneOnRolePlayConfig
   | SceneOnStompConfig
   | SceneOnViceGripConfig
+  | SceneOnGuillotineConfig
   | SceneOnBiteConfig
   | SceneOnHeadbuttConfig
   | SceneOnSubmissionConfig
@@ -3084,6 +3098,11 @@ export interface SceneOnStompView extends StompState {
 
 export interface SceneOnViceGripView extends ViceGripState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnGuillotineView extends GuillotineState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -5436,6 +5455,24 @@ export function sceneOnViceGripView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...viceGripAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first pointer-bounded `Move_GUILLOTINE` source row. */
+export function sceneOnGuillotineView(
+  state: SceneOnMovePresentationState<SceneOnGuillotineConfig>,
+): SceneOnGuillotineView {
+  if (state.config.move !== "GUILLOTINE") {
+    throw new Error(`expected GUILLOTINE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...guillotineAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

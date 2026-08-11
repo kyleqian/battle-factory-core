@@ -1,0 +1,43 @@
+{
+  "schema": "guillotine-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-guillotine-opponent-gligar-player-onix.json",
+  "probe": "tools/compare/agilityProbe.py",
+  "sourceWindow": { "startFrame": 78, "endFrame": 241, "frameCount": 164 },
+  "attacker": {
+    "species": "GLIGAR",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 5 },
+      "animationCenter": { "x": 176, "y": 37 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 142, "playerMaxHp": 142,
+    "opponentHp": 172, "opponentMaxHp": 172,
+    "playerGender": "male", "opponentGender": "male"
+  },
+  "evidenceSha256": "59054f50992919d685713034d1a90a7db65861a956c3530c434fb4c96f1fcbb4",
+  "rawRgbSha256": "16d58dcb19351512baea7973e46f771d2f8e9847bd989b56276d953b814f3ed8",
+  "changeMap": "tools/compare/evidence/guillotine-changemap-opponent.txt",
+  "changeMapSha256": "dc296a41267668224c6ad0b7e61ddc4ce78714cc16cb062d4a54947bd9a479ac",
+  "acceptance": {
+    "status": "exact",
+    "reducerMatching": 164,
+    "typedSeamMatching": 164,
+    "componentMatching": 164,
+    "framebufferMatching": 164,
+    "freshRuns": 2
+  }
+}

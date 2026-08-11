@@ -48,6 +48,7 @@ cites the move whose ledger entry holds the full evidence.
 | `AnimTask_ShakeMonInPlace(target, 3, 0, 11, 1)` | RAM+1 | HI_JUMP_KICK, both orientations, own dense change maps (2026-08-10) |
 | `AnimTask_ShakeMonInPlace(target,4,0,7,1)` twice and `(target,8,0,16,1)` | RAM+2 independently for all three invocations | THRASH, both 103-frame orientations (2026-08-10); move-owned target-palette outline witnesses exclude each fist/hitsplat's complete 32x32 OAM bounds, then actual pixels select RAM+2 at 94.2-98.1% versus 60.5-70.6% for RAM+1 |
 | `AnimTask_ShakeMon2` (usual longer schedules) | RAM+2 | SLASH, LICK, TAKE_DOWN (2026-08-08) |
+| Guillotine `AnimTask_ShakeMon2(target,2,0,23,1)` and `(target,4,0,8,1)` | Both live-mon schedules display RAM+1 from the initial negative-amplitude write through the terminal zero; neither inherits the usual long-schedule RAM+2 rule | GUILLOTINE, complete 165/164-frame bilateral maps (2026-08-11); both creation/body/teardown schedules are independently checked |
 | MOVE_LEER eye OAM, live ScaleMonAndRestore affine matrix, and long target ShakeMon2 | ordinary eye OAM RAM+1; live affine matrix RAM+2; long target x2 RAM+2; source monbg update ages 4-55, clear ages 56-58, and BLDALPHA ages 7-55 | LEER, player-back and opponent-front 70-frame maps (2026-08-11); player/opponent eye OAM centers and pre-shake x2 baselines are measured independently — do not inherit short ShakeMon2 creation/body splits |
 | `AnimTask_ShakeMon2(attacker,2,0,8,1)` | Logical task tick is wave age+1; the live-battler OAM scanout displays the positive creation write at creation+1, then the ordinary source-derived body at RAM+2. The player-back attacker precedes wave OBJs in hardware OAM while opponent-front follows them. | METAL_SOUND corrected ARON exact proof, both orientations (2026-08-11); same split creation/body transfer independently seen on LEAF_BLADE and CONFUSION |
 | `gMetalSoundSpriteTemplate` wave affine/OAM | position and affine matrix both display reducer age−1, including first paint and teardown; not the generic fresh-affine dual-lag class | METAL_SOUND corrected ARON maps, both orientations (2026-08-11) |
@@ -87,6 +88,11 @@ generalize either move to DOUBLE_EDGE without a fresh single-axis probe.
   PPU's one-selected-OBJ blend, and the ROM's OAM allocator REUSES slots out
   of creation order — the reducer must report each sprite's OAM slot and the
   draw case must paint by it (COUNTER, 2026-08-08).
+- **Guillotine's orientation-selected BG makes its CUT pincers and identity
+  IMPACT hitsplat scan out as opaque palette pixels despite their ObjBlend
+  templates.** Its 12:8 register lifecycle remains independently verified;
+  do not transfer VICE_GRIP's field-background blend painter (GUILLOTINE,
+  bilateral 165/164-frame maps, 2026-08-11).
 - **Explicit absolute subpriorities flip painter order with orientation**
   (TORMENT bubbles 6..1: player-back vs opponent-front stack differently).
   Drawing one order for both sides is the trap.

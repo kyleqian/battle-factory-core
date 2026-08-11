@@ -4636,6 +4636,38 @@
     "tests/animation/leer.test.ts",
     "tests/animation/leerSource.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_GUILLOTINE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-315 FRONTIER_MON_GLIGAR_2 versus ONIX Scene-ON parties pass the exclusive 0x082cb829..0x082cb8b5 body through first inactive cleanup twice fresh: player-back frames 74-238 at 165/165 and opponent-front frames 78-241 at 164/164",
+    "the pure orientation-aware reducer and typed seam port the selected BG_GUILLOTINE background fade/restore, target monbg and 12:8 lifecycle, mirrored dual gGuillotineSpriteTemplate close/51-callback-hold/open programs, target-to-black task, both target ShakeMon2 schedules, animation-0 basic hitsplat, complex BG+battler black8 restoration, target-panned SE_M_VICEGRIP and SE_M_RAZOR_WIND, tags and cleanup",
+    "the narrow GLIGAR/ONIX production compositor uses source-extracted Guillotine BG assets and source-identical CUT/IMPACT assets; its hardware painter retains the elevated opponent GLIGAR entry shadow, orientation BG layering and opaque Guillotine effect pixels without owning OHKO, accuracy, damage, RNG, controller, turn, round, or facility state",
+    "guillotinePortable.ts regenerates normalized bilateral maps and proves reducer, typed seam, tasks, sprites, software/hardware OAM and matrices, palettes/tags, registers, audio, immutable battle state, raw RGB and production framebuffer exactness twice fresh; evidence/raw/map digests are player 49f55f7f94cbb4ecc2af8ea116687391a228343292defd7d972f094cb3cb0ac0/e52f5331d06764be107d236930e19b205e484ba33aaf35db887cac16cfe166ef/ab5c9b5a26c41ba7fd9f834f2b33e02eb871e3c6cacf5a3bb133cb8b5e43c707 and opponent 59054f50992919d685713034d1a90a7db65861a956c3530c434fb4c96f1fcbb4/16d58dcb19351512baea7973e46f771d2f8e9847bd989b56276d953b814f3ed8/dc296a41267668224c6ad0b7e61ddc4ce78714cc16cb062d4a54947bd9a479ac",
+    "Guillotine's own maps measure both target ShakeMon2 schedules at RAM+1 from creation through teardown and its BG/palette/painter transitions independently; VICE_GRIP remains 42/42 and MEGA_PUNCH remains 160/160 twice-fresh bilateral controls",
+    "no gameplay/OHKO/accuracy/damage/RNG/controller/turn/round/facility state, animation boundary, unsupported-branch barrier, canonical recording import, per-frame table, absolute tick, coordinate/RGB fit, capture/hash lookup, or sibling coverage changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-guillotine-player-gligar-opponent-onix.json",
+    "tools/battle-lab/mechanic-guillotine-opponent-gligar-player-onix.json",
+    "tools/compare/fixtures/guillotine-evidence-checkpoint.json",
+    "tools/compare/fixtures/guillotine-player-gligar-opponent-onix.json",
+    "tools/compare/fixtures/guillotine-opponent-gligar-player-onix.json",
+    "tools/compare/agilityProbe.py",
+    "tools/compare/guillotineSourceAudit.ts",
+    "tools/compare/guillotinePortable.ts",
+    "tools/compare/evidence/guillotine-changemap-player.txt",
+    "tools/compare/evidence/guillotine-changemap-opponent.txt",
+    "tools/compare/extractGuillotineAssets.ts",
+    "src/animation/assets/guillotine.json",
+    "src/animation/guillotine.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/guillotine.test.ts",
+    "tests/animation/guillotineSource.test.ts",
+    "tests/animation/guillotineEvidence.test.ts"
+   ]
   }
  ],
  "queue": [
