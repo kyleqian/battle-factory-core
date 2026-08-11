@@ -13,8 +13,8 @@ describe("MOVE_COMET_PUNCH source-relative reducer", () => {
   it("selects both choosetwoturnanim routes without owning the hit count", () => {
     expect(cometPunchAtAge(10, 0, player)).toMatchObject({ branch: "left", hitsplat: { x: 168, y: 34 }, fist: { x: 168, y: 42, remaining: 7 } });
     expect(cometPunchAtAge(10, 1, player)).toMatchObject({ branch: "right", hitsplat: { x: 184, y: 34 }, fist: { x: 184, y: 42 } });
-    expect(cometPunchAtAge(10, 2, opponent)).toMatchObject({ branch: "left", hitsplat: { x: 80, y: 72 }, fist: { x: 80, y: 80 } });
-    expect(cometPunchAtAge(10, 3, opponent)).toMatchObject({ branch: "right", hitsplat: { x: 64, y: 72 }, fist: { x: 64, y: 80 } });
+    expect(cometPunchAtAge(10, 2, opponent)).toMatchObject({ branch: "left", hitsplat: { x: 80, y: 80 }, fist: { x: 80, y: 88 } });
+    expect(cometPunchAtAge(10, 3, opponent)).toMatchObject({ branch: "right", hitsplat: { x: 64, y: 80 }, fist: { x: 64, y: 88 } });
   });
 
   it("ports resource, monbg, alpha, fist/hitsplat, ShakeMon, and cleanup ages", () => {

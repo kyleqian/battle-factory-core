@@ -38,6 +38,12 @@ export function cometPunchAtAge(
   const mirror = geometry.attackerSide === "player" ? 1 : -1;
   const effectActive = active && age >= COMET_PUNCH_EFFECT_AGE;
   const x = geometry.targetCenter.x + mirror * (left ? -8 : 8);
+  // `InitSpritePosToAnimAttacker(..., TRUE)` mirrors the script-relative y
+  // offsets when the attacker is on the opponent side. The source OAM has
+  // hitsplat at target -8 / fist at target for the player route, then target
+  // / target +8 for the opponent route.
+  const hitsplatY = geometry.targetCenter.y + (geometry.attackerSide === "player" ? -8 : 0);
+  const fistY = hitsplatY + 8;
   const shakeTick = age - COMET_PUNCH_EFFECT_AGE + 1;
   return {
     active,
@@ -49,8 +55,8 @@ export function cometPunchAtAge(
     alpha: effectActive && age < COMET_PUNCH_CLEAR_AGE ? { eva: 12, evb: 8 } : null,
     targetX2: effectActive ? shakeMonOffsetAtTick(3, 0, 6, 1, shakeTick).x2 : 0,
     shakeTaskActive: effectActive && age <= 19,
-    hitsplat: effectActive && age <= 19 ? { slot: 3, x, y: geometry.targetCenter.y - 8, matrix: 372 } : null,
-    fist: effectActive && age <= 18 ? { slot: 4, x, y: geometry.targetCenter.y, animation: 0, remaining: Math.max(0, 17 - age) } : null,
+    hitsplat: effectActive && age <= 19 ? { slot: 3, x, y: hitsplatY, matrix: 372 } : null,
+    fist: effectActive && age <= 18 ? { slot: 4, x, y: fistY, animation: 0, remaining: Math.max(0, 17 - age) } : null,
     soundEvents: age === COMET_PUNCH_EFFECT_AGE
       ? [{ age: 10, song: "SE_M_COMET_PUNCH", panTarget: true }]
       : [],
