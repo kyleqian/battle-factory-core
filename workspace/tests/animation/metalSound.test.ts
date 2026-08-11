@@ -22,7 +22,7 @@ describe("MOVE_METAL_SOUND source-relative reducer", () => {
   const opponent = (age: number) => metalSoundEffectAtAge(
     age,
     "opponent",
-    { x: 176, y: 45 },
+    { x: 176, y: 56 },
     { x: 72, y: 88 },
   );
 
@@ -67,7 +67,7 @@ describe("MOVE_METAL_SOUND source-relative reducer", () => {
         species: "ARON",
         geometry: {
           side: "player",
-          spriteCorner: { x: 40, y: 70 },
+          spriteCorner: { x: 40, y: 65 },
           animationCenter: { x: 72, y: 104 },
           battlePositionCenter: { x: 72, y: 80 },
         },

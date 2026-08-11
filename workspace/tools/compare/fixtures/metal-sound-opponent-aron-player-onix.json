@@ -1,0 +1,12 @@
+{
+  "schema": "scene-on-portable-component/v1",
+  "oracleProfile": "battle-scene-on",
+  "scenario": "tools/battle-lab/mechanic-metal-sound-opponent-aron-player-onix.json",
+  "probe": "tools/compare/metalSoundProbe.py",
+  "move": "METAL_SOUND",
+  "denseWindow": {"startFrame": 80, "endFrame": 164},
+  "appStage": {"presentationAge": 0},
+  "attacker": {"species":"ARON","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":28},"animationCenter":{"x":176,"y":56},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":142,"playerMaxHp":142,"opponentHp":147,"opponentMaxHp":147,"playerGender":"male","opponentGender":"male"}
+}

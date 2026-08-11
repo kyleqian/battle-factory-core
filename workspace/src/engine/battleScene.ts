@@ -591,6 +591,7 @@ import moonlightAsset from "../animation/assets/moonlight.json" with { type: "js
 import wishAsset from "../animation/assets/wish.json" with { type: "json" };
 import milkDrinkAsset from "../animation/assets/milk-drink.json" with { type: "json" };
 import supersonicAsset from "../animation/assets/supersonic.json" with { type: "json" };
+import metalSoundAsset from "../animation/assets/metal-sound.json" with { type: "json" };
 import waterGunAsset from "../animation/assets/water-gun.json" with { type: "json" };
 import acidAsset from "../animation/assets/acid.json" with { type: "json" };
 import sludgeAsset from "../animation/assets/sludge.json" with { type: "json" };
@@ -907,6 +908,7 @@ import {
   sceneOnMilkDrinkView,
   sceneOnRefreshView,
   sceneOnSupersonicView,
+  sceneOnMetalSoundView,
   sceneOnWaterGunView,
   sceneOnAcidView,
   sceneOnSludgeView,
@@ -1458,6 +1460,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const aronFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARON!;
 const nidorinaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NIDORINA!;
 const taurosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).TAUROS!;
 const ninetalesFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NINETALES!;
@@ -1717,6 +1720,9 @@ const supersonicArt = supersonicAsset as {
   goldRing: { tileset: Tileset; palette: RgbColor[] };
   dustoxBack: { tileset: Tileset; palette: RgbColor[] };
   dustoxFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const metalSoundArt = metalSoundAsset as {
+  waves: { tileset: Tileset; palette: RgbColor[] };
 };
 const waterGunArt = waterGunAsset as {
   smallBubbles: { tileset: Tileset; palette: RgbColor[] };
@@ -2660,6 +2666,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const aronBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARON!;
 const nidorinaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NIDORINA!;
 const taurosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).TAUROS!;
 const ninetalesBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NINETALES!;
@@ -31474,6 +31481,142 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "DUSTOX used" : "Foe DUSTOX used",
       "SUPERSONIC!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "METAL_SOUND") {
+    const view = sceneOnMetalSoundView(state);
+    // Plain OAM (including wave position) reaches the displayed framebuffer
+    // one VBlank after the source RAM row. Fresh affine allocations retain
+    // their source matrix for the first paint; later matrix writes follow the
+    // same displayed row. Removal is likewise driven by the prior OAM row.
+    const displayed = sceneOnMetalSoundView({ ...state, age: state.age - 1 });
+    const affineDisplayed = sceneOnMetalSoundView({ ...state, age: state.age - 2 });
+    const displayedAttackerOffset = state.age <= 0
+      ? { x2: 0, y2: 0 }
+      : displayed.attackerOffset;
+    const playerToOpponent =
+      view.attacker.species === "ARON"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ARON"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged METAL_SOUND pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent ? aronBackSprite : aronFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawTarget = () => {
+      const targetIdle = playerToOpponent
+        ? speciesFrontIdleRestOffset("ONIX")
+        : null;
+      drawSpriteSheet(
+        fb,
+        targetSprite.tileset,
+        targetSprite.palette,
+        view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+        view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+      );
+    };
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x + displayedAttackerOffset.x2,
+      view.attacker.geometry.spriteCorner.y + displayedAttackerOffset.y2,
+    );
+    // monbg ANIM_DEF_PARTNER moves the target beneath the attacker and the
+    // normal affine wave OBJs. The target is therefore painted first in both
+    // orientations, matching the source compositor's priority split.
+    drawTarget();
+    drawAttacker();
+    const affineAtDisplayAge = new Map(
+      affineDisplayed.waves.map((wave) => [wave.spawnIndex, wave]),
+    );
+    const wavePaintOrder = playerToOpponent
+      ? displayed.waves
+      : Array.from(displayed.waves).reverse();
+    for (const wave of wavePaintOrder) {
+      const affine = affineAtDisplayAge.get(wave.spawnIndex);
+      const matrix = affine && affine.spawnIndex === wave.spawnIndex &&
+          affine.x === wave.x && affine.y === wave.y
+        ? affine
+        : wave;
+      drawSpriteSheetAffineRotate(
+        fb,
+        metalSoundArt.waves.tileset,
+        metalSoundArt.waves.palette,
+        wave.x + wave.x2,
+        wave.y + wave.y2,
+        matrix.xScale,
+        0,
+        0,
+        matrix.yScale,
+        undefined,
+        true,
+      );
+    }
+    const opponentSpecies = "ONIX";
+    const playerSpecies = "ARON";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ARON used" : "Foe ARON used",
+      "METAL SOUND!",
       99,
     );
     return;
