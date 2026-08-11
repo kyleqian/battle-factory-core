@@ -1,3 +1,18 @@
+## 1145 — [supervisor, 2026-08-11] **Battle-6 intro generalization verified**
+
+- **State:** `master` is green with a legal noncanonical Battle-6 LUKAS reveal
+  driven through five ordinary round-controller wins/declines. S8 remains
+  closed; the retired Battle-2 march and #56 tail remain untouched.
+- **Did:** reviewed the data-only stage/fixture and independently reverified
+  the complete reveal **154/154** plus focused controller/purity **81/81**.
+  LUKAS uses transition index 3 and sets `267/268/269` vs `270/341/284`.
+- **Next:** extend the same legal Battle-6 proof through the complete
+  status-summary/message assembly, preserving the canonical controls and
+  avoiding post-ack frame 13384.
+- **Notes:** worker gates: controls **154, 65, 249, 238, 3, 256, 115** exact;
+  smoke **375/375**, typecheck, full `npm test` **952 files / 9,136 passed / 1
+  skipped**, build **645 modules**. No lane branch is ahead.
+
 ## 1141 — [supervisor, 2026-08-11] **Summary seam verified; animation/Rust folds green**
 
 - **State:** `master` is green with the generic status-summary/message boundary,

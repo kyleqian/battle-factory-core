@@ -178,4 +178,104 @@ describe("noncanonical generated-round intro generalization", () => {
     expect(state.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party)
       .toEqual(beforeRender.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party);
   });
+
+  it("pins LUKAS's stock-ROM acknowledgement rebase and the #55-blocked opponent release boundary", () => {
+    let state = generatedRoundBattle6LukasStatusSummaryMessageStage(
+      createInitialState({ appRoute: "generated-orchestrator" }),
+    );
+    const initial = structuredClone(state);
+
+    // The factoryLegal pre-checkpoint driver holds A on absolute frames
+    // 1543-1544. Relative to the reveal offset (1151), the generic app
+    // lifecycle must receive its NEW-key edge on frame 390: the source
+    // controller accepts the held edge two display callbacks later. A held
+    // second frame is not another new key and cannot replace the receipt.
+    state = advanceFrames(state, 389);
+    state = tick(state, new Set(["A"]));
+    const accepted = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(accepted.acknowledgedElapsed).toBe(381);
+    expect(accepted.elapsed).toBe(381);
+
+    state = tick(state, new Set(["A"]));
+    const held = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(held.acknowledgedElapsed).toBe(381);
+    expect(held.elapsed).toBe(382);
+    state = tick(state, new Set());
+    expect(state.factoryRoundBattleOrchestrator!.battleStartIntro!.acknowledgedElapsed)
+      .toBe(381);
+
+    // App 461 / oracle absolute 1612 is the already-settled #56 display-tail
+    // frame. The intended new phase begins on app 462 (absolute 1613) and
+    // ends when the ROM clears the opponent controller on app 511
+    // (absolute 1662), immediately before the player send-out dispatch.
+    state = advanceFrames(state, 461 - 392);
+    const tail = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(generatedBattleIntroSourceClock(
+      tail.elapsed,
+      tail.sceneAssemblyDisplayLag,
+    )).toBe(1500);
+    expect(factoryBattleStartIntroPhase(tail)).toBe("opponent-release");
+
+    state = tick(state, new Set());
+    const cleanStart = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(generatedBattleIntroSourceClock(
+      cleanStart.elapsed,
+      cleanStart.sceneAssemblyDisplayLag,
+    )).toBe(1501);
+    expect(factoryBattleStartIntroPhase(cleanStart)).toBe("opponent-release");
+
+    const beforeRender = structuredClone(state);
+    expect(render(state)).toEqual(render(state));
+    expect(state).toEqual(beforeRender);
+
+    state = advanceFrames(state, 511 - 462);
+    const controllerComplete = state.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(generatedBattleIntroSourceClock(
+      controllerComplete.elapsed,
+      controllerComplete.sceneAssemblyDisplayLag,
+    )).toBe(1550);
+    expect(factoryBattleStartIntroPhase(controllerComplete)).toBe("opponent-release");
+
+    const command = controllerComplete.command;
+    expect(command.opponentTrainer).toMatchObject({ trainerId: 121, name: "LUKAS" });
+    expect(command.parties.player.map(({ setId, speciesName }) => ({ setId, speciesName })))
+      .toEqual([
+        { setId: 267, speciesName: "SPECIES_DELCATTY" },
+        { setId: 268, speciesName: "SPECIES_SABLEYE" },
+        { setId: 269, speciesName: "SPECIES_LICKITUNG" },
+      ]);
+    expect(command.parties.opponent.map(({ setId, speciesName }) => ({ setId, speciesName })))
+      .toEqual([
+        { setId: 270, speciesName: "SPECIES_WEEPINBELL" },
+        { setId: 341, speciesName: "SPECIES_HITMONTOP" },
+        { setId: 284, speciesName: "SPECIES_HAUNTER" },
+      ]);
+    expect(command.partySummaries.player).toEqual(ALL_HEALTHY_SUMMARY);
+    expect(command.partySummaries.opponent).toEqual(ALL_HEALTHY_SUMMARY);
+
+    // Two fresh legal-ROM runs produce personality 1547933549 / female for
+    // set 270. The generic clean-stream controller produces the same set,
+    // nature, stats, and ability but a male personality. This is #55's
+    // explicitly unwired ambient-VBlank construction clock, not a renderer
+    // discriminator that this bounded proof may fit or override.
+    expect(command.parties.opponent[0]).toMatchObject({
+      setId: 270,
+      species: 70,
+      personality: 4074577324,
+      gender: "male",
+      hp: 129,
+      maxHP: 129,
+    });
+    expect(command.parties.opponent[0].personality).not.toBe(1547933549);
+    expect(command.parties.opponent[0].gender).not.toBe("female");
+
+    expect(state.rngValue).toBe(initial.rngValue);
+    expect(state.factoryRoundBattleOrchestrator!.round.rules)
+      .toEqual(initial.factoryRoundBattleOrchestrator!.round.rules);
+    expect(state.factoryRoundBattleOrchestrator!.round.rules.lastBattle).toBeNull();
+    expect(state.factoryRoundBattleOrchestrator!.round.rules.playerParty)
+      .toEqual(initial.factoryRoundBattleOrchestrator!.round.rules.playerParty);
+    expect(state.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party)
+      .toEqual(initial.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party);
+  });
 });

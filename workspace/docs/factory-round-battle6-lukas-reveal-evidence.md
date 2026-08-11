@@ -106,3 +106,50 @@ Reproduction:
 npm run compare -- factory-round-battle6-lukas-reveal-off --summary
 npm run compare -- factory-round-battle6-lukas-status-summary-message-off --summary
 ```
+
+## Opponent send-out checkpoint: exact renderer, blocked source identity
+
+The stock-ROM `factoryLegal` pre-checkpoint stream was replayed densely twice
+fresh beyond the summary boundary. Its automatic acknowledgement schedule
+holds `A` on absolute frames **1543–1544**. With the reveal mapping offset
+1151, the generic app lifecycle needs the corresponding NEW-key edge at app
+frame **390**: the ROM accepts that held edge two display callbacks later,
+while the app's public round owner freezes its acknowledgement callback once.
+A second held app callback is not a new key and leaves the stored receipt
+unchanged.
+
+The intended next complete opponent subphase is app **462–511** / oracle
+absolute **1613–1662** (**50 dense frames**). It begins immediately after the
+known #56 summary display-tail at app 461 / absolute 1612 and ends when the ROM
+clears the opponent controller, before the player send-out dispatch and action
+menu. Trainer exit, ball/open particles, WEEPINBELL materialization, background
+fade, healthbox slide, HP, level, cry-duration hold, and message remain on the
+generic acknowledgement-relative compositor.
+
+That phase cannot honestly be promoted yet. Both fresh runs were identical:
+
+- frames **462–469** are byte-exact (**8 frames**);
+- frames **470–511** differ only in the opponent healthbox gender glyph: the
+  first entering column is **20 pixels**, then **24 pixels/frame**, bounded by
+  the sliding glyph at `(0..73,21..28)`; all pixels outside that glyph are
+  exact for all 50 frames;
+- the deliberately excluded app frame 461 retains only the known #56 tail
+  (**15 pixels**, `(0,40)–(164,43)`), so this probe did not alter or claim the
+  existing 69/70 diagnostic.
+
+The cause is semantic and already named by open ISSUES #55. The ordinary
+five-win round controller produces WEEPINBELL set 270 with personality
+`4074577324`, male. The stock ROM's ambient-VBlank-interleaved construction
+produces the same legal set/nature/stats/ability with personality `1547933549`,
+female. Personality-derived gender is exactly the exposure #55 documents;
+its construction clock is explicitly still unwired. Overriding the frozen
+party, drawing a fixture-specific female glyph, or adopting a per-fixture
+personality would violate this increment's unchanged-party and no-#55 rules.
+
+Tier 1 now pins the frame-390 new-key/held-key semantics, clean phase bounds,
+LUKAS and all six set/species identities, both healthy summaries, the exact
+personality/gender obstruction, render purity, and unchanged RNG, rules,
+parties, and outcomes. No failing comparison trace is promoted. The next
+honest owner is #55's generic construction clock; once it supplies the ROM
+personality, this already otherwise-exact 50-frame phase can be rerun without
+any send-out renderer change.
