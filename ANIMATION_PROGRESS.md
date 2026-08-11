@@ -1,3 +1,10 @@
+# MOVE_METAL_SOUND authoritative source checkpoint — remains unsupported (2026-08-11 worker)
+
+- **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported. `MOVE_METAL_SOUND` is not promoted.
+- **Did:** Added a focused source audit/test pinning exclusive `Move_METAL_SOUND` **0x082d59b7..0x082d5a07** (`0x50` bytes), its complete eight-component generated graph, and true lowest legal Level-50 carrier set **122 `FRONTIER_MON_ARON`**; set 108 MAGNEMITE is outside the Level-50 range. Exact `MOVE_SUPERSONIC` reruns as the shared-component control only.
+- **Next:** Missing gate: complete legal bilateral Scene-ON parties with natural Metal Sound selection plus a Metal-Sound-specific pointer-bounded dense probe through first inactive cleanup twice fresh (JSON/raw-RGB hashes), then Supersonic control rerun; only after full reducer/seam/maps/production-framebuffer equality may Metal Sound be promoted.
+- **Notes:** Source-only checkpoint: no oracle dense window, production renderer, coverage/deferred ledger, gameplay/outcomes/RNG/controller state, engine boundary, barrier, canonical capture import, coordinate/RGB fitting, or absolute-tick rendering changed. `panse SE_M_SCREECH`, `monbg ANIM_DEF_PARTNER`, `splitbgprio_foes ANIM_TARGET`, and the Metal Wave asset remain evidence, not inherited behavior.
+
 # MOVE_GUILLOTINE bilateral 329/329 dense evidence checkpoint — remains unsupported (2026-08-11 worker)
 
 - **State:** Coverage remains **170/276 Level-50 exact**, 0 partial, 0 staged, and 106 unsupported. `MOVE_GUILLOTINE` is not promoted: its complete bilateral dense windows reproduce twice fresh, but no Guillotine reducer, typed seam, compositor, normalized change maps, or production-framebuffer gate exists yet.
