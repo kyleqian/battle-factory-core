@@ -1,3 +1,10 @@
+# MOVE_POISON_POWDER source/classification checkpoint — assignment mis-scoped (2026-08-11 worker)
+
+- **State:** Coverage remains **165/276 Level-50 exact**, 0 partial, 0 staged, and **111 unsupported**. `MOVE_POISON_POWDER` is not promoted: the source-derived inventory classifies it as `outsideFactory` (**0 Factory carriers**) rather than one of the 276 Level-50 moves, so the assigned **165→166/276** delta and “lowest Level-50 Factory carrier” do not exist without falsifying generated data or widening scope.
+- **Did:** Pinned the full `Move_POISON_POWDER` interval **0x082c941c..0x082c954d** (`0x131` bytes), the generated three-component graph (`ANIM_TAG_POISON_POWDER`, loaded-but-unused `ANIM_TAG_POISON_BUBBLE`, and `gPoisonPowderParticleSpriteTemplate -> AnimMovePowderParticle_Step` with `gPowderParticlesAnimCmds`), all graphics/palette symbol identities, and the absence of the move from every Factory mon. The lowest source-legal species is Bulbasaur (learns it at level 15), but that is outside the Factory acceptance tier.
+- **Next:** Supervisor must either select an actual unsupported Level-50 move for the 166/276 promotion, or explicitly re-scope this unit to the outside-Factory tier (which would leave Level-50 at 165/276 and advance outside-Factory 0→1/77). Do not relabel Poison Powder as a Factory move.
+- **Notes:** No oracle stage, reducer, compositor, latch, coverage entry, engine/controller/gameplay state, boundary, unsupported barrier, generated inventory, canonical import, or framebuffer branch changed. Existing Stun/Sleep Powder exactness is untouched.
+
 # MOVE_SLEEP_POWDER exact — bilateral 194/194 promotion (2026-08-11 worker)
 
 - **State:** Level-50 coverage advances **164→165/276 exact**, 0 partial, 0 staged, and **112→111 unsupported**. Only `MOVE_SLEEP_POWDER` moved; `MOVE_POISON_POWDER` remains an independent unsupported move. No boundary or unsupported barrier widened.
