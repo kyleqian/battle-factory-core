@@ -1,0 +1,1324 @@
+{
+  "schema": "factory-m4a-mplay-callback-probe/v2",
+  "case": "liliana",
+  "oracleProfile": "battle-scene-off",
+  "sourceStateReference": {
+    "packetSchema": "factory-m4a-source-state-probe/v3",
+    "digestKey": "sourceSemanticState.stateDigest"
+  },
+  "mplayCallback": {
+    "component": {
+      "revision": "factory-m4a-mplay-callback/v1",
+      "dispatchTables": {
+        "gMPlayJumpTable": {
+          "slots": 36,
+          "targets": [
+            "ply_fine",
+            "ply_goto",
+            "ply_patt",
+            "ply_pend",
+            "ply_rept",
+            "ply_fine",
+            "ply_fine",
+            "ply_fine",
+            "ply_memacc",
+            "ply_prio",
+            "ply_tempo",
+            "ply_keysh",
+            "ply_voice",
+            "ply_vol",
+            "ply_pan",
+            "ply_bend",
+            "ply_bendr",
+            "ply_lfos",
+            "ply_lfodl",
+            "ply_mod",
+            "ply_modt",
+            "ply_fine",
+            "ply_fine",
+            "ply_tune",
+            "ply_fine",
+            "ply_fine",
+            "ply_fine",
+            "ply_port",
+            "ply_xcmd",
+            "ply_endtie",
+            "SampleFreqSet",
+            "TrackStop",
+            "FadeOutBody",
+            "TrkVolPitSet",
+            "RealClearChain",
+            "SoundMainBTM"
+          ]
+        },
+        "gXcmdTable": {
+          "slots": 14,
+          "targets": [
+            "ply_xxx",
+            "ply_xwave",
+            "ply_xtype",
+            "ply_xxx",
+            "ply_xatta",
+            "ply_xdeca",
+            "ply_xsust",
+            "ply_xrele",
+            "ply_xiecv",
+            "ply_xiecl",
+            "ply_xleng",
+            "ply_xswee",
+            "ply_xwait",
+            "ply_xcmd_0D"
+          ]
+        }
+      },
+      "fixedTables": {
+        "gMPlayJumpTableTemplate": {
+          "requestedBytes": 144,
+          "capturedBytes": 144,
+          "complete": true,
+          "sha256": "5b7ed978ec28ff48f43439dc8ca03166d48915f9e1bfbec26b23682f14f09c14"
+        },
+        "gXcmdTable": {
+          "requestedBytes": 56,
+          "capturedBytes": 56,
+          "complete": true,
+          "sha256": "f3dd8203ce3a7fe85ae8c6df7e0125dfbc1028137e7188d06fc480760c5e5402"
+        },
+        "gClockTable": {
+          "requestedBytes": 49,
+          "capturedBytes": 49,
+          "complete": true,
+          "sha256": "952d81c712713fc630d9d622d5f79eec8189f2a4cf05a78442857b635f0d23f8"
+        }
+      },
+      "paths": [
+        {
+          "id": "gMPlayJumpTable[0]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 0,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[1]->ply_goto",
+          "table": "gMPlayJumpTable",
+          "index": 1,
+          "target": "ply_goto",
+          "source": "m4a_1.s:ply_goto",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0..3]",
+            "gMPlayJumpTableTemplate target validation"
+          ],
+          "writes": [
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[2]->ply_patt",
+          "table": "gMPlayJumpTable",
+          "index": 2,
+          "target": "ply_patt",
+          "source": "m4a_1.s:ply_patt -> ply_goto",
+          "transitiveTargets": [
+            "ply_goto"
+          ],
+          "reads": [
+            "track.patternStackIndex",
+            "track.cmdPtr",
+            "track.cmdPtr[0..3]"
+          ],
+          "writes": [
+            "track.patternStack[0..2]",
+            "track.patternStackIndex",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[3]->ply_pend",
+          "table": "gMPlayJumpTable",
+          "index": 3,
+          "target": "ply_pend",
+          "source": "m4a_1.s:ply_pend",
+          "transitiveTargets": [],
+          "reads": [
+            "track.patternStackIndex",
+            "track.patternStack[0..2]"
+          ],
+          "writes": [
+            "track.patternStackIndex",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[4]->ply_rept",
+          "table": "gMPlayJumpTable",
+          "index": 4,
+          "target": "ply_rept",
+          "source": "m4a_1.s:ply_rept -> ply_goto",
+          "transitiveTargets": [
+            "ply_goto"
+          ],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.repeatCount",
+            "track.cmdPtr[0..3]"
+          ],
+          "writes": [
+            "track.repeatCount",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[5]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 5,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[6]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 6,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[7]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 7,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[8]->ply_memacc",
+          "table": "gMPlayJumpTable",
+          "index": 8,
+          "target": "ply_memacc",
+          "source": "m4a.c:ply_memacc -> gMPlayJumpTable[1]",
+          "transitiveTargets": [
+            "ply_goto"
+          ],
+          "reads": [
+            "track.cmdPtr[0..2]",
+            "mplayInfo.memAccArea[index]",
+            "track.cmdPtr[0..3]"
+          ],
+          "writes": [
+            "mplayInfo.memAccArea[index]",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[9]->ply_prio",
+          "table": "gMPlayJumpTable",
+          "index": 9,
+          "target": "ply_prio",
+          "source": "m4a_1.s:ply_prio",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.priority"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[10]->ply_tempo",
+          "table": "gMPlayJumpTable",
+          "index": 10,
+          "target": "ply_tempo",
+          "source": "m4a_1.s:ply_tempo",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "mplayInfo.tempoD/tempoI/tempoU"
+          ],
+          "writes": [
+            "mplayInfo.tempoD/tempoI/tempoU"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[11]->ply_keysh",
+          "table": "gMPlayJumpTable",
+          "index": 11,
+          "target": "ply_keysh",
+          "source": "m4a_1.s:ply_keysh",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.flags"
+          ],
+          "writes": [
+            "track.keyShift",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[12]->ply_voice",
+          "table": "gMPlayJumpTable",
+          "index": 12,
+          "target": "ply_voice",
+          "source": "m4a_1.s:ply_voice",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "mplayInfo.toneTable[index].type/wave/attack",
+            "gMPlayJumpTableTemplate target validation"
+          ],
+          "writes": [
+            "track.tone.type/wave/attack/decay/sustain/release"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[13]->ply_vol",
+          "table": "gMPlayJumpTable",
+          "index": 13,
+          "target": "ply_vol",
+          "source": "m4a_1.s:ply_vol",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.flags"
+          ],
+          "writes": [
+            "track.vol",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[14]->ply_pan",
+          "table": "gMPlayJumpTable",
+          "index": 14,
+          "target": "ply_pan",
+          "source": "m4a_1.s:ply_pan",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.flags"
+          ],
+          "writes": [
+            "track.pan",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[15]->ply_bend",
+          "table": "gMPlayJumpTable",
+          "index": 15,
+          "target": "ply_bend",
+          "source": "m4a_1.s:ply_bend",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.flags"
+          ],
+          "writes": [
+            "track.bend",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[16]->ply_bendr",
+          "table": "gMPlayJumpTable",
+          "index": 16,
+          "target": "ply_bendr",
+          "source": "m4a_1.s:ply_bendr",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.flags"
+          ],
+          "writes": [
+            "track.bendRange",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[17]->ply_lfos",
+          "table": "gMPlayJumpTable",
+          "index": 17,
+          "target": "ply_lfos",
+          "source": "m4a_1.s:ply_lfos -> clear_modM",
+          "transitiveTargets": [
+            "clear_modM"
+          ],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.mod"
+          ],
+          "writes": [
+            "track.lfoSpeed",
+            "track.modM",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[18]->ply_lfodl",
+          "table": "gMPlayJumpTable",
+          "index": 18,
+          "target": "ply_lfodl",
+          "source": "m4a_1.s:ply_lfodl",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.lfoDelay"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[19]->ply_mod",
+          "table": "gMPlayJumpTable",
+          "index": 19,
+          "target": "ply_mod",
+          "source": "m4a_1.s:ply_mod -> clear_modM",
+          "transitiveTargets": [
+            "clear_modM"
+          ],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.mod"
+          ],
+          "writes": [
+            "track.modDepth",
+            "track.modM",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[20]->ply_modt",
+          "table": "gMPlayJumpTable",
+          "index": 20,
+          "target": "ply_modt",
+          "source": "m4a_1.s:ply_modt",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.modM",
+            "track.flags"
+          ],
+          "writes": [
+            "track.modType",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[21]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 21,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[22]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 22,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[23]->ply_tune",
+          "table": "gMPlayJumpTable",
+          "index": 23,
+          "target": "ply_tune",
+          "source": "m4a_1.s:ply_tune",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.flags"
+          ],
+          "writes": [
+            "track.tune",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[24]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 24,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[25]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 25,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[26]->ply_fine",
+          "table": "gMPlayJumpTable",
+          "index": 26,
+          "target": "ply_fine",
+          "source": "m4a_1.s:ply_fine; m4a.c:RealClearChain",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.chan",
+            "channel.statusFlags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "channel.statusFlags",
+            "channel.track/previous/next",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[27]->ply_port",
+          "table": "gMPlayJumpTable",
+          "index": 27,
+          "target": "ply_port",
+          "source": "m4a_1.s:ply_port",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "audio register selected by track command"
+          ],
+          "writes": [
+            "audio register selected by track command"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[28]->ply_xcmd",
+          "table": "gMPlayJumpTable",
+          "index": 28,
+          "target": "ply_xcmd",
+          "source": "m4a.c:ply_xcmd -> gXcmdTable[n]",
+          "transitiveTargets": [
+            "ply_xxx",
+            "ply_xwave",
+            "ply_xtype",
+            "ply_xxx",
+            "ply_xatta",
+            "ply_xdeca",
+            "ply_xsust",
+            "ply_xrele",
+            "ply_xiecv",
+            "ply_xiecl",
+            "ply_xleng",
+            "ply_xswee",
+            "ply_xwait",
+            "ply_xcmd_0D"
+          ],
+          "reads": [
+            "track.cmdPtr[0]",
+            "gXcmdTable[n] target"
+          ],
+          "writes": [
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[29]->ply_endtie",
+          "table": "gMPlayJumpTable",
+          "index": 29,
+          "target": "ply_endtie",
+          "source": "m4a_1.s:ply_endtie",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]",
+            "track.chan",
+            "channel.flags/gateTime/key"
+          ],
+          "writes": [
+            "track.key",
+            "channel.statusFlags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[30]->SampleFreqSet",
+          "table": "gMPlayJumpTable",
+          "index": 30,
+          "target": "SampleFreqSet",
+          "source": "m4a.c:SampleFreqSet",
+          "transitiveTargets": [
+            "m4aSoundVSyncOn"
+          ],
+          "reads": [
+            "SOUND_INFO_PTR fields",
+            "gPcmSamplesPerVBlankTable[freq-1]",
+            "VCOUNT",
+            "DMA control registers"
+          ],
+          "writes": [
+            "SoundInfo frequency/pcm timing",
+            "timer 0",
+            "DMA/timer registers"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[31]->TrackStop",
+          "table": "gMPlayJumpTable",
+          "index": 31,
+          "target": "TrackStop",
+          "source": "m4a.c:TrackStop; gMPlayJumpTable[34]",
+          "transitiveTargets": [
+            "RealClearChain"
+          ],
+          "reads": [
+            "track.flags",
+            "track.chan -> channel status/track/previous/next fields",
+            "SoundInfo.CgbOscOff target"
+          ],
+          "writes": [
+            "channel.statusFlags/track",
+            "track.chan"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[32]->FadeOutBody",
+          "table": "gMPlayJumpTable",
+          "index": 32,
+          "target": "FadeOutBody",
+          "source": "m4a.c:FadeOutBody -> TrackStop",
+          "transitiveTargets": [
+            "TrackStop",
+            "RealClearChain"
+          ],
+          "reads": [
+            "mplayInfo.fadeOI/fadeOC/fadeOV/trackCount/tracks",
+            "track.flags",
+            "track.chan -> channel status/track/previous/next fields"
+          ],
+          "writes": [
+            "mplayInfo.fadeOC/fadeOV/fadeOI/status",
+            "track.volX/flags",
+            "channel chain"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[33]->TrkVolPitSet",
+          "table": "gMPlayJumpTable",
+          "index": 33,
+          "target": "TrkVolPitSet",
+          "source": "m4a.c:TrkVolPitSet",
+          "transitiveTargets": [],
+          "reads": [
+            "track.flags",
+            "track.vol/volX/modT/modM/pan/panX/bend/bendRange/tune/keyShift/keyShiftX/pitX"
+          ],
+          "writes": [
+            "track.volMR/volML/keyM/pitM/flags"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[34]->RealClearChain",
+          "table": "gMPlayJumpTable",
+          "index": 34,
+          "target": "RealClearChain",
+          "source": "m4a.c:RealClearChain",
+          "transitiveTargets": [],
+          "reads": [
+            "channel.track",
+            "channel.previous",
+            "channel.next"
+          ],
+          "writes": [
+            "channel.track/previous/next",
+            "track.chan"
+          ]
+        },
+        {
+          "id": "gMPlayJumpTable[35]->SoundMainBTM",
+          "table": "gMPlayJumpTable",
+          "index": 35,
+          "target": "SoundMainBTM",
+          "source": "m4a_1.s:SoundMainBTM",
+          "transitiveTargets": [],
+          "reads": [
+            "SoundInfo and direct channel scalar state",
+            "audio FIFO/register state"
+          ],
+          "writes": [
+            "audio FIFO/register state"
+          ]
+        },
+        {
+          "id": "gXcmdTable[0]->ply_xxx",
+          "table": "gXcmdTable",
+          "index": 0,
+          "target": "ply_xxx",
+          "source": "m4a.c:ply_xxx -> gMPlayJumpTable[0]",
+          "transitiveTargets": [
+            "ply_fine",
+            "RealClearChain"
+          ],
+          "reads": [
+            "gMPlayJumpTable[0] target",
+            "track.chan",
+            "channel chain"
+          ],
+          "writes": [
+            "channel chain",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gXcmdTable[1]->ply_xwave",
+          "table": "gXcmdTable",
+          "index": 1,
+          "target": "ply_xwave",
+          "source": "m4a.c:ply_xwave",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0..3]"
+          ],
+          "writes": [
+            "track.tone.wav",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[2]->ply_xtype",
+          "table": "gXcmdTable",
+          "index": 2,
+          "target": "ply_xtype",
+          "source": "m4a.c:ply_xtype",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.tone.type",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[3]->ply_xxx",
+          "table": "gXcmdTable",
+          "index": 3,
+          "target": "ply_xxx",
+          "source": "m4a.c:ply_xxx -> gMPlayJumpTable[0]",
+          "transitiveTargets": [
+            "ply_fine",
+            "RealClearChain"
+          ],
+          "reads": [
+            "gMPlayJumpTable[0] target",
+            "track.chan",
+            "channel chain"
+          ],
+          "writes": [
+            "channel chain",
+            "track.flags"
+          ]
+        },
+        {
+          "id": "gXcmdTable[4]->ply_xatta",
+          "table": "gXcmdTable",
+          "index": 4,
+          "target": "ply_xatta",
+          "source": "m4a.c:ply_xatta",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.tone.attack",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[5]->ply_xdeca",
+          "table": "gXcmdTable",
+          "index": 5,
+          "target": "ply_xdeca",
+          "source": "m4a.c:ply_xdeca",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.tone.decay",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[6]->ply_xsust",
+          "table": "gXcmdTable",
+          "index": 6,
+          "target": "ply_xsust",
+          "source": "m4a.c:ply_xsust",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.tone.sustain",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[7]->ply_xrele",
+          "table": "gXcmdTable",
+          "index": 7,
+          "target": "ply_xrele",
+          "source": "m4a.c:ply_xrele",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.tone.release",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[8]->ply_xiecv",
+          "table": "gXcmdTable",
+          "index": 8,
+          "target": "ply_xiecv",
+          "source": "m4a.c:ply_xiecv",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.pseudoEchoVolume",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[9]->ply_xiecl",
+          "table": "gXcmdTable",
+          "index": 9,
+          "target": "ply_xiecl",
+          "source": "m4a.c:ply_xiecl",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.pseudoEchoLength",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[10]->ply_xleng",
+          "table": "gXcmdTable",
+          "index": 10,
+          "target": "ply_xleng",
+          "source": "m4a.c:ply_xleng",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.tone.length",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[11]->ply_xswee",
+          "table": "gXcmdTable",
+          "index": 11,
+          "target": "ply_xswee",
+          "source": "m4a.c:ply_xswee",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0]"
+          ],
+          "writes": [
+            "track.tone.pan_sweep",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[12]->ply_xwait",
+          "table": "gXcmdTable",
+          "index": 12,
+          "target": "ply_xwait",
+          "source": "m4a.c:ply_xwait",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0..1]",
+            "track.timer"
+          ],
+          "writes": [
+            "track.timer",
+            "track.wait",
+            "track.cmdPtr"
+          ]
+        },
+        {
+          "id": "gXcmdTable[13]->ply_xcmd_0D",
+          "table": "gXcmdTable",
+          "index": 13,
+          "target": "ply_xcmd_0D",
+          "source": "m4a.c:ply_xcmd_0D",
+          "transitiveTargets": [],
+          "reads": [
+            "track.cmdPtr[0..3]"
+          ],
+          "writes": [
+            "track.unk_3C",
+            "track.cmdPtr"
+          ]
+        }
+      ],
+      "coverage": {
+        "complete": true,
+        "sourceGeneral": true,
+        "expectedPathIds": [
+          "gMPlayJumpTable[0]->ply_fine",
+          "gMPlayJumpTable[1]->ply_goto",
+          "gMPlayJumpTable[2]->ply_patt",
+          "gMPlayJumpTable[3]->ply_pend",
+          "gMPlayJumpTable[4]->ply_rept",
+          "gMPlayJumpTable[5]->ply_fine",
+          "gMPlayJumpTable[6]->ply_fine",
+          "gMPlayJumpTable[7]->ply_fine",
+          "gMPlayJumpTable[8]->ply_memacc",
+          "gMPlayJumpTable[9]->ply_prio",
+          "gMPlayJumpTable[10]->ply_tempo",
+          "gMPlayJumpTable[11]->ply_keysh",
+          "gMPlayJumpTable[12]->ply_voice",
+          "gMPlayJumpTable[13]->ply_vol",
+          "gMPlayJumpTable[14]->ply_pan",
+          "gMPlayJumpTable[15]->ply_bend",
+          "gMPlayJumpTable[16]->ply_bendr",
+          "gMPlayJumpTable[17]->ply_lfos",
+          "gMPlayJumpTable[18]->ply_lfodl",
+          "gMPlayJumpTable[19]->ply_mod",
+          "gMPlayJumpTable[20]->ply_modt",
+          "gMPlayJumpTable[21]->ply_fine",
+          "gMPlayJumpTable[22]->ply_fine",
+          "gMPlayJumpTable[23]->ply_tune",
+          "gMPlayJumpTable[24]->ply_fine",
+          "gMPlayJumpTable[25]->ply_fine",
+          "gMPlayJumpTable[26]->ply_fine",
+          "gMPlayJumpTable[27]->ply_port",
+          "gMPlayJumpTable[28]->ply_xcmd",
+          "gMPlayJumpTable[29]->ply_endtie",
+          "gMPlayJumpTable[30]->SampleFreqSet",
+          "gMPlayJumpTable[31]->TrackStop",
+          "gMPlayJumpTable[32]->FadeOutBody",
+          "gMPlayJumpTable[33]->TrkVolPitSet",
+          "gMPlayJumpTable[34]->RealClearChain",
+          "gMPlayJumpTable[35]->SoundMainBTM",
+          "gXcmdTable[0]->ply_xxx",
+          "gXcmdTable[1]->ply_xwave",
+          "gXcmdTable[2]->ply_xtype",
+          "gXcmdTable[3]->ply_xxx",
+          "gXcmdTable[4]->ply_xatta",
+          "gXcmdTable[5]->ply_xdeca",
+          "gXcmdTable[6]->ply_xsust",
+          "gXcmdTable[7]->ply_xrele",
+          "gXcmdTable[8]->ply_xiecv",
+          "gXcmdTable[9]->ply_xiecl",
+          "gXcmdTable[10]->ply_xleng",
+          "gXcmdTable[11]->ply_xswee",
+          "gXcmdTable[12]->ply_xwait",
+          "gXcmdTable[13]->ply_xcmd_0D"
+        ],
+        "observedPathIds": [
+          "gMPlayJumpTable[0]->ply_fine",
+          "gMPlayJumpTable[1]->ply_goto",
+          "gMPlayJumpTable[2]->ply_patt",
+          "gMPlayJumpTable[3]->ply_pend",
+          "gMPlayJumpTable[4]->ply_rept",
+          "gMPlayJumpTable[5]->ply_fine",
+          "gMPlayJumpTable[6]->ply_fine",
+          "gMPlayJumpTable[7]->ply_fine",
+          "gMPlayJumpTable[8]->ply_memacc",
+          "gMPlayJumpTable[9]->ply_prio",
+          "gMPlayJumpTable[10]->ply_tempo",
+          "gMPlayJumpTable[11]->ply_keysh",
+          "gMPlayJumpTable[12]->ply_voice",
+          "gMPlayJumpTable[13]->ply_vol",
+          "gMPlayJumpTable[14]->ply_pan",
+          "gMPlayJumpTable[15]->ply_bend",
+          "gMPlayJumpTable[16]->ply_bendr",
+          "gMPlayJumpTable[17]->ply_lfos",
+          "gMPlayJumpTable[18]->ply_lfodl",
+          "gMPlayJumpTable[19]->ply_mod",
+          "gMPlayJumpTable[20]->ply_modt",
+          "gMPlayJumpTable[21]->ply_fine",
+          "gMPlayJumpTable[22]->ply_fine",
+          "gMPlayJumpTable[23]->ply_tune",
+          "gMPlayJumpTable[24]->ply_fine",
+          "gMPlayJumpTable[25]->ply_fine",
+          "gMPlayJumpTable[26]->ply_fine",
+          "gMPlayJumpTable[27]->ply_port",
+          "gMPlayJumpTable[28]->ply_xcmd",
+          "gMPlayJumpTable[29]->ply_endtie",
+          "gMPlayJumpTable[30]->SampleFreqSet",
+          "gMPlayJumpTable[31]->TrackStop",
+          "gMPlayJumpTable[32]->FadeOutBody",
+          "gMPlayJumpTable[33]->TrkVolPitSet",
+          "gMPlayJumpTable[34]->RealClearChain",
+          "gMPlayJumpTable[35]->SoundMainBTM",
+          "gXcmdTable[0]->ply_xxx",
+          "gXcmdTable[1]->ply_xwave",
+          "gXcmdTable[2]->ply_xtype",
+          "gXcmdTable[3]->ply_xxx",
+          "gXcmdTable[4]->ply_xatta",
+          "gXcmdTable[5]->ply_xdeca",
+          "gXcmdTable[6]->ply_xsust",
+          "gXcmdTable[7]->ply_xrele",
+          "gXcmdTable[8]->ply_xiecv",
+          "gXcmdTable[9]->ply_xiecl",
+          "gXcmdTable[10]->ply_xleng",
+          "gXcmdTable[11]->ply_xswee",
+          "gXcmdTable[12]->ply_xwait",
+          "gXcmdTable[13]->ply_xcmd_0D"
+        ],
+        "expectedTargetIds": [
+          "0:ply_fine",
+          "1:ply_goto",
+          "2:ply_patt",
+          "3:ply_pend",
+          "4:ply_rept",
+          "5:ply_fine",
+          "6:ply_fine",
+          "7:ply_fine",
+          "8:ply_memacc",
+          "9:ply_prio",
+          "10:ply_tempo",
+          "11:ply_keysh",
+          "12:ply_voice",
+          "13:ply_vol",
+          "14:ply_pan",
+          "15:ply_bend",
+          "16:ply_bendr",
+          "17:ply_lfos",
+          "18:ply_lfodl",
+          "19:ply_mod",
+          "20:ply_modt",
+          "21:ply_fine",
+          "22:ply_fine",
+          "23:ply_tune",
+          "24:ply_fine",
+          "25:ply_fine",
+          "26:ply_fine",
+          "27:ply_port",
+          "28:ply_xcmd",
+          "29:ply_endtie",
+          "30:SampleFreqSet",
+          "31:TrackStop",
+          "32:FadeOutBody",
+          "33:TrkVolPitSet",
+          "34:RealClearChain",
+          "35:SoundMainBTM",
+          "36:ply_xxx",
+          "37:ply_xwave",
+          "38:ply_xtype",
+          "39:ply_xxx",
+          "40:ply_xatta",
+          "41:ply_xdeca",
+          "42:ply_xsust",
+          "43:ply_xrele",
+          "44:ply_xiecv",
+          "45:ply_xiecl",
+          "46:ply_xleng",
+          "47:ply_xswee",
+          "48:ply_xwait",
+          "49:ply_xcmd_0D"
+        ],
+        "observedTargetIds": [
+          "0:ply_fine",
+          "1:ply_goto",
+          "2:ply_patt",
+          "3:ply_pend",
+          "4:ply_rept",
+          "5:ply_fine",
+          "6:ply_fine",
+          "7:ply_fine",
+          "8:ply_memacc",
+          "9:ply_prio",
+          "10:ply_tempo",
+          "11:ply_keysh",
+          "12:ply_voice",
+          "13:ply_vol",
+          "14:ply_pan",
+          "15:ply_bend",
+          "16:ply_bendr",
+          "17:ply_lfos",
+          "18:ply_lfodl",
+          "19:ply_mod",
+          "20:ply_modt",
+          "21:ply_fine",
+          "22:ply_fine",
+          "23:ply_tune",
+          "24:ply_fine",
+          "25:ply_fine",
+          "26:ply_fine",
+          "27:ply_port",
+          "28:ply_xcmd",
+          "29:ply_endtie",
+          "30:SampleFreqSet",
+          "31:TrackStop",
+          "32:FadeOutBody",
+          "33:TrkVolPitSet",
+          "34:RealClearChain",
+          "35:SoundMainBTM",
+          "36:ply_xxx",
+          "37:ply_xwave",
+          "38:ply_xtype",
+          "39:ply_xxx",
+          "40:ply_xatta",
+          "41:ply_xdeca",
+          "42:ply_xsust",
+          "43:ply_xrele",
+          "44:ply_xiecv",
+          "45:ply_xiecl",
+          "46:ply_xleng",
+          "47:ply_xswee",
+          "48:ply_xwait",
+          "49:ply_xcmd_0D"
+        ]
+      }
+    },
+    "componentDigest": "bfacdda5b552bd322fb88e18c20d0af4c54fdf8713d3ec0622810115202d87b8"
+  },
+  "residualDereferences": [
+    {
+      "stage": "sixth-MPlayMain",
+      "source": "reference/pokeemerald/src/m4a_1.s:1130-1466",
+      "read": "Indirect command and pattern handlers can advance cmdPtr or a pattern-stack target beyond the captured 256/128-byte windows.",
+      "captured": "Every gMPlayJumpTable/gXcmdTable target reachable in the 113 boundary tables is source/ELF-audited, but arbitrary command bytes and handler control flow remain window-bounded.",
+      "remainder": "The unbounded command/pattern source window remains residual; this packet closes only callback transitive reads."
+    },
+    {
+      "stage": "SoundMainRAM-channel-passes",
+      "source": "reference/pokeemerald/src/m4a_1.s:134-445",
+      "read": "The ARM mixer indexes PCM and WaveData sample bytes using mutable count/fw/current state.",
+      "captured": "All 12 SoundChannel structs, full readable WaveData sample regions, the complete PCM buffer, DMA roles, and VCOUNT remain in the joined v3 receipt.",
+      "remainder": "If a malformed/current sample target falls outside its captured WaveData, the target remains incomplete; no such target was observed."
+    }
+  ],
+  "observations": [
+    {
+      "sourceStateDigest": "75050563b447f4df6078afc684b2103f401de44e0af83a955615f733e6791f4a",
+      "m4aCost": 28203
+    },
+    {
+      "sourceStateDigest": "de24421aaaa62bc671b7954b161eec35f97343f393722c2bf247ed37d21df6db",
+      "m4aCost": 28069
+    },
+    {
+      "sourceStateDigest": "04e627717fe727b96245a2f4ee30034752d39838a4fe1e4f04c3238087c5f97f",
+      "m4aCost": 33911
+    },
+    {
+      "sourceStateDigest": "c360a4950dfd3a22f12068912a1e1a3937bce17b006ca81d2ca1bc9f2e4b3185",
+      "m4aCost": 24827
+    },
+    {
+      "sourceStateDigest": "67dcf01479ae763df89833827da03bd67ea8c2b2464b1e91acf12fa387454d37",
+      "m4aCost": 24732
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "m4aCost": 40832
+    },
+    {
+      "sourceStateDigest": "7e349fb8f37b31fe407521166341e453e82ec5579cd0df5e735f367e7f8940ff",
+      "m4aCost": 31568
+    },
+    {
+      "sourceStateDigest": "136219c3db5a06a580f1aa93008a8266b67b21f54a53b59af9725013d68478f2",
+      "m4aCost": 31427
+    },
+    {
+      "sourceStateDigest": "254105d0e300044129ce403e43cd0c3e9ef937dc5966e03678aeffd5b4b98e28",
+      "m4aCost": 37552
+    },
+    {
+      "sourceStateDigest": "48e609796c61993b98ce4aed1fa69eb8190f01f114bde9eb392f7cb9c629d981",
+      "m4aCost": 31569
+    },
+    {
+      "sourceStateDigest": "4098a02e3f0a922f3f402061333f5320154be04365649f44ab33db3d406935b6",
+      "m4aCost": 31301
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "m4aCost": 47917
+    },
+    {
+      "sourceStateDigest": "574a5e1547725c9685e4a84569319902188d205a7f3b1c6f3c20c9f25ad33d20",
+      "m4aCost": 33213
+    },
+    {
+      "sourceStateDigest": "6a88a5d761ef2e24daf4c73eb5da29c8413d1066dc261a4878e57a022db33f1a",
+      "m4aCost": 35195
+    },
+    {
+      "sourceStateDigest": "de8497c08457a8bfcd785ac38eb994e6c6ad6146a46e135b95fc9329bffb8f2d",
+      "m4aCost": 35257
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "m4aCost": 34764
+    },
+    {
+      "sourceStateDigest": "0dbdc79bf393698e16fffbb04256067e2193fb6ae71827d5b9451d22dc471808",
+      "m4aCost": 33443
+    },
+    {
+      "sourceStateDigest": "2efd8904f380af9da21b782a50a355dd43c8258ca7005b8b237d84b84a743a3a",
+      "m4aCost": 32531
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "m4aCost": 40609
+    },
+    {
+      "sourceStateDigest": "d4eafd4be04ffbc4a1a5d9a999c46951cf37e4d3455f53d73961e2c4d863c0b4",
+      "m4aCost": 38408
+    },
+    {
+      "sourceStateDigest": "e7fe29bbc43e4e61a49403e7dbb44933dfef2649e6bdcc987b7c658b5e947809",
+      "m4aCost": 37813
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "m4aCost": 39558
+    },
+    {
+      "sourceStateDigest": "22c5d662c36c4bd2b6ba595410f8ba4c148d1bfb6bffaadb74fb52c7517dacd8",
+      "m4aCost": 30214
+    },
+    {
+      "sourceStateDigest": "cec9c411d0fd7a5187232111dfe4f540ea44cc33c6d8892daa58bb056fe45123",
+      "m4aCost": 29571
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "m4aCost": 42318
+    },
+    {
+      "sourceStateDigest": "730d5b961495f425916a9ef802b17018b2256eef4dfc38576f947c2d0ebc239d",
+      "m4aCost": 31777
+    },
+    {
+      "sourceStateDigest": "aa020fe7e7f2649b70633275a7eb7426a5798e75ee67da6606665aeceafd0c4a",
+      "m4aCost": 31737
+    },
+    {
+      "sourceStateDigest": "6854eca211190cad143f165b2c43e6011d7fbba5c910cad932e679c0a933452a",
+      "m4aCost": 36827
+    },
+    {
+      "sourceStateDigest": "898a71ab6287958bf7ee9f5c76a2487e7087dace83615e40ef8bf4ce3fe998bf",
+      "m4aCost": 31550
+    },
+    {
+      "sourceStateDigest": "9808dfff65029cdd2806b77f0c2c5f9617be333e81c3e0c055a4590116a86e3f",
+      "m4aCost": 31415
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "m4aCost": 42275
+    }
+  ]
+}

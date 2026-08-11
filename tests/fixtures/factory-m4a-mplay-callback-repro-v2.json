@@ -1,0 +1,25 @@
+{
+  "schema": "factory-m4a-mplay-callback-repro/v2",
+  "oracleProfile": "battle-scene-off",
+  "freshRunsPerCase": 2,
+  "cases": [
+    {
+      "case": "anchor",
+      "firstFreshSha256": "e7d8d162d18541f408380fc1963a1bd16fda5bb4c7b1a1d76562be733185b66e",
+      "secondFreshSha256": "e7d8d162d18541f408380fc1963a1bd16fda5bb4c7b1a1d76562be733185b66e",
+      "byteIdentical": true
+    },
+    {
+      "case": "liliana",
+      "firstFreshSha256": "7220967d2a9f394dfb6aa6400cd9537706e8d0ac0bd22d82eb147547991fcff9",
+      "secondFreshSha256": "7220967d2a9f394dfb6aa6400cd9537706e8d0ac0bd22d82eb147547991fcff9",
+      "byteIdentical": true
+    },
+    {
+      "case": "factory-varied",
+      "firstFreshSha256": "5495157a1382d16f862c5de84e8957bfaf382068197992f68737b215f08e203c",
+      "secondFreshSha256": "5495157a1382d16f862c5de84e8957bfaf382068197992f68737b215f08e203c",
+      "byteIdentical": true
+    }
+  ]
+}
