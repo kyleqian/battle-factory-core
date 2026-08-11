@@ -121,10 +121,6 @@ function fail(message: string): never {
   throw new Error(`factory-m4a-mplay-execution-v1: ${message}`);
 }
 
-function readJson<T>(path: string): T {
-  return JSON.parse(readFileSync(path, "utf8")) as T;
-}
-
 function sha256(value: Buffer | string): string {
   return createHash("sha256").update(value).digest("hex");
 }
