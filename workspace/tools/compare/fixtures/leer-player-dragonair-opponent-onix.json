@@ -1,0 +1,40 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "orientation": "player-back",
+  "scenario": "tools/battle-lab/mechanic-leer-player-dragonair-opponent-onix.json",
+  "probe": "tools/compare/agilityProbe.py",
+  "denseWindow": { "startFrame": 212, "endFrame": 281, "frameCount": 70 },
+  "appStage": { "presentationAge": 0 },
+  "attacker": {
+    "species": "DRAGONAIR",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 104 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 156,
+    "playerMaxHp": 168,
+    "opponentHp": 142,
+    "opponentMaxHp": 142,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "evidenceSha256": "e9e89adb9d92abb63309308f78d77b0b2700c67c83b8f0922272c52e25601ecd",
+  "secondFreshEvidenceSha256": "e9e89adb9d92abb63309308f78d77b0b2700c67c83b8f0922272c52e25601ecd",
+  "rawRgbSha256": "7f2420c28511ee57b8b9fae9b78a2c2503fbcaa6d26e4f9b8549d97ab6400a73",
+  "changeMap": "tools/compare/evidence/leer-changemap-player.txt",
+  "changeMapSha256": "7738d2fc420e6a288b677065afaa1c292f97904607c8111f4ef900a35cf1a78e"
+}
