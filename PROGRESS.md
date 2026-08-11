@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1131 — [supervisor, 2026-08-11] **S8 reset resumed on folded Scene-OFF union**
+
+- **State:** master is green through the mandatory `animation-main` fold
+  `b7c2408b`. S8's three finite gates remain closed; new work must improve the
+  generic seven-battle controller/presentation seam without extending the
+  stopped canonical Battle-2 march past tick 33331.
+- **Did:** folded `animation-main` through `77201333`, then independently ran
+  `npm test` (**945 files / 8,677 passed / 1 skipped**, **218.85s**) and the
+  production build (**642 modules**, Vite **6.81s**) on the union. Both oracle
+  profiles pass freshness; OFF bootstrap v5 is healthy.
+- **Next:** close the source-proven construction-clock remainder that prevents
+  the live generic post-win handoff from deriving Battle 2+ opponent content
+  without an adopted schedule; verify the resulting reusable transition with
+  short staged OFF evidence, never a sequential canonical turn window.
+- **Notes:** current seven-win live-path pins already reach `roundComplete` at
+  battle index 6 and the far-side staged LILIANA room window is 115/115 exact.
+  #55 is the named provenance blocker between those mechanisms. No material
+  decision is deferred.
+
 ## 1130 — [supervisor, 2026-08-11] **#55 exact MPlay selector folded; wind-down green**
 
 - **State:** master is green through `54712feb`. The sixth-player execution
@@ -40,24 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Focused selector/v3/read-contract **8/8**, smoke **375/375**, forced
   typecheck, full `npm test` **922 files / 8,619 passed / 1 skipped**
   (**84.03s**), and build (**631 modules**, Vite **6.23s**) are green.
-
-## 1128 — [supervisor, 2026-08-11] **#55 audio read closure folded; final union green**
-
-- **State:** master is green through `60d95120`; the actual mixer-entry target,
-  mutable-route provenance, and command/pattern read-safety classes are closed.
-  #55 remains open only for exact timing composition, and its construction
-  clock stays null/unwired.
-- **Did:** folded the 13-target `ply_note` classification (**6 inline / 0
-  keysplit / 7 rhythm**) and the source-general MPlay command contract
-  (**100/100** candidate tracks complete, max **5 commands / 11 reads**).
-  Independently regenerated the combined evidence union at **9/9**.
-- **Next:** capture a versioned player scalar selector that preserves
-  `tempoI`/`tempoC` before attempting exact per-call MPlay cost reduction.
-  Do not alter frozen v3, infer the erased selector, fit a duration, or wire
-  `runFactoryConstructionClock`.
-- **Notes:** orient folded animation-main through `77e3d325`; subsequent
-  animation commits remain owned by the active animation supervisor. Final
-  union `npm test` **921 files / 8,617 passed / 1 skipped** (**146.46s**),
-  build **631 modules** (Vite **6.29s**), vanilla soak **20/20** (**32.2s**),
-  and full-policy soak **60/60** (**278.9s**) are green with **0 crash / 0
-  hang**. OFF oracle is healthy; no material decision was deferred.
