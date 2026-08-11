@@ -5,6 +5,7 @@ import {
   dispatchFactoryTimer0DirectSound,
   type FactoryDirectSoundChannel,
   type FactoryTimer0DirectSoundChannelState,
+  type FactoryTimer0DirectSoundDmaState,
   type FactoryTimer0DirectSoundState,
 } from "../src/engine/factoryConstructionClock.ts";
 
@@ -120,8 +121,12 @@ describe("source-derived Timer 0 Direct Sound dispatch", () => {
       { countWords: 3 },
     ]) {
       const a = channel("A", 0);
+      const invalidDma = {
+        ...a.dma!,
+        ...dmaPatch,
+      } as unknown as FactoryTimer0DirectSoundDmaState;
       expect(() => dispatchFactoryTimer0DirectSound({
-        channels: [{ ...a, dma: { ...a.dma!, ...dmaPatch } }, channel("B", 7)],
+        channels: [{ ...a, dma: invalidDma }, channel("B", 7)],
       })).toThrow(/unmodeled|expected 4/);
     }
     expect(() => dispatchFactoryTimer0DirectSound(soundState(8, 0))).toThrow(/\[0, 7\]/);
