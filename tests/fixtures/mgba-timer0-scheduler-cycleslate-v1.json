@@ -1,0 +1,279 @@
+{
+  "schema": "mgba-timer0-scheduler-cycleslate/v1",
+  "scope": "mGBA 0.10.5 source-only absolute-deadline, cyclesLate propagation, and equal-deadline Timer 0 receipt boundary",
+  "runtime": {
+    "oracleProfile": "battle-scene-off",
+    "binding": "vendored libmgba-py CFFI",
+    "library": "libmgba.0.10.5.dylib",
+    "version": "0.10.5",
+    "gitRevision": null
+  },
+  "release": {
+    "url": "https://github.com/mgba-emu/mgba/archive/refs/tags/0.10.5.tar.gz",
+    "sha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14",
+    "archiveRoot": "mgba-0.10.5"
+  },
+  "source": {
+    "version": "0.10.5",
+    "files": [
+      {
+        "path": "src/core/timing.c",
+        "sha256": "f1290a60ea28cce32ef54c383397b2e2beff852dc02f8d44a69ef78ca7989d51"
+      },
+      {
+        "path": "include/mgba/core/timing.h",
+        "sha256": "0bc98ea66ded4856a258786dc19c3c2a6e19cf4c1046211b93d9304729aa1915"
+      },
+      {
+        "path": "src/gba/gba.c",
+        "sha256": "92b0fd214bfa563a1694921661c4413ffd96871cd6162cd762542fb5c2a2c098"
+      },
+      {
+        "path": "src/gba/timer.c",
+        "sha256": "318054f31c767090b907fe2a32f65f878a702e339468c727a54c6f2b865b83f2"
+      },
+      {
+        "path": "src/gba/audio.c",
+        "sha256": "32f8067d09c80b3e77bedc16d52f16a3b4ee7ba099a6cd24e8d5cc8579729a7c"
+      },
+      {
+        "path": "src/gba/video.c",
+        "sha256": "c99391529cce6729400ae199ca9ddb65fec7c0d7f1945d214b8941c61e1e694c"
+      },
+      {
+        "path": "src/gba/dma.c",
+        "sha256": "83f1ff180942907d274208284d3d5d9148bbcb9e60ab51302bf59933d1ccdb41"
+      }
+    ],
+    "anchors": [
+      {
+        "id": "timing-event-layout",
+        "file": "include/mgba/core/timing.h",
+        "lines": "13-32"
+      },
+      {
+        "id": "timing-interrupt",
+        "file": "src/core/timing.c",
+        "lines": "28-34"
+      },
+      {
+        "id": "timing-schedule",
+        "file": "src/core/timing.c",
+        "lines": "36-59"
+      },
+      {
+        "id": "timing-absolute",
+        "file": "src/core/timing.c",
+        "lines": "61-63"
+      },
+      {
+        "id": "timing-tick",
+        "file": "src/core/timing.c",
+        "lines": "96-117"
+      },
+      {
+        "id": "timing-current-time",
+        "file": "src/core/timing.c",
+        "lines": "119-136"
+      },
+      {
+        "id": "gba-irq-delay",
+        "file": "src/gba/gba.c",
+        "lines": "27-27"
+      },
+      {
+        "id": "gba-irq-registration",
+        "file": "src/gba/gba.c",
+        "lines": "126-131"
+      },
+      {
+        "id": "gba-process-events",
+        "file": "src/gba/gba.c",
+        "lines": "293-339"
+      },
+      {
+        "id": "gba-irq-schedule",
+        "file": "src/gba/gba.c",
+        "lines": "550-565"
+      },
+      {
+        "id": "timer0-callback",
+        "file": "src/gba/timer.c",
+        "lines": "13-43"
+      },
+      {
+        "id": "timer0-registration",
+        "file": "src/gba/timer.c",
+        "lines": "66-84"
+      },
+      {
+        "id": "timer0-reschedule",
+        "file": "src/gba/timer.c",
+        "lines": "86-114"
+      },
+      {
+        "id": "audio-registration",
+        "file": "src/gba/audio.c",
+        "lines": "34-38"
+      },
+      {
+        "id": "audio-fifo-deadline",
+        "file": "src/gba/audio.c",
+        "lines": "327-374"
+      },
+      {
+        "id": "audio-sample-reschedule",
+        "file": "src/gba/audio.c",
+        "lines": "439-481"
+      },
+      {
+        "id": "video-registration",
+        "file": "src/gba/video.c",
+        "lines": "55-77"
+      },
+      {
+        "id": "video-callbacks",
+        "file": "src/gba/video.c",
+        "lines": "140-219"
+      },
+      {
+        "id": "dma-registration",
+        "file": "src/gba/dma.c",
+        "lines": "19-24"
+      },
+      {
+        "id": "dma-schedule",
+        "file": "src/gba/dma.c",
+        "lines": "112-137"
+      },
+      {
+        "id": "dma-video-deadlines",
+        "file": "src/gba/dma.c",
+        "lines": "139-183"
+      },
+      {
+        "id": "dma-callback",
+        "file": "src/gba/dma.c",
+        "lines": "185-215"
+      },
+      {
+        "id": "dma-active-selection",
+        "file": "src/gba/dma.c",
+        "lines": "217-241"
+      },
+      {
+        "id": "dma-service-deadlines",
+        "file": "src/gba/dma.c",
+        "lines": "243-333"
+      }
+    ]
+  },
+  "scheduler": {
+    "clock": {
+      "eventWhenFormula": "mTimingSchedule(delta): event.when = masterCycles + relativeCycles + delta",
+      "currentTimeFormula": "mTimingCurrentTime = masterCycles + relativeCycles",
+      "absoluteScheduleFormula": "mTimingScheduleAbsolute(W): mTimingSchedule(W - mTimingCurrentTime), therefore event.when = W",
+      "duePredicate": "mTimingTick dispatches root event when event.when - masterCycles <= 0",
+      "callbackLateFormula": "cyclesLate = -(event.when - masterCycles) = dispatchCurrentTime - event.when during GBAProcessEvents",
+      "correctedDueFormula": "during the GBA process-events tick, mTimingCurrentTime - cyclesLate = event.when",
+      "callbackChargeRule": "mTimingTick advances masterCycles only by its supplied cycles; callback bodies receive no automatic emulated-cycle charge",
+      "processEventsRule": "GBAProcessEvents clears cpu->cycles before mTimingTick and repeats mTimingTick while cpuBlocked; cpu->cycles is set to the next event while a DMA remains blocked"
+    },
+    "equalDeadlineOrdering": {
+      "insertionRule": "insert before an existing root only if its deadline is later, or its equal deadline has numerically greater priority",
+      "priorityRule": "lower numeric priority runs first at an equal absolute deadline",
+      "equalPriorityRule": "an equal-priority insertion walks past the existing event, preserving existing insertion order",
+      "callbackInsertionRule": "a callback-created event uses the same root-list insertion; it can precede remaining higher-priority equal-deadline roots but cannot rerun callbacks already removed from the root",
+      "rerootRule": "if mTimingInterrupt has moved the root to reroot, scheduling restores it; after the root drains mTimingTick restores reroot and recursively ticks zero cycles when its next event is already due",
+      "registeredPriorities": [
+        {
+          "event": "GBA IRQ Event",
+          "priority": 0
+        },
+        {
+          "event": "GBA Video",
+          "priority": 8
+        },
+        {
+          "event": "GBA Audio Sample",
+          "priority": 24
+        },
+        {
+          "event": "GBA Timer 0",
+          "priority": 32
+        },
+        {
+          "event": "GBA DMA",
+          "priority": 64
+        }
+      ]
+    }
+  },
+  "callbacks": {
+    "irq": {
+      "event": "GBA IRQ Event",
+      "priority": 0,
+      "delayMasterCycles": 7,
+      "propagation": "GBARaiseIRQ marks IF, then GBATestIRQ schedules only when IE & IF is nonzero and no IRQ event is already scheduled: requested delta = 7 - cyclesLate, so an originating deadline D requests IRQ deadline D + 7",
+      "caveat": "an already scheduled IRQ is not moved; an overdue D + 7 IRQ remains ordered by its absolute deadline before priority is considered"
+    },
+    "video": {
+      "event": "GBA Video",
+      "priority": 8,
+      "propagation": "_startHdraw and _startHblank reschedule their next phase with interval - cyclesLate, preserving the original phase deadline D + interval",
+      "dmaDeadlines": "Vblank/Hblank/display-start callbacks pass -cyclesLate to DMA runners; those runners set dma.when = currentTime + 3 - cyclesLate = D + 3",
+      "irqDeadlines": "VCount and Vblank IRQs pass cyclesLate and request D + 7; Hblank passes cyclesLate - 6 and requests D + 13"
+    },
+    "audioSample": {
+      "event": "GBA Audio Sample",
+      "priority": 24,
+      "intervalMasterCycles": 1024,
+      "propagation": "_sample mixes at currentTime - cyclesLate = D, then schedules 1024 - cyclesLate, preserving deadline D + 1024",
+      "relationToTimer0": "the sample event does not call GBAAudioSampleFIFO; Timer 0 owns FIFO word consumption and custom FIFO-DMA requests"
+    },
+    "timer0": {
+      "event": "GBA Timer 0",
+      "priority": 32,
+      "callbackOrder": [
+        "reschedule the normal timer from currentTime - cyclesLate",
+        "raise a Timer 0 IRQ if its IRQ flag is set",
+        "sample routed FIFO A",
+        "sample routed FIFO B",
+        "cascade a qualifying count-up successor"
+      ],
+      "normalReschedule": "GBATimerUpdateRegister derives currentTime = mTimingCurrentTime - cyclesLate = D, aligns it, updates the register, and schedules the next absolute timer deadline from that corrected time",
+      "fifoDmaDeadline": "for each qualifying FIFO, GBAAudioSampleFIFO stores dma.when = currentTime - cyclesLate = D and nextCount = 4 before GBADMASchedule/GBADMAUpdate schedules the shared DMA event",
+      "irqDeadline": "if enabled and no IRQ event is already queued, Timer 0's GBARaiseIRQ path requests D + 7"
+    },
+    "dma": {
+      "event": "GBA DMA",
+      "priority": 64,
+      "activeSelection": "GBADMAUpdate scans DMA0 through DMA3; only a strictly earlier dma.when - currentTime replaces the active channel, so equal DMA deadlines retain the lower-numbered first channel",
+      "timer0SameDeadline": "two eligible Timer 0 FIFO requests have dma.when = D; DMA1 wins a DMA1/DMA2 tie, while the single GBA DMA event remains priority 64 behind equal-deadline IRQ/Video/Audio/Timer0 roots",
+      "freshDispatch": "_dmaEvent ignores cyclesLate; when nextCount == count it overwrites dma.when with actual mTimingCurrentTime, so a fresh DMA requested at D but dispatched late at T starts its service timeline at T, not D",
+      "continuation": "for a partially serviced DMA, _dmaEvent does not overwrite dma.when; GBADMAService advances that stored deadline by per-word timing and coalesces other overdue enabled DMA deadlines to it",
+      "videoCompetition": "Video Hblank/Vblank/display-start callbacks can create DMA deadlines D + 3, and GBADMAUpdate arbitrates them with Timer-originated and pre-existing DMA state"
+    }
+  },
+  "absoluteTimer0Receipt": {
+    "canTranslate": [
+      "With a sampled Timer 0 event deadline D and its cyclesLate L, the callback's corrected scheduling time is D = dispatch current time - L.",
+      "Timer 0 normal rescheduling, a newly eligible Timer IRQ, FIFO custom-DMA request deadlines, Video phase rescheduling, and Audio Sample rescheduling can be translated to their source formulas above.",
+      "At one exact deadline, remaining registered callbacks are ordered IRQ, Video, Audio Sample, Timer 0, DMA; equal priorities retain prior insertion order.",
+      "A same-deadline fresh DMA1/DMA2 pair selects DMA1 first, subject to the shared DMA event and all active-DMA state."
+    ],
+    "cannotTranslate": [
+      "There is no absolute Timer 0 service-completion timestamp from Timer 0's deadline and cyclesLate alone: FIFO eligibility, DMA registers, pre-existing DMA, Video-started DMA, and IRQ state determine the following root list.",
+      "A late fresh DMA does not preserve the Timer 0 request deadline; _dmaEvent resets its service when to actual dispatch current time, so a receipt must record both request and DMA-dispatch times.",
+      "A partially serviced or repeated DMA has different deadline semantics, including overdue coalescing; its count, nextCount, when, source, destination, register mode, and active channel are required.",
+      "Do not fit a fixed Timer 0 callback/service constant or wire serviceCostMasterCycles from this receipt."
+    ],
+    "minimumRuntimeFields": [
+      "Timer 0 event.when, dispatch mTimingCurrentTime, and cyclesLate",
+      "ordered due roots with event name, absolute when, priority, and insertion sequence",
+      "Timer 0 reload/control/lastEvent and FIFO A/B routing, pointers, and internalRemaining",
+      "DMA0-DMA3 register enable/timing/count/nextCount/when/source/destination plus activeDMA",
+      "Video phase and DMA/IRQ enable state, Audio Sample deadline, IE/IF/IME, and whether IRQ/DMA events were already scheduled"
+    ]
+  }
+}
