@@ -39568,6 +39568,21 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
     const effectBackdrop = fb.slice();
+    // `SpriteCB_EnemyShadow` has not yet observed the newly active script on
+    // the first source display. Ledian is elevated, so its 32x8 enemy shadow
+    // survives that one opponent-attacker frame before the callback hides it.
+    if (opponentToPlayer && state.age === 0) {
+      const shadowX = view.attacker.geometry.animationCenter.x - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
     drawSpriteSheet(
       fb,
       ledian.tileset,

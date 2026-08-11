@@ -18,7 +18,8 @@ describe("MOVE_COMET_PUNCH source-relative reducer", () => {
   });
 
   it("ports resource, monbg, alpha, fist/hitsplat, ShakeMon, and cleanup ages", () => {
-    expect(cometPunchAtAge(1, 0, player)).toMatchObject({ impactLoaded: true, handsAndFeetLoaded: true });
+    expect(cometPunchAtAge(1, 0, player)).toMatchObject({ impactLoaded: true, handsAndFeetLoaded: false });
+    expect(cometPunchAtAge(4, 0, player).handsAndFeetLoaded).toBe(true);
     expect(cometPunchAtAge(7, 0, player).targetOnMonBg).toBe(true);
     expect(cometPunchAtAge(10, 0, player)).toMatchObject({ alpha: { eva: 12, evb: 8 }, targetX2: 0, shakeTaskActive: true });
     expect(cometPunchAtAge(18, 0, player).fist?.remaining).toBe(0);

@@ -50,7 +50,9 @@ export function cometPunchAtAge(
     moveTurn,
     branch: left ? "left" : "right",
     impactLoaded: active && age >= 1,
-    handsAndFeetLoaded: active && age >= 1,
+    // `loadspritegfx IMPACT` commits at age 1; the following
+    // `loadspritegfx HANDS_AND_FEET` commits at age 4.
+    handsAndFeetLoaded: active && age >= 4,
     targetOnMonBg: active && age >= 7 && age < COMET_PUNCH_CLEAR_AGE,
     alpha: effectActive && age < COMET_PUNCH_CLEAR_AGE ? { eva: 12, evb: 8 } : null,
     targetX2: effectActive ? shakeMonOffsetAtTick(3, 0, 6, 1, shakeTick).x2 : 0,
