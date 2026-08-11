@@ -430,12 +430,11 @@ export type FactoryGetSubstructType = 0 | 1 | 2 | 3;
 /**
  * The source/ELF-reduced, ROM-only part of one GetSubstruct call.
  *
- * `GetSubstruct`'s modulo helper is a separate libgcc body.  The dispatch
- * table and every one of its 24 compiled arms are in ROM, so those portions
- * can be counted without pretending that the personality-specific modulo
- * dividend or the BoxMon EWRAM bus is a duration key.  `cycles` remains null
- * until the modulo helper is composed with this arm and the surrounding
- * encrypted accessor.
+ * The separate libgcc `% 24` body, dispatch table, and every one of the 24
+ * compiled arms are fully source/ELF-reduced here. `cycles` is consequently
+ * exact for GetSubstruct itself; the surrounding encrypted accessor's EWRAM
+ * loads, field tail, crypt/checksum data buses, async service, and IRQ remain
+ * deliberately outside this reducer.
  */
 export interface FactoryGetSubstructTiming {
   personality: number;
@@ -454,11 +453,25 @@ export interface FactoryGetSubstructTiming {
   armSequentialThumbHalfwords: number;
   armPipelineRefills: number;
   armInstructionFetchCycles: number;
-  /** Common dispatch shell plus the selected arm, excluding __umodsi3. */
+  /** GetSubstruct's Thumb BL into the helper and the caller instruction after it. */
+  moduloCallPc: number;
+  moduloReturnPc: number;
+  /** libgcc's `__umodsi3` symbol entry and its selected `mov pc, lr`. */
+  moduloEntryPc: number;
+  moduloReturnInstructionPc: number;
+  moduloSequentialThumbHalfwords: number;
+  moduloPipelineRefills: number;
+  moduloRorInternalCycles: number;
+  moduloLoop1Iterations: number;
+  moduloLoop2Iterations: number;
+  moduloLoop3Iterations: number;
+  /** Common dispatch shell plus the selected arm, excluding the helper body. */
   nonModuloCycles: number;
-  moduloCycles: null;
-  cycles: null;
-  unresolved: string;
+  /** Exact source-general `__umodsi3(personality, 24)` cost. */
+  moduloCycles: number;
+  /** Complete GetSubstruct instruction/fetch cost; no secure-data load occurs here. */
+  cycles: number;
+  unresolved: null;
 }
 
 export type FactoryEncryptedWordLoopKind = "decrypt" | "encrypt";
@@ -511,10 +524,10 @@ export interface FactoryChecksumLoopTiming {
 
 /**
  * Source/ELF dependency census for the encrypted GetBoxMonData2 subset used
- * by CalculateMonStats. This deliberately exposes a partial exact shell and
- * keeps the complete cost null: GetSubstruct's modulo helper and its 24-way
- * compiled arm, ROM fetches, and EWRAM bus accesses have not yet been summed
- * into one independently accepted total.
+ * by CalculateMonStats. It composes every complete ROM-only GetSubstruct call
+ * with the fixed crypt/checksum fetch subtotal, but deliberately keeps the
+ * complete accessor cost null until the EWRAM accesses, field tails, async
+ * service, and VBlank/IRQ boundaries are independently accepted.
  */
 export interface FactoryGetBoxMonDataDependency {
   field: number;
@@ -534,11 +547,19 @@ export interface FactoryGetBoxMonDataDependency {
   speciesTailRoute: "not-applicable" | "species" | "bad-egg-species";
   /** One field-selected arm; the accessor still performs seven other calls. */
   selectedSubstructTiming: FactoryGetSubstructTiming;
+  /** Source order: outer encrypted setup [0..3], then checksum [0..3]. */
+  getSubstructTypes: readonly FactoryGetSubstructType[];
+  /** Every source-proven GetSubstruct function call in that exact order. */
+  getSubstructTimings: readonly FactoryGetSubstructTiming[];
+  /** Exact function-only total of the eight calls, not an accessor total. */
+  getSubstructCycles: number;
   decryptLoopTiming: FactoryEncryptedWordLoopTiming;
   checksumLoopTiming: FactoryChecksumLoopTiming;
   encryptLoopTiming: FactoryEncryptedWordLoopTiming;
   /** Exact ROM instruction/fetch subtotal, not a complete accessor duration. */
   sharedInstructionFetchCycles: number;
+  /** Shared crypt/checksum fetch work plus the eight complete GetSubstruct calls. */
+  composedInstructionFetchCycles: number;
   getSubstructCalls: 8;
   decryptIterations: 12;
   checksumHalfwordReads: 24;
@@ -1114,6 +1135,13 @@ const GET_SUBSTRUCT_ARM_TARGET_PCS = Object.freeze([
   0x0806_a4fc, // physical slot 3
 ] as const);
 
+// `GetBoxMonData3` establishes pointers for 0..3 before decrypting, then
+// `CalculateBoxMonChecksum` independently establishes 0..3 again. Both
+// sequences are visible in pokemon.c and in the two pinned ELF call blocks.
+const GET_BOX_MON_DATA_GET_SUBSTRUCT_TYPES = Object.freeze([
+  0, 1, 2, 3, 0, 1, 2, 3,
+] as const satisfies readonly FactoryGetSubstructType[]);
+
 const GET_BOX_COMMON_FETCH_CLASSES = Object.freeze([
   "rom-thumb-sequential",
   "rom-literal-u32",
@@ -1143,6 +1171,274 @@ const GET_BOX_COMMON_BOUNDARIES = Object.freeze({
   encryptLoopPc: 0x0806_a232,
 });
 
+/** Exact private result for the one libgcc symbol used by GetSubstruct. */
+interface GetSubstructModulo24Timing {
+  remainder: number;
+  entryPc: number;
+  returnInstructionPc: number;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  rorInternalCycles: number;
+  loop1Iterations: number;
+  loop2Iterations: number;
+  loop3Iterations: number;
+  cycles: number;
+}
+
+/**
+ * Replay the full, pinned `__umodsi3(personality, 24)` libgcc symbol.
+ *
+ * This is intentionally a narrow reducer rather than an assumed alias of
+ * `__udivsi3`: the ELF's `0x082e7be0..0x082e7c9e` body resets the temporary
+ * quotient group in Loop3 and uses register ROR plus a correction tail to
+ * recover a remainder. The only caller-specific work lies outside it in
+ * GetSubstruct's BL at `0x0806a27e` and resume at `0x0806a282`.
+ */
+function reduceGetSubstructModulo24Timing(personalityValue: number): GetSubstructModulo24Timing {
+  const personality = requireU32(personalityValue, "personality");
+  let r0 = personality;
+  let r1 = 24;
+  let sequentialThumbHalfwords = 0;
+  let pipelineRefills = 0;
+  let rorInternalCycles = 0;
+  let loop1Iterations = 0;
+  let loop2Iterations = 0;
+  let loop3Iterations = 0;
+  const instruction = (count = 1): void => {
+    sequentialThumbHalfwords += count;
+  };
+  const branch = (taken: boolean): void => {
+    instruction();
+    if (taken) pipelineRefills += 1;
+  };
+  const returnBranch = (): void => branch(true);
+  const ror = (value: number, amount: number): number => {
+    instruction();
+    // The one-cycle Thumb instruction class omits ARM7TDMI's register-ROR
+    // internal cycle; the mGBA/source timing receipt charges it explicitly.
+    rorInternalCycles += 1;
+    return rotateRight32(value, amount);
+  };
+  const result = (returnInstructionPc: number): GetSubstructModulo24Timing => Object.freeze({
+    remainder: r0,
+    entryPc: 0x082e_7be0,
+    returnInstructionPc,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    rorInternalCycles,
+    loop1Iterations,
+    loop2Iterations,
+    loop3Iterations,
+    cycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
+      + rorInternalCycles,
+  });
+
+  instruction(); // cmp r1, #0
+  branch(false); // beq Ldiv0: compiled divisor is the literal 24
+  let r3 = 1;
+  instruction(); // movs r3, #1
+  instruction(); // cmp r0, r1
+  const belowDivisor = r0 < r1;
+  branch(!belowDivisor); // bcs Over1
+  if (belowDivisor) {
+    returnBranch(); // 0x082e7bea: mov pc, lr
+    return result(0x082e_7bea);
+  }
+
+  instruction(); // push {r4}
+  let r4 = 1;
+  instruction();
+  r4 = (r4 << 28) >>> 0;
+  instruction();
+
+  // ELF Loop1 at 0x082e7bf2: normalize four quotient bits at a time.
+  while (true) {
+    loop1Iterations += 1;
+    instruction();
+    const reachedLargeDivisor = r1 >= r4;
+    branch(reachedLargeDivisor);
+    if (reachedLargeDivisor) break;
+    instruction();
+    const reachedDividend = r1 >= r0;
+    branch(reachedDividend);
+    if (reachedDividend) break;
+    r1 = (r1 << 4) >>> 0;
+    r3 = (r3 << 4) >>> 0;
+    instruction(2);
+    branch(true);
+  }
+
+  r4 = (r4 << 3) >>> 0;
+  instruction();
+  // ELF Loop2 at 0x082e7c02: normalize the remaining zero to three bits.
+  while (true) {
+    loop2Iterations += 1;
+    instruction();
+    const reachedLargeDivisor = r1 >= r4;
+    branch(reachedLargeDivisor);
+    if (reachedLargeDivisor) break;
+    instruction();
+    const reachedDividend = r1 >= r0;
+    branch(reachedDividend);
+    if (reachedDividend) break;
+    r1 = (r1 << 1) >>> 0;
+    r3 = (r3 << 1) >>> 0;
+    instruction(2);
+    branch(true);
+  }
+
+  let ip = r3;
+  let r2 = 0;
+  // ELF Loop3 at 0x082e7c10: consume four quotient bits, retaining the
+  // quotient-group bits solely for the tail correction below.
+  while (true) {
+    loop3Iterations += 1;
+    r2 = 0;
+    instruction(); // movs r2, #0
+
+    instruction(); // cmp r0, r1
+    const below0 = r0 < r1;
+    branch(below0);
+    if (!below0) {
+      r0 = (r0 - r1) >>> 0;
+      instruction();
+    }
+
+    r4 = r1 >>> 1;
+    instruction();
+    instruction(); // cmp r0, r4
+    const below1 = r0 < r4;
+    branch(below1);
+    if (!below1) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      ip = r3;
+      instruction();
+      r4 = 1;
+      instruction();
+      r3 = ror(r3, r4);
+      r2 = (r2 | r3) >>> 0;
+      instruction();
+      r3 = ip;
+      instruction();
+    }
+
+    r4 = r1 >>> 2;
+    instruction();
+    instruction(); // cmp r0, r4
+    const below2 = r0 < r4;
+    branch(below2);
+    if (!below2) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      ip = r3;
+      instruction();
+      r4 = 2;
+      instruction();
+      r3 = ror(r3, r4);
+      r2 = (r2 | r3) >>> 0;
+      instruction();
+      r3 = ip;
+      instruction();
+    }
+
+    r4 = r1 >>> 3;
+    instruction();
+    instruction(); // cmp r0, r4
+    const below3 = r0 < r4;
+    branch(below3);
+    if (!below3) {
+      r0 = (r0 - r4) >>> 0;
+      instruction();
+      ip = r3;
+      instruction();
+      r4 = 3;
+      instruction();
+      r3 = ror(r3, r4);
+      r2 = (r2 | r3) >>> 0;
+      instruction();
+      r3 = ip;
+      instruction();
+    }
+
+    ip = r3;
+    instruction(); // mov ip, r3
+    instruction(); // cmp r0, #0
+    const exactRemainder = r0 === 0;
+    branch(exactRemainder);
+    if (exactRemainder) break;
+    r3 >>>= 4;
+    instruction();
+    const quotientDone = r3 === 0;
+    branch(quotientDone);
+    if (quotientDone) break;
+    r1 >>>= 4;
+    instruction();
+    branch(true);
+  }
+
+  r4 = 14;
+  instruction();
+  r4 = (r4 << 28) >>> 0;
+  instruction();
+  r2 = (r2 & r4) >>> 0;
+  instruction();
+  const needsCorrection = r2 !== 0;
+  branch(needsCorrection);
+  if (!needsCorrection) {
+    instruction(); // pop {r4}
+    returnBranch(); // 0x082e7c66: mov pc, lr
+    return result(0x082e_7c66);
+  }
+
+  r3 = ip;
+  instruction();
+  r4 = 3;
+  instruction();
+  r3 = ror(r3, r4);
+  instruction();
+  const skipThird = (r2 & r3) === 0;
+  branch(skipThird);
+  if (!skipThird) {
+    r4 = r1 >>> 3;
+    r0 = (r0 + r4) >>> 0;
+    instruction(2);
+  }
+
+  r3 = ip;
+  instruction();
+  r4 = 2;
+  instruction();
+  r3 = ror(r3, r4);
+  instruction();
+  const skipSecond = (r2 & r3) === 0;
+  branch(skipSecond);
+  if (!skipSecond) {
+    r4 = r1 >>> 2;
+    r0 = (r0 + r4) >>> 0;
+    instruction(2);
+  }
+
+  r3 = ip;
+  instruction();
+  r4 = 1;
+  instruction();
+  r3 = ror(r3, r4);
+  instruction();
+  const skipFirst = (r2 & r3) === 0;
+  branch(skipFirst);
+  if (!skipFirst) {
+    r4 = r1 >>> 1;
+    r0 = (r0 + r4) >>> 0;
+    instruction(2);
+  }
+
+  instruction(); // pop {r4}
+  returnBranch(); // 0x082e7c94: mov pc, lr
+  return result(0x082e_7c94);
+}
+
 /**
  * Reduce the personality-selected GetSubstruct dispatch arm.
  *
@@ -1153,11 +1449,10 @@ const GET_BOX_COMMON_BOUNDARIES = Object.freeze({
  * `__umodsi3`.  Each selected arm then performs only ROM instructions and
  * pointer arithmetic before joining the common return at `0x0806a510`.
  *
- * The modulo helper is intentionally not guessed here.  `nonModuloCycles`
- * is the independently reusable exact segment; `cycles` stays null until a
- * separately audited `%24` helper and the full encrypted accessor are
- * composed.  Async +18 service and VBlank/IRQ pauses are external to this
- * reducer.
+ * The exact `__umodsi3(personality, 24)` symbol is composed with the fixed
+ * shell and selected arm here. It has no secure-data access of its own, so
+ * `cycles` is complete for GetSubstruct. Async +18 service and VBlank/IRQ
+ * pauses belong to the caller/accessor epoch and remain external.
  */
 export function reduceFactoryGetSubstructTiming(
   personalityValue: number,
@@ -1169,7 +1464,10 @@ export function reduceFactoryGetSubstructTiming(
     throw new Error(`substructType must be a source u8 in [0, 3], got ${substructType}`);
   }
 
-  const personalityModulo24 = personality % 24;
+  // Feed the dispatch from the independently reconstructed `__umodsi3`
+  // result, rather than duplicating the host-language modulo operation.
+  const modulo = reduceGetSubstructModulo24Timing(personality);
+  const personalityModulo24 = modulo.remainder;
   const logicalToPhysicalSlots = GET_SUBSTRUCT_LOGICAL_TO_PHYSICAL[personalityModulo24]!;
   const selectedPhysicalSlot = logicalToPhysicalSlots[substructType as FactoryGetSubstructType]!;
   const armPc = GET_SUBSTRUCT_MODULO_ARM_PCS[personalityModulo24]!;
@@ -1177,6 +1475,9 @@ export function reduceFactoryGetSubstructTiming(
   const armPipelineRefills = GET_SUBSTRUCT_ARM_PIPELINE_REFILLS[personalityModulo24]![substructType]!;
   const armInstructionFetchCycles = armSequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES;
   const commonNonModuloCycles = 68;
+  const nonModuloCycles = commonNonModuloCycles
+    + armInstructionFetchCycles
+    + armPipelineRefills * THUMB_PIPELINE_REFILL_CYCLES;
   return Object.freeze({
     personality,
     personalityModulo24,
@@ -1194,10 +1495,20 @@ export function reduceFactoryGetSubstructTiming(
     armSequentialThumbHalfwords,
     armPipelineRefills,
     armInstructionFetchCycles,
-    nonModuloCycles: commonNonModuloCycles + armInstructionFetchCycles + armPipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
-    moduloCycles: null,
-    cycles: null,
-    unresolved: "GetSubstruct __umodsi3(personality, 24) and encrypted accessor memory timing remain outside this source/fetch segment",
+    moduloCallPc: 0x0806_a27e,
+    moduloReturnPc: 0x0806_a282,
+    moduloEntryPc: modulo.entryPc,
+    moduloReturnInstructionPc: modulo.returnInstructionPc,
+    moduloSequentialThumbHalfwords: modulo.sequentialThumbHalfwords,
+    moduloPipelineRefills: modulo.pipelineRefills,
+    moduloRorInternalCycles: modulo.rorInternalCycles,
+    moduloLoop1Iterations: modulo.loop1Iterations,
+    moduloLoop2Iterations: modulo.loop2Iterations,
+    moduloLoop3Iterations: modulo.loop3Iterations,
+    nonModuloCycles,
+    moduloCycles: modulo.cycles,
+    cycles: modulo.cycles + nonModuloCycles,
+    unresolved: null,
   });
 }
 
@@ -1322,9 +1633,17 @@ export function censusFactoryGetBoxMonDataDependency(
     throw new Error("field is outside the CalculateMonStats/GetLevelFromMonExp encrypted subset");
   }
 
-  const personalityModulo24 = personality % 24;
-  const logicalToPhysicalSlots = GET_SUBSTRUCT_LOGICAL_TO_PHYSICAL[personalityModulo24]!;
-  const selectedPhysicalSlot = logicalToPhysicalSlots[logicalSubstruct]!;
+  const getSubstructTimings = Object.freeze(GET_BOX_MON_DATA_GET_SUBSTRUCT_TYPES.map((substructType) => (
+    reduceFactoryGetSubstructTiming(personality, substructType)
+  )));
+  // The selected field arm is one of the source-proven outer setup calls, so
+  // reuse that exact `% 24` reduction rather than a host-language modulo.
+  const selectedSubstructTiming = getSubstructTimings[logicalSubstruct]!;
+  const personalityModulo24 = selectedSubstructTiming.personalityModulo24;
+  const logicalToPhysicalSlots = selectedSubstructTiming.logicalToPhysicalSlots;
+  const selectedPhysicalSlot = selectedSubstructTiming.selectedPhysicalSlot;
+  const getSubstructCycles = getSubstructTimings.reduce((total, timing) => total + timing.cycles, 0);
+  const sharedInstructionFetchCycles = 328 + 518 + 328;
   return Object.freeze({
     field,
     personality,
@@ -1342,18 +1661,22 @@ export function censusFactoryGetBoxMonDataDependency(
     speciesTailRoute: field !== 11
       ? "not-applicable"
       : input.isBadEgg || !input.checksumValid ? "bad-egg-species" : "species",
-    selectedSubstructTiming: reduceFactoryGetSubstructTiming(personality, logicalSubstruct),
+    selectedSubstructTiming,
+    getSubstructTypes: GET_BOX_MON_DATA_GET_SUBSTRUCT_TYPES,
+    getSubstructTimings,
+    getSubstructCycles,
     decryptLoopTiming: reduceFactoryDecryptBoxMonTiming(),
     checksumLoopTiming: reduceFactoryChecksumLoopTiming(),
     encryptLoopTiming: reduceFactoryEncryptBoxMonTiming(),
-    sharedInstructionFetchCycles: 328 + 518 + 328,
+    sharedInstructionFetchCycles,
+    composedInstructionFetchCycles: sharedInstructionFetchCycles + getSubstructCycles,
     getSubstructCalls: 8,
     decryptIterations: 12,
     checksumHalfwordReads: 24,
     encryptIterations: 12,
     boundaries: GET_BOX_COMMON_BOUNDARIES,
     cycles: null,
-    unresolved: "complete GetBoxMonData2 timing still awaits __umodsi3 composition and EWRAM timing for all eight selections plus shared crypt/checksum loops",
+    unresolved: "complete GetBoxMonData2 timing still awaits EWRAM word/halfword access, field-tail, async +18, and VBlank/IRQ costs",
   });
 }
 

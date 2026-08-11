@@ -86,6 +86,61 @@ const probes = CASES.map((expected) => {
   };
 });
 
+const REFERENCE_ELF = readFileSync("reference/pokeemerald/pokeemerald.elf");
+const REFERENCE_POKEMON_SOURCE = readFileSync("reference/pokeemerald/src/pokemon.c", "utf8");
+
+/** Read an exact loadable-ROM interval from the pinned ELF, not the GBA copy. */
+function elfRomSlice(address: number, length: number): Buffer {
+  expect(REFERENCE_ELF.readUInt32LE(0)).toBe(0x464c457f); // \x7fELF
+  const programHeaderOffset = REFERENCE_ELF.readUInt32LE(0x1c);
+  const programHeaderSize = REFERENCE_ELF.readUInt16LE(0x2a);
+  const programHeaderCount = REFERENCE_ELF.readUInt16LE(0x2c);
+  for (let index = 0; index < programHeaderCount; index += 1) {
+    const offset = programHeaderOffset + index * programHeaderSize;
+    if (REFERENCE_ELF.readUInt32LE(offset) !== 1) continue; // PT_LOAD
+    const fileOffset = REFERENCE_ELF.readUInt32LE(offset + 4);
+    const virtualAddress = REFERENCE_ELF.readUInt32LE(offset + 8);
+    const fileSize = REFERENCE_ELF.readUInt32LE(offset + 16);
+    if (address >= virtualAddress && address + length <= virtualAddress + fileSize) {
+      return REFERENCE_ELF.subarray(fileOffset + address - virtualAddress, fileOffset + address - virtualAddress + length);
+    }
+  }
+  throw new Error(`missing pinned ELF ROM interval 0x${address.toString(16)}+${length}`);
+}
+
+function elfSymbol(name: string): { value: number; size: number } {
+  const sectionHeaderOffset = REFERENCE_ELF.readUInt32LE(0x20);
+  const sectionHeaderSize = REFERENCE_ELF.readUInt16LE(0x2e);
+  const sectionHeaderCount = REFERENCE_ELF.readUInt16LE(0x30);
+  for (let sectionIndex = 0; sectionIndex < sectionHeaderCount; sectionIndex += 1) {
+    const sectionOffset = sectionHeaderOffset + sectionIndex * sectionHeaderSize;
+    if (REFERENCE_ELF.readUInt32LE(sectionOffset + 4) !== 2) continue; // SHT_SYMTAB
+    const symbolOffset = REFERENCE_ELF.readUInt32LE(sectionOffset + 16);
+    const symbolSize = REFERENCE_ELF.readUInt32LE(sectionOffset + 20);
+    const symbolEntrySize = REFERENCE_ELF.readUInt32LE(sectionOffset + 36);
+    const stringTableIndex = REFERENCE_ELF.readUInt32LE(sectionOffset + 24);
+    const stringSectionOffset = sectionHeaderOffset + stringTableIndex * sectionHeaderSize;
+    const stringTableOffset = REFERENCE_ELF.readUInt32LE(stringSectionOffset + 16);
+    for (let offset = symbolOffset; offset < symbolOffset + symbolSize; offset += symbolEntrySize) {
+      const nameOffset = REFERENCE_ELF.readUInt32LE(offset);
+      const nameEnd = REFERENCE_ELF.indexOf(0, stringTableOffset + nameOffset);
+      const symbolName = REFERENCE_ELF.toString("utf8", stringTableOffset + nameOffset, nameEnd);
+      if (symbolName === name) {
+        return {
+          value: REFERENCE_ELF.readUInt32LE(offset + 4),
+          size: REFERENCE_ELF.readUInt32LE(offset + 8),
+        };
+      }
+    }
+  }
+  throw new Error(`missing pinned ELF symbol ${name}`);
+}
+
+function sourceGetSubstructTypes(source: string): number[] {
+  return [...source.matchAll(/GetSubstruct\(boxMon, boxMon->personality, (\d)\)/g)]
+    .map((match) => Number.parseInt(match[1]!, 10));
+}
+
 const DIRECT_CALL_SHAPE = [
   ["get-mon-data", "old-max-hp", "0x08068d1e", "0x0806a51a", "0x08068d22", 58],
   ["get-mon-data", "current-hp", "0x08068d2a", "0x0806a51a", "0x08068d2e", 57],
@@ -177,7 +232,60 @@ function afterPc(pc: string): string {
 }
 
 describe("Factory CalculateMonStats v1 source-call receipt", () => {
-  it("source-reduces every compiled personality-modulo-24 GetSubstruct arm", () => {
+  it("pins the source and pinned ELF bodies that compose GetSubstruct's %24 helper", () => {
+    const getSubstructSource = REFERENCE_POKEMON_SOURCE.slice(
+      REFERENCE_POKEMON_SOURCE.indexOf("static union PokemonSubstruct *GetSubstruct"),
+      REFERENCE_POKEMON_SOURCE.indexOf("/* GameFreak called GetMonData", REFERENCE_POKEMON_SOURCE.indexOf("static union PokemonSubstruct *GetSubstruct")),
+    );
+    const getBoxSource = REFERENCE_POKEMON_SOURCE.slice(
+      REFERENCE_POKEMON_SOURCE.indexOf("u32 GetBoxMonData3"),
+      REFERENCE_POKEMON_SOURCE.indexOf("switch (field)", REFERENCE_POKEMON_SOURCE.indexOf("u32 GetBoxMonData3")),
+    );
+    const checksumSource = REFERENCE_POKEMON_SOURCE.slice(
+      REFERENCE_POKEMON_SOURCE.indexOf("static u16 CalculateBoxMonChecksum"),
+      REFERENCE_POKEMON_SOURCE.indexOf("#define CALC_STAT", REFERENCE_POKEMON_SOURCE.indexOf("static u16 CalculateBoxMonChecksum")),
+    );
+
+    expect(getSubstructSource).toContain("switch (personality % 24)");
+    expect([...getSubstructSource.matchAll(/SUBSTRUCT_CASE\(\s*(\d+),/g)].map((match) => Number.parseInt(match[1]!, 10)))
+      .toEqual(Array.from({ length: 24 }, (_, index) => index));
+    expect(sourceGetSubstructTypes(getBoxSource)).toEqual([0, 1, 2, 3]);
+    expect(sourceGetSubstructTypes(checksumSource)).toEqual([0, 1, 2, 3]);
+    expect(REFERENCE_POKEMON_SOURCE).toContain(
+      'GetBoxMonData2(struct BoxPokemon *boxMon, s32 field) __attribute__((alias("GetBoxMonData3")))',
+    );
+
+    // The Thumb-bit symbol records pin the actual libgcc body and the two
+    // source aliases/callees, independently of the fixed ROM addresses below.
+    expect(elfSymbol("__umodsi3")).toEqual({ value: 0x082e_7be1, size: 0xc0 });
+    expect(elfSymbol("GetSubstruct")).toEqual({ value: 0x0806_a271, size: 0x2a8 });
+    expect(elfSymbol("GetBoxMonData2")).toEqual({ value: 0x0806_a675, size: 0x636 });
+    expect(elfSymbol("GetBoxMonData3")).toEqual({ value: 0x0806_a675, size: 0x636 });
+    expect(elfSymbol("CalculateBoxMonChecksum")).toEqual({ value: 0x0806_8c79, size: 0x92 });
+
+    // ELF symbol body 0x082e7be0..0x082e7c9f: the full 192-byte __umodsi3.
+    expect(createHash("sha256").update(elfRomSlice(0x082e_7be0, 0xc0)).digest("hex"))
+      .toBe("dddbf9d8f5abc4af089a4c4397384388199f4fd8b3a85f849d491390975547dd");
+    expect(elfRomSlice(0x082e_7be0, 12).toString("hex")).toBe("002958d00123884200d2f746");
+    expect(elfRomSlice(0x082e_7bea, 2).toString("hex")).toBe("f746"); // fast mov pc, lr
+    expect(elfRomSlice(0x082e_7c64, 4).toString("hex")).toBe("10bcf746");
+    expect(elfRomSlice(0x082e_7c92, 4).toString("hex")).toBe("10bcf746");
+
+    // GetSubstruct's actual BL / caller-resume / function-return boundaries.
+    expect(createHash("sha256").update(elfRomSlice(0x0806_a270, 0x2a8)).digest("hex"))
+      .toBe("97c515558a8662fe5c687e94a21d95200e17ea3d60100df0a320942b8c4001bf");
+    expect(elfRomSlice(0x0806_a27e, 4).toString("hex")).toBe("7df2affc");
+    expect(elfRomSlice(0x0806_a282, 16).toString("hex")).toBe("172800d943e180000249401800688746");
+    expect(elfRomSlice(0x0806_a510, 8).toString("hex")).toBe("301c70bc02bc0847");
+    // The outer encrypted route and CalculateBoxMonChecksum have their own
+    // four-call sequences; no field-tail choice changes this source fact.
+    expect(createHash("sha256").update(elfRomSlice(0x0806_a674, 0x636)).digest("hex"))
+      .toBe("15b645bab474931b2cb3182f9b4fc9155d0fc92a1039272dd67117de2e50adee");
+    expect(createHash("sha256").update(elfRomSlice(0x0806_8c78, 0x92)).digest("hex"))
+      .toBe("bf7ab7d1337d4f6b3891d2aefc3f01b75c8d673f50b99d52b2446415d80ba2f0");
+  });
+
+  it("source-reduces every compiled personality-modulo-24 GetSubstruct arm and helper path", () => {
     const expectedLayouts = [
       [0, 1, 2, 3], [0, 1, 3, 2], [0, 2, 1, 3], [0, 3, 1, 2],
       [0, 2, 3, 1], [0, 3, 2, 1], [1, 0, 2, 3], [1, 0, 3, 2],
@@ -213,28 +321,84 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     const expectedArmTargets = [0x0806_a50e, 0x0806_a508, 0x0806_a502, 0x0806_a4fc];
 
     for (let modulo = 0; modulo < 24; modulo += 1) {
-      const rows = [0, 1, 2, 3].map((substructType) => (
-        reduceFactoryGetSubstructTiming(modulo, substructType)
-      ));
-      expect(rows.map((row) => row.personalityModulo24)).toEqual([modulo, modulo, modulo, modulo]);
-      expect(rows.map((row) => row.logicalToPhysicalSlots)).toEqual(
-        Array(4).fill(expectedLayouts[modulo]),
-      );
-      expect(rows.map((row) => row.selectedPhysicalSlot)).toEqual(expectedLayouts[modulo]);
-      expect(rows.map((row) => row.armPc)).toEqual(Array(4).fill(expectedArmPcs[modulo]));
-      expect(rows.map((row) => row.armTargetPc)).toEqual(
-        expectedLayouts[modulo].map((physical) => expectedArmTargets[physical]),
-      );
-      expect(rows.map((row) => row.armSequentialThumbHalfwords)).toEqual(expectedArmHalfwords[modulo]);
-      expect(rows.map((row) => row.armPipelineRefills)).toEqual(expectedArmRefills[modulo]);
-      expect(rows.every((row) => row.commonNonModuloCycles === 68)).toBe(true);
-      expect(rows.every((row) => row.moduloCycles === null && row.cycles === null)).toBe(true);
-      expect(rows.map((row) => row.nonModuloCycles)).toEqual(
-        expectedArmHalfwords[modulo]!.map((halfwords, index) => (
-          68 + halfwords * 2 + expectedArmRefills[modulo]![index]! * 6
-        )),
-      );
+      // Exercise both the minimal representative and a full-width u32 that
+      // reaches exactly the same source `% 24` arm without a fixture key.
+      const fullU32 = modulo + 24 * Math.floor((0xffff_ffff - modulo) / 24);
+      for (const personality of [modulo, fullU32]) {
+        const rows = [0, 1, 2, 3].map((substructType) => (
+          reduceFactoryGetSubstructTiming(personality, substructType)
+        ));
+        expect(rows.map((row) => row.personalityModulo24)).toEqual([modulo, modulo, modulo, modulo]);
+        expect(rows.map((row) => row.logicalToPhysicalSlots)).toEqual(
+          Array(4).fill(expectedLayouts[modulo]),
+        );
+        expect(rows.map((row) => row.selectedPhysicalSlot)).toEqual(expectedLayouts[modulo]);
+        expect(rows.map((row) => row.armPc)).toEqual(Array(4).fill(expectedArmPcs[modulo]));
+        expect(rows.map((row) => row.armTargetPc)).toEqual(
+          expectedLayouts[modulo].map((physical) => expectedArmTargets[physical]),
+        );
+        expect(rows.map((row) => row.armSequentialThumbHalfwords)).toEqual(expectedArmHalfwords[modulo]);
+        expect(rows.map((row) => row.armPipelineRefills)).toEqual(expectedArmRefills[modulo]);
+        expect(rows.every((row) => row.commonNonModuloCycles === 68)).toBe(true);
+        expect(rows.every((row) => row.moduloEntryPc === 0x082e_7be0)).toBe(true);
+        expect(rows.every((row) => row.moduloCallPc === 0x0806_a27e && row.moduloReturnPc === 0x0806_a282)).toBe(true);
+        expect(rows.every((row) => row.moduloCycles > 0 && row.cycles === row.moduloCycles + row.nonModuloCycles)).toBe(true);
+        expect(rows.every((row) => row.unresolved === null)).toBe(true);
+        expect(rows.map((row) => row.nonModuloCycles)).toEqual(
+          expectedArmHalfwords[modulo]!.map((halfwords, index) => (
+            68 + halfwords * 2 + expectedArmRefills[modulo]![index]! * 6
+          )),
+        );
+      }
     }
+
+    const fast = reduceFactoryGetSubstructTiming(23, 0);
+    const normalized = reduceFactoryGetSubstructTiming(24, 0);
+    const correction = reduceFactoryGetSubstructTiming(47, 0);
+    const wide = reduceFactoryGetSubstructTiming(0xffff_ffff, 0);
+    expect(fast).toMatchObject({
+      moduloCycles: 18,
+      moduloSequentialThumbHalfwords: 6,
+      moduloPipelineRefills: 1,
+      moduloRorInternalCycles: 0,
+      moduloLoop1Iterations: 0,
+      moduloLoop2Iterations: 0,
+      moduloLoop3Iterations: 0,
+      moduloReturnInstructionPc: 0x082e_7bea,
+    });
+    expect(normalized).toMatchObject({
+      personalityModulo24: 0,
+      moduloCycles: 126,
+      moduloSequentialThumbHalfwords: 39,
+      moduloPipelineRefills: 8,
+      moduloRorInternalCycles: 0,
+      moduloLoop1Iterations: 1,
+      moduloLoop2Iterations: 1,
+      moduloLoop3Iterations: 1,
+      moduloReturnInstructionPc: 0x082e_7c66,
+    });
+    expect(correction).toMatchObject({
+      personalityModulo24: 23,
+      moduloCycles: 290,
+      moduloSequentialThumbHalfwords: 106,
+      moduloPipelineRefills: 12,
+      moduloRorInternalCycles: 6,
+      moduloLoop1Iterations: 2,
+      moduloLoop2Iterations: 1,
+      moduloLoop3Iterations: 2,
+      moduloReturnInstructionPc: 0x082e_7c94,
+    });
+    expect(wide).toMatchObject({
+      personalityModulo24: 15,
+      moduloCycles: 735,
+      moduloSequentialThumbHalfwords: 262,
+      moduloPipelineRefills: 34,
+      moduloRorInternalCycles: 7,
+      moduloLoop1Iterations: 7,
+      moduloLoop2Iterations: 4,
+      moduloLoop3Iterations: 7,
+      moduloReturnInstructionPc: 0x082e_7c66,
+    });
 
     expect(() => reduceFactoryGetSubstructTiming(0, 4)).toThrow("substructType must be a source u8");
     expect(() => reduceFactoryGetSubstructTiming(-1, 0)).toThrow("personality must be a source u32");
@@ -334,7 +498,12 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect(rows.every((row) => row.checksumHalfwordReads === 24)).toBe(true);
     expect(rows.every((row) => row.encryptIterations === 12)).toBe(true);
     expect(rows.every((row) => row.sharedInstructionFetchCycles === 1_174)).toBe(true);
-    expect(rows.every((row) => row.selectedSubstructTiming.cycles === null)).toBe(true);
+    expect(rows.every((row) => row.selectedSubstructTiming.cycles !== null)).toBe(true);
+    expect(rows.every((row) => row.getSubstructTypes.join(",") === "0,1,2,3,0,1,2,3")).toBe(true);
+    expect(rows.every((row) => row.getSubstructTimings.map((timing) => timing.substructType).join(",") === "0,1,2,3,0,1,2,3")).toBe(true);
+    expect(rows.every((row) => row.getSubstructCycles === row.getSubstructTimings
+      .reduce((total, timing) => total + timing.cycles, 0))).toBe(true);
+    expect(rows.every((row) => row.composedInstructionFetchCycles === row.sharedInstructionFetchCycles + row.getSubstructCycles)).toBe(true);
     expect(rows.every((row) => row.decryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
     expect(rows.every((row) => row.checksumLoopTiming.instructionFetchCycles === 518)).toBe(true);
     expect(rows.every((row) => row.encryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
@@ -358,6 +527,64 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       checksumLoopPc: 0x0806_8cb2,
       encryptLoopPc: 0x0806_a232,
     }))).toBe(true);
+
+    // The source's outer encrypted setup and nested checksum each call every
+    // type once. This is a function-only subtotal: it intentionally excludes
+    // their EWRAM loads, crypt/checksum data bus work, field tail, +18, and IRQ.
+    const representative = censusFactoryGetBoxMonDataDependency({
+      field: 39,
+      personality: 0xffff_ffff,
+      checksumValid: true,
+      isBadEgg: false,
+    });
+    expect(representative.getSubstructTypes).toEqual([0, 1, 2, 3, 0, 1, 2, 3]);
+    expect(representative.getSubstructTimings.map((timing) => timing.cycles)).toEqual(
+      [0, 1, 2, 3, 0, 1, 2, 3].map((type) => reduceFactoryGetSubstructTiming(0xffff_ffff, type).cycles),
+    );
+    expect(representative.getSubstructCycles).toBe(
+      representative.getSubstructTimings.reduce((total, timing) => total + timing.cycles, 0),
+    );
+    expect(representative.getSubstructCycles).toBe(6_824);
+    expect(representative.composedInstructionFetchCycles).toBe(
+      representative.getSubstructCycles + 1_174,
+    );
+    expect(representative.composedInstructionFetchCycles).toBe(7_998);
+    expect(representative.cycles).toBeNull();
+  });
+
+  it("checks the composed source subtotal against every OFF stats-accessor boundary without absorbing its remainder", () => {
+    let checked = 0;
+    for (const { value } of probes) {
+      const personalities = new Map(value.mons.map((mon) => [mon.monIndex, mon.acceptedPersonality]));
+      for (const call of value.directCalls.filter((row) => (
+        row.operation === "get-mon-data" && ![57, 58].includes(row.arguments.field!)
+      ))) {
+        const personality = personalities.get(call.monIndex);
+        if (personality === undefined) throw new Error(`missing accepted personality for mon ${call.monIndex}`);
+        const dependency = censusFactoryGetBoxMonDataDependency({
+          field: call.arguments.field!, personality, checksumValid: true, isBadEgg: false,
+        });
+        const outer = reduceFactoryGetMonDataTiming({ field: call.arguments.field! });
+        if (outer.preDelegateCycles === null || outer.returnShellCycles === null) {
+          throw new Error(`missing GetMonData shell for field ${call.arguments.field}`);
+        }
+        const measured = sourceCycles(
+          call.entryMasterCycles,
+          call.returnMasterCycles,
+          value.interruptPauses,
+        );
+        const knownSourceOnly = outer.preDelegateCycles
+          + dependency.composedInstructionFetchCycles
+          + outer.returnShellCycles;
+        // The strictly positive remainder is intentionally left unidentified:
+        // it includes GetBoxMonData2 EWRAM accesses, tails, and other still
+        // unmodelled work, rather than being fitted back into this subtotal.
+        expect(measured).toBeGreaterThan(knownSourceOnly);
+        expect(dependency.cycles).toBeNull();
+        checked += 1;
+      }
+    }
+    expect(checked).toBe(156);
   });
 
   it("derives all modulo-24 GetSubstruct layouts and receipt field extraction tails", () => {
