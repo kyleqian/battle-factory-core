@@ -3166,6 +3166,196 @@ export function reduceFactorySourceReturnTiming(
 }
 
 /**
+ * Source-derived m4a Timer 0 registration for the construction-clock seam.
+ *
+ * The default rate is the `SOUND_MODE_FREQ_13379` / 224-samples-per-VBlank
+ * path in `SampleFreqSet`: reload 0xFB1A, ordinary Timer 0 clock, and a
+ * 1,254-master-cycle recurrence.  The first absolute due time is deliberately
+ * never inferred here.  A caller must provide the proven queue phase, or keep
+ * `nextDueMasterCycle` null while the timer remains enabled but unseeded.
+ *
+ * This is registration only.  It does not price the Timer 0 callback, FIFO
+ * DMA, or any co-due event; the service-cost field remains explicitly null.
+ */
+export const FACTORY_TIMER0_DEFAULT_RELOAD = 0xfb1a;
+export const FACTORY_TIMER0_DEFAULT_CONTROL = 0x0080;
+export const FACTORY_TIMER0_DEFAULT_PRESCALE_BITS = 0;
+export const FACTORY_TIMER0_DEFAULT_PERIOD_MASTER_CYCLES = 1_254;
+export const FACTORY_TIMER0_SERVICE_COST_MASTER_CYCLES = null;
+
+const FACTORY_TIMER0_SOURCE_SAMPLES_PER_VBLANK = Object.freeze([
+  96, 132, 176, 224, 264, 304, 352, 448, 528, 608, 672, 704,
+]);
+
+export interface FactoryTimer0Cadence {
+  enabled: boolean;
+  reload: number;
+  prescaleBits: number;
+  periodMasterCycles: number;
+  nextDueMasterCycle: number | null;
+  serviceCostMasterCycles: null;
+}
+
+function requireTimer0MasterCycle(value: number, field: string): number {
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new Error(`${field} must be a nonnegative safe integer, got ${value}`);
+  }
+  return value;
+}
+
+function deriveFactoryTimer0Period(reload: number, prescaleBits: number): number {
+  if (!Number.isInteger(reload) || reload < 0 || reload > 0xffff) {
+    throw new Error(`Timer 0 reload must be a u16, got ${reload}`);
+  }
+  if (prescaleBits !== FACTORY_TIMER0_DEFAULT_PRESCALE_BITS) {
+    throw new Error(
+      `unmodeled Factory Timer 0 prescale ${prescaleBits}; only source-proven prescale 0 is supported`,
+    );
+  }
+  const period = 0x1_0000 - reload;
+  const supportedReloads = FACTORY_TIMER0_SOURCE_SAMPLES_PER_VBLANK.map(
+    (samples) => 0x1_0000 - GBA_VBLANK_CYCLES / samples,
+  );
+  if (!supportedReloads.includes(reload)) {
+    throw new Error(`unmodeled Factory Timer 0 reload 0x${reload.toString(16)}`);
+  }
+  if (period <= 0 || GBA_VBLANK_CYCLES % period !== 0) {
+    throw new Error(`unmodeled Factory Timer 0 period for reload 0x${reload.toString(16)}`);
+  }
+  return period;
+}
+
+function freezeFactoryTimer0Cadence(state: FactoryTimer0Cadence): FactoryTimer0Cadence {
+  return Object.freeze({ ...state });
+}
+
+function validateFactoryTimer0Cadence(state: FactoryTimer0Cadence): void {
+  const period = deriveFactoryTimer0Period(state.reload, state.prescaleBits);
+  if (state.periodMasterCycles !== period) {
+    throw new Error(
+      `Timer 0 period ${state.periodMasterCycles} does not match reload-derived ${period}`,
+    );
+  }
+  if (state.serviceCostMasterCycles !== null) {
+    throw new Error("Timer 0 service cost is intentionally unknown/null");
+  }
+  if (state.nextDueMasterCycle !== null) {
+    requireTimer0MasterCycle(state.nextDueMasterCycle, "nextDueMasterCycle");
+  }
+  if (!state.enabled && state.nextDueMasterCycle !== null) {
+    throw new Error("disabled Timer 0 cadence cannot retain a due time");
+  }
+}
+
+export interface FactoryTimer0CadenceOptions {
+  /** Proven absolute first overflow, or null when the entry phase is unknown. */
+  firstDueMasterCycle: number | null;
+  reload?: number;
+  prescaleBits?: number;
+}
+
+export function createFactoryTimer0Cadence(
+  options: FactoryTimer0CadenceOptions,
+): FactoryTimer0Cadence {
+  const reload = options.reload ?? FACTORY_TIMER0_DEFAULT_RELOAD;
+  const prescaleBits = options.prescaleBits ?? FACTORY_TIMER0_DEFAULT_PRESCALE_BITS;
+  const periodMasterCycles = deriveFactoryTimer0Period(reload, prescaleBits);
+  if (options.firstDueMasterCycle !== null) {
+    requireTimer0MasterCycle(options.firstDueMasterCycle, "firstDueMasterCycle");
+  }
+  return freezeFactoryTimer0Cadence({
+    enabled: true,
+    reload,
+    prescaleBits,
+    periodMasterCycles,
+    nextDueMasterCycle: options.firstDueMasterCycle,
+    serviceCostMasterCycles: FACTORY_TIMER0_SERVICE_COST_MASTER_CYCLES,
+  });
+}
+
+export function disableFactoryTimer0Cadence(
+  state: FactoryTimer0Cadence,
+): FactoryTimer0Cadence {
+  validateFactoryTimer0Cadence(state);
+  return freezeFactoryTimer0Cadence({ ...state, enabled: false, nextDueMasterCycle: null });
+}
+
+export function enableFactoryTimer0Cadence(
+  state: FactoryTimer0Cadence,
+  firstDueMasterCycle: number,
+): FactoryTimer0Cadence {
+  validateFactoryTimer0Cadence(state);
+  requireTimer0MasterCycle(firstDueMasterCycle, "firstDueMasterCycle");
+  return freezeFactoryTimer0Cadence({
+    ...state,
+    enabled: true,
+    nextDueMasterCycle: firstDueMasterCycle,
+  });
+}
+
+/**
+ * Apply the source's disable → reload sequence.  Enabling must be a separate
+ * call because only that final write has a proven first-due seed.
+ */
+export function reloadFactoryTimer0Cadence(
+  state: FactoryTimer0Cadence,
+  reload: number,
+  prescaleBits = FACTORY_TIMER0_DEFAULT_PRESCALE_BITS,
+): FactoryTimer0Cadence {
+  validateFactoryTimer0Cadence(state);
+  if (state.enabled || state.nextDueMasterCycle !== null) {
+    throw new Error("reloadFactoryTimer0Cadence requires a disabled Timer 0 cadence");
+  }
+  const periodMasterCycles = deriveFactoryTimer0Period(reload, prescaleBits);
+  return freezeFactoryTimer0Cadence({
+    ...state,
+    reload,
+    prescaleBits,
+    periodMasterCycles,
+    nextDueMasterCycle: null,
+  });
+}
+
+export interface FactoryTimer0Dispatch {
+  cadence: FactoryTimer0Cadence;
+  crossedDueMasterCycles: readonly number[];
+  serviceCostMasterCycles: null;
+}
+
+export function dispatchFactoryTimer0Cadence(
+  state: FactoryTimer0Cadence,
+  dispatchMasterCycle: number,
+): FactoryTimer0Dispatch {
+  validateFactoryTimer0Cadence(state);
+  requireTimer0MasterCycle(dispatchMasterCycle, "dispatchMasterCycle");
+  if (!state.enabled || state.nextDueMasterCycle === null) {
+    return Object.freeze({
+      cadence: state,
+      crossedDueMasterCycles: Object.freeze([]),
+      serviceCostMasterCycles: FACTORY_TIMER0_SERVICE_COST_MASTER_CYCLES,
+    });
+  }
+
+  const crossed: number[] = [];
+  let nextDue = state.nextDueMasterCycle;
+  while (nextDue <= dispatchMasterCycle) {
+    crossed.push(nextDue);
+    if (nextDue > Number.MAX_SAFE_INTEGER - state.periodMasterCycles) {
+      throw new Error("Timer 0 recurrence exceeded safe master-cycle range");
+    }
+    nextDue += state.periodMasterCycles;
+  }
+  const cadence = crossed.length === 0
+    ? state
+    : freezeFactoryTimer0Cadence({ ...state, nextDueMasterCycle: nextDue });
+  return Object.freeze({
+    cadence,
+    crossedDueMasterCycles: Object.freeze(crossed),
+    serviceCostMasterCycles: FACTORY_TIMER0_SERVICE_COST_MASTER_CYCLES,
+  });
+}
+
+/**
  * Return the exact source-operation cost in mGBA master-cycle units.
  *
  * The operation is deliberately structural: a cost model may use species,
