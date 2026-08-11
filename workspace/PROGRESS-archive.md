@@ -1,3 +1,21 @@
+## 1150 — [MAIN worker, 2026-08-11] **#55 MPlay post-command state barrier closed**
+
+- **State:** `master` is green at a precise evidence checkpoint; #55 remains
+  open and the construction clock stays null/unwired. S8 remains closed, the
+  Battle-2 march stays stopped at 33331, and #56 was untouched.
+- **Did:** twice-fresh OFF packets capture `_081DD9C4` for all **113/113**
+  sixth-player rows. All **108/108** one-pass rows have nine `0x80` tracks and
+  one inactive track, proving zero `TrkVolPitSet`/channel-worker entries. The
+  prior post-command flags/chan barrier is closed without a duration fit.
+- **Next:** source-reduce the earlier one-pass tempo track/command loop:
+  channel gate/clear, wait/LFO, and bounded callback paths. Complete costs
+  remain **5 exact / 108 null**; do not wire `runFactoryConstructionClock`.
+- **Notes:** no engine/pixel identity changed, so LUKAS remains **8/50** with
+  only set-270 gender differing; controls remain reveal **154**, summary
+  **65**, canonical **154,65,249,238,3,256,115**. Focused **4/4**, smoke
+  **375/375**, typecheck, full **954 files / 9,143 passed / 1 skipped**, build
+  **647 modules**. No new unsupported-branch barrier.
+
 ## 1148 — [MAIN worker, 2026-08-11] **Battle-6 send-out blocked exactly at #55 gender identity**
 
 - **State:** `master` is green with the legal LUKAS acknowledgement/send-out
