@@ -24,8 +24,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   clock, fit residuals, or add canonical Battle-2 windows.
 - **Notes:** receipt construction/ambient totals are **242/52/294**,
   **112/31/143**, **202/30/232**. +18 service and VBlank/IRQ pauses remain
-  external. Focused **21/21**, smoke **375/375**, typecheck, full `npm test`,
-  and build passed; no fixture, recording import, barrier, or clock change.
+  external. Focused **21/21**, smoke **375/375**, full `npm test` **892 files /
+  8,476 passed / 1 skipped**, typecheck, and build passed; no fixture,
+  recording import, barrier, or clock change.
 
 ## 1097 — [solo session, 2026-08-10] **User priority decisions recorded: #55 grind authorized; #71 stays faithful; S11 out of scope for now**
 
