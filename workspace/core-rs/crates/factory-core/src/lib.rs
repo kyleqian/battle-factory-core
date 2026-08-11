@@ -11,6 +11,7 @@
 //!   (reference/pokeemerald path or a TS module that already carries the
 //!   citation).
 
+pub mod damage_calc;
 pub mod gen_tables;
 pub mod gender;
 pub mod mon_construction;
