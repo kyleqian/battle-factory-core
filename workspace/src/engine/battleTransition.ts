@@ -301,6 +301,20 @@ export function frontierTransitionRenderKind(
   return fallback;
 }
 
+/**
+ * Source-relative display handoff into `CB2_InitBattleInternal` /
+ * `BattleIntroSlide3`. LOGO_WAVE destroys its transition task after the
+ * palette fade completes; `Task_BattleStart` observes that completion and
+ * installs `CB2_InitBattle` on the following callback, leaving one retained
+ * black display callback. The circle routes used by the established anchor
+ * have no additional displayed lag at their already-owned room seam.
+ */
+export function battleIntroSceneAssemblyDisplayLag(
+  presentation: FrontierTransitionPresentation | undefined,
+): 0 | 1 {
+  return presentation?.transitionId === 30 ? 1 : 0;
+}
+
 interface CircleSpec {
   init: readonly [number, number];
   speed: readonly [number, number];

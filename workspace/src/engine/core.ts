@@ -112,6 +112,7 @@ import {
 import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
 import {
   applyBattleTransitionOverlay,
+  battleIntroSceneAssemblyDisplayLag,
   frontierTransitionBgFadeY,
   frontierTransitionObjFadeY,
   frontierTransitionRenderKind,
@@ -980,11 +981,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           const generatedPending =
             factoryRoundBattleOrchestrator?.round.presentation?.command;
           if (generatedPending?.type === "battleStart") {
+            const sceneAssemblyDisplayLag =
+              battleIntroSceneAssemblyDisplayLag(
+                battleRoom.transitionPresentation,
+              );
             battleRoom = null;
             postwin = null;
             factoryRoundBattleOrchestrator =
               beginFactoryRoundBattleStartIntro(
                 factoryRoundBattleOrchestrator!,
+                sceneAssemblyDisplayLag,
               );
           } else if (battleRoom.encounter === "jenson") {
             battleSetup = createBattleSetup(
@@ -1837,6 +1843,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           );
           const roomTrainer =
             battleRoom.trainerPresentation ?? CANONICAL_DESTIN_PRESENTATION;
+          const sceneAssemblyDisplayLag = battleIntroSceneAssemblyDisplayLag(
+            battleRoom.transitionPresentation,
+          );
           battleRoom = null;
           return {
             ...state,
@@ -1859,6 +1868,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
                   ],
                 freshBattleRngValue: ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
               }),
+              sceneAssemblyDisplayLag,
             ),
             battle1OpponentConstructionRngValues,
             rngMode,

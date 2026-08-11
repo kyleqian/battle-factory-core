@@ -601,6 +601,7 @@ export function createFactoryRoundBattleOrchestrator(
  */
 export function beginFactoryRoundBattleStartIntro(
   state: FactoryRoundBattleOrchestratorState,
+  sceneAssemblyDisplayLag: 0 | 1 = 0,
 ): FactoryRoundBattleOrchestratorState {
   if (state.battleStartIntro !== null || state.battle !== null) {
     return fail("Factory battle-start intro requires an unstarted battle");
@@ -619,7 +620,11 @@ export function beginFactoryRoundBattleStartIntro(
   return Object.freeze({
     ...state,
     battleStartIntro: Object.freeze({
-      ...createFactoryBattleStartIntro(command, isCanonicalAnchorIntro),
+      ...createFactoryBattleStartIntro(
+        command,
+        isCanonicalAnchorIntro,
+        sceneAssemblyDisplayLag,
+      ),
       elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
     }),
   });

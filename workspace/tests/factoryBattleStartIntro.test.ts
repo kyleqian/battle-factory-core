@@ -7,6 +7,7 @@ import { traceAdvances } from "../tools/compare/traceReplay.ts";
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import { createFactoryBattleStartPresentationCommand } from "../src/engine/factoryBattleStartPresentation.ts";
 import { getLevel50InitialRentalFixedIv } from "../src/engine/factoryRentalGeneration.ts";
 import {
   advanceFactoryBattleStartIntro,
@@ -81,6 +82,79 @@ function intro() {
 }
 
 describe("generated Factory pre-send-out intro lifecycle", () => {
+  it("renders two frozen trainer/index/party-status identities purely through the reusable scene-assembly owner", () => {
+    const firstRound = orchestrator();
+    const firstCommand = factoryBattleStartPresentationForState(firstRound)!;
+    const secondRound = createFactoryRoundBattleOrchestrator({
+      id: "second-scene-assembly-identity",
+      rngValue: 42,
+      factoryWinStreak: 0,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: [record(110), record(130), record(150)],
+        savedRentalRecords: [
+          record(110), record(130), record(150),
+          record(115), record(135), record(145),
+        ],
+      },
+    });
+    const generatedSecond = factoryBattleStartPresentationForState(secondRound)!;
+    const secondPlayerParty = Object.freeze([
+      Object.freeze({
+        ...generatedSecond.parties.player[0],
+        status1: 0x40,
+      }),
+      Object.freeze({
+        ...generatedSecond.parties.player[1],
+        hp: 0,
+      }),
+      generatedSecond.parties.player[2],
+    ]) as typeof generatedSecond.parties.player;
+    const secondCommand = createFactoryBattleStartPresentationCommand({
+      commandId: 99,
+      battleIndex: 5,
+      opponentTrainer: generatedSecond.opponentTrainer,
+      playerParty: secondPlayerParty,
+      opponentParty: generatedSecond.parties.opponent,
+    });
+
+    expect(firstCommand.opponentTrainer.trainerId)
+      .not.toBe(secondCommand.opponentTrainer.trainerId);
+    expect(firstCommand.battleIndex).toBe(0);
+    expect(secondCommand.battleIndex).toBe(5);
+    expect(secondCommand.partySummaries.player)
+      .toEqual(["status", "fainted", "healthy", "empty", "empty", "empty"]);
+
+    const roundsBefore = [structuredClone(firstRound), structuredClone(secondRound)];
+    const frames = [firstCommand, secondCommand].map((command) => {
+      let state = createFactoryBattleStartIntro(command, false, 1);
+      while (generatedBattleIntroSourceClock(
+        state.elapsed,
+        state.sceneAssemblyDisplayLag,
+      ) < 1292) {
+        state = advanceFactoryBattleStartIntro(state);
+      }
+      const before = structuredClone(state);
+      const frameA = new Uint8Array(240 * 160 * 4);
+      const frameB = new Uint8Array(240 * 160 * 4);
+      renderGeneratedBattleStartPreSendOut(frameA, state);
+      renderGeneratedBattleStartPreSendOut(frameB, state);
+      expect(frameB).toEqual(frameA);
+      expect(state).toEqual(before);
+      expect(state.command).toBe(command);
+      return frameA;
+    });
+
+    expect(frames[0]).not.toEqual(frames[1]);
+    expect(firstRound).toEqual(roundsBefore[0]);
+    expect(secondRound).toEqual(roundsBefore[1]);
+    expect(firstRound.round.rules.phase).toBe("presentingBattleStart");
+    expect(secondRound.round.rules.phase).toBe("presentingBattleStart");
+  });
+
   it("pins the interactive generated-intro summary destroy receipt to its semantic handoff clock (ISSUES #56 item 2)", () => {
     // The Battle Scene OFF RAM probe records the real bar+icon destroy at
     // absolute frame 1492. Replay the exact interactive input route through

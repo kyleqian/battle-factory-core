@@ -5,6 +5,7 @@ import circles from "../src/assets/gen/battle-transition-frontier-circles.json" 
 import meta from "../src/data/gen/battle-transitions-frontier.json" with { type: "json" };
 import { advanceRngValue } from "../src/engine/rng.ts";
 import {
+  battleIntroSceneAssemblyDisplayLag,
   frontierTransitionRenderKind,
   selectFrontierTransition,
 } from "../src/engine/battleTransition.ts";
@@ -27,6 +28,18 @@ import type {
 // ROM's own graphics_file_rules.mk build rule byte for byte).
 
 describe("battle-transition-frontier-logo.json (LOGO_WIGGLE/LOGO_WAVE)", () => {
+  it("retains LOGO_WAVE's one displayed-black callback at the battle-intro handoff", () => {
+    const logoWave = selectFrontierTransition(9).presentation;
+    expect(frontierTransitionRenderKind(logoWave, "circlesMeet"))
+      .toBe("logoWave");
+    expect(battleIntroSceneAssemblyDisplayLag(logoWave)).toBe(1);
+    expect(battleIntroSceneAssemblyDisplayLag(undefined)).toBe(0);
+    expect(battleIntroSceneAssemblyDisplayLag({
+      ...logoWave,
+      transitionId: 34,
+    })).toBe(0);
+  });
+
   it("has a 16-color palette (frontier_logo.png's own .gbapal)", () => {
     expect(logo.palette).toHaveLength(16);
   });

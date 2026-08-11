@@ -4144,14 +4144,20 @@ const GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN = 1048;
 export const GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY =
   GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN - TICK0;
 
-export function generatedBattleIntroSourceClock(elapsed: number): number {
-  return GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN + elapsed;
+export function generatedBattleIntroSourceClock(
+  elapsed: number,
+  sceneAssemblyDisplayLag: 0 | 1 = 0,
+): number {
+  return GENERATED_BATTLE_INTRO_SOURCE_CLOCK_ORIGIN
+    + elapsed
+    - sceneAssemblyDisplayLag;
 }
 
 export function generatedBattleIntroVisualPhase(
   elapsed: number,
+  sceneAssemblyDisplayLag: 0 | 1 = 0,
 ): "handoff" | "trainer-slide" | "trainer-message" {
-  const t = generatedBattleIntroSourceClock(elapsed);
+  const t = generatedBattleIntroSourceClock(elapsed, sceneAssemblyDisplayLag);
   if (t < FIRST_VISIBLE_TICK) return "handoff";
   if (t < SLIDE_END_TICK) return "trainer-slide";
   return "trainer-message";
@@ -4160,7 +4166,10 @@ export function generatedBattleIntroVisualPhase(
 export function isGeneratedBattleIntroInputReady(
   state: FactoryBattleStartIntroState,
 ): boolean {
-  const t = generatedBattleIntroSourceClock(state.elapsed);
+  const t = generatedBattleIntroSourceClock(
+    state.elapsed,
+    state.sceneAssemblyDisplayLag,
+  );
   const params = battleIntroEncounterParams(
     "destin",
     state.command.opponentTrainer,
@@ -4187,6 +4196,7 @@ export function renderGeneratedBattleStartPreSendOut(
   }
   const t = generatedBattleIntroSourceClock(
     state.elapsed,
+    state.sceneAssemblyDisplayLag,
   );
   const win = windowRange(t);
   if (win === null) return;
@@ -4227,7 +4237,10 @@ function generatedBattleStartPressTick(
 ): number | null {
   return state.acknowledgedElapsed === null
     ? null
-    : generatedBattleIntroSourceClock(state.acknowledgedElapsed - 1);
+    : generatedBattleIntroSourceClock(
+      state.acknowledgedElapsed - 1,
+      state.sceneAssemblyDisplayLag,
+    );
 }
 
 export function generatedBattleStartOpponentReleaseStarted(
@@ -4236,7 +4249,10 @@ export function generatedBattleStartOpponentReleaseStarted(
   const pressTick = generatedBattleStartPressTick(state);
   if (pressTick === null) return false;
   const [line1, line2] = state.command.text.opponentSendOut;
-  return generatedBattleIntroSourceClock(state.elapsed)
+  return generatedBattleIntroSourceClock(
+    state.elapsed,
+    state.sceneAssemblyDisplayLag,
+  )
     >= sendOutTextStartTick(pressTick)
       + line1.length + line2.length - 1
       + SENDOUT_HANDOFF_LAG;
@@ -4403,7 +4419,10 @@ export function generatedBattleStartPlayerReleaseStarted(
 ): boolean {
   const handoffTick = generatedBattleStartOpponentHandoffTick(state);
   return handoffTick !== null
-    && generatedBattleIntroSourceClock(state.elapsed)
+    && generatedBattleIntroSourceClock(
+      state.elapsed,
+      state.sceneAssemblyDisplayLag,
+    )
       >= handoffTick + generatedPlayerDispatchDelay(state);
 }
 
@@ -4434,7 +4453,10 @@ export function generatedBattleStartCommandReady(
 ): boolean {
   const handoffTick = generatedBattleStartOpponentHandoffTick(state);
   return handoffTick !== null
-    && generatedBattleIntroSourceClock(state.elapsed)
+    && generatedBattleIntroSourceClock(
+      state.elapsed,
+      state.sceneAssemblyDisplayLag,
+    )
       >= handoffTick + generatedPlayerDispatchDelay(state) + generatedPlayerReadyLag(state);
 }
 
@@ -4554,7 +4576,10 @@ export function renderGeneratedBattleStartOpponentRelease(
     renderGeneratedBattleStartPreSendOut(fb, state);
     return;
   }
-  const t = generatedBattleIntroSourceClock(state.elapsed);
+  const t = generatedBattleIntroSourceClock(
+    state.elapsed,
+    state.sceneAssemblyDisplayLag,
+  );
   const [line1, line2] = state.command.text.opponentSendOut;
   const textStartTick = sendOutTextStartTick(pressTick);
   const textTotal = line1.length + line2.length;
@@ -4833,7 +4858,10 @@ export function renderGeneratedBattleStartPlayerRelease(
     renderGeneratedBattleStartOpponentRelease(fb, state);
     return;
   }
-  const t = generatedBattleIntroSourceClock(state.elapsed);
+  const t = generatedBattleIntroSourceClock(
+    state.elapsed,
+    state.sceneAssemblyDisplayLag,
+  );
   const dispatchDelay = generatedPlayerDispatchDelay(state);
   const [playerLineForVisualLag] = state.command.text.playerSendOut;
   const playerVisualT = generatedPlayerVisualClock(

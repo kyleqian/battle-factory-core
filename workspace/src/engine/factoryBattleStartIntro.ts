@@ -37,6 +37,12 @@ export type FactoryBattleStartIntroState = Readonly<{
   command: FactoryBattleStartPresentationCommand;
   /** BeginBattleIntro-relative controller callbacks. */
   elapsed: number;
+  /**
+   * Display callbacks retained black between the selected field transition
+   * completing and BattleIntroSlide3's first displayed callback. This is a
+   * source-lifecycle receipt, never a battle/trainer/trace-time selector.
+   */
+  sceneAssemblyDisplayLag: 0 | 1;
   /** First accepted PAUSE_UNTIL_PRESS A edge, frozen once. */
   acknowledgedElapsed: number | null;
   /**
@@ -53,10 +59,12 @@ export type FactoryBattleStartIntroState = Readonly<{
 export function createFactoryBattleStartIntro(
   command: FactoryBattleStartPresentationCommand,
   isCanonicalAnchorIntro: boolean,
+  sceneAssemblyDisplayLag: 0 | 1 = 0,
 ): FactoryBattleStartIntroState {
   return Object.freeze({
     command,
     elapsed: 0,
+    sceneAssemblyDisplayLag,
     acknowledgedElapsed: null,
     isCanonicalAnchorIntro,
   });
@@ -72,7 +80,10 @@ export function factoryBattleStartIntroPhase(
       ? "opponent-release"
       : "opponent-message";
   }
-  const visualPhase = generatedBattleIntroVisualPhase(state.elapsed);
+  const visualPhase = generatedBattleIntroVisualPhase(
+    state.elapsed,
+    state.sceneAssemblyDisplayLag,
+  );
   if (visualPhase !== "trainer-message") return visualPhase;
   if (!isGeneratedBattleIntroInputReady(state)) return "trainer-message";
   return "awaiting-acknowledgement";
