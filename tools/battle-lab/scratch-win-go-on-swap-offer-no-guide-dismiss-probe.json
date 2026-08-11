@@ -23,7 +23,7 @@
         {
           "species": 362,
           "level": 50,
-          "nature": 0,
+          "nature": 3,
           "ivs": {
             "hp": 31,
             "attack": 31,
@@ -33,8 +33,8 @@
             "spDefense": 31
           },
           "evs": {
-            "hp": 0,
-            "attack": 0,
+            "hp": 255,
+            "attack": 255,
             "defense": 0,
             "speed": 0,
             "spAttack": 0,
@@ -55,7 +55,7 @@
           "item": 0,
           "abilitySlot": 0,
           "friendship": 70,
-          "gender": "male",
+          "gender": "female",
           "shiny": false
         },
         {

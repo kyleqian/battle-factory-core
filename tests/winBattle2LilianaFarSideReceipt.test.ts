@@ -11,6 +11,12 @@ import { loadCompareTrace } from "../tools/compare/traceFile.ts";
 const FAR_SIDE_TRACE = "tools/compare/traces-groundtruth/win-go-on-swap-offer-no-liliana-far-side-off.json";
 const SOURCE_TRACE = "tools/compare/traces-groundtruth/win-go-on-swap-offer-no-guide-dismiss-off.json";
 const FIXTURE = "tools/battle-lab/scratch-win-go-on-swap-offer-no-guide-dismiss-probe.json";
+const BATTLE_START_WINDOWS = [
+  ["tools/compare/traces-groundtruth/win-go-on-battle2-room-dismiss-off.json", 11308, 11337],
+  ["tools/compare/traces-groundtruth/win-go-on-battle2-transition-black-off.json", 11514, 11556],
+  ["tools/compare/traces-groundtruth/win-go-on-battle2-start-off.json", 13385, 13622],
+  ["tools/compare/traces-groundtruth/win-go-on-battle2-action-ready-off.json", 13631, 13633],
+] as const;
 
 type Segment = Readonly<{ frames: number; buttons?: readonly string[] }>;
 type RecordedTrace = Readonly<{
@@ -87,5 +93,46 @@ describe("WIN GO ON LILIANA far-side ground-truth receipt", () => {
     });
     expect(gfxId).toBe(OBJ_EVENT_GFX.GIRL_3);
     expect(opponentSheetNameForGfx(gfxId)).toBe("GIRL_3");
+  });
+
+  it("extends the exact prefix only with the two ordinary held-quote acknowledgements and keeps every claimed window dense", () => {
+    const source = readJson<RecordedTrace>(SOURCE_TRACE);
+    const fixture = readJson<{
+      overrides: { parties: { player: Array<Record<string, unknown>> } };
+    }>(FIXTURE);
+    const appended: readonly Segment[] = [
+      { frames: 2, buttons: ["A"] },
+      { frames: 2000, buttons: [] },
+      { frames: 2, buttons: ["A"] },
+      { frames: 1000, buttons: [] },
+    ];
+
+    for (const [path, start, end] of BATTLE_START_WINDOWS) {
+      const resolved = loadCompareTrace(path);
+      expect(resolved.segments.slice(0, source.segments.length)).toEqual(source.segments);
+      expect(resolved.segments.slice(source.segments.length)).toEqual(appended);
+      expect(resolved.segments.reduce((total, segment) => total + segment.frames, 0))
+        .toBe(14312);
+      expect(resolved.captureFrames).toEqual(
+        Array.from({ length: end - start + 1 }, (_, index) => start + index),
+      );
+      expect(resolved).toMatchObject({
+        appRoute: "generated-orchestrator",
+        oracleProfile: "battle-scene-off",
+        appStage: { id: "win-terminal-window-off", frame: 4623 },
+      });
+    }
+
+    // The live Battle-2 action menu exposes the healed player lead. This
+    // staged DUSCLOPS retains the fixture's harmless SPLASH choice while its
+    // nature/EV/gender identity matches the source-derived set-666 record
+    // already owned by winTerminalWindowStage.
+    expect(fixture.overrides.parties.player[0]).toMatchObject({
+      species: 362,
+      nature: 3,
+      evs: { hp: 255, attack: 255 },
+      moves: [150, 150, 150, 150],
+      gender: "female",
+    });
   });
 });

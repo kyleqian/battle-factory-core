@@ -21,6 +21,7 @@ import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScrip
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { createFreshFactoryBattle } from "../src/engine/factoryBattleStart.ts";
+import { factoryBattleStartIntroPhase } from "../src/engine/factoryBattleStartIntro.ts";
 import {
   createFactoryFullTurnBattleState,
   submitFactoryFullTurnDecision,
@@ -33,8 +34,10 @@ import { getFactoryTrainerPresentation } from "../src/engine/factoryTrainerPrese
 import { createInitialState, render, tick } from "../src/engine/core.ts";
 import {
   advanceFactoryRoundBattleCommand,
+  advanceFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleResolution,
   advanceFactoryRoundPresentation,
+  beginFactoryRoundBattleStartIntro,
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
@@ -2304,7 +2307,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(state.round.rules.phase).toBe("presentingBattleStart");
   });
 
-  it("adopts the probed battle-2 opponent schedule (trainer 9 LILIANA) at the GO ON pre-generation seam", () => {
+  it("carries adopted LILIANA through the nonzero-index battleStart lifecycle to one real decision request", () => {
     // ISSUES #55 receipt (`docs/win-battle2-opponent-provenance-receipt.md`):
     // the ROM's battle-2 opponent on the WIN GO ON route is set-selected
     // single-frame from pre-call cursor 0x7399E3AE, but its personalities are
@@ -2379,5 +2382,72 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(segment.kind).toBe("opponent-generation");
     expect(segment.battleIndex).toBe(1);
     expect(segment.rngBefore).toBe(state.round.rules.rngValue);
+
+    // The optional-swap route publishes the already-owned opponent without
+    // regenerating it, then the same live battleStart command used at every
+    // index owns the room handoff and generated Scene-OFF intro.
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    state = acknowledgeAndAdvance(state);
+
+    const pendingStart = state.round.presentation?.command;
+    expect(state.round.rules.battleIndex).toBe(1);
+    expect(state.round.rules.currentOpponent).toMatchObject({
+      id: "factory-trainer-9",
+      trainerName: "LILIANA",
+    });
+    expect(state.round.rules.currentOpponent.rentalRecords)
+      .toEqual(adoptedNext.opponents);
+    expect(pendingStart).toMatchObject({
+      type: "battleStart",
+      battleIndex: 1,
+      opponent: { id: "factory-trainer-9", trainerName: "LILIANA" },
+    });
+    if (pendingStart?.type !== "battleStart") {
+      throw new Error("expected nonzero-index battleStart");
+    }
+
+    state = beginFactoryRoundBattleStartIntro(state);
+    expect(state.battleStartIntro!.command.battleIndex).toBe(1);
+    expect(state.battleStartIntro!.command.opponentTrainer.name).toBe("LILIANA");
+    while (factoryBattleStartIntroPhase(state.battleStartIntro!) !== "awaiting-acknowledgement") {
+      state = advanceFactoryRoundBattleStartIntro(state, new Set());
+    }
+    state = advanceFactoryRoundBattleStartIntro(state, new Set(["A"]));
+    const acknowledgedElapsed = state.battleStartIntro!.acknowledgedElapsed;
+    expect(acknowledgedElapsed).not.toBeNull();
+    expect(state.round.presentation?.command.commandId).toBe(pendingStart.commandId);
+
+    // A repeated edge cannot acknowledge or advance the round command twice.
+    state = advanceFactoryRoundBattleStartIntro(state, new Set(["A"]));
+    expect(state.battleStartIntro!.acknowledgedElapsed).toBe(acknowledgedElapsed);
+    expect(state.round.presentation?.command.commandId).toBe(pendingStart.commandId);
+    while (state.battleStartIntro !== null) {
+      state = advanceFactoryRoundBattleStartIntro(state, new Set());
+    }
+
+    expect(state.round.rules).toMatchObject({
+      phase: "battleActive",
+      battleIndex: 1,
+      currentOpponent: { id: "factory-trainer-9", trainerName: "LILIANA" },
+    });
+    expect(state.round.presentation).toBeNull();
+    expect(state.battle?.boundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "command", side: "player" },
+    });
+    if (state.battle?.boundary.kind !== "decision-required") {
+      throw new Error("expected next real decision request");
+    }
+    expect(state.battleCommandPresentation?.request)
+      .toEqual(state.battle.boundary.request);
+    expect(state.battleCommandPresentation?.lifecycle).toEqual({
+      phase: "action-menu",
+      phaseElapsed: 0,
+    });
   });
 });
