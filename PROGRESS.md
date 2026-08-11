@@ -5,7 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1106 — [MAIN worker, 2026-08-10] **#55 instruction queue observable blocked safely**
+## 1107 — [solo session, 2026-08-10 ~21:40] **Independent audit of the evening #55 sessions: all green; skipped soak gates re-run and restated in SUPERVISOR.md**
+
+- **State:** master verified first-hand at `76bb72a9`: full `npm test`
+  **895 files / 8,491 passed / 1 skipped**; soak vanilla 0:20 = **20/20 OK**;
+  soak full 0:60 = **60/60 OK / 0 CRASH / 0 HANG** (299 s). These match the
+  workers' claimed numbers exactly.
+- **Did:** audited entries 1097–1106. #55 discipline held throughout
+  (accessor `cycles` stay `null`, clock unwired, +18 censused not fitted,
+  refuted shortcuts recorded). Found one process defect: BOTH 2026-08-10
+  sessions ended without the user-directed wind-down soak gates, because the
+  policy lived only in ROADMAP's now-ticked S10 block. Fixed durably: the
+  gates are restated in SUPERVISOR.md's wind-down section (`76bb72a9`).
+- **Next:** for #55's exit-139 probe blocker, the clean brief is a small
+  compiled queue-inspection helper added to the vendored libmgba binding
+  (read the due event's name/when against matching headers — no
+  hand-declared struct layouts). Fold `animation-main` (~10 ahead) at next
+  orient.
+- **Notes:** decision compliance clean: no S11 work, no #71 OFF-profile
+  wiring, Noland untouched. No engine change in this session; docs-only
+  commits `76bb72a9` (+ this entry).
 
 - **State:** #55 remains open; no fresh instruction packet was admissible,
   dependency `cycles` stay `null`, and the construction clock stays unwired.
