@@ -7,9 +7,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## R2 — [supervised session, 2026-08-11] **M1 decision: hand-rolled C ABI (in progress)**
 
-- **State:** master merged into rust-main; baseline green (cargo test 4/4,
-  wasm32 release build 448 B). M1 boundary decision RECORDED (below);
-  implementation dispatching to a rust-lane worker.
+- **State:** **M1 and M2 are DONE and folded into rust-main; M3 (rental
+  generation) in flight.** master merged in at session start; every fold
+  gate-verified by the supervisor. Cargo 9/9, fmt+clippy clean (gates on
+  as of M1), wasm artifact 20,306 B (sha c7d82fe3…), differential spec
+  73/73 both default and POKEBENCH_ENGINE=wasm, full npm test 948 files /
+  8,756 passed / 1 pre-existing skip (worker-run on identical fold
+  content).
+  - **M1 (fold fe40ab19):** fw_ ABI v1 surface (fw_abi_version/
+    fw_rng_advance/fw_rng_output/fw_alloc/fw_free), `core-rs/build-wasm.sh`
+    → `artifacts/wasm/factory_wasm.wasm` (gitignored), hand-written typed
+    Node loader `core-rs/adapter/loadFactoryWasm.ts`, smoke
+    `core-rs/adapter/smoke.mts` pinning the wasm rng stream to the
+    TS-generated values. One in-territory deviation: narrowly-scoped
+    `#[allow(clippy::should_implement_trait)]` on `GbaRng::next` (mirrors
+    the TS name deliberately).
+  - **M2:** engine adapter `core-rs/adapter/rngEngine.ts` (TS default,
+    `POKEBENCH_ENGINE=wasm` opt-in) + `tests/rngEngineParity.test.ts` —
+    spec conformance parameterized over both engines, 64-seed ×
+    1024-step differential sweep, ABI pin. Artifact-absent worktrees skip
+    the wasm half (verified 4 passed/69 skipped); opt-in without the
+    artifact hard-fails naming build-wasm.sh. No existing TS file
+    modified; tsconfig untouched (adapter enters the tsc program via the
+    test's import).
 - **Did:** **M1 decision — hand-rolled C ABI; wasm-bindgen declined on
   merits, not necessity.** Receipt: network IS available in this session
   (crates.io CDN probe 2026-08-11: HTTP 200, 184,119 bytes for the
@@ -29,9 +49,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   length-prefixed LE byte buffers via `fw_alloc(len) -> ptr` /
   `fw_free(ptr, len)`; every layout is documented in factory-wasm doc
   comments and mirrored by the TS-side decoder next to the adapter.
-- **Next:** M1 implementation (fw_ surface + `core-rs/build-wasm.sh` →
-  `artifacts/wasm/` gitignored + hand-written Node loader + smoke vs
-  TS-pinned rng values), then M2 (vitest adapter, rng spec differential).
+- **Next:** M3 in two worker steps: (a) generated data tables
+  (`core-rs/tools/gen-data.mjs` → checked-in `gen_tables.rs`; frontier
+  mons/held items/species second-ability/natures/round policy) + helper
+  ports with TS-pinned tests; (b) `generateInitialFactoryRentals` port +
+  `fw_generate_initial_rentals` LE-buffer boundary +
+  `tests/factoryRentalParity.test.ts` differential matrix. The #55
+  construction clock (`factoryConstructionClock.ts`) is explicitly NOT
+  ported — open TS-lane work; the current single-cursor contract is the
+  spec.
 - **Notes:** clippy/fmt gates turn on with this step per
   RUST_SUPERVISOR.md. TS lane's open #55 construction-clock work noted for
   M3 sequencing (no porting what it wires into until TS closes it).
