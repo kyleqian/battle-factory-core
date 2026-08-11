@@ -503,6 +503,10 @@ import {
   type SandstormState,
 } from "./sandstorm.ts";
 import {
+  heatWaveAtAge,
+  type HeatWaveState,
+} from "./heatWave.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -759,6 +763,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "HOUNDOUR"
+    | "NINETALES"
     | "VILEPLUME"
     | "BUTTERFREE"
     | "ONIX"
@@ -2122,6 +2127,13 @@ export interface SceneOnSandstormConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnHeatWaveConfig {
+  readonly move: "HEAT_WAVE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -2590,6 +2602,7 @@ export type SceneOnMoveConfig =
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
+  | SceneOnHeatWaveConfig
   | SceneOnTailGlowConfig
   | SceneOnTailWhipConfig
   | SceneOnAgilityConfig
@@ -2743,6 +2756,8 @@ export type SceneOnNeedleArmPresentationState =
   SceneOnMovePresentationState<SceneOnNeedleArmConfig>;
 export type SceneOnSandstormPresentationState =
   SceneOnMovePresentationState<SceneOnSandstormConfig>;
+export type SceneOnHeatWavePresentationState =
+  SceneOnMovePresentationState<SceneOnHeatWaveConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 export type SceneOnTailWhipPresentationState =
@@ -3159,6 +3174,12 @@ export interface SceneOnNeedleArmView extends NeedleArmState {
 }
 
 export interface SceneOnSandstormView extends SandstormState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnHeatWaveView extends HeatWaveState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -6277,6 +6298,21 @@ export function sceneOnSandstormView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...sandstormAtAge(state.age),
+  };
+}
+
+/** `age=0` is Move_HEAT_WAVE's first displayed source-script frame. */
+export function sceneOnHeatWaveView(
+  state: SceneOnHeatWavePresentationState,
+): SceneOnHeatWaveView {
+  if (state.config.move !== "HEAT_WAVE") {
+    throw new Error(`expected HEAT_WAVE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...heatWaveAtAge(state.age, state.config.attacker.geometry.side),
   };
 }
 

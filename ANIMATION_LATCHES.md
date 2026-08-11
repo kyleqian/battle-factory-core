@@ -64,6 +64,7 @@ cites the move whose ledger entry holds the full evidence.
 | Leaf Blade short `AnimTask_ShakeMon2(target,2,0,8,1)` bursts | creation display is the positive amplitude at RAM+1, then the ordinary body is RAM+2 | LEAF_BLADE, all three short bursts in both orientations (2026-08-10); do not generalize beyond this invocation |
 | Leaf Blade monbg `AnimTask_ShakeMon2(target,8,0,18,1)` | BG-scroll target motion RAM+1, including terminal return | LEAF_BLADE impact phase, both orientations (2026-08-10); distinct from live-OBJ ShakeMon2 schedules |
 | script `create_cross_impact_sprite` during target monbg | sprite and terminal destroy-callback display RAM+1 | LEAF_BLADE independently, both orientations (2026-08-10); CROSS_CHOP remains the independent shared-asset control |
+| `AnimTask_MoveHeatWaveTargets` live-battler `x2` writes | RAM+2, including the terminal return; distinct from the one-display flying-sand sprite callbacks in the same move | HEAT_WAVE, both 168-frame orientations (2026-08-10); own hardware OAM/change maps contradict the default plain-OAM expectation for this task specifically |
 
 **Not determined:** other `AnimTask_ShakeMonInPlace` schedules remain open —
 DOUBLE_EDGE's best fit is RAM+1 on its player-back map but is contradicted by
@@ -92,6 +93,11 @@ without a fresh single-axis probe.
   only: `setalpha`/`blendoff`/`monbg`/`clearmonbg` register work with no
   pixel step (COUNTER, CRUNCH, CRUSH_CLAW, TAKE_DOWN), IRON_TAIL's third
   metallic-shine sweep (`ClearBattleAnimBg` already ran).
+- **Mirrored Heat Wave subsprites retain source table order but use the
+  parent's H-flip layout:** tile-offset 0 is at parent−16 and tile-offset 8
+  at parent−48; signed Q8.8 accumulation must floor negative products.
+  HEAT_WAVE proves this bilaterally; SANDSTORM's non-mirrored control is
+  unchanged.
 
 ## Diagnostics
 

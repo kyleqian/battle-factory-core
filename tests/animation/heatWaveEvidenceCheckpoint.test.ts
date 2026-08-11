@@ -63,7 +63,7 @@ describe("MOVE_HEAT_WAVE evidence checkpoint", () => {
     expect(carriers).toBe(2);
   });
 
-  it("pins bilateral dense receipts and normalized maps without claiming exact coverage", () => {
+  it("pins bilateral dense receipts, normalized maps, and exact production acceptance", () => {
     for (const [path, window, evidence, raw, mapHash] of [
       ["tools/compare/fixtures/heat-wave-player-ninetales-opponent-onix.json",
         { startFrame: 78, endFrame: 245, frameCount: 168 },
@@ -82,8 +82,10 @@ describe("MOVE_HEAT_WAVE evidence checkpoint", () => {
       expect(fixture.secondFreshEvidenceSha256).toBe(evidence);
       expect(fixture.rawRgbSha256).toBe(raw);
       expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex")).toBe(mapHash);
-      expect(fixture.acceptance).toEqual({ status: "evidence-only-unsupported", denseEvidenceFrames: 168 });
+      expect(fixture.acceptance).toEqual({
+        status: "exact", denseEvidenceFrames: 168, productionFramebufferFrames: 168,
+      });
     }
-    expect(readFileSync("ANIMATION_COVERAGE.json", "utf8")).toContain("MOVE_HEAT_WAVE remains unsupported");
+    expect(readFileSync("ANIMATION_COVERAGE.json", "utf8")).toContain('"move": "MOVE_HEAT_WAVE"');
   });
 });

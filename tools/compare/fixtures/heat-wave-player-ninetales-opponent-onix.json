@@ -2,6 +2,10 @@
   "schema":"heat-wave-portable-evidence/v1",
   "oracleProfile":"battle-scene-on",
   "move":"HEAT_WAVE",
+  "attacker":{"species":"NINETALES","geometry":{"side":"player","spriteCorner":{"x":40,"y":53},"animationCenter":{"x":72,"y":85},"battlePositionCenter":{"x":72,"y":80}}},
+  "target":{"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "fieldProfile":{"playerHp":148,"playerMaxHp":148,"opponentHp":131,"opponentMaxHp":131,"playerGender":"female","opponentGender":"male"},
+  "appStage":{"presentationAge":0},
   "orientation":"player-back",
   "pair":"set 526 Ninetales (player-back) -> legal staged Onix (opponent-front)",
   "scenario":"tools/battle-lab/mechanic-heat-wave-player-ninetales-opponent-onix.json",
@@ -12,5 +16,5 @@
   "rawRgbSha256":"a22b496d0a8622a96e2cdc223b234976777914196d0add14a6c1a43867ef9446",
   "changeMap":"tools/compare/evidence/heat-wave-changemap-player.txt",
   "changeMapSha256":"29c4abde8bb9fcf6852b3c65a7878236f0b12c625ed184030cf45f59a9362bf8",
-  "acceptance":{"status":"evidence-only-unsupported","denseEvidenceFrames":168}
+  "acceptance":{"status":"exact","denseEvidenceFrames":168,"productionFramebufferFrames":168}
 }

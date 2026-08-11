@@ -3,8 +3,15 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, readdirSync, realpathSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { createScratchDir } from "../lib/scratch.ts";
+import { HEAT_WAVE_FRAME_COUNT, heatWaveAtAge } from "../../src/animation/heatWave.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnHeatWaveView,
+  type SceneOnHeatWaveConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
-interface Fixture {
+interface Fixture extends SceneOnHeatWaveConfig {
   readonly schema: "heat-wave-portable-evidence/v1";
   readonly oracleProfile: "battle-scene-on";
   readonly orientation: "player-back" | "opponent-front";
@@ -16,7 +23,8 @@ interface Fixture {
   readonly rawRgbSha256: string;
   readonly changeMap: string;
   readonly changeMapSha256: string;
-  readonly acceptance: { readonly status: "evidence-only-unsupported"; readonly denseEvidenceFrames: number };
+  readonly appStage: { readonly presentationAge: number };
+  readonly acceptance: { readonly status: "exact"; readonly denseEvidenceFrames: number; readonly productionFramebufferFrames: number };
 }
 interface Probe {
   readonly schema: string;
@@ -74,11 +82,6 @@ function runFresh(fixture: Fixture): {
   };
 }
 
-const coverage = readFileSync(join(root, "ANIMATION_COVERAGE.json"), "utf8");
-if (!coverage.includes("MOVE_HEAT_WAVE remains unsupported")) {
-  throw new Error("Heat Wave coverage was promoted or its explicit unsupported guard disappeared");
-}
-
 for (const fixturePath of fixturePaths) {
   const fixture = JSON.parse(readFileSync(resolve(root, fixturePath), "utf8")) as Fixture;
   const first = runFresh(fixture);
@@ -101,9 +104,10 @@ for (const fixturePath of fixturePaths) {
   const committedMap = readFileSync(resolve(root, fixture.changeMap), "utf8");
   if (first.changeMap !== committedMap || second.changeMap !== committedMap
       || sha(committedMap) !== fixture.changeMapSha256) failures.push("normalized change map");
-  if (fixture.acceptance.status !== "evidence-only-unsupported"
-      || fixture.acceptance.denseEvidenceFrames !== fixture.denseWindow.frameCount) {
-    failures.push("truthful unsupported status");
+  if (fixture.acceptance.status !== "exact"
+      || fixture.acceptance.denseEvidenceFrames !== fixture.denseWindow.frameCount
+      || fixture.acceptance.productionFramebufferFrames !== fixture.denseWindow.frameCount) {
+    failures.push("exact acceptance contract");
   }
   for (const probe of [first.probe, second.probe]) {
     const requiredTasks = ["AnimTask_LoadSandstormBackground", "AnimTask_LoadSandstormBackground_Step",
@@ -136,9 +140,68 @@ for (const fixturePath of fixturePaths) {
       && probe.frames.at(-1).visualTaskCount === 0;
     if (!denseShape || !effects || !cleanup) failures.push("dense hardware/state/effect/cleanup contract");
   }
+  const stage = createSceneOnMovePresentation<SceneOnHeatWaveConfig>({
+    move: "HEAT_WAVE",
+    attacker: fixture.attacker,
+    target: fixture.target,
+    fieldProfile: fixture.fieldProfile,
+  });
+  for (const [index, oracle] of first.probe.frames.entries()) {
+    const age = fixture.appStage.presentationAge + index;
+    const component = heatWaveAtAge(age, fixture.attacker.geometry.side);
+    const seam = sceneOnHeatWaveView({ ...stage, age });
+    const seamMatch = same(
+      { ...seam, age: undefined, attacker: undefined, target: undefined },
+      component,
+    );
+    const actualCrescents = oracle.sprites
+      .filter((sprite: any) => sprite.template.symbol === "gFlyingSandCrescentSpriteTemplate")
+      .sort((left: any, right: any) => left.slot - right.slot)
+      .map((sprite: any) => ({
+        slot: sprite.slot, x: sprite.x, y: sprite.y, x2: sprite.x2, y2: sprite.y2,
+        data: sprite.data,
+      }));
+    const expectedCrescents = component.crescents
+      .slice().sort((left, right) => left.oamSlot - right.oamSlot)
+      .map((sprite) => ({
+        slot: sprite.oamSlot, x: sprite.x, y: sprite.y, x2: sprite.x2, y2: sprite.y2,
+        data: [1, sprite.velocityX, sprite.velocityY, sprite.fractionalX,
+          sprite.fractionalY, sprite.mirrored ? 1 : 0, 0, 0],
+      }));
+    const targetSprite = fixture.target.geometry.side === "player"
+      ? oracle.playerSprite : oracle.opponentSprite;
+    const expectedAlpha = component.backgroundLoaded
+      ? component.blend.eva | component.blend.evb << 8 : 0;
+    const direction = fixture.attacker.geometry.side === "player" ? -1 : 1;
+    const scrollSteps = Math.max(0, Math.min(158, age - 5));
+    const componentMatch = same(actualCrescents, expectedCrescents)
+      && oracle.visualTaskCount === component.visualTaskCount
+      && oracle.backgroundPositions.gBattle_BG1_X === (age >= 166 ? 0 : direction * 6 * scrollSteps)
+      && oracle.backgroundPositions.gBattle_BG1_Y === (age >= 166 ? 0 : -scrollSteps)
+      && oracle.registers.bldalpha === expectedAlpha
+      && oracle.paletteTags.includes(10261) === component.flyingDirtLoaded
+      && oracle.tileTags.includes(10261) === component.flyingDirtLoaded
+      && (age < 12 || age >= 140 || targetSprite.x2 === component.targetX2);
+    const rgb = first.raw.subarray(index * 240 * 160 * 3, (index + 1) * 240 * 160 * 3);
+    const engine: EngineState = {
+      ...createInitialState(), rngMode: "frontierBattle", sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (app[pixel * 4] !== rgb[pixel * 3]
+          || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+          || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]) diff += 1;
+    }
+    const cleanup = index !== HEAT_WAVE_FRAME_COUNT - 1
+      || (!component.active && !oracle.animScriptActive && oracle.visualTaskCount === 0);
+    if (!seamMatch || !componentMatch || diff !== 0 || !cleanup) {
+      failures.push(`frame ${oracle.frame}/age ${age}: seam=${seamMatch} component=${componentMatch} diff=${diff} cleanup=${cleanup}`);
+    }
+  }
   console.log(
     `${fixture.orientation}: ${fixture.denseWindow.frameCount}/${fixture.denseWindow.frameCount} `
-    + "dense source/task/sprite/hardware/audio/state/raw-RGB frames reproduced twice fresh; remains unsupported",
+    + "dense source/component/seam/hardware/audio/state/raw-RGB/framebuffer frames exact twice fresh",
   );
   if (failures.length) throw new Error(`${fixture.orientation}: ${[...new Set(failures)].join(", ")}`);
 }

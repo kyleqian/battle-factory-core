@@ -31,7 +31,7 @@
     "opponentGender": "male"
   },
   "sourceWindow": {"startFrame": 210, "endFrame": 377, "frameCount": 168},
-  "evidenceSha256": "678cbc9073564cec54c76709704009d17586b45f1301dc129d13c840b0337b1e",
+  "evidenceSha256": "a06847b11c6089b18c26a238988b53cad04fcc393babb05fff4a666f41266c4d",
   "rawRgbSha256": "2968b95f680be00e14cb3386487629b142eb0ac05910f1dad69da7dc885e9958",
   "lifecycleCounts": {"gFlyingSandCrescentSpriteTemplate": 7},
   "topology": {

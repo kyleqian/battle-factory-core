@@ -997,6 +997,7 @@ import {
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
+  sceneOnHeatWaveView,
   sceneOnDragonClawView,
   sceneOnFireSpinView,
   sceneOnMetalClawView,
@@ -1045,6 +1046,7 @@ import {
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
+  type SceneOnHeatWavePresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnGlarePresentationState,
   type SceneOnAbsorbPresentationState,
@@ -1436,6 +1438,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const ninetalesFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NINETALES!;
 const quilavaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).QUILAVA!;
 const ariadosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARIADOS!;
 const poliwrathFrontSprite = opponentFrontSpritesAsset.POLIWRATH;
@@ -2619,6 +2622,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const ninetalesBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NINETALES!;
 const quilavaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).QUILAVA!;
 const medichamBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MEDICHAM!;
 const poliwrathBackSprite = battleBackSpritesAsset.POLIWRATH;
@@ -17071,6 +17075,148 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "HEAT_WAVE") {
+    const heatState = state as SceneOnHeatWavePresentationState;
+    const view = sceneOnHeatWaveView(heatState);
+    const displayed = sceneOnHeatWaveView({ ...heatState, age: heatState.age - 1 });
+    const displayedTarget = sceneOnHeatWaveView({ ...heatState, age: heatState.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "NINETALES"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "NINETALES"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HEAT_WAVE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const ninetales = playerToOpponent
+      ? ninetalesBackSprite
+      : { ...ninetalesFrontSprite, tileset: subTileset(ninetalesFrontSprite.tileset, 0, 8) };
+    const onix = playerToOpponent
+      ? { ...onixFrontSprite, tileset: subTileset(onixFrontSprite.tileset, 0, 8) }
+      : onixBackSprite;
+    const opponent = playerToOpponent ? onix : ninetales;
+    const player = playerToOpponent ? ninetales : onix;
+    const opponentBattler = playerToOpponent ? view.target : view.attacker;
+    const playerBattler = playerToOpponent ? view.attacker : view.target;
+    const targetDisplayX2 = displayedTarget.targetTaskActive
+      ? displayedTarget.targetX2
+      : displayedTarget.age < 12 && playerToOpponent
+        ? speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0
+        : 0;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      opponent.tileset,
+      opponent.palette,
+      opponentBattler.geometry.spriteCorner.x + (playerToOpponent ? targetDisplayX2 : 0),
+      opponentBattler.geometry.spriteCorner.y,
+    );
+    drawSpriteSheet(
+      fb,
+      player.tileset,
+      player.palette,
+      playerBattler.geometry.spriteCorner.x + (opponentToPlayer ? targetDisplayX2 : 0),
+      playerBattler.geometry.spriteCorner.y,
+    );
+
+    if (view.backgroundLoaded && view.blend.eva > 0) {
+      const backgroundPalette = blendPaletteToward(
+        sandstormArt.background.palette,
+        { r: 248, g: 0, b: 0 },
+        displayed.backgroundRedCoefficient,
+      );
+      const mapWidth = sandstormArt.background.tilemap.width * 8;
+      const mapHeight = sandstormArt.background.tilemap.height * 8;
+      for (let y = 0; y < 160; y += 1) {
+        const mapY = (y + displayed.bgScroll.y) % mapHeight;
+        for (let x = 0; x < 240; x += 1) {
+          const mapX = (x + displayed.bgScroll.x) % mapWidth;
+          const entry = sandstormArt.background.tilemap.entries[
+            Math.floor(mapY / 8) * sandstormArt.background.tilemap.width
+              + Math.floor(mapX / 8)
+          ];
+          if (!entry) continue;
+          const tile = sandstormArt.background.tileset.tiles[entry.tile];
+          if (!tile) continue;
+          const inTileX = ((mapX % 8) + 8) % 8;
+          const inTileY = ((mapY % 8) + 8) % 8;
+          const sx = entry.hFlip ? 7 - inTileX : inTileX;
+          const sy = entry.vFlip ? 7 - inTileY : inTileY;
+          const index = tile[sy * 8 + sx]!;
+          if (index === 0) continue;
+          const color = backgroundPalette[index];
+          if (!color) continue;
+          const offset = (y * 240 + x) * 4;
+          fb[offset] = blendChannel(color.r, fb[offset]!, view.blend.eva, view.blend.evb);
+          fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, view.blend.eva, view.blend.evb);
+          fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, view.blend.eva, view.blend.evb);
+        }
+      }
+    }
+
+    const dirtPalette = blendPaletteToward(
+      sandstormArt.flyingDirt.palette,
+      { r: 248, g: 0, b: 0 },
+      displayed.particleRedCoefficient,
+    );
+    const dirtLeft = subTileset(sandstormArt.flyingDirt.tileset, 0, 2);
+    const dirtRight = subTileset(sandstormArt.flyingDirt.tileset, 2, 2);
+    for (const crescent of displayed.crescents.slice().sort(
+      (left, right) => right.oamSlot - left.oamSlot,
+    )) {
+      const draw = crescent.mirrored ? drawSpriteSheetHFlip : drawSpriteSheet;
+      draw(fb, dirtLeft, dirtPalette, crescent.x + crescent.x2 - 16, crescent.y + crescent.y2);
+      draw(
+        fb,
+        dirtRight,
+        dirtPalette,
+        crescent.x + crescent.x2 + (crescent.mirrored ? -48 : 16),
+        crescent.y + crescent.y2,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "NINETALES",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "NINETALES" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "NINETALES used" : "Foe NINETALES used",
+      "HEAT WAVE!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "SANDSTORM") {
     const sandState = state as SceneOnSandstormPresentationState;
     const view = sceneOnSandstormView(sandState);

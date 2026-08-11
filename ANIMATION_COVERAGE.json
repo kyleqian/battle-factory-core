@@ -1343,7 +1343,7 @@
     "historical, now-disqualified species-301 NINCADA/SHUCKLE fixtures captured 321 currentMove=313 frames 39-359 and the BlendParticle creation/inactive latch at 2/2 frames 84-85 player-back and 88-89 opponent-front twice fresh; they are retained only as provenance and are not legal set-267 DELCATTY acceptance",
     "that historical mGBA probe records full source script identity/offset/wait, task and sprite bodies, OBJ palette tags plus faded/unfaded/hardware palettes, OAM/matrices, registers, both audio players, raw RGB, and framebuffer state; Fake Tears' args (tag SMALL_BUBBLES, delay 0, initial 4, target 4, RGB(12,11,31)) make the task latch/destroy in Cmd_createvisualtask before it can survive a post-frame gTasks snapshot",
     "the source-owned second frame is only the required first inactive/display latch. RockMonBackAndForth begins in that same batched next-source frame and is explicitly recorded as a boundary, not accepted or modeled by this checkpoint. No reducer, typed seam, app compositor, battle logic, RNG, turn order, facility state, boundary list, or unsupported barrier changed",
-    "MOVE_HEAT_WAVE remains unsupported: it selects FLYING_DIRT but also owns sandstorm/background blends, both-target movement, pan sweep, and seven flying-sand crescent calls. MOVE_LUSTER_PURGE remains unsupported: its white-circle/IMPACT particle calls sit inside a psychic/white BG pipeline, luster circle, six random hitsplats/sounds, target shake, and restore. Neither has independent complete dense move evidence."
+    "MOVE_HEAT_WAVE is independently exact through its own bilateral legal NINETALES evidence, red particle/background blends, target movement, pan sweep, mirrored background, and seven flying-sand crescent calls. MOVE_LUSTER_PURGE remains unsupported: its white-circle/IMPACT particle calls sit inside a psychic/white BG pipeline, luster circle, six random hitsplats/sounds, target shake, and restore."
    ],
    "evidence": [
     "tools/battle-lab/mechanic-fake-tears-player-delcatty-opponent-shuckle.json",
@@ -3049,15 +3049,43 @@
    ]
   },
   {
+   "move": "MOVE_HEAT_WAVE",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-4 Level-50 set-526 FRONTIER_MON_NINETALES_2 versus ONIX Scene-ON parties pass the entire 168-frame source body through first inactive cleanup twice fresh in both orientations: player-back frames 78-245 pass 168/168 with evidence 0a9e7a224193ab76b1ace7cd1c1479d72076b36daa1399604dc5b3bf3e7defbd / raw RGB a22b496d0a8622a96e2cdc223b234976777914196d0add14a6c1a43867ef9446; opponent-front frames 82-249 pass 168/168 with evidence 71fc59d12b5971122802695cd5104be695b47b0f27ecd54a7ee537746c9e3097 / raw RGB 5050e7a3c99a44a4ddfdef57ed5442c50ebfbb4fe9aef0020b25cc9e05b92db0",
+    "the pure source-relative reducer ports red AnimTask_BlendParticle and AnimTask_BlendBackground, side-mirrored AnimTask_LoadSandstormBackground, 0-to-7 alpha, pan sweep, the four-state AnimTask_MoveHeatWaveTargets program, all seven signed fixed-point gFlyingSandCrescentSpriteTemplate lifecycles, cleanup, and first inactive state",
+    "the narrow typed Scene-ON seam carries only resolved NINETALES/ONIX geometry and immutable field state; the production compositor reuses source-derived FLYING_DIRT/sandstorm art and the species catalogs while preserving palette/register transfer, one-display sprite OAM, Heat-Wave-target RAM+2 OAM, mirrored subsprite layout, front-species idle hold, and complete cleanup",
+    "heatWavePortable.ts reruns both pointer-bounded probes twice fresh and proves source tasks/sprites, software and hardware OAM/matrices, palettes/tags/registers/audio, immutable battle state, normalized maps, raw RGB, reducer, typed seam, and every production framebuffer at 168/168 in each orientation",
+    "MOVE_SANDSTORM remains independently exact at 168/168 bilaterally twice fresh after the shared draw changes and receives no new coverage claim",
+    "presentation owns no damage, burn/accuracy outcome, RNG, turn order, controller, round/facility state, or shared battle state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-heat-wave-player-ninetales-opponent-onix.json",
+    "tools/battle-lab/mechanic-heat-wave-opponent-ninetales-player-onix.json",
+    "tools/compare/fixtures/heat-wave-player-ninetales-opponent-onix.json",
+    "tools/compare/fixtures/heat-wave-opponent-ninetales-player-onix.json",
+    "tools/compare/heatWaveProbe.py",
+    "tools/compare/heatWavePortable.ts",
+    "tools/compare/heatWaveSourceAudit.ts",
+    "tools/compare/evidence/heat-wave-changemap-player.txt",
+    "tools/compare/evidence/heat-wave-changemap-opponent.txt",
+    "src/animation/heatWave.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/heatWave.test.ts",
+    "tests/animation/heatWaveEvidenceCheckpoint.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SANDSTORM",
    "status": "exact",
    "covered": [
-    "fresh complete legal challenge-0 Level-50 set-120 PHANPY versus ONIX Scene-ON parties pass the entire 168-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 210-377 reproduce evidence 678cbc9073564cec54c76709704009d17586b45f1301dc129d13c840b0337b1e / raw RGB 2968b95f680be00e14cb3386487629b142eb0ac05910f1dad69da7dc885e9958 and opponent-front frames 305-472 reproduce evidence ba90eb87f3466644cf4e3c085231265bf7138fcd0e2d286a41574e35f9af12d2 / raw RGB 151561fae96ddc3d919e3f0254b987162cd9e078e92c5e414b4e0a9689edd2e4",
+    "fresh complete legal challenge-0 Level-50 set-120 PHANPY versus ONIX Scene-ON parties pass the entire 168-frame source body through first inactive cleanup in both orientations twice fresh: player-back frames 210-377 reproduce integrated evidence a06847b11c6089b18c26a238988b53cad04fcc393babb05fff4a666f41266c4d / unchanged raw RGB 2968b95f680be00e14cb3386487629b142eb0ac05910f1dad69da7dc885e9958 and opponent-front frames 305-472 reproduce integrated evidence 29e51b99d4e4a40be602a031dee4cfae037ff4b1471ee36e2bf17ceaf7e92ffc / unchanged raw RGB 151561fae96ddc3d919e3f0254b987162cd9e078e92c5e414b4e0a9689edd2e4",
     "the source audit proves set 120 FRONTIER_MON_PHANPY is the lowest challenge-0 legal carrier and pins species 231, move 201, Naughty nature, Attack/HP spread, Lax Incense, and complete legal three-Pokemon parties",
     "the pure relative reducer ports ANIM_TAG_FLYING_DIRT and sandstorm BG load/free state, priority-1 BG1 tile/palette transfer, -6/-1 wrapped scroll, 0-to-7 alpha ramp, 101-count hold, fade and reset, plus all seven staggered gFlyingSandCrescentSpriteTemplate fixed-point translations and cleanup",
     "the typed Scene-ON seam carries only resolved PHANPY/ONIX geometry and field state; source-extracted Phanpy front/back, FLYING_DIRT, sandstorm background art and shared ONIX/chrome pass software task/sprite state, OAM/matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
     "sandstormPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 168 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup",
-    "MOVE_HEAT_WAVE remains unsupported: its independent legal set-526 NINETALES checkpoint now banks twice-fresh bilateral 168-frame pointer-bounded source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map evidence through first inactive cleanup, but it has no reducer, typed seam, production compositor, or framebuffer acceptance",
+    "MOVE_HEAT_WAVE is independently exact through its own legal set-526 NINETALES reducer, typed seam, distinct red blend/target-motion/mirrored-scroll compositor, and twice-fresh bilateral 168/168 production acceptance",
     "no damage, weather outcome, RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
    ],
    "evidence": [
@@ -4450,7 +4478,7 @@
     "MOVE_SANDSTORM",
     "MOVE_HEAT_WAVE"
    ],
-   "goal": "MOVE_SANDSTORM independently proves its complete 168-frame background-load/scroll/alpha and seven-crescent body through first inactive cleanup at 168/168 reducer/component, typed-seam, software/hardware state, registers/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh using legal challenge-0 set-120 PHANPY parties. MOVE_HEAT_WAVE independently banks complete legal set-526 NINETALES bilateral 168-frame source/task/sprite/hardware/audio/state/raw-RGB/change-map evidence twice fresh, but remains unsupported until its distinct red BlendParticle/BlendBackground, mirrored background, pan sweep, target-motion, and seven-crescent schedule have a reducer, typed seam, production compositor, and bilateral framebuffer acceptance."
+   "goal": "Track complete. MOVE_SANDSTORM independently proves its complete 168-frame background-load/scroll/alpha and seven-crescent body through first inactive cleanup at 168/168 in both orientations twice fresh using legal challenge-0 set-120 PHANPY parties. MOVE_HEAT_WAVE independently proves its distinct red BlendParticle/BlendBackground, mirrored background and subsprite layout, pan sweep, RAM+2 target-motion OAM, and seven-crescent schedule at 168/168 in both orientations twice fresh using legal challenge-4 set-526 NINETALES parties."
   },
   {
    "id": "green-spike-needle-arm",
