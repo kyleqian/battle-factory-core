@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1144 — [MAIN worker, 2026-08-11] **Later-round generated intro reveal exact**
+
+- **State:** the generic round-controller/presentation seam is exact for legal
+  challenge-2 Battle 6 LUKAS; S8 stays closed and canonical Battle 2 remains
+  stopped at tick 33331. The #56 post-ack tail remains outside this proof.
+- **Did:** staged seed-70 five-win/decline progression through public controller
+  interfaces, freezing trainer 121 and sets `267/268/269` vs `270/341/284`.
+  The complete source reveal is **154/154 twice fresh** with transition index 3.
+- **Next:** supervisor verification/fold only. Do not resume the canonical
+  Battle-2 march or reinterpret the untouched 13384 diagnostic.
+- **Notes:** controls held **154/154, 65/65, 249/249, 238/238, 3/3, 256/256,
+  115/115**. Focused **81/81**, smoke **375/375**, typecheck, full `npm test`
+  **952 files / 9,136 passed / 1 skipped**, and build **645 modules** are green.
+
 ## 1143 — [supervisor, 2026-08-11] **Post-ack checkpoint verified; final lane folds green**
 
 - **State:** `master` is green with the generic hold-clock fix, exact Metal
@@ -38,18 +52,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   238/238, 3/3, 256/256, 115/115**. Focused **56/56**, smoke **375/375**,
   typecheck, full `npm test` **950 files / 9,055 passed / 1 skipped**, and
   build **645 modules** are green.
-
-## 1141 — [supervisor, 2026-08-11] **Summary seam verified; animation/Rust folds green**
-
-- **State:** `master` is green with the generic status-summary/message boundary,
-  Metal Sound through `ee46ddac`, and Rust mon-construction groundwork through
-  `798ee1c1`. S8 remains closed; canonical Battle 2 remains stopped at 33331.
-- **Did:** independently reverified the complete OFF summary assembly **65/65**
-  and focused **79/79**. Folded `animation-main` and `rust-main` as merges
-  `5ff73ca8` and `e57f3c41`.
-- **Next:** own one complete source-defined post-acknowledgement summary-exit /
-  trainer handoff after the unbounded hold at 11775 and before exact send-out
-  starts at 13385. Do not accept the idle hold or submit a Battle-2 action.
-- **Notes:** union gates: Cargo **52/52**, rebuilt WASM ABI/RNG/alloc smoke,
-  full `npm test` **950 files / 9,055 passed / 1 skipped**, build **645
-  modules**. Both lane branches were fully folded; #55 remains null/unwired.

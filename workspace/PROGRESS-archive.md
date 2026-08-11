@@ -1,3 +1,18 @@
+## 1141 — [supervisor, 2026-08-11] **Summary seam verified; animation/Rust folds green**
+
+- **State:** `master` is green with the generic status-summary/message boundary,
+  Metal Sound through `ee46ddac`, and Rust mon-construction groundwork through
+  `798ee1c1`. S8 remains closed; canonical Battle 2 remains stopped at 33331.
+- **Did:** independently reverified the complete OFF summary assembly **65/65**
+  and focused **79/79**. Folded `animation-main` and `rust-main` as merges
+  `5ff73ca8` and `e57f3c41`.
+- **Next:** own one complete source-defined post-acknowledgement summary-exit /
+  trainer handoff after the unbounded hold at 11775 and before exact send-out
+  starts at 13385. Do not accept the idle hold or submit a Battle-2 action.
+- **Notes:** union gates: Cargo **52/52**, rebuilt WASM ABI/RNG/alloc smoke,
+  full `npm test` **950 files / 9,055 passed / 1 skipped**, build **645
+  modules**. Both lane branches were fully folded; #55 remains null/unwired.
+
 ## 1140 — [MAIN worker, 2026-08-11] **Generated status-summary/message assembly exact**
 
 - **State:** the generic post-slide presentation owns the complete concurrent

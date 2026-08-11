@@ -1,0 +1,16 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-round-battle6-lukas-reveal-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-round-battle6-lukas-reveal-off.json",
+    "preCheckpointFrameOffset": 1151
+  },
+  "segments": [
+    { "frames": 187, "buttons": [] }
+  ],
+  "captureWindow": { "start": 34, "end": 187 }
+}

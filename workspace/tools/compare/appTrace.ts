@@ -76,6 +76,7 @@ import type {
   FactoryRoundBattleOrchestratorState,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { BATTLE_SCRIPT_STATUS2_MASKS } from "../../src/engine/battleScriptSourceConstants.ts";
+import { generatedRoundBattle6LukasRevealStage } from "./factoryRoundIntroGeneralizationStage.ts";
 
 export interface AppCapture {
   frame: number;
@@ -1483,6 +1484,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "battle-command-generated-off": generatedBattleCommandStage,
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
   "factory-arbitrary-intro-magneton-off": generatedBattleStartIntroMagnetonStage,
+  "factory-round-battle6-lukas-reveal-off": generatedRoundBattle6LukasRevealStage,
   "factory-postwin-canonical-opponent-party":
     createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
   "factory-postwin-generated-rock-unrestrained-opponent-party":
