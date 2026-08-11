@@ -7,6 +7,10 @@
 //! buffers via `fw_alloc`/`fw_free`. Hand-rolled C ABI, zero
 //! dependencies — no wasm-bindgen.
 
+use factory_core::gender::MonGender;
+use factory_core::mon_construction::{
+    self, FactoryCorpusPartyInstance, FactoryCorpusPartyMemberState, PartyMemberError,
+};
 use factory_core::rental_generation::{self, GenerationError, GenerationInput, GenerationResult};
 use factory_core::rng;
 
@@ -217,6 +221,163 @@ fn encode_generation_result(result: Result<GenerationResult, GenerationError>) -
     buf
 }
 
+/// Runs `factory_core::mon_construction::create_factory_corpus_party_member`
+/// and returns an `fw_alloc`'d little-endian buffer encoding the result.
+/// The caller must `fw_free(ptr, total_len)`, where `total_len` is read
+/// from the first 4 bytes of the buffer.
+///
+/// # Caller contract
+/// `ability_slot` must be 0 or 1 (mirrors the TS `FactoryCorpusPartyInstance`
+/// type's `0 | 1` domain, which is not runtime-validated on the TS side
+/// either — see `mon_construction::FactoryCorpusPartyInstance`'s doc
+/// comment). Every real caller (this crate's own decoder included) only
+/// ever passes 0 or 1.
+///
+/// # Buffer layout (all integers little-endian)
+///
+/// ```text
+/// offset  width  field
+/// 0       4      total_len (u32) — the whole buffer's length, including
+///                these 4 bytes; pass this to fw_free.
+/// 4       1      status (u8) — 0 = ok, 1 = error.
+///
+/// --- status == 1 (error) ---
+/// 5       2      message_len (u16)
+/// 7       message_len   message (utf8 bytes)
+///                total_len == 7 + message_len
+///
+/// --- status == 0 (ok) --- (fields in FactoryCorpusPartyMemberState's
+/// TS return-statement order, with the name fields elided — names are
+/// resolved decoder-side, see core-rs/adapter/factoryEngine.ts)
+/// 5       2      set_id (u16)
+/// 7       2      species_id (u16)
+/// 9       1      is_egg (u8, 0/1) — always 0
+/// 10      1      ability_num (u8)
+/// 11      1      ability_slot (u8)
+/// 12      2      ability (u16)
+/// 14      6      ivs (u8 x 6: hp, attack, defense, speed, sp_attack,
+///                sp_defense)
+/// 20      4      personality (u32)
+/// 24      4      experience (u32)
+/// 28      1      level (u8) — always 50
+/// 29      1      friendship (u8) — always 0
+/// 30      4      max_hp (u32)
+/// 34      4      attack (u32)
+/// 38      4      defense (u32)
+/// 42      4      speed (u32)
+/// 46      4      sp_attack (u32)
+/// 50      4      sp_defense (u32)
+/// 54      4      hp (u32) — always equal to max_hp
+/// 58      1      status1 (u8) — always 0
+/// 59      2      item_id (u16)
+/// 61      2      hold_effect (u16)
+/// 63      1      hold_effect_param (u8)
+/// 64      8      moves (u16 x 4)
+/// 72      4      pp (u8 x 4)
+/// 76      1      pp_bonuses (u8) — always 0
+/// 77      4      pp_ups (u8 x 4) — always [0, 0, 0, 0]
+/// 81      1      nature (u8)
+/// 82      12     evs (u16 x 6: hp, attack, defense, speed, sp_attack,
+///                sp_defense)
+/// 94      1      gender (u8) — 0 = male, 1 = female, 2 = genderless
+/// 95      1      shiny (u8, 0/1)
+///                total_len == 5 + 91 == 96
+/// ```
+#[no_mangle]
+pub extern "C" fn fw_create_factory_party_member(
+    set_id: u32,
+    personality: u32,
+    fixed_iv: u32,
+    ability_slot: u32,
+    ot_id: u32,
+) -> *mut u8 {
+    let instance = FactoryCorpusPartyInstance {
+        set_id,
+        personality,
+        fixed_iv,
+        ability_slot: ability_slot as u8,
+        ot_id,
+    };
+    let bytes = encode_party_member_result(mon_construction::create_factory_corpus_party_member(
+        instance,
+    ));
+    let ptr = fw_alloc(bytes.len() as u32);
+    // SAFETY: `ptr` was just allocated by fw_alloc for exactly `bytes.len()`
+    // bytes (fw_alloc's contract), and `bytes` is a distinct, non-overlapping
+    // source buffer.
+    unsafe {
+        std::ptr::copy_nonoverlapping(bytes.as_ptr(), ptr, bytes.len());
+    }
+    ptr
+}
+
+fn mon_gender_byte(gender: MonGender) -> u8 {
+    match gender {
+        MonGender::Male => 0,
+        MonGender::Female => 1,
+        MonGender::Genderless => 2,
+    }
+}
+
+/// Pure encoding — no logic beyond the byte layout documented on
+/// `fw_create_factory_party_member`. All logic lives in
+/// `factory_core::mon_construction`.
+fn encode_party_member_result(
+    result: Result<FactoryCorpusPartyMemberState, PartyMemberError>,
+) -> Vec<u8> {
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend_from_slice(&0u32.to_le_bytes()); // total_len placeholder, patched below
+    match result {
+        Err(err) => {
+            buf.push(1); // status: error
+            let message = err.to_string();
+            let message_bytes = message.as_bytes();
+            buf.extend_from_slice(&(message_bytes.len() as u16).to_le_bytes());
+            buf.extend_from_slice(message_bytes);
+        }
+        Ok(m) => {
+            buf.push(0); // status: ok
+            buf.extend_from_slice(&m.set_id.to_le_bytes());
+            buf.extend_from_slice(&m.species_id.to_le_bytes());
+            buf.push(u8::from(m.is_egg));
+            buf.push(m.ability_num);
+            buf.push(m.ability_slot);
+            buf.extend_from_slice(&m.ability.to_le_bytes());
+            buf.extend_from_slice(&m.ivs);
+            buf.extend_from_slice(&m.personality.to_le_bytes());
+            buf.extend_from_slice(&m.experience.to_le_bytes());
+            buf.push(m.level);
+            buf.push(m.friendship);
+            buf.extend_from_slice(&m.max_hp.to_le_bytes());
+            buf.extend_from_slice(&m.attack.to_le_bytes());
+            buf.extend_from_slice(&m.defense.to_le_bytes());
+            buf.extend_from_slice(&m.speed.to_le_bytes());
+            buf.extend_from_slice(&m.sp_attack.to_le_bytes());
+            buf.extend_from_slice(&m.sp_defense.to_le_bytes());
+            buf.extend_from_slice(&m.hp.to_le_bytes());
+            buf.push(m.status1);
+            buf.extend_from_slice(&m.item_id.to_le_bytes());
+            buf.extend_from_slice(&m.hold_effect.to_le_bytes());
+            buf.push(m.hold_effect_param);
+            for mv in m.moves {
+                buf.extend_from_slice(&mv.to_le_bytes());
+            }
+            buf.extend_from_slice(&m.pp);
+            buf.push(m.pp_bonuses);
+            buf.extend_from_slice(&m.pp_ups);
+            buf.push(m.nature);
+            for ev in m.evs {
+                buf.extend_from_slice(&ev.to_le_bytes());
+            }
+            buf.push(mon_gender_byte(m.gender));
+            buf.push(u8::from(m.shiny));
+        }
+    }
+    let total_len = buf.len() as u32;
+    buf[0..4].copy_from_slice(&total_len.to_le_bytes());
+    buf
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -418,6 +579,118 @@ mod tests {
         assert_eq!(total_len as usize, 7 + message_len);
 
         // SAFETY: see generate_initial_rentals_ok_buffer_matches_the_seed_0_fixture.
+        unsafe {
+            fw_free(ptr, total_len);
+        }
+    }
+
+    // Round-trips fw_create_factory_party_member through its own documented
+    // buffer layout before the TS decoder (core-rs/adapter/factoryEngine.ts)
+    // depends on it. Not a substitute for tests/factoryPartyMemberParity.test.ts —
+    // this only proves the Rust encoder/decoder agree with each other and
+    // with factory_core's native fixture
+    // (mon_construction::tests::grimer_dual_ability_slot1_matches_ts), not
+    // with the TS spec engine directly.
+
+    fn read_u8(bytes: &[u8], offset: usize) -> u8 {
+        bytes[offset]
+    }
+
+    #[test]
+    fn create_factory_party_member_ok_buffer_matches_the_grimer_fixture() {
+        // Same input as
+        // factory-core::mon_construction::tests::grimer_dual_ability_slot1_matches_ts.
+        let ptr = fw_create_factory_party_member(110, 813_709_149, 3, 1, 0x1234_5678);
+        // SAFETY: `ptr` was just returned by fw_create_factory_party_member;
+        // `total_len` is read from the buffer's own first 4 bytes per the
+        // documented layout, and the slice is dropped before fw_free below.
+        let (total_len, snapshot) = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0);
+            let snapshot = std::slice::from_raw_parts(ptr, total_len as usize).to_vec();
+            (total_len, snapshot)
+        };
+
+        assert_eq!(snapshot[4], 0, "status: ok");
+        assert_eq!(read_u16(&snapshot, 5), 110, "set_id");
+        assert_eq!(read_u16(&snapshot, 7), 88, "species_id");
+        assert_eq!(read_u8(&snapshot, 9), 0, "is_egg");
+        assert_eq!(read_u8(&snapshot, 10), 1, "ability_num");
+        assert_eq!(read_u8(&snapshot, 11), 1, "ability_slot");
+        assert_eq!(read_u16(&snapshot, 12), 60, "ability");
+        assert_eq!(&snapshot[14..20], &[3, 3, 3, 3, 3, 3], "ivs");
+        assert_eq!(read_u32(&snapshot, 20), 813_709_149, "personality");
+        assert_eq!(read_u32(&snapshot, 24), 125_000, "experience");
+        assert_eq!(read_u8(&snapshot, 28), 50, "level");
+        assert_eq!(read_u8(&snapshot, 29), 0, "friendship");
+        assert_eq!(read_u32(&snapshot, 30), 162, "max_hp");
+        assert_eq!(read_u32(&snapshot, 34), 86, "attack");
+        assert_eq!(read_u32(&snapshot, 38), 77, "defense");
+        assert_eq!(read_u32(&snapshot, 42), 31, "speed");
+        assert_eq!(read_u32(&snapshot, 46), 46, "sp_attack");
+        assert_eq!(read_u32(&snapshot, 50), 77, "sp_defense");
+        assert_eq!(read_u32(&snapshot, 54), 162, "hp");
+        assert_eq!(read_u8(&snapshot, 58), 0, "status1");
+        assert_eq!(read_u16(&snapshot, 59), 135, "item_id");
+        assert_eq!(read_u16(&snapshot, 61), 4, "hold_effect");
+        assert_eq!(read_u8(&snapshot, 63), 0, "hold_effect_param");
+        assert_eq!(
+            [
+                read_u16(&snapshot, 64),
+                read_u16(&snapshot, 66),
+                read_u16(&snapshot, 68),
+                read_u16(&snapshot, 70),
+            ],
+            [124, 317, 151, 107],
+            "moves"
+        );
+        assert_eq!(&snapshot[72..76], &[20, 10, 40, 20], "pp");
+        assert_eq!(read_u8(&snapshot, 76), 0, "pp_bonuses");
+        assert_eq!(&snapshot[77..81], &[0, 0, 0, 0], "pp_ups");
+        assert_eq!(read_u8(&snapshot, 81), 24, "nature");
+        assert_eq!(
+            [
+                read_u16(&snapshot, 82),
+                read_u16(&snapshot, 84),
+                read_u16(&snapshot, 86),
+                read_u16(&snapshot, 88),
+                read_u16(&snapshot, 90),
+                read_u16(&snapshot, 92),
+            ],
+            [170, 0, 170, 0, 0, 170],
+            "evs"
+        );
+        assert_eq!(read_u8(&snapshot, 94), 1, "gender (female)");
+        assert_eq!(read_u8(&snapshot, 95), 0, "shiny");
+        assert_eq!(total_len, 96, "total_len == 5 + 91");
+        assert_eq!(snapshot.len() as u32, total_len);
+
+        // SAFETY: `ptr`/`total_len` are exactly the pair
+        // fw_create_factory_party_member returned via fw_alloc, freed
+        // exactly once.
+        unsafe {
+            fw_free(ptr, total_len);
+        }
+    }
+
+    #[test]
+    fn create_factory_party_member_error_buffer_names_the_set_id_range() {
+        // Same input as
+        // factory-core::mon_construction::tests::set_id_out_of_range_matches_ts_message.
+        let ptr = fw_create_factory_party_member(882, 0, 3, 0, 0);
+        // SAFETY: see create_factory_party_member_ok_buffer_matches_the_grimer_fixture.
+        let (total_len, snapshot) = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0);
+            let snapshot = std::slice::from_raw_parts(ptr, total_len as usize).to_vec();
+            (total_len, snapshot)
+        };
+
+        assert_eq!(snapshot[4], 1, "status: error");
+        let message_len = read_u16(&snapshot, 5) as usize;
+        let message = std::str::from_utf8(&snapshot[7..7 + message_len]).unwrap();
+        assert_eq!(message, "Frontier set id must be in 0..881, got 882");
+        assert_eq!(total_len as usize, 7 + message_len);
+
+        // SAFETY: see create_factory_party_member_ok_buffer_matches_the_grimer_fixture.
         unsafe {
             fw_free(ptr, total_len);
         }
