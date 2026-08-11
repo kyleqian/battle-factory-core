@@ -3322,6 +3322,183 @@ export interface FactoryTimer0Dispatch {
   serviceCostMasterCycles: null;
 }
 
+/**
+ * The source-general subset of Direct Sound state whose Timer 0 path is
+ * closed by the mGBA 0.10.5 audit.  A positive DMA source must name the
+ * channel wired to that FIFO.  The only modeled service is the Emerald m4a
+ * four-word IWRAM-to-FIFO custom-timing transfer.
+ */
+export type FactoryDirectSoundChannel = "A" | "B";
+
+export interface FactoryTimer0DirectSoundDmaState {
+  channel: 1 | 2;
+  enabled: boolean;
+  timing: "custom";
+  sourceRegion: "iwram";
+  destination: "fifo-a" | "fifo-b";
+  sourceControl: "increment";
+  destinationControl: "fixed";
+  transferWidthBits: 32;
+  countWords: 4;
+}
+
+export interface FactoryTimer0DirectSoundChannelState {
+  channel: FactoryDirectSoundChannel;
+  /** Modular queued-word level reported by the eight-word FIFO. */
+  queuedWords: number;
+  routedTimer: 0 | 1;
+  outputEnabled: boolean;
+  /** Zero means no DMA source; positive values must match the FIFO mapping. */
+  dmaSource: 0 | 1 | 2;
+  dma: FactoryTimer0DirectSoundDmaState | null;
+}
+
+export interface FactoryTimer0DirectSoundState {
+  channels: readonly [
+    FactoryTimer0DirectSoundChannelState,
+    FactoryTimer0DirectSoundChannelState,
+  ];
+}
+
+export interface FactoryTimer0DirectSoundService {
+  channel: FactoryDirectSoundChannel;
+  dmaChannel: 1 | 2;
+  startMasterCycle: number;
+  completionMasterCycle: number;
+}
+
+export interface FactoryTimer0DirectSoundDispatch {
+  requestedChannels: readonly FactoryDirectSoundChannel[];
+  services: readonly FactoryTimer0DirectSoundService[];
+  /** Includes the zero origin, then each serialized DMA completion. */
+  scheduledServiceProgressionMasterCycles: readonly number[];
+  scheduledServiceMasterCycles: number;
+}
+
+const FACTORY_DIRECT_SOUND_FIFO_CAPACITY_WORDS = 8;
+const FACTORY_DIRECT_SOUND_MAX_REFILL_LEVEL_WORDS = 3;
+const FACTORY_DIRECT_SOUND_DMA_SERVICE_MASTER_CYCLES = 10;
+
+function validateFactoryTimer0DirectSoundChannel(
+  state: FactoryTimer0DirectSoundChannelState,
+  expectedChannel: FactoryDirectSoundChannel,
+): void {
+  if (state.channel !== expectedChannel) {
+    throw new Error(`Direct Sound channel order/mapping must be A then B; got ${state.channel}`);
+  }
+  if (!Number.isInteger(state.queuedWords)
+    || state.queuedWords < 0
+    || state.queuedWords >= FACTORY_DIRECT_SOUND_FIFO_CAPACITY_WORDS) {
+    throw new Error(`FIFO ${state.channel} queuedWords must be an integer in [0, 7]`);
+  }
+  if (state.routedTimer !== 0 && state.routedTimer !== 1) {
+    throw new Error(`FIFO ${state.channel} has unmodeled timer route ${state.routedTimer}`);
+  }
+  if (typeof state.outputEnabled !== "boolean") {
+    throw new Error(`FIFO ${state.channel} outputEnabled must be boolean`);
+  }
+  const expectedDmaChannel = expectedChannel === "A" ? 1 : 2;
+  if (state.dmaSource === 0) {
+    if (state.dma !== null) {
+      throw new Error(`FIFO ${state.channel} with no DMA source cannot carry DMA state`);
+    }
+    return;
+  }
+  if (state.dmaSource !== expectedDmaChannel || state.dma === null) {
+    throw new Error(`FIFO ${state.channel} must map to DMA${expectedDmaChannel}`);
+  }
+  const dma = state.dma;
+  const expectedDestination = expectedChannel === "A" ? "fifo-a" : "fifo-b";
+  if (dma.channel !== expectedDmaChannel || dma.destination !== expectedDestination) {
+    throw new Error(`FIFO ${state.channel} has invalid DMA channel/destination mapping`);
+  }
+  if (typeof dma.enabled !== "boolean") {
+    throw new Error(`DMA${dma.channel} enabled must be boolean`);
+  }
+  if (dma.timing !== "custom"
+    || dma.sourceRegion !== "iwram"
+    || dma.sourceControl !== "increment"
+    || dma.destinationControl !== "fixed"
+    || dma.transferWidthBits !== 32) {
+    throw new Error(`DMA${dma.channel} uses an unmodeled Direct Sound DMA mode or region`);
+  }
+  if (dma.countWords !== 4) {
+    throw new Error(`DMA${dma.channel} uses unmodeled count ${dma.countWords}; expected 4 words`);
+  }
+}
+
+/**
+ * Dispatch the conditional Timer 0 -> Direct Sound request path.  This prices
+ * only fresh four-word IWRAM-to-FIFO DMA work.  It does not price the timer
+ * callback itself or absorb other due timing events.
+ */
+export function dispatchFactoryTimer0DirectSound(
+  state: FactoryTimer0DirectSoundState,
+): FactoryTimer0DirectSoundDispatch {
+  if (!state || !Array.isArray(state.channels) || state.channels.length !== 2) {
+    throw new Error("Timer 0 Direct Sound state must contain exactly channels A and B");
+  }
+  validateFactoryTimer0DirectSoundChannel(state.channels[0], "A");
+  validateFactoryTimer0DirectSoundChannel(state.channels[1], "B");
+
+  const requestedChannels: FactoryDirectSoundChannel[] = [];
+  const services: FactoryTimer0DirectSoundService[] = [];
+  const progression = [0];
+  for (const channel of state.channels) {
+    const dma = channel.dma;
+    const requestsRefill = channel.outputEnabled
+      && channel.routedTimer === 0
+      && channel.queuedWords <= FACTORY_DIRECT_SOUND_MAX_REFILL_LEVEL_WORDS
+      && channel.dmaSource > 0
+      && dma !== null
+      && dma.enabled;
+    if (!requestsRefill || dma === null) continue;
+    const startMasterCycle = progression[progression.length - 1]!;
+    const completionMasterCycle = startMasterCycle
+      + FACTORY_DIRECT_SOUND_DMA_SERVICE_MASTER_CYCLES;
+    requestedChannels.push(channel.channel);
+    services.push(Object.freeze({
+      channel: channel.channel,
+      dmaChannel: dma.channel,
+      startMasterCycle,
+      completionMasterCycle,
+    }));
+    progression.push(completionMasterCycle);
+  }
+  return Object.freeze({
+    requestedChannels: Object.freeze(requestedChannels),
+    services: Object.freeze(services),
+    scheduledServiceProgressionMasterCycles: Object.freeze(progression),
+    scheduledServiceMasterCycles: progression[progression.length - 1]!,
+  });
+}
+
+export interface FactoryTimer0CadenceDirectSoundDispatch extends FactoryTimer0Dispatch {
+  directSoundByCrossing: readonly FactoryTimer0DirectSoundDispatch[];
+}
+
+/** Compose cadence crossings with one explicit source-state snapshot each. */
+export function dispatchFactoryTimer0CadenceWithDirectSound(
+  state: FactoryTimer0Cadence,
+  dispatchMasterCycle: number,
+  directSoundStates: readonly FactoryTimer0DirectSoundState[],
+): FactoryTimer0CadenceDirectSoundDispatch {
+  if (!Array.isArray(directSoundStates)) {
+    throw new Error("Timer 0 Direct Sound crossing states must be an array");
+  }
+  const cadenceDispatch = dispatchFactoryTimer0Cadence(state, dispatchMasterCycle);
+  if (directSoundStates.length !== cadenceDispatch.crossedDueMasterCycles.length) {
+    throw new Error(
+      `Timer 0 crossed ${cadenceDispatch.crossedDueMasterCycles.length} periods but received ${directSoundStates.length} Direct Sound states`,
+    );
+  }
+  const directSoundByCrossing = directSoundStates.map(dispatchFactoryTimer0DirectSound);
+  return Object.freeze({
+    ...cadenceDispatch,
+    directSoundByCrossing: Object.freeze(directSoundByCrossing),
+  });
+}
+
 export function dispatchFactoryTimer0Cadence(
   state: FactoryTimer0Cadence,
   dispatchMasterCycle: number,
