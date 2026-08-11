@@ -593,6 +593,11 @@ import {
   type TripleKickState,
 } from "./tripleKick.ts";
 import {
+  doubleSlapAtAge,
+  type DoubleSlapMoveTurn,
+  type DoubleSlapState,
+} from "./doubleSlap.ts";
+import {
   crabHammerAtAge,
   type CrabHammerState,
 } from "./crabHammer.ts";
@@ -2503,6 +2508,15 @@ export interface SceneOnTripleKickConfig {
   readonly moveTurn: TripleKickMoveTurn;
 }
 
+/** The real multi-hit controller supplies moveTurn; this seam only selects its visual branch. */
+export interface SceneOnDoubleSlapConfig {
+  readonly move: "DOUBLE_SLAP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTurn: DoubleSlapMoveTurn;
+}
+
 /** Typed staging seam only; a later draw case supplies the live target idle x2. */
 export interface SceneOnCrabHammerConfig {
   readonly move: "CRABHAMMER";
@@ -3425,6 +3439,12 @@ export interface SceneOnTripleKickView extends TripleKickState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnDoubleSlapView extends DoubleSlapState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCrabHammerView extends CrabHammerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4095,6 +4115,7 @@ export function createSceneOnMovePresentation<
   | SceneOnThrashConfig
   | SceneOnDoubleKickConfig
   | SceneOnTripleKickConfig
+  | SceneOnDoubleSlapConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
@@ -6941,6 +6962,23 @@ export function sceneOnTripleKickView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...tripleKickAtAge(state.age, state.config.moveTurn, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnDoubleSlapView(
+  state: SceneOnMovePresentationState,
+): SceneOnDoubleSlapView {
+  if (state.config.move !== "DOUBLE_SLAP") {
+    throw new Error(`expected DOUBLE_SLAP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...doubleSlapAtAge(state.age, state.config.moveTurn, {
       attackerSide: state.config.attacker.geometry.side,
       targetCenter: state.config.target.geometry.animationCenter,
     }),

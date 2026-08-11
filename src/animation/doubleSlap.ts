@@ -23,7 +23,7 @@ export interface DoubleSlapState {
 
 export const DOUBLE_SLAP_FRAME_COUNT = 34;
 export const DOUBLE_SLAP_EFFECT_AGE = 7;
-export const DOUBLE_SLAP_CLEAR_AGE = 29;
+export const DOUBLE_SLAP_CLEAR_AGE = 18;
 
 /** Pure presentation port; the controller owns the natural 2-5 hit sequence. */
 export function doubleSlapAtAge(
