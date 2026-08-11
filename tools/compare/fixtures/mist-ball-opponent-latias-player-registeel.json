@@ -1,0 +1,17 @@
+{
+  "schema": "mist-ball-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MIST_BALL",
+  "moveId": 296,
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-mist-ball-opponent-latias-player-registeel.json",
+  "probe": "tools/compare/mistBallProbe.py",
+  "sourceWindow": {"startFrame": 79, "endFrame": 291, "frameCount": 213},
+  "sourceBounds": {"start": "0x082ce62e", "endExclusive": "0x082ce6bc"},
+  "probeJsonSha256": "882e3de5031211f60df8f39795d22ebb06c3770dc38deee15de487357a13f762",
+  "secondFreshProbeJsonSha256": "882e3de5031211f60df8f39795d22ebb06c3770dc38deee15de487357a13f762",
+  "rawRgbSha256": "4729defc1099a6569f060d80f46fb8a1d7434c4645678092f5211b3e63787a83",
+  "changeMap": "tools/compare/evidence/mist-ball-changemap-opponent.txt",
+  "changeMapSha256": "e9309993b6a65655e6fa2a3c2551f2e4fa2f7948f03246281287a1f2b1823519",
+  "acceptance": {"status": "unsupported", "denseEvidenceFrames": 213, "productionFramebufferFrames": 0}
+}
