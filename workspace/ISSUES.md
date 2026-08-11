@@ -1687,6 +1687,25 @@ timing remain later for all one-pass rows. No observed duration was fit, no
 service cost was assigned, and `runFactoryConstructionClock` remains unwired.
 Evidence: `docs/issue55-m4a-channel-gate-v1.md`.
 
+**2026-08-11 ClearChain channel-gate closure:** additive OFF packets now
+capture address-free current/track/previous/next link roles at the compiled
+`ClearChain` wrapper entry, accepting only the `_081DD8AE` MPlay gate
+callsite. Two fresh serial anchor/LILIANA/legal-varied captures are
+byte-identical (`6c1cbae4…` / `002f134d…` / `fd540906…`) and join all
+**47/47** callbacks across the prior **39/108** null one-pass rows. The three
+observed routes are previous-null/next-null **23×87** cycles,
+previous-linked/next-null **19×89**, and previous-linked/next-linked **5×85**.
+The pinned wrapper, indirect trampoline, and `RealClearChain` reducer therefore
+close the complete channel-gate component for **108/108** one-pass rows
+(**204–613** cycles, 70 totals), without an observed-duration fit or pointer
+identity table.
+
+Complete MPlay costs remain **5 exact / 108 null**. The next discriminator is
+one bounded earlier per-track component: wait/LFO or a bounded command-callback
+family. No service cost was assigned, no later component was inferred, and
+`runFactoryConstructionClock` remains unwired. Evidence:
+`docs/issue55-m4a-clearchain-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

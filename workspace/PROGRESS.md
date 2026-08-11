@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1154 — [MAIN worker, 2026-08-11] **#55 ClearChain channel gate source-closed**
+
+- **State:** all **108/108** sixth-player one-pass channel-gate components are
+  source-exact. #55 remains open, complete MPlay costs stay **5 exact / 108
+  null**, and the construction clock stays null/unwired. S8 stays closed;
+  Battle 2 stops at 33331; #56 is untouched; LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets capture all **47/47** compiled
+  `ClearChain` gate calls across the prior **39/108** null rows. Source/ELF
+  accounting closes three observed link routes at **85/87/89** cycles and
+  lifts the full gate component to **108/108** exact (**204–613**, 70 totals).
+- **Next:** capture and source-reduce one bounded earlier per-track component:
+  wait/LFO or a bounded command-callback family. Keep every one-pass complete
+  MPlay cost null and do not wire `runFactoryConstructionClock`.
+- **Notes:** no engine/pixel identity changed, so LUKAS 462–511 was not rerun.
+  Focused **8/8**, smoke **375/375**, and typecheck are green; full suite/build
+  pending final gate. No unsupported-branch barrier or presentation change.
+
 ## 1153 — [supervisor, 2026-08-11] **Channel-gate subset verified; Guillotine folded**
 
 - **State:** `master` is green with **69/108** one-pass sixth-player channel
@@ -38,18 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Focused **10/10**, smoke **375/375**, typecheck, full **955 files / 9,147
   passed / 1 skipped**, and build **647 modules** are green. No
   unsupported-branch barrier or production/presentation change.
-
-## 1151 — [supervisor, 2026-08-11] **#55 post-command closure verified**
-
-- **State:** `master` is green with the sixth-player post-command state closed
-  source-generally for all **113/113** construction VBlanks. #55 remains open,
-  its clock stays null/unwired, and LUKAS remains bounded at **8/50**.
-- **Did:** reviewed the address-free `_081DD9C4` packets/reducer, confirmed all
-  **108/108** one-pass rows skip `TrkVolPitSet` and channel traversal, and
-  independently reran the byte-stable report/focused tests **4/4**.
-- **Next:** source-reduce one bounded part of the earlier tempo-pass track and
-  command loop (gate/clear, wait/LFO, or one callback family). Preserve null
-  complete costs until the whole selected route closes; do not wire the clock.
-- **Notes:** worker full gate **954 files / 9,143 passed / 1 skipped**, smoke
-  **375/375**, typecheck, build **647 modules**. No unsupported barrier or
-  production/presentation change; both lane branches are fully folded.
