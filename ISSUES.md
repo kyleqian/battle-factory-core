@@ -19,6 +19,18 @@ backlog.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
+**User decision (2026-08-10): the playable path stays FAITHFUL — no
+intro-animation divergence.** The user was offered a browser-only
+divergence (play the banked intros in the playable build, gated off in all
+oracle comparisons) and declined: Battle Scene OFF genuinely skips send-out
+intros (this entry's Slice-D record, four independent sources), so the
+current no-intro behavior is correct and stays. Consequence: this issue's
+remainder — the §1e 56/58 move-window patch-site retirement and the
+KABUTO/MAGBY/ONIX hand-fit retirements — is internal code health at
+**filler priority**. Do not wire per-tick playback or terminal offsets into
+any OFF-profile seam; that half is settled twice over (Slice A refuted +
+removed, Slice D not-applicable).
+
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
 mappings) are ported and accepted in the animation lane
 (ANIMATION_PROGRESS.md top entry, 2026-08-03, `ANIM_FRONT_FLIP` closing the
@@ -924,6 +936,14 @@ is unchanged; exact extension remains #55's prohibited/unwired construction-
 clock problem, not a presentation branch.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
+
+**User decision (2026-08-10): GRIND IT OUT.** The user explicitly
+authorized pursuing the full construction-clock model ("I would like to
+grind that out. I would like to attempt to."), with a progress/opinion
+check-in expected after a few more sessions. The standing discipline is
+unchanged: only independently source-proven timing components land; no
+fitted constants; personality-exact construction stays unwired until the
+model closes honestly.
 
 **Wiring landed (2026-08-05, `67211ca2`):** the win-terminal scaffold
 (`tools/compare/appTrace.ts` `winTerminalWindowStage`) now carries the ROM's

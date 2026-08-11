@@ -916,6 +916,32 @@ session plus the surge audit's same-session class fixes). Per the
 is the short "playable round" user-polish pass (#71, #73,
 session-trace-driven pacing fixes).
 
+**User decisions (2026-08-10, solo session — post-close priorities):**
+
+1. **#55 construction clock: GRIND IT OUT.** The user explicitly authorized
+   continuing the bounded source-derived cycle-timing program to completion
+   ("I would like to grind that out. I would like to attempt to."), knowing
+   the payoff is stream-exact personality/opponent provenance, not
+   playability. The existing discipline stands — only independently
+   source-proven components, no fitted constants. The user wants a
+   progress/opinion check-in after a few more sessions rather than an
+   open-ended run.
+2. **#71: playable path stays FAITHFUL — no intro-animation divergence.**
+   Fact-check confirmed both sides animate in the real game only under
+   Battle Scene ON; the playable OFF profile genuinely skips send-out
+   intros (ISSUES #71 Slice-D record, four independent sources). Offered a
+   browser-only divergence; the user chose "keep it faithful, skip intros."
+   #71's remainder (§1e patch-site retirement, KABUTO/MAGBY/ONIX hand-fit
+   retirements) is internal code health at filler priority.
+3. **#39 stays deferred** until the items above are done (reaffirms the
+   standing demotion).
+4. **Pacing polish is user-driven:** the user will play on their own time;
+   session traces arrive via the recorder. No worker pacing slices until
+   real traces exist.
+5. **S11 audio is OUT OF SCOPE for now** — see the dated note on the S11
+   stage heading. The stage entry remains in the roadmap by user
+   instruction; nothing schedules it.
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.
@@ -1714,6 +1740,11 @@ the staging surface. Doubles remains out of scope (supervisor-stated
 interpretation, user-uncorrected 2026-08-05).
 
 ### [ ] S11 — Audio (separate milestone, user-directed 2026-07-28)
+
+**OUT OF SCOPE for now (user decision 2026-08-10):** do not schedule,
+brief, or begin this stage. The entry stays in the roadmap by explicit user
+instruction ("just write that it's out of scope for now, but don't remove
+it"); a future user decision re-opens it.
 
 Sound effects, mon cries, fanfares, and background music across the draft,
 battle, swap, and ending flows. Deliberately unscheduled until S10's parity
