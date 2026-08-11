@@ -17,7 +17,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   plus source-proven command reads; do not fit a duration or wire the clock.
 - **Notes:** two serial fresh OFF captures per case are byte-identical; compact
   hashes anchor `35fe3e32…`, LILIANA `4dbb8aba…`, varied `1e77d465…`.
-  Focused selector/v3/read-contract tests **8/8** are green.
+  Focused selector/v3/read-contract **8/8**, smoke **375/375**, forced
+  typecheck, full `npm test` **922 files / 8,619 passed / 1 skipped**
+  (**84.03s**), and build (**631 modules**, Vite **6.23s**) are green.
 
 ## 1128 — [supervisor, 2026-08-11] **#55 audio read closure folded; final union green**
 
