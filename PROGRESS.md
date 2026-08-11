@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1110 — [supervisor, 2026-08-10] **#55 Timer 0 identity and recurrence evidence united**
+
+- **State:** #55 remains open. Production clock wiring and unresolved
+  `cycles` contracts remain untouched; `DEFERRED.md` has no open entry.
+- **Did:** orient folded **10** presentation-only `animation-main` commits
+  through `77e3d325`; the union passed full `npm test` (**898 files / 8,503
+  passed / 1 skipped**) and build (**631 modules**). Main then classified all
+  **85/85** +18 joins as `GBA Timer 0` crossings against **488** clean
+  controls. Side source/ELF evidence derives reload **`0xFB1A`**, period
+  **1,254 master cycles**, priority **32**, and no Timer-0 IRQ. The merged
+  evidence passes focused **11/11** and smoke **375/375**; both workers passed
+  their full suites and builds.
+- **Next:** snapshot Timer 0 phase at construction entry, prove the 1,254-cycle
+  recurrence, and register a pure cadence state with explicit unknown service
+  cost. Do not wire the live construction clock or fit the two unmatched path
+  controls.
+- **Notes:** stale dual oracles were restarted before evidence work. The side
+  worktree/branch is removed. No controller, presentation, barrier,
+  recording-import, canonical Battle-2, or gameplay-outcome change landed.
+
 ## 1109 — [MAIN worker, 2026-08-10] **#55 all-85 instruction/event classifier banked**
 
 - **State:** evidence and Tier-1 receipt committed at `6884b7e7`; #55 remains
