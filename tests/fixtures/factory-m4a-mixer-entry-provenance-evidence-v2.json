@@ -1,0 +1,619 @@
+{
+  "schema": "factory-m4a-mixer-entry-provenance-evidence/v2",
+  "oracleProfile": "battle-scene-off",
+  "reproducibility": {
+    "freshRunsPerReplacementBearingReceipt": 2,
+    "byteIdenticalReceipts": 2,
+    "captures": [
+      {
+        "receipt": "anchor",
+        "observationsWithReplacements": 5,
+        "replacements": 7,
+        "sha256": "afcb80344d7a2e8475b22a1bb2d2f65b8ae337c358c7b88608460faad6c4dab2"
+      },
+      {
+        "receipt": "liliana",
+        "observationsWithReplacements": 5,
+        "replacements": 6,
+        "sha256": "b5cda91156fb1264e03e8729c83bd845121dc3371fddacb9648e3de5eebd516e"
+      }
+    ],
+    "zeroReplacementReceiptReused": "factory-varied"
+  },
+  "frozenInputs": {
+    "entryReceiptSha256": {
+      "anchor": "6b29d708051e0d4422d8f6527e7bd61ffb6bfa408957c017b89b7f2a3c409e1f",
+      "liliana": "780e332632da2fd024c032a831710c1b8b609d627132836612958546d87fdcf1",
+      "factory-varied": "202f18b6d1877ecac55685e51e4f62ec650e2091cb26912ba362efff2c658ad9"
+    },
+    "entryEvidenceV1": "81635d80696ae102fc67cf5fc670fe37fcb3924942ac0f702632d113229f40a6",
+    "targetAuditV1": "3817b1ab6c0e3e488619e3827cfede5d5a3fa82e038dd551e173c6af0effa04e",
+    "sourceStateV3": {
+      "anchor": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+      "liliana": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+      "factory-varied": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+    }
+  },
+  "sourceAndElf": {
+    "sources": [
+      {
+        "id": "ply-voice-inline-writer",
+        "source": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "945-966",
+        "sha256": "9e3a63b8b56dccfea4d04ebc0c2f360b1a5fed8f21d551d9643d18b1d85cc97b"
+      },
+      {
+        "id": "ply-note-route-and-channel-writer",
+        "source": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1538-1754",
+        "sha256": "e976acf609ccbe97a1cb74c81b816267b5d4f8ffa9da236d200067c1bddff481"
+      },
+      {
+        "id": "ply-xwave-command-writer",
+        "source": "reference/pokeemerald/src/m4a.c",
+        "lines": "1536-1559",
+        "sha256": "dd44be3b645c836e2fc65cbf2037736dd79151e5479c717ab4bff527c46d4023"
+      }
+    ],
+    "symbols": [
+      {
+        "symbol": "ply_voice",
+        "bytes": 46,
+        "sha256": "044d0a4560fe47e556e3da12bf7ea87d0dc0188520653647c687b0c04391770e"
+      },
+      {
+        "symbol": "ply_note",
+        "bytes": 516,
+        "sha256": "00679d21a5acf624391ec1891952d6e132a2137677fb7c7056953f41438e19f0"
+      },
+      {
+        "symbol": "ply_xwave",
+        "bytes": 72,
+        "sha256": "5eef43134c3fc0ec9dbd8bede2ed1646674d2223a1c50791b2880100985b7270"
+      }
+    ],
+    "instructions": [
+      {
+        "id": "ply-note-keysplit-selector",
+        "symbol": "ply_note",
+        "instructionIndex": 47,
+        "instructionRole": "keysplit-table-selector-load",
+        "thumbHalfwordSha256": "e413ba594d9f64c77a0d70da25e052b8666e8a54edc978b48b847853ee23bf13"
+      },
+      {
+        "id": "ply-note-rhythm-selector",
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy",
+        "thumbHalfwordSha256": "0ec8fbfafb93229393dbdbe117db475d73dec9ece4dcc81f4e32c2fd4aad9cad"
+      },
+      {
+        "id": "ply-note-inline-selector",
+        "symbol": "ply_note",
+        "instructionIndex": 76,
+        "instructionRole": "inline-track-tone-select",
+        "thumbHalfwordSha256": "d078c186a798eac3dc23d1888fde24b9467e24487d328f4b526c431cc926f0fd"
+      },
+      {
+        "id": "ply-voice-inline-wave-store",
+        "symbol": "ply_voice",
+        "instructionIndex": 17,
+        "instructionRole": "MusicPlayerTrack.ToneData.wav-store",
+        "thumbHalfwordSha256": "3f366eb46b1d446d0e42aa9c83348763bfb3f2764d62dc0c5e3267ce313c166f"
+      },
+      {
+        "id": "ply-xwave-inline-wave-store",
+        "symbol": "ply_xwave",
+        "instructionIndex": 21,
+        "instructionRole": "MusicPlayerTrack.ToneData.wav-store",
+        "thumbHalfwordSha256": "9868f417ed31c350a8f40572e22e80a5cb56b96bd22ffb94b3079ef4a89fda29"
+      },
+      {
+        "id": "ply-note-channel-wave-store",
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store",
+        "thumbHalfwordSha256": "0b407281768f0e833afef47ed464b6571d01ca4d53c12ce5c51d1462f4ad6677"
+      }
+    ]
+  },
+  "mechanicalJoin": {
+    "keys": [
+      "sourceStateDigest",
+      "entryTargetStateDigest",
+      "channelIndex"
+    ],
+    "frozenEntryObservations": 113,
+    "frozenEntryTargets": 565,
+    "frozenReplacedTargets": 13,
+    "classifiedTargets": 13,
+    "ambiguousJoins": 0
+  },
+  "coverage": {
+    "routes": {
+      "mplay.ply-note.inline-tone-wave": 6,
+      "mplay.ply-note.keysplit-tone-wave": 0,
+      "mplay.ply-note.rhythm-tone-wave": 7
+    },
+    "inlinePlyXwaveCommandU32Ancestry": {
+      "true": 0,
+      "false": 6
+    },
+    "runtimeTargetProvenanceComplete": true
+  },
+  "classifiedTargets": [
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "entryTargetStateDigest": "a27f19b0196906e52b793188e962f719473475217bd7bea6786c1dae90aff6f3",
+      "channelIndex": 0,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 6,
+      "toneType": 128,
+      "route": "mplay.ply-note.rhythm-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.key",
+        "midiKey": 36,
+        "selectedToneIndex": 36
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData.wav-tone-table-row",
+      "selectedToneIndex": 36,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_drum_and_percussion_kick",
+        "payloadBytes": 3846,
+        "payloadSha256": "ea99eb9d0e972ba1aefedcf39aacd401e2b3157bf0c6fc09619cc56fdfdf563b"
+      },
+      "inlineAncestry": null
+    },
+    {
+      "sourceStateDigest": "eb175b21ede38444fddd6937fcaea596fbdb3ede05a11d5f567e55a5801831f2",
+      "entryTargetStateDigest": "54ff450afb01d2781ea3ed9d12bc5ac201609f3f8f01d42bb9de759e54807f4a",
+      "channelIndex": 3,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 2,
+      "toneType": 0,
+      "route": "mplay.ply-note.inline-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 76,
+        "instructionRole": "inline-track-tone-select"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.ToneData"
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData",
+      "selectedToneIndex": null,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_synth_bass",
+        "payloadBytes": 3169,
+        "payloadSha256": "85296ae904a4b773f5289a8328f4798e25ec2c3cc5004d2798efcdcfaa01dd47"
+      },
+      "inlineAncestry": {
+        "lastWriterRouteInSameMPlayMain": "pre-mplay-inline-tone-state",
+        "plyXwaveCommandU32Ancestry": false,
+        "writerBoundary": null
+      }
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "entryTargetStateDigest": "3610023617df77fae368789eb942740770d5fb185ab0e7971796bbe383fdab20",
+      "channelIndex": 0,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 0,
+      "toneType": 0,
+      "route": "mplay.ply-note.inline-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 76,
+        "instructionRole": "inline-track-tone-select"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.ToneData"
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData",
+      "selectedToneIndex": null,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_xylophone",
+        "payloadBytes": 2594,
+        "payloadSha256": "a76a0b0e2b25cc08b01f22fac471e5b82f049a0de0bdb4d7a6a3dbfcd2247f12"
+      },
+      "inlineAncestry": {
+        "lastWriterRouteInSameMPlayMain": "pre-mplay-inline-tone-state",
+        "plyXwaveCommandU32Ancestry": false,
+        "writerBoundary": null
+      }
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "entryTargetStateDigest": "3610023617df77fae368789eb942740770d5fb185ab0e7971796bbe383fdab20",
+      "channelIndex": 2,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 3,
+      "toneType": 0,
+      "route": "mplay.ply-note.inline-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 76,
+        "instructionRole": "inline-track-tone-select"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.ToneData"
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData",
+      "selectedToneIndex": null,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_flute",
+        "payloadBytes": 1874,
+        "payloadSha256": "0544b78118794c0027c44efbf9a2be5a7b13fee7d63fa36a2e34369ee07713af"
+      },
+      "inlineAncestry": {
+        "lastWriterRouteInSameMPlayMain": "pre-mplay-inline-tone-state",
+        "plyXwaveCommandU32Ancestry": false,
+        "writerBoundary": null
+      }
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "entryTargetStateDigest": "73353b524c51f0f4d26e103e0a84b238a18b935bb6bba927f520add08b717287",
+      "channelIndex": 4,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 6,
+      "toneType": 128,
+      "route": "mplay.ply-note.rhythm-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.key",
+        "midiKey": 36,
+        "selectedToneIndex": 36
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData.wav-tone-table-row",
+      "selectedToneIndex": 36,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_drum_and_percussion_kick",
+        "payloadBytes": 3846,
+        "payloadSha256": "ea99eb9d0e972ba1aefedcf39aacd401e2b3157bf0c6fc09619cc56fdfdf563b"
+      },
+      "inlineAncestry": null
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "entryTargetStateDigest": "1cb978ecf860f40bc4f5a8b3f427270b0d95af9901286a23b09370f70295454c",
+      "channelIndex": 2,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 6,
+      "toneType": 128,
+      "route": "mplay.ply-note.rhythm-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.key",
+        "midiKey": 36,
+        "selectedToneIndex": 36
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData.wav-tone-table-row",
+      "selectedToneIndex": 36,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_drum_and_percussion_kick",
+        "payloadBytes": 3846,
+        "payloadSha256": "ea99eb9d0e972ba1aefedcf39aacd401e2b3157bf0c6fc09619cc56fdfdf563b"
+      },
+      "inlineAncestry": null
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "entryTargetStateDigest": "1cb978ecf860f40bc4f5a8b3f427270b0d95af9901286a23b09370f70295454c",
+      "channelIndex": 4,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 3,
+      "toneType": 0,
+      "route": "mplay.ply-note.inline-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 76,
+        "instructionRole": "inline-track-tone-select"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.ToneData"
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData",
+      "selectedToneIndex": null,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_flute",
+        "payloadBytes": 1874,
+        "payloadSha256": "0544b78118794c0027c44efbf9a2be5a7b13fee7d63fa36a2e34369ee07713af"
+      },
+      "inlineAncestry": {
+        "lastWriterRouteInSameMPlayMain": "pre-mplay-inline-tone-state",
+        "plyXwaveCommandU32Ancestry": false,
+        "writerBoundary": null
+      }
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "entryTargetStateDigest": "ec742e1517941358d89c96923a0fbd270e9ed64049e44744c2b2e7b1c6919e93",
+      "channelIndex": 4,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 6,
+      "toneType": 128,
+      "route": "mplay.ply-note.rhythm-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.key",
+        "midiKey": 54,
+        "selectedToneIndex": 54
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData.wav-tone-table-row",
+      "selectedToneIndex": 54,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_tambourine",
+        "payloadBytes": 2211,
+        "payloadSha256": "147f9817fb1c6672c740bf00b6047f1d2bd9a260a9e30b34472000712d2e9e3d"
+      },
+      "inlineAncestry": null
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "entryTargetStateDigest": "d16351d61691fcc34c3bc1cec93155b484d5efa57637e371395ea557f744c202",
+      "channelIndex": 2,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 2,
+      "toneType": 0,
+      "route": "mplay.ply-note.inline-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 76,
+        "instructionRole": "inline-track-tone-select"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.ToneData"
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData",
+      "selectedToneIndex": null,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_synth_bass",
+        "payloadBytes": 3169,
+        "payloadSha256": "85296ae904a4b773f5289a8328f4798e25ec2c3cc5004d2798efcdcfaa01dd47"
+      },
+      "inlineAncestry": {
+        "lastWriterRouteInSameMPlayMain": "pre-mplay-inline-tone-state",
+        "plyXwaveCommandU32Ancestry": false,
+        "writerBoundary": null
+      }
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "entryTargetStateDigest": "d16351d61691fcc34c3bc1cec93155b484d5efa57637e371395ea557f744c202",
+      "channelIndex": 4,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 6,
+      "toneType": 128,
+      "route": "mplay.ply-note.rhythm-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.key",
+        "midiKey": 36,
+        "selectedToneIndex": 36
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData.wav-tone-table-row",
+      "selectedToneIndex": 36,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_drum_and_percussion_kick",
+        "payloadBytes": 3846,
+        "payloadSha256": "ea99eb9d0e972ba1aefedcf39aacd401e2b3157bf0c6fc09619cc56fdfdf563b"
+      },
+      "inlineAncestry": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "entryTargetStateDigest": "64837a59c13f43883f153fbb4de48e97647c8aefb7d1d55241f0efca7c7ab936",
+      "channelIndex": 0,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 6,
+      "toneType": 128,
+      "route": "mplay.ply-note.rhythm-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.key",
+        "midiKey": 54,
+        "selectedToneIndex": 54
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData.wav-tone-table-row",
+      "selectedToneIndex": 54,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_tambourine",
+        "payloadBytes": 2211,
+        "payloadSha256": "147f9817fb1c6672c740bf00b6047f1d2bd9a260a9e30b34472000712d2e9e3d"
+      },
+      "inlineAncestry": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "entryTargetStateDigest": "bce4001e393d2f304e23f6c2684a0c43615debf42250327c42eb374a68385e23",
+      "channelIndex": 4,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 6,
+      "toneType": 128,
+      "route": "mplay.ply-note.rhythm-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 51,
+        "instructionRole": "rhythm-midi-key-selector-copy"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.key",
+        "midiKey": 54,
+        "selectedToneIndex": 54
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData.wav-tone-table-row",
+      "selectedToneIndex": 54,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_tambourine",
+        "payloadBytes": 2211,
+        "payloadSha256": "147f9817fb1c6672c740bf00b6047f1d2bd9a260a9e30b34472000712d2e9e3d"
+      },
+      "inlineAncestry": null
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "entryTargetStateDigest": "7f52646adc6f021150550295182cbf8189b4dda257a053cc04c8cfd7339ef31e",
+      "channelIndex": 0,
+      "mplayInvocationIndex": 5,
+      "playerRole": "SoundInfo.MPlayMain-linked-player",
+      "playerIndex": 5,
+      "trackIndex": 2,
+      "toneType": 0,
+      "route": "mplay.ply-note.inline-tone-wave",
+      "selectorBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 76,
+        "instructionRole": "inline-track-tone-select"
+      },
+      "channelWaveStoreBoundary": {
+        "symbol": "ply_note",
+        "instructionIndex": 195,
+        "instructionRole": "SoundChannel.wav-store"
+      },
+      "selectorInput": {
+        "role": "MusicPlayerTrack.ToneData"
+      },
+      "selectedToneRole": "MusicPlayerTrack.ToneData",
+      "selectedToneIndex": null,
+      "wave": {
+        "storageRole": "gamepak-ws0",
+        "waveSymbol": "DirectSoundWaveData_sc88pro_synth_bass",
+        "payloadBytes": 3169,
+        "payloadSha256": "85296ae904a4b773f5289a8328f4798e25ec2c3cc5004d2798efcdcfaa01dd47"
+      },
+      "inlineAncestry": {
+        "lastWriterRouteInSameMPlayMain": "pre-mplay-inline-tone-state",
+        "plyXwaveCommandU32Ancestry": false,
+        "writerBoundary": null
+      }
+    }
+  ],
+  "closure": {
+    "closed": "All 13 MPlay-replaced mixer-entry targets join uniquely to the final source-general ply_note SoundChannel.wav writer and its exact selector boundary. Inline rows additionally retain the last same-pass inline-tone writer and ply_xwave command-u32 ancestry verdict.",
+    "exactMissingMutableRouteField": null,
+    "durationLicensed": false,
+    "constructionClockLicensed": false
+  }
+}

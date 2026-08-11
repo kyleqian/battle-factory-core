@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1126 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry provenance closed**
+
+- **State:** actual mixer-entry target safety and provenance are complete for
+  all **565** selected slots; #55 stays open and the construction clock remains
+  null/unwired.
+- **Did:** exact `ply_note` selector/store hooks classify all **13/13** MPlay
+  replacements with **0** ambiguity: **6 inline / 0 keysplit / 7 rhythm**.
+  Inline ancestry is explicit: **0 true / 6 false** for same-pass `ply_xwave`.
+- **Next:** continue #55 only with a separately source-proven construction or
+  VBlank component. Do not aggregate a duration or wire the clock from this
+  provenance packet.
+- **Notes:** anchor/LILIANA two-fresh compact hashes are `afcb8034…` /
+  `b5cda911…` in **16.4–16.8s / 11.5–13.2s**; legal-varied reused its frozen
+  **0-replacement** receipt. Focused prior/v2 audit **6/6**, smoke **375/375**,
+  forced typecheck, full `npm test` **920 files / 8,613 passed / 1 skipped**
+  (**90.92s**), and build (**631 modules**, Vite **7.89s**) are green.
+
 ## 1125 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry target safety closed**
 
 - **State:** actual post-six-MPlayMain SoundMainRAM target safety is complete;
@@ -42,21 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   8,607 passed / 1 skipped** (**110.25s**), build **631 modules** (**6.58s**),
   vanilla soak **20/20** (**34.3s**) and full-policy soak **60/60**
   (**294.3s**), both with **0 crash / 0 hang**. OFF oracle is healthy.
-
-## 1123 — [MAIN worker, 2026-08-11] **#55 encrypted construction writes reduced**
-
-- **State:** the synchronous SetMonData→SetBoxMonData EV-write component is
-  exact and #55 remains open; aggregate operation costs and the live clock
-  stay null/unwired.
-- **Did:** censused **27** committed writes and reduced all source fields
-  26–31. Valid/invalid paths are 12/8 GetSubstruct calls with fixed portions
-  **2,380/1,708**, plus the existing 40-cycle SetMon shell; 24 layouts,
-  representative switch arms, alignment, fail-closed inputs, and immutability
-  are pinned.
-- **Next:** continue #55 only with a separately source-proven construction or
-  VBlank component. Do not aggregate or wire the clock from this component.
-- **Notes:** focused **41/41**, smoke **375/375**, forced typecheck, full
-  `npm test` **917 files / 8,604 passed / 1 skipped** (**110.94s**), and build
-  (**631 modules**, Vite **6.73s**) are green. No +18/IRQ/VBlank/external
-  service, clock/controller/presentation/animation, barrier, recording, or
-  side-owned SoundMainRAM artifact changed.

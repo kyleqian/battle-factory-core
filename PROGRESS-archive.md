@@ -40798,3 +40798,21 @@ git; the current live ledger keeps the three load-bearing entries only.
   full `npm test` **916 files / 8,598 passed / 1 skipped** (**77.82s**), and
   build (**631 modules**, **6.32s**) are green. No generator/controller,
   presentation, animation, barrier, recording, or side-owned audit changed.
+
+## 1123 — [MAIN worker, 2026-08-11] **#55 encrypted construction writes reduced**
+
+- **State:** the synchronous SetMonData→SetBoxMonData EV-write component is
+  exact and #55 remains open; aggregate operation costs and the live clock
+  stay null/unwired.
+- **Did:** censused **27** committed writes and reduced all source fields
+  26–31. Valid/invalid paths are 12/8 GetSubstruct calls with fixed portions
+  **2,380/1,708**, plus the existing 40-cycle SetMon shell; 24 layouts,
+  representative switch arms, alignment, fail-closed inputs, and immutability
+  are pinned.
+- **Next:** continue #55 only with a separately source-proven construction or
+  VBlank component. Do not aggregate or wire the clock from this component.
+- **Notes:** focused **41/41**, smoke **375/375**, forced typecheck, full
+  `npm test` **917 files / 8,604 passed / 1 skipped** (**110.94s**), and build
+  (**631 modules**, Vite **6.73s**) are green. No +18/IRQ/VBlank/external
+  service, clock/controller/presentation/animation, barrier, recording, or
+  side-owned SoundMainRAM artifact changed.

@@ -1,0 +1,23 @@
+{
+  "schema": "factory-m4a-mixer-entry-provenance-repro/v2",
+  "oracleProfile": "battle-scene-off",
+  "freshRunsPerCase": 2,
+  "cases": [
+    {
+      "case": "anchor",
+      "firstFreshSha256": "afcb80344d7a2e8475b22a1bb2d2f65b8ae337c358c7b88608460faad6c4dab2",
+      "secondFreshSha256": "afcb80344d7a2e8475b22a1bb2d2f65b8ae337c358c7b88608460faad6c4dab2",
+      "byteIdentical": true
+    },
+    {
+      "case": "liliana",
+      "firstFreshSha256": "b5cda91156fb1264e03e8729c83bd845121dc3371fddacb9648e3de5eebd516e",
+      "secondFreshSha256": "b5cda91156fb1264e03e8729c83bd845121dc3371fddacb9648e3de5eebd516e",
+      "byteIdentical": true
+    }
+  ],
+  "excludedCase": {
+    "case": "factory-varied",
+    "reason": "Frozen mixer-entry v1 has zero MPlay-replaced targets, so no route capture is needed."
+  }
+}

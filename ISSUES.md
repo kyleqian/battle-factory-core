@@ -1577,15 +1577,17 @@ fixed/linear guard bytes; no CMP, REV, compressed, unreadable, unaligned, or
 incomplete row occurs. Thus the observed actual-entry target-safety class is
 closed.
 
-Mutable route provenance remains deliberately partial: **552/565** entry
-targets preserve the pre-MPlay target, while **13** (anchor 7, LILIANA 6,
-varied 0) are proven MPlay replacements whose safe final target is complete
-but whose exact `ply_note` selector is not retained. The exact missing field is
-`mplayReplacementRoute` at the `SoundChannel.wav` write — inline, keysplit,
-or rhythm; inline must additionally say whether `ply_xwave.command-u32`
-replaced the track tone earlier in that MPlay pass. This licenses no duration
-reducer or clock wiring. See
-`docs/issue55-m4a-soundmainram-entry-targets-v1.md`.
+**MPlay mixer-entry provenance closure (2026-08-11):** an additive v2 packet
+joins the exact final `ply_note` `SoundChannel.wav` writer to all **13/13**
+MPlay replacements with **0** ambiguous joins. Exact symbol-relative selector
+and store boundaries classify **6 inline / 0 keysplit / 7 rhythm**; all six
+inline rows retain the same-pass ancestry verdict and prove **0/6**
+`ply_xwave.command-u32` writers. Anchor/LILIANA compact receipts reproduced
+twice byte-identically (`afcb8034…` / `b5cda911…`); legal-varied's frozen zero-
+replacement receipt required no new run. Thus the actual-entry target safety
+and mutable-route provenance classes are both complete for all **565** selected
+slots. No duration reducer, service cost, or clock wiring is licensed. See
+`docs/issue55-m4a-mixer-entry-provenance-v2.md`.
 
 **Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
 threading now makes the first post-cycle pixel boundary observe this debt.
