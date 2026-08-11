@@ -63,7 +63,9 @@ EWRAM word writes: **36 reads / 24 writes**. Retail EWRAM is a 16-bit bus. The
 source-general reducer charges aligned byte/halfword accesses **2** cycles and
 aligned words two 16-bit transfers, **4** cycles. It rejects u16/u32
 misalignment rather than claiming ARM7TDMI rotation behavior not used by this
-source. Thus one crypt helper has **240** bus cycles, of which **120** exceed
+source. The same reducer now backs the older direct-party read/write paths, so
+the module no longer carries a contradictory six-cycle u32 constant. Thus one
+crypt helper has **240** bus cycles, of which **120** exceed
 the load/store instruction baselines already present above, and completes at:
 
 ```text

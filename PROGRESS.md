@@ -7,7 +7,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1102 — [MAIN worker, 2026-08-10] **#55 encrypted EWRAM loops and receipt field tails closed**
 
-- **State:** implementation `54368a1e` corrected/pinned by `fd4c79c1`; #55
+- **State:** implementation `54368a1e` corrected/pinned by `fd4c79c1` and
+  supervisor-reconciled in this entry; #55
   remains open, `GetBoxMonData2.cycles` stays `null`, and the construction
   clock stays unwired. Focused **25/25**, smoke **375/375**, typecheck, full
   `npm test` **894 files / 8,486 passed / 1 skipped**, and production build
@@ -15,14 +16,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did:** source-general aligned EWRAM u8/u16/u32 timing now closes decrypt /
   checksum / encrypt at **448 / 518 / 448** cycles and **528** total bus cycles.
   All **180** dependency rows expose checksum-valid/invalid and species/EXP/
-  EV/IV tail widths, counts, exact PCs, bus totals, and component cycles.
+  EV/IV tail widths, counts, exact PCs, bus totals, and component cycles. The
+  older direct-party u32 read/write paths now use that same reducer instead of
+  retaining a contradictory six-cycle constant / missing store premium.
 - **Next:** continue #55 only with independently source-reduced outer
   `GetBoxMonData2` prologue/setup/dispatch/common-return instruction and
   memory work, or async/IRQ state; do not fit residuals or wire the clock.
 - **Notes:** twice-fresh compact Scene-OFF instruction/component receipt is
   byte-identical at `bff98549…`; misaligned u16/u32 behavior is rejected, not
-  claimed. No fixture import into production, barrier, controller,
-  presentation, animation, or canonical Battle-2 change.
+  claimed. Supervisor reconciliation passed focused **25/25**, smoke
+  **375/375**, typecheck, and build. No fixture import into production,
+  barrier, controller, presentation, animation, or canonical Battle-2 change.
 
 ## 1101 — [supervisor, 2026-08-10] **#55 MPlayMain callback residual closed**
 

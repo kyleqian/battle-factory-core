@@ -1057,10 +1057,11 @@ export function reduceFactoryGetMonDataTiming(
     const pipelineRefills = 4;
     const romLiteralLoads = 1;
     const romJumpTableLoads = 1;
-    // The 32-bit EWRAM LDR occupies six cycles on the 16-bit bus at this
-    // boundary; byte/halfword reads stay in the ordinary two-cycle class.
-    // The sequential instruction baseline already counts two cycles.
-    const ewramReadCycles = status ? 6 : 2;
+    const ewramReadCycles = reduceFactoryEwramAccessTiming({
+      access: "read",
+      width: valueWidth,
+      address: 0x0200_0000 + partyOffset,
+    }).cycles;
     const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
       + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
       + (romLiteralLoads + romJumpTableLoads) * (11 - THUMB_SEQUENTIAL_CYCLES)
@@ -1654,7 +1655,8 @@ function sumFactoryEwramAccesses(
  * Both helpers have 5 prologue halfwords, 12 iterations × 10 halfwords, and
  * 3 epilogue halfwords.  Eleven loop back-edges plus the final `bx` refill
  * are the 12 taken flows.  Each iteration has three word reads and two word
- * writes in EWRAM; their bus cost is deliberately kept null.
+ * writes in EWRAM; the aligned word-access reducer supplies their exact bus
+ * occupancy and premium over the already-counted instruction baselines.
  */
 export function reduceFactoryEncryptedWordLoopTiming(
   kind: FactoryEncryptedWordLoopKind,
@@ -1702,9 +1704,9 @@ export function reduceFactoryEncryptBoxMonTiming(): FactoryEncryptedWordLoopTimi
 }
 
 /**
- * Reduce the four fixed six-halfword checksum loops without claiming their
- * EWRAM read latency.  Seven setup/pointer halfwords surround 192 loop-body
- * halfwords; five of each loop's six `bge` edges are taken.
+ * Reduce the four fixed six-halfword checksum loops including their aligned
+ * EWRAM reads. Seven setup/pointer halfwords surround 192 loop-body halfwords;
+ * five of each loop's six `bge` edges are taken.
  */
 export function reduceFactoryChecksumLoopTiming(): FactoryChecksumLoopTiming {
   const sequentialThumbHalfwords = 4 * 6 * 8 + 7;
@@ -2136,10 +2138,18 @@ export function reduceFactorySetMonDataTiming(
   const sequentialThumbHalfwords = 11 + selectedPathHalfwords + 2;
   const romLiteralLoads = 1;
   const romJumpTableLoads = 1;
+  const ewramWritePremiumCycles = valueWidth === null || valueWidth === 0 || partyOffset === null
+    ? 0
+    : reduceFactoryEwramAccessTiming({
+      access: "write",
+      width: valueWidth,
+      address: 0x0200_0000 + partyOffset,
+    }).busPremiumCycles;
   const cycles = sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
     + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES
     + romLiteralLoads * (THUMB_ROM_LITERAL_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
-    + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES);
+    + romJumpTableLoads * (THUMB_ROM_JUMP_TABLE_LOAD_CYCLES - THUMB_SEQUENTIAL_CYCLES)
+    + ewramWritePremiumCycles;
 
   return Object.freeze({
     field,

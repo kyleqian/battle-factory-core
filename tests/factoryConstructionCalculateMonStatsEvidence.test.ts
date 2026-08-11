@@ -994,7 +994,7 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
         directPartyRead: true,
         delegatedToGetBoxMonData2: false,
         valueWidth: field === 55 ? 4 : field === 56 || field === 64 ? 1 : 2,
-        cycles: 80,
+        cycles: field === 55 ? 78 : 80,
         unresolved: null,
       });
     }
@@ -1277,7 +1277,7 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       pipelineRefills: 3,
       romLiteralLoads: 1,
       romJumpTableLoads: 1,
-      cycles: 86,
+      cycles: 88,
     });
     expect(reduceFactorySetMonDataTiming({ field: 56 })).toMatchObject({
       route: "party-level-u8",
