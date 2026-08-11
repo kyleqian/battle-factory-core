@@ -40314,3 +40314,42 @@ both verify scripts/census independently re-verified before this entry.)*
   exposes only its exact 30-cycle entry and 10-cycle return shell. No
   identity/duration lookup, fixture mutation, excluded lane, canonical
   Battle-2, animation, or unsupported-barrier change.
+## 1095 — [MAIN worker, 2026-08-10] **#55 direct level route bounded; complete callee not reducible yet**
+
+- **State:** evidence `b8bb8306` plus docs `0a1ebd4d`; focused stats **17/17**,
+  smoke **375/375**, typecheck, full `npm test` **881 files / 8,436 passed /
+  1 skipped**, and production build are green. #55 remains open and the
+  construction clock remains unwired.
+- **Did:** audited all **12/12** `GetLevelFromMonExp` calls. Twice-fresh OFF
+  packets pin personality/species/growth/EXP and exact post-accessor timing:
+  **43 + 21 + 2,200 + 18 = 2,282** source cycles; **8 exact + 3×(+18
+  service) + 1×(+308 VCount/audio IRQ)**.
+- **Next:** continue #55 only with the source-general encrypted `GetBoxMonData2`
+  body needed by the 156 direct reads and both level accessors; do not wire
+  aggregate stats or the construction clock.
+- **Notes:** complete level calls total **246,922** pause-subtracted cycles;
+  their two encrypted accessors contribute **219,176** observed cycles and
+  remain unreduced. No fitted duration, keyed/identity branch, residual
+  absorption, canonical Battle-2, animation, fixture production import, or
+  barrier change.
+
+## 1094 — [MAIN worker, 2026-08-10] **#55 direct `GetMonData2` party reads reduced**
+
+- **State:** implementation `9a90f094`, shell correction `bf107b02`, and
+  evidence/docs `3b95eb30`; focused
+  stats **16/16**, smoke **375/375**, typecheck, full `npm test` **881 files /
+  8,435 passed / 1 skipped**, and production build are green. #55 remains open
+  and the construction clock remains unwired.
+- **Did:** censused all **180** stats reads by field/compiled route: **24**
+  direct HP/max-HP reads and **156** encrypted EV/IV/species reads. The direct
+  source-general jump-table arms reduce exactly at **80** cycles each:
+  anchor/LILIANA/varied **960/480/480 = 1,920**, zero residual.
+- **Next:** continue #55 only with a bounded source-derived encrypted
+  `GetBoxMonData2` body or level/growth component; do not wire the aggregate
+  stats operation or construction clock.
+- **Notes:** encrypted/default and Deoxys routes retain only exact compiled
+  entry/return shells with `cycles: null`; the correction includes the opening
+  `push` represented by mGBA's pipelined entry PC. All three Scene-OFF packets
+  match committed hashes. Completed direct-call coverage is **312/480** and
+  **100,214/1,768,691 = 5.666%** of source callee cycles. No duration/identity
+  fit, fixture mutation, canonical Battle-2, animation, or barrier change.
