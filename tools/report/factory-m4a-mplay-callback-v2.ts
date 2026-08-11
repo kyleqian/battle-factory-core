@@ -39,7 +39,6 @@ type ReadAudit = {
 };
 
 const TRACK_CMD = "track.cmdPtr[selector-sized bytes]";
-const TRACK_SCALAR = "track scalar fields named by the handler";
 const CHANNEL_CHAIN = "track.chan -> channel status/track/previous/next fields";
 
 // These are source-relative expressions, not a memory map.  They summarize
