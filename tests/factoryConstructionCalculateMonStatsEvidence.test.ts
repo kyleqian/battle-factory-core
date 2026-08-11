@@ -4,6 +4,10 @@ import { describe, expect, it } from "vitest";
 import expTablesData from "../src/data/gen/exp-tables.json" with { type: "json" };
 import {
   reduceFactoryCalculateMonStatsParentTiming,
+  reduceFactoryChecksumLoopTiming,
+  reduceFactoryDecryptBoxMonTiming,
+  reduceFactoryEncryptBoxMonTiming,
+  reduceFactoryGetSubstructTiming,
   censusFactoryGetBoxMonDataDependency,
   reduceFactoryGetNatureTiming,
   reduceFactoryGetMonDataTiming,
@@ -173,6 +177,134 @@ function afterPc(pc: string): string {
 }
 
 describe("Factory CalculateMonStats v1 source-call receipt", () => {
+  it("source-reduces every compiled personality-modulo-24 GetSubstruct arm", () => {
+    const expectedLayouts = [
+      [0, 1, 2, 3], [0, 1, 3, 2], [0, 2, 1, 3], [0, 3, 1, 2],
+      [0, 2, 3, 1], [0, 3, 2, 1], [1, 0, 2, 3], [1, 0, 3, 2],
+      [2, 0, 1, 3], [3, 0, 1, 2], [2, 0, 3, 1], [3, 0, 2, 1],
+      [1, 2, 0, 3], [1, 3, 0, 2], [2, 1, 0, 3], [3, 1, 0, 2],
+      [2, 3, 0, 1], [3, 2, 0, 1], [1, 2, 3, 0], [1, 3, 2, 0],
+      [2, 1, 3, 0], [3, 1, 2, 0], [2, 3, 1, 0], [3, 2, 1, 0],
+    ];
+    const expectedArmPcs = [
+      0x0806_a2f8, 0x0806_a31c, 0x0806_a338, 0x0806_a34e,
+      0x0806_a364, 0x0806_a380, 0x0806_a396, 0x0806_a3ac,
+      0x0806_a3bc, 0x0806_a3da, 0x0806_a3f2, 0x0806_a402,
+      0x0806_a416, 0x0806_a428, 0x0806_a43a, 0x0806_a44c,
+      0x0806_a45e, 0x0806_a470, 0x0806_a482, 0x0806_a498,
+      0x0806_a4ac, 0x0806_a4ba, 0x0806_a4cc, 0x0806_a4e0,
+    ];
+    const expectedArmHalfwords = [
+      [14, 14, 16, 18], [14, 12, 16, 18], [14, 12, 16, 19], [14, 12, 16, 19],
+      [14, 12, 16, 18], [14, 12, 16, 19], [16, 10, 16, 18], [16, 10, 17, 19],
+      [16, 10, 16, 19], [16, 10, 16, 19], [16, 10, 17, 19], [15, 10, 15, 19],
+      [16, 11, 13, 19], [16, 11, 13, 19], [16, 11, 13, 19], [15, 11, 13, 19],
+      [16, 11, 13, 19], [15, 11, 13, 19], [16, 11, 15, 16], [17, 11, 15, 17],
+      [16, 11, 16, 17], [15, 11, 15, 17], [17, 11, 15, 17], [15, 11, 15, 15],
+    ];
+    const expectedArmRefills = [
+      [3, 4, 4, 7], [4, 3, 4, 6], [4, 3, 4, 7], [4, 3, 4, 7],
+      [4, 3, 4, 6], [4, 3, 4, 7], [4, 2, 5, 7], [5, 2, 5, 7],
+      [4, 2, 5, 8], [5, 2, 5, 8], [5, 2, 5, 7], [5, 2, 4, 6],
+      [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 2, 5],
+      [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 3, 2], [4, 3, 4, 4],
+      [4, 3, 4, 3], [4, 3, 3, 3], [4, 3, 4, 4], [3, 3, 4, 3],
+    ];
+    const expectedArmTargets = [0x0806_a50e, 0x0806_a508, 0x0806_a502, 0x0806_a4fc];
+
+    for (let modulo = 0; modulo < 24; modulo += 1) {
+      const rows = [0, 1, 2, 3].map((substructType) => (
+        reduceFactoryGetSubstructTiming(modulo, substructType)
+      ));
+      expect(rows.map((row) => row.personalityModulo24)).toEqual([modulo, modulo, modulo, modulo]);
+      expect(rows.map((row) => row.logicalToPhysicalSlots)).toEqual(
+        Array(4).fill(expectedLayouts[modulo]),
+      );
+      expect(rows.map((row) => row.selectedPhysicalSlot)).toEqual(expectedLayouts[modulo]);
+      expect(rows.map((row) => row.armPc)).toEqual(Array(4).fill(expectedArmPcs[modulo]));
+      expect(rows.map((row) => row.armTargetPc)).toEqual(
+        expectedLayouts[modulo].map((physical) => expectedArmTargets[physical]),
+      );
+      expect(rows.map((row) => row.armSequentialThumbHalfwords)).toEqual(expectedArmHalfwords[modulo]);
+      expect(rows.map((row) => row.armPipelineRefills)).toEqual(expectedArmRefills[modulo]);
+      expect(rows.every((row) => row.commonNonModuloCycles === 68)).toBe(true);
+      expect(rows.every((row) => row.moduloCycles === null && row.cycles === null)).toBe(true);
+      expect(rows.map((row) => row.nonModuloCycles)).toEqual(
+        expectedArmHalfwords[modulo]!.map((halfwords, index) => (
+          68 + halfwords * 2 + expectedArmRefills[modulo]![index]! * 6
+        )),
+      );
+    }
+
+    expect(() => reduceFactoryGetSubstructTiming(0, 4)).toThrow("substructType must be a source u8");
+    expect(() => reduceFactoryGetSubstructTiming(-1, 0)).toThrow("personality must be a source u32");
+  });
+
+  it("source-reduces the shared crypt/checksum instruction and fetch segments", () => {
+    expect(reduceFactoryDecryptBoxMonTiming()).toMatchObject({
+      kind: "decrypt",
+      entryPc: 0x0806_a24c,
+      loopPc: 0x0806_a256,
+      returnPc: 0x0806_a26e,
+      iterations: 12,
+      ewramWordReads: 36,
+      ewramWordWrites: 24,
+      sequentialThumbHalfwords: 128,
+      pipelineRefills: 12,
+      instructionFetchCycles: 328,
+      dataAccessCycles: null,
+      cycles: null,
+    });
+    expect(reduceFactoryEncryptBoxMonTiming()).toMatchObject({
+      kind: "encrypt",
+      entryPc: 0x0806_a228,
+      loopPc: 0x0806_a232,
+      returnPc: 0x0806_a24a,
+      iterations: 12,
+      ewramWordReads: 36,
+      ewramWordWrites: 24,
+      sequentialThumbHalfwords: 128,
+      pipelineRefills: 12,
+      instructionFetchCycles: 328,
+      dataAccessCycles: null,
+      cycles: null,
+    });
+    expect(reduceFactoryChecksumLoopTiming()).toMatchObject({
+      entryPc: 0x0806_8c78,
+      firstLoopSetupPc: 0x0806_8cb0,
+      firstReadPc: 0x0806_8cb2,
+      afterLoopPc: 0x0806_8cfe,
+      substructCount: 4,
+      halfwordsPerSubstruct: 6,
+      checksumHalfwordReads: 24,
+      sequentialThumbHalfwords: 199,
+      pipelineRefills: 20,
+      instructionFetchCycles: 518,
+      ewramHalfwordReadCycles: null,
+      cycles: null,
+    });
+
+    const v2 = ["anchor", "liliana", "factory-varied"].map((name) => (
+      JSON.parse(readFileSync(`tests/fixtures/factory-construction-cycle-v2/${name}.json`, "utf8")) as {
+        oracleProfile: string;
+        totals: { construction: number; ambient: number; total: number };
+        cycleEvidence: { events: Array<{ resumeFunction?: string }> };
+      }
+    ));
+    expect(v2.every((receipt) => receipt.oracleProfile === "battle-scene-off")).toBe(true);
+    expect(v2.map((receipt) => receipt.totals)).toEqual([
+      { construction: 242, ambient: 52, total: 294 },
+      { construction: 112, ambient: 31, total: 143 },
+      { construction: 202, ambient: 30, total: 232 },
+    ]);
+    const resumed = v2.flatMap((receipt) => receipt.cycleEvidence.events)
+      .map((event) => event.resumeFunction ?? "");
+    expect(resumed.some((name) => name.startsWith("DecryptBoxMon+"))).toBe(true);
+    expect(resumed.some((name) => name.startsWith("EncryptBoxMon+"))).toBe(true);
+    expect(resumed.some((name) => name.startsWith("CalculateBoxMonChecksum+"))).toBe(true);
+    expect(resumed.some((name) => name.startsWith("GetSubstruct+"))).toBe(true);
+  });
+
   it("censuses the shared encrypted accessor route without claiming a total", () => {
     const rows = probes.flatMap(({ value }) => value.mons.flatMap((mon) => {
       const directFields = value.directCalls
@@ -201,6 +333,11 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect(rows.every((row) => row.decryptIterations === 12)).toBe(true);
     expect(rows.every((row) => row.checksumHalfwordReads === 24)).toBe(true);
     expect(rows.every((row) => row.encryptIterations === 12)).toBe(true);
+    expect(rows.every((row) => row.sharedInstructionFetchCycles === 1_174)).toBe(true);
+    expect(rows.every((row) => row.selectedSubstructTiming.cycles === null)).toBe(true);
+    expect(rows.every((row) => row.decryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
+    expect(rows.every((row) => row.checksumLoopTiming.instructionFetchCycles === 518)).toBe(true);
+    expect(rows.every((row) => row.encryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
     expect(rows.every((row) => row.cycles === null && row.unresolved !== null)).toBe(true);
     expect(rows.every((row) => JSON.stringify(row.boundaries) === JSON.stringify({
       symbolEntryPc: 0x0806_a674,

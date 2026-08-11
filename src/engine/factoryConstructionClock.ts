@@ -425,6 +425,90 @@ export type FactoryGetBoxMonDataFetchClass =
   | "ewram-u16-bitfield"
   | "ewram-u32-bitfield";
 
+export type FactoryGetSubstructType = 0 | 1 | 2 | 3;
+
+/**
+ * The source/ELF-reduced, ROM-only part of one GetSubstruct call.
+ *
+ * `GetSubstruct`'s modulo helper is a separate libgcc body.  The dispatch
+ * table and every one of its 24 compiled arms are in ROM, so those portions
+ * can be counted without pretending that the personality-specific modulo
+ * dividend or the BoxMon EWRAM bus is a duration key.  `cycles` remains null
+ * until the modulo helper is composed with this arm and the surrounding
+ * encrypted accessor.
+ */
+export interface FactoryGetSubstructTiming {
+  personality: number;
+  personalityModulo24: number;
+  substructType: FactoryGetSubstructType;
+  logicalToPhysicalSlots: readonly number[];
+  selectedPhysicalSlot: number;
+  secureStorageOffset: number;
+  armPc: number;
+  armTargetPc: number;
+  commonSequentialThumbHalfwords: number;
+  commonPipelineRefills: number;
+  commonRomLiteralLoads: number;
+  commonRomTableLoads: number;
+  commonNonModuloCycles: number;
+  armSequentialThumbHalfwords: number;
+  armPipelineRefills: number;
+  armInstructionFetchCycles: number;
+  /** Common dispatch shell plus the selected arm, excluding __umodsi3. */
+  nonModuloCycles: number;
+  moduloCycles: null;
+  cycles: null;
+  unresolved: string;
+}
+
+export type FactoryEncryptedWordLoopKind = "decrypt" | "encrypt";
+
+/**
+ * Fixed instruction/fetch census for DecryptBoxMon or EncryptBoxMon.
+ *
+ * The loops are source-general and always execute 12 word iterations.  The
+ * instruction stream is exact; the five 32-bit EWRAM accesses per iteration
+ * are reported separately because their bus timing is not yet closed by the
+ * committed receipts.
+ */
+export interface FactoryEncryptedWordLoopTiming {
+  kind: FactoryEncryptedWordLoopKind;
+  entryPc: number;
+  loopPc: number;
+  returnPc: number;
+  iterations: 12;
+  ewramWordReads: 36;
+  ewramWordWrites: 24;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  instructionFetchCycles: number;
+  dataAccessCycles: null;
+  cycles: null;
+  unresolved: string;
+}
+
+/**
+ * Fixed instruction/fetch census for the four six-halfword checksum loops.
+ * The 24 EWRAM halfword reads are intentionally separate from the ROM
+ * instruction accounting; no observed pause or asynchronous service is folded
+ * into this component.
+ */
+export interface FactoryChecksumLoopTiming {
+  entryPc: number;
+  firstLoopSetupPc: number;
+  firstReadPc: number;
+  afterLoopPc: number;
+  substructCount: 4;
+  halfwordsPerSubstruct: 6;
+  checksumHalfwordReads: 24;
+  sequentialThumbHalfwords: number;
+  pipelineRefills: number;
+  instructionFetchCycles: number;
+  ewramHalfwordReadCycles: null;
+  cycles: null;
+  unresolved: string;
+}
+
 /**
  * Source/ELF dependency census for the encrypted GetBoxMonData2 subset used
  * by CalculateMonStats. This deliberately exposes a partial exact shell and
@@ -448,6 +532,13 @@ export interface FactoryGetBoxMonDataDependency {
   commonFetchClasses: readonly string[];
   checksumRoute: "valid" | "invalid-marks-bad-egg";
   speciesTailRoute: "not-applicable" | "species" | "bad-egg-species";
+  /** One field-selected arm; the accessor still performs seven other calls. */
+  selectedSubstructTiming: FactoryGetSubstructTiming;
+  decryptLoopTiming: FactoryEncryptedWordLoopTiming;
+  checksumLoopTiming: FactoryChecksumLoopTiming;
+  encryptLoopTiming: FactoryEncryptedWordLoopTiming;
+  /** Exact ROM instruction/fetch subtotal, not a complete accessor duration. */
+  sharedInstructionFetchCycles: number;
   getSubstructCalls: 8;
   decryptIterations: 12;
   checksumHalfwordReads: 24;
@@ -993,6 +1084,36 @@ const GET_SUBSTRUCT_MODULO_ARM_PCS = Object.freeze([
   0x0806_a4ac, 0x0806_a4ba, 0x0806_a4cc, 0x0806_a4e0,
 ] as const);
 
+// Counts from the compiled arm entry through the common GetSubstruct return
+// (`0x0806a510`), using 2 cycles per ROM Thumb halfword and +6 for each taken
+// control-flow refill.  Rows are personality % 24; columns are substruct
+// types 0..3.  The non-contiguous arm PCs above and this table are both
+// derived from the pinned ELF, not from an observed duration.
+const GET_SUBSTRUCT_ARM_HALFWORDS = Object.freeze([
+  [14, 14, 16, 18], [14, 12, 16, 18], [14, 12, 16, 19], [14, 12, 16, 19],
+  [14, 12, 16, 18], [14, 12, 16, 19], [16, 10, 16, 18], [16, 10, 17, 19],
+  [16, 10, 16, 19], [16, 10, 16, 19], [16, 10, 17, 19], [15, 10, 15, 19],
+  [16, 11, 13, 19], [16, 11, 13, 19], [16, 11, 13, 19], [15, 11, 13, 19],
+  [16, 11, 13, 19], [15, 11, 13, 19], [16, 11, 15, 16], [17, 11, 15, 17],
+  [16, 11, 16, 17], [15, 11, 15, 17], [17, 11, 15, 17], [15, 11, 15, 15],
+] as const);
+
+const GET_SUBSTRUCT_ARM_PIPELINE_REFILLS = Object.freeze([
+  [3, 4, 4, 7], [4, 3, 4, 6], [4, 3, 4, 7], [4, 3, 4, 7],
+  [4, 3, 4, 6], [4, 3, 4, 7], [4, 2, 5, 7], [5, 2, 5, 7],
+  [4, 2, 5, 8], [5, 2, 5, 8], [5, 2, 5, 7], [5, 2, 4, 6],
+  [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 2, 5],
+  [4, 3, 2, 5], [4, 3, 2, 5], [4, 3, 3, 2], [4, 3, 4, 4],
+  [4, 3, 4, 3], [4, 3, 3, 3], [4, 3, 4, 4], [3, 3, 4, 3],
+] as const);
+
+const GET_SUBSTRUCT_ARM_TARGET_PCS = Object.freeze([
+  0x0806_a50e, // physical slot 0: return the box+0x20 base
+  0x0806_a508, // physical slot 1
+  0x0806_a502, // physical slot 2
+  0x0806_a4fc, // physical slot 3
+] as const);
+
 const GET_BOX_COMMON_FETCH_CLASSES = Object.freeze([
   "rom-thumb-sequential",
   "rom-literal-u32",
@@ -1021,6 +1142,136 @@ const GET_BOX_COMMON_BOUNDARIES = Object.freeze({
   checksumLoopPc: 0x0806_8cb2,
   encryptLoopPc: 0x0806_a232,
 });
+
+/**
+ * Reduce the personality-selected GetSubstruct dispatch arm.
+ *
+ * The fixed shell is `GetSubstruct` `0x0806a270..0x0806a290`: seven ordinary
+ * prologue halfwords, the two-halfword BL, the range check, the dispatch
+ * shift, one PC-relative literal load, one ROM jump-table load, and the
+ * `mov pc` refill.  That shell is 68 cycles excluding the body of
+ * `__umodsi3`.  Each selected arm then performs only ROM instructions and
+ * pointer arithmetic before joining the common return at `0x0806a510`.
+ *
+ * The modulo helper is intentionally not guessed here.  `nonModuloCycles`
+ * is the independently reusable exact segment; `cycles` stays null until a
+ * separately audited `%24` helper and the full encrypted accessor are
+ * composed.  Async +18 service and VBlank/IRQ pauses are external to this
+ * reducer.
+ */
+export function reduceFactoryGetSubstructTiming(
+  personalityValue: number,
+  substructTypeValue: number,
+): FactoryGetSubstructTiming {
+  const personality = requireU32(personalityValue, "personality");
+  const substructType = requireNonnegativeInteger(substructTypeValue, "substructType");
+  if (substructType > 3) {
+    throw new Error(`substructType must be a source u8 in [0, 3], got ${substructType}`);
+  }
+
+  const personalityModulo24 = personality % 24;
+  const logicalToPhysicalSlots = GET_SUBSTRUCT_LOGICAL_TO_PHYSICAL[personalityModulo24]!;
+  const selectedPhysicalSlot = logicalToPhysicalSlots[substructType as FactoryGetSubstructType]!;
+  const armPc = GET_SUBSTRUCT_MODULO_ARM_PCS[personalityModulo24]!;
+  const armSequentialThumbHalfwords = GET_SUBSTRUCT_ARM_HALFWORDS[personalityModulo24]![substructType]!;
+  const armPipelineRefills = GET_SUBSTRUCT_ARM_PIPELINE_REFILLS[personalityModulo24]![substructType]!;
+  const armInstructionFetchCycles = armSequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES;
+  const commonNonModuloCycles = 68;
+  return Object.freeze({
+    personality,
+    personalityModulo24,
+    substructType: substructType as FactoryGetSubstructType,
+    logicalToPhysicalSlots,
+    selectedPhysicalSlot,
+    secureStorageOffset: 0x20 + selectedPhysicalSlot * 12,
+    armPc,
+    armTargetPc: GET_SUBSTRUCT_ARM_TARGET_PCS[selectedPhysicalSlot]!,
+    commonSequentialThumbHalfwords: 16,
+    commonPipelineRefills: 3,
+    commonRomLiteralLoads: 1,
+    commonRomTableLoads: 1,
+    commonNonModuloCycles,
+    armSequentialThumbHalfwords,
+    armPipelineRefills,
+    armInstructionFetchCycles,
+    nonModuloCycles: commonNonModuloCycles + armInstructionFetchCycles + armPipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
+    moduloCycles: null,
+    cycles: null,
+    unresolved: "GetSubstruct __umodsi3(personality, 24) and encrypted accessor memory timing remain outside this source/fetch segment",
+  });
+}
+
+/**
+ * Reduce the fixed ROM instruction stream of one 12-word crypt loop.
+ *
+ * Both helpers have 5 prologue halfwords, 12 iterations × 10 halfwords, and
+ * 3 epilogue halfwords.  Eleven loop back-edges plus the final `bx` refill
+ * are the 12 taken flows.  Each iteration has three word reads and two word
+ * writes in EWRAM; their bus cost is deliberately kept null.
+ */
+export function reduceFactoryEncryptedWordLoopTiming(
+  kind: FactoryEncryptedWordLoopKind,
+): FactoryEncryptedWordLoopTiming {
+  const entryPc = kind === "decrypt" ? 0x0806_a24c : 0x0806_a228;
+  const loopPc = kind === "decrypt" ? 0x0806_a256 : 0x0806_a232;
+  const returnPc = kind === "decrypt" ? 0x0806_a26e : 0x0806_a24a;
+  const sequentialThumbHalfwords = 5 + 12 * 10 + 3;
+  const pipelineRefills = 11 + 1;
+  return Object.freeze({
+    kind,
+    entryPc,
+    loopPc,
+    returnPc,
+    iterations: 12,
+    ewramWordReads: 36,
+    ewramWordWrites: 24,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    instructionFetchCycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
+    dataAccessCycles: null,
+    cycles: null,
+    unresolved: "12×(3 EWRAM word reads + 2 EWRAM word writes) require the unresolved encrypted bus-access model",
+  });
+}
+
+export function reduceFactoryDecryptBoxMonTiming(): FactoryEncryptedWordLoopTiming {
+  return reduceFactoryEncryptedWordLoopTiming("decrypt");
+}
+
+export function reduceFactoryEncryptBoxMonTiming(): FactoryEncryptedWordLoopTiming {
+  return reduceFactoryEncryptedWordLoopTiming("encrypt");
+}
+
+/**
+ * Reduce the four fixed six-halfword checksum loops without claiming their
+ * EWRAM read latency.  Seven setup/pointer halfwords surround 192 loop-body
+ * halfwords; five of each loop's six `bge` edges are taken.
+ */
+export function reduceFactoryChecksumLoopTiming(): FactoryChecksumLoopTiming {
+  const sequentialThumbHalfwords = 4 * 6 * 8 + 7;
+  const pipelineRefills = 4 * 5;
+  return Object.freeze({
+    entryPc: 0x0806_8c78,
+    firstLoopSetupPc: 0x0806_8cb0,
+    firstReadPc: 0x0806_8cb2,
+    afterLoopPc: 0x0806_8cfe,
+    substructCount: 4,
+    halfwordsPerSubstruct: 6,
+    checksumHalfwordReads: 24,
+    sequentialThumbHalfwords,
+    pipelineRefills,
+    instructionFetchCycles: sequentialThumbHalfwords * THUMB_SEQUENTIAL_CYCLES
+      + pipelineRefills * THUMB_PIPELINE_REFILL_CYCLES,
+    ewramHalfwordReadCycles: null,
+    cycles: null,
+    unresolved: "24 decrypted EWRAM halfword reads remain outside the source/fetch segment",
+  });
+}
+
+export function reduceFactoryCalculateBoxMonChecksumTiming(): FactoryChecksumLoopTiming {
+  return reduceFactoryChecksumLoopTiming();
+}
 
 /**
  * Census the common encrypted accessor dependency without reducing its total.
@@ -1091,13 +1342,18 @@ export function censusFactoryGetBoxMonDataDependency(
     speciesTailRoute: field !== 11
       ? "not-applicable"
       : input.isBadEgg || !input.checksumValid ? "bad-egg-species" : "species",
+    selectedSubstructTiming: reduceFactoryGetSubstructTiming(personality, logicalSubstruct),
+    decryptLoopTiming: reduceFactoryDecryptBoxMonTiming(),
+    checksumLoopTiming: reduceFactoryChecksumLoopTiming(),
+    encryptLoopTiming: reduceFactoryEncryptBoxMonTiming(),
+    sharedInstructionFetchCycles: 328 + 518 + 328,
     getSubstructCalls: 8,
     decryptIterations: 12,
     checksumHalfwordReads: 24,
     encryptIterations: 12,
     boundaries: GET_BOX_COMMON_BOUNDARIES,
     cycles: null,
-    unresolved: "complete GetBoxMonData2 timing awaits instruction/fetch reduction of modulo-24 arms and shared encrypted memory loops",
+    unresolved: "complete GetBoxMonData2 timing still awaits __umodsi3 composition and EWRAM timing for all eight selections plus shared crypt/checksum loops",
   });
 }
 
