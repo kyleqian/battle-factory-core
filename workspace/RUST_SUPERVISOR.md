@@ -24,7 +24,7 @@ canonical and this lane must never make the TS side worse.
 
 1. **Do not edit** `src/`, `tests/`, `tools/` (TS engine, suite, tooling)
    except for the engine-adapter work in M2 below, and then only in files
-   this lane creates (adapter modules, config). The #55 main lane and the
+   this lane creates (adapter modules, config). The #55 ts lane and the
    animation lane own their territories and will keep folding to master.
 2. `npm test` (full suite), `npm run build`, and the wind-down soak gates
    in `SUPERVISOR.md` must stay green after every fold this lane makes —

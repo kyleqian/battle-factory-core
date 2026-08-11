@@ -55,12 +55,15 @@ Usage: ./run-supervisor.sh [options]
       (no options)      interactive supervisor session, hard-capped at 6h
   -c, --cap-hours N     hard cap in hours (default 6)
       --headless        unattended run (stream view, like run-agent.sh)
-  -l, --lane NAME       main (default), animation, or rust. The animation and
-                        rust lanes run their separate program supervisors
-                        (ANIMATION_SUPERVISOR.md / RUST_SUPERVISOR.md) inside
-                        a persistent .worktrees/<lane>-main worktree on the
-                        single-writer branch <lane>-main; all supervisors may
-                        run concurrently.
+  -l, --lane NAME       ts (default), animation, or rust ("main" is accepted
+                        as a legacy alias for ts). The ts lane is the main
+                        TypeScript program supervisor in the shared tree. The
+                        animation and rust lanes run their separate program
+                        supervisors (ANIMATION_SUPERVISOR.md /
+                        RUST_SUPERVISOR.md) inside a persistent
+                        .worktrees/<lane>-main worktree on the single-writer
+                        branch <lane>-main; all supervisors may run
+                        concurrently.
   -S, --supervisor NAME claude (default), codex, or a Claude model alias
                         (opus, sonnet, fable, haiku) that selects Claude and
                         that exact model in one step. DeepSeek cannot
@@ -86,7 +89,7 @@ Usage: ./run-supervisor.sh [options]
 Environment overrides: SUPERVISOR_AGENT, SUB_AGENT, SUPERVISOR_MODEL,
 SUPERVISOR_REASONING_EFFORT, SUPERVISOR_MAX_MODE, OPENCODE_BIN. Legacy MODEL
 remains supported.
-Exit 6 means the lane's deferred file (DEFERRED.md for main,
+Exit 6 means the lane's deferred file (DEFERRED.md for ts,
 ANIMATION_DEFERRED.md for animation, RUST_DEFERRED.md for rust) has an
 unresolved question that must be resolved before another supervisor session
 can start in that lane.
@@ -95,7 +98,7 @@ EOF
 
 HEADLESS="${HEADLESS:-0}"
 CAP_HOURS="${CAP_HOURS:-6}"
-LANE="${SUPERVISOR_LANE:-main}"
+LANE="${SUPERVISOR_LANE:-ts}"
 PROVIDER="${SUPERVISOR_AGENT:-claude}"
 MODEL="${SUPERVISOR_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${SUPERVISOR_REASONING_EFFORT:-}"
@@ -115,7 +118,7 @@ while [[ $# -gt 0 ]]; do
     --headless)       HEADLESS=1; shift ;;
     -c|--cap-hours)   CAP_HOURS="${2:?--cap-hours needs a number}"; shift 2 ;;
     --cap-hours=*)    CAP_HOURS="${1#*=}"; shift ;;
-    -l|--lane)        LANE="${2:?--lane needs main, animation, or rust}"; shift 2 ;;
+    -l|--lane)        LANE="${2:?--lane needs ts, animation, or rust}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
     -S|--supervisor)  PROVIDER="${2:?--supervisor needs a name}"; SUPERVISOR_SELECTION_SET=1; shift 2 ;;
     --supervisor=*)   PROVIDER="${1#*=}"; SUPERVISOR_SELECTION_SET=1; shift ;;
@@ -216,8 +219,11 @@ if [[ ! "$WORKER_PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
   echo "run-supervisor: unsupported sub-agent '$WORKER_PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
-if [[ ! "$LANE" =~ ^(main|animation|rust)$ ]]; then
-  echo "run-supervisor: unsupported lane '$LANE' (expected main, animation, or rust)" >&2
+# "main" survives as a legacy alias from before the Rust lane existed, when
+# the TypeScript program supervisor was the unqualified "main" lane.
+[[ "$LANE" == "main" ]] && LANE="ts"
+if [[ ! "$LANE" =~ ^(ts|animation|rust)$ ]]; then
+  echo "run-supervisor: unsupported lane '$LANE' (expected ts, animation, or rust)" >&2
   exit 2
 fi
 
@@ -226,7 +232,7 @@ fi
 # only the main tree can commit to master). Bootstrap it if missing, then run
 # from it — everything after this cd (tools, docs, worker launches)
 # self-scopes there.
-if [[ "$LANE" != "main" && "$PRINT_CONFIG" != "1" \
+if [[ "$LANE" != "ts" && "$PRINT_CONFIG" != "1" \
       && "$(git rev-parse --abbrev-ref HEAD)" != "${LANE}-main" ]]; then
   LANE_WT="$(pwd)/.worktrees/${LANE}-main"
   if [[ ! -d "$LANE_WT" ]]; then
@@ -291,8 +297,8 @@ esac
 # Claude Code normally carries `cd` changes across Bash tool calls. Supervisors
 # deliberately enter disposable worker worktrees while verifying them, so make
 # every later Bash call start from this supervisor's launch directory again.
-# For the animation lane that launch directory is animation-main; for the main
-# lane it is this run root.
+# For the animation/rust lanes that launch directory is the lane worktree; for
+# the ts lane it is this workspace root.
 SUPERVISOR_SHELL_CWD_POLICY=per-command
 if [[ "$PROVIDER" == "claude" ]]; then
   export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1
@@ -422,7 +428,7 @@ ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
 # is safe. The animation supervisor never needs the OFF profile; the rust
 # supervisor never needs the ON profile (its differential targets are the
 # OFF-path fixtures).
-if [[ "$LANE" == "main" || "$LANE" == "rust" ]]; then
+if [[ "$LANE" == "ts" || "$LANE" == "rust" ]]; then
   pokebench_ensure_oracle_profile \
     "$HARNESS_ROOT" battle-scene-off "$MAIN_ORACLE_URL" \
     /tmp/emerald-factory-oracle-off.log
@@ -482,7 +488,7 @@ elif [[ "$LANE" == "animation" ]]; then
   DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE}"
   PROMPT="You are the ANIMATION supervisor for this run. Read ANIMATION_SUPERVISOR.md, AGENTS.md, and ANIMATION_PROGRESS.md before dispatching anything. You are in the persistent animation-main worktree and you are that branch's only writer: begin by merging master in (git merge --no-edit master), rerun npm test and npm run build as your baseline, then drive one bounded animation coverage step at a time via ./tools/run-subagent.sh --lane animation from this tree — one worker at a time, animation lane only, verify each result yourself, merge each verified worker branch into animation-main from this tree, and never write master or the main program's docs (PROGRESS.md/ISSUES.md/ROADMAP.md/DEFERRED.md). Your ledger is ANIMATION_PROGRESS.md; your deferral file is ANIMATION_DEFERRED.md. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it with animation-main committed and green so the main supervisor's fold stays boring. ${CONTINUITY_NOTE}"
 else
-  DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE} The launcher offers main and side-worktree lanes; use parallel lanes when their ownership is genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) and the Rust rewrite belongs to the separate rust supervisor (RUST_SUPERVISOR.md) — never brief or launch animation- or rust-lane workers from this session."
+  DELEGATION_NOTE="${WORKER_ROUTING_NOTE} ${WORKER_LAUNCH_NOTE} The launcher offers the shared-tree ts lane and side-worktree lanes; use parallel lanes when their ownership is genuinely disjoint. The animation program belongs to the separate animation supervisor (ANIMATION_SUPERVISOR.md) and the Rust rewrite belongs to the separate rust supervisor (RUST_SUPERVISOR.md) — never brief or launch animation- or rust-lane workers from this session."
   PROMPT="You are the supervisor for this run. Read SUPERVISOR.md, AGENTS.md, and the authoritative reset at the top of ROADMAP S8 before dispatching anything. The old canonical Battle-2 turn march is stopped: drive the generic seven-battle round controller and presentation seam against the Battle Scene OFF oracle. During your orient step, if branch animation-main or rust-main has commits master lacks (git log --oneline master..animation-main; git log --oneline master..rust-main), fold each: merge the lane branch into master from the main tree, rerun npm test and npm run build on the union (plus cargo test per core-rs/README.md when rust-main is folded), and record the fold in your PROGRESS.md entry. Delegate bounded steps via ./tools/run-subagent.sh, verify each result yourself, and continue, fix, or defer a genuinely unresolved decision without interrupting the session. ${DELEGATION_NOTE} Hard deadline for this whole session: ${DEADLINE_HUMAN} (epoch ${DEADLINE_EPOCH}); wind down cleanly before it. ${CONTINUITY_NOTE}"
 fi
 

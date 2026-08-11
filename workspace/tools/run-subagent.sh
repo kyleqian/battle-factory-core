@@ -27,7 +27,7 @@
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
-#         --lane NAME       main, side, animation, or rust
+#         --lane NAME       ts, side, animation, or rust
 #         --log FILE        agent event log path
 #         --brief-file FILE read the step brief verbatim from a file
 #         --read-only       audit only; require a clean tree but no commit
@@ -82,7 +82,8 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -w, --worktree        alias for --lane side (also --side-worktree)
       --animation-worktree
                         alias for --lane animation
-  -l, --lane NAME       main, side, animation, or rust. Non-main lanes use
+  -l, --lane NAME       ts, side, animation, or rust ("main" is a legacy
+                        alias for ts, the shared tree). Non-ts lanes use
                         fresh worktrees and must not touch shared docs. A
                         trailing "-worktree"/"-lane" is accepted and stripped.
       --base REF        base the non-main worktree on REF instead of
@@ -103,7 +104,7 @@ direct worker launches; supervisors pass their selection internally.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
 Exit 4 means the requested lane already has a live worker (max 4 concurrent:
-one each in main, side, animation, and rust).
+one each in ts, side, animation, and rust).
 Exit 5 means a Codex worker violated its postflight contract (clean and
 committed for implementation work; clean and uncommitted for read-only work).
 EOF
@@ -115,7 +116,7 @@ MODEL="${WORKER_MODEL:-${MODEL:-}}"
 REASONING_EFFORT="${WORKER_REASONING_EFFORT:-}"
 MAX_MODE="${POKEBENCH_CODEX_MAX_MODE:-0}"
 AGENT_LOG="${AGENT_LOG:-}"
-LANE="${WORKER_LANE:-main}"
+LANE="${WORKER_LANE:-ts}"
 if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
 BRIEF=""
 BRIEF_OPT=""
@@ -135,7 +136,7 @@ while [[ $# -gt 0 ]]; do
     --cap-minutes=*)  CAP_MINUTES="${1#*=}"; shift ;;
     -w|--worktree|--side-worktree|--side-lane) LANE="side"; shift ;;
     --animation-worktree|--animation-lane) LANE="animation"; shift ;;
-    -l|--lane)        LANE="${2:?--lane needs main, side, or animation}"; shift 2 ;;
+    -l|--lane)        LANE="${2:?--lane needs ts, side, animation, or rust}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
     --base)           WT_BASE_REF="${2:?--base needs a git ref}"; shift 2 ;;
     --base=*)         WT_BASE_REF="${1#*=}"; shift ;;
@@ -230,6 +231,8 @@ fi
 # supervisor briefs use in prose.
 LANE="${LANE%-worktree}"
 LANE="${LANE%-lane}"
+# "main" survives as a legacy alias from before the Rust lane existed.
+[[ "$LANE" == "main" ]] && LANE="ts"
 if [[ -n "$BRIEF_FILE" ]]; then
   if [[ ! -r "$BRIEF_FILE" ]]; then
     echo "run-subagent: cannot read brief file '$BRIEF_FILE'" >&2
@@ -249,12 +252,12 @@ if [[ ! "$PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
   echo "run-subagent: unsupported sub-agent '$PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
-if [[ ! "$LANE" =~ ^(main|side|animation|rust)$ ]]; then
-  echo "run-subagent: unsupported lane '$LANE' (expected main, side, animation, or rust)" >&2
+if [[ ! "$LANE" =~ ^(ts|side|animation|rust)$ ]]; then
+  echo "run-subagent: unsupported lane '$LANE' (expected ts, side, animation, or rust)" >&2
   exit 2
 fi
-if [[ -n "$WT_BASE_REF" && "$LANE" == "main" ]]; then
-  echo "run-subagent: --base only applies to worktree lanes (side/animation/rust); the main lane runs in the shared tree at HEAD" >&2
+if [[ -n "$WT_BASE_REF" && "$LANE" == "ts" ]]; then
+  echo "run-subagent: --base only applies to worktree lanes (side/animation/rust); the ts lane runs in the shared tree at HEAD" >&2
   exit 2
 fi
 case "$PROVIDER" in
@@ -397,7 +400,7 @@ WT_PATH=""
 WT_BRANCH=""
 WT_BASE=""
 IS_WORKTREE=0
-if [[ "$LANE" != "main" ]]; then IS_WORKTREE=1; fi
+if [[ "$LANE" != "ts" ]]; then IS_WORKTREE=1; fi
 CODEX_ACCEPTANCE_GUARDRAILS=""
 if [[ "$PROVIDER" == "codex" ]]; then
   CODEX_ACCEPTANCE_GUARDRAILS="
