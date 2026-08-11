@@ -588,6 +588,11 @@ import {
   type DoubleKickState,
 } from "./doubleKick.ts";
 import {
+  tripleKickAtAge,
+  type TripleKickMoveTurn,
+  type TripleKickState,
+} from "./tripleKick.ts";
+import {
   crabHammerAtAge,
   type CrabHammerState,
 } from "./crabHammer.ts";
@@ -2489,6 +2494,15 @@ export interface SceneOnDoubleKickConfig {
   readonly fistRandom: DoubleKickRandomWords;
 }
 
+/** The controller supplies the hit index; this seam owns only its selected visual branch. */
+export interface SceneOnTripleKickConfig {
+  readonly move: "TRIPLE_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTurn: TripleKickMoveTurn;
+}
+
 /** Typed staging seam only; a later draw case supplies the live target idle x2. */
 export interface SceneOnCrabHammerConfig {
   readonly move: "CRABHAMMER";
@@ -2705,6 +2719,7 @@ export type SceneOnMoveConfig =
   | SceneOnCounterConfig
   | SceneOnThrashConfig
   | SceneOnDoubleKickConfig
+  | SceneOnTripleKickConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
@@ -3404,6 +3419,12 @@ export interface SceneOnDoubleKickView extends DoubleKickState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnTripleKickView extends TripleKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnCrabHammerView extends CrabHammerState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4073,6 +4094,7 @@ export function createSceneOnMovePresentation<
   | SceneOnCounterConfig
   | SceneOnThrashConfig
   | SceneOnDoubleKickConfig
+  | SceneOnTripleKickConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
@@ -6904,6 +6926,23 @@ export function sceneOnDoubleKickView(
       targetCenter: state.config.target.geometry.animationCenter,
       targetDimensions: state.config.targetDimensions,
       fistRandom: state.config.fistRandom,
+    }),
+  };
+}
+
+export function sceneOnTripleKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnTripleKickView {
+  if (state.config.move !== "TRIPLE_KICK") {
+    throw new Error(`expected TRIPLE_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...tripleKickAtAge(state.age, state.config.moveTurn, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
     }),
   };
 }

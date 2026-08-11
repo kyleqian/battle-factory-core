@@ -1,3 +1,11 @@
+# MOVE_TRIPLE_KICK bilateral three-branch evidence checkpoint — remains unsupported (2026-08-11 worker)
+
+- **State:** Coverage remains **166/276 Level-50 exact**, 0 partial, 0 staged, and **110 unsupported**. `MOVE_TRIPLE_KICK` is not promoted: all six complete branch windows reproduce twice fresh and the pure reducer/typed seam/compositor are implemented, but production-framebuffer and normalized change-map equality have not yet passed a portable all-frame gate.
+- **Did:** Pinned the complete exclusive `Move_TRIPLE_KICK` interval **0x082d2293..0x082d235a** (`0xc7` bytes), all `jumpifmoveturn` routes and the full wide-foot/basic-hitsplat/ShakeMon/assets graph, plus sole/lowest Level-50 carrier set 236 `FRONTIER_MON_HITMONTOP_1`. Added complete legal challenge-1 bilateral parties, a pointer-bounded probe, pure 37-age branch reducer, narrow typed Scene-ON seam, and presentation-only HITMONTOP/ONIX compositor. The controller—not the port—supplies moveTurn 0/1/2.
+- **Verified:** Twice fresh, player-back moveTurns 0/1/2 capture **37/37** frames at **225..261 / 354..390 / 483..519**, evidence `278548e0…`, raw RGB `9d0c6cec…`; opponent-front captures **37/37** at **226..262 / 436..472 / 565..601**, evidence `1d08579d…`, raw RGB `56de0099…`. Focused source/reducer/evidence/boundary tests and typecheck pass.
+- **Next:** Add the portable per-frame reducer/seam/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map/production-framebuffer verifier; resolve any framebuffer differences, rerun Double Kick and Counter controls, and promote only if all **222/222** bilateral branch frames pass twice fresh.
+- **Notes:** Exact unresolved gate is specifically the portable production framebuffer plus normalized change maps, not branch reproducibility. No hit count, accuracy, damage/rising power, RNG, turn order, controller, round/facility state, coverage, boundary, unsupported barrier, canonical import, absolute tick, or framebuffer lookup changed.
+
 # MOVE_DOUBLE_KICK exact — bilateral 36/36 source-body promotion (2026-08-11 worker)
 
 - **State:** Level-50 coverage advances **165→166/276 exact**, 0 partial, 0 staged, and **111→110 unsupported**. Only `MOVE_DOUBLE_KICK` moved; no animation-boundary or unsupported-barrier widening.

@@ -1,0 +1,27 @@
+{
+  "schema": "triple-kick-branch-receipts/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "TRIPLE_KICK",
+  "status": "checkpoint",
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-triple-kick-player-hitmontop-opponent-onix.json",
+      "evidenceSha256": "278548e0113af5acc7ca3832a8e2b465c5f831b271d65939d8bc1732ff90bdba",
+      "secondFreshEvidenceSha256": "278548e0113af5acc7ca3832a8e2b465c5f831b271d65939d8bc1732ff90bdba",
+      "rawRgbSha256": "9d0c6cec77bb7ebd4dcec9178b470ffcc81941bdd6488356f20d55921ac483ef",
+      "branchRawRgbSha256": ["fd15011562f0c7ad8308605d9c20f5dd2ac80746aa07fbe761f3caac90d9d3d3", "68f76340facc873b6ae0f09ccd2f5f9bf95bc649968679626707d5cd087fb265", "885f00290a5e7ef91976556003e5a52991abf6e27a754f4698e1a19ef50d98f5"],
+      "windows": [{"moveTurn":0,"startFrame":225,"endFrame":261,"frameCount":37,"playerHp":151,"opponentHp":142,"targetIdleX2":1},{"moveTurn":1,"startFrame":354,"endFrame":390,"frameCount":37,"playerHp":151,"opponentHp":130,"targetIdleX2":0},{"moveTurn":2,"startFrame":483,"endFrame":519,"frameCount":37,"playerHp":151,"opponentHp":108,"targetIdleX2":0}]
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+      "evidenceSha256": "1d08579da8c8e7cfe099e05a1b08c39ebccc352e94f7430d48141e775145f21f",
+      "secondFreshEvidenceSha256": "1d08579da8c8e7cfe099e05a1b08c39ebccc352e94f7430d48141e775145f21f",
+      "rawRgbSha256": "56de00998f7f82735a3e33a0f804c29d38228bfb0480cef51390a407afd2c10d",
+      "branchRawRgbSha256": ["42096d0351f350fefce7e6393ace934dff6c234f14bfa8d701085cf5edb04fa4", "ed7e587b36c42d996686776ba9ea23fbbe13a41ae08fa2396e382b42d4e685d5", "8ef6536a9a1a02cb323107c4416ca14407fbf160f45d5025f55491ed9e87f925"],
+      "windows": [{"moveTurn":0,"startFrame":226,"endFrame":262,"frameCount":37,"playerHp":142,"opponentHp":150,"targetIdleX2":0},{"moveTurn":1,"startFrame":436,"endFrame":472,"frameCount":37,"playerHp":116,"opponentHp":150,"targetIdleX2":0},{"moveTurn":2,"startFrame":565,"endFrame":601,"frameCount":37,"playerHp":93,"opponentHp":150,"targetIdleX2":0}]
+    }
+  ],
+  "unresolved": "production framebuffer equality and normalized change-map gates have not yet been run; no coverage promotion"
+}

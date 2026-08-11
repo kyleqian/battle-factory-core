@@ -1014,6 +1014,7 @@ import {
   sceneOnLickView,
   sceneOnCounterView,
   sceneOnDoubleKickView,
+  sceneOnTripleKickView,
   sceneOnThrashView,
   sceneOnThrashDisplayedTargetOffset,
   sceneOnCrabHammerView,
@@ -39519,6 +39520,107 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
       "COUNTER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "TRIPLE_KICK") {
+    const view = sceneOnTripleKickView(state);
+    const displayed = sceneOnTripleKickView({ ...state, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "HITMONTOP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "HITMONTOP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged TRIPLE_KICK pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // Triple Kick's own bilateral maps select RAM+1 for both the plain
+    // wide-foot/hitsplat OAM and AnimTask_ShakeMon. Each real controller
+    // invocation supplies moveTurn; this draw case only renders that branch.
+    const targetX2 = state.age - 1 < 10 ? targetIdle.x2 : displayed.targetX2;
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const effectBackdrop = fb.slice();
+    drawSpriteSheet(
+      fb,
+      hitmontop.tileset,
+      hitmontop.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (displayed.hitsplat) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        effectBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.x,
+        displayed.hitsplat.y,
+        displayed.hitsplat.matrix,
+        0,
+        0,
+        displayed.hitsplat.matrix,
+        12,
+        8,
+        false,
+      );
+    }
+    if (displayed.foot) {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+        battleAnimHandsAndFeet.palette,
+        displayed.foot.x - 16,
+        displayed.foot.y - 16,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HITMONTOP",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HITMONTOP" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HITMONTOP used" : "Foe HITMONTOP used",
+      "TRIPLE KICK!",
       99,
     );
     return;

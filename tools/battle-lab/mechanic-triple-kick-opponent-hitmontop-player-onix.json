@@ -3,11 +3,11 @@
   "mode": "mechanicLab",
   "profile": "battle-scene-on",
   "level": 50,
-  "challengeNum": 0,
+  "challengeNum": 1,
   "battleNum": 0,
-  "trainerId": 50,
-  "playerSetIds": [156, 149, 180],
-  "opponentSetIds": [236, 184, 135],
+  "trainerId": 100,
+  "playerSetIds": [184, 188, 191],
+  "opponentSetIds": [236, 180, 190],
   "seed": 41,
   "overrides": {
     "parties": {
