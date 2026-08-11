@@ -70,10 +70,10 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
     expect(effects2).toContain(".callback = AnimEyeSparkle");
   });
 
-  it("keeps GLARE exact after the Night Shade promotion at 154/154", () => {
-    expect(coverage.entries).toHaveLength(162);
+  it("keeps GLARE exact after the Sleep Powder promotion at 154/154", () => {
+    expect(coverage.entries).toHaveLength(170);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(114);
+    expect(276 - coverage.entries.length).toBe(106);
   });
 });

@@ -8,6 +8,7 @@ import {
   type FirePunchResolutionProfile,
   type FirePunchResolutionState,
 } from "./firePunch.ts";
+import { swordsDanceAtAge, type SwordsDanceState } from "./swordsDance.ts";
 import {
   biteEffectAtAge,
   type BiteEffect,
@@ -577,6 +578,32 @@ import {
   type CounterState,
 } from "./counter.ts";
 import {
+  thrashAtAge,
+  thrashDisplayedTargetOffsetAtAge,
+  type ThrashRandomWords,
+  type ThrashState,
+} from "./thrash.ts";
+import {
+  doubleKickAtAge,
+  type DoubleKickRandomWords,
+  type DoubleKickState,
+} from "./doubleKick.ts";
+import {
+  tripleKickAtAge,
+  type TripleKickMoveTurn,
+  type TripleKickState,
+} from "./tripleKick.ts";
+import {
+  doubleSlapAtAge,
+  type DoubleSlapMoveTurn,
+  type DoubleSlapState,
+} from "./doubleSlap.ts";
+import {
+  cometPunchAtAge,
+  type CometPunchMoveTurn,
+  type CometPunchState,
+} from "./cometPunch.ts";
+import {
   crabHammerAtAge,
   type CrabHammerState,
 } from "./crabHammer.ts";
@@ -742,6 +769,14 @@ import {
   type CottonSporeState,
 } from "./cottonSpore.ts";
 import {
+  stunSporeAtAge,
+  type StunSporeState,
+} from "./stunSpore.ts";
+import {
+  sleepPowderAtAge,
+  type SleepPowderState,
+} from "./sleepPowder.ts";
+import {
   hypnosisDisplayedRingsAtAge,
   hypnosisAtAge,
   type HypnosisRing,
@@ -821,6 +856,7 @@ export interface SceneOnPresentationBattler {
     | "WAILMER"
     | "POLITOED"
     | "POLIWRATH"
+    | "POLIWHIRL"
     | "EXEGGCUTE"
     | "CORSOLA"
     | "GLOOM"
@@ -846,7 +882,9 @@ export interface SceneOnPresentationBattler {
     | "GLALIE"
     | "HITMONCHAN"
     | "HITMONTOP"
+    | "NIDORINA"
     | "SPINDA"
+    | "TAUROS"
     | "LINOONE"
     | "DELCATTY"
     | "VIGOROTH"
@@ -867,6 +905,7 @@ export interface SceneOnPresentationBattler {
     | "PARASECT"
     | "PONYTA"
     | "CHARMANDER"
+    | "LEDIAN"
     | "LEDYBA"
     | "WURMPLE"
     | "AIPOM"
@@ -878,7 +917,8 @@ export interface SceneOnPresentationBattler {
      | "ROSELIA"
      | "YANMA"
      | "SWABLU"
-     | "FEAROW";
+    | "FEAROW"
+    | "HOPPIP";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -2098,6 +2138,20 @@ export interface SceneOnCottonSporeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnStunSporeConfig {
+  readonly move: "STUN_SPORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSleepPowderConfig {
+  readonly move: "SLEEP_POWDER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnHypnosisConfig {
   readonly move: "HYPNOSIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -2165,6 +2219,13 @@ export interface SceneOnTailWhipConfig {
 
 export interface SceneOnAgilityConfig {
   readonly move: "AGILITY";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+export interface SceneOnSwordsDanceConfig {
+  readonly move: "SWORDS_DANCE";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
@@ -2426,6 +2487,60 @@ export interface SceneOnCounterConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/**
+ * Narrow Scene-ON seam for the complete source-derived Thrash body.  The
+ * callback's three four-word `Random2()` groups are immutable staging input;
+ * this presentation layer neither derives nor advances battle RNG.
+ */
+export interface SceneOnThrashConfig {
+  readonly move: "THRASH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly fistRandom: readonly [
+    ThrashRandomWords,
+    ThrashRandomWords,
+    ThrashRandomWords,
+  ];
+}
+
+/** Narrow Scene-ON seam for Double Kick's presentation-only script body. */
+export interface SceneOnDoubleKickConfig {
+  readonly move: "DOUBLE_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly targetDimensions: Readonly<{ width: number; height: number }>;
+  readonly fistRandom: DoubleKickRandomWords;
+}
+
+/** The controller supplies the hit index; this seam owns only its selected visual branch. */
+export interface SceneOnTripleKickConfig {
+  readonly move: "TRIPLE_KICK";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTurn: TripleKickMoveTurn;
+}
+
+/** The real multi-hit controller supplies moveTurn; this seam only selects its visual branch. */
+export interface SceneOnDoubleSlapConfig {
+  readonly move: "DOUBLE_SLAP";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTurn: DoubleSlapMoveTurn;
+}
+
+/** The real multi-hit controller supplies moveTurn; this seam only selects its visual branch. */
+export interface SceneOnCometPunchConfig {
+  readonly move: "COMET_PUNCH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly moveTurn: CometPunchMoveTurn;
+}
+
 /** Typed staging seam only; a later draw case supplies the live target idle x2. */
 export interface SceneOnCrabHammerConfig {
   readonly move: "CRABHAMMER";
@@ -2611,6 +2726,8 @@ export type SceneOnMoveConfig =
   | SceneOnAttractConfig
   | SceneOnSporeConfig
   | SceneOnCottonSporeConfig
+  | SceneOnStunSporeConfig
+  | SceneOnSleepPowderConfig
   | SceneOnHypnosisConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
@@ -2620,6 +2737,7 @@ export type SceneOnMoveConfig =
   | SceneOnTailGlowConfig
   | SceneOnTailWhipConfig
   | SceneOnAgilityConfig
+  | SceneOnSwordsDanceConfig
   | SceneOnSelfDestructConfig
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
@@ -2638,6 +2756,11 @@ export type SceneOnMoveConfig =
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnThrashConfig
+  | SceneOnDoubleKickConfig
+  | SceneOnTripleKickConfig
+  | SceneOnDoubleSlapConfig
+  | SceneOnCometPunchConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
@@ -2760,6 +2883,10 @@ export type SceneOnSporePresentationState =
   SceneOnMovePresentationState<SceneOnSporeConfig>;
 export type SceneOnCottonSporePresentationState =
   SceneOnMovePresentationState<SceneOnCottonSporeConfig>;
+export type SceneOnStunSporePresentationState =
+  SceneOnMovePresentationState<SceneOnStunSporeConfig>;
+export type SceneOnSleepPowderPresentationState =
+  SceneOnMovePresentationState<SceneOnSleepPowderConfig>;
 export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
@@ -3316,6 +3443,36 @@ export interface SceneOnLickView extends LickState {
 }
 
 export interface SceneOnCounterView extends CounterState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnThrashView extends ThrashState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDoubleKickView extends DoubleKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnTripleKickView extends TripleKickState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDoubleSlapView extends DoubleSlapState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnCometPunchView extends CometPunchState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -3988,6 +4145,11 @@ export function createSceneOnMovePresentation<
   | SceneOnSlashConfig
   | SceneOnLickConfig
   | SceneOnCounterConfig
+  | SceneOnThrashConfig
+  | SceneOnDoubleKickConfig
+  | SceneOnTripleKickConfig
+  | SceneOnDoubleSlapConfig
+  | SceneOnCometPunchConfig
   | SceneOnCrabHammerConfig
   | SceneOnDoubleEdgeConfig
   | SceneOnWrapConfig,
@@ -6229,6 +6391,58 @@ export function sceneOnCottonSporeView(
   };
 }
 
+export interface SceneOnStunSporeView extends StunSporeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_STUN_SPORE's first active source-script frame. */
+export function sceneOnStunSporeView(
+  state: SceneOnStunSporePresentationState,
+): SceneOnStunSporeView {
+  if (state.config.move !== "STUN_SPORE") {
+    throw new Error(
+      `expected STUN_SPORE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...stunSporeAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnSleepPowderView extends SleepPowderState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_SLEEP_POWDER's first active source-script frame. */
+export function sceneOnSleepPowderView(
+  state: SceneOnSleepPowderPresentationState,
+): SceneOnSleepPowderView {
+  if (state.config.move !== "SLEEP_POWDER") {
+    throw new Error(`expected SLEEP_POWDER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...sleepPowderAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
 export interface SceneOnHypnosisView extends HypnosisState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -6402,6 +6616,27 @@ export function sceneOnAgilityView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...agilityAnimationAtAge(state.age, state.config.attacker.geometry.side),
+  };
+}
+
+export interface SceneOnSwordsDanceView extends SwordsDanceState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_SWORDS_DANCE's first active source pointer frame. */
+export function sceneOnSwordsDanceView(
+  state: SceneOnMovePresentationState,
+): SceneOnSwordsDanceView {
+  if (state.config.move !== "SWORDS_DANCE") {
+    throw new Error(`expected SWORDS_DANCE presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...swordsDanceAtAge(state.age, state.config.attacker.geometry.side, state.config.attacker.geometry.battlePositionCenter),
   };
 }
 
@@ -6728,6 +6963,116 @@ export function sceneOnCounterView(
       targetCenter: target.geometry.animationCenter,
     }),
   };
+}
+
+export function sceneOnThrashView(
+  state: SceneOnMovePresentationState,
+): SceneOnThrashView {
+  if (state.config.move !== "THRASH") {
+    throw new Error(`expected THRASH presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...thrashAtAge(state.age, {
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+      targetDimensions: { width: 56, height: 64 },
+      fistRandom: state.config.fistRandom,
+    }),
+  };
+}
+
+export function sceneOnDoubleKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnDoubleKickView {
+  if (state.config.move !== "DOUBLE_KICK") {
+    throw new Error(`expected DOUBLE_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...doubleKickAtAge(state.age, {
+      targetSide: state.config.target.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
+      targetDimensions: state.config.targetDimensions,
+      fistRandom: state.config.fistRandom,
+    }),
+  };
+}
+
+export function sceneOnTripleKickView(
+  state: SceneOnMovePresentationState,
+): SceneOnTripleKickView {
+  if (state.config.move !== "TRIPLE_KICK") {
+    throw new Error(`expected TRIPLE_KICK presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...tripleKickAtAge(state.age, state.config.moveTurn, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnDoubleSlapView(
+  state: SceneOnMovePresentationState,
+): SceneOnDoubleSlapView {
+  if (state.config.move !== "DOUBLE_SLAP") {
+    throw new Error(`expected DOUBLE_SLAP presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...doubleSlapAtAge(state.age, state.config.moveTurn, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnCometPunchView(
+  state: SceneOnMovePresentationState,
+): SceneOnCometPunchView {
+  if (state.config.move !== "COMET_PUNCH") {
+    throw new Error(`expected COMET_PUNCH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...cometPunchAtAge(state.age, state.config.moveTurn, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+/** Typed framebuffer seam for Thrash's independently measured ShakeMon latch. */
+export function sceneOnThrashDisplayedTargetOffset(
+  state: SceneOnMovePresentationState,
+): Readonly<{ x2: number; y2: number }> {
+  if (state.config.move !== "THRASH") {
+    throw new Error(`expected THRASH presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return thrashDisplayedTargetOffsetAtAge(state.age, {
+    attackerSide: attacker.geometry.side,
+    targetSide: target.geometry.side,
+    targetCenter: target.geometry.animationCenter,
+    targetDimensions: { width: 56, height: 64 },
+    fistRandom: state.config.fistRandom,
+  });
 }
 
 export function sceneOnCrabHammerView(

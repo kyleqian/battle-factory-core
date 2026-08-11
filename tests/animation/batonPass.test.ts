@@ -72,8 +72,8 @@ describe("MOVE_BATON_PASS source-relative presentation", () => {
     expect(aipom).toMatchObject({ level: 50, nature: 7, item: 217, moves: [226, 226, 226, 226], ppUps: [0, 0, 0, 0] });
   });
 
-  it("keeps Baton Pass exact after the Night Shade promotion", () => {
-    expect(coverage.entries).toHaveLength(162);
+  it("keeps Baton Pass exact after the Sleep Powder promotion", () => {
+    expect(coverage.entries).toHaveLength(170);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_BATON_PASS"))
       .toMatchObject([{ status: "exact" }]);
   });

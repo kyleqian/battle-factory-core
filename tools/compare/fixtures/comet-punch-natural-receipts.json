@@ -1,0 +1,156 @@
+{
+  "schema": "comet-punch-natural-receipts/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "COMET_PUNCH",
+  "status": "exact",
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-comet-punch-player-ledian-opponent-onix.json",
+      "evidenceSha256": "81cb1f713e5c8c10198901cc360d6aa46012b6d4d9ce85f618eda3ded501a144",
+      "secondFreshEvidenceSha256": "81cb1f713e5c8c10198901cc360d6aa46012b6d4d9ce85f618eda3ded501a144",
+      "rawRgbSha256": "9009ef6bd504460f97516b03ec0f3d7bfa91aa7aa4a98ece3fd3b393dbb6f6d3",
+      "branchRawRgbSha256": [
+        "2a6b3894855c6761b2e77b750d5976184b1900e165ae76eafcd0851e4c41106c",
+        "e17d3f7efd69e020ebe46a6599f2c997b9ffe38eee86fc5fda748b46cdf77de0",
+        "80311b92d0f56f69bf3048e1ddcbf5c430bb683dfd18ef15c250236e5dd07597",
+        "95907130e8a5cd9355d52e20559a310de6ef4189321693ff51752f737de042b5"
+      ],
+      "windows": [
+        {
+          "invocation": 0,
+          "moveTurn": 0,
+          "startFrame": 84,
+          "endFrame": 120,
+          "frameCount": 37,
+          "playerHp": 162,
+          "opponentHp": 142,
+          "targetIdleX2": 1,
+          "changeMap": "tools/compare/evidence/comet-punch-player-hit-0.txt",
+          "changeMapSha256": "69e9e2b0d11cc41e1966f6d54fad8f172e2ef467cc6c5d817356853c2f2cb3c9",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        },
+        {
+          "invocation": 1,
+          "moveTurn": 1,
+          "startFrame": 188,
+          "endFrame": 224,
+          "frameCount": 37,
+          "playerHp": 162,
+          "opponentHp": 141,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-player-hit-1.txt",
+          "changeMapSha256": "cddfc7e5060baf20118b66767f16388647073af0a2619d0d81ded795106b6296",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        },
+        {
+          "invocation": 2,
+          "moveTurn": 2,
+          "startFrame": 373,
+          "endFrame": 409,
+          "frameCount": 37,
+          "playerHp": 162,
+          "opponentHp": 138,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-player-hit-2.txt",
+          "changeMapSha256": "ed32b7c627e04993a678d88069133cd5dd444a1a321b4ef384562f51b2d7ff8d",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        },
+        {
+          "invocation": 3,
+          "moveTurn": 3,
+          "startFrame": 477,
+          "endFrame": 513,
+          "frameCount": 37,
+          "playerHp": 162,
+          "opponentHp": 137,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-player-hit-3.txt",
+          "changeMapSha256": "78f217c6ea3ab1c15ebc949bdd8d62465b71f1bcba8dcbf52ee6846c9075b611",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        }
+      ]
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+      "evidenceSha256": "8f0c8285c3438dd5960ea2de22d4fe8b875aec1a491d678f46f022289b1c47bd",
+      "secondFreshEvidenceSha256": "8f0c8285c3438dd5960ea2de22d4fe8b875aec1a491d678f46f022289b1c47bd",
+      "rawRgbSha256": "de648f4b0021eebc3d10dc7b589861b20413889cbe084b333d9bd8d2131ff6ef",
+      "branchRawRgbSha256": [
+        "0ac52bb0bfa7208de82a1585467c5a97fa8a1eddc6a93ec5906b60938cade78b",
+        "4b9e857adc8c830f4d9170fe0354bb6e3ace1cb1261cdac31f0e131bc952e477",
+        "2e326c3f705aff2642191521461a9c00f6395a9f22cfc80775c295396e4f5e00",
+        "b0ed7f3097bd216a5d1bd5aa4b9096d3404be05aa01e15d7a1795f02080adc45",
+        "fcfd26e9e88b1b00d2c87eaae19bcc0b07b73a59f3a92743ec10cd35a55b788e"
+      ],
+      "windows": [
+        {
+          "invocation": 0,
+          "moveTurn": 0,
+          "startFrame": 88,
+          "endFrame": 124,
+          "frameCount": 37,
+          "playerHp": 142,
+          "opponentHp": 162,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-opponent-hit-0.txt",
+          "changeMapSha256": "ec36957a546b9989cf4634a76a8702ce41c27a1cbf421c0c8aae947fe4d6aad6",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        },
+        {
+          "invocation": 1,
+          "moveTurn": 1,
+          "startFrame": 192,
+          "endFrame": 228,
+          "frameCount": 37,
+          "playerHp": 141,
+          "opponentHp": 162,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-opponent-hit-1.txt",
+          "changeMapSha256": "b9a340af2a7bf4e1dd22f95ae66f17f99f3d3263a77202ace7445dd81046fd9c",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        },
+        {
+          "invocation": 2,
+          "moveTurn": 2,
+          "startFrame": 297,
+          "endFrame": 333,
+          "frameCount": 37,
+          "playerHp": 139,
+          "opponentHp": 162,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-opponent-hit-2.txt",
+          "changeMapSha256": "683748ffd26ab73871d5af815f2da1772fbab5bb691dead22d91f081e849e9b8",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        },
+        {
+          "invocation": 3,
+          "moveTurn": 3,
+          "startFrame": 401,
+          "endFrame": 437,
+          "frameCount": 37,
+          "playerHp": 138,
+          "opponentHp": 162,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-opponent-hit-3.txt",
+          "changeMapSha256": "6161fdac2e2eaf07b543890205a5c14e06fa432687489a51b18a36730bb9e005",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        },
+        {
+          "invocation": 4,
+          "moveTurn": 4,
+          "startFrame": 505,
+          "endFrame": 541,
+          "frameCount": 37,
+          "playerHp": 137,
+          "opponentHp": 162,
+          "targetIdleX2": 0,
+          "changeMap": "tools/compare/evidence/comet-punch-opponent-hit-4.txt",
+          "changeMapSha256": "06d7563084159d667d17c390e012a8e4f1077b15dc810b910666bddc7b4706ca",
+          "acceptance": { "sourceReducerMatching": 37, "typedSeamMatching": 37, "componentMatching": 37, "framebufferMatching": 37 }
+        }
+      ]
+    }
+  ]
+}

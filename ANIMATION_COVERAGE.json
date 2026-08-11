@@ -880,6 +880,35 @@
    ]
   },
   {
+   "move": "MOVE_DOUBLE_KICK",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-0 three-Pokemon Scene-ON parties stage the lowest Level-50 carrier, set-146 NIDORINA, against legal set-156 ONIX in both player-back and opponent-front orientations; all active NIDORINA choices are constrained to DOUBLE_KICK without injecting damage, hit count, RNG, or turn state",
+    "the exclusive Move_DOUBLE_KICK pointer interval 0x082d2261..0x082d2293 and first inactive cleanup pass 36/36 source reducer, typed seam, task/sprite topology, software and hardware OAM/matrix/palette/tag/register/audio, immutable battle-state, raw-RGB/change-map, and production-framebuffer checks twice fresh at frames 227-262 in both orientations",
+    "the pure reducer ports asynchronous HANDS_AND_FEET and IMPACT loads, target monbg and 12/8 alpha, four caller-supplied Random2 words, gFistFootRandomPosSpriteTemplate with its gBasicHitSplatSpriteTemplate child, AnimTask_ShakeMon(4,0,6,1), target-panned SE_M_VITAL_THROW2, wait, cleanup, and first inactive age without advancing RNG or owning multi-hit mechanics",
+    "the narrow NIDORINA/ONIX compositor reproduces the source component display latches: plain fist/child OAM and ShakeMon target motion at RAM+1, resource palette transfer at RAM+1, and the source monbg OBJ-to-BG palette copy on the transition display; HANDS_AND_FEET and IMPACT assets audit byte-for-byte against pinned source PNGs",
+    "MOVE_THRASH remains independently exact from its own 103/103 bilateral dense acceptance; shared fist/hitsplat source did not transfer either move's acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-double-kick-player-nidorina-opponent-onix.json",
+    "tools/battle-lab/mechanic-double-kick-opponent-nidorina-player-onix.json",
+    "tools/compare/fixtures/double-kick-player-nidorina-opponent-onix.json",
+    "tools/compare/fixtures/double-kick-opponent-nidorina-player-onix.json",
+    "tools/compare/doubleKickProbe.py",
+    "tools/compare/doubleKickPortable.ts",
+    "tools/compare/doubleKickSourceAudit.ts",
+    "tools/compare/doubleKickAssetAudit.ts",
+    "tools/compare/evidence/double-kick-changemap-player.txt",
+    "tools/compare/evidence/double-kick-changemap-opponent.txt",
+    "src/animation/doubleKick.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/doubleKick.test.ts",
+    "tests/animation/doubleKickSource.test.ts",
+    "tests/animation/doubleKickEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_DOUBLE_TEAM",
    "status": "exact",
    "covered": [
@@ -3641,6 +3670,64 @@
    ]
   },
   {
+   "move": "MOVE_STUN_SPORE",
+   "status": "exact",
+   "covered": [
+    "the source audit bounds Move_STUN_SPORE at 0x082c954d..0x082c967b (0x12e bytes) and pins the two-component graph asset:ANIM_TAG_STUN_SPORE plus visualCommand:create_stun_spore_particle_sprite, with gStunSporeParticleSpriteTemplate -> AnimMovePowderParticle_Step and gPowderParticlesAnimCmds; the lowest Factory Level-50 carrier is FRONTIER_MON_GLOOM_1 set 167 (SPECIES_GLOOM 44), while dense Scene-ON evidence stages the complete legal SPECIES_HOPPIP 187 carrier",
+    "complete legal Level-50 three-mon Scene-ON parties pass the entire pointer-bounded powder body through first inactive cleanup twice fresh in both orientations: player-back HOPPIP -> ONIX frames 380-573 and opponent-front HOPPIP -> ONIX frames 385-578, each 194/194 source/component, typed-seam, software+hardware OAM/matrix, palette/tag/register/audio, immutable-state, raw-RGB, change-map, and production-framebuffer frames",
+    "the pure source-relative reducer ports the 194-age script offsets, loadspritegfx and looped SE_M_POISON_POWDER, all fifteen source-created particle lifecycles, AnimMovePowderParticle_Step fixed-point velocity/sine callback data, animation cells, side-inverted wave sign, first inactive cleanup, and persistent source OAM sort/draw order without damage, status, RNG, turn, controller, round, or facility state",
+    "the narrow Scene-ON seam and compositor reuse deterministic source-extracted STUN_SPORE powder art, HOPPIP/ONIX geometry, field chrome, healthboxes, and text; the measured move-owned latches are loadspritegfx at the first window frame, callback/OAM position at RAM+1 with the current source animation cell, and static battlers before powder in the shared production painter",
+    "the committed receipts pin player evidence/raw-RGB/change-map e1842c7c7dc6ac3f37d0ccb97f53ec272e3f1f946d7bf8b0659520c5afa47e68 / 0adc53f2890301a822c5e7661ec325e851a9a3a3a571be30a805d84751b3e38f / b97cb47f20fe6033dffa130140419b098a2b3dc09f2a9f68327dc4addfba169c and opponent evidence/raw-RGB/change-map 3b7c9ad524337c496e5e2dccc4fc0385a2ad5640e48c4b22bacedef02d503205 / b7dbe0847205266086d5e4ab6da26d50fb77260d92503b2e355c3b5ed5a6ef3b / e3ebc54f51986502fa81fa1ac54c26af7bd739fc7e2fc30b912540b89a685ba6; MOVE_POISON_POWDER remains an independent unsupported acceptance unit despite the callback shape, and no animation boundary or unsupported barrier widened"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-stun-spore-player-hoppip-opponent-onix.json",
+    "tools/battle-lab/mechanic-stun-spore-opponent-hoppip-player-onix.json",
+    "tools/compare/fixtures/stun-spore-player-hoppip-opponent-onix.json",
+    "tools/compare/fixtures/stun-spore-opponent-hoppip-player-onix.json",
+    "tools/compare/evidence/stun-spore-changemap-player.txt",
+    "tools/compare/evidence/stun-spore-changemap-opponent.txt",
+    "tools/compare/sporeProbe.py",
+    "tools/compare/sporePortable.ts",
+    "tools/compare/stunSporeSourceAudit.ts",
+    "tools/compare/extractStunSporeAssets.ts",
+    "src/animation/assets/stunSpore.json",
+    "src/animation/stunSpore.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/stunSpore.test.ts",
+    "tests/animation/stunSporeEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_SLEEP_POWDER",
+   "status": "exact",
+   "covered": [
+    "the source audit bounds Move_SLEEP_POWDER at 0x082c967b..0x082c97a9 (0x12e bytes) and pins gSleepPowderParticleSpriteTemplate -> AnimMovePowderParticle_Step with gPowderParticlesAnimCmds, shared poison_powder sheet, distinct ANIM_TAG_SLEEP_POWDER/gBattleAnimSpritePal_SleepPowder, and lowest Level-50 carrier set 226 FRONTIER_MON_VENOMOTH_1 (SPECIES_VENOMOTH 49); dense evidence uses source-supported legal SPECIES_HOPPIP 187",
+    "complete legal bilateral three-mon Scene-ON parties pass the pointer-bounded body through first inactive cleanup twice fresh: player-back HOPPIP -> ONIX frames 380-573 and opponent-front frames 385-578, each 194/194 reducer/seam/component, software+hardware OAM/matrix, palette/tag/register/audio, immutable battle-state, raw-RGB/change-map, and shared production-framebuffer frames",
+    "Sleep Powder's own dense rows independently confirm loadspritegfx at the first window frame, callback/OAM position from RAM+1, the current source animation cell, and persistent source OAM ordering; the pure reducer reuses only Stun Spore's literal source-identical callback/script schedule while preserving Sleep Powder resource identity",
+    "the shared narrow powder compositor selects the move-owned palette/tag/text and keeps HOPPIP/ONIX field chrome, healthboxes, battler ordering, source particle order, and first inactive cleanup presentation-only; it owns no sleep outcome, damage, accuracy, RNG, turn, controller, round, or facility state",
+    "twice-fresh stable receipts are player evidence/raw/change-map 207ffeb968088756ef0d371b7e1bb7490ef62cd9d8998c7e2d02c032f7ad2be1 / e90bba35fa7ac51ad2e116a6d83c82832a0c0881b37289f082aa559f37c74559 / 642c7ebc4dd21004ea3a54e0efd8e490f9337ea62c713172bc471e97e11137d4 and opponent f353a36c542dfb7cebe280b175599b270b0c458b6f479bb62e7bf4c6aeb41006 / 63ebdc38b331dc48a68af12a70d1d6fe47969c4445c5d5a8681137120cbb4ff7 / bd82e7856c2bc424eb329c12236974ee2763d17adb3a2422983a0fc480679347; MOVE_POISON_POWDER stays unsupported"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-sleep-powder-player-hoppip-opponent-onix.json",
+    "tools/battle-lab/mechanic-sleep-powder-opponent-hoppip-player-onix.json",
+    "tools/compare/fixtures/sleep-powder-player-hoppip-opponent-onix.json",
+    "tools/compare/fixtures/sleep-powder-opponent-hoppip-player-onix.json",
+    "tools/compare/evidence/sleep-powder-changemap-player.txt",
+    "tools/compare/evidence/sleep-powder-changemap-opponent.txt",
+    "tools/compare/sporeProbe.py",
+    "tools/compare/sporePortable.ts",
+    "tools/compare/sleepPowderSourceAudit.ts",
+    "tools/compare/extractSleepPowderAssets.ts",
+    "src/animation/assets/sleepPowder.json",
+    "src/animation/sleepPowder.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/sleepPowder.test.ts",
+    "tests/animation/sleepPowderEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SUBMISSION",
    "status": "exact",
    "covered": [
@@ -3822,6 +3909,34 @@
    ]
   },
   {
+   "move": "MOVE_SWORDS_DANCE",
+   "status": "exact",
+   "covered": [
+    "complete legal Scene-ON parties naturally stage set-159 LEDIAN against ONIX with all four active choices constrained to SWORDS DANCE/TACKLE; the independent source audit pins exclusive 0x082caaa4..0x082caaea and the true lowest legal Level-50 carrier as set-137 FARFETCHD",
+    "the complete 70-frame source interval through first inactive cleanup passes reducer, typed seam, task/sprite topology, software/hardware OAM and affine matrices, palette/tag/register/audio, immutable battle state, raw RGB, normalized change map, and production framebuffer equality twice fresh at frames 74-143 player-back and 78-147 opponent-front",
+    "the pure source-relative reducer and narrow compositor port ANIM_TAG_SWORD/gSwordsDanceBladeSpriteTemplate, AnimSwordsDanceBlade affine growth/hold/rise, side-respecting TranslateMonEllipticalRespectSide, attacker monbg, 12:8 alpha, flash_anim_tag_with_color's two cyan-white pulses, transfer latches, enemy-shadow handoff, audio topology, blendoff, clearmonbg, and cleanup",
+    "player evidence/raw digests are 1da50d1323400976045892772aa6c1d97a8bc5e89d8af6fc3fe5cc14d1b14489 / 1f7e523841cde8eb33e9eae8b85c58182bd7e843365d0b95c28eb431a0725e90; opponent digests are f067ec78363e4f3ccb12bd6c5a2bff5f93d53014dc2a95346e1796c54e1ed856 / 994d7895d2019441d63a8053765d03eedef31fd5baefc876710cb5d154696436",
+    "AGILITY remains the independent bilateral TranslateMonEllipticalRespectSide control; HYPER BEAM and CONVERSION remain unsupported because shared flash_anim_tag_with_color transfers no move acceptance and their distinct complete bodies lack dense proof"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-swords-dance-player-ledian-opponent-onix.json",
+    "tools/battle-lab/mechanic-swords-dance-opponent-ledian-player-onix.json",
+    "tools/compare/fixtures/swords-dance-receipts.json",
+    "tools/compare/evidence/swords-dance-player.txt",
+    "tools/compare/evidence/swords-dance-opponent.txt",
+    "tools/compare/swordsDanceSourceAudit.ts",
+    "tools/compare/swordsDancePortable.ts",
+    "tools/compare/agilityProbe.py",
+    "tools/extract/extract-swords-dance-assets.ts",
+    "src/assets/gen/battle-anim-sword.json",
+    "src/animation/swordsDance.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/swordsDance.test.ts",
+    "tests/animation/swordsDanceSource.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SYNTHESIS",
    "status": "exact",
    "covered": [
@@ -3947,6 +4062,33 @@
     "src/animation/sceneOnPresentation.ts",
     "src/engine/battleScene.ts",
     "tests/animation/taunt.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_THRASH",
+   "status": "exact",
+   "covered": [
+    "the sole legal Level-50 set-408 TAUROS carrier against legal challenge-3 set-394 ONIX passes the complete pointer-bounded Scene-ON body plus first inactive cleanup at 103/103 frames twice fresh in both orientations: player-back frames 72-174 and opponent-front frames 76-178",
+    "the pure reducer ports async IMPACT/HANDS_AND_FEET resource loads, all three Random2-supplied gFistFootRandomPosSpriteTemplate/basic-hitsplat child pairs, source allocator slots, Thrash horizontal affine loop, vertical motion task, all three target-panned sounds, and cleanup without owning battle state or RNG",
+    "the narrow TAUROS/ONIX seam and compositor reproduce source OAM/matrix/palette/tag/register/audio state, raw RGB and normalized change maps, and all production framebuffers; plain fist/hitsplat OAM is RAM+1, the horizontal affine task is RAM+2, and the source-created first ShakeMonInPlace write plus its task cadence are modeled from the script scheduler",
+    "each 4/0/7/1 invocation and the 8/0/16/1 invocation independently proves RAM+2 target-outline pixels outside the complete 32x32 fist/hitsplat OAM bounds (94.2-98.1% fit versus 60.5-70.6% at RAM+1), in both orientations",
+    "MOVE_DOUBLE_KICK now holds a separate 36/36 twice-fresh bilateral exact claim for its distinct fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup body; shared fist/hitsplat source transferred no acceptance in either direction"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-thrash-player-tauros-opponent-onix.json",
+    "tools/battle-lab/mechanic-thrash-opponent-tauros-player-onix.json",
+    "tools/compare/fixtures/thrash-player-tauros-opponent-onix.json",
+    "tools/compare/fixtures/thrash-opponent-tauros-player-onix.json",
+    "tools/compare/thrashProbe.py",
+    "tools/compare/thrashSourceAudit.ts",
+    "tools/compare/thrashPortable.ts",
+    "tools/compare/evidence/thrash-changemap-player.txt",
+    "tools/compare/evidence/thrash-changemap-opponent.txt",
+    "src/animation/thrash.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/thrash.test.ts",
+    "tests/animation/thrashEvidenceCheckpoint.test.ts"
    ]
   },
   {
@@ -4097,6 +4239,37 @@
     "src/engine/battleScene.ts",
     "tests/animation/torment.test.ts",
     "tests/animation/tormentEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_TRIPLE_KICK",
+   "status": "exact",
+   "covered": [
+    "the sole Level-50 carrier set-236 HITMONTOP is staged in complete legal challenge-1 parties against legal ONIX in both orientations; the real controller supplies independent moveTurn 0/1/2 visual invocations without the presentation port owning hit count, accuracy, damage, rising power, RNG, turn, round, or facility state",
+    "all six complete pointer-bounded Move_TRIPLE_KICK branch windows through first inactive cleanup pass 37/37 reducer, typed seam, branch/task/sprite topology, software and hardware OAM/matrices/palettes/tags/registers/audio, immutable battle state, raw RGB, normalized change map, and production framebuffer twice fresh: player-back frames 225-261, 354-390, and 483-519; opponent-front frames 226-262, 436-472, and 565-601",
+    "the pure source-relative reducer ports all jumpifmoveturn routes, asynchronous HANDS_AND_FEET/IMPACT loads, left/right/center wide-foot and affine basic-hitsplat geometry, branch-specific AnimTask_ShakeMon(4,0,6,1)/(6,0,8,1), target-panned SE_M_VITAL_THROW2, monbg, 12/8 alpha, waits, unloads, and cleanup",
+    "the narrow HITMONTOP/ONIX compositor preserves the source RAM+1 wide-foot, hitsplat, ShakeMon, OAM/matrix, and palette display latches; moveTurn 0 retains ONIX front-idle x2 and the move message while moveTurn 1/2 enter from the prior ShakeMon x2 overwrite and retain blank battle-window chrome, as independently visible in both orientations",
+    "exact MOVE_DOUBLE_KICK remains a separate 36/36 bilateral twice-fresh control for its random-position fist/child body, and exact MOVE_COUNTER remains a separate 88/88 bilateral control for the shared fist/hitsplat/ShakeMon family; no acceptance transfers between moves"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-triple-kick-player-hitmontop-opponent-onix.json",
+    "tools/battle-lab/mechanic-triple-kick-opponent-hitmontop-player-onix.json",
+    "tools/compare/fixtures/triple-kick-branch-receipts.json",
+    "tools/compare/tripleKickProbe.py",
+    "tools/compare/tripleKickPortable.ts",
+    "tools/compare/tripleKickSourceAudit.ts",
+    "tools/compare/evidence/triple-kick-changemap-player-turn0.txt",
+    "tools/compare/evidence/triple-kick-changemap-player-turn1.txt",
+    "tools/compare/evidence/triple-kick-changemap-player-turn2.txt",
+    "tools/compare/evidence/triple-kick-changemap-opponent-turn0.txt",
+    "tools/compare/evidence/triple-kick-changemap-opponent-turn1.txt",
+    "tools/compare/evidence/triple-kick-changemap-opponent-turn2.txt",
+    "src/animation/tripleKick.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/tripleKick.test.ts",
+    "tests/animation/tripleKickSource.test.ts",
+    "tests/animation/tripleKickEvidenceCheckpoint.test.ts"
    ]
   },
   {
@@ -4343,6 +4516,70 @@
     "src/engine/battleScene.ts",
     "tests/animation/mistBall.test.ts",
     "tests/animation/mistBallEvidenceCheckpoint.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_DOUBLE_SLAP",
+   "status": "exact",
+   "covered": [
+    "the real controller naturally selects three hits in both complete legal set-155 POLIWHIRL versus set-156 ONIX Scene-ON orientations; moveTurn 0/1/2 exercises left/right/left without presentation ownership of hit count, accuracy, damage, or RNG",
+    "all six complete pointer-bounded 34-frame invocations through first inactive cleanup pass reducer, typed seam, task/sprite topology, software and hardware OAM/matrices/palettes/tags/register/audio, immutable animation-owned battle fields, raw RGB, normalized change maps, and production framebuffer equality twice fresh (102/102 per orientation, 204/204 bilateral)",
+    "the pure reducer and narrow compositor port the exclusive 0x082c93c9..0x082c941c body: both choosetwoturnanim branches, IMPACT/basic hitsplat affine sprite, AnimTask_ShakeMon, monbg, 12:8 alpha, SE_M_DOUBLE_SLAP, continuation chrome and cleanup using source-relative ages only",
+    "Double Kick, Triple Kick, and Counter remain independent regression controls and transfer no acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-double-slap-player-poliwhirl-opponent-onix.json",
+    "tools/battle-lab/mechanic-double-slap-opponent-poliwhirl-player-onix.json",
+    "tools/compare/fixtures/double-slap-natural-receipts.json",
+    "tools/compare/doubleSlapSourceAudit.ts",
+    "tools/compare/doubleSlapAssetAudit.ts",
+    "tools/compare/doubleSlapProbe.py",
+    "tools/compare/doubleSlapPortable.ts",
+    "tools/compare/evidence/double-slap-changemap-player-hit0.txt",
+    "tools/compare/evidence/double-slap-changemap-player-hit1.txt",
+    "tools/compare/evidence/double-slap-changemap-player-hit2.txt",
+    "tools/compare/evidence/double-slap-changemap-opponent-hit0.txt",
+    "tools/compare/evidence/double-slap-changemap-opponent-hit1.txt",
+    "tools/compare/evidence/double-slap-changemap-opponent-hit2.txt",
+    "src/animation/doubleSlap.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/doubleSlap.test.ts",
+    "tests/animation/doubleSlapEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_COMET_PUNCH",
+   "status": "exact",
+   "covered": [
+    "the real controller naturally selects four player-back and five opponent-front hits in complete legal sole-carrier set-159 FRONTIER_MON_LEDIAN versus ONIX Scene-ON parties; moveTurn 0..3 / 0..4 exercises both choosetwoturnanim branches without presentation ownership of hit count, accuracy, damage, RNG, or controller state",
+    "all nine complete pointer-bounded 37-frame invocations through first inactive cleanup pass reducer, typed seam, task/sprite topology, software and hardware OAM/matrices/palettes/tags/register/audio, immutable battle fields, raw RGB, normalized change maps, and production framebuffer equality twice fresh (148 player-back + 185 opponent-front = 333 dense frames per run)",
+    "the pure source-relative reducer and narrow LEDIAN/ONIX compositor port exclusive 0x082ca2c3..0x082ca33b: IMPACT then HANDS_AND_FEET load latches, basic hitsplat affine sprite, gFistFootSpriteTemplate, AnimTask_ShakeMon, target monbg, 12:8 alpha, SE_M_COMET_PUNCH, first opponent-side enemy-shadow display, and cleanup; each side's source-derived script-relative fist/hitsplat y origin remains explicit",
+    "Double Slap, Double Kick, and Mega Punch remain independent exact regression controls; shared IMPACT, fist, hitsplat, ShakeMon, monbg, and alpha components transfer no move acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-comet-punch-player-ledian-opponent-onix.json",
+    "tools/battle-lab/mechanic-comet-punch-opponent-ledian-player-onix.json",
+    "tools/compare/fixtures/comet-punch-natural-receipts.json",
+    "tools/compare/cometPunchSourceAudit.ts",
+    "tools/compare/cometPunchAssetAudit.ts",
+    "tools/compare/cometPunchProbe.py",
+    "tools/compare/cometPunchPortable.ts",
+    "tools/compare/evidence/comet-punch-player-hit-0.txt",
+    "tools/compare/evidence/comet-punch-player-hit-1.txt",
+    "tools/compare/evidence/comet-punch-player-hit-2.txt",
+    "tools/compare/evidence/comet-punch-player-hit-3.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-0.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-1.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-2.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-3.txt",
+    "tools/compare/evidence/comet-punch-opponent-hit-4.txt",
+    "src/animation/cometPunch.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/cometPunch.test.ts",
+    "tests/animation/cometPunchSource.test.ts",
+    "tests/animation/cometPunchEvidence.test.ts"
    ]
   }
  ],
@@ -5192,7 +5429,7 @@
     "MOVE_THRASH",
     "MOVE_DOUBLE_KICK"
    ],
-   "goal": "MOVE_THRASH remains unsupported: its sole legal Level-50 set-408 TAUROS checkpoint banks complete twice-fresh 103-frame bilateral pointer-bounded source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map evidence through first inactive cleanup, but it has no reducer, typed seam, production compositor, or framebuffer acceptance. Its own maps prove plain fist/foot and child OAM plus vertical position at RAM+1 and the horizontal affine task at RAM+2. A focused move-owned target-palette outline verifier excludes each fist/hitsplat's complete 32x32 OAM bounds and independently resolves both 4/0/7/1 ShakeMonInPlace calls plus the 8/0/16/1 call at RAM+2 in both orientations; actual target pixels fit RAM+2 at 94.2-98.1% versus 60.5-70.6% for RAM+1. MOVE_DOUBLE_KICK remains independently unsupported: the source audit pins its broader 11-carrier body with one distinct 20-frame fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup; the shared sprite source transfers no acceptance."
+   "goal": "MOVE_THRASH exact: its sole legal Level-50 set-408 TAUROS body passes twice-fresh 103/103 bilateral source reducer, typed seam, task/sprite allocator, software/hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB/change-map, and production framebuffer acceptance through first inactive cleanup. Its own maps retain plain fist/foot and child OAM plus vertical position at RAM+1, the horizontal affine task at RAM+2, and all three ShakeMonInPlace target outlines at RAM+2 (94.2-98.1% target-palette witness fit versus 60.5-70.6% at RAM+1). MOVE_DOUBLE_KICK independently passes its distinct 36/36 bilateral fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup acceptance unit twice fresh. Shared sprite source transfers no acceptance."
   }
  ],
  "variantAudits": {

@@ -17,6 +17,7 @@
     "compare:differential": "node --experimental-strip-types tools/compare/app-differential.ts",
     "inspect-frame": "node --experimental-strip-types tools/compare/inspect-frame.ts",
     "animation:coverage": "node --experimental-strip-types tools/animation/report.ts",
+    "animation:audit": "node --experimental-strip-types tools/compare/doubleKickAssetAudit.ts",
     "census:ability-item": "node --experimental-strip-types tools/report/ability-item-parity-census.ts",
     "extract:ability-item-hooks": "node --experimental-strip-types tools/extract/extract-ability-item-hooks.ts",
     "animation:components": "node --experimental-strip-types tools/extract/extract-battle-animation-components.ts",
