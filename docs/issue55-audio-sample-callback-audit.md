@@ -122,6 +122,30 @@ callback order, and full Timer/Audio/completion hardware are pinned in
 This independently validated row remains evidence only. It does not supply a
 service price or construction-clock wiring.
 
+## Selected legal-varied nature-attempt runtime edge
+
+Nature-attempt ordinal 63 closes the Video+Audio sibling at
+`0x082e7c10→0x082e7c12`. Its bounded source-order scout pins zero-based
+repeated-PC occurrence **0**. Wrappers for Video, Timer 0, Audio Sample, and
+DMA install at the selected `GetNatureFromPersonality` entry with those three
+roots **232 / 232 / 233** cycles in the future, then retain only from that
+exact occurrence.
+
+Two fresh OFF runs completed in **12.5s / 12.0s** and produced byte-identical
+34,818-byte packets (SHA-256
+`d32aa8d8abe0f0bb507a84e41c921bec046d849802f549c4a1e7408f35f684a1`).
+Video@D runs first (`cyclesLate=6`), reschedules itself, and leaves all four
+DMA `nextCount`s zero. Timer@D follows (`cyclesLate=6`), then DMA1's first
+callback, Audio@D+1 (`cyclesLate=5`), and the remaining DMA1/2 graph.
+Requests and completions are both 1→2; the DMA active order is again
+`1,1,1,1,2,1,2,2,2,2`; completion is 18 cycles after Timer entry and wrappers
+restore at sequence 12. The byte pin plus explicit Tier-1 assertions retain
+the exact callback deadlines/order and full Video/Timer/Audio/completion
+hardware.
+
+All three natural adjacent-deadline rows are therefore closed twice fresh.
+They remain three bounded runtime observations, not a generic service cost.
+
 ## Construction-state scope
 
 The already-committed construction reachability receipt records two exact
@@ -131,10 +155,9 @@ runtime windows with audio enabled, no optional mixer, and
 outside the post-boot construction epoch. That excludes the optional HLE and
 external-mixing bypass at the construction-epoch scope.
 
-The remaining uncaptured nature-attempt row's compact FIFO boundary does not
-itself serialize mixer pointers,
+The three bounded rows do not make mixer pointers,
 `externalMixing`, PSG/output-route values, stream/sync state, or callback
-duration. This audit deliberately does not promote the two-window observation
-to a per-row runtime graph. It contains no absolute scheduler timestamp or
-fixture-driven production behavior, and it must not wire
+duration into a source-general cost model. They contain exact scheduler
+timestamps only as immutable evidence, not fixture-driven production
+behavior, and must not wire
 `runFactoryConstructionClock`.

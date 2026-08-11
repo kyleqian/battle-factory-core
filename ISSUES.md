@@ -1451,8 +1451,11 @@ hardware state is retained at the exact boundaries. The two legal-varied rows
 use generalized source-order selectors. Get-nature ordinal 12 is now captured
 twice fresh and byte-identical (`21ea4158…`): Timer@D (`cyclesLate=5`), DMA1,
 Audio@D+1 (`cyclesLate=4`), remaining DMA1/2, completion 1→2 at Timer-entry
-+18, with prompt restoration. Nature-attempt ordinal 63 (Video+Audio) remains
-uncaptured. Dispatcher/service cost/clock remain untouched.
++18, with prompt restoration. Nature-attempt ordinal 63 is likewise twice
+fresh and byte-identical (`d32aa8d8…`): Video@D then Timer@D (both late 6),
+DMA1, Audio@D+1 (late 5), remaining DMA1/2, completion +18 and restoration.
+Video schedules no DMA. All three natural adjacent rows are closed;
+dispatcher/service cost/clock remain untouched.
 
 **IRQ / Video-DMA reachability audit (2026-08-11):** source plus the finite OFF
 receipts exclude those roots from the selected construction epoch. MP2K starts

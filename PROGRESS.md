@@ -5,18 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1121 — [MAIN worker, 2026-08-11] **#55 varied get-nature runtime row closed**
+## 1121 — [MAIN worker, 2026-08-11] **#55 varied adjacent runtime rows closed**
 
-- **State:** get-nature is closed twice fresh; nature-attempt 63 is the sole
-  remaining legal-varied adjacent row and #55 stays open/unwired.
+- **State:** both legal-varied adjacent rows are closed twice fresh; #55 stays
+  open for the broader construction clock, which remains unwired.
 - **Did:** generalized the LILIANA selector across encrypted-accessor,
   get-nature, and nature-attempt components. Fresh OFF scouts pin get-nature
   ordinal 12's repeated division occurrence **4** and nature-attempt ordinal
   63's occurrence **0**. Get-nature packets are byte-identical `21ea4158…`:
-  Timer late 5, DMA1, Audio late 4 at D+1, remaining DMA1/2, completion +18.
-- **Next:** retain nature-attempt 63's Video/Timer/Audio/DMA graph twice fresh.
-- **Notes:** captures finished in **12.3/11.6s**; focused selector/runtime
-  **13/13** is green. No service cost, clock, controller, presentation,
+  Timer late 5, DMA1, Audio late 4 at D+1. Nature-attempt is `d32aa8d8…`:
+  Video then Timer late 6 at D, DMA1, Audio late 5 at D+1. Both complete +18.
+- **Next:** finish required smoke/typecheck/full-suite/build verification.
+- **Notes:** captures finished in **12.3/11.6s + 12.5/12.0s**; focused
+  selector/runtime **18/18** is green. No service cost, clock, controller,
+  presentation,
   animation, barrier, recording, or side-owned adjacent-audit artifact changed.
 
 ## 1120 — [MAIN worker, 2026-08-11] **#55 LILIANA adjacent-deadline runtime receipt**
