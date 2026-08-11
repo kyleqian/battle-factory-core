@@ -5,6 +5,13 @@ Lane guide for supervisor sessions working on the Rust/WASM port in
 The general supervisor playbook in `SUPERVISOR.md` applies except where
 this file narrows it.
 
+**Launch:** `./run-supervisor.sh -l rust` from the workspace root (all the
+usual supervisor/sub-agent flags apply). The launcher puts the session in
+the persistent `.worktrees/rust-main` worktree on the single-writer
+`rust-main` branch and ensures the Battle Scene OFF oracle. Workers are
+dispatched with `./tools/run-subagent.sh --lane rust`. The deferral gate
+file is `RUST_DEFERRED.md`.
+
 ## Charter
 
 Port the deterministic engine core to Rust, compiled to WASM, with the
@@ -30,8 +37,9 @@ canonical and this lane must never make the TS side worse.
    are generated from the TS engine or its fixtures and the generation
    command is cited in the test; magic numbers cite reference/pokeemerald
    or the TS module that carries the citation.
-5. Work on a `rust-main` branch; the main supervisor folds it at orients,
-   the same convention the animation lane uses with `animation-main`.
+5. All work happens on the `rust-main` branch (the launcher enforces the
+   worktree); the main supervisor folds it at orients, the same convention
+   the animation lane uses with `animation-main`. Never write master.
 
 ## Milestone ladder
 

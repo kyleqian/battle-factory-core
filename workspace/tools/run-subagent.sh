@@ -27,7 +27,7 @@
 #     -w, --worktree        alias for --lane side
 #         --animation-worktree
 #                           alias for --lane animation
-#         --lane NAME       main, side, or animation
+#         --lane NAME       main, side, animation, or rust
 #         --log FILE        agent event log path
 #         --brief-file FILE read the step brief verbatim from a file
 #         --read-only       audit only; require a clean tree but no commit
@@ -82,10 +82,10 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
   -w, --worktree        alias for --lane side (also --side-worktree)
       --animation-worktree
                         alias for --lane animation
-  -l, --lane NAME       main, side, or animation. Side/animation use fresh
-                        worktrees and must not touch shared docs. A trailing
-                        "-worktree"/"-lane" is accepted and stripped.
-      --base REF        base the side/animation worktree on REF instead of
+  -l, --lane NAME       main, side, animation, or rust. Non-main lanes use
+                        fresh worktrees and must not touch shared docs. A
+                        trailing "-worktree"/"-lane" is accepted and stripped.
+      --base REF        base the non-main worktree on REF instead of
                         current HEAD (name the last supervisor-verified green
                         commit when launching while main is mid-step, so the
                         worker doesn't inherit transiently-red intermediate
@@ -102,8 +102,8 @@ POKEBENCH_CODEX_MAX_MODE, OPENCODE_BIN. Legacy MODEL remains supported for
 direct worker launches; supervisors pass their selection internally.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
-Exit 4 means the requested lane already has a live worker (max 3 concurrent:
-one each in main, side, and animation).
+Exit 4 means the requested lane already has a live worker (max 4 concurrent:
+one each in main, side, animation, and rust).
 Exit 5 means a Codex worker violated its postflight contract (clean and
 committed for implementation work; clean and uncommitted for read-only work).
 EOF
@@ -249,12 +249,12 @@ if [[ ! "$PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
   echo "run-subagent: unsupported sub-agent '$PROVIDER' (expected claude, codex, or deepseek)" >&2
   exit 2
 fi
-if [[ ! "$LANE" =~ ^(main|side|animation)$ ]]; then
-  echo "run-subagent: unsupported lane '$LANE' (expected main, side, or animation)" >&2
+if [[ ! "$LANE" =~ ^(main|side|animation|rust)$ ]]; then
+  echo "run-subagent: unsupported lane '$LANE' (expected main, side, animation, or rust)" >&2
   exit 2
 fi
 if [[ -n "$WT_BASE_REF" && "$LANE" == "main" ]]; then
-  echo "run-subagent: --base only applies to worktree lanes (side/animation); the main lane runs in the shared tree at HEAD" >&2
+  echo "run-subagent: --base only applies to worktree lanes (side/animation/rust); the main lane runs in the shared tree at HEAD" >&2
   exit 2
 fi
 case "$PROVIDER" in
@@ -365,11 +365,11 @@ mkdir -p "$(dirname "$AGENT_LOG")"
 LAUNCH_EPOCH="$(date +%s)"
 
 # Concurrency cap, enforced mechanically (SUPERVISOR.md states the rule; this
-# makes it stick): at most one worker per lane, three lanes total. A lane file
+# makes it stick): at most one worker per lane, four lanes total. A lane file
 # holds "<launcher_pid> <worker_pid>"; a live launcher pid means the lane is
 # taken. A dead one is a stale lock from a killed run — take it over.
 # Lanes are scoped per RUN: several runs of this harness can be active in
-# parallel, and each gets its own three lanes.
+# parallel, and each gets its own four lanes.
 RUN_KEY="$(pwd | shasum | cut -c1-12)"
 LANE_DIR="/tmp/pokebench-worker-lanes-$RUN_KEY"
 mkdir -p "$LANE_DIR"

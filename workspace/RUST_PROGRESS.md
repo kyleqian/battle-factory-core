@@ -20,6 +20,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   were generated from the TS implementation
   (`node --experimental-strip-types` over `src/engine/rng.ts`), not
   hand-computed.
+- **Did (addendum):** lane fully wired into the launchers —
+  `./run-supervisor.sh -l rust` (persistent `.worktrees/rust-main`
+  worktree, branch `rust-main`, OFF oracle only, gate file
+  `RUST_DEFERRED.md`) and `./tools/run-subagent.sh --lane rust` (fresh
+  `worker/rust-*` worktrees, OFF profile). Verified via `--print-config`
+  for rust/animation/bogus on both launchers; the main supervisor's
+  prompt now folds `rust-main` at orients alongside `animation-main`.
 - **Next:** M1 (boundary decision: wasm-bindgen vs hand-rolled ABI +
   Vite-consumable artifact path), then M2 (vitest engine adapter, rng
   spec running against both engines). See the milestone ladder in
