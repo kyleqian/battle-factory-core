@@ -748,6 +748,10 @@ import {
   type CottonSporeState,
 } from "./cottonSpore.ts";
 import {
+  stunSporeAtAge,
+  type StunSporeState,
+} from "./stunSpore.ts";
+import {
   hypnosisDisplayedRingsAtAge,
   hypnosisAtAge,
   type HypnosisRing,
@@ -885,7 +889,8 @@ export interface SceneOnPresentationBattler {
      | "ROSELIA"
      | "YANMA"
      | "SWABLU"
-     | "FEAROW";
+    | "FEAROW"
+    | "HOPPIP";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -2105,6 +2110,13 @@ export interface SceneOnCottonSporeConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnStunSporeConfig {
+  readonly move: "STUN_SPORE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnHypnosisConfig {
   readonly move: "HYPNOSIS";
   readonly attacker: SceneOnPresentationBattler;
@@ -2635,6 +2647,7 @@ export type SceneOnMoveConfig =
   | SceneOnAttractConfig
   | SceneOnSporeConfig
   | SceneOnCottonSporeConfig
+  | SceneOnStunSporeConfig
   | SceneOnHypnosisConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
@@ -2785,6 +2798,8 @@ export type SceneOnSporePresentationState =
   SceneOnMovePresentationState<SceneOnSporeConfig>;
 export type SceneOnCottonSporePresentationState =
   SceneOnMovePresentationState<SceneOnCottonSporeConfig>;
+export type SceneOnStunSporePresentationState =
+  SceneOnMovePresentationState<SceneOnStunSporeConfig>;
 export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
@@ -6254,6 +6269,33 @@ export function sceneOnCottonSporeView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...cottonSporeAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+export interface SceneOnStunSporeView extends StunSporeState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_STUN_SPORE's first active source-script frame. */
+export function sceneOnStunSporeView(
+  state: SceneOnStunSporePresentationState,
+): SceneOnStunSporeView {
+  if (state.config.move !== "STUN_SPORE") {
+    throw new Error(
+      `expected STUN_SPORE presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...stunSporeAtAge(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,

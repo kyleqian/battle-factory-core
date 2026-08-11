@@ -613,6 +613,7 @@ import howlAsset from "../animation/assets/howl.json" with { type: "json" };
 import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
 import attractAsset from "../animation/assets/attract.json" with { type: "json" };
 import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
+import stunSporeAsset from "../animation/assets/stunSpore.json" with { type: "json" };
 import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
@@ -994,6 +995,7 @@ import {
   sceneOnAttractView,
   sceneOnSporeView,
   sceneOnCottonSporeView,
+  sceneOnStunSporeView,
   sceneOnHypnosisView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
@@ -1046,6 +1048,7 @@ import {
   type SceneOnPresentPresentationState,
   type SceneOnSporePresentationState,
   type SceneOnCottonSporePresentationState,
+  type SceneOnStunSporePresentationState,
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnNeedleArmPresentationState,
@@ -1464,6 +1467,7 @@ const chanseyFrontSprite = (opponentFrontSpritesAsset as Record<string, Opponent
 const houndourFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOUNDOUR!;
 const delibirdFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DELIBIRD!;
 const mareepFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MAREEP!;
+const hoppipFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).HOPPIP!;
 const azumarillFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).AZUMARILL!;
 const grimerFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GRIMER!;
 
@@ -1917,6 +1921,9 @@ const sporeArt = sporeAsset as {
   parasectBack: { tileset: Tileset; palette: RgbColor[] };
   parasectFront: { tileset: Tileset; palette: RgbColor[] };
   spore: { tileset: Tileset; palette: RgbColor[] };
+};
+const stunSporeArt = stunSporeAsset as {
+  powder: { tileset: Tileset; palette: RgbColor[] };
 };
 const hypnosisArt = hypnosisAsset as {
   goldRing: { tileset: Tileset; palette: RgbColor[] };
@@ -2653,6 +2660,7 @@ const chanseyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const houndourBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOUNDOUR!;
 const magbyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAGBY!;
 const mareepBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MAREEP!;
+const hoppipBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).HOPPIP!;
 const azumarillBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AZUMARILL!;
 const grimerBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GRIMER!;
 const battleAnimItemHeal = battleAnimItemHealAsset as BattleAnimItemHealAsset;
@@ -28029,6 +28037,119 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MAREEP used" : "Foe MAREEP used",
       "COTTON SPORE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "STUN_SPORE") {
+    const stunState = state as SceneOnStunSporePresentationState;
+    const view = sceneOnStunSporeView(stunState);
+    // Powder sprites are ordinary 8x16 OBJ entries. Their callbacks run
+    // after the hardware OAM transfer, so the framebuffer uses the preceding
+    // source-relative age while the typed seam exposes the current OAM age.
+    const displayed = sceneOnStunSporeView({
+      ...stunState,
+      age: stunState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "HOPPIP"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "HOPPIP"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged STUN_SPORE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const hoppipSource = playerToOpponent
+      ? hoppipBackSprite
+      : hoppipFrontSprite;
+    const hoppip = playerToOpponent
+      ? hoppipSource
+      : { ...hoppipSource, tileset: subTileset(hoppipSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const powderParticles = displayed.particles.slice().sort((a, b) => a.slot - b.slot);
+    const particleBySlot = new Map(powderParticles.map((particle) => [particle.slot, particle]));
+    const drawParticle = (particle: typeof powderParticles[number]): void => {
+      drawSpriteSheet(
+        fb,
+        subTileset(stunSporeArt.powder.tileset, particle.animFrame * 2, 2),
+        stunSporeArt.powder.palette,
+        particle.x + particle.x2 - 4,
+        particle.y + particle.y2 - 8,
+      );
+    };
+    const drawPlayer = () => drawSpriteSheet(
+      fb,
+      playerToOpponent ? hoppip.tileset : onix.tileset,
+      playerToOpponent ? hoppip.palette : onix.palette,
+      view.target.geometry.side === "player"
+        ? view.target.geometry.spriteCorner.x
+        : view.attacker.geometry.spriteCorner.x,
+      view.target.geometry.side === "player"
+        ? view.target.geometry.spriteCorner.y
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    const drawOpponent = () => drawSpriteSheet(
+      fb,
+      playerToOpponent ? onix.tileset : hoppip.tileset,
+      playerToOpponent ? onix.palette : hoppip.palette,
+      view.target.geometry.side === "opponent"
+        ? view.target.geometry.spriteCorner.x
+        : view.attacker.geometry.spriteCorner.x,
+      view.target.geometry.side === "opponent"
+        ? view.target.geometry.spriteCorner.y
+        : view.attacker.geometry.spriteCorner.y,
+    );
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Singles OAM reserves slots 6 and 8 for the player and opponent. The
+    // powder creations occupy the gaps around those entries, so preserving
+    // slot order reproduces the source's equal-priority occlusion.
+    for (let slot = 3; slot <= 19; slot += 1) {
+      const particle = particleBySlot.get(slot);
+      if (particle) drawParticle(particle);
+      else if (slot === 6) drawPlayer();
+      else if (slot === 8) drawOpponent();
+    }
+    const profile = stunState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "HOPPIP",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "HOPPIP" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "HOPPIP used" : "Foe HOPPIP used",
+      "STUN SPORE!",
       99,
     );
     return;
