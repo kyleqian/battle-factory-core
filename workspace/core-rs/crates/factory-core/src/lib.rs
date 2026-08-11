@@ -13,4 +13,5 @@
 
 pub mod gen_tables;
 pub mod rental_data;
+pub mod rental_generation;
 pub mod rng;
