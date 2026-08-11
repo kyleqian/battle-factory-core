@@ -1,3 +1,11 @@
+# MOVE_COMET_PUNCH exact — bilateral natural 333/333 promotion (2026-08-11 worker)
+
+- **State:** Level-50 coverage advances **168→169/276 exact**, 0 partial, 0 staged, and **108→107 unsupported**. Only `MOVE_COMET_PUNCH` moved; no animation-boundary or unsupported-barrier widening.
+- **Did:** Pinned exclusive `Move_COMET_PUNCH` **0x082ca2c3..0x082ca33b** (`0x78` bytes), both `choosetwoturnanim` routes, IMPACT/HANDS_AND_FEET/basic-hitsplat/fist/ShakeMon/monbg/12:8 alpha/audio graph, and sole Level-50 carrier set **159 `FRONTIER_MON_LEDIAN`**. Added legal bilateral three-mon stages, pure reducer, typed seam, narrow LEDIAN/ONIX compositor, source and asset audits, dense probe, portable receipts, and nine normalized maps.
+- **Verified:** Natural controller windows pass twice fresh at player-back **84..120 / 188..224 / 373..409 / 477..513** and opponent-front **88..124 / 192..228 / 297..333 / 401..437 / 505..541**: every **37/37** reducer/seam/component/hardware/raw-RGB/map/framebuffer gate (**148 + 185 = 333** bilateral). Double Slap, Double Kick, and Mega Punch independent portables remain exact. Final audit/full-suite/build verification is next.
+- **Next:** Run final animation audit, coverage, typecheck, full suite, and build; then hand off only Comet Punch’s independent exact claim.
+- **Notes:** Comet’s own maps confirm ordinary fist/OAM and `AnimTask_ShakeMon` RAM+1 plus a fresh affine matrix one display later; this matches existing latch rows, so `ANIMATION_LATCHES.md` is unchanged. No hit count, accuracy, damage, RNG, controller, turn, round/facility state, canonical import, capture lookup, absolute tick, or per-frame RGB table was added.
+
 # MOVE_DOUBLE_SLAP exact — bilateral natural three-hit 204/204 promotion (2026-08-11 worker)
 
 - **State:** Level-50 coverage advances **167→168/276 exact**, 0 partial, 0 staged, and **109→108 unsupported**. Only `MOVE_DOUBLE_SLAP` moved; no animation-boundary or unsupported-barrier widening.
