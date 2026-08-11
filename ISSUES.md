@@ -1245,10 +1245,22 @@ exposes interrupt/resume points, while all **156** Scene-OFF stat receipt
 boundaries are strictly larger than their known GetMonData shell plus this
 ROM-only subtotal after recorded pauses are removed. No residual is absorbed.
 
-**Still open:** EWRAM word/halfword access, field tails, encrypted writes,
-async +18 service, VBlank/IRQ work, and the live construction clock. Complete
-stats/accessor timing remains null and unwired; no identity/duration table or
-residual fit landed. Detailed accounting is in
+**Encrypted EWRAM/tails increment (2026-08-10):** a retail aligned-access
+reducer now closes byte/halfword at **2** cycles and word at **4** cycles on
+the 16-bit EWRAM bus; unneeded misalignment is rejected, not guessed. The
+12-word decrypt/encrypt components are independently exact at **448** each,
+and the 24-halfword checksum loop remains **518**; shared bus occupancy is
+**528** with a **240**-cycle premium over already-counted instruction
+baselines. All 180 dependency rows now expose exact input-derived valid/
+invalid checksum tails and species/EXP/EV/IV field tails, including bad-egg
+species, with exact PCs, widths, counts, bus totals, and complete component
+cycles. A fresh compact Scene-OFF sibling receipt pins the clean mGBA
+component joins without pointer/storage data or a production import.
+
+**Still open:** outer `GetBoxMonData2` prologue/setup/dispatch/common-return
+instruction and memory work, async +18 service, VBlank/IRQ work, and the live
+construction clock. Complete stats/accessor timing remains null and unwired;
+no identity/duration table or residual fit landed. Detailed accounting is in
 `docs/issue55-encrypted-accessor-timing-slice.md`.
 
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state

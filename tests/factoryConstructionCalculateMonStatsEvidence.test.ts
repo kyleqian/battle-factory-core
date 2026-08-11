@@ -417,9 +417,9 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       sequentialThumbHalfwords: 128,
       pipelineRefills: 12,
       instructionFetchCycles: 328,
-      dataAccessCycles: 360,
-      dataAccessPremiumCycles: 240,
-      cycles: 568,
+      dataAccessCycles: 240,
+      dataAccessPremiumCycles: 120,
+      cycles: 448,
       unresolved: null,
     });
     expect(reduceFactoryEncryptBoxMonTiming()).toMatchObject({
@@ -433,9 +433,9 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       sequentialThumbHalfwords: 128,
       pipelineRefills: 12,
       instructionFetchCycles: 328,
-      dataAccessCycles: 360,
-      dataAccessPremiumCycles: 240,
-      cycles: 568,
+      dataAccessCycles: 240,
+      dataAccessPremiumCycles: 120,
+      cycles: 448,
       unresolved: null,
     });
     expect(reduceFactoryChecksumLoopTiming()).toMatchObject({
@@ -486,10 +486,10 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       alignment: 2, transfers: 1, cycles: 2, busPremiumCycles: 0, unresolved: null,
     });
     expect(reduceFactoryEwramAccessTiming({ access: "read", width: 4, address: 0x0200_0024 })).toMatchObject({
-      alignment: 4, transfers: 2, cycles: 6, busPremiumCycles: 4, unresolved: null,
+      alignment: 4, transfers: 2, cycles: 4, busPremiumCycles: 2, unresolved: null,
     });
     expect(reduceFactoryEwramAccessTiming({ access: "write", width: 4, address: 0x0203_fffc })).toMatchObject({
-      access: "write", alignment: 4, transfers: 2, cycles: 6, busPremiumCycles: 4,
+      access: "write", alignment: 4, transfers: 2, cycles: 4, busPremiumCycles: 2,
     });
     expect(() => reduceFactoryEwramAccessTiming({ access: "read", width: 2, address: 0x0200_0023 }))
       .toThrow("misaligned EWRAM halfword behavior is not claimed");
@@ -497,6 +497,40 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
       .toThrow("misaligned EWRAM word behavior is not claimed");
     expect(() => reduceFactoryEwramAccessTiming({ access: "read", width: 1, address: 0x0300_0000 }))
       .toThrow("address must be in retail EWRAM");
+  });
+
+  it("pins the compact Scene-OFF EWRAM instruction and whole-component boundaries", () => {
+    const bytes = readFileSync("tests/fixtures/factory-ewram-access-boundaries-v1/anchor.json");
+    const receipt = JSON.parse(bytes.toString("utf8")) as {
+      schema: string;
+      oracleProfile: string;
+      components: Array<{ kind: string; entryPc: string; cleanCycles: number }>;
+      rows: Array<{
+        label: string; instructionPc: string; observedPc: string;
+        access: string; width: number; addressModulo4: number; cleanCycles: number;
+      }>;
+    };
+    expect(createHash("sha256").update(bytes).digest("hex"))
+      .toBe("bff98549ef1bf901be467b04341c8d1132550754e58f9f10ed5f262c1c28ee92");
+    expect(receipt).toMatchObject({
+      schema: "factory-ewram-access-boundaries/v1",
+      oracleProfile: "battle-scene-off",
+      components: [
+        { kind: "checksum-loop", entryPc: "0x08068cb0", cleanCycles: 518 },
+        { kind: "decrypt-loop", entryPc: "0x0806a24c", cleanCycles: 448 },
+        { kind: "encrypt-loop", entryPc: "0x0806a228", cleanCycles: 448 },
+      ],
+    });
+    expect(new Set(receipt.rows.map((row) => row.width))).toEqual(new Set([1, 2, 4]));
+    expect(receipt.rows.every((row) => row.addressModulo4 % Math.min(row.width, 4) === 0
+      || row.width === 1)).toBe(true);
+    expect(receipt.rows.find((row) => row.label === "experience-word-read")).toMatchObject({
+      instructionPc: "0x0806a97e", observedPc: "0x0806a980",
+      access: "read", width: 4, addressModulo4: 0,
+    });
+    expect(receipt.rows.find((row) => row.label === "species-bad-egg-byte-read")).toMatchObject({
+      instructionPc: "0x0806a960", access: "read", width: 1, addressModulo4: 3,
+    });
   });
 
   it("censuses the shared encrypted accessor route without claiming a total", () => {
@@ -537,11 +571,11 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
     expect(rows.every((row) => row.decryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
     expect(rows.every((row) => row.checksumLoopTiming.instructionFetchCycles === 518)).toBe(true);
     expect(rows.every((row) => row.encryptLoopTiming.instructionFetchCycles === 328)).toBe(true);
-    expect(rows.every((row) => row.decryptLoopTiming.cycles === 568)).toBe(true);
+    expect(rows.every((row) => row.decryptLoopTiming.cycles === 448)).toBe(true);
     expect(rows.every((row) => row.checksumLoopTiming.cycles === 518)).toBe(true);
-    expect(rows.every((row) => row.encryptLoopTiming.cycles === 568)).toBe(true);
-    expect(rows.every((row) => row.sharedDataBusCycles === 768)).toBe(true);
-    expect(rows.every((row) => row.sharedDataBusPremiumCycles === 480)).toBe(true);
+    expect(rows.every((row) => row.encryptLoopTiming.cycles === 448)).toBe(true);
+    expect(rows.every((row) => row.sharedDataBusCycles === 528)).toBe(true);
+    expect(rows.every((row) => row.sharedDataBusPremiumCycles === 240)).toBe(true);
     expect(rows.every((row) => row.tailCycles === row.checksumTailTiming.cycles + row.fieldTailTiming.cycles)).toBe(true);
     expect(rows.every((row) => row.composedKnownCycles === row.getSubstructCycles
       + row.decryptLoopTiming.cycles + row.checksumLoopTiming.cycles
@@ -696,12 +730,12 @@ describe("Factory CalculateMonStats v1 source-call receipt", () => {
 
     const expectedFieldTails = new Map<number, [string, number, number, number, number]>([
       [11, ["species", 11, 2, 4, 34]],
-      [25, ["experience", 3, 1, 6, 16]],
+      [25, ["experience", 3, 1, 4, 14]],
       [26, ["ev-byte", 2, 1, 2, 10]], [27, ["ev-byte", 2, 1, 2, 10]],
       [28, ["ev-byte", 2, 1, 2, 10]], [29, ["ev-byte", 2, 1, 2, 10]],
       [30, ["ev-byte", 2, 1, 2, 10]], [31, ["ev-byte", 2, 1, 2, 10]],
       [39, ["iv-bitfield", 4, 1, 2, 14]], [40, ["iv-bitfield", 4, 1, 2, 14]],
-      [41, ["iv-bitfield", 4, 1, 2, 14]], [42, ["iv-bitfield", 4, 1, 6, 18]],
+      [41, ["iv-bitfield", 4, 1, 2, 14]], [42, ["iv-bitfield", 4, 1, 4, 16]],
       [43, ["iv-bitfield", 4, 1, 2, 14]], [44, ["iv-bitfield", 4, 1, 2, 14]],
     ]);
     for (const [field, [route, halfwords, refills, busCycles, cycles]] of expectedFieldTails) {

@@ -120,6 +120,32 @@ VBLANK_WORKLOAD_INTERNAL_EVIDENCE = (
 CALCULATE_MON_STATS_EVIDENCE = (
     os.environ.get("FACTORY_CALCULATE_MON_STATS_EVIDENCE") == "1"
 )
+# Compact sibling receipt for Issue #55's EWRAM reducer. This never changes
+# the frozen v2/v3 packets: it is emitted only under a separate opt-in and
+# retains instruction PCs, width/access class, address modulo 4, and deltas.
+EWRAM_ACCESS_EVIDENCE = (
+    os.environ.get("FACTORY_EWRAM_ACCESS_EVIDENCE") == "1"
+)
+
+# mGBA exposes executing Thumb PC + 2. `nextPc` is the immediately following
+# instruction boundary, so the delta is the selected data instruction alone.
+EWRAM_ACCESS_BOUNDARIES = {
+    0x0806A258: ("decrypt-word-read", 0x0806A256, 0x0806A25A, "read", 4, 2, 0),
+    0x0806A25E: ("decrypt-word-str", 0x0806A25C, 0x0806A260, "write", 4, 2, 0),
+    0x0806A264: ("decrypt-word-stmia", 0x0806A262, 0x0806A266, "write", 4, 2, 0),
+    0x0806A234: ("encrypt-word-read", 0x0806A232, 0x0806A236, "read", 4, 2, 0),
+    0x0806A23A: ("encrypt-word-str", 0x0806A238, 0x0806A23C, "write", 4, 2, 0),
+    0x0806A240: ("encrypt-word-stmia", 0x0806A23E, 0x0806A242, "write", 4, 2, 0),
+    0x08068CB4: ("checksum-halfword-read", 0x08068CB2, 0x08068CB6, "read", 2, 5, 0),
+    0x0806A6D8: ("stored-checksum-halfword-read", 0x0806A6D6, 0x0806A6DA, "read", 2, 1, 28),
+    0x0806A962: ("species-bad-egg-byte-read", 0x0806A960, 0x0806A964, "read", 1, 2, 19),
+    0x0806A974: ("species-halfword-read", 0x0806A972, 0x0806A976, "read", 2, 6, 0),
+    0x0806A980: ("experience-word-read", 0x0806A97E, 0x0806A982, "read", 4, 1, 4),
+    0x0806A9A6: ("ev-byte-read", 0x0806A9A4, 0x0806A9A8, "read", 1, 7, 0),
+    0x0806A9F8: ("iv-byte-read", 0x0806A9F6, 0x0806A9FA, "read", 1, 5, 4),
+    0x0806AA00: ("iv-halfword-read", 0x0806A9FE, 0x0806AA02, "read", 2, 5, 4),
+    0x0806AA10: ("iv-word-read", 0x0806AA0E, 0x0806AA12, "read", 4, 5, 4),
+}
 
 # mGBA reports the executing Thumb instruction plus two bytes. Every entry
 # below is a direct BL in CalculateMonStats (pokemon.c:2823-2889); nested calls
@@ -711,6 +737,76 @@ def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fiel
     }
 
 
+def observe_ewram_access_boundary(
+    epoch: dict[str, Any], oracle: EmeraldOracle, frame: int, pc: int
+) -> None:
+    """Pair one pinned EWRAM instruction with its immediate successor."""
+    component = epoch.get("ewramComponentActive")
+    if component is not None and (
+        (component["kind"] == "checksum-loop" and pc == 0x08068D00)
+        or (
+            component["kind"] != "checksum-loop"
+            and pc in {component["returnPc"], component["returnPc"] + 2}
+        )
+    ):
+        end = cycle_snapshot(oracle, frame, pc, "ewram-component-end")
+        completed = dict(component)
+        completed["cycles"] = end["masterCycles"] - completed.pop("startMasterCycles")
+        completed["returnPc"] = f"0x{pc:08x}"
+        epoch.setdefault("ewramComponentBoundaries", []).append(completed)
+        epoch.pop("ewramComponentActive", None)
+
+    if epoch.get("ewramComponentActive") is None:
+        component_kind = {
+            0x0806A22A: "encrypt-loop",
+            0x0806A24E: "decrypt-loop",
+            0x08068CB2: "checksum-loop",
+        }.get(pc)
+        if component_kind is not None:
+            epoch["ewramComponentActive"] = {
+                "kind": component_kind,
+                "entryPc": f"0x{pc - 2:08x}",
+                "returnPc": 0x08068CFE if component_kind == "checksum-loop" else (oracle.core.cpu.lr & ~1),
+                "startMasterCycles": cycle_snapshot(
+                    oracle, frame, pc, "ewram-component-start"
+                )["masterCycles"],
+            }
+
+    pending = epoch.get("ewramAccessPending")
+    if pending is not None and pc == pending["nextObservedPc"]:
+        end = cycle_snapshot(oracle, frame, pc, "ewram-access-end")
+        row = dict(pending)
+        row["endMasterCycles"] = end["masterCycles"]
+        row["cycles"] = end["masterCycles"] - row.pop("startMasterCycles")
+        row.pop("nextObservedPc")
+        epoch.setdefault("ewramAccessBoundaries", []).append(row)
+        epoch.pop("ewramAccessPending", None)
+
+    descriptor = EWRAM_ACCESS_BOUNDARIES.get(pc)
+    if descriptor is None or epoch.get("ewramAccessPending") is not None:
+        return
+    label, instruction_pc, next_pc, access, width, base_register, offset = descriptor
+    address = (cpu_gpr(oracle, base_register) + offset) & 0xFFFFFFFF
+    active = epoch.get("calculateMonStatsActiveCall")
+    field = None
+    if active is not None and active.get("operation") == "get-mon-data":
+        field = active.get("arguments", {}).get("field")
+    epoch["ewramAccessPending"] = {
+        "label": label,
+        "instructionPc": f"0x{instruction_pc:08x}",
+        "observedPc": f"0x{pc:08x}",
+        "nextObservedPc": next_pc,
+        "access": access,
+        "width": width,
+        "addressModulo4": address & 3,
+        "field": field,
+        "frame": frame,
+        "startMasterCycles": cycle_snapshot(
+            oracle, frame, pc, "ewram-access-start"
+        )["masterCycles"],
+    }
+
+
 def cpu_gpr(oracle: EmeraldOracle, index: int) -> int:
     """Read a scalar argument/result without retaining a mon-memory address."""
     return int(oracle.core.cpu.gprs[index])
@@ -926,6 +1022,8 @@ def advance_one_instrumented_frame(
             if VBLANK_WORKLOAD_EVIDENCE and pc in VBLANK_STAGE_PCS:
                 append_vblank_stage(epoch, oracle, frame, pc, VBLANK_STAGE_PCS[pc])
             observe_calculate_mon_stats_call(epoch, oracle, frame, pc)
+            if EWRAM_ACCESS_EVIDENCE:
+                observe_ewram_access_boundary(epoch, oracle, frame, pc)
             if pc == target_entry and epoch.get("entry") is None:
                 cycle_events.append(cycle_snapshot(
                     oracle, frame, pc, "source-function-entry",
@@ -1284,6 +1382,11 @@ def classify_and_summarize(
             "schema": "factory-calculate-mon-stats-direct-calls/v1",
             "calls": epoch.get("calculateMonStatsCalls", []),
         }
+    if EWRAM_ACCESS_EVIDENCE:
+        if epoch.get("ewramAccessPending") is not None:
+            raise RuntimeError("EWRAM evidence finished with an unpaired instruction")
+        result["ewramAccessEvidence"] = epoch.get("ewramAccessBoundaries", [])
+        result["ewramComponentEvidence"] = epoch.get("ewramComponentBoundaries", [])
     if VBLANK_WORKLOAD_EVIDENCE:
         # This is a separate raw observation packet, intentionally not folded
         # into cycleEvidence's frozen v2 contract.  The report filters it to
@@ -1659,6 +1762,46 @@ def compact_calculate_mon_stats_receipt(result: dict[str, Any]) -> dict[str, Any
     }
 
 
+def compact_ewram_access_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Keep clean minima and scalar/source-relative alignment classes only."""
+    grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
+    for raw in result["ewramAccessEvidence"]:
+        grouped.setdefault((raw["label"], raw["addressModulo4"]), []).append(raw)
+    rows: list[dict[str, Any]] = []
+    for _, samples in sorted(grouped.items()):
+        first = samples[0]
+        rows.append({
+            "label": first["label"],
+            "instructionPc": first["instructionPc"],
+            "observedPc": first["observedPc"],
+            "access": first["access"],
+            "width": first["width"],
+            "addressModulo4": first["addressModulo4"],
+            "cleanCycles": min(sample["cycles"] for sample in samples),
+            "samples": len(samples),
+        })
+    component_groups: dict[str, list[dict[str, Any]]] = {}
+    for component in result["ewramComponentEvidence"]:
+        component_groups.setdefault(component["kind"], []).append(component)
+    components = []
+    for kind, samples in sorted(component_groups.items()):
+        first = samples[0]
+        components.append({
+            "kind": kind,
+            "entryPc": first["entryPc"],
+            "cleanCycles": min(sample["cycles"] for sample in samples),
+            "samples": len(samples),
+        })
+    return {
+        "schema": "factory-ewram-access-boundaries/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "components": components,
+        "rows": rows,
+    }
+
+
 def main() -> None:
     if OUTPUT.exists():
         raise SystemExit(f"refusing existing output path: {OUTPUT}")
@@ -1668,13 +1811,19 @@ def main() -> None:
         raise SystemExit("FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE=1 requires FACTORY_VBLANK_WORKLOAD_EVIDENCE=1")
     if CALCULATE_MON_STATS_EVIDENCE and not CYCLE_EVIDENCE:
         raise SystemExit("FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1")
+    if EWRAM_ACCESS_EVIDENCE and not (CYCLE_EVIDENCE and CALCULATE_MON_STATS_EVIDENCE):
+        raise SystemExit(
+            "FACTORY_EWRAM_ACCESS_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
+        )
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if CALCULATE_MON_STATS_EVIDENCE:
+    if EWRAM_ACCESS_EVIDENCE:
+        result = compact_ewram_access_receipt(result)
+    elif CALCULATE_MON_STATS_EVIDENCE:
         result = compact_calculate_mon_stats_receipt(result)
     elif VBLANK_WORKLOAD_INTERNAL_EVIDENCE:
         result = compact_vblank_workload_internal_receipt(result)
@@ -1685,6 +1834,9 @@ def main() -> None:
     print(
         (
             f"wrote {OUTPUT}: {result['case']} "
+            f"{len(result['rows'])} compact EWRAM boundaries"
+            if EWRAM_ACCESS_EVIDENCE
+            else f"wrote {OUTPUT}: {result['case']} "
             f"{len(result['directCalls'])} direct CalculateMonStats calls"
             if CALCULATE_MON_STATS_EVIDENCE
             else f"wrote {OUTPUT}: {result['case']} "

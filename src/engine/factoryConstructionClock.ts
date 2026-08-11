@@ -492,9 +492,9 @@ export interface FactoryEwramAccessTiming {
   alignment: FactoryEwramAccessWidth;
   transfers: 1 | 2;
   busWidth: 2;
-  cycles: 2 | 6;
+  cycles: 2 | 4;
   instructionBaselineCycles: 2;
-  busPremiumCycles: 0 | 4;
+  busPremiumCycles: 0 | 2;
   unresolved: null;
 }
 
@@ -1593,7 +1593,7 @@ export function reduceFactoryGetSubstructTiming(
  *
  * Pinned `BoxPokemon` storage is naturally word-aligned. On the retail GBA's
  * 16-bit EWRAM bus, aligned byte/halfword instructions take two master cycles;
- * an aligned word instruction performs two bus transfers and takes six. The
+ * an aligned word instruction performs two bus transfers and takes four. The
  * instruction census already charges two cycles for the load/store itself, so
  * callers add only `busPremiumCycles` when composing a component total.
  *
@@ -1632,9 +1632,9 @@ export function reduceFactoryEwramAccessTiming(
     alignment: input.width,
     transfers: word ? 2 : 1,
     busWidth: 2,
-    cycles: word ? 6 : 2,
+    cycles: word ? 4 : 2,
     instructionBaselineCycles: 2,
-    busPremiumCycles: word ? 4 : 0,
+    busPremiumCycles: word ? 2 : 0,
     unresolved: null,
   } as const);
 }

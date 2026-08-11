@@ -1,0 +1,188 @@
+{
+  "schema": "factory-ewram-access-boundaries/v1",
+  "case": "anchor",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "CreateFrontierFactorySelectableMons",
+  "components": [
+    {
+      "kind": "checksum-loop",
+      "entryPc": "0x08068cb0",
+      "cleanCycles": 518,
+      "samples": 1590
+    },
+    {
+      "kind": "decrypt-loop",
+      "entryPc": "0x0806a24c",
+      "cleanCycles": 448,
+      "samples": 1099
+    },
+    {
+      "kind": "encrypt-loop",
+      "entryPc": "0x0806a228",
+      "cleanCycles": 448,
+      "samples": 1105
+    }
+  ],
+  "rows": [
+    {
+      "label": "checksum-halfword-read",
+      "instructionPc": "0x08068cb2",
+      "observedPc": "0x08068cb4",
+      "access": "read",
+      "width": 2,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 4770
+    },
+    {
+      "label": "checksum-halfword-read",
+      "instructionPc": "0x08068cb2",
+      "observedPc": "0x08068cb4",
+      "access": "read",
+      "width": 2,
+      "addressModulo4": 2,
+      "cleanCycles": 2,
+      "samples": 4770
+    },
+    {
+      "label": "decrypt-word-read",
+      "instructionPc": "0x0806a256",
+      "observedPc": "0x0806a258",
+      "access": "read",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 13188
+    },
+    {
+      "label": "decrypt-word-stmia",
+      "instructionPc": "0x0806a262",
+      "observedPc": "0x0806a264",
+      "access": "write",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 13188
+    },
+    {
+      "label": "decrypt-word-str",
+      "instructionPc": "0x0806a25c",
+      "observedPc": "0x0806a25e",
+      "access": "write",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 4,
+      "samples": 13188
+    },
+    {
+      "label": "encrypt-word-read",
+      "instructionPc": "0x0806a232",
+      "observedPc": "0x0806a234",
+      "access": "read",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 13260
+    },
+    {
+      "label": "encrypt-word-stmia",
+      "instructionPc": "0x0806a23e",
+      "observedPc": "0x0806a240",
+      "access": "write",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 13260
+    },
+    {
+      "label": "encrypt-word-str",
+      "instructionPc": "0x0806a238",
+      "observedPc": "0x0806a23a",
+      "access": "write",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 13260
+    },
+    {
+      "label": "ev-byte-read",
+      "instructionPc": "0x0806a9a4",
+      "observedPc": "0x0806a9a6",
+      "access": "read",
+      "width": 1,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 12
+    },
+    {
+      "label": "experience-word-read",
+      "instructionPc": "0x0806a97e",
+      "observedPc": "0x0806a980",
+      "access": "read",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 18
+    },
+    {
+      "label": "iv-byte-read",
+      "instructionPc": "0x0806a9f6",
+      "observedPc": "0x0806a9f8",
+      "access": "read",
+      "width": 1,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 12
+    },
+    {
+      "label": "iv-halfword-read",
+      "instructionPc": "0x0806a9fe",
+      "observedPc": "0x0806aa00",
+      "access": "read",
+      "width": 2,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 12
+    },
+    {
+      "label": "iv-word-read",
+      "instructionPc": "0x0806aa0e",
+      "observedPc": "0x0806aa10",
+      "access": "read",
+      "width": 4,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 12
+    },
+    {
+      "label": "species-bad-egg-byte-read",
+      "instructionPc": "0x0806a960",
+      "observedPc": "0x0806a962",
+      "access": "read",
+      "width": 1,
+      "addressModulo4": 3,
+      "cleanCycles": 2,
+      "samples": 37
+    },
+    {
+      "label": "species-halfword-read",
+      "instructionPc": "0x0806a972",
+      "observedPc": "0x0806a974",
+      "access": "read",
+      "width": 2,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 37
+    },
+    {
+      "label": "stored-checksum-halfword-read",
+      "instructionPc": "0x0806a6d6",
+      "observedPc": "0x0806a6d8",
+      "access": "read",
+      "width": 2,
+      "addressModulo4": 0,
+      "cleanCycles": 2,
+      "samples": 614
+    }
+  ]
+}
