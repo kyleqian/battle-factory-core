@@ -208,7 +208,7 @@ describe("reduceFactorySetBoxMonDataTiming", () => {
         boxMonAddress: BOX_MON_ADDRESS,
         personality: 0x1ae1_6fda,
         checksumValid: true,
-        ...(expected.fieldValue === undefined ? {} : { fieldValue: expected.fieldValue }),
+        ...("fieldValue" in expected ? { fieldValue: expected.fieldValue } : {}),
       });
       expect(timing.fieldTailTiming).toMatchObject({
         route: expected.route,
