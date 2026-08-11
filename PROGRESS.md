@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1128 — [supervisor, 2026-08-11] **#55 audio read closure folded; final union green**
+
+- **State:** master is green through `60d95120`; the actual mixer-entry target,
+  mutable-route provenance, and command/pattern read-safety classes are closed.
+  #55 remains open only for exact timing composition, and its construction
+  clock stays null/unwired.
+- **Did:** folded the 13-target `ply_note` classification (**6 inline / 0
+  keysplit / 7 rhythm**) and the source-general MPlay command contract
+  (**100/100** candidate tracks complete, max **5 commands / 11 reads**).
+  Independently regenerated the combined evidence union at **9/9**.
+- **Next:** capture a versioned player scalar selector that preserves
+  `tempoI`/`tempoC` before attempting exact per-call MPlay cost reduction.
+  Do not alter frozen v3, infer the erased selector, fit a duration, or wire
+  `runFactoryConstructionClock`.
+- **Notes:** orient folded animation-main through `77e3d325`; subsequent
+  animation commits remain owned by the active animation supervisor. Final
+  union `npm test` **921 files / 8,617 passed / 1 skipped** (**146.46s**),
+  build **631 modules** (Vite **6.29s**), vanilla soak **20/20** (**32.2s**),
+  and full-policy soak **60/60** (**278.9s**) are green with **0 crash / 0
+  hang**. OFF oracle is healthy; no material decision was deferred.
+
 ## 1127 — [bounded MAIN worker, 2026-08-11] **#55 MPlay read bounds closed; selector isolated**
 
 - **State:** the remaining v3 MPlayMain command/pattern dereferences are fully
@@ -39,20 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **0-replacement** receipt. Focused prior/v2 audit **6/6**, smoke **375/375**,
   forced typecheck, full `npm test` **920 files / 8,613 passed / 1 skipped**
   (**90.92s**), and build (**631 modules**, Vite **7.89s**) are green.
-
-## 1125 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry target safety closed**
-
-- **State:** actual post-six-MPlayMain SoundMainRAM target safety is complete;
-  #55 stays open and the construction clock remains null/unwired.
-- **Did:** captured twice-fresh address-free entry descriptors for
-  anchor/LILIANA/legal-varied: **113/113** v3 digest/cost joins, **0** unequal,
-  **565/565** complete aligned physical target/read extents, joined to the
-  frozen **13-branch / 4-rule** audit. Hashes: `6b29d708…` / `780e3326…` /
-  `202f18b6…`.
-- **Next:** classify the exact `ply_note` inline/keysplit/rhythm writer (and
-  inline `ply_xwave` ancestry) for the **13** MPlay-replaced targets; **552**
-  targets already prove pre-MPlay persistence. Do not infer duration or wire.
-- **Notes:** six wrapper-mediated probes finished in **14.5–18.1s** each;
-  focused prior/v3/entry audit **8/8**, smoke **375/375**, forced typecheck,
-  full `npm test` **919 files / 8,610 passed / 1 skipped** (**72.37s**), and
-  build (**631 modules**, Vite **6.34s**) are green. OFF oracle is healthy.

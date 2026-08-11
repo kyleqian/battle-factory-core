@@ -40837,3 +40837,20 @@ git; the current live ledger keeps the three load-bearing entries only.
   8,607 passed / 1 skipped** (**110.25s**), build **631 modules** (**6.58s**),
   vanilla soak **20/20** (**34.3s**) and full-policy soak **60/60**
   (**294.3s**), both with **0 crash / 0 hang**. OFF oracle is healthy.
+
+## 1125 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry target safety closed**
+
+- **State:** actual post-six-MPlayMain SoundMainRAM target safety is complete;
+  #55 stays open and the construction clock remains null/unwired.
+- **Did:** captured twice-fresh address-free entry descriptors for
+  anchor/LILIANA/legal-varied: **113/113** v3 digest/cost joins, **0** unequal,
+  **565/565** complete aligned physical target/read extents, joined to the
+  frozen **13-branch / 4-rule** audit. Hashes: `6b29d708…` / `780e3326…` /
+  `202f18b6…`.
+- **Next:** classify the exact `ply_note` inline/keysplit/rhythm writer (and
+  inline `ply_xwave` ancestry) for the **13** MPlay-replaced targets; **552**
+  targets already prove pre-MPlay persistence. Do not infer duration or wire.
+- **Notes:** six wrapper-mediated probes finished in **14.5–18.1s** each;
+  focused prior/v3/entry audit **8/8**, smoke **375/375**, forced typecheck,
+  full `npm test` **919 files / 8,610 passed / 1 skipped** (**72.37s**), and
+  build (**631 modules**, Vite **6.34s**) are green. OFF oracle is healthy.

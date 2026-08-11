@@ -386,13 +386,28 @@ Per entry:
 - **What:** running the full terminal boundary-control matrix inside one
   long-lived process repeatedly hit teardown/resource instability before
   emitting valid JSON.
-- **Hits:** 2.
+- **Hits:** 3.
 - **Cost each:** ~4.5 min average.
 - **Workaround:** split each outcome/control into a fresh
   `run-mgba-probe.py` wrapper invocation and merge only the concise evidence.
 - **2026-08-08 note:** the three-case construction-clock probe still needed
   the wrapper to contain teardown SIGSEGV/log spew; the fresh-output validation
   worked, but added ~1 min.
+- **2026-08-11 note:** two mixer-provenance hook attempts exited 139 before
+  producing JSON; narrowing the hook then yielded two byte-identical valid
+  receipts per needed case. Cost: ~2 min.
+
+## Shell-interpolated worker briefs execute Markdown backticks
+
+- **What:** a direct `run-subagent.sh` launch used a double-quoted brief that
+  contained Markdown backticks. zsh executed the two enclosed identifier names
+  as command substitutions before the launcher saw the brief, so the worker
+  had to be stopped immediately and relaunched with a single-quoted argument.
+- **Hits:** 1.
+- **Cost each:** ~1 min, plus risk of dispatching a silently corrupted brief.
+- **Workaround:** pass direct briefs in single quotes when they contain no
+  apostrophes, or use `--brief-file`; never place Markdown backticks inside a
+  double-quoted shell argument.
 
 ## Popup evidence used “input gate” for a state handoff, not a sampled key edge
 
