@@ -302,7 +302,7 @@ import {
   beginFactorySwapSummaryReturn,
   createCanonicalFactorySwapPresentation,
   createPendingFactorySwapPresentation,
-  factorySwapBallTile,
+  factorySwapBallTiles,
   factorySwapAcceptExitBgFadeY,
   factorySwapAcceptExitObjFadeY,
   factorySwapQuitExitBgFadeY,
@@ -835,8 +835,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     if (factorySwap) {
       const returnedToField =
         factorySwap.fieldHandoff === "CB2_ReturnToFieldContinueScript";
+      const advancedFactorySwap = advanceFactorySwapPresentation(
+        factorySwap,
+        rngValue,
+      );
       let nextFactorySwap: FactorySwapPresentationState | null =
-        advanceFactorySwapPresentation(factorySwap);
+        advancedFactorySwap.presentation;
+      rngValue = advancedFactorySwap.rngValue;
       if (factoryRoundBattleOrchestrator !== null) {
         const pending =
           factoryRoundBattleOrchestrator.round.presentation?.command;
@@ -2792,7 +2797,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     if (swap.elapsed === 0) return renderPostwinState(state);
     if (swap.elapsed < 19) return renderFactorySwapEntryFade(state);
     if (swap.elapsed < 44) return blackFrame();
-    const tile = factorySwapBallTile(swap.elapsed);
+    const ballTiles = factorySwapBallTiles(swap);
     const fadeLocal = swap.elapsed - 44;
     if (
       swap.controller.phase === "summaryFade" ||
@@ -2819,7 +2824,7 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
                     swap.summaryReturnClock ?? 0,
                   ),
                 ]
-              : [tile, tile, tile],
+              : ballTiles,
           speciesRenderCoeff: swap.speciesNameFade.renderCoeff,
           bgFadeY: bgY,
           objFadeY: objY,
@@ -2896,11 +2901,9 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     return renderFactorySwapPicker({
       state: swap.controller,
       ballTiles: [
-        swap.controller.phase === "quitReturn" && swap.phaseElapsed >= 8
-          ? factorySwapBallTile(swap.elapsed - 1)
-          : tile,
-        tile,
-        tile,
+        ballTiles[0],
+        ballTiles[1],
+        ballTiles[2],
       ],
       speciesRenderCoeff: swap.speciesNameFade.renderCoeff,
       bgFadeY: exiting

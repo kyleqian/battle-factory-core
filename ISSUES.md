@@ -19,6 +19,18 @@ backlog.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
+**User decision (2026-08-10): the playable path stays FAITHFUL — no
+intro-animation divergence.** The user was offered a browser-only
+divergence (play the banked intros in the playable build, gated off in all
+oracle comparisons) and declined: Battle Scene OFF genuinely skips send-out
+intros (this entry's Slice-D record, four independent sources), so the
+current no-intro behavior is correct and stays. Consequence: this issue's
+remainder — the §1e 56/58 move-window patch-site retirement and the
+KABUTO/MAGBY/ONIX hand-fit retirements — is internal code health at
+**filler priority**. Do not wire per-tick playback or terminal offsets into
+any OFF-profile seam; that half is settled twice over (Slice A refuted +
+removed, Slice D not-applicable).
+
 **Symptom:** all 62 Factory-front send-out intro families (**376/376** species
 mappings) are ported and accepted in the animation lane
 (ANIMATION_PROGRESS.md top entry, 2026-08-03, `ANIM_FRONT_FLIP` closing the
@@ -231,73 +243,6 @@ every species flat, unconditionally, which this RAM receipt plus the
 inert-insurance evidence above already cover in full. Disposition: no
 further check needed; the deferred item has nothing left to verify at the
 generated-route settle hooks.
-
-## #86 — Gate-6 manifest route certificates don't self-describe success vs. failure-tail reachability (`routeBranch` deferred)
-
-**Symptom:** every Gate-6 hook-family route certificate (King's Rock, Shell
-Bell, item-move-end, Immunity, Color Change, Contact, Synchronize, etc.) is
-emitted with a single BFS-found route from the move's entry script to a
-moveend handoff, but the manifest does not record *which kind* of route it
-found — an ordinary success path, or a route that only exists because the
-BFS happened to pass through a failure marker (`BattleScript_ButItFailed`,
-an `orbyte gMoveResultFlags, MOVE_RESULT_FAILED`, or a `*Prevents*` redirect
-script). The 2026-08-10 night Gate-6 surge audit that produced this run's
-Mirror Move/Sleep Talk dynamic-dispatch exception fix (see
-`docs/gate6-family-worklist.md`'s "STATUS (2026-08-10 night" note under
-Rank 5) found exactly this defect class by hand-tracing two rows; it is
-very likely not the only two rows where a family's route certificate is a
-failure-tail artifact rather than true success-path hook-join evidence.
-
-**Confirmed:** the class of failure markers a route can pass through, per
-the audit's own definition: `BattleScript_ButItFailed` (the shared
-ordinary-failure landing script most `Effect*` scripts fall through to),
-any `orbyte gMoveResultFlags, MOVE_RESULT_FAILED` write (the explicit
-failure-flag idiom, e.g. `BattleScript_EffectMirrorMove`'s own
-`ppreduce`/`orbyte`/`goto` tail), and any `*Prevents*`-named redirect script
-(e.g. `BattleScript_DampStopsExplosion`, `BattleScript_OwnTempoPrevents` —
-guard-redirect scripts that end a move's execution early without it taking
-effect). The audit additionally established the counter-argument that not
-every failure-tail route is worthless: for rows that reach `MoveEnd` via a
-C-level jump rather than the dynamic-dispatch pattern (audit hand-traced
-Roar/Whirlwind/Substitute), the certificate remains valid hook-join
-evidence regardless of branch, because `Cmd_moveend`'s state loop runs
-unconditionally after the move on **both** the success and failure
-branches — only the *dynamic-dispatch* rows (Assist/Metronome/Mirror
-Move/Sleep Talk) are actually broken by a failure-tail-only route, because
-their success arm bypasses the static graph entirely rather than merely
-taking a different in-script path to the same `Cmd_moveend` call.
-
-**The work:** add a `routeBranch: "success" | "failure-tail"` field to
-every emitted route certificate (mechanical classification: does the
-found route's statement list include a `goto`/`jumpifstatus`/etc. target
-whose label reaches one of the three marker shapes above before its
-terminal moveend node?), thread it into the manifest's evidence text per
-family, and audit every one of the ~296 currently-promoted rows per axis
-(not just the two this run found) for any other failure-tail-only route
-masquerading as a full success-path proof. Where a failure-tail route is
-found for a row that also has no dynamic-dispatch success-arm escape (the
-Roar/Whirlwind/Substitute shape above), the manifest should record the
-classification but the row's promotion stands — cite `Cmd_moveend`'s
-unconditional post-move state loop as the justification in the evidence
-text, once, rather than per-row. Where a failure-tail route is found for a
-row whose success arm *does* dynamically dispatch elsewhere (Mirror
-Move/Sleep Talk's own shape), it should already be caught by this run's
-exception-row fix, but the general sweep is still worth running to see if
-any other row shares that shape.
-
-**Not done this step:** the 50-minute worker cap that produced the
-exception-row fix above did not have room left to build and verify a
-full mechanical `routeBranch` classifier across every promoted family
-plus its manifest test assertions. Landing it half-done (e.g. only for
-one family, or without the failure-marker set fully derived from source
-for every family) risks a second incomplete-audit cycle just like the one
-that produced this issue — so it was deliberately deferred whole rather
-than partially landed. A future step should scope this as its own bounded
-unit: build the classifier, run it read-only across all ~2,000+ currently-
-emitted route certificates first to see how many (if any) beyond Mirror
-Move/Sleep Talk are failure-tail-only, *then* decide whether further rows
-need exception-row conversion before wiring the field into the schema and
-tests.
 
 ## #72 — [CLOSED 2026-08-04; retained as settled record] battleStringResolver completeness guard — FATAL-guard user decision + selection-dismiss timing facts for future option-(a) work
 
@@ -970,7 +915,35 @@ seam had masked:
   optional) is a user-directed feature sequenced behind the play-test fixes
   #76-#81.
 
+**2026-08-10 generic ball-callback checkpoint:** the unconditional shared
+`factorySwapBallTile` restart is removed. `FactorySwapPresentationState` now
+owns three `ballAnim.ts` reducer states; fresh `Swap_InitAllSprites` balls
+enter moving anim 1 without a roll, `animEnded` rolls are threaded through
+core after its ambient VBlank draw in sprite order, successful rolls preserve
+the source's one-callback `StartSpriteAnim(0)` delay, and normal-summary return
+reconstructs a fresh three-sprite epoch. Tier-1 pins independent states,
+ordered consumption, first success/failure/rest boundaries, immutable
+round/parties/controller outcome, and summary reconstruction. The committed
+YES endpoint stays **248/248 exact twice fresh** at 10177. A fresh mGBA RAM
+probe through the fixture's already-present 10214 tail found the remaining
+boundary precisely: at first `animEnded`, oracle ambient+callback cursors are
+`0xA77397C1 -> 0x33DA400A`, producing failure/success/failure and
+`data[0]=[0,32,0]`; the app's unresolved #55 stream reaches `0x8FF192D9`
+after ambient and produces failure/success/success. The honest dense extension
+is **277/285**, with all eight residual frames confined to ball 2's resulting
+tile transitions. Per the fallback contract, the canonical capture endpoint
+is unchanged; exact extension remains #55's prohibited/unwired construction-
+clock problem, not a presentation branch.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
+
+**User decision (2026-08-10): GRIND IT OUT.** The user explicitly
+authorized pursuing the full construction-clock model ("I would like to
+grind that out. I would like to attempt to."), with a progress/opinion
+check-in expected after a few more sessions. The standing discipline is
+unchanged: only independently source-proven timing components land; no
+fitted constants; personality-exact construction stays unwired until the
+model closes honestly.
 
 **Wiring landed (2026-08-05, `67211ca2`):** the win-terminal scaffold
 (`tools/compare/appTrace.ts` `winTerminalWindowStage`) now carries the ROM's
@@ -1057,11 +1030,271 @@ Receipt §7 names the scaffold wiring fields (`winTerminalWindowStage`
 `rngValue`/`playerTrainerId`/`savedRentalRecords` + the per-mon schedule);
 the wiring step is queued.
 
-**Lead:** implement the deterministic construction-clock contract above only
-as a deliberate source/cycle-model slice. Per-mon cursors and per-frame fixture
-schedules are now evidence-refuted as production designs. Until then, keep the
-clean-stream contract and document personality-exactness as out of model when
-construction spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
+**Executable clock checkpoint (2026-08-10, `adac4aca`):**
+`src/engine/factoryConstructionClock.ts` now provides a source-operation
+scheduler with one raw RNG cursor, nature-rejection loops, injectable
+operation-cycle costs, VBlank ambient callbacks (including callback cycle
+cost), frame/event ledgers, and a separately named clean-stream mode. Its
+cost key initially exposed source function, species/nature/EV inputs,
+operation kind, attempt, and Random32 half; it cannot see trainer id, battle
+index, canonical tick, or a receipt schedule. Focused tests are **15/15** and
+preserve the three exact v1 receipt totals (**294/143/232 events**). An opt-in
+`FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1` probe path now records mGBA master
+cycles without changing v1 output. Live wiring remains open: a v2 receipt
+must bank initial phase, source-operation boundary costs, and ambient callback
+cost/order before the generic controller can supply a truthful cost model.
+
+**V2 cycle result (2026-08-10, `3916972f`):** all three direct probe outputs
+now bank the missing source and IRQ boundaries and reproduce twice byte-for-
+byte (`anchor 631bd214…`, `LILIANA ae1282b7…`, `varied 3e10197a…`; focused
+**19/19**). The result identified two independent missing inputs: compiled
+nature-check cost varies with the candidate personality (anchor **755–909**
+source cycles), while VBlank entry-to-resume cost varies with live audio/DMA
+work (anchor **29,475–57,638**, LILIANA **31,368–54,553** master cycles). The
+candidate half is resolved immediately below; the hardware-workload half is
+still absent. A trainer/set/tick/receipt table remains prohibited; the
+isolated scheduler stays unwired.
+
+**Candidate-aware nature timing (2026-08-10, `79448547`):** the cost key now
+also exposes each returned Random u16 and the assembled candidate personality,
+nature, and accepted/rejected result. `reduceFactoryNatureAttemptTiming`
+replays the compiled `GetNatureFromPersonality -> __umodsi3(personality, 25)`
+Thumb path and its wrong/accepted caller tails from source/ARM timing, with no
+trainer/set/battle/tick/cursor/fixture lookup. Across all **278** nature-check
+boundaries in the three v2 receipts, **267** equal the reducer directly; the
+other **11** (case counts **5/2/4**) are each reducer +18 cycles. A fresh
+instruction trace placed that +18 at an asynchronous global timing-service
+handoff between ordinary Thumb instructions, so every boundary decomposes
+exactly into candidate path plus external hardware service. Candidate timing
+is therefore resolved; the async workload is not. A fresh wrapped anchor v2
+probe was byte-identical (`631bd214…`). Focused **9/9** and typecheck pass.
+
+**Source-return timing (2026-08-10):** `reduceFactorySourceReturnTiming`
+replays the two compiled final-loop/epilogue paths using only
+`sourceFunction`. The anchor six-mon tail (`0x0819B612→0x0819A9FE`) is exactly
+40 source cycles; the LILIANA and varied three-mon tails
+(`0x0816376C→0x081635B2`) are exactly 32 each. All **3/3** v2 source-return
+spans decompose directly with zero contained VBlank pause and zero residual
+hardware-service cycles. Source cites and instruction accounting are in the
+v2 receipt; no live wiring or cursor adoption changed.
+
+**Construction-entry timing (2026-08-10):**
+`reduceFactoryConstructionEntryTiming` audits both compiled Factory call
+sites (`0x0819B5A4` selectable, `0x08163706` trainer-party) and reduces their
+shared `CreateMonWithEVSpreadNatureOTID` entry-to-first-`Random` path
+(`0x08068634→0x0806F5CC`). The unconditional prologue is **26** sequential
+Thumb halfwords (**52** cycles) plus one **6**-cycle BL pipeline refill:
+**58** source cycles. All **12/12** v2 spans match directly (anchor/LILIANA/
+varied **6/3/3**), with zero fully contained VBlank pause and zero residual
+hardware-service cycles. The construction clock now exposes this structural
+operation, but remains unwired while the larger costs and async workload below
+are unresolved.
+
+**Non-final outer-loop timing (2026-08-10):**
+`reduceFactoryOuterLoopTiming` now covers all **9/9** committed
+post-mon-end→next-construction-entry spans across both compiled siblings.
+`FillFactoryFrontierTrainerParty` is **130** cycles for all four spans
+(`27×2 + 2×8 + 3×11 + 3×9`); `CreateFrontierFactorySelectableMons` is **261**
+source cycles for all five (`61×2 + 6×8 + 5×11 + 4×9`). Four selectable
+spans match directly and one is **261 + 18 = 279**, with the +18 independently
+classified as asynchronous timing service between ordinary shift
+instructions. All nine contain zero complete VBlank pauses. The selectable
+reducer models only source loop index, rental rank, and challenge-number clamp
+branches; loaded mon values do not alter timing and `sourceSetId` stays
+diagnostic. The clock emits a non-final `factory-outer-loop` operation, but
+remains unwired while CreateMon/EV/stat/Factory-post and live VBlank/audio
+arbitration remain unresolved.
+
+**EV-spread source-state checkpoint (2026-08-10):** the complete v2
+`CreateMon`-return to `CalculateMonStats`-entry boundary is now pinned for all
+**12/12** spans (anchor/LILIANA/varied **6/3/3**) after subtracting contained
+VBlank pauses. Net range remains **26,672–41,256** cycles; only varied mon 1
+contains a complete pause (**36,217** cycles), and all other spans contain
+zero. Compiled audit of `0x0806869C→0x08068D0C` proves every selected EV bit
+takes `SetMonData→SetBoxMonData`, including decrypt, two checksum passes,
+re-encrypt, and **12** `GetSubstruct→__umodsi3(personality,24)` calls. Thus the
+smallest missing source input was the full accepted personality, not merely
+`evSpread`/`evStatCount` or personality modulo 24; it is now propagated to the
+clock's CreateMon/EV/stat/Factory-post operation keys and red-verified. Exact instruction-
+fetch/EWRAM access timing was not completed, so no duration reducer or fitted
+constant landed, and no +18 service residual is claimed before it can be
+separated from that missing compiled timing. See the construction receipt's
+EV-spread section. #55 stays open and the clock stays unwired.
+
+**`CalculateMonStats` parent/direct-call checkpoint (2026-08-10):** a fresh,
+byte-stable Battle Scene OFF sibling receipt now splits the same **12/12**
+entry→return spans (`0x08068D0C→0x080686EA`) into all **40** compiled direct
+calls per mon (**480** total): 15 `GetMonData2`, level lookup, 8 writes, 6
+divides, 5 nature reads, and 5 nature modifications. After seven fully
+contained VBlank pauses, source totals remain **140,999–154,160** cycles;
+direct callees account for **139,916–153,077** and parent interstitial is only
+**1,081/1,083**. `reduceFactoryCalculateMonStatsParentTiming` now explains all
+12 exactly from compiled fetch classes and source-visible species/old-max-HP/
+current-HP/new-max-HP state. The split is the u8 `levelUpHP` zero branch at
+`0x08068E38`: zero executes two extra halfwords but avoids a six-cycle refill,
+net **−2**. Normal nonzero decomposition is
+`345×2 + 51×6 + 5×(11−2) + 6×(9−2) = 1,083`; zero is
+`347×2 + 50×6 + 5×(11−2) + 6×(9−2) = 1,081`. Source tests also pin Shedinja
+and all final-HP branches.
+
+**Nested `ModifyStatByNature` timing (2026-08-10):** the standalone
+`reduceFactoryModifyStatByNatureTiming` now walks `pokemon.c:5878-5911` /
+`0x0806D8D4→0x0806D932` using only real callee ABI state: valid nature,
+stat-index, and incoming u16 stat. It replays the stat-index guard, ROM
+nature-table byte, sign branch, u16 product, ARM7TDMI multiply-width class,
+and nested `__udivsi3(...,100)` loops. All **60/60** committed calls are exact:
+**52×98** neutral, raise **3×416 + 1×418**, lower **3×408 + 1×410**, totaling
+**8,396** source cycles. That is **60/480** direct calls (**12.5%**) but only
+**0.475%** of their **1,768,691** pause-subtracted cycles, so it is an honest
+partial reduction rather than a complete stats claim. A fresh Scene-OFF anchor
+repeat remained byte-identical (current extended receipt `92d3feb4…`).
+
+**Nested direct `GetNature` timing (2026-08-10):**
+`reduceFactoryGetNatureTiming` now reduces the complete
+`0x0806D070→0x0806D088` callee from accepted personality alone: **180** fixed
+cycles for field-zero `GetMonData2→GetBoxMonData2`, **42** wrapper cycles, and
+the exact personality-dependent `__umodsi3(personality,25)` path. All **60/60**
+calls account for **59,900** source cycles (anchor/LILIANA/varied
+**29,875/14,830/15,195**). Raw spans are **57×exact + 2×(+18 async service) +
+1×(+245 complete VCount/audio IRQ)**; a fresh instruction trace classified the
+245-cycle path, and neither external class is folded into the reducer. The
+existing **278-call** nature-attempt contract is unchanged; fresh anchor hash
+remains byte-identical (current extended receipt `92d3feb4…`).
+
+**Nested direct signed-division timing (2026-08-10, `602227bd`):**
+`reduceFactorySignedDivisionTiming` now closes all **72/72** v1 direct
+`__divsi3` calls (**6 per mon, 12 mons**) from only signed-i32 dividend/divisor
+ABI values. It audits the wrapper's divisor-zero `__div0`, sign/absolute-value
+branches, final sign, and inline unsigned Loop1/2/Loop3 core at
+`0x082E755C`, factoring only the exact core shared with the distinct
+`__udivsi3` body at `0x082E7B68`. Source totals are anchor/LILIANA/varied
+**11,252 / 5,630 / 5,700 = 22,582** cycles; all 72 calls contain no complete
+VBlank pause. Raw spans are **71 exact + one +18** asynchronous service
+residual (anchor mon 3 `11300/100`), which is not folded into the reducer.
+The red-first tests also pin negative operands, zero dividend/divisor, and
+`INT_MIN / -1` retail wraparound. This resolves **72/480** direct calls but
+does not claim the aggregate operation.
+
+**Nested direct `SetMonData` timing (2026-08-10, `d877ab2b`, corrected by
+`8789ce5b`):** `reduceFactorySetMonDataTiming` source-reduces all **96/96**
+recorded direct party writes from the signed field ID and the compiled
+`0x0806ACAC` switch: level field 56 is **72** cycles and HP/stat fields 57–63
+are **78** cycles, totaling anchor/LILIANA/varied
+**3,708/1,854/1,854 = 7,416** source cycles with every raw span exact. General
+switch coverage additionally pins field 55 status-u32 at **86**, field 64
+mail-u8 at **72**, and field 65 no-op at **56** cycles. The delegated default
+`SetBoxMonData` route exposes only exact 30-cycle entry and 10-cycle return
+shells; its encrypted body remains unresolved.
+
+**Nested direct `GetMonData2` timing (2026-08-10, `9a90f094`):** the complete
+**180-call** v1 census is 24 direct party reads (fields 57/58), 72 encrypted EV
+reads (26–31), 72 encrypted IV reads (39–44), and 12 encrypted species reads
+(11). `reduceFactoryGetMonDataTiming` instruction-counts the source-general
+simple party jump-table arms from the signed field alone. All **24/24**
+receipt-used HP/max-HP calls are exact at **80** cycles, totaling
+anchor/LILIANA/varied **960/480/480 = 1,920**, with no contained pause or
+async residual. Fresh wrapped Scene-OFF packets for all three cases remain
+byte-identical (current extended receipts `92d3feb4…` / `136efa4a…` /
+`ea323d9e…`). Encrypted/default
+routes retain only exact wrapper shells (**36/12** cycles for the receipt's
+compare-default fields; **68/12** for jump-table holes) and `cycles: null`;
+Deoxys-stat routes likewise retain exact **68**-cycle entry and **26/42**
+return shells without claiming the nested body. Completed direct-call
+coverage is now **312/480**, **100,214 / 1,768,691 = 5.666%** of source
+callee cycles.
+
+**Direct `GetLevelFromMonExp` checkpoint (2026-08-10, `b8bb8306`):** all
+**12/12** calls now carry accepted personality, species, growth rate,
+experience, result, and exact post-accessor boundaries in twice-fresh
+Scene-OFF receipts. The source/ELF path from EXP-accessor return is exactly
+**43 + 21 + 2,200 + 18 = 2,282** source cycles for every level-50 case;
+observations decompose **8 exact + 3×(+18 external service) + 1×(+308
+VCount→m4aSoundVSync IRQ)**, with no asynchronous cost absorbed. The complete
+callee is not reduced: its two encrypted species/EXP accessors contribute
+**219,176** observed cycles and still require the unresolved personality-%24
+decrypt/checksum/fetch model. Complete-call net totals are
+anchor/LILIANA/varied **123,879/61,954/61,089 = 246,922**. No duration table,
+identity branch, residual fit, aggregate stats claim, or clock wiring landed.
+
+**Shared encrypted accessor census (2026-08-10):** the **156** direct
+encrypted reads plus **24** level accessors are now bounded as one source-
+general dependency: species **24**, EXP **12**, EV-byte **72**, IV-bitfield
+**72**. The census derives all 24 `personality % 24` substruct permutations,
+their exact non-contiguous ELF jump-arm entries, the valid-vs-corrupt checksum
+route, exact field-tail PCs/fetch widths, and the
+common four-GetSubstruct + 12-word decrypt + four-GetSubstruct/24-halfword
+checksum + 12-word encrypt structure. The 12 observed mons cover nine modulo
+routes; Tier 1 enumerates all 24. Twice-fresh OFF packets remain byte-stable at
+the existing three hashes, so no pointer/decrypted-storage fixture was added.
+The partial shell stays `cycles: null`: modulo-arm instruction/fetch and
+EWRAM loop timing remain unresolved, with no duration/identity/residual fit.
+
+Exact timing for the censused **156** encrypted `%24` box-mon reads and two
+encrypted accessors inside each of the 12 level calls, plus encrypted writes
+and exact memory/fetch timing, remains unresolved, so the
+complete stats operation and live clock stay unwired. No identity/duration
+table or residual fit landed; #55 stays open. See the construction receipt's
+stats section.
+
+**VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
+probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
+**52/31/30** construction-epoch interrupts. Within each case every measured
+VBlank-body stage except `m4aSoundMain` is constant; audio alone spans
+**23,920–52,083 / 24,732–47,917 / 24,391–41,682** cycles and accounts for the
+entire body variation. GPU/DMA queue shapes are constant. Return-to-resume is
+**41** cycles for **112/113** samples; one varied sample is **59** cycles, with
+no HBlank, VCount, Serial, Timer3, or shared `IntrDummy` ROM ISR entry observed.
+The receipt therefore narrows the remaining contract to complete dereferenced
+m4a state plus hardware interrupt-resume arbitration; it deliberately does
+not claim that the partial audio snapshot is an exact reducer. Compact raw
+receipts use relative timing/source state only and existing v2 files remained
+byte-identical.
+
+**Internal m4a receipt (2026-08-10, `236e1fe4`):** six fresh runs add a
+versioned sibling packet that splits all **113** audio calls at compiled
+`SoundMain`, linked `MPlayMain`, `CgbSound`, and runtime-copied
+`SoundMainRAM` boundaries. The first five player spans are fixed at **55**
+cycles; player six, CGB sound, and the five direct-sound channel passes carry
+the observed variation. The bounded address-free state inventory includes
+track/channel scalar regions and command/tone/wave prefixes, but all **113**
+captured keys are unique, with zero repeated equal-state observations. It
+therefore licenses no reducer: the next evidence requirement is repeated,
+complete source-state equivalence, not a case or frame lookup. The outer
+VBlank v1 and construction v2 byte contracts remain unchanged.
+
+**Extended m4a source-state receipt (2026-08-10, `28f7a5c8`):** a separate v3
+probe now captures full fixed SoundInfo/player/track/channel/CGB structs with
+pointer bytes normalized, reachable graph state, complete readable wave and
+PCM regions by digest, wider command/pattern/tone windows, dispatch targets,
+and relevant audio I/O state. Two fresh Scene-OFF runs per case are byte-
+identical: all **113** captured keys repeat with **0** unequal m4a costs. The
+packet contains no frame, tick, RNG cursor, address, construction identity, or
+absolute-cycle lookup. This remains an evidence boundary, not a reducer:
+`coverage.complete` is false for four residual dereference classes covering
+handler-dependent/unbounded MPlayMain command and callback reads, transitive
+CgbSound callback reads, and malformed/dynamic SoundMainRAM sample targets.
+The next admissible audio step is a complete instruction-traced indirect-read
+contract or controlled repeated cross-state equivalence—not a state-duration
+table. See `docs/issue55-m4a-source-state-receipt-v3.md`.
+
+**Swap-ball exposure (2026-08-10):** source-exact per-ball callback/RNG
+threading now makes the first post-cycle pixel boundary observe this debt.
+The WIN YES fixture's real first callback cursor/outcomes are
+`0xA77397C1`, failure/success/failure; the current synthetic live stream is
+`0x8FF192D9`, failure/success/success. Publishing an adopted construction
+endpoint at GO ON was tested and rejected: it double-counts the 31 ambient
+VBlanks already interleaved within LILIANA's 32-frame C call, exactly the
+v2 refutation above. No fitted cursor, per-frame schedule, or construction-
+clock wiring was landed. The canonical window therefore remains 248/248
+through 10177; its attempted 10214 extension is 277/285, ball 2 only.
+
+**Lead:** continue only with source/cycle-model slices for the remaining
+CreateMon/EV/stat/post budgets and deterministic VBlank/audio/DMA
+workload plus interrupt/event-entry latency. Do not wire the clock until those
+are source-general. Per-mon cursors and per-frame fixture schedules are
+evidence-refuted as production designs. Until then, keep the clean-stream
+contract and document personality-exactness as out of model when construction
+spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
 Gate-5 clause (a) is receipt-linked at the rules level (selection byte-exact
 from the probed cursor; construction proven via filtered ledger); this entry
 tracks the remaining stream-model boundary, not a Gate-5 blocker.

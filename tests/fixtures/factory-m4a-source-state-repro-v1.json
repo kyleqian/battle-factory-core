@@ -1,0 +1,26 @@
+{
+  "schema": "factory-m4a-source-state-repro/v1",
+  "oracleProfile": "battle-scene-off",
+  "freshRunsPerCase": 2,
+  "method": "Each case was run twice through tools/run-mgba-probe.py with a fresh mGBA instance and the sibling v3 source-state driver; SHA-256 covers the complete compact JSON packet.",
+  "cases": [
+    {
+      "case": "anchor",
+      "firstFreshSha256": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+      "secondFreshSha256": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+      "byteIdentical": true
+    },
+    {
+      "case": "liliana",
+      "firstFreshSha256": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+      "secondFreshSha256": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+      "byteIdentical": true
+    },
+    {
+      "case": "factory-varied",
+      "firstFreshSha256": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1",
+      "secondFreshSha256": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1",
+      "byteIdentical": true
+    }
+  ]
+}

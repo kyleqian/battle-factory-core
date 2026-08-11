@@ -1,0 +1,2410 @@
+{
+  "schema": "factory-vblank-workload-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "measurement": {
+    "unit": "mGBA master cycles",
+    "entry": "VBlankIntr entry (reference/pokeemerald/src/main.c:340)",
+    "return": "VBlankIntr terminal return (reference/pokeemerald/src/main.c:372)",
+    "resume": "first interrupted ROM instruction observed after the VBlank return",
+    "inclusion": "Only VBlank entries within each source-function entry-to-return epoch are distributed."
+  },
+  "sourceReferences": [
+    {
+      "source": "reference/pokeemerald/src/main.c",
+      "lines": "340-372",
+      "anchors": [
+        "static void VBlankIntr(void)",
+        "gMain.vblankCallback();",
+        "CopyBufferedValuesToGpuRegs();",
+        "ProcessDma3Requests();",
+        "m4aSoundMain();",
+        "TryReceiveLinkBattleData();",
+        "UpdateWirelessStatusIndicatorSprite();"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/battle_factory_screen.c",
+      "lines": "1101-1106",
+      "anchors": [
+        "static void VBlankCB_SelectScreen(void)",
+        "LoadOam();",
+        "ProcessSpriteCopyRequests();",
+        "TransferPlttBuffer();"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/overworld.c",
+      "lines": "1784-1792",
+      "anchors": [
+        "static void VBlankCB_Field(void)",
+        "ScanlineEffect_InitHBlankDmaTransfer();",
+        "FieldUpdateBgTilemapScroll();",
+        "TransferTilesetAnimsBuffer();"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/gpu_regs.c",
+      "lines": "49-64",
+      "anchors": [
+        "void CopyBufferedValuesToGpuRegs(void)",
+        "sGpuRegWaitingList"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/dma3_manager.c",
+      "lines": "42-96",
+      "anchors": [
+        "void ProcessDma3Requests(void)",
+        "sDma3Requests[sDma3RequestCursor].size",
+        "bytesTransferred > 40 * 1024"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "102-105",
+      "anchors": [
+        "void m4aSoundMain(void)",
+        "SoundMain();"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "20-180",
+      "anchors": [
+        "SoundMain:",
+        "SoundMainRAM:",
+        "SoundMainRAM_ChanLoop:"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/include/gba/m4a_internal.h",
+      "lines": "185-349",
+      "anchors": [
+        "struct SoundInfo",
+        "struct MusicPlayerTrack",
+        "struct MusicPlayerInfo"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/main.c",
+      "lines": "379-409",
+      "anchors": [
+        "static void HBlankIntr(void)",
+        "static void VCountIntr(void)",
+        "static void SerialIntr(void)",
+        "static void IntrDummy(void)"
+      ]
+    }
+  ],
+  "sourceClassification": {
+    "VBlankIntr": "The measured body is decomposed at direct call/return boundaries in main.c; every named component sums to entry-to-return exactly.",
+    "callbacks": "Select screen and field callbacks are separate source routines. Their observed cost is constant within each receipt, but their general cost remains state-dependent.",
+    "gpuAndDma3": "The buffered-register and DMA3 queue snapshots are source-visible inputs. Both are constant within each receipt, so neither explains its observed variation.",
+    "audio": "m4aSoundMain is the only measured VBlank-body stage with within-receipt variation. The captured audio state inventory covaries, but does not prove a field-minimal or causal reducer.",
+    "resume": "return-to-resume sits after VBlankIntr. One 59-cycle sample has no observed HBlank/VCount/Serial/Timer3 ROM ISR entry, so its additional 18 cycles remain an external event/resume-policy residual."
+  },
+  "futureReducerInputContract": {
+    "status": "smallest defensible source-state category contract; not a proof of field minimality",
+    "required": [
+      "VBlank route: gMain callback pointers/flags, link-vsync controls, and the Random() guard state.",
+      "Callback work state: OAM/sprite-copy/palette work plus field scanline, tilemap-scroll, and tileset-animation state when VBlankCB_Field is active.",
+      "GPU buffered-register queue and DMA3 manager lock/cursor/ordered request sizes and modes.",
+      "m4a state actually dereferenced by SoundMain/SoundMainRAM/MPlayMain: SoundInfo controls, linked player/track mutable state and command/tone/wave data, direct-sound channels, CGB state, and DMA1/DMA2 hardware state.",
+      "Hardware timing/event state: VCOUNT and the interrupt entry/return/resume arbitration needed to account for the observed post-return residual."
+    ],
+    "expresslyExcluded": [
+      "receipt name, trainer identity, rental set identity, battle number, construction index, RNG cursor, frame number, absolute tick, and UI cursor"
+    ],
+    "unresolved": [
+      "No complete audio state repeats in these samples, and the probe intentionally omits dereferenced command/tone/wave contents; the inventory cannot justify an exact audio-cycle function.",
+      "The single +18-cycle return-to-resume residual has no observed ROM non-VBlank ISR entry, so source state alone cannot yet explain that event boundary."
+    ]
+  },
+  "cases": [
+    {
+      "receipt": "anchor",
+      "sourceFunction": "CreateFrontierFactorySelectableMons",
+      "sourceEpochObservationCount": 52,
+      "stateInventory": {
+        "route": {
+          "distinct": 1,
+          "values": [
+            {
+              "callback2": "CB2_InitSelectScreen",
+              "vblankCallback": "VBlankCB_SelectScreen",
+              "hblankCallback": null,
+              "vcountCallback": null,
+              "serialCallback": "SerialCB",
+              "oamLoadDisabled": false,
+              "inBattle": false,
+              "trainerHillVBlankCounterActive": false,
+              "wirelessCommType": 1,
+              "linkVSyncDisabled": false
+            }
+          ]
+        },
+        "gpu": {
+          "distinct": 1,
+          "values": [
+            {
+              "bufferLocked": false,
+              "queuedRegisterOffsets": [],
+              "spriteCopyPending": false,
+              "spriteCopyRequestCount": 0,
+              "paletteTransferPending": false,
+              "paletteFadeControl": 4294967295,
+              "scanline": {
+                "state": 161,
+                "sourceBuffer": 53,
+                "dmaControl": 0
+              }
+            }
+          ]
+        },
+        "dma3": {
+          "distinct": 1,
+          "values": [
+            {
+              "locked": false,
+              "cursor": 96,
+              "queuedRequests": [],
+              "queuedBytes": 0
+            }
+          ]
+        },
+        "audio": {
+          "pcmDmaCounter": {
+            "count": 52,
+            "min": 1,
+            "max": 7,
+            "distinct": 7,
+            "histogram": [
+              {
+                "value": 1,
+                "count": 7
+              },
+              {
+                "value": 2,
+                "count": 7
+              },
+              {
+                "value": 3,
+                "count": 7
+              },
+              {
+                "value": 4,
+                "count": 8
+              },
+              {
+                "value": 5,
+                "count": 8
+              },
+              {
+                "value": 6,
+                "count": 8
+              },
+              {
+                "value": 7,
+                "count": 7
+              }
+            ]
+          },
+          "activeDirectSoundChannels": {
+            "count": 52,
+            "min": 2,
+            "max": 5,
+            "distinct": 4,
+            "histogram": [
+              {
+                "value": 2,
+                "count": 5
+              },
+              {
+                "value": 3,
+                "count": 10
+              },
+              {
+                "value": 4,
+                "count": 17
+              },
+              {
+                "value": 5,
+                "count": 20
+              }
+            ]
+          },
+          "capturedMusicPlayerStateDistinct": 52,
+          "capturedSoundStateDistinct": 52
+        }
+      },
+      "distributions": {
+        "entryToResume": {
+          "count": 52,
+          "min": 29475,
+          "max": 57638,
+          "distinct": 52,
+          "histogram": [
+            {
+              "value": 29475,
+              "count": 1
+            },
+            {
+              "value": 29575,
+              "count": 1
+            },
+            {
+              "value": 29623,
+              "count": 1
+            },
+            {
+              "value": 30267,
+              "count": 1
+            },
+            {
+              "value": 30441,
+              "count": 1
+            },
+            {
+              "value": 36645,
+              "count": 1
+            },
+            {
+              "value": 36648,
+              "count": 1
+            },
+            {
+              "value": 36666,
+              "count": 1
+            },
+            {
+              "value": 36916,
+              "count": 1
+            },
+            {
+              "value": 36935,
+              "count": 1
+            },
+            {
+              "value": 37160,
+              "count": 1
+            },
+            {
+              "value": 37205,
+              "count": 1
+            },
+            {
+              "value": 37293,
+              "count": 1
+            },
+            {
+              "value": 37554,
+              "count": 1
+            },
+            {
+              "value": 40137,
+              "count": 1
+            },
+            {
+              "value": 40286,
+              "count": 1
+            },
+            {
+              "value": 41124,
+              "count": 1
+            },
+            {
+              "value": 41139,
+              "count": 1
+            },
+            {
+              "value": 41150,
+              "count": 1
+            },
+            {
+              "value": 41256,
+              "count": 1
+            },
+            {
+              "value": 41268,
+              "count": 1
+            },
+            {
+              "value": 41282,
+              "count": 1
+            },
+            {
+              "value": 41394,
+              "count": 1
+            },
+            {
+              "value": 41398,
+              "count": 1
+            },
+            {
+              "value": 41802,
+              "count": 1
+            },
+            {
+              "value": 42743,
+              "count": 1
+            },
+            {
+              "value": 42799,
+              "count": 1
+            },
+            {
+              "value": 45454,
+              "count": 1
+            },
+            {
+              "value": 45653,
+              "count": 1
+            },
+            {
+              "value": 46545,
+              "count": 1
+            },
+            {
+              "value": 46550,
+              "count": 1
+            },
+            {
+              "value": 47590,
+              "count": 1
+            },
+            {
+              "value": 47739,
+              "count": 1
+            },
+            {
+              "value": 47872,
+              "count": 1
+            },
+            {
+              "value": 47894,
+              "count": 1
+            },
+            {
+              "value": 48237,
+              "count": 1
+            },
+            {
+              "value": 48994,
+              "count": 1
+            },
+            {
+              "value": 49093,
+              "count": 1
+            },
+            {
+              "value": 49095,
+              "count": 1
+            },
+            {
+              "value": 49240,
+              "count": 1
+            },
+            {
+              "value": 49325,
+              "count": 1
+            },
+            {
+              "value": 49460,
+              "count": 1
+            },
+            {
+              "value": 51002,
+              "count": 1
+            },
+            {
+              "value": 51538,
+              "count": 1
+            },
+            {
+              "value": 51685,
+              "count": 1
+            },
+            {
+              "value": 51829,
+              "count": 1
+            },
+            {
+              "value": 51941,
+              "count": 1
+            },
+            {
+              "value": 52906,
+              "count": 1
+            },
+            {
+              "value": 54136,
+              "count": 1
+            },
+            {
+              "value": 54810,
+              "count": 1
+            },
+            {
+              "value": 56370,
+              "count": 1
+            },
+            {
+              "value": 57638,
+              "count": 1
+            }
+          ]
+        },
+        "vblankEntryToReturn": {
+          "count": 52,
+          "min": 29434,
+          "max": 57597,
+          "distinct": 52,
+          "histogram": [
+            {
+              "value": 29434,
+              "count": 1
+            },
+            {
+              "value": 29534,
+              "count": 1
+            },
+            {
+              "value": 29582,
+              "count": 1
+            },
+            {
+              "value": 30226,
+              "count": 1
+            },
+            {
+              "value": 30400,
+              "count": 1
+            },
+            {
+              "value": 36604,
+              "count": 1
+            },
+            {
+              "value": 36607,
+              "count": 1
+            },
+            {
+              "value": 36625,
+              "count": 1
+            },
+            {
+              "value": 36875,
+              "count": 1
+            },
+            {
+              "value": 36894,
+              "count": 1
+            },
+            {
+              "value": 37119,
+              "count": 1
+            },
+            {
+              "value": 37164,
+              "count": 1
+            },
+            {
+              "value": 37252,
+              "count": 1
+            },
+            {
+              "value": 37513,
+              "count": 1
+            },
+            {
+              "value": 40096,
+              "count": 1
+            },
+            {
+              "value": 40245,
+              "count": 1
+            },
+            {
+              "value": 41083,
+              "count": 1
+            },
+            {
+              "value": 41098,
+              "count": 1
+            },
+            {
+              "value": 41109,
+              "count": 1
+            },
+            {
+              "value": 41215,
+              "count": 1
+            },
+            {
+              "value": 41227,
+              "count": 1
+            },
+            {
+              "value": 41241,
+              "count": 1
+            },
+            {
+              "value": 41353,
+              "count": 1
+            },
+            {
+              "value": 41357,
+              "count": 1
+            },
+            {
+              "value": 41761,
+              "count": 1
+            },
+            {
+              "value": 42702,
+              "count": 1
+            },
+            {
+              "value": 42758,
+              "count": 1
+            },
+            {
+              "value": 45413,
+              "count": 1
+            },
+            {
+              "value": 45612,
+              "count": 1
+            },
+            {
+              "value": 46504,
+              "count": 1
+            },
+            {
+              "value": 46509,
+              "count": 1
+            },
+            {
+              "value": 47549,
+              "count": 1
+            },
+            {
+              "value": 47698,
+              "count": 1
+            },
+            {
+              "value": 47831,
+              "count": 1
+            },
+            {
+              "value": 47853,
+              "count": 1
+            },
+            {
+              "value": 48196,
+              "count": 1
+            },
+            {
+              "value": 48953,
+              "count": 1
+            },
+            {
+              "value": 49052,
+              "count": 1
+            },
+            {
+              "value": 49054,
+              "count": 1
+            },
+            {
+              "value": 49199,
+              "count": 1
+            },
+            {
+              "value": 49284,
+              "count": 1
+            },
+            {
+              "value": 49419,
+              "count": 1
+            },
+            {
+              "value": 50961,
+              "count": 1
+            },
+            {
+              "value": 51497,
+              "count": 1
+            },
+            {
+              "value": 51644,
+              "count": 1
+            },
+            {
+              "value": 51788,
+              "count": 1
+            },
+            {
+              "value": 51900,
+              "count": 1
+            },
+            {
+              "value": 52865,
+              "count": 1
+            },
+            {
+              "value": 54095,
+              "count": 1
+            },
+            {
+              "value": 54769,
+              "count": 1
+            },
+            {
+              "value": 56329,
+              "count": 1
+            },
+            {
+              "value": 57597,
+              "count": 1
+            }
+          ]
+        },
+        "returnToResume": {
+          "count": 52,
+          "min": 41,
+          "max": 41,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 41,
+              "count": 52
+            }
+          ]
+        },
+        "bodyMinusM4aSoundMain": {
+          "count": 52,
+          "min": 5514,
+          "max": 5514,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 5514,
+              "count": 52
+            }
+          ]
+        },
+        "bodyStages": {
+          "preCallback": {
+            "count": 52,
+            "min": 235,
+            "max": 235,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 235,
+                "count": 52
+              }
+            ]
+          },
+          "vblankCallback": {
+            "count": 52,
+            "min": 4749,
+            "max": 4749,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 4749,
+                "count": 52
+              }
+            ]
+          },
+          "callbackToGpuCall": {
+            "count": 52,
+            "min": 6,
+            "max": 6,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 6,
+                "count": 52
+              }
+            ]
+          },
+          "copyBufferedGpuRegs": {
+            "count": 52,
+            "min": 68,
+            "max": 68,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 68,
+                "count": 52
+              }
+            ]
+          },
+          "processDma3Requests": {
+            "count": 52,
+            "min": 115,
+            "max": 115,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 115,
+                "count": 52
+              }
+            ]
+          },
+          "dma3ToSoundCall": {
+            "count": 52,
+            "min": 26,
+            "max": 26,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 26,
+                "count": 52
+              }
+            ]
+          },
+          "m4aSoundMain": {
+            "count": 52,
+            "min": 23920,
+            "max": 52083,
+            "distinct": 52,
+            "histogram": [
+              {
+                "value": 23920,
+                "count": 1
+              },
+              {
+                "value": 24020,
+                "count": 1
+              },
+              {
+                "value": 24068,
+                "count": 1
+              },
+              {
+                "value": 24712,
+                "count": 1
+              },
+              {
+                "value": 24886,
+                "count": 1
+              },
+              {
+                "value": 31090,
+                "count": 1
+              },
+              {
+                "value": 31093,
+                "count": 1
+              },
+              {
+                "value": 31111,
+                "count": 1
+              },
+              {
+                "value": 31361,
+                "count": 1
+              },
+              {
+                "value": 31380,
+                "count": 1
+              },
+              {
+                "value": 31605,
+                "count": 1
+              },
+              {
+                "value": 31650,
+                "count": 1
+              },
+              {
+                "value": 31738,
+                "count": 1
+              },
+              {
+                "value": 31999,
+                "count": 1
+              },
+              {
+                "value": 34582,
+                "count": 1
+              },
+              {
+                "value": 34731,
+                "count": 1
+              },
+              {
+                "value": 35569,
+                "count": 1
+              },
+              {
+                "value": 35584,
+                "count": 1
+              },
+              {
+                "value": 35595,
+                "count": 1
+              },
+              {
+                "value": 35701,
+                "count": 1
+              },
+              {
+                "value": 35713,
+                "count": 1
+              },
+              {
+                "value": 35727,
+                "count": 1
+              },
+              {
+                "value": 35839,
+                "count": 1
+              },
+              {
+                "value": 35843,
+                "count": 1
+              },
+              {
+                "value": 36247,
+                "count": 1
+              },
+              {
+                "value": 37188,
+                "count": 1
+              },
+              {
+                "value": 37244,
+                "count": 1
+              },
+              {
+                "value": 39899,
+                "count": 1
+              },
+              {
+                "value": 40098,
+                "count": 1
+              },
+              {
+                "value": 40990,
+                "count": 1
+              },
+              {
+                "value": 40995,
+                "count": 1
+              },
+              {
+                "value": 42035,
+                "count": 1
+              },
+              {
+                "value": 42184,
+                "count": 1
+              },
+              {
+                "value": 42317,
+                "count": 1
+              },
+              {
+                "value": 42339,
+                "count": 1
+              },
+              {
+                "value": 42682,
+                "count": 1
+              },
+              {
+                "value": 43439,
+                "count": 1
+              },
+              {
+                "value": 43538,
+                "count": 1
+              },
+              {
+                "value": 43540,
+                "count": 1
+              },
+              {
+                "value": 43685,
+                "count": 1
+              },
+              {
+                "value": 43770,
+                "count": 1
+              },
+              {
+                "value": 43905,
+                "count": 1
+              },
+              {
+                "value": 45447,
+                "count": 1
+              },
+              {
+                "value": 45983,
+                "count": 1
+              },
+              {
+                "value": 46130,
+                "count": 1
+              },
+              {
+                "value": 46274,
+                "count": 1
+              },
+              {
+                "value": 46386,
+                "count": 1
+              },
+              {
+                "value": 47351,
+                "count": 1
+              },
+              {
+                "value": 48581,
+                "count": 1
+              },
+              {
+                "value": 49255,
+                "count": 1
+              },
+              {
+                "value": 50815,
+                "count": 1
+              },
+              {
+                "value": 52083,
+                "count": 1
+              }
+            ]
+          },
+          "tryReceiveLinkBattleData": {
+            "count": 52,
+            "min": 63,
+            "max": 63,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 63,
+                "count": 52
+              }
+            ]
+          },
+          "linkToAmbientRandomCall": {
+            "count": 52,
+            "min": 29,
+            "max": 29,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 29,
+                "count": 52
+              }
+            ]
+          },
+          "ambientRandom": {
+            "count": 52,
+            "min": 78,
+            "max": 78,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 78,
+                "count": 52
+              }
+            ]
+          },
+          "updateWirelessStatus": {
+            "count": 52,
+            "min": 103,
+            "max": 103,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 103,
+                "count": 52
+              }
+            ]
+          },
+          "vblankTail": {
+            "count": 52,
+            "min": 42,
+            "max": 42,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 42,
+                "count": 52
+              }
+            ]
+          }
+        }
+      },
+      "classification": {
+        "allBodyVariationIsMeasuredInsideM4aSoundMain": true,
+        "bodyStagesFixedWithinReceipt": [
+          "preCallback",
+          "vblankCallback",
+          "callbackToGpuCall",
+          "copyBufferedGpuRegs",
+          "processDma3Requests",
+          "dma3ToSoundCall",
+          "tryReceiveLinkBattleData",
+          "linkToAmbientRandomCall",
+          "ambientRandom",
+          "updateWirelessStatus",
+          "vblankTail"
+        ],
+        "sourceVisibleNonVBlankIsrEntries": [],
+        "returnToResumeIsOutsideVBlankIntr": true,
+        "capturedAudioStateIsOnlyAnInventoryNotAnExactReducerInput": true
+      }
+    },
+    {
+      "receipt": "liliana",
+      "sourceFunction": "FillFactoryFrontierTrainerParty",
+      "sourceEpochObservationCount": 31,
+      "stateInventory": {
+        "route": {
+          "distinct": 1,
+          "values": [
+            {
+              "callback2": "CB2_Overworld",
+              "vblankCallback": "VBlankCB_Field",
+              "hblankCallback": null,
+              "vcountCallback": null,
+              "serialCallback": "SerialCB",
+              "oamLoadDisabled": false,
+              "inBattle": false,
+              "trainerHillVBlankCounterActive": false,
+              "wirelessCommType": 1,
+              "linkVSyncDisabled": false
+            }
+          ]
+        },
+        "gpu": {
+          "distinct": 1,
+          "values": [
+            {
+              "bufferLocked": false,
+              "queuedRegisterOffsets": [],
+              "spriteCopyPending": false,
+              "spriteCopyRequestCount": 0,
+              "paletteTransferPending": false,
+              "paletteFadeControl": 0,
+              "scanline": {
+                "state": 161,
+                "sourceBuffer": 53,
+                "dmaControl": 0
+              }
+            }
+          ]
+        },
+        "dma3": {
+          "distinct": 1,
+          "values": [
+            {
+              "locked": false,
+              "cursor": 81,
+              "queuedRequests": [],
+              "queuedBytes": 0
+            }
+          ]
+        },
+        "audio": {
+          "pcmDmaCounter": {
+            "count": 31,
+            "min": 1,
+            "max": 7,
+            "distinct": 7,
+            "histogram": [
+              {
+                "value": 1,
+                "count": 4
+              },
+              {
+                "value": 2,
+                "count": 4
+              },
+              {
+                "value": 3,
+                "count": 4
+              },
+              {
+                "value": 4,
+                "count": 4
+              },
+              {
+                "value": 5,
+                "count": 5
+              },
+              {
+                "value": 6,
+                "count": 5
+              },
+              {
+                "value": 7,
+                "count": 5
+              }
+            ]
+          },
+          "activeDirectSoundChannels": {
+            "count": 31,
+            "min": 3,
+            "max": 5,
+            "distinct": 3,
+            "histogram": [
+              {
+                "value": 3,
+                "count": 5
+              },
+              {
+                "value": 4,
+                "count": 23
+              },
+              {
+                "value": 5,
+                "count": 3
+              }
+            ]
+          },
+          "capturedMusicPlayerStateDistinct": 31,
+          "capturedSoundStateDistinct": 31
+        }
+      },
+      "distributions": {
+        "entryToResume": {
+          "count": 31,
+          "min": 31368,
+          "max": 54553,
+          "distinct": 31,
+          "histogram": [
+            {
+              "value": 31368,
+              "count": 1
+            },
+            {
+              "value": 31463,
+              "count": 1
+            },
+            {
+              "value": 34705,
+              "count": 1
+            },
+            {
+              "value": 34839,
+              "count": 1
+            },
+            {
+              "value": 36207,
+              "count": 1
+            },
+            {
+              "value": 36850,
+              "count": 1
+            },
+            {
+              "value": 37937,
+              "count": 1
+            },
+            {
+              "value": 38051,
+              "count": 1
+            },
+            {
+              "value": 38063,
+              "count": 1
+            },
+            {
+              "value": 38186,
+              "count": 1
+            },
+            {
+              "value": 38204,
+              "count": 1
+            },
+            {
+              "value": 38205,
+              "count": 1
+            },
+            {
+              "value": 38373,
+              "count": 1
+            },
+            {
+              "value": 38413,
+              "count": 1
+            },
+            {
+              "value": 39167,
+              "count": 1
+            },
+            {
+              "value": 39849,
+              "count": 1
+            },
+            {
+              "value": 40079,
+              "count": 1
+            },
+            {
+              "value": 40547,
+              "count": 1
+            },
+            {
+              "value": 41400,
+              "count": 1
+            },
+            {
+              "value": 41831,
+              "count": 1
+            },
+            {
+              "value": 41893,
+              "count": 1
+            },
+            {
+              "value": 43463,
+              "count": 1
+            },
+            {
+              "value": 44188,
+              "count": 1
+            },
+            {
+              "value": 44449,
+              "count": 1
+            },
+            {
+              "value": 45044,
+              "count": 1
+            },
+            {
+              "value": 46194,
+              "count": 1
+            },
+            {
+              "value": 47245,
+              "count": 1
+            },
+            {
+              "value": 47468,
+              "count": 1
+            },
+            {
+              "value": 48911,
+              "count": 1
+            },
+            {
+              "value": 48954,
+              "count": 1
+            },
+            {
+              "value": 54553,
+              "count": 1
+            }
+          ]
+        },
+        "vblankEntryToReturn": {
+          "count": 31,
+          "min": 31327,
+          "max": 54512,
+          "distinct": 31,
+          "histogram": [
+            {
+              "value": 31327,
+              "count": 1
+            },
+            {
+              "value": 31422,
+              "count": 1
+            },
+            {
+              "value": 34664,
+              "count": 1
+            },
+            {
+              "value": 34798,
+              "count": 1
+            },
+            {
+              "value": 36166,
+              "count": 1
+            },
+            {
+              "value": 36809,
+              "count": 1
+            },
+            {
+              "value": 37896,
+              "count": 1
+            },
+            {
+              "value": 38010,
+              "count": 1
+            },
+            {
+              "value": 38022,
+              "count": 1
+            },
+            {
+              "value": 38145,
+              "count": 1
+            },
+            {
+              "value": 38163,
+              "count": 1
+            },
+            {
+              "value": 38164,
+              "count": 1
+            },
+            {
+              "value": 38332,
+              "count": 1
+            },
+            {
+              "value": 38372,
+              "count": 1
+            },
+            {
+              "value": 39126,
+              "count": 1
+            },
+            {
+              "value": 39808,
+              "count": 1
+            },
+            {
+              "value": 40038,
+              "count": 1
+            },
+            {
+              "value": 40506,
+              "count": 1
+            },
+            {
+              "value": 41359,
+              "count": 1
+            },
+            {
+              "value": 41790,
+              "count": 1
+            },
+            {
+              "value": 41852,
+              "count": 1
+            },
+            {
+              "value": 43422,
+              "count": 1
+            },
+            {
+              "value": 44147,
+              "count": 1
+            },
+            {
+              "value": 44408,
+              "count": 1
+            },
+            {
+              "value": 45003,
+              "count": 1
+            },
+            {
+              "value": 46153,
+              "count": 1
+            },
+            {
+              "value": 47204,
+              "count": 1
+            },
+            {
+              "value": 47427,
+              "count": 1
+            },
+            {
+              "value": 48870,
+              "count": 1
+            },
+            {
+              "value": 48913,
+              "count": 1
+            },
+            {
+              "value": 54512,
+              "count": 1
+            }
+          ]
+        },
+        "returnToResume": {
+          "count": 31,
+          "min": 41,
+          "max": 41,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 41,
+              "count": 31
+            }
+          ]
+        },
+        "bodyMinusM4aSoundMain": {
+          "count": 31,
+          "min": 6595,
+          "max": 6595,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 6595,
+              "count": 31
+            }
+          ]
+        },
+        "bodyStages": {
+          "preCallback": {
+            "count": 31,
+            "min": 235,
+            "max": 235,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 235,
+                "count": 31
+              }
+            ]
+          },
+          "vblankCallback": {
+            "count": 31,
+            "min": 5876,
+            "max": 5876,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 5876,
+                "count": 31
+              }
+            ]
+          },
+          "callbackToGpuCall": {
+            "count": 31,
+            "min": 6,
+            "max": 6,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 6,
+                "count": 31
+              }
+            ]
+          },
+          "copyBufferedGpuRegs": {
+            "count": 31,
+            "min": 68,
+            "max": 68,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 68,
+                "count": 31
+              }
+            ]
+          },
+          "processDma3Requests": {
+            "count": 31,
+            "min": 115,
+            "max": 115,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 115,
+                "count": 31
+              }
+            ]
+          },
+          "dma3ToSoundCall": {
+            "count": 31,
+            "min": 26,
+            "max": 26,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 26,
+                "count": 31
+              }
+            ]
+          },
+          "m4aSoundMain": {
+            "count": 31,
+            "min": 24732,
+            "max": 47917,
+            "distinct": 31,
+            "histogram": [
+              {
+                "value": 24732,
+                "count": 1
+              },
+              {
+                "value": 24827,
+                "count": 1
+              },
+              {
+                "value": 28069,
+                "count": 1
+              },
+              {
+                "value": 28203,
+                "count": 1
+              },
+              {
+                "value": 29571,
+                "count": 1
+              },
+              {
+                "value": 30214,
+                "count": 1
+              },
+              {
+                "value": 31301,
+                "count": 1
+              },
+              {
+                "value": 31415,
+                "count": 1
+              },
+              {
+                "value": 31427,
+                "count": 1
+              },
+              {
+                "value": 31550,
+                "count": 1
+              },
+              {
+                "value": 31568,
+                "count": 1
+              },
+              {
+                "value": 31569,
+                "count": 1
+              },
+              {
+                "value": 31737,
+                "count": 1
+              },
+              {
+                "value": 31777,
+                "count": 1
+              },
+              {
+                "value": 32531,
+                "count": 1
+              },
+              {
+                "value": 33213,
+                "count": 1
+              },
+              {
+                "value": 33443,
+                "count": 1
+              },
+              {
+                "value": 33911,
+                "count": 1
+              },
+              {
+                "value": 34764,
+                "count": 1
+              },
+              {
+                "value": 35195,
+                "count": 1
+              },
+              {
+                "value": 35257,
+                "count": 1
+              },
+              {
+                "value": 36827,
+                "count": 1
+              },
+              {
+                "value": 37552,
+                "count": 1
+              },
+              {
+                "value": 37813,
+                "count": 1
+              },
+              {
+                "value": 38408,
+                "count": 1
+              },
+              {
+                "value": 39558,
+                "count": 1
+              },
+              {
+                "value": 40609,
+                "count": 1
+              },
+              {
+                "value": 40832,
+                "count": 1
+              },
+              {
+                "value": 42275,
+                "count": 1
+              },
+              {
+                "value": 42318,
+                "count": 1
+              },
+              {
+                "value": 47917,
+                "count": 1
+              }
+            ]
+          },
+          "tryReceiveLinkBattleData": {
+            "count": 31,
+            "min": 63,
+            "max": 63,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 63,
+                "count": 31
+              }
+            ]
+          },
+          "linkToAmbientRandomCall": {
+            "count": 31,
+            "min": 29,
+            "max": 29,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 29,
+                "count": 31
+              }
+            ]
+          },
+          "ambientRandom": {
+            "count": 31,
+            "min": 78,
+            "max": 78,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 78,
+                "count": 31
+              }
+            ]
+          },
+          "updateWirelessStatus": {
+            "count": 31,
+            "min": 57,
+            "max": 57,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 57,
+                "count": 31
+              }
+            ]
+          },
+          "vblankTail": {
+            "count": 31,
+            "min": 42,
+            "max": 42,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 42,
+                "count": 31
+              }
+            ]
+          }
+        }
+      },
+      "classification": {
+        "allBodyVariationIsMeasuredInsideM4aSoundMain": true,
+        "bodyStagesFixedWithinReceipt": [
+          "preCallback",
+          "vblankCallback",
+          "callbackToGpuCall",
+          "copyBufferedGpuRegs",
+          "processDma3Requests",
+          "dma3ToSoundCall",
+          "tryReceiveLinkBattleData",
+          "linkToAmbientRandomCall",
+          "ambientRandom",
+          "updateWirelessStatus",
+          "vblankTail"
+        ],
+        "sourceVisibleNonVBlankIsrEntries": [],
+        "returnToResumeIsOutsideVBlankIntr": true,
+        "capturedAudioStateIsOnlyAnInventoryNotAnExactReducerInput": true
+      }
+    },
+    {
+      "receipt": "factory-varied",
+      "sourceFunction": "FillFactoryFrontierTrainerParty",
+      "sourceEpochObservationCount": 30,
+      "stateInventory": {
+        "route": {
+          "distinct": 1,
+          "values": [
+            {
+              "callback2": "CB2_Overworld",
+              "vblankCallback": "VBlankCB_Field",
+              "hblankCallback": null,
+              "vcountCallback": null,
+              "serialCallback": "SerialCB",
+              "oamLoadDisabled": false,
+              "inBattle": false,
+              "trainerHillVBlankCounterActive": false,
+              "wirelessCommType": 1,
+              "linkVSyncDisabled": false
+            }
+          ]
+        },
+        "gpu": {
+          "distinct": 1,
+          "values": [
+            {
+              "bufferLocked": false,
+              "queuedRegisterOffsets": [],
+              "spriteCopyPending": false,
+              "spriteCopyRequestCount": 0,
+              "paletteTransferPending": false,
+              "paletteFadeControl": 0,
+              "scanline": {
+                "state": 161,
+                "sourceBuffer": 53,
+                "dmaControl": 0
+              }
+            }
+          ]
+        },
+        "dma3": {
+          "distinct": 1,
+          "values": [
+            {
+              "locked": false,
+              "cursor": 3,
+              "queuedRequests": [],
+              "queuedBytes": 0
+            }
+          ]
+        },
+        "audio": {
+          "pcmDmaCounter": {
+            "count": 30,
+            "min": 1,
+            "max": 7,
+            "distinct": 7,
+            "histogram": [
+              {
+                "value": 1,
+                "count": 5
+              },
+              {
+                "value": 2,
+                "count": 4
+              },
+              {
+                "value": 3,
+                "count": 4
+              },
+              {
+                "value": 4,
+                "count": 4
+              },
+              {
+                "value": 5,
+                "count": 4
+              },
+              {
+                "value": 6,
+                "count": 4
+              },
+              {
+                "value": 7,
+                "count": 5
+              }
+            ]
+          },
+          "activeDirectSoundChannels": {
+            "count": 30,
+            "min": 3,
+            "max": 4,
+            "distinct": 2,
+            "histogram": [
+              {
+                "value": 3,
+                "count": 18
+              },
+              {
+                "value": 4,
+                "count": 12
+              }
+            ]
+          },
+          "capturedMusicPlayerStateDistinct": 30,
+          "capturedSoundStateDistinct": 30
+        }
+      },
+      "distributions": {
+        "entryToResume": {
+          "count": 30,
+          "min": 31073,
+          "max": 48364,
+          "distinct": 28,
+          "histogram": [
+            {
+              "value": 31073,
+              "count": 1
+            },
+            {
+              "value": 31431,
+              "count": 1
+            },
+            {
+              "value": 31435,
+              "count": 3
+            },
+            {
+              "value": 31534,
+              "count": 1
+            },
+            {
+              "value": 31556,
+              "count": 1
+            },
+            {
+              "value": 31584,
+              "count": 1
+            },
+            {
+              "value": 31850,
+              "count": 1
+            },
+            {
+              "value": 31983,
+              "count": 1
+            },
+            {
+              "value": 35073,
+              "count": 1
+            },
+            {
+              "value": 35851,
+              "count": 1
+            },
+            {
+              "value": 35892,
+              "count": 1
+            },
+            {
+              "value": 36084,
+              "count": 1
+            },
+            {
+              "value": 36217,
+              "count": 1
+            },
+            {
+              "value": 36330,
+              "count": 1
+            },
+            {
+              "value": 36410,
+              "count": 1
+            },
+            {
+              "value": 36412,
+              "count": 1
+            },
+            {
+              "value": 36811,
+              "count": 1
+            },
+            {
+              "value": 36923,
+              "count": 1
+            },
+            {
+              "value": 37128,
+              "count": 1
+            },
+            {
+              "value": 37389,
+              "count": 1
+            },
+            {
+              "value": 37553,
+              "count": 1
+            },
+            {
+              "value": 37790,
+              "count": 1
+            },
+            {
+              "value": 38946,
+              "count": 1
+            },
+            {
+              "value": 39037,
+              "count": 1
+            },
+            {
+              "value": 39673,
+              "count": 1
+            },
+            {
+              "value": 40226,
+              "count": 1
+            },
+            {
+              "value": 40976,
+              "count": 1
+            },
+            {
+              "value": 48364,
+              "count": 1
+            }
+          ]
+        },
+        "vblankEntryToReturn": {
+          "count": 30,
+          "min": 31032,
+          "max": 48323,
+          "distinct": 28,
+          "histogram": [
+            {
+              "value": 31032,
+              "count": 1
+            },
+            {
+              "value": 31390,
+              "count": 1
+            },
+            {
+              "value": 31394,
+              "count": 3
+            },
+            {
+              "value": 31493,
+              "count": 1
+            },
+            {
+              "value": 31515,
+              "count": 1
+            },
+            {
+              "value": 31543,
+              "count": 1
+            },
+            {
+              "value": 31809,
+              "count": 1
+            },
+            {
+              "value": 31942,
+              "count": 1
+            },
+            {
+              "value": 35014,
+              "count": 1
+            },
+            {
+              "value": 35810,
+              "count": 1
+            },
+            {
+              "value": 35851,
+              "count": 1
+            },
+            {
+              "value": 36043,
+              "count": 1
+            },
+            {
+              "value": 36176,
+              "count": 1
+            },
+            {
+              "value": 36289,
+              "count": 1
+            },
+            {
+              "value": 36369,
+              "count": 1
+            },
+            {
+              "value": 36371,
+              "count": 1
+            },
+            {
+              "value": 36770,
+              "count": 1
+            },
+            {
+              "value": 36882,
+              "count": 1
+            },
+            {
+              "value": 37087,
+              "count": 1
+            },
+            {
+              "value": 37348,
+              "count": 1
+            },
+            {
+              "value": 37512,
+              "count": 1
+            },
+            {
+              "value": 37749,
+              "count": 1
+            },
+            {
+              "value": 38905,
+              "count": 1
+            },
+            {
+              "value": 38996,
+              "count": 1
+            },
+            {
+              "value": 39632,
+              "count": 1
+            },
+            {
+              "value": 40185,
+              "count": 1
+            },
+            {
+              "value": 40935,
+              "count": 1
+            },
+            {
+              "value": 48323,
+              "count": 1
+            }
+          ]
+        },
+        "returnToResume": {
+          "count": 30,
+          "min": 41,
+          "max": 59,
+          "distinct": 2,
+          "histogram": [
+            {
+              "value": 41,
+              "count": 29
+            },
+            {
+              "value": 59,
+              "count": 1
+            }
+          ]
+        },
+        "bodyMinusM4aSoundMain": {
+          "count": 30,
+          "min": 6641,
+          "max": 6641,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 6641,
+              "count": 30
+            }
+          ]
+        },
+        "bodyStages": {
+          "preCallback": {
+            "count": 30,
+            "min": 235,
+            "max": 235,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 235,
+                "count": 30
+              }
+            ]
+          },
+          "vblankCallback": {
+            "count": 30,
+            "min": 5876,
+            "max": 5876,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 5876,
+                "count": 30
+              }
+            ]
+          },
+          "callbackToGpuCall": {
+            "count": 30,
+            "min": 6,
+            "max": 6,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 6,
+                "count": 30
+              }
+            ]
+          },
+          "copyBufferedGpuRegs": {
+            "count": 30,
+            "min": 68,
+            "max": 68,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 68,
+                "count": 30
+              }
+            ]
+          },
+          "processDma3Requests": {
+            "count": 30,
+            "min": 115,
+            "max": 115,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 115,
+                "count": 30
+              }
+            ]
+          },
+          "dma3ToSoundCall": {
+            "count": 30,
+            "min": 26,
+            "max": 26,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 26,
+                "count": 30
+              }
+            ]
+          },
+          "m4aSoundMain": {
+            "count": 30,
+            "min": 24391,
+            "max": 41682,
+            "distinct": 28,
+            "histogram": [
+              {
+                "value": 24391,
+                "count": 1
+              },
+              {
+                "value": 24749,
+                "count": 1
+              },
+              {
+                "value": 24753,
+                "count": 3
+              },
+              {
+                "value": 24852,
+                "count": 1
+              },
+              {
+                "value": 24874,
+                "count": 1
+              },
+              {
+                "value": 24902,
+                "count": 1
+              },
+              {
+                "value": 25168,
+                "count": 1
+              },
+              {
+                "value": 25301,
+                "count": 1
+              },
+              {
+                "value": 28373,
+                "count": 1
+              },
+              {
+                "value": 29169,
+                "count": 1
+              },
+              {
+                "value": 29210,
+                "count": 1
+              },
+              {
+                "value": 29402,
+                "count": 1
+              },
+              {
+                "value": 29535,
+                "count": 1
+              },
+              {
+                "value": 29648,
+                "count": 1
+              },
+              {
+                "value": 29728,
+                "count": 1
+              },
+              {
+                "value": 29730,
+                "count": 1
+              },
+              {
+                "value": 30129,
+                "count": 1
+              },
+              {
+                "value": 30241,
+                "count": 1
+              },
+              {
+                "value": 30446,
+                "count": 1
+              },
+              {
+                "value": 30707,
+                "count": 1
+              },
+              {
+                "value": 30871,
+                "count": 1
+              },
+              {
+                "value": 31108,
+                "count": 1
+              },
+              {
+                "value": 32264,
+                "count": 1
+              },
+              {
+                "value": 32355,
+                "count": 1
+              },
+              {
+                "value": 32991,
+                "count": 1
+              },
+              {
+                "value": 33544,
+                "count": 1
+              },
+              {
+                "value": 34294,
+                "count": 1
+              },
+              {
+                "value": 41682,
+                "count": 1
+              }
+            ]
+          },
+          "tryReceiveLinkBattleData": {
+            "count": 30,
+            "min": 63,
+            "max": 63,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 63,
+                "count": 30
+              }
+            ]
+          },
+          "linkToAmbientRandomCall": {
+            "count": 30,
+            "min": 29,
+            "max": 29,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 29,
+                "count": 30
+              }
+            ]
+          },
+          "ambientRandom": {
+            "count": 30,
+            "min": 78,
+            "max": 78,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 78,
+                "count": 30
+              }
+            ]
+          },
+          "updateWirelessStatus": {
+            "count": 30,
+            "min": 103,
+            "max": 103,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 103,
+                "count": 30
+              }
+            ]
+          },
+          "vblankTail": {
+            "count": 30,
+            "min": 42,
+            "max": 42,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 42,
+                "count": 30
+              }
+            ]
+          }
+        }
+      },
+      "classification": {
+        "allBodyVariationIsMeasuredInsideM4aSoundMain": true,
+        "bodyStagesFixedWithinReceipt": [
+          "preCallback",
+          "vblankCallback",
+          "callbackToGpuCall",
+          "copyBufferedGpuRegs",
+          "processDma3Requests",
+          "dma3ToSoundCall",
+          "tryReceiveLinkBattleData",
+          "linkToAmbientRandomCall",
+          "ambientRandom",
+          "updateWirelessStatus",
+          "vblankTail"
+        ],
+        "sourceVisibleNonVBlankIsrEntries": [],
+        "returnToResumeIsOutsideVBlankIntr": true,
+        "capturedAudioStateIsOnlyAnInventoryNotAnExactReducerInput": true
+      }
+    }
+  ],
+  "verdict": "Evidence-only checkpoint: exact distributions and VBlankIntr stage accounting are reproducible, but no live reducer is licensed by this receipt."
+}

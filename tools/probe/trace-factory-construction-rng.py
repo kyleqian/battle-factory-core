@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import bisect
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -61,6 +62,16 @@ BOOTSTRAP_OFF = ORACLE_DIR / "bootstrap" / "factory-battle-scene-off.json"
 RANDOM_ENTRY_PC = 0x0806F5CE  # Random() entry, mGBA's pipelined Thumb PC
 SELECTABLE_ENTRY_PC = 0x0819B486  # CreateFrontierFactorySelectableMons + 2
 FILL_FACTORY_ENTRY_PC = 0x081635D6  # FillFactoryFrontierTrainerParty + 2
+CREATE_EV_ENTRY_PC = 0x08068636  # CreateMonWithEVSpreadNatureOTID + 2
+GET_NATURE_ENTRY_PC = 0x0806D08A  # GetNatureFromPersonality + 2
+CREATE_MON_ENTRY_PC = 0x08067B4E  # CreateMon + 2
+CREATE_MON_RESUME_PC = 0x0806869E  # instruction after CreateMon BL + pipeline
+CALCULATE_STATS_ENTRY_PC = 0x08068D0E  # CalculateMonStats + 2
+CALCULATE_STATS_RESUME_PC = 0x080686EC  # instruction after CalculateMonStats BL + pipeline
+VBLANK_ENTRY_PC = 0x0800073A  # VBlankIntr + 2
+VBLANK_EXIT_PC = 0x080007DC  # VBlankIntr's terminal bx + 2
+SELECTABLE_POST_END_PC = 0x0819B614  # after held-item SetMonData, before loop test
+FILL_FACTORY_POST_END_PC = 0x0816376E  # after held-item SetMonData, before loop test
 SRANDCOUNT_ADDR = 0x020249C0  # src/random.c:5, static EWRAM symbol
 SAVE_RENTALS_OFFSET = 0xE70  # include/global.h: SaveBlock2.frontier.rentalMons
 RENTAL_MON_STRIDE = 12
@@ -74,6 +85,749 @@ LILIANA_FIRST_FRAME = 11311
 LILIANA_LAST_FRAME = 11345
 
 ANCHOR_BOOTSTRAP_SHA256 = "9c89c74113f29e7d4595571c3aceb728417c4fe441b644ec0022fb498463f297"
+
+# The committed v1 receipt intentionally remains frame/cursor-only.  A fresh
+# probe can opt into mGBA master-cycle evidence for the construction-clock
+# follow-up without changing that receipt's byte contract:
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 ... trace-factory-construction-rng.py
+CYCLE_EVIDENCE = os.environ.get("FACTORY_CONSTRUCTION_CYCLE_EVIDENCE") == "1"
+# This is deliberately a separate opt-in receipt from the v2 construction
+# chain.  The v2 files stay frozen while this records the *source-visible*
+# VBlank state and individual VBlankIntr call boundaries needed to investigate
+# the remaining hardware-workload clock.  It must be used with cycle evidence:
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+#   FACTORY_VBLANK_WORKLOAD_EVIDENCE=1 ... trace-factory-construction-rng.py
+VBLANK_WORKLOAD_EVIDENCE = os.environ.get("FACTORY_VBLANK_WORKLOAD_EVIDENCE") == "1"
+# Version two is deliberately a sibling observation packet.  The v1 workload
+# receipt has already been committed as a stable outer-VBlank contract, so the
+# m4a-only instruction boundaries and its extra state are opt-in rather than
+# appended to that contract.
+#
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+#   FACTORY_VBLANK_WORKLOAD_EVIDENCE=1 \
+#   FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE=1 ...
+VBLANK_WORKLOAD_INTERNAL_EVIDENCE = (
+    os.environ.get("FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE") == "1"
+)
+# This is a sibling of the frozen v2 construction receipt. It records each
+# direct source call made by CalculateMonStats, with scalar inputs/results but
+# never a party pointer, set id, trainer id, or timing lookup key. The call
+# sites are from the pinned CalculateMonStats ELF body and distinguish the
+# stat field / arithmetic branch an eventual source reducer must replay.
+#
+#   FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+#   FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 ...
+CALCULATE_MON_STATS_EVIDENCE = (
+    os.environ.get("FACTORY_CALCULATE_MON_STATS_EVIDENCE") == "1"
+)
+
+# mGBA reports the executing Thumb instruction plus two bytes. Every entry
+# below is a direct BL in CalculateMonStats (pokemon.c:2823-2889); nested calls
+# made by these callees have an LR outside this table and are intentionally not
+# duplicated. This keeps the observation a bounded source-operation trace.
+CALCULATE_MON_STATS_DIRECT_CALLS: dict[int, tuple[str, str, int]] = {
+    0x08068D1E: ("get-mon-data", "old-max-hp", 0x0806A51A),
+    0x08068D2A: ("get-mon-data", "current-hp", 0x0806A51A),
+    0x08068D36: ("get-mon-data", "hp-iv", 0x0806A51A),
+    0x08068D42: ("get-mon-data", "hp-ev", 0x0806A51A),
+    0x08068D4E: ("get-mon-data", "attack-iv", 0x0806A51A),
+    0x08068D5A: ("get-mon-data", "attack-ev", 0x0806A51A),
+    0x08068D66: ("get-mon-data", "defense-iv", 0x0806A51A),
+    0x08068D72: ("get-mon-data", "defense-ev", 0x0806A51A),
+    0x08068D7E: ("get-mon-data", "speed-iv", 0x0806A51A),
+    0x08068D8A: ("get-mon-data", "speed-ev", 0x0806A51A),
+    0x08068D96: ("get-mon-data", "sp-attack-iv", 0x0806A51A),
+    0x08068DA2: ("get-mon-data", "sp-attack-ev", 0x0806A51A),
+    0x08068DAE: ("get-mon-data", "sp-defense-iv", 0x0806A51A),
+    0x08068DBA: ("get-mon-data", "sp-defense-ev", 0x0806A51A),
+    0x08068DC6: ("get-mon-data", "species", 0x0806A51A),
+    0x08068DD0: ("get-level-from-exp", "level", 0x08069056),
+    0x08068DE0: ("set-mon-data", "level", 0x0806ACAE),
+    0x08068E1C: ("divide", "max-hp", 0x082E7542),
+    0x08068E42: ("set-mon-data", "max-hp", 0x0806ACAE),
+    0x08068E68: ("divide", "attack", 0x082E7542),
+    0x08068E72: ("get-nature", "attack", 0x0806D072),
+    0x08068E80: ("modify-stat-by-nature", "attack", 0x0806D8D6),
+    0x08068E90: ("set-mon-data", "attack", 0x0806ACAE),
+    0x08068EAE: ("divide", "defense", 0x082E7542),
+    0x08068EB8: ("get-nature", "defense", 0x0806D072),
+    0x08068EC6: ("modify-stat-by-nature", "defense", 0x0806D8D6),
+    0x08068ED6: ("set-mon-data", "defense", 0x0806ACAE),
+    0x08068EF4: ("divide", "speed", 0x082E7542),
+    0x08068EFE: ("get-nature", "speed", 0x0806D072),
+    0x08068F0C: ("modify-stat-by-nature", "speed", 0x0806D8D6),
+    0x08068F1C: ("set-mon-data", "speed", 0x0806ACAE),
+    0x08068F3A: ("divide", "sp-attack", 0x082E7542),
+    0x08068F44: ("get-nature", "sp-attack", 0x0806D072),
+    0x08068F52: ("modify-stat-by-nature", "sp-attack", 0x0806D8D6),
+    0x08068F62: ("set-mon-data", "sp-attack", 0x0806ACAE),
+    0x08068F80: ("divide", "sp-defense", 0x082E7542),
+    0x08068F8A: ("get-nature", "sp-defense", 0x0806D072),
+    0x08068F98: ("modify-stat-by-nature", "sp-defense", 0x0806D8D6),
+    0x08068FA8: ("set-mon-data", "sp-defense", 0x0806ACAE),
+    0x08068FF0: ("set-mon-data", "current-hp", 0x0806ACAE),
+}
+
+# VBlankIntr's direct call/return sites in the pinned ELF.  These are source
+# routines in main.c, not inferred from the construction fixture.  Capturing
+# both sides lets the report attribute elapsed master cycles without trying to
+# guess a callback's cost from a frame identity.
+VBLANK_STAGE_PCS = {
+    # mGBA exposes the pipelined Thumb PC (instruction + 2), just like the
+    # existing VBlankIntr/CreateMon constants above.
+    0x08000780: "vblank-callback-call",
+    0x08000784: "vblank-callback-return",
+    0x0800078A: "copy-buffered-gpu-regs-call",
+    0x0800078E: "copy-buffered-gpu-regs-return/process-dma3-call",
+    0x08000792: "process-dma3-return",
+    0x0800079A: "m4a-sound-main-call",
+    0x0800079E: "m4a-sound-main-return/try-receive-link-call",
+    0x080007A2: "try-receive-link-return",
+    0x080007BC: "ambient-random-call",
+    0x080007C0: "ambient-random-return/update-wireless-call",
+    0x080007C4: "update-wireless-return",
+}
+
+# m4aSoundMain's compiled source-owned boundaries.  The first seven locations
+# are ROM Thumb PCs (mGBA reports the executing instruction + 2); the latter
+# three are the same pinned SoundMainRAM instructions after m4aSoundInit copies
+# the routine to SoundMainRAM_Buffer in IWRAM.  They intentionally name only
+# source routines or loop heads in m4a.c/m4a_1.s, not fixture-specific paths.
+M4A_SOUND_MAIN_CALL_PC = 0x0800079A
+M4A_SOUND_MAIN_RETURN_PC = 0x0800079E
+M4A_INTERNAL_STAGE_PCS = {
+    0x082DF05E: "sound-main-entry",
+    0x082DFA5E: "mplay-main-entry",
+    0x082DFAAE: "mplay-track-command-pass",
+    0x082DFC02: "mplay-track-volume-pitch-pass",
+    0x082DF0A0: "sound-main-after-mplay",
+    0x082E0CAA: "cgb-sound-entry",
+    0x082DF0A6: "sound-main-after-cgb",
+    0x03001AAA: "sound-main-ram-entry",
+    0x03001B42: "sound-main-ram-channel-pass",
+    0x03001E4C: "sound-main-ram-epilogue",
+}
+
+# These are the non-VBlank source ISR entries.  If one ran between VBlank's
+# terminal bx and the interrupted instruction resuming, it would be direct
+# evidence rather than an unexplained timing residual.
+NON_VBLANK_ISR_ENTRY_PCS = {
+    0x08000816: "HBlankIntr",
+    0x08000846: "VCountIntr",
+    0x0800087A: "SerialIntr",
+    # Timer0/1/2, DMA, Key, and Game Pak entries share IntrDummy in this
+    # build. Capturing it prevents the generic resume detector below from
+    # silently mistaking a source ISR entry for the interrupted instruction.
+    0x080008AA: "IntrDummy",
+    0x0800BA2A: "Timer3Intr",
+}
+
+G_MAIN_ADDR = 0x030022C0
+G_MAIN_VBLANK_CALLBACK_OFFSET = 0x0C
+G_MAIN_CALLBACK2_OFFSET = 0x04
+G_MAIN_HBLANK_CALLBACK_OFFSET = 0x10
+G_MAIN_VCOUNT_CALLBACK_OFFSET = 0x14
+G_MAIN_SERIAL_CALLBACK_OFFSET = 0x18
+G_MAIN_FLAGS_OFFSET = 0x439
+G_TRAINER_HILL_VBLANK_COUNTER_ADDR = 0x0203CF5C
+G_WIRELESS_COMM_TYPE_ADDR = 0x030030FC
+G_LINK_VSYNC_DISABLED_ADDR = 0x03002748
+
+DMA3_REQUESTS_ADDR = 0x03000010
+DMA3_MANAGER_LOCKED_ADDR = 0x03000810
+DMA3_REQUEST_CURSOR_ADDR = 0x03000811
+DMA3_REQUEST_SIZE = 16
+DMA3_REQUEST_COUNT = 128
+
+GPU_REG_WAITING_LIST_ADDR = 0x03000878
+GPU_REG_BUFFER_LOCKED_ADDR = 0x030008D8
+GPU_REG_WAITING_LIST_SIZE = 0x60
+
+SPRITE_COPY_PENDING_ADDR = 0x02021834
+SPRITE_COPY_COUNT_ADDR = 0x02021835
+PALETTE_FADE_ADDR = 0x02037FD4
+PALETTE_TRANSFER_PENDING_ADDR = 0x02037FE4
+SCANLINE_EFFECT_ADDR = 0x02039B28
+SOUND_INFO_ADDR = 0x03006380
+
+# The structures below are pinned from include/main.h, dma3_manager.c,
+# gpu_regs.c, palette.c, scanline_effect.h, and gba/m4a_internal.h.  They are
+# intentionally semantic state summaries (not pointer or fixture IDs).
+SOUND_INFO_PCM_DMA_COUNTER = 0x04
+SOUND_INFO_REVERB = 0x05
+SOUND_INFO_MAX_CHANS = 0x06
+SOUND_INFO_FREQ = 0x08
+SOUND_INFO_C15 = 0x0A
+SOUND_INFO_PCM_DMA_PERIOD = 0x0B
+SOUND_INFO_MAX_LINES = 0x0C
+SOUND_INFO_PCM_SAMPLES_PER_VBLANK = 0x10
+SOUND_INFO_CGB_CHANS = 0x1C
+SOUND_INFO_MUSIC_PLAYER_HEAD = 0x24
+SOUND_INFO_CHANNELS = 0x50
+SOUND_CHANNEL_SIZE = 0x40
+MUSIC_PLAYER_INFO_SIZE = 0x40
+MUSIC_PLAYER_TRACK_SIZE = 0x50
+MUSIC_PLAYER_INFO_TRACKS = 0x2C
+MUSIC_PLAYER_INFO_TONE = 0x30
+MUSIC_PLAYER_INFO_NEXT_MAIN = 0x38
+MUSIC_PLAYER_INFO_NEXT_PLAYER = 0x3C
+MUSIC_PLAYER_INFO_TEMPO_D = 0x1C
+MUSIC_PLAYER_INFO_TEMPO_U = 0x1E
+MUSIC_PLAYER_INFO_TEMPO_I = 0x20
+MUSIC_PLAYER_INFO_TEMPO_C = 0x22
+MUSIC_PLAYER_INFO_FADE_OI = 0x24
+MUSIC_PLAYER_INFO_FADE_OC = 0x26
+MUSIC_PLAYER_INFO_FADE_OV = 0x28
+
+MUSIC_TRACK_TONE = 0x24
+MUSIC_TRACK_TIMER = 0x3A
+MUSIC_TRACK_COMMAND = 0x40
+MUSIC_TRACK_PATTERN_STACK = 0x44
+MUSIC_TRACK_CHANNELS = 0x20
+
+WAVE_DATA_TYPE = 0x00
+WAVE_DATA_STATUS = 0x02
+WAVE_DATA_FREQUENCY = 0x04
+WAVE_DATA_LOOP_START = 0x08
+WAVE_DATA_SIZE = 0x0C
+WAVE_DATA_BYTES = 0x10
+
+SOUND_CHANNEL_COUNT = 0x18
+SOUND_CHANNEL_FW = 0x1C
+SOUND_CHANNEL_FREQUENCY = 0x20
+SOUND_CHANNEL_WAVE = 0x24
+SOUND_CHANNEL_CURRENT = 0x28
+SOUND_CHANNEL_NEXT = 0x34
+
+CGB_CHANNEL_SIZE = 0x40
+CGB_CHANNEL_FREQUENCY = 0x20
+CGB_CHANNEL_WAVE = 0x24
+CGB_CHANNEL_CURRENT_WAVE = 0x28
+
+M4A_INPUT_PREFIX_BYTES = 8
+
+
+def pointer_symbol(value: int) -> str | None:
+    """Render a callback pointer as a source symbol without retaining its address."""
+    if value == 0:
+        return None
+    return symbol_at(value & ~1)
+
+
+def snapshot_dma3_queue(oracle: EmeraldOracle) -> dict[str, Any]:
+    """Read the source queue shape ProcessDma3Requests will consume next."""
+    cursor = read_u8(oracle, DMA3_REQUEST_CURSOR_ADDR)
+    queued: list[dict[str, int]] = []
+    for offset in range(DMA3_REQUEST_COUNT):
+        index = (cursor + offset) % DMA3_REQUEST_COUNT
+        base = DMA3_REQUESTS_ADDR + index * DMA3_REQUEST_SIZE
+        size = read_u16(oracle, base + 8)
+        if size == 0:
+            break
+        queued.append({"size": size, "mode": read_u16(oracle, base + 10)})
+    return {
+        "locked": read_u8(oracle, DMA3_MANAGER_LOCKED_ADDR) != 0,
+        "cursor": cursor,
+        "queuedRequests": queued,
+        "queuedBytes": sum(request["size"] for request in queued),
+    }
+
+
+def snapshot_music_players(oracle: EmeraldOracle, head: int) -> list[dict[str, Any]]:
+    """Capture the linked m4a player/track branches without memory addresses."""
+    players: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    current = head
+    while current and current not in seen and len(players) < 16:
+        seen.add(current)
+        track_count = min(read_u8(oracle, current + 8), 16)
+        tracks = read_u32(oracle, current + 0x2C)
+        track_rows: list[dict[str, int]] = []
+        if tracks:
+            for index in range(track_count):
+                track = tracks + index * MUSIC_PLAYER_TRACK_SIZE
+                track_rows.append({
+                    "flags": read_u8(oracle, track),
+                    "wait": read_u8(oracle, track + 1),
+                    "runningStatus": read_u8(oracle, track + 7),
+                    "mod": read_u8(oracle, track + 23),
+                    "lfoSpeed": read_u8(oracle, track + 25),
+                    "lfoDelayCounter": read_u8(oracle, track + 28),
+                })
+        players.append({
+            "status": read_u32(oracle, current + 4),
+            "trackCount": track_count,
+            "tempoCounter": read_u16(oracle, current + 0x22),
+            "tracks": track_rows,
+        })
+        current = read_u32(oracle, current + 0x3C)
+    return players
+
+
+def is_source_readable(address: int, size: int) -> bool:
+    """Keep optional command/wave capture bounded to source memory regions."""
+    if size < 0:
+        return False
+    end = address + size
+    return (
+        0x08000000 <= address and end <= 0x0A000000  # ROM / mapped ROM mirror
+        or 0x02000000 <= address and end <= 0x02040000  # EWRAM
+        or 0x03000000 <= address and end <= 0x03008000  # IWRAM
+    )
+
+
+def bounded_source_bytes(oracle: EmeraldOracle, address: int, length: int = M4A_INPUT_PREFIX_BYTES) -> list[int]:
+    """Return a capped input prefix without persisting a source pointer."""
+    if address == 0 or not is_source_readable(address, length):
+        return []
+    return [read_u8(oracle, address + index) for index in range(length)]
+
+
+def snapshot_wave_input(oracle: EmeraldOracle, wave: int, current_pointer: int = 0) -> dict[str, Any] | None:
+    """Capture only the header and bounded bytes the m4a mixers dereference."""
+    if wave == 0 or not is_source_readable(wave, WAVE_DATA_BYTES):
+        return None
+    data = wave + WAVE_DATA_BYTES
+    size = read_u32(oracle, wave + WAVE_DATA_SIZE)
+    current_offset: int | None = None
+    if current_pointer >= data and current_pointer - data <= max(size, M4A_INPUT_PREFIX_BYTES):
+        current_offset = current_pointer - data
+    return {
+        "type": read_u16(oracle, wave + WAVE_DATA_TYPE),
+        "status": read_u16(oracle, wave + WAVE_DATA_STATUS),
+        "frequency": read_u32(oracle, wave + WAVE_DATA_FREQUENCY),
+        "loopStart": read_u32(oracle, wave + WAVE_DATA_LOOP_START),
+        "size": size,
+        "dataPrefix": bounded_source_bytes(oracle, data),
+        "currentOffset": current_offset,
+        "currentPrefix": bounded_source_bytes(oracle, current_pointer),
+    }
+
+
+def snapshot_tone_input(oracle: EmeraldOracle, tone: int) -> dict[str, Any] | None:
+    """ToneData is the track-visible input to ply_voice and channel creation."""
+    if tone == 0 or not is_source_readable(tone, 12):
+        return None
+    return {
+        "type": read_u8(oracle, tone),
+        "key": read_u8(oracle, tone + 1),
+        "length": read_u8(oracle, tone + 2),
+        "panSweep": read_u8(oracle, tone + 3),
+        "wave": snapshot_wave_input(oracle, read_u32(oracle, tone + 4)),
+        "attack": read_u8(oracle, tone + 8),
+        "decay": read_u8(oracle, tone + 9),
+        "sustain": read_u8(oracle, tone + 10),
+        "release": read_u8(oracle, tone + 11),
+    }
+
+
+def source_channel_kind(address: int, cgb_channels: int) -> str:
+    """Identify a track chain member without retaining its RAM address."""
+    direct_start = SOUND_INFO_ADDR + SOUND_INFO_CHANNELS
+    direct_end = direct_start + 12 * SOUND_CHANNEL_SIZE
+    if direct_start <= address < direct_end and (address - direct_start) % SOUND_CHANNEL_SIZE == 0:
+        return "direct"
+    if cgb_channels and cgb_channels <= address < cgb_channels + 4 * CGB_CHANNEL_SIZE and (address - cgb_channels) % CGB_CHANNEL_SIZE == 0:
+        return "cgb"
+    return "other"
+
+
+def snapshot_track_chain(oracle: EmeraldOracle, first_channel: int, cgb_channels: int) -> list[str]:
+    """MPlayMain walks this source-linked channel list before each track pass."""
+    kinds: list[str] = []
+    current = first_channel
+    seen: set[int] = set()
+    while current and current not in seen and len(kinds) < 16:
+        seen.add(current)
+        kind = source_channel_kind(current, cgb_channels)
+        kinds.append(kind)
+        if kind == "other" or not is_source_readable(current + SOUND_CHANNEL_NEXT, 4):
+            break
+        current = read_u32(oracle, current + SOUND_CHANNEL_NEXT)
+    return kinds
+
+
+def snapshot_track_input(oracle: EmeraldOracle, track: int, player_tone: int, cgb_channels: int) -> dict[str, Any]:
+    """Bounded MPlayMain inputs for its command and volume/pitch track passes."""
+    command = read_u32(oracle, track + MUSIC_TRACK_COMMAND)
+    command_prefix = bounded_source_bytes(oracle, command)
+    pattern_prefixes = [
+        bounded_source_bytes(oracle, read_u32(oracle, track + MUSIC_TRACK_PATTERN_STACK + index * 4))
+        for index in range(3)
+    ]
+    next_voice: dict[str, Any] | None = None
+    # ply_voice consumes the byte after its 0xBD opcode as a ToneData table
+    # index.  Persist that dereferenced row only when this bounded next-command
+    # view proves the handler can enter it immediately.
+    if command_prefix[:1] == [0xBD] and len(command_prefix) >= 2 and player_tone:
+        voice_index = command_prefix[1]
+        next_voice = {
+            "index": voice_index,
+            "tone": snapshot_tone_input(oracle, player_tone + voice_index * 12),
+        }
+    return {
+        # Bytes 0x00-0x1f are the complete scalar control region read by the
+        # two MPlayMain track loops (flags through pseudoEchoLength).
+        "control": [read_u8(oracle, track + index) for index in range(0x20)],
+        "tone": snapshot_tone_input(oracle, track + MUSIC_TRACK_TONE),
+        "timer": read_u16(oracle, track + MUSIC_TRACK_TIMER),
+        "commandPrefix": command_prefix,
+        "patternPrefixes": pattern_prefixes,
+        "nextVoice": next_voice,
+        "linkedChannelKinds": snapshot_track_chain(
+            oracle, read_u32(oracle, track + MUSIC_TRACK_CHANNELS), cgb_channels
+        ),
+    }
+
+
+def snapshot_m4a_players(oracle: EmeraldOracle, head: int, cgb_channels: int) -> list[dict[str, Any]]:
+    """Follow the MPlayMainNext-linked source list with address-free rows."""
+    players: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    current = head
+    while current and current not in seen and len(players) < 16:
+        seen.add(current)
+        track_count = min(read_u8(oracle, current + 8), 16)
+        tracks = read_u32(oracle, current + MUSIC_PLAYER_INFO_TRACKS)
+        player_tone = read_u32(oracle, current + MUSIC_PLAYER_INFO_TONE)
+        players.append({
+            "status": read_u32(oracle, current + 4),
+            "trackCount": track_count,
+            "command": read_u8(oracle, current + 10),
+            "clock": read_u32(oracle, current + 12),
+            "tempo": {
+                "d": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_D),
+                "u": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_U),
+                "i": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_I),
+                "c": read_u16(oracle, current + MUSIC_PLAYER_INFO_TEMPO_C),
+            },
+            "fade": {
+                "i": read_u16(oracle, current + MUSIC_PLAYER_INFO_FADE_OI),
+                "c": read_u16(oracle, current + MUSIC_PLAYER_INFO_FADE_OC),
+                "v": read_u16(oracle, current + MUSIC_PLAYER_INFO_FADE_OV),
+            },
+            "mainRoutine": pointer_symbol(read_u32(oracle, current + MUSIC_PLAYER_INFO_NEXT_MAIN)),
+            "hasNextPlayer": read_u32(oracle, current + MUSIC_PLAYER_INFO_NEXT_PLAYER) != 0,
+            "tracks": [
+                snapshot_track_input(oracle, tracks + index * MUSIC_PLAYER_TRACK_SIZE, player_tone, cgb_channels)
+                for index in range(track_count)
+            ] if tracks else [],
+        })
+        current = read_u32(oracle, current + MUSIC_PLAYER_INFO_NEXT_PLAYER)
+    return players
+
+
+def snapshot_direct_channel_input(oracle: EmeraldOracle, channel: int) -> dict[str, Any]:
+    """SoundMainRAM's direct-sound envelope/mixer input for one fixed slot."""
+    wave = read_u32(oracle, channel + SOUND_CHANNEL_WAVE)
+    current = read_u32(oracle, channel + SOUND_CHANNEL_CURRENT)
+    return {
+        # Bytes 0x00-0x17 cover the scalar SoundChannel inputs consulted by the
+        # envelope and branch selection before the ARM mixer consumes count/fw.
+        "control": [read_u8(oracle, channel + index) for index in range(0x18)],
+        "count": read_u32(oracle, channel + SOUND_CHANNEL_COUNT),
+        "fw": read_u32(oracle, channel + SOUND_CHANNEL_FW),
+        "frequency": read_u32(oracle, channel + SOUND_CHANNEL_FREQUENCY),
+        "wave": snapshot_wave_input(oracle, wave, current),
+    }
+
+
+def snapshot_cgb_channel_input(oracle: EmeraldOracle, channel: int) -> dict[str, Any]:
+    """CgbSound's fixed four-channel branch inputs, without pointer identity."""
+    wave = read_u32(oracle, channel + CGB_CHANNEL_WAVE)
+    current_wave = read_u32(oracle, channel + CGB_CHANNEL_CURRENT_WAVE)
+    return {
+        # CgbSound's branch/control fields live in the first 0x20 bytes.
+        "control": [read_u8(oracle, channel + index) for index in range(0x20)],
+        "frequency": read_u32(oracle, channel + CGB_CHANNEL_FREQUENCY),
+        "wavePrefix": bounded_source_bytes(oracle, wave, M4A_INPUT_PREFIX_BYTES * 2),
+        "waveIsCurrent": wave != 0 and wave == current_wave,
+    }
+
+
+def snapshot_m4a_internal_state(oracle: EmeraldOracle) -> dict[str, Any]:
+    """State actually dereferenced by the compiled m4a routine graph.
+
+    This is intentionally an inventory, not a timing key: command and wave
+    reads are capped at eight bytes (sixteen for CGB wave RAM) and do not claim
+    to model unbounded command control flow or sample data beyond that window.
+    """
+    cgb_channels = read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_CGB_CHANS)
+    music_head = read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_MUSIC_PLAYER_HEAD)
+    return {
+        "soundInfo": {
+            "ident": read_u32(oracle, SOUND_INFO_ADDR),
+            "pcmDmaCounter": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_DMA_COUNTER),
+            "pcmDmaPeriod": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_DMA_PERIOD),
+            "pcmSamplesPerVBlank": read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_SAMPLES_PER_VBLANK),
+            "reverb": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_REVERB),
+            "maxChans": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_MAX_CHANS),
+            "maxLines": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_MAX_LINES),
+            "frequency": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_FREQ),
+            "c15": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_C15),
+            "divFrequency": read_u32(oracle, SOUND_INFO_ADDR + 0x18),
+            "mplayMainRoutine": pointer_symbol(read_u32(oracle, SOUND_INFO_ADDR + 0x20)),
+            "cgbRoutine": pointer_symbol(read_u32(oracle, SOUND_INFO_ADDR + 0x28)),
+        },
+        "musicPlayers": snapshot_m4a_players(oracle, music_head, cgb_channels),
+        "directChannels": [
+            snapshot_direct_channel_input(oracle, SOUND_INFO_ADDR + SOUND_INFO_CHANNELS + index * SOUND_CHANNEL_SIZE)
+            for index in range(12)
+        ],
+        "cgbChannels": [
+            snapshot_cgb_channel_input(oracle, cgb_channels + index * CGB_CHANNEL_SIZE)
+            for index in range(4)
+        ] if cgb_channels else [],
+        "dma": {
+            "dma1Control": read_u32(oracle, 0x040000C4),
+            "dma2Control": read_u32(oracle, 0x040000D0),
+        },
+    }
+
+
+def snapshot_vblank_workload(oracle: EmeraldOracle) -> dict[str, Any]:
+    """Source-visible VBlank inputs that may select a different code path."""
+    main_flags = read_u8(oracle, G_MAIN_ADDR + G_MAIN_FLAGS_OFFSET)
+    sound_channels = []
+    for index in range(12):
+        channel = SOUND_INFO_ADDR + SOUND_INFO_CHANNELS + index * SOUND_CHANNEL_SIZE
+        sound_channels.append({
+            "statusFlags": read_u8(oracle, channel),
+            "type": read_u8(oracle, channel + 1),
+            "gateTime": read_u8(oracle, channel + 16),
+            "envelopeVolume": read_u8(oracle, channel + 9),
+            "count": read_u32(oracle, channel + 24),
+        })
+    cgb_chans = read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_CGB_CHANS)
+    cgb_flags = [] if cgb_chans == 0 else [read_u8(oracle, cgb_chans + index * 0x30) for index in range(4)]
+    queued_gpu_offsets = [
+        read_u8(oracle, GPU_REG_WAITING_LIST_ADDR + index)
+        for index in range(GPU_REG_WAITING_LIST_SIZE)
+    ]
+    queued_gpu_offsets = [value for value in queued_gpu_offsets if value != 0xFF]
+    return {
+        "main": {
+            "callback2": pointer_symbol(read_u32(oracle, G_MAIN_ADDR + G_MAIN_CALLBACK2_OFFSET)),
+            "vblankCallback": pointer_symbol(read_u32(oracle, G_MAIN_ADDR + G_MAIN_VBLANK_CALLBACK_OFFSET)),
+            "hblankCallback": pointer_symbol(read_u32(oracle, G_MAIN_ADDR + G_MAIN_HBLANK_CALLBACK_OFFSET)),
+            "vcountCallback": pointer_symbol(read_u32(oracle, G_MAIN_ADDR + G_MAIN_VCOUNT_CALLBACK_OFFSET)),
+            "serialCallback": pointer_symbol(read_u32(oracle, G_MAIN_ADDR + G_MAIN_SERIAL_CALLBACK_OFFSET)),
+            "oamLoadDisabled": (main_flags & 1) != 0,
+            "inBattle": (main_flags & 2) != 0,
+            "trainerHillVBlankCounterActive": read_u32(oracle, G_TRAINER_HILL_VBLANK_COUNTER_ADDR) != 0,
+        },
+        "link": {
+            "wirelessCommType": read_u8(oracle, G_WIRELESS_COMM_TYPE_ADDR),
+            "linkVSyncDisabled": read_u8(oracle, G_LINK_VSYNC_DISABLED_ADDR) != 0,
+        },
+        "gpu": {
+            "bufferLocked": read_u8(oracle, GPU_REG_BUFFER_LOCKED_ADDR) != 0,
+            "queuedRegisterOffsets": queued_gpu_offsets,
+            "spriteCopyPending": read_u8(oracle, SPRITE_COPY_PENDING_ADDR) != 0,
+            "spriteCopyRequestCount": read_u8(oracle, SPRITE_COPY_COUNT_ADDR),
+            "paletteTransferPending": read_u32(oracle, PALETTE_TRANSFER_PENDING_ADDR) != 0,
+            "paletteFadeControl": read_u32(oracle, PALETTE_FADE_ADDR),
+            "scanline": {
+                "state": read_u8(oracle, SCANLINE_EFFECT_ADDR + 17),
+                "sourceBuffer": read_u8(oracle, SCANLINE_EFFECT_ADDR + 16),
+                "dmaControl": read_u32(oracle, SCANLINE_EFFECT_ADDR + 12),
+            },
+        },
+        "dma3": snapshot_dma3_queue(oracle),
+        "sound": {
+            "ident": read_u32(oracle, SOUND_INFO_ADDR),
+            "pcmDmaCounter": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_DMA_COUNTER),
+            "pcmDmaPeriod": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_DMA_PERIOD),
+            "pcmSamplesPerVBlank": read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_PCM_SAMPLES_PER_VBLANK),
+            "reverb": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_REVERB),
+            "maxChans": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_MAX_CHANS),
+            "maxLines": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_MAX_LINES),
+            "frequency": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_FREQ),
+            "c15": read_u8(oracle, SOUND_INFO_ADDR + SOUND_INFO_C15),
+            "musicPlayers": snapshot_music_players(
+                oracle, read_u32(oracle, SOUND_INFO_ADDR + SOUND_INFO_MUSIC_PLAYER_HEAD)
+            ),
+            "directChannels": sound_channels,
+            "cgbChannelStatusFlags": cgb_flags,
+            "dma1Control": read_u32(oracle, 0x040000C4),
+            "dma2Control": read_u32(oracle, 0x040000D0),
+        },
+    }
+
+
+def current_vblank_workload(epoch: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the currently executing VBlank record, if workload capture is enabled."""
+    workloads = epoch.get("vblankWorkloads")
+    if not workloads:
+        return None
+    for workload in reversed(workloads):
+        if "resume" not in workload:
+            return workload
+    return None
+
+
+def append_vblank_stage(epoch: dict[str, Any], oracle: EmeraldOracle, frame: int, pc: int, stage: str, **fields: Any) -> None:
+    """Append a source instruction boundary to the active workload record."""
+    workload = current_vblank_workload(epoch)
+    if workload is not None:
+        workload["stages"].append(cycle_snapshot(oracle, frame, pc, stage, **fields))
+
+
+def start_m4a_internal_observation(epoch: dict[str, Any], oracle: EmeraldOracle, frame: int, pc: int) -> None:
+    """Snapshot m4a state at its VBlank call boundary, not at epoch identity."""
+    workload = current_vblank_workload(epoch)
+    if workload is None or "audioInternal" in workload:
+        return
+    workload["audioInternal"] = {
+        "state": snapshot_m4a_internal_state(oracle),
+        "stages": [cycle_snapshot(oracle, frame, pc, "m4a-sound-main-call")],
+    }
+
+
+def append_m4a_internal_stage(epoch: dict[str, Any], oracle: EmeraldOracle, frame: int, pc: int, stage: str) -> None:
+    """Append only a pinned m4a routine or loop-head boundary."""
+    workload = current_vblank_workload(epoch)
+    if workload is None:
+        return
+    audio = workload.get("audioInternal")
+    if audio is not None:
+        audio["stages"].append(cycle_snapshot(oracle, frame, pc, stage))
+
+
+def cycle_snapshot(oracle: EmeraldOracle, frame: int, pc: int, kind: str, **fields: Any) -> dict[str, Any]:
+    global_cycles = int(oracle.core._native.timing.globalCycles)
+    frame_cycles = int(oracle.core.frame_cycles)
+    cpu_cycles = int(oracle.core.cpu._native.cycles)
+    master_cycles = global_cycles + cpu_cycles
+    return {
+        "kind": kind,
+        "frame": frame,
+        "globalCycles": global_cycles,
+        "cpuCycles": cpu_cycles,
+        "masterCycles": master_cycles,
+        "cyclePhase": master_cycles % frame_cycles,
+        "pc": f"0x{pc:08x}",
+        **fields,
+    }
+
+
+def cpu_gpr(oracle: EmeraldOracle, index: int) -> int:
+    """Read a scalar argument/result without retaining a mon-memory address."""
+    return int(oracle.core.cpu.gprs[index])
+
+
+def calculate_mon_stats_call_arguments(operation: str, oracle: EmeraldOracle) -> dict[str, int]:
+    """Capture only branch-relevant scalar ABI arguments at a direct call."""
+    if operation in {"get-mon-data", "set-mon-data"}:
+        return {"field": cpu_gpr(oracle, 1)}
+    if operation == "divide":
+        return {"dividend": cpu_gpr(oracle, 0), "divisor": cpu_gpr(oracle, 1)}
+    if operation == "modify-stat-by-nature":
+        return {
+            "nature": cpu_gpr(oracle, 0),
+            "stat": cpu_gpr(oracle, 1),
+            "statIndex": cpu_gpr(oracle, 2),
+        }
+    if operation == "get-level-from-exp":
+        # The outer ABI is a Pokemon pointer, but both encrypted accessors
+        # below route GetSubstruct through personality % 24. Preserve only the
+        # scalar source state needed to audit that compiled route.
+        return {"personality": read_u32(oracle, cpu_gpr(oracle, 0))}
+    return {}
+
+
+def observe_calculate_mon_stats_call(
+    epoch: dict[str, Any],
+    oracle: EmeraldOracle,
+    frame: int,
+    pc: int,
+) -> None:
+    """Pair each direct CalculateMonStats call at ELF-pinned instruction boundaries."""
+    if not CALCULATE_MON_STATS_EVIDENCE:
+        return
+
+    active = epoch.get("calculateMonStatsActiveCall")
+    if active is not None:
+        if active["operation"] == "get-level-from-exp":
+            # GetLevelFromMonExp's source inputs are not ABI registers at its
+            # outer entry: both are returned by nested GetMonData2 calls. Keep
+            # only those scalar results and the compiled loop boundaries; do
+            # not retain the party pointer or decrypted box-mon storage.
+            if pc == 0x08069062:  # after GetMonData2(MON_DATA_SPECIES)
+                active["arguments"]["species"] = cpu_gpr(oracle, 0) & 0xFFFF
+                active.setdefault("boundaries", {})["speciesAccessorReturn"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-species-accessor-return",
+                )
+            elif pc == 0x08069072:  # after GetMonData2(MON_DATA_EXP)
+                active["arguments"]["experience"] = cpu_gpr(oracle, 0)
+                active.setdefault("boundaries", {})["experienceAccessorReturn"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-experience-accessor-return",
+                )
+            elif pc == 0x08069084:  # after gSpeciesInfo[species].growthRate load
+                active["arguments"]["growthRate"] = cpu_gpr(oracle, 0) & 0xFF
+                active.setdefault("boundaries", {})["growthRateLoaded"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-growth-rate-loaded",
+                )
+            elif pc == 0x08069090:  # first experience-table comparison
+                active.setdefault("boundaries", {})["firstLevelCompare"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-first-compare",
+                )
+            elif pc == 0x080690AC:  # common loop exit, before level - 1
+                active.setdefault("boundaries", {})["loopExit"] = cycle_snapshot(
+                    oracle, frame, pc, "get-level-loop-exit",
+                )
+            elif pc == 0x08000846:  # VCountIntr entry inside this callee
+                active.setdefault("asyncService", []).append(cycle_snapshot(
+                    oracle, frame, pc, "get-level-vcount-entry",
+                ))
+            elif pc == 0x082DFA12:  # m4aSoundVSync entry from VCountIntr
+                active.setdefault("asyncService", []).append(cycle_snapshot(
+                    oracle, frame, pc, "get-level-m4a-sound-vsync-entry",
+                ))
+            elif pc == 0x0800086E:  # VCountIntr terminal bx
+                active.setdefault("asyncService", []).append(cycle_snapshot(
+                    oracle, frame, pc, "get-level-vcount-return",
+                ))
+        return_pc = int(active["returnPc"], 16)
+        if pc in {return_pc, return_pc + 2}:
+            completed = dict(active)
+            completed["returnMasterCycles"] = cycle_snapshot(
+                oracle, frame, pc, "calculate-mon-stats-direct-return",
+            )["masterCycles"]
+            completed["returnPcObserved"] = f"0x{pc:08x}"
+            if active["operation"] != "set-mon-data":
+                completed["result"] = cpu_gpr(oracle, 0)
+            epoch.setdefault("calculateMonStatsCalls", []).append(completed)
+            epoch.pop("calculateMonStatsActiveCall", None)
+
+    # CreateMon itself invokes CalculateMonStats before the outer Factory
+    # EV-spread boundary. This v1 receipt is deliberately scoped to the later
+    # CalculateMonStats call whose entry is already pinned in v2.
+    if epoch.get("calculateMonStatsActiveMonIndex") is None:
+        return
+
+    # Thumb BL stores the return address (+4, with the Thumb bit) in LR.
+    call_pc = (oracle.core.cpu.lr & ~1) - 4
+    descriptor = CALCULATE_MON_STATS_DIRECT_CALLS.get(call_pc)
+    if descriptor is None:
+        return
+    operation, target, expected_entry_pc = descriptor
+    if pc != expected_entry_pc:
+        return
+    if epoch.get("calculateMonStatsActiveCall") is not None:
+        raise RuntimeError("nested direct CalculateMonStats observation")
+    epoch["calculateMonStatsActiveCall"] = {
+        "monIndex": epoch.get("calculateMonStatsActiveMonIndex"),
+        "operation": operation,
+        "target": target,
+        "callPc": f"0x{call_pc:08x}",
+        "entryPc": f"0x{pc:08x}",
+        "returnPc": f"0x{(oracle.core.cpu.lr & ~1):08x}",
+        "entryMasterCycles": cycle_snapshot(
+            oracle, frame, pc, "calculate-mon-stats-direct-entry",
+        )["masterCycles"],
+        "arguments": calculate_mon_stats_call_arguments(operation, oracle),
+    }
 
 
 def symbols(elf: Path) -> list[tuple[int, str]]:
@@ -131,36 +885,215 @@ def advance_one_instrumented_frame(
     steps = 0
     while True:
         pc = oracle.core.cpu.pc
+        if CYCLE_EVIDENCE:
+            cycle_events = epoch.setdefault("cycleEvents", [])
+            awaiting_resume = epoch.get("awaitingVBlankResume")
+            if (
+                awaiting_resume is not None
+                and VBLANK_WORKLOAD_EVIDENCE
+                and pc in NON_VBLANK_ISR_ENTRY_PCS
+                and epoch.get("return") is None
+            ):
+                # Do not mistake a nested ISR for the interrupted source
+                # instruction resuming.  The report distinguishes a real ROM
+                # ISR entry from timing that mGBA services outside a ROM path.
+                append_vblank_stage(
+                    epoch, oracle, frame, pc, "non-vblank-isr-entry",
+                    isr=NON_VBLANK_ISR_ENTRY_PCS[pc],
+                )
+            elif awaiting_resume is not None and pc >= 0x08000800 and epoch.get("return") is None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "vblank-resume",
+                    interruptIndex=awaiting_resume,
+                    resumeFunction=symbol_at(pc - 2),
+                ))
+                if VBLANK_WORKLOAD_EVIDENCE:
+                    workload = current_vblank_workload(epoch)
+                    if workload is not None:
+                        workload["resume"] = cycle_snapshot(
+                            oracle, frame, pc, "vblank-resume",
+                            resumeFunction=symbol_at(pc - 2),
+                        )
+                epoch.pop("awaitingVBlankResume", None)
+            if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and pc == M4A_SOUND_MAIN_CALL_PC:
+                start_m4a_internal_observation(epoch, oracle, frame, pc)
+            if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and pc in M4A_INTERNAL_STAGE_PCS:
+                append_m4a_internal_stage(
+                    epoch, oracle, frame, pc, M4A_INTERNAL_STAGE_PCS[pc]
+                )
+            if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and pc == M4A_SOUND_MAIN_RETURN_PC:
+                append_m4a_internal_stage(epoch, oracle, frame, pc, "m4a-sound-main-return")
+            if VBLANK_WORKLOAD_EVIDENCE and pc in VBLANK_STAGE_PCS:
+                append_vblank_stage(epoch, oracle, frame, pc, VBLANK_STAGE_PCS[pc])
+            observe_calculate_mon_stats_call(epoch, oracle, frame, pc)
+            if pc == target_entry and epoch.get("entry") is None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "source-function-entry",
+                    sourceFunction=symbol_at(pc - 2),
+                ))
+            if pc == CREATE_EV_ENTRY_PC:
+                mon_index = sum(
+                    event["kind"] == "construction-entry"
+                    for event in cycle_events
+                )
+                epoch["currentMonIndex"] = mon_index
+                epoch["currentAttempt"] = 0
+                epoch["constructionReturnPc"] = oracle.core.cpu.lr
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "construction-entry",
+                    monIndex=mon_index,
+                    returnPc=f"0x{oracle.core.cpu.lr:08x}",
+                ))
+            elif pc == GET_NATURE_ENTRY_PC and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "personality-attempt-check",
+                    monIndex=epoch.get("currentMonIndex"),
+                    attempt=epoch.get("currentAttempt"),
+                ))
+                epoch["currentAttempt"] = int(epoch.get("currentAttempt", 0)) + 1
+            elif pc == CREATE_MON_ENTRY_PC and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "create-mon-entry",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc == CREATE_MON_RESUME_PC and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "create-mon-return",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif (
+                pc == CALCULATE_STATS_ENTRY_PC
+                and epoch.get("entry") is not None
+                and symbol_at(oracle.core.cpu.lr).startswith("CreateMonWithEVSpreadNatureOTID")
+            ):
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "calculate-mon-stats-entry",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+                if CALCULATE_MON_STATS_EVIDENCE:
+                    epoch["calculateMonStatsActiveMonIndex"] = epoch.get("currentMonIndex")
+            elif pc == CALCULATE_STATS_RESUME_PC and epoch.get("entry") is not None:
+                if CALCULATE_MON_STATS_EVIDENCE:
+                    if epoch.get("calculateMonStatsActiveCall") is not None:
+                        raise RuntimeError("CalculateMonStats returned with an unfinished direct call")
+                    epoch.pop("calculateMonStatsActiveMonIndex", None)
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "calculate-mon-stats-return",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc in {SELECTABLE_POST_END_PC, FILL_FACTORY_POST_END_PC} and epoch.get("entry") is not None:
+                cycle_events.append(cycle_snapshot(
+                    oracle, frame, pc, "factory-post-mon-end",
+                    monIndex=epoch.get("currentMonIndex"),
+                ))
+            elif pc == VBLANK_ENTRY_PC and epoch.get("return") is None:
+                interrupt_index = int(epoch.get("interruptCount", 0))
+                epoch["interruptCount"] = interrupt_index + 1
+                vblank_entry = cycle_snapshot(
+                    oracle, frame, pc, "vblank-entry",
+                    interruptIndex=interrupt_index,
+                    interruptedMonIndex=epoch.get("currentMonIndex"),
+                )
+                cycle_events.append(vblank_entry)
+                if VBLANK_WORKLOAD_EVIDENCE:
+                    epoch.setdefault("vblankWorkloads", []).append({
+                        "interruptIndex": interrupt_index,
+                        "frame": frame,
+                        "state": snapshot_vblank_workload(oracle),
+                        "entry": vblank_entry,
+                        "stages": [vblank_entry],
+                    })
+            elif pc == VBLANK_EXIT_PC and epoch.get("return") is None:
+                interrupt_index = int(epoch.get("interruptCount", 1)) - 1
+                vblank_return = cycle_snapshot(
+                    oracle, frame, pc, "vblank-return",
+                    interruptIndex=interrupt_index,
+                    interruptedMonIndex=epoch.get("currentMonIndex"),
+                )
+                cycle_events.append(vblank_return)
+                if VBLANK_WORKLOAD_EVIDENCE:
+                    workload = current_vblank_workload(epoch)
+                    if workload is not None:
+                        workload["return"] = vblank_return
+                        workload["stages"].append(vblank_return)
+                epoch["awaitingVBlankResume"] = interrupt_index
+            construction_return_pc = epoch.get("constructionReturnPc")
+            if construction_return_pc is not None:
+                aligned_return = int(construction_return_pc) & ~1
+                if pc in {aligned_return, aligned_return + 2}:
+                    cycle_events.append(cycle_snapshot(
+                        oracle, frame, pc, "construction-return",
+                        monIndex=epoch.get("currentMonIndex"),
+                    ))
+                    epoch.pop("constructionReturnPc", None)
         if pc == RANDOM_ENTRY_PC:
             pre = read_u32(oracle, oracle.symbols["gRngValue"])
             lr = oracle.core.cpu.lr
             post = (pre * 1103515245 + 24691) & 0xFFFFFFFF
-            calls.append({
+            call = {
                 "frame": frame,
                 "caller": symbol_at(lr),
                 "lr": f"0x{lr:08x}",
                 "pre": pre,
                 "post": post,
                 "u16": (post >> 16) & 0xFFFF,
-            })
+            }
+            # mGBA's master-cycle clock is the source timing evidence needed
+            # by the follow-up TypeScript construction clock.  Keep it opt-in
+            # so the committed v1 receipt remains byte/schema-compatible.
+            if CYCLE_EVIDENCE:
+                timing = cycle_snapshot(oracle, frame, pc, "random")
+                for field in ("globalCycles", "cpuCycles", "masterCycles", "cyclePhase"):
+                    call[field] = timing[field]
+                if epoch.get("entry") is not None and epoch.get("return") is None:
+                    kind = "ambient-random" if symbol_at(lr).startswith("VBlankIntr") else "personality-random"
+                    cycle_events.append(cycle_snapshot(
+                        oracle, frame, pc, kind,
+                        caller=symbol_at(lr),
+                        monIndex=None if kind == "ambient-random" else epoch.get("currentMonIndex"),
+                        attempt=None if kind == "ambient-random" else epoch.get("currentAttempt"),
+                        half=None if kind == "ambient-random" else (
+                            "low" if symbol_at(lr).endswith("+0x35") else "high"
+                        ),
+                    ))
+            calls.append(call)
         if pc == target_entry and epoch.get("entry") is None:
-            epoch["entry"] = {
+            entry = {
                 "frame": frame,
                 "returnPc": f"0x{oracle.core.cpu.lr:08x}",
                 "rngValue": read_u32(oracle, oracle.symbols["gRngValue"]),
                 "callStartIndex": len(calls),
             }
+            if CYCLE_EVIDENCE:
+                timing = cycle_snapshot(oracle, frame, pc, "entry")
+                entry["globalCycles"] = timing["globalCycles"]
+                entry["cpuCycles"] = timing["cpuCycles"]
+                entry["masterCycles"] = timing["masterCycles"]
+                entry["frameCycles"] = int(oracle.core.frame_cycles)
+                entry["cyclePhase"] = timing["cyclePhase"]
+            epoch["entry"] = entry
         pending = epoch.get("entry")
         if pending is not None and epoch.get("return") is None:
             lr = int(pending["returnPc"], 16)
             return_pcs = {lr, lr & ~1, (lr & ~1) + 2}
             if pc in return_pcs:
-                epoch["return"] = {
+                returned = {
                     "frame": frame,
                     "returnPc": f"0x{pc:08x}",
                     "rngValue": read_u32(oracle, oracle.symbols["gRngValue"]),
                     "callEndIndex": len(calls),
                 }
+                if CYCLE_EVIDENCE:
+                    timing = cycle_snapshot(oracle, frame, pc, "return")
+                    returned["globalCycles"] = timing["globalCycles"]
+                    returned["cpuCycles"] = timing["cpuCycles"]
+                    returned["masterCycles"] = timing["masterCycles"]
+                    returned["cyclePhase"] = timing["cyclePhase"]
+                    cycle_events.append(cycle_snapshot(
+                        oracle, frame, pc, "source-function-return",
+                        sourceFunction=symbol_at(target_entry - 2),
+                    ))
+                epoch["return"] = returned
         if oracle.core.frame_counter != start_counter:
             break
         oracle.core.step()
@@ -322,7 +1255,44 @@ def classify_and_summarize(
         "gapless": True,
     }
     if fast_rows is not None:
-        result["fastFrameEvidence"] = fast_rows
+        # The location-only fast pass is useful while developing a new case,
+        # but cycle-mode output is the compact reproducible receipt and does
+        # not duplicate hundreds of pre-epoch route frames.
+        if not CYCLE_EVIDENCE:
+            result["fastFrameEvidence"] = fast_rows
+    if CYCLE_EVIDENCE:
+        cycle_events = epoch.get("cycleEvents", [])
+        result["cycleEvidence"] = {
+            "frameCycles": int(oracle.core.frame_cycles),
+            "initialMasterCyclePhase": source_calls[0]["cyclePhase"],
+            "sourceEntryMasterCyclePhase": entry["cyclePhase"],
+            "cyclesSincePriorVBlank": (
+                source_calls[0]["masterCycles"]
+                - max(
+                    event["masterCycles"]
+                    for event in cycle_events
+                    if event["kind"] == "vblank-entry"
+                    and event["masterCycles"] <= source_calls[0]["masterCycles"]
+                )
+            ),
+            "events": cycle_events,
+        }
+    if CALCULATE_MON_STATS_EVIDENCE:
+        if epoch.get("calculateMonStatsActiveCall") is not None:
+            raise RuntimeError("CalculateMonStats evidence finished with an unfinished direct call")
+        result["calculateMonStatsEvidence"] = {
+            "schema": "factory-calculate-mon-stats-direct-calls/v1",
+            "calls": epoch.get("calculateMonStatsCalls", []),
+        }
+    if VBLANK_WORKLOAD_EVIDENCE:
+        # This is a separate raw observation packet, intentionally not folded
+        # into cycleEvidence's frozen v2 contract.  The report filters it to
+        # entry->return epochs and derives distributions from the named ROM
+        # stages and source-visible state only.
+        result["vblankWorkloadEvidence"] = {
+            "schema": "factory-vblank-workload-observation/v1",
+            "interrupts": epoch.get("vblankWorkloads", []),
+        }
     return result
 
 
@@ -523,21 +1493,207 @@ def run_factory_varied() -> dict[str, Any]:
     return result
 
 
+def compact_vblank_workload_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Drop construction identities from the optional hardware-workload receipt.
+
+    The v2 receipt remains the authoritative RNG chain. This companion only
+    needs relative VBlank timing, VBlank state, and named stage boundaries. It
+    deliberately omits frame, absolute time, RNG cursor, mon index, set, and
+    trainer details so a later reducer cannot accidentally treat evidence
+    identity as input.
+    """
+    raw = result["vblankWorkloadEvidence"]
+    interrupts: list[dict[str, Any]] = []
+    source_entry = result["entry"]["masterCycles"]
+    source_return = result["return"]["masterCycles"]
+    for workload in raw["interrupts"]:
+        returned = workload.get("return")
+        resumed = workload.get("resume")
+        if returned is None or resumed is None:
+            continue
+        entry_cycles = workload["entry"]["masterCycles"]
+        if entry_cycles < source_entry or entry_cycles > source_return:
+            continue
+        stages = []
+        for stage in workload["stages"]:
+            compact = {
+                "kind": stage["kind"],
+                "cyclesSinceVBlankEntry": stage["masterCycles"] - entry_cycles,
+            }
+            if "isr" in stage:
+                compact["isr"] = stage["isr"]
+            stages.append(compact)
+        interrupts.append({
+            "state": workload["state"],
+            "vblankEntryToReturnCycles": returned["masterCycles"] - entry_cycles,
+            "returnToResumeCycles": resumed["masterCycles"] - returned["masterCycles"],
+            "resumeFunction": resumed["resumeFunction"],
+            "stages": stages,
+        })
+    return {
+        "schema": "factory-vblank-workload-probe/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "interrupts": interrupts,
+    }
+
+
+def compact_vblank_workload_internal_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Write an address-free v2 sibling with the source-owned m4a stages.
+
+    The old v1 packet is intentionally not reused or rewritten.  This carries
+    the same relative VBlank shell plus the snapshot taken at m4aSoundMain's
+    call boundary and the compiled SoundMain/MPlayMain/CgbSound/SoundMainRAM
+    boundaries inside it.
+    """
+    raw = result["vblankWorkloadEvidence"]
+    interrupts: list[dict[str, Any]] = []
+    source_entry = result["entry"]["masterCycles"]
+    source_return = result["return"]["masterCycles"]
+    for workload in raw["interrupts"]:
+        returned = workload.get("return")
+        resumed = workload.get("resume")
+        audio = workload.get("audioInternal")
+        if returned is None or resumed is None or audio is None:
+            continue
+        entry_cycles = workload["entry"]["masterCycles"]
+        if entry_cycles < source_entry or entry_cycles > source_return:
+            continue
+        stages = []
+        for stage in workload["stages"]:
+            compact = {
+                "kind": stage["kind"],
+                "cyclesSinceVBlankEntry": stage["masterCycles"] - entry_cycles,
+            }
+            if "isr" in stage:
+                compact["isr"] = stage["isr"]
+            stages.append(compact)
+        audio_stages = [
+            {
+                "kind": stage["kind"],
+                "cyclesSinceVBlankEntry": stage["masterCycles"] - entry_cycles,
+            }
+            for stage in audio["stages"]
+        ]
+        interrupts.append({
+            "state": workload["state"],
+            "m4a": {
+                "state": audio["state"],
+                "stages": audio_stages,
+            },
+            "vblankEntryToReturnCycles": returned["masterCycles"] - entry_cycles,
+            "returnToResumeCycles": resumed["masterCycles"] - returned["masterCycles"],
+            "resumeFunction": resumed["resumeFunction"],
+            "stages": stages,
+        })
+    return {
+        "schema": "factory-vblank-workload-internal-probe/v2",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "m4aInputPrefixBytes": M4A_INPUT_PREFIX_BYTES,
+        "interrupts": interrupts,
+    }
+
+
+def compact_calculate_mon_stats_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Keep the sibling stats packet source-shaped and independent of v2's full RNG log."""
+    events = result["cycleEvidence"]["events"]
+    entries = {
+        int(event["monIndex"]): event
+        for event in events
+        if event["kind"] == "calculate-mon-stats-entry"
+    }
+    returns = {
+        int(event["monIndex"]): event
+        for event in events
+        if event["kind"] == "calculate-mon-stats-return"
+    }
+    spans = [
+        {
+            "monIndex": mon_index,
+            "entryMasterCycles": entries[mon_index]["masterCycles"],
+            "entryPc": entries[mon_index]["pc"],
+            "returnMasterCycles": returns[mon_index]["masterCycles"],
+            "returnPc": returns[mon_index]["pc"],
+        }
+        for mon_index in sorted(entries)
+    ]
+    first_entry = min(span["entryMasterCycles"] for span in spans)
+    final_return = max(span["returnMasterCycles"] for span in spans)
+    pause_parts: dict[int, dict[str, int]] = {}
+    for event in events:
+        interrupt_index = event.get("interruptIndex")
+        if interrupt_index is None:
+            continue
+        if event["kind"] == "vblank-entry":
+            pause_parts.setdefault(int(interrupt_index), {})["entryMasterCycles"] = event["masterCycles"]
+        elif event["kind"] == "vblank-resume":
+            pause_parts.setdefault(int(interrupt_index), {})["resumeMasterCycles"] = event["masterCycles"]
+    pauses = [
+        part
+        for _, part in sorted(pause_parts.items())
+        if "entryMasterCycles" in part
+        and "resumeMasterCycles" in part
+        and part["entryMasterCycles"] <= final_return
+        and part["resumeMasterCycles"] >= first_entry
+    ]
+    mons = [
+        {
+            "monIndex": mon["monIndex"],
+            "targetNature": mon["targetNature"],
+            "acceptedPersonality": mon["acceptedPersonality"],
+        }
+        for mon in result["monBoundaries"]
+    ]
+    return {
+        "schema": "factory-calculate-mon-stats-direct-calls/v1",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "mons": mons,
+        "spans": spans,
+        "interruptPauses": pauses,
+        "directCalls": result["calculateMonStatsEvidence"]["calls"],
+    }
+
+
 def main() -> None:
     if OUTPUT.exists():
         raise SystemExit(f"refusing existing output path: {OUTPUT}")
+    if VBLANK_WORKLOAD_EVIDENCE and not CYCLE_EVIDENCE:
+        raise SystemExit("FACTORY_VBLANK_WORKLOAD_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1")
+    if VBLANK_WORKLOAD_INTERNAL_EVIDENCE and not VBLANK_WORKLOAD_EVIDENCE:
+        raise SystemExit("FACTORY_VBLANK_WORKLOAD_INTERNAL_EVIDENCE=1 requires FACTORY_VBLANK_WORKLOAD_EVIDENCE=1")
+    if CALCULATE_MON_STATS_EVIDENCE and not CYCLE_EVIDENCE:
+        raise SystemExit("FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 requires FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1")
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
+    if CALCULATE_MON_STATS_EVIDENCE:
+        result = compact_calculate_mon_stats_receipt(result)
+    elif VBLANK_WORKLOAD_INTERNAL_EVIDENCE:
+        result = compact_vblank_workload_internal_receipt(result)
+    elif VBLANK_WORKLOAD_EVIDENCE:
+        result = compact_vblank_workload_receipt(result)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(result, indent=2) + "\n")
     print(
-        f"wrote {OUTPUT}: {result['case']} "
-        f"{result['totals']['construction']} construction + "
-        f"{result['totals']['ambient']} ambient draws",
+        (
+            f"wrote {OUTPUT}: {result['case']} "
+            f"{len(result['directCalls'])} direct CalculateMonStats calls"
+            if CALCULATE_MON_STATS_EVIDENCE
+            else f"wrote {OUTPUT}: {result['case']} "
+            f"{len(result['interrupts'])} VBlank workload observations"
+            if VBLANK_WORKLOAD_EVIDENCE
+            else f"wrote {OUTPUT}: {result['case']} "
+            f"{result['totals']['construction']} construction + "
+            f"{result['totals']['ambient']} ambient draws"
+        ),
         flush=True,
     )
 

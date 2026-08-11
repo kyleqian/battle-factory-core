@@ -1,0 +1,3586 @@
+{
+  "schema": "factory-vblank-workload-internal-evidence/v2",
+  "oracleProfile": "battle-scene-off",
+  "measurement": {
+    "unit": "mGBA master cycles",
+    "m4aEntry": "VBlankIntr's m4aSoundMain call boundary (reference/pokeemerald/src/main.c:356)",
+    "m4aReturn": "VBlankIntr's post-m4aSoundMain instruction boundary (reference/pokeemerald/src/main.c:357)",
+    "stateSnapshot": "m4aSoundMain call boundary; source pointers are omitted and command/wave reads are capped at 8 bytes (16 CGB wave bytes).",
+    "inclusion": "Only VBlank entries inside the source construction epoch are distributed."
+  },
+  "sourceReferences": [
+    {
+      "source": "reference/pokeemerald/src/m4a.c",
+      "lines": "102-105,925-1080",
+      "anchors": [
+        "void m4aSoundMain(void)",
+        "void CgbSound(void)"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "20-455",
+      "anchors": [
+        "SoundMain:",
+        "SoundMainRAM:",
+        "SoundMainRAM_ChanLoop:",
+        "_081DD24A:"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1130-1466",
+      "anchors": [
+        "MPlayMain:",
+        "_081DD874:",
+        "_081DD9C4:",
+        "call_r3:"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/include/gba/m4a_internal.h",
+      "lines": "39-180,286-358",
+      "anchors": [
+        "struct WaveData",
+        "struct ToneData",
+        "struct SoundChannel",
+        "struct MusicPlayerTrack",
+        "struct MusicPlayerInfo"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.map",
+      "lines": "22378-22418",
+      "anchors": [
+        "SoundMain",
+        "SoundMainRAM",
+        "MPlayMain",
+        "m4aSoundMain"
+      ]
+    },
+    {
+      "source": "reference/pokeemerald/pokeemerald.elf",
+      "lines": "defined symbols",
+      "anchors": [
+        "082df05c T SoundMain",
+        "082df0e0 T SoundMainRAM",
+        "082dfa5c T MPlayMain",
+        "082e0124 T m4aSoundMain",
+        "082e0ca8 T CgbSound"
+      ]
+    }
+  ],
+  "reproducibility": {
+    "schema": "factory-vblank-workload-internal-repro/v1",
+    "oracleProfile": "battle-scene-off",
+    "method": "Two independently fresh mGBA probe invocations per case through tools/run-mgba-probe.py; SHA-256 is over each compact JSON packet.",
+    "cases": [
+      {
+        "case": "anchor",
+        "firstFreshSha256": "2df81b1d722f61d6ba2c82b2741d88cf393f2e2fb325376284bd06dfbde538c0",
+        "secondFreshSha256": "2df81b1d722f61d6ba2c82b2741d88cf393f2e2fb325376284bd06dfbde538c0",
+        "byteIdentical": true
+      },
+      {
+        "case": "liliana",
+        "firstFreshSha256": "40033aac6cd07cf6a5a7dc467feba945a872c8216828da57ecf28af4704f7b3e",
+        "secondFreshSha256": "40033aac6cd07cf6a5a7dc467feba945a872c8216828da57ecf28af4704f7b3e",
+        "byteIdentical": true
+      },
+      {
+        "case": "factory-varied",
+        "firstFreshSha256": "dd6633f25c2160843c414d66562086e285ba5dd8f469cb4bc88fa006c12c8326",
+        "secondFreshSha256": "dd6633f25c2160843c414d66562086e285ba5dd8f469cb4bc88fa006c12c8326",
+        "byteIdentical": true
+      }
+    ]
+  },
+  "sourceClassification": {
+    "m4aGraph": "The compiled m4aSoundMain wrapper reaches SoundMain, a linked MPlayMain player chain, CgbSound, and the runtime-copied SoundMainRAM. The receipt marks only those routines and named m4a_1.s loop heads.",
+    "mplay": "The first five linked MPlayMain player spans are fixed in the observed set; the sixth player span varies, as do its command-pass presence and the source state feeding its track loops.",
+    "cgb": "CgbSound is a separately measured variable source routine over the fixed four CgbChannel slots.",
+    "directSound": "SoundMainRAM buffer preparation has two observed costs; its five SoundMainRAM_ChanLoop iterations carry the remaining direct-sound envelope/mixer variation.",
+    "state": "The v2 inventory adds bounded command prefixes, ToneData, WaveData headers/prefixes, complete scalar track/channel control regions, linked-channel kinds, and CGB wave inputs. It deliberately omits raw pointers and unbounded data.",
+    "reducer": "No reducer is licensed: the complete captured m4a state key does not repeat in the observed set, and the bounded command/wave inventory is explicitly not a complete dynamic execution state."
+  },
+  "sourceStateEquivalenceAcrossWholeObservedSet": {
+    "observationCount": 113,
+    "capturedStateKeys": 113,
+    "repeatedCapturedStateKeys": 0,
+    "repeatedObservationCount": 0,
+    "repeatedKeysWithDifferentM4aCost": 0,
+    "interpretation": "No captured m4a state key repeats, so the observed set cannot establish an equal-key cost implication."
+  },
+  "cases": [
+    {
+      "receipt": "anchor",
+      "sourceFunction": "CreateFrontierFactorySelectableMons",
+      "sourceEpochObservationCount": 52,
+      "sourceStateEquivalence": {
+        "observationCount": 52,
+        "capturedStateKeys": 52,
+        "repeatedCapturedStateKeys": 0,
+        "repeatedObservationCount": 0,
+        "repeatedKeysWithDifferentM4aCost": 0,
+        "interpretation": "No captured m4a state key repeats, so the observed set cannot establish an equal-key cost implication."
+      },
+      "distributions": {
+        "m4aSoundMain": {
+          "count": 52,
+          "min": 23920,
+          "max": 52083,
+          "distinct": 52,
+          "histogram": [
+            {
+              "value": 23920,
+              "count": 1
+            },
+            {
+              "value": 24020,
+              "count": 1
+            },
+            {
+              "value": 24068,
+              "count": 1
+            },
+            {
+              "value": 24712,
+              "count": 1
+            },
+            {
+              "value": 24886,
+              "count": 1
+            },
+            {
+              "value": 31090,
+              "count": 1
+            },
+            {
+              "value": 31093,
+              "count": 1
+            },
+            {
+              "value": 31111,
+              "count": 1
+            },
+            {
+              "value": 31361,
+              "count": 1
+            },
+            {
+              "value": 31380,
+              "count": 1
+            },
+            {
+              "value": 31605,
+              "count": 1
+            },
+            {
+              "value": 31650,
+              "count": 1
+            },
+            {
+              "value": 31738,
+              "count": 1
+            },
+            {
+              "value": 31999,
+              "count": 1
+            },
+            {
+              "value": 34582,
+              "count": 1
+            },
+            {
+              "value": 34731,
+              "count": 1
+            },
+            {
+              "value": 35569,
+              "count": 1
+            },
+            {
+              "value": 35584,
+              "count": 1
+            },
+            {
+              "value": 35595,
+              "count": 1
+            },
+            {
+              "value": 35701,
+              "count": 1
+            },
+            {
+              "value": 35713,
+              "count": 1
+            },
+            {
+              "value": 35727,
+              "count": 1
+            },
+            {
+              "value": 35839,
+              "count": 1
+            },
+            {
+              "value": 35843,
+              "count": 1
+            },
+            {
+              "value": 36247,
+              "count": 1
+            },
+            {
+              "value": 37188,
+              "count": 1
+            },
+            {
+              "value": 37244,
+              "count": 1
+            },
+            {
+              "value": 39899,
+              "count": 1
+            },
+            {
+              "value": 40098,
+              "count": 1
+            },
+            {
+              "value": 40990,
+              "count": 1
+            },
+            {
+              "value": 40995,
+              "count": 1
+            },
+            {
+              "value": 42035,
+              "count": 1
+            },
+            {
+              "value": 42184,
+              "count": 1
+            },
+            {
+              "value": 42317,
+              "count": 1
+            },
+            {
+              "value": 42339,
+              "count": 1
+            },
+            {
+              "value": 42682,
+              "count": 1
+            },
+            {
+              "value": 43439,
+              "count": 1
+            },
+            {
+              "value": 43538,
+              "count": 1
+            },
+            {
+              "value": 43540,
+              "count": 1
+            },
+            {
+              "value": 43685,
+              "count": 1
+            },
+            {
+              "value": 43770,
+              "count": 1
+            },
+            {
+              "value": 43905,
+              "count": 1
+            },
+            {
+              "value": 45447,
+              "count": 1
+            },
+            {
+              "value": 45983,
+              "count": 1
+            },
+            {
+              "value": 46130,
+              "count": 1
+            },
+            {
+              "value": 46274,
+              "count": 1
+            },
+            {
+              "value": 46386,
+              "count": 1
+            },
+            {
+              "value": 47351,
+              "count": 1
+            },
+            {
+              "value": 48581,
+              "count": 1
+            },
+            {
+              "value": 49255,
+              "count": 1
+            },
+            {
+              "value": 50815,
+              "count": 1
+            },
+            {
+              "value": 52083,
+              "count": 1
+            }
+          ]
+        },
+        "topLevel": {
+          "wrapperToSoundMain": {
+            "count": 52,
+            "min": 22,
+            "max": 22,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 22,
+                "count": 52
+              }
+            ]
+          },
+          "soundMainSetup": {
+            "count": 52,
+            "min": 94,
+            "max": 94,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 94,
+                "count": 52
+              }
+            ]
+          },
+          "mplayMainChain": {
+            "count": 52,
+            "min": 1139,
+            "max": 11100,
+            "distinct": 40,
+            "histogram": [
+              {
+                "value": 1139,
+                "count": 3
+              },
+              {
+                "value": 2145,
+                "count": 1
+              },
+              {
+                "value": 2171,
+                "count": 1
+              },
+              {
+                "value": 2217,
+                "count": 2
+              },
+              {
+                "value": 2229,
+                "count": 1
+              },
+              {
+                "value": 2235,
+                "count": 6
+              },
+              {
+                "value": 2237,
+                "count": 1
+              },
+              {
+                "value": 2243,
+                "count": 1
+              },
+              {
+                "value": 2245,
+                "count": 1
+              },
+              {
+                "value": 2251,
+                "count": 1
+              },
+              {
+                "value": 2255,
+                "count": 2
+              },
+              {
+                "value": 2259,
+                "count": 1
+              },
+              {
+                "value": 2269,
+                "count": 1
+              },
+              {
+                "value": 2272,
+                "count": 1
+              },
+              {
+                "value": 2277,
+                "count": 2
+              },
+              {
+                "value": 2287,
+                "count": 2
+              },
+              {
+                "value": 2290,
+                "count": 1
+              },
+              {
+                "value": 2297,
+                "count": 1
+              },
+              {
+                "value": 2298,
+                "count": 1
+              },
+              {
+                "value": 2301,
+                "count": 1
+              },
+              {
+                "value": 2310,
+                "count": 1
+              },
+              {
+                "value": 2311,
+                "count": 1
+              },
+              {
+                "value": 2330,
+                "count": 2
+              },
+              {
+                "value": 2342,
+                "count": 1
+              },
+              {
+                "value": 2348,
+                "count": 1
+              },
+              {
+                "value": 2370,
+                "count": 1
+              },
+              {
+                "value": 2498,
+                "count": 1
+              },
+              {
+                "value": 2544,
+                "count": 1
+              },
+              {
+                "value": 3191,
+                "count": 1
+              },
+              {
+                "value": 3208,
+                "count": 1
+              },
+              {
+                "value": 3222,
+                "count": 1
+              },
+              {
+                "value": 3243,
+                "count": 1
+              },
+              {
+                "value": 4540,
+                "count": 1
+              },
+              {
+                "value": 4544,
+                "count": 1
+              },
+              {
+                "value": 4758,
+                "count": 1
+              },
+              {
+                "value": 5027,
+                "count": 1
+              },
+              {
+                "value": 6138,
+                "count": 1
+              },
+              {
+                "value": 8524,
+                "count": 1
+              },
+              {
+                "value": 9013,
+                "count": 1
+              },
+              {
+                "value": 11100,
+                "count": 1
+              }
+            ]
+          },
+          "mplayToCgbCall": {
+            "count": 52,
+            "min": 20,
+            "max": 20,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 20,
+                "count": 52
+              }
+            ]
+          },
+          "cgbSound": {
+            "count": 52,
+            "min": 456,
+            "max": 1914,
+            "distinct": 37,
+            "histogram": [
+              {
+                "value": 456,
+                "count": 3
+              },
+              {
+                "value": 492,
+                "count": 1
+              },
+              {
+                "value": 551,
+                "count": 1
+              },
+              {
+                "value": 647,
+                "count": 1
+              },
+              {
+                "value": 649,
+                "count": 4
+              },
+              {
+                "value": 657,
+                "count": 2
+              },
+              {
+                "value": 702,
+                "count": 1
+              },
+              {
+                "value": 704,
+                "count": 4
+              },
+              {
+                "value": 721,
+                "count": 1
+              },
+              {
+                "value": 744,
+                "count": 1
+              },
+              {
+                "value": 752,
+                "count": 1
+              },
+              {
+                "value": 850,
+                "count": 3
+              },
+              {
+                "value": 881,
+                "count": 1
+              },
+              {
+                "value": 886,
+                "count": 2
+              },
+              {
+                "value": 896,
+                "count": 1
+              },
+              {
+                "value": 897,
+                "count": 2
+              },
+              {
+                "value": 905,
+                "count": 1
+              },
+              {
+                "value": 932,
+                "count": 1
+              },
+              {
+                "value": 945,
+                "count": 1
+              },
+              {
+                "value": 1034,
+                "count": 1
+              },
+              {
+                "value": 1096,
+                "count": 1
+              },
+              {
+                "value": 1098,
+                "count": 2
+              },
+              {
+                "value": 1141,
+                "count": 1
+              },
+              {
+                "value": 1144,
+                "count": 1
+              },
+              {
+                "value": 1148,
+                "count": 1
+              },
+              {
+                "value": 1215,
+                "count": 1
+              },
+              {
+                "value": 1265,
+                "count": 1
+              },
+              {
+                "value": 1272,
+                "count": 1
+              },
+              {
+                "value": 1280,
+                "count": 1
+              },
+              {
+                "value": 1299,
+                "count": 2
+              },
+              {
+                "value": 1344,
+                "count": 1
+              },
+              {
+                "value": 1487,
+                "count": 1
+              },
+              {
+                "value": 1497,
+                "count": 1
+              },
+              {
+                "value": 1514,
+                "count": 1
+              },
+              {
+                "value": 1550,
+                "count": 1
+              },
+              {
+                "value": 1670,
+                "count": 1
+              },
+              {
+                "value": 1914,
+                "count": 1
+              }
+            ]
+          },
+          "postCgbSetup": {
+            "count": 52,
+            "min": 59,
+            "max": 63,
+            "distinct": 2,
+            "histogram": [
+              {
+                "value": 59,
+                "count": 7
+              },
+              {
+                "value": 63,
+                "count": 45
+              }
+            ]
+          },
+          "soundMainRamBufferPreparation": {
+            "count": 52,
+            "min": 6298,
+            "max": 6316,
+            "distinct": 2,
+            "histogram": [
+              {
+                "value": 6298,
+                "count": 34
+              },
+              {
+                "value": 6316,
+                "count": 18
+              }
+            ]
+          },
+          "soundMainRamChannelPasses": {
+            "count": 52,
+            "min": 14743,
+            "max": 37473,
+            "distinct": 51,
+            "histogram": [
+              {
+                "value": 14743,
+                "count": 1
+              },
+              {
+                "value": 14756,
+                "count": 1
+              },
+              {
+                "value": 14782,
+                "count": 1
+              },
+              {
+                "value": 15218,
+                "count": 1
+              },
+              {
+                "value": 15233,
+                "count": 1
+              },
+              {
+                "value": 21364,
+                "count": 1
+              },
+              {
+                "value": 21439,
+                "count": 1
+              },
+              {
+                "value": 21452,
+                "count": 1
+              },
+              {
+                "value": 21465,
+                "count": 1
+              },
+              {
+                "value": 21468,
+                "count": 1
+              },
+              {
+                "value": 21476,
+                "count": 1
+              },
+              {
+                "value": 21486,
+                "count": 1
+              },
+              {
+                "value": 22190,
+                "count": 1
+              },
+              {
+                "value": 22196,
+                "count": 1
+              },
+              {
+                "value": 22229,
+                "count": 1
+              },
+              {
+                "value": 26143,
+                "count": 1
+              },
+              {
+                "value": 26144,
+                "count": 1
+              },
+              {
+                "value": 26147,
+                "count": 1
+              },
+              {
+                "value": 26150,
+                "count": 1
+              },
+              {
+                "value": 26154,
+                "count": 1
+              },
+              {
+                "value": 26160,
+                "count": 1
+              },
+              {
+                "value": 26166,
+                "count": 1
+              },
+              {
+                "value": 26171,
+                "count": 1
+              },
+              {
+                "value": 26173,
+                "count": 2
+              },
+              {
+                "value": 26178,
+                "count": 1
+              },
+              {
+                "value": 26186,
+                "count": 1
+              },
+              {
+                "value": 26257,
+                "count": 1
+              },
+              {
+                "value": 28793,
+                "count": 1
+              },
+              {
+                "value": 30111,
+                "count": 1
+              },
+              {
+                "value": 30119,
+                "count": 1
+              },
+              {
+                "value": 32612,
+                "count": 1
+              },
+              {
+                "value": 32615,
+                "count": 1
+              },
+              {
+                "value": 32625,
+                "count": 1
+              },
+              {
+                "value": 32631,
+                "count": 1
+              },
+              {
+                "value": 32647,
+                "count": 1
+              },
+              {
+                "value": 32662,
+                "count": 1
+              },
+              {
+                "value": 32694,
+                "count": 1
+              },
+              {
+                "value": 33707,
+                "count": 1
+              },
+              {
+                "value": 33775,
+                "count": 1
+              },
+              {
+                "value": 33834,
+                "count": 1
+              },
+              {
+                "value": 33852,
+                "count": 1
+              },
+              {
+                "value": 33860,
+                "count": 1
+              },
+              {
+                "value": 33871,
+                "count": 1
+              },
+              {
+                "value": 33876,
+                "count": 1
+              },
+              {
+                "value": 33877,
+                "count": 1
+              },
+              {
+                "value": 36173,
+                "count": 1
+              },
+              {
+                "value": 36187,
+                "count": 1
+              },
+              {
+                "value": 36197,
+                "count": 1
+              },
+              {
+                "value": 36203,
+                "count": 1
+              },
+              {
+                "value": 37408,
+                "count": 1
+              },
+              {
+                "value": 37473,
+                "count": 1
+              }
+            ]
+          },
+          "soundMainRamTail": {
+            "count": 52,
+            "min": 43,
+            "max": 43,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 43,
+                "count": 52
+              }
+            ]
+          }
+        },
+        "mplayPlayerSpans": [
+          {
+            "count": 52,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 52
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 52
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 52
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 52
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 52
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 864,
+            "max": 10825,
+            "distinct": 40,
+            "histogram": [
+              {
+                "value": 864,
+                "count": 3
+              },
+              {
+                "value": 1870,
+                "count": 1
+              },
+              {
+                "value": 1896,
+                "count": 1
+              },
+              {
+                "value": 1942,
+                "count": 2
+              },
+              {
+                "value": 1954,
+                "count": 1
+              },
+              {
+                "value": 1960,
+                "count": 6
+              },
+              {
+                "value": 1962,
+                "count": 1
+              },
+              {
+                "value": 1968,
+                "count": 1
+              },
+              {
+                "value": 1970,
+                "count": 1
+              },
+              {
+                "value": 1976,
+                "count": 1
+              },
+              {
+                "value": 1980,
+                "count": 2
+              },
+              {
+                "value": 1984,
+                "count": 1
+              },
+              {
+                "value": 1994,
+                "count": 1
+              },
+              {
+                "value": 1997,
+                "count": 1
+              },
+              {
+                "value": 2002,
+                "count": 2
+              },
+              {
+                "value": 2012,
+                "count": 2
+              },
+              {
+                "value": 2015,
+                "count": 1
+              },
+              {
+                "value": 2022,
+                "count": 1
+              },
+              {
+                "value": 2023,
+                "count": 1
+              },
+              {
+                "value": 2026,
+                "count": 1
+              },
+              {
+                "value": 2035,
+                "count": 1
+              },
+              {
+                "value": 2036,
+                "count": 1
+              },
+              {
+                "value": 2055,
+                "count": 2
+              },
+              {
+                "value": 2067,
+                "count": 1
+              },
+              {
+                "value": 2073,
+                "count": 1
+              },
+              {
+                "value": 2095,
+                "count": 1
+              },
+              {
+                "value": 2223,
+                "count": 1
+              },
+              {
+                "value": 2269,
+                "count": 1
+              },
+              {
+                "value": 2916,
+                "count": 1
+              },
+              {
+                "value": 2933,
+                "count": 1
+              },
+              {
+                "value": 2947,
+                "count": 1
+              },
+              {
+                "value": 2968,
+                "count": 1
+              },
+              {
+                "value": 4265,
+                "count": 1
+              },
+              {
+                "value": 4269,
+                "count": 1
+              },
+              {
+                "value": 4483,
+                "count": 1
+              },
+              {
+                "value": 4752,
+                "count": 1
+              },
+              {
+                "value": 5863,
+                "count": 1
+              },
+              {
+                "value": 8249,
+                "count": 1
+              },
+              {
+                "value": 8738,
+                "count": 1
+              },
+              {
+                "value": 10825,
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "directChannelSpans": [
+          {
+            "count": 52,
+            "min": 30,
+            "max": 6755,
+            "distinct": 21,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 5
+              },
+              {
+                "value": 69,
+                "count": 2
+              },
+              {
+                "value": 4854,
+                "count": 4
+              },
+              {
+                "value": 4872,
+                "count": 7
+              },
+              {
+                "value": 4880,
+                "count": 1
+              },
+              {
+                "value": 4885,
+                "count": 1
+              },
+              {
+                "value": 6599,
+                "count": 4
+              },
+              {
+                "value": 6605,
+                "count": 1
+              },
+              {
+                "value": 6610,
+                "count": 3
+              },
+              {
+                "value": 6616,
+                "count": 2
+              },
+              {
+                "value": 6617,
+                "count": 5
+              },
+              {
+                "value": 6623,
+                "count": 1
+              },
+              {
+                "value": 6628,
+                "count": 5
+              },
+              {
+                "value": 6629,
+                "count": 1
+              },
+              {
+                "value": 6731,
+                "count": 2
+              },
+              {
+                "value": 6737,
+                "count": 1
+              },
+              {
+                "value": 6738,
+                "count": 1
+              },
+              {
+                "value": 6744,
+                "count": 1
+              },
+              {
+                "value": 6749,
+                "count": 2
+              },
+              {
+                "value": 6750,
+                "count": 1
+              },
+              {
+                "value": 6755,
+                "count": 2
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 30,
+            "max": 6306,
+            "distinct": 15,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 2
+              },
+              {
+                "value": 69,
+                "count": 2
+              },
+              {
+                "value": 6044,
+                "count": 1
+              },
+              {
+                "value": 6057,
+                "count": 1
+              },
+              {
+                "value": 6137,
+                "count": 13
+              },
+              {
+                "value": 6143,
+                "count": 5
+              },
+              {
+                "value": 6148,
+                "count": 1
+              },
+              {
+                "value": 6155,
+                "count": 2
+              },
+              {
+                "value": 6166,
+                "count": 1
+              },
+              {
+                "value": 6167,
+                "count": 1
+              },
+              {
+                "value": 6258,
+                "count": 2
+              },
+              {
+                "value": 6269,
+                "count": 12
+              },
+              {
+                "value": 6275,
+                "count": 5
+              },
+              {
+                "value": 6287,
+                "count": 3
+              },
+              {
+                "value": 6306,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 30,
+            "max": 8732,
+            "distinct": 18,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 2
+              },
+              {
+                "value": 69,
+                "count": 1
+              },
+              {
+                "value": 4867,
+                "count": 1
+              },
+              {
+                "value": 4898,
+                "count": 1
+              },
+              {
+                "value": 6588,
+                "count": 9
+              },
+              {
+                "value": 6599,
+                "count": 3
+              },
+              {
+                "value": 6606,
+                "count": 1
+              },
+              {
+                "value": 6617,
+                "count": 1
+              },
+              {
+                "value": 8368,
+                "count": 3
+              },
+              {
+                "value": 8381,
+                "count": 4
+              },
+              {
+                "value": 8386,
+                "count": 7
+              },
+              {
+                "value": 8394,
+                "count": 7
+              },
+              {
+                "value": 8399,
+                "count": 3
+              },
+              {
+                "value": 8404,
+                "count": 1
+              },
+              {
+                "value": 8697,
+                "count": 2
+              },
+              {
+                "value": 8701,
+                "count": 3
+              },
+              {
+                "value": 8714,
+                "count": 2
+              },
+              {
+                "value": 8732,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 30,
+            "max": 8400,
+            "distinct": 19,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 24
+              },
+              {
+                "value": 69,
+                "count": 1
+              },
+              {
+                "value": 8018,
+                "count": 1
+              },
+              {
+                "value": 8024,
+                "count": 1
+              },
+              {
+                "value": 8084,
+                "count": 1
+              },
+              {
+                "value": 8089,
+                "count": 3
+              },
+              {
+                "value": 8090,
+                "count": 2
+              },
+              {
+                "value": 8095,
+                "count": 3
+              },
+              {
+                "value": 8107,
+                "count": 1
+              },
+              {
+                "value": 8120,
+                "count": 1
+              },
+              {
+                "value": 8132,
+                "count": 1
+              },
+              {
+                "value": 8377,
+                "count": 1
+              },
+              {
+                "value": 8381,
+                "count": 1
+              },
+              {
+                "value": 8386,
+                "count": 3
+              },
+              {
+                "value": 8387,
+                "count": 2
+              },
+              {
+                "value": 8394,
+                "count": 2
+              },
+              {
+                "value": 8395,
+                "count": 2
+              },
+              {
+                "value": 8399,
+                "count": 1
+              },
+              {
+                "value": 8400,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "count": 52,
+            "min": 28,
+            "max": 8065,
+            "distinct": 15,
+            "histogram": [
+              {
+                "value": 28,
+                "count": 11
+              },
+              {
+                "value": 67,
+                "count": 1
+              },
+              {
+                "value": 4852,
+                "count": 11
+              },
+              {
+                "value": 4878,
+                "count": 1
+              },
+              {
+                "value": 4883,
+                "count": 1
+              },
+              {
+                "value": 6636,
+                "count": 5
+              },
+              {
+                "value": 6647,
+                "count": 7
+              },
+              {
+                "value": 6660,
+                "count": 1
+              },
+              {
+                "value": 7862,
+                "count": 1
+              },
+              {
+                "value": 7867,
+                "count": 1
+              },
+              {
+                "value": 7868,
+                "count": 5
+              },
+              {
+                "value": 7880,
+                "count": 4
+              },
+              {
+                "value": 7892,
+                "count": 1
+              },
+              {
+                "value": 8029,
+                "count": 1
+              },
+              {
+                "value": 8065,
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "mplayCommandPassCount": {
+          "count": 52,
+          "min": 0,
+          "max": 1,
+          "distinct": 2,
+          "histogram": [
+            {
+              "value": 0,
+              "count": 3
+            },
+            {
+              "value": 1,
+              "count": 49
+            }
+          ]
+        },
+        "mplayVolumePitchPassCount": {
+          "count": 52,
+          "min": 10,
+          "max": 10,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 10,
+              "count": 52
+            }
+          ]
+        }
+      },
+      "classification": {
+        "fixedTopLevelStages": [
+          "wrapperToSoundMain",
+          "soundMainSetup",
+          "mplayToCgbCall",
+          "soundMainRamTail"
+        ],
+        "variableTopLevelStages": [
+          "mplayMainChain",
+          "cgbSound",
+          "postCgbSetup",
+          "soundMainRamBufferPreparation",
+          "soundMainRamChannelPasses"
+        ],
+        "sourceOwnedBoundaries": [
+          "m4aSoundMain -> SoundMain",
+          "MPlayMain linked-player entries and command/volume-pitch track-pass loop heads",
+          "CgbSound",
+          "SoundMainRAM setup, SoundMainRAM_ChanLoop iterations, and SoundMainRAM epilogue"
+        ],
+        "noReducerClaim": true
+      }
+    },
+    {
+      "receipt": "liliana",
+      "sourceFunction": "FillFactoryFrontierTrainerParty",
+      "sourceEpochObservationCount": 31,
+      "sourceStateEquivalence": {
+        "observationCount": 31,
+        "capturedStateKeys": 31,
+        "repeatedCapturedStateKeys": 0,
+        "repeatedObservationCount": 0,
+        "repeatedKeysWithDifferentM4aCost": 0,
+        "interpretation": "No captured m4a state key repeats, so the observed set cannot establish an equal-key cost implication."
+      },
+      "distributions": {
+        "m4aSoundMain": {
+          "count": 31,
+          "min": 24732,
+          "max": 47917,
+          "distinct": 31,
+          "histogram": [
+            {
+              "value": 24732,
+              "count": 1
+            },
+            {
+              "value": 24827,
+              "count": 1
+            },
+            {
+              "value": 28069,
+              "count": 1
+            },
+            {
+              "value": 28203,
+              "count": 1
+            },
+            {
+              "value": 29571,
+              "count": 1
+            },
+            {
+              "value": 30214,
+              "count": 1
+            },
+            {
+              "value": 31301,
+              "count": 1
+            },
+            {
+              "value": 31415,
+              "count": 1
+            },
+            {
+              "value": 31427,
+              "count": 1
+            },
+            {
+              "value": 31550,
+              "count": 1
+            },
+            {
+              "value": 31568,
+              "count": 1
+            },
+            {
+              "value": 31569,
+              "count": 1
+            },
+            {
+              "value": 31737,
+              "count": 1
+            },
+            {
+              "value": 31777,
+              "count": 1
+            },
+            {
+              "value": 32531,
+              "count": 1
+            },
+            {
+              "value": 33213,
+              "count": 1
+            },
+            {
+              "value": 33443,
+              "count": 1
+            },
+            {
+              "value": 33911,
+              "count": 1
+            },
+            {
+              "value": 34764,
+              "count": 1
+            },
+            {
+              "value": 35195,
+              "count": 1
+            },
+            {
+              "value": 35257,
+              "count": 1
+            },
+            {
+              "value": 36827,
+              "count": 1
+            },
+            {
+              "value": 37552,
+              "count": 1
+            },
+            {
+              "value": 37813,
+              "count": 1
+            },
+            {
+              "value": 38408,
+              "count": 1
+            },
+            {
+              "value": 39558,
+              "count": 1
+            },
+            {
+              "value": 40609,
+              "count": 1
+            },
+            {
+              "value": 40832,
+              "count": 1
+            },
+            {
+              "value": 42275,
+              "count": 1
+            },
+            {
+              "value": 42318,
+              "count": 1
+            },
+            {
+              "value": 47917,
+              "count": 1
+            }
+          ]
+        },
+        "topLevel": {
+          "wrapperToSoundMain": {
+            "count": 31,
+            "min": 22,
+            "max": 22,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 22,
+                "count": 31
+              }
+            ]
+          },
+          "soundMainSetup": {
+            "count": 31,
+            "min": 94,
+            "max": 94,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 94,
+                "count": 31
+              }
+            ]
+          },
+          "mplayMainChain": {
+            "count": 31,
+            "min": 1139,
+            "max": 10447,
+            "distinct": 29,
+            "histogram": [
+              {
+                "value": 1139,
+                "count": 1
+              },
+              {
+                "value": 2249,
+                "count": 1
+              },
+              {
+                "value": 2275,
+                "count": 1
+              },
+              {
+                "value": 2281,
+                "count": 1
+              },
+              {
+                "value": 2287,
+                "count": 2
+              },
+              {
+                "value": 2368,
+                "count": 1
+              },
+              {
+                "value": 2374,
+                "count": 1
+              },
+              {
+                "value": 2386,
+                "count": 1
+              },
+              {
+                "value": 2416,
+                "count": 1
+              },
+              {
+                "value": 2422,
+                "count": 1
+              },
+              {
+                "value": 2428,
+                "count": 2
+              },
+              {
+                "value": 2461,
+                "count": 1
+              },
+              {
+                "value": 2499,
+                "count": 1
+              },
+              {
+                "value": 2852,
+                "count": 1
+              },
+              {
+                "value": 2878,
+                "count": 1
+              },
+              {
+                "value": 2892,
+                "count": 1
+              },
+              {
+                "value": 2971,
+                "count": 1
+              },
+              {
+                "value": 2987,
+                "count": 1
+              },
+              {
+                "value": 3013,
+                "count": 1
+              },
+              {
+                "value": 3410,
+                "count": 1
+              },
+              {
+                "value": 3440,
+                "count": 1
+              },
+              {
+                "value": 3584,
+                "count": 1
+              },
+              {
+                "value": 4005,
+                "count": 1
+              },
+              {
+                "value": 4258,
+                "count": 1
+              },
+              {
+                "value": 4808,
+                "count": 1
+              },
+              {
+                "value": 5659,
+                "count": 1
+              },
+              {
+                "value": 6824,
+                "count": 1
+              },
+              {
+                "value": 8053,
+                "count": 1
+              },
+              {
+                "value": 10447,
+                "count": 1
+              }
+            ]
+          },
+          "mplayToCgbCall": {
+            "count": 31,
+            "min": 20,
+            "max": 20,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 20,
+                "count": 31
+              }
+            ]
+          },
+          "cgbSound": {
+            "count": 31,
+            "min": 1078,
+            "max": 2328,
+            "distinct": 25,
+            "histogram": [
+              {
+                "value": 1078,
+                "count": 1
+              },
+              {
+                "value": 1098,
+                "count": 2
+              },
+              {
+                "value": 1150,
+                "count": 1
+              },
+              {
+                "value": 1175,
+                "count": 1
+              },
+              {
+                "value": 1214,
+                "count": 1
+              },
+              {
+                "value": 1299,
+                "count": 4
+              },
+              {
+                "value": 1309,
+                "count": 1
+              },
+              {
+                "value": 1322,
+                "count": 1
+              },
+              {
+                "value": 1324,
+                "count": 1
+              },
+              {
+                "value": 1326,
+                "count": 1
+              },
+              {
+                "value": 1403,
+                "count": 2
+              },
+              {
+                "value": 1428,
+                "count": 1
+              },
+              {
+                "value": 1481,
+                "count": 1
+              },
+              {
+                "value": 1498,
+                "count": 1
+              },
+              {
+                "value": 1514,
+                "count": 1
+              },
+              {
+                "value": 1559,
+                "count": 1
+              },
+              {
+                "value": 1603,
+                "count": 1
+              },
+              {
+                "value": 1609,
+                "count": 1
+              },
+              {
+                "value": 1638,
+                "count": 1
+              },
+              {
+                "value": 1642,
+                "count": 2
+              },
+              {
+                "value": 1876,
+                "count": 1
+              },
+              {
+                "value": 1909,
+                "count": 1
+              },
+              {
+                "value": 1921,
+                "count": 1
+              },
+              {
+                "value": 2178,
+                "count": 1
+              },
+              {
+                "value": 2328,
+                "count": 1
+              }
+            ]
+          },
+          "postCgbSetup": {
+            "count": 31,
+            "min": 59,
+            "max": 63,
+            "distinct": 2,
+            "histogram": [
+              {
+                "value": 59,
+                "count": 4
+              },
+              {
+                "value": 63,
+                "count": 27
+              }
+            ]
+          },
+          "soundMainRamBufferPreparation": {
+            "count": 31,
+            "min": 6298,
+            "max": 6316,
+            "distinct": 2,
+            "histogram": [
+              {
+                "value": 6298,
+                "count": 3
+              },
+              {
+                "value": 6316,
+                "count": 28
+              }
+            ]
+          },
+          "soundMainRamChannelPasses": {
+            "count": 31,
+            "min": 14635,
+            "max": 28602,
+            "distinct": 24,
+            "histogram": [
+              {
+                "value": 14635,
+                "count": 1
+              },
+              {
+                "value": 14668,
+                "count": 1
+              },
+              {
+                "value": 17648,
+                "count": 1
+              },
+              {
+                "value": 17659,
+                "count": 1
+              },
+              {
+                "value": 19477,
+                "count": 1
+              },
+              {
+                "value": 19510,
+                "count": 1
+              },
+              {
+                "value": 21271,
+                "count": 2
+              },
+              {
+                "value": 21277,
+                "count": 4
+              },
+              {
+                "value": 21283,
+                "count": 2
+              },
+              {
+                "value": 22495,
+                "count": 1
+              },
+              {
+                "value": 22501,
+                "count": 1
+              },
+              {
+                "value": 22515,
+                "count": 1
+              },
+              {
+                "value": 22559,
+                "count": 1
+              },
+              {
+                "value": 24288,
+                "count": 1
+              },
+              {
+                "value": 24302,
+                "count": 1
+              },
+              {
+                "value": 24306,
+                "count": 1
+              },
+              {
+                "value": 25534,
+                "count": 2
+              },
+              {
+                "value": 25547,
+                "count": 2
+              },
+              {
+                "value": 26739,
+                "count": 1
+              },
+              {
+                "value": 27320,
+                "count": 1
+              },
+              {
+                "value": 27334,
+                "count": 1
+              },
+              {
+                "value": 27339,
+                "count": 1
+              },
+              {
+                "value": 28577,
+                "count": 1
+              },
+              {
+                "value": 28602,
+                "count": 1
+              }
+            ]
+          },
+          "soundMainRamTail": {
+            "count": 31,
+            "min": 43,
+            "max": 43,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 43,
+                "count": 31
+              }
+            ]
+          }
+        },
+        "mplayPlayerSpans": [
+          {
+            "count": 31,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 31
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 31
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 31
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 31
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 31
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 864,
+            "max": 10172,
+            "distinct": 29,
+            "histogram": [
+              {
+                "value": 864,
+                "count": 1
+              },
+              {
+                "value": 1974,
+                "count": 1
+              },
+              {
+                "value": 2000,
+                "count": 1
+              },
+              {
+                "value": 2006,
+                "count": 1
+              },
+              {
+                "value": 2012,
+                "count": 2
+              },
+              {
+                "value": 2093,
+                "count": 1
+              },
+              {
+                "value": 2099,
+                "count": 1
+              },
+              {
+                "value": 2111,
+                "count": 1
+              },
+              {
+                "value": 2141,
+                "count": 1
+              },
+              {
+                "value": 2147,
+                "count": 1
+              },
+              {
+                "value": 2153,
+                "count": 2
+              },
+              {
+                "value": 2186,
+                "count": 1
+              },
+              {
+                "value": 2224,
+                "count": 1
+              },
+              {
+                "value": 2577,
+                "count": 1
+              },
+              {
+                "value": 2603,
+                "count": 1
+              },
+              {
+                "value": 2617,
+                "count": 1
+              },
+              {
+                "value": 2696,
+                "count": 1
+              },
+              {
+                "value": 2712,
+                "count": 1
+              },
+              {
+                "value": 2738,
+                "count": 1
+              },
+              {
+                "value": 3135,
+                "count": 1
+              },
+              {
+                "value": 3165,
+                "count": 1
+              },
+              {
+                "value": 3309,
+                "count": 1
+              },
+              {
+                "value": 3730,
+                "count": 1
+              },
+              {
+                "value": 3983,
+                "count": 1
+              },
+              {
+                "value": 4533,
+                "count": 1
+              },
+              {
+                "value": 5384,
+                "count": 1
+              },
+              {
+                "value": 6549,
+                "count": 1
+              },
+              {
+                "value": 7778,
+                "count": 1
+              },
+              {
+                "value": 10172,
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "directChannelSpans": [
+          {
+            "count": 31,
+            "min": 30,
+            "max": 7904,
+            "distinct": 14,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 5
+              },
+              {
+                "value": 69,
+                "count": 2
+              },
+              {
+                "value": 4268,
+                "count": 1
+              },
+              {
+                "value": 4855,
+                "count": 6
+              },
+              {
+                "value": 4861,
+                "count": 1
+              },
+              {
+                "value": 4867,
+                "count": 1
+              },
+              {
+                "value": 4880,
+                "count": 1
+              },
+              {
+                "value": 6643,
+                "count": 1
+              },
+              {
+                "value": 6654,
+                "count": 5
+              },
+              {
+                "value": 6660,
+                "count": 3
+              },
+              {
+                "value": 6673,
+                "count": 1
+              },
+              {
+                "value": 7874,
+                "count": 1
+              },
+              {
+                "value": 7879,
+                "count": 2
+              },
+              {
+                "value": 7904,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 30,
+            "max": 4880,
+            "distinct": 7,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 7
+              },
+              {
+                "value": 4268,
+                "count": 1
+              },
+              {
+                "value": 4286,
+                "count": 1
+              },
+              {
+                "value": 4855,
+                "count": 13
+              },
+              {
+                "value": 4861,
+                "count": 3
+              },
+              {
+                "value": 4867,
+                "count": 3
+              },
+              {
+                "value": 4880,
+                "count": 3
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 30,
+            "max": 7904,
+            "distinct": 17,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 3
+              },
+              {
+                "value": 69,
+                "count": 1
+              },
+              {
+                "value": 4268,
+                "count": 1
+              },
+              {
+                "value": 4855,
+                "count": 4
+              },
+              {
+                "value": 4861,
+                "count": 1
+              },
+              {
+                "value": 4867,
+                "count": 1
+              },
+              {
+                "value": 4873,
+                "count": 2
+              },
+              {
+                "value": 6654,
+                "count": 2
+              },
+              {
+                "value": 6660,
+                "count": 3
+              },
+              {
+                "value": 6672,
+                "count": 1
+              },
+              {
+                "value": 6691,
+                "count": 1
+              },
+              {
+                "value": 7879,
+                "count": 4
+              },
+              {
+                "value": 7880,
+                "count": 1
+              },
+              {
+                "value": 7885,
+                "count": 3
+              },
+              {
+                "value": 7892,
+                "count": 1
+              },
+              {
+                "value": 7897,
+                "count": 1
+              },
+              {
+                "value": 7904,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 30,
+            "max": 4898,
+            "distinct": 11,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 2
+              },
+              {
+                "value": 4268,
+                "count": 2
+              },
+              {
+                "value": 4286,
+                "count": 1
+              },
+              {
+                "value": 4855,
+                "count": 13
+              },
+              {
+                "value": 4861,
+                "count": 3
+              },
+              {
+                "value": 4867,
+                "count": 2
+              },
+              {
+                "value": 4872,
+                "count": 1
+              },
+              {
+                "value": 4873,
+                "count": 3
+              },
+              {
+                "value": 4880,
+                "count": 2
+              },
+              {
+                "value": 4885,
+                "count": 1
+              },
+              {
+                "value": 4898,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "count": 31,
+            "min": 28,
+            "max": 4883,
+            "distinct": 8,
+            "histogram": [
+              {
+                "value": 28,
+                "count": 5
+              },
+              {
+                "value": 4852,
+                "count": 7
+              },
+              {
+                "value": 4853,
+                "count": 2
+              },
+              {
+                "value": 4870,
+                "count": 4
+              },
+              {
+                "value": 4871,
+                "count": 4
+              },
+              {
+                "value": 4877,
+                "count": 2
+              },
+              {
+                "value": 4878,
+                "count": 4
+              },
+              {
+                "value": 4883,
+                "count": 3
+              }
+            ]
+          }
+        ],
+        "mplayCommandPassCount": {
+          "count": 31,
+          "min": 0,
+          "max": 1,
+          "distinct": 2,
+          "histogram": [
+            {
+              "value": 0,
+              "count": 1
+            },
+            {
+              "value": 1,
+              "count": 30
+            }
+          ]
+        },
+        "mplayVolumePitchPassCount": {
+          "count": 31,
+          "min": 10,
+          "max": 10,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 10,
+              "count": 31
+            }
+          ]
+        }
+      },
+      "classification": {
+        "fixedTopLevelStages": [
+          "wrapperToSoundMain",
+          "soundMainSetup",
+          "mplayToCgbCall",
+          "soundMainRamTail"
+        ],
+        "variableTopLevelStages": [
+          "mplayMainChain",
+          "cgbSound",
+          "postCgbSetup",
+          "soundMainRamBufferPreparation",
+          "soundMainRamChannelPasses"
+        ],
+        "sourceOwnedBoundaries": [
+          "m4aSoundMain -> SoundMain",
+          "MPlayMain linked-player entries and command/volume-pitch track-pass loop heads",
+          "CgbSound",
+          "SoundMainRAM setup, SoundMainRAM_ChanLoop iterations, and SoundMainRAM epilogue"
+        ],
+        "noReducerClaim": true
+      }
+    },
+    {
+      "receipt": "factory-varied",
+      "sourceFunction": "FillFactoryFrontierTrainerParty",
+      "sourceEpochObservationCount": 30,
+      "sourceStateEquivalence": {
+        "observationCount": 30,
+        "capturedStateKeys": 30,
+        "repeatedCapturedStateKeys": 0,
+        "repeatedObservationCount": 0,
+        "repeatedKeysWithDifferentM4aCost": 0,
+        "interpretation": "No captured m4a state key repeats, so the observed set cannot establish an equal-key cost implication."
+      },
+      "distributions": {
+        "m4aSoundMain": {
+          "count": 30,
+          "min": 24391,
+          "max": 41682,
+          "distinct": 28,
+          "histogram": [
+            {
+              "value": 24391,
+              "count": 1
+            },
+            {
+              "value": 24749,
+              "count": 1
+            },
+            {
+              "value": 24753,
+              "count": 3
+            },
+            {
+              "value": 24852,
+              "count": 1
+            },
+            {
+              "value": 24874,
+              "count": 1
+            },
+            {
+              "value": 24902,
+              "count": 1
+            },
+            {
+              "value": 25168,
+              "count": 1
+            },
+            {
+              "value": 25301,
+              "count": 1
+            },
+            {
+              "value": 28373,
+              "count": 1
+            },
+            {
+              "value": 29169,
+              "count": 1
+            },
+            {
+              "value": 29210,
+              "count": 1
+            },
+            {
+              "value": 29402,
+              "count": 1
+            },
+            {
+              "value": 29535,
+              "count": 1
+            },
+            {
+              "value": 29648,
+              "count": 1
+            },
+            {
+              "value": 29728,
+              "count": 1
+            },
+            {
+              "value": 29730,
+              "count": 1
+            },
+            {
+              "value": 30129,
+              "count": 1
+            },
+            {
+              "value": 30241,
+              "count": 1
+            },
+            {
+              "value": 30446,
+              "count": 1
+            },
+            {
+              "value": 30707,
+              "count": 1
+            },
+            {
+              "value": 30871,
+              "count": 1
+            },
+            {
+              "value": 31108,
+              "count": 1
+            },
+            {
+              "value": 32264,
+              "count": 1
+            },
+            {
+              "value": 32355,
+              "count": 1
+            },
+            {
+              "value": 32991,
+              "count": 1
+            },
+            {
+              "value": 33544,
+              "count": 1
+            },
+            {
+              "value": 34294,
+              "count": 1
+            },
+            {
+              "value": 41682,
+              "count": 1
+            }
+          ]
+        },
+        "topLevel": {
+          "wrapperToSoundMain": {
+            "count": 30,
+            "min": 22,
+            "max": 22,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 22,
+                "count": 30
+              }
+            ]
+          },
+          "soundMainSetup": {
+            "count": 30,
+            "min": 94,
+            "max": 94,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 94,
+                "count": 30
+              }
+            ]
+          },
+          "mplayMainChain": {
+            "count": 30,
+            "min": 1139,
+            "max": 9121,
+            "distinct": 24,
+            "histogram": [
+              {
+                "value": 1139,
+                "count": 1
+              },
+              {
+                "value": 2261,
+                "count": 4
+              },
+              {
+                "value": 2273,
+                "count": 1
+              },
+              {
+                "value": 2293,
+                "count": 2
+              },
+              {
+                "value": 2307,
+                "count": 1
+              },
+              {
+                "value": 2354,
+                "count": 1
+              },
+              {
+                "value": 2374,
+                "count": 1
+              },
+              {
+                "value": 2386,
+                "count": 1
+              },
+              {
+                "value": 2388,
+                "count": 2
+              },
+              {
+                "value": 2402,
+                "count": 1
+              },
+              {
+                "value": 2448,
+                "count": 1
+              },
+              {
+                "value": 2511,
+                "count": 1
+              },
+              {
+                "value": 2525,
+                "count": 1
+              },
+              {
+                "value": 3304,
+                "count": 1
+              },
+              {
+                "value": 3368,
+                "count": 2
+              },
+              {
+                "value": 3374,
+                "count": 1
+              },
+              {
+                "value": 3480,
+                "count": 1
+              },
+              {
+                "value": 3495,
+                "count": 1
+              },
+              {
+                "value": 4396,
+                "count": 1
+              },
+              {
+                "value": 4591,
+                "count": 1
+              },
+              {
+                "value": 5332,
+                "count": 1
+              },
+              {
+                "value": 5769,
+                "count": 1
+              },
+              {
+                "value": 6383,
+                "count": 1
+              },
+              {
+                "value": 9121,
+                "count": 1
+              }
+            ]
+          },
+          "mplayToCgbCall": {
+            "count": 30,
+            "min": 20,
+            "max": 20,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 20,
+                "count": 30
+              }
+            ]
+          },
+          "cgbSound": {
+            "count": 30,
+            "min": 760,
+            "max": 2428,
+            "distinct": 24,
+            "histogram": [
+              {
+                "value": 760,
+                "count": 1
+              },
+              {
+                "value": 844,
+                "count": 1
+              },
+              {
+                "value": 1098,
+                "count": 1
+              },
+              {
+                "value": 1214,
+                "count": 1
+              },
+              {
+                "value": 1245,
+                "count": 1
+              },
+              {
+                "value": 1277,
+                "count": 1
+              },
+              {
+                "value": 1299,
+                "count": 7
+              },
+              {
+                "value": 1313,
+                "count": 1
+              },
+              {
+                "value": 1326,
+                "count": 1
+              },
+              {
+                "value": 1398,
+                "count": 1
+              },
+              {
+                "value": 1456,
+                "count": 1
+              },
+              {
+                "value": 1468,
+                "count": 1
+              },
+              {
+                "value": 1482,
+                "count": 1
+              },
+              {
+                "value": 1565,
+                "count": 1
+              },
+              {
+                "value": 1603,
+                "count": 1
+              },
+              {
+                "value": 1616,
+                "count": 1
+              },
+              {
+                "value": 1701,
+                "count": 1
+              },
+              {
+                "value": 1716,
+                "count": 1
+              },
+              {
+                "value": 1820,
+                "count": 1
+              },
+              {
+                "value": 1955,
+                "count": 1
+              },
+              {
+                "value": 2201,
+                "count": 1
+              },
+              {
+                "value": 2267,
+                "count": 1
+              },
+              {
+                "value": 2274,
+                "count": 1
+              },
+              {
+                "value": 2428,
+                "count": 1
+              }
+            ]
+          },
+          "postCgbSetup": {
+            "count": 30,
+            "min": 59,
+            "max": 63,
+            "distinct": 2,
+            "histogram": [
+              {
+                "value": 59,
+                "count": 5
+              },
+              {
+                "value": 63,
+                "count": 25
+              }
+            ]
+          },
+          "soundMainRamBufferPreparation": {
+            "count": 30,
+            "min": 6298,
+            "max": 6316,
+            "distinct": 2,
+            "histogram": [
+              {
+                "value": 6298,
+                "count": 2
+              },
+              {
+                "value": 6316,
+                "count": 28
+              }
+            ]
+          },
+          "soundMainRamChannelPasses": {
+            "count": 30,
+            "min": 14629,
+            "max": 23754,
+            "distinct": 11,
+            "histogram": [
+              {
+                "value": 14629,
+                "count": 5
+              },
+              {
+                "value": 14635,
+                "count": 5
+              },
+              {
+                "value": 18877,
+                "count": 1
+              },
+              {
+                "value": 18890,
+                "count": 2
+              },
+              {
+                "value": 18904,
+                "count": 4
+              },
+              {
+                "value": 18943,
+                "count": 2
+              },
+              {
+                "value": 19466,
+                "count": 1
+              },
+              {
+                "value": 19471,
+                "count": 3
+              },
+              {
+                "value": 19477,
+                "count": 3
+              },
+              {
+                "value": 19490,
+                "count": 3
+              },
+              {
+                "value": 23754,
+                "count": 1
+              }
+            ]
+          },
+          "soundMainRamTail": {
+            "count": 30,
+            "min": 43,
+            "max": 43,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 43,
+                "count": 30
+              }
+            ]
+          }
+        },
+        "mplayPlayerSpans": [
+          {
+            "count": 30,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 30
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 30
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 30
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 30
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 55,
+            "max": 55,
+            "distinct": 1,
+            "histogram": [
+              {
+                "value": 55,
+                "count": 30
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 864,
+            "max": 8846,
+            "distinct": 24,
+            "histogram": [
+              {
+                "value": 864,
+                "count": 1
+              },
+              {
+                "value": 1986,
+                "count": 4
+              },
+              {
+                "value": 1998,
+                "count": 1
+              },
+              {
+                "value": 2018,
+                "count": 2
+              },
+              {
+                "value": 2032,
+                "count": 1
+              },
+              {
+                "value": 2079,
+                "count": 1
+              },
+              {
+                "value": 2099,
+                "count": 1
+              },
+              {
+                "value": 2111,
+                "count": 1
+              },
+              {
+                "value": 2113,
+                "count": 2
+              },
+              {
+                "value": 2127,
+                "count": 1
+              },
+              {
+                "value": 2173,
+                "count": 1
+              },
+              {
+                "value": 2236,
+                "count": 1
+              },
+              {
+                "value": 2250,
+                "count": 1
+              },
+              {
+                "value": 3029,
+                "count": 1
+              },
+              {
+                "value": 3093,
+                "count": 2
+              },
+              {
+                "value": 3099,
+                "count": 1
+              },
+              {
+                "value": 3205,
+                "count": 1
+              },
+              {
+                "value": 3220,
+                "count": 1
+              },
+              {
+                "value": 4121,
+                "count": 1
+              },
+              {
+                "value": 4316,
+                "count": 1
+              },
+              {
+                "value": 5057,
+                "count": 1
+              },
+              {
+                "value": 5494,
+                "count": 1
+              },
+              {
+                "value": 6108,
+                "count": 1
+              },
+              {
+                "value": 8846,
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "directChannelSpans": [
+          {
+            "count": 30,
+            "min": 30,
+            "max": 4880,
+            "distinct": 6,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 7
+              },
+              {
+                "value": 4268,
+                "count": 3
+              },
+              {
+                "value": 4855,
+                "count": 13
+              },
+              {
+                "value": 4861,
+                "count": 2
+              },
+              {
+                "value": 4867,
+                "count": 2
+              },
+              {
+                "value": 4880,
+                "count": 3
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 30,
+            "max": 4880,
+            "distinct": 6,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 5
+              },
+              {
+                "value": 4268,
+                "count": 3
+              },
+              {
+                "value": 4855,
+                "count": 16
+              },
+              {
+                "value": 4861,
+                "count": 2
+              },
+              {
+                "value": 4867,
+                "count": 2
+              },
+              {
+                "value": 4880,
+                "count": 2
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 30,
+            "max": 4880,
+            "distinct": 7,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 5
+              },
+              {
+                "value": 4268,
+                "count": 2
+              },
+              {
+                "value": 4855,
+                "count": 14
+              },
+              {
+                "value": 4861,
+                "count": 2
+              },
+              {
+                "value": 4867,
+                "count": 3
+              },
+              {
+                "value": 4873,
+                "count": 2
+              },
+              {
+                "value": 4880,
+                "count": 2
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 30,
+            "max": 4880,
+            "distinct": 6,
+            "histogram": [
+              {
+                "value": 30,
+                "count": 14
+              },
+              {
+                "value": 69,
+                "count": 2
+              },
+              {
+                "value": 4854,
+                "count": 8
+              },
+              {
+                "value": 4867,
+                "count": 1
+              },
+              {
+                "value": 4872,
+                "count": 4
+              },
+              {
+                "value": 4880,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "count": 30,
+            "min": 28,
+            "max": 4896,
+            "distinct": 10,
+            "histogram": [
+              {
+                "value": 28,
+                "count": 6
+              },
+              {
+                "value": 4284,
+                "count": 2
+              },
+              {
+                "value": 4853,
+                "count": 4
+              },
+              {
+                "value": 4859,
+                "count": 3
+              },
+              {
+                "value": 4865,
+                "count": 2
+              },
+              {
+                "value": 4870,
+                "count": 1
+              },
+              {
+                "value": 4871,
+                "count": 8
+              },
+              {
+                "value": 4878,
+                "count": 2
+              },
+              {
+                "value": 4883,
+                "count": 1
+              },
+              {
+                "value": 4896,
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "mplayCommandPassCount": {
+          "count": 30,
+          "min": 0,
+          "max": 1,
+          "distinct": 2,
+          "histogram": [
+            {
+              "value": 0,
+              "count": 1
+            },
+            {
+              "value": 1,
+              "count": 29
+            }
+          ]
+        },
+        "mplayVolumePitchPassCount": {
+          "count": 30,
+          "min": 10,
+          "max": 10,
+          "distinct": 1,
+          "histogram": [
+            {
+              "value": 10,
+              "count": 30
+            }
+          ]
+        }
+      },
+      "classification": {
+        "fixedTopLevelStages": [
+          "wrapperToSoundMain",
+          "soundMainSetup",
+          "mplayToCgbCall",
+          "soundMainRamTail"
+        ],
+        "variableTopLevelStages": [
+          "mplayMainChain",
+          "cgbSound",
+          "postCgbSetup",
+          "soundMainRamBufferPreparation",
+          "soundMainRamChannelPasses"
+        ],
+        "sourceOwnedBoundaries": [
+          "m4aSoundMain -> SoundMain",
+          "MPlayMain linked-player entries and command/volume-pitch track-pass loop heads",
+          "CgbSound",
+          "SoundMainRAM setup, SoundMainRAM_ChanLoop iterations, and SoundMainRAM epilogue"
+        ],
+        "noReducerClaim": true
+      }
+    }
+  ],
+  "verdict": "Evidence-only checkpoint: m4aSoundMain variability is decomposed into source-owned MPlayMain, CgbSound, and SoundMainRAM stages; no live timing reducer is implemented or claimed."
+}

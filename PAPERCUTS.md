@@ -137,7 +137,7 @@ history.
   polling. Don't reach for a workaround (backgrounding, pkill, chunking) on
   the assumption the suite cannot fit — twice now that assumption, not the
   runtime, was the thing that cost the session time.
-- **Hits:** 9 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
+- **Hits:** 10 (2026-08-02 late: slice-3 worker's ~8.5 min suite — cross-lane
   contention from concurrent side/animation runs — auto-backgrounded; worker
   recovered by pid-polling, ~5 min lost. 2026-08-03: terminal-seam scout,
   ~6 min of foreground-poll waiting. 2026-08-04 R3: two workers same round —
@@ -156,7 +156,9 @@ history.
   reran the suite explicitly, ~14 min lost. 2026-08-08: the printfromtable
   worker lost two exit markers, leaving both suites alive, and started a third
   explicit-exit run; the supervisor killed only the two duplicates, ~8 min
-  lost and heavy cross-lane contention.)
+  lost and heavy cross-lane contention. 2026-08-10: the #55 side worker's
+  green full-suite summary was truncated, leading to redundant reporter and
+  redirected-log passes; ~5 min lost.)
 - **Possible durable fix:** teach the worker preamble (or the brief
   template) to pass an explicit long timeout for the final full-suite call
   (the tool accepts up to 10 min per call; the suite may soon exceed even
@@ -707,7 +709,8 @@ Per entry:
   probe output; when receipts are banked under `tools/probe/receipts/`,
   ~2 MB untracked logs pile up beside them and need manual relocation
   before committing.
-- **Hits:** 1 (2026-07-29, absorption-reveal worker).
+- **Hits:** 3 (2026-07-29 absorption-reveal; 2026-08-10 #55 internal-m4a and
+  source-state-v3 receipts).
 - **Cost each:** ~1 min.
 - **Workaround:** point probe outputs at scratch space and copy only the
   JSON into the repo; or teach the wrapper a `--log-dir`.
@@ -831,7 +834,10 @@ decompose diffs numerically with ad-hoc PIL scripts. Possible fix: a
 2026-08-09, supervised main/side workers: two main-profile full suites plus an
 independent animation-profile suite shared the machine. The main and side runs
 took about 14 minutes each despite staying green. This delayed bounded worker
-handoff by about 7–9 minutes per lane. Hits: 2. A launcher-level full-suite
+handoff by about 7–9 minutes per lane. A third hit during the #55 VBlank
+receipt overlapped main, side, and animation finish gates; typecheck/build
+processes each peaked above 6 GB and added about 3 minutes of polling. Hits: 3.
+A launcher-level full-suite
 semaphore would keep disjoint implementation parallel while serializing only
 the memory-heavy finish gate.
 
@@ -854,7 +860,13 @@ verification. A fourth hit occurred when one retained side-worker session
 started two full suites while the animation supervisor was also verifying.
 The Color Change side worker then repeated a committed-tree full suite after
 a two-line type-only follow-up and hit its cap during that redundant run.
-Hits: 5; cost: about 40 minutes plus avoidable CPU contention. A
+The #55 VBlank worker then repeated green build/typecheck gates after their
+yielded sessions hid completion status. The #55 SetMonData worker likewise
+needed about 3 minutes of extra polling after its terminal verification
+returned before Vitest exited. The encrypted-accessor worker and supervisor
+then each saw a command return before its child verification exited, costing
+about 3 more minutes of polling/rechecks. Hits: 10; cost: about 51 minutes plus
+avoidable CPU contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
 
@@ -872,8 +884,13 @@ formatter-clean, or add a checked narrow-format helper.
 had no `appRoute`, so `npm run compare` replayed the generated route and
 wholesale-mismatched 0/43 frames before the trace declared its historical
 `canonical-recorded` owner. The metadata fix restored 43/43 and shrank the
-legacy allowlist. Hits: 1; cost: about 5 minutes. A compare trace with no
-route should fail with an actionable ambiguity error when both routes exist.
+legacy allowlist. A second worker found the older `battle1-swap-*` staged
+files also lack enough current route/stage metadata; generic compare replayed
+the default app from frame 0 and produced meaningless full-frame diffs before
+the worker restricted verification to runnable #73 windows. Hits: 2; cost:
+about 7 minutes total. A compare trace with no route should fail with an
+actionable ambiguity error when both routes exist, and a staged trace with no
+current app stage should be rejected before replay.
 
 ## `npm run soak -- --help` silently starts the default 0:50 sweep
 
@@ -922,8 +939,9 @@ route should fail with an actionable ambiguity error when both routes exist.
   `npx vitest run tests/<census-loading>.test.ts` still gets Node's 4 GB
   default and crashes with a raw C++ stack trace — easy to misread as a
   broken test, and in a piped compound the crash silently swallows output.
-- **Hits:** 1 (supervisor verification, 2026-08-10 ~00:45).
-- **Cost each:** ~5 min.
+- **Hits:** 2 (supervisor verification and a Gate-6 route-audit worker,
+  2026-08-10).
+- **Cost each:** ~4 min.
 - **Workaround:** prefix targeted runs with
   `NODE_OPTIONS=--max-old-space-size=8192`.
 - **Real fix:** move test-only JSON out of the resolveJsonModule graph (the

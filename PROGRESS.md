@@ -5,122 +5,98 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1076 — [supervisor, 2026-08-10 ~03:00] **Session wind-down: S10 closed, 9 workers + 1 audit, all folds green**
+## 1097 — [solo session, 2026-08-10] **User priority decisions recorded: #55 grind authorized; #71 stays faithful; S11 out of scope for now**
 
-- **State:** master `019c27f2` is green: full suite **872 files / 8,384
-  passed / 1 skipped**, production build clean. Soak gates (run at the
-  engine-identical prior fold): vanilla 0:20 = **20/20 OK**, full-policy
-  0:60 = **60/60 OK**. DEFERRED.md is empty — no open supervisor
-  questions.
-- **Did (session summary):** S10 CLOSED (entry 1074) — the entire Gate-6
-  family program ran start-to-finish in this one session: family worklist →
-  five receipt packs (side lane) → five wiring promotions (main lane,
-  serial) → soak artifact + Noland note → read-only opus audit (3 defects)
-  → same-session class fixes → gates 2/3/4/6 + stage ticked. Final
-  manifest: **296/300 source-proven rows per axis, 4 documented
-  dynamic-dispatch exceptions per axis**. Two animation folds landed
-  Protect/Magic Coat/Role Play exact plus Drill Peck dense evidence
-  (`f913d88a`, `019c27f2`); the animation supervisor session may still be
-  live — any later `animation-main` commits fold next session. A final
-  #73 probe round returned an honest mis-scope verdict (entry 1075): the
-  targeted residual closed 2026-08-04; the stale ISSUES paragraph that
-  produced the brief is now pruned.
-- **Next:** the playable-round polish milestone's real remaining substance
-  is #71 Slice D coordination (ON-profile per-tick send-out playback, with
-  the animation lane) and session-trace-driven pacing fixes (need user
-  play traces); then schedule S11 audio. ISSUES #86 (routeBranch
-  self-description sweep) is optional manifest-hardening filler.
-- **Notes:** new PAPERCUTS this session: same-second launcher JSONL
-  collision, one-EmeraldOracle-per-process, bare-npx-vitest OOM on
-  census-loading tests. ISSUES numbering: #82 was reused by a worker and
-  renumbered to #86 — check new numbers against git history at verify
-  time.
+- **State:** docs-only commit; no engine, test, or fixture change. Full
+  decision text lives in ROADMAP's S10 block ("User decisions 2026-08-10")
+  plus dated notes on ISSUES #55/#71 and the S11 stage heading.
+- **Did:** relayed the S10-close report to the user and took five decisions:
+  (1) **#55 construction clock: grind it out** — user-authorized to
+  completion, opinion check-in expected after a few more sessions;
+  (2) **#71: no intro-animation divergence** — user was offered a
+  browser-only divergence and chose faithful Scene-OFF behavior (no intros),
+  so #71's remainder is internal cleanup at filler priority;
+  (3) **#39 stays deferred** until the above are done; (4) **pacing polish
+  is user-driven** — the user plays on their own time, recorder traces are
+  the input, no pacing slices until traces exist; (5) **S11 audio out of
+  scope for now** — entry kept in the roadmap, nothing schedules it;
+  (6) **Noland back IN scope** (same-day follow-up) — source fact-check
+  showed he is NOT an invariant (`FillFactoryBrainParty` RNG-draws his
+  rentals live, excludes the player's rentalMons, `challengeNum + 2` IVs),
+  so deep-sequence testing under #55 reaches him at battles 21/42; rides
+  with the #55 program; Gate-2 tick not reopened
+  (`docs/gate2-noland-scope-note.md` addendum).
+- **Next:** main lane continues #55 per its own bounded Next lines. Fold
+  `animation-main` at the next orient (it was 30 commits ahead at entry
+  1096's 16:04 check). When user play traces arrive, they become the
+  pacing-fix worklist.
+- **Notes:** the #71 decision followed a fact-check the user requested:
+  both sides DO animate in the real game, but only under Battle Scene ON;
+  the OFF profile's no-intro behavior is proven faithful (ISSUES #71
+  Slice-D record). Difficulty-tier question also answered from source:
+  challenge scaling is deterministic (`factoryOpponentGeneration.ts:263`,
+  `challengeNum = floor(streak/7)`) and independent of #55's timing model.
 
-## 1075 — [MAIN worker, 2026-08-10] **#73 slice-2 assignment was mis-scoped: the player-sprite residual it targeted was already closed 2026-08-05; ISSUES.md's stale paragraph fixed so the next reader doesn't repeat this**
+## 1096 — [MAIN worker, 2026-08-10] **#55 shared encrypted accessor dependency bounded**
 
-- **State:** no engine/controller/asset change — this step is a verification
-  + docs correction. Confirmed live (oracle-backed, two fresh runs each):
-  `loss-terminal-window-off` **1943/1943**, `win-terminal-window-off`
-  **3590/3590**, `battle-command-generated-off` **128/128**, all
-  byte-stable across both runs. `npm test`/`npm run build` unchanged
-  (nothing to re-verify beyond the doc edit — run once at close per the
-  brief's acceptance bar; see Notes for the exact counts).
-- **Did:** the assigned step ("extract the oracle's REAL player object
-  graphic... post-terminal LOSS Lobby window is exact through pages 0-2
-  EXCEPT... the player sprite... oracle renders the bootstrapped save's
-  actual player character (red-brown hat + red shirt)... committed windows
-  350/350, 503/503, 128/128") described a state that predates a same-day
-  fix already recorded in `ISSUES.md` #73: the **2026-08-04 "LOSS slice-2
-  player-sprite residual CLOSED"** paragraph (immediately below the stale
-  one the brief quoted) found the real cause was a wrong `+1px x2` OAM
-  sub-pixel offset on the player object anchor, fixed it generically in
-  `factoryTerminalRender.ts`, and got 0 diff using the **existing**
-  extracted Brendan asset (`factory-lobby-terminal-npcs.json`) unmodified
-  — explicitly retracting the "different player asset" theory. Everything
-  from slice 3 (record prompt) through slice 5 (LOSS decline continuation,
-  WIN GO-ON scouting/commentary/swap-offer/swap-screen) closed in the five
-  sessions since, dated up to 2026-08-05 in `ISSUES.md`. Verified this is
-  really true right now, not just on paper: ran `npm run compare` twice
-  each on all three windows the brief named as the acceptance bar (see
-  State) — all exact and far past the "350/503" checkpoint the brief cited
-  as current. Per this run's protocol ("if blocked/mis-scoped, say why
-  instead of improvising a different plan"), did **not** invent replacement
-  work (e.g. the still-genuinely-open swap-screen ball-rocking RNG boundary
-  or the walkable free-roam lobby feature, both already correctly named as
-  open in `ISSUES.md` #73's tail and out of this step's charter either way).
-  Deleted the stale "Residual classes (documented, honest checkpoint)"
-  paragraph in `ISSUES.md` #73 (the one describing the red-brown-hat theory
-  and the 350/503 checkpoint) since it sat un-pruned right next to its own
-  retraction and is what produced this mis-scoped brief — replaced with a
-  short pointer to the real closure paragraph plus this session's
-  re-confirmation, per this run's "keep ISSUES.md pruned" mandate. Did not
-  touch the record-prompt/slice-3 text the brief asked to preserve as
-  "next territory," since that language was itself the stale part.
-- **Next:** #73's only genuinely open remainders (both already documented,
-  neither touched this step): the swap-screen ball-rocking restart's
-  per-ball `Random()%5` ambient RNG boundary (tracked under #55, one frame
-  past the current WIN swap-YES window's end at 10177), and the walkable
-  free-roam Lobby feature (deliberately sequenced by the user behind
-  play-test fixes #76-#81). Neither is slice-2/#73 core work. Suggest the
-  supervisor re-derive the next MAIN-lane increment from `ISSUES.md`'s
-  current tail rather than re-issuing #73 slice work.
-- **Notes:** PAPERCUT — a step brief quoted a real ISSUES.md paragraph that
-  was itself stale (superseded three paragraphs later, same file, same
-  date-order) and the numbers cited (350/350, 503/503) as "the current
-  committed baseline" were ~5x stale (actual 1943/3590 at time of
-  assignment); ~20 min spent confirming the premise before writing anything,
-  which is exactly the read-first discipline this docs fix is meant to save
-  the next worker/supervisor. Full verification run at close: `npm test`
-  and `npm run build`. Archived entry 1072 to `PROGRESS-archive.md` to keep
-  the ledger at 3 live entries.
+- **State:** evidence `d53eb54b`, independent audit hardening `2594377b`, and
+  supervisor handoff `e8bf2f6b`; final union focused stats **19/19**, smoke
+  **375/375**, typecheck, full `npm test` **881 files / 8,438 passed / 1
+  skipped**, and production build are green. #55 remains open, accessor totals
+  are `null`, and the clock is unwired.
+- **Did:** bounded all **180** encrypted reads (**156** direct + **24** nested):
+  species/EXP/EV/IV **24/12/72/72**. Tests enumerate all **24** personality
+  permutations, checksum/bad-egg routes, exact field tails, fetch classes, and
+  common **8 GetSubstruct + 12 decrypt + 24 checksum + 12 encrypt** loops.
+- **Next:** reduce only independently source-proven modulo-arm and shared-loop
+  instruction/fetch segments; do not claim a complete accessor/stats total or
+  wire the construction clock until the remaining memory/service model closes.
+- **Notes:** twice-fresh OFF packets remain byte-identical at `92d3feb4…` /
+  `136efa4a…` / `ea323d9e…`; no fixture mutation, decrypted bytes/pointers,
+  duration/identity/residual fit, production recording import, barrier change,
+  canonical Battle-2, animation, aggregate stats, or clock wiring. Independent
+  source/ELF audit passed and its 96-case slot/offset gap is pinned by
+  `2594377b`. The orient animation fold is recorded in archived entry 1077;
+  at 16:04 `animation-main` was 30 commits ahead with its separate supervisor
+  still active, so that later tail is intentionally left for the next orient.
+  `DEFERRED.md` has no open entries.
 
-## 1074 — [supervisor, 2026-08-10 ~02:40] **S10 CLOSED: gates 2/3/4/6 ticked; Gate-6 family program complete**
+## 1095 — [MAIN worker, 2026-08-10] **#55 direct level route bounded; complete callee not reducible yet**
 
-- **State:** ROADMAP S10 and all six gates are checked (supervisor commit
-  after entry 1073's audit fixes). Final manifest state: **296/300
-  source-proven per-move hook-join rows on each axis** across ten families,
-  plus the four dynamic-dispatch exception rows (`ASSIST`/`METRONOME`/
-  `MIRROR_MOVE`/`SLEEP_TALK`, both axes). ISSUES #86 (renumbered from the
-  worker's reused #82) records the `routeBranch` self-description
-  enhancement as debt.
-- **Did:** one-session family-level Gate-6 execution per the 2026-08-09
-  user decision: worklist doc → five family receipt packs (side lane) →
-  five wiring promotions (main lane) → soak artifact (vanilla 20/20, full
-  60/60) + Noland scope note → read-only opus surge audit (8 seams: 5
-  clean certifications, 3 defects) → same-session class fixes. Gate ticks
-  carry dated completion notes citing every artifact.
-- **Next:** per the user sequencing decision, the "playable round" polish
-  milestone (#71, #73, session-trace-driven pacing fixes) is the next
-  headline, BEFORE S11 audio. ISSUES #86 is optional manifest-hardening
-  filler.
-- **Notes (wind-down complete, ~03:00):** folded `animation-main`
-  (Protect, Magic Coat, Role Play promoted exact tonight by the live
-  animation supervisor; merge `f913d88a`). Final union is green: full
-  suite **870 files / 8,379 passed / 1 skipped**, production build,
-  animation coverage. Soak gates on the union: vanilla 0:20 = **20 OK /
-  0 CRASH / 0 HANG**; full-policy 0:60 = **60 OK / 0 CRASH / 0 HANG**.
-  DEFERRED.md remains empty — every choice tonight was decidable from
-  the mission, roadmap, source, or receipts. The animation supervisor
-  may still be live; any post-fold commits on `animation-main` fold next
-  session. No engine behavior, controller interface, round outcome,
-  barrier pin, or canonical window changed by the close-out itself.
+- **State:** evidence `b8bb8306` plus docs `0a1ebd4d`; focused stats **17/17**,
+  smoke **375/375**, typecheck, full `npm test` **881 files / 8,436 passed /
+  1 skipped**, and production build are green. #55 remains open and the
+  construction clock remains unwired.
+- **Did:** audited all **12/12** `GetLevelFromMonExp` calls. Twice-fresh OFF
+  packets pin personality/species/growth/EXP and exact post-accessor timing:
+  **43 + 21 + 2,200 + 18 = 2,282** source cycles; **8 exact + 3×(+18
+  service) + 1×(+308 VCount/audio IRQ)**.
+- **Next:** continue #55 only with the source-general encrypted `GetBoxMonData2`
+  body needed by the 156 direct reads and both level accessors; do not wire
+  aggregate stats or the construction clock.
+- **Notes:** complete level calls total **246,922** pause-subtracted cycles;
+  their two encrypted accessors contribute **219,176** observed cycles and
+  remain unreduced. No fitted duration, keyed/identity branch, residual
+  absorption, canonical Battle-2, animation, fixture production import, or
+  barrier change.
+
+## 1094 — [MAIN worker, 2026-08-10] **#55 direct `GetMonData2` party reads reduced**
+
+- **State:** implementation `9a90f094`, shell correction `bf107b02`, and
+  evidence/docs `3b95eb30`; focused
+  stats **16/16**, smoke **375/375**, typecheck, full `npm test` **881 files /
+  8,435 passed / 1 skipped**, and production build are green. #55 remains open
+  and the construction clock remains unwired.
+- **Did:** censused all **180** stats reads by field/compiled route: **24**
+  direct HP/max-HP reads and **156** encrypted EV/IV/species reads. The direct
+  source-general jump-table arms reduce exactly at **80** cycles each:
+  anchor/LILIANA/varied **960/480/480 = 1,920**, zero residual.
+- **Next:** continue #55 only with a bounded source-derived encrypted
+  `GetBoxMonData2` body or level/growth component; do not wire the aggregate
+  stats operation or construction clock.
+- **Notes:** encrypted/default and Deoxys routes retain only exact compiled
+  entry/return shells with `cycles: null`; the correction includes the opening
+  `push` represented by mGBA's pipelined entry PC. All three Scene-OFF packets
+  match committed hashes. Completed direct-call coverage is **312/480** and
+  **100,214/1,768,691 = 5.666%** of source callee cycles. No duration/identity
+  fit, fixture mutation, canonical Battle-2, animation, or barrier change.

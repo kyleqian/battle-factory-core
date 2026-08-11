@@ -1,3 +1,261 @@
+## 1091 — [MAIN worker, 2026-08-10] **#55 direct `GetNature` timing reduced**
+
+- **State:** implementation commit `59b13350`; focused stats/clock **25/25**,
+  smoke **375/375**, typecheck, full `npm test` **881 files / 8,428 passed /
+  1 skipped**, and production build are green. #55 remains open and the
+  construction clock remains unwired.
+- **Did:** reduced all **60/60** direct calls from accepted personality alone:
+  anchor/LILIANA/varied **29,875/14,830/15,195 = 59,900** source cycles. Raw
+  spans decompose as **57×exact + 2×(+18) + 1×(+245 VCount/audio IRQ)**.
+- **Next:** continue only with source-general encrypted Get/Set, level/growth,
+  signed-divide, and VBlank/audio timing; do not wire or claim complete stats.
+- **Notes:** fixed shell is **180** nested field-zero accessor + **42** wrapper;
+  `%25` remains personality-dependent. Fresh Scene-OFF anchor is byte-identical
+  (`cde88e8f…`); no identity/duration lookup, receipt mutation, excluded lane,
+  canonical Battle-2, animation, or unsupported-barrier change.
+
+## 1090 — [MAIN worker, 2026-08-10] **#55 `ModifyStatByNature` direct-callee timing reduced**
+
+- **State:** committed as `76027187`; focused stats/clock **15/15**, smoke
+  **375/375**, typecheck, full `npm test`, and production build are green.
+  #55 remains open and the construction clock remains unwired.
+- **Did:** reduced all **60/60** receipt calls from nature/u16-stat/stat-index
+  ABI inputs: **52×98**, raise **3×416 + 1×418**, lower **3×408 + 1×410** =
+  **8,396** cycles. It resolves **60/480** direct calls (**12.5%**) but only
+  **0.475%** of direct-callee time; fresh Scene-OFF anchor hash is `cde88e8f…`.
+- **Next:** continue only with source-general Get/Set, level, `%25`
+  nature-fetch, signed-divide, and VBlank/audio timing; do not claim or wire
+  the complete stats operation before those nested budgets are exact.
+- **Notes:** source/ELF reduction includes the stat-index guard, ROM table,
+  u16 product, ARM7 multiply width, and nested `__udivsi3`; no identity or
+  duration lookup, fixture mutation, canonical Battle-2, animation, or
+  unsupported-barrier change.
+
+## 1089 — [supervisor, 2026-08-10] **#55 m4a source-state boundary extended and reproduced**
+
+- **State:** squashed side fold `28f7a5c8`; focused union **15/15** and smoke
+  **375/375** pass. Final union typecheck/full suite/build follow after the next
+  bounded main increment.
+- **Did:** two fresh Scene-OFF runs per case reproduce all **113** audio
+  observations byte-for-byte: **113** equal captured-state keys and **0**
+  differing m4a costs. The v3 packet removes frame/tick/cursor/address identity
+  and adds full fixed structs, normalized graph links, blob digests, dispatch
+  targets, and audio I/O state.
+- **Next:** instruction-trace the remaining indirect MPlayMain callbacks and
+  malformed/dynamic sample targets before any cross-state audio reducer; keep
+  VBlank arbitration and the live construction clock unwired.
+- **Notes:** coverage remains explicitly incomplete with four residual
+  dereference classes; no production reducer, canonical Battle-2, animation,
+  or unsupported-barrier change. Side commits were squashed so transient mGBA
+  log blobs did not enter master history.
+
+## 1088 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` parent timing reduced**
+
+- **State:** exact parent-only reducer landed; focused stats/clock **13/13**,
+  smoke **375/375**, typecheck, full `npm test` **880 files / 8,422 passed /
+  1 skipped**, and production build are green. #55 remains open.
+- **Did:** all **12/12** receipts reduce exactly after excluding **480** direct
+  callees: **10×1,083 + 2×1,081**. The split is the u8 `levelUpHP==0` branch:
+  two extra halfwords minus one refill = **−2**. Source tests cover u8 wrap,
+  normal HP initialize/adjust/return, and Shedinja branches.
+- **Next:** port the nested Get/SetMonData, level/growth, divide, nature, and
+  nature-modification ROM/EWRAM timing; do not wire the complete stats cost or
+  live clock before those callees and VBlank/audio arbitration are exact.
+- **Notes:** commit `639f0a81`; no identity/duration lookup, fixture mutation,
+  live wiring, canonical Battle-2, animation, or unsupported-barrier change.
+
+## 1087 — [MAIN worker, 2026-08-10] **#55 `CalculateMonStats` direct-call boundary narrowed**
+
+- **State:** bounded evidence checkpoint committed; all **12/12** complete
+  stats spans and **480** direct calls are pinned. Construction focus **19/19**,
+  smoke **375/375**, typecheck, full `npm test` **880 files / 8,420 passed /
+  1 skipped**, and production build are green.
+- **Did:** added a byte-stable Scene-OFF sibling receipt for anchor/LILIANA/
+  varied and audited `pokemon.c:2823` / the pinned ELF. Direct callees explain
+  **139,916–153,077** of **140,999–154,160** source cycles after **7** complete
+  VBlank pauses; parent interstitial is **1,081/1,083**, not a fitted reducer.
+- **Next:** port source-general nested box-mon/level/nature/HP branch and
+  ROM/EWRAM timing, then collect branch-case evidence; keep #55 open and the
+  live clock unwired.
+- **Notes:** existing `calculate-mon-stats` emission and accepted-personality
+  propagation are tested; no identity/duration table, receipt mutation, live
+  wiring, canonical Battle-2, animation, or unsupported-barrier change.
+
+## 1086 — [MAIN worker, 2026-08-10] **#55 non-final Factory outer-loop timing reduced**
+
+- **State:** source reducer and all **9/9** v2 outer-loop spans are green;
+  focused construction **16/16**, smoke **375/375**, typecheck, full `npm test`
+  **879 files / 8,417 passed / 1 skipped**, and production build pass.
+- **Did:** reduced the selectable sibling to **261** cycles (**5** spans) and
+  trainer-party sibling to **130** (**4** spans) from compiled Thumb/bus classes.
+  Eight match directly; anchor mon 3 is **261 + 18** async service. All nine
+  contain zero complete VBlank pauses. Added the non-final clock operation and
+  source-only selectable rental-rank/challenge branches.
+- **Next:** resume exact CreateMon/EV/stat/Factory-post and VBlank/audio
+  arbitration. Keep #55 open and the live clock unwired.
+- **Notes:** no identity/duration table, evidence mutation, live wiring,
+  canonical Battle-2, animation, or unsupported-barrier change.
+
+## 1085 — [supervisor, 2026-08-10] **#55 m4a workload split into compiled source stages**
+
+- **State:** side commit `236e1fe4` is folded; focused receipt **2/2** and
+  generated report are byte-identical under supervisor rerun. Final union
+  gates follow after the next bounded main increment.
+- **Did:** six fresh runs split all **113** `m4aSoundMain` observations into
+  `MPlayMain`, `CgbSound`, and copied-IWRAM `SoundMainRAM` channel passes. The
+  first five linked players are fixed at **55** cycles; player six, CGB sound,
+  and five direct-channel spans carry the variation. All **113** bounded,
+  address-free source-state keys are unique, so the receipt correctly makes
+  no equal-state timing claim.
+- **Next:** obtain repeated complete m4a source-state equivalence before a
+  reducer claim, or continue the independent ROM-fetch/EWRAM timing required
+  by CreateMon/EV/stat/post. Keep the live construction clock unwired.
+- **Notes:** v1 VBlank and v2 construction receipts are unchanged. Command and
+  wave prefixes remain explicitly bounded evidence, not complete audio state;
+  no runtime lookup, controller, animation, or canonical Battle-2 edit.
+
+## 1084 — [MAIN worker, 2026-08-10] **#55 EV-spread boundary audited; accepted personality exposed**
+
+- **State:** bounded evidence checkpoint landed; focused construction **25/25**
+  including red verification, smoke **375/375**, typecheck, full `npm test`
+  **878 files / 8,413 passed / 1 skipped**, production build, and diff check
+  are green.
+- **Did:** pinned all **12** complete CreateMon-return→stats-entry spans
+  (**6/3/3**, net **26,672–41,256**) and subtracted the sole contained VBlank
+  pause (**36,217**, varied mon 1). Compiled `0x0806869C→0x08068D0C` audit
+  proves each EV write traverses encrypted `SetBoxMonData` and 12 full-dividend
+  `__umodsi3(personality,24)` calls; the clock now exposes the accepted
+  personality to CreateMon/EV/stat/Factory-post operation keys.
+- **Next:** port exact ROM-fetch/EWRAM timing for the audited decrypt/checksum/
+  re-encrypt path, then classify any +18 residual; keep #55 open and the clock
+  unwired until that reducer and live VBlank/audio arbitration are exact.
+- **Notes:** no fitted duration/table, identity/tick/cursor lookup, evidence
+  mutation, live wiring, canonical Battle-2 march, animation edit, or new
+  unsupported barrier.
+
+## 1083 — [supervisor, 2026-08-10] **#55 VBlank variability isolated to audio; resume residual bounded**
+
+- **State:** side commit `6df4fc19` is folded; its focused receipt test is
+  **2/2** and artifact regeneration is byte-identical under supervisor rerun.
+  Final union gates follow after the next bounded main increment.
+- **Did:** added an opt-in source-state VBlank probe plus compact receipts for
+  **52/31/30** construction-epoch interrupts. Every measured VBlank-body stage
+  except `m4aSoundMain` is constant within each case; audio accounts for the
+  full body range (**23,920–52,083 / 24,732–47,917 / 24,391–41,682** cycles).
+  Return-to-resume is **41** cycles for **112/113** samples; the sole **59**-
+  cycle sample has no observed HBlank, VCount, Serial, Timer3, or shared dummy
+  ISR entry, so its +18 remains explicitly outside the reducer.
+- **Next:** use the new receipt to port complete dereferenced m4a state timing
+  and hardware resume arbitration, while continuing CreateMon/EV/stat/post
+  source budgets. Keep the live construction clock unwired.
+- **Notes:** raw fixtures are test-only and contain relative timings plus
+  source-visible state—no frame, RNG, trainer, set, battle, tick, cursor, or
+  construction identity. Existing v2 receipts stayed byte-identical.
+
+## 1079 — [MAIN worker, 2026-08-10] **#55 candidate-aware nature-check timing landed; async construction workload remains open**
+
+- **State:** candidate timing commits `79448547`/`a57d39b9`; focused construction **9/9**,
+  smoke **375/375**, typecheck, full `npm test` **877 files / 8,404 passed / 1
+  skipped**, production build, diff check, and fresh anchor v2 repeat are green.
+- **Did:** threaded Random u16/candidate personality+nature+acceptance through
+  the operation key and added a source/Thumb `__umodsi3` path reducer. All
+  **278** committed v2 nature boundaries decompose exactly: **267** direct,
+  **11** reducer +18 asynchronous service cycles (`5/2/4`). Clean-stream RNG
+  outcome remains unchanged; fresh anchor hash `631bd214…` matches.
+- **Next:** model remaining CreateMon/EV/stat/post/return source budgets and
+  deterministic VBlank/audio/DMA event workload before any live wiring.
+- **Notes:** no trainer/set/tick/cursor/fixture schedule, live-controller
+  wiring, swap-tail extension, canonical Battle-2 march, or animation edit.
+
+## 1078 — [MAIN worker, 2026-08-10] **Generic swap-screen SpriteCB_Pokeball state landed; exact tail remains bounded by #55 construction-clock RNG**
+
+- **State:** all finish gates are green: smoke **375/375**, ball/swap focus
+  **60/60**, typecheck, full `npm test`, build, and runnable #73 regressions
+  **115/115 + 213/213 + 903/903 + 248/248 twice + 128/128**.
+- **Did:** removed the shared elapsed-based unconditional ball restart. The
+  generic swap presentation now owns three `ballAnim.ts` states, threads RNG
+  after core's ambient VBlank in sprite order, models fresh-moving/no-initial-
+  roll and the source success-start delay, renders actual per-ball tiles, and
+  reconstructs fresh callbacks after normal summary. Tier-1 pins independent
+  state/order, first success/failure/rest boundaries, immutable round/party/
+  controller outcome, and summary reconstruction. Updated the ability/item
+  census's exact recovered-site line pin **116→130** after imports shifted it;
+  no support/barrier set changed.
+- **Next:** #55 must first gain the already-specified candidate/audio-aware
+  construction clock before the dense YES fixture can truthfully extend from
+  10177 through 10214. Do not fit a cursor or wire the refuted v2 clock.
+- **Notes:** fresh mGBA probe: oracle first anim-end ambient/callback stream
+  `A77397C1→33DA400A`, rolls F/S/F, `data[0]=[0,32,0]`; app unresolved stream
+  `8FF192D9`, rolls F/S/S. Honest extension **277/285**, eight ball-2-only
+  frames; canonical endpoint remains **10177** per fallback. Supervisor caught
+  the worker's stale build claim and added the missing `ballAnims` carry on
+  nine task handoffs; typecheck/build and focused **60/60** then passed live.
+
+## 1076 — [supervisor, 2026-08-10 ~03:00] **Session wind-down: S10 closed, 9 workers + 1 audit, all folds green**
+
+- **State:** master `019c27f2` is green: full suite **872 files / 8,384
+  passed / 1 skipped**, production build clean. Soak gates (run at the
+  engine-identical prior fold): vanilla 0:20 = **20/20 OK**, full-policy
+  0:60 = **60/60 OK**. DEFERRED.md is empty — no open supervisor
+  questions.
+- **Did (session summary):** S10 CLOSED (entry 1074) — the entire Gate-6
+  family program ran start-to-finish in this one session: family worklist →
+  five receipt packs (side lane) → five wiring promotions (main lane,
+  serial) → soak artifact + Noland note → read-only opus audit (3 defects)
+  → same-session class fixes → gates 2/3/4/6 + stage ticked. Final
+  manifest: **296/300 source-proven rows per axis, 4 documented
+  dynamic-dispatch exceptions per axis**. Two animation folds landed
+  Protect/Magic Coat/Role Play exact plus Drill Peck dense evidence
+  (`f913d88a`, `019c27f2`); the animation supervisor session may still be
+  live — any later `animation-main` commits fold next session. A final
+  #73 probe round returned an honest mis-scope verdict (entry 1075): the
+  targeted residual closed 2026-08-04; the stale ISSUES paragraph that
+  produced the brief is now pruned.
+- **Next:** the playable-round polish milestone's real remaining substance
+  is #71 Slice D coordination (ON-profile per-tick send-out playback, with
+  the animation lane) and session-trace-driven pacing fixes (need user
+  play traces); then schedule S11 audio. ISSUES #86 (routeBranch
+  self-description sweep) is optional manifest-hardening filler.
+- **Notes:** new PAPERCUTS this session: same-second launcher JSONL
+  collision, one-EmeraldOracle-per-process, bare-npx-vitest OOM on
+  census-loading tests. ISSUES numbering: #82 was reused by a worker and
+  renumbered to #86 — check new numbers against git history at verify
+  time.
+
+## 1075 — [MAIN worker, 2026-08-10] **#73 slice-2 brief was stale; player-sprite residual already closed**
+
+- **State:** no engine change. Reconfirmed twice fresh:
+  `loss-terminal-window-off` **1943/1943**, `win-terminal-window-off`
+  **3590/3590**, `battle-command-generated-off` **128/128**; full suite/build
+  green.
+- **Did:** traced the brief's player-asset premise to a stale #73 paragraph;
+  the real `+1px x2` anchor defect had already been fixed with the existing
+  Brendan asset. Pruned the superseded paragraph rather than reopening it.
+- **Next:** the real remaining #73 work was the #55-adjacent swap-ball RNG
+  boundary after 10177 and the user-sequenced free-roam Lobby.
+- **Notes:** PAPERCUT — stale same-file issue text cost ~20 minutes to
+  disprove; see git history for the full forensic entry.
+
+## 1074 — [supervisor, 2026-08-10 ~02:40] **S10 CLOSED: gates 2/3/4/6 ticked; Gate-6 family program complete**
+
+- **State:** ROADMAP S10 and all six gates are checked (supervisor commit
+  after entry 1073's audit fixes). Final manifest state: **296/300
+  source-proven per-move hook-join rows on each axis** across ten families,
+  plus the four dynamic-dispatch exception rows (`ASSIST`/`METRONOME`/
+  `MIRROR_MOVE`/`SLEEP_TALK`, both axes). ISSUES #86 (renumbered from the
+  worker's reused #82) records the `routeBranch` self-description
+  enhancement as debt.
+- **Did:** one-session family-level Gate-6 execution per the 2026-08-09
+  user decision: worklist doc → five family receipt packs (side lane) →
+  five wiring promotions (main lane) → soak artifact + Noland note → surge
+  audit → same-session fixes → gates 2/3/4/6 + stage ticked.
+- **Next:** the playable-round polish milestone (#71, #73, session-trace-
+  driven pacing fixes) comes before S11 audio. ISSUES #86 is optional
+  manifest hardening.
+- **Notes:** folded `animation-main` at `f913d88a`; final union full suite
+  **870 files / 8,379 passed / 1 skipped**, production build, animation
+  coverage, and both soak gates green. DEFERRED.md was empty.
+
 ## 1073 — [MAIN worker, 2026-08-10 night] **Gate-6 surge-audit fixes: dynamic-dispatch exception class completed (2→4 gaps/axis), "undefined" locators fixed, count wording corrected**
 
 - **State:** tree is green: full suite **864 files / 8,347 passed / 1
@@ -39947,3 +40205,112 @@ both verify scripts/census independently re-verified before this entry.)*
   through all seven battle seams. No canonical Battle-2 window past tick
   33331, battle/turn/absolute-tick renderer branch, unsupported-barrier pin,
   round outcome, or controller interface changed in this increment.
+## 1077 — [supervisor, 2026-08-10 ~10:00] **#55 v2 cycle evidence banked; fitted construction callback refuted**
+
+- **State:** master `3916972f` is green after two side folds: smoke **375/375**,
+  construction-clock/v2 focus **19/19**, typecheck, and production build pass.
+  The v2 worker's full suite was **877 files / 8,400 passed / 1 skipped**.
+- **Did:** folded 12 pending animation commits first (Drill Peck, Submission,
+  Spite), then landed #55's source-operation construction scheduler, clean-
+  stream mode, injectable VBlank callback/cycle costs, optional mGBA master-
+  cycle probe, evidence boundary, and idempotence pins. The model contains no
+  trainer, battle, canonical-tick, or fixture schedule branch. Supervisor
+  verification caught and fixed one narrowed callback type before merge.
+- **Next:** leave personality-exact construction unwired until candidate-
+  aware instruction timing plus deterministic VBlank audio/DMA workload are
+  modeled. Continue the playable OFF-profile round seam at the independent
+  swap-screen ball callback boundary: replace the fake unconditional restart
+  after frame 10177 with source `Random()%5` state and extend the dense YES
+  fixture through its existing 10214 endpoint.
+- **Notes:** fresh v2 anchor/LILIANA/varied probes are twice byte-identical.
+  The present cost callback is refuted: nature-check cost depends on candidate
+  personality, and IRQ cost depends on live audio/DMA state. No fitted table,
+  controller wiring, or deferred user question was added.
+## 1080 — [supervisor, 2026-08-10] **Gate-6 route branches classified across the full source graph**
+
+- **State:** side commit `abaec104` is folded by merge `d3faa43c`; focused
+  route/manifest coverage is **16/16**, typecheck and byte-identical artifact
+  regeneration pass. Final union gates follow after the next main increment.
+- **Did:** every one of **2,812** emitted route certificates now declares a
+  source-derived `success` (**2,664**) or `failure-tail` (**148**) branch.
+  Among **845** promoted certificates, **73** are legitimate failure tails
+  (**41** item MoveEnd, **32** immunity MoveEnd) because `Cmd_moveend` runs its
+  post-move state loop on both branches. The full dynamic-dispatch audit found
+  no missing exception: Assist, Metronome, Mirror Move, and Sleep Talk remain
+  the only four exceptions on both axes.
+- **Next:** continue #55 with one bounded, source-general CreateMon/EV/stat or
+  post/return timing component; do not wire a fitted construction cursor.
+- **Notes:** parameterization schema v5 and Gate-6 manifest v2 regenerate
+  byte-for-byte. No production controller, animation, canonical Battle-2
+  replay, unsupported barrier, or hook promotion changed.
+
+## 1081 — [MAIN worker, 2026-08-10] **#55 compiled source-return timing landed across all v2 cases**
+
+- **State:** `source-return` is resolved source-generally: committed v2
+  decomposition **3/3**, focused construction **11/11**, and red verification
+  pass. Smoke **375/375**, typecheck, full `npm test` **877 files / 8,408
+  passed / 1 skipped**, production build, and diff check are green.
+- **Did:** added `reduceFactorySourceReturnTiming` for the exact pret/Thumb
+  final-loop and epilogue paths. Anchor is **40** source cycles; LILIANA and
+  varied are **32** each, with **0** contained VBlank pause and **0** residual
+  service cycles. Both source-function siblings are pinned.
+- **Next:** continue #55 with one bounded CreateMon/EV/CalculateMonStats/
+  factory-post source budget or the deterministic VBlank/audio/DMA workload;
+  keep the construction clock unwired until those remaining pieces are exact.
+- **Notes:** no trainer/set/mon/tick/cursor/receipt timing selection, canonical
+  Battle-2 march, live wiring, evidence regeneration, animation edit, or new
+  unsupported barrier.
+## 1082 — [MAIN worker, 2026-08-10] **#55 construction-entry timing landed across all 12 v2 spans**
+
+- **State:** source-general reducer and receipt pins are implemented; focused
+  construction **13/13** (including red verification), smoke **375/375**,
+  typecheck, full `npm test` **877 files / 8,410 passed / 1 skipped**,
+  production build, and diff check are green.
+- **Did:** reduced the shared entry-to-first-`Random` path to **58** source
+  cycles: **26** sequential Thumb halfwords / **52** cycles plus one **6**-cycle
+  BL refill. All anchor/LILIANA/varied spans (**6/3/3**) have **0** contained
+  VBlank pause and **0** residual service; both compiled caller siblings are
+  LR-pinned.
+- **Next:** continue #55 with CreateMon, EV-spread, CalculateMonStats,
+  factory-post/outer-loop timing, or deterministic VBlank/audio/DMA workload;
+  keep the construction clock unwired until every remaining piece is exact.
+- **Notes:** clock remains unwired; no identity/tick/cursor/fixture selection,
+  canonical Battle-2 march, evidence regeneration, animation edit, or new
+  unsupported barrier.
+## 1092 — [MAIN worker, 2026-08-10] **#55 direct signed-division timing reduced**
+
+- **State:** implementation `602227bd` plus docs `7c2de833`; focused stats
+  evidence **11/11**, smoke **375/375**, typecheck, full `npm test` **881
+  files / 8,430 passed / 1 skipped**, and production build are green. #55
+  remains open and the construction clock remains unwired.
+- **Did:** reduced all **72/72** direct `__divsi3` calls from source signed-i32
+  dividend/divisor ABI values and the compiled `0x082E7542` wrapper plus exact
+  inline unsigned core. Source totals anchor/LILIANA/varied are
+  **11,252/5,630/5,700 = 22,582** cycles; raw spans decompose **71×exact +
+  1×(+18 async service)**. Tests pin zero/sign/`INT_MIN/-1` branches.
+- **Next:** continue only with another bounded #55 source-general component
+  (encrypted Get/Set, level/growth, or VBlank/audio); do not wire the
+  aggregate stats operation or construction clock.
+- **Notes:** factor is limited to the exact Loop1/2/3 body shared with
+  `__udivsi3`; setup/return boundaries remain separate. No identity/duration
+  lookup, fixture mutation, excluded lane, canonical Battle-2, animation, or
+  unsupported-barrier change.
+## 1093 — [MAIN worker, 2026-08-10] **#55 direct `SetMonData` party writes reduced**
+
+- **State:** implementation `d877ab2b` plus audit correction `8789ce5b`;
+  focused stats/clock **21/21**, smoke **375/375**, typecheck, full `npm
+  test` **881 files / 8,432 passed / 1 skipped**, and production build are
+  green. #55 remains open and the construction clock remains unwired.
+- **Did:** source-reduced all **96/96** direct stats writes from only signed
+  source field ID: per mon level **72** + seven HP/stat writes **7×78 = 618**;
+  anchor/LILIANA/varied **3,708/1,854/1,854 = 7,416** cycles, all raw spans
+  exact with zero residual. Tests pin u32/u8/u16/no-op/default switch arms.
+- **Next:** continue only with a bounded #55 source-general encrypted
+  `GetMonData2` or level/growth component (or VBlank/audio); do not wire the
+  aggregate stats operation or construction clock.
+- **Notes:** compiled `0x0806ACAC` dispatcher is instruction/fetch reduced,
+  not a 72/78 duration table; the general u32 status arm is independently
+  instruction-counted at 25 halfwords/86 cycles. Default `SetBoxMonData`
+  exposes only its exact 30-cycle entry and 10-cycle return shell. No
+  identity/duration lookup, fixture mutation, excluded lane, canonical
+  Battle-2, animation, or unsupported-barrier change.
