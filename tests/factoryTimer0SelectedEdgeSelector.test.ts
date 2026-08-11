@@ -54,12 +54,14 @@ armed.append(s.observe(0x0806A51A, lr=0x08069063, field=39))
 for ordinal in range(24):
     return_pc = 0x08068DB3 if ordinal == 23 else 0x08068D3B
     armed.append(s.observe(0x0806A51A, lr=return_pc, field=39))
-    armed.append(s.observe(0x082E7C3E))
+    visits = 28 if ordinal == 23 else 1
+    for _ in range(visits):
+        armed.append(s.observe(0x082E7C3E))
 armed.append(s.observe(0x082E7C3E))
 print(json.dumps({"armed": [i for i, value in enumerate(armed) if value], "summary": s.summary(), "ordinal": s.encrypted_accessor_ordinal}))
 `;
     const value = JSON.parse(execFileSync("python3", ["-c", program], { encoding: "utf8" }));
-    expect(value.armed).toEqual([53]);
+    expect(value.armed).toEqual([80]);
     expect(value.ordinal).toBe(23);
     expect(value.summary).toEqual({
       case: "liliana",
@@ -67,6 +69,7 @@ print(json.dumps({"armed": [i for i, value in enumerate(armed) if value], "summa
       ordinal: 23,
       returnClass: "0x0806a51a->0x08068db2",
       edge: "0x082e7c3e->0x082e7c40",
+      instructionOccurrence: 27,
       crossedEventNames: ["GBA Timer 0", "GBA Audio Sample"],
       deadlineOrder: ["GBA Timer 0", "GBA Audio Sample"],
       audioTimerDeadlineDelta: 1,

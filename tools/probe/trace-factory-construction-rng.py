@@ -53,6 +53,11 @@ sys.path.insert(0, str(ORACLE_DIR))
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 from mgba._pylib import ffi as MGBA_FFI  # noqa: E402
+from factory_timer0_selected_edge import (  # noqa: E402
+    GET_BOX_MON_DATA2_ENTRY_PC,
+    LILIANA_AUDIO_EDGE,
+    SelectedEncryptedAccessorEdge,
+)
 
 
 REFERENCE = (WORKTREE_ROOT / "reference" / "pokeemerald").resolve()
@@ -149,6 +154,12 @@ TIMER0_FIFO_EVIDENCE = (
 # retains one plain dual refill plus one exact Video-co-due contrast.
 TIMER0_SCHEDULER_RUNTIME_EVIDENCE = (
     os.environ.get("FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE") == "1"
+)
+# One source-selected LILIANA edge only. Native wrappers are installed at the
+# selected accessor entry, delegate without retention until 0x082e7c3e, and
+# restore as soon as Timer@D, Audio@D+1, and both FIFO DMAs are complete.
+TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE = (
+    os.environ.get("FACTORY_TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE") == "1"
 )
 # Separate scalar/source-relative packet for the recurring +18-cycle residual
 # audit.  This decorates already-selected source boundaries only; it does not
@@ -1414,6 +1425,219 @@ class Timer0SchedulerRuntimeCapture:
         return sorted(self.windows, key=lambda window: window["kind"] != "isolated-dual-refill")
 
 
+class SelectedAdjacentDeadlineRuntimeCapture:
+    """Transparent wrappers for LILIANA's Timer@D then Audio@D+1 edge."""
+
+    EVENT_NAMES = (TIMER0_EVENT_NAME, "GBA Audio Sample", "GBA DMA")
+
+    def __init__(self, oracle: EmeraldOracle) -> None:
+        self.oracle = oracle
+        self.gba = oracle.core._native
+        self.originals: list[tuple[Any, Any]] = []
+        self.wrappers: list[Any] = []
+        self.installed_names: list[str] = []
+        self.install_state = snapshot_runtime_scheduler_hardware(
+            oracle, self.gba.timing
+        )
+        self.armed = False
+        self.complete = False
+        self.restored = False
+        self.timeline: list[dict[str, Any]] = []
+        self.timer_record: dict[str, Any] | None = None
+        self.audio_record: dict[str, Any] | None = None
+        self.completion_order: list[int] = []
+        self.final_state: dict[str, Any] | None = None
+        self._install()
+        due = {
+            event["name"]: event["deadlineDelta"]
+            for event in self.install_state["queue"]
+            if event["name"] in {TIMER0_EVENT_NAME, "GBA Audio Sample"}
+        }
+        if set(due) != {TIMER0_EVENT_NAME, "GBA Audio Sample"}:
+            self.restore()
+            raise RuntimeError(f"selected runtime install lacks Timer/Audio roots: {due}")
+        if any(delta is None or delta <= 0 for delta in due.values()):
+            self.restore()
+            raise RuntimeError(f"selected runtime wrappers installed after a deadline: {due}")
+
+    @staticmethod
+    def _event_name(event: Any) -> str:
+        if event.name == MGBA_FFI.NULL:
+            return "<unnamed>"
+        return MGBA_FFI.string(
+            event.name, TIMING_QUEUE_NAME_LIMIT
+        ).decode("ascii", "replace")
+
+    def _install(self) -> None:
+        by_name: dict[str, Any] = {}
+        event = self.gba.timing.root
+        while event != MGBA_FFI.NULL and len(by_name) < TIMING_QUEUE_EVENT_LIMIT:
+            name = self._event_name(event)
+            if name in self.EVENT_NAMES:
+                by_name[name] = event
+            event = event.next
+        by_name[TIMER0_EVENT_NAME] = MGBA_FFI.addressof(
+            self.gba.timers[0], "event"
+        )
+        by_name["GBA DMA"] = MGBA_FFI.addressof(self.gba.memory, "dmaEvent")
+        missing = set(self.EVENT_NAMES) - set(by_name)
+        if missing:
+            raise RuntimeError(f"selected runtime wrapper events missing: {sorted(missing)}")
+        for name in self.EVENT_NAMES:
+            event = by_name[name]
+            original = event.callback
+
+            @MGBA_FFI.callback("void(struct mTiming *, void *, uint32_t)")
+            def wrapper(timing: Any, context: Any, cycles_late: int, *,
+                        _event: Any = event, _name: str = name,
+                        _original: Any = original) -> None:
+                self._callback(
+                    _event, _name, _original, timing, context, int(cycles_late)
+                )
+
+            self.originals.append((event, original))
+            self.wrappers.append(wrapper)
+            self.installed_names.append(name)
+            event.callback = wrapper
+
+    def arm(self) -> None:
+        if self.armed or self.restored:
+            raise RuntimeError("selected runtime wrapper cannot be armed twice")
+        self.armed = True
+
+    def restore(self) -> None:
+        if self.restored:
+            return
+        for event, original in self.originals:
+            event.callback = original
+        self.restored = True
+
+    @staticmethod
+    def _dma_counts(state: dict[str, Any]) -> list[int]:
+        return [row["nextCount"] for row in state["dma"]]
+
+    def _callback(self, event: Any, name: str, original: Any, timing: Any,
+                  context: Any, cycles_late: int) -> None:
+        if not self.armed:
+            original(timing, context, cycles_late)
+            return
+        entry = snapshot_runtime_scheduler_hardware(self.oracle, timing)
+        record = {
+            "sequence": len(self.timeline),
+            "name": name,
+            "priority": int(event.priority),
+            "scheduledWhen": int(event.when),
+            "cyclesLate": cycles_late,
+            "schedulerCurrentTime": entry["scheduler"]["currentTime"],
+            "entry": entry,
+        }
+        original(timing, context, cycles_late)
+        after = snapshot_runtime_scheduler_hardware(self.oracle, timing)
+        record["exit"] = after
+        self.timeline.append(record)
+
+        if name == TIMER0_EVENT_NAME:
+            if self.timer_record is not None:
+                self.restore()
+                return
+            self.timer_record = record
+        elif name == "GBA Audio Sample":
+            if self.audio_record is None:
+                self.audio_record = record
+        elif name == "GBA DMA":
+            active = entry["activeDma"]
+            if (
+                active in {1, 2}
+                and entry["dma"][active]["nextCount"] != 0
+                and after["dma"][active]["nextCount"] == 0
+            ):
+                self.completion_order.append(active)
+
+        if (
+            self.timer_record is not None
+            and self.audio_record is not None
+            and self.completion_order == [1, 2]
+        ):
+            self.complete = True
+            self.final_state = after
+            self.restore()
+
+    def finish(self) -> dict[str, Any]:
+        self.restore()
+        if not self.armed or not self.complete:
+            raise RuntimeError(
+                "selected adjacent-deadline runtime capture incomplete: "
+                f"armed={self.armed} complete={self.complete} "
+                f"names={[row['name'] for row in self.timeline]} "
+                f"completion={self.completion_order}"
+            )
+        assert self.timer_record is not None
+        assert self.audio_record is not None
+        timer_due = self.timer_record["scheduledWhen"]
+        audio_due = self.audio_record["scheduledWhen"]
+        timer_index = self.timeline.index(self.timer_record)
+        audio_index = self.timeline.index(self.audio_record)
+        timer_before = self._dma_counts(self.timer_record["entry"])
+        timer_after = self._dma_counts(self.timer_record["exit"])
+        requested = [
+            channel for channel in range(4)
+            if timer_before[channel] == 0 and timer_after[channel] > 0
+        ]
+        if audio_due - timer_due != 1 or timer_index >= audio_index:
+            raise RuntimeError(
+                "selected runtime deadline/order mismatch: "
+                f"Timer={timer_due}@{timer_index} Audio={audio_due}@{audio_index}"
+            )
+        if requested != [1, 2] or self.completion_order != [1, 2]:
+            raise RuntimeError(
+                f"selected runtime DMA mismatch: requested={requested} "
+                f"completion={self.completion_order}"
+            )
+        compact_timeline = []
+        for row in self.timeline:
+            entry = row["entry"]
+            after = row["exit"]
+            compact_timeline.append({
+                key: row[key]
+                for key in (
+                    "sequence", "name", "priority", "scheduledWhen",
+                    "cyclesLate", "schedulerCurrentTime",
+                )
+            } | {
+                "entry": {
+                    "dmaNextCounts": self._dma_counts(entry),
+                    "activeDma": entry["activeDma"],
+                    "performingDma": entry["performingDma"],
+                    "cpuBlocked": entry["cpuBlocked"],
+                },
+                "exit": {
+                    "dmaNextCounts": self._dma_counts(after),
+                    "activeDma": after["activeDma"],
+                    "performingDma": after["performingDma"],
+                    "cpuBlocked": after["cpuBlocked"],
+                },
+            })
+        return {
+            "installState": self.install_state,
+            "deadlineOrder": [TIMER0_EVENT_NAME, "GBA Audio Sample"],
+            "audioTimerDeadlineDelta": audio_due - timer_due,
+            "requestOrder": [
+                {"fifo": "a", "dmaChannel": 1},
+                {"fifo": "b", "dmaChannel": 2},
+            ],
+            "completionOrder": self.completion_order,
+            "timeline": compact_timeline,
+            "hardwareStates": {
+                "timer0Entry": self.timer_record["entry"],
+                "timer0Exit": self.timer_record["exit"],
+                "audioEntry": self.audio_record["entry"],
+                "audioExit": self.audio_record["exit"],
+                "afterCompletion": self.final_state,
+            },
+            "wrappersRestoredAfterSequence": compact_timeline[-1]["sequence"],
+        }
+
+
 def snapshot_timer0_fifo_state(oracle: EmeraldOracle, master_cycles: int) -> dict[str, Any]:
     """Capture the smallest safe mGBA state around one Timer 0 reschedule.
 
@@ -1913,6 +2137,40 @@ def advance_one_instrumented_frame(
     steps = 0
     while True:
         pc = oracle.core.cpu.pc
+        if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
+            selector = epoch.setdefault(
+                "timer0SelectedEdgeSelector",
+                SelectedEncryptedAccessorEdge(LILIANA_AUDIO_EDGE),
+            )
+            selected_now = selector.observe(
+                pc,
+                lr=int(oracle.core.cpu.lr),
+                field=(
+                    cpu_gpr(oracle, 1)
+                    if pc == GET_BOX_MON_DATA2_ENTRY_PC else None
+                ),
+                outer_stats_entry=(
+                    pc == CALCULATE_STATS_ENTRY_PC
+                    and symbol_at(oracle.core.cpu.lr).startswith(
+                        "CreateMonWithEVSpreadNatureOTID"
+                    )
+                ),
+            )
+            if (
+                pc == GET_BOX_MON_DATA2_ENTRY_PC
+                and selector.selected_accessor_active
+                and epoch.get("timer0SelectedEdgeRuntimeCapture") is None
+            ):
+                epoch["timer0SelectedEdgeRuntimeCapture"] = (
+                    SelectedAdjacentDeadlineRuntimeCapture(oracle)
+                )
+            if selected_now:
+                capture = epoch.get("timer0SelectedEdgeRuntimeCapture")
+                if capture is None:
+                    raise RuntimeError(
+                        "selected adjacent-deadline wrapper was not installed"
+                    )
+                capture.arm()
         if CYCLE_EVIDENCE:
             cycle_events = epoch.setdefault("cycleEvents", [])
             awaiting_resume = epoch.get("awaitingVBlankResume")
@@ -2485,6 +2743,19 @@ def run_fixed_fixture(raw: dict[str, Any], first_frame: int, last_frame: int) ->
 def run_liliana() -> dict[str, Any]:
     raw = load_fixture("scratch-win-go-on-swap-offer-no-guide-dismiss-probe.json")
     oracle, _, epoch, calls = run_fixed_fixture(raw, LILIANA_FIRST_FRAME, LILIANA_LAST_FRAME)
+    if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
+        selector = epoch.get("timer0SelectedEdgeSelector")
+        capture = epoch.get("timer0SelectedEdgeRuntimeCapture")
+        if selector is None or capture is None:
+            raise RuntimeError("selected adjacent-deadline runtime edge was not reached")
+        return {
+            "schema": "factory-timer0-selected-adjacent-runtime/v1",
+            "case": "liliana",
+            "oracleProfile": "battle-scene-off",
+            "sourceFunction": "FillFactoryFrontierTrainerParty",
+            "selection": selector.summary(),
+            "runtime": capture.finish(),
+        }
     if (
         RESIDUAL_18_INSTRUCTION_EVIDENCE
         or RESIDUAL_18_CLASSIFIER_EVIDENCE
@@ -3405,13 +3676,24 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_TIMER0_SCHEDULER_RUNTIME_EVIDENCE=1 is bounded to the anchor case"
         )
+    if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE and CASE != "liliana":
+        raise SystemExit(
+            "FACTORY_TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE=1 is bounded to liliana"
+        )
+    if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE and TIMER0_SCHEDULER_RUNTIME_EVIDENCE:
+        raise SystemExit("selected and census Timer 0 runtime modes are exclusive")
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if TIMER0_SCHEDULER_RUNTIME_EVIDENCE:
+    if TIMER0_SELECTED_EDGE_RUNTIME_EVIDENCE:
+        message = (
+            f"wrote {OUTPUT}: {result['case']} selected adjacent-deadline "
+            "Timer 0 runtime window"
+        )
+    elif TIMER0_SCHEDULER_RUNTIME_EVIDENCE:
         message = f"wrote {OUTPUT}: {result['case']} {len(result['windows'])} Timer 0 scheduler windows"
     elif TIMER0_FIFO_EVIDENCE:
         result = compact_timer0_fifo_classifier_receipt(result)

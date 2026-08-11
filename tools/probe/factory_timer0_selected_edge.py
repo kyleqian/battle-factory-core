@@ -28,6 +28,7 @@ class SelectedEdgeSpec:
     ordinal: int
     return_pc: int
     instruction_pc: int
+    instruction_occurrence: int
     next_instruction_pc: int
     crossed_event_names: tuple[str, ...]
     deadline_order: tuple[str, ...]
@@ -40,6 +41,7 @@ LILIANA_AUDIO_EDGE = SelectedEdgeSpec(
     ordinal=23,
     return_pc=0x08068DB2,
     instruction_pc=0x082E7C3E,
+    instruction_occurrence=27,
     next_instruction_pc=0x082E7C40,
     crossed_event_names=("GBA Timer 0", "GBA Audio Sample"),
     deadline_order=("GBA Timer 0", "GBA Audio Sample"),
@@ -55,6 +57,7 @@ class SelectedEncryptedAccessorEdge:
         self.in_outer_calculate_stats = False
         self.encrypted_accessor_ordinal = -1
         self.selected_accessor_active = False
+        self.selected_instruction_occurrence = -1
         self.armed = False
 
     def observe(
@@ -69,9 +72,11 @@ class SelectedEncryptedAccessorEdge:
         if pc == CALCULATE_STATS_ENTRY_PC and outer_stats_entry:
             self.in_outer_calculate_stats = True
             self.selected_accessor_active = False
+            self.selected_instruction_occurrence = -1
         elif pc == CALCULATE_STATS_RESUME_PC:
             self.in_outer_calculate_stats = False
             self.selected_accessor_active = False
+            self.selected_instruction_occurrence = -1
 
         return_pc = lr & ~1
         if (
@@ -89,16 +94,19 @@ class SelectedEncryptedAccessorEdge:
                     self.encrypted_accessor_ordinal == self.spec.ordinal
                     and return_pc == self.spec.return_pc
                 )
+                self.selected_instruction_occurrence = -1
             else:
                 self.selected_accessor_active = False
 
-        if (
-            pc == self.spec.instruction_pc
-            and self.selected_accessor_active
-            and not self.armed
-        ):
-            self.armed = True
-            return True
+        if pc == self.spec.instruction_pc and self.selected_accessor_active:
+            self.selected_instruction_occurrence += 1
+            if (
+                self.selected_instruction_occurrence
+                == self.spec.instruction_occurrence
+                and not self.armed
+            ):
+                self.armed = True
+                return True
         return False
 
     def summary(self) -> dict[str, object]:
@@ -113,6 +121,7 @@ class SelectedEncryptedAccessorEdge:
                 f"0x{self.spec.instruction_pc:08x}->"
                 f"0x{self.spec.next_instruction_pc:08x}"
             ),
+            "instructionOccurrence": self.spec.instruction_occurrence,
             "crossedEventNames": list(self.spec.crossed_event_names),
             "deadlineOrder": list(self.spec.deadline_order),
             "audioTimerDeadlineDelta": self.spec.audio_timer_deadline_delta,

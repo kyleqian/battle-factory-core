@@ -5,20 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1120 — [MAIN worker, 2026-08-11] **#55 adjacent-deadline edge selector checkpoint**
+## 1120 — [MAIN worker, 2026-08-11] **#55 LILIANA adjacent-deadline runtime receipt**
 
-- **State:** a hermetic source-order selector now identifies the LILIANA
-  encrypted-accessor ordinal 23 edge; no runtime packet is claimed, #55 stays
-  open, and the construction clock remains unwired.
-- **Did:** selectively recovered and corrected the stash helper/test. It arms
-  once at `0x082e7c3e` inside the outer `CalculateMonStats` call and pins the
-  actual adjacent timeline **Timer@D → Audio@D+1**, never equal-deadline
-  Audio-first ordering.
-- **Next:** attempt a bounded transparent native-wrapper capture for this one
-  selected edge; accept only twice-fresh byte-identical compact JSON, otherwise
-  discard the integration and retain this tooling checkpoint alone.
-- **Notes:** focused selector/audio/FIFO **13/13**, smoke **375/375**,
-  typecheck, full `npm test` **912 files / 8,572 passed / 1 skipped**, and
+- **State:** the selected LILIANA runtime graph is closed twice fresh; #55
+  stays open for the two legal-varied adjacent rows and broader construction
+  clock, which remains unwired.
+- **Did:** corrected the selector to source-order division occurrence 27 and
+  added a narrow Timer/Audio/DMA wrapper. The compact packet is byte-identical
+  at `a0cdb0c1…`: **Timer@D**, DMA1 first service, **Audio@D+1**, remaining
+  DMA1/2; completion 1→2 and prompt wrapper restoration are full-state pinned.
+- **Next:** capture legal-varied get-nature 12 and nature-attempt 63 only
+  through separately source-selected adjacent-deadline wrappers. Do not fit a
+  cost or wire the construction clock.
+- **Notes:** focused selector/runtime/audio/FIFO **18/18**, smoke **375/375**,
+  typecheck, full `npm test` **913 files / 8,577 passed / 1 skipped**, and
   build (**631 modules**) are green. No service cost, clock/dispatcher,
   controller, presentation, animation, barrier, or canonical recording changed.
 

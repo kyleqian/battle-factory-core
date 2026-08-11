@@ -1438,14 +1438,17 @@ a present mixer, pending/competing DMA, and Audio/IRQ or Video-started DMA are
 not observed. `serviceCostMasterCycles` remains `null`; the construction clock
 remains unwired. Full facts are in the scheduler audit.
 
-**Audio-co-due row selection checkpoint (2026-08-11):** the finite OFF
-receipt's natural candidates are LILIANA encrypted-accessor 23 (Audio only),
-legal-varied get-nature 12 (Audio only), and legal-varied nature-attempt 63
-(Video+Audio); exact return classes and instruction edges are Tier-1 pinned.
-No anchor row qualifies. The bounded edge-selected wrapper attempt did not
-produce a validated packet in cap, so no runtime claim or probe change landed.
-Next is LILIANA twice fresh, then both varied rows through the same wrapper;
-dispatcher/service cost/clock remain untouched.
+**Adjacent Audio/Timer row correction + LILIANA runtime receipt
+(2026-08-11):** the three natural OFF rows cross adjacent deadlines, not an
+equal-deadline Audio-before-Timer class. In each, Timer is due at D and Audio
+at D+1; LILIANA is encrypted-accessor ordinal 23. A specialized wrapper now
+selects that accessor's zero-based division-loop occurrence 27, installs while
+both deadlines are future, retains only from `0x082e7c3e`, and restores after
+DMA completion. Two fresh compact packets are byte-identical (`a0cdb0c1…`):
+Timer@D (`cyclesLate=1`), DMA1's first callback, Audio@D+1 (`cyclesLate=0`),
+then the remaining DMA1/2 graph; requests and completions are both 1→2 and all
+hardware state is retained at the exact boundaries. The two legal-varied rows
+remain uncaptured. Dispatcher/service cost/clock remain untouched.
 
 **IRQ / Video-DMA reachability audit (2026-08-11):** source plus the finite OFF
 receipts exclude those roots from the selected construction epoch. MP2K starts

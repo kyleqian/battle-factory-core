@@ -73,6 +73,31 @@ does validate its periodic reschedule in each row:
 No per-callback execution graph, callback duration, or service cost is
 inferred from the before/after pair.
 
+## Selected LILIANA runtime edge
+
+A specialized opt-in wrapper now closes the first row's live scheduler graph.
+It selects outer `CalculateMonStats` encrypted-accessor ordinal 23, then the
+zero-based 27th visit to the repeated division instruction at `0x082e7c3e`.
+Wrappers for only Timer 0, Audio Sample, and DMA are installed at that
+accessor's entry while the two relevant deadlines are still 1,092 and 529
+master cycles in the future. They delegate without retention until the exact
+selected instruction and restore at the last DMA completion.
+
+Two fresh Battle-Scene-OFF runs through `tools/run-mgba-probe.py` produced
+byte-identical 27,844-byte packets (SHA-256
+`a0cdb0c1952b77580bfe1e3dd4834af98c40d579484931a3bd657061f117e5fc`).
+The actual callback graph is Timer 0 at D (`cyclesLate=1`), one DMA1 service
+callback, Audio Sample at D+1 (`cyclesLate=0`), then the remaining DMA1/2
+service. Timer requests DMA1 then DMA2; completion is DMA1 then DMA2, all
+`nextCount`s return to zero, and wrappers restore at callback sequence 11.
+Full Timer entry/exit, Audio entry/exit, and post-completion scheduler, FIFO,
+DMA0-3, audio/mixer, active-DMA, and CPU-blocked state is retained in
+`tests/fixtures/factory-timer0-selected-adjacent-runtime-v1.json`.
+
+This is adjacent-deadline evidence, not an exact-equality Audio-before-Timer
+class. It does not price either callback, set `serviceCostMasterCycles`, or
+wire `runFactoryConstructionClock`.
+
 ## Construction-state scope
 
 The already-committed construction reachability receipt records two exact
