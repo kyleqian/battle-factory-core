@@ -15,11 +15,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   63's occurrence **0**. Get-nature packets are byte-identical `21ea4158…`:
   Timer late 5, DMA1, Audio late 4 at D+1. Nature-attempt is `d32aa8d8…`:
   Video then Timer late 6 at D, DMA1, Audio late 5 at D+1. Both complete +18.
-- **Next:** finish required smoke/typecheck/full-suite/build verification.
+- **Next:** this bounded adjacent-row step is complete. Continue #55 only with
+  a separately source-proven construction-clock/workload slice; do not fit a
+  cost or wire the clock from these three observations.
 - **Notes:** captures finished in **12.3/11.6s + 12.5/12.0s**; focused
-  selector/runtime **18/18** is green. No service cost, clock, controller,
-  presentation,
-  animation, barrier, recording, or side-owned adjacent-audit artifact changed.
+  selector/runtime **18/18**, smoke **375/375**, typecheck, full `npm test`
+  **916 files / 8,594 passed / 1 skipped**, and build (**631 modules**) are
+  green. No service cost, clock, controller, presentation, animation, barrier,
+  recording, or side-owned adjacent-audit artifact changed.
 
 ## 1120 — [MAIN worker, 2026-08-11] **#55 LILIANA adjacent-deadline runtime receipt**
 
