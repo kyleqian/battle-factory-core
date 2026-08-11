@@ -1668,6 +1668,25 @@ channel gate/clear, wait/LFO, and bounded command-callback paths. No observed
 duration was fit, no service cost was assigned, and the construction clock
 remains unwired. Evidence: `docs/issue55-m4a-post-command-v1.md`.
 
+**2026-08-11 one-pass channel-gate subset closure:** additive OFF packets now
+capture the sixth player's exact compiled `_081DD874` boundary for all
+**108/108** one-pass rows; the five zero-pass calls correctly never reach it.
+Two fresh serial anchor/LILIANA/legal-varied captures are byte-identical
+(`6f0884ff…` / `6650f3fb…` / `6e371fa2…`) and retain only active track flags
+plus address-free channel role, `statusFlags`, and `gateTime`. The source/ELF
+reducer walks **768** channel members and independently instruction-counts the
+empty-chain and `gateTime` 0/1/>1 paths. **69/108** one-pass rows never select
+`ClearChain` and now have exact channel-gate components (**204–398** cycles,
+36 distinct totals). The other **39/108** rows select **47** `ClearChain`
+callbacks and remain null for this component because track/previous/next link
+state is not yet captured at callback entry.
+
+Complete MPlay costs remain **5 exact / 108 null**. The next discriminator is
+the 39-row `ClearChain` entry link state; wait/LFO and bounded command-callback
+timing remain later for all one-pass rows. No observed duration was fit, no
+service cost was assigned, and `runFactoryConstructionClock` remains unwired.
+Evidence: `docs/issue55-m4a-channel-gate-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

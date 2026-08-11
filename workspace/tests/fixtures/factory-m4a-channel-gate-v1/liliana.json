@@ -1,0 +1,3207 @@
+{
+  "schema": "factory-m4a-channel-gate-probe/v1",
+  "case": "liliana",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "sixth-MPlayMain-one-pass-channel-gate",
+  "observations": [
+    {
+      "sourceStateDigest": "75050563b447f4df6078afc684b2103f401de44e0af83a955615f733e6791f4a",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 3
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 84
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 0,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 2,
+                "gateTime": 12
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "de24421aaaa62bc671b7954b161eec35f97343f393722c2bf247ed37d21df6db",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 2
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 83
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 2,
+                "gateTime": 11
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "04e627717fe727b96245a2f4ee30034752d39838a4fe1e4f04c3238087c5f97f",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 82
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 10
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "c360a4950dfd3a22f12068912a1e1a3937bce17b006ca81d2ca1bc9f2e4b3185",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 68,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 81
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 9
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "67dcf01479ae763df89833827da03bd67ea8c2b2464b1e91acf12fa387454d37",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 80
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 8
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 79
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 7
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "7e349fb8f37b31fe407521166341e453e82ec5579cd0df5e735f367e7f8940ff",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 2,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 18,
+                "gateTime": 4
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 3
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 78
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 6
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "136219c3db5a06a580f1aa93008a8266b67b21f54a53b59af9725013d68478f2",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 18,
+                "gateTime": 3
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 2
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 77
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 5
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "254105d0e300044129ce403e43cd0c3e9ef937dc5966e03678aeffd5b4b98e28",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 18,
+                "gateTime": 2
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 76
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 4
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "48e609796c61993b98ce4aed1fa69eb8190f01f114bde9eb392f7cb9c629d981",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 18,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 68,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 75
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 3
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "4098a02e3f0a922f3f402061333f5320154be04365649f44ab33db3d406935b6",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 74
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 2
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 73
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "574a5e1547725c9685e4a84569319902188d205a7f3b1c6f3c20c9f25ad33d20",
+      "channelGate": null
+    },
+    {
+      "sourceStateDigest": "6a88a5d761ef2e24daf4c73eb5da29c8413d1066dc261a4878e57a022db33f1a",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 2,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 4
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 96
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 72
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 12
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 2,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "de8497c08457a8bfcd785ac38eb994e6c6ad6146a46e135b95fc9329bffb8f2d",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 95
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 71
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 1,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 11
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 94
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 70
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 10
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "0dbdc79bf393698e16fffbb04256067e2193fb6ae71827d5b9451d22dc471808",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 93
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 69
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 9
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 68,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "2efd8904f380af9da21b782a50a355dd43c8258ca7005b8b237d84b84a743a3a",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 92
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 68
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 8
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 91
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 67
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 7
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "d4eafd4be04ffbc4a1a5d9a999c46951cf37e4d3455f53d73961e2c4d863c0b4",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 90
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 66
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 6
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 2,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "e7fe29bbc43e4e61a49403e7dbb44933dfef2649e6bdcc987b7c658b5e947809",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 89
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 65
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 5
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 88
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 64
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 0,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 4
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 68,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "22c5d662c36c4bd2b6ba595410f8ba4c148d1bfb6bffaadb74fb52c7517dacd8",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 87
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 63
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 3
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "cec9c411d0fd7a5187232111dfe4f540ea44cc33c6d8892daa58bb056fe45123",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 86
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 62
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 2
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 85
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 61
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "730d5b961495f425916a9ef802b17018b2256eef4dfc38576f947c2d0ebc239d",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 2,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 4
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 84
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 60
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 2,
+                "gateTime": 12
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "aa020fe7e7f2649b70633275a7eb7426a5798e75ee67da6606665aeceafd0c4a",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 3
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 83
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 59
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 2,
+                "gateTime": 11
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "6854eca211190cad143f165b2c43e6011d7fbba5c910cad932e679c0a933452a",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 2
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 82
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 58
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 10
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "898a71ab6287958bf7ee9f5c76a2487e7087dace83615e40ef8bf4ce3fe998bf",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 18,
+                "gateTime": 1
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 81
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 57
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 2,
+                "gateTime": 3
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-0",
+                "statusFlags": 0,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 9
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "9808dfff65029cdd2806b77f0c2c5f9617be333e81c3e0c055a4590116a86e3f",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 80
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 56
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 2,
+                "gateTime": 2
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 8
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "channelGate": {
+        "revision": "factory-m4a-channel-gate/v1",
+        "playerRole": "music-player-5",
+        "boundary": "MPlayMain._081DD874",
+        "tracks": [
+          {
+            "trackIndex": 0,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 1,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-2",
+                "statusFlags": 64,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 2,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-2",
+                "statusFlags": 82,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 3,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 4,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-0",
+                "statusFlags": 1,
+                "gateTime": 79
+              }
+            ]
+          },
+          {
+            "trackIndex": 5,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-1",
+                "statusFlags": 1,
+                "gateTime": 55
+              }
+            ]
+          },
+          {
+            "trackIndex": 6,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "direct-channel-1",
+                "statusFlags": 1,
+                "gateTime": 1
+              },
+              {
+                "role": "direct-channel-4",
+                "statusFlags": 65,
+                "gateTime": 0
+              },
+              {
+                "role": "direct-channel-3",
+                "statusFlags": 65,
+                "gateTime": 0
+              }
+            ]
+          },
+          {
+            "trackIndex": 7,
+            "flags": 128,
+            "channels": []
+          },
+          {
+            "trackIndex": 8,
+            "flags": 128,
+            "channels": [
+              {
+                "role": "cgb-channel-3",
+                "statusFlags": 1,
+                "gateTime": 7
+              }
+            ]
+          },
+          {
+            "trackIndex": 9,
+            "flags": 0,
+            "channels": []
+          }
+        ]
+      }
+    }
+  ]
+}

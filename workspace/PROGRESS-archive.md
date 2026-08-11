@@ -41249,3 +41249,18 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** worker controls, smoke **375/375**, typecheck, full `npm test`
   **952 files / 9,137 passed / 1 skipped**, and build **645 modules** are green.
   Both lane branches remain fully folded.
+## 1149 — [supervisor, 2026-08-11] **LUKAS send-out evidence verified; LEER folded**
+
+- **State:** `master` is green with the legal Battle-6 LUKAS send-out bounded
+  exactly at #55: app 462–469 is **8/8** exact and every pixel in 470–511
+  outside WEEPINBELL's gender glyph is exact. S8 stays closed; #56 and the
+  retired Battle-2 march remain untouched.
+- **Did:** reviewed the acknowledgement/source-clock receipt and independently
+  confirmed the twice-fresh residual bounds. Folded animation-main's LEER
+  Scene-ON acceptance through merge `113015b9`; rust-main was already folded.
+- **Next:** take one source-proven #55 construction-clock increment toward the
+  legal LUKAS set-270 personality, then rerun app 462–511 without party,
+  renderer, or fixture-specific overrides. Do not submit a battle action.
+- **Notes:** merged union full `npm test` **953 files / 9,141 passed / 1
+  skipped**; build **647 modules**. Worker controls remained exact and its
+  focused **4/4**, smoke **375/375**, and typecheck were green.

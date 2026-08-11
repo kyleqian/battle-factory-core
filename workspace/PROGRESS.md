@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1152 — [MAIN worker, 2026-08-11] **#55 one-pass channel-gate subset source-closed**
+
+- **State:** `master` is at a precise generic evidence checkpoint; #55 remains
+  open, complete MPlay costs stay **5 exact / 108 null**, and the construction
+  clock stays null/unwired. S8 stays closed; Battle 2 stops at 33331; #56 is
+  untouched; LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets capture the sixth player's
+  `_081DD874` boundary for **108/108** one-pass rows. Source/ELF accounting
+  closes the channel-gate component for **69/108** rows; **39/108** rows select
+  **47** `ClearChain` callbacks and remain null for this component.
+- **Next:** capture `ClearChain`'s track/previous/next link inputs at its
+  compiled entry and source-reduce that 39-row route. Wait/LFO and bounded
+  command callbacks remain later; do not wire `runFactoryConstructionClock`.
+- **Notes:** no engine/pixel identity changed, so LUKAS 462–511 was not rerun.
+  Focused **10/10**, smoke **375/375**, typecheck, full **955 files / 9,147
+  passed / 1 skipped**, and build **647 modules** are green. No
+  unsupported-branch barrier or production/presentation change.
+
 ## 1151 — [supervisor, 2026-08-11] **#55 post-command closure verified**
 
 - **State:** `master` is green with the sixth-player post-command state closed
@@ -37,19 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **65**, canonical **154,65,249,238,3,256,115**. Focused **4/4**, smoke
   **375/375**, typecheck, full **954 files / 9,143 passed / 1 skipped**, build
   **647 modules**. No new unsupported-branch barrier.
-
-## 1149 — [supervisor, 2026-08-11] **LUKAS send-out evidence verified; LEER folded**
-
-- **State:** `master` is green with the legal Battle-6 LUKAS send-out bounded
-  exactly at #55: app 462–469 is **8/8** exact and every pixel in 470–511
-  outside WEEPINBELL's gender glyph is exact. S8 stays closed; #56 and the
-  retired Battle-2 march remain untouched.
-- **Did:** reviewed the acknowledgement/source-clock receipt and independently
-  confirmed the twice-fresh residual bounds. Folded animation-main's LEER
-  Scene-ON acceptance through merge `113015b9`; rust-main was already folded.
-- **Next:** take one source-proven #55 construction-clock increment toward the
-  legal LUKAS set-270 personality, then rerun app 462–511 without party,
-  renderer, or fixture-specific overrides. Do not submit a battle action.
-- **Notes:** merged union full `npm test` **953 files / 9,141 passed / 1
-  skipped**; build **647 modules**. Worker controls remained exact and its
-  focused **4/4**, smoke **375/375**, and typecheck were green.
