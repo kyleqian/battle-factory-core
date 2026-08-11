@@ -2,7 +2,9 @@
 /dist/
 /coverage/
 /test-results/
-/reference/
+# No trailing slash: in the primary tree this is a directory, but in lane
+# worktrees it is a symlink to the primary's copy — both must be ignored.
+/reference
 /oracle-output/
 /battle-lab-output/
 /tools/compare/out/
