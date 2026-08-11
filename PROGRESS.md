@@ -24,24 +24,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   passed / 1 skipped**, **95.91s**), and build (**642 modules**, Vite **6.90s**)
   are green. No production, barrier, RNG, damage, AI, or animation change.
 
-## 1131 — [supervisor, 2026-08-11] **S8 reset resumed on folded Scene-OFF union**
+## 1131 — [supervisor, 2026-08-11] **Generic Battle-2+ start seam proven; wind-down green**
 
-- **State:** master is green through the mandatory `animation-main` fold
-  `b7c2408b`. S8's three finite gates remain closed; new work must improve the
-  generic seven-battle controller/presentation seam without extending the
-  stopped canonical Battle-2 march past tick 33331.
-- **Did:** folded `animation-main` through `77201333`, then independently ran
-  `npm test` (**945 files / 8,677 passed / 1 skipped**, **218.85s**) and the
-  production build (**642 modules**, Vite **6.81s**) on the union. Both oracle
-  profiles pass freshness; OFF bootstrap v5 is healthy.
-- **Next:** close the source-proven construction-clock remainder that prevents
-  the live generic post-win handoff from deriving Battle 2+ opponent content
-  without an adopted schedule; verify the resulting reusable transition with
-  short staged OFF evidence, never a sequential canonical turn window.
-- **Notes:** current seven-win live-path pins already reach `roundComplete` at
-  battle index 6 and the far-side staged LILIANA room window is 115/115 exact.
-  #55 is the named provenance blocker between those mechanisms. No material
-  decision is deferred.
+- **State:** master is green through `77746165`. A nonzero-index `battleStart`
+  now has staged OFF proof from LILIANA's room quote through the real next
+  command request, without a battle/turn/tick production branch. S8 stays
+  closed and the canonical Battle-2 march remains stopped at tick 33331.
+- **Did:** folded `animation-main` through `77201333`; then banked exact generic
+  Battle-2 room-dismiss **30/30**, black handoff **43/43**, generated intro
+  **238/238**, and action-ready **3/3** windows (each twice fresh; independent
+  intro **238/238** and prior LILIANA **115/115** reruns). The #55 audit joins
+  **113/113** MPlay rows: **5/5** zero-pass calls close at 864 cycles; **108**
+  one-pass rows fail closed on missing post-command `Track.flags`/`chan` state.
+- **Next:** for #55, capture/reduce that post-command MPlay state; keep costs
+  null and the construction clock unwired until all 108 rows compose. For the
+  presentation seam, retire the generic RNG-selected transition residual from
+  frame 11338; do not extend into a Battle-2 action window.
+- **Notes:** final `npm test` **946 files / 8,680 passed / 1 skipped**
+  (**117.75s**), build **642 modules** (Vite **6.47s**), vanilla soak **20/20**
+  (**33.9s**), and full-policy soak **60/60** (**284.4s**) are green with **0
+  crash / 0 hang**. OFF oracle is fresh. `animation-main` has newer Metal
+  Sound evidence commits not folded at wind-down. No material decision is
+  deferred.
 
 ## 1130 — [supervisor, 2026-08-11] **#55 exact MPlay selector folded; wind-down green**
 

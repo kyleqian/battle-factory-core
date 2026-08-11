@@ -935,6 +935,15 @@ tile transitions. Per the fallback contract, the canonical capture endpoint
 is unchanged; exact extension remains #55's prohibited/unwired construction-
 clock problem, not a presentation branch.
 
+**2026-08-11 generic nonzero-index start checkpoint:** the adopted LILIANA
+owner now runs through the live `battleStart` lifecycle to one real player
+decision request. Four short staged OFF windows are exact twice fresh:
+room-dismiss **30/30**, black handoff **43/43**, generated intro **238/238**,
+and action-ready **3/3**; the prior far-side window remains **115/115**.
+The remaining transition-effect span starts at frame 11338 and needs a generic
+RNG-selected presentation owner, not a Battle-2 or LILIANA branch. Evidence:
+`docs/win-go-on-battle2-start-seam-evidence.md`.
+
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
 **User decision (2026-08-10): GRIND IT OUT.** The user explicitly
@@ -1644,6 +1653,14 @@ spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
 Gate-5 clause (a) is receipt-linked at the rules level (selection byte-exact
 from the probed cursor; construction proven via filtered ledger); this entry
 tracks the remaining stream-model boundary, not a Gate-5 blocker.
+
+**2026-08-11 MPlay execution frontier:** an additive source audit now joins all
+**113/113** frozen sixth-player rows by `sourceStateDigest`. All **5/5**
+zero-pass calls close exactly at 864 cycles. The **108** one-pass calls stay
+null because the frozen entry/final-target packets do not contain the mutable
+post-command `Track.flags`/`chan` state consumed by MPlayMain's volume/pitch
+loop. No duration was fit, no service cost was assigned, and the construction
+clock remains unwired. Next capture/reduce that post-command state.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
