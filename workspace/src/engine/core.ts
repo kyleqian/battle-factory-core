@@ -110,7 +110,13 @@ import {
   type BattleRoomState,
 } from "./battleRoom.ts";
 import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
-import { applyBattleTransitionOverlay, exitFadeY } from "./battleTransition.ts";
+import {
+  applyBattleTransitionOverlay,
+  frontierTransitionBgFadeY,
+  frontierTransitionObjFadeY,
+  frontierTransitionRenderKind,
+  selectFrontierTransition,
+} from "./battleTransition.ts";
 import {
   actionMenuInputReady,
   advanceBattleScene,
@@ -954,8 +960,18 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         };
       } else {
         battleRoom = advanceBattleRoom(battleRoom);
-        for (let i = 0; i < opponentSetupExtraRngSteps(battleRoom); i += 1) {
-          rngValue = advanceRngValue(rngValue);
+        const extraRngSteps = opponentSetupExtraRngSteps(battleRoom);
+        if (extraRngSteps === 1 && battleRoom.transitionPresentation === undefined) {
+          const selected = selectFrontierTransition(rngValue);
+          rngValue = selected.rngValue;
+          battleRoom = {
+            ...battleRoom,
+            transitionPresentation: selected.presentation,
+          };
+        } else {
+          for (let i = 0; i < extraRngSteps; i += 1) {
+            rngValue = advanceRngValue(rngValue);
+          }
         }
         if (
           battleRoom.phase === "settled" &&
@@ -1792,8 +1808,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
           rngValue,
         ]);
       }
-      for (let i = 0; i < extraRngSteps; i += 1) {
-        rngValue = advanceRngValue(rngValue);
+      if (extraRngSteps === 1 && battleRoom.transitionPresentation === undefined) {
+        const selected = selectFrontierTransition(rngValue);
+        rngValue = selected.rngValue;
+        battleRoom = {
+          ...battleRoom,
+          transitionPresentation: selected.presentation,
+        };
+      } else {
+        for (let i = 0; i < extraRngSteps; i += 1) {
+          rngValue = advanceRngValue(rngValue);
+        }
       }
       // S6 scene-assembly handoff (battleScene.ts doc): the CIRCLES_MEET
       // transition's own post-fade black hold ("settled" phase) is
@@ -2207,9 +2232,13 @@ function blackFrame(): Uint8Array {
  */
 function renderBattleRoomState(state: EngineState): Uint8Array {
   const b = state.battleRoom!;
-  const transition = b.encounter === "jenson"
+  const fallbackTransition = b.encounter === "jenson"
     ? "asymmetricSpiralInSeq"
     : "circlesMeet";
+  const transition = frontierTransitionRenderKind(
+    b.transitionPresentation,
+    fallbackTransition,
+  );
   const sceneElapsed = b.phase === "entering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
   const step = entryStep(sceneElapsed);
   let bgY = bgFadeY(sceneElapsed, FADE_IN);
@@ -2224,8 +2253,8 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
   // everything else (gray flicker, circle sprites, center-logo blend) is a
   // post-process overlay, no new phase needed.
   if (b.phase === "settled") {
-    bgY = exitFadeY(b.elapsed, transition);
-    objY = exitFadeY(b.elapsed - 1, transition);
+    bgY = frontierTransitionBgFadeY(b.elapsed, transition);
+    objY = frontierTransitionObjFadeY(b.elapsed, transition);
   }
   const fb = createFramebuffer();
   renderBattleRoomEntryScene(fb, step, sceneElapsed, bgY, objY, msgboxVisual(b), b);

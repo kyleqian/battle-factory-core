@@ -67,6 +67,7 @@
 
 import { FADE_IN } from "./paletteFade.ts";
 import type { FactoryTrainerPresentation } from "./factoryTrainerPresentation.ts";
+import type { FrontierTransitionPresentation } from "./battleTransition.ts";
 
 export type BattleRoomPhase = "entering" | "msgboxIdle" | "msgboxClosing" | "settled";
 
@@ -78,6 +79,8 @@ export interface BattleRoomState {
   encounter?: "destin" | "jenson";
   /** Generated round identity; absent only on the legacy canonical fixture. */
   trainerPresentation?: FactoryTrainerPresentation;
+  /** GetSpecialBattleTransition's owned Random()%12 result once selected. */
+  transitionPresentation?: FrontierTransitionPresentation;
 }
 
 /** core.ts creates this the tick prebattleRoom's "warpFade" phase reaches the fixed elapsed count matching trace tick 520 (see core.ts's handoff). */

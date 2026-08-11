@@ -3,6 +3,18 @@ import logo from "../src/assets/gen/battle-transition-frontier-logo.json" with {
 import squares from "../src/assets/gen/battle-transition-frontier-squares.json" with { type: "json" };
 import circles from "../src/assets/gen/battle-transition-frontier-circles.json" with { type: "json" };
 import meta from "../src/data/gen/battle-transitions-frontier.json" with { type: "json" };
+import { advanceRngValue } from "../src/engine/rng.ts";
+import {
+  frontierTransitionRenderKind,
+  selectFrontierTransition,
+} from "../src/engine/battleTransition.ts";
+import { createInitialState, render, tick } from "../src/engine/core.ts";
+import type {
+  BattleMon,
+  BattleOpponent,
+  BattleParty,
+  FixtureBattleScenario,
+} from "../src/engine/battleScenario.ts";
 
 // Not oracle-cross-checked: which of the 12 Factory transitions plays is
 // RNG-dependent (one Random() call, battle_setup.c:863,885), so a targeted
@@ -155,5 +167,105 @@ describe("battle-transitions-frontier.json (12-way id -> mechanism + params tabl
       "battle-transition-frontier-circles.json",
     ]);
     for (const t of meta.table) expect(validAssets.has(t.assets)).toBe(true);
+  });
+});
+
+function seamMon(id: string): BattleMon {
+  return { id, species: id.toUpperCase(), maxHp: 100, hp: 100, status: "none" };
+}
+
+function seamParty(prefix: string): BattleParty {
+  return [seamMon(`${prefix}-0`), seamMon(`${prefix}-1`), seamMon(`${prefix}-2`)];
+}
+
+function seamScenario(): FixtureBattleScenario {
+  const opponentPool: BattleOpponent[] = Array.from({ length: 7 }, (_, index) => ({
+    id: `trainer-${index}`,
+    trainerName: `TRAINER ${index}`,
+    party: seamParty(`foe-${index}`),
+  }));
+  return {
+    id: "frontier-transition-seam",
+    playerParty: seamParty("player"),
+    opponentPool,
+    opponentSelectionInputs: [0, 0, 0, 0, 0, 0, 0],
+    initialRngValue: 0x1234_5678,
+  };
+}
+
+describe("source-owned Frontier transition selection", () => {
+  it("maps two selector inputs through Random()%12 without trainer, battle, turn, or tick keys", () => {
+    const logoWave = selectFrontierTransition(9);
+    expect(logoWave).toEqual({
+      rngValue: 1_341_727_304,
+      presentation: {
+        tableIndex: 1,
+        transitionId: 30,
+        transitionName: "B_TRANSITION_FRONTIER_LOGO_WAVE",
+        family: "logoWave",
+        raw: 20_473,
+      },
+    });
+    expect(frontierTransitionRenderKind(logoWave.presentation, "circlesMeet"))
+      .toBe("logoWave");
+
+    const circlesMeet = selectFrontierTransition(2);
+    expect(circlesMeet.presentation).toMatchObject({
+      tableIndex: 4,
+      transitionId: 34,
+      transitionName: "B_TRANSITION_FRONTIER_CIRCLES_MEET",
+      raw: 33_676,
+    });
+    expect(frontierTransitionRenderKind(circlesMeet.presentation, "asymmetricSpiralInSeq"))
+      .toBe("circlesMeet");
+  });
+
+  it("the live room seam consumes the selector once and preserves round/controller/parties", () => {
+    const initial = createInitialState({ battleScenario: seamScenario() });
+    const state = {
+      ...initial,
+      rngValue: 9,
+      rngMode: "vblank" as const,
+      battleRoom: {
+        phase: "settled" as const,
+        elapsed: 22,
+        encounter: "jenson" as const,
+      },
+    };
+    const roundBefore = structuredClone(state.roundController);
+    const rentalsBefore = structuredClone(state.draftScreen.rentals);
+    const expected = selectFrontierTransition(advanceRngValue(state.rngValue));
+
+    const selected = tick(state, new Set());
+    expect(selected.battleRoom?.transitionPresentation).toEqual(expected.presentation);
+    expect(selected.rngValue).toBe(expected.rngValue);
+    expect(selected.roundController).toEqual(roundBefore);
+    expect(selected.draftScreen.rentals).toEqual(rentalsBefore);
+
+    const held = tick(selected, new Set());
+    expect(held.battleRoom?.transitionPresentation).toBe(
+      selected.battleRoom?.transitionPresentation,
+    );
+    expect(held.roundController).toEqual(roundBefore);
+    expect(held.draftScreen.rentals).toEqual(rentalsBefore);
+  });
+
+  it("rendering the selected transition is deterministic and never advances gameplay RNG", () => {
+    const initial = createInitialState({ battleScenario: seamScenario() });
+    const selection = selectFrontierTransition(9);
+    const state = {
+      ...initial,
+      rngValue: selection.rngValue,
+      battleRoom: {
+        phase: "settled" as const,
+        elapsed: 84,
+        encounter: "jenson" as const,
+        transitionPresentation: selection.presentation,
+      },
+    };
+    const before = structuredClone(state);
+    expect(render(state)).toEqual(render(state));
+    expect(state).toEqual(before);
+    expect(state.rngValue).toBe(selection.rngValue);
   });
 });

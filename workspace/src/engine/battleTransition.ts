@@ -86,8 +86,12 @@
 
 import { blendComponentToBlack } from "./paletteFade.ts";
 import type { RgbColor } from "./bg.ts";
+import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
+import { pickFrontierTransition } from "./opponentGen.ts";
 
 import circlesAsset from "../assets/gen/battle-transition-frontier-circles.json" with { type: "json" };
+import logoAsset from "../assets/gen/battle-transition-frontier-logo.json" with { type: "json" };
+import transitionsAsset from "../data/gen/battle-transitions-frontier.json" with { type: "json" };
 
 interface CircleTileset {
   columns: number;
@@ -112,7 +116,54 @@ const circles = circlesAsset as CirclesAsset;
 const circlePalette = circles.circleSprites.palette;
 const centerBg = circles.centerBg;
 
+interface LogoAsset {
+  palette: RgbColor[];
+  tileset: CircleTileset;
+  tilemap: CenterBgAsset["tilemap"];
+}
+
+interface TransitionMetaEntry {
+  id: number;
+  name: string;
+  family: string;
+}
+
+const logo = logoAsset as LogoAsset;
+const transitionMeta = transitionsAsset as { table: TransitionMetaEntry[] };
+
+export interface FrontierTransitionPresentation {
+  readonly tableIndex: number;
+  readonly transitionId: number;
+  readonly transitionName: string;
+  readonly family: string;
+  readonly raw: number;
+}
+
+/**
+ * Source owner for `GetSpecialBattleTransition(B_TRANSITION_GROUP_B_FACTORY)`:
+ * consume its one gameplay-RNG draw once, then retain an immutable render
+ * receipt. Rendering accepts only the receipt and can never advance RNG.
+ */
+export function selectFrontierTransition(rngValue: number): {
+  readonly rngValue: number;
+  readonly presentation: FrontierTransitionPresentation;
+} {
+  const selected = pickFrontierTransition(rngValue);
+  const entry = transitionMeta.table[selected.tableIndex]!;
+  return {
+    rngValue: selected.rngValue,
+    presentation: Object.freeze({
+      tableIndex: selected.tableIndex,
+      transitionId: selected.transitionId,
+      transitionName: entry.name,
+      family: entry.family,
+      raw: selected.raw,
+    }),
+  };
+}
+
 export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq";
+export type FrontierTransitionRenderKind = FrontierCircleTransition | "logoWave";
 
 /** te (settled-phase elapsed) at which the corresponding trace tick (843+te) begins - named per the phase they gate. */
 const FLICKER_START_TE = 28; // trace tick 871
@@ -153,6 +204,101 @@ export function grayFlickerY(te: number, transition: FrontierCircleTransition = 
   const ft = te - start;
   const k = ft % 16;
   return k <= 7 ? 2 * (k + 1) : 2 * (15 - k);
+}
+
+const LOGO_WAVE_FLICKER_START_TE = 34;
+const LOGO_WAVE_FLICKER_END_TE = LOGO_WAVE_FLICKER_START_TE + 48;
+const LOGO_WAVE_MAIN_START_TE = 84;
+const LOGO_WAVE_FADE_FIRST_MAIN_AGE = 101;
+
+function logoWaveGrayFlickerY(te: number): number {
+  if (te < LOGO_WAVE_FLICKER_START_TE || te >= LOGO_WAVE_FLICKER_END_TE) return 0;
+  const k = (te - LOGO_WAVE_FLICKER_START_TE) % 16;
+  return k <= 7 ? 2 * (k + 1) : 2 * (15 - k);
+}
+
+function logoWaveMainAge(te: number): number {
+  return te - LOGO_WAVE_MAIN_START_TE;
+}
+
+/** BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK), BG half. */
+function logoWaveBgFadeY(te: number): number {
+  const fadeAge = logoWaveMainAge(te) - LOGO_WAVE_FADE_FIRST_MAIN_AGE;
+  if (fadeAge < 0) return 0;
+  return Math.min(16, 2 * (Math.floor(fadeAge / 2) + 1));
+}
+
+/** UpdateNormalPaletteFade's OBJ half is one VBlank behind BG. */
+function logoWaveObjFadeY(te: number): number {
+  return logoWaveBgFadeY(te - 1);
+}
+
+function logoWaveSin(index: number, amplitude: number): number {
+  return (amplitude * GBA_SINE_TABLE_256[index & 0xff]!) >> 8;
+}
+
+function logoWaveScanlineOffset(mainAge: number, screenY: number): number {
+  const n = Math.max(0, mainAge);
+  const sinVal = 0x7fff - n * 2560 + (17 * n * (n - 1)) / 2;
+  const amplitudeValue = n <= 70 ? 8192 : Math.max(0, 8192 - 384 * (n - 70));
+  const amplitude = amplitudeValue >> 8;
+  const scanlineSin = sinVal + screenY * 384;
+  return logoWaveSin(Math.trunc((((scanlineSin % 0x10000) + 0x10000) % 0x10000) / 256), amplitude);
+}
+
+function logoWaveBlend(mainAge: number): { eva: number; evb: number } {
+  const updates = Math.floor(Math.max(0, mainAge) / 3) + 1;
+  const eva = Math.min(16, updates);
+  return { eva, evb: Math.max(0, 16 - Math.max(0, updates - 16)) };
+}
+
+function applyLogoWave(fb: Uint8Array, te: number): void {
+  const mainAge = logoWaveMainAge(te);
+  if (mainAge < 0) return;
+  const { eva, evb } = logoWaveBlend(mainAge);
+  const fadeY = logoWaveBgFadeY(te);
+  const mapWidth = logo.tilemap.width * 8;
+  const mapHeight = logo.tilemap.height * 8;
+  for (let screenY = 0; screenY < 160; screenY += 1) {
+    // HBlank writes REG_BG0VOFS for the following scanline, so scanline y
+    // consumes entry y-1; VBlankCB_BattleTransition resets line 0 to cameraY.
+    const scrollY = screenY === 0
+      ? 0
+      : logoWaveScanlineOffset(mainAge, screenY - 1);
+    const mapY = ((screenY + scrollY) % mapHeight + mapHeight) % mapHeight;
+    const tileRow = Math.floor(mapY / 8);
+    const inTileY = mapY % 8;
+    for (let screenX = 0; screenX < 240; screenX += 1) {
+      const mapX = screenX % mapWidth;
+      const entry = logo.tilemap.entries[tileRow * logo.tilemap.width + Math.floor(mapX / 8)];
+      if (!entry) continue;
+      const tile = logo.tileset.tiles[entry.tile];
+      if (!tile) continue;
+      const sx = entry.hFlip ? 7 - (mapX % 8) : mapX % 8;
+      const sy = entry.vFlip ? 7 - inTileY : inTileY;
+      const colorIndex = tile[sy * 8 + sx]!;
+      if (colorIndex === 0) continue;
+      const source = logo.palette[colorIndex];
+      if (!source) continue;
+      const off = (screenY * 240 + screenX) * 4;
+      const sourceR = fadeY === 0 ? source.r : blendComponentToBlack(source.r, fadeY);
+      const sourceG = fadeY === 0 ? source.g : blendComponentToBlack(source.g, fadeY);
+      const sourceB = fadeY === 0 ? source.b : blendComponentToBlack(source.b, fadeY);
+      fb[off] = Math.min(255, Math.floor((sourceR * eva + fb[off]! * evb) / 16));
+      fb[off + 1] = Math.min(255, Math.floor((sourceG * eva + fb[off + 1]! * evb) / 16));
+      fb[off + 2] = Math.min(255, Math.floor((sourceB * eva + fb[off + 2]! * evb) / 16));
+    }
+  }
+}
+
+export function frontierTransitionRenderKind(
+  presentation: FrontierTransitionPresentation | undefined,
+  fallback: FrontierCircleTransition,
+): FrontierTransitionRenderKind {
+  if (presentation?.transitionId === 30) return "logoWave";
+  if (presentation?.transitionId === 34) return "circlesMeet";
+  if (presentation?.transitionId === 40) return "asymmetricSpiralInSeq";
+  return fallback;
 }
 
 interface CircleSpec {
@@ -234,6 +380,14 @@ export function exitFadeY(te: number, transition: FrontierCircleTransition = "ci
   if (d < 0) return 0;
   const step = Math.floor(d / 2) + 1;
   return Math.min(16, 3 * step);
+}
+
+export function frontierTransitionBgFadeY(te: number, transition: FrontierTransitionRenderKind): number {
+  return transition === "logoWave" ? logoWaveBgFadeY(te) : exitFadeY(te, transition);
+}
+
+export function frontierTransitionObjFadeY(te: number, transition: FrontierTransitionRenderKind): number {
+  return transition === "logoWave" ? logoWaveObjFadeY(te) : exitFadeY(te - 1, transition);
 }
 
 /**
@@ -372,15 +526,21 @@ function applyCenterLogoBlend(fb: Uint8Array, eva: number, exitY: number): void 
 export function applyBattleTransitionOverlay(
   fb: Uint8Array,
   te: number,
-  transition: FrontierCircleTransition = "circlesMeet",
+  transition: FrontierTransitionRenderKind = "circlesMeet",
 ): void {
-  const grayY = grayFlickerY(te, transition);
+  const grayY = transition === "logoWave"
+    ? logoWaveGrayFlickerY(te)
+    : grayFlickerY(te, transition);
   if (grayY > 0) {
     for (let i = 0; i < fb.length; i += 4) {
       fb[i] = blendComponentToGray(fb[i]!, grayY);
       fb[i + 1] = blendComponentToGray(fb[i + 1]!, grayY);
       fb[i + 2] = blendComponentToGray(fb[i + 2]!, grayY);
     }
+  }
+  if (transition === "logoWave") {
+    applyLogoWave(fb, te);
+    return;
   }
   if (transition === "asymmetricSpiralInSeq") {
     for (const name of sequentialCirclePainterOrder(te)) {
