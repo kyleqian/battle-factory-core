@@ -19,8 +19,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   or infer the erased `tempoI/tempoC` values.
 - **Notes:** evidence hash `a158fff7…`; all three prior v3 fixture hashes are
   preserved. No oracle run, duration, cost, clock/controller, presentation,
-  animation, barrier, or canonical recording change. Focused **4/4** and
-  forced typecheck are green; final smoke/full/build gates follow.
+  animation, barrier, or canonical recording change. Focused **4/4**, smoke,
+  forced typecheck, full `npm test` **921 files / 8,617 passed / 1 skipped**
+  (**84.06s**), and build (**631 modules**, Vite **6.36s**) are green.
 
 ## 1126 — [bounded MAIN worker, 2026-08-11] **#55 mixer-entry provenance closed**
 
