@@ -19,8 +19,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   wait/LFO or a bounded command-callback family. Keep every one-pass complete
   MPlay cost null and do not wire `runFactoryConstructionClock`.
 - **Notes:** no engine/pixel identity changed, so LUKAS 462–511 was not rerun.
-  Focused **8/8**, smoke **375/375**, and typecheck are green; full suite/build
-  pending final gate. No unsupported-branch barrier or presentation change.
+  Focused **8/8**, smoke **375/375**, typecheck, full **958 files / 9,157
+  passed / 1 skipped**, and build **649 modules** are green. No
+  unsupported-branch barrier or presentation change.
 
 ## 1153 — [supervisor, 2026-08-11] **Channel-gate subset verified; Guillotine folded**
 
