@@ -44,6 +44,7 @@ cites the move whose ledger entry holds the full evidence.
 | Palette writes (`gPlttBufferFaded`), incl. metallic-shine pulse and BlendPalette ramps | RAM+1 | STEEL_WING/IRON_TAIL shine; TORMENT anger-mark blend |
 | BG-palette rotation and `REG_BLDY` darken | RAM+1 | FUTURE_SIGHT-era BG work (archive, 2026-07-26) |
 | `AnimTask_ShakeMon` | RAM+1 | COUNTER (2026-08-08) — NOT +2 |
+| `AnimTask_ShakeMon(target,5,0,10,0)` and `(target,4,0,70,0)` | RAM+1 independently for both invocations; hardware OAM equals the preceding software buffer | MIST_BALL, both 213-frame orientations (2026-08-10); the two schedules were checked separately against their move-owned maps |
 | `AnimTask_ShakeMonInPlace(target, 3, 0, 11, 1)` | RAM+1 | HI_JUMP_KICK, both orientations, own dense change maps (2026-08-10) |
 | `AnimTask_ShakeMon2` (usual longer schedules) | RAM+2 | SLASH, LICK, TAKE_DOWN (2026-08-08) |
 | `AnimTask_ShakeMon2(target, 3, 0, 2, 1)` short burst | RAM+1 | PIN_MISSILE, all three bursts in both orientations (2026-08-10); this move-owned script schedule is distinct from the longer RAM+2 cases |
@@ -65,6 +66,7 @@ cites the move whose ledger entry holds the full evidence.
 | Leaf Blade monbg `AnimTask_ShakeMon2(target,8,0,18,1)` | BG-scroll target motion RAM+1, including terminal return | LEAF_BLADE impact phase, both orientations (2026-08-10); distinct from live-OBJ ShakeMon2 schedules |
 | script `create_cross_impact_sprite` during target monbg | sprite and terminal destroy-callback display RAM+1 | LEAF_BLADE independently, both orientations (2026-08-10); CROSS_CHOP remains the independent shared-asset control |
 | `AnimTask_MoveHeatWaveTargets` live-battler `x2` writes | RAM+2, including the terminal return; distinct from the one-display flying-sand sprite callbacks in the same move | HEAT_WAVE, both 168-frame orientations (2026-08-10); own hardware OAM/change maps contradict the default plain-OAM expectation for this task specifically |
+| `AnimTask_MistBallFog` BG1 transfer and blend | tiles first change at source age 44; tilemap and first fog pixels at 47; scroll reaches -121; the 5:12 hold and 16-sum fade use the task's displayed register state, while cleanup leaves one source-age-170 `EVB=16` register tail with no fog pixels | MIST_BALL, both 213-frame orientations (2026-08-10); hardware palettes equal the preceding faded buffer and some register transitions have no separate pixel edge |
 
 **Not determined:** other `AnimTask_ShakeMonInPlace` schedules remain open —
 DOUBLE_EDGE's best fit is RAM+1 on its player-back map but is contradicted by
@@ -85,7 +87,16 @@ without a fresh single-axis probe.
 - **Species idle holds are the draw case's job, not the reducer's.** ONIX's
   front idle holds `x2=1`; the reducer reads 0 and the draw supplies the hold
   (TAKE_DOWN/SLASH/LICK/COUNTER convention; DOUBLE_EDGE pins the exclusion
-  explicitly).
+  explicitly). MIST_BALL independently applies the LATIAS/REGISTEEL holds in
+  its compositor, outside the reducer.
+- **Mist Ball fog palette index zero is opaque BG source, not transparent.**
+  Blend every BG1 tile pixel, including palette index zero, against the field;
+  treating zero as transparent breaks the complete fade window. MIST_BALL's
+  bilateral maps prove this together with the source-age 47 first-pixel edge.
+- **Mist Ball projectile painter priority changes with orientation.** The
+  player-back projectile is behind LATIAS; the opponent-front projectile is
+  in front. Both move-owned normalized maps are required; this is not inferred
+  from the four-frame orientation shift (75..287 versus 79..291).
 - **Orientation shift between the two windows varies per move** — measured +4
   (DOUBLE_EDGE, CRUSH_CLAW) and +0 (COUNTER). Read it off the two change
   maps; never assume symmetry.

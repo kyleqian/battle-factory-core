@@ -507,6 +507,10 @@ import {
   type HeatWaveState,
 } from "./heatWave.ts";
 import {
+  mistBallAtAge,
+  type MistBallState,
+} from "./mistBall.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -788,6 +792,8 @@ export interface SceneOnPresentationBattler {
     | "HAUNTER"
     | "IVYSAUR"
     | "KADABRA"
+    | "LATIAS"
+    | "REGISTEEL"
     | "LOMBRE"
     | "SHUPPET"
     | "SHUCKLE"
@@ -2134,6 +2140,13 @@ export interface SceneOnHeatWaveConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnMistBallConfig {
+  readonly move: "MIST_BALL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -2603,6 +2616,7 @@ export type SceneOnMoveConfig =
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
   | SceneOnHeatWaveConfig
+  | SceneOnMistBallConfig
   | SceneOnTailGlowConfig
   | SceneOnTailWhipConfig
   | SceneOnAgilityConfig
@@ -2758,6 +2772,8 @@ export type SceneOnSandstormPresentationState =
   SceneOnMovePresentationState<SceneOnSandstormConfig>;
 export type SceneOnHeatWavePresentationState =
   SceneOnMovePresentationState<SceneOnHeatWaveConfig>;
+export type SceneOnMistBallPresentationState =
+  SceneOnMovePresentationState<SceneOnMistBallConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 export type SceneOnTailWhipPresentationState =
@@ -3180,6 +3196,12 @@ export interface SceneOnSandstormView extends SandstormState {
 }
 
 export interface SceneOnHeatWaveView extends HeatWaveState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnMistBallView extends MistBallState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -6313,6 +6335,24 @@ export function sceneOnHeatWaveView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...heatWaveAtAge(state.age, state.config.attacker.geometry.side),
+  };
+}
+
+/** `age=0` is Move_MIST_BALL's first displayed source-script frame. */
+export function sceneOnMistBallView(
+  state: SceneOnMistBallPresentationState,
+): SceneOnMistBallView {
+  if (state.config.move !== "MIST_BALL") {
+    throw new Error(`expected MIST_BALL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...mistBallAtAge(state.age, {
+      attacker: state.config.attacker.geometry.animationCenter,
+      target: state.config.target.geometry.animationCenter,
+    }),
   };
 }
 

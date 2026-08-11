@@ -3,14 +3,22 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, readdirSync, realpathSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { createScratchDir } from "../lib/scratch.ts";
+import { MIST_BALL_FRAME_COUNT, mistBallAtAge } from "../../src/animation/mistBall.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnMistBallView,
+  type SceneOnMistBallConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
-type Fixture = {
+type Fixture = SceneOnMistBallConfig & {
   schema: "mist-ball-portable-evidence/v1"; oracleProfile: "battle-scene-on";
   orientation: "player-back" | "opponent-front"; scenario: string; probe: string;
   sourceWindow: { startFrame: number; endFrame: number; frameCount: 213 };
   probeJsonSha256: string; secondFreshProbeJsonSha256: string; rawRgbSha256: string;
   changeMap: string; changeMapSha256: string;
-  acceptance: { status: "unsupported"; denseEvidenceFrames: 213; productionFramebufferFrames: 0 };
+  appStage: { presentationAge: number };
+  acceptance: { status: "exact"; denseEvidenceFrames: 213; productionFramebufferFrames: 213 };
 };
 type Frame = {
   frame: number; sha256: string; scriptOffset: number | null; animScriptActive: boolean;
@@ -22,6 +30,7 @@ type Frame = {
   paletteTags: readonly number[]; tileTags: readonly number[];
   registers: Readonly<Record<string, number>>; backgroundPositions: Readonly<Record<string, number>>;
   bg1Tiles: string; bg1Tilemap: string; se1: { status: number }; se2: { status: number };
+  playerSprite: any; opponentSprite: any;
 };
 type Probe = {
   schema: "mist-ball-dense-evidence/v1"; moveId: 296;
@@ -116,9 +125,60 @@ function verify(path: string, runNumber: number): void {
   const audioContract = probe.frames.some((frame) => frame.se1.status !== 0 || frame.se2.status !== 0);
   const cleanup = first.animScriptActive && !probe.frames.at(-1)!.animScriptActive && probe.frames.at(-1)!.visualTaskCount === 0;
   if (projectile.length !== 32 || !resourceContract || !bgContract || !audioContract || !cleanup) failures.push("resource/BG1/audio/projectile/cleanup contract");
-  if (fixture.acceptance.status !== "unsupported" || fixture.acceptance.denseEvidenceFrames !== 213
-      || fixture.acceptance.productionFramebufferFrames !== 0) failures.push("honest unsupported acceptance");
-  console.log(`${fixture.orientation} run ${runNumber}: 213/213 dense source/RAM/task/sprite/OAM/matrix/palette/BG1/audio/state/raw-RGB frames exact; probe/raw/map ${receipt}/${fixture.rawRgbSha256}/${sha(map)}; production framebuffer 0/213 (unsupported)`);
+  if (fixture.acceptance.status !== "exact" || fixture.acceptance.denseEvidenceFrames !== 213
+      || fixture.acceptance.productionFramebufferFrames !== 213) failures.push("exact acceptance");
+
+  const stage = createSceneOnMovePresentation<SceneOnMistBallConfig>({
+    move: "MIST_BALL", attacker: fixture.attacker, target: fixture.target,
+    fieldProfile: fixture.fieldProfile,
+  });
+  for (const [index, oracle] of probe.frames.entries()) {
+    const age = fixture.appStage.presentationAge + index;
+    const component = mistBallAtAge(age, {
+      attacker: fixture.attacker.geometry.animationCenter,
+      target: fixture.target.geometry.animationCenter,
+    });
+    const seam = sceneOnMistBallView({ ...stage, age });
+    const seamMatch = same(
+      { ...seam, age: undefined, attacker: undefined, target: undefined },
+      component,
+    );
+    const actualProjectile = oracle.sprites.find(
+      (sprite: any) => sprite.template.symbol === "gMistBallSpriteTemplate",
+    );
+    const componentMatch = oracle.visualTaskCount === component.visualTaskCount
+      && oracle.tileTags.includes(10155) === component.smallBubblesLoaded
+      && oracle.paletteTags.includes(10155) === component.smallBubblesLoaded
+      && oracle.tileTags.includes(10270) === component.whiteFeatherLoaded
+      && oracle.paletteTags.includes(10270) === component.whiteFeatherLoaded
+      && Boolean(actualProjectile) === Boolean(component.projectile)
+      && (!actualProjectile || !component.projectile || same(
+        { x: actualProjectile.x + actualProjectile.x2, y: actualProjectile.y + actualProjectile.y2 },
+        { x: component.projectile.x, y: component.projectile.y },
+      ))
+      && oracle.backgroundPositions.gBattle_BG1_X === component.fog.scrollX
+      && oracle.registers.bldalpha === (component.fog.eva | component.fog.evb << 8)
+      && (fixture.target.geometry.side === "player"
+        ? oracle.playerSprite.x2 : oracle.opponentSprite.x2) === component.targetX2;
+    const rgb = readFileSync(join(rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`));
+    const engine: EngineState = {
+      ...createInitialState(), rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    let diff = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      if (app[pixel * 4] !== rgb[pixel * 3]
+          || app[pixel * 4 + 1] !== rgb[pixel * 3 + 1]
+          || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]) diff += 1;
+    }
+    const cleanupExact = index !== MIST_BALL_FRAME_COUNT - 1
+      || (!component.active && !oracle.animScriptActive && oracle.visualTaskCount === 0);
+    if (!seamMatch || !componentMatch || diff !== 0 || !cleanupExact) {
+      failures.push(`frame ${oracle.frame}/age ${age}: seam=${seamMatch} component=${componentMatch} diff=${diff} cleanup=${cleanupExact}`);
+    }
+  }
+  console.log(`${fixture.orientation} run ${runNumber}: 213/213 dense reducer/seam/task/sprite/software+hardware OAM/matrix/palette/tag/BG1/audio/state/raw-RGB/normalized-map/production-framebuffer frames exact; probe/raw/map ${receipt}/${fixture.rawRgbSha256}/${sha(map)}`);
   if (failures.length) throw new Error(`${fixture.orientation}: ${[...new Set(failures)].slice(0, 60).join(", ")} (scratch ${scratch})`);
 }
 

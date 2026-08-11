@@ -8,7 +8,7 @@ const fixtures = [
   "tools/compare/fixtures/mist-ball-opponent-latias-player-registeel.json",
 ] as const;
 
-describe("MOVE_MIST_BALL bounded bilateral evidence checkpoint", () => {
+describe("MOVE_MIST_BALL bounded bilateral exact acceptance", () => {
   it("pins the real even exclusive source body, all seven components, and both carriers", () => {
     const output = execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/mistBallSourceAudit.ts"], { encoding: "utf8" });
     expect(output).toContain("0x082ce62e..0x082ce6bc (0x8e bytes), 18 commands, seven source components");
@@ -39,7 +39,7 @@ describe("MOVE_MIST_BALL bounded bilateral evidence checkpoint", () => {
     }
   });
 
-  it("pins both complete dense receipts, maps, and an honest unsupported verdict", () => {
+  it("pins both complete dense receipts, maps, and the exact production verdict", () => {
     const values = fixtures.map((path) => JSON.parse(readFileSync(path, "utf8")));
     expect(values.map((fixture) => [fixture.orientation, fixture.sourceWindow, fixture.probeJsonSha256, fixture.rawRgbSha256])).toEqual([
       ["player-back", { startFrame: 75, endFrame: 287, frameCount: 213 }, "cbdb661c7acff845e050508ae045865925fbc33534625020f61718ea65e23af3", "0324bfaf3533f79fe00d7da9d96dc92492d4749ee371c3a172f725ae3f90d9df"],
@@ -47,13 +47,13 @@ describe("MOVE_MIST_BALL bounded bilateral evidence checkpoint", () => {
     ]);
     for (const fixture of values) {
       expect(fixture.secondFreshProbeJsonSha256).toBe(fixture.probeJsonSha256);
-      expect(fixture.acceptance).toEqual({ status: "unsupported", denseEvidenceFrames: 213, productionFramebufferFrames: 0 });
+      expect(fixture.acceptance).toEqual({ status: "exact", denseEvidenceFrames: 213, productionFramebufferFrames: 213 });
       expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex")).toBe(fixture.changeMapSha256);
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(161);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_MIST_BALL")).toBeUndefined();
-    expect(coverage.componentTracks.find((track: { id: string }) => track.id === "white-feather")?.checkpoint).toContain("213/213 frames each");
+    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(162);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_MIST_BALL")?.status).toBe("exact");
+    expect(coverage.componentTracks.find((track: { id: string }) => track.id === "white-feather")?.checkpoint).toContain("213/213 required evidence and framebuffer frames");
   });
 
   it("keeps every required evidence surface load-bearing in the twice-fresh portable", () => {
@@ -61,7 +61,7 @@ describe("MOVE_MIST_BALL bounded bilateral evidence checkpoint", () => {
     for (const token of [
       "for (let run = 1; run <= 2", "tools/run-mgba-probe.py", "Move_FEATHER_DANCE: 0x082ce6bc",
       "complete callback/task topology", "OAM/palette RAM+1 latch", "immutable battle outcome state",
-      "resource/BG1/audio/projectile/cleanup contract", "production framebuffer 0/213 (unsupported)",
+      "resource/BG1/audio/projectile/cleanup contract", "productionFramebufferFrames !== 213", "production-framebuffer frames exact",
     ]) expect(portable).toContain(token);
   });
 });

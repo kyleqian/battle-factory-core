@@ -617,6 +617,7 @@ import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
+import mistBallAsset from "../animation/assets/mist-ball.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -998,6 +999,7 @@ import {
   sceneOnNeedleArmView,
   sceneOnSandstormView,
   sceneOnHeatWaveView,
+  sceneOnMistBallView,
   sceneOnDragonClawView,
   sceneOnFireSpinView,
   sceneOnMetalClawView,
@@ -1047,6 +1049,7 @@ import {
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
   type SceneOnHeatWavePresentationState,
+  type SceneOnMistBallPresentationState,
   type SceneOnScaryFacePresentationState,
   type SceneOnGlarePresentationState,
   type SceneOnAbsorbPresentationState,
@@ -1521,6 +1524,12 @@ const protectArt = protectAsset as {
 };
 const hazeArt = hazeAsset as {
   fog: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+};
+const mistBallArt = mistBallAsset as {
+  latiasBack: { tileset: Tileset; palette: RgbColor[] };
+  latiasFront: { tileset: Tileset; palette: RgbColor[] };
+  registeelBack: { tileset: Tileset; palette: RgbColor[] };
+  registeelFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
@@ -5547,6 +5556,36 @@ function drawHazeFogBlended(
       if (index === 0) continue;
       const color = palette[index];
       if (!color) continue;
+      const offset = (y * 240 + x) * 4;
+      fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
+    }
+  }
+}
+
+/** Mist Ball uses the same fog art, but BG1's palette-index zero remains an
+ * opaque blend source during its 17-sum ramp and 16-sum fade. */
+function drawMistBallFogBlended(
+  fb: Uint8Array,
+  scrollX: number,
+  eva: number,
+  evb: number,
+  palette: readonly RgbColor[],
+): void {
+  if (eva === 0) return;
+  const { tileset, tilemap } = hazeArt.fog;
+  const mapWidth = tilemap.width * 8;
+  for (let y = 0; y < 160; y += 1) {
+    const tileRow = Math.floor(y / 8), inTileY = y % 8;
+    for (let x = 0; x < 240; x += 1) {
+      const mapX = ((x + scrollX) % mapWidth + mapWidth) % mapWidth;
+      const entry = tilemap.entries[tileRow * tilemap.width + Math.floor(mapX / 8)];
+      const tile = entry ? tileset.tiles[entry.tile] : undefined;
+      if (!entry || !tile) continue;
+      const sx = entry.hFlip ? 7 - mapX % 8 : mapX % 8;
+      const sy = entry.vFlip ? 7 - inTileY : inTileY;
+      const color = palette[tile[sy * 8 + sx]!]!;
       const offset = (y * 240 + x) * 4;
       fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
       fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
@@ -17075,6 +17114,102 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "MIST_BALL") {
+    const mistState = state as SceneOnMistBallPresentationState;
+    const view = sceneOnMistBallView(mistState);
+    const displayed = sceneOnMistBallView({ ...mistState, age: mistState.age - 1 });
+    const playerToOpponent = view.attacker.species === "LATIAS"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "REGISTEEL"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "LATIAS"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "REGISTEEL"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged MIST_BALL pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const flash = displayed.backgroundFlash;
+    const flashColor = flash === "purple"
+      ? { r: 189, g: 132, b: 255 }
+      : { r: 255, g: 255, b: 255 };
+    const backgroundPalettes = flash === "none"
+      ? battleBg.palette
+      : battleBg.palette.map((palette) => blendPaletteToward(palette, flashColor, 16));
+    const targetPalette = blendPaletteToward(
+      playerToOpponent ? mistBallArt.registeelFront.palette : mistBallArt.registeelBack.palette,
+      { r: 255, g: 255, b: 255 },
+      displayed.targetBlendCoefficient,
+    );
+    const latias = playerToOpponent
+      ? mistBallArt.latiasBack
+      : { ...mistBallArt.latiasFront, tileset: subTileset(mistBallArt.latiasFront.tileset, 0, 8) };
+    const registeel = playerToOpponent
+      ? { ...mistBallArt.registeelFront, tileset: subTileset(mistBallArt.registeelFront.tileset, 0, 8), palette: targetPalette }
+      : { ...mistBallArt.registeelBack, palette: targetPalette };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, backgroundPalettes);
+    if (opponentToPlayer && view.age === 0) {
+      drawSpriteSheet(
+        fb, sonicBoomArt.enemyShadow.tileset, sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    // The projectile inherits the target's subpriority: behind the attacker,
+    // but ahead of the target at equal priority/OAM order.
+    drawSpriteSheet(
+      fb, registeel.tileset, registeel.palette,
+      view.target.geometry.spriteCorner.x + view.displayedTargetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawProjectile = (): void => {
+      if (!displayed.projectile) return;
+      drawSpriteSheet(
+        fb,
+        subTileset(waterGunArt.smallBubbles.tileset, 0, 2),
+        waterGunArt.smallBubbles.palette,
+        displayed.projectile.x - 8,
+        displayed.projectile.y - 8,
+      );
+    };
+    if (playerToOpponent) drawProjectile();
+    drawSpriteSheet(
+      fb, latias.tileset, latias.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (opponentToPlayer) drawProjectile();
+    drawMistBallFogBlended(
+      fb,
+      displayed.fog.scrollX,
+        view.fog.eva,
+        view.fog.evb,
+      hazeArt.fog.palette,
+    );
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "REGISTEEL" : "LATIAS", level: 50,
+        gender: playerToOpponent ? "none" : "female",
+        hpFraction: state.config.fieldProfile.opponentHp / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LATIAS" : "REGISTEEL", level: 50,
+        gender: playerToOpponent ? "female" : "none",
+        hpFraction: state.config.fieldProfile.playerHp / state.config.fieldProfile.playerMaxHp,
+        status: "none", currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "LATIAS used" : "Foe LATIAS used", "MIST BALL!", 99,
+    );
+    return;
+  }
+
   if (state.config.move === "HEAT_WAVE") {
     const heatState = state as SceneOnHeatWavePresentationState;
     const view = sceneOnHeatWaveView(heatState);

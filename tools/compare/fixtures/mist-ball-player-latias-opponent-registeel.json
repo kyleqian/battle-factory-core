@@ -3,6 +3,10 @@
   "oracleProfile": "battle-scene-on",
   "move": "MIST_BALL",
   "moveId": 296,
+  "attacker": {"species":"LATIAS","geometry":{"side":"player","spriteCorner":{"x":40,"y":50},"animationCenter":{"x":72,"y":90},"battlePositionCenter":{"x":72,"y":80}}},
+  "target": {"species":"REGISTEEL","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":11},"animationCenter":{"x":176,"y":43},"battlePositionCenter":{"x":176,"y":40}}},
+  "fieldProfile": {"playerHp":176,"playerMaxHp":176,"opponentHp":176,"opponentMaxHp":176,"playerGender":"female"},
+  "appStage": {"presentationAge":0},
   "orientation": "player-back",
   "scenario": "tools/battle-lab/mechanic-mist-ball-player-latias-opponent-registeel.json",
   "probe": "tools/compare/mistBallProbe.py",
@@ -13,5 +17,5 @@
   "rawRgbSha256": "0324bfaf3533f79fe00d7da9d96dc92492d4749ee371c3a172f725ae3f90d9df",
   "changeMap": "tools/compare/evidence/mist-ball-changemap-player.txt",
   "changeMapSha256": "7dc1852fa4062a55b474288318a29a6e11c55bdf95a12ec91380fce88c04dfc4",
-  "acceptance": {"status": "unsupported", "denseEvidenceFrames": 213, "productionFramebufferFrames": 0}
+  "acceptance": {"status": "exact", "denseEvidenceFrames": 213, "productionFramebufferFrames": 213}
 }

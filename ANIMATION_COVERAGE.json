@@ -4313,6 +4313,37 @@
     "tests/animation/flash.test.ts",
     "tests/animation/flashEvidence.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_MIST_BALL",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-7 set-798 FRONTIER_MON_LATIAS_4 versus REGISTEEL Scene-ON parties pass the real even exclusive 0x082ce62e..0x082ce6bc 18-command body through first inactive cleanup twice fresh in both orientations: player-back frames 75-287 pass 213/213 with evidence cbdb661c7acff845e050508ae045865925fbc33534625020f61718ea65e23af3 / raw RGB 0324bfaf3533f79fe00d7da9d96dc92492d4749ee371c3a172f725ae3f90d9df / normalized map 7dc1852fa4062a55b474288318a29a6e11c55bdf95a12ec91380fce88c04dfc4; opponent-front frames 79-291 pass 213/213 with evidence 882e3de5031211f60df8f39795d22ebb06c3770dc38deee15de487357a13f762 / raw RGB 4729defc1099a6569f060d80f46fb8a1d7434c4645678092f5211b3e63787a83 / map e9309993b6a65655e6fa2a3c2551f2e4fa2f7948f03246281287a1f2b1823519",
+    "the pure complete 213-age source-relative reducer ports SMALL_BUBBLES plus loaded-but-unused WHITE_FEATHER resources, gMistBallSpriteTemplate's 30-tick linear flight and real waitforvisualfinish, both target AnimTask_ShakeMon invocations, AnimComplexPaletteBlend over F_PAL_BG, target AnimTask_BlendBattleAnimPal ramps, AnimTask_MistBallFog BG1 load/ramp/hold/fade/scroll/cleanup, audio, and first inactive cleanup",
+    "the narrow typed Scene-ON seam carries only resolved LATIAS/REGISTEEL geometry and immutable field state; deterministic source-extracted species art and the SMALL_BUBBLES/fog assets feed a narrow production compositor which preserves independent task/sprite, OAM/matrix, palette/tag, BG1 tile/tilemap/register/scroll, audio, and species-idle behavior without recorded-frame lookup",
+    "Mist Ball's own bilateral maps prove script-created plain OAM and both ShakeMon invocations at RAM+1, palette buffers at RAM+1 with hardware equal to the preceding faded buffer, fog tiles changing at source age 44 and first tilemap/fog pixels at age 47, scroll reaching -121, BG palette index zero remaining opaque in the alpha compositor, and orientation-dependent projectile priority/order",
+    "mistBallPortable.ts reruns both committed pointer-bounded probes twice fresh through tools/run-mgba-probe.py and requires all 213 reducer, typed-seam, task/sprite, software and hardware OAM/matrix/palette/tag, BG1, audio, immutable-state, raw-RGB, normalized-map, and production-framebuffer frames exact in every run",
+    "MOVE_FEATHER_DANCE remains independently exact at 400/400 in both orientations with unchanged probe hashes d1a3188e7709bedf and 94ba815e85f10605; its falling-feather body supplies no Mist Ball acceptance because WHITE_FEATHER is loaded but unused here",
+    "presentation owns no damage, Special Attack secondary effect, RNG, turn order, controller, round/facility state, or shared battle state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-mist-ball-player-latias-opponent-registeel.json",
+    "tools/battle-lab/mechanic-mist-ball-opponent-latias-player-registeel.json",
+    "tools/compare/fixtures/mist-ball-player-latias-opponent-registeel.json",
+    "tools/compare/fixtures/mist-ball-opponent-latias-player-registeel.json",
+    "tools/compare/mistBallSourceAudit.ts",
+    "tools/compare/mistBallProbe.py",
+    "tools/compare/mistBallPortable.ts",
+    "tools/compare/extractMistBallAssets.ts",
+    "tools/compare/evidence/mist-ball-changemap-player.txt",
+    "tools/compare/evidence/mist-ball-changemap-opponent.txt",
+    "src/animation/assets/mist-ball.json",
+    "src/animation/mistBall.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/mistBall.test.ts",
+    "tests/animation/mistBallEvidenceCheckpoint.test.ts"
+   ]
   }
  ],
  "queue": [
@@ -4855,7 +4886,7 @@
     "MOVE_FEATHER_DANCE",
     "MOVE_MIST_BALL"
    ],
-   "checkpoint": "2026-08-10 MOVE_MIST_BALL now has its own complete bilateral pointer-bounded Scene-ON evidence from first in-bounds script frame through first inactive cleanup: player-back 75..287 and opponent-front 79..291, 213/213 frames each, twice fresh and byte-stable. The strict receipt covers all task/sprite callback identities and data tuples, software/hardware OAM and matrices, faded/unfaded/hardware palettes and both resource tags, BG1 tiles/tilemap/palette/registers/scroll, both audio players, complete parties/battlers and immutable outcome state, raw RGB, normalized orientation-specific change maps, and cleanup. This is an evidence checkpoint only: no whole-move reducer, typed seam, production compositor, or framebuffer equality was added, so MOVE_MIST_BALL remains absent from exact entries and unsupported; MOVE_FEATHER_DANCE remains the independent exact sibling control.",
+   "checkpoint": "2026-08-10 MOVE_MIST_BALL is independently exact through its own complete bilateral pointer-bounded Scene-ON evidence, pure 213-age reducer, narrow typed seam, source-derived assets, and production compositor. Player-back 75..287 and opponent-front 79..291 each pass 213/213 required evidence and framebuffer frames twice fresh with unchanged receipts. WHITE_FEATHER remains loaded but unused; SMALL_BUBBLES supplies the projectile and the fog task supplies its own BG1 resources. MOVE_FEATHER_DANCE remains the independent exact sibling control at 400/400 in both orientations.",
    "evidence": [
     "tools/battle-lab/mechanic-mist-ball-player-latias-opponent-registeel.json",
     "tools/battle-lab/mechanic-mist-ball-opponent-latias-player-registeel.json",
@@ -4864,11 +4895,17 @@
     "tools/compare/mistBallSourceAudit.ts",
     "tools/compare/mistBallProbe.py",
     "tools/compare/mistBallPortable.ts",
+    "tools/compare/extractMistBallAssets.ts",
     "tools/compare/evidence/mist-ball-changemap-player.txt",
     "tools/compare/evidence/mist-ball-changemap-opponent.txt",
+    "src/animation/assets/mist-ball.json",
+    "src/animation/mistBall.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/mistBall.test.ts",
     "tests/animation/mistBallEvidenceCheckpoint.test.ts"
    ],
-   "goal": "FEATHER DANCE exactly proves the shared white-feather/falling-feather body plus complete stat-drop controller continuation in both source-required target-side orientations at 400/400 each. MIST BALL only loads ANIM_TAG_WHITE_FEATHER; source shows its projectile is gMistBallSpriteTemplate using ANIM_TAG_SMALL_BUBBLES, so it does not reuse gFallingFeatherSpriteTemplate and remains unsupported without independent evidence. 2026-07-24 interpreter-generalization step decoded Move_MIST_BALL's full script into battle-move-anim-scripts.json (extractor + source citations) and confirmed by direct read that ANIM_TAG_WHITE_FEATHER is loaded but never consumed by any sprite this script creates (AnimTask_MistBallFog loads its own separate BG1 tiles/tilemap/palette). MIST BALL needs its own independent component work, not this track's falling-feather body; see ANIMATION_PROGRESS.md's 2026-07-24 generalization verdict for the enumerated new-op surface (linear-translation sprite primitive, real waitforvisualfinish semantics, AnimTask_ShakeMon, a generalized AnimTask_BlendBattleAnimPal, and two new subsystems - AnimComplexPaletteBlend and AnimTask_MistBallFog's whole-BG alpha-blend pipeline) and the stop-and-split rationale. 2026-07-24 remainder rungs 1-3: AnimTask_ShakeMon ported (shakeMon.ts), the linear-translation Q8.8 primitive ported (animLinearTranslation.ts), and AnimThrowMistBall/TranslateAnimSpriteToTargetMonLocation/StartAnimLinearTranslation wired through both plus the shared anim-script interpreter's createsprite path (mistBall.ts), RAM-probe-validated field-by-field (tests/animation/mistBall.test.ts, src/data/gen/mist-ball-sprite-probe.json). mistBall.ts is not wired into battleScene.ts - waitforvisualfinish sprite-lifetime semantics, AnimComplexPaletteBlend, AnimTask_MistBallFog's BG pipeline, and generalizing AnimTask_BlendBattleAnimPal are still open, and no dense-pixel comparator exists yet (rendering the ball needs ANIM_TAG_SMALL_BUBBLES asset extraction and OAM draw wiring, not attempted this step). MIST BALL still has no ANIMATION_COVERAGE entry."
+   "goal": "Track complete. MOVE_FEATHER_DANCE exactly proves the falling-feather body plus complete stat-drop continuation in both source-required target-side orientations at 400/400 each. MOVE_MIST_BALL independently proves its distinct SMALL_BUBBLES projectile, two ShakeMon invocations, background/target palette programs, and complete scrolling MistBallFog BG1 pipeline at 213/213 in both orientations twice fresh. WHITE_FEATHER is loaded but unused by Mist Ball; neither move receives acceptance from the other."
   },
   {
    "id": "fast-contact",

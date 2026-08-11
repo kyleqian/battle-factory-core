@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   MIST_BALL_DURATION_TICKS,
+  MIST_BALL_FRAME_COUNT,
   MIST_BALL_LAST_VISIBLE_TICK,
+  mistBallAtAge,
   mistBallSpritePosition,
 } from "../../src/animation/mistBall.ts";
 import mistBallProbe from "../../src/data/gen/mist-ball-sprite-probe.json" with { type: "json" };
@@ -113,5 +115,70 @@ describe("AnimThrowMistBall / TranslateAnimSpriteToTargetMonLocation / StartAnim
   it("the creation tick itself has zero accumulated offset (pre-callback, RAM-confirmed not a curve-fit assumption)", () => {
     const at0 = mistBallSpritePosition(0, { attacker: ATTACKER, target: TARGET });
     expect(at0).toEqual(ATTACKER);
+  });
+});
+
+describe("MOVE_MIST_BALL complete source-relative reducer", () => {
+  const geometry = {
+    attacker: { x: 72, y: 90 },
+    target: { x: 176, y: 43 },
+  } as const;
+
+  it("owns all 213 ages through the first inactive cleanup frame", () => {
+    expect(MIST_BALL_FRAME_COUNT).toBe(213);
+    expect(mistBallAtAge(0, geometry)).toMatchObject({
+      active: true,
+      smallBubblesLoaded: false,
+      whiteFeatherLoaded: false,
+      projectile: null,
+      visualTaskCount: 0,
+    });
+    expect(mistBallAtAge(1, geometry).smallBubblesLoaded).toBe(true);
+    expect(mistBallAtAge(4, geometry).whiteFeatherLoaded).toBe(true);
+    expect(mistBallAtAge(211, geometry)).toMatchObject({
+      active: true,
+      smallBubblesLoaded: true,
+      whiteFeatherLoaded: true,
+      projectile: null,
+      visualTaskCount: 0,
+    });
+    expect(mistBallAtAge(212, geometry)).toEqual({
+      active: false,
+      smallBubblesLoaded: false,
+      whiteFeatherLoaded: false,
+      projectile: null,
+      shortShakeX2: 0,
+      longShakeX2: 0,
+      targetX2: 0,
+      displayedTargetX2: 0,
+      backgroundFlash: "none",
+      targetBlendCoefficient: 0,
+      fog: { loaded: false, taskActive: false, scrollX: 0, eva: 0, evb: 0 },
+      visualTaskCount: 0,
+      audio: { stringShot: false, sandAttackPulse: false, haze: false },
+    });
+  });
+
+  it("ports the projectile, independent ShakeMon schedules, and real visual wait", () => {
+    expect(mistBallAtAge(9, geometry).projectile).toMatchObject({ x: 72, y: 90, callbackAge: 0 });
+    expect(mistBallAtAge(40, geometry).projectile).toMatchObject({ x: 175, y: 44, callbackAge: 31 });
+    expect(mistBallAtAge(41, geometry).projectile).toBeNull();
+    expect(mistBallAtAge(42, geometry)).toMatchObject({ shortShakeX2: 5, longShakeX2: 0, visualTaskCount: 2 });
+    expect(mistBallAtAge(56, geometry)).toMatchObject({ shortShakeX2: 0, longShakeX2: 4, visualTaskCount: 3 });
+    expect(mistBallAtAge(124, geometry)).toMatchObject({ targetX2: 0, displayedTargetX2: 4, visualTaskCount: 1 });
+  });
+
+  it("ports palette flash, fog load/ramp/hold/fade/register tail, and audio cleanup", () => {
+    expect(mistBallAtAge(42, geometry).backgroundFlash).toBe("purple");
+    expect(mistBallAtAge(43, geometry).backgroundFlash).toBe("white");
+    expect(mistBallAtAge(48, geometry).backgroundFlash).toBe("none");
+    expect(mistBallAtAge(44, geometry).fog).toEqual({ loaded: true, taskActive: true, scrollX: 0, eva: 0, evb: 16 });
+    expect(mistBallAtAge(65, geometry).fog).toEqual({ loaded: true, taskActive: true, scrollX: -20, eva: 5, evb: 12 });
+    expect(mistBallAtAge(149, geometry).fog).toEqual({ loaded: true, taskActive: true, scrollX: -104, eva: 5, evb: 12 });
+    expect(mistBallAtAge(165, geometry).fog).toEqual({ loaded: true, taskActive: true, scrollX: -120, eva: 1, evb: 15 });
+    expect(mistBallAtAge(166, geometry).fog).toEqual({ loaded: true, taskActive: true, scrollX: -121, eva: 0, evb: 16 });
+    expect(mistBallAtAge(170, geometry).fog).toEqual({ loaded: false, taskActive: false, scrollX: 0, eva: 0, evb: 16 });
+    expect(mistBallAtAge(181, geometry).targetBlendCoefficient).toBe(0);
+    expect(mistBallAtAge(212, geometry).audio).toEqual({ stringShot: false, sandAttackPulse: false, haze: false });
   });
 });
