@@ -1299,6 +1299,22 @@ The exact next missing observable is a safe libmgba API/shim for the due event's
 callback name and queue position around one `core.step()`; no +18 timing or
 clock wiring is inferred. See the construction schedule receipt.
 
+**Instruction-queue identity BANKED (2026-08-10 late, solo session):** the
+shim premise was refuted — the vendored ffi declares `mTiming`/`mTimingEvent`
+fully, so a guarded walk suffices (`snapshot_timing_queue()` in the probe;
+NULL/link/name-length capped; validated 20,500 walks fault-free and
+savestate-inert; the exit-139 is the known teardown crash and reproduces
+with zero walks). The packet is banked twice-fresh byte-identical
+(`2e3b089c…`, 162,353 bytes, wrapper exit 0) and the frozen v2 anchor still
+regenerates at `631bd214…`. Result: the single matched +18 edge
+(`0x082e7572→0x082e7574`, clean 2 vs member 20 cycles) crosses a due
+**`GBA Timer 0`** event (m4a sample timer) at its queue head; the clean
+control's matched edge crosses none. Next: measure the Timer 0 service-cost
+class across the 85 census joins with this packet mode, then model
+crossings from the source-derivable Timer 0 reload — still no fit, clock
+stays unwired. Full detail: construction schedule receipt, "queue identity
+BANKED" section.
+
 **VBlank workload receipt (2026-08-10, `6df4fc19`):** the opt-in source-state
 probe and generated `docs/issue55-vblank-workload-receipt.md` decompose all
 **52/31/30** construction-epoch interrupts. Within each case every measured

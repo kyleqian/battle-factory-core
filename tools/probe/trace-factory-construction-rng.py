@@ -52,6 +52,7 @@ sys.path.insert(0, str(ORACLE_DIR))
 
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
+from mgba._pylib import ffi as MGBA_FFI  # noqa: E402
 
 
 REFERENCE = (WORKTREE_ROOT / "reference" / "pokeemerald").resolve()
@@ -818,6 +819,41 @@ def snapshot_residual_execution_state(oracle: EmeraldOracle) -> dict[str, Any]:
     }
 
 
+TIMING_QUEUE_EVENT_LIMIT = 32
+TIMING_QUEUE_NAME_LIMIT = 64
+
+
+def snapshot_timing_queue(timing) -> list[dict[str, Any]]:
+    """Bounds-checked walk of mTiming's pending-event list.
+
+    The vendored ffi declares both ``struct mTiming`` and
+    ``struct mTimingEvent`` in full (root/reroot/globalCycles/... and
+    context/callback/name/when/priority/next), so field access is
+    layout-safe.  Validated 2026-08-10: 20,500 per-instruction walks with
+    zero faults, and raw savestates are byte-identical with walks on vs.
+    off.  The binding's known SIGSEGV is interpreter teardown, fires with
+    no walk at all, and is already covered by tools/run-mgba-probe.py's
+    accept-after-valid-JSON contract.  Guards here: never dereference NULL,
+    cap the link walk, cap name reads.  No pointer values are retained.
+    """
+    events: list[dict[str, Any]] = []
+    evt = timing.root
+    while evt != MGBA_FFI.NULL and len(events) < TIMING_QUEUE_EVENT_LIMIT:
+        name = None
+        if evt.name != MGBA_FFI.NULL:
+            raw = MGBA_FFI.string(evt.name, TIMING_QUEUE_NAME_LIMIT)
+            name = raw.decode("ascii", "replace")
+        events.append({
+            "name": name,
+            "when": int(evt.when),
+            "priority": int(evt.priority),
+        })
+        evt = evt.next
+    if evt != MGBA_FFI.NULL:
+        events.append({"name": "<truncated>", "when": None, "priority": None})
+    return events
+
+
 def observe_residual_instruction_trace(
     epoch: dict[str, Any], oracle: EmeraldOracle, pc: int,
 ) -> None:
@@ -834,12 +870,7 @@ def observe_residual_instruction_trace(
         "cpuCycles": int(cpu.cycles),
         "timingMasterCycles": int(timing.masterCycles),
         "nextEvent": int(cpu.nextEvent),
-        # mTiming's opaque queue root is not dereferenced here: the vendored
-        # libmgba ABI does not expose a safe queue iterator.  The instruction
-        # packet still pins the exact increment edge and CPU scheduler
-        # distance; its receipt names semantic event identity as the next
-        # missing observable if these do not discriminate.
-        "eventQueue": [],
+        "eventQueue": snapshot_timing_queue(timing),
     })
     if pc in {active["returnPc"], active["returnPc"] + 2}:
         epoch.setdefault("residualInstructionTraces", []).append(active)

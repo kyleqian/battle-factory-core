@@ -156,6 +156,55 @@ instruction packet cannot expose the responsible event identity, no fresh
 receipt is committed, +18 remains external, and both cycle contracts remain
 null/unwired.
 
+## Instruction-level +18 queue identity BANKED (2026-08-10, late solo session)
+
+The missing observable above now exists and the packet is banked. The
+blocker's premise was wrong in one detail: the vendored libmgba-py ffi
+declares **both** `struct mTiming` and `struct mTimingEvent` in full, so a
+queue walk needs no compiled shim — only guards. `snapshot_timing_queue()`
+(this probe file) never dereferences NULL, caps the link walk at 32 events,
+caps `ffi.string` name reads at 64 bytes, and retains no pointer values.
+Safety validation (scratchpad, 2026-08-10): 20,500 per-instruction walks
+with zero faults; raw savestates byte-identical with walks on vs. off; the
+binding's SIGSEGV reproduces with **zero** walks (one core, steps only,
+no queue access) — it is the known interpreter-teardown crash the wrapper
+already accepts after valid JSON, not a queue-access fault.
+
+Invocation (fresh path each run, per this doc's wrapper contract):
+
+    FACTORY_CONSTRUCTION_CYCLE_EVIDENCE=1 \
+    FACTORY_CALCULATE_MON_STATS_EVIDENCE=1 \
+    FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE=1 \
+      python3 tools/run-mgba-probe.py <fresh.json> -- \
+      python3 tools/probe/trace-factory-construction-rng.py <fresh.json> anchor
+
+Two fresh runs were wrapper-accepted (exit 0) and byte-identical at SHA-256
+`2e3b089cea13a5e0f52b689330468297fb96be1b52508781014eef2d9e26e673`
+(162,353 bytes; regenerates in ~2.5 min — hash-banked, not committed).
+Frozen-evidence insurance: the standard v2 anchor packet regenerated with
+the edited probe still hashes to the committed
+`631bd21408ba41e03c0e119dde3d83d94dda023cee93ebc3e470e6d94741cc2a`.
+
+**The finding.** `matchedIncrements` contains exactly one row. At the
+matched edge `0x082e7572 → 0x082e7574` inside `__divsi3`, the clean control
+spends **2** cycles and the +18 member spends **20**. At that boundary the
+member's due queue head is **`GBA Timer 0`** (`when 1890606559`, priority
+32, due before `GBA Video` at `when 1890606607`); the clean control's
+matched-edge head is `GBA Video`, with Timer 0 second and not due. Both
+queues hold the same four events (`GBA Timer 0`, `GBA Video`,
+`GBA Audio Sample`, `GB Audio Frame Sequencer`). Trace totals: clean
+**318 = 318** source; member **336 = 318 + 18**.
+
+Interpretation boundary: this banks the +18's **event identity** — the
+increment step is the one that crosses the due `GBA Timer 0` timing event
+(the m4a sample timer), whose service costs 18 master cycles here. It is an
+observed identity, not a fitted constant: whether the Timer 0 service cost
+is invariant across all 85 census joins is now measurable per join with
+this same packet mode. Timer 0's reload is source-derivable from the m4a
+sound init, so crossings are schedulable deterministically once its cost
+class is bounded. No cost table was fitted, no residual absorbed, and both
+cycle contracts remain null/unwired.
+
 ## Recurring +18 source-boundary census (2026-08-10)
 
 The opt-in sibling mode `FACTORY_RESIDUAL_18_EVIDENCE=1` replays all three

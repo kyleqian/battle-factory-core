@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1108 — [solo session, 2026-08-10 ~23:30] **#55 instruction-queue observable UNBLOCKED: +18 identity = due `GBA Timer 0` event crossing**
+
+- **State:** probe edit + docs only; no engine, reducer, or fixture change.
+  #55 remains open, `cycles` stay `null`, clock stays unwired. Frozen-
+  evidence insurance passed: the standard v2 anchor packet regenerated with
+  the edited probe still hashes to the committed `631bd214…`.
+- **Did:** refuted the compiled-shim premise (the vendored ffi declares
+  `mTiming`/`mTimingEvent` fully) and proved the exit-139 was the known
+  teardown crash, not a queue-access fault (it reproduces with zero walks;
+  20,500 guarded walks ran fault-free and savestate-inert). Landed
+  `snapshot_timing_queue()` (NULL/link/name capped, no pointer tokens) and
+  filled the packet's `eventQueue` field. Banked the instruction packet
+  twice-fresh byte-identical (`2e3b089c…`, 162,353 B, wrapper exit 0): the
+  single matched +18 edge (`0x082e7572→0x082e7574`, clean 2 vs member 20)
+  crosses a due **`GBA Timer 0`** (m4a sample timer) at queue head; the
+  clean control's matched edge crosses none.
+- **Next:** measure the Timer 0 service-cost class across all 85 census
+  joins with this packet mode; then model crossings from the
+  source-derivable Timer 0 reload. No fit, no clock wiring until that
+  closes honestly.
+- **Notes:** receipt updated (schedule receipt "queue identity BANKED"
+  section) + ISSUES #55 checkpoint paragraph. Validation scripts in session
+  scratchpad only. Suite untouched by this change (Python probe only); full
+  suite + both soak gates were verified green at entry 1107 tonight.
+
 ## 1107 — [solo session, 2026-08-10 ~21:40] **Independent audit of the evening #55 sessions: all green; skipped soak gates re-run and restated in SUPERVISOR.md**
 
 - **State:** master verified first-hand at `76bb72a9`: full `npm test`
