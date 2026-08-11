@@ -142,6 +142,60 @@ RESIDUAL_18_EVIDENCE = (
 RESIDUAL_18_INSTRUCTION_EVIDENCE = (
     os.environ.get("FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE") == "1"
 )
+# Compact three-epoch classifier for the already-censused +18 joins.  These
+# are source-order ordinals within a compiled component, never cycle/tick
+# positions, pointers, RNG values, or observed durations.  The lists are the
+# join established by FACTORY_RESIDUAL_18_EVIDENCE's Tier-1 census; the mode
+# below uses them only to decide which short instruction spans to retain.
+RESIDUAL_18_CLASSIFIER_EVIDENCE = (
+    os.environ.get("FACTORY_RESIDUAL_18_CLASSIFIER_EVIDENCE") == "1"
+)
+
+RESIDUAL_18_CLASSIFIER_MEMBERS: dict[str, dict[str, tuple[int, ...]]] = {
+    "anchor": {
+        "encrypted-accessor": (1, 4, 6, 8, 10, 14, 16, 18, 20, 22, 25, 27, 29, 32, 34, 36, 38, 39, 42, 46, 48, 50, 53, 55, 58, 60, 62, 64, 66, 68, 71, 73, 75),
+        "level-loop": (2,),
+        "signed-divide": (22,),
+        "get-nature": (),
+        "nature-attempt": (4, 30, 51, 71, 91),
+        "outer-factory-loop": (3,),
+    },
+    "liliana": {
+        "encrypted-accessor": (1, 3, 5, 10, 12, 16, 19, 21, 23, 25, 26, 28, 30, 32, 35, 38),
+        "level-loop": (0,),
+        "signed-divide": (),
+        "get-nature": (),
+        "nature-attempt": (25, 45),
+        "outer-factory-loop": (),
+    },
+    "factory-varied": {
+        "encrypted-accessor": (0, 2, 4, 6, 9, 11, 14, 16, 18, 21, 23, 25, 26, 28, 30, 33, 35, 37),
+        "level-loop": (1,),
+        "signed-divide": (),
+        "get-nature": (3, 12),
+        "nature-attempt": (48, 63, 75, 95),
+        "outer-factory-loop": (),
+    },
+}
+
+# First-pass PC/cycle scouts over the 85 known members identify the only
+# instruction starts at which a local source edge is enlarged.  The second
+# pass walks mTiming only at these exact source PCs (and the following edge),
+# so queue evidence is bounded independently of encrypted-loop length.
+RESIDUAL_18_CLASSIFIER_QUEUE_INSTRUCTION_PCS = {
+    0x08068C7A, 0x08068CA2, 0x08068CB2, 0x08068CB6, 0x08068CEE,
+    0x08068CF0, 0x08069094, 0x0806909E, 0x0806A23A, 0x0806A240,
+    0x0806A25A, 0x0806A268, 0x0806A270, 0x0806A282, 0x0806A288,
+    0x0806A28A, 0x0806A28C, 0x0806A342, 0x0806A494, 0x0806A496,
+    0x0806A4FC, 0x0806A508, 0x0806A684, 0x0806A690, 0x0806D096,
+    0x0819B528, 0x082E7572, 0x082E7BF2, 0x082E7BF8, 0x082E7BFE,
+    0x082E7C02, 0x082E7C04, 0x082E7C06, 0x082E7C10, 0x082E7C14,
+    0x082E7C16, 0x082E7C18, 0x082E7C1A, 0x082E7C1C, 0x082E7C1E,
+    0x082E7C20, 0x082E7C26, 0x082E7C2A, 0x082E7C2C, 0x082E7C30,
+    0x082E7C3C, 0x082E7C3E, 0x082E7C42, 0x082E7C44, 0x082E7C46,
+    0x082E7C4A, 0x082E7C4C, 0x082E7C4E, 0x082E7C50, 0x082E7C52,
+    0x082E7C56, 0x082E7C60, 0x082E7C90, 0x082E7C94,
+}
 
 RESIDUAL_18_DIVIDE_TRACE_SELECTORS = {
     # Both calls are in anchor mon 3 and reduce to 318 source cycles.  The
@@ -823,6 +877,124 @@ TIMING_QUEUE_EVENT_LIMIT = 32
 TIMING_QUEUE_NAME_LIMIT = 64
 
 
+def classifier_return_class(entry_pc: int, stop_pc: int) -> str:
+    return f"0x{entry_pc:08x}->0x{stop_pc:08x}"
+
+
+def classifier_member(case: str, component: str, ordinal: int) -> bool:
+    return ordinal in RESIDUAL_18_CLASSIFIER_MEMBERS[case].get(component, ())
+
+
+def classifier_start_trace(
+    epoch: dict[str, Any],
+    *,
+    label: str,
+    component: str,
+    ordinal: int,
+    entry_pc: int,
+    stop_pc: int | None,
+    stop_kind: str,
+    return_class: str,
+) -> None:
+    if epoch.get("residualClassifierTraceActive") is not None:
+        raise RuntimeError("overlapping residual classifier instruction trace")
+    epoch["residualClassifierTraceActive"] = {
+        "label": label,
+        "component": component,
+        "ordinal": ordinal,
+        "entryPc": f"0x{entry_pc:08x}",
+        "stopPc": stop_pc,
+        "stopKind": stop_kind,
+        "returnClass": return_class,
+        "boundaries": [],
+    }
+
+
+def classifier_maybe_start_trace(
+    epoch: dict[str, Any],
+    *,
+    case: str,
+    component: str,
+    ordinal: int,
+    entry_pc: int,
+    stop_pc: int | None,
+    stop_kind: str,
+    return_class: str,
+) -> None:
+    member = classifier_member(case, component, ordinal)
+    if member:
+        label = "member"
+    elif RESIDUAL_18_CLASSIFIER_MEMBERS[case].get(component):
+        # Retain every clean sibling in a component that has a member.  The
+        # compact receipt later deduplicates their edge profiles and chooses
+        # the path-matching clean edge; one arbitrary clean call is not enough
+        # when personality-selected modulo paths differ.
+        label = "control"
+    else:
+        return
+    classifier_start_trace(
+        epoch,
+        label=label,
+        component=component,
+        ordinal=ordinal,
+        entry_pc=entry_pc,
+        stop_pc=stop_pc,
+        stop_kind=stop_kind,
+        return_class=return_class,
+    )
+
+
+def classifier_direct_component(operation: str, arguments: dict[str, int]) -> str | None:
+    if operation == "get-mon-data" and arguments.get("field") not in {57, 58}:
+        return "encrypted-accessor"
+    if operation == "get-level-from-exp":
+        return "level-loop"
+    if operation == "divide":
+        return "signed-divide"
+    if operation == "get-nature":
+        return "get-nature"
+    return None
+
+
+def observe_classifier_epoch_boundary(
+    epoch: dict[str, Any], oracle: EmeraldOracle, pc: int,
+) -> None:
+    if not RESIDUAL_18_CLASSIFIER_EVIDENCE:
+        return
+    if epoch.get("entry") is None or epoch.get("return") is not None:
+        return
+    if pc == GET_NATURE_ENTRY_PC:
+        counters = epoch.setdefault("residualClassifierOrdinals", {})
+        component = "nature-attempt"
+        ordinal = int(counters.get(component, 0))
+        counters[component] = ordinal + 1
+        classifier_maybe_start_trace(
+            epoch,
+            case=CASE,
+            component=component,
+            ordinal=ordinal,
+            entry_pc=pc,
+            stop_pc=None,
+            stop_kind="nature",
+            return_class="nature-attempt",
+        )
+    elif pc in {SELECTABLE_POST_END_PC, FILL_FACTORY_POST_END_PC}:
+        counters = epoch.setdefault("residualClassifierOrdinals", {})
+        component = "outer-factory-loop"
+        ordinal = int(counters.get(component, 0))
+        counters[component] = ordinal + 1
+        classifier_maybe_start_trace(
+            epoch,
+            case=CASE,
+            component=component,
+            ordinal=ordinal,
+            entry_pc=pc,
+            stop_pc=CREATE_EV_ENTRY_PC,
+            stop_kind="pc",
+            return_class=classifier_return_class(pc, CREATE_EV_ENTRY_PC),
+        )
+
+
 def snapshot_timing_queue(timing) -> list[dict[str, Any]]:
     """Bounds-checked walk of mTiming's pending-event list.
 
@@ -857,12 +1029,75 @@ def snapshot_timing_queue(timing) -> list[dict[str, Any]]:
 def observe_residual_instruction_trace(
     epoch: dict[str, Any], oracle: EmeraldOracle, pc: int,
 ) -> None:
-    active = epoch.get("residualInstructionTraceActive")
-    if active is None:
-        return
     timing = oracle.core._native.timing
     cpu = oracle.core.cpu._native
     master_cycles = int(timing.globalCycles) + int(cpu.cycles)
+    classifier = epoch.get("residualClassifierTraceActive")
+    if classifier is not None:
+        candidate_pc = pc - 2 in RESIDUAL_18_CLASSIFIER_QUEUE_INSTRUCTION_PCS
+        pending_queue = classifier.pop("queueAfterPending", False)
+        queue_needed = candidate_pc or pending_queue
+        queue_before = snapshot_timing_queue(timing) if queue_needed else []
+        if candidate_pc:
+            classifier["queueAfterPending"] = True
+        current = {
+            "observedPc": f"0x{pc:08x}",
+            "instructionPc": f"0x{pc - 2:08x}",
+            "masterCycles": master_cycles,
+            "cpuCycles": int(cpu.cycles),
+            "timingMasterCycles": int(timing.masterCycles),
+            "nextEvent": int(cpu.nextEvent),
+            "eventQueue": queue_before,
+        }
+        previous = classifier.pop("lastBoundary", None)
+        if previous is not None:
+            key = (previous["instructionPc"], current["instructionPc"])
+            edge = {
+                "instructionPc": key[0],
+                "nextInstructionPc": key[1],
+                "cycles": current["masterCycles"] - previous["masterCycles"],
+                "eventDistance": int(previous["nextEvent"]) - int(previous["cpuCycles"]),
+                "queueBefore": classifier_queue(previous),
+                "queueAfter": classifier_queue(current),
+            }
+            edges = classifier.setdefault("edges", {})
+            prior = edges.get(key)
+            prefer_larger = classifier["label"] == "member"
+            if prior is None or (
+                edge["cycles"] > prior["cycles"]
+                if prefer_larger
+                else edge["cycles"] < prior["cycles"]
+            ):
+                edges[key] = edge
+        classifier["lastBoundary"] = current
+        stop = False
+        if classifier["stopKind"] == "return":
+            stop = pc in {classifier["stopPc"], classifier["stopPc"] + 2}
+        elif classifier["stopKind"] == "pc":
+            stop = pc == classifier["stopPc"]
+        elif classifier["stopKind"] == "nature":
+            caller = symbol_at(int(oracle.core.cpu.lr))
+            stop = (
+                pc == CREATE_MON_ENTRY_PC
+                or (pc == RANDOM_ENTRY_PC and not caller.startswith("VBlankIntr"))
+            )
+        if stop:
+            classifier["stopObservedPc"] = f"0x{pc:08x}"
+            classifier["edges"] = list(classifier.pop("edges", {}).values())
+            classifier.pop("lastBoundary", None)
+            classifier.pop("queueWalks", None)
+            if classifier["stopKind"] == "nature":
+                classifier["returnClass"] = classifier_return_class(
+                    int(classifier["entryPc"], 16), pc,
+                )
+            epoch.setdefault("residualClassifierTraces", []).append(classifier)
+            epoch.pop("residualClassifierTraceActive", None)
+        return
+
+    active = epoch.get("residualInstructionTraceActive")
+    if active is None:
+        return
+    queue_before = snapshot_timing_queue(timing)
     active["boundaries"].append({
         "observedPc": f"0x{pc:08x}",
         "instructionPc": f"0x{pc - 2:08x}",
@@ -870,9 +1105,12 @@ def observe_residual_instruction_trace(
         "cpuCycles": int(cpu.cycles),
         "timingMasterCycles": int(timing.masterCycles),
         "nextEvent": int(cpu.nextEvent),
-        "eventQueue": snapshot_timing_queue(timing),
+        "eventQueue": queue_before,
     })
+    stop = False
     if pc in {active["returnPc"], active["returnPc"] + 2}:
+        stop = True
+    if stop:
         epoch.setdefault("residualInstructionTraces", []).append(active)
         epoch.pop("residualInstructionTraceActive", None)
 
@@ -1008,6 +1246,17 @@ def observe_calculate_mon_stats_call(
                 active.setdefault("boundaries", {})["firstLevelCompare"] = cycle_snapshot(
                     oracle, frame, pc, "get-level-first-compare",
                 )
+                if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+                    classifier_maybe_start_trace(
+                        epoch,
+                        case=CASE,
+                        component="level-loop",
+                        ordinal=int(active["classifierOrdinal"]),
+                        entry_pc=pc,
+                        stop_pc=0x080690AC,
+                        stop_kind="pc",
+                        return_class=classifier_return_class(pc, 0x080690AC),
+                    )
             elif pc == 0x080690AC:  # common loop exit, before level - 1
                 active.setdefault("boundaries", {})["loopExit"] = cycle_snapshot(
                     oracle, frame, pc, "get-level-loop-exit",
@@ -1069,6 +1318,32 @@ def observe_calculate_mon_stats_call(
         "entryMasterCycles": entry_snapshot["masterCycles"],
         "arguments": calculate_mon_stats_call_arguments(operation, oracle),
     }
+    if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+        arguments = epoch["calculateMonStatsActiveCall"]["arguments"]
+        component = classifier_direct_component(operation, arguments)
+        if component is not None and component != "level-loop":
+            counters = epoch.setdefault("residualClassifierOrdinals", {})
+            ordinal = int(counters.get(component, 0))
+            counters[component] = ordinal + 1
+            epoch["calculateMonStatsActiveCall"]["classifierComponent"] = component
+            epoch["calculateMonStatsActiveCall"]["classifierOrdinal"] = ordinal
+            return_pc = int(oracle.core.cpu.lr) & ~1
+            classifier_maybe_start_trace(
+                epoch,
+                case=CASE,
+                component=component,
+                ordinal=ordinal,
+                entry_pc=pc,
+                stop_pc=return_pc,
+                stop_kind="return",
+                return_class=classifier_return_class(pc, return_pc),
+            )
+        elif component == "level-loop":
+            counters = epoch.setdefault("residualClassifierOrdinals", {})
+            ordinal = int(counters.get(component, 0))
+            counters[component] = ordinal + 1
+            epoch["calculateMonStatsActiveCall"]["classifierComponent"] = component
+            epoch["calculateMonStatsActiveCall"]["classifierOrdinal"] = ordinal
     if RESIDUAL_18_INSTRUCTION_EVIDENCE and operation == "divide":
         arguments = epoch["calculateMonStatsActiveCall"]["arguments"]
         selector = (
@@ -1191,8 +1466,9 @@ def advance_one_instrumented_frame(
                 append_m4a_internal_stage(epoch, oracle, frame, pc, "m4a-sound-main-return")
             if VBLANK_WORKLOAD_EVIDENCE and pc in VBLANK_STAGE_PCS:
                 append_vblank_stage(epoch, oracle, frame, pc, VBLANK_STAGE_PCS[pc])
+            observe_classifier_epoch_boundary(epoch, oracle, pc)
             observe_calculate_mon_stats_call(epoch, oracle, frame, pc)
-            if RESIDUAL_18_INSTRUCTION_EVIDENCE:
+            if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
                 observe_residual_instruction_trace(epoch, oracle, pc)
             if EWRAM_ACCESS_EVIDENCE:
                 observe_ewram_access_boundary(epoch, oracle, frame, pc)
@@ -1568,6 +1844,10 @@ def classify_and_summarize(
         if epoch.get("residualInstructionTraceActive") is not None:
             raise RuntimeError("residual instruction evidence finished mid-trace")
         result["residualInstructionTraces"] = epoch.get("residualInstructionTraces", [])
+    if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+        if epoch.get("residualClassifierTraceActive") is not None:
+            raise RuntimeError("residual classifier evidence finished mid-trace")
+        result["residualClassifierTraces"] = epoch.get("residualClassifierTraces", [])
     if VBLANK_WORKLOAD_EVIDENCE:
         # This is a separate raw observation packet, intentionally not folded
         # into cycleEvidence's frozen v2 contract.  The report filters it to
@@ -1626,12 +1906,13 @@ def run_anchor() -> dict[str, Any]:
         EmeraldOracle._run_bootstrap = original
     if oracle.canonical_screen_sha256 != ANCHOR_BOOTSTRAP_SHA256:
         raise RuntimeError(f"anchor canonical screen changed: {oracle.canonical_screen_sha256}")
-    if RESIDUAL_18_INSTRUCTION_EVIDENCE:
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
         return {
             "case": "anchor",
             "sourceFunction": "CreateFrontierFactorySelectableMons",
             "oracleProfile": "battle-scene-off",
             "residualInstructionTraces": epoch.get("residualInstructionTraces", []),
+            "residualClassifierTraces": epoch.get("residualClassifierTraces", []),
         }
     set_ids = rental_or_temp_ids(oracle, "rentalMons", 6)
     result = classify_and_summarize(
@@ -1688,6 +1969,14 @@ def run_fixed_fixture(raw: dict[str, Any], first_frame: int, last_frame: int) ->
 def run_liliana() -> dict[str, Any]:
     raw = load_fixture("scratch-win-go-on-swap-offer-no-guide-dismiss-probe.json")
     oracle, _, epoch, calls = run_fixed_fixture(raw, LILIANA_FIRST_FRAME, LILIANA_LAST_FRAME)
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
+        return {
+            "case": "liliana",
+            "sourceFunction": "FillFactoryFrontierTrainerParty",
+            "oracleProfile": "battle-scene-off",
+            "residualInstructionTraces": epoch.get("residualInstructionTraces", []),
+            "residualClassifierTraces": epoch.get("residualClassifierTraces", []),
+        }
     set_ids = rental_or_temp_ids(oracle, "tempParty", 3)
     result = classify_and_summarize(
         case="liliana",
@@ -1766,6 +2055,14 @@ def run_factory_varied() -> dict[str, Any]:
 
     oracle2.advance = targeted_advance  # type: ignore[method-assign]
     stage_request(oracle2, raw)
+    if RESIDUAL_18_INSTRUCTION_EVIDENCE or RESIDUAL_18_CLASSIFIER_EVIDENCE:
+        return {
+            "case": "factory-varied",
+            "sourceFunction": "FillFactoryFrontierTrainerParty",
+            "oracleProfile": "battle-scene-off",
+            "residualInstructionTraces": epoch.get("residualInstructionTraces", []),
+            "residualClassifierTraces": epoch.get("residualClassifierTraces", []),
+        }
     set_ids = rental_or_temp_ids(oracle2, "tempParty", 3)
     result = classify_and_summarize(
         case="factory-varied",
@@ -2071,6 +2368,200 @@ def compact_residual_instruction_receipt(result: dict[str, Any]) -> dict[str, An
     }
 
 
+def classifier_queue(row: dict[str, Any]) -> list[dict[str, Any]]:
+    """Keep queue identity and relative due-ness, never absolute timing."""
+    master_cycles = int(row["masterCycles"])
+    def relative_when(event_when: int) -> int:
+        delta = (event_when - (master_cycles & 0xFFFFFFFF)) & 0xFFFFFFFF
+        return delta - 0x1_0000_0000 if delta & 0x8000_0000 else delta
+    return [
+        {
+            "name": event["name"],
+            "priority": event["priority"],
+            "due": relative_when(int(event["when"])) <= 0,
+            "whenDelta": relative_when(int(event["when"])),
+        }
+        for event in row["eventQueue"]
+    ]
+
+
+def classifier_queue_shape(queue: list[dict[str, Any]]) -> list[tuple[Any, ...]]:
+    return [(event["name"], event["priority"]) for event in queue]
+
+
+def classifier_trace_edges(trace: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
+    """Deduplicate a trace to the minimum source edge and its queue evidence."""
+    if isinstance(trace.get("edges"), list):
+        return {
+            (edge["instructionPc"], edge["nextInstructionPc"]): edge
+            for edge in trace["edges"]
+        }
+    boundaries = trace["boundaries"]
+    edges: dict[tuple[str, str], dict[str, Any]] = {}
+    for before, after in zip(boundaries, boundaries[1:]):
+        key = (before["instructionPc"], after["instructionPc"])
+        queue_before = classifier_queue(before)
+        queue_after = classifier_queue(after)
+        row = {
+            "instructionPc": key[0],
+            "nextInstructionPc": key[1],
+            "cycles": after["masterCycles"] - before["masterCycles"],
+            "eventDistance": int(before["nextEvent"]) - int(before["cpuCycles"]),
+            "queueBefore": queue_before,
+            "queueAfter": queue_after,
+        }
+        previous = edges.get(key)
+        prefer_larger = trace["label"] == "member"
+        if previous is None or (
+            row["cycles"] > previous["cycles"]
+            if prefer_larger
+            else row["cycles"] < previous["cycles"]
+        ):
+            edges[key] = row
+    return edges
+
+
+def classifier_event_name(edge: dict[str, Any]) -> str | None:
+    before = edge["queueBefore"]
+    crossed = classifier_crossed_event_names(edge)
+    if crossed:
+        # Timer 0 is the question under test; keep it primary when it is
+        # co-due with Video, while retaining the full crossed set below.
+        if "GBA Timer 0" in crossed:
+            return "GBA Timer 0"
+        return crossed[0]
+    after_shape = classifier_queue_shape(edge["queueAfter"])
+    before_shape = classifier_queue_shape(before)
+    if before_shape != after_shape and before:
+        return before[0]["name"]
+    return next((event["name"] for event in before if event["due"]), None)
+
+
+def classifier_crossed_event_names(edge: dict[str, Any]) -> list[str]:
+    before = [event["name"] for event in edge["queueBefore"] if event["due"]]
+    after = {event["name"] for event in edge["queueAfter"] if event["due"]}
+    return [name for name in before if name is not None and name not in after]
+
+
+def classifier_service_cost_class(crossed: list[str]) -> str | None:
+    if "GBA Timer 0" not in crossed:
+        return None if not crossed else "timing-event:" + "+".join(crossed)
+    co_due = [name for name in crossed if name != "GBA Timer 0"]
+    return (
+        "gba-timer-0-m4a-sample"
+        if not co_due
+        else "gba-timer-0-m4a-sample+co-due:" + "+".join(co_due)
+    )
+
+
+def compact_residual_classifier_receipt(result: dict[str, Any]) -> dict[str, Any]:
+    """Compact all selected member spans and one clean control per class.
+
+    The source-order selectors choose the already-censused rows.  The output
+    contains no absolute master cycle, frame, RNG, party, or pointer fields.
+    Member rows retain only instruction edges whose local cost or due queue
+    differs from the source-clean profile; controls retain a deduplicated edge
+    profile so a later cross-epoch join can fill classes absent in one epoch.
+    """
+    raw = result.get("residualClassifierTraces", [])
+    if not raw:
+        raise RuntimeError(f"{result['case']}: classifier produced no instruction traces")
+    profiles = []
+    for trace in raw:
+        profile = classifier_trace_edges(trace)
+        profiles.append({"trace": trace, "edges": profile})
+    controls: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for item in profiles:
+        trace = item["trace"]
+        if trace["label"] == "control":
+            controls.setdefault((trace["component"], trace["returnClass"]), []).append(item)
+
+    members = []
+    for item in profiles:
+        trace = item["trace"]
+        if trace["label"] != "member":
+            continue
+        control_items = controls.get((trace["component"], trace["returnClass"]), [])
+        control_edges: dict[tuple[str, str], dict[str, Any]] = {}
+        for control in control_items:
+            for key, edge in control["edges"].items():
+                previous = control_edges.get(key)
+                if previous is None or edge["cycles"] < previous["cycles"]:
+                    control_edges[key] = edge
+        increments = []
+        for key, edge in item["edges"].items():
+            control = control_edges.get(key)
+            increment = None if control is None else edge["cycles"] - control["cycles"]
+            event_name = classifier_event_name(edge)
+            if (increment is not None and increment > 0) or (
+                increment is None and edge["cycles"] > 11
+            ):
+                crossed_events = classifier_crossed_event_names(edge)
+                increments.append({
+                    "instructionPc": edge["instructionPc"],
+                    "nextInstructionPc": edge["nextInstructionPc"],
+                    "memberCycles": edge["cycles"],
+                    "controlCycles": None if control is None else control["cycles"],
+                    "incrementCycles": increment,
+                    "eventName": event_name,
+                    "crossedEventNames": crossed_events,
+                    "serviceCostClass": classifier_service_cost_class(crossed_events),
+                    "queueBefore": edge["queueBefore"],
+                    "queueAfter": edge["queueAfter"],
+                    "controlQueueBefore": None if control is None else control["queueBefore"],
+                })
+        members.append({
+            "component": trace["component"],
+            "ordinal": trace["ordinal"],
+            "entryPc": trace["entryPc"],
+            "returnClass": trace["returnClass"],
+            "increments": increments,
+        })
+
+    clean_control_groups: dict[tuple[str, str], dict[str, Any]] = {}
+    for item in profiles:
+        trace = item["trace"]
+        if trace["label"] != "control":
+            continue
+        key = (trace["component"], trace["returnClass"])
+        group = clean_control_groups.setdefault(key, {
+            "component": trace["component"],
+            "returnClass": trace["returnClass"],
+            "sampleCount": 0,
+            "edges": {},
+        })
+        group["sampleCount"] += 1
+        for edge in item["edges"].values():
+            if int(edge["instructionPc"], 16) not in RESIDUAL_18_CLASSIFIER_QUEUE_INSTRUCTION_PCS:
+                continue
+            edge_key = (edge["instructionPc"], edge["nextInstructionPc"])
+            previous = group["edges"].get(edge_key)
+            if previous is None or edge["cycles"] < previous["cycles"]:
+                group["edges"][edge_key] = edge
+    clean_controls = []
+    for group in clean_control_groups.values():
+        clean_controls.append({
+            "component": group["component"],
+            "returnClass": group["returnClass"],
+            "sampleCount": group["sampleCount"],
+            "edges": sorted(group["edges"].values(), key=lambda row: (
+                row["instructionPc"], row["nextInstructionPc"],
+            )),
+        })
+    members.sort(key=lambda row: (row["component"], row["ordinal"]))
+    clean_controls.sort(key=lambda row: (row["component"], row["returnClass"]))
+    return {
+        "schema": "factory-construction-residual-instruction-events/v2",
+        "case": result["case"],
+        "oracleProfile": result["oracleProfile"],
+        "sourceFunction": result["sourceFunction"],
+        "memberCount": len(members),
+        "cleanControlCount": len(clean_controls),
+        "members": members,
+        "cleanControls": clean_controls,
+    }
+
+
 def compact_ewram_access_receipt(result: dict[str, Any]) -> dict[str, Any]:
     """Keep clean minima and scalar/source-relative alignment classes only."""
     grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
@@ -2132,13 +2623,19 @@ def main() -> None:
         raise SystemExit(
             "FACTORY_RESIDUAL_18_INSTRUCTION_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
         )
+    if RESIDUAL_18_CLASSIFIER_EVIDENCE and not (CYCLE_EVIDENCE and CALCULATE_MON_STATS_EVIDENCE):
+        raise SystemExit(
+            "FACTORY_RESIDUAL_18_CLASSIFIER_EVIDENCE=1 requires cycle and CalculateMonStats evidence"
+        )
     if CASE == "anchor":
         result = run_anchor()
     elif CASE == "liliana":
         result = run_liliana()
     else:
         result = run_factory_varied()
-    if RESIDUAL_18_INSTRUCTION_EVIDENCE:
+    if RESIDUAL_18_CLASSIFIER_EVIDENCE:
+        result = compact_residual_classifier_receipt(result)
+    elif RESIDUAL_18_INSTRUCTION_EVIDENCE:
         result = compact_residual_instruction_receipt(result)
     elif RESIDUAL_18_EVIDENCE:
         result = compact_residual_18_receipt(result)
@@ -2155,6 +2652,10 @@ def main() -> None:
     print(
         (
             f"wrote {OUTPUT}: {result['case']} "
+            f"{len(result['members'])} members + "
+            f"{len(result['cleanControls'])} clean controls"
+            if RESIDUAL_18_CLASSIFIER_EVIDENCE
+            else f"wrote {OUTPUT}: {result['case']} "
             f"{len(result['traces'])} instruction-level residual traces"
             if RESIDUAL_18_INSTRUCTION_EVIDENCE
             else f"wrote {OUTPUT}: {result['case']} "
