@@ -7,15 +7,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1103 — [MAIN worker, 2026-08-10] **#55 synchronous GetBoxMonData outer shell closed**
 
-- **State:** implementation `8aa00042`; #55 remains open,
+- **State:** implementation `8aa00042`, supervisor-corrected by `ca1c73d9`;
+  #55 remains open,
   `GetBoxMonData2.cycles` stays `null`, and the construction clock stays
-  unwired. Focused **27/27**, smoke **375/375**, typecheck, full `npm test`
-  **894 files / 8,488 passed / 1 skipped**, and production build are green.
+  unwired. Focused **27/27**, smoke **375/375**, typecheck, supervisor full
+  `npm test` **894 files / 8,488 passed / 1 skipped**, and production build
+  are green.
 - **Did:** source/ELF-reduced the complete synchronous outer shell at
   **314 cycles**: GetBoxMonData2 **216** plus checksum-function setup/return
   **98**. The typed composition excludes all eight GetSubstruct bodies and
   crypt/checksum/crypt components, covers every receipt field/checksum/bad-egg
-  route across all 24 layouts, and matches **77/156** clean OFF direct joins.
+  route across all 24 layouts, and matches **77/156** clean OFF direct joins;
+  the remaining histogram is **+18×67 / +117×5 / +245×6 / +263×1**.
 - **Next:** continue #55 only with independently closed async +18 service and
   VBlank/IRQ entry/body/return costs; do not fit residuals, wire aggregate
   stats/the clock, or resume canonical Battle 2.
