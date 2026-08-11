@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Kick off (or continue) a work session in THIS run of pokeemerald-factory.
+# Kick off (or continue) a work session in the pokeemerald-factory-core
+# workspace.
 #
-# Ensures the shared oracle service (ground truth, ../../oracle) is running,
+# Ensures the shared oracle service (ground truth, ../oracle) is running,
 # then launches a Claude Code agent that resumes from PROGRESS.md. Safe to
 # re-run: each run continues where the last agent left off — all durable state
 # lives in git + PROGRESS.md, never in a running process. The oracle server is
@@ -67,7 +68,7 @@ fi
 # The oracle services are shared by the whole harness (all runs of this demo);
 # the solo lane defaults to Battle Scene OFF while retaining the ON service
 # for legacy trace regression and animation work.
-HARNESS_ROOT="${POKEBENCH_HARNESS_ROOT:-$(cd ../.. && pwd)}"
+HARNESS_ROOT="${POKEBENCH_HARNESS_ROOT:-$(cd .. && pwd)}"
 source tools/oracle-profiles.sh
 MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
 ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"

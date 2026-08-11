@@ -1,13 +1,22 @@
-# pokeemerald-factory run — agent guide
+# pokeemerald-factory-core workspace — agent guide
 
 A native-TypeScript browser reproduction of **Pokémon Emerald's Battle
 Factory**: the rental-draft + 7-battle challenge loop of the Battle Frontier
 facility, matching the real game's pixels and behavior frame-by-frame. This
-directory is one **run** — a
-persistent, incrementally developed workspace nested inside the
-pokeemerald-factory harness (`../../`). You work on top of what exists in
-THIS run and leave it better and green. Several runs may exist in parallel;
-never touch a sibling run.
+directory is the **workspace** — the persistent, incrementally developed
+agent layer of the pokeemerald-factory-core repo. The repo top (`../`) is
+the human/planning layer and holds the shared oracle service; you work on
+top of what exists in THIS workspace and leave it better and green. Do not
+edit anything above this directory.
+
+> **Layout migration (2026-08-11):** this workspace was formerly the run
+> `pokeemerald-factory/runs/20260717-004950_warm-bison/`, promoted to be
+> the canonical repo at `pokebench/pokeemerald-factory-core/workspace/`.
+> Older docs, receipts, and ledger entries that mention `runs/...` paths or
+> a `../../` harness root refer to this directory and `../` respectively.
+> The Rust rewrite lives in `core-rs/` (see `RUST_SUPERVISOR.md`); the
+> TypeScript engine in `src/` remains the working, test-pinned
+> implementation while that port is in flight.
 
 ## Running / resuming
 Launch (or relaunch) a work session with **`./run-agent.sh`** from the run

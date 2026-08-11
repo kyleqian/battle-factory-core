@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Resolve the harness that owns this run. Normal runs live under runs/<name>;
-# external git worktrees can live anywhere, so fall back to the primary run's
+# Resolve the repo top that owns this workspace (where run-oracle.sh and
+# oracle/ live). The workspace sits one level below the repo top; external
+# git worktrees can live anywhere, so fall back to the primary workspace's
 # git common directory in that case.
 
 pokebench_resolve_harness_root() {
@@ -14,7 +15,7 @@ pokebench_resolve_harness_root() {
   fi
 
   local candidate
-  candidate="$(cd ../.. && pwd)"
+  candidate="$(cd .. && pwd)"
   if [[ -x "$candidate/run-oracle.sh" ]]; then
     printf '%s\n' "$candidate"
     return 0
@@ -24,7 +25,7 @@ pokebench_resolve_harness_root() {
   common_dir="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   if [[ -n "$common_dir" && -d "$common_dir" ]]; then
     primary_run="$(cd "$common_dir/.." && pwd)"
-    candidate="$(cd "$primary_run/../.." && pwd)"
+    candidate="$(cd "$primary_run/.." && pwd)"
     if [[ -x "$candidate/run-oracle.sh" ]]; then
       printf '%s\n' "$candidate"
       return 0
