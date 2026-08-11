@@ -1392,11 +1392,19 @@ write, not as an invariant Timer 0 callback cost.
 source-general conditional service reducer is now registered alongside the
 pure cadence. Semantic per-crossing inputs cover the FIFO queued-word
 threshold, Timer/output routing, DMA source/custom-timing/enabled eligibility,
-and only fresh four-word IWRAM-to-FIFO work. Outputs retain A/DMA1 before
-B/DMA2 and scheduled progression **0/10/20**; invalid FIFO levels, mappings,
-regions, modes, counts, and per-crossing state-list lengths fail loudly.
-Multiple late crossings require one explicit state each and preserve cadence
-phase. Tier-1 covers zero/one/two refills, the exact threshold, order, repeated
+the global audio-enable gate, and only fresh four-word IWRAM-to-FIFO work.
+Every represented DMA requires explicit zero pre-Timer-0 `nextCount` work, and
+the reducer requires a caller assertion of no pre-existing, competing, or
+Video-started DMA work before it normalizes the graph. Outputs retain A/DMA1
+before B/DMA2 and the explicitly relative isolated-fresh progression
+**0/10/20**; invalid FIFO levels, mappings, regions, modes, counts, pending
+work, ownership, and per-crossing state-list lengths fail loudly. Multiple
+late crossings require one explicit state each and preserve cadence phase.
+Because a fresh isolated A/B pair shares the source deadline
+`currentTime - cyclesLate`, the common absolute translation cancels from the
+relative progression and stays out of this API; it does not claim a deadline or
+co-due arithmetic. Tier-1 covers zero/one/two refills, the exact threshold,
+audio disabled, pending/competing/Video DMA rejection, order, repeated
 crossings, immutability, and validation.
 
 This closes the pure conditional dispatcher only. #55 remains open for live

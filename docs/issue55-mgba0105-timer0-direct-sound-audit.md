@@ -117,10 +117,23 @@ constant**.
 `dispatchFactoryTimer0DirectSound` now implements only the source-closed
 conditional branch above. Its input is semantic source state: the modular
 queued-word threshold, Timer/output routing, DMA source mapping, custom-timing
-and enable eligibility, and the audited fresh four-word IWRAM-to-FIFO mode.
-It samples A before B and returns requested channel order plus serialized
-scheduled progression **0**, **10**, or **20** master cycles. Invalid FIFO
-levels, channel mappings, regions, modes, or counts are rejected rather than
+and enable eligibility, the global `gba->audio.enable` gate, and the audited
+four-word IWRAM-to-FIFO mode. A caller must additionally assert isolated DMA
+ownership: no pre-existing work, no competing DMA work, and no
+Video-started DMA work. Every represented DMA1/DMA2 has an explicit pre-Timer
+0 `nextCountWords == 0`; a pending transfer is rejected rather than serialized
+as if it were fresh. With the global audio gate false, mGBA does not enter
+either FIFO sampler, so the reducer returns an empty relative progression.
+
+The reducer samples A before B and returns requested channel order plus the
+relative isolated-fresh scheduled progression **0**, **10**, or **20** master
+cycles. It intentionally does not receive absolute `currentTime` or
+`cyclesLate`: after the zero-pending/no-competitor preconditions, every new
+FIFO request receives the same source deadline `currentTime - cyclesLate`, so
+that common translation cancels when the service graph is normalized to zero.
+It therefore does not claim an absolute deadline, co-due ordering, or a
+general scheduler result. Invalid FIFO levels, channel mappings, regions,
+modes, counts, pending work, or ownership assertions are rejected rather than
 generalized beyond the audit.
 
 `dispatchFactoryTimer0CadenceWithDirectSound` composes this reducer with the
@@ -132,6 +145,7 @@ between crossings. Tier-1 coverage is in
 
 This closes the pure conditional FIFO service dispatcher, not the construction
 clock. `serviceCostMasterCycles` remains `null`: no fitted 18-cycle constant is
-exported, and Timer callback overhead, pre-existing DMA work, `cyclesLate`,
-co-due Video/Audio/IRQ arbitration, and live construction state remain outside
-this contract. `runFactoryConstructionClock` is still unwired.
+exported, and Timer callback overhead, non-isolated DMA work, absolute
+`cyclesLate` scheduling, co-due Video/Audio/IRQ arbitration, and live
+construction state remain outside this contract. `runFactoryConstructionClock`
+is still unwired.

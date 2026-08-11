@@ -3340,6 +3340,11 @@ export interface FactoryTimer0DirectSoundDmaState {
   destinationControl: "fixed";
   transferWidthBits: 32;
   countWords: 4;
+  /**
+   * mGBA's `nextCount` immediately before this Timer 0 callback samples the
+   * FIFO. The relative fresh-service reducer supports only a zero value.
+   */
+  nextCountWords: number;
 }
 
 export interface FactoryTimer0DirectSoundChannelState {
@@ -3353,7 +3358,22 @@ export interface FactoryTimer0DirectSoundChannelState {
   dma: FactoryTimer0DirectSoundDmaState | null;
 }
 
+/**
+ * Explicit boundary ownership for the deliberately narrow relative reducer.
+ * These are assertions about all four hardware DMA channels, not a claim that
+ * FIFO A/B alone describes the scheduler queue.
+ */
+export interface FactoryTimer0DirectSoundIsolatedDmaOwnership {
+  noPreexistingDmaWork: true;
+  noCompetingDmaWork: true;
+  noVideoStartedDmaWork: true;
+}
+
 export interface FactoryTimer0DirectSoundState {
+  /** mGBA's global `gba->audio.enable` gate around the FIFO callbacks. */
+  globalAudioEnabled: boolean;
+  /** Required before this reducer can normalize fresh DMA work to time zero. */
+  isolatedDmaOwnership: FactoryTimer0DirectSoundIsolatedDmaOwnership;
   channels: readonly [
     FactoryTimer0DirectSoundChannelState,
     FactoryTimer0DirectSoundChannelState,
@@ -3370,14 +3390,31 @@ export interface FactoryTimer0DirectSoundService {
 export interface FactoryTimer0DirectSoundDispatch {
   requestedChannels: readonly FactoryDirectSoundChannel[];
   services: readonly FactoryTimer0DirectSoundService[];
-  /** Includes the zero origin, then each serialized DMA completion. */
-  scheduledServiceProgressionMasterCycles: readonly number[];
-  scheduledServiceMasterCycles: number;
+  /**
+   * Relative to the shared fresh-request origin only; it is not an mGBA
+   * absolute deadline. Includes zero, then each serialized DMA completion.
+   */
+  isolatedFreshServiceProgressionMasterCycles: readonly number[];
+  isolatedFreshServiceMasterCycles: number;
 }
 
 const FACTORY_DIRECT_SOUND_FIFO_CAPACITY_WORDS = 8;
 const FACTORY_DIRECT_SOUND_MAX_REFILL_LEVEL_WORDS = 3;
 const FACTORY_DIRECT_SOUND_DMA_SERVICE_MASTER_CYCLES = 10;
+
+function validateFactoryTimer0DirectSoundIsolatedDmaOwnership(
+  ownership: FactoryTimer0DirectSoundIsolatedDmaOwnership,
+): void {
+  if (!ownership
+    || ownership.noPreexistingDmaWork !== true
+    || ownership.noCompetingDmaWork !== true
+    || ownership.noVideoStartedDmaWork !== true) {
+    throw new Error(
+      "Timer 0 Direct Sound relative service requires explicit isolated DMA ownership "
+      + "(no preexisting, competing, or Video-started DMA work)",
+    );
+  }
+}
 
 function validateFactoryTimer0DirectSoundChannel(
   state: FactoryTimer0DirectSoundChannelState,
@@ -3425,12 +3462,30 @@ function validateFactoryTimer0DirectSoundChannel(
   if (dma.countWords !== 4) {
     throw new Error(`DMA${dma.channel} uses unmodeled count ${dma.countWords}; expected 4 words`);
   }
+  if (!Number.isInteger(dma.nextCountWords)
+    || dma.nextCountWords < 0
+    || dma.nextCountWords > 0xffff_ffff) {
+    throw new Error(`DMA${dma.channel} nextCountWords must be a u32, got ${dma.nextCountWords}`);
+  }
+  if (dma.nextCountWords !== 0) {
+    throw new Error(
+      `DMA${dma.channel} has pending nextCountWords ${dma.nextCountWords}; `
+      + "relative service requires a fresh zero-work DMA",
+    );
+  }
 }
 
 /**
- * Dispatch the conditional Timer 0 -> Direct Sound request path.  This prices
- * only fresh four-word IWRAM-to-FIFO DMA work.  It does not price the timer
- * callback itself or absorb other due timing events.
+ * Dispatch the conditional Timer 0 -> Direct Sound request path. This prices
+ * only an explicitly isolated, fresh four-word IWRAM-to-FIFO DMA graph. It
+ * does not price the timer callback itself or absorb other due timing events.
+ *
+ * `currentTime` and `cyclesLate` are intentionally absent: under the required
+ * zero-work and no-competitor assertions, fresh A/B requests share the same
+ * `currentTime - cyclesLate` origin. That common absolute translation cancels
+ * from the A-before-B relative progression reported here. Supplying either
+ * value would imply an absolute scheduler/co-due claim this reducer does not
+ * own.
  */
 export function dispatchFactoryTimer0DirectSound(
   state: FactoryTimer0DirectSoundState,
@@ -3438,12 +3493,24 @@ export function dispatchFactoryTimer0DirectSound(
   if (!state || !Array.isArray(state.channels) || state.channels.length !== 2) {
     throw new Error("Timer 0 Direct Sound state must contain exactly channels A and B");
   }
+  if (typeof state.globalAudioEnabled !== "boolean") {
+    throw new Error("Timer 0 Direct Sound globalAudioEnabled must be boolean");
+  }
+  validateFactoryTimer0DirectSoundIsolatedDmaOwnership(state.isolatedDmaOwnership);
   validateFactoryTimer0DirectSoundChannel(state.channels[0], "A");
   validateFactoryTimer0DirectSoundChannel(state.channels[1], "B");
 
   const requestedChannels: FactoryDirectSoundChannel[] = [];
   const services: FactoryTimer0DirectSoundService[] = [];
   const progression = [0];
+  if (!state.globalAudioEnabled) {
+    return Object.freeze({
+      requestedChannels: Object.freeze(requestedChannels),
+      services: Object.freeze(services),
+      isolatedFreshServiceProgressionMasterCycles: Object.freeze(progression),
+      isolatedFreshServiceMasterCycles: progression[progression.length - 1]!,
+    });
+  }
   for (const channel of state.channels) {
     const dma = channel.dma;
     const requestsRefill = channel.outputEnabled
@@ -3468,8 +3535,8 @@ export function dispatchFactoryTimer0DirectSound(
   return Object.freeze({
     requestedChannels: Object.freeze(requestedChannels),
     services: Object.freeze(services),
-    scheduledServiceProgressionMasterCycles: Object.freeze(progression),
-    scheduledServiceMasterCycles: progression[progression.length - 1]!,
+    isolatedFreshServiceProgressionMasterCycles: Object.freeze(progression),
+    isolatedFreshServiceMasterCycles: progression[progression.length - 1]!,
   });
 }
 
@@ -3477,7 +3544,11 @@ export interface FactoryTimer0CadenceDirectSoundDispatch extends FactoryTimer0Di
   directSoundByCrossing: readonly FactoryTimer0DirectSoundDispatch[];
 }
 
-/** Compose cadence crossings with one explicit source-state snapshot each. */
+/**
+ * Compose cadence crossings with one explicit source-state snapshot each.
+ * The Direct Sound entries remain relative, isolated fresh-DMA reductions;
+ * cadence phase is the only absolute-time fact composed here.
+ */
 export function dispatchFactoryTimer0CadenceWithDirectSound(
   state: FactoryTimer0Cadence,
   dispatchMasterCycle: number,

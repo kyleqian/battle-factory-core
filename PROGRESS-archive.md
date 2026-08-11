@@ -1,3 +1,25 @@
+## 1112 — [MAIN worker, 2026-08-11] **#55 Timer 0 conditional FIFO/DMA refill census**
+
+- **State:** #55 remains open; production construction-clock wiring and every
+  unresolved `cycles` field remain untouched. `serviceCostMasterCycles` stays
+  `null`.
+- **Did:** added opt-in `FACTORY_TIMER0_FIFO_EVIDENCE=1` compact evidence,
+  fresh OFF receipts for anchor/LILIANA/legal varied, and the Tier-1 receipt
+  test. The three packets are **126/57/73 = 256** retained crossings: **85**
+  FIFO write/refill rows and **171** DMA-only rows. Every refill has A/B write
+  pointer change and `internalRemaining 3→2`; cross-epoch clean joins are
+  **83/85 exact +18**, with two named null path exceptions. All six fresh
+  outputs are byte-identical; focused Timer0 suite is **16/16**.
+- **Next:** source-reduce the conditional Direct Sound FIFO refill dispatcher
+  and register that pure service seam. Do not wire the construction clock or
+  fit 18.
+- **Notes:** docs and `ISSUES.md` now record observed edge/service classes,
+  FIFO thresholds, DMA1/2 controls, co-due Video/Audio classes, and exact
+  hashes. Focused Timer0 **21/21**, smoke **375/375**, typecheck, full
+  `npm test` **903 files / 8,524 passed / 1 skipped**, and build (**631
+  modules**) are green. No production, animation, canonical Battle-2,
+  barrier, or recording import changed.
+
 ## 1103 — [MAIN worker, 2026-08-10] **#55 synchronous GetBoxMonData outer shell closed**
 
 - **State:** implementation `8aa00042`, supervisor-corrected by `ca1c73d9`;

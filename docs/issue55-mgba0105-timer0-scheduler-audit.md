@@ -129,8 +129,17 @@ audit does not fit 24/26/29 totals or any other edge total.
 No source-closed `serviceCostMasterCycles` exists. mGBA's scheduler charges no
 fixed callback amount, while Timer 0 can enqueue zero, one, or two FIFO DMAs;
 DMA arbitration, `cyclesLate`, prior DMA state, and co-due Video/Audio/IRQ
-events alter what follows. A pure reducer may own the FIFO/DMA state graph only
-when it receives:
+events alter what follows. The registered reducer is intentionally narrower
+than a full scheduler: it only normalizes a fresh, isolated direct-sound graph
+after an explicit `audio.enable` gate, zero DMA1/DMA2 `nextCount` work, and
+no-preexisting/no-competing/no-Video-started-DMA assertions. In that narrow
+case, Timer 0 gives each newly requested FIFO DMA the same
+`currentTime - cyclesLate` deadline. The reducer reports only the relative
+fresh-service sequence, so that shared translation cancels; it correctly keeps
+absolute `currentTime` and `cyclesLate` out of its API. It cannot report a
+deadline or order any co-due event.
+
+A full scheduler reducer would instead need:
 
 - FIFO A/B read/write pointers and `internalRemaining` at the overflow;
 - DMA1/2 enable, count, `nextCount`, `when`, source, destination, and timing;
