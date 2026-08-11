@@ -1,0 +1,154 @@
+{
+  "schema": "factory-timer0-reachability-audit/v1",
+  "release": {
+    "pokeemerald": "repository-pinned pret/pokeemerald",
+    "mgbaVersion": "0.10.5",
+    "mgbaArchiveSha256": "91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14",
+    "oracleProfile": "battle-scene-off"
+  },
+  "auditedAnchors": {
+    "pokeemerald/src/m4a.c": [
+      "REG_SOUNDCNT_X = SOUND_MASTER_ENABLE",
+      "REG_SOUNDCNT_H = SOUND_B_FIFO_RESET | SOUND_B_TIMER_0 | SOUND_B_LEFT_OUTPUT",
+      "| SOUND_A_FIFO_RESET | SOUND_A_TIMER_0 | SOUND_A_RIGHT_OUTPUT",
+      "REG_DMA1SAD = (s32)soundInfo->pcmBuffer;",
+      "REG_DMA1DAD = (s32)&REG_FIFO_A;",
+      "REG_DMA2SAD = (s32)soundInfo->pcmBuffer + PCM_DMA_BUF_SIZE;",
+      "REG_DMA2DAD = (s32)&REG_FIFO_B;",
+      "REG_DMA1CNT_H = DMA_ENABLE | DMA_START_SPECIAL | DMA_32BIT | DMA_REPEAT;",
+      "REG_DMA2CNT_H = DMA_ENABLE | DMA_START_SPECIAL | DMA_32BIT | DMA_REPEAT;",
+      "REG_TM0CNT_L = -(280896 / soundInfo->pcmSamplesPerVBlank);",
+      "REG_TM0CNT_H = TIMER_ENABLE | TIMER_1CLK;",
+      "CpuFill32(0, soundInfo->pcmBuffer, sizeof(soundInfo->pcmBuffer));",
+      "void SetPokemonCryStereo(u32 val)",
+      "SOUND_A_TIMER_0 | SOUND_A_RIGHT_OUTPUT",
+      "SOUND_A_TIMER_0 | SOUND_A_LEFT_OUTPUT | SOUND_A_RIGHT_OUTPUT"
+    ],
+    "pokeemerald/src/main.c": [
+      "gPcmDmaCounter = gSoundInfo.pcmDmaCounter;",
+      "m4aSoundMain();",
+      "m4aSoundVSyncOff();",
+      "SoftReset(RESET_ALL);"
+    ],
+    "mgba/src/gba/timer.c": [
+      "if (gba->audio.enable && timerId < 2)",
+      "GBAAudioSampleFIFO(&gba->audio, 0, cyclesLate);",
+      "GBAAudioSampleFIFO(&gba->audio, 1, cyclesLate);"
+    ],
+    "mgba/src/gba/audio.c": [
+      "audio->externalMixing = false;",
+      "audio->mixer = NULL;",
+      "audio->chA.dmaSource = 1;",
+      "audio->chB.dmaSource = 2;",
+      "audio->enable = false;",
+      "audio->enable = GBAudioEnableGetEnable(value);",
+      "if (GBA_AUDIO_FIFO_SIZE - fifoSize > 4 && channel->dmaSource > 0)",
+      "dma->nextCount = 4;",
+      "if (audio->mixer)",
+      "audio->mixer->engage(audio->mixer, source - offsets[i]);"
+    ],
+    "mgba/src/gba/core.c": [
+      "gbacore->audioMixer = NULL;",
+      "mCoreConfigGetIntValue(&core->config, \"gba.audioHle\", &useAudioMixer) && useAudioMixer",
+      "GBAAudioMixerCreate(gbacore->audioMixer);",
+      "ARMHotplugAttach(core->cpu, CPU_COMPONENT_AUDIO_MIXER);"
+    ],
+    "mgba/src/gba/extra/audio-mixer.c": [
+      "gba->audio.mixer = mixer;",
+      "mixer->p->externalMixing = true;",
+      "_mp2kReload(mixer);"
+    ],
+    "oracle/emerald_core.py": [
+      "self.core = mgba.core.load_path(str(self.rom_path))",
+      "self.core.reset()",
+      "self.core.load_raw_state(self._canonical_state)"
+    ]
+  },
+  "sourceFacts": {
+    "emeraldPairInvariant": [
+      "SoundInit resets FIFO A/B and routes both to Timer 0 in one SOUNDCNT_H write",
+      "DMA1 sources pcmBuffer half A into FIFO A; DMA2 sources half B into FIFO B",
+      "m4aSoundVSyncOn enables both special/repeat/32-bit DMAs as one paired operation before initial Timer 0 enable",
+      "the normal VBlank path runs m4aSoundMain and does not reconfigure either FIFO route",
+      "SetPokemonCryStereo changes output sides but retains Timer 0 and at least one output for both channels"
+    ],
+    "mgbaConsumption": {
+      "timerGate": "audio.enable mirrors SOUNDCNT_X master enable; it is not host playback or mute state",
+      "order": [
+        "FIFO A",
+        "FIFO B"
+      ],
+      "threshold": "each channel requests four words exactly when queued words are at most 3",
+      "induction": "equal queued-word/internal-byte phase plus paired DMA service remains equal at the next Timer 0 entry"
+    },
+    "mixer": {
+      "baseInitializationBeforeOptionalComponent": {
+        "present": false,
+        "externalMixing": false
+      },
+      "presenceMeaning": "mGBA CPU_COMPONENT_AUDIO_MIXER is installed only when emulator config gba.audioHle is present and nonzero",
+      "externalMixingMeaning": "the optional MP2K HLE component recognized and engaged a game sound context; it is emulator-owned state",
+      "refillEffect": "presence may inspect a DMA source and engage HLE, but does not replace Timer 0 FIFO consumption or the four-word refill threshold",
+      "gameControllable": false
+    }
+  },
+  "constructionCensus": {
+    "source": "factory-construction-timer0-fifo-v1 plus factory-timer0-scheduler-runtime-v1",
+    "cases": {
+      "anchor": {
+        "crossings": 126,
+        "zeroRefill": 85,
+        "singleRefill": 0,
+        "dualRefill": 41
+      },
+      "liliana": {
+        "crossings": 57,
+        "zeroRefill": 38,
+        "singleRefill": 0,
+        "dualRefill": 19
+      },
+      "factory-varied": {
+        "crossings": 73,
+        "zeroRefill": 48,
+        "singleRefill": 0,
+        "dualRefill": 25
+      }
+    },
+    "totals": {
+      "crossings": 256,
+      "zeroRefill": 171,
+      "singleRefill": 0,
+      "dualRefill": 85
+    },
+    "symmetricEntryStates": 256,
+    "asymmetricEntryStates": 0,
+    "exactRuntimeWindows": 2,
+    "runtimeWindowClasses": [
+      {
+        "refill": "dual",
+        "audioEnabled": true,
+        "mixerPresent": false,
+        "externalMixing": false
+      },
+      {
+        "refill": "dual",
+        "audioEnabled": true,
+        "mixerPresent": false,
+        "externalMixing": false
+      }
+    ]
+  },
+  "constructionReachability": {
+    "zeroRefill": "source-reachable-and-observed",
+    "dualRefill": "source-reachable-and-observed",
+    "singleRefill": "not reachable while the audited Emerald pair invariant holds; not observed in the finite census",
+    "mixerPresent": "not an oracle game path; optional emulator gba.audioHle component only",
+    "audioDisabled": "not reachable in the audited post-boot Factory construction epoch; SOUNDCNT_X is enabled and runtime receipts agree"
+  },
+  "explicitBoundary": [
+    "The no-single-refill conclusion is scoped to ordinary post-boot Factory construction, not every Emerald transition.",
+    "m4aSoundVSyncOff/On use separate DMA register writes; reset/soft-reset timing or externally staged asymmetric FIFO/DMA state is outside the invariant.",
+    "The 256-crossing census is finite evidence, not the proof; the paired source-state induction supplies the scoped reachability argument.",
+    "Mixer-present behavior remains source-reachable in mGBA only when its caller supplies gba.audioHle; this oracle does not."
+  ]
+}
