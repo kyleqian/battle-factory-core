@@ -125,11 +125,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   test **977 files / 9,527 passed / 1 pre-existing skip**, npm build
   green, soak **vanilla 20/20 OK** + **full 60/60 OK**. No orphan
   worker worktrees or branches; RUST_DEFERRED.md has no open entries.
-- **Next:** open M5d-0 (CV preamble + shared infra + probe machinery +
-  NotYetPorted barrier) per docs/rust-m5d-checkviability-batching.md,
-  then M5d-1..5 in order (only M5d-5 depends on M5d-3's Confuse
-  handler). Re-verify the conflict check at orient per the standing
-  M4+ rule.
+- **M5d-0 DONE (fold `19de08f6`):** `factory_ai_check_viability.rs` —
+  unified `FactoryAiCheckViabilityBattler` (42 fields, recounted =
+  scout), `CheckViabilityDraw` 62 variants over a shared flat
+  101-leaf `CvDrawKind` enum (worker recount: **136** distinct TS leaf
+  kind strings vs scout's "~85" — documented in-module; several TS
+  members union multiple numbered kinds), `next_draw`, CV-specific
+  stale-funcResult maps + 3 helpers (ability side reuses CBM's pub fn),
+  33 new EFFECT consts appended to CBM's block (spot-verified against
+  battle_move_effects.h), CV_TABLE_EFFECTS[122] + probe machinery +
+  dispatcher shell with NotYetPorted trailing barrier and zero-score/
+  funcResultCarry fallthrough. MAX_CHECK_VIABILITY_DRAWS = 8
+  (deliberately conservative; proven single-pass worst case in
+  EvasionUp is 7 — M5d-2 re-verifies). **Worker scoping judgment,
+  supervisor-verified correct:** Result stays 2 variants
+  (Scored/NotYetPorted) — TS's own "unsupported-branch" has exactly ONE
+  emission site (the trailing barrier, :7205, dead at 122/122), so
+  NotYetPorted IS that variant; the scout's "2 + a 3rd" phrasing was
+  confused. 14 native tests + 41 shell vector rows
+  (gen-cv-shell-vectors.mjs, byte-idempotent). Supervisor rerun: scope
+  clean, cargo **350/350** + fmt/clippy + wasm, generator
+  byte-idempotent, funcResultCarry pass-through re-derived from TS
+  independently (fallback present→carried, absent→absent; table-effect
+  sanity proves shell vectors can't cover them). Post-fold: artifact
+  rebuilt, smoke 375/375. Worker: sonnet, 21.6 min, 1 commit.
+- **Next:** M5d-1 (13 effects: sleep/speed/status openers + the 3
+  CV-only handlers) is next; brief staged. Then M5d-2..5 in source
+  order (only M5d-5 depends on M5d-3's Confuse). Re-verify the conflict
+  check at orient per the standing M4+ rule.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
