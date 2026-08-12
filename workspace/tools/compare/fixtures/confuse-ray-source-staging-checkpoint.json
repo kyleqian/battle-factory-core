@@ -46,6 +46,83 @@
       "endpointSha256": "5c9ea0c7e3f19ba0c894fa5a3042046b496cf6c678d13e7e4df54ffbb452ea06"
     }
   ],
-  "denseEvidence": null,
-  "blocker": "The configured vendor/mgba-venv has no importable mgba module; tools/run-mgba-probe.py therefore cannot execute the pointer-bounded probe in this worktree. Endpoint captures validate legal staging only and confer no source-window, latch, change-map, reducer/seam, or framebuffer acceptance."
+  "denseEvidence": {
+    "schema": "confuse-ray-dense-evidence/v1",
+    "twiceFresh": true,
+    "topology": {
+      "tasks": [
+        "AnimTask_BlendColorCycleByTagLoop",
+        "SoundTask_AdjustPanningVar_Step",
+        "Task_ClearMonBg",
+        "Task_FadeToBg",
+        "Task_UpdateMonBg"
+      ],
+      "templates": [
+        "gConfuseRayBallBounceSpriteTemplate",
+        "gConfuseRayBallSpiralSpriteTemplate"
+      ],
+      "callbacks": [
+        "AnimConfuseRayBallBounce_Step1",
+        "AnimConfuseRayBallBounce_Step2",
+        "AnimConfuseRayBallSpiral_Step",
+        "DestroyAnimSpriteAndDisableBlend"
+      ]
+    },
+    "orientations": [
+      {
+        "orientation": "player-back",
+        "sourceWindow": { "startFrame": 76, "endFrame": 345, "frameCount": 270 },
+        "fullStateSha256Runs": [
+          "2a9fde46e5db7349e3f54bab6721aa94306b5c0bc77b8a2dd0c9e443ebf66492",
+          "2a9fde46e5db7349e3f54bab6721aa94306b5c0bc77b8a2dd0c9e443ebf66492"
+        ],
+        "rawRgbSha256Runs": [
+          "17183f79551b7ca80f34e8dcbcafa0974d5e90f8751f7cd301c3ffa058ba9e20",
+          "17183f79551b7ca80f34e8dcbcafa0974d5e90f8751f7cd301c3ffa058ba9e20"
+        ],
+        "retained": {
+          "fullState": "tools/compare/evidence/confuse-ray-player-full-state.json.gz",
+          "fullStateGzipSha256": "26fd19c1dc7214d9473dd3fb3e8c271b2f1c2350c531e21314658583545968fa",
+          "rawRgb": "tools/compare/evidence/confuse-ray-player-source-rgb.tar.gz",
+          "rawRgbArchiveSha256": "51cb0aa2a6f169afc9d02bfc79bbbe04d4e0eef669d74942074c6340b6f55996",
+          "changeMap": "tools/compare/evidence/confuse-ray-changemap-player.txt",
+          "changeMapSha256": "8566fab0fda8301067b88570c5a97c1198e3571ba3d0afaa6bdeeab8d9ab5f7b"
+        }
+      },
+      {
+        "orientation": "opponent-front",
+        "sourceWindow": { "startFrame": 80, "endFrame": 349, "frameCount": 270 },
+        "fullStateSha256Runs": [
+          "83d95bef62a0c7a7eead116a517bfe881279fc0aea0168a453c05f7ede14dd3a",
+          "83d95bef62a0c7a7eead116a517bfe881279fc0aea0168a453c05f7ede14dd3a"
+        ],
+        "rawRgbSha256Runs": [
+          "e97f8c9d762c7c7d924497af86a453423eb5f6b8297e932ab16b7b7684770760",
+          "e97f8c9d762c7c7d924497af86a453423eb5f6b8297e932ab16b7b7684770760"
+        ],
+        "retained": {
+          "fullState": "tools/compare/evidence/confuse-ray-opponent-full-state.json.gz",
+          "fullStateGzipSha256": "bcd2c6686e72e7e11b4122c1d6e895b2262e264073106be8176e3f319a0ee89a",
+          "rawRgb": "tools/compare/evidence/confuse-ray-opponent-source-rgb.tar.gz",
+          "rawRgbArchiveSha256": "4e204b994920a6f0ad00a050d94ec566a4c379cdab6400e2a297a51038ad3ca1",
+          "changeMap": "tools/compare/evidence/confuse-ray-changemap-opponent.txt",
+          "changeMapSha256": "fb0176183d8e69818f10eb1eaebc5581160489341f01395874fd231db6f5ab45"
+        }
+      }
+    ],
+    "orientationDifferences": {
+      "absoluteFrameShift": 4,
+      "soundTask": "player-back captures ages 46..107 from -64 toward +63 in +2 steps (62 rows; target reached on destruction at 108); opponent-front captures ages 46..106 from +63 toward -63 in -2 steps (61 rows; target reached on destruction at 107)",
+      "geometry": "side-relative attacker/target coordinates and Task_UpdateMonBg ownership differ; all script-relative task, bounce, spiral, blend, fade, and cleanup boundaries otherwise align"
+    },
+    "measuredLatches": {
+      "softwareOamToHardwareOam": "RAM+1 exactly on all 269 comparable rows in both orientations",
+      "softwareMatricesToHardwareMatrices": "RAM+1 exactly on all 269 comparable rows in both orientations",
+      "fadedPaletteToHardwarePalette": "RAM+1 on 268/269 comparable rows; Task_UpdateMonBg setup age 4 is the sole same-row transfer",
+      "bounceFramebuffer": "software sprite ages 46..120; framebuffer visible ages 47..120 and cleared at 121; BLDALPHA starts at displayed 14:2 on age 47 and follows the current callback coefficient",
+      "spiralFramebuffer": "software sprite ages 166..224, destroys at 225; framebuffer visible ages 167..225 and cleared at 226",
+      "ghostBgFramebuffer": "hardware BLDY changes and whole-field framebuffer edges are same-row at ages 9..24, 29..44, 230, 233..247, and 252..267"
+    }
+  },
+  "blocker": "Complete twice-fresh source/hardware/audio/raw-RGB evidence and move-owned change maps are banked, but no reducer, assets, typed seam, compositor, or production-framebuffer comparison exists. Confuse Ray therefore remains unsupported; Will-O-Wisp remains audit-only and unpromoted."
 }

@@ -1,3 +1,11 @@
+# MOVE_CONFUSE_RAY dense bilateral evidence checkpoint — remains unsupported (2026-08-12 worker)
+
+- **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Confuse Ray and Will-O-Wisp are not promoted.
+- **Did:** Fixed `tools/run-mgba-probe.py` so either its auto-routed or an explicit harness `mgba-venv` interpreter receives the paired sibling `libmgba-py` checkout without a global install or hardcoded path. Ran the pointer-bounded Confuse Ray probe twice freshly in both orientations and retained complete compressed full-state JSON, 270 raw-RGB frames, and normalized change maps through first inactive cleanup.
+- **Verified:** Player-back source **76..345** and opponent-front **80..349** are **270 frames** each. Both fresh runs are byte-identical per side (state `2a9fde46…` / `83d95bef…`, raw RGB `17183f79…` / `e97f8c9d…`). Hardware OAM and matrices equal the preceding software buffer on **269/269** comparable rows; hardware palette does so on **268/269**, with monbg setup age 4 the sole same-row transfer. Bounce displays ages **47..120**, clears 121; spiral displays **167..225**, clears 226; BG BLDY edges are same-row. Opponent absolute start is +4; relative schedules align except panning duration/direction (**62** captured player rows −64→+63, **61** opponent rows +63→−63).
+- **Next:** Port source-relative YELLOW_BALL/GHOST-BG assets, reducer, typed seam, and compositor; require twice-fresh bilateral all-frame component/hardware/raw-RGB/change-map/production framebuffer equality before promoting only Confuse Ray. Will-O-Wisp remains an independent audit-only control.
+- **Notes:** Honest dense checkpoint only: no reducer/seam/compositor or production framebuffer comparison exists. No gameplay/damage/accuracy/confusion/RNG/turn/controller/facility state, animation boundary, unsupported barrier, canonical recording, per-frame lookup, absolute tick, coordinate/RGB fit, or sibling coverage changed.
+
 # MOVE_CONFUSE_RAY source/staging checkpoint — dense probe blocked, remains unsupported (2026-08-12 worker)
 
 - **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Confuse Ray and Will-O-Wisp are not promoted.
