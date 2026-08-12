@@ -302,6 +302,42 @@ rejections); the test also ratchets both range kinds, both accepted/rejected
 ledger outcomes, every production-reachable input error, and malformed binary
 lengths.
 
+## Factory AI battle history (M8a)
+
+`crates/factory-core/src/factory_ai_battle_history.rs` is the intentionally
+standalone pure port of the history leaf in `src/engine/factoryAiLiveDriver.ts`:
+creation, explicit ability/item records, party-change clearing, target move
+recording, and observed-fact overlays. Its `FactoryAiBattleHistoryLiveInput`
+contains only four party indexes, the target last move, four observed ability
+ids, and four observed item effects. It does not build a live AI view, submit a
+decision, own the construction clock, or expose a WASM ABI.
+
+Ability-id resolution comes from the full generated 78-row
+`ABILITY_NAME_BY_ID` table in `gen_tables.rs`, sourced from canonical
+`src/data/gen/ability-item-hooks.json`; do not hand-copy ability symbols. The
+TS-executed corpus covers creation, explicit record writes over all four slots,
+move NONE/new/duplicate/cap behavior, party changes, retained item history,
+overlay ordering, exact unknown-ability errors, and unvalidated historical
+number/string payloads. Its category census is 15 cases: create=1, record=1,
+target-move=5, party-change=2, observations=2, unknown-ability=3, and
+arbitrary-history=1.
+
+Regenerate both relevant checked-in artifacts, then hash them:
+
+```sh
+node core-rs/tools/gen-data.mjs
+node --experimental-strip-types core-rs/tools/gen-factory-ai-battle-history-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/gen_tables.rs \
+  core-rs/crates/factory-core/src/factory_ai_battle_history_vectors_gen.rs
+```
+
+At M8a landing, the generated data digest is
+`19d8dc6a9e7a40600454be12d59167d228d3434d2ce8713116c4ab2f7c6dbac5` and the
+15-case corpus digest is
+`abc612fc71cb4f469f99e3138e0f8dd495372a0831eeb216c97080e5578e00a4`. Both
+generators validate their source/case shapes and are rerun twice for byte
+identity before committing.
+
 ## Ground rules
 
 - **The vitest suite is the spec gate.** A module counts as ported when

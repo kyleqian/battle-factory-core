@@ -6199,6 +6199,110 @@ pub const FRONTIER_MONS: [FrontierMonRow; 882] = [
     },
 ];
 
+/// One source ability id/symbol pair.  This is the complete canonical
+/// ability universe rather than the narrower Frontier-species subset because
+/// `FactoryAiBattleHistory` records any live observed id.  Source:
+/// src/data/gen/ability-item-hooks.json `.universes.abilities`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AbilityNameRow {
+    pub id: u16,
+    pub name: &'static str,
+}
+
+/// Dense ability-id -> canonical `ABILITY_*` symbol table.  Codegen rejects
+/// schema drift, non-dense ids, and non-symbol names before emitting this.
+pub const ABILITY_NAME_BY_ID: [AbilityNameRow; 78] = [
+    AbilityNameRow { id: 0, name: "ABILITY_NONE" },
+    AbilityNameRow { id: 1, name: "ABILITY_STENCH" },
+    AbilityNameRow { id: 2, name: "ABILITY_DRIZZLE" },
+    AbilityNameRow { id: 3, name: "ABILITY_SPEED_BOOST" },
+    AbilityNameRow { id: 4, name: "ABILITY_BATTLE_ARMOR" },
+    AbilityNameRow { id: 5, name: "ABILITY_STURDY" },
+    AbilityNameRow { id: 6, name: "ABILITY_DAMP" },
+    AbilityNameRow { id: 7, name: "ABILITY_LIMBER" },
+    AbilityNameRow { id: 8, name: "ABILITY_SAND_VEIL" },
+    AbilityNameRow { id: 9, name: "ABILITY_STATIC" },
+    AbilityNameRow { id: 10, name: "ABILITY_VOLT_ABSORB" },
+    AbilityNameRow { id: 11, name: "ABILITY_WATER_ABSORB" },
+    AbilityNameRow { id: 12, name: "ABILITY_OBLIVIOUS" },
+    AbilityNameRow { id: 13, name: "ABILITY_CLOUD_NINE" },
+    AbilityNameRow { id: 14, name: "ABILITY_COMPOUND_EYES" },
+    AbilityNameRow { id: 15, name: "ABILITY_INSOMNIA" },
+    AbilityNameRow { id: 16, name: "ABILITY_COLOR_CHANGE" },
+    AbilityNameRow { id: 17, name: "ABILITY_IMMUNITY" },
+    AbilityNameRow { id: 18, name: "ABILITY_FLASH_FIRE" },
+    AbilityNameRow { id: 19, name: "ABILITY_SHIELD_DUST" },
+    AbilityNameRow { id: 20, name: "ABILITY_OWN_TEMPO" },
+    AbilityNameRow { id: 21, name: "ABILITY_SUCTION_CUPS" },
+    AbilityNameRow { id: 22, name: "ABILITY_INTIMIDATE" },
+    AbilityNameRow { id: 23, name: "ABILITY_SHADOW_TAG" },
+    AbilityNameRow { id: 24, name: "ABILITY_ROUGH_SKIN" },
+    AbilityNameRow { id: 25, name: "ABILITY_WONDER_GUARD" },
+    AbilityNameRow { id: 26, name: "ABILITY_LEVITATE" },
+    AbilityNameRow { id: 27, name: "ABILITY_EFFECT_SPORE" },
+    AbilityNameRow { id: 28, name: "ABILITY_SYNCHRONIZE" },
+    AbilityNameRow { id: 29, name: "ABILITY_CLEAR_BODY" },
+    AbilityNameRow { id: 30, name: "ABILITY_NATURAL_CURE" },
+    AbilityNameRow { id: 31, name: "ABILITY_LIGHTNING_ROD" },
+    AbilityNameRow { id: 32, name: "ABILITY_SERENE_GRACE" },
+    AbilityNameRow { id: 33, name: "ABILITY_SWIFT_SWIM" },
+    AbilityNameRow { id: 34, name: "ABILITY_CHLOROPHYLL" },
+    AbilityNameRow { id: 35, name: "ABILITY_ILLUMINATE" },
+    AbilityNameRow { id: 36, name: "ABILITY_TRACE" },
+    AbilityNameRow { id: 37, name: "ABILITY_HUGE_POWER" },
+    AbilityNameRow { id: 38, name: "ABILITY_POISON_POINT" },
+    AbilityNameRow { id: 39, name: "ABILITY_INNER_FOCUS" },
+    AbilityNameRow { id: 40, name: "ABILITY_MAGMA_ARMOR" },
+    AbilityNameRow { id: 41, name: "ABILITY_WATER_VEIL" },
+    AbilityNameRow { id: 42, name: "ABILITY_MAGNET_PULL" },
+    AbilityNameRow { id: 43, name: "ABILITY_SOUNDPROOF" },
+    AbilityNameRow { id: 44, name: "ABILITY_RAIN_DISH" },
+    AbilityNameRow { id: 45, name: "ABILITY_SAND_STREAM" },
+    AbilityNameRow { id: 46, name: "ABILITY_PRESSURE" },
+    AbilityNameRow { id: 47, name: "ABILITY_THICK_FAT" },
+    AbilityNameRow { id: 48, name: "ABILITY_EARLY_BIRD" },
+    AbilityNameRow { id: 49, name: "ABILITY_FLAME_BODY" },
+    AbilityNameRow { id: 50, name: "ABILITY_RUN_AWAY" },
+    AbilityNameRow { id: 51, name: "ABILITY_KEEN_EYE" },
+    AbilityNameRow { id: 52, name: "ABILITY_HYPER_CUTTER" },
+    AbilityNameRow { id: 53, name: "ABILITY_PICKUP" },
+    AbilityNameRow { id: 54, name: "ABILITY_TRUANT" },
+    AbilityNameRow { id: 55, name: "ABILITY_HUSTLE" },
+    AbilityNameRow { id: 56, name: "ABILITY_CUTE_CHARM" },
+    AbilityNameRow { id: 57, name: "ABILITY_PLUS" },
+    AbilityNameRow { id: 58, name: "ABILITY_MINUS" },
+    AbilityNameRow { id: 59, name: "ABILITY_FORECAST" },
+    AbilityNameRow { id: 60, name: "ABILITY_STICKY_HOLD" },
+    AbilityNameRow { id: 61, name: "ABILITY_SHED_SKIN" },
+    AbilityNameRow { id: 62, name: "ABILITY_GUTS" },
+    AbilityNameRow { id: 63, name: "ABILITY_MARVEL_SCALE" },
+    AbilityNameRow { id: 64, name: "ABILITY_LIQUID_OOZE" },
+    AbilityNameRow { id: 65, name: "ABILITY_OVERGROW" },
+    AbilityNameRow { id: 66, name: "ABILITY_BLAZE" },
+    AbilityNameRow { id: 67, name: "ABILITY_TORRENT" },
+    AbilityNameRow { id: 68, name: "ABILITY_SWARM" },
+    AbilityNameRow { id: 69, name: "ABILITY_ROCK_HEAD" },
+    AbilityNameRow { id: 70, name: "ABILITY_DROUGHT" },
+    AbilityNameRow { id: 71, name: "ABILITY_ARENA_TRAP" },
+    AbilityNameRow { id: 72, name: "ABILITY_VITAL_SPIRIT" },
+    AbilityNameRow { id: 73, name: "ABILITY_WHITE_SMOKE" },
+    AbilityNameRow { id: 74, name: "ABILITY_PURE_POWER" },
+    AbilityNameRow { id: 75, name: "ABILITY_SHELL_ARMOR" },
+    AbilityNameRow { id: 76, name: "ABILITY_CACOPHONY" },
+    AbilityNameRow { id: 77, name: "ABILITY_AIR_LOCK" },
+];
+
+/// Looks up a canonical ability symbol with JavaScript-number equality.  The
+/// live-history port accepts `f64` because its TS source accepts a `number`;
+/// fractional, non-finite, and out-of-range ids naturally remain unknown.
+#[must_use]
+pub fn ability_name_by_id(ability_id: f64) -> Option<&'static str> {
+    ABILITY_NAME_BY_ID
+        .iter()
+        .find(|row| f64::from(row.id) == ability_id)
+        .map(|row| row.name)
+}
+
 /// `SPECIES_UNOWN`'s id, used by the initial-rental selection loop's unown
 /// rejection (reference/pokeemerald/src/battle_factory.c:562-563). Source:
 /// src/data/gen/species-stats.json.
