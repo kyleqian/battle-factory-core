@@ -248,16 +248,44 @@ describe.skipIf(!wasmAvailable)("Factory DecisionPolicy native/WASM complete par
     };
     const duplicate = createBattleCommandRequest({ kind: "command", requestId: 4, side: "trainer", battler: 1, legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 0 }, { kind: "use-move", moveSlot: 0, targetBattler: 1 }] });
     const forced = createBattleForcedSwitchRequest({ kind: "forced-switch", requestId: 5, side: "trainer", battler: 1, faintedPartyIndex: 0, legalPartyIndexes: [1] });
+    const withSwitch = createBattleCommandRequest({ kind: "command", requestId: 7, side: "trainer", battler: 1, legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 0 }, { kind: "switch", partyIndex: 2 }] });
+    const player = createBattleCommandRequest({ kind: "command", requestId: 8, side: "player", battler: 0, legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 1 }] });
+    const moveNone = { ...maskBase, view: { ...maskBase.view, moves: [0, 86, 69, 273] as const } };
     for (const input of [
       { ...maskBase, request: duplicate },
       { ...maskBase, request: forced },
+      { ...maskBase, request: withSwitch },
+      { ...maskBase, request: player },
+      moveNone,
       { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, factoryWinStreak: 14 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, factoryWinStreak: 28 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, trainerOpponentId: 1022 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, levelMode: 1 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, battleMode: 1 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, levelMode: 3 as 0 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, battleMode: 2 as 0 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, factoryWinStreak: 65_536 } } },
+      { ...maskBase, view: { ...maskBase.view, factory: { ...maskBase.view.factory, trainerOpponentId: 65_536 } } },
     ] as MaskZeroDecisionInput[]) {
       expect(thrownMessage(() => native.chooseFactoryAiMaskZeroDecision(input)))
         .toBe(thrownMessage(() => ts.chooseFactoryAiMaskZeroDecision(input)));
     }
-    const unknown: ScoredDecisionInput = { view: scoredView(28, [999, 150, 150, 150]), request: request(1), rng: { value: 1, calls: 0 } };
-    expect(thrownMessage(() => native.chooseFactoryAiScoredDecision(unknown)))
-      .toBe(thrownMessage(() => ts.chooseFactoryAiScoredDecision(unknown)));
+    const scoredBase: ScoredDecisionInput = { view: scoredView(28), request: request(1), rng: { value: 1, calls: 0 } };
+    for (const input of [
+      { ...scoredBase, view: scoredView(0) },
+      { ...scoredBase, request: forced },
+      { ...scoredBase, request: withSwitch },
+      { ...scoredBase, request: duplicate },
+      { ...scoredBase, request: player },
+      { ...scoredBase, view: scoredView(28, [0, 150, 150, 150]) },
+      { ...scoredBase, view: scoredView(28, [999, 150, 150, 150]) },
+      { ...scoredBase, view: { ...scoredBase.view, factory: { ...scoredBase.view.factory, levelMode: 3 as 0 } } },
+      { ...scoredBase, view: { ...scoredBase.view, factory: { ...scoredBase.view.factory, battleMode: 2 as 0 } } },
+      { ...scoredBase, view: { ...scoredBase.view, factory: { ...scoredBase.view.factory, factoryWinStreak: 65_536 } } },
+      { ...scoredBase, view: { ...scoredBase.view, factory: { ...scoredBase.view.factory, trainerOpponentId: 65_536 } } },
+    ] as ScoredDecisionInput[]) {
+      expect(thrownMessage(() => native.chooseFactoryAiScoredDecision(input)))
+        .toBe(thrownMessage(() => ts.chooseFactoryAiScoredDecision(input)));
+    }
   });
 });
