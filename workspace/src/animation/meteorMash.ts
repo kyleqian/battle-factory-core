@@ -31,6 +31,8 @@ export interface MeteorMashTwinkleVariant {
 export interface MeteorMashMiniStar extends MeteorMashTwinkleVariant {
   readonly index: number;
   readonly parentIndex: 0 | 1 | 2;
+  readonly slot: number;
+  readonly initialized: boolean;
   readonly localAge: number;
   readonly x: number;
   readonly y: number;
@@ -56,6 +58,7 @@ export interface MeteorMashState {
   readonly spinningHandMatrix: BlazeKickAffineMatrix | null;
   readonly hitsplat: boolean;
   readonly targetX2: number;
+  readonly targetDisplayedX2: number;
   readonly shakeTaskActive: boolean;
   readonly restoreActive: boolean;
 }
@@ -65,6 +68,65 @@ const STAR_ARGS = [
   { x: -112, destinationX: 8 },
   { x: -80, destinationX: 40 },
 ] as const;
+const STAR_START_AGES = [
+  METEOR_MASH_FIRST_STAR_AGE,
+  METEOR_MASH_SECOND_STAR_AGE,
+  METEOR_MASH_THIRD_STAR_AGE,
+] as const;
+const STAR_SLOTS = [3, 12, 38] as const;
+const MINI_STAR_SPAWNS = ([0, 1, 2] as const)
+  .flatMap((parentIndex) => Array.from({ length: 16 }, (_, spawnIndex) => ({
+    parentIndex,
+    spawnAge: STAR_START_AGES[parentIndex] + spawnIndex * 2,
+  })))
+  .sort((left, right) => left.spawnAge - right.spawnAge
+    || left.parentIndex - right.parentIndex);
+
+interface MiniStarAllocation {
+  readonly slot: number;
+  readonly initializationDelay: 0 | 1;
+}
+
+/**
+ * Reproduce CreateSprite's lowest-free-slot allocation at each parent callback.
+ * A newly created sprite below its parent misses the current callback sweep,
+ * so its Random2/tile/y initialization happens on the following source row.
+ */
+function allocateMiniStarSlots(): readonly MiniStarAllocation[] {
+  const allocations: MiniStarAllocation[] = [];
+  for (const spawn of MINI_STAR_SPAWNS) {
+    const parentSlot = STAR_SLOTS[spawn.parentIndex];
+    const occupied = new Set([0, 1, 2, 6, 8, 60, 61, 62, 63]);
+    STAR_START_AGES.forEach((startAge, index) => {
+      const terminalAge = startAge + 30;
+      if (spawn.spawnAge >= startAge
+        && (spawn.spawnAge < terminalAge
+          || (spawn.spawnAge === terminalAge
+            && STAR_SLOTS[index]! >= parentSlot))) {
+        occupied.add(STAR_SLOTS[index]!);
+      }
+    });
+    if (spawn.spawnAge >= 102 && spawn.spawnAge <= 154) occupied.add(12);
+    if (spawn.spawnAge >= 124 && spawn.spawnAge <= 133) occupied.add(14);
+    MINI_STAR_SPAWNS.slice(0, allocations.length).forEach((prior, index) => {
+      const allocation = allocations[index]!;
+      const destroyAge = prior.spawnAge + 61 + allocation.initializationDelay;
+      if (spawn.spawnAge < destroyAge
+        || (spawn.spawnAge === destroyAge && allocation.slot >= parentSlot)) {
+        occupied.add(allocation.slot);
+      }
+    });
+    let slot = 0;
+    while (occupied.has(slot)) slot += 1;
+    allocations.push({
+      slot,
+      initializationDelay: slot < parentSlot ? 1 : 0,
+    });
+  }
+  return allocations;
+}
+
+const MINI_STAR_ALLOCATIONS = allocateMiniStarSlots();
 
 function truncDiv(numerator: number, denominator: number): number {
   const value = Math.trunc(numerator / denominator);
@@ -76,11 +138,7 @@ function starAtAge(
   age: number,
   geometry: MeteorMashGeometry,
 ): MeteorMashStar | null {
-  const start = [
-    METEOR_MASH_FIRST_STAR_AGE,
-    METEOR_MASH_SECOND_STAR_AGE,
-    METEOR_MASH_THIRD_STAR_AGE,
-  ][index]!;
+  const start = STAR_START_AGES[index];
   const local = age - start;
   if (local < 0 || local > 29) return null;
   // The source callback evaluates data[5] before incrementing it. The first
@@ -94,7 +152,7 @@ function starAtAge(
   const destinationY = geometry.targetCenter.y + 32;
   return {
     index,
-    slot: [3, 12, 38][index]!,
+    slot: STAR_SLOTS[index],
     x: initialX,
     y: initialY,
     x2: truncDiv((destinationX - initialX) * local, 30),
@@ -125,6 +183,7 @@ export function meteorMashAtAge(
       spinningHandMatrix: null,
       hitsplat: false,
       targetX2: 0,
+      targetDisplayedX2: 0,
       shakeTaskActive: false,
       restoreActive: false,
     };
@@ -132,26 +191,19 @@ export function meteorMashAtAge(
   const stars = ([0, 1, 2] as const)
     .map((index) => starAtAge(index, age, geometry))
     .filter((star): star is MeteorMashStar => star !== null);
-  const spawnEvents = ([0, 1, 2] as const)
-    .flatMap((parentIndex) => Array.from({ length: 16 }, (_, spawnIndex) => ({
-      parentIndex,
-      spawnAge: [
-        METEOR_MASH_FIRST_STAR_AGE,
-        METEOR_MASH_SECOND_STAR_AGE,
-        METEOR_MASH_THIRD_STAR_AGE,
-      ][parentIndex]! + spawnIndex * 2,
-    })))
-    .sort((left, right) => left.spawnAge - right.spawnAge
-      || left.parentIndex - right.parentIndex);
-  const miniStars = spawnEvents.flatMap((event, index): MeteorMashMiniStar[] => {
+  const miniStars = MINI_STAR_SPAWNS.flatMap((event, index): MeteorMashMiniStar[] => {
     const variant = geometry.twinkles?.[index];
-    const localAge = age - event.spawnAge;
-    if (!variant || localAge < 0 || localAge > 60) return [];
+    const allocation = MINI_STAR_ALLOCATIONS[index]!;
+    const globalAge = age - event.spawnAge;
+    const localAge = Math.max(0, globalAge - allocation.initializationDelay);
+    if (!variant || globalAge < 0
+      || globalAge > 60 + allocation.initializationDelay) return [];
+    const initialized = globalAge >= allocation.initializationDelay;
     const parent = starAtAge(event.parentIndex, event.spawnAge, geometry);
     // The terminal even callback spawns its mini immediately before destroying
     // the parent, so derive that endpoint even though the parent is no longer live.
     const trajectoryAge = event.spawnAge
-      - [METEOR_MASH_FIRST_STAR_AGE, METEOR_MASH_SECOND_STAR_AGE, METEOR_MASH_THIRD_STAR_AGE][event.parentIndex]!;
+      - STAR_START_AGES[event.parentIndex];
     const args = STAR_ARGS[event.parentIndex];
     const sideSign = geometry.targetSide === "player" ? -1 : 1;
     const initialX = geometry.targetCenter.x + sideSign * args.x;
@@ -183,10 +235,12 @@ export function meteorMashAtAge(
     return [{
       index,
       parentIndex: event.parentIndex,
+      slot: allocation.slot,
+      initialized,
       localAge,
       x: x + x2,
       y: y + y2,
-      invisible,
+      invisible: initialized ? invisible : false,
       ...variant,
     }];
   });
@@ -213,6 +267,24 @@ export function meteorMashAtAge(
   const hand = age >= METEOR_MASH_THIRD_STAR_AGE && age <= 154;
   const shakeTaskActive = age >= METEOR_MASH_IMPACT_AGE
     && age <= METEOR_MASH_SHAKE_LAST_AGE;
+  const targetX2 = shakeTaskActive
+    // This invocation's first visible target write is the negative phase at
+    // source age 124. The source callback has already consumed one task
+    // step by the pointer row; do not inherit the common long-schedule
+    // helper's creation anchor.
+    ? shakeMon2OffsetAtTick(5, 0, 20, 1, age - METEOR_MASH_IMPACT_AGE + 1).x2
+    : 0;
+  // The target is copied through monbg before the battler callback sweep.
+  // Its initial task row does not reach scanout; later rows use the inverse
+  // OBJ displacement, and the final negative phase remains in hardware OAM
+  // for the two transfer rows after task teardown.
+  const targetDisplayedX2 = age > METEOR_MASH_IMPACT_AGE
+    && age <= METEOR_MASH_SHAKE_LAST_AGE
+    ? -targetX2
+    : age > METEOR_MASH_SHAKE_LAST_AGE
+      && age <= METEOR_MASH_SHAKE_LAST_AGE + 2
+      ? -5
+      : 0;
   return {
     active: true,
     background: age >= 29 && age < 194 ? "cosmic" : "battle",
@@ -228,13 +300,8 @@ export function meteorMashAtAge(
         : { pa: 256, pb: 0, pc: 0, pd: 256 })
       : null,
     hitsplat: age >= METEOR_MASH_IMPACT_AGE && age <= 133,
-    targetX2: shakeTaskActive
-      // This invocation's first visible target write is the negative phase at
-      // source age 124. The source callback has already consumed one task
-      // step by the pointer row; do not inherit the common long-schedule
-      // helper's creation anchor.
-      ? shakeMon2OffsetAtTick(5, 0, 20, 1, age - METEOR_MASH_IMPACT_AGE + 1).x2
-      : 0,
+    targetX2,
+    targetDisplayedX2,
     shakeTaskActive,
     restoreActive: restore,
   };

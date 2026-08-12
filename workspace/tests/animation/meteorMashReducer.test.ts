@@ -40,6 +40,13 @@ describe("Meteor Mash source reducer", () => {
       shakeTaskActive: true,
     });
     expect(meteorMashAtAge(162, opponentTarget).shakeTaskActive).toBe(false);
+    expect(meteorMashAtAge(124, opponentTarget).targetDisplayedX2).toBe(0);
+    expect(meteorMashAtAge(125, opponentTarget).targetDisplayedX2).toBe(5);
+    expect(meteorMashAtAge(126, opponentTarget).targetDisplayedX2).toBe(-5);
+    expect(meteorMashAtAge(161, opponentTarget).targetDisplayedX2).toBe(5);
+    expect(meteorMashAtAge(162, opponentTarget).targetDisplayedX2).toBe(-5);
+    expect(meteorMashAtAge(163, opponentTarget).targetDisplayedX2).toBe(-5);
+    expect(meteorMashAtAge(164, opponentTarget).targetDisplayedX2).toBe(0);
     expect(meteorMashAtAge(METEOR_MASH_RESTORE_AGE, opponentTarget).restoreActive).toBe(true);
     expect(meteorMashAtAge(METEOR_MASH_FRAME_COUNT, opponentTarget).active).toBe(false);
     expect(meteorMashAtAge(213, opponentTarget).active).toBe(false);
@@ -60,8 +67,15 @@ describe("Meteor Mash source reducer", () => {
       (star) => star.index === 0 && star.localAge === 60,
     )).toBe(true);
     expect(meteorMashAtAge(109, geometry).miniStars.some((star) => star.index === 0)).toBe(false);
+    expect(meteorMashAtAge(132, geometry).miniStars.at(-1)).toMatchObject({
+      index: 47, slot: 19, initialized: false, localAge: 0,
+    });
+    expect(meteorMashAtAge(133, geometry).miniStars.at(-1)).toMatchObject({
+      index: 47, slot: 19, initialized: true, localAge: 0,
+    });
     expect(meteorMashAtAge(192, geometry).miniStars).toHaveLength(1);
-    expect(meteorMashAtAge(193, geometry).miniStars).toHaveLength(0);
+    expect(meteorMashAtAge(193, geometry).miniStars).toHaveLength(1);
+    expect(meteorMashAtAge(194, geometry).miniStars).toHaveLength(0);
   });
 
   it("pins the two BG_COSMIC blackout/swap/restore register schedules", () => {

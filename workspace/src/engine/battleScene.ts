@@ -34615,38 +34615,53 @@ export function renderSceneOnMovePresentation(
       });
     };
     drawBackground();
-    drawSpriteSheet(
+    const drawTarget = () => drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x + targetIdle.x2 + displayed.targetX2,
+      view.target.geometry.spriteCorner.x
+        + (displayed.age < 124 ? targetIdle.x2 : 0)
+        + view.targetDisplayedX2,
       view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
-    const impactBackdrop = fb.slice();
+    drawTarget();
     const drawEffects = () => {
-      for (const star of displayed.stars) {
-        drawSpriteSheet(
-          fb,
-          subTileset(meteorMashArt.goldStars.tileset, 0, 4),
-          meteorMashArt.goldStars.palette,
-          star.x + star.x2 - 8,
-          star.y + star.y2 - 8,
-        );
-      }
-      for (const mini of displayed.miniStars) {
-        if (mini.invisible) continue;
-        drawSpriteSheet(
-          fb,
-          subTileset(meteorMashArt.goldStars.tileset, mini.tile, 1),
-          meteorMashArt.goldStars.palette,
-          mini.x - 4,
-          mini.y + mini.y2 - 4,
-        );
+      const stars = [
+        ...displayed.stars.map((sprite) => ({ kind: "parent" as const, sprite })),
+        ...displayed.miniStars.map((sprite) => ({ kind: "mini" as const, sprite })),
+      ].sort((left, right) => right.sprite.slot - left.sprite.slot);
+      for (const item of stars) {
+        if (item.kind === "parent") {
+          const star = item.sprite;
+          drawSpriteSheet(
+            fb,
+            subTileset(meteorMashArt.goldStars.tileset, 0, 2),
+            meteorMashArt.goldStars.palette,
+            star.x + star.x2 - 8,
+            star.y + star.y2 - 8,
+          );
+        } else {
+          const mini = item.sprite;
+          if (mini.invisible) continue;
+          drawSpriteSheet(
+            fb,
+            {
+              columns: 1,
+              rows: 1,
+              tiles: [meteorMashArt.goldStars.tileset.tiles[
+                mini.initialized ? mini.tile : 0
+              ]!],
+            },
+            meteorMashArt.goldStars.palette,
+            mini.x - 4,
+            mini.y + (mini.initialized ? mini.y2 : 0) - 4,
+          );
+        }
       }
       if (displayed.spinningHand && displayed.spinningHandMatrix) {
         drawSpriteSheetAffineRotate(
           fb,
-          subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+          subTileset(battleAnimHandsAndFeet.tileset, 0, 4),
           battleAnimHandsAndFeet.palette,
           view.target.geometry.animationCenter.x,
           view.target.geometry.animationCenter.y,
@@ -34659,7 +34674,11 @@ export function renderSceneOnMovePresentation(
         );
       }
       if (displayed.hitsplat) {
-        drawSpriteSheetAffineStretchBlendedOverFb(
+        // The sprite requests OBJ blend, but this script never installs a
+        // BLDCNT target-2 mask (captured BLDCNT/BLDALPHA stay zero). With no
+        // eligible second target, hardware presents the first-target texel
+        // opaquely despite objMode=semi-transparent.
+        drawSpriteSheetAffineStretch(
           fb,
           battleAnimHitsplat.tileset,
           battleAnimHitsplat.palette,
@@ -34667,10 +34686,9 @@ export function renderSceneOnMovePresentation(
           view.target.geometry.animationCenter.y - 16,
           303,
           303,
-          12,
-          8,
-          false,
-          impactBackdrop,
+          0,
+          { r: 0, g: 0, b: 0 },
+          0,
         );
       }
     };

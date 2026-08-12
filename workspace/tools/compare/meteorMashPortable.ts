@@ -3,12 +3,13 @@
 // equality remains a separate promotion gate.
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { readFileSync, realpathSync } from "node:fs";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { PNG } from "pngjs";
 import { meteorMashAtAge } from "../../src/animation/meteorMash.ts";
 import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
-import { createScratchDir } from "../lib/scratch.ts";
+import { createScratchDir, keepScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
   schema: string;
@@ -128,6 +129,8 @@ function expectedMiniInvisible(localAge: number): boolean {
 function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
   framebufferMatches: number;
   closest: readonly (readonly [number, number])[];
+  worst: readonly (readonly [number, number])[];
+  mismatchPhases: readonly string[];
 } {
   const rows = probe.frames;
   if (!same(probe.sourceWindow, fixture.denseWindow)
@@ -157,6 +160,7 @@ function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
   const geometry = {
     targetSide: playerTarget ? "player" as const : "opponent" as const,
     targetCenter: playerTarget ? { x: 72, y: 88 } : { x: 176, y: 42 },
+    twinkles: fixture.twinkles,
   };
   const stage = createSceneOnMovePresentation({
     move: "METEOR_MASH",
@@ -167,6 +171,14 @@ function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
   } as never);
   let framebufferMatches = 0;
   const framebufferDiffs: Array<readonly [number, number]> = [];
+  const mismatchRows: Array<{
+    age: number;
+    differences: number;
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  }> = [];
   rows.forEach((row, age) => {
     const reduced = meteorMashAtAge(age, geometry);
     const parents = row.sprites.filter((sprite) =>
@@ -175,9 +187,10 @@ function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
       reduced.stars.map((star) => [star.x, star.y, star.x2, star.y2, star.callbacks]))) {
       throw new Error(`parent-star reducer drift at age ${age}`);
     }
-    for (const mini of row.sprites.filter((sprite) =>
-      sprite.template.symbol === "gMiniTwinklingStarSpriteTemplate"
-      && sprite.callback.symbol === "AnimMiniTwinklingStar_Step")) {
+    const sourceMinis = row.sprites.filter((sprite) =>
+      sprite.template.symbol === "gMiniTwinklingStarSpriteTemplate");
+    for (const mini of sourceMinis.filter((sprite) =>
+      sprite.callback.symbol === "AnimMiniTwinklingStar_Step")) {
       const localAge = mini.data[0]!;
       const tile = mini.attr[2]! & 0x3ff;
       if (localAge < 0 || localAge > 60 || ![309, 310].includes(tile)
@@ -186,6 +199,34 @@ function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
         throw new Error(`mini-star lifecycle drift at age ${age}, slot ${mini.slot}`);
       }
     }
+    const sourceMiniState = sourceMinis.map((mini) => [
+      mini.slot,
+      mini.callback.symbol === "AnimMiniTwinklingStar_Step",
+      mini.data[0],
+      mini.x,
+      mini.y,
+      mini.callback.symbol === "AnimMiniTwinklingStar_Step" ? mini.y2 : 0,
+      mini.attr[2]! & 0x3ff,
+      Boolean(mini.invisible),
+    ]);
+    const reducedMiniState = reduced.miniStars
+      .slice()
+      .sort((left, right) => left.slot - right.slot)
+      .map((mini) => [
+        mini.slot,
+        mini.initialized,
+        mini.localAge,
+        mini.x,
+        mini.y,
+        mini.initialized ? mini.y2 : 0,
+        mini.initialized ? 305 + mini.tile : 305,
+        mini.invisible,
+      ]);
+    if (!same(sourceMiniState, reducedMiniState)) {
+      throw new Error(
+        `mini-star reducer drift at age ${age}: source=${JSON.stringify(sourceMiniState)} reduced=${JSON.stringify(reducedMiniState)}`,
+      );
+    }
     const engine: EngineState = {
       ...createInitialState(),
       rngMode: "frontierBattle",
@@ -193,13 +234,53 @@ function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
     };
     const app = render(engine);
     const raw = readFileSync(join(rgbDir, `${String(row.frame).padStart(5, "0")}.rgb`));
-    let differences = 0;
+    let differences = 0, minX = 240, minY = 160, maxX = -1, maxY = -1;
     for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
       const rgba = pixel * 4, rgb = pixel * 3;
       if (app[rgba] !== raw[rgb] || app[rgba + 1] !== raw[rgb + 1]
-        || app[rgba + 2] !== raw[rgb + 2]) differences += 1;
+        || app[rgba + 2] !== raw[rgb + 2]) {
+        differences += 1;
+        const x = pixel % 240, y = Math.floor(pixel / 240);
+        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+      }
     }
     if (differences === 0) framebufferMatches += 1;
+    else {
+      mismatchRows.push({ age, differences, minX, minY, maxX, maxY });
+      if (process.env.METEOR_MASH_KEEP_DIAGNOSTICS === "1"
+        && [49, 52, 78, 102, 124, 134, 170, 194, 213].includes(age)) {
+        const witnesses: string[] = [];
+        const oracleRgba = Buffer.alloc(240 * 160 * 4);
+        const diffRgba = Buffer.alloc(240 * 160 * 4);
+        for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+          const rgba = pixel * 4, rgb = pixel * 3;
+          oracleRgba[rgba] = raw[rgb]!;
+          oracleRgba[rgba + 1] = raw[rgb + 1]!;
+          oracleRgba[rgba + 2] = raw[rgb + 2]!;
+          oracleRgba[rgba + 3] = 255;
+          const differs = app[rgba] !== raw[rgb]
+            || app[rgba + 1] !== raw[rgb + 1]
+            || app[rgba + 2] !== raw[rgb + 2];
+          if (differs && witnesses.length < 12) {
+            witnesses.push(
+              `${pixel % 240},${Math.floor(pixel / 240)}:`
+              + `${raw[rgb]},${raw[rgb + 1]},${raw[rgb + 2]}`
+              + `>${app[rgba]},${app[rgba + 1]},${app[rgba + 2]}`,
+            );
+          }
+          diffRgba[rgba] = differs ? 255 : app[rgba]!;
+          diffRgba[rgba + 1] = differs ? 0 : app[rgba + 1]!;
+          diffRgba[rgba + 2] = differs ? 255 : app[rgba + 2]!;
+          diffRgba[rgba + 3] = 255;
+        }
+        const output = dirname(rgbDir);
+        writeFileSync(join(output, `oracle-age-${age}.png`), PNG.sync.write({ width: 240, height: 160, data: oracleRgba }));
+        writeFileSync(join(output, `app-age-${age}.png`), PNG.sync.write({ width: 240, height: 160, data: Buffer.from(app) }));
+        writeFileSync(join(output, `diff-age-${age}.png`), PNG.sync.write({ width: 240, height: 160, data: diffRgba }));
+        console.log(`  age ${age}: ${differences}px bbox ${minX},${minY}-${maxX},${maxY}; witnesses ${witnesses.join(" ")}`);
+      }
+    }
     framebufferDiffs.push([age, differences]);
   });
   const expectedBldy = rows.map((_, age) => meteorMashAtAge(age, geometry).fadeCoefficient);
@@ -209,9 +290,34 @@ function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
   if (rows[11]!.registers.bldcnt !== 232 || rows[47]!.registers.bldcnt !== 0
     || rows[176]!.registers.bldcnt !== 232
     || rows.at(-2)!.registers.bldcnt !== 0) throw new Error("BG_COSMIC BLDCNT drift");
+  const mismatchPhases: string[] = [];
+  for (let index = 0; index < mismatchRows.length;) {
+    const first = mismatchRows[index]!;
+    let last = first;
+    let previousAge = first.age - 1;
+    let pixels = 0, peak = 0;
+    let minX = 240, minY = 160, maxX = -1, maxY = -1;
+    while (index < mismatchRows.length
+      && mismatchRows[index]!.age === previousAge + 1) {
+      const row = mismatchRows[index]!;
+      last = row;
+      previousAge = row.age;
+      pixels += row.differences;
+      peak = Math.max(peak, row.differences);
+      minX = Math.min(minX, row.minX); minY = Math.min(minY, row.minY);
+      maxX = Math.max(maxX, row.maxX); maxY = Math.max(maxY, row.maxY);
+      index += 1;
+    }
+    mismatchPhases.push(
+      `${first.age}..${last.age}: ${pixels}px total, ${peak}px peak, bbox ${minX},${minY}-${maxX},${maxY}`,
+    );
+  }
+  const rankedDiffs = framebufferDiffs.sort((left, right) => left[1] - right[1]);
   return {
     framebufferMatches,
-    closest: framebufferDiffs.sort((left, right) => left[1] - right[1]).slice(0, 8),
+    closest: rankedDiffs.slice(0, 8),
+    worst: rankedDiffs.slice(-12).reverse(),
+    mismatchPhases,
   };
 }
 
@@ -244,11 +350,16 @@ function run(fixturePath: string): void {
     || map !== fixture.normalizedMapSha256) {
     throw new Error(`${fixturePath}: receipt drift evidence=${evidence} raw=${raw} map=${map}`);
   }
-  const { framebufferMatches, closest } = verifyMechanisms(fixture, probe, rgbDir);
+  const { framebufferMatches, closest, worst, mismatchPhases } = verifyMechanisms(fixture, probe, rgbDir);
   if (fixture.expected && framebufferMatches !== fixture.expected.framebufferMatches) {
     throw new Error(`${fixturePath}: framebuffer count ${framebufferMatches}`);
   }
   console.log(`${fixture.orientation}: ${probe.frames.length}/${probe.frames.length} source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/map exact; production framebuffer ${framebufferMatches}/${probe.frames.length} (closest age/diff ${JSON.stringify(closest)}); evidence ${evidence.slice(0, 12)} raw ${raw.slice(0, 12)} map ${map.slice(0, 12)}`);
+  console.log(`  mismatch phases: ${mismatchPhases.join("; ")}`);
+  console.log(`  worst age/diff: ${JSON.stringify(worst)}`);
+  if (process.env.METEOR_MASH_KEEP_DIAGNOSTICS === "1") {
+    console.log(`  diagnostics: ${keepScratchDir(scratch)}`);
+  }
 }
 
 for (const fixturePath of fixturePaths) run(fixturePath);
