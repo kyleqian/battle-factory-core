@@ -5227,6 +5227,18 @@
    "goal": "MOVE_HARDEN independently proves the complete permanent=FALSE MetallicShine body in both orientations at 101/101 component/task/RAM/register/hardware-palette/software+hardware-OAM and framebuffer frames, reproduced twice. MOVE_POISON_TAIL independently proves permanent=TRUE custom RGB(24,6,23), three shine sweeps, mirrored lunge/hitsplat/ShakeMon, explicit palette/monbg/alpha teardown, and the shared PoisonBubblesEffect at 187/187 component/hardware/audio and framebuffer frames in both orientations, reproduced twice. MOVE_STEEL_WING (197/197) and MOVE_IRON_DEFENSE (101/101, shine + BG-only complex palette pulse) independently prove the non-permanent shine body through complete dense both-orientation windows, reproduced twice. MOVE_METAL_CLAW (140/140) independently proves the non-permanent shine followed by the two-strike claw-slash/lunge/shake body in both orientations, reproduced twice. IRON TAIL remains unsupported pending its own evidence."
   },
   {
+   "id": "dirt-plume-fissure-dig",
+   "components": [
+    "asset:ANIM_TAG_MUD_SAND",
+    "sprite:gDirtPlumeSpriteTemplate"
+   ],
+   "representatives": [
+    "MOVE_FISSURE",
+    "MOVE_DIG"
+   ],
+   "goal": "MOVE_FISSURE remains unsupported at a source/staging checkpoint: its exclusive 0x082ccb7e..0x082ccca1 interval, complete 12-component graph, lowest legal Level-50 set-564 DUGTRIO carrier, complete bilateral Scene-ON parties, and pointer-bounded full-state probe mode are pinned. The legal endpoint staging runs in both orientations, but the configured local vendor/mgba-venv has no importable mgba module, so no dense probe, change map, reducer/seam, or framebuffer acceptance is claimed. MOVE_DIG independently has 17 components and shares only ANIM_TAG_MUD_SAND plus gDirtPlumeSpriteTemplate; its distinct dirt-mound, DigDown/DigUp movement, static-monbg, hitsplat, and ShakeMon bodies remain unsupported, and it is not promoted."
+  },
+  {
    "id": "horizontal-shake-complex-bg-palette",
    "components": [
     "task:AnimTask_HorizontalShake",

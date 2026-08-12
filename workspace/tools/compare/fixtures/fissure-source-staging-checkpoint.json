@@ -1,0 +1,41 @@
+{
+  "schema": "fissure-source-staging-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "FISSURE",
+  "status": "unsupported",
+  "sourceSymbols": {
+    "Move_FISSURE": 137153406,
+    "Move_DIG": 137153697
+  },
+  "components": 12,
+  "lowestLevel50Carrier": {
+    "setId": 564,
+    "label": "FRONTIER_MON_DUGTRIO_3",
+    "species": "SPECIES_DUGTRIO"
+  },
+  "siblingAudit": {
+    "move": "MOVE_DIG",
+    "components": 17,
+    "shared": [
+      "asset:ANIM_TAG_MUD_SAND",
+      "sprite:gDirtPlumeSpriteTemplate"
+    ],
+    "promoted": false
+  },
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-fissure-player-dugtrio-opponent-onix.json",
+      "endpointFrame": 834,
+      "endpointSha256": "bf92e5c35b84709f06f01023391f585c890c968dadfce467a75e9dd800cc887d"
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-fissure-opponent-dugtrio-player-onix.json",
+      "endpointFrame": 834,
+      "endpointSha256": "c631d9444ef9bfa5d737258dfa6d61eaff80bf3c45cae6901be71277b632085d"
+    }
+  ],
+  "denseEvidence": null,
+  "blocker": "The configured vendor/mgba-venv has no importable mgba module; tools/run-mgba-probe.py therefore cannot execute the pointer-bounded probe in this worktree. Endpoint captures are staging validation only and confer no pixel acceptance."
+}
