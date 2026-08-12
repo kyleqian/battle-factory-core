@@ -64,6 +64,22 @@ const activeAges = (frames: EvidenceFrame[], symbol: string): number[] => frames
 );
 
 describe("MOVE_FISSURE dense unsupported checkpoint", () => {
+  it.each([
+    "tools/compare/fixtures/fissure-player-dugtrio-opponent-onix.json",
+    "tools/compare/fixtures/fissure-opponent-dugtrio-player-onix.json",
+  ])("pins the staged portable gate without promoting %s", (path) => {
+    const portable = JSON.parse(readFileSync(path, "utf8"));
+    expect(portable.acceptance).toEqual({
+      status: "staged",
+      freshRuns: 2,
+      reducerRows: 254,
+      componentRows: 254,
+      hardwareLatchRows: 253,
+      framebufferRows: 166,
+      residualAges: "50..59,61,64 dirt/target overlap; 155..230 BG_FISSURE target priority",
+    });
+  });
+
   it.each(cases)("retains twice-fresh complete $orientation state and raw RGB", (fixture) => {
     const row = receipt.denseEvidence.orientations.find(
       (candidate: { orientation: string }) => candidate.orientation === fixture.orientation,
