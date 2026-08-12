@@ -101,10 +101,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   EVASION_UP_2, EVASION_DOWN_2, SPECIAL_DEFENSE_DOWN, SPECIAL_DEFENSE_UP,
   SPEED_UP (base variants; their _2 siblings do carry moves). Verified
   against moves.json.
-- **Next:** M5d CheckViability batching scout is RUNNING (docs-only —
-  partition the 122 CV table effects, M5b-doc pattern). Fold it, then
-  wind-down gates. Next session opens M5d-0 (CV preamble + shared infra)
-  per that doc.
+- **M5d batching scout folded (`abc54dfd`):**
+  `docs/rust-m5d-checkviability-batching.md` — CheckViability (9516
+  lines, 122 table effects, TS-side 598/598 complete) partitioned into
+  **M5d-0 (preamble+shared infra) then M5d-1..5** (13/29/30/22/28
+  effects, sum script-verified) with exact dispatch/handler/test ranges.
+  Key scout verdicts, supervisor spot-verified: CV does NOT reuse CBM's
+  draw plumbing (zero nextGetAbilityDraw hits — re-implements the
+  cascade inline; a TS duplication to preserve, not fix); Flatter
+  (M5d-5) calling Confuse (M5d-3) is the ONE cross-batch dependency
+  (Swagger rides with Confuse in-batch); CBM's Curse→BulkUp /
+  PsychUp→Haze reuse pairs do NOT transfer (independent CV bodies);
+  ~half the 90 dispatched handlers have NO ground-truth-doc backing
+  (both the module header and factory-ai-checkviability-ground-truth.md
+  are stale ~22-handler snapshots) — future workers go straight to
+  data/battle_ai_scripts.s. 89/122 EFFECT_* consts already exist in
+  factory_ai_check_bad_move.rs. Worker: sonnet, 21.4 min, 1 commit,
+  docs-only.
+- **Wind-down gates (this tree, supervisor-run, post-M5c):** cargo
+  **335/335** + fmt/clippy clean + wasm build, artifact rebuilt, parity
+  union (rng+damage+turn+rental+partyMember+aiMask+aiCbm) **757/757 in
+  wasm mode** (default mode covered inside the full suite), full npm
+  test **977 files / 9,527 passed / 1 pre-existing skip**, npm build
+  green, soak **vanilla 20/20 OK** + **full 60/60 OK**. No orphan
+  worker worktrees or branches; RUST_DEFERRED.md has no open entries.
+- **Next:** open M5d-0 (CV preamble + shared infra + probe machinery +
+  NotYetPorted barrier) per docs/rust-m5d-checkviability-batching.md,
+  then M5d-1..5 in order (only M5d-5 depends on M5d-3's Confuse
+  handler). Re-verify the conflict check at orient per the standing
+  M4+ rule.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
