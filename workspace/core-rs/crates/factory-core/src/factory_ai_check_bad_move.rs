@@ -236,6 +236,46 @@ pub const EFFECT_WATER_SPORT: u16 = 210; // battle_move_effects.h:214
 pub const EFFECT_CALM_MIND: u16 = 211; // battle_move_effects.h:215
 pub const EFFECT_DRAGON_DANCE: u16 = 212; // battle_move_effects.h:216
 
+// M5d-0 additions (`docs/rust-m5d-checkviability-batching.md` §5 "M5d-0"),
+// the 33 of `factoryAiCheckViability.ts`'s 122-entry `if_effect` table that
+// had no existing const here (89 others already did, reused unchanged) —
+// same registry, same `battle_move_effects.h` line-citation convention,
+// each verified against the header directly (not the batching scout, per
+// its own instruction to re-verify).
+pub const EFFECT_ABSORB: u16 = 3; // battle_move_effects.h:7
+pub const EFFECT_MIRROR_MOVE: u16 = 9; // battle_move_effects.h:13
+pub const EFFECT_ALWAYS_HIT: u16 = 17; // battle_move_effects.h:21
+pub const EFFECT_CONVERSION: u16 = 30; // battle_move_effects.h:34
+pub const EFFECT_RESTORE_HP: u16 = 32; // battle_move_effects.h:36
+pub const EFFECT_REST: u16 = 37; // battle_move_effects.h:41
+pub const EFFECT_TRAP: u16 = 42; // battle_move_effects.h:46
+pub const EFFECT_HIGH_CRITICAL: u16 = 43; // battle_move_effects.h:47
+pub const EFFECT_SPEED_DOWN_HIT: u16 = 70; // battle_move_effects.h:74
+pub const EFFECT_VITAL_THROW: u16 = 78; // battle_move_effects.h:82
+pub const EFFECT_PAIN_SPLIT: u16 = 91; // battle_move_effects.h:95
+pub const EFFECT_LOCK_ON: u16 = 94; // battle_move_effects.h:98
+pub const EFFECT_DESTINY_BOND: u16 = 98; // battle_move_effects.h:102
+pub const EFFECT_HEAL_BELL: u16 = 102; // battle_move_effects.h:106
+pub const EFFECT_THIEF: u16 = 105; // battle_move_effects.h:109
+pub const EFFECT_PROTECT: u16 = 111; // battle_move_effects.h:115
+pub const EFFECT_ENDURE: u16 = 116; // battle_move_effects.h:120
+pub const EFFECT_PURSUIT: u16 = 128; // battle_move_effects.h:132
+pub const EFFECT_MORNING_SUN: u16 = 132; // battle_move_effects.h:136
+pub const EFFECT_SYNTHESIS: u16 = 133; // battle_move_effects.h:137
+pub const EFFECT_MOONLIGHT: u16 = 134; // battle_move_effects.h:138
+pub const EFFECT_SEMI_INVULNERABLE: u16 = 155; // battle_move_effects.h:159
+pub const EFFECT_SOFTBOILED: u16 = 157; // battle_move_effects.h:161
+pub const EFFECT_FACADE: u16 = 169; // battle_move_effects.h:173
+pub const EFFECT_SMELLINGSALT: u16 = 171; // battle_move_effects.h:175
+pub const EFFECT_ROLE_PLAY: u16 = 178; // battle_move_effects.h:182
+pub const EFFECT_MAGIC_COAT: u16 = 183; // battle_move_effects.h:187
+pub const EFFECT_REVENGE: u16 = 185; // battle_move_effects.h:189
+pub const EFFECT_BRICK_BREAK: u16 = 186; // battle_move_effects.h:190
+pub const EFFECT_SKILL_SWAP: u16 = 191; // battle_move_effects.h:195
+pub const EFFECT_SNATCH: u16 = 195; // battle_move_effects.h:199
+pub const EFFECT_BLAZE_KICK: u16 = 200; // battle_move_effects.h:204
+pub const EFFECT_POISON_TAIL: u16 = 209; // battle_move_effects.h:213
+
 // === ABILITY_* ids ===========================================================
 //
 // src/data/gen/ability-item-hooks.json `.universes.abilities`, verified
