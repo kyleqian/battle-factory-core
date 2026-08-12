@@ -13,6 +13,8 @@
 
 pub mod damage_calc;
 pub mod damage_vectors_gen;
+pub mod factory_ai_check_bad_move;
+pub mod factory_ai_check_bad_move_vectors_gen;
 pub mod factory_ai_mask;
 pub mod factory_ai_mask_vectors_gen;
 pub mod gen_tables;
