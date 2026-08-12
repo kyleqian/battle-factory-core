@@ -103,7 +103,11 @@ export function swallowAtAge(
   const matrix = affineMatrixAtAge(age);
   const firstShake = shakeMon2OffsetAtTick(1, 0, 8, 2, age - 6);
   const secondShake = shakeMon2OffsetAtTick(2, 0, 12, 1, age - 46);
-  const shakeX = age >= 47 ? secondShake.x2 : firstShake.x2;
+  const shakeX = age >= 47 && age <= 68
+    ? secondShake.x2
+    : age >= 7 && age <= 28
+      ? firstShake.x2
+      : 0;
   const orbs: SwallowOrb[] = [];
   for (let wave = 0; wave < stockpiles; wave += 1) {
     for (let index = 0; index < ORB_X.length; index += 1) {

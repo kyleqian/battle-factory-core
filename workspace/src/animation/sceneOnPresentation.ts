@@ -844,7 +844,7 @@ export interface SceneOnPresentationBattler {
     | "DROWZEE"
     | "KRABBY"
     | "PELIPPER"
-    | "GULPIN"
+    | "NUMEL"
     | "CRAWDAUNT"
     | "SURSKIT"
     | "KOFFING"

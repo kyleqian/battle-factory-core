@@ -577,6 +577,7 @@ import leafBladeAsset from "../animation/assets/leaf-blade.json" with { type: "j
 import focusEnergyAsset from "../animation/assets/focus-energy.json" with { type: "json" };
 import endureAsset from "../animation/assets/endure.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
+import swallowAsset from "../animation/assets/swallow.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
 import furySwipesAsset from "../animation/assets/furySwipes.json" with { type: "json" };
@@ -960,6 +961,7 @@ import {
   sceneOnFocusEnergyView,
   sceneOnEndureView,
   sceneOnReversalView,
+  sceneOnSwallowView,
   sceneOnTailGlowView,
   sceneOnTailWhipView,
   sceneOnAgilityView,
@@ -1124,6 +1126,7 @@ import {
   type SceneOnFocusEnergyConfig,
   type SceneOnEndureConfig,
   type SceneOnReversalConfig,
+  type SceneOnSwallowConfig,
   type SceneOnTailGlowConfig,
   type SceneOnTailWhipConfig,
   type SceneOnAgilityPresentationState,
@@ -1660,6 +1663,12 @@ const reversalArt = reversalAsset as {
   vigorothBack: { tileset: Tileset; palette: RgbColor[] };
   vigorothFront: { tileset: Tileset; palette: RgbColor[] };
 };
+const swallowArt = swallowAsset as {
+  blueOrb: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  pelipperBack: { tileset: Tileset; palette: RgbColor[] };
+  pelipperFront: { tileset: Tileset; palette: RgbColor[] };
+};
 const tailGlowArt = tailGlowAsset as {
   circleOfLight: { tileset: Tileset; palette: RgbColor[] };
   volbeatBack: { tileset: Tileset; palette: RgbColor[] };
@@ -2083,6 +2092,7 @@ const ariadosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
 const aipomBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AIPOM!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
+const numelBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NUMEL!;
 const grovyleBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GROVYLE!;
 const fearowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).FEAROW!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as {
@@ -20866,6 +20876,139 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "VIGOROTH used" : "Foe VIGOROTH used",
       "REVERSAL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SWALLOW") {
+    const swallowState =
+      state as SceneOnMovePresentationState<SceneOnSwallowConfig>;
+    const view = sceneOnSwallowView(swallowState);
+    // Both affine/OAM state and callback-written sprite coordinates become
+    // visible through the preceding BuildOamBuffer snapshot.
+    const displayed = sceneOnSwallowView({
+      ...swallowState,
+      age: view.battlerDisplayAge,
+    });
+    const playerAttacker =
+      view.attacker.species === "PELIPPER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "DELCATTY"
+      && view.target.geometry.side === "opponent";
+    const opponentAttacker =
+      view.attacker.species === "PELIPPER"
+      && view.attacker.geometry.side === "opponent"
+      && (view.target.species === "DELCATTY" || view.target.species === "NUMEL")
+      && view.target.geometry.side === "player";
+    if (!playerAttacker && !opponentAttacker) {
+      throw new Error(
+        `unsupported staged SWALLOW pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const pelipperSource = playerAttacker
+      ? swallowArt.pelipperBack : swallowArt.pelipperFront;
+    const pelipper = playerAttacker
+      ? pelipperSource
+      : { ...pelipperSource, tileset: subTileset(pelipperSource.tileset, 0, 8) };
+    const delcattySource = playerAttacker
+      ? fakeTearsArt.delcattyFront
+      : view.target.species === "NUMEL"
+        ? numelBackSprite
+        : fakeTearsArt.delcattyBack;
+    const delcatty = playerAttacker
+      ? { ...delcattySource, tileset: subTileset(delcattySource.tileset, 0, 8) }
+      : delcattySource;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawPelipper = () => drawSpriteSheetAffineRotate(
+      fb,
+      pelipper.tileset,
+      pelipper.palette,
+      view.attacker.geometry.animationCenter.x
+        + displayed.attackerOffset.x2,
+      view.attacker.geometry.animationCenter.y
+        + displayed.attackerOffset.y2,
+      displayed.attackerMatrix.a,
+      displayed.attackerMatrix.b,
+      displayed.attackerMatrix.c,
+      displayed.attackerMatrix.d,
+      undefined,
+      false,
+    );
+    const drawDelcatty = () => drawSpriteSheet(
+      fb,
+      delcatty.tileset,
+      delcatty.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    if (playerAttacker) {
+      drawDelcatty();
+      drawPelipper();
+    } else {
+      drawPelipper();
+      drawDelcatty();
+    }
+    for (const orb of displayed.orbs) {
+      drawSpriteSheet(
+        fb,
+        subTileset(swallowArt.blueOrb.tileset, 0, 1),
+        swallowArt.blueOrb.palette,
+        orb.x - 4,
+        orb.y + orb.y2 - 4,
+      );
+    }
+    for (const star of displayed.stars) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: swallowArt.blueStar.tileset.tiles.slice(
+            star.frame * 16,
+            star.frame * 16 + 16,
+          ),
+        },
+        swallowArt.blueStar.palette,
+        star.x - 16,
+        star.y - 16,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerAttacker ? "DELCATTY" : "PELIPPER",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerAttacker ? "PELIPPER" : view.target.species,
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerAttacker ? "PELIPPER used" : "Foe PELIPPER used",
+      "SWALLOW!",
       99,
     );
     return;

@@ -84,7 +84,7 @@ describe("MOVE_SWALLOW source-relative presentation", () => {
         },
       },
       target: {
-        species: "GULPIN",
+    species: "DELCATTY",
         geometry: {
           side: "opponent",
           spriteCorner: { x: 144, y: 16 },
