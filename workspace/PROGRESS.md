@@ -19,7 +19,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** preserve null for allocation body, remaining 75 post-selection
   callbacks, post-callback glue, complete one-pass totals, service, and clock.
 - **Notes:** packet hashes anchor `c1394c32…`, LILIANA `3df2c58b…`, varied
-  `041b590f…`; focused dependent group **17/17** green. No unsupported barrier,
+  `041b590f…`; focused dependent group **17/17**, smoke **375/375**, full
+  **976 files / 9,434 passed / 1 skipped**, typecheck, and build **653 modules**
+  are green. Remaining null boundary is allocation body + 75 other
+  post-selection callbacks, complete callback/glue/one-pass totals, service,
+  VBlank/IRQ/audio arbitration, and clock wiring. No unsupported barrier,
   duration fit, pointer identity, gameplay/pixel, renderer, Rust, or ROADMAP/
   ISSUES change.
 
