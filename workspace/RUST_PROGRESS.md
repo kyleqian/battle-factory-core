@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R3 — [supervised session, 2026-08-11 eve] **M4 opened: damage_calc ported end-to-end (M4a+M4b folded); M4c in flight**
+## R3 — [supervised session, 2026-08-11 eve] **M4 COMPLETE: battle-kernel leaf family ported end-to-end (M4a+M4b+M4c folded)**
 
 - **State:** rust-main = master (merged at orient, fast-forward) + the
   verified M4a fold `30a6da2a`. **M4a DONE:** all 13 exported
@@ -49,9 +49,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   scripts byte-idempotent. Worker also ran full npm test green twice
   (958 files / 9,167 passed / 1 skip); supervisor's one full-suite run
   happens at wind-down per the standing cadence.
-- **Next:** M4c worker IN FLIGHT (turnOrder + turnRng native port +
-  boundary + `tests/turnOrderParity.test.ts`, both modes). Wind-down
-  before 21:40 with union gates incl. both-mode parity + soak.
+- **M4c DONE (fold `63d38e65`):** `turn_order.rs` (effective_speed,
+  get_who_strikes_first, sort_battlers_by_turn_order; reuses damage_calc's
+  STAT_STAGE_RATIOS; ids verified: SWIFT_SWIM=33, CHLOROPHYLL=34,
+  MACHO_BRACE=24, QUICK_CLAW=26) + `turn_rng.rs` (7-step/12-call ledger
+  over GbaRng, u8-discriminant step enum); gen-turn-vectors.mjs → 204
+  checked-in rows + 27 hand-directed native tests; 4 new fw_ exports
+  (incl. a self-describing variable-length sort buffer);
+  `core-rs/adapter/turnEngine.ts`; `tests/turnOrderParity.test.ts` 206
+  tests. Supervisor rerun: cargo **126/126** + fmt/clippy, generator
+  byte-idempotent, turnOrderParity 206/206 default mode, full parity
+  union **660/660 in wasm mode**, smoke 375/375; Quick Claw
+  threshold-boundary pair + speed-tie parity re-derived from the TS
+  module by hand.
+- **Next:** wind-down union gates (ONE full npm test + build + soak per
+  the standing cadence) before 21:40, then M5. A docs-only M5 scout step
+  may land first if time allows.
 - **Notes:** worker-reported TS quirks worth keeping: (1) Plus/Minus only
   boosts spAttack, never attack (damageCalc.ts:371-376) — dead weight on
   physical moves; (2) CritChanceInput.attackerSpecies declared but never
