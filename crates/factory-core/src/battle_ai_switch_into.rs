@@ -24,7 +24,7 @@ pub const PARTY_SIZE_SENTINEL: u8 = PARTY_SIZE as u8;
 const TYPE_MUL_NORMAL: i32 = 10;
 const TYPE_MUL_NO_EFFECT: i32 = 0;
 
-/// `MOVE_NONE` and `MOVE_STRUGGLE` (`include/constants/moves.h:169`).
+/// `MOVE_NONE` and `MOVE_STRUGGLE` (`include/constants/moves.h:4, :169`).
 const MOVE_NONE: u16 = 0;
 const MOVE_STRUGGLE: u16 = 165;
 
@@ -60,7 +60,8 @@ pub struct BattleAiSwitchDamageFallback {
     pub base_damage: i32,
     pub active_types: BattleAiSwitchTypes,
     pub opposing_types: BattleAiSwitchTypes,
-    /// Numeric `ABILITY_*`; only `ABILITY_LEVITATE == 26` affects this leaf.
+    /// Numeric `ABILITY_*`; only `ABILITY_LEVITATE == 26`
+    /// (`include/constants/abilities.h:30`) affects this leaf.
     pub opposing_ability: u16,
     pub opposing_status2: u32,
 }
