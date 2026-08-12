@@ -42366,3 +42366,22 @@ git; the current live ledger keeps the three load-bearing entries only.
   focused v19/v20 **10/10**, smoke **375/375**, typecheck, one final
   `npm test`, and the production build are green. No production, ratchet,
   presentation/animation/Rust, or canonical Battle-2 change.
+## 1210 — [MAIN worker, 2026-08-12] **CGB4 v21 clock-exit r4 decision source-closed**
+
+- **State:** #55 has a source-exact **5,674-cycle** aggregate prefix through
+  the five fixed `_081DD9A4` clock-exit instructions for only the three frozen
+  EXIST-clear CGB4 rows. Complete MPlay remains **5 exact / 108 null** and
+  the construction clock remains unwired.
+- **Did:** two fresh OFF packet sets are byte-identical and join only frozen
+  `sourceStateDigest`: r4 is nonzero for all three clear rows. Source/ELF/ROM
+  close `ldr/add/str/cmp/bne` at **16 × 3 = 48** cycles; four EXIST-set rows
+  remain null before `_081DD886`, and successor/status/tempo/body stay null.
+- **Next:** preserve the four EXIST-set rows and all selected-successor,
+  status-write, tempo/body, later-MPlay, service/arbitration, and
+  construction-clock fields as null unless separately proved.
+- **Notes:** red-first v21 import proof failed as intended, then focused
+  v20/v21 **10/10**, twice-regenerated artifact diff, typecheck, smoke
+  **375/375**, one post-change full suite **1,002 files / 9,633 passed /
+  1 skipped**, and build **653 modules** are green. No `src/**`, ratchet,
+  unsupported-barrier, presentation/animation/Rust, or canonical Battle-2
+  change.

@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1213 — [supervisor, 2026-08-12] **CGB4 v22 and Rust M5 union verified**
+
+- **State:** #55 retains the source-exact **5,692-cycle** aggregate prefix
+  through the three selected `_081DD9B6` status/tempo prefixes. Rust M5 is
+  folded complete: the full Factory AI decision policy now crosses its WASM
+  adapter, and both persistent lane tips are contained.
+- **Did:** audited v22's exact six-byte ROM body, frozen three-row join,
+  IWRAM access classes, and first-unpriced `strh`. Folded `rust-main` through
+  `4790707c`, rebuilt the WASM artifact, forced every boundary-bearing parity
+  suite, and verified the complete union.
+- **Next:** capture only the address-free tempo discriminator needed to price
+  the bounded `_081DD9BC` store/compare/branch slice for the same three rows.
+  Keep the four EXIST-set rows, later body, complete MPlay, service/
+  arbitration, and construction-clock wiring null unless separately proved.
+- **Notes:** v22 focused **5/5**; Rust **682/682**; WASM **300,117 bytes**
+  (`d1ebb568…`), forced parity **9 files / 772 passed**; union npm **1,005
+  files / 9,648 passed / 1 skipped** and build **653 modules**. No `src/**`,
+  ratchet, unsupported-barrier, or canonical Battle-2 change; no soak trigger.
+
 ## 1212 — [MAIN worker, 2026-08-12] **CGB4 v22 r4-taken successor prefix source-closed**
 
 - **State:** #55 reaches a source-exact **5,692-cycle** aggregate prefix for
@@ -48,23 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   parity **766/766**; union npm **1,003 files / 9,637 passed / 1 skipped** and
   build **653 modules**. No `src/**`, ratchet, unsupported-barrier, or
   canonical Battle-2 change; no soak trigger.
-
-## 1210 — [MAIN worker, 2026-08-12] **CGB4 v21 clock-exit r4 decision source-closed**
-
-- **State:** #55 has a source-exact **5,674-cycle** aggregate prefix through
-  the five fixed `_081DD9A4` clock-exit instructions for only the three frozen
-  EXIST-clear CGB4 rows. Complete MPlay remains **5 exact / 108 null** and
-  the construction clock remains unwired.
-- **Did:** two fresh OFF packet sets are byte-identical and join only frozen
-  `sourceStateDigest`: r4 is nonzero for all three clear rows. Source/ELF/ROM
-  close `ldr/add/str/cmp/bne` at **16 × 3 = 48** cycles; four EXIST-set rows
-  remain null before `_081DD886`, and successor/status/tempo/body stay null.
-- **Next:** preserve the four EXIST-set rows and all selected-successor,
-  status-write, tempo/body, later-MPlay, service/arbitration, and
-  construction-clock fields as null unless separately proved.
-- **Notes:** red-first v21 import proof failed as intended, then focused
-  v20/v21 **10/10**, twice-regenerated artifact diff, typecheck, smoke
-  **375/375**, one post-change full suite **1,002 files / 9,633 passed /
-  1 skipped**, and build **653 modules** are green. No `src/**`, ratchet,
-  unsupported-barrier, presentation/animation/Rust, or canonical Battle-2
-  change.
