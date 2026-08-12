@@ -11465,3 +11465,23 @@ pub const TYPE_EFFECTIVENESS_TABLE: [TypeEffectivenessEntry; 110] = [
     TypeEffectivenessEntry { attacking_type: 0, defending_type: 7, multiplier_tenths: 0 },
     TypeEffectivenessEntry { attacking_type: 1, defending_type: 7, multiplier_tenths: 0 },
 ];
+
+/// Per-branch AI script mask (`0`, `AI_SCRIPT_CHECK_BAD_MOVE` = `1`, or the
+/// Frontier Brain/late-challenge full mask `7`), indexed by
+/// `FactoryAiPolicyBranchId`'s declared order: 0 tent, 1 frontierBrain,
+/// 2 challengeBelow2, 3 challengeBelow4, 4 challengeAtLeast4
+/// (`factory_ai_mask::FactoryAiPolicyBranchId`, whose discriminants match
+/// this order 1:1 — validated at codegen time above, mirroring
+/// src/engine/factoryAiMaskSelection.ts's `POLICY_BRANCHES` construction).
+/// `condition`/`flags` strings stay TS-side (M5c's adapter renders them for
+/// receipts/UI; this native port only needs the id to select a mask).
+/// Source: src/data/gen/factory-ai-policy.json `.branches[].mask`.
+pub const FACTORY_AI_POLICY_MASKS: [u8; 5] = [0, 7, 0, 1, 7];
+
+/// `FRONTIER_STAGES_PER_CHALLENGE` (`include/constants/battle_frontier.h`):
+/// win-streak stages per challenge, used to derive `challengeNum =
+/// factoryWinStreak / FRONTIER_STAGES_PER_CHALLENGE`
+/// (reference/pokeemerald/src/battle_factory.c:899, mirrored by
+/// `factory_ai_mask::select_factory_ai_mask`). Source:
+/// src/data/gen/factory-ai-policy.json `.constants.frontierStagesPerChallenge`.
+pub const FACTORY_AI_FRONTIER_STAGES_PER_CHALLENGE: u32 = 7;
