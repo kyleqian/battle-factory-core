@@ -5118,4 +5118,53 @@ mod tests {
             assert_eq!(draw_count, 0, "move {move_id}");
         }
     }
+
+    // === M5b-2: TS-generated SpAtkDown vectors (crate::factory_ai_check_bad_move_m5b2_vectors_gen) ===
+    //
+    // EFFECT_SPECIAL_ATTACK_DOWN(_2) has no real Gen-3 move, so
+    // `cbm_m5b2_vectors.rs` (a separate integration-test crate, `pub` items
+    // only) can't drive it through the full preamble or call
+    // `run_cbm_sp_atk_down` (`pub(crate)`, per the batching doc §4) directly
+    // -- checked here instead, in the same module as the handler.
+
+    #[test]
+    fn sp_atk_down_direct_cases_match_ts() {
+        use crate::factory_ai_check_bad_move_m5b2_vectors_gen::CBM_M5B2_SP_ATK_DOWN_CASES;
+
+        assert!(!CBM_M5B2_SP_ATK_DOWN_CASES.is_empty());
+        for (i, c) in CBM_M5B2_SP_ATK_DOWN_CASES.iter().enumerate() {
+            let t = FactoryAiCheckBadMoveTarget {
+                sp_atk_stage: c.sp_atk_stage,
+                ..target(
+                    c.species,
+                    [TYPE_NORMAL, TYPE_NORMAL],
+                    c.known_ability,
+                    c.real_ability,
+                )
+            };
+            let (rng, draw, score_delta) = run_cbm_sp_atk_down(
+                &t,
+                BattleRngState { value: c.rng_value, calls: 0 },
+                c.ordinal,
+            );
+            let ctx = format!("case {i}: {c:?}");
+            assert_eq!(rng.value, c.expected_rng_value, "{ctx}");
+            assert_eq!(rng.calls, c.expected_rng_calls, "{ctx}");
+            assert_eq!(score_delta, c.expected_score_delta, "{ctx}");
+            if c.expected_draw_count == 0 {
+                assert!(draw.is_none(), "{ctx}");
+            } else {
+                let draw = draw.unwrap_or_else(|| panic!("{ctx}: expected a draw"));
+                assert_eq!(draw.ordinal, c.draw.ordinal, "{ctx}");
+                assert_eq!(draw.site as u8, c.draw.site, "{ctx}");
+                assert_eq!(draw.before.value, c.draw.before_value, "{ctx}");
+                assert_eq!(draw.before.calls, c.draw.before_calls, "{ctx}");
+                assert_eq!(draw.after.value, c.draw.after_value, "{ctx}");
+                assert_eq!(draw.after.calls, c.draw.after_calls, "{ctx}");
+                assert_eq!(draw.raw_rng_value, c.draw.raw_rng_value, "{ctx}");
+                assert_eq!(draw.random_value, c.draw.random_value, "{ctx}");
+                assert_eq!(draw.guessed_ability, c.draw.guessed_ability, "{ctx}");
+            }
+        }
+    }
 }
