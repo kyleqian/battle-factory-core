@@ -30,11 +30,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and guessed ability exact. `CBM_HANDLED_EFFECTS_M5B1` = exactly the 32
   batch effects. Post-fold on rust-main: cargo 204/204, artifact rebuilt,
   smoke 375/375. Worker: sonnet, 23.6 min of a 90-min cap, 2 commits.
-- **Next:** M5b-2 (RNG-gated status/stat-DOWN, 33 effects — brief
-  pre-drafted and premise-checked: draw-site census confirms all
-  remaining handler draws live in this batch), then M5b-3 (44 zero-RNG
-  effects — census confirms zero draw sites), then M5c
-  boundary+adapter+parity per docs/rust-m5-scout.md.
+- **M5b-2 DONE (fold `cc1b07e1`):** all 33 RNG-gated status/stat-DOWN
+  effects native (OHKO/Sleep/Roar/Paralyze/Confuse-Swagger-Flatter/
+  Toxic-Poison/WillOWisp/LeechSeed/FakeOut, the 14-effect stat-DOWN
+  shared-tail family, KnockOff+Trick, Attract full gender matrix,
+  Explosion, DreamEater, SpitUp+Swallow) + `computeAiEffectiveness`
+  ported once (x0→1 clamp preserved; its table-entry iteration naturally
+  avoids dual-same-type double-count, unlike `typeMultiplierTenths`'s
+  per-slot loop — asymmetry preserved and tested). Native tests 58→133;
+  111 scored + 8 direct-handler TS-generated vector rows
+  (gen-cbm-m5b2-vectors.mjs, byte-idempotent). Unported = 44, pinned.
+  MAX_CHECK_BAD_MOVE_DRAWS re-verified UNCHANGED at 3 (AttackDown/AccDown
+  add 2 handler draws but their movers are all power 0 → negates-type
+  never co-occurs; KnockOff hits 3 via negates-type+soundproof+own).
+  Worker quirk finding: FIVE M5b-2 effects have zero real Gen-3 moves
+  (SPECIAL_ATTACK_DOWN(+_2), SPECIAL_DEFENSE_DOWN, ACCURACY_DOWN_2,
+  EVASION_DOWN_2) — one more than the scout's vestigial list; siblings
+  exercise their shared arms. Supervisor rerun: scope clean, cargo
+  **282/282** + fmt/clippy(--all-targets) + wasm build, all THREE
+  generators byte-idempotent, 2 rows re-derived independently (Growl vs
+  Marowak 3-draw both-sites chain; Attract vs known-Oblivious −10/0-draw)
+  — exact. Post-fold: artifact rebuilt, smoke 375/375. Worker: sonnet,
+  30.0 min, 2 commits.
+- **Next:** M5b-3 (44 zero-RNG stat-UP/screens/singles — census confirms
+  zero draw sites), then M5c boundary+adapter+parity per
+  docs/rust-m5-scout.md.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
