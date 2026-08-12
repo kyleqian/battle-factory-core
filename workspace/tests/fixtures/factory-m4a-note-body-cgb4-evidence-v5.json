@@ -1,0 +1,468 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v5",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "caller": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1738-1741",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "helper": {
+        "path": "reference/pokeemerald/src/m4a.c",
+        "lines": "765-808",
+        "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+      }
+    },
+    "elf": {
+      "callerBoundary": "0x082dfe9e",
+      "callerCallTarget": "0x082e0a80",
+      "helperEntry": "0x082e0a80",
+      "helperReturn": "0x082e0b34"
+    },
+    "compiledRegions": [
+      {
+        "role": "_081DDC66 caller argument setup and BL",
+        "start": "0x082dfe9e",
+        "endExclusive": "0x082dfea6",
+        "bytes": 8,
+        "sha256": "84202b0a985448762c0d683663253e945761c43830b79f76102525ee885ee9b3"
+      },
+      {
+        "role": "TrkVolPitSet complete prologue",
+        "start": "0x082e0a80",
+        "endExclusive": "0x082e0a82",
+        "bytes": 2,
+        "sha256": "45032905ccc19f93939ffc8a27669cc54ac144bd58ce513681f9320712ed9b2c"
+      },
+      {
+        "role": "TrkVolPitSet complete compiled region",
+        "start": "0x082e0a80",
+        "endExclusive": "0x082e0b34",
+        "bytes": 180,
+        "sha256": "00879cc3e04cd6caf909a6f1763a16ae1ceff8b9f40b83afea83b283b3dc35f5"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "iwramWordDataAccessPremiumCycles": 0,
+      "callerStackDataAccess": "one IWRAM word read",
+      "helperPrologueStackDataAccess": "two IWRAM word writes"
+    },
+    "sourceCycleAccounting": {
+      "callerCallEdge": {
+        "sequentialThumbHalfwords": 4,
+        "pipelineRefills": 1,
+        "iwramWordReads": 1,
+        "dataAccessPremiumCycles": 0,
+        "cycles": "4*2 + 1*6 + 1*0",
+        "totalCycles": 14
+      },
+      "helperPrologue": {
+        "sequentialThumbHalfwords": 1,
+        "pipelineRefills": 0,
+        "iwramWordWrites": 2,
+        "dataAccessPremiumCycles": 0,
+        "cycles": "1*2 + 0*6 + 2*0",
+        "totalCycles": 2
+      },
+      "callerCallEdgeAndHelperPrologue": {
+        "totalCycles": 16
+      },
+      "laterAllocationFields": null
+    }
+  },
+  "frozenInputs": {
+    "acceptedV4EvidenceSha256": "a29476ae5e0f55c2a491513f0e6dad1c4e445f047c9f93a82f7b8723812cc423",
+    "acceptedV4FrozenInputs": {
+      "packets": {
+        "anchor": "fbe6a35f48861ab7408b55d81da17d307ac2a6254ccba474c730fe3e51a7599f",
+        "liliana": "4f2e86fe6c1725e0f2e8d96c1416dfb79c927fd8cbd33db51bb93191248cc442",
+        "factory-varied": "64ea0a16a0817f49b27f13fed096c43f16c9ecf40ab17b0d0b560dceea03df08"
+      },
+      "acceptedV3Packets": {
+        "anchor": "818433d12eddd52c6ce1bb1a3128ca5a27cad4e52d7f3b699620f3999a46eaad",
+        "liliana": "c0f11db93b544f86781064565f618c7c95aaa43b9ca3e6eb06fc5a17067e9ef5",
+        "factory-varied": "b303a6dedd26f1d0ba0f6797e2b57f5f5c9e5b3aff7b3599a26b80143055beb9"
+      },
+      "acceptedV3EvidenceSha256": "558e043ae23308abf43f4642b9acb8d520c6d30f6efe0c0a5e188bb9e67a4cba",
+      "acceptedV3FrozenInputs": {
+        "packets": {
+          "anchor": "818433d12eddd52c6ce1bb1a3128ca5a27cad4e52d7f3b699620f3999a46eaad",
+          "liliana": "c0f11db93b544f86781064565f618c7c95aaa43b9ca3e6eb06fc5a17067e9ef5",
+          "factory-varied": "b303a6dedd26f1d0ba0f6797e2b57f5f5c9e5b3aff7b3599a26b80143055beb9"
+        },
+        "acceptedV2Packets": {
+          "anchor": "c1394c322f2290d99f37eebed80c1fe45938da19097317250fe553e153c6cf7d",
+          "liliana": "3df2c58b9b37731f803dd2e8e68953ea0a4eea4936bf2eb3fd95b11d69e7e1f2",
+          "factory-varied": "041b590f55f8a5b37c582594f1e54fbd4affa6f3dc9c799d6f3446e7ccc15009"
+        },
+        "acceptedV2EvidenceSha256": "cd6030344b403b10bd5c39aa4e1b4a8cdf0c68ab3871b11a677570621dff46ac",
+        "notePackets": {
+          "anchor": "d71c40f5078db50508985b28eb0b36c1b9713ee889696ffe1af59ebcdf15fd01",
+          "liliana": "58031720e867e9bbb33311fb5577afc0621bdb5561aad49f6c7a2c841009e615",
+          "factory-varied": "789fabb54fae6102d3fb3a13d6958e44ab0aa8b4ac1d23da7dcfaf7e1617ce20"
+        },
+        "sourceStatePackets": {
+          "anchor": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+          "liliana": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+          "factory-varied": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+        }
+      }
+    }
+  },
+  "acceptedV4Summary": {
+    "schema": "factory-m4a-note-body-cgb4-evidence/v4",
+    "join": {
+      "key": "sourceStateDigest",
+      "rows": 113,
+      "cgb4Rows": 7,
+      "ambiguousRows": 0,
+      "addressFree": true
+    },
+    "coverage": {
+      "observedNoteCallbacks": 82,
+      "cgbChannel4Callbacks": 7,
+      "byCase": {
+        "anchor": {
+          "observations": 52,
+          "callbacks": 33,
+          "cgb4": 0,
+          "flagsClear": 0,
+          "volumeAndClear": 0
+        },
+        "liliana": {
+          "observations": 31,
+          "callbacks": 24,
+          "cgb4": 3,
+          "flagsClear": 2,
+          "volumeAndClear": 1
+        },
+        "factory-varied": {
+          "observations": 30,
+          "callbacks": 25,
+          "cgb4": 4,
+          "flagsClear": 3,
+          "volumeAndClear": 1
+        }
+      },
+      "trkVolPitSetRouteCounts": {
+        "flags-clear": 5,
+        "volume-and-clear-observed": 2
+      },
+      "helperBranchCounts": {
+        "TrkVolPitSet-entry": 7,
+        "clear_modM": 0,
+        "TrkVolPitSet-unobserved": 0
+      },
+      "exactTrkVolPitSetCallbacks": 7,
+      "nullOtherPostSelectionCallbacks": 75,
+      "nullCompleteNoteCallbacks": 82,
+      "exactCompleteMPlaySourceCostRows": 5,
+      "nullCompleteMPlaySourceCostRows": 108,
+      "trkVolPitSetSourceCycleRange": {
+        "min": 56,
+        "max": 138,
+        "distinct": 2
+      },
+      "trkVolPitSetSourceCycles": 556,
+      "acceptedPrefixThroughAllocationBodySourceCycles": 1413,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 1969,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null
+    }
+  },
+  "capture": {
+    "boundary": "accepted-v3-allocation-body -> _081DDC66 caller edge -> TrkVolPitSet prologue -> accepted-v4 helper component",
+    "state": "address-free source route labels only; no new runtime operand or pointer is captured",
+    "selectedChannelIndex": 3
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "observations": 52,
+        "callbacks": 33,
+        "cgb4": 0,
+        "flagsClear": 0,
+        "volumeAndClear": 0
+      },
+      "liliana": {
+        "observations": 31,
+        "callbacks": 24,
+        "cgb4": 3,
+        "flagsClear": 2,
+        "volumeAndClear": 1
+      },
+      "factory-varied": {
+        "observations": 30,
+        "callbacks": 25,
+        "cgb4": 4,
+        "flagsClear": 3,
+        "volumeAndClear": 1
+      }
+    },
+    "exactCallerCallEdgeCallbacks": 7,
+    "exactHelperPrologueCallbacks": 7,
+    "callerCallEdgeSourceCycleRange": {
+      "min": 14,
+      "max": 14,
+      "distinct": 1
+    },
+    "helperPrologueSourceCycleRange": {
+      "min": 2,
+      "max": 2,
+      "distinct": 1
+    },
+    "callerCallEdgeAndHelperPrologueSourceCycleRange": {
+      "min": 16,
+      "max": 16,
+      "distinct": 1
+    },
+    "knownComponentSumExcludingCallerGapSourceCycles": 1969,
+    "callerCallEdgeAndHelperPrologueSourceCycles": 112,
+    "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 2081,
+    "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 2081,
+    "nullLaterAllocationFieldsCallbacks": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "branchCoverage": {
+    "closed": [
+      "_081DDC66 ldr argument",
+      "_081DDC66 adds argument",
+      "BL TrkVolPitSet",
+      "TrkVolPitSet push {r4,lr}"
+    ],
+    "sourceGeneral": true,
+    "addressFree": true,
+    "laterAllocationFields": null
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "allocationBodyState": {
+        "currentRole": "cgb-channel-3",
+        "trackRole": "music-player-5-track-8",
+        "previousRole": null,
+        "nextRole": null,
+        "trackChanRole": null,
+        "lfoDelay": 0
+      },
+      "trkVolPitSetState": {
+        "flags": 131,
+        "volume": {
+          "vol": 47,
+          "volX": 64,
+          "pan": 63,
+          "panX": 0,
+          "modT": 0
+        }
+      },
+      "allocationBodySourceCycles": 135,
+      "trkVolPitSetSourceCycles": 138,
+      "knownComponentSumExcludingCallerGapSourceCycles": 377,
+      "callerCallEdgeSourceCycles": 14,
+      "helperPrologueSourceCycles": 2,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 16,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 393,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 393,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "allocationBodyState": {
+        "currentRole": "cgb-channel-3",
+        "trackRole": null,
+        "previousRole": null,
+        "nextRole": null,
+        "trackChanRole": null,
+        "lfoDelay": 0
+      },
+      "trkVolPitSetState": {
+        "flags": 128
+      },
+      "allocationBodySourceCycles": 111,
+      "trkVolPitSetSourceCycles": 56,
+      "knownComponentSumExcludingCallerGapSourceCycles": 243,
+      "callerCallEdgeSourceCycles": 14,
+      "helperPrologueSourceCycles": 2,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 16,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 259,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "allocationBodyState": {
+        "currentRole": "cgb-channel-3",
+        "trackRole": null,
+        "previousRole": null,
+        "nextRole": null,
+        "trackChanRole": null,
+        "lfoDelay": 0
+      },
+      "trkVolPitSetState": {
+        "flags": 128
+      },
+      "allocationBodySourceCycles": 111,
+      "trkVolPitSetSourceCycles": 56,
+      "knownComponentSumExcludingCallerGapSourceCycles": 243,
+      "callerCallEdgeSourceCycles": 14,
+      "helperPrologueSourceCycles": 2,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 16,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 259,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "allocationBodyState": {
+        "currentRole": "cgb-channel-3",
+        "trackRole": null,
+        "previousRole": null,
+        "nextRole": null,
+        "trackChanRole": null,
+        "lfoDelay": 0
+      },
+      "trkVolPitSetState": {
+        "flags": 128
+      },
+      "allocationBodySourceCycles": 111,
+      "trkVolPitSetSourceCycles": 56,
+      "knownComponentSumExcludingCallerGapSourceCycles": 243,
+      "callerCallEdgeSourceCycles": 14,
+      "helperPrologueSourceCycles": 2,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 16,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 259,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "allocationBodyState": {
+        "currentRole": "cgb-channel-3",
+        "trackRole": "music-player-5-track-8",
+        "previousRole": null,
+        "nextRole": null,
+        "trackChanRole": null,
+        "lfoDelay": 0
+      },
+      "trkVolPitSetState": {
+        "flags": 131,
+        "volume": {
+          "vol": 47,
+          "volX": 64,
+          "pan": 63,
+          "panX": 0,
+          "modT": 0
+        }
+      },
+      "allocationBodySourceCycles": 135,
+      "trkVolPitSetSourceCycles": 138,
+      "knownComponentSumExcludingCallerGapSourceCycles": 377,
+      "callerCallEdgeSourceCycles": 14,
+      "helperPrologueSourceCycles": 2,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 16,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 393,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 393,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "allocationBodyState": {
+        "currentRole": "cgb-channel-3",
+        "trackRole": null,
+        "previousRole": null,
+        "nextRole": null,
+        "trackChanRole": null,
+        "lfoDelay": 0
+      },
+      "trkVolPitSetState": {
+        "flags": 128
+      },
+      "allocationBodySourceCycles": 111,
+      "trkVolPitSetSourceCycles": 56,
+      "knownComponentSumExcludingCallerGapSourceCycles": 243,
+      "callerCallEdgeSourceCycles": 14,
+      "helperPrologueSourceCycles": 2,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 16,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 259,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "allocationBodyState": {
+        "currentRole": "cgb-channel-3",
+        "trackRole": null,
+        "previousRole": null,
+        "nextRole": null,
+        "trackChanRole": null,
+        "lfoDelay": 0
+      },
+      "trkVolPitSetState": {
+        "flags": 128
+      },
+      "allocationBodySourceCycles": 111,
+      "trkVolPitSetSourceCycles": 56,
+      "knownComponentSumExcludingCallerGapSourceCycles": 243,
+      "callerCallEdgeSourceCycles": 14,
+      "helperPrologueSourceCycles": 2,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 16,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 259,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "The exact caller call edge and complete TrkVolPitSet prologue bridge the accepted v3 allocation-body prefix to the existing v4 post-prologue helper join for all seven observed zero-lfoDelay CGB4 callbacks.",
+    "contiguousPrefix": "2081 aggregate source cycles through TrkVolPitSet return across the seven observed callbacks; the next later allocation fields remain null.",
+    "knownComponentTerminology": "1969 is retained as the pre-gap known-component sum; 2081 is the mechanically distinct contiguous prefix after the 112-cycle gap is closed.",
+    "remainingDiscriminator": "Later allocation fields, clear_modM, nonzero-lfoDelay routes, every unobserved TrkVolPitSet operand/branch, the other 75 post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals, service cost, VBlank/IRQ/audio arbitration, and runFactoryConstructionClock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "Source-exact CGB4 coverage is contiguous through TrkVolPitSet return for 7/82 observed callbacks: 1413 accepted prefix cycles + 112 caller/prologue cycles + 556 helper cycles = 2081 cycles. Later allocation fields and all broader note/MPlay/construction-clock costs remain null."
+}
