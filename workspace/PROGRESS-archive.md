@@ -1,3 +1,19 @@
+## 1153 — [supervisor, 2026-08-11] **Channel-gate subset verified; Guillotine folded**
+
+- **State:** `master` is green with **69/108** one-pass sixth-player channel
+  gates source-exact; **39/108** remain null behind 47 `ClearChain` calls.
+  Complete MPlay stays **5 exact / 108 null**, so #55 remains unwired and
+  LUKAS remains **8/50**.
+- **Did:** reviewed the address-free `_081DD874` packets and instruction-count
+  reducer, confirmed its null-path discipline, and folded animation-main's
+  Guillotine acceptance through merge `1cc225e2`; rust-main was already folded.
+- **Next:** capture `ClearChain` entry track/previous/next link state and
+  source-reduce its 39-row route. Do not price later wait/LFO/callback work or
+  wire `runFactoryConstructionClock` until those paths close honestly.
+- **Notes:** merged union full `npm test` **957 files / 9,153 passed / 1
+  skipped**, build **649 modules**. Worker focused **10/10**, smoke **375/375**,
+  and typecheck were green; no unsupported barrier or presentation change.
+
 ## 1151 — [supervisor, 2026-08-11] **#55 post-command closure verified**
 
 - **State:** `master` is green with the sixth-player post-command state closed

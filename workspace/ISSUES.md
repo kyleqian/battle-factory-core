@@ -1706,6 +1706,24 @@ family. No service cost was assigned, no later component was inferred, and
 `runFactoryConstructionClock` remains unwired. Evidence:
 `docs/issue55-m4a-clearchain-v1.md`.
 
+**2026-08-11 per-track wait/LFO mod-zero closure:** additive OFF packets now
+capture only address-free track index plus mutable `wait`, `lfoSpeed`, and
+`mod` bytes at the sixth player's exact compiled `_081DD938` boundary. Two
+fresh serial anchor/LILIANA/legal-varied captures are byte-identical
+(`b0509335…` / `acf844d6…` / `1ff1a524…`) and join all **113/113** frozen
+rows without ambiguity. The five zero-pass calls never reach the boundary;
+all **972/972** active-track visits in the **108/108** one-pass rows have a
+nonzero final wait, nonzero LFO speed, and `mod == 0`.
+
+The pinned 22-byte ELF route therefore closes at **28 cycles/track** and
+**252 cycles/one-pass row**. Combined with the already-closed channel gate,
+the two known components total **456–865** cycles (70 totals). Complete MPlay
+costs remain **5 exact / 108 null**: bounded command dispatch/callback paths
+are the next discriminator, while every unresolved callback and later
+nonzero-modulation route stays null. No observed duration or pointer identity
+was used, no service cost was assigned, and `runFactoryConstructionClock`
+remains unwired. Evidence: `docs/issue55-m4a-wait-lfo-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

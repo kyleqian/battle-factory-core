@@ -1,0 +1,2913 @@
+{
+  "schema": "factory-m4a-wait-lfo-probe/v1",
+  "case": "anchor",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "CreateFrontierFactorySelectableMons",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "sixth-MPlayMain-per-track-wait-lfo",
+  "observations": [
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 24,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 24,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 24,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "d62505501da61610c3753911c10872af0d776469de37d52fb4aed38184bcd574",
+      "waitLfoTracks": null
+    },
+    {
+      "sourceStateDigest": "d80949626f7d610dd95ab6d54680becc527daefe8ef71394d26eb0a115752b26",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 23,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 23,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 23,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "0729091bc1e3ad697c461941af75e6d438ec30372e7c9e0bd545e8e2635da7a4",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 22,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 22,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 22,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "37d325c692fed6c90f37b6d85db511db69ea906ce036771091ba2ac0b7d5aa38",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 21,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 21,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 21,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "bdae7bcc3277dec315f1fbed191bcaa63a4c4f59a9d61736fc579345e2414bd4",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 20,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 20,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 20,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "dfaaad8c85c3beeea3c6143490acf32783a078f19fc18d823e5916bf89a71722",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 19,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 19,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 19,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "0c6175ca663144388d7459a968f09b606dfb425af534e088879482a0018deddf",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 18,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 18,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 18,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "cb407e1a4662a4f5f073af67d96959c9c0626d395efdcbcd0a7812e089485b17",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 17,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 17,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 17,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "e0c04b9ed2e2f89b44aa3de1fb6cee0baf3e78a755ef6ac5aebbcc610aca65df",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "c1e6393f827465170da7bdec72e9a9fcdb194a7986970e93e44c7a9647af1311",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "d839224c061a4ba5a402a53d9b60f57d00622df6aec2c820b274a1b3fc1d8832",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "ac6b9c19ebb97961028f0f154ef16973629d3997fd81fa26a34a11afd18894c9",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "eb175b21ede38444fddd6937fcaea596fbdb3ede05a11d5f567e55a5801831f2",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "419ca11cd896f34c4da4dba39df3c8cc23535f973a97349def7cd9bc34788fe1",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "3c06f68e3266884e6e4daa37edd33fb207cf58ee48f2593d007c743bdfbdc9b2",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "59e038686268dd7b3ebdf9bbec69d4f9f5dd7fb6b5b5becf1138aa5dd1d42371",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "3047a6f1087fc70c3a7149d0270696fb5c5cd5123d490e2965f7895d15a1c095",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "255c03651d8a4cbf9f2443d33ba4845705669990fab93275ecbcb7542902a626",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "89291726e11be6c56885a0b7329ea9203c1ffa918a219705a6625bb67c72cdf0",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "cf3b3e07813298ecee91fb8b4d8029bf606acae95cc9b472d72e79cee2bb298e",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "f16801e198aa1527e914c55e4a5112ac090a26e4c52e4d69f9298da256976f68",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "c74a4c4f9a8c20643c1ea405103a8fd88aff1c6a1456c8bcce02fc1a4715ecca",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "548288c96af84b9558a6555c3de77cd6cdf391b2a3945481600ca090ff4a5e97",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 24,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 24,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 24,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 96,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 96,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "67b9353798107ef023a18831779c4b6f2dd85ccab17b3fbc58402f0839f53311",
+      "waitLfoTracks": null
+    },
+    {
+      "sourceStateDigest": "c91e5411bfea4d985d55b19ffa294b4c45e0fc52af7a15e6f05c1411e96d941a",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 23,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 23,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 23,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 95,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 95,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "060a76b8417cd9757e936288ba5a65e72ff4fa33eec284918387ee30cc28c437",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 22,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 22,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 22,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 94,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 94,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "8d35b47fb1022e5821f26a1d153751a5582712b05d1fcb8b3d50d5a014837744",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 21,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 21,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 21,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 93,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 93,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "efd66e8983ead21baf57cc16d0ac553583c3267c6bf39ea2b14b6fbdd98e32f2",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 20,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 20,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 20,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 92,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 92,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "4934593587b11e18fe34e1c43390b5d795c8e6f6ed387b21ef954ee940f2c444",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 19,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 19,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 19,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 91,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 91,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "59b1018599edb4f9bff79a13a5e6d16d07908dd316b4acb17c1a45cfe0e445b9",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 18,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 18,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 18,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 90,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 90,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "cb6ddd8b64388ff751bcefb23bc9c7236c62d870334f981ab8f1e4b6ba127d3e",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 17,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 17,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 17,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 89,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 89,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "5521ab0bb6378f01e0d54d29ac2e1c7c9ce30e2606cf14215c23f216647939ed",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 88,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 88,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "800dde1a43898fc7280bcb0536e69cc352b582812a7c5138fd839245d7f469f6",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 15,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 87,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 87,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "f4ed0055d961b54d23c8df572d30e3aa5603b3e85e3d46f3a0021b47ea1d41b7",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 14,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 86,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 86,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "8b0eda86230f7ad57262b22b34b7d919a544ac9077daabca0b5e81f53340f6b6",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 13,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 85,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 85,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "7e74daf0955c7a3e6dcc506148a45c20fad9ce02b8a34638524623454d0ee74c",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 84,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 84,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "8386b4b2bc0a096d08a9851ee1b475f6d51b660f700860a024225a069b81c967",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 83,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 83,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "fc6f8f357f9ed2783aca331523ebd94ded651d3c9661c664aeba60d7234e3071",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 82,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 82,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "2b1c79f0b21a6010f65593f4978a30424f82d9bfc5bb8b8710f0951a1891351e",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 81,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 81,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "e5bf9a67aa79e9f6031f3a3bd2ab50a9020bab5b9364ccb34678e0344b74e7a8",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 80,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 80,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "d3c9d0785e0a58484caeeb439cb89bddcdd7cdecffd4f81b4dbeae34b9c71fa9",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 11,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 79,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 79,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "aef35eb97f0069bb2e27e5742817014d69a1073c6c7abeb2bb89553061c8050a",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 10,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 78,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 78,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "03202c202e5b57dff7d0f945897ce9c3afa917cd492a246b61239e0c2a8fa115",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 9,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 77,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 77,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "89a12bb237ef407a548a70da2d4c0516d94e169b6681c7bd640b21b33e49853a",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 8,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 76,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 76,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "30437cd1bbff1f6f347091289a8bb1a8e3dffb43f7eed3c3846d0fc557490ff1",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 7,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 3,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 75,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 75,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "fa61b3d178f4d921fd1403d2eb158970e8c2c42b88ae835b17f50f62a735d121",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 74,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 74,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "f2ced1bcd774a3695b298fa7589f0b37a7e917f365e03af48bcfa550bb310719",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 5,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 1,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 73,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 73,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "waitLfoTracks": [
+        {
+          "trackIndex": 0,
+          "wait": 16,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 1,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 2,
+          "wait": 6,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 3,
+          "wait": 2,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 4,
+          "wait": 4,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 5,
+          "wait": 12,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 6,
+          "wait": 24,
+          "mod": 0,
+          "lfoSpeed": 22
+        },
+        {
+          "trackIndex": 7,
+          "wait": 72,
+          "mod": 0,
+          "lfoSpeed": 44
+        },
+        {
+          "trackIndex": 8,
+          "wait": 72,
+          "mod": 0,
+          "lfoSpeed": 44
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "53f5ebb6bb07d31bff644e15e162df2d88ca06b515d00d157d88075142903950",
+      "waitLfoTracks": null
+    }
+  ]
+}
