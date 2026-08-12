@@ -115,6 +115,41 @@ export function fissureDirtAtAge(
   return result;
 }
 
+/**
+ * Back-to-front software painter order for the equal-subpriority dirt OBJs.
+ *
+ * `BuildOamBuffer` emits the frontmost equal-subpriority OBJ first: larger
+ * on-screen Y first, while a tie keeps the previous row's stable OAM order.
+ * A framebuffer compositor therefore paints the inverse order.
+ */
+export function fissureDirtPainterOrder(
+  plumes: readonly FissureDirtPlume[],
+): readonly FissureDirtPlume[] {
+  if (plumes.length <= 1) return plumes;
+  const exemplar = plumes[0]!;
+  const specs = exemplar.group === 1 ? CLOSE_PLUMES : FAR_PLUMES;
+  const targetCenter = {
+    x: exemplar.x - (specs.find(({ slot }) => slot === exemplar.slot)!.side === 0 ? 24 : -24),
+    y: exemplar.y - 30,
+  };
+  // SortSprites is stable. Replaying its source-relative comparisons from
+  // creation preserves the previous row's OAM order when two arcs cross at
+  // the same Y; a slot-only tie-break loses that persistent state.
+  let frontToBack = specs.map(({ slot }) => slot);
+  for (let localAge = 0; localAge <= exemplar.localAge; localAge += 1) {
+    const yBySlot = new Map(specs.map((spec) => [
+      spec.slot,
+      (() => {
+        const plume = plumeAtLocalAge(localAge, exemplar.group, spec, targetCenter)!;
+        return plume.y + plume.y2;
+      })(),
+    ]));
+    frontToBack = [...frontToBack].sort((a, b) => yBySlot.get(b)! - yBySlot.get(a)!);
+  }
+  const bySlot = new Map(plumes.map((plume) => [plume.slot, plume]));
+  return frontToBack.reverse().map((slot) => bySlot.get(slot)!);
+}
+
 export function fissurePaletteAtAge(age: number): ComplexPaletteBlendState {
   for (const startAge of [31, 65]) {
     const local = age - startAge;

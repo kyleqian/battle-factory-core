@@ -4753,6 +4753,35 @@
     "tests/animation/guillotineSource.test.ts",
     "tests/animation/guillotineEvidence.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_FISSURE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-564 FRONTIER_MON_DUGTRIO_3 versus ONIX Scene-ON parties naturally pass the exclusive 0x082ccb7e..0x082ccca1 body through first inactive cleanup twice fresh: player-back frames 72-325 and opponent-front frames 76-329 at 254/254",
+    "the pure 254-age reducer and narrow typed seam port all three four-sprite MUD_SAND dirt groups, target/platform HorizontalShake(10,50), both complex BG-only palette pulses, BG_FISSURE fade/hold/restore, side-relative BG3 scroll, audio, tags, registers, and cleanup without owning OHKO, accuracy, damage, RNG, controller, turn, round, or facility state",
+    "the source-derived compositor normalizes BG_FISSURE's two contiguous 32x32 GBA screenblocks into its 64x32 row-major renderer contract and replays BuildOamBuffer's stable descending-Y equal-subpriority dirt order before painting back-to-front; no per-age lookup, coordinate/RGB fitting, canonical recording import, or absolute tick enters production",
+    "fissurePortable.ts regenerates both complete direct-mGBA windows twice fresh and proves 254/254 reducer/seam/component and production framebuffer rows plus 253/253 preceding software-to-hardware OAM/matrix/palette latches; stable evidence/raw-RGB/change-map digests are player fafd5619e316e5fa2d4cdf4bf1f229faeda2e73b1777c8a57ca3074eb462af1e / 67cadfd5e807c5bbc41b9a751a643be698a18c7055e0c50024578c58f5a83899 / 23a4e2a2db999dbccfe7d8d8d9fae6bc95d00995937fc4138c5e9bedbc17172c and opponent c52ac9f940887d7982df6cba7fab81b5ee303b15449d371d9bff3fa62be1de20 / 55b75e4f1ff2bdcfe5395aeb516f91685fbfcfda2b8c229bfdb594396d9bded6 / 1d38281db6e6313b424dac6eb4fde21fca343e25f7823b06eabf2f882f7f2d52",
+    "MOVE_DIG remains independently unsupported: it shares only ANIM_TAG_MUD_SAND and gDirtPlumeSpriteTemplate and still requires its distinct dirt-mound, DigDown/DigUp movement, monbg_static/clearmonbg_static, hitsplat, ShakeMon, and two-turn bodies"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-fissure-player-dugtrio-opponent-onix.json",
+    "tools/battle-lab/mechanic-fissure-opponent-dugtrio-player-onix.json",
+    "tools/compare/fixtures/fissure-source-staging-checkpoint.json",
+    "tools/compare/fixtures/fissure-player-dugtrio-opponent-onix.json",
+    "tools/compare/fixtures/fissure-opponent-dugtrio-player-onix.json",
+    "tools/compare/agilityProbe.py",
+    "tools/compare/fissurePortable.ts",
+    "tools/compare/extractFissureAssets.ts",
+    "tools/compare/evidence/fissure-changemap-player.txt",
+    "tools/compare/evidence/fissure-changemap-opponent.txt",
+    "src/animation/assets/fissure.json",
+    "src/animation/fissure.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/fissure.test.ts",
+    "tests/animation/fissureEvidence.test.ts"
+   ]
   }
  ],
  "queue": [
@@ -5273,7 +5302,7 @@
     "MOVE_FISSURE",
     "MOVE_DIG"
    ],
-   "goal": "MOVE_FISSURE remains unsupported at a staged production checkpoint. Its source-derived BG_FISSURE plus reused MUD_SAND asset, pure 254-age reducer, narrow typed seam, compositor, and direct-mGBA verifier pass 254/254 source/reducer/seam/component rows and 253/253 hardware transfer rows twice fresh in both orientations with stable full-state/raw-RGB/change-map receipts. Production framebuffer is 166/254 bilaterally: only close-plume/target overlap ages 50..59,61,64 and BG_FISSURE target-priority ages 155..230 remain. Fissure is not promoted until 254/254 framebuffer equality repeats twice fresh. MOVE_DIG independently has 17 components and shares only ANIM_TAG_MUD_SAND plus gDirtPlumeSpriteTemplate; its distinct dirt-mound, DigDown/DigUp movement, static-monbg, hitsplat, and ShakeMon bodies remain unsupported, and it is not promoted."
+   "goal": "MOVE_FISSURE independently proves its complete three-group MUD_SAND dirt, target/platform HorizontalShake, two complex BG-only palette pulses, BG_FISSURE two-screenblock fade/hold/restore, audio, hardware transfer, stable OAM painter order, and cleanup in both orientations at 254/254 source/component/framebuffer rows twice fresh. MOVE_DIG remains independently unsupported: it shares only ANIM_TAG_MUD_SAND plus gDirtPlumeSpriteTemplate and still requires its distinct dirt-mound, DigDown/DigUp movement, static-monbg, hitsplat, ShakeMon, and two-turn bodies."
   },
   {
    "id": "horizontal-shake-complex-bg-palette",
@@ -5289,7 +5318,7 @@
     "MOVE_ERUPTION",
     "MOVE_LUSTER_PURGE"
    ],
-   "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH and MOVE_MEGA_KICK independently prove their complex-palette bodies. FISSURE now passes 254/254 source/reducer/seam/component and 253/253 hardware-transfer rows twice fresh in both orientations for its target-only (10,50) shake, two BG-only palette pulses, three dirt groups, and BG_FISSURE pipeline, but remains unsupported at 166/254 production framebuffer rows pending close-plume overlap and BG target-priority closure. SKY ATTACK, MAGNITUDE, ERUPTION, and LUSTER PURGE retain their distinct unsupported bodies. Every named unsupported move remains unsupported pending independent complete dense evidence."
+   "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH and MOVE_MEGA_KICK independently prove their complex-palette bodies. MOVE_FISSURE independently proves its target/platform (10,50) shake, two BG-only palette pulses, three stable-OAM dirt groups, BG_FISSURE pipeline, and cleanup at 254/254 complete bilateral source/component/framebuffer rows twice fresh. SKY ATTACK, MAGNITUDE, ERUPTION, and LUSTER PURGE retain their distinct unsupported bodies. Every named unsupported move remains unsupported pending independent complete dense evidence."
   },
   {
    "id": "elemental-punch",

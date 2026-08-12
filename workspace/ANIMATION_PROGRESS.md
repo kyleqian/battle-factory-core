@@ -1,3 +1,11 @@
+# MOVE_FISSURE exact — bilateral 254/254 promotion (2026-08-12 worker)
+
+- **State:** Level-50 coverage advances **176→177/276 exact**, 0 partial, 0 staged, and unsupported falls **100→99**. Only Fissure is promoted; Dig remains an independent audit-only sibling.
+- **Did:** Closed both staged compositor residuals with source-derived mechanisms. BG_FISSURE's 512x256 text map is two contiguous 32x32 GBA screenblocks, now normalized to the renderer's 64x32 row-major contract. The four equal-subpriority dirt OBJs now replay `BuildOamBuffer`'s stable descending-screen-Y order from creation and paint its inverse, preserving prior OAM order at arc-crossing ties.
+- **Verified:** Twice freshly per orientation, player-back **72..325** and opponent-front **76..329** pass **254/254 reducer/seam/component/framebuffer**, **253/253** software→hardware OAM/matrix/palette latches, complete state/RGB/map gates, and byte-stable receipts (`fafd5619…/67cadfd5…/23a4e2a2…`; `c52ac9f9…/55b75e4f…/1d38281d…`). Focused Fissure/evidence/boundary **14/14**, animation audit/coverage, typecheck, full suite **999 files / 9,617 passed / 1 skipped**, and the **657-module** build are green after rebuilding the gitignored WASM prerequisite.
+- **Next:** None for Fissure. Dig still needs its own complete two-turn dirt-mound/movement/static-monbg/hitsplat/shake evidence and implementation before any acceptance.
+- **Notes:** Presentation-only. No OHKO/accuracy/damage/RNG/turn/controller/facility state, boundary, unsupported barrier, canonical recording import, absolute tick, per-age framebuffer/hash lookup, coordinate/RGB fitting, or sibling coverage changed.
+
 # MOVE_FISSURE staged production checkpoint — component exact, remains unsupported (2026-08-12 worker)
 
 - **State:** Coverage remains **176/276 Level-50 exact**, 0 partial, 0 staged, and **100 unsupported**. Fissure is not promoted; Dig remains an independent audit-only sibling.

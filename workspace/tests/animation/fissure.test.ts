@@ -1,9 +1,11 @@
 import { gunzipSync } from "node:zlib";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import fissureAsset from "../../src/animation/assets/fissure.json" with { type: "json" };
 import {
   FISSURE_FRAME_COUNT,
   fissureAtAge,
+  fissureDirtPainterOrder,
 } from "../../src/animation/fissure.ts";
 import {
   createSceneOnMovePresentation,
@@ -39,6 +41,16 @@ const cases = [
 ] as const;
 
 describe("MOVE_FISSURE source reducer", () => {
+  it("normalizes the 512x256 BG_FISSURE screenblocks to row-major tiles", () => {
+    const tilemap = fissureAsset.background.tilemap;
+    expect([tilemap.width, tilemap.height]).toEqual([64, 32]);
+    expect(tilemap.entries[1]).toMatchObject({ tile: 1, hFlip: false, vFlip: false });
+    expect(tilemap.entries[7 + 7 * 64]).toMatchObject({ tile: 63, hFlip: false, vFlip: false });
+    expect(tilemap.entries[8 * 64]).toMatchObject({ tile: 63, hFlip: true, vFlip: true });
+    expect(tilemap.entries.filter((_, index) => index % 64 >= 32).every(({ tile }) => tile === 0))
+      .toBe(true);
+  });
+
   it.each(cases)("matches every retained $side source task, dirt sprite, and register row", (fixture) => {
     const probe = JSON.parse(gunzipSync(readFileSync(fixture.artifact)).toString()) as {
       frames: EvidenceFrame[];
@@ -99,6 +111,19 @@ describe("MOVE_FISSURE source reducer", () => {
     expect(state(234).bg3Scroll).toEqual({ x: 0, y: 0 });
     expect(state(252).active).toBe(true);
     expect(state(253).active).toBe(false);
+  });
+
+  it("replays stable equal-subpriority OAM ordering as the dirt arcs cross", () => {
+    const state = (age: number) => fissureAtAge(
+      age, "opponent", { x: 176, y: 42 }, { x: 176, y: 40 }, 1,
+    );
+    const painterSlots = (age: number) =>
+      fissureDirtPainterOrder(state(age).displayedDirt).map(({ slot }) => slot);
+    expect(painterSlots(50)).toEqual([7, 5, 4, 3]);
+    expect(painterSlots(51)).toEqual([7, 5, 3, 4]);
+    expect(painterSlots(57)).toEqual([7, 5, 3, 4]);
+    expect(painterSlots(60)).toEqual([7, 3, 4, 5]);
+    expect(painterSlots(61)).toEqual([7, 4, 3, 5]);
   });
 
   it("exposes only presentation geometry and immutable field values through the typed seam", () => {
