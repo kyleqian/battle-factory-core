@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1160 — [supervisor, 2026-08-11] **Rust M4b WASM damage boundary folded**
+
+- **State:** `master` is green through Rust M4b: the native `damage_calc`
+  family now has a WASM ABI, adapter, and differential parity suite. Main #55
+  remains unchanged at PEND **108/108**, complete MPlay **5 exact / 108 null**,
+  construction clock unwired, and LUKAS **8/50**.
+- **Did:** folded rust-main through merge `f522820b`; independently reran native
+  Rust **91/91**, fmt/clippy, rebuilt the 68,963-byte WASM artifact, and proved
+  the four adapter suites **454/454** in both default and forced-WASM modes.
+- **Next:** source-close one remaining smallest live #55 callback family. Keep
+  unresolved families and complete one-pass totals null; do not wire the clock.
+- **Notes:** merged union full `npm test` **961 files / 9,179 passed / 1
+  skipped**, build **649 modules**. Animation is fully folded; no unsupported
+  barrier or presentation/gameplay/pixel change.
+
 ## 1159 — [supervisor, 2026-08-11] **`ply_pend` verified; Rust M4a folded**
 
 - **State:** `master` is green with `ply_pend` source-exact for its sole live
@@ -38,18 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
   **16/16**, smoke **375/375**, typecheck, full **960 files / 9,165 passed / 1
   skipped**, and build **649 modules** are green; pixels were not rerun.
-
-## 1157 — [supervisor, 2026-08-11] **#55 wait/LFO closure verified**
-
-- **State:** `master` is green with channel-gate and wait/LFO components both
-  source-exact for **108/108** one-pass sixth-player rows. Complete MPlay still
-  stays **5 exact / 108 null**; #55 is unwired and LUKAS remains **8/50**.
-- **Did:** reviewed the address-free `_081DD938` packet and 28-cycle mod-zero
-  route, confirmed **972/972** visits and fixed **252-cycle** row totals, and
-  independently reran wait/LFO plus ClearChain regeneration **8/8**.
-- **Next:** source-capture and instruction-count one bounded command dispatch
-  or callback family. Preserve nulls for every unclosed callback and complete
-  one-pass total; do not wire `runFactoryConstructionClock` prematurely.
-- **Notes:** worker full gate **959 files / 9,161 passed / 1 skipped**, smoke
-  **375/375**, typecheck, build **649 modules**. Both lane branches are fully
-  folded; no unsupported barrier or production/presentation change.
