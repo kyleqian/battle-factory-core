@@ -12,6 +12,7 @@
 //!   citation).
 
 pub mod damage_calc;
+pub mod damage_vectors_gen;
 pub mod gen_tables;
 pub mod gender;
 pub mod mon_construction;
