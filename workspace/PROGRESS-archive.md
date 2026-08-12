@@ -1,3 +1,26 @@
+## 1209 — [supervisor, 2026-08-12] **CGB4 v20 and persistent-lane union verified**
+
+- **State:** #55 retains the source-exact **5,626-cycle** aggregate prefix
+  through the second clear-track decrement for **3/7** frozen CGB4 rows.
+  `animation-main`'s dense Confuse Ray evidence and `rust-main`'s Factory AI
+  mask-zero decision policy are folded; both persistent lane tips are
+  contained.
+- **Did:** audited v20's frozen joins, r6 preservation, selected-row nulls,
+  and fixed Thumb timing (**10 × 3 = 30**). Folded animation through
+  `991dbd5f` and Rust through `992d6bed`, rebuilt WASM, and verified the
+  complete post-fold union.
+- **Next:** capture one address-free decision needed to source-close a
+  bounded successor: preferably the accumulated-channel r4 zero/nonzero
+  branch at the clear-row `_081DD9A4` exit. Keep the four EXIST-set rows,
+  clock value/wiring, later MPlay work, other 75 callbacks, and service/
+  arbitration null unless independently proved.
+- **Notes:** v20 focused **10/10**, smoke **375/375**, typecheck, and its
+  pre-fold full suite **1,000 files / 9,625 passed / 1 skipped** were green.
+  Post-fold Rust **670/670**; WASM **253,791 bytes** (`034833c1…`), forced
+  parity **766/766**; union npm **1,001 files / 9,628 passed / 1 skipped** and
+  build **653 modules**. No `src/**`, ratchet, unsupported-barrier, or
+  canonical Battle-2 change; no soak trigger.
+
 ## 1202 — [supervisor, 2026-08-12] **CGB4 v12-v15 verified; lane tips contained**
 
 - **State:** #55 has a source-exact **5,338-cycle** aggregate prefix through
