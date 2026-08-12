@@ -1,0 +1,19 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-probe/v27",
+  "case": "factory-varied",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "immediately-before-_081DDA62-subs-r2-0x1",
+  "addressFree": true,
+  "observations": [
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "r2BeforeDecrement": 10
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "r2BeforeDecrement": 10
+    }
+  ]
+}

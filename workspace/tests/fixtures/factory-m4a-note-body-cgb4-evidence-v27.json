@@ -1,0 +1,185 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v27",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1443-1450",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      }
+    },
+    "elf": {
+      "containingEntry": "0x082dfc00",
+      "instructionStart": "0x082dfc9a",
+      "endExclusive": "0x082dfc9e",
+      "takenSuccessor": "0x082dfca4",
+      "nextSequentialInstruction": "0x082dfc9e",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "subs r2, 0x1; ble _081DDA6C",
+        "start": "0x082dfc9a",
+        "endExclusive": "0x082dfc9e",
+        "bytes": 4,
+        "bytesHex": "01 3a 02 dd",
+        "sha256": "a70595d17cb12da032e89ea67903bf3fe0b222c4c87bd2375a1c6eef2aa5791a"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "memoryAccesses": 0,
+      "dataAccessPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "bleNotTakenModel": "subs; non-taken ble = 2 halfwords * 2 + zero refill = 4",
+      "bleTakenModel": "subs; taken ble = 2 halfwords * 2 + one 6-cycle refill = 10"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV26EvidenceSha256": "a4cff030582607369f63bd70cb1ed6a3c5afad4d36997d0f3626684a9122bae1",
+    "acceptedV26DocSha256": "2eb2f9e4ccb12149145a881d24d63e552caf05515d73fc1eb95ccf206803636c",
+    "acceptedV25PacketSha256": {
+      "anchor": "3ac4e4a8797b7e459c15019e7f847dce592643f604cdc437e74074dfc8d6d1a7",
+      "liliana": "ce74203999ee3d5492f060ef879483403002c06ab501776e7063b0fa1421d4da",
+      "factory-varied": "bd289cb97eaafe49b63ce41c9b1546037b899394d7cdaf25998efcc6427646b5"
+    },
+    "v26EvidenceAndReportRegenerateByteForByte": true,
+    "v26EvidenceReportAndInheritedV25PacketsRetainedByteForByte": true,
+    "v27PacketSha256": {
+      "anchor": "af43b96726ecbab87348608a4da6c85bb798648e0e7a6d39a6d62aecd5f3f930",
+      "liliana": "9078aa6611250012a1654f05b6ea6f8f30190117f7db0f6d2713f1ab71447626",
+      "factory-varied": "6a5a1424b507c62bed61d7da753502965f0de47924425f52ba36152d7132be68"
+    },
+    "v27PacketRepeatSha256": {
+      "anchor": "af43b96726ecbab87348608a4da6c85bb798648e0e7a6d39a6d62aecd5f3f930",
+      "liliana": "9078aa6611250012a1654f05b6ea6f8f30190117f7db0f6d2713f1ab71447626",
+      "factory-varied": "6a5a1424b507c62bed61d7da753502965f0de47924425f52ba36152d7132be68"
+    },
+    "v27PacketRepeatIdentity": true
+  },
+  "capture": {
+    "boundary": "immediately before _081DDA62: subs r2, 0x1",
+    "scalars": [
+      "r2BeforeDecrement"
+    ],
+    "excluded": [
+      "track pointer",
+      "runtime address",
+      "track count",
+      "track index",
+      "track identity",
+      "channel",
+      "frame",
+      "duration",
+      "condition flags",
+      "wider state",
+      "subtraction result serialization",
+      "_081DDA6C body",
+      "movs r0, MusicPlayerTrack_size continuation body",
+      "later loop work",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV26SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v26-selected-row",
+      "unsupported-packet-field",
+      "source-operand-out-of-range",
+      "unexpected-successor-boundary"
+    ]
+  },
+  "coverage": {
+    "frozenV26SelectedRows": 3,
+    "packetRowsByCase": {
+      "anchor": 0,
+      "liliana": 1,
+      "factory-varied": 2
+    },
+    "r2BeforeDecrementRows": 3,
+    "r2BeforeDecrementValues": [
+      10
+    ],
+    "bleNotTakenRows": 3,
+    "bleTakenRows": 0,
+    "postV26FirstTrackDecrementDecisionSourceCycles": 12,
+    "acceptedContiguousPrefixThroughFirstTrackVolPitchDecisionSourceCycles": 5800,
+    "contiguousPrefixThroughFirstTrackDecrementDecisionSourceCycles": 5812,
+    "sequentialThumbHalfwords": 6,
+    "memoryAccesses": 0,
+    "dataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 0,
+    "failClosedSchemaConsistentUnobservedExitSourceCycles": 10,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "r2BeforeDecrement": 10,
+      "decrementDecision": "subs-r2-1; ble-not-taken",
+      "postV26FirstTrackDecrementDecisionSourceCycles": 4,
+      "contiguousPrefixThroughFirstTrackDecrementDecisionSourceCycles": 832,
+      "bleTakenControlTransferRefills": 0,
+      "stopsBeforeV27Instruction": "movs r0, MusicPlayerTrack_size"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "r2BeforeDecrement": 10,
+      "decrementDecision": "subs-r2-1; ble-not-taken",
+      "postV26FirstTrackDecrementDecisionSourceCycles": 4,
+      "contiguousPrefixThroughFirstTrackDecrementDecisionSourceCycles": 832,
+      "bleTakenControlTransferRefills": 0,
+      "stopsBeforeV27Instruction": "movs r0, MusicPlayerTrack_size"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "r2BeforeDecrement": 10,
+      "decrementDecision": "subs-r2-1; ble-not-taken",
+      "postV26FirstTrackDecrementDecisionSourceCycles": 4,
+      "contiguousPrefixThroughFirstTrackDecrementDecisionSourceCycles": 832,
+      "bleTakenControlTransferRefills": 0,
+      "stopsBeforeV27Instruction": "movs r0, MusicPlayerTrack_size"
+    }
+  ],
+  "containment": {
+    "frozenV26ArtifactsReadOnly": true,
+    "inheritedV25PacketsReadOnly": true,
+    "frozenV26ArtifactsAreNotProductionImports": true,
+    "inheritedV25PacketsAreNotProductionImports": true,
+    "v27PacketsAreNotProductionImports": true,
+    "v27PacketStripBackPreserved": true,
+    "trackPointer": null,
+    "runtimeAddress": null,
+    "trackCount": null,
+    "trackIndex": null,
+    "trackIdentity": null,
+    "channel": null,
+    "frame": null,
+    "duration": null,
+    "conditionFlags": null,
+    "widerState": null,
+    "subtractionResult": null,
+    "continuationBody": null,
+    "exitBody": null,
+    "laterLoopWork": null,
+    "serviceCost": null,
+    "constructionClock": null,
+    "controller": null,
+    "presentation": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Two fresh byte-identical address-free v27 packet sets freeze v26 evidence/report and all inherited v25 packets byte-for-byte, then join only the same three sourceStateDigest rows. Each packet retains only r2BeforeDecrement. Source/ELF/exact-ROM price subs r2, 0x1; ble _081DDA6C from that operand, yielding 3 observed non-taken and 0 observed taken routes, 12 aggregate cycles, and a contiguous prefix of 5812. The schema-consistent r2BeforeDecrement=1 exit route is source-priced at 10 cycles but is fail-closed unless independently observed; both successor bodies remain excluded."
+}
