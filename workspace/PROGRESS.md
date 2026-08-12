@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1200 — [MAIN worker, 2026-08-12] **CGB4 v14 lfoSpeed decision source-closed**
+
+- **State:** #55 is source-exact for **5,254 aggregate cycles** through the
+  immediate post-note `lfoSpeed` decision across the frozen **7/82** CGB4
+  callbacks: v13 **5,212** plus v14 **42** cycles. Complete MPlay remains
+  **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** twice-fresh address-free packets capture only `lfoSpeed` on the same
+  sourceStateDigest join: all seven are **44**. Source/ELF/ROM close its IWRAM
+  load, compare, and non-taken branch for **6 cycles each**; frozen v13 is
+  byte-identical and the first later scalar remains unobserved.
+- **Next:** stop before `MusicPlayerTrack.mod`; retain later track-loop work,
+  other 75 note callbacks, complete MPlay, service/arbitration, and
+  construction-clock wiring null.
+- **Notes:** packet hashes `04188570…` / `a641b339…` / `e2b8cf01…`; evidence/
+  doc `82138617…` / `189c21ac…`; red-first followed by focused v1-v14
+  **57/57**, smoke **8 files / 375 passed**, and typecheck are green. One full
+  suite and build remain before handoff.
+
 ## 1199 — [MAIN worker, 2026-08-12] **CGB4 v13 next-command wait route source-closed**
 
 - **State:** #55 is source-exact for **5,212 aggregate cycles** through the
@@ -51,24 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   1 skipped**, and build **653 modules** are green. No duration fit, runtime
   pointer/address identity, production import, unsupported barrier, animation/
   Rust change, or canonical Battle-2 branch.
-
-## 1197 — [supervisor, 2026-08-12] **CGB4 v11 verified; Rust M5d completed and folded**
-
-- **State:** #55 now has exact complete-`ply_note` totals for the observed
-  **7/82** zero-`lfoDelay` CGB4 callbacks, with a **4,435-cycle** aggregate
-  contiguous boundary through final `bx r0`. Rust `CheckViability` is
-  **122/122** table effects native; its WASM boundary remains the next Rust
-  milestone.
-- **Did:** independently audited v11's fixed **44-cycle** caller tail and
-  verified both IWRAM POP classes against a temporary Scene-OFF instruction
-  probe before removing the hooks. Folded Rust M5d-5 through merge `6253143b`:
-  all remaining **28** effects plus 97 TS-generated vector rows; the native
-  barrier is dry. Animation-main remains contained.
-- **Next:** source-close one separately bounded post-`ply_note` dispatcher/
-  MPlay continuation slice without widening the seven-row evidence to the
-  other 75 callbacks. Keep service/arbitration and construction-clock wiring
-  null. Fold Rust M5e if rust-main advances.
-- **Notes:** union full **988 files / 9,570 passed / 1 skipped**, build **653
-  modules**. Rust is **662/662**, fmt/clippy clean; rebuilt WASM is **138,436
-  bytes** (`9d53f91e…`) and forced parity is **757/757**. No engine-changing
-  fold, soak trigger, unsupported barrier, or canonical Battle-2 extension.

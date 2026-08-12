@@ -2115,6 +2115,29 @@ captured. Later track-loop work, the other 75 callbacks, complete MPlay totals
 remain null. No runtime pointer/address identity, unsupported barrier,
 animation/Rust change, or canonical Battle-2 extension landed.
 
+**2026-08-12 CGB4 v14 `lfoSpeed` decision closure:** additive v14 preserves
+frozen v13 byte-for-byte and joins only the same **7/82** CGB4 rows by
+`sourceStateDigest`. Twice-fresh address-free Battle Scene OFF packets capture
+only `MusicPlayerTrack.lfoSpeed`: all seven are `44` (0 anchor / 3 LILIANA / 4
+legal-varied). Packet SHA256 are anchor `04188570…`, LILIANA `a641b339…`, and
+legal-varied `e2b8cf01…`, with byte-identical repeats.
+
+The first LFO decision contiguous with v13's wait decrement takes the same
+nonzero/no-refill edge in every row. Source/ELF/ROM guards cover only the exact
+six bytes `0x082dfb7a..0x082dfb80`: IWRAM `lfoSpeed` read, compare, and
+not-taken branch. That adds **6 cycles each / 42 aggregate**, advancing the
+contiguous prefix from **5,212** to **5,254 aggregate cycles**. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v14.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v14.json` (SHA256
+`82138617…`).
+
+Closure stops before the immediately following IWRAM `MusicPlayerTrack.mod`
+read: `mod`, delay/oscillator state, later re-visits of the positive wait, and
+every later branch/memory access remain uncaptured and null. The other 75
+callbacks, complete MPlay totals (**5 exact / 108 null**), service/arbitration,
+construction-clock wiring, runtime pointer/address identity, animation/Rust,
+and canonical Battle-2 work remain untouched.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

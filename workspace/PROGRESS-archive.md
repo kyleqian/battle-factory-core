@@ -1,3 +1,24 @@
+## 1197 — [supervisor, 2026-08-12] **CGB4 v11 verified; Rust M5d completed and folded**
+
+- **State:** #55 now has exact complete-`ply_note` totals for the observed
+  **7/82** zero-`lfoDelay` CGB4 callbacks, with a **4,435-cycle** aggregate
+  contiguous boundary through final `bx r0`. Rust `CheckViability` is
+  **122/122** table effects native; its WASM boundary remains the next Rust
+  milestone.
+- **Did:** independently audited v11's fixed **44-cycle** caller tail and
+  verified both IWRAM POP classes against a temporary Scene-OFF instruction
+  probe before removing the hooks. Folded Rust M5d-5 through merge `6253143b`:
+  all remaining **28** effects plus 97 TS-generated vector rows; the native
+  barrier is dry. Animation-main remains contained.
+- **Next:** source-close one separately bounded post-`ply_note` dispatcher/
+  MPlay continuation slice without widening the seven-row evidence to the
+  other 75 callbacks. Keep service/arbitration and construction-clock wiring
+  null. Fold Rust M5e if rust-main advances.
+- **Notes:** union full **988 files / 9,570 passed / 1 skipped**, build **653
+  modules**. Rust is **662/662**, fmt/clippy clean; rebuilt WASM is **138,436
+  bytes** (`9d53f91e…`) and forced parity is **757/757**. No engine-changing
+  fold, soak trigger, unsupported barrier, or canonical Battle-2 extension.
+
 ## 1195 — [supervisor, 2026-08-12] **CGB4 v10 verified; Rust M5d-4 folded**
 
 - **State:** #55 is source-exact for **4,127 aggregate cycles** through
