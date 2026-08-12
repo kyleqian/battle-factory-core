@@ -81,11 +81,12 @@ canonical and this lane must never make the TS side worse.
   `docs/rust-m5b-checkbadmove-batching.md`), and M5c (fw_ boundary +
   `core-rs/adapter/factoryAiEngine.ts` + both-mode parity suites
   `tests/factoryAiMaskParity.test.ts`/`factoryAiCheckBadMoveParity.test.ts`)
-  are DONE. M5d (CheckViability, 122 effects, per
-  `docs/rust-m5d-checkviability-batching.md`) is mid-flight — see
-  RUST_PROGRESS.md's top entry for the exact batch state. After M5d-5,
-  the CV boundary+adapter+parity step (M5c pattern) closes the family;
-  then TryToFaint + DecisionPolicy (M5f per the scout).
+  are DONE. **M5d is DONE (R4, 2026-08-12): CheckViability 122/122
+  native** in 6 steps per `docs/rust-m5d-checkviability-batching.md`.
+  Remaining in the family: M5e — the CV boundary+adapter+parity step
+  (M5c pattern; touches tests/, full npm gates apply), then TryToFaint
+  + DecisionPolicy (M5f per the scout). See RUST_PROGRESS.md's top
+  entry.
 
 ## Verification gates (every session)
 
