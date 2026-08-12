@@ -42220,3 +42220,20 @@ git; the current live ledger keeps the three load-bearing entries only.
   **991 files / 9,584 passed / 1 skipped**, and build **653 modules** are
   green. No runtime pointer/address identity, production import, unsupported
   barrier, animation/Rust change, or canonical Battle-2 branch.
+## 1203 — [MAIN worker, 2026-08-12] **CGB4 v16 fixed exit moves source-closed**
+
+- **State:** #55 has a source-exact **5,366-cycle** aggregate prefix through
+  the two fixed `_081DD994` register moves for the frozen **7/82** CGB4
+  callbacks. Complete MPlay remains **5 exact / 108 null**; the construction
+  clock is unwired.
+- **Did:** preserved v15 byte-for-byte and joined only its seven
+  `sourceStateDigest` rows. Source/ELF/ROM close `mov r3, sl; mov r4, fp` for
+  **4 cycles each / 28 aggregate**, with no oracle capture or state inference.
+- **Next:** stop before `subs r6, 0x1`; retain `r6`/track count, loop
+  continuation/exit, other 75 callbacks, complete MPlay, service/arbitration,
+  and construction-clock wiring null.
+- **Notes:** evidence/doc `f9d539ac…` / `3fbb25e2…`; red-first then focused
+  v15-v16 **7/7**, smoke **8 files / 375 passed**, typecheck, exactly one full
+  suite **993 files / 9,591 passed / 1 skipped**, and build **653 modules** are
+  green. No production, unsupported barrier, animation/Rust, canonical
+  Battle-2, or absolute-tick change.

@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1206 — [supervisor, 2026-08-12] **CGB4 v18 verified; animation and Rust lanes folded**
+
+- **State:** #55 retains the source-exact **5,492-cycle** aggregate prefix
+  through the frozen **7/82** CGB4 continuation rows. `animation-main`'s
+  Fissure source-staging checkpoint and `rust-main`'s M5e CheckViability WASM
+  boundary are folded into master; both persistent lane tips are contained.
+- **Did:** audited v18's fixed 4-halfword route: three sequential Thumb
+  instructions plus the unconditional-branch refill are **14 cycles/row**, so
+  **14 × 7 = 98** and **5,394 + 98 = 5,492**. Folded animation at `29cd94ac`
+  and Rust at `4e0db2d3`; rebuilt the WASM artifact and verified the complete
+  post-fold union.
+- **Next:** capture only the next-track flag read/decision at `_081DD87C`
+  for the frozen seven rows, then source-close one bounded route. Keep track
+  identity/count, later loop work, the unobserved exit successor, other 75
+  callbacks, complete MPlay, service/arbitration, and construction-clock
+  wiring null.
+- **Notes:** Rust **662/662**; rebuilt WASM **253,683 bytes** (`d55486c8…`);
+  forced-WASM parity **8 files / 766 passed**. Full union **997 files / 9,611
+  passed / 1 skipped** and build **653 modules** are green. Fissure adds only
+  a source/staging checkpoint; M5e adds no `src/**` change. No soak trigger,
+  unsupported-barrier/import-ratchet change, or canonical Battle-2 extension.
+
 ## 1205 — [MAIN worker, 2026-08-12] **CGB4 v18 continuation body source-closed**
 
 - **State:** #55 has a source-exact **5,492-cycle** aggregate prefix through
@@ -47,22 +69,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Meteor Mash promotion (`2ca00a35`); the union passes **994 files / 9,595
   passed / 1 skipped** and build **653 modules**. Rust remains contained. No
   production battle logic, unsupported barrier, recording import, canonical
-  Battle-2, or absolute-tick change.
-
-## 1203 — [MAIN worker, 2026-08-12] **CGB4 v16 fixed exit moves source-closed**
-
-- **State:** #55 has a source-exact **5,366-cycle** aggregate prefix through
-  the two fixed `_081DD994` register moves for the frozen **7/82** CGB4
-  callbacks. Complete MPlay remains **5 exact / 108 null**; the construction
-  clock is unwired.
-- **Did:** preserved v15 byte-for-byte and joined only its seven
-  `sourceStateDigest` rows. Source/ELF/ROM close `mov r3, sl; mov r4, fp` for
-  **4 cycles each / 28 aggregate**, with no oracle capture or state inference.
-- **Next:** stop before `subs r6, 0x1`; retain `r6`/track count, loop
-  continuation/exit, other 75 callbacks, complete MPlay, service/arbitration,
-  and construction-clock wiring null.
-- **Notes:** evidence/doc `f9d539ac…` / `3fbb25e2…`; red-first then focused
-  v15-v16 **7/7**, smoke **8 files / 375 passed**, typecheck, exactly one full
-  suite **993 files / 9,591 passed / 1 skipped**, and build **653 modules** are
-  green. No production, unsupported barrier, animation/Rust, canonical
   Battle-2, or absolute-tick change.
