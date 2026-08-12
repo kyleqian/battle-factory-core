@@ -740,14 +740,11 @@ pub struct FactoryAiCheckViabilityBattler {
 /// arm's own `kind` field is a literal union of more than one named call
 /// site (27 of the 62 arms; 101 leaf names total — see the module doc
 /// comment's recount note). Each variant name mirrors its TS `kind` string
-/// (e.g. `"defense-up-roll-3"` -> `DefenseUp3`). Not constructed by this
-/// step (M5d-1..5's own handlers construct these); scoped
-/// `#[allow(dead_code)]` chosen over a 101-case shape-pinning test for
-/// time/code-size (module doc comment).
-/// Not every variant is constructed yet -- per-variant `#[allow(dead_code)]`
-/// covers exactly the kinds no landed batch constructs (module doc comment).
-/// M5d-1/2/3 between them construct every kind above `Curse1` (M5d-4/5's own
-/// kinds start there); the rest await M5d-4..5.
+/// (e.g. `"defense-up-roll-3"` -> `DefenseUp3`). M5d-1 through M5d-5
+/// between them now construct every variant here (M5d-5's own batch closed
+/// the last 14 -- `LockOn`/`Imprison`/`Haze1..3`/`MirrorMove1..2`/
+/// `SpAtkDown1..2`/`Snatch1..5`, batching doc §2 "M5d-5"), so no
+/// `#[allow(dead_code)]` remains on any variant.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CvDrawKind {
     Rest1,
@@ -859,16 +856,13 @@ pub enum CvDrawKind {
 /// literal `kind` tag dropped where the TS arm has only one `kind` value
 /// (the variant name already identifies it) and kept as a `kind:
 /// CvDrawKind` field where the TS arm's `kind` is itself a multi-name
-/// union. Not every variant is constructed yet -- per-variant
-/// `#[allow(dead_code)]` covers exactly the sites no landed batch
-/// constructs. M5d-1/2/3 between them construct `TargetFasterTie`/
-/// `UserFasterTie`/`SpeedDownRoll`/`PursuitSleepRoarParalyzeRoll`/
-/// `ProtectRoll`/`ToxicRoll`/`HighCritFallthroughRoll`/`HighCritRoll`/
-/// `AlwaysHitRoll`/`VitalThrowMidbandRoll`/`VitalThrowRoll`/every M5d-2
-/// stat-mod roll/`RestRoll`/`HealRoll`/`AbsorbRoll`/`EndureRoll`/
-/// `TrapRoll`/`SemiInvulnerableRoll`/`FlailRoll`/`DestinyBondRoll`/
-/// `SelfKoRoll`/`ConfuseRoll`/`SwaggerRoll`/`CounterRoll`; the rest await
-/// M5d-4..5.
+/// union. M5d-1 through M5d-5 between them now construct every variant
+/// (M5d-5's own batch closed the last 15 -- `TrickRoll`/
+/// `ChangeSelfAbilityRoll`/`AccuracyUpRoll`/`DisableRoll`/`FlatterRoll`/
+/// `LockOnImprisonRoll`/`ConversionRoll`/`ThiefRoll`/`HazeRoll`/
+/// `RecycleRoll`/`SpitUpRoll`/`MirrorMoveRoll`/`SpAtkDownRoll`/
+/// `SnatchRoll`/`GetAbility`, batching doc §2 "M5d-5"), so no
+/// `#[allow(dead_code)]` remains on any variant.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CheckViabilityDraw {
     TargetFasterTie {
