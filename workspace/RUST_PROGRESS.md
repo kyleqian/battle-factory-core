@@ -5,14 +5,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R5 — [supervised session, 2026-08-12] **M5 COMPLETE; M6b native switch policy folded**
+## R5 — [supervised session, 2026-08-12] **M5 and M6 COMPLETE; switch policy end-to-end**
 
-- **State:** rust-main = master `9bb4cee9`, including verified M6a folds
-  `8f7e231f`/`237509ea` and M6b folds `00e099ac`/`b3af11a9`. The complete
-  Factory AI mask 0/1/7 decision family is native and WASM differential-green.
-  The singles switch-in selector and full switch policy are native and corpus-
-  differential-green; their WASM boundary remains M6c. `RUST_DEFERRED.md` has
-  no open entries.
+- **State:** rust-main = master `492a9d4f` + verified M6c fold `82a224cc`.
+  The complete Factory AI mask 0/1/7 decision family and the singles switch-in
+  selector/full switch policy are native and WASM differential-green.
+  `RUST_DEFERRED.md` has no open entries.
 - **M6a DONE:** ported pure RNG-free `GetMostSuitableMonToSwitchInto`, including
   both source passes, strict ties, defender dedup, mono-attacker double apply,
   Levitate/Foresight, active-type STAB, u8 wrap, special move behavior, and the
@@ -36,11 +34,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `b6acb929ccf9026ee33a0e471997cb60cbb25b3cda37b3ac68c10b565aeb34c7`.
   Post-fold full npm is **1,007 files / 9,659 passed / 1 skip**; build is green
   at **655 modules**.
-- **Next:** M6c — add the honest ABI/adapter boundary and both-mode full-object
-  parity for the M6a selector and M6b switch policy. Re-check live conflicts
-  before dispatch; do not edit the canonical TypeScript implementation.
-- **Notes:** M6b used Sol/high, followed by one narrow Terra/max correction.
-  Scope stayed within `core-rs/**`; no main-lane ledger or engine file changed.
+- **M6c DONE:** additive ABI-v1 exports cross the selector's fixed 114-byte
+  input and the policy's fixed 401-byte input with typed length/policy errors.
+  The adapter calls WASM directly and reconstructs the full choice, selection,
+  RNG, **10-kind** draw/reason, and **17-kind / 5-outcome** branch surface.
+  Both-mode parity covers **100 selector cases + 160 policy inputs**, all 3
+  choices, three policy errors, and six malformed lengths. Supervisor audited
+  wire widths/order and no-fallback routing, then reran cargo **693 harness
+  cases**, fmt, clippy, artifact build, smoke **375/375**, targeted **3/3**, and
+  forced-WASM union **11 files / 779/779**. Artifact: 324,348 bytes, sha256
+  `3f8094c9c20f4d77dc5a9b168cbb62c53dd230af2496aa37eaef2e4213a9cbf1`.
+  Post-fold full npm: **1,010 files / 9,673 passed / 1 skip**; build **657
+  modules**.
+- **Next:** M7a — port stable pure `factoryTrainerSchedule.ts` natively as the
+  opener for opponent generation, with a TS-executed corpus and byte-idempotent
+  generated policy data. Keep its WASM boundary as a separately verified step.
+- **Notes:** M6b used Sol/high plus one narrow Terra/max correction; M6c used
+  Sol/high. Scope stayed within `core-rs/**` plus the authorized new parity
+  test; no canonical TS engine or main-lane ledger file changed.
 
 ---
 
