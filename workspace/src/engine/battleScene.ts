@@ -678,6 +678,7 @@ import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with
 import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import confuseRayAsset from "../animation/assets/confuse-ray.json" with { type: "json" };
+import fissureAsset from "../animation/assets/fissure.json" with { type: "json" };
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
@@ -985,6 +986,7 @@ import {
   sceneOnIronTailView,
   sceneOnToxicView,
   sceneOnEarthquakeView,
+  sceneOnFissureView,
   sceneOnHardenView,
   sceneOnIronDefenseView,
   sceneOnFlashView,
@@ -1054,6 +1056,7 @@ import {
   type SceneOnStompConfig,
   type SceneOnViceGripConfig,
   type SceneOnGuillotineConfig,
+  type SceneOnFissureConfig,
   type SceneOnFirePunchConfig,
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
@@ -2037,6 +2040,9 @@ const battleAnimMudSand = battleAnimMudSandAsset as {
   tileset: Tileset;
   mudSlapTileset: Tileset;
   palette: RgbColor[];
+};
+const fissureArt = fissureAsset as {
+  background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
 /** S7/S8 turn 14 (docs/turn14-notes.md's worktree-lane addendum): `gFlyBallUpSpriteTemplate`'s "round shadow" ball sprite (`ANIM_TAG_ROUND_SHADOW`, `round_shadow.png`, 64x64) - see `tools/extract/extract-fly-ball.ts`. */
 const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
@@ -39132,6 +39138,129 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "HAUNTER used" : "Foe HAUNTER used",
       "SHADOW PUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FISSURE") {
+    const fissureState = state as SceneOnMovePresentationState<SceneOnFissureConfig>;
+    const view = sceneOnFissureView(fissureState);
+    const playerToOpponent =
+      view.attacker.species === "DUGTRIO"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "DUGTRIO"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FISSURE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const darken = (palette: readonly RgbColor[]) => palette.map((color) => {
+      const packed = mgbaDarkenColor(
+        color.r | (color.g << 8) | (color.b << 16),
+        view.bldy,
+      );
+      return {
+        r: packed & 0xff,
+        g: (packed >>> 8) & 0xff,
+        b: (packed >>> 16) & 0xff,
+      };
+    });
+    if (view.background === "fissure") {
+      drawExtractedTileBg(fb, {
+        tileset: fissureArt.background.tileset,
+        tilemap: fissureArt.background.tilemap,
+        subpalettes: [darken(fissureArt.background.palette)],
+      }, view.bg3Scroll.x, view.bg3Scroll.y);
+    } else {
+      const tint = view.displayedPalette.color === "black"
+        ? { r: 0, g: 0, b: 0 }
+        : { r: 255, g: 255, b: 255 };
+      const pulsed = view.displayedPalette.active
+        ? blendPaletteBanksToward(
+            battleBg.palette,
+            tint,
+            view.displayedPalette.coefficient,
+          )
+        : battleBg.palette;
+      drawStaticBgShiftedX(
+        fb,
+        view.bg3Scroll.x,
+        pulsed.map((palette) => darken(palette)),
+      );
+    }
+
+    const player = playerToOpponent ? view.attacker : view.target;
+    const opponent = playerToOpponent ? view.target : view.attacker;
+    const drawPlayer = () => drawSpriteSheet(
+      fb,
+      playerToOpponent ? dugtrioBackSprite.tileset : onixBackSprite.tileset,
+      playerToOpponent ? dugtrioBackSprite.palette : onixBackSprite.palette,
+      player.geometry.spriteCorner.x
+        + (playerToOpponent ? 0 : view.displayedTargetX2),
+      player.geometry.spriteCorner.y,
+    );
+    const drawOpponent = () => drawSpriteSheet(
+      fb,
+      playerToOpponent ? onixFrontSprite.tileset : dugtrioFrontSprite.tileset,
+      playerToOpponent ? onixFrontSprite.palette : dugtrioFrontSprite.palette,
+      opponent.geometry.spriteCorner.x
+        + (playerToOpponent ? view.displayedTargetX2 : 0),
+      opponent.geometry.spriteCorner.y,
+    );
+    drawPlayer();
+    drawOpponent();
+    // Plain 8x8 gDirtPlumeSpriteTemplate OAM transfers one display after
+    // software state and paints above the battlers for the measured far arcs.
+    for (const plume of view.displayedDirt) {
+      drawSpriteSheet(
+        fb,
+        battleAnimMudSand.tileset,
+        battleAnimMudSand.palette,
+        plume.x + plume.x2 - 4,
+        plume.y + plume.y2 - 4,
+      );
+    }
+
+    const opponentSpecies = playerToOpponent ? "ONIX" : "DUGTRIO";
+    const playerSpecies = playerToOpponent ? "DUGTRIO" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: fissureState.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: fissureState.config.fieldProfile.opponentHp
+          / fissureState.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: fissureState.config.fieldProfile.playerGender ?? "male",
+        hpFraction: fissureState.config.fieldProfile.playerHp
+          / fissureState.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: fissureState.config.fieldProfile.playerHp,
+        maxHp: fissureState.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "DUGTRIO used" : "Foe DUGTRIO used",
+      "FISSURE!",
       99,
     );
     return;

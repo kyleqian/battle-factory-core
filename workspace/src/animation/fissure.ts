@@ -116,9 +116,19 @@ export function fissureDirtAtAge(
 }
 
 export function fissurePaletteAtAge(age: number): ComplexPaletteBlendState {
-  const first = earthquakePaletteAtAge(age - 18);
-  if (first.active) return first;
-  return earthquakePaletteAtAge(age - 34);
+  for (const startAge of [31, 65]) {
+    const local = age - startAge;
+    if (local < 0 || local > 7) continue;
+    if (local <= 2) return {
+      active: true, timer: 2 - local, remainingBlends: 1,
+      color: "black", coefficient: 14,
+    };
+    return {
+      active: true, timer: Math.max(0, 6 - local), remainingBlends: 0,
+      color: "white", coefficient: 14,
+    };
+  }
+  return earthquakePaletteAtAge(-1);
 }
 
 export function fissureBldyAtAge(age: number): number {
@@ -160,8 +170,8 @@ export function fissureAtAge(
     mudSandLoaded: age >= 1 && age < FISSURE_FRAME_COUNT - 1,
     shake,
     sourceTargetX2: age < 5 ? initialTargetX2 : targetShakeX2AtAge(age),
-    displayedTargetX2: firstTargetWriteDisplayed
-      ? targetShakeX2AtAge(age - 1)
+    displayedTargetX2: firstTargetWriteDisplayed && age !== 6
+        ? targetShakeX2AtAge(age - 2)
       : initialTargetX2,
     dirt: fissureDirtAtAge(age, targetBattleCenter),
     displayedDirt: fissureDirtAtAge(age - 1, targetBattleCenter),
@@ -174,7 +184,7 @@ export function fissureAtAge(
       ? hold
       : { x: platformDisplay, y: 0 },
     soundEvents: [
-      ...(age === 3 ? [{ age, song: "SE_M_EARTHQUAKE" as const, panSide: targetSide }] : []),
+      ...(age === 4 ? [{ age, song: "SE_M_EARTHQUAKE" as const, panSide: targetSide }] : []),
       ...([14, 48, 82].includes(age)
         ? [{ age, song: "SE_M_DIG" as const, panSide: targetSide }]
         : []),

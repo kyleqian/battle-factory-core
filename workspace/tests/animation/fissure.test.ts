@@ -5,6 +5,10 @@ import {
   FISSURE_FRAME_COUNT,
   fissureAtAge,
 } from "../../src/animation/fissure.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnFissureView,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 type EvidenceFrame = {
   tasks: Array<{ func: { symbol: string | null }; data: number[] }>;
@@ -88,12 +92,48 @@ describe("MOVE_FISSURE source reducer", () => {
     expect(state(65).palette.color).toBe("black");
     expect(state(68).palette.color).toBe("white");
     expect(state(73).palette.active).toBe(false);
-    expect([3, 14, 48, 82].flatMap((age) => state(age).soundEvents.map((event) => event.song)))
+    expect([4, 14, 48, 82].flatMap((age) => state(age).soundEvents.map((event) => event.song)))
       .toEqual(["SE_M_EARTHQUAKE", "SE_M_DIG", "SE_M_DIG", "SE_M_DIG"]);
     expect(state(154).bg3Scroll).toEqual({ x: 368, y: 22 });
     expect(state(233).bg3Scroll).toEqual({ x: 368, y: 22 });
     expect(state(234).bg3Scroll).toEqual({ x: 0, y: 0 });
     expect(state(252).active).toBe(true);
     expect(state(253).active).toBe(false);
+  });
+
+  it("exposes only presentation geometry and immutable field values through the typed seam", () => {
+    const stage = createSceneOnMovePresentation({
+      move: "FISSURE",
+      attacker: {
+        species: "DUGTRIO",
+        geometry: {
+          side: "player", spriteCorner: { x: 40, y: 59 },
+          animationCenter: { x: 72, y: 91 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent", spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 176, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      initialTargetX2: 1,
+      fieldProfile: {
+        playerHp: 110, playerMaxHp: 110,
+        opponentHp: 110, opponentMaxHp: 110,
+        playerGender: "male", opponentGender: "male",
+      },
+    });
+    for (let age = 0; age < FISSURE_FRAME_COUNT; age += 1) {
+      const { attacker, target, ...view } = sceneOnFissureView({ ...stage, age });
+      expect(view).toEqual(fissureAtAge(
+        age, "opponent", target.geometry.animationCenter,
+        target.geometry.battlePositionCenter, 1,
+      ));
+      expect(attacker.species).toBe("DUGTRIO");
+    }
   });
 });

@@ -644,6 +644,10 @@ import {
   type EarthquakeAnimationState,
 } from "./earthquake.ts";
 import {
+  fissureAtAge,
+  type FissureState,
+} from "./fissure.ts";
+import {
   futureSightAttackerEffectAtAge,
   futureSightBgBldyAtAge,
   futureSightBgIsPsychic,
@@ -2421,6 +2425,16 @@ export interface SceneOnEarthquakeConfig {
   readonly initialBattlerX2: Readonly<{ player: number; opponent: number }>;
 }
 
+/** Narrow Scene-ON Fissure seam; OHKO resolution and RNG stay external. */
+export interface SceneOnFissureConfig {
+  readonly move: "FISSURE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source target x2 retained until HorizontalShake's first visible write. */
+  readonly initialTargetX2: number;
+}
+
 export interface SceneOnHardenConfig {
   readonly move: "HARDEN";
   readonly attacker: SceneOnPresentationBattler;
@@ -2854,6 +2868,7 @@ export type SceneOnMoveConfig =
   | SceneOnDoubleEdgeConfig
   | SceneOnToxicConfig
   | SceneOnEarthquakeConfig
+  | SceneOnFissureConfig
   | SceneOnHardenConfig
   | SceneOnIronDefenseConfig
   | SceneOnFlashConfig
@@ -3694,6 +3709,11 @@ export interface SceneOnEarthquakeView extends EarthquakeAnimationState {
   readonly target: SceneOnPresentationBattler;
   readonly playerBattlerX2: number;
   readonly opponentBattlerX2: number;
+}
+
+export interface SceneOnFissureView extends FissureState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnHardenView extends MetallicShineState {
@@ -7422,6 +7442,26 @@ export function sceneOnEarthquakeView(
     opponentBattlerX2: beforeFirstShakeWrite
       ? state.config.initialBattlerX2.opponent
       : animation.shake.battlerX2,
+  };
+}
+
+/** `age=0` is the pointer-bounded `loadspritegfx ANIM_TAG_MUD_SAND` row. */
+export function sceneOnFissureView(
+  state: SceneOnMovePresentationState<SceneOnFissureConfig>,
+): SceneOnFissureView {
+  if (state.config.move !== "FISSURE") {
+    throw new Error(`expected FISSURE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...fissureAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.target.geometry.battlePositionCenter,
+      state.config.initialTargetX2,
+    ),
   };
 }
 
