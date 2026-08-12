@@ -20,8 +20,8 @@ describe("Issue #55 CGB4 post-ply_note mod discriminator v15", () => {
       takenControlTransferRefills: 1,
       iwramByteReads: 1,
       sourceCycles: 12,
-      nextUnresolvedInstruction: "ldrb r0, [r5, o_MusicPlayerTrack_lfoDelayC]",
-      nextMissingScalar: "MusicPlayerTrack.lfoDelayC",
+      nextUnresolvedInstruction: "mov r3, sl",
+      nextMissingScalar: null,
     });
     expect(reduceCgb4PostPlyNoteModTiming({ mod: 1 })).toBeNull();
   });
@@ -32,7 +32,7 @@ describe("Issue #55 CGB4 post-ply_note mod discriminator v15", () => {
     expect(reduceCgb4PostPlyNoteModTiming({ mod: 0, address: 0x03000000 })).toBeNull();
   });
 
-  it("joins exactly the frozen seven callbacks and stops before lfoDelayC", () => {
+  it("joins exactly the frozen seven callbacks and skips lfoDelayC", () => {
     const evidence = makeEvidence() as any;
     expect(evidence.join).toEqual({ key: "sourceStateDigest", rows: 7, cgb4Rows: 7, ambiguousRows: 0, addressFree: true });
     expect(evidence.coverage).toMatchObject({

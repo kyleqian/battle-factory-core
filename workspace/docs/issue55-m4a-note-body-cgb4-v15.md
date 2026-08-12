@@ -6,6 +6,6 @@ Battle Scene OFF, additive evidence only. v15 preserves frozen v14 byte-for-byte
 
 All seven captured `mod` values are `0`, so the immediate comparison takes `beq _081DD994`. Source, ELF symbols, and the exact six compiled bytes at `0x082dfb80..0x082dfb86` are hash-guarded. The route contains only the IWRAM `mod` byte read, `cmp r0, 0`, and the taken branch: **3×2 + 6 = 12 cycles each / 84 aggregate**; IWRAM has no added data premium.
 
-The contiguous boundary advances from **5,254** to **5338 aggregate cycles**. It stops before the immediately following `ldrb r0, [r5, o_MusicPlayerTrack_lfoDelayC]`; no `lfoDelayC`, oscillator, pointer/address, frame, duration, or later wait revisit was captured or priced.
+The contiguous boundary advances from **5,254** to **5338 aggregate cycles**. The taken branch skips `lfoDelayC` and lands at `_081DD994`; the boundary stops before its first track-loop-exit instruction, `mov r3, sl`. No oscillator state, pointer/address, frame, duration, or later wait revisit was captured or priced.
 
 The other 75 note callbacks, later track-loop state, complete MPlay totals (**5 exact / 108 null**), service/arbitration, construction-clock wiring, runtime pointer/address identity, animation/Rust behavior, and canonical Battle-2 work remain null.

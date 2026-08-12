@@ -201,7 +201,7 @@
   "closure": {
     "closed": "All seven captured mod bytes are zero and take the same taken decision to _081DD994.",
     "contiguousPrefix": "5338 aggregate source cycles through the mod decision across the seven callbacks (5254 frozen v14 + 84 v15).",
-    "remainingDiscriminator": "The immediately following MusicPlayerTrack.lfoDelayC IWRAM read lacks a newly captured scalar; stop before it.",
+    "remainingDiscriminator": "The taken branch skips MusicPlayerTrack.lfoDelayC and lands at _081DD994; stop before its first track-loop-exit instruction, mov r3, sl.",
     "durationFit": false,
     "runtimePointerIdentity": false,
     "runtimeAddressLookup": false,
