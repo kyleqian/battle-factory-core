@@ -78,9 +78,48 @@ def resolve_probe_command(
     return [str(interpreter), *command]
 
 
-def run_with_bounded_log(command: list[str], log_path: Path, max_bytes: int) -> int:
+def find_paired_mgba_binding(command: list[str]) -> Path | None:
+    """Find libmgba-py paired with an explicit mgba-venv interpreter."""
+    if not command:
+        return None
+
+    executable = Path(command[0]).expanduser()
+    if not executable.is_absolute():
+        executable = Path.cwd() / executable
+    for parent in executable.parents:
+        if parent.name != "mgba-venv":
+            continue
+        candidate = parent.parent / "libmgba-py"
+        if candidate.is_dir():
+            return candidate
+        return None
+    return None
+
+
+def probe_environment(command: list[str]) -> dict[str, str] | None:
+    """Expose a harness-managed interpreter's sibling libmgba-py checkout."""
+    binding = find_paired_mgba_binding(command)
+    if binding is None:
+        return None
+
+    environment = os.environ.copy()
+    existing = environment.get("PYTHONPATH")
+    entries = existing.split(os.pathsep) if existing else []
+    binding_text = str(binding)
+    if binding_text not in entries:
+        environment["PYTHONPATH"] = os.pathsep.join((binding_text, *entries))
+    return environment
+
+
+def run_with_bounded_log(
+    command: list[str],
+    log_path: Path,
+    max_bytes: int,
+    environment: dict[str, str] | None = None,
+) -> int:
     process = subprocess.Popen(
         command,
+        env=environment,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -165,7 +204,12 @@ def main() -> int:
 
     log_path: Path = args.log or output.with_name(f"{output.name}.log")
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    returncode = run_with_bounded_log(command, log_path, args.max_log_bytes)
+    returncode = run_with_bounded_log(
+        command,
+        log_path,
+        args.max_log_bytes,
+        probe_environment(command),
+    )
 
     valid_output = parses_as_json(output)
     status = normalized_status(returncode)
