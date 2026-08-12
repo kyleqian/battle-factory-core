@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1159 — [supervisor, 2026-08-11] **`ply_pend` verified; Rust M4a folded**
+
+- **State:** `master` is green with `ply_pend` source-exact for its sole live
+  callback and all **108/108** one-pass rows. Complete MPlay remains **5 exact /
+  108 null**; #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** reviewed and regenerated the address-free PEND receipt **4/4**, then
+  folded rust-main M4a (`damage_calc` plus **1,129** TS-pinned vectors) through
+  merge `75e234ee`. Native Rust is **82/82** with fmt/clippy clean; rebuilt WASM
+  is 62,344 bytes and adapter parity is **440/440** in both default and forced
+  WASM modes.
+- **Next:** source-capture and instruction-count one remaining smallest live
+  callback family, keeping all unclosed families and complete one-pass totals
+  null. Do not wire `runFactoryConstructionClock` prematurely.
+- **Notes:** merged union full `npm test` **960 files / 9,165 passed / 1
+  skipped**, build **649 modules**. Animation is fully folded; no unsupported
+  barrier, presentation, gameplay, or pixel identity changed.
+
 ## 1158 — [MAIN worker, 2026-08-11] **#55 `ply_pend` callback family source-closed**
 
 - **State:** the sixth-player `ply_pend` family is source-exact for **1/1**
@@ -36,19 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** worker full gate **959 files / 9,161 passed / 1 skipped**, smoke
   **375/375**, typecheck, build **649 modules**. Both lane branches are fully
   folded; no unsupported barrier or production/presentation change.
-
-## 1156 — [MAIN worker, 2026-08-11] **#55 wait/LFO mod-zero component source-closed**
-
-- **State:** the sixth-player wait/LFO component is source-exact for
-  **108/108** one-pass rows. Complete MPlay stays **5 exact / 108 null** and
-  the construction clock stays null/unwired; S8/#56 and LUKAS **8/50** are
-  untouched.
-- **Did:** twice-fresh address-free OFF packets capture **972/972** active
-  track visits at compiled `_081DD938`. Every visit selects nonzero
-  `lfoSpeed` / `mod == 0`; the pinned route is **28 cycles/track**, **252/row**.
-- **Next:** source-capture and instruction-count one bounded command dispatch
-  or callback family. Keep unresolved callbacks and every complete one-pass
-  MPlay cost null; do not wire `runFactoryConstructionClock`.
-- **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
-  **8/8**, smoke **375/375**, typecheck, full **959 files / 9,161 passed / 1
-  skipped**, and build **649 modules** are green; pixels were not rerun.
