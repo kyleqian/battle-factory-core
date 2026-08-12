@@ -16734,4 +16734,174 @@ mod tests {
         };
         assert_eq!(kind, CvDrawKind::Snatch5);
     }
+
+    // === M5d-5 vestigial-handler TS-generated vector consumer ==============
+    //
+    // `run_cv_accuracy_up`/`run_cv_sp_atk_down` are `pub(crate)`, not `pub`
+    // (batching doc §2/§4 -- fully vestigial, no real Gen-3 move reaches
+    // either through the dispatcher), so their own checked-in TS-generated
+    // vectors (`CV_M5D5_VESTIGIAL_CASES`,
+    // `factory_ai_check_viability_m5d5_vectors_gen.rs`, regenerate with
+    // `node core-rs/tools/gen-cv-m5d5-vectors.mjs`) are consumed HERE
+    // (same-crate access) rather than in the external
+    // `tests/cv_m5d5_vectors.rs` integration test, which only reaches the
+    // 26 handlers dispatch-reachable through the fully `pub`
+    // `run_check_viability`.
+
+    fn decode_vestigial_draw(
+        d: &CheckViabilityDraw,
+    ) -> (u8, u32, BattleRngState, BattleRngState, u32, u16, u8) {
+        match *d {
+            CheckViabilityDraw::AccuracyUpRoll {
+                ordinal,
+                before,
+                after,
+                raw_rng_value,
+                random_value,
+                jumped,
+            } => (
+                100,
+                ordinal,
+                before,
+                after,
+                raw_rng_value,
+                random_value,
+                u8::from(jumped),
+            ),
+            CheckViabilityDraw::SpAtkDownRoll {
+                ordinal,
+                before,
+                after,
+                raw_rng_value,
+                random_value,
+                kind,
+                succeeded,
+            } => {
+                let site = match kind {
+                    CvDrawKind::SpAtkDown1 => 101,
+                    CvDrawKind::SpAtkDown2 => 102,
+                    other => panic!("unexpected CvDrawKind {other:?} for SpAtkDownRoll"),
+                };
+                (
+                    site,
+                    ordinal,
+                    before,
+                    after,
+                    raw_rng_value,
+                    random_value,
+                    u8::from(succeeded),
+                )
+            }
+            other => {
+                panic!("decode_vestigial_draw: unexpected M5d-5 vestigial draw variant {other:?}")
+            }
+        }
+    }
+
+    #[test]
+    fn m5d5_vestigial_cases_match_ts() {
+        use crate::factory_ai_check_viability_m5d5_vectors_gen::CV_M5D5_VESTIGIAL_CASES;
+
+        assert!(!CV_M5D5_VESTIGIAL_CASES.is_empty());
+        for c in CV_M5D5_VESTIGIAL_CASES.iter() {
+            let (draws, draw_count, score_delta, rng, func_result_after): (
+                [CheckViabilityDraw; MAX_CHECK_VIABILITY_DRAWS],
+                u8,
+                i32,
+                BattleRngState,
+                Option<u8>,
+            ) = if c.handler == 0 {
+                let result = run_cv_accuracy_up(
+                    BattleRngState { value: c.rng_value, calls: 0 },
+                    c.attacker_acc_stage,
+                    c.attacker_hp,
+                    c.attacker_max_hp,
+                    1,
+                );
+                (
+                    result.draws,
+                    result.draw_count,
+                    result.score_delta,
+                    result.rng,
+                    None,
+                )
+            } else {
+                let (result, func_result_after) = run_cv_sp_atk_down(
+                    BattleRngState { value: c.rng_value, calls: 0 },
+                    c.attacker_hp,
+                    c.attacker_max_hp,
+                    c.target_atk_stage,
+                    c.target_sp_atk_stage,
+                    c.target_hp,
+                    c.target_max_hp,
+                    c.target_types,
+                    1,
+                );
+                (
+                    result.draws,
+                    result.draw_count,
+                    result.score_delta,
+                    result.rng,
+                    func_result_after,
+                )
+            };
+
+            assert_eq!(rng.value, c.expected_rng_value, "case {}", c.label);
+            assert_eq!(rng.calls, c.expected_rng_calls, "case {}", c.label);
+            assert_eq!(draw_count, c.expected_draw_count, "case {}", c.label);
+            assert_eq!(score_delta, c.expected_score_delta, "case {}", c.label);
+            assert_eq!(
+                func_result_after, c.expected_func_result_after,
+                "case {}",
+                c.label
+            );
+
+            for (i, (actual_draw, expected)) in draws
+                .iter()
+                .zip(c.draws.iter())
+                .take(draw_count as usize)
+                .enumerate()
+            {
+                let (site, ordinal, before, after, raw_rng_value, random_value, flag) =
+                    decode_vestigial_draw(actual_draw);
+                assert_eq!(site, expected.site, "case {} draw {i}: site", c.label);
+                assert_eq!(
+                    ordinal, expected.ordinal,
+                    "case {} draw {i}: ordinal",
+                    c.label
+                );
+                assert_eq!(
+                    before.value, expected.before_value,
+                    "case {} draw {i}: before.value",
+                    c.label
+                );
+                assert_eq!(
+                    before.calls, expected.before_calls,
+                    "case {} draw {i}: before.calls",
+                    c.label
+                );
+                assert_eq!(
+                    after.value, expected.after_value,
+                    "case {} draw {i}: after.value",
+                    c.label
+                );
+                assert_eq!(
+                    after.calls, expected.after_calls,
+                    "case {} draw {i}: after.calls",
+                    c.label
+                );
+                assert_eq!(
+                    raw_rng_value, expected.raw_rng_value,
+                    "case {} draw {i}: raw_rng_value",
+                    c.label
+                );
+                assert_eq!(
+                    random_value, expected.random_value,
+                    "case {} draw {i}: random_value",
+                    c.label
+                );
+                assert_eq!(flag, expected.flag, "case {} draw {i}: flag", c.label);
+            }
+        }
+    }
 }
