@@ -1,16 +1,24 @@
-//! Pure port of `AI_CheckBadMove`'s universal preamble
-//! (`src/engine/factoryAiCheckBadMove.ts:1-115,1259-1333,2639-2650`, itself a
-//! port of `data/battle_ai_scripts.s:51-93` + `AI_CheckBadMove_CheckEffect`'s
-//! trailing barrier). Per `docs/rust-m5b-checkbadmove-batching.md` §5
-//! (M5b-0): setup + `isMovePowerOther` classification, the FISSURE/
-//! HORN_DRILL short-circuit, the type-immunity `Score_Minus10`, the five
-//! ability-negation branches (Volt Absorb/Water Absorb/Flash Fire/Wonder
-//! Guard/Levitate), the Soundproof nine-move list, and the trailing
-//! `if_effect` table barrier (`NotYetPorted` for all 109 table effects —
-//! M5b-1/2/3 grow `cbm_handled_effects()` one batch at a time). No per-effect
-//! handler is ported yet: every move whose effect is one of the 109 table
-//! entries halts at the barrier; every other move scores 0 past the
-//! preamble.
+//! Pure port of `AI_CheckBadMove`'s universal preamble plus its M5b-1 batch
+//! of per-effect handlers
+//! (`src/engine/factoryAiCheckBadMove.ts:1-115,1259-1333,1338-1810,2076-2118,
+//! 2410-2419,2639-2711,3158-3266,3286-3294,3311-3361`, itself a port of
+//! `data/battle_ai_scripts.s:51-93` plus the handler bodies it dispatches
+//! to). Per `docs/rust-m5b-checkbadmove-batching.md` §5 (M5b-0): setup +
+//! `isMovePowerOther` classification, the FISSURE/HORN_DRILL short-circuit,
+//! the type-immunity `Score_Minus10`, the five ability-negation branches
+//! (Volt Absorb/Water Absorb/Flash Fire/Wonder Guard/Levitate), the
+//! Soundproof nine-move list, and the trailing `if_effect` table barrier
+//! (`NotYetPorted` for every table effect not yet in `cbm_handled_effects()`).
+//! Per batching doc §2 "M5b-1": the 18-effect HighRiskForDamage cluster
+//! (Counter/Flail/Mirror Coat/Focus Punch/Level Damage/Frustration/Return/
+//! Recharge/Endeavor/Superpower/Razor Wind/Psywave/Low Kick/Super Fang/
+//! Present/Sonic Boom/Bide/Skull Bash), Teleport, 8 zero-RNG single-flag
+//! effects (Ingrain/Perish Song/Nightmare/Foresight/Spikes/Future Sight/
+//! Focus Energy/Refresh), the weather quartet (Rain Dance/Sunny Day/Hail/
+//! Sandstorm), and Magnitude — 32 effects total, `CBM_HANDLED_EFFECTS_M5B1`.
+//! M5b-2/3 grow `cbm_handled_effects()` one batch at a time; every table
+//! effect not yet in the union halts at the barrier, and every other move
+//! (not in the table at all) scores 0 past the preamble.
 //!
 //! ## Representation decisions (mirroring `factory_ai_mask.rs`'s precedent)
 //! - **Move effect**: TS compares `move.effect` (a string) to `"EFFECT_X"`
@@ -48,25 +56,34 @@
 //!   soundproof`, built for human-readable receipts/UI) and constant
 //!   `kind: "get-ability"` tag are dropped, same precedent as
 //!   `factory_ai_mask.rs`'s dropped `id`/`condition`/`flags` strings — a
-//!   `CheckBadMoveDrawSite` enum distinguishes the two M5b-0 call sites
-//!   instead (extended by later batches per handler). `reasonPrefix` itself
+//!   `CheckBadMoveDrawSite` enum distinguishes each call site instead
+//!   (extended by later batches per handler; M5b-1 adds
+//!   `HighRiskForDamageAbility`/`MagnitudeLevitate`). `reasonPrefix` itself
 //!   (a caller-supplied slot-numbering aid, not consumed by any branch) is
 //!   dropped from the preamble's own input for the same reason; `ordinal`
 //!   alone still numbers draws across a caller's multi-slot pass.
 //! - **Draws/Result**: mirrors `factory_ai_mask.rs`'s fixed-array-plus-count
 //!   receipt (`FactoryAiMaskSelectionReceipt.evaluations`/`evaluation_count`)
-//!   — no heap `Vec` in `CheckBadMoveResult`. `MAX_CHECK_BAD_MOVE_DRAWS = 2`
-//!   is this step's own exact maximum (negates-type + soundproof, TS
-//!   :1297,1329) — later batches that add per-handler draws on top may need
-//!   to widen it.
+//!   — no heap `Vec` in `CheckBadMoveResult`. `MAX_CHECK_BAD_MOVE_DRAWS = 3`
+//!   is the true worst case across the preamble plus every M5b-1 handler:
+//!   Magnitude alone can produce 3 (the preamble's own soundproof draw +
+//!   its own Levitate draw + the shared HighRiskForDamage body's ability
+//!   draw, TS :3342,3352) — the preamble's own negates-type draw never
+//!   co-occurs with a handler draw in this batch, since every M5b-1 effect
+//!   with a handler-owned draw site (the HighRiskForDamage cluster,
+//!   Magnitude) has power ≤1 or sits in `IGNORED_POWERFUL_MOVE_EFFECTS`,
+//!   forcing `isMovePowerOther` true and skipping the negates-type block
+//!   entirely (verified against `src/data/gen/moves.json` for all 18+1
+//!   moves). Later batches that add per-handler draws on top of a
+//!   negates-type-eligible move may need to widen this further.
 //!
 //! ## Scope NOT covered by this step
-//! Every per-effect handler (`AI_CBM_*`, TS :787-1258,2652-3657) is
-//! unported. `run_check_bad_move_preamble` never reaches a handler: the
-//! trailing barrier returns `NotYetPorted` for all 109/109
-//! `CBM_TABLE_EFFECTS` members (`cbm_handled_effects()` is empty), and every
-//! other move (not in the table) scores 0, matching TS's own "genuine,
-//! complete port of that path" fallthrough (module doc comment :27-30).
+//! Every per-effect handler outside M5b-1's 32 (`AI_CBM_*`, TS
+//! :787-1258,2652-3657) is unported. `run_check_bad_move_preamble`'s
+//! trailing barrier returns `NotYetPorted` for the 77 `CBM_TABLE_EFFECTS`
+//! members not yet in `cbm_handled_effects()`, and every other move (not in
+//! the table at all) scores 0, matching TS's own "genuine, complete port of
+//! that path" fallthrough (module doc comment :27-30).
 
 use crate::damage_calc::{TYPE_ELECTRIC, TYPE_FIRE, TYPE_GROUND, TYPE_WATER};
 use crate::gen_tables;
@@ -425,21 +442,59 @@ pub const CBM_TABLE_EFFECTS: [u16; 109] = [
     EFFECT_DRAGON_DANCE,
 ];
 
+/// M5b-1's landed batch (`docs/rust-m5b-checkbadmove-batching.md` §2
+/// "M5b-1"), TS dispatch source order: the 18-effect HighRiskForDamage
+/// cluster (TS :1338-1689), Teleport (:1694-1701), the 8 zero-RNG
+/// single-flag effects (:1707-1809), the weather quartet (:2076-2118), and
+/// Magnitude (:2410-2419) — exactly 32 effects.
+pub const CBM_HANDLED_EFFECTS_M5B1: &[u16] = &[
+    EFFECT_COUNTER,
+    EFFECT_FLAIL,
+    EFFECT_MIRROR_COAT,
+    EFFECT_FOCUS_PUNCH,
+    EFFECT_LEVEL_DAMAGE,
+    EFFECT_FRUSTRATION,
+    EFFECT_RETURN,
+    EFFECT_RECHARGE,
+    EFFECT_ENDEAVOR,
+    EFFECT_SUPERPOWER,
+    EFFECT_RAZOR_WIND,
+    EFFECT_PSYWAVE,
+    EFFECT_LOW_KICK,
+    EFFECT_SUPER_FANG,
+    EFFECT_PRESENT,
+    EFFECT_SONICBOOM,
+    EFFECT_BIDE,
+    EFFECT_SKULL_BASH,
+    EFFECT_TELEPORT,
+    EFFECT_INGRAIN,
+    EFFECT_PERISH_SONG,
+    EFFECT_NIGHTMARE,
+    EFFECT_FORESIGHT,
+    EFFECT_SPIKES,
+    EFFECT_FUTURE_SIGHT,
+    EFFECT_FOCUS_ENERGY,
+    EFFECT_REFRESH,
+    EFFECT_RAIN_DANCE,
+    EFFECT_SUNNY_DAY,
+    EFFECT_HAIL,
+    EFFECT_SANDSTORM,
+    EFFECT_MAGNITUDE,
+];
+
 /// Union of every landed batch's handled-effect consts, mirroring
 /// `CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS` (`factoryAiCheckBadMove.ts:266-302`).
-/// Empty at M5b-0 — no batch has landed a handler yet. M5b-1/2/3 each add
-/// their own `CBM_HANDLED_EFFECTS_M5BN: &[u16]` const and union it in here,
-/// "add the effect in the same commit as its handler" (TS doc comment
-/// :262-264).
+/// M5b-2/3 each add their own `CBM_HANDLED_EFFECTS_M5BN: &[u16]` const and
+/// union it in here, "add the effect in the same commit as its handler" (TS
+/// doc comment :262-264).
 #[must_use]
 pub fn cbm_handled_effects() -> &'static [u16] {
-    &[]
+    CBM_HANDLED_EFFECTS_M5B1
 }
 
 /// Direct port of `unportedCheckBadMoveTableEffects`
 /// (`factoryAiCheckBadMove.ts:312-316`): `CBM_TABLE_EFFECTS` minus
-/// `cbm_handled_effects()`, sorted. At M5b-0 this always returns all 109
-/// table effects.
+/// `cbm_handled_effects()`, sorted. Returns 77 table effects after M5b-1.
 #[must_use]
 pub fn unported_cbm_table_effects() -> Vec<u16> {
     let handled = cbm_handled_effects();
@@ -672,12 +727,16 @@ pub struct FactoryAiCheckBadMoveRoarTarget {
 
 // === draws/result =============================================================
 
-/// This step's two `next_get_ability_draw` call sites
-/// (negates-type + soundproof, TS :1297,1329) — the exact maximum draws
-/// `run_check_bad_move_preamble` can produce, since no handler runs yet.
-pub const MAX_CHECK_BAD_MOVE_DRAWS: usize = 2;
+/// The true worst case across the preamble's own two call sites (negates-
+/// type + soundproof, TS :1297,1329) plus every M5b-1 handler's own draws:
+/// Magnitude's own Levitate draw (TS :3342) plus the shared
+/// `run_cbm_high_risk_for_damage` body's own ability draw (TS :2696) can
+/// both fire on top of the preamble's soundproof draw (3 total) — see the
+/// module doc comment for why the negates-type draw never co-occurs with a
+/// handler draw in this batch.
+pub const MAX_CHECK_BAD_MOVE_DRAWS: usize = 3;
 
-/// Distinguishes `run_check_bad_move_preamble`'s two `next_get_ability_draw`
+/// Distinguishes `run_check_bad_move_preamble`'s `next_get_ability_draw`
 /// call sites, replacing TS's free-form `reason` string (see the module doc
 /// comment). Extended by later batches, one variant per handler call site.
 #[repr(u8)]
@@ -687,6 +746,13 @@ pub enum CheckBadMoveDrawSite {
     NegatesType = 0,
     /// `AI_CheckBadMove_CheckSoundproof`'s ability read (TS :1329).
     Soundproof = 1,
+    /// `AI_CBM_HighRiskForDamage`'s own ability read (TS :2696), reached
+    /// directly by the 18-effect cluster or via Magnitude's fall-through
+    /// (TS :3352-3357).
+    HighRiskForDamageAbility = 2,
+    /// `AI_CBM_Magnitude`'s own Levitate read, before its fall-through into
+    /// `AI_CBM_HighRiskForDamage` (TS :3342).
+    MagnitudeLevitate = 3,
 }
 
 /// Mirrors `FactoryAiCheckBadMoveDraw` (`factoryAiCheckBadMove.ts:689-698`),
@@ -720,7 +786,7 @@ const DRAW_FILLER: CheckBadMoveDraw = CheckBadMoveDraw {
 /// be read. `NotYetPorted` is the Rust analog of TS's `"unsupported-branch"`
 /// kind (`docs/rust-m5b-checkbadmove-batching.md` §3), returned by the
 /// trailing barrier for any of the 109 `CBM_TABLE_EFFECTS` not yet in
-/// `cbm_handled_effects()` — all 109, at this step.
+/// `cbm_handled_effects()` — 77, after M5b-1.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CheckBadMoveResult {
     Scored {
@@ -847,6 +913,239 @@ pub fn type_multiplier_tenths(attacking_type: u8, defending_types: [u8; 2]) -> i
     mult
 }
 
+// === M5b-1 handlers (batching doc §2 "M5b-1") ================================
+
+/// `AI_CBM_HighRiskForDamage` (`data/battle_ai_scripts.s:368-376`,
+/// `factoryAiCheckBadMove.ts:2681-2706`), the shared body for the 18-effect
+/// HighRiskForDamage cluster (Counter/Flail/Mirror Coat/Focus Punch/Level
+/// Damage/Frustration/Return/Recharge/Endeavor/Superpower/Razor Wind/
+/// Psywave/Low Kick/Super Fang/Present/Sonic Boom/Bide/Skull Bash) and,
+/// via fall-through, `run_cbm_magnitude` below. Its own ability read is
+/// fresh even though the universal Soundproof prologue already read the
+/// same target.
+#[must_use]
+fn run_cbm_high_risk_for_damage(
+    move_type: u8,
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    let effectiveness_tenths = type_multiplier_tenths(move_type, target.types);
+    if effectiveness_tenths == 0 {
+        return (rng, None, -10);
+    }
+    let ability = next_get_ability_draw(
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::HighRiskForDamageAbility,
+        target,
+    );
+    let score_delta = if ability.ability == ABILITY_WONDER_GUARD && effectiveness_tenths != 20 {
+        -10
+    } else {
+        0
+    };
+    (ability.rng, ability.draw, score_delta)
+}
+
+/// `AI_CBM_Ingrain` (`data/battle_ai_scripts.s:550-552`, EFFECT_INGRAIN,
+/// TS :1707-1714/3158-3160): a single `if_status3 AI_USER, STATUS3_ROOTED,
+/// Score_Minus10`. Zero ability/type reads.
+#[must_use]
+fn run_cbm_ingrain(attacker_is_rooted: bool) -> i32 {
+    if attacker_is_rooted {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_PerishSong` (`data/battle_ai_scripts.s:447-449`,
+/// EFFECT_PERISH_SONG, TS :1720-1727/3168-3170): a single
+/// `if_status3 AI_TARGET, STATUS3_PERISH_SONG, Score_Minus10`. Zero
+/// ability/type reads.
+#[must_use]
+fn run_cbm_perish_song(target_has_perish_song: bool) -> i32 {
+    if target_has_perish_song {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Nightmare` (`data/battle_ai_scripts.s:237-240`, EFFECT_NIGHTMARE,
+/// TS :1733-1740/3187-3192): existing Nightmare JUMPs to -10 first; a
+/// not-asleep target then JUMPs to -8 (Nightmare needs the target asleep).
+/// Sequential Score_Minus10 then Score_Minus8 JUMPs, never additive — a
+/// Nightmared target never reaches the sleep check. Zero ability/type reads.
+#[must_use]
+fn run_cbm_nightmare(target_nightmared: bool, target_asleep: bool) -> i32 {
+    if target_nightmared {
+        return -10;
+    }
+    if target_asleep {
+        0
+    } else {
+        -8
+    }
+}
+
+/// `AI_CBM_Foresight` (`data/battle_ai_scripts.s:443-445`,
+/// EFFECT_FORESIGHT, TS :1746-1753/3200-3202): a single
+/// `if_status2 AI_TARGET, STATUS2_FORESIGHT, Score_Minus10`. Zero
+/// ability/type reads.
+#[must_use]
+fn run_cbm_foresight(target_foresighted: bool) -> i32 {
+    if target_foresighted {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Spikes` (`data/battle_ai_scripts.s:439-441`, EFFECT_SPIKES,
+/// TS :1759-1766/3210-3212): a single `if_side_affecting AI_TARGET,
+/// SIDE_STATUS_SPIKES, Score_Minus10`. Zero ability/type reads.
+#[must_use]
+fn run_cbm_spikes(target_spikes_up: bool) -> i32 {
+    if target_spikes_up {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_FutureSight` (`data/battle_ai_scripts.s:500-504`,
+/// EFFECT_FUTURE_SIGHT, TS :1772-1782/3230-3235): either side already
+/// carrying a Future Sight attack JUMPs to -12; the all-clear path FALLS
+/// THROUGH to `score +5` (Future Sight is positively valued when unused).
+/// Sequential Score_Minus12 JUMPs then a Score_Plus5, never additive. Zero
+/// ability/type reads.
+#[must_use]
+fn run_cbm_future_sight(target_future_attack_up: bool, attacker_future_attack_up: bool) -> i32 {
+    if target_future_attack_up || attacker_future_attack_up {
+        -12
+    } else {
+        5
+    }
+}
+
+/// `AI_CBM_FocusEnergy` (`data/battle_ai_scripts.s:382-384`,
+/// EFFECT_FOCUS_ENERGY, TS :1788-1795/3243-3245): a single
+/// `if_status2 AI_USER, STATUS2_FOCUS_ENERGY, Score_Minus10`. Zero
+/// ability/type reads.
+#[must_use]
+fn run_cbm_focus_energy(attacker_has_focus_energy: bool) -> i32 {
+    if attacker_has_focus_energy {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Refresh` (`data/battle_ai_scripts.s:563-565`, EFFECT_REFRESH,
+/// TS :1802-1809/3253-3255): a single `if_not_status AI_USER, STATUS1_POISON
+/// | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON,
+/// Score_Minus10` — penalized when the AI has none of the four curable
+/// statuses. Zero ability/type reads.
+#[must_use]
+fn run_cbm_refresh(attacker_has_curable_status: bool) -> i32 {
+    if attacker_has_curable_status {
+        0
+    } else {
+        -10
+    }
+}
+
+/// `AI_CBM_RainDance`/`AI_CBM_SunnyDay`/`AI_CBM_Hail`/`AI_CBM_Sandstorm`
+/// (`data/battle_ai_scripts.s:490-493`/`:495-498`/`:522-525`/`:451-454`,
+/// TS `runCbmWeatherSetter` :1209-1230 + `runCbmSandstorm` :1238-1240) —
+/// four separate, individually named dispatch targets sharing one
+/// byte-for-byte 3-instruction body: `get_weather; if_equal
+/// <OWN_WEATHER>, Score_Minus8; end`.
+///
+/// **`get_weather`'s own stale-`funcResult` bug** (TS :1191-1207): only
+/// writes `funcResult` when a real weather bit is set. On a genuinely
+/// weatherless battle (`current_weather == None`), the read is whatever the
+/// *previous* AI script command left in `funcResult` — for these four
+/// handlers specifically, that's always this same pass's own
+/// `AI_CheckBadMove_CheckSoundproof` ability guess (`soundproof_guess`,
+/// already computed by `run_check_bad_move_preamble` before any dispatch —
+/// not a fresh read, no new RNG draw). Only ability ids 0-3
+/// (`ability_id_in_weather_range`) can ever collide with an `AI_WEATHER_*`
+/// constant; every other ability leaves the compare as genuine
+/// non-equality, matching the clean "no weather" outcome anyway.
+#[must_use]
+fn run_cbm_weather_setter(
+    current_weather: Option<u8>,
+    stale_ability_guess: u16,
+    own_weather_constant: u8,
+) -> i32 {
+    let func_result = current_weather.or_else(|| ability_id_in_weather_range(stale_ability_guess));
+    if func_result == Some(own_weather_constant) {
+        -8
+    } else {
+        0
+    }
+}
+
+#[must_use]
+fn run_cbm_rain_dance(current_weather: Option<u8>, stale_ability_guess: u16) -> i32 {
+    run_cbm_weather_setter(current_weather, stale_ability_guess, AI_WEATHER_RAIN)
+}
+
+#[must_use]
+fn run_cbm_sunny_day(current_weather: Option<u8>, stale_ability_guess: u16) -> i32 {
+    run_cbm_weather_setter(current_weather, stale_ability_guess, AI_WEATHER_SUN)
+}
+
+#[must_use]
+fn run_cbm_hail(current_weather: Option<u8>, stale_ability_guess: u16) -> i32 {
+    run_cbm_weather_setter(current_weather, stale_ability_guess, AI_WEATHER_HAIL)
+}
+
+#[must_use]
+fn run_cbm_sandstorm(current_weather: Option<u8>, stale_ability_guess: u16) -> i32 {
+    run_cbm_weather_setter(current_weather, stale_ability_guess, AI_WEATHER_SANDSTORM)
+}
+
+/// `AI_CBM_Magnitude` (`data/battle_ai_scripts.s:365-367`, EFFECT_MAGNITUDE,
+/// TS :3331-3361): one fresh own ability read for the Levitate gate, then a
+/// genuine fall-through into `run_cbm_high_risk_for_damage`'s own body (its
+/// own x0 type check and its own second fresh ability read). A non-Levitate
+/// result therefore draws twice inside this handler; a Levitate result
+/// returns -10 after its single draw.
+#[must_use]
+fn run_cbm_magnitude(
+    move_type: u8,
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (
+    BattleRngState,
+    Option<CheckBadMoveDraw>,
+    Option<CheckBadMoveDraw>,
+    i32,
+) {
+    let levitate = next_get_ability_draw(
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::MagnitudeLevitate,
+        target,
+    );
+    if levitate.ability == ABILITY_LEVITATE {
+        return (levitate.rng, levitate.draw, None, -10);
+    }
+    let next_ordinal = if levitate.draw.is_some() {
+        ordinal + 1
+    } else {
+        ordinal
+    };
+    let (rng, high_risk_draw, score_delta) =
+        run_cbm_high_risk_for_damage(move_type, target, levitate.rng, next_ordinal);
+    (rng, levitate.draw, high_risk_draw, score_delta)
+}
+
 // === universal preamble ======================================================
 
 /// Mirrors `runCheckBadMovePreamble`'s input (`factoryAiCheckBadMove.ts:1259-1266`),
@@ -861,13 +1160,16 @@ pub struct CheckBadMovePreambleInput {
 }
 
 /// `AI_CheckBadMove`'s universal preamble for one move slot against one
-/// target (`data/battle_ai_scripts.s:51-93`, `factoryAiCheckBadMove.ts:1259-1333,2639-2650`).
-/// This step's entire scope: setup + `isMovePowerOther` classification, the
-/// FISSURE/HORN_DRILL short-circuit, the type-immunity `Score_Minus10`, the
-/// five ability-negation branches, the Soundproof check, and the trailing
-/// `if_effect` table barrier. `input.attacker` is unused (no attacker-reading
-/// handler is dispatched by the preamble itself — TS's `runCheckBadMovePreamble`
-/// doesn't read `input.attacker` before its first handler branch either).
+/// target, plus M5b-1's 32-effect dispatch (`data/battle_ai_scripts.s:51-93`
+/// and handler bodies, `factoryAiCheckBadMove.ts:1259-1333,1338-1810,
+/// 2076-2118,2410-2419,2639-2650`): setup and `isMovePowerOther`
+/// classification, the FISSURE/HORN_DRILL short-circuit, the type-immunity
+/// `Score_Minus10`, the five ability-negation branches, the Soundproof
+/// check, the M5b-1 dispatch blocks (TS source order), and the trailing
+/// `if_effect` table barrier for every effect not yet in
+/// `cbm_handled_effects()`. `input.attacker` is read by several M5b-1
+/// handlers (Ingrain/FocusEnergy/Refresh/FutureSight/the weather quartet),
+/// unlike M5b-0's own preamble-only scope.
 #[must_use]
 pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBadMoveResult {
     let move_row = gen_tables::MOVES.get(input.move_id as usize).unwrap_or_else(|| {
@@ -947,20 +1249,170 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
     if let Some(draw) = soundproof.draw {
         draws[draw_count as usize] = draw;
         draw_count += 1;
-        // `ordinal`'s post-increment value is unread until M5b-1 adds a
-        // handler dispatch (and its own draws) after this point.
-        #[allow(unused_assignments)]
-        {
-            ordinal += 1;
-        }
+        ordinal += 1;
     }
     let soundproof_guess = soundproof.ability;
     if soundproof_guess == ABILITY_SOUNDPROOF && SOUNDPROOF_MOVES.contains(&input.move_id) {
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta: -10 };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_COUNTER/FLAIL/MIRROR_COAT/
+    // FOCUS_PUNCH/LEVEL_DAMAGE/FRUSTRATION/RETURN/RECHARGE/ENDEAVOR/
+    // SUPERPOWER/RAZOR_WIND/PSYWAVE/LOW_KICK/SUPER_FANG/PRESENT/SONICBOOM/
+    // BIDE/SKULL_BASH -> AI_CBM_HighRiskForDamage, the shared 18-effect
+    // cluster (TS :1338-1689, `data/battle_ai_scripts.s:156,160,182,196,
+    // 154,173,171,151,203,200,128,155,206,129,172,177,123,183` -- one shared
+    // handler body per the batching doc, not split into 18 separate Rust
+    // arms).
+    if move_row.effect == EFFECT_COUNTER
+        || move_row.effect == EFFECT_FLAIL
+        || move_row.effect == EFFECT_MIRROR_COAT
+        || move_row.effect == EFFECT_FOCUS_PUNCH
+        || move_row.effect == EFFECT_LEVEL_DAMAGE
+        || move_row.effect == EFFECT_FRUSTRATION
+        || move_row.effect == EFFECT_RETURN
+        || move_row.effect == EFFECT_RECHARGE
+        || move_row.effect == EFFECT_ENDEAVOR
+        || move_row.effect == EFFECT_SUPERPOWER
+        || move_row.effect == EFFECT_RAZOR_WIND
+        || move_row.effect == EFFECT_PSYWAVE
+        || move_row.effect == EFFECT_LOW_KICK
+        || move_row.effect == EFFECT_SUPER_FANG
+        || move_row.effect == EFFECT_PRESENT
+        || move_row.effect == EFFECT_SONICBOOM
+        || move_row.effect == EFFECT_BIDE
+        || move_row.effect == EFFECT_SKULL_BASH
+    {
+        let (next_rng, draw, score_delta) =
+            run_cbm_high_risk_for_damage(move_row.move_type, target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_TELEPORT -> Score_Minus10 directly
+    // (`data/battle_ai_scripts.s:185`, TS :1694-1701): the table entry is a
+    // bare Score_Minus10 jump with no handler body. Teleport is penalized
+    // unconditionally.
+    if move_row.effect == EFFECT_TELEPORT {
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta: -10 };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_INGRAIN -> AI_CBM_Ingrain
+    // (`data/battle_ai_scripts.s:199,550-552`, TS :1707-1714).
+    if move_row.effect == EFFECT_INGRAIN {
+        let score_delta = run_cbm_ingrain(input.attacker.is_rooted.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_PERISH_SONG -> AI_CBM_PerishSong
+    // (`data/battle_ai_scripts.s:167,447-449`, TS :1720-1727).
+    if move_row.effect == EFFECT_PERISH_SONG {
+        let score_delta = run_cbm_perish_song(target.has_perish_song.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_NIGHTMARE -> AI_CBM_Nightmare
+    // (`data/battle_ai_scripts.s:162,237-240`, TS :1733-1740).
+    if move_row.effect == EFFECT_NIGHTMARE {
+        let score_delta = run_cbm_nightmare(
+            target.is_nightmared.unwrap_or(false),
+            target.is_asleep.unwrap_or(false),
+        );
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_FORESIGHT -> AI_CBM_Foresight
+    // (`data/battle_ai_scripts.s:166,443-445`, TS :1746-1753).
+    if move_row.effect == EFFECT_FORESIGHT {
+        let score_delta = run_cbm_foresight(target.is_foresighted.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPIKES -> AI_CBM_Spikes
+    // (`data/battle_ai_scripts.s:165,439-441`, TS :1759-1766).
+    if move_row.effect == EFFECT_SPIKES {
+        let score_delta = run_cbm_spikes(target.spikes_up.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_FUTURE_SIGHT -> AI_CBM_FutureSight
+    // (`data/battle_ai_scripts.s:184,500-504`, TS :1772-1782).
+    if move_row.effect == EFFECT_FUTURE_SIGHT {
+        let score_delta = run_cbm_future_sight(
+            target.target_future_attack_up.unwrap_or(false),
+            input.attacker.attacker_future_attack_up.unwrap_or(false),
+        );
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_FOCUS_ENERGY -> AI_CBM_FocusEnergy
+    // (`data/battle_ai_scripts.s:131,382-384`, TS :1788-1795).
+    if move_row.effect == EFFECT_FOCUS_ENERGY {
+        let score_delta = run_cbm_focus_energy(input.attacker.has_focus_energy.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_REFRESH -> AI_CBM_Refresh
+    // (`data/battle_ai_scripts.s:205,563-565`, TS :1802-1809).
+    if move_row.effect == EFFECT_REFRESH {
+        let score_delta = run_cbm_refresh(input.attacker.has_curable_status.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_RAIN_DANCE -> AI_CBM_RainDance
+    // (`data/battle_ai_scripts.s:490-493`, TS :2076-2083).
+    if move_row.effect == EFFECT_RAIN_DANCE {
+        let score_delta = run_cbm_rain_dance(input.attacker.current_weather, soundproof_guess);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SUNNY_DAY -> AI_CBM_SunnyDay
+    // (`data/battle_ai_scripts.s:495-498`, TS :2085-2094).
+    if move_row.effect == EFFECT_SUNNY_DAY {
+        let score_delta = run_cbm_sunny_day(input.attacker.current_weather, soundproof_guess);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_HAIL -> AI_CBM_Hail
+    // (`data/battle_ai_scripts.s:522-525`, TS :2096-2105).
+    if move_row.effect == EFFECT_HAIL {
+        let score_delta = run_cbm_hail(input.attacker.current_weather, soundproof_guess);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SANDSTORM -> AI_CBM_Sandstorm
+    // (`data/battle_ai_scripts.s:168,451-454`, TS :2107-2118).
+    if move_row.effect == EFFECT_SANDSTORM {
+        let score_delta = run_cbm_sandstorm(input.attacker.current_weather, soundproof_guess);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_MAGNITUDE -> AI_CBM_Magnitude
+    // (`data/battle_ai_scripts.s:175,365-367`, TS :2410-2419): a fresh own
+    // ability read (Levitate -> -10), then FALLS THROUGH into
+    // AI_CBM_HighRiskForDamage's own x0/Wonder Guard body with a second
+    // fresh ability read.
+    if move_row.effect == EFFECT_MAGNITUDE {
+        let (next_rng, levitate_draw, high_risk_draw, score_delta) =
+            run_cbm_magnitude(move_row.move_type, target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = levitate_draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        if let Some(draw) = high_risk_draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: source-complete if_effect table lookup
-    // (TS :2639-2647). No handler is ported yet, so every table effect
+    // (TS :2639-2647). Every table effect not yet in `cbm_handled_effects()`
     // halts here.
     if CBM_TABLE_EFFECTS.contains(&move_row.effect) {
         return CheckBadMoveResult::NotYetPorted {
@@ -993,8 +1445,10 @@ mod tests {
     const TYPE_NORMAL: u8 = 0;
     const TYPE_PSYCHIC: u8 = 14;
     const TYPE_FLYING: u8 = 2;
-    const TYPE_DARK: u8 = 17;
     const TYPE_GRASS: u8 = 12;
+    const TYPE_GHOST: u8 = 7;
+    const TYPE_ROCK: u8 = 5;
+    const TYPE_BUG: u8 = 6;
 
     fn target(
         species: u16,
@@ -1078,6 +1532,21 @@ mod tests {
             move_id,
             target: roar_target(t),
             attacker: neutral_attacker(),
+            draw_ordinal_start: 1,
+        })
+    }
+
+    fn run_with_attacker(
+        move_id: u16,
+        t: FactoryAiCheckBadMoveTarget,
+        rng_value: u32,
+        attacker: FactoryAiCheckBadMoveAttacker,
+    ) -> CheckBadMoveResult {
+        run_check_bad_move_preamble(CheckBadMovePreambleInput {
+            rng: BattleRngState { value: rng_value, calls: 0 },
+            move_id,
+            target: roar_target(t),
+            attacker,
             draw_ordinal_start: 1,
         })
     }
@@ -1258,13 +1727,18 @@ mod tests {
     // === completeness-probe machinery ============================================
 
     #[test]
-    fn unported_returns_all_109_effects_before_any_batch_lands() {
-        assert!(cbm_handled_effects().is_empty());
+    fn unported_returns_77_effects_after_m5b1_lands() {
+        assert_eq!(cbm_handled_effects().len(), 32);
+        assert_eq!(CBM_HANDLED_EFFECTS_M5B1.len(), 32);
         let unported = unported_cbm_table_effects();
-        assert_eq!(unported.len(), 109);
-        let mut sorted_table = CBM_TABLE_EFFECTS.to_vec();
-        sorted_table.sort_unstable();
-        assert_eq!(unported, sorted_table);
+        assert_eq!(unported.len(), 77);
+        let mut expected: Vec<u16> = CBM_TABLE_EFFECTS
+            .iter()
+            .copied()
+            .filter(|effect| !CBM_HANDLED_EFFECTS_M5B1.contains(effect))
+            .collect();
+        expected.sort_unstable();
+        assert_eq!(unported, expected);
     }
 
     #[test]
@@ -1475,7 +1949,6 @@ mod tests {
     fn horn_drill_short_circuit_also_reaches_the_type_immunity_check() {
         // Normal (Horn Drill's type) vs Ghost/Ghost = 0x (attacking_type=0
         // -> defending_type=7).
-        const TYPE_GHOST: u8 = 7;
         let t = target(
             SHUCKLE,
             [TYPE_GHOST, TYPE_GHOST],
@@ -1491,21 +1964,25 @@ mod tests {
 
     #[test]
     fn ordinary_power_1_move_skips_the_type_immunity_check_unlike_ohko() {
-        // Contrast case: MOVE_PSYWAVE (power 1, EFFECT_PSYWAVE, not
-        // FISSURE/HORN_DRILL) is movePowerOther, so the immunity block never
-        // runs even against Psychic-vs-Dark's genuine 0x matchup
-        // (attacking_type=14 -> defending_type=17, multiplier_tenths=0) --
-        // it falls through to the table barrier instead of scoring -10.
+        // Contrast case: MOVE_MEAN_LOOK (power 0, EFFECT_MEAN_LOOK, not
+        // FISSURE/HORN_DRILL, still unported after M5b-1) is movePowerOther,
+        // so the immunity block never runs even against Normal-vs-Ghost's
+        // genuine 0x matchup (attacking_type=0 -> defending_type=7,
+        // multiplier_tenths=0, the same pairing as the Horn Drill test
+        // above) -- it falls through to the table barrier instead of
+        // scoring -10. (M5b-0 originally used MOVE_PSYWAVE here; M5b-1 ports
+        // EFFECT_PSYWAVE into the HighRiskForDamage cluster, so this pin
+        // moved to a still-unported effect with the same 0x-immunity shape.)
         let t = target(
             SHUCKLE,
-            [TYPE_DARK, TYPE_DARK],
+            [TYPE_GHOST, TYPE_GHOST],
             Some(ABILITY_STURDY),
             ABILITY_STURDY,
         );
-        let result = run(149 /* MOVE_PSYWAVE */, t, RNG_SEED);
+        let result = run(212 /* MOVE_MEAN_LOOK */, t, RNG_SEED);
         assert_eq!(
             result,
-            CheckBadMoveResult::NotYetPorted { effect: EFFECT_PSYWAVE, move_id: 149 }
+            CheckBadMoveResult::NotYetPorted { effect: EFFECT_MEAN_LOOK, move_id: 212 }
         );
     }
 
@@ -1545,13 +2022,15 @@ mod tests {
     }
 
     #[test]
-    fn every_reachable_table_effect_halts_at_the_notyetported_barrier() {
-        // Sweeps all 109 table effects (skipping the 10 with no real Gen-3
-        // move, matching TS's "skipped in both directions" comment,
-        // test.ts:1517-1518) against the GENERIC_BARRIER_TARGET-equivalent
-        // fixture (test.ts:1484-1493): single-ability known Sturdy, so every
-        // preamble draw short-circuits and every table-effect move reaches
-        // the barrier untouched.
+    fn every_still_unported_table_effect_halts_at_the_notyetported_barrier() {
+        // Sweeps every still-unported table effect after M5b-1 (skipping
+        // those with no real Gen-3 move, matching TS's "skipped in both
+        // directions" comment, test.ts:1517-1518) against the
+        // GENERIC_BARRIER_TARGET-equivalent fixture (test.ts:1484-1493):
+        // single-ability known Sturdy, so every preamble draw short-circuits
+        // and every still-unported table-effect move reaches the barrier
+        // untouched. All 32 M5b-1 effects have a real move (verified against
+        // src/data/gen/moves.json), so this drops from 99 to 67 = 99 - 32.
         let t = target(
             SHUCKLE,
             [TYPE_PSYCHIC, TYPE_PSYCHIC],
@@ -1559,7 +2038,7 @@ mod tests {
             ABILITY_STURDY,
         );
         let mut checked = 0;
-        for &effect in CBM_TABLE_EFFECTS.iter() {
+        for effect in unported_cbm_table_effects() {
             if let Some(move_id) = first_move_id_with_effect(effect) {
                 assert_eq!(
                     run(move_id, t, RNG_SEED),
@@ -1569,7 +2048,33 @@ mod tests {
                 checked += 1;
             }
         }
-        assert_eq!(checked, 99);
+        assert_eq!(checked, 67);
+    }
+
+    #[test]
+    fn every_m5b1_handled_effect_scores_instead_of_halting() {
+        // The converse of the sweep above: every one of M5b-1's 32 handled
+        // effects now reaches a `Scored` result (never `NotYetPorted`) for
+        // its first reachable Gen-3 move, against the same generic
+        // ability-short-circuiting fixture.
+        let t = target(
+            SHUCKLE,
+            [TYPE_PSYCHIC, TYPE_PSYCHIC],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let mut checked = 0;
+        for &effect in CBM_HANDLED_EFFECTS_M5B1.iter() {
+            let move_id = first_move_id_with_effect(effect)
+                .unwrap_or_else(|| panic!("effect {effect}: expected a real Gen-3 move"));
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!(
+                    "effect {effect} move {move_id}: expected Scored, M5b-1 handles this effect"
+                );
+            };
+            checked += 1;
+        }
+        assert_eq!(checked, 32);
     }
 
     #[test]
@@ -1602,5 +2107,441 @@ mod tests {
         }
         assert_eq!(total_draws, 6);
         assert_eq!(scores, vec![0, 0, 0, -10]);
+    }
+
+    // === M5b-1: AI_CBM_HighRiskForDamage (TS :2681-2706, test.ts:30-931) =====
+
+    const TYPE_FIGHTING: u8 = 1;
+
+    #[test]
+    fn high_risk_for_damage_x0_effectiveness_scores_minus10_with_no_draw() {
+        // Fighting vs Ghost/Ghost = 0x -- JUMPs to -10 before the handler's
+        // own ability read (TS :2692-2695, test.ts:46-54).
+        let t = target(SHUCKLE, [TYPE_GHOST, TYPE_GHOST], None, ABILITY_STURDY);
+        let before = BattleRngState { value: RNG_SEED, calls: 0 };
+        let (rng, draw, score_delta) = run_cbm_high_risk_for_damage(TYPE_FIGHTING, &t, before, 1);
+        assert_eq!(score_delta, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, before);
+    }
+
+    #[test]
+    fn high_risk_for_damage_non_wonder_guard_falls_through_to_zero() {
+        // TS :2696-2705, test.ts:56-61: a non-Wonder-Guard result always
+        // scores 0, regardless of which of Marowak's two abilities is
+        // guessed.
+        let t = target(MAROWAK, [TYPE_WATER, TYPE_WATER], None, ABILITY_ROCK_HEAD);
+        let before = BattleRngState { value: RNG_SEED, calls: 0 };
+        let (rng, draw, score_delta) = run_cbm_high_risk_for_damage(TYPE_FIGHTING, &t, before, 1);
+        assert_eq!(score_delta, 0);
+        let draw = draw.expect("two distinct unknown abilities must draw");
+        assert_eq!(draw.site, CheckBadMoveDrawSite::HighRiskForDamageAbility);
+        assert_eq!(draw.before, before);
+        assert_ne!(rng, before);
+    }
+
+    #[test]
+    fn high_risk_for_damage_wonder_guard_with_x2_effectiveness_scores_zero() {
+        // TS :2701-2704, test.ts:63-69: Wonder Guard only ever penalizes
+        // when effectiveness is NOT the expected x2 -- an x2 match falls to
+        // the end at zero.
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_WONDER_GUARD),
+            ABILITY_WONDER_GUARD,
+        );
+        let (_, draw, score_delta) = run_cbm_high_risk_for_damage(
+            TYPE_FIGHTING,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score_delta, 0);
+        assert!(draw.is_none()); // known ability -- zero-RNG short-circuit
+    }
+
+    #[test]
+    fn high_risk_for_damage_wonder_guard_with_non_x2_effectiveness_scores_minus10() {
+        // TS :2701-2704, test.ts:71-76.
+        let t = target(
+            SHUCKLE,
+            [TYPE_WATER, TYPE_WATER],
+            Some(ABILITY_WONDER_GUARD),
+            ABILITY_WONDER_GUARD,
+        );
+        let (_, _, score_delta) = run_cbm_high_risk_for_damage(
+            TYPE_FIGHTING,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score_delta, -10);
+    }
+
+    #[test]
+    fn high_risk_for_damage_cluster_dispatch_reaches_the_shared_handler() {
+        // Two representative cluster members through the full preamble:
+        // Counter (own power 1, NOT in IGNORED_POWERFUL_MOVE_EFFECTS) and
+        // Skull Bash (power 100, IS in the ignored list) -- both are
+        // isMovePowerOther regardless, so neither ever draws a negates-type
+        // ability; only soundproof + the handler's own draw fire (TS
+        // test.ts:30-90 / Skull Bash's own describe block).
+        let t = target(MAROWAK, [TYPE_WATER, TYPE_WATER], None, ABILITY_ROCK_HEAD);
+        for move_id in [68u16 /* Counter */, 130 /* Skull Bash */] {
+            let result = run(move_id, t, RNG_SEED);
+            let CheckBadMoveResult::Scored { draws, draw_count, .. } = result else {
+                panic!("move {move_id}: expected Scored")
+            };
+            assert_eq!(draw_count, 2, "move {move_id}");
+            assert_eq!(
+                draws[0].site,
+                CheckBadMoveDrawSite::Soundproof,
+                "move {move_id}"
+            );
+            assert_eq!(
+                draws[1].site,
+                CheckBadMoveDrawSite::HighRiskForDamageAbility,
+                "move {move_id}"
+            );
+        }
+    }
+
+    // === M5b-1: EFFECT_TELEPORT (TS :1694-1701, test.ts:932-939) =============
+
+    #[test]
+    fn teleport_scores_minus10_unconditionally_with_zero_draws() {
+        let t = target(
+            MAROWAK,
+            [TYPE_GROUND, TYPE_GROUND],
+            Some(ABILITY_ROCK_HEAD),
+            ABILITY_ROCK_HEAD,
+        );
+        let result = run(100 /* MOVE_TELEPORT */, t, RNG_SEED);
+        let CheckBadMoveResult::Scored { score_delta, draw_count, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, -10);
+        assert_eq!(draw_count, 0);
+    }
+
+    // === M5b-1: the 8 zero-RNG single-flag handlers (TS :3158-3255, ==========
+    // test.ts:941-1207) ==========================================================
+
+    #[test]
+    fn run_cbm_ingrain_branches() {
+        // TS :3158-3160, test.ts:958-971.
+        assert_eq!(run_cbm_ingrain(true), -10);
+        assert_eq!(run_cbm_ingrain(false), 0);
+    }
+
+    #[test]
+    fn run_cbm_perish_song_branches() {
+        // TS :3168-3170, test.ts:991-1002.
+        assert_eq!(run_cbm_perish_song(true), -10);
+        assert_eq!(run_cbm_perish_song(false), 0);
+    }
+
+    #[test]
+    fn run_cbm_nightmare_branches() {
+        // TS :3187-3192, test.ts:1022-1040: sequential JUMPs, never
+        // additive -- a Nightmared target never reaches the sleep check.
+        assert_eq!(run_cbm_nightmare(true, true), -10);
+        assert_eq!(run_cbm_nightmare(true, false), -10);
+        assert_eq!(run_cbm_nightmare(false, true), 0);
+        assert_eq!(run_cbm_nightmare(false, false), -8);
+    }
+
+    #[test]
+    fn run_cbm_foresight_branches() {
+        // TS :3200-3202, test.ts:1060-1071.
+        assert_eq!(run_cbm_foresight(true), -10);
+        assert_eq!(run_cbm_foresight(false), 0);
+    }
+
+    #[test]
+    fn run_cbm_spikes_branches() {
+        // TS :3210-3212, test.ts:1091-1102.
+        assert_eq!(run_cbm_spikes(true), -10);
+        assert_eq!(run_cbm_spikes(false), 0);
+    }
+
+    #[test]
+    fn run_cbm_future_sight_branches() {
+        // TS :3230-3235, test.ts:1122-1140: either side JUMPs to -12; the
+        // all-clear path FALLS THROUGH to +5, never additive.
+        assert_eq!(run_cbm_future_sight(true, false), -12);
+        assert_eq!(run_cbm_future_sight(false, true), -12);
+        assert_eq!(run_cbm_future_sight(true, true), -12);
+        assert_eq!(run_cbm_future_sight(false, false), 5);
+    }
+
+    #[test]
+    fn run_cbm_focus_energy_branches() {
+        // TS :3243-3245, test.ts:1160-1173.
+        assert_eq!(run_cbm_focus_energy(true), -10);
+        assert_eq!(run_cbm_focus_energy(false), 0);
+    }
+
+    #[test]
+    fn run_cbm_refresh_branches() {
+        // TS :3253-3255, test.ts:1193-1206.
+        assert_eq!(run_cbm_refresh(true), 0);
+        assert_eq!(run_cbm_refresh(false), -10);
+    }
+
+    #[test]
+    fn singles_dispatch_threads_attacker_and_target_fields_through_the_preamble() {
+        // Dispatch-level spot-check (handler-direct tests above cover the
+        // pure logic): Ingrain reads input.attacker.is_rooted, FutureSight
+        // reads the target's own flag -- both through the full preamble,
+        // zero draws when the ability is known.
+        let t = target(
+            MAROWAK,
+            [TYPE_GROUND, TYPE_GROUND],
+            Some(ABILITY_ROCK_HEAD),
+            ABILITY_ROCK_HEAD,
+        );
+        let rooted_attacker =
+            FactoryAiCheckBadMoveAttacker { is_rooted: Some(true), ..neutral_attacker() };
+        let result = run_with_attacker(275 /* MOVE_INGRAIN */, t, RNG_SEED, rooted_attacker);
+        assert_eq!(
+            result,
+            CheckBadMoveResult::Scored {
+                rng: BattleRngState { value: RNG_SEED, calls: 0 },
+                draws: [DRAW_FILLER; MAX_CHECK_BAD_MOVE_DRAWS],
+                draw_count: 0,
+                score_delta: -10,
+            }
+        );
+
+        let future_sight_target = FactoryAiCheckBadMoveTarget {
+            target_future_attack_up: Some(true),
+            ..target(
+                MAROWAK,
+                [TYPE_GROUND, TYPE_GROUND],
+                Some(ABILITY_ROCK_HEAD),
+                ABILITY_ROCK_HEAD,
+            )
+        };
+        let result = run(
+            248, /* MOVE_FUTURE_SIGHT */
+            future_sight_target,
+            RNG_SEED,
+        );
+        let CheckBadMoveResult::Scored { score_delta, draw_count, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, -12);
+        assert_eq!(draw_count, 0);
+    }
+
+    // === M5b-1: weather quartet (TS :1209-1240, dispatch :2076-2118, ==========
+    // test.ts:3277-3496) =========================================================
+
+    #[test]
+    fn run_cbm_weather_setter_matches_current_weather_scores_minus8_with_no_stale_read() {
+        // TS :1209-1218, test.ts:3297-3306: a genuinely set weather always
+        // wins, the stale ability guess is never consulted.
+        assert_eq!(
+            run_cbm_weather_setter(Some(AI_WEATHER_RAIN), ABILITY_STENCH, AI_WEATHER_RAIN),
+            -8
+        );
+    }
+
+    #[test]
+    fn run_cbm_weather_setter_different_current_weather_scores_zero() {
+        // test.ts:3308-3317.
+        assert_eq!(
+            run_cbm_weather_setter(Some(AI_WEATHER_SUN), ABILITY_STENCH, AI_WEATHER_RAIN),
+            0
+        );
+    }
+
+    #[test]
+    fn run_cbm_weather_setter_no_weather_and_non_colliding_ability_scores_zero() {
+        // test.ts:3323-3328: currentWeather omitted, stale guess doesn't
+        // collide with any AI_WEATHER_* value at all (Sturdy, id 5).
+        assert_eq!(
+            run_cbm_weather_setter(None, ABILITY_STURDY, AI_WEATHER_RAIN),
+            0
+        );
+    }
+
+    #[test]
+    fn run_cbm_weather_setter_stale_funcresult_collision_scores_minus8() {
+        // TS :1191-1218 (stale-funcResult bug), test.ts:3357-3366: weatherless
+        // + a target ability ID (0-3) that collides with this handler's own
+        // weather constant.
+        assert_eq!(
+            run_cbm_weather_setter(None, ABILITY_NONE, AI_WEATHER_SUN),
+            -8
+        ); // id 0
+        assert_eq!(
+            run_cbm_weather_setter(None, ABILITY_STENCH, AI_WEATHER_RAIN),
+            -8
+        ); // id 1
+        assert_eq!(
+            run_cbm_weather_setter(None, ABILITY_SPEED_BOOST, AI_WEATHER_HAIL),
+            -8
+        ); // id 3
+    }
+
+    #[test]
+    fn run_cbm_weather_setter_stale_funcresult_wrong_collision_scores_zero() {
+        // test.ts:3368-3380: the colliding ID belongs to a DIFFERENT
+        // handler's own constant (id 1 == Rain, checked against Hail).
+        assert_eq!(
+            run_cbm_weather_setter(None, ABILITY_STENCH, AI_WEATHER_HAIL),
+            0
+        );
+    }
+
+    #[test]
+    fn weather_wrappers_each_check_their_own_ai_weather_constant() {
+        // test.ts:3297-3340, :3461-3489: byte-for-byte identical shape,
+        // each wired to a distinct AI_WEATHER_* constant.
+        assert_eq!(run_cbm_rain_dance(Some(AI_WEATHER_RAIN), ABILITY_NONE), -8);
+        assert_eq!(run_cbm_sunny_day(Some(AI_WEATHER_SUN), ABILITY_NONE), -8);
+        assert_eq!(run_cbm_hail(Some(AI_WEATHER_HAIL), ABILITY_NONE), -8);
+        assert_eq!(
+            run_cbm_sandstorm(Some(AI_WEATHER_SANDSTORM), ABILITY_NONE),
+            -8
+        );
+        assert_eq!(run_cbm_sandstorm(None, ABILITY_DRIZZLE), -8); // id 2 collides with Sandstorm
+        assert_eq!(run_cbm_rain_dance(None, ABILITY_DRIZZLE), 0); // id 2 doesn't collide with Rain
+    }
+
+    #[test]
+    fn weather_dispatch_reads_soundproof_guess_as_the_stale_funcresult_fallback() {
+        // Dispatch-level: the preamble's own soundproof_guess local (from
+        // its ability read, TS :1329) is exactly what the weather handlers
+        // read when weatherless -- reproduces doc §25.10.2's Ninjask
+        // fixture (Speed Boost, id 3, single-ability species so zero draws
+        // either way), test.ts:3407-3412.
+        let ninjask = target(
+            302, /* SPECIES_NINJASK */
+            [TYPE_BUG, TYPE_FLYING],
+            None,
+            ABILITY_SPEED_BOOST,
+        );
+        let weatherless =
+            FactoryAiCheckBadMoveAttacker { current_weather: None, ..neutral_attacker() };
+        let result = run_with_attacker(258 /* MOVE_HAIL */, ninjask, RNG_SEED, weatherless);
+        let CheckBadMoveResult::Scored { score_delta, draw_count, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, -8);
+        assert_eq!(draw_count, 0);
+    }
+
+    // === M5b-1: AI_CBM_Magnitude (TS :3331-3361, dispatch :2410-2419, =========
+    // test.ts:4012-4072) =========================================================
+
+    #[test]
+    fn magnitude_levitate_scores_minus10_after_its_own_first_ability_read() {
+        // test.ts:4029-4035.
+        let t = target(
+            SHUCKLE,
+            [TYPE_ROCK, TYPE_BUG],
+            Some(ABILITY_LEVITATE),
+            ABILITY_LEVITATE,
+        );
+        let before = BattleRngState { value: RNG_SEED, calls: 0 };
+        let (rng, levitate_draw, high_risk_draw, score_delta) =
+            run_cbm_magnitude(TYPE_GROUND, &t, before, 1);
+        assert_eq!(score_delta, -10);
+        assert!(levitate_draw.is_none()); // known ability -- zero-RNG short-circuit
+        assert!(high_risk_draw.is_none());
+        assert_eq!(rng, before);
+    }
+
+    #[test]
+    fn magnitude_non_levitate_x0_effectiveness_scores_minus10_via_the_fallthrough() {
+        // test.ts:4037-4047: Ground vs Flying/Flying = 0x.
+        let t = target(
+            SHUCKLE,
+            [TYPE_FLYING, TYPE_FLYING],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let (_, levitate_draw, high_risk_draw, score_delta) = run_cbm_magnitude(
+            TYPE_GROUND,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score_delta, -10);
+        assert!(levitate_draw.is_none());
+        assert!(high_risk_draw.is_none()); // the x0 short-circuit adds no draw of its own
+    }
+
+    #[test]
+    fn magnitude_non_levitate_non_wonder_guard_falls_through_to_zero() {
+        // test.ts:4049-4052.
+        let t = target(
+            SHUCKLE,
+            [TYPE_ROCK, TYPE_BUG],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let (_, _, _, score_delta) = run_cbm_magnitude(
+            TYPE_GROUND,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score_delta, 0);
+    }
+
+    #[test]
+    fn magnitude_ambiguous_non_levitate_target_draws_twice_never_caches() {
+        // test.ts:4054-4071: Lanturn (Volt Absorb / Water Absorb) draws at
+        // both the handler's own Levitate gate and HighRisk's own
+        // get_ability -- the never-caches quirk applied twice inside one
+        // handler.
+        let t = target(
+            171, /* SPECIES_LANTURN */
+            [TYPE_ROCK, TYPE_BUG],
+            None,
+            ABILITY_VOLT_ABSORB,
+        );
+        let before = BattleRngState { value: RNG_SEED, calls: 0 };
+        let (rng, levitate_draw, high_risk_draw, score_delta) =
+            run_cbm_magnitude(TYPE_GROUND, &t, before, 1);
+        assert_eq!(score_delta, 0);
+        let levitate_draw = levitate_draw.expect("ambiguous species draws at the levitate gate");
+        let high_risk_draw =
+            high_risk_draw.expect("ambiguous species draws again at the high-risk gate");
+        assert_eq!(levitate_draw.site, CheckBadMoveDrawSite::MagnitudeLevitate);
+        assert_eq!(
+            high_risk_draw.site,
+            CheckBadMoveDrawSite::HighRiskForDamageAbility
+        );
+        assert_eq!(levitate_draw.before, before);
+        assert_eq!(levitate_draw.after, high_risk_draw.before); // never-caches: advances at both
+        assert_ne!(levitate_draw.before, high_risk_draw.before);
+        assert_eq!(rng, high_risk_draw.after);
+    }
+
+    #[test]
+    fn magnitude_dispatch_through_the_full_preamble_draws_soundproof_then_both_handler_sites() {
+        // Dispatch-level: MOVE_MAGNITUDE (id 222, power 1) is
+        // movePowerOther, so the preamble's own negates-type draw never
+        // fires -- only soundproof plus the handler's own two draws,
+        // exactly filling MAX_CHECK_BAD_MOVE_DRAWS (test.ts:4054-4071).
+        let t = target(171, [TYPE_ROCK, TYPE_BUG], None, ABILITY_VOLT_ABSORB);
+        let result = run(222 /* MOVE_MAGNITUDE */, t, RNG_SEED);
+        let CheckBadMoveResult::Scored { draws, draw_count, score_delta, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, 0);
+        assert_eq!(draw_count, 3);
+        assert_eq!(draws[0].site, CheckBadMoveDrawSite::Soundproof);
+        assert_eq!(draws[1].site, CheckBadMoveDrawSite::MagnitudeLevitate);
+        assert_eq!(
+            draws[2].site,
+            CheckBadMoveDrawSite::HighRiskForDamageAbility
+        );
     }
 }

@@ -5,6 +5,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R4 — [supervised session, 2026-08-11 night] **M5b-1 folded: CheckBadMove batch 1 (32 effects) native**
+
+- **State:** rust-main = master (merged at orient, clean — animation/audio
+  content only) + M5b-1 fold `4aa6240a`. CheckBadMove is 32/109 table
+  effects native: the 18-effect HighRiskForDamage cluster (one shared
+  handler) + Magnitude (own Levitate draw, rides the cluster), Teleport,
+  8 zero-RNG singles, and the weather quartet with the stale-`funcResult`
+  collision bug ported bug-for-bug. `unported_cbm_table_effects()` = 77,
+  pinned. 95 TS-generated vector rows
+  (`tools/gen-cbm-m5b1-vectors.mjs` → checked-in
+  `factory_ai_check_bad_move_m5b1_vectors_gen.rs`, byte-idempotent).
+  `MAX_CHECK_BAD_MOVE_DRAWS` 2→3 (Magnitude worst case: soundproof +
+  levitate + high-risk draws; the whole batch is `isMovePowerOther`, so
+  the preamble's negates-type draw can never co-occur — worker-verified
+  against moves.json).
+- **Did:** supervisor verification on the worker branch before fold:
+  scope clean (5 files, all core-rs/), cargo **204/204** + fmt +
+  clippy(--all-targets) + wasm build rerun independently, BOTH generators
+  rerun byte-identical, 2 vector rows re-derived from the TS module by an
+  independent script (inputs reconstructed from pokeemerald headers, not
+  the generator): Ninjask stale-weather collision (−8, 0 draws) and
+  Lanturn Magnitude 3-draw chain — every rng before/after, randomValue,
+  and guessed ability exact. `CBM_HANDLED_EFFECTS_M5B1` = exactly the 32
+  batch effects. Post-fold on rust-main: cargo 204/204, artifact rebuilt,
+  smoke 375/375. Worker: sonnet, 23.6 min of a 90-min cap, 2 commits.
+- **Next:** M5b-2 (RNG-gated status/stat-DOWN, 33 effects — brief
+  pre-drafted and premise-checked: draw-site census confirms all
+  remaining handler draws live in this batch), then M5b-3 (44 zero-RNG
+  effects — census confirms zero draw sites), then M5c
+  boundary+adapter+parity per docs/rust-m5-scout.md.
+- **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
+  example pin from Psywave (now handled) to Mean Look — the exact
+  staleness pattern the TS doc comment warns about for its own
+  generic-barrier pins; M5b-2/3 workers will do the same dance.
+
+---
+
 ## R3 — [supervised session, 2026-08-11 eve] **M4 COMPLETE + M5 opened: battle-kernel family end-to-end; AI family scouted and groundwork folded**
 
 - **State:** rust-main = master (merged at orient, fast-forward) + the
@@ -267,37 +304,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   challengeNum 7 + better-range fixed IV deliberately throws in TS
   (documented retail-OOB boundary, factoryRentalGeneration.ts:184); the
   parity matrix compares errors symmetrically there.
-
----
-
-## R1 — [solo session, 2026-08-11] **Lane born: scaffold + rng port proven**
-
-- **State:** `core-rs/` exists and is green: cargo workspace,
-  `factory-core` (Gen-3 LCG ported from `src/engine/rng.ts`, 4/4 tests),
-  `factory-wasm` C-ABI stub, wasm32 release build produced a 448-byte
-  artifact. Zero dependencies; builds and tests fully offline. No TS
-  file was modified. No supervisor runs have started in this lane yet.
-- **Did:** user decisions recorded: repo restructured to
-  `pokeemerald-factory-core` (workspace/ layout, warm-bison history
-  promoted); Rust chosen for the rewrite; TS stays canonical until the
-  user archives it; animation lane continues in TS by explicit decision
-  (discovery transfers, see RUST_SUPERVISOR.md). Expected rng values
-  were generated from the TS implementation
-  (`node --experimental-strip-types` over `src/engine/rng.ts`), not
-  hand-computed.
-- **Did (addendum):** lane fully wired into the launchers —
-  `./run-supervisor.sh -l rust` (persistent `.worktrees/rust-main`
-  worktree, branch `rust-main`, OFF oracle only, gate file
-  `RUST_DEFERRED.md`) and `./tools/run-subagent.sh --lane rust` (fresh
-  `worker/rust-*` worktrees, OFF profile). Verified via `--print-config`
-  for rust/animation/bogus on both launchers; the main supervisor's
-  prompt now folds `rust-main` at orients alongside `animation-main`.
-- **Next:** M1 (boundary decision: wasm-bindgen vs hand-rolled ABI +
-  Vite-consumable artifact path), then M2 (vitest engine adapter, rng
-  spec running against both engines). See the milestone ladder in
-  RUST_SUPERVISOR.md.
-- **Notes:** cargo is NOT on the login PATH — use
-  `export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"`;
-  `rustup run stable cargo` fails in sandboxed non-interactive shells
-  ("could not execute process `rustc -vV`"). wasm32-unknown-unknown
-  target is already installed.
