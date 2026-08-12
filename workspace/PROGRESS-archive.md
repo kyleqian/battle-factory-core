@@ -41382,6 +41382,23 @@ git; the current live ledger keeps the three load-bearing entries only.
   **8/8**, smoke **375/375**, typecheck, full **959 files / 9,161 passed / 1
   skipped**, and build **649 modules** are green; pixels were not rerun.
 
+## 1161 — [MAIN worker, 2026-08-11] **#55 `ply_patt` callback family source-closed**
+
+- **State:** the sixth-player `ply_patt` family is source-exact for **1/1**
+  callback and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
+  null**; the construction clock stays null/unwired, S8/#56 are untouched,
+  and LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets across anchor/LILIANA/varied
+  select one depth-0 `ply_patt -> ply_goto` route at **134 cycles**. The pure
+  reducer covers depths 0–2 and fails closed on the unobserved `ply_fine` path.
+- **Next:** source-close the command dispatcher or one remaining
+  voice/vol/pan/bend/note family. Keep complete one-pass totals null and do not
+  wire `runFactoryConstructionClock`.
+- **Notes:** focused predecessor controls **20/20**, smoke **375/375**,
+  typecheck, full **962 files / 9,183 passed / 1 skipped**, and build **649
+  modules** are green. No engine/pixel identity or unsupported barrier changed;
+  pixels were not rerun.
+
 ## 1157 — [supervisor, 2026-08-11] **#55 wait/LFO closure verified**
 
 - **State:** `master` is green with channel-gate and wait/LFO components both

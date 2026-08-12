@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1164 — [supervisor, 2026-08-11] **VOICE verified; Rust M5a folded**
+
+- **State:** `master` is green with VOICE source-exact for **2/2** callbacks
+  and **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
+  #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated VOICE **4/4**, then folded rust-main M5a
+  AI mask selection plus generated move data through `a33deba6`. Native Rust is
+  **145/145** with fmt/clippy clean; rebuilt WASM is 80,342 bytes and all five
+  adapter suites are **660/660** in default and forced-WASM modes.
+- **Next:** source-close `ply_bend`, the next-smallest live #55 callback family
+  at four census entries. Keep all unresolved families and complete costs null.
+- **Notes:** merged union full `npm test` **967 files / 9,402 passed / 1
+  skipped**, build **651 modules**. Animation is fully folded; no unsupported
+  barrier or main presentation/gameplay/pixel change.
+
 ## 1163 — [MAIN worker, 2026-08-11] **#55 `ply_voice` callback family source-closed**
 
 - **State:** the sixth-player `ply_voice` family is source-exact for **2/2**
@@ -38,20 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** merged union full `npm test` **966 files / 9,398 passed / 1
   skipped**, build **651 modules**. No unsupported barrier or main gameplay /
   pixel identity changed.
-
-## 1161 — [MAIN worker, 2026-08-11] **#55 `ply_patt` callback family source-closed**
-
-- **State:** the sixth-player `ply_patt` family is source-exact for **1/1**
-  callback and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
-  null**; the construction clock stays null/unwired, S8/#56 are untouched,
-  and LUKAS remains **8/50**.
-- **Did:** twice-fresh address-free OFF packets across anchor/LILIANA/varied
-  select one depth-0 `ply_patt -> ply_goto` route at **134 cycles**. The pure
-  reducer covers depths 0–2 and fails closed on the unobserved `ply_fine` path.
-- **Next:** source-close the command dispatcher or one remaining
-  voice/vol/pan/bend/note family. Keep complete one-pass totals null and do not
-  wire `runFactoryConstructionClock`.
-- **Notes:** focused predecessor controls **20/20**, smoke **375/375**,
-  typecheck, full **962 files / 9,183 passed / 1 skipped**, and build **649
-  modules** are green. No engine/pixel identity or unsupported barrier changed;
-  pixels were not rerun.
