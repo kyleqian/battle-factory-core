@@ -74,11 +74,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   21.4 min, 1 commit. Worker PAPERCUT worth adopting as lane practice:
   always verify move ids against moves.json before hand-typing them in
   directed cases — several first-pass guesses were wrong.
-- **Next:** M5c boundary+adapter+parity (fw_ exports for
-  select_factory_ai_mask + run_check_bad_move_preamble, presence-
-  preserving Option encoding, both-mode parity suites; full npm gates —
-  touches tests/), then the M5d CheckViability batching scout
-  (docs-only) if session time allows.
+- **M5c DONE (fold `570239fc`) — the Factory AI surface is behind the
+  differential harness.** 2 additive fw_ exports (ABI v1 unchanged):
+  `fw_select_factory_ai_mask` (scalar args in; 28 B ok / 10 B error out,
+  all 4 FactoryAiMaskError sites cross as codes) and
+  `fw_run_check_bad_move_preamble` (132 B input — rng, move_id,
+  RoarTarget 29 + Attacker 29 fields, ~50 optionals presence-preserving
+  via per-field flag byte; 105 B scored / 9 B not-yet-ported /
+  variable-length error out; unknown-move throw crosses as
+  message-matched error, no trap). Layout decision recorded: mirrored
+  sequential byte-cursor reader/writer on both sides instead of
+  hand-transcribed offset literals (~60 fields = transcription risk);
+  offset table still documented in the doc comment. New
+  `core-rs/adapter/factoryAiEngine.ts` + `tests/factoryAiMaskParity.test.ts`
+  (17) + `tests/factoryAiCheckBadMoveParity.test.ts` (80, incl. 327-case
+  seeded sweep across all 109 effects). Supervisor rerun: scope = core-rs
+  + exactly the 2 authorized test files, cargo **335/335** + fmt/clippy +
+  wasm build, new suites **97/97 in BOTH modes**, existing union 660/660
+  in wasm mode, adapter wiring skimmed (wasm path genuinely routes
+  through loadFactoryWasm encode/decode — no TS fallback faking parity).
+  Worker ran full npm test green (977 files / 9,527 + 1 skip) + build in
+  its tree; supervisor full suite on rust-main runs post-fold (doubles
+  as the wind-down suite). Worker: sonnet, 33.1 min, 3 commits.
+  **Scout correction from the sweep:** 10 (not 5) CBM_TABLE_EFFECTS
+  members have zero real Gen-3 moves — the batching doc's §4 list plus
+  EVASION_UP_2, EVASION_DOWN_2, SPECIAL_DEFENSE_DOWN, SPECIAL_DEFENSE_UP,
+  SPEED_UP (base variants; their _2 siblings do carry moves). Verified
+  against moves.json.
+- **Next:** M5d CheckViability batching scout is RUNNING (docs-only —
+  partition the 122 CV table effects, M5b-doc pattern). Fold it, then
+  wind-down gates. Next session opens M5d-0 (CV preamble + shared infra)
+  per that doc.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own

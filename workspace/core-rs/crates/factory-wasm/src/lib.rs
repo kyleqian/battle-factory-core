@@ -11,6 +11,12 @@ use factory_core::damage_calc::{
     self, AccuracyCalcInput, CritChanceInput, CritMoveEffect, DamageBattler, DamageCalcInput,
     StatStages,
 };
+use factory_core::factory_ai_check_bad_move::{
+    self, BattleRngState, CheckBadMovePreambleInput, CheckBadMoveResult,
+    FactoryAiCheckBadMoveAttacker, FactoryAiCheckBadMoveRoarTarget, FactoryAiCheckBadMoveTarget,
+    FactoryAiMonGender,
+};
+use factory_core::factory_ai_mask::{self, FactoryAiMaskError, FactoryAiMaskSelectionInput};
 use factory_core::gen_tables;
 use factory_core::gender::MonGender;
 use factory_core::mon_construction::{
@@ -979,6 +985,608 @@ pub extern "C" fn fw_run_turn1_rng_ledger(starting_rng_value: u32) -> *mut u8 {
     ptr
 }
 
+// === factory_ai_mask / factory_ai_check_bad_move surface (M5c) ==============
+//
+// Two entry points, matching exactly the two module APIs
+// `src/engine/factoryAiDecisionPolicy.ts` consumes (`selectFactoryAiMask`,
+// `runCheckBadMovePreamble`) -- not the vestigial direct-test handlers
+// (`runCbmAccUp`/`runCbmSpAtkDown`) or the shared infra (`nextGetAbilityDraw`
+// et al.), whose own coverage lives in factory-core's native tests and
+// checked-in vectors already (docs/rust-m5-scout.md "Boundary sketch").
+//
+// Both exports return an `fw_alloc`'d, length-prefixed little-endian buffer
+// (the `fw_generate_initial_rentals`/`fw_create_factory_party_member`
+// pattern above); the caller must `fw_free(ptr, total_len)`.
+
+fn alloc_and_copy(bytes: &[u8]) -> *mut u8 {
+    let ptr = fw_alloc(bytes.len() as u32);
+    // SAFETY: `ptr` was just allocated by fw_alloc for exactly `bytes.len()`
+    // bytes (fw_alloc's contract), and `bytes` is a distinct, non-overlapping
+    // source buffer.
+    unsafe {
+        std::ptr::copy_nonoverlapping(bytes.as_ptr(), ptr, bytes.len());
+    }
+    ptr
+}
+
+fn patch_total_len(buf: &mut [u8]) {
+    let total_len = buf.len() as u32;
+    buf[0..4].copy_from_slice(&total_len.to_le_bytes());
+}
+
+// --- fw_select_factory_ai_mask ------------------------------------------
+
+const FACTORY_AI_MASK_ERROR_LEVEL_MODE: u8 = 0;
+const FACTORY_AI_MASK_ERROR_BATTLE_MODE: u8 = 1;
+const FACTORY_AI_MASK_ERROR_FACTORY_WIN_STREAK: u8 = 2;
+const FACTORY_AI_MASK_ERROR_TRAINER_OPPONENT_ID: u8 = 3;
+
+fn encode_factory_ai_mask_error(kind: u8, value: u32) -> Vec<u8> {
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    buf.push(1); // status: error
+    buf.push(kind);
+    buf.extend_from_slice(&value.to_le_bytes());
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn encode_factory_ai_mask_selection(selection: factory_ai_mask::FactoryAiMaskSelection) -> Vec<u8> {
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    buf.push(0); // status: ok
+    let r = &selection.receipt;
+    buf.push(selection.mask);
+    buf.push(u8::from(r.is_frontier_brain));
+    buf.extend_from_slice(&r.frontier_stages_per_challenge.to_le_bytes());
+    buf.push(u8::from(r.challenge_number.is_some()));
+    buf.extend_from_slice(&r.challenge_number.unwrap_or(0).to_le_bytes());
+    buf.push(r.evaluation_count);
+    for i in 0..r.evaluations.len() {
+        if i < r.evaluation_count as usize {
+            let e = r.evaluations[i];
+            buf.push(e.branch as u8);
+            buf.push(u8::from(e.matched));
+        } else {
+            buf.push(0);
+            buf.push(0);
+        }
+    }
+    buf.push(r.branch as u8);
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// `GetAiScriptsInBattleFactory` via `factory_ai_mask::select_factory_ai_mask`.
+/// Scalar-args input (the whole input is 4 small integers -- the cheapest
+/// faithful shape, no buffer needed): booleans/enums cross as `u32` per the
+/// ABI's scalar convention; `level_mode`/`battle_mode` are validated against
+/// their full `u32` range here (not truncated to `u8` first) so an
+/// out-of-range caller value is reported exactly, mirroring TS's
+/// `requireIntegerInRange` reading the untruncated JS number -- truncating
+/// first would let e.g. `level_mode = 256` wrap to `0` and silently validate.
+/// `factory_win_streak`/`trainer_opponent_id` are already `u32` on both
+/// sides, so `factory_ai_mask::select_factory_ai_mask` itself reports their
+/// out-of-range cases. Returns an `fw_alloc`'d buffer; the caller must
+/// `fw_free(ptr, total_len)`.
+///
+/// # Buffer layout (all integers little-endian)
+///
+/// ```text
+/// offset  width  field
+/// 0       4      total_len (u32) -- the whole buffer's length, including
+///                these 4 bytes; pass this to fw_free.
+/// 4       1      status (u8) -- 0 = ok, 1 = error.
+///
+/// --- status == 1 (error) ---
+/// 5       1      error_kind (u8) -- 0 = LevelModeOutOfRange,
+///                1 = BattleModeOutOfRange, 2 = FactoryWinStreakOutOfRange,
+///                3 = TrainerOpponentIdOutOfRange (FactoryAiMaskError's four
+///                variants, `factory_ai_mask.rs` doc comment "Error surface").
+/// 6       4      value (u32) -- the offending input value, untruncated.
+///                total_len == 10
+///
+/// --- status == 0 (ok) ---
+/// 5       1      mask (u8) -- 0, 1, or 7.
+/// 6       1      is_frontier_brain (u8, 0/1)
+/// 7       4      frontier_stages_per_challenge (u32)
+/// 11      1      has_challenge_number (u8, 0/1) -- gates challenge_number
+///                below (`None` in Tent mode; no native Option on the WASM
+///                ABI, same convention as `has_construction_rng` above).
+/// 12      4      challenge_number (u32) -- ignored when has_challenge_number == 0
+/// 16      1      evaluation_count (u8, 1..=5) -- the source loop breaks at
+///                the first match, so not always 5.
+/// 17      10     evaluations: 5 fixed-width 2-byte records, back to back
+///                (only the first evaluation_count are meaningful; the rest
+///                are zero-filled and MUST be ignored by the decoder):
+///                  0   1   branch (u8) -- FactoryAiPolicyBranchId's
+///                          discriminant: 0=Tent, 1=FrontierBrain,
+///                          2=ChallengeBelow2, 3=ChallengeBelow4,
+///                          4=ChallengeAtLeast4 (BRANCH_ORDER's index order,
+///                          `factory_ai_mask.rs`).
+///                  1   1   matched (u8, 0/1)
+/// 27      1      branch (u8) -- the selected branch, same discriminant as above.
+///                total_len == 28
+/// ```
+#[no_mangle]
+pub extern "C" fn fw_select_factory_ai_mask(
+    level_mode: u32,
+    battle_mode: u32,
+    factory_win_streak: u32,
+    trainer_opponent_id: u32,
+) -> *mut u8 {
+    if level_mode > factory_ai_mask::FACTORY_LEVEL_MODE_TENT as u32 {
+        return alloc_and_copy(&encode_factory_ai_mask_error(
+            FACTORY_AI_MASK_ERROR_LEVEL_MODE,
+            level_mode,
+        ));
+    }
+    if battle_mode > factory_ai_mask::FACTORY_BATTLE_MODE_DOUBLES as u32 {
+        return alloc_and_copy(&encode_factory_ai_mask_error(
+            FACTORY_AI_MASK_ERROR_BATTLE_MODE,
+            battle_mode,
+        ));
+    }
+    let input = FactoryAiMaskSelectionInput {
+        level_mode: level_mode as u8,
+        battle_mode: battle_mode as u8,
+        factory_win_streak,
+        trainer_opponent_id,
+    };
+    let bytes = match factory_ai_mask::select_factory_ai_mask(input) {
+        Ok(selection) => encode_factory_ai_mask_selection(selection),
+        Err(FactoryAiMaskError::LevelModeOutOfRange { value }) => {
+            encode_factory_ai_mask_error(FACTORY_AI_MASK_ERROR_LEVEL_MODE, value as u32)
+        }
+        Err(FactoryAiMaskError::BattleModeOutOfRange { value }) => {
+            encode_factory_ai_mask_error(FACTORY_AI_MASK_ERROR_BATTLE_MODE, value as u32)
+        }
+        Err(FactoryAiMaskError::FactoryWinStreakOutOfRange { value }) => {
+            encode_factory_ai_mask_error(FACTORY_AI_MASK_ERROR_FACTORY_WIN_STREAK, value)
+        }
+        Err(FactoryAiMaskError::TrainerOpponentIdOutOfRange { value }) => {
+            encode_factory_ai_mask_error(FACTORY_AI_MASK_ERROR_TRAINER_OPPONENT_ID, value)
+        }
+    };
+    alloc_and_copy(&bytes)
+}
+
+// --- fw_run_check_bad_move_preamble --------------------------------------
+
+/// Minimal little-endian byte cursor for `CheckBadMovePreambleInput`'s ~60
+/// scalar/optional fields -- a sequential reader (rather than the
+/// hardcoded-offset-literal style `decode_damage_battler` et al. use above)
+/// because at this field count, hand-transcribed offset literals on both the
+/// Rust and TS sides are the real correctness risk, not the offsets
+/// themselves; the doc comment below documents the field order and each
+/// one's derived offset for readers, generated by summing this exact field
+/// list once. `opt_*` methods decode the presence-preserving convention
+/// point 2 of the M5c brief requires: one leading `bool` presence byte
+/// (`0`/`1`) followed by a value slot that MUST be ignored when the presence
+/// byte is `0` (mirrors `decode_damage_battler`'s `has_hp`/`hp` gate, scaled
+/// to ~30 optional fields per struct instead of two).
+struct ByteReader<'a> {
+    bytes: &'a [u8],
+    offset: usize,
+}
+
+impl<'a> ByteReader<'a> {
+    fn new(bytes: &'a [u8]) -> Self {
+        Self { bytes, offset: 0 }
+    }
+    fn u8(&mut self) -> u8 {
+        let v = self.bytes[self.offset];
+        self.offset += 1;
+        v
+    }
+    fn bool_(&mut self) -> bool {
+        self.u8() != 0
+    }
+    fn u16(&mut self) -> u16 {
+        let v = u16::from_le_bytes(self.bytes[self.offset..self.offset + 2].try_into().unwrap());
+        self.offset += 2;
+        v
+    }
+    fn u32(&mut self) -> u32 {
+        let v = u32::from_le_bytes(self.bytes[self.offset..self.offset + 4].try_into().unwrap());
+        self.offset += 4;
+        v
+    }
+    fn i32(&mut self) -> i32 {
+        let v = i32::from_le_bytes(self.bytes[self.offset..self.offset + 4].try_into().unwrap());
+        self.offset += 4;
+        v
+    }
+    fn opt_u8(&mut self) -> Option<u8> {
+        let present = self.bool_();
+        let v = self.u8();
+        present.then_some(v)
+    }
+    fn opt_bool(&mut self) -> Option<bool> {
+        let present = self.bool_();
+        let v = self.bool_();
+        present.then_some(v)
+    }
+    fn opt_u16(&mut self) -> Option<u16> {
+        let present = self.bool_();
+        let v = self.u16();
+        present.then_some(v)
+    }
+    fn opt_i32(&mut self) -> Option<i32> {
+        let present = self.bool_();
+        let v = self.i32();
+        present.then_some(v)
+    }
+}
+
+fn gender_from_byte(b: u8) -> FactoryAiMonGender {
+    match b {
+        0 => FactoryAiMonGender::Male,
+        1 => FactoryAiMonGender::Female,
+        _ => FactoryAiMonGender::Genderless,
+    }
+}
+
+/// Decodes `FactoryAiCheckBadMoveTarget`'s 28 fields (offsets 14..67 of the
+/// full `CheckBadMovePreambleInput` buffer -- see `fw_run_check_bad_move_preamble`'s
+/// doc comment for the complete field-by-field offset table), in exactly the
+/// Rust struct's declaration order (`factory_ai_check_bad_move.rs`).
+fn decode_cbm_target(r: &mut ByteReader) -> FactoryAiCheckBadMoveTarget {
+    let species = r.u16();
+    let types = [r.u8(), r.u8()];
+    let known_ability = r.opt_u16();
+    let real_ability = r.u16();
+    let speed_stage = r.u8();
+    let atk_stage = r.u8();
+    let def_stage = r.u8();
+    let sp_def_stage = r.u8();
+    let acc_stage = r.opt_u8();
+    let evasion_stage = r.opt_u8();
+    let has_any_status = r.opt_bool();
+    let safeguard_up = r.opt_bool();
+    let is_confused = r.opt_bool();
+    let is_leech_seeded = r.opt_bool();
+    let is_asleep = r.opt_bool();
+    let is_escape_prevented = r.opt_bool();
+    let is_tormented = r.opt_bool();
+    let has_perish_song = r.opt_bool();
+    let is_nightmared = r.opt_bool();
+    let is_foresighted = r.opt_bool();
+    let spikes_up = r.opt_bool();
+    let target_future_attack_up = r.opt_bool();
+    let level = r.opt_u8();
+    let sp_atk_stage = r.opt_u8();
+    let is_infatuated = r.opt_bool();
+    let any_move_disabled = r.opt_bool();
+    let any_move_encored = r.opt_bool();
+    let gender = r.opt_u8().map(gender_from_byte);
+    FactoryAiCheckBadMoveTarget {
+        species,
+        types,
+        known_ability,
+        real_ability,
+        speed_stage,
+        atk_stage,
+        def_stage,
+        sp_def_stage,
+        acc_stage,
+        evasion_stage,
+        has_any_status,
+        safeguard_up,
+        is_confused,
+        is_leech_seeded,
+        is_asleep,
+        is_escape_prevented,
+        is_tormented,
+        has_perish_song,
+        is_nightmared,
+        is_foresighted,
+        spikes_up,
+        target_future_attack_up,
+        level,
+        sp_atk_stage,
+        is_infatuated,
+        any_move_disabled,
+        any_move_encored,
+        gender,
+    }
+}
+
+/// Decodes `FactoryAiCheckBadMoveAttacker`'s 29 fields (offsets 69..132 of
+/// the full `CheckBadMovePreambleInput` buffer), in exactly the Rust
+/// struct's declaration order.
+fn decode_cbm_attacker(r: &mut ByteReader) -> FactoryAiCheckBadMoveAttacker {
+    let atk_stage = r.u8();
+    let def_stage = r.u8();
+    let speed_stage = r.opt_u8();
+    let sp_atk_stage = r.opt_u8();
+    let sp_def_stage = r.opt_u8();
+    let light_screen_up = r.opt_bool();
+    let reflect_up = r.opt_bool();
+    let evasion_stage = r.opt_u8();
+    let attacker_future_attack_up = r.opt_bool();
+    let has_focus_energy = r.opt_bool();
+    let has_curable_status = r.opt_bool();
+    let current_weather = r.opt_u8();
+    let level = r.opt_u8();
+    let is_first_turn = r.opt_u8();
+    let safeguard_up = r.opt_bool();
+    let is_asleep = r.opt_bool();
+    let usable_party_mons = r.opt_u8();
+    let has_substitute = r.opt_bool();
+    let hp = r.opt_i32();
+    let max_hp = r.opt_i32();
+    let is_rooted = r.opt_bool();
+    let acc_stage = r.opt_u8();
+    let mist_up = r.opt_bool();
+    let gender = r.opt_u8().map(gender_from_byte);
+    let imprisoned_others = r.opt_bool();
+    let mud_sport_up = r.opt_bool();
+    let water_sport_up = r.opt_bool();
+    let used_held_item_id = r.opt_u16();
+    let stockpile_count = r.opt_u8();
+    FactoryAiCheckBadMoveAttacker {
+        atk_stage,
+        def_stage,
+        speed_stage,
+        sp_atk_stage,
+        sp_def_stage,
+        light_screen_up,
+        reflect_up,
+        evasion_stage,
+        attacker_future_attack_up,
+        has_focus_energy,
+        has_curable_status,
+        current_weather,
+        level,
+        is_first_turn,
+        safeguard_up,
+        is_asleep,
+        usable_party_mons,
+        has_substitute,
+        hp,
+        max_hp,
+        is_rooted,
+        acc_stage,
+        mist_up,
+        gender,
+        imprisoned_others,
+        mud_sport_up,
+        water_sport_up,
+        used_held_item_id,
+        stockpile_count,
+    }
+}
+
+/// Total width of the `CheckBadMovePreambleInput` buffer
+/// `fw_run_check_bad_move_preamble` reads -- see that export's doc comment
+/// for the full field-by-field offset table this constant is summed from.
+const CBM_PREAMBLE_INPUT_WIDTH: usize = 132;
+
+fn encode_cbm_result(result: CheckBadMoveResult) -> Vec<u8> {
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    match result {
+        CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta } => {
+            buf.push(0); // status: scored
+            buf.extend_from_slice(&rng.value.to_le_bytes());
+            buf.extend_from_slice(&rng.calls.to_le_bytes());
+            buf.push(draw_count);
+            for draw in draws.iter() {
+                buf.extend_from_slice(&draw.ordinal.to_le_bytes());
+                buf.push(draw.site as u8);
+                buf.extend_from_slice(&draw.before.value.to_le_bytes());
+                buf.extend_from_slice(&draw.before.calls.to_le_bytes());
+                buf.extend_from_slice(&draw.after.value.to_le_bytes());
+                buf.extend_from_slice(&draw.after.calls.to_le_bytes());
+                buf.extend_from_slice(&draw.raw_rng_value.to_le_bytes());
+                buf.extend_from_slice(&draw.random_value.to_le_bytes());
+                buf.extend_from_slice(&draw.guessed_ability.to_le_bytes());
+            }
+            buf.extend_from_slice(&score_delta.to_le_bytes());
+        }
+        CheckBadMoveResult::NotYetPorted { effect, move_id } => {
+            buf.push(1); // status: not-yet-ported
+            buf.extend_from_slice(&effect.to_le_bytes());
+            buf.extend_from_slice(&move_id.to_le_bytes());
+        }
+    }
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn encode_cbm_error(message: &str) -> Vec<u8> {
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    buf.push(2); // status: error
+    let message_bytes = message.as_bytes();
+    buf.extend_from_slice(&(message_bytes.len() as u16).to_le_bytes());
+    buf.extend_from_slice(message_bytes);
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// `AI_CheckBadMove` for one move slot against one target, via
+/// `factory_ai_check_bad_move::run_check_bad_move_preamble`. Reads a fixed
+/// `CBM_PREAMBLE_INPUT_WIDTH`-byte buffer at `input_ptr` and returns an
+/// `fw_alloc`'d buffer; the caller must `fw_free(ptr, total_len)`.
+///
+/// The unknown-move-id panic site (`factory_ai_check_bad_move.rs`'s
+/// `run_check_bad_move_preamble`, mirroring TS's own `throw` at
+/// `factoryAiCheckBadMove.ts:1269`) is checked here, BEFORE calling into
+/// factory-core, and crosses as status 2 -- not a WASM trap. The
+/// unknown-species panic inside `next_get_ability_draw` is NOT re-checked
+/// here: `factory_ai_check_bad_move.rs`'s own doc comment establishes it is
+/// unreachable by construction against `gen_tables::SPECIES` (the Factory
+/// rental corpus this boundary's callers exclusively draw `target.species`
+/// from), the same "impossible against generated gen_tables" class
+/// `mon_construction.rs`/`factory_ai_mask.rs` already document -- not a
+/// second TS-observable error site.
+///
+/// # Buffer layout -- input (all integers little-endian, no length prefix:
+/// the width is the compile-time constant `CBM_PREAMBLE_INPUT_WIDTH`, same
+/// convention as `fw_calculate_base_damage`'s `DamageCalcInput`). Every
+/// `opt_*`-decoded field below is one presence byte (`0`/`1`) followed by
+/// its value slot, ignored when the presence byte is `0` (point 2 of the
+/// M5c brief: presence-preserving, so the Rust side's own default paths are
+/// what parity exercises, not TS-side pre-resolved defaults).
+///
+/// ```text
+/// offset  width  field
+/// 0       4      rng.value (u32)
+/// 4       4      rng.calls (u32)
+/// 8       2      move_id (u16)
+/// 10      4      draw_ordinal_start (u32)
+/// -- target: FactoryAiCheckBadMoveTarget, 14..67 --
+/// 14      2      target.species (u16)
+/// 16      1      target.types[0] (u8, damage_calc::TYPE_*)
+/// 17      1      target.types[1] (u8)
+/// 18      3      target.known_ability (opt_u16 -- presence byte + u16;
+///                required-but-nullable in TS, modeled the same as every
+///                other optional field here)
+/// 21      2      target.real_ability (u16)
+/// 23      1      target.speed_stage (u8)
+/// 24      1      target.atk_stage (u8)
+/// 25      1      target.def_stage (u8)
+/// 26      1      target.sp_def_stage (u8)
+/// 27      2      target.acc_stage (opt_u8)
+/// 29      2      target.evasion_stage (opt_u8)
+/// 31      2      target.has_any_status (opt_bool)
+/// 33      2      target.safeguard_up (opt_bool)
+/// 35      2      target.is_confused (opt_bool)
+/// 37      2      target.is_leech_seeded (opt_bool)
+/// 39      2      target.is_asleep (opt_bool)
+/// 41      2      target.is_escape_prevented (opt_bool)
+/// 43      2      target.is_tormented (opt_bool)
+/// 45      2      target.has_perish_song (opt_bool)
+/// 47      2      target.is_nightmared (opt_bool)
+/// 49      2      target.is_foresighted (opt_bool)
+/// 51      2      target.spikes_up (opt_bool)
+/// 53      2      target.target_future_attack_up (opt_bool)
+/// 55      2      target.level (opt_u8)
+/// 57      2      target.sp_atk_stage (opt_u8)
+/// 59      2      target.is_infatuated (opt_bool)
+/// 61      2      target.any_move_disabled (opt_bool)
+/// 63      2      target.any_move_encored (opt_bool)
+/// 65      2      target.gender (opt_u8 -- 0=Male, 1=Female, 2=Genderless)
+/// -- roar target extra field, 67..69 --
+/// 67      2      target.usable_party_mons (opt_u8 -- Roar/Explosion's own
+///                target-side bench count; part of
+///                FactoryAiCheckBadMoveRoarTarget, not the base Target)
+/// -- attacker: FactoryAiCheckBadMoveAttacker, 69..132 --
+/// 69      1      attacker.atk_stage (u8)
+/// 70      1      attacker.def_stage (u8)
+/// 71      2      attacker.speed_stage (opt_u8)
+/// 73      2      attacker.sp_atk_stage (opt_u8)
+/// 75      2      attacker.sp_def_stage (opt_u8)
+/// 77      2      attacker.light_screen_up (opt_bool)
+/// 79      2      attacker.reflect_up (opt_bool)
+/// 81      2      attacker.evasion_stage (opt_u8)
+/// 83      2      attacker.attacker_future_attack_up (opt_bool)
+/// 85      2      attacker.has_focus_energy (opt_bool)
+/// 87      2      attacker.has_curable_status (opt_bool)
+/// 89      2      attacker.current_weather (opt_u8, AI_WEATHER_*)
+/// 91      2      attacker.level (opt_u8)
+/// 93      2      attacker.is_first_turn (opt_u8)
+/// 95      2      attacker.safeguard_up (opt_bool)
+/// 97      2      attacker.is_asleep (opt_bool)
+/// 99      2      attacker.usable_party_mons (opt_u8)
+/// 101     2      attacker.has_substitute (opt_bool)
+/// 103     5      attacker.hp (opt_i32 -- presence byte + i32)
+/// 108     5      attacker.max_hp (opt_i32)
+/// 113     2      attacker.is_rooted (opt_bool)
+/// 115     2      attacker.acc_stage (opt_u8)
+/// 117     2      attacker.mist_up (opt_bool)
+/// 119     2      attacker.gender (opt_u8 -- 0=Male, 1=Female, 2=Genderless)
+/// 121     2      attacker.imprisoned_others (opt_bool)
+/// 123     2      attacker.mud_sport_up (opt_bool)
+/// 125     2      attacker.water_sport_up (opt_bool)
+/// 127     3      attacker.used_held_item_id (opt_u16)
+/// 130     2      attacker.stockpile_count (opt_u8)
+///                width == 132 (CBM_PREAMBLE_INPUT_WIDTH)
+/// ```
+///
+/// # Buffer layout -- output (all integers little-endian)
+///
+/// ```text
+/// offset  width  field
+/// 0       4      total_len (u32)
+/// 4       1      status (u8) -- 0 = scored, 1 = not-yet-ported, 2 = error.
+///
+/// --- status == 0 (scored) ---
+/// 5       4      rng.value (u32)
+/// 9       4      rng.calls (u32)
+/// 13      1      draw_count (u8, 0..=3 -- MAX_CHECK_BAD_MOVE_DRAWS)
+/// 14      87     draws: 3 fixed-width 29-byte records, back to back (only
+///                the first draw_count are meaningful; the rest are
+///                zero-filled and MUST be ignored by the decoder):
+///                  0   4   ordinal (u32)
+///                  4   1   site (u8 -- CheckBadMoveDrawSite's discriminant,
+///                          `factory_ai_check_bad_move.rs`)
+///                  5   4   before.value (u32)
+///                  9   4   before.calls (u32)
+///                  13  4   after.value (u32)
+///                  17  4   after.calls (u32)
+///                  21  4   raw_rng_value (u32)
+///                  25  2   random_value (u16)
+///                  27  2   guessed_ability (u16)
+/// 101     4      score_delta (i32)
+///                total_len == 105
+///
+/// --- status == 1 (not-yet-ported) ---
+/// 5       2      effect (u16)
+/// 7       2      move_id (u16)
+///                total_len == 9
+///
+/// --- status == 2 (error) ---
+/// 5       2      message_len (u16)
+/// 7       message_len   message (utf8 bytes)
+///                total_len == 7 + message_len
+/// ```
+///
+/// # Safety
+/// `input_ptr` must point to at least `CBM_PREAMBLE_INPUT_WIDTH` (132)
+/// readable, initialized bytes encoding a `CheckBadMovePreambleInput` per
+/// the documented layout. Same ownership contract as
+/// `fw_calculate_base_damage`.
+#[no_mangle]
+pub unsafe extern "C" fn fw_run_check_bad_move_preamble(input_ptr: *const u8) -> *mut u8 {
+    // SAFETY: caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, CBM_PREAMBLE_INPUT_WIDTH) };
+    let mut r = ByteReader::new(bytes);
+    let rng = BattleRngState { value: r.u32(), calls: r.u32() };
+    let move_id = r.u16();
+    let draw_ordinal_start = r.u32();
+    let target = decode_cbm_target(&mut r);
+    let roar_usable_party_mons = r.opt_u8();
+    let attacker = decode_cbm_attacker(&mut r);
+    debug_assert_eq!(r.offset, CBM_PREAMBLE_INPUT_WIDTH);
+
+    if gen_tables::MOVES.get(move_id as usize).is_none() {
+        // Message text matches factoryAiCheckBadMove.ts:1269's throw exactly
+        // (`factory-ai-check-bad-move: unknown move ${input.moveId}`) --
+        // error-message parity, the factoryPartyMemberParity.test.ts
+        // precedent (PartyMemberError's Display is written to match TS text
+        // exactly for the same reason).
+        return alloc_and_copy(&encode_cbm_error(&format!(
+            "factory-ai-check-bad-move: unknown move {move_id}"
+        )));
+    }
+
+    let input = CheckBadMovePreambleInput {
+        rng,
+        move_id,
+        target: FactoryAiCheckBadMoveRoarTarget {
+            target,
+            usable_party_mons: roar_usable_party_mons,
+        },
+        attacker,
+        draw_ordinal_start,
+    };
+    let result = factory_ai_check_bad_move::run_check_bad_move_preamble(input);
+    alloc_and_copy(&encode_cbm_result(result))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1712,6 +2320,436 @@ mod tests {
         // SAFETY: freeing the exact (ptr, 133) pair fw_run_turn1_rng_ledger returned.
         unsafe {
             fw_free(ptr, (TURN_RNG_STEP_WIDTH * TURN_RNG_STEP_COUNT) as u32);
+        }
+    }
+
+    // === factory_ai_mask / factory_ai_check_bad_move surface (M5c) ==========
+
+    #[test]
+    fn fw_select_factory_ai_mask_matches_native_ok_case() {
+        let native = factory_ai_mask::select_factory_ai_mask(FactoryAiMaskSelectionInput {
+            level_mode: 0,
+            battle_mode: 0,
+            factory_win_streak: 21,
+            trainer_opponent_id: 299,
+        })
+        .unwrap();
+        let ptr = fw_select_factory_ai_mask(0, 0, 21, 299);
+        // SAFETY: `ptr` was just returned by fw_select_factory_ai_mask as an
+        // fw_alloc'd buffer; total_len lives in the first 4 bytes.
+        let bytes = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0) as usize;
+            std::slice::from_raw_parts(ptr, total_len).to_vec()
+        };
+        assert_eq!(bytes[4], 0, "status: ok");
+        assert_eq!(bytes[5], native.mask);
+        assert_eq!(bytes[6], u8::from(native.receipt.is_frontier_brain));
+        assert_eq!(
+            read_u32(&bytes, 7),
+            native.receipt.frontier_stages_per_challenge
+        );
+        assert_eq!(
+            bytes[11],
+            u8::from(native.receipt.challenge_number.is_some())
+        );
+        assert_eq!(
+            read_u32(&bytes, 12),
+            native.receipt.challenge_number.unwrap_or(0)
+        );
+        assert_eq!(bytes[16], native.receipt.evaluation_count);
+        for i in 0..native.receipt.evaluation_count as usize {
+            let e = native.receipt.evaluations[i];
+            assert_eq!(bytes[17 + i * 2], e.branch as u8, "evaluation {i} branch");
+            assert_eq!(
+                bytes[18 + i * 2],
+                u8::from(e.matched),
+                "evaluation {i} matched"
+            );
+        }
+        assert_eq!(bytes[27], native.receipt.branch as u8);
+        assert_eq!(bytes.len(), 28);
+        // SAFETY: freeing the exact (ptr, total_len) pair returned above.
+        unsafe {
+            fw_free(ptr, bytes.len() as u32);
+        }
+    }
+
+    #[test]
+    fn fw_select_factory_ai_mask_reports_all_four_error_sites() {
+        let cases: [(u32, u32, u32, u32, u8, u32); 4] = [
+            (3, 0, 0, 0, FACTORY_AI_MASK_ERROR_LEVEL_MODE, 3),
+            (0, 2, 0, 0, FACTORY_AI_MASK_ERROR_BATTLE_MODE, 2),
+            (
+                0,
+                0,
+                0x1_0000,
+                0,
+                FACTORY_AI_MASK_ERROR_FACTORY_WIN_STREAK,
+                0x1_0000,
+            ),
+            (
+                0,
+                0,
+                0,
+                0x1_0000,
+                FACTORY_AI_MASK_ERROR_TRAINER_OPPONENT_ID,
+                0x1_0000,
+            ),
+        ];
+        for (level_mode, battle_mode, factory_win_streak, trainer_opponent_id, kind, value) in cases
+        {
+            let ptr = fw_select_factory_ai_mask(
+                level_mode,
+                battle_mode,
+                factory_win_streak,
+                trainer_opponent_id,
+            );
+            // SAFETY: fixed 10-byte error buffer per fw_select_factory_ai_mask's doc comment.
+            let bytes = unsafe { std::slice::from_raw_parts(ptr, 10).to_vec() };
+            assert_eq!(bytes.len(), 10);
+            assert_eq!(bytes[4], 1, "status: error, case {kind}");
+            assert_eq!(bytes[5], kind, "error_kind, case {kind}");
+            assert_eq!(read_u32(&bytes, 6), value, "value, case {kind}");
+            // SAFETY: freeing the exact (ptr, 10) pair returned above.
+            unsafe {
+                fw_free(ptr, 10);
+            }
+        }
+    }
+
+    fn encode_opt_u8(buf: &mut Vec<u8>, v: Option<u8>) {
+        buf.push(u8::from(v.is_some()));
+        buf.push(v.unwrap_or(0));
+    }
+    fn encode_opt_bool(buf: &mut Vec<u8>, v: Option<bool>) {
+        encode_opt_u8(buf, v.map(u8::from));
+    }
+    fn encode_opt_u16(buf: &mut Vec<u8>, v: Option<u16>) {
+        buf.push(u8::from(v.is_some()));
+        buf.extend_from_slice(&v.unwrap_or(0).to_le_bytes());
+    }
+    fn encode_opt_i32(buf: &mut Vec<u8>, v: Option<i32>) {
+        buf.push(u8::from(v.is_some()));
+        buf.extend_from_slice(&v.unwrap_or(0).to_le_bytes());
+    }
+    fn encode_gender_for_test(g: FactoryAiMonGender) -> u8 {
+        match g {
+            FactoryAiMonGender::Male => 0,
+            FactoryAiMonGender::Female => 1,
+            FactoryAiMonGender::Genderless => 2,
+        }
+    }
+
+    fn encode_cbm_target_for_test(buf: &mut Vec<u8>, t: &FactoryAiCheckBadMoveTarget) {
+        buf.extend_from_slice(&t.species.to_le_bytes());
+        buf.push(t.types[0]);
+        buf.push(t.types[1]);
+        encode_opt_u16(buf, t.known_ability);
+        buf.extend_from_slice(&t.real_ability.to_le_bytes());
+        buf.push(t.speed_stage);
+        buf.push(t.atk_stage);
+        buf.push(t.def_stage);
+        buf.push(t.sp_def_stage);
+        encode_opt_u8(buf, t.acc_stage);
+        encode_opt_u8(buf, t.evasion_stage);
+        encode_opt_bool(buf, t.has_any_status);
+        encode_opt_bool(buf, t.safeguard_up);
+        encode_opt_bool(buf, t.is_confused);
+        encode_opt_bool(buf, t.is_leech_seeded);
+        encode_opt_bool(buf, t.is_asleep);
+        encode_opt_bool(buf, t.is_escape_prevented);
+        encode_opt_bool(buf, t.is_tormented);
+        encode_opt_bool(buf, t.has_perish_song);
+        encode_opt_bool(buf, t.is_nightmared);
+        encode_opt_bool(buf, t.is_foresighted);
+        encode_opt_bool(buf, t.spikes_up);
+        encode_opt_bool(buf, t.target_future_attack_up);
+        encode_opt_u8(buf, t.level);
+        encode_opt_u8(buf, t.sp_atk_stage);
+        encode_opt_bool(buf, t.is_infatuated);
+        encode_opt_bool(buf, t.any_move_disabled);
+        encode_opt_bool(buf, t.any_move_encored);
+        encode_opt_u8(buf, t.gender.map(encode_gender_for_test));
+    }
+
+    fn encode_cbm_attacker_for_test(buf: &mut Vec<u8>, a: &FactoryAiCheckBadMoveAttacker) {
+        buf.push(a.atk_stage);
+        buf.push(a.def_stage);
+        encode_opt_u8(buf, a.speed_stage);
+        encode_opt_u8(buf, a.sp_atk_stage);
+        encode_opt_u8(buf, a.sp_def_stage);
+        encode_opt_bool(buf, a.light_screen_up);
+        encode_opt_bool(buf, a.reflect_up);
+        encode_opt_u8(buf, a.evasion_stage);
+        encode_opt_bool(buf, a.attacker_future_attack_up);
+        encode_opt_bool(buf, a.has_focus_energy);
+        encode_opt_bool(buf, a.has_curable_status);
+        encode_opt_u8(buf, a.current_weather);
+        encode_opt_u8(buf, a.level);
+        encode_opt_u8(buf, a.is_first_turn);
+        encode_opt_bool(buf, a.safeguard_up);
+        encode_opt_bool(buf, a.is_asleep);
+        encode_opt_u8(buf, a.usable_party_mons);
+        encode_opt_bool(buf, a.has_substitute);
+        encode_opt_i32(buf, a.hp);
+        encode_opt_i32(buf, a.max_hp);
+        encode_opt_bool(buf, a.is_rooted);
+        encode_opt_u8(buf, a.acc_stage);
+        encode_opt_bool(buf, a.mist_up);
+        encode_opt_u8(buf, a.gender.map(encode_gender_for_test));
+        encode_opt_bool(buf, a.imprisoned_others);
+        encode_opt_bool(buf, a.mud_sport_up);
+        encode_opt_bool(buf, a.water_sport_up);
+        encode_opt_u16(buf, a.used_held_item_id);
+        encode_opt_u8(buf, a.stockpile_count);
+    }
+
+    fn encode_cbm_preamble_input_for_test(input: &CheckBadMovePreambleInput) -> Vec<u8> {
+        let mut buf: Vec<u8> = Vec::with_capacity(CBM_PREAMBLE_INPUT_WIDTH);
+        buf.extend_from_slice(&input.rng.value.to_le_bytes());
+        buf.extend_from_slice(&input.rng.calls.to_le_bytes());
+        buf.extend_from_slice(&input.move_id.to_le_bytes());
+        buf.extend_from_slice(&input.draw_ordinal_start.to_le_bytes());
+        encode_cbm_target_for_test(&mut buf, &input.target.target);
+        encode_opt_u8(&mut buf, input.target.usable_party_mons);
+        encode_cbm_attacker_for_test(&mut buf, &input.attacker);
+        assert_eq!(buf.len(), CBM_PREAMBLE_INPUT_WIDTH);
+        buf
+    }
+
+    fn empty_cbm_target_for_test(
+        species: u16,
+        types: [u8; 2],
+        real_ability: u16,
+    ) -> FactoryAiCheckBadMoveTarget {
+        FactoryAiCheckBadMoveTarget {
+            species,
+            types,
+            known_ability: None,
+            real_ability,
+            speed_stage: 6,
+            atk_stage: 6,
+            def_stage: 6,
+            sp_def_stage: 6,
+            acc_stage: None,
+            evasion_stage: None,
+            has_any_status: None,
+            safeguard_up: None,
+            is_confused: None,
+            is_leech_seeded: None,
+            is_asleep: None,
+            is_escape_prevented: None,
+            is_tormented: None,
+            has_perish_song: None,
+            is_nightmared: None,
+            is_foresighted: None,
+            spikes_up: None,
+            target_future_attack_up: None,
+            level: None,
+            sp_atk_stage: None,
+            is_infatuated: None,
+            any_move_disabled: None,
+            any_move_encored: None,
+            gender: None,
+        }
+    }
+
+    fn empty_cbm_attacker_for_test() -> FactoryAiCheckBadMoveAttacker {
+        FactoryAiCheckBadMoveAttacker {
+            atk_stage: 6,
+            def_stage: 6,
+            speed_stage: None,
+            sp_atk_stage: None,
+            sp_def_stage: None,
+            light_screen_up: None,
+            reflect_up: None,
+            evasion_stage: None,
+            attacker_future_attack_up: None,
+            has_focus_energy: None,
+            has_curable_status: None,
+            current_weather: None,
+            level: None,
+            is_first_turn: None,
+            safeguard_up: None,
+            is_asleep: None,
+            usable_party_mons: None,
+            has_substitute: None,
+            hp: None,
+            max_hp: None,
+            is_rooted: None,
+            acc_stage: None,
+            mist_up: None,
+            gender: None,
+            imprisoned_others: None,
+            mud_sport_up: None,
+            water_sport_up: None,
+            used_held_item_id: None,
+            stockpile_count: None,
+        }
+    }
+
+    fn decode_cbm_draw_for_test(
+        bytes: &[u8],
+        off: usize,
+    ) -> (u32, u8, u32, u32, u32, u32, u32, u16, u16) {
+        (
+            read_u32(bytes, off),
+            bytes[off + 4],
+            read_u32(bytes, off + 5),
+            read_u32(bytes, off + 9),
+            read_u32(bytes, off + 13),
+            read_u32(bytes, off + 17),
+            read_u32(bytes, off + 21),
+            u16::from_le_bytes(bytes[off + 25..off + 27].try_into().unwrap()),
+            u16::from_le_bytes(bytes[off + 27..off + 29].try_into().unwrap()),
+        )
+    }
+
+    #[test]
+    fn fw_run_check_bad_move_preamble_matches_native_two_draw_case() {
+        // Mirrors factory_ai_check_bad_move.rs's own
+        // non_immune_no_table_entry_move_draws_exactly_two_and_scores_zero
+        // (MOVE_SURF=57 vs MAROWAK [GROUND,GROUND]): MAROWAK's two distinct
+        // unknown abilities (69 ROCK_HEAD / 31 LIGHTNING_ROD) force a genuine
+        // advance_rng_value draw at both the negates-type and soundproof
+        // preamble call sites (module doc comment's "never caches" quirk).
+        const MAROWAK: u16 = 105;
+        const ABILITY_ROCK_HEAD: u16 = 69;
+        const TYPE_GROUND: u8 = 4;
+        const RNG_SEED: u32 = 249_678_687;
+
+        let t = empty_cbm_target_for_test(MAROWAK, [TYPE_GROUND, TYPE_GROUND], ABILITY_ROCK_HEAD);
+        let input = CheckBadMovePreambleInput {
+            rng: BattleRngState { value: RNG_SEED, calls: 0 },
+            move_id: 57,
+            target: FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: None },
+            attacker: empty_cbm_attacker_for_test(),
+            draw_ordinal_start: 1,
+        };
+        let native = factory_ai_check_bad_move::run_check_bad_move_preamble(input);
+        let CheckBadMoveResult::Scored {
+            rng: native_rng,
+            draws: native_draws,
+            draw_count: native_draw_count,
+            score_delta: native_score_delta,
+        } = native
+        else {
+            panic!("expected Scored");
+        };
+        assert_eq!(native_draw_count, 2);
+
+        let buf = encode_cbm_preamble_input_for_test(&input);
+        // SAFETY: `buf` is exactly CBM_PREAMBLE_INPUT_WIDTH bytes, matching
+        // fw_run_check_bad_move_preamble's documented input layout.
+        let ptr = unsafe { fw_run_check_bad_move_preamble(buf.as_ptr()) };
+        // SAFETY: `ptr` was just returned as an fw_alloc'd buffer; total_len
+        // lives in the first 4 bytes.
+        let bytes = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0) as usize;
+            std::slice::from_raw_parts(ptr, total_len).to_vec()
+        };
+
+        assert_eq!(bytes[4], 0, "status: scored");
+        assert_eq!(read_u32(&bytes, 5), native_rng.value);
+        assert_eq!(read_u32(&bytes, 9), native_rng.calls);
+        assert_eq!(bytes[13], native_draw_count);
+        for (i, expected) in native_draws
+            .iter()
+            .enumerate()
+            .take(native_draw_count as usize)
+        {
+            let (ordinal, site, before_v, before_c, after_v, after_c, raw, random, guessed) =
+                decode_cbm_draw_for_test(&bytes, 14 + i * 29);
+            assert_eq!(ordinal, expected.ordinal, "draw {i} ordinal");
+            assert_eq!(site, expected.site as u8, "draw {i} site");
+            assert_eq!(before_v, expected.before.value, "draw {i} before.value");
+            assert_eq!(before_c, expected.before.calls, "draw {i} before.calls");
+            assert_eq!(after_v, expected.after.value, "draw {i} after.value");
+            assert_eq!(after_c, expected.after.calls, "draw {i} after.calls");
+            assert_eq!(raw, expected.raw_rng_value, "draw {i} raw_rng_value");
+            assert_eq!(random, expected.random_value, "draw {i} random_value");
+            assert_eq!(
+                guessed, expected.guessed_ability,
+                "draw {i} guessed_ability"
+            );
+        }
+        assert_eq!(
+            i32::from_le_bytes(bytes[101..105].try_into().unwrap()),
+            native_score_delta
+        );
+        assert_eq!(bytes.len(), 105);
+
+        // SAFETY: freeing the exact (ptr, total_len) pair returned above.
+        unsafe {
+            fw_free(ptr, bytes.len() as u32);
+        }
+    }
+
+    #[test]
+    fn fw_run_check_bad_move_preamble_type_immune_zero_draws_matches_native() {
+        // MOVE_THUNDERBOLT=85 vs MAROWAK [GROUND,GROUND]: Electric vs
+        // Ground/Ground is 0x, Score_Minus10 before any ability draw.
+        const MAROWAK: u16 = 105;
+        const ABILITY_ROCK_HEAD: u16 = 69;
+        const TYPE_GROUND: u8 = 4;
+        const RNG_SEED: u32 = 249_678_687;
+
+        let t = empty_cbm_target_for_test(MAROWAK, [TYPE_GROUND, TYPE_GROUND], ABILITY_ROCK_HEAD);
+        let input = CheckBadMovePreambleInput {
+            rng: BattleRngState { value: RNG_SEED, calls: 0 },
+            move_id: 85,
+            target: FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: None },
+            attacker: empty_cbm_attacker_for_test(),
+            draw_ordinal_start: 1,
+        };
+        let buf = encode_cbm_preamble_input_for_test(&input);
+        // SAFETY: `buf` is exactly CBM_PREAMBLE_INPUT_WIDTH bytes.
+        let ptr = unsafe { fw_run_check_bad_move_preamble(buf.as_ptr()) };
+        // SAFETY: `ptr` was just returned as an fw_alloc'd buffer.
+        let bytes = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0) as usize;
+            std::slice::from_raw_parts(ptr, total_len).to_vec()
+        };
+        assert_eq!(bytes[4], 0, "status: scored");
+        assert_eq!(read_u32(&bytes, 5), RNG_SEED, "rng untouched");
+        assert_eq!(read_u32(&bytes, 9), 0, "rng.calls untouched");
+        assert_eq!(bytes[13], 0, "draw_count");
+        assert_eq!(i32::from_le_bytes(bytes[101..105].try_into().unwrap()), -10);
+        assert_eq!(bytes.len(), 105);
+        // SAFETY: freeing the exact (ptr, total_len) pair returned above.
+        unsafe {
+            fw_free(ptr, bytes.len() as u32);
+        }
+    }
+
+    #[test]
+    fn fw_run_check_bad_move_preamble_unknown_move_id_is_an_error_not_a_trap() {
+        const MAROWAK: u16 = 105;
+        const ABILITY_ROCK_HEAD: u16 = 69;
+        const TYPE_GROUND: u8 = 4;
+        let t = empty_cbm_target_for_test(MAROWAK, [TYPE_GROUND, TYPE_GROUND], ABILITY_ROCK_HEAD);
+        let input = CheckBadMovePreambleInput {
+            rng: BattleRngState { value: 1, calls: 0 },
+            move_id: 9999,
+            target: FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: None },
+            attacker: empty_cbm_attacker_for_test(),
+            draw_ordinal_start: 1,
+        };
+        let buf = encode_cbm_preamble_input_for_test(&input);
+        // SAFETY: `buf` is exactly CBM_PREAMBLE_INPUT_WIDTH bytes.
+        let ptr = unsafe { fw_run_check_bad_move_preamble(buf.as_ptr()) };
+        // SAFETY: `ptr` was just returned as an fw_alloc'd buffer.
+        let bytes = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0) as usize;
+            std::slice::from_raw_parts(ptr, total_len).to_vec()
+        };
+        assert_eq!(bytes[4], 2, "status: error");
+        let message_len = u16::from_le_bytes(bytes[5..7].try_into().unwrap()) as usize;
+        let message = std::str::from_utf8(&bytes[7..7 + message_len]).unwrap();
+        assert_eq!(message, "factory-ai-check-bad-move: unknown move 9999");
+        // SAFETY: freeing the exact (ptr, total_len) pair returned above.
+        unsafe {
+            fw_free(ptr, bytes.len() as u32);
         }
     }
 }
