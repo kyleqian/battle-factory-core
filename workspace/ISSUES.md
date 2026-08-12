@@ -1811,6 +1811,24 @@ live callback family is `ply_vol` at 16; command dispatch and note families
 also remain unresolved. No observed duration, pointer identity, service cost,
 or clock wiring landed. Evidence: `docs/issue55-m4a-pan-v1.md`.
 
+**2026-08-11 `ply_vol` callback-family closure:** additive OFF packets capture
+only track index, normalized command source, parameter byte, and pre-callback
+flags at the exact compiled `ply_vol` entry. Two fresh serial
+anchor/LILIANA/legal-varied captures are byte-identical (`0d37f852…` /
+`9638d5f9…` / `72fbf177…`) and join all **113/113** frozen rows. Across the
+**108/108** one-pass rows there are exactly **16/16** callbacks: anchor
+**2** in one row, LILIANA **13** across eleven, and legal-varied **1** in one.
+
+All 16 select the complete `ply_vol -> ld_r3_tp_adr_i -> chk_adr_r2`
+GamePak command-byte fast-accept route at **79 cycles** each. The pure reducer
+pins the 18-byte callback, 10-byte loader, and transitive guard from source/ELF
+and fails closed outside normalized song offsets and u8 callback inputs.
+Joined source-exact one-pass components now span **456–1413** cycles (73
+totals). Complete MPlay costs remain **5 exact / 108 null**. The remaining
+discriminators are command decode/jump-table dispatch and note callback
+families. No observed duration, pointer identity, service cost, or clock
+wiring landed. Evidence: `docs/issue55-m4a-vol-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

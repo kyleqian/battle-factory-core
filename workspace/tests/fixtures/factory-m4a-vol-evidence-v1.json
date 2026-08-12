@@ -1,0 +1,1395 @@
+{
+  "schema": "factory-m4a-vol-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceAndElf": {
+    "source": [
+      {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "969-979",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      }
+    ],
+    "compiledRegions": [
+      {
+        "role": "ply_vol callback",
+        "start": 137230704,
+        "end": 137230722,
+        "sha256": "11defa40b26dd10d50fa96d8d32342e53b9a1cefa69eefe025293140837d551c",
+        "bytes": 18
+      },
+      {
+        "role": "transitive chk_adr_r2",
+        "start": 137230438,
+        "end": 137230460,
+        "sha256": "dd3e100af89b39dcaacbb89ba15c4f6458c374e4a238d4117c84f918e773d4c1",
+        "bytes": 22
+      }
+    ],
+    "songRoleBytes": {
+      "battle-factory-bgm-track-1": 316,
+      "battle-factory-bgm-track-2": 910,
+      "battle-factory-bgm-track-3": 933,
+      "battle-factory-bgm-track-4": 117,
+      "battle-factory-bgm-track-5": 1576,
+      "battle-factory-bgm-track-6": 1634,
+      "battle-factory-bgm-track-7": 1328,
+      "battle-factory-bgm-track-8": 647,
+      "battle-factory-bgm-track-9": 347
+    },
+    "timingClasses": {
+      "sequentialRomThumbHalfword": 2,
+      "takenPipelineRefillPremium": 6,
+      "alignedEwramWordPremium": 2,
+      "gamepakByteReadTotal": 9
+    }
+  },
+  "capture": {
+    "boundary": "ply_vol entry",
+    "exactCaller": "MPlayMain._081DD90C jump-table dispatch",
+    "runtimeCompiledPc": "0x082df974",
+    "state": "track index, normalized command source, parameter byte, and flags byte",
+    "freshRunsPerCase": 2,
+    "repeatability": "byte-identical full packet"
+  },
+  "frozenInputs": {
+    "packets": {
+      "anchor": "0d37f852b4480be03b48ada182d88d5103f08b6d3520e5112ad15ca314513a92",
+      "liliana": "9638d5f930147adf4dfc6b81528bf0e92ee71bc3bd9727a2661849443e0bc87b",
+      "factory-varied": "72fbf17714f20c0f2226dfa9384ac92b2455892c0dfeb62a54a53f8dd52dfa37"
+    },
+    "panEvidence": "tests/fixtures/factory-m4a-pan-evidence-v1.json"
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "onePassRows": 108,
+    "zeroPassRows": 5,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "byCase": {
+      "anchor": {
+        "rows": 52,
+        "onePass": 49,
+        "zeroPass": 3,
+        "callbackRows": 1,
+        "callbacks": 2
+      },
+      "liliana": {
+        "rows": 31,
+        "onePass": 30,
+        "zeroPass": 1,
+        "callbackRows": 11,
+        "callbacks": 13
+      },
+      "factory-varied": {
+        "rows": 30,
+        "onePass": 29,
+        "zeroPass": 1,
+        "callbackRows": 1,
+        "callbacks": 1
+      }
+    },
+    "rowsWithVolCallbacks": 13,
+    "volCallbacks": 16,
+    "callbackFamilySelectionCensus": {
+      "ply_bend": 4,
+      "ply_pan": 13,
+      "ply_patt": 1,
+      "ply_pend": 1,
+      "ply_voice": 2,
+      "ply_vol": 16
+    },
+    "callbackRouteCounts": {
+      "gamepak-command-byte-fast-accept": 16
+    },
+    "exactVolRowsWithinOnePass": 108,
+    "nullVolRowsWithinOnePass": 0,
+    "exactVolSourceCycleRange": {
+      "min": 0,
+      "max": 158,
+      "distinct": 3
+    },
+    "knownComponentSourceCycleRange": {
+      "min": 456,
+      "max": 1413,
+      "distinct": 73
+    },
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 682,
+      "knownComponentsSourceCycles": 682,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d62505501da61610c3753911c10872af0d776469de37d52fb4aed38184bcd574",
+      "case": "anchor",
+      "passCount": 0,
+      "volCallbackCount": 0,
+      "volSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "d80949626f7d610dd95ab6d54680becc527daefe8ef71394d26eb0a115752b26",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 588,
+      "knownComponentsSourceCycles": 588,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0729091bc1e3ad697c461941af75e6d438ec30372e7c9e0bd545e8e2635da7a4",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 574,
+      "knownComponentsSourceCycles": 574,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "37d325c692fed6c90f37b6d85db511db69ea906ce036771091ba2ac0b7d5aa38",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 574,
+      "knownComponentsSourceCycles": 574,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "bdae7bcc3277dec315f1fbed191bcaa63a4c4f59a9d61736fc579345e2414bd4",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 574,
+      "knownComponentsSourceCycles": 574,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "dfaaad8c85c3beeea3c6143490acf32783a078f19fc18d823e5916bf89a71722",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 618,
+      "knownComponentsSourceCycles": 618,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0c6175ca663144388d7459a968f09b606dfb425af534e088879482a0018deddf",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 606,
+      "knownComponentsSourceCycles": 606,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cb407e1a4662a4f5f073af67d96959c9c0626d395efdcbcd0a7812e089485b17",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 691,
+      "knownComponentsSourceCycles": 691,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e0c04b9ed2e2f89b44aa3de1fb6cee0baf3e78a755ef6ac5aebbcc610aca65df",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 562,
+      "knownComponentsSourceCycles": 562,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c1e6393f827465170da7bdec72e9a9fcdb194a7986970e93e44c7a9647af1311",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 570,
+      "knownComponentsSourceCycles": 570,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d839224c061a4ba5a402a53d9b60f57d00622df6aec2c820b274a1b3fc1d8832",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 556,
+      "knownComponentsSourceCycles": 556,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ac6b9c19ebb97961028f0f154ef16973629d3997fd81fa26a34a11afd18894c9",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 649,
+      "knownComponentsSourceCycles": 649,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "eb175b21ede38444fddd6937fcaea596fbdb3ede05a11d5f567e55a5801831f2",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 631,
+      "knownComponentsSourceCycles": 631,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "419ca11cd896f34c4da4dba39df3c8cc23535f973a97349def7cd9bc34788fe1",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 647,
+      "knownComponentsSourceCycles": 647,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3c06f68e3266884e6e4daa37edd33fb207cf58ee48f2593d007c743bdfbdc9b2",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 613,
+      "knownComponentsSourceCycles": 613,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "59e038686268dd7b3ebdf9bbec69d4f9f5dd7fb6b5b5becf1138aa5dd1d42371",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 484,
+      "knownComponentsSourceCycles": 484,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 484,
+      "knownComponentsSourceCycles": 484,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3047a6f1087fc70c3a7149d0270696fb5c5cd5123d490e2965f7895d15a1c095",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "255c03651d8a4cbf9f2443d33ba4845705669990fab93275ecbcb7542902a626",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 616,
+      "knownComponentsSourceCycles": 616,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "89291726e11be6c56885a0b7329ea9203c1ffa918a219705a6625bb67c72cdf0",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 622,
+      "knownComponentsSourceCycles": 622,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cf3b3e07813298ecee91fb8b4d8029bf606acae95cc9b472d72e79cee2bb298e",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "f16801e198aa1527e914c55e4a5112ac090a26e4c52e4d69f9298da256976f68",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 632,
+      "knownComponentsSourceCycles": 632,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c74a4c4f9a8c20643c1ea405103a8fd88aff1c6a1456c8bcce02fc1a4715ecca",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 598,
+      "knownComponentsSourceCycles": 598,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "548288c96af84b9558a6555c3de77cd6cdf391b2a3945481600ca090ff4a5e97",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 865,
+      "knownComponentsSourceCycles": 865,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 2,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept",
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 158,
+      "priorKnownComponentsSourceCycles": 1255,
+      "knownComponentsSourceCycles": 1413,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "67b9353798107ef023a18831779c4b6f2dd85ccab17b3fbc58402f0839f53311",
+      "case": "anchor",
+      "passCount": 0,
+      "volCallbackCount": 0,
+      "volSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "c91e5411bfea4d985d55b19ffa294b4c45e0fc52af7a15e6f05c1411e96d941a",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 667,
+      "knownComponentsSourceCycles": 667,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "060a76b8417cd9757e936288ba5a65e72ff4fa33eec284918387ee30cc28c437",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "8d35b47fb1022e5821f26a1d153751a5582712b05d1fcb8b3d50d5a014837744",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "efd66e8983ead21baf57cc16d0ac553583c3267c6bf39ea2b14b6fbdd98e32f2",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4934593587b11e18fe34e1c43390b5d795c8e6f6ed387b21ef954ee940f2c444",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 596,
+      "knownComponentsSourceCycles": 596,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "59b1018599edb4f9bff79a13a5e6d16d07908dd316b4acb17c1a45cfe0e445b9",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 576,
+      "knownComponentsSourceCycles": 576,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cb6ddd8b64388ff751bcefb23bc9c7236c62d870334f981ab8f1e4b6ba127d3e",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 661,
+      "knownComponentsSourceCycles": 661,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "5521ab0bb6378f01e0d54d29ac2e1c7c9ce30e2606cf14215c23f216647939ed",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 546,
+      "knownComponentsSourceCycles": 546,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "800dde1a43898fc7280bcb0536e69cc352b582812a7c5138fd839245d7f469f6",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 562,
+      "knownComponentsSourceCycles": 562,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "f4ed0055d961b54d23c8df572d30e3aa5603b3e85e3d46f3a0021b47ea1d41b7",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 534,
+      "knownComponentsSourceCycles": 534,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "8b0eda86230f7ad57262b22b34b7d919a544ac9077daabca0b5e81f53340f6b6",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 627,
+      "knownComponentsSourceCycles": 627,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "7e74daf0955c7a3e6dcc506148a45c20fad9ce02b8a34638524623454d0ee74c",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 520,
+      "knownComponentsSourceCycles": 520,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "8386b4b2bc0a096d08a9851ee1b475f6d51b660f700860a024225a069b81c967",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 605,
+      "knownComponentsSourceCycles": 605,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "fc6f8f357f9ed2783aca331523ebd94ded651d3c9661c664aeba60d7234e3071",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 585,
+      "knownComponentsSourceCycles": 585,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2b1c79f0b21a6010f65593f4978a30424f82d9bfc5bb8b8710f0951a1891351e",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 456,
+      "knownComponentsSourceCycles": 456,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e5bf9a67aa79e9f6031f3a3bd2ab50a9020bab5b9364ccb34678e0344b74e7a8",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 456,
+      "knownComponentsSourceCycles": 456,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d3c9d0785e0a58484caeeb439cb89bddcdd7cdecffd4f81b4dbeae34b9c71fa9",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "aef35eb97f0069bb2e27e5742817014d69a1073c6c7abeb2bb89553061c8050a",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "03202c202e5b57dff7d0f945897ce9c3afa917cd492a246b61239e0c2a8fa115",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "89a12bb237ef407a548a70da2d4c0516d94e169b6681c7bd640b21b33e49853a",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "30437cd1bbff1f6f347091289a8bb1a8e3dffb43f7eed3c3846d0fc557490ff1",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 576,
+      "knownComponentsSourceCycles": 576,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "fa61b3d178f4d921fd1403d2eb158970e8c2c42b88ae835b17f50f62a735d121",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 534,
+      "knownComponentsSourceCycles": 534,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "f2ced1bcd774a3695b298fa7589f0b37a7e917f365e03af48bcfa550bb310719",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 815,
+      "knownComponentsSourceCycles": 815,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "case": "anchor",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 553,
+      "knownComponentsSourceCycles": 553,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "53f5ebb6bb07d31bff644e15e162df2d88ca06b515d00d157d88075142903950",
+      "case": "anchor",
+      "passCount": 0,
+      "volCallbackCount": 0,
+      "volSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "75050563b447f4df6078afc684b2103f401de44e0af83a955615f733e6791f4a",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 822,
+      "knownComponentsSourceCycles": 822,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "de24421aaaa62bc671b7954b161eec35f97343f393722c2bf247ed37d21df6db",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 568,
+      "knownComponentsSourceCycles": 568,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "04e627717fe727b96245a2f4ee30034752d39838a4fe1e4f04c3238087c5f97f",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 584,
+      "knownComponentsSourceCycles": 584,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c360a4950dfd3a22f12068912a1e1a3937bce17b006ca81d2ca1bc9f2e4b3185",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 596,
+      "knownComponentsSourceCycles": 596,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "67dcf01479ae763df89833827da03bd67ea8c2b2464b1e91acf12fa387454d37",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 782,
+      "knownComponentsSourceCycles": 782,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 734,
+      "knownComponentsSourceCycles": 734,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "7e349fb8f37b31fe407521166341e453e82ec5579cd0df5e735f367e7f8940ff",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 751,
+      "knownComponentsSourceCycles": 751,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "136219c3db5a06a580f1aa93008a8266b67b21f54a53b59af9725013d68478f2",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "254105d0e300044129ce403e43cd0c3e9ef937dc5966e03678aeffd5b4b98e28",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 624,
+      "knownComponentsSourceCycles": 624,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "48e609796c61993b98ce4aed1fa69eb8190f01f114bde9eb392f7cb9c629d981",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 739,
+      "knownComponentsSourceCycles": 739,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4098a02e3f0a922f3f402061333f5320154be04365649f44ab33db3d406935b6",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 689,
+      "knownComponentsSourceCycles": 689,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 2,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept",
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 158,
+      "priorKnownComponentsSourceCycles": 752,
+      "knownComponentsSourceCycles": 910,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "574a5e1547725c9685e4a84569319902188d205a7f3b1c6f3c20c9f25ad33d20",
+      "case": "liliana",
+      "passCount": 0,
+      "volCallbackCount": 0,
+      "volSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "6a88a5d761ef2e24daf4c73eb5da29c8413d1066dc261a4878e57a022db33f1a",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 765,
+      "knownComponentsSourceCycles": 844,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "de8497c08457a8bfcd785ac38eb994e6c6ad6146a46e135b95fc9329bffb8f2d",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 687,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 616,
+      "knownComponentsSourceCycles": 695,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0dbdc79bf393698e16fffbb04256067e2193fb6ae71827d5b9451d22dc471808",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 745,
+      "knownComponentsSourceCycles": 824,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2efd8904f380af9da21b782a50a355dd43c8258ca7005b8b237d84b84a743a3a",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 695,
+      "knownComponentsSourceCycles": 695,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 588,
+      "knownComponentsSourceCycles": 667,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d4eafd4be04ffbc4a1a5d9a999c46951cf37e4d3455f53d73961e2c4d863c0b4",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 650,
+      "knownComponentsSourceCycles": 729,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e7fe29bbc43e4e61a49403e7dbb44933dfef2649e6bdcc987b7c658b5e947809",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 636,
+      "knownComponentsSourceCycles": 715,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 735,
+      "knownComponentsSourceCycles": 814,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "22c5d662c36c4bd2b6ba595410f8ba4c148d1bfb6bffaadb74fb52c7517dacd8",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 729,
+      "knownComponentsSourceCycles": 808,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cec9c411d0fd7a5187232111dfe4f540ea44cc33c6d8892daa58bb056fe45123",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 707,
+      "knownComponentsSourceCycles": 707,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 2,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept",
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 158,
+      "priorKnownComponentsSourceCycles": 782,
+      "knownComponentsSourceCycles": 940,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "730d5b961495f425916a9ef802b17018b2256eef4dfc38576f947c2d0ebc239d",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 751,
+      "knownComponentsSourceCycles": 751,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "aa020fe7e7f2649b70633275a7eb7426a5798e75ee67da6606665aeceafd0c4a",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "6854eca211190cad143f165b2c43e6011d7fbba5c910cad932e679c0a933452a",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 616,
+      "knownComponentsSourceCycles": 616,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "898a71ab6287958bf7ee9f5c76a2487e7087dace83615e40ef8bf4ce3fe998bf",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 745,
+      "knownComponentsSourceCycles": 745,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "9808dfff65029cdd2806b77f0c2c5f9617be333e81c3e0c055a4590116a86e3f",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 602,
+      "knownComponentsSourceCycles": 602,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "case": "liliana",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 610,
+      "knownComponentsSourceCycles": 610,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "72bca7e9ae37db13fceeaefde6cf1b054a8a78ae3b8149e55e83e1e7edf9eec9",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 592,
+      "knownComponentsSourceCycles": 592,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 697,
+      "knownComponentsSourceCycles": 697,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "392ee1fb36befc987d1bcb0462da7f223fc70ac21a4336bdf233b44a40f8486f",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 834,
+      "knownComponentsSourceCycles": 834,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "67da954832dba2cbfead528ad8dbecf917ce2b5588182f87ec59409b100af8a1",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "be6e35509daf720d28d012b068c1ac2dccbbf4d4fe31e87947e4bbf0cad05656",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 588,
+      "knownComponentsSourceCycles": 588,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "96f21bb6fe6a7140ae69b6ab4e9d18ba9d4a9517fc73b104c7b895d2d3c45663",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 709,
+      "knownComponentsSourceCycles": 709,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4eae4709804911c2abc42733fd9452c3c44989aa973f9e981b203b0e2bfc9378",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 673,
+      "knownComponentsSourceCycles": 673,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e2f1fb2e5c957630aaa452a47df79e68afbc0147822327b019f8c05d369561fc",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 574,
+      "knownComponentsSourceCycles": 574,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4ed56a833cd84416897ff7a7a926adec1c58b0311852289fd21c9192616bc83b",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 723,
+      "knownComponentsSourceCycles": 723,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "1a41ee2b2964a23bfbcb69313a23f3aff269e417d1b3388eace35b3b87bfa7d2",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "630ba6390a518e9bb2b9d5f66c0a4f8134fb6d0758755dd5e45fab99df4dfd7e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 588,
+      "knownComponentsSourceCycles": 588,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0787d864304b6a56152fca5b68730d77c89f15675ac057dfc5200d439fb6ba5e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 709,
+      "knownComponentsSourceCycles": 709,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ccdc4dcafc27b1504e0753c03c88c267593760955727b13665d1e00c5dc3349e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 1,
+      "volRoutes": [
+        "gamepak-command-byte-fast-accept"
+      ],
+      "volSourceCycles": 79,
+      "priorKnownComponentsSourceCycles": 1029,
+      "knownComponentsSourceCycles": 1108,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "87b1f90262c93b8c354d84c8ea190e8d7593fa8a92e24b471c2a5509491dfc7b",
+      "case": "factory-varied",
+      "passCount": 0,
+      "volCallbackCount": 0,
+      "volSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "e4253fd0cdee35d287ef5037ae6bdf517df8d5ce6e098170d96459229ebaef7e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 771,
+      "knownComponentsSourceCycles": 771,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "159fef34a4d3820d0f9ad73209757b12344891ffe5355de79d16a091e4df1b3d",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 614,
+      "knownComponentsSourceCycles": 614,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3159277d5f556ef6113a34474482746e76d02159d7e1215677a0b082a6646ece",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 717,
+      "knownComponentsSourceCycles": 717,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d3dc5c9872ff67b604bc26816075088d8d30ee7f2f51f1af0fde99774d193451",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 614,
+      "knownComponentsSourceCycles": 614,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c3a3ad5236e8251f2207ae94b5f68e7e71a31469f27e214248a4b00d54835811",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 707,
+      "knownComponentsSourceCycles": 707,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 695,
+      "knownComponentsSourceCycles": 695,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "fd44eb47158ac1cfda1f8553782a2517ba504c9837e4a177eb8993de97d1832a",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 628,
+      "knownComponentsSourceCycles": 628,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "aed1a0ca751cdc3c7d1747b4146f917b4f59335dc6c9fea5a527d31caaea6e77",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 622,
+      "knownComponentsSourceCycles": 622,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "bee08cb380bc0841a92edaeb11e2aa4071e253d29a0c08910de9d21c90535af3",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 721,
+      "knownComponentsSourceCycles": 721,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "148dde7ef3a312dd26ae03e5b3f3352ebcd92859df77841a8fbb5b9dd442d3f1",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 715,
+      "knownComponentsSourceCycles": 715,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "a5d11e18994a55a33e1149e5aca21ef193a346a6d807793cc94d97d78588c592",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 693,
+      "knownComponentsSourceCycles": 693,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "5f3dbed00174fe0734a52b590743488ed1c6a18234f57bbb84aae8e84684d5f0",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 848,
+      "knownComponentsSourceCycles": 848,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c07267f55e24cae3562b69d8e663de5a2769fb079669abd396ac8785275dcc1b",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e45d7989cd5133f64e109597b535ff57fb383ecf768fb8eda745f57918d0bbbb",
+      "case": "factory-varied",
+      "passCount": 1,
+      "volCallbackCount": 0,
+      "volRoutes": [],
+      "volSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 588,
+      "knownComponentsSourceCycles": 588,
+      "completeMPlaySourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "All 16 ply_vol callbacks and zero-callback contribution for every other one-pass row are source-timed from exact normalized entry state.",
+    "remainingDiscriminator": "MPlayMain command decode/jump-table dispatch plus note callback families remain unresolved.",
+    "durationFit": false,
+    "pointerIdentityTable": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "The ply_vol callback family is source-exact for 16/16 callbacks and 108/108 one-pass rows; complete MPlay costs remain 5 exact / 108 null."
+}
