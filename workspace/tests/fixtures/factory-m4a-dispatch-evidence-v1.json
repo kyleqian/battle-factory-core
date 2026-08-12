@@ -1,0 +1,4337 @@
+{
+  "schema": "factory-m4a-dispatch-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceAndElf": {
+    "source": "reference/pokeemerald/src/m4a_1.s:1214-1295,1459-1460",
+    "compiledRegions": [
+      {
+        "role": "MPlayMain decode/dispatch",
+        "start": "0x082dfb18",
+        "endExclusive": "0x082dfb70",
+        "bytes": 88,
+        "sha256": "fed706a0e27f9805b3162f37c04e68783ac82ea6f01f817cec566d86ef3765e6"
+      },
+      {
+        "role": "call_r3 trampoline",
+        "start": "0x082dfcb4",
+        "endExclusive": "0x082dfcb6",
+        "bytes": 2,
+        "sha256": "477db9ac7ca5efc12e37f882656b8fe5a363ffeb99b2e565a953d10c3c91ab21"
+      }
+    ],
+    "timingClasses": {
+      "sequentialRomThumbHalfword": 2,
+      "takenPipelineRefillPremium": 6,
+      "alignedEwramWordPremium": 2,
+      "romLiteralPremium": 9,
+      "gamepakBytePremium": 7
+    }
+  },
+  "frozenInputs": {
+    "command": "a158fff7201f2650c5177c0c84bb3853bd1355bfb1b947129c15783c78799f28",
+    "execution": "81ed2b14a684cb781417a093744ddf5652ef967e9e8c6a117b3e98833af1d9b1",
+    "callback": "0348b09ff235317d0fa1b3dac76f1a8c16f83a1742ea4add925283c9937deaab",
+    "note": "a07f443c036dbe54d991f7b98e114903d0ab5ecb461a882560af359a22f74039"
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "onePassRows": 108,
+    "zeroPassRows": 5,
+    "commandCandidateRows": 100,
+    "exactDispatchRows": 40,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "dispatches": 218,
+    "routeCounts": {
+      "encoded-high-jump-table": 24,
+      "encoded-low-jump-table": 2,
+      "encoded-note": 34,
+      "encoded-wait": 99,
+      "running-status-jump-table": 11,
+      "running-status-note": 48
+    },
+    "targetCounts": {
+      "gClockTable-wait-store": 99,
+      "ply_bend": 4,
+      "ply_note": 82,
+      "ply_pan": 13,
+      "ply_patt": 1,
+      "ply_pend": 1,
+      "ply_voice": 2,
+      "ply_vol": 16
+    },
+    "sourceCycleCounts": {
+      "63": 48,
+      "71": 34,
+      "81": 11,
+      "85": 99,
+      "89": 24,
+      "93": 2
+    },
+    "executedTotals": {
+      "sequentialThumbHalfwords": 4069,
+      "pipelineRefills": 792,
+      "alignedEwramWordAccesses": 533,
+      "romLiteralLoads": 99,
+      "gamepakByteReads": 317,
+      "cycles": 17066
+    },
+    "dispatchSourceCycles": 17066,
+    "exactDispatchRowsWithinOnePass": 108,
+    "nullCompleteNoteRowsWithinOnePass": 108,
+    "knownComponentSourceCycleRange": {
+      "min": 456,
+      "max": 4170,
+      "distinct": 87
+    },
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "executedDispatches": [
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 142
+      },
+      "encoded": 192,
+      "command": 192,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 15
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 144
+      },
+      "encoded": 212,
+      "command": 212,
+      "runningStatusBefore": 192,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 146
+      },
+      "encoded": 144,
+      "command": 144,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 648
+      },
+      "encoded": 208,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 649
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 713
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 715
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 62
+      },
+      "encoded": 213,
+      "command": 213,
+      "runningStatusBefore": 231,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 64
+      },
+      "encoded": 144,
+      "command": 144,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1370
+      },
+      "encoded": 64,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1371
+      },
+      "encoded": 144,
+      "command": 144,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1028
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1029
+      },
+      "encoded": 152,
+      "command": 152,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1422
+      },
+      "encoded": 72,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1424
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 650
+      },
+      "encoded": 52,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 651
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 716
+      },
+      "encoded": 213,
+      "command": 213,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 718
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 652
+      },
+      "encoded": 55,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 653
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 719
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 721
+      },
+      "encoded": 213,
+      "command": 213,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 723
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 147
+      },
+      "encoded": 72,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 148
+      },
+      "encoded": 136,
+      "command": 136,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 65
+      },
+      "encoded": 94,
+      "command": 213,
+      "runningStatusBefore": 213,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 66
+      },
+      "encoded": 136,
+      "command": 136,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1425
+      },
+      "encoded": 69,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1427
+      },
+      "encoded": 136,
+      "command": 136,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1372
+      },
+      "encoded": 72,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1373
+      },
+      "encoded": 136,
+      "command": 136,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 654
+      },
+      "encoded": 40,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 655
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 724
+      },
+      "encoded": 40,
+      "command": 213,
+      "runningStatusBefore": 213,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 725
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 149
+      },
+      "encoded": 190,
+      "command": 190,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 151
+      },
+      "encoded": 192,
+      "command": 192,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 15
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 153
+      },
+      "encoded": 212,
+      "command": 212,
+      "runningStatusBefore": 192,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 155
+      },
+      "encoded": 144,
+      "command": 144,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 656
+      },
+      "encoded": 189,
+      "command": 189,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 12
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 658
+      },
+      "encoded": 192,
+      "command": 192,
+      "runningStatusBefore": 189,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 15
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 660
+      },
+      "encoded": 213,
+      "command": 213,
+      "runningStatusBefore": 192,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 662
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 726
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 728
+      },
+      "encoded": 190,
+      "command": 190,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 730
+      },
+      "encoded": 192,
+      "command": 192,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 15
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 732
+      },
+      "encoded": 152,
+      "command": 152,
+      "runningStatusBefore": 192,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 67
+      },
+      "encoded": 231,
+      "command": 231,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 69
+      },
+      "encoded": 152,
+      "command": 152,
+      "runningStatusBefore": 231,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1428
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1430
+      },
+      "encoded": 132,
+      "command": 132,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1374
+      },
+      "encoded": 67,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1375
+      },
+      "encoded": 144,
+      "command": 144,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1030
+      },
+      "encoded": 180,
+      "command": 180,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 3
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1031
+      },
+      "encoded": 179,
+      "command": 179,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 2
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1020
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1023
+      },
+      "encoded": 152,
+      "command": 152,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 481
+      },
+      "encoded": 176,
+      "command": 176,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 303
+      },
+      "encoded": 176,
+      "command": 176,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1431
+      },
+      "encoded": 212,
+      "command": 212,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1434
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 663
+      },
+      "encoded": 210,
+      "command": 210,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 665
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 666
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 668
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 156
+      },
+      "encoded": 74,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 157
+      },
+      "encoded": 136,
+      "command": 136,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1435
+      },
+      "encoded": 71,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1437
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1376
+      },
+      "encoded": 74,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1377
+      },
+      "encoded": 136,
+      "command": 136,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 158
+      },
+      "encoded": 62,
+      "command": 212,
+      "runningStatusBefore": 212,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-1",
+        "offset": 159
+      },
+      "encoded": 144,
+      "command": 144,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 669
+      },
+      "encoded": 247,
+      "command": 247,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 672
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 247,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 733
+      },
+      "encoded": 213,
+      "command": 213,
+      "runningStatusBefore": 192,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 736
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 70
+      },
+      "encoded": 209,
+      "command": 209,
+      "runningStatusBefore": 231,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-4",
+        "offset": 72
+      },
+      "encoded": 130,
+      "command": 130,
+      "runningStatusBefore": 209,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1378
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1380
+      },
+      "encoded": 212,
+      "command": 212,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1382
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 212,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1024
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 1025
+      },
+      "encoded": 152,
+      "command": 152,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 287
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 289
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 168
+      },
+      "encoded": 40,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 169
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 419
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 211,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 421
+      },
+      "encoded": 211,
+      "command": 211,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 423
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 211,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1057
+      },
+      "encoded": 74,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1058
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 290
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 292
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 293
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 295
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 170
+      },
+      "encoded": 52,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 171
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 424
+      },
+      "encoded": 52,
+      "command": 211,
+      "runningStatusBefore": 211,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 425
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 211,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1059
+      },
+      "encoded": 190,
+      "command": 190,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1061
+      },
+      "encoded": 255,
+      "command": 255,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1064
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 255,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1017
+      },
+      "encoded": 44,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1018
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 296
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 299
+      },
+      "encoded": 210,
+      "command": 210,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 302
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 106
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 108
+      },
+      "encoded": 208,
+      "command": 208,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 111
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 250
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 252
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1065
+      },
+      "encoded": 190,
+      "command": 190,
+      "runningStatusBefore": 255,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1067
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1068
+      },
+      "encoded": 17,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1069
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1070
+      },
+      "encoded": 24,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1071
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 303
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 305
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1072
+      },
+      "encoded": 25,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1073
+      },
+      "encoded": 130,
+      "command": 130,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1074
+      },
+      "encoded": 29,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1075
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 306
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 308
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 112
+      },
+      "encoded": 64,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 114
+      },
+      "encoded": 146,
+      "command": 146,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1076
+      },
+      "encoded": 35,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1077
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1078
+      },
+      "encoded": 37,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1079
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1080
+      },
+      "encoded": 44,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1081
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 309
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 311
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1082
+      },
+      "encoded": 49,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1083
+      },
+      "encoded": 130,
+      "command": 130,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 172
+      },
+      "encoded": 40,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 173
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 426
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 211,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 428
+      },
+      "encoded": 211,
+      "command": 211,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 430
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 211,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1084
+      },
+      "encoded": 50,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 1085
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1019
+      },
+      "encoded": 37,
+      "command": 190,
+      "runningStatusBefore": 190,
+      "decode": "running-status",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 1020
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 312
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 314
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 253
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 254
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 315
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 317
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 174
+      },
+      "encoded": 52,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 175
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 431
+      },
+      "encoded": 52,
+      "command": 211,
+      "runningStatusBefore": 211,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-3",
+        "offset": 432
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 211,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 318
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 320
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 335
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 337
+      },
+      "encoded": 213,
+      "command": 213,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 339
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 284
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 286
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 51
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 54
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 287
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 289
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 232
+      },
+      "encoded": 40,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 233
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 340
+      },
+      "encoded": 71,
+      "command": 213,
+      "runningStatusBefore": 213,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 341
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 290
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 292
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 293
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 295
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 234
+      },
+      "encoded": 52,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 235
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 342
+      },
+      "encoded": 189,
+      "command": 189,
+      "runningStatusBefore": 213,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 12
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 344
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 189,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 346
+      },
+      "encoded": 190,
+      "command": 190,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 13
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 348
+      },
+      "encoded": 234,
+      "command": 234,
+      "runningStatusBefore": 190,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-5",
+        "offset": 350
+      },
+      "encoded": 155,
+      "command": 155,
+      "runningStatusBefore": 234,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 296
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 299
+      },
+      "encoded": 210,
+      "command": 210,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 302
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 69
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 71
+      },
+      "encoded": 208,
+      "command": 208,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 74
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 55
+      },
+      "encoded": 191,
+      "command": 191,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "jump-table",
+      "jumpTableIndex": 14
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 57
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 303
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 305
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 306
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 308
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 75
+      },
+      "encoded": 64,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-8",
+        "offset": 77
+      },
+      "encoded": 146,
+      "command": 146,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 339
+      },
+      "encoded": 208,
+      "command": 208,
+      "runningStatusBefore": 234,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 342
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 343
+      },
+      "encoded": 81,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 344
+      },
+      "encoded": 129,
+      "command": 129,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 309
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 311
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 345
+      },
+      "encoded": 80,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 346
+      },
+      "encoded": 130,
+      "command": 130,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 236
+      },
+      "encoded": 40,
+      "command": 208,
+      "runningStatusBefore": 208,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-2",
+        "offset": 237
+      },
+      "encoded": 134,
+      "command": 134,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 347
+      },
+      "encoded": 233,
+      "command": 233,
+      "runningStatusBefore": 208,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-6",
+        "offset": 349
+      },
+      "encoded": 154,
+      "command": 154,
+      "runningStatusBefore": 233,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 312
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 314
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 58
+      },
+      "encoded": 219,
+      "command": 219,
+      "runningStatusBefore": 191,
+      "decode": "encoded",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-9",
+        "offset": 59
+      },
+      "encoded": 140,
+      "command": 140,
+      "runningStatusBefore": 219,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 315
+      },
+      "encoded": 54,
+      "command": 210,
+      "runningStatusBefore": 210,
+      "decode": "running-status",
+      "route": "note",
+      "jumpTableIndex": null
+    },
+    {
+      "source": {
+        "role": "battle-factory-bgm-track-7",
+        "offset": 317
+      },
+      "encoded": 131,
+      "command": 131,
+      "runningStatusBefore": 210,
+      "decode": "encoded",
+      "route": "wait",
+      "jumpTableIndex": null
+    }
+  ],
+  "rows": [
+    {
+      "sourceStateDigest": "8a9cf2f590e9c2b49c12b525d2745da5e769378abc50c0d8f2cf6cbffd25b15c",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 13,
+      "dispatchRoutes": [
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 1035,
+      "priorKnownComponentsSourceCycles": 1370,
+      "knownComponentsSourceCycles": 2405,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d62505501da61610c3753911c10872af0d776469de37d52fb4aed38184bcd574",
+      "case": "anchor",
+      "passCount": 0,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "d80949626f7d610dd95ab6d54680becc527daefe8ef71394d26eb0a115752b26",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 588,
+      "knownComponentsSourceCycles": 588,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0729091bc1e3ad697c461941af75e6d438ec30372e7c9e0bd545e8e2635da7a4",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 574,
+      "knownComponentsSourceCycles": 574,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "37d325c692fed6c90f37b6d85db511db69ea906ce036771091ba2ac0b7d5aa38",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 574,
+      "knownComponentsSourceCycles": 574,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "bdae7bcc3277dec315f1fbed191bcaa63a4c4f59a9d61736fc579345e2414bd4",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 720,
+      "knownComponentsSourceCycles": 868,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "dfaaad8c85c3beeea3c6143490acf32783a078f19fc18d823e5916bf89a71722",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 618,
+      "knownComponentsSourceCycles": 618,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0c6175ca663144388d7459a968f09b606dfb425af534e088879482a0018deddf",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 4,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 304,
+      "priorKnownComponentsSourceCycles": 864,
+      "knownComponentsSourceCycles": 1168,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cb407e1a4662a4f5f073af67d96959c9c0626d395efdcbcd0a7812e089485b17",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 691,
+      "knownComponentsSourceCycles": 691,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e0c04b9ed2e2f89b44aa3de1fb6cee0baf3e78a755ef6ac5aebbcc610aca65df",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 562,
+      "knownComponentsSourceCycles": 562,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c1e6393f827465170da7bdec72e9a9fcdb194a7986970e93e44c7a9647af1311",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 570,
+      "knownComponentsSourceCycles": 570,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d839224c061a4ba5a402a53d9b60f57d00622df6aec2c820b274a1b3fc1d8832",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 556,
+      "knownComponentsSourceCycles": 556,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ac6b9c19ebb97961028f0f154ef16973629d3997fd81fa26a34a11afd18894c9",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 649,
+      "knownComponentsSourceCycles": 649,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "eb175b21ede38444fddd6937fcaea596fbdb3ede05a11d5f567e55a5801831f2",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 5,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 393,
+      "priorKnownComponentsSourceCycles": 889,
+      "knownComponentsSourceCycles": 1282,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "419ca11cd896f34c4da4dba39df3c8cc23535f973a97349def7cd9bc34788fe1",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 647,
+      "knownComponentsSourceCycles": 647,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3c06f68e3266884e6e4daa37edd33fb207cf58ee48f2593d007c743bdfbdc9b2",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 613,
+      "knownComponentsSourceCycles": 613,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "59e038686268dd7b3ebdf9bbec69d4f9f5dd7fb6b5b5becf1138aa5dd1d42371",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 484,
+      "knownComponentsSourceCycles": 484,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "508aee1599040f138a3ed60c42ef66c85d55eef5b04100cec341515d09295cf3",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 8,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 592,
+      "priorKnownComponentsSourceCycles": 1017,
+      "knownComponentsSourceCycles": 1609,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3047a6f1087fc70c3a7149d0270696fb5c5cd5123d490e2965f7895d15a1c095",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "255c03651d8a4cbf9f2443d33ba4845705669990fab93275ecbcb7542902a626",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 4,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 296,
+      "priorKnownComponentsSourceCycles": 874,
+      "knownComponentsSourceCycles": 1170,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "89291726e11be6c56885a0b7329ea9203c1ffa918a219705a6625bb67c72cdf0",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 622,
+      "knownComponentsSourceCycles": 622,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cf3b3e07813298ecee91fb8b4d8029bf606acae95cc9b472d72e79cee2bb298e",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "f16801e198aa1527e914c55e4a5112ac090a26e4c52e4d69f9298da256976f68",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 632,
+      "knownComponentsSourceCycles": 632,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c74a4c4f9a8c20643c1ea405103a8fd88aff1c6a1456c8bcce02fc1a4715ecca",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 598,
+      "knownComponentsSourceCycles": 598,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "548288c96af84b9558a6555c3de77cd6cdf391b2a3945481600ca090ff4a5e97",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 865,
+      "knownComponentsSourceCycles": 865,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0d2bcfd6fd30cbc317c4cd782452a5cf7aa9de795b1916f0f5d05ea2111eaf84",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 24,
+      "dispatchRoutes": [
+        "encoded-high-jump-table",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-high-jump-table",
+        "encoded-high-jump-table",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "encoded-low-jump-table",
+        "encoded-low-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-wait",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 2010,
+      "priorKnownComponentsSourceCycles": 2160,
+      "knownComponentsSourceCycles": 4170,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "67b9353798107ef023a18831779c4b6f2dd85ccab17b3fbc58402f0839f53311",
+      "case": "anchor",
+      "passCount": 0,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "c91e5411bfea4d985d55b19ffa294b4c45e0fc52af7a15e6f05c1411e96d941a",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 667,
+      "knownComponentsSourceCycles": 667,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "060a76b8417cd9757e936288ba5a65e72ff4fa33eec284918387ee30cc28c437",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "8d35b47fb1022e5821f26a1d153751a5582712b05d1fcb8b3d50d5a014837744",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "efd66e8983ead21baf57cc16d0ac553583c3267c6bf39ea2b14b6fbdd98e32f2",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 156,
+      "priorKnownComponentsSourceCycles": 698,
+      "knownComponentsSourceCycles": 854,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4934593587b11e18fe34e1c43390b5d795c8e6f6ed387b21ef954ee940f2c444",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 596,
+      "knownComponentsSourceCycles": 596,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "59b1018599edb4f9bff79a13a5e6d16d07908dd316b4acb17c1a45cfe0e445b9",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 156,
+      "priorKnownComponentsSourceCycles": 705,
+      "knownComponentsSourceCycles": 861,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cb6ddd8b64388ff751bcefb23bc9c7236c62d870334f981ab8f1e4b6ba127d3e",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 661,
+      "knownComponentsSourceCycles": 661,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "5521ab0bb6378f01e0d54d29ac2e1c7c9ce30e2606cf14215c23f216647939ed",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 546,
+      "knownComponentsSourceCycles": 546,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "800dde1a43898fc7280bcb0536e69cc352b582812a7c5138fd839245d7f469f6",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 562,
+      "knownComponentsSourceCycles": 562,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "f4ed0055d961b54d23c8df572d30e3aa5603b3e85e3d46f3a0021b47ea1d41b7",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 534,
+      "knownComponentsSourceCycles": 534,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "8b0eda86230f7ad57262b22b34b7d919a544ac9077daabca0b5e81f53340f6b6",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 627,
+      "knownComponentsSourceCycles": 627,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "7e74daf0955c7a3e6dcc506148a45c20fad9ce02b8a34638524623454d0ee74c",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 156,
+      "priorKnownComponentsSourceCycles": 649,
+      "knownComponentsSourceCycles": 805,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "8386b4b2bc0a096d08a9851ee1b475f6d51b660f700860a024225a069b81c967",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 605,
+      "knownComponentsSourceCycles": 605,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "fc6f8f357f9ed2783aca331523ebd94ded651d3c9661c664aeba60d7234e3071",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 585,
+      "knownComponentsSourceCycles": 585,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2b1c79f0b21a6010f65593f4978a30424f82d9bfc5bb8b8710f0951a1891351e",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 456,
+      "knownComponentsSourceCycles": 456,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e5bf9a67aa79e9f6031f3a3bd2ab50a9020bab5b9364ccb34678e0344b74e7a8",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 6,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 444,
+      "priorKnownComponentsSourceCycles": 860,
+      "knownComponentsSourceCycles": 1304,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d3c9d0785e0a58484caeeb439cb89bddcdd7cdecffd4f81b4dbeae34b9c71fa9",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "aef35eb97f0069bb2e27e5742817014d69a1073c6c7abeb2bb89553061c8050a",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "03202c202e5b57dff7d0f945897ce9c3afa917cd492a246b61239e0c2a8fa115",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "89a12bb237ef407a548a70da2d4c0516d94e169b6681c7bd640b21b33e49853a",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 552,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "30437cd1bbff1f6f347091289a8bb1a8e3dffb43f7eed3c3846d0fc557490ff1",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 576,
+      "knownComponentsSourceCycles": 576,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "fa61b3d178f4d921fd1403d2eb158970e8c2c42b88ae835b17f50f62a735d121",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 534,
+      "knownComponentsSourceCycles": 534,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "f2ced1bcd774a3695b298fa7589f0b37a7e917f365e03af48bcfa550bb310719",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 815,
+      "knownComponentsSourceCycles": 815,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "64cbb386f803abc25d47dfe99cbf6d4e594dab3900df4f0869518c4971d98c5b",
+      "case": "anchor",
+      "passCount": 1,
+      "dispatchCount": 13,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 1017,
+      "priorKnownComponentsSourceCycles": 1425,
+      "knownComponentsSourceCycles": 2442,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "53f5ebb6bb07d31bff644e15e162df2d88ca06b515d00d157d88075142903950",
+      "case": "anchor",
+      "passCount": 0,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "75050563b447f4df6078afc684b2103f401de44e0af83a955615f733e6791f4a",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 822,
+      "knownComponentsSourceCycles": 822,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "de24421aaaa62bc671b7954b161eec35f97343f393722c2bf247ed37d21df6db",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 568,
+      "knownComponentsSourceCycles": 568,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "04e627717fe727b96245a2f4ee30034752d39838a4fe1e4f04c3238087c5f97f",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 815,
+      "knownComponentsSourceCycles": 963,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c360a4950dfd3a22f12068912a1e1a3937bce17b006ca81d2ca1bc9f2e4b3185",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 596,
+      "knownComponentsSourceCycles": 596,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "67dcf01479ae763df89833827da03bd67ea8c2b2464b1e91acf12fa387454d37",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 782,
+      "knownComponentsSourceCycles": 782,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 9,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 689,
+      "priorKnownComponentsSourceCycles": 1352,
+      "knownComponentsSourceCycles": 2041,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "7e349fb8f37b31fe407521166341e453e82ec5579cd0df5e735f367e7f8940ff",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 751,
+      "knownComponentsSourceCycles": 751,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "136219c3db5a06a580f1aa93008a8266b67b21f54a53b59af9725013d68478f2",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "254105d0e300044129ce403e43cd0c3e9ef937dc5966e03678aeffd5b4b98e28",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 855,
+      "knownComponentsSourceCycles": 1003,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "48e609796c61993b98ce4aed1fa69eb8190f01f114bde9eb392f7cb9c629d981",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 739,
+      "knownComponentsSourceCycles": 739,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4098a02e3f0a922f3f402061333f5320154be04365649f44ab33db3d406935b6",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 689,
+      "knownComponentsSourceCycles": 689,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 17,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "running-status-jump-table",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 1353,
+      "priorKnownComponentsSourceCycles": 1922,
+      "knownComponentsSourceCycles": 3275,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "574a5e1547725c9685e4a84569319902188d205a7f3b1c6f3c20c9f25ad33d20",
+      "case": "liliana",
+      "passCount": 0,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "6a88a5d761ef2e24daf4c73eb5da29c8413d1066dc261a4878e57a022db33f1a",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "encoded-high-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 174,
+      "priorKnownComponentsSourceCycles": 844,
+      "knownComponentsSourceCycles": 1018,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "de8497c08457a8bfcd785ac38eb994e6c6ad6146a46e135b95fc9329bffb8f2d",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 166,
+      "priorKnownComponentsSourceCycles": 687,
+      "knownComponentsSourceCycles": 853,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 4,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 314,
+      "priorKnownComponentsSourceCycles": 926,
+      "knownComponentsSourceCycles": 1240,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0dbdc79bf393698e16fffbb04256067e2193fb6ae71827d5b9451d22dc471808",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 166,
+      "priorKnownComponentsSourceCycles": 824,
+      "knownComponentsSourceCycles": 990,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2efd8904f380af9da21b782a50a355dd43c8258ca7005b8b237d84b84a743a3a",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 695,
+      "knownComponentsSourceCycles": 695,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 6,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 462,
+      "priorKnownComponentsSourceCycles": 1044,
+      "knownComponentsSourceCycles": 1506,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d4eafd4be04ffbc4a1a5d9a999c46951cf37e4d3455f53d73961e2c4d863c0b4",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 166,
+      "priorKnownComponentsSourceCycles": 729,
+      "knownComponentsSourceCycles": 895,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e7fe29bbc43e4e61a49403e7dbb44933dfef2649e6bdcc987b7c658b5e947809",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 166,
+      "priorKnownComponentsSourceCycles": 715,
+      "knownComponentsSourceCycles": 881,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 4,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 314,
+      "priorKnownComponentsSourceCycles": 1045,
+      "knownComponentsSourceCycles": 1359,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "22c5d662c36c4bd2b6ba595410f8ba4c148d1bfb6bffaadb74fb52c7517dacd8",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 166,
+      "priorKnownComponentsSourceCycles": 808,
+      "knownComponentsSourceCycles": 974,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "cec9c411d0fd7a5187232111dfe4f540ea44cc33c6d8892daa58bb056fe45123",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 707,
+      "knownComponentsSourceCycles": 707,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 13,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "running-status-jump-table",
+        "encoded-wait",
+        "running-status-jump-table",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 1029,
+      "priorKnownComponentsSourceCycles": 1537,
+      "knownComponentsSourceCycles": 2566,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "730d5b961495f425916a9ef802b17018b2256eef4dfc38576f947c2d0ebc239d",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 751,
+      "knownComponentsSourceCycles": 751,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "aa020fe7e7f2649b70633275a7eb7426a5798e75ee67da6606665aeceafd0c4a",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 608,
+      "knownComponentsSourceCycles": 608,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "6854eca211190cad143f165b2c43e6011d7fbba5c910cad932e679c0a933452a",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 847,
+      "knownComponentsSourceCycles": 995,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "898a71ab6287958bf7ee9f5c76a2487e7087dace83615e40ef8bf4ce3fe998bf",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 745,
+      "knownComponentsSourceCycles": 745,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "9808dfff65029cdd2806b77f0c2c5f9617be333e81c3e0c055a4590116a86e3f",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 602,
+      "knownComponentsSourceCycles": 602,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "case": "liliana",
+      "passCount": 1,
+      "dispatchCount": 6,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 444,
+      "priorKnownComponentsSourceCycles": 1099,
+      "knownComponentsSourceCycles": 1543,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "72bca7e9ae37db13fceeaefde6cf1b054a8a78ae3b8149e55e83e1e7edf9eec9",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 592,
+      "knownComponentsSourceCycles": 592,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 7,
+      "dispatchRoutes": [
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 549,
+      "priorKnownComponentsSourceCycles": 1203,
+      "knownComponentsSourceCycles": 1752,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "392ee1fb36befc987d1bcb0462da7f223fc70ac21a4336bdf233b44a40f8486f",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 834,
+      "knownComponentsSourceCycles": 834,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "67da954832dba2cbfead528ad8dbecf917ce2b5588182f87ec59409b100af8a1",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "be6e35509daf720d28d012b068c1ac2dccbbf4d4fe31e87947e4bbf0cad05656",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 819,
+      "knownComponentsSourceCycles": 967,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "96f21bb6fe6a7140ae69b6ab4e9d18ba9d4a9517fc73b104c7b895d2d3c45663",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 709,
+      "knownComponentsSourceCycles": 709,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4eae4709804911c2abc42733fd9452c3c44989aa973f9e981b203b0e2bfc9378",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 673,
+      "knownComponentsSourceCycles": 673,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e2f1fb2e5c957630aaa452a47df79e68afbc0147822327b019f8c05d369561fc",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 6,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 444,
+      "priorKnownComponentsSourceCycles": 1063,
+      "knownComponentsSourceCycles": 1507,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "4ed56a833cd84416897ff7a7a926adec1c58b0311852289fd21c9192616bc83b",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 723,
+      "knownComponentsSourceCycles": 723,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "1a41ee2b2964a23bfbcb69313a23f3aff269e417d1b3388eace35b3b87bfa7d2",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "630ba6390a518e9bb2b9d5f66c0a4f8134fb6d0758755dd5e45fab99df4dfd7e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 819,
+      "knownComponentsSourceCycles": 967,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "0787d864304b6a56152fca5b68730d77c89f15675ac057dfc5200d439fb6ba5e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 709,
+      "knownComponentsSourceCycles": 709,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ccdc4dcafc27b1504e0753c03c88c267593760955727b13665d1e00c5dc3349e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 15,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-high-jump-table",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-note",
+        "encoded-wait",
+        "encoded-high-jump-table",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 1217,
+      "priorKnownComponentsSourceCycles": 1974,
+      "knownComponentsSourceCycles": 3191,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "87b1f90262c93b8c354d84c8ea190e8d7593fa8a92e24b471c2a5509491dfc7b",
+      "case": "factory-varied",
+      "passCount": 0,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 0,
+      "knownComponentsSourceCycles": 0,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": 864
+    },
+    {
+      "sourceStateDigest": "e4253fd0cdee35d287ef5037ae6bdf517df8d5ce6e098170d96459229ebaef7e",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 771,
+      "knownComponentsSourceCycles": 771,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "159fef34a4d3820d0f9ad73209757b12344891ffe5355de79d16a091e4df1b3d",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 614,
+      "knownComponentsSourceCycles": 614,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "3159277d5f556ef6113a34474482746e76d02159d7e1215677a0b082a6646ece",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 948,
+      "knownComponentsSourceCycles": 1096,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "d3dc5c9872ff67b604bc26816075088d8d30ee7f2f51f1af0fde99774d193451",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 614,
+      "knownComponentsSourceCycles": 614,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c3a3ad5236e8251f2207ae94b5f68e7e71a31469f27e214248a4b00d54835811",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 707,
+      "knownComponentsSourceCycles": 707,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 4,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 296,
+      "priorKnownComponentsSourceCycles": 1072,
+      "knownComponentsSourceCycles": 1368,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "fd44eb47158ac1cfda1f8553782a2517ba504c9837e4a177eb8993de97d1832a",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 628,
+      "knownComponentsSourceCycles": 628,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "aed1a0ca751cdc3c7d1747b4146f917b4f59335dc6c9fea5a527d31caaea6e77",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 156,
+      "priorKnownComponentsSourceCycles": 768,
+      "knownComponentsSourceCycles": 924,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "bee08cb380bc0841a92edaeb11e2aa4071e253d29a0c08910de9d21c90535af3",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 4,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 296,
+      "priorKnownComponentsSourceCycles": 1081,
+      "knownComponentsSourceCycles": 1377,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "148dde7ef3a312dd26ae03e5b3f3352ebcd92859df77841a8fbb5b9dd442d3f1",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 844,
+      "knownComponentsSourceCycles": 992,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "a5d11e18994a55a33e1149e5aca21ef193a346a6d807793cc94d97d78588c592",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 693,
+      "knownComponentsSourceCycles": 693,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 8,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait",
+        "running-status-note",
+        "encoded-wait",
+        "encoded-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 608,
+      "priorKnownComponentsSourceCycles": 1177,
+      "knownComponentsSourceCycles": 1785,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "5f3dbed00174fe0734a52b590743488ed1c6a18234f57bbb84aae8e84684d5f0",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 848,
+      "knownComponentsSourceCycles": 848,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c07267f55e24cae3562b69d8e663de5a2769fb079669abd396ac8785275dcc1b",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 0,
+      "dispatchRoutes": [],
+      "dispatchSourceCycles": 0,
+      "priorKnownComponentsSourceCycles": 580,
+      "knownComponentsSourceCycles": 580,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e45d7989cd5133f64e109597b535ff57fb383ecf768fb8eda745f57918d0bbbb",
+      "case": "factory-varied",
+      "passCount": 1,
+      "dispatchCount": 2,
+      "dispatchRoutes": [
+        "running-status-note",
+        "encoded-wait"
+      ],
+      "dispatchSourceCycles": 148,
+      "priorKnownComponentsSourceCycles": 819,
+      "knownComponentsSourceCycles": 967,
+      "completeNoteCallbacksSourceCycles": null,
+      "completeMPlaySourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "Every executed command decode, running-status selection, wait-table store, and callback jump-table dispatch in all 108 one-pass rows is source-timed through its selected target entry.",
+    "boundary": "MPlayMain._081DD8E0 through gClockTable wait store or call_r3 target entry; callback bodies and post-callback loop glue are separate components.",
+    "remainingDiscriminator": "Every post-selection ply_note body, the unobserved keysplit note route, complete note callback cost, post-callback loop glue, later MPlay components, and every complete one-pass MPlay total remain null.",
+    "durationFit": false,
+    "pointerIdentityTable": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "The observed command decode/running-status/jump-table dispatcher is source-exact for 218/218 executed commands and 108/108 one-pass rows; complete MPlay remains 5 exact / 108 null."
+}

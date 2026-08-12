@@ -19,6 +19,16 @@ export type TrackReadResult = {
   outcome: "wait" | "fine";
   reads: SourcePosition[];
   commands: string[];
+  dispatches: CommandDispatch[];
+};
+export type CommandDispatch = {
+  source: SourcePosition;
+  encoded: number;
+  command: number;
+  runningStatusBefore: number;
+  decode: "running-status" | "encoded";
+  route: "note" | "wait" | "jump-table";
+  jumpTableIndex: number | null;
 };
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -67,8 +77,8 @@ export function traceMPlayTrackReads(
   regions: readonly SourceRegion[],
   resolvePointer: (encoded: number) => SourcePosition | null,
 ): TrackReadResult {
-  if ((input.flags & 0x80) === 0) return { outcome: "fine", reads: [], commands: [] };
-  if (input.wait > 0) return { outcome: "wait", reads: [], commands: [] };
+  if ((input.flags & 0x80) === 0) return { outcome: "fine", reads: [], commands: [], dispatches: [] };
+  if (input.wait > 0) return { outcome: "wait", reads: [], commands: [], dispatches: [] };
   if (!Number.isInteger(input.patternLevel) || input.patternLevel < 0 || input.patternLevel > 3) fail("invalid pattern level");
   if (input.patternStack.length !== 3) fail("pattern stack must have three slots");
   for (let index = 0; index < input.patternLevel; index += 1) if (!input.patternStack[index]) fail(`active pattern stack slot ${index} is unavailable`);
@@ -80,13 +90,16 @@ export function traceMPlayTrackReads(
   const stack = input.patternStack.map((entry) => entry && ({ ...entry }));
   const reads: SourcePosition[] = [];
   const commands: string[] = [];
+  const dispatches: CommandDispatch[] = [];
   const seen = new Set<string>();
 
   for (let step = 0; step < 1024; step += 1) {
     const signature = canonical({ current, running, patternLevel, repeatCount, stack });
     if (seen.has(signature)) fail("recursive command/control flow");
     seen.add(signature);
+    const source = { ...current };
     const encoded = byte(current, regions, reads);
+    const runningStatusBefore = running;
     let command = encoded;
     if (encoded < 0x80) {
       command = running;
@@ -98,6 +111,7 @@ export function traceMPlayTrackReads(
 
     if (command >= 0xcf) {
       commands.push("note");
+      dispatches.push({ source, encoded, command, runningStatusBefore, decode: encoded < 0x80 ? "running-status" : "encoded", route: "note", jumpTableIndex: null });
       const key = byte(current, regions, reads);
       if (key < 0x80) {
         current = add(current, 1, regions);
@@ -111,13 +125,15 @@ export function traceMPlayTrackReads(
     }
     if (command >= 0x80 && command <= 0xb0) {
       commands.push("wait");
-      return { outcome: "wait", reads, commands };
+      dispatches.push({ source, encoded, command, runningStatusBefore, decode: "encoded", route: "wait", jumpTableIndex: null });
+      return { outcome: "wait", reads, commands, dispatches };
     }
     commands.push(`0x${command.toString(16)}`);
-    if (command === 0xb1 || (command >= 0xb6 && command <= 0xb8) || (command >= 0xc6 && command <= 0xc7) || (command >= 0xc9 && command <= 0xcb)) return { outcome: "fine", reads, commands };
+    dispatches.push({ source, encoded, command, runningStatusBefore, decode: encoded < 0x80 ? "running-status" : "encoded", route: "jump-table", jumpTableIndex: command - 0xb1 });
+    if (command === 0xb1 || (command >= 0xb6 && command <= 0xb8) || (command >= 0xc6 && command <= 0xc7) || (command >= 0xc9 && command <= 0xcb)) return { outcome: "fine", reads, commands, dispatches };
     if (command === 0xb2) { current = pointer(current, regions, reads, resolvePointer); continue; }
     if (command === 0xb3) {
-      if (patternLevel >= 3) return { outcome: "fine", reads, commands };
+      if (patternLevel >= 3) return { outcome: "fine", reads, commands, dispatches };
       stack[patternLevel] = add(current, 4, regions);
       patternLevel += 1;
       current = pointer(current, regions, reads, resolvePointer);
@@ -156,11 +172,11 @@ export function traceMPlayTrackReads(
     if (command === 0xcd) {
       const selector = byte(current, regions, reads);
       current = add(current, 1, regions);
-      if (selector === 0 || selector === 3) return { outcome: "fine", reads, commands };
+      if (selector === 0 || selector === 3) return { outcome: "fine", reads, commands, dispatches };
       const length = selector === 1 || selector === 13 ? 4 : selector === 12 ? 2 : selector >= 2 && selector <= 11 ? 1 : -1;
       if (length < 0) fail(`unknown XCMD selector ${selector}`);
       for (let index = 0; index < length; index += 1) byte(add(current, index, regions), regions, reads);
-      if (selector === 12) return { outcome: "wait", reads, commands };
+      if (selector === 12) return { outcome: "wait", reads, commands, dispatches };
       current = add(current, length, regions);
       continue;
     }
@@ -173,11 +189,11 @@ export function traceMPlayTrackReads(
   fail("command step bound exceeded");
 }
 
-type RegionDigest = { requestedBytes: number; capturedBytes: number; complete: boolean; sha256: string | null };
+export type RegionDigest = { requestedBytes: number; capturedBytes: number; complete: boolean; sha256: string | null };
 type Track = { scalarBytes: number[]; commandRegion: RegionDigest; patternRegions: RegionDigest[] };
 type V3 = { schema: string; case: string; interrupts: Array<{ m4a: { state: { sourceSemanticState: { stateDigest: string; musicPlayers: Array<{ scalarBytes: number[]; tracks: Track[] }> } } } }> };
 
-function compiledSong(): { regions: SourceRegion[]; bases: Map<string, number>; songDigest: string; scanBase: number; scanBytes: Uint8Array; controlFlow: Array<{ symbol: string; bytes: number; sha256: string }> } {
+export function compiledSong(): { regions: SourceRegion[]; bases: Map<string, number>; songDigest: string; scanBase: number; scanBytes: Uint8Array; controlFlow: Array<{ symbol: string; bytes: number; sha256: string }> } {
   const nm = execFileSync("arm-none-eabi-nm", ["--defined-only", "-S", "-n", join(ROOT, "reference/pokeemerald/pokeemerald.elf")], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
   const wanted = new Set([...Array.from({ length: 9 }, (_, index) => `mus_b_factory_${index + 1}`), "mus_b_factory"]);
   const symbols = nm.split("\n").map((line) => line.trim().split(/\s+/)).filter((parts) => parts.length >= 3 && wanted.has(parts.at(-1)!)).map((parts) => ({ name: parts.at(-1)!, value: Number.parseInt(parts[0]!, 16) })).sort((a, b) => a.value - b.value);
@@ -212,7 +228,7 @@ function compiledSong(): { regions: SourceRegion[]; bases: Map<string, number>; 
   };
 }
 
-function digestPosition(region: RegionDigest, window: number, regions: readonly SourceRegion[], bases: ReadonlyMap<string, number>, scanBase: number, scanBytes: Uint8Array): SourcePosition | null {
+export function digestPosition(region: RegionDigest, window: number, regions: readonly SourceRegion[], bases: ReadonlyMap<string, number>, scanBase: number, scanBytes: Uint8Array): SourcePosition | null {
   if (!region.complete || region.capturedBytes !== window || !region.sha256) return null;
   const matches: SourcePosition[] = [];
   for (let scanOffset = 0; scanOffset + window <= scanBytes.length; scanOffset += 1) {
