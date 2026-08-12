@@ -18,7 +18,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   or callback family. Keep unresolved callbacks and every complete one-pass
   MPlay cost null; do not wire `runFactoryConstructionClock`.
 - **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
-  gate **8/8** is green; smoke/typecheck/full/build verification is pending.
+  **8/8**, smoke **375/375**, typecheck, full **959 files / 9,161 passed / 1
+  skipped**, and build **649 modules** are green; pixels were not rerun.
 
 ## 1155 — [supervisor, 2026-08-11] **#55 ClearChain closure verified**
 
