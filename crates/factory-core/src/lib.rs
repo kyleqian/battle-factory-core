@@ -21,6 +21,7 @@ pub mod factory_ai_check_bad_move_vectors_gen;
 pub mod factory_ai_check_viability;
 pub mod factory_ai_check_viability_m5d1_vectors_gen;
 pub mod factory_ai_check_viability_m5d2_vectors_gen;
+pub mod factory_ai_check_viability_m5d3_vectors_gen;
 pub mod factory_ai_check_viability_shell_vectors_gen;
 pub mod factory_ai_mask;
 pub mod factory_ai_mask_vectors_gen;
