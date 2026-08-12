@@ -5,21 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R4 — [supervised session, 2026-08-11 night] **M5b-1 folded: CheckBadMove batch 1 (32 effects) native**
+## R4 — [supervised session, 2026-08-11 night through 2026-08-12] **M5e folded: CheckViability is differential-green through WASM**
 
-- **State:** rust-main = master (merged at orient, clean — animation/audio
-  content only) + M5b-1 fold `4aa6240a`. CheckBadMove is 32/109 table
-  effects native: the 18-effect HighRiskForDamage cluster (one shared
-  handler) + Magnitude (own Levitate draw, rides the cluster), Teleport,
-  8 zero-RNG singles, and the weather quartet with the stale-`funcResult`
-  collision bug ported bug-for-bug. `unported_cbm_table_effects()` = 77,
-  pinned. 95 TS-generated vector rows
-  (`tools/gen-cbm-m5b1-vectors.mjs` → checked-in
-  `factory_ai_check_bad_move_m5b1_vectors_gen.rs`, byte-idempotent).
-  `MAX_CHECK_BAD_MOVE_DRAWS` 2→3 (Magnitude worst case: soundproof +
-  levitate + high-risk draws; the whole batch is `isMovePowerOther`, so
-  the preamble's negates-type draw can never co-occur — worker-verified
-  against moves.json).
+- **State:** rust-main = master `07f1aba5` (fast-forward merged at orient;
+  main/animation content only) + verified M5e folds `cd97dc59`/`739c4df0`.
+  M5's mask, CheckBadMove, and CheckViability surfaces are native and all
+  cross the WASM differential harness. Main-tree artifact is 253,683 bytes,
+  sha256 `d55486c8…`; Rust **662/662**, CheckViability parity **9/9** in
+  both modes, prior WASM parity union **757/757**, smoke **375/375**.
+  Start-of-session merged baseline was full npm **993 files / 9,591 passed /
+  1 pre-existing skip** + build; the M5e worker's same-commit full npm gate
+  was **994 files / 9,600 passed / 1 skip** + build. No open rust deferrals.
 - **Did:** supervisor verification on the worker branch before fold:
   scope clean (5 files, all core-rs/), cargo **204/204** + fmt +
   clippy(--all-targets) + wasm build rerun independently, BOTH generators
@@ -239,7 +235,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rows re-derived independently (Haze both-blocks repeated-ordinal;
   SkillSwap known-Static 1-draw) — exact. Worker: sonnet, 33.9 min,
   3 commits.
-- **Wind-down gates (this tree, supervisor-run, final):** cargo
+- **M5e DONE (folds `cd97dc59`/`739c4df0`) — CheckViability boundary,
+  adapter, and parity.** Additive ABI-v1 `fw_run_check_viability` uses a
+  236-byte fixed input prefix plus UTF-8 `reasonPrefix`: two complete
+  108-byte, 42-field battlers preserve every optional's presence. The
+  variable output preserves final RNG, optional `funcResultAfter`, score,
+  and every typed draw receipt. `factoryAiEngine.ts` now has a genuine WASM
+  path; `factoryAiCheckViabilityParity.test.ts` has 9 tests, a 122-effect
+  census, and 672 runnable seeded cases across 112 source-addressable
+  effects. Directed cases pin max-seven draws, stale carry/collisions,
+  Haze's repeated ordinal, SemiInvulnerable's dropped receipt with retained
+  RNG advance, UTF-8 reasons, and both caller errors. Supervisor reran scope
+  audit, cargo **662/662** + fmt/clippy + wasm, new suite **9/9 BOTH modes**,
+  prior WASM union **757/757**, post-fold smoke **375/375**. Worker:
+  gpt-5.6-terra/max, ~45 min, 2 commits.
+- **Prior wind-down gates (this tree, supervisor-run):** cargo
   **662/662** + fmt/clippy clean, artifact rebuilt (final hash
   9d53f91e…), parity union (7 suites) **757/757 in wasm mode**, smoke
   375/375. Full npm test **977 files / 9,527 passed / 1 pre-existing
@@ -248,12 +258,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   core-rs/-only (plus one rust-lane docs commit), so the TS side is
   bit-identical to those runs. No orphan worker worktrees or branches;
   RUST_DEFERRED.md has no open entries.
-- **Next:** M5e — the CV boundary+adapter+parity step (M5c pattern:
-  fw_run_check_viability export, presence-preserving Battler encoding,
-  `tests/factoryAiCheckViabilityParity.test.ts` both-mode; full npm
-  gates since it touches tests/). Then M5f (TryToFaint 275 lines +
-  DecisionPolicy 1402 lines, the family's integration layer). Re-verify
-  the conflict check at orient per the standing M4+ rule.
+- **Next:** M5f — port `factoryAiTryToFaint.ts` (275 lines) first, then
+  `factoryAiDecisionPolicy.ts` (1,402 lines) as a separate bounded step if
+  the TryToFaint interface is stable. Each needs native TS-derived vectors;
+  DecisionPolicy then gets the boundary/adapter parity integration for the
+  whole Factory AI family. Re-check current TS conflicts before each brief.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
