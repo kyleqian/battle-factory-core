@@ -231,6 +231,7 @@ const errorSpecs = [
   [3, "wrong-battler"], [4, "switch"], [5, "duplicate"],
   [6, "move-none"], [7, "empty"], [8, "level-range"],
   [9, "battle-range"], [10, "streak-range"], [11, "trainer-range"],
+  [12, "unknown-move"],
 ];
 const errorCases = errorSpecs.map(([id, label]) => {
   const input = makeInput({ scenarioId: 0, legalMask: 1, streak: 14, seed: 1, calls: 0 });
@@ -245,6 +246,7 @@ const errorCases = errorSpecs.map(([id, label]) => {
   if (id === 9) input.view.factory.battleMode = 2;
   if (id === 10) input.view.factory.factoryWinStreak = 65536;
   if (id === 11) input.view.factory.trainerOpponentId = 65536;
+  if (id === 12) input.view.moves = [999, 150, 150, 150];
   // createBattleCommandRequest rejects [] before the chooser's own explicit
   // empty-map guard. Rust's borrowed slice makes that defensive guard typed-
   // reachable, so pin the exact chooser literal (TS :940) as M5f-2a did.

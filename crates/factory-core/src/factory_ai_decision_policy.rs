@@ -38,6 +38,7 @@ use crate::factory_ai_try_to_faint::{
     run_try_to_faint, FactoryAiMostPowerful, FactoryAiTryToFaintBattler, FactoryAiTryToFaintDraw,
     FactoryAiTryToFaintTarget, RunTryToFaintInput, TryToFaintResult, MAX_TRY_TO_FAINT_DRAWS,
 };
+use crate::gen_tables;
 use crate::rng::advance_rng_value;
 
 /// `MAX_MON_MOVES` (`include/constants/pokemon.h`), mirrored by the TS
@@ -798,6 +799,9 @@ pub struct FactoryAiScoredChoice {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FactoryAiScoredDecisionError {
     Policy(FactoryAiDecisionPolicyError),
+    UnknownCheckBadMove {
+        move_id: u16,
+    },
     CheckBadMoveBarrier {
         move_slot: FactoryAiMoveSlot,
         move_id: u16,
@@ -867,6 +871,9 @@ impl std::fmt::Display for FactoryAiScoredDecisionError {
                 branch_name(*branch)
             ),
             Self::Policy(error) => error.fmt(f),
+            Self::UnknownCheckBadMove { move_id } => {
+                write!(f, "factory-ai-check-bad-move: unknown move {move_id}")
+            }
             Self::CheckBadMoveBarrier { move_slot, move_id, effect } => write!(
                 f,
                 "Factory AI check-bad-move barrier: slot {} move {move_id} effect {effect}",
@@ -1113,6 +1120,11 @@ pub fn choose_factory_ai_scored_decision(
     for score in &mut slot_scores {
         if !score.legal {
             continue;
+        }
+        if gen_tables::MOVES.get(score.move_id as usize).is_none() {
+            return Err(FactoryAiScoredDecisionError::UnknownCheckBadMove {
+                move_id: score.move_id,
+            });
         }
         match run_check_bad_move_preamble(CheckBadMovePreambleInput {
             rng,
