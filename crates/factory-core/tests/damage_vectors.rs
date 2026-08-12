@@ -14,8 +14,8 @@ use factory_core::damage_vectors_gen::{
     BattlerRow, ACCURACY_CASES, ACCURACY_ROLL_CASES, CALC_BASE_DAMAGE_CASES,
     CRIT_CHANCE_STAGE_CASES, CRIT_ROLL_CASES, ENDEAVOR_CASES, ENDEAVOR_RESOLVE_CASES,
     RANDOM_MULTIPLIER_CASES, STAB_CASES, STAT_STAGE_CASES, TYPE_EFFECTIVENESS_CASES,
-    TYPE_EFFECTIVENESS_TABLE,
 };
+use factory_core::gen_tables::TYPE_EFFECTIVENESS_TABLE;
 
 fn battler_from_row(row: BattlerRow) -> DamageBattler {
     DamageBattler {
