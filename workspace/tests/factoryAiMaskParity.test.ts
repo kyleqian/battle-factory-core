@@ -237,13 +237,12 @@ describe.skipIf(!wasmAvailable)("selectFactoryAiMask differential sweeps — ts 
 
   it("error site parity: the first offending field wins when several are simultaneously invalid", async () => {
     const wasm = await getWasmEngine();
-    const cases: Partial<FactoryAiMaskSelectionInput>[] = [
-      { levelMode: 3, battleMode: 2, factoryWinStreak: 0x1_0000, trainerOpponentId: 0x1_0000 },
-      { levelMode: 0, battleMode: 2, factoryWinStreak: 0x1_0000, trainerOpponentId: 0x1_0000 },
-      { levelMode: 0, battleMode: 0, factoryWinStreak: 0x1_0000, trainerOpponentId: 0x1_0000 },
+    const cases: FactoryAiMaskSelectionInput[] = [
+      { levelMode: 3, battleMode: 2, factoryWinStreak: 0x1_0000, trainerOpponentId: 0x1_0000 } as unknown as FactoryAiMaskSelectionInput,
+      { levelMode: 0, battleMode: 2, factoryWinStreak: 0x1_0000, trainerOpponentId: 0x1_0000 } as unknown as FactoryAiMaskSelectionInput,
+      { levelMode: 0, battleMode: 0, factoryWinStreak: 0x1_0000, trainerOpponentId: 0x1_0000 } as unknown as FactoryAiMaskSelectionInput,
     ];
-    for (const changes of cases) {
-      const i = input(changes);
+    for (const i of cases) {
       let message: string | undefined;
       try {
         ts.selectFactoryAiMask(i);
