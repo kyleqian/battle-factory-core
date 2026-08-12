@@ -2138,6 +2138,31 @@ callbacks, complete MPlay totals (**5 exact / 108 null**), service/arbitration,
 construction-clock wiring, runtime pointer/address identity, animation/Rust,
 and canonical Battle-2 work remain untouched.
 
+**2026-08-12 CGB4 v15 `mod` decision closure:** additive v15 preserves frozen
+v14 byte-for-byte and joins only the same **7/82** CGB4 rows by
+`sourceStateDigest`. Two fresh address-free Battle Scene OFF packet sets are
+byte-identical: anchor `0700a3f3…`, LILIANA `4375e86d…`, and legal-varied
+`6c903177…`; the distribution remains **0 anchor / 3 LILIANA / 4
+legal-varied**. The only new scalar is `MusicPlayerTrack.mod`, and all seven
+values are zero.
+
+Source/ELF/ROM guards close only the six bytes `0x082dfb80..0x082dfb86`:
+IWRAM `mod` read, compare, and the taken `beq _081DD994` to the existing exit.
+The route is **3 sequential Thumb halfwords + 1 taken refill = 12 cycles per
+row / 84 aggregate**, advancing the source-exact contiguous prefix from
+**5,254** to **5,338 cycles**. Evidence is
+`docs/issue55-m4a-note-body-cgb4-v15.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v15.json` (SHA256
+`9fb35b54…`); the packet repeat hashes are equal by construction and the
+Tier-1 report guard verifies the v14 prefix byte-for-byte.
+
+Closure stops before the immediately subsequent IWRAM
+`MusicPlayerTrack.lfoDelayC` read; no delay/oscillator state, later revisit,
+pointer/address identity, frame/duration, service/arbitration,
+construction-clock wiring, unsupported barrier, animation/Rust work, or
+canonical Battle-2 extension landed. The other 75 callbacks and complete MPlay
+totals (**5 exact / 108 null**) remain null.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
