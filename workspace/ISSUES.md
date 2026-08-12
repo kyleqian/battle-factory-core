@@ -1988,15 +1988,34 @@ cycles** across the seven rows, immediately before the first unresolved
 `docs/issue55-m4a-note-body-cgb4-v8.md` and
 `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v8.json`.
 
-The current contiguous boundary is the `pan_sweep` read/tst boundary before
-that branch. The v8 reducer fails closed for source, packet, scalar,
-observed-route, and storage-class mutations. The still-open remainder is the
-`pan_sweep` branch and later allocation fields, `clear_modM`, nonzero-
-`lfoDelay` routes, unobserved keyM/clamp/helper operand routes, the other **75**
-post-selection callbacks, complete note callbacks, post-callback glue,
-complete one-pass MPlay totals (**5 exact / 108 null**), service/arbitration,
-and construction-clock wiring. No unsupported barrier or canonical Battle-2
-extension was added.
+**2026-08-12 CGB4 pan-sweep caller-edge closure:** additive v9 packets preserve
+v8 byte-for-byte and capture only `ToneData.pan_sweep` at the exact pipelined
+`bne` boundary `0x082dfeec`, gated by the live ChnVolSetAsm return LR. Two
+fresh Battle Scene OFF runs per anchor/LILIANA/legal-varied case are
+byte-identical (anchor `13d65261…`, LILIANA `86d4d2c5…`, varied
+`87a32977…`). The same **7/82** rows all have `pan_sweep=0`: both the `0x80`
+and `0x70` `bne` tests are not taken and the caller stores `sweep=8`.
+
+The pinned `0x082dfeea..0x082dff04` route includes the sweep store, EWRAM
+`pitM` byte read, two IWRAM stack-argument loads, IWRAM
+`SoundInfo.MidiKeyToCgbFreq` function-pointer load, and fixed `BL call_r3`
+edge: **13** sequential Thumb halfwords, one taken refill, and one EWRAM
+access premium, or **34 cycles per callback / 238 aggregate**. This extends
+the contiguous source-exact boundary from **3,215** to **3,453 aggregate
+cycles** through `call_r3` entry `0x082dfcb4`. The pointer value, the dynamic
+`bx r3`, `MidiKeyToCgbFreq` body, and result are not captured or priced.
+Evidence: `docs/issue55-m4a-note-body-cgb4-v9.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v9.json`.
+
+The current contiguous boundary is fixed `call_r3` entry. The v9 reducer fails
+closed for source, packet, scalar, observed-route, and storage-class
+mutations. The still-open remainder is dynamic `call_r3`/`MidiKeyToCgbFreq`
+execution and result, later allocation fields, `clear_modM`, nonzero-
+`lfoDelay` routes, unobserved pan_sweep/keyM/clamp/helper operand routes, the
+other **75** post-selection callbacks, complete note callbacks, post-callback
+glue, complete one-pass MPlay totals (**5 exact / 108 null**),
+service/arbitration, and construction-clock wiring. No unsupported barrier or
+canonical Battle-2 extension was added.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 

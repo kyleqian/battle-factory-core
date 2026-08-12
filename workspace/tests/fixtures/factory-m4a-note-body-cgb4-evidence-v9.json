@@ -1,0 +1,341 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v9",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "caller": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1773-1789",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "soundSetup": {
+        "path": "reference/pokeemerald/src/m4a.c",
+        "lines": "308-311",
+        "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+      },
+      "soundInfo": {
+        "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+        "lines": "185-216",
+        "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+      },
+      "map": {
+        "path": "reference/pokeemerald/pokeemerald.map",
+        "sha256": "27c5f864f0f985637a3934946f256d64064977e2a240efd1ffe2c20b0dd11aa6"
+      }
+    },
+    "elf": {
+      "callerResume": "0x082dfecc",
+      "panSweepBranch": "0x082dfeea",
+      "callR3Entry": "0x082dfcb4",
+      "dynamicMidiKeyToCgbFreq": "0x082e0b34"
+    },
+    "compiledRegions": [
+      {
+        "role": "observed pan_sweep branches through BL call_r3 edge",
+        "start": "0x082dfeea",
+        "endExclusive": "0x082dff04",
+        "bytes": 26,
+        "sha256": "5d1d00835d0ae7e606894606bb2ac9643e9234434a930bc17b04998348a8e83c"
+      },
+      {
+        "role": "first pan_sweep branch",
+        "start": "0x082dfeea",
+        "endExclusive": "0x082dfeec",
+        "bytes": 2,
+        "sha256": "260fec2056d7e4bb1b8ca16084b7c0c53b0ef5519d515e02bbcb613273f1e4aa"
+      },
+      {
+        "role": "dynamic call_r3 entry, explicitly not priced",
+        "start": "0x082dfcb4",
+        "endExclusive": "0x082dfcb6",
+        "bytes": 2,
+        "sha256": "477db9ac7ca5efc12e37f882656b8fe5a363ffeb99b2e565a953d10c3c91ab21"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "notTakenConditionalBranchRefillCycles": 0,
+      "ewramDataAccessPremiumCyclesPerByteRead": 2,
+      "iwramDataAccessPremiumCyclesPerByteOrWord": 0,
+      "toneAndTrackDataClass": "EWRAM",
+      "channelStackAndSoundInfoDataClass": "IWRAM",
+      "dynamicTarget": "the IWRAM SoundInfo function-pointer load is priced as a load only; its value and bx r3 execution are excluded"
+    },
+    "sourceCycleAccounting": {
+      "observedPanSweepZeroRoute": {
+        "panSweep80Branch": {
+          "branches": 1,
+          "route": "not-taken",
+          "sequentialThumbHalfwords": 1,
+          "refills": 0
+        },
+        "panSweep70Branch": {
+          "branches": 1,
+          "route": "not-taken",
+          "sequentialThumbHalfwords": 1,
+          "refills": 0
+        },
+        "sweepSetup": {
+          "sequentialThumbHalfwords": 3,
+          "includes": [
+            "movs 0x70",
+            "tst",
+            "movs sweep=8"
+          ]
+        },
+        "sweepStore": {
+          "sequentialThumbHalfwords": 1,
+          "iwramByteStores": 1
+        },
+        "pitchRead": {
+          "sequentialThumbHalfwords": 1,
+          "ewramByteReads": 1,
+          "field": "MusicPlayerTrack.pitM"
+        },
+        "argumentAndFunctionPointerLoads": {
+          "sequentialThumbHalfwords": 5,
+          "iwramWordReads": 3,
+          "includes": [
+            "ToneData argument from stack",
+            "SoundInfo argument from stack",
+            "SoundInfo.MidiKeyToCgbFreq function-pointer load"
+          ]
+        },
+        "callR3CallerEdge": {
+          "sequentialThumbHalfwords": 2,
+          "takenControlTransferRefills": 1,
+          "destination": "0x082dfcb4"
+        },
+        "cycles": "13*2 + 1*6 + 1*2",
+        "totalCycles": 34
+      }
+    }
+  },
+  "frozenInputs": {
+    "acceptedV8EvidenceSha256": "9c0f6c687dab444970e50d11079b401da35e966a5f7f08e3e819dcf25871a8db",
+    "packetSha256": {
+      "anchor": "13d6526138359b145d707c0fdf55d074527e93e5e6d6b37d52bdd61c8414bedd",
+      "liliana": "86d4d2c5dfc6d63a74d5708fb50b8eb84d02b3218bedde9b066f30c278ce934e",
+      "factory-varied": "87a32977d6d69546e4720f2715ccf1315efebbee5d4826783cc35cbeca161fb2"
+    },
+    "packetRepeatSha256": {
+      "anchor": "13d6526138359b145d707c0fdf55d074527e93e5e6d6b37d52bdd61c8414bedd",
+      "liliana": "86d4d2c5dfc6d63a74d5708fb50b8eb84d02b3218bedde9b066f30c278ce934e",
+      "factory-varied": "87a32977d6d69546e4720f2715ccf1315efebbee5d4826783cc35cbeca161fb2"
+    }
+  },
+  "capture": {
+    "boundary": "pipelined 0x082dfeec at bne 0x082dfeea after the frozen ChnVolSetAsm-return route",
+    "scalars": [
+      "ToneData.pan_sweep only"
+    ],
+    "excluded": [
+      "pointer",
+      "frame",
+      "duration",
+      "callback identity",
+      "pitM value",
+      "stack argument values",
+      "function-pointer value",
+      "call_r3 body",
+      "MidiKeyToCgbFreq body",
+      "result bytes"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "exactPanSweepToCallR3Slices": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "exactPanSweepToCallR3Slices": 3
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "exactPanSweepToCallR3Slices": 4
+      }
+    },
+    "exactPanSweepToCallR3Callbacks": 7,
+    "panSweepToCallR3SourceCycleRange": {
+      "min": 34,
+      "max": 34,
+      "distinct": 1
+    },
+    "panSweepToCallR3SourceCycles": 238,
+    "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 3215,
+    "contiguousPrefixThroughCallR3EntrySourceCycles": 3453,
+    "observedPanSweepValues": {
+      "0": 7
+    },
+    "panSweep80BranchCounts": {
+      "bneTaken": 0,
+      "bneNotTaken": 7
+    },
+    "panSweep70BranchCounts": {
+      "bneTaken": 0,
+      "bneNotTaken": 7
+    },
+    "sweepStoreValues": {
+      "8": 7
+    },
+    "sweepStores": 7,
+    "pitMReads": 7,
+    "stackArgumentLoads": 14,
+    "functionPointerLoads": 7,
+    "callR3CallerEdges": 7,
+    "nullDynamicCallR3HelperCallbacks": 7,
+    "nullDynamicMidiKeyToCgbFreqCallbacks": 7,
+    "nullLaterAllocationFieldsCallbacks": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "branchCoverage": {
+    "observed": {
+      "panSweepReads": 7,
+      "panSweep80BneNotTaken": 7,
+      "panSweep70BneNotTaken": 7,
+      "sweepStores": 7,
+      "pitMReads": 7,
+      "toneDataStackArgumentLoads": 7,
+      "soundInfoStackArgumentLoads": 7,
+      "midiKeyToCgbFreqFunctionPointerLoads": 7,
+      "callR3CallerEdges": 7
+    },
+    "unobservedPanSweep80TakenRoute": null,
+    "unobservedPanSweep70TakenRoute": null,
+    "dynamicCallR3Body": null,
+    "dynamicMidiKeyToCgbFreqBodyAndResult": null
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 555,
+      "panSweep": 0,
+      "panSweepToCallR3Route": "pan-sweep-zero-to-call-r3-entry",
+      "panSweepToCallR3SourceCycles": 34,
+      "contiguousPrefixThroughCallR3EntrySourceCycles": 589,
+      "dynamicCallR3HelperSourceCycles": null,
+      "dynamicMidiKeyToCgbFreqSourceCycles": null,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "panSweep": 0,
+      "panSweepToCallR3Route": "pan-sweep-zero-to-call-r3-entry",
+      "panSweepToCallR3SourceCycles": 34,
+      "contiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "dynamicCallR3HelperSourceCycles": null,
+      "dynamicMidiKeyToCgbFreqSourceCycles": null,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "panSweep": 0,
+      "panSweepToCallR3Route": "pan-sweep-zero-to-call-r3-entry",
+      "panSweepToCallR3SourceCycles": 34,
+      "contiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "dynamicCallR3HelperSourceCycles": null,
+      "dynamicMidiKeyToCgbFreqSourceCycles": null,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "panSweep": 0,
+      "panSweepToCallR3Route": "pan-sweep-zero-to-call-r3-entry",
+      "panSweepToCallR3SourceCycles": 34,
+      "contiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "dynamicCallR3HelperSourceCycles": null,
+      "dynamicMidiKeyToCgbFreqSourceCycles": null,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 555,
+      "panSweep": 0,
+      "panSweepToCallR3Route": "pan-sweep-zero-to-call-r3-entry",
+      "panSweepToCallR3SourceCycles": 34,
+      "contiguousPrefixThroughCallR3EntrySourceCycles": 589,
+      "dynamicCallR3HelperSourceCycles": null,
+      "dynamicMidiKeyToCgbFreqSourceCycles": null,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "panSweep": 0,
+      "panSweepToCallR3Route": "pan-sweep-zero-to-call-r3-entry",
+      "panSweepToCallR3SourceCycles": 34,
+      "contiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "dynamicCallR3HelperSourceCycles": null,
+      "dynamicMidiKeyToCgbFreqSourceCycles": null,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "panSweep": 0,
+      "panSweepToCallR3Route": "pan-sweep-zero-to-call-r3-entry",
+      "panSweepToCallR3SourceCycles": 34,
+      "contiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "dynamicCallR3HelperSourceCycles": null,
+      "dynamicMidiKeyToCgbFreqSourceCycles": null,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "The observed zero ToneData.pan_sweep branch route, CGB sweep store, pitM and argument/function-pointer loads, and BL call_r3 caller edge through fixed call_r3 entry for the same seven callbacks.",
+    "contiguousPrefix": "3453 aggregate source cycles through call_r3 entry across seven callbacks (3215 accepted through the pan_sweep read/tst boundary + 238 new).",
+    "remainingDiscriminator": "The dynamic call_r3 bx r3 execution, MidiKeyToCgbFreq target/body/result, all later allocation fields, unobserved pan_sweep/keyM/helper/clamp routes, clear_modM, nonzero-lfoDelay routes, other 75 callbacks, complete note/glue/MPlay, service/arbitration, and construction clock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "All 7/82 observed zero-lfoDelay CGB4 callbacks have ToneData.pan_sweep=0, so both 0x80 and 0x70 bne branches are not taken and sweep=8 is stored. The 34-cycle caller-only route includes the pitM EWRAM read, three IWRAM argument/function-pointer loads, and fixed BL call_r3 edge; dynamic helper execution and its result remain null."
+}

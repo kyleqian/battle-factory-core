@@ -1,3 +1,25 @@
+## 1189 — [MAIN worker, 2026-08-12] **CGB4 `ChnVolSetAsm` observed routes source-closed**
+
+- **State:** #55 is source-exact for **2,935 contiguous cycles** through
+  `ChnVolSetAsm` return across the same observed **7/82** CGB4 callbacks.
+  Complete MPlay stays **5 exact / 108 null**; the construction clock is
+  unwired.
+- **Did:** chose path B and captured only four address-free entry scalars.
+  Twice-fresh packets prove both unsigned clamps take `bls` on all seven
+  callbacks. The complete helper costs **68 each / 476 total**, including two
+  ARM7TDMI multiply-internal premium cycles. Red-first and focused v3-v7
+  **19/19** are green.
+- **Next:** source-close one bounded post-helper caller-field slice, stopping
+  before its first unresolved branch. Keep unobserved clamp/nonzero-LFO
+  routes, other 75 callbacks, complete note/glue/MPlay, service/arbitration,
+  and clock wiring null.
+- **Notes:** packets SHA256 anchor `a2f62e3b…`, LILIANA `53db7226…`, varied
+  `406586b9…`; evidence `bec89adb…`, doc `269cae4c…`. No duration fit,
+  pointer/identity lookup, production import, unsupported barrier, or
+  canonical Battle-2 extension. Smoke **8 files / 375 passed**, typecheck,
+  full **984 files / 9,554 passed / 1 skipped**, and build **653 modules** are
+  green; the executable-frontier barrier ratchet is unchanged and passes.
+
 ## 1182 — [supervisor, 2026-08-11] **CGB4 body verified; animation and Rust lanes folded**
 
 - **State:** the observed CGB4 note route is source-exact through the
