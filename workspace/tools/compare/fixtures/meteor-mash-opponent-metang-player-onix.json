@@ -1,0 +1,14 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "METEOR_MASH",
+  "orientation": "opponent-to-player",
+  "scenario": "tools/battle-lab/mechanic-meteor-mash-opponent-metang-player-onix.json",
+  "probe": "tools/compare/meteorMashProbe.py",
+  "denseWindow": { "startFrame": 233, "endFrame": 447, "frameCount": 215 },
+  "evidenceSchema": "meteor-mash-dense-evidence/v1",
+  "evidenceSha256": "c46d8308b1f118fb2d0bd44d15850fb2b6557ce676f23ca228c9ca2a3e08fb63",
+  "secondFreshEvidenceSha256": "c46d8308b1f118fb2d0bd44d15850fb2b6557ce676f23ca228c9ca2a3e08fb63",
+  "rawRgbSha256": "941977c1b620219b4dc207ad0e4890660fc63402050ec087ddbf53a618c90d16",
+  "normalizedMapSha256": "3bb80e1b02869d9fa6b8c357487a6708c2cd15b807b3302a4dacfaadee59f35e"
+}

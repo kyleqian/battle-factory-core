@@ -78,6 +78,11 @@ if (
   || !effects.includes("const struct SpriteTemplate gMeteorMashStarSpriteTemplate")
   || !effects.includes("static void AnimMeteorMashStar_Step")
   || !effects.includes("sprite->data[5] == sprite->data[4]")
+  || !effects.includes("static void AnimMiniTwinklingStar(struct Sprite *sprite)")
+  || !effects.includes("rand = Random2() & 3")
+  || !effects.includes("y = Random2() & 7")
+  || !effects.includes("if (++sprite->data[0] < 30)")
+  || !effects.includes("if (sprite->data[0] > 60)")
   || !fight.includes("const struct SpriteTemplate gSpinningHandOrFootSpriteTemplate")
   || !movement.includes("void AnimTask_ShakeMon2(u8 taskId)")
   || move?.id !== 309
