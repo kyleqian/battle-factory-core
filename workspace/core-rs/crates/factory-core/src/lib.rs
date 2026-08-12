@@ -29,6 +29,7 @@ pub mod factory_ai_decision_policy;
 pub mod factory_ai_decision_policy_vectors_gen;
 pub mod factory_ai_mask;
 pub mod factory_ai_mask_vectors_gen;
+pub mod factory_ai_scored_decision_vectors_gen;
 pub mod factory_ai_try_to_faint;
 pub mod factory_ai_try_to_faint_vectors_gen;
 pub mod gen_tables;

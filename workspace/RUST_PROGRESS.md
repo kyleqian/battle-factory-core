@@ -5,15 +5,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R4 — [supervised session, 2026-08-11 night through 2026-08-12] **M5f-2a folded: mask-zero DecisionPolicy is native**
+## R4 — [supervised session, 2026-08-11 night through 2026-08-12] **M5f-2 folded: the pure DecisionPolicy is native**
 
-- **State:** rust-main = master `da5b9c13` + verified Rust folds through
-  M5f-2a `2d15da47`. M5's mask, CheckBadMove, CheckViability, TryToFaint,
-  and the mask-zero DecisionPolicy chooser are native; all boundary-bearing
-  surfaces through CheckViability cross the WASM differential harness.
-  Main-tree artifact is 253,791 bytes, sha256 `034833c1…`; Rust **674/674**
-  and post-fold smoke **375/375**. The scored policy and its final WASM
-  boundary remain. No open rust deferrals.
+- **State:** rust-main = master `27804f67` + verified Rust folds through
+  M5f-2b `d92cf1dd`/`acecf978`. The full pure DecisionPolicy (mask 0/1/7),
+  mask selector, CheckBadMove, TryToFaint, and CheckViability are native;
+  all boundary-bearing surfaces through CheckViability cross the WASM
+  differential harness. Main-tree artifact is 253,842 bytes, sha256
+  `86b488d6…`; Rust **680/680** and post-fold smoke **375/375**. Only the
+  final DecisionPolicy WASM boundary/adapter parity step remains in M5.
+  No open rust deferrals.
   Start-of-session merged baseline was full npm **993 files / 9,591 passed /
   1 pre-existing skip** + build; the M5e worker's same-commit full npm gate
   was **994 files / 9,600 passed / 1 skip** + build. No open rust deferrals.
@@ -275,6 +276,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`290b78f6…`); cargo **674/674** + fmt/clippy/wasm passed. After merging
   current master, artifact = 253,791 bytes (`034833c1…`) and smoke =
   **375/375**. Worker: gpt-5.6-terra/max, ~18 min, 1 commit.
+- **M5f-2b DONE (folds `d92cf1dd`/`acecf978`) — scored masks 1/7 native.**
+  Added the pure typed scored chooser, reusing the landed setup/tie seam and
+  all three leaf scorers. It preserves logic-ID-major whole-slot passes,
+  optional decision-owned turn-start draw, authoritative legal targets,
+  every delta and final score, and the shared stale `funcResult` channel from
+  the last writing TryToFaint slot across the complete CheckViability pass.
+  Four direct tests + a TS-executed corpus of **45 success + 13 error** cases:
+  all 15 nonempty legal subsets under both masks, winners/ties, multiple
+  seeds/cursors, CBM/TTF/CV choice influence, x4, draw-heavy and turn-owner
+  paths, stale preserve/overwrite, mask/request/legal and unknown-move errors.
+  Full retained result/trace receipts are field-hashed on both sides.
+  Supervisor audited exactly five `core-rs/**` files, reran generator
+  byte-identical (`b3b483de…`), cargo **680/680** + fmt/clippy/wasm, and
+  independently checked the mask-7 `[104,104,104,89]` directed score vector.
+  Worker full npm = **999 files / 9,620 passed / 1 skip** + build; post-fold
+  current-master artifact = 253,842 bytes (`86b488d6…`), smoke **375/375**.
+  Worker: gpt-5.6-sol/high, ~29 min, 2 commits.
 - **Prior wind-down gates (this tree, supervisor-run):** cargo
   **662/662** + fmt/clippy clean, artifact rebuilt (final hash
   9d53f91e…), parity union (7 suites) **757/757 in wasm mode**, smoke
@@ -284,10 +302,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   core-rs/-only (plus one rust-lane docs commit), so the TS side is
   bit-identical to those runs. No orphan worker worktrees or branches;
   RUST_DEFERRED.md has no open entries.
-- **Next:** M5f-2b — port the pure scored DecisionPolicy (masks 1/7), reusing
-  the mask-zero setup/tie seam and all three scoring leaves. Then M5f-3 adds
-  the final WASM boundary, adapter, and both-mode family parity. Re-check TS
-  conflicts before each brief.
+- **Next:** M5f-3 — add the final DecisionPolicy WASM boundary, adapter, and
+  both-mode family parity for mask 0/1/7. Re-check TS conflicts before brief,
+  then run the full wind-down gates and soaks if M5 closes.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
