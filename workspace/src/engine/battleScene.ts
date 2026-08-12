@@ -678,6 +678,7 @@ import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with
 import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
+import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
@@ -962,6 +963,7 @@ import {
   sceneOnSwordsDanceView,
   sceneOnDizzyPunchView,
   sceneOnFurySwipesView,
+  sceneOnMeteorMashView,
   sceneOnAstonishView,
   sceneOnFakeOutView,
   sceneOnSubstituteView,
@@ -1121,6 +1123,7 @@ import {
   type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
   type SceneOnFurySwipesConfig,
+  type SceneOnMeteorMashConfig,
   type SceneOnAstonishConfig,
   type SceneOnFakeOutConfig,
   type SceneOnSubstituteConfig,
@@ -1474,6 +1477,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const metangFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).METANG!;
 const dragonairFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DRAGONAIR!;
 const aronFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARON!;
 const nidorinaFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).NIDORINA!;
@@ -2076,6 +2080,10 @@ const battleAnimGhostBg = battleAnimGhostBgAsset as {
   tilemap: Tilemap;
 };
 const battleAnimPsychicBg = battleAnimPsychicBgAsset as { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
+const meteorMashArt = meteorMashAsset as {
+  background: { tileset: Tileset; palette: RgbColor[]; tilemap: Tilemap };
+  goldStars: { tileset: Tileset; palette: RgbColor[] };
+};
 const extremeSpeedBg = (extremeSpeedAsset as {
   background: {
     tileset: Tileset;
@@ -2695,6 +2703,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const metangBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).METANG!;
 const dragonairBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DRAGONAIR!;
 const aronBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARON!;
 const nidorinaBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NIDORINA!;
@@ -34548,6 +34557,147 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ILLUMISE used" : "Foe ILLUMISE used",
       "WISH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "METEOR_MASH") {
+    const meteorState = state as SceneOnMovePresentationState<SceneOnMeteorMashConfig>;
+    const view = sceneOnMeteorMashView(meteorState);
+    // OAM and affine callbacks are consumed by the following display's
+    // scanout. Keep the seam source-relative; this is a display latch, not a
+    // battle tick or a framebuffer lookup.
+    const displayed = sceneOnMeteorMashView({
+      ...meteorState,
+      age: state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "METANG"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "METANG"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged METEOR_MASH pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? metangBackSprite : metangFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const drawBackground = () => {
+      const bg = displayed.background === "cosmic"
+        ? meteorMashArt.background
+        : battleBg.static;
+      const palette = displayed.background === "cosmic"
+        ? [meteorMashArt.background.palette]
+        : battleBg.palette;
+      drawExtractedTileBg(fb, {
+        tileset: bg.tileset,
+        tilemap: bg.tilemap,
+        subpalettes: palette,
+      });
+    };
+    drawBackground();
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetIdle.x2 + displayed.targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const impactBackdrop = fb.slice();
+    const drawEffects = () => {
+      for (const star of displayed.stars) {
+        drawSpriteSheet(
+          fb,
+          subTileset(meteorMashArt.goldStars.tileset, 0, 4),
+          meteorMashArt.goldStars.palette,
+          star.x + star.x2 - 8,
+          star.y + star.y2 - 8,
+        );
+      }
+      if (displayed.spinningHand && displayed.spinningHandMatrix) {
+        drawSpriteSheetAffineRotate(
+          fb,
+          subTileset(battleAnimHandsAndFeet.tileset, 4, 4),
+          battleAnimHandsAndFeet.palette,
+          view.target.geometry.animationCenter.x,
+          view.target.geometry.animationCenter.y,
+          displayed.spinningHandMatrix.pa,
+          displayed.spinningHandMatrix.pb,
+          displayed.spinningHandMatrix.pc,
+          displayed.spinningHandMatrix.pd,
+          undefined,
+          true,
+        );
+      }
+      if (displayed.hitsplat) {
+        drawSpriteSheetAffineStretchBlendedOverFb(
+          fb,
+          battleAnimHitsplat.tileset,
+          battleAnimHitsplat.palette,
+          view.target.geometry.animationCenter.x - 16,
+          view.target.geometry.animationCenter.y - 16,
+          303,
+          303,
+          12,
+          8,
+          false,
+          impactBackdrop,
+        );
+      }
+    };
+    if (playerToOpponent) {
+      drawEffects();
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb,
+        attackerSprite.tileset,
+        attackerSprite.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawEffects();
+    }
+    const profile = state.config.fieldProfile;
+    const opponentMaxHp = Math.max(1, profile.opponentHp);
+    const playerMaxHp = Math.max(1, profile.playerHp);
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "METANG",
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "METANG" : "ONIX",
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "METANG used" : "Foe METANG used",
+      "METEOR MASH!",
       99,
     );
     return;
