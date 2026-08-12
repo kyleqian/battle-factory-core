@@ -41774,3 +41774,22 @@ git; the current live ledger keeps the three load-bearing entries only.
   VBlank/IRQ/audio arbitration, and clock wiring. No unsupported barrier,
   duration fit, pointer identity, gameplay/pixel, renderer, Rust, or ROADMAP/
   ISSUES change.
+## 1181 — [MAIN worker, 2026-08-11] **CGB4 allocation body prefix source-closed**
+
+- **State:** #55 is source-exact through the observed `_081DDC40` CGB4
+  allocation body and the zero-delay branch before `TrkVolPitSet` for **7/82**
+  callbacks. Complete MPlay remains **5 exact / 108 null**; the construction
+  clock stays unwired.
+- **Did:** twice-fresh OFF packets are byte-identical across anchor/LILIANA/
+  legal-varied (0/3/4 CGB4 callbacks): five track-null `ClearChain` routes are
+  **111** cycles, two previous-null/next-null owner routes are **135**, for
+  **825** body and **1,413** known prefix-through-body cycles. Captured only
+  address-free channel/track links and `lfoDelay=0`; helper bodies remain null.
+- **Next:** preserve null for `clear_modM`, `TrkVolPitSet`, later allocation
+  fields, the other 75 post-selection callbacks, complete callback/glue,
+  one-pass totals, service, arbitration, and `runFactoryConstructionClock`.
+- **Notes:** packet hashes anchor `818433d1…`, LILIANA `c0f11db9…`, varied
+  `b303a6ad…`; focused dependent group **24/24**, smoke **375/375**, full
+  **977 files / 9,437 passed / 1 skipped**, typecheck, and build **653
+  modules** are green. S8 stays closed at 33331; no unsupported barrier,
+  gameplay, renderer, pixel, Rust, or ROADMAP/ISSUES change.
