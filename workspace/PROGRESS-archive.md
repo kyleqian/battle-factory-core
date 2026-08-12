@@ -41953,3 +41953,23 @@ git; the current live ledger keeps the three load-bearing entries only.
   **757/757**. The latest engine-changing fold already passed vanilla
   **20/20** and full **60/60** soaks. Both branches are contained; no
   unsupported barrier or canonical Battle-2 extension.
+## 1190 — [supervisor, 2026-08-12] **CGB4 helper verified; Rust M5d-2 folded**
+
+- **State:** #55 is source-exact for **2,935 contiguous cycles** through
+  `ChnVolSetAsm` return across the observed **7/82** CGB4 callbacks. Complete
+  MPlay stays **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** audited the four-scalar entry packets and exact both-unclamped
+  helper route, including **2** multiply-internal premium cycles per callback;
+  regenerated v3-v7 **19/19**. Folded Rust M5d-2's **29** stat/screen
+  `CheckViability` effects through merge `fa09a5b0`; animation-main is
+  contained.
+- **Next:** source-close one coherent post-helper caller-field slice, stopping
+  before its first unresolved branch. Preserve unobserved clamp/nonzero-LFO
+  routes, the other 75 callbacks, complete note/glue/MPlay costs,
+  service/arbitration, and clock wiring null.
+- **Notes:** union full **984 files / 9,554 passed / 1 skipped**, build **653
+  modules**. Rust is **441/441**, fmt/clippy clean; rebuilt WASM is **138,463
+  bytes** (`6f84f91c…`) and forced parity is **757/757**. The latest
+  engine-changing fold remains covered by vanilla **20/20** and full **60/60**
+  soaks. Both branches are contained; no unsupported barrier or canonical
+  Battle-2 extension.
