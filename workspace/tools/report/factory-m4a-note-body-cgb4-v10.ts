@@ -185,7 +185,12 @@ export function reduceMPlayCgb4MidiKeyToCgbFreqTiming(state: unknown): Cgb4MidiK
     + pipelineRefills * TAKEN_REFILL_CYCLES
     + (ROM_WORD_TOTAL_CYCLES - THUMB_FETCH_CYCLES)
     + (ROM_BYTE_TOTAL_CYCLES - THUMB_FETCH_CYCLES);
-  const callR3BxEdgeSourceCycles = THUMB_FETCH_CYCLES + TAKEN_REFILL_CYCLES;
+  const callR3BxEdgeSourceCycles: 8 = 8;
+  const romLiteralWordPremiumCycles: 9 = 9;
+  const romNoiseTableBytePremiumCycles: 7 = 7;
+  if (callR3BxEdgeSourceCycles !== THUMB_FETCH_CYCLES + TAKEN_REFILL_CYCLES) fail("call_r3 timing class changed");
+  if (romLiteralWordPremiumCycles !== ROM_WORD_TOTAL_CYCLES - THUMB_FETCH_CYCLES
+    || romNoiseTableBytePremiumCycles !== ROM_BYTE_TOTAL_CYCLES - THUMB_FETCH_CYCLES) fail("GamePak data timing class changed");
   return Object.freeze({
     route: "cgb4-type4-noise-table",
     target: "MidiKeyToCgbFreq",
@@ -208,10 +213,10 @@ export function reduceMPlayCgb4MidiKeyToCgbFreqTiming(state: unknown): Cgb4MidiK
     iwramDataAccessPremiumCycles: IWRAM_ACCESS_PREMIUM_CYCLES,
     romLiteralWordReads: 1,
     romLiteralWordTotalCycles: ROM_WORD_TOTAL_CYCLES,
-    romLiteralWordPremiumCycles: ROM_WORD_TOTAL_CYCLES - THUMB_FETCH_CYCLES,
+    romLiteralWordPremiumCycles,
     romNoiseTableByteReads: 1,
     romNoiseTableByteTotalCycles: ROM_BYTE_TOTAL_CYCLES,
-    romNoiseTableBytePremiumCycles: ROM_BYTE_TOTAL_CYCLES - THUMB_FETCH_CYCLES,
+    romNoiseTableBytePremiumCycles,
     multiplyInstructions: 0,
     multiplyInternalCycles: 0,
     multiplyInternalPremiumCycles: 0,

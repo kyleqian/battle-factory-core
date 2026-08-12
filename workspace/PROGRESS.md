@@ -23,8 +23,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   discriminator slice.
 - **Notes:** v10 evidence SHA256 `3e3af127…`; full field-reference/init-guard
   census and WAITCNT/flash/release-ELF timing guards added; focused v3-v10
-  **31/31**, smoke **8 files / 375 passed**, and typecheck green. No duration
-  fit, runtime address lookup, production import, unsupported barrier,
+  **31/31**, smoke **8 files / 375 passed**, typecheck, exactly one full suite
+  **987 files / 9,566 passed / 1 skipped**, and build **653 modules** green. No
+  duration fit, runtime address lookup, production import, unsupported barrier,
   animation/Rust change, or canonical Battle-2 extension.
 
 ## 1193 — [supervisor, 2026-08-12] **CGB4 v9 verified; Rust M5d-3 folded**
