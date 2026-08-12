@@ -1,3 +1,23 @@
+## 1195 — [supervisor, 2026-08-12] **CGB4 v10 verified; Rust M5d-4 folded**
+
+- **State:** #55 is source-exact for **4,127 aggregate cycles** through
+  `MidiKeyToCgbFreq` return across the observed **7/82** zero-`lfoDelay` CGB4
+  callbacks. Complete MPlay stays **5 exact / 108 null** and the construction
+  clock is unwired.
+- **Did:** independently reviewed and corrected v10's instruction/refill
+  census plus `gNoiseTable[59]` result; regenerated focused v3-v10 **31/31**.
+  Folded Rust M5d-4's **22** charge-up/status-cure/screen/Substitute
+  `CheckViability` effects through merge `262ad551`; **28** table effects
+  remain behind the native barrier. Animation-main is contained.
+- **Next:** source-close the straight-line post-helper caller tail through
+  `ply_note` return if fully provable, stopping before any unresolved state.
+  Preserve unobserved helper/key routes, the other 75 callbacks, complete
+  note/glue/MPlay, service/arbitration, and clock wiring null.
+- **Notes:** union full **987 files / 9,566 passed / 1 skipped**, build **653
+  modules**. Rust is **601/601**, fmt/clippy clean; rebuilt WASM is **138,222
+  bytes** (`db974b04…`) and forced parity is **757/757**. No engine-changing
+  fold, unsupported barrier, or canonical Battle-2 extension.
+
 ## 1194 — [MAIN worker, 2026-08-12] **CGB4 v10 helper return source-closed**
 
 - **State:** #55 is source-exact for **4,127 aggregate cycles** through

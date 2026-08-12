@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1198 — [MAIN worker, 2026-08-12] **CGB4 v12 post-`ply_note` dispatcher source-closed**
+
+- **State:** #55 is source-exact for **4,589 aggregate cycles** through the
+  next `MusicPlayerTrack.cmdPtr` load across the same observed **7/82** CGB4
+  callbacks: **4,435** unchanged complete-`ply_note` cycles plus **154**
+  post-callback glue cycles. Complete MPlay stays **5 exact / 108 null** and
+  the construction clock is unwired.
+- **Did:** proved the real return owner from source/ELF/ROM: MPlayMain's
+  dedicated note `BL` at `0x082dfb3e` preserves LR through `call_r3`, so
+  `ply_note` resumes at caller branch `0x082dfb42`, not the generic jump-table
+  tail. Frozen-v11-only v12 joins solely by `sourceStateDigest`; each row takes
+  the fixed return branch, source-proven `wait==0` loop, and IWRAM `cmdPtr`
+  load for **22 cycles**. It stops before `ldrb r1, [r2]` because v11 retains
+  neither the current command byte nor `cmdPtr` target storage class.
+- **Next:** retain that exact command-byte/storage discriminator, the other 75
+  note callbacks, later command/track-loop work, complete MPlay totals,
+  service/arbitration, and clock wiring null unless a new bounded receipt
+  proves them source-generally.
+- **Notes:** v12 evidence/doc SHA256 `d8e94417…` / `821b488f…`; red-first
+  route/mutation/count guards and focused v3-v12 **41/41**, smoke **8 files /
+  375 passed**, typecheck, exactly one full suite **989 files / 9,576 passed /
+  1 skipped**, and build **653 modules** are green. No duration fit, runtime
+  pointer/address identity, production import, unsupported barrier, animation/
+  Rust change, or canonical Battle-2 branch.
+
 ## 1197 — [supervisor, 2026-08-12] **CGB4 v11 verified; Rust M5d completed and folded**
 
 - **State:** #55 now has exact complete-`ply_note` totals for the observed
@@ -51,23 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Frozen v10 SHA256 `3e3af127…`; v11 uses **no** duration fit, runtime
   identity/address lookup, production import, unsupported barrier, animation/
   Rust change, or canonical Battle-2 branch.
-
-## 1195 — [supervisor, 2026-08-12] **CGB4 v10 verified; Rust M5d-4 folded**
-
-- **State:** #55 is source-exact for **4,127 aggregate cycles** through
-  `MidiKeyToCgbFreq` return across the observed **7/82** zero-`lfoDelay` CGB4
-  callbacks. Complete MPlay stays **5 exact / 108 null** and the construction
-  clock is unwired.
-- **Did:** independently reviewed and corrected v10's instruction/refill
-  census plus `gNoiseTable[59]` result; regenerated focused v3-v10 **31/31**.
-  Folded Rust M5d-4's **22** charge-up/status-cure/screen/Substitute
-  `CheckViability` effects through merge `262ad551`; **28** table effects
-  remain behind the native barrier. Animation-main is contained.
-- **Next:** source-close the straight-line post-helper caller tail through
-  `ply_note` return if fully provable, stopping before any unresolved state.
-  Preserve unobserved helper/key routes, the other 75 callbacks, complete
-  note/glue/MPlay, service/arbitration, and clock wiring null.
-- **Notes:** union full **987 files / 9,566 passed / 1 skipped**, build **653
-  modules**. Rust is **601/601**, fmt/clippy clean; rebuilt WASM is **138,222
-  bytes** (`db974b04…`) and forced parity is **757/757**. No engine-changing
-  fold, unsupported barrier, or canonical Battle-2 extension.

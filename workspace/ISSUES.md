@@ -2058,12 +2058,38 @@ The seven rows therefore now carry exact complete-`ply_note` callback costs;
 only the other 75 note callbacks stay null.
 
 The v11 reducer fails closed for route, helper/continuation, storage-class,
-source/ROM/ELF, frozen-v10, and source-state-join mutations. The still-open
-remainder is post-callback MPlay dispatcher/glue, the other **75** note
-callbacks, unobserved helper/key/nonzero-`lfoDelay` routes, and the still-
-unpriced complete-MPlay aggregate (**5 exact / 108 null** on the existing MPlay
-receipt), service/arbitration, and construction-clock wiring. No new unsupported
-barrier or canonical Battle-2 extension was added.
+source/ROM/ELF, frozen-v10, and source-state-join mutations.
+
+**2026-08-12 CGB4 v12 post-`ply_note` dispatcher closure:** additive v12 reads
+only frozen v11 (evidence SHA256 `1ad73dc8…`), verifies it regenerates
+byte-for-byte, preserves the same seven complete-`ply_note` costs, and joins
+only by `sourceStateDigest`. Source/ELF/ROM prove the actual caller ownership:
+MPlayMain's dedicated note `BL` at `0x082dfb3e` writes Thumb LR
+`0x082dfb43`; `call_r3`'s `bx r3` preserves it; and `ply_note` returns to
+aligned caller instruction `0x082dfb42`, `b _081DD938`, rather than the
+generic jump-table callback tail.
+
+The return-target branch costs **8** cycles. The IWRAM `wait` read, compare,
+and taken zero branch cost **12**; zero is source-proven because the command
+loop reached the note only through that same zero test and `ply_note` never
+accesses `wait`. The following IWRAM `cmdPtr` word load costs **2**. Thus v12
+adds **22 cycles each / 154 aggregate**, extending the contiguous boundary
+from **4,435** to **4,589 aggregate cycles** through the command-pointer load.
+Five separately hashed ROM regions plus source/ELF symbols guard return
+ownership and every instruction/refill/data class. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v12.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v12.json` (SHA256
+`d8e94417…`).
+
+The exact next instruction is `ldrb r1, [r2]`. Frozen v11 retains neither the
+current command byte nor the storage class targeted by
+`MusicPlayerTrack.cmdPtr`, and neither is statically source-general, so v12
+stops before the dereference. The still-open remainder is that command-byte/
+storage discriminator and later track-loop work for these seven callbacks,
+the other **75** note callbacks and their glue, unobserved helper/key/nonzero-
+`lfoDelay` routes, the complete-MPlay aggregate (**5 exact / 108 null**),
+service/arbitration, and construction-clock wiring. No new unsupported barrier
+or canonical Battle-2 extension was added.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
