@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R3 — [supervised session, 2026-08-11 eve] **M4 COMPLETE: battle-kernel leaf family ported end-to-end (M4a+M4b+M4c folded)**
+## R3 — [supervised session, 2026-08-11 eve] **M4 COMPLETE + M5 opened: battle-kernel family end-to-end; AI family scouted and groundwork folded**
 
 - **State:** rust-main = master (merged at orient, fast-forward) + the
   verified M4a fold `30a6da2a`. **M4a DONE:** all 13 exported
@@ -62,9 +62,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   union **660/660 in wasm mode**, smoke 375/375; Quick Claw
   threshold-boundary pair + speed-tie parity re-derived from the TS
   module by hand.
-- **Next:** wind-down union gates (ONE full npm test + build + soak per
-  the standing cadence) before 21:40, then M5. A docs-only M5 scout step
-  may land first if time allows.
+- **M5 scout folded (`91fcc87e`):** `docs/rust-m5-scout.md` — next family
+  is the **Factory AI move-scoring leaves** (maskSelection → CheckBadMove
+  → boundary → CheckViability in effect-group batches → TryToFaint +
+  DecisionPolicy). factorySwap (state fused with #55-adjacent ball-anim
+  presentation), round-policy consumers (= opponent selection, the R2
+  exclusion), and draft-screen (no separable state core) all REJECTED
+  with receipts. Supervisor re-verified: zero ISSUES/PROGRESS hits for
+  factoryAi*, maskSelection imports only the policy JSON.
+- **M5a DONE (fold `be53c146`):** `factory_ai_mask.rs`
+  (select_factory_ai_mask + receipt, branch id as #[repr(u8)]
+  discriminant; policy JSON codegen-validated into gen_tables so the
+  no-branch-matched failPolicy is provably unreachable → documented
+  .expect(); the 4 RangeError sites ported as FactoryAiMaskError with
+  the documented quirk that Rust's u8/u32 inputs exclude TS's
+  negative/NaN triggers — upper-bound violations remain) + 529
+  TS-generated success vectors + 8 error-site vectors + **MOVES 355-row
+  codegen table** (effect ids parsed from battle_move_effects.h, target/
+  flag bits from battle.h:46-53 / pokemon.h:208-213). Supervisor rerun:
+  cargo **145/145** + fmt/clippy, both generators byte-idempotent,
+  FOCUS_PUNCH row cross-checked JSON↔table↔header (effect 170,
+  priority −3), tent+brain mask case re-derived from TS by hand.
+- **Wind-down gates (this tree, supervisor-run):** cargo **145/145**,
+  fmt/clippy clean, artifact rebuilt 80,342 B, parity union
+  (rng+damage+turn+rental+partyMember) **660/660 in BOTH engine modes**,
+  smoke 375/375, full npm test **959 files / 9,373 passed / 1
+  pre-existing skip**, npm build green, soak **vanilla 20/20 OK** +
+  **full 60/60 OK**. No orphan worker worktrees or branches;
+  RUST_DEFERRED.md has no open entries.
+- **Next:** M5b — `factoryAiCheckBadMove.ts` native port (3657 lines,
+  109 table effects; batch by effect group per the scout's sizing
+  warning), then M5c boundary+adapter+parity for M5a+M5b. Re-verify the
+  scout's conflict check at orient per the standing M4+ rule.
+- **Notes (ops):** the two parity suites HARD-FAIL under plain `npm test`
+  in a tree whose gitignored `artifacts/wasm/factory_wasm.wasm` is
+  present but STALE (absent → skip; stale → 204 failures, seen live this
+  session when the R2-era 62,344 B artifact met the M4 suites). Recipe:
+  `./core-rs/build-wasm.sh` before any full suite in a supervisor tree —
+  exactly what launcher hardening `cfd80cb7` does for main-supervisor
+  folds. Artifact hash is reproducible per source state but shifts with
+  any factory-core change (M5a moved it despite no fw_ change).
 - **Notes:** worker-reported TS quirks worth keeping: (1) Plus/Minus only
   boosts spAttack, never attack (damageCalc.ts:371-376) — dead weight on
   physical moves; (2) CritChanceInput.attackerSpecies declared but never
