@@ -2209,6 +2209,29 @@ totals (**5 exact / 108 null**), service/arbitration, construction-clock
 wiring, production, presentation, animation/Rust, and canonical Battle-2 work
 remain null; no unsupported-barrier or canonical-recording ratchet changed.
 
+**2026-08-12 CGB4 v18 observed continuation-body closure:** source-only v18
+preserves frozen v17 evidence/report and its three address-free packets
+byte-for-byte (evidence `e4ff5796…`, doc `884ad63d…`, packets
+`5dca04f7…` / `68fb3aa3…` / `e5e3ce1a…`), verifies v17 regenerates, and joins
+only its same **7/82** `sourceStateDigest` rows. No oracle data, flags,
+next-track identity, or track count is read or inferred.
+
+Source/ELF/exact-ROM guards close only `0x082dfbd4..0x082dfbdc` bytes
+`50 20 2d 18 5b 00 6b e7`: `movs r0, MusicPlayerTrack_size; adds r5, r0;
+lsls r3, 1; b _081DD87C`. The established ARM7TDMI classes give four
+sequential Thumb halfwords plus one taken branch refill: **14 cycles each /
+98 aggregate**, advancing the seven-row contiguous prefix from **5,394** to
+**5,492 cycles**. Evidence is `docs/issue55-m4a-note-body-cgb4-v18.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v18.json` (SHA256
+`812f3f49…`).
+
+The closure stops before `_081DD87C`'s first `ldrb r0, [r5, o_MusicPlayerTrack_flags]`; next-track flags, track identity,
+`trackCount`, and later loop body remain null. The v17 exit successor remains
+**null**, as do the other **75** callbacks, complete MPlay totals (**5 exact /
+108 null**), service/arbitration, and construction-clock wiring. No production,
+presentation, animation/Rust, canonical Battle-2, unsupported-branch, or
+canonical-recording import change landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

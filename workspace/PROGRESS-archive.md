@@ -1,3 +1,22 @@
+## 1202 — [supervisor, 2026-08-12] **CGB4 v12-v15 verified; lane tips contained**
+
+- **State:** #55 has a source-exact **5,338-cycle** aggregate prefix through
+  the post-note zero-`mod` decision for the observed **7/82** CGB4 callbacks.
+  Complete MPlay remains **5 exact / 108 null** and the construction clock is
+  unwired.
+- **Did:** independently regenerated v12-v15 and audited their timing classes.
+  Corrected v15's handoff: zero `mod` takes `_081DD994`, skips `lfoDelayC`,
+  and stops before `mov r3, sl`. Watched rust-main through its supervisor's
+  05:31 wind-down; rust-main and animation-main both remain contained, so no
+  fold or WASM/soak gate was triggered.
+- **Next:** source-close only a separately evidenced track-loop-exit slice
+  beginning at `_081DD994`; retain the other 75 callbacks, complete MPlay,
+  service/arbitration, and construction-clock wiring null.
+- **Notes:** final union **992 files / 9,588 passed / 1 skipped**, build **653
+  modules**; focused v15 **4/4**, diff check and tree clean. No production
+  engine/presentation change, unsupported barrier, or canonical Battle-2
+  extension.
+
 ## 1201 — [MAIN worker, 2026-08-12] **CGB4 v15 mod decision source-closed**
 
 - **State:** #55 is source-exact for **5,338 aggregate cycles** through the
