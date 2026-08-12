@@ -120,13 +120,13 @@ export function reduceMPlayCgb4PostTrkVolPitSetAllocationTiming(
     fieldCopyIwramByteStores: 4,
     fieldCopyIwramHalfwordStores: 1,
     fieldCopyIwramWordStores: 3,
-    fieldCopyEwramDataAccessPremiumCycles: 5 * 2,
+    fieldCopyEwramDataAccessPremiumCycles: 5 * 2 as 10,
     fieldCopyIwramDataAccessPremiumCycles: 0,
-    fieldCopyCycles: 17 * 2 + 0 * 6 + 5 * 2,
+    fieldCopyCycles: (17 * 2 + 0 * 6 + 5 * 2) as 44,
     callerBlSequentialThumbHalfwords: 2,
     callerBlPipelineRefills: 1,
-    callerBlCycles: 2 * 2 + 1 * 6,
-    cycles: 17 * 2 + 0 * 6 + 5 * 2 + 2 * 2 + 1 * 6,
+    callerBlCycles: (2 * 2 + 1 * 6) as 10,
+    cycles: (17 * 2 + 0 * 6 + 5 * 2 + 2 * 2 + 1 * 6) as 54,
   } as const);
 }
 
