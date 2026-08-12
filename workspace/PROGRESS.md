@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1157 — [supervisor, 2026-08-11] **#55 wait/LFO closure verified**
+
+- **State:** `master` is green with channel-gate and wait/LFO components both
+  source-exact for **108/108** one-pass sixth-player rows. Complete MPlay still
+  stays **5 exact / 108 null**; #55 is unwired and LUKAS remains **8/50**.
+- **Did:** reviewed the address-free `_081DD938` packet and 28-cycle mod-zero
+  route, confirmed **972/972** visits and fixed **252-cycle** row totals, and
+  independently reran wait/LFO plus ClearChain regeneration **8/8**.
+- **Next:** source-capture and instruction-count one bounded command dispatch
+  or callback family. Preserve nulls for every unclosed callback and complete
+  one-pass total; do not wire `runFactoryConstructionClock` prematurely.
+- **Notes:** worker full gate **959 files / 9,161 passed / 1 skipped**, smoke
+  **375/375**, typecheck, build **649 modules**. Both lane branches are fully
+  folded; no unsupported barrier or production/presentation change.
+
 ## 1156 — [MAIN worker, 2026-08-11] **#55 wait/LFO mod-zero component source-closed**
 
 - **State:** the sixth-player wait/LFO component is source-exact for
@@ -36,21 +51,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** worker full gate **958 files / 9,157 passed / 1 skipped**, smoke
   **375/375**, typecheck, build **649 modules**. No unsupported barrier,
   production/presentation change, or Rust/WASM artifact delta.
-
-## 1154 — [MAIN worker, 2026-08-11] **#55 ClearChain channel gate source-closed**
-
-- **State:** all **108/108** sixth-player one-pass channel-gate components are
-  source-exact. #55 remains open, complete MPlay costs stay **5 exact / 108
-  null**, and the construction clock stays null/unwired. S8 stays closed;
-  Battle 2 stops at 33331; #56 is untouched; LUKAS remains **8/50**.
-- **Did:** twice-fresh address-free OFF packets capture all **47/47** compiled
-  `ClearChain` gate calls across the prior **39/108** null rows. Source/ELF
-  accounting closes three observed link routes at **85/87/89** cycles and
-  lifts the full gate component to **108/108** exact (**204–613**, 70 totals).
-- **Next:** capture and source-reduce one bounded earlier per-track component:
-  wait/LFO or a bounded command-callback family. Keep every one-pass complete
-  MPlay cost null and do not wire `runFactoryConstructionClock`.
-- **Notes:** no engine/pixel identity changed, so LUKAS 462–511 was not rerun.
-  Focused **8/8**, smoke **375/375**, typecheck, full **958 files / 9,157
-  passed / 1 skipped**, and build **649 modules** are green. No
-  unsupported-branch barrier or presentation change.
