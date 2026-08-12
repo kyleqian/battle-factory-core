@@ -566,6 +566,10 @@ import {
   type CrushClawState,
 } from "./crushClaw.ts";
 import {
+  furySwipesAtAge,
+  type FurySwipesState,
+} from "./furySwipes.ts";
+import {
   takeDownAtAge,
   type TakeDownState,
 } from "./takeDown.ts";
@@ -2298,6 +2302,14 @@ export interface SceneOnDizzyPunchConfig {
   readonly attackerPersonality: number;
 }
 
+/** Narrow Scene-ON seam for the source-derived Fury Swipes body. */
+export interface SceneOnFurySwipesConfig {
+  readonly move: "FURY_SWIPES";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnAstonishConfig {
   readonly move: "ASTONISH";
   readonly attacker: SceneOnPresentationBattler;
@@ -2782,6 +2794,7 @@ export type SceneOnMoveConfig =
   | SceneOnExplosionConfig
   | SceneOnDynamicPunchConfig
   | SceneOnDizzyPunchConfig
+  | SceneOnFurySwipesConfig
   | SceneOnAstonishConfig
   | SceneOnFakeOutConfig
   | SceneOnSubstituteConfig
@@ -3439,6 +3452,12 @@ export interface SceneOnDynamicPunchView extends DynamicPunchState {
 }
 
 export interface SceneOnDizzyPunchView extends DizzyPunchState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFurySwipesView extends FurySwipesState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -6840,6 +6859,26 @@ export function sceneOnDizzyPunchView(
       state.config.attacker.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+export function sceneOnFurySwipesView(
+  state: SceneOnMovePresentationState,
+): SceneOnFurySwipesView {
+  if (state.config.move !== "FURY_SWIPES") {
+    throw new Error(`expected FURY_SWIPES presentation, got ${state.config.move}`);
+  }
+  const attacker = state.config.attacker;
+  const target = state.config.target;
+  return {
+    age: state.age,
+    attacker,
+    target,
+    ...furySwipesAtAge(state.age, {
+      attackerSide: attacker.geometry.side,
+      targetSide: target.geometry.side,
+      targetCenter: target.geometry.animationCenter,
+    }),
   };
 }
 
