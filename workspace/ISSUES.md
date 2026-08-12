@@ -2283,6 +2283,29 @@ v17 exit successor, other 75 callbacks, complete MPlay totals (**5 exact /
 No production, presentation, animation/Rust, canonical Battle-2,
 unsupported-branch, or recording-import ratchet change landed.
 
+**2026-08-12 CGB4 v21 clock-exit decision closure:** additive v21 freezes
+v20 evidence/report byte-for-byte and joins only its three frozen EXIST-clear
+`sourceStateDigest` rows. Two fresh address-free Battle Scene OFF packet sets
+are byte-identical (anchor `f13515a2…`, LILIANA `11d4dab5…`, legal-varied
+`7adb7dfd…`). Each packet retains exactly the join digest plus one boolean:
+`r4Nonzero`; every observed row is true. It retains no pointer, runtime
+address, frame, duration, clock scalar, track identity/count, or later state.
+
+Source/ELF/exact-ROM close only `_081DD9A4` through its `bne`: clock `ldr`,
+`adds`, clock `str`, `cmp r4, 0`, and branch. `MusicPlayerInfo` is source/ELF
+IWRAM storage, so the two word accesses add zero premium. The three observed
+nonzero branches each take the established six-cycle refill: **5×2 + 6 = 16
+cycles each / 48 aggregate**, advancing the prefix from **5,626** to
+**5,674 cycles**. The branch stops before any successor instruction; selected
+successor, status write, tempo/body, other 75 callbacks, complete MPlay,
+service/arbitration, and construction-clock wiring remain null. All four
+EXIST-set rows retain null v21 fields before `_081DD886`. Generated evidence:
+`docs/issue55-m4a-note-body-cgb4-v21.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v21.json` (SHA256
+`a5581d78…`); both frozen v20 artifacts and v21 packets are explicitly
+verified absent from production imports. No `src/**`, unsupported barrier,
+animation/Rust, or canonical Battle-2 change landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
