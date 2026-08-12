@@ -18,6 +18,8 @@ use factory_core::mon_construction::{
 };
 use factory_core::rental_generation::{self, GenerationError, GenerationInput, GenerationResult};
 use factory_core::rng;
+use factory_core::turn_order::{self, TurnOrderBattler, WeatherState};
+use factory_core::turn_rng;
 
 /// ABI version this build implements. Bumps on any breaking layout change.
 #[no_mangle]
@@ -740,6 +742,243 @@ pub extern "C" fn fw_roll_accuracy_hits(calc: i32, rng_roll: u32) -> u32 {
     u32::from(damage_calc::roll_accuracy_hits(calc, rng_roll as u16))
 }
 
+// === turn_order / turn_rng surface (M4c) ====================================
+//
+// Every export below is a thin scalar/buffer wrapper over
+// `factory_core::turn_order`/`factory_core::turn_rng`'s pure functions (see
+// those modules' doc comments for the numeric id spaces: ability/hold-effect
+// ids from src/data/gen/ability-item-hooks.json .universes, same ids
+// damage_calc.rs's own boundary above uses). Booleans cross as u32 0/1.
+
+/// Fixed-width `TurnOrderBattler` encoding (all integers little-endian).
+///
+/// ```text
+/// offset  width  field
+/// 0       4      speed (u32)
+/// 4       1      speed_stage (u8)
+/// 5       4      move_priority (i32)
+/// 9       1      is_paralyzed (u8, 0/1)
+/// 10      2      ability (u16, ABILITY_NONE == 0)
+/// 12      2      hold_effect (u16, HOLD_EFFECT_NONE == 0)
+/// 14      4      hold_effect_param (u32)
+///                width == 18
+/// ```
+const TURN_ORDER_BATTLER_WIDTH: usize = 18;
+
+fn decode_turn_order_battler(bytes: &[u8]) -> TurnOrderBattler {
+    TurnOrderBattler {
+        speed: u32::from_le_bytes(bytes[0..4].try_into().unwrap()),
+        speed_stage: bytes[4],
+        move_priority: i32::from_le_bytes(bytes[5..9].try_into().unwrap()),
+        is_paralyzed: bytes[9] != 0,
+        ability: u16::from_le_bytes(bytes[10..12].try_into().unwrap()),
+        hold_effect: u16::from_le_bytes(bytes[12..14].try_into().unwrap()),
+        hold_effect_param: u32::from_le_bytes(bytes[14..18].try_into().unwrap()),
+    }
+}
+
+fn weather_from_flags(is_raining: u32, is_sunny: u32) -> WeatherState {
+    WeatherState { is_raining: is_raining != 0, is_sunny: is_sunny != 0 }
+}
+
+/// `effectiveSpeed`. Reads a fixed `TURN_ORDER_BATTLER_WIDTH`-byte buffer at
+/// `battler_ptr` (layout documented on `decode_turn_order_battler`) and
+/// returns the effective speed directly (this function cannot fail).
+///
+/// # Safety
+/// `battler_ptr` must point to at least `TURN_ORDER_BATTLER_WIDTH` (18)
+/// readable, initialized bytes encoding a `TurnOrderBattler` per the
+/// documented layout. Same ownership contract as `fw_calculate_base_damage`.
+#[no_mangle]
+pub unsafe extern "C" fn fw_effective_speed(
+    battler_ptr: *const u8,
+    is_raining: u32,
+    is_sunny: u32,
+    random_turn_number: u32,
+) -> u32 {
+    // SAFETY: caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(battler_ptr, TURN_ORDER_BATTLER_WIDTH) };
+    let battler = decode_turn_order_battler(bytes);
+    turn_order::effective_speed(
+        &battler,
+        weather_from_flags(is_raining, is_sunny),
+        random_turn_number as u16,
+    )
+}
+
+/// `GetWhoStrikesFirst`. Reads two fixed `TURN_ORDER_BATTLER_WIDTH`-byte
+/// buffers (layout documented on `decode_turn_order_battler`) and returns
+/// `0`/`1`/`2` directly (this function cannot fail).
+///
+/// # Safety
+/// `battler1_ptr`/`battler2_ptr` must each point to at least
+/// `TURN_ORDER_BATTLER_WIDTH` (18) readable, initialized bytes encoding a
+/// `TurnOrderBattler` per the documented layout.
+#[no_mangle]
+pub unsafe extern "C" fn fw_get_who_strikes_first(
+    battler1_ptr: *const u8,
+    battler2_ptr: *const u8,
+    speed_tie_rng_roll: u32,
+    is_raining: u32,
+    is_sunny: u32,
+    random_turn_number: u32,
+) -> u32 {
+    // SAFETY: caller contract above.
+    let (b1, b2) = unsafe {
+        let bytes1 = std::slice::from_raw_parts(battler1_ptr, TURN_ORDER_BATTLER_WIDTH);
+        let bytes2 = std::slice::from_raw_parts(battler2_ptr, TURN_ORDER_BATTLER_WIDTH);
+        (
+            decode_turn_order_battler(bytes1),
+            decode_turn_order_battler(bytes2),
+        )
+    };
+    u32::from(turn_order::get_who_strikes_first(
+        &b1,
+        &b2,
+        speed_tie_rng_roll as u16,
+        weather_from_flags(is_raining, is_sunny),
+        random_turn_number as u16,
+    ))
+}
+
+/// `sortBattlersByTurnOrder`. Reads a single input buffer at `input_ptr`
+/// (`input_len` bytes) and returns an `fw_alloc`'d buffer of `battler_count
+/// * 4` little-endian `u32` battler ids (the sorted order) — no length
+/// prefix, since the caller already knows `battler_count`. The caller must
+/// `fw_free(ptr, battler_count * 4)`.
+///
+/// # Input buffer layout (all integers little-endian)
+///
+/// ```text
+/// offset          width                field
+/// 0               4                    battler_count (u32) N
+/// 4               4                    roll_count (u32) R
+/// 8               N * 4                battler_ids (u32 each)
+/// 8 + N*4         N * 18               battlers (TurnOrderBattler, 18
+///                                      bytes each — see
+///                                      decode_turn_order_battler — same
+///                                      order as battler_ids)
+/// 8 + N*22        R * 2                speed_tie_rng_rolls (u16 each)
+/// 8 + N*22 + R*2  1                    is_raining (u8)
+/// +1              1                    is_sunny (u8)
+/// +1              4                    random_turn_number (u32)
+///                 total: 8 + N*22 + R*2 + 6
+/// ```
+///
+/// # Safety
+/// `input_ptr` must point to at least `input_len` readable, initialized
+/// bytes encoding the layout above (`input_len` must equal the buffer's own
+/// self-described total width, i.e. `8 + N*22 + R*2 + 6` for its own
+/// embedded `N`/`R` — an undersized `input_len` may cause an out-of-bounds
+/// slice panic, same failure mode as every other fixed-width decoder in
+/// this crate).
+#[no_mangle]
+pub unsafe extern "C" fn fw_sort_battlers_by_turn_order(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    // SAFETY: caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len as usize) };
+    let battler_count = u32::from_le_bytes(bytes[0..4].try_into().unwrap()) as usize;
+    let roll_count = u32::from_le_bytes(bytes[4..8].try_into().unwrap()) as usize;
+
+    let ids_start = 8;
+    let ids_end = ids_start + battler_count * 4;
+    let mut battler_ids: Vec<u32> = Vec::with_capacity(battler_count);
+    for i in 0..battler_count {
+        let off = ids_start + i * 4;
+        battler_ids.push(u32::from_le_bytes(bytes[off..off + 4].try_into().unwrap()));
+    }
+
+    let battlers_start = ids_end;
+    let mut battlers: std::collections::HashMap<u32, TurnOrderBattler> =
+        std::collections::HashMap::new();
+    for (i, &id) in battler_ids.iter().enumerate() {
+        let off = battlers_start + i * TURN_ORDER_BATTLER_WIDTH;
+        let battler = decode_turn_order_battler(&bytes[off..off + TURN_ORDER_BATTLER_WIDTH]);
+        battlers.insert(id, battler);
+    }
+
+    let rolls_start = battlers_start + battler_count * TURN_ORDER_BATTLER_WIDTH;
+    let mut rolls: Vec<u16> = Vec::with_capacity(roll_count);
+    for i in 0..roll_count {
+        let off = rolls_start + i * 2;
+        rolls.push(u16::from_le_bytes(bytes[off..off + 2].try_into().unwrap()));
+    }
+
+    let flags_start = rolls_start + roll_count * 2;
+    let weather = weather_from_flags(
+        u32::from(bytes[flags_start]),
+        u32::from(bytes[flags_start + 1]),
+    );
+    let random_turn_number =
+        u32::from_le_bytes(bytes[flags_start + 2..flags_start + 6].try_into().unwrap()) as u16;
+
+    let order = turn_order::sort_battlers_by_turn_order(
+        &battler_ids,
+        &battlers,
+        &rolls,
+        weather,
+        random_turn_number,
+    );
+
+    let mut out = Vec::with_capacity(order.len() * 4);
+    for id in &order {
+        out.extend_from_slice(&id.to_le_bytes());
+    }
+    let ptr = fw_alloc(out.len() as u32);
+    // SAFETY: `ptr` was just allocated by fw_alloc for exactly `out.len()`
+    // bytes, and `out` is a distinct, non-overlapping source buffer.
+    unsafe {
+        std::ptr::copy_nonoverlapping(out.as_ptr(), ptr, out.len());
+    }
+    ptr
+}
+
+/// One `run_turn1_rng_ledger` step's fixed-width encoding (all integers
+/// little-endian), repeated 7 times back to back in
+/// `fw_run_turn1_rng_ledger`'s output buffer.
+///
+/// ```text
+/// offset  width  field
+/// 0       4      rng_value_before (u32)
+/// 4       4      rng_value_after (u32)
+/// 8       1      roll_count (u8)
+/// 9       10     rolls (u16 x 5, only the first roll_count are meaningful)
+///                width == 19
+/// ```
+const TURN_RNG_STEP_WIDTH: usize = 19;
+/// `TURN1_RNG_STEPS.len()` (7) — see `factory_core::turn_rng`.
+const TURN_RNG_STEP_COUNT: usize = 7;
+
+/// `runTurn1RngLedger`. Returns an `fw_alloc`'d fixed
+/// `TURN_RNG_STEP_WIDTH * TURN_RNG_STEP_COUNT` (133)-byte buffer (no status
+/// byte or length prefix — this function cannot fail, and the width is a
+/// compile-time constant on both sides); the caller must `fw_free(ptr,
+/// 133)`.
+#[no_mangle]
+pub extern "C" fn fw_run_turn1_rng_ledger(starting_rng_value: u32) -> *mut u8 {
+    let results = turn_rng::run_turn1_rng_ledger(starting_rng_value);
+    let mut buf = [0u8; TURN_RNG_STEP_WIDTH * TURN_RNG_STEP_COUNT];
+    for (i, step) in results.iter().enumerate() {
+        let off = i * TURN_RNG_STEP_WIDTH;
+        buf[off..off + 4].copy_from_slice(&step.rng_value_before.to_le_bytes());
+        buf[off + 4..off + 8].copy_from_slice(&step.rng_value_after.to_le_bytes());
+        buf[off + 8] = step.roll_count as u8;
+        for (r, roll) in step.rolls.iter().enumerate() {
+            let roff = off + 9 + r * 2;
+            buf[roff..roff + 2].copy_from_slice(&roll.to_le_bytes());
+        }
+    }
+    let ptr = fw_alloc(buf.len() as u32);
+    // SAFETY: `ptr` was just allocated by fw_alloc for exactly `buf.len()`
+    // bytes, and `buf` is a distinct, non-overlapping source buffer.
+    unsafe {
+        std::ptr::copy_nonoverlapping(buf.as_ptr(), ptr, buf.len());
+    }
+    ptr
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1344,5 +1583,135 @@ mod tests {
         // (roll % 100 < calc) is only unreachable when calc <= 0.
         assert_eq!(fw_roll_accuracy_hits(100, 99), 1);
         assert_eq!(fw_roll_accuracy_hits(0, 0), 0, "calc == 0 always misses");
+    }
+
+    // --- turn_order / turn_rng surface (M4c) --------------------------------
+    //
+    // Round-trips each fw_ export through its own documented encoding
+    // before the TS decoder (core-rs/adapter/turnEngine.ts) depends on it,
+    // pinning the same battle-1-turn-1 anchor turn_order.rs's own native
+    // tests carry. Not a substitute for tests/turnOrderParity.test.ts's
+    // exhaustive differential sweep against the TS engine.
+
+    fn encode_turn_order_battler(b: &TurnOrderBattler) -> [u8; TURN_ORDER_BATTLER_WIDTH] {
+        let mut buf = [0u8; TURN_ORDER_BATTLER_WIDTH];
+        buf[0..4].copy_from_slice(&b.speed.to_le_bytes());
+        buf[4] = b.speed_stage;
+        buf[5..9].copy_from_slice(&b.move_priority.to_le_bytes());
+        buf[9] = u8::from(b.is_paralyzed);
+        buf[10..12].copy_from_slice(&b.ability.to_le_bytes());
+        buf[12..14].copy_from_slice(&b.hold_effect.to_le_bytes());
+        buf[14..18].copy_from_slice(&b.hold_effect_param.to_le_bytes());
+        buf
+    }
+
+    fn onix_battler() -> TurnOrderBattler {
+        TurnOrderBattler {
+            speed: 76,
+            speed_stage: 6,
+            move_priority: 0,
+            is_paralyzed: false,
+            ability: 0,
+            hold_effect: 0,
+            hold_effect_param: 0,
+        }
+    }
+    fn grovyle_battler() -> TurnOrderBattler {
+        TurnOrderBattler { speed: 90, ..onix_battler() }
+    }
+
+    #[test]
+    fn fw_effective_speed_matches_native() {
+        let onix = onix_battler();
+        let buf = encode_turn_order_battler(&onix);
+        // SAFETY: `buf` is a local 18-byte array matching TURN_ORDER_BATTLER_WIDTH exactly.
+        let speed = unsafe { fw_effective_speed(buf.as_ptr(), 0, 0, 0xffff) };
+        assert_eq!(
+            speed,
+            turn_order::effective_speed(&onix, WeatherState::default(), 0xffff)
+        );
+        assert_eq!(speed, 76);
+    }
+
+    #[test]
+    fn fw_get_who_strikes_first_reproduces_battle1_turn1() {
+        let onix = encode_turn_order_battler(&onix_battler());
+        let grovyle = encode_turn_order_battler(&grovyle_battler());
+        // SAFETY: both buffers are local 18-byte arrays matching TURN_ORDER_BATTLER_WIDTH exactly.
+        let result =
+            unsafe { fw_get_who_strikes_first(onix.as_ptr(), grovyle.as_ptr(), 0, 0, 0, 0xffff) };
+        assert_eq!(result, 1, "battler2 (Grovyle, faster) strikes first");
+    }
+
+    #[test]
+    fn fw_sort_battlers_by_turn_order_reproduces_gbattler_by_turn_order() {
+        let ids: [u32; 2] = [0, 1];
+        let battlers = [onix_battler(), grovyle_battler()];
+        let mut input = Vec::new();
+        input.extend_from_slice(&2u32.to_le_bytes()); // battler_count
+        input.extend_from_slice(&0u32.to_le_bytes()); // roll_count
+        for id in ids {
+            input.extend_from_slice(&id.to_le_bytes());
+        }
+        for b in &battlers {
+            input.extend_from_slice(&encode_turn_order_battler(b));
+        }
+        // no rolls
+        input.push(0); // is_raining
+        input.push(0); // is_sunny
+        input.extend_from_slice(&0xffffu32.to_le_bytes()); // random_turn_number
+
+        // SAFETY: `input` encodes exactly its own declared battler_count/roll_count per the documented layout.
+        let ptr = unsafe { fw_sort_battlers_by_turn_order(input.as_ptr(), input.len() as u32) };
+        // SAFETY: `ptr` was just returned by fw_sort_battlers_by_turn_order as a `battler_count * 4`-byte fw_alloc'd buffer.
+        let order = unsafe {
+            let bytes = std::slice::from_raw_parts(ptr, 8);
+            [read_u32(bytes, 0), read_u32(bytes, 4)]
+        };
+        assert_eq!(order, [1, 0], "matches gBattlerByTurnOrder = [1, 0]");
+        // SAFETY: freeing the exact (ptr, 8) pair fw_sort_battlers_by_turn_order returned.
+        unsafe {
+            fw_free(ptr, 8);
+        }
+    }
+
+    #[test]
+    fn fw_run_turn1_rng_ledger_matches_the_ram_anchored_seed() {
+        const RAM_ANCHORED_SEED: u32 = 3_485_459_011;
+        let ptr = fw_run_turn1_rng_ledger(RAM_ANCHORED_SEED);
+        // SAFETY: `ptr` was just returned by fw_run_turn1_rng_ledger as a fixed 133-byte fw_alloc'd buffer.
+        let snapshot = unsafe {
+            std::slice::from_raw_parts(ptr, TURN_RNG_STEP_WIDTH * TURN_RNG_STEP_COUNT).to_vec()
+        };
+
+        let native = turn_rng::run_turn1_rng_ledger(RAM_ANCHORED_SEED);
+        for (i, step) in native.iter().enumerate() {
+            let off = i * TURN_RNG_STEP_WIDTH;
+            assert_eq!(
+                read_u32(&snapshot, off),
+                step.rng_value_before,
+                "step {i} before"
+            );
+            assert_eq!(
+                read_u32(&snapshot, off + 4),
+                step.rng_value_after,
+                "step {i} after"
+            );
+            assert_eq!(
+                snapshot[off + 8] as usize,
+                step.roll_count,
+                "step {i} roll_count"
+            );
+        }
+        assert_eq!(
+            read_u32(&snapshot, 6 * TURN_RNG_STEP_WIDTH + 4),
+            4_098_214_719,
+            "final rng value"
+        );
+
+        // SAFETY: freeing the exact (ptr, 133) pair fw_run_turn1_rng_ledger returned.
+        unsafe {
+            fw_free(ptr, (TURN_RNG_STEP_WIDTH * TURN_RNG_STEP_COUNT) as u32);
+        }
     }
 }
