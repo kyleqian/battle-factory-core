@@ -77,6 +77,20 @@ Current exports:
   tie/submission receipt or an exact UTF-8 error. The decoder in
   `adapter/factoryAiEngine.ts` reconstructs the canonical TypeScript receipt
   strings and routes these methods through WASM when `POKEBENCH_ENGINE=wasm`.
+- `fw_get_most_suitable_mon_to_switch_into(input_ptr, input_len) -> ptr` —
+  the complete plain-singles selector. Its fixed 114-byte input preserves all
+  six bench records and the optional 14-byte damage fallback; its typed output
+  distinguishes a concrete index (including the PARTY_SIZE sentinel) from
+  `damage-fallback-needed` and bounds errors.
+- `fw_evaluate_factory_ai_switch_policy(input_ptr, input_len) -> ptr` — the
+  RNG-free precheck and complete trainer-singles policy. Its fixed 401-byte
+  input carries all four battlers, six opponent-party records, rule globals,
+  RNG before, and optional selector fallback. Its length-prefixed output keeps
+  precheck state, typed policy/boundary errors, choice and selected index, RNG
+  after, every draw receipt, and every branch receipt. Both switch layouts are
+  additive ABI-v1 exports documented field-by-field beside their Rust exports;
+  `adapter/factoryAiEngine.ts` genuinely encodes/calls/decodes them in WASM
+  mode and uses canonical TypeScript only in default mode.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes

@@ -1,17 +1,15 @@
 // The Factory AI move/switch-scoring leaf adapter: a uniform FactoryAiEngine
-// interface over the TS spec engine (src/engine/factoryAiMaskSelection.ts +
-// src/engine/factoryAiCheckBadMove.ts + src/engine/factoryAiCheckViability.ts)
-// and the factory-wasm boundary's fw_select_factory_ai_mask /
-// fw_run_check_bad_move_preamble / fw_run_check_viability exports, so the
-// three Factory-AI parity suites can run identical inputs against either
+// interface over the TS spec engine's mask, move scoring, switch selector,
+// and switch-policy modules and the corresponding factory-wasm `fw_` exports,
+// so the Factory-AI parity suites can run identical inputs against either
 // without knowing which one it's holding. Sibling to
 // ./damageEngine.ts/./turnEngine.ts — same M2 opt-in
 // pattern (POKEBENCH_ENGINE env var, TS default, wasm opt-in), reusing
 // rngEngine.ts's defaultEngineId/resolveWasmArtifactPath directly.
 //
-// The boundary is exactly the three module APIs factoryAiDecisionPolicy.ts
-// consumes: selectFactoryAiMask, runCheckBadMovePreamble, and
-// runCheckViability. Strings stay
+// The move-policy boundary includes the three APIs factoryAiDecisionPolicy.ts
+// consumes; the switch boundary adds getMostSuitableMonToSwitchInto plus the
+// precheck and complete switch-policy evaluator. Strings stay
 // TS-side: move ids are already numeric on both sides (moves.json's own
 // `id` field); species ids are already numeric on both sides
 // (FactoryAiCheckBadMoveTarget.species); ability names cross as the
@@ -64,6 +62,22 @@ import {
   type FactoryAiPolicyBranchId,
   selectFactoryAiMask as tsSelectFactoryAiMask,
 } from "../../src/engine/factoryAiMaskSelection.ts";
+import {
+  getMostSuitableMonToSwitchInto as tsGetMostSuitableMonToSwitchInto,
+  type BattleAiSwitchBench,
+  type BattleAiSwitchDamageFallback,
+  type BattleAiSwitchIntoResult,
+  type BattleAiSwitchTypes,
+} from "../../src/engine/battleAiSwitchInto.ts";
+import {
+  evaluateFactoryAiSwitchPolicy as tsEvaluateFactoryAiSwitchPolicy,
+  isFactoryAiSwitchPrecheckBlocked as tsIsFactoryAiSwitchPrecheckBlocked,
+  type FactoryAiSwitchBranch,
+  type FactoryAiSwitchChoice,
+  type FactoryAiSwitchDraw,
+  type FactoryAiSwitchPolicyInput,
+  type FactoryAiSwitchPolicyResult,
+} from "../../src/engine/factoryAiSwitchPolicy.ts";
 import {
   chooseFactoryAiMaskZeroDecision as tsChooseFactoryAiMaskZeroDecision,
   chooseFactoryAiScoredDecision as tsChooseFactoryAiScoredDecision,
@@ -146,6 +160,16 @@ export interface FactoryAiEngine {
   runCheckViability(input: RunCheckViabilityInput): CvResultView;
   chooseFactoryAiMaskZeroDecision(input: MaskZeroDecisionInput): FactoryAiDecisionChoice;
   chooseFactoryAiScoredDecision(input: ScoredDecisionInput): FactoryAiScoredChoice;
+  getMostSuitableMonToSwitchInto(
+    bench: BattleAiSwitchBench,
+    activePartyIndex: number,
+    opposingTypes: BattleAiSwitchTypes,
+    damageFallback?: BattleAiSwitchDamageFallback,
+  ): BattleAiSwitchIntoResult;
+  isFactoryAiSwitchPrecheckBlocked(
+    rules: Parameters<typeof tsIsFactoryAiSwitchPrecheckBlocked>[0],
+  ): boolean;
+  evaluateFactoryAiSwitchPolicy(input: FactoryAiSwitchPolicyInput): FactoryAiSwitchPolicyResult;
 }
 
 export type MaskZeroDecisionInput = Parameters<typeof tsChooseFactoryAiMaskZeroDecision>[0];
@@ -204,6 +228,9 @@ export function tsFactoryAiEngine(): FactoryAiEngine {
     runCheckViability: tsRunCheckViability,
     chooseFactoryAiMaskZeroDecision: tsChooseFactoryAiMaskZeroDecision,
     chooseFactoryAiScoredDecision: tsChooseFactoryAiScoredDecision,
+    getMostSuitableMonToSwitchInto: tsGetMostSuitableMonToSwitchInto,
+    isFactoryAiSwitchPrecheckBlocked: tsIsFactoryAiSwitchPrecheckBlocked,
+    evaluateFactoryAiSwitchPolicy: tsEvaluateFactoryAiSwitchPolicy,
   };
 }
 
@@ -1010,6 +1037,200 @@ function decodeMaskSelection(bytes: Uint8Array, input: FactoryAiMaskSelectionInp
   });
 }
 
+// === Factory switch selector/policy ========================================
+
+const SWITCH_INTO_INPUT_WIDTH = 114;
+const SWITCH_POLICY_INPUT_WIDTH = 401;
+
+function encodeSwitchFallback(w: ByteWriter, fallback?: BattleAiSwitchDamageFallback): void {
+  w.i32(fallback?.baseDamage ?? 0);
+  w.u8(typeId(fallback?.activeTypes[0] ?? "TYPE_NORMAL"));
+  w.u8(typeId(fallback?.activeTypes[1] ?? "TYPE_NORMAL"));
+  w.u8(typeId(fallback?.opposingTypes[0] ?? "TYPE_NORMAL"));
+  w.u8(typeId(fallback?.opposingTypes[1] ?? "TYPE_NORMAL"));
+  w.u16(fallback?.opposingAbility ?? 0);
+  w.u32(fallback?.opposingStatus2 ?? 0);
+}
+
+function encodeSwitchIntoInput(
+  bench: BattleAiSwitchBench,
+  activePartyIndex: number,
+  opposingTypes: BattleAiSwitchTypes,
+  damageFallback?: BattleAiSwitchDamageFallback,
+): ArrayBuffer {
+  const w = new ByteWriter(SWITCH_INTO_INPUT_WIDTH);
+  for (const member of bench) {
+    w.u16(member.species);
+    w.i32(member.hp);
+    w.u8(typeId(member.types[0]));
+    w.u8(typeId(member.types[1]));
+    for (const moveId of member.moves) w.u16(moveId);
+  }
+  w.u8(activePartyIndex);
+  w.u8(typeId(opposingTypes[0]));
+  w.u8(typeId(opposingTypes[1]));
+  w.bool(damageFallback !== undefined);
+  encodeSwitchFallback(w, damageFallback);
+  return w.finish();
+}
+
+function decodeBoundaryError(r: ByteReader): never {
+  const message = r.utf8(r.u16());
+  throw new Error(message);
+}
+
+function decodeSwitchIntoResult(bytes: Uint8Array): BattleAiSwitchIntoResult {
+  const r = new ByteReader(bytes);
+  r.u32();
+  const status = r.u8();
+  if (status === 0) return Object.freeze({ kind: "resolved", partyIndex: r.u8() });
+  if (status === 1) return Object.freeze({ kind: "damage-fallback-needed" });
+  if (status === 2) return decodeBoundaryError(r);
+  throw new Error(`factory-wasm factoryAiEngine: unknown switch-into status ${status}`);
+}
+
+function encodeSwitchBattler(w: ByteWriter, battler: FactoryAiSwitchPolicyInput["rules"]["battlers"][number]): void {
+  w.u16(battler.species);
+  w.u16(battler.ability);
+  w.u8(typeId(battler.types[0]));
+  w.u8(typeId(battler.types[1]));
+  w.i32(battler.hp);
+  w.i32(battler.maxHP);
+  for (const moveId of battler.moves) w.u16(moveId);
+  w.u32(battler.status1);
+  w.u32(battler.status2);
+  w.u32(battler.status3);
+  for (const stage of battler.statStages) w.i32(stage);
+  w.u8(battler.partyIndex);
+  w.u8(battler.perishSongTimer);
+}
+
+function encodeSwitchPartyMember(
+  w: ByteWriter,
+  member: FactoryAiSwitchPolicyInput["rules"]["party"]["opponent"][number],
+): void {
+  w.u16(member.species);
+  w.bool(member.isEgg);
+  w.u8(member.abilityNum);
+  w.i32(member.hp);
+  for (const moveId of member.moves) w.u16(moveId);
+}
+
+function encodeSwitchPolicyInput(input: FactoryAiSwitchPolicyInput): ArrayBuffer {
+  const w = new ByteWriter(SWITCH_POLICY_INPUT_WIDTH);
+  for (const battler of input.rules.battlers) encodeSwitchBattler(w, battler);
+  for (const member of input.rules.party.opponent) encodeSwitchPartyMember(w, member);
+  w.u16(input.rules.moveHistory.lastLandedMoves[1]!);
+  w.u8(input.rules.moveHistory.lastHitBy[1]!);
+  w.u8(input.rules.monToSwitchIntoId[1]!);
+  w.u8(input.rules.absentBattlerFlags);
+  w.u8(input.rules.battleTopology.battlersCount);
+  w.u32(input.rules.battleTopology.battleTypeFlags);
+  w.u32(input.rng.value);
+  w.u32(input.rng.calls);
+  w.bool(input.suitableDamageFallback !== undefined);
+  encodeSwitchFallback(w, input.suitableDamageFallback);
+  return w.finish();
+}
+
+const SWITCH_DRAW_KINDS: readonly FactoryAiSwitchDraw["kind"][] = [
+  "wonder-guard-candidate",
+  "absorber-active-super-effective",
+  "absorber-candidate",
+  "natural-cure-early",
+  "natural-cure-status-move",
+  "natural-cure-defensive",
+  "natural-cure-final",
+  "active-super-effective",
+  "immunity-fallback",
+  "not-very-effective-fallback",
+];
+const SWITCH_BRANCH_KINDS: readonly FactoryAiSwitchBranch["branch"][] = [
+  "wrapped-or-escape-prevented", "rooted", "shadow-tag", "arena-trap",
+  "magnet-pull-steel", "battle-arena", "available-bench", "perish-song",
+  "wonder-guard", "absorber", "natural-cure", "active-super-effective",
+  "stats-raised", "immunity-fallback", "not-very-effective-fallback",
+  "suitable-selector", "first-legal-fallback",
+];
+const SWITCH_BRANCH_OUTCOMES: readonly FactoryAiSwitchBranch["outcome"][] = [
+  "pass", "blocked", "selected", "suppressed", "none",
+];
+
+function decodeOptionalU8(r: ByteReader): number | null {
+  const present = r.bool();
+  const value = r.u8();
+  return present ? value : null;
+}
+
+function decodeSwitchPolicyPrecheck(bytes: Uint8Array): boolean {
+  const r = new ByteReader(bytes);
+  r.u32();
+  const status = r.u8();
+  if (status === 2) return decodeBoundaryError(r);
+  if (status !== 0 && status !== 1) {
+    throw new Error(`factory-wasm factoryAiEngine: unknown switch-policy status ${status}`);
+  }
+  return r.bool();
+}
+
+function decodeSwitchPolicyResult(bytes: Uint8Array): FactoryAiSwitchPolicyResult {
+  const r = new ByteReader(bytes);
+  r.u32();
+  const status = r.u8();
+  if (status === 2) return decodeBoundaryError(r);
+  r.bool(); // precheck result is exposed by the sibling adapter method.
+  if (status === 1) throw new Error(r.utf8(r.u16()));
+  if (status !== 0) {
+    throw new Error(`factory-wasm factoryAiEngine: unknown switch-policy status ${status}`);
+  }
+  const choiceKind = r.u8();
+  const choicePartyIndex = r.u8();
+  let choice: FactoryAiSwitchChoice;
+  if (choiceKind === 0) choice = Object.freeze({ kind: "chosen", partyIndex: choicePartyIndex });
+  else if (choiceKind === 1) choice = Object.freeze({ kind: "sentinel" });
+  else if (choiceKind === 2) choice = Object.freeze({ kind: "no-switch" });
+  else throw new Error(`factory-wasm factoryAiEngine: unknown switch choice ${choiceKind}`);
+  const selectedPartyIndex = decodeOptionalU8(r);
+  const rng = Object.freeze({ value: r.u32(), calls: r.u32() });
+  const drawCount = r.u32();
+  const draws: FactoryAiSwitchDraw[] = [];
+  for (let index = 0; index < drawCount; index++) {
+    const ordinal = r.u32();
+    const kind = SWITCH_DRAW_KINDS[r.u8()];
+    if (kind === undefined) throw new Error("factory-wasm factoryAiEngine: unknown switch draw kind");
+    const before = Object.freeze({ value: r.u32(), calls: r.u32() });
+    const after = Object.freeze({ value: r.u32(), calls: r.u32() });
+    const rawRngValue = r.u32();
+    const randomValue = r.u16();
+    const modulus = r.u16();
+    const remainder = r.u16();
+    const succeeded = r.bool();
+    const partyIndex = decodeOptionalU8(r);
+    const moveSlot = decodeOptionalU8(r);
+    const reason = r.utf8(r.u16());
+    draws.push(Object.freeze({ ordinal, reason, kind, before, after, rawRngValue, randomValue, modulus, remainder, succeeded, partyIndex, moveSlot }));
+  }
+  const branchCount = r.u32();
+  const branches: FactoryAiSwitchBranch[] = [];
+  for (let index = 0; index < branchCount; index++) {
+    const ordinal = r.u32();
+    const branch = SWITCH_BRANCH_KINDS[r.u8()];
+    const outcome = SWITCH_BRANCH_OUTCOMES[r.u8()];
+    if (branch === undefined || outcome === undefined) {
+      throw new Error("factory-wasm factoryAiEngine: unknown switch branch member");
+    }
+    branches.push(Object.freeze({ ordinal, branch, outcome, partyIndex: decodeOptionalU8(r) }));
+  }
+  return Object.freeze({
+    schema: "factory-ai-switch-policy/v1",
+    choice,
+    selectedPartyIndex,
+    rng,
+    draws: Object.freeze(draws),
+    branches: Object.freeze(branches),
+  });
+}
+
 /**
  * Wraps the factory-wasm boundary's `fw_select_factory_ai_mask` /
  * `fw_run_check_bad_move_preamble` / `fw_run_check_viability` exports as a
@@ -1095,6 +1316,27 @@ export async function wasmFactoryAiEngine(): Promise<FactoryAiEngine> {
         exports.fw_choose_factory_ai_scored_decision,
       );
       return decodePolicyChoice(bytes, input, true) as FactoryAiScoredChoice;
+    },
+    getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes, damageFallback) {
+      const bytes = withPolicyInput(
+        encodeSwitchIntoInput(bench, activePartyIndex, opposingTypes, damageFallback),
+        exports.fw_get_most_suitable_mon_to_switch_into,
+      );
+      return decodeSwitchIntoResult(bytes);
+    },
+    isFactoryAiSwitchPrecheckBlocked(rules) {
+      const bytes = withPolicyInput(
+        encodeSwitchPolicyInput({ rules, rng: { value: 0, calls: 0 } }),
+        exports.fw_evaluate_factory_ai_switch_policy,
+      );
+      return decodeSwitchPolicyPrecheck(bytes);
+    },
+    evaluateFactoryAiSwitchPolicy(input) {
+      const bytes = withPolicyInput(
+        encodeSwitchPolicyInput(input),
+        exports.fw_evaluate_factory_ai_switch_policy,
+      );
+      return decodeSwitchPolicyResult(bytes);
     },
   };
 }
