@@ -20,9 +20,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** stop at the pinned `pan_sweep` discriminator; preserve its
   unobserved routes, later fields, other 75 callbacks, complete note/glue/
   MPlay, service/arbitration, and clock wiring null.
-- **Notes:** focused v3-v8 **23/23** green. Source/ELF/ROM receipt and report
-  are additive; no duration fit, runtime identity lookup, production import,
-  unsupported barrier, animation/Rust change, or canonical Battle-2 branch.
+- **Notes:** focused v3-v8 **23/23** and smoke **8 files / 375 passed** are
+  green; the executable-frontier barrier ratchet is unchanged. Source/ELF/ROM
+  receipt and report are additive; no duration fit, runtime identity lookup,
+  production import, unsupported barrier, animation/Rust change, or canonical
+  Battle-2 branch.
 
 ## 1190 — [supervisor, 2026-08-12] **CGB4 helper verified; Rust M5d-2 folded**
 
