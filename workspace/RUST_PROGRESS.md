@@ -105,10 +105,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   direct-handler tests, CURSE→BulkUp / PSYCH_UP→Haze same-function
   pairs). Supervisor spot-verified handler/clamp line ranges and the
   109 = 32+33+44 partition.
-- **Next:** M5b-0 per the batching doc, then M5b-1/2/3 (independent of
-  each other, all depend on M5b-0), then M5c boundary+adapter+parity.
-  Re-verify the scout conflict checks at orient per the standing M4+
-  rule.
+- **M5b-0 DONE (fold `6f4935c8`):**
+  `factory_ai_check_bad_move.rs` — 113 EFFECT_* consts verified
+  line-by-line against battle_move_effects.h + 13 ABILITY_* consts
+  (representation decision: abilities cross numerically, same id space
+  as gen_tables::SpeciesRow.abilities); data heads (weather collision
+  table, IGNORED_POWERFUL_MOVE_EFFECTS, trapper/negating/soundproof
+  sets, ids verified against the JSONs); full Target/Attacker/RoarTarget
+  structs (28/29/1 fields — the batching doc's 22/27 counts were stale);
+  never-caching next_get_ability_draw + check_ability_ai_target
+  (dummy-variable collapse) + type_multiplier_tenths; completeness-probe
+  machinery (CBM_TABLE_EFFECTS[109], empty handled union,
+  unported_cbm_table_effects, first_move_id_with_effect,
+  Result::NotYetPorted trailing barrier); run_check_bad_move_preamble
+  (immunity −10, FISSURE/HORN_DRILL short-circuit, 5 ability-negation
+  branches, Soundproof, soundproofGuess stale-funcResult exposure). 29
+  native tests + 48 TS-generated scored-case vectors
+  (gen-cbm-preamble-vectors.mjs, byte-idempotent). **Worker scoping
+  correction, verified live:** TS is 109/109 so its preamble never emits
+  barrier results — NotYetPorted coverage is native-hand-test-only;
+  TS-differential vectors use preamble-exit and non-table-effect flows.
+  Supervisor rerun: cargo **175/175** total, fmt/clippy(--all-targets)
+  clean, wasm build green, generator byte-identical, EFFECT consts
+  spot-checked against the header, type-immunity case re-derived from TS
+  by hand (scored −10, rng untouched, 0 draws — exact match).
+- **Next:** M5b-1 (HighRisk cluster + weather + zero-RNG singles, 32
+  effects), then M5b-2/M5b-3 (independent), per
+  docs/rust-m5b-checkbadmove-batching.md — each batch adds its
+  CBM_HANDLED_EFFECTS const + handler-direct tests + TS-differential
+  vectors (now derivable per batch since handlers exist TS-side), and
+  shrinks the pinned unported set. Then M5c boundary+adapter+parity.
+  Re-verify scout conflict checks at orient per the standing M4+ rule.
 - **Notes (ops):** the two parity suites HARD-FAIL under plain `npm test`
   in a tree whose gitignored `artifacts/wasm/factory_wasm.wasm` is
   present but STALE (absent → skip; stale → 204 failures, seen live this
