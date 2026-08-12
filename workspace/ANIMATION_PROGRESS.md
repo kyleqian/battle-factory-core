@@ -1,3 +1,11 @@
+# MOVE_FISSURE dense bilateral evidence checkpoint — remains unsupported (2026-08-12 worker)
+
+- **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Fissure and Dig are not promoted.
+- **Did:** Source-derived the natural equal-level OHKO gate (`Random() % 100 + 1 < 30`) and added a narrow mGBA seed scout. The smallest scenario correction changes only player-back seed `0x12345679→0x12345678`; opponent-front retains `0x12345679`. Both complete legal parties now enter `Move_FISSURE` naturally at frames **72/76**. Ran the pointer-bounded probe twice freshly per side and retained complete compressed state, 254 raw-RGB frames, and normalized change maps through first inactive cleanup.
+- **Verified:** Player-back source **72..325** and opponent-front **76..329** are **254 frames** each. Both fresh runs are byte-identical per side (state `fafd5619…` / `c52ac9f9…`, raw RGB `67cadfd5…` / `55b75e4f…`). Hardware OAM, matrices, and palette equal the preceding software buffers on **253/253** comparable rows bilaterally. Three four-sprite dirt groups have source ages **14..37, 48..71, 82..105**; both horizontal tasks live **4..199**; BG_FISSURE/restore BLDY and side-relative BG3 holds are fully pinned through cleanup. Immutable outcome/weather/side state stays constant; SE1/SE2 and animation RNG are retained.
+- **Next:** Port source-relative MUD_SAND/BG_FISSURE assets, reducer, typed seam, and compositor; require twice-fresh bilateral all-frame component/hardware/raw-RGB/change-map/production framebuffer equality before promoting only Fissure. Dig remains an independent audit-only sibling.
+- **Notes:** Honest dense checkpoint only: no reducer/seam/compositor or production framebuffer comparison exists. No gameplay/OHKO/accuracy/damage/RNG/controller/turn/facility state, animation boundary, unsupported barrier, canonical recording, per-frame lookup, absolute tick, coordinate/RGB fit, or Dig coverage changed.
+
 # MOVE_CONFUSE_RAY dense bilateral evidence checkpoint — remains unsupported (2026-08-12 worker)
 
 - **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Confuse Ray and Will-O-Wisp are not promoted.

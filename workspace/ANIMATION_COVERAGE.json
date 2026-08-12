@@ -5246,7 +5246,7 @@
     "MOVE_FISSURE",
     "MOVE_DIG"
    ],
-   "goal": "MOVE_FISSURE remains unsupported at a source/staging checkpoint: its exclusive 0x082ccb7e..0x082ccca1 interval, complete 12-component graph, lowest legal Level-50 set-564 DUGTRIO carrier, complete bilateral Scene-ON parties, and pointer-bounded full-state probe mode are pinned. The legal endpoint staging runs in both orientations, but the configured local vendor/mgba-venv has no importable mgba module, so no dense probe, change map, reducer/seam, or framebuffer acceptance is claimed. MOVE_DIG independently has 17 components and shares only ANIM_TAG_MUD_SAND plus gDirtPlumeSpriteTemplate; its distinct dirt-mound, DigDown/DigUp movement, static-monbg, hitsplat, and ShakeMon bodies remain unsupported, and it is not promoted."
+   "goal": "MOVE_FISSURE remains unsupported at a complete dense evidence checkpoint: its exclusive 0x082ccb7e..0x082ccca1 interval, 12-component graph, lowest legal Level-50 set-564 DUGTRIO carrier, and complete bilateral Scene-ON parties are pinned. Source-derived equal-level OHKO seeds execute naturally, and twice-fresh player-back 72..325 plus opponent-front 76..329 windows retain all 254 task/sprite/software+hardware OAM/matrix/palette/register/audio/immutable-state/raw-RGB/change-map rows through cleanup with byte-stable receipts. No reducer, source-relative assets, typed seam, compositor, or production framebuffer comparison exists, so Fissure is not promoted. MOVE_DIG independently has 17 components and shares only ANIM_TAG_MUD_SAND plus gDirtPlumeSpriteTemplate; its distinct dirt-mound, DigDown/DigUp movement, static-monbg, hitsplat, and ShakeMon bodies remain unsupported, and it is not promoted."
   },
   {
    "id": "horizontal-shake-complex-bg-palette",
