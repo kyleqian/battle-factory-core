@@ -223,8 +223,10 @@ function encodeAccuracyCalcInput(input: AccuracyCalcInput): ArrayBuffer {
   return buffer;
 }
 
+export type DamageEngineId = "ts" | "wasm";
+
 export interface DamageEngine {
-  readonly id: "wasm";
+  readonly id: DamageEngineId;
   isTypePhysical(moveType: string): boolean;
   isTypeSpecial(moveType: string): boolean;
   applyStatStageMod(stat: number, stage: number): number;
@@ -246,7 +248,7 @@ export interface DamageEngine {
 }
 
 /** Thin wrapper over the TS spec engine — the default, always-available engine. */
-export function tsDamageEngine(): DamageEngine & { readonly id: "ts" } {
+export function tsDamageEngine(): DamageEngine {
   return {
     id: "ts",
     isTypePhysical: tsIsTypePhysical,
