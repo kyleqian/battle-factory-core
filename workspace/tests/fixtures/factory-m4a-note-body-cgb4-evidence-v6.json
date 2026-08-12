@@ -1,0 +1,378 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v6",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "caller": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1738-1759",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      }
+    },
+    "elf": {
+      "callerResume": "0x082dfea6",
+      "fieldCopyEnd": "0x082dfec8",
+      "chnVolSetAsmCallTarget": "0x082dfd08",
+      "chnVolSetAsmEntry": "0x082dfecc",
+      "chnVolSetAsmBodyEnd": "0x082dfd38"
+    },
+    "compiledRegions": [
+      {
+        "role": "post-TrkVolPitSet allocation field copies",
+        "start": "0x082dfea6",
+        "endExclusive": "0x082dfec8",
+        "bytes": 34,
+        "sha256": "10bf357a60a0d4863a9a8bc46defeb0d709d2d58c0763743b8563cdb5e2a171d"
+      },
+      {
+        "role": "ChnVolSetAsm caller BL",
+        "start": "0x082dfec8",
+        "endExclusive": "0x082dfecc",
+        "bytes": 4,
+        "sha256": "d46e3d9bcf957b9d9435415e3a98393cdf108f1dc82a1655daf2228cd85c7f1f"
+      },
+      {
+        "role": "post-TrkVolPitSet allocation fields + caller BL through ChnVolSetAsm entry",
+        "start": "0x082dfea6",
+        "endExclusive": "0x082dfecc",
+        "bytes": 38,
+        "sha256": "ba89374e447e47c7bd627ac19180ce58725ebaf33f228a4c9b5e8a6c31bb9241"
+      },
+      {
+        "role": "ChnVolSetAsm unresolved helper body",
+        "start": "0x082dfd08",
+        "endExclusive": "0x082dfd38",
+        "bytes": 48,
+        "sha256": "04988bf8e911a12b477d9aafa24342b68e83960a06796e555869cc67b24bd4d2"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "ewramDataAccessPremiumCyclesPerAccess": 2,
+      "iwramDataAccessPremiumCyclesPerAccess": 0,
+      "trackAndToneDataClass": "EWRAM",
+      "channelAndStackDataClass": "IWRAM"
+    },
+    "sourceCycleAccounting": {
+      "fieldCopies": {
+        "sequentialThumbHalfwords": 17,
+        "pipelineRefills": 0,
+        "ewramByteReads": 1,
+        "ewramHalfwordReads": 1,
+        "ewramWordReads": 3,
+        "iwramWordReads": 3,
+        "iwramByteStores": 4,
+        "iwramHalfwordStores": 1,
+        "iwramWordStores": 3,
+        "ewramDataAccessPremiumCycles": 10,
+        "iwramDataAccessPremiumCycles": 0,
+        "cycles": "17*2 + 0*6 + 5*2 + 0",
+        "totalCycles": 44
+      },
+      "chnVolSetAsmCallerEdge": {
+        "sequentialThumbHalfwords": 2,
+        "pipelineRefills": 1,
+        "dataAccessPremiumCycles": 0,
+        "cycles": "2*2 + 1*6 + 0",
+        "totalCycles": 10
+      },
+      "postTrkVolPitSetAllocationSlice": {
+        "sequentialThumbHalfwords": 19,
+        "pipelineRefills": 1,
+        "ewramDataAccessPremiumCycles": 10,
+        "cycles": "17*2 + 0*6 + 5*2 + 2*2 + 1*6",
+        "totalCycles": 54
+      },
+      "laterAllocationFields": null,
+      "chnVolSetAsmBody": null
+    }
+  },
+  "frozenInputs": {
+    "acceptedV5EvidenceSha256": "9a36fadbcc65cc6e31c173510a20081e0ce500380a6001ddde6e033fda2fd3b5",
+    "acceptedV5FrozenInputs": {
+      "acceptedV4EvidenceSha256": "a29476ae5e0f55c2a491513f0e6dad1c4e445f047c9f93a82f7b8723812cc423",
+      "acceptedV4FrozenInputs": {
+        "packets": {
+          "anchor": "fbe6a35f48861ab7408b55d81da17d307ac2a6254ccba474c730fe3e51a7599f",
+          "liliana": "4f2e86fe6c1725e0f2e8d96c1416dfb79c927fd8cbd33db51bb93191248cc442",
+          "factory-varied": "64ea0a16a0817f49b27f13fed096c43f16c9ecf40ab17b0d0b560dceea03df08"
+        },
+        "acceptedV3Packets": {
+          "anchor": "818433d12eddd52c6ce1bb1a3128ca5a27cad4e52d7f3b699620f3999a46eaad",
+          "liliana": "c0f11db93b544f86781064565f618c7c95aaa43b9ca3e6eb06fc5a17067e9ef5",
+          "factory-varied": "b303a6dedd26f1d0ba0f6797e2b57f5f5c9e5b3aff7b3599a26b80143055beb9"
+        },
+        "acceptedV3EvidenceSha256": "558e043ae23308abf43f4642b9acb8d520c6d30f6efe0c0a5e188bb9e67a4cba",
+        "acceptedV3FrozenInputs": {
+          "packets": {
+            "anchor": "818433d12eddd52c6ce1bb1a3128ca5a27cad4e52d7f3b699620f3999a46eaad",
+            "liliana": "c0f11db93b544f86781064565f618c7c95aaa43b9ca3e6eb06fc5a17067e9ef5",
+            "factory-varied": "b303a6dedd26f1d0ba0f6797e2b57f5f5c9e5b3aff7b3599a26b80143055beb9"
+          },
+          "acceptedV2Packets": {
+            "anchor": "c1394c322f2290d99f37eebed80c1fe45938da19097317250fe553e153c6cf7d",
+            "liliana": "3df2c58b9b37731f803dd2e8e68953ea0a4eea4936bf2eb3fd95b11d69e7e1f2",
+            "factory-varied": "041b590f55f8a5b37c582594f1e54fbd4affa6f3dc9c799d6f3446e7ccc15009"
+          },
+          "acceptedV2EvidenceSha256": "cd6030344b403b10bd5c39aa4e1b4a8cdf0c68ab3871b11a677570621dff46ac",
+          "notePackets": {
+            "anchor": "d71c40f5078db50508985b28eb0b36c1b9713ee889696ffe1af59ebcdf15fd01",
+            "liliana": "58031720e867e9bbb33311fb5577afc0621bdb5561aad49f6c7a2c841009e615",
+            "factory-varied": "789fabb54fae6102d3fb3a13d6958e44ab0aa8b4ac1d23da7dcfaf7e1617ce20"
+          },
+          "sourceStatePackets": {
+            "anchor": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+            "liliana": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+            "factory-varied": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+          }
+        }
+      }
+    }
+  },
+  "acceptedV5Summary": {
+    "schema": "factory-m4a-note-body-cgb4-evidence/v5",
+    "join": {
+      "key": "sourceStateDigest",
+      "rows": 113,
+      "cgb4Rows": 7,
+      "ambiguousRows": 0,
+      "addressFree": true
+    },
+    "coverage": {
+      "observedNoteCallbacks": 82,
+      "cgbChannel4Callbacks": 7,
+      "byCase": {
+        "anchor": {
+          "observations": 52,
+          "callbacks": 33,
+          "cgb4": 0,
+          "flagsClear": 0,
+          "volumeAndClear": 0
+        },
+        "liliana": {
+          "observations": 31,
+          "callbacks": 24,
+          "cgb4": 3,
+          "flagsClear": 2,
+          "volumeAndClear": 1
+        },
+        "factory-varied": {
+          "observations": 30,
+          "callbacks": 25,
+          "cgb4": 4,
+          "flagsClear": 3,
+          "volumeAndClear": 1
+        }
+      },
+      "exactCallerCallEdgeCallbacks": 7,
+      "exactHelperPrologueCallbacks": 7,
+      "callerCallEdgeSourceCycleRange": {
+        "min": 14,
+        "max": 14,
+        "distinct": 1
+      },
+      "helperPrologueSourceCycleRange": {
+        "min": 2,
+        "max": 2,
+        "distinct": 1
+      },
+      "callerCallEdgeAndHelperPrologueSourceCycleRange": {
+        "min": 16,
+        "max": 16,
+        "distinct": 1
+      },
+      "knownComponentSumExcludingCallerGapSourceCycles": 1969,
+      "callerCallEdgeAndHelperPrologueSourceCycles": 112,
+      "knownComponentSumIncludingCallerGapAndThroughTrkVolPitSetSourceCycles": 2081,
+      "contiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 2081,
+      "nullLaterAllocationFieldsCallbacks": 7,
+      "nullOtherPostSelectionCallbacks": 75,
+      "nullCompleteNoteCallbacks": 82,
+      "exactCompleteMPlaySourceCostRows": 5,
+      "nullCompleteMPlaySourceCostRows": 108
+    }
+  },
+  "capture": {
+    "boundary": "v5 TrkVolPitSet return -> _081DDC66 post-helper allocation fields -> ChnVolSetAsm caller edge -> callee entry",
+    "state": "address-free source route and storage classes only; no new runtime operand or pointer is captured",
+    "selectedChannelIndex": 3
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "exactPostTrkVolPitSetAllocationSlices": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "exactPostTrkVolPitSetAllocationSlices": 3
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "exactPostTrkVolPitSetAllocationSlices": 4
+      }
+    },
+    "exactPostTrkVolPitSetAllocationFieldCallbacks": 7,
+    "exactChnVolSetAsmCallerEdgeCallbacks": 7,
+    "postTrkVolPitSetAllocationFieldSourceCycleRange": {
+      "min": 44,
+      "max": 44,
+      "distinct": 1
+    },
+    "chnVolSetAsmCallerEdgeSourceCycleRange": {
+      "min": 10,
+      "max": 10,
+      "distinct": 1
+    },
+    "postTrkVolPitSetAllocationSliceSourceCycleRange": {
+      "min": 54,
+      "max": 54,
+      "distinct": 1
+    },
+    "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 2081,
+    "postTrkVolPitSetAllocationFieldSourceCycles": 308,
+    "chnVolSetAsmCallerEdgeSourceCycles": 70,
+    "postTrkVolPitSetAllocationSliceSourceCycles": 378,
+    "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 2459,
+    "nullLaterAllocationFieldsCallbacks": 7,
+    "nullChnVolSetAsmBodyCallbacks": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "branchCoverage": {
+    "closed": [
+      "_081DDC66 post-TrkVolPitSet gateTime/priority/key/rhythmPan copies",
+      "_081DDC66 ToneData type/wav/attack copies",
+      "_081DDC66 pseudoEchoVolume copy",
+      "BL ChnVolSetAsm caller edge"
+    ],
+    "sourceGeneral": true,
+    "addressFree": true,
+    "laterAllocationFields": null,
+    "chnVolSetAsmBody": null
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 393,
+      "postTrkVolPitSetAllocationFieldSourceCycles": 44,
+      "chnVolSetAsmCallerEdgeSourceCycles": 10,
+      "postTrkVolPitSetAllocationSliceSourceCycles": 54,
+      "knownComponentSumIncludingPostTrkVolPitSetAllocationSliceSourceCycles": 447,
+      "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 447,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "postTrkVolPitSetAllocationFieldSourceCycles": 44,
+      "chnVolSetAsmCallerEdgeSourceCycles": 10,
+      "postTrkVolPitSetAllocationSliceSourceCycles": 54,
+      "knownComponentSumIncludingPostTrkVolPitSetAllocationSliceSourceCycles": 313,
+      "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "postTrkVolPitSetAllocationFieldSourceCycles": 44,
+      "chnVolSetAsmCallerEdgeSourceCycles": 10,
+      "postTrkVolPitSetAllocationSliceSourceCycles": 54,
+      "knownComponentSumIncludingPostTrkVolPitSetAllocationSliceSourceCycles": 313,
+      "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "postTrkVolPitSetAllocationFieldSourceCycles": 44,
+      "chnVolSetAsmCallerEdgeSourceCycles": 10,
+      "postTrkVolPitSetAllocationSliceSourceCycles": 54,
+      "knownComponentSumIncludingPostTrkVolPitSetAllocationSliceSourceCycles": 313,
+      "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 393,
+      "postTrkVolPitSetAllocationFieldSourceCycles": 44,
+      "chnVolSetAsmCallerEdgeSourceCycles": 10,
+      "postTrkVolPitSetAllocationSliceSourceCycles": 54,
+      "knownComponentSumIncludingPostTrkVolPitSetAllocationSliceSourceCycles": 447,
+      "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 447,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "postTrkVolPitSetAllocationFieldSourceCycles": 44,
+      "chnVolSetAsmCallerEdgeSourceCycles": 10,
+      "postTrkVolPitSetAllocationSliceSourceCycles": 54,
+      "knownComponentSumIncludingPostTrkVolPitSetAllocationSliceSourceCycles": 313,
+      "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughTrkVolPitSetReturnSourceCycles": 259,
+      "postTrkVolPitSetAllocationFieldSourceCycles": 44,
+      "chnVolSetAsmCallerEdgeSourceCycles": 10,
+      "postTrkVolPitSetAllocationSliceSourceCycles": 54,
+      "knownComponentSumIncludingPostTrkVolPitSetAllocationSliceSourceCycles": 313,
+      "contiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "The straight-line post-TrkVolPitSet allocation-field copies and exact ChnVolSetAsm caller BL edge are source-counted for the same seven zero-lfoDelay CGB4 callbacks, ending at ChnVolSetAsm entry.",
+    "contiguousPrefix": "2459 aggregate source cycles through ChnVolSetAsm entry across the seven observed callbacks; the helper body and later allocation fields remain null.",
+    "knownComponentTerminology": "2081 is retained as the accepted contiguous prefix through TrkVolPitSet return; 2459 is the contiguous prefix after 378 source cycles of post-helper field/call-edge closure.",
+    "remainingDiscriminator": "The ChnVolSetAsm body, later allocation fields, clear_modM, nonzero-lfoDelay routes, every unobserved TrkVolPitSet operand/branch, the other 75 post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals, service cost, VBlank/IRQ/audio arbitration, and runFactoryConstructionClock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "Source-exact CGB4 coverage is contiguous through ChnVolSetAsm entry for 7/82 observed callbacks: 2081 accepted prefix cycles + 308 post-helper field-copy cycles + 70 caller-edge cycles = 2459 cycles. ChnVolSetAsm's body and all broader note/MPlay/construction-clock costs remain null."
+}
