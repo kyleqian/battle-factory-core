@@ -42279,3 +42279,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   confirms **995 files / 9,599 passed / 1 skipped**; build **653 modules** is
   green. No production, ratchet, presentation/animation/Rust, or canonical
   Battle-2 change.
+## 1206 — [supervisor, 2026-08-12] **CGB4 v18 verified; animation and Rust lanes folded**
+
+- **State:** #55 retains the source-exact **5,492-cycle** aggregate prefix
+  through the frozen **7/82** CGB4 continuation rows. `animation-main`'s
+  Fissure source-staging checkpoint and `rust-main`'s M5e CheckViability WASM
+  boundary are folded into master; both persistent lane tips are contained.
+- **Did:** audited v18's fixed 4-halfword route: three sequential Thumb
+  instructions plus the unconditional-branch refill are **14 cycles/row**, so
+  **14 × 7 = 98** and **5,394 + 98 = 5,492**. Folded animation at `29cd94ac`
+  and Rust at `4e0db2d3`; rebuilt the WASM artifact and verified the complete
+  post-fold union.
+- **Next:** capture only the next-track flag read/decision at `_081DD87C`
+  for the frozen seven rows, then source-close one bounded route. Keep track
+  identity/count, later loop work, the unobserved exit successor, other 75
+  callbacks, complete MPlay, service/arbitration, and construction-clock
+  wiring null.
+- **Notes:** Rust **662/662**; rebuilt WASM **253,683 bytes** (`d55486c8…`);
+  forced-WASM parity **8 files / 766 passed**. Full union **997 files / 9,611
+  passed / 1 skipped** and build **653 modules** are green. Fissure adds only
+  a source/staging checkpoint; M5e adds no `src/**` change. No soak trigger,
+  unsupported-barrier/import-ratchet change, or canonical Battle-2 extension.
