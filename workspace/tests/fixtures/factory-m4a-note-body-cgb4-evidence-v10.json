@@ -1,0 +1,447 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v10",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "caller": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1784-1789",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "initialization": {
+        "path": "reference/pokeemerald/src/m4a.c",
+        "lines": "70-77,308-311,353-398",
+        "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+      },
+      "helper": {
+        "path": "reference/pokeemerald/src/m4a.c",
+        "lines": "810-825",
+        "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+      },
+      "tables": {
+        "path": "reference/pokeemerald/src/m4a_tables.c",
+        "lines": "149-162",
+        "sha256": "6d407283c29e707f8dfb85be4eaee3111af4b393d8f2fb370e2390c87ddf09c6"
+      },
+      "soundInfo": {
+        "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+        "lines": "181-216",
+        "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+      },
+      "map": {
+        "path": "reference/pokeemerald/pokeemerald.map",
+        "sha256": "27c5f864f0f985637a3934946f256d64064977e2a240efd1ffe2c20b0dd11aa6"
+      }
+    },
+    "targetResolution": {
+      "proof": "source-init-midi-key-to-cgb-freq",
+      "m4aSoundInitOrder": [
+        "SoundInit(&gSoundInfo)",
+        "MPlayExtender(gCgbChans)"
+      ],
+      "soundInitInitialTarget": "DummyFunc",
+      "mplayExtenderTarget": "MidiKeyToCgbFreq",
+      "fieldWritesInPinnedSource": 2,
+      "runtimePointerIdentity": false,
+      "runtimeAddressLookup": false
+    },
+    "elf": {
+      "callR3Entry": "0x082dfcb4",
+      "midiKeyToCgbFreq": "0x082e0b34",
+      "midiKeyToCgbFreqSize": "0xa8",
+      "gNoiseTable": "0x08675c18"
+    },
+    "compiledRegions": [
+      {
+        "role": "call_r3 bx r3 edge",
+        "start": "0x082dfcb4",
+        "endExclusive": "0x082dfcb6",
+        "bytes": 2,
+        "sha256": "477db9ac7ca5efc12e37f882656b8fe5a363ffeb99b2e565a953d10c3c91ab21"
+      },
+      {
+        "role": "complete MidiKeyToCgbFreq body and literal pool",
+        "start": "0x082e0b34",
+        "endExclusive": "0x082e0bdc",
+        "bytes": 168,
+        "sha256": "4377844ebb1d188dd92436bbe784237a330026867f4cda5ab8345cdf2ec08aee"
+      },
+      {
+        "role": "MidiKeyToCgbFreq gNoiseTable literal",
+        "start": "0x082e0b68",
+        "endExclusive": "0x082e0b6c",
+        "bytes": 4,
+        "sha256": "7041c777c797e870148eed38ae6c6688244a17635b827def6ca4693227cb2056"
+      },
+      {
+        "role": "gNoiseTable",
+        "start": "0x08675c18",
+        "endExclusive": "0x08675c54",
+        "bytes": 60,
+        "sha256": "197f0679262884d48dd459dcfe690c0a41e8a73cf76cb62838119fc9cb0e7ab6"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "notTakenConditionalBranchRefillCycles": 0,
+      "iwramStackAccessPremiumCycles": 0,
+      "romLiteralWordReadTotalCycles": 11,
+      "romLiteralWordReadPremiumCycles": 9,
+      "romNoiseTableByteReadTotalCycles": 9,
+      "romNoiseTableByteReadPremiumCycles": 7,
+      "multiplyInternalCycles": 0,
+      "multiplyInternalPremiumCycles": 0,
+      "dynamicTarget": "resolved only from pinned source initialization; no runtime pointer value or address lookup"
+    },
+    "sourceCycleAccounting": {
+      "callR3BxEdge": {
+        "sequentialThumbHalfwords": 1,
+        "takenControlTransferRefills": 1,
+        "cycles": 8
+      },
+      "key64": {
+        "sourceRoute": "chanNum==4, key>20, key-21=43, bls taken",
+        "sequentialThumbHalfwords": 26,
+        "pipelineRefills": 5,
+        "iwramStackWordWrites": 5,
+        "iwramStackWordReads": 5,
+        "romLiteralWordReads": 1,
+        "romNoiseTableByteReads": 1,
+        "multiplyInstructions": 0,
+        "multiplyInternalCycles": 0,
+        "cycles": "26*2 + 5*6 + (11-2) + (9-2) = 98",
+        "callR3ToReturnCycles": "8 + 98 = 106"
+      },
+      "key91": {
+        "sourceRoute": "chanNum==4, key>20, key-21=70, bls not taken, clamp=59",
+        "sequentialThumbHalfwords": 27,
+        "pipelineRefills": 4,
+        "iwramStackWordWrites": 5,
+        "iwramStackWordReads": 5,
+        "romLiteralWordReads": 1,
+        "romNoiseTableByteReads": 1,
+        "multiplyInstructions": 0,
+        "multiplyInternalCycles": 0,
+        "cycles": "27*2 + 4*6 + (11-2) + (9-2) = 94",
+        "callR3ToReturnCycles": "8 + 94 = 102"
+      }
+    }
+  },
+  "frozenInputs": {
+    "acceptedV9EvidenceSha256": "2dd867648aa3ecb307a041a4868a2f06f934097dded180bc21c5afd1d8f52e4b",
+    "packetSha256": {
+      "anchor": "13d6526138359b145d707c0fdf55d074527e93e5e6d6b37d52bdd61c8414bedd",
+      "liliana": "86d4d2c5dfc6d63a74d5708fb50b8eb84d02b3218bedde9b066f30c278ce934e",
+      "factory-varied": "87a32977d6d69546e4720f2715ccf1315efebbee5d4826783cc35cbeca161fb2"
+    },
+    "packetRepeatSha256": {
+      "anchor": "13d6526138359b145d707c0fdf55d074527e93e5e6d6b37d52bdd61c8414bedd",
+      "liliana": "86d4d2c5dfc6d63a74d5708fb50b8eb84d02b3218bedde9b066f30c278ce934e",
+      "factory-varied": "87a32977d6d69546e4720f2715ccf1315efebbee5d4826783cc35cbeca161fb2"
+    }
+  },
+  "capture": {
+    "boundary": "frozen v9 call_r3 entry through source-proven MidiKeyToCgbFreq return",
+    "scalars": [
+      "none; keyAfter/keyM/toneType are reused from frozen v9 state"
+    ],
+    "excluded": [
+      "pointer",
+      "runtime address",
+      "frame",
+      "duration",
+      "callback identity",
+      "pitM/fineAdjust value",
+      "later allocation fields",
+      "result bytes from runtime"
+    ],
+    "targetProof": "SoundInit installs DummyFunc, then MPlayExtender source-initializes MidiKeyToCgbFreq before the observed MPlay callbacks; no runtime pointer identity is used"
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "exactCallR3ToReturnRoutes": 0,
+        "key64Callbacks": 0,
+        "key91Callbacks": 0,
+        "callR3ToReturnSourceCycles": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "exactCallR3ToReturnRoutes": 3,
+        "key64Callbacks": 2,
+        "key91Callbacks": 1,
+        "callR3ToReturnSourceCycles": 314
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "exactCallR3ToReturnRoutes": 4,
+        "key64Callbacks": 2,
+        "key91Callbacks": 2,
+        "callR3ToReturnSourceCycles": 416
+      }
+    },
+    "exactCallR3BxEdgeCallbacks": 7,
+    "callR3BxEdgeSourceCycleRange": {
+      "min": 8,
+      "max": 8,
+      "distinct": 1
+    },
+    "callR3BxEdgeSourceCycles": 56,
+    "exactMidiKeyToCgbFreqCallbacks": 7,
+    "midiKeyToCgbFreqSourceCycleRange": {
+      "min": 94,
+      "max": 98,
+      "distinct": 2
+    },
+    "midiKeyToCgbFreqSourceCycles": 674,
+    "dynamicCallR3ToReturnSourceCycleRange": {
+      "min": 102,
+      "max": 106,
+      "distinct": 2
+    },
+    "dynamicCallR3ToReturnSourceCycles": 730,
+    "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 3453,
+    "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 4183,
+    "observedKeyAfterValues": {
+      "64": 4,
+      "91": 3
+    },
+    "observedKeyMValues": {
+      "0": 7
+    },
+    "keyPassedToHelperValues": {
+      "64": 4,
+      "91": 3
+    },
+    "keyAfterSubtract21Values": {
+      "43": 4,
+      "70": 3
+    },
+    "noiseTableIndices": {
+      "43": 4,
+      "59": 3
+    },
+    "midiKeyToCgbFreqResults": {
+      "4": 3,
+      "52": 4
+    },
+    "clampBranchCounts": {
+      "blsTakenNoClamp": 4,
+      "blsNotTakenClampTo59": 3,
+      "clampMovExecuted": 3
+    },
+    "nullLaterAllocationFieldsCallbacks": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "branchCoverage": {
+    "observed": {
+      "sourceInitializedTarget": 7,
+      "chanNum4BneNotTaken": 7,
+      "keyAtMost20BhiTaken": 7,
+      "key64BlsTaken": 4,
+      "key91BlsNotTaken": 3,
+      "key91ClampMovExecuted": 3,
+      "callR3BxEdges": 7,
+      "noiseTableReturns": 7
+    },
+    "unobservedNonType4Route": null,
+    "unobservedKeyAtMost20Route": null,
+    "unobservedType4KeyRoutes": null,
+    "runtimePointerIdentity": null
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 589,
+      "targetResolution": "MidiKeyToCgbFreq",
+      "toneType": 12,
+      "channelNumber": 4,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPassedToHelper": 64,
+      "keyAfterSubtract21": 43,
+      "clampBranch": "bls-taken-no-clamp",
+      "noiseTableIndex": 43,
+      "midiKeyToCgbFreqResult": 52,
+      "callR3BxEdgeSourceCycles": 8,
+      "midiKeyToCgbFreqSourceCycles": 98,
+      "dynamicCallR3HelperSourceCycles": 106,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 695,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "targetResolution": "MidiKeyToCgbFreq",
+      "toneType": 12,
+      "channelNumber": 4,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPassedToHelper": 64,
+      "keyAfterSubtract21": 43,
+      "clampBranch": "bls-taken-no-clamp",
+      "noiseTableIndex": 43,
+      "midiKeyToCgbFreqResult": 52,
+      "callR3BxEdgeSourceCycles": 8,
+      "midiKeyToCgbFreqSourceCycles": 98,
+      "dynamicCallR3HelperSourceCycles": 106,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 561,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "targetResolution": "MidiKeyToCgbFreq",
+      "toneType": 12,
+      "channelNumber": 4,
+      "keyAfter": 91,
+      "keyM": 0,
+      "keyPassedToHelper": 91,
+      "keyAfterSubtract21": 70,
+      "clampBranch": "bls-not-taken-clamp-to-59",
+      "noiseTableIndex": 59,
+      "midiKeyToCgbFreqResult": 4,
+      "callR3BxEdgeSourceCycles": 8,
+      "midiKeyToCgbFreqSourceCycles": 94,
+      "dynamicCallR3HelperSourceCycles": 102,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 94,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 557,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "targetResolution": "MidiKeyToCgbFreq",
+      "toneType": 12,
+      "channelNumber": 4,
+      "keyAfter": 91,
+      "keyM": 0,
+      "keyPassedToHelper": 91,
+      "keyAfterSubtract21": 70,
+      "clampBranch": "bls-not-taken-clamp-to-59",
+      "noiseTableIndex": 59,
+      "midiKeyToCgbFreqResult": 4,
+      "callR3BxEdgeSourceCycles": 8,
+      "midiKeyToCgbFreqSourceCycles": 94,
+      "dynamicCallR3HelperSourceCycles": 102,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 94,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 557,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 589,
+      "targetResolution": "MidiKeyToCgbFreq",
+      "toneType": 12,
+      "channelNumber": 4,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPassedToHelper": 64,
+      "keyAfterSubtract21": 43,
+      "clampBranch": "bls-taken-no-clamp",
+      "noiseTableIndex": 43,
+      "midiKeyToCgbFreqResult": 52,
+      "callR3BxEdgeSourceCycles": 8,
+      "midiKeyToCgbFreqSourceCycles": 98,
+      "dynamicCallR3HelperSourceCycles": 106,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 695,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "targetResolution": "MidiKeyToCgbFreq",
+      "toneType": 12,
+      "channelNumber": 4,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPassedToHelper": 64,
+      "keyAfterSubtract21": 43,
+      "clampBranch": "bls-taken-no-clamp",
+      "noiseTableIndex": 43,
+      "midiKeyToCgbFreqResult": 52,
+      "callR3BxEdgeSourceCycles": 8,
+      "midiKeyToCgbFreqSourceCycles": 98,
+      "dynamicCallR3HelperSourceCycles": 106,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 561,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 455,
+      "targetResolution": "MidiKeyToCgbFreq",
+      "toneType": 12,
+      "channelNumber": 4,
+      "keyAfter": 91,
+      "keyM": 0,
+      "keyPassedToHelper": 91,
+      "keyAfterSubtract21": 70,
+      "clampBranch": "bls-not-taken-clamp-to-59",
+      "noiseTableIndex": 59,
+      "midiKeyToCgbFreqResult": 4,
+      "callR3BxEdgeSourceCycles": 8,
+      "midiKeyToCgbFreqSourceCycles": 94,
+      "dynamicCallR3HelperSourceCycles": 102,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 94,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 557,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "Pinned source initialization resolves the SoundInfo target; the call_r3 bx edge and both observed type-4 MidiKeyToCgbFreq routes are source/ROM/ELF exact through bx return, including gNoiseTable results.",
+    "contiguousPrefix": "4183 aggregate source cycles through MidiKeyToCgbFreq return across seven callbacks (3453 accepted through call_r3 entry + 730 new).",
+    "remainingDiscriminator": "Later allocation fields, unobserved type-4 keys and non-type-4 helper routes, clear_modM, nonzero-lfoDelay routes, other 75 callbacks, complete note/glue/MPlay, service/arbitration, and construction clock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "The source-initialized SoundInfo target is fail-closed without runtime pointer identity. The same 7/82 callbacks split into four key=64 no-clamp routes (106 cycles from call_r3 entry through return) and three key=91 clamp-to-59 routes (102 cycles); the exact aggregate prefix is 4183 cycles through MidiKeyToCgbFreq return."
+}
