@@ -1846,6 +1846,24 @@ complete one-pass MPlay totals remain null (**5 exact / 108 null**). No
 observed duration, pointer identity, service cost, or construction-clock
 wiring landed. Evidence: `docs/issue55-m4a-note-census-v1.md`.
 
+**2026-08-11 `ply_note` inline-prefix closure:** the committed address-free
+census proves one inline selector family with three observed parameter
+subroutes. All **57/57** callbacks have `toneType & 0xc0 == 0`, retain the
+track's inline ToneData, and reach the same `_081DDB9C` join: **3** zero-byte
+callbacks cost **108** cycles, **41** key-only callbacks cost **129**, and
+**13** key+velocity callbacks cost **146**. The reducer replays pinned song
+bytes and scalar key/velocity/tone state, and counts the exact compiled
+instructions, taken refills, ROM literals, aligned EWRAM words, and GamePak
+byte reads; source/ELF and malformed-route mutations fail closed.
+
+All **82/82** observed tone-selection prefixes are now source-exact. Known
+one-pass components span **456–2160** cycles (**84** totals), but every
+post-selection note body, keysplit route, command decode/jump-table dispatch,
+complete note callback cost, and complete one-pass MPlay total remains null
+(**5 exact / 108 null**). No observed duration, runtime pointer identity,
+service cost, or `runFactoryConstructionClock` wiring landed. Evidence remains
+`docs/issue55-m4a-note-census-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

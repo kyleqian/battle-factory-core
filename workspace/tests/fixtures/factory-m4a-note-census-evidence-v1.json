@@ -14,13 +14,24 @@
         "sha256": "cc68c146389ac7a529fe02b5729827a30345a2b8d17d346d525f550f29f4c493"
       }
     ],
-    "compiledRegion": {
-      "symbol": "ply_note",
-      "start": "0x082dfd38",
-      "endExclusive": "0x082dfdd0",
-      "bytes": 152,
-      "sha256": "f78e1a8e4582e30bc9e2e795048faaecf5edc7e4e935223d80f8bfc0583cfc98"
-    },
+    "compiledRegions": [
+      {
+        "role": "rhythm entry-to-selection",
+        "symbol": "ply_note",
+        "start": "0x082dfd38",
+        "endExclusive": "0x082dfdd0",
+        "bytes": 152,
+        "sha256": "f78e1a8e4582e30bc9e2e795048faaecf5edc7e4e935223d80f8bfc0583cfc98"
+      },
+      {
+        "role": "inline entry-to-selection",
+        "symbol": "ply_note",
+        "start": "0x082dfd38",
+        "endExclusive": "0x082dfdd4",
+        "bytes": 156,
+        "sha256": "180e3bedc2db15f9cb5985d594ee49619b65742573e1dd603abca1641a7f0b51"
+      }
+    ],
     "selectors": {
       "inline": "!(toneType & 0xc0)",
       "rhythm": "(toneType & 0x80) && !(toneType & 0x40)",
@@ -103,7 +114,19 @@
       "keysplit": 0
     },
     "smallestObservedRoute": "rhythm",
+    "inlineCallbacksSourceClosed": 57,
     "rhythmCallbacksSourceClosed": 25,
+    "inlineParameterCounts": {
+      "0": 3,
+      "1": 41,
+      "2": 13
+    },
+    "inlineCallbackSourceCycleCounts": {
+      "108": 3,
+      "129": 41,
+      "146": 13
+    },
+    "inlineToneSelectionSourceCycles": 7511,
     "rhythmParameterCounts": {
       "0": 2,
       "2": 23
@@ -112,12 +135,13 @@
       "193": 2,
       "231": 23
     },
-    "exactRhythmPrefixRowsWithinOnePass": 108,
+    "rhythmToneSelectionSourceCycles": 5699,
+    "exactToneSelectionPrefixRowsWithinOnePass": 108,
     "nullCompleteNoteRowsWithinOnePass": 108,
     "knownComponentSourceCycleRange": {
       "min": 456,
-      "max": 1644,
-      "distinct": 78
+      "max": 2160,
+      "distinct": 84
     },
     "exactCompleteMPlaySourceCostRows": 5,
     "nullCompleteMPlaySourceCostRows": 108
@@ -135,13 +159,21 @@
         "inline",
         "rhythm"
       ],
+      "inlineCallbackCount": 4,
+      "inlineToneSelectionCycles": [
+        129,
+        108,
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 495,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         193
       ],
       "rhythmToneSelectionSourceCycles": 193,
       "priorKnownComponentsSourceCycles": 682,
-      "knownComponentsSourceCycles": 875,
+      "knownComponentsSourceCycles": 1370,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -160,6 +192,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -174,6 +209,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -188,6 +226,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -204,11 +245,16 @@
       "noteRouteCensus": [
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 146,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 574,
-      "knownComponentsSourceCycles": 574,
+      "knownComponentsSourceCycles": 720,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -218,6 +264,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -235,11 +284,17 @@
         "inline",
         "inline"
       ],
+      "inlineCallbackCount": 2,
+      "inlineToneSelectionCycles": [
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 258,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 606,
-      "knownComponentsSourceCycles": 606,
+      "knownComponentsSourceCycles": 864,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -249,6 +304,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -263,6 +321,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -277,6 +338,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -291,6 +355,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -305,6 +372,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -322,11 +392,17 @@
         "inline",
         "inline"
       ],
+      "inlineCallbackCount": 2,
+      "inlineToneSelectionCycles": [
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 258,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 631,
-      "knownComponentsSourceCycles": 631,
+      "knownComponentsSourceCycles": 889,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -336,6 +412,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -350,6 +429,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -364,6 +446,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -383,11 +468,19 @@
         "inline",
         "inline"
       ],
+      "inlineCallbackCount": 4,
+      "inlineToneSelectionCycles": [
+        129,
+        129,
+        146,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 533,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 484,
-      "knownComponentsSourceCycles": 484,
+      "knownComponentsSourceCycles": 1017,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -397,6 +490,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -414,11 +510,17 @@
         "inline",
         "inline"
       ],
+      "inlineCallbackCount": 2,
+      "inlineToneSelectionCycles": [
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 258,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 616,
-      "knownComponentsSourceCycles": 616,
+      "knownComponentsSourceCycles": 874,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -428,6 +530,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -442,6 +547,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -456,6 +564,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -470,6 +581,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -484,6 +598,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -504,13 +621,21 @@
         "inline",
         "rhythm"
       ],
+      "inlineCallbackCount": 4,
+      "inlineToneSelectionCycles": [
+        129,
+        129,
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 516,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 1413,
-      "knownComponentsSourceCycles": 1644,
+      "knownComponentsSourceCycles": 2160,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -529,6 +654,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -543,6 +671,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -557,6 +688,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -573,11 +707,16 @@
       "noteRouteCensus": [
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 146,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 552,
-      "knownComponentsSourceCycles": 552,
+      "knownComponentsSourceCycles": 698,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -587,6 +726,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -603,11 +745,16 @@
       "noteRouteCensus": [
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 129,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 576,
-      "knownComponentsSourceCycles": 576,
+      "knownComponentsSourceCycles": 705,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -617,6 +764,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -631,6 +781,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -645,6 +798,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -659,6 +815,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -673,6 +832,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -689,11 +851,16 @@
       "noteRouteCensus": [
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 129,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 520,
-      "knownComponentsSourceCycles": 520,
+      "knownComponentsSourceCycles": 649,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -703,6 +870,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -717,6 +887,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -731,6 +904,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -749,11 +925,18 @@
         "inline",
         "inline"
       ],
+      "inlineCallbackCount": 3,
+      "inlineToneSelectionCycles": [
+        129,
+        146,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 404,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 456,
-      "knownComponentsSourceCycles": 456,
+      "knownComponentsSourceCycles": 860,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -763,6 +946,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -777,6 +963,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -791,6 +980,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -805,6 +997,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -819,6 +1014,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -833,6 +1031,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -847,6 +1048,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -868,13 +1072,22 @@
         "inline",
         "rhythm"
       ],
+      "inlineCallbackCount": 5,
+      "inlineToneSelectionCycles": [
+        129,
+        146,
+        146,
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 679,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         193
       ],
       "rhythmToneSelectionSourceCycles": 193,
       "priorKnownComponentsSourceCycles": 553,
-      "knownComponentsSourceCycles": 746,
+      "knownComponentsSourceCycles": 1425,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -893,6 +1106,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -907,6 +1123,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -923,6 +1142,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -939,6 +1161,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -953,6 +1178,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -972,13 +1200,20 @@
         "inline",
         "rhythm"
       ],
+      "inlineCallbackCount": 3,
+      "inlineToneSelectionCycles": [
+        129,
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 387,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 734,
-      "knownComponentsSourceCycles": 965,
+      "knownComponentsSourceCycles": 1352,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -988,6 +1223,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1002,6 +1240,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1018,6 +1259,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1034,6 +1278,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1048,6 +1295,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1069,6 +1319,14 @@
         "rhythm",
         "inline"
       ],
+      "inlineCallbackCount": 4,
+      "inlineToneSelectionCycles": [
+        129,
+        129,
+        146,
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 550,
       "rhythmCallbackCount": 2,
       "rhythmToneSelectionCycles": [
         231,
@@ -1076,7 +1334,7 @@
       ],
       "rhythmToneSelectionSourceCycles": 462,
       "priorKnownComponentsSourceCycles": 910,
-      "knownComponentsSourceCycles": 1372,
+      "knownComponentsSourceCycles": 1922,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1095,6 +1353,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1109,6 +1370,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1125,6 +1389,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1141,6 +1408,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1155,6 +1425,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1172,13 +1445,18 @@
         "rhythm",
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 146,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 667,
-      "knownComponentsSourceCycles": 898,
+      "knownComponentsSourceCycles": 1044,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1188,6 +1466,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1202,6 +1483,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1218,6 +1502,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1234,6 +1521,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1248,6 +1538,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1267,13 +1560,20 @@
         "rhythm",
         "inline"
       ],
+      "inlineCallbackCount": 3,
+      "inlineToneSelectionCycles": [
+        129,
+        129,
+        108
+      ],
+      "inlineToneSelectionSourceCycles": 366,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 940,
-      "knownComponentsSourceCycles": 1171,
+      "knownComponentsSourceCycles": 1537,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1283,6 +1583,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1297,6 +1600,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1313,6 +1619,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1329,6 +1638,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1343,6 +1655,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1361,13 +1676,19 @@
         "inline",
         "rhythm"
       ],
+      "inlineCallbackCount": 2,
+      "inlineToneSelectionCycles": [
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 258,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 610,
-      "knownComponentsSourceCycles": 841,
+      "knownComponentsSourceCycles": 1099,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1377,6 +1698,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1395,13 +1719,19 @@
         "rhythm",
         "inline"
       ],
+      "inlineCallbackCount": 2,
+      "inlineToneSelectionCycles": [
+        129,
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 275,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 697,
-      "knownComponentsSourceCycles": 928,
+      "knownComponentsSourceCycles": 1203,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1411,6 +1741,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1425,6 +1758,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1441,6 +1777,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1457,6 +1796,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1471,6 +1813,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1489,13 +1834,19 @@
         "inline",
         "rhythm"
       ],
+      "inlineCallbackCount": 2,
+      "inlineToneSelectionCycles": [
+        129,
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 258,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 574,
-      "knownComponentsSourceCycles": 805,
+      "knownComponentsSourceCycles": 1063,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1505,6 +1856,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1519,6 +1873,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1535,6 +1892,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1551,6 +1911,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1565,6 +1928,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1585,6 +1951,13 @@
         "rhythm",
         "inline"
       ],
+      "inlineCallbackCount": 3,
+      "inlineToneSelectionCycles": [
+        129,
+        129,
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 404,
       "rhythmCallbackCount": 2,
       "rhythmToneSelectionCycles": [
         231,
@@ -1592,7 +1965,7 @@
       ],
       "rhythmToneSelectionSourceCycles": 462,
       "priorKnownComponentsSourceCycles": 1108,
-      "knownComponentsSourceCycles": 1570,
+      "knownComponentsSourceCycles": 1974,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1611,6 +1984,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1625,6 +2001,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1641,6 +2020,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1657,6 +2039,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1671,6 +2056,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1688,13 +2076,18 @@
         "rhythm",
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 146,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 695,
-      "knownComponentsSourceCycles": 926,
+      "knownComponentsSourceCycles": 1072,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1704,6 +2097,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1720,11 +2116,16 @@
       "noteRouteCensus": [
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        146
+      ],
+      "inlineToneSelectionSourceCycles": 146,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 622,
-      "knownComponentsSourceCycles": 622,
+      "knownComponentsSourceCycles": 768,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1737,13 +2138,18 @@
         "inline",
         "rhythm"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 129,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 721,
-      "knownComponentsSourceCycles": 952,
+      "knownComponentsSourceCycles": 1081,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1755,11 +2161,16 @@
       "noteRouteCensus": [
         "inline"
       ],
+      "inlineCallbackCount": 1,
+      "inlineToneSelectionCycles": [
+        129
+      ],
+      "inlineToneSelectionSourceCycles": 129,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
       "priorKnownComponentsSourceCycles": 715,
-      "knownComponentsSourceCycles": 715,
+      "knownComponentsSourceCycles": 844,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1769,6 +2180,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1788,13 +2202,20 @@
         "rhythm",
         "inline"
       ],
+      "inlineCallbackCount": 3,
+      "inlineToneSelectionCycles": [
+        129,
+        129,
+        108
+      ],
+      "inlineToneSelectionSourceCycles": 366,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
       ],
       "rhythmToneSelectionSourceCycles": 231,
       "priorKnownComponentsSourceCycles": 580,
-      "knownComponentsSourceCycles": 811,
+      "knownComponentsSourceCycles": 1177,
       "completeNoteCallbacksSourceCycles": null,
       "completeMPlaySourceCycles": null
     },
@@ -1804,6 +2225,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1818,6 +2242,9 @@
       "passCount": 1,
       "noteCallbackCount": 0,
       "noteRouteCensus": [],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 0,
       "rhythmToneSelectionCycles": [],
       "rhythmToneSelectionSourceCycles": 0,
@@ -1834,6 +2261,9 @@
       "noteRouteCensus": [
         "rhythm"
       ],
+      "inlineCallbackCount": 0,
+      "inlineToneSelectionCycles": [],
+      "inlineToneSelectionSourceCycles": 0,
       "rhythmCallbackCount": 1,
       "rhythmToneSelectionCycles": [
         231
@@ -1846,12 +2276,12 @@
     }
   ],
   "closure": {
-    "closed": "The smallest observed ply_note selector family (rhythm) is source-exact from entry through the tone-selection join for all 25 callbacks; zero rhythm contribution is exact in every other one-pass row.",
-    "remainingDiscriminator": "The 57 inline selectors, the remainder of every note callback after tone selection, command decode/jump-table dispatch, and complete one-pass MPlay totals remain null.",
+    "closed": "Both observed ply_note selector families are source-exact from entry through the common tone-selection join: 57 inline and 25 rhythm callbacks; zero contribution is exact in every other one-pass row.",
+    "remainingDiscriminator": "The remainder of every note callback after tone selection, command decode/jump-table dispatch, and complete one-pass MPlay totals remain null.",
     "durationFit": false,
     "pointerIdentityTable": false,
     "serviceCost": null,
     "constructionClock": null
   },
-  "verdict": "The ply_note census is 82 callbacks (57 inline / 25 rhythm / 0 keysplit); the 25-callback rhythm tone-selection prefix is source-closed while complete MPlay remains 5 exact / 108 null."
+  "verdict": "The ply_note census is 82 callbacks (57 inline / 25 rhythm / 0 keysplit); all 82 tone-selection prefixes are source-closed while complete MPlay remains 5 exact / 108 null."
 }

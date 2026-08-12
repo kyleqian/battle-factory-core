@@ -20,6 +20,7 @@ const DOC = join(ROOT, "docs/issue55-m4a-note-census-v1.md");
 const ROM_BASE = 0x0800_0000;
 const PLY_NOTE_START = 0x082d_fd38;
 const RHYTHM_PREFIX_END = 0x082d_fdd0;
+const INLINE_PREFIX_END = 0x082d_fdd4;
 const DRUMSET_START = 0x0867_6148;
 const SONG_STARTS = [0x0895_8848, 0x0895_8984, 0x0895_8d12, 0x0895_90b7, 0x0895_912c, 0x0895_9754, 0x0895_9db6, 0x0895_a2e6, 0x0895_a56d, 0x0895_a6c8] as const;
 const THUMB_FETCH_CYCLES = 2;
@@ -43,6 +44,11 @@ export type RhythmToneSelectionTiming = Readonly<{
   route: "rhythm-midi-key-drumset"; acceptedParameters: number; sequentialThumbHalfwords: number;
   pipelineRefills: number; romLiteralLoads: number; ewramWordAccesses: number; gamepakByteReads: number;
   cycles: number; selectedMidiKey: number; selectedToneType: number; rhythmPan: number;
+}>;
+export type InlineToneSelectionTiming = Readonly<{
+  route: "inline-track-tone"; acceptedParameters: number; sequentialThumbHalfwords: number;
+  pipelineRefills: number; romLiteralLoads: number; ewramWordAccesses: number; gamepakByteReads: number;
+  cycles: number; selectedMidiKey: number; selectedToneType: number;
 }>;
 
 function fail(message: string): never { throw new Error(`factory-m4a-note-census-v1: ${message}`); }
@@ -76,6 +82,11 @@ function parseParameters(entry: NoteCallback): { accepted: number; key: number; 
   }
   return { accepted, key, velocity };
 }
+function histogram(values: readonly number[]): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const value of values) result[String(value)] = (result[String(value)] ?? 0) + 1;
+  return result;
+}
 
 /** Count the exact compiled entry-through-`_081DDB9C` rhythm selection prefix. */
 export function reduceMPlayRhythmToneSelectionTiming(entry: NoteCallback): RhythmToneSelectionTiming {
@@ -108,17 +119,51 @@ export function reduceMPlayRhythmToneSelectionTiming(entry: NoteCallback): Rhyth
     selectedToneType, rhythmPan });
 }
 
+/** Count the exact compiled entry-through-`_081DDB9C` inline-tone selection prefix. */
+export function reduceMPlayInlineToneSelectionTiming(entry: NoteCallback): InlineToneSelectionTiming {
+  if (!Number.isInteger(entry.trackIndex) || entry.trackIndex < 0 || entry.trackIndex > 9) fail("trackIndex must be 0..9");
+  if (!Number.isInteger(entry.noteCode) || entry.noteCode < 0 || entry.noteCode >= 49) fail("noteCode must index gClockTable");
+  const sourceBytes = sourceSongBytes(entry.commandPointer);
+  if (JSON.stringify(sourceBytes) !== JSON.stringify(entry.commandBytes)) fail("commandBytes disagree with the pinned song");
+  const parsed = parseParameters(entry);
+  if (entry.acceptedParameters !== parsed.accepted || entry.keyAfter !== parsed.key || entry.velocityAfter !== parsed.velocity) fail("captured parameter result disagrees with source replay");
+  const toneType = u8(entry.toneType, "toneType");
+  if ((toneType & 0xc0) !== 0 || entry.derivedSelector !== "inline" || entry.observedSelector !== "inline") fail("entry is not the source-derived inline selector");
+  if (entry.toneTable !== null || entry.selectedTone !== null) fail("inline selector must retain the MusicPlayerTrack tone");
+
+  // The parameter parser has four compiled paths. All observed inline callbacks
+  // use its 0/1/2-byte paths, then take the type&0xc0 == 0 branch and copy the
+  // track ToneData address/key before the common _081DDB9C join.
+  const prefixHalfwords = [28, 34, 39, 43][parsed.accepted]!;
+  const sequentialThumbHalfwords = prefixHalfwords + 2;
+  const pipelineRefills = (parsed.accepted < 3 ? 1 : 0) + 1;
+  const romLiteralLoads = 2;
+  const ewramWordAccesses = 2 + (parsed.accepted > 0 ? 1 : 0);
+  const gamepakByteReads = 1 + Math.min(parsed.accepted + 1, 3);
+  const cycles = sequentialThumbHalfwords * THUMB_FETCH_CYCLES + pipelineRefills * PIPELINE_REFILL_CYCLES
+    + romLiteralLoads * ROM_LITERAL_PREMIUM_CYCLES + ewramWordAccesses * EWRAM_WORD_PREMIUM_CYCLES
+    + gamepakByteReads * ROM_BYTE_PREMIUM_CYCLES;
+  return Object.freeze({ route: "inline-track-tone", acceptedParameters: parsed.accepted, sequentialThumbHalfwords,
+    pipelineRefills, romLiteralLoads, ewramWordAccesses, gamepakByteReads, cycles, selectedMidiKey: parsed.key,
+    selectedToneType: toneType });
+}
+
 function assertSourceAndElf(): Record<string, unknown> {
   const assembly = readFileSync(join(ROOT, "reference/pokeemerald/src/m4a_1.s"), "utf8");
   const drumset = readFileSync(join(ROOT, "reference/pokeemerald/sound/voicegroups/drumsets/frlg.inc"), "utf8");
   for (const anchor of ["ply_note:", "tst r0, r2", "adds r0, r3, 0", "ldrb r1, [r6, o_ToneData_pan_sweep]"]) if (!assembly.includes(anchor)) fail(`m4a_1.s lost ${anchor}`);
   for (const anchor of ["voice_group frlg_drumset, 36", "DirectSoundWaveData_drum_and_percussion_kick", "DirectSoundWaveData_sc88pro_tambourine"]) if (!drumset.includes(anchor)) fail(`frlg.inc lost ${anchor}`);
-  const prefix = romSlice(PLY_NOTE_START, RHYTHM_PREFIX_END);
-  if (sha256(prefix) !== "f78e1a8e4582e30bc9e2e795048faaecf5edc7e4e935223d80f8bfc0583cfc98") fail("compiled ply_note selector prefix changed");
+  const rhythmPrefix = romSlice(PLY_NOTE_START, RHYTHM_PREFIX_END);
+  const inlinePrefix = romSlice(PLY_NOTE_START, INLINE_PREFIX_END);
+  if (sha256(rhythmPrefix) !== "f78e1a8e4582e30bc9e2e795048faaecf5edc7e4e935223d80f8bfc0583cfc98") fail("compiled ply_note rhythm selector prefix changed");
+  if (sha256(inlinePrefix) !== "180e3bedc2db15f9cb5985d594ee49619b65742573e1dd603abca1641a7f0b51") fail("compiled ply_note inline selector prefix changed");
   return { source: [
     { path: "reference/pokeemerald/src/m4a_1.s", lines: "1538-1619", sha256: sha256(assembly) },
     { path: "reference/pokeemerald/sound/voicegroups/drumsets/frlg.inc", lines: "1-56", sha256: sha256(drumset) },
-  ], compiledRegion: { symbol: "ply_note", start: "0x082dfd38", endExclusive: "0x082dfdd0", bytes: prefix.length, sha256: sha256(prefix) },
+  ], compiledRegions: [
+    { role: "rhythm entry-to-selection", symbol: "ply_note", start: "0x082dfd38", endExclusive: "0x082dfdd0", bytes: rhythmPrefix.length, sha256: sha256(rhythmPrefix) },
+    { role: "inline entry-to-selection", symbol: "ply_note", start: "0x082dfd38", endExclusive: "0x082dfdd4", bytes: inlinePrefix.length, sha256: sha256(inlinePrefix) },
+  ],
   selectors: { inline: "!(toneType & 0xc0)", rhythm: "(toneType & 0x80) && !(toneType & 0x40)", keysplit: "toneType & 0x40" },
   timingClasses: { sequentialRomThumbHalfword: 2, takenPipelineRefillPremium: 6, romLiteralPremium: 9, alignedEwramWordPremium: 2, gamepakBytePremium: 7 } };
 }
@@ -135,7 +180,7 @@ export function makeEvidence(): Record<string, unknown> {
   const sourceAndElf = assertSourceAndElf();
   const prior = makeVolEvidence() as { rows: PriorRow[] };
   const priorByDigest = new Map(prior.rows.map((row) => [row.sourceStateDigest, row]));
-  const rows: Array<Record<string, unknown>> = [], rhythmTimings: RhythmToneSelectionTiming[] = [];
+  const rows: Array<Record<string, unknown>> = [], rhythmTimings: RhythmToneSelectionTiming[] = [], inlineTimings: InlineToneSelectionTiming[] = [];
   const routeCounts: Record<string, number> = { inline: 0, rhythm: 0, keysplit: 0 };
   const byCase: Record<string, { rows: number; onePass: number; zeroPass: number; callbackRows: number; callbacks: number; routes: Record<string, number> }> = {};
   for (const packet of CASES.map(loadPacket)) {
@@ -159,12 +204,16 @@ export function makeEvidence(): Record<string, unknown> {
         summary.routes[callback.observedSelector as keyof typeof summary.routes] += 1;
       }
       const timings = observation.noteCallbacks.filter((callback) => callback.observedSelector === "rhythm").map(reduceMPlayRhythmToneSelectionTiming);
+      const inline = observation.noteCallbacks.filter((callback) => callback.observedSelector === "inline").map(reduceMPlayInlineToneSelectionTiming);
       rhythmTimings.push(...timings);
+      inlineTimings.push(...inline);
       const rhythmCycles = timings.reduce((sum, timing) => sum + timing.cycles, 0);
+      const inlineCycles = inline.reduce((sum, timing) => sum + timing.cycles, 0);
       rows.push({ sourceStateDigest: observation.sourceStateDigest, case: packet.case, passCount: 1,
         noteCallbackCount: observation.noteCallbacks.length, noteRouteCensus: observation.noteCallbacks.map((callback) => callback.observedSelector),
+        inlineCallbackCount: inline.length, inlineToneSelectionCycles: inline.map((timing) => timing.cycles), inlineToneSelectionSourceCycles: inlineCycles,
         rhythmCallbackCount: timings.length, rhythmToneSelectionCycles: timings.map((timing) => timing.cycles), rhythmToneSelectionSourceCycles: rhythmCycles,
-        priorKnownComponentsSourceCycles: priorRow.knownComponentsSourceCycles, knownComponentsSourceCycles: priorRow.knownComponentsSourceCycles + rhythmCycles,
+        priorKnownComponentsSourceCycles: priorRow.knownComponentsSourceCycles, knownComponentsSourceCycles: priorRow.knownComponentsSourceCycles + rhythmCycles + inlineCycles,
         completeNoteCallbacksSourceCycles: null, completeMPlaySourceCycles: null });
     }
     byCase[packet.case] = summary;
@@ -172,31 +221,44 @@ export function makeEvidence(): Record<string, unknown> {
   const onePass = rows.filter((row) => row.passCount === 1), callbacks = Object.values(routeCounts).reduce((sum, count) => sum + count, 0);
   if (rows.length !== 113 || onePass.length !== 108 || callbacks !== 82 || JSON.stringify(routeCounts) !== JSON.stringify({ inline: 57, rhythm: 25, keysplit: 0 })) fail("note route census changed");
   if (rhythmTimings.length !== 25 || rhythmTimings.some((timing) => ![193, 231].includes(timing.cycles))) fail("rhythm route timing changed");
+  if (inlineTimings.length !== 57 || inlineTimings.some((timing) => ![108, 129, 146].includes(timing.cycles))) fail("inline route timing changed");
+  const inlineParameterCounts = histogram(inlineTimings.map((timing) => timing.acceptedParameters));
+  const inlineCallbackSourceCycleCounts = histogram(inlineTimings.map((timing) => timing.cycles));
+  const rhythmParameterCounts = histogram(rhythmTimings.map((timing) => timing.acceptedParameters));
+  const rhythmCallbackSourceCycleCounts = histogram(rhythmTimings.map((timing) => timing.cycles));
+  if (JSON.stringify(inlineParameterCounts) !== JSON.stringify({ "0": 3, "1": 41, "2": 13 })
+    || JSON.stringify(inlineCallbackSourceCycleCounts) !== JSON.stringify({ "108": 3, "129": 41, "146": 13 })
+    || JSON.stringify(rhythmParameterCounts) !== JSON.stringify({ "0": 2, "2": 23 })
+    || JSON.stringify(rhythmCallbackSourceCycleCounts) !== JSON.stringify({ "193": 2, "231": 23 })) fail("note parameter subroute census changed");
+  const inlineToneSelectionSourceCycles = inlineTimings.reduce((sum, timing) => sum + timing.cycles, 0);
+  const rhythmToneSelectionSourceCycles = rhythmTimings.reduce((sum, timing) => sum + timing.cycles, 0);
   const known = onePass.map((row) => row.knownComponentsSourceCycles as number);
   return { schema: "factory-m4a-note-census-evidence/v1", oracleProfile: "battle-scene-off", sourceAndElf,
     capture: { boundary: "exact compiled ply_note entry plus selector", runtimeCompiledPc: "0x082dfd3a", freshRunsPerCase: 2, repeatability: "byte-identical full packet", addressFree: true },
     frozenInputs: { packets: PACKET_HASHES, volEvidence: "tests/fixtures/factory-m4a-vol-evidence-v1.json" },
     join: { key: "sourceStateDigest", rows: 113, onePassRows: 108, zeroPassRows: 5, ambiguousRows: 0, addressFree: true },
-    coverage: { byCase, noteCallbacks: callbacks, noteRouteCounts: routeCounts, smallestObservedRoute: "rhythm", rhythmCallbacksSourceClosed: 25,
-      rhythmParameterCounts: { "0": 2, "2": 23 }, rhythmCallbackSourceCycleCounts: { "193": 2, "231": 23 },
-      exactRhythmPrefixRowsWithinOnePass: 108, nullCompleteNoteRowsWithinOnePass: 108,
+    coverage: { byCase, noteCallbacks: callbacks, noteRouteCounts: routeCounts, smallestObservedRoute: "rhythm", inlineCallbacksSourceClosed: 57, rhythmCallbacksSourceClosed: 25,
+      inlineParameterCounts, inlineCallbackSourceCycleCounts, inlineToneSelectionSourceCycles,
+      rhythmParameterCounts, rhythmCallbackSourceCycleCounts, rhythmToneSelectionSourceCycles,
+      exactToneSelectionPrefixRowsWithinOnePass: 108, nullCompleteNoteRowsWithinOnePass: 108,
       knownComponentSourceCycleRange: { min: Math.min(...known), max: Math.max(...known), distinct: new Set(known).size },
       exactCompleteMPlaySourceCostRows: 5, nullCompleteMPlaySourceCostRows: 108 }, rows,
-    closure: { closed: "The smallest observed ply_note selector family (rhythm) is source-exact from entry through the tone-selection join for all 25 callbacks; zero rhythm contribution is exact in every other one-pass row.",
-      remainingDiscriminator: "The 57 inline selectors, the remainder of every note callback after tone selection, command decode/jump-table dispatch, and complete one-pass MPlay totals remain null.",
+    closure: { closed: "Both observed ply_note selector families are source-exact from entry through the common tone-selection join: 57 inline and 25 rhythm callbacks; zero contribution is exact in every other one-pass row.",
+      remainingDiscriminator: "The remainder of every note callback after tone selection, command decode/jump-table dispatch, and complete one-pass MPlay totals remain null.",
       durationFit: false, pointerIdentityTable: false, serviceCost: null, constructionClock: null },
-    verdict: "The ply_note census is 82 callbacks (57 inline / 25 rhythm / 0 keysplit); the 25-callback rhythm tone-selection prefix is source-closed while complete MPlay remains 5 exact / 108 null." };
+    verdict: "The ply_note census is 82 callbacks (57 inline / 25 rhythm / 0 keysplit); all 82 tone-selection prefixes are source-closed while complete MPlay remains 5 exact / 108 null." };
 }
 
 function markdown(evidence: ReturnType<typeof makeEvidence>): string {
   const coverage = evidence.coverage as any;
-  return ["# Issue #55 — sixth-MPlayMain `ply_note` census and rhythm prefix v1", "",
+  return ["# Issue #55 — sixth-MPlayMain `ply_note` selector prefixes v1", "",
     "Generated by `node --experimental-strip-types tools/report/factory-m4a-note-census-v1.ts`; do not hand-edit.", "",
     "Two fresh serial Battle Scene OFF captures per anchor, LILIANA, and legal-varied epoch were byte-identical. At the exact compiled `ply_note` entry, the address-free packets retain only track index, note code, normalized song source/bytes, scalar key/velocity/tone inputs, and normalized nested-tone state; the three executed selector hooks independently agree with the source bit tests for every callback.", "",
-    `The complete census is **${coverage.noteCallbacks}** callbacks: **57 inline / 25 rhythm / 0 keysplit**. Anchor is **33** (30/3/0), LILIANA **24** (13/11/0), and legal-varied **25** (14/11/0). Rhythm is the smallest observed family and is the only family priced here.`, "",
+    `The complete census is **${coverage.noteCallbacks}** callbacks: **57 inline / 25 rhythm / 0 keysplit**. Anchor is **33** (30/3/0), LILIANA **24** (13/11/0), and legal-varied **25** (14/11/0). Both observed selector families are priced through the same tone-selection join.`, "",
+    "All 57 inline callbacks have `toneType & 0xc0 == 0` and retain the track's inline ToneData directly. The three parameter subroutes are **3** zero-byte callbacks at **108 cycles**, **41** key-only callbacks at **129 cycles**, and **13** key+velocity callbacks at **146 cycles**.", "",
     "All 25 rhythm callbacks are track 6 with `toneType=0x80`. The source selector uses the post-parameter MIDI key directly: keys **36/54** select the pinned `voicegroup_frlg_drumset` entries, whose nested types pass the `0xc0` rejection and whose pan/sweep high bit takes the same source route. Two callbacks accept zero parameter bytes and cost **193 cycles**; 23 accept key+velocity and cost **231 cycles**.", "",
-    "The reducer counts the exact `0x082dfd38..0x082dfdd0` entry-to-join instructions, taken refills, ROM literals, aligned EWRAM words, `gClockTable`/song/drumset GamePak byte reads, and independently replays parameter parsing and MIDI-key selection from pinned ROM bytes. It uses no observed duration or runtime pointer identity.", "",
-    `Known one-pass components now span **${coverage.knownComponentSourceCycleRange.min}–${coverage.knownComponentSourceCycleRange.max}** cycles (${coverage.knownComponentSourceCycleRange.distinct} totals). The 57 inline selectors, every post-selection note route, command decode/jump-table dispatch, all complete note costs, and all complete one-pass MPlay totals remain null (**5 exact / 108 null**). No service cost or construction-clock wiring is introduced.`, "",
+    "The reducer counts the exact `0x082dfd38..0x082dfdd4` entry-to-inline-join and `0x082dfd38..0x082dfdd0` rhythm-path regions, executed instructions, taken refills, ROM literals, aligned EWRAM words, and `gClockTable`/song/drumset GamePak byte reads. It independently replays parameter parsing and MIDI-key/tone selection from pinned ROM bytes and mutable scalar state, with no observed duration or runtime pointer identity.", "",
+    `Known one-pass components now span **${coverage.knownComponentSourceCycleRange.min}–${coverage.knownComponentSourceCycleRange.max}** cycles (${coverage.knownComponentSourceCycleRange.distinct} totals). Every post-selection note route, command decode/jump-table dispatch, all complete note costs, and all complete one-pass MPlay totals remain null (**5 exact / 108 null**). No service cost or construction-clock wiring is introduced.`, "",
   ].join("\n");
 }
 

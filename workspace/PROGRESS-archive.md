@@ -41589,3 +41589,19 @@ git; the current live ledger keeps the three load-bearing entries only.
   modules** are green. Known one-pass components span **456–1413** cycles (73
   totals). No engine/pixel identity or unsupported barrier changed; pixels
   were not rerun.
+## 1170 — [supervisor, 2026-08-11] **VOL verified; Rust M5b-0 folded**
+
+- **State:** `master` is green with VOL source-exact for **16/16** callbacks
+  and **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
+  #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated the address-free VOL receipt **4/4**, then
+  folded rust-main's native `CheckBadMove` preamble through merge `2529c1b4`.
+  Native Rust is **175/175** with fmt/clippy clean; rebuilt WASM is **100,143
+  bytes**, and all five adapter suites are **660/660** in default and
+  forced-WASM modes.
+- **Next:** census `ply_note` callbacks and source-close one bounded observed
+  route. Preserve nulls for every other note route, command dispatch, and all
+  complete one-pass MPlay totals.
+- **Notes:** merged union full `npm test` **970 files / 9,414 passed / 1
+  skipped**, build **651 modules**. Both lane branches are fully contained; no
+  unsupported barrier or main presentation/gameplay/pixel change.
