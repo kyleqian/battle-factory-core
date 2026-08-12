@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1202 — [supervisor, 2026-08-12] **CGB4 v12-v15 verified; lane tips contained**
+
+- **State:** #55 has a source-exact **5,338-cycle** aggregate prefix through
+  the post-note zero-`mod` decision for the observed **7/82** CGB4 callbacks.
+  Complete MPlay remains **5 exact / 108 null** and the construction clock is
+  unwired.
+- **Did:** independently regenerated v12-v15 and audited their timing classes.
+  Corrected v15's handoff: zero `mod` takes `_081DD994`, skips `lfoDelayC`,
+  and stops before `mov r3, sl`. Watched rust-main through its supervisor's
+  05:31 wind-down; rust-main and animation-main both remain contained, so no
+  fold or WASM/soak gate was triggered.
+- **Next:** source-close only a separately evidenced track-loop-exit slice
+  beginning at `_081DD994`; retain the other 75 callbacks, complete MPlay,
+  service/arbitration, and construction-clock wiring null.
+- **Notes:** final union **992 files / 9,588 passed / 1 skipped**, build **653
+  modules**; focused v15 **4/4**, diff check and tree clean. No production
+  engine/presentation change, unsupported barrier, or canonical Battle-2
+  extension.
+
 ## 1201 — [MAIN worker, 2026-08-12] **CGB4 v15 mod decision source-closed**
 
 - **State:** #55 is source-exact for **5,338 aggregate cycles** through the
@@ -42,27 +61,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   doc `82138617…` / `189c21ac…`; red-first followed by focused v1-v14
   **57/57**, smoke **8 files / 375 passed**, typecheck, exactly one full suite
   **991 files / 9,584 passed / 1 skipped**, and build **653 modules** are
-  green. No runtime pointer/address identity, production import, unsupported
-  barrier, animation/Rust change, or canonical Battle-2 branch.
-
-## 1199 — [MAIN worker, 2026-08-12] **CGB4 v13 next-command wait route source-closed**
-
-- **State:** #55 is source-exact for **5,212 aggregate cycles** through the
-  first post-note wait decrement across the same observed **7/82** CGB4
-  callbacks: frozen-v12 **4,589** plus v13 **623** cycles. Complete MPlay
-  remains **5 exact / 108 null** and the construction clock is unwired.
-- **Did:** twice-fresh address-free packets captured `MusicPlayerTrack.cmdPtr`'s
-  target class and byte for exactly the frozen seven rows: all `gamepak-ws0`,
-  with `0x86 ×2 / 0x8c ×3 / 0x92 ×2`. Source/ELF/ROM guards close their shared
-  encoded-wait route from v12's `ldrb r1,[r2]` through `gClockTable` assignment
-  and the first decrement at **89 cycles each**; v12 is byte-identical and the
-  only join is `sourceStateDigest`.
-- **Next:** stop before the next IWRAM `lfoSpeed` read, whose scalar is absent
-  from the packet. Retain later track-loop work, the other 75 note callbacks,
-  complete MPlay, service/arbitration, and construction-clock wiring null.
-- **Notes:** packet hashes anchor `c3c7b33f…`, LILIANA `10adc46c…`, varied
-  `14524c0f…`; v13 evidence/doc `1bb3b2b6…` / `d9a39158…`. Red-first focused
-  v3-v13 **45/45**, smoke **8 files / 375 passed**, typecheck, exactly one full
-  suite **990 files / 9,580 passed / 1 skipped**, and build **653 modules** are
   green. No runtime pointer/address identity, production import, unsupported
   barrier, animation/Rust change, or canonical Battle-2 branch.
