@@ -149,10 +149,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   independently (fallback present→carried, absent→absent; table-effect
   sanity proves shell vectors can't cover them). Post-fold: artifact
   rebuilt, smoke 375/375. Worker: sonnet, 21.6 min, 1 commit.
-- **Next:** M5d-1 (13 effects: sleep/speed/status openers + the 3
-  CV-only handlers) is next; brief staged. Then M5d-2..5 in source
-  order (only M5d-5 depends on M5d-3's Confuse). Re-verify the conflict
-  check at orient per the standing M4+ rule.
+- **M5d-1 DONE (fold `dfc75027`):** 13 effects (Sleep, SpeedDown+_2,
+  SpeedDownFromChance→SpeedDown delegation ported as a call, Toxic+
+  LeechSeed, Protect, Pursuit, HighCrit+BlazeKick+PoisonTail, AlwaysHit,
+  VitalThrow — the last three are the module's CV-only handlers).
+  unported = 109, pinned. 47 native tests (roll seeds FOUND via a
+  find_seed search, not hand-picked) + 111 TS-generated vector rows with
+  per-draw site/rng/funcResultAfter assertions (gen-cv-m5d1-vectors.mjs,
+  byte-idempotent). Worker quirk findings: HighCrit's fallthrough burns
+  1-or-2 draws depending on the first roll; AlwaysHit's ScoreUp1 does
+  NOT short-circuit (falls into the second roll); Protect's
+  EFFECT_ID_IN_WEATHER_RANGE map needed 2 file-local consts (EFFECT_HIT=0,
+  EFFECT_POISON_HIT=2) the M5d-0 const inventory missed. Supervisor
+  rerun: scope clean, cargo **384/384** + fmt/clippy + wasm, generator
+  byte-idempotent, 2 rows re-derived independently (Protect roll-1 +1
+  with funcResultAfter=0; Karate Chop vs Ghost immune 2-draw
+  fallthrough) — exact. Post-fold: artifact rebuilt, smoke 375/375.
+  Worker: sonnet, 29.0 min, 1 commit.
+- **Next:** M5d-2 (29 effects, stat-mod+screens, the largest batch —
+  brief staged), then M5d-3..5 in source order (only M5d-5 depends on
+  M5d-3's Confuse). Re-verify the conflict check at orient per the
+  standing M4+ rule.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
