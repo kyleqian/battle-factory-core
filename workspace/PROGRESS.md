@@ -23,7 +23,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** packets SHA256 anchor `a2f62e3b…`, LILIANA `53db7226…`, varied
   `406586b9…`; evidence `bec89adb…`, doc `269cae4c…`. No duration fit,
   pointer/identity lookup, production import, unsupported barrier, or
-  canonical Battle-2 extension. Final smoke/typecheck/full/build pending.
+  canonical Battle-2 extension. Smoke **8 files / 375 passed**, typecheck,
+  full **984 files / 9,554 passed / 1 skipped**, and build **653 modules** are
+  green; the executable-frontier barrier ratchet is unchanged and passes.
 
 ## 1188 — [supervisor, 2026-08-12] **CGB4 field slice verified; Rust M5d-1 folded**
 
