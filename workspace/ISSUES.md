@@ -2257,6 +2257,32 @@ and construction-clock wiring remain null. No production, presentation,
 animation/Rust, canonical Battle-2, unsupported-branch, or recording-import
 ratchet change landed.
 
+**2026-08-12 CGB4 v20 EXIST-clear second-decrement closure:** additive v20 is
+strictly source-only: it preserves frozen v19 evidence/report and all three
+v19 packets byte-for-byte, verifies v19 regenerates, joins only
+`sourceStateDigest`, and captures no new oracle data. It closes only the three
+frozen `flags=0` rows whose v19-selected successor is `_081DD998`; the four
+EXIST-set rows retain **null v20 cost** and remain stopped before `_081DD886`.
+
+For every clear row, frozen v17 fields prove `r6BeforeDecrement=2` and
+`postDecrementR6=1`. Source/ELF/exact-ROM guards prove that every exact v18
+continuation and v19 clear-decision instruction leaves `r6` untouched, so
+`r6=1` reaches `_081DD998` without an identity/index/count inference. Exact
+ROM bytes `01 3e 03 dd` then close only `subs r6, 0x1; ble _081DD9A4`: the
+second decrement yields zero and the branch is taken. Both executed Thumb
+halfwords—including the branch—cost 2 cycles plus the established 6-cycle
+taken refill: **10 cycles each / 30 aggregate**, advancing the seven-row
+prefix from **5,596** to **5,626 cycles**. The v17 (2 halfwords/no refill),
+v18 (4/one), and v19-clear (5/one) timing is explicitly cross-checked.
+Evidence is `docs/issue55-m4a-note-body-cgb4-v20.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v20.json` (SHA256
+`ba5fa1b0…`). All clear rows stop before `_081DD9A4`'s first `ldr`; its exit
+body, the clock, track identity/index/count, later loop work, the unobserved
+v17 exit successor, other 75 callbacks, complete MPlay totals (**5 exact /
+108 null**), service/arbitration, and construction-clock wiring remain null.
+No production, presentation, animation/Rust, canonical Battle-2,
+unsupported-branch, or recording-import ratchet change landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
