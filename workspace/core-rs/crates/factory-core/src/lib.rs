@@ -27,6 +27,7 @@ pub mod factory_ai_check_viability_m5d5_vectors_gen;
 pub mod factory_ai_check_viability_shell_vectors_gen;
 pub mod factory_ai_mask;
 pub mod factory_ai_mask_vectors_gen;
+pub mod factory_ai_try_to_faint;
 pub mod gen_tables;
 pub mod gender;
 pub mod mon_construction;
