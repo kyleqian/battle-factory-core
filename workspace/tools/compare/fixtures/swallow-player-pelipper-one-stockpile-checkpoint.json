@@ -10,8 +10,10 @@
   ],
   "branch": {
     "animTurn": 1,
+    "attackerBattler": 0,
     "orbWaves": 1,
-    "stockpiles": 1
+    "stockpiles": 1,
+    "targetBattler": 0
   },
   "cleanup": {
     "active": 0,
