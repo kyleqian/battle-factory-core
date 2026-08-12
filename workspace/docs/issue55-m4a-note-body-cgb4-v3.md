@@ -6,7 +6,7 @@ Battle Scene OFF, additive evidence only. Two fresh emulator paths per anchor, L
 
 The observed family is **7/82** callbacks: **0 anchor / 3 LILIANA / 4 legal-varied**. All seven select CGB channel index **3**. Five callbacks have a null selected-channel owner and take source ClearChain's **track-null** route; two have a previous-null/next-null owner route. All seven have lfoDelay=0, so the captured branch reaches the TrkVolPitSet entry boundary; neither helper body is priced.
 
-The reducer source-counts the `_081DDC40` caller/link sequence, the compiled ClearChain wrapper, indirect trampoline, and RealClearChain route. The common caller/link/LFO prefix is **15 Thumb halfwords** and **3 taken refills = 48 cycles** for the observed null next-link and zero-delay route. ClearChain contributes **63 cycles** on the five track-null rows and **87 cycles** on the two previous-null/next-null rows, for **111/135 allocation-body cycles** and **801 total**.
+The reducer source-counts the `_081DDC40` caller/link sequence, the compiled ClearChain wrapper, indirect trampoline, and RealClearChain route. The common caller/link/LFO prefix is **15 Thumb halfwords** and **3 taken refills = 48 cycles** for the observed null next-link and zero-delay route. ClearChain contributes **63 cycles** on the five track-null rows and **87 cycles** on the two previous-null/next-null rows, for **111/135 allocation-body cycles** and **825 total**.
 
 | case | CGB4 callbacks | track-null | owner route | packet repeats |
 | --- | ---: | ---: | ---: | ---: |

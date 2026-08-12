@@ -24,6 +24,7 @@ describe("Issue #55 ply_note CGB-channel-4 allocation body v3", () => {
     expect(evidence.rows).toHaveLength(7);
     expect(evidence.rows.every((row: any) => row.completeNoteCallbackSourceCycles === null && row.postCallbackGlueSourceCycles === null)).toBe(true);
     expect(evidence.closure).toMatchObject({ durationFit: false, runtimePointerIdentity: false, serviceCost: null, constructionClock: null });
+    expect(readFileSync(DOC, "utf8")).toContain(`**${evidence.coverage.allocationBodySourceCycles} total**`);
   });
 
   it("regenerates the v3 evidence and report byte-for-byte", () => {
