@@ -1,3 +1,11 @@
+# MOVE_METEOR_MASH staged implementation checkpoint — remains unsupported (2026-08-11 supervisor)
+
+- **State:** Coverage remains **174/276 Level-50 exact**, 0 partial, 0 staged, and **102 unsupported**. `MOVE_METEOR_MASH` is not promoted: source/legal staging, dense evidence plumbing, reducer/assets, typed seam, a narrow Metang/Onix compositor, shake latch, and healthbox staging are banked, but the complete production-framebuffer acceptance gate is still open.
+- **Did:** Pinned the exclusive source interval **0x082d56aa..0x082d5731**, complete legal bilateral parties using lowest Level-50 carrier set **311 METANG_2**, and a 214-frame source-relative reducer. Added a pointer-bounded Meteor Mash probe/source audit, source-derived assets, typed Scene-ON presentation seam, staged compositor, and move-owned latch rows for `ShakeMon2(ANIM_TARGET,5,0,20,1)` plus the twinkling-star parent lifecycle.
+- **Verified:** Worker full suite passed **956 files / 8,709 tests / 1 skipped**, with build, typecheck, smoke, focused source/reducer tests, boundary audit, and coverage green. Supervisor independently confirmed the branch was animation-only and clean, reran the source audit plus focused **12/12** tests and typecheck, then fast-forwarded commits `49ebabb8..3b7603ba`. Coverage and gameplay state are unchanged.
+- **Next:** Finish the source-owned mini-twinkling-star/OAM/palette lifecycle, BG/fade/register/audio state, portable bilateral fixtures/verifier, normalized change maps, and complete production framebuffer. Require twice-fresh bilateral all-frame equality before promoting only Meteor Mash.
+- **Notes:** The current compositor is intentionally staged, not exact. No damage, accuracy/stat outcome, RNG, controller/turn/round/facility state, animation boundary, unsupported-branch barrier, canonical recording import, per-frame RGB/hash lookup, absolute-tick branch, coordinate fit, or sibling promotion changed.
+
 # MOVE_FURY_SWIPES exact — bilateral Scene-ON dense acceptance (2026-08-11 worker)
 
 - **State:** Coverage advances **173→174/276 Level-50 exact**, 0 partial, 0 staged, and **103→102 unsupported**; only `MOVE_FURY_SWIPES` moves.
