@@ -41995,3 +41995,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   engine-changing fold remains covered by vanilla **20/20** and full **60/60**
   soaks. Both branches are contained; no unsupported barrier or canonical
   Battle-2 extension.
+## 1192 — [MAIN worker, 2026-08-12] **CGB4 pan-sweep caller edge source-closed**
+
+- **State:** #55 is source-exact for **3,453 aggregate cycles** through fixed
+  `call_r3` entry across the same observed **7/82** zero-`lfoDelay` CGB4
+  callbacks. Complete MPlay stays **5 exact / 108 null** and the construction
+  clock is unwired.
+- **Did:** added additive v9 evidence from the callsite-gated `0x082dfeea`
+  `pan_sweep` branch. All seven have `pan_sweep=0`, taking both `0x80`/`0x70`
+  sweep tests not-taken and storing `sweep=8`; the caller-only route is **34
+  cycles/callback**, **238 aggregate**, through `BL call_r3` entry
+  `0x082dfcb4`. Fresh packets are byte-identical: anchor `13d65261…`, LILIANA
+  `86d4d2c5…`, varied `87a32977…`.
+- **Next:** stop before dynamic `call_r3`/`MidiKeyToCgbFreq` execution. Preserve
+  helper/body/result, later fields, unobserved sweep/keyM/helper routes, other
+  75 callbacks, complete note/glue/MPlay, service/arbitration, and clock
+  wiring null.
+- **Notes:** red-first v9 and focused v3-v9 **27/27**, typecheck, smoke
+  **8 files / 375 passed**, full `npm test` **986 files / 9,562 passed / 1
+  skipped**, and build **653 modules** are green. No duration fit, runtime
+  identity, production import, unsupported barrier, animation/Rust change, or
+  canonical Battle-2 branch.

@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1195 — [supervisor, 2026-08-12] **CGB4 v10 verified; Rust M5d-4 folded**
+
+- **State:** #55 is source-exact for **4,127 aggregate cycles** through
+  `MidiKeyToCgbFreq` return across the observed **7/82** zero-`lfoDelay` CGB4
+  callbacks. Complete MPlay stays **5 exact / 108 null** and the construction
+  clock is unwired.
+- **Did:** independently reviewed and corrected v10's instruction/refill
+  census plus `gNoiseTable[59]` result; regenerated focused v3-v10 **31/31**.
+  Folded Rust M5d-4's **22** charge-up/status-cure/screen/Substitute
+  `CheckViability` effects through merge `262ad551`; **28** table effects
+  remain behind the native barrier. Animation-main is contained.
+- **Next:** source-close the straight-line post-helper caller tail through
+  `ply_note` return if fully provable, stopping before any unresolved state.
+  Preserve unobserved helper/key routes, the other 75 callbacks, complete
+  note/glue/MPlay, service/arbitration, and clock wiring null.
+- **Notes:** union full **987 files / 9,566 passed / 1 skipped**, build **653
+  modules**. Rust is **601/601**, fmt/clippy clean; rebuilt WASM is **138,222
+  bytes** (`db974b04…`) and forced parity is **757/757**. No engine-changing
+  fold, unsupported barrier, or canonical Battle-2 extension.
+
 ## 1194 — [MAIN worker, 2026-08-12] **CGB4 v10 helper return source-closed**
 
 - **State:** #55 is source-exact for **4,127 aggregate cycles** through
@@ -48,25 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   modules**. Rust is **528/528**, fmt/clippy clean; rebuilt WASM is **138,223
   bytes** (`e6096b79…`) and forced parity is **757/757**. No engine-changing
   fold, unsupported barrier, or canonical Battle-2 extension.
-
-## 1192 — [MAIN worker, 2026-08-12] **CGB4 pan-sweep caller edge source-closed**
-
-- **State:** #55 is source-exact for **3,453 aggregate cycles** through fixed
-  `call_r3` entry across the same observed **7/82** zero-`lfoDelay` CGB4
-  callbacks. Complete MPlay stays **5 exact / 108 null** and the construction
-  clock is unwired.
-- **Did:** added additive v9 evidence from the callsite-gated `0x082dfeea`
-  `pan_sweep` branch. All seven have `pan_sweep=0`, taking both `0x80`/`0x70`
-  sweep tests not-taken and storing `sweep=8`; the caller-only route is **34
-  cycles/callback**, **238 aggregate**, through `BL call_r3` entry
-  `0x082dfcb4`. Fresh packets are byte-identical: anchor `13d65261…`, LILIANA
-  `86d4d2c5…`, varied `87a32977…`.
-- **Next:** stop before dynamic `call_r3`/`MidiKeyToCgbFreq` execution. Preserve
-  helper/body/result, later fields, unobserved sweep/keyM/helper routes, other
-  75 callbacks, complete note/glue/MPlay, service/arbitration, and clock
-  wiring null.
-- **Notes:** red-first v9 and focused v3-v9 **27/27**, typecheck, smoke
-  **8 files / 375 passed**, full `npm test` **986 files / 9,562 passed / 1
-  skipped**, and build **653 modules** are green. No duration fit, runtime
-  identity, production import, unsupported barrier, animation/Rust change, or
-  canonical Battle-2 branch.
