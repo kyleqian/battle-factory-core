@@ -2232,6 +2232,31 @@ The closure stops before `_081DD87C`'s first `ldrb r0, [r5, o_MusicPlayerTrack_f
 presentation, animation/Rust, canonical Battle-2, unsupported-branch, or
 canonical-recording import change landed.
 
+**2026-08-12 CGB4 v19 next-track EXIST decision closure:** additive v19
+preserves frozen v18 evidence/report and all v17 packets byte-for-byte, and
+joins only the frozen **7/82** rows by `sourceStateDigest`. Two fresh Battle
+Scene OFF packet sets are byte-identical: anchor `18620078…`, LILIANA
+`1d31dfc0…`, and legal-varied `7c9978e5…`. Packets are address-free and
+contain only the next-track `flags` byte and direct `r0`/`r1`/TST branch
+evidence. Four rows have `flags=0x80` and take `_081DD886`; three have
+`flags=0` and fall through to `b _081DD998`.
+
+Source/header/ELF/ROM guards close only bytes `0x082dfab4..0x082dfabe`:
+`ldrb flags; movs MPT_FLG_EXIST; tst; bne _081DD886`, plus the unconditional
+branch only on clear rows. Counting each executed branch halfword consistently
+with v18 gives **14 cycles** for each EXIST-set route and **16** for each clear
+route: **104 aggregate**, advancing the prefix from **5,492** to **5,596
+cycles**. Evidence is `docs/issue55-m4a-note-body-cgb4-v19.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v19.json`.
+
+Closure stops before the selected `_081DD886` or `_081DD998` successor.
+Next-track identity/index/count, `r5`, channel pointer/status/gate time, start
+flag, command pointer, later loop body, the v17 exit successor, other 75
+callbacks, complete MPlay totals (**5 exact / 108 null**), service/arbitration,
+and construction-clock wiring remain null. No production, presentation,
+animation/Rust, canonical Battle-2, unsupported-branch, or recording-import
+ratchet change landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

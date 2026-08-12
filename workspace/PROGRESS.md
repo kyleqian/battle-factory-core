@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1207 — [supervisor, 2026-08-12] **CGB4 v19 next-track EXIST decision verified**
+
+- **State:** #55 has a source-exact **5,596-cycle** aggregate prefix through
+  the next-track `MPT_FLG_EXIST` branch decision for the frozen **7/82** CGB4
+  callbacks. Complete MPlay remains **5 exact / 108 null**; the construction
+  clock is unwired.
+- **Did:** two fresh address-free OFF packet sets are byte-identical and join
+  only by frozen `sourceStateDigest`: flags **0x80 ×4 / 0x00 ×3**, selecting
+  `_081DD886 ×4 / _081DD998 ×3`. The worker initially omitted the executed
+  branch halfword from each route; supervisor corrected the timing to **14 ×4
+  + 16 ×3 = 104** cycles, consistent with v18, and regenerated the evidence.
+- **Next:** source-close one bounded selected-successor slice, separating the
+  four EXIST-set rows from the three clear rows. Keep track identity/count,
+  channel state, later loop work, the unobserved v17 exit successor, other 75
+  callbacks, complete MPlay, service/arbitration, and clock wiring null.
+- **Notes:** packet hashes anchor `18620078…`, LILIANA `1d31dfc0…`, varied
+  `7c9978e5…`; focused v18/v19 **9/9**. No production, ratchet, animation/Rust,
+  presentation, or canonical Battle-2 change. Broader gates follow this docs
+  commit.
+
 ## 1206 — [supervisor, 2026-08-12] **CGB4 v18 verified; animation and Rust lanes folded**
 
 - **State:** #55 retains the source-exact **5,492-cycle** aggregate prefix
@@ -48,25 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   confirms **995 files / 9,599 passed / 1 skipped**; build **653 modules** is
   green. No production, ratchet, presentation/animation/Rust, or canonical
   Battle-2 change.
-
-## 1204 — [supervisor, 2026-08-12] **CGB4 v17 track-loop decision verified**
-
-- **State:** #55 has a source-exact **5,394-cycle** aggregate prefix through
-  `subs r6, 0x1; ble _081DD9A4` for the frozen **7/82** CGB4 callbacks.
-  Complete MPlay remains **5 exact / 108 null**; the construction clock is
-  unwired.
-- **Did:** two fresh address-free OFF packet sets capture live pre-decrement
-  `r6`: **3×4 / 2×3**; decrement leaves **2×4 / 1×3**, so all **7** `ble`
-  routes continue (no refill). Source/ELF/ROM close only the pair for **4
-  cycles each / 28 aggregate**; v16 evidence/doc regenerate byte-for-byte.
-- **Next:** stop before `movs r0, MusicPlayerTrack_size` on continuation and
-  `ldr r0, [r7, o_MusicPlayerInfo_clock]` on exit. Keep later loop body,
-  other 75 callbacks, complete MPlay, service/arbitration, and construction
-  clock wiring null.
-- **Notes:** worker red-first; supervisor independently regenerated v17 and
-  reran focused v16/v17 **7/7** plus smoke **8 files / 375 passed**. Worker
-  typecheck and build **653 modules** are green. Folded animation-main's exact
-  Meteor Mash promotion (`2ca00a35`); the union passes **994 files / 9,595
-  passed / 1 skipped** and build **653 modules**. Rust remains contained. No
-  production battle logic, unsupported barrier, recording import, canonical
-  Battle-2, or absolute-tick change.

@@ -42237,3 +42237,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   suite **993 files / 9,591 passed / 1 skipped**, and build **653 modules** are
   green. No production, unsupported barrier, animation/Rust, canonical
   Battle-2, or absolute-tick change.
+## 1204 — [supervisor, 2026-08-12] **CGB4 v17 track-loop decision verified**
+
+- **State:** #55 has a source-exact **5,394-cycle** aggregate prefix through
+  `subs r6, 0x1; ble _081DD9A4` for the frozen **7/82** CGB4 callbacks.
+  Complete MPlay remains **5 exact / 108 null**; the construction clock is
+  unwired.
+- **Did:** two fresh address-free OFF packet sets capture live pre-decrement
+  `r6`: **3×4 / 2×3**; decrement leaves **2×4 / 1×3**, so all **7** `ble`
+  routes continue (no refill). Source/ELF/ROM close only the pair for **4
+  cycles each / 28 aggregate**; v16 evidence/doc regenerate byte-for-byte.
+- **Next:** stop before `movs r0, MusicPlayerTrack_size` on continuation and
+  `ldr r0, [r7, o_MusicPlayerInfo_clock]` on exit. Keep later loop body,
+  other 75 callbacks, complete MPlay, service/arbitration, and construction
+  clock wiring null.
+- **Notes:** worker red-first; supervisor independently regenerated v17 and
+  reran focused v16/v17 **7/7** plus smoke **8 files / 375 passed**. Worker
+  typecheck and build **653 modules** are green. Folded animation-main's exact
+  Meteor Mash promotion (`2ca00a35`); the union passes **994 files / 9,595
+  passed / 1 skipped** and build **653 modules**. Rust remains contained. No
+  production battle logic, unsupported barrier, recording import, canonical
+  Battle-2, or absolute-tick change.
