@@ -20,6 +20,13 @@ use factory_core::factory_ai_check_viability::{
     self, CheckViabilityDraw, CheckViabilityResult, CvDrawKind, FactoryAiCheckViabilityBattler,
     RunCheckViabilityInput,
 };
+use factory_core::factory_ai_decision_policy::{
+    self, FactoryAiDecisionSide, FactoryAiLegalDecision, FactoryAiMaskZeroDecisionInput,
+    FactoryAiMoveDecision, FactoryAiMovePolicyRequest, FactoryAiMovePolicyView, FactoryAiMoveSlot,
+    FactoryAiRequestKind, FactoryAiScoredBattlerView, FactoryAiScoredChoice,
+    FactoryAiScoredDecisionInput, FactoryAiScoredDraw, FactoryAiScoredTargetView,
+    FactoryAiScoredView, FactoryAiTurnStartRandomNumber,
+};
 use factory_core::factory_ai_mask::{self, FactoryAiMaskError, FactoryAiMaskSelectionInput};
 use factory_core::gen_tables;
 use factory_core::gender::MonGender;
@@ -3116,6 +3123,633 @@ pub unsafe extern "C" fn fw_run_check_viability(input_ptr: *const u8, input_len:
     alloc_and_copy(&encode_cv_result(result, reason_prefix))
 }
 
+// === complete Factory DecisionPolicy boundary (M5f-3) ======================
+
+const FACTORY_AI_MASK_ZERO_INPUT_FIXED_WIDTH: usize = 40;
+const FACTORY_AI_SCORED_INPUT_FIXED_WIDTH: usize = 332;
+
+fn decode_policy_factory(r: &mut ByteReader) -> FactoryAiMaskSelectionInput {
+    let level_mode = r.u32();
+    let battle_mode = r.u32();
+    FactoryAiMaskSelectionInput {
+        // Preserve the canonical error branch instead of wrapping a wide ABI
+        // scalar through u8 before factory-core validates it.
+        level_mode: if level_mode > 2 { 3 } else { level_mode as u8 },
+        battle_mode: if battle_mode > 1 {
+            2
+        } else {
+            battle_mode as u8
+        },
+        factory_win_streak: r.u32(),
+        trainer_opponent_id: r.u32(),
+    }
+}
+
+fn policy_move_slot(value: u8) -> Result<FactoryAiMoveSlot, String> {
+    FactoryAiMoveSlot::from_index(value as usize)
+        .ok_or_else(|| format!("factory-wasm factoryAiEngine: invalid move slot {value}"))
+}
+
+fn decode_policy_request(
+    r: &mut ByteReader,
+) -> Result<
+    (
+        FactoryAiRequestKind,
+        u32,
+        FactoryAiDecisionSide,
+        u8,
+        Vec<FactoryAiLegalDecision>,
+    ),
+    String,
+> {
+    let kind = match r.u8() {
+        0 => FactoryAiRequestKind::Command,
+        1 => FactoryAiRequestKind::ForcedSwitch,
+        value => {
+            return Err(format!(
+                "factory-wasm factoryAiEngine: invalid request kind {value}"
+            ))
+        }
+    };
+    let request_id = r.u32();
+    let side = match r.u8() {
+        0 => FactoryAiDecisionSide::Player,
+        1 => FactoryAiDecisionSide::Trainer,
+        value => {
+            return Err(format!(
+                "factory-wasm factoryAiEngine: invalid request side {value}"
+            ))
+        }
+    };
+    let battler = r.u8();
+    let legal_count = r.u8() as usize;
+    let mut legal_decisions = Vec::with_capacity(legal_count);
+    for _ in 0..legal_count {
+        let tag = r.u8();
+        let first = r.u8();
+        let second = r.u8();
+        legal_decisions.push(match tag {
+            0 => FactoryAiLegalDecision::UseMove(FactoryAiMoveDecision {
+                move_slot: policy_move_slot(first)?,
+                target_battler: second,
+            }),
+            1 => FactoryAiLegalDecision::Switch { party_index: first },
+            value => {
+                return Err(format!(
+                    "factory-wasm factoryAiEngine: invalid legal decision tag {value}"
+                ));
+            }
+        });
+    }
+    Ok((kind, request_id, side, battler, legal_decisions))
+}
+
+fn decode_scored_battler(r: &mut ByteReader) -> FactoryAiScoredBattlerView {
+    FactoryAiScoredBattlerView {
+        types: [r.u8(), r.u8()],
+        attack: r.i32(),
+        defense: r.i32(),
+        sp_attack: r.i32(),
+        sp_defense: r.i32(),
+        speed: r.u32(),
+        level: r.u8(),
+        stat_stages: StatStages { atk: r.u8(), def: r.u8(), sp_atk: r.u8(), sp_def: r.u8() },
+        speed_stage: r.u8(),
+        acc_stage: r.u8(),
+        evasion_stage: r.u8(),
+        is_first_turn: r.u8(),
+        hp: r.i32(),
+        max_hp: r.i32(),
+        last_used_move_id: r.opt_u16(),
+        is_toxic_poisoned: r.opt_bool(),
+        has_any_status: r.opt_bool(),
+        is_confused: r.opt_bool(),
+        is_asleep: r.opt_bool(),
+        is_taunted: r.opt_bool(),
+        is_leech_seeded: r.opt_bool(),
+        is_infatuated: r.opt_bool(),
+        has_yawn: r.opt_bool(),
+        has_perish_song: r.opt_bool(),
+        is_nightmared: r.opt_bool(),
+        is_foresighted: r.opt_bool(),
+        spikes_up: r.opt_bool(),
+        target_future_attack_up: r.opt_bool(),
+        protect_uses: r.opt_u8(),
+        battle_turn_count: r.opt_u32(),
+        is_rooted: r.opt_bool(),
+        attacker_future_attack_up: r.opt_bool(),
+        has_focus_energy: r.opt_bool(),
+        has_curable_status: r.opt_bool(),
+        is_poisoned: r.opt_bool(),
+        is_burned: r.opt_bool(),
+        is_paralyzed: r.opt_bool(),
+        is_cursed: r.opt_bool(),
+        is_escape_prevented: r.opt_bool(),
+        is_tormented: r.opt_bool(),
+        light_screen_up: r.opt_bool(),
+        reflect_up: r.opt_bool(),
+        target_side_reflect_up: r.opt_bool(),
+        target_party_status_equals_any: r.opt_bool(),
+        safeguard_up: r.opt_bool(),
+        ability: r.u16(),
+        hold_effect: r.opt_u16(),
+        current_weather: r.opt_u8(),
+        usable_party_mons: r.opt_u8(),
+        has_substitute: r.opt_bool(),
+        any_move_disabled: r.opt_bool(),
+        any_move_encored: r.opt_bool(),
+        mist_up: r.opt_bool(),
+        gender: r.opt_u8().map(gender_from_byte),
+        imprisoned_others: r.opt_bool(),
+        mud_sport_up: r.opt_bool(),
+        water_sport_up: r.opt_bool(),
+        used_held_item_id: r.opt_u16(),
+        stockpile_count: r.opt_u8(),
+    }
+}
+
+fn encode_policy_error(message: &str) -> Vec<u8> {
+    let mut buf = vec![0, 0, 0, 0, 1];
+    buf.extend_from_slice(&(message.len() as u32).to_le_bytes());
+    buf.extend_from_slice(message.as_bytes());
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn append_policy_selection(buf: &mut Vec<u8>, selection: factory_ai_mask::FactoryAiMaskSelection) {
+    let receipt = selection.receipt;
+    buf.push(u8::from(receipt.is_frontier_brain));
+    buf.extend_from_slice(&receipt.frontier_stages_per_challenge.to_le_bytes());
+    buf.push(u8::from(receipt.challenge_number.is_some()));
+    buf.extend_from_slice(&receipt.challenge_number.unwrap_or(0).to_le_bytes());
+    buf.push(receipt.evaluation_count);
+    for index in 0..5 {
+        if index < receipt.evaluation_count as usize {
+            buf.push(receipt.evaluations[index].branch as u8);
+            buf.push(u8::from(receipt.evaluations[index].matched));
+        } else {
+            buf.extend_from_slice(&[0, 0]);
+        }
+    }
+    buf.push(receipt.branch as u8);
+}
+
+#[allow(clippy::too_many_arguments)]
+fn append_policy_draw_base(
+    buf: &mut Vec<u8>,
+    tag: u8,
+    move_slot: u8,
+    ordinal: u32,
+    before: BattleRngState,
+    after: BattleRngState,
+    raw_rng_value: u32,
+    random_value: u16,
+) {
+    buf.push(tag);
+    buf.push(move_slot);
+    buf.extend_from_slice(&ordinal.to_le_bytes());
+    buf.extend_from_slice(&before.value.to_le_bytes());
+    buf.extend_from_slice(&before.calls.to_le_bytes());
+    buf.extend_from_slice(&after.value.to_le_bytes());
+    buf.extend_from_slice(&after.calls.to_le_bytes());
+    buf.extend_from_slice(&raw_rng_value.to_le_bytes());
+    buf.extend_from_slice(&random_value.to_le_bytes());
+}
+
+fn append_policy_footer(
+    buf: &mut Vec<u8>,
+    slot_scores: impl IntoIterator<
+        Item = (
+            u8,
+            u16,
+            bool,
+            i32,
+            Option<i32>,
+            Option<i32>,
+            Option<i32>,
+            i32,
+        ),
+    >,
+    best_slots: &[FactoryAiMoveSlot],
+    tie_modulus: u8,
+    tie_index: u8,
+    chosen: FactoryAiMoveDecision,
+) {
+    for (slot, move_id, legal, initial, cbm, ttf, cv, final_score) in slot_scores {
+        buf.push(slot);
+        buf.extend_from_slice(&move_id.to_le_bytes());
+        buf.push(u8::from(legal));
+        buf.extend_from_slice(&initial.to_le_bytes());
+        for value in [cbm, ttf, cv] {
+            buf.push(u8::from(value.is_some()));
+            buf.extend_from_slice(&value.unwrap_or(0).to_le_bytes());
+        }
+        buf.extend_from_slice(&final_score.to_le_bytes());
+    }
+    buf.push(best_slots.len() as u8);
+    for index in 0..4 {
+        buf.push(
+            best_slots
+                .get(index)
+                .copied()
+                .unwrap_or(FactoryAiMoveSlot::Slot0) as u8,
+        );
+    }
+    buf.push(tie_modulus);
+    buf.push(tie_index);
+    buf.push(chosen.move_slot as u8);
+    buf.push(chosen.target_battler);
+}
+
+fn encode_mask_zero_choice(
+    result: Result<
+        factory_ai_decision_policy::FactoryAiMaskZeroDecisionChoice,
+        factory_ai_decision_policy::FactoryAiDecisionPolicyError,
+    >,
+) -> Vec<u8> {
+    let choice = match result {
+        Ok(choice) => choice,
+        Err(error) => return encode_policy_error(&error.to_string()),
+    };
+    let mut buf = vec![0, 0, 0, 0, 0];
+    buf.extend_from_slice(&choice.submission.request_id.to_le_bytes());
+    buf.push(choice.submission.side as u8);
+    buf.push(choice.submission.decision.move_slot as u8);
+    buf.push(choice.submission.decision.target_battler);
+    buf.extend_from_slice(&choice.rng.value.to_le_bytes());
+    buf.extend_from_slice(&choice.rng.calls.to_le_bytes());
+    buf.push(choice.trace.mask);
+    append_policy_selection(&mut buf, choice.trace.mask_selection);
+    buf.extend_from_slice(&[0, 0, 0, 0]); // script count + fixed script slots
+    buf.extend_from_slice(&[2, 0, 0, 0]); // legacy-post-boundary + absent value
+    buf.push(choice.trace.draws.len() as u8);
+    for draw in choice.trace.draws {
+        match draw {
+            factory_ai_decision_policy::FactoryAiRngDraw::SetupSimulatedRng(draw) => {
+                append_policy_draw_base(
+                    &mut buf,
+                    1,
+                    draw.move_slot as u8,
+                    draw.ordinal,
+                    draw.before,
+                    draw.after,
+                    draw.raw_rng_value,
+                    draw.random_value,
+                );
+                buf.push(draw.simulated_rng);
+            }
+            factory_ai_decision_policy::FactoryAiRngDraw::BestMoveTie(draw) => {
+                append_policy_draw_base(
+                    &mut buf,
+                    5,
+                    u8::MAX,
+                    draw.ordinal,
+                    draw.before,
+                    draw.after,
+                    draw.raw_rng_value,
+                    draw.random_value,
+                );
+            }
+        }
+    }
+    let best_count = choice.trace.best_move_slot_count as usize;
+    append_policy_footer(
+        &mut buf,
+        choice.trace.slot_scores.map(|score| {
+            (
+                score.move_slot as u8,
+                score.move_id,
+                score.legal,
+                score.initial_score,
+                None,
+                None,
+                None,
+                score.final_score,
+            )
+        }),
+        &choice.trace.best_move_slots[..best_count],
+        choice.trace.tie_modulus,
+        choice.trace.tie_index,
+        choice.trace.chosen_decision,
+    );
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn encode_scored_choice(
+    result: Result<FactoryAiScoredChoice, factory_ai_decision_policy::FactoryAiScoredDecisionError>,
+) -> Vec<u8> {
+    let choice = match result {
+        Ok(choice) => choice,
+        Err(error) => return encode_policy_error(&error.to_string()),
+    };
+    let mut buf = vec![0, 0, 0, 0, 0];
+    buf.extend_from_slice(&choice.submission.request_id.to_le_bytes());
+    buf.push(choice.submission.side as u8);
+    buf.push(choice.submission.decision.move_slot as u8);
+    buf.push(choice.submission.decision.target_battler);
+    buf.extend_from_slice(&choice.rng.value.to_le_bytes());
+    buf.extend_from_slice(&choice.rng.calls.to_le_bytes());
+    buf.push(choice.trace.mask);
+    append_policy_selection(&mut buf, choice.trace.mask_selection);
+    buf.push(choice.trace.executed_scoring_script_count);
+    for script in choice.trace.executed_scoring_scripts {
+        buf.push(script.map_or(0, |value| value as u8));
+    }
+    buf.push(choice.trace.turn_start_random_number.owner as u8);
+    buf.push(u8::from(
+        choice.trace.turn_start_random_number.value.is_some(),
+    ));
+    buf.extend_from_slice(
+        &choice
+            .trace
+            .turn_start_random_number
+            .value
+            .unwrap_or(0)
+            .to_le_bytes(),
+    );
+    buf.push(choice.trace.draw_count);
+    for draw in choice
+        .trace
+        .draws
+        .into_iter()
+        .take(choice.trace.draw_count as usize)
+        .flatten()
+    {
+        match draw {
+            FactoryAiScoredDraw::TurnStartRandomNumber(draw) => {
+                append_policy_draw_base(
+                    &mut buf,
+                    0,
+                    u8::MAX,
+                    draw.ordinal,
+                    draw.before,
+                    draw.after,
+                    draw.raw_rng_value,
+                    draw.random_value,
+                );
+            }
+            FactoryAiScoredDraw::SetupSimulatedRng(draw) => {
+                append_policy_draw_base(
+                    &mut buf,
+                    1,
+                    draw.move_slot as u8,
+                    draw.ordinal,
+                    draw.before,
+                    draw.after,
+                    draw.raw_rng_value,
+                    draw.random_value,
+                );
+                buf.push(draw.simulated_rng);
+            }
+            FactoryAiScoredDraw::CheckBadMove { move_slot, draw } => {
+                append_policy_draw_base(
+                    &mut buf,
+                    2,
+                    move_slot as u8,
+                    draw.ordinal,
+                    draw.before,
+                    draw.after,
+                    draw.raw_rng_value,
+                    draw.random_value,
+                );
+                buf.push(draw.site as u8);
+                buf.extend_from_slice(&draw.guessed_ability.to_le_bytes());
+            }
+            FactoryAiScoredDraw::TryToFaint { move_slot, draw } => {
+                append_policy_draw_base(
+                    &mut buf,
+                    3,
+                    move_slot as u8,
+                    draw.ordinal,
+                    draw.before,
+                    draw.after,
+                    draw.raw_rng_value,
+                    draw.random_value,
+                );
+                buf.push(draw.kind as u8);
+                buf.push(u8::from(draw.succeeded));
+            }
+            FactoryAiScoredDraw::CheckViability { move_slot, draw } => {
+                buf.push(4);
+                buf.push(move_slot as u8);
+                append_encoded_cv_draw(
+                    &mut buf,
+                    &format!("slot-{}-check-viability", move_slot as u8),
+                    draw,
+                );
+            }
+            FactoryAiScoredDraw::BestMoveTie(draw) => {
+                append_policy_draw_base(
+                    &mut buf,
+                    5,
+                    u8::MAX,
+                    draw.ordinal,
+                    draw.before,
+                    draw.after,
+                    draw.raw_rng_value,
+                    draw.random_value,
+                );
+            }
+        }
+    }
+    let best_count = choice.trace.best_move_slot_count as usize;
+    append_policy_footer(
+        &mut buf,
+        choice.trace.slot_scores.map(|score| {
+            (
+                score.move_slot as u8,
+                score.move_id,
+                score.legal,
+                score.initial_score,
+                score.check_bad_move_delta,
+                score.try_to_faint_delta,
+                score.check_viability_delta,
+                score.final_score,
+            )
+        }),
+        &choice.trace.best_move_slots[..best_count],
+        choice.trace.tie_modulus,
+        choice.trace.tie_index,
+        choice.trace.chosen_decision,
+    );
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// Runs the native mask-zero DecisionPolicy chooser. Input has a 40-byte
+/// little-endian prefix: rng `{value,calls}` (8); factory level/battle/streak/
+/// opponent as four u32s (16); four move ids (8); request kind:u8,
+/// request_id:u32, side:u8, battler:u8, legal_count:u8 (8); then variable
+/// legal-decision records `{tag,slot_or_party,target}` (3 * legal_count). Tag
+/// 0 is a move and tag 1 a switch. The output is the
+/// common length-prefixed complete-choice layout documented on
+/// `fw_choose_factory_ai_scored_decision`, or status 1 + u32 UTF-8 error.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_choose_factory_ai_mask_zero_decision(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if (input_len as usize) < FACTORY_AI_MASK_ZERO_INPUT_FIXED_WIDTH {
+        return alloc_and_copy(&encode_policy_error(
+            "factory-wasm factoryAiEngine: mask-zero decision input shorter than 40 bytes",
+        ));
+    }
+    // SAFETY: exact-width check plus caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len as usize) };
+    let legal_count = bytes[39] as usize;
+    if bytes.len() != FACTORY_AI_MASK_ZERO_INPUT_FIXED_WIDTH + 3 * legal_count {
+        return alloc_and_copy(&encode_policy_error(
+            "factory-wasm factoryAiEngine: malformed mask-zero legal-decision length",
+        ));
+    }
+    let mut r = ByteReader::new(bytes);
+    let rng = BattleRngState { value: r.u32(), calls: r.u32() };
+    let factory = decode_policy_factory(&mut r);
+    let moves = [r.u16(), r.u16(), r.u16(), r.u16()];
+    let (kind, request_id, side, battler, legal) = match decode_policy_request(&mut r) {
+        Ok(request) => request,
+        Err(message) => return alloc_and_copy(&encode_policy_error(&message)),
+    };
+    let request =
+        FactoryAiMovePolicyRequest { kind, request_id, side, battler, legal_decisions: &legal };
+    debug_assert_eq!(r.offset, bytes.len());
+    alloc_and_copy(&encode_mask_zero_choice(
+        factory_ai_decision_policy::choose_factory_ai_mask_zero_decision(
+            FactoryAiMaskZeroDecisionInput {
+                view: FactoryAiMovePolicyView { factory, moves },
+                request,
+                rng,
+            },
+        ),
+    ))
+}
+
+/// Runs the native scored mask-1/mask-7 DecisionPolicy chooser.
+///
+/// Input has a 332-byte fixed portion plus 3 bytes per legal decision. Let
+/// `N = legal_count` and `B = 40 + 3*N`:
+///
+/// ```text
+/// 0 rng.value:u32; 4 rng.calls:u32
+/// 8 levelMode:u32; 12 battleMode:u32; 16 factoryWinStreak:u32;
+/// 20 trainerOpponentId:u32; 24 moves:[u16;4]
+/// 32 request kind:u8; 33 requestId:u32; 37 side:u8; 38 battler:u8;
+/// 39 legal_count:u8; 40 legal records:[tag:u8,slot_or_party:u8,target:u8;N]
+/// B turn owner:u8; B+1 turn value:u16 (owner 0=legacy,1=decision,2=boundary)
+/// B+3 attacker:135 bytes; B+138 target battler:135 bytes
+/// B+273 target species:u16; B+275 knownAbility:opt_u16;
+/// B+278 speciesAbilities:opt_[u16;2]; B+283 knownMoves:opt_[u16;4]
+/// total input_len = B+292 = 332+3*N
+/// ```
+///
+/// A 135-byte battler is declaration-order. Relative offsets are: types 0/2;
+/// attack 2/i32; defense 6/i32; spAttack 10/i32; spDefense 14/i32; speed
+/// 18/u32; level 22; atk/def/spAtk/spDef/speed/acc/evasion stages 23..29;
+/// isFirstTurn 30; hp 31/i32; maxHp 35/i32; then lastMove 39/opt_u16;
+/// toxic/anyStatus/confused/asleep/taunted/leechSeeded/infatuated/yawn/
+/// perishSong/nightmared/foresighted/spikes/futureAttack at 42,44,...,66
+/// (opt_bool); protectUses 68/opt_u8; battleTurnCount 70/opt_u32; rooted,
+/// attackerFutureAttack, focusEnergy, curableStatus, poisoned, burned,
+/// paralyzed, cursed, escapePrevented, tormented, lightScreen, reflect,
+/// targetReflect, targetPartyStatus, safeguard at 75,77,...,103 (opt_bool);
+/// ability 105/u16; holdEffect 107/opt_u16; weather 110/opt_u8; usableParty
+/// 112/opt_u8; substitute/disabled/encored/mist at 114..120 (opt_bool);
+/// gender 122/opt_u8; imprisoned/mudSport/waterSport 124..128 (opt_bool);
+/// usedHeldItem 130/opt_u16; stockpile 133/opt_u8. `opt_T` is presence:u8
+/// plus a fixed T slot ignored when absent, preserving false/zero presence.
+///
+/// All output begins `total_len:u32,status:u8`. Status 1 is
+/// `message_len:u32,message:utf8`. Status 0 is:
+///
+/// ```text
+/// 5 requestId:u32; 9 side:u8; 10 chosenSlot:u8; 11 chosenTarget:u8
+/// 12 finalRng.value:u32; 16 finalRng.calls:u32; 20 mask:u8
+/// 21 mask receipt: isBrain:u8, stages:u32, challenge:opt_u32,
+///    evaluationCount:u8, five [branch:u8,matched:u8], selectedBranch:u8
+/// 43 scriptCount:u8; 44 scripts:[u8;3]; 47 turnOwner:u8;
+/// 48 turnValue:opt_u16; 51 drawCount:u8; 52 draw records...
+/// ```
+///
+/// Every non-CV draw starts with tag:u8, moveSlot:u8 (255 when not owned by
+/// a slot), ordinal:u32, before `{value,calls}` u32x2, after u32x2,
+/// rawRng:u32, randomValue:u16 (28 bytes). Tag 0 turn-start and tag 5 tie
+/// end there; tag 1 adds simulatedRng:u8; tag 2 adds CBM site:u8 and guessed
+/// ability:u16; tag 3 adds TTF kind:u8 and succeeded:u8. Tag 4 starts with
+/// tag+slot then the CV record documented by `fw_run_check_viability`
+/// (including kind/reason UTF-8 and typed extra tag/value). After the draws,
+/// four 27-byte scores carry slot:u8, move:u16, legal:u8, initial:i32, three
+/// `opt_i32` deltas, final:i32; then bestCount:u8, four fixed slot bytes,
+/// tie modulus/index, and chosen slot/target. Mask zero uses this same output
+/// with zero scripts, a legacy/absent turn block, and absent score deltas.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_choose_factory_ai_scored_decision(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if (input_len as usize) < FACTORY_AI_SCORED_INPUT_FIXED_WIDTH {
+        return alloc_and_copy(&encode_policy_error(
+            "factory-wasm factoryAiEngine: scored decision input shorter than 332 bytes",
+        ));
+    }
+    // SAFETY: exact-width check plus caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len as usize) };
+    let legal_count = bytes[39] as usize;
+    if bytes.len() != FACTORY_AI_SCORED_INPUT_FIXED_WIDTH + 3 * legal_count {
+        return alloc_and_copy(&encode_policy_error(
+            "factory-wasm factoryAiEngine: malformed scored legal-decision length",
+        ));
+    }
+    let mut r = ByteReader::new(bytes);
+    let rng = BattleRngState { value: r.u32(), calls: r.u32() };
+    let factory = decode_policy_factory(&mut r);
+    let moves = [r.u16(), r.u16(), r.u16(), r.u16()];
+    let (kind, request_id, side, battler, legal) = match decode_policy_request(&mut r) {
+        Ok(request) => request,
+        Err(message) => return alloc_and_copy(&encode_policy_error(&message)),
+    };
+    let request =
+        FactoryAiMovePolicyRequest { kind, request_id, side, battler, legal_decisions: &legal };
+    let turn_start_random_number = match r.u8() {
+        0 => None,
+        1 => {
+            r.u16();
+            Some(FactoryAiTurnStartRandomNumber::Decision)
+        }
+        2 => Some(FactoryAiTurnStartRandomNumber::BattleTurnBoundary { value: r.u16() }),
+        value => {
+            return alloc_and_copy(&encode_policy_error(&format!(
+                "factory-wasm factoryAiEngine: invalid turn-start owner {value}"
+            )))
+        }
+    };
+    if turn_start_random_number.is_none() {
+        r.u16();
+    }
+    let attacker = decode_scored_battler(&mut r);
+    let target_battler = decode_scored_battler(&mut r);
+    let target = FactoryAiScoredTargetView {
+        battler: target_battler,
+        species: r.u16(),
+        known_ability: r.opt_u16(),
+        species_abilities: r.opt_u16x2(),
+        known_moves: r.opt_u16x4(),
+    };
+    debug_assert_eq!(r.offset, bytes.len());
+    let view = FactoryAiScoredView { factory, moves, attacker, target };
+    alloc_and_copy(&encode_scored_choice(
+        factory_ai_decision_policy::choose_factory_ai_scored_decision(
+            FactoryAiScoredDecisionInput { view, request, rng, turn_start_random_number },
+        ),
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -4280,5 +4914,62 @@ mod tests {
         unsafe {
             fw_free(ptr, bytes.len() as u32);
         }
+    }
+
+    #[test]
+    fn fw_choose_factory_ai_mask_zero_preserves_authoritative_self_target() {
+        let mut input = Vec::new();
+        input.extend_from_slice(&1u32.to_le_bytes()); // rng.value
+        input.extend_from_slice(&7u32.to_le_bytes()); // rng.calls
+        input.extend_from_slice(&0u32.to_le_bytes()); // level 50
+        input.extend_from_slice(&0u32.to_le_bytes()); // singles
+        input.extend_from_slice(&0u32.to_le_bytes()); // streak => mask 0
+        input.extend_from_slice(&50u32.to_le_bytes());
+        for move_id in [85u16, 86, 69, 273] {
+            input.extend_from_slice(&move_id.to_le_bytes());
+        }
+        input.push(0); // command
+        input.extend_from_slice(&77u32.to_le_bytes());
+        input.extend_from_slice(&[1, 1, 1]); // trainer, battler 1, one legal
+        input.extend_from_slice(&[0, 3, 1]); // use slot 3, authoritative self target
+        assert_eq!(input.len(), 43);
+
+        // SAFETY: the vector follows the export's complete documented layout.
+        let ptr =
+            unsafe { fw_choose_factory_ai_mask_zero_decision(input.as_ptr(), input.len() as u32) };
+        // SAFETY: the export returns an fw_alloc'd length-prefixed buffer.
+        let bytes = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0) as usize;
+            std::slice::from_raw_parts(ptr, total_len).to_vec()
+        };
+        assert_eq!(bytes[4], 0);
+        assert_eq!(read_u32(&bytes, 5), 77);
+        assert_eq!(bytes[9], 1);
+        assert_eq!(bytes[10], 3);
+        assert_eq!(bytes[11], 1);
+        assert_eq!(read_u32(&bytes, 16), 12); // incoming 7 + setup 4 + tie 1
+        unsafe { fw_free(ptr, bytes.len() as u32) };
+    }
+
+    #[test]
+    fn fw_choose_factory_ai_scored_returns_a_safe_exact_error_buffer() {
+        // A structurally complete zero-filled record selects Player battler 0;
+        // native validation rejects it before it can enter any scorer.
+        let input = vec![0u8; FACTORY_AI_SCORED_INPUT_FIXED_WIDTH];
+        // SAFETY: exact fixed width, with legal_count=0 at byte 39.
+        let ptr =
+            unsafe { fw_choose_factory_ai_scored_decision(input.as_ptr(), input.len() as u32) };
+        // SAFETY: the export returns an fw_alloc'd length-prefixed buffer.
+        let bytes = unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0) as usize;
+            std::slice::from_raw_parts(ptr, total_len).to_vec()
+        };
+        assert_eq!(bytes[4], 1);
+        let message_len = read_u32(&bytes, 5) as usize;
+        assert_eq!(
+            std::str::from_utf8(&bytes[9..9 + message_len]).unwrap(),
+            "Factory AI scored policy requires the current trainer battler-1 request"
+        );
+        unsafe { fw_free(ptr, bytes.len() as u32) };
     }
 }

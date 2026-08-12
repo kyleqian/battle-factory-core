@@ -64,8 +64,19 @@ import {
   type FactoryAiPolicyBranchId,
   selectFactoryAiMask as tsSelectFactoryAiMask,
 } from "../../src/engine/factoryAiMaskSelection.ts";
+import {
+  chooseFactoryAiMaskZeroDecision as tsChooseFactoryAiMaskZeroDecision,
+  chooseFactoryAiScoredDecision as tsChooseFactoryAiScoredDecision,
+  type FactoryAiDecisionChoice,
+  type FactoryAiScoredBattlerView,
+  type FactoryAiScoredChoice,
+} from "../../src/engine/factoryAiDecisionPolicy.ts";
+import type {
+  BattleDecisionRequest,
+} from "../../src/engine/battleDecisionBoundary.ts";
 import { typeId } from "./damageEngine.ts";
 import { loadFactoryWasm } from "./loadFactoryWasm.ts";
+import { defaultEngineId } from "./rngEngine.ts";
 
 type SymbolIdRow = Readonly<{ name: string; id: number }>;
 const ABILITY_ID_BY_NAME = new Map(
@@ -133,7 +144,12 @@ export interface FactoryAiEngine {
   selectFactoryAiMask(input: FactoryAiMaskSelectionInput): FactoryAiMaskSelection;
   runCheckBadMovePreamble(input: RunCheckBadMovePreambleInput): CbmResultView;
   runCheckViability(input: RunCheckViabilityInput): CvResultView;
+  chooseFactoryAiMaskZeroDecision(input: MaskZeroDecisionInput): FactoryAiDecisionChoice;
+  chooseFactoryAiScoredDecision(input: ScoredDecisionInput): FactoryAiScoredChoice;
 }
+
+export type MaskZeroDecisionInput = Parameters<typeof tsChooseFactoryAiMaskZeroDecision>[0];
+export type ScoredDecisionInput = Parameters<typeof tsChooseFactoryAiScoredDecision>[0];
 
 export type RunCheckBadMovePreambleInput = Readonly<{
   rng: BattleRngState;
@@ -186,6 +202,8 @@ export function tsFactoryAiEngine(): FactoryAiEngine {
       };
     },
     runCheckViability: tsRunCheckViability,
+    chooseFactoryAiMaskZeroDecision: tsChooseFactoryAiMaskZeroDecision,
+    chooseFactoryAiScoredDecision: tsChooseFactoryAiScoredDecision,
   };
 }
 
@@ -374,6 +392,152 @@ function encodeCbmPreambleInput(input: RunCheckBadMovePreambleInput): ArrayBuffe
   return w.finish();
 }
 
+// === complete DecisionPolicy chooser inputs ================================
+
+function policyLegalDecisions(request: BattleDecisionRequest): readonly Readonly<{
+  kind: "use-move" | "switch";
+  moveSlot?: number;
+  targetBattler?: number;
+  partyIndex?: number;
+}>[] {
+  return request.kind === "command" ? request.legalDecisions : [];
+}
+
+function encodePolicyPrefix(
+  w: ByteWriter,
+  input: MaskZeroDecisionInput | ScoredDecisionInput,
+): void {
+  w.u32(input.rng.value);
+  w.u32(input.rng.calls);
+  w.u32(input.view.factory.levelMode);
+  w.u32(input.view.factory.battleMode);
+  w.u32(input.view.factory.factoryWinStreak);
+  w.u32(input.view.factory.trainerOpponentId);
+  for (const moveId of input.view.moves) w.u16(moveId);
+  w.u8(input.request.kind === "command" ? 0 : 1);
+  w.u32(input.request.requestId);
+  w.u8(input.request.side === "player" ? 0 : 1);
+  w.u8(input.request.battler);
+  const legal = policyLegalDecisions(input.request);
+  if (legal.length > 0xff) {
+    throw new Error("factory-wasm factoryAiEngine: legal decision count exceeds 255");
+  }
+  w.u8(legal.length);
+  for (const decision of legal) {
+    if (decision.kind === "use-move") {
+      w.u8(0);
+      w.u8(decision.moveSlot!);
+      w.u8(decision.targetBattler!);
+    } else {
+      w.u8(1);
+      w.u8(decision.partyIndex!);
+      w.u8(0);
+    }
+  }
+}
+
+function encodeMaskZeroDecisionInput(input: MaskZeroDecisionInput): ArrayBuffer {
+  const legalCount = policyLegalDecisions(input.request).length;
+  const w = new ByteWriter(40 + 3 * legalCount);
+  encodePolicyPrefix(w, input);
+  return w.finish();
+}
+
+function encodeScoredBattler(w: ByteWriter, b: FactoryAiScoredBattlerView): void {
+  w.u8(typeId(b.types[0]));
+  w.u8(typeId(b.types[1]));
+  w.i32(b.attack);
+  w.i32(b.defense);
+  w.i32(b.spAttack);
+  w.i32(b.spDefense);
+  w.u32(b.speed);
+  w.u8(b.level);
+  w.u8(b.statStages.atk);
+  w.u8(b.statStages.def);
+  w.u8(b.statStages.spAtk);
+  w.u8(b.statStages.spDef);
+  w.u8(b.statStages.speed);
+  w.u8(b.statStages.acc);
+  w.u8(b.statStages.evasion);
+  w.u8(b.isFirstTurn);
+  w.i32(b.hp);
+  w.i32(b.maxHp);
+  w.optU16(b.lastUsedMoveId);
+  w.optBool(b.isToxicPoisoned);
+  w.optBool(b.hasAnyStatus);
+  w.optBool(b.isConfused);
+  w.optBool(b.isAsleep);
+  w.optBool(b.isTaunted);
+  w.optBool(b.isLeechSeeded);
+  w.optBool(b.isInfatuated);
+  w.optBool(b.hasYawn);
+  w.optBool(b.hasPerishSong);
+  w.optBool(b.isNightmared);
+  w.optBool(b.isForesighted);
+  w.optBool(b.spikesUp);
+  w.optBool(b.targetFutureAttackUp);
+  w.optU8(b.protectUses);
+  w.optU32(b.battleTurnCount);
+  w.optBool(b.isRooted);
+  w.optBool(b.attackerFutureAttackUp);
+  w.optBool(b.hasFocusEnergy);
+  w.optBool(b.hasCurableStatus);
+  w.optBool(b.isPoisoned);
+  w.optBool(b.isBurned);
+  w.optBool(b.isParalyzed);
+  w.optBool(b.isCursed);
+  w.optBool(b.isEscapePrevented);
+  w.optBool(b.isTormented);
+  w.optBool(b.lightScreenUp);
+  w.optBool(b.reflectUp);
+  w.optBool(b.targetSideReflectUp);
+  w.optBool(b.targetPartyStatusEqualsAny);
+  w.optBool(b.safeguardUp);
+  w.u16(abilityId(b.ability ?? "ABILITY_NONE"));
+  w.optU16(b.holdEffect);
+  w.optU8(b.currentWeather);
+  w.optU8(b.usablePartyMons);
+  w.optBool(b.hasSubstitute);
+  w.optBool(b.anyMoveDisabled);
+  w.optBool(b.anyMoveEncored);
+  w.optBool(b.mistUp);
+  w.optU8(b.gender === undefined ? undefined : genderByte(b.gender));
+  w.optBool(b.imprisonedOthers);
+  w.optBool(b.mudSportUp);
+  w.optBool(b.waterSportUp);
+  w.optU16(b.usedHeldItemId);
+  w.optU8(b.stockpileCount);
+}
+
+function encodeScoredDecisionInput(input: ScoredDecisionInput): ArrayBuffer {
+  const legalCount = policyLegalDecisions(input.request).length;
+  const w = new ByteWriter(332 + 3 * legalCount);
+  encodePolicyPrefix(w, input);
+  const turnStart = input.turnStartRandomNumber;
+  if (turnStart === undefined) {
+    w.u8(0);
+    w.u16(0);
+  } else if (turnStart.owner === "decision") {
+    w.u8(1);
+    w.u16(0);
+  } else if (turnStart.owner === "battle-turn-boundary") {
+    w.u8(2);
+    w.u16(turnStart.value);
+  } else {
+    throw new Error("Factory AI turn-start random-number owner must be decision or battle-turn-boundary");
+  }
+  encodeScoredBattler(w, input.view.attacker);
+  encodeScoredBattler(w, input.view.target);
+  w.u16(input.view.target.species);
+  w.optU16(input.view.target.knownAbility === null ? undefined : abilityId(input.view.target.knownAbility));
+  w.bool(input.view.target.speciesAbilities !== undefined);
+  w.u16(input.view.target.speciesAbilities === undefined ? 0 : abilityId(input.view.target.speciesAbilities[0]));
+  w.u16(input.view.target.speciesAbilities === undefined ? 0 : abilityId(input.view.target.speciesAbilities[1]));
+  w.bool(input.view.target.knownMoveIds !== undefined);
+  for (let i = 0; i < 4; i++) w.u16(input.view.target.knownMoveIds?.[i] ?? 0);
+  return w.finish();
+}
+
 // === fw_run_check_viability ================================================
 //
 // ABI-v1 layout, all little-endian. The input is self-describing solely for
@@ -528,6 +692,33 @@ function decodeCbmResult(bytes: Uint8Array): CbmResultView {
 // export owns the literal kind/reason reconstruction so this decoder never
 // reruns any CheckViability branch logic.
 
+function decodeCvDraw(r: ByteReader): FactoryAiCheckViabilityDraw {
+  const ordinal = r.u32();
+  const before = { value: r.u32(), calls: r.u32() };
+  const after = { value: r.u32(), calls: r.u32() };
+  const rawRngValue = r.u32();
+  const randomValue = r.u16();
+  const kind = r.utf8(r.u32());
+  const reason = r.utf8(r.u32());
+  const extraTag = r.u8();
+  const extraValue = r.u16();
+  const common = { ordinal, reason, kind, before, after, rawRngValue, randomValue };
+  switch (extraTag) {
+    case 1:
+      return { ...common, strikesFirst: extraValue } as FactoryAiCheckViabilityDraw;
+    case 2:
+      return { ...common, jumped: extraValue !== 0 } as FactoryAiCheckViabilityDraw;
+    case 3:
+      return { ...common, jumpedToEnd: extraValue !== 0 } as FactoryAiCheckViabilityDraw;
+    case 4:
+      return { ...common, succeeded: extraValue !== 0 } as FactoryAiCheckViabilityDraw;
+    case 5:
+      return { ...common, guessedAbility: abilityName(extraValue) } as FactoryAiCheckViabilityDraw;
+    default:
+      throw new Error(`factory-wasm factoryAiEngine: unknown CheckViability draw extra tag ${extraTag}`);
+  }
+}
+
 function decodeCvResult(bytes: Uint8Array): CvResultView {
   const r = new ByteReader(bytes);
   r.u32(); // total_len -- already used by the caller to size `bytes`.
@@ -540,37 +731,7 @@ function decodeCvResult(bytes: Uint8Array): CvResultView {
     const drawCount = r.u8();
     const draws: FactoryAiCheckViabilityDraw[] = [];
     for (let i = 0; i < drawCount; i++) {
-      const ordinal = r.u32();
-      const before = { value: r.u32(), calls: r.u32() };
-      const after = { value: r.u32(), calls: r.u32() };
-      const rawRngValue = r.u32();
-      const randomValue = r.u16();
-      const kind = r.utf8(r.u32());
-      const reason = r.utf8(r.u32());
-      const extraTag = r.u8();
-      const extraValue = r.u16();
-      const common = { ordinal, reason, kind, before, after, rawRngValue, randomValue };
-      let draw: unknown;
-      switch (extraTag) {
-        case 1:
-          draw = { ...common, strikesFirst: extraValue };
-          break;
-        case 2:
-          draw = { ...common, jumped: extraValue !== 0 };
-          break;
-        case 3:
-          draw = { ...common, jumpedToEnd: extraValue !== 0 };
-          break;
-        case 4:
-          draw = { ...common, succeeded: extraValue !== 0 };
-          break;
-        case 5:
-          draw = { ...common, guessedAbility: abilityName(extraValue) };
-          break;
-        default:
-          throw new Error(`factory-wasm factoryAiEngine: unknown CheckViability draw extra tag ${extraTag}`);
-      }
-      draws.push(draw as FactoryAiCheckViabilityDraw);
+      draws.push(decodeCvDraw(r));
     }
     return {
       kind: "scored",
@@ -595,6 +756,199 @@ function decodeCvResult(bytes: Uint8Array): CvResultView {
     throw new Error(r.utf8(r.u32()));
   }
   throw new Error(`factory-wasm factoryAiEngine: unknown CheckViability result status ${status}`);
+}
+
+const POLICY_SCRIPT_NAMES = ["check-bad-move", "try-to-faint", "check-viability"] as const;
+const TURN_OWNER_NAMES = ["decision", "battle-turn-boundary", "legacy-post-boundary"] as const;
+const CBM_REASON_SUFFIXES = [
+  "negates-type", "soundproof", "high-risk-ability", "magnitude-levitate",
+  "speed-down-shared-tail", "attack-down-hyper-cutter", "attack-down-shared-tail",
+  "defense-down-shared-tail", "sp-def-down-shared-tail", "acc-down-keen-eye",
+  "acc-down-shared-tail", "evasion-down-shared-tail", "sp-atk-down-shared-tail",
+  "toxic-immunity", "sleep-ability", "paralyze-ability", "confuse-ability",
+  "one-hit-ko-ability", "will-o-wisp-ability", "roar-ability",
+  "trick-and-knock-off-ability", "explosion-ability", "attract-ability",
+] as const;
+
+function decodePolicyMaskReceipt(r: ByteReader, input: FactoryAiMaskSelectionInput) {
+  const isFrontierBrain = r.bool();
+  const frontierStagesPerChallenge = r.u32();
+  const hasChallengeNumber = r.bool();
+  const challengeNumber = r.u32();
+  const evaluationCount = r.u8();
+  const evaluations: { order: number; id: FactoryAiPolicyBranchId; matched: boolean }[] = [];
+  for (let i = 0; i < 5; i++) {
+    const branchOrder = r.u8();
+    const matched = r.bool();
+    if (i < evaluationCount) {
+      evaluations.push(Object.freeze({ order: branchOrder, id: BRANCH_IDS[branchOrder], matched }));
+    }
+  }
+  const branchOrder = r.u8();
+  const branch = POLICY.branches[branchOrder]!;
+  return Object.freeze({
+    schema: "factory-ai-mask-selection/v1" as const,
+    inputs: Object.freeze({ ...input, isFrontierBrain }),
+    frontierStagesPerChallenge,
+    challengeNumber: hasChallengeNumber ? challengeNumber : null,
+    evaluations: Object.freeze(evaluations),
+    branch: Object.freeze({
+      order: branch.order,
+      id: BRANCH_IDS[branchOrder],
+      condition: branch.condition,
+      flags: Object.freeze([...branch.flags]),
+      mask: branch.mask as FactoryAiMaskSelection["mask"],
+    }),
+  });
+}
+
+function decodePolicyChoice(
+  bytes: Uint8Array,
+  input: MaskZeroDecisionInput | ScoredDecisionInput,
+  scored: boolean,
+): FactoryAiDecisionChoice | FactoryAiScoredChoice {
+  const r = new ByteReader(bytes);
+  r.u32();
+  const status = r.u8();
+  if (status === 1) throw new Error(r.utf8(r.u32()));
+  if (status !== 0) throw new Error(`factory-wasm factoryAiEngine: unknown policy status ${status}`);
+
+  const requestId = r.u32();
+  const side = r.u8() === 0 ? "player" as const : "trainer" as const;
+  const submissionDecision = Object.freeze({
+    kind: "use-move" as const,
+    moveSlot: r.u8() as 0 | 1 | 2 | 3,
+    targetBattler: r.u8(),
+  });
+  const rng = Object.freeze({ value: r.u32(), calls: r.u32() });
+  const mask = r.u8();
+  const maskSelection = decodePolicyMaskReceipt(r, input.view.factory);
+  const scriptCount = r.u8();
+  const scripts: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    const tag = r.u8();
+    if (i < scriptCount) scripts.push(POLICY_SCRIPT_NAMES[tag]!);
+  }
+  const turnOwner = r.u8();
+  const hasTurnValue = r.bool();
+  const turnValue = r.u16();
+  const drawCount = r.u8();
+  const draws: unknown[] = [];
+  for (let i = 0; i < drawCount; i++) {
+    const tag = r.u8();
+    const moveSlotByte = r.u8();
+    if (tag === 4) {
+      draws.push(Object.freeze({
+        ...decodeCvDraw(r),
+        phase: "check-viability" as const,
+        moveSlot: moveSlotByte,
+      }));
+      continue;
+    }
+    const ordinal = r.u32();
+    const before = Object.freeze({ value: r.u32(), calls: r.u32() });
+    const after = Object.freeze({ value: r.u32(), calls: r.u32() });
+    const rawRngValue = r.u32();
+    const randomValue = r.u16();
+    const common = { ordinal, before, after, rawRngValue, randomValue };
+    if (tag === 0) {
+      draws.push(Object.freeze({
+        ...common,
+        reason: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+        kind: "turn-start-random-number" as const,
+      }));
+    } else if (tag === 1) {
+      draws.push(Object.freeze({
+        ...common,
+        reason: `setup-simulated-rng-slot-${moveSlotByte}`,
+        kind: "setup-simulated-rng" as const,
+        moveSlot: moveSlotByte,
+        simulatedRng: r.u8(),
+      }));
+    } else if (tag === 2) {
+      const site = r.u8();
+      const guessedAbility = abilityName(r.u16());
+      draws.push(Object.freeze({
+        ...common,
+        reason: `slot-${moveSlotByte}-check-bad-move-${CBM_REASON_SUFFIXES[site]}`,
+        kind: "get-ability" as const,
+        guessedAbility,
+        phase: "check-bad-move" as const,
+        moveSlot: moveSlotByte,
+      }));
+    } else if (tag === 3) {
+      r.u8(); // TryToFaintDrawKind::DoubleSuperEffective
+      draws.push(Object.freeze({
+        ...common,
+        reason: `slot-${moveSlotByte}-try-to-faint-double-super-effective`,
+        kind: "double-super-effective" as const,
+        succeeded: r.bool(),
+        phase: "try-to-faint" as const,
+        moveSlot: moveSlotByte,
+      }));
+    } else if (tag === 5) {
+      draws.push(Object.freeze({
+        ...common,
+        reason: "best-move-tie-selection",
+        kind: "best-move-tie" as const,
+      }));
+    } else {
+      throw new Error(`factory-wasm factoryAiEngine: unknown policy draw tag ${tag}`);
+    }
+  }
+
+  const slotScores: unknown[] = [];
+  for (let i = 0; i < 4; i++) {
+    const moveSlot = r.u8();
+    const moveId = r.u16();
+    const legal = r.bool();
+    const initialScore = r.i32();
+    const deltas: (number | null)[] = [];
+    for (let d = 0; d < 3; d++) {
+      const present = r.bool();
+      const value = r.i32();
+      deltas.push(present ? value : null);
+    }
+    const finalScore = r.i32();
+    slotScores.push(Object.freeze(scored
+      ? { moveSlot, moveId, legal, initialScore, checkBadMoveDelta: deltas[0], tryToFaintDelta: deltas[1], checkViabilityDelta: deltas[2], finalScore }
+      : { moveSlot, moveId, legal, initialScore, finalScore }));
+  }
+  const bestCount = r.u8();
+  const bestMoveSlots: number[] = [];
+  for (let i = 0; i < 4; i++) {
+    const slot = r.u8();
+    if (i < bestCount) bestMoveSlots.push(slot);
+  }
+  const modulus = r.u8();
+  const index = r.u8();
+  const chosenDecision = Object.freeze({
+    kind: "use-move" as const,
+    moveSlot: r.u8() as 0 | 1 | 2 | 3,
+    targetBattler: r.u8(),
+  });
+  const submission = Object.freeze({ requestId, side, decision: submissionDecision });
+  const traceBase = {
+    schema: "factory-ai-trace/v1" as const,
+    phase: "choose-move" as const,
+    mask,
+    maskSelection,
+    executedScoringScripts: Object.freeze(scripts),
+    draws: Object.freeze(draws),
+    slotScores: Object.freeze(slotScores),
+    bestMoveSlots: Object.freeze(bestMoveSlots),
+    tie: Object.freeze({ modulus, index, chosenDecision }),
+  };
+  const trace = scored
+    ? Object.freeze({
+      ...traceBase,
+      turnStartRandomNumber: Object.freeze({
+        owner: TURN_OWNER_NAMES[turnOwner]!,
+        value: hasTurnValue ? turnValue : null,
+      }),
+    })
+    : Object.freeze(traceBase);
+  return Object.freeze({ submission, rng, trace }) as unknown as FactoryAiDecisionChoice | FactoryAiScoredChoice;
 }
 
 function decodeMaskSelection(bytes: Uint8Array, input: FactoryAiMaskSelectionInput): FactoryAiMaskSelection {
@@ -678,6 +1032,21 @@ export async function wasmFactoryAiEngine(): Promise<FactoryAiEngine> {
     return bytes;
   }
 
+  function withPolicyInput(
+    encoded: ArrayBuffer,
+    invoke: (ptr: number, len: number) => number,
+  ): Uint8Array {
+    const inputPtr = exports.fw_alloc(encoded.byteLength);
+    let outputPtr: number;
+    try {
+      new Uint8Array(exports.memory.buffer, inputPtr, encoded.byteLength).set(new Uint8Array(encoded));
+      outputPtr = invoke(inputPtr, encoded.byteLength);
+    } finally {
+      exports.fw_free(inputPtr, encoded.byteLength);
+    }
+    return copyOutAllocdBuffer(outputPtr);
+  }
+
   return {
     id: "wasm",
     selectFactoryAiMask(input) {
@@ -713,5 +1082,24 @@ export async function wasmFactoryAiEngine(): Promise<FactoryAiEngine> {
       }
       return decodeCvResult(copyOutAllocdBuffer(ptr));
     },
+    chooseFactoryAiMaskZeroDecision(input) {
+      const bytes = withPolicyInput(
+        encodeMaskZeroDecisionInput(input),
+        exports.fw_choose_factory_ai_mask_zero_decision,
+      );
+      return decodePolicyChoice(bytes, input, false) as FactoryAiDecisionChoice;
+    },
+    chooseFactoryAiScoredDecision(input) {
+      const bytes = withPolicyInput(
+        encodeScoredDecisionInput(input),
+        exports.fw_choose_factory_ai_scored_decision,
+      );
+      return decodePolicyChoice(bytes, input, true) as FactoryAiScoredChoice;
+    },
   };
+}
+
+/** Selects the uniform Factory AI API from `POKEBENCH_ENGINE` (TS by default). */
+export async function factoryAiEngine(): Promise<FactoryAiEngine> {
+  return defaultEngineId() === "wasm" ? wasmFactoryAiEngine() : tsFactoryAiEngine();
 }
