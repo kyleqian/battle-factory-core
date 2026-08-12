@@ -22,9 +22,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   complete MPlay, service/arbitration, and construction-clock wiring null.
 - **Notes:** packet hashes anchor `c3c7b33f…`, LILIANA `10adc46c…`, varied
   `14524c0f…`; v13 evidence/doc `1bb3b2b6…` / `d9a39158…`. Red-first focused
-  v3-v13 **45/45** is green; finish gates pending. No runtime pointer/address
-  identity, production import, unsupported barrier, animation/Rust change, or
-  canonical Battle-2 branch.
+  v3-v13 **45/45**, smoke **8 files / 375 passed**, typecheck, exactly one full
+  suite **990 files / 9,580 passed / 1 skipped**, and build **653 modules** are
+  green. No runtime pointer/address identity, production import, unsupported
+  barrier, animation/Rust change, or canonical Battle-2 branch.
 
 ## 1198 — [MAIN worker, 2026-08-12] **CGB4 v12 post-`ply_note` dispatcher source-closed**
 
