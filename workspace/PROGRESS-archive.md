@@ -41397,6 +41397,23 @@ git; the current live ledger keeps the three load-bearing entries only.
   **375/375**, typecheck, build **649 modules**. Both lane branches are fully
   folded; no unsupported barrier or production/presentation change.
 
+## 1159 — [supervisor, 2026-08-11] **`ply_pend` verified; Rust M4a folded**
+
+- **State:** `master` is green with `ply_pend` source-exact for its sole live
+  callback and all **108/108** one-pass rows. Complete MPlay remains **5 exact /
+  108 null**; #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** reviewed and regenerated the address-free PEND receipt **4/4**, then
+  folded rust-main M4a (`damage_calc` plus **1,129** TS-pinned vectors) through
+  merge `75e234ee`. Native Rust is **82/82** with fmt/clippy clean; rebuilt WASM
+  is 62,344 bytes and adapter parity is **440/440** in both default and forced
+  WASM modes.
+- **Next:** source-capture and instruction-count one remaining smallest live
+  callback family, keeping all unclosed families and complete one-pass totals
+  null. Do not wire `runFactoryConstructionClock` prematurely.
+- **Notes:** merged union full `npm test` **960 files / 9,165 passed / 1
+  skipped**, build **649 modules**. Animation is fully folded; no unsupported
+  barrier, presentation, gameplay, or pixel identity changed.
+
 ## 1158 — [MAIN worker, 2026-08-11] **#55 `ply_pend` callback family source-closed**
 
 - **State:** the sixth-player `ply_pend` family is source-exact for **1/1**

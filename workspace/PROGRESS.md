@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1162 — [supervisor, 2026-08-11] **PATT verified; animation and Rust M4c folded**
+
+- **State:** `master` is green with PATT source-exact for its sole callback and
+  **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
+  #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated PATT **4/4**, folded animation-main Fury
+  Swipes through `d58ccfbb`, and folded rust-main M4c turn-order/turn-RNG plus
+  WASM adapter parity through `e4f11a78`. Native Rust is **126/126** with
+  fmt/clippy clean; rebuilt WASM is 80,342 bytes and all five adapter suites
+  are **660/660** in both default and forced-WASM modes.
+- **Next:** source-close one remaining #55 command/callback family. Keep every
+  unresolved family and complete one-pass total null; do not wire the clock.
+- **Notes:** merged union full `npm test` **966 files / 9,398 passed / 1
+  skipped**, build **651 modules**. No unsupported barrier or main gameplay /
+  pixel identity changed.
+
 ## 1161 — [MAIN worker, 2026-08-11] **#55 `ply_patt` callback family source-closed**
 
 - **State:** the sixth-player `ply_patt` family is source-exact for **1/1**
@@ -37,20 +53,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** merged union full `npm test` **961 files / 9,179 passed / 1
   skipped**, build **649 modules**. Animation is fully folded; no unsupported
   barrier or presentation/gameplay/pixel change.
-
-## 1159 — [supervisor, 2026-08-11] **`ply_pend` verified; Rust M4a folded**
-
-- **State:** `master` is green with `ply_pend` source-exact for its sole live
-  callback and all **108/108** one-pass rows. Complete MPlay remains **5 exact /
-  108 null**; #55 stays unwired and LUKAS remains **8/50**.
-- **Did:** reviewed and regenerated the address-free PEND receipt **4/4**, then
-  folded rust-main M4a (`damage_calc` plus **1,129** TS-pinned vectors) through
-  merge `75e234ee`. Native Rust is **82/82** with fmt/clippy clean; rebuilt WASM
-  is 62,344 bytes and adapter parity is **440/440** in both default and forced
-  WASM modes.
-- **Next:** source-capture and instruction-count one remaining smallest live
-  callback family, keeping all unclosed families and complete one-pass totals
-  null. Do not wire `runFactoryConstructionClock` prematurely.
-- **Notes:** merged union full `npm test` **960 files / 9,165 passed / 1
-  skipped**, build **649 modules**. Animation is fully folded; no unsupported
-  barrier, presentation, gameplay, or pixel identity changed.
