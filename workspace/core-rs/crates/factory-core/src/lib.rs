@@ -36,6 +36,8 @@ pub mod factory_ai_switch_policy;
 pub mod factory_ai_switch_policy_vectors_gen;
 pub mod factory_ai_try_to_faint;
 pub mod factory_ai_try_to_faint_vectors_gen;
+pub mod factory_trainer_schedule;
+pub mod factory_trainer_schedule_vectors_gen;
 pub mod gen_tables;
 pub mod gender;
 pub mod mon_construction;
