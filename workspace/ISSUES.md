@@ -1958,14 +1958,26 @@ cycles through `ChnVolSetAsm` entry. The seven rows keep later allocation
 fields explicit null; the v6 fixture is
 `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v6.json`.
 
-The current contiguous boundary is `ChnVolSetAsm` entry. The reducer fails
-closed for source, route, and storage-class mutations; the helper body is not
-priced. The still-open remainder is the `ChnVolSetAsm` body, later allocation
-fields, `clear_modM`, nonzero-`lfoDelay` routes, every unobserved helper
-operand/branch, the other **75** post-selection callbacks, complete note
-callbacks, post-callback glue, complete one-pass MPlay totals (**5 exact / 108
-null**), service/arbitration, and construction-clock wiring. No unsupported
-barrier or canonical Battle-2 extension was added.
+**2026-08-12 CGB4 `ChnVolSetAsm` closure:** path B was required because frozen
+v3-v6 state lacked the helper's four scalar operands. The additive v7 packet
+captures only `velocity`, signed `rhythmPan`, `volMR`, and `volML` at exact
+helper entry, with no address, frame, duration, identity, or result byte. Two
+fresh Scene-OFF runs are byte-identical per case (anchor `a2f62e3b…`, LILIANA
+`53db7226…`, varied `406586b9…`). All **7/82** callbacks take both unsigned
+unclamped branches. The complete route executes 22 Thumb halfwords, three
+taken refills, two EWRAM-read premiums, and two ARM7TDMI multiply-internal
+premium cycles: **68 cycles each / 476 total**. This extends the contiguous
+prefix from **2,459** at helper entry to **2,935 cycles** through `bx lr`.
+Evidence: `docs/issue55-m4a-note-body-cgb4-v7.md`.
+
+The current contiguous boundary is `ChnVolSetAsm` return. The reducer fails
+closed for source, packet, scalar, observed-route, and storage-class
+mutations. The still-open remainder is later allocation fields, `clear_modM`,
+nonzero-`lfoDelay` routes, unobserved clamp/helper operand routes, the other
+**75** post-selection callbacks, complete note callbacks, post-callback glue,
+complete one-pass MPlay totals (**5 exact / 108 null**), service/arbitration,
+and construction-clock wiring. No unsupported barrier or canonical Battle-2
+extension was added.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 

@@ -1,0 +1,278 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v7",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "path": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1508-1538",
+      "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+    },
+    "elf": {
+      "helperEntry": "0x082dfd08",
+      "helperSize": "0x30",
+      "helperReturn": "0x082dfd38"
+    },
+    "compiledRegions": [
+      {
+        "role": "complete ChnVolSetAsm",
+        "start": "0x082dfd08",
+        "endExclusive": "0x082dfd38",
+        "bytes": 48,
+        "sha256": "04988bf8e911a12b477d9aafa24342b68e83960a06796e555869cc67b24bd4d2"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "ewramDataAccessPremiumCyclesPerAccess": 2,
+      "iwramDataAccessPremiumCyclesPerAccess": 0,
+      "arm7tdmiMultiply": "1I for captured u8 velocity operands; 2I for captured 12-14-bit pan*velocity operands; ordinary class already contains 1I"
+    },
+    "sourceCycleAccounting": {
+      "bothUnclampedObserved": {
+        "sequentialThumbHalfwords": 22,
+        "pipelineRefills": 3,
+        "iwramByteReads": 2,
+        "iwramByteStores": 2,
+        "ewramByteReads": 2,
+        "ewramDataAccessPremiumCycles": 4,
+        "multiplyInternalCycles": 6,
+        "multiplyInternalPremiumCycles": 2,
+        "cycles": "22*2 + 3*6 + 2*2 + 2",
+        "totalCycles": 68
+      },
+      "clampRoutes": null
+    }
+  },
+  "frozenInputs": {
+    "acceptedV6EvidenceSha256": "341be83906b17cd9ad972886a11e6f91270fc1eb3d66dc7cad4ff644daec468f",
+    "packetSha256": {
+      "anchor": "a2f62e3b7ea01cccfe19b41f7cef7ab45cde50400c74eb4285491e1987479566",
+      "liliana": "53db7226067890c8996ddc5c045ee8afd45bb1f2f469a82be5f5a9dc9d278624",
+      "factory-varied": "406586b9fc00ddc24aba5984ed8a4b5a40f952ba72789d455549165c589a6784"
+    },
+    "packetRepeatSha256": {
+      "anchor": "a2f62e3b7ea01cccfe19b41f7cef7ab45cde50400c74eb4285491e1987479566",
+      "liliana": "53db7226067890c8996ddc5c045ee8afd45bb1f2f469a82be5f5a9dc9d278624",
+      "factory-varied": "406586b9fc00ddc24aba5984ed8a4b5a40f952ba72789d455549165c589a6784"
+    }
+  },
+  "capture": {
+    "boundary": "ChnVolSetAsm entry before first ldrb",
+    "scalars": [
+      "velocity",
+      "signed rhythmPan",
+      "volMR",
+      "volML"
+    ],
+    "excluded": [
+      "pointer",
+      "frame",
+      "duration",
+      "callback identity",
+      "result bytes"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "exactHelperBodies": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "exactHelperBodies": 3
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "exactHelperBodies": 4
+      }
+    },
+    "exactChnVolSetAsmBodyCallbacks": 7,
+    "chnVolSetAsmBodySourceCycleRange": {
+      "min": 68,
+      "max": 68,
+      "distinct": 1
+    },
+    "chnVolSetAsmBodySourceCycles": 476,
+    "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 2459,
+    "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 2935,
+    "nullLaterAllocationFieldsCallbacks": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "branchCoverage": {
+    "observed": {
+      "rightClampBlsTaken": 7,
+      "leftClampBlsTaken": 7,
+      "clampMovExecuted": 0
+    },
+    "completeObservedHelperRoutes": true,
+    "unobservedClampRoutes": null,
+    "nonzeroLfoRoutes": null
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 447,
+      "chnVolSetAsmState": {
+        "velocity": 64,
+        "rhythmPan": 0,
+        "volMR": 93,
+        "volML": 0
+      },
+      "chnVolSetAsmRoute": "both-unclamped-observed",
+      "rightVolume": 46,
+      "leftVolume": 0,
+      "chnVolSetAsmBodySourceCycles": 68,
+      "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 515,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "chnVolSetAsmState": {
+        "velocity": 32,
+        "rhythmPan": 0,
+        "volMR": 93,
+        "volML": 0
+      },
+      "chnVolSetAsmRoute": "both-unclamped-observed",
+      "rightVolume": 23,
+      "leftVolume": 0,
+      "chnVolSetAsmBodySourceCycles": 68,
+      "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "chnVolSetAsmState": {
+        "velocity": 64,
+        "rhythmPan": 0,
+        "volMR": 0,
+        "volML": 131
+      },
+      "chnVolSetAsmRoute": "both-unclamped-observed",
+      "rightVolume": 0,
+      "leftVolume": 64,
+      "chnVolSetAsmBodySourceCycles": 68,
+      "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "chnVolSetAsmState": {
+        "velocity": 64,
+        "rhythmPan": 0,
+        "volMR": 99,
+        "volML": 0
+      },
+      "chnVolSetAsmRoute": "both-unclamped-observed",
+      "rightVolume": 49,
+      "leftVolume": 0,
+      "chnVolSetAsmBodySourceCycles": 68,
+      "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 447,
+      "chnVolSetAsmState": {
+        "velocity": 64,
+        "rhythmPan": 0,
+        "volMR": 93,
+        "volML": 0
+      },
+      "chnVolSetAsmRoute": "both-unclamped-observed",
+      "rightVolume": 46,
+      "leftVolume": 0,
+      "chnVolSetAsmBodySourceCycles": 68,
+      "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 515,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "chnVolSetAsmState": {
+        "velocity": 32,
+        "rhythmPan": 0,
+        "volMR": 93,
+        "volML": 0
+      },
+      "chnVolSetAsmRoute": "both-unclamped-observed",
+      "rightVolume": 23,
+      "leftVolume": 0,
+      "chnVolSetAsmBodySourceCycles": 68,
+      "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughChnVolSetAsmEntrySourceCycles": 313,
+      "chnVolSetAsmState": {
+        "velocity": 64,
+        "rhythmPan": 0,
+        "volMR": 0,
+        "volML": 99
+      },
+      "chnVolSetAsmRoute": "both-unclamped-observed",
+      "rightVolume": 0,
+      "leftVolume": 49,
+      "chnVolSetAsmBodySourceCycles": 68,
+      "contiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "The complete both-unclamped observed ChnVolSetAsm route through bx lr for the same seven callbacks.",
+    "contiguousPrefix": "2935 aggregate source cycles through ChnVolSetAsm return across the seven observed callbacks.",
+    "remainingDiscriminator": "Later allocation fields, clamp routes not observed here, clear_modM, nonzero-lfoDelay routes, other helper operands, 75 callbacks, complete note/glue/MPlay, service/arbitration, and construction clock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "All 7/82 observed zero-lfoDelay CGB4 callbacks take both unsigned unclamped branches. The 68-cycle complete helper adds 476 cycles, extending the contiguous prefix from 2459 at entry to 2935 through return."
+}
