@@ -41430,3 +41430,19 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
   **16/16**, smoke **375/375**, typecheck, full **960 files / 9,165 passed / 1
   skipped**, and build **649 modules** are green; pixels were not rerun.
+
+## 1160 — [supervisor, 2026-08-11] **Rust M4b WASM damage boundary folded**
+
+- **State:** `master` is green through Rust M4b: the native `damage_calc`
+  family now has a WASM ABI, adapter, and differential parity suite. Main #55
+  remains unchanged at PEND **108/108**, complete MPlay **5 exact / 108 null**,
+  construction clock unwired, and LUKAS **8/50**.
+- **Did:** folded rust-main M4b through merge `f522820b` and its verified lane
+  ledger through `982b6221`; independently reran native Rust **91/91** after
+  each fold, with fmt/clippy, rebuilt the 68,963-byte WASM artifact, and proved
+  the four adapter suites **454/454** in both default and forced-WASM modes.
+- **Next:** source-close one remaining smallest live #55 callback family. Keep
+  unresolved families and complete one-pass totals null; do not wire the clock.
+- **Notes:** merged union full `npm test` **961 files / 9,179 passed / 1
+  skipped**, build **649 modules**. Animation is fully folded; no unsupported
+  barrier or presentation/gameplay/pixel change.

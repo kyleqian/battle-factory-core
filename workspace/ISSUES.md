@@ -1757,6 +1757,24 @@ the command decode/jump-table dispatcher or one remaining live `ply_voice`,
 pointer identity, service cost, or clock wiring landed. Evidence:
 `docs/issue55-m4a-patt-v1.md`.
 
+**2026-08-11 `ply_voice` callback-family closure:** additive OFF packets now
+capture only track index, normalized command source, voice index, and the
+normalized `voicegroup_b_factory` table/entry relation at the exact compiled
+`ply_voice` entry. Two fresh serial anchor/LILIANA/legal-varied captures are
+byte-identical (`036123ca…` / `b35b16c3…` / `0aeae1bc…`) and join all
+**113/113** frozen rows. Across the **108/108** one-pass rows there are exactly
+**2/2** callbacks: anchor track 1 selects voice 87/tone offset 1044, and varied
+track 4 selects voice 93/tone offset 1116; LILIANA selects none. Both traverse
+the complete pinned `ply_voice` plus three `chk_adr_r2` GamePak fast-accept
+routes at **182 cycles each**. Other tone tables, malformed source offsets,
+voice ranges, and tone-entry relations fail closed.
+
+Complete MPlay costs remain **5 exact / 108 null**. The next discriminator is
+the command decode/jump-table dispatcher or one remaining live `ply_vol`,
+`ply_pan`, `ply_bend`, or note family. No observed duration, pointer identity,
+service cost, or clock wiring landed. Evidence:
+`docs/issue55-m4a-voice-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
