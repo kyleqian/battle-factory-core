@@ -2182,6 +2182,33 @@ later track-loop work, other 75 callbacks, complete MPlay totals (**5 exact /
 No production, unsupported-barrier, animation/Rust, or canonical Battle-2
 change landed.
 
+**2026-08-12 CGB4 v17 track-loop decrement/decision closure:** additive v17
+preserves frozen v16 evidence and report byte-for-byte and joins only the same
+**7/82** CGB4 rows by `sourceStateDigest`. Two fresh address-free Battle Scene
+OFF packet sets are byte-identical: anchor `5dca04f7…`, LILIANA
+`68fb3aa3…`, and legal-varied `e5e3ce1a…`. At the exact pipelined
+`subs r6, 0x1` boundary, four rows capture `r6=3` and three capture `r6=2`;
+the source decrement leaves positive `2`/`1`, so all seven observed
+`ble _081DD9A4` routes are not taken. This is direct register evidence, not a
+track-count relation inferred from `trackIndex`.
+
+Source/ELF/ROM guards close only bytes `0x082dfbd0..0x082dfbd4`:
+`subs r6, 0x1; ble _081DD9A4`. Each observed ARM7TDMI route is two sequential
+Thumb halfwords with no refill: **4 cycles per row / 28 aggregate**, advancing
+the contiguous prefix from **5,366** to **5,394 cycles**. The generic reducer
+also prices a captured taken route at 10 cycles, but no exit row is observed.
+Evidence is `docs/issue55-m4a-note-body-cgb4-v17.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v17.json` (SHA256
+`e4ff5796…`); its Tier-1 guard verifies frozen v16 evidence/doc hashes and
+regeneration.
+
+Closure stops before `movs r0, MusicPlayerTrack_size` on the observed
+continuation and before `ldr r0, [r7, o_MusicPlayerInfo_clock]` on the
+unobserved exit. Later loop-body work, other 75 callbacks, complete MPlay
+totals (**5 exact / 108 null**), service/arbitration, construction-clock
+wiring, production, presentation, animation/Rust, and canonical Battle-2 work
+remain null; no unsupported-barrier or canonical-recording ratchet changed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
