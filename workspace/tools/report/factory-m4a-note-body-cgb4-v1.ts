@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import { reduceMPlayInlineToneSelectionTiming, type NoteCallback } from "./factory-m4a-note-census-v1.ts";
 
 type CaseName = "anchor" | "liliana" | "factory-varied";
-type SourcePointer = Readonly<{ role: string; offset: number }>;
 type NotePacket = { schema: string; case: CaseName; oracleProfile: string; addressFree: boolean; observations: Array<{ sourceStateDigest: string; noteCallbacks: NoteCallback[] | null }> };
 type SourcePacket = { schema: string; case: CaseName; oracleProfile: string; stateKey: string; interrupts: Array<{ m4a: { state: { sourceSemanticState: { stateDigest: string; musicPlayers: Array<{ scalarBytes: number[]; tracks: Array<{ scalarBytes: number[] }> }>; cgbChannels: unknown[] } } } }> };
 

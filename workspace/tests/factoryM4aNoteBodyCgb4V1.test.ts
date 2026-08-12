@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { makeEvidence, reduceMPlayCgb4AllocationPrefixTiming } from "../tools/report/factory-m4a-note-body-cgb4-v1.ts";
+import type { NoteCallback } from "../tools/report/factory-m4a-note-census-v1.ts";
 
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v1.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v1.md";
@@ -12,7 +13,7 @@ const callback = {
   commandPointer: { role: "battle-factory-bgm-track-9", offset: 52 }, commandBytes: [91, 64, 140],
   acceptedParameters: 2, keyBefore: 91, velocityBefore: 64, keyAfter: 91, velocityAfter: 64,
   toneType: 12, toneTable: null, selectedTone: null, derivedSelector: "inline", observedSelector: "inline",
-} as const;
+} satisfies NoteCallback;
 const input = { playerPriority: 0, trackPriority: 0, cgbChannelCount: 4 } as const;
 
 describe("Issue #55 ply_note CGB-channel-4 allocation prefix v1", () => {

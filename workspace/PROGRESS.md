@@ -17,8 +17,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** capture per-callback CGB channel state before extending this route,
   or source-close another bounded post-selection prefix. Preserve all complete
   callback, post-callback glue, one-pass total, and clock nulls.
-- **Notes:** focused **4/4** is green; smoke/typecheck/full/build pending final
-  gate. No probe, duration fit, pointer identity, unsupported barrier,
+- **Notes:** dependent focused **16/16**, smoke **375/375**, typecheck, full
+  **973 files / 9,427 passed / 1 skipped**, and build **651 modules** are green.
+  No probe, duration fit, pointer identity, unsupported barrier,
   gameplay/pixel/Rust/#56 change.
 
 ## 1176 — [supervisor, 2026-08-11] **MPlay dispatcher verified**
