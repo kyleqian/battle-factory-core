@@ -1,24 +1,30 @@
-//! Pure port of `AI_CheckBadMove`'s universal preamble plus its M5b-1 batch
-//! of per-effect handlers
-//! (`src/engine/factoryAiCheckBadMove.ts:1-115,1259-1333,1338-1810,2076-2118,
-//! 2410-2419,2639-2711,3158-3266,3286-3294,3311-3361`, itself a port of
-//! `data/battle_ai_scripts.s:51-93` plus the handler bodies it dispatches
-//! to). Per `docs/rust-m5b-checkbadmove-batching.md` §5 (M5b-0): setup +
-//! `isMovePowerOther` classification, the FISSURE/HORN_DRILL short-circuit,
-//! the type-immunity `Score_Minus10`, the five ability-negation branches
-//! (Volt Absorb/Water Absorb/Flash Fire/Wonder Guard/Levitate), the
-//! Soundproof nine-move list, and the trailing `if_effect` table barrier
-//! (`NotYetPorted` for every table effect not yet in `cbm_handled_effects()`).
-//! Per batching doc §2 "M5b-1": the 18-effect HighRiskForDamage cluster
-//! (Counter/Flail/Mirror Coat/Focus Punch/Level Damage/Frustration/Return/
-//! Recharge/Endeavor/Superpower/Razor Wind/Psywave/Low Kick/Super Fang/
-//! Present/Sonic Boom/Bide/Skull Bash), Teleport, 8 zero-RNG single-flag
-//! effects (Ingrain/Perish Song/Nightmare/Foresight/Spikes/Future Sight/
-//! Focus Energy/Refresh), the weather quartet (Rain Dance/Sunny Day/Hail/
-//! Sandstorm), and Magnitude — 32 effects total, `CBM_HANDLED_EFFECTS_M5B1`.
-//! M5b-2/3 grow `cbm_handled_effects()` one batch at a time; every table
-//! effect not yet in the union halts at the barrier, and every other move
-//! (not in the table at all) scores 0 past the preamble.
+//! Pure port of `AI_CheckBadMove`'s universal preamble plus its M5b-1/M5b-2
+//! batches of per-effect handlers
+//! (`src/engine/factoryAiCheckBadMove.ts:1-115,787-1252,1259-2650,2652-3616`,
+//! itself a port of `data/battle_ai_scripts.s:51-93` plus the handler bodies
+//! it dispatches to). Per `docs/rust-m5b-checkbadmove-batching.md` §5
+//! (M5b-0): setup + `isMovePowerOther` classification, the FISSURE/
+//! HORN_DRILL short-circuit, the type-immunity `Score_Minus10`, the five
+//! ability-negation branches (Volt Absorb/Water Absorb/Flash Fire/Wonder
+//! Guard/Levitate), the Soundproof nine-move list, and the trailing
+//! `if_effect` table barrier (`NotYetPorted` for every table effect not yet
+//! in `cbm_handled_effects()`). Per batching doc §2 "M5b-1": the 18-effect
+//! HighRiskForDamage cluster (Counter/Flail/Mirror Coat/Focus Punch/Level
+//! Damage/Frustration/Return/Recharge/Endeavor/Superpower/Razor Wind/
+//! Psywave/Low Kick/Super Fang/Present/Sonic Boom/Bide/Skull Bash),
+//! Teleport, 8 zero-RNG single-flag effects (Ingrain/Perish Song/
+//! Nightmare/Foresight/Spikes/Future Sight/Focus Energy/Refresh), the
+//! weather quartet (Rain Dance/Sunny Day/Hail/Sandstorm), and Magnitude —
+//! 32 effects total, `CBM_HANDLED_EFFECTS_M5B1`. Per batching doc §2
+//! "M5b-2": the stat-DOWN sextet (Speed/Attack/Defense/SpDef/Acc/Evasion,
+//! each `+_2`, 14 effects through the shared `run_cbm_stat_down_via_shared_
+//! tail`), Toxic+Poison, Roar, Sleep, Paralyze, Confuse+Swagger+Flatter,
+//! OHKO, Leech Seed, Fake Out, Will-O-Wisp, Knock Off+Trick, Explosion,
+//! Dream Eater, Special Attack Down (`+_2`, vestigial dispatch), Attract,
+//! and Spit Up+Swallow — 33 effects total, `CBM_HANDLED_EFFECTS_M5B2`, 65
+//! handled overall. M5b-3 grows `cbm_handled_effects()` further; every
+//! table effect not yet in the union halts at the barrier, and every other
+//! move (not in the table at all) scores 0 past the preamble.
 //!
 //! ## Representation decisions (mirroring `factory_ai_mask.rs`'s precedent)
 //! - **Move effect**: TS compares `move.effect` (a string) to `"EFFECT_X"`
@@ -78,14 +84,17 @@
 //!   negates-type-eligible move may need to widen this further.
 //!
 //! ## Scope NOT covered by this step
-//! Every per-effect handler outside M5b-1's 32 (`AI_CBM_*`, TS
+//! Every per-effect handler outside M5b-1/M5b-2's 65 (`AI_CBM_*`, TS
 //! :787-1258,2652-3657) is unported. `run_check_bad_move_preamble`'s
-//! trailing barrier returns `NotYetPorted` for the 77 `CBM_TABLE_EFFECTS`
+//! trailing barrier returns `NotYetPorted` for the 44 `CBM_TABLE_EFFECTS`
 //! members not yet in `cbm_handled_effects()`, and every other move (not in
 //! the table at all) scores 0, matching TS's own "genuine, complete port of
 //! that path" fallthrough (module doc comment :27-30).
 
-use crate::damage_calc::{TYPE_ELECTRIC, TYPE_FIRE, TYPE_GROUND, TYPE_WATER};
+use crate::damage_calc::{
+    DEFAULT_STAT_STAGE, MIN_STAT_STAGE, TYPE_ELECTRIC, TYPE_FIRE, TYPE_GRASS, TYPE_GROUND,
+    TYPE_POISON, TYPE_STEEL, TYPE_WATER,
+};
 use crate::gen_tables;
 use crate::rng::advance_rng_value;
 
@@ -235,6 +244,26 @@ pub const ABILITY_LEVITATE: u16 = 26;
 pub const ABILITY_MAGNET_PULL: u16 = 42;
 pub const ABILITY_SOUNDPROOF: u16 = 43;
 pub const ABILITY_ARENA_TRAP: u16 = 71;
+
+// M5b-2 additions (`docs/rust-m5b-checkbadmove-batching.md` §2 "M5b-2"),
+// verified against `reference/pokeemerald/include/constants/abilities.h`
+// directly (each line cited below) and cross-checked against
+// `src/data/gen/ability-item-hooks.json` `.universes.abilities`.
+pub const ABILITY_STURDY: u16 = 5; // abilities.h:9
+pub const ABILITY_DAMP: u16 = 6; // abilities.h:10
+pub const ABILITY_LIMBER: u16 = 7; // abilities.h:11
+pub const ABILITY_OBLIVIOUS: u16 = 12; // abilities.h:16
+pub const ABILITY_INSOMNIA: u16 = 15; // abilities.h:19
+pub const ABILITY_IMMUNITY: u16 = 17; // abilities.h:21
+pub const ABILITY_OWN_TEMPO: u16 = 20; // abilities.h:24
+pub const ABILITY_SUCTION_CUPS: u16 = 21; // abilities.h:25
+pub const ABILITY_CLEAR_BODY: u16 = 29; // abilities.h:33
+pub const ABILITY_WATER_VEIL: u16 = 41; // abilities.h:45
+pub const ABILITY_KEEN_EYE: u16 = 51; // abilities.h:55
+pub const ABILITY_HYPER_CUTTER: u16 = 52; // abilities.h:56
+pub const ABILITY_STICKY_HOLD: u16 = 60; // abilities.h:64
+pub const ABILITY_VITAL_SPIRIT: u16 = 72; // abilities.h:76
+pub const ABILITY_WHITE_SMOKE: u16 = 73; // abilities.h:77
 
 // === AI_WEATHER_* + the stale-funcResult collision table ====================
 
@@ -482,19 +511,72 @@ pub const CBM_HANDLED_EFFECTS_M5B1: &[u16] = &[
     EFFECT_MAGNITUDE,
 ];
 
+/// M5b-2's landed batch (`docs/rust-m5b-checkbadmove-batching.md` §2
+/// "M5b-2"), TS dispatch source order: the stat-DOWN sextet
+/// (SpeedDown/AttackDown/DefenseDown/SpDefDown/AccDown/EvasionDown, each
+/// `+_2`, TS :1813-2059), Toxic/Poison (:2063-2072), the weather quartet's
+/// neighbors Roar/Sleep/Paralyze/Confuse+Swagger+Flatter (:2122-2176),
+/// OHKO/LeechSeed/FakeOut/WillOWisp (:2180-2239), Knock Off/Trick
+/// (:2244-2258), Explosion (:2287-2303), Dream Eater (:2332-2339),
+/// SpAtkDown (:2446-2455, vestigial dispatch), Attract (:2534-2543), and
+/// Spit Up/Swallow (:2577-2584) — exactly 33 effects.
+pub const CBM_HANDLED_EFFECTS_M5B2: &[u16] = &[
+    EFFECT_SPEED_DOWN,
+    EFFECT_SPEED_DOWN_2,
+    EFFECT_ATTACK_DOWN,
+    EFFECT_ATTACK_DOWN_2,
+    EFFECT_DEFENSE_DOWN,
+    EFFECT_DEFENSE_DOWN_2,
+    EFFECT_SPECIAL_DEFENSE_DOWN,
+    EFFECT_SPECIAL_DEFENSE_DOWN_2,
+    EFFECT_ACCURACY_DOWN,
+    EFFECT_ACCURACY_DOWN_2,
+    EFFECT_EVASION_DOWN,
+    EFFECT_EVASION_DOWN_2,
+    EFFECT_TOXIC,
+    EFFECT_POISON,
+    EFFECT_ROAR,
+    EFFECT_SLEEP,
+    EFFECT_PARALYZE,
+    EFFECT_CONFUSE,
+    EFFECT_SWAGGER,
+    EFFECT_FLATTER,
+    EFFECT_OHKO,
+    EFFECT_LEECH_SEED,
+    EFFECT_FAKE_OUT,
+    EFFECT_WILL_O_WISP,
+    EFFECT_KNOCK_OFF,
+    EFFECT_TRICK,
+    EFFECT_EXPLOSION,
+    EFFECT_DREAM_EATER,
+    EFFECT_SPECIAL_ATTACK_DOWN,
+    EFFECT_SPECIAL_ATTACK_DOWN_2,
+    EFFECT_ATTRACT,
+    EFFECT_SPIT_UP,
+    EFFECT_SWALLOW,
+];
+
 /// Union of every landed batch's handled-effect consts, mirroring
 /// `CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS` (`factoryAiCheckBadMove.ts:266-302`).
-/// M5b-2/3 each add their own `CBM_HANDLED_EFFECTS_M5BN: &[u16]` const and
-/// union it in here, "add the effect in the same commit as its handler" (TS
-/// doc comment :262-264).
+/// M5b-3 adds its own `CBM_HANDLED_EFFECTS_M5B3: &[u16]` const and unions it
+/// in here, "add the effect in the same commit as its handler" (TS doc
+/// comment :262-264). Unlike TS's frozen `Set` (built once at module load),
+/// this recomputes on every call — cheap (65 entries after M5b-2) and this
+/// function is completeness-probe-only, never on `run_check_bad_move_
+/// preamble`'s hot path (its own trailing barrier checks `CBM_TABLE_EFFECTS`
+/// directly, not this union).
 #[must_use]
-pub fn cbm_handled_effects() -> &'static [u16] {
+pub fn cbm_handled_effects() -> Vec<u16> {
     CBM_HANDLED_EFFECTS_M5B1
+        .iter()
+        .copied()
+        .chain(CBM_HANDLED_EFFECTS_M5B2.iter().copied())
+        .collect()
 }
 
 /// Direct port of `unportedCheckBadMoveTableEffects`
 /// (`factoryAiCheckBadMove.ts:312-316`): `CBM_TABLE_EFFECTS` minus
-/// `cbm_handled_effects()`, sorted. Returns 77 table effects after M5b-1.
+/// `cbm_handled_effects()`, sorted. Returns 44 table effects after M5b-2.
 #[must_use]
 pub fn unported_cbm_table_effects() -> Vec<u16> {
     let handled = cbm_handled_effects();
@@ -728,12 +810,24 @@ pub struct FactoryAiCheckBadMoveRoarTarget {
 // === draws/result =============================================================
 
 /// The true worst case across the preamble's own two call sites (negates-
-/// type + soundproof, TS :1297,1329) plus every M5b-1 handler's own draws:
-/// Magnitude's own Levitate draw (TS :3342) plus the shared
-/// `run_cbm_high_risk_for_damage` body's own ability draw (TS :2696) can
-/// both fire on top of the preamble's soundproof draw (3 total) — see the
-/// module doc comment for why the negates-type draw never co-occurs with a
-/// handler draw in this batch.
+/// type + soundproof, TS :1297,1329) plus every landed handler's own draws.
+/// Re-verified after M5b-2 (`docs/rust-m5b-checkbadmove-batching.md` §2):
+/// M5b-2 adds two handlers with their own *two* ability draws each
+/// (`AI_CBM_AttackDown`'s Hyper Cutter + shared-tail, TS :834,843;
+/// `AI_CBM_AccDown`'s Keen Eye + shared-tail, TS :906,915), which could in
+/// principle push the total to 4 (2 preamble + 2 handler) — but every real
+/// Gen-3 move carrying `EFFECT_ATTACK_DOWN(_2)`/`EFFECT_ACCURACY_DOWN(_2)`
+/// has power 0 (Growl/Charm/Featherdance; Sand-Attack/Smokescreen/Kinesis/
+/// Flash, verified against `src/data/gen/moves.json`), so `isMovePowerOther`
+/// is always true for them and the preamble's own negates-type draw never
+/// fires alongside a handler draw — the same structural argument M5b-1
+/// already established for its own cluster. The tied worst case remains 3,
+/// achieved several ways: Magnitude's own Levitate draw (TS :3342) plus the
+/// shared `run_cbm_high_risk_for_damage` body's own ability draw (TS :2696)
+/// on top of soundproof; `AI_CBM_AttackDown`/`AI_CBM_AccDown`'s own two
+/// draws on top of soundproof; or `EFFECT_KNOCK_OFF`'s own single ability
+/// draw (TS :3016, power 20, NOT movePowerOther) on top of BOTH preamble
+/// draws (negates-type + soundproof).
 pub const MAX_CHECK_BAD_MOVE_DRAWS: usize = 3;
 
 /// Distinguishes `run_check_bad_move_preamble`'s `next_get_ability_draw`
@@ -753,6 +847,52 @@ pub enum CheckBadMoveDrawSite {
     /// `AI_CBM_Magnitude`'s own Levitate read, before its fall-through into
     /// `AI_CBM_HighRiskForDamage` (TS :3342).
     MagnitudeLevitate = 3,
+    // === M5b-2 additions (docs/rust-m5b-checkbadmove-batching.md §2 "M5b-2") ===
+    /// `AI_CBM_SpeedDown`'s shared-tail `get_ability AI_TARGET` (TS :808).
+    SpeedDownSharedTail = 4,
+    /// `AI_CBM_AttackDown`'s own Hyper Cutter read (TS :834).
+    AttackDownHyperCutter = 5,
+    /// `AI_CBM_AttackDown`'s shared-tail `get_ability AI_TARGET` (TS :843).
+    AttackDownSharedTail = 6,
+    /// `AI_CBM_DefenseDown`'s shared-tail read (TS :869, via
+    /// `runCbmStatDownViaSharedTail`).
+    DefenseDownSharedTail = 7,
+    /// `AI_CBM_SpDefDown`'s shared-tail read (TS :869, via
+    /// `runCbmStatDownViaSharedTail`).
+    SpDefDownSharedTail = 8,
+    /// `AI_CBM_AccDown`'s own Keen Eye read (TS :906).
+    AccDownKeenEye = 9,
+    /// `AI_CBM_AccDown`'s shared-tail `get_ability AI_TARGET` (TS :915).
+    AccDownSharedTail = 10,
+    /// `AI_CBM_EvasionDown`'s shared-tail read (TS :869, via
+    /// `runCbmStatDownViaSharedTail`).
+    EvasionDownSharedTail = 11,
+    /// `AI_CBM_SpAtkDown`'s shared-tail read (TS :869, via
+    /// `runCbmStatDownViaSharedTail`) -- vestigial dispatch (no real move),
+    /// exercised only by handler-direct tests/vectors.
+    SpAtkDownSharedTail = 12,
+    /// `AI_CBM_Toxic`'s own Immunity read (TS :1162).
+    ToxicImmunity = 13,
+    /// `AI_CBM_Sleep`'s own Insomnia/Vital Spirit read (TS :2732).
+    SleepAbility = 14,
+    /// `AI_CBM_Paralyze`'s own Limber read (TS :2788).
+    ParalyzeAbility = 15,
+    /// `AI_CBM_Confuse`'s own Own Tempo read (TS :2818), shared by
+    /// Confuse/Swagger/Flatter.
+    ConfuseAbility = 16,
+    /// `AI_CBM_OneHitKO`'s own Sturdy read (TS :2861).
+    OneHitKoAbility = 17,
+    /// `AI_CBM_WillOWisp`'s own Water Veil read (TS :2953).
+    WillOWispAbility = 18,
+    /// `AI_CBM_Roar`'s own Suction Cups read (TS :2989).
+    RoarAbility = 19,
+    /// `AI_CBM_TrickAndKnockOff`'s own Sticky Hold read (TS :3016), shared
+    /// by Knock Off/Trick.
+    TrickAndKnockOffAbility = 20,
+    /// `AI_CBM_Explosion`'s own Damp read (TS :3071).
+    ExplosionAbility = 21,
+    /// `AI_CBM_Attract`'s own Oblivious read (TS :3533).
+    AttractAbility = 22,
 }
 
 /// Mirrors `FactoryAiCheckBadMoveDraw` (`factoryAiCheckBadMove.ts:689-698`),
@@ -786,7 +926,7 @@ const DRAW_FILLER: CheckBadMoveDraw = CheckBadMoveDraw {
 /// be read. `NotYetPorted` is the Rust analog of TS's `"unsupported-branch"`
 /// kind (`docs/rust-m5b-checkbadmove-batching.md` §3), returned by the
 /// trailing barrier for any of the 109 `CBM_TABLE_EFFECTS` not yet in
-/// `cbm_handled_effects()` — 77, after M5b-1.
+/// `cbm_handled_effects()` — 44, after M5b-2.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CheckBadMoveResult {
     Scored {
@@ -1146,6 +1286,559 @@ fn run_cbm_magnitude(
     (rng, levitate.draw, high_risk_draw, score_delta)
 }
 
+// === M5b-2 handlers (batching doc §2 "M5b-2") ================================
+
+/// `Cmd_if_type_effectiveness`'s AI effectiveness value
+/// (`battle_ai_script_commands.c:1515-1557`, TS `computeAiEffectiveness`
+/// :2757-2765), shared by every M5b-2 handler whose first gate is
+/// `if_type_effectiveness AI_EFFECTIVENESS_x0` (Paralyze/OneHitKO/WillOWisp/
+/// Explosion/SpitUpAndSwallow/DreamEater — port once, per the batching doc).
+/// Initializes to AI_EFFECTIVENESS_x1 (40), then applies
+/// `gen_tables::TYPE_EFFECTIVENESS_TABLE` in table order. Preserves the
+/// source's no-effect-followed-by-nonzero quirk: a zero intermediate is
+/// clamped back to 1 whenever a LATER multiplier for the same move is
+/// nonzero — Electric against Ground/Flying is 1 here, not 0. Distinct from
+/// `type_multiplier_tenths` (no such clamp) — two different type-
+/// effectiveness functions in this module, do not merge. Unlike
+/// `type_multiplier_tenths`, this iterates *table entries* (one per
+/// attacking/defending type pair) filtered by `types.contains`, so a dual
+/// same-type target (`types[0] == types[1]`) is naturally applied once, with
+/// no separate dedup step needed (mirrors TS's own asymmetry: `computeAiEffectiveness`
+/// loops `TYPE_EFFECTIVENESS` directly with an `includes` membership test,
+/// while `typeMultiplierTenths` loops the two defending-type *slots* and so
+/// needs its own explicit `distinct` dedup).
+#[must_use]
+pub(crate) fn compute_ai_effectiveness(move_type: u8, types: [u8; 2]) -> i32 {
+    let mut ai_effectiveness: i32 = 40;
+    for entry in gen_tables::TYPE_EFFECTIVENESS_TABLE
+        .iter()
+        .filter(|e| e.attacking_type == move_type && types.contains(&e.defending_type))
+    {
+        ai_effectiveness = (ai_effectiveness * entry.multiplier_tenths) / 10;
+        if ai_effectiveness == 0 && entry.multiplier_tenths != 0 {
+            ai_effectiveness = 1;
+        }
+    }
+    ai_effectiveness
+}
+
+/// `AI_CBM_SpeedDown` + the shared `CheckIfAbilityBlocksStatChange` tail
+/// (`data/battle_ai_scripts.s:287-312`, TS :796-812). MIN_STAT_STAGE and
+/// Speed Boost are zero-RNG short-circuits (the latter via
+/// `check_ability_ai_target`, distinct from `next_get_ability_draw`'s own
+/// guess-and-draw machinery); the shared tail's own `get_ability AI_TARGET`
+/// reuses `next_get_ability_draw` unchanged.
+#[must_use]
+pub(crate) fn run_cbm_speed_down(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if target.speed_stage == MIN_STAT_STAGE {
+        return (rng, None, -10);
+    }
+    if check_ability_ai_target(target, ABILITY_SPEED_BOOST) {
+        return (rng, None, -10);
+    }
+    let tail = next_get_ability_draw(
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::SpeedDownSharedTail,
+        target,
+    );
+    let blocks_change = tail.ability == ABILITY_CLEAR_BODY || tail.ability == ABILITY_WHITE_SMOKE;
+    (tail.rng, tail.draw, if blocks_change { -10 } else { 0 })
+}
+
+/// `AI_CBM_AttackDown` + the shared `CheckIfAbilityBlocksStatChange` tail
+/// (`data/battle_ai_scripts.s:277-281,308-312`, TS :824-848). Unlike
+/// `run_cbm_speed_down`'s second gate (zero-RNG `check_ability_ai_target`),
+/// this handler's own Hyper Cutter check is a real `get_ability AI_TARGET` +
+/// `if_equal` pair — a genuine second (guessing, uncached) draw site
+/// distinct from the shared tail's own.
+#[must_use]
+pub(crate) fn run_cbm_attack_down(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (
+    BattleRngState,
+    Option<CheckBadMoveDraw>,
+    Option<CheckBadMoveDraw>,
+    i32,
+) {
+    if target.atk_stage == MIN_STAT_STAGE {
+        return (rng, None, None, -10);
+    }
+    let hyper_cutter = next_get_ability_draw(
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::AttackDownHyperCutter,
+        target,
+    );
+    if hyper_cutter.ability == ABILITY_HYPER_CUTTER {
+        return (hyper_cutter.rng, hyper_cutter.draw, None, -10);
+    }
+    let next_ordinal = if hyper_cutter.draw.is_some() {
+        ordinal + 1
+    } else {
+        ordinal
+    };
+    let tail = next_get_ability_draw(
+        hyper_cutter.rng,
+        next_ordinal,
+        CheckBadMoveDrawSite::AttackDownSharedTail,
+        target,
+    );
+    let blocks_change = tail.ability == ABILITY_CLEAR_BODY || tail.ability == ABILITY_WHITE_SMOKE;
+    (
+        tail.rng,
+        hyper_cutter.draw,
+        tail.draw,
+        if blocks_change { -10 } else { 0 },
+    )
+}
+
+/// Shared body for `AI_CBM_DefenseDown` (`data/battle_ai_scripts.s:283-285`)
+/// and `AI_CBM_SpDefDown` (`:296-298`), TS `runCbmStatDownViaSharedTail`
+/// :859-873 — port once, reused by every bare-MIN_STAT_STAGE-plus-direct-
+/// goto-to-the-shared-tail handler (DefenseDown/SpDefDown/EvasionDown/
+/// SpAtkDown, none has its own intervening `get_ability` call before the
+/// shared tail, unlike AttackDown/AccDown).
+#[must_use]
+pub(crate) fn run_cbm_stat_down_via_shared_tail(
+    stage: u8,
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+    site: CheckBadMoveDrawSite,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if stage == MIN_STAT_STAGE {
+        return (rng, None, -10);
+    }
+    let tail = next_get_ability_draw(rng, ordinal, site, target);
+    let blocks_change = tail.ability == ABILITY_CLEAR_BODY || tail.ability == ABILITY_WHITE_SMOKE;
+    (tail.rng, tail.draw, if blocks_change { -10 } else { 0 })
+}
+
+#[must_use]
+pub(crate) fn run_cbm_defense_down(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    run_cbm_stat_down_via_shared_tail(
+        target.def_stage,
+        target,
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::DefenseDownSharedTail,
+    )
+}
+
+#[must_use]
+pub(crate) fn run_cbm_sp_def_down(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    run_cbm_stat_down_via_shared_tail(
+        target.sp_def_stage,
+        target,
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::SpDefDownSharedTail,
+    )
+}
+
+#[must_use]
+pub(crate) fn run_cbm_evasion_down(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    run_cbm_stat_down_via_shared_tail(
+        target.evasion_stage.unwrap_or(DEFAULT_STAT_STAGE),
+        target,
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::EvasionDownSharedTail,
+    )
+}
+
+/// `AI_CBM_SpAtkDown` (`data/battle_ai_scripts.s:292-294`, TS
+/// `runCbmSpAtkDown` :3404-3411, exported there so TS's own vestigial gate
+/// stays receipt-pinned directly) — the same bare shape as DefenseDown/
+/// SpDefDown with `STAT_SPATK` swapped in, so it reuses the shared tail
+/// unchanged. Dispatch: `EFFECT_SPECIAL_ATTACK_DOWN`/`_2` — both vestigial
+/// in Gen 3 (no move carries either effect; Mist Ball is the distinct
+/// `EFFECT_SPECIAL_ATTACK_DOWN_HIT`, not table-listed), so this handler is
+/// dispatch-reachable only through a synthetic move id in tests/vectors.
+#[must_use]
+pub(crate) fn run_cbm_sp_atk_down(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    run_cbm_stat_down_via_shared_tail(
+        target.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE),
+        target,
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::SpAtkDownSharedTail,
+    )
+}
+
+/// `AI_CBM_AccDown` + the shared `CheckIfAbilityBlocksStatChange` tail
+/// (`data/battle_ai_scripts.s:300-312`, TS :896-920) — the same two-
+/// `get_ability`-call shape `run_cbm_attack_down` already established for
+/// Hyper Cutter, here for Keen Eye instead. A genuine second,
+/// independently redrawing `get_ability` site distinct from the shared
+/// tail's own. Dispatch also reaches `EFFECT_ACCURACY_DOWN_2`, source-
+/// faithfully, despite it being a vestigial constant with zero real moves.
+#[must_use]
+pub(crate) fn run_cbm_acc_down(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (
+    BattleRngState,
+    Option<CheckBadMoveDraw>,
+    Option<CheckBadMoveDraw>,
+    i32,
+) {
+    if target.acc_stage.unwrap_or(DEFAULT_STAT_STAGE) == MIN_STAT_STAGE {
+        return (rng, None, None, -10);
+    }
+    let keen_eye =
+        next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::AccDownKeenEye, target);
+    if keen_eye.ability == ABILITY_KEEN_EYE {
+        return (keen_eye.rng, keen_eye.draw, None, -10);
+    }
+    let next_ordinal = if keen_eye.draw.is_some() {
+        ordinal + 1
+    } else {
+        ordinal
+    };
+    let tail = next_get_ability_draw(
+        keen_eye.rng,
+        next_ordinal,
+        CheckBadMoveDrawSite::AccDownSharedTail,
+        target,
+    );
+    let blocks_change = tail.ability == ABILITY_CLEAR_BODY || tail.ability == ABILITY_WHITE_SMOKE;
+    (
+        tail.rng,
+        keen_eye.draw,
+        tail.draw,
+        if blocks_change { -10 } else { 0 },
+    )
+}
+
+/// `AI_CBM_Toxic` (`data/battle_ai_scripts.s:341-352`, TS :1148-1172),
+/// shared by `EFFECT_TOXIC` and `EFFECT_POISON`. The type gates precede the
+/// handler's own uncached `get_ability` call, so they consume no handler
+/// draw. Status and Safeguard are checked only after that call and
+/// therefore do not suppress its draw for an ambiguous target.
+#[must_use]
+pub(crate) fn run_cbm_toxic(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if target.types[0] == TYPE_STEEL
+        || target.types[0] == TYPE_POISON
+        || target.types[1] == TYPE_STEEL
+        || target.types[1] == TYPE_POISON
+    {
+        return (rng, None, -10);
+    }
+    let ability = next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::ToxicImmunity, target);
+    let blocked = ability.ability == ABILITY_IMMUNITY
+        || target.has_any_status.unwrap_or(false)
+        || target.safeguard_up.unwrap_or(false);
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_Sleep` (`data/battle_ai_scripts.s:216-222`, TS :2722-2742): one
+/// fresh target ability read, then Insomnia, Vital Spirit, primary-status,
+/// and Safeguard rejection gates in source order. The ability read is
+/// unconditional — unlike Toxic/Paralyze, nothing gates it away.
+#[must_use]
+pub(crate) fn run_cbm_sleep(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    let ability = next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::SleepAbility, target);
+    let blocked = ability.ability == ABILITY_INSOMNIA
+        || ability.ability == ABILITY_VITAL_SPIRIT
+        || target.has_any_status.unwrap_or(false)
+        || target.safeguard_up.unwrap_or(false);
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_Paralyze` (`data/battle_ai_scripts.s:397-403`, TS :2773-2797):
+/// type immunity, one fresh target ability read, Limber, primary-status,
+/// and Safeguard rejection gates in source order. Every rejection JUMPs to
+/// Score_Minus10; only the all-clear path FALLS THROUGH to end at zero.
+#[must_use]
+pub(crate) fn run_cbm_paralyze(
+    move_type: u8,
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if compute_ai_effectiveness(move_type, target.types) == 0 {
+        return (rng, None, -10);
+    }
+    let ability =
+        next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::ParalyzeAbility, target);
+    let blocked = ability.ability == ABILITY_LIMBER
+        || target.has_any_status.unwrap_or(false)
+        || target.safeguard_up.unwrap_or(false);
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_Confuse` (`data/battle_ai_scripts.s:386-391`, TS :2805-2825),
+/// shared by `EFFECT_CONFUSE`/`EFFECT_SWAGGER`/`EFFECT_FLATTER`: existing
+/// confusion JUMPs to -5 before the ability read; otherwise one fresh
+/// target ability read runs, Own Tempo JUMPs to -10, Safeguard JUMPs to
+/// -10, and only the all-clear path FALLS THROUGH to end at zero.
+#[must_use]
+pub(crate) fn run_cbm_confuse(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if target.is_confused.unwrap_or(false) {
+        return (rng, None, -5);
+    }
+    let ability = next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::ConfuseAbility, target);
+    let blocked = ability.ability == ABILITY_OWN_TEMPO || target.safeguard_up.unwrap_or(false);
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_OneHitKO` (`data/battle_ai_scripts.s:358-362`, TS :2846-2868):
+/// x0 type immunity JUMPs to -10 before any ability read. Otherwise one
+/// fresh target ability read runs; Sturdy JUMPs to -10, then
+/// `if_level_cond 1` ("less than") JUMPs to -10. Only the all-clear path
+/// FALLS THROUGH to end at zero.
+#[must_use]
+pub(crate) fn run_cbm_one_hit_ko(
+    move_type: u8,
+    target: &FactoryAiCheckBadMoveTarget,
+    attacker_level: u8,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if compute_ai_effectiveness(move_type, target.types) == 0 {
+        return (rng, None, -10);
+    }
+    let ability =
+        next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::OneHitKoAbility, target);
+    let blocked = ability.ability == ABILITY_STURDY || attacker_level < target.level.unwrap_or(0);
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_LeechSeed` (`data/battle_ai_scripts.s:410-416`, TS :2886-2902):
+/// Leech Seed already on the target, or a Grass-typed target, JUMPs to -10.
+/// Zero `get_ability` calls — every gate reads direct battle state, no RNG.
+#[must_use]
+pub(crate) fn run_cbm_leech_seed(target: &FactoryAiCheckBadMoveTarget) -> i32 {
+    let blocked = target.is_leech_seeded.unwrap_or(false)
+        || target.types[0] == TYPE_GRASS
+        || target.types[1] == TYPE_GRASS;
+    if blocked {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_FakeOut` (`data/battle_ai_scripts.s:506-509`, TS :2918-2920):
+/// `Cmd_is_first_turn_for` writes 0-2; `if_equal FALSE` (0) JUMPs to
+/// Score_Minus10 when the attacker is NOT in its first turn. Zero
+/// `get_ability` calls, zero RNG.
+#[must_use]
+pub(crate) fn run_cbm_fake_out(attacker_is_first_turn: u8) -> i32 {
+    if attacker_is_first_turn == 0 {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_WillOWisp` (`data/battle_ai_scripts.s:531-539`, TS :2942-2966):
+/// unlike `run_cbm_paralyze`, the ability read comes FIRST and is never
+/// short-circuited by a type gate — the x0/x0_5/x0_25 effectiveness checks
+/// (`AI_EFFECTIVENESS` 0/20/10) run only after it.
+#[must_use]
+pub(crate) fn run_cbm_will_o_wisp(
+    move_type: u8,
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    let ability =
+        next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::WillOWispAbility, target);
+    let ai_effectiveness = compute_ai_effectiveness(move_type, target.types);
+    let blocked = ability.ability == ABILITY_WATER_VEIL
+        || target.has_any_status.unwrap_or(false)
+        || ai_effectiveness == 0
+        || ai_effectiveness == 20
+        || ai_effectiveness == 10
+        || target.safeguard_up.unwrap_or(false);
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_Roar` (`data/battle_ai_scripts.s:334-339`, TS :2976-2995): count
+/// usable target-side party members first; zero JUMPs to -10 without an
+/// ability read. A positive count FALLS THROUGH to one fresh target
+/// `get_ability`; Suction Cups then JUMPs to -10, every other result FALLS
+/// THROUGH to end.
+#[must_use]
+pub(crate) fn run_cbm_roar(
+    roar_target: &FactoryAiCheckBadMoveRoarTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if roar_target.usable_party_mons.unwrap_or(0) == 0 {
+        return (rng, None, -10);
+    }
+    let ability = next_get_ability_draw(
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::RoarAbility,
+        &roar_target.target,
+    );
+    let blocked = ability.ability == ABILITY_SUCTION_CUPS;
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_TrickAndKnockOff` (`data/battle_ai_scripts.s:545-548`, TS
+/// :3006-3022), shared by `EFFECT_KNOCK_OFF`/`EFFECT_TRICK`: one fresh
+/// target ability read, then a single Sticky Hold rejection gate JUMPing
+/// to Score_Minus10; the all-clear path FALLS THROUGH to end at zero.
+#[must_use]
+pub(crate) fn run_cbm_trick_and_knock_off(
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    let ability = next_get_ability_draw(
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::TrickAndKnockOffAbility,
+        target,
+    );
+    let blocked = ability.ability == ABILITY_STICKY_HOLD;
+    (ability.rng, ability.draw, if blocked { -10 } else { 0 })
+}
+
+/// `AI_CBM_Explosion` (`data/battle_ai_scripts.s:224-235`, TS :3056-3085):
+/// type x0 JUMPs to -10 before any ability read; one fresh target ability
+/// read (Damp -> -10); then the paired usable-party gates — AI_USER's own
+/// count nonzero means Explosion is fine (End, zero); both sides zero means
+/// both are down to their last mon (Score_Minus1); only AI_TARGET still has
+/// reserves scores -10.
+#[must_use]
+pub(crate) fn run_cbm_explosion(
+    move_type: u8,
+    roar_target: &FactoryAiCheckBadMoveRoarTarget,
+    attacker_usable_party_mons: u8,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if compute_ai_effectiveness(move_type, roar_target.target.types) == 0 {
+        return (rng, None, -10);
+    }
+    let ability = next_get_ability_draw(
+        rng,
+        ordinal,
+        CheckBadMoveDrawSite::ExplosionAbility,
+        &roar_target.target,
+    );
+    if ability.ability == ABILITY_DAMP {
+        return (ability.rng, ability.draw, -10);
+    }
+    if attacker_usable_party_mons != 0 {
+        return (ability.rng, ability.draw, 0);
+    }
+    if roar_target.usable_party_mons.unwrap_or(0) != 0 {
+        return (ability.rng, ability.draw, -10);
+    }
+    (ability.rng, ability.draw, -1)
+}
+
+/// `AI_CBM_DreamEater` (`data/battle_ai_scripts.s:242-245`, TS :3123-3131):
+/// `if_not_status AI_TARGET, STATUS1_SLEEP, Score_Minus8` then
+/// `if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10` — Dream Eater
+/// is penalized against a target that is not asleep, and doubly so
+/// (reaches -10 only if asleep) against a type it cannot affect. Zero
+/// ability reads.
+#[must_use]
+pub(crate) fn run_cbm_dream_eater(move_type: u8, target: &FactoryAiCheckBadMoveTarget) -> i32 {
+    if !target.is_asleep.unwrap_or(false) {
+        return -8;
+    }
+    if compute_ai_effectiveness(move_type, target.types) == 0 {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Attract` (`data/battle_ai_scripts.s:456-476`, TS :3523-3547):
+/// the ability read comes after the infatuation gate and is a genuine fresh
+/// `get_ability` draw. The two `get_gender` reads are direct field reads,
+/// zero RNG. Gender gates: an infatuated target, an Oblivious target, a
+/// genderless (or unmodeled/`None`) user — the source's own `goto
+/// Score_Minus10` fallthrough when the user matches neither MALE nor
+/// FEMALE — and a gendered-mismatch pairing all score -10.
+#[must_use]
+pub(crate) fn run_cbm_attract(
+    attacker: &FactoryAiCheckBadMoveAttacker,
+    target: &FactoryAiCheckBadMoveTarget,
+    rng: BattleRngState,
+    ordinal: u32,
+) -> (BattleRngState, Option<CheckBadMoveDraw>, i32) {
+    if target.is_infatuated.unwrap_or(false) {
+        return (rng, None, -10);
+    }
+    let ability = next_get_ability_draw(rng, ordinal, CheckBadMoveDrawSite::AttractAbility, target);
+    if ability.ability == ABILITY_OBLIVIOUS {
+        return (ability.rng, ability.draw, -10);
+    }
+    let opposite_gendered_pair = (attacker.gender == Some(FactoryAiMonGender::Male)
+        && target.gender == Some(FactoryAiMonGender::Female))
+        || (attacker.gender == Some(FactoryAiMonGender::Female)
+            && target.gender == Some(FactoryAiMonGender::Male));
+    let score_delta = if opposite_gendered_pair { 0 } else { -10 };
+    (ability.rng, ability.draw, score_delta)
+}
+
+/// `AI_CBM_SpitUpAndSwallow` (`data/battle_ai_scripts.s:516-520`, TS
+/// :3607-3616) — ONE shared handler for `EFFECT_SPIT_UP`/`EFFECT_SWALLOW`:
+/// x0 type immunity JUMPs to -10 before the count read; a zero stockpile
+/// count (nothing to spit up or swallow) JUMPs to -10. Sequential JUMPs,
+/// never additive. Zero `get_ability` calls, zero RNG.
+#[must_use]
+pub(crate) fn run_cbm_spit_up_and_swallow(
+    move_type: u8,
+    target: &FactoryAiCheckBadMoveTarget,
+    attacker_stockpile_count: u8,
+) -> i32 {
+    if compute_ai_effectiveness(move_type, target.types) == 0 {
+        return -10;
+    }
+    if attacker_stockpile_count == 0 {
+        -10
+    } else {
+        0
+    }
+}
+
 // === universal preamble ======================================================
 
 /// Mirrors `runCheckBadMovePreamble`'s input (`factoryAiCheckBadMove.ts:1259-1266`),
@@ -1160,16 +1853,16 @@ pub struct CheckBadMovePreambleInput {
 }
 
 /// `AI_CheckBadMove`'s universal preamble for one move slot against one
-/// target, plus M5b-1's 32-effect dispatch (`data/battle_ai_scripts.s:51-93`
-/// and handler bodies, `factoryAiCheckBadMove.ts:1259-1333,1338-1810,
-/// 2076-2118,2410-2419,2639-2650`): setup and `isMovePowerOther`
+/// target, plus M5b-1/M5b-2's combined 65-effect dispatch
+/// (`data/battle_ai_scripts.s:51-93` and handler bodies,
+/// `factoryAiCheckBadMove.ts:1259-2650`): setup and `isMovePowerOther`
 /// classification, the FISSURE/HORN_DRILL short-circuit, the type-immunity
 /// `Score_Minus10`, the five ability-negation branches, the Soundproof
-/// check, the M5b-1 dispatch blocks (TS source order), and the trailing
-/// `if_effect` table barrier for every effect not yet in
-/// `cbm_handled_effects()`. `input.attacker` is read by several M5b-1
-/// handlers (Ingrain/FocusEnergy/Refresh/FutureSight/the weather quartet),
-/// unlike M5b-0's own preamble-only scope.
+/// check, the M5b-1/M5b-2 dispatch blocks interleaved in TS source order,
+/// and the trailing `if_effect` table barrier for every effect not yet in
+/// `cbm_handled_effects()`. `input.attacker` is read by several handlers
+/// (Ingrain/FocusEnergy/Refresh/FutureSight/the weather quartet/every
+/// stat-UP-reading M5b-2 handler), unlike M5b-0's own preamble-only scope.
 #[must_use]
 pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBadMoveResult {
     let move_row = gen_tables::MOVES.get(input.move_id as usize).unwrap_or_else(|| {
@@ -1363,6 +2056,107 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_DOWN(_2) -> AI_CBM_SpeedDown
+    // (`data/battle_ai_scripts.s:110,135,287-312`, TS :1813-1822/796-812).
+    if move_row.effect == EFFECT_SPEED_DOWN || move_row.effect == EFFECT_SPEED_DOWN_2 {
+        let (next_rng, draw, score_delta) = run_cbm_speed_down(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_ATTACK_DOWN(_2) -> AI_CBM_AttackDown
+    // (`data/battle_ai_scripts.s:112,137,277-281,308-312`, TS
+    // :1826-1835/824-848).
+    if move_row.effect == EFFECT_ATTACK_DOWN || move_row.effect == EFFECT_ATTACK_DOWN_2 {
+        let (next_rng, hyper_cutter_draw, tail_draw, score_delta) =
+            run_cbm_attack_down(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = hyper_cutter_draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        if let Some(draw) = tail_draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_DEFENSE_DOWN(_2) -> AI_CBM_DefenseDown
+    // (`data/battle_ai_scripts.s:113,138,283-285`, TS :1839-1848/922-929).
+    if move_row.effect == EFFECT_DEFENSE_DOWN || move_row.effect == EFFECT_DEFENSE_DOWN_2 {
+        let (next_rng, draw, score_delta) = run_cbm_defense_down(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_DEFENSE_DOWN(_2) ->
+    // AI_CBM_SpDefDown (`data/battle_ai_scripts.s:116,141,296-298`, TS
+    // :1852-1861/931-938).
+    if move_row.effect == EFFECT_SPECIAL_DEFENSE_DOWN
+        || move_row.effect == EFFECT_SPECIAL_DEFENSE_DOWN_2
+    {
+        let (next_rng, draw, score_delta) = run_cbm_sp_def_down(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_ACCURACY_DOWN(_2) -> AI_CBM_AccDown
+    // (`data/battle_ai_scripts.s:117,142,300-312`, TS :1867-1876/896-920).
+    // EFFECT_ACCURACY_DOWN_2 is dispatched too, source-faithfully, despite
+    // being a vestigial constant with zero real moves.
+    if move_row.effect == EFFECT_ACCURACY_DOWN || move_row.effect == EFFECT_ACCURACY_DOWN_2 {
+        let (next_rng, keen_eye_draw, tail_draw, score_delta) =
+            run_cbm_acc_down(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = keen_eye_draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        if let Some(draw) = tail_draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_EVASION_DOWN(_2) -> AI_CBM_EvasionDown
+    // (`data/battle_ai_scripts.s:121,146,306-312`, TS :2050-2059/1123-1130).
+    if move_row.effect == EFFECT_EVASION_DOWN || move_row.effect == EFFECT_EVASION_DOWN_2 {
+        let (next_rng, draw, score_delta) = run_cbm_evasion_down(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_TOXIC/EFFECT_POISON -> AI_CBM_Toxic
+    // (`data/battle_ai_scripts.s:341-352`, TS :2063-2072/1148-1172),
+    // source-complete through its ordered type/ability/status/Safeguard gates.
+    if move_row.effect == EFFECT_TOXIC || move_row.effect == EFFECT_POISON {
+        let (next_rng, draw, score_delta) = run_cbm_toxic(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: EFFECT_RAIN_DANCE -> AI_CBM_RainDance
     // (`data/battle_ai_scripts.s:490-493`, TS :2076-2083).
     if move_row.effect == EFFECT_RAIN_DANCE {
@@ -1391,6 +2185,148 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_ROAR -> AI_CBM_Roar
+    // (`data/battle_ai_scripts.s:124,334-339`, TS :2122-2131/2976-2995).
+    if move_row.effect == EFFECT_ROAR {
+        let (next_rng, draw, score_delta) = run_cbm_roar(&input.target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SLEEP -> AI_CBM_Sleep
+    // (`data/battle_ai_scripts.s:104,216-222`, TS :2135-2144/2722-2742).
+    if move_row.effect == EFFECT_SLEEP {
+        let (next_rng, draw, score_delta) = run_cbm_sleep(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_PARALYZE -> AI_CBM_Paralyze
+    // (`data/battle_ai_scripts.s:149,397-403`, TS :2148-2157/2773-2797).
+    if move_row.effect == EFFECT_PARALYZE {
+        let (next_rng, draw, score_delta) =
+            run_cbm_paralyze(move_row.move_type, target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_CONFUSE/EFFECT_SWAGGER/EFFECT_FLATTER
+    // -> the one shared AI_CBM_Confuse body (`data/battle_ai_scripts.s:
+    // 132,169,193,386-391`, TS :2163-2176/2805-2825). Swagger/Flatter retain
+    // their unported CV barriers after this source-complete shared CBM
+    // dispatch.
+    if move_row.effect == EFFECT_CONFUSE
+        || move_row.effect == EFFECT_SWAGGER
+        || move_row.effect == EFFECT_FLATTER
+    {
+        let (next_rng, draw, score_delta) = run_cbm_confuse(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_OHKO -> AI_CBM_OneHitKO
+    // (`data/battle_ai_scripts.s:127,358-362`, TS :2180-2196/2846-2868), the
+    // Fissure/Sheer Cold family.
+    if move_row.effect == EFFECT_OHKO {
+        let (next_rng, draw, score_delta) = run_cbm_one_hit_ko(
+            move_row.move_type,
+            target,
+            input.attacker.level.unwrap_or(0),
+            rng,
+            ordinal,
+        );
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_LEECH_SEED -> AI_CBM_LeechSeed
+    // (`data/battle_ai_scripts.s:152,410-416`, TS :2200-2209/2886-2902).
+    if move_row.effect == EFFECT_LEECH_SEED {
+        let score_delta = run_cbm_leech_seed(target);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_FAKE_OUT -> AI_CBM_FakeOut
+    // (`data/battle_ai_scripts.s:187,506-509`, TS :2213-2220/2918-2920).
+    if move_row.effect == EFFECT_FAKE_OUT {
+        let score_delta = run_cbm_fake_out(input.attacker.is_first_turn.unwrap_or(0));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_WILL_O_WISP -> AI_CBM_WillOWisp
+    // (`data/battle_ai_scripts.s:194,531-539`, TS :2224-2239/2942-2966).
+    if move_row.effect == EFFECT_WILL_O_WISP {
+        let (next_rng, draw, score_delta) =
+            run_cbm_will_o_wisp(move_row.move_type, target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_KNOCK_OFF/EFFECT_TRICK ->
+    // AI_CBM_TrickAndKnockOff (`data/battle_ai_scripts.s:202,198,545-548`, TS
+    // :2244-2258/3006-3022): one target ability read; Sticky Hold rejects at
+    // -10.
+    if move_row.effect == EFFECT_KNOCK_OFF || move_row.effect == EFFECT_TRICK {
+        let (next_rng, draw, score_delta) = run_cbm_trick_and_knock_off(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_EXPLOSION -> AI_CBM_Explosion
+    // (`data/battle_ai_scripts.s:106,224-235`, TS :2287-2303/3056-3085): type
+    // x0, Damp, and the paired usable-party gates.
+    if move_row.effect == EFFECT_EXPLOSION {
+        let (next_rng, draw, score_delta) = run_cbm_explosion(
+            move_row.move_type,
+            &input.target,
+            input.attacker.usable_party_mons.unwrap_or(0),
+            rng,
+            ordinal,
+        );
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_DREAM_EATER -> AI_CBM_DreamEater
+    // (`data/battle_ai_scripts.s:107,242-245`, TS :2332-2339/3123-3131):
+    // target not asleep rejects at -8; asleep-but-x0 rejects at -10.
+    if move_row.effect == EFFECT_DREAM_EATER {
+        let score_delta = run_cbm_dream_eater(move_row.move_type, target);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: EFFECT_MAGNITUDE -> AI_CBM_Magnitude
     // (`data/battle_ai_scripts.s:175,365-367`, TS :2410-2419): a fresh own
     // ability read (Levitate -> -10), then FALLS THROUGH into
@@ -1408,6 +2344,53 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
             draws[draw_count as usize] = draw;
             draw_count += 1;
         }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_ATTACK_DOWN(_2) ->
+    // AI_CBM_SpAtkDown (`data/battle_ai_scripts.s:118,143,292-294`, TS
+    // :2446-2455/3404-3411) -- vestigial in Gen 3 (no move carries either
+    // effect; Mist Ball is the distinct EFFECT_SPECIAL_ATTACK_DOWN_HIT, not
+    // table-listed), but the table entry is source-complete here all the
+    // same.
+    if move_row.effect == EFFECT_SPECIAL_ATTACK_DOWN
+        || move_row.effect == EFFECT_SPECIAL_ATTACK_DOWN_2
+    {
+        let (next_rng, draw, score_delta) = run_cbm_sp_atk_down(target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_ATTRACT -> AI_CBM_Attract
+    // (`data/battle_ai_scripts.s:170,456-476`, TS :2534-2543/3523-3547):
+    // target already infatuated JUMPs to -10; one fresh target ability read
+    // (Oblivious -> -10); then the user/target gender gates.
+    if move_row.effect == EFFECT_ATTRACT {
+        let (next_rng, draw, score_delta) = run_cbm_attract(&input.attacker, target, rng, ordinal);
+        rng = next_rng;
+        if let Some(draw) = draw {
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+        }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPIT_UP/EFFECT_SWALLOW -> the one
+    // shared AI_CBM_SpitUpAndSwallow body (`data/battle_ai_scripts.s:
+    // 189-190,516-520`, TS :2577-2584/3607-3616): x0 type immunity JUMPs to
+    // -10, then a zero stockpile count JUMPs to -10 -- the opposite
+    // comparison end of AI_CBM_Stockpile's own `if_equal 3` on the same
+    // field.
+    if move_row.effect == EFFECT_SPIT_UP || move_row.effect == EFFECT_SWALLOW {
+        let score_delta = run_cbm_spit_up_and_swallow(
+            move_row.move_type,
+            target,
+            input.attacker.stockpile_count.unwrap_or(0),
+        );
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
@@ -1449,6 +2432,8 @@ mod tests {
     const TYPE_GHOST: u8 = 7;
     const TYPE_ROCK: u8 = 5;
     const TYPE_BUG: u8 = 6;
+    const TYPE_ICE: u8 = 15;
+    const TYPE_DARK: u8 = 17;
 
     fn target(
         species: u16,
@@ -1727,15 +2712,17 @@ mod tests {
     // === completeness-probe machinery ============================================
 
     #[test]
-    fn unported_returns_77_effects_after_m5b1_lands() {
-        assert_eq!(cbm_handled_effects().len(), 32);
+    fn unported_returns_44_effects_after_m5b2_lands() {
         assert_eq!(CBM_HANDLED_EFFECTS_M5B1.len(), 32);
+        assert_eq!(CBM_HANDLED_EFFECTS_M5B2.len(), 33);
+        assert_eq!(cbm_handled_effects().len(), 65);
         let unported = unported_cbm_table_effects();
-        assert_eq!(unported.len(), 77);
+        assert_eq!(unported.len(), 44);
+        let handled = cbm_handled_effects();
         let mut expected: Vec<u16> = CBM_TABLE_EFFECTS
             .iter()
             .copied()
-            .filter(|effect| !CBM_HANDLED_EFFECTS_M5B1.contains(effect))
+            .filter(|effect| !handled.contains(effect))
             .collect();
         expected.sort_unstable();
         assert_eq!(unported, expected);
@@ -2023,14 +3010,17 @@ mod tests {
 
     #[test]
     fn every_still_unported_table_effect_halts_at_the_notyetported_barrier() {
-        // Sweeps every still-unported table effect after M5b-1 (skipping
+        // Sweeps every still-unported table effect after M5b-2 (skipping
         // those with no real Gen-3 move, matching TS's "skipped in both
         // directions" comment, test.ts:1517-1518) against the
         // GENERIC_BARRIER_TARGET-equivalent fixture (test.ts:1484-1493):
         // single-ability known Sturdy, so every preamble draw short-circuits
         // and every still-unported table-effect move reaches the barrier
-        // untouched. All 32 M5b-1 effects have a real move (verified against
-        // src/data/gen/moves.json), so this drops from 99 to 67 = 99 - 32.
+        // untouched. All 32 M5b-1 effects have a real move, and 28 of
+        // M5b-2's 33 do (5 vestigial: SPECIAL_ATTACK_DOWN(+_2)/
+        // SPECIAL_DEFENSE_DOWN/ACCURACY_DOWN_2/EVASION_DOWN_2, verified
+        // against src/data/gen/moves.json), so this drops from 99 to
+        // 39 = 99 - 32 - 28.
         let t = target(
             SHUCKLE,
             [TYPE_PSYCHIC, TYPE_PSYCHIC],
@@ -2048,7 +3038,7 @@ mod tests {
                 checked += 1;
             }
         }
-        assert_eq!(checked, 67);
+        assert_eq!(checked, 39);
     }
 
     #[test]
@@ -2075,6 +3065,35 @@ mod tests {
             checked += 1;
         }
         assert_eq!(checked, 32);
+    }
+
+    #[test]
+    fn every_m5b2_handled_effect_with_a_real_move_scores_instead_of_halting() {
+        // The M5b-2 counterpart of the sweep above. Unlike M5b-1, 5 of
+        // M5b-2's 33 effects are vestigial (no real Gen-3 move --
+        // SPECIAL_ATTACK_DOWN/_2, SPECIAL_DEFENSE_DOWN, ACCURACY_DOWN_2,
+        // EVASION_DOWN_2), so those are skipped here (each is still covered
+        // directly by its own handler-direct native test below) and the
+        // dispatch-reachable count is 28, not 33.
+        let t = target(
+            SHUCKLE,
+            [TYPE_PSYCHIC, TYPE_PSYCHIC],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let mut checked = 0;
+        for &effect in CBM_HANDLED_EFFECTS_M5B2.iter() {
+            let Some(move_id) = first_move_id_with_effect(effect) else {
+                continue;
+            };
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!(
+                    "effect {effect} move {move_id}: expected Scored, M5b-2 handles this effect"
+                );
+            };
+            checked += 1;
+        }
+        assert_eq!(checked, 28);
     }
 
     #[test]
@@ -2543,5 +3562,1609 @@ mod tests {
             draws[2].site,
             CheckBadMoveDrawSite::HighRiskForDamageAbility
         );
+    }
+
+    // === M5b-2: shared computeAiEffectiveness (TS :2744-2765) ===================
+
+    #[test]
+    fn compute_ai_effectiveness_clamps_no_effect_then_nonzero_to_one() {
+        // The module doc comment's own pinned quirk: Electric vs Ground is
+        // x0, Flying is x2 -- the intermediate zero is clamped back to 1
+        // once the later nonzero multiplier applies, unlike
+        // type_multiplier_tenths (no such clamp).
+        assert_eq!(
+            compute_ai_effectiveness(TYPE_ELECTRIC, [TYPE_GROUND, TYPE_FLYING]),
+            1
+        );
+        assert_eq!(
+            type_multiplier_tenths(TYPE_ELECTRIC, [TYPE_GROUND, TYPE_FLYING]),
+            0
+        );
+    }
+
+    #[test]
+    fn compute_ai_effectiveness_pure_immunity_stays_zero() {
+        assert_eq!(
+            compute_ai_effectiveness(TYPE_NORMAL, [TYPE_GHOST, TYPE_GHOST]),
+            0
+        );
+    }
+
+    #[test]
+    fn compute_ai_effectiveness_neutral_matchup_is_forty() {
+        assert_eq!(
+            compute_ai_effectiveness(TYPE_NORMAL, [TYPE_NORMAL, TYPE_PSYCHIC]),
+            40
+        );
+    }
+
+    // === M5b-2: stat-DOWN sextet (TS :796-938,859-873, test.ts:2042-2484) ========
+
+    const NINJASK: u16 = 302; // single-ability Speed Boost (id 3), like the M5b-1 weather fixture.
+
+    #[test]
+    fn speed_down_min_stat_stage_short_circuits_without_a_draw() {
+        let t = FactoryAiCheckBadMoveTarget {
+            speed_stage: MIN_STAT_STAGE,
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (rng, draw, score) =
+            run_cbm_speed_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn speed_down_speed_boost_short_circuits_zero_rng() {
+        // check_ability_ai_target's zero-RNG gate: Ninjask is single-ability
+        // Speed Boost, so the real ability compares directly.
+        let t = target(NINJASK, [TYPE_BUG, TYPE_FLYING], None, ABILITY_SPEED_BOOST);
+        let (rng, draw, score) =
+            run_cbm_speed_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn speed_down_shared_tail_blocks_on_clear_body_or_white_smoke() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_CLEAR_BODY),
+            ABILITY_CLEAR_BODY,
+        );
+        let (_, draw, score) =
+            run_cbm_speed_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none()); // known ability -- zero-RNG short-circuit
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_WHITE_SMOKE),
+            ABILITY_WHITE_SMOKE,
+        );
+        let (_, _, score) = run_cbm_speed_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn speed_down_shared_tail_non_blocking_ability_scores_zero_and_draws() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (rng, draw, score) =
+            run_cbm_speed_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, 0);
+        let draw = draw.expect("ambiguous species draws at the shared tail");
+        assert_eq!(draw.site, CheckBadMoveDrawSite::SpeedDownSharedTail);
+        assert_ne!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn speed_down_dispatch_reaches_the_shared_handler_for_both_effects() {
+        // Known Sturdy makes every ability read (including the preamble's
+        // own soundproof draw) zero-RNG, so this pins the shared-handler
+        // route itself, not the shared tail's own draw.
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [
+            81u16, /* String Shot */
+            178,   /* Cotton Spore */
+            184,   /* Scary Face */
+        ] {
+            let result = run(move_id, t, RNG_SEED);
+            let CheckBadMoveResult::Scored { draw_count, .. } = result else {
+                panic!("move {move_id}: expected Scored")
+            };
+            assert_eq!(draw_count, 0, "move {move_id}");
+        }
+    }
+
+    #[test]
+    fn attack_down_min_stat_stage_short_circuits_without_a_draw() {
+        let t = FactoryAiCheckBadMoveTarget {
+            atk_stage: MIN_STAT_STAGE,
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (rng, d1, d2, score) =
+            run_cbm_attack_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(d1.is_none());
+        assert!(d2.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn attack_down_hyper_cutter_short_circuits_before_the_shared_tail() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_HYPER_CUTTER),
+            ABILITY_HYPER_CUTTER,
+        );
+        let (_, d1, d2, score) =
+            run_cbm_attack_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(d1.is_none()); // known ability -- zero-RNG short-circuit
+        assert!(d2.is_none()); // shared tail never reached
+    }
+
+    #[test]
+    fn attack_down_ambiguous_species_draws_at_both_sites_never_caches() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let before = BattleRngState { value: RNG_SEED, calls: 0 };
+        let (rng, d1, d2, score) = run_cbm_attack_down(&t, before, 1);
+        assert_eq!(score, 0); // neither Rock Head nor Lightning Rod blocks
+        let d1 = d1.expect("hyper-cutter site draws");
+        let d2 = d2.expect("shared-tail site draws");
+        assert_eq!(d1.site, CheckBadMoveDrawSite::AttackDownHyperCutter);
+        assert_eq!(d2.site, CheckBadMoveDrawSite::AttackDownSharedTail);
+        assert_eq!(d1.before, before);
+        assert_eq!(d1.after, d2.before); // never-caches: advances at both
+        assert_ne!(d1.before, d2.before);
+        assert_eq!(rng, d2.after);
+    }
+
+    #[test]
+    fn attack_down_dispatch_fills_max_draws_via_soundproof_plus_both_handler_sites() {
+        // Growl (power 0) is movePowerOther, so the preamble's own
+        // negates-type draw never fires -- soundproof + the handler's own
+        // two draws exactly fills MAX_CHECK_BAD_MOVE_DRAWS.
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let result = run(45 /* Growl */, t, RNG_SEED);
+        let CheckBadMoveResult::Scored { draws, draw_count, score_delta, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, 0);
+        assert_eq!(draw_count, 3);
+        assert_eq!(draws[0].site, CheckBadMoveDrawSite::Soundproof);
+        assert_eq!(draws[1].site, CheckBadMoveDrawSite::AttackDownHyperCutter);
+        assert_eq!(draws[2].site, CheckBadMoveDrawSite::AttackDownSharedTail);
+    }
+
+    #[test]
+    fn defense_down_and_sp_def_down_share_the_min_stage_and_blocking_shape() {
+        let min_t = FactoryAiCheckBadMoveTarget {
+            def_stage: MIN_STAT_STAGE,
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, draw, score) =
+            run_cbm_defense_down(&min_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+
+        let blocked_t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_WHITE_SMOKE),
+            ABILITY_WHITE_SMOKE,
+        );
+        let (_, _, score) =
+            run_cbm_defense_down(&blocked_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+
+        let ambiguous_t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_defense_down(
+            &ambiguous_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        assert_eq!(
+            draw.unwrap().site,
+            CheckBadMoveDrawSite::DefenseDownSharedTail
+        );
+
+        let sp_def_min_t = FactoryAiCheckBadMoveTarget {
+            sp_def_stage: MIN_STAT_STAGE,
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, draw, score) = run_cbm_sp_def_down(
+            &sp_def_min_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        let sp_def_ambiguous_t =
+            target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_sp_def_down(
+            &sp_def_ambiguous_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        assert_eq!(
+            draw.unwrap().site,
+            CheckBadMoveDrawSite::SpDefDownSharedTail
+        );
+    }
+
+    #[test]
+    fn defense_down_and_sp_def_down_dispatch_reach_their_shared_handlers() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [
+            39u16, /* Tail Whip */
+            43,    /* Leer */
+            103,   /* Screech */
+        ] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+        for move_id in [313u16 /* Fake Tears */, 319 /* Metal Sound */] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+    }
+
+    #[test]
+    fn acc_down_min_stat_stage_short_circuits_without_a_draw() {
+        let t = FactoryAiCheckBadMoveTarget {
+            acc_stage: Some(MIN_STAT_STAGE),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (rng, d1, d2, score) =
+            run_cbm_acc_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(d1.is_none());
+        assert!(d2.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn acc_down_keen_eye_short_circuits_before_the_shared_tail() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_KEEN_EYE),
+            ABILITY_KEEN_EYE,
+        );
+        let (_, d1, d2, score) =
+            run_cbm_acc_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(d1.is_none());
+        assert!(d2.is_none());
+    }
+
+    #[test]
+    fn acc_down_ambiguous_species_draws_at_both_sites_never_caches() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let before = BattleRngState { value: RNG_SEED, calls: 0 };
+        let (rng, d1, d2, score) = run_cbm_acc_down(&t, before, 1);
+        assert_eq!(score, 0);
+        let d1 = d1.expect("keen-eye site draws");
+        let d2 = d2.expect("shared-tail site draws");
+        assert_eq!(d1.site, CheckBadMoveDrawSite::AccDownKeenEye);
+        assert_eq!(d2.site, CheckBadMoveDrawSite::AccDownSharedTail);
+        assert_eq!(d1.after, d2.before);
+        assert_ne!(d1.before, d2.before);
+        assert_eq!(rng, d2.after);
+    }
+
+    #[test]
+    fn acc_down_dispatch_reaches_the_shared_handler_for_real_moves() {
+        // EFFECT_ACCURACY_DOWN_2 has no real Gen-3 move (module doc §4);
+        // the shared arm is exercised through its sibling instead.
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [
+            28u16, /* Sand-Attack */
+            108,   /* Smokescreen */
+            134,   /* Kinesis */
+            148,   /* Flash */
+        ] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+    }
+
+    #[test]
+    fn acc_down_2_vestigial_handler_direct_only() {
+        // No real move carries EFFECT_ACCURACY_DOWN_2 (module doc §4); the
+        // handler itself is still fully exercised directly.
+        assert!(first_move_id_with_effect(EFFECT_ACCURACY_DOWN_2).is_none());
+        let t = FactoryAiCheckBadMoveTarget {
+            acc_stage: Some(MIN_STAT_STAGE),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, _, score) =
+            run_cbm_acc_down(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn evasion_down_shares_the_min_stage_and_blocking_shape() {
+        let min_t = FactoryAiCheckBadMoveTarget {
+            evasion_stage: Some(MIN_STAT_STAGE),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, draw, score) =
+            run_cbm_evasion_down(&min_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+
+        let default_t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_CLEAR_BODY),
+            ABILITY_CLEAR_BODY,
+        );
+        let (_, _, score) =
+            run_cbm_evasion_down(&default_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10); // DEFAULT_STAT_STAGE default, blocked by Clear Body
+
+        let ambiguous_t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_evasion_down(
+            &ambiguous_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        assert_eq!(
+            draw.unwrap().site,
+            CheckBadMoveDrawSite::EvasionDownSharedTail
+        );
+    }
+
+    #[test]
+    fn evasion_down_dispatch_reaches_the_shared_handler() {
+        // EFFECT_EVASION_DOWN_2 has no real Gen-3 move (module doc §4); the
+        // shared arm is exercised through its sibling.
+        assert!(first_move_id_with_effect(EFFECT_EVASION_DOWN_2).is_none());
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let CheckBadMoveResult::Scored { .. } = run(230 /* Sweet Scent */, t, RNG_SEED) else {
+            panic!("expected Scored")
+        };
+    }
+
+    #[test]
+    fn sp_atk_down_vestigial_handler_shares_the_stat_down_shape() {
+        // TS exports runCbmSpAtkDown (`file:3404`) precisely because neither
+        // EFFECT_SPECIAL_ATTACK_DOWN nor its `_2` sibling reaches a real
+        // Gen-3 move -- handler-direct pinning only.
+        assert!(first_move_id_with_effect(EFFECT_SPECIAL_ATTACK_DOWN).is_none());
+        assert!(first_move_id_with_effect(EFFECT_SPECIAL_ATTACK_DOWN_2).is_none());
+        let min_t = FactoryAiCheckBadMoveTarget {
+            sp_atk_stage: Some(MIN_STAT_STAGE),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, draw, score) =
+            run_cbm_sp_atk_down(&min_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+
+        let blocked_t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_WHITE_SMOKE),
+            ABILITY_WHITE_SMOKE,
+        );
+        let (_, _, score) =
+            run_cbm_sp_atk_down(&blocked_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+
+        let ambiguous_t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_sp_atk_down(
+            &ambiguous_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        assert_eq!(
+            draw.unwrap().site,
+            CheckBadMoveDrawSite::SpAtkDownSharedTail
+        );
+    }
+
+    // === M5b-2: Toxic/Poison (TS :1148-1172, test.ts:1716-2042) ==================
+
+    #[test]
+    fn toxic_type_immune_short_circuits_without_a_draw() {
+        for types in [[TYPE_STEEL, TYPE_NORMAL], [TYPE_NORMAL, TYPE_POISON]] {
+            let t = target(SHUCKLE, types, Some(ABILITY_STURDY), ABILITY_STURDY);
+            let (rng, draw, score) =
+                run_cbm_toxic(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+            assert_eq!(score, -10, "{types:?}");
+            assert!(draw.is_none(), "{types:?}");
+            assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+        }
+    }
+
+    #[test]
+    fn toxic_immunity_ability_blocks_after_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_IMMUNITY),
+            ABILITY_IMMUNITY,
+        );
+        let (_, draw, score) = run_cbm_toxic(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none()); // known ability -- zero-RNG short-circuit
+    }
+
+    #[test]
+    fn toxic_status_and_safeguard_block_after_the_ability_draw() {
+        let status_t = FactoryAiCheckBadMoveTarget {
+            has_any_status: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) =
+            run_cbm_toxic(&status_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        let safeguard_t = FactoryAiCheckBadMoveTarget {
+            safeguard_up: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) = run_cbm_toxic(
+            &safeguard_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn toxic_all_clear_scores_zero_and_draws_for_an_ambiguous_target() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_toxic(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, 0);
+        assert_eq!(draw.unwrap().site, CheckBadMoveDrawSite::ToxicImmunity);
+    }
+
+    #[test]
+    fn toxic_and_poison_dispatch_share_the_handler() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [
+            92u16, /* Toxic */
+            77,    /* Poisonpowder */
+            139,   /* Poison Gas */
+        ] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+    }
+
+    // === M5b-2: Sleep (TS :2722-2742, test.ts:1716-2042) =========================
+
+    #[test]
+    fn sleep_ability_read_is_unconditional_and_insomnia_or_vital_spirit_block() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_INSOMNIA),
+            ABILITY_INSOMNIA,
+        );
+        let (_, draw, score) = run_cbm_sleep(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_VITAL_SPIRIT),
+            ABILITY_VITAL_SPIRIT,
+        );
+        let (_, _, score) = run_cbm_sleep(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn sleep_status_and_safeguard_block() {
+        let status_t = FactoryAiCheckBadMoveTarget {
+            has_any_status: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) =
+            run_cbm_sleep(&status_t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        let safeguard_t = FactoryAiCheckBadMoveTarget {
+            safeguard_up: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) = run_cbm_sleep(
+            &safeguard_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn sleep_all_clear_scores_zero_and_draws_for_an_ambiguous_target() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_sleep(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, 0);
+        assert_eq!(draw.unwrap().site, CheckBadMoveDrawSite::SleepAbility);
+    }
+
+    #[test]
+    fn sleep_dispatch_reaches_the_handler_for_every_real_move() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [47u16, 79, 95, 142, 147, 320] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+    }
+
+    // === M5b-2: Roar (TS :2976-2995, test.ts:1716-2042) ===========================
+
+    #[test]
+    fn roar_zero_usable_party_mons_short_circuits_without_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let rt = FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(0) };
+        let (rng, draw, score) = run_cbm_roar(&rt, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn roar_suction_cups_blocks_after_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_SUCTION_CUPS),
+            ABILITY_SUCTION_CUPS,
+        );
+        let rt = FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(1) };
+        let (_, draw, score) = run_cbm_roar(&rt, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+    }
+
+    #[test]
+    fn roar_non_suction_cups_scores_zero_and_draws() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let rt = FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(2) };
+        let (_, draw, score) = run_cbm_roar(&rt, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, 0);
+        assert_eq!(draw.unwrap().site, CheckBadMoveDrawSite::RoarAbility);
+    }
+
+    #[test]
+    fn roar_dispatch_reaches_the_handler_via_the_roar_target_extension() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [18u16 /* Whirlwind */, 46 /* Roar */] {
+            let result = run_check_bad_move_preamble(CheckBadMovePreambleInput {
+                rng: BattleRngState { value: RNG_SEED, calls: 0 },
+                move_id,
+                target: FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(0) },
+                attacker: neutral_attacker(),
+                draw_ordinal_start: 1,
+            });
+            let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+                panic!("move {move_id}: expected Scored")
+            };
+            assert_eq!(score_delta, -10, "move {move_id}");
+        }
+    }
+
+    // === M5b-2: Paralyze (TS :2773-2797, test.ts:1716-2042) =======================
+
+    #[test]
+    fn paralyze_type_immune_short_circuits_without_a_draw() {
+        // Electric vs Ground/Ground: x0.
+        let t = target(
+            SHUCKLE,
+            [TYPE_GROUND, TYPE_GROUND],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let (rng, draw, score) = run_cbm_paralyze(
+            TYPE_ELECTRIC,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn paralyze_limber_status_and_safeguard_block() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_LIMBER),
+            ABILITY_LIMBER,
+        );
+        let (_, draw, score) = run_cbm_paralyze(
+            TYPE_NORMAL,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        let status_t = FactoryAiCheckBadMoveTarget {
+            has_any_status: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) = run_cbm_paralyze(
+            TYPE_NORMAL,
+            &status_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        let safeguard_t = FactoryAiCheckBadMoveTarget {
+            safeguard_up: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) = run_cbm_paralyze(
+            TYPE_NORMAL,
+            &safeguard_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn paralyze_all_clear_scores_zero_and_draws() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_paralyze(
+            TYPE_NORMAL,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        assert_eq!(draw.unwrap().site, CheckBadMoveDrawSite::ParalyzeAbility);
+    }
+
+    #[test]
+    fn paralyze_dispatch_reaches_the_handler_for_every_real_move() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [78u16, 86, 137] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+    }
+
+    // === M5b-2: Confuse/Swagger/Flatter (TS :2805-2825, test.ts:1716-2042) =======
+
+    #[test]
+    fn confuse_already_confused_short_circuits_to_minus_five_without_a_draw() {
+        let t = FactoryAiCheckBadMoveTarget {
+            is_confused: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (rng, draw, score) =
+            run_cbm_confuse(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -5);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn confuse_own_tempo_and_safeguard_block_after_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_OWN_TEMPO),
+            ABILITY_OWN_TEMPO,
+        );
+        let (_, draw, score) = run_cbm_confuse(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        let safeguard_t = FactoryAiCheckBadMoveTarget {
+            safeguard_up: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) = run_cbm_confuse(
+            &safeguard_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn confuse_all_clear_scores_zero_and_draws() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_confuse(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, 0);
+        assert_eq!(draw.unwrap().site, CheckBadMoveDrawSite::ConfuseAbility);
+    }
+
+    #[test]
+    fn confuse_swagger_flatter_dispatch_share_the_handler() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [
+            48u16, /* Supersonic */
+            109,   /* Confuse Ray */
+            186,   /* Sweet Kiss */
+            207,   /* Swagger */
+            260,   /* Flatter */
+        ] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+    }
+
+    // === M5b-2: OHKO (TS :2846-2868, test.ts:1209-1554) ===========================
+
+    #[test]
+    fn one_hit_ko_type_immune_short_circuits_without_a_draw() {
+        // Ice (Sheer Cold) vs Fire/Fire: x0.
+        let t = target(
+            SHUCKLE,
+            [TYPE_FIRE, TYPE_FIRE],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let (rng, draw, score) = run_cbm_one_hit_ko(
+            TYPE_ICE,
+            &t,
+            50,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn one_hit_ko_sturdy_and_lower_attacker_level_block() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let (_, draw, score) = run_cbm_one_hit_ko(
+            TYPE_NORMAL,
+            &t,
+            50,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+
+        let level_t = FactoryAiCheckBadMoveTarget {
+            level: Some(80),
+            ..target(
+                105, /* Marowak, dual ability */
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_ROCK_HEAD),
+                ABILITY_ROCK_HEAD,
+            )
+        };
+        let (_, draw, score) = run_cbm_one_hit_ko(
+            TYPE_NORMAL,
+            &level_t,
+            50,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none()); // known ability -- zero-RNG short-circuit
+    }
+
+    #[test]
+    fn one_hit_ko_all_clear_scores_zero_and_draws() {
+        let t = FactoryAiCheckBadMoveTarget {
+            level: Some(10),
+            ..target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD)
+        };
+        let (_, draw, score) = run_cbm_one_hit_ko(
+            TYPE_NORMAL,
+            &t,
+            50,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        assert_eq!(draw.unwrap().site, CheckBadMoveDrawSite::OneHitKoAbility);
+    }
+
+    #[test]
+    fn ohko_dispatch_reaches_the_handler_including_the_fissure_horn_drill_short_circuit() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [
+            12u16, /* Guillotine */
+            90,    /* Fissure */
+            32,    /* Horn Drill */
+            329,   /* Sheer Cold */
+        ] {
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!("move {move_id}: expected Scored")
+            };
+        }
+    }
+
+    // === M5b-2: Leech Seed (TS :2886-2902, test.ts:1209-1554) =====================
+
+    #[test]
+    fn leech_seed_already_seeded_or_grass_typed_blocks_zero_rng() {
+        let seeded_t = FactoryAiCheckBadMoveTarget {
+            is_leech_seeded: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        assert_eq!(run_cbm_leech_seed(&seeded_t), -10);
+        assert_eq!(
+            run_cbm_leech_seed(&target(
+                SHUCKLE,
+                [TYPE_GRASS, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY
+            )),
+            -10
+        );
+        assert_eq!(
+            run_cbm_leech_seed(&target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_GRASS],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY
+            )),
+            -10
+        );
+        assert_eq!(
+            run_cbm_leech_seed(&target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY
+            )),
+            0
+        );
+    }
+
+    #[test]
+    fn leech_seed_dispatch_scores_with_zero_draws() {
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let result = run(73 /* Leech Seed */, t, RNG_SEED);
+        let CheckBadMoveResult::Scored { draw_count, score_delta, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, 0);
+        assert_eq!(draw_count, 0); // zero-RNG handler, movePowerOther skips negates-type
+    }
+
+    // === M5b-2: Fake Out (TS :2918-2920, test.ts:1209-1554) =======================
+
+    #[test]
+    fn fake_out_first_turn_gate() {
+        assert_eq!(run_cbm_fake_out(0), -10);
+        assert_eq!(run_cbm_fake_out(1), 0);
+        assert_eq!(run_cbm_fake_out(2), 0);
+    }
+
+    #[test]
+    fn fake_out_dispatch_reads_the_attacker_first_turn_flag() {
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let attacker =
+            FactoryAiCheckBadMoveAttacker { is_first_turn: Some(1), ..neutral_attacker() };
+        let result = run_with_attacker(252 /* Fake Out */, t, RNG_SEED, attacker);
+        let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, 0);
+    }
+
+    // === M5b-2: Will-O-Wisp (TS :2942-2966, test.ts:1209-1554) =====================
+
+    #[test]
+    fn will_o_wisp_ability_read_is_unconditional_water_veil_blocks() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_WATER_VEIL),
+            ABILITY_WATER_VEIL,
+        );
+        let (_, draw, score) = run_cbm_will_o_wisp(
+            TYPE_FIRE,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+    }
+
+    #[test]
+    fn will_o_wisp_status_and_reduced_effectiveness_and_safeguard_block() {
+        let status_t = FactoryAiCheckBadMoveTarget {
+            has_any_status: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) = run_cbm_will_o_wisp(
+            TYPE_FIRE,
+            &status_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+
+        // Fire vs Fire/Fire: x0.
+        let immune_t = target(
+            SHUCKLE,
+            [TYPE_FIRE, TYPE_FIRE],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let (_, _, score) = run_cbm_will_o_wisp(
+            TYPE_FIRE,
+            &immune_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+
+        // Fire vs Rock/Water: x0.5 (AI_EFFECTIVENESS_x0_5 == 20).
+        let half_t = target(
+            SHUCKLE,
+            [TYPE_ROCK, TYPE_WATER],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let (_, _, score) = run_cbm_will_o_wisp(
+            TYPE_FIRE,
+            &half_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+
+        let safeguard_t = FactoryAiCheckBadMoveTarget {
+            safeguard_up: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (_, _, score) = run_cbm_will_o_wisp(
+            TYPE_FIRE,
+            &safeguard_t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn will_o_wisp_all_clear_scores_zero_and_draws() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) = run_cbm_will_o_wisp(
+            TYPE_FIRE,
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        assert_eq!(draw.unwrap().site, CheckBadMoveDrawSite::WillOWispAbility);
+    }
+
+    #[test]
+    fn will_o_wisp_dispatch_reaches_the_handler() {
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let CheckBadMoveResult::Scored { .. } = run(261 /* Will-O-Wisp */, t, RNG_SEED) else {
+            panic!("expected Scored")
+        };
+    }
+
+    // === M5b-2: Knock Off / Trick (TS :3006-3022, test.ts:3498-3546) =============
+
+    #[test]
+    fn trick_and_knock_off_sticky_hold_blocks_after_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STICKY_HOLD),
+            ABILITY_STICKY_HOLD,
+        );
+        let (_, draw, score) =
+            run_cbm_trick_and_knock_off(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+    }
+
+    #[test]
+    fn trick_and_knock_off_non_sticky_hold_scores_zero_and_draws() {
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let (_, draw, score) =
+            run_cbm_trick_and_knock_off(&t, BattleRngState { value: RNG_SEED, calls: 0 }, 1);
+        assert_eq!(score, 0);
+        assert_eq!(
+            draw.unwrap().site,
+            CheckBadMoveDrawSite::TrickAndKnockOffAbility
+        );
+    }
+
+    #[test]
+    fn knock_off_dispatch_draws_negates_type_soundproof_and_its_own_ability_check() {
+        // Knock Off (power 20, not in IGNORED_POWERFUL_MOVE_EFFECTS) is NOT
+        // movePowerOther, so the preamble's own negates-type draw fires too
+        // -- exactly fills MAX_CHECK_BAD_MOVE_DRAWS via a different route
+        // than Magnitude/AttackDown.
+        let t = target(MAROWAK, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_ROCK_HEAD);
+        let result = run(282 /* Knock Off */, t, RNG_SEED);
+        let CheckBadMoveResult::Scored { draws, draw_count, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(draw_count, 3);
+        assert_eq!(draws[0].site, CheckBadMoveDrawSite::NegatesType);
+        assert_eq!(draws[1].site, CheckBadMoveDrawSite::Soundproof);
+        assert_eq!(draws[2].site, CheckBadMoveDrawSite::TrickAndKnockOffAbility);
+    }
+
+    #[test]
+    fn trick_dispatch_reaches_the_shared_handler() {
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let CheckBadMoveResult::Scored { .. } = run(271 /* Trick */, t, RNG_SEED) else {
+            panic!("expected Scored")
+        };
+    }
+
+    // === M5b-2: Explosion (TS :3056-3085, test.ts:3629-3694) ======================
+
+    #[test]
+    fn explosion_type_immune_short_circuits_without_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_GHOST, TYPE_GHOST],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let rt = FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(1) };
+        let (rng, draw, score) = run_cbm_explosion(
+            TYPE_NORMAL,
+            &rt,
+            1,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn explosion_damp_blocks_after_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_DAMP),
+            ABILITY_DAMP,
+        );
+        let rt = FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(1) };
+        let (_, draw, score) = run_cbm_explosion(
+            TYPE_NORMAL,
+            &rt,
+            1,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+    }
+
+    #[test]
+    fn explosion_usable_party_gates() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        // attacker has reserves -- fine.
+        let rt = FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(1) };
+        let (_, _, score) = run_cbm_explosion(
+            TYPE_NORMAL,
+            &rt,
+            3,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, 0);
+        // both sides down to their last mon.
+        let rt0 = FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(0) };
+        let (_, _, score) = run_cbm_explosion(
+            TYPE_NORMAL,
+            &rt0,
+            0,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -1);
+        // only the target still has reserves.
+        let (_, _, score) = run_cbm_explosion(
+            TYPE_NORMAL,
+            &rt,
+            0,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+    }
+
+    #[test]
+    fn explosion_dispatch_reaches_the_handler_via_the_roar_target_extension() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        for move_id in [120u16 /* Selfdestruct */, 153 /* Explosion */] {
+            let result = run_check_bad_move_preamble(CheckBadMovePreambleInput {
+                rng: BattleRngState { value: RNG_SEED, calls: 0 },
+                move_id,
+                target: FactoryAiCheckBadMoveRoarTarget { target: t, usable_party_mons: Some(1) },
+                attacker: FactoryAiCheckBadMoveAttacker {
+                    usable_party_mons: Some(1),
+                    ..neutral_attacker()
+                },
+                draw_ordinal_start: 1,
+            });
+            let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+                panic!("move {move_id}: expected Scored")
+            };
+            assert_eq!(score_delta, 0, "move {move_id}");
+        }
+    }
+
+    // === M5b-2: Dream Eater (TS :3123-3131, test.ts:3782-3821) ====================
+
+    #[test]
+    fn dream_eater_not_asleep_scores_minus_eight() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        assert_eq!(run_cbm_dream_eater(TYPE_PSYCHIC, &t), -8);
+    }
+
+    #[test]
+    fn dream_eater_asleep_and_type_immune_scores_minus_ten() {
+        let t = FactoryAiCheckBadMoveTarget {
+            is_asleep: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_DARK, TYPE_DARK],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        assert_eq!(run_cbm_dream_eater(TYPE_PSYCHIC, &t), -10);
+    }
+
+    #[test]
+    fn dream_eater_asleep_and_not_immune_scores_zero() {
+        let t = FactoryAiCheckBadMoveTarget {
+            is_asleep: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        assert_eq!(run_cbm_dream_eater(TYPE_PSYCHIC, &t), 0);
+    }
+
+    #[test]
+    fn dream_eater_dispatch_reaches_the_handler_with_zero_draws() {
+        let t = FactoryAiCheckBadMoveTarget {
+            is_asleep: Some(true),
+            ..target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY)
+        };
+        let result = run(138 /* Dream Eater */, t, RNG_SEED);
+        let CheckBadMoveResult::Scored { score_delta, draw_count, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, 0);
+        assert_eq!(draw_count, 0); // ignored-powerful-move + zero-RNG handler
+    }
+
+    // === M5b-2: Attract (TS :3523-3547, test.ts:4356-4438) ========================
+
+    #[test]
+    fn attract_already_infatuated_short_circuits_without_a_draw() {
+        let t = FactoryAiCheckBadMoveTarget {
+            is_infatuated: Some(true),
+            ..target(
+                SHUCKLE,
+                [TYPE_NORMAL, TYPE_NORMAL],
+                Some(ABILITY_STURDY),
+                ABILITY_STURDY,
+            )
+        };
+        let (rng, draw, score) = run_cbm_attract(
+            &neutral_attacker(),
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+        assert_eq!(rng, BattleRngState { value: RNG_SEED, calls: 0 });
+    }
+
+    #[test]
+    fn attract_oblivious_blocks_after_a_draw() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_OBLIVIOUS),
+            ABILITY_OBLIVIOUS,
+        );
+        let (_, draw, score) = run_cbm_attract(
+            &neutral_attacker(),
+            &t,
+            BattleRngState { value: RNG_SEED, calls: 0 },
+            1,
+        );
+        assert_eq!(score, -10);
+        assert!(draw.is_none());
+    }
+
+    #[test]
+    fn attract_gender_pairing_matrix() {
+        // Genderless / same / opposite / unknown, per the batching doc.
+        let base = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let cases: &[(Option<FactoryAiMonGender>, Option<FactoryAiMonGender>, i32)] = &[
+            // Opposite pairings score 0.
+            (
+                Some(FactoryAiMonGender::Male),
+                Some(FactoryAiMonGender::Female),
+                0,
+            ),
+            (
+                Some(FactoryAiMonGender::Female),
+                Some(FactoryAiMonGender::Male),
+                0,
+            ),
+            // Same-gender pairings score -10.
+            (
+                Some(FactoryAiMonGender::Male),
+                Some(FactoryAiMonGender::Male),
+                -10,
+            ),
+            (
+                Some(FactoryAiMonGender::Female),
+                Some(FactoryAiMonGender::Female),
+                -10,
+            ),
+            // A gendered user vs a genderless target scores -10.
+            (
+                Some(FactoryAiMonGender::Male),
+                Some(FactoryAiMonGender::Genderless),
+                -10,
+            ),
+            (
+                Some(FactoryAiMonGender::Female),
+                Some(FactoryAiMonGender::Genderless),
+                -10,
+            ),
+            // A gendered user vs an unknown (None) target scores -10.
+            (Some(FactoryAiMonGender::Male), None, -10),
+            (Some(FactoryAiMonGender::Female), None, -10),
+            // A genderless (or unmodeled/None) user always scores -10,
+            // regardless of the target's own gender.
+            (
+                Some(FactoryAiMonGender::Genderless),
+                Some(FactoryAiMonGender::Female),
+                -10,
+            ),
+            (None, Some(FactoryAiMonGender::Female), -10),
+            (None, None, -10),
+        ];
+        for &(attacker_gender, target_gender, expected) in cases {
+            let attacker =
+                FactoryAiCheckBadMoveAttacker { gender: attacker_gender, ..neutral_attacker() };
+            let t = FactoryAiCheckBadMoveTarget { gender: target_gender, ..base };
+            let (_, draw, score) = run_cbm_attract(
+                &attacker,
+                &t,
+                BattleRngState { value: RNG_SEED, calls: 0 },
+                1,
+            );
+            assert_eq!(
+                score, expected,
+                "attacker={attacker_gender:?} target={target_gender:?}"
+            );
+            assert!(draw.is_none()); // known ability -- zero-RNG short-circuit throughout
+        }
+    }
+
+    #[test]
+    fn attract_dispatch_reaches_the_handler_via_the_attacker_and_target_genders() {
+        let t = FactoryAiCheckBadMoveTarget {
+            gender: Some(FactoryAiMonGender::Female),
+            ..target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY)
+        };
+        let attacker = FactoryAiCheckBadMoveAttacker {
+            gender: Some(FactoryAiMonGender::Male),
+            ..neutral_attacker()
+        };
+        let result = run_with_attacker(213 /* Attract */, t, RNG_SEED, attacker);
+        let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, 0);
+    }
+
+    // === M5b-2: Spit Up / Swallow (TS :3607-3616, test.ts:4520-4564) ==============
+
+    #[test]
+    fn spit_up_and_swallow_type_immune_scores_minus_ten() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_GHOST, TYPE_GHOST],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        assert_eq!(run_cbm_spit_up_and_swallow(TYPE_NORMAL, &t, 3), -10);
+    }
+
+    #[test]
+    fn spit_up_and_swallow_zero_stockpile_scores_minus_ten() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        assert_eq!(run_cbm_spit_up_and_swallow(TYPE_NORMAL, &t, 0), -10);
+    }
+
+    #[test]
+    fn spit_up_and_swallow_nonzero_stockpile_scores_zero() {
+        let t = target(
+            SHUCKLE,
+            [TYPE_NORMAL, TYPE_NORMAL],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        assert_eq!(run_cbm_spit_up_and_swallow(TYPE_NORMAL, &t, 2), 0);
+    }
+
+    #[test]
+    fn spit_up_and_swallow_dispatch_share_the_handler_with_zero_draws() {
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let attacker =
+            FactoryAiCheckBadMoveAttacker { stockpile_count: Some(1), ..neutral_attacker() };
+        for move_id in [255u16 /* Spit Up */, 256 /* Swallow */] {
+            let result = run_with_attacker(move_id, t, RNG_SEED, attacker);
+            let CheckBadMoveResult::Scored { score_delta, draw_count, .. } = result else {
+                panic!("move {move_id}: expected Scored")
+            };
+            assert_eq!(score_delta, 0, "move {move_id}");
+            assert_eq!(draw_count, 0, "move {move_id}");
+        }
+    }
+
+    // === M5b-2: TS-generated SpAtkDown vectors (crate::factory_ai_check_bad_move_m5b2_vectors_gen) ===
+    //
+    // EFFECT_SPECIAL_ATTACK_DOWN(_2) has no real Gen-3 move, so
+    // `cbm_m5b2_vectors.rs` (a separate integration-test crate, `pub` items
+    // only) can't drive it through the full preamble or call
+    // `run_cbm_sp_atk_down` (`pub(crate)`, per the batching doc §4) directly
+    // -- checked here instead, in the same module as the handler.
+
+    #[test]
+    fn sp_atk_down_direct_cases_match_ts() {
+        use crate::factory_ai_check_bad_move_m5b2_vectors_gen::CBM_M5B2_SP_ATK_DOWN_CASES;
+
+        assert!(!CBM_M5B2_SP_ATK_DOWN_CASES.is_empty());
+        for (i, c) in CBM_M5B2_SP_ATK_DOWN_CASES.iter().enumerate() {
+            let t = FactoryAiCheckBadMoveTarget {
+                sp_atk_stage: c.sp_atk_stage,
+                ..target(
+                    c.species,
+                    [TYPE_NORMAL, TYPE_NORMAL],
+                    c.known_ability,
+                    c.real_ability,
+                )
+            };
+            let (rng, draw, score_delta) = run_cbm_sp_atk_down(
+                &t,
+                BattleRngState { value: c.rng_value, calls: 0 },
+                c.ordinal,
+            );
+            let ctx = format!("case {i}: {c:?}");
+            assert_eq!(rng.value, c.expected_rng_value, "{ctx}");
+            assert_eq!(rng.calls, c.expected_rng_calls, "{ctx}");
+            assert_eq!(score_delta, c.expected_score_delta, "{ctx}");
+            if c.expected_draw_count == 0 {
+                assert!(draw.is_none(), "{ctx}");
+            } else {
+                let draw = draw.unwrap_or_else(|| panic!("{ctx}: expected a draw"));
+                assert_eq!(draw.ordinal, c.draw.ordinal, "{ctx}");
+                assert_eq!(draw.site as u8, c.draw.site, "{ctx}");
+                assert_eq!(draw.before.value, c.draw.before_value, "{ctx}");
+                assert_eq!(draw.before.calls, c.draw.before_calls, "{ctx}");
+                assert_eq!(draw.after.value, c.draw.after_value, "{ctx}");
+                assert_eq!(draw.after.calls, c.draw.after_calls, "{ctx}");
+                assert_eq!(draw.raw_rng_value, c.draw.raw_rng_value, "{ctx}");
+                assert_eq!(draw.random_value, c.draw.random_value, "{ctx}");
+                assert_eq!(draw.guessed_ability, c.draw.guessed_ability, "{ctx}");
+            }
+        }
     }
 }
