@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1166 — [supervisor, 2026-08-11] **BEND verified; Rust M5b scout folded**
+
+- **State:** `master` is green with BEND source-exact for **4/4** callbacks and
+  **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
+  #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated BEND **4/4**, then folded rust-main's
+  documentation-only M5b `CheckBadMove` batching scout through `9c5c927c`.
+  The merge added exactly `RUST_PROGRESS.md` plus the scout receipt; native
+  Rust remains **145/145**.
+- **Next:** source-close `ply_pan`, the next-smallest live family at 13 census
+  callbacks. Preserve nulls for VOL, notes, dispatch, and complete MPlay.
+- **Notes:** merged union full `npm test` **968 files / 9,406 passed / 1
+  skipped**, build **651 modules**. Animation is fully folded; no unsupported
+  barrier or main presentation/gameplay/pixel change.
+
 ## 1165 — [MAIN worker, 2026-08-11] **#55 `ply_bend` callback family source-closed**
 
 - **State:** `ply_bend` is source-exact for **4/4** callbacks and **108/108**
@@ -36,21 +51,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** merged union full `npm test` **967 files / 9,402 passed / 1
   skipped**, build **651 modules**. Animation is fully folded; no unsupported
   barrier or main presentation/gameplay/pixel change.
-
-## 1163 — [MAIN worker, 2026-08-11] **#55 `ply_voice` callback family source-closed**
-
-- **State:** the sixth-player `ply_voice` family is source-exact for **2/2**
-  callbacks and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
-  null**; the construction clock stays null/unwired, S8/#56 are untouched,
-  and LUKAS remains **8/50**.
-- **Did:** twice-fresh address-free OFF packets across anchor/LILIANA/varied
-  select the GamePak tone-entry fast-accept route twice at **182 cycles** each
-  (voices 87/93). The pure reducer pins the source/ELF route and fails closed
-  outside the normalized song/`voicegroup_b_factory` relation.
-- **Next:** source-close the command dispatcher or the next-smallest live
-  vol/pan/bend/note family. Keep complete one-pass totals null and do not wire
-  `runFactoryConstructionClock`.
-- **Notes:** focused predecessor controls **12/12**, smoke **375/375**,
-  typecheck, full **967 files / 9,402 passed / 1 skipped**, and build **651
-  modules** are green. No engine/pixel identity or unsupported barrier changed;
-  pixels were not rerun.

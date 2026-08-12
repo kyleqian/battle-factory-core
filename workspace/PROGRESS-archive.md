@@ -41382,6 +41382,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   **8/8**, smoke **375/375**, typecheck, full **959 files / 9,161 passed / 1
   skipped**, and build **649 modules** are green; pixels were not rerun.
 
+## 1163 — [MAIN worker, 2026-08-11] **#55 `ply_voice` callback family source-closed**
+
+- **State:** the sixth-player `ply_voice` family is source-exact for **2/2**
+  callbacks and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
+  null**; the construction clock stays null/unwired, S8/#56 are untouched,
+  and LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets across anchor/LILIANA/varied
+  select the GamePak tone-entry fast-accept route twice at **182 cycles** each
+  (voices 87/93). The pure reducer pins the source/ELF route and fails closed
+  outside the normalized song/`voicegroup_b_factory` relation.
+- **Next:** source-close the command dispatcher or the next-smallest live
+  vol/pan/bend/note family. Keep complete one-pass totals null and do not wire
+  `runFactoryConstructionClock`.
+- **Notes:** focused predecessor controls **12/12**, smoke **375/375**,
+  typecheck, full **967 files / 9,402 passed / 1 skipped**, and build **651
+  modules** are green. No engine/pixel identity or unsupported barrier changed;
+  pixels were not rerun.
+
 ## 1161 — [MAIN worker, 2026-08-11] **#55 `ply_patt` callback family source-closed**
 
 - **State:** the sixth-player `ply_patt` family is source-exact for **1/1**
