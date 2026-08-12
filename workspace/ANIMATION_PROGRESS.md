@@ -2,7 +2,7 @@
 
 - **State:** Coverage advances **174→175/276 Level-50 exact**; unsupported falls **102→101**. Only Meteor Mash is promoted.
 - **Did:** Reclassified the existing source-relative reducer/seam/compositor after the stale freshness heuristic was disproved for this service: `check-oracle-freshness.sh` sees 8012 predating a documentation-only harness HEAD, while `git -C "$POKEBENCH_HARNESS_ROOT" log --since='2026-08-11 21:51:36' -- oracle/ bin/ run-oracle.sh` is empty.
-- **Verified:** Strict fresh portable receipts repeat player-back **214/214** and opponent-front **215/215** with all listed source/reducer/seam/task/sprite/OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/map/framebuffer gates exact and stable `ed028a16…/309e0ea2…/c1b452de…` plus `367dda53…/05e1a334…/d6ac27b1…`; move-owned ShakeMon2, opaque IMPACT, mini lifecycle, and painter latches remain directly verified.
+- **Verified:** Strict fresh portable receipts repeat player-back **214/214** and opponent-front **215/215** with all listed source/reducer/seam/task/sprite/OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/map/framebuffer gates exact and stable `ed028a16…/309e0ea2…/c1b452de…` plus `367dda53…/05e1a334…/d6ac27b1…`; move-owned ShakeMon2, opaque IMPACT, mini lifecycle, and painter latches remain directly verified. Focused/boundary **69/69**, smoke **375/375**, typecheck, full suite **993 files / 9,591 passed / 1 skipped**, and the **653-module** build are green.
 - **Next:** Meteor Mash is complete; every sibling remains an independent acceptance unit.
 - **Notes:** Presentation-only; no gameplay/RNG/controller/facility state, boundary, unsupported barrier, canonical recording, absolute-tick lookup, coordinate/RGB fitting, or sibling promotion changed.
 
