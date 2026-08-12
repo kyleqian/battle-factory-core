@@ -16,12 +16,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   routes at **138**, adding **556** helper cycles to the **1,413** v3 boundary
   (**1,969** through helper). Capture is operand-minimal and joins frozen v3
   rows by `sourceStateDigest`; source/ELF/ROM pins are committed.
-- **Next:** run smoke, typecheck, full `npm test`, and build; commit the green
-  docs/evidence/reducer step and leave all unobserved helper branches, caller
-  BL/later fields, callback/glue, service, arbitration, and clock null.
-- **Notes:** focused dependent group is **15/15** green so far. No production
-  src, gameplay, renderer, animation, Rust, ROADMAP, canonical Battle-2, or
-  unsupported-barrier change.
+- **Next:** hand off the source-close receipt; leave all unobserved helper
+  branches, caller BL/later fields, callback/glue, service, arbitration, and
+  clock null for the next bounded step.
+- **Notes:** focused dependent group **15/15**, smoke **375/375**, typecheck,
+  full **979 files / 9,445 passed / 1 skipped**, and build **653 modules** are
+  green. Commits `f70f0a9c` and `754cb27e`; no production src, gameplay,
+  renderer, animation, Rust, ROADMAP, canonical Battle-2, or unsupported-
+  barrier change.
 
 ## 1182 — [supervisor, 2026-08-11] **CGB4 body verified; animation and Rust lanes folded**
 
