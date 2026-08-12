@@ -19,9 +19,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   work, other 75 callbacks, complete MPlay, service/arbitration, and
   construction-clock wiring null.
 - **Notes:** packet hashes `0700a3f3…` / `4375e86d…` / `6c903177…`; evidence/
-  doc `9fb35b54…` / `fadab079…`; focused v1-v15 **61/61** is green.
-  Smoke, typecheck, one full suite, build, diff check, and final docs commit
-  remain.
+  doc `9fb35b54…` / `fadab079…`; focused v1-v15 **61/61**, smoke **8 files /
+  375 passed**, typecheck, exactly one full suite **992 files / 9,588 passed /
+  1 skipped**, and build **653 modules** are green. Final diff/clean check and
+  docs commit remain. No runtime pointer/address identity, production import,
+  unsupported barrier, animation/Rust change, or canonical Battle-2 branch.
   No runtime pointer/address identity, production import, unsupported barrier,
   animation/Rust change, or canonical Battle-2 branch.
 
