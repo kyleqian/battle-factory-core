@@ -5,50 +5,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R5 — [supervised session, 2026-08-12] **M5 COMPLETE; M6 switch-policy family opened**
+## R5 — [supervised session, 2026-08-12] **M5 COMPLETE; M6b native switch policy folded**
 
-- **State:** rust-main = master `c72eef50` + verified Rust folds through
-  M6a `8f7e231f`/`237509ea`. Factory AI mask selection, CheckBadMove,
-  TryToFaint, CheckViability, and the complete mask 0/1/7 DecisionPolicy
-  are native and differential-green through the WASM adapter. Native Rust
-  is **682/682**; the release artifact is 300,117 bytes, sha256
-  `d1ebb5683d6b0efdbff98372110889e393770743bcdd9d3b163dfc2fa24e8ad3`.
-  `RUST_DEFERRED.md` has no open entries. The RNG-free switch-in selector is
-  now native; its containing switch-policy family remains native-only work.
-- **Did:** M5f-3 added ABI-v1 exports
-  `fw_choose_factory_ai_mask_zero_decision` and
-  `fw_choose_factory_ai_scored_decision`, using documented length-prefixed
-  40+3N and 332+3N inputs. The adapter invokes those exports directly and
-  preserves the complete result, score, RNG, target, and typed trace surface;
-  it has no TypeScript chooser fallback. The new parity suite passes **6/6**
-  in both modes and contains a **2,160-case** internal sweep. Supervisor
-  reviewed boundary lengths before decode, full-object equality and error
-  cases, then reran cargo test/fmt/clippy/WASM and the nine-file WASM parity
-  union (**772/772**) before fold.
-- **Wind-down gates:** after merging current master, cargo **682/682**,
-  fmt, clippy, and wasm32 release build are green; smoke **375/375**; full
-  npm test **1,004 files / 9,643 passed / 1 pre-existing skip**; npm build
-  **653 modules**; soak vanilla **20/20 OK** and full policy **60/60 OK**,
-  with zero crashes or hangs.
-- **M6a DONE (folds `8f7e231f`/`237509ea`):** ported the pure, RNG-free
-  singles `GetMostSuitableMonToSwitchInto` leaf. Both source passes and their
-  quirks are pinned: largest-defensive-multiplier ordering, mono-attacker
-  double application, defender dedup, Levitate/Foresight, active-type STAB,
-  strict ties, non-BUGFIX u8 wrap, MOVE_NONE/power-1/Struggle behavior, and
-  PARTY_SIZE sentinel. The byte-idempotent TS-executed corpus has **215**
-  cases (8 focused, 8 DESTIN, 7 named quirks, 192 deterministic sweep), sha256
-  `331bd58adb890bac3460adf06665c2746a511c00c699ce8cc64bcf89c627bc1e`.
-  Supervisor independently re-executed the wrap and unknown-move cases and
-  reran cargo **897/897**, fmt, clippy, WASM, and smoke **375/375**. Current
-  artifact is 300,227 bytes, sha256 `c4da2f6c92b4360b1708dc8a201422eac31df6c97b57dec7a5063c72ee322abd`.
-  Post-master-v22 union: npm **1,005 files / 9,648 passed / 1 skip** and build
-  **653 modules**.
-- **Next:** M6b — port the remaining pure `factoryAiSwitchPolicy.ts` decision
-  and typed trace surface natively, reusing M6a; keep the boundary/adapter as
-  a later separately verified step. Re-check live conflicts before dispatch.
-- **Notes:** M5f-3 worker used gpt-5.6-sol/high and stayed within the allowed
-  `core-rs/**` plus newly created adapter-parity test surface. No main-lane
-  document or canonical TypeScript engine file was edited.
+- **State:** rust-main = master `9bb4cee9`, including verified M6a folds
+  `8f7e231f`/`237509ea` and M6b folds `00e099ac`/`b3af11a9`. The complete
+  Factory AI mask 0/1/7 decision family is native and WASM differential-green.
+  The singles switch-in selector and full switch policy are native and corpus-
+  differential-green; their WASM boundary remains M6c. `RUST_DEFERRED.md` has
+  no open entries.
+- **M6a DONE:** ported pure RNG-free `GetMostSuitableMonToSwitchInto`, including
+  both source passes, strict ties, defender dedup, mono-attacker double apply,
+  Levitate/Foresight, active-type STAB, u8 wrap, special move behavior, and the
+  PARTY_SIZE sentinel. Its byte-idempotent TS-executed corpus is **215 cases**,
+  sha256 `331bd58adb890bac3460adf06665c2746a511c00c699ce8cc64bcf89c627bc1e`.
+- **M6b DONE:** ported pure `factoryAiSwitchPolicy.ts`, reusing M6a and
+  preserving the complete result, RNG, draw, branch, and error surface. The
+  byte-idempotent TS-executed corpus has **416 cases** and ratchets all **3**
+  choices, **10** draw kinds, **17** branch kinds, and **5** outcomes; sha256
+  `2d1aa4dafe0fb3d22c410d28d55b071acc1b2b8d505112fd826a6127fe02edf4`.
+  Source-derived species types and both ability slots cover dense IDs 1..411;
+  table sha256 `7ae8feed6dcedad22fd5dc9d8f4f4f2746951019b68a3a65b231b7481fe3ec94`.
+  Supervisor caught and corrected a generator-only FACTORY-bit error before
+  fold; policy outputs were unaffected and the repaired corpus separately pins
+  Factory, double-battle, battler-count, and non-trainer prechecks.
+- **Verification:** supervisor reviewed the native policy and canonical TS,
+  spot-checked seven generated species rows, regenerated both switch corpora
+  byte-for-byte, and reran cargo **690 test harness cases**, fmt, clippy, WASM,
+  smoke **375/375**, and the forced nine-file WASM union **772/772**. Release
+  artifact is 287,620 bytes, sha256
+  `b6acb929ccf9026ee33a0e471997cb60cbb25b3cda37b3ac68c10b565aeb34c7`.
+  Post-fold full npm is **1,007 files / 9,659 passed / 1 skip**; build is green
+  at **655 modules**.
+- **Next:** M6c — add the honest ABI/adapter boundary and both-mode full-object
+  parity for the M6a selector and M6b switch policy. Re-check live conflicts
+  before dispatch; do not edit the canonical TypeScript implementation.
+- **Notes:** M6b used Sol/high, followed by one narrow Terra/max correction.
+  Scope stayed within `core-rs/**`; no main-lane ledger or engine file changed.
 
 ---
 
