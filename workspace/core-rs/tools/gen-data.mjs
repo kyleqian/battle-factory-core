@@ -409,6 +409,13 @@ const rentalRankThresholdsLine = rentalRankThresholds.join(", ");
 
 const aiPolicyMasksLine = aiPolicyMasks.join(", ");
 
+const moveRowsLines = moveRows
+  .map(
+    (row) =>
+      `    MoveRow { id: ${row.id}, move_type: ${row.type}, power: ${row.power}, accuracy: ${row.accuracy}, pp: ${row.pp}, secondary_effect_chance: ${row.secondaryEffectChance}, priority: ${row.priority}, effect: ${row.effect}, target: ${row.target}, flags: ${row.flags} },`,
+  )
+  .join("\n");
+
 const typeEffectivenessLines = typeEffectivenessRows
   .map(
     (row) =>
@@ -633,6 +640,43 @@ pub const FACTORY_AI_POLICY_MASKS: [u8; ${aiPolicyMasks.length}] = [${aiPolicyMa
 /// \`factory_ai_mask::select_factory_ai_mask\`). Source:
 /// src/data/gen/factory-ai-policy.json \`.constants.frontierStagesPerChallenge\`.
 pub const FACTORY_AI_FRONTIER_STAGES_PER_CHALLENGE: u32 = ${frontierStagesPerChallenge};
+
+/// One \`gMovesInfo\`/\`gBattleMoves\` row (\`reference/pokeemerald/src/data/moves_info.h\`),
+/// the fields the M5 Factory AI move-scoring family (\`factoryAiCheckBadMove\`/
+/// \`factoryAiCheckViability\`) needs. \`move_type\` uses \`damage_calc.rs\`'s
+/// \`TYPE_*\` ids (named \`move_type\` because \`type\` is a Rust keyword).
+/// \`effect\` is the move's \`EFFECT_*\` numeric id, parsed at codegen time from
+/// reference/pokeemerald/include/constants/battle_move_effects.h (its
+/// \`#define EFFECT_* N\` declared values — not invented). \`target\` is the
+/// move's single \`MOVE_TARGET_*\` bit value (every moves.json row carries
+/// exactly one, verified at codegen time), parsed from
+/// reference/pokeemerald/include/battle.h:46-53. \`flags\` is the OR of the
+/// move's \`FLAG_*\` bits, parsed from
+/// reference/pokeemerald/include/constants/pokemon.h:208-213. Source:
+/// src/data/gen/moves.json \`.moves[]\` (\`.type\`/\`.effect\`/\`.target[0]\`/
+/// \`.flags[]\` resolved via the headers above; every other field copied
+/// directly).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct MoveRow {
+    pub id: u16,
+    pub move_type: u8,
+    pub power: u8,
+    pub accuracy: u8,
+    pub pp: u8,
+    pub secondary_effect_chance: u8,
+    pub priority: i8,
+    pub effect: u16,
+    pub target: u8,
+    pub flags: u8,
+}
+
+/// Dense move id -> full move row, indexed by \`id\` (\`moves.json\` ids are
+/// contiguous 0..${moveRows.length - 1}, verified at codegen time alongside \`MOVE_PP\`'s
+/// same check above — the two tables share one id space over the same
+/// ${moveRows.length} moves). Source: src/data/gen/moves.json \`.moves[]\`.
+pub const MOVES: [MoveRow; ${moveRows.length}] = [
+${moveRowsLines}
+];
 `;
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
@@ -663,4 +707,4 @@ if (!formatted) {
 }
 
 console.log(`gen-data: wrote ${path.relative(workspaceRoot, outPath)}`);
-console.log(`gen-data: ${frontierMonRows.length} frontier mons, ${heldItemByTableId.length} held items, ${natures.length} natures, ${level50Ranges.length} level50 ranges, ${fixedIvs.length} fixed IV rows, ${speciesSecondAbility.length} species second-abilities, ${movePp.length} move PP rows, ${speciesRows.length} frontier-corpus species rows, ${natureModifierRows.length} nature modifier rows, ${typeEffectivenessRows.length} type-effectiveness rows, ${aiPolicyMasks.length} factory AI policy branch masks, ${moveRows.length} move rows (computed, not yet emitted)`);
+console.log(`gen-data: ${frontierMonRows.length} frontier mons, ${heldItemByTableId.length} held items, ${natures.length} natures, ${level50Ranges.length} level50 ranges, ${fixedIvs.length} fixed IV rows, ${speciesSecondAbility.length} species second-abilities, ${movePp.length} move PP rows, ${speciesRows.length} frontier-corpus species rows, ${natureModifierRows.length} nature modifier rows, ${typeEffectivenessRows.length} type-effectiveness rows, ${aiPolicyMasks.length} factory AI policy branch masks, ${moveRows.length} move rows`);
