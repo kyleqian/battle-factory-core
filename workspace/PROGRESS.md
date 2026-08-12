@@ -18,9 +18,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   continuation/exit, other 75 callbacks, complete MPlay, service/arbitration,
   and construction-clock wiring null.
 - **Notes:** evidence/doc `f9d539ac…` / `3fbb25e2…`; red-first then focused
-  v15-v16 **7/7** green. No production, unsupported barrier, animation/Rust,
-  canonical Battle-2, or absolute-tick change. Remaining gates are recorded
-  after final verification.
+  v15-v16 **7/7**, smoke **8 files / 375 passed**, typecheck, exactly one full
+  suite **993 files / 9,591 passed / 1 skipped**, and build **653 modules** are
+  green. No production, unsupported barrier, animation/Rust, canonical
+  Battle-2, or absolute-tick change.
 
 ## 1202 — [supervisor, 2026-08-12] **CGB4 v12-v15 verified; lane tips contained**
 
