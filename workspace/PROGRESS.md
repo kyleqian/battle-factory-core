@@ -21,11 +21,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   service/arbitration, and construction-clock wiring null.
 - **Notes:** v18 evidence/doc `812f3f49…` / `9e10b6d5…`; frozen v17 hashes and
   regeneration are Tier-1-pinned. Focused v17/v18 **8/8**, smoke **8 files /
-  375 passed**, and typecheck are green. The exactly-one `npm test` runner
-  exited after its full run, but its tool transport lost the final reporter
-  summary; build runner likewise completed after transport detachment, so no
-  unobserved green-summary claim is made. No production, ratchet,
-  presentation/animation/Rust, or canonical Battle-2 change.
+  375 passed**, and typecheck are green. The exactly-one `npm test` runner's
+  transport lost its final summary, so a retained direct equivalent full suite
+  confirms **995 files / 9,599 passed / 1 skipped**; build **653 modules** is
+  green. No production, ratchet, presentation/animation/Rust, or canonical
+  Battle-2 change.
 
 ## 1204 — [supervisor, 2026-08-12] **CGB4 v17 track-loop decision verified**
 
