@@ -101,4 +101,14 @@ describe("MOVE_CONFUSE_RAY dense unsupported checkpoint", () => {
     expect(receipt.denseEvidence.orientationDifferences.soundTask).toContain("+63 toward -63");
     expect(receipt.siblingAudit).toMatchObject({ move: "MOVE_WILL_O_WISP", promoted: false });
   });
+
+  it("promotes only Confuse Ray after complete bilateral production equality", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
+    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
+      .toHaveLength(176);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_CONFUSE_RAY"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_WILL_O_WISP"))
+      .toBeUndefined();
+  });
 });
