@@ -20,8 +20,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   construction-clock wiring null.
 - **Notes:** packet hashes `04188570…` / `a641b339…` / `e2b8cf01…`; evidence/
   doc `82138617…` / `189c21ac…`; red-first followed by focused v1-v14
-  **57/57**, smoke **8 files / 375 passed**, and typecheck are green. One full
-  suite and build remain before handoff.
+  **57/57**, smoke **8 files / 375 passed**, typecheck, exactly one full suite
+  **991 files / 9,584 passed / 1 skipped**, and build **653 modules** are
+  green. No runtime pointer/address identity, production import, unsupported
+  barrier, animation/Rust change, or canonical Battle-2 branch.
 
 ## 1199 — [MAIN worker, 2026-08-12] **CGB4 v13 next-command wait route source-closed**
 
