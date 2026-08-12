@@ -34602,21 +34602,23 @@ export function renderSceneOnMovePresentation(
       drawEffects();
     }
     const profile = state.config.fieldProfile;
+    const opponentMaxHp = Math.max(1, profile.opponentHp);
+    const playerMaxHp = Math.max(1, profile.playerHp);
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerToOpponent ? "ONIX" : "METANG",
       level: 50,
       gender: profile.opponentGender ?? "male",
-      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      hpFraction: profile.opponentHp / opponentMaxHp,
       status: "none",
     }));
     drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
       name: playerToOpponent ? "METANG" : "ONIX",
       level: 50,
       gender: profile.playerGender ?? "male",
-      hpFraction: profile.playerHp / profile.playerMaxHp,
+      hpFraction: profile.playerHp / playerMaxHp,
       status: "none",
       currentHp: profile.playerHp,
-      maxHp: profile.playerMaxHp,
+      maxHp: playerMaxHp,
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
