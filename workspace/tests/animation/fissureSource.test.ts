@@ -6,6 +6,7 @@ const scenarios = [
   "tools/battle-lab/mechanic-fissure-player-dugtrio-opponent-onix.json",
   "tools/battle-lab/mechanic-fissure-opponent-dugtrio-player-onix.json",
 ];
+const expectedSeeds = [305419896, 305419897];
 
 describe("MOVE_FISSURE source/staging checkpoint", () => {
   it("pins the exclusive interval, complete graph, lowest carrier, and Dig distinction", () => {
@@ -17,9 +18,10 @@ describe("MOVE_FISSURE source/staging checkpoint", () => {
   });
 
   it("keeps complete legal bilateral Scene-ON parties with all four active choices constrained", () => {
-    for (const path of scenarios) {
+    for (const [index, path] of scenarios.entries()) {
       const stage = JSON.parse(readFileSync(path, "utf8"));
       expect(stage.profile).toBe("battle-scene-on");
+      expect(stage.seed).toBe(expectedSeeds[index]);
       expect(stage.overrides.parties.player).toHaveLength(3);
       expect(stage.overrides.parties.opponent).toHaveLength(3);
       const dugtrio = [...stage.overrides.parties.player, ...stage.overrides.parties.opponent].find((mon: { species: number }) => mon.species === 51);
@@ -42,7 +44,20 @@ describe("MOVE_FISSURE source/staging checkpoint", () => {
       expect(probe).toContain(`"${field}"`);
     }
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/fissure-source-staging-checkpoint.json", "utf8"));
-    expect(receipt).toMatchObject({ oracleProfile: "battle-scene-on", move: "FISSURE", status: "unsupported", components: 12, denseEvidence: null });
+    expect(receipt).toMatchObject({
+      oracleProfile: "battle-scene-on",
+      move: "FISSURE",
+      status: "unsupported",
+      components: 12,
+      denseEvidence: { schema: "fissure-dense-evidence/v1", twiceFresh: true },
+    });
     expect(receipt.siblingAudit).toEqual({ move: "MOVE_DIG", components: 17, shared: ["asset:ANIM_TAG_MUD_SAND", "sprite:gDirtPlumeSpriteTemplate"], promoted: false });
+  });
+
+  it("keeps the natural OHKO seed scout reproducible", () => {
+    const probe = readFileSync("tools/compare/fissureSeedProbe.py", "utf8");
+    expect(probe).toContain('"Random() % 100 + 1 < 30 at equal levels"');
+    expect(probe).toContain('start = names["Move_FISSURE"]');
+    expect(probe).toContain('end = names["Move_DIG"]');
   });
 });

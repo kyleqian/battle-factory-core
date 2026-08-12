@@ -27,7 +27,7 @@
       "orientation": "player-back",
       "scenario": "tools/battle-lab/mechanic-fissure-player-dugtrio-opponent-onix.json",
       "endpointFrame": 834,
-      "endpointSha256": "bf92e5c35b84709f06f01023391f585c890c968dadfce467a75e9dd800cc887d"
+      "endpointSha256": "52563cd25328c7b57100f1fbe5318c37970ae61ced6ffa40ae32c3a055931863"
     },
     {
       "orientation": "opponent-front",
@@ -36,6 +36,97 @@
       "endpointSha256": "c631d9444ef9bfa5d737258dfa6d61eaff80bf3c45cae6901be71277b632085d"
     }
   ],
-  "denseEvidence": null,
-  "blocker": "The configured vendor/mgba-venv has no importable mgba module; tools/run-mgba-probe.py therefore cannot execute the pointer-bounded probe in this worktree. Endpoint captures are staging validation only and confer no pixel acceptance."
+  "denseEvidence": {
+    "schema": "fissure-dense-evidence/v1",
+    "twiceFresh": true,
+    "naturalExecution": {
+      "sourceRule": "At equal levels Cmd_tryKO uses Random() % 100 + 1 < 30; an OHKO miss bypasses attackanimation.",
+      "playerBack": "seed 305419896 (0x12345678) enters Move_FISSURE at frame 72",
+      "opponentFront": "seed 305419897 (0x12345679) enters Move_FISSURE at frame 76"
+    },
+    "topology": {
+      "tasks": [
+        "AnimTask_ShakeBattlers",
+        "AnimTask_ShakePlatforms",
+        "Task_FadeToBg",
+        "WaitForFissureCompletion"
+      ],
+      "templates": [
+        "gComplexPaletteBlendSpriteTemplate",
+        "gDirtPlumeSpriteTemplate",
+        "gMultiuseSpriteTemplate",
+        "gSpriteTemplate_EnemyShadow",
+        "sHealthbarSpriteTemplates",
+        "sHealthboxOpponentSpriteTemplates",
+        "sHealthboxPlayerSpriteTemplates"
+      ],
+      "callbacks": [
+        "AnimComplexPaletteBlend_Step1",
+        "AnimComplexPaletteBlend_Step2",
+        "AnimDirtPlumeParticle_Step",
+        "SpriteCB_HealthBar",
+        "SpriteCB_HealthBoxOther",
+        "SpriteCB_SetInvisible",
+        "SpriteCallbackDummy"
+      ]
+    },
+    "orientations": [
+      {
+        "orientation": "player-back",
+        "sourceWindow": { "startFrame": 72, "endFrame": 325, "frameCount": 254 },
+        "fullStateSha256Runs": [
+          "fafd5619e316e5fa2d4cdf4bf1f229faeda2e73b1777c8a57ca3074eb462af1e",
+          "fafd5619e316e5fa2d4cdf4bf1f229faeda2e73b1777c8a57ca3074eb462af1e"
+        ],
+        "rawRgbSha256Runs": [
+          "67cadfd5e807c5bbc41b9a751a643be698a18c7055e0c50024578c58f5a83899",
+          "67cadfd5e807c5bbc41b9a751a643be698a18c7055e0c50024578c58f5a83899"
+        ],
+        "retained": {
+          "fullState": "tools/compare/evidence/fissure-player-full-state.json.gz",
+          "fullStateGzipSha256": "3b723d70ca5b092680678a5160a78e422dcda74cadaf4b4daf8171965fbaad5f",
+          "rawRgb": "tools/compare/evidence/fissure-player-source-rgb.tar.gz",
+          "rawRgbArchiveSha256": "82556270a3084c62aa0a1e61ad5e6222107d2bb4c3d1c80513c633f44ef5eda3",
+          "changeMap": "tools/compare/evidence/fissure-changemap-player.txt",
+          "changeMapSha256": "23a4e2a2db999dbccfe7d8d8d9fae6bc95d00995937fc4138c5e9bedbc17172c"
+        }
+      },
+      {
+        "orientation": "opponent-front",
+        "sourceWindow": { "startFrame": 76, "endFrame": 329, "frameCount": 254 },
+        "fullStateSha256Runs": [
+          "c52ac9f940887d7982df6cba7fab81b5ee303b15449d371d9bff3fa62be1de20",
+          "c52ac9f940887d7982df6cba7fab81b5ee303b15449d371d9bff3fa62be1de20"
+        ],
+        "rawRgbSha256Runs": [
+          "55b75e4f1ff2bdcfe5395aeb516f91685fbfcfda2b8c229bfdb594396d9bded6",
+          "55b75e4f1ff2bdcfe5395aeb516f91685fbfcfda2b8c229bfdb594396d9bded6"
+        ],
+        "retained": {
+          "fullState": "tools/compare/evidence/fissure-opponent-full-state.json.gz",
+          "fullStateGzipSha256": "de3def4c7bc73b1455bd24323ceaab8d8e3b00b33499820755ae4072bde4d56e",
+          "rawRgb": "tools/compare/evidence/fissure-opponent-source-rgb.tar.gz",
+          "rawRgbArchiveSha256": "aa079fbf6492ed080a2529aee7c67e66d2adec6fa59ebf4bb825fa705cf21bfb",
+          "changeMap": "tools/compare/evidence/fissure-changemap-opponent.txt",
+          "changeMapSha256": "1d38281db6e6313b424dac6eb4fde21fca343e25f7823b06eabf2f882f7f2d52"
+        }
+      }
+    ],
+    "orientationDifferences": {
+      "absoluteFrameShift": 4,
+      "dirtGeometry": "player-back target centers plume pairs at x 200/152, y 70; opponent-front target centers them at x 96/48, y 110",
+      "fissureBgScroll": "player-back BG3 holds (368,22), opponent-front holds (472,232); all relative task, plume, palette, fade, shake, and cleanup ages align"
+    },
+    "measuredLatches": {
+      "softwareOamToHardwareOam": "RAM+1 exactly on all 253 comparable rows in both orientations",
+      "softwareMatricesToHardwareMatrices": "RAM+1 exactly on all 253 comparable rows in both orientations",
+      "fadedPaletteToHardwarePalette": "RAM+1 exactly on all 253 comparable rows in both orientations",
+      "dirtPlumes": "four source sprites live at ages 14..37, 48..71, and 82..105; hardware/framebuffer presentation is ages 15..38, 49..72, and 83..106, clearing one display later",
+      "horizontalShake": "platform and target tasks live ages 4..199; BG3 first moves at age 6 and target OAM first displays its task displacement at age 6, both settle for display age 200",
+      "palettePulses": "faded-buffer writes at ages 31/34/39 and 65/68/73 transfer to hardware/display at ages 32/35/40 and 66/69/74",
+      "fissureBg": "BLDCNT=232 at 135..170 and 215..251; BLDY fade-out 136..151, Fissure fade-in 155..169, restore fade-out 216..231, field fade-in 236..250; BG3 side-relative scroll holds ages 154..233 and clears at 234"
+    },
+    "capturedState": "Complete tasks, sprites, software/hardware OAM and matrices, faded/unfaded/hardware palettes, tile/palette tags, GPU registers, SE1/SE2, immutable outcome/weather/side state, animation RNG, raw RGB, and normalized change maps are retained. Immutable outcome/weather/side state is constant through all 254 rows."
+  },
+  "blocker": "Complete twice-fresh bilateral source/hardware/audio/raw-RGB evidence and move-owned change maps are banked, but no source-relative assets, reducer, typed seam, compositor, or production-framebuffer comparison exists. Fissure therefore remains unsupported; Dig remains audit-only and unpromoted."
 }
