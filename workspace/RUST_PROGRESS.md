@@ -90,10 +90,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pre-existing skip**, npm build green, soak **vanilla 20/20 OK** +
   **full 60/60 OK**. No orphan worker worktrees or branches;
   RUST_DEFERRED.md has no open entries.
-- **Next:** M5b — `factoryAiCheckBadMove.ts` native port (3657 lines,
-  109 table effects; batch by effect group per the scout's sizing
-  warning), then M5c boundary+adapter+parity for M5a+M5b. Re-verify the
-  scout's conflict check at orient per the standing M4+ rule.
+- **M5b batching scout folded (`f7a89ca7`):**
+  `docs/rust-m5b-checkbadmove-batching.md` — the CheckBadMove port is now
+  a mechanical four-step program: **M5b-0** (preamble + shared infra:
+  nextGetAbilityDraw/checkAbilityAiTarget/typeMultiplierTenths +
+  completeness-probe machinery + NotYetPorted trailing barrier), then
+  **M5b-1** (HighRisk cluster + weather + zero-RNG singles, 32 effects),
+  **M5b-2** (RNG-gated status/stat-DOWN, 33 effects, largest), **M5b-3**
+  (stat-UP/screens/singles, 44 effects, cheapest) — each with exact
+  dispatch/handler/test line ranges, shared-handler clusters kept whole,
+  and the module's quirks enumerated (never-caching ability draws,
+  abilityDummyVariable collapse, stale-funcResult weather bug,
+  computeAiEffectiveness x0→1 clamp, vestigial dispatches needing
+  direct-handler tests, CURSE→BulkUp / PSYCH_UP→Haze same-function
+  pairs). Supervisor spot-verified handler/clamp line ranges and the
+  109 = 32+33+44 partition.
+- **Next:** M5b-0 per the batching doc, then M5b-1/2/3 (independent of
+  each other, all depend on M5b-0), then M5c boundary+adapter+parity.
+  Re-verify the scout conflict checks at orient per the standing M4+
+  rule.
 - **Notes (ops):** the two parity suites HARD-FAIL under plain `npm test`
   in a tree whose gitignored `artifacts/wasm/factory_wasm.wasm` is
   present but STALE (absent → skip; stale → 204 failures, seen live this
