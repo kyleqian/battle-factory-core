@@ -125,7 +125,7 @@ fn render_result(result: &FactoryAiSwitchPolicyResult) -> String {
 
 #[test]
 fn complete_results_and_errors_match_canonical_typescript() {
-    assert_eq!(FACTORY_AI_SWITCH_POLICY_CASES.len(), 415);
+    assert_eq!(FACTORY_AI_SWITCH_POLICY_CASES.len(), 416);
     for (index, case) in FACTORY_AI_SWITCH_POLICY_CASES.iter().enumerate() {
         assert_eq!(
             is_factory_ai_switch_precheck_blocked(&case.input.rules),
@@ -153,21 +153,32 @@ fn complete_results_and_errors_match_canonical_typescript() {
 #[test]
 fn corpus_covers_every_retained_kind() {
     use std::collections::BTreeSet;
+    let mut choices = BTreeSet::new();
     let mut draws = BTreeSet::new();
     let mut branches = BTreeSet::new();
+    let mut outcomes = BTreeSet::new();
     for case in FACTORY_AI_SWITCH_POLICY_CASES.iter() {
         if let Ok(result) = evaluate_factory_ai_switch_policy(&case.input) {
+            choices.insert(choice_name(result.choice));
             draws.extend(result.draws.into_iter().map(|draw| draw_kind(draw.kind)));
             branches.extend(
                 result
                     .branches
-                    .into_iter()
+                    .iter()
                     .map(|branch| branch_name(branch.branch)),
+            );
+            outcomes.extend(
+                result
+                    .branches
+                    .iter()
+                    .map(|branch| outcome_name(branch.outcome)),
             );
         }
     }
+    assert_eq!(choices.len(), 3, "{choices:?}");
     assert_eq!(draws.len(), 10, "{draws:?}");
     // The canonical TS union currently declares 17 branch strings (the
     // assignment brief's census of 16 omits first-legal-fallback).
     assert_eq!(branches.len(), 17, "{branches:?}");
+    assert_eq!(outcomes.len(), 5, "{outcomes:?}");
 }
