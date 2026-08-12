@@ -41637,3 +41637,20 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** merged union full `npm test` **971 files / 9,418 passed / 1
   skipped**, build **651 modules**. Both lane branches are contained; no
   unsupported barrier or gameplay/pixel identity change.
+## 1173 — [MAIN worker, 2026-08-11] **#55 `ply_note` inline prefix source-closed**
+
+- **State:** all **82/82** observed note-selector prefixes are source-exact
+  (**57 inline / 25 rhythm / 0 keysplit**). Complete MPlay remains **5 exact /
+  108 null**; #55 and `runFactoryConstructionClock` stay unwired.
+- **Did:** the committed address-free census splits inline into **3×108**
+  cycle zero-parameter, **41×129** key-only, and **13×146** key+velocity
+  callbacks, all reaching the same tone-selection join. Source/ELF and
+  malformed selector/state mutations fail closed.
+- **Next:** source-close one bounded post-selection note-body subroute or the
+  command decode/jump-table dispatcher. Preserve nulls for keysplit, all
+  complete note callbacks, and all complete one-pass MPlay totals.
+- **Notes:** focused **5/5**, smoke **375/375**, typecheck, full **971 files /
+  9,419 passed / 1 skipped**, and build **651 modules** are green. Known
+  components span **456–2160** cycles (**84** totals). No new oracle capture,
+  duration fit, pointer identity, unsupported barrier, construction-clock
+  wiring, gameplay, renderer, pixel, #56, or Rust change.
