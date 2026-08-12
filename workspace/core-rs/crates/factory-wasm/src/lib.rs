@@ -36,6 +36,9 @@ use factory_core::factory_ai_switch_policy::{
     self, FactoryAiSwitchBattler, FactoryAiSwitchChoice, FactoryAiSwitchPartyMember,
     FactoryAiSwitchPolicyInput, FactoryAiSwitchPolicyResult, FactoryAiSwitchRules,
 };
+use factory_core::factory_trainer_schedule::{
+    self, FactoryTrainerDrawLedgerEntry, FactoryTrainerRangeKind, FactoryTrainerScheduleError,
+};
 use factory_core::gen_tables;
 use factory_core::gender::MonGender;
 use factory_core::mon_construction::{
@@ -4005,6 +4008,292 @@ pub unsafe extern "C" fn fw_evaluate_factory_ai_switch_policy(
         precheck_blocked,
         factory_ai_switch_policy::evaluate_factory_ai_switch_policy(&input),
     ))
+}
+
+// --- Factory trainer selection and seven-battle schedule (ABI v1) --------
+
+const FACTORY_TRAINER_SELECT_PREFIX_WIDTH: usize = 28;
+const FACTORY_TRAINER_SCHEDULE_INPUT_WIDTH: usize = 16;
+
+fn read_f64(bytes: &[u8], offset: usize) -> f64 {
+    f64::from_le_bytes(bytes[offset..offset + 8].try_into().unwrap())
+}
+
+fn encode_factory_trainer_boundary_error(message: &str) -> Vec<u8> {
+    let mut buf = vec![0; 4];
+    buf.push(2); // status: boundary error
+    buf.extend_from_slice(&(message.len() as u16).to_le_bytes());
+    buf.extend_from_slice(message.as_bytes());
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn factory_trainer_error_kind(error: FactoryTrainerScheduleError) -> (u8, u8) {
+    match error {
+        FactoryTrainerScheduleError::InvalidBattleIndex => (0, 0),
+        FactoryTrainerScheduleError::InvalidRngValue => (1, 0),
+        FactoryTrainerScheduleError::HistoryTooShort { battle_index } => (2, battle_index),
+        FactoryTrainerScheduleError::InvalidFactoryWinStreak => (3, 0),
+        FactoryTrainerScheduleError::InvalidRngPortRngValue => (4, 0),
+        FactoryTrainerScheduleError::InvalidRngPortValue => (5, 0),
+    }
+}
+
+fn encode_factory_trainer_typed_error(error: FactoryTrainerScheduleError) -> Vec<u8> {
+    let (kind, context) = factory_trainer_error_kind(error);
+    let mut buf = vec![0; 4];
+    buf.push(1); // status: typed production error
+    buf.push(kind);
+    buf.push(context);
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn checked_js_battle_index(value: f64) -> Result<i64, FactoryTrainerScheduleError> {
+    if value.is_finite() && value.fract() == 0.0 && (0.0..7.0).contains(&value) {
+        Ok(value as i64)
+    } else {
+        Err(FactoryTrainerScheduleError::InvalidBattleIndex)
+    }
+}
+
+fn checked_js_rng_value(value: f64) -> Result<i64, FactoryTrainerScheduleError> {
+    if value.is_finite() && value.fract() == 0.0 && (0.0..=f64::from(u32::MAX)).contains(&value) {
+        Ok(value as i64)
+    } else {
+        Err(FactoryTrainerScheduleError::InvalidRngValue)
+    }
+}
+
+fn checked_js_factory_win_streak(value: f64) -> Result<i64, FactoryTrainerScheduleError> {
+    if value.is_finite()
+        && value.fract() == 0.0
+        && (0.0..=factory_trainer_schedule::MAX_SAFE_INTEGER as f64).contains(&value)
+    {
+        Ok(value as i64)
+    } else {
+        Err(FactoryTrainerScheduleError::InvalidFactoryWinStreak)
+    }
+}
+
+fn history_value_for_native(value: f64) -> i64 {
+    // JS `includes` can only reject a generated u16 trainer when the history
+    // value is that exact integer. All other IEEE-754 values use a sentinel
+    // outside every generated range; the original f64 bits are retained for
+    // the successful result below.
+    if value.is_finite() && value.fract() == 0.0 && (0.0..=f64::from(u16::MAX)).contains(&value) {
+        value as i64
+    } else {
+        -1
+    }
+}
+
+fn encode_factory_trainer_ledger(buf: &mut Vec<u8>, ledger: &[FactoryTrainerDrawLedgerEntry]) {
+    for draw in ledger {
+        buf.push(draw.battle_index);
+        buf.extend_from_slice(
+            &u32::try_from(draw.attempt)
+                .expect("Factory trainer attempt count fits the ABI u32")
+                .to_le_bytes(),
+        );
+        buf.extend_from_slice(&draw.challenge.to_le_bytes());
+        buf.extend_from_slice(
+            &u32::try_from(draw.range_index)
+                .expect("generated Factory trainer range index fits the ABI u32")
+                .to_le_bytes(),
+        );
+        buf.push(match draw.range_kind {
+            FactoryTrainerRangeKind::Normal => 0,
+            FactoryTrainerRangeKind::Hard => 1,
+        });
+        buf.extend_from_slice(&draw.range_start.to_le_bytes());
+        buf.extend_from_slice(&draw.range_end.to_le_bytes());
+        buf.extend_from_slice(&draw.rng_before.to_le_bytes());
+        buf.extend_from_slice(&draw.rng_after.to_le_bytes());
+        buf.extend_from_slice(&draw.raw.to_le_bytes());
+        buf.extend_from_slice(&draw.trainer_id.to_le_bytes());
+        buf.push(u8::from(draw.accepted));
+    }
+}
+
+fn encode_factory_trainer_selection(
+    input_history: &[f64],
+    battle_index: usize,
+    result: factory_trainer_schedule::FactoryTrainerSelectionResult,
+) -> Vec<u8> {
+    let mut stored_history = if battle_index
+        == usize::from(gen_tables::FACTORY_TRAINER_HISTORY_OMIT_FINAL_BATTLE_INDEX)
+    {
+        input_history.to_vec()
+    } else {
+        let mut history = input_history[..battle_index].to_vec();
+        history.push(f64::from(result.trainer_id));
+        history
+    };
+    debug_assert_eq!(stored_history.len(), result.stored_trainer_ids.len());
+
+    let mut buf = vec![0; 4];
+    buf.push(0); // status: ok
+    buf.extend_from_slice(&result.trainer_id.to_le_bytes());
+    buf.extend_from_slice(&(stored_history.len() as u32).to_le_bytes());
+    for trainer_id in stored_history.drain(..) {
+        buf.extend_from_slice(&trainer_id.to_le_bytes());
+    }
+    buf.extend_from_slice(&result.rng_value.to_le_bytes());
+    buf.extend_from_slice(&(result.draw_count as u32).to_le_bytes());
+    buf.extend_from_slice(&(result.ledger.len() as u32).to_le_bytes());
+    encode_factory_trainer_ledger(&mut buf, &result.ledger);
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn encode_factory_trainer_schedule(
+    result: factory_trainer_schedule::FactoryTrainerScheduleResult,
+) -> Vec<u8> {
+    let mut buf = vec![0; 4];
+    buf.push(0); // status: ok
+    buf.push(result.trainer_ids.len() as u8);
+    for trainer_id in result.trainer_ids {
+        buf.extend_from_slice(&trainer_id.to_le_bytes());
+    }
+    buf.extend_from_slice(&(result.stored_trainer_ids.len() as u32).to_le_bytes());
+    for trainer_id in result.stored_trainer_ids {
+        buf.extend_from_slice(&(trainer_id as f64).to_le_bytes());
+    }
+    buf.extend_from_slice(&result.rng_value.to_le_bytes());
+    buf.extend_from_slice(&(result.draw_count as u32).to_le_bytes());
+    buf.extend_from_slice(&(result.ledger.len() as u32).to_le_bytes());
+    encode_factory_trainer_ledger(&mut buf, &result.ledger);
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// Selects one default-GBA Factory trainer through an additive ABI-v1
+/// boundary. The injectable scripted RNG remains native-only test infra.
+///
+/// Input is variable-width little-endian bytes (no prefix):
+/// `factory_win_streak:f64` at 0, `battle_index:f64` at 8,
+/// `rng_value:f64` at 16, `history_count:u32` at 24, then exactly
+/// `history_count` IEEE-754 `stored_trainer_ids:f64` records at 28. The f64
+/// slots preserve the canonical JS Number validation domain (NaN,
+/// fractional and unsafe values reach typed errors rather than truncating).
+/// History values themselves are not validated by the canonical function;
+/// their original bits are retained in the returned history.
+///
+/// Output starts `total_len:u32,status:u8`. Status 1 is the typed error
+/// `{kind:u8,context:u8}`: battle=0, rng=1, short-history=2 (context is the
+/// battle index), streak=3, RNG-port-rng=4, RNG-port-value=5. The last two
+/// are complete but unreachable through this default-GBA export. Status 2
+/// is `message_len:u16,message:utf8` for malformed binary input. Status 0:
+/// `trainer_id:u16,stored_count:u32,stored:f64[],rng_value:u32,
+/// draw_count:u32,ledger_count:u32,ledger[]`. Each ledger record is 35 bytes:
+/// `battle:u8,attempt:u32,challenge:i64,range_index:u32,range_kind:u8
+/// (normal=0,hard=1),range_start:u16,range_end:u16,rng_before:u32,
+/// rng_after:u32,raw:u16,trainer_id:u16,accepted:u8`.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_select_factory_trainer(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    let input_len = input_len as usize;
+    if input_len < FACTORY_TRAINER_SELECT_PREFIX_WIDTH {
+        return alloc_and_copy(&encode_factory_trainer_boundary_error(
+            "factory-wasm factoryTrainerScheduleEngine: select input must be at least 28 bytes",
+        ));
+    }
+    // SAFETY: minimum-width check plus caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
+    let history_count = u32::from_le_bytes(bytes[24..28].try_into().unwrap()) as usize;
+    let expected_len = history_count
+        .checked_mul(8)
+        .and_then(|width| FACTORY_TRAINER_SELECT_PREFIX_WIDTH.checked_add(width));
+    if expected_len != Some(input_len) {
+        return alloc_and_copy(&encode_factory_trainer_boundary_error(
+            "factory-wasm factoryTrainerScheduleEngine: malformed select history length",
+        ));
+    }
+
+    // Canonical validation order: battle, rng, history length, streak.
+    let battle_index = match checked_js_battle_index(read_f64(bytes, 8)) {
+        Ok(value) => value,
+        Err(error) => return alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    };
+    let rng_value = match checked_js_rng_value(read_f64(bytes, 16)) {
+        Ok(value) => value,
+        Err(error) => return alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    };
+    if history_count < battle_index as usize {
+        return alloc_and_copy(&encode_factory_trainer_typed_error(
+            FactoryTrainerScheduleError::HistoryTooShort { battle_index: battle_index as u8 },
+        ));
+    }
+    let factory_win_streak = match checked_js_factory_win_streak(read_f64(bytes, 0)) {
+        Ok(value) => value,
+        Err(error) => return alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    };
+    let input_history: Vec<f64> = (0..history_count)
+        .map(|index| read_f64(bytes, FACTORY_TRAINER_SELECT_PREFIX_WIDTH + index * 8))
+        .collect();
+    let native_history: Vec<i64> = input_history
+        .iter()
+        .copied()
+        .map(history_value_for_native)
+        .collect();
+    match factory_trainer_schedule::select_factory_trainer_gba(
+        factory_win_streak,
+        battle_index,
+        &native_history,
+        rng_value,
+    ) {
+        Ok(result) => alloc_and_copy(&encode_factory_trainer_selection(
+            &input_history,
+            battle_index as usize,
+            result,
+        )),
+        Err(error) => alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    }
+}
+
+/// Generates all seven default-GBA Factory trainers. Input is exactly 16
+/// bytes: `factory_win_streak:f64,rng_value:f64`. Output shares the status
+/// and 35-byte ledger layouts of `fw_select_factory_trainer`; status 0 is
+/// `trainer_count:u8,trainer_ids:u16[],stored_count:u32,stored:f64[],
+/// rng_value:u32,draw_count:u32,ledger_count:u32,ledger[]`.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_generate_factory_trainer_schedule(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_len as usize != FACTORY_TRAINER_SCHEDULE_INPUT_WIDTH {
+        return alloc_and_copy(&encode_factory_trainer_boundary_error(
+            "factory-wasm factoryTrainerScheduleEngine: schedule input must be exactly 16 bytes",
+        ));
+    }
+    // SAFETY: exact-width check plus caller contract above.
+    let bytes =
+        unsafe { std::slice::from_raw_parts(input_ptr, FACTORY_TRAINER_SCHEDULE_INPUT_WIDTH) };
+    // Canonical schedule reaches rng validation before streak validation.
+    let rng_value = match checked_js_rng_value(read_f64(bytes, 8)) {
+        Ok(value) => value,
+        Err(error) => return alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    };
+    let factory_win_streak = match checked_js_factory_win_streak(read_f64(bytes, 0)) {
+        Ok(value) => value,
+        Err(error) => return alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    };
+    match factory_trainer_schedule::generate_factory_trainer_schedule_gba(
+        factory_win_streak,
+        rng_value,
+    ) {
+        Ok(result) => alloc_and_copy(&encode_factory_trainer_schedule(result)),
+        Err(error) => alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    }
 }
 
 #[cfg(test)]

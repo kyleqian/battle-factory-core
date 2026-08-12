@@ -184,6 +184,10 @@ export interface FactoryWasmExports {
   fw_get_most_suitable_mon_to_switch_into(input_ptr: number, input_len: number): number;
   /** Combined RNG-free precheck plus full switch-policy evaluation; exact 401-byte input and complete typed output are documented on the Rust export. */
   fw_evaluate_factory_ai_switch_policy(input_ptr: number, input_len: number): number;
+  /** Default-GBA single Factory trainer selection; variable input and complete typed output are documented on the Rust export. */
+  fw_select_factory_trainer(input_ptr: number, input_len: number): number;
+  /** Default-GBA seven-trainer Factory schedule; exact 16-byte input and complete typed output are documented on the Rust export. */
+  fw_generate_factory_trainer_schedule(input_ptr: number, input_len: number): number;
   memory: WebAssembly.Memory;
 }
 
