@@ -1,3 +1,11 @@
+# MOVE_HYDRO_PUMP current Scene-ON receipt refresh (2026-08-12 worker)
+
+- **State:** Level-50 coverage remains **177/276 exact**, 0 partial, 0 staged, and **99 unsupported**. Hydro Pump remains exact; Whirlpool remains an independent exact sibling with no coverage-count change.
+- **Did:** Revalidated the selected Hydro Pump representative against the Battle Scene ON oracle and refreshed only the two stale serialized evidence digests. Source-relative reducer, typed seam, compositor, legal Masquerain carrier, complete source interval, and raw-RGB receipts are unchanged.
+- **Verified:** Twice fresh, player-back and opponent-front each pass **141/141 component and 141/141 production framebuffer** rows. Current evidence/raw digests are `a5b1f983…/360d0d72…` and `1ac9a23b…/ff315fb5…`; focused Hydro/Whirlpool/source/boundary tests pass **14/14**.
+- **Next:** No Hydro Pump implementation work remains. Whirlpool receives no inherited acceptance; supervisor may fold this receipt-only refresh.
+- **Notes:** Presentation-only. No gameplay, damage, RNG, turn/controller/facility state, animation boundary, unsupported barrier, canonical recording import, absolute-tick lookup, coordinate/RGB fitting, or sibling promotion changed.
+
 # MOVE_FISSURE exact — bilateral 254/254 promotion (2026-08-12 worker)
 
 - **State:** Level-50 coverage advances **176→177/276 exact**, 0 partial, 0 staged, and unsupported falls **100→99**. Only Fissure is promoted; Dig remains an independent audit-only sibling.
