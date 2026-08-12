@@ -6,7 +6,7 @@ Battle Scene OFF, additive evidence. v21 freezes/regenerates v20 evidence and re
 
 Only v20's three EXIST-clear final-exit rows enter this slice. All three freshly capture `r4Nonzero=true` immediately at `cmp r4, 0`. The branch is therefore taken, but its selected successor stays null: v21 stops before that successor's first instruction, status write, and tempo/body.
 
-Source, ELF, exact ROM bytes `f8 68 01 30 f8 60 00 2c 03 d1`, and IWRAM `MusicPlayerInfo` storage close exactly `ldr clock; adds; str clock; cmp r4,0; bne`. Five executed Thumb halfwords cost **5×2 = 10**; the two IWRAM word accesses add **0** premium; each observed taken branch adds one **6**-cycle refill: **16 cycles per row / 48 aggregate**. The clock value is never read or retained.
+Source, ELF, exact ROM bytes `f8 68 01 30 f8 60 00 2c 03 d1`, and the sixth player's IWRAM `gPokemonCryMusicPlayers` storage close exactly `ldr clock; adds; str clock; cmp r4,0; bne`. Five executed Thumb halfwords cost **5×2 = 10**; the two IWRAM word accesses add **0** premium; each observed taken branch adds one **6**-cycle refill: **16 cycles per row / 48 aggregate**. The clock value is never read or retained.
 
 | case | callbacks | EXIST-set / clock-exit | v21 cycles |
 | --- | ---: | ---: | ---: |

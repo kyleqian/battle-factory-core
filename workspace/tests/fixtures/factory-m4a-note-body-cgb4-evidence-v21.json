@@ -13,6 +13,7 @@
         "path": "reference/pokeemerald/src/m4a.c",
         "lines": "12-21",
         "class": "IWRAM COMMON_DATA MusicPlayerInfo",
+        "sixthPlayerSymbol": "gPokemonCryMusicPlayers",
         "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
       },
       "clockOffset": {

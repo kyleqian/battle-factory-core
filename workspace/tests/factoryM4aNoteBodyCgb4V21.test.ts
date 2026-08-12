@@ -51,7 +51,7 @@ describe("Issue #55 CGB4 clock-exit r4 decision v21", () => {
   it("joins only the three frozen v20 clear digests and leaves every successor/body field null", () => {
     const evidence = makeEvidence() as any;
     expect(evidence.sourceAndElf).toMatchObject({
-      source: { clockOffset: { offset: 12 }, storage: { class: "IWRAM COMMON_DATA MusicPlayerInfo" } },
+      source: { clockOffset: { offset: 12 }, storage: { class: "IWRAM COMMON_DATA MusicPlayerInfo", sixthPlayerSymbol: "gPokemonCryMusicPlayers" } },
       elf: { exit: "0x082dfbdc", successorLabel: "0x082dfbee", musicPlayerInfoClass: "IWRAM" },
       compiledRegions: [{
         role: "clock ldr; add; clock str; cmp r4, 0; bne",
