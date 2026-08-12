@@ -17,13 +17,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   prologue (**2**), joining frozen v4 rows by `sourceStateDigest`. Later
   allocation fields remain explicit nulls; no oracle rerun or production
   engine change.
-- **Next:** run the final smoke, full test, typecheck, and build gates; leave
-  later allocation fields, unobserved helper routes, the other 75 callbacks,
-  complete note/glue/MPlay costs, service, arbitration, and clock wiring null.
-- **Notes:** v5 focused **4/4** (dependent v3/v4/v5 **11/11**) and typecheck
-  are green. Receipt: `docs/issue55-m4a-note-body-cgb4-v5.md` and
-  `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v5.json`; commit
-  `704d9aa6`.
+- **Next:** leave later allocation fields, unobserved helper routes, the other
+  75 callbacks, complete note/glue/MPlay costs, service, arbitration, and
+  clock wiring null for the next bounded source slice.
+- **Notes:** focused v5 **4/4** (dependent v3/v4/v5 **11/11**), smoke
+  **375/375**, full **982 files / 9,546 passed / 1 skipped**, typecheck, and
+  build **653 modules** are green. Receipts are
+  `docs/issue55-m4a-note-body-cgb4-v5.md` and
+  `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v5.json`; commits
+  `704d9aa6`, `5f221715`.
 
 ## 1184 — [supervisor, 2026-08-12] **CGB4 helper verified; animation and Rust lanes folded**
 
