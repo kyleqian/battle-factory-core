@@ -1,0 +1,101 @@
+{
+  "attackerHpRange": {
+    "maximum": 43,
+    "minimum": 43
+  },
+  "audio": [
+    "se_m_absorb_2",
+    "se_m_spit_up",
+    "se_m_take_down"
+  ],
+  "branch": {
+    "animTurn": 2,
+    "attackerBattler": 0,
+    "orbWaves": 2,
+    "stockpiles": 2,
+    "targetBattler": 0
+  },
+  "cleanup": {
+    "active": 0,
+    "soundTaskCount": 0,
+    "visualTaskCount": 0
+  },
+  "lifecycleCounts": {
+    "blueOrb": 10,
+    "blueStar": 4,
+    "deform": 1,
+    "shake": 2
+  },
+  "oracleProfile": "battle-scene-on",
+  "registerValues": {
+    "bldalpha": [
+      0
+    ],
+    "bldcnt": [
+      0
+    ],
+    "bldy": [
+      0
+    ],
+    "mosaic": [
+      0
+    ],
+    "winin": [
+      16191
+    ],
+    "winout": [
+      16191
+    ]
+  },
+  "schema": "swallow-natural-checkpoint/v1",
+  "setup": {
+    "challengeNum": 1,
+    "customPartiesBuiltBeforeBattle": true,
+    "mode": "mechanicLab",
+    "opponentLeadSetId": 162,
+    "playerLeadSetId": 213,
+    "profile": "battle-scene-on"
+  },
+  "sourceWindow": {
+    "endFrame": 2351,
+    "frameCount": 178,
+    "rgbSequenceSha256": "f864b72c9e6580d45a8c9c63810d6e3a04828c8b231b9e747471fd7edf0590c4",
+    "startFrame": 2174
+  },
+  "tagPresence": {
+    "blueOrb": {
+      "absentAfterCleanup": true,
+      "paletteFrames": 176,
+      "tileFrames": 176
+    },
+    "blueStar": {
+      "absentAfterCleanup": true,
+      "paletteFrames": 173,
+      "tileFrames": 173
+    }
+  },
+  "topology": {
+    "callbacks": [
+      "AnimSpriteOnMonPos",
+      "AnimSwallowBlueOrb",
+      "SpriteCB_HealthBar",
+      "SpriteCB_HealthBoxOther",
+      "SpriteCB_SetInvisible",
+      "SpriteCallbackDummy"
+    ],
+    "tasks": [
+      "AnimTask_ShakeMon2_Step",
+      "AnimTask_SwallowDeformMon"
+    ],
+    "templates": [
+      "0x0832c1d8",
+      "gHealingBlueStarSpriteTemplate",
+      "gMultiuseSpriteTemplate",
+      "gSpriteTemplate_EnemyShadow",
+      "gSwallowBlueOrbSpriteTemplate",
+      "sHealthbarSpriteTemplates",
+      "sHealthboxOpponentSpriteTemplates",
+      "sHealthboxPlayerSpriteTemplates"
+    ]
+  }
+}

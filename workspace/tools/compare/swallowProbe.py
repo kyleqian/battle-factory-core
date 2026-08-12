@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Emit a compact natural Scene-ON receipt for MOVE_SWALLOW.
 
-The scenario must stage Stockpile through controller input.  This probe observes
-the resulting Swallow presentation; it does not patch transient battle state.
+The scenario must stage one, two, or three Stockpiles through controller input.
+This probe observes the resulting Swallow presentation; it does not patch
+transient battle state.
 """
 from __future__ import annotations
 
@@ -118,12 +119,17 @@ def main() -> None:
             "frame": frame,
             "active": active_now,
             "scriptOffset": pointer - script_start if in_source else None,
+            "attackerBattler": oracle.read_u8(symbols["gBattleAnimAttacker"]),
+            "targetBattler": oracle.read_u8(symbols["gBattleAnimTarget"]),
             "animTurn": oracle.read_u8(symbols["gAnimMoveTurn"]),
             "visualTaskCount": oracle.read_u8(symbols["gAnimVisualTaskCount"]),
             "soundTaskCount": oracle.read_u8(symbols["gAnimSoundTaskCount"]),
             "tasks": live_tasks(),
             "sprites": live_sprites(),
-            "attackerHp": snapshot["battlers"]["player"]["hp"],
+            "battlerHp": {
+                "player": snapshot["battlers"]["player"]["hp"],
+                "opponent": snapshot["battlers"]["opponent"]["hp"],
+            },
             "registers": {
                 "winin": u16(0x04000048),
                 "winout": u16(0x0400004A),
@@ -189,11 +195,28 @@ def main() -> None:
         "deform": task_starts({"AnimTask_SwallowDeformMon"}),
         "shake": task_starts({"AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step"}),
     }
-    expected = {"blueOrb": 5, "blueStar": 4, "deform": 1, "shake": 2}
+    anim_turns = {row["animTurn"] for row in source}
+    if len(anim_turns) != 1 or not 1 <= next(iter(anim_turns)) <= 3:
+        raise RuntimeError(f"natural trace did not preserve a 1..3 Stockpile animTurn: {anim_turns}")
+    anim_turn = next(iter(anim_turns))
+    expected = {"blueOrb": anim_turn * 5, "blueStar": 4, "deform": 1, "shake": 2}
     if lifecycle_counts != expected:
-        raise RuntimeError(f"incomplete one-stockpile lifecycle receipt: {lifecycle_counts}")
-    if {row["animTurn"] for row in source} != {1}:
-        raise RuntimeError("natural trace did not preserve the one-stockpile animTurn")
+        raise RuntimeError(
+            f"incomplete {anim_turn}-Stockpile lifecycle receipt: {lifecycle_counts}"
+        )
+    attackers = {row["attackerBattler"] for row in source}
+    targets = {row["targetBattler"] for row in source}
+    if (
+        len(attackers) != 1
+        or len(targets) != 1
+        or not attackers <= {0, 1}
+        or targets != attackers
+    ):
+        raise RuntimeError(
+            f"Swallow attacker/target topology changed: attacker={attackers}, target={targets}"
+        )
+    attacker = next(iter(attackers))
+    target = next(iter(targets))
     if source[-1]["active"] or source[-1]["visualTaskCount"] or source[-1]["soundTaskCount"]:
         raise RuntimeError("first inactive frame retained animation work")
 
@@ -241,7 +264,13 @@ def main() -> None:
             "frameCount": len(source),
             "rgbSequenceSha256": rgb_digest.hexdigest(),
         },
-        "branch": {"stockpiles": 1, "animTurn": 1, "orbWaves": 1},
+        "branch": {
+            "stockpiles": anim_turn,
+            "animTurn": anim_turn,
+            "orbWaves": anim_turn,
+            "attackerBattler": attacker,
+            "targetBattler": target,
+        },
         "lifecycleCounts": lifecycle_counts,
         "audio": observed_audio,
         "tagPresence": tag_presence,
@@ -253,8 +282,14 @@ def main() -> None:
             "soundTaskCount": source[-1]["soundTaskCount"],
         },
         "attackerHpRange": {
-            "minimum": min(row["attackerHp"] for row in source),
-            "maximum": max(row["attackerHp"] for row in source),
+            "minimum": min(
+                row["battlerHp"]["player" if attacker == 0 else "opponent"]
+                for row in source
+            ),
+            "maximum": max(
+                row["battlerHp"]["player" if attacker == 0 else "opponent"]
+                for row in source
+            ),
         },
     }
     OUTPUT.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n")

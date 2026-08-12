@@ -1,0 +1,66 @@
+{
+  "branches": [
+    {
+      "fixture": "tools/compare/fixtures/swallow-player-pelipper-one-stockpile-checkpoint.json",
+      "freshReceiptSha256": [
+        "c863ac1beb362972f036b7747f973eda3f630f478cee4ef3565c967bc0c417cb",
+        "c863ac1beb362972f036b7747f973eda3f630f478cee4ef3565c967bc0c417cb"
+      ],
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-swallow-player-pelipper-one-stockpile.json",
+      "stockpiles": 1
+    },
+    {
+      "fixture": "tools/compare/fixtures/swallow-player-pelipper-two-stockpile-checkpoint.json",
+      "freshReceiptSha256": [
+        "d15231b88f93b930f63f46fbad6dbb3b2e79fbebb1e31b61da59a312f1659795",
+        "d15231b88f93b930f63f46fbad6dbb3b2e79fbebb1e31b61da59a312f1659795"
+      ],
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-swallow-player-pelipper-two-stockpile.json",
+      "stockpiles": 2
+    },
+    {
+      "fixture": "tools/compare/fixtures/swallow-player-pelipper-three-stockpile-checkpoint.json",
+      "freshReceiptSha256": [
+        "357fddee8a847764322b07fcbc8d0827500a37a33fcd8899e471b7cff6ae5427",
+        "357fddee8a847764322b07fcbc8d0827500a37a33fcd8899e471b7cff6ae5427"
+      ],
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-swallow-player-pelipper-three-stockpile.json",
+      "stockpiles": 3
+    },
+    {
+      "fixture": "tools/compare/fixtures/swallow-opponent-pelipper-one-stockpile-checkpoint.json",
+      "freshReceiptSha256": [
+        "09a04f0fba54d8b7b834ae5e4c8b0f264545bb0ef11841a9329e310c2bf5506a",
+        "09a04f0fba54d8b7b834ae5e4c8b0f264545bb0ef11841a9329e310c2bf5506a"
+      ],
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-swallow-opponent-pelipper-one-stockpile.json",
+      "stockpiles": 1
+    },
+    {
+      "fixture": "tools/compare/fixtures/swallow-opponent-pelipper-two-stockpile-checkpoint.json",
+      "freshReceiptSha256": [
+        "c546ad617e7c69aaa8f8a7a0b25a018eb79fd7084abc4ed22b22bf97323a1fbd",
+        "c546ad617e7c69aaa8f8a7a0b25a018eb79fd7084abc4ed22b22bf97323a1fbd"
+      ],
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-swallow-opponent-pelipper-two-stockpile.json",
+      "stockpiles": 2
+    },
+    {
+      "fixture": "tools/compare/fixtures/swallow-opponent-pelipper-three-stockpile-checkpoint.json",
+      "freshReceiptSha256": [
+        "9fb266c28577258e096948985527fb67eef35935b08e064082d4afc9b7c489a1",
+        "9fb266c28577258e096948985527fb67eef35935b08e064082d4afc9b7c489a1"
+      ],
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-swallow-opponent-pelipper-three-stockpile.json",
+      "stockpiles": 3
+    }
+  ],
+  "oracleProfile": "battle-scene-on",
+  "schema": "swallow-natural-evidence-matrix/v1"
+}
