@@ -1,3 +1,19 @@
+## 1174 — [supervisor, 2026-08-11] **`ply_note` inline prefix verified**
+
+- **State:** all **82/82** observed note-selector prefixes are source-exact
+  (**57 inline / 25 rhythm / 0 keysplit**). Complete MPlay remains **5 exact /
+  108 null**; #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated the expanded address-free receipt **5/5**
+  and reviewed its source, parameter, inline-tone, and retained-track-tone
+  fail-closed checks. Inline costs are **3×108**, **41×129**, and **13×146**
+  cycles; all post-selection bodies remain null.
+- **Next:** source-close one bounded observed post-selection note-body route or
+  the command decode/jump-table dispatcher. Preserve nulls for keysplit,
+  complete note callbacks, and all complete one-pass MPlay totals.
+- **Notes:** supervisor full `npm test` **971 files / 9,419 passed / 1
+  skipped**, build **651 modules**. Both lane branches are contained; no
+  unsupported barrier or gameplay/pixel/Rust change.
+
 ## 1166 — [supervisor, 2026-08-11] **BEND verified; Rust M5b scout folded**
 
 - **State:** `master` is green with BEND source-exact for **4/4** callbacks and

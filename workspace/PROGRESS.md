@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1177 — [MAIN worker, 2026-08-11] **`ply_note` CGB4 allocation prefix source-closed**
+
+- **State:** the smallest observed post-selection note family is source-exact
+  for **7/82** callbacks; complete MPlay remains **5 exact / 108 null**. #55
+  and `runFactoryConstructionClock` stay unwired; S8 remains closed at 33331.
+- **Did:** joined committed address-free note/source-state packets and frozen
+  dispatcher/mixer provenance. Type-12 selects CGB channel 4 for **0/3/4**
+  anchor/LILIANA/legal-varied callbacks; its 21-instruction prefix costs **62
+  cycles each / 434 total** and stops before mutable channel status.
+- **Next:** capture per-callback CGB channel state before extending this route,
+  or source-close another bounded post-selection prefix. Preserve all complete
+  callback, post-callback glue, one-pass total, and clock nulls.
+- **Notes:** focused **4/4** is green; smoke/typecheck/full/build pending final
+  gate. No probe, duration fit, pointer identity, unsupported barrier,
+  gameplay/pixel/Rust/#56 change.
+
 ## 1176 — [supervisor, 2026-08-11] **MPlay dispatcher verified**
 
 - **State:** command decode/running-status/jump-table dispatch is source-exact
@@ -38,19 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **375/375**, typecheck, full **972 files / 9,423 passed / 1 skipped**, and
   build **651 modules** are green. No oracle capture, duration fit, pointer
   identity, unsupported barrier, gameplay/pixel/Rust/#56 change.
-
-## 1174 — [supervisor, 2026-08-11] **`ply_note` inline prefix verified**
-
-- **State:** all **82/82** observed note-selector prefixes are source-exact
-  (**57 inline / 25 rhythm / 0 keysplit**). Complete MPlay remains **5 exact /
-  108 null**; #55 stays unwired and LUKAS remains **8/50**.
-- **Did:** independently regenerated the expanded address-free receipt **5/5**
-  and reviewed its source, parameter, inline-tone, and retained-track-tone
-  fail-closed checks. Inline costs are **3×108**, **41×129**, and **13×146**
-  cycles; all post-selection bodies remain null.
-- **Next:** source-close one bounded observed post-selection note-body route or
-  the command decode/jump-table dispatcher. Preserve nulls for keysplit,
-  complete note callbacks, and all complete one-pass MPlay totals.
-- **Notes:** supervisor full `npm test` **971 files / 9,419 passed / 1
-  skipped**, build **651 modules**. Both lane branches are contained; no
-  unsupported barrier or gameplay/pixel/Rust change.

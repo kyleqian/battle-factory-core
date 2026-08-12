@@ -1,0 +1,219 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v1",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "source": {
+    "source": {
+      "path": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1626-1655",
+      "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+    },
+    "compiledRegion": {
+      "symbol": "ply_note",
+      "start": "0x082dfdd4",
+      "endExclusive": "0x082dfe02",
+      "bytes": 46,
+      "compiledHalfwords": 23,
+      "executedHalfwords": 21,
+      "sha256": "b30d41be9e1eaac1d3dd495bbe936cfd7d24cab89ce772fa580ebdf4428f1088"
+    },
+    "timingClasses": {
+      "sequentialGamePakThumbHalfword": 2,
+      "takenPipelineRefillPremium": 6,
+      "iwramWordAccessPremium": 0,
+      "ewramAccessPremium": 2
+    }
+  },
+  "frozenInputs": {
+    "note": {
+      "anchor": "d71c40f5078db50508985b28eb0b36c1b9713ee889696ffe1af59ebcdf15fd01",
+      "liliana": "58031720e867e9bbb33311fb5577afc0621bdb5561aad49f6c7a2c841009e615",
+      "factory-varied": "789fabb54fae6102d3fb3a13d6958e44ab0aa8b4ac1d23da7dcfaf7e1617ce20"
+    },
+    "state": {
+      "anchor": "a3c7fb2baeee2cf253481086d77f9262ee8842c9595d4ff2e4a5cd2776d3fbc3",
+      "liliana": "24717d4e2861bc74948d23470de25e97d69b2a553962d25f303a6a48d75268d6",
+      "factory-varied": "54426be9e6af1a9d4bd945ef2276a9a0b58da9c2bfd185ec988029fa4f9f67c1"
+    },
+    "dispatch": "dea14f5904f32bc3a67fd073198447fbd75500b0b04b075feadc9dc1d18ffcfe",
+    "mixerEntryProvenance": "67c9ee1b70cebd44ea82bc8483f167b81473901a45074604f6a545ef892d7450"
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "ambiguousRows": 0,
+    "sixthPlayerIndex": 5
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4PrefixCallbacks": 7,
+    "byCase": {
+      "anchor": 0,
+      "liliana": 3,
+      "factory-varied": 4
+    },
+    "selectedToneTypes": [
+      12
+    ],
+    "selectedCgbChannelIndices": [
+      3
+    ],
+    "sourceCyclesPerCallback": 62,
+    "sourceCycles": 434,
+    "exactPostSelectionPrefixCallbacks": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "selector": "selectedToneType&7==4",
+      "route": "cgb-channel-4-allocation-prefix",
+      "selectedToneType": 12,
+      "selectedCgbChannelIndex": 3,
+      "effectivePriority": 0,
+      "executedThumbHalfwords": 21,
+      "takenPipelineRefills": 2,
+      "iwramWordReads": 2,
+      "iwramWordStores": 3,
+      "ewramByteReads": 3,
+      "ewramWordReads": 1,
+      "gamepakDataReads": 0,
+      "cycles": 62,
+      "completeNoteCallbackSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "selector": "selectedToneType&7==4",
+      "route": "cgb-channel-4-allocation-prefix",
+      "selectedToneType": 12,
+      "selectedCgbChannelIndex": 3,
+      "effectivePriority": 0,
+      "executedThumbHalfwords": 21,
+      "takenPipelineRefills": 2,
+      "iwramWordReads": 2,
+      "iwramWordStores": 3,
+      "ewramByteReads": 3,
+      "ewramWordReads": 1,
+      "gamepakDataReads": 0,
+      "cycles": 62,
+      "completeNoteCallbackSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "selector": "selectedToneType&7==4",
+      "route": "cgb-channel-4-allocation-prefix",
+      "selectedToneType": 12,
+      "selectedCgbChannelIndex": 3,
+      "effectivePriority": 0,
+      "executedThumbHalfwords": 21,
+      "takenPipelineRefills": 2,
+      "iwramWordReads": 2,
+      "iwramWordStores": 3,
+      "ewramByteReads": 3,
+      "ewramWordReads": 1,
+      "gamepakDataReads": 0,
+      "cycles": 62,
+      "completeNoteCallbackSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "selector": "selectedToneType&7==4",
+      "route": "cgb-channel-4-allocation-prefix",
+      "selectedToneType": 12,
+      "selectedCgbChannelIndex": 3,
+      "effectivePriority": 0,
+      "executedThumbHalfwords": 21,
+      "takenPipelineRefills": 2,
+      "iwramWordReads": 2,
+      "iwramWordStores": 3,
+      "ewramByteReads": 3,
+      "ewramWordReads": 1,
+      "gamepakDataReads": 0,
+      "cycles": 62,
+      "completeNoteCallbackSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "selector": "selectedToneType&7==4",
+      "route": "cgb-channel-4-allocation-prefix",
+      "selectedToneType": 12,
+      "selectedCgbChannelIndex": 3,
+      "effectivePriority": 0,
+      "executedThumbHalfwords": 21,
+      "takenPipelineRefills": 2,
+      "iwramWordReads": 2,
+      "iwramWordStores": 3,
+      "ewramByteReads": 3,
+      "ewramWordReads": 1,
+      "gamepakDataReads": 0,
+      "cycles": 62,
+      "completeNoteCallbackSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "selector": "selectedToneType&7==4",
+      "route": "cgb-channel-4-allocation-prefix",
+      "selectedToneType": 12,
+      "selectedCgbChannelIndex": 3,
+      "effectivePriority": 0,
+      "executedThumbHalfwords": 21,
+      "takenPipelineRefills": 2,
+      "iwramWordReads": 2,
+      "iwramWordStores": 3,
+      "ewramByteReads": 3,
+      "ewramWordReads": 1,
+      "gamepakDataReads": 0,
+      "cycles": 62,
+      "completeNoteCallbackSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "selector": "selectedToneType&7==4",
+      "route": "cgb-channel-4-allocation-prefix",
+      "selectedToneType": 12,
+      "selectedCgbChannelIndex": 3,
+      "effectivePriority": 0,
+      "executedThumbHalfwords": 21,
+      "takenPipelineRefills": 2,
+      "iwramWordReads": 2,
+      "iwramWordStores": 3,
+      "ewramByteReads": 3,
+      "ewramWordReads": 1,
+      "gamepakDataReads": 0,
+      "cycles": 62,
+      "completeNoteCallbackSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "Seven type-12 callbacks are source-exact from the common tone-selection join through CGB channel-4 pointer selection, before the first mutable CgbChannel status read.",
+    "selectorProof": "The note packet supplies selected tone type 12; source-state v3 supplies player/track priority 0 and four normalized CGB channels; exact dispatch proves no intervening ply_prio callback.",
+    "remainingDiscriminator": "All other post-selection routes, the CGB status/priority body, every complete note callback, post-callback MPlay glue, all complete one-pass MPlay totals, and the construction clock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "mixerEntryBoundary": {
+    "frozenClassifiedTargets": 13,
+    "changed": false,
+    "noteBodyCostLicensedByFinalTarget": false
+  },
+  "verdict": "The smallest observed post-selection family is 7/82 type-12 CGB-channel-4 prefixes at 62 cycles each (434 total); no complete note cost or construction-clock wiring is licensed."
+}

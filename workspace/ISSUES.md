@@ -1889,6 +1889,28 @@ duration, runtime pointer identity, service cost, unsupported barrier, or
 `runFactoryConstructionClock` wiring landed. Evidence:
 `docs/issue55-m4a-dispatch-v1.md`.
 
+**2026-08-11 post-selection CGB-channel-4 allocation-prefix closure:** the
+committed address-free note packets join source-state v3 for all **113/113**
+rows; frozen exact dispatcher evidence proves no intervening `ply_prio`
+callback, and mixer-entry provenance remains unchanged. The smallest observed
+post-selection family is **7/82** callbacks (**0** anchor / **3** LILIANA /
+**4** legal-varied): selected tone type **12** takes `type & 7 == 4`, choosing
+CGB channel index 3.
+
+The exact `_081DDB9C`-through-channel-pointer prefix executes **21** Thumb
+halfwords, **2** taken refills, **2 IWRAM word reads + 3 stores**, **3 EWRAM
+byte reads + 1 word read**, and no GamePak data reads: **62 cycles each / 434
+total**. Player/track priorities are both zero and the normalized CGB array has
+four channels. Source/ROM/input/provenance mutations fail closed.
+
+Closure stops before the first mutable `CgbChannel.statusFlags` read because
+the committed packets do not snapshot that state per callback. The other
+**75** post-selection callbacks, the CGB status/priority body, all **82**
+complete note costs, keysplit, post-callback glue, all complete one-pass MPlay
+totals (**5 exact / 108 null**), service cost, and
+`runFactoryConstructionClock` remain null. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
