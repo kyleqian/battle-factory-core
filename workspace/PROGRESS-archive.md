@@ -41830,3 +41830,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   green. Commits `f70f0a9c` and `754cb27e`; no production src, gameplay,
   renderer, animation, Rust, ROADMAP, canonical Battle-2, or unsupported-
   barrier change.
+
+## 1184 — [supervisor, 2026-08-12] **CGB4 helper verified; animation and Rust lanes folded**
+
+- **State:** #55 has **1,969 known component cycles** for the observed CGB4
+  family, but its contiguous source-exact prefix remains **1,413** cycles for
+  **7/82** callbacks. Complete MPlay stays **5 exact / 108 null** and the
+  construction clock remains unwired.
+- **Did:** corrected the worker receipt so the caller BL/helper prologue gap
+  cannot masquerade as a contiguous prefix (`892ac754`). Folded Meteor Mash's
+  target compositor through `470cc12b`, Rust M5c's Factory-AI WASM adapter
+  through `dc02abcc`, and the M5d CheckViability scout through `efd083b6`.
+- **Next:** source-close the exact CGB4 caller-BL/helper-prologue gap, stopping
+  at a coherent join. Keep later allocation fields, unobserved helper routes,
+  the other 75 note callbacks, complete note/glue/MPlay totals, service,
+  arbitration, and construction-clock wiring null.
+- **Notes:** union full **981 files / 9,542 passed / 1 skipped**, build **653
+  modules**. Rust is **335/335**, fmt/clippy clean; rebuilt WASM is **138,304
+  bytes** (`f9da85e0…`) and forced parity is **757/757**. Post-engine-fold
+  soaks are vanilla **20/20** and full **60/60**, zero crashes/hangs. Both
+  lane branches are contained; no unsupported barrier or canonical Battle-2
+  extension.
