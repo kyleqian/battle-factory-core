@@ -93,6 +93,8 @@ def main() -> None:
             "y": s16(base + 0x22),
             "x2": s16(base + 0x24),
             "y2": s16(base + 0x26),
+            "subpriority": u8(base + 0x2B),
+            "invisible": (u8(base + 0x3E) >> 2) & 1,
             "matrixNum": matrix_num,
             "matrix": [s16(matrix + offset) for offset in (0, 2, 4, 6)],
             "data": [s16(base + 0x2e + index * 2) for index in range(8)],
@@ -232,6 +234,30 @@ def main() -> None:
         "templates": sorted({sprite["template"]["symbol"] for row in source for sprite in row["sprites"] if sprite["template"]["symbol"]}),
         "callbacks": sorted({sprite["callback"]["symbol"] for row in source for sprite in row["sprites"] if sprite["callback"]["symbol"]}),
     }
+    def starts(template: str) -> int:
+        count, prior = 0, set()
+        for row in source:
+            current = {
+                item["slot"] for item in row["sprites"]
+                if item["template"]["symbol"] == template
+            }
+            count += len(current - prior)
+            prior = current
+        return count
+
+    lifecycle = {
+        "meteorMashStars": starts("gMeteorMashStarSpriteTemplate"),
+        "miniTwinklingStars": starts("gMiniTwinklingStarSpriteTemplate"),
+        "spinningHands": starts("gSpinningHandOrFootSpriteTemplate"),
+        "basicHitsplats": starts("gBasicHitSplatSpriteTemplate"),
+    }
+    if lifecycle != {
+        "meteorMashStars": 3,
+        "miniTwinklingStars": 48,
+        "spinningHands": 1,
+        "basicHitsplats": 1,
+    }:
+        raise RuntimeError(f"Meteor Mash lifecycle changed: {lifecycle}")
     required = {"AnimTask_ShakeMon2_Step", "AnimMeteorMashStar_Step", "AnimSpinningKickOrPunchFinish"}
     if not required <= set(topology["tasks"]) | set(topology["callbacks"]):
         raise RuntimeError(f"Meteor Mash topology changed: {topology}")
@@ -245,6 +271,7 @@ def main() -> None:
         },
         "sourceSymbols": {"Move_METEOR_MASH": start, "Move_REVENGE": end},
         "topology": topology,
+        "lifecycle": lifecycle,
         "frames": source,
     }
     OUTPUT.write_text(json.dumps(result, separators=(",", ":")) + "\n")
