@@ -42509,3 +42509,22 @@ git; the current live ledger keeps the three load-bearing entries only.
   1 skipped**, and build **653 modules** are green. No `src/**`, ratchet,
   unsupported-barrier, presentation/animation/Rust, or canonical Battle-2
   change.
+
+## 1217 — [supervisor, 2026-08-12] **CGB4 v24 independently verified**
+
+- **State:** #55 retains the source-exact **5,740-cycle** aggregate prefix
+  through the three selected `_081DD9C4` two-load successors, stopping before
+  `_081DD9C8` reads the first track's flags. Both persistent lane tips remain
+  contained and construction-clock wiring remains null.
+- **Did:** audited the exact four-byte ROM region, source/storage offsets,
+  IWRAM access classes, digest-only three-row join, and 4-cycle per-row model.
+  Confirmed v23's hashes are frozen, v24 accepts no runtime field, all actual
+  track operands remain excluded/null, and no production or barrier changed.
+- **Next:** capture only the first-track flags discriminator needed to price
+  `_081DD9C8` through its first `MPT_FLG_EXIST` decision for these same three
+  rows. Stop before the `MPT_FLG_VOLCHG | MPT_FLG_PITCHG` test and retain
+  track identity/count/pointer, later loop work, and construction clock null.
+- **Notes:** v24 evidence/doc `288bb342…` / `be4b6a31…`; focused v23/v24
+  **12/12**, smoke **375/375**, typecheck, npm **1,008 files / 9,664 passed /
+  1 skipped**, and build **655 modules** are green. No ratchet, unsupported-
+  barrier, animation/Rust, presentation, or canonical Battle-2 change.
