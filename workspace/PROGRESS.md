@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1211 — [supervisor, 2026-08-12] **CGB4 v21 and persistent-lane union verified**
+
+- **State:** #55 retains the source-exact **5,674-cycle** aggregate prefix
+  through the three clear-row clock-exit decisions. Fissure dense evidence
+  and Rust's scored Factory-AI chooser are folded; both persistent lane tips
+  are contained.
+- **Did:** audited v21's twice-fresh digest-only packets, exact 10-byte ROM
+  body, five-halfword count, IWRAM accesses, and three taken refills. Added an
+  explicit fail-closed source/ELF pin for the sixth player's
+  `gPokemonCryMusicPlayers` IWRAM storage. Folded animation through
+  `2e976eed` and Rust through `0740592c`, then verified the union.
+- **Next:** source-close one bounded selected successor, preferably the fixed
+  nonzero-r4 status/tempo prefix beginning at `_081DD9B6`. Keep the four
+  EXIST-set rows, tempo discriminator/body beyond the new boundary, complete
+  MPlay, service/arbitration, and construction-clock wiring null unless
+  independently proved.
+- **Notes:** v21 evidence/doc `769bb40e…` / `29733308…`; focused v21 **5/5**.
+  Post-fold Rust **676/676**; WASM **253,842 bytes** (`86b488d6…`), forced
+  parity **766/766**; union npm **1,003 files / 9,637 passed / 1 skipped** and
+  build **653 modules**. No `src/**`, ratchet, unsupported-barrier, or
+  canonical Battle-2 change; no soak trigger.
+
 ## 1210 — [MAIN worker, 2026-08-12] **CGB4 v21 clock-exit r4 decision source-closed**
 
 - **State:** #55 has a source-exact **5,674-cycle** aggregate prefix through
@@ -46,25 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   parity **766/766**; union npm **1,001 files / 9,628 passed / 1 skipped** and
   build **653 modules**. No `src/**`, ratchet, unsupported-barrier, or
   canonical Battle-2 change; no soak trigger.
-
-## 1208 — [MAIN worker, 2026-08-12] **CGB4 v20 clear-successor second decrement source-closed**
-
-- **State:** #55 has a source-exact **5,626-cycle** aggregate prefix through
-  `_081DD998: subs r6, 0x1; ble _081DD9A4` for only the three frozen
-  EXIST-clear CGB4 rows. Complete MPlay remains **5 exact / 108 null** and
-  the construction clock is unwired.
-- **Did:** v20 preserves/regenerates frozen v19 evidence/report/packets
-  byte-for-byte and joins only `sourceStateDigest`; it reads no oracle data.
-  Frozen clear fields prove `r6 2→1`; exact v18/v19 routes do not write r6,
-  so the source-closed second decrement yields zero and takes the branch:
-  **10 × 3 = 30** cycles. The four EXIST-set rows retain null v20 cost before
-  `_081DD886`; every clear row stops before `_081DD9A4`'s first instruction.
-- **Next:** retain the exit body/clock, identity/index/count, later loop work,
-  v17's unobserved exit, other callbacks, complete MPlay, service/arbitration,
-  and clock wiring as null; any next #55 slice must be separately source- or
-  capture-proven.
-- **Notes:** v20 evidence/doc `ba5fa1b0…` / `741d8ab6…`; explicit v17/v18/v19
-  branch-halfword cross-check is pinned. Red-first under-price **8** failed;
-  focused v19/v20 **10/10**, smoke **375/375**, typecheck, one final
-  `npm test`, and the production build are green. No production, ratchet,
-  presentation/animation/Rust, or canonical Battle-2 change.
