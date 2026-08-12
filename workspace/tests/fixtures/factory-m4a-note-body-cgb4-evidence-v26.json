@@ -1,0 +1,178 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v26",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1368-1371",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "musicPlayerTrack": {
+        "volumePitchMask": {
+          "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+          "lines": "265-270",
+          "volumeChange": {
+            "name": "MPT_FLG_VOLCHG",
+            "value": "0x03"
+          },
+          "pitchChange": {
+            "name": "MPT_FLG_PITCHG",
+            "value": "0x0c"
+          },
+          "orMask": "0x0f",
+          "runtimeValue": null,
+          "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+        }
+      }
+    },
+    "elf": {
+      "containingEntry": "0x082dfc00",
+      "instructionStart": "0x082dfc08",
+      "endExclusive": "0x082dfc0e",
+      "takenSuccessor": "0x082dfc9a",
+      "nextSequentialInstruction": "0x082dfc0e",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "movs r1, MPT_FLG_VOLCHG | MPT_FLG_PITCHG; tst r1, r0; beq _081DDA62",
+        "start": "0x082dfc08",
+        "endExclusive": "0x082dfc0e",
+        "bytes": 6,
+        "bytesHex": "0f 21 01 42 45 d0",
+        "sha256": "8f6cc54a0a1866eaa559291e5fcc4103996f67168b30353a0eb15f44ed9c3fd4"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "memoryAccesses": 0,
+      "dataAccessPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "volPitchMaskClearModel": "movs; tst; taken beq = 3 halfwords * 2 + one 6-cycle refill = 12",
+      "volPitchMaskNonzeroModel": "movs; tst; non-taken beq = 3 halfwords * 2 + zero refill = 6"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV25EvidenceSha256": "26a2f0c9dfb5442f95c5813cf0f359c3e01ca389ad3f415118b480889a0900ab",
+    "acceptedV25DocSha256": "4bd41b232aa24ec2b309aaac30bf07573abf73a614c62d44843a0fca603282bf",
+    "acceptedV25PacketSha256": {
+      "anchor": "3ac4e4a8797b7e459c15019e7f847dce592643f604cdc437e74074dfc8d6d1a7",
+      "liliana": "ce74203999ee3d5492f060ef879483403002c06ab501776e7063b0fa1421d4da",
+      "factory-varied": "bd289cb97eaafe49b63ce41c9b1546037b899394d7cdaf25998efcc6427646b5"
+    },
+    "v25EvidenceAndReportRegenerateByteForByte": true,
+    "v25EvidenceReportAndPacketsRetainedByteForByte": true
+  },
+  "capture": {
+    "boundary": "source-only _081DD9D0 volume/pitch-mask decision through beq; no new runtime capture",
+    "scalars": [],
+    "excluded": [
+      "new runtime or oracle fields",
+      "track pointer",
+      "runtime address",
+      "track count",
+      "track index",
+      "track identity",
+      "channel",
+      "frame",
+      "duration",
+      "condition flags",
+      "wider state",
+      "firstTrackFlags serialization",
+      "mov r9, r2 and later body",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV25SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "sourceOnly": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v25-selected-row",
+      "unsupported-runtime-field",
+      "unexpected-frozen-v25-flags",
+      "unexpected-observed-route"
+    ]
+  },
+  "coverage": {
+    "frozenV25SelectedRows": 3,
+    "sourceOnlyVolPitchDecisionRows": 3,
+    "frozenFirstTrackFlagsValues": [
+      128
+    ],
+    "volPitchMask": "0x0f",
+    "volPitchMaskClearRows": 3,
+    "volPitchMaskNonzeroRows": 0,
+    "postV25FirstTrackVolPitchDecisionSourceCycles": 36,
+    "acceptedContiguousPrefixThroughFirstTrackExistDecisionSourceCycles": 5764,
+    "contiguousPrefixThroughFirstTrackVolPitchDecisionSourceCycles": 5800,
+    "sequentialThumbHalfwords": 9,
+    "memoryAccesses": 0,
+    "dataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 3,
+    "failClosedUnobservedVolPitchMaskNonzeroSourceCycles": 6,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "volPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV25FirstTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughFirstTrackVolPitchDecisionSourceCycles": 828,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV26Instruction": "_081DDA62: first instruction"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "volPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV25FirstTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughFirstTrackVolPitchDecisionSourceCycles": 828,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV26Instruction": "_081DDA62: first instruction"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "volPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV25FirstTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughFirstTrackVolPitchDecisionSourceCycles": 828,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV26Instruction": "_081DDA62: first instruction"
+    }
+  ],
+  "containment": {
+    "frozenV25ArtifactsReadOnly": true,
+    "frozenV25ArtifactsAreNotProductionImports": true,
+    "v25PacketsAreNotProductionImports": true,
+    "v26RuntimeCaptureCount": 0,
+    "trackPointer": null,
+    "runtimeAddress": null,
+    "trackCount": null,
+    "trackIndex": null,
+    "trackIdentity": null,
+    "channel": null,
+    "frame": null,
+    "duration": null,
+    "conditionFlags": null,
+    "widerState": null,
+    "firstTrackFlags": null,
+    "laterBody": null,
+    "serviceCost": null,
+    "constructionClock": null,
+    "controller": null,
+    "presentation": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Source-only v26 freezes v25 evidence, report, and all three packets byte-for-byte, then joins only the same three sourceStateDigest rows. Frozen firstTrackFlags is 0x80 for every row; source-defined MPT_FLG_VOLCHG|MPT_FLG_PITCHG is 0x0f, so each observed mask test is clear and takes beq _081DDA62. Source/ELF/exact-ROM price movs; tst; taken beq at twelve cycles per row, advancing the aggregate prefix from 5764 to 5800 and stopping before _081DDA62's first instruction. The mask-nonzero route is source-priced at six cycles but is fail-closed and not claimed observed."
+}
