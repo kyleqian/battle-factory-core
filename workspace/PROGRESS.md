@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1217 — [supervisor, 2026-08-12] **CGB4 v24 independently verified**
+
+- **State:** #55 retains the source-exact **5,740-cycle** aggregate prefix
+  through the three selected `_081DD9C4` two-load successors, stopping before
+  `_081DD9C8` reads the first track's flags. Both persistent lane tips remain
+  contained and construction-clock wiring remains null.
+- **Did:** audited the exact four-byte ROM region, source/storage offsets,
+  IWRAM access classes, digest-only three-row join, and 4-cycle per-row model.
+  Confirmed v23's hashes are frozen, v24 accepts no runtime field, all actual
+  track operands remain excluded/null, and no production or barrier changed.
+- **Next:** capture only the first-track flags discriminator needed to price
+  `_081DD9C8` through its first `MPT_FLG_EXIST` decision for these same three
+  rows. Stop before the `MPT_FLG_VOLCHG | MPT_FLG_PITCHG` test and retain
+  track identity/count/pointer, later loop work, and construction clock null.
+- **Notes:** v24 evidence/doc `288bb342…` / `be4b6a31…`; focused v23/v24
+  **12/12**, smoke **375/375**, typecheck, npm **1,008 files / 9,664 passed /
+  1 skipped**, and build **655 modules** are green. No ratchet, unsupported-
+  barrier, animation/Rust, presentation, or canonical Battle-2 change.
+
 ## 1216 — [MAIN worker, 2026-08-12] **CGB4 v24 source-only successor prefix**
 
 - **State:** #55's selected three-row source-exact prefix reaches **5,740**
@@ -43,25 +62,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   files / 772 passed**; union npm **1,007 files / 9,659 passed / 1 skipped**
   and build **655 modules**. No ratchet, unsupported-barrier, or canonical
   Battle-2 change; no soak trigger.
-
-## 1214 — [MAIN worker, 2026-08-12] **CGB4 v23 post-subs branch closure**
-
-- **State:** #55 reaches a source-exact **5,728-cycle** aggregate prefix for
-  only the three frozen `_081DD9B6` rows, stopping before `_081DD9C4`'s first
-  `ldrb`. Complete MPlay remains **5 exact / 108 null** and the construction
-  clock stays unwired.
-- **Did:** captured twice-fresh, Battle Scene OFF, address-free v23 packets
-  keyed only by frozen `sourceStateDigest`; every selected row has only
-  `subtractionResult=72`. Frozen v22 evidence/report and every v21 packet
-  byte/hash are pinned; source/ELF/ROM close `strh/cmp/bcc` at **12 × 3 = 36**
-  cycles. The source-general non-taken route includes its unconditional `b`
-  at **14** cycles but is not observed or body-expanded.
-- **Next:** any #55 continuation must be separately scoped from
-  `_081DD9C4` or `_081DD874`; preserve the four EXIST-set rows, original
-  tempoC, successor bodies, service/arbitration, and construction-clock wiring
-  as null unless independently evidenced.
-- **Notes:** fresh packet hashes `fc84cabe…` / `f506f1e9…` / `9019c3fa…`;
-  evidence/doc `4ae623c8…` / `1c28507b…`; focused v22/v23 **12/12**,
-  smoke **375/375**, typecheck, exactly one post-change `npm test`, and build
-  are green. No `src/**`, ratchet, unsupported-barrier, animation/Rust,
-  presentation, or canonical Battle-2 change.

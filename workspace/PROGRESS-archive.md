@@ -1852,6 +1852,28 @@
 
 ---
 
+## 1214 — [MAIN worker, 2026-08-12] **CGB4 v23 post-subs branch closure**
+
+- **State:** #55 reaches a source-exact **5,728-cycle** aggregate prefix for
+  only the three frozen `_081DD9B6` rows, stopping before `_081DD9C4`'s first
+  `ldrb`. Complete MPlay remains **5 exact / 108 null** and the construction
+  clock stays unwired.
+- **Did:** captured twice-fresh, Battle Scene OFF, address-free v23 packets
+  keyed only by frozen `sourceStateDigest`; every selected row has only
+  `subtractionResult=72`. Frozen v22 evidence/report and every v21 packet
+  byte/hash are pinned; source/ELF/ROM close `strh/cmp/bcc` at **12 × 3 = 36**
+  cycles. The source-general non-taken route includes its unconditional `b`
+  at **14** cycles but is not observed or body-expanded.
+- **Next:** any #55 continuation must be separately scoped from
+  `_081DD9C4` or `_081DD874`; preserve the four EXIST-set rows, original
+  tempoC, successor bodies, service/arbitration, and construction-clock wiring
+  as null unless independently evidenced.
+- **Notes:** fresh packet hashes `fc84cabe…` / `f506f1e9…` / `9019c3fa…`;
+  evidence/doc `4ae623c8…` / `1c28507b…`; focused v22/v23 **12/12**,
+  smoke **375/375**, typecheck, exactly one post-change `npm test`, and build
+  are green. No `src/**`, ratchet, unsupported-barrier, animation/Rust,
+  presentation, or canonical Battle-2 change.
+
 ## 1212 — [MAIN worker, 2026-08-12] **CGB4 v22 r4-taken successor prefix source-closed**
 
 - **State:** #55 reaches a source-exact **5,692-cycle** aggregate prefix for
