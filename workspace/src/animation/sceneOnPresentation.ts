@@ -255,6 +255,10 @@ import {
   type BlazeKickOrderedSprite,
   type BlazeKickPaletteState,
 } from "./blazeKick.ts";
+import {
+  meteorMashAtAge,
+  type MeteorMashState,
+} from "./meteorMash.ts";
 import { flameWheelAtAge, type FlameWheelState } from "./flameWheel.ts";
 import {
   bindAnimationAtAge,
@@ -937,7 +941,8 @@ export interface SceneOnPresentationBattler {
     | "FEAROW"
     | "HOPPIP"
     | "DRAGONAIR"
-    | "GLIGAR";
+    | "GLIGAR"
+    | "METANG";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1032,6 +1037,14 @@ export interface SceneOnBlazeKickConfig {
   readonly animationProfile: Readonly<BlazeKickGeometry>;
   readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
   readonly animationAgeOffset?: number;
+}
+
+/** Narrow Scene-ON seam for Meteor Mash's source-relative presentation body. */
+export interface SceneOnMeteorMashConfig {
+  readonly move: "METEOR_MASH";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
 }
 
 export interface SceneOnFlameWheelConfig {
@@ -2682,6 +2695,7 @@ export type SceneOnMoveConfig =
   | SceneOnDragonBreathConfig
   | SceneOnFlamethrowerConfig
   | SceneOnBlazeKickConfig
+  | SceneOnMeteorMashConfig
   | SceneOnFlameWheelConfig
   | SceneOnBindConfig
   | SceneOnWrapConfig
@@ -3978,6 +3992,12 @@ export interface SceneOnBlazeKickView {
   readonly animation: BlazeKickAnimationState;
   readonly sprites: readonly BlazeKickOrderedSprite[];
   readonly palette: BlazeKickPaletteState;
+}
+
+export interface SceneOnMeteorMashView extends MeteorMashState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnFlameWheelView extends FlameWheelState {
@@ -6878,6 +6898,24 @@ export function sceneOnFurySwipesView(
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+/** `age` spans Move_METEOR_MASH from its first source pointer row to cleanup. */
+export function sceneOnMeteorMashView(
+  state: SceneOnMovePresentationState<SceneOnMeteorMashConfig>,
+): SceneOnMeteorMashView {
+  if (state.config.move !== "METEOR_MASH") {
+    throw new Error(`expected METEOR_MASH presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...meteorMashAtAge(state.age, {
+      targetSide: state.config.target.geometry.side,
+      targetCenter: state.config.target.geometry.animationCenter,
     }),
   };
 }
