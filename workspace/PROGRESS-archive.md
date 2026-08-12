@@ -41670,3 +41670,20 @@ git; the current live ledger keeps the three load-bearing entries only.
   components span **456–2160** cycles (**84** totals). No new oracle capture,
   duration fit, pointer identity, unsupported barrier, construction-clock
   wiring, gameplay, renderer, pixel, #56, or Rust change.
+## 1175 — [MAIN worker, 2026-08-11] **#55 MPlay dispatcher source-closed**
+
+- **State:** command decode/running-status/jump-table dispatch is source-exact
+  for **218/218** commands and **108/108** one-pass rows. Complete MPlay remains
+  **5 exact / 108 null**; #55 and `runFactoryConstructionClock` stay unwired.
+- **Did:** joined exact execution, bounded command reads, callback tables,
+  callback-family census, and note census: **99 waits / 82 notes / 37 table
+  callbacks**, six routes at **63–93 cycles**, **17,066** cycles total. Pinned
+  **4,069** Thumb halfwords / **792** refills / **533** EWRAM words / **99**
+  ROM literals / **317** GamePak bytes; source/state/target mutations fail closed.
+- **Next:** source-close one bounded post-selection `ply_note` body subroute.
+  Preserve nulls for keysplit, complete notes, post-callback glue, all complete
+  one-pass MPlay totals, and the construction clock.
+- **Notes:** implementation commit `8f72b6a6`; focused **15/15**, smoke
+  **375/375**, typecheck, full **972 files / 9,423 passed / 1 skipped**, and
+  build **651 modules** are green. No oracle capture, duration fit, pointer
+  identity, unsupported barrier, gameplay/pixel/Rust/#56 change.

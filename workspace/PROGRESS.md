@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1178 — [supervisor, 2026-08-11] **CGB4 prefix verified; Meteor Mash checkpoint folded**
+
+- **State:** the smallest observed post-selection note family is source-exact
+  for **7/82** callbacks; complete MPlay remains **5 exact / 108 null**. #55
+  and `runFactoryConstructionClock` stay unwired; S8 remains closed at 33331.
+- **Did:** independently regenerated the CGB4 receipt byte-identically and
+  reran its dependent note group, then folded animation-main's presentation-
+  only Meteor Mash checkpoint and ledger through merge `d7d9c089`. Rust-main
+  is fully contained.
+- **Next:** capture per-callback mutable CGB channel state before extending the
+  remaining 75 post-selection note routes. Preserve complete callback,
+  post-callback glue, one-pass-total, and construction-clock nulls.
+- **Notes:** worker full gate **973 files / 9,427 passed / 1 skipped**, folded
+  CGB4/Meteor-Mash focus **7/7**, union smoke **375/375**, and union build
+  **653 modules** are green. The final union
+  run passed **856/975 files,
+  7,964 assertions / 1 skipped**; the other 119 files hit collection-only
+  worker-fetch timeouts while a separate animation full-suite pool restarted
+  concurrently (zero assertion failures). Both lane branches are contained;
+  OFF oracle is healthy. No unsupported barrier or main gameplay/pixel change.
+
 ## 1177 — [MAIN worker, 2026-08-11] **`ply_note` CGB4 allocation prefix source-closed**
 
 - **State:** the smallest observed post-selection note family is source-exact
@@ -37,21 +58,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** worker full `npm test` **972 files / 9,423 passed / 1 skipped**,
   smoke **375/375**, typecheck, build **651 modules**. Both lane branches are
   contained; no unsupported barrier or gameplay/pixel/Rust change.
-
-## 1175 — [MAIN worker, 2026-08-11] **#55 MPlay dispatcher source-closed**
-
-- **State:** command decode/running-status/jump-table dispatch is source-exact
-  for **218/218** commands and **108/108** one-pass rows. Complete MPlay remains
-  **5 exact / 108 null**; #55 and `runFactoryConstructionClock` stay unwired.
-- **Did:** joined exact execution, bounded command reads, callback tables,
-  callback-family census, and note census: **99 waits / 82 notes / 37 table
-  callbacks**, six routes at **63–93 cycles**, **17,066** cycles total. Pinned
-  **4,069** Thumb halfwords / **792** refills / **533** EWRAM words / **99**
-  ROM literals / **317** GamePak bytes; source/state/target mutations fail closed.
-- **Next:** source-close one bounded post-selection `ply_note` body subroute.
-  Preserve nulls for keysplit, complete notes, post-callback glue, all complete
-  one-pass MPlay totals, and the construction clock.
-- **Notes:** implementation commit `8f72b6a6`; focused **15/15**, smoke
-  **375/375**, typecheck, full **972 files / 9,423 passed / 1 skipped**, and
-  build **651 modules** are green. No oracle capture, duration fit, pointer
-  identity, unsupported barrier, gameplay/pixel/Rust/#56 change.
