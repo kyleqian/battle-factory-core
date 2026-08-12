@@ -42162,3 +42162,22 @@ git; the current live ledger keeps the three load-bearing entries only.
   1 skipped**, and build **653 modules** are green. No duration fit, runtime
   pointer/address identity, production import, unsupported barrier, animation/
   Rust change, or canonical Battle-2 branch.
+## 1200 — [MAIN worker, 2026-08-12] **CGB4 v14 lfoSpeed decision source-closed**
+
+- **State:** #55 is source-exact for **5,254 aggregate cycles** through the
+  immediate post-note `lfoSpeed` decision across the frozen **7/82** CGB4
+  callbacks: v13 **5,212** plus v14 **42** cycles. Complete MPlay remains
+  **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** twice-fresh address-free packets capture only `lfoSpeed` on the same
+  sourceStateDigest join: all seven are **44**. Source/ELF/ROM close its IWRAM
+  load, compare, and non-taken branch for **6 cycles each**; frozen v13 is
+  byte-identical and the first later scalar remains unobserved.
+- **Next:** stop before `MusicPlayerTrack.mod`; retain later track-loop work,
+  other 75 note callbacks, complete MPlay, service/arbitration, and
+  construction-clock wiring null.
+- **Notes:** packet hashes `04188570…` / `a641b339…` / `e2b8cf01…`; evidence/
+  doc `82138617…` / `189c21ac…`; red-first followed by focused v1-v14
+  **57/57**, smoke **8 files / 375 passed**, typecheck, exactly one full suite
+  **991 files / 9,584 passed / 1 skipped**, and build **653 modules** are
+  green. No runtime pointer/address identity, production import, unsupported
+  barrier, animation/Rust change, or canonical Battle-2 branch.

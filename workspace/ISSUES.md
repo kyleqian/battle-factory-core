@@ -2153,7 +2153,7 @@ row / 84 aggregate**, advancing the source-exact contiguous prefix from
 **5,254** to **5,338 cycles**. Evidence is
 `docs/issue55-m4a-note-body-cgb4-v15.md` and
 `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v15.json` (SHA256
-`9fb35b54…`); the packet repeat hashes are equal by construction and the
+`28ec38e9…`); the packet repeat hashes are equal by construction and the
 Tier-1 report guard verifies the v14 prefix byte-for-byte.
 
 Closure stops before the immediately subsequent IWRAM
@@ -2162,6 +2162,25 @@ pointer/address identity, frame/duration, service/arbitration,
 construction-clock wiring, unsupported barrier, animation/Rust work, or
 canonical Battle-2 extension landed. The other 75 callbacks and complete MPlay
 totals (**5 exact / 108 null**) remain null.
+
+**2026-08-12 CGB4 v16 track-loop exit register-move closure:** source-only
+v16 preserves frozen v15 byte-for-byte and joins only its same seven
+`sourceStateDigest` rows (**0 anchor / 3 LILIANA / 4 legal-varied**). It
+captures no oracle data and neither reads nor infers `r6` or a track count.
+
+Source/ELF/ROM guards close exactly the four bytes
+`0x082dfbcc..0x082dfbd0`: `mov r3, sl` then `mov r4, fp` at `_081DD994`.
+The pair is **2 sequential Thumb halfwords = 4 cycles per row / 28
+aggregate**, advancing the contiguous prefix from **5,338** to **5,366
+cycles**. Evidence is `docs/issue55-m4a-note-body-cgb4-v16.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v16.json` (SHA256
+`f9d539ac…`); the Tier-1 report guard regenerates frozen v15 byte-for-byte.
+
+Closure stops before `subs r6, 0x1`. The decrement, loop continuation/exit,
+later track-loop work, other 75 callbacks, complete MPlay totals (**5 exact /
+108 null**), service/arbitration, and construction-clock wiring remain null.
+No production, unsupported-barrier, animation/Rust, or canonical Battle-2
+change landed.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
