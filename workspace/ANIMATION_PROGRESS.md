@@ -1,3 +1,11 @@
+# MOVE_CONFUSE_RAY source/staging checkpoint — dense probe blocked, remains unsupported (2026-08-12 worker)
+
+- **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Confuse Ray and Will-O-Wisp are not promoted.
+- **Did:** Pinned Confuse Ray's exclusive **0x082cbe91..0x082cbee4** interval, exact 12-component graph, source callbacks/assets/GHOST-BG symbols, lowest legal Level-50 carrier **set 116 CHINCHOU**, complete legal bilateral Scene-ON parties, and a pointer-bounded full-state probe mode. The sibling audit pins Will-O-Wisp's **10** components and exact three-component intersection (`SoundTask_AdjustPanningVar`, `monbg`, `clearmonbg`); its WISP sprites, split-bg transitions, and ShakeMon2 body remain independent.
+- **Verified:** Scene-ON bootstrap v5 is reachable. `check-oracle-freshness.sh` is the documented false positive: 8012 predates a documentation-only harness HEAD and `git -C "$POKEBENCH_HARNESS_ROOT" log --since='2026-08-11 21:51:36' -- oracle/ bin/ run-oracle.sh` is empty. Legal endpoints reached frame 834 at `276079d7…` / `5c9ea0c7…`. The direct dense probe was attempted only through `tools/run-mgba-probe.py` and failed before emulation because the configured mGBA venv has no importable `mgba` module. Therefore no source window, latch, change map, reducer/seam, or framebuffer claim is made.
+- **Next:** Restore the harness-managed mGBA Python binding, run the banked pointer-bounded probe twice in both orientations through first inactive cleanup, derive complete maps/latches, then implement the source-relative reducer/assets/seam/compositor. Require twice-fresh all-frame component/hardware/raw-RGB/change-map/production equality before promoting only Confuse Ray.
+- **Notes:** Presentation-only checkpoint; no damage, accuracy/confusion, RNG, turn/controller/facility state, animation boundary, unsupported barrier, canonical recording, per-frame lookup, absolute tick, coordinate fit, or Will-O-Wisp coverage changed. No latch row was added because no rendering mechanism was measured.
+
 # MOVE_FISSURE source/staging checkpoint — dense probe blocked, remains unsupported (2026-08-12 worker)
 
 - **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Fissure and Dig are not promoted.
