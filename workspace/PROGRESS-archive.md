@@ -41396,3 +41396,20 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** worker full gate **959 files / 9,161 passed / 1 skipped**, smoke
   **375/375**, typecheck, build **649 modules**. Both lane branches are fully
   folded; no unsupported barrier or production/presentation change.
+
+## 1158 — [MAIN worker, 2026-08-11] **#55 `ply_pend` callback family source-closed**
+
+- **State:** the sixth-player `ply_pend` family is source-exact for **1/1**
+  callback and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
+  null**; the construction clock stays null/unwired, S8/#56 are untouched,
+  and LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets capture exact compiled callback
+  entry state across anchor/LILIANA/varied. The sole live callback selects the
+  **20-cycle** empty-pattern-stack route; the pure reducer also counts the
+  source-general nonempty route at **30 cycles** without claiming it observed.
+- **Next:** source-capture and instruction-count one remaining live command
+  dispatcher/callback family (`ply_patt`, voice/vol/pan/bend, or note). Keep
+  all unresolved families and every complete one-pass MPlay total null.
+- **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
+  **16/16**, smoke **375/375**, typecheck, full **960 files / 9,165 passed / 1
+  skipped**, and build **649 modules** are green; pixels were not rerun.

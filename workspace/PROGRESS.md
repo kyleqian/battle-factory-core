@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1161 — [MAIN worker, 2026-08-11] **#55 `ply_patt` callback family source-closed**
+
+- **State:** the sixth-player `ply_patt` family is source-exact for **1/1**
+  callback and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
+  null**; the construction clock stays null/unwired, S8/#56 are untouched,
+  and LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets across anchor/LILIANA/varied
+  select one depth-0 `ply_patt -> ply_goto` route at **134 cycles**. The pure
+  reducer covers depths 0–2 and fails closed on the unobserved `ply_fine` path.
+- **Next:** source-close the command dispatcher or one remaining
+  voice/vol/pan/bend/note family. Keep complete one-pass totals null and do not
+  wire `runFactoryConstructionClock`.
+- **Notes:** focused predecessor controls **20/20**, smoke **375/375**,
+  typecheck, full **962 files / 9,183 passed / 1 skipped**, and build **649
+  modules** are green. No engine/pixel identity or unsupported barrier changed;
+  pixels were not rerun.
+
 ## 1160 — [supervisor, 2026-08-11] **Rust M4b WASM damage boundary folded**
 
 - **State:** `master` is green through Rust M4b: the native `damage_calc`
@@ -37,20 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** merged union full `npm test` **960 files / 9,165 passed / 1
   skipped**, build **649 modules**. Animation is fully folded; no unsupported
   barrier, presentation, gameplay, or pixel identity changed.
-
-## 1158 — [MAIN worker, 2026-08-11] **#55 `ply_pend` callback family source-closed**
-
-- **State:** the sixth-player `ply_pend` family is source-exact for **1/1**
-  callback and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
-  null**; the construction clock stays null/unwired, S8/#56 are untouched,
-  and LUKAS remains **8/50**.
-- **Did:** twice-fresh address-free OFF packets capture exact compiled callback
-  entry state across anchor/LILIANA/varied. The sole live callback selects the
-  **20-cycle** empty-pattern-stack route; the pure reducer also counts the
-  source-general nonempty route at **30 cycles** without claiming it observed.
-- **Next:** source-capture and instruction-count one remaining live command
-  dispatcher/callback family (`ply_patt`, voice/vol/pan/bend, or note). Keep
-  all unresolved families and every complete one-pass MPlay total null.
-- **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
-  **16/16**, smoke **375/375**, typecheck, full **960 files / 9,165 passed / 1
-  skipped**, and build **649 modules** are green; pixels were not rerun.

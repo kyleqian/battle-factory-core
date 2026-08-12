@@ -1740,6 +1740,23 @@ the command decode/jump-table dispatcher or one of the remaining live
 No observed duration, pointer identity, service cost, or clock wiring landed.
 Evidence: `docs/issue55-m4a-pend-v1.md`.
 
+**2026-08-11 `ply_patt` callback-family closure:** additive OFF packets now
+capture only track index, `patternLevel`, and normalized command-payload,
+return, and pattern-target source offsets at the exact compiled `ply_patt`
+entry. Two fresh serial runs per anchor/LILIANA/legal-varied case are
+byte-identical (`44264459…` / `690dc18b…` / `929365a4…`) and join all
+**113/113** frozen rows. Across the **108/108** one-pass rows there is exactly
+**1/1** callback (anchor track 6, depth 0): the pinned `ply_patt -> ply_goto ->
+ldrb_r3_r2/chk_adr_r2` route is **134 cycles**. Depths 0–2 share that source
+route; malformed normalized state and the unobserved full-stack `ply_fine`
+teardown route fail closed.
+
+Complete MPlay costs remain **5 exact / 108 null**. The next discriminator is
+the command decode/jump-table dispatcher or one remaining live `ply_voice`,
+`ply_vol`, `ply_pan`, `ply_bend`, or note family. No observed duration,
+pointer identity, service cost, or clock wiring landed. Evidence:
+`docs/issue55-m4a-patt-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

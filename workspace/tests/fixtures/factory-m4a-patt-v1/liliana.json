@@ -1,0 +1,194 @@
+{
+  "schema": "factory-m4a-patt-probe/v1",
+  "case": "liliana",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "sixth-MPlayMain-ply_patt-entry",
+  "observations": [
+    {
+      "sourceStateDigest": "75050563b447f4df6078afc684b2103f401de44e0af83a955615f733e6791f4a",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "de24421aaaa62bc671b7954b161eec35f97343f393722c2bf247ed37d21df6db",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "04e627717fe727b96245a2f4ee30034752d39838a4fe1e4f04c3238087c5f97f",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "c360a4950dfd3a22f12068912a1e1a3937bce17b006ca81d2ca1bc9f2e4b3185",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "67dcf01479ae763df89833827da03bd67ea8c2b2464b1e91acf12fa387454d37",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "2c3a7b829e16e25266da89f3371b2ac1683f86bffea9e8c7af808113cfe2d668",
+      "callbackFamilies": [
+        "ply_pan"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "7e349fb8f37b31fe407521166341e453e82ec5579cd0df5e735f367e7f8940ff",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "136219c3db5a06a580f1aa93008a8266b67b21f54a53b59af9725013d68478f2",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "254105d0e300044129ce403e43cd0c3e9ef937dc5966e03678aeffd5b4b98e28",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "48e609796c61993b98ce4aed1fa69eb8190f01f114bde9eb392f7cb9c629d981",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "4098a02e3f0a922f3f402061333f5320154be04365649f44ab33db3d406935b6",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "callbackFamilies": [
+        "ply_vol",
+        "ply_vol",
+        "ply_pan",
+        "ply_pan"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "574a5e1547725c9685e4a84569319902188d205a7f3b1c6f3c20c9f25ad33d20",
+      "callbackFamilies": null,
+      "pattCallbacks": null
+    },
+    {
+      "sourceStateDigest": "6a88a5d761ef2e24daf4c73eb5da29c8413d1066dc261a4878e57a022db33f1a",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "de8497c08457a8bfcd785ac38eb994e6c6ad6146a46e135b95fc9329bffb8f2d",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "9ce9f1322ace6ba5c929dc98388f903fcbaf24804136deebc9fecef49ffe828e",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "0dbdc79bf393698e16fffbb04256067e2193fb6ae71827d5b9451d22dc471808",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "2efd8904f380af9da21b782a50a355dd43c8258ca7005b8b237d84b84a743a3a",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "d4eafd4be04ffbc4a1a5d9a999c46951cf37e4d3455f53d73961e2c4d863c0b4",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "e7fe29bbc43e4e61a49403e7dbb44933dfef2649e6bdcc987b7c658b5e947809",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "bd882d6563c02bafe1fae4a9f015355c5eeb5b630ba4e706f8bd0e9020149cb9",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "22c5d662c36c4bd2b6ba595410f8ba4c148d1bfb6bffaadb74fb52c7517dacd8",
+      "callbackFamilies": [
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "cec9c411d0fd7a5187232111dfe4f540ea44cc33c6d8892daa58bb056fe45123",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "callbackFamilies": [
+        "ply_pan",
+        "ply_vol",
+        "ply_vol"
+      ],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "730d5b961495f425916a9ef802b17018b2256eef4dfc38576f947c2d0ebc239d",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "aa020fe7e7f2649b70633275a7eb7426a5798e75ee67da6606665aeceafd0c4a",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "6854eca211190cad143f165b2c43e6011d7fbba5c910cad932e679c0a933452a",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "898a71ab6287958bf7ee9f5c76a2487e7087dace83615e40ef8bf4ce3fe998bf",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "9808dfff65029cdd2806b77f0c2c5f9617be333e81c3e0c055a4590116a86e3f",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    },
+    {
+      "sourceStateDigest": "a9d6df7eb2b963a9c115133f199adfc0b4da9f9dd60e07135c303e6d0e4842b1",
+      "callbackFamilies": [],
+      "pattCallbacks": []
+    }
+  ]
+}
