@@ -41653,6 +41653,19 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** merged union full `npm test` **971 files / 9,418 passed / 1
   skipped**, build **651 modules**. Both lane branches are contained; no
   unsupported barrier or gameplay/pixel identity change.
+
+## 1177 — [MAIN worker, 2026-08-11] **`ply_note` CGB4 allocation prefix source-closed**
+
+- **State:** the smallest observed post-selection note family was source-exact
+  for **7/82** callbacks; complete MPlay remained **5 exact / 108 null**. #55
+  and `runFactoryConstructionClock` stayed unwired; S8 stayed closed at 33331.
+- **Did:** joined committed address-free note/source-state packets and frozen
+  dispatcher/mixer provenance. Type-12 selected CGB channel 4 for **0/3/4**
+  anchor/LILIANA/legal-varied callbacks; its prefix cost **62 cycles each /
+  434 total** and stopped before mutable channel status.
+- **Notes:** dependent focused **16/16**, smoke **375/375**, typecheck, full
+  **973 files / 9,427 passed / 1 skipped**, and build **651 modules** were green.
+  No duration fit, pointer identity, unsupported barrier, gameplay, or pixel change.
 ## 1173 — [MAIN worker, 2026-08-11] **#55 `ply_note` inline prefix source-closed**
 
 - **State:** all **82/82** observed note-selector prefixes are source-exact

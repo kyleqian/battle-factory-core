@@ -997,3 +997,15 @@ current app stage should be rejected before replay.
 - **Real fix:** move test-only JSON out of the resolveJsonModule graph (the
   known ~650 MB relief in AGENTS.md), or add a vitest config-level
   heap guard.
+
+## Nested m4a probe imports are fragile for one-off boundary capture
+
+- **What:** a #55 worker needed several retries to load the nested m4a probe
+  chain, supply `tools/probe` on `sys.path`, route execution through
+  `run-mgba-probe.py`, and avoid a literal escaped newline after valid JSON.
+- **Hits:** 1 (2026-08-11, CGB4 mutable-route capture).
+- **Cost each:** ~8 min.
+- **Workaround:** start from a committed sibling probe and always invoke it
+  through `python3 tools/run-mgba-probe.py <out> -- <probe command>`.
+- **Real fix:** provide a small shared probe-loader/helper that installs the
+  probe module path and writes newline-terminated JSON safely.
