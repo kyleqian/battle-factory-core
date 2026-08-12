@@ -14,5 +14,6 @@
   "evidenceSha256": "367dda5391d7b509718504afd34085a426db14b49daa4ca9d69d4b21937d99a6",
   "secondFreshEvidenceSha256": "367dda5391d7b509718504afd34085a426db14b49daa4ca9d69d4b21937d99a6",
   "rawRgbSha256": "05e1a33470919690888ad07a5cf7faf96a04ce561fb79d0089c6ea2153d8c789",
-  "normalizedMapSha256": "d6ac27b1253dbc5360bccb498041a67d00b0fe08bc2474b957980d2054cce8b9"
+  "normalizedMapSha256": "d6ac27b1253dbc5360bccb498041a67d00b0fe08bc2474b957980d2054cce8b9",
+  "expected": { "framebufferMatches": 153 }
 }
