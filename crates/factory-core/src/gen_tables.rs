@@ -11778,6 +11778,56 @@ pub const FIXED_IVS: [FixedIvRow; 8] = [
     FixedIvRow { regular: 31, last_battle: 31 },
 ];
 
+/// One inclusive Factory trainer-id range. Source:
+/// src/data/gen/factory-round-policy.json trainerSelection normal/hard ranges.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FactoryTrainerRange {
+    pub start: u16,
+    pub end: u16,
+}
+
+/// Source stages per challenge for factory trainer scheduling.
+pub const FACTORY_TRAINER_STAGES_PER_CHALLENGE: u8 = 7;
+
+/// Battle indexes written into the source trainer-history save array.
+pub const FACTORY_TRAINER_HISTORY_WRITE_BATTLE_INDEXES: [u8; 6] = [0, 1, 2, 3, 4, 5];
+
+/// The final regular battle deliberately omitted from source trainer history.
+pub const FACTORY_TRAINER_HISTORY_OMIT_FINAL_BATTLE_INDEX: u8 = 6;
+
+/// Battle index which selects the harder trainer table before the post-range clamp.
+pub const FACTORY_TRAINER_HARD_BATTLE_INDEX: u8 = 6;
+
+/// Challenges strictly after this index select the normal clamp row.
+pub const FACTORY_TRAINER_AFTER_CHALLENGE_INDEX: i64 = 7;
+
+/// Normal-table row selected by the post-range clamp.
+pub const FACTORY_TRAINER_AFTER_CHALLENGE_RANGE_INDEX: usize = 7;
+
+/// Normal Factory trainer-id ranges indexed by raw challenge before the clamp.
+pub const FACTORY_TRAINER_NORMAL_RANGES: [FactoryTrainerRange; 8] = [
+    FactoryTrainerRange { start: 0, end: 99 },
+    FactoryTrainerRange { start: 80, end: 119 },
+    FactoryTrainerRange { start: 100, end: 139 },
+    FactoryTrainerRange { start: 120, end: 159 },
+    FactoryTrainerRange { start: 140, end: 179 },
+    FactoryTrainerRange { start: 160, end: 199 },
+    FactoryTrainerRange { start: 180, end: 219 },
+    FactoryTrainerRange { start: 200, end: 299 },
+];
+
+/// Final-battle hard Factory trainer-id ranges indexed by raw challenge before the clamp.
+pub const FACTORY_TRAINER_HARD_RANGES: [FactoryTrainerRange; 8] = [
+    FactoryTrainerRange { start: 100, end: 119 },
+    FactoryTrainerRange { start: 120, end: 139 },
+    FactoryTrainerRange { start: 140, end: 159 },
+    FactoryTrainerRange { start: 160, end: 179 },
+    FactoryTrainerRange { start: 180, end: 199 },
+    FactoryTrainerRange { start: 200, end: 219 },
+    FactoryTrainerRange { start: 220, end: 239 },
+    FactoryTrainerRange { start: 200, end: 299 },
+];
+
 /// The Gen-3 type-effectiveness table (`include/constants/pokemon.h`
 /// TYPE_* ids, sType1AffectionTable/sType2AffectionTable's merged semantics),
 /// translated from move-type-name pairs to numeric TYPE_* ids, excluding the

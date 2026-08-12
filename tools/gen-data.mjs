@@ -51,7 +51,10 @@ const abilities = abilityItemHooks.universes.abilities;
 const holdEffects = abilityItemHooks.universes.holdEffects;
 const moves = readJson("moves.json").moves;
 const expTables = readJson("exp-tables.json");
-const policy = readJson("factory-round-policy.json").rentalSelection;
+const factoryRoundPolicy = readJson("factory-round-policy.json");
+const policy = factoryRoundPolicy.rentalSelection;
+const trainerPolicy = factoryRoundPolicy.trainerSelection;
+const trainerConstants = factoryRoundPolicy.constants;
 const typeEffectiveness = readJson("type-effectiveness.json").typeEffectiveness;
 const aiPolicy = readJson("factory-ai-policy.json");
 
@@ -276,6 +279,91 @@ if (fixedIvs.length !== 8) {
 const rentalRankThresholds = policy.rentalRankThresholds;
 const maximumRentalRank = policy.maximumRentalRank;
 
+// --- FACTORY_TRAINER_*: source-derived policy for the pure trainer
+// schedule leaf (`src/engine/factoryTrainerSchedule.ts`).  Keep the range
+// selection data here rather than retyping it into Rust: the canonical JSON
+// already cites GetRandomScaledFrontierTrainerId / GenerateOpponentMons and
+// is the one stable generated policy input shared by the TS engine. ---
+if (factoryRoundPolicy.schema !== "factory-round-policy/v1") {
+  throw new Error(`gen-data: unexpected factory-round-policy.json schema ${factoryRoundPolicy.schema}`);
+}
+function requireSafeIntegerInRange(value, label, minimum, maximum) {
+  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {
+    throw new Error(`gen-data: ${label} must be a safe integer in [${minimum}, ${maximum}], got ${value}`);
+  }
+  return value;
+}
+const trainerStagesPerChallenge = requireSafeIntegerInRange(
+  trainerConstants.stagesPerChallenge,
+  "factory-round-policy.json constants.stagesPerChallenge",
+  1,
+  0xff,
+);
+const trainerHistoryWriteBattleIndexes = trainerConstants.trainerHistory.writeBattleIndexes.map(
+  (value, index) => requireSafeIntegerInRange(
+    value,
+    `factory-round-policy.json constants.trainerHistory.writeBattleIndexes[${index}]`,
+    0,
+    trainerStagesPerChallenge - 1,
+  ),
+);
+if (new Set(trainerHistoryWriteBattleIndexes).size !== trainerHistoryWriteBattleIndexes.length) {
+  throw new Error("gen-data: factory-round-policy.json trainer history write indexes must be unique");
+}
+const trainerHistoryOmitFinalBattleIndex = requireSafeIntegerInRange(
+  trainerConstants.trainerHistory.omitFinalBattleIndex,
+  "factory-round-policy.json constants.trainerHistory.omitFinalBattleIndex",
+  0,
+  trainerStagesPerChallenge - 1,
+);
+const trainerHardBattleIndex = requireSafeIntegerInRange(
+  trainerPolicy.hardBattleIndex,
+  "factory-round-policy.json trainerSelection.hardBattleIndex",
+  0,
+  trainerStagesPerChallenge - 1,
+);
+const trainerAfterChallengeIndex = requireSafeIntegerInRange(
+  trainerPolicy.afterChallengeIndex,
+  "factory-round-policy.json trainerSelection.afterChallengeIndex",
+  0,
+  Number.MAX_SAFE_INTEGER,
+);
+const trainerAfterChallengeRangeIndex = requireSafeIntegerInRange(
+  trainerPolicy.afterChallengeRangeIndex,
+  "factory-round-policy.json trainerSelection.afterChallengeRangeIndex",
+  0,
+  Number.MAX_SAFE_INTEGER,
+);
+function trainerRanges(rows, label) {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new Error(`gen-data: factory-round-policy.json ${label} must be a nonempty array`);
+  }
+  return rows.map((row, index) => {
+    const start = requireSafeIntegerInRange(
+      row.start,
+      `factory-round-policy.json ${label}[${index}].start`,
+      0,
+      0xffff,
+    );
+    const end = requireSafeIntegerInRange(
+      row.end,
+      `factory-round-policy.json ${label}[${index}].end`,
+      start,
+      0xffff,
+    );
+    return { start, end };
+  });
+}
+const trainerNormalRanges = trainerRanges(trainerPolicy.normalRanges, "trainerSelection.normalRanges");
+const trainerHardRanges = trainerRanges(trainerPolicy.hardRanges, "trainerSelection.hardRanges");
+if (
+  trainerAfterChallengeIndex >= trainerNormalRanges.length
+  || trainerAfterChallengeIndex >= trainerHardRanges.length
+  || trainerAfterChallengeRangeIndex >= trainerNormalRanges.length
+) {
+  throw new Error("gen-data: factory-round-policy.json trainer range indexes must address generated range rows");
+}
+
 // --- FACTORY_AI_POLICY_MASKS / FACTORY_AI_FRONTIER_STAGES_PER_CHALLENGE:
 // mirrors src/engine/factoryAiMaskSelection.ts's module-load validation of
 // factory-ai-policy.json (POLICY / POLICY_BRANCHES's failPolicy checks),
@@ -431,6 +519,14 @@ const fixedIvsLines = fixedIvs
   .join("\n");
 
 const rentalRankThresholdsLine = rentalRankThresholds.join(", ");
+
+const trainerHistoryWriteBattleIndexesLine = trainerHistoryWriteBattleIndexes.join(", ");
+const trainerNormalRangesLines = trainerNormalRanges
+  .map((row) => `    FactoryTrainerRange { start: ${row.start}, end: ${row.end} },`)
+  .join("\n");
+const trainerHardRangesLines = trainerHardRanges
+  .map((row) => `    FactoryTrainerRange { start: ${row.start}, end: ${row.end} },`)
+  .join("\n");
 
 const aiPolicyMasksLine = aiPolicyMasks.join(", ");
 
@@ -664,6 +760,42 @@ pub const FIXED_IVS: [FixedIvRow; ${fixedIvs.length}] = [
 ${fixedIvsLines}
 ];
 
+/// One inclusive Factory trainer-id range. Source:
+/// src/data/gen/factory-round-policy.json trainerSelection normal/hard ranges.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FactoryTrainerRange {
+    pub start: u16,
+    pub end: u16,
+}
+
+/// Source stages per challenge for factory trainer scheduling.
+pub const FACTORY_TRAINER_STAGES_PER_CHALLENGE: u8 = ${trainerStagesPerChallenge};
+
+/// Battle indexes written into the source trainer-history save array.
+pub const FACTORY_TRAINER_HISTORY_WRITE_BATTLE_INDEXES: [u8; ${trainerHistoryWriteBattleIndexes.length}] = [${trainerHistoryWriteBattleIndexesLine}];
+
+/// The final regular battle deliberately omitted from source trainer history.
+pub const FACTORY_TRAINER_HISTORY_OMIT_FINAL_BATTLE_INDEX: u8 = ${trainerHistoryOmitFinalBattleIndex};
+
+/// Battle index which selects the harder trainer table before the post-range clamp.
+pub const FACTORY_TRAINER_HARD_BATTLE_INDEX: u8 = ${trainerHardBattleIndex};
+
+/// Challenges strictly after this index select the normal clamp row.
+pub const FACTORY_TRAINER_AFTER_CHALLENGE_INDEX: i64 = ${trainerAfterChallengeIndex};
+
+/// Normal-table row selected by the post-range clamp.
+pub const FACTORY_TRAINER_AFTER_CHALLENGE_RANGE_INDEX: usize = ${trainerAfterChallengeRangeIndex};
+
+/// Normal Factory trainer-id ranges indexed by raw challenge before the clamp.
+pub const FACTORY_TRAINER_NORMAL_RANGES: [FactoryTrainerRange; ${trainerNormalRanges.length}] = [
+${trainerNormalRangesLines}
+];
+
+/// Final-battle hard Factory trainer-id ranges indexed by raw challenge before the clamp.
+pub const FACTORY_TRAINER_HARD_RANGES: [FactoryTrainerRange; ${trainerHardRanges.length}] = [
+${trainerHardRangesLines}
+];
+
 /// The Gen-3 type-effectiveness table (\`include/constants/pokemon.h\`
 /// TYPE_* ids, sType1AffectionTable/sType2AffectionTable's merged semantics),
 /// translated from move-type-name pairs to numeric TYPE_* ids, excluding the
@@ -764,4 +896,4 @@ if (!formatted) {
 }
 
 console.log(`gen-data: wrote ${path.relative(workspaceRoot, outPath)}`);
-console.log(`gen-data: ${frontierMonRows.length} frontier mons, ${heldItemByTableId.length} held items, ${natures.length} natures, ${level50Ranges.length} level50 ranges, ${fixedIvs.length} fixed IV rows, ${speciesSecondAbility.length} species second-abilities, ${switchPolicySpeciesRows.length} switch-policy species rows, ${movePp.length} move PP rows, ${speciesRows.length} frontier-corpus species rows, ${natureModifierRows.length} nature modifier rows, ${typeEffectivenessRows.length} type-effectiveness rows, ${aiPolicyMasks.length} factory AI policy branch masks, ${moveRows.length} move rows`);
+console.log(`gen-data: ${frontierMonRows.length} frontier mons, ${heldItemByTableId.length} held items, ${natures.length} natures, ${level50Ranges.length} level50 ranges, ${fixedIvs.length} fixed IV rows, ${trainerNormalRanges.length} normal trainer ranges, ${trainerHardRanges.length} hard trainer ranges, ${speciesSecondAbility.length} species second-abilities, ${switchPolicySpeciesRows.length} switch-policy species rows, ${movePp.length} move PP rows, ${speciesRows.length} frontier-corpus species rows, ${natureModifierRows.length} nature modifier rows, ${typeEffectivenessRows.length} type-effectiveness rows, ${aiPolicyMasks.length} factory AI policy branch masks, ${moveRows.length} move rows`);
