@@ -1,5 +1,5 @@
-//! Pure port of `AI_CheckBadMove`'s universal preamble plus its M5b-1/M5b-2
-//! batches of per-effect handlers
+//! Pure port of `AI_CheckBadMove`'s universal preamble plus its M5b-1/M5b-2/
+//! M5b-3 batches of per-effect handlers
 //! (`src/engine/factoryAiCheckBadMove.ts:1-115,787-1252,1259-2650,2652-3616`,
 //! itself a port of `data/battle_ai_scripts.s:51-93` plus the handler bodies
 //! it dispatches to). Per `docs/rust-m5b-checkbadmove-batching.md` §5
@@ -22,9 +22,20 @@
 //! OHKO, Leech Seed, Fake Out, Will-O-Wisp, Knock Off+Trick, Explosion,
 //! Dream Eater, Special Attack Down (`+_2`, vestigial dispatch), Attract,
 //! and Spit Up+Swallow — 33 effects total, `CBM_HANDLED_EFFECTS_M5B2`, 65
-//! handled overall. M5b-3 grows `cbm_handled_effects()` further; every
-//! table effect not yet in the union halts at the barrier, and every other
-//! move (not in the table at all) scores 0 past the preamble.
+//! handled overall. Per batching doc §2 "M5b-3": the stat-UP family
+//! (Attack/Defense+Curl/Bulk Up/Curse/Speed/SpAtk/SpDef Up, each composing
+//! shared bare-gate handlers; Cosmic Power/Calm Mind/Dragon Dance, each
+//! composing a stat-UP handler for their first check), the screens (Light
+//! Screen/Reflect), Evasion Up (`+_2`/Minimize), Accuracy Up (`+_2`,
+//! vestigial dispatch), Safeguard, Snore+Sleep Talk, Baton Pass, Substitute,
+//! Mean Look, Torment, Helping Hand, Tickle, Belly Drum (composing Attack
+//! Up), Memento (composing Baton Pass), Stockpile, Recycle, Imprison, Mud
+//! Sport, Water Sport, Haze (the 14-comparison stat-stage chain) and Psych
+//! Up (a separate dispatch arm reusing the same `run_cbm_haze` unchanged),
+//! Mist, Disable, and Encore — 44 effects total, `CBM_HANDLED_EFFECTS_M5B3`,
+//! 109 handled overall (source-complete: `unported_cbm_table_effects()` now
+//! returns `[]`). Every other move (not in the table at all) scores 0 past
+//! the preamble.
 //!
 //! ## Representation decisions (mirroring `factory_ai_mask.rs`'s precedent)
 //! - **Move effect**: TS compares `move.effect` (a string) to `"EFFECT_X"`
@@ -84,16 +95,19 @@
 //!   negates-type-eligible move may need to widen this further.
 //!
 //! ## Scope NOT covered by this step
-//! Every per-effect handler outside M5b-1/M5b-2's 65 (`AI_CBM_*`, TS
-//! :787-1258,2652-3657) is unported. `run_check_bad_move_preamble`'s
-//! trailing barrier returns `NotYetPorted` for the 44 `CBM_TABLE_EFFECTS`
-//! members not yet in `cbm_handled_effects()`, and every other move (not in
-//! the table at all) scores 0, matching TS's own "genuine, complete port of
-//! that path" fallthrough (module doc comment :27-30).
+//! None: M5b-3 is the last of the three landed batches, and the 109-effect
+//! `CBM_TABLE_EFFECTS` table is now fully handled
+//! (`unported_cbm_table_effects()` returns `[]`). `run_check_bad_move_
+//! preamble`'s trailing `if_effect` barrier and the `NotYetPorted` variant
+//! stay in place regardless (the honesty analog of TS's own dead barrier,
+//! TS :2639-2647, and the guard against future `CBM_TABLE_EFFECTS` growth) —
+//! every other move (not in the table at all) scores 0, matching TS's own
+//! "genuine, complete port of that path" fallthrough (module doc comment
+//! :27-30).
 
 use crate::damage_calc::{
-    DEFAULT_STAT_STAGE, MIN_STAT_STAGE, TYPE_ELECTRIC, TYPE_FIRE, TYPE_GRASS, TYPE_GROUND,
-    TYPE_POISON, TYPE_STEEL, TYPE_WATER,
+    DEFAULT_STAT_STAGE, MAX_STAT_STAGE, MIN_STAT_STAGE, TYPE_ELECTRIC, TYPE_FIRE, TYPE_GRASS,
+    TYPE_GROUND, TYPE_POISON, TYPE_STEEL, TYPE_WATER,
 };
 use crate::gen_tables;
 use crate::rng::advance_rng_value;
@@ -556,12 +570,68 @@ pub const CBM_HANDLED_EFFECTS_M5B2: &[u16] = &[
     EFFECT_SWALLOW,
 ];
 
+/// M5b-3's landed batch (`docs/rust-m5b-checkbadmove-batching.md` §2
+/// "M5b-3"), TS dispatch source order: the stat-UP family (AttackUp/
+/// DefenseUp+Curl/BulkUp/Curse/SpeedUp/SpAtkUp/SpDefUp/CosmicPower/CalmMind/
+/// DragonDance, TS :1878-2006), the screens (LightScreen/Reflect,
+/// :2008-2030), EvasionUp+Minimize (:2032-2046), Safeguard/Snore+SleepTalk
+/// (:2260-2282), BatonPass/Substitute (:2305-2327), MeanLook/Torment/
+/// HelpingHand/Tickle/BellyDrum (:2341-2404), AccUp (:2421-2436, vestigial
+/// dispatch), Haze/PsychUp/Mist/Disable/Encore (:2457-2526), Memento/
+/// Stockpile (:2545-2570), and Recycle/Imprison/MudSport/WaterSport
+/// (:2586-2637) — exactly 44 effects. After this batch every `CBM_TABLE_
+/// EFFECTS` member is handled (`unported_cbm_table_effects()` returns `[]`).
+pub const CBM_HANDLED_EFFECTS_M5B3: &[u16] = &[
+    EFFECT_ATTACK_UP,
+    EFFECT_ATTACK_UP_2,
+    EFFECT_DEFENSE_UP,
+    EFFECT_DEFENSE_UP_2,
+    EFFECT_DEFENSE_CURL,
+    EFFECT_BULK_UP,
+    EFFECT_CURSE,
+    EFFECT_SPEED_UP,
+    EFFECT_SPEED_UP_2,
+    EFFECT_SPECIAL_ATTACK_UP,
+    EFFECT_SPECIAL_ATTACK_UP_2,
+    EFFECT_SPECIAL_DEFENSE_UP,
+    EFFECT_SPECIAL_DEFENSE_UP_2,
+    EFFECT_COSMIC_POWER,
+    EFFECT_CALM_MIND,
+    EFFECT_DRAGON_DANCE,
+    EFFECT_LIGHT_SCREEN,
+    EFFECT_REFLECT,
+    EFFECT_EVASION_UP,
+    EFFECT_EVASION_UP_2,
+    EFFECT_MINIMIZE,
+    EFFECT_ACCURACY_UP,
+    EFFECT_ACCURACY_UP_2,
+    EFFECT_SAFEGUARD,
+    EFFECT_SNORE,
+    EFFECT_SLEEP_TALK,
+    EFFECT_BATON_PASS,
+    EFFECT_SUBSTITUTE,
+    EFFECT_MEAN_LOOK,
+    EFFECT_TORMENT,
+    EFFECT_HELPING_HAND,
+    EFFECT_TICKLE,
+    EFFECT_BELLY_DRUM,
+    EFFECT_HAZE,
+    EFFECT_PSYCH_UP,
+    EFFECT_MIST,
+    EFFECT_DISABLE,
+    EFFECT_ENCORE,
+    EFFECT_MEMENTO,
+    EFFECT_STOCKPILE,
+    EFFECT_RECYCLE,
+    EFFECT_IMPRISON,
+    EFFECT_MUD_SPORT,
+    EFFECT_WATER_SPORT,
+];
+
 /// Union of every landed batch's handled-effect consts, mirroring
 /// `CHECK_BAD_MOVE_HANDLED_TABLE_EFFECTS` (`factoryAiCheckBadMove.ts:266-302`).
-/// M5b-3 adds its own `CBM_HANDLED_EFFECTS_M5B3: &[u16]` const and unions it
-/// in here, "add the effect in the same commit as its handler" (TS doc
-/// comment :262-264). Unlike TS's frozen `Set` (built once at module load),
-/// this recomputes on every call — cheap (65 entries after M5b-2) and this
+/// Unlike TS's frozen `Set` (built once at module load), this recomputes on
+/// every call — cheap (109 entries, source-complete after M5b-3) and this
 /// function is completeness-probe-only, never on `run_check_bad_move_
 /// preamble`'s hot path (its own trailing barrier checks `CBM_TABLE_EFFECTS`
 /// directly, not this union).
@@ -571,12 +641,14 @@ pub fn cbm_handled_effects() -> Vec<u16> {
         .iter()
         .copied()
         .chain(CBM_HANDLED_EFFECTS_M5B2.iter().copied())
+        .chain(CBM_HANDLED_EFFECTS_M5B3.iter().copied())
         .collect()
 }
 
 /// Direct port of `unportedCheckBadMoveTableEffects`
 /// (`factoryAiCheckBadMove.ts:312-316`): `CBM_TABLE_EFFECTS` minus
-/// `cbm_handled_effects()`, sorted. Returns 44 table effects after M5b-2.
+/// `cbm_handled_effects()`, sorted. Returns `[]` now that M5b-3 has landed --
+/// every `CBM_TABLE_EFFECTS` member is handled.
 #[must_use]
 pub fn unported_cbm_table_effects() -> Vec<u16> {
     let handled = cbm_handled_effects();
@@ -1839,6 +1911,484 @@ pub(crate) fn run_cbm_spit_up_and_swallow(
     }
 }
 
+// === M5b-3 handlers (batching doc §2 "M5b-3") ================================
+
+/// `AI_CBM_AttackUp` (`data/battle_ai_scripts.s:249-251`, TS :956-958): a
+/// bare `if_stat_level_equal AI_USER, STAT_ATK, MAX_STAT_STAGE, Score_Minus10`
+/// -- zero `get_ability` calls, no shared tail, unlike every stat-DOWN CBM
+/// handler. Also composed unchanged by `run_cbm_bulk_up`/`run_cbm_dragon_dance`/
+/// `run_cbm_belly_drum` below, and reused verbatim by `EFFECT_CURSE`'s own
+/// separate dispatch arm via `run_cbm_bulk_up` (TS :1920-1927, doc §4).
+#[must_use]
+pub(crate) fn run_cbm_attack_up(attacker_atk_stage: u8) -> i32 {
+    if attacker_atk_stage == MAX_STAT_STAGE {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_DefenseUp` (`:253-255`, TS :969-971) -- byte-for-byte the same
+/// shape as `run_cbm_attack_up` with `STAT_DEF` swapped in. Dispatch also
+/// reaches `EFFECT_DEFENSE_CURL` (TS :1892-1903): Defense Curl has no
+/// `AI_CV_*` counterpart at all, so only this CBM half is reachable.
+/// Composed unchanged by `run_cbm_cosmic_power` below.
+#[must_use]
+pub(crate) fn run_cbm_defense_up(attacker_def_stage: u8) -> i32 {
+    if attacker_def_stage == MAX_STAT_STAGE {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_BulkUp` (`:581-584`, TS :990-992): `run_cbm_attack_up`'s own gate
+/// applied a second time for `STAT_DEF` at a different penalty (-8, not
+/// -10), sequentially, no interaction between the two checks. `EFFECT_CURSE`
+/// dispatches to this same function unchanged (TS :1920-1927, doc §4) --
+/// kept as two separate dispatch arms in the preamble below, one shared
+/// function.
+#[must_use]
+pub(crate) fn run_cbm_bulk_up(attacker_atk_stage: u8, attacker_def_stage: u8) -> i32 {
+    run_cbm_attack_up(attacker_atk_stage)
+        + if attacker_def_stage == MAX_STAT_STAGE {
+            -8
+        } else {
+            0
+        }
+}
+
+/// `AI_CBM_SpeedUp` (`:257-259`, TS :1001-1003) -- the same bare shape as
+/// `run_cbm_attack_up` with `STAT_SPEED` swapped in.
+#[must_use]
+pub(crate) fn run_cbm_speed_up(attacker_speed_stage: u8) -> i32 {
+    if attacker_speed_stage == MAX_STAT_STAGE {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_SpAtkUp` (`:261-263`, TS :1011-1013) -- the same bare shape as
+/// `run_cbm_attack_up` with `STAT_SPATK` swapped in. Composed unchanged by
+/// `run_cbm_calm_mind` below.
+#[must_use]
+pub(crate) fn run_cbm_sp_atk_up(attacker_sp_atk_stage: u8) -> i32 {
+    if attacker_sp_atk_stage == MAX_STAT_STAGE {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_SpDefUp` (`:265-267`, TS :2672-2674) -- the same bare shape as
+/// `run_cbm_attack_up` with `STAT_SPDEF` swapped in. Both
+/// `EFFECT_SPECIAL_DEFENSE_UP`/`_2` converge with Cosmic Power/Calm Mind on
+/// this already-ported shared body.
+#[must_use]
+pub(crate) fn run_cbm_sp_def_up(attacker_sp_def_stage: u8) -> i32 {
+    if attacker_sp_def_stage == MAX_STAT_STAGE {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_CosmicPower` (`:576-579`, TS :1032-1034): `run_cbm_bulk_up`'s own
+/// dual-stat shape (own DEF then own SPDEF, sequentially, no interaction)
+/// applied to Cosmic Power's own two raised stats -- a genuinely separate
+/// handler (inlines its own DEF check rather than reusing
+/// `run_cbm_defense_up` in TS, but composes it here for the identical first
+/// check exactly as `run_cbm_bulk_up` composes `run_cbm_attack_up`).
+#[must_use]
+pub(crate) fn run_cbm_cosmic_power(attacker_def_stage: u8, attacker_sp_def_stage: u8) -> i32 {
+    run_cbm_defense_up(attacker_def_stage)
+        + if attacker_sp_def_stage == MAX_STAT_STAGE {
+            -8
+        } else {
+            0
+        }
+}
+
+/// `AI_CBM_CalmMind` (`:590-593`, TS :1042-1044) -- the same dual-stat shape
+/// as `run_cbm_cosmic_power`, `STAT_SPATK` then `STAT_SPDEF` (Calm Mind's own
+/// two raised stats). Composes `run_cbm_sp_atk_up` for the first check.
+#[must_use]
+pub(crate) fn run_cbm_calm_mind(attacker_sp_atk_stage: u8, attacker_sp_def_stage: u8) -> i32 {
+    run_cbm_sp_atk_up(attacker_sp_atk_stage)
+        + if attacker_sp_def_stage == MAX_STAT_STAGE {
+            -8
+        } else {
+            0
+        }
+}
+
+/// `AI_CBM_DragonDance` (`:595-598`, TS :1061-1063) -- the same dual-stat
+/// shape as `run_cbm_bulk_up`/`run_cbm_calm_mind` with `STAT_SPEED` as the
+/// second, lighter (-8) stat. Composes `run_cbm_attack_up` for the first
+/// check.
+#[must_use]
+pub(crate) fn run_cbm_dragon_dance(attacker_atk_stage: u8, attacker_speed_stage: u8) -> i32 {
+    run_cbm_attack_up(attacker_atk_stage)
+        + if attacker_speed_stage == MAX_STAT_STAGE {
+            -8
+        } else {
+            0
+        }
+}
+
+/// `AI_CBM_LightScreen` (`:354-356`, TS :1079-1081): a single
+/// `if_side_affecting AI_USER, SIDE_STATUS_LIGHTSCREEN, Score_Minus8` -- the
+/// smallest CBM handler shape: one side-status bit test against AI_USER's
+/// OWN side, zero stat-stage/ability reads.
+#[must_use]
+pub(crate) fn run_cbm_light_screen(attacker_light_screen_up: bool) -> i32 {
+    if attacker_light_screen_up {
+        -8
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Reflect` (`:393-395`, TS :1089-1091) -- the same bare shape as
+/// `run_cbm_light_screen` with `SIDE_STATUS_REFLECT` swapped in (a distinct
+/// bit, not an alias of `SIDE_STATUS_LIGHTSCREEN`).
+#[must_use]
+pub(crate) fn run_cbm_reflect(attacker_reflect_up: bool) -> i32 {
+    if attacker_reflect_up {
+        -8
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_EvasionUp` (`:273-275`, TS :1111-1113) -- the same bare shape as
+/// `run_cbm_attack_up`/`run_cbm_defense_up`/`run_cbm_speed_up`/
+/// `run_cbm_sp_atk_up` with `STAT_EVASION` swapped in. Dispatch also reaches
+/// `EFFECT_MINIMIZE` (TS :2035-2046) -- Minimize shares this single-stat
+/// shape, not `run_cbm_bulk_up`/`run_cbm_cosmic_power`/`run_cbm_calm_mind`'s
+/// separate dual-stat pattern, because it only ever raises STAT_EVASION.
+#[must_use]
+pub(crate) fn run_cbm_evasion_up(attacker_evasion_stage: u8) -> i32 {
+    if attacker_evasion_stage == MAX_STAT_STAGE {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_AccUp` (`:269-271`, TS `runCbmAccUp` :3380-3382) -- the same bare
+/// shape as `run_cbm_attack_up`/`run_cbm_speed_up` with `STAT_ACC` swapped
+/// in. Dispatch: `EFFECT_ACCURACY_UP`/`EFFECT_ACCURACY_UP_2` (TS :2429-2436)
+/// -- vestigial in Gen 3 (no move carries either effect), so this handler is
+/// dispatch-reachable only through a synthetic move id; TS exports
+/// `runCbmAccUp` for exactly this, so this handler stays `pub(crate)`
+/// (batching doc §4) for the same direct-call test/vector treatment.
+#[must_use]
+pub(crate) fn run_cbm_acc_up(attacker_acc_stage: u8) -> i32 {
+    if attacker_acc_stage == MAX_STAT_STAGE {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Safeguard` (`data/battle_ai_scripts.s:478-480`, TS :3031-3033): a
+/// single `if_side_affecting AI_USER, SIDE_STATUS_SAFEGUARD, Score_Minus8` --
+/// the same bare shape as `run_cbm_light_screen`/`run_cbm_reflect` with the
+/// AI's OWN Safeguard bit swapped in. Reads only AI_USER's own side.
+#[must_use]
+pub(crate) fn run_cbm_safeguard(attacker_safeguard_up: bool) -> i32 {
+    if attacker_safeguard_up {
+        -8
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_DamageDuringSleep` (`data/battle_ai_scripts.s:426-428`, TS
+/// :3042-3044), shared by `EFFECT_SNORE`/`EFFECT_SLEEP_TALK`: a single
+/// `if_not_status AI_USER, STATUS1_SLEEP, Score_Minus8` -- Snore and Sleep
+/// Talk are penalized whenever the user is NOT asleep. Reads only AI_USER's
+/// own primary status.
+#[must_use]
+pub(crate) fn run_cbm_damage_during_sleep(attacker_is_asleep: bool) -> i32 {
+    if attacker_is_asleep {
+        0
+    } else {
+        -8
+    }
+}
+
+/// `AI_CBM_BatonPass` (`data/battle_ai_scripts.s:485-488`, TS :3093-3095): a
+/// single `count_usable_party_mons AI_USER; if_equal 0, Score_Minus10` --
+/// Baton Pass is penalized only when the AI has no usable party member left
+/// to switch to. Composed unchanged by `run_cbm_memento` below (`EFFECT_
+/// MEMENTO` has no `end` of its own and falls through into this same gate,
+/// TS :3568-3576).
+#[must_use]
+pub(crate) fn run_cbm_baton_pass(attacker_usable_party_mons: u8) -> i32 {
+    if attacker_usable_party_mons == 0 {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Substitute` (`data/battle_ai_scripts.s:405-408`, TS :3105-3113):
+/// `if_status2 AI_USER, STATUS2_SUBSTITUTE, Score_Minus8` then
+/// `if_hp_less_than AI_USER, 26, Score_Minus10`. HP percent is truncating
+/// `100*hp/maxHp`, matching `Cmd_if_hp_less_than`'s own `(u32)` cast (same
+/// convention as `run_cbm_belly_drum` below).
+#[must_use]
+pub(crate) fn run_cbm_substitute(attacker: &FactoryAiCheckBadMoveAttacker) -> i32 {
+    if attacker.has_substitute.unwrap_or(false) {
+        return -8;
+    }
+    if hp_percent(attacker) < 26 {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_CantEscape` (`data/battle_ai_scripts.s:430-433`, TS :3140-3142),
+/// `EFFECT_MEAN_LOOK`'s handler: a single `if_status2 AI_TARGET,
+/// STATUS2_ESCAPE_PREVENTION, Score_Minus10` -- penalized when the target is
+/// already trapped.
+#[must_use]
+pub(crate) fn run_cbm_cant_escape(target_escape_prevented: bool) -> i32 {
+    if target_escape_prevented {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Torment` (`data/battle_ai_scripts.s:527-529`, TS :3149-3151): a
+/// single `if_status2 AI_TARGET, STATUS2_TORMENT, Score_Minus10` --
+/// penalized when the target is already tormented.
+#[must_use]
+pub(crate) fn run_cbm_torment(target_tormented: bool) -> i32 {
+    if target_tormented {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_HelpingHand` (`data/battle_ai_scripts.s:541-543`, TS :3264-3266):
+/// a single `if_not_double_battle Score_Minus10`. This engine models singles
+/// only (BATTLE_TYPE_DOUBLE out of scope), so the check is always true and
+/// Helping Hand always scores -10 -- a faithful constant for the modeled
+/// scope, not an approximation.
+#[must_use]
+pub(crate) fn run_cbm_helping_hand() -> i32 {
+    -10
+}
+
+/// `AI_CBM_Tickle` (`data/battle_ai_scripts.s:571-574`, TS :3311-3314): the
+/// same dual-stat shape as `run_cbm_bulk_up`/Curse but reading AI_TARGET's
+/// OWN ATK then DEF at `MIN_STAT_STAGE` (the stats Tickle lowers),
+/// sequentially, no interaction -- both stages at floor score -18.
+#[must_use]
+pub(crate) fn run_cbm_tickle(target_atk_stage: u8, target_def_stage: u8) -> i32 {
+    (if target_atk_stage == MIN_STAT_STAGE {
+        -10
+    } else {
+        0
+    }) + (if target_def_stage == MIN_STAT_STAGE {
+        -8
+    } else {
+        0
+    })
+}
+
+/// `AI_CBM_BellyDrum` (`data/battle_ai_scripts.s:247-251`, TS :3286-3294):
+/// AI_USER's own HP% below 51 JUMPs to -10, then FALLS THROUGH into
+/// `run_cbm_attack_up`'s own own-ATK `MAX_STAT_STAGE` gate (also -10) --
+/// sequential, never additive. HP percent is truncating `100*hp/maxHp`, same
+/// convention as `run_cbm_substitute` above.
+#[must_use]
+pub(crate) fn run_cbm_belly_drum(attacker: &FactoryAiCheckBadMoveAttacker) -> i32 {
+    if hp_percent(attacker) < 51 {
+        return -10;
+    }
+    run_cbm_attack_up(attacker.atk_stage)
+}
+
+/// Truncating `100*hp/maxHp`, matching `Cmd_if_hp_less_than`'s own `(u32)`
+/// cast and TS's `Math.floor((100 * hp) / maxHp)` (shared by
+/// `run_cbm_substitute`/`run_cbm_belly_drum` above). `maxHp` defaults to 1
+/// when absent (TS :610); a genuinely zero `maxHp` (never a real battle
+/// state) mirrors JS's `x/0` -> `Infinity`/`NaN`, both "not below any real
+/// threshold", by saturating to `i32::MAX` instead of dividing by zero.
+#[must_use]
+fn hp_percent(attacker: &FactoryAiCheckBadMoveAttacker) -> i32 {
+    let max_hp = attacker.max_hp.unwrap_or(1);
+    let hp = attacker.hp.unwrap_or(1);
+    if max_hp == 0 {
+        i32::MAX
+    } else {
+        (100 * hp) / max_hp
+    }
+}
+
+/// `AI_CBM_Haze` (`data/battle_ai_scripts.s:314-332`, TS :3435-3454), shared
+/// by `EFFECT_HAZE` and `EFFECT_PSYCH_UP` (Psych Up has no separate CBM
+/// handler; its table entry dispatches to this same body, TS :2473-2484):
+/// seven `if_stat_level_less_than AI_USER, <stat>, DEFAULT_STAT_STAGE` gates
+/// then seven `if_stat_level_more_than AI_TARGET, <stat>, DEFAULT_STAT_STAGE`
+/// gates, all JUMPing to End (zero); only the all-clear path falls through
+/// to Score_Minus10 -- Haze is penalized only when there is nothing to reset
+/// (no lowered own stat, no raised target stat). Stat stages absent from the
+/// view default to `DEFAULT_STAT_STAGE`, so an omitted stage never fires a
+/// gate, same convention as the stat-up/down handlers.
+#[must_use]
+pub(crate) fn run_cbm_haze(
+    attacker: &FactoryAiCheckBadMoveAttacker,
+    target: &FactoryAiCheckBadMoveTarget,
+) -> i32 {
+    let user_has_lowered_stat = attacker.atk_stage < DEFAULT_STAT_STAGE
+        || attacker.def_stage < DEFAULT_STAT_STAGE
+        || attacker.speed_stage.unwrap_or(DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+        || attacker.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+        || attacker.sp_def_stage.unwrap_or(DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+        || attacker.acc_stage.unwrap_or(DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE
+        || attacker.evasion_stage.unwrap_or(DEFAULT_STAT_STAGE) < DEFAULT_STAT_STAGE;
+    if user_has_lowered_stat {
+        return 0;
+    }
+    let target_has_raised_stat = target.atk_stage > DEFAULT_STAT_STAGE
+        || target.def_stage > DEFAULT_STAT_STAGE
+        || target.speed_stage > DEFAULT_STAT_STAGE
+        || target.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE
+        || target.sp_def_stage > DEFAULT_STAT_STAGE
+        || target.acc_stage.unwrap_or(DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE
+        || target.evasion_stage.unwrap_or(DEFAULT_STAT_STAGE) > DEFAULT_STAT_STAGE;
+    if target_has_raised_stat {
+        0
+    } else {
+        -10
+    }
+}
+
+/// `AI_CBM_Mist` (`data/battle_ai_scripts.s:378-380`, TS :3463-3465): a
+/// single `if_side_affecting AI_USER, SIDE_STATUS_MIST, Score_Minus8` -- the
+/// same bare shape as `run_cbm_light_screen`/`run_cbm_reflect`/
+/// `run_cbm_safeguard` with `SIDE_STATUS_MIST` swapped in.
+#[must_use]
+pub(crate) fn run_cbm_mist(attacker_mist_up: bool) -> i32 {
+    if attacker_mist_up {
+        -8
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Disable` (`data/battle_ai_scripts.s:418-420`, TS :3473-3475): a
+/// single `if_any_move_disabled AI_TARGET, Score_Minus8` -- penalized when
+/// the target already has any move disabled.
+#[must_use]
+pub(crate) fn run_cbm_disable(target_any_move_disabled: bool) -> i32 {
+    if target_any_move_disabled {
+        -8
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Encore` (`data/battle_ai_scripts.s:422-424`, TS :3483-3485): a
+/// single `if_any_move_encored AI_TARGET, Score_Minus8` -- penalized when the
+/// target already has any move encored.
+#[must_use]
+pub(crate) fn run_cbm_encore(target_any_move_encored: bool) -> i32 {
+    if target_any_move_encored {
+        -8
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Memento` (`data/battle_ai_scripts.s:482-484`, TS :3568-3576): the
+/// two target stat-stage gates then a genuine fall-through into `run_cbm_
+/// baton_pass`'s own usable-party count gate -- Memento has no `end` of its
+/// own. Sequential JUMPs, never additive.
+#[must_use]
+pub(crate) fn run_cbm_memento(
+    target: &FactoryAiCheckBadMoveTarget,
+    attacker_usable_party_mons: u8,
+) -> i32 {
+    if target.atk_stage == MIN_STAT_STAGE {
+        return -10;
+    }
+    if target.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE) == MIN_STAT_STAGE {
+        return -8;
+    }
+    run_cbm_baton_pass(attacker_usable_party_mons)
+}
+
+/// `AI_CBM_Stockpile` (`data/battle_ai_scripts.s:511-514`, TS :3584-3586): a
+/// single `get_stockpile_count AI_USER; if_equal 3, Score_Minus10` --
+/// penalized when the AI's stockpile counter is already at its 3-count
+/// maximum.
+#[must_use]
+pub(crate) fn run_cbm_stockpile(attacker_stockpile_count: u8) -> i32 {
+    if attacker_stockpile_count == 3 {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Recycle` (`data/battle_ai_scripts.s:554-557`, TS :3625-3627): a
+/// single `get_used_held_item AI_USER; if_equal ITEM_NONE, Score_Minus10` --
+/// penalized when the AI has no used item left to recycle.
+#[must_use]
+pub(crate) fn run_cbm_recycle(attacker_used_held_item_id: u16) -> i32 {
+    if attacker_used_held_item_id == 0 {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_Imprison` (`data/battle_ai_scripts.s:559-561`, TS :3635-3637): a
+/// single `if_status3 AI_USER, STATUS3_IMPRISONED_OTHERS, Score_Minus10` --
+/// penalized when the AI is already imprisoning the target's moves.
+#[must_use]
+pub(crate) fn run_cbm_imprison(attacker_imprisoned_others: bool) -> i32 {
+    if attacker_imprisoned_others {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_MudSport` (`data/battle_ai_scripts.s:567-569`, TS :3645-3647): a
+/// single `if_status3 AI_USER, STATUS3_MUDSPORT, Score_Minus10` -- penalized
+/// when the effect is already up on the AI's side.
+#[must_use]
+pub(crate) fn run_cbm_mud_sport(attacker_mud_sport_up: bool) -> i32 {
+    if attacker_mud_sport_up {
+        -10
+    } else {
+        0
+    }
+}
+
+/// `AI_CBM_WaterSport` (`data/battle_ai_scripts.s:586-588`, TS :3655-3657): a
+/// single `if_status3 AI_USER, STATUS3_WATERSPORT, Score_Minus10` --
+/// penalized when the effect is already up on the AI's side.
+#[must_use]
+pub(crate) fn run_cbm_water_sport(attacker_water_sport_up: bool) -> i32 {
+    if attacker_water_sport_up {
+        -10
+    } else {
+        0
+    }
+}
+
 // === universal preamble ======================================================
 
 /// Mirrors `runCheckBadMovePreamble`'s input (`factoryAiCheckBadMove.ts:1259-1266`),
@@ -2132,6 +2682,136 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_ATTACK_UP(_2) -> AI_CBM_AttackUp
+    // (`data/battle_ai_scripts.s:96,127,249-251`, TS :1878-1888/956-958).
+    if move_row.effect == EFFECT_ATTACK_UP || move_row.effect == EFFECT_ATTACK_UP_2 {
+        let score_delta = run_cbm_attack_up(input.attacker.atk_stage);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_DEFENSE_UP(_2)/EFFECT_DEFENSE_CURL ->
+    // AI_CBM_DefenseUp (`data/battle_ai_scripts.s:109,134,186,253-255`, TS
+    // :1890-1903/969-971).
+    if move_row.effect == EFFECT_DEFENSE_UP
+        || move_row.effect == EFFECT_DEFENSE_UP_2
+        || move_row.effect == EFFECT_DEFENSE_CURL
+    {
+        let score_delta = run_cbm_defense_up(input.attacker.def_stage);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_BULK_UP -> AI_CBM_BulkUp
+    // (`data/battle_ai_scripts.s:210,581-584`, TS :1905-1914/990-992) -- a
+    // separate third stat-up handler reached on the CBM side only.
+    if move_row.effect == EFFECT_BULK_UP {
+        let score_delta = run_cbm_bulk_up(input.attacker.atk_stage, input.attacker.def_stage);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_CURSE -> AI_CBM_Curse
+    // (`data/battle_ai_scripts.s:164,434-437`, TS :1920-1927) -- byte-for-byte
+    // the same dual-stat body as AI_CBM_BulkUp, so it reuses run_cbm_bulk_up
+    // unchanged (doc §4: kept as its own separate dispatch arm, not folded
+    // into EFFECT_BULK_UP's arm above).
+    if move_row.effect == EFFECT_CURSE {
+        let score_delta = run_cbm_bulk_up(input.attacker.atk_stage, input.attacker.def_stage);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPEED_UP(_2) -> AI_CBM_SpeedUp
+    // (`data/battle_ai_scripts.s:110,135,257-259`, TS :1929-1938/1001-1003).
+    if move_row.effect == EFFECT_SPEED_UP || move_row.effect == EFFECT_SPEED_UP_2 {
+        let score_delta =
+            run_cbm_speed_up(input.attacker.speed_stage.unwrap_or(DEFAULT_STAT_STAGE));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_ATTACK_UP(_2) ->
+    // AI_CBM_SpAtkUp (`data/battle_ai_scripts.s:111,136,261-263`, TS
+    // :1940-1949/1011-1013).
+    if move_row.effect == EFFECT_SPECIAL_ATTACK_UP || move_row.effect == EFFECT_SPECIAL_ATTACK_UP_2
+    {
+        let score_delta =
+            run_cbm_sp_atk_up(input.attacker.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_DEFENSE_UP(_2) ->
+    // AI_CBM_SpDefUp (`data/battle_ai_scripts.s:112,137,265-267`, TS
+    // :1954-1961/2672-2674).
+    if move_row.effect == EFFECT_SPECIAL_DEFENSE_UP
+        || move_row.effect == EFFECT_SPECIAL_DEFENSE_UP_2
+    {
+        let score_delta =
+            run_cbm_sp_def_up(input.attacker.sp_def_stage.unwrap_or(DEFAULT_STAT_STAGE));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_COSMIC_POWER -> AI_CBM_CosmicPower
+    // (`data/battle_ai_scripts.s:576-579`, TS :1966-1976/1032-1034) -- a
+    // separate dual-stat handler (DEF then SPDEF), not an alias of
+    // AI_CBM_DefenseUp.
+    if move_row.effect == EFFECT_COSMIC_POWER {
+        let score_delta = run_cbm_cosmic_power(
+            input.attacker.def_stage,
+            input.attacker.sp_def_stage.unwrap_or(DEFAULT_STAT_STAGE),
+        );
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_CALM_MIND -> AI_CBM_CalmMind
+    // (`data/battle_ai_scripts.s:590-593`, TS :1981-1991/1042-1044) -- a
+    // separate dual-stat handler (SPATK then SPDEF), not an alias of
+    // AI_CBM_SpAtkUp.
+    if move_row.effect == EFFECT_CALM_MIND {
+        let score_delta = run_cbm_calm_mind(
+            input.attacker.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE),
+            input.attacker.sp_def_stage.unwrap_or(DEFAULT_STAT_STAGE),
+        );
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_DRAGON_DANCE -> AI_CBM_DragonDance
+    // (`data/battle_ai_scripts.s:213,595-598`, TS :1996-2006/1061-1063) -- the
+    // same dual-stat shape as BulkUp/CalmMind with STAT_SPEED as the second,
+    // lighter stat.
+    if move_row.effect == EFFECT_DRAGON_DANCE {
+        let score_delta = run_cbm_dragon_dance(
+            input.attacker.atk_stage,
+            input.attacker.speed_stage.unwrap_or(DEFAULT_STAT_STAGE),
+        );
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_LIGHT_SCREEN -> AI_CBM_LightScreen
+    // (`data/battle_ai_scripts.s:354-356`, TS :2011-2018/1079-1081) -- a
+    // single AI_USER-own-side-status bit test, zero stat-stage/ability reads.
+    if move_row.effect == EFFECT_LIGHT_SCREEN {
+        let score_delta = run_cbm_light_screen(input.attacker.light_screen_up.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_REFLECT -> AI_CBM_Reflect
+    // (`data/battle_ai_scripts.s:393-395`, TS :2023-2030/1089-1091), the same
+    // shape as LightScreen with SIDE_STATUS_REFLECT swapped in.
+    if move_row.effect == EFFECT_REFLECT {
+        let score_delta = run_cbm_reflect(input.attacker.reflect_up.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_EVASION_UP(_2)/EFFECT_MINIMIZE ->
+    // AI_CBM_EvasionUp (`data/battle_ai_scripts.s:114,139,163,273-275`, TS
+    // :2035-2046/1111-1113) -- reads AI_USER's own state, same shape as
+    // AttackUp/DefenseUp/etc.
+    if move_row.effect == EFFECT_EVASION_UP
+        || move_row.effect == EFFECT_EVASION_UP_2
+        || move_row.effect == EFFECT_MINIMIZE
+    {
+        let score_delta =
+            run_cbm_evasion_up(input.attacker.evasion_stage.unwrap_or(DEFAULT_STAT_STAGE));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: EFFECT_EVASION_DOWN(_2) -> AI_CBM_EvasionDown
     // (`data/battle_ai_scripts.s:121,146,306-312`, TS :2050-2059/1123-1130).
     if move_row.effect == EFFECT_EVASION_DOWN || move_row.effect == EFFECT_EVASION_DOWN_2 {
@@ -2300,6 +2980,23 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_SAFEGUARD -> AI_CBM_Safeguard
+    // (`data/battle_ai_scripts.s:174,478-480`, TS :2263-2270/3031-3033): the
+    // AI's own Safeguard bit rejects at -8, same bare shape as
+    // LightScreen/Reflect.
+    if move_row.effect == EFFECT_SAFEGUARD {
+        let score_delta = run_cbm_safeguard(input.attacker.safeguard_up.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SNORE/EFFECT_SLEEP_TALK ->
+    // AI_CBM_DamageDuringSleep (`data/battle_ai_scripts.s:158-159,426-428`,
+    // TS :2275-2282/3042-3044): the user not being asleep rejects at -8.
+    if move_row.effect == EFFECT_SNORE || move_row.effect == EFFECT_SLEEP_TALK {
+        let score_delta = run_cbm_damage_during_sleep(input.attacker.is_asleep.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: EFFECT_EXPLOSION -> AI_CBM_Explosion
     // (`data/battle_ai_scripts.s:106,224-235`, TS :2287-2303/3056-3085): type
     // x0, Damp, and the paired usable-party gates.
@@ -2319,11 +3016,70 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_BATON_PASS -> AI_CBM_BatonPass
+    // (`data/battle_ai_scripts.s:176,485-488`, TS :2308-2315/3093-3095):
+    // AI_USER's own usable party count zero rejects at -10.
+    if move_row.effect == EFFECT_BATON_PASS {
+        let score_delta = run_cbm_baton_pass(input.attacker.usable_party_mons.unwrap_or(0));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_SUBSTITUTE -> AI_CBM_Substitute
+    // (`data/battle_ai_scripts.s:150,405-408`, TS :2320-2327/3105-3113): own
+    // substitute up rejects at -8; own HP% under 26 rejects at -10.
+    if move_row.effect == EFFECT_SUBSTITUTE {
+        let score_delta = run_cbm_substitute(&input.attacker);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: EFFECT_DREAM_EATER -> AI_CBM_DreamEater
     // (`data/battle_ai_scripts.s:107,242-245`, TS :2332-2339/3123-3131):
     // target not asleep rejects at -8; asleep-but-x0 rejects at -10.
     if move_row.effect == EFFECT_DREAM_EATER {
         let score_delta = run_cbm_dream_eater(move_row.move_type, target);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_MEAN_LOOK -> AI_CBM_CantEscape
+    // (`data/battle_ai_scripts.s:161,430-433`, TS :2344-2351/3140-3142):
+    // target already trapped rejects at -10.
+    if move_row.effect == EFFECT_MEAN_LOOK {
+        let score_delta = run_cbm_cant_escape(target.is_escape_prevented.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_TORMENT -> AI_CBM_Torment
+    // (`data/battle_ai_scripts.s:192,527-529`, TS :2356-2363/3149-3151):
+    // target already tormented rejects at -10.
+    if move_row.effect == EFFECT_TORMENT {
+        let score_delta = run_cbm_torment(target.is_tormented.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_HELPING_HAND -> AI_CBM_HelpingHand
+    // (`data/battle_ai_scripts.s:197,541-543`, TS :2371-2378/3264-3266): a
+    // single `if_not_double_battle Score_Minus10`. This engine models singles
+    // only, so the check is always true and Helping Hand always scores -10.
+    if move_row.effect == EFFECT_HELPING_HAND {
+        let score_delta = run_cbm_helping_hand();
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_TICKLE -> AI_CBM_Tickle
+    // (`data/battle_ai_scripts.s:208,571-574`, TS :2384-2391/3311-3314): the
+    // same dual-stat shape as AI_CBM_BulkUp/Curse but reading AI_TARGET's OWN
+    // ATK then DEF at MIN_STAT_STAGE.
+    if move_row.effect == EFFECT_TICKLE {
+        let score_delta = run_cbm_tickle(target.atk_stage, target.def_stage);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_BELLY_DRUM -> AI_CBM_BellyDrum
+    // (`data/battle_ai_scripts.s:180,247-251`, TS :2397-2404/3286-3294):
+    // AI_USER's own HP% below 51 JUMPs to -10, then FALLS THROUGH into
+    // AI_CBM_AttackUp's own own-ATK MAX_STAT_STAGE gate (also -10).
+    if move_row.effect == EFFECT_BELLY_DRUM {
+        let score_delta = run_cbm_belly_drum(&input.attacker);
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
@@ -2347,6 +3103,17 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_ACCURACY_UP(_2) -> AI_CBM_AccUp
+    // (`data/battle_ai_scripts.s:113,138,269-271`, TS :2421-2436/3380-3382):
+    // byte-for-byte the same bare MAX_STAT_STAGE-on-AI_USER's-own-stage shape
+    // as AttackUp/SpeedUp with STAT_ACC swapped in. Vestigial in Gen 3 (no
+    // move carries either effect), but the table entry is source-complete
+    // here all the same.
+    if move_row.effect == EFFECT_ACCURACY_UP || move_row.effect == EFFECT_ACCURACY_UP_2 {
+        let score_delta = run_cbm_acc_up(input.attacker.acc_stage.unwrap_or(DEFAULT_STAT_STAGE));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: EFFECT_SPECIAL_ATTACK_DOWN(_2) ->
     // AI_CBM_SpAtkDown (`data/battle_ai_scripts.s:118,143,292-294`, TS
     // :2446-2455/3404-3411) -- vestigial in Gen 3 (no move carries either
@@ -2365,6 +3132,52 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
+    // AI_CheckBadMove_CheckEffect: EFFECT_HAZE -> AI_CBM_Haze
+    // (`data/battle_ai_scripts.s:122,314-332`, TS :2457-2471/3435-3454): seven
+    // own-stat-lowered-below-default gates then seven target-stat-raised-
+    // above-default gates, all falling through to zero; only the all-clear
+    // path scores -10.
+    if move_row.effect == EFFECT_HAZE {
+        let score_delta = run_cbm_haze(&input.attacker, target);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_PSYCH_UP -> AI_CBM_Haze
+    // (`data/battle_ai_scripts.s:181,314-332`, TS :2473-2484): Psych Up has
+    // no separate handler on the CheckBadMove side -- its table entry
+    // dispatches straight to AI_CBM_Haze's own body unchanged (doc §4: kept
+    // as its own separate dispatch arm, not folded into EFFECT_HAZE's arm
+    // above).
+    if move_row.effect == EFFECT_PSYCH_UP {
+        let score_delta = run_cbm_haze(&input.attacker, target);
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_MIST -> AI_CBM_Mist
+    // (`data/battle_ai_scripts.s:130,378-380`, TS :2491-2498/3463-3465): the
+    // same bare shape as LightScreen/Reflect/Safeguard with SIDE_STATUS_MIST
+    // swapped in.
+    if move_row.effect == EFFECT_MIST {
+        let score_delta = run_cbm_mist(input.attacker.mist_up.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_DISABLE -> AI_CBM_Disable
+    // (`data/battle_ai_scripts.s:153,418-420`, TS :2505-2512/3473-3475):
+    // penalized when the target already has any move disabled.
+    if move_row.effect == EFFECT_DISABLE {
+        let score_delta = run_cbm_disable(target.any_move_disabled.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_ENCORE -> AI_CBM_Encore
+    // (`data/battle_ai_scripts.s:157,422-424`, TS :2519-2526/3483-3485):
+    // penalized when the target already has any move encored.
+    if move_row.effect == EFFECT_ENCORE {
+        let score_delta = run_cbm_encore(target.any_move_encored.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
     // AI_CheckBadMove_CheckEffect: EFFECT_ATTRACT -> AI_CBM_Attract
     // (`data/battle_ai_scripts.s:170,456-476`, TS :2534-2543/3523-3547):
     // target already infatuated JUMPs to -10; one fresh target ability read
@@ -2376,6 +3189,25 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
             draws[draw_count as usize] = draw;
             draw_count += 1;
         }
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_MEMENTO -> AI_CBM_Memento
+    // (`data/battle_ai_scripts.s:195,482-484`, TS :2549-2556/3568-3576): the
+    // two target stat-stage gates then a genuine fall-through into
+    // AI_CBM_BatonPass's own usable-party count gate -- Memento has no `end`
+    // of its own.
+    if move_row.effect == EFFECT_MEMENTO {
+        let score_delta = run_cbm_memento(target, input.attacker.usable_party_mons.unwrap_or(0));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_STOCKPILE -> AI_CBM_Stockpile
+    // (`data/battle_ai_scripts.s:188,511-514`, TS :2563-2570/3584-3586):
+    // penalized when the AI's stockpile counter is already at its 3-count
+    // maximum.
+    if move_row.effect == EFFECT_STOCKPILE {
+        let score_delta = run_cbm_stockpile(input.attacker.stockpile_count.unwrap_or(0));
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
@@ -2391,6 +3223,38 @@ pub fn run_check_bad_move_preamble(input: CheckBadMovePreambleInput) -> CheckBad
             target,
             input.attacker.stockpile_count.unwrap_or(0),
         );
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_RECYCLE -> AI_CBM_Recycle
+    // (`data/battle_ai_scripts.s:201,554-557`, TS :2591-2598/3625-3627):
+    // penalized when the AI has no used item left to recycle.
+    if move_row.effect == EFFECT_RECYCLE {
+        let score_delta = run_cbm_recycle(input.attacker.used_held_item_id.unwrap_or(0));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_IMPRISON -> AI_CBM_Imprison
+    // (`data/battle_ai_scripts.s:204,559-561`, TS :2604-2611/3635-3637):
+    // penalized when the AI is already imprisoning the target's moves.
+    if move_row.effect == EFFECT_IMPRISON {
+        let score_delta = run_cbm_imprison(input.attacker.imprisoned_others.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_MUD_SPORT -> AI_CBM_MudSport
+    // (`data/battle_ai_scripts.s:207,567-569`, TS :2617-2624/3645-3647):
+    // penalized when the effect is already up on the AI's side.
+    if move_row.effect == EFFECT_MUD_SPORT {
+        let score_delta = run_cbm_mud_sport(input.attacker.mud_sport_up.unwrap_or(false));
+        return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
+    }
+
+    // AI_CheckBadMove_CheckEffect: EFFECT_WATER_SPORT -> AI_CBM_WaterSport
+    // (`data/battle_ai_scripts.s:211,586-588`, TS :2630-2637/3655-3657):
+    // penalized when the effect is already up on the AI's side.
+    if move_row.effect == EFFECT_WATER_SPORT {
+        let score_delta = run_cbm_water_sport(input.attacker.water_sport_up.unwrap_or(false));
         return CheckBadMoveResult::Scored { rng, draws, draw_count, score_delta };
     }
 
@@ -2712,20 +3576,12 @@ mod tests {
     // === completeness-probe machinery ============================================
 
     #[test]
-    fn unported_returns_44_effects_after_m5b2_lands() {
+    fn unported_returns_zero_effects_after_m5b3_lands() {
         assert_eq!(CBM_HANDLED_EFFECTS_M5B1.len(), 32);
         assert_eq!(CBM_HANDLED_EFFECTS_M5B2.len(), 33);
-        assert_eq!(cbm_handled_effects().len(), 65);
-        let unported = unported_cbm_table_effects();
-        assert_eq!(unported.len(), 44);
-        let handled = cbm_handled_effects();
-        let mut expected: Vec<u16> = CBM_TABLE_EFFECTS
-            .iter()
-            .copied()
-            .filter(|effect| !handled.contains(effect))
-            .collect();
-        expected.sort_unstable();
-        assert_eq!(unported, expected);
+        assert_eq!(CBM_HANDLED_EFFECTS_M5B3.len(), 44);
+        assert_eq!(cbm_handled_effects().len(), 109);
+        assert!(unported_cbm_table_effects().is_empty());
     }
 
     #[test]
@@ -2952,14 +3808,16 @@ mod tests {
     #[test]
     fn ordinary_power_1_move_skips_the_type_immunity_check_unlike_ohko() {
         // Contrast case: MOVE_MEAN_LOOK (power 0, EFFECT_MEAN_LOOK, not
-        // FISSURE/HORN_DRILL, still unported after M5b-1) is movePowerOther,
-        // so the immunity block never runs even against Normal-vs-Ghost's
-        // genuine 0x matchup (attacking_type=0 -> defending_type=7,
-        // multiplier_tenths=0, the same pairing as the Horn Drill test
-        // above) -- it falls through to the table barrier instead of
-        // scoring -10. (M5b-0 originally used MOVE_PSYWAVE here; M5b-1 ports
-        // EFFECT_PSYWAVE into the HighRiskForDamage cluster, so this pin
-        // moved to a still-unported effect with the same 0x-immunity shape.)
+        // FISSURE/HORN_DRILL) is movePowerOther, so the immunity block never
+        // runs even against Normal-vs-Ghost's genuine 0x matchup
+        // (attacking_type=0 -> defending_type=7, multiplier_tenths=0, the
+        // same pairing as the Horn Drill test above) -- it scores via
+        // AI_CBM_CantEscape's own handler (target not escape-prevented, so
+        // 0), not the type-immunity -10 the OHKO short-circuit would give.
+        // (M5b-0 originally used MOVE_PSYWAVE here; M5b-1 then M5b-3 ported
+        // EFFECT_PSYWAVE/EFFECT_MEAN_LOOK, so this pin moved to
+        // EFFECT_MEAN_LOOK, still with the same 0x-immunity shape, now that
+        // the table is fully ported and no still-unported effect remains.)
         let t = target(
             SHUCKLE,
             [TYPE_GHOST, TYPE_GHOST],
@@ -2967,9 +3825,13 @@ mod tests {
             ABILITY_STURDY,
         );
         let result = run(212 /* MOVE_MEAN_LOOK */, t, RNG_SEED);
+        let CheckBadMoveResult::Scored { score_delta, draw_count, .. } = result else {
+            panic!("expected Scored, got {result:?}")
+        };
+        assert_eq!(score_delta, 0);
         assert_eq!(
-            result,
-            CheckBadMoveResult::NotYetPorted { effect: EFFECT_MEAN_LOOK, move_id: 212 }
+            draw_count, 0,
+            "known ability short-circuits every draw site"
         );
     }
 
@@ -3009,18 +3871,18 @@ mod tests {
     }
 
     #[test]
-    fn every_still_unported_table_effect_halts_at_the_notyetported_barrier() {
-        // Sweeps every still-unported table effect after M5b-2 (skipping
-        // those with no real Gen-3 move, matching TS's "skipped in both
-        // directions" comment, test.ts:1517-1518) against the
+    fn every_table_effects_first_move_now_scores_the_barrier_is_dry() {
+        // M5b-3 completes the 109-effect table (doc §3, mirroring TS's own
+        // "unsupported-branch"-is-now-unreachable precedent, test:1522-1528):
+        // `unported_cbm_table_effects()` is empty, so there is no longer any
+        // move that can reach `NotYetPorted`. This is the converse of the
+        // now-retired `every_still_unported_table_effect_halts_at_the_
+        // notyetported_barrier` sweep -- every table effect's first
+        // reachable Gen-3 move scores instead, against the same
         // GENERIC_BARRIER_TARGET-equivalent fixture (test.ts:1484-1493):
-        // single-ability known Sturdy, so every preamble draw short-circuits
-        // and every still-unported table-effect move reaches the barrier
-        // untouched. All 32 M5b-1 effects have a real move, and 28 of
-        // M5b-2's 33 do (5 vestigial: SPECIAL_ATTACK_DOWN(+_2)/
-        // SPECIAL_DEFENSE_DOWN/ACCURACY_DOWN_2/EVASION_DOWN_2, verified
-        // against src/data/gen/moves.json), so this drops from 99 to
-        // 39 = 99 - 32 - 28.
+        // single-ability known Sturdy, so every preamble draw
+        // short-circuits.
+        assert!(unported_cbm_table_effects().is_empty());
         let t = target(
             SHUCKLE,
             [TYPE_PSYCHIC, TYPE_PSYCHIC],
@@ -3028,17 +3890,15 @@ mod tests {
             ABILITY_STURDY,
         );
         let mut checked = 0;
-        for effect in unported_cbm_table_effects() {
+        for &effect in CBM_TABLE_EFFECTS.iter() {
             if let Some(move_id) = first_move_id_with_effect(effect) {
-                assert_eq!(
-                    run(move_id, t, RNG_SEED),
-                    CheckBadMoveResult::NotYetPorted { effect, move_id },
-                    "effect {effect} move {move_id}"
-                );
+                let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                    panic!("effect {effect} move {move_id}: expected Scored once fully ported");
+                };
                 checked += 1;
             }
         }
-        assert_eq!(checked, 39);
+        assert_eq!(checked, 99);
     }
 
     #[test]
@@ -3094,6 +3954,36 @@ mod tests {
             checked += 1;
         }
         assert_eq!(checked, 28);
+    }
+
+    #[test]
+    fn every_m5b3_handled_effect_with_a_real_move_scores_instead_of_halting() {
+        // The M5b-3 counterpart of the two sweeps above. 5 of M5b-3's 44
+        // effects are vestigial (no real Gen-3 move -- SPEED_UP,
+        // SPECIAL_DEFENSE_UP, EVASION_UP_2, ACCURACY_UP, ACCURACY_UP_2;
+        // verified directly against src/data/gen/moves.json), so those are
+        // skipped here (each is still covered directly by its own
+        // handler-direct native test below) and the dispatch-reachable
+        // count is 39, not 44.
+        let t = target(
+            SHUCKLE,
+            [TYPE_PSYCHIC, TYPE_PSYCHIC],
+            Some(ABILITY_STURDY),
+            ABILITY_STURDY,
+        );
+        let mut checked = 0;
+        for &effect in CBM_HANDLED_EFFECTS_M5B3.iter() {
+            let Some(move_id) = first_move_id_with_effect(effect) else {
+                continue;
+            };
+            let CheckBadMoveResult::Scored { .. } = run(move_id, t, RNG_SEED) else {
+                panic!(
+                    "effect {effect} move {move_id}: expected Scored, M5b-3 handles this effect"
+                );
+            };
+            checked += 1;
+        }
+        assert_eq!(checked, 39);
     }
 
     #[test]
@@ -5165,6 +6055,568 @@ mod tests {
                 assert_eq!(draw.random_value, c.draw.random_value, "{ctx}");
                 assert_eq!(draw.guessed_ability, c.draw.guessed_ability, "{ctx}");
             }
+        }
+    }
+
+    // === M5b-3: stat-UP family (TS :956-1063, test.ts:2484-2913) =================
+
+    #[test]
+    fn attack_up_branches_on_max_stat_stage() {
+        assert_eq!(run_cbm_attack_up(MAX_STAT_STAGE), -10);
+        assert_eq!(run_cbm_attack_up(MAX_STAT_STAGE - 1), 0);
+        assert_eq!(run_cbm_attack_up(0), 0);
+    }
+
+    #[test]
+    fn attack_up_dispatch_reaches_the_handler_for_both_effects() {
+        for move_id in [
+            96u16, /* Meditate, EFFECT_ATTACK_UP */
+            14,    /* Swords Dance, EFFECT_ATTACK_UP_2 */
+        ] {
+            let attacker =
+                FactoryAiCheckBadMoveAttacker { atk_stage: MAX_STAT_STAGE, ..neutral_attacker() };
+            let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+            let result = run_with_attacker(move_id, t, RNG_SEED, attacker);
+            let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+                panic!("expected Scored")
+            };
+            assert_eq!(score_delta, -10, "move {move_id}");
+        }
+    }
+
+    #[test]
+    fn defense_up_branches_on_max_stat_stage() {
+        assert_eq!(run_cbm_defense_up(MAX_STAT_STAGE), -10);
+        assert_eq!(run_cbm_defense_up(MAX_STAT_STAGE - 1), 0);
+    }
+
+    #[test]
+    fn defense_curl_dispatch_reuses_the_defense_up_handler() {
+        // EFFECT_DEFENSE_CURL has no AI_CV_* counterpart at all; only its CBM
+        // half is reachable (doc §2 M5b-3, TS :1892-1903).
+        let attacker =
+            FactoryAiCheckBadMoveAttacker { def_stage: MAX_STAT_STAGE, ..neutral_attacker() };
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let result = run_with_attacker(111 /* Defense Curl */, t, RNG_SEED, attacker);
+        let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, -10);
+    }
+
+    #[test]
+    fn bulk_up_composes_attack_up_and_its_own_def_gate_additively() {
+        // TS :990-992 sums both gates (`+`), unlike Memento/BellyDrum's own
+        // early-return sequential shape -- both maxed stacks to -18.
+        assert_eq!(run_cbm_bulk_up(MAX_STAT_STAGE, MAX_STAT_STAGE), -18);
+        assert_eq!(run_cbm_bulk_up(MAX_STAT_STAGE, DEFAULT_STAT_STAGE), -10);
+        assert_eq!(run_cbm_bulk_up(DEFAULT_STAT_STAGE, MAX_STAT_STAGE), -8);
+        assert_eq!(run_cbm_bulk_up(DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE), 0);
+    }
+
+    #[test]
+    fn curse_and_bulk_up_score_identically_given_identical_stages() {
+        // doc §4: EFFECT_CURSE reuses run_cbm_bulk_up unchanged via its own
+        // separate dispatch arm -- proven here through the full dispatcher
+        // for both effects, not just by calling the same Rust function.
+        for (atk, def) in [
+            (MAX_STAT_STAGE, MAX_STAT_STAGE),
+            (MAX_STAT_STAGE, 0),
+            (0, MAX_STAT_STAGE),
+            (0, 0),
+        ] {
+            let attacker = FactoryAiCheckBadMoveAttacker {
+                atk_stage: atk,
+                def_stage: def,
+                ..neutral_attacker()
+            };
+            let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+            let bulk_up = run_with_attacker(339 /* Bulk Up */, t, RNG_SEED, attacker);
+            let curse = run_with_attacker(174 /* Curse */, t, RNG_SEED, attacker);
+            let (
+                CheckBadMoveResult::Scored { score_delta: bulk_up_score, .. },
+                CheckBadMoveResult::Scored { score_delta: curse_score, .. },
+            ) = (bulk_up, curse)
+            else {
+                panic!("expected both Scored")
+            };
+            assert_eq!(bulk_up_score, curse_score, "atk={atk} def={def}");
+            assert_eq!(bulk_up_score, run_cbm_bulk_up(atk, def));
+        }
+    }
+
+    #[test]
+    fn speed_up_branches_on_max_stat_stage_with_default_fallback() {
+        assert_eq!(run_cbm_speed_up(MAX_STAT_STAGE), -10);
+        assert_eq!(run_cbm_speed_up(DEFAULT_STAT_STAGE), 0);
+    }
+
+    #[test]
+    fn sp_atk_up_branches_on_max_stat_stage() {
+        assert_eq!(run_cbm_sp_atk_up(MAX_STAT_STAGE), -10);
+        assert_eq!(run_cbm_sp_atk_up(DEFAULT_STAT_STAGE), 0);
+    }
+
+    #[test]
+    fn sp_def_up_branches_on_max_stat_stage() {
+        assert_eq!(run_cbm_sp_def_up(MAX_STAT_STAGE), -10);
+        assert_eq!(run_cbm_sp_def_up(DEFAULT_STAT_STAGE), 0);
+    }
+
+    #[test]
+    fn cosmic_power_composes_defense_up_and_its_own_spdef_gate_additively() {
+        // TS :1032-1034 sums both gates (`+`) -- both maxed stacks to -18.
+        assert_eq!(run_cbm_cosmic_power(MAX_STAT_STAGE, MAX_STAT_STAGE), -18);
+        assert_eq!(
+            run_cbm_cosmic_power(MAX_STAT_STAGE, DEFAULT_STAT_STAGE),
+            -10
+        );
+        assert_eq!(run_cbm_cosmic_power(DEFAULT_STAT_STAGE, MAX_STAT_STAGE), -8);
+        assert_eq!(
+            run_cbm_cosmic_power(DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE),
+            0
+        );
+    }
+
+    #[test]
+    fn calm_mind_composes_sp_atk_up_and_its_own_spdef_gate_additively() {
+        // TS :1042-1044 sums both gates (`+`) -- both maxed stacks to -18.
+        assert_eq!(run_cbm_calm_mind(MAX_STAT_STAGE, MAX_STAT_STAGE), -18);
+        assert_eq!(run_cbm_calm_mind(MAX_STAT_STAGE, DEFAULT_STAT_STAGE), -10);
+        assert_eq!(run_cbm_calm_mind(DEFAULT_STAT_STAGE, MAX_STAT_STAGE), -8);
+        assert_eq!(run_cbm_calm_mind(DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE), 0);
+    }
+
+    #[test]
+    fn dragon_dance_composes_attack_up_and_its_own_speed_gate_additively() {
+        // TS :1061-1063 sums both gates (`+`) -- both maxed stacks to -18.
+        assert_eq!(run_cbm_dragon_dance(MAX_STAT_STAGE, MAX_STAT_STAGE), -18);
+        assert_eq!(
+            run_cbm_dragon_dance(MAX_STAT_STAGE, DEFAULT_STAT_STAGE),
+            -10
+        );
+        assert_eq!(run_cbm_dragon_dance(DEFAULT_STAT_STAGE, MAX_STAT_STAGE), -8);
+        assert_eq!(
+            run_cbm_dragon_dance(DEFAULT_STAT_STAGE, DEFAULT_STAT_STAGE),
+            0
+        );
+    }
+
+    #[test]
+    fn stat_up_dispatch_sweep_reaches_every_composed_handler() {
+        // CosmicPower/CalmMind/DragonDance/SpDefUp dispatch, sourced from
+        // real Gen-3 moves, sweeping both-maxed (additive -18) and
+        // neither-maxed stages.
+        for (move_id, atk, def, speed, sp_atk, sp_def, expected) in [
+            (
+                322u16, /* Cosmic Power */
+                6u8,
+                MAX_STAT_STAGE,
+                6u8,
+                6u8,
+                MAX_STAT_STAGE,
+                -18,
+            ),
+            (322, 6, DEFAULT_STAT_STAGE, 6, 6, MAX_STAT_STAGE, -8),
+            (322, 6, DEFAULT_STAT_STAGE, 6, 6, DEFAULT_STAT_STAGE, 0),
+            (
+                347, /* Calm Mind */
+                6,
+                6,
+                6,
+                MAX_STAT_STAGE,
+                MAX_STAT_STAGE,
+                -18,
+            ),
+            (347, 6, 6, 6, DEFAULT_STAT_STAGE, MAX_STAT_STAGE, -8),
+            (
+                349, /* Dragon Dance */
+                MAX_STAT_STAGE,
+                6,
+                MAX_STAT_STAGE,
+                6,
+                6,
+                -18,
+            ),
+            (349, MAX_STAT_STAGE, 6, DEFAULT_STAT_STAGE, 6, 6, -10),
+        ] {
+            let attacker = FactoryAiCheckBadMoveAttacker {
+                atk_stage: atk,
+                def_stage: def,
+                speed_stage: Some(speed),
+                sp_atk_stage: Some(sp_atk),
+                sp_def_stage: Some(sp_def),
+                ..neutral_attacker()
+            };
+            let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+            let result = run_with_attacker(move_id, t, RNG_SEED, attacker);
+            let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+                panic!("move {move_id}: expected Scored")
+            };
+            assert_eq!(score_delta, expected, "move {move_id}");
+        }
+    }
+
+    // === M5b-3: screens + Evasion Up/Minimize (TS :1079-1113, ====================
+    // test.ts:3050-3175) ===========================================================
+
+    #[test]
+    fn light_screen_branches_on_own_side_status() {
+        assert_eq!(run_cbm_light_screen(true), -8);
+        assert_eq!(run_cbm_light_screen(false), 0);
+    }
+
+    #[test]
+    fn reflect_branches_on_own_side_status() {
+        assert_eq!(run_cbm_reflect(true), -8);
+        assert_eq!(run_cbm_reflect(false), 0);
+    }
+
+    #[test]
+    fn evasion_up_branches_on_max_stat_stage_with_default_fallback() {
+        assert_eq!(run_cbm_evasion_up(MAX_STAT_STAGE), -10);
+        assert_eq!(run_cbm_evasion_up(DEFAULT_STAT_STAGE), 0);
+    }
+
+    #[test]
+    fn minimize_dispatch_reuses_the_evasion_up_handler() {
+        let attacker = FactoryAiCheckBadMoveAttacker {
+            evasion_stage: Some(MAX_STAT_STAGE),
+            ..neutral_attacker()
+        };
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let result = run_with_attacker(107 /* Minimize */, t, RNG_SEED, attacker);
+        let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+            panic!("expected Scored")
+        };
+        assert_eq!(score_delta, -10);
+    }
+
+    // === M5b-3: AccUp (vestigial dispatch, TS `runCbmAccUp` :3380-3382) ===========
+
+    #[test]
+    fn acc_up_branches_on_max_stat_stage_with_default_fallback() {
+        assert_eq!(run_cbm_acc_up(MAX_STAT_STAGE), -10);
+        assert_eq!(run_cbm_acc_up(DEFAULT_STAT_STAGE), 0);
+    }
+
+    // === M5b-3: Safeguard, Snore/Sleep Talk (TS :3031-3044, ========================
+    // test.ts:3546-3629) ===========================================================
+
+    #[test]
+    fn safeguard_branches_on_own_side_status() {
+        assert_eq!(run_cbm_safeguard(true), -8);
+        assert_eq!(run_cbm_safeguard(false), 0);
+    }
+
+    #[test]
+    fn damage_during_sleep_branches_on_own_asleep_status() {
+        assert_eq!(run_cbm_damage_during_sleep(true), 0);
+        assert_eq!(run_cbm_damage_during_sleep(false), -8);
+    }
+
+    #[test]
+    fn snore_and_sleep_talk_dispatch_share_the_handler() {
+        for move_id in [173u16 /* Snore */, 214 /* Sleep Talk */] {
+            let attacker =
+                FactoryAiCheckBadMoveAttacker { is_asleep: Some(false), ..neutral_attacker() };
+            let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+            let result = run_with_attacker(move_id, t, RNG_SEED, attacker);
+            let CheckBadMoveResult::Scored { score_delta, .. } = result else {
+                panic!("move {move_id}: expected Scored")
+            };
+            assert_eq!(score_delta, -8, "move {move_id}");
+        }
+    }
+
+    // === M5b-3: Baton Pass, Substitute (TS :3093-3113, test.ts:3694-4012) ========
+
+    #[test]
+    fn baton_pass_branches_on_zero_usable_party() {
+        assert_eq!(run_cbm_baton_pass(0), -10);
+        assert_eq!(run_cbm_baton_pass(1), 0);
+    }
+
+    #[test]
+    fn substitute_own_substitute_up_scores_minus8_before_the_hp_check() {
+        let attacker = FactoryAiCheckBadMoveAttacker {
+            has_substitute: Some(true),
+            hp: Some(1),
+            max_hp: Some(100),
+            ..neutral_attacker()
+        };
+        assert_eq!(run_cbm_substitute(&attacker), -8);
+    }
+
+    #[test]
+    fn substitute_hp_percent_threshold_at_26() {
+        let below =
+            FactoryAiCheckBadMoveAttacker { hp: Some(25), max_hp: Some(100), ..neutral_attacker() };
+        let at =
+            FactoryAiCheckBadMoveAttacker { hp: Some(26), max_hp: Some(100), ..neutral_attacker() };
+        assert_eq!(run_cbm_substitute(&below), -10);
+        assert_eq!(run_cbm_substitute(&at), 0);
+    }
+
+    #[test]
+    fn substitute_truncates_hp_percent_like_cmd_if_hp_less_than() {
+        // 33/132 = 25% truncated (not 25.75), matching TS's Math.floor.
+        let t =
+            FactoryAiCheckBadMoveAttacker { hp: Some(33), max_hp: Some(132), ..neutral_attacker() };
+        assert_eq!(run_cbm_substitute(&t), -10);
+    }
+
+    // === M5b-3: Mean Look, Torment (TS :3140-3151, test.ts:3694-4012) ============
+
+    #[test]
+    fn cant_escape_branches_on_target_escape_prevented() {
+        assert_eq!(run_cbm_cant_escape(true), -10);
+        assert_eq!(run_cbm_cant_escape(false), 0);
+    }
+
+    #[test]
+    fn torment_branches_on_target_tormented() {
+        assert_eq!(run_cbm_torment(true), -10);
+        assert_eq!(run_cbm_torment(false), 0);
+    }
+
+    // === M5b-3: Helping Hand, Tickle, Belly Drum (TS :3264-3294, =================
+    // test.ts:3694-4012) ===========================================================
+
+    #[test]
+    fn helping_hand_is_the_constant_minus10() {
+        assert_eq!(run_cbm_helping_hand(), -10);
+    }
+
+    #[test]
+    fn tickle_dual_stat_gates_are_sequential_not_additive() {
+        assert_eq!(run_cbm_tickle(MIN_STAT_STAGE, MIN_STAT_STAGE), -18);
+        assert_eq!(run_cbm_tickle(6, MIN_STAT_STAGE), -8);
+        assert_eq!(run_cbm_tickle(MIN_STAT_STAGE, 6), -10);
+        assert_eq!(run_cbm_tickle(6, 6), 0);
+    }
+
+    #[test]
+    fn belly_drum_low_hp_jumps_before_the_attack_up_gate() {
+        let low_hp = FactoryAiCheckBadMoveAttacker {
+            atk_stage: MAX_STAT_STAGE, // would also gate -10, but HP wins first
+            hp: Some(50),
+            max_hp: Some(100),
+            ..neutral_attacker()
+        };
+        assert_eq!(run_cbm_belly_drum(&low_hp), -10);
+    }
+
+    #[test]
+    fn belly_drum_falls_through_to_attack_up_above_the_hp_floor() {
+        let maxed_atk = FactoryAiCheckBadMoveAttacker {
+            atk_stage: MAX_STAT_STAGE,
+            hp: Some(51),
+            max_hp: Some(100),
+            ..neutral_attacker()
+        };
+        let low_atk = FactoryAiCheckBadMoveAttacker {
+            atk_stage: 6,
+            hp: Some(100),
+            max_hp: Some(100),
+            ..neutral_attacker()
+        };
+        assert_eq!(run_cbm_belly_drum(&maxed_atk), -10);
+        assert_eq!(run_cbm_belly_drum(&low_atk), 0);
+    }
+
+    // === M5b-3: Haze, Psych Up, Mist, Disable, Encore (TS :3435-3485, ============
+    // test.ts:4150-4356) ===========================================================
+
+    fn haze_attacker_at(stage: u8) -> FactoryAiCheckBadMoveAttacker {
+        FactoryAiCheckBadMoveAttacker {
+            atk_stage: stage,
+            def_stage: stage,
+            speed_stage: Some(stage),
+            sp_atk_stage: Some(stage),
+            sp_def_stage: Some(stage),
+            acc_stage: Some(stage),
+            evasion_stage: Some(stage),
+            ..neutral_attacker()
+        }
+    }
+
+    fn haze_target_at(stage: u8) -> FactoryAiCheckBadMoveTarget {
+        FactoryAiCheckBadMoveTarget {
+            speed_stage: stage,
+            atk_stage: stage,
+            def_stage: stage,
+            sp_def_stage: stage,
+            acc_stage: Some(stage),
+            evasion_stage: Some(stage),
+            sp_atk_stage: Some(stage),
+            ..target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY)
+        }
+    }
+
+    #[test]
+    fn haze_scores_minus10_only_when_nothing_needs_resetting() {
+        let neutral_attacker = haze_attacker_at(DEFAULT_STAT_STAGE);
+        let neutral_target = haze_target_at(DEFAULT_STAT_STAGE);
+        assert_eq!(run_cbm_haze(&neutral_attacker, &neutral_target), -10);
+    }
+
+    #[test]
+    fn haze_each_of_the_seven_own_lowered_stats_short_circuits_to_zero() {
+        let neutral_target = haze_target_at(DEFAULT_STAT_STAGE);
+        let fields: [fn(FactoryAiCheckBadMoveAttacker) -> FactoryAiCheckBadMoveAttacker; 7] = [
+            |a| FactoryAiCheckBadMoveAttacker { atk_stage: 0, ..a },
+            |a| FactoryAiCheckBadMoveAttacker { def_stage: 0, ..a },
+            |a| FactoryAiCheckBadMoveAttacker { speed_stage: Some(0), ..a },
+            |a| FactoryAiCheckBadMoveAttacker { sp_atk_stage: Some(0), ..a },
+            |a| FactoryAiCheckBadMoveAttacker { sp_def_stage: Some(0), ..a },
+            |a| FactoryAiCheckBadMoveAttacker { acc_stage: Some(0), ..a },
+            |a| FactoryAiCheckBadMoveAttacker { evasion_stage: Some(0), ..a },
+        ];
+        for (i, lower) in fields.iter().enumerate() {
+            let attacker = lower(haze_attacker_at(DEFAULT_STAT_STAGE));
+            assert_eq!(
+                run_cbm_haze(&attacker, &neutral_target),
+                0,
+                "own-stat index {i}"
+            );
+        }
+    }
+
+    #[test]
+    fn haze_each_of_the_seven_target_raised_stats_short_circuits_to_zero() {
+        let neutral_attacker = haze_attacker_at(DEFAULT_STAT_STAGE);
+        let fields: [fn(FactoryAiCheckBadMoveTarget) -> FactoryAiCheckBadMoveTarget; 7] = [
+            |t| FactoryAiCheckBadMoveTarget { atk_stage: MAX_STAT_STAGE, ..t },
+            |t| FactoryAiCheckBadMoveTarget { def_stage: MAX_STAT_STAGE, ..t },
+            |t| FactoryAiCheckBadMoveTarget { speed_stage: MAX_STAT_STAGE, ..t },
+            |t| FactoryAiCheckBadMoveTarget { sp_atk_stage: Some(MAX_STAT_STAGE), ..t },
+            |t| FactoryAiCheckBadMoveTarget { sp_def_stage: MAX_STAT_STAGE, ..t },
+            |t| FactoryAiCheckBadMoveTarget { acc_stage: Some(MAX_STAT_STAGE), ..t },
+            |t| FactoryAiCheckBadMoveTarget { evasion_stage: Some(MAX_STAT_STAGE), ..t },
+        ];
+        for (i, raise) in fields.iter().enumerate() {
+            let target = raise(haze_target_at(DEFAULT_STAT_STAGE));
+            assert_eq!(
+                run_cbm_haze(&neutral_attacker, &target),
+                0,
+                "target-stat index {i}"
+            );
+        }
+    }
+
+    #[test]
+    fn haze_own_lowered_stat_is_checked_before_target_raised_stat() {
+        // Both a lowered own stat and a raised target stat present: the own
+        // gate is checked first in source order (TS :3436-3444), so it wins.
+        let attacker = haze_attacker_at(0);
+        let target = haze_target_at(MAX_STAT_STAGE);
+        assert_eq!(run_cbm_haze(&attacker, &target), 0);
+    }
+
+    #[test]
+    fn psych_up_and_haze_score_identically_given_identical_stages() {
+        // doc §4: EFFECT_PSYCH_UP reuses run_cbm_haze unchanged via its own
+        // separate dispatch arm -- proven here through the full dispatcher
+        // for both effects, not just by calling the same Rust function.
+        for stage in [0u8, DEFAULT_STAT_STAGE, MAX_STAT_STAGE] {
+            let attacker = haze_attacker_at(stage);
+            let t = haze_target_at(stage);
+            let haze = run_with_attacker(114 /* Haze */, t, RNG_SEED, attacker);
+            let psych_up = run_with_attacker(244 /* Psych Up */, t, RNG_SEED, attacker);
+            let (
+                CheckBadMoveResult::Scored { score_delta: haze_score, .. },
+                CheckBadMoveResult::Scored { score_delta: psych_up_score, .. },
+            ) = (haze, psych_up)
+            else {
+                panic!("expected both Scored")
+            };
+            assert_eq!(haze_score, psych_up_score, "stage={stage}");
+            assert_eq!(haze_score, run_cbm_haze(&attacker, &t));
+        }
+    }
+
+    #[test]
+    fn mist_branches_on_own_side_status() {
+        assert_eq!(run_cbm_mist(true), -8);
+        assert_eq!(run_cbm_mist(false), 0);
+    }
+
+    #[test]
+    fn disable_branches_on_target_any_move_disabled() {
+        assert_eq!(run_cbm_disable(true), -8);
+        assert_eq!(run_cbm_disable(false), 0);
+    }
+
+    #[test]
+    fn encore_branches_on_target_any_move_encored() {
+        assert_eq!(run_cbm_encore(true), -8);
+        assert_eq!(run_cbm_encore(false), 0);
+    }
+
+    // === M5b-3: Memento, Stockpile, Recycle, Imprison, Mud/Water Sport ===========
+    // (TS :3568-3657, test.ts:4438-4692) ===========================================
+
+    #[test]
+    fn memento_gates_are_sequential_then_falls_through_to_baton_pass() {
+        let t = target(SHUCKLE, [TYPE_NORMAL, TYPE_NORMAL], None, ABILITY_STURDY);
+        let atk_floor = FactoryAiCheckBadMoveTarget { atk_stage: MIN_STAT_STAGE, ..t };
+        assert_eq!(run_cbm_memento(&atk_floor, 1), -10);
+
+        let sp_atk_floor = FactoryAiCheckBadMoveTarget { sp_atk_stage: Some(MIN_STAT_STAGE), ..t };
+        assert_eq!(run_cbm_memento(&sp_atk_floor, 1), -8);
+
+        assert_eq!(run_cbm_memento(&t, 0), -10); // falls through to Baton Pass's own gate
+        assert_eq!(run_cbm_memento(&t, 1), 0);
+    }
+
+    #[test]
+    fn stockpile_branches_on_max_count() {
+        assert_eq!(run_cbm_stockpile(3), -10);
+        assert_eq!(run_cbm_stockpile(2), 0);
+        assert_eq!(run_cbm_stockpile(0), 0);
+    }
+
+    #[test]
+    fn recycle_branches_on_no_used_item() {
+        assert_eq!(run_cbm_recycle(0), -10);
+        assert_eq!(run_cbm_recycle(1), 0);
+    }
+
+    #[test]
+    fn imprison_branches_on_own_imprisoned_others_status() {
+        assert_eq!(run_cbm_imprison(true), -10);
+        assert_eq!(run_cbm_imprison(false), 0);
+    }
+
+    #[test]
+    fn mud_sport_branches_on_own_status() {
+        assert_eq!(run_cbm_mud_sport(true), -10);
+        assert_eq!(run_cbm_mud_sport(false), 0);
+    }
+
+    #[test]
+    fn water_sport_branches_on_own_status() {
+        assert_eq!(run_cbm_water_sport(true), -10);
+        assert_eq!(run_cbm_water_sport(false), 0);
+    }
+
+    // === M5b-3: TS-generated vectors (crate::factory_ai_check_bad_move_m5b3_vectors_gen) ===
+    //
+    // EFFECT_ACCURACY_UP(_2) has no real Gen-3 move, so `cbm_m5b3_vectors.rs`
+    // (a separate integration-test crate, `pub` items only) can't drive it
+    // through the full preamble or call `run_cbm_acc_up` (`pub(crate)`, per
+    // the batching doc §4) directly -- checked here instead, in the same
+    // module as the handler.
+
+    #[test]
+    fn acc_up_direct_cases_match_ts() {
+        use crate::factory_ai_check_bad_move_m5b3_vectors_gen::CBM_M5B3_ACC_UP_CASES;
+
+        assert!(!CBM_M5B3_ACC_UP_CASES.is_empty());
+        for (i, c) in CBM_M5B3_ACC_UP_CASES.iter().enumerate() {
+            let score_delta = run_cbm_acc_up(c.acc_stage);
+            assert_eq!(score_delta, c.expected_score_delta, "case {i}: {c:?}");
         }
     }
 }
