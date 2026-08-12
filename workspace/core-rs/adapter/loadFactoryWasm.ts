@@ -102,6 +102,50 @@ export interface FactoryWasmExports {
   fw_calculate_accuracy(input_ptr: number): number;
   /** `Cmd_accuracycheck`'s final roll. `rng_roll` truncates to u16. Returns 0/1. */
   fw_roll_accuracy_hits(calc: number, rng_roll: number): number;
+  /**
+   * `effectiveSpeed`. Reads a fixed 18-byte `TurnOrderBattler` buffer at
+   * `battler_ptr` (layout: `crates/factory-wasm/src/lib.rs`'s
+   * `decode_turn_order_battler` doc comment; encoder: `adapter/turnEngine.ts`)
+   * and returns the effective speed directly. `random_turn_number` truncates
+   * to u16.
+   */
+  fw_effective_speed(
+    battler_ptr: number,
+    is_raining: number,
+    is_sunny: number,
+    random_turn_number: number,
+  ): number;
+  /**
+   * `GetWhoStrikesFirst`. Reads two fixed 18-byte `TurnOrderBattler` buffers
+   * (same layout/encoder as `fw_effective_speed`). Returns 0/1/2.
+   */
+  fw_get_who_strikes_first(
+    battler1_ptr: number,
+    battler2_ptr: number,
+    speed_tie_rng_roll: number,
+    is_raining: number,
+    is_sunny: number,
+    random_turn_number: number,
+  ): number;
+  /**
+   * `sortBattlersByTurnOrder`. Reads the self-describing input buffer at
+   * `input_ptr` (`input_len` bytes; layout:
+   * `crates/factory-wasm/src/lib.rs`'s `fw_sort_battlers_by_turn_order` doc
+   * comment; encoder: `adapter/turnEngine.ts`) and returns an `fw_alloc`'d
+   * `battler_count * 4`-byte buffer of little-endian sorted battler ids (no
+   * length prefix — the caller already knows `battler_count`); the caller
+   * must `fw_free(ptr, battler_count * 4)`.
+   */
+  fw_sort_battlers_by_turn_order(input_ptr: number, input_len: number): number;
+  /**
+   * `runTurn1RngLedger`. Returns an `fw_alloc`'d fixed 133-byte buffer (7
+   * steps x 19 bytes each: `rng_value_before: u32`, `rng_value_after: u32`,
+   * `roll_count: u8`, `rolls: u16 x 5`; layout:
+   * `crates/factory-wasm/src/lib.rs`'s `fw_run_turn1_rng_ledger` doc
+   * comment; decoder: `adapter/turnEngine.ts`); the caller must
+   * `fw_free(ptr, 133)`.
+   */
+  fw_run_turn1_rng_ledger(starting_rng_value: number): number;
   memory: WebAssembly.Memory;
 }
 

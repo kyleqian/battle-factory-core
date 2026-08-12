@@ -20,3 +20,6 @@ pub mod rental_data;
 pub mod rental_generation;
 pub mod rng;
 pub mod stats;
+pub mod turn_order;
+pub mod turn_rng;
+pub mod turn_vectors_gen;
