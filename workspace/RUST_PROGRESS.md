@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R3 — [supervised session, 2026-08-11 eve] **M4 opened: damage_calc native port folded (M4a); M4b/M4c in flight**
+## R3 — [supervised session, 2026-08-11 eve] **M4 opened: damage_calc ported end-to-end (M4a+M4b folded); M4c in flight**
 
 - **State:** rust-main = master (merged at orient, fast-forward) + the
   verified M4a fold `30a6da2a`. **M4a DONE:** all 13 exported
@@ -30,11 +30,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   orient: zero ISSUES.md hits for damageCalc/turnOrder/turnRng; main lane
   is in #55 m4a-audio territory (unrelated namespace), animation lane in
   reducer coverage. M4a worker (sonnet-5, 90-min cap) finished in ~50 min.
-- **Next:** M4b worker IN FLIGHT (fw_ boundary + adapter + differential
-  parity suite `tests/damageCalcParity.test.ts`, both engine modes; brief
-  notes the TYPE_EFFECTIVENESS_TABLE promotion question). Then M4c
-  (turnOrder + turnRng port + boundary + `tests/turnOrderParity.test.ts`).
-  Wind-down before 21:40 with union gates incl. both-mode parity + soak.
+- **M4b DONE (fold `45fa9e94`):** 12 new `fw_` exports (ABI v1 unchanged;
+  fixed-width documented LE buffers: DamageCalcInput 117 B = 2×48 B
+  battlers + 21 B top-level, AccuracyCalcInput 26 B, type-effectiveness
+  8 B output); TYPE_EFFECTIVENESS_TABLE promoted out of the vector file
+  into `gen_tables.rs` (codegen-owned by gen-data.mjs, sourced from
+  type-effectiveness.json) so no 110-row table crosses the ABI; new
+  `core-rs/adapter/damageEngine.ts` (TS default / POKEBENCH_ENGINE=wasm
+  opt-in, strings→ids TS-side); `tests/damageCalcParity.test.ts` 14
+  batched blocks (18×18 type grid, stage grids, ~230 base-damage cases,
+  crit/STAB/endeavor/multiplier/accuracy sweeps). Boundary scoping
+  decision, documented both sides: `activeBattlerAbilities` (doubles-only
+  Plus/Minus field scan) is NOT encodable at this boundary — adapter
+  throws if set; the singles default pairing IS the full field, and M4a's
+  native hand tests cover the scan. Supervisor rerun: cargo **91/91** +
+  fmt/clippy, artifact 68,963 B, damageCalcParity **14/14 in BOTH modes**,
+  existing parity files 440/440 in wasm mode, smoke 375/375, both codegen
+  scripts byte-idempotent. Worker also ran full npm test green twice
+  (958 files / 9,167 passed / 1 skip); supervisor's one full-suite run
+  happens at wind-down per the standing cadence.
+- **Next:** M4c worker IN FLIGHT (turnOrder + turnRng native port +
+  boundary + `tests/turnOrderParity.test.ts`, both modes). Wind-down
+  before 21:40 with union gates incl. both-mode parity + soak.
 - **Notes:** worker-reported TS quirks worth keeping: (1) Plus/Minus only
   boosts spAttack, never attack (damageCalc.ts:371-376) — dead weight on
   physical moves; (2) CritChanceInput.attackerSpecies declared but never
