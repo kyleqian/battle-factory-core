@@ -17,9 +17,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** source-close the MPlayMain command decode/jump-table dispatcher or
   one bounded note family. Keep every complete one-pass total null and do not
   wire `runFactoryConstructionClock`.
-- **Notes:** focused reducer **4/4** is green; full verification is in progress.
-  Known one-pass components span **456–1413** cycles (73 totals). No engine,
-  pixel identity, or unsupported barrier changed; pixels were not rerun.
+- **Notes:** focused predecessor controls **24/24**, smoke **375/375**,
+  typecheck, full **970 files / 9,414 passed / 1 skipped**, and build **651
+  modules** are green. Known one-pass components span **456–1413** cycles (73
+  totals). No engine/pixel identity or unsupported barrier changed; pixels
+  were not rerun.
 
 ## 1168 — [supervisor, 2026-08-11] **PAN closure verified**
 
