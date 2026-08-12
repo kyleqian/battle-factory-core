@@ -256,6 +256,8 @@ pub const EFFECT_PAIN_SPLIT: u16 = 91; // battle_move_effects.h:95
 pub const EFFECT_LOCK_ON: u16 = 94; // battle_move_effects.h:98
 pub const EFFECT_DESTINY_BOND: u16 = 98; // battle_move_effects.h:102
 pub const EFFECT_HEAL_BELL: u16 = 102; // battle_move_effects.h:106
+/// Shared with `AI_TryToFaint`'s source fallthrough bonus.
+pub const EFFECT_QUICK_ATTACK: u16 = 103; // battle_move_effects.h:107
 pub const EFFECT_THIEF: u16 = 105; // battle_move_effects.h:109
 pub const EFFECT_PROTECT: u16 = 111; // battle_move_effects.h:115
 pub const EFFECT_ENDURE: u16 = 116; // battle_move_effects.h:120
