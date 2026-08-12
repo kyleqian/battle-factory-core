@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1214 — [MAIN worker, 2026-08-12] **CGB4 v23 post-subs branch closure — verification in progress**
+## 1214 — [MAIN worker, 2026-08-12] **CGB4 v23 post-subs branch closure**
 
 - **State:** #55 reaches a source-exact **5,728-cycle** aggregate prefix for
   only the three frozen `_081DD9B6` rows, stopping before `_081DD9C4`'s first
@@ -17,14 +17,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   byte/hash are pinned; source/ELF/ROM close `strh/cmp/bcc` at **12 × 3 = 36**
   cycles. The source-general non-taken route includes its unconditional `b`
   at **14** cycles but is not observed or body-expanded.
-- **Next:** finish the required focused/smoke/typecheck/full/build gates,
-  confirm twice regeneration, then commit this evidence-only step. Preserve
-  the four EXIST-set rows, original tempoC, successor bodies, service/
-  arbitration, and construction-clock wiring as null.
+- **Next:** any #55 continuation must be separately scoped from
+  `_081DD9C4` or `_081DD874`; preserve the four EXIST-set rows, original
+  tempoC, successor bodies, service/arbitration, and construction-clock wiring
+  as null unless independently evidenced.
 - **Notes:** fresh packet hashes `fc84cabe…` / `f506f1e9…` / `9019c3fa…`;
-  evidence/doc `4ae623c8…` / `1c28507b…`. No `src/**`, ratchet,
-  unsupported-barrier, animation/Rust, presentation, or canonical Battle-2
-  change.
+  evidence/doc `4ae623c8…` / `1c28507b…`; focused v22/v23 **12/12**,
+  smoke **375/375**, typecheck, exactly one post-change `npm test`, and build
+  are green. No `src/**`, ratchet, unsupported-barrier, animation/Rust,
+  presentation, or canonical Battle-2 change.
 
 ## 1213 — [supervisor, 2026-08-12] **CGB4 v22 and Rust M5 union verified**
 
