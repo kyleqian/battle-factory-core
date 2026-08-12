@@ -176,6 +176,10 @@ export interface FactoryWasmExports {
    * length-prefixed buffer. The caller must `fw_free(ptr, total_len)`.
    */
   fw_run_check_viability(input_ptr: number, input_len: number): number;
+  /** Complete native mask-zero DecisionPolicy chooser; see the Rust export for its variable input and complete result layouts. */
+  fw_choose_factory_ai_mask_zero_decision(input_ptr: number, input_len: number): number;
+  /** Complete native mask-1/mask-7 DecisionPolicy chooser; see the Rust export for its variable input and complete result layouts. */
+  fw_choose_factory_ai_scored_decision(input_ptr: number, input_len: number): number;
   memory: WebAssembly.Memory;
 }
 
