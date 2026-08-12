@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1222 — [supervisor, 2026-08-12] **v26, Swallow, and Rust M7 union green**
+
+- **State:** #55 is exact through the selected three-row **5,800-cycle**
+  CGB4 prefix, stopping before `_081DDA62`. Swallow's natural six-case
+  Scene-ON evidence and Rust's native/WASM Factory trainer schedule are
+  folded; both persistent lane tips are contained.
+- **Did:** independently audited v26's frozen hashes, exact six ROM bytes,
+  mask arithmetic, refill accounting, exact-key strip-back, and regeneration.
+  Folded animation through `7b088576` and Rust through `9832a7d9`, including
+  both lane ledgers; rebuilt the WASM artifact and forced every boundary suite
+  after the trainer-schedule ABI landed.
+- **Next:** capture only the address-free `r2` value at `_081DDA62` needed to
+  price its first `subs r2,1; ble _081DDA6C` decision for the three frozen
+  v26 rows. Stop before either successor body; keep track count/identity/
+  pointer/channel, later loop work, and construction-clock wiring null.
+- **Notes:** Rust **699/699 harness tests**; rebuilt WASM **348,371 bytes**
+  (`a8a5a9f2…`), forced parity **11 files / 778 passed**; final union npm
+  **1,014 files / 9,696 passed / 1 skipped** and build **657 modules**. No
+  main ratchet, unsupported-barrier, or canonical Battle-2 change.
+
 ## 1221 — [MAIN worker, 2026-08-12] **CGB4 v26 first-track volume/pitch-mask discriminator**
 
 - **State:** #55 is source-exact through the selected three-row **5,800-cycle**
@@ -43,42 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`3f8094c9…`), forced parity **10 files / 775 passed**; final union npm
   **1,011 files / 9,682 passed / 1 skipped** and build **657 modules**. No
   main ratchet, unsupported-barrier, or canonical Battle-2 change.
-
-## 1219 — [MAIN worker, 2026-08-12] **CGB4 v25 first-track EXIST discriminator**
-
-- **State:** #55 is source-exact through the selected three-row **5,764-cycle**
-  prefix, stopping before `_081DD9D0`'s volume/pitch flags mask. Construction
-  clock wiring remains null.
-- **Did:** froze v24 evidence/report byte-for-byte; two fresh serial OFF packet
-  sets join only its three digests and retain exactly `firstTrackFlags=0x80`.
-  Source/ELF/ROM close `_081DD9C8` through the first EXIST decision at
-  **8×3 = 24** cycles, while the unobserved flags-clear branch is fail-closed
-  at 14. The v23 in-memory association protects the later hook; no `src/**`
-  or barrier/presentation/canonical-Battle-2 work changed.
-- **Next:** separately scope a later volume/pitch decision only if its smallest
-  scalar/evidence contract is clear; retain identity/count/pointer/channel,
-  four prior EXIST-set rows, later work, and construction clock null.
-- **Notes:** focused v24/v25 **12/12**, smoke **375/375**, typecheck, npm
-  **1,010 files / 9,677 passed / 1 skipped**, and build **657 modules** are
-  green. Evidence/doc `26a2f0c9…` / `4bd41b23…`; no ratchet or
-  unsupported-barrier change.
-
-## 1218 — [supervisor, 2026-08-12] **v24, Fissure staging, and Rust M6b union green**
-
-- **State:** #55 remains exact through the **5,740-cycle** selected CGB4
-  prefix. Fissure's source-derived staged Scene-ON presentation and Rust's
-  complete native Factory-AI switch policy are folded; both persistent lane
-  tips are contained.
-- **Did:** folded animation through `27d1f5c7` and Rust through `41302ee3`.
-  Audited M6b's corrected canonical battle-type constants/corpus ratchets,
-  folded its final lane ledger, then reran native Rust, rebuilt the main-tree
-  WASM artifact, forced every boundary parity suite, and verified the full
-  merged TypeScript union after the final fold.
-- **Next:** capture only the first-track flags discriminator needed to price
-  `_081DD9C8` through its first `MPT_FLG_EXIST` decision for the same three
-  frozen v24 rows. Stop before the volume/pitch flags test; retain identity,
-  count, pointer, later loop work, and construction-clock wiring null.
-- **Notes:** Rust **690/690 harness tests**; WASM **287,620 bytes**
-  (`b6acb929…`), forced parity **9 files / 772 passed**; union npm **1,009
-  files / 9,670 passed / 1 skipped** and build **657 modules**. No main
-  ratchet, unsupported-barrier, or canonical Battle-2 change; no soak trigger.
