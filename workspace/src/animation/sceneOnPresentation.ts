@@ -742,6 +742,10 @@ import {
   type ShadowBallSprite,
 } from "./shadowBall.ts";
 import {
+  confuseRayAtAge,
+  type ConfuseRayState,
+} from "./confuseRay.ts";
+import {
   encoreAtAge,
   type EncoreState,
 } from "./encore.ts";
@@ -826,6 +830,7 @@ export interface SceneOnPresentationBattler {
     | "NINETALES"
     | "VILEPLUME"
     | "BUTTERFREE"
+    | "CHINCHOU"
     | "ONIX"
     | "DROWZEE"
     | "KRABBY"
@@ -2486,6 +2491,13 @@ export interface SceneOnShadowBallConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnConfuseRayConfig {
+  readonly move: "CONFUSE_RAY";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnEncoreConfig {
   readonly move: "ENCORE";
   readonly attacker: SceneOnPresentationBattler;
@@ -2850,6 +2862,7 @@ export type SceneOnMoveConfig =
   | SceneOnAcidArmorConfig
   | SceneOnCalmMindConfig
   | SceneOnShadowBallConfig
+  | SceneOnConfuseRayConfig
   | SceneOnEncoreConfig
   | SceneOnDragonClawConfig
   | SceneOnFireSpinConfig
@@ -3730,6 +3743,12 @@ export interface SceneOnShadowBallView {
   readonly targetOffset: Readonly<{ x2: number; y2: number }>;
   readonly displayedTargetOffset: Readonly<{ x2: number; y2: number }>;
   readonly loopSound: LoopSeAdjustPanningState | null;
+}
+
+export interface SceneOnConfuseRayView extends ConfuseRayState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
 }
 
 export interface SceneOnFirePunchView {
@@ -7554,6 +7573,25 @@ export function sceneOnShadowBallView(
       state.age,
       state.config.attacker.geometry.side,
     ),
+  };
+}
+
+/** `age=0` is the pointer-bounded YELLOW_BALL load row. */
+export function sceneOnConfuseRayView(
+  state: SceneOnMovePresentationState,
+): SceneOnConfuseRayView {
+  if (state.config.move !== "CONFUSE_RAY") {
+    throw new Error(`expected CONFUSE_RAY presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...confuseRayAtAge(state.age, {
+      attackerSide: state.config.attacker.geometry.side,
+      attackerCenter: state.config.attacker.geometry.animationCenter,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
   };
 }
 

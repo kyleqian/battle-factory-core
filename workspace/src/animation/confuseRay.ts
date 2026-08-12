@@ -144,6 +144,13 @@ function backgroundBldy(age: number): number {
 }
 
 function blendAtAge(age: number): { eva: number; evb: number } {
+  // The spiral template is OBJ_BLEND and its initializer installs 8:8 on
+  // the creation row. DestroyAnimSpriteAndDisableBlend clears it after the
+  // terminal software row; the hardware OAM latch keeps that sprite visible
+  // for one further display row.
+  if (age >= CONFUSE_RAY_SPIRAL_FIRST_AGE && age <= 225) {
+    return { eva: 8, evb: 8 };
+  }
   let eva = 0;
   if (age >= 47 && age <= 61) eva = 61 - age;
   else if (age >= 75 && age <= 90) eva = age - 74;

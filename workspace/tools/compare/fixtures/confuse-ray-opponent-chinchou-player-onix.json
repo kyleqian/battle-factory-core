@@ -1,0 +1,27 @@
+{
+  "scenario": "tools/battle-lab/mechanic-confuse-ray-opponent-chinchou-player-onix.json",
+  "probe": "tools/compare/agilityProbe.py",
+  "attacker": {
+    "species": "CHINCHOU",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 24 },
+      "animationCenter": { "x": 176, "y": 56 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 48 },
+      "animationCenter": { "x": 72, "y": 88 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 110, "playerMaxHp": 110,
+    "opponentHp": 150, "opponentMaxHp": 150,
+    "playerGender": "male", "opponentGender": "female"
+  }
+}
