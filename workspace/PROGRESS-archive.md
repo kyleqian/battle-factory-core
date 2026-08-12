@@ -1,3 +1,20 @@
+## 1182 — [supervisor, 2026-08-11] **CGB4 body verified; animation and Rust lanes folded**
+
+- **State:** the observed CGB4 note route is source-exact through the
+  allocation body for **7/82** callbacks. Complete MPlay remains **5 exact /
+  108 null** and the construction clock stays unwired.
+- **Did:** independently audited the reducer and fixed its generated prose to
+  derive the correct **825-cycle** body total (`68afcb84`). Folded Meteor
+  Mash bilateral Scene-ON evidence through `ee1b5eaa`, then Rust
+  `CheckBadMove` M5b-2/M5b-3 through `48ef0a5f` and `ba63c1ca`.
+- **Next:** source-close the observed zero-LFO `TrkVolPitSet` helper route.
+  Keep `clear_modM`, later fields, the other 75 post-selection callbacks,
+  complete callback/glue, service, arbitration, and clock wiring null.
+- **Notes:** focused CGB4 **15/15** plus corrected v3 **3/3**. Union full is
+  **978 files / 9,441 passed / 1 skipped** and build **653 modules**. Rust is
+  **330/330**, fmt/clippy clean; no unsupported barrier or canonical Battle-2
+  extension.
+
 ## 1180 — [supervisor, 2026-08-11] **CGB4 mutable route verified; Rust M5b-1 folded**
 
 - **State:** the observed type-12 CGB4 family is source-exact through its

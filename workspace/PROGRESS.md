@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1185 — [MAIN worker, 2026-08-12] **CGB4 caller/prologue gap source-closed**
+
+- **State:** #55 now has a **2,081-cycle contiguous source-exact prefix**
+  through `TrkVolPitSet` return for **7/82** observed callbacks. The prior
+  **1,969** known-component sum is retained as the pre-gap total; the exact
+  caller/prologue gap is **112** cycles. Complete MPlay remains **5 exact /
+  108 null** and the construction clock stays unwired.
+- **Did:** added v5 source/ELF/ROM-pinned evidence for `_081DDC66`'s
+  argument setup + BL (**14** cycles) and `TrkVolPitSet`'s complete push
+  prologue (**2**), joining frozen v4 rows by `sourceStateDigest`. Later
+  allocation fields remain explicit nulls; no oracle rerun or production
+  engine change.
+- **Next:** run the final smoke, full test, typecheck, and build gates; leave
+  later allocation fields, unobserved helper routes, the other 75 callbacks,
+  complete note/glue/MPlay costs, service, arbitration, and clock wiring null.
+- **Notes:** v5 focused **4/4** (dependent v3/v4/v5 **11/11**) and typecheck
+  are green. Receipt: `docs/issue55-m4a-note-body-cgb4-v5.md` and
+  `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v5.json`; commit
+  `704d9aa6`.
+
 ## 1184 — [supervisor, 2026-08-12] **CGB4 helper verified; animation and Rust lanes folded**
 
 - **State:** #55 has **1,969 known component cycles** for the observed CGB4
@@ -46,23 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   green. Commits `f70f0a9c` and `754cb27e`; no production src, gameplay,
   renderer, animation, Rust, ROADMAP, canonical Battle-2, or unsupported-
   barrier change.
-
-## 1182 — [supervisor, 2026-08-11] **CGB4 body verified; animation and Rust lanes folded**
-
-- **State:** the observed CGB4 note route is source-exact through the
-  allocation body for **7/82** callbacks. Complete MPlay remains **5 exact /
-  108 null** and the construction clock stays unwired.
-- **Did:** independently audited the reducer and fixed its generated prose to
-  derive the correct **825-cycle** body total (`68afcb84`). Folded Meteor Mash
-  bilateral Scene-ON evidence through `ee1b5eaa`, then Rust `CheckBadMove`
-  M5b-2/M5b-3 through `48ef0a5f` and `ba63c1ca`; Rust now handles all **109**
-  table effects natively.
-- **Next:** source-close the observed zero-LFO `TrkVolPitSet` helper route.
-  Keep `clear_modM`, later fields, the other 75 post-selection callbacks,
-  complete callback/glue, service, arbitration, and clock wiring null.
-- **Notes:** focused CGB4 **15/15** plus corrected v3 **3/3**. Union full is
-  **978 files / 9,441 passed / 1 skipped** and build **653 modules**. Rust is
-  **330/330**, fmt/clippy clean; rebuilt WASM is **99,929 bytes**
-  (`ee204627…`) and forced parity is **660/660**. Required soaks are vanilla
-  **20/20** and full **60/60**, zero crashes/hangs. No unsupported barrier or
-  canonical Battle-2 extension.
