@@ -1,0 +1,99 @@
+import { gunzipSync } from "node:zlib";
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import {
+  FISSURE_FRAME_COUNT,
+  fissureAtAge,
+} from "../../src/animation/fissure.ts";
+
+type EvidenceFrame = {
+  tasks: Array<{ func: { symbol: string | null }; data: number[] }>;
+  sprites: Array<{
+    slot: number; x: number; y: number; x2: number; y2: number;
+    template: { symbol: string | null };
+  }>;
+  battlers: { player: { species: number }; opponent: { species: number } };
+  softwareOam: string[];
+  registers: Record<string, number>;
+};
+
+const cases = [
+  {
+    side: "opponent" as const,
+    artifact: "tools/compare/evidence/fissure-player-full-state.json.gz",
+    animationCenter: { x: 176, y: 42 },
+    battleCenter: { x: 176, y: 40 },
+    initialTargetX2: 1,
+  },
+  {
+    side: "player" as const,
+    artifact: "tools/compare/evidence/fissure-opponent-full-state.json.gz",
+    animationCenter: { x: 72, y: 88 },
+    battleCenter: { x: 72, y: 80 },
+    initialTargetX2: 0,
+  },
+] as const;
+
+describe("MOVE_FISSURE source reducer", () => {
+  it.each(cases)("matches every retained $side source task, dirt sprite, and register row", (fixture) => {
+    const probe = JSON.parse(gunzipSync(readFileSync(fixture.artifact)).toString()) as {
+      frames: EvidenceFrame[];
+    };
+    expect(probe.frames).toHaveLength(FISSURE_FRAME_COUNT);
+    for (let age = 0; age < probe.frames.length; age += 1) {
+      const oracle = probe.frames[age]!;
+      const reduced = fissureAtAge(
+        age,
+        fixture.side,
+        fixture.animationCenter,
+        fixture.battleCenter,
+        fixture.initialTargetX2,
+      );
+      const platform = oracle.tasks.find((task) => task.func.symbol === "AnimTask_ShakePlatforms");
+      const target = oracle.tasks.find((task) => task.func.symbol === "AnimTask_ShakeBattlers");
+      if (age >= 4 && age <= 199) {
+        expect(platform?.data.slice(0, 4)).toEqual([
+          reduced.shake.taskState, reduced.shake.delay,
+          reduced.shake.timer, 50,
+        ]);
+        expect(platform?.data.slice(14, 16)).toEqual([
+          reduced.shake.horizontalOffset, 13,
+        ]);
+        expect(target?.data.slice(0, 4)).toEqual(platform?.data.slice(0, 4));
+      } else {
+        expect(platform).toBeUndefined();
+        expect(target).toBeUndefined();
+      }
+      expect(oracle.sprites.filter(
+        (sprite) => sprite.template.symbol === "gDirtPlumeSpriteTemplate",
+      ).map(({ slot, x, y, x2, y2 }) => ({ slot, x, y, x2, y2 })))
+        .toEqual(reduced.dirt.map(({ slot, x, y, x2, y2 }) => ({ slot, x, y, x2, y2 })));
+      expect(oracle.registers.bldcnt).toBe(reduced.bldcnt);
+      expect(oracle.registers.bldy).toBe(reduced.bldy);
+      expect(oracle.registers.bg3hofs).toBe(reduced.bg3Scroll.x & 0x1ff);
+      expect(oracle.registers.bg3vofs).toBe(reduced.bg3Scroll.y & 0xff);
+    }
+  });
+
+  it("pins the three dirt groups, two palette pulses, audio cues, and cleanup", () => {
+    const state = (age: number) => fissureAtAge(
+      age, "opponent", { x: 176, y: 42 }, { x: 176, y: 40 }, 1,
+    );
+    expect(state(14).dirt).toHaveLength(4);
+    expect(state(38).displayedDirt).toHaveLength(4);
+    expect(state(39).displayedDirt).toEqual([]);
+    expect(state(31).palette).toMatchObject({ color: "black", coefficient: 14 });
+    expect(state(34).palette).toMatchObject({ color: "white", coefficient: 14 });
+    expect(state(39).palette.active).toBe(false);
+    expect(state(65).palette.color).toBe("black");
+    expect(state(68).palette.color).toBe("white");
+    expect(state(73).palette.active).toBe(false);
+    expect([3, 14, 48, 82].flatMap((age) => state(age).soundEvents.map((event) => event.song)))
+      .toEqual(["SE_M_EARTHQUAKE", "SE_M_DIG", "SE_M_DIG", "SE_M_DIG"]);
+    expect(state(154).bg3Scroll).toEqual({ x: 368, y: 22 });
+    expect(state(233).bg3Scroll).toEqual({ x: 368, y: 22 });
+    expect(state(234).bg3Scroll).toEqual({ x: 0, y: 0 });
+    expect(state(252).active).toBe(true);
+    expect(state(253).active).toBe(false);
+  });
+});
