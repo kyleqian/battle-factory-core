@@ -5,15 +5,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R5 — [supervised session, 2026-08-12] **M5 COMPLETE: Factory AI move decisions cross the Rust/WASM boundary**
+## R5 — [supervised session, 2026-08-12] **M5 COMPLETE; M6 switch-policy family opened**
 
-- **State:** rust-main = master `251b1027` + verified Rust folds through
-  M5f-3 `680c8e82`/`a0a35a72`. Factory AI mask selection, CheckBadMove,
+- **State:** rust-main = master `c72eef50` + verified Rust folds through
+  M6a `8f7e231f`/`237509ea`. Factory AI mask selection, CheckBadMove,
   TryToFaint, CheckViability, and the complete mask 0/1/7 DecisionPolicy
   are native and differential-green through the WASM adapter. Native Rust
   is **682/682**; the release artifact is 300,117 bytes, sha256
   `d1ebb5683d6b0efdbff98372110889e393770743bcdd9d3b163dfc2fa24e8ad3`.
-  `RUST_DEFERRED.md` has no open entries.
+  `RUST_DEFERRED.md` has no open entries. The RNG-free switch-in selector is
+  now native; its containing switch-policy family remains native-only work.
 - **Did:** M5f-3 added ABI-v1 exports
   `fw_choose_factory_ai_mask_zero_decision` and
   `fw_choose_factory_ai_scored_decision`, using documented length-prefixed
@@ -29,10 +30,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   npm test **1,004 files / 9,643 passed / 1 pre-existing skip**; npm build
   **653 modules**; soak vanilla **20/20 OK** and full policy **60/60 OK**,
   with zero crashes or hangs.
-- **Next:** orient M6 against current `PROGRESS.md`/`ISSUES.md`, reject every
-  moving target, and dispatch one bounded Rust-family scout or first native
-  leaf step. Natural first candidate is the remaining Factory AI switch
-  policy family, subject to a fresh import/conflict/census check.
+- **M6a DONE (folds `8f7e231f`/`237509ea`):** ported the pure, RNG-free
+  singles `GetMostSuitableMonToSwitchInto` leaf. Both source passes and their
+  quirks are pinned: largest-defensive-multiplier ordering, mono-attacker
+  double application, defender dedup, Levitate/Foresight, active-type STAB,
+  strict ties, non-BUGFIX u8 wrap, MOVE_NONE/power-1/Struggle behavior, and
+  PARTY_SIZE sentinel. The byte-idempotent TS-executed corpus has **215**
+  cases (8 focused, 8 DESTIN, 7 named quirks, 192 deterministic sweep), sha256
+  `331bd58adb890bac3460adf06665c2746a511c00c699ce8cc64bcf89c627bc1e`.
+  Supervisor independently re-executed the wrap and unknown-move cases and
+  reran cargo **897/897**, fmt, clippy, WASM, and smoke **375/375**. Current
+  artifact is 300,227 bytes, sha256 `c4da2f6c92b4360b1708dc8a201422eac31df6c97b57dec7a5063c72ee322abd`.
+  Post-master-v22 union: npm **1,005 files / 9,648 passed / 1 skip** and build
+  **653 modules**.
+- **Next:** M6b — port the remaining pure `factoryAiSwitchPolicy.ts` decision
+  and typed trace surface natively, reusing M6a; keep the boundary/adapter as
+  a later separately verified step. Re-check live conflicts before dispatch.
 - **Notes:** M5f-3 worker used gpt-5.6-sol/high and stayed within the allowed
   `core-rs/**` plus newly created adapter-parity test surface. No main-lane
   document or canonical TypeScript engine file was edited.
