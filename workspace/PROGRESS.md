@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1191 — [MAIN worker, 2026-08-12] **CGB4 post-helper caller slice source-closed**
+
+- **State:** #55 is source-exact for **3,215 aggregate cycles** through the
+  `pan_sweep` read/tst boundary across the same observed **7/82** zero-
+  `lfoDelay` CGB4 callbacks. Complete MPlay stays **5 exact / 108 null** and
+  the construction clock is unwired.
+- **Did:** added additive v8 evidence from caller resume `0x082dfecc`, capturing
+  only signed `keyM` at the callsite-gated `bpl` boundary. All seven have
+  `keyM=0`, so the route is **40 cycles/callback**, **280 aggregate**; the
+  first unresolved branch is `0x082dfeea bne _081DDCBA` on `ToneData.pan_sweep`.
+  Independent fresh packets are byte-identical: anchor `e9c67695…`, LILIANA
+  `80450910…`, varied `ff77f6e1…`.
+- **Next:** stop at the pinned `pan_sweep` discriminator; preserve its
+  unobserved routes, later fields, other 75 callbacks, complete note/glue/
+  MPlay, service/arbitration, and clock wiring null.
+- **Notes:** focused v3-v8 **23/23** green. Source/ELF/ROM receipt and report
+  are additive; no duration fit, runtime identity lookup, production import,
+  unsupported barrier, animation/Rust change, or canonical Battle-2 branch.
+
 ## 1190 — [supervisor, 2026-08-12] **CGB4 helper verified; Rust M5d-2 folded**
 
 - **State:** #55 is source-exact for **2,935 contiguous cycles** through
@@ -47,23 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   canonical Battle-2 extension. Smoke **8 files / 375 passed**, typecheck,
   full **984 files / 9,554 passed / 1 skipped**, and build **653 modules** are
   green; the executable-frontier barrier ratchet is unchanged and passes.
-
-## 1188 — [supervisor, 2026-08-12] **CGB4 field slice verified; Rust M5d-1 folded**
-
-- **State:** #55 is source-exact for **2,459 contiguous cycles** through
-  `ChnVolSetAsm` entry across the observed **7/82** CGB4 callbacks. Complete
-  MPlay stays **5 exact / 108 null** and the construction clock is unwired.
-- **Did:** independently regenerated v6 byte-for-byte (`341be839…`) and
-  audited its **44** field-copy + **10** BL-edge cycles per callback. Folded
-  Rust M5d-1's first **13** native `CheckViability` effects through merge
-  `e59b520a`; animation-main remains contained.
-- **Next:** source-close one bounded observed `ChnVolSetAsm` body route. Stop
-  before any unresolved branch/state input; preserve later fields, the other
-  75 callbacks, complete note/glue/MPlay costs, service/arbitration, and clock
-  wiring null.
-- **Notes:** focused v5-v6 **8/8**; union full **983 files / 9,550 passed / 1
-  skipped**, build **653 modules**. Rust is **384/384**, fmt/clippy clean;
-  rebuilt WASM is **138,325 bytes** (`9548adb8…`) and forced parity is
-  **757/757**. The latest engine-changing fold already passed vanilla
-  **20/20** and full **60/60** soaks. Both branches are contained; no
-  unsupported barrier or canonical Battle-2 extension.

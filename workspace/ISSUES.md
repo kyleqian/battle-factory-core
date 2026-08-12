@@ -1970,11 +1970,30 @@ premium cycles: **68 cycles each / 476 total**. This extends the contiguous
 prefix from **2,459** at helper entry to **2,935 cycles** through `bx lr`.
 Evidence: `docs/issue55-m4a-note-body-cgb4-v7.md`.
 
-The current contiguous boundary is `ChnVolSetAsm` return. The reducer fails
-closed for source, packet, scalar, observed-route, and storage-class
-mutations. The still-open remainder is later allocation fields, `clear_modM`,
-nonzero-`lfoDelay` routes, unobserved clamp/helper operand routes, the other
-**75** post-selection callbacks, complete note callbacks, post-callback glue,
+**2026-08-12 CGB4 post-helper caller-field closure:** additive v8 packets
+preserve v7 byte-for-byte and capture only signed `keyM` at the exact
+pipelined `bpl` boundary `0x082dfed6`, gated by the live ChnVolSetAsm return
+callsite. Two fresh Battle Scene OFF runs per anchor/LILIANA/legal-varied case
+are byte-identical (anchor `e9c67695…`, LILIANA `80450910…`, varied
+`ff77f6e1…`); the same **7/82** rows all have `keyM=0`, so the signed key-plus-
+keyM `bpl` is taken. Frozen `toneType=12` source state makes the following CGB
+`beq` not taken without another capture.
+
+From caller resume `0x082dfecc`, the observed route executes **14** Thumb
+halfwords, one taken refill, one IWRAM byte read, one IWRAM word read, one
+IWRAM byte store, and three EWRAM byte reads: **40 cycles per callback / 280
+aggregate**. The contiguous source-exact boundary is now **3,215 aggregate
+cycles** across the seven rows, immediately before the first unresolved
+`0x082dfeea bne _081DDCBA` on `ToneData.pan_sweep`. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v8.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v8.json`.
+
+The current contiguous boundary is the `pan_sweep` read/tst boundary before
+that branch. The v8 reducer fails closed for source, packet, scalar,
+observed-route, and storage-class mutations. The still-open remainder is the
+`pan_sweep` branch and later allocation fields, `clear_modM`, nonzero-
+`lfoDelay` routes, unobserved keyM/clamp/helper operand routes, the other **75**
+post-selection callbacks, complete note callbacks, post-callback glue,
 complete one-pass MPlay totals (**5 exact / 108 null**), service/arbitration,
 and construction-clock wiring. No unsupported barrier or canonical Battle-2
 extension was added.

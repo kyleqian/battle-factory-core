@@ -1,0 +1,283 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v8",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "caller": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1760-1775",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      }
+    },
+    "elf": {
+      "callerResume": "0x082dfecc",
+      "keyMBranch": "0x082dfed4",
+      "keyMBranchPipelinedBoundary": "0x082dfed6",
+      "firstUnresolvedPanSweepBranch": "0x082dfeea",
+      "chnVolSetAsmEntry": "0x082dfd08",
+      "chnVolSetAsmReturn": "0x082dfd38"
+    },
+    "compiledRegions": [
+      {
+        "role": "post-ChnVolSetAsm caller route through pan_sweep read/tst",
+        "start": "0x082dfecc",
+        "endExclusive": "0x082dfeea",
+        "bytes": 30,
+        "sha256": "a929ad4f85d2bcd90b0b68a16f744954a99828dc78224ecfa1b78c0210b23a7c"
+      },
+      {
+        "role": "first unresolved pan_sweep branch",
+        "start": "0x082dfeea",
+        "endExclusive": "0x082dfeec",
+        "bytes": 2,
+        "sha256": "260fec2056d7e4bb1b8ca16084b7c0c53b0ef5519d515e02bbcb613273f1e4aa"
+      },
+      {
+        "role": "ChnVolSetAsm frozen v7 helper",
+        "start": "0x082dfd08",
+        "endExclusive": "0x082dfd38",
+        "bytes": 48,
+        "sha256": "04988bf8e911a12b477d9aafa24342b68e83960a06796e555869cc67b24bd4d2"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "ewramDataAccessPremiumCyclesPerByteRead": 2,
+      "iwramDataAccessPremiumCycles": 0,
+      "trackAndToneDataClass": "EWRAM",
+      "channelAndStackDataClass": "IWRAM",
+      "branchRoute": "bpl taken for key+keyM >= 0; CGB beq not taken for toneType 12"
+    },
+    "sourceCycleAccounting": {
+      "observedRoute": {
+        "sequentialThumbHalfwords": 14,
+        "pipelineRefills": 1,
+        "iwramByteReads": 1,
+        "iwramWordReads": 1,
+        "iwramByteStores": 1,
+        "ewramByteReads": 3,
+        "ewramDataAccessPremiumCycles": 6,
+        "cycles": "14*2 + 1*6 + 3*2",
+        "totalCycles": 40
+      },
+      "firstUnresolvedBranch": "0x082dfeea bne _081DDCBA on ToneData.pan_sweep"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV7EvidenceSha256": "bec89adb6ace334390a8fab6ba6dd839e1383dc78c7817a005067436144d8241",
+    "packetSha256": {
+      "anchor": "e9c6769519eb43252fd7caef11268661f35fe5b967c44f28c966c4827d8c068b",
+      "liliana": "804509102c5d47e78d141dfd1c613dc0abe0e844b5d8b1b7fcb41a4db5a0ba90",
+      "factory-varied": "ff77f6e124feb87902e0ba588f3a27a03f6630c6cbbd8102946ffde4254d57e8"
+    },
+    "packetRepeatSha256": {
+      "anchor": "e9c6769519eb43252fd7caef11268661f35fe5b967c44f28c966c4827d8c068b",
+      "liliana": "804509102c5d47e78d141dfd1c613dc0abe0e844b5d8b1b7fcb41a4db5a0ba90",
+      "factory-varied": "ff77f6e124feb87902e0ba588f3a27a03f6630c6cbbd8102946ffde4254d57e8"
+    }
+  },
+  "capture": {
+    "boundary": "pipelined 0x082dfed6 at bpl 0x082dfed4 after ChnVolSetAsm return",
+    "scalars": [
+      "signed keyM only"
+    ],
+    "excluded": [
+      "pointer",
+      "frame",
+      "duration",
+      "callback identity",
+      "channel key (reused frozen v7 keyAfter)",
+      "ToneData.pan_sweep",
+      "result bytes"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 113,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "exactPostChnVolSetAsmSlices": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "exactPostChnVolSetAsmSlices": 3
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "exactPostChnVolSetAsmSlices": 4
+      }
+    },
+    "exactPostChnVolSetAsmCallbacks": 7,
+    "postChnVolSetAsmSourceCycleRange": {
+      "min": 40,
+      "max": 40,
+      "distinct": 1
+    },
+    "postChnVolSetAsmSourceCycles": 280,
+    "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 2935,
+    "contiguousPrefixThroughPanSweepBranchSourceCycles": 3215,
+    "observedKeyMValues": {
+      "0": 7
+    },
+    "keyPlusKeyMBranchCounts": {
+      "bplTaken": 7,
+      "movsZeroExecuted": 0
+    },
+    "cgbBranchCounts": {
+      "beqTaken": 0,
+      "beqNotTaken": 7
+    },
+    "firstUnresolvedBranch": "0x082dfeea bne _081DDCBA on ToneData.pan_sweep",
+    "nullLaterAllocationFieldsCallbacks": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "branchCoverage": {
+    "observed": {
+      "keyMReads": 7,
+      "keyPlusKeyMNonnegative": 7,
+      "bplTaken": 7,
+      "cgbToneBitsNonzero": 7,
+      "cgbBeqNotTaken": 7
+    },
+    "firstUnresolved": "ToneData.pan_sweep at 0x082dfeea",
+    "unobservedKeyMRoutes": null,
+    "panSweepRoutes": null
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 515,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPlusKeyM": 64,
+      "postChnVolSetAsmRoute": "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",
+      "postChnVolSetAsmSourceCycles": 40,
+      "contiguousPrefixThroughPanSweepBranchSourceCycles": 555,
+      "firstUnresolvedBranch": "0x082dfeea:bne-pan-sweep",
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPlusKeyM": 64,
+      "postChnVolSetAsmRoute": "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",
+      "postChnVolSetAsmSourceCycles": 40,
+      "contiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "firstUnresolvedBranch": "0x082dfeea:bne-pan-sweep",
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "keyAfter": 91,
+      "keyM": 0,
+      "keyPlusKeyM": 91,
+      "postChnVolSetAsmRoute": "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",
+      "postChnVolSetAsmSourceCycles": 40,
+      "contiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "firstUnresolvedBranch": "0x082dfeea:bne-pan-sweep",
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "keyAfter": 91,
+      "keyM": 0,
+      "keyPlusKeyM": 91,
+      "postChnVolSetAsmRoute": "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",
+      "postChnVolSetAsmSourceCycles": 40,
+      "contiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "firstUnresolvedBranch": "0x082dfeea:bne-pan-sweep",
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 515,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPlusKeyM": 64,
+      "postChnVolSetAsmRoute": "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",
+      "postChnVolSetAsmSourceCycles": 40,
+      "contiguousPrefixThroughPanSweepBranchSourceCycles": 555,
+      "firstUnresolvedBranch": "0x082dfeea:bne-pan-sweep",
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "keyAfter": 64,
+      "keyM": 0,
+      "keyPlusKeyM": 64,
+      "postChnVolSetAsmRoute": "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",
+      "postChnVolSetAsmSourceCycles": 40,
+      "contiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "firstUnresolvedBranch": "0x082dfeea:bne-pan-sweep",
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughChnVolSetAsmReturnSourceCycles": 381,
+      "keyAfter": 91,
+      "keyM": 0,
+      "keyPlusKeyM": 91,
+      "postChnVolSetAsmRoute": "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",
+      "postChnVolSetAsmSourceCycles": 40,
+      "contiguousPrefixThroughPanSweepBranchSourceCycles": 421,
+      "firstUnresolvedBranch": "0x082dfeea:bne-pan-sweep",
+      "laterAllocationFieldsSourceCycles": null,
+      "completeNoteCallbackSourceCycles": null,
+      "postCallbackGlueSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "The post-ChnVolSetAsm caller route from 0x082dfecc through the CGB length store and pan_sweep read/tst boundary for the same seven observed callbacks.",
+    "contiguousPrefix": "3215 aggregate source cycles through the first unresolved pan_sweep branch boundary across seven callbacks (2935 accepted through helper return + 280 new).",
+    "remainingDiscriminator": "The 0x082dfeea pan_sweep branch and all later allocation fields, keyM routes not observed here, clear_modM, nonzero-lfoDelay routes, unobserved helper operands/clamps, other 75 callbacks, complete note/glue/MPlay, service/arbitration, and construction clock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "serviceCost": null,
+    "constructionClock": null
+  },
+  "verdict": "All 7/82 observed zero-lfoDelay CGB4 callbacks have signed keyM=0; the key+keyM bpl is taken and the toneType=12 CGB beq is not taken. The 40-cycle source-exact post-helper slice adds 280 cycles, extending the contiguous aggregate from 2935 to 3215 before the unresolved pan_sweep branch."
+}

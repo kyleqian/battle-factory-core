@@ -41912,3 +41912,22 @@ git; the current live ledger keeps the three load-bearing entries only.
   doc SHA256 is `21227e6a766c9eff565e006e314369049853fbb47c042581534e18f0e7b70ad5`.
   Checkpoints are `c0c6b368` and `8c1efe17`. No oracle rerun, production
   engine change, unsupported barrier, or canonical Battle-2 extension.
+## 1188 — [supervisor, 2026-08-12] **CGB4 field slice verified; Rust M5d-1 folded**
+
+- **State:** #55 is source-exact for **2,459 contiguous cycles** through
+  `ChnVolSetAsm` entry across the observed **7/82** CGB4 callbacks. Complete
+  MPlay stays **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** independently regenerated v6 byte-for-byte (`341be839…`) and
+  audited its **44** field-copy + **10** BL-edge cycles per callback. Folded
+  Rust M5d-1's first **13** native `CheckViability` effects through merge
+  `e59b520a`; animation-main remains contained.
+- **Next:** source-close one bounded observed `ChnVolSetAsm` body route. Stop
+  before any unresolved branch/state input; preserve later fields, the other
+  75 callbacks, complete note/glue/MPlay costs, service/arbitration, and clock
+  wiring null.
+- **Notes:** focused v5-v6 **8/8**; union full **983 files / 9,550 passed / 1
+  skipped**, build **653 modules**. Rust is **384/384**, fmt/clippy clean;
+  rebuilt WASM is **138,325 bytes** (`9548adb8…`) and forced parity is
+  **757/757**. The latest engine-changing fold already passed vanilla
+  **20/20** and full **60/60** soaks. Both branches are contained; no
+  unsupported barrier or canonical Battle-2 extension.
