@@ -7,6 +7,10 @@
 //! buffers via `fw_alloc`/`fw_free`. Hand-rolled C ABI, zero
 //! dependencies — no wasm-bindgen.
 
+use factory_core::battle_ai_switch_into::{
+    self, BattleAiSwitchBench, BattleAiSwitchBenchMember, BattleAiSwitchDamageFallback,
+    BattleAiSwitchIntoResult,
+};
 use factory_core::damage_calc::{
     self, AccuracyCalcInput, CritChanceInput, CritMoveEffect, DamageBattler, DamageCalcInput,
     StatStages,
@@ -28,6 +32,10 @@ use factory_core::factory_ai_decision_policy::{
     FactoryAiScoredView, FactoryAiTurnStartRandomNumber,
 };
 use factory_core::factory_ai_mask::{self, FactoryAiMaskError, FactoryAiMaskSelectionInput};
+use factory_core::factory_ai_switch_policy::{
+    self, FactoryAiSwitchBattler, FactoryAiSwitchChoice, FactoryAiSwitchPartyMember,
+    FactoryAiSwitchPolicyInput, FactoryAiSwitchPolicyResult, FactoryAiSwitchRules,
+};
 use factory_core::gen_tables;
 use factory_core::gender::MonGender;
 use factory_core::mon_construction::{
@@ -3750,6 +3758,255 @@ pub unsafe extern "C" fn fw_choose_factory_ai_scored_decision(
     ))
 }
 
+// --- Factory switch selector and policy (additive ABI v1) -----------------
+
+const SWITCH_INTO_INPUT_WIDTH: usize = 114;
+const SWITCH_POLICY_INPUT_WIDTH: usize = 401;
+
+fn decode_switch_fallback(r: &mut ByteReader) -> BattleAiSwitchDamageFallback {
+    BattleAiSwitchDamageFallback {
+        base_damage: r.i32(),
+        active_types: [r.u8(), r.u8()],
+        opposing_types: [r.u8(), r.u8()],
+        opposing_ability: r.u16(),
+        opposing_status2: r.u32(),
+    }
+}
+
+fn encode_switch_boundary_error(message: &str) -> Vec<u8> {
+    let mut buf = vec![0; 4];
+    buf.push(2); // status: boundary error
+    buf.extend_from_slice(&(message.len() as u16).to_le_bytes());
+    buf.extend_from_slice(message.as_bytes());
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// Runs the native plain-singles `GetMostSuitableMonToSwitchInto` selector.
+/// This is an additive ABI-v1 export; `fw_abi_version` remains 1.
+///
+/// Input is exactly 114 little-endian bytes (no prefix): six consecutive
+/// 16-byte bench records `{species:u16,hp:i32,types:[u8;2],moves:[u16;4]}`;
+/// then `active_party_index:u8`, `opposing_types:[u8;2]`,
+/// `has_damage_fallback:u8`, and the always-present 14-byte fallback payload
+/// `{base_damage:i32,active_types:[u8;2],opposing_types:[u8;2],
+/// opposing_ability:u16,opposing_status2:u32}`. The payload is ignored when
+/// its presence byte is zero.
+///
+/// Output uses the shared length prefix, then status `0 = resolved` followed
+/// by `party_index:u8`, `1 = damage-fallback-needed`, or `2 = boundary error`
+/// followed by `message_len:u16` and UTF-8 bytes.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_get_most_suitable_mon_to_switch_into(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_len as usize != SWITCH_INTO_INPUT_WIDTH {
+        return alloc_and_copy(&encode_switch_boundary_error(
+            "factory-wasm factoryAiEngine: switch-into input must be exactly 114 bytes",
+        ));
+    }
+    // SAFETY: exact-width check plus caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, SWITCH_INTO_INPUT_WIDTH) };
+    let mut r = ByteReader::new(bytes);
+    let bench: BattleAiSwitchBench = std::array::from_fn(|_| BattleAiSwitchBenchMember {
+        species: r.u16(),
+        hp: r.i32(),
+        types: [r.u8(), r.u8()],
+        moves: [r.u16(), r.u16(), r.u16(), r.u16()],
+    });
+    let active_party_index = r.u8();
+    let opposing_types = [r.u8(), r.u8()];
+    let has_fallback = r.bool_();
+    let fallback = decode_switch_fallback(&mut r);
+    debug_assert_eq!(r.offset, bytes.len());
+    let result = battle_ai_switch_into::get_most_suitable_mon_to_switch_into(
+        &bench,
+        active_party_index,
+        opposing_types,
+        has_fallback.then_some(fallback),
+    );
+    let mut output = vec![0; 4];
+    match result {
+        BattleAiSwitchIntoResult::Resolved { party_index } => {
+            output.push(0);
+            output.push(party_index);
+        }
+        BattleAiSwitchIntoResult::DamageFallbackNeeded => output.push(1),
+    }
+    patch_total_len(&mut output);
+    alloc_and_copy(&output)
+}
+
+fn decode_switch_battler(r: &mut ByteReader) -> FactoryAiSwitchBattler {
+    FactoryAiSwitchBattler {
+        species: r.u16(),
+        ability: r.u16(),
+        types: [r.u8(), r.u8()],
+        hp: r.i32(),
+        max_hp: r.i32(),
+        moves: [r.u16(), r.u16(), r.u16(), r.u16()],
+        status1: r.u32(),
+        status2: r.u32(),
+        status3: r.u32(),
+        stat_stages: std::array::from_fn(|_| r.i32()),
+        party_index: r.u8(),
+        perish_song_timer: r.u8(),
+    }
+}
+
+fn decode_switch_party_member(r: &mut ByteReader) -> FactoryAiSwitchPartyMember {
+    FactoryAiSwitchPartyMember {
+        species: r.u16(),
+        is_egg: r.bool_(),
+        ability_num: r.u8(),
+        hp: r.i32(),
+        moves: [r.u16(), r.u16(), r.u16(), r.u16()],
+    }
+}
+
+fn encode_switch_policy_result(
+    precheck_blocked: bool,
+    result: Result<
+        FactoryAiSwitchPolicyResult,
+        factory_ai_switch_policy::FactoryAiSwitchPolicyError,
+    >,
+) -> Vec<u8> {
+    let mut buf = vec![0; 4];
+    match result {
+        Err(error) => {
+            buf.push(1); // status: typed policy error
+            buf.push(u8::from(precheck_blocked));
+            let message = error.to_string();
+            buf.extend_from_slice(&(message.len() as u16).to_le_bytes());
+            buf.extend_from_slice(message.as_bytes());
+        }
+        Ok(result) => {
+            buf.push(0);
+            buf.push(u8::from(precheck_blocked));
+            match result.choice {
+                FactoryAiSwitchChoice::Chosen { party_index } => {
+                    buf.push(0);
+                    buf.push(party_index);
+                }
+                FactoryAiSwitchChoice::Sentinel => {
+                    buf.push(1);
+                    buf.push(0);
+                }
+                FactoryAiSwitchChoice::NoSwitch => {
+                    buf.push(2);
+                    buf.push(0);
+                }
+            }
+            buf.push(u8::from(result.selected_party_index.is_some()));
+            buf.push(result.selected_party_index.unwrap_or(0));
+            buf.extend_from_slice(&result.rng.value.to_le_bytes());
+            buf.extend_from_slice(&result.rng.calls.to_le_bytes());
+            buf.extend_from_slice(&(result.draws.len() as u32).to_le_bytes());
+            for draw in result.draws {
+                buf.extend_from_slice(&draw.ordinal.to_le_bytes());
+                buf.push(draw.kind as u8);
+                buf.extend_from_slice(&draw.before.value.to_le_bytes());
+                buf.extend_from_slice(&draw.before.calls.to_le_bytes());
+                buf.extend_from_slice(&draw.after.value.to_le_bytes());
+                buf.extend_from_slice(&draw.after.calls.to_le_bytes());
+                buf.extend_from_slice(&draw.raw_rng_value.to_le_bytes());
+                buf.extend_from_slice(&draw.random_value.to_le_bytes());
+                buf.extend_from_slice(&draw.modulus.to_le_bytes());
+                buf.extend_from_slice(&draw.remainder.to_le_bytes());
+                buf.push(u8::from(draw.succeeded));
+                buf.push(u8::from(draw.party_index.is_some()));
+                buf.push(draw.party_index.unwrap_or(0));
+                buf.push(u8::from(draw.move_slot.is_some()));
+                buf.push(draw.move_slot.unwrap_or(0));
+                buf.extend_from_slice(&(draw.reason.len() as u16).to_le_bytes());
+                buf.extend_from_slice(draw.reason.as_bytes());
+            }
+            buf.extend_from_slice(&(result.branches.len() as u32).to_le_bytes());
+            for branch in result.branches {
+                buf.extend_from_slice(&branch.ordinal.to_le_bytes());
+                buf.push(branch.branch as u8);
+                buf.push(branch.outcome as u8);
+                buf.push(u8::from(branch.party_index.is_some()));
+                buf.push(branch.party_index.unwrap_or(0));
+            }
+        }
+    }
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// Runs both the native RNG-free switch precheck and the complete native
+/// trainer-singles switch policy through one additive ABI-v1 boundary.
+///
+/// Input is exactly 401 little-endian bytes (no prefix): four 68-byte battler
+/// records in Rust declaration order; six 16-byte party-member records; then
+/// `last_landed_move:u16,last_hit_by:u8,reserved_party_index:u8,
+/// absent_battler_flags:u8,battlers_count:u8,battle_type_flags:u32`, RNG
+/// `{value:u32,calls:u32}`, `has_suitable_damage_fallback:u8`, and the same
+/// 14-byte fallback payload documented by
+/// `fw_get_most_suitable_mon_to_switch_into`. A battler record is
+/// `{species:u16,ability:u16,types:[u8;2],hp:i32,max_hp:i32,moves:[u16;4],
+/// status1:u32,status2:u32,status3:u32,stat_stages:[i32;8],party_index:u8,
+/// perish_song_timer:u8}`; a party record is
+/// `{species:u16,is_egg:u8,ability_num:u8,hp:i32,moves:[u16;4]}`.
+///
+/// Output starts `total_len:u32,status:u8,precheck_blocked:u8`. Status 1 is
+/// the typed policy error `{message_len:u16,message:utf8}`. Status 0 continues
+/// with `choice_kind:u8` (0 chosen, 1 sentinel, 2 no-switch), choice value,
+/// `selected_party_index:opt_u8`, final RNG, `draw_count:u32`, variable draw
+/// records, then `branch_count:u32` and fixed 8-byte branch records. Each draw
+/// preserves ordinal/kind, before+after RNG, raw/random/modulus/remainder,
+/// success, optional party/move indices, and a u16-length-prefixed UTF-8
+/// reason. This crosses every member of the canonical typed result.
+/// Boundary-length failures use status 2 plus u16-length-prefixed UTF-8.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_evaluate_factory_ai_switch_policy(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_len as usize != SWITCH_POLICY_INPUT_WIDTH {
+        return alloc_and_copy(&encode_switch_boundary_error(
+            "factory-wasm factoryAiEngine: switch-policy input must be exactly 401 bytes",
+        ));
+    }
+    // SAFETY: exact-width check plus caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, SWITCH_POLICY_INPUT_WIDTH) };
+    let mut r = ByteReader::new(bytes);
+    let battlers = std::array::from_fn(|_| decode_switch_battler(&mut r));
+    let opponent_party = std::array::from_fn(|_| decode_switch_party_member(&mut r));
+    let rules = FactoryAiSwitchRules {
+        battlers,
+        opponent_party,
+        last_landed_move: r.u16(),
+        last_hit_by: r.u8(),
+        reserved_party_index: r.u8(),
+        absent_battler_flags: r.u8(),
+        battlers_count: r.u8(),
+        battle_type_flags: r.u32(),
+    };
+    let rng = BattleRngState { value: r.u32(), calls: r.u32() };
+    let has_fallback = r.bool_();
+    let suitable_damage_fallback = decode_switch_fallback(&mut r);
+    debug_assert_eq!(r.offset, bytes.len());
+    let precheck_blocked = factory_ai_switch_policy::is_factory_ai_switch_precheck_blocked(&rules);
+    let input = FactoryAiSwitchPolicyInput {
+        rules,
+        rng,
+        suitable_damage_fallback: has_fallback.then_some(suitable_damage_fallback),
+    };
+    alloc_and_copy(&encode_switch_policy_result(
+        precheck_blocked,
+        factory_ai_switch_policy::evaluate_factory_ai_switch_policy(&input),
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -4971,5 +5228,67 @@ mod tests {
             "Factory AI scored policy requires the current trainer battler-1 request"
         );
         unsafe { fw_free(ptr, bytes.len() as u32) };
+    }
+
+    fn copied_boundary_buffer(ptr: *mut u8) -> Vec<u8> {
+        // SAFETY: every switch export returns an fw_alloc'd length-prefixed
+        // buffer, and callers below retain it until this copy completes.
+        unsafe {
+            let total_len = read_u32(std::slice::from_raw_parts(ptr, 4), 0) as usize;
+            let bytes = std::slice::from_raw_parts(ptr, total_len).to_vec();
+            fw_free(ptr, total_len as u32);
+            bytes
+        }
+    }
+
+    #[test]
+    fn fw_switch_into_valid_empty_input_returns_typed_fallback_needed() {
+        let input = [0u8; SWITCH_INTO_INPUT_WIDTH];
+        // SAFETY: exact documented width.
+        let ptr =
+            unsafe { fw_get_most_suitable_mon_to_switch_into(input.as_ptr(), input.len() as u32) };
+        let bytes = copied_boundary_buffer(ptr);
+        assert_eq!(&bytes[4..], &[1], "damage-fallback-needed status");
+    }
+
+    #[test]
+    fn fw_switch_policy_valid_nontrainer_input_returns_typed_policy_error() {
+        let input = [0u8; SWITCH_POLICY_INPUT_WIDTH];
+        // SAFETY: exact documented width.
+        let ptr =
+            unsafe { fw_evaluate_factory_ai_switch_policy(input.as_ptr(), input.len() as u32) };
+        let bytes = copied_boundary_buffer(ptr);
+        assert_eq!(bytes[4], 1, "typed policy error");
+        assert_eq!(bytes[5], 0, "precheck is not blocked");
+        let message_len = u16::from_le_bytes(bytes[6..8].try_into().unwrap()) as usize;
+        assert_eq!(
+            std::str::from_utf8(&bytes[8..8 + message_len]).unwrap(),
+            "factory-ai-switch-policy supports only trainer singles"
+        );
+    }
+
+    #[test]
+    fn switch_exports_reject_wrong_lengths_without_reading_or_trapping() {
+        let input = [0u8];
+        for (ptr, expected) in [
+            (
+                // SAFETY: wrong length is rejected before input_ptr is read.
+                unsafe { fw_get_most_suitable_mon_to_switch_into(input.as_ptr(), 1) },
+                "factory-wasm factoryAiEngine: switch-into input must be exactly 114 bytes",
+            ),
+            (
+                // SAFETY: wrong length is rejected before input_ptr is read.
+                unsafe { fw_evaluate_factory_ai_switch_policy(input.as_ptr(), 1) },
+                "factory-wasm factoryAiEngine: switch-policy input must be exactly 401 bytes",
+            ),
+        ] {
+            let bytes = copied_boundary_buffer(ptr);
+            assert_eq!(bytes[4], 2, "boundary error");
+            let message_len = u16::from_le_bytes(bytes[5..7].try_into().unwrap()) as usize;
+            assert_eq!(
+                std::str::from_utf8(&bytes[7..7 + message_len]).unwrap(),
+                expected
+            );
+        }
     }
 }
