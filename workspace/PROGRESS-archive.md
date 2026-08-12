@@ -41559,3 +41559,16 @@ git; the current live ledger keeps the three load-bearing entries only.
   typecheck, full **969 files / 9,410 passed / 1 skipped**, and build **651
   modules** are green. No engine/pixel identity or unsupported barrier changed;
   pixels were not rerun.
+## 1168 — [supervisor, 2026-08-11] **PAN closure verified**
+
+- **State:** `master` is green with PAN source-exact for **13/13** callbacks
+  and **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
+  #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** reviewed the nine callback rows and 81-cycle fast-accept reducer,
+  then independently regenerated the address-free PAN receipt **4/4**. Both
+  lane branches are fully contained in `master`.
+- **Next:** source-close `ply_vol` at 16 census callbacks. Preserve nulls for
+  note families, dispatch, and all complete one-pass MPlay totals.
+- **Notes:** worker full gate **969 files / 9,410 passed / 1 skipped**, smoke
+  **375/375**, typecheck, build **651 modules**. No unsupported barrier or main
+  presentation/gameplay/pixel change.

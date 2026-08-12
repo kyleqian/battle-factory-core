@@ -1829,6 +1829,23 @@ discriminators are command decode/jump-table dispatch and note callback
 families. No observed duration, pointer identity, service cost, or clock
 wiring landed. Evidence: `docs/issue55-m4a-vol-v1.md`.
 
+**2026-08-11 `ply_note` route census + rhythm-prefix closure:** additive OFF
+packets capture the exact compiled `ply_note` entry and three selector
+boundaries. Twice-fresh anchor/LILIANA/legal-varied packets are byte-identical
+and join all **113/113** rows address-free. The **108** one-pass rows execute
+**82 callbacks: 57 inline / 25 rhythm / 0 keysplit** (case totals
+**33/24/25**); source tone-type tests independently predict every selector.
+The smallest rhythm family is source-exact from entry through tone selection:
+all 25 use track 6, `toneType=0x80`, and MIDI-key-indexed FRLG drumset entries
+36/54. Two zero-parameter routes cost **193** cycles; 23 key+velocity routes
+cost **231**, from compiled instructions/refills and ROM/EWRAM access classes.
+
+Only this prefix is closed. The **57** inline selectors, every post-selection
+note body, command decode/jump-table dispatch, complete note costs, and
+complete one-pass MPlay totals remain null (**5 exact / 108 null**). No
+observed duration, pointer identity, service cost, or construction-clock
+wiring landed. Evidence: `docs/issue55-m4a-note-census-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
