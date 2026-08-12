@@ -2007,15 +2007,45 @@ cycles** through `call_r3` entry `0x082dfcb4`. The pointer value, the dynamic
 Evidence: `docs/issue55-m4a-note-body-cgb4-v9.md` and
 `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v9.json`.
 
-The current contiguous boundary is fixed `call_r3` entry. The v9 reducer fails
-closed for source, packet, scalar, observed-route, and storage-class
-mutations. The still-open remainder is dynamic `call_r3`/`MidiKeyToCgbFreq`
-execution and result, later allocation fields, `clear_modM`, nonzero-
-`lfoDelay` routes, unobserved pan_sweep/keyM/clamp/helper operand routes, the
-other **75** post-selection callbacks, complete note callbacks, post-callback
-glue, complete one-pass MPlay totals (**5 exact / 108 null**),
-service/arbitration, and construction-clock wiring. No unsupported barrier or
-canonical Battle-2 extension was added.
+**2026-08-12 CGB4 v10 target/helper closure:** additive v10 evidence preserves
+the v9 packets and evidence byte-for-byte and joins only by
+`sourceStateDigest`; no new oracle capture was required. Pinned source
+initialization is sufficient to fail closed without runtime pointer identity:
+`m4aSoundInit` calls `SoundInit(&gSoundInfo)` then `MPlayExtender(gCgbChans)`,
+`SoundInit` clears the whole struct and installs `DummyFunc`, and
+`MPlayExtender`'s satisfied `ID_NUMBER` guard then assigns
+`MidiKeyToCgbFreq`. A complete `.c/.h/.s/.inc` reference census pins the two
+direct field writes, preceding whole-struct clear, two assembly loads, and all
+declarations; runtime pointer/address lookup remains absent.
+The `call_r3` `bx r3` edge is **8 cycles** per callback. The complete observed
+type-4 helper has two source routes: key **64** subtracts 21 to noise-table
+index 43, takes `bls` without clamping, returns `gNoiseTable[43] = 0x34`, and
+costs **90** helper / **98** edge-to-return cycles; key **91** subtracts 21 to
+70, does not take `bls`, clamps to index 59, returns `gNoiseTable[59] = 0x00`,
+and costs **86** helper / **94** edge-to-return cycles. Four rows are key 64
+and three are key 91, adding **674** cycles and extending the contiguous
+source-exact boundary to **4,127 aggregate cycles** through
+`MidiKeyToCgbFreq` return. The reducer pins sequential Thumb/refill classes,
+the exact **25 halfword / 4 refill** and **26 / 3** helper PC routes,
+zero-premium IWRAM stack accesses, and the 11-cycle ROM literal-word/9-cycle
+ROM-table-byte totals under the source-pinned pre-audio WAITCNT value. All ten
+post-boot flash writes preserve WS0/prefetch, and debug-printer writers are
+absent from the release ELF. The canceled checkpoint's 98/94 helper counts
+double-counted `bx r3` inside the helper; its `0x04` result was table index 55,
+not the actual clamped index 59.
+Evidence: `docs/issue55-m4a-note-body-cgb4-v10.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v10.json` (SHA256
+`3e3af127…`); frozen v9 evidence SHA256 is `2dd86764…` and packet hashes
+remain anchor `13d65261…`, LILIANA `86d4d2c5…`, legal-varied `87a32977…`.
+
+The current contiguous boundary is `MidiKeyToCgbFreq` return. The v10 reducer
+fails closed for source, ROM/ELF, packet, target-proof, scalar, observed-route,
+and storage-class mutations. The still-open remainder is later allocation
+fields, unobserved type-4 keys and non-type-4 helper routes, `clear_modM`,
+nonzero-`lfoDelay` routes, the other **75** post-selection callbacks, complete
+note callbacks, post-callback glue, complete one-pass MPlay totals (**5 exact /
+108 null**), service/arbitration, and construction-clock wiring. No new
+unsupported barrier or canonical Battle-2 extension was added.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 

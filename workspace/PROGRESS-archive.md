@@ -1,3 +1,25 @@
+## 1191 — [MAIN worker, 2026-08-12] **CGB4 post-helper caller slice source-closed**
+
+- **State:** #55 is source-exact for **3,215 aggregate cycles** through the
+  `pan_sweep` read/tst boundary across the same observed **7/82** zero-
+  `lfoDelay` CGB4 callbacks. Complete MPlay stays **5 exact / 108 null** and
+  the construction clock is unwired.
+- **Did:** added additive v8 evidence from caller resume `0x082dfecc`, capturing
+  only signed `keyM` at the callsite-gated `bpl` boundary. All seven have
+  `keyM=0`, so the route is **40 cycles/callback**, **280 aggregate**; the
+  first unresolved branch is `0x082dfeea bne _081DDCBA` on `ToneData.pan_sweep`.
+  Independent fresh packets are byte-identical: anchor `e9c67695…`, LILIANA
+  `80450910…`, varied `ff77f6e1…`.
+- **Next:** stop at the pinned `pan_sweep` discriminator; preserve its
+  unobserved routes, later fields, other 75 callbacks, complete note/glue/
+  MPlay, service/arbitration, and clock wiring null.
+- **Notes:** focused v3-v8 **23/23**, smoke **8 files / 375 passed**, full
+  `npm test` **985 files / 9,558 passed / 1 skipped**, typecheck, and build
+  **653 modules** are green; the executable-frontier barrier ratchet is
+  unchanged. Source/ELF/ROM receipt and report are additive; no duration fit,
+  runtime identity lookup, production import, unsupported barrier, animation/
+  Rust change, or canonical Battle-2 branch.
+
 ## 1189 — [MAIN worker, 2026-08-12] **CGB4 `ChnVolSetAsm` observed routes source-closed**
 
 - **State:** #55 is source-exact for **2,935 contiguous cycles** through

@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1194 — [MAIN worker, 2026-08-12] **CGB4 v10 helper return source-closed**
+
+- **State:** #55 is source-exact for **4,127 aggregate cycles** through
+  `MidiKeyToCgbFreq` return across the same observed **7/82** zero-`lfoDelay`
+  CGB4 callbacks. Complete MPlay stays **5 exact / 108 null** and the
+  construction clock is unwired.
+- **Did:** proved the SoundInfo target from pinned `SoundInit` →
+  `MPlayExtender` source initialization without runtime pointer identity;
+  corrected the canceled checkpoint's double-counted helper entry and wrong
+  table result. `call_r3` `bx r3` is **8**; key=64/key=91 helpers are **90/86**
+  (**98/94** through return). Their 4/3 rows return index 43/`0x34` and clamped
+  index 59/`0x00`. No new capture; v9 packets/evidence remain byte-identical.
+- **Next:** keep later allocation fields, unobserved helper/key routes, the
+  other 75 callbacks, complete note/glue/MPlay, service/arbitration, and
+  construction-clock wiring null; only continue with another source-exact
+  discriminator slice.
+- **Notes:** v10 evidence SHA256 `3e3af127…`; full field-reference/init-guard
+  census and WAITCNT/flash/release-ELF timing guards added; focused v3-v10
+  **31/31**, smoke **8 files / 375 passed**, and typecheck green. No duration
+  fit, runtime address lookup, production import, unsupported barrier,
+  animation/Rust change, or canonical Battle-2 extension.
+
 ## 1193 — [supervisor, 2026-08-12] **CGB4 v9 verified; Rust M5d-3 folded**
 
 - **State:** #55 is source-exact for **3,453 aggregate cycles** through fixed
@@ -47,25 +69,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   skipped**, and build **653 modules** are green. No duration fit, runtime
   identity, production import, unsupported barrier, animation/Rust change, or
   canonical Battle-2 branch.
-
-## 1191 — [MAIN worker, 2026-08-12] **CGB4 post-helper caller slice source-closed**
-
-- **State:** #55 is source-exact for **3,215 aggregate cycles** through the
-  `pan_sweep` read/tst boundary across the same observed **7/82** zero-
-  `lfoDelay` CGB4 callbacks. Complete MPlay stays **5 exact / 108 null** and
-  the construction clock is unwired.
-- **Did:** added additive v8 evidence from caller resume `0x082dfecc`, capturing
-  only signed `keyM` at the callsite-gated `bpl` boundary. All seven have
-  `keyM=0`, so the route is **40 cycles/callback**, **280 aggregate**; the
-  first unresolved branch is `0x082dfeea bne _081DDCBA` on `ToneData.pan_sweep`.
-  Independent fresh packets are byte-identical: anchor `e9c67695…`, LILIANA
-  `80450910…`, varied `ff77f6e1…`.
-- **Next:** stop at the pinned `pan_sweep` discriminator; preserve its
-  unobserved routes, later fields, other 75 callbacks, complete note/glue/
-  MPlay, service/arbitration, and clock wiring null.
-- **Notes:** focused v3-v8 **23/23**, smoke **8 files / 375 passed**, full
-  `npm test` **985 files / 9,558 passed / 1 skipped**, typecheck, and build
-  **653 modules** are green; the executable-frontier barrier ratchet is
-  unchanged. Source/ELF/ROM receipt and report are additive; no duration fit,
-  runtime identity lookup, production import, unsupported barrier,
-  animation/Rust change, or canonical Battle-2 branch.
