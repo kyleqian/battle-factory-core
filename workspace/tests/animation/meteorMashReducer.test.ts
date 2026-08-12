@@ -40,6 +40,13 @@ describe("Meteor Mash source reducer", () => {
       shakeTaskActive: true,
     });
     expect(meteorMashAtAge(162, opponentTarget).shakeTaskActive).toBe(false);
+    expect(meteorMashAtAge(124, opponentTarget).targetDisplayedX2).toBe(0);
+    expect(meteorMashAtAge(125, opponentTarget).targetDisplayedX2).toBe(5);
+    expect(meteorMashAtAge(126, opponentTarget).targetDisplayedX2).toBe(-5);
+    expect(meteorMashAtAge(161, opponentTarget).targetDisplayedX2).toBe(5);
+    expect(meteorMashAtAge(162, opponentTarget).targetDisplayedX2).toBe(-5);
+    expect(meteorMashAtAge(163, opponentTarget).targetDisplayedX2).toBe(-5);
+    expect(meteorMashAtAge(164, opponentTarget).targetDisplayedX2).toBe(0);
     expect(meteorMashAtAge(METEOR_MASH_RESTORE_AGE, opponentTarget).restoreActive).toBe(true);
     expect(meteorMashAtAge(METEOR_MASH_FRAME_COUNT, opponentTarget).active).toBe(false);
     expect(meteorMashAtAge(213, opponentTarget).active).toBe(false);

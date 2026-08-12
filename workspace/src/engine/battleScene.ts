@@ -34621,11 +34621,10 @@ export function renderSceneOnMovePresentation(
       targetSprite.palette,
       view.target.geometry.spriteCorner.x
         + (displayed.age < 124 ? targetIdle.x2 : 0)
-        + displayed.targetX2,
+        + view.targetDisplayedX2,
       view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
     drawTarget();
-    const impactBackdrop = fb.slice();
     const drawEffects = () => {
       const stars = [
         ...displayed.stars.map((sprite) => ({ kind: "parent" as const, sprite })),
@@ -34675,7 +34674,11 @@ export function renderSceneOnMovePresentation(
         );
       }
       if (displayed.hitsplat) {
-        drawSpriteSheetAffineStretchBlendedOverFb(
+        // The sprite requests OBJ blend, but this script never installs a
+        // BLDCNT target-2 mask (captured BLDCNT/BLDALPHA stay zero). With no
+        // eligible second target, hardware presents the first-target texel
+        // opaquely despite objMode=semi-transparent.
+        drawSpriteSheetAffineStretch(
           fb,
           battleAnimHitsplat.tileset,
           battleAnimHitsplat.palette,
@@ -34683,10 +34686,9 @@ export function renderSceneOnMovePresentation(
           view.target.geometry.animationCenter.y - 16,
           303,
           303,
-          12,
-          8,
-          false,
-          impactBackdrop,
+          0,
+          { r: 0, g: 0, b: 0 },
+          0,
         );
       }
     };

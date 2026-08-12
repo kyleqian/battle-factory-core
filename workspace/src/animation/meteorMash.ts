@@ -58,6 +58,7 @@ export interface MeteorMashState {
   readonly spinningHandMatrix: BlazeKickAffineMatrix | null;
   readonly hitsplat: boolean;
   readonly targetX2: number;
+  readonly targetDisplayedX2: number;
   readonly shakeTaskActive: boolean;
   readonly restoreActive: boolean;
 }
@@ -182,6 +183,7 @@ export function meteorMashAtAge(
       spinningHandMatrix: null,
       hitsplat: false,
       targetX2: 0,
+      targetDisplayedX2: 0,
       shakeTaskActive: false,
       restoreActive: false,
     };
@@ -265,6 +267,24 @@ export function meteorMashAtAge(
   const hand = age >= METEOR_MASH_THIRD_STAR_AGE && age <= 154;
   const shakeTaskActive = age >= METEOR_MASH_IMPACT_AGE
     && age <= METEOR_MASH_SHAKE_LAST_AGE;
+  const targetX2 = shakeTaskActive
+    // This invocation's first visible target write is the negative phase at
+    // source age 124. The source callback has already consumed one task
+    // step by the pointer row; do not inherit the common long-schedule
+    // helper's creation anchor.
+    ? shakeMon2OffsetAtTick(5, 0, 20, 1, age - METEOR_MASH_IMPACT_AGE + 1).x2
+    : 0;
+  // The target is copied through monbg before the battler callback sweep.
+  // Its initial task row does not reach scanout; later rows use the inverse
+  // OBJ displacement, and the final negative phase remains in hardware OAM
+  // for the two transfer rows after task teardown.
+  const targetDisplayedX2 = age > METEOR_MASH_IMPACT_AGE
+    && age <= METEOR_MASH_SHAKE_LAST_AGE
+    ? -targetX2
+    : age > METEOR_MASH_SHAKE_LAST_AGE
+      && age <= METEOR_MASH_SHAKE_LAST_AGE + 2
+      ? -5
+      : 0;
   return {
     active: true,
     background: age >= 29 && age < 194 ? "cosmic" : "battle",
@@ -280,13 +300,8 @@ export function meteorMashAtAge(
         : { pa: 256, pb: 0, pc: 0, pd: 256 })
       : null,
     hitsplat: age >= METEOR_MASH_IMPACT_AGE && age <= 133,
-    targetX2: shakeTaskActive
-      // This invocation's first visible target write is the negative phase at
-      // source age 124. The source callback has already consumed one task
-      // step by the pointer row; do not inherit the common long-schedule
-      // helper's creation anchor.
-      ? shakeMon2OffsetAtTick(5, 0, 20, 1, age - METEOR_MASH_IMPACT_AGE + 1).x2
-      : 0,
+    targetX2,
+    targetDisplayedX2,
     shakeTaskActive,
     restoreActive: restore,
   };
