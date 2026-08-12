@@ -1,4 +1,8 @@
 import { shakeMon2DisplayedOffsetAtAge } from "./shakeMon2.ts";
+import {
+  blazeKickSpinningFootMatrixAtAge,
+  type BlazeKickAffineMatrix,
+} from "./blazeKick.ts";
 
 /** Source-relative Move_METEOR_MASH script clock. */
 export const METEOR_MASH_FRAME_COUNT = 214;
@@ -32,6 +36,7 @@ export interface MeteorMashState {
   readonly stars: readonly MeteorMashStar[];
   readonly spinningHand: boolean;
   readonly spinningHandWait: number | null;
+  readonly spinningHandMatrix: BlazeKickAffineMatrix | null;
   readonly hitsplat: boolean;
   readonly targetX2: number;
   readonly shakeTaskActive: boolean;
@@ -96,6 +101,7 @@ export function meteorMashAtAge(
       stars: [],
       spinningHand: false,
       spinningHandWait: null,
+      spinningHandMatrix: null,
       hitsplat: false,
       targetX2: 0,
       shakeTaskActive: false,
@@ -120,12 +126,17 @@ export function meteorMashAtAge(
     && age <= METEOR_MASH_SHAKE_LAST_AGE;
   return {
     active: true,
-    background: restore ? "battle" : "cosmic",
+    background: restore ? "battle" : age >= 10 ? "cosmic" : "battle",
     fadeCoefficient,
     panActive: age >= 10 && age < 20,
     stars,
     spinningHand: hand,
     spinningHandWait: handWait,
+    spinningHandMatrix: hand
+      ? (age < 133
+        ? blazeKickSpinningFootMatrixAtAge(age - 99)
+        : { pa: 256, pb: 0, pc: 0, pd: 256 })
+      : null,
     hitsplat: age >= METEOR_MASH_IMPACT_AGE && age <= 133,
     targetX2: shakeTaskActive
       ? shakeMon2DisplayedOffsetAtAge(5, 0, 20, 1, age, METEOR_MASH_IMPACT_AGE).x2
