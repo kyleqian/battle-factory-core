@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1182 — [supervisor, 2026-08-11] **CGB4 body verified; animation and Rust lanes folded**
+
+- **State:** the observed CGB4 note route is source-exact through the
+  allocation body for **7/82** callbacks. Complete MPlay remains **5 exact /
+  108 null** and the construction clock stays unwired.
+- **Did:** independently audited the reducer and fixed its generated prose to
+  derive the correct **825-cycle** body total (`68afcb84`). Folded Meteor Mash
+  bilateral Scene-ON evidence through `ee1b5eaa`, then Rust `CheckBadMove`
+  M5b-2/M5b-3 through `48ef0a5f` and `ba63c1ca`; Rust now handles all **109**
+  table effects natively.
+- **Next:** source-close the observed zero-LFO `TrkVolPitSet` helper route.
+  Keep `clear_modM`, later fields, the other 75 post-selection callbacks,
+  complete callback/glue, service, arbitration, and clock wiring null.
+- **Notes:** focused CGB4 **15/15** plus corrected v3 **3/3**. Union full is
+  **978 files / 9,441 passed / 1 skipped** and build **653 modules**. Rust is
+  **330/330**, fmt/clippy clean; rebuilt WASM is **99,929 bytes**
+  (`ee204627…`) and forced parity is **660/660**. Required soaks are vanilla
+  **20/20** and full **60/60**, zero crashes/hangs. No unsupported barrier or
+  canonical Battle-2 extension.
+
 ## 1181 — [MAIN worker, 2026-08-11] **CGB4 allocation body prefix source-closed**
 
 - **State:** #55 is source-exact through the observed `_081DDC40` CGB4
@@ -41,25 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   forced-WASM parity is **660/660**. Union full is **976 files / 9,434 passed /
   1 skipped** and build **653 modules**. Both lane branches are contained; no
   unsupported barrier, gameplay, renderer, pixel, or canonical Battle-2 change.
-
-## 1179 — [MAIN worker, 2026-08-11] **`ply_note` CGB4 mutable route source-closed**
-
-- **State:** #55 now has a source-general mutable CGB-channel reducer for the
-  observed type-12 route: **7/82** callbacks exact; complete MPlay remains
-  **5 exact / 108 null** and `runFactoryConstructionClock` stays unwired.
-- **Did:** twice-fresh OFF packets for anchor/LILIANA/legal-varied are
-  byte-identical (0/3/4 CGB4 callbacks). Captured only status, priority, and
-  address-free track ordering at `0x082dfe04`; source-priced **5×14 + 2×42 =
-  154** continuation cycles, **588** including the accepted prefix. All six
-  status/priority/track branches are reducer-accounted; unresolved inputs
-  remain null.
-- **Next:** preserve null for allocation body, remaining 75 post-selection
-  callbacks, post-callback glue, complete one-pass totals, service, and clock.
-- **Notes:** packet hashes anchor `c1394c32…`, LILIANA `3df2c58b…`, varied
-  `041b590f…`; focused dependent group **17/17**, smoke **375/375**, full
-  **976 files / 9,434 passed / 1 skipped**, typecheck, and build **653 modules**
-  are green. Remaining null boundary is allocation body + 75 other
-  post-selection callbacks, complete callback/glue/one-pass totals, service,
-  VBlank/IRQ/audio arbitration, and clock wiring. No unsupported barrier,
-  duration fit, pointer identity, gameplay/pixel, renderer, Rust, or ROADMAP/
-  ISSUES change.

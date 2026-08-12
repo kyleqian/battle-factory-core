@@ -41735,3 +41735,25 @@ git; the current live ledger keeps the three load-bearing entries only.
   worker-fetch timeouts while a separate animation full-suite pool restarted
   concurrently (zero assertion failures). Both lane branches are contained;
   OFF oracle is healthy. No unsupported barrier or main gameplay/pixel change.
+
+## 1179 — [MAIN worker, 2026-08-11] **`ply_note` CGB4 mutable route source-closed**
+
+- **State:** #55 now has a source-general mutable CGB-channel reducer for the
+  observed type-12 route: **7/82** callbacks exact; complete MPlay remains
+  **5 exact / 108 null** and `runFactoryConstructionClock` stays unwired.
+- **Did:** twice-fresh OFF packets for anchor/LILIANA/legal-varied are
+  byte-identical (0/3/4 CGB4 callbacks). Captured only status, priority, and
+  address-free track ordering at `0x082dfe04`; source-priced **5×14 + 2×42 =
+  154** continuation cycles, **588** including the accepted prefix. All six
+  status/priority/track branches are reducer-accounted; unresolved inputs
+  remain null.
+- **Next:** preserve null for allocation body, remaining 75 post-selection
+  callbacks, post-callback glue, complete one-pass totals, service, and clock.
+- **Notes:** packet hashes anchor `c1394c32…`, LILIANA `3df2c58b…`, varied
+  `041b590f…`; focused dependent group **17/17**, smoke **375/375**, full
+  **976 files / 9,434 passed / 1 skipped**, typecheck, and build **653 modules**
+  are green. Remaining null boundary is allocation body + 75 other
+  post-selection callbacks, complete callback/glue/one-pass totals, service,
+  VBlank/IRQ/audio arbitration, and clock wiring. No unsupported barrier,
+  duration fit, pointer identity, gameplay/pixel, renderer, Rust, or ROADMAP/
+  ISSUES change.

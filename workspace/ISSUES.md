@@ -1911,6 +1911,22 @@ totals (**5 exact / 108 null**), service cost, and
 `runFactoryConstructionClock` remain null. Evidence:
 `docs/issue55-m4a-note-body-cgb4-v1.md`.
 
+**2026-08-11 CGB4 mutable/allocation-body closure:** twice-fresh address-free
+OFF packets close the same **7/82** callbacks through priority/status selection,
+`ClearChain`, ownership relinking, the `lfoDelayC` update, and the zero-delay
+branch immediately before `TrkVolPitSet`. The mutable continuation contributes
+**154** cycles; the allocation body contributes **825** cycles, for **1,413**
+known prefix-through-body cycles across the seven rows. Five routes have a null
+owner (**111** cycles each); two take the previous-null/next-null owner route
+(**135** each). Evidence: `docs/issue55-m4a-note-body-cgb4-v2.md` and
+`docs/issue55-m4a-note-body-cgb4-v3.md`.
+
+The current boundary is the observed zero-LFO `TrkVolPitSet` helper entry.
+`clear_modM`, later allocation fields, the other **75** post-selection
+callbacks, all complete note/glue costs, all complete one-pass MPlay totals
+(**5 exact / 108 null**), service/arbitration, and construction-clock wiring
+remain deliberately null.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
