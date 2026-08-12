@@ -63,20 +63,20 @@ const activeAges = (frames: EvidenceFrame[], symbol: string): number[] => frames
   (frame, age) => frame.tasks.some((task) => task.func.symbol === symbol) ? [age] : [],
 );
 
-describe("MOVE_FISSURE dense unsupported checkpoint", () => {
+describe("MOVE_FISSURE dense exact acceptance", () => {
   it.each([
     "tools/compare/fixtures/fissure-player-dugtrio-opponent-onix.json",
     "tools/compare/fixtures/fissure-opponent-dugtrio-player-onix.json",
-  ])("pins the staged portable gate without promoting %s", (path) => {
+  ])("pins the exact portable gate for %s", (path) => {
     const portable = JSON.parse(readFileSync(path, "utf8"));
     expect(portable.acceptance).toEqual({
-      status: "staged",
+      status: "exact",
       freshRuns: 2,
       reducerRows: 254,
       componentRows: 254,
       hardwareLatchRows: 253,
-      framebufferRows: 166,
-      residualAges: "50..59,61,64 dirt/target overlap; 155..230 BG_FISSURE target priority",
+      framebufferRows: 254,
+      residualAges: "none",
     });
   });
 

@@ -5,7 +5,7 @@
   "scenario":"tools/battle-lab/mechanic-hydro-pump-opponent-masquerain-player-onix.json",
   "probe":"tools/compare/hydroPumpProbe.py",
   "sourceWindow":{"startFrame":232,"endFrame":372,"frameCount":141},
-  "evidenceSha256":"3330496d0d3dd1feec78443a274380e43b593250459b36ed0b6976ae2e105880",
+  "evidenceSha256":"1ac9a23b2ef858a57ecc8b0f8298406131014a41f1cd22aef74fdb4a7de6737f",
   "rawRgbSha256":"ff315fb58f55bcaa8c5e728faa33635d97e41d624747d867d4f1c9487fc06cee",
   "move":"HYDRO_PUMP",
   "attacker":{"species":"MASQUERAIN","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":-1},"animationCenter":{"x":176,"y":31},"battlePositionCenter":{"x":176,"y":40}}},

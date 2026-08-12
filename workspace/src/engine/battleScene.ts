@@ -679,6 +679,7 @@ import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" wit
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
 import confuseRayAsset from "../animation/assets/confuse-ray.json" with { type: "json" };
 import fissureAsset from "../animation/assets/fissure.json" with { type: "json" };
+import { fissureDirtPainterOrder } from "../animation/fissure.ts";
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
@@ -39218,8 +39219,9 @@ export function renderSceneOnMovePresentation(
     drawPlayer();
     drawOpponent();
     // Plain 8x8 gDirtPlumeSpriteTemplate OAM transfers one display after
-    // software state and paints above the battlers for the measured far arcs.
-    for (const plume of view.displayedDirt) {
+    // software state. Equal-subpriority sprites are emitted frontmost-first
+    // by descending screen Y, so the software painter uses the inverse.
+    for (const plume of fissureDirtPainterOrder(view.displayedDirt)) {
       drawSpriteSheet(
         fb,
         battleAnimMudSand.tileset,

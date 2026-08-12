@@ -14,12 +14,12 @@
   "changeMap": "tools/compare/evidence/fissure-changemap-player.txt",
   "changeMapSha256": "23a4e2a2db999dbccfe7d8d8d9fae6bc95d00995937fc4138c5e9bedbc17172c",
   "acceptance": {
-    "status": "staged",
+    "status": "exact",
     "freshRuns": 2,
     "reducerRows": 254,
     "componentRows": 254,
     "hardwareLatchRows": 253,
-    "framebufferRows": 166,
-    "residualAges": "50..59,61,64 dirt/target overlap; 155..230 BG_FISSURE target priority"
+    "framebufferRows": 254,
+    "residualAges": "none"
   }
 }
