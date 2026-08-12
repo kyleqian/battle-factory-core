@@ -426,7 +426,7 @@ pub struct FactoryAiScoredDecisionErrorCase {
     pub expected_message: &'static str,
 }
 
-pub static FACTORY_AI_SCORED_DECISION_ERROR_CASES: [FactoryAiScoredDecisionErrorCase; 12] = [
+pub static FACTORY_AI_SCORED_DECISION_ERROR_CASES: [FactoryAiScoredDecisionErrorCase; 13] = [
     // mask-zero
     FactoryAiScoredDecisionErrorCase {
         scenario_id: 0,
@@ -490,5 +490,10 @@ pub static FACTORY_AI_SCORED_DECISION_ERROR_CASES: [FactoryAiScoredDecisionError
         scenario_id: 11,
         expected_message:
             "Factory AI scored view.factory.trainerOpponentId must be an integer in 0..65535",
+    },
+    // unknown-move
+    FactoryAiScoredDecisionErrorCase {
+        scenario_id: 12,
+        expected_message: "factory-ai-check-bad-move: unknown move 999",
     },
 ];

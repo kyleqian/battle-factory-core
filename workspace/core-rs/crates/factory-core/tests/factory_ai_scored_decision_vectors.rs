@@ -539,6 +539,7 @@ fn canonical_ts_error_corpus_matches_typed_reachable_errors() {
             9 => value.view.factory.battle_mode = 2,
             10 => value.view.factory.factory_win_streak = 65_536,
             11 => value.view.factory.trainer_opponent_id = 65_536,
+            12 => value.view.moves[0] = 999,
             other => panic!("unknown error scenario {other}"),
         }
         let error = choose_factory_ai_scored_decision(value)
