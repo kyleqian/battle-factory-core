@@ -85,7 +85,16 @@ describe("MOVE_CONFUSE_RAY source contract", () => {
       expect(probe).toContain(`"${field}"`);
     }
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/confuse-ray-source-staging-checkpoint.json", "utf8"));
-    expect(receipt).toMatchObject({ oracleProfile: "battle-scene-on", move: "CONFUSE_RAY", status: "unsupported", components: 12, denseEvidence: null });
+    expect(receipt).toMatchObject({
+      oracleProfile: "battle-scene-on",
+      move: "CONFUSE_RAY",
+      status: "unsupported",
+      components: 12,
+      denseEvidence: {
+        schema: "confuse-ray-dense-evidence/v1",
+        twiceFresh: true,
+      },
+    });
     expect(receipt.sourceSymbols).toEqual({ Move_CONFUSE_RAY: 137150097, Move_LOCK_ON: 137150180 });
     expect(receipt.orientations).toEqual([
       {
