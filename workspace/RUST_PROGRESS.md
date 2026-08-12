@@ -72,13 +72,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   / 782/782**, full npm **1,014 files / 9,695 passed / 1 skip**, and build
   **657 modules**. Artifact: 348,371 bytes, sha256
   `a8a5a9f2fefce59d495a9786767a9257a91ee24513f6e32afed8b8145ca00bb4`.
-- **Next:** M7c — port stable pure `factoryOpponentGeneration.ts` natively,
-  reusing M7a trainer scheduling and existing mon construction. Keep its WASM
-  boundary as a separate step; do not touch #55 construction-clock ownership.
+- **Next:** M8a — port the independent pure battle-history leaf from
+  `factoryAiLiveDriver.ts` (create/record/sync plus ability-id resolution)
+  natively with TS-executed vectors. Keep view construction and the WASM
+  boundary separate.
 - **Notes:** M6b used Sol/high plus one narrow Terra/max correction; M6c used
   Sol/high; M7a used Terra/max and M7b used Sol/high. Scope stayed within
   `core-rs/**` plus authorized new parity tests; no canonical TS engine or
-  main-lane ledger file changed.
+  main-lane ledger file changed. M7c opponent generation is intentionally
+  waiting: its personality construction cursors are fed by unresolved #55,
+  and the Rust charter forbids porting that dependency before the TS clock
+  closes.
 
 ---
 
