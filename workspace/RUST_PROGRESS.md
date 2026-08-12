@@ -5,6 +5,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R3 — [supervised session, 2026-08-11 eve] **M4 opened: damage_calc native port folded (M4a); M4b/M4c in flight**
+
+- **State:** rust-main = master (merged at orient, fast-forward) + the
+  verified M4a fold `30a6da2a`. **M4a DONE:** all 13 exported
+  functions/consts of `src/engine/damageCalc.ts` ported in source order to
+  `core-rs/crates/factory-core/src/damage_calc.rs` (i32 arithmetic
+  matching the C s32 widths, truncation order preserved, the pokemon.c:3371
+  unconditional `+2` included), with 9 hand-written native tests (both
+  RAM-pinned regressions carried over: Rock Slide 32→48→42, corrected
+  Fury Cutter base=4) + 1129 TS-generated vector rows
+  (`core-rs/tools/gen-damage-vectors.mjs` → checked-in
+  `damage_vectors_gen.rs`, byte-idempotent, regeneration command in
+  header). Supervisor verification: scope clean (5 files, all core-rs/),
+  cargo **82/82** + fmt/clippy clean + wasm build OK rerun independently,
+  generator rerun byte-identical, 2 vector rows re-derived from the TS
+  module by hand (directed huge_power + sweep_0), type chart re-checked
+  against src/data/gen/type-effectiveness.json (111 rows − 1
+  TYPE_FORESIGHT sentinel = 110 embedded). TS-side baseline on this tree:
+  full npm test **957 files / 9,153 passed / 1 pre-existing skip**, build
+  green.
+- **Did:** session opened per docs/rust-m4-battle-kernel-scout.md (user
+  decision: battle-kernel leaf family first). Fresh conflict check at
+  orient: zero ISSUES.md hits for damageCalc/turnOrder/turnRng; main lane
+  is in #55 m4a-audio territory (unrelated namespace), animation lane in
+  reducer coverage. M4a worker (sonnet-5, 90-min cap) finished in ~50 min.
+- **Next:** M4b worker IN FLIGHT (fw_ boundary + adapter + differential
+  parity suite `tests/damageCalcParity.test.ts`, both engine modes; brief
+  notes the TYPE_EFFECTIVENESS_TABLE promotion question). Then M4c
+  (turnOrder + turnRng port + boundary + `tests/turnOrderParity.test.ts`).
+  Wind-down before 21:40 with union gates incl. both-mode parity + soak.
+- **Notes:** worker-reported TS quirks worth keeping: (1) Plus/Minus only
+  boosts spAttack, never attack (damageCalc.ts:371-376) — dead weight on
+  physical moves; (2) CritChanceInput.attackerSpecies declared but never
+  read (:492 vs :499-511) — isChansey/isFarfetchd pre-resolve it; not
+  ported; (3) Wonder Guard has no row in type-effectiveness.json (out of
+  scope per the TS header); (4) the JSON's TYPE_FORESIGHT/TYPE_FORESIGHT
+  sentinel row is excluded from the Rust embed (can never match real ids).
+  Random sweeps include physically-unreachable flag combos (isBurned
+  without hasStatus1) — deliberate: both engines get identical inputs and
+  TS treats them as independent booleans.
+
+---
+
 ## R2 — [supervised session, 2026-08-11] **M1→M3d landed: ABI, adapter, rental generation AND mon construction differential-green**
 
 - **State:** **M1, M2, and the FULL M3 vertical slice (rental generation
