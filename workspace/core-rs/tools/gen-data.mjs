@@ -65,6 +65,37 @@ const abilityIdByName = new Map(abilities.map((a) => [a.name, a.id]));
 const holdEffectIdByName = new Map(holdEffects.map((h) => [h.name, h.id]));
 const moveIdByName = new Map(moves.map((m) => [m.move, m.id]));
 
+// --- ABILITY_NAME_BY_ID: the Factory AI's live-history overlay resolves an
+// observed numeric ability id to this source symbol before carrying it into
+// later AI views.  Keep the full universe, including ABILITY_NONE, so a
+// future caller never has to fit or hand-copy names. ---
+if (abilityItemHooks.schema !== "ability-item-hooks/v2") {
+  throw new Error(
+    `gen-data: expected ability-item-hooks/v2, got ${JSON.stringify(abilityItemHooks.schema)}`,
+  );
+}
+if (!Array.isArray(abilities) || abilities.length !== 78) {
+  throw new Error(
+    `gen-data: expected 78 ability-item-hooks abilities, got ${Array.isArray(abilities) ? abilities.length : typeof abilities}`,
+  );
+}
+const abilityNameRows = abilities.map((row, index) => {
+  if (
+    typeof row?.name !== "string"
+    || !/^ABILITY_[A-Z0-9_]+$/.test(row.name)
+    || !Number.isInteger(row.id)
+    || row.id !== index
+  ) {
+    throw new Error(
+      `gen-data: ability-item-hooks abilities[${index}] must be dense { name: ABILITY_*, id: ${index} }`,
+    );
+  }
+  return { id: row.id, name: row.name };
+});
+const abilityNameLines = abilityNameRows
+  .map((row) => `    AbilityNameRow { id: ${row.id}, name: "${row.name}" },`)
+  .join("\n");
+
 // --- EV_SPREAD bit order (`F_EV_SPREAD_*`, battle_frontier.h): the bit
 // assignment `FrontierMonRow.ev_flags` and `derive_evs` both use. ---
 const EV_FLAG_BITS = {
@@ -578,6 +609,33 @@ pub struct FrontierMonRow {
 pub const FRONTIER_MONS: [FrontierMonRow; ${frontierMonRows.length}] = [
 ${frontierMonsLines}
 ];
+
+/// One source ability id/symbol pair.  This is the complete canonical
+/// ability universe rather than the narrower Frontier-species subset because
+/// \`FactoryAiBattleHistory\` records any live observed id.  Source:
+/// src/data/gen/ability-item-hooks.json \`.universes.abilities\`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AbilityNameRow {
+    pub id: u16,
+    pub name: &'static str,
+}
+
+/// Dense ability-id -> canonical \`ABILITY_*\` symbol table.  Codegen rejects
+/// schema drift, non-dense ids, and non-symbol names before emitting this.
+pub const ABILITY_NAME_BY_ID: [AbilityNameRow; ${abilityNameRows.length}] = [
+${abilityNameLines}
+];
+
+/// Looks up a canonical ability symbol with JavaScript-number equality.  The
+/// live-history port accepts \`f64\` because its TS source accepts a \`number\`;
+/// fractional, non-finite, and out-of-range ids naturally remain unknown.
+#[must_use]
+pub fn ability_name_by_id(ability_id: f64) -> Option<&'static str> {
+    ABILITY_NAME_BY_ID
+        .iter()
+        .find(|row| f64::from(row.id) == ability_id)
+        .map(|row| row.name)
+}
 
 /// \`SPECIES_UNOWN\`'s id, used by the initial-rental selection loop's unown
 /// rejection (reference/pokeemerald/src/battle_factory.c:562-563). Source:
