@@ -45,6 +45,63 @@ export interface FactoryWasmExports {
     ability_slot: number,
     ot_id: number,
   ): number;
+  /** `IS_TYPE_PHYSICAL(moveType)`; `move_type` truncates to u8 (0..17). Returns 0/1. */
+  fw_is_type_physical(move_type: number): number;
+  /** `IS_TYPE_SPECIAL(moveType)`; same `move_type` contract. Returns 0/1. */
+  fw_is_type_special(move_type: number): number;
+  /** `APPLY_STAT_MOD`. `stage` must be 0..12 (traps otherwise). */
+  fw_apply_stat_stage_mod(stat: number, stage: number): number;
+  /**
+   * `CalculateBaseDamage`. Reads a fixed 117-byte `DamageCalcInput` buffer
+   * at `input_ptr` (layout: `crates/factory-wasm/src/lib.rs`'s
+   * `decode_damage_calc_input` doc comment; encoder:
+   * `adapter/damageEngine.ts`) and returns the damage directly.
+   */
+  fw_calculate_base_damage(input_ptr: number): number;
+  /**
+   * `Cmd_critcalc`'s crit-chance stage. `move_effect` uses the 0..4
+   * discriminant mapping documented on the Rust `crit_move_effect_from_u32`
+   * helper. Booleans are 0/1. Returns 0..4.
+   */
+  fw_get_critical_hit_chance_stage(
+    focus_energy: number,
+    move_effect: number,
+    attacker_hold_effect: number,
+    is_chansey: number,
+    is_farfetchd: number,
+  ): number;
+  /** `Cmd_critcalc`'s final roll. `crit_chance_stage` must be 0..4 (traps otherwise). Returns 0/1. */
+  fw_roll_is_critical_hit(crit_chance_stage: number, rng_roll: number, target_immune: number): number;
+  /** `Cmd_typecalc`'s STAB step. Type fields truncate to u8 (0..17). */
+  fw_apply_stab(damage: number, attacker_type_a: number, attacker_type_b: number, move_type: number): number;
+  /**
+   * `ModulateDmgByType`, using the `TYPE_EFFECTIVENESS_TABLE` embedded in
+   * factory-core (not passed across the ABI). Returns an `fw_alloc`'d
+   * fixed 8-byte buffer (`damage: i32`, `multiplier_tenths: i32`, no
+   * status byte — this function cannot fail); the caller must
+   * `fw_free(ptr, 8)`.
+   */
+  fw_apply_type_effectiveness(
+    damage: number,
+    move_type: number,
+    defender_type_a: number,
+    defender_type_b: number,
+  ): number;
+  /** `Cmd_setdamagetohealthdifference`'s raw HP-diff, clamped to 0. */
+  fw_calculate_endeavor_damage(target_hp: number, user_hp: number): number;
+  /** EFFECT_ENDEAVOR's full resolution (the type multiplier only gates immunity, never scales). */
+  fw_resolve_endeavor_damage(target_hp: number, user_hp: number, type_multiplier_tenths: number): number;
+  /** `ApplyRandomDmgMultiplier`. `rng_roll` truncates to u16. */
+  fw_apply_random_damage_multiplier(damage: number, rng_roll: number): number;
+  /**
+   * `Cmd_accuracycheck`'s `calc` value. Reads a fixed 26-byte
+   * `AccuracyCalcInput` buffer at `input_ptr` (layout:
+   * `crates/factory-wasm/src/lib.rs`'s `decode_accuracy_calc_input` doc
+   * comment; encoder: `adapter/damageEngine.ts`) and returns `calc` directly.
+   */
+  fw_calculate_accuracy(input_ptr: number): number;
+  /** `Cmd_accuracycheck`'s final roll. `rng_roll` truncates to u16. Returns 0/1. */
+  fw_roll_accuracy_hits(calc: number, rng_roll: number): number;
   memory: WebAssembly.Memory;
 }
 
