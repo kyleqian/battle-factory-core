@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1179 — [MAIN worker, 2026-08-11] **`ply_note` CGB4 mutable route source-closed**
+
+- **State:** #55 now has a source-general mutable CGB-channel reducer for the
+  observed type-12 route: **7/82** callbacks exact; complete MPlay remains
+  **5 exact / 108 null** and `runFactoryConstructionClock` stays unwired.
+- **Did:** twice-fresh OFF packets for anchor/LILIANA/legal-varied are
+  byte-identical (0/3/4 CGB4 callbacks). Captured only status, priority, and
+  address-free track ordering at `0x082dfe04`; source-priced **5×14 + 2×42 =
+  154** continuation cycles, **588** including the accepted prefix. All six
+  status/priority/track branches are reducer-accounted; unresolved inputs
+  remain null.
+- **Next:** preserve null for allocation body, remaining 75 post-selection
+  callbacks, post-callback glue, complete one-pass totals, service, and clock.
+- **Notes:** packet hashes anchor `c1394c32…`, LILIANA `3df2c58b…`, varied
+  `041b590f…`; focused dependent group **17/17** green. No unsupported barrier,
+  duration fit, pointer identity, gameplay/pixel, renderer, Rust, or ROADMAP/
+  ISSUES change.
+
 ## 1178 — [supervisor, 2026-08-11] **CGB4 prefix verified; Meteor Mash checkpoint folded**
 
 - **State:** the smallest observed post-selection note family is source-exact
@@ -42,19 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **973 files / 9,427 passed / 1 skipped**, and build **651 modules** are green.
   No probe, duration fit, pointer identity, unsupported barrier,
   gameplay/pixel/Rust/#56 change.
-
-## 1176 — [supervisor, 2026-08-11] **MPlay dispatcher verified**
-
-- **State:** command decode/running-status/jump-table dispatch is source-exact
-  for **218/218** commands across **108/108** one-pass rows. Complete MPlay
-  remains **5 exact / 108 null**; #55 stays unwired and LUKAS remains **8/50**.
-- **Did:** independently regenerated the additive dispatch receipt and ran the
-  entire dependent MPlay group **15/15**. Verified **99 waits / 82 notes / 37
-  table callbacks**, six costs from **63–93 cycles**, and normalized
-  source/state/target mutation guards.
-- **Next:** source-close one bounded observed post-selection `ply_note` body
-  route. Preserve nulls for keysplit, complete notes, post-callback glue,
-  complete one-pass MPlay totals, and the construction clock.
-- **Notes:** worker full `npm test` **972 files / 9,423 passed / 1 skipped**,
-  smoke **375/375**, typecheck, build **651 modules**. Both lane branches are
-  contained; no unsupported barrier or gameplay/pixel/Rust change.

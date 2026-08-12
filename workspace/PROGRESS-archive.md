@@ -41687,3 +41687,18 @@ git; the current live ledger keeps the three load-bearing entries only.
   **375/375**, typecheck, full **972 files / 9,423 passed / 1 skipped**, and
   build **651 modules** are green. No oracle capture, duration fit, pointer
   identity, unsupported barrier, gameplay/pixel/Rust/#56 change.
+
+## 1176 — [supervisor, 2026-08-11] **MPlay dispatcher verified**
+
+- **State:** command decode/running-status/jump-table dispatch was source-exact
+  for **218/218** commands across **108/108** one-pass rows. Complete MPlay
+  remained **5 exact / 108 null**; #55 stayed unwired and LUKAS remained
+  **8/50**.
+- **Did:** independently regenerated the additive dispatch receipt and ran the
+  entire dependent MPlay group **15/15**. Verified **99 waits / 82 notes / 37
+  table callbacks**, six costs from **63–93 cycles**, and normalized
+  source/state/target mutation guards.
+- **Notes:** implementation commit `8f72b6a6`; focused **15/15**, smoke
+  **375/375**, typecheck, full **972 files / 9,423 passed / 1 skipped**, and
+  build **651 modules** were green. No oracle capture, duration fit, pointer
+  identity, unsupported barrier, gameplay/pixel/Rust/#56 change.

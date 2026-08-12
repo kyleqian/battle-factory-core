@@ -1,0 +1,903 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-probe/v2",
+  "case": "factory-varied",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "sixth-MPlayMain-ply_note-CGB4-status-priority-track",
+  "addressFree": true,
+  "observations": [
+    {
+      "sourceStateDigest": "72bca7e9ae37db13fceeaefde6cf1b054a8a78ae3b8149e55e83e1e7edf9eec9",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "noteCallbacks": [
+        {
+          "trackIndex": 4,
+          "noteCode": 6,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-5",
+            "offset": 338
+          },
+          "commandBytes": [
+            76,
+            134,
+            71
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 82,
+          "velocityBefore": 112,
+          "keyAfter": 76,
+          "velocityAfter": 112,
+          "toneType": 9,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 284
+          },
+          "commandBytes": [
+            54,
+            40,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 20,
+          "keyAfter": 54,
+          "velocityAfter": 40,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        },
+        {
+          "trackIndex": 8,
+          "noteCode": 12,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-9",
+            "offset": 52
+          },
+          "commandBytes": [
+            91,
+            64,
+            140
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 91,
+          "velocityBefore": 64,
+          "keyAfter": 91,
+          "velocityAfter": 64,
+          "toneType": 12,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline",
+          "cgb4MutableState": {
+            "statusFlags": 0,
+            "priority": 0,
+            "trackRelation": "null"
+          }
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "392ee1fb36befc987d1bcb0462da7f223fc70ac21a4336bdf233b44a40f8486f",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "67da954832dba2cbfead528ad8dbecf917ce2b5588182f87ec59409b100af8a1",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "be6e35509daf720d28d012b068c1ac2dccbbf4d4fe31e87947e4bbf0cad05656",
+      "noteCallbacks": [
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 287
+          },
+          "commandBytes": [
+            54,
+            20,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 40,
+          "keyAfter": 54,
+          "velocityAfter": 20,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "96f21bb6fe6a7140ae69b6ab4e9d18ba9d4a9517fc73b104c7b895d2d3c45663",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "4eae4709804911c2abc42733fd9452c3c44989aa973f9e981b203b0e2bfc9378",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "e2f1fb2e5c957630aaa452a47df79e68afbc0147822327b019f8c05d369561fc",
+      "noteCallbacks": [
+        {
+          "trackIndex": 1,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-2",
+            "offset": 232
+          },
+          "commandBytes": [
+            40,
+            134,
+            52
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 52,
+          "velocityBefore": 112,
+          "keyAfter": 40,
+          "velocityAfter": 112,
+          "toneType": 11,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 4,
+          "noteCode": 6,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-5",
+            "offset": 340
+          },
+          "commandBytes": [
+            71,
+            134,
+            189
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 76,
+          "velocityBefore": 112,
+          "keyAfter": 71,
+          "velocityAfter": 112,
+          "toneType": 9,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 290
+          },
+          "commandBytes": [
+            54,
+            40,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 20,
+          "keyAfter": 54,
+          "velocityAfter": 40,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "4ed56a833cd84416897ff7a7a926adec1c58b0311852289fd21c9192616bc83b",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "1a41ee2b2964a23bfbcb69313a23f3aff269e417d1b3388eace35b3b87bfa7d2",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "630ba6390a518e9bb2b9d5f66c0a4f8134fb6d0758755dd5e45fab99df4dfd7e",
+      "noteCallbacks": [
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 293
+          },
+          "commandBytes": [
+            54,
+            20,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 40,
+          "keyAfter": 54,
+          "velocityAfter": 20,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "0787d864304b6a56152fca5b68730d77c89f15675ac057dfc5200d439fb6ba5e",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "ccdc4dcafc27b1504e0753c03c88c267593760955727b13665d1e00c5dc3349e",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "noteCallbacks": [
+        {
+          "trackIndex": 1,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-2",
+            "offset": 234
+          },
+          "commandBytes": [
+            52,
+            140,
+            40
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 40,
+          "velocityBefore": 112,
+          "keyAfter": 52,
+          "velocityAfter": 112,
+          "toneType": 11,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 4,
+          "noteCode": 27,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-5",
+            "offset": 349
+          },
+          "commandBytes": [
+            83,
+            155,
+            191
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 71,
+          "velocityBefore": 112,
+          "keyAfter": 83,
+          "velocityAfter": 112,
+          "toneType": 9,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 6,
+          "noteCode": 12,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 297
+          },
+          "commandBytes": [
+            36,
+            112,
+            210
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 20,
+          "keyAfter": 36,
+          "velocityAfter": 112,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 36,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              192,
+              255,
+              0,
+              255,
+              0
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        },
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 300
+          },
+          "commandBytes": [
+            54,
+            56,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 36,
+          "velocityBefore": 112,
+          "keyAfter": 54,
+          "velocityAfter": 56,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        },
+        {
+          "trackIndex": 7,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-8",
+            "offset": 72
+          },
+          "commandBytes": [
+            64,
+            64,
+            134
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 64,
+          "velocityBefore": 32,
+          "keyAfter": 64,
+          "velocityAfter": 64,
+          "toneType": 12,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline",
+          "cgb4MutableState": {
+            "statusFlags": 1,
+            "priority": 0,
+            "trackRelation": "greater"
+          }
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "87b1f90262c93b8c354d84c8ea190e8d7593fa8a92e24b471c2a5509491dfc7b",
+      "noteCallbacks": null
+    },
+    {
+      "sourceStateDigest": "e4253fd0cdee35d287ef5037ae6bdf517df8d5ce6e098170d96459229ebaef7e",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "159fef34a4d3820d0f9ad73209757b12344891ffe5355de79d16a091e4df1b3d",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "3159277d5f556ef6113a34474482746e76d02159d7e1215677a0b082a6646ece",
+      "noteCallbacks": [
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 303
+          },
+          "commandBytes": [
+            54,
+            20,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 56,
+          "keyAfter": 54,
+          "velocityAfter": 20,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "d3dc5c9872ff67b604bc26816075088d8d30ee7f2f51f1af0fde99774d193451",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "c3a3ad5236e8251f2207ae94b5f68e7e71a31469f27e214248a4b00d54835811",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "noteCallbacks": [
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 306
+          },
+          "commandBytes": [
+            54,
+            40,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 20,
+          "keyAfter": 54,
+          "velocityAfter": 40,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        },
+        {
+          "trackIndex": 7,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-8",
+            "offset": 75
+          },
+          "commandBytes": [
+            64,
+            32,
+            146
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 64,
+          "velocityBefore": 64,
+          "keyAfter": 64,
+          "velocityAfter": 32,
+          "toneType": 12,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline",
+          "cgb4MutableState": {
+            "statusFlags": 0,
+            "priority": 0,
+            "trackRelation": "null"
+          }
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "fd44eb47158ac1cfda1f8553782a2517ba504c9837e4a177eb8993de97d1832a",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "aed1a0ca751cdc3c7d1747b4146f917b4f59335dc6c9fea5a527d31caaea6e77",
+      "noteCallbacks": [
+        {
+          "trackIndex": 5,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-6",
+            "offset": 340
+          },
+          "commandBytes": [
+            82,
+            64,
+            129
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 83,
+          "velocityBefore": 112,
+          "keyAfter": 82,
+          "velocityAfter": 64,
+          "toneType": 10,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "bee08cb380bc0841a92edaeb11e2aa4071e253d29a0c08910de9d21c90535af3",
+      "noteCallbacks": [
+        {
+          "trackIndex": 5,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-6",
+            "offset": 343
+          },
+          "commandBytes": [
+            81,
+            129,
+            80
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 82,
+          "velocityBefore": 64,
+          "keyAfter": 81,
+          "velocityAfter": 64,
+          "toneType": 10,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 309
+          },
+          "commandBytes": [
+            54,
+            20,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 40,
+          "keyAfter": 54,
+          "velocityAfter": 20,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "148dde7ef3a312dd26ae03e5b3f3352ebcd92859df77841a8fbb5b9dd442d3f1",
+      "noteCallbacks": [
+        {
+          "trackIndex": 5,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-6",
+            "offset": 345
+          },
+          "commandBytes": [
+            80,
+            130,
+            233
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 81,
+          "velocityBefore": 64,
+          "keyAfter": 80,
+          "velocityAfter": 64,
+          "toneType": 10,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "a5d11e18994a55a33e1149e5aca21ef193a346a6d807793cc94d97d78588c592",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "noteCallbacks": [
+        {
+          "trackIndex": 1,
+          "noteCode": 1,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-2",
+            "offset": 236
+          },
+          "commandBytes": [
+            40,
+            134,
+            52
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 52,
+          "velocityBefore": 112,
+          "keyAfter": 40,
+          "velocityAfter": 112,
+          "toneType": 11,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 5,
+          "noteCode": 26,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-6",
+            "offset": 348
+          },
+          "commandBytes": [
+            79,
+            154,
+            129
+          ],
+          "acceptedParameters": 1,
+          "keyBefore": 80,
+          "velocityBefore": 64,
+          "keyAfter": 79,
+          "velocityAfter": 64,
+          "toneType": 10,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline"
+        },
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 312
+          },
+          "commandBytes": [
+            54,
+            40,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 20,
+          "keyAfter": 54,
+          "velocityAfter": 40,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        },
+        {
+          "trackIndex": 8,
+          "noteCode": 12,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-9",
+            "offset": 59
+          },
+          "commandBytes": [
+            140,
+            191,
+            127
+          ],
+          "acceptedParameters": 0,
+          "keyBefore": 91,
+          "velocityBefore": 64,
+          "keyAfter": 91,
+          "velocityAfter": 64,
+          "toneType": 12,
+          "toneTable": null,
+          "selectedTone": null,
+          "derivedSelector": "inline",
+          "observedSelector": "inline",
+          "cgb4MutableState": {
+            "statusFlags": 0,
+            "priority": 0,
+            "trackRelation": "null"
+          }
+        }
+      ]
+    },
+    {
+      "sourceStateDigest": "5f3dbed00174fe0734a52b590743488ed1c6a18234f57bbb84aae8e84684d5f0",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "c07267f55e24cae3562b69d8e663de5a2769fb079669abd396ac8785275dcc1b",
+      "noteCallbacks": []
+    },
+    {
+      "sourceStateDigest": "e45d7989cd5133f64e109597b535ff57fb383ecf768fb8eda745f57918d0bbbb",
+      "noteCallbacks": [
+        {
+          "trackIndex": 6,
+          "noteCode": 3,
+          "commandPointer": {
+            "role": "battle-factory-bgm-track-7",
+            "offset": 315
+          },
+          "commandBytes": [
+            54,
+            20,
+            131
+          ],
+          "acceptedParameters": 2,
+          "keyBefore": 54,
+          "velocityBefore": 40,
+          "keyAfter": 54,
+          "velocityAfter": 20,
+          "toneType": 128,
+          "toneTable": {
+            "role": "voicegroup_frlg_drumset-midi-index-base",
+            "offset": 0
+          },
+          "selectedTone": {
+            "index": 54,
+            "scalarBytes": [
+              8,
+              64,
+              0,
+              162,
+              255,
+              127,
+              77,
+              204
+            ]
+          },
+          "derivedSelector": "rhythm",
+          "observedSelector": "rhythm"
+        }
+      ]
+    }
+  ]
+}
