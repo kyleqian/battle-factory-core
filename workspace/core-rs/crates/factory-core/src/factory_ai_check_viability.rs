@@ -127,7 +127,7 @@ use crate::factory_ai_check_bad_move::{
     EFFECT_SPEED_UP, EFFECT_SPEED_UP_2, EFFECT_SPIT_UP, EFFECT_SUBSTITUTE, EFFECT_SUNNY_DAY,
     EFFECT_SUPERPOWER, EFFECT_SUPER_FANG, EFFECT_SWAGGER, EFFECT_SWALLOW, EFFECT_SYNTHESIS,
     EFFECT_THIEF, EFFECT_TICKLE, EFFECT_TOXIC, EFFECT_TRAP, EFFECT_TRICK, EFFECT_VITAL_THROW,
-    EFFECT_WATER_SPORT,
+    EFFECT_WATER_SPORT, EFFECT_WILL_O_WISP,
 };
 use crate::gen_tables;
 use crate::rng::advance_rng_value;
@@ -461,7 +461,55 @@ pub const CV_HANDLED_EFFECTS_M5D3: &[u16] = &[
     EFFECT_COUNTER,
 ];
 
-/// M5d-4..5 have not landed yet — union of every landed batch's own
+/// M5d-4 (batching doc §2): charge-up/status-cure/screen-siblings/
+/// Substitute cluster, straddling the ground-truth-doc coverage boundary
+/// (`EFFECT_BRICK_BREAK` is the LAST doc-backed handler, doc §35;
+/// everything else here is source-citation-only, batching doc §0/§4). 22
+/// effects: `EFFECT_BRICK_BREAK` (`run_cv_brick_break`, own side-Reflect
+/// gate); `EFFECT_SOLAR_BEAM`+`RAZOR_WIND`+`SKY_ATTACK`+`SKULL_BASH`
+/// (`run_cv_charge_up_move`, one shared handler); `EFFECT_OVERHEAT`
+/// (`run_cv_overheat`); `EFFECT_FACADE` (`run_cv_facade`); `EFFECT_CURSE`
+/// (`run_cv_curse`, own independent DEF-raise/Ghost-HP body — does NOT
+/// reuse `run_cv_defense_up`, unlike CBM's Curse->BulkUp shortcut);
+/// `EFFECT_PSYCH_UP` (`run_cv_psych_up`, own independent body — no CV Haze
+/// handler exists to reuse, unlike CBM's PsychUp->Haze shortcut);
+/// `EFFECT_MIRROR_COAT` (`run_cv_mirror_coat`, 7-draw-site special-pivot
+/// handler); `EFFECT_DRAGON_DANCE` (`run_cv_dragon_dance`);
+/// `EFFECT_BATON_PASS` (`run_cv_baton_pass`); `EFFECT_KNOCK_OFF`
+/// (`run_cv_knock_off`); `EFFECT_FOCUS_PUNCH` (`run_cv_focus_punch`);
+/// `EFFECT_REVENGE` (`run_cv_revenge`); `EFFECT_SUPERPOWER`
+/// (`run_cv_superpower`); `EFFECT_MAGIC_COAT` (`run_cv_magic_coat`);
+/// `EFFECT_FORESIGHT` (`run_cv_foresight`, non-BUGFIX own-type/evasion
+/// read); `EFFECT_ENDEAVOR` (`run_cv_endeavor`); `EFFECT_ENCORE`
+/// (`run_cv_encore`); `EFFECT_HEAL_BELL` (`run_cv_heal_bell`);
+/// `EFFECT_SUBSTITUTE` (`run_cv_substitute`, 4-draw-site HP-band descent
+/// + last-move-effect branch, 3rd-largest handler body).
+pub const CV_HANDLED_EFFECTS_M5D4: &[u16] = &[
+    EFFECT_BRICK_BREAK,
+    EFFECT_SOLAR_BEAM,
+    EFFECT_RAZOR_WIND,
+    EFFECT_SKY_ATTACK,
+    EFFECT_SKULL_BASH,
+    EFFECT_OVERHEAT,
+    EFFECT_FACADE,
+    EFFECT_CURSE,
+    EFFECT_PSYCH_UP,
+    EFFECT_MIRROR_COAT,
+    EFFECT_DRAGON_DANCE,
+    EFFECT_BATON_PASS,
+    EFFECT_KNOCK_OFF,
+    EFFECT_FOCUS_PUNCH,
+    EFFECT_REVENGE,
+    EFFECT_SUPERPOWER,
+    EFFECT_MAGIC_COAT,
+    EFFECT_FORESIGHT,
+    EFFECT_ENDEAVOR,
+    EFFECT_ENCORE,
+    EFFECT_HEAL_BELL,
+    EFFECT_SUBSTITUTE,
+];
+
+/// M5d-5 has not landed yet — union of every landed batch's own
 /// `CV_HANDLED_EFFECTS_M5D*` const, mirroring `cbm_handled_effects`'s own
 /// chained shape (`factory_ai_check_bad_move.rs:679-685`).
 #[must_use]
@@ -469,14 +517,15 @@ pub fn cv_handled_effects() -> Vec<u16> {
     let mut handled = CV_HANDLED_EFFECTS_M5D1.to_vec();
     handled.extend_from_slice(CV_HANDLED_EFFECTS_M5D2);
     handled.extend_from_slice(CV_HANDLED_EFFECTS_M5D3);
+    handled.extend_from_slice(CV_HANDLED_EFFECTS_M5D4);
     handled
 }
 
 /// Direct port of the CBM precedent's `unported_cbm_table_effects`
 /// (`factory_ai_check_bad_move.rs:648-662`): `CV_TABLE_EFFECTS` minus
-/// `cv_handled_effects()`, sorted. Returns 50 entries now that M5d-1's 13 +
-/// M5d-2's 29 + M5d-3's 30 effects are handled (122 - 13 - 29 - 30 = 50);
-/// will shrink further as M5d-4..5 land.
+/// `cv_handled_effects()`, sorted. Returns 28 entries now that M5d-1's 13 +
+/// M5d-2's 29 + M5d-3's 30 + M5d-4's 22 effects are handled
+/// (122 - 13 - 29 - 30 - 22 = 28); will shrink to 0 once M5d-5 lands.
 #[must_use]
 pub fn unported_cv_table_effects() -> Vec<u16> {
     let handled = cv_handled_effects();
@@ -686,53 +735,29 @@ pub enum CvDrawKind {
     SelfKo3,
     SelfKo4,
     SelfKo5,
-    #[allow(dead_code)]
     Curse1,
-    #[allow(dead_code)]
     Curse2,
-    #[allow(dead_code)]
     Curse3,
-    #[allow(dead_code)]
     MirrorCoat1,
-    #[allow(dead_code)]
     MirrorCoat2,
-    #[allow(dead_code)]
     MirrorCoat3,
-    #[allow(dead_code)]
     MirrorCoat4,
-    #[allow(dead_code)]
     MirrorCoat5,
-    #[allow(dead_code)]
     MirrorCoat6,
-    #[allow(dead_code)]
     MirrorCoat7,
-    #[allow(dead_code)]
     DragonDance1,
-    #[allow(dead_code)]
     DragonDance2,
-    #[allow(dead_code)]
     FocusPunch1,
-    #[allow(dead_code)]
     FocusPunch2,
-    #[allow(dead_code)]
     KnockOff,
-    #[allow(dead_code)]
     MagicCoat1,
-    #[allow(dead_code)]
     MagicCoat2,
-    #[allow(dead_code)]
     MagicCoat3,
-    #[allow(dead_code)]
     Foresight1,
-    #[allow(dead_code)]
     Foresight2,
-    #[allow(dead_code)]
     Substitute1,
-    #[allow(dead_code)]
     Substitute2,
-    #[allow(dead_code)]
     Substitute3,
-    #[allow(dead_code)]
     Substitute4,
     #[allow(dead_code)]
     LockOn,
@@ -1085,7 +1110,6 @@ pub enum CheckViabilityDraw {
         kind: CvDrawKind,
         jumped: bool,
     },
-    #[allow(dead_code)]
     CurseRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1095,7 +1119,6 @@ pub enum CheckViabilityDraw {
         kind: CvDrawKind,
         jumped: bool,
     },
-    #[allow(dead_code)]
     PsychUpRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1104,7 +1127,6 @@ pub enum CheckViabilityDraw {
         random_value: u16,
         jumped: bool,
     },
-    #[allow(dead_code)]
     MirrorCoatRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1114,7 +1136,6 @@ pub enum CheckViabilityDraw {
         kind: CvDrawKind,
         jumped: bool,
     },
-    #[allow(dead_code)]
     DragonDanceRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1124,7 +1145,6 @@ pub enum CheckViabilityDraw {
         kind: CvDrawKind,
         succeeded: bool,
     },
-    #[allow(dead_code)]
     BatonPassRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1133,7 +1153,6 @@ pub enum CheckViabilityDraw {
         random_value: u16,
         succeeded: bool,
     },
-    #[allow(dead_code)]
     FocusPunchKnockOffRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1143,7 +1162,6 @@ pub enum CheckViabilityDraw {
         kind: CvDrawKind,
         succeeded: bool,
     },
-    #[allow(dead_code)]
     RevengeRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1152,7 +1170,6 @@ pub enum CheckViabilityDraw {
         random_value: u16,
         jumped: bool,
     },
-    #[allow(dead_code)]
     MagicCoatRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1162,7 +1179,6 @@ pub enum CheckViabilityDraw {
         kind: CvDrawKind,
         jumped: bool,
     },
-    #[allow(dead_code)]
     ForesightRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1172,7 +1188,6 @@ pub enum CheckViabilityDraw {
         kind: CvDrawKind,
         jumped: bool,
     },
-    #[allow(dead_code)]
     EncoreRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -1199,7 +1214,6 @@ pub enum CheckViabilityDraw {
         random_value: u16,
         jumped: bool,
     },
-    #[allow(dead_code)]
     SubstituteRoll {
         ordinal: u32,
         before: BattleRngState,
@@ -2257,6 +2271,303 @@ pub fn run_check_viability(input: RunCheckViabilityInput) -> CheckViabilityResul
         };
     }
 
+    if move_row.effect == EFFECT_BRICK_BREAK {
+        let brick_break =
+            run_cv_brick_break(input.rng, input.target.has_side_reflect.unwrap_or(false));
+        return CheckViabilityResult::Scored {
+            rng: brick_break.rng,
+            draws: brick_break.draws,
+            draw_count: brick_break.draw_count,
+            score_delta: brick_break.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_SOLAR_BEAM
+        || move_row.effect == EFFECT_RAZOR_WIND
+        || move_row.effect == EFFECT_SKY_ATTACK
+        || move_row.effect == EFFECT_SKULL_BASH
+    {
+        let charge_up_move =
+            run_cv_charge_up_move(input.rng, input.attacker, input.target, move_row.move_type);
+        return CheckViabilityResult::Scored {
+            rng: charge_up_move.rng,
+            draws: charge_up_move.draws,
+            draw_count: charge_up_move.draw_count,
+            score_delta: charge_up_move.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_OVERHEAT {
+        let overheat = run_cv_overheat(
+            input.rng,
+            input.attacker,
+            input.target,
+            move_row.move_type,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: overheat.rng,
+            draws: overheat.draws,
+            draw_count: overheat.draw_count,
+            score_delta: overheat.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_FACADE {
+        let facade = run_cv_facade(
+            input.rng,
+            input.target.is_poisoned.unwrap_or(false),
+            input.target.is_burned.unwrap_or(false),
+            input.target.is_paralyzed.unwrap_or(false),
+            input.target.is_toxic_poisoned.unwrap_or(false),
+        );
+        return CheckViabilityResult::Scored {
+            rng: facade.rng,
+            draws: facade.draws,
+            draw_count: facade.draw_count,
+            score_delta: facade.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_CURSE {
+        let (curse, func_result_after) =
+            run_cv_curse(input.rng, input.attacker, input.draw_ordinal_start);
+        return CheckViabilityResult::Scored {
+            rng: curse.rng,
+            draws: curse.draws,
+            draw_count: curse.draw_count,
+            score_delta: curse.score_delta,
+            func_result_after,
+        };
+    }
+
+    if move_row.effect == EFFECT_PSYCH_UP {
+        let psych_up = run_cv_psych_up(
+            input.rng,
+            input.target,
+            input.attacker,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: psych_up.rng,
+            draws: psych_up.draws,
+            draw_count: psych_up.draw_count,
+            score_delta: psych_up.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_MIRROR_COAT {
+        let (mirror_coat, func_result_after) = run_cv_mirror_coat(
+            input.rng,
+            input.attacker,
+            input.target,
+            func_result_carry,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: mirror_coat.rng,
+            draws: mirror_coat.draws,
+            draw_count: mirror_coat.draw_count,
+            score_delta: mirror_coat.score_delta,
+            func_result_after,
+        };
+    }
+
+    if move_row.effect == EFFECT_DRAGON_DANCE {
+        let dragon_dance = run_cv_dragon_dance(
+            input.rng,
+            input.attacker,
+            input.target,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: dragon_dance.rng,
+            draws: dragon_dance.draws,
+            draw_count: dragon_dance.draw_count,
+            score_delta: dragon_dance.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_BATON_PASS {
+        let baton_pass = run_cv_baton_pass(
+            input.rng,
+            input.attacker,
+            input.target,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: baton_pass.rng,
+            draws: baton_pass.draws,
+            draw_count: baton_pass.draw_count,
+            score_delta: baton_pass.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_KNOCK_OFF {
+        let (knock_off, func_result_after) = run_cv_knock_off(
+            input.rng,
+            input.target.hp,
+            input.target.max_hp,
+            input.attacker.is_first_turn,
+            func_result_carry,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: knock_off.rng,
+            draws: knock_off.draws,
+            draw_count: knock_off.draw_count,
+            score_delta: knock_off.score_delta,
+            func_result_after,
+        };
+    }
+
+    if move_row.effect == EFFECT_FOCUS_PUNCH {
+        let (focus_punch, func_result_after) = run_cv_focus_punch(
+            input.rng,
+            input.attacker,
+            input.target,
+            move_row.move_type,
+            func_result_carry,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: focus_punch.rng,
+            draws: focus_punch.draws,
+            draw_count: focus_punch.draw_count,
+            score_delta: focus_punch.score_delta,
+            func_result_after,
+        };
+    }
+
+    if move_row.effect == EFFECT_REVENGE {
+        let revenge = run_cv_revenge(input.rng, input.target, input.draw_ordinal_start);
+        return CheckViabilityResult::Scored {
+            rng: revenge.rng,
+            draws: revenge.draws,
+            draw_count: revenge.draw_count,
+            score_delta: revenge.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_SUPERPOWER {
+        let superpower = run_cv_superpower(
+            input.rng,
+            input.attacker,
+            input.target,
+            move_row.move_type,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: superpower.rng,
+            draws: superpower.draws,
+            draw_count: superpower.draw_count,
+            score_delta: superpower.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_MAGIC_COAT {
+        let (magic_coat, func_result_after) = run_cv_magic_coat(
+            input.rng,
+            input.target.hp,
+            input.target.max_hp,
+            input.attacker.is_first_turn,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: magic_coat.rng,
+            draws: magic_coat.draws,
+            draw_count: magic_coat.draw_count,
+            score_delta: magic_coat.score_delta,
+            func_result_after,
+        };
+    }
+
+    if move_row.effect == EFFECT_FORESIGHT {
+        let (foresight, func_result_after) = run_cv_foresight(
+            input.rng,
+            input.attacker.types,
+            input.attacker.evasion_stage,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: foresight.rng,
+            draws: foresight.draws,
+            draw_count: foresight.draw_count,
+            score_delta: foresight.score_delta,
+            func_result_after,
+        };
+    }
+
+    if move_row.effect == EFFECT_ENDEAVOR {
+        let endeavor = run_cv_endeavor(
+            input.rng,
+            input.attacker,
+            input.target,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: endeavor.rng,
+            draws: endeavor.draws,
+            draw_count: endeavor.draw_count,
+            score_delta: endeavor.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_ENCORE {
+        let (encore, func_result_after) = run_cv_encore(
+            input.rng,
+            input.attacker,
+            input.target,
+            func_result_carry,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: encore.rng,
+            draws: encore.draws,
+            draw_count: encore.draw_count,
+            score_delta: encore.score_delta,
+            func_result_after,
+        };
+    }
+
+    if move_row.effect == EFFECT_HEAL_BELL {
+        let heal_bell = run_cv_heal_bell(input.rng, input.target);
+        return CheckViabilityResult::Scored {
+            rng: heal_bell.rng,
+            draws: heal_bell.draws,
+            draw_count: heal_bell.draw_count,
+            score_delta: heal_bell.score_delta,
+            func_result_after: func_result_carry,
+        };
+    }
+
+    if move_row.effect == EFFECT_SUBSTITUTE {
+        let (substitute, func_result_after) = run_cv_substitute(
+            input.rng,
+            input.attacker,
+            input.target,
+            func_result_carry,
+            input.draw_ordinal_start,
+        );
+        return CheckViabilityResult::Scored {
+            rng: substitute.rng,
+            draws: substitute.draws,
+            draw_count: substitute.draw_count,
+            score_delta: substitute.score_delta,
+            func_result_after,
+        };
+    }
+
     if CV_TABLE_EFFECTS.contains(&move_row.effect) {
         return CheckViabilityResult::NotYetPorted {
             effect: move_row.effect,
@@ -2303,7 +2614,9 @@ const EFFECT_POISON_HIT: u16 = 2;
 /// `AI_CV_Protect`'s own stale-`funcResult` collision map over the
 /// TARGET's last-used move's effect (`get_last_used_bank_move;
 /// get_move_effect_from_result`, always executed on both of Protect's
-/// paths, TS's own doc comment at :1242-1247).
+/// paths, TS's own doc comment at :1242-1247). Also reused as-is by M5d-4's
+/// `run_cv_encore`/`run_cv_substitute` (TS reads the same module-level
+/// `EFFECT_ID_IN_WEATHER_RANGE` map at :8010/:8180), not reimplemented.
 fn protect_last_move_effect_func_result(last_move_effect: u16) -> Option<u8> {
     match last_move_effect {
         EFFECT_HIT => Some(AI_WEATHER_SUN),
@@ -5999,6 +6312,1444 @@ fn run_cv_counter(
     (
         CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
         type_func_result_collision(type2),
+    )
+}
+
+// === M5d-4 handlers (batching doc §2 "M5d-4") ===============================
+//
+// `EFFECT_BRICK_BREAK` (doc §35) is the LAST handler with ground-truth-doc
+// backing; every other handler below is source-citation-only (`data/
+// battle_ai_scripts.s` + the TS handler's own inline JSDoc, batching doc §0).
+
+/// `AI_CV_BrickBreak` (`data/battle_ai_scripts.s:2457-2464`, doc §35,
+/// `factoryAiCheckViability.ts:4620-4629`). A single side-condition gate on
+/// the TARGET's own Reflect (`Cmd_if_side_affecting`): a Reflect'd target
+/// side scores +1, otherwise 0. Zero draws, no funcResult write.
+fn run_cv_brick_break(rng: BattleRngState, target_has_side_reflect: bool) -> CvDraws {
+    CvDraws {
+        rng,
+        draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+        draw_count: 0,
+        score_delta: if target_has_side_reflect { 1 } else { 0 },
+    }
+}
+
+/// `AI_CV_ChargeUpMove` (`data/battle_ai_scripts.s:2184-2195`,
+/// `factoryAiCheckViability.ts:4661-4691`) — one shared handler for all four
+/// `EFFECT_SOLAR_BEAM`/`RAZOR_WIND`/`SKY_ATTACK`/`SKULL_BASH` dispatch
+/// entries. Zero `if_random_less_than` sites: weak effectiveness
+/// (x0.25/x0.5) or a target-history Protect scan (the same pinned
+/// non-BUGFIX positional gate `AI_CV_Protect` uses) is -2; otherwise own
+/// HP<=38% is -1, HP>38% is 0. No command writes funcResult.
+fn run_cv_charge_up_move(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    move_type: u8,
+) -> CvDraws {
+    let deterministic = |score_delta: i32| CvDraws {
+        rng,
+        draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+        draw_count: 0,
+        score_delta,
+    };
+    let classified = classify_high_crit_effectiveness(attacker.types, move_type, target.types);
+    if classified == AI_EFFECTIVENESS_X0_25 || classified == AI_EFFECTIVENESS_X0_5 {
+        return deterministic(-2);
+    }
+    let user_moves = attacker.moves.unwrap_or([0, 0, 0, 0]);
+    let known_moves = target.known_moves.unwrap_or([0, 0, 0, 0]);
+    let target_history_has_protect = known_moves.iter().enumerate().any(|(slot, &move_id)| {
+        user_moves[slot] != 0
+            && gen_tables::MOVES
+                .get(move_id as usize)
+                .is_some_and(|m| m.effect == EFFECT_PROTECT)
+    });
+    if target_history_has_protect {
+        return deterministic(-2);
+    }
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+    deterministic(if hp_percent > 38 { 0 } else { -1 })
+}
+
+/// `AI_CV_Overheat` (`data/battle_ai_scripts.s:2572-2584`,
+/// `factoryAiCheckViability.ts:4722-4766`) — Overheat/Psycho Boost's shared
+/// handler. Exactly 0.25x/0.5x effectiveness is the deterministic -1 (the
+/// `if_target_faster` tie-break is never reached on this path). Otherwise
+/// target faster: own HP>80% is 0, else -1. Target not faster: own HP>60%
+/// is 0, else -1. No command writes funcResult.
+fn run_cv_overheat(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    move_type: u8,
+    ordinal_start: u32,
+) -> CvDraws {
+    let classified = classify_high_crit_effectiveness(attacker.types, move_type, target.types);
+    if classified == AI_EFFECTIVENESS_X0_25 || classified == AI_EFFECTIVENESS_X0_5 {
+        return CvDraws {
+            rng,
+            draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+            draw_count: 0,
+            score_delta: -1,
+        };
+    }
+    let attacker_to = cv_turn_order_battler(attacker.speed, attacker.speed_stage);
+    let target_to = cv_turn_order_battler(target.speed, target.speed_stage);
+    let (cur_rng, _ordinal, tie_draw, strikes_first) =
+        cv_resolve_target_faster(rng, ordinal_start, attacker_to, target_to);
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+    if let Some(draw) = tie_draw {
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+    }
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+    let score_delta = if strikes_first == 1 {
+        if hp_percent > 80 {
+            0
+        } else {
+            -1
+        }
+    } else if hp_percent > 60 {
+        0
+    } else {
+        -1
+    };
+    CvDraws { rng: cur_rng, draws, draw_count, score_delta }
+}
+
+/// `AI_CV_Facade` (`data/battle_ai_scripts.s:2279-2287`,
+/// `factoryAiCheckViability.ts:4792-4808`), non-BUGFIX pin: the gate reads
+/// the TARGET's OWN status1 (source's own @BUG comment notes it should key
+/// on the user, but the ROM ships the target-side check). A target with
+/// none of poison/burn/paralysis/toxic-poison scores 0; any of the four
+/// scores +1. Zero draws, no funcResult write.
+fn run_cv_facade(
+    rng: BattleRngState,
+    target_is_poisoned: bool,
+    target_is_burned: bool,
+    target_is_paralyzed: bool,
+    target_is_toxic_poisoned: bool,
+) -> CvDraws {
+    let has_status =
+        target_is_poisoned || target_is_burned || target_is_paralyzed || target_is_toxic_poisoned;
+    CvDraws {
+        rng,
+        draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+        draw_count: 0,
+        score_delta: if has_status { 1 } else { 0 },
+    }
+}
+
+/// One of `AI_CV_Curse`'s 3 named DEF-band roll sites
+/// (`factoryAiCheckViability.ts:4875-4883`): a fixed `<128` threshold,
+/// JUMP (roll<128) keeps the running score, FALL-THROUGH (roll>=128)
+/// applies +1.
+fn cv_curse_roll(
+    rng: BattleRngState,
+    ordinal: u32,
+    kind: CvDrawKind,
+) -> (CheckViabilityDraw, BattleRngState, bool) {
+    let draw = next_draw(rng, ordinal);
+    let jumped = draw.random_value % 256 < 128;
+    (
+        CheckViabilityDraw::CurseRoll {
+            ordinal: draw.ordinal,
+            before: draw.before,
+            after: draw.after,
+            raw_rng_value: draw.raw_rng_value,
+            random_value: draw.random_value,
+            kind,
+            jumped,
+        },
+        draw.after,
+        jumped,
+    )
+}
+
+/// `AI_CV_Curse` (`data/battle_ai_scripts.s:1870-1892`,
+/// `factoryAiCheckViability.ts:4853-4898`) — **its own independent 46-line
+/// body; does NOT reuse `run_cv_defense_up`**, unlike CBM's Curse->BulkUp
+/// shortcut (batching doc §4). A Ghost-typed user (type1 or type2) takes
+/// the 1/2-HP spectral variant: own HP>80% is 0, else -1, zero draws.
+/// Non-Ghost users get the DEF-raise variant, gated on the user's OWN DEF
+/// stage (0-12, `DEFAULT_STAT_STAGE`=6): DEF>9 stops before any roll; DEF>7
+/// runs 1 roll; DEF>6 runs 2; DEF 0-6 runs all 3, +1 per roll>=128.
+/// `get_user_type1`/`get_user_type2` always write funcResult: type1 (if
+/// Ghost) or type2 (otherwise), the same `type_chain_func_result_after`
+/// shape every other type-reading handler uses.
+fn run_cv_curse(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    let func_result_after = type_chain_func_result_after(attacker.types, &[TYPE_GHOST]);
+    let is_ghost = attacker.types[0] == TYPE_GHOST || attacker.types[1] == TYPE_GHOST;
+    if is_ghost {
+        let hp_percent = 100 * attacker.hp / attacker.max_hp;
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: if hp_percent > 80 { 0 } else { -1 },
+            },
+            func_result_after,
+        );
+    }
+
+    let mut cur_rng = rng;
+    let mut ordinal = ordinal_start;
+    let mut score: i32 = 0;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+
+    let def_stage = attacker.def_stage;
+    if def_stage > 9 {
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+    let (draw, rng2, jumped) = cv_curse_roll(cur_rng, ordinal, CvDrawKind::Curse1);
+    draws[draw_count as usize] = draw;
+    draw_count += 1;
+    cur_rng = rng2;
+    ordinal += 1;
+    if !jumped {
+        score += 1;
+    }
+    if def_stage > 7 {
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+    let (draw, rng2, jumped) = cv_curse_roll(cur_rng, ordinal, CvDrawKind::Curse2);
+    draws[draw_count as usize] = draw;
+    draw_count += 1;
+    cur_rng = rng2;
+    ordinal += 1;
+    if !jumped {
+        score += 1;
+    }
+    if def_stage > 6 {
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+    let (draw, rng2, jumped) = cv_curse_roll(cur_rng, ordinal, CvDrawKind::Curse3);
+    draws[draw_count as usize] = draw;
+    draw_count += 1;
+    cur_rng = rng2;
+    if !jumped {
+        score += 1;
+    }
+    (
+        CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+        func_result_after,
+    )
+}
+
+/// `AI_CV_PsychUp` (`data/battle_ai_scripts.s:2086-2112`,
+/// `factoryAiCheckViability.ts:4942-4980`) — **its own independent 39-line
+/// body; no CV Haze handler exists to reuse**, unlike CBM's PsychUp->Haze
+/// shortcut (batching doc §4; Haze is not even a CV table effect). Five
+/// target-stage gates (>8) run first: none raised is the deterministic -2.
+/// Otherwise five user-stage gates (<7) run in source order: any of the
+/// first four (ATK/DEF/SPATK/SPDEF) is a bare +1; the EVASION gate's own
+/// `score +1` FALLS THROUGH into the shared tail's `score +1` — +2 total.
+/// All five user stages >=7 reaches the single `<50` roll: JUMP is 0,
+/// FALL-THROUGH is -2. Exactly one `if_random_less_than` site. No command
+/// writes funcResult.
+fn run_cv_psych_up(
+    rng: BattleRngState,
+    target: FactoryAiCheckViabilityBattler,
+    attacker: FactoryAiCheckViabilityBattler,
+    ordinal_start: u32,
+) -> CvDraws {
+    let deterministic = |score_delta: i32| CvDraws {
+        rng,
+        draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+        draw_count: 0,
+        score_delta,
+    };
+    let target_has_raised_stat = target.atk_stage > 8
+        || target.def_stage > 8
+        || target.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE) > 8
+        || target.sp_def_stage > 8
+        || target.evasion_stage > 8;
+    if !target_has_raised_stat {
+        return deterministic(-2);
+    }
+
+    let user_atk_low = attacker.atk_stage < 7;
+    let user_def_low = attacker.def_stage < 7;
+    let user_sp_atk_low = attacker.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE) < 7;
+    let user_sp_def_low = attacker.sp_def_stage < 7;
+    let user_evasion_low = attacker.evasion_stage < 7;
+
+    if user_atk_low || user_def_low || user_sp_atk_low || user_sp_def_low {
+        return deterministic(1);
+    }
+    if user_evasion_low {
+        return deterministic(2);
+    }
+
+    let roll = next_draw(rng, ordinal_start);
+    let jumped = roll.random_value % 256 < 50;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    draws[0] = CheckViabilityDraw::PsychUpRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        jumped,
+    };
+    CvDraws { rng: roll.after, draws, draw_count: 1, score_delta: if jumped { 0 } else { -2 } }
+}
+
+/// `AI_CV_MirrorCoat`'s Counter move id (`include/constants/moves.h:72`) —
+/// `MirrorCoat3`'s `if_has_move AI_USER, MOVE_COUNTER` gate.
+const MOVE_COUNTER: u16 = 68;
+
+/// `AI_CV_MirrorCoat_SpecialTypeList` (`data/battle_ai_scripts.s`,
+/// `factoryAiCheckViability.ts:4982-4984`) — the 8 types Mirror Coat's own
+/// type gates test membership against.
+const AI_CV_MIRROR_COAT_SPECIAL_TYPES: [u8; 8] = [
+    TYPE_FIRE,
+    TYPE_WATER,
+    TYPE_GRASS,
+    TYPE_ELECTRIC,
+    TYPE_PSYCHIC,
+    TYPE_ICE,
+    TYPE_DRAGON,
+    TYPE_DARK,
+];
+
+/// One of `AI_CV_MirrorCoat`'s 7 named roll sites
+/// (`factoryAiCheckViability.ts:5089-5101`), all sharing the same
+/// `nextDraw`-then-classify shape.
+fn cv_mirror_coat_roll(
+    rng: BattleRngState,
+    ordinal: u32,
+    kind: CvDrawKind,
+    threshold: u16,
+) -> (CheckViabilityDraw, BattleRngState, bool) {
+    let draw = next_draw(rng, ordinal);
+    let jumped = draw.random_value % 256 < threshold;
+    (
+        CheckViabilityDraw::MirrorCoatRoll {
+            ordinal: draw.ordinal,
+            before: draw.before,
+            after: draw.after,
+            raw_rng_value: draw.raw_rng_value,
+            random_value: draw.random_value,
+            kind,
+            jumped,
+        },
+        draw.after,
+        jumped,
+    )
+}
+
+/// `AI_CV_MirrorCoat` (`data/battle_ai_scripts.s:2116-2171`,
+/// `factoryAiCheckViability.ts:5076-5166`, 91 lines, non-BUGFIX pin), the
+/// module's 7-draw-site special-pivot handler. Prologue: target
+/// asleep/infatuated/confused is the deterministic -1, zero draws.
+/// Otherwise own HP<=30% runs the `<10` roll (fall-through -1), HP<=50%
+/// runs the `<100` roll (fall-through -1) — both may fire. `MirrorCoat3`:
+/// a user with `MOVE_COUNTER` in its live set jumps straight to the shared
+/// `ScoreUp4` tail (`<100` roll, +4 on fall-through). Otherwise the
+/// TARGET's last move's power is read: nonzero power runs an optional
+/// taunt roll then a special-type gate (NOT special is deterministic -1;
+/// special runs a `<100` roll, +1 on fall-through); zero power runs the
+/// same optional taunt roll then `MirrorCoat6`'s non-BUGFIX TARGET-type
+/// gate (source's own @BUG: special type1/type2 ends at zero; neither
+/// reaches `MirrorCoat7`'s `<50` roll, whose fall-through continues into
+/// the shared `ScoreUp4` tail). funcResult: the Counter-jump and status
+/// prologue paths preserve the carry; the nonzero-power path always
+/// overwrites with the last move's TYPE; the zero-power path is overwritten
+/// by `MirrorCoat6`'s target-type read (`type_chain_func_result_after`).
+fn run_cv_mirror_coat(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    func_result_carry: Option<u8>,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    if target.is_asleep.unwrap_or(false)
+        || target.is_infatuated.unwrap_or(false)
+        || target.is_confused.unwrap_or(false)
+    {
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: -1,
+            },
+            func_result_carry,
+        );
+    }
+
+    let mut cur_rng = rng;
+    let mut ordinal = ordinal_start;
+    let mut score: i32 = 0;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+    if hp_percent <= 30 {
+        let (draw, rng2, jumped) =
+            cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat1, 10);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+    }
+    if hp_percent <= 50 {
+        let (draw, rng2, jumped) =
+            cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat2, 100);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+    }
+
+    let user_moves = attacker.moves.unwrap_or([0, 0, 0, 0]);
+    let last_move = gen_tables::MOVES.get(target.last_used_move_id.unwrap_or(0) as usize);
+    let last_power = last_move.map_or(0, |m| m.power);
+
+    if user_moves.contains(&MOVE_COUNTER) {
+        let (draw, rng2, jumped) =
+            cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat7, 100);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        if !jumped {
+            score += 4;
+        }
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_carry,
+        );
+    }
+
+    let target_is_taunted = target.is_taunted.unwrap_or(false);
+
+    if last_power != 0 {
+        if target_is_taunted {
+            let (draw, rng2, jumped) =
+                cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat3, 100);
+            draws[draw_count as usize] = draw;
+            draw_count += 1;
+            cur_rng = rng2;
+            ordinal += 1;
+            if !jumped {
+                score += 1;
+            }
+        }
+        let last_type = last_move.map_or(TYPE_NORMAL, |m| m.move_type);
+        let func_result_after = type_func_result_collision(last_type);
+        if !AI_CV_MIRROR_COAT_SPECIAL_TYPES.contains(&last_type) {
+            return (
+                CvDraws { rng: cur_rng, draws, draw_count, score_delta: score - 1 },
+                func_result_after,
+            );
+        }
+        let (draw, rng2, jumped) =
+            cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat4, 100);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        if !jumped {
+            score += 1;
+        }
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+
+    // MirrorCoat5 (power 0): taunt gate first.
+    if target_is_taunted {
+        let (draw, rng2, jumped) =
+            cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat5, 100);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score += 1;
+        }
+    }
+    // MirrorCoat6 non-BUGFIX: type1/type2 in the special list end at zero;
+    // neither reaches MirrorCoat7. funcResult is overwritten by the type
+    // reads (the earlier get_move_power write of 0 is clobbered).
+    let func_result_after =
+        type_chain_func_result_after(target.types, &AI_CV_MIRROR_COAT_SPECIAL_TYPES);
+    let has_special_type = AI_CV_MIRROR_COAT_SPECIAL_TYPES.contains(&target.types[0])
+        || AI_CV_MIRROR_COAT_SPECIAL_TYPES.contains(&target.types[1]);
+    if has_special_type {
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+    let (draw, rng2, jumped) = cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat6, 50);
+    draws[draw_count as usize] = draw;
+    draw_count += 1;
+    cur_rng = rng2;
+    ordinal += 1;
+    if jumped {
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+    let (draw, rng2, jumped2) = cv_mirror_coat_roll(cur_rng, ordinal, CvDrawKind::MirrorCoat7, 100);
+    draws[draw_count as usize] = draw;
+    draw_count += 1;
+    cur_rng = rng2;
+    if !jumped2 {
+        score += 4;
+    }
+    (
+        CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+        func_result_after,
+    )
+}
+
+/// `AI_CV_DragonDance` (`data/battle_ai_scripts.s:2603-2614`,
+/// `factoryAiCheckViability.ts:5196-5243`). Target strictly faster jumps
+/// straight to the `<128` roll (JUMP is 0, FALL-THROUGH +1). Target NOT
+/// faster: own HP>50% is 0; HP<=50% runs the `<70` roll (JUMP is 0,
+/// FALL-THROUGH -1). Two mutually-exclusive `if_random_less_than` sites,
+/// plus the usual `if_target_faster` tie-break. No command writes
+/// funcResult.
+fn run_cv_dragon_dance(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    ordinal_start: u32,
+) -> CvDraws {
+    let attacker_to = cv_turn_order_battler(attacker.speed, attacker.speed_stage);
+    let target_to = cv_turn_order_battler(target.speed, target.speed_stage);
+    let (mut cur_rng, ordinal, tie_draw, strikes_first) =
+        cv_resolve_target_faster(rng, ordinal_start, attacker_to, target_to);
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+    if let Some(draw) = tie_draw {
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+    }
+
+    if strikes_first == 1 {
+        let roll = next_draw(cur_rng, ordinal);
+        cur_rng = roll.after;
+        let succeeded = roll.random_value % 256 >= 128;
+        draws[draw_count as usize] = CheckViabilityDraw::DragonDanceRoll {
+            ordinal: roll.ordinal,
+            before: roll.before,
+            after: roll.after,
+            raw_rng_value: roll.raw_rng_value,
+            random_value: roll.random_value,
+            kind: CvDrawKind::DragonDance2,
+            succeeded,
+        };
+        draw_count += 1;
+        return CvDraws {
+            rng: cur_rng,
+            draws,
+            draw_count,
+            score_delta: if succeeded { 1 } else { 0 },
+        };
+    }
+
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+    if hp_percent > 50 {
+        return CvDraws { rng: cur_rng, draws, draw_count, score_delta: 0 };
+    }
+    let roll = next_draw(cur_rng, ordinal);
+    cur_rng = roll.after;
+    let succeeded = roll.random_value % 256 >= 70;
+    draws[draw_count as usize] = CheckViabilityDraw::DragonDanceRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        kind: CvDrawKind::DragonDance1,
+        succeeded,
+    };
+    draw_count += 1;
+    CvDraws { rng: cur_rng, draws, draw_count, score_delta: if succeeded { -1 } else { 0 } }
+}
+
+/// `AI_CV_BatonPass` (`data/battle_ai_scripts.s:1978-2016`,
+/// `factoryAiCheckViability.ts:5296-5363`). Split on the user's OWN stat
+/// stages: any of the five stages above 8 reaches the `>60`/`>70` HP gate
+/// (by target-faster) into the single `<80` roll (+2 on fall-through); none
+/// above 8 but any above 7 reaches the mirrored HP gate into a
+/// deterministic -2/0; none above 7 is the deterministic -2. Exactly one
+/// `if_random_less_than` site, only reachable from the top stage band. No
+/// command writes funcResult.
+fn run_cv_baton_pass(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    ordinal_start: u32,
+) -> CvDraws {
+    let user_any_stat_above = |threshold: u8| {
+        attacker.atk_stage > threshold
+            || attacker.def_stage > threshold
+            || attacker.sp_atk_stage.unwrap_or(DEFAULT_STAT_STAGE) > threshold
+            || attacker.sp_def_stage > threshold
+            || attacker.evasion_stage > threshold
+    };
+
+    let attacker_to = cv_turn_order_battler(attacker.speed, attacker.speed_stage);
+    let target_to = cv_turn_order_battler(target.speed, target.speed_stage);
+    let (mut cur_rng, ordinal, tie_draw, strikes_first) =
+        cv_resolve_target_faster(rng, ordinal_start, attacker_to, target_to);
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+    if let Some(draw) = tie_draw {
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+    }
+    let target_faster = strikes_first == 1;
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+
+    if user_any_stat_above(8) {
+        if target_faster {
+            if hp_percent > 70 {
+                return CvDraws { rng: cur_rng, draws, draw_count, score_delta: 0 };
+            }
+        } else if hp_percent > 60 {
+            return CvDraws { rng: cur_rng, draws, draw_count, score_delta: 0 };
+        }
+        let roll = next_draw(cur_rng, ordinal);
+        cur_rng = roll.after;
+        let succeeded = roll.random_value % 256 >= 80;
+        draws[draw_count as usize] = CheckViabilityDraw::BatonPassRoll {
+            ordinal: roll.ordinal,
+            before: roll.before,
+            after: roll.after,
+            raw_rng_value: roll.raw_rng_value,
+            random_value: roll.random_value,
+            succeeded,
+        };
+        draw_count += 1;
+        return CvDraws {
+            rng: cur_rng,
+            draws,
+            draw_count,
+            score_delta: if succeeded { 2 } else { 0 },
+        };
+    }
+
+    if !user_any_stat_above(7) {
+        return CvDraws { rng: cur_rng, draws, draw_count, score_delta: -2 };
+    }
+    if target_faster {
+        if hp_percent < 70 {
+            return CvDraws { rng: cur_rng, draws, draw_count, score_delta: 0 };
+        }
+    } else if hp_percent > 60 {
+        return CvDraws { rng: cur_rng, draws, draw_count, score_delta: -2 };
+    } else {
+        return CvDraws { rng: cur_rng, draws, draw_count, score_delta: 0 };
+    }
+    CvDraws { rng: cur_rng, draws, draw_count, score_delta: -2 }
+}
+
+/// `AI_CV_KnockOff` (`data/battle_ai_scripts.s:2466-2473`,
+/// `factoryAiCheckViability.ts:1775-1815`, physically located before the
+/// dispatcher in TS but dispatch-order-M5d-4, batching doc §2). Target HP
+/// <30% ends before anything else (stale-funcResult carry survives
+/// untouched). Otherwise `is_first_turn_for AI_USER` always writes
+/// funcResult = the attacker's `isFirstTurn` (0-2, all valid
+/// `AI_WEATHER_*` ids); nonzero (not first turn) ends at zero. Only a
+/// first-turn attacker reaches the single roll: low byte <180 is zero,
+/// >=180 is +1.
+fn run_cv_knock_off(
+    rng: BattleRngState,
+    target_hp: i32,
+    target_max_hp: i32,
+    attacker_is_first_turn: u8,
+    func_result_carry: Option<u8>,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    let target_hp_percent = 100 * target_hp / target_max_hp;
+    if target_hp_percent < 30 {
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: 0,
+            },
+            func_result_carry,
+        );
+    }
+    let func_result_after = Some(attacker_is_first_turn);
+    if attacker_is_first_turn != 0 {
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: 0,
+            },
+            func_result_after,
+        );
+    }
+    let roll = next_draw(rng, ordinal_start);
+    let succeeded = roll.random_value % 256 >= 180;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    draws[0] = CheckViabilityDraw::FocusPunchKnockOffRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        kind: CvDrawKind::KnockOff,
+        succeeded,
+    };
+    (
+        CvDraws {
+            rng: roll.after,
+            draws,
+            draw_count: 1,
+            score_delta: if succeeded { 1 } else { 0 },
+        },
+        func_result_after,
+    )
+}
+
+/// `AI_CV_FocusPunch` (`data/battle_ai_scripts.s:2289-2311`,
+/// `factoryAiCheckViability.ts:5411-5460`). Exactly 0.25x/0.5x
+/// effectiveness is the deterministic -1. A sleeping target is a bare +1.
+/// Infatuated/confused reaches the `<100` roll: JUMP is 0; FALL-THROUGH
+/// checks the user's OWN Substitute — Substitute'd is +5, otherwise +1. The
+/// statusless path runs `is_first_turn_for AI_USER` (always writes
+/// funcResult): nonzero is 0; zero runs the `<100` roll (+1 on
+/// fall-through). Two `if_random_less_than` sites, mutually exclusive by
+/// the status split.
+fn run_cv_focus_punch(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    move_type: u8,
+    func_result_carry: Option<u8>,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    let classified = classify_high_crit_effectiveness(attacker.types, move_type, target.types);
+    if classified == AI_EFFECTIVENESS_X0_25 || classified == AI_EFFECTIVENESS_X0_5 {
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: -1,
+            },
+            func_result_carry,
+        );
+    }
+    if target.is_asleep.unwrap_or(false) {
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: 1,
+            },
+            func_result_carry,
+        );
+    }
+    if target.is_infatuated.unwrap_or(false) || target.is_confused.unwrap_or(false) {
+        let roll = next_draw(rng, ordinal_start);
+        let jumped = roll.random_value % 256 < 100;
+        let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+        draws[0] = CheckViabilityDraw::FocusPunchKnockOffRoll {
+            ordinal: roll.ordinal,
+            before: roll.before,
+            after: roll.after,
+            raw_rng_value: roll.raw_rng_value,
+            random_value: roll.random_value,
+            kind: CvDrawKind::FocusPunch1,
+            succeeded: !jumped,
+        };
+        if jumped {
+            return (
+                CvDraws { rng: roll.after, draws, draw_count: 1, score_delta: 0 },
+                func_result_carry,
+            );
+        }
+        let has_substitute = attacker.has_substitute.unwrap_or(false);
+        let score_delta = if has_substitute { 5 } else { 1 };
+        return (
+            CvDraws { rng: roll.after, draws, draw_count: 1, score_delta },
+            func_result_carry,
+        );
+    }
+
+    let is_first_turn = attacker.is_first_turn;
+    let func_result_after = Some(is_first_turn);
+    if is_first_turn != 0 {
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: 0,
+            },
+            func_result_after,
+        );
+    }
+    let roll = next_draw(rng, ordinal_start);
+    let succeeded = roll.random_value % 256 >= 100;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    draws[0] = CheckViabilityDraw::FocusPunchKnockOffRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        kind: CvDrawKind::FocusPunch2,
+        succeeded,
+    };
+    (
+        CvDraws {
+            rng: roll.after,
+            draws,
+            draw_count: 1,
+            score_delta: if succeeded { 1 } else { 0 },
+        },
+        func_result_after,
+    )
+}
+
+/// `AI_CV_Revenge` (`data/battle_ai_scripts.s:2444-2455`,
+/// `factoryAiCheckViability.ts:7592-7611`). Any of the target's three
+/// status classes (sleep/infatuation/confusion) is the deterministic -2. A
+/// clean target runs the single `<180` roll (JUMP, ~70%, -2; FALL-THROUGH,
+/// ~30%, +2). No command writes funcResult.
+fn run_cv_revenge(
+    rng: BattleRngState,
+    target: FactoryAiCheckViabilityBattler,
+    ordinal_start: u32,
+) -> CvDraws {
+    let status_jumps = target.is_asleep.unwrap_or(false)
+        || target.is_infatuated.unwrap_or(false)
+        || target.is_confused.unwrap_or(false);
+    if status_jumps {
+        return CvDraws {
+            rng,
+            draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+            draw_count: 0,
+            score_delta: -2,
+        };
+    }
+    let roll = next_draw(rng, ordinal_start);
+    let jumped = roll.random_value % 256 < 180;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    draws[0] = CheckViabilityDraw::RevengeRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        jumped,
+    };
+    CvDraws { rng: roll.after, draws, draw_count: 1, score_delta: if jumped { -2 } else { 2 } }
+}
+
+/// `AI_CV_Superpower` (`data/battle_ai_scripts.s:2392-2405`,
+/// `factoryAiCheckViability.ts:7642-7696`). Zero `if_random_less_than`
+/// sites — entirely deterministic aside from the usual tie-break. Weak
+/// effectiveness (x0.25/x0.5) or the user's own ATK stage below neutral (6)
+/// is -1. Target strictly faster: user HP<60% is 0, else -1. Target NOT
+/// faster: user HP>40% is -1, else 0.
+fn run_cv_superpower(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    move_type: u8,
+    ordinal_start: u32,
+) -> CvDraws {
+    let classified = classify_high_crit_effectiveness(attacker.types, move_type, target.types);
+    if classified == AI_EFFECTIVENESS_X0_25 || classified == AI_EFFECTIVENESS_X0_5 {
+        return CvDraws {
+            rng,
+            draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+            draw_count: 0,
+            score_delta: -1,
+        };
+    }
+    if attacker.atk_stage < DEFAULT_STAT_STAGE {
+        return CvDraws {
+            rng,
+            draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+            draw_count: 0,
+            score_delta: -1,
+        };
+    }
+    let attacker_to = cv_turn_order_battler(attacker.speed, attacker.speed_stage);
+    let target_to = cv_turn_order_battler(target.speed, target.speed_stage);
+    let (cur_rng, _ordinal, tie_draw, strikes_first) =
+        cv_resolve_target_faster(rng, ordinal_start, attacker_to, target_to);
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+    if let Some(draw) = tie_draw {
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+    }
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+    let score_delta = if strikes_first == 1 {
+        if hp_percent < 60 {
+            0
+        } else {
+            -1
+        }
+    } else if hp_percent > 40 {
+        -1
+    } else {
+        0
+    };
+    CvDraws { rng: cur_rng, draws, draw_count, score_delta }
+}
+
+/// `AI_CV_MagicCoat` (`data/battle_ai_scripts.s:2407-2424`,
+/// `factoryAiCheckViability.ts:7733-7775`). Three named roll sites, but
+/// the 50-threshold site lives at a dead label (zero references in the
+/// compiled ROM, same class as `AI_CV_Heal2`) — only two are reachable.
+/// Target HP<=30% runs the `<100` roll first (fall-through -1).
+/// `is_first_turn_for AI_USER` always writes funcResult: nonzero (not
+/// first turn) runs the `<30` roll (fall-through -1); zero (first turn)
+/// runs the `<150` roll (fall-through +1).
+fn run_cv_magic_coat(
+    rng: BattleRngState,
+    target_hp: i32,
+    target_max_hp: i32,
+    attacker_is_first_turn: u8,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    let mut cur_rng = rng;
+    let mut ordinal = ordinal_start;
+    let mut score: i32 = 0;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+
+    let target_hp_percent = 100 * target_hp / target_max_hp;
+    if target_hp_percent <= 30 {
+        let roll = next_draw(cur_rng, ordinal);
+        cur_rng = roll.after;
+        ordinal += 1;
+        let jumped = roll.random_value % 256 < 100;
+        draws[draw_count as usize] = CheckViabilityDraw::MagicCoatRoll {
+            ordinal: roll.ordinal,
+            before: roll.before,
+            after: roll.after,
+            raw_rng_value: roll.raw_rng_value,
+            random_value: roll.random_value,
+            kind: CvDrawKind::MagicCoat1,
+            jumped,
+        };
+        draw_count += 1;
+        if !jumped {
+            score -= 1;
+        }
+    }
+
+    let func_result_after = Some(attacker_is_first_turn);
+    if attacker_is_first_turn != 0 {
+        let roll = next_draw(cur_rng, ordinal);
+        cur_rng = roll.after;
+        let jumped = roll.random_value % 256 < 30;
+        draws[draw_count as usize] = CheckViabilityDraw::MagicCoatRoll {
+            ordinal: roll.ordinal,
+            before: roll.before,
+            after: roll.after,
+            raw_rng_value: roll.raw_rng_value,
+            random_value: roll.random_value,
+            kind: CvDrawKind::MagicCoat3,
+            jumped,
+        };
+        draw_count += 1;
+        if !jumped {
+            score -= 1;
+        }
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+
+    let roll = next_draw(cur_rng, ordinal);
+    cur_rng = roll.after;
+    let jumped = roll.random_value % 256 < 150;
+    draws[draw_count as usize] = CheckViabilityDraw::MagicCoatRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        kind: CvDrawKind::MagicCoat2,
+        jumped,
+    };
+    draw_count += 1;
+    if !jumped {
+        score += 1;
+    }
+    (
+        CvDraws { rng: cur_rng, draws, draw_count, score_delta: score },
+        func_result_after,
+    )
+}
+
+/// `AI_CV_Foresight` (`data/battle_ai_scripts.s:1940-1963`,
+/// `factoryAiCheckViability.ts:7808-7834`), Emerald's non-BUGFIX build,
+/// which reads the USER's own type/evasion (source comment flags this as a
+/// bug — it should check the target). User is Ghost (type1 or type2) OR
+/// user's own evasion stage>8 reaches a `<80` roll (JUMP is 0,
+/// FALL-THROUGH +2, two mutually-exclusive sites by the Ghost split);
+/// neither is the deterministic -2. `get_user_type1`/`2` always write
+/// funcResult.
+fn run_cv_foresight(
+    rng: BattleRngState,
+    attacker_types: [u8; 2],
+    attacker_evasion_stage: u8,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    let func_result_after = type_chain_func_result_after(attacker_types, &[TYPE_GHOST]);
+    let is_ghost = attacker_types[0] == TYPE_GHOST || attacker_types[1] == TYPE_GHOST;
+    if !is_ghost && attacker_evasion_stage <= 8 {
+        return (
+            CvDraws {
+                rng,
+                draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+                draw_count: 0,
+                score_delta: -2,
+            },
+            func_result_after,
+        );
+    }
+    let kind = if is_ghost {
+        CvDrawKind::Foresight1
+    } else {
+        CvDrawKind::Foresight2
+    };
+    let roll = next_draw(rng, ordinal_start);
+    let jumped = roll.random_value % 256 < 80;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    draws[0] = CheckViabilityDraw::ForesightRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        kind,
+        jumped,
+    };
+    (
+        CvDraws { rng: roll.after, draws, draw_count: 1, score_delta: if jumped { 0 } else { 2 } },
+        func_result_after,
+    )
+}
+
+/// `AI_CV_Endeavor` (`data/battle_ai_scripts.s:2475-2490`,
+/// `factoryAiCheckViability.ts:7861-7906`). Zero `if_random_less_than`
+/// sites. Target HP<70% is the deterministic -1. Target faster: user
+/// HP>50% is -1, else +1. Target NOT faster: user HP>40% is -1, else +1.
+fn run_cv_endeavor(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    ordinal_start: u32,
+) -> CvDraws {
+    let target_hp_percent = 100 * target.hp / target.max_hp;
+    if target_hp_percent < 70 {
+        return CvDraws {
+            rng,
+            draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+            draw_count: 0,
+            score_delta: -1,
+        };
+    }
+    let attacker_to = cv_turn_order_battler(attacker.speed, attacker.speed_stage);
+    let target_to = cv_turn_order_battler(target.speed, target.speed_stage);
+    let (cur_rng, _ordinal, tie_draw, strikes_first) =
+        cv_resolve_target_faster(rng, ordinal_start, attacker_to, target_to);
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+    if let Some(draw) = tie_draw {
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+    }
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+    let score_delta = if strikes_first == 1 {
+        if hp_percent > 50 {
+            -1
+        } else {
+            1
+        }
+    } else if hp_percent > 40 {
+        -1
+    } else {
+        1
+    };
+    CvDraws { rng: cur_rng, draws, draw_count, score_delta }
+}
+
+/// `AI_CV_Encore_EncouragedMovesToEncore`
+/// (`data/battle_ai_scripts.s:1703-1766`,
+/// `factoryAiCheckViability.ts:7915-7932`), 61 unique effect ids — TS's own
+/// 62-entry literal has one duplicate `EFFECT_SKILL_SWAP`, deduped by its
+/// `Set` (membership is the only thing `if_not_in_bytes` tests, so order
+/// here is immaterial). Numeric ids read directly from
+/// `reference/pokeemerald/include/constants/battle_move_effects.h`, not
+/// hand-recalled.
+const AI_CV_ENCORE_ENCOURAGED_EFFECTS: [u16; 61] = [
+    8,   // EFFECT_DREAM_EATER
+    10,  // EFFECT_ATTACK_UP
+    11,  // EFFECT_DEFENSE_UP
+    12,  // EFFECT_SPEED_UP
+    13,  // EFFECT_SPECIAL_ATTACK_UP
+    25,  // EFFECT_HAZE
+    28,  // EFFECT_ROAR
+    30,  // EFFECT_CONVERSION
+    33,  // EFFECT_TOXIC
+    35,  // EFFECT_LIGHT_SCREEN
+    37,  // EFFECT_REST
+    40,  // EFFECT_SUPER_FANG
+    54,  // EFFECT_SPECIAL_DEFENSE_UP_2
+    49,  // EFFECT_CONFUSE
+    66,  // EFFECT_POISON
+    67,  // EFFECT_PARALYZE
+    84,  // EFFECT_LEECH_SEED
+    85,  // EFFECT_SPLASH
+    50,  // EFFECT_ATTACK_UP_2
+    90,  // EFFECT_ENCORE
+    93,  // EFFECT_CONVERSION_2
+    94,  // EFFECT_LOCK_ON
+    102, // EFFECT_HEAL_BELL
+    106, // EFFECT_MEAN_LOOK
+    107, // EFFECT_NIGHTMARE
+    111, // EFFECT_PROTECT
+    191, // EFFECT_SKILL_SWAP
+    113, // EFFECT_FORESIGHT
+    114, // EFFECT_PERISH_SONG
+    115, // EFFECT_SANDSTORM
+    116, // EFFECT_ENDURE
+    118, // EFFECT_SWAGGER
+    120, // EFFECT_ATTRACT
+    124, // EFFECT_SAFEGUARD
+    136, // EFFECT_RAIN_DANCE
+    137, // EFFECT_SUNNY_DAY
+    142, // EFFECT_BELLY_DRUM
+    143, // EFFECT_PSYCH_UP
+    148, // EFFECT_FUTURE_SIGHT
+    158, // EFFECT_FAKE_OUT
+    160, // EFFECT_STOCKPILE
+    161, // EFFECT_SPIT_UP
+    162, // EFFECT_SWALLOW
+    164, // EFFECT_HAIL
+    165, // EFFECT_TORMENT
+    167, // EFFECT_WILL_O_WISP
+    172, // EFFECT_FOLLOW_ME
+    174, // EFFECT_CHARGE
+    177, // EFFECT_TRICK
+    178, // EFFECT_ROLE_PLAY
+    181, // EFFECT_INGRAIN
+    184, // EFFECT_RECYCLE
+    188, // EFFECT_KNOCK_OFF
+    192, // EFFECT_IMPRISON
+    193, // EFFECT_REFRESH
+    194, // EFFECT_GRUDGE
+    199, // EFFECT_TEETER_DANCE
+    201, // EFFECT_MUD_SPORT
+    210, // EFFECT_WATER_SPORT
+    212, // EFFECT_DRAGON_DANCE
+    213, // EFFECT_CAMOUFLAGE
+];
+
+/// `AI_CV_Encore` (`data/battle_ai_scripts.s:1687-1701`,
+/// `factoryAiCheckViability.ts:7962-8022`). The target having ANY disabled
+/// move jumps straight to the `<30` roll (funcResult keeps the incoming
+/// carry, since `get_last_used_bank_move` never executes on this path;
+/// FALL-THROUGH +3). Otherwise target strictly faster is the deterministic
+/// -2. A target that is NOT faster has its last move's effect read
+/// (always overwrites funcResult via the shared `EFFECT_ID_IN_WEATHER_RANGE`
+/// collision map, reused here as `protect_last_move_effect_func_result`):
+/// an effect outside the 61-entry encouraged table is -2; one inside falls
+/// to the same `<30` roll.
+fn run_cv_encore(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    func_result_carry: Option<u8>,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    if target.any_move_disabled.unwrap_or(false) {
+        let roll = next_draw(rng, ordinal_start);
+        let jumped = roll.random_value % 256 < 30;
+        let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+        draws[0] = CheckViabilityDraw::EncoreRoll {
+            ordinal: roll.ordinal,
+            before: roll.before,
+            after: roll.after,
+            raw_rng_value: roll.raw_rng_value,
+            random_value: roll.random_value,
+            jumped,
+        };
+        return (
+            CvDraws {
+                rng: roll.after,
+                draws,
+                draw_count: 1,
+                score_delta: if jumped { 0 } else { 3 },
+            },
+            func_result_carry,
+        );
+    }
+
+    let attacker_to = cv_turn_order_battler(attacker.speed, attacker.speed_stage);
+    let target_to = cv_turn_order_battler(target.speed, target.speed_stage);
+    let (cur_rng, ordinal, tie_draw, strikes_first) =
+        cv_resolve_target_faster(rng, ordinal_start, attacker_to, target_to);
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+    if let Some(draw) = tie_draw {
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+    }
+    if strikes_first == 1 {
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: -2 },
+            func_result_carry,
+        );
+    }
+
+    let last_move = gen_tables::MOVES.get(target.last_used_move_id.unwrap_or(0) as usize);
+    let last_effect = last_move.map_or(EFFECT_HIT, |m| m.effect);
+    let func_result_after = protect_last_move_effect_func_result(last_effect);
+    if !AI_CV_ENCORE_ENCOURAGED_EFFECTS.contains(&last_effect) {
+        return (
+            CvDraws { rng: cur_rng, draws, draw_count, score_delta: -2 },
+            func_result_after,
+        );
+    }
+    let roll = next_draw(cur_rng, ordinal);
+    let jumped = roll.random_value % 256 < 30;
+    draws[draw_count as usize] = CheckViabilityDraw::EncoreRoll {
+        ordinal: roll.ordinal,
+        before: roll.before,
+        after: roll.after,
+        raw_rng_value: roll.raw_rng_value,
+        random_value: roll.random_value,
+        jumped,
+    };
+    draw_count += 1;
+    (
+        CvDraws { rng: roll.after, draws, draw_count, score_delta: if jumped { 0 } else { 3 } },
+        func_result_after,
+    )
+}
+
+/// `AI_CV_HealBell` (`data/battle_ai_scripts.s:1841-1846`,
+/// `factoryAiCheckViability.ts:8043-8054`). The target's own status1
+/// nonzero, or `Cmd_if_status_in_party`'s exact-`==` party scan on the
+/// TARGET's side matching, is the clean zero; neither is the deterministic
+/// -5. Zero draws, no funcResult write.
+fn run_cv_heal_bell(rng: BattleRngState, target: FactoryAiCheckViabilityBattler) -> CvDraws {
+    let target_has_any_status = target.has_any_status.unwrap_or(false);
+    let party_member_has_status = target.target_party_status_equals_any.unwrap_or(false);
+    CvDraws {
+        rng,
+        draws: [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS],
+        draw_count: 0,
+        score_delta: if target_has_any_status || party_member_has_status {
+            0
+        } else {
+            -5
+        },
+    }
+}
+
+/// One of `AI_CV_Substitute`'s 4 named roll sites
+/// (`factoryAiCheckViability.ts:8129-8136`), all sharing the same fixed
+/// `<100` threshold.
+fn cv_substitute_roll(
+    rng: BattleRngState,
+    ordinal: u32,
+    kind: CvDrawKind,
+) -> (CheckViabilityDraw, BattleRngState, bool) {
+    let draw = next_draw(rng, ordinal);
+    let jumped = draw.random_value % 256 < 100;
+    (
+        CheckViabilityDraw::SubstituteRoll {
+            ordinal: draw.ordinal,
+            before: draw.before,
+            after: draw.after,
+            raw_rng_value: draw.raw_rng_value,
+            random_value: draw.random_value,
+            kind,
+            jumped,
+        },
+        draw.after,
+        jumped,
+    )
+}
+
+/// `AI_CV_Substitute` (`data/battle_ai_scripts.s:1547-1586`,
+/// `factoryAiCheckViability.ts:8114-8220`, 107 lines, 3rd-largest handler
+/// body). Three `<100` rolls (all threshold 100) gate the descent from the
+/// attacker's own HP bands: HP>90% runs none; 70%<HP<=90% runs
+/// `substitute-roll-3`; 50%<HP<=70% runs roll-2 then roll-3; HP<=50% runs
+/// roll-1, roll-2, roll-3 — every JUMP-taken roll skips its own -1, every
+/// FALL-THROUGH applies it. `Substitute4`'s target-faster gate ends at
+/// zero without reading the target's last move; a NOT-faster target's last
+/// move effect is read (always overwrites funcResult via the shared
+/// `EFFECT_ID_IN_WEATHER_RANGE` map, reused here as
+/// `protect_last_move_effect_func_result`): the five status-inducing
+/// effects (sleep/toxic/poison/paralyze/will-o-wisp) and confusion share
+/// the same polarity (statused/confused target ends at zero, clean target
+/// reaches the 4th `<100` roll, +1 on fall-through); leech-seed inverts it
+/// (seeded ends at zero, unseeded reaches the same roll); any other last
+/// move effect ends at zero.
+fn run_cv_substitute(
+    rng: BattleRngState,
+    attacker: FactoryAiCheckViabilityBattler,
+    target: FactoryAiCheckViabilityBattler,
+    func_result_carry: Option<u8>,
+    ordinal_start: u32,
+) -> (CvDraws, Option<u8>) {
+    let mut cur_rng = rng;
+    let mut ordinal = ordinal_start;
+    let mut score: i32 = 0;
+    let mut draws = [DRAW_FILLER; MAX_CHECK_VIABILITY_DRAWS];
+    let mut draw_count: u8 = 0;
+
+    let hp_percent = 100 * attacker.hp / attacker.max_hp;
+    if hp_percent > 90 {
+        // Straight to Substitute4, no rolls.
+    } else if hp_percent > 70 {
+        let (draw, rng2, jumped) = cv_substitute_roll(cur_rng, ordinal, CvDrawKind::Substitute3);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+    } else if hp_percent > 50 {
+        let (draw, rng2, jumped) = cv_substitute_roll(cur_rng, ordinal, CvDrawKind::Substitute2);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+        let (draw, rng2, jumped) = cv_substitute_roll(cur_rng, ordinal, CvDrawKind::Substitute3);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+    } else {
+        let (draw, rng2, jumped) = cv_substitute_roll(cur_rng, ordinal, CvDrawKind::Substitute1);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+        let (draw, rng2, jumped) = cv_substitute_roll(cur_rng, ordinal, CvDrawKind::Substitute2);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+        let (draw, rng2, jumped) = cv_substitute_roll(cur_rng, ordinal, CvDrawKind::Substitute3);
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+        cur_rng = rng2;
+        ordinal += 1;
+        if !jumped {
+            score -= 1;
+        }
+    }
+
+    let attacker_to = cv_turn_order_battler(attacker.speed, attacker.speed_stage);
+    let target_to = cv_turn_order_battler(target.speed, target.speed_stage);
+    let (cur_rng2, ordinal2, tie_draw, strikes_first) =
+        cv_resolve_target_faster(cur_rng, ordinal, attacker_to, target_to);
+    if let Some(draw) = tie_draw {
+        draws[draw_count as usize] = draw;
+        draw_count += 1;
+    }
+    if strikes_first == 1 {
+        return (
+            CvDraws { rng: cur_rng2, draws, draw_count, score_delta: score },
+            func_result_carry,
+        );
+    }
+
+    let last_move = gen_tables::MOVES.get(target.last_used_move_id.unwrap_or(0) as usize);
+    let last_effect = last_move.map_or(EFFECT_HIT, |m| m.effect);
+    let func_result_after = protect_last_move_effect_func_result(last_effect);
+
+    let status1_effects = [
+        EFFECT_SLEEP,
+        EFFECT_TOXIC,
+        EFFECT_POISON,
+        EFFECT_PARALYZE,
+        EFFECT_WILL_O_WISP,
+    ];
+
+    // Substitute5/6/7: each branch decides whether to fall through into the
+    // shared Substitute8 roll (+1 on fall-through) or end at zero directly.
+    // Leech Seed's own gate is inverted relative to the other two (seeded
+    // ends at zero; unseeded reaches Substitute8).
+    let reaches_substitute8 = if status1_effects.contains(&last_effect) {
+        !target.has_any_status.unwrap_or(false)
+    } else if last_effect == EFFECT_CONFUSE {
+        !target.is_confused.unwrap_or(false)
+    } else if last_effect == EFFECT_LEECH_SEED {
+        !target.is_leech_seeded.unwrap_or(false)
+    } else {
+        false
+    };
+    if !reaches_substitute8 {
+        return (
+            CvDraws { rng: cur_rng2, draws, draw_count, score_delta: score },
+            func_result_after,
+        );
+    }
+    let (draw, rng3, jumped) = cv_substitute_roll(cur_rng2, ordinal2, CvDrawKind::Substitute4);
+    draws[draw_count as usize] = draw;
+    draw_count += 1;
+    (
+        CvDraws { rng: rng3, draws, draw_count, score_delta: score + if jumped { 0 } else { 1 } },
+        func_result_after,
     )
 }
 
@@ -10398,6 +12149,1521 @@ mod tests {
         assert_eq!(func_result, type_func_result_collision(TYPE_PSYCHIC));
     }
 
+    // === M5d-4 handler-direct tests (batching doc §2 "M5d-4") ===============
+
+    // --- run_cv_brick_break (TS test:5773-5802) -----------------------------
+
+    #[test]
+    fn cv_brick_break_target_has_side_reflect_scores_plus1() {
+        let result = run_cv_brick_break(BattleRngState { value: 1, calls: 0 }, true);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 1);
+    }
+
+    #[test]
+    fn cv_brick_break_no_side_reflect_scores_zero() {
+        let result = run_cv_brick_break(BattleRngState { value: 1, calls: 0 }, false);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    // --- run_cv_charge_up_move (TS test:5803-5865) --------------------------
+
+    #[test]
+    fn cv_charge_up_move_weak_effectiveness_is_minus2() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            hp: 100,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_ROCK, TYPE_ROCK],
+            ..neutral_battler()
+        });
+        let result = run_cv_charge_up_move(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -2);
+    }
+
+    #[test]
+    fn cv_charge_up_move_target_history_has_protect_is_minus2() {
+        const MOVE_PROTECT_ID: u16 = 182;
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            hp: 100,
+            max_hp: 100,
+            moves: Some([MOVE_PROTECT_ID, 0, 0, 0]),
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            known_moves: Some([MOVE_PROTECT_ID, 0, 0, 0]),
+            ..neutral_battler()
+        });
+        let result = run_cv_charge_up_move(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+        );
+        assert_eq!(result.score_delta, -2);
+    }
+
+    #[test]
+    fn cv_charge_up_move_hp_bands() {
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            hp: 39,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let high = run_cv_charge_up_move(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_high,
+            target,
+            TYPE_NORMAL,
+        );
+        assert_eq!(high.score_delta, 0);
+
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            hp: 38,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let low = run_cv_charge_up_move(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_low,
+            target,
+            TYPE_NORMAL,
+        );
+        assert_eq!(low.score_delta, -1);
+    }
+
+    // --- run_cv_overheat (TS test:5866-5914) --------------------------------
+
+    #[test]
+    fn cv_overheat_weak_effectiveness_is_minus1_no_tie_draw() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            hp: 100,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_ROCK, TYPE_ROCK],
+            ..neutral_battler()
+        });
+        let result = run_cv_overheat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -1);
+    }
+
+    #[test]
+    fn cv_overheat_target_faster_hp_bands() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 150,
+            ..neutral_battler()
+        });
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 50,
+            hp: 81,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let high = run_cv_overheat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_high,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(high.score_delta, 0);
+
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 50,
+            hp: 80,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let low = run_cv_overheat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_low,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(low.score_delta, -1);
+    }
+
+    #[test]
+    fn cv_overheat_not_target_faster_hp_bands() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 50,
+            ..neutral_battler()
+        });
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 150,
+            hp: 61,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let high = run_cv_overheat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_high,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(high.score_delta, 0);
+
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 150,
+            hp: 60,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let low = run_cv_overheat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_low,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(low.score_delta, -1);
+    }
+
+    // --- run_cv_facade (TS test:5915-5953) ----------------------------------
+
+    #[test]
+    fn cv_facade_any_status_scores_plus1() {
+        assert_eq!(
+            run_cv_facade(
+                BattleRngState { value: 1, calls: 0 },
+                true,
+                false,
+                false,
+                false
+            )
+            .score_delta,
+            1
+        );
+        assert_eq!(
+            run_cv_facade(
+                BattleRngState { value: 1, calls: 0 },
+                false,
+                true,
+                false,
+                false
+            )
+            .score_delta,
+            1
+        );
+        assert_eq!(
+            run_cv_facade(
+                BattleRngState { value: 1, calls: 0 },
+                false,
+                false,
+                true,
+                false
+            )
+            .score_delta,
+            1
+        );
+        assert_eq!(
+            run_cv_facade(
+                BattleRngState { value: 1, calls: 0 },
+                false,
+                false,
+                false,
+                true
+            )
+            .score_delta,
+            1
+        );
+    }
+
+    #[test]
+    fn cv_facade_no_status_scores_zero() {
+        let result = run_cv_facade(
+            BattleRngState { value: 1, calls: 0 },
+            false,
+            false,
+            false,
+            false,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    // --- run_cv_curse (TS test:5954-6024) — own INDEPENDENT body; does NOT
+    // reuse run_cv_defense_up. Every scenario below mirrors a TS test 1:1
+    // (same seeds), which pins the DEF-band roll cascade + Ghost-HP branch
+    // exactly as this handler's own body computes it, not as
+    // run_cv_defense_up (a genuinely different roll cascade/threshold set)
+    // would.
+
+    #[test]
+    fn cv_curse_def_10_plus_is_zero_draws_zero_score() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            def_stage: 10,
+            ..neutral_battler()
+        });
+        let (result, _) = run_cv_curse(BattleRngState { value: 1, calls: 0 }, attacker, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_curse_def_8_one_draw_fallthrough_plus1() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            def_stage: 8,
+            ..neutral_battler()
+        });
+        let (result, _) = run_cv_curse(BattleRngState { value: 1, calls: 0 }, attacker, 1);
+        assert_eq!(result.draw_count, 1);
+        assert_eq!(result.score_delta, 1);
+        assert_eq!(
+            result.draws[0],
+            CheckViabilityDraw::CurseRoll {
+                ordinal: 1,
+                before: BattleRngState { value: 1, calls: 0 },
+                after: next_draw(BattleRngState { value: 1, calls: 0 }, 1).after,
+                raw_rng_value: next_draw(BattleRngState { value: 1, calls: 0 }, 1).raw_rng_value,
+                random_value: next_draw(BattleRngState { value: 1, calls: 0 }, 1).random_value,
+                kind: CvDrawKind::Curse1,
+                jumped: false,
+            }
+        );
+    }
+
+    #[test]
+    fn cv_curse_def_7_two_draws_both_jump_zero_score() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            def_stage: 7,
+            ..neutral_battler()
+        });
+        let (result, _) = run_cv_curse(BattleRngState { value: 4, calls: 0 }, attacker, 1);
+        assert_eq!(result.draw_count, 2);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_curse_def_6_seed1_all_three_rolls_plus2() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            def_stage: 6,
+            ..neutral_battler()
+        });
+        let (result, _) = run_cv_curse(BattleRngState { value: 1, calls: 0 }, attacker, 1);
+        assert_eq!(result.draw_count, 3);
+        assert_eq!(result.score_delta, 2);
+    }
+
+    #[test]
+    fn cv_curse_def_6_seed4_all_three_rolls_jump_zero_score() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            def_stage: 6,
+            ..neutral_battler()
+        });
+        let (result, _) = run_cv_curse(BattleRngState { value: 4, calls: 0 }, attacker, 1);
+        assert_eq!(result.draw_count, 3);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_curse_ghost_user_hp_bands() {
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_GHOST, TYPE_GHOST],
+            hp: 81,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let (high, _) = run_cv_curse(BattleRngState { value: 1, calls: 0 }, attacker_high, 1);
+        assert_eq!(high.draw_count, 0);
+        assert_eq!(high.score_delta, 0);
+
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_GHOST, TYPE_GHOST],
+            hp: 80,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let (low, _) = run_cv_curse(BattleRngState { value: 1, calls: 0 }, attacker_low, 1);
+        assert_eq!(low.score_delta, -1);
+    }
+
+    #[test]
+    fn cv_curse_func_result_is_type2_for_non_ghost_user() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_FIRE, TYPE_FIGHTING],
+            def_stage: 10,
+            ..neutral_battler()
+        });
+        let (_, func_result) = run_cv_curse(BattleRngState { value: 1, calls: 0 }, attacker, 1);
+        assert_eq!(func_result, type_func_result_collision(TYPE_FIGHTING));
+    }
+
+    // --- run_cv_psych_up (TS test:6025-6073) — own INDEPENDENT body; no CV
+    // Haze handler exists to reuse. Mirrors TS's own scenarios (same seeds),
+    // which pin this handler's own 5-gate/5-gate/single-roll cascade, not
+    // any Haze-style shortcut.
+
+    #[test]
+    fn cv_psych_up_target_no_raised_stat_is_deterministic_minus2() {
+        let target = battler(FactoryAiCheckViabilityBattler { atk_stage: 8, ..neutral_battler() });
+        let result = run_cv_psych_up(
+            BattleRngState { value: 1, calls: 0 },
+            target,
+            neutral_battler(),
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -2);
+    }
+
+    #[test]
+    fn cv_psych_up_target_raised_user_atk_low_bare_plus1() {
+        let attacker =
+            battler(FactoryAiCheckViabilityBattler { atk_stage: 5, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler { atk_stage: 9, ..neutral_battler() });
+        let result = run_cv_psych_up(BattleRngState { value: 1, calls: 0 }, target, attacker, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 1);
+    }
+
+    #[test]
+    fn cv_psych_up_target_raised_only_user_evasion_low_chained_plus2() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            atk_stage: 7,
+            def_stage: 7,
+            sp_atk_stage: Some(7),
+            sp_def_stage: 7,
+            evasion_stage: 5,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { atk_stage: 9, ..neutral_battler() });
+        let result = run_cv_psych_up(BattleRngState { value: 1, calls: 0 }, target, attacker, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 2);
+    }
+
+    #[test]
+    fn cv_psych_up_all_user_stages_high_roll_below_50_is_zero() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            atk_stage: 7,
+            def_stage: 7,
+            sp_atk_stage: Some(7),
+            sp_def_stage: 7,
+            evasion_stage: 7,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { atk_stage: 9, ..neutral_battler() });
+        let result = run_cv_psych_up(BattleRngState { value: 4, calls: 0 }, target, attacker, 1);
+        assert_eq!(result.draw_count, 1);
+        assert_eq!(result.score_delta, 0);
+        let CheckViabilityDraw::PsychUpRoll { jumped, .. } = result.draws[0] else {
+            panic!("expected PsychUpRoll");
+        };
+        assert!(jumped);
+    }
+
+    #[test]
+    fn cv_psych_up_all_user_stages_high_roll_at_or_above_50_is_minus2() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            atk_stage: 7,
+            def_stage: 7,
+            sp_atk_stage: Some(7),
+            sp_def_stage: 7,
+            evasion_stage: 7,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { atk_stage: 9, ..neutral_battler() });
+        let result = run_cv_psych_up(BattleRngState { value: 1, calls: 0 }, target, attacker, 1);
+        assert_eq!(result.score_delta, -2);
+        let CheckViabilityDraw::PsychUpRoll { jumped, .. } = result.draws[0] else {
+            panic!("expected PsychUpRoll");
+        };
+        assert!(!jumped);
+    }
+
+    // --- run_cv_mirror_coat (TS test:6074-6172) -----------------------------
+
+    #[test]
+    fn cv_mirror_coat_status_prologue_is_deterministic_minus1() {
+        let attacker = neutral_battler();
+        let target =
+            battler(FactoryAiCheckViabilityBattler { is_asleep: Some(true), ..neutral_battler() });
+        let (result, func_result) = run_cv_mirror_coat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            Some(AI_WEATHER_SUN),
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -1);
+        assert_eq!(func_result, Some(AI_WEATHER_SUN));
+    }
+
+    #[test]
+    fn cv_mirror_coat_counter_shortcut_jumps_to_score_up4() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            hp: 100,
+            max_hp: 100,
+            moves: Some([MOVE_COUNTER, 0, 0, 0]),
+            ..neutral_battler()
+        });
+        let target = neutral_battler();
+        let (result, func_result) = run_cv_mirror_coat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 1);
+        let CheckViabilityDraw::MirrorCoatRoll { kind, jumped, .. } = result.draws[0] else {
+            panic!("expected MirrorCoatRoll");
+        };
+        assert_eq!(kind, CvDrawKind::MirrorCoat7);
+        assert_eq!(result.score_delta, if jumped { 0 } else { 4 });
+        assert_eq!(
+            func_result, None,
+            "Counter shortcut preserves the funcResult carry"
+        );
+    }
+
+    #[test]
+    fn cv_mirror_coat_nonzero_power_special_type_writes_last_move_type() {
+        const MOVE_THUNDERBOLT: u16 = 85; // power 95, TYPE_ELECTRIC (special list member)
+        let attacker =
+            battler(FactoryAiCheckViabilityBattler { hp: 100, max_hp: 100, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            last_used_move_id: Some(MOVE_THUNDERBOLT),
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_mirror_coat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 1);
+        let CheckViabilityDraw::MirrorCoatRoll { kind, .. } = result.draws[0] else {
+            panic!("expected MirrorCoatRoll");
+        };
+        assert_eq!(kind, CvDrawKind::MirrorCoat4);
+        assert_eq!(func_result, type_func_result_collision(TYPE_ELECTRIC));
+    }
+
+    #[test]
+    fn cv_mirror_coat_nonzero_power_nonspecial_type_is_minus1() {
+        const MOVE_TACKLE_MC: u16 = 33; // power 35, TYPE_NORMAL (not in the special list)
+        let attacker =
+            battler(FactoryAiCheckViabilityBattler { hp: 100, max_hp: 100, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            last_used_move_id: Some(MOVE_TACKLE_MC),
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_mirror_coat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -1);
+        assert_eq!(func_result, type_func_result_collision(TYPE_NORMAL));
+    }
+
+    #[test]
+    fn cv_mirror_coat_zero_power_special_target_type_ends_at_zero() {
+        let attacker =
+            battler(FactoryAiCheckViabilityBattler { hp: 100, max_hp: 100, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            last_used_move_id: None,
+            types: [TYPE_FIRE, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_mirror_coat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+        assert_eq!(func_result, type_func_result_collision(TYPE_FIRE));
+    }
+
+    #[test]
+    fn cv_mirror_coat_zero_power_nonspecial_target_type_reaches_tail_roll() {
+        let attacker =
+            battler(FactoryAiCheckViabilityBattler { hp: 100, max_hp: 100, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            last_used_move_id: None,
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_mirror_coat(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert!(result.draw_count >= 1);
+        let last_draw = result.draws[result.draw_count as usize - 1];
+        let CheckViabilityDraw::MirrorCoatRoll { kind, .. } = last_draw else {
+            panic!("expected MirrorCoatRoll");
+        };
+        assert!(matches!(
+            kind,
+            CvDrawKind::MirrorCoat6 | CvDrawKind::MirrorCoat7
+        ));
+        assert_eq!(
+            func_result,
+            type_chain_func_result_after(
+                [TYPE_NORMAL, TYPE_NORMAL],
+                &AI_CV_MIRROR_COAT_SPECIAL_TYPES
+            )
+        );
+    }
+
+    // --- run_cv_dragon_dance (TS test:6173-6227) ----------------------------
+
+    #[test]
+    fn cv_dragon_dance_target_faster_roll_site() {
+        let attacker = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 150, ..neutral_battler() });
+        let seed = find_seed(|rv| rv % 256 >= 128);
+        let result = run_cv_dragon_dance(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            1,
+        );
+        assert_eq!(result.score_delta, 1);
+        let CheckViabilityDraw::DragonDanceRoll { kind, succeeded, .. } = result.draws[0] else {
+            panic!("expected DragonDanceRoll");
+        };
+        assert_eq!(kind, CvDrawKind::DragonDance2);
+        assert!(succeeded);
+    }
+
+    #[test]
+    fn cv_dragon_dance_not_faster_high_hp_is_zero() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            speed: 150,
+            hp: 51,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let result =
+            run_cv_dragon_dance(BattleRngState { value: 1, calls: 0 }, attacker, target, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_dragon_dance_not_faster_low_hp_roll_site() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            speed: 150,
+            hp: 50,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let seed = find_seed(|rv| rv % 256 >= 70);
+        let result = run_cv_dragon_dance(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            1,
+        );
+        assert_eq!(result.score_delta, -1);
+        let CheckViabilityDraw::DragonDanceRoll { kind, .. } = result.draws[0] else {
+            panic!("expected DragonDanceRoll");
+        };
+        assert_eq!(kind, CvDrawKind::DragonDance1);
+    }
+
+    // --- run_cv_baton_pass (TS test:6228-6296) ------------------------------
+
+    #[test]
+    fn cv_baton_pass_stat_above_8_roll_site() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            atk_stage: 9,
+            speed: 150,
+            hp: 50,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let seed = find_seed(|rv| rv % 256 >= 80);
+        let result = run_cv_baton_pass(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            1,
+        );
+        assert_eq!(result.score_delta, 2);
+        assert!(matches!(
+            result.draws[result.draw_count as usize - 1],
+            CheckViabilityDraw::BatonPassRoll { .. }
+        ));
+    }
+
+    #[test]
+    fn cv_baton_pass_stat_above_7_not_8_deterministic_minus2() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            atk_stage: 8,
+            speed: 150,
+            hp: 61,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let result = run_cv_baton_pass(BattleRngState { value: 1, calls: 0 }, attacker, target, 1);
+        assert_eq!(result.score_delta, -2);
+    }
+
+    #[test]
+    fn cv_baton_pass_no_stat_above_7_is_deterministic_minus2() {
+        let attacker = battler(FactoryAiCheckViabilityBattler { speed: 150, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let result = run_cv_baton_pass(BattleRngState { value: 1, calls: 0 }, attacker, target, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -2);
+    }
+
+    // --- run_cv_knock_off (TS test:5063-5116) -------------------------------
+
+    #[test]
+    fn cv_knock_off_low_target_hp_preserves_carry() {
+        let (result, func_result) = run_cv_knock_off(
+            BattleRngState { value: 1, calls: 0 },
+            29,
+            100,
+            0,
+            Some(AI_WEATHER_RAIN),
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+        assert_eq!(func_result, Some(AI_WEATHER_RAIN));
+    }
+
+    #[test]
+    fn cv_knock_off_not_first_turn_writes_func_result_zero_score() {
+        let (result, func_result) =
+            run_cv_knock_off(BattleRngState { value: 1, calls: 0 }, 100, 100, 2, None, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+        assert_eq!(func_result, Some(2));
+    }
+
+    #[test]
+    fn cv_knock_off_first_turn_roll_site() {
+        let seed = find_seed(|rv| rv % 256 >= 180);
+        let (result, func_result) = run_cv_knock_off(
+            BattleRngState { value: seed, calls: 0 },
+            100,
+            100,
+            0,
+            None,
+            1,
+        );
+        assert_eq!(result.score_delta, 1);
+        assert_eq!(func_result, Some(0));
+        let CheckViabilityDraw::FocusPunchKnockOffRoll { kind, .. } = result.draws[0] else {
+            panic!("expected FocusPunchKnockOffRoll");
+        };
+        assert_eq!(kind, CvDrawKind::KnockOff);
+    }
+
+    // --- run_cv_focus_punch (TS test:6297-6364) -----------------------------
+
+    #[test]
+    fn cv_focus_punch_weak_effectiveness_is_minus1() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_ROCK, TYPE_ROCK],
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_focus_punch(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            Some(AI_WEATHER_HAIL),
+            1,
+        );
+        assert_eq!(result.score_delta, -1);
+        assert_eq!(func_result, Some(AI_WEATHER_HAIL));
+    }
+
+    #[test]
+    fn cv_focus_punch_asleep_target_is_bare_plus1() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            is_asleep: Some(true),
+            ..neutral_battler()
+        });
+        let (result, _) = run_cv_focus_punch(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 1);
+    }
+
+    #[test]
+    fn cv_focus_punch_confused_roll_jumped_is_zero() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            is_confused: Some(true),
+            ..neutral_battler()
+        });
+        let seed = find_seed(|rv| rv % 256 < 100);
+        let (result, _) = run_cv_focus_punch(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            None,
+            1,
+        );
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_focus_punch_confused_fallthrough_substitute_gives_plus5() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            has_substitute: Some(true),
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            is_infatuated: Some(true),
+            ..neutral_battler()
+        });
+        let seed = find_seed(|rv| rv % 256 >= 100);
+        let (result, _) = run_cv_focus_punch(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            None,
+            1,
+        );
+        assert_eq!(result.score_delta, 5);
+    }
+
+    #[test]
+    fn cv_focus_punch_statusless_not_first_turn_is_zero_writes_func_result() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            is_first_turn: 1,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_focus_punch(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+        assert_eq!(func_result, Some(1));
+    }
+
+    #[test]
+    fn cv_focus_punch_statusless_first_turn_roll_site() {
+        let attacker = neutral_battler();
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let seed = find_seed(|rv| rv % 256 >= 100);
+        let (result, func_result) = run_cv_focus_punch(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            None,
+            1,
+        );
+        assert_eq!(result.score_delta, 1);
+        assert_eq!(func_result, Some(0));
+    }
+
+    // --- run_cv_revenge (TS test:6387-6422) ---------------------------------
+
+    #[test]
+    fn cv_revenge_status_is_deterministic_minus2() {
+        let target =
+            battler(FactoryAiCheckViabilityBattler { is_asleep: Some(true), ..neutral_battler() });
+        let result = run_cv_revenge(BattleRngState { value: 1, calls: 0 }, target, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -2);
+    }
+
+    #[test]
+    fn cv_revenge_clean_target_roll_site() {
+        let target = neutral_battler();
+        let jump_seed = find_seed(|rv| rv % 256 < 180);
+        let jumped = run_cv_revenge(BattleRngState { value: jump_seed, calls: 0 }, target, 1);
+        assert_eq!(jumped.score_delta, -2);
+
+        let no_jump_seed = find_seed(|rv| rv % 256 >= 180);
+        let no_jump = run_cv_revenge(BattleRngState { value: no_jump_seed, calls: 0 }, target, 1);
+        assert_eq!(no_jump.score_delta, 2);
+    }
+
+    // --- run_cv_superpower (TS test:6423-6465) ------------------------------
+
+    #[test]
+    fn cv_superpower_weak_effectiveness_is_minus1() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_ROCK, TYPE_ROCK],
+            ..neutral_battler()
+        });
+        let result = run_cv_superpower(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(result.score_delta, -1);
+    }
+
+    #[test]
+    fn cv_superpower_low_atk_stage_is_minus1() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            atk_stage: 5,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            ..neutral_battler()
+        });
+        let result = run_cv_superpower(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(result.score_delta, -1);
+    }
+
+    #[test]
+    fn cv_superpower_target_faster_hp_bands() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 150,
+            ..neutral_battler()
+        });
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 50,
+            hp: 59,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let low = run_cv_superpower(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_low,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(low.score_delta, 0);
+
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 50,
+            hp: 60,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let high = run_cv_superpower(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_high,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(high.score_delta, -1);
+    }
+
+    #[test]
+    fn cv_superpower_not_target_faster_hp_bands() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 50,
+            ..neutral_battler()
+        });
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 150,
+            hp: 41,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let high = run_cv_superpower(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_high,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(high.score_delta, -1);
+
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            types: [TYPE_NORMAL, TYPE_NORMAL],
+            speed: 150,
+            hp: 40,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let low = run_cv_superpower(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_low,
+            target,
+            TYPE_NORMAL,
+            1,
+        );
+        assert_eq!(low.score_delta, 0);
+    }
+
+    // --- run_cv_magic_coat (TS test:6466-6521) ------------------------------
+
+    #[test]
+    fn cv_magic_coat_low_target_hp_and_first_turn_roll3() {
+        // Both rolls fall through (roll1 >= 100, roll3 >= 30): -1 twice.
+        let seed = (1..200_000u32)
+            .find(|&v| {
+                let rng = BattleRngState { value: v, calls: 0 };
+                let roll1 = next_draw(rng, 1);
+                let roll3 = next_draw(roll1.after, 2);
+                roll1.random_value % 256 >= 100 && roll3.random_value % 256 >= 30
+            })
+            .expect("no seed in range satisfies both magic-coat roll predicates");
+        let (result, func_result) =
+            run_cv_magic_coat(BattleRngState { value: seed, calls: 0 }, 30, 100, 1, 1);
+        assert_eq!(result.draw_count, 2);
+        assert_eq!(func_result, Some(1));
+        assert_eq!(result.score_delta, -2);
+    }
+
+    #[test]
+    fn cv_magic_coat_high_target_hp_first_turn_zero_roll2() {
+        let seed = find_seed(|rv| rv % 256 >= 150);
+        let (result, func_result) =
+            run_cv_magic_coat(BattleRngState { value: seed, calls: 0 }, 100, 100, 0, 1);
+        assert_eq!(result.draw_count, 1);
+        assert_eq!(func_result, Some(0));
+        assert_eq!(result.score_delta, 1);
+        let CheckViabilityDraw::MagicCoatRoll { kind, .. } = result.draws[0] else {
+            panic!("expected MagicCoatRoll");
+        };
+        assert_eq!(kind, CvDrawKind::MagicCoat2);
+    }
+
+    // --- run_cv_foresight (TS test:6522-6567) -------------------------------
+
+    #[test]
+    fn cv_foresight_non_ghost_low_evasion_is_deterministic_minus2() {
+        let (result, func_result) = run_cv_foresight(
+            BattleRngState { value: 1, calls: 0 },
+            [TYPE_NORMAL, TYPE_NORMAL],
+            8,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -2);
+        assert_eq!(
+            func_result,
+            type_chain_func_result_after([TYPE_NORMAL, TYPE_NORMAL], &[TYPE_GHOST])
+        );
+    }
+
+    #[test]
+    fn cv_foresight_ghost_user_roll_site() {
+        let jump_seed = find_seed(|rv| rv % 256 < 80);
+        let jumped = run_cv_foresight(
+            BattleRngState { value: jump_seed, calls: 0 },
+            [TYPE_GHOST, TYPE_NORMAL],
+            6,
+            1,
+        )
+        .0;
+        assert_eq!(jumped.score_delta, 0);
+        let CheckViabilityDraw::ForesightRoll { kind, .. } = jumped.draws[0] else {
+            panic!("expected ForesightRoll");
+        };
+        assert_eq!(kind, CvDrawKind::Foresight1);
+    }
+
+    #[test]
+    fn cv_foresight_high_evasion_non_ghost_roll_site() {
+        let no_jump_seed = find_seed(|rv| rv % 256 >= 80);
+        let (result, _) = run_cv_foresight(
+            BattleRngState { value: no_jump_seed, calls: 0 },
+            [TYPE_NORMAL, TYPE_NORMAL],
+            9,
+            1,
+        );
+        assert_eq!(result.score_delta, 2);
+        let CheckViabilityDraw::ForesightRoll { kind, .. } = result.draws[0] else {
+            panic!("expected ForesightRoll");
+        };
+        assert_eq!(kind, CvDrawKind::Foresight2);
+    }
+
+    // --- run_cv_endeavor (TS test:6568-6604) --------------------------------
+
+    #[test]
+    fn cv_endeavor_low_target_hp_is_deterministic_minus1() {
+        let attacker = neutral_battler();
+        let target =
+            battler(FactoryAiCheckViabilityBattler { hp: 69, max_hp: 100, ..neutral_battler() });
+        let result = run_cv_endeavor(BattleRngState { value: 1, calls: 0 }, attacker, target, 1);
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -1);
+    }
+
+    #[test]
+    fn cv_endeavor_target_faster_hp_bands() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            hp: 70,
+            max_hp: 100,
+            speed: 150,
+            ..neutral_battler()
+        });
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            hp: 51,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let high = run_cv_endeavor(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_high,
+            target,
+            1,
+        );
+        assert_eq!(high.score_delta, -1);
+
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            hp: 50,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let low = run_cv_endeavor(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_low,
+            target,
+            1,
+        );
+        assert_eq!(low.score_delta, 1);
+    }
+
+    #[test]
+    fn cv_endeavor_not_target_faster_hp_bands() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            hp: 70,
+            max_hp: 100,
+            speed: 50,
+            ..neutral_battler()
+        });
+        let attacker_high = battler(FactoryAiCheckViabilityBattler {
+            speed: 150,
+            hp: 41,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let high = run_cv_endeavor(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_high,
+            target,
+            1,
+        );
+        assert_eq!(high.score_delta, -1);
+
+        let attacker_low = battler(FactoryAiCheckViabilityBattler {
+            speed: 150,
+            hp: 40,
+            max_hp: 100,
+            ..neutral_battler()
+        });
+        let low = run_cv_endeavor(
+            BattleRngState { value: 1, calls: 0 },
+            attacker_low,
+            target,
+            1,
+        );
+        assert_eq!(low.score_delta, 1);
+    }
+
+    // --- run_cv_encore (TS test:6605-6660) ----------------------------------
+
+    #[test]
+    fn cv_encore_any_move_disabled_reaches_roll_carry_preserved() {
+        let attacker = neutral_battler();
+        let target = battler(FactoryAiCheckViabilityBattler {
+            any_move_disabled: Some(true),
+            ..neutral_battler()
+        });
+        let seed = find_seed(|rv| rv % 256 >= 30);
+        let (result, func_result) = run_cv_encore(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            Some(AI_WEATHER_HAIL),
+            1,
+        );
+        assert_eq!(result.draw_count, 1);
+        assert_eq!(result.score_delta, 3);
+        assert_eq!(func_result, Some(AI_WEATHER_HAIL));
+    }
+
+    #[test]
+    fn cv_encore_target_faster_is_deterministic_minus2() {
+        let attacker = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 150, ..neutral_battler() });
+        let (result, _) = run_cv_encore(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.score_delta, -2);
+    }
+
+    #[test]
+    fn cv_encore_not_faster_last_effect_not_encouraged_is_minus2() {
+        const MOVE_TACKLE_ENCORE: u16 = 33; // EFFECT_HIT (0) -- not in the 61-entry encouraged table
+        let attacker = battler(FactoryAiCheckViabilityBattler { speed: 150, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            last_used_move_id: Some(MOVE_TACKLE_ENCORE),
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_encore(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -2);
+        assert_eq!(
+            func_result,
+            protect_last_move_effect_func_result(EFFECT_HIT)
+        );
+    }
+
+    #[test]
+    fn cv_encore_not_faster_last_effect_encouraged_roll_site() {
+        const MOVE_TOXIC_ENCORE: u16 = 92; // EFFECT_TOXIC, in the encouraged table
+        let attacker = battler(FactoryAiCheckViabilityBattler { speed: 150, ..neutral_battler() });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            last_used_move_id: Some(MOVE_TOXIC_ENCORE),
+            ..neutral_battler()
+        });
+        let seed = find_seed(|rv| rv % 256 >= 30);
+        let (result, _) = run_cv_encore(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.score_delta, 3);
+        let CheckViabilityDraw::EncoreRoll { .. } = result.draws[result.draw_count as usize - 1]
+        else {
+            panic!("expected EncoreRoll");
+        };
+    }
+
+    // --- run_cv_heal_bell (TS test:6661-6694) -------------------------------
+
+    #[test]
+    fn cv_heal_bell_target_status_scores_zero() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            has_any_status: Some(true),
+            ..neutral_battler()
+        });
+        let result = run_cv_heal_bell(BattleRngState { value: 1, calls: 0 }, target);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_heal_bell_party_status_scores_zero() {
+        let target = battler(FactoryAiCheckViabilityBattler {
+            target_party_status_equals_any: Some(true),
+            ..neutral_battler()
+        });
+        let result = run_cv_heal_bell(BattleRngState { value: 1, calls: 0 }, target);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_heal_bell_no_status_anywhere_is_minus5() {
+        let result = run_cv_heal_bell(BattleRngState { value: 1, calls: 0 }, neutral_battler());
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, -5);
+    }
+
+    // --- run_cv_substitute (TS test:6695-6807) ------------------------------
+
+    #[test]
+    fn cv_substitute_high_hp_no_hp_band_rolls_target_faster() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            hp: 91,
+            max_hp: 100,
+            speed: 50,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 150, ..neutral_battler() });
+        let (result, func_result) = run_cv_substitute(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            Some(AI_WEATHER_SANDSTORM),
+            1,
+        );
+        assert_eq!(result.score_delta, 0);
+        assert_eq!(func_result, Some(AI_WEATHER_SANDSTORM));
+    }
+
+    #[test]
+    fn cv_substitute_low_hp_runs_all_three_hp_band_rolls() {
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            hp: 40,
+            max_hp: 100,
+            speed: 150,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler { speed: 50, ..neutral_battler() });
+        let (result, _) = run_cv_substitute(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert!(result.draw_count >= 3);
+        for i in 0..3 {
+            let CheckViabilityDraw::SubstituteRoll { kind, .. } = result.draws[i] else {
+                panic!("expected SubstituteRoll");
+            };
+            assert_eq!(
+                kind,
+                [
+                    CvDrawKind::Substitute1,
+                    CvDrawKind::Substitute2,
+                    CvDrawKind::Substitute3
+                ][i]
+            );
+        }
+    }
+
+    #[test]
+    fn cv_substitute_not_faster_unmatched_last_effect_ends_at_zero() {
+        const MOVE_TACKLE_SUB: u16 = 33; // EFFECT_HIT -- not in any of the three status buckets
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            hp: 100,
+            max_hp: 100,
+            speed: 150,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            last_used_move_id: Some(MOVE_TACKLE_SUB),
+            ..neutral_battler()
+        });
+        let (result, func_result) = run_cv_substitute(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+        assert_eq!(
+            func_result,
+            protect_last_move_effect_func_result(EFFECT_HIT)
+        );
+    }
+
+    #[test]
+    fn cv_substitute_not_faster_status1_effect_clean_target_reaches_roll8() {
+        const MOVE_GLARE_SUB: u16 = 78; // EFFECT_PARALYZE
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            hp: 100,
+            max_hp: 100,
+            speed: 150,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            last_used_move_id: Some(MOVE_GLARE_SUB),
+            has_any_status: Some(false),
+            ..neutral_battler()
+        });
+        let seed = find_seed(|rv| rv % 256 >= 100);
+        let (result, _) = run_cv_substitute(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.score_delta, 1);
+        let CheckViabilityDraw::SubstituteRoll { kind, .. } =
+            result.draws[result.draw_count as usize - 1]
+        else {
+            panic!("expected SubstituteRoll");
+        };
+        assert_eq!(kind, CvDrawKind::Substitute4);
+    }
+
+    #[test]
+    fn cv_substitute_not_faster_status1_effect_statused_target_ends_at_zero() {
+        const MOVE_GLARE_SUB: u16 = 78; // EFFECT_PARALYZE
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            hp: 100,
+            max_hp: 100,
+            speed: 150,
+            ..neutral_battler()
+        });
+        let target = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            last_used_move_id: Some(MOVE_GLARE_SUB),
+            has_any_status: Some(true),
+            ..neutral_battler()
+        });
+        let (result, _) = run_cv_substitute(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            target,
+            None,
+            1,
+        );
+        assert_eq!(result.draw_count, 0);
+        assert_eq!(result.score_delta, 0);
+    }
+
+    #[test]
+    fn cv_substitute_not_faster_leech_seed_polarity_is_inverted() {
+        const MOVE_LEECH_SEED_SUB: u16 = 73;
+        let attacker = battler(FactoryAiCheckViabilityBattler {
+            hp: 100,
+            max_hp: 100,
+            speed: 150,
+            ..neutral_battler()
+        });
+        let seeded_target = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            last_used_move_id: Some(MOVE_LEECH_SEED_SUB),
+            is_leech_seeded: Some(true),
+            ..neutral_battler()
+        });
+        let (seeded, _) = run_cv_substitute(
+            BattleRngState { value: 1, calls: 0 },
+            attacker,
+            seeded_target,
+            None,
+            1,
+        );
+        assert_eq!(seeded.draw_count, 0);
+        assert_eq!(seeded.score_delta, 0);
+
+        let unseeded_target = battler(FactoryAiCheckViabilityBattler {
+            speed: 50,
+            last_used_move_id: Some(MOVE_LEECH_SEED_SUB),
+            is_leech_seeded: Some(false),
+            ..neutral_battler()
+        });
+        let seed = find_seed(|rv| rv % 256 >= 100);
+        let (unseeded, _) = run_cv_substitute(
+            BattleRngState { value: seed, calls: 0 },
+            attacker,
+            unseeded_target,
+            None,
+            1,
+        );
+        assert_eq!(unseeded.score_delta, 1);
+    }
+
     // === M5d-3 completeness-probe machinery ==================================
 
     #[test]
@@ -10407,20 +13673,6 @@ mod tests {
         sorted.sort_unstable();
         sorted.dedup();
         assert_eq!(sorted.len(), CV_HANDLED_EFFECTS_M5D3.len());
-    }
-
-    #[test]
-    fn cv_handled_effects_m5d3_cumulative_state_is_72_handled_50_unported() {
-        assert_eq!(cv_handled_effects().len(), 13 + 29 + 30);
-        assert_eq!(unported_cv_table_effects().len(), 50);
-        let handled = cv_handled_effects();
-        let unported = unported_cv_table_effects();
-        assert!(unported.iter().all(|e| !handled.contains(e)));
-        let mut union: Vec<u16> = handled.iter().chain(unported.iter()).copied().collect();
-        union.sort_unstable();
-        let mut expected = CV_TABLE_EFFECTS;
-        expected.sort_unstable();
-        assert_eq!(union, expected);
     }
 
     #[test]
@@ -10443,15 +13695,61 @@ mod tests {
         );
     }
 
+    // === M5d-4 completeness-probe machinery ==================================
+
     #[test]
-    fn barrier_still_fires_against_an_m5d4_effect() {
-        // EFFECT_BRICK_BREAK is M5d-4's first dispatch-order effect
-        // (batching doc §2 "M5d-4") -- still unported after M5d-3.
-        let move_id = first_move_id_with_effect(EFFECT_BRICK_BREAK)
-            .expect("at least one real Gen-3 Brick Break move");
+    fn cv_handled_effects_m5d4_has_22_entries_and_no_duplicates() {
+        assert_eq!(CV_HANDLED_EFFECTS_M5D4.len(), 22);
+        let mut sorted = CV_HANDLED_EFFECTS_M5D4.to_vec();
+        sorted.sort_unstable();
+        sorted.dedup();
+        assert_eq!(sorted.len(), CV_HANDLED_EFFECTS_M5D4.len());
+    }
+
+    #[test]
+    fn cv_handled_effects_m5d4_cumulative_state_is_94_handled_28_unported() {
+        assert_eq!(cv_handled_effects().len(), 13 + 29 + 30 + 22);
+        assert_eq!(unported_cv_table_effects().len(), 28);
+        let handled = cv_handled_effects();
+        let unported = unported_cv_table_effects();
+        assert!(unported.iter().all(|e| !handled.contains(e)));
+        let mut union: Vec<u16> = handled.iter().chain(unported.iter()).copied().collect();
+        union.sort_unstable();
+        let mut expected = CV_TABLE_EFFECTS;
+        expected.sort_unstable();
+        assert_eq!(union, expected);
+    }
+
+    #[test]
+    fn every_m5d4_handled_effects_first_move_now_scores() {
+        let mut checked = 0;
+        for &effect in CV_HANDLED_EFFECTS_M5D4 {
+            if let Some(move_id) = first_move_id_with_effect(effect) {
+                let result = run(move_id, 1);
+                let CheckViabilityResult::Scored { .. } = result else {
+                    panic!(
+                        "effect {effect} move {move_id}: expected Scored now that M5d-4 handles it, got {result:?}"
+                    );
+                };
+                checked += 1;
+            }
+        }
+        assert_eq!(
+            checked,
+            CV_HANDLED_EFFECTS_M5D4.len(),
+            "every M5d-4 effect has at least one real Gen-3 move"
+        );
+    }
+
+    #[test]
+    fn barrier_still_fires_against_an_m5d5_effect() {
+        // EFFECT_TRICK is M5d-5's first dispatch-order effect (batching doc
+        // §2 "M5d-5") -- still unported after M5d-4.
+        let move_id =
+            first_move_id_with_effect(EFFECT_TRICK).expect("at least one real Gen-3 Trick move");
         assert_eq!(
             run(move_id, 1),
-            CheckViabilityResult::NotYetPorted { effect: EFFECT_BRICK_BREAK, move_id }
+            CheckViabilityResult::NotYetPorted { effect: EFFECT_TRICK, move_id }
         );
     }
 }

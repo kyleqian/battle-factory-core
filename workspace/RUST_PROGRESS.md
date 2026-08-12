@@ -201,12 +201,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   re-derived independently (Fly tie-draw dropped-receipt; SunnyDay
   stale-fallback carry) — exact. Post-fold: artifact rebuilt, smoke
   375/375. Worker: sonnet, 38.6 min, 1 commit.
-- **Next:** M5d-4 (22 effects, charge-up/status-cure/Substitute — brief
-  staged; ground-truth doc ends at BrickBreak, rest is
-  source-citation-only), then M5d-5 (28 effects, needs M5d-3's Confuse —
-  now available), then the CV boundary+adapter+parity step (M5e, M5c
-  pattern). Re-verify the conflict check at orient per the standing
-  M4+ rule.
+- **M5d-4 DONE (fold `5d3f2f1c`):** 22 effects (BrickBreak, shared
+  ChargeUpMove ×4, Overheat, Facade, Curse and PsychUp with their OWN
+  independent bodies — the CBM reuse shortcuts verifiably don't
+  transfer, MirrorCoat 91-line 7-roll handler, DragonDance, BatonPass,
+  KnockOff, FocusPunch, Revenge, Superpower, MagicCoat, Foresight,
+  Endeavor, Encore, HealBell, Substitute 107-line handler). unported =
+  28 (M5d-5's set), pinned; barrier probe moved to EFFECT_TRICK. 74
+  native tests + 153 vector rows (gen-cv-m5d4-vectors.mjs,
+  byte-idempotent; all 153 matched first-run). Worker findings: Encore's
+  EncouragedMovesToEncore = 61 raw effect ids (most have no EFFECT_*
+  const here — inline literals with name comments, header-sourced);
+  MagicCoat roll site 3 is dead code in the compiled ROM, ported
+  faithfully; protect_last_move_effect_func_result is genuinely shared
+  by Protect/Encore/Substitute in TS. Supervisor rerun: scope clean,
+  cargo **601/601** + fmt/clippy + wasm, generator byte-idempotent, 2
+  rows re-derived independently (MirrorCoat low-hp 4-roll chain +3;
+  Curse neutral-stage 3-roll +2) — exact. Post-fold: artifact rebuilt,
+  smoke 375/375. Worker: sonnet, 29.4 min, 2 commits.
+- **Wind-down gates (this tree, supervisor-run, final):** cargo
+  **601/601** + fmt/clippy clean, artifact rebuilt, parity union (7
+  suites) **757/757 in wasm mode** with the final artifact. Full npm
+  test **977 files / 9,527 passed / 1 pre-existing skip**, npm build,
+  soak **vanilla 20/20** + **full 60/60** were all recorded post-M5c
+  this session; every fold after M5c was core-rs/-only (plus one
+  rust-lane docs commit), so the TS side is bit-identical to those
+  runs — smoke 375/375 re-run after every fold regardless. No orphan
+  worker worktrees or branches; RUST_DEFERRED.md has no open entries.
+- **Next:** M5d-5 (28 effects, remaining singles + MudSport/WaterSport
+  same-function pair + 2 fully-vestigial exported handlers; M5d-3's
+  Confuse is pub(crate) and ready for Flatter's cross-batch call), then
+  the CV boundary+adapter+parity step (M5e, M5c pattern), then
+  TryToFaint + DecisionPolicy (M5f). Re-verify the conflict check at
+  orient per the standing M4+ rule.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
