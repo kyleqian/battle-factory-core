@@ -1,0 +1,40 @@
+{
+  "schema": "scene-on-portable-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "FURY_SWIPES",
+  "orientation": "player-to-opponent",
+  "scenario": "tools/battle-lab/mechanic-fury-swipes-player-aipom-opponent-onix.json",
+  "probe": "tools/compare/dizzyPunchProbe.py",
+  "denseWindow": { "startFrame": 83, "endFrame": 130, "frameCount": 48 },
+  "attacker": {
+    "species": "AIPOM",
+    "geometry": {
+      "side": "player",
+      "spriteCorner": { "x": 40, "y": 57 },
+      "animationCenter": { "x": 72, "y": 97 },
+      "battlePositionCenter": { "x": 72, "y": 80 }
+    }
+  },
+  "target": {
+    "species": "ONIX",
+    "geometry": {
+      "side": "opponent",
+      "spriteCorner": { "x": 144, "y": 10 },
+      "animationCenter": { "x": 176, "y": 42 },
+      "battlePositionCenter": { "x": 176, "y": 40 }
+    }
+  },
+  "fieldProfile": {
+    "playerHp": 162,
+    "playerMaxHp": 162,
+    "opponentHp": 110,
+    "opponentMaxHp": 110,
+    "playerGender": "female",
+    "opponentGender": "male"
+  },
+  "evidenceSchema": "fury-swipes-dense-evidence/v1",
+  "evidenceSha256": "a54e4d2c6337f2d6add5fb0281e5fb6a5e9b4605e5d71dd57b6844c4766d0db6",
+  "secondFreshEvidenceSha256": "a54e4d2c6337f2d6add5fb0281e5fb6a5e9b4605e5d71dd57b6844c4766d0db6",
+  "rawRgbSha256": "f0ea9b5c80bcecb15898addc6a1f86c3a11781d015c26256af3fb5e530ca5c13",
+  "normalizedMapSha256": "26504c1b7169add1c4f35d89527258eddf06f63b8f8f8321e64bfdc6140c201d"
+}
