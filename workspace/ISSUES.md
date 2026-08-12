@@ -2330,6 +2330,36 @@ construction-clock wiring remain null. Evidence:
 `fb345eca…`). No `src/**`, unsupported barrier, animation/Rust, canonical
 Battle-2, recording import, oracle, or probe change landed.
 
+**2026-08-12 CGB4 v23 post-`subs` store/compare/branch closure:** additive
+v23 freezes v22 evidence/report byte-for-byte and preserves every v21 packet
+byte/hash exactly. Two fresh, address-free Battle Scene OFF packet sets are
+byte-identical (anchor `fc84cabe…`, LILIANA `f506f1e9…`, legal-varied
+`9019c3fa…`) and join **only** the three frozen v22 `sourceStateDigest` rows
+whose selected successor is `_081DD9B6`. Each selected packet retains exactly
+that digest plus one scalar, the post-`subs` `r0` `subtractionResult`, which
+is **72** in all three rows; neither the original `tempoC` scalar, pointer or
+runtime address, frame/duration, clock, track identity/index/count, condition
+flags, nor later body state is read, retained, or reconstructed. All four
+EXIST-set rows remain null before `_081DD886`.
+
+Source/ELF/exact-ROM close only `0x082dfbf4`'s eight bytes `78 84 96 28 00 d3
+57 e7`: `strh r0,[r7,#0x22]; cmp r0,#150; bcc _081DD9C4; b _081DD874`.
+The static player-storage class proves the `strh` is IWRAM at zero premium
+without selecting a runtime player. Every executed Thumb halfword costs 2
+cycles and exactly one taken-control refill costs 6: the observed
+`72 < 150` bcc-taken route is **3×2 + 6 = 12** cycles per row (**36**
+aggregate), advancing the contiguous prefix **5,692 → 5,728** cycles and
+stopping before `_081DD9C4`'s first `ldrb`. The fail-closed reducer also
+prices the unobserved bcc-not-taken plus immediately executed unconditional
+`b _081DD874` route at **4×2 + 6 = 14** cycles, stopping before that target's
+first instruction; it does not claim either successor body. Complete MPlay
+remains **5 exact / 108 null**; other callbacks, service/arbitration, and
+construction-clock wiring remain null. Evidence is
+`docs/issue55-m4a-note-body-cgb4-v23.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v23.json` (SHA256
+`4ae623c8…`). No production, presentation, animation/Rust, canonical
+Battle-2, ratchet, or unsupported-barrier change landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

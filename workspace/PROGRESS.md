@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1214 — [MAIN worker, 2026-08-12] **CGB4 v23 post-subs branch closure — verification in progress**
+
+- **State:** #55 reaches a source-exact **5,728-cycle** aggregate prefix for
+  only the three frozen `_081DD9B6` rows, stopping before `_081DD9C4`'s first
+  `ldrb`. Complete MPlay remains **5 exact / 108 null** and the construction
+  clock stays unwired.
+- **Did:** captured twice-fresh, Battle Scene OFF, address-free v23 packets
+  keyed only by frozen `sourceStateDigest`; every selected row has only
+  `subtractionResult=72`. Frozen v22 evidence/report and every v21 packet
+  byte/hash are pinned; source/ELF/ROM close `strh/cmp/bcc` at **12 × 3 = 36**
+  cycles. The source-general non-taken route includes its unconditional `b`
+  at **14** cycles but is not observed or body-expanded.
+- **Next:** finish the required focused/smoke/typecheck/full/build gates,
+  confirm twice regeneration, then commit this evidence-only step. Preserve
+  the four EXIST-set rows, original tempoC, successor bodies, service/
+  arbitration, and construction-clock wiring as null.
+- **Notes:** fresh packet hashes `fc84cabe…` / `f506f1e9…` / `9019c3fa…`;
+  evidence/doc `4ae623c8…` / `1c28507b…`. No `src/**`, ratchet,
+  unsupported-barrier, animation/Rust, presentation, or canonical Battle-2
+  change.
+
 ## 1213 — [supervisor, 2026-08-12] **CGB4 v22 and Rust M5 union verified**
 
 - **State:** #55 retains the source-exact **5,692-cycle** aggregate prefix
@@ -45,25 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   suite **1,004 files / 9,642 passed / 1 skipped**, and build **653 modules**
   are green. No oracle/probe or `src/**`, ratchet, unsupported-barrier,
   animation/Rust, or canonical Battle-2 change.
-
-## 1211 — [supervisor, 2026-08-12] **CGB4 v21 and persistent-lane union verified**
-
-- **State:** #55 retains the source-exact **5,674-cycle** aggregate prefix
-  through the three clear-row clock-exit decisions. Fissure dense evidence
-  and Rust's scored Factory-AI chooser are folded; both persistent lane tips
-  are contained.
-- **Did:** audited v21's twice-fresh digest-only packets, exact 10-byte ROM
-  body, five-halfword count, IWRAM accesses, and three taken refills. Added an
-  explicit fail-closed source/ELF pin for the sixth player's
-  `gPokemonCryMusicPlayers` IWRAM storage. Folded animation through
-  `2e976eed` and Rust through `0740592c`, then verified the union.
-- **Next:** source-close one bounded selected successor, preferably the fixed
-  nonzero-r4 status/tempo prefix beginning at `_081DD9B6`. Keep the four
-  EXIST-set rows, tempo discriminator/body beyond the new boundary, complete
-  MPlay, service/arbitration, and construction-clock wiring null unless
-  independently proved.
-- **Notes:** v21 evidence/doc `769bb40e…` / `29733308…`; focused v21 **5/5**.
-  Post-fold Rust **676/676**; WASM **253,842 bytes** (`86b488d6…`), forced
-  parity **766/766**; union npm **1,003 files / 9,637 passed / 1 skipped** and
-  build **653 modules**. No `src/**`, ratchet, unsupported-barrier, or
-  canonical Battle-2 change; no soak trigger.

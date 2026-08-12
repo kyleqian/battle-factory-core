@@ -1,3 +1,25 @@
+## 1211 — [supervisor, 2026-08-12] **CGB4 v21 and persistent-lane union verified**
+
+- **State:** #55 retains the source-exact **5,674-cycle** aggregate prefix
+  through the three clear-row clock-exit decisions. Fissure dense evidence
+  and Rust's scored Factory-AI chooser are folded; both persistent lane tips
+  are contained.
+- **Did:** audited v21's twice-fresh digest-only packets, exact 10-byte ROM
+  body, five-halfword count, IWRAM accesses, and three taken refills. Added an
+  explicit fail-closed source/ELF pin for the sixth player's
+  `gPokemonCryMusicPlayers` IWRAM storage. Folded animation through
+  `2e976eed` and Rust through `0740592c`, then verified the union.
+- **Next:** source-close one bounded selected successor, preferably the fixed
+  nonzero-r4 status/tempo prefix beginning at `_081DD9B6`. Keep the four
+  EXIST-set rows, tempo discriminator/body beyond the new boundary, complete
+  MPlay, service/arbitration, and construction-clock wiring null unless
+  independently proved.
+- **Notes:** v21 evidence/doc `769bb40e…` / `29733308…`; focused v21 **5/5**.
+  Post-fold Rust **676/676**; WASM **253,842 bytes** (`86b488d6…`), forced
+  parity **766/766**; union npm **1,003 files / 9,637 passed / 1 skipped** and
+  build **653 modules**. No `src/**`, ratchet, unsupported-barrier, or
+  canonical Battle-2 change; no soak trigger.
+
 ## 1209 — [supervisor, 2026-08-12] **CGB4 v20 and persistent-lane union verified**
 
 - **State:** #55 retains the source-exact **5,626-cycle** aggregate prefix
