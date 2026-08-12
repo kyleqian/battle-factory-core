@@ -25,10 +25,12 @@ const TYPES = Object.freeze({
   TYPE_GRASS: 12, TYPE_ELECTRIC: 13, TYPE_PSYCHIC: 14, TYPE_ICE: 15,
   TYPE_DRAGON: 16, TYPE_DARK: 17,
 });
-const TRAINER = 1 << 3;
-const FACTORY = 1 << 17;
-const ARENA = 1 << 18;
-const DOUBLE = 1;
+const {
+  BATTLE_SCRIPT_BATTLE_TYPE_TRAINER: TRAINER,
+  BATTLE_SCRIPT_BATTLE_TYPE_FACTORY: FACTORY,
+  BATTLE_SCRIPT_BATTLE_TYPE_ARENA: ARENA,
+  BATTLE_SCRIPT_BATTLE_TYPE_DOUBLE: DOUBLE,
+} = rulesModule;
 const SLEEP = 0x7;
 const WRAPPED = 0x0000e000;
 const ROOTED = 1 << 10;
@@ -79,6 +81,19 @@ function makeRules(spec = {}) {
     monToSwitchIntoId: [6, spec.reservedPartyIndex ?? 6, 6, 6],
     absentBattlerFlags: spec.absentBattlerFlags ?? 0,
   });
+  // The canonical context constructor rejects inconsistent DOUBLE/count
+  // topology. The policy has its own three-predicate trainer-singles guard,
+  // so its directed validation vectors patch that already-canonical context
+  // only to isolate one policy predicate at a time.
+  if (spec.policyBattleTopology !== undefined) {
+    return Object.freeze({
+      ...rules,
+      battleTopology: Object.freeze({
+        ...rules.battleTopology,
+        ...spec.policyBattleTopology,
+      }),
+    });
+  }
   return rules;
 }
 function seedFor(sequence) {
@@ -186,7 +201,16 @@ add("directed_absorber_scan_excludes_reserved", {
   reservedPartyIndex: 1, lastLandedMove: 55, lastHitBy: 0,
 });
 add("validation_non_trainer", { bench: [member(132, [33, 0, 0, 0])], battleTypeFlags: FACTORY });
-add("validation_double", { bench: [member(132, [33, 0, 0, 0])], battleTypeFlags: TRAINER | FACTORY | DOUBLE, battlersCount: 4 });
+add("validation_double", {
+  bench: [member(132, [33, 0, 0, 0])],
+  policyBattleTopology: { battleTypeFlags: TRAINER | FACTORY | DOUBLE },
+});
+add("validation_trainer_singles_flags_battlers_count_four", {
+  bench: [member(132, [33, 0, 0, 0])],
+  battlersCount: 4,
+  battleTypeFlags: TRAINER | FACTORY | DOUBLE,
+  policyBattleTopology: { battleTypeFlags: TRAINER | FACTORY },
+});
 const absorberReceipt = { bench: [member(134, [129, 129, 129, 129]), member(132, [150, 150, 150, 150])], lastLandedMove: 55, lastHitBy: 0 };
 add("r13d_absorber_success", absorberReceipt, 0xf69f135c);
 add("r13d_absorber_even_control", absorberReceipt, 0xde17efe2);
