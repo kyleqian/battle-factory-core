@@ -1911,18 +1911,23 @@ totals (**5 exact / 108 null**), service cost, and
 `runFactoryConstructionClock` remain null. Evidence:
 `docs/issue55-m4a-note-body-cgb4-v1.md`.
 
-**2026-08-11 CGB4 mutable/allocation-body closure:** twice-fresh address-free
-OFF packets close the same **7/82** callbacks through priority/status selection,
-`ClearChain`, ownership relinking, the `lfoDelayC` update, and the zero-delay
-branch immediately before `TrkVolPitSet`. The mutable continuation contributes
-**154** cycles; the allocation body contributes **825** cycles, for **1,413**
-known prefix-through-body cycles across the seven rows. Five routes have a null
-owner (**111** cycles each); two take the previous-null/next-null owner route
-(**135** each). Evidence: `docs/issue55-m4a-note-body-cgb4-v2.md` and
-`docs/issue55-m4a-note-body-cgb4-v3.md`.
+**2026-08-11 CGB4 mutable/allocation/helper closure:** twice-fresh
+address-free Battle Scene OFF packets close the same **7/82** callbacks through
+priority/status selection, `ClearChain`, ownership relinking, the `lfoDelayC`
+update, the zero-delay branch, and the compiled `TrkVolPitSet` return. The
+mutable continuation contributes **154** cycles; the allocation body **825**;
+the helper contributes **556** (**5 × 56** flags-clear and **2 × 138** observed
+VOLSET), for **1,969** known prefix-through-helper cycles across the seven
+rows. The v4 packets are byte-identical twice per case: anchor
+`fbe6a35f…`, LILIANA `4f2e86fe…`, legal-varied `64ea0a16…`. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v2.md`,
+`docs/issue55-m4a-note-body-cgb4-v3.md`, and
+`docs/issue55-m4a-note-body-cgb4-v4.md`.
 
-The current boundary is the observed zero-LFO `TrkVolPitSet` helper entry.
-`clear_modM`, later allocation fields, the other **75** post-selection
+The current boundary is the source-compiled `TrkVolPitSet` helper return for
+the observed zero-LFO routes. The reducer fails closed for every unobserved
+helper operand/branch and does not price the caller BL or later allocation
+fields. `clear_modM`, nonzero-LFO routes, the other **75** post-selection
 callbacks, all complete note/glue costs, all complete one-pass MPlay totals
 (**5 exact / 108 null**), service/arbitration, and construction-clock wiring
 remain deliberately null.

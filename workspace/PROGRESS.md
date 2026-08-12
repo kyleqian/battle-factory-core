@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1183 — [MAIN worker, 2026-08-11] **CGB4 `TrkVolPitSet` helper source-closed**
+
+- **State:** #55 is source-exact through the compiled helper return for the
+  observed zero-LFO CGB4 family: **7/82** callbacks, with complete MPlay still
+  **5 exact / 108 null** and the construction clock unwired.
+- **Did:** twice-fresh OFF v4 packets are byte-identical for anchor/LILIANA/
+  legal-varied (0/3/4): `fbe6a35f…` / `4f2e86fe…` / `64ea0a16…`. The reducer
+  closes five flags-clear routes at **56** cycles and two observed VOLSET
+  routes at **138**, adding **556** helper cycles to the **1,413** v3 boundary
+  (**1,969** through helper). Capture is operand-minimal and joins frozen v3
+  rows by `sourceStateDigest`; source/ELF/ROM pins are committed.
+- **Next:** run smoke, typecheck, full `npm test`, and build; commit the green
+  docs/evidence/reducer step and leave all unobserved helper branches, caller
+  BL/later fields, callback/glue, service, arbitration, and clock null.
+- **Notes:** focused dependent group is **15/15** green so far. No production
+  src, gameplay, renderer, animation, Rust, ROADMAP, canonical Battle-2, or
+  unsupported-barrier change.
+
 ## 1182 — [supervisor, 2026-08-11] **CGB4 body verified; animation and Rust lanes folded**
 
 - **State:** the observed CGB4 note route is source-exact through the
@@ -44,20 +62,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **977 files / 9,437 passed / 1 skipped**, typecheck, and build **653
   modules** are green. S8 stays closed at 33331; no unsupported barrier,
   gameplay, renderer, pixel, Rust, or ROADMAP/ISSUES change.
-
-## 1180 — [supervisor, 2026-08-11] **CGB4 mutable route verified; Rust M5b-1 folded**
-
-- **State:** the observed type-12 CGB4 family is source-exact through its
-  mutable allocation decision for **7/82** callbacks. Complete MPlay remains
-  **5 exact / 108 null**; #55 and `runFactoryConstructionClock` stay unwired.
-- **Did:** independently regenerated the CGB4 v2 receipt **17/17**, then folded
-  rust-main M5b-1 through merge `b9268dc2`: native `CheckBadMove` now covers a
-  first batch of 32 effects with TS-generated vectors.
-- **Next:** source-close one bounded observed CGB4 allocation-body route or
-  another post-selection note family. Preserve complete callback, glue,
-  one-pass-total, service, and construction-clock nulls.
-- **Notes:** CGB4 worker full **976 files / 9,434 passed / 1 skipped**. Union
-  Rust is **204/204**, fmt/clippy clean; rebuilt WASM is **92,766 bytes** and
-  forced-WASM parity is **660/660**. Union full is **976 files / 9,434 passed /
-  1 skipped** and build **653 modules**. Both lane branches are contained; no
-  unsupported barrier, gameplay, renderer, pixel, or canonical Battle-2 change.
