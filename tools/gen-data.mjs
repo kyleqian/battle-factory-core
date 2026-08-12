@@ -52,6 +52,7 @@ const moves = readJson("moves.json").moves;
 const expTables = readJson("exp-tables.json");
 const policy = readJson("factory-round-policy.json").rentalSelection;
 const typeEffectiveness = readJson("type-effectiveness.json").typeEffectiveness;
+const aiPolicy = readJson("factory-ai-policy.json");
 
 const speciesIdByName = new Map(speciesStats.map((s) => [s.name, s.id]));
 const speciesByName = new Map(speciesStats.map((s) => [s.name, s]));
@@ -250,6 +251,115 @@ if (fixedIvs.length !== 8) {
 const rentalRankThresholds = policy.rentalRankThresholds;
 const maximumRentalRank = policy.maximumRentalRank;
 
+// --- FACTORY_AI_POLICY_MASKS / FACTORY_AI_FRONTIER_STAGES_PER_CHALLENGE:
+// mirrors src/engine/factoryAiMaskSelection.ts's module-load validation of
+// factory-ai-policy.json (POLICY / POLICY_BRANCHES's failPolicy checks),
+// baked in at codegen time instead of at Rust runtime -- the FRONTIER_MONS
+// index-order check above is the same precedent. Rust's
+// factory_ai_mask::FactoryAiPolicyBranchId enum hand-codes the branch
+// matching logic (branchMatches's switch is native code, not data), so only
+// the per-branch mask and the frontierStagesPerChallenge constant need to
+// cross as generated data. ---
+const AI_POLICY_BRANCH_IDS = [
+  "tent",
+  "frontierBrain",
+  "challengeBelow2",
+  "challengeBelow4",
+  "challengeAtLeast4",
+];
+const AI_POLICY_MASKS = new Set([0, 1, 7]);
+if (aiPolicy.schema !== "factory-ai-policy/v1") {
+  throw new Error(`gen-data: unexpected factory-ai-policy.json schema ${aiPolicy.schema}`);
+}
+if (
+  !Number.isSafeInteger(aiPolicy.constants.frontierStagesPerChallenge) ||
+  aiPolicy.constants.frontierStagesPerChallenge <= 0
+) {
+  throw new Error("gen-data: factory-ai-policy.json frontierStagesPerChallenge must be a positive safe integer");
+}
+if (aiPolicy.branches.length !== AI_POLICY_BRANCH_IDS.length) {
+  throw new Error(
+    `gen-data: expected ${AI_POLICY_BRANCH_IDS.length} factory-ai-policy.json branches, got ${aiPolicy.branches.length}`,
+  );
+}
+aiPolicy.branches.forEach((branch, i) => {
+  if (branch.order !== i || branch.id !== AI_POLICY_BRANCH_IDS[i]) {
+    throw new Error(`gen-data: factory-ai-policy.json branches[${i}] must be ${AI_POLICY_BRANCH_IDS[i]}`);
+  }
+  if (!AI_POLICY_MASKS.has(branch.mask)) {
+    throw new Error(`gen-data: factory-ai-policy.json branches[${i}] has unsupported mask ${branch.mask}`);
+  }
+});
+const frontierStagesPerChallenge = aiPolicy.constants.frontierStagesPerChallenge;
+const aiPolicyMasks = aiPolicy.branches.map((branch) => branch.mask);
+
+// --- MOVES: full per-move data row, extending the existing dense MOVE_PP
+// table with the fields the M5b/M5d Factory AI move-scoring ports need.
+// EFFECT_* ids parsed from battle_move_effects.h; MOVE_TARGET_*/FLAG_* bit
+// values parsed from battle.h/pokemon.h -- none of these orderings are
+// invented, all read from the reference headers at codegen time. ---
+function parseHeaderDefines(relativePath) {
+  const absolutePath = path.join(workspaceRoot, "reference", "pokeemerald", relativePath);
+  const map = new Map();
+  for (const line of fs.readFileSync(absolutePath, "utf8").split("\n")) {
+    const withoutComment = line.split("//")[0];
+    const match = withoutComment.match(/^#define\s+(\S+)\s+(.+?)\s*$/);
+    if (!match) continue;
+    const [, name, rawValue] = match;
+    const shiftMatch = rawValue.match(/^\(\s*1\s*<<\s*(\d+)\s*\)$/);
+    if (shiftMatch) {
+      map.set(name, 1 << Number(shiftMatch[1]));
+    } else if (/^\d+$/.test(rawValue)) {
+      map.set(name, Number(rawValue));
+    }
+  }
+  return map;
+}
+const effectIds = parseHeaderDefines("include/constants/battle_move_effects.h");
+const moveTargetBits = parseHeaderDefines("include/battle.h");
+const moveFlagBits = parseHeaderDefines("include/constants/pokemon.h");
+
+const moveRows = moves.map((row) => {
+  if (!(row.type in TYPE_IDS)) {
+    throw new Error(`gen-data: moves.json move ${row.move} has unknown type ${row.type}`);
+  }
+  const typeId = TYPE_IDS[row.type];
+  const effectId = requireLookup(effectIds, row.effect, "move effect (include/constants/battle_move_effects.h)");
+  if (row.target.length !== 1) {
+    throw new Error(`gen-data: moves.json move ${row.move} has ${row.target.length} target flags, expected exactly 1`);
+  }
+  const targetBits = requireLookup(moveTargetBits, row.target[0], "move target (include/battle.h)");
+  let flagBits = 0;
+  for (const flagName of row.flags) {
+    flagBits |= requireLookup(moveFlagBits, flagName, "move flag (include/constants/pokemon.h)");
+  }
+  for (const [field, value] of [
+    ["power", row.power],
+    ["accuracy", row.accuracy],
+    ["pp", row.pp],
+    ["secondaryEffectChance", row.secondaryEffectChance],
+  ]) {
+    if (!Number.isInteger(value) || value < 0 || value > 255) {
+      throw new Error(`gen-data: moves.json move ${row.move} field ${field}=${value} does not fit u8`);
+    }
+  }
+  if (!Number.isInteger(row.priority) || row.priority < -128 || row.priority > 127) {
+    throw new Error(`gen-data: moves.json move ${row.move} priority=${row.priority} does not fit i8`);
+  }
+  return {
+    id: row.id,
+    type: typeId,
+    power: row.power,
+    accuracy: row.accuracy,
+    pp: row.pp,
+    secondaryEffectChance: row.secondaryEffectChance,
+    priority: row.priority,
+    effect: effectId,
+    target: targetBits,
+    flags: flagBits,
+  };
+});
+
 // --- emit Rust source ---
 function emitStructArray(name, typeName, elemLen, rows) {
   const items = rows.map((row) => `    ${typeName} ${row},`).join("\n");
@@ -296,6 +406,8 @@ const fixedIvsLines = fixedIvs
   .join("\n");
 
 const rentalRankThresholdsLine = rentalRankThresholds.join(", ");
+
+const aiPolicyMasksLine = aiPolicyMasks.join(", ");
 
 const typeEffectivenessLines = typeEffectivenessRows
   .map(
@@ -501,6 +613,26 @@ ${fixedIvsLines}
 pub const TYPE_EFFECTIVENESS_TABLE: [TypeEffectivenessEntry; ${typeEffectivenessRows.length}] = [
 ${typeEffectivenessLines}
 ];
+
+/// Per-branch AI script mask (\`0\`, \`AI_SCRIPT_CHECK_BAD_MOVE\` = \`1\`, or the
+/// Frontier Brain/late-challenge full mask \`7\`), indexed by
+/// \`FactoryAiPolicyBranchId\`'s declared order: 0 tent, 1 frontierBrain,
+/// 2 challengeBelow2, 3 challengeBelow4, 4 challengeAtLeast4
+/// (\`factory_ai_mask::FactoryAiPolicyBranchId\`, whose discriminants match
+/// this order 1:1 — validated at codegen time above, mirroring
+/// src/engine/factoryAiMaskSelection.ts's \`POLICY_BRANCHES\` construction).
+/// \`condition\`/\`flags\` strings stay TS-side (M5c's adapter renders them for
+/// receipts/UI; this native port only needs the id to select a mask).
+/// Source: src/data/gen/factory-ai-policy.json \`.branches[].mask\`.
+pub const FACTORY_AI_POLICY_MASKS: [u8; ${aiPolicyMasks.length}] = [${aiPolicyMasksLine}];
+
+/// \`FRONTIER_STAGES_PER_CHALLENGE\` (\`include/constants/battle_frontier.h\`):
+/// win-streak stages per challenge, used to derive \`challengeNum =
+/// factoryWinStreak / FRONTIER_STAGES_PER_CHALLENGE\`
+/// (reference/pokeemerald/src/battle_factory.c:899, mirrored by
+/// \`factory_ai_mask::select_factory_ai_mask\`). Source:
+/// src/data/gen/factory-ai-policy.json \`.constants.frontierStagesPerChallenge\`.
+pub const FACTORY_AI_FRONTIER_STAGES_PER_CHALLENGE: u32 = ${frontierStagesPerChallenge};
 `;
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
@@ -531,4 +663,4 @@ if (!formatted) {
 }
 
 console.log(`gen-data: wrote ${path.relative(workspaceRoot, outPath)}`);
-console.log(`gen-data: ${frontierMonRows.length} frontier mons, ${heldItemByTableId.length} held items, ${natures.length} natures, ${level50Ranges.length} level50 ranges, ${fixedIvs.length} fixed IV rows, ${speciesSecondAbility.length} species second-abilities, ${movePp.length} move PP rows, ${speciesRows.length} frontier-corpus species rows, ${natureModifierRows.length} nature modifier rows, ${typeEffectivenessRows.length} type-effectiveness rows`);
+console.log(`gen-data: ${frontierMonRows.length} frontier mons, ${heldItemByTableId.length} held items, ${natures.length} natures, ${level50Ranges.length} level50 ranges, ${fixedIvs.length} fixed IV rows, ${speciesSecondAbility.length} species second-abilities, ${movePp.length} move PP rows, ${speciesRows.length} frontier-corpus species rows, ${natureModifierRows.length} nature modifier rows, ${typeEffectivenessRows.length} type-effectiveness rows, ${aiPolicyMasks.length} factory AI policy branch masks, ${moveRows.length} move rows (computed, not yet emitted)`);
