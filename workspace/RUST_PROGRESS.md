@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 history leaf native**
+## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 history end-to-end**
 
-- **State:** rust-main = master `95470661` + verified M8a fold `20cfd1b3`.
+- **State:** rust-main = master `75bb11c1` + verified M8b fold `2cdca907`.
   Factory trainer selection and the seven-trainer schedule are now
   native and WASM differential-green end-to-end.
   The complete Factory AI mask 0/1/7 decision family and the singles switch-in
@@ -89,9 +89,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full npm **1,014 files / 9,696 passed / 1 skip**, and build **657 modules**.
   Artifact: 348,965 bytes, sha256
   `f593924927773e3f223334bbc2d3316e6f52fab57178b9e8a2ba81e86e5cbdfa`.
-- **Next:** M8b — add the battle-history ABI/adapter and a new both-mode parity
-  suite, keeping live view construction separate. Then resume independent
-  `factoryAiLiveDriver.ts` leaves while M7c opponent generation waits on #55.
+- **M8b DONE:** additive ABI-v1 operation packets now expose history create,
+  record ability/item, and sync. Variable-width histories preserve arbitrary
+  JS Numbers as `f64`, UTF-8 abilities, canonical errors, and fully checked
+  malformed-input status without traps. The new adapter routes forced WASM
+  directly with no TS fallback; its sole new both-mode suite covers the full
+  history lifecycle, NaN/−0/Infinity, Unicode, unknown abilities, and six bad
+  packets. Supervisor audited the layout/decoder and reran cargo **708 harness
+  cases**, fmt, clippy, WASM, smoke **375/375**, forced union **13 files /
+  785/785**, full npm **1,016 files / 9,706 passed / 1 skip**, build **657
+  modules**, vanilla soak **20/20**, and full soak **60/60**. Artifact: 395,869
+  bytes, sha256
+  `1d566618694f3ced4718c39a0a4170927fa73d43d63c1963e44e465c2f59782f`.
+- **Next:** M8c — port the independent weather/stat-stage projection leaves
+  that feed live-view construction, with TS-executed vectors; keep the full
+  view constructor and its boundary separate. M7c still waits on #55.
 - **Notes:** M6b used Sol/high plus one narrow Terra/max correction; M6c used
   Sol/high; M7a and M8a used Terra/max, and M7b used Sol/high. Scope stayed within
   `core-rs/**` plus authorized new parity tests; no canonical TS engine or
