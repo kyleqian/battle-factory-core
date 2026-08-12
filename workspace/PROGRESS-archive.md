@@ -1,3 +1,26 @@
+## 1194 — [MAIN worker, 2026-08-12] **CGB4 v10 helper return source-closed**
+
+- **State:** #55 is source-exact for **4,127 aggregate cycles** through
+  `MidiKeyToCgbFreq` return across the same observed **7/82** zero-`lfoDelay`
+  CGB4 callbacks. Complete MPlay stays **5 exact / 108 null** and the
+  construction clock is unwired.
+- **Did:** proved the SoundInfo target from pinned `SoundInit` →
+  `MPlayExtender` source initialization without runtime pointer identity;
+  corrected the canceled checkpoint's double-counted helper entry and wrong
+  table result. `call_r3` `bx r3` is **8**; key=64/key=91 helpers are **90/86**
+  (**98/94** through return). Their 4/3 rows return index 43/`0x34` and clamped
+  index 59/`0x00`. No new capture; v9 packets/evidence remain byte-identical.
+- **Next:** keep later allocation fields, unobserved helper/key routes, the
+  other 75 callbacks, complete note/glue/MPlay, service/arbitration, and
+  construction-clock wiring null; only continue with another source-exact
+  discriminator slice.
+- **Notes:** v10 evidence SHA256 `3e3af127…`; full field-reference/init-guard
+  census and WAITCNT/flash/release-ELF timing guards added; focused v3-v10
+  **31/31**, smoke **8 files / 375 passed**, typecheck, exactly one full suite
+  **987 files / 9,566 passed / 1 skipped**, and build **653 modules** green. No
+  duration fit, runtime address lookup, production import, unsupported barrier,
+  animation/Rust change, or canonical Battle-2 extension.
+
 ## 1193 — [supervisor, 2026-08-12] **CGB4 v9 verified; Rust M5d-3 folded**
 
 - **State:** #55 is source-exact for **3,453 aggregate cycles** through fixed

@@ -899,7 +899,10 @@ active, adding about 2 minutes of polling. The CGB4 v7 worker then needed about
 green build after retained output hid its first completion and inferred the
 full-suite count because its summary scrolled out of the tool window. The v9
 worker then lost two full-suite output handles before recovering a compact
-scratch log. Hits: 17; cost: about 71 minutes plus avoidable CPU
+scratch log. The CGB4 v11 worker recovered a yielded full-suite summary only
+after extra process polling, and the following supervisor fold repeated a
+green build when its first yielded completion omitted the exit status. Hits:
+19; cost: about 75 minutes plus avoidable CPU
 contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
