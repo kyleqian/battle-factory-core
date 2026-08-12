@@ -41463,3 +41463,19 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** merged union full `npm test` **961 files / 9,179 passed / 1
   skipped**, build **649 modules**. Animation is fully folded; no unsupported
   barrier or presentation/gameplay/pixel change.
+
+## 1162 — [supervisor, 2026-08-11] **PATT verified; animation and Rust M4c folded**
+
+- **State:** `master` is green with PATT source-exact for its sole callback and
+  **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
+  #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated PATT **4/4**, folded animation-main Fury
+  Swipes through `d58ccfbb`, and folded rust-main M4c turn-order/turn-RNG plus
+  WASM adapter parity through `e4f11a78`. Native Rust is **126/126** with
+  fmt/clippy clean; rebuilt WASM is 80,342 bytes and all five adapter suites
+  are **660/660** in both default and forced-WASM modes.
+- **Next:** source-close one remaining #55 command/callback family. Keep every
+  unresolved family and complete one-pass total null; do not wire the clock.
+- **Notes:** merged union full `npm test` **966 files / 9,398 passed / 1
+  skipped**, build **651 modules**. No unsupported barrier or main gameplay /
+  pixel identity changed.

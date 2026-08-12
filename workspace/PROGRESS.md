@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1165 — [MAIN worker, 2026-08-11] **#55 `ply_bend` callback family source-closed**
+
+- **State:** `ply_bend` is source-exact for **4/4** callbacks and **108/108**
+  one-pass rows. Complete MPlay stays **5 exact / 108 null**; the construction
+  clock stays null/unwired, S8/#56 are untouched, and LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets join all **113/113** rows. Two
+  anchor rows select four GamePak command-byte fast-accept callbacks at **81
+  cycles** each; LILIANA/varied select none. The source/ELF reducer fails
+  closed outside normalized song offsets and u8 callback inputs.
+- **Next:** source-close `ply_pan`, the next-smallest live callback family at
+  13 census entries, or the command dispatcher. Keep complete one-pass totals
+  null and do not wire `runFactoryConstructionClock`.
+- **Notes:** focused predecessor controls **16/16**, smoke **375/375**,
+  typecheck, full **968 files / 9,406 passed / 1 skipped**, and build **651
+  modules** are green. No engine/pixel identity or unsupported barrier changed;
+  pixels were not rerun.
+
 ## 1164 — [supervisor, 2026-08-11] **VOICE verified; Rust M5a folded**
 
 - **State:** `master` is green with VOICE source-exact for **2/2** callbacks
@@ -37,19 +54,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   typecheck, full **967 files / 9,402 passed / 1 skipped**, and build **651
   modules** are green. No engine/pixel identity or unsupported barrier changed;
   pixels were not rerun.
-
-## 1162 — [supervisor, 2026-08-11] **PATT verified; animation and Rust M4c folded**
-
-- **State:** `master` is green with PATT source-exact for its sole callback and
-  **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
-  #55 stays unwired and LUKAS remains **8/50**.
-- **Did:** independently regenerated PATT **4/4**, folded animation-main Fury
-  Swipes through `d58ccfbb`, and folded rust-main M4c turn-order/turn-RNG plus
-  WASM adapter parity through `e4f11a78`. Native Rust is **126/126** with
-  fmt/clippy clean; rebuilt WASM is 80,342 bytes and all five adapter suites
-  are **660/660** in both default and forced-WASM modes.
-- **Next:** source-close one remaining #55 command/callback family. Keep every
-  unresolved family and complete one-pass total null; do not wire the clock.
-- **Notes:** merged union full `npm test` **966 files / 9,398 passed / 1
-  skipped**, build **651 modules**. No unsupported barrier or main gameplay /
-  pixel identity changed.
