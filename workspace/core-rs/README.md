@@ -67,6 +67,16 @@ Current exports:
   over the export in `crates/factory-wasm/src/lib.rs`;
   `core-rs/adapter/factoryEngine.ts`'s `decodeFactoryPartyMember` mirrors it
   field-for-field.
+- `fw_choose_factory_ai_mask_zero_decision(input_ptr, input_len) -> ptr` and
+  `fw_choose_factory_ai_scored_decision(input_ptr, input_len) -> ptr` — the
+  complete native Factory DecisionPolicy choosers. Their additive ABI-v1
+  layouts are documented beside the exports: a 40-byte common prefix plus
+  three bytes per authoritative legal decision; scored inputs add a
+  turn-start ownership record, two 135-byte presence-preserving battlers,
+  and the target-only fields. Outputs retain the full mask/scoring/draw/score/
+  tie/submission receipt or an exact UTF-8 error. The decoder in
+  `adapter/factoryAiEngine.ts` reconstructs the canonical TypeScript receipt
+  strings and routes these methods through WASM when `POKEBENCH_ENGINE=wasm`.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes
