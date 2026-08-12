@@ -57,20 +57,20 @@ describe("Issue #55 CGB4 next-track MPT_FLG_EXIST v19", () => {
     expect(reduceCgb4NextTrackExistTiming(takenState)).toEqual({
       route: "exist-set-bne-taken",
       flags: 0x80,
-      sequentialThumbHalfwords: 3,
+      sequentialThumbHalfwords: 4,
       takenControlTransferRefills: 1,
-      sourceCycles: 12,
+      sourceCycles: 14,
       stopsBeforeSelectedSuccessor: "_081DD886",
     });
     expect(reduceCgb4NextTrackExistTiming(clearState)).toEqual({
       route: "exist-clear-bne-not-taken-then-unconditional",
       flags: 0,
-      sequentialThumbHalfwords: 4,
+      sequentialThumbHalfwords: 5,
       takenControlTransferRefills: 1,
-      sourceCycles: 14,
+      sourceCycles: 16,
       stopsBeforeSelectedSuccessor: "_081DD998",
     });
-    expect(5492 + 4 * 12 + 3 * 14).toBe(5582);
+    expect(5492 + 4 * 14 + 3 * 16).toBe(5596);
   });
 
   it("fails closed on malformed, reordered-field, or identity-bearing branch state", () => {
@@ -112,10 +112,10 @@ describe("Issue #55 CGB4 next-track MPT_FLG_EXIST v19", () => {
       nextTrackFlagsHistogram: { "0": 3, "128": 4 },
       existSetRouteRows: 4,
       existClearRouteRows: 3,
-      postV18NextTrackExistDecisionSourceCycles: 90,
+      postV18NextTrackExistDecisionSourceCycles: 104,
       acceptedContiguousPrefixThroughTrackLoopContinuationSourceCycles: 5492,
-      contiguousPrefixThroughNextTrackExistDecisionSourceCycles: 5582,
-      sequentialThumbHalfwords: 24,
+      contiguousPrefixThroughNextTrackExistDecisionSourceCycles: 5596,
+      sequentialThumbHalfwords: 31,
       takenControlTransferRefills: 7,
       unobservedV17ExitSuccessorSourceCycles: null,
       nullOtherPostSelectionCallbacks: 75,

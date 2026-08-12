@@ -121,13 +121,13 @@
         "callbacks": 3,
         "existSetRows": 2,
         "existClearRows": 1,
-        "sourceCycles": 38
+        "sourceCycles": 44
       },
       "factory-varied": {
         "callbacks": 4,
         "existSetRows": 2,
         "existClearRows": 2,
-        "sourceCycles": 52
+        "sourceCycles": 60
       }
     },
     "nextTrackFlagsHistogram": {
@@ -136,10 +136,10 @@
     },
     "existSetRouteRows": 4,
     "existClearRouteRows": 3,
-    "postV18NextTrackExistDecisionSourceCycles": 90,
+    "postV18NextTrackExistDecisionSourceCycles": 104,
     "acceptedContiguousPrefixThroughTrackLoopContinuationSourceCycles": 5492,
-    "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 5582,
-    "sequentialThumbHalfwords": 24,
+    "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 5596,
+    "sequentialThumbHalfwords": 31,
     "takenControlTransferRefills": 7,
     "unobservedV17ExitSuccessorSourceCycles": null,
     "nullOtherPostSelectionCallbacks": 75,
@@ -175,8 +175,8 @@
       "unobservedV17ExitSuccessorSourceCycles": null,
       "nextTrackFlags": 128,
       "nextTrackExistBranchRoute": "exist-set-bne-taken",
-      "postV18NextTrackExistDecisionSourceCycles": 12,
-      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 894,
+      "postV18NextTrackExistDecisionSourceCycles": 14,
+      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 896,
       "stopsBeforeNextTrackSelectedSuccessor": "_081DD886"
     },
     {
@@ -207,8 +207,8 @@
       "unobservedV17ExitSuccessorSourceCycles": null,
       "nextTrackFlags": 128,
       "nextTrackExistBranchRoute": "exist-set-bne-taken",
-      "postV18NextTrackExistDecisionSourceCycles": 12,
-      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 760,
+      "postV18NextTrackExistDecisionSourceCycles": 14,
+      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 762,
       "stopsBeforeNextTrackSelectedSuccessor": "_081DD886"
     },
     {
@@ -239,8 +239,8 @@
       "unobservedV17ExitSuccessorSourceCycles": null,
       "nextTrackFlags": 0,
       "nextTrackExistBranchRoute": "exist-clear-bne-not-taken-then-unconditional",
-      "postV18NextTrackExistDecisionSourceCycles": 14,
-      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 758,
+      "postV18NextTrackExistDecisionSourceCycles": 16,
+      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 760,
       "stopsBeforeNextTrackSelectedSuccessor": "_081DD998"
     },
     {
@@ -271,8 +271,8 @@
       "unobservedV17ExitSuccessorSourceCycles": null,
       "nextTrackFlags": 0,
       "nextTrackExistBranchRoute": "exist-clear-bne-not-taken-then-unconditional",
-      "postV18NextTrackExistDecisionSourceCycles": 14,
-      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 758,
+      "postV18NextTrackExistDecisionSourceCycles": 16,
+      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 760,
       "stopsBeforeNextTrackSelectedSuccessor": "_081DD998"
     },
     {
@@ -303,8 +303,8 @@
       "unobservedV17ExitSuccessorSourceCycles": null,
       "nextTrackFlags": 128,
       "nextTrackExistBranchRoute": "exist-set-bne-taken",
-      "postV18NextTrackExistDecisionSourceCycles": 12,
-      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 894,
+      "postV18NextTrackExistDecisionSourceCycles": 14,
+      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 896,
       "stopsBeforeNextTrackSelectedSuccessor": "_081DD886"
     },
     {
@@ -335,8 +335,8 @@
       "unobservedV17ExitSuccessorSourceCycles": null,
       "nextTrackFlags": 128,
       "nextTrackExistBranchRoute": "exist-set-bne-taken",
-      "postV18NextTrackExistDecisionSourceCycles": 12,
-      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 760,
+      "postV18NextTrackExistDecisionSourceCycles": 14,
+      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 762,
       "stopsBeforeNextTrackSelectedSuccessor": "_081DD886"
     },
     {
@@ -367,14 +367,14 @@
       "unobservedV17ExitSuccessorSourceCycles": null,
       "nextTrackFlags": 0,
       "nextTrackExistBranchRoute": "exist-clear-bne-not-taken-then-unconditional",
-      "postV18NextTrackExistDecisionSourceCycles": 14,
-      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 758,
+      "postV18NextTrackExistDecisionSourceCycles": 16,
+      "contiguousPrefixThroughNextTrackExistDecisionSourceCycles": 760,
       "stopsBeforeNextTrackSelectedSuccessor": "_081DD998"
     }
   ],
   "closure": {
     "closed": "Only ldrb r0, [r5, o_MusicPlayerTrack_flags]; movs r1, MPT_FLG_EXIST; tst r1, r0; bne _081DD886, plus b _081DD998 only for captured exist-clear rows, stopping before the selected successor.",
-    "contiguousPrefix": "5582 aggregate source cycles through the next-track MPT_FLG_EXIST branch decision across the seven frozen v18 continuation rows (5492 frozen v18 + 90 v19).",
+    "contiguousPrefix": "5596 aggregate source cycles through the next-track MPT_FLG_EXIST branch decision across the seven frozen v18 continuation rows (5492 frozen v18 + 104 v19).",
     "remainingDiscriminator": "Next-track identity, track index/count, r5, channel pointer/status/gateTime, start flag, command pointer, the selected successor's first instruction and later loop body, and the unobserved v17 exit successor remain unobserved and unpriced.",
     "nextTrackIdentityInferred": false,
     "trackCountInferred": false,
