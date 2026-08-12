@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1174 — [supervisor, 2026-08-11] **`ply_note` inline prefix verified**
+
+- **State:** all **82/82** observed note-selector prefixes are source-exact
+  (**57 inline / 25 rhythm / 0 keysplit**). Complete MPlay remains **5 exact /
+  108 null**; #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated the expanded address-free receipt **5/5**
+  and reviewed its source, parameter, inline-tone, and retained-track-tone
+  fail-closed checks. Inline costs are **3×108**, **41×129**, and **13×146**
+  cycles; all post-selection bodies remain null.
+- **Next:** source-close one bounded observed post-selection note-body route or
+  the command decode/jump-table dispatcher. Preserve nulls for keysplit,
+  complete note callbacks, and all complete one-pass MPlay totals.
+- **Notes:** supervisor full `npm test` **971 files / 9,419 passed / 1
+  skipped**, build **651 modules**. Both lane branches are contained; no
+  unsupported barrier or gameplay/pixel/Rust change.
+
 ## 1173 — [MAIN worker, 2026-08-11] **#55 `ply_note` inline prefix source-closed**
 
 - **State:** all **82/82** observed note-selector prefixes are source-exact
@@ -39,20 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** merged union full `npm test` **971 files / 9,418 passed / 1
   skipped**, build **651 modules**. Both lane branches are contained; no
   unsupported barrier or gameplay/pixel identity change.
-
-## 1171 — [MAIN worker, 2026-08-11] **#55 `ply_note` census; rhythm prefix source-closed**
-
-- **State:** exact-entry census is **82 callbacks** (**57 inline / 25 rhythm /
-  0 keysplit**) across **108** one-pass rows. The smallest observed rhythm
-  tone-selection prefix is source-exact **25/25**; complete MPlay remains
-  **5 exact / 108 null**.
-- **Did:** twice-fresh address-free OFF packets join **113/113** rows. Rhythm
-  contributes anchor/LILIANA/varied **3/11/11** callbacks; 2 zero-parameter
-  routes cost **193** cycles and 23 key+velocity routes cost **231**.
-- **Next:** close the 57-callback inline selector family or command dispatch.
-  Keep post-selection note bodies, complete note/MPlay costs, and the
-  construction clock null.
-- **Notes:** focused **4/4**, smoke **375/375**, typecheck, full **971 files /
-  9,418 passed / 1 skipped**, and build **651 modules** are green. Known
-  components span **456–1644** cycles (78 totals). No gameplay/pixel/Rust
-  change, duration fit, pointer identity, or unsupported barrier.
