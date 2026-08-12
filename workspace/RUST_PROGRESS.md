@@ -5,14 +5,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R4 — [supervised session, 2026-08-11 night through 2026-08-12] **M5e folded: CheckViability is differential-green through WASM**
+## R4 — [supervised session, 2026-08-11 night through 2026-08-12] **M5f-2a folded: mask-zero DecisionPolicy is native**
 
-- **State:** rust-main = master `07f1aba5` (fast-forward merged at orient;
-  main/animation content only) + verified M5e folds `cd97dc59`/`739c4df0`.
-  M5's mask, CheckBadMove, and CheckViability surfaces are native and all
-  cross the WASM differential harness. Main-tree artifact is 253,683 bytes,
-  sha256 `d55486c8…`; Rust **662/662**, CheckViability parity **9/9** in
-  both modes, prior WASM parity union **757/757**, smoke **375/375**.
+- **State:** rust-main = master `da5b9c13` + verified Rust folds through
+  M5f-2a `2d15da47`. M5's mask, CheckBadMove, CheckViability, TryToFaint,
+  and the mask-zero DecisionPolicy chooser are native; all boundary-bearing
+  surfaces through CheckViability cross the WASM differential harness.
+  Main-tree artifact is 253,791 bytes, sha256 `034833c1…`; Rust **674/674**
+  and post-fold smoke **375/375**. The scored policy and its final WASM
+  boundary remain. No open rust deferrals.
   Start-of-session merged baseline was full npm **993 files / 9,591 passed /
   1 pre-existing skip** + build; the M5e worker's same-commit full npm gate
   was **994 files / 9,600 passed / 1 skip** + build. No open rust deferrals.
@@ -262,6 +263,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   receipt from TS, then reran cargo **670/670** + fmt/clippy + wasm. Post-fold
   artifact 253,573 bytes (`74b778ce…`), smoke **375/375**. Worker:
   gpt-5.6-terra/max, ~26 min, 2 commits; scope six `core-rs/**` files only.
+- **M5f-2a DONE (fold `2d15da47`) — mask-zero DecisionPolicy native.**
+  Added the pure typed setup, mask-zero chooser, and shared best-score/tie
+  seam. It preserves all four unconditional setup draws, the unconditional
+  fifth tie draw even for one legal move, 100/0 scores, legal target identity,
+  mask receipt, and exact typed-reachable errors. The checked-in TS-executed
+  corpus has **113 success + 22 error** cases across every nonempty legal-slot
+  subset, targets, seeds/cursors, mask rejection, request/legality guards, and
+  one documented typed-only empty-list guard. Supervisor scope audit was
+  exactly five `core-rs/**` files; generator reran byte-identically
+  (`290b78f6…`); cargo **674/674** + fmt/clippy/wasm passed. After merging
+  current master, artifact = 253,791 bytes (`034833c1…`) and smoke =
+  **375/375**. Worker: gpt-5.6-terra/max, ~18 min, 1 commit.
 - **Prior wind-down gates (this tree, supervisor-run):** cargo
   **662/662** + fmt/clippy clean, artifact rebuilt (final hash
   9d53f91e…), parity union (7 suites) **757/757 in wasm mode**, smoke
@@ -271,11 +284,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   core-rs/-only (plus one rust-lane docs commit), so the TS side is
   bit-identical to those runs. No orphan worker worktrees or branches;
   RUST_DEFERRED.md has no open entries.
-- **Next:** M5f-2 — port `factoryAiDecisionPolicy.ts`'s integration layer
-  natively, reusing the four landed leaf surfaces. Split mask-zero and scored
-  policy only if a fresh bounded scout proves the full 1,402-line module
-  cannot land within one worker cap. Then M5f-3 adds the final WASM boundary,
-  adapter, and both-mode family parity. Re-check TS conflicts before brief.
+- **Next:** M5f-2b — port the pure scored DecisionPolicy (masks 1/7), reusing
+  the mask-zero setup/tie seam and all three scoring leaves. Then M5f-3 adds
+  the final WASM boundary, adapter, and both-mode family parity. Re-check TS
+  conflicts before each brief.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
