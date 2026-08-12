@@ -1,0 +1,67 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-probe/v19",
+  "case": "factory-varied",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "first-successor-loop-head-MPT_FLG_EXIST-bne-before-selected-successor",
+  "addressFree": true,
+  "observations": [
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "cgb4NextTrackExistState": {
+        "flags": 0,
+        "directBranchEvidence": {
+          "branchInstruction": "MPlayMain._081DD884:bne _081DD886",
+          "r0AfterFlagsLoad": 0,
+          "r1ExistMask": 128,
+          "tstZero": true,
+          "branchRoute": "bne-not-taken-then-b-_081DD998",
+          "selectedSuccessor": "_081DD998"
+        }
+      }
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "cgb4NextTrackExistState": {
+        "flags": 128,
+        "directBranchEvidence": {
+          "branchInstruction": "MPlayMain._081DD884:bne _081DD886",
+          "r0AfterFlagsLoad": 128,
+          "r1ExistMask": 128,
+          "tstZero": false,
+          "branchRoute": "bne-taken-to-_081DD886",
+          "selectedSuccessor": "_081DD886"
+        }
+      }
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "cgb4NextTrackExistState": {
+        "flags": 128,
+        "directBranchEvidence": {
+          "branchInstruction": "MPlayMain._081DD884:bne _081DD886",
+          "r0AfterFlagsLoad": 128,
+          "r1ExistMask": 128,
+          "tstZero": false,
+          "branchRoute": "bne-taken-to-_081DD886",
+          "selectedSuccessor": "_081DD886"
+        }
+      }
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "cgb4NextTrackExistState": {
+        "flags": 0,
+        "directBranchEvidence": {
+          "branchInstruction": "MPlayMain._081DD884:bne _081DD886",
+          "r0AfterFlagsLoad": 0,
+          "r1ExistMask": 128,
+          "tstZero": true,
+          "branchRoute": "bne-not-taken-then-b-_081DD998",
+          "selectedSuccessor": "_081DD998"
+        }
+      }
+    }
+  ]
+}

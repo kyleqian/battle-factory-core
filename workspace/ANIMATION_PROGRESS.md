@@ -1,3 +1,11 @@
+# MOVE_FISSURE source/staging checkpoint — dense probe blocked, remains unsupported (2026-08-12 worker)
+
+- **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Fissure and Dig are not promoted.
+- **Did:** Pinned Fissure's exclusive **0x082ccb7e..0x082ccca1** interval, exact 12-component graph, source callbacks/assets/BG symbols, lowest legal Level-50 carrier **set 564 DUGTRIO_3**, and complete legal bilateral Scene-ON parties. The sibling audit pins Dig's **17** components and the exact two-component intersection (`ANIM_TAG_MUD_SAND`, `gDirtPlumeSpriteTemplate`); its mound/movement/static-monbg body remains independent. Added a Fissure mode to the existing full-state pointer-bounded probe and banked an explicit unsupported receipt.
+- **Verified:** Scene-ON bootstrap v5 and the documented byte-identical service provenance were confirmed; both legal staging scenarios ran through frame 834 with endpoint hashes `bf92e5c3…` / `c631d944…`. The direct dense probe was attempted only through `tools/run-mgba-probe.py` and failed before emulation because the configured gitignored `vendor/mgba-venv` has no importable `mgba` module. Therefore no window, latch, change-map, reducer/seam, or framebuffer claim is made. Focused source/boundary **5/5** is green.
+- **Next:** Restore the harness-managed mGBA Python binding, run the banked pointer-bounded probe twice in both orientations, derive complete change maps/latches through first inactive cleanup, then implement the source-relative reducer/assets/seam/compositor. Require twice-fresh all-frame component/hardware/raw-RGB/change-map/production equality before promoting only Fissure.
+- **Notes:** Presentation-only checkpoint; no gameplay/OHKO/accuracy/damage/RNG/controller/turn/facility state, animation boundary, unsupported barrier, canonical recording, per-frame lookup, absolute tick, coordinate fit, or Dig coverage changed.
+
 # MOVE_METEOR_MASH exact — bilateral Scene-ON dense acceptance (2026-08-12 worker)
 
 - **State:** Coverage advances **174→175/276 Level-50 exact**; unsupported falls **102→101**. Only Meteor Mash is promoted.

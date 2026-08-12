@@ -1,0 +1,53 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-probe/v19",
+  "case": "liliana",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "first-successor-loop-head-MPT_FLG_EXIST-bne-before-selected-successor",
+  "addressFree": true,
+  "observations": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "cgb4NextTrackExistState": {
+        "flags": 128,
+        "directBranchEvidence": {
+          "branchInstruction": "MPlayMain._081DD884:bne _081DD886",
+          "r0AfterFlagsLoad": 128,
+          "r1ExistMask": 128,
+          "tstZero": false,
+          "branchRoute": "bne-taken-to-_081DD886",
+          "selectedSuccessor": "_081DD886"
+        }
+      }
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "cgb4NextTrackExistState": {
+        "flags": 128,
+        "directBranchEvidence": {
+          "branchInstruction": "MPlayMain._081DD884:bne _081DD886",
+          "r0AfterFlagsLoad": 128,
+          "r1ExistMask": 128,
+          "tstZero": false,
+          "branchRoute": "bne-taken-to-_081DD886",
+          "selectedSuccessor": "_081DD886"
+        }
+      }
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "cgb4NextTrackExistState": {
+        "flags": 0,
+        "directBranchEvidence": {
+          "branchInstruction": "MPlayMain._081DD884:bne _081DD886",
+          "r0AfterFlagsLoad": 0,
+          "r1ExistMask": 128,
+          "tstZero": true,
+          "branchRoute": "bne-not-taken-then-b-_081DD998",
+          "selectedSuccessor": "_081DD998"
+        }
+      }
+    }
+  ]
+}
