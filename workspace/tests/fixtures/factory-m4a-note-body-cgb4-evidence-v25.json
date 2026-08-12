@@ -1,0 +1,246 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v25",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1362-1368",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "musicPlayerTrack": {
+        "flags": {
+          "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+          "lines": "264-274",
+          "offset": 0,
+          "width": "u8",
+          "runtimeValue": null
+        },
+        "existMask": {
+          "name": "MPT_FLG_EXIST",
+          "value": "0x80",
+          "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+        }
+      },
+      "staticTrackStorage": {
+        "ordinaryPlayers": 4,
+        "cryPlayers": 2,
+        "selectedStorage": null,
+        "mPlayOpen": {
+          "path": "reference/pokeemerald/src/m4a.c",
+          "lines": "83-99",
+          "allCandidateTrackStorage": "IWRAM",
+          "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+        },
+        "ordinaryTable": {
+          "path": "reference/pokeemerald/sound/music_player_table.inc",
+          "lines": "29-33",
+          "sha256": "babb0eb8acce75ada42c2747ca0ef09825135d1c85b46254b1f44520b1a57a36"
+        },
+        "cryTracks": {
+          "path": "reference/pokeemerald/src/m4a.c",
+          "line": 18,
+          "entries": 4,
+          "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+        },
+        "commonData": {
+          "path": "reference/pokeemerald/include/gba/defines.h",
+          "line": 11,
+          "section": "common_data",
+          "sha256": "528c5983bf23f3b12036e9f7ed20e482b1dbe15e0198ec6bb10292d413f68644"
+        },
+        "linker": {
+          "path": "reference/pokeemerald/ld_script.ld",
+          "lines": "6-10, 32-47",
+          "class": "IWRAM",
+          "origin": "0x03000000",
+          "sha256": "ea3df8331ffacc75e1377b2d2f2d8ec6530f6436788b812603ba3af1a964cfb0"
+        }
+      }
+    },
+    "elf": {
+      "entry": "0x082dfc00",
+      "endExclusive": "0x082dfc08",
+      "existClearSuccessor": "0x082dfc9a",
+      "tracks": {
+        "gMPlayTrack_BGM": {
+          "start": "0x03001340",
+          "bytes": 800,
+          "class": "IWRAM"
+        },
+        "gMPlayTrack_SE1": {
+          "start": "0x03001660",
+          "bytes": 240,
+          "class": "IWRAM"
+        },
+        "gMPlayTrack_SE2": {
+          "start": "0x03001750",
+          "bytes": 720,
+          "class": "IWRAM"
+        },
+        "gMPlayTrack_SE3": {
+          "start": "0x03001a20",
+          "bytes": 80,
+          "class": "IWRAM"
+        },
+        "gPokemonCryTracks": {
+          "start": "0x03007670",
+          "bytes": 320,
+          "entries": 4,
+          "class": "IWRAM"
+        },
+        "selectedRuntimeTrack": null
+      },
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "ldrb r0, [r5, flags]; movs r1, MPT_FLG_EXIST; tst r1, r0; beq _081DDA62",
+        "start": "0x082dfc00",
+        "endExclusive": "0x082dfc08",
+        "bytes": 8,
+        "bytesHex": "28 78 80 21 01 42 48 d0",
+        "sha256": "3a41edf45b6169cf3cdcf4ee298a61c576e224d16df2d3f31aa2dba9ec8e6c66"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "iwramByteLoadPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "existSetModel": "ldrb; movs; tst; non-taken beq = 4 halfwords * 2 + zero IWRAM data premium = 8",
+      "existClearModel": "ldrb; movs; tst; taken beq = 4 halfwords * 2 + one 6-cycle refill = 14"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV24EvidenceSha256": "288bb342ff0e321c1d09646998bb30fde48b564015f487b9ea293dd21245e491",
+    "acceptedV24DocSha256": "be4b6a319ca0ac082b46629daf928640670e7e19ec4e5247c8d1b8b9d618e8ab",
+    "v24RegeneratesByteForByte": true,
+    "v24EvidenceAndReportRetainedByteForByte": true,
+    "v25PacketSha256": {
+      "anchor": "3ac4e4a8797b7e459c15019e7f847dce592643f604cdc437e74074dfc8d6d1a7",
+      "liliana": "ce74203999ee3d5492f060ef879483403002c06ab501776e7063b0fa1421d4da",
+      "factory-varied": "bd289cb97eaafe49b63ce41c9b1546037b899394d7cdaf25998efcc6427646b5"
+    },
+    "v25PacketRepeatSha256": {
+      "anchor": "3ac4e4a8797b7e459c15019e7f847dce592643f604cdc437e74074dfc8d6d1a7",
+      "liliana": "ce74203999ee3d5492f060ef879483403002c06ab501776e7063b0fa1421d4da",
+      "factory-varied": "bd289cb97eaafe49b63ce41c9b1546037b899394d7cdaf25998efcc6427646b5"
+    },
+    "v25PacketRepeatIdentity": true
+  },
+  "capture": {
+    "boundary": "post-_081DD9C8 ldrb r0 flags, before movs r1, MPT_FLG_EXIST",
+    "scalars": [
+      "firstTrackFlags"
+    ],
+    "excluded": [
+      "pointer",
+      "runtime address",
+      "track count",
+      "track index",
+      "track identity",
+      "channel",
+      "frame",
+      "duration",
+      "condition flags",
+      "wider state",
+      "MPT_FLG_VOLCHG|MPT_FLG_PITCHG decision",
+      "successor loop body",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV24SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v24-selected-row",
+      "unsupported-packet-field",
+      "unexpected-observed-route"
+    ]
+  },
+  "coverage": {
+    "frozenV24SelectedRows": 3,
+    "packetRowsByCase": {
+      "anchor": 0,
+      "liliana": 1,
+      "factory-varied": 2
+    },
+    "firstTrackFlagsRows": 3,
+    "firstTrackFlagsValues": [
+      128
+    ],
+    "existSetRows": 3,
+    "existClearRows": 0,
+    "priorExistSetRowsRemainNull": 4,
+    "postV24FirstTrackExistDecisionSourceCycles": 24,
+    "acceptedContiguousPrefixThroughSourceOnlySuccessorPrefixSourceCycles": 5740,
+    "contiguousPrefixThroughFirstTrackExistDecisionSourceCycles": 5764,
+    "sequentialThumbHalfwords": 12,
+    "iwramByteLoads": 3,
+    "iwramDataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 0,
+    "failClosedUnobservedExistClearSourceCycles": 14,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "firstTrackFlags": 128,
+      "firstTrackExistDecision": "MPT_FLG_EXIST-set-beq-not-taken",
+      "postV24FirstTrackExistDecisionSourceCycles": 8,
+      "contiguousPrefixThroughFirstTrackExistDecisionSourceCycles": 816,
+      "beqTakenControlTransferRefills": 0,
+      "stopsBeforeV25Instruction": "_081DD9D0: movs r1, MPT_FLG_VOLCHG | MPT_FLG_PITCHG"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "firstTrackFlags": 128,
+      "firstTrackExistDecision": "MPT_FLG_EXIST-set-beq-not-taken",
+      "postV24FirstTrackExistDecisionSourceCycles": 8,
+      "contiguousPrefixThroughFirstTrackExistDecisionSourceCycles": 816,
+      "beqTakenControlTransferRefills": 0,
+      "stopsBeforeV25Instruction": "_081DD9D0: movs r1, MPT_FLG_VOLCHG | MPT_FLG_PITCHG"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "firstTrackFlags": 128,
+      "firstTrackExistDecision": "MPT_FLG_EXIST-set-beq-not-taken",
+      "postV24FirstTrackExistDecisionSourceCycles": 8,
+      "contiguousPrefixThroughFirstTrackExistDecisionSourceCycles": 816,
+      "beqTakenControlTransferRefills": 0,
+      "stopsBeforeV25Instruction": "_081DD9D0: movs r1, MPT_FLG_VOLCHG | MPT_FLG_PITCHG"
+    }
+  ],
+  "containment": {
+    "frozenV24ArtifactsReadOnly": true,
+    "frozenV24ArtifactsAreNotProductionImports": true,
+    "v25PacketsAreNotProductionImports": true,
+    "v25PacketStripBackPreserved": true,
+    "trackPointer": null,
+    "runtimeAddress": null,
+    "trackCount": null,
+    "trackIndex": null,
+    "trackIdentity": null,
+    "channel": null,
+    "frame": null,
+    "duration": null,
+    "widerState": null,
+    "priorExistSetRows": null,
+    "successorLoopBody": null,
+    "serviceCost": null,
+    "constructionClock": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Two fresh byte-identical address-free v25 packet sets freeze v24 evidence/report byte-for-byte and join only its same three sourceStateDigest rows. Each captures only firstTrackFlags after _081DD9C8's ldrb and before movs; all observed values are 0x80, so source/ELF/exact-ROM price ldrb; movs; tst; non-taken beq at eight cycles per row. The receipt stops before _081DD9D0's volume/pitch mask; the flags-absent taken-beq route is fail-closed at fourteen cycles and is not claimed observed."
+}

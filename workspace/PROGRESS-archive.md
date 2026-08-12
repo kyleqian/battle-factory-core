@@ -1,3 +1,20 @@
+## 1216 — [MAIN worker, 2026-08-12] **CGB4 v24 source-only successor prefix**
+
+- **State:** #55's selected three-row source-exact prefix reaches **5,740**
+  cycles through the two fixed _081DD9C4 loads, stopping before _081DD9C8's
+  first track-flags read. No construction-clock wiring landed.
+- **Did:** froze v23 evidence/report byte-for-byte, joined only its three
+  selected sourceStateDigest rows, and pinned source/ELF/ROM bytes
+  `3a 7a fd 6a`, field offsets 8/44, IWRAM access class, and **4×3 = 12**
+  cycles. v24 rows retain only digests and timing; the 2-cycle under-price
+  and runtime-field widening fail closed.
+- **Next:** this receipt ends before the first _081DD9C8 track-flags read.
+  Any continuation needs a separately scoped, fail-closed evidence plan.
+- **Notes:** focused v23/v24 **12/12**, smoke **375/375**, typecheck,
+  exactly one post-change npm **1,008 files / 9,664 passed / 1 skipped**,
+  and build **655 modules** are green. No `src/**`, ratchet, unsupported-
+  barrier, animation/Rust, presentation, or canonical Battle-2 change.
+
 ## 1213 — [supervisor, 2026-08-12] **CGB4 v22 and Rust M5 union verified**
 
 - **State:** #55 retains the source-exact **5,692-cycle** aggregate prefix

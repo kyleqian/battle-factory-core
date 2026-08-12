@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1219 — [MAIN worker, 2026-08-12] **CGB4 v25 first-track EXIST discriminator**
+
+- **State:** #55 is source-exact through the selected three-row **5,764-cycle**
+  prefix, stopping before `_081DD9D0`'s volume/pitch flags mask. Construction
+  clock wiring remains null.
+- **Did:** froze v24 evidence/report byte-for-byte; two fresh serial OFF packet
+  sets join only its three digests and retain exactly `firstTrackFlags=0x80`.
+  Source/ELF/ROM close `_081DD9C8` through the first EXIST decision at
+  **8×3 = 24** cycles, while the unobserved flags-clear branch is fail-closed
+  at 14. The v23 in-memory association protects the later hook; no `src/**`
+  or barrier/presentation/canonical-Battle-2 work changed.
+- **Next:** separately scope a later volume/pitch decision only if its smallest
+  scalar/evidence contract is clear; retain identity/count/pointer/channel,
+  four prior EXIST-set rows, later work, and construction clock null.
+- **Notes:** focused v24/v25 **12/12**, smoke **375/375**, typecheck, npm
+  **1,010 files / 9,677 passed / 1 skipped**, and build **657 modules** are
+  green. Evidence/doc `26a2f0c9…` / `4bd41b23…`; no ratchet or
+  unsupported-barrier change.
+
 ## 1218 — [supervisor, 2026-08-12] **v24, Fissure staging, and Rust M6b union green**
 
 - **State:** #55 remains exact through the **5,740-cycle** selected CGB4
@@ -42,21 +61,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** v24 evidence/doc `288bb342…` / `be4b6a31…`; focused v23/v24
   **12/12**, smoke **375/375**, typecheck, npm **1,008 files / 9,664 passed /
   1 skipped**, and build **655 modules** are green. No ratchet, unsupported-
-  barrier, animation/Rust, presentation, or canonical Battle-2 change.
-
-## 1216 — [MAIN worker, 2026-08-12] **CGB4 v24 source-only successor prefix**
-
-- **State:** #55's selected three-row source-exact prefix reaches **5,740**
-  cycles through the two fixed _081DD9C4 loads, stopping before _081DD9C8's
-  first track-flags read. No construction-clock wiring landed.
-- **Did:** froze v23 evidence/report byte-for-byte, joined only its three
-  selected sourceStateDigest rows, and pinned source/ELF/ROM bytes
-  `3a 7a fd 6a`, field offsets 8/44, IWRAM access class, and **4×3 = 12**
-  cycles. v24 rows retain only digests and timing; the 2-cycle under-price
-  and runtime-field widening fail closed.
-- **Next:** this receipt ends before the first _081DD9C8 track-flags read.
-  Any continuation needs a separately scoped, fail-closed evidence plan.
-- **Notes:** focused v23/v24 **12/12**, smoke **375/375**, typecheck,
-  exactly one post-change npm **1,008 files / 9,664 passed / 1 skipped**,
-  and build **655 modules** are green. No `src/**`, ratchet, unsupported-
   barrier, animation/Rust, presentation, or canonical Battle-2 change.

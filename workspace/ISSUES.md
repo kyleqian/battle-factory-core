@@ -2381,6 +2381,33 @@ Tier-1 proof rejects the 2-cycle under-price and runtime-field widening fails
 closed. No production, presentation, animation/Rust, canonical Battle-2,
 ratchet, or unsupported-barrier change landed.
 
+**2026-08-12 CGB4 v25 first-track `MPT_FLG_EXIST` decision closure:** two
+fresh serial address-free Battle Scene OFF packet sets are byte-identical
+(anchor `3ac4e4a8…`, LILIANA `ce742039…`, legal-varied `bd289cb9…`). v25
+freezes v24 evidence/report byte-for-byte and joins only its same three
+`sourceStateDigest` rows. At the exact post-`ldrb` / pre-`movs` boundary for
+`_081DD9C8`, each packet retains exactly the digest plus
+`firstTrackFlags`; all three observations are **0x80**. The association is
+carried in memory from v23's proven digest handoff, so no pointer/runtime
+address, track count/index/identity, channel, frame, duration, condition
+flags, or wider state is serialized.
+
+Source/ELF/exact-ROM close only `ldrb r0,[r5,flags]; movs r1,0x80; tst
+r1,r0; beq _081DDA62` (`28 78 80 21 01 42 48 d0`). All candidate static
+MPlay/cry track storage is IWRAM without selecting a runtime track. The
+observed EXIST-set/non-taken route is **4×2 = 8 cycles per row / 24
+aggregate**, advancing **5,740 → 5,764** and stopping before `_081DD9D0`'s
+volume/pitch mask. The flags-absent taken-`beq` route is source-priced
+fail-closed at **14** cycles (8 + one 6-cycle refill), but is not claimed
+observed and does not enter `_081DDA62`. The four prior EXIST-set rows, other
+75 callbacks, complete MPlay (**5 exact / 108 null**), service/arbitration,
+and construction-clock wiring remain null. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v25.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v25.json` (SHA256
+`26a2f0c9…`); red-first tests reject the missing-refill/wrong-route
+under-price and packet widening. No `src/**`, presentation, animation/Rust,
+canonical Battle-2, ratchet, or unsupported-barrier change landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
