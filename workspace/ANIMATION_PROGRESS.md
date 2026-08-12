@@ -1,3 +1,11 @@
+# MOVE_METEOR_MASH exact — bilateral Scene-ON dense acceptance (2026-08-12 worker)
+
+- **State:** Coverage advances **174→175/276 Level-50 exact**; unsupported falls **102→101**. Only Meteor Mash is promoted.
+- **Did:** Reclassified the existing source-relative reducer/seam/compositor after the stale freshness heuristic was disproved for this service: `check-oracle-freshness.sh` sees 8012 predating a documentation-only harness HEAD, while `git -C "$POKEBENCH_HARNESS_ROOT" log --since='2026-08-11 21:51:36' -- oracle/ bin/ run-oracle.sh` is empty.
+- **Verified:** Strict fresh portable receipts repeat player-back **214/214** and opponent-front **215/215** with all listed source/reducer/seam/task/sprite/OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/map/framebuffer gates exact and stable `ed028a16…/309e0ea2…/c1b452de…` plus `367dda53…/05e1a334…/d6ac27b1…`; move-owned ShakeMon2, opaque IMPACT, mini lifecycle, and painter latches remain directly verified.
+- **Next:** Meteor Mash is complete; every sibling remains an independent acceptance unit.
+- **Notes:** Presentation-only; no gameplay/RNG/controller/facility state, boundary, unsupported barrier, canonical recording, absolute-tick lookup, coordinate/RGB fitting, or sibling promotion changed.
+
 # MOVE_METEOR_MASH production framebuffer exact; remains unsupported on stale freshness (2026-08-11 worker)
 
 - **State:** Coverage remains **174/276 Level-50 exact**, 0 partial, 0 staged, and **102 unsupported**. Meteor Mash now passes complete production framebuffer at **214/214 player-back + 215/215 opponent-front**, but is not promoted because the shared Scene-ON services remain older than current harness `649098e9` (and the assigned `627a2e06` baseline).

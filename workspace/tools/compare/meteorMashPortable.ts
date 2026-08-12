@@ -1,6 +1,5 @@
-// Fresh bilateral source/task/OAM/palette/audio/RGB proof for MOVE_METEOR_MASH.
-// This is deliberately an evidence checkpoint verifier: production framebuffer
-// equality remains a separate promotion gate.
+// Fresh bilateral source/task/OAM/palette/audio/RGB acceptance proof for
+// MOVE_METEOR_MASH. It also requires exact production framebuffers.
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";

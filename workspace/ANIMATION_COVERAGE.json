@@ -2354,6 +2354,35 @@
    ]
   },
   {
+   "move": "MOVE_METEOR_MASH",
+   "status": "exact",
+   "covered": [
+    "the source audit pins the exclusive 0x082d56aa..0x082d5731 Move_METEOR_MASH body, its complete 11-component GOLD_STARS/MeteorStar/SpinningHand/IMPACT/ShakeMon2/BG_COSMIC graph, and legal Level-50 carrier set 311 FRONTIER_MON_METANG_2 (Emerald species 399) in complete three-Pokemon Scene-ON parties against ONIX in both orientations",
+    "three consecutive fresh direct-mGBA bilateral portable passes reproduce the complete pointer-bounded body through first inactive cleanup with every source/reducer/typed-seam/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map/production-framebuffer row exact: player-back frames 298-511 at 214/214, evidence ed028a168afdd4554a015978bd081655a64d5fc8cfa5df7685d165b5bb2747e5 / raw RGB 309e0ea2bc55da359b7cefc265cce1ea15115db1e5eef637b3a35b60959b29ea / normalized map c1b452de28dceca38d6d95d38c540a7f86272fcfc0ab92eeb724e557686f09a2; opponent-front frames 231-445 at 215/215, evidence 367dda5391d7b509718504afd34085a426db14b49daa4ca9d69d4b21937d99a6 / raw RGB 05e1a33470919690888ad07a5cf7faf96a04ce561fb79d0089c6ea2153d8c789 / normalized map d6ac27b1253dbc5360bccb498041a67d00b0fe08bc2474b957980d2054cce8b9",
+    "the pure source-relative reducer and narrow Scene-ON seam port ANIM_TAG_GOLD_STARS, the three Meteor Mash parents, all 48 lowest-free-slot mini stars with below-parent one-row delayed initialization and local ages 0..60, spinning hand affine program, opaque IMPACT, target ShakeMon2, BG_COSMIC fade/register timing, tagged resources, audio, and first inactive cleanup without gameplay ownership",
+    "move-owned bilateral maps prove the ShakeMon2(target,5,0,20,1) split: creation holds idle, display age 125 is +5, source-derived two-frame -5/+5 pairs continue through 161, final -5 holds through teardown 162..163, and zero lands at 164 while the copied target uses inverse live-body displacement; IMPACT remains opaque because BLDCNT and BLDALPHA remain zero",
+    "the production compositor derives BuildOamBuffer ordering from source state: fixed-subpriority-5 minis paint first, equal-family painter order follows descending hardware OAM y with lower source slot winning equal-y ties, and hardware OAM/matrices/palette equal the preceding software buffers across both complete windows",
+    "no damage, stat outcome, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, unsupported-branch barrier, canonical recording import, absolute-tick framebuffer lookup, coordinate/RGB fitting, or sibling acceptance changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-meteor-mash-player-metang-opponent-onix.json",
+    "tools/battle-lab/mechanic-meteor-mash-opponent-metang-player-onix.json",
+    "tools/compare/fixtures/meteor-mash-player-metang-opponent-onix.json",
+    "tools/compare/fixtures/meteor-mash-opponent-metang-player-onix.json",
+    "tools/compare/meteorMashProbe.py",
+    "tools/compare/meteorMashPortable.ts",
+    "tools/compare/meteorMashSourceAudit.ts",
+    "tools/compare/extractMeteorMashAssets.ts",
+    "src/animation/assets/meteorMash.json",
+    "src/animation/meteorMash.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/meteorMashSource.test.ts",
+    "tests/animation/meteorMashReducer.test.ts",
+    "tests/animation/meteorMashEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_METRONOME",
    "status": "exact",
    "covered": [
@@ -4475,7 +4504,6 @@
     "the pure source-relative reducer ports ANIM_TAG_GOLD_STARS and ANIM_TAG_SPARKLE_2 lifetime, both simple BG palette blends, gWishStarSpriteTemplate's cross-screen parabolic travel, exactly 21 gMiniTwinklingStarSpriteTemplate presentation-Random2 variants and blink programs, the literal 60-frame hold, and both GrantingStarsEffect fixed-point/frame-animation bodies",
     "the typed Scene-ON seam carries only resolved ILLUMISE/ONIX geometry, field state, and the 21 presentation-only Random2 results without consuming or mutating gameplay RNG; source-extracted Illumise front/back, GOLD_STARS, SPARKLE_2, and shared ONIX/chrome pass software/hardware OAM, matrices, palettes/tags, registers, both audio players, raw RGB, and every production framebuffer",
     "wishPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 271 immutable dense source/hardware/audio/reducer/seam/framebuffer frames twice fresh in both orientations through first inactive cleanup; the shared Synthesis GrantingStarsEffect control remains 130/130 exact in both orientations",
-    "MOVE_METEOR_MASH remains unsupported solely because the shared Scene-ON freshness gate is stale relative to current harness 649098e9 (and the assigned 627a2e06 baseline): corrected Emerald species 399 METANG complete legal bilateral windows pass pinned direct-mGBA 214/214 + 215/215 reducer/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/normalized-map and production-framebuffer gates. All 48 mini-star slots, delayed initialization rows, local ages and terminal lifetime match source. The move-owned painter follows BuildOamBuffer subpriority then hardware-y order: fixed-subpriority-5 minis win over target-relative parents, spinning hand, and hitsplat, while equal-family rows paint smaller top-y first with the persistent source-slot tie. This closes the former 802/293-pixel age-121..155 footprint and every early mini residual without changing the stable evidence/raw/map digests. No fresh promotion receipt is claimed",
     "no Wish battle state, delayed healing outcome/timing, damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, or unsupported barrier changed"
    ],
    "evidence": [
