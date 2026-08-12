@@ -1,0 +1,385 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v11",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "continuation": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1789-1812",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "mplayRegistration": {
+        "path": "reference/pokeemerald/src/m4a.c",
+        "lines": "70-99,257-321,565-612",
+        "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+      },
+      "staticTrackStorage": {
+        "path": "reference/pokeemerald/sound/music_player_table.inc",
+        "lines": "1-36",
+        "sha256": "babb0eb8acce75ada42c2747ca0ef09825135d1c85b46254b1f44520b1a57a36"
+      },
+      "stack": {
+        "path": "reference/pokeemerald/src/crt0.s",
+        "line": 28,
+        "sha256": "6dc9dfef60aa316388551796cbd812b98726c33c7b8f7cdf42ba20574fec658c"
+      },
+      "iwramDefinition": {
+        "path": "reference/pokeemerald/include/gba/defines.h",
+        "lines": "27-29",
+        "sha256": "528c5983bf23f3b12036e9f7ed20e482b1dbe15e0198ec6bb10292d413f68644"
+      },
+      "linker": {
+        "path": "reference/pokeemerald/ld_script.ld",
+        "line": 9,
+        "sha256": "ea3df8331ffacc75e1377b2d2f2d8ec6530f6436788b812603ba3af1a964cfb0"
+      },
+      "map": {
+        "path": "reference/pokeemerald/pokeemerald.map",
+        "sha256": "27c5f864f0f985637a3934946f256d64064977e2a240efd1ffe2c20b0dd11aa6"
+      }
+    },
+    "elf": {
+      "plyNote": "0x082dfd38+0x204",
+      "finalContinuationLabel": "0x082dff14",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b",
+      "iwramSymbols": [
+        "03001340 00000320 B gMPlayTrack_BGM",
+        "03001660 000000f0 B gMPlayTrack_SE1",
+        "03001750 000002d0 B gMPlayTrack_SE2",
+        "03001a20 00000050 B gMPlayTrack_SE3",
+        "030074f0 00000100 B gCgbChans",
+        "03007670 00000140 B gPokemonCryTracks"
+      ]
+    },
+    "compiledRegions": [
+      {
+        "role": "post-MidiKeyToCgbFreq return branch",
+        "start": "0x82dff04",
+        "endExclusive": "0x82dff06",
+        "bytes": 2,
+        "sha256": "23edb5b5af45e9490920bc4d068ce5836ebe10c64d6134b01ce11a831e358b87"
+      },
+      {
+        "role": "_081DDCDC frequency/status/track-flag writes",
+        "start": "0x82dff14",
+        "endExclusive": "0x82dff22",
+        "bytes": 14,
+        "sha256": "762979e69c1f5331dbdda90edcb0a598306c5b3bf3abc1631ca852c05643b336"
+      },
+      {
+        "role": "ply_note stack/high-register/bx epilogue",
+        "start": "0x82dff22",
+        "endExclusive": "0x82dff32",
+        "bytes": 16,
+        "sha256": "2920edd5012189df801a00c1e0704e2793fd6f7ef797baad4082e39d9b7645b2"
+      }
+    ],
+    "memoryClassClosure": {
+      "completeMPlayOpenAllocationCensus": true,
+      "mplayOpenReferenceCensus": [
+        {
+          "path": "include/gba/m4a_internal.h",
+          "line": 430,
+          "text": "void MPlayOpen(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *tracks, u8 trackCount);"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 86,
+          "text": "MPlayOpen(mplayInfo, gMPlayTable[i].track, gMPlayTable[i].numTracks);"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 97,
+          "text": "MPlayOpen(mplayInfo, track, 2);"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 565,
+          "text": "void MPlayOpen(struct MusicPlayerInfo *mplayInfo, struct MusicPlayerTrack *tracks, u8 trackCount)"
+        }
+      ],
+      "mplayExtenderReferenceCensus": [
+        {
+          "path": "include/gba/m4a_internal.h",
+          "line": 428,
+          "text": "void MPlayExtender(struct CgbChannel *cgbChans);"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 77,
+          "text": "MPlayExtender(gCgbChans);"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 257,
+          "text": "void MPlayExtender(struct CgbChannel *cgbChans)"
+        }
+      ],
+      "registeredTrackAllocations": [
+        "gMPlayTrack_BGM",
+        "gMPlayTrack_SE1",
+        "gMPlayTrack_SE2",
+        "gMPlayTrack_SE3",
+        "gPokemonCryTracks"
+      ],
+      "trackStorage": "iwram",
+      "channelStorage": "iwram",
+      "stackStorage": "iwram",
+      "channelProof": "m4aSoundInit passes gCgbChans to MPlayExtender, which assigns soundInfo->cgbChans before callbacks",
+      "stackProof": "crt0 sp_sys is IWRAM_END - 0x1c0",
+      "iwramRange": [
+        "0x03000000",
+        "0x03008000"
+      ],
+      "runtimePointerIdentity": false,
+      "runtimeAddressLookup": false
+    },
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "iwramSingleByteOrWordAccessPremiumCycles": 0,
+      "iwramMultipleWordAccessPremiumCycles": 0,
+      "ewramAccessesInThisSlice": 0,
+      "model": "one 2-cycle sequential Thumb halfword per executed instruction; taken b/bx adds one 6-cycle refill; IWRAM single and multiple data accesses add zero premium"
+    },
+    "sourceCycleAccounting": {
+      "returnBranch": "1*2 + 1*6 = 8",
+      "finalWrites": "7*2 + 0 IWRAM premiums = 14",
+      "epilogue": "8*2 + 1*6 + 0 IWRAM premiums = 22",
+      "fullContinuation": "8 + 14 + 22 = 44"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV10EvidenceSha256": "3e3af127e2010c95189fde78aa2b77999c76b8026b48c65080a8da3b50bbb3b0",
+    "v10RegeneratesByteForByte": true
+  },
+  "capture": {
+    "boundary": "frozen v10 MidiKeyToCgbFreq return through the fixed ply_note bx r0 return",
+    "scalars": [
+      "none; the continuation is fixed after frozen v10's helper return"
+    ],
+    "excluded": [
+      "oracle recapture",
+      "runtime pointer",
+      "runtime address",
+      "frame",
+      "duration",
+      "callback identity",
+      "post-callback dispatcher/glue"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "continuationCycles": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "continuationCycles": 132
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "continuationCycles": 176
+      }
+    },
+    "exactMidiKeyToCgbFreqReturnCallbacks": 7,
+    "exactPlyNoteReturnCallbacks": 7,
+    "continuationThroughPlyNoteReturnSourceCyclesPerCallback": 44,
+    "continuationThroughPlyNoteReturnSourceCycles": 308,
+    "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 4127,
+    "contiguousPrefixThroughPlyNoteReturnSourceCycles": 4435,
+    "exactCompleteNoteCallbacks": 7,
+    "exactCompleteNoteCallbackSourceCycles": 4435,
+    "returnBranches": 7,
+    "frequencyIwramWordStores": 7,
+    "statusFlagsIwramByteStores": 7,
+    "trackFlagsIwramByteReads": 7,
+    "trackFlagsIwramByteStores": 7,
+    "popR0R7MultipleIwramWordReads": 56,
+    "highRegisterRestoreThumbHalfwords": 28,
+    "finalPopR0SingleIwramWordReads": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 75,
+    "nullPostCallbackGlueCallbacks": 82,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 687,
+      "helperReturn": "MidiKeyToCgbFreq",
+      "callerContinuation": "_081DDCDC",
+      "continuationThroughPlyNoteReturnSourceCycles": 44,
+      "contiguousPrefixThroughPlyNoteReturnSourceCycles": 731,
+      "frequencyStorage": "CgbChannel.frequency/iwram",
+      "frequencyIwramWordStores": 1,
+      "statusFlagsValue": 128,
+      "statusFlagsIwramByteStores": 1,
+      "trackFlagsMask": 240,
+      "trackFlagsIwramByteReads": 1,
+      "trackFlagsIwramByteStores": 1,
+      "popR0R7MultipleIwramWordReads": 8,
+      "highRegisterRestoreThumbHalfwords": 4,
+      "finalPopR0SingleIwramWordReads": 1,
+      "completeNoteCallbackSourceCycles": 731,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 553,
+      "helperReturn": "MidiKeyToCgbFreq",
+      "callerContinuation": "_081DDCDC",
+      "continuationThroughPlyNoteReturnSourceCycles": 44,
+      "contiguousPrefixThroughPlyNoteReturnSourceCycles": 597,
+      "frequencyStorage": "CgbChannel.frequency/iwram",
+      "frequencyIwramWordStores": 1,
+      "statusFlagsValue": 128,
+      "statusFlagsIwramByteStores": 1,
+      "trackFlagsMask": 240,
+      "trackFlagsIwramByteReads": 1,
+      "trackFlagsIwramByteStores": 1,
+      "popR0R7MultipleIwramWordReads": 8,
+      "highRegisterRestoreThumbHalfwords": 4,
+      "finalPopR0SingleIwramWordReads": 1,
+      "completeNoteCallbackSourceCycles": 597,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 549,
+      "helperReturn": "MidiKeyToCgbFreq",
+      "callerContinuation": "_081DDCDC",
+      "continuationThroughPlyNoteReturnSourceCycles": 44,
+      "contiguousPrefixThroughPlyNoteReturnSourceCycles": 593,
+      "frequencyStorage": "CgbChannel.frequency/iwram",
+      "frequencyIwramWordStores": 1,
+      "statusFlagsValue": 128,
+      "statusFlagsIwramByteStores": 1,
+      "trackFlagsMask": 240,
+      "trackFlagsIwramByteReads": 1,
+      "trackFlagsIwramByteStores": 1,
+      "popR0R7MultipleIwramWordReads": 8,
+      "highRegisterRestoreThumbHalfwords": 4,
+      "finalPopR0SingleIwramWordReads": 1,
+      "completeNoteCallbackSourceCycles": 593,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 549,
+      "helperReturn": "MidiKeyToCgbFreq",
+      "callerContinuation": "_081DDCDC",
+      "continuationThroughPlyNoteReturnSourceCycles": 44,
+      "contiguousPrefixThroughPlyNoteReturnSourceCycles": 593,
+      "frequencyStorage": "CgbChannel.frequency/iwram",
+      "frequencyIwramWordStores": 1,
+      "statusFlagsValue": 128,
+      "statusFlagsIwramByteStores": 1,
+      "trackFlagsMask": 240,
+      "trackFlagsIwramByteReads": 1,
+      "trackFlagsIwramByteStores": 1,
+      "popR0R7MultipleIwramWordReads": 8,
+      "highRegisterRestoreThumbHalfwords": 4,
+      "finalPopR0SingleIwramWordReads": 1,
+      "completeNoteCallbackSourceCycles": 593,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 687,
+      "helperReturn": "MidiKeyToCgbFreq",
+      "callerContinuation": "_081DDCDC",
+      "continuationThroughPlyNoteReturnSourceCycles": 44,
+      "contiguousPrefixThroughPlyNoteReturnSourceCycles": 731,
+      "frequencyStorage": "CgbChannel.frequency/iwram",
+      "frequencyIwramWordStores": 1,
+      "statusFlagsValue": 128,
+      "statusFlagsIwramByteStores": 1,
+      "trackFlagsMask": 240,
+      "trackFlagsIwramByteReads": 1,
+      "trackFlagsIwramByteStores": 1,
+      "popR0R7MultipleIwramWordReads": 8,
+      "highRegisterRestoreThumbHalfwords": 4,
+      "finalPopR0SingleIwramWordReads": 1,
+      "completeNoteCallbackSourceCycles": 731,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 553,
+      "helperReturn": "MidiKeyToCgbFreq",
+      "callerContinuation": "_081DDCDC",
+      "continuationThroughPlyNoteReturnSourceCycles": 44,
+      "contiguousPrefixThroughPlyNoteReturnSourceCycles": 597,
+      "frequencyStorage": "CgbChannel.frequency/iwram",
+      "frequencyIwramWordStores": 1,
+      "statusFlagsValue": 128,
+      "statusFlagsIwramByteStores": 1,
+      "trackFlagsMask": 240,
+      "trackFlagsIwramByteReads": 1,
+      "trackFlagsIwramByteStores": 1,
+      "popR0R7MultipleIwramWordReads": 8,
+      "highRegisterRestoreThumbHalfwords": 4,
+      "finalPopR0SingleIwramWordReads": 1,
+      "completeNoteCallbackSourceCycles": 597,
+      "postCallbackGlueSourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 549,
+      "helperReturn": "MidiKeyToCgbFreq",
+      "callerContinuation": "_081DDCDC",
+      "continuationThroughPlyNoteReturnSourceCycles": 44,
+      "contiguousPrefixThroughPlyNoteReturnSourceCycles": 593,
+      "frequencyStorage": "CgbChannel.frequency/iwram",
+      "frequencyIwramWordStores": 1,
+      "statusFlagsValue": 128,
+      "statusFlagsIwramByteStores": 1,
+      "trackFlagsMask": 240,
+      "trackFlagsIwramByteReads": 1,
+      "trackFlagsIwramByteStores": 1,
+      "popR0R7MultipleIwramWordReads": 8,
+      "highRegisterRestoreThumbHalfwords": 4,
+      "finalPopR0SingleIwramWordReads": 1,
+      "completeNoteCallbackSourceCycles": 593,
+      "postCallbackGlueSourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "The same seven sourceStateDigest-joined CGB4 callbacks are exact from the frozen MidiKeyToCgbFreq return PC, through b _081DDCDC, the frequency/status/track-flag writes, and ply_note's final bx r0 return.",
+    "contiguousPrefix": "4435 aggregate source cycles through ply_note return across seven callbacks (4127 frozen v10 + 308 v11).",
+    "remainingDiscriminator": "Post-callback MPlay dispatcher/glue, the other 75 note callbacks, unobserved helper/key/nonzero-LFO routes, all complete-MPlay totals, service/arbitration, and construction clock remain null.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "runtimeAddressLookup": false,
+    "serviceCost": null,
+    "constructionClock": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Frozen v10 is byte-identical and joined only by sourceStateDigest. Static source/ELF/ROM proof closes seven complete ply_note callbacks: the fixed 44-cycle continuation yields 4435 aggregate cycles through bx r0 return without touching post-callback glue."
+}

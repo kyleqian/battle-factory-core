@@ -2038,14 +2038,32 @@ Evidence: `docs/issue55-m4a-note-body-cgb4-v10.md` and
 `3e3af127…`); frozen v9 evidence SHA256 is `2dd86764…` and packet hashes
 remain anchor `13d65261…`, LILIANA `86d4d2c5…`, legal-varied `87a32977…`.
 
-The current contiguous boundary is `MidiKeyToCgbFreq` return. The v10 reducer
-fails closed for source, ROM/ELF, packet, target-proof, scalar, observed-route,
-and storage-class mutations. The still-open remainder is later allocation
-fields, unobserved type-4 keys and non-type-4 helper routes, `clear_modM`,
-nonzero-`lfoDelay` routes, the other **75** post-selection callbacks, complete
-note callbacks, post-callback glue, complete one-pass MPlay totals (**5 exact /
-108 null**), service/arbitration, and construction-clock wiring. No new
-unsupported barrier or canonical Battle-2 extension was added.
+**2026-08-12 CGB4 v11 `ply_note` return closure:** additive v11 reads only the
+frozen v10 evidence (SHA256 `3e3af127…`), verifies v10 regenerates byte-for-byte,
+and joins the same **7/82** CGB4 rows only by `sourceStateDigest`; no new oracle
+capture, runtime identity, or runtime-address lookup is used. From the helper
+return PC `0x082dff04`, the fixed `b _081DDCDC` costs **8** cycles, the
+frequency/status/track-flags writes cost **14**, and the complete epilogue costs
+**22**: `add sp`, `pop {r0-r7}` (eight IWRAM words, multiple transfer), four
+high-register restores, final `pop {r0}` (one IWRAM word, single transfer), and
+the final `bx r0` return. Static `MPlayOpen`/`MPlayExtender` source census plus
+ELF/map prove CGB channels and every registered track allocation IWRAM; `crt0`
+proves the IWRAM system stack. Three source/ELF/ROM-guarded compiled regions
+therefore add **44 cycles each / 308 aggregate**, extending the contiguous
+source-exact boundary from **4,127** through `MidiKeyToCgbFreq` return to
+**4,435 aggregate cycles** through `ply_note` return. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v11.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v11.json`.
+The seven rows therefore now carry exact complete-`ply_note` callback costs;
+only the other 75 note callbacks stay null.
+
+The v11 reducer fails closed for route, helper/continuation, storage-class,
+source/ROM/ELF, frozen-v10, and source-state-join mutations. The still-open
+remainder is post-callback MPlay dispatcher/glue, the other **75** note
+callbacks, unobserved helper/key/nonzero-`lfoDelay` routes, and the still-
+unpriced complete-MPlay aggregate (**5 exact / 108 null** on the existing MPlay
+receipt), service/arbitration, and construction-clock wiring. No new unsupported
+barrier or canonical Battle-2 extension was added.
 
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 

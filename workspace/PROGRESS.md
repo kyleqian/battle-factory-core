@@ -5,6 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1196 — [MAIN worker, 2026-08-12] **CGB4 v11 `ply_note` return source-closed**
+
+- **State:** #55 is source-exact for **4,435 aggregate cycles** through the
+  final `ply_note` `bx r0` return across the same observed **7/82** zero-
+  `lfoDelay` CGB4 callbacks; those seven individual complete-note costs are
+  now exact. The other 75 note callbacks, complete-MPlay aggregate,
+  post-callback glue, and construction clock remain null.
+- **Did:** added a frozen-v10-only v11 receipt joined solely by
+  `sourceStateDigest`. It source/ELF/ROM-guards the `0x082dff04` branch,
+  `_081DDCDC` frequency/status/track-flags writes, and complete epilogue:
+  `pop {r0-r7}` eight-word IWRAM multiple read, four high-register restores,
+  final IWRAM `pop {r0}`, and `bx r0`. Static `MPlayOpen`/`MPlayExtender` and
+  stack provenance prove the new r4/r5/stack accesses IWRAM; fixed cost is
+  **44 each / 308 aggregate**. No oracle capture.
+- **Next:** retain post-callback MPlay dispatcher/glue, the other 75 note
+  callbacks, unobserved helper/key/nonzero-LFO routes, complete-MPlay
+  aggregate, service/arbitration, and construction-clock wiring null. A future
+  worker may select one new bounded source-exact discriminator, but must not
+  extend this receipt past `ply_note` return without a separate brief.
+- **Notes:** red-first v11 route/mutation/count guards are green; focused
+  v3-v11 **35/35**, smoke **8 files / 375 passed**, typecheck, post-change full
+  **988 files / 9,570 passed / 1 skipped**, and build **653 modules** are green.
+  Frozen v10 SHA256 `3e3af127…`; v11 uses **no** duration fit, runtime
+  identity/address lookup, production import, unsupported barrier, animation/
+  Rust change, or canonical Battle-2 branch.
+
 ## 1195 — [supervisor, 2026-08-12] **CGB4 v10 verified; Rust M5d-4 folded**
 
 - **State:** #55 is source-exact for **4,127 aggregate cycles** through
@@ -47,24 +73,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **987 files / 9,566 passed / 1 skipped**, and build **653 modules** green. No
   duration fit, runtime address lookup, production import, unsupported barrier,
   animation/Rust change, or canonical Battle-2 extension.
-
-## 1193 — [supervisor, 2026-08-12] **CGB4 v9 verified; Rust M5d-3 folded**
-
-- **State:** #55 is source-exact for **3,453 aggregate cycles** through fixed
-  `call_r3` entry across the observed **7/82** zero-`lfoDelay` CGB4 callbacks.
-  Complete MPlay stays **5 exact / 108 null** and the construction clock is
-  unwired.
-- **Did:** independently regenerated/audited v9's twice-fresh `pan_sweep=0`
-  route (**34 each / 238 aggregate**) and its strict dynamic-helper boundary.
-  Folded Rust M5d-3's **30** weather/heal/damage/status/Counter
-  `CheckViability` effects through merge `84789fbb`; **50** table effects
-  remain behind the native barrier. Animation-main is contained.
-- **Next:** source-close one coherent dynamic `call_r3`/
-  `MidiKeyToCgbFreq` helper slice, stopping before its first unresolved
-  discriminator. Preserve helper result/later fields, unobserved routes, the
-  other 75 callbacks, complete note/glue/MPlay, service/arbitration, and clock
-  wiring null.
-- **Notes:** union full **986 files / 9,562 passed / 1 skipped**, build **653
-  modules**. Rust is **528/528**, fmt/clippy clean; rebuilt WASM is **138,223
-  bytes** (`e6096b79…`) and forced parity is **757/757**. No engine-changing
-  fold, unsupported barrier, or canonical Battle-2 extension.

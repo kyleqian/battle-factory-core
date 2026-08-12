@@ -1,3 +1,24 @@
+## 1193 — [supervisor, 2026-08-12] **CGB4 v9 verified; Rust M5d-3 folded**
+
+- **State:** #55 is source-exact for **3,453 aggregate cycles** through fixed
+  `call_r3` entry across the observed **7/82** zero-`lfoDelay` CGB4 callbacks.
+  Complete MPlay stays **5 exact / 108 null** and the construction clock is
+  unwired.
+- **Did:** independently regenerated/audited v9's twice-fresh `pan_sweep=0`
+  route (**34 each / 238 aggregate**) and its strict dynamic-helper boundary.
+  Folded Rust M5d-3's **30** weather/heal/damage/status/Counter
+  `CheckViability` effects through merge `84789fbb`; **50** table effects
+  remain behind the native barrier. Animation-main is contained.
+- **Next:** source-close one coherent dynamic `call_r3`/
+  `MidiKeyToCgbFreq` helper slice, stopping before its first unresolved
+  discriminator. Preserve helper result/later fields, unobserved routes, the
+  other 75 callbacks, complete note/glue/MPlay, service/arbitration, and clock
+  wiring null.
+- **Notes:** union full **986 files / 9,562 passed / 1 skipped**, build **653
+  modules**. Rust is **528/528**, fmt/clippy clean; rebuilt WASM is **138,223
+  bytes** (`e6096b79…`) and forced parity is **757/757**. No engine-changing
+  fold, unsupported barrier, or canonical Battle-2 extension.
+
 ## 1191 — [MAIN worker, 2026-08-12] **CGB4 post-helper caller slice source-closed**
 
 - **State:** #55 is source-exact for **3,215 aggregate cycles** through the
