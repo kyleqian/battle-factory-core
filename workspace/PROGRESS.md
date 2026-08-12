@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1181 — [MAIN worker, 2026-08-11] **CGB4 allocation body prefix source-closed**
+
+- **State:** #55 is source-exact through the observed `_081DDC40` CGB4
+  allocation body and the zero-delay branch before `TrkVolPitSet` for **7/82**
+  callbacks. Complete MPlay remains **5 exact / 108 null**; the construction
+  clock stays unwired.
+- **Did:** twice-fresh OFF packets are byte-identical across anchor/LILIANA/
+  legal-varied (0/3/4 CGB4 callbacks): five track-null `ClearChain` routes are
+  **111** cycles, two previous-null/next-null owner routes are **135**, for
+  **825** body and **1,413** known prefix-through-body cycles. Captured only
+  address-free channel/track links and `lfoDelay=0`; helper bodies remain null.
+- **Next:** preserve null for `clear_modM`, `TrkVolPitSet`, later allocation
+  fields, the other 75 post-selection callbacks, complete callback/glue,
+  one-pass totals, service, arbitration, and `runFactoryConstructionClock`.
+- **Notes:** packet hashes anchor `818433d1…`, LILIANA `c0f11db9…`, varied
+  `b303a6ad…`; focused dependent group **24/24**, smoke **375/375**, full
+  **977 files / 9,437 passed / 1 skipped**, typecheck, and build **653
+  modules** are green. S8 stays closed at 33331; no unsupported barrier,
+  gameplay, renderer, pixel, Rust, or ROADMAP/ISSUES change.
+
 ## 1180 — [supervisor, 2026-08-11] **CGB4 mutable route verified; Rust M5b-1 folded**
 
 - **State:** the observed type-12 CGB4 family is source-exact through its
@@ -43,24 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   VBlank/IRQ/audio arbitration, and clock wiring. No unsupported barrier,
   duration fit, pointer identity, gameplay/pixel, renderer, Rust, or ROADMAP/
   ISSUES change.
-
-## 1178 — [supervisor, 2026-08-11] **CGB4 prefix verified; Meteor Mash checkpoint folded**
-
-- **State:** the smallest observed post-selection note family is source-exact
-  for **7/82** callbacks; complete MPlay remains **5 exact / 108 null**. #55
-  and `runFactoryConstructionClock` stay unwired; S8 remains closed at 33331.
-- **Did:** independently regenerated the CGB4 receipt byte-identically and
-  reran its dependent note group, then folded animation-main's presentation-
-  only Meteor Mash checkpoint and ledger through merge `d7d9c089`. Rust-main
-  is fully contained.
-- **Next:** capture per-callback mutable CGB channel state before extending the
-  remaining 75 post-selection note routes. Preserve complete callback,
-  post-callback glue, one-pass-total, and construction-clock nulls.
-- **Notes:** worker full gate **973 files / 9,427 passed / 1 skipped**, folded
-  CGB4/Meteor-Mash focus **7/7**, union smoke **375/375**, and union build
-  **653 modules** are green. The final union
-  run passed **856/975 files,
-  7,964 assertions / 1 skipped**; the other 119 files hit collection-only
-  worker-fetch timeouts while a separate animation full-suite pool restarted
-  concurrently (zero assertion failures). Both lane branches are contained;
-  OFF oracle is healthy. No unsupported barrier or main gameplay/pixel change.
