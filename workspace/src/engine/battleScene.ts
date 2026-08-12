@@ -34593,12 +34593,21 @@ export function renderSceneOnMovePresentation(
       ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
       : { x2: 0, y2: 0 };
     const drawBackground = () => {
-      const bg = displayed.background === "cosmic"
+      const bg = view.background === "cosmic"
         ? meteorMashArt.background
         : battleBg.static;
-      const palette = displayed.background === "cosmic"
+      const sourcePalette = view.background === "cosmic"
         ? [meteorMashArt.background.palette]
         : battleBg.palette;
+      const palette = view.fadeCoefficient === 0
+        ? sourcePalette
+        : sourcePalette.map((bank) => bank.map((color) => {
+          const packed = mgbaDarkenColor(
+            color.r | (color.g << 8) | (color.b << 16),
+            view.fadeCoefficient,
+          );
+          return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+        }));
       drawExtractedTileBg(fb, {
         tileset: bg.tileset,
         tilemap: bg.tilemap,
@@ -34622,6 +34631,16 @@ export function renderSceneOnMovePresentation(
           meteorMashArt.goldStars.palette,
           star.x + star.x2 - 8,
           star.y + star.y2 - 8,
+        );
+      }
+      for (const mini of displayed.miniStars) {
+        if (mini.invisible) continue;
+        drawSpriteSheet(
+          fb,
+          subTileset(meteorMashArt.goldStars.tileset, mini.tile, 1),
+          meteorMashArt.goldStars.palette,
+          mini.x - 4,
+          mini.y + mini.y2 - 4,
         );
       }
       if (displayed.spinningHand && displayed.spinningHandMatrix) {
@@ -34675,8 +34694,8 @@ export function renderSceneOnMovePresentation(
       drawEffects();
     }
     const profile = state.config.fieldProfile;
-    const opponentMaxHp = Math.max(1, profile.opponentHp);
-    const playerMaxHp = Math.max(1, profile.playerHp);
+    const opponentMaxHp = Math.max(1, profile.opponentMaxHp);
+    const playerMaxHp = Math.max(1, profile.playerMaxHp);
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerToOpponent ? "ONIX" : "METANG",
       level: 50,

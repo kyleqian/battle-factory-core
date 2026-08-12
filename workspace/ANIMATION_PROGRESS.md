@@ -1,3 +1,11 @@
+# MOVE_METEOR_MASH corrected bilateral evidence checkpoint — remains unsupported (2026-08-11 worker)
+
+- **State:** Coverage remains **174/276 Level-50 exact**, 0 partial, 0 staged, and **102 unsupported**. Meteor Mash is not promoted: its complete source/hardware gate is exact, but production framebuffer is only **52/214 player-back** and **84/215 opponent-front**.
+- **Did:** Corrected the staged carrier from National-Dex `375` (Emerald `GOREBYSS`) to source `SPECIES_METANG=399` and genderless healthboxes; completed all **48** Random2 mini-star variants and local-age **0..60** flicker reducer; pinned BG_COSMIC/BLDY/BLDCNT restore schedules, RAM+1 OAM/matrix/palette transfers, legal bilateral fixtures, portable verifier, raw RGB and normalized maps. The staged compositor now paints minis and hardware darkening but is deliberately not claimed exact.
+- **Verified:** Twice fresh player frames **298..511** pass **214/214** source/reducer/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/map (evidence/raw/map `ed028a16…` / `309e0ea2…` / `c1b452de…`); opponent **231..445** passes **215/215** (`367dda53…` / `05e1a334…` / `d6ac27b1…`). Focused **10/10**, portable bilateral, boundary, source audit, typecheck, coverage, smoke, full suite, and build are green at handoff.
+- **Next:** Resolve the remaining production-framebuffer mini OAM order/initialization, BG fade/palette composition, spinning-hand/hitsplat overlap and cleanup; require **214/214 + 215/215 framebuffer twice fresh** before promoting only Meteor Mash.
+- **Notes:** No gameplay/damage/RNG/turn/controller/facility state, boundary, unsupported barrier, canonical import, per-frame pixel/hash/RGB lookup, absolute tick, coordinate fit, or sibling promotion changed.
+
 # MOVE_METEOR_MASH staged implementation checkpoint — remains unsupported (2026-08-11 supervisor)
 
 - **State:** Coverage remains **174/276 Level-50 exact**, 0 partial, 0 staged, and **102 unsupported**. `MOVE_METEOR_MASH` is not promoted: source/legal staging, dense evidence plumbing, reducer/assets, typed seam, a narrow Metang/Onix compositor, shake latch, and healthbox staging are banked, but the complete production-framebuffer acceptance gate is still open.

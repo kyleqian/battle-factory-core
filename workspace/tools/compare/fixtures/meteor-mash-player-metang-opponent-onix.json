@@ -5,10 +5,14 @@
   "orientation": "player-to-opponent",
   "scenario": "tools/battle-lab/mechanic-meteor-mash-player-metang-opponent-onix.json",
   "probe": "tools/compare/meteorMashProbe.py",
-  "denseWindow": { "startFrame": 217, "endFrame": 430, "frameCount": 214 },
+  "denseWindow": { "startFrame": 298, "endFrame": 511, "frameCount": 214 },
+  "attacker": {"species":"METANG","geometry":{"side":"player","spriteCorner":{"x":40,"y":64},"animationCenter":{"x":72,"y":96},"battlePositionCenter":{"x":72,"y":80}}},
+  "target": {"species":"ONIX","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":10},"animationCenter":{"x":176,"y":42},"battlePositionCenter":{"x":176,"y":40}}},
+  "fieldProfile": {"playerHp":131,"playerMaxHp":135,"opponentHp":110,"opponentMaxHp":110,"playerGender":"none","opponentGender":"male"},
+  "twinkles": [{"tile":4,"y2":1},{"tile":4,"y2":3},{"tile":5,"y2":-6},{"tile":4,"y2":-6},{"tile":5,"y2":-4},{"tile":5,"y2":2},{"tile":5,"y2":-7},{"tile":4,"y2":2},{"tile":4,"y2":0},{"tile":5,"y2":1},{"tile":5,"y2":2},{"tile":5,"y2":2},{"tile":5,"y2":2},{"tile":5,"y2":0},{"tile":5,"y2":-7},{"tile":5,"y2":1},{"tile":4,"y2":-4},{"tile":4,"y2":3},{"tile":5,"y2":0},{"tile":5,"y2":0},{"tile":4,"y2":-7},{"tile":4,"y2":3},{"tile":5,"y2":0},{"tile":5,"y2":-6},{"tile":5,"y2":-6},{"tile":4,"y2":-5},{"tile":5,"y2":-6},{"tile":5,"y2":-6},{"tile":5,"y2":0},{"tile":5,"y2":3},{"tile":5,"y2":-6},{"tile":4,"y2":-6},{"tile":4,"y2":1},{"tile":4,"y2":-5},{"tile":5,"y2":-4},{"tile":5,"y2":-7},{"tile":5,"y2":-4},{"tile":5,"y2":-6},{"tile":5,"y2":0},{"tile":5,"y2":-4},{"tile":5,"y2":1},{"tile":4,"y2":2},{"tile":4,"y2":3},{"tile":5,"y2":-4},{"tile":5,"y2":1},{"tile":5,"y2":2},{"tile":5,"y2":-7},{"tile":4,"y2":-6}],
   "evidenceSchema": "meteor-mash-dense-evidence/v1",
-  "evidenceSha256": "1e73a00f8d1d77f6c7f5b60bfba6068ab56acdf2a5c3a4393b2ff60b05250bba",
-  "secondFreshEvidenceSha256": "1e73a00f8d1d77f6c7f5b60bfba6068ab56acdf2a5c3a4393b2ff60b05250bba",
-  "rawRgbSha256": "f762b55ad8c20ba57c93b39ce661f88e0a109b417a19aeff278018c3a4b773de",
-  "normalizedMapSha256": "1533f90497e72d75235babf395d1a378f247352a80c9b4214795796c227a8e29"
+  "evidenceSha256": "ed028a168afdd4554a015978bd081655a64d5fc8cfa5df7685d165b5bb2747e5",
+  "secondFreshEvidenceSha256": "ed028a168afdd4554a015978bd081655a64d5fc8cfa5df7685d165b5bb2747e5",
+  "rawRgbSha256": "309e0ea2bc55da359b7cefc265cce1ea15115db1e5eef637b3a35b60959b29ea",
+  "normalizedMapSha256": "c1b452de28dceca38d6d95d38c540a7f86272fcfc0ab92eeb724e557686f09a2"
 }

@@ -6,18 +6,18 @@ const cases = [
   [
     "meteor-mash-player-metang-opponent-onix.json",
     "player-to-opponent",
-    217,
-    430,
+    298,
+    511,
     214,
-    "1e73a00f8d1d77f6c7f5b60bfba6068ab56acdf2a5c3a4393b2ff60b05250bba",
+    "ed028a168afdd4554a015978bd081655a64d5fc8cfa5df7685d165b5bb2747e5",
   ],
   [
     "meteor-mash-opponent-metang-player-onix.json",
     "opponent-to-player",
-    233,
-    447,
+    231,
+    445,
     215,
-    "c46d8308b1f118fb2d0bd44d15850fb2b6557ce676f23ca228c9ca2a3e08fb63",
+    "367dda5391d7b509718504afd34085a426db14b49daa4ca9d69d4b21937d99a6",
   ],
 ] as const;
 
@@ -40,6 +40,9 @@ describe("MOVE_METEOR_MASH bilateral dense evidence checkpoint", () => {
       expect(scenario).toMatchObject({ profile: "battle-scene-on", level: 50 });
       expect(scenario.overrides.parties.player).toHaveLength(3);
       expect(scenario.overrides.parties.opponent).toHaveLength(3);
+      const parties = [...scenario.overrides.parties.player, ...scenario.overrides.parties.opponent];
+      expect(parties.some((mon: { species: number }) => mon.species === 399)).toBe(true);
+      expect(parties.some((mon: { species: number }) => mon.species === 375)).toBe(false);
       // Production framebuffer equality is still open; never promote from
       // source/component receipts alone.
       expect(coverage.entries.find((entry) => entry.move === "MOVE_METEOR_MASH"))

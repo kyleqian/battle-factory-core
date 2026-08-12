@@ -5,10 +5,14 @@
   "orientation": "opponent-to-player",
   "scenario": "tools/battle-lab/mechanic-meteor-mash-opponent-metang-player-onix.json",
   "probe": "tools/compare/meteorMashProbe.py",
-  "denseWindow": { "startFrame": 233, "endFrame": 447, "frameCount": 215 },
+  "denseWindow": { "startFrame": 231, "endFrame": 445, "frameCount": 215 },
+  "attacker": {"species":"METANG","geometry":{"side":"opponent","spriteCorner":{"x":144,"y":15},"animationCenter":{"x":176,"y":47},"battlePositionCenter":{"x":176,"y":40}}},
+  "target": {"species":"ONIX","geometry":{"side":"player","spriteCorner":{"x":40,"y":48},"animationCenter":{"x":72,"y":88},"battlePositionCenter":{"x":72,"y":80}}},
+  "fieldProfile": {"playerHp":110,"playerMaxHp":110,"opponentHp":135,"opponentMaxHp":135,"playerGender":"male","opponentGender":"none"},
+  "twinkles": [{"tile":5,"y2":0},{"tile":5,"y2":-5},{"tile":5,"y2":3},{"tile":4,"y2":2},{"tile":5,"y2":-7},{"tile":4,"y2":1},{"tile":5,"y2":2},{"tile":5,"y2":1},{"tile":5,"y2":-4},{"tile":5,"y2":-6},{"tile":5,"y2":-6},{"tile":5,"y2":1},{"tile":5,"y2":-5},{"tile":5,"y2":0},{"tile":5,"y2":2},{"tile":5,"y2":-6},{"tile":5,"y2":-4},{"tile":5,"y2":1},{"tile":5,"y2":3},{"tile":4,"y2":1},{"tile":5,"y2":-7},{"tile":5,"y2":0},{"tile":5,"y2":3},{"tile":5,"y2":1},{"tile":5,"y2":-5},{"tile":5,"y2":-4},{"tile":5,"y2":-6},{"tile":4,"y2":2},{"tile":5,"y2":3},{"tile":4,"y2":-5},{"tile":5,"y2":2},{"tile":5,"y2":3},{"tile":5,"y2":-4},{"tile":5,"y2":3},{"tile":4,"y2":-5},{"tile":5,"y2":0},{"tile":5,"y2":-7},{"tile":5,"y2":-6},{"tile":5,"y2":-6},{"tile":5,"y2":-4},{"tile":4,"y2":-4},{"tile":5,"y2":-4},{"tile":5,"y2":-7},{"tile":5,"y2":3},{"tile":5,"y2":-5},{"tile":4,"y2":3},{"tile":5,"y2":3},{"tile":4,"y2":3}],
   "evidenceSchema": "meteor-mash-dense-evidence/v1",
-  "evidenceSha256": "c46d8308b1f118fb2d0bd44d15850fb2b6557ce676f23ca228c9ca2a3e08fb63",
-  "secondFreshEvidenceSha256": "c46d8308b1f118fb2d0bd44d15850fb2b6557ce676f23ca228c9ca2a3e08fb63",
-  "rawRgbSha256": "941977c1b620219b4dc207ad0e4890660fc63402050ec087ddbf53a618c90d16",
-  "normalizedMapSha256": "3bb80e1b02869d9fa6b8c357487a6708c2cd15b807b3302a4dacfaadee59f35e"
+  "evidenceSha256": "367dda5391d7b509718504afd34085a426db14b49daa4ca9d69d4b21937d99a6",
+  "secondFreshEvidenceSha256": "367dda5391d7b509718504afd34085a426db14b49daa4ca9d69d4b21937d99a6",
+  "rawRgbSha256": "05e1a33470919690888ad07a5cf7faf96a04ce561fb79d0089c6ea2153d8c789",
+  "normalizedMapSha256": "d6ac27b1253dbc5360bccb498041a67d00b0fe08bc2474b957980d2054cce8b9"
 }

@@ -6,6 +6,8 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { meteorMashAtAge } from "../../src/animation/meteorMash.ts";
+import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {
@@ -21,6 +23,11 @@ interface Fixture {
   secondFreshEvidenceSha256: string;
   rawRgbSha256: string;
   normalizedMapSha256: string;
+  attacker: unknown;
+  target: unknown;
+  fieldProfile: unknown;
+  twinkles: readonly { tile: 4 | 5; y2: number }[];
+  expected?: { framebufferMatches: number };
 }
 interface Sprite {
   slot: number;
@@ -118,7 +125,10 @@ function expectedMiniInvisible(localAge: number): boolean {
   return invisible;
 }
 
-function verifyMechanisms(fixture: Fixture, probe: Probe): void {
+function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
+  framebufferMatches: number;
+  closest: readonly (readonly [number, number])[];
+} {
   const rows = probe.frames;
   if (!same(probe.sourceWindow, fixture.denseWindow)
     || rows.length !== fixture.denseWindow.frameCount
@@ -148,6 +158,15 @@ function verifyMechanisms(fixture: Fixture, probe: Probe): void {
     targetSide: playerTarget ? "player" as const : "opponent" as const,
     targetCenter: playerTarget ? { x: 72, y: 88 } : { x: 176, y: 42 },
   };
+  const stage = createSceneOnMovePresentation({
+    move: "METEOR_MASH",
+    attacker: fixture.attacker,
+    target: fixture.target,
+    fieldProfile: fixture.fieldProfile,
+    twinkles: fixture.twinkles,
+  } as never);
+  let framebufferMatches = 0;
+  const framebufferDiffs: Array<readonly [number, number]> = [];
   rows.forEach((row, age) => {
     const reduced = meteorMashAtAge(age, geometry);
     const parents = row.sprites.filter((sprite) =>
@@ -167,6 +186,21 @@ function verifyMechanisms(fixture: Fixture, probe: Probe): void {
         throw new Error(`mini-star lifecycle drift at age ${age}, slot ${mini.slot}`);
       }
     }
+    const engine: EngineState = {
+      ...createInitialState(),
+      rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const app = render(engine);
+    const raw = readFileSync(join(rgbDir, `${String(row.frame).padStart(5, "0")}.rgb`));
+    let differences = 0;
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      const rgba = pixel * 4, rgb = pixel * 3;
+      if (app[rgba] !== raw[rgb] || app[rgba + 1] !== raw[rgb + 1]
+        || app[rgba + 2] !== raw[rgb + 2]) differences += 1;
+    }
+    if (differences === 0) framebufferMatches += 1;
+    framebufferDiffs.push([age, differences]);
   });
   const expectedBldy = rows.map((_, age) => meteorMashAtAge(age, geometry).fadeCoefficient);
   if (!same(rows.map((row) => row.registers.bldy), expectedBldy)) {
@@ -175,6 +209,10 @@ function verifyMechanisms(fixture: Fixture, probe: Probe): void {
   if (rows[11]!.registers.bldcnt !== 232 || rows[47]!.registers.bldcnt !== 0
     || rows[176]!.registers.bldcnt !== 232
     || rows.at(-2)!.registers.bldcnt !== 0) throw new Error("BG_COSMIC BLDCNT drift");
+  return {
+    framebufferMatches,
+    closest: framebufferDiffs.sort((left, right) => left[1] - right[1]).slice(0, 8),
+  };
 }
 
 function run(fixturePath: string): void {
@@ -206,8 +244,11 @@ function run(fixturePath: string): void {
     || map !== fixture.normalizedMapSha256) {
     throw new Error(`${fixturePath}: receipt drift evidence=${evidence} raw=${raw} map=${map}`);
   }
-  verifyMechanisms(fixture, probe);
-  console.log(`${fixture.orientation}: ${probe.frames.length}/${probe.frames.length} source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/map exact; evidence ${evidence.slice(0, 12)} raw ${raw.slice(0, 12)} map ${map.slice(0, 12)}`);
+  const { framebufferMatches, closest } = verifyMechanisms(fixture, probe, rgbDir);
+  if (fixture.expected && framebufferMatches !== fixture.expected.framebufferMatches) {
+    throw new Error(`${fixturePath}: framebuffer count ${framebufferMatches}`);
+  }
+  console.log(`${fixture.orientation}: ${probe.frames.length}/${probe.frames.length} source/task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/map exact; production framebuffer ${framebufferMatches}/${probe.frames.length} (closest age/diff ${JSON.stringify(closest)}); evidence ${evidence.slice(0, 12)} raw ${raw.slice(0, 12)} map ${map.slice(0, 12)}`);
 }
 
 for (const fixturePath of fixturePaths) run(fixturePath);
