@@ -1,0 +1,212 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v16",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "path": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1331-1335",
+      "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+    },
+    "elf": {
+      "start": "0x082dfbcc",
+      "stop": "0x082dfbd0",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "mov r3, sl; mov r4, fp",
+        "start": "0x082dfbcc",
+        "endExclusive": "0x082dfbd0",
+        "bytes": 4,
+        "sha256": "ad1569b5c2595cf14bd35576d2aa6a02c2da945075275510d60cf140d4a9ed1e"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2
+    }
+  },
+  "frozenInputs": {
+    "acceptedV15EvidenceSha256": "28ec38e9339a19d576d77f6d0e2f809858757f8dcf23d6439b28543167c625c8",
+    "acceptedV15DocSha256": "62038919910f00066dbd2180b14e74ed1bee236e98c8808b540aa50c0e4a653b",
+    "v15RegeneratesByteForByte": true
+  },
+  "capture": {
+    "boundary": "none: source-only fixed instructions at _081DD994",
+    "scalars": [],
+    "excluded": [
+      "oracle data",
+      "r6",
+      "track count",
+      "subs r6, 0x1",
+      "later track-loop work",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 7,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "sourceCycles": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "sourceCycles": 12
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "sourceCycles": 16
+      }
+    },
+    "postV15RouteSourceCyclesPerCallback": 4,
+    "postV15RouteSourceCycles": 28,
+    "acceptedContiguousPrefixThroughModDecisionSourceCycles": 5338,
+    "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 5366,
+    "sequentialThumbHalfwords": 14,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 842,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 848,
+      "mod": 0,
+      "postV14RouteSourceCycles": 12,
+      "contiguousPrefixThroughModDecisionSourceCycles": 860,
+      "nextLfoDelayC": null,
+      "completeMPlaySourceCycles": null,
+      "postV15RouteSourceCycles": 4,
+      "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 864,
+      "nextTrackLoopCount": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 708,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 714,
+      "mod": 0,
+      "postV14RouteSourceCycles": 12,
+      "contiguousPrefixThroughModDecisionSourceCycles": 726,
+      "nextLfoDelayC": null,
+      "completeMPlaySourceCycles": null,
+      "postV15RouteSourceCycles": 4,
+      "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 730,
+      "nextTrackLoopCount": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 704,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 710,
+      "mod": 0,
+      "postV14RouteSourceCycles": 12,
+      "contiguousPrefixThroughModDecisionSourceCycles": 722,
+      "nextLfoDelayC": null,
+      "completeMPlaySourceCycles": null,
+      "postV15RouteSourceCycles": 4,
+      "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 726,
+      "nextTrackLoopCount": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 704,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 710,
+      "mod": 0,
+      "postV14RouteSourceCycles": 12,
+      "contiguousPrefixThroughModDecisionSourceCycles": 722,
+      "nextLfoDelayC": null,
+      "completeMPlaySourceCycles": null,
+      "postV15RouteSourceCycles": 4,
+      "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 726,
+      "nextTrackLoopCount": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 842,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 848,
+      "mod": 0,
+      "postV14RouteSourceCycles": 12,
+      "contiguousPrefixThroughModDecisionSourceCycles": 860,
+      "nextLfoDelayC": null,
+      "completeMPlaySourceCycles": null,
+      "postV15RouteSourceCycles": 4,
+      "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 864,
+      "nextTrackLoopCount": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 708,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 714,
+      "mod": 0,
+      "postV14RouteSourceCycles": 12,
+      "contiguousPrefixThroughModDecisionSourceCycles": 726,
+      "nextLfoDelayC": null,
+      "completeMPlaySourceCycles": null,
+      "postV15RouteSourceCycles": 4,
+      "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 730,
+      "nextTrackLoopCount": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 704,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 710,
+      "mod": 0,
+      "postV14RouteSourceCycles": 12,
+      "contiguousPrefixThroughModDecisionSourceCycles": 722,
+      "nextLfoDelayC": null,
+      "completeMPlaySourceCycles": null,
+      "postV15RouteSourceCycles": 4,
+      "contiguousPrefixThroughTrackLoopExitMovesSourceCycles": 726,
+      "nextTrackLoopCount": null
+    }
+  ],
+  "closure": {
+    "closed": "The fixed mov-r3-from-sl then mov-r4-from-fp pair at _081DD994 for the frozen seven rows.",
+    "contiguousPrefix": "5366 aggregate source cycles through the two register moves (5338 frozen v15 + 28 v16).",
+    "remainingDiscriminator": "Stop before subs r6, 0x1; r6 and track count are unobserved and unpriced.",
+    "oracleCapture": false,
+    "r6Inferred": false,
+    "durationFit": false,
+    "serviceCost": null,
+    "constructionClock": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Frozen v15 plus source/ELF/ROM close only the fixed two-instruction register-move pair and stop before the track-count decrement."
+}
