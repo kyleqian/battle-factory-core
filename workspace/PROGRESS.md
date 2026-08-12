@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1215 — [supervisor, 2026-08-12] **CGB4 v23 and persistent-lane union verified**
+
+- **State:** #55 retains the source-exact **5,728-cycle** aggregate prefix
+  through the three selected `_081DD9BC` store/compare/branch decisions.
+  Confuse Ray exact Scene-ON presentation and Rust M6a's pure Factory-AI
+  switch selector are folded; both persistent lane tips are contained.
+- **Did:** independently audited v23's frozen digest join, exact one-scalar
+  packet schema, twice-fresh identity, 12-cycle taken route, 14-cycle
+  source-general non-taken route, and all retained null boundaries. Folded
+  animation through `64ec9f90` and Rust through `30641085`, rebuilt WASM,
+  forced all boundary parity suites, and verified the complete union.
+- **Next:** source-close only the fixed two-instruction `_081DD9C4` successor
+  prefix for the same three rows, stopping before `_081DD9C8` reads track
+  flags. Keep track count/value/pointer identity, loop body, the four
+  EXIST-set rows, complete MPlay, service/arbitration, and construction-clock
+  wiring null unless separately evidenced.
+- **Notes:** v23 focused **12/12** and independent post-final-edit typecheck;
+  Rust **897/897**; WASM **300,227 bytes** (`c4da2f6c…`), forced parity **9
+  files / 772 passed**; union npm **1,007 files / 9,659 passed / 1 skipped**
+  and build **655 modules**. No ratchet, unsupported-barrier, or canonical
+  Battle-2 change; no soak trigger.
+
 ## 1214 — [MAIN worker, 2026-08-12] **CGB4 v23 post-subs branch closure**
 
 - **State:** #55 reaches a source-exact **5,728-cycle** aggregate prefix for
@@ -45,25 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`d1ebb568…`), forced parity **9 files / 772 passed**; union npm **1,005
   files / 9,648 passed / 1 skipped** and build **653 modules**. No `src/**`,
   ratchet, unsupported-barrier, or canonical Battle-2 change; no soak trigger.
-
-## 1212 — [MAIN worker, 2026-08-12] **CGB4 v22 r4-taken successor prefix source-closed**
-
-- **State:** #55 reaches a source-exact **5,692-cycle** aggregate prefix for
-  only the three frozen v21 r4-nonzero rows: the selected `_081DD9B6` prefix
-  stops before `_081DD9BC`'s first `strh`. Complete MPlay remains **5 exact /
-  108 null** and construction-clock wiring is unwired.
-- **Did:** frozen v21 evidence/report and all three packet bytes; v22 joins
-  only their three taken-branch `sourceStateDigest` rows. Source/ELF/ROM close
-  `str status; ldrh tempoC; subs #150` at **3 × 6 = 18** cycles, with exact
-  sixth-player `gPokemonCryMusicPlayers` IWRAM/offset/byte provenance. The
-  four EXIST-set rows remain null before `_081DD886`; no scalar/result/bcc/body
-  was read. Red-first 4-cycle under-price failed as intended; twice-fresh v22
-  generation is byte-identical.
-- **Next:** preserve `tempoC` scalar, subtraction result, bcc, later body,
-  other callbacks, MPlay, service/arbitration, and construction-clock wiring
-  as null unless a later separately assigned source-only slice proves them.
-- **Notes:** v22 evidence/doc `fb345eca…` / `b9c57628…`; focused v21 **5/5**
-  and v22 **5/5**, smoke **375/375**, typecheck, exactly one post-change full
-  suite **1,004 files / 9,642 passed / 1 skipped**, and build **653 modules**
-  are green. No oracle/probe or `src/**`, ratchet, unsupported-barrier,
-  animation/Rust, or canonical Battle-2 change.
