@@ -168,6 +168,14 @@ export interface FactoryWasmExports {
    * `fw_alloc`'d buffer; the caller must `fw_free(ptr, total_len)`.
    */
   fw_run_check_bad_move_preamble(input_ptr: number): number;
+  /**
+   * `AI_CheckViability` for one move slot. Reads the self-describing
+   * `CheckViabilityInput` buffer at `input_ptr` (`input_len` bytes; layout:
+   * `crates/factory-wasm/src/lib.rs`'s `fw_run_check_viability` doc comment;
+   * encoder/decoder: `adapter/factoryAiEngine.ts`) and returns an `fw_alloc`'d
+   * length-prefixed buffer. The caller must `fw_free(ptr, total_len)`.
+   */
+  fw_run_check_viability(input_ptr: number, input_len: number): number;
   memory: WebAssembly.Memory;
 }
 

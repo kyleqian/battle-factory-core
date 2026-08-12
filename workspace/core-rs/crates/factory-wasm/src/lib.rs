@@ -14,7 +14,11 @@ use factory_core::damage_calc::{
 use factory_core::factory_ai_check_bad_move::{
     self, BattleRngState, CheckBadMovePreambleInput, CheckBadMoveResult,
     FactoryAiCheckBadMoveAttacker, FactoryAiCheckBadMoveRoarTarget, FactoryAiCheckBadMoveTarget,
-    FactoryAiMonGender,
+    FactoryAiMonGender, EFFECT_LEECH_SEED, EFFECT_TOXIC,
+};
+use factory_core::factory_ai_check_viability::{
+    self, CheckViabilityDraw, CheckViabilityResult, CvDrawKind, FactoryAiCheckViabilityBattler,
+    RunCheckViabilityInput,
 };
 use factory_core::factory_ai_mask::{self, FactoryAiMaskError, FactoryAiMaskSelectionInput};
 use factory_core::gen_tables;
@@ -1217,6 +1221,26 @@ impl<'a> ByteReader<'a> {
         let v = self.i32();
         present.then_some(v)
     }
+    fn opt_u32(&mut self) -> Option<u32> {
+        let present = self.bool_();
+        let v = self.u32();
+        present.then_some(v)
+    }
+    fn opt_u16x4(&mut self) -> Option<[u16; 4]> {
+        let present = self.bool_();
+        let values = [self.u16(), self.u16(), self.u16(), self.u16()];
+        present.then_some(values)
+    }
+    fn opt_u16x2(&mut self) -> Option<[u16; 2]> {
+        let present = self.bool_();
+        let values = [self.u16(), self.u16()];
+        present.then_some(values)
+    }
+    fn bytes(&mut self, len: usize) -> &'a [u8] {
+        let result = &self.bytes[self.offset..self.offset + len];
+        self.offset += len;
+        result
+    }
 }
 
 fn gender_from_byte(b: u8) -> FactoryAiMonGender {
@@ -1358,6 +1382,58 @@ fn decode_cbm_attacker(r: &mut ByteReader) -> FactoryAiCheckBadMoveAttacker {
     }
 }
 
+/// Decodes the 42-field, 108-byte `FactoryAiCheckViabilityBattler` record
+/// used by `fw_run_check_viability`. The field order and derived offsets are
+/// documented on that export; keeping this sequential cursor next to the
+/// existing CBM cursor makes optional presence (especially false/zero values)
+/// impossible to accidentally pre-resolve in the boundary.
+fn decode_cv_battler(r: &mut ByteReader) -> FactoryAiCheckViabilityBattler {
+    FactoryAiCheckViabilityBattler {
+        speed: r.u32(),
+        speed_stage: r.u8(),
+        types: [r.u8(), r.u8()],
+        is_first_turn: r.u8(),
+        evasion_stage: r.u8(),
+        acc_stage: r.u8(),
+        atk_stage: r.u8(),
+        def_stage: r.u8(),
+        sp_def_stage: r.u8(),
+        hp: r.i32(),
+        max_hp: r.i32(),
+        sp_atk_stage: r.opt_u8(),
+        last_used_move_id: r.opt_u16(),
+        is_toxic_poisoned: r.opt_bool(),
+        is_leech_seeded: r.opt_bool(),
+        is_rooted: r.opt_bool(),
+        is_cursed: r.opt_bool(),
+        ability: r.opt_u16(),
+        current_weather: r.opt_u8(),
+        moves: r.opt_u16x4(),
+        battle_turn_count: r.opt_u32(),
+        known_moves: r.opt_u16x4(),
+        is_infatuated: r.opt_bool(),
+        is_asleep: r.opt_bool(),
+        is_confused: r.opt_bool(),
+        is_taunted: r.opt_bool(),
+        has_yawn: r.opt_bool(),
+        has_perish_song: r.opt_bool(),
+        protect_uses: r.opt_u8(),
+        has_side_reflect: r.opt_bool(),
+        is_poisoned: r.opt_bool(),
+        is_burned: r.opt_bool(),
+        is_paralyzed: r.opt_bool(),
+        has_substitute: r.opt_bool(),
+        any_move_disabled: r.opt_bool(),
+        has_any_status: r.opt_bool(),
+        target_party_status_equals_any: r.opt_bool(),
+        hold_effect: r.opt_u16(),
+        species_abilities: r.opt_u16x2(),
+        known_ability: r.opt_u16(),
+        used_held_item_id: r.opt_u16(),
+        stockpile_count: r.opt_u8(),
+    }
+}
+
 /// Total width of the `CheckBadMovePreambleInput` buffer
 /// `fw_run_check_bad_move_preamble` reads -- see that export's doc comment
 /// for the full field-by-field offset table this constant is summed from.
@@ -1402,6 +1478,1310 @@ fn encode_cbm_error(message: &str) -> Vec<u8> {
     let message_bytes = message.as_bytes();
     buf.extend_from_slice(&(message_bytes.len() as u16).to_le_bytes());
     buf.extend_from_slice(message_bytes);
+    patch_total_len(&mut buf);
+    buf
+}
+
+// --- fw_run_check_viability -------------------------------------------------
+
+const CV_DRAW_STRIKES_FIRST: u8 = 1;
+const CV_DRAW_JUMPED: u8 = 2;
+const CV_DRAW_JUMPED_TO_END: u8 = 3;
+const CV_DRAW_SUCCEEDED: u8 = 4;
+const CV_DRAW_GUESSED_ABILITY: u8 = 5;
+
+/// Converts `CvDrawKind`'s intentionally TS-mirrored Rust identifier into
+/// its dashed literal. Every enum variant is a draw site and therefore takes
+/// `-roll`; a trailing ordinal belongs after that word (`SpAtkDown2` becomes
+/// `sp-atk-down-roll-2`). Keeping this derivation here avoids maintaining a
+/// second 101-row hand transcription at the ABI seam.
+fn cv_draw_kind_name(kind: CvDrawKind) -> String {
+    let raw = format!("{kind:?}");
+    let chars: Vec<char> = raw.chars().collect();
+    let mut dashed = String::with_capacity(raw.len() + 8);
+    for (i, ch) in chars.iter().copied().enumerate() {
+        let previous = i.checked_sub(1).and_then(|index| chars.get(index)).copied();
+        let next = chars.get(i + 1).copied();
+        if ch.is_ascii_uppercase()
+            && i != 0
+            && (previous.is_some_and(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
+                || (previous.is_some_and(|c| c.is_ascii_uppercase())
+                    && next.is_some_and(|c| c.is_ascii_lowercase())))
+        {
+            dashed.push('-');
+        }
+        dashed.push(ch.to_ascii_lowercase());
+    }
+    let trailing_digits = dashed.bytes().rev().take_while(u8::is_ascii_digit).count();
+    if trailing_digits == 0 {
+        format!("{dashed}-roll")
+    } else {
+        let split = dashed.len() - trailing_digits;
+        format!("{}-roll-{}", &dashed[..split], &dashed[split..])
+    }
+}
+
+/// `nextDraw`'s reason text is mostly its public `kind`; only handlers whose
+/// original TS port labels a script-local site (`draw1`, `roll`, etc.) differ.
+/// This is receipt formatting only: all scoring/RNG logic remains in
+/// `factory_core::factory_ai_check_viability`.
+fn cv_reason_suffix(kind: &str) -> &str {
+    match kind {
+        "high-crit-fallthrough-roll" => "fallthrough-roll",
+        "vital-throw-midband-roll" => "midband-roll",
+        "high-crit-roll" | "always-hit-roll" | "vital-throw-roll" | "speed-down-roll"
+        | "speed-up-roll" | "defense-down-roll" | "sp-def-down-roll" | "evasion-down-roll"
+        | "light-screen-roll" | "reflect-roll" => "roll",
+        _ => {
+            let site_groups = [
+                "attack-down-roll-",
+                "attack-up-roll-",
+                "sp-atk-up-roll-",
+                "defense-up-roll-",
+                "sp-def-up-roll-",
+                "accuracy-down-roll-",
+                "evasion-up-roll-",
+                "sp-atk-down-roll-",
+            ];
+            for group in site_groups {
+                if let Some(site) = kind.strip_prefix(group) {
+                    return match site {
+                        "1" => "draw1",
+                        "2" => "draw2",
+                        "3" => "draw3",
+                        "4" => "draw4",
+                        "5" => "draw5",
+                        "6" => "draw6",
+                        "7" => "draw7",
+                        "8" => "draw8",
+                        _ => kind,
+                    };
+                }
+            }
+            kind
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn append_cv_draw(
+    buf: &mut Vec<u8>,
+    reason_prefix: &str,
+    kind: &str,
+    ordinal: u32,
+    before: BattleRngState,
+    after: BattleRngState,
+    raw_rng_value: u32,
+    random_value: u16,
+    extra_tag: u8,
+    extra_value: u16,
+) {
+    let reason = format!("{reason_prefix}-{}", cv_reason_suffix(kind));
+    buf.extend_from_slice(&ordinal.to_le_bytes());
+    buf.extend_from_slice(&before.value.to_le_bytes());
+    buf.extend_from_slice(&before.calls.to_le_bytes());
+    buf.extend_from_slice(&after.value.to_le_bytes());
+    buf.extend_from_slice(&after.calls.to_le_bytes());
+    buf.extend_from_slice(&raw_rng_value.to_le_bytes());
+    buf.extend_from_slice(&random_value.to_le_bytes());
+    buf.extend_from_slice(&(kind.len() as u32).to_le_bytes());
+    buf.extend_from_slice(kind.as_bytes());
+    buf.extend_from_slice(&(reason.len() as u32).to_le_bytes());
+    buf.extend_from_slice(reason.as_bytes());
+    buf.push(extra_tag);
+    buf.extend_from_slice(&extra_value.to_le_bytes());
+}
+
+fn cv_draw_base(draw: &CheckViabilityDraw) -> (u32, BattleRngState, BattleRngState, u32, u16) {
+    match draw {
+        CheckViabilityDraw::TargetFasterTie {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ConfuseRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SwaggerRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::UserFasterTie {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SpeedDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::PursuitSleepRoarParalyzeRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::RestRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::AbsorbRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::EndureRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::CounterRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::HighCritFallthroughRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::HighCritRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::AlwaysHitRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::VitalThrowMidbandRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::VitalThrowRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::AttackDownRoll1 {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::AttackDownRoll2 {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::DefenseDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SpDefDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::EvasionDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::AttackUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SpeedUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SpAtkUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::DefenseUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SpDefUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ScreenRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ToxicRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ProtectRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::AccuracyDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::EvasionUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::HealRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::TrapRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SemiInvulnerableRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::FlailRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::DestinyBondRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SelfKoRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::CurseRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::PsychUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::MirrorCoatRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::DragonDanceRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::BatonPassRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::FocusPunchKnockOffRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::RevengeRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::MagicCoatRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ForesightRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::EncoreRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ChangeSelfAbilityRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::TrickRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SubstituteRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::AccuracyUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::DisableRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::FlatterRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::LockOnImprisonRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ConversionRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::ThiefRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::HazeRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::RecycleRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SpitUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::MirrorMoveRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SpAtkDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::SnatchRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        }
+        | CheckViabilityDraw::GetAbility {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            ..
+        } => (*ordinal, *before, *after, *raw_rng_value, *random_value),
+    }
+}
+
+#[allow(unused_variables)] // the common receipt fields are read once by cv_draw_base above.
+fn append_encoded_cv_draw(buf: &mut Vec<u8>, reason_prefix: &str, draw: CheckViabilityDraw) {
+    let (base_ordinal, base_before, base_after, base_raw_rng_value, base_random_value) =
+        cv_draw_base(&draw);
+    macro_rules! emit {
+        ($kind:expr, $tag:expr, $value:expr) => {
+            append_cv_draw(
+                buf,
+                reason_prefix,
+                $kind,
+                base_ordinal,
+                base_before,
+                base_after,
+                base_raw_rng_value,
+                base_random_value,
+                $tag,
+                $value,
+            )
+        };
+    }
+
+    match draw {
+        CheckViabilityDraw::TargetFasterTie {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            strikes_first,
+        } => emit!(
+            "target-faster-tie",
+            CV_DRAW_STRIKES_FIRST,
+            strikes_first as u16
+        ),
+        CheckViabilityDraw::ConfuseRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("confuse-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::SwaggerRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("swagger-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::UserFasterTie {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            strikes_first,
+        } => emit!(
+            "user-faster-tie",
+            CV_DRAW_STRIKES_FIRST,
+            strikes_first as u16
+        ),
+        CheckViabilityDraw::SpeedDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("speed-down-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::PursuitSleepRoarParalyzeRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::RestRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::AbsorbRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("absorb-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::EndureRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("endure-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::CounterRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::HighCritFallthroughRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped_to_end,
+        } => emit!(
+            "high-crit-fallthrough-roll",
+            CV_DRAW_JUMPED_TO_END,
+            u16::from(jumped_to_end)
+        ),
+        CheckViabilityDraw::HighCritRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("high-crit-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::AlwaysHitRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("always-hit-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::VitalThrowMidbandRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped_to_end,
+        } => emit!(
+            "vital-throw-midband-roll",
+            CV_DRAW_JUMPED_TO_END,
+            u16::from(jumped_to_end)
+        ),
+        CheckViabilityDraw::VitalThrowRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("vital-throw-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::AttackDownRoll1 {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!(
+            "attack-down-roll-1",
+            CV_DRAW_SUCCEEDED,
+            u16::from(succeeded)
+        ),
+        CheckViabilityDraw::AttackDownRoll2 {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!(
+            "attack-down-roll-2",
+            CV_DRAW_SUCCEEDED,
+            u16::from(succeeded)
+        ),
+        CheckViabilityDraw::DefenseDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("defense-down-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::SpDefDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("sp-def-down-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::EvasionDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("evasion-down-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::AttackUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::SpeedUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("speed-up-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::SpAtkUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::DefenseUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::SpDefUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::ScreenRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::ToxicRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::ProtectRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::AccuracyDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::EvasionUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::HealRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::TrapRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("trap-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::SemiInvulnerableRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("semi-invulnerable-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::FlailRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("flail-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::DestinyBondRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::SelfKoRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::CurseRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::PsychUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("psych-up-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::MirrorCoatRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::DragonDanceRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::BatonPassRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            succeeded,
+        } => emit!("baton-pass-roll", CV_DRAW_SUCCEEDED, u16::from(succeeded)),
+        CheckViabilityDraw::FocusPunchKnockOffRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::RevengeRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("revenge-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::MagicCoatRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::ForesightRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::EncoreRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("encore-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::ChangeSelfAbilityRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!(
+            "change-self-ability-roll",
+            CV_DRAW_JUMPED,
+            u16::from(jumped)
+        ),
+        CheckViabilityDraw::TrickRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("trick-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::SubstituteRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::AccuracyUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("accuracy-up-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::DisableRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("disable-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::FlatterRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("flatter-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::LockOnImprisonRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::ConversionRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("conversion-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::ThiefRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("thief-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::HazeRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::RecycleRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("recycle-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::SpitUpRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            jumped,
+        } => emit!("spit-up-roll", CV_DRAW_JUMPED, u16::from(jumped)),
+        CheckViabilityDraw::MirrorMoveRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::SpAtkDownRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            succeeded,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_SUCCEEDED, u16::from(succeeded));
+        }
+        CheckViabilityDraw::SnatchRoll {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            kind,
+            jumped,
+        } => {
+            let kind = cv_draw_kind_name(kind);
+            emit!(&kind, CV_DRAW_JUMPED, u16::from(jumped));
+        }
+        CheckViabilityDraw::GetAbility {
+            ordinal,
+            before,
+            after,
+            raw_rng_value,
+            random_value,
+            guessed_ability,
+        } => emit!("get-ability", CV_DRAW_GUESSED_ABILITY, guessed_ability),
+    }
+}
+
+fn encode_cv_result(result: CheckViabilityResult, reason_prefix: &str) -> Vec<u8> {
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    match result {
+        CheckViabilityResult::Scored { rng, draws, draw_count, score_delta, func_result_after } => {
+            buf.push(0); // status: scored
+            buf.extend_from_slice(&rng.value.to_le_bytes());
+            buf.extend_from_slice(&rng.calls.to_le_bytes());
+            buf.extend_from_slice(&score_delta.to_le_bytes());
+            buf.push(u8::from(func_result_after.is_some()));
+            buf.push(func_result_after.unwrap_or(0));
+            buf.push(draw_count);
+            for draw in draws.iter().take(draw_count as usize) {
+                append_encoded_cv_draw(&mut buf, reason_prefix, *draw);
+            }
+        }
+        CheckViabilityResult::NotYetPorted { effect, move_id } => {
+            buf.push(1); // status: unsupported-branch / not-yet-ported
+            buf.extend_from_slice(&effect.to_le_bytes());
+            buf.extend_from_slice(&move_id.to_le_bytes());
+        }
+    }
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn encode_cv_error(message: &str) -> Vec<u8> {
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    buf.push(2); // status: error
+    buf.extend_from_slice(&(message.len() as u32).to_le_bytes());
+    buf.extend_from_slice(message.as_bytes());
     patch_total_len(&mut buf);
     buf
 }
@@ -1585,6 +2965,155 @@ pub unsafe extern "C" fn fw_run_check_bad_move_preamble(input_ptr: *const u8) ->
     };
     let result = factory_ai_check_bad_move::run_check_bad_move_preamble(input);
     alloc_and_copy(&encode_cbm_result(result))
+}
+
+/// `AI_CheckViability` for one move slot, via
+/// `factory_ai_check_viability::run_check_viability`. Reads a
+/// caller-allocated self-describing buffer and returns an `fw_alloc`'d,
+/// length-prefixed result buffer; free the returned pointer with its leading
+/// `total_len`.
+///
+/// `reasonPrefix` is encoded even though factory-core correctly drops it from
+/// scoring input: it is part of the public TS call shape and the boundary uses
+/// it only to restore every draw receipt's exact TS `reason` string. No AI
+/// branch, random draw, or default is duplicated here.
+///
+/// # Input layout (all integers little-endian)
+///
+/// ```text
+/// offset  width  field
+/// 0       4      rng.value (u32)
+/// 4       4      rng.calls (u32)
+/// 8       2      move_id (u16)
+/// 10      2      stale_func_result_fallback (opt_u8: presence + value)
+/// 12      4      draw_ordinal_start (u32)
+/// 16      108    attacker: FactoryAiCheckViabilityBattler
+/// 124     108    target: FactoryAiCheckViabilityBattler
+/// 232     4      reason_prefix UTF-8 byte length (u32)
+/// 236     N      reason_prefix UTF-8 bytes; input_len == 236 + N
+/// ```
+///
+/// Each battler is exactly 108 bytes, in
+/// `FactoryAiCheckViabilityBattler` declaration order. `opt_T` is a u8
+/// presence flag followed by a T-valued slot ignored when absent, preserving
+/// omitted vs present false/zero input. Relative offsets: `speed` 0/u32,
+/// `speed_stage` 4/u8, `types` 5/[u8;2], `is_first_turn` 7/u8,
+/// `evasion_stage`/`acc_stage`/`atk_stage`/`def_stage`/`sp_def_stage` 8..12,
+/// `hp` 13/i32, `max_hp` 17/i32, `sp_atk_stage` 21/opt_u8,
+/// `last_used_move_id` 23/opt_u16, `is_toxic_poisoned` 26/opt_bool,
+/// `is_leech_seeded` 28/opt_bool, `is_rooted` 30/opt_bool,
+/// `is_cursed` 32/opt_bool, `ability` 34/opt_u16,
+/// `current_weather` 37/opt_u8, `moves` 39/opt_[u16;4],
+/// `battle_turn_count` 48/opt_u32, `known_moves` 53/opt_[u16;4], then
+/// `is_infatuated`, `is_asleep`, `is_confused`, `is_taunted`, `has_yawn`,
+/// `has_perish_song`, `protect_uses`, `has_side_reflect`, `is_poisoned`,
+/// `is_burned`, `is_paralyzed`, `has_substitute`, `any_move_disabled`,
+/// `has_any_status`, and `target_party_status_equals_any` at relative
+/// offsets 62,64,66,68,70,72,74,76,78,80,82,84,86,88,90 respectively (all
+/// opt_bool except `protect_uses`: opt_u8). Finally `hold_effect` 92/opt_u16,
+/// `species_abilities` 95/opt_[u16;2], `known_ability` 100/opt_u16,
+/// `used_held_item_id` 103/opt_u16, and `stockpile_count` 106/opt_u8.
+///
+/// # Output layout (all integers little-endian)
+///
+/// ```text
+/// offset  width  field
+/// 0       4      total_len (u32)
+/// 4       1      status: 0=scored, 1=not-yet-ported, 2=error
+///
+/// --- scored ---
+/// 5       4      rng.value (u32)
+/// 9       4      rng.calls (u32)
+/// 13      4      score_delta (i32)
+/// 17      1      has_func_result_after (u8 0/1)
+/// 18      1      func_result_after (u8; ignored when absent)
+/// 19      1      draw_count (u8, 0..=8)
+/// 20      var    draw_count records, each:
+///                  ordinal u32; before.value/calls u32/u32;
+///                  after.value/calls u32/u32; raw_rng_value u32;
+///                  random_value u16; kind_len u32 + UTF-8 kind;
+///                  reason_len u32 + UTF-8 reason; extra_tag u8 +
+///                  extra_value u16. extra_tag is 1=strikesFirst,
+///                  2=jumped, 3=jumpedToEnd, 4=succeeded, or
+///                  5=guessedAbility; tags 1..4 use 0/1 (or 0..2 for
+///                  strikesFirst) in extra_value.
+///
+/// --- not-yet-ported ---
+/// 5       2      effect (u16)
+/// 7       2      move_id (u16)
+///
+/// --- error ---
+/// 5       4      message_len (u32)
+/// 9       N      UTF-8 message
+/// ```
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes following
+/// the layout above. Passing a smaller or structurally malformed length yields
+/// a normal error buffer before factory-core is called.
+#[no_mangle]
+pub unsafe extern "C" fn fw_run_check_viability(input_ptr: *const u8, input_len: u32) -> *mut u8 {
+    const CV_INPUT_FIXED_WIDTH: usize = 236;
+    let input_len = input_len as usize;
+    if input_len < CV_INPUT_FIXED_WIDTH {
+        return alloc_and_copy(&encode_cv_error(
+            "factory-wasm factoryAiEngine: CheckViability input shorter than 236 bytes",
+        ));
+    }
+    // SAFETY: caller contract above, and the preceding length check establishes
+    // the fixed cursor prefix exists before any field decoder reads it.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
+    let mut r = ByteReader::new(bytes);
+    let rng = BattleRngState { value: r.u32(), calls: r.u32() };
+    let move_id = r.u16();
+    let stale_func_result_fallback = r.opt_u8();
+    let draw_ordinal_start = r.u32();
+    let attacker = decode_cv_battler(&mut r);
+    let target = decode_cv_battler(&mut r);
+    let reason_len = r.u32() as usize;
+    if r.offset.checked_add(reason_len) != Some(input_len) {
+        return alloc_and_copy(&encode_cv_error(
+            "factory-wasm factoryAiEngine: malformed CheckViability reasonPrefix length",
+        ));
+    }
+    let reason_prefix = match std::str::from_utf8(r.bytes(reason_len)) {
+        Ok(value) => value,
+        Err(_) => {
+            return alloc_and_copy(&encode_cv_error(
+                "factory-wasm factoryAiEngine: CheckViability reasonPrefix is not UTF-8",
+            ));
+        }
+    };
+    debug_assert_eq!(r.offset, input_len);
+
+    let Some(move_data) = gen_tables::MOVES.get(move_id as usize) else {
+        return alloc_and_copy(&encode_cv_error(&format!(
+            "factory-ai-check-viability: unknown move {move_id}"
+        )));
+    };
+    // `AI_CV_Toxic` (shared by Toxic and Leech Seed) is the only native CV
+    // leaf which deliberately models TS's missing optional input as a throw.
+    // Native factory-core uses `expect` so its unit tests can pin that source
+    // error directly; a WASM boundary must never turn caller input into an
+    // abort, so preserve the TS Error surface before entering the reused core
+    // scorer. This is validation only, not a duplicate scoring branch.
+    if (move_data.effect == EFFECT_TOXIC || move_data.effect == EFFECT_LEECH_SEED)
+        && attacker.moves.is_none()
+    {
+        return alloc_and_copy(&encode_cv_error(
+            "factory-ai-check-viability: AI_CV_Toxic requires AI_USER moves",
+        ));
+    }
+
+    let result = factory_ai_check_viability::run_check_viability(RunCheckViabilityInput {
+        rng,
+        move_id,
+        attacker,
+        target,
+        stale_func_result_fallback,
+        draw_ordinal_start,
+    });
+    alloc_and_copy(&encode_cv_result(result, reason_prefix))
 }
 
 #[cfg(test)]
