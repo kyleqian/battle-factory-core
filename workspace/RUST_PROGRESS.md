@@ -5,6 +5,40 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R5 — [supervised session, 2026-08-12] **M5 COMPLETE: Factory AI move decisions cross the Rust/WASM boundary**
+
+- **State:** rust-main = master `251b1027` + verified Rust folds through
+  M5f-3 `680c8e82`/`a0a35a72`. Factory AI mask selection, CheckBadMove,
+  TryToFaint, CheckViability, and the complete mask 0/1/7 DecisionPolicy
+  are native and differential-green through the WASM adapter. Native Rust
+  is **682/682**; the release artifact is 300,117 bytes, sha256
+  `d1ebb5683d6b0efdbff98372110889e393770743bcdd9d3b163dfc2fa24e8ad3`.
+  `RUST_DEFERRED.md` has no open entries.
+- **Did:** M5f-3 added ABI-v1 exports
+  `fw_choose_factory_ai_mask_zero_decision` and
+  `fw_choose_factory_ai_scored_decision`, using documented length-prefixed
+  40+3N and 332+3N inputs. The adapter invokes those exports directly and
+  preserves the complete result, score, RNG, target, and typed trace surface;
+  it has no TypeScript chooser fallback. The new parity suite passes **6/6**
+  in both modes and contains a **2,160-case** internal sweep. Supervisor
+  reviewed boundary lengths before decode, full-object equality and error
+  cases, then reran cargo test/fmt/clippy/WASM and the nine-file WASM parity
+  union (**772/772**) before fold.
+- **Wind-down gates:** after merging current master, cargo **682/682**,
+  fmt, clippy, and wasm32 release build are green; smoke **375/375**; full
+  npm test **1,004 files / 9,643 passed / 1 pre-existing skip**; npm build
+  **653 modules**; soak vanilla **20/20 OK** and full policy **60/60 OK**,
+  with zero crashes or hangs.
+- **Next:** orient M6 against current `PROGRESS.md`/`ISSUES.md`, reject every
+  moving target, and dispatch one bounded Rust-family scout or first native
+  leaf step. Natural first candidate is the remaining Factory AI switch
+  policy family, subject to a fresh import/conflict/census check.
+- **Notes:** M5f-3 worker used gpt-5.6-sol/high and stayed within the allowed
+  `core-rs/**` plus newly created adapter-parity test surface. No main-lane
+  document or canonical TypeScript engine file was edited.
+
+---
+
 ## R4 — [supervised session, 2026-08-11 night through 2026-08-12] **M5f-2 folded: the pure DecisionPolicy is native**
 
 - **State:** rust-main = master `27804f67` + verified Rust folds through
