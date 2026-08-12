@@ -1,0 +1,190 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v14",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "path": "reference/pokeemerald/src/m4a_1.s",
+      "lines": "1279-1288",
+      "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+    },
+    "elf": {
+      "waitLoop": "0x082dfb70",
+      "lfoSpeedDecision": "0x082dfb7a..0x082dfb80",
+      "exit": "0x082dfbcc",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "lfoSpeed load/compare/non-taken decision before mod",
+        "start": "0x082dfb7a",
+        "endExclusive": "0x082dfb80",
+        "bytes": 6,
+        "sha256": "89396c47acd7dd3dc57c0185a1f2b8fae0719ce305d5e7ee1d80f96edb1bad00"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "iwramDataAccessPremiumCycles": 0
+    }
+  },
+  "frozenInputs": {
+    "acceptedV13EvidenceSha256": "1bb3b2b680b4686b879ccb657816982ce0ad1f1c2d656f174bf8dd65193e60cd",
+    "acceptedV13DocSha256": "d9a39158dda10745b4dbeab7469c5404d5133e6b85424bd50f8355b7cea5d674",
+    "v13RegeneratesByteForByte": true,
+    "packetSha256": {
+      "anchor": "0418857033ee4bcf1876d16c87bb33532d602bf65a232202af0a68007cd42e87",
+      "liliana": "a641b3393fb9005807355f3d54f7ac10996eb2aad2b22a0c0eb26adf0df4e4d6",
+      "factory-varied": "e2b8cf0157f78abc87299aa17768df0aa5bca13fc32cc9e756e812e490ff2fe3"
+    },
+    "packetRepeatSha256": {
+      "anchor": "0418857033ee4bcf1876d16c87bb33532d602bf65a232202af0a68007cd42e87",
+      "liliana": "a641b3393fb9005807355f3d54f7ac10996eb2aad2b22a0c0eb26adf0df4e4d6",
+      "factory-varied": "e2b8cf0157f78abc87299aa17768df0aa5bca13fc32cc9e756e812e490ff2fe3"
+    }
+  },
+  "capture": {
+    "boundary": "first MPlayMain lfoSpeed decision after each observed CGB4 ply_note return",
+    "scalars": [
+      "MusicPlayerTrack.lfoSpeed"
+    ],
+    "excluded": [
+      "pointer",
+      "runtime address",
+      "frame",
+      "duration",
+      "later revisits of the same wait",
+      "MusicPlayerTrack.mod",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 7,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "sourceCycles": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "sourceCycles": 18
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "sourceCycles": 24
+      }
+    },
+    "lfoSpeedHistogram": {
+      "44": 7
+    },
+    "postV13RouteSourceCyclesPerCallback": 6,
+    "postV13RouteSourceCycles": 42,
+    "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 5212,
+    "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 5254,
+    "sequentialThumbHalfwords": 21,
+    "takenControlTransferRefills": 0,
+    "iwramByteReads": 7,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 842,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 848,
+      "nextMod": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 708,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 714,
+      "nextMod": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 704,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 710,
+      "nextMod": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 704,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 710,
+      "nextMod": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 842,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 848,
+      "nextMod": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 708,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 714,
+      "nextMod": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "acceptedContiguousPrefixThroughWaitDecrementSourceCycles": 704,
+      "lfoSpeed": 44,
+      "postV13RouteSourceCycles": 6,
+      "contiguousPrefixThroughLfoSpeedDecisionSourceCycles": 710,
+      "nextMod": null,
+      "completeMPlaySourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "All seven captured lfoSpeed bytes are nonzero and take the same no-refill decision through the lfoSpeed comparison.",
+    "contiguousPrefix": "5254 aggregate source cycles through the lfoSpeed decision across the seven callbacks (5212 frozen v13 + 42 v14).",
+    "remainingDiscriminator": "The immediately following MusicPlayerTrack.mod IWRAM read lacks a newly captured scalar; stop before it.",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "runtimeAddressLookup": false,
+    "serviceCost": null,
+    "constructionClock": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Twice-fresh address-free packets prove lfoSpeed 44 for exactly the frozen seven callbacks; source/ELF/ROM close only the six-cycle nonzero decision before mod."
+}
