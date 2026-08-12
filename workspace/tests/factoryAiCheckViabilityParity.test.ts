@@ -90,7 +90,7 @@ function baseInput(
   moveId: number,
   attacker: FactoryAiCheckViabilityBattler = baseBattler(),
   target: FactoryAiCheckViabilityBattler = baseBattler(),
-  overrides: Partial<Omit<RunCheckViabilityInput, "rng" | "moveId" | "attacker" | "target">> = {},
+  overrides: Partial<Omit<RunCheckViabilityInput, "moveId" | "attacker" | "target">> = {},
 ): RunCheckViabilityInput {
   return {
     rng: { value: 249_678_687, calls: 0 },
