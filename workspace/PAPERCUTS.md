@@ -313,7 +313,7 @@ Per entry:
 - **What:** Markdown backticks embedded in a double-quoted
   `run-subagent.sh` brief were evaluated by the shell as commands, stripping
   two source paths before launch and requiring an immediate clean relaunch.
-- **Hits:** 1.
+- **Hits:** 2.
 - **Cost each:** ~1 min.
 - **Workaround:** use plain path text or a `--brief-file`; never place
   backticks or `$()` inside a shell-interpolated brief argument.
