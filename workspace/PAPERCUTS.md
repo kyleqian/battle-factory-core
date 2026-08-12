@@ -892,8 +892,10 @@ then each saw a command return before its child verification exited, costing
 about 3 more minutes of polling/rechecks. Two final #55 workers then collided
 with another full-suite process and needed retained-session polling plus
 compact-output reruns. The sixth-MPlay selector worker later reran a green full
-suite solely because the yielded handle hid its terminal summary. Hits: 13;
-cost: about 60 minutes plus avoidable CPU
+suite solely because the yielded handle hid its terminal summary. The CGB4 v6
+worker likewise restarted the full suite while its first yielded run was still
+active, adding about 2 minutes of polling. Hits: 14;
+cost: about 62 minutes plus avoidable CPU
 contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.

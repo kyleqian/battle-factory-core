@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1188 — [supervisor, 2026-08-12] **CGB4 field slice verified; Rust M5d-1 folded**
+
+- **State:** #55 is source-exact for **2,459 contiguous cycles** through
+  `ChnVolSetAsm` entry across the observed **7/82** CGB4 callbacks. Complete
+  MPlay stays **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** independently regenerated v6 byte-for-byte (`341be839…`) and
+  audited its **44** field-copy + **10** BL-edge cycles per callback. Folded
+  Rust M5d-1's first **13** native `CheckViability` effects through merge
+  `e59b520a`; animation-main remains contained.
+- **Next:** source-close one bounded observed `ChnVolSetAsm` body route. Stop
+  before any unresolved branch/state input; preserve later fields, the other
+  75 callbacks, complete note/glue/MPlay costs, service/arbitration, and clock
+  wiring null.
+- **Notes:** focused v5-v6 **8/8**; union full **983 files / 9,550 passed / 1
+  skipped**, build **653 modules**. Rust is **384/384**, fmt/clippy clean;
+  rebuilt WASM is **138,325 bytes** (`9548adb8…`) and forced parity is
+  **757/757**. The latest engine-changing fold already passed vanilla
+  **20/20** and full **60/60** soaks. Both branches are contained; no
+  unsupported barrier or canonical Battle-2 extension.
+
 ## 1187 — [MAIN worker, 2026-08-12] **CGB4 post-helper allocation fields source-closed**
 
 - **State:** #55 is source-exact through `ChnVolSetAsm` entry for **2,459
@@ -46,25 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **757/757**. Fresh post-engine-fold soaks are vanilla **20/20** and full
   **60/60**, zero crashes/hangs. Both branches are contained; no unsupported
   barrier or canonical Battle-2 extension.
-
-## 1185 — [MAIN worker, 2026-08-12] **CGB4 caller/prologue gap source-closed**
-
-- **State:** #55 now has a **2,081-cycle contiguous source-exact prefix**
-  through `TrkVolPitSet` return for **7/82** observed callbacks. The prior
-  **1,969** known-component sum is retained as the pre-gap total; the exact
-  caller/prologue gap is **112** cycles. Complete MPlay remains **5 exact /
-  108 null** and the construction clock stays unwired.
-- **Did:** added v5 source/ELF/ROM-pinned evidence for `_081DDC66`'s
-  argument setup + BL (**14** cycles) and `TrkVolPitSet`'s complete push
-  prologue (**2**), joining frozen v4 rows by `sourceStateDigest`. Later
-  allocation fields remain explicit nulls; no oracle rerun or production
-  engine change.
-- **Next:** leave later allocation fields, unobserved helper routes, the other
-  75 callbacks, complete note/glue/MPlay costs, service, arbitration, and
-  clock wiring null for the next bounded source slice.
-- **Notes:** focused v5 **4/4** (dependent v3/v4/v5 **11/11**), smoke
-  **375/375**, full **982 files / 9,546 passed / 1 skipped**, typecheck, and
-  build **653 modules** are green. Receipts are
-  `docs/issue55-m4a-note-body-cgb4-v5.md` and
-  `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v5.json`; commits
-  `704d9aa6`, `5f221715`.

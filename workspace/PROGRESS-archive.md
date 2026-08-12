@@ -41851,3 +41851,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   soaks are vanilla **20/20** and full **60/60**, zero crashes/hangs. Both
   lane branches are contained; no unsupported barrier or canonical Battle-2
   extension.
+## 1185 — [MAIN worker, 2026-08-12] **CGB4 caller/prologue gap source-closed**
+
+- **State:** #55 now has a **2,081-cycle contiguous source-exact prefix**
+  through `TrkVolPitSet` return for **7/82** observed callbacks. The prior
+  **1,969** known-component sum is retained as the pre-gap total; the exact
+  caller/prologue gap is **112** cycles. Complete MPlay remains **5 exact /
+  108 null** and the construction clock stays unwired.
+- **Did:** added v5 source/ELF/ROM-pinned evidence for `_081DDC66`'s
+  argument setup + BL (**14** cycles) and `TrkVolPitSet`'s complete push
+  prologue (**2**), joining frozen v4 rows by `sourceStateDigest`. Later
+  allocation fields remain explicit nulls; no oracle rerun or production
+  engine change.
+- **Next:** leave later allocation fields, unobserved helper routes, the other
+  75 callbacks, complete note/glue/MPlay costs, service, arbitration, and
+  clock wiring null for the next bounded source slice.
+- **Notes:** focused v5 **4/4** (dependent v3/v4/v5 **11/11**), smoke
+  **375/375**, full **982 files / 9,546 passed / 1 skipped**, typecheck, and
+  build **653 modules** are green. Receipts are
+  `docs/issue55-m4a-note-body-cgb4-v5.md` and
+  `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v5.json`; commits
+  `704d9aa6`, `5f221715`.
