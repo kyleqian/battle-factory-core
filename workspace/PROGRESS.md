@@ -11,8 +11,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   family now has a WASM ABI, adapter, and differential parity suite. Main #55
   remains unchanged at PEND **108/108**, complete MPlay **5 exact / 108 null**,
   construction clock unwired, and LUKAS **8/50**.
-- **Did:** folded rust-main through merge `f522820b`; independently reran native
-  Rust **91/91**, fmt/clippy, rebuilt the 68,963-byte WASM artifact, and proved
+- **Did:** folded rust-main M4b through merge `f522820b` and its verified lane
+  ledger through `982b6221`; independently reran native Rust **91/91** after
+  each fold, with fmt/clippy, rebuilt the 68,963-byte WASM artifact, and proved
   the four adapter suites **454/454** in both default and forced-WASM modes.
 - **Next:** source-close one remaining smallest live #55 callback family. Keep
   unresolved families and complete one-pass totals null; do not wire the clock.
