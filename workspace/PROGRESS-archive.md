@@ -42080,3 +42080,18 @@ git; the current live ledger keeps the three load-bearing entries only.
   skipped**, and build **653 modules** are green. No duration fit, runtime
   identity, production import, unsupported barrier, animation/Rust change, or
   canonical Battle-2 branch.
+## 1196 — [MAIN worker, 2026-08-12] **CGB4 v11 `ply_note` return source-closed**
+
+- **State:** #55 is source-exact for **4,435 aggregate cycles** through the
+  final `ply_note` `bx r0` return across the same observed **7/82** zero-
+  `lfoDelay` CGB4 callbacks; those seven individual complete-note costs are
+  now exact. The other 75 note callbacks, complete-MPlay aggregate,
+  post-callback glue, and construction clock remain null.
+- **Did:** added a frozen-v10-only v11 receipt joined solely by
+  `sourceStateDigest`. It source/ELF/ROM-guards the `0x082dff04` branch,
+  `_081DDCDC` writes, and complete epilogue for **44 each / 308 aggregate**.
+- **Next:** retain post-callback MPlay dispatcher/glue, the other 75 note
+  callbacks, complete-MPlay aggregate, service/arbitration, and clock wiring
+  null unless separately proved.
+- **Notes:** focused v3-v11 **35/35**, smoke **375**, full **9,570 passed / 1
+  skipped**, typecheck, and build were green. Frozen v10 SHA256 `3e3af127…`.

@@ -2091,6 +2091,30 @@ the other **75** note callbacks and their glue, unobserved helper/key/nonzero-
 service/arbitration, and construction-clock wiring. No new unsupported barrier
 or canonical Battle-2 extension was added.
 
+**2026-08-12 CGB4 v13 next-command wait-route closure:** additive v13 preserves
+frozen v12 byte-for-byte and joins only by `sourceStateDigest`. Twice-fresh,
+address-free Battle Scene OFF packets capture exactly the current command byte
+and `MusicPlayerTrack.cmdPtr` target storage class for the same **7/82** rows:
+all target `gamepak-ws0`; bytes are `0x86 ×2 / 0x8c ×3 / 0x92 ×2`. Packet
+SHA256 are anchor `c3c7b33f…`, LILIANA `10adc46c…`, and legal-varied
+`14524c0f…`, with byte-identical repeats.
+
+All seven take the encoded-wait route. Exact source/ELF/ROM guards cover the
+compiled command path, complete `gClockTable`, and each inherited normalized
+song byte. From v12's `ldrb r1,[r2]` through wait assignment and the first
+decrement, the route executes 21 sequential Thumb halfwords, four taken
+refills, two GamePak bytes, and one GamePak literal word: **89 cycles each /
+623 aggregate**. The contiguous boundary advances from **4,589** to **5,212
+aggregate cycles**. Evidence: `docs/issue55-m4a-note-body-cgb4-v13.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v13.json` (SHA256
+`1bb3b2b6…`).
+
+Closure stops before the next IWRAM `lfoSpeed` read because its scalar is not
+captured. Later track-loop work, the other 75 callbacks, complete MPlay totals
+(**5 exact / 108 null**), service/arbitration, and construction-clock wiring
+remain null. No runtime pointer/address identity, unsupported barrier,
+animation/Rust change, or canonical Battle-2 extension landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

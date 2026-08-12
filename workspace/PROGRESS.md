@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1199 — [MAIN worker, 2026-08-12] **CGB4 v13 next-command wait route source-closed**
+
+- **State:** #55 is source-exact for **5,212 aggregate cycles** through the
+  first post-note wait decrement across the same observed **7/82** CGB4
+  callbacks: frozen-v12 **4,589** plus v13 **623** cycles. Complete MPlay
+  remains **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** twice-fresh address-free packets captured `MusicPlayerTrack.cmdPtr`'s
+  target class and byte for exactly the frozen seven rows: all `gamepak-ws0`,
+  with `0x86 ×2 / 0x8c ×3 / 0x92 ×2`. Source/ELF/ROM guards close their shared
+  encoded-wait route from v12's `ldrb r1,[r2]` through `gClockTable` assignment
+  and the first decrement at **89 cycles each**; v12 is byte-identical and the
+  only join is `sourceStateDigest`.
+- **Next:** stop before the next IWRAM `lfoSpeed` read, whose scalar is absent
+  from the packet. Retain later track-loop work, the other 75 note callbacks,
+  complete MPlay, service/arbitration, and construction-clock wiring null.
+- **Notes:** packet hashes anchor `c3c7b33f…`, LILIANA `10adc46c…`, varied
+  `14524c0f…`; v13 evidence/doc `1bb3b2b6…` / `d9a39158…`. Red-first focused
+  v3-v13 **45/45** is green; finish gates pending. No runtime pointer/address
+  identity, production import, unsupported barrier, animation/Rust change, or
+  canonical Battle-2 branch.
+
 ## 1198 — [MAIN worker, 2026-08-12] **CGB4 v12 post-`ply_note` dispatcher source-closed**
 
 - **State:** #55 is source-exact for **4,589 aggregate cycles** through the
@@ -50,29 +71,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   modules**. Rust is **662/662**, fmt/clippy clean; rebuilt WASM is **138,436
   bytes** (`9d53f91e…`) and forced parity is **757/757**. No engine-changing
   fold, soak trigger, unsupported barrier, or canonical Battle-2 extension.
-
-## 1196 — [MAIN worker, 2026-08-12] **CGB4 v11 `ply_note` return source-closed**
-
-- **State:** #55 is source-exact for **4,435 aggregate cycles** through the
-  final `ply_note` `bx r0` return across the same observed **7/82** zero-
-  `lfoDelay` CGB4 callbacks; those seven individual complete-note costs are
-  now exact. The other 75 note callbacks, complete-MPlay aggregate,
-  post-callback glue, and construction clock remain null.
-- **Did:** added a frozen-v10-only v11 receipt joined solely by
-  `sourceStateDigest`. It source/ELF/ROM-guards the `0x082dff04` branch,
-  `_081DDCDC` frequency/status/track-flags writes, and complete epilogue:
-  `pop {r0-r7}` eight-word IWRAM multiple read, four high-register restores,
-  final IWRAM `pop {r0}`, and `bx r0`. Static `MPlayOpen`/`MPlayExtender` and
-  stack provenance prove the new r4/r5/stack accesses IWRAM; fixed cost is
-  **44 each / 308 aggregate**. No oracle capture.
-- **Next:** retain post-callback MPlay dispatcher/glue, the other 75 note
-  callbacks, unobserved helper/key/nonzero-LFO routes, complete-MPlay
-  aggregate, service/arbitration, and construction-clock wiring null. A future
-  worker may select one new bounded source-exact discriminator, but must not
-  extend this receipt past `ply_note` return without a separate brief.
-- **Notes:** red-first v11 route/mutation/count guards are green; focused
-  v3-v11 **35/35**, smoke **8 files / 375 passed**, typecheck, post-change full
-  **988 files / 9,570 passed / 1 skipped**, and build **653 modules** are green.
-  Frozen v10 SHA256 `3e3af127…`; v11 uses **no** duration fit, runtime
-  identity/address lookup, production import, unsupported barrier, animation/
-  Rust change, or canonical Battle-2 branch.
