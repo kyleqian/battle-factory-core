@@ -4,6 +4,7 @@ import {
   FURY_SWIPES_LAST_BODY_AGE,
   FURY_SWIPES_SECOND_SWIPE_AGE,
   furySwipesAtAge,
+  furySwipesDisplayedTargetX2AtAge,
 } from "../../src/animation/furySwipes.ts";
 import {
   createSceneOnMovePresentation,
@@ -49,6 +50,15 @@ describe("Move_FURY_SWIPES source-relative reducer", () => {
     expect(at(44).swipes).toEqual([]);
     expect(at(FURY_SWIPES_LAST_BODY_AGE).active).toBe(true);
     expect(at(FURY_SWIPES_LAST_BODY_AGE + 1).active).toBe(false);
+  });
+
+  it("ports both short ShakeMon2 schedules through the Scene-ON OAM latch", () => {
+    expect([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((age) =>
+      furySwipesDisplayedTargetX2AtAge(age, 1)))
+      .toEqual([1, 3, -3, -3, 3, 3, -3, -3, 3, 3, 0]);
+    expect([28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42].map((age) =>
+      furySwipesDisplayedTargetX2AtAge(age, 0)))
+      .toEqual([0, 4, -4, -4, 4, 4, -4, -4, 4, 4, -4, -4, 4, 4, 0]);
   });
 
   it("exposes only immutable geometry and field data through the typed seam", () => {

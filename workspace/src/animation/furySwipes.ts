@@ -1,5 +1,8 @@
 import { horizontalLungeX2AtTick } from "./horizontalLunge.ts";
-import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
+import {
+  shakeMon2DisplayedOffsetAtAge,
+  shakeMon2OffsetAtTick,
+} from "./shakeMon2.ts";
 
 /** Source-relative Move_FURY_SWIPES visual state. */
 export interface FurySwipesSwipe {
@@ -106,4 +109,37 @@ export function furySwipesAtAge(
       : null,
     active: age >= 0 && age <= FURY_SWIPES_LAST_BODY_AGE,
   };
+}
+
+/**
+ * Scene-ON target displacement after the BuildOamBuffer display latch.
+ *
+ * The source task's sprite `x2` is intentionally not reused here: the stock
+ * task initializes and immediately advances its software state, while the
+ * framebuffer sees the prior OAM row. The generic source-derived display
+ * helper preserves the creation row, both short schedules' bodies, terminal
+ * zero, and teardown without baking a capture timeline into this move.
+ */
+export function furySwipesDisplayedTargetX2AtAge(
+  age: number,
+  targetIdleX2: number,
+): number {
+  const first = shakeMon2DisplayedOffsetAtAge(
+    3,
+    0,
+    5,
+    1,
+    age,
+    FURY_SWIPES_FIRST_SWIPE_AGE,
+  );
+  const second = shakeMon2DisplayedOffsetAtAge(
+    4,
+    0,
+    7,
+    1,
+    age,
+    FURY_SWIPES_SECOND_SWIPE_AGE,
+  );
+  if (age <= FURY_SWIPES_FIRST_SWIPE_AGE) return targetIdleX2;
+  return first.x2 + second.x2;
 }

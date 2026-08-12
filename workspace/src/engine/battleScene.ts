@@ -513,6 +513,7 @@ import {
 } from "../animation/dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
 import { shakeMon2OffsetAtTick } from "../animation/shakeMon2.ts";
+import { furySwipesDisplayedTargetX2AtAge } from "../animation/furySwipes.ts";
 import {
   leafBladeDisplayedOamOrderAtAge,
   leafBladeDisplayedTargetX2AtAge,
@@ -19640,8 +19641,9 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "FURY_SWIPES") {
     const furyState = state as SceneOnMovePresentationState<SceneOnFurySwipesConfig>;
     const view = sceneOnFurySwipesView(furyState);
-    // Plain sprite OAM and both live ShakeMon2 schedules consume the
-    // preceding software state in the Scene-ON framebuffer.
+    // Plain sprite OAM and the swipe cells consume the preceding software
+    // state in the Scene-ON framebuffer. ShakeMon2 has its own task display
+    // latch, modeled by furySwipesDisplayedTargetX2AtAge below.
     const displayed = sceneOnFurySwipesView({ ...furyState, age: state.age - 1 });
     const playerToOpponent = view.attacker.species === "AIPOM"
       && view.attacker.geometry.side === "player"
@@ -19664,15 +19666,13 @@ export function renderSceneOnMovePresentation(
     const targetIdle = playerToOpponent
       ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
       : { x2: 0, y2: 0 };
-    // ShakeMon2 writes source x2 in the mon's mirrored coordinate system. The
-    // hardware OAM latch therefore displays its negation. Front sprites also
-    // carry the one-pixel idle x2 baked into their source OAM baseline; keep
-    // that compositor-only species geometry out of the reducer.
-    const targetX2 = displayed.age < 10
-      ? targetIdle.x2
-      : playerToOpponent
-        ? -displayed.targetX2 - 1
-        : -displayed.targetX2;
+    // Keep the species' settled front idle offset in the compositor. The
+    // task helper independently resolves creation, body, terminal zero, and
+    // teardown for both (3,0,5,1) and (4,0,7,1) schedules.
+    const targetX2 = furySwipesDisplayedTargetX2AtAge(
+      state.age,
+      targetIdle.x2,
+    );
     drawTileBg(
       fb,
       battleBg.static.tileset,
