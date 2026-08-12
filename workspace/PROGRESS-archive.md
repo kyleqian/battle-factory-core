@@ -42566,3 +42566,23 @@ git; the current live ledger keeps the three load-bearing entries only.
   (`b6acb929…`), forced parity **9 files / 772 passed**; union npm **1,009
   files / 9,670 passed / 1 skipped** and build **657 modules**. No main
   ratchet, unsupported-barrier, or canonical Battle-2 change; no soak trigger.
+## 1220 — [supervisor, 2026-08-12] **v25 and latest persistent-lane union green**
+
+- **State:** #55 is exact through the selected three-row **5,764-cycle**
+  CGB4 prefix. Animation's completed Fissure compositor/Hydro Pump receipt
+  and Rust M6's switch-policy WASM boundary are folded; both persistent lane
+  tips are contained.
+- **Did:** independently recovered and audited the timed-out v25 worker's
+  finished evidence, committed `7570a564`, then folded animation through
+  `ef4118ea` and Rust through `a6ade760`. The first post-Rust full suite
+  correctly exposed a stale WASM artifact missing the new switch exports; I
+  rebuilt it before forcing all boundary parity suites and rerunning the full
+  union.
+- **Next:** source-close only `_081DD9D0`'s volume/pitch-mask discriminator
+  for the same three frozen rows, using v25's exact `firstTrackFlags=0x80`.
+  Stop before `_081DDA62`'s first instruction; retain identity/count/pointer,
+  channel/later body, and construction-clock wiring null.
+- **Notes:** Rust **693/693 harness tests**; rebuilt WASM **324,348 bytes**
+  (`3f8094c9…`), forced parity **10 files / 775 passed**; final union npm
+  **1,011 files / 9,682 passed / 1 skipped** and build **657 modules**. No
+  main ratchet, unsupported-barrier, or canonical Battle-2 change.

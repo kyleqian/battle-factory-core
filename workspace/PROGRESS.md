@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1224 — [supervisor, 2026-08-12] **v27 and Rust M8a union green**
+
+- **State:** #55 is exact through the three selected-row **5,812-cycle** CGB4
+  prefix. Rust's native Factory-AI battle-history leaf is folded; both
+  persistent lane tips are contained.
+- **Did:** audited v27's twice-fresh exact-key packets, `r2=10` result, exact
+  ROM bytes, branch-halfword timing, fail-closed exit route, and byte-stable
+  regeneration. Folded Rust through `e500d74f`, reran native Rust, rebuilt
+  WASM, forced all existing boundary suites, and verified the full union.
+- **Next:** source-close only the observed non-exit continuation `movs r0,
+  MusicPlayerTrack_size; adds r5,r0; bgt _081DD9C8` for the same three frozen
+  v27 rows. Stop before `_081DD9C8`; retain actual count/identity/pointer/
+  channel, next flags/body, and construction-clock wiring null.
+- **Notes:** Rust **708/708 harness tests**; rebuilt WASM **348,965 bytes**
+  (`f5939249…`), forced parity **11 files / 778 passed**; union npm **1,015
+  files / 9,703 passed / 1 skipped** and build **657 modules**. No main
+  ratchet, unsupported-barrier, or canonical Battle-2 change.
+
 ## 1223 — [MAIN worker, 2026-08-12] **CGB4 v27 first-track decrement/exit decision**
 
 - **State:** #55 is source-exact through the three selected-row **5,812-cycle** CGB4 prefix, stopping before either `_081DDA6C`'s first instruction or the non-exit continuation's `movs r0, MusicPlayerTrack_size`. Construction-clock wiring remains null.
@@ -49,24 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **1,012 files / 9,688 passed / 1 skipped**, and build **657 modules** are
   green. Evidence/doc `a4cff030…` / `2eb2f9e4…`; no ratchet or
   unsupported-barrier change.
-
-## 1220 — [supervisor, 2026-08-12] **v25 and latest persistent-lane union green**
-
-- **State:** #55 is exact through the selected three-row **5,764-cycle**
-  CGB4 prefix. Animation's completed Fissure compositor/Hydro Pump receipt
-  and Rust M6's switch-policy WASM boundary are folded; both persistent lane
-  tips are contained.
-- **Did:** independently recovered and audited the timed-out v25 worker's
-  finished evidence, committed `7570a564`, then folded animation through
-  `ef4118ea` and Rust through `a6ade760`. The first post-Rust full suite
-  correctly exposed a stale WASM artifact missing the new switch exports; I
-  rebuilt it before forcing all boundary parity suites and rerunning the full
-  union.
-- **Next:** source-close only `_081DD9D0`'s volume/pitch-mask discriminator
-  for the same three frozen rows, using v25's exact `firstTrackFlags=0x80`.
-  Stop before `_081DDA62`'s first instruction; retain identity/count/pointer,
-  channel/later body, and construction-clock wiring null.
-- **Notes:** Rust **693/693 harness tests**; rebuilt WASM **324,348 bytes**
-  (`3f8094c9…`), forced parity **10 files / 775 passed**; final union npm
-  **1,011 files / 9,682 passed / 1 skipped** and build **657 modules**. No
-  main ratchet, unsupported-barrier, or canonical Battle-2 change.
