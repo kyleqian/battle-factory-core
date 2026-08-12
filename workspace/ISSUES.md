@@ -1724,6 +1724,22 @@ nonzero-modulation route stays null. No observed duration or pointer identity
 was used, no service cost was assigned, and `runFactoryConstructionClock`
 remains unwired. Evidence: `docs/issue55-m4a-wait-lfo-v1.md`.
 
+**2026-08-11 `ply_pend` callback-family closure:** the smallest nonempty
+sixth-player callback family is now source-exact. Additive OFF packets capture
+only track index, `patternLevel`, and a normalized pattern-return role/offset
+at the exact compiled `ply_pend` entry. Two fresh serial runs per anchor,
+LILIANA, and legal-varied case are byte-identical (`ccaf8b53…` / `eb925d3a…`
+/ `c22d9302…`). Across all **108/108** one-pass rows there is exactly **1/1**
+`ply_pend` callback (anchor track 6); it selects the empty-pattern-stack route
+at **20 cycles**. The source-general nonempty route is independently counted
+at **30 cycles** but is not claimed as observed.
+
+Complete MPlay costs remain **5 exact / 108 null**. The next discriminator is
+the command decode/jump-table dispatcher or one of the remaining live
+`ply_patt`, `ply_voice`, `ply_vol`, `ply_pan`, `ply_bend`, and note families.
+No observed duration, pointer identity, service cost, or clock wiring landed.
+Evidence: `docs/issue55-m4a-pend-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

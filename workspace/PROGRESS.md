@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1158 — [MAIN worker, 2026-08-11] **#55 `ply_pend` callback family source-closed**
+
+- **State:** the sixth-player `ply_pend` family is source-exact for **1/1**
+  callback and **108/108** one-pass rows. Complete MPlay stays **5 exact / 108
+  null**; the construction clock stays null/unwired, S8/#56 are untouched,
+  and LUKAS remains **8/50**.
+- **Did:** twice-fresh address-free OFF packets capture exact compiled callback
+  entry state across anchor/LILIANA/varied. The sole live callback selects the
+  **20-cycle** empty-pattern-stack route; the pure reducer also counts the
+  source-general nonempty route at **30 cycles** without claiming it observed.
+- **Next:** source-capture and instruction-count one remaining live command
+  dispatcher/callback family (`ply_patt`, voice/vol/pan/bend, or note). Keep
+  all unresolved families and every complete one-pass MPlay total null.
+- **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
+  **16/16**, smoke **375/375**, typecheck, full **960 files / 9,165 passed / 1
+  skipped**, and build **649 modules** are green; pixels were not rerun.
+
 ## 1157 — [supervisor, 2026-08-11] **#55 wait/LFO closure verified**
 
 - **State:** `master` is green with channel-gate and wait/LFO components both
@@ -35,19 +52,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no engine/pixel identity or unsupported barrier changed. Focused
   **8/8**, smoke **375/375**, typecheck, full **959 files / 9,161 passed / 1
   skipped**, and build **649 modules** are green; pixels were not rerun.
-
-## 1155 — [supervisor, 2026-08-11] **#55 ClearChain closure verified**
-
-- **State:** `master` is green with the entire sixth-player channel-gate
-  component source-exact for **108/108** one-pass rows. Complete MPlay remains
-  **5 exact / 108 null**; #55 stays unwired and LUKAS stays **8/50**.
-- **Did:** reviewed the callsite-filtered address-free packets and 85/87/89
-  cycle link-topology reducer, then independently reran the gate/ClearChain
-  regeneration tests **8/8**. Preserved the concurrent Rust launcher/docs
-  commits; both lane branches are fully contained in `master`.
-- **Next:** capture and source-reduce one bounded per-track wait/LFO component
-  before command callbacks. Keep complete one-pass costs null and do not wire
-  `runFactoryConstructionClock` until every selected route closes.
-- **Notes:** worker full gate **958 files / 9,157 passed / 1 skipped**, smoke
-  **375/375**, typecheck, build **649 modules**. No unsupported barrier,
-  production/presentation change, or Rust/WASM artifact delta.
