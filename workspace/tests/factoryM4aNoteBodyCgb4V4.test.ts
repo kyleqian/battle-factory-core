@@ -44,7 +44,7 @@ describe("Issue #55 ply_note CGB-channel-4 TrkVolPitSet helper v4", () => {
     expect(() => reduceMPlayTrkVolPitSetTiming({ flags: "0x80" })).toThrow(/flags must be u8/);
   });
 
-  it("preserves the frozen v3 join and closes seven callbacks through helper return", () => {
+  it("preserves the frozen v3 join and closes seven post-prologue helper components", () => {
     const evidence = makeEvidence() as any;
     expect(evidence.join).toEqual({ key: "sourceStateDigest", rows: 113, cgb4Rows: 7, ambiguousRows: 0, addressFree: true });
     expect(evidence.coverage).toMatchObject({
@@ -59,17 +59,19 @@ describe("Issue #55 ply_note CGB-channel-4 TrkVolPitSet helper v4", () => {
       trkVolPitSetSourceCycleRange: { min: 56, max: 138, distinct: 2 },
       trkVolPitSetSourceCycles: 556,
       acceptedPrefixThroughAllocationBodySourceCycles: 1413,
-      knownPrefixThroughTrkVolPitSetSourceCycles: 1969,
+      knownComponentSumIncludingTrkVolPitSetSourceCycles: 1969,
+      contiguousPrefixThroughTrkVolPitSetSourceCycles: null,
     });
     expect(evidence.rows).toHaveLength(7);
     expect(evidence.rows.every((row: any) => row.completeNoteCallbackSourceCycles === null && row.postCallbackGlueSourceCycles === null)).toBe(true);
     expect(evidence.sourceAndElf.sourceCycleAccounting).toMatchObject({
       flagsClear: { sequentialThumbHalfwords: 19, pipelineRefills: 3, totalCycles: 56 },
       volumeAndClearObserved: { sequentialThumbHalfwords: 51, pipelineRefills: 6, totalCycles: 138 },
-      callerBlAndPostHelperAllocationFields: null,
+      callerBlHelperPrologueAndPostHelperAllocationFields: null,
     });
     expect(evidence.closure).toMatchObject({ durationFit: false, runtimePointerIdentity: false, serviceCost: null, constructionClock: null });
     expect(readFileSync(DOC, "utf8")).toContain("**556 cycles**");
+    expect(readFileSync(DOC, "utf8")).toContain("this is not a contiguous prefix");
   });
 
   it("regenerates the v4 evidence and report byte-for-byte", () => {

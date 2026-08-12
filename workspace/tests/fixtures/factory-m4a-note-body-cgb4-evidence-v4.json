@@ -48,7 +48,7 @@
         "cycles": "51*2 + 6*6",
         "totalCycles": 138
       },
-      "callerBlAndPostHelperAllocationFields": null
+      "callerBlHelperPrologueAndPostHelperAllocationFields": null
     }
   },
   "reproducibility": {
@@ -230,7 +230,8 @@
     },
     "trkVolPitSetSourceCycles": 556,
     "acceptedPrefixThroughAllocationBodySourceCycles": 1413,
-    "knownPrefixThroughTrkVolPitSetSourceCycles": 1969
+    "knownComponentSumIncludingTrkVolPitSetSourceCycles": 1969,
+    "contiguousPrefixThroughTrkVolPitSetSourceCycles": null
   },
   "branchCoverage": {
     "sourceBranches": [
@@ -274,7 +275,8 @@
       },
       "allocationBodySourceCycles": 135,
       "trkVolPitSetSourceCycles": 138,
-      "knownPrefixThroughTrkVolPitSetSourceCycles": 377,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 377,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
     },
@@ -295,7 +297,8 @@
       },
       "allocationBodySourceCycles": 111,
       "trkVolPitSetSourceCycles": 56,
-      "knownPrefixThroughTrkVolPitSetSourceCycles": 243,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 243,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
     },
@@ -316,7 +319,8 @@
       },
       "allocationBodySourceCycles": 111,
       "trkVolPitSetSourceCycles": 56,
-      "knownPrefixThroughTrkVolPitSetSourceCycles": 243,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 243,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
     },
@@ -337,7 +341,8 @@
       },
       "allocationBodySourceCycles": 111,
       "trkVolPitSetSourceCycles": 56,
-      "knownPrefixThroughTrkVolPitSetSourceCycles": 243,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 243,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
     },
@@ -365,7 +370,8 @@
       },
       "allocationBodySourceCycles": 135,
       "trkVolPitSetSourceCycles": 138,
-      "knownPrefixThroughTrkVolPitSetSourceCycles": 377,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 377,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
     },
@@ -386,7 +392,8 @@
       },
       "allocationBodySourceCycles": 111,
       "trkVolPitSetSourceCycles": 56,
-      "knownPrefixThroughTrkVolPitSetSourceCycles": 243,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 243,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
     },
@@ -407,14 +414,15 @@
       },
       "allocationBodySourceCycles": 111,
       "trkVolPitSetSourceCycles": 56,
-      "knownPrefixThroughTrkVolPitSetSourceCycles": 243,
+      "knownComponentSumIncludingTrkVolPitSetSourceCycles": 243,
+      "contiguousPrefixThroughTrkVolPitSetSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
     }
   ],
   "closure": {
-    "closed": "Seven observed type-12 CGB4 callbacks are source-exact from the accepted v3 allocation body through the compiled TrkVolPitSet return: five flags-clear routes at 56 cycles and two observed VOLSET routes at 138 cycles.",
-    "remainingDiscriminator": "clear_modM, nonzero-lfoDelay paths, all other TrkVolPitSet operands and modT/PITSET/clamp routes, caller BL accounting, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals, service cost, VBlank/IRQ/audio arbitration, and construction-clock wiring remain null.",
+    "closed": "Seven observed type-12 CGB4 callbacks have source-exact post-prologue TrkVolPitSet components: five flags-clear routes at 56 cycles and two observed VOLSET routes at 138 cycles.",
+    "remainingDiscriminator": "The TrkVolPitSet caller BL and helper prologue remain an explicit gap after the accepted v3 allocation body. clear_modM, nonzero-lfoDelay paths, all other TrkVolPitSet operands and modT/PITSET/clamp routes, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals, service cost, VBlank/IRQ/audio arbitration, and construction-clock wiring remain null.",
     "durationFit": false,
     "runtimePointerIdentity": false,
     "serviceCost": null,

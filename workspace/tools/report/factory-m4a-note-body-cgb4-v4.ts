@@ -209,7 +209,7 @@ function assertSourceAndElf(): Record<string, unknown> {
     sourceCycleAccounting: {
       flagsClear: { sequentialThumbHalfwords: 19, pipelineRefills: 3, cycles: "19*2 + 3*6", totalCycles: 56 },
       volumeAndClearObserved: { sequentialThumbHalfwords: 51, pipelineRefills: 6, cycles: "51*2 + 6*6", totalCycles: 138 },
-      callerBlAndPostHelperAllocationFields: null,
+      callerBlHelperPrologueAndPostHelperAllocationFields: null,
     },
   };
 }
@@ -281,7 +281,8 @@ export function makeEvidence(): Record<string, unknown> {
           trkVolPitSetState: helperState,
           allocationBodySourceCycles: bodyTiming.cycles,
           trkVolPitSetSourceCycles: helperTiming.cycles,
-          knownPrefixThroughTrkVolPitSetSourceCycles: (priorRow.knownPrefixThroughBodySourceCycles as number) + helperTiming.cycles,
+          knownComponentSumIncludingTrkVolPitSetSourceCycles: (priorRow.knownPrefixThroughBodySourceCycles as number) + helperTiming.cycles,
+          contiguousPrefixThroughTrkVolPitSetSourceCycles: null,
           completeNoteCallbackSourceCycles: null,
           postCallbackGlueSourceCycles: null,
         });
@@ -292,7 +293,7 @@ export function makeEvidence(): Record<string, unknown> {
   }
   if (rows.length !== 7 || rows.filter((row) => (row.trkVolPitSetState as TrkVolPitSetState).flags === 0x80).length !== 5 || rows.filter((row) => (row.trkVolPitSetState as TrkVolPitSetState).flags === 0x83).length !== 2) fail("TrkVolPitSet route partition changed");
   const helperCycles = rows.reduce((sum, row) => sum + (row.trkVolPitSetSourceCycles as number), 0);
-  const knownCycles = rows.reduce((sum, row) => sum + (row.knownPrefixThroughTrkVolPitSetSourceCycles as number), 0);
+  const knownComponentCycles = rows.reduce((sum, row) => sum + (row.knownComponentSumIncludingTrkVolPitSetSourceCycles as number), 0);
   return {
     schema: "factory-m4a-note-body-cgb4-evidence/v4",
     oracleProfile: "battle-scene-off",
@@ -327,7 +328,8 @@ export function makeEvidence(): Record<string, unknown> {
       trkVolPitSetSourceCycleRange: { min: 56, max: 138, distinct: 2 },
       trkVolPitSetSourceCycles: helperCycles,
       acceptedPrefixThroughAllocationBodySourceCycles: 1413,
-      knownPrefixThroughTrkVolPitSetSourceCycles: knownCycles,
+      knownComponentSumIncludingTrkVolPitSetSourceCycles: knownComponentCycles,
+      contiguousPrefixThroughTrkVolPitSetSourceCycles: null,
     },
     branchCoverage: {
       sourceBranches: ["flags & VOLSET", "modT == 1", "modT == 2", "volume clamp", "flags & PITSET", "clear VOLSET/PITSET bits"],
@@ -336,8 +338,8 @@ export function makeEvidence(): Record<string, unknown> {
     },
     rows,
     closure: {
-      closed: "Seven observed type-12 CGB4 callbacks are source-exact from the accepted v3 allocation body through the compiled TrkVolPitSet return: five flags-clear routes at 56 cycles and two observed VOLSET routes at 138 cycles.",
-      remainingDiscriminator: "clear_modM, nonzero-lfoDelay paths, all other TrkVolPitSet operands and modT/PITSET/clamp routes, caller BL accounting, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals, service cost, VBlank/IRQ/audio arbitration, and construction-clock wiring remain null.",
+      closed: "Seven observed type-12 CGB4 callbacks have source-exact post-prologue TrkVolPitSet components: five flags-clear routes at 56 cycles and two observed VOLSET routes at 138 cycles.",
+      remainingDiscriminator: "The TrkVolPitSet caller BL and helper prologue remain an explicit gap after the accepted v3 allocation body. clear_modM, nonzero-lfoDelay paths, all other TrkVolPitSet operands and modT/PITSET/clamp routes, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals, service cost, VBlank/IRQ/audio arbitration, and construction-clock wiring remain null.",
       durationFit: false,
       runtimePointerIdentity: false,
       serviceCost: null,
@@ -365,9 +367,9 @@ function markdown(evidence: ReturnType<typeof makeEvidence>): string {
     "| --- | ---: | ---: | ---: | ---: |",
     ...CASES.map((name) => `| ${name} | ${byCase[name].cgb4} | ${byCase[name].flagsClear} | ${byCase[name].volumeAndClear} | byte-identical ×2 |`),
     "",
-    `The accepted v3 prefix through allocation body remains **1413** cycles; through the TrkVolPitSet helper return it is **${coverage.knownPrefixThroughTrkVolPitSetSourceCycles}** source cycles across the seven rows. The caller BL and later allocation fields are intentionally outside this boundary.`,
+    `The accepted contiguous v3 prefix through allocation body remains **1413** cycles. Adding the separately closed post-prologue helper components gives **${coverage.knownComponentSumIncludingTrkVolPitSetSourceCycles} known component cycles** across the seven rows, but this is not a contiguous prefix: the caller BL and helper prologue remain null, as do later allocation fields.`,
     "",
-    "The closure stops before `clear_modM`, every unobserved TrkVolPitSet operand/branch, nonzero-lfoDelay routes, caller BL accounting, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals (**5 exact / 108 null**), service cost, VBlank/IRQ/audio arbitration, and `runFactoryConstructionClock`.",
+    "The closure leaves `clear_modM`, every unobserved TrkVolPitSet operand/branch, nonzero-lfoDelay routes, caller BL and helper-prologue accounting, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals (**5 exact / 108 null**), service cost, VBlank/IRQ/audio arbitration, and `runFactoryConstructionClock` null.",
     "",
   ].join("\n");
 }

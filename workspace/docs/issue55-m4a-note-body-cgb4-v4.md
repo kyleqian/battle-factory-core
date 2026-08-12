@@ -14,6 +14,6 @@ The reducer source-counts the compiled TrkVolPitSet body from 0x082e0a82 through
 | liliana | 3 | 2 | 1 | byte-identical ×2 |
 | factory-varied | 4 | 3 | 1 | byte-identical ×2 |
 
-The accepted v3 prefix through allocation body remains **1413** cycles; through the TrkVolPitSet helper return it is **1969** source cycles across the seven rows. The caller BL and later allocation fields are intentionally outside this boundary.
+The accepted contiguous v3 prefix through allocation body remains **1413** cycles. Adding the separately closed post-prologue helper components gives **1969 known component cycles** across the seven rows, but this is not a contiguous prefix: the caller BL and helper prologue remain null, as do later allocation fields.
 
-The closure stops before `clear_modM`, every unobserved TrkVolPitSet operand/branch, nonzero-lfoDelay routes, caller BL accounting, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals (**5 exact / 108 null**), service cost, VBlank/IRQ/audio arbitration, and `runFactoryConstructionClock`.
+The closure leaves `clear_modM`, every unobserved TrkVolPitSet operand/branch, nonzero-lfoDelay routes, caller BL and helper-prologue accounting, later allocation fields, all other post-selection callbacks, complete note callbacks, post-callback glue, complete one-pass MPlay totals (**5 exact / 108 null**), service cost, VBlank/IRQ/audio arbitration, and `runFactoryConstructionClock` null.
