@@ -70,6 +70,11 @@ canonical and this lane must never make the TS side worse.
   (`stats.ts`/`monGender.ts` are already ported, M3c). Module inventory,
   fresh conflict check, census pointers, and a suggested step split are
   in `docs/rust-m4-battle-kernel-scout.md`; re-verify the conflict check
+  at orient. **DONE 2026-08-11 eve (R3): all three modules ported
+  end-to-end** — native + vectors, fw_ boundary, adapters, both-mode
+  parity suites (`tests/damageCalcParity.test.ts`,
+  `tests/turnOrderParity.test.ts`). Next family: see
+  `docs/rust-m5-scout.md` once folded, and re-verify its conflict check
   at orient.
 
 ## Verification gates (every session)
