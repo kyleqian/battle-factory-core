@@ -1,6 +1,7 @@
 {
   "scenario": "tools/battle-lab/mechanic-confuse-ray-opponent-chinchou-player-onix.json",
   "probe": "tools/compare/agilityProbe.py",
+  "expectedFullStateSha256": "83d95bef62a0c7a7eead116a517bfe881279fc0aea0168a453c05f7ede14dd3a",
   "attacker": {
     "species": "CHINCHOU",
     "geometry": {

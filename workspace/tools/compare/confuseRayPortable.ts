@@ -13,6 +13,7 @@ import { createScratchDir } from "../lib/scratch.ts";
 interface Fixture {
   readonly scenario: string;
   readonly probe: string;
+  readonly expectedFullStateSha256: string;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: {
@@ -65,6 +66,9 @@ function probeFresh(runIndex: number): { probe: Probe; raw: Buffer; rgbDir: stri
 const fresh = [probeFresh(1), probeFresh(2)];
 if (sha(fresh[0]!.raw) !== sha(fresh[1]!.raw)) {
   throw new Error("twice-fresh full-state JSON differs");
+}
+if (sha(fresh[0]!.raw) !== fixture.expectedFullStateSha256) {
+  throw new Error("fresh complete state differs from the committed mechanical contract");
 }
 const rows = fresh[0]!.probe.frames;
 if (fresh[0]!.probe.sourceWindow.frameCount !== 270 || rows.length !== 270) {
