@@ -10,6 +10,7 @@ const fight = read("reference/pokeemerald/src/battle_anim_fight.c");
 const movement = read("reference/pokeemerald/src/battle_anim_mon_movement.c");
 const mons = read("reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h");
 const constants = read("reference/pokeemerald/include/constants/battle_frontier_mons.h");
+const speciesConstants = read("reference/pokeemerald/include/constants/species.h");
 const inventory = JSON.parse(read("src/data/gen/factory-animation-inventory.json"));
 const graph = JSON.parse(read("src/data/gen/battle-animation-components.json"));
 const nm = execFileSync(
@@ -78,6 +79,11 @@ if (
   || !effects.includes("const struct SpriteTemplate gMeteorMashStarSpriteTemplate")
   || !effects.includes("static void AnimMeteorMashStar_Step")
   || !effects.includes("sprite->data[5] == sprite->data[4]")
+  || !effects.includes("static void AnimMiniTwinklingStar(struct Sprite *sprite)")
+  || !effects.includes("rand = Random2() & 3")
+  || !effects.includes("y = Random2() & 7")
+  || !effects.includes("if (++sprite->data[0] < 30)")
+  || !effects.includes("if (sprite->data[0] > 60)")
   || !fight.includes("const struct SpriteTemplate gSpinningHandOrFootSpriteTemplate")
   || !movement.includes("void AnimTask_ShakeMon2(u8 taskId)")
   || move?.id !== 309
@@ -87,6 +93,7 @@ if (
   ])
   || JSON.stringify(components?.componentIds) !== JSON.stringify(expectedComponents)
   || !constants.includes("#define FRONTIER_MON_METANG_2       311")
+  || !speciesConstants.includes("#define SPECIES_METANG 399")
   || !carrier.includes(".species = SPECIES_METANG")
   || !carrier.includes(".moves = {MOVE_METEOR_MASH, MOVE_PSYCHIC, MOVE_BODY_SLAM, MOVE_SCARY_FACE}")
   || !carrier.includes("BATTLE_FRONTIER_ITEM_FOCUS_BAND")

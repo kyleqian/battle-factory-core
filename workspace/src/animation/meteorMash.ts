@@ -23,9 +23,25 @@ export interface MeteorMashStar {
   readonly callbacks: number;
 }
 
+export interface MeteorMashTwinkleVariant {
+  readonly tile: 4 | 5;
+  readonly y2: number;
+}
+
+export interface MeteorMashMiniStar extends MeteorMashTwinkleVariant {
+  readonly index: number;
+  readonly parentIndex: 0 | 1 | 2;
+  readonly localAge: number;
+  readonly x: number;
+  readonly y: number;
+  readonly invisible: boolean;
+}
+
 export interface MeteorMashGeometry {
   readonly targetSide: "player" | "opponent";
   readonly targetCenter: Readonly<{ x: number; y: number }>;
+  /** Two Random2 results, reduced to tile/y, for each of 48 source spawns. */
+  readonly twinkles?: readonly MeteorMashTwinkleVariant[];
 }
 
 export interface MeteorMashState {
@@ -34,6 +50,7 @@ export interface MeteorMashState {
   readonly fadeCoefficient: number;
   readonly panActive: boolean;
   readonly stars: readonly MeteorMashStar[];
+  readonly miniStars: readonly MeteorMashMiniStar[];
   readonly spinningHand: boolean;
   readonly spinningHandWait: number | null;
   readonly spinningHandMatrix: BlazeKickAffineMatrix | null;
@@ -91,7 +108,10 @@ export function meteorMashAtAge(
   age: number,
   geometry: MeteorMashGeometry,
 ): MeteorMashState {
-  const inWindow = age >= 0 && age < METEOR_MASH_FRAME_COUNT;
+  // RestoreBg's task runs one row longer when the target is on the player
+  // side. The pointer-bounded windows include the following inactive row.
+  const terminalAge = geometry.targetSide === "player" ? 214 : 213;
+  const inWindow = age >= 0 && age < terminalAge;
   if (!inWindow) {
     return {
       active: false,
@@ -99,6 +119,7 @@ export function meteorMashAtAge(
       fadeCoefficient: 0,
       panActive: false,
       stars: [],
+      miniStars: [],
       spinningHand: false,
       spinningHandWait: null,
       spinningHandMatrix: null,
@@ -111,13 +132,81 @@ export function meteorMashAtAge(
   const stars = ([0, 1, 2] as const)
     .map((index) => starAtAge(index, age, geometry))
     .filter((star): star is MeteorMashStar => star !== null);
-  const fadeIn = age >= 10 && age < 44;
+  const spawnEvents = ([0, 1, 2] as const)
+    .flatMap((parentIndex) => Array.from({ length: 16 }, (_, spawnIndex) => ({
+      parentIndex,
+      spawnAge: [
+        METEOR_MASH_FIRST_STAR_AGE,
+        METEOR_MASH_SECOND_STAR_AGE,
+        METEOR_MASH_THIRD_STAR_AGE,
+      ][parentIndex]! + spawnIndex * 2,
+    })))
+    .sort((left, right) => left.spawnAge - right.spawnAge
+      || left.parentIndex - right.parentIndex);
+  const miniStars = spawnEvents.flatMap((event, index): MeteorMashMiniStar[] => {
+    const variant = geometry.twinkles?.[index];
+    const localAge = age - event.spawnAge;
+    if (!variant || localAge < 0 || localAge > 60) return [];
+    const parent = starAtAge(event.parentIndex, event.spawnAge, geometry);
+    // The terminal even callback spawns its mini immediately before destroying
+    // the parent, so derive that endpoint even though the parent is no longer live.
+    const trajectoryAge = event.spawnAge
+      - [METEOR_MASH_FIRST_STAR_AGE, METEOR_MASH_SECOND_STAR_AGE, METEOR_MASH_THIRD_STAR_AGE][event.parentIndex]!;
+    const args = STAR_ARGS[event.parentIndex];
+    const sideSign = geometry.targetSide === "player" ? -1 : 1;
+    const initialX = geometry.targetCenter.x + sideSign * args.x;
+    const destinationX = geometry.targetCenter.x + sideSign * args.destinationX;
+    const initialY = geometry.targetCenter.y - 64;
+    const destinationY = geometry.targetCenter.y + 32;
+    const x = parent?.x ?? initialX;
+    const y = parent?.y ?? initialY;
+    const x2 = parent?.x2 ?? truncDiv((destinationX - initialX) * trajectoryAge, 30);
+    const y2 = parent?.y2 ?? truncDiv((destinationY - initialY) * trajectoryAge, 30);
+    let invisible = false;
+    let phase = 0;
+    for (let callback = 1; callback <= localAge; callback += 1) {
+      if (callback < 30) {
+        phase += 1;
+        if (phase === 2) {
+          invisible = !invisible;
+          phase = 0;
+        }
+      } else {
+        if (phase === 2) invisible = false;
+        if (phase === 3) {
+          invisible = true;
+          phase = -1;
+        }
+        phase += 1;
+      }
+    }
+    return [{
+      index,
+      parentIndex: event.parentIndex,
+      localAge,
+      x: x + x2,
+      y: y + y2,
+      invisible,
+      ...variant,
+    }];
+  });
   const restore = age >= METEOR_MASH_RESTORE_AGE;
-  const fadeCoefficient = restore
-    ? Math.max(0, 16 - Math.min(16, age - METEOR_MASH_RESTORE_AGE))
-    : fadeIn
-      ? Math.min(16, Math.floor((age - 10) / 2))
-      : 16;
+  const restoreFallAge = geometry.targetSide === "player" ? 197 : 196;
+  const fadeCoefficient = age < 11
+    ? 0
+    : age <= 27
+      ? Math.min(16, age - 11)
+      : age <= 30
+        ? 16
+        : age <= 46
+          ? 46 - age
+          : age < 176
+            ? 0
+            : age <= 192
+              ? Math.min(16, age - 176)
+              : age < restoreFallAge
+                ? 16
+                : Math.max(0, 16 - (age - restoreFallAge + 1));
   const handWait = age >= METEOR_MASH_THIRD_STAR_AGE && age < 133
     ? Math.max(0, 133 - age)
     : null;
@@ -126,10 +215,11 @@ export function meteorMashAtAge(
     && age <= METEOR_MASH_SHAKE_LAST_AGE;
   return {
     active: true,
-    background: restore ? "battle" : age >= 10 ? "cosmic" : "battle",
+    background: age >= 29 && age < 194 ? "cosmic" : "battle",
     fadeCoefficient,
     panActive: age >= 10 && age < 20,
     stars,
+    miniStars,
     spinningHand: hand,
     spinningHandWait: handWait,
     spinningHandMatrix: hand

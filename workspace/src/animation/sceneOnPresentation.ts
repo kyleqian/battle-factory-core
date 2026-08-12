@@ -1044,7 +1044,17 @@ export interface SceneOnMeteorMashConfig {
   readonly move: "METEOR_MASH";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
-  readonly fieldProfile: Readonly<SceneOnFaintAttackFieldProfile>;
+  readonly fieldProfile: Readonly<
+    Omit<SceneOnFaintAttackFieldProfile, "playerGender" | "opponentGender">
+    & {
+      readonly playerMaxHp: number;
+      readonly opponentMaxHp: number;
+      readonly playerGender?: "male" | "female" | "none";
+      readonly opponentGender?: "male" | "female" | "none";
+    }
+  >;
+  /** Presentation-only Random2 results for the 48 source mini stars. */
+  readonly twinkles?: readonly import("./meteorMash.ts").MeteorMashTwinkleVariant[];
 }
 
 export interface SceneOnFlameWheelConfig {
@@ -6916,6 +6926,7 @@ export function sceneOnMeteorMashView(
     ...meteorMashAtAge(state.age, {
       targetSide: state.config.target.geometry.side,
       targetCenter: state.config.target.geometry.animationCenter,
+      twinkles: state.config.twinkles,
     }),
   };
 }
