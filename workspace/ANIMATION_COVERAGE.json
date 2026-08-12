@@ -1580,6 +1580,36 @@
    ]
   },
   {
+   "move": "MOVE_FURY_SWIPES",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 mechanicLab parties stage the lowest suitable carrier, set-142 FRONTIER_MON_AIPOM (species 190, Relaxed, HP/Attack EVs, Silk Scarf), against legal ONIX in both player-back and opponent-front orientations; all three party records are complete and all four opponent slots are legally constrained to TACKLE",
+    "the exclusive Move_FURY_SWIPES pointer interval 0x082d407c..0x082d40e0 and first inactive cleanup pass 48/48 source-relative, typed-seam, task/sprite, software/hardware OAM/matrix, palette/tag/register/audio, immutable-state, raw-RGB, normalized-map, and production-framebuffer checks twice fresh in each orientation: player frames 83..130 and opponent frames 87..134",
+    "the pure reducer ports the source SWIPE four-cell hFlip program, both HorizontalLunge(5,5) callbacks, both target-relative Fury Swipes placements and animations, SE_M_SCRATCH target pan, and both independently resolved short AnimTask_ShakeMon2 schedules (3,0,5,1) and (4,0,7,1), including creation/body/terminal/teardown display state",
+    "the narrow Scene-ON AIPOM/ONIX compositor reuses source-derived battler and SWIPE art, keeps ONIX's settled front idle offset in the compositor, and reproduces the source subpriority painter order without damage, multihit count, accuracy, RNG, controller, turn, round, facility, absolute tick, per-frame RGB, coordinate fit, or capture lookup",
+    "furySwipesPortable.ts regenerates both committed probe modes through tools/run-mgba-probe.py and proves every one of the 48 ages twice fresh; stable receipts are player evidence a54e4d2c6337f2d6add5fb0281e5fb6a5e9b4605e5d71dd57b6844c4766d0db6 / raw RGB f0ea9b5c80bcecb15898addc6a1f86c3a11781d015c26256af3fb5e530ca5c13 / map 26504c1b7169add1c4f35d89527258eddf06f63b8f8f8321e64bfdc6140c201d and opponent evidence c7bc934f8e509477b3938f0d32db1f612e93d351d209c1185524ca865552de1d / raw RGB 0667282ac0e80e8a9e9ac9528b4204e01588beefd65f24ea0deea704f3ed4137 / map 33b0fc8007b509c384676c56d30cdaef414cc0acc8a1c4b0ae7c2074c69c7f07",
+    "MOVE_DIZZY_PUNCH and MOVE_CRUSH_CLAW remain independently exact shared HorizontalLunge/ShakeMon2 controls; no sibling is reclassified"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-fury-swipes-player-aipom-opponent-onix.json",
+    "tools/battle-lab/mechanic-fury-swipes-player-onix-opponent-aipom.json",
+    "tools/compare/fixtures/fury-swipes-player-aipom-opponent-onix.json",
+    "tools/compare/fixtures/fury-swipes-player-onix-opponent-aipom.json",
+    "tools/compare/dizzyPunchProbe.py",
+    "tools/compare/furySwipesPortable.ts",
+    "tools/compare/evidence/fury-swipes-changemap-player.txt",
+    "tools/compare/evidence/fury-swipes-changemap-mirror.txt",
+    "tools/compare/furySwipesSourceAudit.ts",
+    "tools/compare/extractFurySwipesAssets.ts",
+    "src/animation/assets/furySwipes.json",
+    "src/animation/furySwipes.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/furySwipesSource.test.ts",
+    "tests/animation/furySwipes.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_FOLLOW_ME",
    "status": "exact",
    "covered": [

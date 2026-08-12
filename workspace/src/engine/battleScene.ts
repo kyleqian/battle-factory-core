@@ -513,6 +513,7 @@ import {
 } from "../animation/dragonBreath.ts";
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
 import { shakeMon2OffsetAtTick } from "../animation/shakeMon2.ts";
+import { furySwipesDisplayedTargetX2AtAge } from "../animation/furySwipes.ts";
 import {
   leafBladeDisplayedOamOrderAtAge,
   leafBladeDisplayedTargetX2AtAge,
@@ -578,6 +579,7 @@ import endureAsset from "../animation/assets/endure.json" with { type: "json" };
 import reversalAsset from "../animation/assets/reversal.json" with { type: "json" };
 import tailGlowAsset from "../animation/assets/tail-glow.json" with { type: "json" };
 import dizzyPunchAsset from "../animation/assets/dizzyPunch.json" with { type: "json" };
+import furySwipesAsset from "../animation/assets/furySwipes.json" with { type: "json" };
 import covetAsset from "../animation/assets/covet.json" with { type: "json" };
 import headbuttAsset from "../animation/assets/headbutt.json" with { type: "json" };
 import whirlwindAsset from "../animation/assets/whirlwind.json" with { type: "json" };
@@ -959,6 +961,7 @@ import {
   sceneOnAgilityView,
   sceneOnSwordsDanceView,
   sceneOnDizzyPunchView,
+  sceneOnFurySwipesView,
   sceneOnAstonishView,
   sceneOnFakeOutView,
   sceneOnSubstituteView,
@@ -1117,6 +1120,7 @@ import {
   type SceneOnTailWhipConfig,
   type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
+  type SceneOnFurySwipesConfig,
   type SceneOnAstonishConfig,
   type SceneOnFakeOutConfig,
   type SceneOnSubstituteConfig,
@@ -1660,6 +1664,9 @@ const dizzyPunchArt = dizzyPunchAsset as {
   spindaSpots: readonly {
     x: number; y: number; mask: readonly number[];
   }[];
+};
+const furySwipesArt = furySwipesAsset as {
+  swipe: { tileset: Tileset; palette: RgbColor[] };
 };
 const covetArt = covetAsset as {
   linooneBack: { tileset: Tileset; palette: RgbColor[] };
@@ -19699,6 +19706,131 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SPINDA used" : "Foe SPINDA used",
       "DIZZY PUNCH!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FURY_SWIPES") {
+    const furyState = state as SceneOnMovePresentationState<SceneOnFurySwipesConfig>;
+    const view = sceneOnFurySwipesView(furyState);
+    // Plain sprite OAM and the swipe cells consume the preceding software
+    // state in the Scene-ON framebuffer. ShakeMon2 has its own task display
+    // latch, modeled by furySwipesDisplayedTargetX2AtAge below.
+    const displayed = sceneOnFurySwipesView({ ...furyState, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "AIPOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "AIPOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FURY_SWIPES pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent
+      ? aipomBackSprite
+      : { ...aipomFrontSprite, tileset: subTileset(aipomFrontSprite.tileset, 0, 8) };
+    const targetSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // Keep the species' settled front idle offset in the compositor. The
+    // task helper independently resolves creation, body, terminal zero, and
+    // teardown for both (3,0,5,1) and (4,0,7,1) schedules.
+    const targetX2 = furySwipesDisplayedTargetX2AtAge(
+      state.age,
+      targetIdle.x2,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSource.tileset,
+      attackerSource.palette,
+      view.attacker.geometry.spriteCorner.x + displayed.attackerX2,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSource.tileset,
+      targetSource.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2,
+    );
+    const drawSwipes = () => {
+      for (const swipe of displayed.swipes) {
+        const frame = subTileset(
+          furySwipesArt.swipe.tileset,
+          swipe.animationFrame * 4,
+          4,
+        );
+        const draw = swipe.animation === 1
+          ? drawSpriteSheetHFlip
+          : drawSpriteSheet;
+        draw(
+          fb,
+          frame,
+          furySwipesArt.swipe.palette,
+          swipe.x - 16,
+          swipe.y - 16,
+        );
+      }
+    };
+    // The stock subpriorities put the target's 32x32 swipe between the two
+    // battlers on player-back -> opponent-front, and in front of both on the
+    // mirrored opponent-front -> player-back path.
+    if (playerToOpponent) {
+      drawTarget();
+      drawSwipes();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawSwipes();
+    }
+    const profile = furyState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "AIPOM",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "AIPOM" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "AIPOM used" : "Foe AIPOM used",
+      "FURY SWIPES!",
       99,
     );
     return;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dense software/hardware/audio/RGB evidence for legal Scene-ON DIZZY_PUNCH."""
+"""Dense software/hardware/audio/RGB evidence for legal Scene-ON fist/scratch moves."""
 from __future__ import annotations
 
 import hashlib
@@ -25,7 +25,10 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
+IS_FURY_SWIPES = "fury-swipes-" in SCENARIO.name
 MOVE_DIZZY_PUNCH = 146
+MOVE_FURY_SWIPES = 154
+MOVE = MOVE_FURY_SWIPES if IS_FURY_SWIPES else MOVE_DIZZY_PUNCH
 
 
 def main() -> None:
@@ -58,6 +61,7 @@ def main() -> None:
         "gFistFootSpriteTemplate",
         "gBasicHitSplatSpriteTemplate",
         "gDizzyPunchDuckSpriteTemplate",
+        "gFurySwipesSpriteTemplate",
     )
     templates = {name: oracle.symbols[name] for name in template_names}
     task_names = ("AnimTask_ShakeMon2", "AnimTask_ShakeMon2_Step")
@@ -142,7 +146,7 @@ def main() -> None:
 
     def capture(frame: int) -> None:
         snapshot = lab.snapshot()
-        if snapshot["engine"]["currentMove"] != MOVE_DIZZY_PUNCH:
+        if snapshot["engine"]["currentMove"] != MOVE:
             return
         effects = []
         for slot in range(64):
@@ -222,17 +226,22 @@ def main() -> None:
             capture(frame)
 
     if not frames:
-        raise RuntimeError("stock ROM did not reach MOVE_DIZZY_PUNCH")
+        raise RuntimeError(
+            "stock ROM did not reach MOVE_FURY_SWIPES"
+            if IS_FURY_SWIPES else "stock ROM did not reach MOVE_DIZZY_PUNCH"
+        )
     OUTPUT.write_text(
         json.dumps(
             {
-                "schema": "dizzy-punch-dense-evidence/v1",
+                "schema": "fury-swipes-dense-evidence/v1" if IS_FURY_SWIPES
+                else "dizzy-punch-dense-evidence/v1",
                 "setup": setup,
                 "templates": templates,
                 "taskFuncs": task_funcs,
                 "songHeaders": {
                     "SE_M_COMET_PUNCH": oracle.read_u32(song_table + 139 * 8),
                     "SE_M_VITAL_THROW2": oracle.read_u32(song_table + 123 * 8),
+                    "SE_M_SCRATCH": oracle.read_u32(song_table + 155 * 8),
                 },
                 "frames": frames,
             }

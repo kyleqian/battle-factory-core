@@ -1,3 +1,11 @@
+# MOVE_FURY_SWIPES exact — bilateral Scene-ON dense acceptance (2026-08-11 worker)
+
+- **State:** Coverage advances **173→174/276 Level-50 exact**, 0 partial, 0 staged, and **103→102 unsupported**; only `MOVE_FURY_SWIPES` moves.
+- **Did:** Pinned the exclusive `Move_FURY_SWIPES` interval **0x082d407c..0x082d40e0**, four-component SWIPE/HorizontalLunge/ShakeMon2 graph, source four-cell/hFlip asset, and lowest Level-50 carrier set **142 AIPOM**. Added legal complete bilateral AIPOM/ONIX parties, a pure reducer, typed Scene-ON seam, source-derived asset/compositor, portable verifier, and normalized maps.
+- **Verified:** Player-back frames **83..130** and opponent-front frames **87..134** pass **48/48 reducer/seam/component, software+hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB/map, and production-framebuffer** gates twice fresh. Stable receipts: player evidence/raw/map `a54e4d2c…` / `f0ea9b5c…` / `26504c1b…`; opponent `c7bc934f…` / `0667282a…` / `33b0fc80…`. DIZZY_PUNCH remains **69/69** and CRUSH_CLAW **69/69**, both orientations twice fresh.
+- **Next:** Supervisor merges this animation-only promotion; MOVE_DIZZY_PUNCH and MOVE_CRUSH_CLAW remain independent exact controls.
+- **Notes:** Commits `12c14168`, `a62658cd`, and `3262234b` carry the source contract, reducer/compositor, and dual ShakeMon2 latch. No gameplay/state ownership, animation boundary, unsupported-branch barrier, or canonical-import allowlist changed; no per-frame lookup, absolute tick, capture/hash/RGB lookup, coordinate fit, or sibling promotion.
+
 # MOVE_GUILLOTINE exact — bilateral Scene-ON dense acceptance (2026-08-11 worker)
 
 - **State:** Coverage advances **172→173/276 Level-50 exact**, 0 partial, 0 staged, and **104→103 unsupported**; only `MOVE_GUILLOTINE` moves.
