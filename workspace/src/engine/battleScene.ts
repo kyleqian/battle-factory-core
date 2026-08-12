@@ -514,7 +514,6 @@ import {
 import { flamethrowerDisplayedBattlerOffsetsAtAge } from "../animation/flamethrower.ts";
 import { shakeMon2OffsetAtTick } from "../animation/shakeMon2.ts";
 import { furySwipesDisplayedTargetX2AtAge } from "../animation/furySwipes.ts";
-import { meteorMashAtAge } from "../animation/meteorMash.ts";
 import {
   leafBladeDisplayedOamOrderAtAge,
   leafBladeDisplayedTargetX2AtAge,

@@ -1,4 +1,4 @@
-import { shakeMon2DisplayedOffsetAtAge } from "./shakeMon2.ts";
+import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 import {
   blazeKickSpinningFootMatrixAtAge,
   type BlazeKickAffineMatrix,
@@ -139,7 +139,11 @@ export function meteorMashAtAge(
       : null,
     hitsplat: age >= METEOR_MASH_IMPACT_AGE && age <= 133,
     targetX2: shakeTaskActive
-      ? shakeMon2DisplayedOffsetAtAge(5, 0, 20, 1, age, METEOR_MASH_IMPACT_AGE).x2
+      // This invocation's first visible target write is the negative phase at
+      // source age 124. The source callback has already consumed one task
+      // step by the pointer row; do not inherit the common long-schedule
+      // helper's creation anchor.
+      ? shakeMon2OffsetAtTick(5, 0, 20, 1, age - METEOR_MASH_IMPACT_AGE + 1).x2
       : 0,
     shakeTaskActive,
     restoreActive: restore,
