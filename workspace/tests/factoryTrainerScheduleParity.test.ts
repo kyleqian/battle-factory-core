@@ -117,10 +117,12 @@ describe("Factory trainer schedule ABI-v1 parity", () => {
       [-1, 1, [], 0], // history wins validation ordering
     ] as const;
     for (const input of selectionInputs) {
-      const expected = capture(() => selectFactoryTrainer(...input));
+      const expected = capture(() => selectFactoryTrainer(input[0], input[1], input[2], input[3]));
       expect(expected).toBeInstanceOf(Error);
       for (const adapter of adapters) {
-        expect(() => adapter.selectFactoryTrainer(...input)).toThrow((expected as Error).message);
+        expect(() => adapter.selectFactoryTrainer(input[0], input[1], input[2], input[3])).toThrow(
+          (expected as Error).message,
+        );
       }
     }
 
@@ -130,10 +132,12 @@ describe("Factory trainer schedule ABI-v1 parity", () => {
       [-1, -1], // schedule's first select validates rng before streak
     ] as const;
     for (const input of scheduleInputs) {
-      const expected = capture(() => generateFactoryTrainerSchedule(...input));
+      const expected = capture(() => generateFactoryTrainerSchedule(input[0], input[1]));
       expect(expected).toBeInstanceOf(Error);
       for (const adapter of adapters) {
-        expect(() => adapter.generateFactoryTrainerSchedule(...input)).toThrow((expected as Error).message);
+        expect(() => adapter.generateFactoryTrainerSchedule(input[0], input[1])).toThrow(
+          (expected as Error).message,
+        );
       }
     }
     expect({ selectionErrors: selectionInputs.length, scheduleErrors: scheduleInputs.length }).toEqual({
