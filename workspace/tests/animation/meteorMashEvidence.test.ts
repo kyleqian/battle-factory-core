@@ -23,7 +23,7 @@ const cases = [
   ],
 ] as const;
 
-describe("MOVE_METEOR_MASH bilateral dense evidence checkpoint", () => {
+describe("MOVE_METEOR_MASH bilateral dense acceptance", () => {
   it.each(cases)("pins the complete portable source window: %s",
     (name, orientation, startFrame, endFrame, frameCount, evidenceSha256, framebufferMatches) => {
       const fixture = JSON.parse(readFileSync(`tools/compare/fixtures/${name}`, "utf8"));
@@ -46,10 +46,8 @@ describe("MOVE_METEOR_MASH bilateral dense evidence checkpoint", () => {
       const parties = [...scenario.overrides.parties.player, ...scenario.overrides.parties.opponent];
       expect(parties.some((mon: { species: number }) => mon.species === 399)).toBe(true);
       expect(parties.some((mon: { species: number }) => mon.species === 375)).toBe(false);
-      // Production equality is complete, but the shared Scene-ON service is
-      // stale relative to the harness; never promote without fresh repeats.
-      expect(coverage.entries.find((entry) => entry.move === "MOVE_METEOR_MASH"))
-        .toBeUndefined();
-      expect(JSON.stringify(coverage)).toContain("MOVE_METEOR_MASH remains unsupported");
+      const entry = coverage.entries.find((candidate) => candidate.move === "MOVE_METEOR_MASH");
+      expect(entry).toMatchObject({ status: "exact" });
+      expect(entry?.covered.join("\n")).toContain(`${framebufferMatches}/${framebufferMatches}`);
     });
 });
