@@ -1,0 +1,267 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v12",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "dispatcher": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1232-1282,1459-1460",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "registration": {
+        "path": "reference/pokeemerald/src/m4a.c",
+        "line": 385,
+        "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+      }
+    },
+    "elf": {
+      "mPlayMain": "0x082dfa5c+0x268",
+      "dedicatedNoteBl": "0x082dfb3e",
+      "callbackReturnTarget": "0x082dfb42",
+      "commandLoop": "0x082dfb18",
+      "waitLoop": "0x082dfb70",
+      "callR3": "0x082dfcb4",
+      "plyNote": "0x082dfd38+0x204",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "dedicated note dispatch through caller return target",
+        "start": "0x82dfb32",
+        "endExclusive": "0x82dfb44",
+        "bytes": 18,
+        "sha256": "225db9954708ed26ff054bf9573f3750a6ae9076eb3a65865ccb2eca9ab19238"
+      },
+      {
+        "role": "call_r3 indirect trampoline",
+        "start": "0x82dfcb4",
+        "endExclusive": "0x82dfcb6",
+        "bytes": 2,
+        "sha256": "477db9ac7ca5efc12e37f882656b8fe5a363ffeb99b2e565a953d10c3c91ab21"
+      },
+      {
+        "role": "post-ply_note return branch",
+        "start": "0x82dfb42",
+        "endExclusive": "0x82dfb44",
+        "bytes": 2,
+        "sha256": "97c0d0bc789f834ac316da12278bd3e49cf92be17147c2cc0968be04eaccf31b"
+      },
+      {
+        "role": "wait-zero command-loop branch",
+        "start": "0x82dfb70",
+        "endExclusive": "0x82dfb76",
+        "bytes": 6,
+        "sha256": "ca345c16f6c4253a81e51a65a6626fa3f090b4ac7bf08e035c1a6266d053a214"
+      },
+      {
+        "role": "next command-pointer load",
+        "start": "0x82dfb18",
+        "endExclusive": "0x82dfb1a",
+        "bytes": 2,
+        "sha256": "5a5faa3732cc1f76e9c6955aad91496527f767c6385005e62846cd1375f2fe9e"
+      }
+    ],
+    "returnOwnership": {
+      "registeredCallback": "MPlayExtender assigns SoundInfo.plynote = ply_note",
+      "uniqueCompiledLoad": "MPlayMain has one o_SoundInfo_plynote load",
+      "bl": "BL at 0x082dfb3e writes Thumb LR 0x082dfb43",
+      "trampoline": "call_r3 bx r3 preserves LR while transferring to ply_note",
+      "callbackReturn": "ply_note restores 0x082dfb43 and bx aligns execution to 0x082dfb42",
+      "targetInstruction": "b _081DD938",
+      "runtimeReturnAddressLookup": false
+    },
+    "waitZeroProof": "MPlayMain can reach the dedicated note call only from _081DD8E0 after _081DD938 observed wait == 0; ply_note has no wait-field access",
+    "memoryClassClosure": {
+      "trackStorage": "iwram",
+      "inheritedFromFrozenV11": true,
+      "waitRead": "MusicPlayerTrack.wait/IWRAM",
+      "commandPointerRead": "MusicPlayerTrack.cmdPtr/IWRAM",
+      "commandByteTargetStorage": null
+    },
+    "timingClasses": {
+      "sequentialThumbFetchCycles": 2,
+      "takenControlTransferRefillCycles": 6,
+      "iwramSingleByteOrWordAccessPremiumCycles": 0,
+      "model": "one 2-cycle sequential Thumb halfword per executed instruction; each taken b/beq adds one 6-cycle refill; IWRAM byte/word data accesses add zero premium"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV11EvidenceSha256": "1ad73dc86d0f8b887b1050090f9384bb231858eea39c309209cd73f4686d8f6e",
+    "acceptedV11DocSha256": "57eeed8e00d5efb5997e2d211d9b7df1d4634c3dd3fbea8952fa6b4a372998f8",
+    "v11RegeneratesByteForByte": true,
+    "onlyInputReceipt": "factory-m4a-note-body-cgb4-evidence/v11"
+  },
+  "capture": {
+    "boundary": "frozen v11 final ply_note bx r0 return through MPlayMain's next command-pointer load",
+    "scalars": [
+      "none beyond source-proven waitAtCallbackEntry=0 and frozen v11 trackStorage=iwram"
+    ],
+    "excluded": [
+      "oracle recapture",
+      "runtime pointer",
+      "runtime address",
+      "frame",
+      "duration",
+      "command byte",
+      "command-byte target storage",
+      "later command dispatch"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "rows": 7,
+    "cgb4Rows": 7,
+    "ambiguousRows": 0,
+    "addressFree": true
+  },
+  "coverage": {
+    "observedNoteCallbacks": 82,
+    "cgbChannel4Callbacks": 7,
+    "byCase": {
+      "anchor": {
+        "callbacks": 0,
+        "postCallbackGlueCycles": 0
+      },
+      "liliana": {
+        "callbacks": 3,
+        "postCallbackGlueCycles": 66
+      },
+      "factory-varied": {
+        "callbacks": 4,
+        "postCallbackGlueCycles": 88
+      }
+    },
+    "exactCompleteNoteCallbacks": 7,
+    "exactCompleteNoteCallbackSourceCycles": 4435,
+    "postCallbackGlueSourceCyclesPerCallback": 22,
+    "exactPostCallbackGlueCallbacks": 7,
+    "postCallbackGlueSourceCycles": 154,
+    "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 4589,
+    "returnTargetBranches": 7,
+    "waitIwramByteReads": 7,
+    "waitZeroBranches": 7,
+    "commandPointerIwramWordReads": 7,
+    "sequentialThumbHalfwords": 35,
+    "takenControlTransferRefills": 14,
+    "nullOtherPostSelectionCallbacks": 75,
+    "nullCompleteNoteCallbacks": 75,
+    "nullPostCallbackGlueCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "3dd968914895ef4b92a7d211458ff8c14a4df2be5e0c0475a515ccfb53089e93",
+      "case": "liliana",
+      "trackIndex": 7,
+      "completeNoteCallbackSourceCycles": 731,
+      "callbackReturnTarget": "0x082dfb42",
+      "callbackReturnTargetOwnership": "MPlayMain dedicated note BL via call_r3",
+      "waitAtCallbackEntry": 0,
+      "postCallbackGlueSourceCycles": 22,
+      "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 753,
+      "nextCommandByte": null,
+      "nextCommandByteStorage": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c992ad8281e357eeab1206124c866025bb507f8279747a59b52d0dd5c7f3d2c3",
+      "case": "liliana",
+      "trackIndex": 7,
+      "completeNoteCallbackSourceCycles": 597,
+      "callbackReturnTarget": "0x082dfb42",
+      "callbackReturnTargetOwnership": "MPlayMain dedicated note BL via call_r3",
+      "waitAtCallbackEntry": 0,
+      "postCallbackGlueSourceCycles": 22,
+      "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 619,
+      "nextCommandByte": null,
+      "nextCommandByteStorage": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "case": "liliana",
+      "trackIndex": 8,
+      "completeNoteCallbackSourceCycles": 593,
+      "callbackReturnTarget": "0x082dfb42",
+      "callbackReturnTargetOwnership": "MPlayMain dedicated note BL via call_r3",
+      "waitAtCallbackEntry": 0,
+      "postCallbackGlueSourceCycles": 22,
+      "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 615,
+      "nextCommandByte": null,
+      "nextCommandByteStorage": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "completeNoteCallbackSourceCycles": 593,
+      "callbackReturnTarget": "0x082dfb42",
+      "callbackReturnTargetOwnership": "MPlayMain dedicated note BL via call_r3",
+      "waitAtCallbackEntry": 0,
+      "postCallbackGlueSourceCycles": 22,
+      "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 615,
+      "nextCommandByte": null,
+      "nextCommandByteStorage": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "849d56bffe90bbb7de356c4e885078c697320b92122be75fff5ecd3930e1c43b",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "completeNoteCallbackSourceCycles": 731,
+      "callbackReturnTarget": "0x082dfb42",
+      "callbackReturnTargetOwnership": "MPlayMain dedicated note BL via call_r3",
+      "waitAtCallbackEntry": 0,
+      "postCallbackGlueSourceCycles": 22,
+      "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 753,
+      "nextCommandByte": null,
+      "nextCommandByteStorage": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "ebdbea6b4b8411938e0c8ece194e26027f1f81303aa408a8e095fcd9ab687bf2",
+      "case": "factory-varied",
+      "trackIndex": 7,
+      "completeNoteCallbackSourceCycles": 597,
+      "callbackReturnTarget": "0x082dfb42",
+      "callbackReturnTargetOwnership": "MPlayMain dedicated note BL via call_r3",
+      "waitAtCallbackEntry": 0,
+      "postCallbackGlueSourceCycles": 22,
+      "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 619,
+      "nextCommandByte": null,
+      "nextCommandByteStorage": null,
+      "completeMPlaySourceCycles": null
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "case": "factory-varied",
+      "trackIndex": 8,
+      "completeNoteCallbackSourceCycles": 593,
+      "callbackReturnTarget": "0x082dfb42",
+      "callbackReturnTargetOwnership": "MPlayMain dedicated note BL via call_r3",
+      "waitAtCallbackEntry": 0,
+      "postCallbackGlueSourceCycles": 22,
+      "contiguousPrefixThroughNextCommandPointerLoadSourceCycles": 615,
+      "nextCommandByte": null,
+      "nextCommandByteStorage": null,
+      "completeMPlaySourceCycles": null
+    }
+  ],
+  "closure": {
+    "closed": "The same seven sourceStateDigest-joined CGB4 callbacks return to MPlayMain's dedicated note continuation, branch through wait==0, and load the next command pointer from IWRAM.",
+    "contiguousPrefix": "4589 aggregate source cycles through the next command-pointer load across seven callbacks (4435 unchanged complete ply_note cycles + 154 v12 post-callback glue).",
+    "remainingDiscriminator": "The next ldrb needs the current command byte and MusicPlayerTrack.cmdPtr target storage class, neither retained by frozen v11 nor source-general statically; stop before it.",
+    "nextMissingScalar": "current command byte",
+    "nextMissingMemoryClass": "MusicPlayerTrack.cmdPtr target storage",
+    "durationFit": false,
+    "runtimePointerIdentity": false,
+    "runtimeAddressLookup": false,
+    "serviceCost": null,
+    "constructionClock": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Frozen v11 regenerates byte-for-byte and joins only by sourceStateDigest. Source/ELF/ROM ownership proves a fixed 22-cycle post-ply_note continuation for the same seven callbacks, ending before the unproved next command-byte dereference."
+}
