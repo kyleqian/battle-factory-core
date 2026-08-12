@@ -49,13 +49,13 @@ import {
   type FactoryAiCheckBadMoveAttacker,
   type FactoryAiCheckBadMoveRoarTarget,
   type FactoryAiMonGender,
+  MOVES_BY_ID,
   runCheckBadMovePreamble as tsRunCheckBadMovePreamble,
 } from "../../src/engine/factoryAiCheckBadMove.ts";
 import {
   type FactoryAiCheckViabilityBattler,
   type FactoryAiCheckViabilityDraw,
   type FactoryAiCheckViabilityResult,
-  MOVES_BY_ID,
   runCheckViability as tsRunCheckViability,
 } from "../../src/engine/factoryAiCheckViability.ts";
 import {
