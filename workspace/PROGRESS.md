@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1204 — [MAIN worker, 2026-08-12] **CGB4 v17 track-loop decision source-closed**
+## 1204 — [supervisor, 2026-08-12] **CGB4 v17 track-loop decision verified**
 
 - **State:** #55 has a source-exact **5,394-cycle** aggregate prefix through
   `subs r6, 0x1; ble _081DD9A4` for the frozen **7/82** CGB4 callbacks.
@@ -19,11 +19,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `ldr r0, [r7, o_MusicPlayerInfo_clock]` on exit. Keep later loop body,
   other 75 callbacks, complete MPlay, service/arbitration, and construction
   clock wiring null.
-- **Notes:** red-first then focused v16/v17 **7/7**, smoke, typecheck, and
-  build are green; the exactly-one `npm test` foreground process ran but its
-  tool transport lost the final exit summary, so no full-suite-green claim is
-  recorded. No production, unsupported barrier, canonical-recording import,
-  presentation/animation/Rust, canonical Battle-2, or absolute-tick change.
+- **Notes:** worker red-first; supervisor independently regenerated v17 and
+  reran focused v16/v17 **7/7** plus smoke **8 files / 375 passed**. Worker
+  typecheck and build **653 modules** are green. Its one full-suite process
+  lost the final transport summary; session-start baseline was **993 files /
+  9,591 passed / 1 skipped**. No lane fold, production, unsupported barrier,
+  recording import, animation/Rust, canonical Battle-2, or absolute-tick change.
 
 ## 1203 — [MAIN worker, 2026-08-12] **CGB4 v16 fixed exit moves source-closed**
 
