@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1190 — [supervisor, 2026-08-12] **CGB4 helper verified; Rust M5d-2 folded**
+
+- **State:** #55 is source-exact for **2,935 contiguous cycles** through
+  `ChnVolSetAsm` return across the observed **7/82** CGB4 callbacks. Complete
+  MPlay stays **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** audited the four-scalar entry packets and exact both-unclamped
+  helper route, including **2** multiply-internal premium cycles per callback;
+  regenerated v3-v7 **19/19**. Folded Rust M5d-2's **29** stat/screen
+  `CheckViability` effects through merge `fa09a5b0`; animation-main is
+  contained.
+- **Next:** source-close one coherent post-helper caller-field slice, stopping
+  before its first unresolved branch. Preserve unobserved clamp/nonzero-LFO
+  routes, the other 75 callbacks, complete note/glue/MPlay costs,
+  service/arbitration, and clock wiring null.
+- **Notes:** union full **984 files / 9,554 passed / 1 skipped**, build **653
+  modules**. Rust is **441/441**, fmt/clippy clean; rebuilt WASM is **138,463
+  bytes** (`6f84f91c…`) and forced parity is **757/757**. The latest
+  engine-changing fold remains covered by vanilla **20/20** and full **60/60**
+  soaks. Both branches are contained; no unsupported barrier or canonical
+  Battle-2 extension.
+
 ## 1189 — [MAIN worker, 2026-08-12] **CGB4 `ChnVolSetAsm` observed routes source-closed**
 
 - **State:** #55 is source-exact for **2,935 contiguous cycles** through
@@ -46,24 +67,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **757/757**. The latest engine-changing fold already passed vanilla
   **20/20** and full **60/60** soaks. Both branches are contained; no
   unsupported barrier or canonical Battle-2 extension.
-
-## 1187 — [MAIN worker, 2026-08-12] **CGB4 post-helper allocation fields source-closed**
-
-- **State:** #55 is source-exact through `ChnVolSetAsm` entry for **2,459
-  contiguous cycles** across the same **7/82** zero-lfoDelay CGB4 callbacks.
-  Complete MPlay remains **5 exact / 108 null** and the construction clock is
-  unwired.
-- **Did:** added additive v6 source/ELF/ROM-pinned evidence from caller resume
-  `0x082dfea6`: **44** straight-line field-copy cycles plus **10** BL-edge
-  cycles per callback, reusing v5 rows without new runtime state. Red-first
-  route/storage/input guards and focused v6 **4/4** are green. Smoke is
-  **8 files / 375 passed**; typecheck, full `npm test` (**983 files / 9,550
-  passed / 1 skipped**), and build (**653 modules**) are green.
-- **Next:** hand off with the current boundary at the unresolved
-  `ChnVolSetAsm` helper body; keep later fields and all broader Issue #55
-  scope null until independently source-proven.
-- **Notes:** v6 receipt SHA256 is
-  `341be83906b17cd9ad972886a11e6f91270fc1eb3d66dc7cad4ff644daec468f` and
-  doc SHA256 is `21227e6a766c9eff565e006e314369049853fbb47c042581534e18f0e7b70ad5`.
-  Checkpoints are `c0c6b368` and `8c1efe17`. No oracle rerun, production
-  engine change, unsupported barrier, or canonical Battle-2 extension.

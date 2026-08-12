@@ -41892,3 +41892,23 @@ git; the current live ledger keeps the three load-bearing entries only.
   **757/757**. Fresh post-engine-fold soaks are vanilla **20/20** and full
   **60/60**, zero crashes/hangs. Both branches are contained; no unsupported
   barrier or canonical Battle-2 extension.
+## 1187 — [MAIN worker, 2026-08-12] **CGB4 post-helper allocation fields source-closed**
+
+- **State:** #55 is source-exact through `ChnVolSetAsm` entry for **2,459
+  contiguous cycles** across the same **7/82** zero-lfoDelay CGB4 callbacks.
+  Complete MPlay remains **5 exact / 108 null** and the construction clock is
+  unwired.
+- **Did:** added additive v6 source/ELF/ROM-pinned evidence from caller resume
+  `0x082dfea6`: **44** straight-line field-copy cycles plus **10** BL-edge
+  cycles per callback, reusing v5 rows without new runtime state. Red-first
+  route/storage/input guards and focused v6 **4/4** are green. Smoke is
+  **8 files / 375 passed**; typecheck, full `npm test` (**983 files / 9,550
+  passed / 1 skipped**), and build (**653 modules**) are green.
+- **Next:** hand off with the current boundary at the unresolved
+  `ChnVolSetAsm` helper body; keep later fields and all broader Issue #55
+  scope null until independently source-proven.
+- **Notes:** v6 receipt SHA256 is
+  `341be83906b17cd9ad972886a11e6f91270fc1eb3d66dc7cad4ff644daec468f` and
+  doc SHA256 is `21227e6a766c9eff565e006e314369049853fbb47c042581534e18f0e7b70ad5`.
+  Checkpoints are `c0c6b368` and `8c1efe17`. No oracle rerun, production
+  engine change, unsupported barrier, or canonical Battle-2 extension.
