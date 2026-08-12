@@ -21,10 +21,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   clock wiring null.
 - **Notes:** worker red-first; supervisor independently regenerated v17 and
   reran focused v16/v17 **7/7** plus smoke **8 files / 375 passed**. Worker
-  typecheck and build **653 modules** are green. Its one full-suite process
-  lost the final transport summary; session-start baseline was **993 files /
-  9,591 passed / 1 skipped**. No lane fold, production, unsupported barrier,
-  recording import, animation/Rust, canonical Battle-2, or absolute-tick change.
+  typecheck and build **653 modules** are green. Folded animation-main's exact
+  Meteor Mash promotion (`2ca00a35`); the union passes **994 files / 9,595
+  passed / 1 skipped** and build **653 modules**. Rust remains contained. No
+  production battle logic, unsupported barrier, recording import, canonical
+  Battle-2, or absolute-tick change.
 
 ## 1203 — [MAIN worker, 2026-08-12] **CGB4 v16 fixed exit moves source-closed**
 
