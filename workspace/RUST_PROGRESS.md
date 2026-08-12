@@ -7,7 +7,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## R5 — [supervised session, 2026-08-12] **M5 and M6 COMPLETE; switch policy end-to-end**
 
-- **State:** rust-main = master `17b66e78` + verified M7a fold `b058a260`.
+- **State:** rust-main = master `1a36e6c0` + verified M7b folds `f622d20b`/
+  `f9d4de3e`. Factory trainer selection and the seven-trainer schedule are now
+  native and WASM differential-green end-to-end.
   The complete Factory AI mask 0/1/7 decision family and the singles switch-in
   selector/full switch policy are native and WASM differential-green. Factory
   trainer selection/scheduling is now native and corpus-differential-green.
@@ -58,14 +60,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **375/375**, forced union **779/779**, full npm **1,011 files / 9,682 passed /
   1 skip**, and build **657 modules**. Artifact: 336,570 bytes, sha256
   `e040c86b15f82b9b4a10ad50d9ba5d031e28af61fb2413df9c1a5f959f0c9d1b`.
-- **Next:** M7b — add the additive ABI/adapter and both-mode full-object parity
-  for the default-GBA single selection and seven-trainer schedule. Keep the
-  injectable scripted-port-only test surface native unless the boundary needs
-  it for a demonstrated production use.
+- **M7b DONE:** additive ABI-v1 exports accept JS-number-preserving `f64`
+  inputs (selection `28+8N` bytes; schedule 16 bytes), return typed errors and
+  the complete result/35-byte ledger records, and keep scripted RNG native-
+  only. The new adapter routes forced WASM directly with no TS fallback.
+  Both-mode parity covers **425 selections + 64 schedules per adapter**, **25**
+  production error inputs, and **9** malformed lengths; real GBA seed 31 pins
+  duplicate rejections at battles 1 and 5. Supervisor audited width/validation
+  order and arbitrary history-number preservation, then reran cargo **699
+  harness cases**, fmt, clippy, WASM, smoke **375/375**, forced union **12 files
+  / 782/782**, full npm **1,014 files / 9,695 passed / 1 skip**, and build
+  **657 modules**. Artifact: 348,371 bytes, sha256
+  `a8a5a9f2fefce59d495a9786767a9257a91ee24513f6e32afed8b8145ca00bb4`.
+- **Next:** M7c — port stable pure `factoryOpponentGeneration.ts` natively,
+  reusing M7a trainer scheduling and existing mon construction. Keep its WASM
+  boundary as a separate step; do not touch #55 construction-clock ownership.
 - **Notes:** M6b used Sol/high plus one narrow Terra/max correction; M6c used
-  Sol/high; M7a used Terra/max. Scope stayed within `core-rs/**` plus the
-  authorized new parity test; no canonical TS engine or main-lane ledger file
-  changed.
+  Sol/high; M7a used Terra/max and M7b used Sol/high. Scope stayed within
+  `core-rs/**` plus authorized new parity tests; no canonical TS engine or
+  main-lane ledger file changed.
 
 ---
 
