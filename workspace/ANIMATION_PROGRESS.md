@@ -1,3 +1,11 @@
+# MOVE_CONFUSE_RAY exact — bilateral Scene-ON dense acceptance (2026-08-12 worker)
+
+- **State:** Coverage advances **175→176/276 Level-50 exact**, 0 partial, 0 staged, and unsupported falls **101→100**. Only Confuse Ray is promoted; Will-O-Wisp remains unsupported.
+- **Did:** Extracted source YELLOW_BALL and legal CHINCHOU back/front art, reused the source-derived BG_GHOST, and ported the complete source-age bounce/spiral affine bodies, BG fade/restore, monbg, palette cycle, alpha registers, side-relative `SoundTask_AdjustPanningVar`, typed seam, and compositor. The move-owned painter preserves opaque bounce versus OBJ_BLEND spiral behavior and current-row palette/register transfer without importing recordings or fitting pixels.
+- **Verified:** Player-back source frames **76..345** and opponent-front **80..349** each pass **270/270** reducer/component and production framebuffer rows twice fresh through first inactive cleanup. Complete OAM/matrix latches pass **269/269** per side; palette passes the preceding-buffer rule on **268/269** with the monbg age-4 same-row exception. Fresh full-state hashes repeat `2a9fde46…` / `83d95bef…`, and all task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/immutable-state/raw-RGB/change-map gates retain their committed evidence.
+- **Next:** Confuse Ray is complete. Will-O-Wisp remains an independent audit-only sibling: its WISP_FIRE/WISP_ORB, split-bg, ShakeMon2, and distinct body need complete bilateral evidence before promotion.
+- **Notes:** Presentation-only. No confusion/accuracy/damage/RNG/turn/controller/facility state, animation boundary, unsupported barrier, canonical recording import, absolute tick, per-age framebuffer/hash lookup, coordinate/RGB fit, or sibling coverage changed.
+
 # MOVE_FISSURE dense bilateral evidence checkpoint — remains unsupported (2026-08-12 worker)
 
 - **State:** Coverage remains **175/276 Level-50 exact**, 0 partial, 0 staged, and **101 unsupported**. Fissure and Dig are not promoted.

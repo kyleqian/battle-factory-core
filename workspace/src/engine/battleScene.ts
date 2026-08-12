@@ -677,6 +677,7 @@ import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with
 import faintAttackDarkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import extremeSpeedAsset from "../assets/gen/battle-anim-extreme-speed.json" with { type: "json" };
 import battleAnimGhostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
+import confuseRayAsset from "../animation/assets/confuse-ray.json" with { type: "json" };
 import battleAnimPsychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
 import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
@@ -992,6 +993,7 @@ import {
   sceneOnAcidArmorView,
   sceneOnCalmMindView,
   sceneOnShadowBallView,
+  sceneOnConfuseRayView,
   sceneOnEncoreView,
   sceneOnSparkView,
   sceneOnThunderWaveView,
@@ -1886,6 +1888,11 @@ const shadowBallArt = shadowBallAsset as {
   shadowBall: { tileset: Tileset; palette: RgbColor[] };
   sableyeBack: { tileset: Tileset; palette: RgbColor[] };
   sableyeFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const confuseRayArt = confuseRayAsset as {
+  yellowBall: { tileset: Tileset; palette: RgbColor[] };
+  chinchouBack: { tileset: Tileset; palette: RgbColor[] };
+  chinchouFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const encoreArt = encoreAsset as {
   spotlight: { tileset: Tileset; palette: RgbColor[] };
@@ -33444,6 +33451,171 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SABLEYE used" : "Foe SABLEYE used",
       "SHADOW BALL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "CONFUSE_RAY") {
+    const view = sceneOnConfuseRayView(state);
+    const displayed = sceneOnConfuseRayView({ ...state, age: state.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "CHINCHOU"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "CHINCHOU"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged CONFUSE_RAY pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.background === "ghost") {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimGhostBg.tileset,
+        tilemap: battleAnimGhostBg.tilemap,
+        subpalettes: [gpuDarken(battleAnimGhostBg.palette)],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+
+    const chinchouSource = playerToOpponent
+      ? confuseRayArt.chinchouBack
+      : confuseRayArt.chinchouFront;
+    const chinchou = playerToOpponent
+      ? chinchouSource
+      : {
+          ...chinchouSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: chinchouSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      // monbg owns a BG palette bank that FadeToBg deliberately excludes
+      // from the brightness target mask; only the field background darkens.
+      onix.palette,
+      view.target.geometry.spriteCorner.x + onixIdle.x2,
+      view.target.geometry.spriteCorner.y + onixIdle.y2,
+    );
+    if (view.monBgActive) drawTarget();
+    const nonObjTarget2 = fb.slice();
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      chinchou.tileset,
+      chinchou.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (!view.monBgActive) drawTarget();
+    if (opponentToPlayer) drawAttacker();
+
+    const ball = state.age >= 47 && state.age <= 120
+      ? displayed.bounce
+      : state.age >= 167 && state.age <= 225
+        ? displayed.spiral
+        : null;
+    if (ball) {
+      const palette = blendPaletteToward(
+        confuseRayArt.yellowBall.palette,
+        { r: 255, g: 82, b: 0 },
+        // The color-cycle task updates the faded buffer one scheduler pass
+        // ahead of the source-age labels used for software sprites; its
+        // hardware palette therefore aligns with this current display age.
+        view.paletteBlendCoefficient,
+      );
+      if (ball.kind === "bounce") {
+        // gConfuseRayBallBounceSpriteTemplate is OBJ_NORMAL. The script's
+        // changing BLDALPHA is observable hardware state but does not select
+        // this object for alpha composition.
+        drawSpriteSheetAffineRotate(
+          fb,
+          confuseRayArt.yellowBall.tileset,
+          palette,
+          ball.x + ball.x2,
+          ball.y + ball.y2,
+          ball.matrix.pa,
+          ball.matrix.pb,
+          ball.matrix.pc,
+          ball.matrix.pd,
+        );
+      } else {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          confuseRayArt.yellowBall.tileset,
+          palette,
+          ball.x + ball.x2,
+          ball.y + ball.y2,
+          ball.matrix.pa,
+          ball.matrix.pb,
+          ball.matrix.pc,
+          ball.matrix.pd,
+          view.blend.eva,
+          view.blend.evb,
+          true,
+        );
+      }
+    }
+    if (playerToOpponent) drawAttacker();
+
+    const fieldProfile = state.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CHINCHOU",
+        level: 50,
+        gender: fieldProfile.opponentGender ?? "male",
+        hpFraction: fieldProfile.opponentHp / fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CHINCHOU" : "ONIX",
+        level: 50,
+        gender: fieldProfile.playerGender ?? "male",
+        hpFraction: fieldProfile.playerHp / fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: fieldProfile.playerHp,
+        maxHp: fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHINCHOU used" : "Foe CHINCHOU used",
+      "CONFUSE RAY!",
       99,
     );
     return;
