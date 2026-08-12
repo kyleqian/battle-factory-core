@@ -183,9 +183,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   through the DefenseDown shared tail −2; Double Team toxic-pair 2-draw
   chain) — exact. Post-fold: artifact rebuilt, smoke 375/375. Worker:
   sonnet, 31.8 min, 2 commits.
-- **Next:** M5d-3 (30 effects, weather/heal/status/Counter — brief
-  staged; Confuse must stay pub(crate) for M5d-5's Flatter), then
-  M5d-4/M5d-5. Re-verify the conflict check at orient per the standing
+- **M5d-3 DONE (fold `1f74ba5c`):** 30 effects (weather trio with
+  SunnyDay/Hail sharing weather_setter_cv_score and RainDance's own
+  diverging body kept separate; heal family; OHKO as an inline arm;
+  SelfKO for Explosion+Memento; SemiInvulnerable 129-line handler;
+  Confuse kept pub(crate) for M5d-5's Flatter; Swagger delegates to
+  run_cv_confuse; Counter). unported = 50, pinned. ~130 native tests +
+  181 vector rows (gen-cv-m5d3-vectors.mjs, byte-idempotent), incl. the
+  weather stale-funcResult collision cases exercising M5d-0's maps
+  end-to-end. **Port finding, supervisor-confirmed independently:**
+  AI_CV_SemiInvulnerable5's tryEncourage tail returns its own fresh
+  draws array, silently DROPPING the speed-tie draw's receipt while
+  keeping its rng advance (TS :2180-2198; calls 2, draw_count 1,
+  surviving ordinal 2) — caught by the differential vectors mid-port,
+  replicated bug-for-bug. Supervisor rerun: scope clean, cargo
+  **528/528** + fmt/clippy + wasm, generator byte-idempotent, 2 rows
+  re-derived independently (Fly tie-draw dropped-receipt; SunnyDay
+  stale-fallback carry) — exact. Post-fold: artifact rebuilt, smoke
+  375/375. Worker: sonnet, 38.6 min, 1 commit.
+- **Next:** M5d-4 (22 effects, charge-up/status-cure/Substitute — brief
+  staged; ground-truth doc ends at BrickBreak, rest is
+  source-citation-only), then M5d-5 (28 effects, needs M5d-3's Confuse —
+  now available), then the CV boundary+adapter+parity step (M5e, M5c
+  pattern). Re-verify the conflict check at orient per the standing
   M4+ rule.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
