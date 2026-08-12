@@ -1852,6 +1852,28 @@
 
 ---
 
+## 1215 — [supervisor, 2026-08-12] **CGB4 v23 and persistent-lane union verified**
+
+- **State:** #55 retains the source-exact **5,728-cycle** aggregate prefix
+  through the three selected `_081DD9BC` store/compare/branch decisions.
+  Confuse Ray exact Scene-ON presentation and Rust M6a's pure Factory-AI
+  switch selector are folded; both persistent lane tips are contained.
+- **Did:** independently audited v23's frozen digest join, exact one-scalar
+  packet schema, twice-fresh identity, 12-cycle taken route, 14-cycle
+  source-general non-taken route, and all retained null boundaries. Folded
+  animation through `64ec9f90` and Rust through `30641085`, rebuilt WASM,
+  forced all boundary parity suites, and verified the complete union.
+- **Next:** source-close only the fixed two-instruction `_081DD9C4` successor
+  prefix for the same three rows, stopping before `_081DD9C8` reads track
+  flags. Keep track count/value/pointer identity, loop body, the four
+  EXIST-set rows, complete MPlay, service/arbitration, and construction-clock
+  wiring null unless separately evidenced.
+- **Notes:** v23 focused **12/12** and independent post-final-edit typecheck;
+  Rust **897/897**; WASM **300,227 bytes** (`c4da2f6c…`), forced parity **9
+  files / 772 passed**; union npm **1,007 files / 9,659 passed / 1 skipped**
+  and build **655 modules**. No ratchet, unsupported-barrier, or canonical
+  Battle-2 change; no soak trigger.
+
 ## 1214 — [MAIN worker, 2026-08-12] **CGB4 v23 post-subs branch closure**
 
 - **State:** #55 reaches a source-exact **5,728-cycle** aggregate prefix for

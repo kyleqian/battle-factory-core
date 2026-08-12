@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1218 — [supervisor, 2026-08-12] **v24, Fissure staging, and Rust M6b union green**
+
+- **State:** #55 remains exact through the **5,740-cycle** selected CGB4
+  prefix. Fissure's source-derived staged Scene-ON presentation and Rust's
+  complete native Factory-AI switch policy are folded; both persistent lane
+  tips are contained.
+- **Did:** folded animation through `27d1f5c7` and Rust through `9bb4cee9`.
+  Audited M6b's corrected canonical battle-type constants/corpus ratchets,
+  reran native Rust, rebuilt the main-tree WASM artifact, forced every
+  boundary parity suite, and verified the full merged TypeScript union.
+- **Next:** capture only the first-track flags discriminator needed to price
+  `_081DD9C8` through its first `MPT_FLG_EXIST` decision for the same three
+  frozen v24 rows. Stop before the volume/pitch flags test; retain identity,
+  count, pointer, later loop work, and construction-clock wiring null.
+- **Notes:** Rust **690/690 harness tests**; WASM **287,620 bytes**
+  (`b6acb929…`), forced parity **9 files / 772 passed**; union npm **1,009
+  files / 9,670 passed / 1 skipped** and build **657 modules**. No main
+  ratchet, unsupported-barrier, or canonical Battle-2 change; no soak trigger.
+
 ## 1217 — [supervisor, 2026-08-12] **CGB4 v24 independently verified**
 
 - **State:** #55 retains the source-exact **5,740-cycle** aggregate prefix
@@ -40,25 +59,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   exactly one post-change npm **1,008 files / 9,664 passed / 1 skipped**,
   and build **655 modules** are green. No `src/**`, ratchet, unsupported-
   barrier, animation/Rust, presentation, or canonical Battle-2 change.
-
-## 1215 — [supervisor, 2026-08-12] **CGB4 v23 and persistent-lane union verified**
-
-- **State:** #55 retains the source-exact **5,728-cycle** aggregate prefix
-  through the three selected `_081DD9BC` store/compare/branch decisions.
-  Confuse Ray exact Scene-ON presentation and Rust M6a's pure Factory-AI
-  switch selector are folded; both persistent lane tips are contained.
-- **Did:** independently audited v23's frozen digest join, exact one-scalar
-  packet schema, twice-fresh identity, 12-cycle taken route, 14-cycle
-  source-general non-taken route, and all retained null boundaries. Folded
-  animation through `64ec9f90` and Rust through `30641085`, rebuilt WASM,
-  forced all boundary parity suites, and verified the complete union.
-- **Next:** source-close only the fixed two-instruction `_081DD9C4` successor
-  prefix for the same three rows, stopping before `_081DD9C8` reads track
-  flags. Keep track count/value/pointer identity, loop body, the four
-  EXIST-set rows, complete MPlay, service/arbitration, and construction-clock
-  wiring null unless separately evidenced.
-- **Notes:** v23 focused **12/12** and independent post-final-edit typecheck;
-  Rust **897/897**; WASM **300,227 bytes** (`c4da2f6c…`), forced parity **9
-  files / 772 passed**; union npm **1,007 files / 9,659 passed / 1 skipped**
-  and build **655 modules**. No ratchet, unsupported-barrier, or canonical
-  Battle-2 change; no soak trigger.
