@@ -1864,6 +1864,31 @@ complete note callback cost, and complete one-pass MPlay total remains null
 service cost, or `runFactoryConstructionClock` wiring landed. Evidence remains
 `docs/issue55-m4a-note-census-v1.md`.
 
+**2026-08-11 command decode/running-status/jump-table closure:** the committed
+exact execution selector removes the command-read safety superset's one
+zero-pass candidate, leaving **218/218** executed dispatcher iterations across
+**40** rows and closing the component for all **108/108** one-pass rows. The
+source-exact census is **99** wait stores, **82** `ply_note` dispatches, and
+**37** jump-table callbacks (`patt 1 / pend 1 / voice 2 / vol 16 / pan 13 /
+bend 4`), exactly agreeing with the independent note and callback-family
+evidence.
+
+The six compiled routes cost **63 / 71 / 81 / 85 / 89 / 93** cycles and total
+**17,066** cycles: **4,069** WS0 Thumb halfwords, **792** taken refills,
+**533** aligned EWRAM words, **99** ROM literals, and **317** GamePak bytes.
+The reducer pins normalized song offsets/bytes, running status, table indices,
+target symbols, the 88-byte dispatcher, `call_r3`, and the 36-slot jump table;
+source/route/state/target mutations fail closed. Known one-pass components now
+span **456–4170** cycles (**87** totals).
+
+This closes only `_081DD8E0` through the wait store or selected callback entry.
+Every post-selection note body, the unobserved keysplit route, complete note
+callback cost, post-callback loop glue, later MPlay component, and complete
+one-pass MPlay total remains null (**5 exact / 108 null**). No observed
+duration, runtime pointer identity, service cost, unsupported barrier, or
+`runFactoryConstructionClock` wiring landed. Evidence:
+`docs/issue55-m4a-dispatch-v1.md`.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn
