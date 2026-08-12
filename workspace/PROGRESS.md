@@ -21,9 +21,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   channel state, later loop work, the unobserved v17 exit successor, other 75
   callbacks, complete MPlay, service/arbitration, and clock wiring null.
 - **Notes:** packet hashes anchor `18620078…`, LILIANA `1d31dfc0…`, varied
-  `7c9978e5…`; focused v18/v19 **9/9**. No production, ratchet, animation/Rust,
-  presentation, or canonical Battle-2 change. Broader gates follow this docs
-  commit.
+  `7c9978e5…`; focused v18/v19 **9/9**, smoke **375/375**, and typecheck are
+  green. Folded Confuse Ray source staging and Rust M5f TryToFaint native
+  vectors after v19. Final union: Rust **670/670**, rebuilt WASM **253,573
+  bytes** (`74b778ce…`), forced parity **766/766**, npm **999 files / 9,620
+  passed / 1 skipped**, build **653 modules**. Both folds avoid `src/**`; no
+  soak trigger, ratchet, presentation, or canonical Battle-2 change.
 
 ## 1206 — [supervisor, 2026-08-12] **CGB4 v18 verified; animation and Rust lanes folded**
 
