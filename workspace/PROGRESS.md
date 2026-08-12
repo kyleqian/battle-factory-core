@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1216 — [MAIN worker, 2026-08-12] **CGB4 v24 source-only successor prefix**
+
+- **State:** #55's selected three-row source-exact prefix reaches **5,740**
+  cycles through the two fixed _081DD9C4 loads, stopping before _081DD9C8's
+  first track-flags read. No construction-clock wiring landed.
+- **Did:** froze v23 evidence/report byte-for-byte, joined only its three
+  selected sourceStateDigest rows, and pinned source/ELF/ROM bytes
+  `3a 7a fd 6a`, field offsets 8/44, IWRAM access class, and **4×3 = 12**
+  cycles. v24 rows retain only digests and timing; the 2-cycle under-price
+  and runtime-field widening fail closed.
+- **Next:** this receipt ends before the first _081DD9C8 track-flags read.
+  Any continuation needs a separately scoped, fail-closed evidence plan.
+- **Notes:** focused v23/v24 **12/12**, smoke **375/375**, typecheck,
+  exactly one post-change npm **1,008 files / 9,664 passed / 1 skipped**,
+  and build **655 modules** are green. No `src/**`, ratchet, unsupported-
+  barrier, animation/Rust, presentation, or canonical Battle-2 change.
+
 ## 1215 — [supervisor, 2026-08-12] **CGB4 v23 and persistent-lane union verified**
 
 - **State:** #55 retains the source-exact **5,728-cycle** aggregate prefix
@@ -48,22 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   smoke **375/375**, typecheck, exactly one post-change `npm test`, and build
   are green. No `src/**`, ratchet, unsupported-barrier, animation/Rust,
   presentation, or canonical Battle-2 change.
-
-## 1213 — [supervisor, 2026-08-12] **CGB4 v22 and Rust M5 union verified**
-
-- **State:** #55 retains the source-exact **5,692-cycle** aggregate prefix
-  through the three selected `_081DD9B6` status/tempo prefixes. Rust M5 is
-  folded complete: the full Factory AI decision policy now crosses its WASM
-  adapter, and both persistent lane tips are contained.
-- **Did:** audited v22's exact six-byte ROM body, frozen three-row join,
-  IWRAM access classes, and first-unpriced `strh`. Folded `rust-main` through
-  `4790707c`, rebuilt the WASM artifact, forced every boundary-bearing parity
-  suite, and verified the complete union.
-- **Next:** capture only the address-free tempo discriminator needed to price
-  the bounded `_081DD9BC` store/compare/branch slice for the same three rows.
-  Keep the four EXIST-set rows, later body, complete MPlay, service/
-  arbitration, and construction-clock wiring null unless separately proved.
-- **Notes:** v22 focused **5/5**; Rust **682/682**; WASM **300,117 bytes**
-  (`d1ebb568…`), forced parity **9 files / 772 passed**; union npm **1,005
-  files / 9,648 passed / 1 skipped** and build **653 modules**. No `src/**`,
-  ratchet, unsupported-barrier, or canonical Battle-2 change; no soak trigger.

@@ -1,3 +1,22 @@
+## 1213 — [supervisor, 2026-08-12] **CGB4 v22 and Rust M5 union verified**
+
+- **State:** #55 retains the source-exact **5,692-cycle** aggregate prefix
+  through the three selected `_081DD9B6` status/tempo prefixes. Rust M5 is
+  folded complete: the full Factory AI decision policy now crosses its WASM
+  adapter, and both persistent lane tips are contained.
+- **Did:** audited v22's exact six-byte ROM body, frozen three-row join,
+  IWRAM access classes, and first-unpriced `strh`. Folded `rust-main` through
+  `4790707c`, rebuilt the WASM artifact, forced every boundary-bearing parity
+  suite, and verified the complete union.
+- **Next:** capture only the address-free tempo discriminator needed to price
+  the bounded `_081DD9BC` store/compare/branch slice for the same three rows.
+  Keep the four EXIST-set rows, later body, complete MPlay, service/
+  arbitration, and construction-clock wiring null unless separately proved.
+- **Notes:** v22 focused **5/5**; Rust **682/682**; WASM **300,117 bytes**
+  (`d1ebb568…`), forced parity **9 files / 772 passed**; union npm **1,005
+  files / 9,648 passed / 1 skipped** and build **653 modules**. No `src/**`,
+  ratchet, unsupported-barrier, or canonical Battle-2 change; no soak trigger.
+
 ## 1211 — [supervisor, 2026-08-12] **CGB4 v21 and persistent-lane union verified**
 
 - **State:** #55 retains the source-exact **5,674-cycle** aggregate prefix

@@ -2360,6 +2360,27 @@ construction-clock wiring remain null. Evidence is
 `4ae623c8…`). No production, presentation, animation/Rust, canonical
 Battle-2, ratchet, or unsupported-barrier change landed.
 
+**2026-08-12 CGB4 v24 source-only successor-prefix closure:** v24 freezes
+v23 evidence/report byte-for-byte and joins only the same three frozen
+selected sourceStateDigest rows, with no oracle capture or runtime scalar.
+It closes exactly source lines 1360-1362 / ELF 0x082dfbfc..0x082dfc00:
+the track-count byte load and tracks-field word load. Source layout pins
+their offsets (8/44), static player storage is IWRAM without selecting a
+runtime player, and exact ROM bytes are 3a 7a fd 6a.
+
+The two sequential Thumb halfwords cost 2 cycles each; both IWRAM loads add
+zero premium and no control-transfer refill executes. Thus the fixed prefix
+is **4 cycles per selected row / 12 aggregate**, advancing **5,728 → 5,740**
+and stopping before _081DD9C8's first track-flags load. No actual track
+count, tracks pointer/identity/address, track flags/index/identity, loop
+body, complete MPlay, service/arbitration, or construction-clock behavior is
+captured or claimed. Evidence:
+`docs/issue55-m4a-note-body-cgb4-v24.md` and
+`tests/fixtures/factory-m4a-note-body-cgb4-evidence-v24.json`; the red-first
+Tier-1 proof rejects the 2-cycle under-price and runtime-field widening fails
+closed. No production, presentation, animation/Rust, canonical Battle-2,
+ratchet, or unsupported-barrier change landed.
+
 ## #39 — `battleScene.ts` is a state machine over one canonical battle
 
 **Symptom:** most production battle presentation is still keyed to *which turn

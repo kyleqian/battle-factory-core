@@ -1,0 +1,179 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v24",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1360-1362",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "musicPlayerInfo": {
+        "trackCount": {
+          "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+          "lines": "327-350",
+          "offset": 8,
+          "width": "u8",
+          "runtimeValue": null
+        },
+        "tracks": {
+          "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+          "lines": "327-350",
+          "offset": 44,
+          "width": "pointer",
+          "runtimeValue": null
+        },
+        "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+      },
+      "staticPlayerStorage": {
+        "declaration": {
+          "path": "reference/pokeemerald/src/m4a.c",
+          "line": 12,
+          "symbol": "gPokemonCryMusicPlayers",
+          "entries": 2,
+          "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+        },
+        "staticOrder": {
+          "path": "reference/pokeemerald/sound/music_player_table.inc",
+          "lines": "29-33",
+          "ordinaryPlayers": 4,
+          "cryPlayers": 2,
+          "staticSlots": 6,
+          "selectedArrayElement": null,
+          "sha256": "babb0eb8acce75ada42c2747ca0ef09825135d1c85b46254b1f44520b1a57a36"
+        },
+        "commonData": {
+          "path": "reference/pokeemerald/include/gba/defines.h",
+          "line": 11,
+          "section": "common_data",
+          "sha256": "528c5983bf23f3b12036e9f7ed20e482b1dbe15e0198ec6bb10292d413f68644"
+        },
+        "linker": {
+          "path": "reference/pokeemerald/ld_script.ld",
+          "lines": "6-10, 32-47",
+          "class": "IWRAM",
+          "origin": "0x03000000",
+          "sha256": "ea3df8331ffacc75e1377b2d2f2d8ec6530f6436788b812603ba3af1a964cfb0"
+        }
+      }
+    },
+    "elf": {
+      "entry": "0x082dfbfc",
+      "endExclusive": "0x082dfc00",
+      "gPokemonCryMusicPlayers": {
+        "start": "0x030073a0",
+        "endExclusive": "0x03007420",
+        "bytes": 128,
+        "entries": 2,
+        "musicPlayerInfoBytes": 64,
+        "class": "IWRAM"
+      },
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "ldrb r2, [r7, trackCount]; ldr r5, [r7, tracks]",
+        "start": "0x082dfbfc",
+        "endExclusive": "0x082dfc00",
+        "bytes": 4,
+        "bytesHex": "3a 7a fd 6a",
+        "sha256": "7819a0d1d7a2513e6f9f8802939f4acc59c4733ebb6ec021ba1e3396dd77706f"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "iwramByteLoadPremiumCycles": 0,
+      "iwramWordLoadPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "fixedPrefixModel": "ldrb; ldr = 2 halfwords * 2 + zero IWRAM data premium + zero control-transfer refill = 4"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV23EvidenceSha256": "4ae623c81d7a0d0345a672807a6ba20e1ac3bae812450e45824f26d5ee3346e4",
+    "acceptedV23DocSha256": "1c28507bf165e6960a1293764cf192c6decd7619fd756610629edbef8c1011af",
+    "v23RegeneratesByteForByte": true,
+    "v23EvidenceAndReportRetainedByteForByte": true
+  },
+  "capture": {
+    "boundary": "source-only _081DD9C4 successor prefix through ldr r5, before _081DD9C8",
+    "scalars": [],
+    "excluded": [
+      "trackCount",
+      "tracks pointer",
+      "tracks identity",
+      "tracks address",
+      "track flags",
+      "track index",
+      "successor loop body",
+      "runtime address",
+      "frame",
+      "duration"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV23SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "sourceOnly": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v23-selected-row",
+      "unsupported-runtime-field"
+    ]
+  },
+  "coverage": {
+    "frozenV23SelectedRows": 3,
+    "sourceOnlySuccessorPrefixRows": 3,
+    "postV23SourceOnlySuccessorPrefixSourceCycles": 12,
+    "acceptedContiguousPrefixThroughBccDecisionSourceCycles": 5728,
+    "contiguousPrefixThroughSourceOnlySuccessorPrefixSourceCycles": 5740,
+    "sequentialThumbHalfwords": 6,
+    "iwramByteLoads": 3,
+    "iwramWordLoads": 3,
+    "iwramDataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 0
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "postV23SourceOnlySuccessorPrefixSourceCycles": 4,
+      "contiguousPrefixThroughSourceOnlySuccessorPrefixSourceCycles": 808,
+      "stopsBeforeV24Instruction": "_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "postV23SourceOnlySuccessorPrefixSourceCycles": 4,
+      "contiguousPrefixThroughSourceOnlySuccessorPrefixSourceCycles": 808,
+      "stopsBeforeV24Instruction": "_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "postV23SourceOnlySuccessorPrefixSourceCycles": 4,
+      "contiguousPrefixThroughSourceOnlySuccessorPrefixSourceCycles": 808,
+      "stopsBeforeV24Instruction": "_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]"
+    }
+  ],
+  "containment": {
+    "frozenV23ArtifactsReadOnly": true,
+    "frozenV23ArtifactsAreNotProductionImports": true,
+    "v24RuntimeCaptureCount": 0,
+    "trackCount": null,
+    "tracksPointer": null,
+    "tracksIdentity": null,
+    "tracksAddress": null,
+    "trackFlags": null,
+    "trackIndex": null,
+    "successorLoopBody": null,
+    "serviceCost": null,
+    "constructionClock": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Source-only v24 freezes v23 evidence/report byte-for-byte and joins only the same three frozen selected sourceStateDigest rows. The fixed _081DD9C4 ldrb/ldr prefix costs four cycles per row from source/ELF/exact-ROM evidence, advancing the aggregate prefix from 5728 to 5740 and stopping before the first track-flags ldrb at _081DD9C8."
+}
