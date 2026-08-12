@@ -166,10 +166,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   with funcResultAfter=0; Karate Chop vs Ghost immune 2-draw
   fallthrough) — exact. Post-fold: artifact rebuilt, smoke 375/375.
   Worker: sonnet, 29.0 min, 1 commit.
-- **Next:** M5d-2 (29 effects, stat-mod+screens, the largest batch —
-  brief staged), then M5d-3..5 in source order (only M5d-5 depends on
-  M5d-3's Confuse). Re-verify the conflict check at orient per the
-  standing M4+ rule.
+- **M5d-2 DONE (fold `7a035650`):** 29 effects, all three shared-tail
+  clusters (run_cv_stat_down, run_cv_attack_style_stat_up,
+  run_cv_side_screen_type_gate). unported = 80, pinned. 56 native
+  tests + 208 vector rows (gen-cv-m5d2-vectors.mjs, byte-idempotent).
+  **EvasionUp worst case proven 7, not 8** (site 1 needs hp≥90, site 8
+  needs hp∈[40,70] — disjoint, exhaustively checked 0-100;
+  MAX_CHECK_VIABILITY_DRAWS stays 8 per brief). Design note, verified
+  behaviorally identical by supervisor re-derivation: TS's one-line
+  pass-through wrappers (runCvDefenseDown etc.) collapsed into
+  selector-driven shared-tail dispatch. 6 of 29 effects vestigial
+  (SPEED_UP, SPECIAL_DEFENSE_UP, SPECIAL_DEFENSE_DOWN base variants +
+  EVASION_UP_2/ACCURACY_DOWN_2/EVASION_DOWN_2), live-verified.
+  Supervisor rerun: scope clean, cargo **441/441** + fmt/clippy + wasm,
+  generator byte-idempotent, 2 rows re-derived independently (Tickle
+  through the DefenseDown shared tail −2; Double Team toxic-pair 2-draw
+  chain) — exact. Post-fold: artifact rebuilt, smoke 375/375. Worker:
+  sonnet, 31.8 min, 2 commits.
+- **Next:** M5d-3 (30 effects, weather/heal/status/Counter — brief
+  staged; Confuse must stay pub(crate) for M5d-5's Flatter), then
+  M5d-4/M5d-5. Re-verify the conflict check at orient per the standing
+  M4+ rule.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
