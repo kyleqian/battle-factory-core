@@ -1,0 +1,99 @@
+{
+  "attackerHpRange": {
+    "maximum": 57,
+    "minimum": 57
+  },
+  "audio": [
+    "se_m_absorb_2",
+    "se_m_spit_up",
+    "se_m_take_down"
+  ],
+  "branch": {
+    "animTurn": 1,
+    "orbWaves": 1,
+    "stockpiles": 1
+  },
+  "cleanup": {
+    "active": 0,
+    "soundTaskCount": 0,
+    "visualTaskCount": 0
+  },
+  "lifecycleCounts": {
+    "blueOrb": 5,
+    "blueStar": 4,
+    "deform": 1,
+    "shake": 2
+  },
+  "oracleProfile": "battle-scene-on",
+  "registerValues": {
+    "bldalpha": [
+      0
+    ],
+    "bldcnt": [
+      0
+    ],
+    "bldy": [
+      0
+    ],
+    "mosaic": [
+      0
+    ],
+    "winin": [
+      16191
+    ],
+    "winout": [
+      16191
+    ]
+  },
+  "schema": "swallow-natural-checkpoint/v1",
+  "setup": {
+    "challengeNum": 1,
+    "customPartiesBuiltBeforeBattle": true,
+    "mode": "mechanicLab",
+    "opponentLeadSetId": 162,
+    "playerLeadSetId": 213,
+    "profile": "battle-scene-on"
+  },
+  "sourceWindow": {
+    "endFrame": 1409,
+    "frameCount": 163,
+    "rgbSequenceSha256": "1723b6d66528faf51a26facde57ab0e96ce7a564804f26da828428e29d5f95b8",
+    "startFrame": 1247
+  },
+  "tagPresence": {
+    "blueOrb": {
+      "absentAfterCleanup": true,
+      "paletteFrames": 161,
+      "tileFrames": 161
+    },
+    "blueStar": {
+      "absentAfterCleanup": true,
+      "paletteFrames": 158,
+      "tileFrames": 158
+    }
+  },
+  "topology": {
+    "callbacks": [
+      "AnimSpriteOnMonPos",
+      "AnimSwallowBlueOrb",
+      "SpriteCB_HealthBar",
+      "SpriteCB_HealthBoxOther",
+      "SpriteCB_SetInvisible",
+      "SpriteCallbackDummy"
+    ],
+    "tasks": [
+      "AnimTask_ShakeMon2_Step",
+      "AnimTask_SwallowDeformMon"
+    ],
+    "templates": [
+      "0x0832c1d8",
+      "gHealingBlueStarSpriteTemplate",
+      "gMultiuseSpriteTemplate",
+      "gSpriteTemplate_EnemyShadow",
+      "gSwallowBlueOrbSpriteTemplate",
+      "sHealthbarSpriteTemplates",
+      "sHealthboxOpponentSpriteTemplates",
+      "sHealthboxPlayerSpriteTemplates"
+    ]
+  }
+}

@@ -1,3 +1,11 @@
+# MOVE_SWALLOW natural one-Stockpile source checkpoint — remains unsupported (2026-08-12 worker)
+
+- **State:** Coverage remains **177/276 Level-50 exact**, 0 partial, 0 staged, and **99 unsupported**. Swallow is not promoted; exact Reversal remains unchanged.
+- **Did:** Pinned Swallow's exclusive **0x082d4b2e..0x082d4bda** ROM interval, complete three-branch source contract, lowest legal Level-50 carrier **set 213 PELIPPER_1**, BLUE_ORB/BLUE_STAR extraction and exact shared-asset identity, attacker deform, both ShakeMon2 calls, HealingEffect, audio, tags, GPU-register non-ownership, and cleanup. Added a complete legal Scene-ON party/trace that stages Stockpile through real controller moves and a compact symbolic probe/receipt; no transient state is injected.
+- **Verified:** Two fresh direct-mGBA runs are byte-identical (`8a819816…`). Natural player-back animTurn/Stockpile **1** spans source frames **1247..1409 = 163 frames**, with exactly **5** blue-orb, **4** healing-star, **1** deform, and **2** shake lifecycles; TAKE_DOWN/SPIT_UP/ABSORB_2, tag unload, zero blend/mosaic ownership, inactive/task-free cleanup, and whole-window raw-RGB digest `1723b6d6…` are pinned. Focused source/asset/boundary **12/12**, animation audit/coverage, typecheck, full suite **1,000 files / 9,621 passed / 1 skipped**, and the **657-module** build pass using the existing gitignored WASM prerequisite.
+- **Next:** Obtain natural two- and three-Stockpile branches and the opposite orientation, then implement a source-relative reducer, typed seam, and compositor. Require complete twice-fresh bilateral dense component/latch/framebuffer equality for all required branches before promoting Swallow.
+- **Notes:** Honest evidence checkpoint only: no reducer/seam/compositor or framebuffer claim. No healing calculation, stockpile mutation, damage, RNG, turn/controller/facility state, animation boundary, unsupported barrier, canonical recording import, per-frame framebuffer/hash table, absolute tick, coordinate/RGB fitting, or sibling coverage changed.
+
 # MOVE_HYDRO_PUMP current Scene-ON receipt refresh (2026-08-12 worker)
 
 - **State:** Level-50 coverage remains **177/276 exact**, 0 partial, 0 staged, and **99 unsupported**. Hydro Pump remains exact; Whirlpool remains an independent exact sibling with no coverage-count change.
