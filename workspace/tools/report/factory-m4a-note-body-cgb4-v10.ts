@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeEvidence as makeV9Evidence } from "./factory-m4a-note-body-cgb4-v9.ts";
@@ -20,6 +20,14 @@ const M4A1_SHA256 = "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a47354
 const M4A_C_SHA256 = "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4";
 const M4A_TABLES_SHA256 = "6d407283c29e707f8dfb85be4eaee3111af4b393d8f2fb370e2390c87ddf09c6";
 const M4A_INTERNAL_H_SHA256 = "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74";
+const MAIN_C_SHA256 = "c68345c6e35a104662c6982aa35a6aa09688c5886c44e9f27314653b8c8cfc48";
+const IO_REG_H_SHA256 = "a657a53322f354b898eefe85f15a32be5e229cbc335e200958d18b5f7f0da862";
+const CONFIG_H_SHA256 = "92f3ec15effc330b67a75068d6ecb3cb0cff44165a69e645323f88543e911581";
+const FLASH_SOURCE_SHA256 = Object.freeze({
+  "src/agb_flash.c": "6ec9769d867ecfd9390d2b0496005e769d3964fb897b2fbc7308cd807f2e1145",
+  "src/agb_flash_1m.c": "addae712b7f512b673782c9bf42f675a924caf86f688e42ad4ebe23613bf2c70",
+  "src/agb_flash_mx.c": "d0d7a24a804873523682cb8c27ce08297c40d06a2319ce1679b227c54976df22",
+});
 const MAP_SHA256 = "27c5f864f0f985637a3934946f256d64064977e2a240efd1ffe2c20b0dd11aa6";
 const CALL_R3_ENTRY_SHA256 = "477db9ac7ca5efc12e37f882656b8fe5a363ffeb99b2e565a953d10c3c91ab21";
 const MIDI_KEY_TO_CGB_FREQ_SHA256 = "4377844ebb1d188dd92436bbe784237a330026867f4cda5ab8345cdf2ec08aee";
@@ -44,6 +52,16 @@ const TAKEN_REFILL_CYCLES = 6;
 const IWRAM_ACCESS_PREMIUM_CYCLES = 0;
 const ROM_BYTE_TOTAL_CYCLES = 9;
 const ROM_WORD_TOTAL_CYCLES = 11;
+const KEY64_HELPER_PCS = Object.freeze([
+  0x082e_0b34, 0x082e_0b36, 0x082e_0b38, 0x082e_0b3a, 0x082e_0b3c,
+  0x082e_0b3e, 0x082e_0b40, 0x082e_0b42, 0x082e_0b44, 0x082e_0b46,
+  0x082e_0b48, 0x082e_0b4a, 0x082e_0b50, 0x082e_0b52, 0x082e_0b54,
+  0x082e_0b56, 0x082e_0b58, 0x082e_0b5a, 0x082e_0b5e, 0x082e_0b60,
+  0x082e_0b62, 0x082e_0b64, 0x082e_0bce, 0x082e_0bd0, 0x082e_0bd2,
+]);
+const KEY91_HELPER_PCS = Object.freeze([...KEY64_HELPER_PCS.slice(0, 18), 0x082e_0b5c, ...KEY64_HELPER_PCS.slice(18)]);
+const KEY64_HELPER_REFILL_PCS = Object.freeze([0x082e_0b4a, 0x082e_0b5a, 0x082e_0b64, 0x082e_0bd2]);
+const KEY91_HELPER_REFILL_PCS = Object.freeze([0x082e_0b4a, 0x082e_0b64, 0x082e_0bd2]);
 
 export type Cgb4MidiKeyToCgbFreqState = Readonly<{
   route: "call-r3-midi-key-to-cgb-freq-type4";
@@ -64,12 +82,12 @@ export type Cgb4MidiKeyToCgbFreqTiming = Readonly<{
   keyAfterSubtract21: 43 | 70;
   clampBranch: "bls-taken-no-clamp" | "bls-not-taken-clamp-to-59";
   noiseTableIndex: 43 | 59;
-  midiKeyToCgbFreqResult: 0x34 | 0x04;
+  midiKeyToCgbFreqResult: 0x34 | 0x00;
   callR3BxEdgeSequentialThumbHalfwords: 1;
   callR3BxEdgePipelineRefills: 1;
   callR3BxEdgeSourceCycles: 8;
-  sequentialThumbHalfwords: 26 | 27;
-  pipelineRefills: 4 | 5;
+  sequentialThumbHalfwords: 25 | 26;
+  pipelineRefills: 3 | 4;
   iwramStackWordWrites: 5;
   iwramStackWordReads: 5;
   iwramDataAccessPremiumCycles: 0;
@@ -82,8 +100,8 @@ export type Cgb4MidiKeyToCgbFreqTiming = Readonly<{
   multiplyInstructions: 0;
   multiplyInternalCycles: 0;
   multiplyInternalPremiumCycles: 0;
-  midiKeyToCgbFreqSourceCycles: 94 | 98;
-  callR3ToReturnSourceCycles: 102 | 106;
+  midiKeyToCgbFreqSourceCycles: 86 | 90;
+  callR3ToReturnSourceCycles: 94 | 98;
 }>;
 
 function fail(message: string): never {
@@ -115,6 +133,28 @@ function romSlice(start: number, end: number): Buffer {
   return rom.subarray(start - ROM_BASE, end - ROM_BASE);
 }
 
+type SourceReference = Readonly<{ path: string; line: number; text: string }>;
+
+function sourceReferences(token: string): SourceReference[] {
+  const sourceRoot = join(ROOT, "reference/pokeemerald");
+  const extensions = new Set([".c", ".h", ".s", ".inc"]);
+  const rows: SourceReference[] = [];
+  const visit = (directory: string): void => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        visit(path);
+      } else if (extensions.has(entry.name.slice(entry.name.lastIndexOf(".")))) {
+        readFileSync(path, "utf8").split("\n").forEach((text, index) => {
+          if (text.includes(token)) rows.push({ path: path.slice(sourceRoot.length + 1), line: index + 1, text: text.trim() });
+        });
+      }
+    }
+  };
+  visit(sourceRoot);
+  return rows.sort((a, b) => a.path.localeCompare(b.path) || a.line - b.line);
+}
+
 /**
  * Reduce only the two source-proven type-4 key routes present in frozen v9.
  * The third argument (pitM/fineAdjust) is intentionally absent: the source's
@@ -134,9 +174,13 @@ export function reduceMPlayCgb4MidiKeyToCgbFreqTiming(state: unknown): Cgb4MidiK
   const keyAfterSubtract21 = keyAfter - 21;
   const clamped = keyAfterSubtract21 > 59;
   const noiseTableIndex = clamped ? 59 : keyAfterSubtract21;
-  const midiKeyToCgbFreqResult = clamped ? 0x04 : 0x34;
-  const sequentialThumbHalfwords = clamped ? 27 : 26;
-  const pipelineRefills = clamped ? 4 : 5;
+  const noiseTable = romSlice(NOISE_TABLE_START, NOISE_TABLE_END);
+  const midiKeyToCgbFreqResult = noiseTable[noiseTableIndex];
+  if (midiKeyToCgbFreqResult !== (clamped ? 0x00 : 0x34)) fail("pinned gNoiseTable result changed");
+  const helperPcs = clamped ? KEY91_HELPER_PCS : KEY64_HELPER_PCS;
+  const helperRefillPcs = clamped ? KEY91_HELPER_REFILL_PCS : KEY64_HELPER_REFILL_PCS;
+  const sequentialThumbHalfwords = helperPcs.length;
+  const pipelineRefills = helperRefillPcs.length;
   const midiKeyToCgbFreqSourceCycles = sequentialThumbHalfwords * THUMB_FETCH_CYCLES
     + pipelineRefills * TAKEN_REFILL_CYCLES
     + (ROM_WORD_TOTAL_CYCLES - THUMB_FETCH_CYCLES)
@@ -153,12 +197,12 @@ export function reduceMPlayCgb4MidiKeyToCgbFreqTiming(state: unknown): Cgb4MidiK
     keyAfterSubtract21: keyAfterSubtract21 as 43 | 70,
     clampBranch: clamped ? "bls-not-taken-clamp-to-59" : "bls-taken-no-clamp",
     noiseTableIndex: noiseTableIndex as 43 | 59,
-    midiKeyToCgbFreqResult: midiKeyToCgbFreqResult as 0x34 | 0x04,
+    midiKeyToCgbFreqResult: midiKeyToCgbFreqResult as 0x34 | 0x00,
     callR3BxEdgeSequentialThumbHalfwords: 1,
     callR3BxEdgePipelineRefills: 1,
     callR3BxEdgeSourceCycles,
-    sequentialThumbHalfwords: sequentialThumbHalfwords as 26 | 27,
-    pipelineRefills: pipelineRefills as 4 | 5,
+    sequentialThumbHalfwords: sequentialThumbHalfwords as 25 | 26,
+    pipelineRefills: pipelineRefills as 3 | 4,
     iwramStackWordWrites: 5,
     iwramStackWordReads: 5,
     iwramDataAccessPremiumCycles: IWRAM_ACCESS_PREMIUM_CYCLES,
@@ -171,8 +215,8 @@ export function reduceMPlayCgb4MidiKeyToCgbFreqTiming(state: unknown): Cgb4MidiK
     multiplyInstructions: 0,
     multiplyInternalCycles: 0,
     multiplyInternalPremiumCycles: 0,
-    midiKeyToCgbFreqSourceCycles: midiKeyToCgbFreqSourceCycles as 94 | 98,
-    callR3ToReturnSourceCycles: (callR3BxEdgeSourceCycles + midiKeyToCgbFreqSourceCycles) as 102 | 106,
+    midiKeyToCgbFreqSourceCycles: midiKeyToCgbFreqSourceCycles as 86 | 90,
+    callR3ToReturnSourceCycles: (callR3BxEdgeSourceCycles + midiKeyToCgbFreqSourceCycles) as 94 | 98,
   });
 }
 
@@ -181,6 +225,14 @@ function assertSourceAndElf(): Record<string, unknown> {
   const m4aC = readFileSync(join(ROOT, "reference/pokeemerald/src/m4a.c"), "utf8");
   const tables = readFileSync(join(ROOT, "reference/pokeemerald/src/m4a_tables.c"), "utf8");
   const internal = readFileSync(join(ROOT, "reference/pokeemerald/include/gba/m4a_internal.h"), "utf8");
+  const main = readFileSync(join(ROOT, "reference/pokeemerald/src/main.c"), "utf8");
+  const ioReg = readFileSync(join(ROOT, "reference/pokeemerald/include/gba/io_reg.h"), "utf8");
+  const config = readFileSync(join(ROOT, "reference/pokeemerald/include/config.h"), "utf8");
+  const flashSources = Object.fromEntries(Object.entries(FLASH_SOURCE_SHA256).map(([path, hash]) => {
+    const source = readFileSync(join(ROOT, "reference/pokeemerald", path), "utf8");
+    if (sha256(source) !== hash) fail(`${path} source bytes changed`);
+    return [path, source];
+  }));
   const map = readFileSync(join(ROOT, "reference/pokeemerald/pokeemerald.map"), "utf8");
   for (const anchor of [
     "ldr r3, [r3, o_SoundInfo_MidiKeyToCgbFreq]",
@@ -193,6 +245,8 @@ function assertSourceAndElf(): Record<string, unknown> {
     "MPlayExtender(gCgbChans);",
     "soundInfo->MidiKeyToCgbFreq = (MidiKeyToCgbFreqFunc)DummyFunc;",
     "soundInfo->MidiKeyToCgbFreq = MidiKeyToCgbFreq;",
+    "if (ident != ID_NUMBER)",
+    "soundInfo->ident = ID_NUMBER;",
     "u32 MidiKeyToCgbFreq(u8 chanNum, u8 key, u8 fineAdjust)",
     "if (chanNum == 4)",
     "if (key <= 20)",
@@ -200,8 +254,39 @@ function assertSourceAndElf(): Record<string, unknown> {
     "if (key > 59)",
     "return gNoiseTable[key];",
   ]) if (!m4aC.includes(anchor)) fail(`m4a.c lost ${anchor}`);
-  if ((m4aC.match(/soundInfo->MidiKeyToCgbFreq\s*=/g) ?? []).length !== 2) fail("MidiKeyToCgbFreq field write count changed");
-  if (m4aC.indexOf("SoundInit(&gSoundInfo);") > m4aC.indexOf("MPlayExtender(gCgbChans);")) fail("m4aSoundInit initialization order changed");
+  const fieldReferences = sourceReferences("MidiKeyToCgbFreq");
+  const expectedFieldReferences = [
+    "constants/m4a_constants.inc:95:struct_field o_SoundInfo_MidiKeyToCgbFreq, 4",
+    "include/gba/m4a_internal.h:181:typedef u32 (*MidiKeyToCgbFreqFunc)(u8, u8, u8);",
+    "include/gba/m4a_internal.h:214:MidiKeyToCgbFreqFunc MidiKeyToCgbFreq;",
+    "include/gba/m4a_internal.h:434:u32 MidiKeyToCgbFreq(u8, u8, u8);",
+    "src/m4a_1.s:1416:ldr r3, [r0, o_SoundInfo_MidiKeyToCgbFreq]",
+    "src/m4a_1.s:1788:ldr r3, [r3, o_SoundInfo_MidiKeyToCgbFreq]",
+    "src/m4a.c:311:soundInfo->MidiKeyToCgbFreq = MidiKeyToCgbFreq;",
+    "src/m4a.c:388:soundInfo->MidiKeyToCgbFreq = (MidiKeyToCgbFreqFunc)DummyFunc;",
+    "src/m4a.c:810:u32 MidiKeyToCgbFreq(u8 chanNum, u8 key, u8 fineAdjust)",
+  ];
+  const normalizedReferences = fieldReferences.map((row) => `${row.path}:${row.line}:${row.text}`);
+  if (JSON.stringify(normalizedReferences) !== JSON.stringify(expectedFieldReferences)) fail(`complete MidiKeyToCgbFreq source-reference census changed: ${JSON.stringify(normalizedReferences)}`);
+  if ((m4aC.match(/soundInfo->MidiKeyToCgbFreq\s*=/g) ?? []).length !== 2) fail("MidiKeyToCgbFreq direct field-write count changed");
+  if ((assembly.match(/(?:str|stm)[^\n]*o_SoundInfo_MidiKeyToCgbFreq/g) ?? []).length !== 0) fail("assembly acquired a MidiKeyToCgbFreq field write");
+  const soundInitCall = m4aC.indexOf("SoundInit(&gSoundInfo);");
+  const extenderCall = m4aC.indexOf("MPlayExtender(gCgbChans);");
+  const wholeStructClear = m4aC.indexOf("CpuFill32(0, soundInfo, sizeof(struct SoundInfo));");
+  const dummyWrite = m4aC.indexOf("soundInfo->MidiKeyToCgbFreq = (MidiKeyToCgbFreqFunc)DummyFunc;");
+  const liveWrite = m4aC.indexOf("soundInfo->MidiKeyToCgbFreq = MidiKeyToCgbFreq;");
+  if (!(soundInitCall < extenderCall && wholeStructClear < dummyWrite && liveWrite > m4aC.indexOf("void MPlayExtender(struct CgbChannel *cgbChans)"))) fail("m4aSoundInit/SoundInit/MPlayExtender field initialization order changed");
+  if ((m4aC.match(/CpuFill32\(0, soundInfo, sizeof\(struct SoundInfo\)\);/g) ?? []).length !== 1) fail("SoundInfo whole-struct clear census changed");
+  const waitcntAssignment = "REG_WAITCNT = WAITCNT_PREFETCH_ENABLE | WAITCNT_WS0_S_1 | WAITCNT_WS0_N_3;";
+  if (!main.includes(waitcntAssignment) || main.indexOf(waitcntAssignment) > main.indexOf("m4aSoundInit();")) fail("AgbMain WAITCNT initialization changed");
+  const flashWaitcntWrites = Object.values(flashSources).flatMap((source) => source.split("\n").filter((line) => line.includes("REG_WAITCNT =")));
+  if (flashWaitcntWrites.length !== 10 || flashWaitcntWrites.some((line) => !line.includes("REG_WAITCNT & ~WAITCNT_SRAM_MASK"))) fail("post-boot flash WAITCNT preservation census changed");
+  if (!config.includes("#define NDEBUG") || sha256(config) !== CONFIG_H_SHA256) fail("release debug-print exclusion changed");
+  for (const define of [
+    "#define WAITCNT_WS0_N_3         (1 << 2)",
+    "#define WAITCNT_WS0_S_1         (1 << 4)",
+    "#define WAITCNT_PREFETCH_ENABLE (1 << 14)",
+  ]) if (!ioReg.includes(define)) fail(`io_reg.h lost ${define}`);
   for (const anchor of ["const u8 gNoiseTable[]", "0x37, 0x36, 0x35, 0x34", "0x03, 0x02, 0x01, 0x00"]) {
     if (!tables.includes(anchor)) fail(`m4a_tables.c lost ${anchor}`);
   }
@@ -209,6 +294,8 @@ function assertSourceAndElf(): Record<string, unknown> {
   if (sha256(m4aC) !== M4A_C_SHA256) fail("m4a.c source bytes changed");
   if (sha256(tables) !== M4A_TABLES_SHA256) fail("m4a_tables.c source bytes changed");
   if (sha256(internal) !== M4A_INTERNAL_H_SHA256) fail("m4a_internal.h source bytes changed");
+  if (sha256(main) !== MAIN_C_SHA256) fail("main.c source bytes changed");
+  if (sha256(ioReg) !== IO_REG_H_SHA256) fail("io_reg.h source bytes changed");
   if (sha256(map) !== MAP_SHA256) fail("map bytes changed");
 
   const symbols = execFileSync("arm-none-eabi-nm", ["--defined-only", "-S", "-n", join(ROOT, "reference/pokeemerald/pokeemerald.elf")], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
@@ -217,6 +304,7 @@ function assertSourceAndElf(): Record<string, unknown> {
     "082e0b34 000000a8 T MidiKeyToCgbFreq",
     "08675c18 0000003c R gNoiseTable",
   ]) if (!symbols.includes(symbol)) fail(`ELF symbol ${symbol} changed`);
+  if (symbols.includes(" AGBPrint") || symbols.includes(" AGBPutc")) fail("release ELF acquired debug-printer WAITCNT writers");
   if (!map.includes("0x03006380") || !map.includes("gSoundInfo = .") || !map.includes("0x030074f0") || !map.includes("gCgbChans = .")) fail("map lost IWRAM sound anchors");
 
   if (romSlice(CALL_R3_ENTRY, CALL_R3_ENTRY_END).length !== 2 || sha256(romSlice(CALL_R3_ENTRY, CALL_R3_ENTRY_END)) !== CALL_R3_ENTRY_SHA256) fail("call_r3 entry bytes changed");
@@ -231,6 +319,12 @@ function assertSourceAndElf(): Record<string, unknown> {
       helper: { path: "reference/pokeemerald/src/m4a.c", lines: "810-825", sha256: sha256(m4aC) },
       tables: { path: "reference/pokeemerald/src/m4a_tables.c", lines: "149-162", sha256: sha256(tables) },
       soundInfo: { path: "reference/pokeemerald/include/gba/m4a_internal.h", lines: "181-216", sha256: sha256(internal) },
+      waitcnt: [
+        { path: "reference/pokeemerald/src/main.c", lines: "98-101", sha256: sha256(main) },
+        { path: "reference/pokeemerald/include/gba/io_reg.h", lines: "732-775", sha256: sha256(ioReg) },
+        { path: "reference/pokeemerald/include/config.h", lines: "1-15", sha256: sha256(config) },
+        ...Object.entries(flashSources).map(([path, source]) => ({ path: `reference/pokeemerald/${path}`, sha256: sha256(source) })),
+      ],
       map: { path: "reference/pokeemerald/pokeemerald.map", sha256: sha256(map) },
     },
     targetResolution: {
@@ -238,7 +332,11 @@ function assertSourceAndElf(): Record<string, unknown> {
       m4aSoundInitOrder: ["SoundInit(&gSoundInfo)", "MPlayExtender(gCgbChans)"],
       soundInitInitialTarget: "DummyFunc",
       mplayExtenderTarget: "MidiKeyToCgbFreq",
+      mplayExtenderGuardSatisfiedBySoundInit: true,
       fieldWritesInPinnedSource: 2,
+      wholeStructClearsBeforeFieldWrites: 1,
+      completeFieldReferenceCensus: true,
+      fieldReferenceCensus: fieldReferences,
       runtimePointerIdentity: false,
       runtimeAddressLookup: false,
     },
@@ -263,6 +361,11 @@ function assertSourceAndElf(): Record<string, unknown> {
       romLiteralWordReadPremiumCycles: ROM_WORD_TOTAL_CYCLES - THUMB_FETCH_CYCLES,
       romNoiseTableByteReadTotalCycles: ROM_BYTE_TOTAL_CYCLES,
       romNoiseTableByteReadPremiumCycles: ROM_BYTE_TOTAL_CYCLES - THUMB_FETCH_CYCLES,
+      waitcntBootValue: "prefetch-enabled/ws0-n3/ws0-s1",
+      waitcntAssignmentBeforeM4aSoundInit: true,
+      postBootFlashWritesPreservingWs0AndPrefetch: flashWaitcntWrites.length,
+      debugPrinterWaitcntWritesCompiledOut: !symbols.includes("AGBPrint"),
+      gamePakDataClass: "a ROM data access breaks sequential instruction prefetch: byte N+next-N = 9 total; aligned word N+S+next-N = 11 total",
       multiplyInternalCycles: 0,
       multiplyInternalPremiumCycles: 0,
       dynamicTarget: "resolved only from pinned source initialization; no runtime pointer value or address lookup",
@@ -271,21 +374,25 @@ function assertSourceAndElf(): Record<string, unknown> {
       callR3BxEdge: { sequentialThumbHalfwords: 1, takenControlTransferRefills: 1, cycles: 8 },
       key64: {
         sourceRoute: "chanNum==4, key>20, key-21=43, bls taken",
-        sequentialThumbHalfwords: 26, pipelineRefills: 5,
+        executedPcs: KEY64_HELPER_PCS.map((pc) => `0x${pc.toString(16)}`),
+        refillPcs: KEY64_HELPER_REFILL_PCS.map((pc) => `0x${pc.toString(16)}`),
+        sequentialThumbHalfwords: 25, pipelineRefills: 4,
         iwramStackWordWrites: 5, iwramStackWordReads: 5,
         romLiteralWordReads: 1, romNoiseTableByteReads: 1,
         multiplyInstructions: 0, multiplyInternalCycles: 0,
-        cycles: "26*2 + 5*6 + (11-2) + (9-2) = 98",
-        callR3ToReturnCycles: "8 + 98 = 106",
+        cycles: "25*2 + 4*6 + (11-2) + (9-2) = 90",
+        callR3ToReturnCycles: "8 + 90 = 98",
       },
       key91: {
         sourceRoute: "chanNum==4, key>20, key-21=70, bls not taken, clamp=59",
-        sequentialThumbHalfwords: 27, pipelineRefills: 4,
+        executedPcs: KEY91_HELPER_PCS.map((pc) => `0x${pc.toString(16)}`),
+        refillPcs: KEY91_HELPER_REFILL_PCS.map((pc) => `0x${pc.toString(16)}`),
+        sequentialThumbHalfwords: 26, pipelineRefills: 3,
         iwramStackWordWrites: 5, iwramStackWordReads: 5,
         romLiteralWordReads: 1, romNoiseTableByteReads: 1,
         multiplyInstructions: 0, multiplyInternalCycles: 0,
-        cycles: "27*2 + 4*6 + (11-2) + (9-2) = 94",
-        callR3ToReturnCycles: "8 + 94 = 102",
+        cycles: "26*2 + 3*6 + (11-2) + (9-2) = 86",
+        callR3ToReturnCycles: "8 + 86 = 94",
       },
     },
   };
@@ -373,7 +480,7 @@ export function makeEvidence(): Record<string, unknown> {
   const helperCycles = rows.reduce((sum: number, row: any) => sum + row.dynamicMidiKeyToCgbFreqSourceCycles, 0);
   const dynamicCycles = rows.reduce((sum: number, row: any) => sum + row.dynamicCallR3HelperSourceCycles, 0);
   const contiguous = rows.reduce((sum: number, row: any) => sum + row.contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles, 0);
-  if (bxCycles !== 56 || helperCycles !== 674 || dynamicCycles !== 730 || contiguous !== 4183) fail("v10 timing totals changed");
+  if (bxCycles !== 56 || helperCycles !== 618 || dynamicCycles !== 674 || contiguous !== 4127) fail("v10 timing totals changed");
 
   return {
     schema: "factory-m4a-note-body-cgb4-evidence/v10",
@@ -396,9 +503,9 @@ export function makeEvidence(): Record<string, unknown> {
       callR3BxEdgeSourceCycleRange: { min: 8, max: 8, distinct: 1 },
       callR3BxEdgeSourceCycles: bxCycles,
       exactMidiKeyToCgbFreqCallbacks: 7,
-      midiKeyToCgbFreqSourceCycleRange: { min: 94, max: 98, distinct: 2 },
+      midiKeyToCgbFreqSourceCycleRange: { min: 86, max: 90, distinct: 2 },
       midiKeyToCgbFreqSourceCycles: helperCycles,
-      dynamicCallR3ToReturnSourceCycleRange: { min: 102, max: 106, distinct: 2 },
+      dynamicCallR3ToReturnSourceCycleRange: { min: 94, max: 98, distinct: 2 },
       dynamicCallR3ToReturnSourceCycles: dynamicCycles,
       acceptedContiguousPrefixThroughCallR3EntrySourceCycles: 3453,
       contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles: contiguous,
@@ -407,7 +514,7 @@ export function makeEvidence(): Record<string, unknown> {
       keyPassedToHelperValues: { "64": key64Rows.length, "91": key91Rows.length },
       keyAfterSubtract21Values: { "43": key64Rows.length, "70": key91Rows.length },
       noiseTableIndices: { "43": key64Rows.length, "59": key91Rows.length },
-      midiKeyToCgbFreqResults: { "52": key64Rows.length, "4": key91Rows.length },
+      midiKeyToCgbFreqResults: { "52": key64Rows.length, "0": key91Rows.length },
       clampBranchCounts: { blsTakenNoClamp: key64Rows.length, blsNotTakenClampTo59: key91Rows.length, clampMovExecuted: key91Rows.length },
       nullLaterAllocationFieldsCallbacks: 7,
       nullOtherPostSelectionCallbacks: 75,
@@ -434,14 +541,14 @@ export function makeEvidence(): Record<string, unknown> {
     rows,
     closure: {
       closed: "Pinned source initialization resolves the SoundInfo target; the call_r3 bx edge and both observed type-4 MidiKeyToCgbFreq routes are source/ROM/ELF exact through bx return, including gNoiseTable results.",
-      contiguousPrefix: "4183 aggregate source cycles through MidiKeyToCgbFreq return across seven callbacks (3453 accepted through call_r3 entry + 730 new).",
+      contiguousPrefix: "4127 aggregate source cycles through MidiKeyToCgbFreq return across seven callbacks (3453 accepted through call_r3 entry + 674 new).",
       remainingDiscriminator: "Later allocation fields, unobserved type-4 keys and non-type-4 helper routes, clear_modM, nonzero-lfoDelay routes, other 75 callbacks, complete note/glue/MPlay, service/arbitration, and construction clock remain null.",
       durationFit: false,
       runtimePointerIdentity: false,
       serviceCost: null,
       constructionClock: null,
     },
-    verdict: "The source-initialized SoundInfo target is fail-closed without runtime pointer identity. The same 7/82 callbacks split into four key=64 no-clamp routes (106 cycles from call_r3 entry through return) and three key=91 clamp-to-59 routes (102 cycles); the exact aggregate prefix is 4183 cycles through MidiKeyToCgbFreq return.",
+    verdict: "The source-initialized SoundInfo target is fail-closed without runtime pointer identity. The same 7/82 callbacks split into four key=64 no-clamp routes (98 cycles from call_r3 entry through return) and three key=91 clamp-to-59 routes (94 cycles); the exact aggregate prefix is 4127 cycles through MidiKeyToCgbFreq return.",
   };
 }
 
@@ -452,10 +559,10 @@ function markdown(evidence: ReturnType<typeof makeEvidence>): string {
     "# Issue #55 — `ply_note` CGB-channel-4 `MidiKeyToCgbFreq` v10", "",
     "Generated by `node --experimental-strip-types tools/report/factory-m4a-note-body-cgb4-v10.ts`; do not hand-edit.", "",
     "Battle Scene OFF, additive evidence only. The v10 receipt preserves frozen v9 packets and evidence byte-for-byte and joins solely by `sourceStateDigest`; no new oracle packet or runtime pointer identity is used.", "",
-    "The pinned source initialization is sufficient to fail closed: `m4aSoundInit` calls `SoundInit(&gSoundInfo)` and then `MPlayExtender(gCgbChans)`; `SoundInit` installs `DummyFunc`, while `MPlayExtender` assigns `MidiKeyToCgbFreq`. The pinned source contains exactly those two field writes, in that order, so the observed callback target is source-proven without looking up a runtime pointer.", "",
+    "The pinned source initialization is sufficient to fail closed: `m4aSoundInit` calls `SoundInit(&gSoundInfo)` and then `MPlayExtender(gCgbChans)`; `SoundInit` clears the whole `SoundInfo` and installs `DummyFunc`, while `MPlayExtender` assigns `MidiKeyToCgbFreq`. A complete `.c/.h/.s/.inc` source-reference census pins both direct field writes, the preceding whole-struct clear, both assembly loads, the field/offset declarations, and the helper declaration/definition, so the observed callback target is source-proven without looking up a runtime pointer.", "",
     `The same **${coverage.cgbChannel4Callbacks}/82** callbacks are covered: **0 anchor / 3 LILIANA / 4 legal-varied**. Frozen v9 state has four key=64 rows and three key=91 rows; all have type 12 (channel 4), keyM=0, and the type-4 helper ignores the uncaptured fineAdjust/pitM value.`, "",
-    "The fixed `call_r3` edge is `bx r3`: one sequential Thumb halfword plus one taken refill, **8 cycles** per callback. `MidiKeyToCgbFreq` then executes the complete type-4 route. Key 64 subtracts 21 to index 43 with the `bls` no-clamp branch and returns `gNoiseTable[43] = 0x34`; key 91 subtracts 21 to 70, takes the clamp branch to index 59, and returns `gNoiseTable[59] = 0x04`.", "",
-    "All timing classes are explicit: sequential Thumb fetches are 2 cycles, taken refills are 6, IWRAM stack accesses have zero premium, the ROM literal word read is 11 total (9 premium over the load's 2-cycle instruction class), the ROM noise-table byte read is 9 total (7 premium), and this route executes no multiply or multiply-internal cycles. The helper is **98 cycles** for key 64 (26 halfwords/5 refills) and **94 cycles** for key 91 (27 halfwords/4 refills); including `bx r3`, the dynamic edge-to-return costs are **106/102**.", "",
+    "The fixed `call_r3` edge is `bx r3`: one sequential Thumb halfword plus one taken refill, **8 cycles** per callback. `MidiKeyToCgbFreq` then executes the complete type-4 route. Key 64 subtracts 21 to index 43 with the `bls` no-clamp branch and returns `gNoiseTable[43] = 0x34`; key 91 subtracts 21 to 70, takes the clamp branch to index 59, and returns `gNoiseTable[59] = 0x00`. The canceled checkpoint's `0x04` was table index 55, not 59.", "",
+    "All timing classes are explicit and pinned to `AgbMain`'s pre-audio `WAITCNT` assignment (prefetch enabled, WS0 N=3/S=1): sequential Thumb fetches are 2 cycles, taken refills are 6, IWRAM stack accesses have zero premium, a ROM data access breaks sequential prefetch, the ROM literal word read is 11 total (9 premium over the load's 2-cycle instruction class), and the ROM noise-table byte read is 9 total (7 premium). The exact executed-PC lists contain 25 halfwords/4 refills for key 64 and 26/3 for key 91; the canceled checkpoint had double-counted the dynamic-entry transfer as one helper instruction plus one helper refill. The corrected helper costs are **90/86 cycles**; including the separately counted `bx r3`, the dynamic edge-to-return costs are **98/94**.", "",
     `The new slice adds **${coverage.dynamicCallR3ToReturnSourceCycles} cycles** across seven callbacks, extending the accepted **3453-cycle** call_r3-entry prefix to **${coverage.contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles} aggregate cycles** through the helper return.`, "",
     "| case | callbacks | key=64 | key=91 | edge-to-return cycles |", "| --- | ---: | ---: | ---: | ---: |",
     ...CASES.map((name) => `| ${name} | ${byCase[name].callbacks} | ${byCase[name].key64Callbacks} | ${byCase[name].key91Callbacks} | ${byCase[name].callR3ToReturnSourceCycles} |`), "",

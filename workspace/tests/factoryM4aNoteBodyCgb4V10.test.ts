@@ -36,8 +36,8 @@ describe("Issue #55 CGB4 MidiKeyToCgbFreq slice v10", () => {
       callR3BxEdgeSequentialThumbHalfwords: 1,
       callR3BxEdgePipelineRefills: 1,
       callR3BxEdgeSourceCycles: 8,
-      sequentialThumbHalfwords: 26,
-      pipelineRefills: 5,
+      sequentialThumbHalfwords: 25,
+      pipelineRefills: 4,
       iwramStackWordWrites: 5,
       iwramStackWordReads: 5,
       iwramDataAccessPremiumCycles: 0,
@@ -50,19 +50,19 @@ describe("Issue #55 CGB4 MidiKeyToCgbFreq slice v10", () => {
       multiplyInstructions: 0,
       multiplyInternalCycles: 0,
       multiplyInternalPremiumCycles: 0,
-      midiKeyToCgbFreqSourceCycles: 98,
-      callR3ToReturnSourceCycles: 106,
+      midiKeyToCgbFreqSourceCycles: 90,
+      callR3ToReturnSourceCycles: 98,
     });
     expect(reduceMPlayCgb4MidiKeyToCgbFreqTiming(state(91))).toMatchObject({
       keyAfter: 91,
       keyAfterSubtract21: 70,
       clampBranch: "bls-not-taken-clamp-to-59",
       noiseTableIndex: 59,
-      midiKeyToCgbFreqResult: 0x04,
-      sequentialThumbHalfwords: 27,
-      pipelineRefills: 4,
-      midiKeyToCgbFreqSourceCycles: 94,
-      callR3ToReturnSourceCycles: 102,
+      midiKeyToCgbFreqResult: 0x00,
+      sequentialThumbHalfwords: 26,
+      pipelineRefills: 3,
+      midiKeyToCgbFreqSourceCycles: 86,
+      callR3ToReturnSourceCycles: 94,
     });
   });
 
@@ -90,16 +90,16 @@ describe("Issue #55 CGB4 MidiKeyToCgbFreq slice v10", () => {
       callR3BxEdgeSourceCycleRange: { min: 8, max: 8, distinct: 1 },
       callR3BxEdgeSourceCycles: 56,
       exactMidiKeyToCgbFreqCallbacks: 7,
-      midiKeyToCgbFreqSourceCycleRange: { min: 94, max: 98, distinct: 2 },
-      midiKeyToCgbFreqSourceCycles: 674,
-      dynamicCallR3ToReturnSourceCycleRange: { min: 102, max: 106, distinct: 2 },
-      dynamicCallR3ToReturnSourceCycles: 730,
+      midiKeyToCgbFreqSourceCycleRange: { min: 86, max: 90, distinct: 2 },
+      midiKeyToCgbFreqSourceCycles: 618,
+      dynamicCallR3ToReturnSourceCycleRange: { min: 94, max: 98, distinct: 2 },
+      dynamicCallR3ToReturnSourceCycles: 674,
       acceptedContiguousPrefixThroughCallR3EntrySourceCycles: 3453,
-      contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles: 4183,
+      contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles: 4127,
       observedKeyAfterValues: { "64": 4, "91": 3 },
       keyAfterSubtract21Values: { "43": 4, "70": 3 },
       noiseTableIndices: { "43": 4, "59": 3 },
-      midiKeyToCgbFreqResults: { "52": 4, "4": 3 },
+      midiKeyToCgbFreqResults: { "52": 4, "0": 3 },
       clampBranchCounts: { blsTakenNoClamp: 4, blsNotTakenClampTo59: 3, clampMovExecuted: 3 },
       nullLaterAllocationFieldsCallbacks: 7,
       nullOtherPostSelectionCallbacks: 75,
@@ -111,16 +111,26 @@ describe("Issue #55 CGB4 MidiKeyToCgbFreq slice v10", () => {
       proof: "source-init-midi-key-to-cgb-freq",
       soundInitInitialTarget: "DummyFunc",
       mplayExtenderTarget: "MidiKeyToCgbFreq",
+      mplayExtenderGuardSatisfiedBySoundInit: true,
       fieldWritesInPinnedSource: 2,
+      wholeStructClearsBeforeFieldWrites: 1,
+      completeFieldReferenceCensus: true,
       runtimePointerIdentity: false,
       runtimeAddressLookup: false,
     });
     expect(evidence.rows).toHaveLength(7);
-    expect(evidence.rows.filter((row: any) => row.keyAfter === 64).every((row: any) => row.midiKeyToCgbFreqResult === 0x34 && row.dynamicCallR3HelperSourceCycles === 106)).toBe(true);
-    expect(evidence.rows.filter((row: any) => row.keyAfter === 91).every((row: any) => row.midiKeyToCgbFreqResult === 0x04 && row.dynamicCallR3HelperSourceCycles === 102)).toBe(true);
+    expect(evidence.sourceAndElf.timingClasses).toMatchObject({
+      waitcntBootValue: "prefetch-enabled/ws0-n3/ws0-s1",
+      postBootFlashWritesPreservingWs0AndPrefetch: 10,
+      debugPrinterWaitcntWritesCompiledOut: true,
+      romLiteralWordReadTotalCycles: 11,
+      romNoiseTableByteReadTotalCycles: 9,
+    });
+    expect(evidence.rows.filter((row: any) => row.keyAfter === 64).every((row: any) => row.midiKeyToCgbFreqResult === 0x34 && row.dynamicCallR3HelperSourceCycles === 98)).toBe(true);
+    expect(evidence.rows.filter((row: any) => row.keyAfter === 91).every((row: any) => row.midiKeyToCgbFreqResult === 0x00 && row.dynamicCallR3HelperSourceCycles === 94)).toBe(true);
     expect(evidence.rows.every((row: any) => row.laterAllocationFieldsSourceCycles === null && row.completeNoteCallbackSourceCycles === null && row.postCallbackGlueSourceCycles === null)).toBe(true);
     expect(evidence.closure).toMatchObject({ durationFit: false, runtimePointerIdentity: false, serviceCost: null, constructionClock: null });
-    expect(readFileSync(DOC, "utf8")).toContain("**4183 aggregate cycles**");
+    expect(readFileSync(DOC, "utf8")).toContain("**4127 aggregate cycles**");
   });
 
   it("regenerates v10 evidence and report byte-for-byte", () => {

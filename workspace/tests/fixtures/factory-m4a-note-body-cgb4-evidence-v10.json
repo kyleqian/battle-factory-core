@@ -29,6 +29,35 @@
         "lines": "181-216",
         "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
       },
+      "waitcnt": [
+        {
+          "path": "reference/pokeemerald/src/main.c",
+          "lines": "98-101",
+          "sha256": "c68345c6e35a104662c6982aa35a6aa09688c5886c44e9f27314653b8c8cfc48"
+        },
+        {
+          "path": "reference/pokeemerald/include/gba/io_reg.h",
+          "lines": "732-775",
+          "sha256": "a657a53322f354b898eefe85f15a32be5e229cbc335e200958d18b5f7f0da862"
+        },
+        {
+          "path": "reference/pokeemerald/include/config.h",
+          "lines": "1-15",
+          "sha256": "92f3ec15effc330b67a75068d6ecb3cb0cff44165a69e645323f88543e911581"
+        },
+        {
+          "path": "reference/pokeemerald/src/agb_flash.c",
+          "sha256": "6ec9769d867ecfd9390d2b0496005e769d3964fb897b2fbc7308cd807f2e1145"
+        },
+        {
+          "path": "reference/pokeemerald/src/agb_flash_1m.c",
+          "sha256": "addae712b7f512b673782c9bf42f675a924caf86f688e42ad4ebe23613bf2c70"
+        },
+        {
+          "path": "reference/pokeemerald/src/agb_flash_mx.c",
+          "sha256": "d0d7a24a804873523682cb8c27ce08297c40d06a2319ce1679b227c54976df22"
+        }
+      ],
       "map": {
         "path": "reference/pokeemerald/pokeemerald.map",
         "sha256": "27c5f864f0f985637a3934946f256d64064977e2a240efd1ffe2c20b0dd11aa6"
@@ -42,7 +71,57 @@
       ],
       "soundInitInitialTarget": "DummyFunc",
       "mplayExtenderTarget": "MidiKeyToCgbFreq",
+      "mplayExtenderGuardSatisfiedBySoundInit": true,
       "fieldWritesInPinnedSource": 2,
+      "wholeStructClearsBeforeFieldWrites": 1,
+      "completeFieldReferenceCensus": true,
+      "fieldReferenceCensus": [
+        {
+          "path": "constants/m4a_constants.inc",
+          "line": 95,
+          "text": "struct_field o_SoundInfo_MidiKeyToCgbFreq, 4"
+        },
+        {
+          "path": "include/gba/m4a_internal.h",
+          "line": 181,
+          "text": "typedef u32 (*MidiKeyToCgbFreqFunc)(u8, u8, u8);"
+        },
+        {
+          "path": "include/gba/m4a_internal.h",
+          "line": 214,
+          "text": "MidiKeyToCgbFreqFunc MidiKeyToCgbFreq;"
+        },
+        {
+          "path": "include/gba/m4a_internal.h",
+          "line": 434,
+          "text": "u32 MidiKeyToCgbFreq(u8, u8, u8);"
+        },
+        {
+          "path": "src/m4a_1.s",
+          "line": 1416,
+          "text": "ldr r3, [r0, o_SoundInfo_MidiKeyToCgbFreq]"
+        },
+        {
+          "path": "src/m4a_1.s",
+          "line": 1788,
+          "text": "ldr r3, [r3, o_SoundInfo_MidiKeyToCgbFreq]"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 311,
+          "text": "soundInfo->MidiKeyToCgbFreq = MidiKeyToCgbFreq;"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 388,
+          "text": "soundInfo->MidiKeyToCgbFreq = (MidiKeyToCgbFreqFunc)DummyFunc;"
+        },
+        {
+          "path": "src/m4a.c",
+          "line": 810,
+          "text": "u32 MidiKeyToCgbFreq(u8 chanNum, u8 key, u8 fineAdjust)"
+        }
+      ],
       "runtimePointerIdentity": false,
       "runtimeAddressLookup": false
     },
@@ -91,6 +170,11 @@
       "romLiteralWordReadPremiumCycles": 9,
       "romNoiseTableByteReadTotalCycles": 9,
       "romNoiseTableByteReadPremiumCycles": 7,
+      "waitcntBootValue": "prefetch-enabled/ws0-n3/ws0-s1",
+      "waitcntAssignmentBeforeM4aSoundInit": true,
+      "postBootFlashWritesPreservingWs0AndPrefetch": 10,
+      "debugPrinterWaitcntWritesCompiledOut": true,
+      "gamePakDataClass": "a ROM data access breaks sequential instruction prefetch: byte N+next-N = 9 total; aligned word N+S+next-N = 11 total",
       "multiplyInternalCycles": 0,
       "multiplyInternalPremiumCycles": 0,
       "dynamicTarget": "resolved only from pinned source initialization; no runtime pointer value or address lookup"
@@ -103,20 +187,40 @@
       },
       "key64": {
         "sourceRoute": "chanNum==4, key>20, key-21=43, bls taken",
-        "sequentialThumbHalfwords": 26,
-        "pipelineRefills": 5,
-        "iwramStackWordWrites": 5,
-        "iwramStackWordReads": 5,
-        "romLiteralWordReads": 1,
-        "romNoiseTableByteReads": 1,
-        "multiplyInstructions": 0,
-        "multiplyInternalCycles": 0,
-        "cycles": "26*2 + 5*6 + (11-2) + (9-2) = 98",
-        "callR3ToReturnCycles": "8 + 98 = 106"
-      },
-      "key91": {
-        "sourceRoute": "chanNum==4, key>20, key-21=70, bls not taken, clamp=59",
-        "sequentialThumbHalfwords": 27,
+        "executedPcs": [
+          "0x82e0b34",
+          "0x82e0b36",
+          "0x82e0b38",
+          "0x82e0b3a",
+          "0x82e0b3c",
+          "0x82e0b3e",
+          "0x82e0b40",
+          "0x82e0b42",
+          "0x82e0b44",
+          "0x82e0b46",
+          "0x82e0b48",
+          "0x82e0b4a",
+          "0x82e0b50",
+          "0x82e0b52",
+          "0x82e0b54",
+          "0x82e0b56",
+          "0x82e0b58",
+          "0x82e0b5a",
+          "0x82e0b5e",
+          "0x82e0b60",
+          "0x82e0b62",
+          "0x82e0b64",
+          "0x82e0bce",
+          "0x82e0bd0",
+          "0x82e0bd2"
+        ],
+        "refillPcs": [
+          "0x82e0b4a",
+          "0x82e0b5a",
+          "0x82e0b64",
+          "0x82e0bd2"
+        ],
+        "sequentialThumbHalfwords": 25,
         "pipelineRefills": 4,
         "iwramStackWordWrites": 5,
         "iwramStackWordReads": 5,
@@ -124,8 +228,54 @@
         "romNoiseTableByteReads": 1,
         "multiplyInstructions": 0,
         "multiplyInternalCycles": 0,
-        "cycles": "27*2 + 4*6 + (11-2) + (9-2) = 94",
-        "callR3ToReturnCycles": "8 + 94 = 102"
+        "cycles": "25*2 + 4*6 + (11-2) + (9-2) = 90",
+        "callR3ToReturnCycles": "8 + 90 = 98"
+      },
+      "key91": {
+        "sourceRoute": "chanNum==4, key>20, key-21=70, bls not taken, clamp=59",
+        "executedPcs": [
+          "0x82e0b34",
+          "0x82e0b36",
+          "0x82e0b38",
+          "0x82e0b3a",
+          "0x82e0b3c",
+          "0x82e0b3e",
+          "0x82e0b40",
+          "0x82e0b42",
+          "0x82e0b44",
+          "0x82e0b46",
+          "0x82e0b48",
+          "0x82e0b4a",
+          "0x82e0b50",
+          "0x82e0b52",
+          "0x82e0b54",
+          "0x82e0b56",
+          "0x82e0b58",
+          "0x82e0b5a",
+          "0x82e0b5c",
+          "0x82e0b5e",
+          "0x82e0b60",
+          "0x82e0b62",
+          "0x82e0b64",
+          "0x82e0bce",
+          "0x82e0bd0",
+          "0x82e0bd2"
+        ],
+        "refillPcs": [
+          "0x82e0b4a",
+          "0x82e0b64",
+          "0x82e0bd2"
+        ],
+        "sequentialThumbHalfwords": 26,
+        "pipelineRefills": 3,
+        "iwramStackWordWrites": 5,
+        "iwramStackWordReads": 5,
+        "romLiteralWordReads": 1,
+        "romNoiseTableByteReads": 1,
+        "multiplyInstructions": 0,
+        "multiplyInternalCycles": 0,
+        "cycles": "26*2 + 3*6 + (11-2) + (9-2) = 86",
+        "callR3ToReturnCycles": "8 + 86 = 94"
       }
     }
   },
@@ -182,14 +332,14 @@
         "exactCallR3ToReturnRoutes": 3,
         "key64Callbacks": 2,
         "key91Callbacks": 1,
-        "callR3ToReturnSourceCycles": 314
+        "callR3ToReturnSourceCycles": 290
       },
       "factory-varied": {
         "callbacks": 4,
         "exactCallR3ToReturnRoutes": 4,
         "key64Callbacks": 2,
         "key91Callbacks": 2,
-        "callR3ToReturnSourceCycles": 416
+        "callR3ToReturnSourceCycles": 384
       }
     },
     "exactCallR3BxEdgeCallbacks": 7,
@@ -201,19 +351,19 @@
     "callR3BxEdgeSourceCycles": 56,
     "exactMidiKeyToCgbFreqCallbacks": 7,
     "midiKeyToCgbFreqSourceCycleRange": {
+      "min": 86,
+      "max": 90,
+      "distinct": 2
+    },
+    "midiKeyToCgbFreqSourceCycles": 618,
+    "dynamicCallR3ToReturnSourceCycleRange": {
       "min": 94,
       "max": 98,
       "distinct": 2
     },
-    "midiKeyToCgbFreqSourceCycles": 674,
-    "dynamicCallR3ToReturnSourceCycleRange": {
-      "min": 102,
-      "max": 106,
-      "distinct": 2
-    },
-    "dynamicCallR3ToReturnSourceCycles": 730,
+    "dynamicCallR3ToReturnSourceCycles": 674,
     "acceptedContiguousPrefixThroughCallR3EntrySourceCycles": 3453,
-    "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 4183,
+    "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 4127,
     "observedKeyAfterValues": {
       "64": 4,
       "91": 3
@@ -234,7 +384,7 @@
       "59": 3
     },
     "midiKeyToCgbFreqResults": {
-      "4": 3,
+      "0": 3,
       "52": 4
     },
     "clampBranchCounts": {
@@ -281,10 +431,10 @@
       "noiseTableIndex": 43,
       "midiKeyToCgbFreqResult": 52,
       "callR3BxEdgeSourceCycles": 8,
-      "midiKeyToCgbFreqSourceCycles": 98,
-      "dynamicCallR3HelperSourceCycles": 106,
-      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
-      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 695,
+      "midiKeyToCgbFreqSourceCycles": 90,
+      "dynamicCallR3HelperSourceCycles": 98,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 90,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 687,
       "laterAllocationFieldsSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
@@ -305,10 +455,10 @@
       "noiseTableIndex": 43,
       "midiKeyToCgbFreqResult": 52,
       "callR3BxEdgeSourceCycles": 8,
-      "midiKeyToCgbFreqSourceCycles": 98,
-      "dynamicCallR3HelperSourceCycles": 106,
-      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
-      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 561,
+      "midiKeyToCgbFreqSourceCycles": 90,
+      "dynamicCallR3HelperSourceCycles": 98,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 90,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 553,
       "laterAllocationFieldsSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
@@ -327,12 +477,12 @@
       "keyAfterSubtract21": 70,
       "clampBranch": "bls-not-taken-clamp-to-59",
       "noiseTableIndex": 59,
-      "midiKeyToCgbFreqResult": 4,
+      "midiKeyToCgbFreqResult": 0,
       "callR3BxEdgeSourceCycles": 8,
-      "midiKeyToCgbFreqSourceCycles": 94,
-      "dynamicCallR3HelperSourceCycles": 102,
-      "dynamicMidiKeyToCgbFreqSourceCycles": 94,
-      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 557,
+      "midiKeyToCgbFreqSourceCycles": 86,
+      "dynamicCallR3HelperSourceCycles": 94,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 86,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 549,
       "laterAllocationFieldsSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
@@ -351,12 +501,12 @@
       "keyAfterSubtract21": 70,
       "clampBranch": "bls-not-taken-clamp-to-59",
       "noiseTableIndex": 59,
-      "midiKeyToCgbFreqResult": 4,
+      "midiKeyToCgbFreqResult": 0,
       "callR3BxEdgeSourceCycles": 8,
-      "midiKeyToCgbFreqSourceCycles": 94,
-      "dynamicCallR3HelperSourceCycles": 102,
-      "dynamicMidiKeyToCgbFreqSourceCycles": 94,
-      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 557,
+      "midiKeyToCgbFreqSourceCycles": 86,
+      "dynamicCallR3HelperSourceCycles": 94,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 86,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 549,
       "laterAllocationFieldsSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
@@ -377,10 +527,10 @@
       "noiseTableIndex": 43,
       "midiKeyToCgbFreqResult": 52,
       "callR3BxEdgeSourceCycles": 8,
-      "midiKeyToCgbFreqSourceCycles": 98,
-      "dynamicCallR3HelperSourceCycles": 106,
-      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
-      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 695,
+      "midiKeyToCgbFreqSourceCycles": 90,
+      "dynamicCallR3HelperSourceCycles": 98,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 90,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 687,
       "laterAllocationFieldsSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
@@ -401,10 +551,10 @@
       "noiseTableIndex": 43,
       "midiKeyToCgbFreqResult": 52,
       "callR3BxEdgeSourceCycles": 8,
-      "midiKeyToCgbFreqSourceCycles": 98,
-      "dynamicCallR3HelperSourceCycles": 106,
-      "dynamicMidiKeyToCgbFreqSourceCycles": 98,
-      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 561,
+      "midiKeyToCgbFreqSourceCycles": 90,
+      "dynamicCallR3HelperSourceCycles": 98,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 90,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 553,
       "laterAllocationFieldsSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
@@ -423,12 +573,12 @@
       "keyAfterSubtract21": 70,
       "clampBranch": "bls-not-taken-clamp-to-59",
       "noiseTableIndex": 59,
-      "midiKeyToCgbFreqResult": 4,
+      "midiKeyToCgbFreqResult": 0,
       "callR3BxEdgeSourceCycles": 8,
-      "midiKeyToCgbFreqSourceCycles": 94,
-      "dynamicCallR3HelperSourceCycles": 102,
-      "dynamicMidiKeyToCgbFreqSourceCycles": 94,
-      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 557,
+      "midiKeyToCgbFreqSourceCycles": 86,
+      "dynamicCallR3HelperSourceCycles": 94,
+      "dynamicMidiKeyToCgbFreqSourceCycles": 86,
+      "contiguousPrefixThroughMidiKeyToCgbFreqReturnSourceCycles": 549,
       "laterAllocationFieldsSourceCycles": null,
       "completeNoteCallbackSourceCycles": null,
       "postCallbackGlueSourceCycles": null
@@ -436,12 +586,12 @@
   ],
   "closure": {
     "closed": "Pinned source initialization resolves the SoundInfo target; the call_r3 bx edge and both observed type-4 MidiKeyToCgbFreq routes are source/ROM/ELF exact through bx return, including gNoiseTable results.",
-    "contiguousPrefix": "4183 aggregate source cycles through MidiKeyToCgbFreq return across seven callbacks (3453 accepted through call_r3 entry + 730 new).",
+    "contiguousPrefix": "4127 aggregate source cycles through MidiKeyToCgbFreq return across seven callbacks (3453 accepted through call_r3 entry + 674 new).",
     "remainingDiscriminator": "Later allocation fields, unobserved type-4 keys and non-type-4 helper routes, clear_modM, nonzero-lfoDelay routes, other 75 callbacks, complete note/glue/MPlay, service/arbitration, and construction clock remain null.",
     "durationFit": false,
     "runtimePointerIdentity": false,
     "serviceCost": null,
     "constructionClock": null
   },
-  "verdict": "The source-initialized SoundInfo target is fail-closed without runtime pointer identity. The same 7/82 callbacks split into four key=64 no-clamp routes (106 cycles from call_r3 entry through return) and three key=91 clamp-to-59 routes (102 cycles); the exact aggregate prefix is 4183 cycles through MidiKeyToCgbFreq return."
+  "verdict": "The source-initialized SoundInfo target is fail-closed without runtime pointer identity. The same 7/82 callbacks split into four key=64 no-clamp routes (98 cycles from call_r3 entry through return) and three key=91 clamp-to-59 routes (94 cycles); the exact aggregate prefix is 4127 cycles through MidiKeyToCgbFreq return."
 }
