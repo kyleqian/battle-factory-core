@@ -20,6 +20,7 @@ import sys
 
 DEFAULT_MAX_LOG_BYTES = 2 * 1024 * 1024
 BARE_PYTHON_COMMANDS = frozenset(("python", "python3"))
+MGBA_BINDING_EXTENSION = Path("mgba") / "_pylib.abi3.so"
 
 
 def parses_as_json(path: Path) -> bool:
@@ -33,6 +34,21 @@ def parses_as_json(path: Path) -> bool:
 
 def normalized_status(returncode: int) -> int:
     return 128 - returncode if returncode < 0 else returncode
+
+
+def find_paired_mgba_binding_for_interpreter(interpreter: Path) -> Path | None:
+    """Return an interpreter's usable sibling libmgba-py checkout, if any."""
+    executable = interpreter.expanduser()
+    if not executable.is_absolute():
+        executable = Path.cwd() / executable
+    for parent in executable.parents:
+        if parent.name != "mgba-venv":
+            continue
+        binding = parent.parent / "libmgba-py"
+        if (binding / MGBA_BINDING_EXTENSION).is_file():
+            return binding
+        return None
+    return None
 
 
 def find_mgba_python(start: Path | None = None) -> Path:
@@ -50,10 +66,15 @@ def find_mgba_python(start: Path | None = None) -> Path:
     for parent in (origin, *origin.parents):
         for executable in ("python3", "python"):
             candidate = parent / "vendor" / "mgba-venv" / "bin" / executable
-            if candidate.is_file() and os.access(candidate, os.X_OK):
+            if (
+                candidate.is_file()
+                and os.access(candidate, os.X_OK)
+                and find_paired_mgba_binding_for_interpreter(candidate) is not None
+            ):
                 return candidate
     raise FileNotFoundError(
-        "could not find vendor/mgba-venv/bin/python3 above "
+        "could not find a usable vendor/mgba-venv/bin/python3 paired with "
+        "vendor/libmgba-py/mgba/_pylib.abi3.so above "
         f"{origin}; restore the harness vendor environment or set "
         "POKEBENCH_MGBA_PYTHON"
     )
@@ -82,18 +103,7 @@ def find_paired_mgba_binding(command: list[str]) -> Path | None:
     """Find libmgba-py paired with an explicit mgba-venv interpreter."""
     if not command:
         return None
-
-    executable = Path(command[0]).expanduser()
-    if not executable.is_absolute():
-        executable = Path.cwd() / executable
-    for parent in executable.parents:
-        if parent.name != "mgba-venv":
-            continue
-        candidate = parent.parent / "libmgba-py"
-        if candidate.is_dir():
-            return candidate
-        return None
-    return None
+    return find_paired_mgba_binding_for_interpreter(Path(command[0]))
 
 
 def probe_environment(command: list[str]) -> dict[str, str] | None:

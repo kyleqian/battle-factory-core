@@ -11,10 +11,20 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+import importlib.util
 
 
 ROOT = Path(__file__).resolve().parent.parent
 WRAPPER = ROOT / "tools" / "run-mgba-probe.py"
+
+
+def load_wrapper_module() -> object:
+    spec = importlib.util.spec_from_file_location("run_mgba_probe", WRAPPER)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class RunMgbaProbeTests(unittest.TestCase):
@@ -24,7 +34,8 @@ class RunMgbaProbeTests(unittest.TestCase):
         interpreter.parent.mkdir(parents=True)
         interpreter.symlink_to(sys.executable)
         binding = vendor / "libmgba-py"
-        binding.mkdir()
+        (binding / "mgba").mkdir(parents=True)
+        (binding / "mgba" / "_pylib.abi3.so").touch()
         (binding / "probe_binding.py").write_text("VALUE = 'paired-binding'\n")
         return interpreter, binding
 
@@ -201,6 +212,21 @@ class RunMgbaProbeTests(unittest.TestCase):
                 json.loads(output.read_text()),
                 {"binding": "paired-binding"},
             )
+
+    def test_auto_discovery_skips_nearer_venv_without_usable_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            complete_interpreter, _ = self.make_mgba_environment(temp_dir)
+            nested = Path(temp_dir) / "nested" / "workspace"
+            incomplete = nested / "vendor" / "mgba-venv" / "bin" / "python3"
+            incomplete.parent.mkdir(parents=True)
+            incomplete.symlink_to(sys.executable)
+            origin = nested / "tools" / "run-mgba-probe.py"
+            wrapper = load_wrapper_module()
+
+            with patch.dict(os.environ, {"POKEBENCH_MGBA_PYTHON": ""}):
+                selected = wrapper.find_mgba_python(origin)
+
+            self.assertEqual(selected.resolve(), complete_interpreter.resolve())
 
 
 if __name__ == "__main__":
