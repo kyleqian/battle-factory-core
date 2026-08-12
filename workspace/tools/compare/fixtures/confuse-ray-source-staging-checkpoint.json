@@ -1,0 +1,51 @@
+{
+  "schema": "confuse-ray-source-staging-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "CONFUSE_RAY",
+  "status": "unsupported",
+  "sourceSymbols": {
+    "Move_CONFUSE_RAY": 137150097,
+    "Move_LOCK_ON": 137150180
+  },
+  "components": 12,
+  "lowestLevel50Carrier": {
+    "setId": 116,
+    "label": "FRONTIER_MON_CHINCHOU",
+    "species": "SPECIES_CHINCHOU"
+  },
+  "siblingAudit": {
+    "move": "MOVE_WILL_O_WISP",
+    "components": 10,
+    "shared": [
+      "task:SoundTask_AdjustPanningVar",
+      "visualCommand:clearmonbg",
+      "visualCommand:monbg"
+    ],
+    "distinct": [
+      "asset:ANIM_TAG_WISP_FIRE",
+      "asset:ANIM_TAG_WISP_ORB",
+      "sprite:gWillOWispFireSpriteTemplate",
+      "sprite:gWillOWispOrbSpriteTemplate",
+      "task:AnimTask_ShakeMon2",
+      "visualCommand:splitbgprio_all",
+      "visualCommand:splitbgprio_foes"
+    ],
+    "promoted": false
+  },
+  "orientations": [
+    {
+      "orientation": "player-back",
+      "scenario": "tools/battle-lab/mechanic-confuse-ray-player-chinchou-opponent-onix.json",
+      "endpointFrame": 834,
+      "endpointSha256": "276079d7a85d294688abd28c4d25419653af9b348ebd6ae7fa2c203fc2887206"
+    },
+    {
+      "orientation": "opponent-front",
+      "scenario": "tools/battle-lab/mechanic-confuse-ray-opponent-chinchou-player-onix.json",
+      "endpointFrame": 834,
+      "endpointSha256": "5c9ea0c7e3f19ba0c894fa5a3042046b496cf6c678d13e7e4df54ffbb452ea06"
+    }
+  ],
+  "denseEvidence": null,
+  "blocker": "The configured vendor/mgba-venv has no importable mgba module; tools/run-mgba-probe.py therefore cannot execute the pointer-bounded probe in this worktree. Endpoint captures validate legal staging only and confer no source-window, latch, change-map, reducer/seam, or framebuffer acceptance."
+}

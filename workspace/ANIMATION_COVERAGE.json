@@ -5197,6 +5197,16 @@
    "goal": "MOVE_SHADOW_BALL independently proves its complete 5/5/0/5 LoopSEAdjustPanning task schedule and full ghost-BG/projectile/impact/shake/restore body in both orientations at 148/148 task/sprite/OAM/matrix/register/palette/raw-RGB and framebuffer frames, reproduced twice. No sibling is promoted. ICE BEAM needs its BG darken/restore, two outer-crystal beam starters, eleven IceBeamCreateCrystals groups, target blue blend, target ShakeMon2, terminal inner crystals, IceCrystalEffectShort, monbg/splitbgprio/alpha teardown, and its distinct 4/4/0/10 sound schedule. PSYBEAM needs SetPsychicBackground/UnsetPsychicBackground, eleven GoldRing groups, target SwayMon, two-leg target blend_color_cycle, and its distinct 3/4/0/15 sound schedule. AURORA BEAM needs BG_AURORA fade/restore, rotating rainbow-ring palette task, ten four-ring groups, both target ShakeMon2 tasks, script arg-7 lifetime gate, and its distinct 3/6/0/10 sound schedule. HYPER BEAM needs full BG blackout/restore, attacker ShakeMon2 and Y-shake, flashing orb palette, twenty-five HyperBeamOrbs groups, target ShakeMon2, both target palette blends, and its distinct 1/15/0/5 sound schedule. PSYWAVE needs SetPsychicBackground/UnsetPsychicBackground, StartSinAnimTimer, twelve blue-ring sprites, four-leg target blend_color_cycle, and its distinct 2/9/0/10 sound schedule. TRI ATTACK needs the translating triangle, two initial sound/delay legs, BG blackout, eight fire scatters plus patterned shake, three lightning strikes plus inversion/patterned shake, the final ice body, and its distinct 5/6/0/7 sound schedule. Every sibling remains unsupported pending independent complete dense move evidence."
   },
   {
+   "id": "adjust-panning-var-confuse-ray",
+   "components": [
+    "task:SoundTask_AdjustPanningVar"
+   ],
+   "representatives": [
+    "MOVE_CONFUSE_RAY"
+   ],
+   "goal": "MOVE_CONFUSE_RAY remains unsupported at a source/staging checkpoint: its exclusive 0x082cbe91..0x082cbee4 interval, complete 12-component YELLOW_BALL/GHOST-BG/blend graph, lowest legal Level-50 set-116 CHINCHOU carrier, complete bilateral Scene-ON parties, and pointer-bounded full-state probe mode are pinned. Legal endpoint staging passes in both orientations, but the configured vendor/mgba-venv has no importable mgba module, so no dense source window, latch, change map, reducer/seam, or framebuffer acceptance is claimed. MOVE_WILL_O_WISP is audit/control only and not promoted: its ten-component WISP_FIRE/WISP_ORB orb/fire, splitbgprio_foes/all, and ShakeMon2 body shares exactly SoundTask_AdjustPanningVar, monbg, and clearmonbg with Confuse Ray; it needs independent complete dense evidence."
+  },
+  {
    "id": "blend-battle-anim-palette-exclude",
    "components": [
     "task:AnimTask_BlendBattleAnimPalExclude"
