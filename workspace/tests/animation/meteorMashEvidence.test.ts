@@ -10,7 +10,7 @@ const cases = [
     511,
     214,
     "ed028a168afdd4554a015978bd081655a64d5fc8cfa5df7685d165b5bb2747e5",
-    161,
+    214,
   ],
   [
     "meteor-mash-opponent-metang-player-onix.json",
@@ -19,7 +19,7 @@ const cases = [
     445,
     215,
     "367dda5391d7b509718504afd34085a426db14b49daa4ca9d69d4b21937d99a6",
-    153,
+    215,
   ],
 ] as const;
 
@@ -46,8 +46,8 @@ describe("MOVE_METEOR_MASH bilateral dense evidence checkpoint", () => {
       const parties = [...scenario.overrides.parties.player, ...scenario.overrides.parties.opponent];
       expect(parties.some((mon: { species: number }) => mon.species === 399)).toBe(true);
       expect(parties.some((mon: { species: number }) => mon.species === 375)).toBe(false);
-      // Production framebuffer equality is still open; never promote from
-      // source/component receipts alone.
+      // Production equality is complete, but the shared Scene-ON service is
+      // stale relative to the harness; never promote without fresh repeats.
       expect(coverage.entries.find((entry) => entry.move === "MOVE_METEOR_MASH"))
         .toBeUndefined();
       expect(JSON.stringify(coverage)).toContain("MOVE_METEOR_MASH remains unsupported");

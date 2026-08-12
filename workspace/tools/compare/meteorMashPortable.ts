@@ -249,7 +249,7 @@ function verifyMechanisms(fixture: Fixture, probe: Probe, rgbDir: string): {
     else {
       mismatchRows.push({ age, differences, minX, minY, maxX, maxY });
       if (process.env.METEOR_MASH_KEEP_DIAGNOSTICS === "1"
-        && [49, 52, 78, 102, 124, 134, 170, 194, 213].includes(age)) {
+        && [51, 71, 87, 107, 124, 140, 170, 194, 213].includes(age)) {
         const witnesses: string[] = [];
         const oracleRgba = Buffer.alloc(240 * 160 * 4);
         const diffRgba = Buffer.alloc(240 * 160 * 4);

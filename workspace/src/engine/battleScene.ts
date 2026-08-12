@@ -34629,35 +34629,23 @@ export function renderSceneOnMovePresentation(
       const stars = [
         ...displayed.stars.map((sprite) => ({ kind: "parent" as const, sprite })),
         ...displayed.miniStars.map((sprite) => ({ kind: "mini" as const, sprite })),
-      ].sort((left, right) => right.sprite.slot - left.sprite.slot);
-      for (const item of stars) {
-        if (item.kind === "parent") {
-          const star = item.sprite;
-          drawSpriteSheet(
-            fb,
-            subTileset(meteorMashArt.goldStars.tileset, 0, 2),
-            meteorMashArt.goldStars.palette,
-            star.x + star.x2 - 8,
-            star.y + star.y2 - 8,
-          );
-        } else {
-          const mini = item.sprite;
-          if (mini.invisible) continue;
-          drawSpriteSheet(
-            fb,
-            {
-              columns: 1,
-              rows: 1,
-              tiles: [meteorMashArt.goldStars.tileset.tiles[
-                mini.initialized ? mini.tile : 0
-              ]!],
-            },
-            meteorMashArt.goldStars.palette,
-            mini.x - 4,
-            mini.y + (mini.initialized ? mini.y2 : 0) - 4,
-          );
-        }
-      }
+      ].sort((left, right) => {
+        // Script-created parents use target subpriority - 3; callback-created
+        // minis use the literal subpriority 5. The lower mini subpriority is
+        // always emitted earlier in OAM and therefore paints in front,
+        // independent of either sprite's y coordinate.
+        const familyOrder = Number(left.kind === "mini")
+          - Number(right.kind === "mini");
+        if (familyOrder !== 0) return familyOrder;
+        // `SortSprites` orders equal-priority/subpriority OBJs by descending
+        // hardware OAM y. Since this software painter runs back-to-front,
+        // visit the smaller top coordinate first. Equal coordinates retain
+        // the initial ascending sprite order, so the lower slot paints last.
+        const top = (item: typeof left): number => item.kind === "parent"
+          ? item.sprite.y + item.sprite.y2 - 8
+          : item.sprite.y + (item.sprite.initialized ? item.sprite.y2 : 0) - 4;
+        return top(left) - top(right) || right.sprite.slot - left.sprite.slot;
+      });
       if (displayed.spinningHand && displayed.spinningHandMatrix) {
         drawSpriteSheetAffineRotate(
           fb,
@@ -34690,6 +34678,39 @@ export function renderSceneOnMovePresentation(
           { r: 0, g: 0, b: 0 },
           0,
         );
+      }
+      // Meteor Mash creates every mini at fixed subpriority 5.  The hardware
+      // rows place those 8x8 OBJs ahead of both the spinning hand and the
+      // later hitsplat (for example mini slot 13 is OAM 13 while the hand is
+      // OAM 21 at age 140). Paint the higher hardware indices first, then
+      // preserve the source slot tie-break within the star family.
+      for (const item of stars) {
+        if (item.kind === "parent") {
+          const star = item.sprite;
+          drawSpriteSheet(
+            fb,
+            subTileset(meteorMashArt.goldStars.tileset, 0, 2),
+            meteorMashArt.goldStars.palette,
+            star.x + star.x2 - 8,
+            star.y + star.y2 - 8,
+          );
+        } else {
+          const mini = item.sprite;
+          if (mini.invisible) continue;
+          drawSpriteSheet(
+            fb,
+            {
+              columns: 1,
+              rows: 1,
+              tiles: [meteorMashArt.goldStars.tileset.tiles[
+                mini.initialized ? mini.tile : 0
+              ]!],
+            },
+            meteorMashArt.goldStars.palette,
+            mini.x - 4,
+            mini.y + (mini.initialized ? mini.y2 : 0) - 4,
+          );
+        }
       }
     };
     if (playerToOpponent) {
