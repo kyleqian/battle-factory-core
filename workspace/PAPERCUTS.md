@@ -901,8 +901,10 @@ full-suite count because its summary scrolled out of the tool window. The v9
 worker then lost two full-suite output handles before recovering a compact
 scratch log. The CGB4 v11 worker recovered a yielded full-suite summary only
 after extra process polling, and the following supervisor fold repeated a
-green build when its first yielded completion omitted the exit status. Hits:
-19; cost: about 75 minutes plus avoidable CPU
+green build when its first yielded completion omitted the exit status. The
+CGB4 v14 worker then spent about 2 minutes confirming detached full-suite and
+build completion before its final ledger commit. Hits:
+20; cost: about 77 minutes plus avoidable CPU
 contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
