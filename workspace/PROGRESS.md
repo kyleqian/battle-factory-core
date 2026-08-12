@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1186 — [supervisor, 2026-08-12] **CGB4 prefix verified; animation and Rust lanes folded**
+
+- **State:** #55 is source-exact for **2,081 contiguous cycles** through
+  `TrkVolPitSet` return across the observed **7/82** CGB4 callbacks. Complete
+  MPlay remains **5 exact / 108 null** and the construction clock is unwired.
+- **Did:** independently regenerated v5 byte-for-byte (`9a36fadb…`) and
+  audited the disassembly: caller argument setup + BL is **14** cycles and
+  the helper push is **2** per callback. Folded Meteor Mash framebuffer
+  closure through `85fcf7e0` and Rust M5d-0 viability infrastructure through
+  `b1ea599a`.
+- **Next:** source-close one coherent observed post-helper allocation-field
+  slice. Preserve `clear_modM`, nonzero-LFO/unobserved routes, the other 75
+  note callbacks, complete note/glue/MPlay costs, service/arbitration, and
+  construction-clock wiring null.
+- **Notes:** focused v3-v5 **11/11**; union full **982 files / 9,546 passed /
+  1 skipped**, build **653 modules**. Rust is **350/350**, fmt/clippy clean;
+  rebuilt WASM is **118,835 bytes** (`798127bc…`) and forced parity is
+  **757/757**. Fresh post-engine-fold soaks are vanilla **20/20** and full
+  **60/60**, zero crashes/hangs. Both branches are contained; no unsupported
+  barrier or canonical Battle-2 extension.
+
 ## 1185 — [MAIN worker, 2026-08-12] **CGB4 caller/prologue gap source-closed**
 
 - **State:** #55 now has a **2,081-cycle contiguous source-exact prefix**
@@ -47,24 +68,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   are vanilla **20/20** and full **60/60**, zero crashes/hangs. Both lane
   branches are contained; no unsupported barrier or canonical Battle-2
   extension.
-
-## 1183 — [MAIN worker, 2026-08-11] **CGB4 `TrkVolPitSet` helper source-closed**
-
-- **State:** #55 has source-exact post-prologue helper components for the
-  observed zero-LFO CGB4 family: **7/82** callbacks, with complete MPlay still
-  **5 exact / 108 null** and the construction clock unwired.
-- **Did:** twice-fresh OFF v4 packets are byte-identical for anchor/LILIANA/
-  legal-varied (0/3/4): `fbe6a35f…` / `4f2e86fe…` / `64ea0a16…`. The reducer
-  closes five flags-clear routes at **56** cycles and two observed VOLSET
-  routes at **138**. The **556** helper cycles plus the **1,413** v3 prefix are
-  **1,969 known component cycles**, not a contiguous prefix: caller BL and the
-  helper prologue remain null. Capture is operand-minimal and joins frozen v3
-  rows by `sourceStateDigest`; source/ELF/ROM pins are committed.
-- **Next:** hand off the source-close receipt; leave all unobserved helper
-  branches, caller BL/prologue/later fields, callback/glue, service,
-  arbitration, and clock null for the next bounded step.
-- **Notes:** focused dependent group **15/15**, smoke **375/375**, typecheck,
-  full **979 files / 9,445 passed / 1 skipped**, and build **653 modules** are
-  green. Commits `f70f0a9c` and `754cb27e`; no production src, gameplay,
-  renderer, animation, Rust, ROADMAP, canonical Battle-2, or unsupported-
-  barrier change.

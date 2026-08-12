@@ -41810,3 +41810,23 @@ git; the current live ledger keeps the three load-bearing entries only.
   **977 files / 9,437 passed / 1 skipped**, typecheck, and build **653
   modules** are green. S8 stays closed at 33331; no unsupported barrier,
   gameplay, renderer, pixel, Rust, or ROADMAP/ISSUES change.
+## 1183 — [MAIN worker, 2026-08-11] **CGB4 `TrkVolPitSet` helper source-closed**
+
+- **State:** #55 has source-exact post-prologue helper components for the
+  observed zero-LFO CGB4 family: **7/82** callbacks, with complete MPlay still
+  **5 exact / 108 null** and the construction clock unwired.
+- **Did:** twice-fresh OFF v4 packets are byte-identical for anchor/LILIANA/
+  legal-varied (0/3/4): `fbe6a35f…` / `4f2e86fe…` / `64ea0a16…`. The reducer
+  closes five flags-clear routes at **56** cycles and two observed VOLSET
+  routes at **138**. The **556** helper cycles plus the **1,413** v3 prefix are
+  **1,969 known component cycles**, not a contiguous prefix: caller BL and the
+  helper prologue remain null. Capture is operand-minimal and joins frozen v3
+  rows by `sourceStateDigest`; source/ELF/ROM pins are committed.
+- **Next:** hand off the source-close receipt; leave all unobserved helper
+  branches, caller BL/prologue/later fields, callback/glue, service,
+  arbitration, and clock null for the next bounded step.
+- **Notes:** focused dependent group **15/15**, smoke **375/375**, typecheck,
+  full **979 files / 9,445 passed / 1 skipped**, and build **653 modules** are
+  green. Commits `f70f0a9c` and `754cb27e`; no production src, gameplay,
+  renderer, animation, Rust, ROADMAP, canonical Battle-2, or unsupported-
+  barrier change.
