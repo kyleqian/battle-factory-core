@@ -219,21 +219,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rows re-derived independently (MirrorCoat low-hp 4-roll chain +3;
   Curse neutral-stage 3-roll +2) — exact. Post-fold: artifact rebuilt,
   smoke 375/375. Worker: sonnet, 29.4 min, 2 commits.
+- **M5d-5 DONE (fold `848988d8`) — CheckViability is 122/122 native;
+  the M5d program is COMPLETE.** All 28 remaining effects (Trick,
+  Snatch 94-line closer, MirrorMove, Haze, the MudSport/WaterSport
+  same-function pair proven identical through both arms,
+  Flatter→run_cv_confuse cross-batch delegation proven through the
+  dispatcher, ChangeSelfAbility's inline ability cascade ported
+  bug-for-bug — NOT CBM's plumbing, both vestigial handlers pub(crate)
+  + direct-call tested). `unported_cv_table_effects()` = [];
+  completeness probe flipped to the all-ported arm; ZERO
+  #[allow(dead_code)] attributes remain on Draw variants/kinds; 4
+  stale intermediate-state barrier pins updated (the M5b-3 precedent).
+  320 native tests + 88 dispatcher + 9 vestigial direct-call vector
+  rows (gen-cv-m5d5-vectors.mjs, byte-idempotent). **Port finding,
+  supervisor-confirmed live:** run_cv_haze never increments `ordinal`
+  between its two draw sites — both draws carry the SAME ordinal label
+  while rng advances twice; bug-for-bug. Supervisor rerun: scope clean,
+  cargo **662/662** + fmt/clippy + wasm, generator byte-idempotent, 2
+  rows re-derived independently (Haze both-blocks repeated-ordinal;
+  SkillSwap known-Static 1-draw) — exact. Worker: sonnet, 33.9 min,
+  3 commits.
 - **Wind-down gates (this tree, supervisor-run, final):** cargo
-  **601/601** + fmt/clippy clean, artifact rebuilt, parity union (7
-  suites) **757/757 in wasm mode** with the final artifact. Full npm
-  test **977 files / 9,527 passed / 1 pre-existing skip**, npm build,
-  soak **vanilla 20/20** + **full 60/60** were all recorded post-M5c
-  this session; every fold after M5c was core-rs/-only (plus one
-  rust-lane docs commit), so the TS side is bit-identical to those
-  runs — smoke 375/375 re-run after every fold regardless. No orphan
-  worker worktrees or branches; RUST_DEFERRED.md has no open entries.
-- **Next:** M5d-5 (28 effects, remaining singles + MudSport/WaterSport
-  same-function pair + 2 fully-vestigial exported handlers; M5d-3's
-  Confuse is pub(crate) and ready for Flatter's cross-batch call), then
-  the CV boundary+adapter+parity step (M5e, M5c pattern), then
-  TryToFaint + DecisionPolicy (M5f). Re-verify the conflict check at
-  orient per the standing M4+ rule.
+  **662/662** + fmt/clippy clean, artifact rebuilt (final hash
+  9d53f91e…), parity union (7 suites) **757/757 in wasm mode**, smoke
+  375/375. Full npm test **977 files / 9,527 passed / 1 pre-existing
+  skip**, npm build, soak **vanilla 20/20** + **full 60/60** were all
+  recorded post-M5c this session; every fold after M5c was
+  core-rs/-only (plus one rust-lane docs commit), so the TS side is
+  bit-identical to those runs. No orphan worker worktrees or branches;
+  RUST_DEFERRED.md has no open entries.
+- **Next:** M5e — the CV boundary+adapter+parity step (M5c pattern:
+  fw_run_check_viability export, presence-preserving Battler encoding,
+  `tests/factoryAiCheckViabilityParity.test.ts` both-mode; full npm
+  gates since it touches tests/). Then M5f (TryToFaint 275 lines +
+  DecisionPolicy 1402 lines, the family's integration layer). Re-verify
+  the conflict check at orient per the standing M4+ rule.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
