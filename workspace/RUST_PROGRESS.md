@@ -52,9 +52,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Marowak 3-draw both-sites chain; Attract vs known-Oblivious −10/0-draw)
   — exact. Post-fold: artifact rebuilt, smoke 375/375. Worker: sonnet,
   30.0 min, 2 commits.
-- **Next:** M5b-3 (44 zero-RNG stat-UP/screens/singles — census confirms
-  zero draw sites), then M5c boundary+adapter+parity per
-  docs/rust-m5-scout.md.
+- **M5b-3 DONE (fold `b139100e`) — CheckBadMove is 109/109 native.** All
+  44 zero-RNG stat-UP/screens/singles effects;
+  `unported_cbm_table_effects()` = `[]`; completeness probe flipped to
+  the all-ported arm; `NotYetPorted` barrier stays (honesty analog of
+  TS's own dead barrier). Native tests 135→281; 107 scored + 9 direct
+  AccUp vector rows (gen-cbm-m5b3-vectors.mjs, byte-idempotent). Both
+  same-function pairs (Curse↔BulkUp, PsychUp↔Haze) proven identical
+  through the full dispatcher. Port findings worth keeping: (1) dual-stat
+  stat-UP composition is ADDITIVE (BulkUp both-maxed = −18, not −10) —
+  TS doc phrasing "sequential, no interaction" is easy to misread;
+  (2) Snore (power 40) is the ONE M5b-3 move where isMovePowerOther is
+  false → negates-type + soundproof both draw (directed vector added);
+  (3) hp_percent maxHp=0 guard saturates to i32::MAX — verified faithful:
+  both TS uses compare `< threshold`, and Infinity/NaN/i32::MAX all fail
+  `<` identically (unreachable input regardless). Supervisor rerun: scope
+  clean, cargo **330/330** + fmt/clippy(--all-targets) + wasm build, all
+  FOUR generators byte-idempotent, 2 rows re-derived independently
+  (Snore ambiguous 2-draw preamble chain; BulkUp both-maxed −18) —
+  exact. Post-fold: artifact rebuilt, smoke 375/375. Worker: sonnet,
+  21.4 min, 1 commit. Worker PAPERCUT worth adopting as lane practice:
+  always verify move ids against moves.json before hand-typing them in
+  directed cases — several first-pass guesses were wrong.
+- **Next:** M5c boundary+adapter+parity (fw_ exports for
+  select_factory_ai_mask + run_check_bad_move_preamble, presence-
+  preserving Option encoding, both-mode parity suites; full npm gates —
+  touches tests/), then the M5d CheckViability batching scout
+  (docs-only) if session time allows.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
