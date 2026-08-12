@@ -146,6 +146,28 @@ export interface FactoryWasmExports {
    * `fw_free(ptr, 133)`.
    */
   fw_run_turn1_rng_ledger(starting_rng_value: number): number;
+  /**
+   * `GetAiScriptsInBattleFactory`. Scalar args (booleans/enums cross as u32
+   * per the ABI convention; `level_mode`/`battle_mode` are validated against
+   * their full range here, not truncated first). Returns an `fw_alloc`'d
+   * buffer (layout: `crates/factory-wasm/src/lib.rs`'s
+   * `fw_select_factory_ai_mask` doc comment; decoder:
+   * `adapter/factoryAiEngine.ts`); the caller must `fw_free(ptr, total_len)`.
+   */
+  fw_select_factory_ai_mask(
+    level_mode: number,
+    battle_mode: number,
+    factory_win_streak: number,
+    trainer_opponent_id: number,
+  ): number;
+  /**
+   * `AI_CheckBadMove` for one move slot against one target. Reads a fixed
+   * 132-byte `CheckBadMovePreambleInput` buffer at `input_ptr` (layout:
+   * `crates/factory-wasm/src/lib.rs`'s `fw_run_check_bad_move_preamble` doc
+   * comment; encoder/decoder: `adapter/factoryAiEngine.ts`) and returns an
+   * `fw_alloc`'d buffer; the caller must `fw_free(ptr, total_len)`.
+   */
+  fw_run_check_bad_move_preamble(input_ptr: number): number;
   memory: WebAssembly.Memory;
 }
 
