@@ -78,8 +78,8 @@ pub struct FactoryAiTryToFaintDraw {
     pub after: BattleRngState,
     pub raw_rng_value: u32,
     pub random_value: u16,
-    /// TS's `succeeded`: the `< 80` jump was taken, so the +2 fallthrough
-    /// bonus was skipped.
+    /// TS's `succeeded`: the `< 80` jump was *not* taken, so the source
+    /// falls through to its +2 bonus.
     pub succeeded: bool,
 }
 
@@ -287,7 +287,7 @@ fn next_draw(rng: BattleRngState, ordinal: u32) -> FactoryAiTryToFaintDraw {
         after,
         raw_rng_value,
         random_value,
-        succeeded: random_value % 256 < 80,
+        succeeded: random_value % 256 >= 80,
     }
 }
 
@@ -354,8 +354,9 @@ pub fn run_try_to_faint(input: RunTryToFaintInput) -> TryToFaintResult {
     ) {
         let draw = next_draw(rng, input.draw_ordinal_start);
         rng = draw.after;
-        if !draw.succeeded {
-            // `if_random_less_than 80` jumps past the score when `< 80`.
+        if draw.succeeded {
+            // `if_random_less_than 80` jumps past the score when `< 80`; its
+            // fallthrough (`>= 80`) receives the bonus.
             score_delta += 2;
         }
         draws[0] = draw;
@@ -491,7 +492,7 @@ mod tests {
         assert_eq!(draw_count, 1);
         assert_eq!(draws[0].ordinal, 7);
         assert_eq!(draws[0].random_value % 256, 198);
-        assert!(!draws[0].succeeded);
+        assert!(draws[0].succeeded);
         assert_eq!(score_delta, 2);
         assert_eq!(rng.calls, 1);
 
@@ -507,7 +508,7 @@ mod tests {
         });
         let TryToFaintResult::Scored { draws, score_delta, .. } = skipped;
         assert_eq!(draws[0].random_value % 256, 25);
-        assert!(draws[0].succeeded);
+        assert!(!draws[0].succeeded);
         assert_eq!(score_delta, 0);
     }
 
