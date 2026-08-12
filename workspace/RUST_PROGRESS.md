@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R5 — [supervised session, 2026-08-12] **M5 and M6 COMPLETE; switch policy end-to-end**
+## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 history leaf native**
 
-- **State:** rust-main = master `1a36e6c0` + verified M7b folds `f622d20b`/
-  `f9d4de3e`. Factory trainer selection and the seven-trainer schedule are now
+- **State:** rust-main = master `95470661` + verified M8a fold `20cfd1b3`.
+  Factory trainer selection and the seven-trainer schedule are now
   native and WASM differential-green end-to-end.
   The complete Factory AI mask 0/1/7 decision family and the singles switch-in
   selector/full switch policy are native and WASM differential-green. Factory
@@ -72,12 +72,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   / 782/782**, full npm **1,014 files / 9,695 passed / 1 skip**, and build
   **657 modules**. Artifact: 348,371 bytes, sha256
   `a8a5a9f2fefce59d495a9786767a9257a91ee24513f6e32afed8b8145ca00bb4`.
-- **Next:** M8a — port the independent pure battle-history leaf from
-  `factoryAiLiveDriver.ts` (create/record/sync plus ability-id resolution)
-  natively with TS-executed vectors. Keep view construction and the WASM
-  boundary separate.
+- **M8a DONE:** ported the independent pure battle-history leaf from
+  `factoryAiLiveDriver.ts`: create, record ability/item, target last-move
+  SameValueZero dedup/cap, party-change move+ability invalidation with item
+  retention, and observed ability/item overlays. The source-derived dense
+  ability-name table covers IDs 0..77; unknown IDs preserve the canonical
+  error. The twice-byte-identical TS corpus has **15 cases** across create,
+  record, target move, party change, observation, unknown-ability, and
+  arbitrary-history categories; table sha256
+  `19d8dc6a9e7a40600454be12d59167d228d3434d2ce8713116c4ab2f7c6dbac5`,
+  corpus sha256
+  `abc612fc71cb4f469f99e3138e0f8dd495372a0831eeb216c97080e5578e00a4`.
+  Supervisor audited the live-driver ordering and JS-number edge semantics,
+  regenerated both artifacts twice, and reran cargo **708 harness cases**,
+  fmt, clippy, WASM, smoke **375/375**, forced union **12 files / 782/782**,
+  full npm **1,014 files / 9,696 passed / 1 skip**, and build **657 modules**.
+  Artifact: 348,965 bytes, sha256
+  `f593924927773e3f223334bbc2d3316e6f52fab57178b9e8a2ba81e86e5cbdfa`.
+- **Next:** M8b — add the battle-history ABI/adapter and a new both-mode parity
+  suite, keeping live view construction separate. Then resume independent
+  `factoryAiLiveDriver.ts` leaves while M7c opponent generation waits on #55.
 - **Notes:** M6b used Sol/high plus one narrow Terra/max correction; M6c used
-  Sol/high; M7a used Terra/max and M7b used Sol/high. Scope stayed within
+  Sol/high; M7a and M8a used Terra/max, and M7b used Sol/high. Scope stayed within
   `core-rs/**` plus authorized new parity tests; no canonical TS engine or
   main-lane ledger file changed. M7c opponent generation is intentionally
   waiting: its personality construction cursors are fed by unresolved #55,
