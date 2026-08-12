@@ -1,3 +1,18 @@
+## 1164 — [supervisor, 2026-08-11] **VOICE verified; Rust M5a folded**
+
+- **State:** `master` is green with VOICE source-exact for **2/2** callbacks
+  and **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
+  #55 stays unwired and LUKAS remains **8/50**.
+- **Did:** independently regenerated VOICE **4/4**, then folded rust-main M5a
+  AI mask selection plus generated move data through `a33deba6`. Native Rust is
+  **145/145** with fmt/clippy clean; rebuilt WASM is 80,342 bytes and all five
+  adapter suites are **660/660** in default and forced-WASM modes.
+- **Next:** source-close `ply_bend`, the next-smallest live #55 callback family
+  at four census entries. Keep all unresolved families and complete costs null.
+- **Notes:** merged union full `npm test` **967 files / 9,402 passed / 1
+  skipped**, build **651 modules**. Animation is fully folded; no unsupported
+  barrier or main presentation/gameplay/pixel change.
+
 ## 1155 — [supervisor, 2026-08-11] **#55 ClearChain closure verified**
 
 - **State:** `master` is green with the entire sixth-player channel-gate
