@@ -191,6 +191,8 @@ function assertSourceAndElf(): Record<string, unknown> {
   ]) {
     if (!helperSource.includes(anchor)) fail(`m4a.c lost ${anchor}`);
   }
+  if (sha256(assembly) !== M4A1_SHA256) fail("m4a_1.s source bytes changed");
+  if (sha256(helperSource) !== M4A_C_SHA256) fail("m4a.c source bytes changed");
   const symbols = execFileSync("arm-none-eabi-nm", ["--defined-only", "-S", "-n", join(ROOT, "reference/pokeemerald/pokeemerald.elf")], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
   for (const symbol of ["082dfe78 t _081DDC40", "082dfe9e t _081DDC66", "082e0a80 000000b4 T TrkVolPitSet"]) {
     if (!symbols.includes(symbol)) fail(`ELF symbol ${symbol} changed`);
