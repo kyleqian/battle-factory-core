@@ -895,8 +895,10 @@ compact-output reruns. The sixth-MPlay selector worker later reran a green full
 suite solely because the yielded handle hid its terminal summary. The CGB4 v6
 worker likewise restarted the full suite while its first yielded run was still
 active, adding about 2 minutes of polling. The CGB4 v7 worker then needed about
-1 minute of extra retained-handle polling. Hits: 15;
-cost: about 63 minutes plus avoidable CPU
+1 minute of extra retained-handle polling. The CGB4 v8 worker then repeated a
+green build after retained output hid its first completion and inferred the
+full-suite count because its summary scrolled out of the tool window. Hits: 16;
+cost: about 66 minutes plus avoidable CPU
 contention. A
 launcher/tool response that visually distinguishes “still running; wait on
 this handle” from completion would prevent this class of mistake.
