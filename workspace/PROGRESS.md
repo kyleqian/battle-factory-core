@@ -11,10 +11,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   prefix. Fissure's source-derived staged Scene-ON presentation and Rust's
   complete native Factory-AI switch policy are folded; both persistent lane
   tips are contained.
-- **Did:** folded animation through `27d1f5c7` and Rust through `9bb4cee9`.
+- **Did:** folded animation through `27d1f5c7` and Rust through `41302ee3`.
   Audited M6b's corrected canonical battle-type constants/corpus ratchets,
-  reran native Rust, rebuilt the main-tree WASM artifact, forced every
-  boundary parity suite, and verified the full merged TypeScript union.
+  folded its final lane ledger, then reran native Rust, rebuilt the main-tree
+  WASM artifact, forced every boundary parity suite, and verified the full
+  merged TypeScript union after the final fold.
 - **Next:** capture only the first-track flags discriminator needed to price
   `_081DD9C8` through its first `MPT_FLG_EXIST` decision for the same three
   frozen v24 rows. Stop before the volume/pitch flags test; retain identity,
