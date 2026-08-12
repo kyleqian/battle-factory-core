@@ -249,6 +249,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   audit, cargo **662/662** + fmt/clippy + wasm, new suite **9/9 BOTH modes**,
   prior WASM union **757/757**, post-fold smoke **375/375**. Worker:
   gpt-5.6-terra/max, ~45 min, 2 commits.
+- **M5f-1 DONE (folds `eb8df0c4`/`5fdfca2c`) — TryToFaint native.**
+  Complete 275-line leaf port in `factory_ai_try_to_faint.rs`; it reuses
+  the shared damage/type/RNG modules and exposes DecisionPolicy-ready
+  battler/target/input/result structs. Six directed native tests + 93
+  TS-executed scored vectors (64 seeded) + 2 exact-error vectors; generator
+  rerun byte-identical. Source quirks pinned: per-slot simulated RNG reuse,
+  the sole optional x4 draw and >=80 fallthrough +2, Explosion +0, Quick
+  Attack +6, strict sibling comparison, power-other behavior, unknown
+  sibling zero vs unknown considered panic, and Levitate/Ground loop skip.
+  Supervisor re-derived Pound's 19-HP KO and the x4 calls 4→5/ordinal-17
+  receipt from TS, then reran cargo **670/670** + fmt/clippy + wasm. Post-fold
+  artifact 253,573 bytes (`74b778ce…`), smoke **375/375**. Worker:
+  gpt-5.6-terra/max, ~26 min, 2 commits; scope six `core-rs/**` files only.
 - **Prior wind-down gates (this tree, supervisor-run):** cargo
   **662/662** + fmt/clippy clean, artifact rebuilt (final hash
   9d53f91e…), parity union (7 suites) **757/757 in wasm mode**, smoke
@@ -258,11 +271,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   core-rs/-only (plus one rust-lane docs commit), so the TS side is
   bit-identical to those runs. No orphan worker worktrees or branches;
   RUST_DEFERRED.md has no open entries.
-- **Next:** M5f — port `factoryAiTryToFaint.ts` (275 lines) first, then
-  `factoryAiDecisionPolicy.ts` (1,402 lines) as a separate bounded step if
-  the TryToFaint interface is stable. Each needs native TS-derived vectors;
-  DecisionPolicy then gets the boundary/adapter parity integration for the
-  whole Factory AI family. Re-check current TS conflicts before each brief.
+- **Next:** M5f-2 — port `factoryAiDecisionPolicy.ts`'s integration layer
+  natively, reusing the four landed leaf surfaces. Split mask-zero and scored
+  policy only if a fresh bounded scout proves the full 1,402-line module
+  cannot land within one worker cap. Then M5f-3 adds the final WASM boundary,
+  adapter, and both-mode family parity. Re-check TS conflicts before brief.
 - **Notes:** worker moved one M5b-0 test's "still-unported power≤1"
   example pin from Psywave (now handled) to Mean Look — the exact
   staleness pattern the TS doc comment warns about for its own
