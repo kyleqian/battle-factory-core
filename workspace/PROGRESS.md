@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1238 — [supervisor, 2026-08-13] **CGB4 v37 plus M8i/M8j union verified**
+
+- **State:** #55 is source-exact through the selected-row **6,088-cycle**
+  CGB4 prefix, stopping before fourth-track mask/body. Rust M8i/M8j are folded:
+  the pure live planner is native and forced-WASM differential-green.
+- **Did:** independently regenerated v37 byte-for-byte and audited its exact-key
+  containment; folded `rust-main` through `2dce4f2b`, ran native Rust **726**,
+  rebuilt WASM, and forced all **16 parity files / 797 tests** through it.
+- **Next:** retry the full npm union after concurrent lane suites release host
+  resources; fold any completed persistent lane head before wind-down. Keep the
+  fourth-track mask/body and wider MPlay/construction-clock wiring separate.
+- **Notes:** v37 evidence/doc `59c5f83c…` / `5cf3314a…`; WASM **455,721 B**,
+  `10d7fca8…`; build **661 modules**. Two union full-suite attempts were
+  externally terminated with exit 143 under concurrent supervisor load after
+  v37/Rust parity and all assertions seen had passed; no test failure occurred.
+  Latest production-source union soaks remain vanilla **20/20** and full
+  **60/60**, with **0 crashes / 0 hangs**.
+
 ## 1237 — [MAIN worker, 2026-08-13] **CGB4 v37 fourth-track EXIST decision green**
 
 - **State:** #55 is source-exact through the same three selected-row **6,088-cycle**
@@ -44,20 +62,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `69ceae98…`. Focused v36/v35 **14/14**, smoke **375/375**, full npm
   **1,030 files / 9,780 passed / 1 skipped**, build **660 modules**. No fresh
   oracle capture, `src/**`, ratchet, unsupported-barrier, or canonical Battle-2 change.
-
-## 1235 — [supervisor, 2026-08-13] **CGB4 v35 and final lane union green**
-
-- **State:** #55 is source-exact through the three selected-row **6,028-cycle**
-  CGB4 prefix. Ancient Power's bounded bilateral evidence checkpoint is
-  folded without promotion; both persistent lane tips are contained.
-- **Did:** independently reran v35 **8/8**, folded animation through
-  `a359d9a3`, verified the final union, and ran both generic seven-battle soak
-  policies after all production-source folds.
-- **Next:** source-close only the observed third-track non-exit continuation
-  through `bgt _081DD9C8`, stopping before the fourth flags read. Keep actual
-  pointer/count/index/identity/channel, next flags/body, service/arbitration,
-  construction-clock wiring, and retired canonical Battle-2 work null.
-- **Notes:** soak vanilla **20/20** and full **60/60**, each with **0 crashes / 0
-  hangs**; final npm **1,029 files / 9,774 passed / 1 skipped**, build **660
-  modules**. Ancient Power remains unsupported at **179/276 exact** overall;
-  no main ratchet or unsupported-barrier change.
