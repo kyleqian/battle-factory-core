@@ -1,3 +1,10 @@
+## 1240 — [MAIN worker, 2026-08-13] **CGB4 v39 fourth-track decrement/exit decision green**
+
+- **State:** #55 is source-exact through the selected-row **6,136-cycle** CGB4 prefix, stopping at `_081DDA62` before either successor body.
+- **Did:** v39 freezes v38 evidence/report and inherited v37 three fresh OFF packets byte-for-byte, with predecessor regeneration. All three address-free joins retain only `sourceStateDigest` + `r2BeforeDecrement=7`; exact source/ELF/ROM `01 3a 02 dd` at `0x082DFC9A` makes `subs; ble _081DDA6C` not taken (**4×3 = 12**, **6,124 → 6,136**). The source-priced zero/negative exit is fail-closed at **10** cycles including its taken refill.
+- **Next:** no successor body began. A separate bounded step may scope only the positive fourth-track continuation decision; retain the exit body, wider loop, MPlay/service/arbitration, live wiring, presentation, animation, Rust, and retired canonical Battle-2 work as null.
+- **Notes:** v39 evidence/doc `86286add…` / `14fd2f23…`; focused v38/v39 **13/13**, smoke **375/375**, full npm **1,037 files / 9,817 passed / 1 skipped**, build **661 modules**. Exact-key schemas reject trainer, battle index, canonical tick, receipt schedules, pointer/address/count/index/identity/channel/frame/duration/condition, and unrelated future state. No `src/**`, ratchet/barrier, ROADMAP/DEFERRED, ISSUES, or oracle-pixel change.
+
 ## 1239 — [MAIN worker, 2026-08-13] **CGB4 v38 fourth-track volume/pitch decision green**
 
 - **State:** #55 is source-exact through the selected-row **6,124-cycle** CGB4 prefix, stopping before `_081DDA62`'s fourth-track decrement/exit body.
