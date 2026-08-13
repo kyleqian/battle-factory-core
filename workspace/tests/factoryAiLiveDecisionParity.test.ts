@@ -70,13 +70,13 @@ function history(overrides: Patch = {}): FactoryAiBattleHistory {
     usedMoves: [[], [], [], []], knownAbilities: [null, null, null, null],
     knownItemEffects: [0, 0, 0, 0], partyIndexes: [0, 1, 2, 3],
   };
-  const value = { ...base, ...overrides } as typeof base;
+  const value = { ...base, ...overrides } as unknown as typeof base;
   return {
     usedMoves: value.usedMoves.map((row) => [...row]),
     knownAbilities: [...value.knownAbilities],
     knownItemEffects: [...value.knownItemEffects],
     partyIndexes: [...value.partyIndexes],
-  } as FactoryAiBattleHistory;
+  } as unknown as FactoryAiBattleHistory;
 }
 
 function legalDecisions(mask: number): BattleCommandRequest["legalDecisions"] {
@@ -211,11 +211,13 @@ describe("Factory AI live decision ABI-v1 parity", () => {
       for (const adapter of adapters) {
         const result = adapter.chooseFactoryAiLiveDecision(testInput);
         expect(result.trace.mask).toBe(7);
-        expect(result.trace.turnStartRandomNumber.owner).toBe(
+        const trace = result.trace;
+        if (trace.mask !== 7) throw new Error("expected scored mask 7 trace");
+        expect(trace.turnStartRandomNumber.owner).toBe(
           testInput === boundary ? "battle-turn-boundary" : "decision",
         );
-        expect(result.trace.tie.chosenDecision.targetBattler).toBe(
-          result.trace.tie.chosenDecision.moveSlot === 2 ? 1 : 0,
+        expect(trace.tie.chosenDecision.targetBattler).toBe(
+          trace.tie.chosenDecision.moveSlot === 2 ? 1 : 0,
         );
       }
     }
