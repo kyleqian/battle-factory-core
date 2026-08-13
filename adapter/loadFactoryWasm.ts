@@ -196,6 +196,8 @@ export interface FactoryWasmExports {
   fw_apply_factory_ai_battle_history_operation(input_ptr: number, input_len: number): number;
   /** Complete Factory swap state/mutation/reducer operation packet; see the Rust export for the v1 layout. */
   fw_apply_factory_swap_operation(input_ptr: number, input_len: number): number;
+  /** Twelve pure Factory draft-selection helpers; see the Rust export for the checked ABI-v1 operation packet. */
+  fw_apply_factory_draft_selection_operation(input_ptr: number, input_len: number): number;
   memory: WebAssembly.Memory;
 }
 
