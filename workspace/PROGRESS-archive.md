@@ -1,3 +1,26 @@
+## 1234 — [MAIN worker, 2026-08-13] **CGB4 v35 third-track decrement/exit decision green**
+
+- **State:** #55 is source-exact through the same three selected-row **6,028-cycle**
+  CGB4 prefix, stopping before both `_081DDA6C`'s exit successor and the
+  non-exit continuation body.
+- **Did:** independently captured two fresh serial Battle Scene OFF packet sets
+  through the pointer-bounded third iteration. Exact-key packets retain only
+  `sourceStateDigest` + `r2BeforeDecrement`; all three values are **8**, so
+  `subs r2, 1` leaves 7 and `ble` is not taken: exact ROM `01 3a 02 dd`,
+  **4 cycles/row, 0 refill, +12 aggregate** (**6,016 → 6,028**). Red-first
+  pins reject subtraction result and pointer/address/count/index/identity/
+  channel/frame/duration/condition/body/wider state; v35 regeneration is
+  byte-stable twice.
+- **Next:** keep non-exit continuation, exit successor, broader MPlay/service/
+  arbitration, construction clock, presentation, animation, Rust, and retired
+  canonical Battle-2 work null.
+- **Notes:** v35 evidence/doc `f2072d5c…` / `2fb614a5…`; fresh packet hashes
+  anchor `e3b48fc0…`, LILIANA `47366316…`, legal-varied `69ceae98…` (repeat
+  identical). Focused v35/v34 **13/13**, smoke **375/375**, full npm
+  **1,027 files / 9,764 passed / 1 skipped**, and build **660 modules** are
+  green. No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2
+  change.
+
 ## 1233 — [supervisor, 2026-08-13] **CGB4 v34 and lane union green**
 
 - **State:** #55 is source-exact through the three selected-row **6,016-cycle**

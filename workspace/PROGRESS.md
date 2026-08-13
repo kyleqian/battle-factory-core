@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1237 — [MAIN worker, 2026-08-13] **CGB4 v37 fourth-track EXIST decision green**
+
+- **State:** #55 is source-exact through the same three selected-row **6,088-cycle**
+  CGB4 prefix, stopping before `_081DD9D0`'s mask/body.
+- **Did:** captured two fresh serial Battle Scene OFF packet sets with a
+  pointer-bounded fourth iteration. Exact-key packets retain only
+  `sourceStateDigest` + `fourthTrackFlags`; all three observed values are
+  **0x80**, so EXIST is set and `beq` is not taken: **8 cycles/row, +24**
+  (**6,064 → 6,088**). Source/ELF/exact ROM price the absent clear route at
+  **14** cycles with its taken refill; v37 regenerates twice byte-stably and
+  freezes v36 exactly.
+- **Next:** run smoke, full npm, and build; keep mask/body, later loop, exit
+  successor, broader MPlay/service/arbitration, construction-clock wiring,
+  presentation, animation, Rust, and retired canonical Battle-2 work null.
+- **Notes:** focused v36/v37 **11/11**; v37 evidence/doc
+  `59c5f83c…` / `5cf3314a…`; fresh packet hashes anchor `4dad511a…`, LILIANA
+  `8afcc0ba…`, legal-varied `6f202501…` (repeat identical). No `src/**`,
+  shared interfaces, ROADMAP/ISSUES/DEFERRED, ratchet, barrier, or canonical
+  Battle-2 change.
+
 ## 1236 — [MAIN worker, 2026-08-13] **CGB4 v36 third-track non-exit continuation green**
 
 - **State:** #55 is source-exact through the same three selected-row **6,064-cycle**
@@ -41,26 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   hangs**; final npm **1,029 files / 9,774 passed / 1 skipped**, build **660
   modules**. Ancient Power remains unsupported at **179/276 exact** overall;
   no main ratchet or unsupported-barrier change.
-
-## 1234 — [MAIN worker, 2026-08-13] **CGB4 v35 third-track decrement/exit decision green**
-
-- **State:** #55 is source-exact through the same three selected-row **6,028-cycle**
-  CGB4 prefix, stopping before both `_081DDA6C`'s exit successor and the
-  non-exit continuation body.
-- **Did:** independently captured two fresh serial Battle Scene OFF packet sets
-  through the pointer-bounded third iteration. Exact-key packets retain only
-  `sourceStateDigest` + `r2BeforeDecrement`; all three values are **8**, so
-  `subs r2, 1` leaves 7 and `ble` is not taken: exact ROM `01 3a 02 dd`,
-  **4 cycles/row, 0 refill, +12 aggregate** (**6,016 → 6,028**). Red-first
-  pins reject subtraction result and pointer/address/count/index/identity/
-  channel/frame/duration/condition/body/wider state; v35 regeneration is
-  byte-stable twice.
-- **Next:** keep non-exit continuation, exit successor, broader MPlay/service/
-  arbitration, construction clock, presentation, animation, Rust, and retired
-  canonical Battle-2 work null.
-- **Notes:** v35 evidence/doc `f2072d5c…` / `2fb614a5…`; fresh packet hashes
-  anchor `e3b48fc0…`, LILIANA `47366316…`, legal-varied `69ceae98…` (repeat
-  identical). Focused v35/v34 **13/13**, smoke **375/375**, full npm
-  **1,027 files / 9,764 passed / 1 skipped**, and build **660 modules** are
-  green. No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2
-  change.
