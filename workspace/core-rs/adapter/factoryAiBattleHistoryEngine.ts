@@ -154,7 +154,7 @@ function encodeSync(history: FactoryAiBattleHistory, rules: BattleScriptRulesCon
   return writer.finish();
 }
 
-function decodeHistory(bytes: Uint8Array): FactoryAiBattleHistory {
+export function decodeFactoryAiBattleHistory(bytes: Uint8Array): FactoryAiBattleHistory {
   const reader = new Reader(bytes);
   const totalLength = reader.u32();
   if (totalLength !== bytes.length) {
@@ -191,7 +191,7 @@ export async function wasmFactoryAiBattleHistoryEngine(): Promise<FactoryAiBattl
     const totalLength = new DataView(wasm.memory.buffer, outputPtr, 4).getUint32(0, true);
     const output = new Uint8Array(wasm.memory.buffer, outputPtr, totalLength).slice();
     wasm.fw_free(outputPtr, totalLength);
-    return decodeHistory(output);
+    return decodeFactoryAiBattleHistory(output);
   }
   return {
     id: "wasm",

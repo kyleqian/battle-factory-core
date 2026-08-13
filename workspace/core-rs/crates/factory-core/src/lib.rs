@@ -33,6 +33,8 @@ pub mod factory_ai_decision_policy;
 pub mod factory_ai_decision_policy_vectors_gen;
 pub mod factory_ai_live_decision_bridge;
 pub mod factory_ai_live_decision_bridge_vectors_gen;
+pub mod factory_ai_live_planner;
+pub mod factory_ai_live_planner_vectors_gen;
 pub mod factory_ai_live_replay;
 pub mod factory_ai_live_replay_vectors_gen;
 pub mod factory_ai_live_view;

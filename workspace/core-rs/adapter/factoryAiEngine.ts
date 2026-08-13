@@ -1187,7 +1187,7 @@ function decodeSwitchPolicyPrecheck(bytes: Uint8Array): boolean {
   return r.bool();
 }
 
-function decodeSwitchPolicyResult(bytes: Uint8Array): FactoryAiSwitchPolicyResult {
+export function decodeFactoryAiSwitchPolicyResult(bytes: Uint8Array): FactoryAiSwitchPolicyResult {
   const r = new ByteReader(bytes);
   r.u32();
   const status = r.u8();
@@ -1350,7 +1350,7 @@ export async function wasmFactoryAiEngine(): Promise<FactoryAiEngine> {
         encodeSwitchPolicyInput(input),
         exports.fw_evaluate_factory_ai_switch_policy,
       );
-      return decodeSwitchPolicyResult(bytes);
+      return decodeFactoryAiSwitchPolicyResult(bytes);
     },
   };
 }

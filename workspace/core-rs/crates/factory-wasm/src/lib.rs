@@ -28,14 +28,18 @@ use factory_core::factory_ai_check_viability::{
     RunCheckViabilityInput,
 };
 use factory_core::factory_ai_decision_policy::{
-    self, FactoryAiDecisionSide, FactoryAiLegalDecision, FactoryAiMaskZeroDecisionInput,
-    FactoryAiMoveDecision, FactoryAiMovePolicyRequest, FactoryAiMovePolicyView, FactoryAiMoveSlot,
-    FactoryAiRequestKind, FactoryAiScoredBattlerView, FactoryAiScoredChoice,
-    FactoryAiScoredDecisionInput, FactoryAiScoredDraw, FactoryAiScoredTargetView,
-    FactoryAiScoredView, FactoryAiTurnStartRandomNumber,
+    self, FactoryAiDecisionSide, FactoryAiLegalDecision, FactoryAiMaskZeroDecisionChoice,
+    FactoryAiMaskZeroDecisionInput, FactoryAiMoveDecision, FactoryAiMovePolicyRequest,
+    FactoryAiMovePolicyView, FactoryAiMoveSlot, FactoryAiRequestKind, FactoryAiScoredBattlerView,
+    FactoryAiScoredChoice, FactoryAiScoredDecisionInput, FactoryAiScoredDraw,
+    FactoryAiScoredTargetView, FactoryAiScoredView, FactoryAiTurnStartRandomNumber,
 };
 use factory_core::factory_ai_live_decision_bridge::{
     self as live_decision_bridge, FactoryAiLiveDecisionChoice, FactoryAiLiveDecisionInput,
+};
+use factory_core::factory_ai_live_planner::{
+    self, FactoryAiLivePlannerBoundary, FactoryAiLivePlannerInput, FactoryAiLivePlannerMoveTrace,
+    FactoryAiLivePlannerResult, FactoryAiLivePlannerRulesContext,
 };
 use factory_core::factory_ai_live_view::{
     self, FactoryAiChallengePolicy, FactoryAiLiveRulesBattler, FactoryAiLiveRulesContext,
@@ -5135,6 +5139,462 @@ pub unsafe extern "C" fn fw_choose_factory_ai_live_decision(
     );
     match result {
         Ok(choice) => alloc_and_copy(&encode_live_decision_choice(choice)),
+        Err(error) => alloc_and_copy(&encode_live_view_message(1, &error.to_string())),
+    }
+}
+
+// --- Complete live Factory AI pure planner (additive ABI v1) -------------
+
+const FACTORY_AI_LIVE_PLANNER_MALFORMED_MESSAGE: &str =
+    "factory-wasm factoryAiLivePlannerEngine: malformed input";
+
+#[derive(Debug, Clone, Copy)]
+struct LivePlannerBattlerExtra {
+    party_index: f64,
+    perish_song_timer: f64,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct LivePlannerPartyMemberWire {
+    species: f64,
+    is_egg: bool,
+    ability_num: f64,
+    hp: f64,
+    moves: [f64; 4],
+}
+
+fn planner_u8(value: f64, field: &str) -> Result<u8, String> {
+    if value.is_finite() && value.fract() == 0.0 && (0.0..=f64::from(u8::MAX)).contains(&value) {
+        Ok(value as u8)
+    } else {
+        Err(format!("{field} must be an integer from 0 through 255"))
+    }
+}
+
+fn planner_u16(value: f64, field: &str) -> Result<u16, String> {
+    if value.is_finite() && value.fract() == 0.0 && (0.0..=f64::from(u16::MAX)).contains(&value) {
+        Ok(value as u16)
+    } else {
+        Err(format!("{field} must be an integer from 0 through 65535"))
+    }
+}
+
+fn planner_u32(value: f64, field: &str) -> Result<u32, String> {
+    if value.is_finite() && value.fract() == 0.0 && (0.0..=f64::from(u32::MAX)).contains(&value) {
+        Ok(value as u32)
+    } else {
+        Err(format!(
+            "{field} must be an integer from 0 through 4294967295"
+        ))
+    }
+}
+
+fn planner_i32(value: f64, field: &str) -> Result<i32, String> {
+    if value.is_finite()
+        && value.fract() == 0.0
+        && (f64::from(i32::MIN)..=f64::from(i32::MAX)).contains(&value)
+    {
+        Ok(value as i32)
+    } else {
+        Err(format!("{field} must be a signed 32-bit integer"))
+    }
+}
+
+fn planner_type_id(value: &str) -> Result<u8, String> {
+    const TYPES: [&str; 18] = [
+        "TYPE_NORMAL",
+        "TYPE_FIGHTING",
+        "TYPE_FLYING",
+        "TYPE_POISON",
+        "TYPE_GROUND",
+        "TYPE_ROCK",
+        "TYPE_BUG",
+        "TYPE_GHOST",
+        "TYPE_STEEL",
+        "TYPE_MYSTERY",
+        "TYPE_FIRE",
+        "TYPE_WATER",
+        "TYPE_GRASS",
+        "TYPE_ELECTRIC",
+        "TYPE_PSYCHIC",
+        "TYPE_ICE",
+        "TYPE_DRAGON",
+        "TYPE_DARK",
+    ];
+    TYPES
+        .iter()
+        .position(|candidate| *candidate == value)
+        .map(|index| index as u8)
+        .ok_or_else(|| format!("factory-ai-switch-policy: unknown type {value}"))
+}
+
+fn planner_switch_battler(
+    live: &FactoryAiLiveRulesBattler,
+    extra: LivePlannerBattlerExtra,
+) -> Result<FactoryAiSwitchBattler, String> {
+    Ok(FactoryAiSwitchBattler {
+        species: planner_u16(live.species, "battler.species")?,
+        ability: planner_u16(live.ability, "battler.ability")?,
+        types: [
+            planner_type_id(&live.types[0])?,
+            planner_type_id(&live.types[1])?,
+        ],
+        hp: planner_i32(live.hp, "battler.hp")?,
+        max_hp: planner_i32(live.max_hp, "battler.maxHP")?,
+        moves: live
+            .moves
+            .map(|value| planner_u16(value, "battler.moves[]"))
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()?
+            .try_into()
+            .expect("four source moves remain four native moves"),
+        status1: planner_u32(live.status1, "battler.status1")?,
+        status2: planner_u32(live.status2, "battler.status2")?,
+        status3: planner_u32(live.status3, "battler.status3")?,
+        stat_stages: live
+            .stat_stages
+            .map(|value| planner_i32(value, "battler.statStages[]"))
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()?
+            .try_into()
+            .expect("eight source stages remain eight native stages"),
+        party_index: planner_u8(extra.party_index, "battler.partyIndex")?,
+        perish_song_timer: planner_u8(extra.perish_song_timer, "battler.perishSongTimer")?,
+    })
+}
+
+fn planner_party_member(
+    wire: LivePlannerPartyMemberWire,
+) -> Result<FactoryAiSwitchPartyMember, String> {
+    Ok(FactoryAiSwitchPartyMember {
+        species: planner_u16(wire.species, "party.opponent[].species")?,
+        is_egg: wire.is_egg,
+        ability_num: planner_u8(wire.ability_num, "party.opponent[].abilityNum")?,
+        hp: planner_i32(wire.hp, "party.opponent[].hp")?,
+        moves: wire
+            .moves
+            .map(|value| planner_u16(value, "party.opponent[].moves[]"))
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()?
+            .try_into()
+            .expect("four source moves remain four native moves"),
+    })
+}
+
+fn append_framed(buf: &mut Vec<u8>, packet: &[u8]) {
+    buf.extend_from_slice(
+        &u32::try_from(packet.len())
+            .expect("nested planner packet fits ABI u32")
+            .to_le_bytes(),
+    );
+    buf.extend_from_slice(packet);
+}
+
+fn encode_live_planner_result(result: FactoryAiLivePlannerResult) -> Vec<u8> {
+    let mut buf = vec![0; 5];
+    match result {
+        FactoryAiLivePlannerResult::Move(result) => {
+            buf.push(0); // phase: move
+            append_framed(&mut buf, &encode_battle_history_result(Ok(result.history)));
+            append_framed(&mut buf, &encode_live_view_result(Ok(result.view)));
+            append_framed(
+                &mut buf,
+                &encode_switch_policy_result(false, Ok(result.switch_policy)),
+            );
+            let choice = match result.trace {
+                FactoryAiLivePlannerMoveTrace::MaskZero(trace) => {
+                    encode_mask_zero_choice(Ok(FactoryAiMaskZeroDecisionChoice {
+                        submission: result.submission,
+                        rng: result.rng,
+                        trace,
+                    }))
+                }
+                FactoryAiLivePlannerMoveTrace::Scored(trace) => {
+                    encode_scored_choice(Ok(FactoryAiScoredChoice {
+                        submission: result.submission,
+                        rng: result.rng,
+                        trace,
+                    }))
+                }
+            };
+            append_framed(&mut buf, &choice);
+        }
+        FactoryAiLivePlannerResult::Switch(result) => {
+            buf.push(1); // phase: switch
+            append_framed(&mut buf, &encode_battle_history_result(Ok(result.history)));
+            append_framed(&mut buf, &encode_live_view_result(Ok(result.view)));
+            append_framed(
+                &mut buf,
+                &encode_switch_policy_result(false, Ok(result.switch_policy)),
+            );
+            buf.extend_from_slice(&result.submission.request_id.to_le_bytes());
+            buf.push(result.submission.side as u8);
+            buf.push(result.submission.party_index);
+            buf.extend_from_slice(&result.rng.value.to_le_bytes());
+            buf.extend_from_slice(&result.rng.calls.to_le_bytes());
+        }
+    }
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// Plans the complete pure switch-or-move prefix of
+/// `submitLiveFactoryAiDecision` through one additive ABI-v1 packet. It never
+/// calls or ports the generic BattleState reducer.
+///
+/// The variable-width prefix is exactly the single source-shaped M8e layout
+/// documented on `fw_create_factory_ai_view_from_live_rules`: battlers,
+/// weather/side/last-move fields, history, and challenge occur once. The
+/// following suffix carries only source fields not present in that prefix:
+///
+/// ```text
+/// battler_extras[4]: party_index:f64, perish_song_timer:f64
+/// ai_observed_ability_ids:f64[4], ai_observed_item_effects:f64[4]
+/// opponent_party[6]: species:f64, is_egg:u8(0/1), ability_num:f64,
+///   hp:f64, moves:f64[4]
+/// last_landed_move:f64, last_hit_by:f64, reserved_party_index:f64,
+/// absent_battler_flags:f64, battlers_count:f64, battle_type_flags:f64,
+/// random_turn_number:f64, rng.value:u32, rng.calls:u32,
+/// boundary:u8 (0=decision-required,1=other)
+/// if boundary=0: request.kind:u8 (0=command,1=forced-switch),
+///   request_id:u32, side:u8 (0=player,1=trainer), battler:u8,
+///   legal_count:u8, legal[legal_count]:tag:u8,slot_or_party:u8,target:u8
+/// ```
+///
+/// Rust atomically decodes the entire packet, then derives the history/live
+/// and M6c switch projections from that one rules representation. In
+/// particular, species, abilities, types, HP, moves, statuses, and stages are
+/// not duplicated. Status 0 frames the existing complete history, live-view,
+/// switch-policy and (for move results) chooser packets. Status 1 is an exact
+/// reachable planner/leaf error (`message_len:u32,message:utf8`); status 2 is
+/// the same shape and owns every truncation, append, invalid UTF-8, presence,
+/// boundary, request, or legal-decision tag before semantic evaluation.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes. Null or
+/// empty input is rejected without dereferencing it.
+#[no_mangle]
+pub unsafe extern "C" fn fw_plan_live_factory_ai_decision(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    let malformed = || {
+        alloc_and_copy(&encode_live_view_message(
+            2,
+            FACTORY_AI_LIVE_PLANNER_MALFORMED_MESSAGE,
+        ))
+    };
+    if input_ptr.is_null() && input_len != 0 {
+        return malformed();
+    }
+    let input_len = input_len as usize;
+    if input_len == 0 {
+        return malformed();
+    }
+    // SAFETY: nonzero width, non-null pointer guard, and caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
+    let decoded = (|| {
+        let mut reader = CheckedReader::new(bytes);
+        let live_rules = decode_live_view_rules(&mut reader)?;
+        let history = decode_battle_history(&mut reader)?;
+        let challenge = decode_live_view_challenge(&mut reader)?;
+        let battler_extras: [Result<LivePlannerBattlerExtra, ()>; 4] = std::array::from_fn(|_| {
+            Ok::<_, ()>(LivePlannerBattlerExtra {
+                party_index: reader.f64()?,
+                perish_song_timer: reader.f64()?,
+            })
+        });
+        let battler_extras = battler_extras.into_iter().collect::<Result<Vec<_>, _>>()?;
+        let battler_extras: [LivePlannerBattlerExtra; 4] =
+            battler_extras.try_into().map_err(|_| ())?;
+        let observed_ability_ids = reader.f64x4()?;
+        let observed_item_effects = reader.f64x4()?;
+        let opponent_party: [Result<LivePlannerPartyMemberWire, ()>; 6] =
+            std::array::from_fn(|_| {
+                let species = reader.f64()?;
+                let is_egg = match reader.u8()? {
+                    0 => false,
+                    1 => true,
+                    _ => return Err(()),
+                };
+                Ok::<_, ()>(LivePlannerPartyMemberWire {
+                    species,
+                    is_egg,
+                    ability_num: reader.f64()?,
+                    hp: reader.f64()?,
+                    moves: reader.f64x4()?,
+                })
+            });
+        let opponent_party = opponent_party.into_iter().collect::<Result<Vec<_>, _>>()?;
+        let opponent_party: [LivePlannerPartyMemberWire; 6] =
+            opponent_party.try_into().map_err(|_| ())?;
+        let switch_scalars = [
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+        ];
+        let rng = BattleRngState { value: reader.u32()?, calls: reader.u32()? };
+        let boundary_tag = reader.u8()?;
+        let request = if boundary_tag == 0 {
+            Some(decode_live_decision_request(&mut reader)?)
+        } else if boundary_tag == 1 {
+            None
+        } else {
+            return Err(());
+        };
+        reader.finish()?;
+        Ok((
+            live_rules,
+            history,
+            challenge,
+            battler_extras,
+            observed_ability_ids,
+            observed_item_effects,
+            opponent_party,
+            switch_scalars,
+            rng,
+            request,
+        ))
+    })();
+    let (
+        live_rules,
+        history,
+        challenge,
+        battler_extras,
+        observed_ability_ids,
+        observed_item_effects,
+        opponent_party,
+        switch_scalars,
+        rng,
+        request,
+    ) = match decoded {
+        Ok(value) => value,
+        Err(()) => return malformed(),
+    };
+
+    // Tags are part of structural validity. The source boundary guard remains
+    // the first semantic operation: no numeric narrowing or history lookup can
+    // precede it.
+    let is_decision_boundary = request.is_some();
+    let (request_kind, request_id, request_side, request_battler, legal_decisions) = match request {
+        None => (
+            FactoryAiRequestKind::Command,
+            0,
+            FactoryAiDecisionSide::Player,
+            0,
+            Vec::new(),
+        ),
+        Some(wire) => {
+            let kind = match wire.kind {
+                0 => FactoryAiRequestKind::Command,
+                1 => FactoryAiRequestKind::ForcedSwitch,
+                _ => return malformed(),
+            };
+            let side = match wire.side {
+                0 => FactoryAiDecisionSide::Player,
+                1 => FactoryAiDecisionSide::Trainer,
+                _ => return malformed(),
+            };
+            let mut decisions = Vec::with_capacity(wire.legal_decisions.len());
+            for (tag, first, second) in wire.legal_decisions {
+                let decision = match tag {
+                    0 => match FactoryAiMoveSlot::from_index(usize::from(first)) {
+                        Some(move_slot) => FactoryAiLegalDecision::UseMove(FactoryAiMoveDecision {
+                            move_slot,
+                            target_battler: second,
+                        }),
+                        None => return malformed(),
+                    },
+                    1 => FactoryAiLegalDecision::Switch { party_index: first },
+                    _ => return malformed(),
+                };
+                decisions.push(decision);
+            }
+            (kind, wire.request_id, side, wire.battler, decisions)
+        }
+    };
+    let boundary = if is_decision_boundary {
+        FactoryAiLivePlannerBoundary::DecisionRequired(FactoryAiMovePolicyRequest {
+            kind: request_kind,
+            request_id,
+            side: request_side,
+            battler: request_battler,
+            legal_decisions: &legal_decisions,
+        })
+    } else {
+        FactoryAiLivePlannerBoundary::NotDecisionRequired
+    };
+    if !matches!(
+        boundary,
+        FactoryAiLivePlannerBoundary::DecisionRequired(FactoryAiMovePolicyRequest {
+            kind: FactoryAiRequestKind::Command,
+            side: FactoryAiDecisionSide::Trainer,
+            ..
+        })
+    ) {
+        return alloc_and_copy(&encode_live_view_message(
+            1,
+            "Factory AI live driver requires a trainer command boundary",
+        ));
+    }
+
+    let narrowed = (|| {
+        let battlers: [Result<FactoryAiSwitchBattler, String>; 4] = std::array::from_fn(|index| {
+            planner_switch_battler(&live_rules.battlers[index], battler_extras[index])
+        });
+        let battlers = battlers
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()?
+            .try_into()
+            .expect("four source battlers remain four switch battlers");
+        let opponent_party = opponent_party
+            .map(planner_party_member)
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()?
+            .try_into()
+            .expect("six source party members remain six switch members");
+        Ok::<_, String>((
+            FactoryAiSwitchRules {
+                battlers,
+                opponent_party,
+                last_landed_move: planner_u16(switch_scalars[0], "moveHistory.lastLandedMoves[1]")?,
+                last_hit_by: planner_u8(switch_scalars[1], "moveHistory.lastHitBy[1]")?,
+                reserved_party_index: planner_u8(switch_scalars[2], "monToSwitchIntoId[1]")?,
+                absent_battler_flags: planner_u8(switch_scalars[3], "absentBattlerFlags")?,
+                battlers_count: planner_u8(switch_scalars[4], "battleTopology.battlersCount")?,
+                battle_type_flags: planner_u32(
+                    switch_scalars[5],
+                    "battleTopology.battleTypeFlags",
+                )?,
+            },
+            planner_u16(switch_scalars[6], "randomTurnNumber")?,
+        ))
+    })();
+    let (switch_rules, random_turn_number) = match narrowed {
+        Ok(value) => value,
+        Err(message) => return alloc_and_copy(&encode_live_view_message(1, &message)),
+    };
+
+    let result =
+        factory_ai_live_planner::plan_live_factory_ai_decision(FactoryAiLivePlannerInput {
+            boundary,
+            rules_context: FactoryAiLivePlannerRulesContext {
+                live_view: &live_rules,
+                observed_ability_ids,
+                observed_item_effects,
+                switch_rules,
+                random_turn_number,
+            },
+            history: &history,
+            challenge,
+            rng,
+        });
+    match result {
+        Ok(result) => alloc_and_copy(&encode_live_planner_result(result)),
         Err(error) => alloc_and_copy(&encode_live_view_message(1, &error.to_string())),
     }
 }
