@@ -1,3 +1,12 @@
+# MOVE_ICY_WIND source-exact seam/compositor checkpoint — remains unsupported (2026-08-13 worker)
+
+- **State:** Coverage remains **180/276 Level-50 exact**, 0 partial, 0 staged, and 96 unsupported. Icy Wind is not promoted; coverage counts and `ANIMATION_COVERAGE.json` are unchanged.
+- **Did:** Added the complete source-relative linear/Step1/pre-increment signed-shift Step2/End snowball reducer, thirteen-spike wave, BG_ICE/monbg, both palette ramps, blend-register and cleanup lifecycles; added reproducibly extracted BG_ICE/spike assets, SWINUB/ONIX bilateral typed seam, and production compositor. No Blizzard ages, receipts, seam, or compositor are inherited.
+- **Verified:** Both retained 287-row orientations pass **287/287 reducer + typed seam**, all **10** snowballs / **320** Step2 rows / **13** spikes, immutable state, audio/tags/registers, **286/286** OAM+matrix and **285/286 + age-7** palette transfers, raw RGB/change maps, and cleanup. Production framebuffer reaches player **209/287** and opponent **281/287**; exact residuals are player ages **93, 100..176** (78 rows, 2..44 px) and opponent ages **129,136,144,149,150,158** (6 rows, 2..18 px), isolated to overlapping snowball pixels under the GBA scanline OBJ evaluator. Backgrounds, battlers, ramps, spikes, chrome, text, and all other rows are exact. Receipts remain player `f9825553… / 07b0434b… / ce477d78…`, opponent `0f356e88… / aa229485… / 20f6f7ae…`.
+- **Sibling/control:** Blizzard's committed verifier remains unchanged at **448/448 Step2 rows per side** and **371/371 + 360/360** transfers. No sibling promotion or coverage inheritance.
+- **Next:** Port the source OAM scanline evaluation budget for the staged battler/healthbox object topology, replace the current unlimited raster snowball paint with that generic evaluator, then require twice-fresh **287/287 + 287/287** framebuffer equality before promoting Icy Wind alone.
+- **Notes:** Honest partial only: no per-age RGB/framebuffer/hash table, absolute battle tick, coordinate/RGB fitting, capture thinning, gameplay/damage/RNG/controller/facility state, boundary widening, or coverage change.
+
 # MOVE_ICY_WIND bilateral dense evidence checkpoint — remains unsupported (2026-08-13 worker)
 
 - **State:** Coverage remains **180/276 Level-50 exact**, 0 partial, 0 staged, and 96 unsupported. Icy Wind and Blizzard remain independently unpromoted; Icy Wind production seam/framebuffer acceptance is **0/287 + 0/287**.

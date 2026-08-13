@@ -11,8 +11,10 @@ import {
   ICY_WIND_SOURCE_SET_ID,
   ICY_WIND_SOURCE_SPECIES_ID,
   ICY_WIND_SPIKE_CALLS,
+  icyWindAtAge,
   icyWindSnowballStep2State,
 } from "../../src/animation/icyWind.ts";
+import { createSceneOnMovePresentation, sceneOnIcyWindView } from "../../src/animation/sceneOnPresentation.ts";
 
 describe("MOVE_ICY_WIND source checkpoint", () => {
   it("pins the complete exclusive graph and root call order", () => {
@@ -46,6 +48,29 @@ describe("MOVE_ICY_WIND source checkpoint", () => {
     const initial = { x: 100, y: 40, x2: 4, y2: -2, data: [0, 72, 0, 0, 0, 0, 0, 0] as const };
     expect(icyWindSnowballStep2State(initial, 0, "player")).toMatchObject({ x: 104, y: 38, x2: 0, y2: 0, data: [144, 72, 0, 0, -15, 1, 0, 0] });
     expect(icyWindSnowballStep2State(initial, 1, "opponent")).toMatchObject({ x2: -8, y2: 1, data: [160, 72, 0, 0, -15, 2, 0, 0] });
+  });
+
+  it("reduces the complete move relative to explicit bilateral geometry", () => {
+    const geometry = { attackerCenter: { x: 72, y: 104 }, targetCenter: { x: 176, y: 42 }, spikeTargetCenter: { x: 176, y: 40 } };
+    expect(icyWindAtAge(-1, "player", geometry)).toMatchObject({ active: false, snowballs: [], spikes: [], background: "field" });
+    expect(icyWindAtAge(48, "player", geometry).snowballs).toEqual([
+      expect.objectContaining({ callIndex: 0, oamSlot: 3, callback: "AnimFastTranslateLinearWaitEnd", x: -19, y: 156, x2: 4, y2: -2 }),
+    ]);
+    expect(icyWindAtAge(168, "player", geometry).spikes).toContainEqual(
+      expect.objectContaining({ callIndex: 0, oamSlot: 3, x: 176, y: 64, tileFrame: 0 }),
+    );
+    expect(icyWindAtAge(172, "player", geometry).spikes[0]).toMatchObject({ tileFrame: 2 });
+    expect(icyWindAtAge(286, "player", geometry)).toMatchObject({ active: false, snowballs: [], spikes: [], background: "field", blendCnt: 0 });
+    expect(() => icyWindAtAge(1.5, "player", geometry)).toThrow(/integer/u);
+  });
+
+  it("exposes a narrow fail-closed ICY_WIND Scene-ON seam", () => {
+    const attacker = { species: "SWINUB" as const, geometry: { side: "player" as const, spriteCorner: { x: 40, y: 69 }, animationCenter: { x: 72, y: 104 }, battlePositionCenter: { x: 72, y: 80 } } };
+    const target = { species: "ONIX" as const, geometry: { side: "opponent" as const, spriteCorner: { x: 145, y: 10 }, animationCenter: { x: 176, y: 42 }, battlePositionCenter: { x: 176, y: 40 } } };
+    const effectGeometry = { attackerCenter: { x: 72, y: 104 }, targetCenter: { x: 176, y: 42 }, spikeTargetCenter: { x: 176, y: 40 } };
+    const stage = createSceneOnMovePresentation({ move: "ICY_WIND", attacker, target, effectGeometry, fieldProfile: { playerHp: 108, playerMaxHp: 125, opponentHp: 110, opponentMaxHp: 110 } });
+    expect(sceneOnIcyWindView({ ...stage, age: 168 })).toMatchObject({ age: 168, attacker, target, spikes: [expect.objectContaining({ x: 176, y: 64 })] });
+    expect(() => sceneOnIcyWindView({ ...stage, config: { ...stage.config, move: "THUNDER" } } as never)).toThrow(/expected ICY_WIND/u);
   });
 
   it("audits ROM intervals, assets, callbacks, cleanup, and the lowest legal carrier", () => {

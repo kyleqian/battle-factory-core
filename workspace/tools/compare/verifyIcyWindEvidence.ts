@@ -2,7 +2,9 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
-import { icyWindSnowballStep2State } from "../../src/animation/icyWind.ts";
+import { icyWindAtAge, icyWindSnowballStep2State } from "../../src/animation/icyWind.ts";
+import { createSceneOnMovePresentation, sceneOnIcyWindView, type SceneOnPresentationBattler } from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
 const sha256 = (value: Buffer | string): string => createHash("sha256").update(value).digest("hex");
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -47,7 +49,7 @@ function legalScenario(path: string, side: "player" | "opponent"): void {
   const swinub = parties[side][0]; invariant(swinub.species === 220 && swinub.nature === 21 && same(swinub.moves, [196, 196, 196, 196]), `${side}: Swinub carrier`);
 }
 
-export interface IcyWindEvidenceResult { readonly orientation: string; readonly frames: number; readonly snowballs: number; readonly step2Rows: number; readonly spikes: number; readonly oamRows: number; readonly matrixRows: number; readonly paletteRows: number; readonly rgbRows: number }
+export interface IcyWindEvidenceResult { readonly orientation: string; readonly frames: number; readonly snowballs: number; readonly step2Rows: number; readonly spikes: number; readonly oamRows: number; readonly matrixRows: number; readonly paletteRows: number; readonly rgbRows: number; readonly seamRows: number; readonly framebufferRows: number; readonly residuals: readonly string[] }
 
 function verifyOrientation(root: string, orientation: string, receipt: any): IcyWindEvidenceResult {
   const side = orientation === "player-back" ? "player" : "opponent";
@@ -93,6 +95,25 @@ function verifyOrientation(root: string, orientation: string, receipt: any): Icy
   invariant(same(callbackRows, receipt.snowballCallbackRows) && step2Rows === 320, `${orientation}: snowball rows`);
   const spikes = generations("gIceGroundSpikeSpriteTemplate"); invariant(spikes.length === 13 && spikes.flat().length === 455 && spikes.every((rows) => rows.every((row) => row.callback.symbol === "AnimWaveFromCenterOfTarget")), `${orientation}: thirteen spike waves`);
 
+  const geometry = side === "player"
+    ? { attackerCenter: { x: 72, y: 104 }, targetCenter: { x: 176, y: 42 }, spikeTargetCenter: { x: 176, y: 40 } }
+    : { attackerCenter: { x: 176, y: 60 }, targetCenter: { x: 72, y: 88 }, spikeTargetCenter: { x: 72, y: 80 } };
+  for (let age = 0; age < frames.length; age += 1) {
+    const expected = icyWindAtAge(age, side, geometry);
+    const actualSnowballs = frames[age].sprites.filter((sprite: any) => sprite.template.symbol === "gSwirlingSnowballSpriteTemplate");
+    invariant(actualSnowballs.length === expected.snowballs.length, `${orientation}: reducer snowball count age ${age}`);
+    for (const [index, sprite] of expected.snowballs.entries()) {
+      const actual = actualSnowballs[index];
+      invariant(actual?.callback.symbol === sprite.callback && actual.x === sprite.x && actual.y === sprite.y && actual.x2 === sprite.x2 && actual.y2 === sprite.y2 && same(actual.data.slice(0, 6), sprite.data.slice(0, 6)), `${orientation}: reducer snowball ${index} age ${age}: ${JSON.stringify({ actual: actual && { callback: actual.callback.symbol, x: actual.x, y: actual.y, x2: actual.x2, y2: actual.y2, data: actual.data.slice(0, 6) }, expected: sprite })}`);
+    }
+    const actualSpikes = frames[age].sprites.filter((sprite: any) => sprite.template.symbol === "gIceGroundSpikeSpriteTemplate");
+    invariant(actualSpikes.length === expected.spikes.length, `${orientation}: reducer spike count age ${age}`);
+    for (const [index, spike] of expected.spikes.entries()) {
+      const actual = actualSpikes.find((candidate: any) => candidate.x === spike.x && candidate.y === spike.y);
+      invariant(actual, `${orientation}: reducer spike ${index} age ${age}: ${JSON.stringify({ expected:spike})}`);
+    }
+  }
+
   let oamRows = 0; let matrixRows = 0; let paletteRows = 0;
   for (let age = 1; age < frames.length; age += 1) {
     invariant(same(frames[age].hardwareOam, frames[age - 1].softwareOam), `${orientation}: OAM latch ${age}`); oamRows += 1;
@@ -112,12 +133,40 @@ function verifyOrientation(root: string, orientation: string, receipt: any): Icy
   const members = readTarGzip(archivePath); invariant(members.length === 287 && members.every((member) => /^\.\/\d{5}\.rgb$/u.test(member.name) && member.data.length === 115200), `${orientation}: RGB members`);
   const rgb = members.map((member) => member.data); invariant(sha256(Buffer.concat(rgb)) === receipt.rawRgbSequenceSha256 && rgb.every((bytes, age) => sha256(bytes) === frames[age].sha256), `${orientation}: raw RGB`);
   const committedMap = readFileSync(mapPath, "utf8"); invariant(sha256(committedMap) === receipt.changeMapSha256 && changeMap(side, frames, rgb) === committedMap, `${orientation}: normalized change map`);
-  return { orientation, frames: 287, snowballs: 10, step2Rows, spikes: 13, oamRows, matrixRows, paletteRows, rgbRows: rgb.length };
+  const attacker: SceneOnPresentationBattler = side === "player"
+    ? { species: "SWINUB", geometry: { side: "player", spriteCorner: { x: 40, y: 69 }, animationCenter: { x: 72, y: 104 }, battlePositionCenter: { x: 72, y: 80 } } }
+    : { species: "SWINUB", geometry: { side: "opponent", spriteCorner: { x: 144, y: 28 }, animationCenter: { x: 176, y: 60 }, battlePositionCenter: { x: 176, y: 40 } } };
+  const target: SceneOnPresentationBattler = side === "player"
+    ? { species: "ONIX", geometry: { side: "opponent", spriteCorner: { x: 145, y: 10 }, animationCenter: { x: 176, y: 42 }, battlePositionCenter: { x: 176, y: 40 } } }
+    : { species: "ONIX", geometry: { side: "player", spriteCorner: { x: 40, y: 48 }, animationCenter: { x: 72, y: 80 }, battlePositionCenter: { x: 72, y: 80 } } };
+  const fieldProfile = side === "player"
+    ? { playerHp: 108, playerMaxHp: 125, opponentHp: 110, opponentMaxHp: 110, playerGender: "male" as const, opponentGender: "male" as const }
+    : { playerHp: 110, playerMaxHp: 110, opponentHp: 108, opponentMaxHp: 125, playerGender: "male" as const, opponentGender: "male" as const };
+  const stage = createSceneOnMovePresentation({ move: "ICY_WIND", attacker, target, fieldProfile, effectGeometry: geometry });
+  let seamRows = 0; let framebufferRows = 0; const residuals: string[] = [];
+  for (let age = 0; age < 287; age += 1) {
+    const expected = icyWindAtAge(age, side, geometry);
+    const seam = sceneOnIcyWindView({ ...stage, age });
+    if (same({ ...seam, attacker: undefined, target: undefined }, expected)) seamRows += 1;
+    const engine: EngineState = { ...createInitialState(), rngMode: "frontierBattle", sceneOnPresentation: { ...stage, age } };
+    const app = render(engine); let changed = 0; let minX = 240; let minY = 160; let maxX = -1; let maxY = -1;
+    for (let pixel = 0; pixel < 38400; pixel += 1) {
+      const at = pixel * 4; const ref = pixel * 3;
+      if (app[at] === rgb[age]![ref] && app[at + 1] === rgb[age]![ref + 1] && app[at + 2] === rgb[age]![ref + 2]) continue;
+      changed += 1; const x = pixel % 240; const y = Math.floor(pixel / 240); minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+    }
+    if (changed === 0) framebufferRows += 1;
+    else {
+      const samplePixel = minY * 240 + minX; const aa = samplePixel * 4; const rr = samplePixel * 3;
+      residuals.push(`age ${age}: ${changed}px bbox ${minX},${minY}-${maxX},${maxY} sample app=${app[aa]},${app[aa + 1]},${app[aa + 2]} ref=${rgb[age]![rr]},${rgb[age]![rr + 1]},${rgb[age]![rr + 2]}`);
+    }
+  }
+  return { orientation, frames: 287, snowballs: 10, step2Rows, spikes: 13, oamRows, matrixRows, paletteRows, rgbRows: rgb.length, seamRows, framebufferRows, residuals };
 }
 
 export function verifyIcyWindEvidence(root = resolve(".")): readonly IcyWindEvidenceResult[] {
   const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/icy-wind-dense-evidence.json"), "utf8"));
-  invariant(receipt.status === "unsupported-evidence-checkpoint" && receipt.acceptance.seamRows === "0/287 + 0/287" && receipt.acceptance.framebufferRows === "0/287 + 0/287", "Icy Wind must remain unsupported");
+  invariant(receipt.status === "unsupported-source-exact-partial-compositor" && receipt.acceptance.seamRows === "287/287 + 287/287" && receipt.acceptance.framebufferRows === "209/287 + 281/287", "Icy Wind partial acceptance drift");
   return Object.entries(receipt.orientations).map(([orientation, row]) => verifyOrientation(root, orientation, row));
 }
 

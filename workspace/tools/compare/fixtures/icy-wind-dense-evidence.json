@@ -1,6 +1,6 @@
 {
   "schema": "icy-wind-dense-evidence/v1",
-  "status": "unsupported-evidence-checkpoint",
+  "status": "unsupported-source-exact-partial-compositor",
   "move": "MOVE_ICY_WIND",
   "moveId": 196,
   "oracleProfile": "battle-scene-on",
@@ -27,6 +27,6 @@
       "snowballCallbackRows":{"AnimFastTranslateLinearWaitEnd":410,"AnimSwirlingSnowball_Step1":10,"AnimSwirlingSnowball_Step2":320,"AnimSwirlingSnowball_End":210}
     }
   },
-  "acceptance": {"window":"220..506","framesPerOrientation":287,"ownedPointerRows":"287/287 + 287/287","snowballCreates":"10 + 10","step2ReducerRows":"320/320 + 320/320","spikeCreates":"13 + 13","spikeCallbackRows":"455 + 455","oamLatchRows":"286/286 + 286/286","matrixLatchRows":"286/286 + 286/286","paletteLatchRows":"285/286 + 285/286; age 7 current-row monbg transfer","seamRows":"0/287 + 0/287","framebufferRows":"0/287 + 0/287","freshRuns":2},
-  "residual":"No typed Icy Wind seam or production compositor exists; all 287 bilateral production framebuffer rows remain unaccepted. Blizzard remains an independent unsupported sibling control."
+  "acceptance": {"window":"220..506","framesPerOrientation":287,"ownedPointerRows":"287/287 + 287/287","snowballCreates":"10 + 10","step2ReducerRows":"320/320 + 320/320","spikeCreates":"13 + 13","spikeCallbackRows":"455 + 455","oamLatchRows":"286/286 + 286/286","matrixLatchRows":"286/286 + 286/286","paletteLatchRows":"285/286 + 285/286; age 7 current-row monbg transfer","seamRows":"287/287 + 287/287","framebufferRows":"209/287 + 281/287","freshRuns":2},
+  "residual":"Production framebuffer residual is bounded to player ages 93 and 100..176 (78 rows, 2..44 px) plus opponent ages 129,136,144,149,150,158 (6 rows, 2..18 px): overlapping snowball pixels need the source GBA scanline OBJ evaluation budget. Blizzard remains an independent unsupported sibling control."
 }

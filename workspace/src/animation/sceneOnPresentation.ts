@@ -12,6 +12,7 @@ import {
   type FirePunchResolutionProfile,
   type FirePunchResolutionState,
 } from "./firePunch.ts";
+import { icyWindAtAge, type IcyWindState } from "./icyWind.ts";
 import { swordsDanceAtAge, type SwordsDanceState } from "./swordsDance.ts";
 import {
   biteEffectAtAge,
@@ -849,6 +850,7 @@ export interface SceneOnPresentationBattler {
     | "VILEPLUME"
     | "BUTTERFREE"
     | "CHINCHOU"
+    | "SWINUB"
     | "ONIX"
     | "DROWZEE"
     | "KRABBY"
@@ -2098,6 +2100,19 @@ export interface SceneOnThunderConfig {
   readonly targetEffectCenter: Readonly<{ x: number; y: number }>;
 }
 
+export interface SceneOnIcyWindConfig {
+  readonly move: "ICY_WIND";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC attacker and SetAverageBattlerPositions target centers. */
+  readonly effectGeometry: Readonly<{
+    attackerCenter: Readonly<{ x: number; y: number }>;
+    targetCenter: Readonly<{ x: number; y: number }>;
+    spikeTargetCenter: Readonly<{ x: number; y: number }>;
+  }>;
+}
+
 export interface SceneOnSurfConfig {
   /** `Move_MUDDY_WATER` is the muddy-palette sibling of `Move_SURF`. */
   readonly move: "SURF" | "MUDDY_WATER";
@@ -2865,6 +2880,7 @@ export type SceneOnMoveConfig =
   | SceneOnSparkConfig
   | SceneOnThunderWaveConfig
   | SceneOnThunderConfig
+  | SceneOnIcyWindConfig
   | SceneOnSurfConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
@@ -3010,6 +3026,8 @@ export type SceneOnThunderWavePresentationState =
   SceneOnMovePresentationState<SceneOnThunderWaveConfig>;
 export type SceneOnThunderPresentationState =
   SceneOnMovePresentationState<SceneOnThunderConfig>;
+export type SceneOnIcyWindPresentationState =
+  SceneOnMovePresentationState<SceneOnIcyWindConfig>;
 export type SceneOnSurfPresentationState =
   SceneOnMovePresentationState<SceneOnSurfConfig>;
 export type SceneOnCharmPresentationState =
@@ -3426,6 +3444,11 @@ export interface SceneOnThunderWaveView extends ThunderWaveState {
 
 export interface SceneOnThunderView extends ThunderState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnIcyWindView extends IcyWindState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6409,6 +6432,20 @@ export function sceneOnThunderView(
       state.config.target.geometry.side,
       state.config.targetEffectCenter,
     ),
+  };
+}
+
+/** `age=0` is Move_ICY_WIND's active source-script offset-zero display. */
+export function sceneOnIcyWindView(
+  state: SceneOnIcyWindPresentationState,
+): SceneOnIcyWindView {
+  if (state.config.move !== "ICY_WIND") {
+    throw new Error(`expected ICY_WIND presentation, got ${state.config.move}`);
+  }
+  return {
+    ...icyWindAtAge(state.age, state.config.attacker.geometry.side, state.config.effectGeometry),
+    attacker: state.config.attacker,
+    target: state.config.target,
   };
 }
 
