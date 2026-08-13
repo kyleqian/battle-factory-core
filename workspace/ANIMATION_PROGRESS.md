@@ -1,3 +1,12 @@
+# MOVE_ICY_WIND exact — bilateral generic OBJ scanline closure (2026-08-13 worker)
+
+- **State:** Level-50 coverage advances **180→181/276 exact**, 0 partial, 0 staged, and unsupported falls **96→95**. Icy Wind alone is promoted; Blizzard remains independently unsupported.
+- **Did:** Replaced unlimited snowball painting with the shared generic 1210-cycle GBA OBJ scanline evaluator. The staged compositor now derives persistent source allocator slots and stable `BuildOamBuffer` order for nine healthbox parts, battlers/monbg visibility, spikes, and snowballs; the side-specific spike slots reproduce the opponent slot-13 collision during late creation. No move-specific pixel mask or age/frame/RGB lookup was added.
+- **Verified:** Twice-fresh complete Scene-ON frames **220..506** are byte-identical per orientation: player JSON/raw-RGB `31aa7cb8… / 07b0434b…`, opponent `ded4eceb… / aa229485…`. Both pass **287/287** source reducer, typed seam, OAM topology, raw RGB, change map, and production framebuffer rows with no residuals; retained transfer gates remain **286/286** OAM+matrix and **285/286 + age-7** palette. All **10** snowballs, **320** Step2 rows, and **13** spikes remain pinned.
+- **Sibling/control:** Blizzard reruns unchanged at **448/448 Step2 rows per side** and **371/371 + 360/360** OAM/matrix transfers; it inherits no Icy Wind topology, seam, compositor, receipt, or promotion.
+- **Checks:** Focused Icy Wind/assets/evidence/generic-compositor/Blizzard/boundary/coverage tests **26/26**, standalone bilateral verifier, source audit, animation audit/coverage, typecheck, full suite, and production build are green. No animation-boundary list, unsupported barrier, gameplay/damage/RNG/controller/turn/round/facility state, or sibling coverage changed.
+- **Next:** None for Icy Wind.
+
 # MOVE_ICY_WIND source-exact seam/compositor checkpoint — remains unsupported (2026-08-13 worker)
 
 - **State:** Coverage remains **180/276 Level-50 exact**, 0 partial, 0 staged, and 96 unsupported. Icy Wind is not promoted; coverage counts and `ANIMATION_COVERAGE.json` are unchanged.
