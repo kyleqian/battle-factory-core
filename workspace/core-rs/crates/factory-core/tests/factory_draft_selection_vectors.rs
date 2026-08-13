@@ -6,18 +6,30 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use factory_core::factory_draft_selection::{
     advance_cursor_redraw, advance_menu_highlight_redraw, advance_rent_confirm_redraw,
-    apply_deselect, apply_select, cursor_move_stalls_balls, is_mons_confirmed, move_cursor,
-    move_menu_cursor, select_mon_message, FactoryDraftDirection,
+    apply_deselect, apply_select, chosen_mon_species, cursor_move_stalls_balls, is_mons_confirmed,
+    move_cursor, move_menu_cursor, select_mon_message, selected_rental_party,
+    FactoryDraftDirection,
 };
 use factory_core::factory_draft_selection_vectors_gen::{
-    FACTORY_DRAFT_APPLY_DESELECT_CASES, FACTORY_DRAFT_APPLY_SELECT_CASES,
+    FactoryDraftRentalVectorExpected, FACTORY_DRAFT_APPLY_DESELECT_CASES,
+    FACTORY_DRAFT_APPLY_SELECT_CASES, FACTORY_DRAFT_CHOSEN_SPECIES_CASES,
     FACTORY_DRAFT_CONFIRMATION_CASES, FACTORY_DRAFT_CURSOR_MOVE_STALL_CASES,
     FACTORY_DRAFT_CURSOR_REDRAW_CASES, FACTORY_DRAFT_MENU_HIGHLIGHT_REDRAW_CASES,
     FACTORY_DRAFT_MOVE_CURSOR_CASES, FACTORY_DRAFT_MOVE_MENU_CURSOR_CASES,
-    FACTORY_DRAFT_RENT_CONFIRM_REDRAW_CASES, FACTORY_DRAFT_SELECTION_VECTOR_CASE_COUNT,
+    FACTORY_DRAFT_PROJECTION_BRANCHES, FACTORY_DRAFT_RENT_CONFIRM_REDRAW_CASES,
+    FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES, FACTORY_DRAFT_SELECTION_VECTOR_CASE_COUNT,
     FACTORY_DRAFT_SELECTION_VECTOR_CATEGORY_COUNTS, FACTORY_DRAFT_SELECTION_VECTOR_DOMAIN,
-    FACTORY_DRAFT_SELECT_MON_MESSAGE_CASES,
+    FACTORY_DRAFT_SELECT_MON_MESSAGE_CASES, FACTORY_DRAFT_VECTOR_SOURCE_RECORDS,
 };
+
+const SLOT_SPECIES: [&str; 6] = [
+    "SPECIES_ZERO",
+    "SPECIES_ONE",
+    "SPECIES_TWO",
+    "SPECIES_THREE",
+    "SPECIES_FOUR",
+    "SPECIES_FIVE",
+];
 
 #[test]
 fn complete_results_match_canonically_executed_typescript_vectors() {
@@ -109,6 +121,26 @@ fn complete_results_match_canonically_executed_typescript_vectors() {
             case.label,
         );
     }
+    for case in FACTORY_DRAFT_CHOSEN_SPECIES_CASES {
+        assert_eq!(
+            chosen_mon_species(&case.selected_ids, &SLOT_SPECIES),
+            case.expected_species,
+            "{}",
+            case.label,
+        );
+    }
+    for case in FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES {
+        let actual =
+            selected_rental_party(&case.selected_ids, &FACTORY_DRAFT_VECTOR_SOURCE_RECORDS);
+        match case.expected {
+            FactoryDraftRentalVectorExpected::Ok(expected) => {
+                assert_eq!(actual.unwrap(), expected, "{}", case.label);
+            }
+            FactoryDraftRentalVectorExpected::Err(expected) => {
+                assert_eq!(actual.unwrap_err().to_string(), expected, "{}", case.label);
+            }
+        }
+    }
 }
 
 #[test]
@@ -174,20 +206,178 @@ fn category_census_and_bounded_domain_are_ratchet_pinned() {
     {
         *observed.entry(category).or_insert(0usize) += 1;
     }
+    for category in FACTORY_DRAFT_CHOSEN_SPECIES_CASES
+        .iter()
+        .map(|case| case.category)
+    {
+        *observed.entry(category).or_insert(0usize) += 1;
+    }
+    for category in FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES
+        .iter()
+        .map(|case| case.category)
+    {
+        *observed.entry(category).or_insert(0usize) += 1;
+    }
     let expected = FACTORY_DRAFT_SELECTION_VECTOR_CATEGORY_COUNTS
         .iter()
         .copied()
         .collect::<BTreeMap<_, _>>();
     assert_eq!(observed, expected);
-    assert_eq!(FACTORY_DRAFT_SELECTION_VECTOR_CATEGORY_COUNTS.len(), 12);
-    assert_eq!(FACTORY_DRAFT_SELECTION_VECTOR_CASE_COUNT, 102);
+    assert_eq!(FACTORY_DRAFT_SELECTION_VECTOR_CATEGORY_COUNTS.len(), 23);
+    assert_eq!(FACTORY_DRAFT_SELECTION_VECTOR_CASE_COUNT, 180);
     assert_eq!(
         observed.values().sum::<usize>(),
         FACTORY_DRAFT_SELECTION_VECTOR_CASE_COUNT
     );
     assert_eq!(
         FACTORY_DRAFT_SELECTION_VECTOR_DOMAIN,
-        "six selectedIds cells 0..=3; slots 0..=5; menu rows 0..=2; selectingMonsState 1..=4; elapsed only through each controller settle tick",
+        "six selectedIds cells 0..=3 for controller helpers and 0..=255 for projections; slots 0..=5; menu rows 0..=2; selectingMonsState 1..=4; elapsed only through each controller settle tick",
+    );
+}
+
+#[test]
+fn projection_branch_census_and_complete_slot_rank_matrices_are_pinned() {
+    let observed_branches = FACTORY_DRAFT_CHOSEN_SPECIES_CASES
+        .iter()
+        .flat_map(|case| case.branches.iter().copied())
+        .chain(
+            FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES
+                .iter()
+                .flat_map(|case| case.branches.iter().copied()),
+        )
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        observed_branches,
+        FACTORY_DRAFT_PROJECTION_BRANCHES.into_iter().collect()
+    );
+    assert_eq!(observed_branches.len(), 13);
+
+    let chosen_matrix = FACTORY_DRAFT_CHOSEN_SPECIES_CASES
+        .iter()
+        .filter(|case| case.category == "chosen-slot-rank")
+        .flat_map(|case| {
+            case.selected_ids
+                .iter()
+                .enumerate()
+                .filter(|(_, rank)| **rank > 0)
+                .map(|(slot, &rank)| (slot, rank))
+        })
+        .collect::<BTreeSet<_>>();
+    for slot in 0..6 {
+        for rank in 1..=3 {
+            assert!(
+                chosen_matrix.contains(&(slot, rank)),
+                "missing chosen slot {slot}, rank {rank}"
+            );
+        }
+    }
+
+    let rental_matrix = FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES
+        .iter()
+        .filter(|case| case.category == "rental-slot-rank")
+        .flat_map(|case| {
+            case.selected_ids
+                .iter()
+                .enumerate()
+                .filter(|(_, rank)| **rank > 0)
+                .map(|(slot, &rank)| (slot, rank))
+        })
+        .collect::<BTreeSet<_>>();
+    for slot in 0..6 {
+        for rank in 1..=3 {
+            assert!(
+                rental_matrix.contains(&(slot, rank)),
+                "missing rental slot {slot}, rank {rank}"
+            );
+        }
+    }
+}
+
+#[test]
+fn projection_vectors_pin_overwrite_errors_u32_boundaries_and_non_mutation() {
+    for rank in 1..=3 {
+        let chosen = FACTORY_DRAFT_CHOSEN_SPECIES_CASES
+            .iter()
+            .find(|case| case.label == format!("chosen_duplicate_rank_{rank}"))
+            .expect("duplicate chosen rank case");
+        let last_slot = chosen
+            .selected_ids
+            .iter()
+            .rposition(|&candidate| candidate == rank)
+            .unwrap();
+        let first_slot = chosen
+            .selected_ids
+            .iter()
+            .position(|&candidate| candidate == rank)
+            .unwrap();
+        assert!(chosen.expected_species.contains(&SLOT_SPECIES[last_slot]));
+        assert!(!chosen.expected_species.contains(&SLOT_SPECIES[first_slot]));
+
+        let rental = FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES
+            .iter()
+            .find(|case| case.label == format!("rental_duplicate_rank_{rank}"))
+            .expect("duplicate rental rank case");
+        let duplicate_slot = rental
+            .selected_ids
+            .iter()
+            .enumerate()
+            .find_map(|(slot, &candidate)| {
+                (candidate == rank && rental.selected_ids[..slot].contains(&candidate))
+                    .then_some(slot)
+            })
+            .unwrap();
+        let FactoryDraftRentalVectorExpected::Err(expected_error) = rental.expected else {
+            panic!("duplicate rental case unexpectedly succeeded");
+        };
+        assert_eq!(
+            expected_error,
+            format!("invalid draft pick rank {rank} at rental slot {duplicate_slot}")
+        );
+    }
+
+    assert_eq!(
+        FACTORY_DRAFT_VECTOR_SOURCE_RECORDS[0].boundary_value,
+        u32::MAX
+    );
+    assert_eq!(FACTORY_DRAFT_VECTOR_SOURCE_RECORDS[5].record_id, u32::MAX);
+    assert_eq!(
+        FACTORY_DRAFT_VECTOR_SOURCE_RECORDS[1].optional_value,
+        Some(0)
+    );
+    assert_eq!(
+        FACTORY_DRAFT_VECTOR_SOURCE_RECORDS[3].optional_value,
+        Some(u32::MAX)
+    );
+
+    let invalid_matrix = FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES
+        .iter()
+        .filter(|case| case.category == "rental-invalid")
+        .flat_map(|case| {
+            case.selected_ids
+                .iter()
+                .enumerate()
+                .filter(|(_, rank)| matches!(**rank, 4 | 200))
+                .map(|(slot, &rank)| (slot, rank))
+        })
+        .collect::<BTreeSet<_>>();
+    assert_eq!(invalid_matrix.len(), 12);
+    for slot in 0..6 {
+        for rank in [4, 200] {
+            assert!(invalid_matrix.contains(&(slot, rank)));
+        }
+    }
+
+    let selected_ids = [3, 0, 1, 0, 2, 0];
+    let selected_ids_before = selected_ids;
+    let sources = FACTORY_DRAFT_VECTOR_SOURCE_RECORDS;
+    let sources_before = sources;
+    let selected = selected_rental_party(&selected_ids, &sources).unwrap();
+    assert_eq!(selected_ids, selected_ids_before);
+    assert_eq!(sources, sources_before);
+    assert_eq!(
+        selected,
+        [sources[2], sources[4], sources[0]],
+        "complete generic records must be preserved in rank order"
     );
 }
 

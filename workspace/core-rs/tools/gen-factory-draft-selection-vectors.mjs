@@ -110,6 +110,126 @@ function cloneRentConfirmRedraw(value) {
   });
 }
 
+const SLOT_SPECIES = Object.freeze([
+  "SPECIES_ZERO",
+  "SPECIES_ONE",
+  "SPECIES_TWO",
+  "SPECIES_THREE",
+  "SPECIES_FOUR",
+  "SPECIES_FIVE",
+]);
+
+const RENTAL_SOURCES = Object.freeze([
+  { recordId: 0, boundaryValue: 4_294_967_295, optionalValue: null, marker: "source-zero" },
+  { recordId: 1, boundaryValue: 4_294_967_294, optionalValue: 0, marker: "source-one" },
+  { recordId: 2_147_483_647, boundaryValue: 2_147_483_648, optionalValue: null, marker: "source-two" },
+  { recordId: 2_147_483_648, boundaryValue: 2_147_483_647, optionalValue: 4_294_967_295, marker: "source-three" },
+  { recordId: 4_294_967_294, boundaryValue: 1, optionalValue: null, marker: "source-four" },
+  { recordId: 4_294_967_295, boundaryValue: 0, optionalValue: 2_147_483_648, marker: "source-five" },
+].map((record) => Object.freeze(record)));
+
+function cloneSourceRecord(record) {
+  assert(record !== null && typeof record === "object", "rental source must be an object");
+  for (const key of ["recordId", "boundaryValue"]) {
+    assert(Number.isInteger(record[key]) && record[key] >= 0 && record[key] <= 0xffff_ffff, `${key} must be u32`);
+  }
+  assert(
+    record.optionalValue === null
+      || (Number.isInteger(record.optionalValue) && record.optionalValue >= 0 && record.optionalValue <= 0xffff_ffff),
+    "optionalValue must be null/u32",
+  );
+  assert(typeof record.marker === "string", "rental source marker must be a string");
+  return Object.freeze({ ...record });
+}
+
+function projectionState(selectedIds) {
+  assert(Array.isArray(selectedIds) && selectedIds.length === SLOT_COUNT, "projection selectedIds must have six cells");
+  selectedIds.forEach((rank, slot) => {
+    assert(Number.isInteger(rank) && rank >= 0 && rank <= 0xff, `projection selectedIds[${slot}] must be u8`);
+  });
+  const frozenIds = Object.freeze([...selectedIds]);
+  const slots = Object.freeze(SLOT_SPECIES.map((species) => Object.freeze({ species })));
+  const rentals = Object.freeze(RENTAL_SOURCES.map((source) => Object.freeze({ source })));
+  return Object.freeze({ selectedIds: frozenIds, slots, rentals });
+}
+
+function canonicalChosenSpecies(selectedIds) {
+  const state = projectionState(selectedIds);
+  const beforeIds = [...state.selectedIds];
+  const result = canonicalDraft.chosenMonSpecies(state);
+  assert(Array.isArray(result) && result.every((species) => typeof species === "string"), "chosenMonSpecies result shape");
+  assert(JSON.stringify(state.selectedIds) === JSON.stringify(beforeIds), "canonical chosenMonSpecies mutated selectedIds");
+  assert(state.slots.every((slot, index) => slot.species === SLOT_SPECIES[index]), "canonical chosenMonSpecies mutated slots");
+  return Object.freeze([...result]);
+}
+
+function canonicalSelectedRentalParty(selectedIds) {
+  const state = projectionState(selectedIds);
+  const beforeIds = [...state.selectedIds];
+  const beforeSources = state.rentals.map(({ source }) => cloneSourceRecord(source));
+  let expected;
+  try {
+    const result = canonicalDraft.selectedRentalParty(state);
+    assert(Object.isFrozen(result), "canonical selectedRentalParty result must be frozen");
+    expected = Object.freeze({ ok: true, records: Object.freeze(result.map(cloneSourceRecord)) });
+  } catch (error) {
+    assert(error instanceof Error, "canonical selectedRentalParty threw a non-Error");
+    expected = Object.freeze({ ok: false, error: error.message });
+  }
+  assert(JSON.stringify(state.selectedIds) === JSON.stringify(beforeIds), "canonical selectedRentalParty mutated selectedIds");
+  assert(
+    JSON.stringify(state.rentals.map(({ source }) => source)) === JSON.stringify(beforeSources),
+    "canonical selectedRentalParty mutated rental sources",
+  );
+  return expected;
+}
+
+function chosenBranches(selectedIds) {
+  const branches = new Set();
+  const seen = new Set();
+  for (const rank of selectedIds) {
+    if (rank === 0) {
+      branches.add("chosen-zero-skip");
+      continue;
+    }
+    branches.add("chosen-positive-write");
+    if (seen.has(rank)) branches.add("chosen-later-duplicate-overwrite");
+    seen.add(rank);
+    if (rank > PARTY_SIZE) branches.add("chosen-above-three-not-emitted");
+  }
+  for (let rank = 1; rank <= PARTY_SIZE; rank += 1) {
+    branches.add(seen.has(rank) ? "chosen-present-rank-emit" : "chosen-missing-rank-skip");
+  }
+  return Object.freeze([...branches].sort());
+}
+
+function rentalBranches(selectedIds, expected) {
+  const branches = new Set();
+  const occupied = new Set();
+  for (const rank of selectedIds) {
+    if (rank === 0) {
+      branches.add("rental-zero-skip");
+      continue;
+    }
+    if (rank > PARTY_SIZE) {
+      branches.add("rental-invalid-rank-error");
+      break;
+    }
+    if (occupied.has(rank)) {
+      branches.add("rental-duplicate-rank-error");
+      break;
+    }
+    occupied.add(rank);
+    branches.add("rental-valid-rank-store");
+  }
+  branches.add(expected.ok ? "rental-complete-success" : (
+    expected.error === "draft routing requires exactly three ranked rental picks"
+      ? "rental-missing-ranks-error"
+      : "rental-first-validation-error"
+  ));
+  return Object.freeze([...branches].sort());
+}
+
 const categoryCounts = new Map();
 const labels = new Set();
 function addCase(collection, value) {
@@ -340,6 +460,141 @@ for (const { elapsed, fromMessage, fromSelected } of [
   });
 }
 
+const chosenSpeciesCases = [];
+function addChosenSpeciesCase(label, category, selectedIds) {
+  const frozenIds = Object.freeze([...selectedIds]);
+  const expectedSpecies = canonicalChosenSpecies(frozenIds);
+  addCase(chosenSpeciesCases, {
+    label,
+    category,
+    selectedIds: frozenIds,
+    expectedSpecies,
+    branches: chosenBranches(frozenIds),
+  });
+}
+
+// Every one of the six slots is observed in every emitted rank position.
+for (let slot = 0; slot < SLOT_COUNT; slot += 1) {
+  for (let rank = 1; rank <= PARTY_SIZE; rank += 1) {
+    const selectedIds = Array(SLOT_COUNT).fill(0);
+    selectedIds[slot] = rank;
+    addChosenSpeciesCase(`chosen_slot_${slot}_rank_${rank}`, "chosen-slot-rank", selectedIds);
+  }
+}
+
+const RANK_PERMUTATIONS = Object.freeze([
+  [1, 2, 3],
+  [1, 3, 2],
+  [2, 1, 3],
+  [2, 3, 1],
+  [3, 1, 2],
+  [3, 2, 1],
+].map((permutation) => Object.freeze(permutation)));
+for (const permutation of RANK_PERMUTATIONS) {
+  addChosenSpeciesCase(
+    `chosen_permutation_${permutation.join("_")}`,
+    "chosen-permutation",
+    [...permutation, 0, 0, 0],
+  );
+}
+for (const [label, selectedIds] of [
+  ["all_zero", [0, 0, 0, 0, 0, 0]],
+  ["rank_one_only", [0, 0, 1, 0, 0, 0]],
+  ["ranks_one_three", [3, 0, 0, 1, 0, 0]],
+  ["rank_two_only", [0, 2, 0, 0, 0, 0]],
+]) {
+  addChosenSpeciesCase(`chosen_sparse_${label}`, "chosen-sparse", selectedIds);
+}
+for (const [rank, selectedIds] of [
+  [1, [1, 1, 2, 3, 0, 0]],
+  [2, [2, 1, 0, 2, 3, 0]],
+  [3, [3, 1, 2, 0, 0, 3]],
+]) {
+  addChosenSpeciesCase(`chosen_duplicate_rank_${rank}`, "chosen-duplicate-overwrite", selectedIds);
+}
+addChosenSpeciesCase("chosen_rank_4_ignored", "chosen-above-three", [4, 1, 2, 3, 0, 0]);
+addChosenSpeciesCase("chosen_rank_200_ignored", "chosen-above-three", [200, 3, 0, 2, 0, 1]);
+
+const selectedRentalPartyCases = [];
+function addSelectedRentalPartyCase(label, category, selectedIds) {
+  const frozenIds = Object.freeze([...selectedIds]);
+  const expected = canonicalSelectedRentalParty(frozenIds);
+  addCase(selectedRentalPartyCases, {
+    label,
+    category,
+    selectedIds: frozenIds,
+    expected,
+    branches: rentalBranches(frozenIds, expected),
+  });
+}
+
+function completeSelectionWith(slot, rank) {
+  const selectedIds = Array(SLOT_COUNT).fill(0);
+  selectedIds[slot] = rank;
+  const openSlots = freeSlots(slot);
+  let openIndex = 0;
+  for (let otherRank = 1; otherRank <= PARTY_SIZE; otherRank += 1) {
+    if (otherRank === rank) continue;
+    selectedIds[openSlots[openIndex]] = otherRank;
+    openIndex += 1;
+  }
+  return selectedIds;
+}
+
+// Complete parties prove all six source records can occupy every result rank.
+for (let slot = 0; slot < SLOT_COUNT; slot += 1) {
+  for (let rank = 1; rank <= PARTY_SIZE; rank += 1) {
+    addSelectedRentalPartyCase(
+      `rental_slot_${slot}_rank_${rank}`,
+      "rental-slot-rank",
+      completeSelectionWith(slot, rank),
+    );
+  }
+}
+for (const permutation of RANK_PERMUTATIONS) {
+  addSelectedRentalPartyCase(
+    `rental_permutation_${permutation.join("_")}`,
+    "rental-permutation",
+    [...permutation, 0, 0, 0],
+  );
+}
+for (const [label, selectedIds] of [
+  ["all_zero", [0, 0, 0, 0, 0, 0]],
+  ["rank_one_only", [1, 0, 0, 0, 0, 0]],
+  ["ranks_one_three", [1, 0, 3, 0, 0, 0]],
+  ["ranks_two_three", [0, 2, 0, 3, 0, 0]],
+]) {
+  addSelectedRentalPartyCase(`rental_missing_${label}`, "rental-missing", selectedIds);
+}
+for (const [rank, selectedIds] of [
+  [1, [1, 0, 1, 2, 3, 0]],
+  [2, [2, 1, 0, 2, 3, 0]],
+  [3, [3, 1, 2, 0, 0, 3]],
+]) {
+  addSelectedRentalPartyCase(`rental_duplicate_rank_${rank}`, "rental-duplicate", selectedIds);
+}
+for (const invalidRank of [4, 200]) {
+  for (let slot = 0; slot < SLOT_COUNT; slot += 1) {
+    const selectedIds = Array(SLOT_COUNT).fill(0);
+    selectedIds[slot] = invalidRank;
+    addSelectedRentalPartyCase(
+      `rental_invalid_rank_${invalidRank}_slot_${slot}`,
+      "rental-invalid",
+      selectedIds,
+    );
+  }
+}
+addSelectedRentalPartyCase(
+  "rental_duplicate_precedes_later_invalid",
+  "rental-error-order",
+  [1, 1, 4, 2, 3, 0],
+);
+addSelectedRentalPartyCase(
+  "rental_invalid_precedes_later_duplicate",
+  "rental-error-order",
+  [4, 1, 1, 2, 3, 0],
+);
+
 const allCaseCount = [
   selectMonMessageCases,
   applySelectCases,
@@ -351,6 +606,8 @@ const allCaseCount = [
   cursorRedrawCases,
   menuHighlightRedrawCases,
   rentConfirmRedrawCases,
+  chosenSpeciesCases,
+  selectedRentalPartyCases,
 ].reduce((total, cases) => total + cases.length, 0);
 
 assert(selectMonMessageCases.length === 4, "message matrix drifted");
@@ -363,7 +620,9 @@ assert(moveMenuCursorCases.length === MENU_OPTION_COUNT * 2, "menu matrix drifte
 assert(cursorRedrawCases.length === 6, "cursor redraw matrix drifted");
 assert(menuHighlightRedrawCases.length === 3, "menu redraw matrix drifted");
 assert(rentConfirmRedrawCases.length === 3, "rent redraw matrix drifted");
-assert(allCaseCount === 102, `total matrix drifted to ${allCaseCount}`);
+assert(chosenSpeciesCases.length === 33, "chosen-species matrix drifted");
+assert(selectedRentalPartyCases.length === 45, "selected-rental matrix drifted");
+assert(allCaseCount === 180, `total matrix drifted to ${allCaseCount}`);
 
 function rustString(value) {
   assert(typeof value === "string", "rust string must receive a string");
@@ -373,6 +632,43 @@ function rustString(value) {
 function rustSelectedIds(value) {
   assertSelectedIds(value, "rust selectedIds");
   return `[${value.join(", ")}]`;
+}
+
+function rustProjectionSelectedIds(value) {
+  assert(Array.isArray(value) && value.length === SLOT_COUNT, "rust projection selectedIds must have six cells");
+  value.forEach((rank) => assert(Number.isInteger(rank) && rank >= 0 && rank <= 0xff, "rust projection rank must be u8"));
+  return `[${value.join(", ")}]`;
+}
+
+function rustBranches(value) {
+  assert(Array.isArray(value) && value.every((branch) => typeof branch === "string"), "branches must be strings");
+  return `&[${value.map(rustString).join(", ")}]`;
+}
+
+function rustOptionalU32(value) {
+  if (value === null) return "None";
+  assert(Number.isInteger(value) && value >= 0 && value <= 0xffff_ffff, "optional u32 out of range");
+  return `Some(${value})`;
+}
+
+function rustSourceRecord(value) {
+  const record = cloneSourceRecord(value);
+  return `FactoryDraftVectorSourceRecord {
+            record_id: ${record.recordId},
+            boundary_value: ${record.boundaryValue},
+            optional_value: ${rustOptionalU32(record.optionalValue)},
+            marker: ${rustString(record.marker)},
+        }`;
+}
+
+function rustRentalExpected(value) {
+  if (value.ok) {
+    assert(value.records.length === PARTY_SIZE, "successful rental result must have three records");
+    return `FactoryDraftRentalVectorExpected::Ok([
+            ${value.records.map(rustSourceRecord).join(",\n            ")},
+        ])`;
+  }
+  return `FactoryDraftRentalVectorExpected::Err(${rustString(value.error)})`;
 }
 
 function rustDirection(value) {
@@ -498,6 +794,50 @@ function renderRentConfirmRedrawCase(value) {
     },`;
 }
 
+function renderChosenSpeciesCase(value) {
+  return `    FactoryDraftChosenSpeciesVectorCase {
+        label: ${rustString(value.label)},
+        category: ${rustString(value.category)},
+        selected_ids: ${rustProjectionSelectedIds(value.selectedIds)},
+        expected_species: &[${value.expectedSpecies.map(rustString).join(", ")}],
+        branches: ${rustBranches(value.branches)},
+    },`;
+}
+
+function renderSelectedRentalPartyCase(value) {
+  return `    FactoryDraftSelectedRentalPartyVectorCase {
+        label: ${rustString(value.label)},
+        category: ${rustString(value.category)},
+        selected_ids: ${rustProjectionSelectedIds(value.selectedIds)},
+        expected: ${rustRentalExpected(value.expected)},
+        branches: ${rustBranches(value.branches)},
+    },`;
+}
+
+const projectionBranches = [...new Set([
+  ...chosenSpeciesCases.flatMap((value) => value.branches),
+  ...selectedRentalPartyCases.flatMap((value) => value.branches),
+])].sort();
+const expectedProjectionBranches = [
+  "chosen-above-three-not-emitted",
+  "chosen-later-duplicate-overwrite",
+  "chosen-missing-rank-skip",
+  "chosen-positive-write",
+  "chosen-present-rank-emit",
+  "chosen-zero-skip",
+  "rental-complete-success",
+  "rental-duplicate-rank-error",
+  "rental-first-validation-error",
+  "rental-invalid-rank-error",
+  "rental-missing-ranks-error",
+  "rental-valid-rank-store",
+  "rental-zero-skip",
+];
+assert(
+  JSON.stringify(projectionBranches) === JSON.stringify(expectedProjectionBranches),
+  `projection branch coverage drifted: ${projectionBranches.join(", ")}`,
+);
+
 const categoryLines = [...categoryCounts]
   .map(([category, count]) => `    (${rustString(category)}, ${count}),`)
   .join("\n");
@@ -514,7 +854,49 @@ use crate::factory_draft_selection::{
 
 /// Stored-cell bounds exercised by this canonical helper corpus.
 pub const FACTORY_DRAFT_SELECTION_VECTOR_DOMAIN: &str =
-    "six selectedIds cells 0..=3; slots 0..=5; menu rows 0..=2; selectingMonsState 1..=4; elapsed only through each controller settle tick";
+    "six selectedIds cells 0..=3 for controller helpers and 0..=255 for projections; slots 0..=5; menu rows 0..=2; selectingMonsState 1..=4; elapsed only through each controller settle tick";
+
+/// Complete semantic branch census for the two M10b projections.
+pub static FACTORY_DRAFT_PROJECTION_BRANCHES: [&str; ${projectionBranches.length}] = [
+${projectionBranches.map((branch) => `    ${rustString(branch)},`).join("\n")}
+];
+
+/// Synthetic generic source record used only by the differential corpus.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FactoryDraftVectorSourceRecord {
+    pub record_id: u32,
+    pub boundary_value: u32,
+    pub optional_value: Option<u32>,
+    pub marker: &'static str,
+}
+
+pub static FACTORY_DRAFT_VECTOR_SOURCE_RECORDS: [FactoryDraftVectorSourceRecord; 6] = [
+${RENTAL_SOURCES.map((record) => `    ${rustSourceRecord(record)},`).join("\n")}
+];
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FactoryDraftRentalVectorExpected {
+    Ok([FactoryDraftVectorSourceRecord; 3]),
+    Err(&'static str),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FactoryDraftChosenSpeciesVectorCase {
+    pub label: &'static str,
+    pub category: &'static str,
+    pub selected_ids: [u8; 6],
+    pub expected_species: &'static [&'static str],
+    pub branches: &'static [&'static str],
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FactoryDraftSelectedRentalPartyVectorCase {
+    pub label: &'static str,
+    pub category: &'static str,
+    pub selected_ids: [u8; 6],
+    pub expected: FactoryDraftRentalVectorExpected,
+    pub branches: &'static [&'static str],
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct FactoryDraftSelectMonMessageVectorCase {
@@ -636,6 +1018,14 @@ ${menuHighlightRedrawCases.map(renderMenuHighlightRedrawCase).join("\n")}
 
 pub static FACTORY_DRAFT_RENT_CONFIRM_REDRAW_CASES: [FactoryDraftRentConfirmRedrawVectorCase; ${rentConfirmRedrawCases.length}] = [
 ${rentConfirmRedrawCases.map(renderRentConfirmRedrawCase).join("\n")}
+];
+
+pub static FACTORY_DRAFT_CHOSEN_SPECIES_CASES: [FactoryDraftChosenSpeciesVectorCase; ${chosenSpeciesCases.length}] = [
+${chosenSpeciesCases.map(renderChosenSpeciesCase).join("\n")}
+];
+
+pub static FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES: [FactoryDraftSelectedRentalPartyVectorCase; ${selectedRentalPartyCases.length}] = [
+${selectedRentalPartyCases.map(renderSelectedRentalPartyCase).join("\n")}
 ];
 `;
 

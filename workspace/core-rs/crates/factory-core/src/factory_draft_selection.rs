@@ -1,9 +1,10 @@
 //! Presentation-free Battle Factory rental-draft selection helpers.
 //!
 //! This is the deliberately narrow pure leaf from
-//! `src/engine/factoryDraftScreen.ts`: selection numbering, cursor wrapping,
-//! and redraw-settle scheduling.  It owns neither draft-state construction,
-//! rendering, ball animation, confirmation reveal, nor the controller reducer.
+//! `src/engine/factoryDraftScreen.ts`: selection numbering, pick-order
+//! projections, cursor wrapping, and redraw-settle scheduling.  It owns neither
+//! draft-state construction, rental presentation expansion, rendering, ball
+//! animation, confirmation reveal, nor the controller reducer.
 //!
 //! ## Bounded controller domain
 //!
@@ -32,6 +33,33 @@ pub const MENU_OPTION_COUNT: u8 = 3;
 
 /// The source controller's fixed six-cell `selectedIds` storage.
 pub type FactoryDraftSelectedIds = [u8; FACTORY_DRAFT_SLOT_COUNT];
+
+/// Exact semantic failures from `selectedRentalParty`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FactoryDraftRoutingError {
+    /// A non-zero rank was outside `1..=3`, or its rank was already occupied.
+    InvalidPickRank { rank: u8, rental_slot: usize },
+    /// Validation completed without finding all three pick ranks.
+    MissingRankedPicks,
+}
+
+impl std::fmt::Display for FactoryDraftRoutingError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InvalidPickRank { rank, rental_slot } => {
+                write!(
+                    formatter,
+                    "invalid draft pick rank {rank} at rental slot {rental_slot}"
+                )
+            }
+            Self::MissingRankedPicks => {
+                formatter.write_str("draft routing requires exactly three ranked rental picks")
+            }
+        }
+    }
+}
+
+impl std::error::Error for FactoryDraftRoutingError {}
 
 const SELECT_FIRST_MON_MESSAGE: &str = "Select the first POKéMON.";
 const SELECT_SECOND_MON_MESSAGE: &str = "Select the second POKéMON.";
@@ -153,6 +181,64 @@ pub const fn is_mons_confirmed(selecting_mons_state: u8) -> bool {
     selecting_mons_state > FRONTIER_PARTY_SIZE
 }
 
+/// `Select_CreateChosenMonsSprites`: chosen species in rank order.
+///
+/// This is deliberately a borrowed projection: the result owns only its new
+/// vector and every string still belongs to the caller's six slot records.
+/// As with the source `Map`, every positive rank participates, a later slot
+/// overwrites an earlier duplicate, only ranks 1 through 3 are read back, and
+/// absent (or source-falsy empty) strings are skipped.
+#[must_use]
+pub fn chosen_mon_species<'a>(
+    selected_ids: &FactoryDraftSelectedIds,
+    slot_species: &[&'a str; FACTORY_DRAFT_SLOT_COUNT],
+) -> Vec<&'a str> {
+    let mut by_rank = [None; FRONTIER_PARTY_SIZE as usize];
+    for (&rank, &species) in selected_ids.iter().zip(slot_species) {
+        if (1..=FRONTIER_PARTY_SIZE).contains(&rank) {
+            by_rank[usize::from(rank - 1)] = Some(species);
+        }
+    }
+    by_rank
+        .into_iter()
+        .flatten()
+        .filter(|species| !species.is_empty())
+        .collect()
+}
+
+/// Route six generic source records into the three-record rental party.
+///
+/// The fresh result array clones `T` and otherwise knows nothing about its
+/// shape, so callers retain complete source values (including optional fields)
+/// without duplicating `FactoryRentalPresentation` in this native-only leaf.
+/// Callers that need identity-preserving borrowed records can use a reference
+/// as `T`; `Clone` then copies only those references.
+///
+/// Validation visits slots in source order.  The first invalid or duplicate
+/// non-zero rank wins; only after that scan completes does a missing rank
+/// produce `MissingRankedPicks`, matching the canonical error ordering.
+pub fn selected_rental_party<T: Clone>(
+    selected_ids: &FactoryDraftSelectedIds,
+    rental_sources: &[T; FACTORY_DRAFT_SLOT_COUNT],
+) -> Result<[T; FRONTIER_PARTY_SIZE as usize], FactoryDraftRoutingError> {
+    let mut by_rank: [Option<&T>; FRONTIER_PARTY_SIZE as usize] =
+        [None; FRONTIER_PARTY_SIZE as usize];
+    for (rental_slot, (&rank, source)) in selected_ids.iter().zip(rental_sources).enumerate() {
+        if rank == 0 {
+            continue;
+        }
+        if rank > FRONTIER_PARTY_SIZE || by_rank[usize::from(rank - 1)].is_some() {
+            return Err(FactoryDraftRoutingError::InvalidPickRank { rank, rental_slot });
+        }
+        by_rank[usize::from(rank - 1)] = Some(source);
+    }
+
+    let [Some(first), Some(second), Some(third)] = by_rank else {
+        return Err(FactoryDraftRoutingError::MissingRankedPicks);
+    };
+    Ok([first.clone(), second.clone(), third.clone()])
+}
+
 /// Whether a cursor move into this species stalls the other active balls.
 ///
 /// The two exact canonical spellings are exceptions; comparison is deliberately
@@ -252,8 +338,9 @@ pub fn advance_rent_confirm_redraw<'a>(
 #[cfg(test)]
 mod tests {
     use super::{
-        advance_cursor_redraw, apply_deselect, apply_select, cursor_move_stalls_balls,
-        FactoryDraftCursorRedrawState, FRONTIER_PARTY_SIZE,
+        advance_cursor_redraw, apply_deselect, apply_select, chosen_mon_species,
+        cursor_move_stalls_balls, selected_rental_party, FactoryDraftCursorRedrawState,
+        FRONTIER_PARTY_SIZE,
     };
 
     #[test]
@@ -286,5 +373,36 @@ mod tests {
         );
         assert!(cursor_move_stalls_balls("Bayleef"));
         assert!(!cursor_move_stalls_balls("BAYLEEF"));
+    }
+
+    #[test]
+    fn generic_rental_routing_preserves_non_copy_records_and_borrows_when_requested() {
+        #[derive(Debug, Clone, PartialEq, Eq)]
+        struct SourceRecord {
+            name: String,
+            optional_values: Option<Vec<u32>>,
+        }
+
+        let records = std::array::from_fn(|slot| SourceRecord {
+            name: format!("source-{slot}"),
+            optional_values: (slot == 4).then(|| vec![0, u32::MAX]),
+        });
+        let before = records.clone();
+        let selected = selected_rental_party(&[3, 0, 1, 0, 2, 0], &records).unwrap();
+        assert_eq!(
+            selected,
+            [records[2].clone(), records[4].clone(), records[0].clone()]
+        );
+        assert_eq!(records, before);
+
+        let borrowed = std::array::from_fn(|slot| &records[slot]);
+        let borrowed_party = selected_rental_party(&[3, 0, 1, 0, 2, 0], &borrowed).unwrap();
+        assert!(std::ptr::eq(borrowed_party[0], &records[2]));
+        assert!(std::ptr::eq(borrowed_party[1], &records[4]));
+        assert!(std::ptr::eq(borrowed_party[2], &records[0]));
+
+        let species = ["S0", "S1", "S2", "S3", "S4", "S5"];
+        let chosen = chosen_mon_species(&[3, 0, 1, 0, 2, 0], &species);
+        assert_eq!(chosen, ["S2", "S4", "S0"]);
     }
 }
