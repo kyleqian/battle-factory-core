@@ -5,9 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 history end-to-end**
+## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
-- **State:** rust-main = master `75bb11c1` + verified M8b fold `2cdca907`.
+- **State:** rust-main = master `ebd00cda`, which contains the verified M8a–M8c
+  folds. Battle history is native and WASM differential-green end-to-end;
+  live-view weather and stat-stage projections are native.
   Factory trainer selection and the seven-trainer schedule are now
   native and WASM differential-green end-to-end.
   The complete Factory AI mask 0/1/7 decision family and the singles switch-in
@@ -101,11 +103,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   modules**, vanilla soak **20/20**, and full soak **60/60**. Artifact: 395,869
   bytes, sha256
   `1d566618694f3ced4718c39a0a4170927fa73d43d63c1963e44e465c2f59782f`.
-- **Next:** M8c — port the independent weather/stat-stage projection leaves
-  that feed live-view construction, with TS-executed vectors; keep the full
-  view constructor and its boundary separate. M7c still waits on #55.
+- **M8c DONE:** ported only `currentWeather` and `statStages` from the live
+  view constructor. Weather preserves Sun→Rain→Sandstorm→Hail precedence and
+  ECMAScript `ToInt32` for arbitrary Number inputs; stages project slots 1..7
+  in canonical order with unvalidated numeric cells intact. The twice-byte-
+  identical TS-executed corpus has **25 cases** (10 raw weather, 2 precedence,
+  10 coercion, 3 stage); sha256
+  `1a3fce2c30b3a17c16d086b85803a5da948bf46c40efea7f9e543cea357be77c`.
+  Supervisor audited the helpers/generator and reran cargo **712 harness
+  cases**, fmt, clippy, WASM, full npm **1,018 files / 9,714 passed / 1 skip**,
+  build **659 modules**, vanilla soak **20/20**, and full soak **60/60** on the
+  final master-v28 union. Artifact remains 395,869 bytes, sha256
+  `1d566618694f3ced4718c39a0a4170927fa73d43d63c1963e44e465c2f59782f`.
+- **Next:** M8d — port `createFactoryAiViewFromLiveRules` natively with
+  TS-executed vectors, reusing M8a/M8c; keep its WASM boundary separate. M7c
+  opponent generation still waits on #55.
 - **Notes:** M6b used Sol/high plus one narrow Terra/max correction; M6c used
-  Sol/high; M7a and M8a used Terra/max, and M7b used Sol/high. Scope stayed within
+  Sol/high; M7a, M8a, and M8c used Terra/max, and M7b/M8b used Sol/high. Scope stayed within
   `core-rs/**` plus authorized new parity tests; no canonical TS engine or
   main-lane ledger file changed. M7c opponent generation is intentionally
   waiting: its personality construction cursors are fed by unresolved #55,
