@@ -467,6 +467,49 @@ deep-compares complete views, error ordering, numeric edge cases, arbitrary
 UTF-8 history, optional-property presence, and malformed boundary packets in
 both modes.
 
+## Factory AI live-driver RNG replay (M8f)
+
+`crates/factory-core/src/factory_ai_live_replay.rs` is the isolated pure
+observable semantics of private `replayAiDraws` in
+`src/engine/factoryAiLiveDriver.ts`. It takes an initial
+`FactoryAiLiveReplayBattleRngState` plus ordered
+`FactoryAiLiveReplayDraw` receipts (`ordinal`, `reason`, `before`, `after`,
+`random_value`) and returns only the final RNG checkpoint or an exact source
+error. It does not construct `BattleState`, run a reducer, submit a decision,
+choose a switch/move, parse/serialize an input, or cross a WASM boundary.
+
+The raw `value` remains a u32, as validated by the canonical battle boundary.
+`calls` is a u64 so every source-reachable JavaScript safe integer survives
+without truncation; the older policy-only `BattleRngState` is still accepted
+losslessly through `From`. An LCG replay compares each recorded `before`,
+advances through `advance_rng_value`, derives Random()'s upper-u16 output,
+then compares `random_value` and `after`. Receipt array order is authoritative:
+the ordinal is diagnostic-only, including duplicate/non-monotonic ordinals.
+The two helper messages are preserved exactly:
+`Factory AI RNG diverged before live draw {index}/{ordinal}` and
+`Factory AI RNG diverged after live draw {index}/{ordinal}`. The standalone
+leaf also preserves the live boundary's exact
+`Battle RNG call counter overflow` before an impossible safe-integer draw.
+
+The deterministic checked-in TypeScript-executed corpus has **17 cases**:
+empty=1, single-draw=1, mixed-reasons=1, multi-draw-chain=1,
+nonzero-calls=2 (including a call counter past u32), u32-wrap=1,
+before-checkpoint=4, random-value=1, after-checkpoint=2,
+ordering-ordinal=2, and call-counter-overflow=1. The generator makes a
+fresh `mktemp -d` scratch copy of the canonical driver, exposes only the
+private declaration in that copy, and invokes the original helper; it never
+edits `src/`. Its generated Rust digest is
+`e8e8e9778e82e252f80a454207b1f8f75728fba535655898d1514e53fa7d7c7b`.
+
+Regenerate twice for byte identity:
+
+```sh
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-replay-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_replay_vectors_gen.rs
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-replay-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_replay_vectors_gen.rs
+```
+
 ## Ground rules
 
 - **The vitest suite is the spec gate.** A module counts as ported when
