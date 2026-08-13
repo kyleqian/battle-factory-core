@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Full-result differential corpus for the native-only Factory-swap mutation
-// leaf. Expected outcomes come exclusively from executing the canonical
+// Full-result differential corpus for the native-only Factory-swap state and
+// mutation leaf. Expected outcomes come exclusively from executing the canonical
 // src/engine/factorySwap.ts exports; this file owns only deterministic staged
 // inputs and Rust literal emission.
 //
@@ -44,10 +44,16 @@ const VALID_STATUSES = new Set([
 const VALID_RESULTS = new Set(["accepted", "keptParty"]);
 const VALID_QUIT_RETURN_PHASES = new Set(["playerPicker", "enemyPicker"]);
 const OP_ALREADY_HAS_SPECIES = "already-has-species";
+const OP_CREATE = "create";
+const OP_ACKNOWLEDGE = "acknowledge";
+const OP_COPY_CURSOR = "copy-cursor";
 const OP_APPLY_MUTATION = "apply-mutation";
 const OP_COMMIT_MUTATION = "commit-mutation";
 const OP_ROUND_DECISION = "round-decision";
 const VALID_OPERATIONS = new Set([
+  OP_CREATE,
+  OP_ACKNOWLEDGE,
+  OP_COPY_CURSOR,
   OP_ALREADY_HAS_SPECIES,
   OP_APPLY_MUTATION,
   OP_COMMIT_MUTATION,
@@ -216,7 +222,17 @@ const labels = new Set();
 function canonicalOutcome(operation, input, enemyMonId) {
   try {
     let result;
-    if (operation === OP_ALREADY_HAS_SPECIES) {
+    if (operation === OP_CREATE) {
+      result = canonicalSwap.createFactorySwapState(
+        input.playerParty,
+        input.enemyParty,
+        input.rentalMons,
+      );
+    } else if (operation === OP_ACKNOWLEDGE) {
+      result = canonicalSwap.acknowledgeFactorySwapPresentation(input);
+    } else if (operation === OP_COPY_CURSOR) {
+      result = canonicalSwap.copyFactorySwapCursor(input);
+    } else if (operation === OP_ALREADY_HAS_SPECIES) {
       result = enemyMonId === null
         ? canonicalSwap.factorySwapAlreadyHasSpecies(input)
         : canonicalSwap.factorySwapAlreadyHasSpecies(input, enemyMonId);
@@ -264,6 +280,107 @@ function addCase({ label, category, operation, state: input, enemyMonId = null }
     expected,
   }));
 }
+
+// Initialization is executed canonically and separately proves the source's
+// observable deep-clone contract before Rust literals erase object identity.
+{
+  const input = state();
+  const output = canonicalSwap.createFactorySwapState(
+    input.playerParty,
+    input.enemyParty,
+    input.rentalMons,
+  );
+  for (const field of ["playerParty", "enemyParty", "rentalMons"]) {
+    assert(output[field] !== input[field], `create must clone ${field}`);
+    output[field].forEach((entry, index) => {
+      assert(entry !== input[field][index], `create must clone ${field}[${index}]`);
+    });
+  }
+  addCase({
+    label: "create_deep_clones_values_and_uses_defaults",
+    category: "initialization",
+    operation: OP_CREATE,
+    state: input,
+  });
+}
+
+addCase({
+  label: "acknowledge_sets_input_ready_and_preserves_state",
+  category: "acknowledgement",
+  operation: OP_ACKNOWLEDGE,
+  state: state({ phase: "enemyPicker", inputReady: false, cursor: 4, yesNoCursor: 1 }),
+});
+addCase({
+  label: "acknowledge_complete_is_value_equal",
+  category: "acknowledgement",
+  operation: OP_ACKNOWLEDGE,
+  state: state({ phase: "complete", inputReady: false }),
+});
+addCase({
+  label: "acknowledge_ready_is_value_equal",
+  category: "acknowledgement",
+  operation: OP_ACKNOWLEDGE,
+  state: state({ phase: "acceptPrompt", inputReady: true }),
+});
+
+addCase({
+  label: "copy_cursor_vblank_one_info_only",
+  category: "cursor-lag",
+  operation: OP_COPY_CURSOR,
+  state: state({ cursor: 2, infoCursor: 0, displayCursor: 0, arrowCursor: 0,
+    cursorCopyPending: true, playerOptionCursor: 1, playerOptionDisplayCursor: 1,
+    playerOptionCursorCopyPending: false }),
+});
+addCase({
+  label: "copy_cursor_vblank_two_display_follows",
+  category: "cursor-lag",
+  operation: OP_COPY_CURSOR,
+  state: state({ cursor: 2, infoCursor: 2, displayCursor: 0, arrowCursor: 0,
+    cursorCopyPending: false, playerOptionCursor: 1, playerOptionDisplayCursor: 1,
+    playerOptionCursorCopyPending: false }),
+});
+addCase({
+  label: "copy_cursor_vblank_three_arrow_follows",
+  category: "cursor-lag",
+  operation: OP_COPY_CURSOR,
+  state: state({ cursor: 2, infoCursor: 2, displayCursor: 2, arrowCursor: 0,
+    cursorCopyPending: false, playerOptionCursor: 1, playerOptionDisplayCursor: 1,
+    playerOptionCursorCopyPending: false }),
+});
+addCase({
+  label: "copy_option_pending_suppresses_once_and_clears",
+  category: "pending-flags",
+  operation: OP_COPY_CURSOR,
+  state: state({ cursor: 1, infoCursor: 1, displayCursor: 1, arrowCursor: 1,
+    cursorCopyPending: false, playerOptionCursor: 2, playerOptionDisplayCursor: 0,
+    playerOptionCursorCopyPending: true }),
+});
+addCase({
+  label: "copy_option_follows_after_pending_cleared",
+  category: "pending-flags",
+  operation: OP_COPY_CURSOR,
+  state: state({ cursor: 1, infoCursor: 1, displayCursor: 1, arrowCursor: 1,
+    cursorCopyPending: false, playerOptionCursor: 2, playerOptionDisplayCursor: 0,
+    playerOptionCursorCopyPending: false }),
+});
+addCase({
+  label: "copy_cursor_and_option_simultaneously_preserves_unrelated_state",
+  category: "simultaneous-copy",
+  operation: OP_COPY_CURSOR,
+  state: state({ phase: "duplicateReturn", cursor: 4, infoCursor: 0,
+    displayCursor: 1, arrowCursor: 3, cursorCopyPending: false,
+    playerOptionCursor: 2, playerOptionDisplayCursor: 0,
+    playerOptionCursorCopyPending: false, playerMonId: 2, enemyMonId: 1,
+    quitReturnPhase: "enemyPicker", scriptResult: true, result: "keptParty" }),
+});
+addCase({
+  label: "copy_cursor_aligned_is_value_equal_noop",
+  category: "cursor-noop",
+  operation: OP_COPY_CURSOR,
+  state: state({ cursor: 3, infoCursor: 3, displayCursor: 3, arrowCursor: 3,
+    cursorCopyPending: false, playerOptionCursor: 2, playerOptionDisplayCursor: 2,
+    playerOptionCursorCopyPending: false }),
+});
 
 // Source default/null selection behavior and the selected-player exclusion.
 addCase({
@@ -461,11 +578,12 @@ addCase({
   }),
 });
 
-assert(cases.length === 17, `expected 17 cases, got ${cases.length}`);
+assert(cases.length === 28, `expected 28 cases, got ${cases.length}`);
 const categoryCounts = new Map();
 for (const vector of cases) {
   categoryCounts.set(vector.category, (categoryCounts.get(vector.category) ?? 0) + 1);
 }
+assert(categoryCounts.size === 12, `expected 12 categories, got ${categoryCounts.size}`);
 
 function rustString(value) {
   assert(typeof value === "string" && /^[\x20-\x7e]*$/.test(value),
@@ -570,6 +688,9 @@ ${value.rentalMons.map((entry) => `            ${rustRental(entry)},`).join("\n"
 
 function rustOperation(value) {
   return new Map([
+    [OP_CREATE, "Create"],
+    [OP_ACKNOWLEDGE, "Acknowledge"],
+    [OP_COPY_CURSOR, "CopyCursor"],
     [OP_ALREADY_HAS_SPECIES, "AlreadyHasSpecies"],
     [OP_APPLY_MUTATION, "ApplyMutation"],
     [OP_COMMIT_MUTATION, "CommitMutation"],
@@ -615,8 +736,8 @@ const caseLines = cases.map((vector) => `    FactorySwapVectorCase {
     },`).join("\n");
 
 const rust = `// GENERATED by core-rs/tools/gen-factory-swap-vectors.mjs.
-// Expected values/errors come only from executing the four canonical
-// src/engine/factorySwap.ts mutation boundaries.
+// Expected values/errors come only from executing the seven canonical
+// src/engine/factorySwap.ts state/mutation boundaries.
 // Regenerate: node --experimental-strip-types core-rs/tools/gen-factory-swap-vectors.mjs
 // Deterministic fixed corpus; do not hand-edit.
 
@@ -673,6 +794,9 @@ pub struct FactorySwapVectorState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FactorySwapVectorOperation {
+    Create,
+    Acknowledge,
+    CopyCursor,
     AlreadyHasSpecies,
     ApplyMutation,
     CommitMutation,
