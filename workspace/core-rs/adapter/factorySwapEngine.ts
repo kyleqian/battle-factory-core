@@ -266,12 +266,6 @@ function status(value: number): FactorySwapMon["status"] {
   return result;
 }
 
-function input(value: number): FactorySwapInput {
-  const result = INPUTS[value];
-  if (result === undefined) throw new Error("factory-wasm factorySwapEngine: malformed result input");
-  return result;
-}
-
 function readBool(reader: Reader): boolean {
   const value = reader.u8();
   if (value > 1) throw new Error("factory-wasm factorySwapEngine: malformed result boolean");
