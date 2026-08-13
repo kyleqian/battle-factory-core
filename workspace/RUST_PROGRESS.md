@@ -5,6 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R9 — [supervised session, 2026-08-13] **M10a draft-selection helper leaf**
+
+- **State:** `rust-main` = current master `af0688fb` plus verified M9 and
+  native-only M10a through `308a87c7`. Ten presentation-free draft-selection
+  helpers are native; no ABI or adapter surface was widened.
+- **Did:** ported select/deselect numbering and immutable-copy behavior,
+  first-pick renumbering (including `findIndex === -1`), selection messages,
+  confirmation, exact species stall exceptions, both cursor wraps, and all
+  three redraw settle schedulers. The canonically executed TypeScript corpus
+  has **102 cases / 12 categories** and regenerates byte-identically at sha256
+  `e78b50ca6b407637cafbdb1d71f98eadcb80e93203ea7384735a6848c67af5fb`.
+- **Next:** M10b — port the two remaining presentation-free draft selection
+  projections (`chosenMonSpecies` and `selectedRentalParty`) as a native-only
+  bounded step. Keep draft state construction, presentation expansion,
+  rendering, animation, reveal, and controller logic out of scope. M7c still
+  waits on #55.
+- **Notes:** Terra/max worker, one commit. Supervisor audited all ten source
+  branches, regenerated twice, and reran cargo **747/747**, focused vectors
+  **4/4**, fmt, strict clippy, release WASM, and post-fold smoke **375/375**.
+  Worker same-commit full npm and build passed. Artifact is **491,775 bytes**,
+  sha256 `4b5e14d2f789464abf1e60f7c746062abb0c4115238de0666db4d1dc690ff344`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+
 ## R8 — [supervised session, 2026-08-13] **M9d Factory swap WASM boundary**
 
 - **State:** `rust-main` = current master `af0688fb` plus verified M9c–M9d
