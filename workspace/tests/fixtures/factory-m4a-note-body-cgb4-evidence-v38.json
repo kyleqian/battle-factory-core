@@ -1,0 +1,204 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v38",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1368-1370, 1443-1444",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "musicPlayerTrack": {
+        "volumePitchMask": {
+          "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+          "lines": "265-270",
+          "volumeChange": {
+            "name": "MPT_FLG_VOLCHG",
+            "value": "0x03"
+          },
+          "pitchChange": {
+            "name": "MPT_FLG_PITCHG",
+            "value": "0x0c"
+          },
+          "orMask": "0x0f",
+          "runtimeValue": null,
+          "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+        }
+      }
+    },
+    "elf": {
+      "containingEntry": "0x082dfc00",
+      "instructionStart": "0x082dfc08",
+      "endExclusive": "0x082dfc0e",
+      "takenSuccessor": "0x082dfc9a",
+      "selectedSuccessorFirstInstruction": "_081DDA62: subs r2, 0x1",
+      "alternateNonselectedFirstInstruction": "mov r9, r2",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "movs r1, MPT_FLG_VOLCHG | MPT_FLG_PITCHG; tst r1, r0; beq _081DDA62",
+        "start": "0x082dfc08",
+        "endExclusive": "0x082dfc0e",
+        "bytes": 6,
+        "bytesHex": "0f 21 01 42 45 d0",
+        "sha256": "8f6cc54a0a1866eaa559291e5fcc4103996f67168b30353a0eb15f44ed9c3fd4",
+        "decodedBeq": {
+          "condition": "EQ",
+          "target": "_081DDA62",
+          "targetAddress": "0x082dfc9a"
+        }
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "memoryAccesses": 0,
+      "dataAccessPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "volPitchMaskClearModel": "movs; tst; taken beq = 3 halfwords * 2 + one 6-cycle refill = 12",
+      "volPitchMaskNonzeroModel": "movs; tst; non-taken beq = 3 halfwords * 2 + zero refill = 6"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV37EvidenceSha256": "59c5f83c2e70f21cb96076fd04e0b3d4829c8d50e3f2988e437063eabc36861c",
+    "acceptedV37DocSha256": "5cf3314ae5beb43203e81e59970235141862dda3fff4d314d01f9e6ca5aec601",
+    "acceptedV37PacketSha256": {
+      "anchor": "4dad511aee6b508723c2ddd5ca283756ca17435c23388ecf374273bbcf86a8c4",
+      "liliana": "8afcc0bad8bd77c9ae28d442a9a496101af1321c4b71e54b5bb49160197d7a9d",
+      "factory-varied": "6f202501970fd31eddb94f489d2e3360fde3ec78d90df6ab4cbdba64f5d81e67"
+    },
+    "v37EvidenceAndReportRegenerateByteForByte": true,
+    "v37EvidenceReportAndPacketsRetainedByteForByte": true,
+    "v37FreshSerialRunsPerCase": 2,
+    "v38RuntimeCaptureCount": 0
+  },
+  "capture": {
+    "boundary": "source-only fourth-track _081DD9D0 volume/pitch-mask decision through beq; no new runtime capture",
+    "scalars": [],
+    "excluded": [
+      "new runtime or oracle fields",
+      "track pointer",
+      "runtime address",
+      "track count",
+      "track index",
+      "track identity",
+      "trainer",
+      "battle index",
+      "canonical tick",
+      "receipt schedule",
+      "unrelated future state",
+      "channel",
+      "frame",
+      "duration",
+      "condition flags",
+      "wider state",
+      "fourthTrackFlags serialization",
+      "selected _081DDA62 decrement/exit body",
+      "alternate nonselected mov r9, r2 body",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV37SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "sourceOnly": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v37-selected-row",
+      "unsupported-runtime-field",
+      "unexpected-frozen-v37-flags",
+      "unexpected-observed-route"
+    ]
+  },
+  "coverage": {
+    "frozenV37SelectedRows": 3,
+    "sourceOnlyVolPitchDecisionRows": 3,
+    "frozenFourthTrackFlagsValues": [
+      128
+    ],
+    "volPitchMask": "0x0f",
+    "volPitchMaskClearRows": 3,
+    "volPitchMaskNonzeroRows": 0,
+    "postV37FourthTrackVolPitchDecisionSourceCycles": 36,
+    "acceptedContiguousPrefixThroughFourthTrackExistDecisionSourceCycles": 6088,
+    "contiguousPrefixThroughFourthTrackVolPitchDecisionSourceCycles": 6124,
+    "sequentialThumbHalfwords": 9,
+    "memoryAccesses": 0,
+    "dataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 3,
+    "failClosedUnobservedVolPitchMaskNonzeroSourceCycles": 6,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "fourthTrackVolPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV37FourthTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughFourthTrackVolPitchDecisionSourceCycles": 936,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV38Instruction": "_081DDA62: subs r2, 0x1"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "fourthTrackVolPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV37FourthTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughFourthTrackVolPitchDecisionSourceCycles": 936,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV38Instruction": "_081DDA62: subs r2, 0x1"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "fourthTrackVolPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV37FourthTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughFourthTrackVolPitchDecisionSourceCycles": 936,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV38Instruction": "_081DDA62: subs r2, 0x1"
+    }
+  ],
+  "containment": {
+    "frozenV37ArtifactsReadOnly": true,
+    "v37PacketsRetainedReadOnly": true,
+    "frozenV37ArtifactsAreNotProductionImports": true,
+    "v38RuntimeCaptureCount": 0,
+    "trainer": null,
+    "battleIndex": null,
+    "canonicalTick": null,
+    "receiptSchedule": null,
+    "unrelatedFutureState": null,
+    "trackPointer": null,
+    "runtimeAddress": null,
+    "trackCount": null,
+    "trackIndex": null,
+    "trackIdentity": null,
+    "channel": null,
+    "frame": null,
+    "duration": null,
+    "conditionFlags": null,
+    "widerState": null,
+    "fourthTrackFlags": null,
+    "decrementExitBody": null,
+    "alternateNonselectedBody": null,
+    "otherPostSelectionCallbacks": null,
+    "completeMPlay": null,
+    "serviceCost": null,
+    "arbitration": null,
+    "constructionClock": null,
+    "controller": null,
+    "presentation": null,
+    "animation": null,
+    "rust": null,
+    "canonicalBattle2": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Source-only v38 freezes v37 evidence, report, and all three fresh Battle Scene OFF packets byte-for-byte, then derives each decision only from its frozen fourthTrackFlags value. Every frozen value is 0x80; source-defined MPT_FLG_VOLCHG|MPT_FLG_PITCHG is 0x0f, so each mask test is clear and takes beq _081DDA62. Source/ELF/exact-ROM price movs; tst; taken beq at twelve cycles per row, advancing the aggregate prefix from 6088 to 6124 and stopping before _081DDA62: subs r2, 0x1. The mask-nonzero route is source-priced at six cycles but is fail-closed and not claimed observed. No live construction-clock wiring or fitted residual is claimed."
+}

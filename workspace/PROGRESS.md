@@ -5,6 +5,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1239 — [MAIN worker, 2026-08-13] **CGB4 v38 fourth-track volume/pitch decision green**
+
+- **State:** #55 is source-exact through the selected-row **6,124-cycle** CGB4 prefix, stopping before `_081DDA62`'s fourth-track decrement/exit body.
+- **Did:** v38 freezes v37 evidence/report/three fresh OFF packets byte-for-byte and joins only `sourceStateDigest`. Frozen `fourthTrackFlags=0x80` plus source `MPT_FLG_VOLCHG|MPT_FLG_PITCHG=0x0f` takes `beq`; source/ELF/ROM bytes `0f 21 01 42 45 d0` price **12×3 = 36** cycles (**6,088 → 6,124**). Focused v37/v38 **10/10**; both v38 regenerations match.
+- **Next:** no follow-on began. A separate bounded step may scope only the fourth-track decrement/exit decision; keep later loop, broader MPlay/service/arbitration, live construction-clock wiring, presentation, animation, Rust, and retired canonical Battle-2 work null.
+- **Notes:** v38 evidence/doc `374076df…` / `420b7b30…`; focused **10/10**, smoke **375/375**, full npm **1,036 files / 9,809 passed / 1 skipped**, build **661 modules**. Exact-key schemas reject pointer/address/count/index/identity, trainer, battle index, canonical tick, receipt schedules, and unrelated future state. No `src/**`, ratchet, barrier, ROADMAP/DEFERRED, ISSUES, or oracle-pixel change.
+
 ## 1238 — [supervisor, 2026-08-13] **CGB4 v37 plus late lane folds verified**
 
 - **State:** #55 is source-exact through the selected-row **6,088-cycle**
@@ -48,23 +55,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `8afcc0ba…`, legal-varied `6f202501…` (repeat identical). No `src/**`,
   shared interfaces, ROADMAP/ISSUES/DEFERRED, ratchet, barrier, or canonical
   Battle-2 change.
-
-## 1236 — [MAIN worker, 2026-08-13] **CGB4 v36 third-track non-exit continuation green**
-
-- **State:** #55 is source-exact through the same three selected-row **6,064-cycle**
-  CGB4 prefix, stopping before `_081DD9C8`'s fourth-track flags load.
-- **Did:** source-only v36 freezes v35 evidence/report/packets byte-for-byte,
-  strips its `r2` scalar to digest-only joins, and independently pins `50 20 2d
-  18 ad dc`, IWRAM signed-positive 80-byte stride proof, taken-`bgt` refill,
-  and **12×3 = 36** cycles (**6,028 → 6,064**). Red-first exact-key pins
-  reject predecessor scalar, pointer/address/count/index/identity/channel/frame/
-  duration/condition, next flags, and body; v36 regenerates twice byte-stably.
-- **Next:** separately scope only the fourth-track flags load/decision if needed;
-  keep its body, exit successor, broader MPlay/service/arbitration,
-  construction-clock wiring, presentation, animation, Rust, and retired
-  canonical Battle-2 work null.
-- **Notes:** v36 evidence/doc `58dc2bc3…` / `847569d4…`; frozen v35 hashes
-  `f2072d5c…` / `2fb614a5…` plus packets `e3b48fc0…` / `47366316…` /
-  `69ceae98…`. Focused v36/v35 **14/14**, smoke **375/375**, full npm
-  **1,030 files / 9,780 passed / 1 skipped**, build **660 modules**. No fresh
-  oracle capture, `src/**`, ratchet, unsupported-barrier, or canonical Battle-2 change.
