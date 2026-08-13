@@ -2,23 +2,87 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import receipt from "../../tools/compare/fixtures/ancient-power-dense-evidence.json" with { type: "json" };
 
 const sha256 = (bytes: Buffer): string => createHash("sha256").update(bytes).digest("hex");
+const read = (path: string): string => readFileSync(path, "utf8");
+const species = read("reference/pokeemerald/include/constants/species.h");
+const frontierIds = read("reference/pokeemerald/include/constants/battle_frontier_mons.h");
+const frontierMons = read("reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h");
+const baltoyStart = frontierMons.indexOf("[FRONTIER_MON_BALTOY] = {");
+const baltoyEnd = frontierMons.indexOf("[FRONTIER_MON_SNORUNT] = {", baltoyStart);
+const baltoySourceBlock = frontierMons.slice(baltoyStart, baltoyEnd);
+
+const completeRecordKeys = [
+  "abilitySlot", "evs", "friendship", "gender", "item", "ivs", "level",
+  "moves", "nature", "ppUps", "shiny", "species",
+];
+const statKeys = ["attack", "defense", "hp", "spAttack", "spDefense", "speed"];
+const expectedCarrier = {
+  species: 318,
+  level: 50,
+  nature: 4,
+  ivs: { hp: 31, attack: 31, defense: 31, speed: 0, spAttack: 31, spDefense: 31 },
+  evs: { hp: 4, attack: 252, defense: 0, speed: 0, spAttack: 252, spDefense: 0 },
+  moves: [246, 246, 246, 246],
+  ppUps: [0, 0, 0, 0],
+  item: 140,
+  abilitySlot: 0,
+  friendship: 70,
+  gender: "genderless",
+  shiny: false,
+};
+
+function expectCompleteRecord(mon: Record<string, unknown>): void {
+  expect(Object.keys(mon).sort()).toEqual([...completeRecordKeys].sort());
+  expect(Object.keys(mon.ivs as Record<string, unknown>).sort()).toEqual(statKeys);
+  expect(Object.keys(mon.evs as Record<string, unknown>).sort()).toEqual(statKeys);
+  expect(mon.moves).toHaveLength(4);
+  expect(mon.ppUps).toHaveLength(4);
+}
 
 describe("MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint", () => {
-  it("pins the numeric carrier and source record independently of fixture labels", () => {
+  it("reads the authoritative Baltoy identity directly from Emerald source", () => {
     expect(receipt.status).toBe("unsupported-staged");
     expect(receipt.source).toMatchObject({ moveId: 246, carrierSetId: 75, carrierSpeciesId: 318, carrierLabel: "FRONTIER_MON_BALTOY", completePartyRecords: true });
-    expect(frontierMons.entries.find(({ index }) => index === 75)).toMatchObject({
-      index: 75,
-      label: "FRONTIER_MON_BALTOY",
-      species: "SPECIES_BALTOY",
-      moves: ["MOVE_PSYBEAM", "MOVE_ANCIENT_POWER", "MOVE_LIGHT_SCREEN", "MOVE_MUD_SLAP"],
-      itemTableId: 7,
-      nature: "NATURE_NAUGHTY",
+    expect(species).toContain("#define SPECIES_BALTOY 318");
+    expect(frontierIds).toMatch(/#define FRONTIER_MON_BALTOY\s+75(?:\s|$)/);
+    expect(baltoyStart).toBeGreaterThanOrEqual(0);
+    expect(baltoyEnd).toBeGreaterThan(baltoyStart);
+    expect(baltoySourceBlock).toContain(".species = SPECIES_BALTOY");
+    expect(baltoySourceBlock).toContain(".moves = {MOVE_PSYBEAM, MOVE_ANCIENT_POWER, MOVE_LIGHT_SCREEN, MOVE_MUD_SLAP}");
+    expect(baltoySourceBlock).toContain(".itemTableId = BATTLE_FRONTIER_ITEM_PERSIM_BERRY");
+    expect(baltoySourceBlock).toContain(".evSpread = F_EV_SPREAD_SP_ATTACK | F_EV_SPREAD_ATTACK");
+    expect(baltoySourceBlock).toContain(".nature = NATURE_NAUGHTY");
+  });
+
+  it.each(["player-back", "opponent-front"] as const)("pins the committed complete six-Pokemon scenario for %s", (orientation) => {
+    const row = receipt.orientations[orientation];
+    const bytes = readFileSync(row.scenario);
+    expect(sha256(bytes)).toBe(row.scenarioSha256);
+    const scenario = JSON.parse(bytes.toString("utf8"));
+    expect(scenario).toMatchObject({
+      schemaVersion: 1,
+      mode: "mechanicLab",
+      profile: "battle-scene-on",
+      level: 50,
+      trace: {
+        segments: [
+          { frames: 2, buttons: ["A"] },
+          { frames: 30, buttons: [] },
+          { frames: 2, buttons: ["A"] },
+          { frames: 1500, buttons: [] },
+        ],
+      },
     });
+    const parties = scenario.overrides.parties as Record<string, Record<string, unknown>[]>;
+    expect(parties.player).toHaveLength(3);
+    expect(parties.opponent).toHaveLength(3);
+    const records = [...parties.player, ...parties.opponent];
+    expect(records).toHaveLength(6);
+    records.forEach(expectCompleteRecord);
+    const carrier = orientation === "player-back" ? parties.player[0] : parties.opponent[0];
+    expect(carrier).toEqual(expectedCarrier);
   });
 
   it.each(["player-back", "opponent-front"] as const)("retains the full 128-row state receipt for %s", (orientation) => {

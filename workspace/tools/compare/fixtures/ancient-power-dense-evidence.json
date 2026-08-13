@@ -13,6 +13,8 @@
   },
   "orientations": {
     "player-back": {
+      "scenario": "tools/battle-lab/mechanic-ancient-power-player-baltoy-opponent-onix.json",
+      "scenarioSha256": "986feb13a9a034b6510ca5d875868da283602bcd455dadb484243d1ccd6f9532",
       "stateGzip": "tools/compare/evidence/ancient-power-player-dense-state.json.gz",
       "stateGzipSha256": "462dfc1b8923a4afa09551610197d7c4012451ac282bcfc100aea5f9b57fbe54",
       "rawRgbArchive": "tools/compare/evidence/ancient-power-player-raw-rgb.tar.gz",
@@ -21,6 +23,8 @@
       "freshRawRgbSha256": "bd59ebbf7ef9918fc6c4a478f00d809b83f088948503de338f0162f1c241b3e4"
     },
     "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-ancient-power-opponent-baltoy-player-onix.json",
+      "scenarioSha256": "7817c6de4990aa871d3481a9dabe3a84cc94b7357437945d936d3cda3884c40f",
       "stateGzip": "tools/compare/evidence/ancient-power-opponent-dense-state.json.gz",
       "stateGzipSha256": "a271c846aafab5753c62160ae48588c16ff4843621d29a07bf6069aaaf3de35e",
       "rawRgbArchive": "tools/compare/evidence/ancient-power-opponent-raw-rgb.tar.gz",

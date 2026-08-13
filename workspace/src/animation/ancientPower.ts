@@ -146,16 +146,16 @@ export const ANCIENT_POWER_SLIDE_TO_ORIGINAL_AGE = 89;
 
 /** Components claimed by this reducer; shared components remain independent acceptance units. */
 export const ANCIENT_POWER_COMPONENTS = Object.freeze([
-  "asset:ANIM_TAG_ROCKS",
   "asset:ANIM_TAG_IMPACT",
+  "asset:ANIM_TAG_ROCKS",
   "sprite:gAncientPowerRockSpriteTemplate",
   "sprite:gSlideMonToOffsetSpriteTemplate",
   "sprite:gSlideMonToOriginalPosSpriteTemplate",
   "task:AnimTask_ShakeMon2",
   "visualCommand:blendoff",
-  "clearmonbg",
-  "create_basic_hitsplat_sprite",
-  "monbg",
-  "setalpha",
-  "shake_mon_or_platform",
+  "visualCommand:clearmonbg",
+  "visualCommand:create_basic_hitsplat_sprite",
+  "visualCommand:monbg",
+  "visualCommand:setalpha",
+  "visualCommand:shake_mon_or_platform",
 ] as const);

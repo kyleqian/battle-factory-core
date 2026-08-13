@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import animationComponents from "../../src/data/gen/battle-animation-components.json" with { type: "json" };
 import {
   ANCIENT_POWER_ATTACKER_SHAKE,
   ANCIENT_POWER_COMPONENTS,
@@ -49,9 +50,27 @@ describe("MOVE_ANCIENT_POWER source body", () => {
     expect(ANCIENT_POWER_SLIDE_TO_ORIGINAL_AGE).toBe(89);
   });
 
-  it("enumerates exactly the assigned non-exclusive component track", () => {
-    expect(ANCIENT_POWER_COMPONENTS).toHaveLength(12);
-    expect(ANCIENT_POWER_COMPONENTS).toContain("sprite:gAncientPowerRockSpriteTemplate");
-    expect(ANCIENT_POWER_COMPONENTS).toContain("task:AnimTask_ShakeMon2");
+  it("equals the complete generated Ancient Power component graph in source order", () => {
+    const expected = [
+      "asset:ANIM_TAG_IMPACT",
+      "asset:ANIM_TAG_ROCKS",
+      "sprite:gAncientPowerRockSpriteTemplate",
+      "sprite:gSlideMonToOffsetSpriteTemplate",
+      "sprite:gSlideMonToOriginalPosSpriteTemplate",
+      "task:AnimTask_ShakeMon2",
+      "visualCommand:blendoff",
+      "visualCommand:clearmonbg",
+      "visualCommand:create_basic_hitsplat_sprite",
+      "visualCommand:monbg",
+      "visualCommand:setalpha",
+      "visualCommand:shake_mon_or_platform",
+    ];
+    const generated = animationComponents.moves.find((move) =>
+      move.move === "MOVE_ANCIENT_POWER",
+    );
+    expect(generated).toBeDefined();
+    expect(generated?.componentIds).toEqual(expected);
+    expect(ANCIENT_POWER_COMPONENTS).toEqual(expected);
+    expect(ANCIENT_POWER_COMPONENTS).toEqual(generated?.componentIds);
   });
 });
