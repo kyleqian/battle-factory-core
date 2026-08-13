@@ -13,6 +13,6 @@
   "rawRgbTarSha256": "c5eab06271d1fc3d4b5af6a96d2eb47fa379c162a92f435d636a228a921793ab",
   "rawRgbConcatSha256": "2d4f60675e0d343256694dea526929071e7f31742360ef8bf5f02ab136949aed",
   "changeMap": "tools/compare/evidence/cosmic-power-changemap-opponent.txt",
-  "changeMapSha256": "ee190a63e72887d6286a592d8239b758627a3a7a30a3fa1349deb70b79bef625",
-  "acceptance": {"status": "checkpoint", "componentFrames": 241, "framebufferFrames": "unmeasured"}
+  "changeMapSha256": "f86487c263d462587f4de1b29fb308ffba2349c05d8fd88b5c7660bc95583b6b",
+  "acceptance": {"status": "exact", "reducerRows": 241, "seamRows": 241, "componentFrames": 241, "latchRows": 240, "framebufferFrames": 241, "freshRuns": 2}
 }

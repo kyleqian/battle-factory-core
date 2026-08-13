@@ -35,6 +35,8 @@ describe("Move_COSMIC_POWER source reducer", () => {
     expect(cosmicPowerAtAge(41, "player", center).bg3vofs).toBe(1);
     expect(cosmicPowerAtAge(220, "player", center).bg3vofs).toBe(91);
     expect(cosmicPowerAtAge(221, "player", center).bg3vofs).toBe(0);
+    expect(cosmicPowerAtAge(220, "player", center).background).toBe("cosmic");
+    expect(cosmicPowerAtAge(221, "player", center).background).toBe("battle");
     expect(cosmicPowerAtAge(238, "player", center).bldy).toBe(0);
   });
 
@@ -54,5 +56,8 @@ describe("Move_COSMIC_POWER source reducer", () => {
     expect(cosmicPowerAtAge(199, "player", center).sprites[0]?.y2).toBe(7);
     expect(cosmicPowerAtAge(240, "player", center).active).toBe(false);
     expect(cosmicPowerAtAge(240, "player", center).sprites).toEqual([]);
+    expect(cosmicPowerAtAge(0, "player", center).resources.sparkle2Loaded).toBe(false);
+    expect(cosmicPowerAtAge(1, "player", center).resources.sparkle2Loaded).toBe(true);
+    expect(cosmicPowerAtAge(240, "player", center).resources.sparkle2Loaded).toBe(false);
   });
 });
