@@ -194,6 +194,8 @@ export interface FactoryWasmExports {
   fw_generate_factory_trainer_schedule(input_ptr: number, input_len: number): number;
   /** Pure Factory AI history operation; variable input/output layouts are documented on the Rust export. */
   fw_apply_factory_ai_battle_history_operation(input_ptr: number, input_len: number): number;
+  /** Complete Factory swap state/mutation/reducer operation packet; see the Rust export for the v1 layout. */
+  fw_apply_factory_swap_operation(input_ptr: number, input_len: number): number;
   memory: WebAssembly.Memory;
 }
 

@@ -5,6 +5,82 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R9 — [supervised session, 2026-08-13] **M10a draft-selection helper leaf**
+
+- **State:** `rust-main` = current master `af0688fb` plus verified M9 and
+  native-only M10a through `308a87c7`. Ten presentation-free draft-selection
+  helpers are native; no ABI or adapter surface was widened.
+- **Did:** ported select/deselect numbering and immutable-copy behavior,
+  first-pick renumbering (including `findIndex === -1`), selection messages,
+  confirmation, exact species stall exceptions, both cursor wraps, and all
+  three redraw settle schedulers. The canonically executed TypeScript corpus
+  has **102 cases / 12 categories** and regenerates byte-identically at sha256
+  `e78b50ca6b407637cafbdb1d71f98eadcb80e93203ea7384735a6848c67af5fb`.
+- **Next:** M10b — port the two remaining presentation-free draft selection
+  projections (`chosenMonSpecies` and `selectedRentalParty`) as a native-only
+  bounded step. Keep draft state construction, presentation expansion,
+  rendering, animation, reveal, and controller logic out of scope. M7c still
+  waits on #55.
+- **Notes:** Terra/max worker, one commit. Supervisor audited all ten source
+  branches, regenerated twice, and reran cargo **747/747**, focused vectors
+  **4/4**, fmt, strict clippy, release WASM, and post-fold smoke **375/375**.
+  Worker same-commit full npm and build passed. Artifact is **491,775 bytes**,
+  sha256 `4b5e14d2f789464abf1e60f7c746062abb0c4115238de0666db4d1dc690ff344`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+
+## R8 — [supervised session, 2026-08-13] **M9d Factory swap WASM boundary**
+
+- **State:** `rust-main` = current master `af0688fb` plus verified M9c–M9d
+  through `d5c7cb8d` (merge head `cca0ac1e`). The complete pure Factory swap
+  surface is native and reachable through forced WASM with no TypeScript
+  fallback. `RUST_DEFERRED.md` has no open entries.
+- **Did:** added one versioned additive ABI-v1 operation packet for all eight
+  swap entry points, preserving full state, UTF-8 strings, u32 boundaries,
+  optional selections, typed decisions, and the two exact semantic errors.
+  The decoder rejects bad version/operation/enum/presence/domain/UTF-8/length,
+  truncated, appended, missing-suffix, and forbidden-suffix packets before
+  semantic execution. Both-mode parity covers the complete **176-case** M9c
+  corpus, all **17 phases x 6 inputs**, and **17 malformed classes**.
+- **Next:** select the next conflict-free pure family. M7c opponent generation
+  remains blocked until the main lane closes #55; generic BattleState reducer
+  replay remains outside the completed M8 planning seam.
+- **Notes:** Luna/max worker, two commits. Supervisor audited the packet and
+  adapter line-by-line and reran cargo **740 tests**, fmt, strict clippy,
+  release WASM, swap parity **3/3** in both modes, forced-WASM union **17 files
+  / 800/800**, and smoke **375/375**. Worker same-commit full npm was **1,037
+  files / 9,812 passed / 1 skip** plus build **661 modules**. Artifact is
+  **491,761 bytes**, sha256
+  `980bcf83cec1c2f5eb1b84160247dba2d7e5943b22bacc8fa9efc68d875b1f11`.
+  Scope was `core-rs/**` plus the single M2-allowed parity file
+  `tests/factorySwapParity.test.ts`; no canonical TypeScript or other lane
+  ledger was edited.
+
+## R7 — [supervised session, 2026-08-13] **M9c Factory swap input reducer**
+
+- **State:** `rust-main` = current master `6edeb188` plus verified M9c
+  `29470d38`. The complete pure `factorySwap.ts` state, mutation, cursor,
+  decision, and six-input reducer surface is now native. `RUST_DEFERRED.md`
+  has no open entries.
+- **Did:** ported every `handleFactorySwapInput` readiness gate, picker/action
+  wrap, cursor-copy staging flag, player-option route, duplicate-species
+  route, accept/quit prompt branch, and transition-phase no-op. The
+  canonical-TypeScript-executed corpus has **176 full-state cases / 22
+  categories**, including the complete **17 phases x 6 inputs** matrix;
+  sha256 `6798e1b084014722be065fc45f6d0b817754d05330d95cd7269ac099f0d90759`.
+- **Next:** M9d — expose the complete Factory swap pure surface through one
+  additive ABI-v1 operation packet, a new `core-rs/adapter` module, and one
+  new both-mode parity suite. Forced WASM must call the export directly with
+  no TypeScript fallback. M7c opponent generation still waits on #55.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the reducer
+  branch-by-branch, regenerated the corpus twice byte-identically, and reran
+  cargo **737 tests**, focused vectors **5/5**, fmt, strict clippy, release
+  WASM, and smoke **375/375**. Worker same-commit full npm was **1,035 files /
+  9,804 passed / 1 skip** plus build **661 modules**. Artifact is **471,931
+  bytes**, sha256
+  `aa740344412b2daa2c904bf1e67f181fe7cf28e43f16a2caed057936405d5fe4`.
+  Scope stayed entirely inside `core-rs/**`; no adapter, canonical TypeScript,
+  TS test/config, or other lane ledger changed.
+
 ## R6 — [supervised session, 2026-08-13] **M8d–M8j live planning + M9a–M9b Factory swap leaves**
 
 - **State:** `rust-main` = master `fafcf933` plus verified M8d–M9b through

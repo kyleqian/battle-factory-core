@@ -110,6 +110,23 @@ Current exports:
   The complete byte layout is documented beside the Rust export and mirrored
   by `adapter/factoryAiBattleHistoryEngine.ts`; forced WASM mode invokes that
   export directly.
+- `fw_apply_factory_swap_operation(input_ptr, input_len) -> ptr` — the
+  complete pure Factory-swap state, mutation, cursor, decision, and six-input
+  reducer surface. Its additive ABI-v1 packet starts with
+  `version:u8=1,operation:u8`: create is followed by three player mons, three
+  enemy mons, and six rentals; every other operation carries the full
+  source-shaped state and only its exact operation suffix. Mon strings are
+  UTF-8 `u32` byte-length-prefixed values, and optional party selections,
+  quit phase, and script result retain explicit presence tags, including the
+  duplicate check's absent enemy index (canonical default-to-cursor case).
+  Status 0 returns a complete state, bool, or typed null/accept/decline
+  decision; status 1 carries one of the two exact native semantic errors;
+  status 2 is reserved for checked structural failures. The decoder validates
+  version, operation/phase/status/input tags, cursor domains, lengths, UTF-8,
+  suffix shape, and full consumption before semantic execution. The complete
+  field-level layout is documented beside the export and mirrored by
+  `adapter/factorySwapEngine.ts`, which calls it directly in forced WASM mode
+  with no TypeScript fallback.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes

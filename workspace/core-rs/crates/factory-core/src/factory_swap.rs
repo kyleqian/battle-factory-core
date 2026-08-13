@@ -1,10 +1,10 @@
-//! Native-only pure Factory-swap state/mutation leaf.
+//! Native-only pure Factory-swap state, mutation, and input reducer.
 //!
 //! This ports the state-only boundaries in `src/engine/factorySwap.ts`:
 //! initialization, presentation acknowledgement, VBlank cursor copying,
 //! duplicate-species detection, the atomic accepted-swap copy, its live-exit
-//! wrapper, and the presentation-to-round decision seam. Input/UI reducers
-//! deliberately remain outside this module.
+//! wrapper, the presentation-to-round decision seam, and the complete
+//! `handleFactorySwapInput` UI reducer.
 
 /// The source's fixed Factory party width.
 pub const FACTORY_SWAP_PARTY_SIZE: usize = 3;
@@ -85,6 +85,35 @@ impl FactorySwapPhase {
             Self::DuplicateSpecies => "duplicateSpecies",
             Self::DuplicateReturn => "duplicateReturn",
             Self::Complete => "complete",
+        }
+    }
+}
+
+/// The six discrete inputs accepted by source `handleFactorySwapInput`.
+///
+/// Keeping this as a closed native enum mirrors the canonical TypeScript
+/// string union and makes it impossible for callers to inject an unrelated
+/// controller button into this pure reducer.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FactorySwapInput {
+    Left,
+    Right,
+    Up,
+    Down,
+    A,
+    B,
+}
+
+impl FactorySwapInput {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Left => "LEFT",
+            Self::Right => "RIGHT",
+            Self::Up => "UP",
+            Self::Down => "DOWN",
+            Self::A => "A",
+            Self::B => "B",
         }
     }
 }
@@ -174,10 +203,8 @@ impl FactorySwapResult {
     }
 }
 
-/// The smallest source-shaped state that all four boundaries clone, inspect,
-/// or preserve.  Menu/presentation cells are intentionally data-only here:
-/// input progression belongs to `handleFactorySwapInput`, which is not part
-/// of this native mutation leaf.
+/// The smallest source-shaped state that the pure boundaries clone, inspect,
+/// or preserve.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FactorySwapState {
     pub phase: FactorySwapPhase,
@@ -336,20 +363,277 @@ pub fn factory_swap_already_has_species(
     state: &FactorySwapState,
     enemy_mon_id: Option<FactorySwapPartyIndex>,
 ) -> Result<bool, FactorySwapError> {
-    let Some(player_mon_id) = state.player_mon_id else {
+    if state.player_mon_id.is_none() {
         return Ok(false);
-    };
+    }
     let enemy_mon_id = match enemy_mon_id {
         Some(enemy_mon_id) => enemy_mon_id,
         None => FactorySwapPartyIndex::from_u8(state.cursor)
             .ok_or(FactorySwapError::EnemyCursorDoesNotIdentifyPartyMon { cursor: state.cursor })?,
     };
+    Ok(factory_swap_already_has_species_at(state, enemy_mon_id))
+}
+
+fn factory_swap_already_has_species_at(
+    state: &FactorySwapState,
+    enemy_mon_id: FactorySwapPartyIndex,
+) -> bool {
+    let Some(player_mon_id) = state.player_mon_id else {
+        return false;
+    };
     let species = &state.enemy_party[enemy_mon_id.index()].species;
-    Ok(state
+    state
         .player_party
         .iter()
         .enumerate()
-        .any(|(index, mon)| index != player_mon_id.index() && mon.species == *species))
+        .any(|(index, mon)| index != player_mon_id.index() && mon.species == *species)
+}
+
+fn move_action_left(value: u8, actions_count: u8) -> u8 {
+    let actions_count = u16::from(actions_count);
+    if actions_count == 0 {
+        return value;
+    }
+    ((u16::from(value) + actions_count - 1) % actions_count) as u8
+}
+
+fn move_action_right(value: u8, actions_count: u8) -> u8 {
+    let actions_count = u16::from(actions_count);
+    if actions_count == 0 {
+        return value;
+    }
+    ((u16::from(value) + 1) % actions_count) as u8
+}
+
+fn move_three_up(value: u8) -> u8 {
+    ((u16::from(value) + 2) % 3) as u8
+}
+
+fn move_three_down(value: u8) -> u8 {
+    ((u16::from(value) + 1) % 3) as u8
+}
+
+fn quit_prompt_from_picker(state: &FactorySwapState) -> FactorySwapState {
+    let mut next = state.clone();
+    next.phase = FactorySwapPhase::QuitPrompt;
+    next.input_ready = false;
+    next.yes_no_cursor = 0;
+    next.quit_return_phase = Some(match state.phase {
+        FactorySwapPhase::PlayerPicker => FactorySwapQuitReturnPhase::PlayerPicker,
+        FactorySwapPhase::EnemyPicker => FactorySwapQuitReturnPhase::EnemyPicker,
+        _ => unreachable!("only picker phases may open the quit prompt"),
+    });
+    next
+}
+
+/// Source `handleFactorySwapInput`.
+///
+/// This reducer only changes source-owned state for the current ready phase.
+/// It deliberately derives every lag/pending field from the old state (the
+/// separate VBlank copy boundary remains [`copy_factory_swap_cursor`]) and
+/// keeps all presentation transition phases value-identical until their
+/// presentation adapter advances them.
+#[must_use]
+pub fn handle_factory_swap_input(
+    state: &FactorySwapState,
+    input: FactorySwapInput,
+) -> FactorySwapState {
+    if !state.input_ready || state.phase == FactorySwapPhase::Complete {
+        return state.clone();
+    }
+
+    match state.phase {
+        FactorySwapPhase::PlayerPicker | FactorySwapPhase::EnemyPicker => {
+            if matches!(
+                input,
+                FactorySwapInput::Left
+                    | FactorySwapInput::Right
+                    | FactorySwapInput::Up
+                    | FactorySwapInput::Down
+            ) {
+                let cursor = match input {
+                    FactorySwapInput::Left => move_action_left(state.cursor, state.actions_count),
+                    FactorySwapInput::Right => move_action_right(state.cursor, state.actions_count),
+                    FactorySwapInput::Down => {
+                        if state.cursor < 3 {
+                            3
+                        } else {
+                            move_action_right(state.cursor, state.actions_count)
+                        }
+                    }
+                    FactorySwapInput::Up => {
+                        if state.cursor < 3 {
+                            state.actions_count.saturating_sub(1)
+                        } else {
+                            move_action_left(state.cursor, state.actions_count)
+                        }
+                    }
+                    FactorySwapInput::A | FactorySwapInput::B => unreachable!("filtered above"),
+                };
+                let mut next = state.clone();
+                next.cursor = cursor;
+                next.cursor_copy_pending = true;
+                return next;
+            }
+            if input == FactorySwapInput::B {
+                return quit_prompt_from_picker(state);
+            }
+
+            debug_assert_eq!(input, FactorySwapInput::A);
+            if (state.phase == FactorySwapPhase::PlayerPicker && state.cursor == 3)
+                || (state.phase == FactorySwapPhase::EnemyPicker && state.cursor == 4)
+            {
+                return quit_prompt_from_picker(state);
+            }
+            if state.phase == FactorySwapPhase::EnemyPicker && state.cursor == 3 {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::PlayerSwitch;
+                next.input_ready = false;
+                return next;
+            }
+            if state.cursor >= 3 {
+                return state.clone();
+            }
+            if state.phase == FactorySwapPhase::PlayerPicker {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::PlayerOptions;
+                next.player_option_cursor = 0;
+                next.player_option_display_cursor = 0;
+                next.player_option_cursor_copy_pending = false;
+                next.input_ready = false;
+                return next;
+            }
+
+            let Some(enemy_mon_id) = FactorySwapPartyIndex::from_u8(state.cursor) else {
+                return state.clone();
+            };
+            if factory_swap_already_has_species_at(state, enemy_mon_id) {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::DuplicateSpecies;
+                next.input_ready = false;
+                return next;
+            }
+            let mut next = state.clone();
+            next.phase = FactorySwapPhase::AcceptPrompt;
+            next.enemy_mon_id = Some(enemy_mon_id);
+            next.yes_no_cursor = 0;
+            next.input_ready = false;
+            next
+        }
+        FactorySwapPhase::PlayerOptions => match input {
+            FactorySwapInput::Up | FactorySwapInput::Down => {
+                let mut next = state.clone();
+                next.player_option_cursor = if input == FactorySwapInput::Up {
+                    move_three_up(state.player_option_cursor)
+                } else {
+                    move_three_down(state.player_option_cursor)
+                };
+                next.player_option_cursor_copy_pending = true;
+                next
+            }
+            FactorySwapInput::B => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::PlayerPickerReturn;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::A if state.player_option_cursor == 2 => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::PlayerPickerReturn;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::A if state.player_option_cursor == 0 => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::SummaryFade;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::A => {
+                let Some(player_mon_id) = FactorySwapPartyIndex::from_u8(state.cursor) else {
+                    return state.clone();
+                };
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::EnemySwitch;
+                next.player_mon_id = Some(player_mon_id);
+                next.cursor = 0;
+                next.info_cursor = 0;
+                next.display_cursor = 0;
+                next.arrow_cursor = 0;
+                next.cursor_copy_pending = false;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::Left | FactorySwapInput::Right => state.clone(),
+        },
+        FactorySwapPhase::SummaryFade
+        | FactorySwapPhase::SummaryReturn
+        | FactorySwapPhase::PlayerPickerReturn
+        | FactorySwapPhase::EnemySwitch
+        | FactorySwapPhase::PlayerSwitch
+        | FactorySwapPhase::DuplicateReturn
+        | FactorySwapPhase::AcceptReturn
+        | FactorySwapPhase::AcceptExit
+        | FactorySwapPhase::QuitReturn
+        | FactorySwapPhase::QuitExit => state.clone(),
+        FactorySwapPhase::AcceptPrompt => match input {
+            FactorySwapInput::Up | FactorySwapInput::Down => {
+                let mut next = state.clone();
+                next.yes_no_cursor = if state.yes_no_cursor == 0 { 1 } else { 0 };
+                next
+            }
+            FactorySwapInput::B => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::AcceptReturn;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::A if state.yes_no_cursor == 1 => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::AcceptReturn;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::A => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::AcceptExit;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::Left | FactorySwapInput::Right => state.clone(),
+        },
+        FactorySwapPhase::QuitPrompt => match input {
+            FactorySwapInput::Up | FactorySwapInput::Down => {
+                let mut next = state.clone();
+                next.yes_no_cursor = if state.yes_no_cursor == 0 { 1 } else { 0 };
+                next
+            }
+            FactorySwapInput::A if state.yes_no_cursor == 0 => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::QuitExit;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::A | FactorySwapInput::B => {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::QuitReturn;
+                next.input_ready = false;
+                next
+            }
+            FactorySwapInput::Left | FactorySwapInput::Right => state.clone(),
+        },
+        FactorySwapPhase::DuplicateSpecies => {
+            if matches!(input, FactorySwapInput::A | FactorySwapInput::B) {
+                let mut next = state.clone();
+                next.phase = FactorySwapPhase::DuplicateReturn;
+                next.input_ready = false;
+                next
+            } else {
+                state.clone()
+            }
+        }
+        FactorySwapPhase::Complete => state.clone(),
+    }
 }
 
 /// Source `applyFactorySwapMutation`.
@@ -433,9 +717,10 @@ pub fn factory_swap_round_decision(state: &FactorySwapState) -> Option<FactorySw
 mod tests {
     use super::{
         apply_factory_swap_mutation, commit_factory_swap_mutation,
-        factory_swap_already_has_species, factory_swap_round_decision, FactoryRentalMon,
-        FactorySwapBattleStatus, FactorySwapError, FactorySwapMon, FactorySwapPartyIndex,
-        FactorySwapPhase, FactorySwapResult, FactorySwapRoundDecision, FactorySwapState,
+        factory_swap_already_has_species, factory_swap_round_decision, handle_factory_swap_input,
+        FactoryRentalMon, FactorySwapBattleStatus, FactorySwapError, FactorySwapInput,
+        FactorySwapMon, FactorySwapPartyIndex, FactorySwapPhase, FactorySwapResult,
+        FactorySwapRoundDecision, FactorySwapState,
     };
 
     fn mon(
@@ -566,6 +851,150 @@ mod tests {
         assert_eq!(
             factory_swap_round_decision(&decline),
             Some(FactorySwapRoundDecision::Decline)
+        );
+    }
+
+    #[test]
+    fn picker_actions_wrap_and_stage_only_the_old_state_cursor_copy_flag() {
+        let mut player = state();
+        player.phase = FactorySwapPhase::PlayerPicker;
+        player.actions_count = 4;
+        player.cursor = 0;
+        player.info_cursor = 1;
+        player.display_cursor = 2;
+        player.arrow_cursor = 3;
+        player.cursor_copy_pending = false;
+        player.input_ready = true;
+
+        let mut expected = player.clone();
+        expected.cursor = 3;
+        expected.cursor_copy_pending = true;
+        assert_eq!(
+            handle_factory_swap_input(&player, FactorySwapInput::Left),
+            expected
+        );
+
+        player.cursor = 3;
+        let mut expected = player.clone();
+        expected.cursor = 0;
+        expected.cursor_copy_pending = true;
+        assert_eq!(
+            handle_factory_swap_input(&player, FactorySwapInput::Right),
+            expected
+        );
+
+        let mut enemy = player.clone();
+        enemy.phase = FactorySwapPhase::EnemyPicker;
+        enemy.actions_count = 5;
+        enemy.cursor = 0;
+        enemy.player_mon_id = Some(FactorySwapPartyIndex::Slot1);
+        let mut expected = enemy.clone();
+        expected.cursor = 4;
+        expected.cursor_copy_pending = true;
+        assert_eq!(
+            handle_factory_swap_input(&enemy, FactorySwapInput::Up),
+            expected
+        );
+    }
+
+    #[test]
+    fn player_option_routes_reset_exactly_the_source_owned_picker_cells() {
+        let mut options = state();
+        options.phase = FactorySwapPhase::PlayerOptions;
+        options.actions_count = 4;
+        options.cursor = 2;
+        options.info_cursor = 1;
+        options.display_cursor = 2;
+        options.arrow_cursor = 3;
+        options.cursor_copy_pending = true;
+        options.input_ready = true;
+
+        options.player_option_cursor = 0;
+        let mut expected = options.clone();
+        expected.phase = FactorySwapPhase::SummaryFade;
+        expected.input_ready = false;
+        assert_eq!(
+            handle_factory_swap_input(&options, FactorySwapInput::A),
+            expected
+        );
+
+        options.player_option_cursor = 1;
+        let mut expected = options.clone();
+        expected.phase = FactorySwapPhase::EnemySwitch;
+        expected.player_mon_id = Some(FactorySwapPartyIndex::Slot2);
+        expected.cursor = 0;
+        expected.info_cursor = 0;
+        expected.display_cursor = 0;
+        expected.arrow_cursor = 0;
+        expected.cursor_copy_pending = false;
+        expected.input_ready = false;
+        assert_eq!(
+            handle_factory_swap_input(&options, FactorySwapInput::A),
+            expected
+        );
+
+        options.player_option_cursor = 2;
+        let mut expected = options.clone();
+        expected.phase = FactorySwapPhase::PlayerPickerReturn;
+        expected.input_ready = false;
+        assert_eq!(
+            handle_factory_swap_input(&options, FactorySwapInput::A),
+            expected
+        );
+    }
+
+    #[test]
+    fn picker_duplicate_and_yes_no_routes_follow_selected_slot_exclusion() {
+        let mut duplicate = state();
+        duplicate.phase = FactorySwapPhase::EnemyPicker;
+        duplicate.actions_count = 5;
+        duplicate.cursor = 1;
+        duplicate.player_mon_id = Some(FactorySwapPartyIndex::Slot0);
+        duplicate.enemy_mon_id = None;
+        duplicate.input_ready = true;
+        duplicate.enemy_party[1].species = duplicate.player_party[2].species.clone();
+        let mut expected = duplicate.clone();
+        expected.phase = FactorySwapPhase::DuplicateSpecies;
+        expected.input_ready = false;
+        assert_eq!(
+            handle_factory_swap_input(&duplicate, FactorySwapInput::A),
+            expected
+        );
+
+        duplicate.player_mon_id = Some(FactorySwapPartyIndex::Slot1);
+        duplicate.enemy_party[1].species = duplicate.player_party[1].species.clone();
+        let mut expected = duplicate.clone();
+        expected.phase = FactorySwapPhase::AcceptPrompt;
+        expected.enemy_mon_id = Some(FactorySwapPartyIndex::Slot1);
+        expected.yes_no_cursor = 0;
+        expected.input_ready = false;
+        assert_eq!(
+            handle_factory_swap_input(&duplicate, FactorySwapInput::A),
+            expected
+        );
+
+        let mut accept = state();
+        accept.phase = FactorySwapPhase::AcceptPrompt;
+        accept.yes_no_cursor = 0;
+        accept.input_ready = true;
+        let mut expected = accept.clone();
+        expected.phase = FactorySwapPhase::AcceptExit;
+        expected.input_ready = false;
+        assert_eq!(
+            handle_factory_swap_input(&accept, FactorySwapInput::A),
+            expected
+        );
+
+        let mut quit = state();
+        quit.phase = FactorySwapPhase::QuitPrompt;
+        quit.yes_no_cursor = 1;
+        quit.input_ready = true;
+        let mut expected = quit.clone();
+        expected.phase = FactorySwapPhase::QuitReturn;
+        expected.input_ready = false;
+        assert_eq!(
+            handle_factory_swap_input(&quit, FactorySwapInput::A),
+            expected
         );
     }
 }
