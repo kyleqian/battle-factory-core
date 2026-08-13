@@ -1,0 +1,205 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v30",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1368-1371",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "musicPlayerTrack": {
+        "volumePitchMask": {
+          "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+          "lines": "265-270",
+          "volumeChange": {
+            "name": "MPT_FLG_VOLCHG",
+            "value": "0x03"
+          },
+          "pitchChange": {
+            "name": "MPT_FLG_PITCHG",
+            "value": "0x0c"
+          },
+          "orMask": "0x0f",
+          "runtimeValue": null,
+          "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+        }
+      }
+    },
+    "elf": {
+      "containingEntry": "0x082dfc00",
+      "instructionStart": "0x082dfc08",
+      "endExclusive": "0x082dfc0e",
+      "takenSuccessor": "0x082dfc9a",
+      "nextSequentialInstruction": "0x082dfc0e",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "movs r1, MPT_FLG_VOLCHG | MPT_FLG_PITCHG; tst r1, r0; beq _081DDA62",
+        "start": "0x082dfc08",
+        "endExclusive": "0x082dfc0e",
+        "bytes": 6,
+        "bytesHex": "0f 21 01 42 45 d0",
+        "sha256": "8f6cc54a0a1866eaa559291e5fcc4103996f67168b30353a0eb15f44ed9c3fd4"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "memoryAccesses": 0,
+      "dataAccessPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "volPitchMaskClearModel": "movs; tst; taken beq = 3 halfwords * 2 + one 6-cycle refill = 12",
+      "volPitchMaskNonzeroModel": "movs; tst; non-taken beq = 3 halfwords * 2 + zero refill = 6"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV29EvidenceSha256": "c932813860e8d9dade9d7dd66891971a942c694b48ea75b255f6719eca20c91d",
+    "acceptedV29DocSha256": "0bf37691f80c93c8c808e431750e97e2f13393f8a42cc1f805896a340c657d82",
+    "acceptedV29PacketSha256": {
+      "anchor": "59c2daf500f773368db0d6fd8756220b0154a4938fe23c7617c758a9982b88cb",
+      "liliana": "db2a26b30ec3a02b7420e05650025f0f28d0c11e1b6b453b22d368f6695d4f1e",
+      "factory-varied": "8190a650678950fab698f06c07c0327df76d108ad2778f08661eddd5b42e8444"
+    },
+    "v29RegeneratesByteForByte": true,
+    "v29EvidenceReportAndPacketsRetainedByteForByte": true,
+    "v30PacketSha256": {
+      "anchor": "77ce80af100e6fd8d46fcf8e6359019f65ec03935f4702cf956a02c76a3910a2",
+      "liliana": "b6c53e5fc7385036ebf4b9a9985ddb49c83c77856bcfdc1e2c0f54df0bd1e8fa",
+      "factory-varied": "53fabb3e0cf7663015c25c8d67dad04c2c1685756aef1b682df8707579076485"
+    },
+    "v30PacketRepeatSha256": {
+      "anchor": "77ce80af100e6fd8d46fcf8e6359019f65ec03935f4702cf956a02c76a3910a2",
+      "liliana": "b6c53e5fc7385036ebf4b9a9985ddb49c83c77856bcfdc1e2c0f54df0bd1e8fa",
+      "factory-varied": "53fabb3e0cf7663015c25c8d67dad04c2c1685756aef1b682df8707579076485"
+    },
+    "v30PacketRepeatIdentity": true
+  },
+  "capture": {
+    "boundary": "second track-loop iteration post-_081DD9C8 ldrb r0 flags, before _081DD9D0 volume/pitch-mask decision",
+    "scalars": [
+      "secondTrackFlags"
+    ],
+    "packetObservationExactKeys": [
+      "sourceStateDigest",
+      "secondTrackFlags"
+    ],
+    "excluded": [
+      "pointer",
+      "runtime address",
+      "track count",
+      "track index",
+      "track identity",
+      "iteration count",
+      "channel",
+      "frame",
+      "duration",
+      "condition flags",
+      "wider state",
+      "selected branch body",
+      "sequential successor body",
+      "any next instruction beyond the decision",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV29SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v29-selected-row",
+      "packet-key-mismatch",
+      "unsupported-packet-field",
+      "out-of-range-scalar",
+      "unexpected-observed-route"
+    ]
+  },
+  "coverage": {
+    "frozenV29SelectedRows": 3,
+    "packetRowsByCase": {
+      "anchor": 0,
+      "liliana": 1,
+      "factory-varied": 2
+    },
+    "secondTrackFlagsRows": 3,
+    "secondTrackFlagsValues": [
+      128
+    ],
+    "volPitchMask": "0x0f",
+    "volPitchMaskClearRows": 3,
+    "volPitchMaskNonzeroRows": 0,
+    "postV29SecondTrackVolPitchDecisionSourceCycles": 36,
+    "acceptedContiguousPrefixThroughSecondTrackExistDecisionSourceCycles": 5872,
+    "contiguousPrefixThroughSecondTrackVolPitchDecisionSourceCycles": 5908,
+    "sequentialThumbHalfwords": 9,
+    "memoryAccesses": 0,
+    "dataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 3,
+    "failClosedUnobservedVolPitchMaskNonzeroSourceCycles": 6,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "secondTrackFlags": 128,
+      "secondTrackVolPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV29SecondTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughSecondTrackVolPitchDecisionSourceCycles": 864,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV30Instruction": "_081DDA62: first instruction"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "secondTrackFlags": 128,
+      "secondTrackVolPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV29SecondTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughSecondTrackVolPitchDecisionSourceCycles": 864,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV30Instruction": "_081DDA62: first instruction"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "secondTrackFlags": 128,
+      "secondTrackVolPitchMaskDecision": "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
+      "postV29SecondTrackVolPitchDecisionSourceCycles": 12,
+      "contiguousPrefixThroughSecondTrackVolPitchDecisionSourceCycles": 864,
+      "beqTakenControlTransferRefills": 1,
+      "stopsBeforeV30Instruction": "_081DDA62: first instruction"
+    }
+  ],
+  "containment": {
+    "frozenV29ArtifactsReadOnly": true,
+    "v29PacketStripBackPreserved": true,
+    "v29AndV30ArtifactsAreNotProductionImports": true,
+    "trackPointer": null,
+    "runtimeAddress": null,
+    "trackCount": null,
+    "trackIndex": null,
+    "trackIdentity": null,
+    "iterationCount": null,
+    "channel": null,
+    "frame": null,
+    "duration": null,
+    "conditionFlags": null,
+    "widerState": null,
+    "selectedBranchBody": null,
+    "sequentialSuccessorBody": null,
+    "nextInstructionBeyondDecision": null,
+    "serviceCost": null,
+    "constructionClock": null,
+    "controller": null,
+    "presentation": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Two fresh byte-identical OFF packet sets retain only sourceStateDigest and secondTrackFlags. All three flags are 0x80, so the 0x0f volume/pitch mask is clear and beq _081DDA62 is taken at 12 cycles per row / 36 aggregate. The prefix advances 5872 to 5908 cycles and stops before either successor instruction."
+}

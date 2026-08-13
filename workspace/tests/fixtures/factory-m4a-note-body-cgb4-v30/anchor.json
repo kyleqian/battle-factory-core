@@ -1,0 +1,10 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-probe/v30",
+  "case": "anchor",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "CreateFrontierFactorySelectableMons",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "second-track-loop-post-_081DD9C8-ldrb-r0-before-_081DD9D0-volume-pitch-mask-decision",
+  "addressFree": true,
+  "observations": []
+}

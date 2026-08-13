@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1227 — [MAIN worker, 2026-08-13] **CGB4 v30 second-track mask decision green**
+
+- **State:** #55 is source-exact through the three selected-row **5,908-cycle**
+  CGB4 prefix, stopping before the selected `_081DDA62: subs r2, 0x1` branch
+  body (and before the non-selected `mov r9, r2` body).
+- **Did:** captured two fresh serial OFF packet sets with only
+  `sourceStateDigest` + `secondTrackFlags`; all three values are `0x80`.
+  Frozen v29 evidence/report/packets remain byte-for-byte; source/ELF/ROM
+  close `0f 21 01 42 45 d0`, deriving the clear-mask taken `beq` at
+  **12×3 = 36** cycles. Added the address-free v30 probe/reporter/fixtures/
+  generated doc and red-first Tier-1 pins.
+- **Next:** separately scope only the second-track `_081DDA62` decrement/exit
+  decision, with the minimum address-free scalar if fresh evidence is needed.
+  Keep actual pointer/count/index/identity/channel/frame/duration, either
+  successor body, broader MPlay, service/arbitration, and construction-clock
+  wiring null.
+- **Notes:** focused v30 **6/6**, v29 **4/4**, smoke **375/375**, final npm
+  **1,020 files / 9,724 passed / 1 skipped**, build **659 modules**. Fresh
+  hashes: anchor `77ce80af…`, LILIANA `b6c53e5f…`, legal-varied `53fabb3e…`;
+  no `src/**`, presentation, animation/Rust, ratchet, unsupported-barrier, or
+  canonical Battle-2 change.
+
 ## 1226 — [supervisor, 2026-08-12] **CGB4 v29 and final lane union green**
 
 - **State:** #55 is exact through the three selected-row **5,872-cycle** CGB4
@@ -44,22 +66,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`1d566618…`), forced parity **12 files / 781 passed**; final union npm
   **1,018 files / 9,714 passed / 1 skipped** and build **659 modules**. The
   pre-rebuild parity failure correctly exposed the stale artifact. No main
-  ratchet, unsupported-barrier, or canonical Battle-2 change.
-
-## 1224 — [supervisor, 2026-08-12] **v27 and Rust M8a union green**
-
-- **State:** #55 is exact through the three selected-row **5,812-cycle** CGB4
-  prefix. Rust's native Factory-AI battle-history leaf is folded; both
-  persistent lane tips are contained.
-- **Did:** audited v27's twice-fresh exact-key packets, `r2=10` result, exact
-  ROM bytes, branch-halfword timing, fail-closed exit route, and byte-stable
-  regeneration. Folded Rust through `e500d74f`, reran native Rust, rebuilt
-  WASM, forced all existing boundary suites, and verified the full union.
-- **Next:** source-close only the observed non-exit continuation `movs r0,
-  MusicPlayerTrack_size; adds r5,r0; bgt _081DD9C8` for the same three frozen
-  v27 rows. Stop before `_081DD9C8`; retain actual count/identity/pointer/
-  channel, next flags/body, and construction-clock wiring null.
-- **Notes:** Rust **708/708 harness tests**; rebuilt WASM **348,965 bytes**
-  (`f5939249…`), forced parity **11 files / 778 passed**; union npm **1,015
-  files / 9,703 passed / 1 skipped** and build **657 modules**. No main
   ratchet, unsupported-barrier, or canonical Battle-2 change.
