@@ -78,6 +78,14 @@ async function loadCanonicalPrivateReplay() {
 const canonicalRng = await import(
   pathToFileURL(path.join(workspaceRoot, "src", "engine", "rng.ts")).href,
 );
+const canonicalBoundary = await import(
+  pathToFileURL(path.join(
+    workspaceRoot,
+    "src",
+    "engine",
+    "battleDecisionBoundary.ts",
+  )).href,
+);
 const replayAiDraws = await loadCanonicalPrivateReplay();
 
 function state(value, calls) {
@@ -132,39 +140,44 @@ function recordedChain(initial, entries) {
 }
 
 /**
- * Executes the canonical private helper with the actual boundary-owned RNG
- * behavior it observes in production (`submitBattleDecision`).  The wrapper
- * reducer is intentionally inert: this corpus is only the helper's replay
- * prefix and its final cursor.
+ * Executes the canonical private helper inside the actual canonical
+ * `submitBattleDecision` boundary.  The wrapper reducer is intentionally
+ * inert: this corpus is only the helper's replay prefix and its final cursor.
+ * This makes every expected final state and error—including the boundary's
+ * call-counter overflow—come from executed canonical TypeScript rather than
+ * an imitation context in this generator.
  */
 function runCanonicalReplay(initial, draws) {
-  let rngValue = initial.value;
-  let rngCalls = initial.calls;
-  let finalRng = null;
-  const rng = Object.freeze({
-    draw(reason) {
-      if (typeof reason !== "string" || reason.trim().length === 0) {
-        throw new Error(`Battle RNG draw reason must be a non-empty string, got ${String(reason)}`);
-      }
-      if (rngCalls >= MAX_SAFE_INTEGER) {
-        throw new Error("Battle RNG call counter overflow");
-      }
-      rngValue = canonicalRng.advanceRngValue(rngValue);
-      rngCalls += 1;
-      return (rngValue >>> 16) & 0xffff;
-    },
-    snapshot() {
-      return Object.freeze({ value: rngValue, calls: rngCalls });
-    },
-  });
-  const reducer = replayAiDraws(draws, (context) => {
-    finalRng = context.rng.snapshot();
-    return Object.freeze({});
-  });
   try {
-    reducer(Object.freeze({ rng }));
-    assert(finalRng !== null, "canonical replay returned without calling its wrapped reducer");
-    return Object.freeze({ kind: "final", rng: cloneState(finalRng) });
+    const decision = Object.freeze({
+      kind: "use-move",
+      moveSlot: 0,
+      targetBattler: 0,
+    });
+    const request = canonicalBoundary.createBattleCommandRequest(Object.freeze({
+      kind: "command",
+      requestId: 0,
+      side: "trainer",
+      battler: 1,
+      legalDecisions: Object.freeze([decision]),
+    }));
+    const state = canonicalBoundary.createBattleState(Object.freeze({
+      rules: Object.freeze({}),
+      rngSeed: initial.value,
+      rngCalls: initial.calls,
+      request,
+    }));
+    const reducer = replayAiDraws(draws, (context) => Object.freeze({
+      rules: context.rules,
+      events: Object.freeze([]),
+      boundary: Object.freeze({ kind: "terminal", outcome: "trainer-win" }),
+    }));
+    const transition = canonicalBoundary.submitBattleDecision(
+      state,
+      Object.freeze({ requestId: 0, side: "trainer", decision }),
+      reducer,
+    );
+    return Object.freeze({ kind: "final", rng: cloneState(transition.state.rng) });
   } catch (error) {
     return Object.freeze({
       kind: "error",
