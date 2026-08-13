@@ -30,6 +30,7 @@ use crate::factory_ai_live_view::{
     FactoryAiScoredBattlerView as LiveBattlerView, FactoryAiScoredTargetView as LiveTargetView,
     FactoryAiScoredView as LiveScoredView,
 };
+use crate::factory_ai_mask::{select_factory_ai_mask, FactoryAiMaskError};
 use crate::gen_tables;
 
 /// `Cmd_get_ability` cannot observe an arbitrary history string as one of the
@@ -52,6 +53,8 @@ enum PolicyFlavor {
 pub enum FactoryAiLiveDecisionError {
     MaskZeroPolicy(FactoryAiDecisionPolicyError),
     ScoredPolicy(FactoryAiScoredDecisionError),
+    MaskSelection(FactoryAiMaskError),
+    MaskSelectionInvalidInteger { field: &'static str, maximum: u32 },
     InvalidInteger { field: &'static str },
     KnownMoveHistoryTooLong { length: usize },
 }
@@ -61,6 +64,12 @@ impl std::fmt::Display for FactoryAiLiveDecisionError {
         match self {
             Self::MaskZeroPolicy(error) => error.fmt(f),
             Self::ScoredPolicy(error) => error.fmt(f),
+            Self::MaskSelection(error) => {
+                write!(f, "Factory AI mask selection failed: {error}")
+            }
+            Self::MaskSelectionInvalidInteger { field, maximum } => {
+                write!(f, "{field} must be an integer from 0 through {maximum}")
+            }
             Self::InvalidInteger { field } => {
                 write!(
                     f,
@@ -86,6 +95,62 @@ pub struct FactoryAiLiveDecisionInput<'a> {
     pub request: FactoryAiMovePolicyRequest<'a>,
     pub rng: BattleRngState,
     pub turn_start_random_number: Option<FactoryAiTurnStartRandomNumber>,
+}
+
+/// The dispatch result for the live driver's mask-selected move chooser.
+/// Keeping the two concrete choices in one enum lets the WASM boundary reuse
+/// the existing complete receipt encoders without reconstructing a second
+/// policy result or dropping the mask-specific trace fields.
+#[allow(clippy::large_enum_variant)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FactoryAiLiveDecisionChoice {
+    MaskZero(FactoryAiMaskZeroDecisionChoice),
+    Scored(FactoryAiScoredChoice),
+}
+
+/// Constructs the source-shaped view's compact policy projection and selects
+/// the existing mask-0 or mask-1/mask-7 chooser.  The selector is only a
+/// dispatch read; each existing chooser remains the owner of its complete
+/// validation, RNG, scoring, tie, and receipt semantics.
+pub fn choose_factory_ai_decision_from_live_view(
+    input: FactoryAiLiveDecisionInput<'_>,
+) -> Result<FactoryAiLiveDecisionChoice, FactoryAiLiveDecisionError> {
+    // The composite mirrors `selectFactoryAiMask(view.factory)` before it
+    // dispatches to either chooser. Its raw f64 challenge fields therefore
+    // retain the selector's generic RangeError text, while the two direct M8g
+    // entry points below keep their chooser-view projection labels.
+    let factory = project_factory_for_mask_selection(input.view)?;
+    let selection =
+        select_factory_ai_mask(factory).map_err(FactoryAiLiveDecisionError::MaskSelection)?;
+    if selection.mask == 0 {
+        choose_factory_ai_mask_zero_decision_from_live_view(input)
+            .map(FactoryAiLiveDecisionChoice::MaskZero)
+    } else {
+        choose_factory_ai_scored_decision_from_live_view(input)
+            .map(FactoryAiLiveDecisionChoice::Scored)
+    }
+}
+
+fn project_factory_for_mask_selection(
+    view: &LiveScoredView,
+) -> Result<crate::factory_ai_mask::FactoryAiMaskSelectionInput, FactoryAiLiveDecisionError> {
+    fn raw_u16(value: f64, field: &'static str) -> Result<u32, FactoryAiLiveDecisionError> {
+        const MAXIMUM: u32 = u16::MAX as u32;
+        if !value.is_finite() || value.fract() != 0.0 || value < 0.0 || value > f64::from(MAXIMUM) {
+            return Err(FactoryAiLiveDecisionError::MaskSelectionInvalidInteger {
+                field,
+                maximum: MAXIMUM,
+            });
+        }
+        Ok(value as u32)
+    }
+
+    Ok(crate::factory_ai_mask::FactoryAiMaskSelectionInput {
+        level_mode: view.factory.level_mode,
+        battle_mode: view.factory.battle_mode,
+        factory_win_streak: raw_u16(view.factory.factory_win_streak, "factoryWinStreak")?,
+        trainer_opponent_id: raw_u16(view.factory.trainer_opponent_id, "trainerOpponentId")?,
+    })
 }
 
 /// Runs the existing native mask-0 chooser from a view produced by

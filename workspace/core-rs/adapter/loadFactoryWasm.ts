@@ -180,6 +180,8 @@ export interface FactoryWasmExports {
   fw_choose_factory_ai_mask_zero_decision(input_ptr: number, input_len: number): number;
   /** Complete native mask-1/mask-7 DecisionPolicy chooser; see the Rust export for its variable input and complete result layouts. */
   fw_choose_factory_ai_scored_decision(input_ptr: number, input_len: number): number;
+  /** Complete source-shaped live-view -> mask-selected move chooser; see the Rust export for the appended request/RNG/turn suffix. */
+  fw_choose_factory_ai_live_decision(input_ptr: number, input_len: number): number;
   /** Plain-singles GetMostSuitableMonToSwitchInto; exact 114-byte input and length-prefixed typed output are documented on the Rust export. */
   fw_get_most_suitable_mon_to_switch_into(input_ptr: number, input_len: number): number;
   /** Combined RNG-free precheck plus full switch-policy evaluation; exact 401-byte input and complete typed output are documented on the Rust export. */
