@@ -15,6 +15,9 @@ use factory_core::damage_calc::{
     self, AccuracyCalcInput, CritChanceInput, CritMoveEffect, DamageBattler, DamageCalcInput,
     StatStages,
 };
+use factory_core::factory_ai_battle_history::{
+    self, FactoryAiBattleHistory, FactoryAiBattleHistoryBattler, FactoryAiBattleHistoryLiveInput,
+};
 use factory_core::factory_ai_check_bad_move::{
     self, BattleRngState, CheckBadMovePreambleInput, CheckBadMoveResult,
     FactoryAiCheckBadMoveAttacker, FactoryAiCheckBadMoveRoarTarget, FactoryAiCheckBadMoveTarget,
@@ -4293,6 +4296,251 @@ pub unsafe extern "C" fn fw_generate_factory_trainer_schedule(
     ) {
         Ok(result) => alloc_and_copy(&encode_factory_trainer_schedule(result)),
         Err(error) => alloc_and_copy(&encode_factory_trainer_typed_error(error)),
+    }
+}
+
+// --- Factory AI battle history (additive ABI v1) -------------------------
+
+struct CheckedReader<'a> {
+    bytes: &'a [u8],
+    offset: usize,
+}
+
+impl<'a> CheckedReader<'a> {
+    fn new(bytes: &'a [u8]) -> Self {
+        Self { bytes, offset: 0 }
+    }
+
+    fn take(&mut self, len: usize) -> Result<&'a [u8], ()> {
+        let end = self.offset.checked_add(len).ok_or(())?;
+        let value = self.bytes.get(self.offset..end).ok_or(())?;
+        self.offset = end;
+        Ok(value)
+    }
+
+    fn u8(&mut self) -> Result<u8, ()> {
+        Ok(self.take(1)?[0])
+    }
+
+    fn u32(&mut self) -> Result<u32, ()> {
+        Ok(u32::from_le_bytes(self.take(4)?.try_into().unwrap()))
+    }
+
+    fn f64(&mut self) -> Result<f64, ()> {
+        Ok(f64::from_le_bytes(self.take(8)?.try_into().unwrap()))
+    }
+
+    fn f64x4(&mut self) -> Result<[f64; 4], ()> {
+        Ok([self.f64()?, self.f64()?, self.f64()?, self.f64()?])
+    }
+
+    fn string(&mut self) -> Result<String, ()> {
+        let len = usize::try_from(self.u32()?).map_err(|_| ())?;
+        String::from_utf8(self.take(len)?.to_vec()).map_err(|_| ())
+    }
+
+    fn finish(self) -> Result<(), ()> {
+        (self.offset == self.bytes.len()).then_some(()).ok_or(())
+    }
+}
+
+fn decode_battle_history_live(
+    reader: &mut CheckedReader,
+) -> Result<FactoryAiBattleHistoryLiveInput, ()> {
+    Ok(FactoryAiBattleHistoryLiveInput {
+        party_indexes: reader.f64x4()?,
+        target_last_move: reader.f64()?,
+        observed_ability_ids: reader.f64x4()?,
+        observed_item_effects: reader.f64x4()?,
+    })
+}
+
+fn decode_battle_history(reader: &mut CheckedReader) -> Result<FactoryAiBattleHistory, ()> {
+    fn moves(reader: &mut CheckedReader) -> Result<Vec<f64>, ()> {
+        let count = usize::try_from(reader.u32()?).map_err(|_| ())?;
+        if count > reader.bytes.len().saturating_sub(reader.offset) / 8 {
+            return Err(());
+        }
+        (0..count).map(|_| reader.f64()).collect()
+    }
+    fn ability(reader: &mut CheckedReader) -> Result<Option<String>, ()> {
+        match reader.u8()? {
+            0 => Ok(None),
+            1 => Ok(Some(reader.string()?)),
+            _ => Err(()),
+        }
+    }
+    let used_moves = [
+        moves(reader)?,
+        moves(reader)?,
+        moves(reader)?,
+        moves(reader)?,
+    ];
+    let known_abilities = [
+        ability(reader)?,
+        ability(reader)?,
+        ability(reader)?,
+        ability(reader)?,
+    ];
+    Ok(FactoryAiBattleHistory {
+        used_moves,
+        known_abilities,
+        known_item_effects: reader.f64x4()?,
+        party_indexes: reader.f64x4()?,
+    })
+}
+
+fn encode_battle_history_payload(buf: &mut Vec<u8>, history: &FactoryAiBattleHistory) {
+    for moves in &history.used_moves {
+        buf.extend_from_slice(
+            &u32::try_from(moves.len())
+                .expect("battle-history move count fits ABI u32")
+                .to_le_bytes(),
+        );
+        for move_id in moves {
+            buf.extend_from_slice(&move_id.to_le_bytes());
+        }
+    }
+    for ability in &history.known_abilities {
+        match ability {
+            None => buf.push(0),
+            Some(ability) => {
+                buf.push(1);
+                buf.extend_from_slice(
+                    &u32::try_from(ability.len())
+                        .expect("battle-history ability name fits ABI u32")
+                        .to_le_bytes(),
+                );
+                buf.extend_from_slice(ability.as_bytes());
+            }
+        }
+    }
+    for item_effect in history.known_item_effects {
+        buf.extend_from_slice(&item_effect.to_le_bytes());
+    }
+    for party_index in history.party_indexes {
+        buf.extend_from_slice(&party_index.to_le_bytes());
+    }
+}
+
+fn encode_battle_history_result(
+    result: Result<FactoryAiBattleHistory, factory_ai_battle_history::FactoryAiBattleHistoryError>,
+) -> Vec<u8> {
+    let mut buf = vec![0; 4];
+    match result {
+        Ok(history) => {
+            buf.push(0);
+            encode_battle_history_payload(&mut buf, &history);
+        }
+        Err(error) => {
+            let message = error.to_string();
+            buf.push(1);
+            buf.extend_from_slice(&(message.len() as u16).to_le_bytes());
+            buf.extend_from_slice(message.as_bytes());
+        }
+    }
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn encode_battle_history_boundary_error() -> Vec<u8> {
+    let message = "factory-wasm factoryAiBattleHistoryEngine: malformed operation input";
+    let mut buf = vec![0; 4];
+    buf.push(2);
+    buf.extend_from_slice(&(message.len() as u16).to_le_bytes());
+    buf.extend_from_slice(message.as_bytes());
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn battle_history_battler(value: u8) -> Result<FactoryAiBattleHistoryBattler, ()> {
+    match value {
+        0 => Ok(FactoryAiBattleHistoryBattler::Battler0),
+        1 => Ok(FactoryAiBattleHistoryBattler::Battler1),
+        2 => Ok(FactoryAiBattleHistoryBattler::Battler2),
+        3 => Ok(FactoryAiBattleHistoryBattler::Battler3),
+        _ => Err(()),
+    }
+}
+
+/// Applies one pure Factory AI battle-history operation through additive ABI
+/// v1. Every JavaScript Number crosses as little-endian IEEE-754 `f64`.
+///
+/// Input starts with `operation:u8`: 0=create, 1=record ability, 2=record
+/// item, 3=sync. A live input is exactly 104 bytes in this order:
+/// `party_indexes:f64[4],target_last_move:f64,observed_ability_ids:f64[4],
+/// observed_item_effects:f64[4]`. Create is `operation,live`. Record ability
+/// is `operation,battler:u8,ability_len:u32,ability:utf8,history`; record item
+/// is `operation,battler:u8,item_effect:f64,history`; sync is
+/// `operation,live,history`.
+///
+/// A history is four `move_count:u32,moves:f64[move_count]` rows, then four
+/// abilities (`present:u8`, followed when present by `byte_len:u32,utf8`),
+/// `known_item_effects:f64[4]`, and `party_indexes:f64[4]`. No count or
+/// string may extend beyond `input_len`, presence is exactly 0/1, battler is
+/// 0..3, UTF-8 must be valid, and all bytes must be consumed.
+///
+/// Output is `total_len:u32,status:u8`. Status 0 appends one history in that
+/// same layout. Status 1 appends `message_len:u16,message:utf8` for the
+/// canonical unknown-ability error. Status 2 uses the same message layout for
+/// every malformed wire input. The caller frees the output with
+/// `fw_free(ptr,total_len)`.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_apply_factory_ai_battle_history_operation(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_len == 0 {
+        return alloc_and_copy(&encode_battle_history_boundary_error());
+    }
+    // SAFETY: nonzero width plus caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len as usize) };
+    let decoded = (|| {
+        let mut reader = CheckedReader::new(bytes);
+        let operation = reader.u8()?;
+        let result = match operation {
+            0 => {
+                let live = decode_battle_history_live(&mut reader)?;
+                Ok(factory_ai_battle_history::create_factory_ai_battle_history(
+                    &live,
+                ))
+            }
+            1 => {
+                let battler = battle_history_battler(reader.u8()?)?;
+                let ability = reader.string()?;
+                let history = decode_battle_history(&mut reader)?;
+                Ok(factory_ai_battle_history::record_factory_ai_known_ability(
+                    &history, battler, ability,
+                ))
+            }
+            2 => {
+                let battler = battle_history_battler(reader.u8()?)?;
+                let item_effect = reader.f64()?;
+                let history = decode_battle_history(&mut reader)?;
+                Ok(
+                    factory_ai_battle_history::record_factory_ai_known_item_effect(
+                        &history,
+                        battler,
+                        item_effect,
+                    ),
+                )
+            }
+            3 => {
+                let live = decode_battle_history_live(&mut reader)?;
+                let history = decode_battle_history(&mut reader)?;
+                factory_ai_battle_history::sync_factory_ai_battle_history(&history, &live)
+            }
+            _ => return Err(()),
+        };
+        reader.finish()?;
+        Ok(result)
+    })();
+    match decoded {
+        Ok(result) => alloc_and_copy(&encode_battle_history_result(result)),
+        Err(()) => alloc_and_copy(&encode_battle_history_boundary_error()),
     }
 }
 

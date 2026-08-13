@@ -188,6 +188,8 @@ export interface FactoryWasmExports {
   fw_select_factory_trainer(input_ptr: number, input_len: number): number;
   /** Default-GBA seven-trainer Factory schedule; exact 16-byte input and complete typed output are documented on the Rust export. */
   fw_generate_factory_trainer_schedule(input_ptr: number, input_len: number): number;
+  /** Pure Factory AI history operation; variable input/output layouts are documented on the Rust export. */
+  fw_apply_factory_ai_battle_history_operation(input_ptr: number, input_len: number): number;
   memory: WebAssembly.Memory;
 }
 

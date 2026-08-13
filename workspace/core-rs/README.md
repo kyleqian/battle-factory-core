@@ -101,6 +101,15 @@ Current exports:
   omission cross in length-prefixed outputs. Exact layouts and error codes
   are documented beside the Rust exports; `adapter/factoryTrainerScheduleEngine.ts`
   calls them directly in WASM mode with no TypeScript fallback.
+- `fw_apply_factory_ai_battle_history_operation(input_ptr, input_len) -> ptr`
+  — the pure create/record-ability/record-item/sync history leaf. Its
+  variable-width operation packet and result use IEEE-754 `f64` for every JS
+  Number, preserving NaN/SameValueZero and unvalidated historical payloads;
+  history move rows and UTF-8 ability names are length-prefixed. Canonical
+  unknown-ability errors and malformed wire packets have distinct statuses.
+  The complete byte layout is documented beside the Rust export and mirrored
+  by `adapter/factoryAiBattleHistoryEngine.ts`; forced WASM mode invokes that
+  export directly.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes
@@ -302,7 +311,7 @@ rejections); the test also ratchets both range kinds, both accepted/rejected
 ledger outcomes, every production-reachable input error, and malformed binary
 lengths.
 
-## Factory AI battle history (M8a)
+## Factory AI battle history (M8a/M8b)
 
 `crates/factory-core/src/factory_ai_battle_history.rs` is the intentionally
 standalone pure port of the history leaf in `src/engine/factoryAiLiveDriver.ts`:
@@ -310,7 +319,9 @@ creation, explicit ability/item records, party-change clearing, target move
 recording, and observed-fact overlays. Its `FactoryAiBattleHistoryLiveInput`
 contains only four party indexes, the target last move, four observed ability
 ids, and four observed item effects. It does not build a live AI view, submit a
-decision, own the construction clock, or expose a WASM ABI.
+decision or own the construction clock. M8b exposes only these four history
+operations through the additive ABI-v1 packet documented above; live-view
+construction remains separate.
 
 Ability-id resolution comes from the full generated 78-row
 `ABILITY_NAME_BY_ID` table in `gen_tables.rs`, sourced from canonical
@@ -337,6 +348,32 @@ At M8a landing, the generated data digest is
 `abc612fc71cb4f469f99e3138e0f8dd495372a0831eeb216c97080e5578e00a4`. Both
 generators validate their source/case shapes and are rerun twice for byte
 identity before committing.
+
+## Factory AI live-view projections (M8c)
+
+`crates/factory-core/src/factory_ai_live_view.rs` is the deliberately narrow
+native port of only `currentWeather(weather)` and `statStages(battler)` from
+`src/engine/factoryAiLiveDriver.ts:257-274`. It does not construct a live AI
+view, select a decision, own history, or cross the WASM boundary. Weather
+keeps the canonical Sun → Rain → Sandstorm → Hail precedence and JavaScript
+bitwise `ToInt32` semantics over the helper's `number` input; no weather is
+`None`. The raw weather masks cite
+`reference/pokeemerald/include/constants/battle.h:232-243`; returned values
+are the `AI_WEATHER_*` encoding cited in
+`src/engine/factoryAiCheckBadMove.ts:138-152`. Stat stages project exactly
+slots 1 through 7 as `{ atk, def, speed, spAtk, spDef, acc, evasion }`.
+
+The 25-case TypeScript-executed corpus includes every raw weather family,
+overlap precedence, non-finite/fractional/wrapped-number bitwise inputs, and
+distinct/signed-extreme stage rows for both attacker and target. Regenerate
+twice for byte identity:
+
+```sh
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.rs
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.rs
+```
 
 ## Ground rules
 
