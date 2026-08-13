@@ -564,7 +564,7 @@ pub const FACTORY_AI_LIVE_VIEW_CONSTRUCTOR_VECTOR_CATEGORY_COUNTS: [(&str, usize
 ${categoryLines}
 ];
 
-pub const FACTORY_AI_LIVE_VIEW_CONSTRUCTOR_CASES: [FactoryAiLiveViewConstructorCase; ${cases.length}] = [
+pub static FACTORY_AI_LIVE_VIEW_CONSTRUCTOR_CASES: [FactoryAiLiveViewConstructorCase; ${cases.length}] = [
 ${caseLines}
 ];
 `;

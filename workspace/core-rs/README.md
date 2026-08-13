@@ -351,13 +351,11 @@ identity before committing.
 
 ## Factory AI live-view projections (M8c)
 
-`crates/factory-core/src/factory_ai_live_view.rs` is the deliberately narrow
-native port of only `currentWeather(weather)` and `statStages(battler)` from
-`src/engine/factoryAiLiveDriver.ts:257-274`. It does not construct a live AI
-view, select a decision, own history, or cross the WASM boundary. Weather
-keeps the canonical Sun → Rain → Sandstorm → Hail precedence and JavaScript
-bitwise `ToInt32` semantics over the helper's `number` input; no weather is
-`None`. The raw weather masks cite
+M8c's `currentWeather(weather)` and `statStages(battler)` leaves in
+`crates/factory-core/src/factory_ai_live_view.rs` remain independently tested
+and are reused by M8d below. Weather keeps the canonical Sun → Rain →
+Sandstorm → Hail precedence and JavaScript bitwise `ToInt32` semantics over
+the helper's `number` input; no weather is `None`. The raw weather masks cite
 `reference/pokeemerald/include/constants/battle.h:232-243`; returned values
 are the `AI_WEATHER_*` encoding cited in
 `src/engine/factoryAiCheckBadMove.ts:138-152`. Stat stages project exactly
@@ -373,6 +371,25 @@ node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-vectors.m
 shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.rs
 node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-vectors.mjs
 shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.rs
+```
+
+## Factory AI live-view constructor (M8d)
+
+`create_factory_ai_view_from_live_rules` is the complete source-shaped native
+port of `createFactoryAiViewFromLiveRules` (`factoryAiLiveDriver.ts:277-411`).
+It reuses M8a history and M8c weather/stage leaves, preserves raw Number
+values, ability-name errors, nullable history fields, and optional-property
+presence; it has no WASM export or adapter yet. The TS-executed corpus has
+**17 cases**: baseline=1, attacker-fields=1, target-fields=2,
+history-projection=2, stat-stages=1, numeric-coercion=1, weather=5,
+challenge=2, ability-error=2. Its generated Rust digest is
+`8020bcd29c0e9dc6fd48da3ff008ebbdf3dd3e8d4375fd7da246448a4e2d6186`.
+
+```sh
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-constructor-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_constructor_vectors_gen.rs
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-constructor-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_constructor_vectors_gen.rs
 ```
 
 ## Ground rules

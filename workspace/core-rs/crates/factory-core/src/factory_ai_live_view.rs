@@ -615,9 +615,9 @@ mod tests {
         assert_eq!(view.attacker.protect_uses, Some(2.0));
         assert_eq!(view.target.ability, "ABILITY_ROCK_HEAD");
         assert_eq!(view.target.has_any_status, Some(true));
-        assert_eq!(view.target.is_toxic_poisoned, true);
-        assert_eq!(view.target.is_leech_seeded, true);
-        assert_eq!(view.target.is_cursed, true);
+        assert!(view.target.is_toxic_poisoned);
+        assert!(view.target.is_leech_seeded);
+        assert!(view.target.is_cursed);
         assert_eq!(view.target.is_confused, Some(true));
         assert_eq!(view.target.is_taunted, Some(true));
         assert_eq!(view.target.known_ability.as_deref(), Some("ABILITY_CUSTOM"));

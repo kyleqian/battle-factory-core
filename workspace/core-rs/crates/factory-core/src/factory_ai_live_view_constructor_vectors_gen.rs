@@ -63,7 +63,7 @@ pub const FACTORY_AI_LIVE_VIEW_CONSTRUCTOR_VECTOR_CATEGORY_COUNTS: [(&str, usize
     ("ability-error", 2),
 ];
 
-pub const FACTORY_AI_LIVE_VIEW_CONSTRUCTOR_CASES: [FactoryAiLiveViewConstructorCase; 17] = [
+pub static FACTORY_AI_LIVE_VIEW_CONSTRUCTOR_CASES: [FactoryAiLiveViewConstructorCase; 17] = [
     FactoryAiLiveViewConstructorCase {
         label: "baseline_absent_flags",
         category: "baseline",
