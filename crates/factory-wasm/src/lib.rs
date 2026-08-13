@@ -34,6 +34,11 @@ use factory_core::factory_ai_decision_policy::{
     FactoryAiScoredDecisionInput, FactoryAiScoredDraw, FactoryAiScoredTargetView,
     FactoryAiScoredView, FactoryAiTurnStartRandomNumber,
 };
+use factory_core::factory_ai_live_view::{
+    self, FactoryAiChallengePolicy, FactoryAiLiveRulesBattler, FactoryAiLiveRulesContext,
+    FactoryAiLiveViewInput, FactoryAiScoredBattlerView as LiveScoredBattlerView,
+    FactoryAiScoredTargetView as LiveScoredTargetView,
+};
 use factory_core::factory_ai_mask::{self, FactoryAiMaskError, FactoryAiMaskSelectionInput};
 use factory_core::factory_ai_switch_policy::{
     self, FactoryAiSwitchBattler, FactoryAiSwitchChoice, FactoryAiSwitchPartyMember,
@@ -4541,6 +4546,358 @@ pub unsafe extern "C" fn fw_apply_factory_ai_battle_history_operation(
     match decoded {
         Ok(result) => alloc_and_copy(&encode_battle_history_result(result)),
         Err(()) => alloc_and_copy(&encode_battle_history_boundary_error()),
+    }
+}
+
+// --- Factory AI live-view constructor (additive ABI v1) ------------------
+
+const FACTORY_AI_LIVE_VIEW_MALFORMED_MESSAGE: &str =
+    "factory-wasm factoryAiLiveViewEngine: malformed input";
+
+fn encode_live_view_message(status: u8, message: &str) -> Vec<u8> {
+    let mut buf = vec![0; 5];
+    buf[4] = status;
+    let message_len = u32::try_from(message.len()).unwrap_or(u32::MAX);
+    buf.extend_from_slice(&message_len.to_le_bytes());
+    buf.extend_from_slice(message.as_bytes());
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn encode_live_view_string(buf: &mut Vec<u8>, value: &str) -> Result<(), ()> {
+    let length = u32::try_from(value.len()).map_err(|_| ())?;
+    buf.extend_from_slice(&length.to_le_bytes());
+    buf.extend_from_slice(value.as_bytes());
+    Ok(())
+}
+
+fn encode_live_view_f64(buf: &mut Vec<u8>, value: f64) {
+    buf.extend_from_slice(&value.to_le_bytes());
+}
+
+fn encode_live_view_optional_bool(buf: &mut Vec<u8>, value: Option<bool>) {
+    match value {
+        None => buf.push(0),
+        Some(value) => {
+            buf.push(1);
+            buf.push(u8::from(value));
+        }
+    }
+}
+
+fn encode_live_view_stat_stages(
+    buf: &mut Vec<u8>,
+    stages: &factory_ai_live_view::FactoryAiStatStages,
+) {
+    encode_live_view_f64(buf, stages.atk);
+    encode_live_view_f64(buf, stages.def);
+    encode_live_view_f64(buf, stages.speed);
+    encode_live_view_f64(buf, stages.sp_atk);
+    encode_live_view_f64(buf, stages.sp_def);
+    encode_live_view_f64(buf, stages.acc);
+    encode_live_view_f64(buf, stages.evasion);
+}
+
+fn encode_live_view_battler(buf: &mut Vec<u8>, battler: &LiveScoredBattlerView) -> Result<(), ()> {
+    encode_live_view_string(buf, &battler.types[0])?;
+    encode_live_view_string(buf, &battler.types[1])?;
+    encode_live_view_f64(buf, battler.attack);
+    encode_live_view_f64(buf, battler.defense);
+    encode_live_view_f64(buf, battler.sp_attack);
+    encode_live_view_f64(buf, battler.sp_defense);
+    encode_live_view_f64(buf, battler.speed);
+    encode_live_view_f64(buf, battler.level);
+    encode_live_view_stat_stages(buf, &battler.stat_stages);
+    encode_live_view_f64(buf, battler.is_first_turn);
+    encode_live_view_f64(buf, battler.hp);
+    encode_live_view_f64(buf, battler.max_hp);
+    encode_live_view_string(buf, &battler.ability)?;
+    encode_live_view_f64(buf, battler.battle_turn_count);
+    buf.push(u8::from(battler.light_screen_up));
+    buf.push(u8::from(battler.reflect_up));
+    match battler.current_weather {
+        None => buf.push(0),
+        Some(weather) => {
+            buf.push(1);
+            buf.push(weather.ai_weather_value());
+        }
+    }
+    buf.push(u8::from(battler.is_rooted));
+    encode_live_view_optional_bool(buf, battler.attacker_future_attack_up);
+    encode_live_view_optional_bool(buf, battler.is_infatuated);
+    encode_live_view_optional_bool(buf, battler.safeguard_up);
+    encode_live_view_optional_bool(buf, battler.is_asleep);
+    encode_live_view_optional_bool(buf, battler.has_curable_status);
+    encode_live_view_optional_bool(buf, battler.has_substitute);
+    encode_live_view_optional_bool(buf, battler.has_focus_energy);
+    encode_live_view_optional_bool(buf, battler.is_leech_seeded);
+    encode_live_view_optional_bool(buf, battler.has_yawn);
+    match battler.protect_uses {
+        None => buf.push(0),
+        Some(value) => {
+            buf.push(1);
+            encode_live_view_f64(buf, value);
+        }
+    }
+    Ok(())
+}
+
+fn encode_live_view_target(buf: &mut Vec<u8>, target: &LiveScoredTargetView) -> Result<(), ()> {
+    encode_live_view_f64(buf, target.species);
+    encode_live_view_string(buf, &target.types[0])?;
+    encode_live_view_string(buf, &target.types[1])?;
+    encode_live_view_f64(buf, target.attack);
+    encode_live_view_f64(buf, target.defense);
+    encode_live_view_f64(buf, target.sp_attack);
+    encode_live_view_f64(buf, target.sp_defense);
+    encode_live_view_f64(buf, target.speed);
+    encode_live_view_f64(buf, target.level);
+    encode_live_view_stat_stages(buf, &target.stat_stages);
+    encode_live_view_f64(buf, target.is_first_turn);
+    encode_live_view_f64(buf, target.hp);
+    encode_live_view_f64(buf, target.max_hp);
+    encode_live_view_f64(buf, target.last_used_move_id);
+    encode_live_view_optional_bool(buf, target.has_any_status);
+    encode_live_view_optional_bool(buf, target.is_asleep);
+    buf.push(u8::from(target.is_toxic_poisoned));
+    buf.push(u8::from(target.is_leech_seeded));
+    buf.push(u8::from(target.is_cursed));
+    encode_live_view_optional_bool(buf, target.is_confused);
+    encode_live_view_optional_bool(buf, target.is_taunted);
+    encode_live_view_optional_bool(buf, target.is_infatuated);
+    encode_live_view_optional_bool(buf, target.is_escape_prevented);
+    encode_live_view_optional_bool(buf, target.is_tormented);
+    encode_live_view_optional_bool(buf, target.is_nightmared);
+    encode_live_view_optional_bool(buf, target.is_foresighted);
+    encode_live_view_optional_bool(buf, target.has_yawn);
+    encode_live_view_optional_bool(buf, target.has_perish_song);
+    encode_live_view_string(buf, &target.ability)?;
+    match &target.known_ability {
+        None => buf.push(0),
+        Some(value) => {
+            buf.push(1);
+            encode_live_view_string(buf, value)?;
+        }
+    }
+    encode_live_view_f64(buf, target.known_item_effect);
+    match &target.known_move_ids {
+        None => buf.push(0),
+        Some(moves) => {
+            buf.push(1);
+            let count = u32::try_from(moves.len()).map_err(|_| ())?;
+            buf.extend_from_slice(&count.to_le_bytes());
+            for move_id in moves {
+                encode_live_view_f64(buf, *move_id);
+            }
+        }
+    }
+    encode_live_view_optional_bool(buf, target.safeguard_up);
+    encode_live_view_optional_bool(buf, target.spikes_up);
+    encode_live_view_optional_bool(buf, target.target_future_attack_up);
+    Ok(())
+}
+
+fn encode_live_view_success(
+    view: factory_ai_live_view::FactoryAiScoredView,
+) -> Result<Vec<u8>, ()> {
+    let mut buf = vec![0; 5];
+    encode_live_view_string(&mut buf, view.schema)?;
+    encode_live_view_string(&mut buf, view.mode)?;
+    encode_live_view_f64(&mut buf, f64::from(view.active.ai_battler));
+    encode_live_view_f64(&mut buf, f64::from(view.active.target_battler));
+    encode_live_view_f64(&mut buf, f64::from(view.factory.level_mode));
+    encode_live_view_f64(&mut buf, f64::from(view.factory.battle_mode));
+    encode_live_view_f64(&mut buf, view.factory.factory_win_streak);
+    encode_live_view_f64(&mut buf, view.factory.trainer_opponent_id);
+    for move_id in view.moves {
+        encode_live_view_f64(&mut buf, move_id);
+    }
+    encode_live_view_battler(&mut buf, &view.attacker)?;
+    encode_live_view_target(&mut buf, &view.target)?;
+    buf[4] = 0;
+    if buf.len() > u32::MAX as usize {
+        return Err(());
+    }
+    patch_total_len(&mut buf);
+    Ok(buf)
+}
+
+fn decode_live_view_battler(reader: &mut CheckedReader) -> Result<FactoryAiLiveRulesBattler, ()> {
+    Ok(FactoryAiLiveRulesBattler {
+        types: [reader.string()?, reader.string()?],
+        attack: reader.f64()?,
+        defense: reader.f64()?,
+        sp_attack: reader.f64()?,
+        sp_defense: reader.f64()?,
+        speed: reader.f64()?,
+        level: reader.f64()?,
+        stat_stages: [
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+            reader.f64()?,
+        ],
+        is_first_turn: reader.f64()?,
+        hp: reader.f64()?,
+        max_hp: reader.f64()?,
+        ability: reader.f64()?,
+        status1: reader.f64()?,
+        status2: reader.f64()?,
+        status3: reader.f64()?,
+        protect_uses: reader.f64()?,
+        taunt_timer: reader.f64()?,
+        species: reader.f64()?,
+        moves: [reader.f64()?, reader.f64()?, reader.f64()?, reader.f64()?],
+    })
+}
+
+fn decode_live_view_rules(reader: &mut CheckedReader) -> Result<FactoryAiLiveRulesContext, ()> {
+    Ok(FactoryAiLiveRulesContext {
+        battlers: [
+            decode_live_view_battler(reader)?,
+            decode_live_view_battler(reader)?,
+            decode_live_view_battler(reader)?,
+            decode_live_view_battler(reader)?,
+        ],
+        weather: reader.f64()?,
+        side_statuses: [reader.f64()?, reader.f64()?],
+        last_moves: reader.f64x4()?,
+    })
+}
+
+fn decode_live_view_challenge(reader: &mut CheckedReader) -> Result<FactoryAiChallengePolicy, ()> {
+    let factory_win_streak = reader.f64()?;
+    let trainer_opponent_id = reader.f64()?;
+    let battle_turn_count = match reader.u8()? {
+        0 => None,
+        1 => Some(reader.f64()?),
+        _ => return Err(()),
+    };
+    Ok(FactoryAiChallengePolicy { factory_win_streak, trainer_opponent_id, battle_turn_count })
+}
+
+fn encode_live_view_result(
+    result: Result<
+        factory_ai_live_view::FactoryAiScoredView,
+        factory_ai_live_view::FactoryAiLiveViewError,
+    >,
+) -> Vec<u8> {
+    match result {
+        Ok(view) => encode_live_view_success(view).unwrap_or_else(|()| {
+            encode_live_view_message(2, FACTORY_AI_LIVE_VIEW_MALFORMED_MESSAGE)
+        }),
+        Err(error) => encode_live_view_message(1, &error.to_string()),
+    }
+}
+
+/// Constructs the complete source-shaped Factory AI live view through an
+/// additive ABI-v1 packet. The constructor itself is pure: this export does
+/// not execute a decision, synchronize history, select a switch, or own a
+/// battle clock.
+///
+/// # Input layout (all integers little-endian)
+///
+/// The input is variable-width and has no redundant prefix; `input_len` is
+/// the caller-provided packet length. A `string` is `byte_len:u32,utf8`.
+/// Every JavaScript `number` below is an IEEE-754 `f64`, including history
+/// values and challenge fields. The packet is, in order:
+///
+/// ```text
+/// rules.battlers[4]:
+///   types:string[2], attack:f64, defense:f64, sp_attack:f64,
+///   sp_defense:f64, speed:f64, level:f64, stat_stages:f64[8],
+///   is_first_turn:f64, hp:f64, max_hp:f64, ability:f64,
+///   status1:f64, status2:f64, status3:f64, protect_uses:f64,
+///   taunt_timer:f64, species:f64, moves:f64[4]
+/// rules.weather:f64, rules.side_statuses:f64[2], rules.last_moves:f64[4]
+/// history.used_moves[4]: move_count:u32, moves:f64[move_count]
+/// history.known_abilities[4]: present:u8 (0/1), [if present] string
+/// history.known_item_effects:f64[4], history.party_indexes:f64[4]
+/// challenge.factory_win_streak:f64, challenge.trainer_opponent_id:f64,
+/// challenge.battle_turn_count:present:u8 (0/1), [if present] f64
+/// ```
+///
+/// Counts, string widths, presence tags, UTF-8, and exact packet
+/// consumption are checked before the native constructor runs. Output is an
+/// `fw_alloc`'d length-prefixed packet, freed with `fw_free(ptr,total_len)`:
+///
+/// ```text
+/// total_len:u32, status:u8
+/// status 0: schema:string, mode:string, active.ai_battler:f64,
+///   active.target_battler:f64, factory.level_mode:f64,
+///   factory.battle_mode:f64, factory.factory_win_streak:f64,
+///   factory.trainer_opponent_id:f64, moves:f64[4], attacker, target
+/// status 1/2: message_len:u32, message:utf8
+/// ```
+///
+/// The status-0 `attacker` fields are the two type strings, five stat f64s,
+/// level, seven stat-stage f64s in `atk,def,speed,sp_atk,sp_def,acc,evasion`
+/// order, `is_first_turn`, `hp`, `max_hp`, ability string,
+/// `battle_turn_count`, unconditional boolean bytes
+/// `light_screen_up,reflect_up`, weather presence plus weather byte,
+/// unconditional `is_rooted`, then optional booleans (presence byte followed
+/// by value byte when present) in source order:
+/// `attacker_future_attack_up,is_infatuated,safeguard_up,is_asleep,
+/// has_curable_status,has_substitute,has_focus_energy,is_leech_seeded,
+/// has_yawn`, and optional `protect_uses` (presence plus f64). The target is
+/// encoded in source property order with species first, the same common stat
+/// fields, `last_used_move_id`, optional `has_any_status,is_asleep`,
+/// unconditional `is_toxic_poisoned,is_leech_seeded,is_cursed`, optional
+/// `is_confused,is_taunted,is_infatuated,is_escape_prevented,is_tormented,
+/// is_nightmared,is_foresighted,has_yawn,has_perish_song`, ability string,
+/// required-but-nullable `known_ability` presence/string, `known_item_effect`,
+/// optional `known_move_ids` presence/count/f64 values, and optional
+/// `safeguard_up,spikes_up,target_future_attack_up`. Status 1 is a typed
+/// unknown-ability error carrying the exact canonical constructor message;
+/// status 2 is the malformed-packet message below.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes. A null
+/// pointer is treated as malformed when `input_len` is nonzero as an extra
+/// fail-closed guard for boundary callers.
+#[no_mangle]
+pub unsafe extern "C" fn fw_create_factory_ai_view_from_live_rules(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_ptr.is_null() && input_len != 0 {
+        return alloc_and_copy(&encode_live_view_message(
+            2,
+            FACTORY_AI_LIVE_VIEW_MALFORMED_MESSAGE,
+        ));
+    }
+    let input_len = input_len as usize;
+    if input_len == 0 {
+        return alloc_and_copy(&encode_live_view_message(
+            2,
+            FACTORY_AI_LIVE_VIEW_MALFORMED_MESSAGE,
+        ));
+    }
+    // SAFETY: nonzero width, non-null pointer guard, and caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
+    let result =
+        (|| {
+            let mut reader = CheckedReader::new(bytes);
+            let rules = decode_live_view_rules(&mut reader)?;
+            let history = decode_battle_history(&mut reader)?;
+            let challenge = decode_live_view_challenge(&mut reader)?;
+            reader.finish()?;
+            Ok(
+                factory_ai_live_view::create_factory_ai_view_from_live_rules(
+                    FactoryAiLiveViewInput { rules_context: &rules, history: &history, challenge },
+                ),
+            )
+        })();
+    match result {
+        Ok(result) => alloc_and_copy(&encode_live_view_result(result)),
+        Err(()) => alloc_and_copy(&encode_live_view_message(
+            2,
+            FACTORY_AI_LIVE_VIEW_MALFORMED_MESSAGE,
+        )),
     }
 }
 
