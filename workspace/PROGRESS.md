@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1235 — [supervisor, 2026-08-13] **CGB4 v35 and final lane union green**
+
+- **State:** #55 is source-exact through the three selected-row **6,028-cycle**
+  CGB4 prefix. Ancient Power's bounded bilateral evidence checkpoint is
+  folded without promotion; both persistent lane tips are contained.
+- **Did:** independently reran v35 **8/8**, folded animation through
+  `a359d9a3`, verified the final union, and ran both generic seven-battle soak
+  policies after all production-source folds.
+- **Next:** source-close only the observed third-track non-exit continuation
+  through `bgt _081DD9C8`, stopping before the fourth flags read. Keep actual
+  pointer/count/index/identity/channel, next flags/body, service/arbitration,
+  construction-clock wiring, and retired canonical Battle-2 work null.
+- **Notes:** soak vanilla **20/20** and full **60/60**, each with **0 crashes / 0
+  hangs**; final npm **1,029 files / 9,774 passed / 1 skipped**, build **660
+  modules**. Ancient Power remains unsupported at **179/276 exact** overall;
+  no main ratchet or unsupported-barrier change.
+
 ## 1234 — [MAIN worker, 2026-08-13] **CGB4 v35 third-track decrement/exit decision green**
 
 - **State:** #55 is source-exact through the same three selected-row **6,028-cycle**
@@ -46,23 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   forced parity **14 files / 790 passed**; union npm **1,026 files / 9,756
   passed / 1 skipped**, build **660 modules**. No main ratchet or
   unsupported-barrier change.
-
-## 1232 — [MAIN worker, 2026-08-13] **CGB4 v34 third-track volume/pitch decision green**
-
-- **State:** #55 is source-exact through the same three selected-row **6,016-cycle**
-  CGB4 prefix, stopping before `_081DDA62: subs r2, 0x1`.
-- **Did:** froze v33 evidence/report/packets byte-for-byte with no fresh oracle
-  capture; derived each frozen `thirdTrackFlags=0x80` against
-  `MPT_FLG_VOLCHG | MPT_FLG_PITCHG = 0x0f`. Source/ELF/exact-ROM close
-  `0f 21 01 42 45 d0`: clear mask takes `beq _081DDA62`, **12 cycles/row,
-  one refill, +36 aggregate** (**5,980 → 6,016**). Exact-key/fail-closed pins
-  and two v34 regenerations are green.
-- **Next:** separately scope only the `_081DDA62` decrement/exit decision if
-  needed; retain pointer/address/count/index/identity/channel/frame/duration/
-  condition flags, wider/alternate bodies, broader MPlay/service/arbitration,
-  construction clock, presentation, animation/Rust, and canonical Battle-2
-  march out of scope.
-- **Notes:** v34 evidence/doc `49a6bd71…` / `c7133ef3…`; frozen v33
-  `806b5582…` / `61fe1034…`. Focused v34/v33 **10/10**, smoke **375/375**,
-  final npm **1,026 files / 9,755 passed / 1 skipped**, build **660 modules**.
-  No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2 change.

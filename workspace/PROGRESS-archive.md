@@ -42793,3 +42793,22 @@ git; the current live ledger keeps the three load-bearing entries only.
   identical). Focused v33/v32 **9/9**, smoke **375/375**, final npm **1,025
   files / 9,750 passed / 1 skipped**, build **660 modules**. No `src/**`,
   ratchet, unsupported-barrier, or canonical Battle-2 change.
+## 1232 — [MAIN worker, 2026-08-13] **CGB4 v34 third-track volume/pitch decision green**
+
+- **State:** #55 is source-exact through the same three selected-row **6,016-cycle**
+  CGB4 prefix, stopping before `_081DDA62: subs r2, 0x1`.
+- **Did:** froze v33 evidence/report/packets byte-for-byte with no fresh oracle
+  capture; derived each frozen `thirdTrackFlags=0x80` against
+  `MPT_FLG_VOLCHG | MPT_FLG_PITCHG = 0x0f`. Source/ELF/exact-ROM close
+  `0f 21 01 42 45 d0`: clear mask takes `beq _081DDA62`, **12 cycles/row,
+  one refill, +36 aggregate** (**5,980 → 6,016**). Exact-key/fail-closed pins
+  and two v34 regenerations are green.
+- **Next:** separately scope only the `_081DDA62` decrement/exit decision if
+  needed; retain pointer/address/count/index/identity/channel/frame/duration/
+  condition flags, wider/alternate bodies, broader MPlay/service/arbitration,
+  construction clock, presentation, animation/Rust, and canonical Battle-2
+  march out of scope.
+- **Notes:** v34 evidence/doc `49a6bd71…` / `c7133ef3…`; frozen v33
+  `806b5582…` / `61fe1034…`. Focused v34/v33 **10/10**, smoke **375/375**,
+  final npm **1,026 files / 9,755 passed / 1 skipped**, build **660 modules**.
+  No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2 change.
