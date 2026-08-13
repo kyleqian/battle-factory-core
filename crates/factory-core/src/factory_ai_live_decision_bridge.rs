@@ -16,6 +16,9 @@ use crate::damage_calc::{
     TYPE_POISON, TYPE_PSYCHIC, TYPE_ROCK, TYPE_STEEL, TYPE_WATER,
 };
 use crate::factory_ai_check_bad_move::BattleRngState;
+use crate::factory_ai_check_viability::{
+    FactoryAiKnownMoveHistoryTail, FACTORY_AI_KNOWN_MOVE_HISTORY_TAIL_CAPACITY,
+};
 use crate::factory_ai_decision_policy::{
     choose_factory_ai_mask_zero_decision, choose_factory_ai_scored_decision,
     FactoryAiDecisionPolicyError, FactoryAiMaskZeroDecisionChoice, FactoryAiMovePolicyRequest,
@@ -66,7 +69,7 @@ impl std::fmt::Display for FactoryAiLiveDecisionError {
             }
             Self::KnownMoveHistoryTooLong { length } => write!(
                 f,
-                "Factory AI live decision known move history length {length} exceeds four slots"
+                "Factory AI live decision known move history length {length} exceeds eight slots"
             ),
         }
     }
@@ -288,13 +291,14 @@ fn project_target(view: &LiveTargetView) -> Result<PolicyTargetView, FactoryAiLi
     battler.safeguard_up = view.safeguard_up;
     battler.spikes_up = view.spikes_up;
     battler.target_future_attack_up = view.target_future_attack_up;
-    let known_moves = project_known_moves(view.known_move_ids.as_deref())?;
+    let (known_moves, known_moves_tail) = project_known_moves(view.known_move_ids.as_deref())?;
     Ok(PolicyTargetView {
         battler,
         species: lossy_move(view.species),
         known_ability: view.known_ability.as_deref().map(ability_id_or_unknown),
         species_abilities: None,
         known_moves,
+        known_moves_tail,
     })
 }
 
@@ -405,18 +409,29 @@ fn ability_id_or_unknown(name: &str) -> u16 {
 
 fn project_known_moves(
     values: Option<&[f64]>,
-) -> Result<Option<[u16; 4]>, FactoryAiLiveDecisionError> {
+) -> Result<(Option<[u16; 4]>, Option<FactoryAiKnownMoveHistoryTail>), FactoryAiLiveDecisionError> {
     let Some(values) = values else {
-        return Ok(None);
+        return Ok((None, None));
     };
-    if values.len() > 4 {
+    if values.len() > 4 + FACTORY_AI_KNOWN_MOVE_HISTORY_TAIL_CAPACITY {
         return Err(FactoryAiLiveDecisionError::KnownMoveHistoryTooLong { length: values.len() });
     }
-    let mut result = [0; 4];
-    for (index, value) in values.iter().copied().enumerate() {
-        result[index] = lossy_move(value);
+    let mut leading = [0; 4];
+    let leading_length = values.len().min(leading.len());
+    for (index, value) in values.iter().copied().take(leading_length).enumerate() {
+        leading[index] = lossy_move(value);
     }
-    Ok(Some(result))
+    if values.len() <= leading.len() {
+        return Ok((Some(leading), None));
+    }
+    let mut tail = [0; FACTORY_AI_KNOWN_MOVE_HISTORY_TAIL_CAPACITY];
+    for (index, value) in values.iter().copied().skip(leading.len()).enumerate() {
+        tail[index] = lossy_move(value);
+    }
+    Ok((
+        Some(leading),
+        Some(FactoryAiKnownMoveHistoryTail { values: tail, length: (values.len() - 4) as u8 }),
+    ))
 }
 
 fn lossy_move(value: f64) -> u16 {
