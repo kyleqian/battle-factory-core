@@ -5,6 +5,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R8 — [supervised session, 2026-08-13] **M9d Factory swap WASM boundary**
+
+- **State:** `rust-main` = current master `af0688fb` plus verified M9c–M9d
+  through `d5c7cb8d` (merge head `cca0ac1e`). The complete pure Factory swap
+  surface is native and reachable through forced WASM with no TypeScript
+  fallback. `RUST_DEFERRED.md` has no open entries.
+- **Did:** added one versioned additive ABI-v1 operation packet for all eight
+  swap entry points, preserving full state, UTF-8 strings, u32 boundaries,
+  optional selections, typed decisions, and the two exact semantic errors.
+  The decoder rejects bad version/operation/enum/presence/domain/UTF-8/length,
+  truncated, appended, missing-suffix, and forbidden-suffix packets before
+  semantic execution. Both-mode parity covers the complete **176-case** M9c
+  corpus, all **17 phases x 6 inputs**, and **17 malformed classes**.
+- **Next:** select the next conflict-free pure family. M7c opponent generation
+  remains blocked until the main lane closes #55; generic BattleState reducer
+  replay remains outside the completed M8 planning seam.
+- **Notes:** Luna/max worker, two commits. Supervisor audited the packet and
+  adapter line-by-line and reran cargo **740 tests**, fmt, strict clippy,
+  release WASM, swap parity **3/3** in both modes, forced-WASM union **17 files
+  / 800/800**, and smoke **375/375**. Worker same-commit full npm was **1,037
+  files / 9,812 passed / 1 skip** plus build **661 modules**. Artifact is
+  **491,761 bytes**, sha256
+  `980bcf83cec1c2f5eb1b84160247dba2d7e5943b22bacc8fa9efc68d875b1f11`.
+  Scope was `core-rs/**` plus the single M2-allowed parity file
+  `tests/factorySwapParity.test.ts`; no canonical TypeScript or other lane
+  ledger was edited.
+
 ## R7 — [supervised session, 2026-08-13] **M9c Factory swap input reducer**
 
 - **State:** `rust-main` = current master `6edeb188` plus verified M9c
