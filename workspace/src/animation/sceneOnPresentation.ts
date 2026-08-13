@@ -113,6 +113,11 @@ import {
   type ReversalState,
 } from "./reversal.ts";
 import {
+  swallowAtAge,
+  type SwallowState,
+  type SwallowStockpileCount,
+} from "./swallow.ts";
+import {
   metallicShineAtAge,
   type MetallicShineState,
 } from "./metallicShine.ts";
@@ -838,6 +843,8 @@ export interface SceneOnPresentationBattler {
     | "ONIX"
     | "DROWZEE"
     | "KRABBY"
+    | "PELIPPER"
+    | "NUMEL"
     | "CRAWDAUNT"
     | "SURSKIT"
     | "KOFFING"
@@ -1941,6 +1948,17 @@ export interface SceneOnReversalConfig {
   readonly resolvedShake: Readonly<ReversalResolvedShakeReceipt>;
 }
 
+/** Narrow self-targeted seam; the caller owns immutable Stockpile state. */
+export interface SceneOnSwallowConfig {
+  readonly move: "SWALLOW";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly stockpileCount: SwallowStockpileCount;
+  readonly attackerPictureOffset: Readonly<{ x: number; y: number }>;
+  readonly attackerPictureYOffset: number;
+}
+
 export interface SceneOnSwaggerConfig {
   readonly move: "SWAGGER";
   readonly attacker: SceneOnPresentationBattler;
@@ -2804,6 +2822,7 @@ export type SceneOnMoveConfig =
   | SceneOnFocusEnergyConfig
   | SceneOnEndureConfig
   | SceneOnReversalConfig
+  | SceneOnSwallowConfig
   | SceneOnSwaggerConfig
   | SceneOnBulkUpConfig
   | SceneOnTauntConfig
@@ -3315,6 +3334,13 @@ export interface SceneOnReversalView extends ReversalState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly resolvedShake: Readonly<ReversalResolvedShakeReceipt>;
+}
+
+export interface SceneOnSwallowView extends SwallowState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly stockpileCount: SwallowStockpileCount;
 }
 
 export interface SceneOnSwaggerView extends SwaggerState {
@@ -6076,6 +6102,31 @@ export function sceneOnReversalView(
       state.config.attackerPictureOffset,
       state.config.targetPictureOffset,
       state.config.resolvedShake,
+    ),
+  };
+}
+
+/** `age=0` is Move_SWALLOW's first BLUE_ORB load display. */
+export function sceneOnSwallowView(
+  state: SceneOnMovePresentationState<SceneOnSwallowConfig>,
+): SceneOnSwallowView {
+  if (state.config.move !== "SWALLOW") {
+    throw new Error(
+      `expected SWALLOW presentation, got ${state.config.move}`,
+    );
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    stockpileCount: state.config.stockpileCount,
+    ...swallowAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.stockpileCount,
+      state.config.attacker.geometry.battlePositionCenter,
+      state.config.attackerPictureOffset,
+      state.config.attackerPictureYOffset,
     ),
   };
 }

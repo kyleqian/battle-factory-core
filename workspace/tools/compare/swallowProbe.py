@@ -13,10 +13,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
-    raise SystemExit("usage: swallowProbe.py <scenario.json> <output.json>")
+if len(sys.argv) not in (3, 4):
+    raise SystemExit("usage: swallowProbe.py <scenario.json> <output.json> [rgb-dir]")
 
-SCENARIO, OUTPUT = map(Path, sys.argv[1:])
+SCENARIO, OUTPUT = map(Path, sys.argv[1:3])
+RGB = Path(sys.argv[3]) if len(sys.argv) == 4 else None
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle" / "emerald_core.py").is_file())
 sys.path.insert(0, str(HARNESS / "oracle"))
@@ -53,6 +54,7 @@ def main() -> None:
     by_address = {address: name for address, name in pairs}
     symbols = oracle.symbols
     sprites = symbols["gSprites"]
+    matrices = symbols["gOamMatrices"]
     tasks = symbols["gTasks"]
     script_active = names["gAnimScriptActive"]
     script_ptr = names["sBattleAnimScriptPtr"]
@@ -60,6 +62,9 @@ def main() -> None:
     script_end = names["Move_TRANSFORM"]
     palette_tags = names["sSpritePaletteTags"]
     tile_tags = names["sSpriteTileRangeTags"]
+    software_oam = names["gMain"] + 0x38
+    if RGB is not None:
+        RGB.mkdir(parents=True, exist_ok=True)
 
     def u16(address: int) -> int:
         return oracle.read_u8(address) | (oracle.read_u8(address + 1) << 8)
@@ -71,6 +76,33 @@ def main() -> None:
         value = u16(address)
         return value - 0x10000 if value >= 0x8000 else value
 
+    def s8(address: int) -> int:
+        value = oracle.read_u8(address)
+        return value - 0x100 if value >= 0x80 else value
+
+    def raw(address: int, length: int) -> str:
+        return "".join(f"{oracle.read_u8(address + offset):02x}" for offset in range(length))
+
+    def ident(address: int) -> dict:
+        return {"address": address, "symbol": by_address.get(address & ~1)}
+
+    def audio_player(name: str) -> dict:
+        info = symbols[f"gMPlayInfo_{name}"]
+        tracks = symbols[f"gMPlayTrack_{name}"]
+        return {
+            "rawInfo": raw(info, 0x40),
+            "songHeader": u32(info),
+            "status": u32(info + 4),
+            "tracks": [
+                {
+                    "flags": oracle.read_u8(tracks + index * 0x50),
+                    "panX": s8(tracks + index * 0x50 + 0x15),
+                    "raw": raw(tracks + index * 0x50, 0x50),
+                }
+                for index in range(3)
+            ],
+        }
+
     def live_tasks() -> list[dict]:
         result = []
         for slot in range(16):
@@ -80,6 +112,8 @@ def main() -> None:
                 result.append({
                     "slot": slot,
                     "function": by_address.get(address, f"0x{address:08x}"),
+                    "func": ident(u32(base)),
+                    "raw": raw(base, 0x28),
                     "data": [s16(base + 8 + index * 2) for index in range(16)],
                 })
         return result
@@ -91,10 +125,19 @@ def main() -> None:
             if oracle.read_u8(base + 0x3E) & 1:
                 template = u32(base + 0x14) & ~1
                 callback = u32(base + 0x1C) & ~1
+                matrix_num = (u16(base + 2) >> 9) & 31
+                matrix = matrices + matrix_num * 8
                 result.append({
                     "slot": slot,
                     "template": by_address.get(template, f"0x{template:08x}"),
                     "callback": by_address.get(callback, f"0x{callback:08x}"),
+                    "templateId": ident(u32(base + 0x14)),
+                    "callbackId": ident(u32(base + 0x1C)),
+                    "raw": raw(base, 0x44),
+                    "attr": [u16(base + offset) for offset in (0, 2, 4)],
+                    "matrixNum": matrix_num,
+                    "matrix": [s16(matrix + offset) for offset in (0, 2, 4, 6)],
+                    "data": [s16(base + 0x2E + index * 2) for index in range(8)],
                 })
         return result
 
@@ -115,9 +158,15 @@ def main() -> None:
             source_seen = True
         if not source_seen:
             return
+        rgb = oracle.screen_rgb()
+        if RGB is not None:
+            (RGB / f"{frame:05d}.rgb").write_bytes(rgb)
         rows.append({
             "frame": frame,
+            "currentMove": MOVE_SWALLOW,
+            "sha256": hashlib.sha256(rgb).hexdigest(),
             "active": active_now,
+            "gAnimScriptActive": active_now,
             "scriptOffset": pointer - script_start if in_source else None,
             "attackerBattler": oracle.read_u8(symbols["gBattleAnimAttacker"]),
             "targetBattler": oracle.read_u8(symbols["gBattleAnimTarget"]),
@@ -142,9 +191,26 @@ def main() -> None:
                 by_address.get(u32(symbols[f"gMPlayInfo_{player}"]) & ~1)
                 for player in ("SE1", "SE2")
             ],
+            "se1": audio_player("SE1"),
+            "se2": audio_player("SE2"),
+            "battlers": snapshot["battlers"],
+            "parties": snapshot["parties"],
+            "immutableState": {
+                key: snapshot[key]
+                for key in ("battleOutcome", "weather", "weatherTurns", "sideStatuses", "sideConditions")
+            },
+            "softwareOam": [raw(software_oam + index * 8, 8) for index in range(128)],
+            "hardwareOam": [raw(0x07000000 + index * 8, 8) for index in range(128)],
+            "hardwareMatrices": [
+                [s16(0x07000006 + index * 0x20 + offset) for offset in (0, 8, 16, 24)]
+                for index in range(32)
+            ],
+            "fadedPalette": [u16(symbols["gPlttBufferFaded"] + index * 2) for index in range(512)],
+            "unfadedPalette": [u16(symbols["gPlttBufferUnfaded"] + index * 2) for index in range(512)],
+            "hardwarePalette": [u16(0x05000000 + index * 2) for index in range(512)],
             "paletteTags": [u16(palette_tags + index * 2) for index in range(16)],
             "tileTags": [u16(tile_tags + index * 2) for index in range(128)],
-            "rgb": oracle.screen_rgb(),
+            "rgb": rgb,
         })
         if source_seen and not active_now:
             done = True
@@ -292,6 +358,25 @@ def main() -> None:
             ),
         },
     }
+    if RGB is not None:
+        output = {
+            "schema": "swallow-dense-evidence/v1",
+            "oracleProfile": "battle-scene-on",
+            "setup": output["setup"],
+            "sourceWindow": output["sourceWindow"],
+            "branch": output["branch"],
+            "lifecycleCounts": lifecycle_counts,
+            "songHeaders": {
+                "SE_M_TAKE_DOWN": names["se_m_take_down"],
+                "SE_M_SPIT_UP": names["se_m_spit_up"],
+                "SE_M_ABSORB_2": names["se_m_absorb_2"],
+            },
+            "topology": output["topology"],
+            "tagPresence": tag_presence,
+            "registerValues": register_values,
+            "attackerHpRange": output["attackerHpRange"],
+            "frames": source,
+        }
     OUTPUT.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n")
     print(
         f"wrote {OUTPUT}: source {source[0]['frame']}..{source[-1]['frame']} "
