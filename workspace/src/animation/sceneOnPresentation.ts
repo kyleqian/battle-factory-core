@@ -326,6 +326,10 @@ import {
   type SynthesisSprite,
 } from "./synthesis.ts";
 import {
+  cosmicPowerAtAge,
+  type CosmicPowerState,
+} from "./cosmicPower.ts";
+import {
   aromatherapyAtAge,
   type AromatherapyState,
 } from "./aromatherapy.ts";
@@ -1559,6 +1563,14 @@ export interface SceneOnSynthesisConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for Cosmic Power's source-relative presentation. */
+export interface SceneOnCosmicPowerConfig {
+  readonly move: "COSMIC_POWER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnAromatherapyConfig {
   readonly move: "AROMATHERAPY";
   readonly attacker: SceneOnPresentationBattler;
@@ -2773,6 +2785,7 @@ export type SceneOnMoveConfig =
   | SceneOnNightShadeConfig
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
+  | SceneOnCosmicPowerConfig
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
@@ -4134,6 +4147,12 @@ export interface SceneOnSynthesisView {
   readonly sprites: readonly SynthesisSprite[];
 }
 
+export interface SceneOnCosmicPowerView extends CosmicPowerState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnAromatherapyView extends AromatherapyState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5084,6 +5103,25 @@ export function sceneOnSynthesisView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...synthesisEffectAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active Move_COSMIC_POWER source-script row. */
+export function sceneOnCosmicPowerView(
+  state: SceneOnMovePresentationState<SceneOnCosmicPowerConfig>,
+): SceneOnCosmicPowerView {
+  if (state.config.move !== "COSMIC_POWER") {
+    throw new Error(`expected COSMIC_POWER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...cosmicPowerAtAge(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
