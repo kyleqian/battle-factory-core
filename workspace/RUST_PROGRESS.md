@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R6 — [supervised session, 2026-08-13] **M8d native live-view constructor folded**
+
+- **State:** `rust-main` = master `fafcf933` plus verified M8d through
+  `1649c03d`. The complete pure `createFactoryAiViewFromLiveRules` projection
+  is native; no WASM export or adapter was added. `RUST_DEFERRED.md` has no
+  open entries.
+- **Did:** ported the source-shaped view with exact optional-property presence,
+  JS-number/bit-mask behavior, status and side conditions, M8a history slot-0
+  projection, M8c weather/stages, challenge defaults, and attacker-before-
+  target ability error ordering. The twice-byte-identical TS-executed corpus
+  has **17 cases** across 9 categories; sha256
+  `8020bcd29c0e9dc6fd48da3ff008ebbdf3dd3e8d4375fd7da246448a4e2d6186`.
+- **Next:** M8e — add the separate ABI-v1 boundary, adapter, and both-mode
+  parity suite for the live-view constructor; do not widen into decision
+  execution or the live driver.
+- **Notes:** Terra/max worker, 3 commits. Supervisor audited the complete TS/Rust
+  property mapping, regenerated the corpus twice, and reran cargo **716 tests**,
+  fmt, clippy, WASM, and smoke **375/375**. The rebuilt artifact is 391,563
+  bytes, sha256 `6b587cb1e3887a0ccc7ad3a4d2c40181044a100b61e2b0b1ffe8aac6ff8aeb99`;
+  worker same-commit full npm was **1,019 files / 9,718 passed / 1 skip** plus
+  build. Scope stayed within `core-rs/**`.
+
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
 - **State:** rust-main = master `ebd00cda`, which contains the verified M8a–M8c
