@@ -140,7 +140,9 @@ export function cosmicPowerAtAge(
     nonAttackerBlendTaskActive:
       (age >= 4 && age <= 17) || (age >= 181 && age <= 194),
     fadeToBgTaskActive: (age >= 19 && age <= 55) || (age >= 201 && age <= 238),
-    bldcnt: bldy === 0 ? 0 : 232,
+    bldcnt:
+      (age >= 20 && age <= 55) || (age >= 202 && age <= 238)
+        ? 232 : 0,
     bldy,
     resources: {
       sparkle2Loaded: age >= 0,

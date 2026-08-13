@@ -21,6 +21,7 @@ describe("Move_COSMIC_POWER source reducer", () => {
   it("models the measured fade and two-frame sliding BG cadence", () => {
     expect(cosmicPowerAtAge(19, "player", center).bldcnt).toBe(0);
     expect(cosmicPowerAtAge(20, "player", center).bldy).toBe(0);
+    expect(cosmicPowerAtAge(20, "player", center).bldcnt).toBe(232);
     expect(cosmicPowerAtAge(36, "player", center).bldy).toBe(16);
     expect(cosmicPowerAtAge(38, "player", center).background).toBe("cosmic");
     expect(cosmicPowerAtAge(40, "player", center).bg3vofs).toBe(1);
