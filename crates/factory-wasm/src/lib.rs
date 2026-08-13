@@ -4916,13 +4916,29 @@ const FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE: &str =
     "factory-wasm factoryAiLiveDecisionEngine: malformed input";
 
 #[derive(Debug)]
-enum LiveDecisionDecodeError {
-    Malformed,
-    Typed(String),
+struct LiveDecisionRequestWire {
+    kind: u8,
+    request_id: u32,
+    side: u8,
+    battler: u8,
+    legal_decisions: Vec<(u8, u8, u8)>,
 }
 
-fn decode_live_decision_request(
-    reader: &mut CheckedReader,
+fn decode_live_decision_request(reader: &mut CheckedReader) -> Result<LiveDecisionRequestWire, ()> {
+    let kind = reader.u8()?;
+    let request_id = reader.u32()?;
+    let side = reader.u8()?;
+    let battler = reader.u8()?;
+    let legal_count = reader.u8()? as usize;
+    let mut legal_decisions = Vec::with_capacity(legal_count);
+    for _ in 0..legal_count {
+        legal_decisions.push((reader.u8()?, reader.u8()?, reader.u8()?));
+    }
+    Ok(LiveDecisionRequestWire { kind, request_id, side, battler, legal_decisions })
+}
+
+fn validate_live_decision_request(
+    wire: LiveDecisionRequestWire,
 ) -> Result<
     (
         FactoryAiRequestKind,
@@ -4931,100 +4947,66 @@ fn decode_live_decision_request(
         u8,
         Vec<FactoryAiLegalDecision>,
     ),
-    LiveDecisionDecodeError,
+    String,
 > {
-    let kind = match reader
-        .u8()
-        .map_err(|()| LiveDecisionDecodeError::Malformed)?
-    {
+    let kind = match wire.kind {
         0 => FactoryAiRequestKind::Command,
         1 => FactoryAiRequestKind::ForcedSwitch,
         value => {
-            return Err(LiveDecisionDecodeError::Typed(format!(
+            return Err(format!(
                 "factory-wasm factoryAiEngine: invalid request kind {value}"
-            )))
+            ))
         }
     };
-    let request_id = reader
-        .u32()
-        .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-    let side = match reader
-        .u8()
-        .map_err(|()| LiveDecisionDecodeError::Malformed)?
-    {
+    let side = match wire.side {
         0 => FactoryAiDecisionSide::Player,
         1 => FactoryAiDecisionSide::Trainer,
         value => {
-            return Err(LiveDecisionDecodeError::Typed(format!(
+            return Err(format!(
                 "factory-wasm factoryAiEngine: invalid request side {value}"
-            )))
+            ))
         }
     };
-    let battler = reader
-        .u8()
-        .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-    let legal_count = reader
-        .u8()
-        .map_err(|()| LiveDecisionDecodeError::Malformed)? as usize;
-    if legal_count == 0 {
-        return Err(LiveDecisionDecodeError::Typed(
+    if wire.legal_decisions.is_empty() {
+        return Err(
             "Battle command request.legalDecisions must be a non-empty array, got ".to_owned(),
-        ));
+        );
     }
-    let mut legal_decisions = Vec::with_capacity(legal_count);
-    for _ in 0..legal_count {
-        let tag = reader
-            .u8()
-            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-        let first = reader
-            .u8()
-            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-        let second = reader
-            .u8()
-            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+    let mut legal_decisions = Vec::with_capacity(wire.legal_decisions.len());
+    for (tag, first, second) in wire.legal_decisions {
         legal_decisions.push(match tag {
             0 => FactoryAiLegalDecision::UseMove(FactoryAiMoveDecision {
-                move_slot: policy_move_slot(first).map_err(LiveDecisionDecodeError::Typed)?,
+                move_slot: policy_move_slot(first)?,
                 target_battler: second,
             }),
             1 => FactoryAiLegalDecision::Switch { party_index: first },
             value => {
-                return Err(LiveDecisionDecodeError::Typed(format!(
+                return Err(format!(
                     "factory-wasm factoryAiEngine: invalid legal decision tag {value}"
-                )))
+                ))
             }
         });
     }
-    Ok((kind, request_id, side, battler, legal_decisions))
+    Ok((kind, wire.request_id, side, wire.battler, legal_decisions))
 }
 
-fn decode_live_decision_turn_start(
-    reader: &mut CheckedReader,
-) -> Result<Option<FactoryAiTurnStartRandomNumber>, LiveDecisionDecodeError> {
-    match reader
-        .u8()
-        .map_err(|()| LiveDecisionDecodeError::Malformed)?
-    {
-        0 => {
-            reader
-                .u16()
-                .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-            Ok(None)
-        }
-        1 => {
-            reader
-                .u16()
-                .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-            Ok(Some(FactoryAiTurnStartRandomNumber::Decision))
-        }
+fn decode_live_decision_turn_start(reader: &mut CheckedReader) -> Result<(u8, u16), ()> {
+    Ok((reader.u8()?, reader.u16()?))
+}
+
+fn validate_live_decision_turn_start(
+    owner: u8,
+    value: u16,
+) -> Result<Option<FactoryAiTurnStartRandomNumber>, String> {
+    match owner {
+        0 => Ok(None),
+        1 => Ok(Some(FactoryAiTurnStartRandomNumber::Decision)),
         2 => Ok(Some(FactoryAiTurnStartRandomNumber::BattleTurnBoundary {
-            value: reader
-                .u16()
-                .map_err(|()| LiveDecisionDecodeError::Malformed)?,
+            value,
         })),
-        value => Err(LiveDecisionDecodeError::Typed(format!(
-            "factory-wasm factoryAiEngine: invalid turn-start owner {value}"
-        ))),
+        owner => Err(format!(
+            "factory-wasm factoryAiEngine: invalid turn-start owner {owner}"
+        )),
     }
 }
 
@@ -5091,32 +5073,32 @@ pub unsafe extern "C" fn fw_choose_factory_ai_live_decision(
     }
     // SAFETY: nonzero width, non-null pointer guard, and caller contract above.
     let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
-    let mut reader = CheckedReader::new(bytes);
-    let decoded_live = (|| {
-        let rules =
-            decode_live_view_rules(&mut reader).map_err(|()| LiveDecisionDecodeError::Malformed)?;
-        let history =
-            decode_battle_history(&mut reader).map_err(|()| LiveDecisionDecodeError::Malformed)?;
-        let challenge = decode_live_view_challenge(&mut reader)
-            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-        Ok((rules, history, challenge))
+    // Decode and finish the complete packet before evaluating any semantic
+    // content. Structural malformation always owns status 2, even when the
+    // live prefix would independently fail ability resolution.
+    let decoded = (|| {
+        let mut reader = CheckedReader::new(bytes);
+        let rules = decode_live_view_rules(&mut reader)?;
+        let history = decode_battle_history(&mut reader)?;
+        let challenge = decode_live_view_challenge(&mut reader)?;
+        let rng = BattleRngState { value: reader.u32()?, calls: reader.u32()? };
+        let request = decode_live_decision_request(&mut reader)?;
+        let turn_start = decode_live_decision_turn_start(&mut reader)?;
+        reader.finish()?;
+        Ok((rules, history, challenge, rng, request, turn_start))
     })();
-    let (rules, history, challenge) = match decoded_live {
+    let (rules, history, challenge, rng, request, turn_start) = match decoded {
         Ok(value) => value,
-        Err(LiveDecisionDecodeError::Malformed) => {
+        Err(()) => {
             return alloc_and_copy(&encode_live_view_message(
                 2,
                 FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
             ))
         }
-        Err(LiveDecisionDecodeError::Typed(message)) => {
-            return alloc_and_copy(&encode_live_view_message(1, &message))
-        }
     };
 
-    // Canonical `chooseWithTs` constructs the live view before validating the
-    // command request. Keep that semantic error order while retaining checked
-    // structural decoding for both packet sections.
+    // Canonical semantic order: live constructor, command request, then mask
+    // selection/chooser dispatch.
     let view =
         match factory_ai_live_view::create_factory_ai_view_from_live_rules(FactoryAiLiveViewInput {
             rules_context: &rules,
@@ -5126,45 +5108,15 @@ pub unsafe extern "C" fn fw_choose_factory_ai_live_decision(
             Ok(view) => view,
             Err(error) => return alloc_and_copy(&encode_live_view_message(1, &error.to_string())),
         };
-
-    let decoded_request = (|| {
-        let rng = BattleRngState {
-            value: reader
-                .u32()
-                .map_err(|()| LiveDecisionDecodeError::Malformed)?,
-            calls: reader
-                .u32()
-                .map_err(|()| LiveDecisionDecodeError::Malformed)?,
-        };
-        let (kind, request_id, side, battler, legal_decisions) =
-            decode_live_decision_request(&mut reader)?;
-        let turn_start_random_number = decode_live_decision_turn_start(&mut reader)?;
-        reader
-            .finish()
-            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
-        Ok((
-            rng,
-            kind,
-            request_id,
-            side,
-            battler,
-            legal_decisions,
-            turn_start_random_number,
-        ))
-    })();
-
-    let (rng, kind, request_id, side, battler, legal_decisions, turn_start_random_number) =
-        match decoded_request {
+    let (kind, request_id, side, battler, legal_decisions) =
+        match validate_live_decision_request(request) {
             Ok(value) => value,
-            Err(LiveDecisionDecodeError::Malformed) => {
-                return alloc_and_copy(&encode_live_view_message(
-                    2,
-                    FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
-                ))
-            }
-            Err(LiveDecisionDecodeError::Typed(message)) => {
-                return alloc_and_copy(&encode_live_view_message(1, &message))
-            }
+            Err(message) => return alloc_and_copy(&encode_live_view_message(1, &message)),
+        };
+    let turn_start_random_number =
+        match validate_live_decision_turn_start(turn_start.0, turn_start.1) {
+            Ok(value) => value,
+            Err(message) => return alloc_and_copy(&encode_live_view_message(1, &message)),
         };
 
     let result = live_decision_bridge::choose_factory_ai_decision_from_live_view(
