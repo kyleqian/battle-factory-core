@@ -1,3 +1,10 @@
+## 1239 — [MAIN worker, 2026-08-13] **CGB4 v38 fourth-track volume/pitch decision green**
+
+- **State:** #55 is source-exact through the selected-row **6,124-cycle** CGB4 prefix, stopping before `_081DDA62`'s fourth-track decrement/exit body.
+- **Did:** v38 freezes v37 evidence/report/three fresh OFF packets byte-for-byte and joins only `sourceStateDigest`. Frozen `fourthTrackFlags=0x80` plus source `MPT_FLG_VOLCHG|MPT_FLG_PITCHG=0x0f` takes `beq`; source/ELF/ROM bytes `0f 21 01 42 45 d0` price **12×3 = 36** cycles (**6,088 → 6,124**). Focused v37/v38 **10/10**; both v38 regenerations match.
+- **Next:** no follow-on began. A separate bounded step may scope only the fourth-track decrement/exit decision; keep later loop, broader MPlay/service/arbitration, live construction-clock wiring, presentation, animation, Rust, and retired canonical Battle-2 work null.
+- **Notes:** v38 evidence/doc `374076df…` / `420b7b30…`; focused **10/10**, smoke **375/375**, full npm **1,036 files / 9,809 passed / 1 skipped**, build **661 modules**. Exact-key schemas reject pointer/address/count/index/identity, trainer, battle index, canonical tick, receipt schedules, and unrelated future state. No `src/**`, ratchet, barrier, ROADMAP/DEFERRED, ISSUES, or oracle-pixel change.
+
 ## 1238 — [supervisor, 2026-08-13] **CGB4 v37 plus late lane folds verified**
 
 - **State:** #55 is source-exact through the selected-row **6,088-cycle**
