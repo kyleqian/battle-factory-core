@@ -349,6 +349,32 @@ At M8a landing, the generated data digest is
 generators validate their source/case shapes and are rerun twice for byte
 identity before committing.
 
+## Factory AI live-view projections (M8c)
+
+`crates/factory-core/src/factory_ai_live_view.rs` is the deliberately narrow
+native port of only `currentWeather(weather)` and `statStages(battler)` from
+`src/engine/factoryAiLiveDriver.ts:257-274`. It does not construct a live AI
+view, select a decision, own history, or cross the WASM boundary. Weather
+keeps the canonical Sun → Rain → Sandstorm → Hail precedence and JavaScript
+bitwise `ToInt32` semantics over the helper's `number` input; no weather is
+`None`. The raw weather masks cite
+`reference/pokeemerald/include/constants/battle.h:232-243`; returned values
+are the `AI_WEATHER_*` encoding cited in
+`src/engine/factoryAiCheckBadMove.ts:138-152`. Stat stages project exactly
+slots 1 through 7 as `{ atk, def, speed, spAtk, spDef, acc, evasion }`.
+
+The 25-case TypeScript-executed corpus includes every raw weather family,
+overlap precedence, non-finite/fractional/wrapped-number bitwise inputs, and
+distinct/signed-extreme stage rows for both attacker and target. Regenerate
+twice for byte identity:
+
+```sh
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.rs
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.rs
+```
+
 ## Ground rules
 
 - **The vitest suite is the spec gate.** A module counts as ported when

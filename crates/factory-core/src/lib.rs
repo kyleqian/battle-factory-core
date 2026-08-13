@@ -31,6 +31,8 @@ pub mod factory_ai_check_viability_m5d5_vectors_gen;
 pub mod factory_ai_check_viability_shell_vectors_gen;
 pub mod factory_ai_decision_policy;
 pub mod factory_ai_decision_policy_vectors_gen;
+pub mod factory_ai_live_view;
+pub mod factory_ai_live_view_vectors_gen;
 pub mod factory_ai_mask;
 pub mod factory_ai_mask_vectors_gen;
 pub mod factory_ai_scored_decision_vectors_gen;
