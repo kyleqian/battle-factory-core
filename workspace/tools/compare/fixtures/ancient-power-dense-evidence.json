@@ -1,0 +1,39 @@
+{
+  "schema": "ancient-power-dense-evidence/v1",
+  "status": "unsupported-staged",
+  "move": "MOVE_ANCIENT_POWER",
+  "profile": "battle-scene-on",
+  "source": {
+    "moveId": 246,
+    "carrierSetId": 75,
+    "carrierSpeciesId": 318,
+    "carrierLabel": "FRONTIER_MON_BALTOY",
+    "completePartyRecords": true,
+    "sourceWindow": { "startFrame": 225, "endFrame": 352, "frameCount": 128 }
+  },
+  "orientations": {
+    "player-back": {
+      "stateGzip": "tools/compare/evidence/ancient-power-player-dense-state.json.gz",
+      "stateGzipSha256": "462dfc1b8923a4afa09551610197d7c4012451ac282bcfc100aea5f9b57fbe54",
+      "rawRgbArchive": "tools/compare/evidence/ancient-power-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "5698f0c16e229dd3269163fbd8759bc2d8fffb68f7c96dcae4fa7904ed104c34",
+      "freshStateSha256": "fabfdb19a01548bff506dee275e5827f6b6d04ff393ed498f7953daac70a17f3",
+      "freshRawRgbSha256": "bd59ebbf7ef9918fc6c4a478f00d809b83f088948503de338f0162f1c241b3e4"
+    },
+    "opponent-front": {
+      "stateGzip": "tools/compare/evidence/ancient-power-opponent-dense-state.json.gz",
+      "stateGzipSha256": "a271c846aafab5753c62160ae48588c16ff4843621d29a07bf6069aaaf3de35e",
+      "rawRgbArchive": "tools/compare/evidence/ancient-power-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "b985835ae05e3b75d7fcdb5d8aedf518060603969797093c7118ff1669231f0b",
+      "freshStateSha256": "cad96a741987f7f48b751db754dda9f9fd9c045b641b35ec500c2a3610e52197",
+      "freshRawRgbSha256": "32d27b5fe45bb846b174e4f19c72044cccdefd50486a78f379c5744fb69a71be"
+    }
+  },
+  "twiceFresh": { "playerBack": true, "opponentFront": true, "byteIdenticalPerOrientation": true },
+  "topology": {
+    "tasks": ["AnimTask_ShakeMon2_Step", "Task_ClearMonBg", "Task_UpdateMonBg"],
+    "moveSprites": ["gAncientPowerRockSpriteTemplate", "gBasicHitSplatSpriteTemplate", "gSlideMonToOffsetSpriteTemplate", "gSlideMonToOriginalPosSpriteTemplate", "gShakeMonOrPlatformSpriteTemplate"],
+    "lifecycle": ["monbg", "setalpha", "clearmonbg", "blendoff"]
+  },
+  "residual": "No source/reducer-to-production framebuffer proof or Baltoy Scene-ON seam is claimed; next action is the bilateral compositor and exact latch proof."
+}
