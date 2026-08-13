@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R10 — [supervised session, 2026-08-13] **M10b draft projections**
+
+- **State:** `rust-main` = current master `cc8e1d3f` plus verified M10b
+  `11410fba` (merge head `e4ab5621`). The complete presentation-free draft
+  selection helper surface is native; no ABI or adapter was widened.
+- **Did:** ported `chosenMonSpecies` with rank-order emission, later-duplicate
+  overwrite, sparse-rank skipping, and above-three non-emission; ported
+  `selectedRentalParty` as a generic full-record projection with exact first
+  invalid/duplicate error ordering and missing-rank error. The coherent corpus
+  now has **180 cases / 23 categories**, with all **13 projection branches**;
+  sha256 `9264b667c3e7118c5a5d607bf73bd18d554b99d9708d82a0b40f1df34bb3c208`.
+- **Next:** M10c — expose the complete draft-selection helper surface through
+  one checked additive ABI-v1 packet, adapter, and both-mode parity suite.
+  Preserve optional `otId`, UTF-8 species/messages, exact semantic errors, and
+  forced-WASM no-fallback routing. Keep presentation/state construction out.
+- **Notes:** Sol/high worker, one commit. Supervisor audited Map/projection and
+  first-error semantics, regenerated twice, and reran cargo **750/750**,
+  focused vectors **6/6**, fmt, strict clippy, release WASM, and post-fold
+  smoke **375/375**. Artifact is **493,998 bytes**, sha256
+  `206c997958d5c54d5b0ebd0f400d23ee0dfd77008068bf9d26432cdd83b39c55`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+
 ## R9 — [supervised session, 2026-08-13] **M10a draft-selection helper leaf**
 
 - **State:** `rust-main` = current master `af0688fb` plus verified M9 and
