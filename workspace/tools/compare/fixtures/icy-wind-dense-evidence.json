@@ -1,0 +1,32 @@
+{
+  "schema": "icy-wind-dense-evidence/v1",
+  "status": "unsupported-evidence-checkpoint",
+  "move": "MOVE_ICY_WIND",
+  "moveId": 196,
+  "oracleProfile": "battle-scene-on",
+  "carrier": {"setId":31,"speciesId":220,"label":"FRONTIER_MON_SWINUB","species":"SPECIES_SWINUB","completeLegalParties":true},
+  "sourceIntervals": [
+    {"start":"0x082cc250","endExclusive":"0x082cc310","byteLength":192,"sha256":"2730d7d465bd48eae485f4351683f0582b800f58edda0ab4fddc716b8ee20979"},
+    {"start":"0x082d78f8","endExclusive":"0x082d79b4","byteLength":188,"sha256":"55c6515e31bbf7a417d3770528b7ab7ae634cb448bfa3a8de0fff6386cb2b4fa"}
+  ],
+  "orientations": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-icy-wind-player-swinub-opponent-onix.json","scenarioSha256":"c00ac32ecc74d9cc393ba012598d78a1ecdc2f14237e54f130e9c38f90400584",
+      "stateGzip":"tools/compare/evidence/icy-wind-player-dense-state.json.gz","stateGzipSha256":"f9825553fa3005a98f07d1c88792a74272414331fac427ddc66b370aecf5a8b3","uncompressedStateSha256":"31aa7cb83e053666eff73f87a7ca489dfbca2778dfa31c7d1bf5b346c27607a8",
+      "rawRgbArchive":"tools/compare/evidence/icy-wind-player-raw-rgb.tar.gz","rawRgbArchiveSha256":"c82430ef18580c554f7a4af810a1716fb4d5b0ed02aa527fc614043ba9929936","rawRgbSequenceSha256":"07b0434bd3ad8a3e2b2afa34377f753e7f6b1a7f7852dad5a1fd5b6c973dd41b",
+      "changeMap":"tools/compare/evidence/icy-wind-changemap-player.txt","changeMapSha256":"ce477d7853d5a54702fcd57d5993e99b4107f31beb869a119adef07ae4df9e77",
+      "sourcePointerSequenceSha256":"fd58a96f6b0c2ab1c34617076552007177dd0da9d1eb11820fbd2fd3aabce21a","observedTopologySha256":"f5d9b25fd0450d5bef2d0ea796f1c0f2978a417ffa4e10da4e579a11ee081053",
+      "snowballCallbackRows":{"AnimFastTranslateLinearWaitEnd":408,"AnimSwirlingSnowball_Step1":10,"AnimSwirlingSnowball_Step2":320,"AnimSwirlingSnowball_End":202}
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-icy-wind-opponent-swinub-player-onix.json","scenarioSha256":"d7daaeb65d94fd83f1f47752c228112a3ed62d00877bca80ef097191603293b0",
+      "stateGzip":"tools/compare/evidence/icy-wind-opponent-dense-state.json.gz","stateGzipSha256":"0f356e882abcb40853ed2163187063807f98a5124da2e0458e97b3b5a122fd25","uncompressedStateSha256":"ded4eceb288f9060eb3b09a3b31c172ec06811a785aede47bcfee1223be3c322",
+      "rawRgbArchive":"tools/compare/evidence/icy-wind-opponent-raw-rgb.tar.gz","rawRgbArchiveSha256":"634c3c8ca710c6aeaa0b3d457912cc621db7612335d68d44d8cbc976c0ea30d8","rawRgbSequenceSha256":"aa229485b31d554e2e65ff874b3046f254869517a6e3449836e4ec756ff9e512",
+      "changeMap":"tools/compare/evidence/icy-wind-changemap-opponent.txt","changeMapSha256":"20f6f7aed807320488a5685d3c52e089bf045e27d978274b7bbcd34022ec1493",
+      "sourcePointerSequenceSha256":"fd58a96f6b0c2ab1c34617076552007177dd0da9d1eb11820fbd2fd3aabce21a","observedTopologySha256":"f5d9b25fd0450d5bef2d0ea796f1c0f2978a417ffa4e10da4e579a11ee081053",
+      "snowballCallbackRows":{"AnimFastTranslateLinearWaitEnd":410,"AnimSwirlingSnowball_Step1":10,"AnimSwirlingSnowball_Step2":320,"AnimSwirlingSnowball_End":210}
+    }
+  },
+  "acceptance": {"window":"220..506","framesPerOrientation":287,"ownedPointerRows":"287/287 + 287/287","snowballCreates":"10 + 10","step2ReducerRows":"320/320 + 320/320","spikeCreates":"13 + 13","spikeCallbackRows":"455 + 455","oamLatchRows":"286/286 + 286/286","matrixLatchRows":"286/286 + 286/286","paletteLatchRows":"285/286 + 285/286; age 7 current-row monbg transfer","seamRows":"0/287 + 0/287","framebufferRows":"0/287 + 0/287","freshRuns":2},
+  "residual":"No typed Icy Wind seam or production compositor exists; all 287 bilateral production framebuffer rows remain unaccepted. Blizzard remains an independent unsupported sibling control."
+}
