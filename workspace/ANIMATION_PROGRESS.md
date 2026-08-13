@@ -1,3 +1,11 @@
+# MOVE_ICY_WIND source/component sibling checkpoint — remains unsupported (2026-08-13 worker)
+
+- **State:** Coverage remains **180/276 Level-50 exact**, 0 partial, 0 staged, and 96 unsupported. Icy Wind and Blizzard remain independently unpromoted; no dense oracle capture or compositor was added.
+- **Did:** Audited the complete generated graph and exclusive ROM intervals: `Move_ICY_WIND` + `IcyWindSwirlingSnowballs` **0x82cc250..0x82cc310 (192 bytes, `2730d7d4…`)**, and `IceSpikesEffectLong` **0x82d78f8..0x82d79b4 (188 bytes, `55c6515e…`)**. Pinned exact root call order/arguments, both 5-snowball batches, thirteen spikes, callbacks, assets, BG/palette/audio effects, cleanup, and lowest legal Level-50 carrier set **31**, internal species **220 SWINUB**.
+- **Shared boundary:** Only the selected `ANIM_TAG_ICE_CRYSTALS` / `gSwirlingSnowballSpriteTemplate` component reuses Blizzard's source-derived 32-write Step2 math. Icy Wind inherits no Blizzard ages, latches, receipts, seam, compositor, or acceptance; ICE_SPIKES/`AnimWaveFromCenterOfTarget`, BG_ICE, palette schedule, and audio are exclusive.
+- **Next:** Capture complete bilateral Icy Wind Scene-ON source windows; prove linear/Step1/Step2/End and spike OAM/animation/palette/BG/register/audio latches; add a typed seam and source-derived compositor; require complete twice-fresh dense production framebuffer equality through cleanup before promoting Icy Wind alone.
+- **Notes:** Focused Icy Wind + Blizzard **9/9** and standalone source audit pass. No gameplay/RNG/controller/facility state, boundary widening, coverage ledger, production renderer, absolute-tick/framebuffer lookup, coordinate/RGB fitting, or sibling promotion changed.
+
 # MOVE_BLIZZARD corrective evidence checkpoint — remains unsupported (2026-08-13 worker)
 
 - **State:** Coverage remains **180/276 Level-50 exact**, 0 partial, 0 staged, and 96 unsupported. Blizzard and Icy Wind remain independently unpromoted; seam/framebuffer acceptance is **0/372 + 0/361**.
