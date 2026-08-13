@@ -47,6 +47,8 @@ pub mod factory_ai_switch_policy;
 pub mod factory_ai_switch_policy_vectors_gen;
 pub mod factory_ai_try_to_faint;
 pub mod factory_ai_try_to_faint_vectors_gen;
+pub mod factory_draft_selection;
+pub mod factory_draft_selection_vectors_gen;
 pub mod factory_swap;
 pub mod factory_swap_vectors_gen;
 pub mod factory_trainer_schedule;
