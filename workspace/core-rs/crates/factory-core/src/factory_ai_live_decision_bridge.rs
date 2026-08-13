@@ -30,6 +30,7 @@ use crate::factory_ai_live_view::{
     FactoryAiScoredBattlerView as LiveBattlerView, FactoryAiScoredTargetView as LiveTargetView,
     FactoryAiScoredView as LiveScoredView,
 };
+use crate::factory_ai_mask::{select_factory_ai_mask, FactoryAiMaskError};
 use crate::gen_tables;
 
 /// `Cmd_get_ability` cannot observe an arbitrary history string as one of the
@@ -52,6 +53,7 @@ enum PolicyFlavor {
 pub enum FactoryAiLiveDecisionError {
     MaskZeroPolicy(FactoryAiDecisionPolicyError),
     ScoredPolicy(FactoryAiScoredDecisionError),
+    MaskSelection(FactoryAiMaskError),
     InvalidInteger { field: &'static str },
     KnownMoveHistoryTooLong { length: usize },
 }
@@ -61,6 +63,9 @@ impl std::fmt::Display for FactoryAiLiveDecisionError {
         match self {
             Self::MaskZeroPolicy(error) => error.fmt(f),
             Self::ScoredPolicy(error) => error.fmt(f),
+            Self::MaskSelection(error) => {
+                write!(f, "Factory AI mask selection failed: {error}")
+            }
             Self::InvalidInteger { field } => {
                 write!(
                     f,
@@ -86,6 +91,35 @@ pub struct FactoryAiLiveDecisionInput<'a> {
     pub request: FactoryAiMovePolicyRequest<'a>,
     pub rng: BattleRngState,
     pub turn_start_random_number: Option<FactoryAiTurnStartRandomNumber>,
+}
+
+/// The dispatch result for the live driver's mask-selected move chooser.
+/// Keeping the two concrete choices in one enum lets the WASM boundary reuse
+/// the existing complete receipt encoders without reconstructing a second
+/// policy result or dropping the mask-specific trace fields.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FactoryAiLiveDecisionChoice {
+    MaskZero(FactoryAiMaskZeroDecisionChoice),
+    Scored(FactoryAiScoredChoice),
+}
+
+/// Constructs the source-shaped view's compact policy projection and selects
+/// the existing mask-0 or mask-1/mask-7 chooser.  The selector is only a
+/// dispatch read; each existing chooser remains the owner of its complete
+/// validation, RNG, scoring, tie, and receipt semantics.
+pub fn choose_factory_ai_decision_from_live_view(
+    input: FactoryAiLiveDecisionInput<'_>,
+) -> Result<FactoryAiLiveDecisionChoice, FactoryAiLiveDecisionError> {
+    let factory = project_factory(&input.view, PolicyFlavor::MaskZero)?;
+    let selection =
+        select_factory_ai_mask(factory).map_err(FactoryAiLiveDecisionError::MaskSelection)?;
+    if selection.mask == 0 {
+        choose_factory_ai_mask_zero_decision_from_live_view(input)
+            .map(FactoryAiLiveDecisionChoice::MaskZero)
+    } else {
+        choose_factory_ai_scored_decision_from_live_view(input)
+            .map(FactoryAiLiveDecisionChoice::Scored)
+    }
 }
 
 /// Runs the existing native mask-0 chooser from a view produced by

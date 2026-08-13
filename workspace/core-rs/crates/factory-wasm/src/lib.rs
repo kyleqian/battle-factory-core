@@ -34,6 +34,9 @@ use factory_core::factory_ai_decision_policy::{
     FactoryAiScoredDecisionInput, FactoryAiScoredDraw, FactoryAiScoredTargetView,
     FactoryAiScoredView, FactoryAiTurnStartRandomNumber,
 };
+use factory_core::factory_ai_live_decision_bridge::{
+    self as live_decision_bridge, FactoryAiLiveDecisionChoice, FactoryAiLiveDecisionInput,
+};
 use factory_core::factory_ai_live_view::{
     self, FactoryAiChallengePolicy, FactoryAiLiveRulesBattler, FactoryAiLiveRulesContext,
     FactoryAiLiveViewInput, FactoryAiScoredBattlerView as LiveScoredBattlerView,
@@ -4329,6 +4332,10 @@ impl<'a> CheckedReader<'a> {
         Ok(self.take(1)?[0])
     }
 
+    fn u16(&mut self) -> Result<u16, ()> {
+        Ok(u16::from_le_bytes(self.take(2)?.try_into().unwrap()))
+    }
+
     fn u32(&mut self) -> Result<u32, ()> {
         Ok(u32::from_le_bytes(self.take(4)?.try_into().unwrap()))
     }
@@ -4900,6 +4907,271 @@ pub unsafe extern "C" fn fw_create_factory_ai_view_from_live_rules(
             2,
             FACTORY_AI_LIVE_VIEW_MALFORMED_MESSAGE,
         )),
+    }
+}
+
+// --- Factory AI live-view -> move chooser (additive ABI v1) -------------
+
+const FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE: &str =
+    "factory-wasm factoryAiLiveDecisionEngine: malformed input";
+
+#[derive(Debug)]
+enum LiveDecisionDecodeError {
+    Malformed,
+    Typed(String),
+}
+
+fn decode_live_decision_request(
+    reader: &mut CheckedReader,
+) -> Result<
+    (
+        FactoryAiRequestKind,
+        u32,
+        FactoryAiDecisionSide,
+        u8,
+        Vec<FactoryAiLegalDecision>,
+    ),
+    LiveDecisionDecodeError,
+> {
+    let kind = match reader
+        .u8()
+        .map_err(|()| LiveDecisionDecodeError::Malformed)?
+    {
+        0 => FactoryAiRequestKind::Command,
+        1 => FactoryAiRequestKind::ForcedSwitch,
+        value => {
+            return Err(LiveDecisionDecodeError::Typed(format!(
+                "factory-wasm factoryAiEngine: invalid request kind {value}"
+            )))
+        }
+    };
+    let request_id = reader
+        .u32()
+        .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+    let side = match reader
+        .u8()
+        .map_err(|()| LiveDecisionDecodeError::Malformed)?
+    {
+        0 => FactoryAiDecisionSide::Player,
+        1 => FactoryAiDecisionSide::Trainer,
+        value => {
+            return Err(LiveDecisionDecodeError::Typed(format!(
+                "factory-wasm factoryAiEngine: invalid request side {value}"
+            )))
+        }
+    };
+    let battler = reader
+        .u8()
+        .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+    let legal_count = reader
+        .u8()
+        .map_err(|()| LiveDecisionDecodeError::Malformed)? as usize;
+    let mut legal_decisions = Vec::with_capacity(legal_count);
+    for _ in 0..legal_count {
+        let tag = reader
+            .u8()
+            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        let first = reader
+            .u8()
+            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        let second = reader
+            .u8()
+            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        legal_decisions.push(match tag {
+            0 => FactoryAiLegalDecision::UseMove(FactoryAiMoveDecision {
+                move_slot: policy_move_slot(first).map_err(LiveDecisionDecodeError::Typed)?,
+                target_battler: second,
+            }),
+            1 => FactoryAiLegalDecision::Switch { party_index: first },
+            value => {
+                return Err(LiveDecisionDecodeError::Typed(format!(
+                    "factory-wasm factoryAiEngine: invalid legal decision tag {value}"
+                )))
+            }
+        });
+    }
+    Ok((kind, request_id, side, battler, legal_decisions))
+}
+
+fn decode_live_decision_turn_start(
+    reader: &mut CheckedReader,
+) -> Result<Option<FactoryAiTurnStartRandomNumber>, LiveDecisionDecodeError> {
+    match reader
+        .u8()
+        .map_err(|()| LiveDecisionDecodeError::Malformed)?
+    {
+        0 => {
+            reader
+                .u16()
+                .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+            Ok(None)
+        }
+        1 => {
+            reader
+                .u16()
+                .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+            Ok(Some(FactoryAiTurnStartRandomNumber::Decision))
+        }
+        2 => Ok(Some(FactoryAiTurnStartRandomNumber::BattleTurnBoundary {
+            value: reader
+                .u16()
+                .map_err(|()| LiveDecisionDecodeError::Malformed)?,
+        })),
+        value => Err(LiveDecisionDecodeError::Typed(format!(
+            "factory-wasm factoryAiEngine: invalid turn-start owner {value}"
+        ))),
+    }
+}
+
+fn encode_live_decision_choice(choice: FactoryAiLiveDecisionChoice) -> Vec<u8> {
+    match choice {
+        FactoryAiLiveDecisionChoice::MaskZero(choice) => encode_mask_zero_choice(Ok(choice)),
+        FactoryAiLiveDecisionChoice::Scored(choice) => encode_scored_choice(Ok(choice)),
+    }
+}
+
+/// Runs the complete live Factory AI move chooser through one additive
+/// ABI-v1 packet. The source-shaped rules/history/challenge prefix is exactly
+/// the `fw_create_factory_ai_view_from_live_rules` input; the suffix adds the
+/// authoritative request, RNG cursor, and turn-start ownership. Rust builds
+/// the live view, dispatches the existing M8g bridge, and reuses the existing
+/// complete mask/scored receipt encoders.
+///
+/// # Input layout (all integers little-endian)
+///
+/// The packet has the variable-width live-view constructor layout documented
+/// on `fw_create_factory_ai_view_from_live_rules`, followed by:
+///
+/// ```text
+/// rng.value:u32, rng.calls:u32,
+/// request.kind:u8 (0=command, 1=forced-switch), request.request_id:u32,
+/// request.side:u8 (0=player, 1=trainer), request.battler:u8,
+/// request.legal_count:u8,
+/// request.legal_decisions[legal_count]: tag:u8, slot_or_party:u8, target:u8
+/// turn_start.owner:u8 (0=legacy/absent, 1=decision, 2=battle-boundary),
+/// turn_start.value:u16 (ignored for owners 0/1)
+/// ```
+///
+/// Legal decision records use the existing policy tags: 0 is a move
+/// (`slot,target`) and 1 is a switch (`party_index,ignored`). The live
+/// driver normally supplies only move records; retaining the switch tag keeps
+/// the native chooser's exact production guard reachable for malformed or
+/// staged callers. The output is the existing complete chooser layout from
+/// `fw_choose_factory_ai_mask_zero_decision` or
+/// `fw_choose_factory_ai_scored_decision`: status 0 is the full submission,
+/// final RNG, mask receipt, ordered draw receipt, scores, tie, scripts, and
+/// turn ownership; status 1 is an exact typed production error; status 2 is
+/// the fixed malformed-packet message below.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes. Null or
+/// empty input is rejected with status 2 and never dereferenced.
+#[no_mangle]
+pub unsafe extern "C" fn fw_choose_factory_ai_live_decision(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_ptr.is_null() && input_len != 0 {
+        return alloc_and_copy(&encode_live_view_message(
+            2,
+            FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
+        ));
+    }
+    let input_len = input_len as usize;
+    if input_len == 0 {
+        return alloc_and_copy(&encode_live_view_message(
+            2,
+            FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
+        ));
+    }
+    // SAFETY: nonzero width, non-null pointer guard, and caller contract above.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
+    let decoded = (|| {
+        let mut reader = CheckedReader::new(bytes);
+        let rules =
+            decode_live_view_rules(&mut reader).map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        let history =
+            decode_battle_history(&mut reader).map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        let challenge = decode_live_view_challenge(&mut reader)
+            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        let rng = BattleRngState {
+            value: reader
+                .u32()
+                .map_err(|()| LiveDecisionDecodeError::Malformed)?,
+            calls: reader
+                .u32()
+                .map_err(|()| LiveDecisionDecodeError::Malformed)?,
+        };
+        let (kind, request_id, side, battler, legal_decisions) =
+            decode_live_decision_request(&mut reader)?;
+        let turn_start_random_number = decode_live_decision_turn_start(&mut reader)?;
+        reader
+            .finish()
+            .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        Ok((
+            rules,
+            history,
+            challenge,
+            rng,
+            kind,
+            request_id,
+            side,
+            battler,
+            legal_decisions,
+            turn_start_random_number,
+        ))
+    })();
+
+    let (
+        rules,
+        history,
+        challenge,
+        rng,
+        kind,
+        request_id,
+        side,
+        battler,
+        legal_decisions,
+        turn_start_random_number,
+    ) = match decoded {
+        Ok(value) => value,
+        Err(LiveDecisionDecodeError::Malformed) => {
+            return alloc_and_copy(&encode_live_view_message(
+                2,
+                FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
+            ))
+        }
+        Err(LiveDecisionDecodeError::Typed(message)) => {
+            return alloc_and_copy(&encode_live_view_message(1, &message))
+        }
+    };
+
+    let view =
+        match factory_ai_live_view::create_factory_ai_view_from_live_rules(FactoryAiLiveViewInput {
+            rules_context: &rules,
+            history: &history,
+            challenge,
+        }) {
+            Ok(view) => view,
+            Err(error) => return alloc_and_copy(&encode_live_view_message(1, &error.to_string())),
+        };
+    let result = live_decision_bridge::choose_factory_ai_decision_from_live_view(
+        FactoryAiLiveDecisionInput {
+            view: &view,
+            request: FactoryAiMovePolicyRequest {
+                kind,
+                request_id,
+                side,
+                battler,
+                legal_decisions: &legal_decisions,
+            },
+            rng,
+            turn_start_random_number,
+        },
+    );
+    match result {
+        Ok(choice) => alloc_and_copy(&encode_live_decision_choice(choice)),
+        Err(error) => alloc_and_copy(&encode_live_view_message(1, &error.to_string())),
     }
 }
 
