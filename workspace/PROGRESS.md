@@ -5,6 +5,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1240 — [MAIN worker, 2026-08-13] **CGB4 v39 fourth-track decrement/exit decision green**
+
+- **State:** #55 is source-exact through the selected-row **6,136-cycle** CGB4 prefix, stopping at `_081DDA62` before either successor body.
+- **Did:** v39 freezes v38 evidence/report and inherited v37 three fresh OFF packets byte-for-byte, with predecessor regeneration. All three address-free joins retain only `sourceStateDigest` + `r2BeforeDecrement=7`; exact source/ELF/ROM `01 3a 02 dd` at `0x082DFC9A` makes `subs; ble _081DDA6C` not taken (**4×3 = 12**, **6,124 → 6,136**). The source-priced zero/negative exit is fail-closed at **10** cycles including its taken refill.
+- **Next:** no successor body began. A separate bounded step may scope only the positive fourth-track continuation decision; retain the exit body, wider loop, MPlay/service/arbitration, live wiring, presentation, animation, Rust, and retired canonical Battle-2 work as null.
+- **Notes:** v39 evidence/doc `86286add…` / `14fd2f23…`; focused v38/v39 **13/13**, smoke **375/375**, full npm **1,037 files / 9,817 passed / 1 skipped**, build **661 modules**. Exact-key schemas reject trainer, battle index, canonical tick, receipt schedules, pointer/address/count/index/identity/channel/frame/duration/condition, and unrelated future state. No `src/**`, ratchet/barrier, ROADMAP/DEFERRED, ISSUES, or oracle-pixel change.
+
 ## 1239 — [MAIN worker, 2026-08-13] **CGB4 v38 fourth-track volume/pitch decision green**
 
 - **State:** #55 is source-exact through the selected-row **6,124-cycle** CGB4 prefix, stopping before `_081DDA62`'s fourth-track decrement/exit body.
@@ -35,23 +42,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   completed cleanly. Production soaks remain vanilla **20/20** and full
   **60/60**, with **0 crashes / 0 hangs**. Both persistent lane heads are
   folded and have no commits ahead of master.
-
-## 1237 — [MAIN worker, 2026-08-13] **CGB4 v37 fourth-track EXIST decision green**
-
-- **State:** #55 is source-exact through the same three selected-row **6,088-cycle**
-  CGB4 prefix, stopping before `_081DD9D0`'s mask/body.
-- **Did:** captured two fresh serial Battle Scene OFF packet sets with a
-  pointer-bounded fourth iteration. Exact-key packets retain only
-  `sourceStateDigest` + `fourthTrackFlags`; all three observed values are
-  **0x80**, so EXIST is set and `beq` is not taken: **8 cycles/row, +24**
-  (**6,064 → 6,088**). Source/ELF/exact ROM price the absent clear route at
-  **14** cycles with its taken refill; v37 regenerates twice byte-stably and
-  freezes v36 exactly.
-- **Next:** run smoke, full npm, and build; keep mask/body, later loop, exit
-  successor, broader MPlay/service/arbitration, construction-clock wiring,
-  presentation, animation, Rust, and retired canonical Battle-2 work null.
-- **Notes:** focused v36/v37 **11/11**; v37 evidence/doc
-  `59c5f83c…` / `5cf3314a…`; fresh packet hashes anchor `4dad511a…`, LILIANA
-  `8afcc0ba…`, legal-varied `6f202501…` (repeat identical). No `src/**`,
-  shared interfaces, ROADMAP/ISSUES/DEFERRED, ratchet, barrier, or canonical
-  Battle-2 change.
