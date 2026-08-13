@@ -42751,3 +42751,24 @@ git; the current live ledger keeps the three load-bearing entries only.
   **1,018 files / 9,714 passed / 1 skipped** and build **659 modules**. The
   pre-rebuild parity failure correctly exposed the stale artifact. No main
   ratchet, unsupported-barrier, or canonical Battle-2 change.
+## 1230 — [MAIN worker, 2026-08-13] **CGB4 v32 second-track continuation green**
+
+- **State:** #55 is source-exact through the same three selected-row
+  **5,956-cycle** CGB4 prefix, stopping immediately before
+  `_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]`.
+- **Did:** froze all v31 evidence/report/packets byte-for-byte, retained only
+  their three `sourceStateDigest` associations, and added no fresh oracle
+  scalar. Source/ELF/exact-ROM close `50 20 2d 18 ad dc` for `movs; adds;
+  taken bgt`: **12×3 = 36** cycles from **5,920 → 5,956**. Red-first Tier-1
+  pins cover empty-input containment, the IWRAM signed-positive proof,
+  branch refill, frozen artifacts, and two byte-stable regenerations.
+- **Next:** separately scope only `_081DD9C8` if needed; keep actual
+  pointer/count/index/identity/channel, next-track flags/body, either exit
+  successor, broader MPlay/service/arbitration, and construction-clock wiring
+  null.
+- **Notes:** v32 evidence/doc `6301f67a…` / `e818d931…`; frozen v31 evidence/
+  doc `ee0a10bb…` / `57abe28a…` and packets anchor `6a4af5ec…`, LILIANA
+  `4b13624c…`, legal-varied `ad82e79e…`. Focused v32 **4/4**, v31 **8/8**,
+  smoke **375/375**, final npm **1,024 files / 9,745 passed / 1 skipped**,
+  build **660 modules**. No `src/**`, presentation, animation/Rust, ratchet,
+  unsupported-barrier, or canonical Battle-2 change.

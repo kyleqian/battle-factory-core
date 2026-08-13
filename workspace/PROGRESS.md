@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1233 — [supervisor, 2026-08-13] **CGB4 v34 and lane union green**
+
+- **State:** #55 is source-exact through the three selected-row **6,016-cycle**
+  CGB4 prefix. Cosmic Power is corrected and exact at **179/276** Level-50
+  moves; Rust M8f/M8g replay and live chooser bridge are folded. Both
+  persistent lane tips are contained.
+- **Did:** independently reran v34 **5/5**, folded animation through
+  `90e24dc4` and Rust through `2b1b276e`, audited both lane ledgers, ran native
+  Rust, rebuilt WASM, forced every established parity suite through WASM, and
+  verified the full TypeScript union.
+- **Next:** capture/source-close only the third-track `_081DDA62` decrement/
+  exit decision for the same three frozen rows. Keep pointer/address/count/
+  index/identity/channel, successor bodies, broader MPlay/service/arbitration,
+  construction-clock wiring, and retired canonical Battle-2 work null.
+- **Notes:** Rust **722/722 tests**; WASM **417,761 bytes** (`68e9768c…`),
+  forced parity **14 files / 790 passed**; union npm **1,026 files / 9,756
+  passed / 1 skipped**, build **660 modules**. No main ratchet or
+  unsupported-barrier change.
+
 ## 1232 — [MAIN worker, 2026-08-13] **CGB4 v34 third-track volume/pitch decision green**
 
 - **State:** #55 is source-exact through the same three selected-row **6,016-cycle**
@@ -46,25 +65,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   identical). Focused v33/v32 **9/9**, smoke **375/375**, final npm **1,025
   files / 9,750 passed / 1 skipped**, build **660 modules**. No `src/**`,
   ratchet, unsupported-barrier, or canonical Battle-2 change.
-
-## 1230 — [MAIN worker, 2026-08-13] **CGB4 v32 second-track continuation green**
-
-- **State:** #55 is source-exact through the same three selected-row
-  **5,956-cycle** CGB4 prefix, stopping immediately before
-  `_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]`.
-- **Did:** froze all v31 evidence/report/packets byte-for-byte, retained only
-  their three `sourceStateDigest` associations, and added no fresh oracle
-  scalar. Source/ELF/exact-ROM close `50 20 2d 18 ad dc` for `movs; adds;
-  taken bgt`: **12×3 = 36** cycles from **5,920 → 5,956**. Red-first Tier-1
-  pins cover empty-input containment, the IWRAM signed-positive proof,
-  branch refill, frozen artifacts, and two byte-stable regenerations.
-- **Next:** separately scope only `_081DD9C8` if needed; keep actual
-  pointer/count/index/identity/channel, next-track flags/body, either exit
-  successor, broader MPlay/service/arbitration, and construction-clock wiring
-  null.
-- **Notes:** v32 evidence/doc `6301f67a…` / `e818d931…`; frozen v31 evidence/
-  doc `ee0a10bb…` / `57abe28a…` and packets anchor `6a4af5ec…`, LILIANA
-  `4b13624c…`, legal-varied `ad82e79e…`. Focused v32 **4/4**, v31 **8/8**,
-  smoke **375/375**, final npm **1,024 files / 9,745 passed / 1 skipped**,
-  build **660 modules**. No `src/**`, presentation, animation/Rust, ratchet,
-  unsupported-barrier, or canonical Battle-2 change.
