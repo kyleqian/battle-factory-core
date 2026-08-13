@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R6 — [supervised session, 2026-08-13] **M8d–M8h live driver through WASM chooser**
+## R6 — [supervised session, 2026-08-13] **M8d–M8i live driver through pure action planning**
 
-- **State:** `rust-main` = master `fafcf933` plus verified M8d–M8h through
-  `f3e40c0d`. The complete pure `createFactoryAiViewFromLiveRules` projection
+- **State:** `rust-main` = master `fafcf933` plus verified M8d–M8i through
+  `053760d9`. The complete pure `createFactoryAiViewFromLiveRules` projection
   and source-shaped mask-0/1/7 move chooser are native and WASM differential-
   green end-to-end; the live driver's private RNG replay/checkpoint leaf is
   native, and a single native projection drives every existing chooser.
@@ -46,9 +46,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   mask ordering. Forced WASM calls the export directly with no TS fallback.
   Parity covers **12 cases / 9 categories**, exact errors, eight-entry history,
   u32 RNG edges, and malformed prefix/suffix combinations.
-- **Next:** M8i — compose the pure switch-or-move planning boundary over the
-  existing native switch-policy and live-chooser leaves without pulling in the
-  generic BattleState reducer. M7c opponent generation still waits on #55.
+- **M8i DONE:** added the native-only pure planning prefix of
+  `submitLiveFactoryAiDecision`, composing history sync, live view, switch
+  policy, selected-switch bypass, move filtering, and the live chooser without
+  the generic BattleState reducer. Scored moves retain battle-turn-boundary
+  ownership of the stored random number. The twice-identical canonical-driver
+  corpus has **12 cases / 10 categories**; sha256
+  `dd298a0fbf083b0e6d01749ca9b36af34b0467c80269833e705d375493fd54b3`.
+- **Next:** M8j — expose the M8i planner through one additive WASM/app parity
+  boundary derived atomically from one source-shaped rules packet, then leave
+  generic reducer replay/submission for a later seam. M7c opponent generation
+  still waits on #55.
 - **Notes:** Terra/max worker, 3 commits. Supervisor audited the complete TS/Rust
   property mapping, regenerated the corpus twice, and reran cargo **716 tests**,
   fmt, clippy, WASM, and smoke **375/375**. The rebuilt artifact is 391,563
@@ -80,7 +88,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   9,727 passed / 1 skip**, and build. Artifact: 434,944 bytes, sha256
   `81df933139ea8ea7f4d4e1cfcd1d0788408ec84291cfbfcb9496d73d9c9e0107`.
   M8h scope stayed within `core-rs/**` plus its one newly authorized parity
-  file; no canonical TS engine or existing test/config changed.
+  file; no canonical TS engine or existing test/config changed. M8i used
+  Terra/max. Supervisor audited its composition/order, regenerated the corpus
+  twice, and reran focused parity **2/2**, cargo **726 tests**, fmt, clippy,
+  WASM, and smoke **375/375**. Worker same-commit full npm was **1,021 files /
+  9,727 passed / 1 skip** plus build. Artifact: 416,805 bytes, sha256
+  `e47a6a361a8c04fa2fc116edcfb2192b4c4aa10724075450eecc0468950caed1`.
+  M8i stayed entirely inside `core-rs/**`; no WASM export, adapter, canonical
+  TS engine, or TS test/config changed.
 
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
