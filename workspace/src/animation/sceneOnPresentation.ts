@@ -887,6 +887,7 @@ export interface SceneOnPresentationBattler {
     | "SKIPLOOM"
     | "RELICANTH"
     | "LUNATONE"
+    | "ELECTRIKE"
     | "SHUPPET"
     | "PLUSLE"
     | "MINUN"
