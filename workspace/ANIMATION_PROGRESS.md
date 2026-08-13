@@ -1,3 +1,11 @@
+# MOVE_COSMIC_POWER bilateral dense evidence + source seam checkpoint — remains unsupported (2026-08-13 worker)
+
+- **State:** Level-50 coverage remains **178/276 exact**, 0 partial, and **98 unsupported**. Cosmic Power is not promoted; GrantingStars, palette, BG, and audio siblings remain independent.
+- **Did:** Pinned the exclusive `Move_COSMIC_POWER` interval **0x082d5f5d..0x082d5fe2**, true lowest Level-50 source carrier **set 222 FRONTIER_MON_LUNATONE_1** (species 337, move 322), and complete legal custom three-Pokémon Scene-ON parties in both player-back and opponent-front orientations. Added the pure source-relative reducer, typed seam, source-derived LUNATONE/ONIX/SPARKLE_2/BG_COSMIC compositor, Tier-1 timing pins, and banked full-state/raw-RGB/change-map receipts.
+- **Verified:** Twice fresh per orientation, each dense window is **241/241** through first inactive cleanup: player-back **74..314** (`f935f6bb…` full state, `bdd6044c…` raw RGB, `c7807dcf…` map) and opponent-front **78..318** (`c85e8126…`, `c5eab062…`, `ee190a63…`). Source reducer/task/OAM/palette/register/audio schedules are pinned. Production-framebuffer equality and a portable live verifier were not completed within this step, so no coverage promotion is claimed.
+- **Next:** Add the portable twice-fresh verifier and close the production framebuffer compositor/latch comparison across all 241 rows in both orientations; retain sibling audit-only status and require the complete promotion bar before moving 178→179 exact.
+- **Notes:** Evidence: `tools/compare/fixtures/cosmic-power-*.json`, `tools/compare/evidence/cosmic-power-*`; legal scenarios: `tools/battle-lab/mechanic-cosmic-power-*.json`. No gameplay/damage/stat/RNG/turn/controller/facility state, boundary, barrier, canonical recording, absolute-tick branch, per-frame framebuffer/RGB lookup, coordinate fitting, or sibling promotion changed.
+
 # MOVE_SWALLOW exact — all-six dense compositor acceptance (2026-08-12 worker)
 
 - **State:** Level-50 coverage advances **177→178/276 exact**, 0 partial, 0 staged, and unsupported falls **99→98**. Only Swallow is promoted; Reversal and every other sibling remain independent.

@@ -2,11 +2,18 @@ import { describe, expect, it } from "vitest";
 import {
   cosmicPowerAtAge,
   cosmicPowerDisplayedBlendCoefficient,
+  COSMIC_POWER_SOURCE_END_EXCLUSIVE,
+  COSMIC_POWER_SOURCE_START,
 } from "../../src/animation/cosmicPower.ts";
 
 const center = { x: 72, y: 104 };
 
 describe("Move_COSMIC_POWER source reducer", () => {
+  it("pins the exclusive source interval and first inactive cleanup row", () => {
+    expect(COSMIC_POWER_SOURCE_START).toBe(0x082d5f5d);
+    expect(COSMIC_POWER_SOURCE_END_EXCLUSIVE).toBe(0x082d5fe2);
+  });
+
   it("keeps the two non-attacker palette ramps one display behind task RAM", () => {
     expect(cosmicPowerAtAge(3, "player", center).nonAttackerBlendTaskActive).toBe(false);
     expect(cosmicPowerAtAge(4, "player", center).nonAttackerBlendRamCoefficient).toBe(2);

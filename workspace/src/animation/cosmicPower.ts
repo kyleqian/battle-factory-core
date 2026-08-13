@@ -9,6 +9,8 @@ import { linearTranslationOffsetAfterCallbacks } from "./animLinearTranslation.t
  */
 export const COSMIC_POWER_FRAME_COUNT = 241;
 export const COSMIC_POWER_FIRST_INACTIVE_AGE = 240;
+export const COSMIC_POWER_SOURCE_START = 0x082d5f5d;
+export const COSMIC_POWER_SOURCE_END_EXCLUSIVE = 0x082d5fe2;
 export const COSMIC_POWER_GRANTING_STAR_STARTS = [129, 139] as const;
 export const COSMIC_POWER_GRANTING_STAR_ARGS = Object.freeze([
   Object.freeze({ x: -15, y: 0 }),
