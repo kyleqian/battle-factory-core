@@ -5091,14 +5091,43 @@ pub unsafe extern "C" fn fw_choose_factory_ai_live_decision(
     }
     // SAFETY: nonzero width, non-null pointer guard, and caller contract above.
     let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len) };
-    let decoded = (|| {
-        let mut reader = CheckedReader::new(bytes);
+    let mut reader = CheckedReader::new(bytes);
+    let decoded_live = (|| {
         let rules =
             decode_live_view_rules(&mut reader).map_err(|()| LiveDecisionDecodeError::Malformed)?;
         let history =
             decode_battle_history(&mut reader).map_err(|()| LiveDecisionDecodeError::Malformed)?;
         let challenge = decode_live_view_challenge(&mut reader)
             .map_err(|()| LiveDecisionDecodeError::Malformed)?;
+        Ok((rules, history, challenge))
+    })();
+    let (rules, history, challenge) = match decoded_live {
+        Ok(value) => value,
+        Err(LiveDecisionDecodeError::Malformed) => {
+            return alloc_and_copy(&encode_live_view_message(
+                2,
+                FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
+            ))
+        }
+        Err(LiveDecisionDecodeError::Typed(message)) => {
+            return alloc_and_copy(&encode_live_view_message(1, &message))
+        }
+    };
+
+    // Canonical `chooseWithTs` constructs the live view before validating the
+    // command request. Keep that semantic error order while retaining checked
+    // structural decoding for both packet sections.
+    let view =
+        match factory_ai_live_view::create_factory_ai_view_from_live_rules(FactoryAiLiveViewInput {
+            rules_context: &rules,
+            history: &history,
+            challenge,
+        }) {
+            Ok(view) => view,
+            Err(error) => return alloc_and_copy(&encode_live_view_message(1, &error.to_string())),
+        };
+
+    let decoded_request = (|| {
         let rng = BattleRngState {
             value: reader
                 .u32()
@@ -5114,9 +5143,6 @@ pub unsafe extern "C" fn fw_choose_factory_ai_live_decision(
             .finish()
             .map_err(|()| LiveDecisionDecodeError::Malformed)?;
         Ok((
-            rules,
-            history,
-            challenge,
             rng,
             kind,
             request_id,
@@ -5127,39 +5153,20 @@ pub unsafe extern "C" fn fw_choose_factory_ai_live_decision(
         ))
     })();
 
-    let (
-        rules,
-        history,
-        challenge,
-        rng,
-        kind,
-        request_id,
-        side,
-        battler,
-        legal_decisions,
-        turn_start_random_number,
-    ) = match decoded {
-        Ok(value) => value,
-        Err(LiveDecisionDecodeError::Malformed) => {
-            return alloc_and_copy(&encode_live_view_message(
-                2,
-                FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
-            ))
-        }
-        Err(LiveDecisionDecodeError::Typed(message)) => {
-            return alloc_and_copy(&encode_live_view_message(1, &message))
-        }
-    };
-
-    let view =
-        match factory_ai_live_view::create_factory_ai_view_from_live_rules(FactoryAiLiveViewInput {
-            rules_context: &rules,
-            history: &history,
-            challenge,
-        }) {
-            Ok(view) => view,
-            Err(error) => return alloc_and_copy(&encode_live_view_message(1, &error.to_string())),
+    let (rng, kind, request_id, side, battler, legal_decisions, turn_start_random_number) =
+        match decoded_request {
+            Ok(value) => value,
+            Err(LiveDecisionDecodeError::Malformed) => {
+                return alloc_and_copy(&encode_live_view_message(
+                    2,
+                    FACTORY_AI_LIVE_DECISION_MALFORMED_MESSAGE,
+                ))
+            }
+            Err(LiveDecisionDecodeError::Typed(message)) => {
+                return alloc_and_copy(&encode_live_view_message(1, &message))
+            }
         };
+
     let result = live_decision_bridge::choose_factory_ai_decision_from_live_view(
         FactoryAiLiveDecisionInput {
             view: &view,

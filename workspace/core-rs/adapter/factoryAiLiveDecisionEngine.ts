@@ -165,6 +165,9 @@ function decodeChoice(
   const status = view.getUint8(4);
   if (status !== 0) {
     const result = decodeMessage(bytes);
+    if (/^(factoryWinStreak|trainerOpponentId) must be an integer from 0 through 65535$/.test(result.message)) {
+      throw new RangeError(result.message);
+    }
     throw new Error(result.message);
   }
   if (bytes.length <= 20) {

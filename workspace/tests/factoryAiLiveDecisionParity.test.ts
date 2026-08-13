@@ -225,6 +225,24 @@ describe("Factory AI live decision ABI-v1 parity", () => {
 
   it("preserves exact production errors while malformed packets stay checked", async () => {
     const adapter = await wasmFactoryAiLiveDecisionEngine();
+    const challengeErrors = [
+      { challenge: { factoryWinStreak: 1.5, trainerOpponentId: 222 }, message: "factoryWinStreak must be an integer from 0 through 65535" },
+      { challenge: { factoryWinStreak: -1, trainerOpponentId: 222 }, message: "factoryWinStreak must be an integer from 0 through 65535" },
+      { challenge: { factoryWinStreak: 65536, trainerOpponentId: 222 }, message: "factoryWinStreak must be an integer from 0 through 65535" },
+      { challenge: { factoryWinStreak: 0, trainerOpponentId: 65536 }, message: "trainerOpponentId must be an integer from 0 through 65535" },
+    ] as const;
+    for (const { challenge, message } of challengeErrors) {
+      const invalid = { ...CASES[0]!, challenge } as FactoryAiLiveDecisionInput;
+      for (const engine of [tsFactoryAiLiveDecisionEngine(), adapter]) {
+        expect(() => engine.chooseFactoryAiLiveDecision(invalid)).toThrow(RangeError);
+        expect(() => engine.chooseFactoryAiLiveDecision(invalid)).toThrow(message);
+      }
+      expect(outputStatus(await invokeFactoryAiLiveDecisionPacket(encodeFactoryAiLiveDecisionInput(invalid)))).toEqual({
+        status: 1,
+        message,
+      });
+    }
+
     const unknownAbility = sourceCase({ label: "unknown", category: "error", streak: 28, attacker: { ability: 78 }, legalMask: 1, seed: 1 });
     expect(() => tsFactoryAiLiveDecisionEngine().chooseFactoryAiLiveDecision(unknownAbility)).toThrow("Factory AI live view: unknown ability id 78");
     expect(() => adapter.chooseFactoryAiLiveDecision(unknownAbility)).toThrow("Factory AI live view: unknown ability id 78");
@@ -235,6 +253,20 @@ describe("Factory AI live decision ABI-v1 parity", () => {
     };
     expect(() => tsFactoryAiLiveDecisionEngine().chooseFactoryAiLiveDecision(noLegal)).toThrow("Battle command request.legalDecisions must be a non-empty array, got ");
     expect(() => adapter.chooseFactoryAiLiveDecision(noLegal)).toThrow("Battle command request.legalDecisions must be a non-empty array, got ");
+
+    const invalidRequestAndUnknownAbility = {
+      ...unknownAbility,
+      request: noLegal.request,
+    };
+    expect(() => tsFactoryAiLiveDecisionEngine().chooseFactoryAiLiveDecision(invalidRequestAndUnknownAbility)).toThrow("Factory AI live view: unknown ability id 78");
+    expect(() => adapter.chooseFactoryAiLiveDecision(invalidRequestAndUnknownAbility)).toThrow("Factory AI live view: unknown ability id 78");
+
+    const invalidRequestAndChallenge = {
+      ...noLegal,
+      challenge: { ...noLegal.challenge, factoryWinStreak: 1.5 },
+    };
+    expect(() => tsFactoryAiLiveDecisionEngine().chooseFactoryAiLiveDecision(invalidRequestAndChallenge)).toThrow("Battle command request.legalDecisions must be a non-empty array, got ");
+    expect(() => adapter.chooseFactoryAiLiveDecision(invalidRequestAndChallenge)).toThrow("Battle command request.legalDecisions must be a non-empty array, got ");
 
     const switchRequest = createBattleCommandRequest({
       ...noLegal.request,
@@ -259,6 +291,16 @@ describe("Factory AI live decision ABI-v1 parity", () => {
     }
     expect(outputStatus(await invokeFactoryAiLiveDecisionPacket(corruptTurnOwner))).toEqual({
       status: 1, message: "factory-wasm factoryAiEngine: invalid turn-start owner 9",
+    });
+
+    const oversizedHistory = sourceCase({
+      label: "history-overflow", category: "error", streak: 28,
+      history: { usedMoves: [[1, 2, 3, 4, 5, 6, 7, 8, 9], [], [], []] },
+      legalMask: 1, seed: 1,
+    });
+    expect(outputStatus(await invokeFactoryAiLiveDecisionPacket(encodeFactoryAiLiveDecisionInput(oversizedHistory)))).toEqual({
+      status: 1,
+      message: "Factory AI live decision known move history length 9 exceeds eight slots",
     });
   });
 
