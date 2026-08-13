@@ -351,13 +351,11 @@ identity before committing.
 
 ## Factory AI live-view projections (M8c)
 
-`crates/factory-core/src/factory_ai_live_view.rs` is the deliberately narrow
-native port of only `currentWeather(weather)` and `statStages(battler)` from
-`src/engine/factoryAiLiveDriver.ts:257-274`. It does not construct a live AI
-view, select a decision, own history, or cross the WASM boundary. Weather
-keeps the canonical Sun → Rain → Sandstorm → Hail precedence and JavaScript
-bitwise `ToInt32` semantics over the helper's `number` input; no weather is
-`None`. The raw weather masks cite
+M8c's `currentWeather(weather)` and `statStages(battler)` leaves in
+`crates/factory-core/src/factory_ai_live_view.rs` remain independently tested
+and are reused by M8d below. Weather keeps the canonical Sun → Rain →
+Sandstorm → Hail precedence and JavaScript bitwise `ToInt32` semantics over
+the helper's `number` input; no weather is `None`. The raw weather masks cite
 `reference/pokeemerald/include/constants/battle.h:232-243`; returned values
 are the `AI_WEATHER_*` encoding cited in
 `src/engine/factoryAiCheckBadMove.ts:138-152`. Stat stages project exactly
@@ -374,6 +372,100 @@ shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.r
 node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-vectors.mjs
 shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_vectors_gen.rs
 ```
+
+## Factory AI live-view constructor (M8d)
+
+`create_factory_ai_view_from_live_rules` is the complete source-shaped native
+port of `createFactoryAiViewFromLiveRules` (`factoryAiLiveDriver.ts:277-411`).
+It reuses M8a history and M8c weather/stage leaves, preserves raw Number
+values, ability-name errors, nullable history fields, and optional-property
+presence; it has no WASM export or adapter yet. The TS-executed corpus has
+**17 cases**: baseline=1, attacker-fields=1, target-fields=2,
+history-projection=2, stat-stages=1, numeric-coercion=1, weather=5,
+challenge=2, ability-error=2. Its generated Rust digest is
+`8020bcd29c0e9dc6fd48da3ff008ebbdf3dd3e8d4375fd7da246448a4e2d6186`.
+
+```sh
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-constructor-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_constructor_vectors_gen.rs
+node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-constructor-vectors.mjs
+shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_constructor_vectors_gen.rs
+```
+
+## Factory AI live-view WASM boundary (M8e)
+
+`fw_create_factory_ai_view_from_live_rules(input_ptr, input_len)` and
+`adapter/factoryAiLiveViewEngine.ts` expose the M8d constructor without
+executing a decision or changing history. The input is a caller-allocated,
+variable-width little-endian packet; `input_len` is its exact width (there is
+no second input prefix). `string` means `byte_len:u32` followed by UTF-8, and
+every JavaScript `number` is an IEEE-754 `f64`, including NaN, signed zero,
+infinities, and arbitrary history values. The exact input order is:
+
+```text
+for battler in rules.battlers[4]:
+  types:string[2], attack:f64, defense:f64, sp_attack:f64,
+  sp_defense:f64, speed:f64, level:f64, stat_stages:f64[8],
+  is_first_turn:f64, hp:f64, max_hp:f64, ability:f64,
+  status1:f64, status2:f64, status3:f64, protect_uses:f64,
+  taunt_timer:f64, species:f64, moves:f64[4]
+rules.weather:f64, side_statuses:f64[2], last_moves:f64[4]
+history.used_moves[4]: move_count:u32, moves:f64[move_count]
+history.known_abilities[4]: present:u8 (0/1), [if 1] string
+history.known_item_effects:f64[4], history.party_indexes:f64[4]
+challenge.factory_win_streak:f64, trainer_opponent_id:f64,
+challenge.battle_turn_count:present:u8 (0/1), [if 1] f64
+```
+
+The returned `fw_alloc` buffer is `total_len:u32,status:u8`; the caller frees
+the exact `(ptr,total_len)` pair. Status `0` is the complete view in this
+order: `schema:string, mode:string, active.ai_battler:f64,
+active.target_battler:f64, factory.level_mode:f64, factory.battle_mode:f64,
+factory_win_streak:f64, trainer_opponent_id:f64, moves:f64[4], attacker,
+target`. Status `1` is `message_len:u32,message:utf8` for the typed unknown
+ability error and preserves the canonical message exactly. Status `2` uses the
+same message layout for checked malformed packets. The attacker and target
+field order is:
+
+```text
+attacker:
+  types:string[2], attack:f64, defense:f64, sp_attack:f64,
+  sp_defense:f64, speed:f64, level:f64, stat_stages:f64[7]
+    (atk,def,speed,sp_atk,sp_def,acc,evasion),
+  is_first_turn:f64, hp:f64, max_hp:f64, ability:string,
+  battle_turn_count:f64, light_screen_up:u8, reflect_up:u8,
+  current_weather:present:u8, [if 1] weather:u8, is_rooted:u8,
+  each optional bool in source order as present:u8,[if 1] value:u8:
+    attacker_future_attack_up, is_infatuated, safeguard_up, is_asleep,
+    has_curable_status, has_substitute, has_focus_energy, is_leech_seeded,
+    has_yawn,
+  protect_uses:present:u8, [if 1] f64
+target:
+  species:f64, types:string[2], attack:f64, defense:f64, sp_attack:f64,
+  sp_defense:f64, speed:f64, level:f64, stat_stages:f64[7]
+    (atk,def,speed,sp_atk,sp_def,acc,evasion),
+  is_first_turn:f64, hp:f64, max_hp:f64, last_used_move_id:f64,
+  optional has_any_status, is_asleep as presence/value bools,
+  is_toxic_poisoned:u8, is_leech_seeded:u8, is_cursed:u8,
+  optional is_confused, is_taunted, is_infatuated, is_escape_prevented,
+    is_tormented, is_nightmared, is_foresighted, has_yawn, has_perish_song,
+  ability:string, known_ability:present:u8,[if 1] string,
+  known_item_effect:f64, known_move_ids:present:u8,
+    [if 1] move_count:u32,moves:f64[move_count],
+  optional safeguard_up, spikes_up, target_future_attack_up as
+    presence/value bools.
+```
+
+All optional booleans use the stated presence/value encoding; the three
+unconditional bool groups use one `u8` value byte. The Rust export comment in
+`crates/factory-wasm/src/lib.rs` repeats this layout beside the symbol. No
+malformed packet is allowed to panic or trap.
+
+The adapter selects canonical TS when `POKEBENCH_ENGINE` is unset/`ts`, and
+calls this export directly when it is `wasm`. `tests/factoryAiLiveViewParity.test.ts`
+deep-compares complete views, error ordering, numeric edge cases, arbitrary
+UTF-8 history, optional-property presence, and malformed boundary packets in
+both modes.
 
 ## Ground rules
 
