@@ -27,7 +27,7 @@ use crate::factory_ai_check_bad_move::{
 };
 use crate::factory_ai_check_viability::{
     run_check_viability, CheckViabilityDraw, CheckViabilityResult, FactoryAiCheckViabilityBattler,
-    RunCheckViabilityInput, MAX_CHECK_VIABILITY_DRAWS,
+    FactoryAiKnownMoveHistoryTail, RunCheckViabilityInput, MAX_CHECK_VIABILITY_DRAWS,
 };
 use crate::factory_ai_mask::{
     select_factory_ai_mask, FactoryAiMaskError, FactoryAiMaskSelection,
@@ -676,6 +676,7 @@ pub struct FactoryAiScoredTargetView {
     pub known_ability: Option<u16>,
     pub species_abilities: Option<[u16; 2]>,
     pub known_moves: Option<[u16; 4]>,
+    pub known_moves_tail: Option<FactoryAiKnownMoveHistoryTail>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -977,6 +978,7 @@ fn scored_cv_battler(
     view: FactoryAiScoredBattlerView,
     moves: Option<[u16; 4]>,
     known_moves: Option<[u16; 4]>,
+    known_moves_tail: Option<FactoryAiKnownMoveHistoryTail>,
     species_abilities: Option<[u16; 2]>,
     known_ability: Option<u16>,
 ) -> FactoryAiCheckViabilityBattler {
@@ -1003,6 +1005,7 @@ fn scored_cv_battler(
         moves,
         battle_turn_count: view.battle_turn_count,
         known_moves,
+        known_moves_tail,
         is_infatuated: view.is_infatuated,
         is_asleep: view.is_asleep,
         is_confused: view.is_confused,
@@ -1212,11 +1215,13 @@ pub fn choose_factory_ai_scored_decision(
             None,
             None,
             None,
+            None,
         );
         let cv_target = scored_cv_battler(
             input.view.target.battler,
             None,
             input.view.target.known_moves,
+            input.view.target.known_moves_tail,
             input.view.target.species_abilities,
             input.view.target.known_ability,
         );
@@ -1437,6 +1442,7 @@ mod tests {
                     known_ability: Some(ABILITY_STURDY),
                     species_abilities: None,
                     known_moves: None,
+                    known_moves_tail: None,
                 },
             },
             request: FactoryAiMovePolicyRequest {

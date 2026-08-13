@@ -260,6 +260,11 @@ const cases = [
     target: { types: ["TYPE_WATER", "TYPE_PSYCHIC"], ability: 37, status2: STATUS2_INFATUATION, status3: STATUS3_LEECHSEED },
     history: { usedMoves: [[150, 150, 150, 138], [], [], []], knownAbilities: ["ABILITY_HUGE_POWER", null, null, null] },
     legalMask: 9, seed: 0xabcdef01, calls: 4, turnMode: 1, battleTurnCountPresent: true, battleTurnCount: 19 }),
+  sourceCase({ label: "mask_seven_sleep_history_extended", category: "mask-7-history", chooser: 1, streak: 28,
+    weather: B_WEATHER_HAIL, attacker: { moves: [47, 57, 157, 34], statStages: [99, 0, 1, 2, 3, 4, 5, 12], hp: 37, maxHP: 155 },
+    target: { types: ["TYPE_WATER", "TYPE_PSYCHIC"], ability: 37, status2: STATUS2_INFATUATION, status3: STATUS3_LEECHSEED },
+    history: { usedMoves: [[150, 150, 150, 150, 138], [], [], []], knownAbilities: ["ABILITY_HUGE_POWER", null, null, null] },
+    legalMask: 9, seed: 0xabcdef01, calls: 4, turnMode: 1, battleTurnCountPresent: true, battleTurnCount: 19 }),
   sourceCase({ label: "mask_seven_protect_optional_flags", category: "mask-7-optional", chooser: 1, streak: 28,
     sideStatuses: [SIDE_STATUS_REFLECT | SIDE_STATUS_FUTUREATTACK, SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_SAFEGUARD | SIDE_STATUS_FUTUREATTACK],
     attacker: { moves: [182, 57, 157, 34], status2: STATUS2_INFATUATION | STATUS2_FOCUS_ENERGY | STATUS2_SUBSTITUTE, status3: STATUS3_LEECHSEED | STATUS3_YAWN | STATUS3_ROOTED, protectUses: 2 },
@@ -279,7 +284,7 @@ const cases = [
 
 const EXPECTED_CATEGORY_COUNTS = new Map([
   ["mask-0", 1], ["mask-0-history", 1], ["mask-1-type-ability", 1],
-  ["mask-1-status-weather", 1], ["mask-7-history", 2], ["mask-7-optional", 1],
+  ["mask-1-status-weather", 1], ["mask-7-history", 3], ["mask-7-optional", 1],
   ["mask-7-stages", 1], ["mask-7-turn-ownership", 2],
 ]);
 const counts = new Map();

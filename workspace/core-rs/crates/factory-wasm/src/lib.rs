@@ -1437,6 +1437,7 @@ fn decode_cv_battler(r: &mut ByteReader) -> FactoryAiCheckViabilityBattler {
         moves: r.opt_u16x4(),
         battle_turn_count: r.opt_u32(),
         known_moves: r.opt_u16x4(),
+        known_moves_tail: None,
         is_infatuated: r.opt_bool(),
         is_asleep: r.opt_bool(),
         is_confused: r.opt_bool(),
@@ -3759,6 +3760,7 @@ pub unsafe extern "C" fn fw_choose_factory_ai_scored_decision(
         known_ability: r.opt_u16(),
         species_abilities: r.opt_u16x2(),
         known_moves: r.opt_u16x4(),
+        known_moves_tail: None,
     };
     debug_assert_eq!(r.offset, bytes.len());
     let view = FactoryAiScoredView { factory, moves, attacker, target };
