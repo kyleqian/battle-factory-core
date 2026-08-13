@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R6 — [supervised session, 2026-08-13] **M8d–M8j live planning + M9a Factory swap leaf**
+## R6 — [supervised session, 2026-08-13] **M8d–M8j live planning + M9a–M9b Factory swap leaves**
 
-- **State:** `rust-main` = master `fafcf933` plus verified M8d–M9a through
-  `48bb3a62`. The complete pure `createFactoryAiViewFromLiveRules` projection
+- **State:** `rust-main` = master `fafcf933` plus verified M8d–M9b through
+  `50a2466e`. The complete pure `createFactoryAiViewFromLiveRules` projection
   and source-shaped mask-0/1/7 move chooser are native and WASM differential-
   green end-to-end; the live driver's private RNG replay/checkpoint leaf is
   native, and a single native projection drives every existing chooser.
@@ -66,6 +66,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   timing seam. The twice-byte-identical canonical-TS corpus has **17 cases / 6
   categories**; sha256
   `5fdaa2feb71d1fa6e8617bcb4661d66cf719eb246e4475d3eb6597d5ce441846`.
+- **M9b DONE:** ported Factory swap initialization, presentation
+  acknowledgement, and the old-state-derived VBlank cursor/option copy
+  pipeline. Deep-clone ownership and each pending/lag/no-op path are pinned.
+  The extended twice-byte-identical canonical-TS corpus has **28 cases / 12
+  categories**; sha256
+  `d0a218bc3336e0f2f3e329d46c391ddda90a3ef10746ef576aefdacd7b7b6bfb`.
 - **Next:** select the next unblocked pure family; generic reducer replay stays
   outside M8 because the canonical BattleState reducer is not yet native. M7c
   opponent generation still waits on #55.
@@ -125,6 +131,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   461,613 bytes, sha256
   `f94d5f7cebd4f04cb6e941a0eb1a469533fe365b58c95ac8a9b9887f66264623`.
   M9a stayed entirely inside `core-rs/**`; no WASM export, adapter, canonical
+  TS engine, or TS test/config changed. M9b used Sol/high; supervisor audited
+  old-state cursor ordering and clone/default semantics, regenerated twice,
+  and reran focused **7/7**, cargo **733 tests**, fmt, strict clippy, and WASM.
+  Worker full npm was **1,022 files / 9,730 passed / 1 skip** plus build **659
+  modules**. Artifact: 474,121 bytes, sha256
+  `a2720645060b58cbcb563f770615685f0f6eefe25bd101bc36af5e42d115e16a`.
+  M9b stayed entirely inside `core-rs/**`; no WASM export, adapter, canonical
   TS engine, or TS test/config changed.
 
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
