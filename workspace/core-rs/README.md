@@ -425,10 +425,41 @@ factory_win_streak:f64, trainer_opponent_id:f64, moves:f64[4], attacker,
 target`. Status `1` is `message_len:u32,message:utf8` for the typed unknown
 ability error and preserves the canonical message exactly. Status `2` uses the
 same message layout for checked malformed packets. The attacker and target
-field order, including every unconditional bool, optional presence/value
-tag, nullable `known_ability`, and optional move-row count, is documented
-beside the Rust export in `crates/factory-wasm/src/lib.rs`; no malformed
-packet is allowed to panic or trap.
+field order is:
+
+```text
+attacker:
+  types:string[2], attack:f64, defense:f64, sp_attack:f64,
+  sp_defense:f64, speed:f64, level:f64, stat_stages:f64[7]
+    (atk,def,speed,sp_atk,sp_def,acc,evasion),
+  is_first_turn:f64, hp:f64, max_hp:f64, ability:string,
+  battle_turn_count:f64, light_screen_up:u8, reflect_up:u8,
+  current_weather:present:u8, [if 1] weather:u8, is_rooted:u8,
+  each optional bool in source order as present:u8,[if 1] value:u8:
+    attacker_future_attack_up, is_infatuated, safeguard_up, is_asleep,
+    has_curable_status, has_substitute, has_focus_energy, is_leech_seeded,
+    has_yawn,
+  protect_uses:present:u8, [if 1] f64
+target:
+  species:f64, types:string[2], attack:f64, defense:f64, sp_attack:f64,
+  sp_defense:f64, speed:f64, level:f64, stat_stages:f64[7]
+    (atk,def,speed,sp_atk,sp_def,acc,evasion),
+  is_first_turn:f64, hp:f64, max_hp:f64, last_used_move_id:f64,
+  optional has_any_status, is_asleep as presence/value bools,
+  is_toxic_poisoned:u8, is_leech_seeded:u8, is_cursed:u8,
+  optional is_confused, is_taunted, is_infatuated, is_escape_prevented,
+    is_tormented, is_nightmared, is_foresighted, has_yawn, has_perish_song,
+  ability:string, known_ability:present:u8,[if 1] string,
+  known_item_effect:f64, known_move_ids:present:u8,
+    [if 1] move_count:u32,moves:f64[move_count],
+  optional safeguard_up, spikes_up, target_future_attack_up as
+    presence/value bools.
+```
+
+All optional booleans use the stated presence/value encoding; the three
+unconditional bool groups use one `u8` value byte. The Rust export comment in
+`crates/factory-wasm/src/lib.rs` repeats this layout beside the symbol. No
+malformed packet is allowed to panic or trap.
 
 The adapter selects canonical TS when `POKEBENCH_ENGINE` is unset/`ts`, and
 calls this export directly when it is `wasm`. `tests/factoryAiLiveViewParity.test.ts`
