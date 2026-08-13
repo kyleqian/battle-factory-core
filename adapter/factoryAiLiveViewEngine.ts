@@ -344,7 +344,7 @@ function decodeTarget(reader: Reader): FactoryAiScoredTargetView {
   return result as FactoryAiScoredTargetView;
 }
 
-function decodeLiveView(bytes: Uint8Array): FactoryAiScoredView {
+export function decodeFactoryAiLiveView(bytes: Uint8Array): FactoryAiScoredView {
   const reader = new Reader(bytes);
   const totalLength = reader.u32();
   if (totalLength !== bytes.length) {
@@ -408,7 +408,7 @@ export async function wasmFactoryAiLiveViewEngine(): Promise<FactoryAiLiveViewEn
   return {
     id: "wasm",
     createFactoryAiViewFromLiveRules(input): FactoryAiScoredView {
-      return decodeLiveView(invoke(wasm, encodeFactoryAiLiveViewInput(input)));
+      return decodeFactoryAiLiveView(invoke(wasm, encodeFactoryAiLiveViewInput(input)));
     },
   };
 }

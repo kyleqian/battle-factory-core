@@ -182,6 +182,8 @@ export interface FactoryWasmExports {
   fw_choose_factory_ai_scored_decision(input_ptr: number, input_len: number): number;
   /** Complete source-shaped live-view -> mask-selected move chooser; see the Rust export for the appended request/RNG/turn suffix. */
   fw_choose_factory_ai_live_decision(input_ptr: number, input_len: number): number;
+  /** Pure live Factory AI switch-or-move planner; canonical packet layout is documented on the Rust export. */
+  fw_plan_live_factory_ai_decision(input_ptr: number, input_len: number): number;
   /** Plain-singles GetMostSuitableMonToSwitchInto; exact 114-byte input and length-prefixed typed output are documented on the Rust export. */
   fw_get_most_suitable_mon_to_switch_into(input_ptr: number, input_len: number): number;
   /** Combined RNG-free precheck plus full switch-policy evaluation; exact 401-byte input and complete typed output are documented on the Rust export. */
