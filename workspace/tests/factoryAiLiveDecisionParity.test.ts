@@ -289,6 +289,21 @@ describe("Factory AI live decision ABI-v1 parity", () => {
         status: 2, message: "factory-wasm factoryAiLiveDecisionEngine: malformed input",
       });
     }
+
+    const unknownAbilityPacket = encodeFactoryAiLiveDecisionInput(unknownAbility);
+    const unknownPrefixLength = encodeFactoryAiLiveViewInput(unknownAbility).length;
+    const unknownCorruptPresence = unknownAbilityPacket.slice();
+    unknownCorruptPresence[unknownPrefixLength - 1] = 9;
+    const structurallyMalformedUnknownAbility = [
+      unknownAbilityPacket.slice(0, unknownAbilityPacket.length - 1),
+      Uint8Array.from([...unknownAbilityPacket, 0]),
+      unknownCorruptPresence,
+    ];
+    for (const packet of structurallyMalformedUnknownAbility) {
+      expect(outputStatus(await invokeFactoryAiLiveDecisionPacket(packet))).toEqual({
+        status: 2, message: "factory-wasm factoryAiLiveDecisionEngine: malformed input",
+      });
+    }
     expect(outputStatus(await invokeFactoryAiLiveDecisionPacket(corruptTurnOwner))).toEqual({
       status: 1, message: "factory-wasm factoryAiEngine: invalid turn-start owner 9",
     });

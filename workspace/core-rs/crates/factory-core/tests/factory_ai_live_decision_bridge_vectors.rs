@@ -6,7 +6,7 @@ use factory_core::factory_ai_decision_policy::{
     FactoryAiScoredDraw, FactoryAiTurnStartRandomNumber,
 };
 use factory_core::factory_ai_live_decision_bridge::{
-    choose_factory_ai_mask_zero_decision_from_live_view,
+    choose_factory_ai_decision_from_live_view, choose_factory_ai_mask_zero_decision_from_live_view,
     choose_factory_ai_scored_decision_from_live_view, FactoryAiLiveDecisionInput,
 };
 use factory_core::factory_ai_live_decision_bridge_vectors_gen::{
@@ -440,26 +440,7 @@ fn input<'a>(
 }
 
 fn run_case(case: &FactoryAiLiveDecisionCase) -> u64 {
-    let battlers = case.battlers.map(native_battler);
-    let rules = FactoryAiLiveRulesContext {
-        battlers,
-        weather: case.weather,
-        side_statuses: case.side_statuses,
-        last_moves: case.last_moves,
-    };
-    let history = native_history(case.history);
-    let view = create_factory_ai_view_from_live_rules(FactoryAiLiveViewInput {
-        rules_context: &rules,
-        history: &history,
-        challenge: FactoryAiChallengePolicy {
-            factory_win_streak: case.streak,
-            trainer_opponent_id: case.trainer_opponent_id,
-            battle_turn_count: case
-                .battle_turn_count_present
-                .then_some(case.battle_turn_count),
-        },
-    })
-    .unwrap_or_else(|error| panic!("{} constructor failed: {error}", case.label));
+    let view = native_view(case);
     let decisions = legal_decisions(case.legal_mask);
     let bridge_input = input(case, &view, &decisions);
     if case.chooser == 0 {
@@ -471,6 +452,31 @@ fn run_case(case: &FactoryAiLiveDecisionCase) -> u64 {
             .unwrap_or_else(|error| panic!("{} scored bridge failed: {error}", case.label));
         hash_scored(&result)
     }
+}
+
+fn native_view(
+    case: &FactoryAiLiveDecisionCase,
+) -> factory_core::factory_ai_live_view::FactoryAiScoredView {
+    let battlers = case.battlers.map(native_battler);
+    let rules = FactoryAiLiveRulesContext {
+        battlers,
+        weather: case.weather,
+        side_statuses: case.side_statuses,
+        last_moves: case.last_moves,
+    };
+    let history = native_history(case.history);
+    create_factory_ai_view_from_live_rules(FactoryAiLiveViewInput {
+        rules_context: &rules,
+        history: &history,
+        challenge: FactoryAiChallengePolicy {
+            factory_win_streak: case.streak,
+            trainer_opponent_id: case.trainer_opponent_id,
+            battle_turn_count: case
+                .battle_turn_count_present
+                .then_some(case.battle_turn_count),
+        },
+    })
+    .unwrap_or_else(|error| panic!("{} constructor failed: {error}", case.label))
 }
 
 #[test]
@@ -505,4 +511,51 @@ fn canonical_ts_live_constructor_to_chooser_receipts_match() {
             case.label
         );
     }
+}
+
+#[test]
+fn direct_chooser_entries_keep_their_existing_projection_error_labels() {
+    let mask_zero_case = &FACTORY_AI_LIVE_DECISION_BRIDGE_CASES[0];
+    let mut mask_zero_view = native_view(mask_zero_case);
+    mask_zero_view.factory.factory_win_streak = 65_536.0;
+    let mask_zero_decisions = legal_decisions(mask_zero_case.legal_mask);
+    let error = choose_factory_ai_mask_zero_decision_from_live_view(input(
+        mask_zero_case,
+        &mask_zero_view,
+        &mask_zero_decisions,
+    ))
+    .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "Factory AI live decision view.factory.factoryWinStreak must be a native integer"
+    );
+
+    let scored_case = &FACTORY_AI_LIVE_DECISION_BRIDGE_CASES[4];
+    let mut scored_view = native_view(scored_case);
+    scored_view.factory.trainer_opponent_id = -1.0;
+    let scored_decisions = legal_decisions(scored_case.legal_mask);
+    let error = choose_factory_ai_scored_decision_from_live_view(input(
+        scored_case,
+        &scored_view,
+        &scored_decisions,
+    ))
+    .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "Factory AI live decision view.factory.trainerOpponentId must be a native integer"
+    );
+}
+
+#[test]
+fn composite_projection_keeps_select_factory_ai_mask_range_text() {
+    let case = &FACTORY_AI_LIVE_DECISION_BRIDGE_CASES[0];
+    let mut view = native_view(case);
+    view.factory.factory_win_streak = f64::NAN;
+    let decisions = legal_decisions(case.legal_mask);
+    let error =
+        choose_factory_ai_decision_from_live_view(input(case, &view, &decisions)).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "factoryWinStreak must be an integer from 0 through 65535"
+    );
 }

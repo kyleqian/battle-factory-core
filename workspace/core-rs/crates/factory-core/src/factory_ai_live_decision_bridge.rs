@@ -54,6 +54,7 @@ pub enum FactoryAiLiveDecisionError {
     MaskZeroPolicy(FactoryAiDecisionPolicyError),
     ScoredPolicy(FactoryAiScoredDecisionError),
     MaskSelection(FactoryAiMaskError),
+    MaskSelectionInvalidInteger { field: &'static str, maximum: u32 },
     InvalidInteger { field: &'static str },
     KnownMoveHistoryTooLong { length: usize },
 }
@@ -66,15 +67,14 @@ impl std::fmt::Display for FactoryAiLiveDecisionError {
             Self::MaskSelection(error) => {
                 write!(f, "Factory AI mask selection failed: {error}")
             }
+            Self::MaskSelectionInvalidInteger { field, maximum } => {
+                write!(f, "{field} must be an integer from 0 through {maximum}")
+            }
             Self::InvalidInteger { field } => {
-                if matches!(*field, "factoryWinStreak" | "trainerOpponentId") {
-                    write!(f, "{field} must be an integer from 0 through 65535")
-                } else {
-                    write!(
-                        f,
-                        "Factory AI live decision {field} must be a native integer"
-                    )
-                }
+                write!(
+                    f,
+                    "Factory AI live decision {field} must be a native integer"
+                )
             }
             Self::KnownMoveHistoryTooLong { length } => write!(
                 f,
@@ -115,7 +115,11 @@ pub enum FactoryAiLiveDecisionChoice {
 pub fn choose_factory_ai_decision_from_live_view(
     input: FactoryAiLiveDecisionInput<'_>,
 ) -> Result<FactoryAiLiveDecisionChoice, FactoryAiLiveDecisionError> {
-    let factory = project_factory(input.view, PolicyFlavor::MaskZero)?;
+    // The composite mirrors `selectFactoryAiMask(view.factory)` before it
+    // dispatches to either chooser. Its raw f64 challenge fields therefore
+    // retain the selector's generic RangeError text, while the two direct M8g
+    // entry points below keep their chooser-view projection labels.
+    let factory = project_factory_for_mask_selection(input.view)?;
     let selection =
         select_factory_ai_mask(factory).map_err(FactoryAiLiveDecisionError::MaskSelection)?;
     if selection.mask == 0 {
@@ -125,6 +129,28 @@ pub fn choose_factory_ai_decision_from_live_view(
         choose_factory_ai_scored_decision_from_live_view(input)
             .map(FactoryAiLiveDecisionChoice::Scored)
     }
+}
+
+fn project_factory_for_mask_selection(
+    view: &LiveScoredView,
+) -> Result<crate::factory_ai_mask::FactoryAiMaskSelectionInput, FactoryAiLiveDecisionError> {
+    fn raw_u16(value: f64, field: &'static str) -> Result<u32, FactoryAiLiveDecisionError> {
+        const MAXIMUM: u32 = u16::MAX as u32;
+        if !value.is_finite() || value.fract() != 0.0 || value < 0.0 || value > f64::from(MAXIMUM) {
+            return Err(FactoryAiLiveDecisionError::MaskSelectionInvalidInteger {
+                field,
+                maximum: MAXIMUM,
+            });
+        }
+        Ok(value as u32)
+    }
+
+    Ok(crate::factory_ai_mask::FactoryAiMaskSelectionInput {
+        level_mode: view.factory.level_mode,
+        battle_mode: view.factory.battle_mode,
+        factory_win_streak: raw_u16(view.factory.factory_win_streak, "factoryWinStreak")?,
+        trainer_opponent_id: raw_u16(view.factory.trainer_opponent_id, "trainerOpponentId")?,
+    })
 }
 
 /// Runs the existing native mask-0 chooser from a view produced by
@@ -198,13 +224,13 @@ fn project_factory(
     )?;
     let factory_win_streak = project_u32(
         view.factory.factory_win_streak,
-        "factoryWinStreak",
+        "view.factory.factoryWinStreak",
         0xffff,
         flavor,
     )?;
     let trainer_opponent_id = project_u32(
         view.factory.trainer_opponent_id,
-        "trainerOpponentId",
+        "view.factory.trainerOpponentId",
         0xffff,
         flavor,
     )?;
