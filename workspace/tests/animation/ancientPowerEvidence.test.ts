@@ -9,6 +9,7 @@ const read = (path: string): string => readFileSync(path, "utf8");
 const species = read("reference/pokeemerald/include/constants/species.h");
 const frontierIds = read("reference/pokeemerald/include/constants/battle_frontier_mons.h");
 const frontierMons = read("reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h");
+const probeSource = read("tools/compare/ancientPowerProbe.py");
 const baltoyStart = frontierMons.indexOf("[FRONTIER_MON_BALTOY] = {");
 const baltoyEnd = frontierMons.indexOf("[FRONTIER_MON_SNORUNT] = {", baltoyStart);
 const baltoySourceBlock = frontierMons.slice(baltoyStart, baltoyEnd);
@@ -54,6 +55,13 @@ describe("MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint", () => {
     expect(baltoySourceBlock).toContain(".itemTableId = BATTLE_FRONTIER_ITEM_PERSIM_BERRY");
     expect(baltoySourceBlock).toContain(".evSpread = F_EV_SPREAD_SP_ATTACK | F_EV_SPREAD_ATTACK");
     expect(baltoySourceBlock).toContain(".nature = NATURE_NAUGHTY");
+  });
+
+  it("keeps the committed probe runnable through the relative mGBA wrapper route", () => {
+    expect(probeSource).toContain("tools/run-mgba-probe.py");
+    expect(probeSource).toContain("tools/compare/ancientPowerProbe.py");
+    expect(probeSource).toContain("tools/battle-lab/mechanic-ancient-power-player-baltoy-opponent-onix.json");
+    expect(probeSource).not.toContain("/Users/");
   });
 
   it.each(["player-back", "opponent-front"] as const)("pins the committed complete six-Pokemon scenario for %s", (orientation) => {

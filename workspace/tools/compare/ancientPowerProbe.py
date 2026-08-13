@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""Capture a pointer-bounded Scene-ON MOVE_ANCIENT_POWER window."""
+"""Capture a pointer-bounded Scene-ON MOVE_ANCIENT_POWER window.
+
+Run this through ``tools/run-mgba-probe.py`` with a relative probe path so
+the wrapper discovers the harness-managed mGBA interpreter.  For example:
+
+  python3 tools/run-mgba-probe.py <fresh-output.json> -- \\
+    tools/compare/ancientPowerProbe.py \\
+    tools/battle-lab/mechanic-ancient-power-player-baltoy-opponent-onix.json \\
+    <fresh-output.json> <rgb-dir>
+"""
 from __future__ import annotations
 import hashlib, json, subprocess, sys
 from pathlib import Path
