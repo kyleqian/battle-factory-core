@@ -1,3 +1,11 @@
+# MOVE_SWALLOW exact — all-six dense compositor acceptance (2026-08-12 worker)
+
+- **State:** Level-50 coverage advances **177→178/276 exact**, 0 partial, 0 staged, and unsupported falls **99→98**. Only Swallow is promoted; Reversal and every other sibling remain independent.
+- **Did:** Closed the source-derived selected-latch and compositor contract: Pelipper deform uses affine-double rendering with the age-2 matrix/display transfer; BLUE_ORB/BLUE_STAR use the age-1 hardware OAM/palette transfer; both ShakeMon2 phases follow their task display schedule, including the second initializer's age-48 zero-offset row. Preserved the opponent age-0 elevated shadow and corrected the opponent-three post-switch target from an assumed Numel to source-proved internal species 322 **Sableye**.
+- **Verified:** Twice fresh, all six complete natural windows pass source/reducer/seam/component, selected OAM/matrix/palette latch, and production framebuffer at player **163/163, 178/178, 193/193** and opponent **161/161, 176/176, 191/191**. Raw-RGB receipts remain `1723b6d6…`, `f864b72c…`, `f4e2c8b3…`; `62ac89c0…`, `be8e2bd5…`, `002662dc…`. Whole preceding-buffer equality remains diagnostic only at **115/162, 130/177, 145/192; 113/160, 128/175, 143/190**. Focused source/reducer/boundary tests **12/12**, typecheck, animation audit, and coverage are green.
+- **Next:** None for Swallow. Shared BLUE_ORB/BLUE_STAR code does not promote any sibling; each still requires its own dense acceptance.
+- **Notes:** Stockpile count remains immutable caller input. No healing calculation, stockpile mutation, damage, RNG, turn/controller/facility/Rust/main-doc state, boundary ratchet, unsupported barrier, canonical recording import, per-age framebuffer/hash table, absolute tick, or coordinate/RGB fit was added.
+
 # MOVE_SWALLOW source/component-exact staged compositor — remains unsupported (2026-08-12 worker)
 
 - **State:** Coverage remains **177/276 Level-50 exact**, 0 partial, 0 staged, and **99 unsupported**. Swallow is not promoted; exact Reversal and all siblings remain unchanged.

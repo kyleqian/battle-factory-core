@@ -2092,7 +2092,6 @@ const ariadosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSp
 const ivysaurBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).IVYSAUR!;
 const aipomBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).AIPOM!;
 const kadabraBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).KADABRA!;
-const numelBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).NUMEL!;
 const grovyleBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GROVYLE!;
 const fearowBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).FEAROW!;
 const battleAnimGhostBg = battleAnimGhostBgAsset as {
@@ -20887,9 +20886,13 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnSwallowView(swallowState);
     // Both affine/OAM state and callback-written sprite coordinates become
     // visible through the preceding BuildOamBuffer snapshot.
-    const displayed = sceneOnSwallowView({
+    const displayedBattler = sceneOnSwallowView({
       ...swallowState,
       age: view.battlerDisplayAge,
+    });
+    const displayedEffects = sceneOnSwallowView({
+      ...swallowState,
+      age: view.effectDisplayAge,
     });
     const playerAttacker =
       view.attacker.species === "PELIPPER"
@@ -20899,7 +20902,7 @@ export function renderSceneOnMovePresentation(
     const opponentAttacker =
       view.attacker.species === "PELIPPER"
       && view.attacker.geometry.side === "opponent"
-      && (view.target.species === "DELCATTY" || view.target.species === "NUMEL")
+      && (view.target.species === "DELCATTY" || view.target.species === "SABLEYE")
       && view.target.geometry.side === "player";
     if (!playerAttacker && !opponentAttacker) {
       throw new Error(
@@ -20914,8 +20917,8 @@ export function renderSceneOnMovePresentation(
       : { ...pelipperSource, tileset: subTileset(pelipperSource.tileset, 0, 8) };
     const delcattySource = playerAttacker
       ? fakeTearsArt.delcattyFront
-      : view.target.species === "NUMEL"
-        ? numelBackSprite
+      : view.target.species === "SABLEYE"
+        ? shadowBallArt.sableyeBack
         : fakeTearsArt.delcattyBack;
     const delcatty = playerAttacker
       ? { ...delcattySource, tileset: subTileset(delcattySource.tileset, 0, 8) }
@@ -20926,20 +20929,36 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
+    // Pelipper is elevated. Its pre-animation enemy shadow survives in the
+    // first hardware OAM row; SpriteCB_EnemyShadow hides it one display later.
+    if (opponentAttacker && swallowState.age === 0) {
+      const shadowX = view.attacker.geometry.animationCenter.x
+        - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
+        - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
     const drawPelipper = () => drawSpriteSheetAffineRotate(
       fb,
       pelipper.tileset,
       pelipper.palette,
       view.attacker.geometry.animationCenter.x
-        + displayed.attackerOffset.x2,
+        + view.attackerDisplayedX2,
       view.attacker.geometry.animationCenter.y
-        + displayed.attackerOffset.y2,
-      displayed.attackerMatrix.a,
-      displayed.attackerMatrix.b,
-      displayed.attackerMatrix.c,
-      displayed.attackerMatrix.d,
+        + view.attackerDisplayedY2,
+      displayedBattler.attackerMatrix.a,
+      displayedBattler.attackerMatrix.b,
+      displayedBattler.attackerMatrix.c,
+      displayedBattler.attackerMatrix.d,
       undefined,
-      false,
+      true,
     );
     const drawDelcatty = () => drawSpriteSheet(
       fb,
@@ -20948,23 +20967,27 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.x,
       view.target.geometry.spriteCorner.y,
     );
+    const drawOrbs = () => {
+      for (const orb of displayedEffects.orbs) {
+        drawSpriteSheet(
+          fb,
+          subTileset(swallowArt.blueOrb.tileset, 0, 1),
+          swallowArt.blueOrb.palette,
+          orb.x - 4,
+          orb.y + orb.y2 - 4,
+        );
+      }
+    };
     if (playerAttacker) {
       drawDelcatty();
       drawPelipper();
+      drawOrbs();
     } else {
       drawPelipper();
       drawDelcatty();
+      drawOrbs();
     }
-    for (const orb of displayed.orbs) {
-      drawSpriteSheet(
-        fb,
-        subTileset(swallowArt.blueOrb.tileset, 0, 1),
-        swallowArt.blueOrb.palette,
-        orb.x - 4,
-        orb.y + orb.y2 - 4,
-      );
-    }
-    for (const star of displayed.stars) {
+    for (const star of displayedEffects.stars) {
       drawSpriteSheet(
         fb,
         {

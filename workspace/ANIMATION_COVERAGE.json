@@ -3034,7 +3034,7 @@
     "the pure source-relative reducer ports BLUE_ORB, HANDS_AND_FEET, and IMPACT load/free lifecycles, Detect/Reversal/Vital Throw audio, both complex palette-blend lifecycles, BlendColorCycle, exactly six 26-frame grow/shrink gReversalOrbSpriteTemplate callbacks, delays/waits, HorizontalLunge, fist, basic hitsplat, receipt-driven AnimTask_ShakeTargetBasedOnMovePowerOrDmg, and first inactive cleanup",
     "the typed Scene-ON seam accepts only an already-resolved shake-amplitude receipt and never calculates power or damage; the shared compositor uses reproducibly extracted Vigoroth front/back and BLUE_ORB art plus byte-proved literal HANDS/IMPACT reuse and matches all 174 raw framebuffers without absolute ticks, input delays, coordinate/RGB fitting, pixel exceptions, or canonical recording imports",
     "reversalPortable.ts runs the v2 probe through tools/run-mgba-probe.py and verifies reducer/component state, source activity, typed seam, software/hardware OAM, affine matrices, tagged palettes, registers, both audio players and pans, raw RGB, and application framebuffer twice fresh in both orientations",
-    "MOVE_SWALLOW remains unsupported because it adds BLUE_STAR, move-turn-dependent one/two/three five-orb waves, attacker deform/shake, and HealingEffect without independent dense acceptance",
+    "MOVE_SWALLOW is independently exact across all six natural Stockpile-count/orientation branches; no Reversal acceptance was transferred",
     "no battle logic, damage calculation, RNG, controller, turn order, round/facility state, boundary list, unsupported barrier, or sibling status changed"
    ],
    "evidence": [
@@ -3987,6 +3987,36 @@
     "src/animation/sceneOnPresentation.ts",
     "src/engine/battleScene.ts",
     "tests/animation/swagger.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_SWALLOW",
+   "status": "exact",
+   "covered": [
+    "all six natural Stockpile-count/orientation branches pass twice fresh through first inactive cleanup: player-back 1/2/3 at 163/163, 178/178, and 193/193; opponent-front 1/2/3 at 161/161, 176/176, and 191/191 source/component, selected hardware latch, raw-RGB, and production-framebuffer frames",
+    "the pure reducer and typed seam keep Stockpile count immutable while porting 5/10/15 BLUE_ORB callbacks, affine attacker deformation, both ShakeMon2 tasks, shared four-star HealingEffect, three audio cues, tag lifetimes, register non-ownership, and cleanup",
+    "the compositor uses source affine-double OBJ sampling and the measured split transfer: deform matrix/y at source age minus two, BLUE_ORB/BLUE_STAR at minus one, ShakeMon2's task display schedule, and the second-shake initializer's single selected zero-y row",
+    "the opponent branches retain Pelipper's elevated enemy shadow only at source age zero; the naturally switched three-Stockpile field is source species 322 SABLEYE, not the earlier misidentified NUMEL label",
+    "swallowPortable.ts gates the selected Pelipper hardware matrix, every displayed BLUE_ORB/BLUE_STAR OAM position and size, their hardware palette slots, immutable battle/party state, raw RGB, and the production framebuffer; whole-buffer OAM equality remains diagnostic only",
+    "no healing calculation, Stockpile mutation, damage, RNG, turn order, controller, round/facility state, absolute battle tick, per-frame framebuffer lookup, coordinate/RGB fit, boundary list, or sibling status changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-swallow-player-pelipper-one-stockpile.json",
+    "tools/battle-lab/mechanic-swallow-player-pelipper-two-stockpile.json",
+    "tools/battle-lab/mechanic-swallow-player-pelipper-three-stockpile.json",
+    "tools/battle-lab/mechanic-swallow-opponent-pelipper-one-stockpile.json",
+    "tools/battle-lab/mechanic-swallow-opponent-pelipper-two-stockpile.json",
+    "tools/battle-lab/mechanic-swallow-opponent-pelipper-three-stockpile.json",
+    "tools/compare/fixtures/swallow-evidence-matrix.json",
+    "tools/compare/swallowProbe.py",
+    "tools/compare/swallowPortable.ts",
+    "tools/compare/swallowSourceAudit.ts",
+    "src/animation/assets/swallow.json",
+    "src/animation/swallow.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/swallow.test.ts",
+    "tests/animation/swallowSourceCheckpoint.test.ts"
    ]
   },
   {
@@ -5051,7 +5081,7 @@
     "MOVE_REVERSAL",
     "MOVE_SWALLOW"
    ],
-   "goal": "MOVE_REVERSAL independently proves its complete 174-frame source body through first inactive cleanup at 174/174 source/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 451-624 player-back and 404-577 opponent-front, twice fresh. Its pure reducer and shared compositor port the three load/free lifecycles, both complex palette blends, BlendColorCycle, exactly six ReversalOrb callbacks, delays/waits, lunge/fist/basic hitsplat, and the already-resolved receipt-driven shake without calculating damage or touching battle state. MOVE_SWALLOW now has twice-fresh natural source-only receipts for all six required orientation/count branches: player-back 1/2/3 at 1247..1409, 2174..2351, 2999..3191 and opponent-front 1/2/3 at 1140..1300, 2066..2241, 6979..7169. Each pins 5/10/15 BLUE_ORB, four BLUE_STAR, both shakes, attacker deform, audio, register non-ownership, tag cleanup, topology, and raw-RGB sequence digest. MOVE_SWALLOW remains independently unsupported until complete dense source-relative reducer/seam/component/latch/production-framebuffer windows pass twice fresh."
+   "goal": "MOVE_REVERSAL independently proves its complete 174-frame source body through first inactive cleanup at 174/174 source/component, typed-seam, software/hardware OAM, matrices, palettes, registers, both audio players and pans, raw-RGB, and shared-framebuffer frames 451-624 player-back and 404-577 opponent-front, twice fresh. Its pure reducer and shared compositor port the three load/free lifecycles, both complex palette blends, BlendColorCycle, exactly six ReversalOrb callbacks, delays/waits, lunge/fist/basic hitsplat, and the already-resolved receipt-driven shake without calculating damage or touching battle state. MOVE_SWALLOW independently proves all six natural orientation/count branches twice fresh at player-back 163/178/193 and opponent-front 161/176/191 complete source/component, selected matrix/OAM/palette latch, raw-RGB, and production-framebuffer frames."
   },
   {
    "id": "blue-light-wall-reflect",
@@ -5621,7 +5651,7 @@
     "MOVE_MOONLIGHT",
     "MOVE_SWALLOW"
    ],
-   "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. MOVE_PRESENT independently proves its target HealingEffect2 tail within both 252-frame healing orientations, alongside its separately accepted damage branch. No other sibling is promoted: MEGA_DRAIN needs its paired 16-orb stronger-green body; DREAM_EATER its psychic-background/target-scale-and-shake/24-orb body; GIGA_DRAIN its 24-orb/high-green body; SOFT_BOILED has a distinct breaking-egg pair, attacker shake, two offset affine-program-0 thin rings, palette blend, and target HealingEffect2 body; and SWALLOW needs its move-turn-dependent deform/shake/blue-orb multiplicity. Each remains unsupported pending its own complete dense acceptance."
+   "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. MOVE_PRESENT independently proves its target HealingEffect2 tail within both 252-frame healing orientations, alongside its separately accepted damage branch. MOVE_SWALLOW independently proves its move-turn-dependent deform/shake/5/10/15 BLUE_ORB plus HealingEffect body across all six natural branches. MEGA_DRAIN, DREAM_EATER, GIGA_DRAIN, and SOFT_BOILED remain unsupported pending their distinct complete dense acceptance."
   },
   {
    "id": "absorption-orb-drain",
