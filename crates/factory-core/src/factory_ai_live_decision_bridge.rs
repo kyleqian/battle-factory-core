@@ -67,10 +67,14 @@ impl std::fmt::Display for FactoryAiLiveDecisionError {
                 write!(f, "Factory AI mask selection failed: {error}")
             }
             Self::InvalidInteger { field } => {
-                write!(
-                    f,
-                    "Factory AI live decision {field} must be a native integer"
-                )
+                if matches!(*field, "factoryWinStreak" | "trainerOpponentId") {
+                    write!(f, "{field} must be an integer from 0 through 65535")
+                } else {
+                    write!(
+                        f,
+                        "Factory AI live decision {field} must be a native integer"
+                    )
+                }
             }
             Self::KnownMoveHistoryTooLong { length } => write!(
                 f,
@@ -194,13 +198,13 @@ fn project_factory(
     )?;
     let factory_win_streak = project_u32(
         view.factory.factory_win_streak,
-        "view.factory.factoryWinStreak",
+        "factoryWinStreak",
         0xffff,
         flavor,
     )?;
     let trainer_opponent_id = project_u32(
         view.factory.trainer_opponent_id,
-        "view.factory.trainerOpponentId",
+        "trainerOpponentId",
         0xffff,
         flavor,
     )?;
