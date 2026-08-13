@@ -65,6 +65,9 @@ const STATUS3_LEECHSEED = 1 << 2;
 const STATUS3_PERISH_SONG = 1 << 5;
 const STATUS3_ROOTED = 1 << 10;
 const STATUS3_YAWN = (1 << 11) | (1 << 12);
+// src/data/gen/moves.json (`MOVE_SOLAR_BEAM` / `MOVE_PROTECT`).
+const MOVE_SOLAR_BEAM = 76;
+const MOVE_PROTECT = 182;
 
 class Hash64 {
   value = 0xcbf29ce484222325n;
@@ -265,6 +268,11 @@ const cases = [
     target: { types: ["TYPE_WATER", "TYPE_PSYCHIC"], ability: 37, status2: STATUS2_INFATUATION, status3: STATUS3_LEECHSEED },
     history: { usedMoves: [[150, 150, 150, 150, 138], [], [], []], knownAbilities: ["ABILITY_HUGE_POWER", null, null, null] },
     legalMask: 9, seed: 0xabcdef01, calls: 4, turnMode: 1, battleTurnCountPresent: true, battleTurnCount: 19 }),
+  sourceCase({ label: "mask_seven_charge_up_extended_protect_positional_gate", category: "mask-7-positional-history", chooser: 1, streak: 28,
+    attacker: { moves: [MOVE_SOLAR_BEAM, 57, 157, 34], types: ["TYPE_GRASS", "TYPE_GRASS"] },
+    target: { types: ["TYPE_NORMAL", "TYPE_NORMAL"] },
+    history: { usedMoves: [[33, 33, 33, 33, MOVE_PROTECT], [], [], []] },
+    legalMask: 1, seed: 0x2468ace0, calls: 17 }),
   sourceCase({ label: "mask_seven_protect_optional_flags", category: "mask-7-optional", chooser: 1, streak: 28,
     sideStatuses: [SIDE_STATUS_REFLECT | SIDE_STATUS_FUTUREATTACK, SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_SAFEGUARD | SIDE_STATUS_FUTUREATTACK],
     attacker: { moves: [182, 57, 157, 34], status2: STATUS2_INFATUATION | STATUS2_FOCUS_ENERGY | STATUS2_SUBSTITUTE, status3: STATUS3_LEECHSEED | STATUS3_YAWN | STATUS3_ROOTED, protectUses: 2 },
@@ -285,7 +293,7 @@ const cases = [
 const EXPECTED_CATEGORY_COUNTS = new Map([
   ["mask-0", 1], ["mask-0-history", 1], ["mask-1-type-ability", 1],
   ["mask-1-status-weather", 1], ["mask-7-history", 3], ["mask-7-optional", 1],
-  ["mask-7-stages", 1], ["mask-7-turn-ownership", 2],
+  ["mask-7-positional-history", 1], ["mask-7-stages", 1], ["mask-7-turn-ownership", 2],
 ]);
 const counts = new Map();
 for (const value of cases) counts.set(value.category, (counts.get(value.category) ?? 0) + 1);
