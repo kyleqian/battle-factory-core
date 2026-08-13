@@ -51,6 +51,12 @@ use factory_core::factory_ai_switch_policy::{
     self, FactoryAiSwitchBattler, FactoryAiSwitchChoice, FactoryAiSwitchPartyMember,
     FactoryAiSwitchPolicyInput, FactoryAiSwitchPolicyResult, FactoryAiSwitchRules,
 };
+use factory_core::factory_swap::{
+    self as factory_swap, FactoryRentalMon, FactorySwapBattleStatus, FactorySwapInput,
+    FactorySwapMon, FactorySwapPartyIndex, FactorySwapPhase, FactorySwapQuitReturnPhase,
+    FactorySwapResult, FactorySwapRoundDecision, FactorySwapState, FACTORY_SWAP_PARTY_SIZE,
+    FACTORY_SWAP_RENTAL_ROSTER_SIZE,
+};
 use factory_core::factory_trainer_schedule::{
     self, FactoryTrainerDrawLedgerEntry, FactoryTrainerRangeKind, FactoryTrainerScheduleError,
 };
@@ -4562,6 +4568,516 @@ pub unsafe extern "C" fn fw_apply_factory_ai_battle_history_operation(
     }
 }
 
+// --- Factory swap operation packet (additive ABI v1) ----------------------
+
+const FACTORY_SWAP_PACKET_VERSION: u8 = 1;
+const FACTORY_SWAP_MALFORMED_MESSAGE: &str =
+    "factory-wasm factorySwapEngine: malformed operation packet";
+
+#[derive(Debug)]
+enum FactorySwapPacket {
+    Create {
+        player_party: [FactorySwapMon; FACTORY_SWAP_PARTY_SIZE],
+        enemy_party: [FactorySwapMon; FACTORY_SWAP_PARTY_SIZE],
+        rental_mons: [FactoryRentalMon; FACTORY_SWAP_RENTAL_ROSTER_SIZE],
+    },
+    Acknowledge(FactorySwapState),
+    CopyCursor(FactorySwapState),
+    HandleInput(FactorySwapState, FactorySwapInput),
+    AlreadyHasSpecies(FactorySwapState, Option<FactorySwapPartyIndex>),
+    ApplyMutation(FactorySwapState),
+    CommitMutation(FactorySwapState),
+    RoundDecision(FactorySwapState),
+}
+
+#[derive(Debug)]
+enum FactorySwapBoundaryValue {
+    State(Box<FactorySwapState>),
+    Bool(bool),
+    Decision(Option<FactorySwapRoundDecision>),
+}
+
+fn encode_factory_swap_message(status: u8, message: &str) -> Vec<u8> {
+    let message = message.as_bytes();
+    let mut buf = Vec::with_capacity(9 + message.len());
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    buf.push(status);
+    buf.extend_from_slice(
+        &u32::try_from(message.len())
+            .unwrap_or(u32::MAX)
+            .to_le_bytes(),
+    );
+    buf.extend_from_slice(message);
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn factory_swap_write_string(buf: &mut Vec<u8>, value: &str) -> Result<(), ()> {
+    let bytes = value.as_bytes();
+    let length = u32::try_from(bytes.len()).map_err(|_| ())?;
+    buf.extend_from_slice(&length.to_le_bytes());
+    buf.extend_from_slice(bytes);
+    Ok(())
+}
+
+fn factory_swap_bool(reader: &mut CheckedReader<'_>) -> Result<bool, ()> {
+    match reader.u8()? {
+        0 => Ok(false),
+        1 => Ok(true),
+        _ => Err(()),
+    }
+}
+
+fn factory_swap_phase(value: u8) -> Result<FactorySwapPhase, ()> {
+    Ok(match value {
+        0 => FactorySwapPhase::PlayerPicker,
+        1 => FactorySwapPhase::PlayerOptions,
+        2 => FactorySwapPhase::SummaryFade,
+        3 => FactorySwapPhase::SummaryReturn,
+        4 => FactorySwapPhase::PlayerPickerReturn,
+        5 => FactorySwapPhase::EnemySwitch,
+        6 => FactorySwapPhase::PlayerSwitch,
+        7 => FactorySwapPhase::EnemyPicker,
+        8 => FactorySwapPhase::AcceptPrompt,
+        9 => FactorySwapPhase::AcceptReturn,
+        10 => FactorySwapPhase::AcceptExit,
+        11 => FactorySwapPhase::QuitPrompt,
+        12 => FactorySwapPhase::QuitReturn,
+        13 => FactorySwapPhase::QuitExit,
+        14 => FactorySwapPhase::DuplicateSpecies,
+        15 => FactorySwapPhase::DuplicateReturn,
+        16 => FactorySwapPhase::Complete,
+        _ => return Err(()),
+    })
+}
+
+fn factory_swap_status(value: u8) -> Result<FactorySwapBattleStatus, ()> {
+    Ok(match value {
+        0 => FactorySwapBattleStatus::None,
+        1 => FactorySwapBattleStatus::Sleep,
+        2 => FactorySwapBattleStatus::Poison,
+        3 => FactorySwapBattleStatus::Burn,
+        4 => FactorySwapBattleStatus::Freeze,
+        5 => FactorySwapBattleStatus::Paralysis,
+        6 => FactorySwapBattleStatus::Toxic,
+        _ => return Err(()),
+    })
+}
+
+fn factory_swap_input(value: u8) -> Result<FactorySwapInput, ()> {
+    Ok(match value {
+        0 => FactorySwapInput::Left,
+        1 => FactorySwapInput::Right,
+        2 => FactorySwapInput::Up,
+        3 => FactorySwapInput::Down,
+        4 => FactorySwapInput::A,
+        5 => FactorySwapInput::B,
+        _ => return Err(()),
+    })
+}
+
+fn factory_swap_party_index(value: u8) -> Result<FactorySwapPartyIndex, ()> {
+    FactorySwapPartyIndex::from_u8(value).ok_or(())
+}
+
+fn factory_swap_cursor(value: u8) -> Result<u8, ()> {
+    (value <= 4).then_some(value).ok_or(())
+}
+
+fn factory_swap_option_cursor(value: u8) -> Result<u8, ()> {
+    (value <= 2).then_some(value).ok_or(())
+}
+
+fn factory_swap_yes_no_cursor(value: u8) -> Result<u8, ()> {
+    (value <= 1).then_some(value).ok_or(())
+}
+
+fn factory_swap_optional_party_index(
+    reader: &mut CheckedReader<'_>,
+) -> Result<Option<FactorySwapPartyIndex>, ()> {
+    match reader.u8()? {
+        0 => Ok(None),
+        1 => Ok(Some(factory_swap_party_index(reader.u8()?)?)),
+        _ => Err(()),
+    }
+}
+
+fn factory_swap_optional_quit_return_phase(
+    reader: &mut CheckedReader<'_>,
+) -> Result<Option<FactorySwapQuitReturnPhase>, ()> {
+    match reader.u8()? {
+        0 => Ok(None),
+        1 => Ok(Some(match reader.u8()? {
+            0 => FactorySwapQuitReturnPhase::PlayerPicker,
+            1 => FactorySwapQuitReturnPhase::EnemyPicker,
+            _ => return Err(()),
+        })),
+        _ => Err(()),
+    }
+}
+
+fn factory_swap_optional_bool(reader: &mut CheckedReader<'_>) -> Result<Option<bool>, ()> {
+    match reader.u8()? {
+        0 => Ok(None),
+        1 => Ok(Some(factory_swap_bool(reader)?)),
+        _ => Err(()),
+    }
+}
+
+fn factory_swap_optional_result(
+    reader: &mut CheckedReader<'_>,
+) -> Result<Option<FactorySwapResult>, ()> {
+    match reader.u8()? {
+        0 => Ok(None),
+        1 => Ok(Some(FactorySwapResult::Accepted)),
+        2 => Ok(Some(FactorySwapResult::KeptParty)),
+        _ => Err(()),
+    }
+}
+
+fn decode_factory_swap_mon(reader: &mut CheckedReader<'_>) -> Result<FactorySwapMon, ()> {
+    Ok(FactorySwapMon {
+        id: reader.string()?,
+        species: reader.string()?,
+        max_hp: reader.u32()?,
+        hp: reader.u32()?,
+        status: factory_swap_status(reader.u8()?)?,
+        personality: reader.u32()?,
+        ability_num: reader.u8()?,
+        friendship: reader.u8()?,
+    })
+}
+
+fn decode_factory_swap_party(
+    reader: &mut CheckedReader<'_>,
+) -> Result<[FactorySwapMon; FACTORY_SWAP_PARTY_SIZE], ()> {
+    Ok([
+        decode_factory_swap_mon(reader)?,
+        decode_factory_swap_mon(reader)?,
+        decode_factory_swap_mon(reader)?,
+    ])
+}
+
+fn decode_factory_swap_rental(reader: &mut CheckedReader<'_>) -> Result<FactoryRentalMon, ()> {
+    Ok(FactoryRentalMon {
+        mon_id: reader.u32()?,
+        personality: reader.u32()?,
+        ivs: reader.u32()?,
+        ability_num: reader.u8()?,
+    })
+}
+
+fn decode_factory_swap_rentals(
+    reader: &mut CheckedReader<'_>,
+) -> Result<[FactoryRentalMon; FACTORY_SWAP_RENTAL_ROSTER_SIZE], ()> {
+    Ok([
+        decode_factory_swap_rental(reader)?,
+        decode_factory_swap_rental(reader)?,
+        decode_factory_swap_rental(reader)?,
+        decode_factory_swap_rental(reader)?,
+        decode_factory_swap_rental(reader)?,
+        decode_factory_swap_rental(reader)?,
+    ])
+}
+
+fn decode_factory_swap_state(reader: &mut CheckedReader<'_>) -> Result<FactorySwapState, ()> {
+    let phase = factory_swap_phase(reader.u8()?)?;
+    let player_party = decode_factory_swap_party(reader)?;
+    let enemy_party = decode_factory_swap_party(reader)?;
+    let rental_mons = decode_factory_swap_rentals(reader)?;
+    let cursor = factory_swap_cursor(reader.u8()?)?;
+    let info_cursor = factory_swap_cursor(reader.u8()?)?;
+    let display_cursor = factory_swap_cursor(reader.u8()?)?;
+    let arrow_cursor = factory_swap_cursor(reader.u8()?)?;
+    let cursor_copy_pending = factory_swap_bool(reader)?;
+    let actions_count = match reader.u8()? {
+        4 => 4,
+        5 => 5,
+        _ => return Err(()),
+    };
+    let player_option_cursor = factory_swap_option_cursor(reader.u8()?)?;
+    let player_option_display_cursor = factory_swap_option_cursor(reader.u8()?)?;
+    let player_option_cursor_copy_pending = factory_swap_bool(reader)?;
+    let yes_no_cursor = factory_swap_yes_no_cursor(reader.u8()?)?;
+    let player_mon_id = factory_swap_optional_party_index(reader)?;
+    let enemy_mon_id = factory_swap_optional_party_index(reader)?;
+    let quit_return_phase = factory_swap_optional_quit_return_phase(reader)?;
+    let player_switch_completed = factory_swap_bool(reader)?;
+    let input_ready = factory_swap_bool(reader)?;
+    let script_result = factory_swap_optional_bool(reader)?;
+    let mutation_committed = factory_swap_bool(reader)?;
+    let result = factory_swap_optional_result(reader)?;
+    Ok(FactorySwapState {
+        phase,
+        player_party,
+        enemy_party,
+        rental_mons,
+        cursor,
+        info_cursor,
+        display_cursor,
+        arrow_cursor,
+        cursor_copy_pending,
+        actions_count,
+        player_option_cursor,
+        player_option_display_cursor,
+        player_option_cursor_copy_pending,
+        yes_no_cursor,
+        player_mon_id,
+        enemy_mon_id,
+        quit_return_phase,
+        player_switch_completed,
+        input_ready,
+        script_result,
+        mutation_committed,
+        result,
+    })
+}
+
+fn decode_factory_swap_packet(bytes: &[u8]) -> Result<FactorySwapPacket, ()> {
+    let mut reader = CheckedReader::new(bytes);
+    if reader.u8()? != FACTORY_SWAP_PACKET_VERSION {
+        return Err(());
+    }
+    let operation = reader.u8()?;
+    let packet = match operation {
+        0 => FactorySwapPacket::Create {
+            player_party: decode_factory_swap_party(&mut reader)?,
+            enemy_party: decode_factory_swap_party(&mut reader)?,
+            rental_mons: decode_factory_swap_rentals(&mut reader)?,
+        },
+        1 => FactorySwapPacket::Acknowledge(decode_factory_swap_state(&mut reader)?),
+        2 => FactorySwapPacket::CopyCursor(decode_factory_swap_state(&mut reader)?),
+        3 => FactorySwapPacket::HandleInput(
+            decode_factory_swap_state(&mut reader)?,
+            factory_swap_input(reader.u8()?)?,
+        ),
+        4 => FactorySwapPacket::AlreadyHasSpecies(
+            decode_factory_swap_state(&mut reader)?,
+            factory_swap_optional_party_index(&mut reader)?,
+        ),
+        5 => FactorySwapPacket::ApplyMutation(decode_factory_swap_state(&mut reader)?),
+        6 => FactorySwapPacket::CommitMutation(decode_factory_swap_state(&mut reader)?),
+        7 => FactorySwapPacket::RoundDecision(decode_factory_swap_state(&mut reader)?),
+        _ => return Err(()),
+    };
+    reader.finish()?;
+    Ok(packet)
+}
+
+fn factory_swap_execute(packet: FactorySwapPacket) -> Result<FactorySwapBoundaryValue, String> {
+    match packet {
+        FactorySwapPacket::Create { player_party, enemy_party, rental_mons } => {
+            Ok(FactorySwapBoundaryValue::State(Box::new(
+                factory_swap::create_factory_swap_state(&player_party, &enemy_party, &rental_mons),
+            )))
+        }
+        FactorySwapPacket::Acknowledge(state) => Ok(FactorySwapBoundaryValue::State(Box::new(
+            factory_swap::acknowledge_factory_swap_presentation(&state),
+        ))),
+        FactorySwapPacket::CopyCursor(state) => Ok(FactorySwapBoundaryValue::State(Box::new(
+            factory_swap::copy_factory_swap_cursor(&state),
+        ))),
+        FactorySwapPacket::HandleInput(state, input) => Ok(FactorySwapBoundaryValue::State(
+            Box::new(factory_swap::handle_factory_swap_input(&state, input)),
+        )),
+        FactorySwapPacket::AlreadyHasSpecies(state, enemy_mon_id) => {
+            factory_swap::factory_swap_already_has_species(&state, enemy_mon_id)
+                .map(FactorySwapBoundaryValue::Bool)
+                .map_err(|error| error.to_string())
+        }
+        FactorySwapPacket::ApplyMutation(state) => {
+            factory_swap::apply_factory_swap_mutation(&state)
+                .map(|state| FactorySwapBoundaryValue::State(Box::new(state)))
+                .map_err(|error| error.to_string())
+        }
+        FactorySwapPacket::CommitMutation(state) => {
+            factory_swap::commit_factory_swap_mutation(&state)
+                .map(|state| FactorySwapBoundaryValue::State(Box::new(state)))
+                .map_err(|error| error.to_string())
+        }
+        FactorySwapPacket::RoundDecision(state) => Ok(FactorySwapBoundaryValue::Decision(
+            factory_swap::factory_swap_round_decision(&state),
+        )),
+    }
+}
+
+fn encode_factory_swap_mon(buf: &mut Vec<u8>, mon: &FactorySwapMon) -> Result<(), ()> {
+    factory_swap_write_string(buf, &mon.id)?;
+    factory_swap_write_string(buf, &mon.species)?;
+    buf.extend_from_slice(&mon.max_hp.to_le_bytes());
+    buf.extend_from_slice(&mon.hp.to_le_bytes());
+    buf.push(match mon.status {
+        FactorySwapBattleStatus::None => 0,
+        FactorySwapBattleStatus::Sleep => 1,
+        FactorySwapBattleStatus::Poison => 2,
+        FactorySwapBattleStatus::Burn => 3,
+        FactorySwapBattleStatus::Freeze => 4,
+        FactorySwapBattleStatus::Paralysis => 5,
+        FactorySwapBattleStatus::Toxic => 6,
+    });
+    buf.extend_from_slice(&mon.personality.to_le_bytes());
+    buf.push(mon.ability_num);
+    buf.push(mon.friendship);
+    Ok(())
+}
+
+fn encode_factory_swap_state(buf: &mut Vec<u8>, state: &FactorySwapState) -> Result<(), ()> {
+    buf.push(match state.phase {
+        FactorySwapPhase::PlayerPicker => 0,
+        FactorySwapPhase::PlayerOptions => 1,
+        FactorySwapPhase::SummaryFade => 2,
+        FactorySwapPhase::SummaryReturn => 3,
+        FactorySwapPhase::PlayerPickerReturn => 4,
+        FactorySwapPhase::EnemySwitch => 5,
+        FactorySwapPhase::PlayerSwitch => 6,
+        FactorySwapPhase::EnemyPicker => 7,
+        FactorySwapPhase::AcceptPrompt => 8,
+        FactorySwapPhase::AcceptReturn => 9,
+        FactorySwapPhase::AcceptExit => 10,
+        FactorySwapPhase::QuitPrompt => 11,
+        FactorySwapPhase::QuitReturn => 12,
+        FactorySwapPhase::QuitExit => 13,
+        FactorySwapPhase::DuplicateSpecies => 14,
+        FactorySwapPhase::DuplicateReturn => 15,
+        FactorySwapPhase::Complete => 16,
+    });
+    for mon in state.player_party.iter().chain(state.enemy_party.iter()) {
+        encode_factory_swap_mon(buf, mon)?;
+    }
+    for rental in &state.rental_mons {
+        buf.extend_from_slice(&rental.mon_id.to_le_bytes());
+        buf.extend_from_slice(&rental.personality.to_le_bytes());
+        buf.extend_from_slice(&rental.ivs.to_le_bytes());
+        buf.push(rental.ability_num);
+    }
+    buf.extend_from_slice(&[
+        state.cursor,
+        state.info_cursor,
+        state.display_cursor,
+        state.arrow_cursor,
+        u8::from(state.cursor_copy_pending),
+        state.actions_count,
+        state.player_option_cursor,
+        state.player_option_display_cursor,
+        u8::from(state.player_option_cursor_copy_pending),
+        state.yes_no_cursor,
+    ]);
+    for value in [state.player_mon_id, state.enemy_mon_id] {
+        match value {
+            None => buf.push(0),
+            Some(value) => {
+                buf.push(1);
+                buf.push(value as u8);
+            }
+        }
+    }
+    match state.quit_return_phase {
+        None => buf.push(0),
+        Some(FactorySwapQuitReturnPhase::PlayerPicker) => buf.extend_from_slice(&[1, 0]),
+        Some(FactorySwapQuitReturnPhase::EnemyPicker) => buf.extend_from_slice(&[1, 1]),
+    }
+    buf.extend_from_slice(&[
+        u8::from(state.player_switch_completed),
+        u8::from(state.input_ready),
+    ]);
+    match state.script_result {
+        None => buf.push(0),
+        Some(value) => buf.extend_from_slice(&[1, u8::from(value)]),
+    }
+    buf.push(u8::from(state.mutation_committed));
+    match state.result {
+        None => buf.push(0),
+        Some(FactorySwapResult::Accepted) => buf.push(1),
+        Some(FactorySwapResult::KeptParty) => buf.push(2),
+    }
+    Ok(())
+}
+
+fn encode_factory_swap_value(value: FactorySwapBoundaryValue) -> Result<Vec<u8>, ()> {
+    let mut buf = vec![0; 6];
+    buf[4] = 0;
+    match value {
+        FactorySwapBoundaryValue::State(state) => {
+            buf[5] = 0;
+            encode_factory_swap_state(&mut buf, &state)?;
+        }
+        FactorySwapBoundaryValue::Bool(value) => {
+            buf[5] = 1;
+            buf.push(u8::from(value));
+        }
+        FactorySwapBoundaryValue::Decision(decision) => {
+            buf[5] = 2;
+            match decision {
+                None => buf.push(0),
+                Some(FactorySwapRoundDecision::Accept {
+                    player_party_index,
+                    opponent_party_index,
+                }) => {
+                    buf.push(1);
+                    buf.push(player_party_index as u8);
+                    buf.push(opponent_party_index as u8);
+                }
+                Some(FactorySwapRoundDecision::Decline) => buf.push(2),
+            }
+        }
+    }
+    patch_total_len(&mut buf);
+    Ok(buf)
+}
+
+/// Executes one source-shaped Factory swap boundary operation through
+/// additive ABI v1. The packet is versioned and little-endian:
+/// `version:u8,operation:u8`, with operation tags 0=create, 1=acknowledge,
+/// 2=copy-cursor, 3=handle-input, 4=already-has-species, 5=apply-mutation,
+/// 6=commit-mutation, and 7=round-decision. Create carries three player mon
+/// records, three enemy mon records, and six rental records. Every other
+/// operation carries the full state, followed only by its operation-specific
+/// suffix: handle-input has `input:u8`; already-has-species has
+/// `enemy_mon_id:presence:u8,[party_index:u8]`; all others have no suffix.
+///
+/// A mon is `id_len:u32,id:utf8,species_len:u32,species:utf8,max_hp:u32,
+/// hp:u32,status:u8,personality:u32,ability_num:u8,friendship:u8`. A rental
+/// is `mon_id:u32,personality:u32,ivs:u32,ability_num:u8`. The full state then
+/// carries all 17 phases, all cursor/pending/option/selection/quit/script/
+/// mutation/result fields in source declaration order. Optional values use an
+/// exact 0/1 presence tag; all enum/domain tags are checked before execution.
+///
+/// Output is `total_len:u32,status:u8`. Status 0 carries `value_kind:u8`
+/// (0=state, 1=bool, 2=decision) and the complete value. Decisions use
+/// `0=null,1=accept,2=decline`, with accept followed by two party indexes.
+/// Status 1 carries `message_len:u32,message:utf8` for the two exact native
+/// semantic errors. Status 2 carries the same message layout for every
+/// structural error. Checked arithmetic, UTF-8 decoding, exact operation
+/// suffixes, and full-packet consumption finish before semantic execution.
+/// The caller frees the result with `fw_free(ptr,total_len)`.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_apply_factory_swap_operation(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_len == 0 {
+        return alloc_and_copy(&encode_factory_swap_message(
+            2,
+            FACTORY_SWAP_MALFORMED_MESSAGE,
+        ));
+    }
+    // SAFETY: the caller contract supplies exactly input_len readable bytes.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len as usize) };
+    let output = match decode_factory_swap_packet(bytes) {
+        Err(()) => encode_factory_swap_message(2, FACTORY_SWAP_MALFORMED_MESSAGE),
+        Ok(packet) => match factory_swap_execute(packet) {
+            Err(message) => encode_factory_swap_message(1, &message),
+            Ok(value) => encode_factory_swap_value(value).unwrap_or_else(|()| {
+                encode_factory_swap_message(2, FACTORY_SWAP_MALFORMED_MESSAGE)
+            }),
+        },
+    };
+    alloc_and_copy(&output)
+}
+
 // --- Factory AI live-view constructor (additive ABI v1) ------------------
 
 const FACTORY_AI_LIVE_VIEW_MALFORMED_MESSAGE: &str =
@@ -6882,5 +7398,119 @@ mod tests {
                 expected
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod factory_swap_boundary_tests {
+    use super::fw_apply_factory_swap_operation;
+    use super::fw_free;
+
+    fn push_string(packet: &mut Vec<u8>, value: &str) {
+        packet.extend_from_slice(&(value.len() as u32).to_le_bytes());
+        packet.extend_from_slice(value.as_bytes());
+    }
+
+    fn push_mon(packet: &mut Vec<u8>, id: &str, species: &str) {
+        push_string(packet, id);
+        push_string(packet, species);
+        packet.extend_from_slice(&100u32.to_le_bytes());
+        packet.extend_from_slice(&100u32.to_le_bytes());
+        packet.push(0); // none
+        packet.extend_from_slice(&0x0102_0304u32.to_le_bytes());
+        packet.push(0);
+        packet.push(70);
+    }
+
+    fn create_packet() -> Vec<u8> {
+        let mut packet = vec![1, 0];
+        for index in 0..3 {
+            push_mon(
+                &mut packet,
+                &format!("player-{index}"),
+                &format!("PLAYER_{index}"),
+            );
+        }
+        for index in 0..3 {
+            push_mon(
+                &mut packet,
+                &format!("enemy-{index}"),
+                &format!("ENEMY_{index}"),
+            );
+        }
+        for index in 0..6u32 {
+            packet.extend_from_slice(&(100 + index).to_le_bytes());
+            packet.extend_from_slice(&(200 + index).to_le_bytes());
+            packet.extend_from_slice(&3u32.to_le_bytes());
+            packet.push((index & 1) as u8);
+        }
+        packet
+    }
+
+    fn copy_output(ptr: *mut u8) -> Vec<u8> {
+        // SAFETY: every boundary result is allocated by fw_alloc and starts
+        // with its own total length.
+        unsafe {
+            let total_len =
+                u32::from_le_bytes(std::slice::from_raw_parts(ptr, 4).try_into().unwrap());
+            let bytes = std::slice::from_raw_parts(ptr, total_len as usize).to_vec();
+            fw_free(ptr, total_len);
+            bytes
+        }
+    }
+
+    #[test]
+    fn factory_swap_boundary_accepts_a_valid_create_packet() {
+        let packet = create_packet();
+        // SAFETY: packet is a live, initialized buffer for the documented ABI.
+        let bytes = copy_output(unsafe {
+            fw_apply_factory_swap_operation(packet.as_ptr(), packet.len() as u32)
+        });
+        assert_eq!(bytes[4], 0);
+        assert_eq!(bytes[5], 0, "state value kind");
+        assert_eq!(bytes[6], 0, "created phase is playerPicker");
+        assert_eq!(bytes[bytes.len() - 1], 0, "created result is absent");
+    }
+
+    #[test]
+    fn factory_swap_boundary_preserves_the_exact_semantic_error() {
+        let create = create_packet();
+        // First obtain the encoded state, then reuse its state payload for an
+        // apply packet whose selections are both absent.
+        // SAFETY: create is a live, initialized buffer for the documented ABI.
+        let created = copy_output(unsafe {
+            fw_apply_factory_swap_operation(create.as_ptr(), create.len() as u32)
+        });
+        let mut apply = vec![1, 5];
+        apply.extend_from_slice(&created[6..]);
+        // SAFETY: apply is a live, initialized buffer for the documented ABI.
+        let bytes = copy_output(unsafe {
+            fw_apply_factory_swap_operation(apply.as_ptr(), apply.len() as u32)
+        });
+        assert_eq!(bytes[4], 1);
+        let message_len = u32::from_le_bytes(bytes[5..9].try_into().unwrap()) as usize;
+        assert_eq!(
+            std::str::from_utf8(&bytes[9..9 + message_len]).unwrap(),
+            "accepted Factory swap requires both selected party indexes"
+        );
+    }
+
+    #[test]
+    fn factory_swap_boundary_reports_truncation_append_and_bad_tags_as_status_2() {
+        for mut packet in [vec![1, 0], vec![1, 0xff]] {
+            // SAFETY: malformed packets are validated before any unchecked
+            // semantic access and the pointer remains valid for this call.
+            let bytes = copy_output(unsafe {
+                fw_apply_factory_swap_operation(packet.as_mut_ptr(), packet.len() as u32)
+            });
+            assert_eq!(bytes[4], 2);
+        }
+        let mut appended = create_packet();
+        appended.push(0);
+        // SAFETY: the appended packet is a live initialized malformed packet.
+        let bytes = copy_output(unsafe {
+            fw_apply_factory_swap_operation(appended.as_ptr(), appended.len() as u32)
+        });
+        assert_eq!(bytes[4], 2);
     }
 }
