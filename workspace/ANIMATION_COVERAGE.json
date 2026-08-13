@@ -119,6 +119,29 @@
    ]
   },
   {
+   "move": "MOVE_ANCIENT_POWER",
+   "status": "exact",
+   "covered": [
+    "complete legal set-75 numeric-species-318 BALTOY versus ONIX Scene-ON windows at source frames 225-352 pass 128/128 source reducer, typed seam, component/topology/state/register/audio, raw-RGB, change-map, and production framebuffer rows in both player-back and opponent-front orientations twice fresh",
+    "the source-relative reducer and compositor cover all ten gAncientPowerRockSpriteTemplate Q8.8 bodies/cells/teardown, first-scanout OAM order, attacker and target ShakeMon2 schedules, platform BG3 displacement, both invisible slide helpers, animation-1 IMPACT, monbg/setalpha/clearmonbg/blendoff, tags, audio, immutable state, and cleanup",
+    "hardware transfer acceptance is 127/127 comparable rows per orientation: age 7 is the measured monbg same-row hardware palette transfer and the other 126 rows use the preceding faded/software buffer contract"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-ancient-power-player-baltoy-opponent-onix.json",
+    "tools/battle-lab/mechanic-ancient-power-opponent-baltoy-player-onix.json",
+    "tools/compare/fixtures/ancient-power-dense-evidence.json",
+    "tools/compare/evidence/ancient-power-changemap-player.txt",
+    "tools/compare/evidence/ancient-power-changemap-opponent.txt",
+    "tools/compare/ancientPowerProbe.py",
+    "tools/compare/ancientPowerPortable.ts",
+    "src/animation/ancientPower.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/ancientPower.test.ts",
+    "tests/animation/ancientPowerEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_AROMATHERAPY",
    "status": "exact",
    "covered": [

@@ -1,4 +1,12 @@
-# MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint — remains unsupported (2026-08-13 worker)
+# MOVE_ANCIENT_POWER exact — bilateral 128/128 closure (2026-08-13 worker)
+
+- **State:** Level-50 coverage advances **179→180/276 exact**, 0 partial, 0 staged, and unsupported falls **97→96**. Ancient Power alone is promoted; ROCK_THROW and ROCK_SLIDE remain independent exact controls.
+- **Did:** Added the narrow typed BALTOY back/front Scene-ON seam and source compositor for ten Q8.8 rising rocks, both move-owned ShakeMon2 schedules, platform BG3 shake, offset/restore slide helpers, animation-1 IMPACT, monbg/alpha lifecycle, resources, audio, chrome, and cleanup. Banked bilateral move-owned change maps and a strict fresh-scratch portable verifier that rejects scenario/state/RGB/map drift.
+- **Verified:** Complete player-back and opponent-front source frames **225..352** pass **128/128 reducer, seam, component, raw-RGB, change-map, and production framebuffer** rows twice freshly; transfer acceptance is **127/127** with measured same-row monbg palette transfer at age 7 and preceding-buffer transfer on the other 126 rows. Stable receipts remain `fabfdb19…/bd59ebbf…/b0d3c51f…` and `cad96a74…/32d27b5…/b6106425…`.
+- **Next:** None for Ancient Power. Shared ROCKS/IMPACT/ShakeMon2/slide code does not promote another move.
+- **Notes:** Presentation-only. No damage, stat boost, RNG, turn/controller/facility state, boundary widening, canonical recording import, absolute-tick/framebuffer lookup, coordinate/RGB fitting, or sibling coverage changed.
+
+# MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint — superseded (2026-08-13 worker)
 
 - **State:** Level-50 coverage remains **179/276 exact**, 0 partial, 0 staged, and 97 unsupported. Ancient Power is not promoted; ROCK_THROW and ROCK_SLIDE remain independent controls.
 - **Did:** Added the source-relative ten-rock `AnimRaiseSprite` reducer and focused component tests for the assigned 12-component track. Added a pointer-bounded Scene-ON probe and retained complete state/raw-RGB receipts for actual numeric species **318 BALTOY**, source metadata set **75**, with complete legal Level-50 party records in both player-back and opponent-front orientations. Committed those two reproducible scenarios under `tools/battle-lab`, pinned their SHA-256 values in the receipt/test, and corrected `ANCIENT_POWER_COMPONENTS` to the generated source graph exactly.

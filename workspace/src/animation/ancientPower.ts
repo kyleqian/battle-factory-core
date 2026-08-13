@@ -14,6 +14,10 @@ import {
   shakeMon2DisplayedOffsetAtAge,
   type ShakeMon2Offset,
 } from "./shakeMon2.ts";
+import {
+  slideMonToOffsetAtTick,
+  slideMonToOriginalPosAtTick,
+} from "./slideMon.ts";
 
 export const ANCIENT_POWER_MOVE_ID = 246;
 export const ANCIENT_POWER_ATTACKER_SPECIES_ID = 318;
@@ -71,12 +75,13 @@ function signedInitialX(xOffset: number, side: AncientPowerGeometry["attackerSid
 function raiseY2(spec: AncientPowerRockSpec, age: number): number {
   const step = age - spec.spawnAge + 1;
   if (step <= 0) return 0;
-  const magnitude = Math.floor(
-    (Math.abs(spec.terminalY) * 256 * step) / spec.duration,
-  );
+  // InitAnimLinearTranslation first truncates the Q8.8 delta, then the
+  // callback truncates the accumulated magnitude back toward zero.
+  const delta = Math.trunc((Math.abs(spec.terminalY) * 256) / spec.duration) | 1;
+  const magnitude = (delta * Math.min(step, spec.duration)) >> 8;
   const y2 = spec.terminalY < 0
-    ? -Math.floor(magnitude / 256)
-    : Math.floor(magnitude / 256);
+    ? -magnitude
+    : magnitude;
   return y2 === 0 ? 0 : y2;
 }
 
@@ -143,6 +148,70 @@ export function ancientPowerShakeAtAge(
 /** The two source-side helpers temporarily move the attacker by sixteen px. */
 export const ANCIENT_POWER_SLIDE_TO_OFFSET_AGE = 73;
 export const ANCIENT_POWER_SLIDE_TO_ORIGINAL_AGE = 89;
+
+export interface AncientPowerState {
+  readonly age: number;
+  readonly active: boolean;
+  readonly rocks: readonly AncientPowerRockState[];
+  readonly attackerX2: number;
+  readonly targetX2: number;
+  readonly bg3vofs: number;
+  readonly monBgActive: boolean;
+  readonly bldcnt: number;
+  readonly bldalpha: number;
+  readonly resources: Readonly<{ rocks: boolean; impact: boolean }>;
+  readonly hitsplatVisible: boolean;
+}
+
+/** Complete source-relative presentation state through first inactive cleanup. */
+export function ancientPowerAtAge(
+  age: number,
+  geometry: Readonly<AncientPowerGeometry>,
+): AncientPowerState {
+  const shake = ancientPowerShakeAtAge(age, ANCIENT_POWER_ATTACKER_SHAKE).x2;
+  let slide = 0;
+  if (age >= ANCIENT_POWER_SLIDE_TO_OFFSET_AGE) {
+    slide = slideMonToOffsetAtTick({
+      battlerSide: geometry.attackerSide,
+      targetXOffset: 16,
+      targetYOffset: 0,
+      mirrorVertical: false,
+      durationTicks: 4,
+    }, age - ANCIENT_POWER_SLIDE_TO_OFFSET_AGE).x2;
+  }
+  if (age >= ANCIENT_POWER_SLIDE_TO_ORIGINAL_AGE) {
+    const held = geometry.attackerSide === "player" ? 16 : -16;
+    slide = slideMonToOriginalPosAtTick({
+      currentX2: held,
+      currentY2: 0,
+      axisSnapMode: 0,
+      durationTicks: 7,
+    }, age - ANCIENT_POWER_SLIDE_TO_ORIGINAL_AGE).x2;
+  }
+  // The invisible helper initializes at age 9. Its first -4 write is age
+  // 11 and reaches BG3 scanout at 12; alternate -4/0 two-row holds follow.
+  const bg3vofs = age >= 12 && age <= 20
+    ? (Math.floor((age - 12) / 2) % 2 === 0 ? -4 : 0)
+    : 0;
+  return {
+    age,
+    active: age >= 0 && age < 127,
+    rocks: ancientPowerRocksAtAge(age, geometry),
+    // Both tasks run their first callback on the creation row, so their
+    // move-owned scanout begins with the negative write (not the common
+    // helper's positive initializer assumption).
+    attackerX2: age < ANCIENT_POWER_SLIDE_TO_OFFSET_AGE ? shake : slide,
+    targetX2: age >= 78 && age <= 87
+      ? (Math.floor((age - 78) / 2) % 2 === 0 ? -3 : 3)
+      : 0,
+    bg3vofs,
+    monBgActive: age >= 8 && age < 96,
+    bldcnt: age >= 10 && age < 96 ? 0x3f40 : 0,
+    bldalpha: age >= 10 && age < 96 ? 0x080c : 0,
+    resources: { rocks: age >= 1 && age < 127, impact: age >= 4 && age < 127 },
+    hitsplatVisible: age >= 77 && age <= 86,
+  };
+}
 
 /** Components claimed by this reducer; shared components remain independent acceptance units. */
 export const ANCIENT_POWER_COMPONENTS = Object.freeze([

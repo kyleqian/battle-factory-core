@@ -44,7 +44,7 @@ function expectCompleteRecord(mon: Record<string, unknown>): void {
 
 describe("MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint", () => {
   it("reads the authoritative Baltoy identity directly from Emerald source", () => {
-    expect(receipt.status).toBe("unsupported-staged");
+    expect(receipt.status).toBe("exact");
     expect(receipt.source).toMatchObject({ moveId: 246, carrierSetId: 75, carrierSpeciesId: 318, carrierLabel: "FRONTIER_MON_BALTOY", completePartyRecords: true });
     expect(species).toContain("#define SPECIES_BALTOY 318");
     expect(frontierIds).toMatch(/#define FRONTIER_MON_BALTOY\s+75(?:\s|$)/);
@@ -55,6 +55,15 @@ describe("MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint", () => {
     expect(baltoySourceBlock).toContain(".itemTableId = BATTLE_FRONTIER_ITEM_PERSIM_BERRY");
     expect(baltoySourceBlock).toContain(".evSpread = F_EV_SPREAD_SP_ATTACK | F_EV_SPREAD_ATTACK");
     expect(baltoySourceBlock).toContain(".nature = NATURE_NAUGHTY");
+  });
+
+  it("pins the complete twice-fresh bilateral exact production gate", () => {
+    expect(receipt.acceptance).toEqual({ status: "exact", reducerRows: 128, seamRows: 128, componentRows: 128, latchRows: 127, framebufferRows: 128, freshRuns: 2 });
+    expect(receipt.residual).toBeNull();
+    for (const orientation of ["player-back", "opponent-front"] as const) {
+      const row = receipt.orientations[orientation];
+      expect(sha256(readFileSync(row.changeMap))).toBe(row.changeMapSha256);
+    }
   });
 
   it("keeps the committed probe runnable through the relative mGBA wrapper route", () => {
