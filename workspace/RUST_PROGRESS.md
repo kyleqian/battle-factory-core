@@ -5,6 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R7 — [supervised session, 2026-08-13] **M9c Factory swap input reducer**
+
+- **State:** `rust-main` = current master `6edeb188` plus verified M9c
+  `29470d38`. The complete pure `factorySwap.ts` state, mutation, cursor,
+  decision, and six-input reducer surface is now native. `RUST_DEFERRED.md`
+  has no open entries.
+- **Did:** ported every `handleFactorySwapInput` readiness gate, picker/action
+  wrap, cursor-copy staging flag, player-option route, duplicate-species
+  route, accept/quit prompt branch, and transition-phase no-op. The
+  canonical-TypeScript-executed corpus has **176 full-state cases / 22
+  categories**, including the complete **17 phases x 6 inputs** matrix;
+  sha256 `6798e1b084014722be065fc45f6d0b817754d05330d95cd7269ac099f0d90759`.
+- **Next:** M9d — expose the complete Factory swap pure surface through one
+  additive ABI-v1 operation packet, a new `core-rs/adapter` module, and one
+  new both-mode parity suite. Forced WASM must call the export directly with
+  no TypeScript fallback. M7c opponent generation still waits on #55.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the reducer
+  branch-by-branch, regenerated the corpus twice byte-identically, and reran
+  cargo **737 tests**, focused vectors **5/5**, fmt, strict clippy, release
+  WASM, and smoke **375/375**. Worker same-commit full npm was **1,035 files /
+  9,804 passed / 1 skip** plus build **661 modules**. Artifact is **471,931
+  bytes**, sha256
+  `aa740344412b2daa2c904bf1e67f181fe7cf28e43f16a2caed057936405d5fe4`.
+  Scope stayed entirely inside `core-rs/**`; no adapter, canonical TypeScript,
+  TS test/config, or other lane ledger changed.
+
 ## R6 — [supervised session, 2026-08-13] **M8d–M8j live planning + M9a–M9b Factory swap leaves**
 
 - **State:** `rust-main` = master `fafcf933` plus verified M8d–M9b through
