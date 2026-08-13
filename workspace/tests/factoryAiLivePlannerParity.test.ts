@@ -47,6 +47,28 @@ type Spec = Readonly<{
 
 const TRAINER_FACTORY = BATTLE_SCRIPT_BATTLE_TYPE_TRAINER | BATTLE_SCRIPT_BATTLE_TYPE_FACTORY;
 const STAGES = [6, 6, 6, 6, 6, 6, 6, 6] as const;
+const U8_BYTES = Uint8Array.BYTES_PER_ELEMENT;
+const U32_BYTES = Uint32Array.BYTES_PER_ELEMENT;
+const F64_BYTES = Float64Array.BYTES_PER_ELEMENT;
+const PLANNER_PACKET = {
+  battlerCount: 4,
+  battlerExtraF64Fields: 2,
+  observedSlots: 4,
+  opponentPartyCount: 6,
+  opponentMemberF64Fields: 7, // species, ability, HP, and four moves
+  switchScalarF64Fields: 7,
+  rngU32Fields: 2,
+  requestIdBytes: U32_BYTES,
+  legalDecisionBytes: 3, // tag, slot-or-party, target
+} as const;
+const MALFORMED_PLANNER_PACKET = {
+  status: 2,
+  message: "factory-wasm factoryAiLivePlannerEngine: malformed input",
+} as const;
+const UNKNOWN_ATTACKER_ABILITY = {
+  status: 1,
+  message: "Factory AI live view: unknown ability id 78",
+} as const;
 
 function battler(overrides: Patch = {}): Record<string, unknown> {
   const base = {
@@ -189,6 +211,59 @@ function packetStatus(packet: Uint8Array): { status: number; message: string } {
   };
 }
 
+/** Derives raw suffix locations from the documented planner ABI-v1 layout. */
+function plannerPacketOffsets(input: FactoryAiLivePlannerInput): Readonly<{
+  firstOpponentEggTag: number;
+  boundaryTag: number;
+  requestKindTag: number;
+  firstLegalDecisionTag: number;
+  expectedLength: number;
+}> {
+  if (input.state.boundary.kind !== "decision-required"
+    || input.state.boundary.request.kind !== "command"
+    || input.state.boundary.request.legalDecisions.length === 0) {
+    throw new Error("planner packet offset helper requires a command request with legal decisions");
+  }
+  const prefixLength = encodeFactoryAiLiveViewInput({
+    rulesContext: input.state.rules.rulesContext,
+    history: input.history,
+    challenge: input.challenge,
+  }).length;
+  let offset = prefixLength;
+  offset += PLANNER_PACKET.battlerCount * PLANNER_PACKET.battlerExtraF64Fields * F64_BYTES;
+  offset += PLANNER_PACKET.observedSlots * F64_BYTES; // observed abilities
+  offset += PLANNER_PACKET.observedSlots * F64_BYTES; // observed item effects
+  const firstOpponentEggTag = offset + F64_BYTES;
+  offset += PLANNER_PACKET.opponentPartyCount
+    * (PLANNER_PACKET.opponentMemberF64Fields * F64_BYTES + U8_BYTES);
+  offset += PLANNER_PACKET.switchScalarF64Fields * F64_BYTES;
+  offset += PLANNER_PACKET.rngU32Fields * U32_BYTES;
+  const boundaryTag = offset;
+  const requestKindTag = boundaryTag + U8_BYTES;
+  const firstLegalDecisionTag = requestKindTag
+    + U8_BYTES // request kind
+    + PLANNER_PACKET.requestIdBytes
+    + U8_BYTES // request side
+    + U8_BYTES // request battler
+    + U8_BYTES; // legal decision count
+  const expectedLength = firstLegalDecisionTag
+    + input.state.boundary.request.legalDecisions.length * PLANNER_PACKET.legalDecisionBytes;
+  return { firstOpponentEggTag, boundaryTag, requestKindTag, firstLegalDecisionTag, expectedLength };
+}
+
+function overwritePacketByte(packet: Uint8Array, offset: number, value: number): Uint8Array {
+  if (offset < 0 || offset >= packet.length) {
+    throw new Error(`planner packet offset ${offset} is outside ${packet.length} bytes`);
+  }
+  const result = packet.slice();
+  result[offset] = value;
+  return result;
+}
+
+async function expectMalformedPlannerPacket(packet: Uint8Array): Promise<void> {
+  expect(packetStatus(await invokeFactoryAiLivePlannerPacket(packet))).toEqual(MALFORMED_PLANNER_PACKET);
+}
+
 describe("Factory AI live planner ABI-v1 parity", () => {
   it("matches the M8i 12-case / 10-category surface in both modes", async () => {
     const engines = [tsFactoryAiLivePlannerEngine(), await wasmFactoryAiLivePlannerEngine()];
@@ -205,20 +280,35 @@ describe("Factory AI live planner ABI-v1 parity", () => {
   it("gives malformed structure status 2 before semantic evaluation", async () => {
     const input = inputFor(CASES[1]);
     const valid = encodeFactoryAiLivePlannerInput(input);
-    const prefixLength = encodeFactoryAiLiveViewInput({
-      rulesContext: input.state.rules.rulesContext,
-      history: input.history,
-      challenge: input.challenge,
-    }).length;
-    const corruptEgg = valid.slice();
-    corruptEgg[prefixLength + 136] = 2;
-    const corruptBoundary = valid.slice();
-    corruptBoundary[prefixLength + 534] = 9;
-    for (const packet of [valid.slice(0, -1), Uint8Array.from([...valid, 0]), corruptEgg, corruptBoundary]) {
-      expect(packetStatus(await invokeFactoryAiLivePlannerPacket(packet))).toEqual({
-        status: 2,
-        message: "factory-wasm factoryAiLivePlannerEngine: malformed input",
-      });
+    const offsets = plannerPacketOffsets(input);
+    expect(valid).toHaveLength(offsets.expectedLength);
+    for (const packet of [
+      valid.slice(0, -1),
+      Uint8Array.from([...valid, 0]),
+      overwritePacketByte(valid, offsets.firstOpponentEggTag, 2),
+      overwritePacketByte(valid, offsets.boundaryTag, 9),
+      overwritePacketByte(valid, offsets.requestKindTag, 2),
+      overwritePacketByte(valid, offsets.firstLegalDecisionTag, 2),
+    ]) {
+      await expectMalformedPlannerPacket(packet);
+    }
+
+    const semanticFailure = inputFor({
+      label: "unknown_attacker_ability_raw_precedence",
+      category: "raw-structural-precedence",
+      attacker: { ability: 78 },
+    });
+    const semanticallyInvalidPacket = encodeFactoryAiLivePlannerInput(semanticFailure);
+    const semanticOffsets = plannerPacketOffsets(semanticFailure);
+    expect(semanticallyInvalidPacket).toHaveLength(semanticOffsets.expectedLength);
+    expect(packetStatus(await invokeFactoryAiLivePlannerPacket(semanticallyInvalidPacket)))
+      .toEqual(UNKNOWN_ATTACKER_ABILITY);
+    for (const packet of [
+      semanticallyInvalidPacket.slice(0, -1),
+      Uint8Array.from([...semanticallyInvalidPacket, 0]),
+      overwritePacketByte(semanticallyInvalidPacket, semanticOffsets.requestKindTag, 2),
+    ]) {
+      await expectMalformedPlannerPacket(packet);
     }
   });
 
