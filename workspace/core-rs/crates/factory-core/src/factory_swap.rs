@@ -1,10 +1,10 @@
-//! Native-only pure Factory-swap mutation leaf.
+//! Native-only pure Factory-swap state/mutation leaf.
 //!
-//! This ports exactly the four state-only boundaries in
-//! `src/engine/factorySwap.ts`: duplicate-species detection, the atomic
-//! accepted-swap copy, its live-exit wrapper, and the presentation-to-round
-//! decision seam.  Input/UI reducers and presentation timing deliberately
-//! remain outside this module.
+//! This ports the state-only boundaries in `src/engine/factorySwap.ts`:
+//! initialization, presentation acknowledgement, VBlank cursor copying,
+//! duplicate-species detection, the atomic accepted-swap copy, its live-exit
+//! wrapper, and the presentation-to-round decision seam. Input/UI reducers
+//! deliberately remain outside this module.
 
 /// The source's fixed Factory party width.
 pub const FACTORY_SWAP_PARTY_SIZE: usize = 3;
@@ -202,6 +202,104 @@ pub struct FactorySwapState {
     pub script_result: Option<bool>,
     pub mutation_committed: bool,
     pub result: Option<FactorySwapResult>,
+}
+
+/// Source `createFactorySwapState`.
+///
+/// All caller-owned records are cloned into a fresh persistent value, matching
+/// the source's per-record spreads rather than retaining shared references.
+#[must_use]
+pub fn create_factory_swap_state(
+    player_party: &[FactorySwapMon; FACTORY_SWAP_PARTY_SIZE],
+    enemy_party: &[FactorySwapMon; FACTORY_SWAP_PARTY_SIZE],
+    rental_mons: &[FactoryRentalMon; FACTORY_SWAP_RENTAL_ROSTER_SIZE],
+) -> FactorySwapState {
+    FactorySwapState {
+        phase: FactorySwapPhase::PlayerPicker,
+        player_party: player_party.clone(),
+        enemy_party: enemy_party.clone(),
+        rental_mons: *rental_mons,
+        cursor: 0,
+        info_cursor: 0,
+        display_cursor: 0,
+        arrow_cursor: 0,
+        cursor_copy_pending: false,
+        actions_count: 4,
+        player_option_cursor: 0,
+        player_option_display_cursor: 0,
+        player_option_cursor_copy_pending: false,
+        yes_no_cursor: 0,
+        player_mon_id: None,
+        enemy_mon_id: None,
+        quit_return_phase: None,
+        player_switch_completed: false,
+        input_ready: false,
+        script_result: None,
+        mutation_committed: false,
+        result: None,
+    }
+}
+
+/// Source `acknowledgeFactorySwapPresentation`.
+///
+/// Rust values have no observable object identity, so both source identity
+/// branches are represented by a value-equal clone.
+#[must_use]
+pub fn acknowledge_factory_swap_presentation(state: &FactorySwapState) -> FactorySwapState {
+    if state.phase == FactorySwapPhase::Complete || state.input_ready {
+        return state.clone();
+    }
+    let mut next = state.clone();
+    next.input_ready = true;
+    next
+}
+
+/// Source `copyFactorySwapCursor`, called at the VBlank copy boundary.
+///
+/// Each output is derived from the old state, preserving the source's cursor
+/// pipeline: info follows the logical cursor, display follows on a later copy,
+/// and the arrow follows the old display cursor one copy after that. Pending
+/// flags suppress their corresponding display copy once and are always clear
+/// in the returned state.
+#[must_use]
+pub fn copy_factory_swap_cursor(state: &FactorySwapState) -> FactorySwapState {
+    let info_cursor = state.cursor;
+    let display_cursor = if state.cursor_copy_pending || state.display_cursor == state.cursor {
+        state.display_cursor
+    } else {
+        state.cursor
+    };
+    let arrow_cursor = if state.arrow_cursor == state.display_cursor {
+        state.arrow_cursor
+    } else {
+        state.display_cursor
+    };
+    let player_option_display_cursor = if state.player_option_cursor_copy_pending
+        || state.player_option_display_cursor == state.player_option_cursor
+    {
+        state.player_option_display_cursor
+    } else {
+        state.player_option_cursor
+    };
+
+    if info_cursor == state.info_cursor
+        && display_cursor == state.display_cursor
+        && arrow_cursor == state.arrow_cursor
+        && !state.cursor_copy_pending
+        && player_option_display_cursor == state.player_option_display_cursor
+        && !state.player_option_cursor_copy_pending
+    {
+        return state.clone();
+    }
+
+    let mut next = state.clone();
+    next.info_cursor = info_cursor;
+    next.display_cursor = display_cursor;
+    next.arrow_cursor = arrow_cursor;
+    next.cursor_copy_pending = false;
+    next.player_option_display_cursor = player_option_display_cursor;
+    next.player_option_cursor_copy_pending = false;
+    next
 }
 
 /// Rust's typed/result boundary for the only source throw plus the one

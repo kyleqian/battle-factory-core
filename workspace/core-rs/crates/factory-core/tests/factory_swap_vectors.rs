@@ -1,13 +1,14 @@
-//! Full-result differential test for the native-only Factory-swap mutation
-//! leaf. Regenerate with `node --experimental-strip-types
+//! Full-result differential test for the native-only Factory-swap state and
+//! mutation leaf. Regenerate with `node --experimental-strip-types
 //! core-rs/tools/gen-factory-swap-vectors.mjs`.
 
 use std::collections::{BTreeMap, BTreeSet};
 
 use factory_core::factory_swap::{
-    apply_factory_swap_mutation, commit_factory_swap_mutation, factory_swap_already_has_species,
-    factory_swap_round_decision, FactoryRentalMon, FactorySwapMon, FactorySwapPartyIndex,
-    FactorySwapState,
+    acknowledge_factory_swap_presentation, apply_factory_swap_mutation,
+    commit_factory_swap_mutation, copy_factory_swap_cursor, create_factory_swap_state,
+    factory_swap_already_has_species, factory_swap_round_decision, FactoryRentalMon,
+    FactorySwapMon, FactorySwapPartyIndex, FactorySwapState,
 };
 use factory_core::factory_swap_vectors_gen::{
     FactorySwapVectorCase, FactorySwapVectorExpected, FactorySwapVectorMon,
@@ -81,6 +82,15 @@ enum Actual {
 fn execute_case(case: &FactorySwapVectorCase) -> Result<Actual, String> {
     let state = state_from_vector(case.state);
     match case.operation {
+        FactorySwapVectorOperation::Create => Ok(Actual::State(Box::new(
+            create_factory_swap_state(&state.player_party, &state.enemy_party, &state.rental_mons),
+        ))),
+        FactorySwapVectorOperation::Acknowledge => Ok(Actual::State(Box::new(
+            acknowledge_factory_swap_presentation(&state),
+        ))),
+        FactorySwapVectorOperation::CopyCursor => {
+            Ok(Actual::State(Box::new(copy_factory_swap_cursor(&state))))
+        }
         FactorySwapVectorOperation::AlreadyHasSpecies => {
             factory_swap_already_has_species(&state, party_index(case.enemy_mon_id))
                 .map(Actual::Bool)
@@ -114,7 +124,7 @@ fn same_expected(case: &FactorySwapVectorCase, actual: Result<Actual, String>) -
 
 #[test]
 fn full_results_and_errors_match_canonical_typescript() {
-    assert_eq!(FACTORY_SWAP_CASES.len(), 17);
+    assert_eq!(FACTORY_SWAP_CASES.len(), 28);
     for (index, case) in FACTORY_SWAP_CASES.iter().enumerate() {
         assert!(
             same_expected(case, execute_case(case)),
@@ -135,7 +145,25 @@ fn category_census_is_ratchet_pinned() {
         .copied()
         .collect::<BTreeMap<_, _>>();
     assert_eq!(observed, expected);
-    assert_eq!(FACTORY_SWAP_CASES.len(), 17);
+    assert_eq!(FACTORY_SWAP_VECTOR_CATEGORY_COUNTS.len(), 12);
+    assert_eq!(FACTORY_SWAP_CASES.len(), 28);
+}
+
+#[test]
+fn initialization_owns_deep_cloned_mon_strings() {
+    let case = FACTORY_SWAP_CASES
+        .iter()
+        .find(|case| matches!(case.operation, FactorySwapVectorOperation::Create))
+        .expect("initialization vector");
+    let mut input = state_from_vector(case.state);
+    let created =
+        create_factory_swap_state(&input.player_party, &input.enemy_party, &input.rental_mons);
+    input.player_party[0].id.push_str("-changed");
+    input.enemy_party[1].species.push_str("-changed");
+    input.rental_mons[2].mon_id += 1;
+    assert_ne!(created.player_party[0], input.player_party[0]);
+    assert_ne!(created.enemy_party[1], input.enemy_party[1]);
+    assert_ne!(created.rental_mons[2], input.rental_mons[2]);
 }
 
 #[test]
