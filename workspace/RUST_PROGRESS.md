@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
-- **State:** rust-main = master `796f546d`, which contains the verified M8a–M8c
+- **State:** rust-main = master `ebd00cda`, which contains the verified M8a–M8c
   folds. Battle history is native and WASM differential-green end-to-end;
   live-view weather and stat-stage projections are native.
   Factory trainer selection and the seven-trainer schedule are now
