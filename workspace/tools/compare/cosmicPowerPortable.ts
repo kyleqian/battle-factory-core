@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { gunzipSync } from "node:zlib";
 import {
   cosmicPowerAtAge,
   COSMIC_POWER_SOURCE_END_EXCLUSIVE,
@@ -26,6 +27,10 @@ interface Fixture {
   readonly sourceBounds: { readonly start: string; readonly endExclusive: string };
   readonly carrier: { readonly setId: number; readonly species: string; readonly move: number; readonly level: number };
   readonly probeJsonSha256: string;
+  readonly evidenceFullState: string;
+  readonly evidenceFullStateGzipSha256: string;
+  readonly rawRgbArchive: string;
+  readonly rawRgbTarSha256: string;
   readonly rawRgbConcatSha256: string;
   readonly changeMap: string;
   readonly changeMapSha256: string;
@@ -110,10 +115,10 @@ function configFor(orientation: Fixture["orientation"]): SceneOnCosmicPowerConfi
   return {
     move: "COSMIC_POWER",
     attacker: {
-      species: "ELECTRIKE",
+      species: "LUNATONE",
       geometry: player
-        ? { side: "player", spriteCorner: { x: 40, y: 64 }, animationCenter: { x: 72, y: 104 }, battlePositionCenter: { x: 72, y: 80 } }
-        : { side: "opponent", spriteCorner: { x: 144, y: 26 }, animationCenter: { x: 176, y: 58 }, battlePositionCenter: { x: 176, y: 40 } },
+        ? { side: "player", spriteCorner: { x: 40, y: 53 }, animationCenter: { x: 72, y: 93 }, battlePositionCenter: { x: 72, y: 80 } }
+        : { side: "opponent", spriteCorner: { x: 144, y: 4 }, animationCenter: { x: 176, y: 36 }, battlePositionCenter: { x: 176, y: 40 } },
     },
     target: {
       species: "ONIX",
@@ -122,8 +127,8 @@ function configFor(orientation: Fixture["orientation"]): SceneOnCosmicPowerConfi
         : { side: "player", spriteCorner: { x: 40, y: 48 }, animationCenter: { x: 72, y: 80 }, battlePositionCenter: { x: 72, y: 80 } },
     },
     fieldProfile: player
-      ? { playerHp: 115, playerMaxHp: 115, opponentHp: 110, opponentMaxHp: 110, playerGender: "male", opponentGender: "male" }
-      : { playerHp: 110, playerMaxHp: 110, opponentHp: 115, opponentMaxHp: 115, playerGender: "male", opponentGender: "male" },
+      ? { playerHp: 173, playerMaxHp: 177, opponentHp: 110, opponentMaxHp: 110, playerGender: "none", opponentGender: "male" }
+      : { playerHp: 110, playerMaxHp: 110, opponentHp: 173, opponentMaxHp: 177, playerGender: "male", opponentGender: "none" },
   };
 }
 
@@ -292,8 +297,13 @@ function verify(path: string, runNumber: number): void {
 
   const changeMap = normalizedChangeMap(fixture, rgbDir);
   const receipts = [sha256(probeBytes), rawConcat.digest("hex"), sha256(changeMap)] as const;
+  const committedFullState = readFileSync(resolve(root, fixture.evidenceFullState));
+  const committedRawArchive = readFileSync(resolve(root, fixture.rawRgbArchive));
   if (receipts[0] !== fixture.probeJsonSha256 || receipts[1] !== fixture.rawRgbConcatSha256
     || receipts[2] !== fixture.changeMapSha256
+    || sha256(committedFullState) !== fixture.evidenceFullStateGzipSha256
+    || !same(gunzipSync(committedFullState), probeBytes)
+    || sha256(committedRawArchive) !== fixture.rawRgbTarSha256
     || changeMap !== readFileSync(resolve(root, fixture.changeMap), "utf8")) {
     failures.push("immutable probe/raw-RGB/change-map receipt");
   }

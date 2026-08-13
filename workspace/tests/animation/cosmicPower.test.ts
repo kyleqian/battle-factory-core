@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   cosmicPowerAtAge,
@@ -9,6 +10,47 @@ import {
 const center = { x: 72, y: 104 };
 
 describe("Move_COSMIC_POWER source reducer", () => {
+  it("pins set 222 to internal species 348 Lunatone and stages its real identity", () => {
+    const species = readFileSync(
+      "reference/pokeemerald/include/constants/species.h",
+      "utf8",
+    );
+    const sets = readFileSync(
+      "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h",
+      "utf8",
+    );
+    expect(species).toContain("#define SPECIES_ELECTRIKE 337");
+    expect(species).toContain("#define SPECIES_LUNATONE 348");
+    expect(sets).toMatch(
+      /\[FRONTIER_MON_LUNATONE_1\] = \{\s*\.species = SPECIES_LUNATONE,\s*\.moves = \{MOVE_CONFUSION, MOVE_COSMIC_POWER, MOVE_LIGHT_SCREEN, MOVE_SANDSTORM\},\s*\.itemTableId = BATTLE_FRONTIER_ITEM_SITRUS_BERRY,\s*\.evSpread = F_EV_SPREAD_DEFENSE \| F_EV_SPREAD_HP,\s*\.nature = NATURE_QUIET/s,
+    );
+
+    for (const path of [
+      "tools/battle-lab/mechanic-cosmic-power-player-lunatone-opponent-onix.json",
+      "tools/battle-lab/mechanic-cosmic-power-opponent-lunatone-player-onix.json",
+    ]) {
+      const scenario = JSON.parse(readFileSync(path, "utf8"));
+      const lunatoneSide = path.includes("player-lunatone")
+        ? scenario.overrides.parties.player
+        : scenario.overrides.parties.opponent;
+      expect(lunatoneSide).toHaveLength(3);
+      expect(lunatoneSide).toEqual(Array.from({ length: 3 }, () => ({
+        species: 348,
+        level: 50,
+        nature: 17,
+        ivs: { hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31 },
+        evs: { hp: 255, attack: 0, defense: 255, speed: 0, spAttack: 0, spDefense: 0 },
+        moves: [322, 322, 322, 322],
+        ppUps: [0, 0, 0, 0],
+        item: 142,
+        abilitySlot: 0,
+        friendship: 70,
+        gender: "genderless",
+        shiny: false,
+      })));
+    }
+  });
+
   it("pins the exclusive source interval and first inactive cleanup row", () => {
     expect(COSMIC_POWER_SOURCE_START).toBe(0x082d5f5d);
     expect(COSMIC_POWER_SOURCE_END_EXCLUSIVE).toBe(0x082d5fe2);

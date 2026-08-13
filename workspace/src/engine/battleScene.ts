@@ -1488,7 +1488,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
-const electrikeFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ELECTRIKE!;
+const lunatoneFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LUNATONE!;
 const metangFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).METANG!;
 const dragonairFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DRAGONAIR!;
 const aronFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARON!;
@@ -2729,7 +2729,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
-const electrikeBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ELECTRIKE!;
+const lunatoneBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LUNATONE!;
 const metangBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).METANG!;
 const dragonairBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DRAGONAIR!;
 const aronBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARON!;
@@ -34774,12 +34774,12 @@ export function renderSceneOnMovePresentation(
       age: state.age - 1,
     });
     const playerToOpponent =
-      view.attacker.species === "ELECTRIKE"
+      view.attacker.species === "LUNATONE"
       && view.attacker.geometry.side === "player"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "opponent";
     const opponentToPlayer =
-      view.attacker.species === "ELECTRIKE"
+      view.attacker.species === "LUNATONE"
       && view.attacker.geometry.side === "opponent"
       && view.target.species === "ONIX"
       && view.target.geometry.side === "player";
@@ -34817,8 +34817,24 @@ export function renderSceneOnMovePresentation(
       });
     };
     drawBackground();
+    // The elevated Lunatone shadow survives in hardware OAM only on the
+    // pointer-entry row; SpriteCB_EnemyShadow hides it on the next display.
+    if (opponentToPlayer && state.age === 0) {
+      const shadowX = view.attacker.geometry.battlePositionCenter.x
+        - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
+        - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
     const attackerSprite = playerToOpponent
-      ? electrikeBackSprite : electrikeFrontSprite;
+      ? lunatoneBackSprite : lunatoneFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffset(view.target.species)
@@ -34861,28 +34877,28 @@ export function renderSceneOnMovePresentation(
       );
     }
     const profile = cosmicState.config.fieldProfile;
-    const opponentSpecies = playerToOpponent ? "ONIX" : "ELECTRIKE";
-    const playerSpecies = playerToOpponent ? "ELECTRIKE" : "ONIX";
+    const opponentSpecies = playerToOpponent ? "ONIX" : "LUNATONE";
+    const playerSpecies = playerToOpponent ? "LUNATONE" : "ONIX";
     drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: opponentSpecies,
       level: 50,
       gender: profile.opponentGender ?? "male",
-      hpFraction: profile.opponentHp / Math.max(1, profile.opponentHp),
+      hpFraction: profile.opponentHp / Math.max(1, profile.opponentMaxHp),
       status: "none",
     }));
     drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
       name: playerSpecies,
       level: 50,
       gender: profile.playerGender ?? "male",
-      hpFraction: profile.playerHp / Math.max(1, profile.playerHp),
+      hpFraction: profile.playerHp / Math.max(1, profile.playerMaxHp),
       status: "none",
       currentHp: profile.playerHp,
-      maxHp: Math.max(1, profile.playerHp),
+      maxHp: Math.max(1, profile.playerMaxHp),
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "ELECTRIKE used" : "Foe ELECTRIKE used",
+      playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
       "COSMIC POWER!",
       99,
     );
