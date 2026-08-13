@@ -21,10 +21,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** keep non-exit continuation, exit successor, broader MPlay/service/
   arbitration, construction clock, presentation, animation, Rust, and retired
   canonical Battle-2 work null.
-- **Notes:** v35 evidence/doc `46e2f83f…` / `2fb614a5…`; fresh packet hashes
+- **Notes:** v35 evidence/doc `f2072d5c…` / `2fb614a5…`; fresh packet hashes
   anchor `e3b48fc0…`, LILIANA `47366316…`, legal-varied `69ceae98…` (repeat
-  identical). Focused v35/v34 **13/13** green. No `src/**`, ratchet,
-  unsupported-barrier, or canonical Battle-2 change.
+  identical). Focused v35/v34 **13/13**, smoke **375/375**, full npm
+  **1,027 files / 9,764 passed / 1 skipped**, and build **660 modules** are
+  green. No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2
+  change.
 
 ## 1233 — [supervisor, 2026-08-13] **CGB4 v34 and lane union green**
 

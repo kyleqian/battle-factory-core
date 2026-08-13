@@ -324,6 +324,7 @@ export function makeEvidence(): Record<string, unknown> {
       frozenV34ArtifactsReadOnly: true,
       inheritedV33PacketsRetainedReadOnly: true,
       v35FreshPacketsAddressFree: true,
+      v35ArtifactsAreNotProductionImports: noProductionImports,
       v35RuntimeCaptureCount: 3,
       trackPointer: null,
       runtimeAddress: null,

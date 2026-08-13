@@ -166,6 +166,7 @@
     "frozenV34ArtifactsReadOnly": true,
     "inheritedV33PacketsRetainedReadOnly": true,
     "v35FreshPacketsAddressFree": true,
+    "v35ArtifactsAreNotProductionImports": true,
     "v35RuntimeCaptureCount": 3,
     "trackPointer": null,
     "runtimeAddress": null,
