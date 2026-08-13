@@ -35,17 +35,17 @@ describe("MOVE_SWALLOW bounded source checkpoint", () => {
     expect(swallow.source.blueStar).toContain("source-identical HealingEffect");
   });
 
-  it("keeps Swallow unsupported despite the complete source-only evidence matrix", () => {
+  it("records Swallow exact only after the complete portable six-branch gate", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact"))
-      .toHaveLength(177);
+      .toHaveLength(178);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SWALLOW"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     const track = coverage.componentTracks.find(
       (entry: { id: string }) => entry.id === "blue-orb-reversal-evidence",
     );
     expect(track.representatives).toContain("MOVE_SWALLOW");
-    expect(track.goal).toContain("MOVE_SWALLOW remains independently unsupported");
+    expect(track.goal).toContain("MOVE_SWALLOW independently proves all six natural");
   });
 
   it("stages every branch through complete legal parties and ordinary controller input", () => {

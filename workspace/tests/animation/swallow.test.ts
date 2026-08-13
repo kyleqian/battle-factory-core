@@ -33,6 +33,13 @@ describe("MOVE_SWALLOW source-relative presentation", () => {
     });
     expect(player(92).attackerMatrix).toEqual({ a: 258, b: 0, c: 0, d: 256 });
     expect(player(93).attackerMatrix).toEqual({ a: 256, b: 0, c: 0, d: 256 });
+    expect(player(48)).toMatchObject({
+      battlerDisplayAge: 46,
+      attackerDisplayedX2: 2,
+      attackerDisplayedY2: 0,
+      effectDisplayAge: 47,
+    });
+    expect(player(49).attackerDisplayedY2).toBe(7);
   });
 
   it("creates five source-ordered orbs per immutable Stockpile count", () => {

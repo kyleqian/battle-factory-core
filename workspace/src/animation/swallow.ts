@@ -1,5 +1,8 @@
 import { healingBlueStarsAtAge, type RecoverEffectSprite } from "./recover.ts";
-import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
+import {
+  shakeMon2DisplayedOffsetAtAge,
+  shakeMon2OffsetAtTick,
+} from "./shakeMon2.ts";
 
 export type SwallowSide = "player" | "opponent";
 export type SwallowStockpileCount = 1 | 2 | 3;
@@ -27,6 +30,9 @@ export interface SwallowState {
     pan: number;
   }> | null;
   readonly battlerDisplayAge: number;
+  readonly attackerDisplayedX2: number;
+  readonly attackerDisplayedY2: number;
+  readonly effectDisplayAge: number;
 }
 
 const ORB_X = [0, -24, 16, -16, 24] as const;
@@ -133,6 +139,9 @@ export function swallowAtAge(
   const firstShakeActive = age >= 7 && age <= 28;
   const secondShakeActive = age >= 47 && age <= 68;
   const pan = side === "player" ? -64 : 63;
+  const displayedAffineMatrix = affineMatrixAtAge(age - 2);
+  const firstDisplayedShake = shakeMon2DisplayedOffsetAtAge(1, 0, 8, 2, age, 7);
+  const secondDisplayedShake = shakeMon2DisplayedOffsetAtAge(2, 0, 12, 1, age, 47);
   return {
     active: age >= 0 && age < cleanupAge,
     assetsLoaded: {
@@ -155,6 +164,21 @@ export function swallowAtAge(
         : age === healingStart
           ? { song: "SE_M_ABSORB_2", player: "SE1", pan }
           : null,
-    battlerDisplayAge: age - 1,
+    // Affine task writes trail source RAM by two rows. ShakeMon2's creation
+    // write is already available to BuildOamBuffer and follows its separately
+    // source-derived task display schedule.
+    battlerDisplayAge: age - 2,
+    attackerDisplayedX2: age >= 8 && age <= 30
+      ? firstDisplayedShake.x2
+      : age >= 48 && age <= 72
+        ? secondDisplayedShake.x2
+        : 0,
+    // The second ShakeMon2 initializer writes its zero yOffset into the
+    // selected OAM row after deform prepared the preceding affine matrix;
+    // deform resumes ownership on the following row.
+    attackerDisplayedY2: age === 48
+      ? 0
+      : affineYOffset(displayedAffineMatrix.d, pictureYOffset),
+    effectDisplayAge: age - 1,
   };
 }
