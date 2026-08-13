@@ -5,11 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R6 — [supervised session, 2026-08-13] **M8d native live-view constructor folded**
+## R6 — [supervised session, 2026-08-13] **M8d/M8e live-view constructor end-to-end**
 
-- **State:** `rust-main` = master `fafcf933` plus verified M8d through
-  `1649c03d`. The complete pure `createFactoryAiViewFromLiveRules` projection
-  is native; no WASM export or adapter was added. `RUST_DEFERRED.md` has no
+- **State:** `rust-main` = master `fafcf933` plus verified M8d/M8e through
+  `a2e65928`. The complete pure `createFactoryAiViewFromLiveRules` projection
+  is native and WASM differential-green end-to-end. `RUST_DEFERRED.md` has no
   open entries.
 - **Did:** ported the source-shaped view with exact optional-property presence,
   JS-number/bit-mask behavior, status and side conditions, M8a history slot-0
@@ -17,15 +17,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   target ability error ordering. The twice-byte-identical TS-executed corpus
   has **17 cases** across 9 categories; sha256
   `8020bcd29c0e9dc6fd48da3ff008ebbdf3dd3e8d4375fd7da246448a4e2d6186`.
-- **Next:** M8e — add the separate ABI-v1 boundary, adapter, and both-mode
-  parity suite for the live-view constructor; do not widen into decision
-  execution or the live driver.
+- **M8e DONE:** additive ABI-v1 variable-width packets preserve all Number,
+  UTF-8, history, and optional-property states. Status 0 carries the complete
+  view, status 1 the exact typed ability error, and status 2 checked malformed
+  input. The adapter routes forced WASM directly with no TS fallback; parity
+  covers complete views, optional combinations, numeric/history edges, error
+  order, and five malformed packets.
+- **Next:** orient the dependency seam for the remaining live decision driver;
+  prefer a bounded `battleDecisionBoundary.ts` core slice or a documented
+  pure-plan split rather than importing its reducer/transition surface into
+  M8 all at once. M7c opponent generation still waits on #55.
 - **Notes:** Terra/max worker, 3 commits. Supervisor audited the complete TS/Rust
   property mapping, regenerated the corpus twice, and reran cargo **716 tests**,
   fmt, clippy, WASM, and smoke **375/375**. The rebuilt artifact is 391,563
-  bytes, sha256 `6b587cb1e3887a0ccc7ad3a4d2c40181044a100b61e2b0b1ffe8aac6ff8aeb99`;
-  worker same-commit full npm was **1,019 files / 9,718 passed / 1 skip** plus
-  build. Scope stayed within `core-rs/**`.
+  bytes, sha256 `6b587cb1e3887a0ccc7ad3a4d2c40181044a100b61e2b0b1ffe8aac6ff8aeb99`.
+  M8e used Luna/max; supervisor audited the wire and no-fallback routing and
+  reran cargo **716 tests**, fmt, clippy, both-mode focused **5/5**, forced
+  union **14 files / 790/790**, and smoke **375/375**. Final artifact is
+  412,104 bytes, sha256
+  `d5abf0a57f8b3a587ad9ff5ef8faa0891cbecf3acaf17f57e089544fea57e725`;
+  worker same-commit full npm was **1,020 files / 9,723 passed / 1 skip** plus
+  build. Scope stayed within `core-rs/**` plus the one authorized new parity
+  file; no canonical TS engine or existing test/config changed.
 
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
