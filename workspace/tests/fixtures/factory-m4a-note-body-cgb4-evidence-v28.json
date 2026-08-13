@@ -1,0 +1,215 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v28",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1360-1362, 1443-1450",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      },
+      "musicPlayerInfo": {
+        "tracks": {
+          "path": "reference/pokeemerald/include/gba/m4a_internal.h",
+          "offset": 44,
+          "width": "pointer",
+          "runtimeValue": null,
+          "sha256": "40936cbac9a2ad96da8aebd52e5c9d8e3bbee624e6dcb51e0436f29ef65edd74"
+        },
+        "r5Origin": "MusicPlayerInfo.tracks"
+      },
+      "musicPlayerTrack": {
+        "assemblerSize": {
+          "path": "reference/pokeemerald/constants/m4a_constants.inc",
+          "symbol": "MusicPlayerTrack_size",
+          "bytes": 80,
+          "sha256": "36a0f4b5be5a777886350810b1aec40364557f2e021352d67d8ae604a6a0a9fd"
+        },
+        "staticTableStride": {
+          "path": "reference/pokeemerald/sound/music_player_table.inc",
+          "symbol": "TRACK_SIZE",
+          "bytes": 80,
+          "sha256": "babb0eb8acce75ada42c2747ca0ef09825135d1c85b46254b1f44520b1a57a36"
+        }
+      },
+      "staticMplayAndCryTrackStorage": {
+        "assignment": {
+          "path": "reference/pokeemerald/src/m4a.c",
+          "lines": "83-98, 565-592",
+          "musicPlayerTracksFieldAssignedBy": "MPlayOpen",
+          "sha256": "e924928bbe9fea4a10cfb9b202eb770746e03cd3849bbfd03479f55e01d2e2f4"
+        },
+        "allCandidateStorageClass": "IWRAM",
+        "selectedRuntimeTrack": null,
+        "runtimePointerOrAddress": null,
+        "linker": {
+          "path": "reference/pokeemerald/ld_script.ld",
+          "class": "IWRAM",
+          "sha256": "ea3df8331ffacc75e1377b2d2f2d8ec6530f6436788b812603ba3af1a964cfb0"
+        },
+        "commonData": {
+          "path": "reference/pokeemerald/include/gba/defines.h",
+          "section": "common_data",
+          "sha256": "528c5983bf23f3b12036e9f7ed20e482b1dbe15e0198ec6bb10292d413f68644"
+        }
+      }
+    },
+    "elf": {
+      "continuationEntry": "0x082dfc9e",
+      "stopBoundary": "0x082dfc00",
+      "selectedRuntimeTrack": null,
+      "runtimePointerOrAddress": null,
+      "allCandidateTrackStorageClass": "IWRAM",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "movs r0, MusicPlayerTrack_size; adds r5, r0; bgt _081DD9C8",
+        "start": "0x082dfc9e",
+        "endExclusive": "0x082dfca4",
+        "bytes": 6,
+        "bytesHex": "50 20 2d 18 ad dc",
+        "sha256": "05a30c0a17fafc028ce3218c1ad9921ce4ffd3efc591503956f4793a4c43b993",
+        "decodedBgt": {
+          "condition": "GT",
+          "target": "_081DD9C8",
+          "targetAddress": "0x082dfc00"
+        }
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "registerDataAccesses": 0,
+      "dataAccessPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "signedAddProof": {
+        "inputClass": "IWRAM MusicPlayerInfo.tracks candidate",
+        "trackStrideBytes": 80,
+        "resultSignedPositive": true,
+        "signedOverflow": false,
+        "bgtTaken": true,
+        "runtimePointerOrAddress": null
+      },
+      "continuationModel": "movs; adds; taken bgt = 3 halfwords * 2 + one 6-cycle refill = 12"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV27EvidenceSha256": "5e730d95829b186df347d6bfa2f4bc703e3b1e19f369397fb68efffae3026a85",
+    "acceptedV27DocSha256": "827fe735000ead669189f29826b8a95003e80a407b44cbe9b1c9b94ea6fdcf54",
+    "acceptedV27PacketSha256": {
+      "anchor": "af43b96726ecbab87348608a4da6c85bb798648e0e7a6d39a6d62aecd5f3f930",
+      "liliana": "9078aa6611250012a1654f05b6ea6f8f30190117f7db0f6d2713f1ab71447626",
+      "factory-varied": "6a5a1424b507c62bed61d7da753502965f0de47924425f52ba36152d7132be68"
+    },
+    "v27EvidenceAndReportRegenerateByteForByte": true,
+    "v27EvidenceReportAndPacketsRetainedByteForByte": true
+  },
+  "capture": {
+    "boundary": "source-only _081DDA62 non-exit continuation through bgt _081DD9C8; no new runtime capture",
+    "scalars": [],
+    "excluded": [
+      "new runtime or oracle fields",
+      "r2BeforeDecrement serialization",
+      "track pointer",
+      "runtime address",
+      "track count",
+      "track index",
+      "track identity",
+      "next-track flags",
+      "channel",
+      "frame",
+      "duration",
+      "condition flags",
+      "wider state",
+      "_081DD9C8 ldrb and subsequent body",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV27SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "sourceOnly": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v27-selected-row",
+      "unexpected-frozen-v27-r2-or-route",
+      "unsupported-runtime-field",
+      "unexpected-continuation-boundary"
+    ]
+  },
+  "coverage": {
+    "frozenV27SelectedRows": 3,
+    "sourceOnlyContinuationRows": 3,
+    "bgtTakenRows": 3,
+    "bgtNotTakenRows": 0,
+    "postV27FirstTrackContinuationSourceCycles": 36,
+    "acceptedContiguousPrefixThroughFirstTrackDecrementDecisionSourceCycles": 5812,
+    "contiguousPrefixThroughFirstTrackContinuationSourceCycles": 5848,
+    "sequentialThumbHalfwords": 9,
+    "registerDataAccesses": 0,
+    "dataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 3,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "continuationDecision": "movs-MusicPlayerTrack_size; adds-r5-r0; bgt-taken-_081DD9C8",
+      "postV27FirstTrackContinuationSourceCycles": 12,
+      "contiguousPrefixThroughFirstTrackContinuationSourceCycles": 844,
+      "bgtTakenControlTransferRefills": 1,
+      "stopsBeforeV28Instruction": "_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "continuationDecision": "movs-MusicPlayerTrack_size; adds-r5-r0; bgt-taken-_081DD9C8",
+      "postV27FirstTrackContinuationSourceCycles": 12,
+      "contiguousPrefixThroughFirstTrackContinuationSourceCycles": 844,
+      "bgtTakenControlTransferRefills": 1,
+      "stopsBeforeV28Instruction": "_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "continuationDecision": "movs-MusicPlayerTrack_size; adds-r5-r0; bgt-taken-_081DD9C8",
+      "postV27FirstTrackContinuationSourceCycles": 12,
+      "contiguousPrefixThroughFirstTrackContinuationSourceCycles": 844,
+      "bgtTakenControlTransferRefills": 1,
+      "stopsBeforeV28Instruction": "_081DD9C8: ldrb r0, [r5, o_MusicPlayerTrack_flags]"
+    }
+  ],
+  "containment": {
+    "frozenV27ArtifactsReadOnly": true,
+    "frozenV27ArtifactsAreNotProductionImports": true,
+    "v28RuntimeCaptureCount": 0,
+    "r2BeforeDecrement": null,
+    "trackPointer": null,
+    "runtimeAddress": null,
+    "trackCount": null,
+    "trackIndex": null,
+    "trackIdentity": null,
+    "nextTrackFlags": null,
+    "channel": null,
+    "frame": null,
+    "duration": null,
+    "conditionFlags": null,
+    "widerState": null,
+    "nextTrackBody": null,
+    "subsequentLoopWork": null,
+    "serviceCost": null,
+    "constructionClock": null,
+    "controller": null,
+    "presentation": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Source-only v28 freezes v27 evidence/report/packets byte-for-byte and joins only the same three sourceStateDigest rows. Each frozen row validates the non-exit continuation, but this receipt retains no predecessor scalar. Pinned source/ELF/ROM plus the complete static MPlay/cry IWRAM track-storage class prove movs MusicPlayerTrack_size; adds r5, r0 yields signed-positive, non-overflowing flags and takes bgt _081DD9C8. Three halfwords plus the taken refill cost 12 cycles per row, 36 aggregate, advancing the bounded prefix to 5848; it stops before _081DD9C8's ldrb flags."
+}
