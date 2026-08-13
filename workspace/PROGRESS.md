@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1232 — [MAIN worker, 2026-08-13] **CGB4 v34 third-track volume/pitch decision green**
+
+- **State:** #55 is source-exact through the same three selected-row **6,016-cycle**
+  CGB4 prefix, stopping before `_081DDA62: subs r2, 0x1`.
+- **Did:** froze v33 evidence/report/packets byte-for-byte with no fresh oracle
+  capture; derived each frozen `thirdTrackFlags=0x80` against
+  `MPT_FLG_VOLCHG | MPT_FLG_PITCHG = 0x0f`. Source/ELF/exact-ROM close
+  `0f 21 01 42 45 d0`: clear mask takes `beq _081DDA62`, **12 cycles/row,
+  one refill, +36 aggregate** (**5,980 → 6,016**). Exact-key/fail-closed pins
+  and two v34 regenerations are green.
+- **Next:** separately scope only the `_081DDA62` decrement/exit decision if
+  needed; retain pointer/address/count/index/identity/channel/frame/duration/
+  condition flags, wider/alternate bodies, broader MPlay/service/arbitration,
+  construction clock, presentation, animation/Rust, and canonical Battle-2
+  march out of scope.
+- **Notes:** v34 evidence/doc `49a6bd71…` / `c7133ef3…`; frozen v33
+  `806b5582…` / `61fe1034…`. Focused v34/v33 **10/10**, smoke **375/375**,
+  final npm **1,026 files / 9,755 passed / 1 skipped**, build **660 modules**.
+  No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2 change.
+
 ## 1231 — [MAIN worker, 2026-08-13] **CGB4 v33 third-track EXIST decision green**
 
 - **State:** #55 is source-exact through the same three selected-row **5,980-cycle**
@@ -47,24 +67,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `4b13624c…`, legal-varied `ad82e79e…`. Focused v32 **4/4**, v31 **8/8**,
   smoke **375/375**, final npm **1,024 files / 9,745 passed / 1 skipped**,
   build **660 modules**. No `src/**`, presentation, animation/Rust, ratchet,
-  unsupported-barrier, or canonical Battle-2 change.
-
-## 1229 — [supervisor, 2026-08-13] **CGB4 v31 and lane union green**
-
-- **State:** #55 is source-exact through the three selected-row **5,920-cycle**
-  CGB4 prefix. Cosmic Power's bounded presentation checkpoint and Rust M8d/M8e
-  live-view constructor boundary are folded; both persistent lane tips are
-  contained.
-- **Did:** independently reran v31 **8/8**, then folded animation through
-  `25bca32b` and Rust through `b2423e2a`. Audited the Rust ABI, ran native
-  Rust, rebuilt the WASM artifact, forced every parity suite through WASM, and
-  verified the full TypeScript union.
-- **Next:** source-close only the observed second-track non-exit continuation
-  `movs r0, MusicPlayerTrack_size; adds r5,r0; bgt _081DD9C8` for the same
-  three frozen v31 rows. Stop before `_081DD9C8`; retain actual pointer/count/
-  index/identity/channel, next-track flags/body, service/arbitration, and
-  construction-clock wiring null.
-- **Notes:** Rust **716/716 tests**; WASM **412,104 bytes** (`d5abf0a5…`),
-  forced parity **14 files / 790 passed**; union npm **1,023 files / 9,741
-  passed / 1 skipped**, build **660 modules**. No main ratchet,
   unsupported-barrier, or canonical Battle-2 change.

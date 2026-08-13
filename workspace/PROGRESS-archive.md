@@ -1,3 +1,23 @@
+## 1229 — [supervisor, 2026-08-13] **CGB4 v31 and lane union green**
+
+- **State:** #55 is source-exact through the three selected-row **5,920-cycle**
+  CGB4 prefix. Cosmic Power's bounded presentation checkpoint and Rust M8d/M8e
+  live-view constructor boundary are folded; both persistent lane tips are
+  contained.
+- **Did:** independently reran v31 **8/8**, then folded animation through
+  `25bca32b` and Rust through `b2423e2a`. Audited the Rust ABI, ran native
+  Rust, rebuilt the WASM artifact, forced every parity suite through WASM, and
+  verified the full TypeScript union.
+- **Next:** source-close only the observed second-track non-exit continuation
+  `movs r0, MusicPlayerTrack_size; adds r5,r0; bgt _081DD9C8` for the same
+  three frozen v31 rows. Stop before `_081DD9C8`; retain actual pointer/count/
+  index/identity/channel, next-track flags/body, service/arbitration, and
+  construction-clock wiring null.
+- **Notes:** Rust **716/716 tests**; WASM **412,104 bytes** (`d5abf0a5…`),
+  forced parity **14 files / 790 passed**; union npm **1,023 files / 9,741
+  passed / 1 skipped**, build **660 modules**. No main ratchet,
+  unsupported-barrier, or canonical Battle-2 change.
+
 ## 1228 — [MAIN worker, 2026-08-13] **CGB4 v31 second-track decrement decision green**
 
 - **State:** #55 is source-exact through the three selected-row **5,920-cycle**
