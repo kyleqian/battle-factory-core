@@ -28,11 +28,18 @@ export interface FactoryAiLiveViewEngine {
   createFactoryAiViewFromLiveRules(input: FactoryAiLiveViewInput): FactoryAiScoredView;
 }
 
-/** Small dynamic packet writer; all numeric payload cells use f64. */
-class Writer {
+/** Shared little-endian packet writer for the live-view ABI family. */
+export class FactoryAiLiveViewPacketWriter {
   private readonly bytes: number[] = [];
 
   u8(value: number): void { this.bytes.push(value); }
+
+  u16(value: number): void {
+    if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff) {
+      throw new Error(`factory-wasm factoryAiLiveViewEngine: width ${value} is not a u16`);
+    }
+    this.bytes.push(value & 0xff, (value >>> 8) & 0xff);
+  }
 
   u32(value: number): void {
     if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff_ffff) {
@@ -61,6 +68,8 @@ class Writer {
     return Uint8Array.from(this.bytes);
   }
 }
+
+type Writer = FactoryAiLiveViewPacketWriter;
 
 class Reader {
   private readonly view: DataView;

@@ -829,9 +829,15 @@ function decodePolicyMaskReceipt(r: ByteReader, input: FactoryAiMaskSelectionInp
   });
 }
 
-function decodePolicyChoice(
+/**
+ * Decodes the shared native chooser receipt without requiring callers to
+ * provide a second scored battler projection. The live-decision adapter only
+ * needs the source view's factory fields to reconstruct the mask receipt;
+ * every decision/draw/score field is already retained in the native packet.
+ */
+export function decodeFactoryAiPolicyChoice(
   bytes: Uint8Array,
-  input: MaskZeroDecisionInput | ScoredDecisionInput,
+  factory: FactoryAiMaskSelectionInput,
   scored: boolean,
 ): FactoryAiDecisionChoice | FactoryAiScoredChoice {
   const r = new ByteReader(bytes);
@@ -849,7 +855,7 @@ function decodePolicyChoice(
   });
   const rng = Object.freeze({ value: r.u32(), calls: r.u32() });
   const mask = r.u8();
-  const maskSelection = decodePolicyMaskReceipt(r, input.view.factory);
+  const maskSelection = decodePolicyMaskReceipt(r, factory);
   const scriptCount = r.u8();
   const scripts: string[] = [];
   for (let i = 0; i < 3; i++) {
@@ -976,6 +982,14 @@ function decodePolicyChoice(
     })
     : Object.freeze(traceBase);
   return Object.freeze({ submission, rng, trace }) as unknown as FactoryAiDecisionChoice | FactoryAiScoredChoice;
+}
+
+function decodePolicyChoice(
+  bytes: Uint8Array,
+  input: MaskZeroDecisionInput | ScoredDecisionInput,
+  scored: boolean,
+): FactoryAiDecisionChoice | FactoryAiScoredChoice {
+  return decodeFactoryAiPolicyChoice(bytes, input.view.factory, scored);
 }
 
 function decodeMaskSelection(bytes: Uint8Array, input: FactoryAiMaskSelectionInput): FactoryAiMaskSelection {
