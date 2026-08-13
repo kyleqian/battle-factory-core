@@ -5118,7 +5118,6 @@ export function sceneOnCosmicPowerView(
     throw new Error(`expected COSMIC_POWER presentation, got ${state.config.move}`);
   }
   return {
-    age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     ...cosmicPowerAtAge(
