@@ -42623,3 +42623,9 @@ git; the current live ledger keeps the three load-bearing entries only.
   **1,012 files / 9,688 passed / 1 skipped**, and build **657 modules** are
   green. Evidence/doc `a4cff030…` / `2eb2f9e4…`; no ratchet or
   unsupported-barrier change.
+## 1223 — [MAIN worker, 2026-08-12] **CGB4 v27 first-track decrement/exit decision**
+
+- **State:** #55 is source-exact through the three selected-row **5,812-cycle** CGB4 prefix, stopping before either `_081DDA6C`'s first instruction or the non-exit continuation's `movs r0, MusicPlayerTrack_size`. Construction-clock wiring remains null.
+- **Did:** two fresh serial OFF packet sets are byte-identical and retain only address-free `r2BeforeDecrement`; all three observed values are **10**, independently deriving `subs r2,1; ble` not-taken at **4×3 = 12** cycles. Pinned source/ELF/ROM bytes `01 3a 02 dd`; the schema-consistent unobserved exit route is fail-closed at 10 cycles including its refill. v26 evidence/report and inherited v25 packets are frozen byte-for-byte.
+- **Next:** leave actual track count/identity/pointer/channel, both successor bodies, later loop work, broader MPlay/controller/presentation, service/arbitration, and construction clock null; any successor work needs a separately bounded receipt.
+- **Notes:** focused v25/v26/v27 **20/20**, smoke **375/375**, typecheck, npm **1,015 files / 9,703 passed / 1 skipped**, and build **657 modules** green. No `src/**`, ratchet, unsupported-barrier, canonical Battle-2, animation, or Rust change.
