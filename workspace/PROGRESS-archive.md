@@ -1,3 +1,25 @@
+## 1227 — [MAIN worker, 2026-08-13] **CGB4 v30 second-track mask decision green**
+
+- **State:** #55 is source-exact through the three selected-row **5,908-cycle**
+  CGB4 prefix, stopping before the selected `_081DDA62: subs r2, 0x1` branch
+  body (and before the non-selected `mov r9, r2` body).
+- **Did:** captured two fresh serial OFF packet sets with only
+  `sourceStateDigest` + `secondTrackFlags`; all three values are `0x80`.
+  Frozen v29 evidence/report/packets remain byte-for-byte; source/ELF/ROM
+  close `0f 21 01 42 45 d0`, deriving the clear-mask taken `beq` at
+  **12×3 = 36** cycles. Added the address-free v30 probe/reporter/fixtures/
+  generated doc and red-first Tier-1 pins.
+- **Next:** separately scope only the second-track `_081DDA62` decrement/exit
+  decision, with the minimum address-free scalar if fresh evidence is needed.
+  Keep actual pointer/count/index/identity/channel/frame/duration, either
+  successor body, broader MPlay, service/arbitration, and construction-clock
+  wiring null.
+- **Notes:** focused v30 **6/6**, v29 **4/4**, smoke **375/375**, final npm
+  **1,020 files / 9,724 passed / 1 skipped**, build **659 modules**. Fresh
+  hashes: anchor `77ce80af…`, LILIANA `b6c53e5f…`, legal-varied `53fabb3e…`;
+  no `src/**`, presentation, animation/Rust, ratchet, unsupported-barrier, or
+  canonical Battle-2 change.
+
 ## 1216 — [MAIN worker, 2026-08-12] **CGB4 v24 source-only successor prefix**
 
 - **State:** #55's selected three-row source-exact prefix reaches **5,740**
