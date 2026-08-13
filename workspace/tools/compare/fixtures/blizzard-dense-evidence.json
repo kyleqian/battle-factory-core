@@ -1,0 +1,104 @@
+{
+  "schema": "blizzard-dense-evidence/v1",
+  "status": "unsupported-evidence-checkpoint",
+  "move": "MOVE_BLIZZARD",
+  "moveId": 59,
+  "oracleProfile": "battle-scene-on",
+  "sourceInterval": {
+    "start": "0x082d0b2d",
+    "endExclusive": "0x082d3118",
+    "byteLength": 9707,
+    "sha256": "66fbe1dbfa6b98cf8aa2d8be330942bc2ef4ee0b43d6213ec091ba1d61ad059c"
+  },
+  "carrier": {
+    "setId": 318,
+    "speciesId": 310,
+    "label": "FRONTIER_MON_PELIPPER_2",
+    "species": "SPECIES_PELIPPER",
+    "completeLegalParties": true,
+    "playerBackScenario": "tools/battle-lab/mechanic-blizzard-player-pelipper-opponent-onix.json",
+    "opponentFrontScenario": "tools/battle-lab/mechanic-blizzard-opponent-pelipper-player-onix.json"
+  },
+  "topology": {
+    "componentCount": 19,
+    "snowballCalls": 14,
+    "impactCrystalCalls": 11,
+    "sharedWithIcyWind": ["asset:ANIM_TAG_ICE_CRYSTALS", "sprite:gSwirlingSnowballSpriteTemplate"],
+    "icyWindPromotion": "unpromoted"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-blizzard-player-pelipper-opponent-onix.json",
+      "scenarioSha256": "3de4de4e6aecafcda894b81d16f6a57028d516bfc22369c6363b6266d475bd0b",
+      "denseWindow": { "startFrame": 214, "endFrame": 585, "frameCount": 372 },
+      "stateGzip": "tools/compare/evidence/blizzard-player-dense-state.json.gz",
+      "stateGzipSha256": "70fd660b6f86823ec923f006370e142ff2e9248d7d8b519d23ea1bb510ddf46e",
+      "rawRgbArchive": "tools/compare/evidence/blizzard-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "0eabc3cf146b31d11d62ac1d833249e90595c6f97edef4ea79b41232b7967343",
+      "rawRgbSequenceSha256": "750599176862a389243749c40333747a2dcc613561159c108ef83b0695cacab2",
+      "changeMap": "tools/compare/evidence/blizzard-changemap-player.txt",
+      "changeMapSha256": "5e18cc8178c19765188c3ccc13e911bbdfd0a67b1a1be00eb1b86d22a42a2a80",
+      "uncompressedStateSha256": "31f2244e1862b92c05f7a0ac8c734720c11db6fc276a57a295813699a50cfabf",
+      "sourceIntervalObservedFrames": 312,
+      "sourcePointerSequenceSha256": "24b4d18c63605f2a27853cd9926ed8ef3f5f84131a460c6285c24800cf7072de",
+      "observedTopologySha256": "0a9b36fe6c22d9af099e63e41f8ccca92bfa0fcb4df9ba1a9c2fef6c9bfb8f04",
+      "reducerInitialRows": 14,
+      "reducerMatchedSpriteRows": 448,
+      "oamLatch": { "comparisonRows": 371, "matchedRows": 371, "allowanceFrames": 1, "transfer": "hardware[n] == software[n-1]" },
+      "rgbArchiveMemberCount": 1119,
+      "rawRgbMemberCount": 372,
+      "rawRgbMemberOrderSha256": "beb9a26b1e7c8698a9f8c6d1f289840241ac5d517c1ba7314aa374e235e3301b",
+      "seamRows": 0,
+      "framebufferRows": 0,
+      "residuals": [
+        { "component": "production battleScene Blizzard compositor", "ages": "0-371", "rows": 372 },
+        { "component": "sprite:gSwirlingSnowballSpriteTemplate linear/Step1/End", "ages": "45-206", "observedFrameCount": 162, "unreducedSpriteRows": 910 },
+        { "component": "sprite:gBlizzardIceCrystalSpriteTemplate", "ages": "45-163", "observedFrameCount": 119, "unreducedSpriteRows": 752 },
+        { "component": "sprite:gIceCrystalHitLargeSpriteTemplate", "ages": "208-304", "observedFrameCount": 97, "unreducedSpriteRows": 185 },
+        { "component": "sprite:gIceCrystalHitSmallSpriteTemplate", "ages": "214-298", "observedFrameCount": 85, "unreducedSpriteRows": 222 }
+      ]
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-blizzard-opponent-pelipper-player-onix.json",
+      "scenarioSha256": "1a8106c321b98d57fcd023a02a7415057ba0053fe07c0ed23781c652b19104cd",
+      "denseWindow": { "startFrame": 213, "endFrame": 573, "frameCount": 361 },
+      "stateGzip": "tools/compare/evidence/blizzard-opponent-dense-state.json.gz",
+      "stateGzipSha256": "6151f7a254b03e1bbb8fde9b35bbc32568152b3ca8ed4032a9613ee672c58d93",
+      "rawRgbArchive": "tools/compare/evidence/blizzard-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "2f5a240ded9a8aff9796c8512f2cac506f479e5109855f463715544b64c254a0",
+      "rawRgbSequenceSha256": "f96eda965952ad58f0c85d5f0d532585c087f98e82ed501c4a14e7e8fb26805b",
+      "changeMap": "tools/compare/evidence/blizzard-changemap-opponent.txt",
+      "changeMapSha256": "be1a4e7137db59021b513e4f8c0a7ac4f7c354fd4cdee8ce608f4c8b78890472",
+      "uncompressedStateSha256": "ee1eea6064a1c3b73af7585ecd10093c826c37d7c7e8c28f8eaaac7f92e360e6",
+      "sourceIntervalObservedFrames": 301,
+      "sourcePointerSequenceSha256": "27564744c543924795a68bf49f43bacd890fc3a709909032efc331fcd00249cf",
+      "observedTopologySha256": "2398b4198fc0100b62ad4ce1f1947ed3cc3faa8192620c4431260a46811ea8f8",
+      "reducerInitialRows": 14,
+      "reducerMatchedSpriteRows": 448,
+      "oamLatch": { "comparisonRows": 360, "matchedRows": 360, "allowanceFrames": 1, "transfer": "hardware[n] == software[n-1]" },
+      "rgbArchiveMemberCount": 1086,
+      "rawRgbMemberCount": 361,
+      "rawRgbMemberOrderSha256": "96b7ccc19330793dab1733944ed18e0a22f2bbeedc546c2b7c23721b73a814c7",
+      "seamRows": 0,
+      "framebufferRows": 0,
+      "residuals": [
+        { "component": "production battleScene Blizzard compositor", "ages": "0-360", "rows": 361 },
+        { "component": "sprite:gSwirlingSnowballSpriteTemplate linear/Step1/End", "ages": "45-195", "observedFrameCount": 151, "unreducedSpriteRows": 822 },
+        { "component": "sprite:gBlizzardIceCrystalSpriteTemplate", "ages": "45-162", "observedFrameCount": 118, "unreducedSpriteRows": 726 },
+        { "component": "sprite:gIceCrystalHitLargeSpriteTemplate", "ages": "197-293", "observedFrameCount": 97, "unreducedSpriteRows": 185 },
+        { "component": "sprite:gIceCrystalHitSmallSpriteTemplate", "ages": "203-287", "observedFrameCount": 85, "unreducedSpriteRows": 222 }
+      ]
+    }
+  },
+  "captureFreshness": "one retained capture per orientation; no duplicate archive is claimed",
+  "acceptance": {
+    "status": "unsupported-evidence-checkpoint",
+    "sourceIntervalObservedFrames": "312/372 + 301/361",
+    "swirlReducerMatchedSpriteRows": "448/448 + 448/448",
+    "oamLatchRows": "371/371 + 360/360 with one-frame transfer",
+    "seamRows": "0/372 + 0/361",
+    "framebufferRows": "0/372 + 0/361",
+    "freshRuns": 2
+  },
+  "residual": "No production Blizzard compositor or bilateral presentation seam is implemented; MOVE_ICY_WIND remains independently unpromoted."
+}
