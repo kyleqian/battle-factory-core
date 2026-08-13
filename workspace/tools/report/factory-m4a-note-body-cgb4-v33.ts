@@ -373,7 +373,7 @@ export function makeEvidence(): Record<string, unknown> {
   const added = rows.reduce((sum, row) => sum + row.postV32ThirdTrackExistDecisionSourceCycles, 0);
   const contiguous = 5956 + added;
   if (added !== 24 || contiguous !== 5980 || !rows.every((row) => row.contiguousPrefixThroughThirdTrackExistDecisionSourceCycles === 888)) fail("v33 pricing changed");
-  const noImports = productionContainment();
+  productionContainment();
   return {
     schema: "factory-m4a-note-body-cgb4-evidence/v33",
     oracleProfile: "battle-scene-off",

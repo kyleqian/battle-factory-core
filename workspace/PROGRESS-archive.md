@@ -1,3 +1,24 @@
+## 1228 — [MAIN worker, 2026-08-13] **CGB4 v31 second-track decrement decision green**
+
+- **State:** #55 is source-exact through the three selected-row **5,920-cycle**
+  CGB4 prefix, stopping before the selected continuation and `_081DDA6C` exit
+  successor bodies.
+- **Did:** captured two fresh serial OFF packet sets retaining only
+  `sourceStateDigest` + `r2BeforeDecrement`; all three r2 values are `9`.
+  Frozen v30 evidence/report/packets remain byte-for-byte; source/ELF/ROM
+  close `01 3a 02 dd`, deriving observed `subs; ble` **not taken** at
+  **4×3 = 12** cycles.
+- **Next:** separately scope only the observed second-track
+  `movs r0, MusicPlayerTrack_size` continuation decision/body if needed; keep
+  actual pointer/count/index/identity/channel/frame/duration/condition flags,
+  subtraction-result serialization, either successor body, broader MPlay,
+  service/arbitration, and construction-clock wiring null until then.
+- **Notes:** focused v31 **8/8**, v30 **6/6**, smoke **375/375**, final npm
+  **1,021 files / 9,732 passed / 1 skipped**, build **659 modules**. Fresh
+  hashes: anchor `6a4af5ec…`, LILIANA `4b13624c…`, legal-varied `ad82e79e…`;
+  no `src/**`, presentation, animation/Rust, ratchet, unsupported-barrier, or
+  canonical Battle-2 change.
+
 ## 1227 — [MAIN worker, 2026-08-13] **CGB4 v30 second-track mask decision green**
 
 - **State:** #55 is source-exact through the three selected-row **5,908-cycle**

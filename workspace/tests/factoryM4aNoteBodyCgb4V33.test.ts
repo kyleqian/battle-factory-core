@@ -164,10 +164,10 @@ describe("Issue #55 CGB4 third-track flags v33", () => {
         "beqTakenControlTransferRefills",
         "contiguousPrefixThroughThirdTrackExistDecisionSourceCycles",
         "postV32ThirdTrackExistDecisionSourceCycles",
+        "sourceStateDigest",
         "stopsBeforeV33Instruction",
         "thirdTrackExistDecision",
         "thirdTrackFlags",
-        "sourceStateDigest",
       ]);
       expect(row.pointer).toBeUndefined();
       expect(row.address).toBeUndefined();
@@ -217,7 +217,7 @@ describe("Issue #55 CGB4 third-track flags v33", () => {
     for (const [name, hash] of Object.entries(V33_PACKET_HASHES)) {
       expect(sha256(join("tests/fixtures/factory-m4a-note-body-cgb4-v33", `${name}.json`))).toBe(hash);
       const packet = JSON.parse(readFileSync(join("tests/fixtures/factory-m4a-note-body-cgb4-v33", `${name}.json`), "utf8"));
-      expect(Object.keys(packet).sort()).toEqual(["addressFree", "case", "captureBoundary", "joinKey", "observations", "oracleProfile", "schema", "sourceFunction"]);
+      expect(Object.keys(packet).sort()).toEqual(["addressFree", "captureBoundary", "case", "joinKey", "observations", "oracleProfile", "schema", "sourceFunction"]);
       for (const row of packet.observations) expect(Object.keys(row).sort()).toEqual(["sourceStateDigest", "thirdTrackFlags"]);
     }
   });
