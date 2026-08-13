@@ -97,6 +97,7 @@ pub struct FactoryAiLiveDecisionInput<'a> {
 /// Keeping the two concrete choices in one enum lets the WASM boundary reuse
 /// the existing complete receipt encoders without reconstructing a second
 /// policy result or dropping the mask-specific trace fields.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FactoryAiLiveDecisionChoice {
     MaskZero(FactoryAiMaskZeroDecisionChoice),
@@ -110,7 +111,7 @@ pub enum FactoryAiLiveDecisionChoice {
 pub fn choose_factory_ai_decision_from_live_view(
     input: FactoryAiLiveDecisionInput<'_>,
 ) -> Result<FactoryAiLiveDecisionChoice, FactoryAiLiveDecisionError> {
-    let factory = project_factory(&input.view, PolicyFlavor::MaskZero)?;
+    let factory = project_factory(input.view, PolicyFlavor::MaskZero)?;
     let selection =
         select_factory_ai_mask(factory).map_err(FactoryAiLiveDecisionError::MaskSelection)?;
     if selection.mask == 0 {
