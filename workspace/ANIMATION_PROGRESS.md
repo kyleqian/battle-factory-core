@@ -1,3 +1,11 @@
+# MOVE_BLIZZARD corrective evidence checkpoint — remains unsupported (2026-08-13 worker)
+
+- **State:** Coverage remains **180/276 Level-50 exact**, 0 partial, 0 staged, and 96 unsupported. Blizzard and Icy Wind remain independently unpromoted; seam/framebuffer acceptance is **0/372 + 0/361**.
+- **Did:** Corrected `AnimSwirlingSnowball_Step2` to compute x2/y2 from the pre-increment angle with signed C `>> 8`, and narrowed the reducer to the 32 writes reconstructible from each captured Step1 row. Added a strict retained-evidence verifier; removed invented linear/Step1/End and duplicate-fresh claims.
+- **Verified:** Player-back **214..585** and opponent-front **213..573** replay **448/448 Step2 sprite rows** each, complete pointer windows (**312/372 + 301/361** rows inside the pinned ROM interval), immutable battle state/topology/source offsets/cleanup, and exact one-frame software→hardware OAM/matrix transfer (**371/371 + 360/360**). All **372 + 361** archived RGB members pass per-frame and aggregate SHA plus regenerated change maps; all scenario/state/RGB/map receipt SHAs pass.
+- **Next:** A production Blizzard seam/compositor and all unresolved snowball linear/Step1/End, large-snowball, impact-crystal, background, palette, and audio phases remain required before promotion. Icy Wind requires its own complete acceptance.
+- **Notes:** Numeric set **318**, species **310 PELIPPER**, four Blizzard choices, and complete legal parties remain pinned. No gameplay/RNG/controller/facility state, boundary widening, coverage ledger, latch ledger, production renderer, absolute-tick/framebuffer lookup, RGB fitting, or sibling promotion changed.
+
 # MOVE_ANCIENT_POWER audit correction — bilateral exact gate strengthened (2026-08-13 worker)
 
 - **State:** Level-50 coverage remains **180/276 exact**, 0 partial, 0 staged, and 96 unsupported. Ancient Power alone remains promoted; ROCK_THROW and ROCK_SLIDE remain independent exact controls.
