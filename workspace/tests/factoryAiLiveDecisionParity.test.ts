@@ -21,30 +21,30 @@ import type {
 
 type Patch = Readonly<Record<string, unknown>>;
 
-const B_WEATHER_RAIN = (1 << 0) | (1 << 1) | (1 << 2);
-const B_WEATHER_SUN = (1 << 5) | (1 << 6);
-const B_WEATHER_HAIL = 1 << 7;
-const SIDE_STATUS_REFLECT = 1 << 0;
-const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
-const SIDE_STATUS_SPIKES = 1 << 4;
-const SIDE_STATUS_SAFEGUARD = 1 << 5;
-const SIDE_STATUS_FUTUREATTACK = 1 << 6;
-const STATUS1_SLEEP = 0x0000_0007;
-const STATUS1_TOXIC_POISON = 1 << 7;
-const STATUS1_REFRESH_CURE_MASK = (1 << 3) | (1 << 4) | (1 << 6) | (1 << 7);
-const STATUS2_CONFUSION = 0x0000_0007;
-const STATUS2_INFATUATION = 0x000f_0000;
-const STATUS2_FOCUS_ENERGY = 1 << 20;
-const STATUS2_SUBSTITUTE = 1 << 24;
-const STATUS2_ESCAPE_PREVENTION = 1 << 26;
-const STATUS2_NIGHTMARE = 1 << 27;
-const STATUS2_CURSED = 1 << 28;
-const STATUS2_FORESIGHT = 1 << 29;
-const STATUS2_TORMENT = 0x8000_0000;
-const STATUS3_LEECHSEED = 1 << 2;
-const STATUS3_PERISH_SONG = 1 << 5;
-const STATUS3_ROOTED = 1 << 10;
-const STATUS3_YAWN = (1 << 11) | (1 << 12);
+const WEATHER_RAIN_BITS = (1 << 0) | (1 << 1) | (1 << 2);
+const WEATHER_SUN_BITS = (1 << 5) | (1 << 6);
+const WEATHER_HAIL_BITS = 1 << 7;
+const SIDE_REFLECT_BITS = 1 << 0;
+const SIDE_LIGHTSCREEN_BITS = 1 << 1;
+const SIDE_SPIKES_BITS = 1 << 4;
+const SIDE_SAFEGUARD_BITS = 1 << 5;
+const SIDE_FUTUREATTACK_BITS = 1 << 6;
+const STATE1_SLEEP_BITS = 0x0000_0007;
+const STATE1_TOXIC_POISON_BITS = 1 << 7;
+const STATE1_REFRESH_CURE_BITS = (1 << 3) | (1 << 4) | (1 << 6) | (1 << 7);
+const STATE2_CONFUSION_BITS = 0x0000_0007;
+const STATE2_INFATUATION_BITS = 0x000f_0000;
+const STATE2_FOCUS_ENERGY_BITS = 1 << 20;
+const STATE2_SUBSTITUTE_BITS = 1 << 24;
+const STATE2_ESCAPE_PREVENTION_BITS = 1 << 26;
+const STATE2_NIGHTMARE_BITS = 1 << 27;
+const STATE2_CURSED_BITS = 1 << 28;
+const STATE2_FORESIGHT_BITS = 1 << 29;
+const STATE2_TORMENT_BITS = 0x8000_0000;
+const STATE3_LEECHSEED_BITS = 1 << 2;
+const STATE3_PERISH_SONG_BITS = 1 << 5;
+const STATE3_ROOTED_BITS = 1 << 10;
+const STATE3_YAWN_BITS = (1 << 11) | (1 << 12);
 const MOVE_SOLAR_BEAM = 76;
 const MOVE_PROTECT = 182;
 
@@ -132,12 +132,12 @@ const CASES = [
   sourceCase({ label: "mask_zero_baseline", category: "mask-0", streak: 0, attacker: { moves: [33, 0, 0, 0] }, legalMask: 1, seed: 0x1234_5678 }),
   sourceCase({ label: "mask_zero_sparse_history", category: "mask-0-history", streak: 6, attacker: { moves: [57, 157, 34, 85], types: ["TYPE_WATER", "TYPE_ICE"] }, target: { types: ["TYPE_GROUND", "TYPE_ROCK"], ability: 69 }, history: { usedMoves: [[105, 0], [57], [], []], knownAbilities: ["ABILITY_ROCK_HEAD", null, null, null], knownItemEffects: [44, 0, 0, 0] }, legalMask: 5, seed: 0x0bad_cafe, calls: 9 }),
   sourceCase({ label: "mask_one_type_ability_edges", category: "mask-1-type-ability", streak: 14, attacker: { moves: [85, 150, 150, 150], types: ["TYPE_FIRE", "TYPE_FLYING"], ability: 70 }, target: { species: 105, types: ["TYPE_GROUND", "TYPE_GROUND"], ability: 69 }, history: { knownAbilities: ["ABILITY_ROCK_HEAD", null, null, null], usedMoves: [[182], [], [], []] }, legalMask: 1, seed: 1, calls: 7 }),
-  sourceCase({ label: "mask_one_status_weather_screens", category: "mask-1-status-weather", streak: 20, weather: B_WEATHER_RAIN | B_WEATHER_SUN | B_WEATHER_HAIL, sideStatuses: [SIDE_STATUS_SAFEGUARD | SIDE_STATUS_SPIKES, SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_REFLECT], attacker: { moves: [92, 150, 150, 150], status1: STATUS1_REFRESH_CURE_MASK, status2: STATUS2_FOCUS_ENERGY | STATUS2_SUBSTITUTE, status3: STATUS3_ROOTED, protectUses: 3 }, target: { species: 213, ability: 5, status1: STATUS1_TOXIC_POISON, status2: STATUS2_CONFUSION | STATUS2_ESCAPE_PREVENTION | STATUS2_TORMENT, status3: STATUS3_LEECHSEED | STATUS3_PERISH_SONG, tauntTimer: 2 }, legalMask: 1, seed: 0x1020_3040, calls: 3 }),
-  sourceCase({ label: "mask_seven_sleep_history_short", category: "mask-7-history", streak: 28, weather: B_WEATHER_SUN, attacker: { moves: [47, 57, 157, 34], ability: 70 }, target: { ability: 5, status1: STATUS1_SLEEP, status2: STATUS2_NIGHTMARE | STATUS2_FORESIGHT | STATUS2_CURSED, status3: STATUS3_YAWN }, history: { usedMoves: [[138], [], [], []], knownAbilities: [null, null, null, null] }, legalMask: 15, seed: 1, turnMode: 2, battleTurnCount: 3 }),
-  sourceCase({ label: "mask_seven_sleep_history_four", category: "mask-7-history", streak: 28, weather: B_WEATHER_HAIL, attacker: { moves: [47, 57, 157, 34], statStages: [99, 0, 1, 2, 3, 4, 5, 12], hp: 37, maxHP: 155 }, target: { types: ["TYPE_WATER", "TYPE_PSYCHIC"], ability: 37, status2: STATUS2_INFATUATION, status3: STATUS3_LEECHSEED }, history: { usedMoves: [[150, 150, 150, 138], [], [], []], knownAbilities: ["ABILITY_HUGE_POWER", null, null, null] }, legalMask: 9, seed: 0xabcd_ef01, calls: 4, turnMode: 1, battleTurnCount: 19 }),
-  sourceCase({ label: "mask_seven_sleep_history_extended", category: "mask-7-history", streak: 28, weather: B_WEATHER_HAIL, attacker: { moves: [47, 57, 157, 34], statStages: [99, 0, 1, 2, 3, 4, 5, 12], hp: 37, maxHP: 155 }, target: { types: ["TYPE_WATER", "TYPE_PSYCHIC"], ability: 37, status2: STATUS2_INFATUATION, status3: STATUS3_LEECHSEED }, history: { usedMoves: [[150, 150, 150, 150, 138], [], [], []], knownAbilities: ["ABILITY_HUGE_POWER", null, null, null] }, legalMask: 9, seed: 0xabcd_ef01, calls: 4, turnMode: 1, battleTurnCount: 19 }),
+  sourceCase({ label: "mask_one_status_weather_screens", category: "mask-1-status-weather", streak: 20, weather: WEATHER_RAIN_BITS | WEATHER_SUN_BITS | WEATHER_HAIL_BITS, sideStatuses: [SIDE_SAFEGUARD_BITS | SIDE_SPIKES_BITS, SIDE_LIGHTSCREEN_BITS | SIDE_REFLECT_BITS], attacker: { moves: [92, 150, 150, 150], status1: STATE1_REFRESH_CURE_BITS, status2: STATE2_FOCUS_ENERGY_BITS | STATE2_SUBSTITUTE_BITS, status3: STATE3_ROOTED_BITS, protectUses: 3 }, target: { species: 213, ability: 5, status1: STATE1_TOXIC_POISON_BITS, status2: STATE2_CONFUSION_BITS | STATE2_ESCAPE_PREVENTION_BITS | STATE2_TORMENT_BITS, status3: STATE3_LEECHSEED_BITS | STATE3_PERISH_SONG_BITS, tauntTimer: 2 }, legalMask: 1, seed: 0x1020_3040, calls: 3 }),
+  sourceCase({ label: "mask_seven_sleep_history_short", category: "mask-7-history", streak: 28, weather: WEATHER_SUN_BITS, attacker: { moves: [47, 57, 157, 34], ability: 70 }, target: { ability: 5, status1: STATE1_SLEEP_BITS, status2: STATE2_NIGHTMARE_BITS | STATE2_FORESIGHT_BITS | STATE2_CURSED_BITS, status3: STATE3_YAWN_BITS }, history: { usedMoves: [[138], [], [], []], knownAbilities: [null, null, null, null] }, legalMask: 15, seed: 1, turnMode: 2, battleTurnCount: 3 }),
+  sourceCase({ label: "mask_seven_sleep_history_four", category: "mask-7-history", streak: 28, weather: WEATHER_HAIL_BITS, attacker: { moves: [47, 57, 157, 34], statStages: [99, 0, 1, 2, 3, 4, 5, 12], hp: 37, maxHP: 155 }, target: { types: ["TYPE_WATER", "TYPE_PSYCHIC"], ability: 37, status2: STATE2_INFATUATION_BITS, status3: STATE3_LEECHSEED_BITS }, history: { usedMoves: [[150, 150, 150, 138], [], [], []], knownAbilities: ["ABILITY_HUGE_POWER", null, null, null] }, legalMask: 9, seed: 0xabcd_ef01, calls: 4, turnMode: 1, battleTurnCount: 19 }),
+  sourceCase({ label: "mask_seven_sleep_history_extended", category: "mask-7-history", streak: 28, weather: WEATHER_HAIL_BITS, attacker: { moves: [47, 57, 157, 34], statStages: [99, 0, 1, 2, 3, 4, 5, 12], hp: 37, maxHP: 155 }, target: { types: ["TYPE_WATER", "TYPE_PSYCHIC"], ability: 37, status2: STATE2_INFATUATION_BITS, status3: STATE3_LEECHSEED_BITS }, history: { usedMoves: [[150, 150, 150, 150, 138], [], [], []], knownAbilities: ["ABILITY_HUGE_POWER", null, null, null] }, legalMask: 9, seed: 0xabcd_ef01, calls: 4, turnMode: 1, battleTurnCount: 19 }),
   sourceCase({ label: "mask_seven_charge_up_extended_protect_positional_gate", category: "mask-7-positional-history", streak: 28, attacker: { moves: [MOVE_SOLAR_BEAM, 57, 157, 34], types: ["TYPE_GRASS", "TYPE_GRASS"] }, target: { types: ["TYPE_NORMAL", "TYPE_NORMAL"] }, history: { usedMoves: [[33, 33, 33, 33, MOVE_PROTECT], [], [], []] }, legalMask: 1, seed: 0x2468_ace0, calls: 17 }),
-  sourceCase({ label: "mask_seven_protect_optional_flags", category: "mask-7-optional", streak: 28, sideStatuses: [SIDE_STATUS_REFLECT | SIDE_STATUS_FUTUREATTACK, SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_SAFEGUARD | SIDE_STATUS_FUTUREATTACK], attacker: { moves: [182, 57, 157, 34], status2: STATUS2_INFATUATION | STATUS2_FOCUS_ENERGY | STATUS2_SUBSTITUTE, status3: STATUS3_LEECHSEED | STATUS3_YAWN | STATUS3_ROOTED, protectUses: 2 }, target: { status1: STATUS1_TOXIC_POISON, status2: STATUS2_CURSED | STATUS2_TORMENT, status3: STATUS3_LEECHSEED | STATUS3_PERISH_SONG, tauntTimer: 4 }, legalMask: 1, seed: 0x3141_5926, calls: 12 }),
+  sourceCase({ label: "mask_seven_protect_optional_flags", category: "mask-7-optional", streak: 28, sideStatuses: [SIDE_REFLECT_BITS | SIDE_FUTUREATTACK_BITS, SIDE_LIGHTSCREEN_BITS | SIDE_SAFEGUARD_BITS | SIDE_FUTUREATTACK_BITS], attacker: { moves: [182, 57, 157, 34], status2: STATE2_INFATUATION_BITS | STATE2_FOCUS_ENERGY_BITS | STATE2_SUBSTITUTE_BITS, status3: STATE3_LEECHSEED_BITS | STATE3_YAWN_BITS | STATE3_ROOTED_BITS, protectUses: 2 }, target: { status1: STATE1_TOXIC_POISON_BITS, status2: STATE2_CURSED_BITS | STATE2_TORMENT_BITS, status3: STATE3_LEECHSEED_BITS | STATE3_PERISH_SONG_BITS, tauntTimer: 4 }, legalMask: 1, seed: 0x3141_5926, calls: 12 }),
   sourceCase({ label: "mask_seven_stage_type_edges", category: "mask-7-stages", streak: 28, attacker: { moves: [104, 150, 150, 150], types: ["TYPE_GROUND", "TYPE_ROCK"], statStages: [0, 0, 12, 0, 12, 0, 12, 9], hp: 50, maxHP: 100 }, target: { species: 12, types: ["TYPE_GRASS", "TYPE_FLYING"], statStages: [0, 12, 0, 12, 0, 12, 0, 0], hp: 999, maxHP: 999, ability: 71 }, legalMask: 1, seed: 99, calls: 23 }),
   sourceCase({ label: "mask_seven_boundary_turn_owner", category: "mask-7-turn-ownership", streak: 28, attacker: { moves: [57, 157, 34, 85] }, target: { ability: 37, types: ["TYPE_WATER", "TYPE_WATER"] }, legalMask: 15, seed: 0x7654_3210, calls: 41, turnMode: 2, battleTurnCount: 0 }),
   sourceCase({ label: "mask_seven_decision_turn_owner", category: "mask-7-turn-ownership", streak: 28, attacker: { moves: [57, 157, 34, 85] }, target: { ability: 37, types: ["TYPE_WATER", "TYPE_WATER"] }, legalMask: 15, seed: 0x7654_3210, calls: 41, turnMode: 1 }),
