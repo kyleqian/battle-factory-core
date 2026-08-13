@@ -1,4 +1,8 @@
 import {
+  ancientPowerAtAge,
+  type AncientPowerState,
+} from "./ancientPower.ts";
+import {
   FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
   firePunchBurnFlames,
   firePunchParticlesInDrawOrder,
@@ -839,6 +843,7 @@ export interface SceneOnBattlerGeometry {
 export interface SceneOnPresentationBattler {
   readonly species:
     | "ARON"
+    | "BALTOY"
     | "HOUNDOUR"
     | "NINETALES"
     | "VILEPLUME"
@@ -1575,6 +1580,14 @@ export interface SceneOnCosmicPowerConfig {
       readonly opponentGender?: "male" | "female" | "none";
     }
   >;
+}
+
+/** Narrow Scene-ON seam for Ancient Power; battle resolution remains external. */
+export interface SceneOnAncientPowerConfig {
+  readonly move: "ANCIENT_POWER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnAromatherapyConfig {
@@ -2792,6 +2805,7 @@ export type SceneOnMoveConfig =
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
   | SceneOnCosmicPowerConfig
+  | SceneOnAncientPowerConfig
   | SceneOnAromatherapyConfig
   | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
@@ -5131,6 +5145,29 @@ export function sceneOnCosmicPowerView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
     ),
+  };
+}
+
+export interface SceneOnAncientPowerView extends AncientPowerState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+/** `age=0` is Move_ANCIENT_POWER's first loadspritegfx row. */
+export function sceneOnAncientPowerView(
+  state: SceneOnMovePresentationState<SceneOnAncientPowerConfig>,
+): SceneOnAncientPowerView {
+  if (state.config.move !== "ANCIENT_POWER") {
+    throw new Error(`expected ANCIENT_POWER presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...ancientPowerAtAge(state.age, {
+      attackerCenter: state.config.attacker.geometry.animationCenter,
+      attackerBattlePositionCenter: state.config.attacker.geometry.battlePositionCenter,
+      attackerSide: state.config.attacker.geometry.side,
+    }),
   };
 }
 

@@ -1,6 +1,6 @@
 {
   "schema": "ancient-power-dense-evidence/v1",
-  "status": "unsupported-staged",
+  "status": "exact",
   "move": "MOVE_ANCIENT_POWER",
   "profile": "battle-scene-on",
   "source": {
@@ -16,28 +16,34 @@
       "scenario": "tools/battle-lab/mechanic-ancient-power-player-baltoy-opponent-onix.json",
       "scenarioSha256": "986feb13a9a034b6510ca5d875868da283602bcd455dadb484243d1ccd6f9532",
       "stateGzip": "tools/compare/evidence/ancient-power-player-dense-state.json.gz",
-      "stateGzipSha256": "462dfc1b8923a4afa09551610197d7c4012451ac282bcfc100aea5f9b57fbe54",
+      "stateGzipSha256": "7b7028ed76c7677d7ad7070276e04a2c9731f88ef5ad9bbe9d8c25db88dd8a3c",
       "rawRgbArchive": "tools/compare/evidence/ancient-power-player-raw-rgb.tar.gz",
       "rawRgbArchiveSha256": "5698f0c16e229dd3269163fbd8759bc2d8fffb68f7c96dcae4fa7904ed104c34",
-      "freshStateSha256": "fabfdb19a01548bff506dee275e5827f6b6d04ff393ed498f7953daac70a17f3",
-      "freshRawRgbSha256": "bd59ebbf7ef9918fc6c4a478f00d809b83f088948503de338f0162f1c241b3e4"
+      "freshStateSha256": "1d57cb97e515433d704008a22c1454ef6955876e6fd3c0a85e5c994a587716f2",
+      "freshRawRgbSha256": "bd59ebbf7ef9918fc6c4a478f00d809b83f088948503de338f0162f1c241b3e4",
+      "changeMap": "tools/compare/evidence/ancient-power-changemap-player.txt",
+      "changeMapSha256": "b0d3c51fa0e262810486e7188ffa4a32d3dea6491e3c95da82daa1085e97f59c"
     },
     "opponent-front": {
       "scenario": "tools/battle-lab/mechanic-ancient-power-opponent-baltoy-player-onix.json",
       "scenarioSha256": "7817c6de4990aa871d3481a9dabe3a84cc94b7357437945d936d3cda3884c40f",
       "stateGzip": "tools/compare/evidence/ancient-power-opponent-dense-state.json.gz",
-      "stateGzipSha256": "a271c846aafab5753c62160ae48588c16ff4843621d29a07bf6069aaaf3de35e",
+      "stateGzipSha256": "2f453d268beb16b75fa3604307d81c2e5702e3816c93ee547fd08dc1e9b1c496",
       "rawRgbArchive": "tools/compare/evidence/ancient-power-opponent-raw-rgb.tar.gz",
       "rawRgbArchiveSha256": "b985835ae05e3b75d7fcdb5d8aedf518060603969797093c7118ff1669231f0b",
-      "freshStateSha256": "cad96a741987f7f48b751db754dda9f9fd9c045b641b35ec500c2a3610e52197",
-      "freshRawRgbSha256": "32d27b5fe45bb846b174e4f19c72044cccdefd50486a78f379c5744fb69a71be"
+      "freshStateSha256": "2d5adc9d2a0b6ac69692b951f52160738b9d88e35e7a0cfa446c77889fa23b3f",
+      "freshRawRgbSha256": "32d27b5fe45bb846b174e4f19c72044cccdefd50486a78f379c5744fb69a71be",
+      "changeMap": "tools/compare/evidence/ancient-power-changemap-opponent.txt",
+      "changeMapSha256": "b61064258ecccf3883eb49f018fed611dcb3e21dad57e28e8c0998381c5126df"
     }
   },
   "twiceFresh": { "playerBack": true, "opponentFront": true, "byteIdenticalPerOrientation": true },
   "topology": {
     "tasks": ["AnimTask_ShakeMon2_Step", "Task_ClearMonBg", "Task_UpdateMonBg"],
     "moveSprites": ["gAncientPowerRockSpriteTemplate", "gBasicHitSplatSpriteTemplate", "gSlideMonToOffsetSpriteTemplate", "gSlideMonToOriginalPosSpriteTemplate", "gShakeMonOrPlatformSpriteTemplate"],
+    "allTemplates": ["gAncientPowerRockSpriteTemplate", "gBasicHitSplatSpriteTemplate", "gMultiuseSpriteTemplate", "gShakeMonOrPlatformSpriteTemplate", "gSlideMonToOffsetSpriteTemplate", "gSlideMonToOriginalPosSpriteTemplate", "gSpriteTemplate_EnemyShadow", "sHealthbarSpriteTemplates", "sHealthboxOpponentSpriteTemplates", "sHealthboxPlayerSpriteTemplates"],
     "lifecycle": ["monbg", "setalpha", "clearmonbg", "blendoff"]
   },
-  "residual": "No source/reducer-to-production framebuffer proof or Baltoy Scene-ON seam is claimed; next action is the bilateral compositor and exact latch proof."
+  "acceptance": { "status": "exact", "reducerRows": 128, "seamRows": 128, "componentRows": 128, "latchRows": 127, "framebufferRows": 128, "freshRuns": 2 },
+  "residual": null
 }

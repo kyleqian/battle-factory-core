@@ -10,6 +10,7 @@ const species = read("reference/pokeemerald/include/constants/species.h");
 const frontierIds = read("reference/pokeemerald/include/constants/battle_frontier_mons.h");
 const frontierMons = read("reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h");
 const probeSource = read("tools/compare/ancientPowerProbe.py");
+const verifierSource = read("tools/compare/ancientPowerPortable.ts");
 const baltoyStart = frontierMons.indexOf("[FRONTIER_MON_BALTOY] = {");
 const baltoyEnd = frontierMons.indexOf("[FRONTIER_MON_SNORUNT] = {", baltoyStart);
 const baltoySourceBlock = frontierMons.slice(baltoyStart, baltoyEnd);
@@ -44,7 +45,7 @@ function expectCompleteRecord(mon: Record<string, unknown>): void {
 
 describe("MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint", () => {
   it("reads the authoritative Baltoy identity directly from Emerald source", () => {
-    expect(receipt.status).toBe("unsupported-staged");
+    expect(receipt.status).toBe("exact");
     expect(receipt.source).toMatchObject({ moveId: 246, carrierSetId: 75, carrierSpeciesId: 318, carrierLabel: "FRONTIER_MON_BALTOY", completePartyRecords: true });
     expect(species).toContain("#define SPECIES_BALTOY 318");
     expect(frontierIds).toMatch(/#define FRONTIER_MON_BALTOY\s+75(?:\s|$)/);
@@ -57,11 +58,27 @@ describe("MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint", () => {
     expect(baltoySourceBlock).toContain(".nature = NATURE_NAUGHTY");
   });
 
+  it("pins the complete twice-fresh bilateral exact production gate", () => {
+    expect(receipt.acceptance).toEqual({ status: "exact", reducerRows: 128, seamRows: 128, componentRows: 128, latchRows: 127, framebufferRows: 128, freshRuns: 2 });
+    expect(receipt.residual).toBeNull();
+    for (const orientation of ["player-back", "opponent-front"] as const) {
+      const row = receipt.orientations[orientation];
+      expect(sha256(readFileSync(row.changeMap))).toBe(row.changeMapSha256);
+    }
+  });
+
   it("keeps the committed probe runnable through the relative mGBA wrapper route", () => {
     expect(probeSource).toContain("tools/run-mgba-probe.py");
     expect(probeSource).toContain("tools/compare/ancientPowerProbe.py");
     expect(probeSource).toContain("tools/battle-lab/mechanic-ancient-power-player-baltoy-opponent-onix.json");
     expect(probeSource).not.toContain("/Users/");
+    expect(probeSource).toContain('"battlerSprites"');
+    expect(probeSource).toContain('"spriteOrder"');
+    expect(probeSource).toContain('"battleBg3"');
+    expect(probeSource).toContain('"bg3vofs"');
+    expect(probeSource).toContain('"SE_M_DRAGON_RAGE"');
+    expect(verifierSource).toContain("validateAncientPowerProbeSurface");
+    expect(verifierSource).toContain("if (sourceFailures.length === 0) reducerRows += 1;");
   });
 
   it.each(["player-back", "opponent-front"] as const)("pins the committed complete six-Pokemon scenario for %s", (orientation) => {
@@ -110,6 +127,12 @@ describe("MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint", () => {
     expect(carrierParty[0]).toMatchObject({ species: 318, level: 50, nature: 4, moves: [246, 246, 246, 246], item: 140, abilitySlot: 0, friendship: 70, gender: "genderless", shiny: false });
     expect(probe.topology.tasks).toEqual(expect.arrayContaining(receipt.topology.tasks));
     expect(probe.topology.templates).toEqual(expect.arrayContaining(receipt.topology.moveSprites));
+    expect(probe.topology.templates).toEqual(receipt.topology.allTemplates);
+    expect(probe.sourceSymbols).toMatchObject({ SE_M_DRAGON_RAGE: expect.any(Number), SE_M_SELF_DESTRUCT: expect.any(Number) });
+    expect(probe.frames.every((frame: { battlerSprites: unknown; spriteOrder: unknown[]; battleBg3: unknown; registers: Record<string, unknown> }) =>
+      Boolean(frame.battlerSprites) && frame.spriteOrder.length === 64 && Boolean(frame.battleBg3)
+        && "bg3vofs" in frame.registers && "bldcnt" in frame.registers,
+    )).toBe(true);
     expect(probe.frames.some((frame: { scriptOffset: number }) => frame.scriptOffset === 151)).toBe(true);
     expect(probe.frames.some((frame: { scriptOffset: number }) => frame.scriptOffset === 277)).toBe(true);
   });

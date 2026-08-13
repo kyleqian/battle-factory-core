@@ -1,4 +1,12 @@
-# MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint — remains unsupported (2026-08-13 worker)
+# MOVE_ANCIENT_POWER audit correction — bilateral exact gate strengthened (2026-08-13 worker)
+
+- **State:** Level-50 coverage remains **180/276 exact**, 0 partial, 0 staged, and 96 unsupported. Ancient Power alone remains promoted; ROCK_THROW and ROCK_SLIDE remain independent exact controls.
+- **Did:** Replaced unconditional reducer counting with fresh source-state agreement. The probe now retains battler bindings/offsets, `sSpriteOrder`, live `gBattle_BG3_*`, BG scroll/BLD registers, and resolved SE headers; the verifier checks both ShakeMon2 and slide bodies, every owned helper/task including monbg cleanup, ROCKS/IMPACT tags, immutable battle state, audio pan/timing, and complete OAM/matrix/palette transfers. Replaced the compositor's `state.age===11`/`<=13` rock branches with source-seeded stable `SortSprites` OAM rank and inverse painter order.
+- **Verified:** Both fresh runs of both player-back and opponent-front source frames **225..352** pass **128/128 reducer, seam, component, raw-RGB, change-map, and production framebuffer** rows; full transfer acceptance remains **127/127**, with only age 7's current-row monbg palette transfer and preceding software OAM/matrices/palette otherwise. Fresh receipts are player `1d57cb97…/bd59ebbf…/b0d3c51f…`, opponent `2d5adc9d…/32d27b5f…/b6106425…`.
+- **Next:** None for Ancient Power. Shared ROCKS/IMPACT/ShakeMon2/slide code does not promote another move.
+- **Notes:** Presentation-only. Fail-closed Tier-1 source-surface mutations cover battler/register/OAM-order mismatches. No damage, stat boost, RNG, turn/controller/facility state, boundary widening, canonical recording import, absolute-tick/framebuffer lookup, coordinate/RGB fitting, or sibling coverage changed.
+
+# MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint — superseded (2026-08-13 worker)
 
 - **State:** Level-50 coverage remains **179/276 exact**, 0 partial, 0 staged, and 97 unsupported. Ancient Power is not promoted; ROCK_THROW and ROCK_SLIDE remain independent controls.
 - **Did:** Added the source-relative ten-rock `AnimRaiseSprite` reducer and focused component tests for the assigned 12-component track. Added a pointer-bounded Scene-ON probe and retained complete state/raw-RGB receipts for actual numeric species **318 BALTOY**, source metadata set **75**, with complete legal Level-50 party records in both player-back and opponent-front orientations. Committed those two reproducible scenarios under `tools/battle-lab`, pinned their SHA-256 values in the receipt/test, and corrected `ANCIENT_POWER_COMPONENTS` to the generated source graph exactly.

@@ -869,6 +869,7 @@ import {
 } from "./fightCommandPresentation.ts";
 import { stunSporeParticleDrawOrderAtAge } from "../animation/stunSpore.ts";
 import { sleepPowderParticleDrawOrderAtAge } from "../animation/sleepPowder.ts";
+import { ancientPowerRockPainterOrder } from "../animation/ancientPower.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -914,6 +915,7 @@ import {
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
   sceneOnCosmicPowerView,
+  sceneOnAncientPowerView,
   sceneOnWishView,
   sceneOnMilkDrinkView,
   sceneOnRefreshView,
@@ -1135,6 +1137,7 @@ import {
   type SceneOnFurySwipesConfig,
   type SceneOnMeteorMashConfig,
   type SceneOnCosmicPowerConfig,
+  type SceneOnAncientPowerConfig,
   type SceneOnAstonishConfig,
   type SceneOnFakeOutConfig,
   type SceneOnSubstituteConfig,
@@ -1488,6 +1491,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const baltoyFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).BALTOY!;
 const lunatoneFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LUNATONE!;
 const metangFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).METANG!;
 const dragonairFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DRAGONAIR!;
@@ -2729,6 +2733,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const baltoyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).BALTOY!;
 const lunatoneBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LUNATONE!;
 const metangBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).METANG!;
 const dragonairBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DRAGONAIR!;
@@ -14802,6 +14807,22 @@ function drawRockSprite(fb: Uint8Array, animNum: 0 | 1 | 2, centerX: number, cen
       }
     }
   }
+}
+
+/** Ancient Power uses sAnims_BasicRock directly: animNum 1..5 selects sheet frame 1..5. */
+function drawAncientPowerRock(
+  fb: Uint8Array,
+  animNum: 1 | 2 | 3 | 4 | 5,
+  centerX: number,
+  centerY: number,
+): void {
+  drawSpriteSheet(
+    fb,
+    subTileset(battleAnimRocks.tileset, animNum * 4, 4),
+    battleAnimRocks.palette,
+    centerX - 16,
+    centerY - 16,
+  );
 }
 
 /** The settled (post-tick-1227) composite: static bg + both trainer pics + the window frame - byte-exact against the oracle (see module doc point 1). */
@@ -34902,6 +34923,83 @@ export function renderSceneOnMovePresentation(
       "COSMIC POWER!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "ANCIENT_POWER") {
+    const ancientState = state as SceneOnMovePresentationState<SceneOnAncientPowerConfig>;
+    const view = sceneOnAncientPowerView(ancientState);
+    const displayedRocks = sceneOnAncientPowerView({ ...ancientState, age: state.age - 1 });
+    const playerToOpponent = view.attacker.species === "BALTOY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "BALTOY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged ANCIENT_POWER pair ${view.attacker.species}->${view.target.species}`);
+    }
+    drawStaticBgShiftedY(fb, view.bg3vofs);
+    if (opponentToPlayer && state.age === 0) {
+      const shadowX = view.attacker.geometry.battlePositionCenter.x - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(fb, shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width), battleEnemyShadow.color);
+      }
+    }
+    const opponentSprite = playerToOpponent ? onixFrontSprite : baltoyFrontSprite;
+    const playerSprite = playerToOpponent ? baltoyBackSprite : onixBackSprite;
+    const opponentBattler = playerToOpponent ? view.target : view.attacker;
+    const playerBattler = playerToOpponent ? view.attacker : view.target;
+    // The target ShakeMon2 initializer overwrites ONIX's pre-existing front
+    // idle x2 and its terminal zero remains after the task is destroyed.
+    const opponentIdle = playerToOpponent && state.age >= 78
+      ? null
+      : speciesFrontIdleRestOffset(opponentBattler.species);
+    const opponentX2 = (playerToOpponent ? view.targetX2 : view.attackerX2) + (opponentIdle?.x2 ?? 0);
+    const playerX2 = playerToOpponent ? view.attackerX2 : view.targetX2;
+    const drawOpponent = (): void => drawSpriteSheet(fb, opponentSprite.tileset, opponentSprite.palette,
+      opponentBattler.geometry.spriteCorner.x + opponentX2,
+      opponentBattler.geometry.spriteCorner.y + (opponentIdle?.y2 ?? 0));
+    const drawPlayer = (): void => drawSpriteSheet(fb, playerSprite.tileset, playerSprite.palette,
+      playerBattler.geometry.spriteCorner.x + playerX2, playerBattler.geometry.spriteCorner.y);
+    const impactDisplayed = state.age >= 78 && state.age <= 87;
+    const drawImpact = (): void => drawSpriteSheetAffineStretchBlendedOverFb(
+      fb, battleAnimHitsplat.tileset, battleAnimHitsplat.palette,
+      view.target.geometry.animationCenter.x - 16,
+      view.target.geometry.animationCenter.y + (opponentToPlayer ? 8 : 0) - 16,
+      TURN9_HITSPLAT_MATRIX, TURN9_HITSPLAT_MATRIX, 12, 8,
+      false, "live",
+    );
+    if (impactDisplayed) {
+      // monbg places the target in target-2 beneath the semi-transparent
+      // hitsplat; the live attacker remains the frontmost OBJ while lunging.
+      if (playerToOpponent) { drawOpponent(); drawImpact(); drawPlayer(); }
+      else { drawPlayer(); drawImpact(); drawOpponent(); }
+    } else {
+      drawOpponent();
+      drawPlayer();
+    }
+    for (const rock of ancientPowerRockPainterOrder(displayedRocks.rocks)) {
+      drawAncientPowerRock(fb, rock.animNum, rock.centerX, rock.centerY + rock.y2);
+    }
+    const profile = ancientState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "BALTOY", level: 50,
+      gender: profile.opponentGender ?? "none",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "BALTOY" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "none",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(fb, playerToOpponent ? "BALTOY used" : "Foe BALTOY used", "ANCIENTPOWER!", 99);
     return;
   }
 
