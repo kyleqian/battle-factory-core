@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1234 — [MAIN worker, 2026-08-13] **CGB4 v35 third-track decrement/exit decision green**
+
+- **State:** #55 is source-exact through the same three selected-row **6,028-cycle**
+  CGB4 prefix, stopping before both `_081DDA6C`'s exit successor and the
+  non-exit continuation body.
+- **Did:** independently captured two fresh serial Battle Scene OFF packet sets
+  through the pointer-bounded third iteration. Exact-key packets retain only
+  `sourceStateDigest` + `r2BeforeDecrement`; all three values are **8**, so
+  `subs r2, 1` leaves 7 and `ble` is not taken: exact ROM `01 3a 02 dd`,
+  **4 cycles/row, 0 refill, +12 aggregate** (**6,016 → 6,028**). Red-first
+  pins reject subtraction result and pointer/address/count/index/identity/
+  channel/frame/duration/condition/body/wider state; v35 regeneration is
+  byte-stable twice.
+- **Next:** keep non-exit continuation, exit successor, broader MPlay/service/
+  arbitration, construction clock, presentation, animation, Rust, and retired
+  canonical Battle-2 work null.
+- **Notes:** v35 evidence/doc `46e2f83f…` / `2fb614a5…`; fresh packet hashes
+  anchor `e3b48fc0…`, LILIANA `47366316…`, legal-varied `69ceae98…` (repeat
+  identical). Focused v35/v34 **13/13** green. No `src/**`, ratchet,
+  unsupported-barrier, or canonical Battle-2 change.
+
 ## 1233 — [supervisor, 2026-08-13] **CGB4 v34 and lane union green**
 
 - **State:** #55 is source-exact through the three selected-row **6,016-cycle**
@@ -43,25 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `806b5582…` / `61fe1034…`. Focused v34/v33 **10/10**, smoke **375/375**,
   final npm **1,026 files / 9,755 passed / 1 skipped**, build **660 modules**.
   No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2 change.
-
-## 1231 — [MAIN worker, 2026-08-13] **CGB4 v33 third-track EXIST decision green**
-
-- **State:** #55 is source-exact through the same three selected-row **5,980-cycle**
-  CGB4 prefix, stopping before `_081DD9D0: movs r1, MPT_FLG_VOLCHG | MPT_FLG_PITCHG`
-  (the volume/pitch-mask body).
-- **Did:** froze v32 evidence/report and inherited v31 packets byte-for-byte;
-  captured two fresh serial Battle Scene OFF packet sets with exact observation
-  keys `sourceStateDigest` + `thirdTrackFlags`. All three rows are `0x80`, so
-  `MPT_FLG_EXIST` is set and `beq _081DDA62` is not taken: source/ELF/exact-ROM
-  close `28 78 80 21 01 42 48 d0` (region `3a41edf4…`), **8 cycles/row, 0 refill, +24 aggregate**
-  (**5,956 → 5,980**). Red-first exact-key pins reject all pointer/address/
-  count/index/identity/channel/frame/duration/body/condition fields; v33
-  regeneration is byte-stable twice.
-- **Next:** separately scope only the volume/pitch-mask body if needed; keep its
-  body/successors, broader MPlay/service/arbitration, construction clock,
-  presentation, animation/Rust, and canonical Battle-2 march out of scope.
-- **Notes:** v33 evidence/doc `806b5582…` / `61fe1034…`; fresh packet hashes
-  anchor `5b200f46…`, LILIANA `edb093d8…`, legal-varied `a6e227b5…` (repeat
-  identical). Focused v33/v32 **9/9**, smoke **375/375**, final npm **1,025
-  files / 9,750 passed / 1 skipped**, build **660 modules**. No `src/**`,
-  ratchet, unsupported-barrier, or canonical Battle-2 change.

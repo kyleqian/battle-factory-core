@@ -1,0 +1,15 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-probe/v35",
+  "case": "liliana",
+  "oracleProfile": "battle-scene-off",
+  "sourceFunction": "FillFactoryFrontierTrainerParty",
+  "joinKey": "sourceStateDigest",
+  "captureBoundary": "third-track-immediately-before-_081DDA62-subs-r2-0x1",
+  "addressFree": true,
+  "observations": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "r2BeforeDecrement": 8
+    }
+  ]
+}

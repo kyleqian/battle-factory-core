@@ -1,0 +1,196 @@
+{
+  "schema": "factory-m4a-note-body-cgb4-evidence/v35",
+  "oracleProfile": "battle-scene-off",
+  "addressFree": true,
+  "sourceAndElf": {
+    "source": {
+      "assembly": {
+        "path": "reference/pokeemerald/src/m4a_1.s",
+        "lines": "1443-1450",
+        "sha256": "9980a795dc659663b237ee5000e3b220b5145492db4d463b12f73a473547838c"
+      }
+    },
+    "elf": {
+      "containingEntry": "0x082dfc00",
+      "instructionStart": "0x082dfc9a",
+      "endExclusive": "0x082dfc9e",
+      "takenSuccessor": "0x082dfca4",
+      "nextSequentialInstruction": "0x082dfc9e",
+      "sha256": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b"
+    },
+    "compiledRegions": [
+      {
+        "role": "subs r2, 0x1; ble _081DDA6C",
+        "start": "0x082dfc9a",
+        "endExclusive": "0x082dfc9e",
+        "bytes": 4,
+        "bytesHex": "01 3a 02 dd",
+        "sha256": "a70595d17cb12da032e89ea67903bf3fe0b222c4c87bd2375a1c6eef2aa5791a"
+      }
+    ],
+    "timingClasses": {
+      "sequentialThumbHalfwordCycles": 2,
+      "memoryAccesses": 0,
+      "dataAccessPremiumCycles": 0,
+      "takenControlTransferRefillCycles": 6,
+      "bleNotTakenModel": "subs; non-taken ble = 2 halfwords * 2 + zero refill = 4",
+      "bleTakenModel": "subs; taken ble = 2 halfwords * 2 + one 6-cycle refill = 10"
+    }
+  },
+  "frozenInputs": {
+    "acceptedV34EvidenceSha256": "49a6bd712f69f16f92f51c2058be7a1fe2d5b54fe277afec2be68b54df06690c",
+    "acceptedV34DocSha256": "c7133ef394e44089521e318f461f89ea11ef097bdf00710fbc9b5ad7d20e01d1",
+    "acceptedInheritedV33PacketSha256": {
+      "anchor": "5b200f46ea9182f5f1ba1f349b07f012b282f2d96157c2b49c0cee0e163b88c9",
+      "liliana": "edb093d86fd4deffdc39f2802d545d2422d3ca94ece18883d6d8dd2522c3bc13",
+      "factory-varied": "a6e227b52726b060268a24d01aa404bcf54b576d3640cbdb85d76d9ffe4a4411"
+    },
+    "v34EvidenceAndReportRegenerateByteForByte": true,
+    "v34EvidenceReportAndInheritedV33PacketsRetainedByteForByte": true,
+    "v35PacketSha256": {
+      "anchor": "e3b48fc009941742c1d2d19b8fb8625544b81a99fb5a6b16d9ae894f642407e3",
+      "liliana": "47366316f6450119b3d3d3c93e0dad10a0a6c5d9fe437fa70a8588ed40d33998",
+      "factory-varied": "69ceae984c5647ccdc486b10ad478f0556344dab50c7cc032a12a661cf1c74c9"
+    },
+    "v35PacketRepeatSha256": {
+      "anchor": "e3b48fc009941742c1d2d19b8fb8625544b81a99fb5a6b16d9ae894f642407e3",
+      "liliana": "47366316f6450119b3d3d3c93e0dad10a0a6c5d9fe437fa70a8588ed40d33998",
+      "factory-varied": "69ceae984c5647ccdc486b10ad478f0556344dab50c7cc032a12a661cf1c74c9"
+    },
+    "v35PacketRepeatIdentity": true,
+    "v35FreshSerialRunsPerCase": 2
+  },
+  "capture": {
+    "boundary": "third-track immediately before _081DDA62: subs r2, 0x1; ble _081DDA6C",
+    "scalars": [
+      "r2BeforeDecrement"
+    ],
+    "packetObservationExactKeys": [
+      "sourceStateDigest",
+      "r2BeforeDecrement"
+    ],
+    "excluded": [
+      "pointer",
+      "address",
+      "runtime address",
+      "track count",
+      "track index",
+      "track identity",
+      "channel",
+      "frame",
+      "duration",
+      "condition flags",
+      "wider state",
+      "subtraction result serialization",
+      "_081DDA6C exit successor body",
+      "movs r0, MusicPlayerTrack_size continuation successor body",
+      "third-track flags",
+      "volume/pitch mask",
+      "other 75 callbacks"
+    ]
+  },
+  "join": {
+    "key": "sourceStateDigest",
+    "frozenV34SelectedRows": 3,
+    "joinedRows": 3,
+    "ambiguousRows": 0,
+    "addressFree": true,
+    "failClosed": [
+      "missing",
+      "duplicate",
+      "reordered",
+      "ambiguous",
+      "extra",
+      "non-v34-selected-row",
+      "packet-key-mismatch",
+      "unsupported-packet-field",
+      "source-operand-out-of-range",
+      "unexpected-observed-route"
+    ]
+  },
+  "coverage": {
+    "frozenV34SelectedRows": 3,
+    "packetRowsByCase": {
+      "anchor": 0,
+      "liliana": 1,
+      "factory-varied": 2
+    },
+    "r2BeforeDecrementRows": 3,
+    "r2BeforeDecrementValues": [
+      8
+    ],
+    "bleNotTakenRows": 3,
+    "bleTakenRows": 0,
+    "postV34ThirdTrackDecrementDecisionSourceCycles": 12,
+    "acceptedContiguousPrefixThroughThirdTrackVolPitchDecisionSourceCycles": 6016,
+    "contiguousPrefixThroughThirdTrackDecrementDecisionSourceCycles": 6028,
+    "sequentialThumbHalfwords": 6,
+    "memoryAccesses": 0,
+    "dataAccessPremiumCycles": 0,
+    "takenControlTransferRefills": 0,
+    "failClosedSchemaConsistentUnobservedExitSourceCycles": 10,
+    "nullOtherPostSelectionCallbacks": 75,
+    "exactCompleteMPlaySourceCostRows": 5,
+    "nullCompleteMPlaySourceCostRows": 108
+  },
+  "rows": [
+    {
+      "sourceStateDigest": "2cc957521c57b34f4efd579d9d3b3cf2a96925b919f36766c0d7bfdd2c32175e",
+      "r2BeforeDecrement": 8,
+      "thirdTrackDecrementDecision": "subs-r2-1; ble-not-taken",
+      "postV34ThirdTrackDecrementDecisionSourceCycles": 4,
+      "contiguousPrefixThroughThirdTrackDecrementDecisionSourceCycles": 904,
+      "bleTakenControlTransferRefills": 0,
+      "stopsBeforeV35Instruction": "movs r0, MusicPlayerTrack_size"
+    },
+    {
+      "sourceStateDigest": "c31fe070ed62179a6c35e6b5159a0cda21ddc7cb7bb4494a85be9e3c6f2cb902",
+      "r2BeforeDecrement": 8,
+      "thirdTrackDecrementDecision": "subs-r2-1; ble-not-taken",
+      "postV34ThirdTrackDecrementDecisionSourceCycles": 4,
+      "contiguousPrefixThroughThirdTrackDecrementDecisionSourceCycles": 904,
+      "bleTakenControlTransferRefills": 0,
+      "stopsBeforeV35Instruction": "movs r0, MusicPlayerTrack_size"
+    },
+    {
+      "sourceStateDigest": "e8c4ca3b7f0344a7e8d875e749aec2d53a10c31bc14c41689298552dd5af9da8",
+      "r2BeforeDecrement": 8,
+      "thirdTrackDecrementDecision": "subs-r2-1; ble-not-taken",
+      "postV34ThirdTrackDecrementDecisionSourceCycles": 4,
+      "contiguousPrefixThroughThirdTrackDecrementDecisionSourceCycles": 904,
+      "bleTakenControlTransferRefills": 0,
+      "stopsBeforeV35Instruction": "movs r0, MusicPlayerTrack_size"
+    }
+  ],
+  "containment": {
+    "frozenV34ArtifactsReadOnly": true,
+    "inheritedV33PacketsRetainedReadOnly": true,
+    "v35FreshPacketsAddressFree": true,
+    "v35RuntimeCaptureCount": 3,
+    "trackPointer": null,
+    "runtimeAddress": null,
+    "trackCount": null,
+    "trackIndex": null,
+    "trackIdentity": null,
+    "channel": null,
+    "frame": null,
+    "duration": null,
+    "conditionFlags": null,
+    "widerState": null,
+    "subtractionResult": null,
+    "continuationBody": null,
+    "exitBody": null,
+    "otherPostSelectionCallbacks": null,
+    "completeMPlay": null,
+    "serviceCost": null,
+    "arbitration": null,
+    "constructionClock": null,
+    "controller": null,
+    "presentation": null,
+    "animation": null,
+    "rust": null,
+    "canonicalBattle2": null,
+    "unsupportedBarrierAdded": false
+  },
+  "verdict": "Fresh twice-byte-stable v35 Battle Scene OFF packets join only v34's three selected sourceStateDigest rows and retain exactly r2BeforeDecrement. All three observed operands are 8, so subs r2, 0x1 leaves positive 7 and ble _081DDA6C is not taken. Source/ELF/exact-ROM price the pair at four cycles per row with no refill, advancing the aggregate prefix from 6016 to 6028 and stopping before both successor bodies. The exit route is source-priced fail-closed at ten cycles and is not claimed observed."
+}
