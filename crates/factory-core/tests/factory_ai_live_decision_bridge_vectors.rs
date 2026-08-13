@@ -475,7 +475,7 @@ fn run_case(case: &FactoryAiLiveDecisionCase) -> u64 {
 
 #[test]
 fn category_census_is_checked_in_and_complete() {
-    assert_eq!(FACTORY_AI_LIVE_DECISION_BRIDGE_CATEGORY_COUNTS.len(), 8);
+    assert_eq!(FACTORY_AI_LIVE_DECISION_BRIDGE_CATEGORY_COUNTS.len(), 9);
     assert_eq!(
         FACTORY_AI_LIVE_DECISION_BRIDGE_CASES.len(),
         FACTORY_AI_LIVE_DECISION_BRIDGE_CATEGORY_COUNTS

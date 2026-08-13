@@ -6817,12 +6817,15 @@ fn run_cv_charge_up_move(
     }
     let user_moves = attacker.moves.unwrap_or([0, 0, 0, 0]);
     let (known_moves, known_move_count) = target.known_move_ids();
+    // Histories may outgrow the four live slots. TypeScript's
+    // `(userMoves[slot] ?? 0)` makes every such tail position fail this
+    // positional gate while membership-only scans still see the tail.
     let target_history_has_protect =
         known_moves[..known_move_count]
             .iter()
             .enumerate()
             .any(|(slot, &move_id)| {
-                user_moves[slot] != 0
+                user_moves.get(slot).copied().unwrap_or(0) != 0
                     && gen_tables::MOVES
                         .get(move_id as usize)
                         .is_some_and(|m| m.effect == EFFECT_PROTECT)
