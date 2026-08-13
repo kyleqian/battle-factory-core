@@ -43,10 +43,13 @@ const VALID_STATUSES = new Set([
 ]);
 const VALID_RESULTS = new Set(["accepted", "keptParty"]);
 const VALID_QUIT_RETURN_PHASES = new Set(["playerPicker", "enemyPicker"]);
+const INPUTS = ["LEFT", "RIGHT", "UP", "DOWN", "A", "B"];
+const VALID_INPUTS = new Set(INPUTS);
 const OP_ALREADY_HAS_SPECIES = "already-has-species";
 const OP_CREATE = "create";
 const OP_ACKNOWLEDGE = "acknowledge";
 const OP_COPY_CURSOR = "copy-cursor";
+const OP_HANDLE_INPUT = "handle-input";
 const OP_APPLY_MUTATION = "apply-mutation";
 const OP_COMMIT_MUTATION = "commit-mutation";
 const OP_ROUND_DECISION = "round-decision";
@@ -54,6 +57,7 @@ const VALID_OPERATIONS = new Set([
   OP_CREATE,
   OP_ACKNOWLEDGE,
   OP_COPY_CURSOR,
+  OP_HANDLE_INPUT,
   OP_ALREADY_HAS_SPECIES,
   OP_APPLY_MUTATION,
   OP_COMMIT_MUTATION,
@@ -219,7 +223,7 @@ function assertState(value, label) {
 const cases = [];
 const labels = new Set();
 
-function canonicalOutcome(operation, input, enemyMonId) {
+function canonicalOutcome(operation, input, enemyMonId, swapInput) {
   try {
     let result;
     if (operation === OP_CREATE) {
@@ -232,6 +236,8 @@ function canonicalOutcome(operation, input, enemyMonId) {
       result = canonicalSwap.acknowledgeFactorySwapPresentation(input);
     } else if (operation === OP_COPY_CURSOR) {
       result = canonicalSwap.copyFactorySwapCursor(input);
+    } else if (operation === OP_HANDLE_INPUT) {
+      result = canonicalSwap.handleFactorySwapInput(input, swapInput);
     } else if (operation === OP_ALREADY_HAS_SPECIES) {
       result = enemyMonId === null
         ? canonicalSwap.factorySwapAlreadyHasSpecies(input)
@@ -251,7 +257,14 @@ function canonicalOutcome(operation, input, enemyMonId) {
   }
 }
 
-function addCase({ label, category, operation, state: input, enemyMonId = null }) {
+function addCase({
+  label,
+  category,
+  operation,
+  state: input,
+  enemyMonId = null,
+  swapInput = null,
+}) {
   assert(/^[a-z0-9_]+$/.test(label) && !labels.has(label), `invalid or duplicate label ${label}`);
   assert(typeof category === "string" && category.length > 0, `${label} category is required`);
   assert(VALID_OPERATIONS.has(operation), `${label} operation is invalid`);
@@ -259,7 +272,13 @@ function addCase({ label, category, operation, state: input, enemyMonId = null }
   assert(operation === OP_ALREADY_HAS_SPECIES || enemyMonId === null,
     `${label} may only carry enemyMonId for duplicate detection`);
   assertPartyIndex(enemyMonId, `${label}.enemyMonId`);
-  const expected = canonicalOutcome(operation, cloneState(input), enemyMonId);
+  assert(
+    operation === OP_HANDLE_INPUT
+      ? VALID_INPUTS.has(swapInput)
+      : swapInput === null,
+    `${label} input may only be present for handle-input`,
+  );
+  const expected = canonicalOutcome(operation, cloneState(input), enemyMonId, swapInput);
   if (expected.kind === "ok") {
     if (operation === OP_ALREADY_HAS_SPECIES) {
       assert(typeof expected.value === "boolean", `${label} must produce boolean`);
@@ -277,6 +296,7 @@ function addCase({ label, category, operation, state: input, enemyMonId = null }
     operation,
     state: cloneState(input),
     enemyMonId,
+    swapInput,
     expected,
   }));
 }
@@ -578,12 +598,256 @@ addCase({
   }),
 });
 
-assert(cases.length === 28, `expected 28 cases, got ${cases.length}`);
+// The reducer corpus is intentionally a full phase-by-input matrix.  The
+// targeted rows below supplement that matrix with source-state boundaries
+// which the real transition driver reaches only after prior callbacks.
+const phaseLabels = new Map([
+  ["playerPicker", "player_picker"], ["playerOptions", "player_options"],
+  ["summaryFade", "summary_fade"], ["summaryReturn", "summary_return"],
+  ["playerPickerReturn", "player_picker_return"], ["enemySwitch", "enemy_switch"],
+  ["playerSwitch", "player_switch"], ["enemyPicker", "enemy_picker"],
+  ["acceptPrompt", "accept_prompt"], ["acceptReturn", "accept_return"],
+  ["acceptExit", "accept_exit"], ["quitPrompt", "quit_prompt"],
+  ["quitReturn", "quit_return"], ["quitExit", "quit_exit"],
+  ["duplicateSpecies", "duplicate_species"], ["duplicateReturn", "duplicate_return"],
+  ["complete", "complete"],
+]);
+const transitionOnlyPhases = new Set([
+  "summaryFade", "summaryReturn", "playerPickerReturn", "enemySwitch",
+  "playerSwitch", "duplicateReturn", "acceptReturn", "acceptExit",
+  "quitReturn", "quitExit",
+]);
+
+function inputStateForPhase(phase) {
+  if (phase === "playerPicker") {
+    return state({
+      phase,
+      actionsCount: 4,
+      cursor: 0,
+      playerMonId: null,
+      enemyMonId: null,
+      inputReady: true,
+    });
+  }
+  if (phase === "playerOptions") {
+    return state({
+      phase,
+      actionsCount: 4,
+      cursor: 1,
+      playerOptionCursor: 1,
+      playerMonId: null,
+      enemyMonId: null,
+      inputReady: true,
+    });
+  }
+  if (phase === "enemyPicker") {
+    return state({ phase, actionsCount: 5, cursor: 0, playerMonId: 1, inputReady: true });
+  }
+  if (phase === "acceptPrompt" || phase === "quitPrompt") {
+    return state({ phase, yesNoCursor: 0, inputReady: true });
+  }
+  return state({ phase, inputReady: true });
+}
+
+for (const phase of VALID_PHASES) {
+  for (const swapInput of INPUTS) {
+    addCase({
+      label: `input_matrix_${phaseLabels.get(phase)}_${swapInput.toLowerCase()}`,
+      category: transitionOnlyPhases.has(phase)
+        ? "input-transition-noops"
+        : "input-phase-matrix",
+      operation: OP_HANDLE_INPUT,
+      state: inputStateForPhase(phase),
+      swapInput,
+    });
+  }
+}
+
+for (const swapInput of INPUTS) {
+  addCase({
+    label: `input_not_ready_player_picker_${swapInput.toLowerCase()}`,
+    category: "input-ready-gate",
+    operation: OP_HANDLE_INPUT,
+    state: state({
+      phase: "playerPicker",
+      actionsCount: 4,
+      cursor: 2,
+      infoCursor: 1,
+      displayCursor: 0,
+      arrowCursor: 3,
+      cursorCopyPending: false,
+      inputReady: false,
+    }),
+    swapInput,
+  });
+  addCase({
+    label: `input_complete_not_ready_${swapInput.toLowerCase()}`,
+    category: "complete-gate",
+    operation: OP_HANDLE_INPUT,
+    state: state({ phase: "complete", inputReady: false }),
+    swapInput,
+  });
+}
+
+const pickerBoundaryCases = [
+  ["player_left_wrap_0_to_3", "playerPicker", 4, 0, "LEFT"],
+  ["player_right_wrap_3_to_0", "playerPicker", 4, 3, "RIGHT"],
+  ["player_up_jumps_party_to_cancel", "playerPicker", 4, 0, "UP"],
+  ["player_down_jumps_party_to_cancel", "playerPicker", 4, 0, "DOWN"],
+  ["player_down_wraps_cancel_to_party", "playerPicker", 4, 3, "DOWN"],
+  ["player_accepts_cancel_action", "playerPicker", 4, 3, "A"],
+  ["enemy_left_wrap_0_to_4", "enemyPicker", 5, 0, "LEFT"],
+  ["enemy_right_wrap_4_to_0", "enemyPicker", 5, 4, "RIGHT"],
+  ["enemy_up_jumps_party_to_fifth_action", "enemyPicker", 5, 0, "UP"],
+  ["enemy_down_jumps_party_to_player_switch", "enemyPicker", 5, 0, "DOWN"],
+  ["enemy_down_wraps_fifth_action_to_party", "enemyPicker", 5, 4, "DOWN"],
+  ["enemy_accepts_player_switch_action", "enemyPicker", 5, 3, "A"],
+  ["enemy_accepts_cancel_action", "enemyPicker", 5, 4, "A"],
+];
+for (const [label, phase, actionsCount, cursor, swapInput] of pickerBoundaryCases) {
+  addCase({
+    label: `input_picker_${label}`,
+    category: "picker-action-boundaries",
+    operation: OP_HANDLE_INPUT,
+    state: state({
+      phase,
+      actionsCount,
+      cursor,
+      infoCursor: 1,
+      displayCursor: 2,
+      arrowCursor: 3,
+      cursorCopyPending: false,
+      playerMonId: phase === "enemyPicker" ? 1 : null,
+      inputReady: true,
+    }),
+    swapInput,
+  });
+}
+
+for (const [label, playerOptionCursor, cursor, swapInput] of [
+  ["up_wraps_zero_to_two", 0, 2, "UP"],
+  ["down_wraps_two_to_zero", 2, 2, "DOWN"],
+  ["a_opens_summary", 0, 2, "A"],
+  ["a_routes_to_enemy_switch", 1, 2, "A"],
+  ["a_on_cancel_returns_to_picker", 2, 2, "A"],
+  ["b_returns_to_picker", 1, 2, "B"],
+]) {
+  addCase({
+    label: `input_player_options_${label}`,
+    category: "player-options-branches",
+    operation: OP_HANDLE_INPUT,
+    state: state({
+      phase: "playerOptions",
+      actionsCount: 4,
+      cursor,
+      infoCursor: 1,
+      displayCursor: 2,
+      arrowCursor: 3,
+      cursorCopyPending: true,
+      playerOptionCursor,
+      playerOptionDisplayCursor: 1,
+      playerOptionCursorCopyPending: false,
+      playerMonId: null,
+      enemyMonId: null,
+      inputReady: true,
+    }),
+    swapInput,
+  });
+}
+
+for (const swapInput of INPUTS) {
+  addCase({
+    label: `input_accept_prompt_yes_no_${swapInput.toLowerCase()}`,
+    category: "accept-prompt-branches",
+    operation: OP_HANDLE_INPUT,
+    state: state({ phase: "acceptPrompt", yesNoCursor: 1, inputReady: true }),
+    swapInput,
+  });
+  addCase({
+    label: `input_quit_prompt_yes_no_${swapInput.toLowerCase()}`,
+    category: "quit-prompt-branches",
+    operation: OP_HANDLE_INPUT,
+    state: state({ phase: "quitPrompt", yesNoCursor: 1, inputReady: true }),
+    swapInput,
+  });
+}
+
+{
+  const input = state({
+    phase: "enemyPicker",
+    actionsCount: 5,
+    cursor: 1,
+    playerMonId: 0,
+    enemyMonId: null,
+    inputReady: true,
+  });
+  input.enemyParty[1] = mon(
+    "enemy-duplicate-route",
+    input.playerParty[2].species,
+    0x9192_9394,
+    1,
+    12,
+  );
+  addCase({
+    label: "input_enemy_picker_duplicate_species_routes_to_notice",
+    category: "duplicate-input-routes",
+    operation: OP_HANDLE_INPUT,
+    state: input,
+    swapInput: "A",
+  });
+}
+{
+  const input = state({
+    phase: "enemyPicker",
+    actionsCount: 5,
+    cursor: 1,
+    playerMonId: 1,
+    enemyMonId: null,
+    inputReady: true,
+  });
+  input.enemyParty[1] = mon(
+    "enemy-selected-slot-match",
+    input.playerParty[1].species,
+    0xa1a2_a3a4,
+    0,
+    13,
+  );
+  addCase({
+    label: "input_enemy_picker_selected_species_is_not_duplicate",
+    category: "duplicate-input-routes",
+    operation: OP_HANDLE_INPUT,
+    state: input,
+    swapInput: "A",
+  });
+}
+
+addCase({
+  label: "input_picker_move_only_stages_old_state_cursor_pipeline",
+  category: "old-state-cursor-pipeline",
+  operation: OP_HANDLE_INPUT,
+  state: state({
+    phase: "enemyPicker",
+    actionsCount: 5,
+    cursor: 2,
+    infoCursor: 0,
+    displayCursor: 1,
+    arrowCursor: 4,
+    cursorCopyPending: false,
+    playerOptionCursor: 2,
+    playerOptionDisplayCursor: 0,
+    playerOptionCursorCopyPending: true,
+    playerMonId: 1,
+    inputReady: true,
+  }),
+  swapInput: "RIGHT",
+});
+
+assert(cases.length === 176, `expected 176 cases, got ${cases.length}`);
 const categoryCounts = new Map();
 for (const vector of cases) {
   categoryCounts.set(vector.category, (categoryCounts.get(vector.category) ?? 0) + 1);
 }
-assert(categoryCounts.size === 12, `expected 12 categories, got ${categoryCounts.size}`);
+assert(categoryCounts.size === 22, `expected 22 categories, got ${categoryCounts.size}`);
 
 function rustString(value) {
   assert(typeof value === "string" && /^[\x20-\x7e]*$/.test(value),
@@ -620,6 +884,10 @@ const resultNames = new Map([["accepted", "Accepted"], ["keptParty", "KeptParty"
 const quitReturnPhaseNames = new Map([
   ["playerPicker", "PlayerPicker"], ["enemyPicker", "EnemyPicker"],
 ]);
+const inputNames = new Map([
+  ["LEFT", "Left"], ["RIGHT", "Right"], ["UP", "Up"],
+  ["DOWN", "Down"], ["A", "A"], ["B", "B"],
+]);
 
 function rustMon(value) {
   return `FactorySwapVectorMon {
@@ -649,6 +917,10 @@ function rustOptionU8(value) {
 
 function rustOptionBool(value) {
   return value === null ? "None" : `Some(${value})`;
+}
+
+function rustOptionInput(value) {
+  return value === null ? "None" : `Some(FactorySwapInput::${inputNames.get(value)})`;
 }
 
 function rustState(value) {
@@ -691,6 +963,7 @@ function rustOperation(value) {
     [OP_CREATE, "Create"],
     [OP_ACKNOWLEDGE, "Acknowledge"],
     [OP_COPY_CURSOR, "CopyCursor"],
+    [OP_HANDLE_INPUT, "HandleInput"],
     [OP_ALREADY_HAS_SPECIES, "AlreadyHasSpecies"],
     [OP_APPLY_MUTATION, "ApplyMutation"],
     [OP_COMMIT_MUTATION, "CommitMutation"],
@@ -732,17 +1005,18 @@ const caseLines = cases.map((vector) => `    FactorySwapVectorCase {
         operation: FactorySwapVectorOperation::${rustOperation(vector.operation)},
         state: ${rustState(vector.state)},
         enemy_mon_id: ${rustOptionU8(vector.enemyMonId)},
+        input: ${rustOptionInput(vector.swapInput)},
         expected: ${rustExpected(vector)},
     },`).join("\n");
 
 const rust = `// GENERATED by core-rs/tools/gen-factory-swap-vectors.mjs.
-// Expected values/errors come only from executing the seven canonical
-// src/engine/factorySwap.ts state/mutation boundaries.
+// Expected values/errors come only from executing the eight canonical
+// src/engine/factorySwap.ts state/mutation/input boundaries.
 // Regenerate: node --experimental-strip-types core-rs/tools/gen-factory-swap-vectors.mjs
 // Deterministic fixed corpus; do not hand-edit.
 
 use crate::factory_swap::{
-    FactorySwapBattleStatus, FactorySwapPartyIndex, FactorySwapPhase,
+    FactorySwapBattleStatus, FactorySwapInput, FactorySwapPartyIndex, FactorySwapPhase,
     FactorySwapQuitReturnPhase, FactorySwapResult, FactorySwapRoundDecision,
 };
 
@@ -797,6 +1071,7 @@ pub enum FactorySwapVectorOperation {
     Create,
     Acknowledge,
     CopyCursor,
+    HandleInput,
     AlreadyHasSpecies,
     ApplyMutation,
     CommitMutation,
@@ -820,6 +1095,8 @@ pub struct FactorySwapVectorCase {
     pub state: FactorySwapVectorState,
     /// None means invoke the TypeScript boundary's default state.cursor.
     pub enemy_mon_id: Option<u8>,
+    /// Present only for source handleFactorySwapInput cases.
+    pub input: Option<FactorySwapInput>,
     pub expected: FactorySwapVectorExpected,
 }
 

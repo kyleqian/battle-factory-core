@@ -1,5 +1,5 @@
-//! Full-result differential test for the native-only Factory-swap state and
-//! mutation leaf. Regenerate with `node --experimental-strip-types
+//! Full-result differential test for the native-only Factory-swap state,
+//! mutation, and input reducer. Regenerate with `node --experimental-strip-types
 //! core-rs/tools/gen-factory-swap-vectors.mjs`.
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -7,8 +7,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use factory_core::factory_swap::{
     acknowledge_factory_swap_presentation, apply_factory_swap_mutation,
     commit_factory_swap_mutation, copy_factory_swap_cursor, create_factory_swap_state,
-    factory_swap_already_has_species, factory_swap_round_decision, FactoryRentalMon,
-    FactorySwapMon, FactorySwapPartyIndex, FactorySwapState,
+    factory_swap_already_has_species, factory_swap_round_decision, handle_factory_swap_input,
+    FactoryRentalMon, FactorySwapMon, FactorySwapPartyIndex, FactorySwapState,
 };
 use factory_core::factory_swap_vectors_gen::{
     FactorySwapVectorCase, FactorySwapVectorExpected, FactorySwapVectorMon,
@@ -91,6 +91,13 @@ fn execute_case(case: &FactorySwapVectorCase) -> Result<Actual, String> {
         FactorySwapVectorOperation::CopyCursor => {
             Ok(Actual::State(Box::new(copy_factory_swap_cursor(&state))))
         }
+        FactorySwapVectorOperation::HandleInput => {
+            Ok(Actual::State(Box::new(handle_factory_swap_input(
+                &state,
+                case.input
+                    .expect("generator validation requires an input for handle-input"),
+            ))))
+        }
         FactorySwapVectorOperation::AlreadyHasSpecies => {
             factory_swap_already_has_species(&state, party_index(case.enemy_mon_id))
                 .map(Actual::Bool)
@@ -124,7 +131,7 @@ fn same_expected(case: &FactorySwapVectorCase, actual: Result<Actual, String>) -
 
 #[test]
 fn full_results_and_errors_match_canonical_typescript() {
-    assert_eq!(FACTORY_SWAP_CASES.len(), 28);
+    assert_eq!(FACTORY_SWAP_CASES.len(), 176);
     for (index, case) in FACTORY_SWAP_CASES.iter().enumerate() {
         assert!(
             same_expected(case, execute_case(case)),
@@ -145,8 +152,54 @@ fn category_census_is_ratchet_pinned() {
         .copied()
         .collect::<BTreeMap<_, _>>();
     assert_eq!(observed, expected);
-    assert_eq!(FACTORY_SWAP_VECTOR_CATEGORY_COUNTS.len(), 12);
-    assert_eq!(FACTORY_SWAP_CASES.len(), 28);
+    assert_eq!(FACTORY_SWAP_VECTOR_CATEGORY_COUNTS.len(), 22);
+    assert_eq!(FACTORY_SWAP_CASES.len(), 176);
+}
+
+#[test]
+fn input_matrix_covers_every_source_phase_and_each_six_value_input() {
+    let matrix = FACTORY_SWAP_CASES
+        .iter()
+        .filter(|case| {
+            matches!(case.operation, FactorySwapVectorOperation::HandleInput)
+                && matches!(
+                    case.category,
+                    "input-phase-matrix" | "input-transition-noops"
+                )
+        })
+        .map(|case| {
+            (
+                case.state.phase.as_str(),
+                case.input
+                    .expect("matrix cases always contain a typed input")
+                    .as_str(),
+            )
+        })
+        .collect::<BTreeSet<_>>();
+    assert_eq!(matrix.len(), 17 * 6);
+    for phase in [
+        "playerPicker",
+        "playerOptions",
+        "summaryFade",
+        "summaryReturn",
+        "playerPickerReturn",
+        "enemySwitch",
+        "playerSwitch",
+        "enemyPicker",
+        "acceptPrompt",
+        "acceptReturn",
+        "acceptExit",
+        "quitPrompt",
+        "quitReturn",
+        "quitExit",
+        "duplicateSpecies",
+        "duplicateReturn",
+        "complete",
+    ] {
+        for input in ["LEFT", "RIGHT", "UP", "DOWN", "A", "B"] {
+            assert!(matrix.contains(&(phase, input)), "missing {phase}/{input}");
+        }
+    }
 }
 
 #[test]
