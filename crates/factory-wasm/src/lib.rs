@@ -4966,6 +4966,11 @@ fn decode_live_decision_request(
     let legal_count = reader
         .u8()
         .map_err(|()| LiveDecisionDecodeError::Malformed)? as usize;
+    if legal_count == 0 {
+        return Err(LiveDecisionDecodeError::Typed(
+            "Battle command request.legalDecisions must be a non-empty array, got ".to_owned(),
+        ));
+    }
     let mut legal_decisions = Vec::with_capacity(legal_count);
     for _ in 0..legal_count {
         let tag = reader
