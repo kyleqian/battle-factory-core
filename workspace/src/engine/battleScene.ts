@@ -913,6 +913,7 @@ import {
   sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
   sceneOnSynthesisView,
+  sceneOnCosmicPowerView,
   sceneOnWishView,
   sceneOnMilkDrinkView,
   sceneOnRefreshView,
@@ -1133,6 +1134,7 @@ import {
   type SceneOnDizzyPunchConfig,
   type SceneOnFurySwipesConfig,
   type SceneOnMeteorMashConfig,
+  type SceneOnCosmicPowerConfig,
   type SceneOnAstonishConfig,
   type SceneOnFakeOutConfig,
   type SceneOnSubstituteConfig,
@@ -34754,6 +34756,139 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "GLOOM used" : "Foe GLOOM used",
       "MOONLIGHT!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "COSMIC_POWER") {
+    const cosmicState = state as SceneOnMovePresentationState<SceneOnCosmicPowerConfig>;
+    const view = sceneOnCosmicPowerView(cosmicState);
+    // Source OAM, palette, and BG writes are consumed by the following
+    // display.  Keeping this one-row presentation latch here makes the seam
+    // usable by both orientations without importing a battle clock.
+    const displayed = sceneOnCosmicPowerView({
+      ...cosmicState,
+      age: state.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "LUNATONE"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "LUNATONE"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged COSMIC_POWER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const dark = { r: 0, g: 0, b: 0 };
+    const drawBackground = (): void => {
+      if (displayed.background === "cosmic") {
+        drawExtractedTileBg(fb, {
+          tileset: meteorMashArt.background.tileset,
+          tilemap: meteorMashArt.background.tilemap,
+          subpalettes: [blendPaletteToward(
+            meteorMashArt.background.palette,
+            dark,
+            displayed.backgroundDarkCoefficient,
+          )],
+        }, 0, displayed.bg3vofs);
+        return;
+      }
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: blendPaletteBanksToward(
+          battleBg.palette,
+          dark,
+          displayed.backgroundDarkCoefficient,
+        ),
+      });
+    };
+    drawBackground();
+    const attackerSource = playerToOpponent
+      ? calmMindArt.lunatoneBack
+      : calmMindArt.lunatoneFront;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: {
+            columns: 8,
+            rows: 8,
+            tiles: attackerSource.tileset.tiles.slice(0, 64),
+          },
+        };
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetIdle = view.target.geometry.side === "opponent"
+      ? speciesFrontIdleRestOffset(view.target.species)
+      : null;
+    drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      blendPaletteToward(
+        targetSprite.palette,
+        dark,
+        displayed.nonAttackerBlendCoefficient,
+      ),
+      view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
+      view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
+    );
+    drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    for (const sprite of displayed.sprites
+      .filter((candidate) => !candidate.invisible)
+      .slice()
+      .sort((left, right) => right.oamSlot - left.oamSlot)) {
+      drawSpriteSheet(
+        fb,
+        {
+          columns: 4,
+          rows: 4,
+          tiles: synthesisArt.sparkle2.tileset.tiles.slice(
+            sprite.frame * 16,
+            sprite.frame * 16 + 16,
+          ),
+        },
+        synthesisArt.sparkle2.palette,
+        sprite.x - 16,
+        sprite.y + sprite.y2 - 16,
+      );
+    }
+    const profile = cosmicState.config.fieldProfile;
+    const opponentSpecies = playerToOpponent ? "ONIX" : "LUNATONE";
+    const playerSpecies = playerToOpponent ? "LUNATONE" : "ONIX";
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: opponentSpecies,
+      level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / Math.max(1, profile.opponentHp),
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerSpecies,
+      level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / Math.max(1, profile.playerHp),
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: Math.max(1, profile.playerHp),
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LUNATONE used" : "Foe LUNATONE used",
+      "COSMIC POWER!",
       99,
     );
     return;

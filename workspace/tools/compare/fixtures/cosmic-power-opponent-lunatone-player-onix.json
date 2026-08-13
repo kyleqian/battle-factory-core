@@ -1,0 +1,18 @@
+{
+  "schema": "scene-on-dense-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_COSMIC_POWER",
+  "orientation": "opponent-front",
+  "scenario": "tools/battle-lab/mechanic-cosmic-power-opponent-lunatone-player-onix.json",
+  "probe": "tools/compare/cosmicPowerProbe.py",
+  "sourceWindow": {"startFrame": 78, "endFrame": 318, "frameCount": 241},
+  "sourceBounds": {"start": "0x082d5f5d", "endExclusive": "0x082d5fe2"},
+  "carrier": {"setId": 222, "species": "LUNATONE", "move": 322, "level": 50},
+  "probeJsonSha256": "9e7e17e96e9520bc5c096e6f8a2e1e16f6338cfd6a739b42dce655dbe4de615e",
+  "evidenceFullStateGzipSha256": "c85e81266170b9a8f497131b2aef762ae448e6a32fec79743a776868b76bccce",
+  "rawRgbTarSha256": "c5eab06271d1fc3d4b5af6a96d2eb47fa379c162a92f435d636a228a921793ab",
+  "rawRgbConcatSha256": "2d4f60675e0d343256694dea526929071e7f31742360ef8bf5f02ab136949aed",
+  "changeMap": "tools/compare/evidence/cosmic-power-changemap-opponent.txt",
+  "changeMapSha256": "ee190a63e72887d6286a592d8239b758627a3a7a30a3fa1349deb70b79bef625",
+  "acceptance": {"status": "checkpoint", "componentFrames": 241, "framebufferFrames": "unmeasured"}
+}
