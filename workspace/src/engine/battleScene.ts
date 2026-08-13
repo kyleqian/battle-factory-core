@@ -869,6 +869,7 @@ import {
 } from "./fightCommandPresentation.ts";
 import { stunSporeParticleDrawOrderAtAge } from "../animation/stunSpore.ts";
 import { sleepPowderParticleDrawOrderAtAge } from "../animation/sleepPowder.ts";
+import { ancientPowerRockPainterOrder } from "../animation/ancientPower.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -34982,17 +34983,7 @@ export function renderSceneOnMovePresentation(
       drawOpponent();
       drawPlayer();
     }
-    const firstRockScanoutPainter: readonly number[] = [1, 2, 3, 4, 5, 0];
-    for (const rock of displayedRocks.rocks.slice().sort((a, b) => {
-      if (state.age === 11) {
-        return firstRockScanoutPainter.indexOf(displayedRocks.rocks.indexOf(a))
-          - firstRockScanoutPainter.indexOf(displayedRocks.rocks.indexOf(b));
-      }
-      const vertical = (a.centerY + a.y2) - (b.centerY + b.y2);
-      if (vertical !== 0) return vertical;
-      const sourceOrder = displayedRocks.rocks.indexOf(a) - displayedRocks.rocks.indexOf(b);
-      return state.age <= 13 ? -sourceOrder : sourceOrder;
-    })) {
+    for (const rock of ancientPowerRockPainterOrder(displayedRocks.rocks)) {
       drawAncientPowerRock(fb, rock.animNum, rock.centerX, rock.centerY + rock.y2);
     }
     const profile = ancientState.config.fieldProfile;
