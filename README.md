@@ -392,6 +392,50 @@ node --experimental-strip-types core-rs/tools/gen-factory-ai-live-view-construct
 shasum -a 256 core-rs/crates/factory-core/src/factory_ai_live_view_constructor_vectors_gen.rs
 ```
 
+## Factory AI live-view WASM boundary (M8e)
+
+`fw_create_factory_ai_view_from_live_rules(input_ptr, input_len)` and
+`adapter/factoryAiLiveViewEngine.ts` expose the M8d constructor without
+executing a decision or changing history. The input is a caller-allocated,
+variable-width little-endian packet; `input_len` is its exact width (there is
+no second input prefix). `string` means `byte_len:u32` followed by UTF-8, and
+every JavaScript `number` is an IEEE-754 `f64`, including NaN, signed zero,
+infinities, and arbitrary history values. The exact input order is:
+
+```text
+for battler in rules.battlers[4]:
+  types:string[2], attack:f64, defense:f64, sp_attack:f64,
+  sp_defense:f64, speed:f64, level:f64, stat_stages:f64[8],
+  is_first_turn:f64, hp:f64, max_hp:f64, ability:f64,
+  status1:f64, status2:f64, status3:f64, protect_uses:f64,
+  taunt_timer:f64, species:f64, moves:f64[4]
+rules.weather:f64, side_statuses:f64[2], last_moves:f64[4]
+history.used_moves[4]: move_count:u32, moves:f64[move_count]
+history.known_abilities[4]: present:u8 (0/1), [if 1] string
+history.known_item_effects:f64[4], history.party_indexes:f64[4]
+challenge.factory_win_streak:f64, trainer_opponent_id:f64,
+challenge.battle_turn_count:present:u8 (0/1), [if 1] f64
+```
+
+The returned `fw_alloc` buffer is `total_len:u32,status:u8`; the caller frees
+the exact `(ptr,total_len)` pair. Status `0` is the complete view in this
+order: `schema:string, mode:string, active.ai_battler:f64,
+active.target_battler:f64, factory.level_mode:f64, factory.battle_mode:f64,
+factory_win_streak:f64, trainer_opponent_id:f64, moves:f64[4], attacker,
+target`. Status `1` is `message_len:u32,message:utf8` for the typed unknown
+ability error and preserves the canonical message exactly. Status `2` uses the
+same message layout for checked malformed packets. The attacker and target
+field order, including every unconditional bool, optional presence/value
+tag, nullable `known_ability`, and optional move-row count, is documented
+beside the Rust export in `crates/factory-wasm/src/lib.rs`; no malformed
+packet is allowed to panic or trap.
+
+The adapter selects canonical TS when `POKEBENCH_ENGINE` is unset/`ts`, and
+calls this export directly when it is `wasm`. `tests/factoryAiLiveViewParity.test.ts`
+deep-compares complete views, error ordering, numeric edge cases, arbitrary
+UTF-8 history, optional-property presence, and malformed boundary packets in
+both modes.
+
 ## Ground rules
 
 - **The vitest suite is the spec gate.** A module counts as ported when
