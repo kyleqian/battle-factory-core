@@ -143,7 +143,7 @@ function writeBattler(writer: Writer, battler: BattleScriptRulesContext["battler
 
 /** Encodes the exact packet accepted by fw_create_factory_ai_view_from_live_rules. */
 export function encodeFactoryAiLiveViewInput(input: FactoryAiLiveViewInput): Uint8Array {
-  const writer = new Writer();
+  const writer = new FactoryAiLiveViewPacketWriter();
   for (const battler of input.rulesContext.battlers) writeBattler(writer, battler);
   writer.f64(input.rulesContext.weather);
   for (const sideStatus of input.rulesContext.sideStatuses) writer.f64(sideStatus);
