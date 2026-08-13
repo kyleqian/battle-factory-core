@@ -350,6 +350,7 @@ fn scenario(id: u8) -> FactoryAiScoredView {
         known_ability: Some(ABILITY_STURDY),
         species_abilities: None,
         known_moves: None,
+        known_moves_tail: None,
     };
     let mut moves = [150; 4];
     match id {

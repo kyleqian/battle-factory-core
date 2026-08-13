@@ -618,6 +618,20 @@ pub fn unported_cv_table_effects() -> Vec<u16> {
 
 // === input battler (batching doc §5 item a) =================================
 
+/// The live TypeScript history is an unbounded `readonly number[]`, while
+/// Emerald's ordinary battler move list has four slots. Keep the old
+/// four-slot field ABI for existing native callers and carry an additional
+/// four-entry tail for the source-shaped live-view bridge. The tail is
+/// enough to preserve the first observable over-four case without changing
+/// the fixed-width leaves' value semantics.
+pub const FACTORY_AI_KNOWN_MOVE_HISTORY_TAIL_CAPACITY: usize = 4;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FactoryAiKnownMoveHistoryTail {
+    pub values: [u16; FACTORY_AI_KNOWN_MOVE_HISTORY_TAIL_CAPACITY],
+    pub length: u8,
+}
+
 /// Mirrors `FactoryAiCheckViabilityBattler` (`factoryAiCheckViability.ts
 /// :256-439`), **42 fields (11 required + 31 optional), recounted
 /// directly** — one unified struct used as BOTH `attacker` and `target` in
@@ -671,11 +685,13 @@ pub struct FactoryAiCheckViabilityBattler {
     /// `gBattleResults.battleTurnCounter`, `AI_CV_Swagger`'s
     /// `get_turn_count`. Default 0 (TS :343-348).
     pub battle_turn_count: Option<u32>,
-    /// BattleHistory-known moves for AI_TARGET move-effect scans
-    /// (`AI_CV_Toxic`). Bounded to 4 slots, the same domain as `moves`
-    /// above (TS types this as an unbounded `readonly number[]`, but no
-    /// real battler ever carries more than `MAX_MON_MOVES` known moves).
+    /// The first four entries of BattleHistory-known moves. A live source
+    /// view with more than four entries stores its remaining entries in
+    /// `known_moves_tail` below.
     pub known_moves: Option<[u16; 4]>,
+    /// Entries five through eight of the source-shaped known-move history.
+    /// `length` is the number of meaningful cells in `values` (0..=4).
+    pub known_moves_tail: Option<FactoryAiKnownMoveHistoryTail>,
     /// `STATUS2_INFATUATION`. Default `false`.
     pub is_infatuated: Option<bool>,
     /// `STATUS1_SLEEP`, `AI_CV_Counter`'s first gate. Default `false`.
@@ -732,6 +748,29 @@ pub struct FactoryAiCheckViabilityBattler {
     /// `gDisableStructs[battler].stockpileCounter`, AI_USER's own copy,
     /// `AI_CV_SpitUp`. Default 0.
     pub stockpile_count: Option<u8>,
+}
+
+impl FactoryAiCheckViabilityBattler {
+    /// Returns the source-order history, retaining the legacy four zero
+    /// padding cells when `known_moves` is present. The extra padding is
+    /// harmless for every native move-effect scan and preserves the old
+    /// positional-gate behavior for existing callers.
+    #[must_use]
+    fn known_move_ids(&self) -> ([u16; 8], usize) {
+        let mut ids = [0; 8];
+        let mut length = 0;
+        if let Some(known_moves) = self.known_moves {
+            ids[..4].copy_from_slice(&known_moves);
+            length = 4;
+        }
+        if let Some(tail) = self.known_moves_tail {
+            let tail_length =
+                usize::from(tail.length).min(FACTORY_AI_KNOWN_MOVE_HISTORY_TAIL_CAPACITY);
+            ids[length..length + tail_length].copy_from_slice(&tail.values[..tail_length]);
+            length += tail_length;
+        }
+        (ids, length)
+    }
 }
 
 // === draw receipts (batching doc §5 item a/b) ===============================
@@ -1498,9 +1537,10 @@ pub fn run_check_viability(input: RunCheckViabilityInput) -> CheckViabilityResul
     let func_result_carry = input.stale_func_result_fallback;
 
     if move_row.effect == EFFECT_SLEEP {
+        let (target_known_moves, target_known_move_count) = input.target.known_move_ids();
         let sleep = run_cv_sleep(
             input.rng,
-            input.target.known_moves,
+            &target_known_moves[..target_known_move_count],
             input.draw_ordinal_start,
         );
         return CheckViabilityResult::Scored {
@@ -3065,13 +3105,8 @@ fn protect_last_move_effect_func_result(last_move_effect: u16) -> Option<u8> {
 /// the battler has none); a `Some([...])` with `MOVE_NONE`(0) padding
 /// slots is harmless since move id 0's own effect (`EFFECT_HIT`=0) never
 /// equals `EFFECT_DREAM_EATER`(8) or `EFFECT_NIGHTMARE`(107).
-fn run_cv_sleep(
-    rng: BattleRngState,
-    target_known_moves: Option<[u16; 4]>,
-    ordinal_start: u32,
-) -> CvDraws {
-    let known_moves = target_known_moves.unwrap_or([0, 0, 0, 0]);
-    let encourages_sleep_damage = known_moves.iter().any(|&move_id| {
+fn run_cv_sleep(rng: BattleRngState, target_known_moves: &[u16], ordinal_start: u32) -> CvDraws {
+    let encourages_sleep_damage = target_known_moves.iter().any(|&move_id| {
         gen_tables::MOVES
             .get(move_id as usize)
             .is_some_and(|m| m.effect == EFFECT_DREAM_EATER || m.effect == EFFECT_NIGHTMARE)
@@ -3353,14 +3388,14 @@ fn run_cv_protect(
         .map_or(EFFECT_HIT, |m| m.effect);
     let func_result_after = protect_last_move_effect_func_result(last_move_effect);
 
-    let known_moves = target.known_moves.unwrap_or([0, 0, 0, 0]);
+    let (known_moves, known_move_count) = target.known_move_ids();
     let user_moves = attacker.moves.unwrap_or([0, 0, 0, 0]);
     // Cmd_if_has_move_with_effect's pinned-source AI_TARGET bug checks the
     // AI user's move slot for nonzero before reading the target-history
     // move at that same index (TS :1265-1268) -- preserve the positional
     // gate instead of a plain history membership test.
     let target_history_has_effect = |effect: u16| -> bool {
-        known_moves
+        known_moves[..known_move_count]
             .iter()
             .zip(user_moves.iter())
             .any(|(&move_id, &user_move)| {
@@ -5403,15 +5438,12 @@ fn run_cv_rest(
     }
     let target_faster = strikes_first == 1;
     let hp_percent = 100 * attacker.hp / attacker.max_hp;
-    let target_has_snatch = target
-        .known_moves
-        .unwrap_or([0, 0, 0, 0])
-        .iter()
-        .any(|&id| {
-            gen_tables::MOVES
-                .get(id as usize)
-                .is_some_and(|m| m.effect == EFFECT_SNATCH)
-        });
+    let (known_moves, known_move_count) = target.known_move_ids();
+    let target_has_snatch = known_moves[..known_move_count].iter().any(|&id| {
+        gen_tables::MOVES
+            .get(id as usize)
+            .is_some_and(|m| m.effect == EFFECT_SNATCH)
+    });
 
     if target_faster {
         if hp_percent < 60 {
@@ -5565,15 +5597,12 @@ fn run_cv_heal_body(
     }
     let target_faster = strikes_first == 1;
     let hp_percent = 100 * attacker.hp / attacker.max_hp;
-    let target_has_snatch = target
-        .known_moves
-        .unwrap_or([0, 0, 0, 0])
-        .iter()
-        .any(|&id| {
-            gen_tables::MOVES
-                .get(id as usize)
-                .is_some_and(|m| m.effect == EFFECT_SNATCH)
-        });
+    let (known_moves, known_move_count) = target.known_move_ids();
+    let target_has_snatch = known_moves[..known_move_count].iter().any(|&id| {
+        gen_tables::MOVES
+            .get(id as usize)
+            .is_some_and(|m| m.effect == EFFECT_SNATCH)
+    });
 
     if hp_percent == 100 {
         return CvDraws { rng: cur_rng, draws, draw_count, score_delta: -3 };
@@ -6279,15 +6308,12 @@ fn run_cv_semi_invulnerable(
     stale_func_result_fallback: Option<u8>,
     ordinal_start: u32,
 ) -> (CvDraws, Option<u8>) {
-    let target_has_protect = target
-        .known_moves
-        .unwrap_or([0, 0, 0, 0])
-        .iter()
-        .any(|&id| {
-            gen_tables::MOVES
-                .get(id as usize)
-                .is_some_and(|m| m.effect == EFFECT_PROTECT)
-        });
+    let (known_moves, known_move_count) = target.known_move_ids();
+    let target_has_protect = known_moves[..known_move_count].iter().any(|&id| {
+        gen_tables::MOVES
+            .get(id as usize)
+            .is_some_and(|m| m.effect == EFFECT_PROTECT)
+    });
     if target_has_protect {
         return (
             CvDraws {
@@ -6790,13 +6816,20 @@ fn run_cv_charge_up_move(
         return deterministic(-2);
     }
     let user_moves = attacker.moves.unwrap_or([0, 0, 0, 0]);
-    let known_moves = target.known_moves.unwrap_or([0, 0, 0, 0]);
-    let target_history_has_protect = known_moves.iter().enumerate().any(|(slot, &move_id)| {
-        user_moves[slot] != 0
-            && gen_tables::MOVES
-                .get(move_id as usize)
-                .is_some_and(|m| m.effect == EFFECT_PROTECT)
-    });
+    let (known_moves, known_move_count) = target.known_move_ids();
+    // Histories may outgrow the four live slots. TypeScript's
+    // `(userMoves[slot] ?? 0)` makes every such tail position fail this
+    // positional gate while membership-only scans still see the tail.
+    let target_history_has_protect =
+        known_moves[..known_move_count]
+            .iter()
+            .enumerate()
+            .any(|(slot, &move_id)| {
+                user_moves.get(slot).copied().unwrap_or(0) != 0
+                    && gen_tables::MOVES
+                        .get(move_id as usize)
+                        .is_some_and(|m| m.effect == EFFECT_PROTECT)
+            });
     if target_history_has_protect {
         return deterministic(-2);
     }
@@ -9402,10 +9435,10 @@ fn run_cv_snatch(
                 func_result_after,
             );
         }
-        let known_moves = target.known_moves.unwrap_or([0, 0, 0, 0]);
+        let (known_moves, known_move_count) = target.known_move_ids();
         let user_moves = attacker.moves.unwrap_or([0, 0, 0, 0]);
         let target_history_has_effect = |effect: u16| -> bool {
-            known_moves
+            known_moves[..known_move_count]
                 .iter()
                 .zip(user_moves.iter())
                 .any(|(&move_id, &user_move)| {
@@ -9528,6 +9561,7 @@ mod tests {
             moves: Some([MOVE_SURF, MOVE_ROCK_SLIDE, MOVE_BODY_SLAM, MOVE_THUNDERBOLT]),
             battle_turn_count: None,
             known_moves: None,
+            known_moves_tail: None,
             is_infatuated: None,
             is_asleep: None,
             is_confused: None,
@@ -9836,7 +9870,7 @@ mod tests {
 
     #[test]
     fn cv_sleep_no_known_moves_is_deterministic_zero_score_zero_draws() {
-        let result = run_cv_sleep(BattleRngState { value: 1, calls: 0 }, None, 1);
+        let result = run_cv_sleep(BattleRngState { value: 1, calls: 0 }, &[], 1);
         assert_eq!(result.draw_count, 0);
         assert_eq!(result.score_delta, 0);
         assert_eq!(result.rng, BattleRngState { value: 1, calls: 0 });
@@ -9844,11 +9878,7 @@ mod tests {
 
     #[test]
     fn cv_sleep_known_moves_without_dream_eater_or_nightmare_is_deterministic_zero() {
-        let result = run_cv_sleep(
-            BattleRngState { value: 1, calls: 0 },
-            Some([33, 0, 0, 0]),
-            1,
-        );
+        let result = run_cv_sleep(BattleRngState { value: 1, calls: 0 }, &[33, 0, 0, 0], 1);
         assert_eq!(result.draw_count, 0);
         assert_eq!(result.score_delta, 0);
     }
@@ -9860,7 +9890,7 @@ mod tests {
 
         let jumped = run_cv_sleep(
             BattleRngState { value: jump_seed, calls: 0 },
-            Some([EFFECT_DREAM_EATER_MOVE, 0, 0, 0]),
+            &[EFFECT_DREAM_EATER_MOVE, 0, 0, 0],
             1,
         );
         assert_eq!(jumped.draw_count, 1);
@@ -9875,7 +9905,7 @@ mod tests {
 
         let not_jumped = run_cv_sleep(
             BattleRngState { value: no_jump_seed, calls: 0 },
-            Some([0, EFFECT_NIGHTMARE_MOVE, 0, 0]),
+            &[0, EFFECT_NIGHTMARE_MOVE, 0, 0],
             1,
         );
         assert_eq!(not_jumped.draw_count, 1);

@@ -40,6 +40,7 @@ fn neutral_battler() -> FactoryAiCheckViabilityBattler {
         moves: None,
         battle_turn_count: None,
         known_moves: None,
+        known_moves_tail: None,
         is_infatuated: None,
         is_asleep: None,
         is_confused: None,
