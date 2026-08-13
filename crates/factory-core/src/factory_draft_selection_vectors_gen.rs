@@ -10,7 +10,96 @@ use crate::factory_draft_selection::{
 
 /// Stored-cell bounds exercised by this canonical helper corpus.
 pub const FACTORY_DRAFT_SELECTION_VECTOR_DOMAIN: &str =
-    "six selectedIds cells 0..=3; slots 0..=5; menu rows 0..=2; selectingMonsState 1..=4; elapsed only through each controller settle tick";
+    "six selectedIds cells 0..=3 for controller helpers and 0..=255 for projections; slots 0..=5; menu rows 0..=2; selectingMonsState 1..=4; elapsed only through each controller settle tick";
+
+/// Complete semantic branch census for the two M10b projections.
+pub static FACTORY_DRAFT_PROJECTION_BRANCHES: [&str; 13] = [
+    "chosen-above-three-not-emitted",
+    "chosen-later-duplicate-overwrite",
+    "chosen-missing-rank-skip",
+    "chosen-positive-write",
+    "chosen-present-rank-emit",
+    "chosen-zero-skip",
+    "rental-complete-success",
+    "rental-duplicate-rank-error",
+    "rental-first-validation-error",
+    "rental-invalid-rank-error",
+    "rental-missing-ranks-error",
+    "rental-valid-rank-store",
+    "rental-zero-skip",
+];
+
+/// Synthetic generic source record used only by the differential corpus.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FactoryDraftVectorSourceRecord {
+    pub record_id: u32,
+    pub boundary_value: u32,
+    pub optional_value: Option<u32>,
+    pub marker: &'static str,
+}
+
+pub static FACTORY_DRAFT_VECTOR_SOURCE_RECORDS: [FactoryDraftVectorSourceRecord; 6] = [
+    FactoryDraftVectorSourceRecord {
+        record_id: 0,
+        boundary_value: 4294967295,
+        optional_value: None,
+        marker: "source-zero",
+    },
+    FactoryDraftVectorSourceRecord {
+        record_id: 1,
+        boundary_value: 4294967294,
+        optional_value: Some(0),
+        marker: "source-one",
+    },
+    FactoryDraftVectorSourceRecord {
+        record_id: 2147483647,
+        boundary_value: 2147483648,
+        optional_value: None,
+        marker: "source-two",
+    },
+    FactoryDraftVectorSourceRecord {
+        record_id: 2147483648,
+        boundary_value: 2147483647,
+        optional_value: Some(4294967295),
+        marker: "source-three",
+    },
+    FactoryDraftVectorSourceRecord {
+        record_id: 4294967294,
+        boundary_value: 1,
+        optional_value: None,
+        marker: "source-four",
+    },
+    FactoryDraftVectorSourceRecord {
+        record_id: 4294967295,
+        boundary_value: 0,
+        optional_value: Some(2147483648),
+        marker: "source-five",
+    },
+];
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FactoryDraftRentalVectorExpected {
+    Ok([FactoryDraftVectorSourceRecord; 3]),
+    Err(&'static str),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FactoryDraftChosenSpeciesVectorCase {
+    pub label: &'static str,
+    pub category: &'static str,
+    pub selected_ids: [u8; 6],
+    pub expected_species: &'static [&'static str],
+    pub branches: &'static [&'static str],
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct FactoryDraftSelectedRentalPartyVectorCase {
+    pub label: &'static str,
+    pub category: &'static str,
+    pub selected_ids: [u8; 6],
+    pub expected: FactoryDraftRentalVectorExpected,
+    pub branches: &'static [&'static str],
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct FactoryDraftSelectMonMessageVectorCase {
@@ -88,7 +177,7 @@ pub struct FactoryDraftRentConfirmRedrawVectorCase {
     pub expected: Option<FactoryDraftRentConfirmRedrawState<'static>>,
 }
 
-pub const FACTORY_DRAFT_SELECTION_VECTOR_CATEGORY_COUNTS: [(&str, usize); 12] = [
+pub const FACTORY_DRAFT_SELECTION_VECTOR_CATEGORY_COUNTS: [(&str, usize); 23] = [
     ("select-message", 4),
     ("apply-select", 18),
     ("apply-deselect-standard", 30),
@@ -101,9 +190,20 @@ pub const FACTORY_DRAFT_SELECTION_VECTOR_CATEGORY_COUNTS: [(&str, usize); 12] = 
     ("cursor-redraw", 6),
     ("menu-highlight-redraw", 3),
     ("rent-confirm-redraw", 3),
+    ("chosen-slot-rank", 18),
+    ("chosen-permutation", 6),
+    ("chosen-sparse", 4),
+    ("chosen-duplicate-overwrite", 3),
+    ("chosen-above-three", 2),
+    ("rental-slot-rank", 18),
+    ("rental-permutation", 6),
+    ("rental-missing", 4),
+    ("rental-duplicate", 3),
+    ("rental-invalid", 12),
+    ("rental-error-order", 2),
 ];
 
-pub const FACTORY_DRAFT_SELECTION_VECTOR_CASE_COUNT: usize = 102;
+pub const FACTORY_DRAFT_SELECTION_VECTOR_CASE_COUNT: usize = 180;
 
 pub static FACTORY_DRAFT_SELECT_MON_MESSAGE_CASES: [FactoryDraftSelectMonMessageVectorCase; 4] = [
     FactoryDraftSelectMonMessageVectorCase {
@@ -1090,5 +1190,1377 @@ pub static FACTORY_DRAFT_RENT_CONFIRM_REDRAW_CASES: [FactoryDraftRentConfirmRedr
             elapsed: 1,
         }),
         expected: None,
+    },
+];
+
+pub static FACTORY_DRAFT_CHOSEN_SPECIES_CASES: [FactoryDraftChosenSpeciesVectorCase; 33] = [
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_0_rank_1",
+        category: "chosen-slot-rank",
+        selected_ids: [1, 0, 0, 0, 0, 0],
+        expected_species: &["SPECIES_ZERO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_0_rank_2",
+        category: "chosen-slot-rank",
+        selected_ids: [2, 0, 0, 0, 0, 0],
+        expected_species: &["SPECIES_ZERO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_0_rank_3",
+        category: "chosen-slot-rank",
+        selected_ids: [3, 0, 0, 0, 0, 0],
+        expected_species: &["SPECIES_ZERO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_1_rank_1",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 1, 0, 0, 0, 0],
+        expected_species: &["SPECIES_ONE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_1_rank_2",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 2, 0, 0, 0, 0],
+        expected_species: &["SPECIES_ONE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_1_rank_3",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 3, 0, 0, 0, 0],
+        expected_species: &["SPECIES_ONE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_2_rank_1",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 1, 0, 0, 0],
+        expected_species: &["SPECIES_TWO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_2_rank_2",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 2, 0, 0, 0],
+        expected_species: &["SPECIES_TWO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_2_rank_3",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 3, 0, 0, 0],
+        expected_species: &["SPECIES_TWO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_3_rank_1",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 1, 0, 0],
+        expected_species: &["SPECIES_THREE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_3_rank_2",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 2, 0, 0],
+        expected_species: &["SPECIES_THREE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_3_rank_3",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 3, 0, 0],
+        expected_species: &["SPECIES_THREE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_4_rank_1",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 0, 1, 0],
+        expected_species: &["SPECIES_FOUR"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_4_rank_2",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 0, 2, 0],
+        expected_species: &["SPECIES_FOUR"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_4_rank_3",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 0, 3, 0],
+        expected_species: &["SPECIES_FOUR"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_5_rank_1",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 0, 0, 1],
+        expected_species: &["SPECIES_FIVE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_5_rank_2",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 0, 0, 2],
+        expected_species: &["SPECIES_FIVE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_slot_5_rank_3",
+        category: "chosen-slot-rank",
+        selected_ids: [0, 0, 0, 0, 0, 3],
+        expected_species: &["SPECIES_FIVE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_permutation_1_2_3",
+        category: "chosen-permutation",
+        selected_ids: [1, 2, 3, 0, 0, 0],
+        expected_species: &["SPECIES_ZERO", "SPECIES_ONE", "SPECIES_TWO"],
+        branches: &[
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_permutation_1_3_2",
+        category: "chosen-permutation",
+        selected_ids: [1, 3, 2, 0, 0, 0],
+        expected_species: &["SPECIES_ZERO", "SPECIES_TWO", "SPECIES_ONE"],
+        branches: &[
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_permutation_2_1_3",
+        category: "chosen-permutation",
+        selected_ids: [2, 1, 3, 0, 0, 0],
+        expected_species: &["SPECIES_ONE", "SPECIES_ZERO", "SPECIES_TWO"],
+        branches: &[
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_permutation_2_3_1",
+        category: "chosen-permutation",
+        selected_ids: [2, 3, 1, 0, 0, 0],
+        expected_species: &["SPECIES_TWO", "SPECIES_ZERO", "SPECIES_ONE"],
+        branches: &[
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_permutation_3_1_2",
+        category: "chosen-permutation",
+        selected_ids: [3, 1, 2, 0, 0, 0],
+        expected_species: &["SPECIES_ONE", "SPECIES_TWO", "SPECIES_ZERO"],
+        branches: &[
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_permutation_3_2_1",
+        category: "chosen-permutation",
+        selected_ids: [3, 2, 1, 0, 0, 0],
+        expected_species: &["SPECIES_TWO", "SPECIES_ONE", "SPECIES_ZERO"],
+        branches: &[
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_sparse_all_zero",
+        category: "chosen-sparse",
+        selected_ids: [0, 0, 0, 0, 0, 0],
+        expected_species: &[],
+        branches: &["chosen-missing-rank-skip", "chosen-zero-skip"],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_sparse_rank_one_only",
+        category: "chosen-sparse",
+        selected_ids: [0, 0, 1, 0, 0, 0],
+        expected_species: &["SPECIES_TWO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_sparse_ranks_one_three",
+        category: "chosen-sparse",
+        selected_ids: [3, 0, 0, 1, 0, 0],
+        expected_species: &["SPECIES_THREE", "SPECIES_ZERO"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_sparse_rank_two_only",
+        category: "chosen-sparse",
+        selected_ids: [0, 2, 0, 0, 0, 0],
+        expected_species: &["SPECIES_ONE"],
+        branches: &[
+            "chosen-missing-rank-skip",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_duplicate_rank_1",
+        category: "chosen-duplicate-overwrite",
+        selected_ids: [1, 1, 2, 3, 0, 0],
+        expected_species: &["SPECIES_ONE", "SPECIES_TWO", "SPECIES_THREE"],
+        branches: &[
+            "chosen-later-duplicate-overwrite",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_duplicate_rank_2",
+        category: "chosen-duplicate-overwrite",
+        selected_ids: [2, 1, 0, 2, 3, 0],
+        expected_species: &["SPECIES_ONE", "SPECIES_THREE", "SPECIES_FOUR"],
+        branches: &[
+            "chosen-later-duplicate-overwrite",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_duplicate_rank_3",
+        category: "chosen-duplicate-overwrite",
+        selected_ids: [3, 1, 2, 0, 0, 3],
+        expected_species: &["SPECIES_ONE", "SPECIES_TWO", "SPECIES_FIVE"],
+        branches: &[
+            "chosen-later-duplicate-overwrite",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_rank_4_ignored",
+        category: "chosen-above-three",
+        selected_ids: [4, 1, 2, 3, 0, 0],
+        expected_species: &["SPECIES_ONE", "SPECIES_TWO", "SPECIES_THREE"],
+        branches: &[
+            "chosen-above-three-not-emitted",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+    FactoryDraftChosenSpeciesVectorCase {
+        label: "chosen_rank_200_ignored",
+        category: "chosen-above-three",
+        selected_ids: [200, 3, 0, 2, 0, 1],
+        expected_species: &["SPECIES_FIVE", "SPECIES_THREE", "SPECIES_ONE"],
+        branches: &[
+            "chosen-above-three-not-emitted",
+            "chosen-positive-write",
+            "chosen-present-rank-emit",
+            "chosen-zero-skip",
+        ],
+    },
+];
+
+pub static FACTORY_DRAFT_SELECTED_RENTAL_PARTY_CASES: [FactoryDraftSelectedRentalPartyVectorCase;
+    45] = [
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_0_rank_1",
+        category: "rental-slot-rank",
+        selected_ids: [1, 2, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_0_rank_2",
+        category: "rental-slot-rank",
+        selected_ids: [2, 1, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_0_rank_3",
+        category: "rental-slot-rank",
+        selected_ids: [3, 1, 2, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_1_rank_1",
+        category: "rental-slot-rank",
+        selected_ids: [2, 1, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_1_rank_2",
+        category: "rental-slot-rank",
+        selected_ids: [1, 2, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_1_rank_3",
+        category: "rental-slot-rank",
+        selected_ids: [1, 3, 2, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_2_rank_1",
+        category: "rental-slot-rank",
+        selected_ids: [2, 3, 1, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_2_rank_2",
+        category: "rental-slot-rank",
+        selected_ids: [1, 3, 2, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_2_rank_3",
+        category: "rental-slot-rank",
+        selected_ids: [1, 2, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_3_rank_1",
+        category: "rental-slot-rank",
+        selected_ids: [2, 3, 0, 1, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483648,
+                boundary_value: 2147483647,
+                optional_value: Some(4294967295),
+                marker: "source-three",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_3_rank_2",
+        category: "rental-slot-rank",
+        selected_ids: [1, 3, 0, 2, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483648,
+                boundary_value: 2147483647,
+                optional_value: Some(4294967295),
+                marker: "source-three",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_3_rank_3",
+        category: "rental-slot-rank",
+        selected_ids: [1, 2, 0, 3, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483648,
+                boundary_value: 2147483647,
+                optional_value: Some(4294967295),
+                marker: "source-three",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_4_rank_1",
+        category: "rental-slot-rank",
+        selected_ids: [2, 3, 0, 0, 1, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 4294967294,
+                boundary_value: 1,
+                optional_value: None,
+                marker: "source-four",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_4_rank_2",
+        category: "rental-slot-rank",
+        selected_ids: [1, 3, 0, 0, 2, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 4294967294,
+                boundary_value: 1,
+                optional_value: None,
+                marker: "source-four",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_4_rank_3",
+        category: "rental-slot-rank",
+        selected_ids: [1, 2, 0, 0, 3, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 4294967294,
+                boundary_value: 1,
+                optional_value: None,
+                marker: "source-four",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_5_rank_1",
+        category: "rental-slot-rank",
+        selected_ids: [2, 3, 0, 0, 0, 1],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 4294967295,
+                boundary_value: 0,
+                optional_value: Some(2147483648),
+                marker: "source-five",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_5_rank_2",
+        category: "rental-slot-rank",
+        selected_ids: [1, 3, 0, 0, 0, 2],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 4294967295,
+                boundary_value: 0,
+                optional_value: Some(2147483648),
+                marker: "source-five",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_slot_5_rank_3",
+        category: "rental-slot-rank",
+        selected_ids: [1, 2, 0, 0, 0, 3],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 4294967295,
+                boundary_value: 0,
+                optional_value: Some(2147483648),
+                marker: "source-five",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_permutation_1_2_3",
+        category: "rental-permutation",
+        selected_ids: [1, 2, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_permutation_1_3_2",
+        category: "rental-permutation",
+        selected_ids: [1, 3, 2, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_permutation_2_1_3",
+        category: "rental-permutation",
+        selected_ids: [2, 1, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_permutation_2_3_1",
+        category: "rental-permutation",
+        selected_ids: [2, 3, 1, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_permutation_3_1_2",
+        category: "rental-permutation",
+        selected_ids: [3, 1, 2, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_permutation_3_2_1",
+        category: "rental-permutation",
+        selected_ids: [3, 2, 1, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Ok([
+            FactoryDraftVectorSourceRecord {
+                record_id: 2147483647,
+                boundary_value: 2147483648,
+                optional_value: None,
+                marker: "source-two",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 1,
+                boundary_value: 4294967294,
+                optional_value: Some(0),
+                marker: "source-one",
+            },
+            FactoryDraftVectorSourceRecord {
+                record_id: 0,
+                boundary_value: 4294967295,
+                optional_value: None,
+                marker: "source-zero",
+            },
+        ]),
+        branches: &[
+            "rental-complete-success",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_missing_all_zero",
+        category: "rental-missing",
+        selected_ids: [0, 0, 0, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "draft routing requires exactly three ranked rental picks",
+        ),
+        branches: &["rental-missing-ranks-error", "rental-zero-skip"],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_missing_rank_one_only",
+        category: "rental-missing",
+        selected_ids: [1, 0, 0, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "draft routing requires exactly three ranked rental picks",
+        ),
+        branches: &[
+            "rental-missing-ranks-error",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_missing_ranks_one_three",
+        category: "rental-missing",
+        selected_ids: [1, 0, 3, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "draft routing requires exactly three ranked rental picks",
+        ),
+        branches: &[
+            "rental-missing-ranks-error",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_missing_ranks_two_three",
+        category: "rental-missing",
+        selected_ids: [0, 2, 0, 3, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "draft routing requires exactly three ranked rental picks",
+        ),
+        branches: &[
+            "rental-missing-ranks-error",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_duplicate_rank_1",
+        category: "rental-duplicate",
+        selected_ids: [1, 0, 1, 2, 3, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 1 at rental slot 2",
+        ),
+        branches: &[
+            "rental-duplicate-rank-error",
+            "rental-first-validation-error",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_duplicate_rank_2",
+        category: "rental-duplicate",
+        selected_ids: [2, 1, 0, 2, 3, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 2 at rental slot 3",
+        ),
+        branches: &[
+            "rental-duplicate-rank-error",
+            "rental-first-validation-error",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_duplicate_rank_3",
+        category: "rental-duplicate",
+        selected_ids: [3, 1, 2, 0, 0, 3],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 3 at rental slot 5",
+        ),
+        branches: &[
+            "rental-duplicate-rank-error",
+            "rental-first-validation-error",
+            "rental-valid-rank-store",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_4_slot_0",
+        category: "rental-invalid",
+        selected_ids: [4, 0, 0, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 4 at rental slot 0",
+        ),
+        branches: &["rental-first-validation-error", "rental-invalid-rank-error"],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_4_slot_1",
+        category: "rental-invalid",
+        selected_ids: [0, 4, 0, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 4 at rental slot 1",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_4_slot_2",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 4, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 4 at rental slot 2",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_4_slot_3",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 0, 4, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 4 at rental slot 3",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_4_slot_4",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 0, 0, 4, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 4 at rental slot 4",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_4_slot_5",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 0, 0, 0, 4],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 4 at rental slot 5",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_200_slot_0",
+        category: "rental-invalid",
+        selected_ids: [200, 0, 0, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 200 at rental slot 0",
+        ),
+        branches: &["rental-first-validation-error", "rental-invalid-rank-error"],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_200_slot_1",
+        category: "rental-invalid",
+        selected_ids: [0, 200, 0, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 200 at rental slot 1",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_200_slot_2",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 200, 0, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 200 at rental slot 2",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_200_slot_3",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 0, 200, 0, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 200 at rental slot 3",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_200_slot_4",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 0, 0, 200, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 200 at rental slot 4",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_rank_200_slot_5",
+        category: "rental-invalid",
+        selected_ids: [0, 0, 0, 0, 0, 200],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 200 at rental slot 5",
+        ),
+        branches: &[
+            "rental-first-validation-error",
+            "rental-invalid-rank-error",
+            "rental-zero-skip",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_duplicate_precedes_later_invalid",
+        category: "rental-error-order",
+        selected_ids: [1, 1, 4, 2, 3, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 1 at rental slot 1",
+        ),
+        branches: &[
+            "rental-duplicate-rank-error",
+            "rental-first-validation-error",
+            "rental-valid-rank-store",
+        ],
+    },
+    FactoryDraftSelectedRentalPartyVectorCase {
+        label: "rental_invalid_precedes_later_duplicate",
+        category: "rental-error-order",
+        selected_ids: [4, 1, 1, 2, 3, 0],
+        expected: FactoryDraftRentalVectorExpected::Err(
+            "invalid draft pick rank 4 at rental slot 0",
+        ),
+        branches: &["rental-first-validation-error", "rental-invalid-rank-error"],
     },
 ];
