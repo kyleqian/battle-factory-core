@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R6 — [supervised session, 2026-08-13] **M8d–M8j live driver end-to-end pure planning**
+## R6 — [supervised session, 2026-08-13] **M8d–M8j live planning + M9a Factory swap leaf**
 
-- **State:** `rust-main` = master `fafcf933` plus verified M8d–M8j through
-  `25b0b3f2`. The complete pure `createFactoryAiViewFromLiveRules` projection
+- **State:** `rust-main` = master `fafcf933` plus verified M8d–M9a through
+  `48bb3a62`. The complete pure `createFactoryAiViewFromLiveRules` projection
   and source-shaped mask-0/1/7 move chooser are native and WASM differential-
   green end-to-end; the live driver's private RNG replay/checkpoint leaf is
   native, and a single native projection drives every existing chooser.
@@ -60,6 +60,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   RNG, and chooser trace. Forced WASM has no TS fallback. Structural status 2
   is pinned for truncation, append, egg/boundary/request/legal tags, including
   packets whose live view would otherwise fail semantically.
+- **M9a DONE:** ported the native-only pure Factory swap mutation leaf:
+  duplicate-species exclusion, accepted copy/commit, friendship reset, rental
+  `enemy + 3` indexing, typed missing-selection errors, and the round-decision
+  timing seam. The twice-byte-identical canonical-TS corpus has **17 cases / 6
+  categories**; sha256
+  `5fdaa2feb71d1fa6e8617bcb4661d66cf719eb246e4475d3eb6597d5ce441846`.
 - **Next:** select the next unblocked pure family; generic reducer replay stays
   outside M8 because the canonical BattleState reducer is not yet native. M7c
   opponent generation still waits on #55.
@@ -110,7 +116,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   build **659 modules**. Artifact: 455,721 bytes, sha256
   `10d7fca84423652c206eb60a40fbd28d02db82215cd9c4277d95aad17f6aa32f`.
   Scope stayed within `core-rs/**` plus one newly authorized parity file; no
-  canonical TS engine or existing TS test/config changed.
+  canonical TS engine or existing TS test/config changed. M9a used Terra/max;
+  supervisor audited the Rust/TS field mapping, generator provenance, full
+  result/error comparison, and all player/enemy offsets, regenerated twice,
+  and reran focused **6/6**, cargo **732 tests**, fmt, strict clippy, and WASM.
+  Worker smoke and build **659 modules** were green; its full npm process
+  completed but lost the aggregate status stream and is not claimed. Artifact:
+  461,613 bytes, sha256
+  `f94d5f7cebd4f04cb6e941a0eb1a469533fe365b58c95ac8a9b9887f66264623`.
+  M9a stayed entirely inside `core-rs/**`; no WASM export, adapter, canonical
+  TS engine, or TS test/config changed.
 
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
