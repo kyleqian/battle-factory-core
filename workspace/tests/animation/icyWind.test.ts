@@ -12,6 +12,7 @@ import {
   ICY_WIND_SOURCE_SPECIES_ID,
   ICY_WIND_SPIKE_CALLS,
   icyWindAtAge,
+  icyWindEffectOamOrderAtAge,
   icyWindSnowballStep2State,
 } from "../../src/animation/icyWind.ts";
 import { createSceneOnMovePresentation, sceneOnIcyWindView } from "../../src/animation/sceneOnPresentation.ts";
@@ -62,6 +63,23 @@ describe("MOVE_ICY_WIND source checkpoint", () => {
     expect(icyWindAtAge(172, "player", geometry).spikes[0]).toMatchObject({ tileFrame: 2 });
     expect(icyWindAtAge(286, "player", geometry)).toMatchObject({ active: false, snowballs: [], spikes: [], background: "field", blendCnt: 0 });
     expect(() => icyWindAtAge(1.5, "player", geometry)).toThrow(/integer/u);
+  });
+
+  it("replays persistent source slots through SortSprites instead of painting by slot", () => {
+    const playerGeometry = { attackerCenter: { x: 72, y: 104 }, targetCenter: { x: 176, y: 42 }, spikeTargetCenter: { x: 176, y: 40 } };
+    expect(icyWindEffectOamOrderAtAge(93, "player", playerGeometry).map(({ kind, oamSlot }) => [kind, oamSlot])).toEqual([
+      ["snowball", 11], ["snowball", 10], ["snowball", 9], ["snowball", 7],
+      ["snowball", 5], ["snowball", 3], ["snowball", 4],
+    ]);
+    expect(icyWindEffectOamOrderAtAge(100, "player", playerGeometry).map(({ kind, oamSlot }) => [kind, oamSlot])).toEqual([
+      ["snowball", 12], ["snowball", 11], ["snowball", 10], ["snowball", 9],
+      ["snowball", 3], ["snowball", 4], ["snowball", 7], ["snowball", 5],
+    ]);
+    expect(icyWindEffectOamOrderAtAge(204, "player", playerGeometry).map(({ kind, oamSlot }) => [kind, oamSlot])).toEqual([
+      ["snowball", 14], ["spike", 5], ["spike", 4], ["spike", 9], ["spike", 7],
+      ["spike", 11], ["spike", 10], ["spike", 16], ["spike", 15], ["spike", 12],
+      ["spike", 13], ["spike", 3], ["spike", 17],
+    ]);
   });
 
   it("exposes a narrow fail-closed ICY_WIND Scene-ON seam", () => {

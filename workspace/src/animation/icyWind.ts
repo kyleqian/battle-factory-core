@@ -5,6 +5,16 @@ import {
   type BlizzardSnowballStep1Input,
   type BlizzardSnowballSwirlState,
 } from "./blizzard.ts";
+import {
+  createOrderedSprite,
+  createSpriteOrderState,
+  destroyOrderedSprite,
+  sortSpriteOrder,
+  spriteSlotForOwner,
+  updateOrderedSprite,
+  type SpriteOrderKey,
+  type SpriteOrderState,
+} from "./spriteOrder.ts";
 
 /** Exact generated source graph for Icy Wind; none of these imply pixel acceptance. */
 export const ICY_WIND_COMPONENTS = [
@@ -141,7 +151,141 @@ export const ICY_WIND_SPIKE_CALLS: readonly IcyWindSpikeCall[] = SPIKE_X.map((x,
 const SNOWBALL_CREATE_AGES = [48, 55, 62, 69, 76, 83, 90, 97, 104, 111] as const;
 const SNOWBALL_OAM_SLOTS = [3, 4, 5, 7, 9, 10, 11, 12, 13, 14] as const;
 const SPIKE_CREATE_AGES = [168, 174, 174, 180, 180, 186, 186, 192, 192, 198, 198, 204, 204] as const;
-const SPIKE_OAM_SLOTS = [3, 4, 5, 7, 9, 10, 11, 15, 16, 12, 13, 3, 17] as const;
+const SPIKE_OAM_SLOTS = {
+  // Player snowball 8 releases slot 13 before the age-198 pair is created.
+  player: [3, 4, 5, 7, 9, 10, 11, 15, 16, 12, 13, 3, 17],
+  // Opponent snowball 8 remains in slot 13 through that creation pass, so
+  // spike 10 takes slot 17; slot 13 is free for the final age-204 pair.
+  opponent: [3, 4, 5, 7, 9, 10, 11, 15, 16, 12, 17, 3, 13],
+} as const;
+
+/**
+ * Icy Wind's source allocation pool and its persistent pre-move
+ * `sSpriteOrder` projection. The full retained order begins
+ * `62,60,0,63,1,61,6,8,2,3,4,21,20,5,19,18,17,16,15,14,13,12,11,10,9,7`;
+ * fixed healthbox/battler objects are modeled by the compositor, while this
+ * projection owns exactly the slots reached by the move's sprites.
+ */
+export const ICY_WIND_EFFECT_SPRITE_ORDER_SEED = [
+  3, 4, 5, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7,
+] as const;
+
+export interface IcyWindEffectOamEntry {
+  readonly kind: "snowball" | "spike";
+  readonly callIndex: number;
+  readonly oamSlot: number;
+}
+
+const SPIKE_OWNER_BASE = 100;
+
+function effectOwner(kind: IcyWindEffectOamEntry["kind"], callIndex: number): number {
+  return kind === "snowball" ? callIndex : SPIKE_OWNER_BASE + callIndex;
+}
+
+function effectOrderKey(
+  entry: Readonly<IcyWindEffectOamEntry>,
+  side: IcyWindSide,
+  frame: Readonly<IcyWindState>,
+): SpriteOrderKey {
+  if (entry.kind === "snowball") {
+    const sprite = frame.snowballs.find(({ callIndex }) => callIndex === entry.callIndex);
+    if (!sprite) throw new Error(`missing Icy Wind snowball ${entry.callIndex}`);
+    return {
+      priority: 2,
+      // `createsprite ..., ANIM_TARGET, 40` resolves to target-relative 3 in
+      // both retained bilateral scenes.
+      subpriority: 3,
+      oamY: sprite.y + sprite.y2 - 4,
+    };
+  }
+  const sprite = frame.spikes.find(({ callIndex }) => callIndex === entry.callIndex);
+  if (!sprite) throw new Error(`missing Icy Wind spike ${entry.callIndex}`);
+  return {
+    priority: 2,
+    // `createsprite ..., ANIM_TARGET, 2` is resolved against the target's
+    // side: opponent target 38, player target 28.
+    subpriority: side === "player" ? 38 : 28,
+    oamY: sprite.y - 8,
+  };
+}
+
+function effectEntries(frame: Readonly<IcyWindState>): readonly IcyWindEffectOamEntry[] {
+  return [
+    ...frame.snowballs.map(({ callIndex, oamSlot }) => ({
+      kind: "snowball" as const,
+      callIndex,
+      oamSlot,
+    })),
+    ...frame.spikes.map(({ callIndex, oamSlot }) => ({
+      kind: "spike" as const,
+      callIndex,
+      oamSlot,
+    })),
+  ].sort((a, b) => effectOwner(a.kind, a.callIndex) - effectOwner(b.kind, b.callIndex));
+}
+
+/**
+ * Replays source CreateSprite/DestroySprite plus one stable `SortSprites`
+ * pass per move age. This is the software-OAM order consumed by
+ * `BuildOamBuffer`; it is deliberately derived from lifecycle state rather
+ * than stored as an age-indexed painter table.
+ */
+export function icyWindEffectOamOrderAtAge(
+  age: number,
+  side: IcyWindSide,
+  geometry: IcyWindGeometry,
+): readonly IcyWindEffectOamEntry[] {
+  if (!Number.isInteger(age)) throw new RangeError(`Icy Wind age must be an integer, got ${age}`);
+  if (age < 0) return [];
+  let scheduler: SpriteOrderState = createSpriteOrderState(
+    ICY_WIND_EFFECT_SPRITE_ORDER_SEED,
+    ICY_WIND_EFFECT_SPRITE_ORDER_SEED,
+  );
+  for (let tick = 0; tick <= age; tick += 1) {
+    const frame = icyWindAtAge(tick, side, geometry);
+    const desired = effectEntries(frame);
+    const desiredOwners = new Set(desired.map((entry) => effectOwner(entry.kind, entry.callIndex)));
+    // The battle-animation script creates this age's sprites before
+    // AnimateSprites runs callbacks that can destroy the prior age's final
+    // snowballs. At age 192 this is observable: slot 13 remains occupied
+    // while spike calls 7/8 allocate slots 15/16, then it is released.
+    for (const entry of desired) {
+      const owner = effectOwner(entry.kind, entry.callIndex);
+      const key = effectOrderKey(entry, side, frame);
+      if (spriteSlotForOwner(scheduler, owner) === null) {
+        scheduler = createOrderedSprite(scheduler, owner, key);
+        const allocated = spriteSlotForOwner(scheduler, owner);
+        if (allocated !== entry.oamSlot) {
+          throw new Error(
+            `Icy Wind ${entry.kind} ${entry.callIndex} allocated slot ${allocated}, expected ${entry.oamSlot}; occupants ${scheduler.occupants.map(({ owner: activeOwner, slot }) => `${activeOwner}:${slot}`).join(",")}`,
+          );
+        }
+      } else {
+        scheduler = updateOrderedSprite(scheduler, owner, key);
+      }
+    }
+    for (const occupant of [...scheduler.occupants]) {
+      if (!desiredOwners.has(occupant.owner)) {
+        scheduler = destroyOrderedSprite(scheduler, occupant.owner);
+      }
+    }
+    scheduler = sortSpriteOrder(scheduler);
+  }
+  const entryByOwner = new Map(
+    effectEntries(icyWindAtAge(age, side, geometry)).map((entry) => [
+      effectOwner(entry.kind, entry.callIndex),
+      entry,
+    ]),
+  );
+  const ownerBySlot = new Map(
+    scheduler.occupants.map(({ owner, slot }) => [slot, owner]),
+  );
+  return scheduler.order.flatMap((slot) => {
+    const owner = ownerBySlot.get(slot);
+    const entry = owner === undefined ? undefined : entryByOwner.get(owner);
+    return entry ? [entry] : [];
+  });
+}
 
 interface MutableSnowball {
   callback: IcyWindSnowballState["callback"];
@@ -291,7 +435,7 @@ export function icyWindAtAge(age: number, side: IcyWindSide, geometry: IcyWindGe
     // command after the first begins at source local ages 4, 9, … .
     const frame = [0, 2, 4, 6, 4, 2, 0][Math.min(6, Math.floor((local + 1) / 5))]! as 0 | 2 | 4 | 6;
     const sourceX = ICY_WIND_SPIKE_CALLS[callIndex]!.x * (side === "opponent" ? -1 : 1);
-    return [{ callIndex, oamSlot: SPIKE_OAM_SLOTS[callIndex]!, x: geometry.spikeTargetCenter.x + sourceX, y: geometry.spikeTargetCenter.y + 24, tileFrame: frame }];
+    return [{ callIndex, oamSlot: SPIKE_OAM_SLOTS[side][callIndex]!, x: geometry.spikeTargetCenter.x + sourceX, y: geometry.spikeTargetCenter.y + 24, tileFrame: frame }];
   });
   const bldy = backgroundBldy(age);
   return {
