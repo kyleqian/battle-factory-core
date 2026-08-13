@@ -1,3 +1,22 @@
+## 1233 — [supervisor, 2026-08-13] **CGB4 v34 and lane union green**
+
+- **State:** #55 is source-exact through the three selected-row **6,016-cycle**
+  CGB4 prefix. Cosmic Power is corrected and exact at **179/276** Level-50
+  moves; Rust M8f/M8g replay and live chooser bridge are folded. Both
+  persistent lane tips are contained.
+- **Did:** independently reran v34 **5/5**, folded animation through
+  `90e24dc4` and Rust through `2b1b276e`, audited both lane ledgers, ran native
+  Rust, rebuilt WASM, forced every established parity suite through WASM, and
+  verified the full TypeScript union.
+- **Next:** capture/source-close only the third-track `_081DDA62` decrement/
+  exit decision for the same three frozen rows. Keep pointer/address/count/
+  index/identity/channel, successor bodies, broader MPlay/service/arbitration,
+  construction-clock wiring, and retired canonical Battle-2 work null.
+- **Notes:** Rust **722/722 tests**; WASM **417,761 bytes** (`68e9768c…`),
+  forced parity **14 files / 790 passed**; union npm **1,026 files / 9,756
+  passed / 1 skipped**, build **660 modules**. No main ratchet or
+  unsupported-barrier change.
+
 ## 1229 — [supervisor, 2026-08-13] **CGB4 v31 and lane union green**
 
 - **State:** #55 is source-exact through the three selected-row **5,920-cycle**
