@@ -5,13 +5,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R6 — [supervised session, 2026-08-13] **M8d–M8g live-view through chooser bridge**
+## R6 — [supervised session, 2026-08-13] **M8d–M8h live driver through WASM chooser**
 
-- **State:** `rust-main` = master `fafcf933` plus verified M8d–M8g through
-  `04f41a05`. The complete pure `createFactoryAiViewFromLiveRules` projection
-  is native and WASM differential-green end-to-end; the live driver's private
-  RNG replay/checkpoint leaf is native, and a single native projection now
-  drives the existing mask-0/1/7 choosers from that source-shaped view.
+- **State:** `rust-main` = master `fafcf933` plus verified M8d–M8h through
+  `f3e40c0d`. The complete pure `createFactoryAiViewFromLiveRules` projection
+  and source-shaped mask-0/1/7 move chooser are native and WASM differential-
+  green end-to-end; the live driver's private RNG replay/checkpoint leaf is
+  native, and a single native projection drives every existing chooser.
   `RUST_DEFERRED.md` has no open entries.
 - **Did:** ported the source-shaped view with exact optional-property presence,
   JS-number/bit-mask behavior, status and side conditions, M8a history slot-0
@@ -38,9 +38,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   gates use canonical `?? 0` behavior. The twice-identical corpus has **12
   cases / 9 categories**; sha256
   `0aa8b03965284418c563df3418a3906b7f7d27f1a68a52bfe7ce62722e80eea1`.
-- **Next:** expose M8g through a typed WASM/app parity boundary without pulling
-  in the generic reducer; after that, compose switch/move planning over the
-  existing native leaves. M7c opponent generation still waits on #55.
+- **M8h DONE:** additive ABI-v1 packets reuse the exact M8e live prefix and add
+  u32 RNG state, authoritative request records, and turn-RNG ownership. Rust
+  constructs the live view, selects the mask, and returns the existing complete
+  chooser receipts. Status 2 owns every structurally malformed packet before
+  semantic evaluation; valid packets preserve canonical live-view -> request ->
+  mask ordering. Forced WASM calls the export directly with no TS fallback.
+  Parity covers **12 cases / 9 categories**, exact errors, eight-entry history,
+  u32 RNG edges, and malformed prefix/suffix combinations.
+- **Next:** M8i — compose the pure switch-or-move planning boundary over the
+  existing native switch-policy and live-chooser leaves without pulling in the
+  generic BattleState reducer. M7c opponent generation still waits on #55.
 - **Notes:** Terra/max worker, 3 commits. Supervisor audited the complete TS/Rust
   property mapping, regenerated the corpus twice, and reran cargo **716 tests**,
   fmt, clippy, WASM, and smoke **375/375**. The rebuilt artifact is 391,563
@@ -65,7 +73,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Both worker same-commit full npm runs were **1,020 files / 9,723 passed / 1
   skip** plus build. Scope stayed within `core-rs/**` plus the one
   M8e-authorized parity file; no canonical TS engine or existing test/config
-  changed.
+  changed. M8h used Sol/high plus two bounded Sol/high corrections for exact
+  validation text/order and structural precedence. Supervisor audited the wire,
+  projection, and no-fallback route, reran focused both-mode **4/4**, cargo
+  **724 tests**, fmt, clippy, WASM, smoke **375/375**, full npm **1,021 files /
+  9,727 passed / 1 skip**, and build. Artifact: 434,944 bytes, sha256
+  `81df933139ea8ea7f4d4e1cfcd1d0788408ec84291cfbfcb9496d73d9c9e0107`.
+  M8h scope stayed within `core-rs/**` plus its one newly authorized parity
+  file; no canonical TS engine or existing test/config changed.
 
 ## R5 — [supervised session, 2026-08-12] **M5–M7 COMPLETE; M8 live-driver leaves advancing**
 
