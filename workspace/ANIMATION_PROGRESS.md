@@ -1,3 +1,11 @@
+# MOVE_ANCIENT_POWER dense Scene-ON evidence checkpoint — remains unsupported (2026-08-13 worker)
+
+- **State:** Level-50 coverage remains **179/276 exact**, 0 partial, 0 staged, and 97 unsupported. Ancient Power is not promoted; ROCK_THROW and ROCK_SLIDE remain independent controls.
+- **Did:** Added the source-relative ten-rock `AnimRaiseSprite` reducer and focused component tests for the assigned 12-component track. Added a pointer-bounded Scene-ON probe and retained complete state/raw-RGB receipts for actual numeric species **318 BALTOY**, source metadata set **75**, with complete legal Level-50 party records in both player-back and opponent-front orientations. Committed those two reproducible scenarios under `tools/battle-lab`, pinned their SHA-256 values in the receipt/test, and corrected `ANCIENT_POWER_COMPONENTS` to the generated source graph exactly.
+- **Verified:** Twice-fresh direct mGBA runs are byte-identical per orientation over source frames **225..352 (128/128)**. Player state/raw digests are `fabfdb19…` / `bd59ebbf…`; opponent state/raw digests are `cad96a74…` / `32d27b5f…`. Dense topology includes `gAncientPowerRockSpriteTemplate`, `gBasicHitSplatSpriteTemplate`, both slide helpers, `AnimTask_ShakeMon2`, `monbg`/`setalpha`/`clearmonbg`/`blendoff`, and full software/hardware OAM, matrices, palettes, registers, tasks, audio, and immutable state.
+- **Next:** Build the typed Baltoy bilateral Scene-ON seam and compositor, then independently fit the attacker `(1,0,30,1)` and target `(3,0,6,1)` ShakeMon2 creation/body/teardown latches plus rock OAM/palette transfer before any exact claim.
+- **Notes:** Honest evidence checkpoint only. No source/reducer-to-production framebuffer parity, exact latch proof, per-age lookup, absolute-tick branch, coordinate/RGB fit, gameplay/damage/RNG/controller/facility ownership, boundary change, or sibling coverage change.
+
 # MOVE_COSMIC_POWER corrective exact postflight — actual species-348 bilateral 241/241 (2026-08-13 worker)
 
 - **State:** The **178→179/276 exact** promotion is retained after replacing the rejected carrier evidence with actual internal species 348 LUNATONE. Cosmic Power alone is exact; GrantingStars, palette, BG, audio, and named sibling acceptance remains independent.
