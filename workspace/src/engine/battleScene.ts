@@ -661,6 +661,7 @@ import battleAnimSwordAsset from "../assets/gen/battle-anim-sword.json" with { t
 import battleAnimLeerAsset from "../assets/gen/battle-anim-leer.json" with { type: "json" };
 import thunderWaveAsset from "../assets/gen/battle-anim-spark.json" with { type: "json" };
 import thunderAsset from "../animation/assets/thunder.json" with { type: "json" };
+import icyWindAsset from "../animation/assets/icy-wind.json" with { type: "json" };
 import surfWaveAsset from "../animation/assets/surf-wave.json" with { type: "json" };
 import battleBackSpritesAsset from "../assets/gen/battle-back-sprites.json" with { type: "json" };
 import battleAnimItemHealAsset from "../assets/gen/battle-anim-item-heal.json" with { type: "json" };
@@ -1006,6 +1007,7 @@ import {
   sceneOnSparkView,
   sceneOnThunderWaveView,
   sceneOnThunderView,
+  sceneOnIcyWindView,
   sceneOnSurfView,
   sceneOnCharmView,
   sceneOnCovetView,
@@ -1067,6 +1069,7 @@ import {
   type SceneOnSparkPresentationState,
   type SceneOnThunderWavePresentationState,
   type SceneOnThunderPresentationState,
+  type SceneOnIcyWindPresentationState,
   type SceneOnSurfPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
@@ -2084,6 +2087,10 @@ const battleAnimSword = battleAnimSwordAsset as { tileset: Tileset; palette: Rgb
 const battleAnimLeer = battleAnimLeerAsset as { tileset: Tileset; palette: RgbColor[] };
 const thunderArt = thunderAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+};
+const icyWindArt = icyWindAsset as {
+  background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
+  spike: { tileset: Tileset; palette: RgbColor[] };
 };
 const pidgeottoBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PIDGEOTTO!;
 const crawdauntBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CRAWDAUNT!;
@@ -17312,6 +17319,127 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "ICY_WIND") {
+    const icyState = state as SceneOnIcyWindPresentationState;
+    const view = sceneOnIcyWindView(icyState);
+    // Icy Wind's move-owned maps prove ordinary OBJ/palette DMA from the
+    // preceding software buffer; registers (BG swap/brightness) are same-row.
+    const displayed = sceneOnIcyWindView({ ...icyState, age: icyState.age - 1 });
+    const playerToOpponent = view.attacker.species === "SWINUB"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "SWINUB"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged ICY_WIND pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const swinubSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).SWINUB!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).SWINUB!;
+    const swinub = playerToOpponent
+      ? swinubSource
+      : { ...swinubSource, tileset: subTileset(swinubSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const black = { r: 0, g: 0, b: 0 };
+    const bgPalette = displayed.paletteBlackCoefficient === 0
+      ? battleBg.palette.map((palette) => [...palette])
+      : blendPaletteBanksToward(battleBg.palette, black, displayed.paletteBlackCoefficient);
+    const restoredBgPalette = view.age === 264 || view.age === 265
+      ? battleBg.palette.map((palette) => [...palette])
+      : bgPalette;
+    // BG_ICE replaces the unfaded bank while the first task is running. Its
+    // first source write that survives the swap is the terminal coefficient.
+    const icePalette = displayed.paletteBlackCoefficient === 4
+      ? blendPaletteToward(icyWindArt.background.palette, black, 4)
+      : icyWindArt.background.palette;
+    const hardwareDarken = (palettes: readonly (readonly RgbColor[])[]) =>
+      palettes.map((palette) => palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.backgroundBldy,
+        );
+        return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+      }));
+    if (view.background === "ice") {
+      drawExtractedTileBg(fb, {
+        tileset: icyWindArt.background.tileset,
+        tilemap: icyWindArt.background.tilemap,
+        subpalettes: hardwareDarken([icePalette]),
+      }, 0, 0);
+    } else {
+      drawTileBg(
+        fb,
+        battleBg.static.tileset,
+        battleBg.static.tilemap,
+        hardwareDarken(restoredBgPalette),
+      );
+    }
+    const snowballTile: Tileset = {
+      columns: 1, rows: 1, tiles: [battleAnimIceCrystals.tileset.tiles[7]!],
+    };
+    const snowballsInPaintOrder = [...displayed.snowballs].sort((a, b) => b.oamSlot - a.oamSlot);
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    for (const spike of [...displayed.spikes].sort((a, b) => b.oamSlot - a.oamSlot)) {
+      drawSpriteSheet(
+        fb,
+        subTileset(icyWindArt.spike.tileset, spike.tileFrame, 2),
+        icyWindArt.spike.palette,
+        spike.x - 4,
+        spike.y - 8,
+      );
+    }
+    const attackerPalette = blendPaletteToward(
+      swinub.palette,
+      black,
+      displayed.paletteBlackCoefficient,
+    );
+    drawSpriteSheet(
+      fb,
+      swinub.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    for (const snowball of snowballsInPaintOrder) {
+      drawSpriteSheet(
+        fb,
+        snowballTile,
+        battleAnimIceCrystals.palette,
+        snowball.x + snowball.x2 - 4,
+        snowball.y + snowball.y2 - 4,
+      );
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "SWINUB", level: 50, gender: "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "SWINUB" : "ONIX", level: 50, gender: "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SWINUB used" : "Foe SWINUB used",
+      "ICY WIND!",
+      99,
+    );
+    return;
+  }
   if (state.config.move === "MIST_BALL") {
     const mistState = state as SceneOnMistBallPresentationState;
     const view = sceneOnMistBallView(mistState);
