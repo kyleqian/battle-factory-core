@@ -5,14 +5,16 @@
   "orientation": "player-back",
   "scenario": "tools/battle-lab/mechanic-cosmic-power-player-lunatone-opponent-onix.json",
   "probe": "tools/compare/cosmicPowerProbe.py",
-  "sourceWindow": {"startFrame": 74, "endFrame": 314, "frameCount": 241},
+  "sourceWindow": {"startFrame": 294, "endFrame": 534, "frameCount": 241},
   "sourceBounds": {"start": "0x082d5f5d", "endExclusive": "0x082d5fe2"},
   "carrier": {"setId": 222, "species": "LUNATONE", "move": 322, "level": 50},
-  "probeJsonSha256": "6d732cff0e20db6d1eddca292ab7a3186a1c50a221cd9f83567194b1b5047fb9",
-  "evidenceFullStateGzipSha256": "f935f6bb6bc87fe5ce380e3b6151adbec2933c9e7b4522146a358e4640a3e70b",
-  "rawRgbTarSha256": "bdd6044cbed104d8b68dfe74b2162906a1b18d045c5075d2daf63e5e00b067b0",
-  "rawRgbConcatSha256": "7e7715c33fb42dda64539b8b6c34e6754b716ad7f428fec8337acbf56d8688d0",
+  "probeJsonSha256": "03d5f944dfc907535f7877675674a3724934b488147187602a1681a69513ad54",
+  "evidenceFullState": "tools/compare/evidence/cosmic-power-player-full-state.json.gz",
+  "evidenceFullStateGzipSha256": "df6f396931e5b61fbd6297cfcd24cffe986ebcc249ec850955603e67ef8279fe",
+  "rawRgbArchive": "tools/compare/evidence/cosmic-power-player-source-rgb.tar.gz",
+  "rawRgbTarSha256": "a7bec5ae0117e9af638fbfbde2c251f8c4d303a03f573b0d1ec59ecf1e983980",
+  "rawRgbConcatSha256": "84ed15d1a8c9b6e2970fae2b021d27bc44ddd91b36e37e09b7e1996de12a7d6f",
   "changeMap": "tools/compare/evidence/cosmic-power-changemap-player.txt",
-  "changeMapSha256": "c7807dcf2ef55a23d9366dac6775607e0b0020cc3adb40976eb86a7764050f82",
-  "acceptance": {"status": "checkpoint", "componentFrames": 241, "framebufferFrames": "unmeasured"}
+  "changeMapSha256": "185baa8ecd9617cefe89cf7ec774532fd76b9c4e5e5d85b980606e04ed72aee0",
+  "acceptance": {"status": "exact", "reducerRows": 241, "seamRows": 241, "componentFrames": 241, "latchRows": 240, "framebufferFrames": 241, "freshRuns": 2}
 }

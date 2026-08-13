@@ -4812,6 +4812,35 @@
     "tests/animation/fissure.test.ts",
     "tests/animation/fissureEvidence.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_COSMIC_POWER",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-222 FRONTIER_MON_LUNATONE_1 versus ONIX parties use actual internal SPECIES_LUNATONE=348 in all three carrier-side records, with Quiet nature, HP/Defense EVs, Sitrus Berry, Levitate slot 0, genderless identity, and constrained MOVE_COSMIC_POWER choices; both orientations pass the exclusive 0x082d5f5d..0x082d5fe2 Scene-ON body through first inactive cleanup twice fresh at frames 294-534 and 241/241",
+    "the pure source-relative reducer and typed seam port the non-attacker palette blend, BG_COSMIC fade/BLDY/slide/restore schedule, two GrantingStarsEffect sprites, SPARKLE_2 tags, centered SE_M_COSMIC_POWER, attacker-panned SE_M_MORNING_SUN, waits, and cleanup; the compositor uses actual LUNATONE/ONIX front/back art, geometry and chrome, including the opponent-front elevated-shadow pointer-entry row",
+    "cosmicPowerPortable.ts directly reruns both pointer-bounded mGBA probes and proves 241/241 reducer, typed seam, task/sprite/component, raw-RGB, normalized change-map and production framebuffer rows plus 240/240 preceding software-to-hardware OAM/matrix/palette transfers in each orientation twice fresh; stable probe/raw/map digests are player 03d5f944dfc907535f7877675674a3724934b488147187602a1681a69513ad54 / 84ed15d1a8c9b6e2970fae2b021d27bc44ddd91b36e37e09b7e1996de12a7d6f / 185baa8ecd9617cefe89cf7ec774532fd76b9c4e5e5d85b980606e04ed72aee0 and opponent 65c13d8610067b16cfe0c716faf5a95ae150a7415c39312d2d05b9742e98b5a4 / f23332550d5aaf70bb56a84f6c2b5645574267cf073bc03f27e53d2cfe6619be / 3f323b42b4c14d01fbb46f86e251634f2ba1755be8c7b13cff45e993f970aeb3; committed full-state/raw archives are also hash-checked against the fixtures",
+    "the verifier pins complete task/template/callback topology; exact star OAM slots, coordinates, tiles and y2; tile/palette tags; BG and blend registers; all software/hardware OAM, matrices and palettes; both audio players; and immutable battler, party, outcome, weather and side state",
+    "MOVE_SYNTHESIS, MOVE_HEAL_BELL, MOVE_WISH, MOVE_REFRESH, MOVE_AROMATHERAPY, MOVE_METEOR_MASH and every play-SE sibling retain independent acceptance; no gameplay state, animation boundary/barrier, canonical recording import, per-age framebuffer/hash lookup, absolute tick, coordinate or RGB fitting changed"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-cosmic-power-player-lunatone-opponent-onix.json",
+    "tools/battle-lab/mechanic-cosmic-power-opponent-lunatone-player-onix.json",
+    "tools/compare/fixtures/cosmic-power-player-lunatone-opponent-onix.json",
+    "tools/compare/fixtures/cosmic-power-opponent-lunatone-player-onix.json",
+    "tools/compare/cosmicPowerProbe.py",
+    "tools/compare/cosmicPowerPortable.ts",
+    "tools/compare/evidence/cosmic-power-player-full-state.json.gz",
+    "tools/compare/evidence/cosmic-power-opponent-full-state.json.gz",
+    "tools/compare/evidence/cosmic-power-player-source-rgb.tar.gz",
+    "tools/compare/evidence/cosmic-power-opponent-source-rgb.tar.gz",
+    "tools/compare/evidence/cosmic-power-changemap-player.txt",
+    "tools/compare/evidence/cosmic-power-changemap-opponent.txt",
+    "src/animation/cosmicPower.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/cosmicPower.test.ts"
+   ]
   }
  ],
  "queue": [
@@ -5264,7 +5293,7 @@
     "MOVE_LUSTER_PURGE",
     "MOVE_COSMIC_POWER"
    ],
-   "goal": "MOVE_DRAGON_CLAW independently proves SoundTask_PlaySE1WithPanning and its complete palette/shake/lunge/FireSpin/claw/cleanup body in both orientations at 137/137 strengthened source component/task/sprite/OAM/global-coordinate/palette/audio and shared-seam framebuffer frames, reproduced twice. No sibling is promoted. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. LUSTER PURGE needs psychic/white BG transitions, circle and particle blends, six RNG-positioned hitsplats/sounds, target shake, and restore. COSMIC POWER needs non-attacker blends, cosmic BG slide/restore, two granting stars, and its distinct centered/attacker-pan sounds. Each remains unsupported pending independent complete dense framebuffer evidence."
+   "goal": "MOVE_DRAGON_CLAW independently proves SoundTask_PlaySE1WithPanning and its complete palette/shake/lunge/FireSpin/claw/cleanup body in both orientations at 137/137 strengthened source component/task/sprite/OAM/global-coordinate/palette/audio and shared-seam framebuffer frames, reproduced twice. MOVE_COSMIC_POWER independently proves its non-attacker blend, BG_COSMIC slide/restore, two granting stars, and distinct centered/attacker-pan sounds at 241/241 complete bilateral source/hardware/raw-RGB/framebuffer rows twice fresh. No sibling is promoted. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. LUSTER PURGE needs psychic/white BG transitions, circle and particle blends, six RNG-positioned hitsplats/sounds, target shake, and restore. Each remaining sibling stays unsupported pending independent complete dense framebuffer evidence."
   },
   {
    "id": "loop-se-adjust-panning",
@@ -5621,7 +5650,7 @@
     "MOVE_AROMATHERAPY",
     "MOVE_COSMIC_POWER"
    ],
-   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. MOVE_REFRESH independently proves its StatusClearedEffect mask, two GrantingStarsEffect stars, field/battler palette-restoration blend, and thin-ring body at 209/209 in both orientations, reproduced twice. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. COSMIC POWER now has independent pointer-bounded 241-row bilateral full-state/raw-RGB/change-map receipts, a source-relative reducer, typed seam, source-derived BG_COSMIC/GrantingStars/audio body, and move-owned latches; its production framebuffer and portable live verifier remain open, so it remains unsupported. Each move remains an independent acceptance unit."
+   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. MOVE_REFRESH independently proves its StatusClearedEffect mask, two GrantingStarsEffect stars, field/battler palette-restoration blend, and thin-ring body at 209/209 in both orientations, reproduced twice. MOVE_COSMIC_POWER independently proves its complete non-attacker blend, BG_COSMIC/BLDY/slide schedule, two GrantingStarsEffect stars, audio and cleanup body at 241/241 complete bilateral source/hardware/raw-RGB/framebuffer rows twice fresh. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. Each move remains an independent acceptance unit."
   },
   {
    "id": "healing-blue-star",

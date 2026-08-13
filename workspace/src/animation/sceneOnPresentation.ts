@@ -1568,7 +1568,13 @@ export interface SceneOnCosmicPowerConfig {
   readonly move: "COSMIC_POWER";
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
-  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly fieldProfile: Readonly<
+    Omit<SceneOnDragonRageFieldProfile, "playerGender" | "opponentGender">
+    & {
+      readonly playerGender?: "male" | "female" | "none";
+      readonly opponentGender?: "male" | "female" | "none";
+    }
+  >;
 }
 
 export interface SceneOnAromatherapyConfig {

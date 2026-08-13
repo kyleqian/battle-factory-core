@@ -1488,6 +1488,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const lunatoneFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LUNATONE!;
 const metangFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).METANG!;
 const dragonairFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).DRAGONAIR!;
 const aronFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ARON!;
@@ -2728,6 +2729,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const lunatoneBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LUNATONE!;
 const metangBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).METANG!;
 const dragonairBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).DRAGONAIR!;
 const aronBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ARON!;
@@ -34787,43 +34789,52 @@ export function renderSceneOnMovePresentation(
       );
     }
     const dark = { r: 0, g: 0, b: 0 };
+    const gpuDarken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.backgroundDarkCoefficient,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
     const drawBackground = (): void => {
-      if (displayed.background === "cosmic") {
+      if (view.background === "cosmic") {
         drawExtractedTileBg(fb, {
           tileset: meteorMashArt.background.tileset,
           tilemap: meteorMashArt.background.tilemap,
-          subpalettes: [blendPaletteToward(
-            meteorMashArt.background.palette,
-            dark,
-            displayed.backgroundDarkCoefficient,
-          )],
-        }, 0, displayed.bg3vofs);
+          subpalettes: [gpuDarken(meteorMashArt.background.palette)],
+        }, 0, view.bg3vofs);
         return;
       }
       drawExtractedTileBg(fb, {
         tileset: battleBg.static.tileset,
         tilemap: battleBg.static.tilemap,
-        subpalettes: blendPaletteBanksToward(
-          battleBg.palette,
-          dark,
-          displayed.backgroundDarkCoefficient,
-        ),
+        subpalettes: battleBg.palette.map(gpuDarken),
       });
     };
     drawBackground();
-    const attackerSource = playerToOpponent
-      ? calmMindArt.lunatoneBack
-      : calmMindArt.lunatoneFront;
+    // The elevated Lunatone shadow survives in hardware OAM only on the
+    // pointer-entry row; SpriteCB_EnemyShadow hides it on the next display.
+    if (opponentToPlayer && state.age === 0) {
+      const shadowX = view.attacker.geometry.battlePositionCenter.x
+        - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
+        - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
     const attackerSprite = playerToOpponent
-      ? attackerSource
-      : {
-          ...attackerSource,
-          tileset: {
-            columns: 8,
-            rows: 8,
-            tiles: attackerSource.tileset.tiles.slice(0, 64),
-          },
-        };
+      ? lunatoneBackSprite : lunatoneFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffset(view.target.species)
@@ -34872,17 +34883,17 @@ export function renderSceneOnMovePresentation(
       name: opponentSpecies,
       level: 50,
       gender: profile.opponentGender ?? "male",
-      hpFraction: profile.opponentHp / Math.max(1, profile.opponentHp),
+      hpFraction: profile.opponentHp / Math.max(1, profile.opponentMaxHp),
       status: "none",
     }));
     drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
       name: playerSpecies,
       level: 50,
       gender: profile.playerGender ?? "male",
-      hpFraction: profile.playerHp / Math.max(1, profile.playerHp),
+      hpFraction: profile.playerHp / Math.max(1, profile.playerMaxHp),
       status: "none",
       currentHp: profile.playerHp,
-      maxHp: Math.max(1, profile.playerHp),
+      maxHp: Math.max(1, profile.playerMaxHp),
     }));
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(

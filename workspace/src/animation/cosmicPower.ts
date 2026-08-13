@@ -128,7 +128,7 @@ export function cosmicPowerAtAge(
 ): CosmicPowerState {
   const active = age >= 0 && age < COSMIC_POWER_FIRST_INACTIVE_AGE;
   const bldy = fadeBldyAtAge(age);
-  const background = age >= 38 && age < COSMIC_POWER_FIRST_INACTIVE_AGE
+  const background = age >= 38 && age <= 220
     ? "cosmic" : "battle";
   return {
     age,
@@ -147,8 +147,8 @@ export function cosmicPowerAtAge(
         ? 232 : 0,
     bldy,
     resources: {
-      sparkle2Loaded: age >= 0,
-      cosmicBackgroundLoaded: age >= 38,
+      sparkle2Loaded: age >= 1 && age < COSMIC_POWER_FIRST_INACTIVE_AGE,
+      cosmicBackgroundLoaded: age >= 38 && age <= 220,
     },
     audio: [
       ...(age === 4
