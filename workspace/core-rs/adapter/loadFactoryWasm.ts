@@ -198,6 +198,8 @@ export interface FactoryWasmExports {
   fw_apply_factory_swap_operation(input_ptr: number, input_len: number): number;
   /** Twelve pure Factory draft-selection helpers; see the Rust export for the checked ABI-v1 operation packet. */
   fw_apply_factory_draft_selection_operation(input_ptr: number, input_len: number): number;
+  /** Complete `keyRepeat.ts` state/read/hasButton surface; see the Rust export for the checked ABI-v1 operation packet. */
+  fw_apply_key_repeat_operation(input_ptr: number, input_len: number): number;
   memory: WebAssembly.Memory;
 }
 
