@@ -374,7 +374,7 @@
     "the typed seam carries only resolved Sudowoodo/Onix geometry and immutable HP/gender state; presentation exposes no trapped flag and owns no trap effect, damage, RNG, turn order, controller, or facility state",
     "source extraction regenerates Sudowoodo front/back and X_SIGN art with its source-shared HollowOrb palette byte-for-byte; the production compositor uses the shared battle framebuffer and source OAM latch/order without absolute ticks, baked frames, coordinate/RGB fitting, or screenshots",
     "blockEvidence.ts proves every source/component/typed-seam/software+hardware OAM/matrix/palette/register/audio/state/raw-RGB/production-framebuffer frame twice fresh in both orientations",
-    "MOVE_ROCK_TOMB remains unsupported: it independently adds ROCKS load/free, four gRockTombRockSpriteTemplate falls, gRedXSpriteTemplate, AnimTask_ShakeMon, platform shakes, audio/waits, damage/stat/controller presentation and cleanup, and lacks its own dense both-orientation acceptance"
+    "MOVE_ROCK_TOMB now has an independent dense Scene-ON acceptance; MOVE_HYPER_VOICE remains unsupported and receives no inherited acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-block-player-sudowoodo-opponent-onix.json",
@@ -391,6 +391,37 @@
     "src/engine/battleScene.ts",
     "tests/animation/block.test.ts",
     "tests/animation/blockEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_ROCK_TOMB",
+   "status": "exact",
+   "covered": [
+    "the lowest suitable legal Level-50 Factory carrier is challenge-0 set 110 FRONTIER_MON_GRIMER (species 88); complete legal three-mon Battle Scene ON parties stage GRIMER against ONIX in both orientations",
+    "fresh dense oracle probes cover the complete body through first inactive cleanup twice reproducibly: player-back frames 217-390 and opponent-front frames 229-402 pass 174/174 source, typed-seam, raw-RGB, and shared-framebuffer rows in each orientation",
+    "the pure source-relative reducer ports all four gRockTombRockSpriteTemplate falls, gRedXSpriteTemplate, AnimTask_ShakeMon(target,3,0,20,1), six platform shakes, source audio/waits, cleanup, and all 348 retained state rows",
+    "the typed seam carries only source-derived GRIMER/ONIX geometry, effect center, and immutable field presentation; the compositor reuses source ROCKS, X_SIGN, battler, healthbox, field, and window assets without owning damage, Speed drops, RNG, AI, turn, controller, or facility state",
+    "the move-local late ShakeMon transfer and fourth-rock OAM tie order are independently pinned; hardware OAM/matrices/palettes pass 346/346/346 comparable rows, audio 10/10, immutable state 348/348, and raw RGB 348/348",
+    "MOVE_HYPER_VOICE remains independently unsupported and receives no shared reducer, seam, compositor, receipt, or coverage acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-rock-tomb-player-grimer-opponent-onix.json",
+    "tools/battle-lab/mechanic-rock-tomb-opponent-grimer-player-onix.json",
+    "tools/compare/fixtures/rock-tomb-dense-evidence.json",
+    "tools/compare/rockTombProbe.py",
+    "tools/compare/rockTombSourceAudit.ts",
+    "tools/compare/rockTombPortable.ts",
+    "tools/compare/evidence/rock-tomb-player-dense-state.json.gz",
+    "tools/compare/evidence/rock-tomb-opponent-dense-state.json.gz",
+    "tools/compare/evidence/rock-tomb-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/rock-tomb-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/rock-tomb-changemap-player.txt",
+    "tools/compare/evidence/rock-tomb-changemap-opponent.txt",
+    "src/animation/rockTomb.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/rockTomb.test.ts",
+    "tests/animation/rockTombSource.test.ts"
    ]
   },
   {

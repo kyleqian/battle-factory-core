@@ -39,9 +39,9 @@ describe("MOVE_METAL_SOUND source checkpoint", () => {
     });
   });
 
-  it("promotes only Metal Sound while the Level-50 exact count reaches 172", () => {
+  it("promotes only Metal Sound while the Level-50 exact count reaches 183", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(182);
+    expect(coverage.entries).toHaveLength(183);
     expect(coverage.entries.find(
       (entry: { move: string }) => entry.move === "MOVE_METAL_SOUND",
     )).toMatchObject({ status: "exact" });

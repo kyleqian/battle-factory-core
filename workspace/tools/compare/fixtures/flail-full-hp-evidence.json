@@ -1,0 +1,50 @@
+{
+  "schema": "flail-full-hp-bilateral-checkpoint/v1",
+  "status": "unsupported",
+  "move": "MOVE_FLAIL",
+  "moveId": 175,
+  "oracleProfile": "battle-scene-on",
+  "probe": "tools/compare/flailProbe.py",
+  "coveredBranch": {"naturalHpBand": "full", "power": 20, "shakeAmplitude": 1},
+  "requiredBranches": [
+    {"power": 20, "shakeAmplitude": 1, "covered": true},
+    {"power": 40, "shakeAmplitude": 3, "covered": false},
+    {"power": 80, "shakeAmplitude": 6, "covered": false},
+    {"power": 100, "shakeAmplitude": 8, "covered": false},
+    {"power": 150, "shakeAmplitude": 12, "covered": false},
+    {"power": 200, "shakeAmplitude": 16, "covered": false}
+  ],
+  "orientations": [
+    {
+      "id": "player-back-krabby-to-opponent-front-onix",
+      "scenario": "tools/battle-lab/mechanic-flail-player-krabby-opponent-onix.json",
+      "sourceWindow": {"startFrame": 209, "endFrame": 322, "frameCount": 114},
+      "evidenceSha256": "aff8a90389b800878b5ea4dd5be2172687698130327e2a37181d53285b54f55f",
+      "rawRgbSha256": "dcad7a27b3f0d59a02717dd9652ac34f863e2033762042f473ff8e393a1e3900",
+      "hitsplat": {"sourceAge": 49, "slot": 3, "x": 177, "y": 43, "x2": 2, "y2": -9, "animation": 3, "liveRows": 10},
+      "animMoveDamage": 3
+    },
+    {
+      "id": "opponent-front-krabby-to-player-back-onix",
+      "scenario": "tools/battle-lab/mechanic-flail-opponent-krabby-player-onix.json",
+      "sourceWindow": {"startFrame": 210, "endFrame": 323, "frameCount": 114},
+      "evidenceSha256": "e305bdfeae0756aad492ea2e899cdcd42f95b859fc29c7ecb975ac16a0b8d104",
+      "rawRgbSha256": "c0eb1a48e0466dce2d7b8daeed2ad186e1a98d04c0163ebdcea5bce2a7e15c2e",
+      "hitsplat": {"sourceAge": 49, "slot": 3, "x": 71, "y": 83, "x2": 14, "y2": -1, "animation": 3, "liveRows": 10},
+      "animMoveDamage": 7
+    }
+  ],
+  "repeatability": {"runsPerOrientation": 2, "evidenceAndRawRgbByteStable": true},
+  "stateGate": {"battlersStable": true, "partiesStable": true, "gameplayRngStable": true, "outcomeWeatherSidesStable": true},
+  "latches": {
+    "wholeHardwareOamEqualsPrecedingSoftwareRows": "113/113 bilaterally",
+    "hardwarePaletteEqualsPrecedingFadedRows": "112/113 bilaterally; age 4 monbg setup is same-row",
+    "flailMovementLiveBattlerMatrix": "RAM+2 on 114/115 comparable affine rows; the only exception is random-hitsplat matrix teardown",
+    "randomHitsplat": "plain OAM RAM+1; fresh affine paint RAM+2 and teardown RAM+1"
+  },
+  "animationRng": {
+    "source": "AnimHitSplatRandom with fixed animation 3 skips animation selection and calls Random2 exactly twice for x/y; the observed source-age-49 transition is three LCG steps because the surrounding Scene-ON row cadence contributes one independent step",
+    "productionBoundary": "visual placement may use immutable gRng2 input plus local source-derived stepping; gameplay gRngValue is unchanged"
+  },
+  "boundedRemainder": "No reducer, typed seam, compositor, production framebuffer acceptance, or coverage promotion is claimed. Natural power 40/80/100/150/200 branches require complete bilateral dense evidence and acceptance. Luster Purge remains independently unsupported with its distinct psychic/white background, circle/particle blends, six hitsplats/sounds, HorizontalShake, and restore body."
+}

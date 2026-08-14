@@ -34,6 +34,11 @@ import {
   type MementoConfig,
   type MementoState,
 } from "./memento.ts";
+import {
+  rockTombAtAge,
+  type RockTombConfig,
+  type RockTombState,
+} from "./rockTomb.ts";
 import { nightShadeAtAge, type NightShadeState } from "./nightShade.ts";
 import {
   headbuttAtAge,
@@ -1840,6 +1845,20 @@ export interface SceneOnBlockConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for MOVE_ROCK_TOMB's source-created rocks and tasks. */
+export interface SceneOnRockTombConfig {
+  readonly move: "ROCK_TOMB";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Sprite allocator identity retained at the source boundary. */
+  readonly targetSpriteSlot: number;
+  /** Target's pre-task front/back idle x2, before ShakeMon writes it. */
+  readonly targetInitialX2: number;
+  /** `InitSpritePosToAnimTarget` center used by the four rocks and Red-X. */
+  readonly effectCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnBodySlamConfig {
   readonly move: "BODY_SLAM";
   readonly attacker: SceneOnPresentationBattler;
@@ -2868,6 +2887,7 @@ export type SceneOnMoveConfig =
   | SceneOnDrillPeckConfig
   | SceneOnWhirlwindConfig
   | SceneOnBlockConfig
+  | SceneOnRockTombConfig
   | SceneOnBodySlamConfig
   | SceneOnSlamConfig
   | SceneOnSecretPowerConfig
@@ -3084,6 +3104,8 @@ export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
 export type SceneOnBlockPresentationState =
   SceneOnMovePresentationState<SceneOnBlockConfig>;
+export type SceneOnRockTombPresentationState =
+  SceneOnMovePresentationState<SceneOnRockTombConfig>;
 export type SceneOnPerishSongPresentationState =
   SceneOnMovePresentationState<SceneOnPerishSongConfig>;
 export type SceneOnNeedleArmPresentationState =
@@ -5836,6 +5858,12 @@ export interface SceneOnBlockView extends BlockState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnRockTombView extends RockTombState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly effectCenter: Readonly<{ x: number; y: number }>;
+}
+
 /** `age=0` is BLOCK's source `loadspritegfx` display. */
 export function sceneOnBlockView(
   state: SceneOnMovePresentationState<SceneOnBlockConfig>,
@@ -5852,6 +5880,25 @@ export function sceneOnBlockView(
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is ROCK TOMB's source `loadspritegfx` display. */
+export function sceneOnRockTombView(
+  state: SceneOnMovePresentationState<SceneOnRockTombConfig>,
+): SceneOnRockTombView {
+  if (state.config.move !== "ROCK_TOMB") {
+    throw new Error(`expected ROCK_TOMB presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...rockTombAtAge(state.age, {
+      targetSpriteSlot: state.config.targetSpriteSlot,
+      targetInitialX2: state.config.targetInitialX2,
+      targetCenter: state.config.effectCenter,
+    } satisfies RockTombConfig),
+    effectCenter: state.config.effectCenter,
   };
 }
 

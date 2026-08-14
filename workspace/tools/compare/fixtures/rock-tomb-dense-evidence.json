@@ -1,0 +1,35 @@
+{
+  "schema": "rock-tomb-dense-evidence/v1",
+  "profile": "battle-scene-on",
+  "move": "MOVE_ROCK_TOMB",
+  "status": "exact",
+  "freshness": { "coarseGate": "failed", "pathScopedOracleBootstrapToolingDiff": [], "materiallyFresh": true },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-rock-tomb-player-grimer-opponent-onix.json",
+      "scenarioSha256": "482fcae82fc46ad492fc26e1dc6f9dea9547398d9787814206e033531295ffbb",
+      "sourceWindow": { "startFrame": 217, "endFrame": 390, "frameCount": 174 },
+      "stateGzip": "tools/compare/evidence/rock-tomb-player-dense-state.json.gz",
+      "stateGzipSha256": "acdadfecc2696700dacc0b13d2ef16886b3efdab30c9c2e522df6d2e97ef9648",
+      "stateSha256": "a480b906533415d38636e2d3bd1aaa0c2e7e87439094447e6988792f8cc14d08",
+      "rawRgbArchive": "tools/compare/evidence/rock-tomb-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "0f0b9a2ab307253da54d0cf59ef2a5825d52d37798a8f30fb00990e4d5902bd9",
+      "changeMap": "tools/compare/evidence/rock-tomb-changemap-player.txt",
+      "changeMapSha256": "58e21ab113979298509df6b04d37f06de705ed676bc98039f3a1e2ab85b753a7"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-rock-tomb-opponent-grimer-player-onix.json",
+      "scenarioSha256": "e9daeec4dd4055a6f1428bee85722dcda9cca3afd69d18b4237e793f1a54586c",
+      "sourceWindow": { "startFrame": 229, "endFrame": 402, "frameCount": 174 },
+      "stateGzip": "tools/compare/evidence/rock-tomb-opponent-dense-state.json.gz",
+      "stateGzipSha256": "af616bc3c654d91af1c251fa143d20d0fbbc95100f8cf792b42b47eeced02a53",
+      "stateSha256": "f2e7f0ca2a448792598347429d5367c68d1f4859626ac7eb1175066f7791bd4a",
+      "rawRgbArchive": "tools/compare/evidence/rock-tomb-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "bd5bc48b57376307c69a7f3e211f219b60072b549a732a39cf24ce0e1cefb28f",
+      "changeMap": "tools/compare/evidence/rock-tomb-changemap-opponent.txt",
+      "changeMapSha256": "e967063de8886772262922748a06e22b03d9208c42d547e8140a20fdc683fc79"
+    }
+  },
+  "acceptance": { "sourceRows": 348, "rawRgbRows": 348, "freshRuns": 2, "reducerRows": 348, "seamRows": 348, "hardwareOamRows": 346, "hardwareMatrixRows": 346, "hardwarePaletteRows": 346, "audioRows": 10, "immutableStateRows": 348, "framebufferRows": 348, "residualAges": "none" },
+  "siblingAudit": { "move": "MOVE_HYPER_VOICE", "status": "unsupported", "inherited": false }
+}

@@ -949,6 +949,7 @@ import {
   sceneOnDrillPeckView,
   sceneOnWhirlwindView,
   sceneOnBlockView,
+  sceneOnRockTombView,
   sceneOnBodySlamView,
   sceneOnSlamView,
   sceneOnSecretPowerView,
@@ -1117,6 +1118,7 @@ import {
   type SceneOnDrillPeckConfig,
   type SceneOnWhirlwindConfig,
   type SceneOnBlockConfig,
+  type SceneOnRockTombConfig,
   type SceneOnBodySlamConfig,
   type SceneOnSlamConfig,
   type SceneOnSecretPowerConfig,
@@ -1204,6 +1206,10 @@ import {
 } from "../animation/shadowPunch.ts";
 import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
 import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
+import {
+  rockTombSettledRocksForPainter,
+  rockTombTargetDisplayX2,
+} from "../animation/rockTomb.ts";
 import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
 import { SHAKE_FIRST_STEP_AGE } from "../animation/crushClaw.ts";
@@ -19339,6 +19345,142 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SUDOWOODO used" : "Foe SUDOWOODO used",
       "BLOCK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "ROCK_TOMB") {
+    const rockState =
+      state as SceneOnMovePresentationState<SceneOnRockTombConfig>;
+    const view = sceneOnRockTombView(rockState);
+    // The retained bilateral maps prove ordinary OBJ/BG3 transfers from the
+    // preceding software state.  This is the presentation seam's sole
+    // hardware rule: the compositor consumes the source-relative preceding
+    // age, never an absolute battle tick or a captured framebuffer.
+    const displayed = sceneOnRockTombView({
+      ...rockState,
+      age: rockState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "GRIMER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ROCK_TOMB pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attackerSource = playerToOpponent ? grimerBackSprite : grimerFrontSprite;
+    const attackerSprite = playerToOpponent
+      ? attackerSource
+      : { ...attackerSource, tileset: subTileset(attackerSource.tileset, 0, 8) };
+    const targetSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const targetSprite = playerToOpponent
+      ? { ...targetSource, tileset: subTileset(targetSource.tileset, 0, 8) }
+      : targetSource;
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const targetDisplayX2 = rockTombTargetDisplayX2(rockState.age, {
+      targetSpriteSlot: rockState.config.targetSpriteSlot,
+      targetInitialX2: rockState.config.targetInitialX2,
+      targetCenter: displayed.effectCenter,
+    });
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      view.target.geometry.spriteCorner.x + targetDisplayX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const drawRock = (rock: typeof displayed.rocks[number]): void => {
+      drawSpriteSheet(
+        fb,
+        subTileset(battleAnimRocks.tileset, 0, 4),
+        battleAnimRocks.palette,
+        displayed.effectCenter.x + rock.x2 - 16,
+        displayed.effectCenter.y + rock.y2 - 16,
+      );
+    };
+    const drawXSign = (): void => {
+      if (displayed.redX === null || displayed.redX.invisible) return;
+      drawSpriteSheet(
+        fb,
+        blockArt.xSign.tileset,
+        blockArt.xSign.palette,
+        displayed.effectCenter.x - 32,
+        displayed.effectCenter.y - 32,
+      );
+    };
+    if (displayed.battleBg3.y !== 0) {
+      drawStaticBgShiftedY(fb, displayed.battleBg3.y);
+    } else {
+      drawStaticBgShiftedX(fb, displayed.battleBg3.x);
+    }
+    // BuildOamBuffer's stable order puts the third falling rock behind the
+    // target while the settled rocks and Red-X are in front.  The source
+    // sprite order is front-to-back, so the software compositor paints the
+    // falling rock first, then the target, then the remaining effect sprites.
+    // This is source-relative layering, not a frame lookup: the reducer's
+    // slot identities keep the rule valid as each rock is created/destroyed.
+    const fallingRock = displayed.rocks.find((rock) => rock.slot === 5);
+    const sourceSettledOrder = rockTombSettledRocksForPainter(displayed);
+    if (playerToOpponent) {
+      if (fallingRock !== undefined) drawRock(fallingRock);
+      drawTarget();
+      for (const rock of sourceSettledOrder) drawRock(rock);
+      drawAttacker();
+    } else {
+      if (fallingRock !== undefined) drawRock(fallingRock);
+      drawTarget();
+      drawAttacker();
+      for (const rock of sourceSettledOrder) drawRock(rock);
+    }
+    drawXSign();
+
+    const profile = rockState.config.fieldProfile;
+    const opponentSpecies = playerToOpponent ? "ONIX" : "GRIMER";
+    const playerSpecies = playerToOpponent ? "GRIMER" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "GRIMER used" : "Foe GRIMER used",
+      "ROCK TOMB!",
       99,
     );
     return;
