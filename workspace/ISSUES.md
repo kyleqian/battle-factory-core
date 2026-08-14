@@ -17,6 +17,54 @@ backlog.
 
 # Open
 
+## #87 — Battle-start ready-frame formula is missing the ROM's pre-first-turn span (universal +4..+7 tick late-fire)
+
+**Symptom:** the app's predicted first-action-menu-ready frame
+(`generatedBattleStartCommandReady` family, `src/engine/battleScene.ts:4437-4600`)
+fires 4-7 ticks EARLY relative to the oracle's real menu-open, with a
+per-fixture magnitude. Confirmed table (2026-08-14, four probes):
+
+| fixture | route | opponent (dispatchDelay) | residual |
+| --- | --- | --- | --- |
+| silver Noland reveal | factoryBrain + overrides | TANGELA (86) | +7 |
+| PUPITAR/DELCATTY probe | mechanicLab (109, ch2) | PUPITAR (67) | +7 |
+| gold Noland dense | factoryBrain free-run | BLAZIKEN (132) | +5 |
+| QUINN low-dispatch | factoryLegal real-gen | WEEPINBELL (85) | +4 |
+| GRIMER/YOSHI, KADABRA/SHIZUKA | factoryLegal | (≥101) | +4/+5 by RAM predicate |
+
+**Confirmed mechanism (source-located, not yet modeled):**
+`TryDoEventsBeforeFirstTurn`'s switch-in ability/item/weather loop plus
+`HandleTurnActionSelectionState`'s `ChooseAction` dispatch
+(`reference/pokeemerald/src/battle_main.c`) run between send-out completion
+and menu interactivity — a real ROM span the current formula has NO term
+for. Span length varies per battle (plausibly with the switch-in
+processing content), which is why no flat constant fits: an empirical
+bisection of a flat K peaked at 690/701 on the silver window (K=9) and was
+reverted (PROGRESS 1264).
+
+**Eliminated with committed instruments:** `overrides.parties` staging
+(± differential, offsets all zero — `docs/overrides-ready-lag-probe.md`);
+the `dispatchDelay(opponent)<101` regime discriminator (gold BLAZIKEN 132
+shows +5 — `docs/ready-lag-discriminator-scout.md` + the falsification
+round in `docs/trainer-pic-off-window-scout.md`); species/cry-proportional
+scaling (+7 identical across dispatchDelay 86 and 67). NOTE the historical
+"0-residual" points were PNG-landmark reads; the RAM handshake predicate
+(`tools/probe/probe-ready-lag-chooseaction-handshake.ts`) shows they carry
++4/+5 too — the late-fire is universal, not route-gated.
+
+**Why it matters:** caps the silver Brain-reveal compare at 648/701 (its
+last 53 frames) and will shave the tail of any future battle-start window
+extended to the true ready frame. Committed windows that end before their
+ready transition (gold 700/701, Lukas, Yoshi, shizuka) are unaffected.
+
+**Next instrument (from PROGRESS 1264):** first resolve the separate small
+frames-647-653 bbox residual on the silver window (it may mask the true
+optimum), then model the located span from source — count the actual
+`TryDoEventsBeforeFirstTurn` iterations for each fixture's exact parties
+(abilities/items present) and check the per-fixture span predicts
++7/+7/+5/+4; the four dense fixtures + probes above are the validation
+matrix. All instruments are committed and rerunnable.
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **User decision (2026-08-10): the playable path stays FAITHFUL — no
