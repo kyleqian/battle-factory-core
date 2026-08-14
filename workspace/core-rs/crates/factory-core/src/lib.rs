@@ -55,6 +55,8 @@ pub mod battle_script_setyawn;
 pub mod battle_script_setyawn_vectors_gen;
 pub mod battle_script_trycopyability;
 pub mod battle_script_trycopyability_vectors_gen;
+pub mod battle_script_trysetdestinybondtohappen;
+pub mod battle_script_trysetdestinybondtohappen_vectors_gen;
 pub mod battle_script_trysetgrudge;
 pub mod battle_script_trysetgrudge_vectors_gen;
 pub mod damage_calc;
