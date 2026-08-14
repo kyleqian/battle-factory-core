@@ -5,6 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1251 — [supervisor, 2026-08-14] **Orient folds verified; Noland program round 1 dispatched**
+
+- **State:** master holds both lane folds and the full union is green. The
+  main lane's program is Noland per the 2026-08-13 user decisions: port
+  `FillFactoryBrainParty` with pool/rules/odds receipts, then the
+  battles-21/42 round-loop branch and the Brain staging representation.
+- **Did:** folded `animation-main` (Memento source-checkpoint test
+  strengthening, `f22e828e`) and `rust-main` (M14-class battler-position
+  resolver port, `d46ec3ec`) into master. Union verification: cargo native
+  green; wasm artifact rebuilt **507,847 B** `4e540a35…`; forced-WASM
+  parity **18 files / 803 tests**; full npm **1,047 files / 9,864 passed /
+  1 skipped**; build green. Both sibling supervisors (animation, rust) were
+  live in their worktrees throughout; folds touched only master.
+- **Next:** verify round-1 results — ts lane: pure
+  `factoryBrainOpponentGeneration` port + Tier-1 receipts; side lane:
+  twice-fresh mGBA `FillFactoryBrainParty` receipts with LR-attributed draw
+  ledgers (silver challengeNum 2; gold 5 if cap permits). Then rung 2: the
+  differential structure check consuming both.
+- **Notes:** oracle 8014/8012 left untouched (coarse freshness failure is
+  the recorded docs-only false positive; 39ca5d64 + these folds change no
+  harness contract). Wind-down must re-check both lane branches for new
+  sibling commits.
+
 ## 1250 — [solo session, 2026-08-13] **#55 check-in: grind PARKED, main lane redirected to the Noland program**
 
 - **State:** the #55 opinion check-in promised on 2026-08-10 happened. User
@@ -53,22 +76,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   exact**; Memento source **3/3**. Production soaks are vanilla **20/20** and
   full **60/60**, with **0 crashes / 0 hangs**. No unsupported barrier or
   DEFERRED entry.
-
-## 1248 — [MAIN worker, 2026-08-13] **CGB4 v44 fifth clear-route positive continuation checkpoint**
-
-- **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**
-  CGB4 prefix. The frozen 0x83 nonzero-mask row remains at v42 before its
-  body; the two clear rows stop immediately before the sixth-track flags load.
-- **Did:** source-only v44 freezes v43/v42 and inherited artifacts byte-for-byte,
-  joins only the two v43 clear rows by `sourceStateDigest`, and proves the exact
-  `movs r0, MusicPlayerTrack_size; adds r5, r0; bgt _081DD9C8` body at
-  `50 20 2d 18 ad dc`. Static MPlay/cry storage is IWRAM, so the taken `bgt`
-  costs **12×2 = 24** cycles (**6,234 → 6,258**); no sixth-track scalar,
-  flags decision/body, exit, or broader loop is claimed.
-- **Next:** finish the required smoke/full/build verification from this clean
-  checkpoint; keep all follow-on body, MPlay/service/arbitration, live clock,
-  production, presentation, animation, Rust, and canonical Battle-2 work out
-  of scope.
-- **Notes:** evidence/doc `f5dc524a…` / `a1cd1558…`; isolated regeneration
-  matches both byte-for-byte and focused v44 is **6/6**. No oracle capture,
-  `src/**` change, ratchet/barrier, ROADMAP/DEFERRED/ISSUES, or animation change.

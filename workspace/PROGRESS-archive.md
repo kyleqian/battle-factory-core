@@ -1,3 +1,22 @@
+## 1248 — [MAIN worker, 2026-08-13] **CGB4 v44 fifth clear-route positive continuation checkpoint**
+
+- **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**
+  CGB4 prefix. The frozen 0x83 nonzero-mask row remains at v42 before its
+  body; the two clear rows stop immediately before the sixth-track flags load.
+- **Did:** source-only v44 freezes v43/v42 and inherited artifacts byte-for-byte,
+  joins only the two v43 clear rows by `sourceStateDigest`, and proves the exact
+  `movs r0, MusicPlayerTrack_size; adds r5, r0; bgt _081DD9C8` body at
+  `50 20 2d 18 ad dc`. Static MPlay/cry storage is IWRAM, so the taken `bgt`
+  costs **12×2 = 24** cycles (**6,234 → 6,258**); no sixth-track scalar,
+  flags decision/body, exit, or broader loop is claimed.
+- **Next:** finish the required smoke/full/build verification from this clean
+  checkpoint; keep all follow-on body, MPlay/service/arbitration, live clock,
+  production, presentation, animation, Rust, and canonical Battle-2 work out
+  of scope.
+- **Notes:** evidence/doc `f5dc524a…` / `a1cd1558…`; isolated regeneration
+  matches both byte-for-byte and focused v44 is **6/6**. No oracle capture,
+  `src/**` change, ratchet/barrier, ROADMAP/DEFERRED/ISSUES, or animation change.
+
 ## 1247 — [MAIN worker, 2026-08-13] **CGB4 v43 fifth clear-route decrement/exit decision green**
 
 - **State:** #55 is source-exact through the mixed selected-row **6,234-cycle**
