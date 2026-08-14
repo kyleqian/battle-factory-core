@@ -49,7 +49,7 @@ function configFrom(first: SourceRow): MementoConfig {
   };
 }
 
-function sourceProjection(row: SourceRow): Omit<MementoState, "age" | "phase" | "monbg"> {
+function sourceProjection(row: SourceRow, config: MementoConfig): Omit<MementoState, "age" | "phase"> {
   const task = row.tasks[0]
     ? { name: row.tasks[0].func.symbol, data: row.tasks[0].data }
     : null;
@@ -76,6 +76,14 @@ function sourceProjection(row: SourceRow): Omit<MementoState, "age" | "phase" | 
       win0h: row.battleBg.gBattle_WIN0H,
       win0v: row.battleBg.gBattle_WIN0V,
     },
+    monbg: {
+      attacker: config.attacker.bg === "BG1"
+        ? row.battleBg.gBattle_BG1_X === config.attacker.bgX && row.battleBg.gBattle_BG1_Y === config.attacker.bgY
+        : row.battleBg.gBattle_BG2_X === config.attacker.bgX && row.battleBg.gBattle_BG2_Y === config.attacker.bgY,
+      target: config.target.bg === "BG1"
+        ? row.battleBg.gBattle_BG1_X === config.target.bgX && row.battleBg.gBattle_BG1_Y === config.target.bgY
+        : row.battleBg.gBattle_BG2_X === config.target.bgX && row.battleBg.gBattle_BG2_Y === config.target.bgY,
+    },
     registers: {
       win0h: row.registers.win0h,
       win0v: row.registers.win0v,
@@ -89,16 +97,19 @@ function sourceProjection(row: SourceRow): Omit<MementoState, "age" | "phase" | 
       target: (row.battlerSprites.target.attr[2] >>> 10) & 3,
     },
     blackBgPaletteIds,
-  } as Omit<MementoState, "age" | "phase" | "monbg">;
+  } as Omit<MementoState, "age" | "phase">;
 }
 
-function reducerProjection(state: MementoState): Omit<MementoState, "age" | "phase" | "monbg"> {
-  const { age: _age, phase: _phase, monbg: _monbg, ...projection } = state;
+function reducerProjection(state: MementoState): Omit<MementoState, "age" | "phase"> {
+  const { age: _age, phase: _phase, ...projection } = state;
   return projection;
 }
 
 function assertRowEqual(age: number, actual: unknown, expected: unknown): void {
-  if (JSON.stringify(actual) === JSON.stringify(expected)) return;
+  const stable = (value: any): any => Array.isArray(value) ? value.map(stable)
+    : value && typeof value === "object"
+      ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, stable(value[key])])) : value;
+  if (JSON.stringify(stable(actual)) === JSON.stringify(stable(expected))) return;
   const actualRow = actual as Record<string, unknown>;
   const expectedRow = expected as Record<string, unknown>;
   const fields = Object.keys(expectedRow).filter((key) =>
@@ -112,11 +123,12 @@ describe("MOVE_MEMENTO source-relative reducer", () => {
     it(`matches every retained ${orientation} source row explicitly`, () => {
       const probe = JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"));
       const rows = probe.frames as SourceRow[];
-      const states = reduceMemento(configFrom(rows[0]!));
+      const config = configFrom(rows[0]!);
+      const states = reduceMemento(config);
       expect(states).toHaveLength(rows.length);
       let matching = 0;
       for (const [age, row] of rows.entries()) {
-        assertRowEqual(age, reducerProjection(states[age]!), sourceProjection(row));
+        assertRowEqual(age, reducerProjection(states[age]!), sourceProjection(row, config));
         matching += 1;
       }
       expect(matching).toBe(orientation === "player-back" ? 178 : 175);
@@ -129,7 +141,7 @@ describe("MOVE_MEMENTO source-relative reducer", () => {
     const rows = structuredClone(probe.frames) as SourceRow[];
     rows[53]!.scanlineBuffers[0][17] ^= 1;
     const states = reduceMemento(configFrom(rows[0]!));
-    expect(() => assertRowEqual(53, reducerProjection(states[53]!), sourceProjection(rows[53]!))).toThrow();
+    expect(() => assertRowEqual(53, reducerProjection(states[53]!), sourceProjection(rows[53]!, configFrom(rows[0]!)))).toThrow();
   });
 
   it("does not mutate reducer configuration or battle-facing retained state", () => {

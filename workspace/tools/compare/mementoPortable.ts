@@ -29,6 +29,10 @@ const selected = process.argv.includes("--orientation")
 const receipt = JSON.parse(readFileSync(resolve(root, receiptPath), "utf8")) as Receipt;
 const sha256 = (value: Buffer | string): string => createHash("sha256").update(value).digest("hex");
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+const stable = (value: any): any => Array.isArray(value) ? value.map(stable)
+  : value && typeof value === "object"
+    ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, stable(value[key])])) : value;
+const sameValue = (a: unknown, b: unknown): boolean => JSON.stringify(stable(a)) === JSON.stringify(stable(b));
 
 function battlerConfig(row: Row, which: "attacker" | "target"): MementoBattlerConfig {
   const battler = row.animationBattlers[which] as 0 | 1;
@@ -59,7 +63,7 @@ function reducerConfig(first: Row): MementoConfig {
   };
 }
 
-function sourceProjection(row: Row): unknown {
+function sourceProjection(row: Row, config: MementoConfig): unknown {
   const task = row.tasks[0] ? { name: row.tasks[0].func.symbol, data: row.tasks[0].data } : null;
   return {
     active: row.gAnimScriptActive, scriptOffset: row.scriptOffset,
@@ -73,6 +77,14 @@ function sourceProjection(row: Row): unknown {
       bg1X: row.battleBg.gBattle_BG1_X, bg1Y: row.battleBg.gBattle_BG1_Y,
       bg2X: row.battleBg.gBattle_BG2_X, bg2Y: row.battleBg.gBattle_BG2_Y,
       win0h: row.battleBg.gBattle_WIN0H, win0v: row.battleBg.gBattle_WIN0V,
+    },
+    monbg: {
+      attacker: config.attacker.bg === "BG1"
+        ? row.battleBg.gBattle_BG1_X === config.attacker.bgX && row.battleBg.gBattle_BG1_Y === config.attacker.bgY
+        : row.battleBg.gBattle_BG2_X === config.attacker.bgX && row.battleBg.gBattle_BG2_Y === config.attacker.bgY,
+      target: config.target.bg === "BG1"
+        ? row.battleBg.gBattle_BG1_X === config.target.bgX && row.battleBg.gBattle_BG1_Y === config.target.bgY
+        : row.battleBg.gBattle_BG2_X === config.target.bgX && row.battleBg.gBattle_BG2_Y === config.target.bgY,
     },
     registers: {
       win0h: row.registers.win0h, win0v: row.registers.win0v,
@@ -89,7 +101,7 @@ function sourceProjection(row: Row): unknown {
 }
 
 function reducerProjection(state: MementoState): unknown {
-  const { age: _age, phase: _phase, monbg: _monbg, ...projection } = state;
+  const { age: _age, phase: _phase, ...projection } = state;
   return projection;
 }
 
@@ -102,7 +114,8 @@ function validate(orientation: Orientation, config: ReceiptRow, probe: Row, rgbD
   const first = frames[0]!; const rawHash = createHash("sha256");
   let priorOam = 0, priorMatrices = 0, priorPalette = 0;
   let reducerRows = 0;
-  const reduced = reduceMemento(reducerConfig(first));
+  const sourceConfig = reducerConfig(first);
+  const reduced = reduceMemento(sourceConfig);
   if (reduced.length !== frames.length) throw new Error(`${orientation}: reducer window ${reduced.length}/${frames.length}`);
   const sameRowPaletteAges: number[] = [], monbgPaletteExceptionAges: number[] = [];
   for (const [age, row] of frames.entries()) {
@@ -116,7 +129,7 @@ function validate(orientation: Orientation, config: ReceiptRow, probe: Row, rgbD
       || !row.registers || !row.battleBg || !row.audio?.SE1 || !row.audio?.SE2) throw new Error(`${orientation} age ${age}: retained surface`);
     if (!same(row.battlers, first.battlers) || !same(row.parties, first.parties)
       || !same(row.immutableState, first.immutableState)) throw new Error(`${orientation} age ${age}: gameplay state mutated`);
-    if (!same(reducerProjection(reduced[age]!), sourceProjection(row))) throw new Error(`${orientation} age ${age}: reducer/source mismatch`);
+    if (!sameValue(reducerProjection(reduced[age]!), sourceProjection(row, sourceConfig))) throw new Error(`${orientation} age ${age}: reducer/source mismatch`);
     reducerRows++;
     const raw = readFileSync(join(rgbDir, `${String(row.frame).padStart(5, "0")}.rgb`)); rawHash.update(raw);
     if (sha256(raw) !== row.sha256) throw new Error(`${orientation} age ${age}: raw RGB`);
