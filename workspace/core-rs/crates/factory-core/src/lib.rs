@@ -21,6 +21,8 @@ pub mod battle_script_gender;
 pub mod battle_script_gender_vectors_gen;
 pub mod battle_script_negativedamage;
 pub mod battle_script_negativedamage_vectors_gen;
+pub mod battle_script_normalisebuffs;
+pub mod battle_script_normalisebuffs_vectors_gen;
 pub mod battle_script_setalwayshitflag;
 pub mod battle_script_setalwayshitflag_vectors_gen;
 pub mod battle_script_setdefensecurlbit;
