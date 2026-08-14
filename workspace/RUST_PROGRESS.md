@@ -5,6 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R23 — [supervised session, 2026-08-14] **M22 Battle Script Defense Curl state leaf**
+
+- **State:** `rust-main` = current master `58a818fd` plus the verified Defense
+  Curl worker through merge `6f1b4f88`. The complete pure
+  `battleScriptSetDefenseCurlBitOpcode.ts` state projection is native and
+  wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported exact missing-attacker ordering and the unconditional,
+  idempotent attacker-only `STATUS2_DEFENSE_CURL` OR with `Advance`. Stat
+  changes, absolute program counters, opcode registration, generic
+  BattleState reduction, RNG, scheduling, and presentation remain outside the
+  narrow result. Canonical TypeScript execution supplies **27 cases** across
+  all four attackers, clear/set inputs, u32 edges, sibling preservation,
+  missing attacker, and repeated application; corpus sha256
+  `39dd1fb0a8d96809508adfd1282eef87c6fc202f49920bb009d80ce61b839825`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited source and
+  canonical-handler execution, regenerated twice byte-identically (generated
+  sha256
+  `904047b8ffa00588b42c813709536dd7e5b397e59291f7c994a6c3847e1fdb93`),
+  and reran focused **5/5**, cargo **800/800**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,013 passed files / 44 grind files skipped; 9,757
+  passed / 223 skipped tests**, and build **668 modules**. The main fold's
+  CGB4 opt-in gate reduced the supervisor full suite to **84.53 s**. Artifact
+  is **510,065 bytes**, sha256
+  `62a2a1a4baa70500da6f5465fb75beb54acd8901a9a8ff3ce1cc45f1ec4ecd34`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: before the CGB4 gate reached this worktree, the worker's repeated
+  full npm verification took ~20m45s under shared-machine contention.
+
 ## R22 — [supervised session, 2026-08-14] **M21 Battle Script Foresight state leaf**
 
 - **State:** `rust-main` = current master `9deb3cae` plus the verified
@@ -73,33 +106,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the Battle Scene OFF oracle remained healthy.
   PAPERCUT: recursive CGB4 evidence dominated both required full npm runs;
   worker and supervisor runs cost ~22 min combined.
-
-## R20 — [supervised session, 2026-08-14] **M19 Battle Script Yawn decision/state leaf**
-
-- **State:** `rust-main` = current master `438d06ba` plus verified R15-R20
-  through `4d0fa001`. The complete pure `battleScriptSetyawnOpcode.ts`
-  decision/state projection is native and wasm32-compilable; no ABI or
-  adapter surface was widened.
-- **Did:** ported exact missing-target ordering, the source-ordered
-  `STATUS3_YAWN || STATUS1_ANY` failure decision with unchanged state, and the
-  success advance that ORs a fresh two-turn counter into only the target.
-  Absolute program counters stay outside the narrow `Advance | FailJump`
-  result. Canonical TypeScript execution supplies **96 cases** across all
-  targets, all four Yawn counters, every primary-status member, OR
-  combinations, u32 edges, and repeated success/failure; corpus sha256
-  `bfaba855da35331383adfd4281e1194e16eb8bb66e3a800e81b733bfd511de79`.
-- **Next:** select at most one final conflict-free pure Battle Script leaf,
-  then begin mandatory wind-down validation and soaks. M7c opponent generation
-  remains deferred while Issue #55 is open.
-- **Notes:** Terra/max worker, one commit. Supervisor audited exact status
-  masks, target-only mutation, and the narrow control result; regenerated
-  twice byte-identically (generated sha256
-  `77bfb1165b49ff39f76a3497f6089924bc5eb30d266fea63b941959fd7ffdf10`),
-  and reran focused **5/5**, cargo **785/785**, fmt, strict Clippy, wasm32
-  release, forced-WASM union **19 files / 807/807**, and smoke **375/375**.
-  Worker same-commit full npm was **1,047 files / 9,864 passed / 1 skip**;
-  build was **664 modules**. Artifact is **509,478 bytes**, sha256
-  `6196301dc2313b1ab768563da1c66e96a53250dabcbb595570940ab5358254ca`.
-  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
-  PAPERCUT: cargo was absent from the worker login PATH; explicit toolchain
-  setup cost ~1 min.
