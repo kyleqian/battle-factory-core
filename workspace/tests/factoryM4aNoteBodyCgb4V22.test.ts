@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4R4TakenSuccessorPrefixTiming,
@@ -21,7 +22,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 r4-taken successor prefix v22", () => {
+describeCgb4Evidence("Issue #55 CGB4 r4-taken successor prefix v22", () => {
   it("prices every fixed successor-prefix halfword without a control-transfer or IWRAM premium", () => {
     const timing = reduceCgb4R4TakenSuccessorPrefixTiming({ r4Nonzero: true });
     expect(timing).toEqual({

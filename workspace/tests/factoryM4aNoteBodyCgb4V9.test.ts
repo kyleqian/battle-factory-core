@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   CGB4_PAN_SWEEP_STATE,
   makeEvidence,
@@ -12,7 +13,7 @@ import {
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v9.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v9.md";
 
-describe("Issue #55 CGB4 pan_sweep caller slice v9", () => {
+describeCgb4Evidence("Issue #55 CGB4 pan_sweep caller slice v9", () => {
   it("source-counts the observed zero pan_sweep route through call_r3 entry", () => {
     expect(reduceMPlayCgb4PanSweepToCallR3Timing(CGB4_PAN_SWEEP_STATE)).toEqual({
       route: "pan-sweep-zero-to-call-r3-entry",

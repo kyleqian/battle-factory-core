@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   CGB4_POST_CHN_VOL_SET_STATE,
   makeEvidence,
@@ -12,7 +13,7 @@ import {
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v8.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v8.md";
 
-describe("Issue #55 CGB4 post-ChnVolSetAsm caller slice v8", () => {
+describeCgb4Evidence("Issue #55 CGB4 post-ChnVolSetAsm caller slice v8", () => {
   it("source-counts the observed key-plus-keyM CGB route to the pan_sweep boundary", () => {
     expect(reduceMPlayCgb4PostChnVolSetTiming(CGB4_POST_CHN_VOL_SET_STATE)).toEqual({
       route: "post-ChnVolSetAsm-key-plus-keyM-to-pan-sweep-boundary",

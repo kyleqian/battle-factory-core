@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   CGB4_POST_TRKVOLPITSET_ALLOCATION_STATE,
   makeEvidence,
@@ -12,7 +13,7 @@ import {
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v6.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v6.md";
 
-describe("Issue #55 CGB4 post-TrkVolPitSet allocation fields v6", () => {
+describeCgb4Evidence("Issue #55 CGB4 post-TrkVolPitSet allocation fields v6", () => {
   it("source-counts the straight-line field copies and ChnVolSetAsm caller edge", () => {
     expect(reduceMPlayCgb4PostTrkVolPitSetAllocationTiming(CGB4_POST_TRKVOLPITSET_ALLOCATION_STATE)).toEqual({
       route: "post-TrkVolPitSet-allocation-fields-to-ChnVolSetAsm-entry",

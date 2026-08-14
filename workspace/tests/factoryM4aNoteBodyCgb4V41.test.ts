@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4FifthTrackFlagsTiming,
@@ -38,7 +39,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 fifth-track MPT_FLG_EXIST decision v41", () => {
+describeCgb4Evidence("Issue #55 CGB4 fifth-track MPT_FLG_EXIST decision v41", () => {
   let evidence: any;
 
   beforeAll(() => {

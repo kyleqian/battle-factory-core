@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import { makeEvidence, reduceCgb4SecondTrackFlagsTiming } from "../tools/report/factory-m4a-note-body-cgb4-v29.ts";
 
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v29.json";
@@ -15,7 +16,7 @@ const DIGESTS = [
 ];
 const sha256 = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex");
 
-describe("Issue #55 CGB4 second-track flags v29", () => {
+describeCgb4Evidence("Issue #55 CGB4 second-track flags v29", () => {
   it("prices exactly the EXIST decision and fails closed on widened input", () => {
     expect(reduceCgb4SecondTrackFlagsTiming({ secondTrackFlags: 0x80 })).toEqual({
       route: "MPT_FLG_EXIST-set-beq-not-taken", secondTrackFlags: 0x80,

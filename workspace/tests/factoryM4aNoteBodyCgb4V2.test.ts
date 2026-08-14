@@ -2,14 +2,15 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import { makeEvidence, reduceMPlayCgb4MutableChannelTiming } from "../tools/report/factory-m4a-note-body-cgb4-v2.ts";
 
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v2.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v2.md";
 const base = { statusFlags: 1, priority: 0, trackRelation: "greater" as const };
 
-describe("Issue #55 ply_note CGB-channel-4 mutable route v2", () => {
+describeCgb4Evidence("Issue #55 ply_note CGB-channel-4 mutable route v2", () => {
   it("source-counts every status/priority/track branch", () => {
     expect(reduceMPlayCgb4MutableChannelTiming({ effectivePriority: 0, state: { ...base, statusFlags: 0 } })).toMatchObject({ route: "free-channel", executedThumbHalfwords: 4, takenPipelineRefills: 1, iwramByteReads: 1, iwramWordReads: 0, cycles: 14 });
     expect(reduceMPlayCgb4MutableChannelTiming({ effectivePriority: 0, state: { ...base, statusFlags: 0x40 } })).toMatchObject({ route: "stopped-channel", executedThumbHalfwords: 7, takenPipelineRefills: 1, cycles: 20 });
