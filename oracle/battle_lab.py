@@ -5,7 +5,11 @@ rewinds to the canonical rental screen, replaces source-level Factory set IDs,
 re-enters the real rental UI, and lets the ROM construct both parties and
 initialize the battle.  ``mechanicLab`` may instead construct complete legal
 Pokémon in both party buffers before the ROM initializes the battle, or retain
-the legacy active-battler loadout overrides.  It never writes HP, status,
+the legacy active-battler loadout overrides.  ``factoryBrain`` stages Noland's
+challenge-2 (silver) or challenge-5 (gold) final battle: the trainer identity
+is structural (always ``TRAINER_FRONTIER_BRAIN``) and his party is generated
+live by the ROM's ``FillFactoryBrainParty``, with ``overrides.parties``
+optionally pinning a known roster.  It never writes HP, status,
 volatile, stat-stage, weather, side-condition, or other transient battle state.
 
 Raw addresses and C-structure offsets stay private to this module.  The HTTP
@@ -24,6 +28,16 @@ from itertools import permutations
 
 SCHEMA_VERSION = 1
 FACTORY_TRAINERS_COUNT = 300
+# Noland, the Factory's Frontier Brain. His trainer-opponent value lives far
+# outside the 300-row facility catalog (include/constants/trainers.h:12), and
+# his party is generated live by FillFactoryBrainParty
+# (src/battle_factory.c:759) — so factoryBrain requests carry no trainerId,
+# battleNum, or opponentSetIds fields at all; the identity is structural.
+TRAINER_FRONTIER_BRAIN = 1022
+# sFixedIVTable[challengeNum + 2][0] (src/battle_factory.c:157-167, consulted
+# by FillFactoryBrainParty at :772 with isLastBattle=FALSE) at the only two
+# real Noland encounters: silver (challenge 2) and gold (challenge 5).
+FACTORY_BRAIN_FIXED_IVS = {2: 15, 5: 31}
 LEVEL_50_MAX_SET_ID = 849
 ITEMS_COUNT = 377
 ABILITIES_COUNT = 78
@@ -47,6 +61,12 @@ SIDE_TIMER_SIZE = 12
 CONTROLLER_CHOOSE_ACTION = 18
 PLAYER_CONTROLLER_FLAG = 1 << 0
 ACTION_MENU_MAX_ACKS = 12
+# Noland's battle intro ("FACTORY HEAD NOLAND would like to battle!" plus the
+# Brain intro presentation) runs longer than the ordinary trainer intro: a
+# live challenge-2 factoryBrain staging measured 16 ack blocks to the first
+# action menu versus the ordinary 12-block budget. Double the measured need
+# for headroom without becoming unbounded.
+ACTION_MENU_MAX_ACKS_BRAIN = 32
 STATE_BEFORE_ACTION_CHOSEN = 1
 # `SELECT_TO_ACTION_MENU` (the (0, 1, 2) rental-position ordering) is 1886
 # frames, but rental_selection_route()'s real runtime length is data-
@@ -377,25 +397,46 @@ def validate_request(value: object, profile: str) -> dict:
         SCHEMA_VERSION,
     )
     mode = value.get("mode")
-    if mode not in ("factoryLegal", "mechanicLab"):
-        raise ValueError("mode must be 'factoryLegal' or 'mechanicLab'")
+    if mode not in ("factoryLegal", "mechanicLab", "factoryBrain"):
+        raise ValueError("mode must be 'factoryLegal', 'mechanicLab', or 'factoryBrain'")
     requested_profile = value.get("profile", profile)
     if requested_profile != profile:
         raise ValueError(
             f"profile {requested_profile!r} does not match this oracle service ({profile!r})"
         )
     level = _integer(value.get("level", 50), "level", 50, 50)
-    challenge_num = _integer(value.get("challengeNum", 0), "challengeNum", 0, 7)
-    battle_num = _integer(value.get("battleNum", 0), "battleNum", 0, 6)
-    if battle_num == 6 and challenge_num in (2, 5):
-        raise ValueError(
-            "challenge 2/5 battle 6 is a Noland battle; battle-lab schema v1 "
-            "supports regular Factory trainers only"
-        )
-    trainer_id = _integer(value.get("trainerId"), "trainerId", 0, FACTORY_TRAINERS_COUNT - 1)
     max_set_id = LEVEL_50_MAX_SET_ID
+    if mode == "factoryBrain":
+        forbidden = {"trainerId", "battleNum", "opponentSetIds"} & set(value)
+        if forbidden:
+            raise ValueError(
+                "factoryBrain does not accept fields: "
+                f"{', '.join(sorted(forbidden))} (the trainer is implied "
+                "TRAINER_FRONTIER_BRAIN, Noland is always his challenge's "
+                "final battle, and his party is generated live by "
+                "FillFactoryBrainParty, not staged from set IDs)"
+            )
+        challenge_num = _integer(value.get("challengeNum"), "challengeNum", 0, 7)
+        if challenge_num not in (2, 5):
+            raise ValueError(
+                "factoryBrain challengeNum must be 2 (silver) or 5 (gold); "
+                "those are the only real in-game Noland encounters"
+            )
+        battle_num = 6
+        trainer_id = TRAINER_FRONTIER_BRAIN
+        opponent_set_ids = ()
+    else:
+        challenge_num = _integer(value.get("challengeNum", 0), "challengeNum", 0, 7)
+        battle_num = _integer(value.get("battleNum", 0), "battleNum", 0, 6)
+        if battle_num == 6 and challenge_num in (2, 5):
+            raise ValueError(
+                "challenge 2/5 battle 6 is a Noland battle; use mode "
+                "'factoryBrain' to stage it (ordinary trainerId staging of "
+                "Noland remains unsupported)"
+            )
+        trainer_id = _integer(value.get("trainerId"), "trainerId", 0, FACTORY_TRAINERS_COUNT - 1)
+        opponent_set_ids = _set_ids(value.get("opponentSetIds"), "opponentSetIds", max_set_id)
     player_set_ids = _set_ids(value.get("playerSetIds"), "playerSetIds", max_set_id)
-    opponent_set_ids = _set_ids(value.get("opponentSetIds"), "opponentSetIds", max_set_id)
     rental_swap_count = _integer(
         value.get("rentalSwapCount", 0),
         "rentalSwapCount",
@@ -410,6 +451,17 @@ def validate_request(value: object, profile: str) -> dict:
         raise ValueError("factoryLegal does not permit overrides; use mechanicLab")
     if mode == "mechanicLab":
         _validate_loadout_overrides(overrides)
+    if mode == "factoryBrain" and overrides:
+        if "battlers" in overrides:
+            raise ValueError(
+                "factoryBrain does not permit overrides.battlers; the Brain "
+                "party is generated live — pin a known roster with "
+                "overrides.parties instead"
+            )
+        unknown_overrides = set(overrides) - {"parties"}
+        if unknown_overrides:
+            raise ValueError(f"unknown overrides: {', '.join(sorted(unknown_overrides))}")
+        _validate_parties(overrides["parties"])
     trace = value.get("trace", {"segments": [], "captureFrames": [0]})
     if not isinstance(trace, dict):
         raise ValueError("trace must be an object")
@@ -515,7 +567,7 @@ class BattleLab:
         player = [self.catalog.mon(set_id) for set_id in request["playerSetIds"]]
         opponent = [self.catalog.mon(set_id) for set_id in request["opponentSetIds"]]
         rental_plan = self._validate_and_plan(request, player, opponent)
-        if request["mode"] == "mechanicLab":
+        if request["mode"] in ("mechanicLab", "factoryBrain"):
             self._validate_pp_ups(request["overrides"])
             self._validate_custom_parties(request["overrides"])
 
@@ -620,7 +672,14 @@ class BattleLab:
         self._advance(120, (), after_frame)
         for frames, buttons in rental_selection_route(rental_plan.selected_positions):
             self._advance(frames, buttons, after_frame)
-        self._finish_intro_to_action_menu(after_frame)
+        self._finish_intro_to_action_menu(
+            after_frame,
+            max_acks=(
+                ACTION_MENU_MAX_ACKS_BRAIN
+                if request["mode"] == "factoryBrain"
+                else ACTION_MENU_MAX_ACKS
+            ),
+        )
 
         if self.oracle.read_u8(self.oracle.symbols["gBattlersCount"]) != 2:
             raise RuntimeError("battle lab route did not reach a singles battle")
@@ -642,7 +701,7 @@ class BattleLab:
         # User trace frames are relative to the completed lab setup, not the
         # internal route used to reach it.
         self.oracle.frame = 0
-        return {
+        descriptor = {
             "schemaVersion": SCHEMA_VERSION,
             "mode": request["mode"],
             "profile": request["profile"],
@@ -663,6 +722,17 @@ class BattleLab:
             "rangeIndex": challenge_index,
             "preCheckpointCaptures": pre_checkpoint_captures,
         }
+        if request["mode"] == "factoryBrain":
+            # No trainerId/rangeIndex echo: the Brain's identity is structural
+            # and his party never came from catalog set IDs. Instead expose
+            # the party the ROM actually generated (read back from RAM after
+            # battle init) plus the derived fixed IV, so callers can
+            # cross-check against the workspace port without re-deriving.
+            del descriptor["trainerId"]
+            del descriptor["rangeIndex"]
+            descriptor["fixedIv"] = FACTORY_BRAIN_FIXED_IVS[request["challengeNum"]]
+            descriptor["opponentParty"] = self._party("opponent")
+        return descriptor
 
     def preview_report(
         self,
@@ -1346,6 +1416,21 @@ class BattleLab:
         opponent: list[FacilityMon],
     ) -> RentalPlan:
         challenge = min(request["challengeNum"], 7)
+        if request["mode"] == "factoryBrain":
+            # Only the player half stages from set IDs. Noland's party is
+            # generated live by FillFactoryBrainParty once the battle starts,
+            # after the draft, excluding the player's rentals itself — so the
+            # empty opponent list constrains nothing here.
+            for mon in player:
+                if mon.species == SPECIES_UNOWN:
+                    raise ValueError(f"player set {mon.set_id} is Unown, which Factory forbids")
+            self._validate_unique_team("player", player)
+            return self._plan_rentals(
+                challenge,
+                self._rental_rank(request["rentalSwapCount"]),
+                player,
+                opponent,
+            )
         if request["mode"] == "factoryLegal":
             rental_rank = self._rental_rank(request["rentalSwapCount"])
             for mon in player:
@@ -1599,6 +1684,7 @@ class BattleLab:
     def _finish_intro_to_action_menu(
         self,
         after_frame: Callable[[], None] | None = None,
+        max_acks: int = ACTION_MENU_MAX_ACKS,
     ) -> None:
         """Acknowledge variable entrance hooks until the player can act.
 
@@ -1618,7 +1704,7 @@ class BattleLab:
 
         if ready():
             return
-        for _ in range(ACTION_MENU_MAX_ACKS):
+        for _ in range(max_acks):
             self._advance(120, (), after_frame)
             if ready():
                 return

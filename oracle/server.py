@@ -152,7 +152,7 @@ class Handler(BaseHTTPRequestHandler):
                     "battleLab": {
                         "schemaVersion": 1,
                         "endpoint": "/v1/battle-lab/run",
-                        "modes": ["factoryLegal", "mechanicLab"],
+                        "modes": ["factoryLegal", "mechanicLab", "factoryBrain"],
                     },
                 },
             }))

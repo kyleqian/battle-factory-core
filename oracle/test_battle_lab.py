@@ -102,6 +102,21 @@ def request(**changes) -> dict:
     return value
 
 
+def brain_request(**changes) -> dict:
+    value = {
+        "schemaVersion": 1,
+        "mode": "factoryBrain",
+        "profile": "battle-scene-off",
+        "challengeNum": 2,
+        "level": 50,
+        "playerSetIds": [110, 111, 112],
+        "seed": 123,
+        "trace": {"segments": [], "captureFrames": [0]},
+    }
+    value.update(changes)
+    return value
+
+
 def custom_mon(species: int, **changes) -> dict:
     value = {
         "species": species,
@@ -323,6 +338,82 @@ class ValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Noland"):
             validate_request(
                 request(challengeNum=2, battleNum=6, trainerId=140),
+                "battle-scene-off",
+            )
+
+    def test_factory_brain_normalizes_structural_identity(self):
+        value = validate_request(brain_request(), "battle-scene-off")
+        self.assertEqual(value["mode"], "factoryBrain")
+        self.assertEqual(value["trainerId"], 1022)
+        self.assertEqual(value["battleNum"], 6)
+        self.assertEqual(tuple(value["opponentSetIds"]), ())
+        self.assertEqual(value["playerSetIds"], (110, 111, 112))
+
+    def test_factory_brain_accepts_both_real_encounters_only(self):
+        self.assertEqual(
+            validate_request(brain_request(challengeNum=5), "battle-scene-off")["challengeNum"],
+            5,
+        )
+        for challenge_num in (0, 1, 3, 4, 6, 7):
+            with self.assertRaisesRegex(ValueError, "2 \\(silver\\) or 5 \\(gold\\)"):
+                validate_request(
+                    brain_request(challengeNum=challenge_num), "battle-scene-off"
+                )
+
+    def test_factory_brain_requires_challenge_num(self):
+        req = brain_request()
+        del req["challengeNum"]
+        with self.assertRaisesRegex(ValueError, "challengeNum must be an integer"):
+            validate_request(req, "battle-scene-off")
+
+    def test_factory_brain_rejects_explicit_identity_fields(self):
+        for field, sample in (
+            ("trainerId", 50),
+            ("battleNum", 6),
+            ("opponentSetIds", [113, 114, 115]),
+        ):
+            with self.assertRaisesRegex(ValueError, "does not accept fields"):
+                validate_request(
+                    brain_request(**{field: sample}), "battle-scene-off"
+                )
+
+    def test_factory_brain_rejects_battler_overrides(self):
+        with self.assertRaisesRegex(ValueError, "does not permit overrides.battlers"):
+            validate_request(
+                brain_request(
+                    overrides={
+                        "battlers": {
+                            "player": {
+                                "moves": [73, 33, 33, 33],
+                                "ppUps": [0, 0, 0, 0],
+                            }
+                        }
+                    }
+                ),
+                "battle-scene-off",
+            )
+
+    def test_factory_brain_accepts_pinned_party_override(self):
+        value = validate_request(
+            brain_request(
+                overrides={
+                    "parties": {
+                        "player": [custom_mon(1), custom_mon(2), custom_mon(3)],
+                        "opponent": [custom_mon(4), custom_mon(5), custom_mon(6)],
+                    }
+                }
+            ),
+            "battle-scene-off",
+        )
+        self.assertEqual(
+            value["overrides"]["parties"]["opponent"][0]["species"],
+            4,
+        )
+
+    def test_factory_brain_rejects_unknown_overrides(self):
+        with self.assertRaisesRegex(ValueError, "unknown overrides"):
+            validate_request(
+                brain_request(overrides={"weather": "rain"}),
                 "battle-scene-off",
             )
 

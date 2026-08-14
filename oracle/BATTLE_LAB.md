@@ -20,6 +20,18 @@ pixel hashes are unchanged.
   applies the legacy allowlisted loadout choices to the two active Pokémon.
   The stock ROM executes entry hooks, switching, moves, RNG, damage, status,
   and end-turn processing.
+- `factoryBrain` stages Noland, the Factory's Frontier Brain, at one of his
+  two real encounters: `challengeNum` 2 (silver) or 5 (gold). The request has
+  no `trainerId`, `battleNum`, or `opponentSetIds` fields — the trainer is
+  structurally `TRAINER_FRONTIER_BRAIN`, the battle is always the challenge's
+  final one, and the opponent party is generated live by the ROM's
+  `FillFactoryBrainParty` (which draws with the real rejection rules,
+  excluding the staged player rentals, at fixed IV 15/31). The response omits
+  `trainerId`/`rangeIndex` and instead echoes `fixedIv` and `opponentParty`
+  (the ROM-generated roster read back after battle initialization).
+  `overrides.parties` is permitted, to pin a known Brain roster for
+  deterministic replays — the AI still thinks with the Brain's real
+  aggression mask either way; `overrides.battlers` is rejected.
 
 In Emerald's Battle Factory, trainer identity and opponent set generation are
 separate selections within the current challenge band. The Factory does not
@@ -319,9 +331,11 @@ secondary-effect results, battle outcomes, or post-action RNG.
 ## Version-1 boundaries
 
 - Level-50 singles and challenge indices 0 through 7 only.
-- Version 1 stages regular Factory trainers. Noland's challenge-2 and
-  challenge-5 final battles are rejected explicitly until the schema can
-  represent Frontier Brains without pretending they are ordinary trainer IDs.
+- Ordinary modes stage regular Factory trainers; staging Noland through an
+  ordinary `trainerId` stays rejected explicitly. His challenge-2 and
+  challenge-5 final battles are staged through the dedicated `factoryBrain`
+  mode, which represents the Frontier Brain structurally instead of
+  pretending he is an ordinary trainer ID.
 - The source route still needs a legal Factory base battle, represented by
   `playerSetIds` and `opponentSetIds`. In Mechanics Lab, `overrides.parties`
   replaces the resulting three persistent Pokémon on each side before battle
