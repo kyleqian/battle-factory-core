@@ -5,6 +5,78 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1259 — [MAIN worker, 2026-08-14] **Brain presentation seam landed: rungs A-C green (data, wiring, pins); rung D not attempted (time)**
+
+- **State:** `getFactoryTrainerPresentation(1022)` now resolves NOLAND's
+  real identity instead of throwing; `beginFactoryRoundBattleStartIntro`
+  constructs a real battle-start command for the Frontier Brain. The rung-4
+  blocker 1257 found (`factoryTrainerPresentation.ts:78` throwing `missing
+  Battle Frontier trainer 1022`) is closed.
+- **Did:** **Rung A (data)** — every §2.3 field re-derived directly against
+  `reference/pokeemerald` this session (not just the design doc's
+  citations): `GetFrontierBrainTrainerPicIndex`/`…Class`/
+  `CopyFrontierBrainTrainerName` (`frontier_util.c:2443-2481`) all read
+  `gTrainers[TRAINER_NOLAND]` (`src/data/trainers.h:9712-9722`) via
+  `sFrontierBrainTrainerIds[FRONTIER_FACILITY_FACTORY] = TRAINER_NOLAND`
+  (`frontier_util.c:719-728`): `trainerPic = TRAINER_PIC_FACTORY_HEAD_NOLAND`
+  (86, `include/constants/trainers.h:105`; size 8/yOffset 1,
+  `front_pic_tables.h:89`), `trainerClass = TRAINER_CLASS_FACTORY_HEAD`
+  (0x3e=62, `include/constants/trainers.h:350`; display name "FACTORY HEAD",
+  `trainer_class_names.h:64`), `trainerName = "NOLAND"`; gender via
+  `IsFrontierBrainFemale` (`frontier_util.c:2483-2487`) reads
+  `sFrontierBrainObjEventGfx[FACTORY][1] = FALSE` (`frontier_util.c:674`) —
+  male. **Architecture decision:** ported as a source-cited special case in
+  `factoryTrainerPresentation.ts`, NOT injected into the generated 300-row
+  `battle-frontier-trainers.json` — the ROM itself never routes the brain
+  through `gFacilityTrainers`, and folding him in would corrupt that table's
+  "ordinary corpus" invariant the same way design §1 argues against widening
+  the `trainerId` field itself. Same reasoning applied to the pic asset:
+  Noland's `FACTORY_HEAD_NOLAND` sprite sheet was missing from
+  `frontier-trainer-pics.json` (that catalog's own test suite pins it as
+  "all and only" the ordinary 50-picture surface), so a new sibling
+  extractor (`extract-frontier-brain-trainer-pic.ts`, reusing the same
+  PNG/tile helpers) writes a separate additive file
+  (`frontier-brain-trainer-pic.json`); `battleScene.ts`'s
+  `resolveFrontierTrainerPic` now unions both catalogs so callers stay
+  provenance-agnostic. Also fixed `generatedOpponent`'s frontier-brain
+  placeholder `trainerName` (was `"Frontier Brain"`, now sourced from the
+  real presentation) — the identity mismatch check in
+  `factoryTrainerPresentationForOpponent` would otherwise reject it now that
+  1022 resolves to real data. **Rung B (wiring)** —
+  `generatedRoundRevealProofStage`'s `targetBattleIndex` union now admits
+  `6`; live-verified seed 70 / entering streak 14 lands battleIndex 6 at
+  effective streak 21 (silver) with `factorySymbolsCount` defaulted 0, so
+  this exact proof-stage config reaches the Brain deterministically. New
+  test in `factoryRoundIntroGeneralization.test.ts` proves the command
+  builds without throwing. **Rung C (pins)** —
+  `tests/factoryBrainPresentation.test.ts` (new) pins every
+  `CANONICAL_NOLAND_PRESENTATION` field + the special-case-only reachability
+  (1021/300 still throw) + the real pic resolution; extended both existing
+  real-round-shape cases (silver seed 4, gold seed 2) in
+  `factoryBrainRoundShape.test.ts` to drive to battleIndex 6 through the
+  genuine six-real-win orchestrator path and assert the battle-start command
+  carries NOLAND's identity while `currentOpponent.frontierBrain`
+  ({status: silver}/{status: gold}) stays consistent before/after.
+- **Next:** rung D (stretch) was not attempted — time budget. The real next
+  step is exactly what 1257 deferred: a Brain-reveal `APP_STAGES` entry in
+  `tools/compare/appTrace.ts` (the proof-stage plumbing for battleIndex 6 now
+  exists, see rung B) + a paired oracle-side `factoryBrain` scenario (reuse
+  `tools/battle-lab/factory-brain-silver-turn1-off.json` or a dense variant)
+  + a live `npm run compare` FIRST-frame probe. Acceptance is the compare
+  running with an honest mismatch inventory, not pixel exactness — Brain
+  pixels have never been rendered app-side, so a nonzero mismatch count on
+  the first attempt is expected and is the deliverable, not a failure.
+- **Notes:** each rung its own commit (`feat: ... data`, `feat: ... wiring`,
+  `test: ... rung C`), tree green at each; `npm run typecheck` +
+  `test:smoke` between rungs. Finish gate: full `npm test` **1,014 files /
+  9,764 passed, 44 skipped** (the gated CGB4 family per merge `dc57b7c3` —
+  not a regression) in ~2 min; `npm run build` green (669 modules, +1 for
+  the new brain-pic asset/test module). No `unsupported-branch` barrier
+  moved. Nothing outside `workspace/` touched; no oracle service restarted;
+  did not read/edit any `docs/noland-brain-intro-*` doc or
+  `tools/battle-lab/factory-brain-intro-*` fixture (side lane's concurrent
+  scout territory, per this step's OUT OF SCOPE).
+
 ## 1258 — [supervisor, 2026-08-14] **Round 1 folded: §5.2 rungs 1-3 (main) + CGB4 family gated (side salvage)**
 
 - **State:** supervisor session, deadline 17:54. Baseline re-verified at
@@ -116,40 +188,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   1254 flagged — not a regression); `npm run build` green (668 modules).
   Nothing outside `workspace/` touched; no oracle service restarted; no
   `unsupported-branch` barrier moved.
-
-## 1256 — [solo session, 2026-08-14] **factoryBrain lab mode LIVE on :8014; CGB4 test tail measured at 430 s**
-
-- **State:** the 1255 USER handoff (a) is done: the oracle harness accepts
-  `mode: "factoryBrain"` (design §5.1 items 1-7 complete, commit
-  `33354440`), so Brain presentation ground truth is now reachable through
-  the lab. The refreshed battle-scene-off service on **:8014** advertises
-  the mode; **:8012 still runs pre-change code** by design (the animation
-  lane restarts it at its own orient, per its standard freshness flow).
-- **Did:** harness-side `factoryBrain` — structural identity (always
-  `TRAINER_FRONTIER_BRAIN`/final battle; no `trainerId`/`battleNum`/
-  `opponentSetIds` fields), `challengeNum` restricted to `{2, 5}`,
-  `overrides.parties` permitted / `overrides.battlers` rejected,
-  `fixedIv` (15/31) + `opponentParty` (RAM read-back) echoed, Brain intro
-  ack budget 32 (live-measured need 16 vs the ordinary 12). Contract tests
-  **54/54**; new `oracle/battle-lab-brain-smoke-test.py` **32/32** live
-  (silver + gold end-to-end: three ROM-generated mons at the Brain fixed
-  IVs, no duplicate species/items, captured RAM party equal to the echo,
-  all standing rejections intact); existing ordinary-mode smoke green on
-  the new code. MEASURED, quiet host: the **44-file recursive CGB4
-  evidence family alone runs 430 s wall / 5,643 s CPU** — it dominates the
-  ~6-minute full suite (the older isolate:false fix stands; this family
-  landed on top of it and grew quadratically with grind versions).
-- **Next:** main lane: (a) workspace §5.2 consumers — update
-  `tools/battle-lab/README.md`, teach `tools/compare/appTrace.ts` the
-  `factoryBrain` trace shape, check in silver/gold lab fixtures, then
-  drive Brain presentation ground truth through the new mode; (b) test-time
-  papercut: with #55 parked, gate the 44 `factoryM4aNoteBodyCgb4V*` files
-  behind an opt-in env flag keeping a light terminal digest pin in the
-  default suite — expected to return ~7 minutes per full run; (c) rust
-  supervisor: record that M7c waits on the TS live-generation port, not
-  #55.
-- **Notes:** oracle freshness gates now see a REAL `oracle/` change —
-  restart-before-staging is genuinely required (only :8012 remains on the
-  old code). No `workspace/src/**`, test, or lane-file change; the two
-  worker lanes were idle throughout.
 
