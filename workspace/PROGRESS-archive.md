@@ -1,3 +1,26 @@
+## 1249 — [supervisor, 2026-08-13] **CGB4 v44 and final lane union verified**
+
+- **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**
+  CGB4 prefix. The generic seven-battle controller remains the governing S8
+  path, and both persistent lane heads are folded.
+- **Did:** audited v44's two source-only fifth-track continuations at exact ROM
+  `50 20 2d 18 ad dc` (**12×2 = 24**, **6,234 → 6,258**), with the 0x83
+  row frozen before its body and both clear rows stopped before sixth-track
+  flags. Folded the final Rust M13 gender resolver and rebuilt the native/WASM
+  union; earlier final source folds remain exact bilateral Icy Wind plus the
+  Memento source checkpoint.
+- **Next:** continue #55 in one bounded source-only step at the two selected
+  sixth-track `MPT_FLG_EXIST` flags load/decision rows. Keep the 0x83 row at
+  its v42 stop, stop before all sixth-track bodies, and keep wider
+  MPlay/service/arbitration, live clock wiring, production, presentation,
+  animation, Rust, and the retired Battle-2 march out of scope.
+- **Notes:** final full npm **1,047 files / 9,864 passed / 1 skipped**; build
+  **664 modules**. Native Rust **761/761**; WASM **509,805 B**,
+  `d415fea6...`; forced WASM **19 files / 807 tests**. Animation is **181/276
+  exact**; Memento source **3/3**. Production soaks are vanilla **20/20** and
+  full **60/60**, with **0 crashes / 0 hangs**. No unsupported barrier or
+  DEFERRED entry.
+
 ## 1248 — [MAIN worker, 2026-08-13] **CGB4 v44 fifth clear-route positive continuation checkpoint**
 
 - **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**

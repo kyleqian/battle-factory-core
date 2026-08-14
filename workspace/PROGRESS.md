@@ -5,6 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1252 — [MAIN worker, 2026-08-14] **Noland rung 1: FillFactoryBrainParty ported as generateFactoryBrainOpponent**
+
+- **State:** `src/engine/factoryBrainOpponentGeneration.ts` is a new pure
+  module exporting `generateFactoryBrainOpponent`, covering the Level-50
+  singles Frontier Brain (Noland) opponent party — the pure-generation half
+  of the Noland program's round-1 ts-lane task.
+- **Did:** ported `FillFactoryBrainParty` (`battle_factory.c:759-826`)
+  exactly: no trainer-selection phase (unlike the ordinary opponent), and
+  selection/personality-construction interleave per mon in source order
+  rather than batching into two epochs. Five rejection rules in source
+  order — unown, high-tier (source-real, proven unreachable), saved-rental
+  **set-id** equality (not species), duplicate species, duplicate item —
+  reusing `getLevel50FactoryRentalRange`, `randomU16`,
+  `natureFromPersonality`, and `createFactoryCorpusPartyMember` from
+  `factoryOpponentGeneration.ts`/`factoryCorpusParty.ts` rather than
+  duplicating them. New `tests/factoryBrainOpponentGeneration.test.ts` (10
+  tests) pins each rejection rule individually via forced RNG seeds, the
+  rejection-order priority for two multi-rule collisions, fixed-IV receipts
+  (15 @ challengeNum 2, 31 @ challengeNum 5, retail challenge-6 OOB
+  rejection), draw-range receipts matching the ordinary opponent's range
+  helper, determinism, and one full three-mon walk with a hand-derived
+  10-entry ledger checked entry by entry. `npm run typecheck` and
+  `test:smoke` green before the full run; full npm **1,048 files / 9,874
+  passed / 1 skipped**; build **664 modules**, green.
+- **Next:** rung 2 — the battles-21/42 round-loop branch that calls into
+  this module, plus the differential structure check consuming both ts-lane
+  and side-lane (mGBA) receipts per 1251's dispatch.
+- **Notes:** out of scope and untouched: roundController/battle scheduling,
+  mechanicLab/oracle staging, presentation, `src/animation/**`,
+  `core-rs/**`. No `executableFrontierRatchet` pin moved (both barrier
+  counts and the recording-import allowlist are unchanged). No oracle
+  service touched.
+
 ## 1251 — [supervisor, 2026-08-14] **Orient folds verified; Noland program round 1 dispatched**
 
 - **State:** master holds both lane folds and the full union is green. The
@@ -53,26 +86,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** docs-only change; no suites required per standing cadence.
   #55 stays open as a parked, resumable program; `serviceCostMasterCycles`
   stays null and the construction clock stays unwired.
-
-## 1249 — [supervisor, 2026-08-13] **CGB4 v44 and final lane union verified**
-
-- **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**
-  CGB4 prefix. The generic seven-battle controller remains the governing S8
-  path, and both persistent lane heads are folded.
-- **Did:** audited v44's two source-only fifth-track continuations at exact ROM
-  `50 20 2d 18 ad dc` (**12×2 = 24**, **6,234 → 6,258**), with the 0x83
-  row frozen before its body and both clear rows stopped before sixth-track
-  flags. Folded the final Rust M13 gender resolver and rebuilt the native/WASM
-  union; earlier final source folds remain exact bilateral Icy Wind plus the
-  Memento source checkpoint.
-- **Next:** continue #55 in one bounded source-only step at the two selected
-  sixth-track `MPT_FLG_EXIST` flags load/decision rows. Keep the 0x83 row at
-  its v42 stop, stop before all sixth-track bodies, and keep wider
-  MPlay/service/arbitration, live clock wiring, production, presentation,
-  animation, Rust, and the retired Battle-2 march out of scope.
-- **Notes:** final full npm **1,047 files / 9,864 passed / 1 skipped**; build
-  **664 modules**. Native Rust **761/761**; WASM **509,805 B**,
-  `d415fea6...`; forced WASM **19 files / 807 tests**. Animation is **181/276
-  exact**; Memento source **3/3**. Production soaks are vanilla **20/20** and
-  full **60/60**, with **0 crashes / 0 hangs**. No unsupported barrier or
-  DEFERRED entry.
