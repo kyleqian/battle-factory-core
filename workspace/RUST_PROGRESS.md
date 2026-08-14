@@ -5,6 +5,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R17 — [supervised session, 2026-08-14] **M16 Battle Script always-hit state leaf**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15-R17
+  through `22b46762`. The complete pure
+  `battleScriptSetalwayshitflagOpcode.ts` state projection is native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported the exact four-battler attacker/target transformation: clear
+  both packed `STATUS3_ALWAYS_HITS` bits, set turn 2, overwrite the target's
+  `battlerWithSureHit` owner with the attacker, preserve all unrelated bits
+  and non-target state, and retain attacker-first missing-role error
+  precedence. Canonical TypeScript execution supplies **71 cases** across all
+  16 role pairs, all four incoming counters, u32 edges, prior owners, and the
+  three missing-role combinations; corpus sha256
+  `9a69a8a8336fd55fcbec4ad7866585239d47fe0af32f43638636fe321c9ee106`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation remains deferred while Issue #55 is open; keep opcode
+  registration, generic BattleState reduction, presentation, and callback
+  expansion out.
+- **Notes:** Terra/max worker, one commit. Supervisor audited role ordering,
+  target-only mutation, and packed-field replacement; regenerated twice
+  byte-identically (generated sha256
+  `0fbc089c4cf87c2c32bfa7931344edd57d06778d763c9d3ebb6bf2a6c1356159`);
+  and reran focused **4/4**, cargo **771/771**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **375/375**, full
+  npm **1,047 files / 9,864 passed / 1 skip**, and build **664 modules**.
+  Artifact is **509,811 bytes**, sha256
+  `c2ea109ccadc9f2849d508de3134fe996a905d7e38e080ef812755602bfe5a52`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: the worker lost its full-npm command handle and falsely reported
+  completion; supervisor reran the full suite correctly, costing ~15 min.
+
 ## R16 — [supervised session, 2026-08-14] **M15 Battle Script negative-damage arithmetic**
 
 - **State:** `rust-main` = current master `438d06ba` plus verified R15 and R16
