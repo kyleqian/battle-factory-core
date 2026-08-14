@@ -81,12 +81,12 @@ describe("MOVE_MEMENTO source/staging checkpoint", () => {
     expect(coverage.entries.some((entry: { move: string }) => entry.move === "MOVE_DIG")).toBe(false);
   });
 
-  it("retains the twice-fresh bilateral dense source/hardware/RGB evidence without claiming a reducer or seam", () => {
+  it("retains the twice-fresh bilateral dense evidence and reducer without claiming a seam", () => {
     const sha256 = (bytes: Buffer): string => createHash("sha256").update(bytes).digest("hex");
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/memento-dense-evidence.json", "utf8"));
     expect(receipt).toMatchObject({
       schema: "memento-dense-evidence/v1", status: "unsupported",
-      acceptance: { sourceRows: 353, rawRgbRows: 353, freshRuns: 2, reducerRows: 0, seamRows: 0, framebufferRows: 0 },
+      acceptance: { sourceRows: 353, rawRgbRows: 353, freshRuns: 2, reducerRows: 353, seamRows: 0, framebufferRows: 0 },
       siblingAudit: { move: "MOVE_DIG", status: "unsupported", inherited: false },
       freshness: { coarseGate: "failed", pathScopedOracleBootstrapToolingDiff: [], materiallyFresh: true },
     });

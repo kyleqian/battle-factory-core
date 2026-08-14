@@ -26,5 +26,5 @@
   "denseEvidenceReceipt": "tools/compare/fixtures/memento-dense-evidence.json",
   "productionFramebuffer": false,
   "siblingAudit": {"move": "MOVE_DIG", "components": 17, "shared": ["visualCommand:clearmonbg_static", "visualCommand:monbg_static"], "promoted": false},
-  "next": "Derive the pure source-relative Memento task/scanline/register reducer from the retained bilateral rows, then add a typed seam and compositor; require twice-fresh complete production framebuffer equality before promotion."
+  "next": "Add a typed Memento seam and compositor; require twice-fresh complete production framebuffer equality before promotion."
 }
