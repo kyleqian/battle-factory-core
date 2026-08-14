@@ -5891,7 +5891,6 @@ export function sceneOnRockTombView(
     throw new Error(`expected ROCK_TOMB presentation, got ${state.config.move}`);
   }
   return {
-    age: state.age,
     attacker: state.config.attacker,
     target: state.config.target,
     ...rockTombAtAge(state.age, {
