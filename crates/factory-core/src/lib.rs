@@ -29,6 +29,8 @@ pub mod battle_script_normalisebuffs;
 pub mod battle_script_normalisebuffs_vectors_gen;
 pub mod battle_script_setalwayshitflag;
 pub mod battle_script_setalwayshitflag_vectors_gen;
+pub mod battle_script_setbide;
+pub mod battle_script_setbide_vectors_gen;
 pub mod battle_script_setdefensecurlbit;
 pub mod battle_script_setdefensecurlbit_vectors_gen;
 pub mod battle_script_setdestinybond;
