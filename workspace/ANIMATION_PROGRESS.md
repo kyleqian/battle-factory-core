@@ -1,3 +1,11 @@
+# MOVE_FLAIL full-HP bilateral evidence checkpoint — remains unsupported (2026-08-14 worker)
+
+- **State:** Coverage remains **183/276 Level-50 exact**, 0 partial, 0 staged, and **93 unsupported**. Flail and Luster Purge remain independent unsupported moves; no reducer, typed seam, compositor, production framebuffer claim, or coverage pin changed.
+- **Did:** Source-audited Flail's exclusive **0x082cd4f9..0x082cd536 (0x3d-byte)** body, all 11 legal Level-50 species (lowest set 111 KRABBY), FlailMovement, the fixed-animation random hitsplat's two `Random2` coordinate calls, power-shake source, assets/audio/waits/cleanup, and Luster Purge's distinct unsupported remainder. Added complete legal KRABBY/ONIX three-mon Scene-ON parties, a pointer-bounded full-state/gRng2/raw-RGB probe, and the full-HP natural-power-20 bilateral checkpoint.
+- **Verified:** Twice fresh, player-back **209..322** and opponent-front **210..323** each reproduce **114/114** source rows through first inactive cleanup. Evidence/raw-RGB digests are player `aff8a903… / dcad7a27…` and opponent `e305bdfe… / c0eb1a48…`; battlers, parties, gameplay RNG, outcome/weather/sides are immutable. The random hitsplat is source age 49, slot 3, live 10 rows, at player `(177,43)+(2,-9)` and opponent `(71,83)+(14,-1)`; whole OAM is preceding-transfer **113/113** and palette **112/113** per side.
+- **Next:** Stage the natural **40/80/100/150/200** power branches bilaterally (shake amplitudes **3/6/8/12/16**), then build a pure source-relative reducer, immutable visual-RNG seam, and KRABBY/ONIX compositor. Require twice-fresh zero-residual complete acceptance for every required branch before promoting Flail alone. Luster Purge still needs its own full body.
+- **Notes:** FlailMovement's live matrix is RAM+2; random hitsplat OAM is RAM+1 and its fresh affine matrix has paint RAM+2/teardown RAM+1. No damage/HP calculation, gameplay RNG, AI, turn/controller/round/facility state, boundary/barrier, canonical import, absolute tick, per-frame/hash/RGB/coordinate lookup, or sibling status changed.
+
 # MOVE_ROCK_TOMB exact — bilateral Scene-ON promotion (2026-08-14 worker)
 
 - **State:** Coverage advances **182→183/276 Level-50 exact**, with 0 partial, 0 staged, and 93 unsupported. Rock Tomb alone promotes; Hyper Voice remains independently unsupported.

@@ -40,6 +40,7 @@ cites the move whose ledger entry holds the full evidence.
 
 | Mechanism | Latch | Measured on (ledger anchor) |
 | --- | --- | --- |
+| Flail `AnimTask_FlailMovement` live attacker + fixed-animation random hitsplat | Whole hardware OAM is preceding software on 113/113 comparable rows per orientation. The live-attacker rotation matrix is RAM+2; the hitsplat uses ordinary OAM RAM+1 plus the established fresh-affine dual lag (paint RAM+2, teardown RAM+1). Hardware palette is preceding faded on 112/113 rows, with same-row monbg setup at age 4. | FLAIL unsupported full-HP checkpoint, complete KRABBY/ONIX 114-row bilateral maps twice fresh (2026-08-14); the remaining five power branches and production compositor are open, so this row conveys no move acceptance |
 | Sprite-driven `x2` / plain OAM edits / script-`createsprite` sprites | RAM+1 | five-move rule (TAKE_DOWN wind-down, 2026-08-07); COUNTER fists/hitsplats/slides |
 | Palette writes (`gPlttBufferFaded`), incl. metallic-shine pulse and BlendPalette ramps | RAM+1 | STEEL_WING/IRON_TAIL shine; TORMENT anger-mark blend |
 | BG-palette rotation and `REG_BLDY` darken | RAM+1 | FUTURE_SIGHT-era BG work (archive, 2026-07-26) |
