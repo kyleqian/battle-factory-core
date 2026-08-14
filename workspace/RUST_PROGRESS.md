@@ -5,6 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R16 — [supervised session, 2026-08-14] **M15 Battle Script negative-damage arithmetic**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15 and R16
+  `f28a20e6`. The complete pure `battleScriptNegativedamageOpcode.ts`
+  arithmetic surface is native and wasm32-compilable; no ABI or adapter
+  surface was widened.
+- **Did:** ported signed-`i32` `-Math.floor(hpDealt / 2)` plus the exact
+  zero-result-to-`-1` guard. The Rust implementation explicitly corrects
+  truncation for negative odd inputs, preserving the complete typed-reachable
+  TypeScript domain. Canonical TypeScript execution supplies **24 cases**;
+  corpus sha256
+  `fc4526fac0345c329ede2f2ce2072f207a7096c75e1461da89bc8451a318fe46`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation remains deferred while Issue #55 is open; keep opcode
+  registration, the generic BattleState reducer, presentation, and callback
+  stack expansion out.
+- **Notes:** Luna/max worker, one commit. Supervisor audited the signed-domain
+  floor correction, regenerated twice byte-identically (generated sha256
+  `8538ed4437b6aa272771fd03b27d993722293df053dcde8e74c58b5f62d83a20`),
+  and reran focused **3/3**, cargo **767/767**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, and smoke **375/375**.
+  Worker same-commit full npm was **1,047 files / 9,864 passed / 1 skip**;
+  build was **664 modules**. Artifact is **507,846 bytes**, sha256
+  `66c35cdc1b2f2b1222322dcd08a2926bea800212ebd54721e19dd165e33e651d`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: the first full npm attempt lacked the gitignored WASM artifact;
+  after `build-wasm.sh`, the required rerun took ~20 min.
+
 ## R15 — [supervised session, 2026-08-13] **M14 Battle Script battler-position resolver**
 
 - **State:** `rust-main` = current master `438d06ba` plus verified R15
