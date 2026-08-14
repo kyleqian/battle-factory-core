@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { reduceRockTomb } from "../../src/animation/rockTomb.ts";
+import {
+  reduceRockTomb,
+  rockTombSettledRocksForPainter,
+  rockTombTargetDisplayX2,
+} from "../../src/animation/rockTomb.ts";
 
 type Row = Record<string, any>;
 
@@ -117,5 +121,42 @@ describe("MOVE_ROCK_TOMB source-relative reducer", () => {
     expect(hardwareOamRows).toBe(346);
     expect(hardwareMatrixRows).toBe(346);
     expect(hardwarePaletteRows).toBe(346);
+  });
+
+  it("pins Rock Tomb's move-local late transfer and OAM tie order", () => {
+    for (const [, archive, targetSpriteSlot, targetInitialX2] of archives) {
+      const rows = JSON.parse(gunzipSync(readFileSync(archive)).toString("utf8")).frames as Row[];
+      const config = {
+        targetSpriteSlot,
+        targetInitialX2,
+        targetCenter: { x: rows[0]!.battlerSprites.target.x, y: rows[0]!.battlerSprites.target.y },
+      };
+      const states = reduceRockTomb(config);
+      const firstRedXAge = states.findIndex((state) => state.redX !== null);
+      expect(firstRedXAge).toBeGreaterThan(0);
+      expect(rockTombTargetDisplayX2(firstRedXAge, config)).toBe(
+        states[firstRedXAge - 1]!.targetX2,
+      );
+      expect(rockTombTargetDisplayX2(firstRedXAge + 1, config)).toBe(
+        states[firstRedXAge + 3]!.targetX2,
+      );
+      const tailAge = states.find(
+        (state) => state.tasks.some(
+          (task) => task.name === "AnimTask_ShakeMon_Step" && task.data[1] === 1,
+        ),
+      )!.age;
+      expect(rockTombTargetDisplayX2(tailAge, config)).toBe(3);
+      expect(rockTombTargetDisplayX2(tailAge + 1, config)).toBe(3);
+      expect(rockTombTargetDisplayX2(tailAge + 2, config)).toBe(0);
+
+      const firstFourthSettled = states.find(
+        (state) => state.rocks.some((rock) => rock.slot === 7 && rock.y2 === 1),
+      )!;
+      expect(rockTombSettledRocksForPainter(firstFourthSettled).map((rock) => rock.slot))
+        .toEqual([7, 3, 4]);
+      const following = states[firstFourthSettled.age + 1]!;
+      expect(rockTombSettledRocksForPainter(following).map((rock) => rock.slot))
+        .toEqual([3, 4, 7]);
+    }
   });
 });

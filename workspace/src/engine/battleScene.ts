@@ -1206,6 +1206,10 @@ import {
 } from "../animation/shadowPunch.ts";
 import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
 import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
+import {
+  rockTombSettledRocksForPainter,
+  rockTombTargetDisplayX2,
+} from "../animation/rockTomb.ts";
 import { encoreTargetX2AtAge } from "../animation/encore.ts";
 import { dragonClawDisplayedAttackerShakeY } from "../animation/dragonClaw.ts";
 import { SHAKE_FIRST_STEP_AGE } from "../animation/crushClaw.ts";
@@ -19389,11 +19393,16 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
+    const targetDisplayX2 = rockTombTargetDisplayX2(rockState.age, {
+      targetSpriteSlot: rockState.config.targetSpriteSlot,
+      targetInitialX2: rockState.config.targetInitialX2,
+      targetCenter: displayed.effectCenter,
+    });
     const drawTarget = (): void => drawSpriteSheet(
       fb,
       targetSprite.tileset,
       targetSprite.palette,
-      view.target.geometry.spriteCorner.x + displayed.targetX2,
+      view.target.geometry.spriteCorner.x + targetDisplayX2,
       view.target.geometry.spriteCorner.y,
     );
     const drawRock = (rock: typeof displayed.rocks[number]): void => {
@@ -19401,8 +19410,8 @@ export function renderSceneOnMovePresentation(
         fb,
         subTileset(battleAnimRocks.tileset, 0, 4),
         battleAnimRocks.palette,
-        rockState.config.target.geometry.spriteCorner.x + rock.x2 + 16,
-        rockState.config.target.geometry.spriteCorner.y + rock.y2 + 16,
+        displayed.effectCenter.x + rock.x2 - 16,
+        displayed.effectCenter.y + rock.y2 - 16,
       );
     };
     const drawXSign = (): void => {
@@ -19411,8 +19420,8 @@ export function renderSceneOnMovePresentation(
         fb,
         blockArt.xSign.tileset,
         blockArt.xSign.palette,
-        displayed.target.geometry.animationCenter.x - 32,
-        displayed.target.geometry.animationCenter.y - 32,
+        displayed.effectCenter.x - 32,
+        displayed.effectCenter.y - 32,
       );
     };
     if (displayed.battleBg3.y !== 0) {
@@ -19420,14 +19429,25 @@ export function renderSceneOnMovePresentation(
     } else {
       drawStaticBgShiftedX(fb, displayed.battleBg3.x);
     }
+    // BuildOamBuffer's stable order puts the third falling rock behind the
+    // target while the settled rocks and Red-X are in front.  The source
+    // sprite order is front-to-back, so the software compositor paints the
+    // falling rock first, then the target, then the remaining effect sprites.
+    // This is source-relative layering, not a frame lookup: the reducer's
+    // slot identities keep the rule valid as each rock is created/destroyed.
+    const fallingRock = displayed.rocks.find((rock) => rock.slot === 5);
+    const sourceSettledOrder = rockTombSettledRocksForPainter(displayed);
     if (playerToOpponent) {
+      if (fallingRock !== undefined) drawRock(fallingRock);
       drawTarget();
+      for (const rock of sourceSettledOrder) drawRock(rock);
       drawAttacker();
     } else {
-      drawAttacker();
+      if (fallingRock !== undefined) drawRock(fallingRock);
       drawTarget();
+      drawAttacker();
+      for (const rock of sourceSettledOrder) drawRock(rock);
     }
-    for (const rock of displayed.rocks) drawRock(rock);
     drawXSign();
 
     const profile = rockState.config.fieldProfile;

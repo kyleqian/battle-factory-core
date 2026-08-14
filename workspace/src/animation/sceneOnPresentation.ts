@@ -1855,6 +1855,8 @@ export interface SceneOnRockTombConfig {
   readonly targetSpriteSlot: number;
   /** Target's pre-task front/back idle x2, before ShakeMon writes it. */
   readonly targetInitialX2: number;
+  /** `InitSpritePosToAnimTarget` center used by the four rocks and Red-X. */
+  readonly effectCenter: Readonly<{ x: number; y: number }>;
 }
 
 export interface SceneOnBodySlamConfig {
@@ -5859,6 +5861,7 @@ export interface SceneOnBlockView extends BlockState {
 export interface SceneOnRockTombView extends RockTombState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
+  readonly effectCenter: Readonly<{ x: number; y: number }>;
 }
 
 /** `age=0` is BLOCK's source `loadspritegfx` display. */
@@ -5894,8 +5897,9 @@ export function sceneOnRockTombView(
     ...rockTombAtAge(state.age, {
       targetSpriteSlot: state.config.targetSpriteSlot,
       targetInitialX2: state.config.targetInitialX2,
-      targetCenter: state.config.target.geometry.animationCenter,
+      targetCenter: state.config.effectCenter,
     } satisfies RockTombConfig),
+    effectCenter: state.config.effectCenter,
   };
 }
 

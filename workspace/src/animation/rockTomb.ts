@@ -227,3 +227,39 @@ export function rockTombAtAge(age: number, config: RockTombConfig): RockTombStat
   };
 }
 
+/**
+ * Source-relative target translation at the shared software-to-framebuffer
+ * seam. Rock Tomb's late Red-X/ShakeMon phase has a move-local transfer
+ * split: the live body is two source ages ahead of the ordinary preceding
+ * software row, while the final `data[1] === 1` callback holds the positive
+ * x2 through its last two scanouts. Before Red-X, the ordinary RAM+1 row is
+ * the display contract.
+ */
+export function rockTombTargetDisplayX2(
+  age: number,
+  config: RockTombConfig,
+): number {
+  const displayed = rockTombAtAge(age - 1, config);
+  if (displayed.redX === null) return displayed.targetX2;
+  const current = rockTombAtAge(age, config);
+  const shakeTail = current.tasks.some(
+    (task) => task.name === "AnimTask_ShakeMon_Step" && task.data[1] === 1,
+  );
+  if (shakeTail) return 3;
+  return rockTombAtAge(age + 2, config).targetX2;
+}
+
+/**
+ * Settled-rock painter order at the shared Scene-ON seam. The source's
+ * stable OAM order changes once the fourth fall reaches its first settled
+ * callback row (`y2 === 1`); preserving that source-relative tie order is
+ * observable only where the fourth rock overlaps the earlier rocks.
+ */
+export function rockTombSettledRocksForPainter(
+  state: RockTombState,
+): readonly RockTombRockState[] {
+  const settled = state.rocks.filter((rock) => rock.slot !== 5);
+  const fourthRock = settled.find((rock) => rock.slot === 7);
+  if (fourthRock?.y2 !== 1) return settled;
+  return [fourthRock, ...settled.filter((rock) => rock.slot !== 7)];
+}
