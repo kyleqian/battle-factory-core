@@ -27,6 +27,8 @@ pub mod battle_script_setdestinybond;
 pub mod battle_script_setdestinybond_vectors_gen;
 pub mod battle_script_setminimize;
 pub mod battle_script_setminimize_vectors_gen;
+pub mod battle_script_settaunt;
+pub mod battle_script_settaunt_vectors_gen;
 pub mod battle_script_setyawn;
 pub mod battle_script_setyawn_vectors_gen;
 pub mod damage_calc;
