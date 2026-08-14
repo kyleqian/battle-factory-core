@@ -1,3 +1,40 @@
+## 1256 — [solo session, 2026-08-14] **factoryBrain lab mode LIVE on :8014; CGB4 test tail measured at 430 s**
+
+- **State:** the 1255 USER handoff (a) is done: the oracle harness accepts
+  `mode: "factoryBrain"` (design §5.1 items 1-7 complete, commit
+  `33354440`), so Brain presentation ground truth is now reachable through
+  the lab. The refreshed battle-scene-off service on **:8014** advertises
+  the mode; **:8012 still runs pre-change code** by design (the animation
+  lane restarts it at its own orient, per its standard freshness flow).
+- **Did:** harness-side `factoryBrain` — structural identity (always
+  `TRAINER_FRONTIER_BRAIN`/final battle; no `trainerId`/`battleNum`/
+  `opponentSetIds` fields), `challengeNum` restricted to `{2, 5}`,
+  `overrides.parties` permitted / `overrides.battlers` rejected,
+  `fixedIv` (15/31) + `opponentParty` (RAM read-back) echoed, Brain intro
+  ack budget 32 (live-measured need 16 vs the ordinary 12). Contract tests
+  **54/54**; new `oracle/battle-lab-brain-smoke-test.py` **32/32** live
+  (silver + gold end-to-end: three ROM-generated mons at the Brain fixed
+  IVs, no duplicate species/items, captured RAM party equal to the echo,
+  all standing rejections intact); existing ordinary-mode smoke green on
+  the new code. MEASURED, quiet host: the **44-file recursive CGB4
+  evidence family alone runs 430 s wall / 5,643 s CPU** — it dominates the
+  ~6-minute full suite (the older isolate:false fix stands; this family
+  landed on top of it and grew quadratically with grind versions).
+- **Next:** main lane: (a) workspace §5.2 consumers — update
+  `tools/battle-lab/README.md`, teach `tools/compare/appTrace.ts` the
+  `factoryBrain` trace shape, check in silver/gold lab fixtures, then
+  drive Brain presentation ground truth through the new mode; (b) test-time
+  papercut: with #55 parked, gate the 44 `factoryM4aNoteBodyCgb4V*` files
+  behind an opt-in env flag keeping a light terminal digest pin in the
+  default suite — expected to return ~7 minutes per full run; (c) rust
+  supervisor: record that M7c waits on the TS live-generation port, not
+  #55.
+- **Notes:** oracle freshness gates now see a REAL `oracle/` change —
+  restart-before-staging is genuinely required (only :8012 remains on the
+  old code). No `workspace/src/**`, test, or lane-file change; the two
+  worker lanes were idle throughout.
+
+
 ## 1255 — [supervisor, 2026-08-14] **Wind-down: Noland program items 1-3 landed and verified; all gates green**
 
 - **State:** the 2026-08-13 decision-3 program is complete through the
