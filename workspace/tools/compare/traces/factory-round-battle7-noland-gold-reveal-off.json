@@ -7,12 +7,12 @@
   },
   "oracleBattleLab": {
     "scenario": "../../battle-lab/factory-round-battle7-noland-gold-reveal-off.json",
-    "preCheckpointFrameOffset": 1152
+    "preCheckpointFrameOffset": 1151
   },
   "segments": [
-    { "frames": 388, "buttons": [] },
+    { "frames": 389, "buttons": [] },
     { "frames": 1, "buttons": ["A"] },
-    { "frames": 311, "buttons": [] }
+    { "frames": 310, "buttons": [] }
   ],
   "captureWindow": { "start": 0, "end": 700 }
 }
