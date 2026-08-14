@@ -92,6 +92,14 @@ import {
   generateFactoryOpponent,
   type FactoryOpponentGenerationResult,
 } from "./factoryOpponentGeneration.ts";
+import {
+  generateFactoryBrainOpponent,
+  type FactoryBrainOpponentGenerationResult,
+} from "./factoryBrainOpponentGeneration.ts";
+import {
+  getFactoryFrontierBrainStatus,
+  type FrontierBrainStatus,
+} from "./frontierBrainStatus.ts";
 import { factoryTrainerPresentationForOpponent } from "./factoryTrainerPresentation.ts";
 import {
   createFactoryBattleStartPresentationCommand,
@@ -122,6 +130,9 @@ import {
   type SwapDecision,
 } from "./roundController.ts";
 import type { BattlePresentationCompletion } from "./battlePresentation.ts";
+
+/** `TRAINER_FRONTIER_BRAIN` (`include/constants/trainers.h:12`). */
+const TRAINER_FRONTIER_BRAIN = 1022;
 
 const EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
   species: 0,
@@ -176,6 +187,13 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   factoryWinStreak: number;
   playerTrainerId: number;
   battleTowerLevel50WinStreak: number;
+  /**
+   * `GetPlayerSymbolCountForFacility(FRONTIER_FACILITY_FACTORY)`, consumed by
+   * `getFactoryFrontierBrainStatus` to decide whether an upcoming battle is
+   * Noland's. Defaults to 0 (no symbols yet) so every existing construction
+   * site compiles and behaves unchanged.
+   */
+  factorySymbolsCount?: 0 | 1 | 2;
   facilityState: FactoryFacilityState;
   rentals: FactoryRoundRentalSource;
   /**
@@ -204,6 +222,32 @@ export type FactoryRoundBattleOrchestratorConfig = Readonly<{
     battleIndex: number;
   }>;
 }>;
+
+/**
+ * Every opponent-generation call site (the first-opponent seam, and both the
+ * `AskSwapMon` pre-generation and its swap-resolution fallback) must decide,
+ * per battle, whether the upcoming opponent is ordinary or the Frontier
+ * Brain (`frontier_getbrainstatus`, `pre-battle-room scripts.inc:61,80-81`
+ * gates BEFORE `factory_generateopponentmons` runs, so a brain battle draws
+ * none of the ordinary trainer-selection/species-selection RNG). `trainerId`
+ * and `storedTrainerIds` are exposed uniformly on both variants so callers
+ * (the AI driver's `trainerOpponentId`, the next generation's repeat-trainer
+ * history) do not need to branch on `kind`.
+ */
+export type FactoryScheduledOpponentGeneration =
+  | Readonly<{
+    kind: "ordinary";
+    trainerId: number;
+    storedTrainerIds: readonly number[];
+    generation: FactoryOpponentGenerationResult;
+  }>
+  | Readonly<{
+    kind: "frontier-brain";
+    status: Exclude<FrontierBrainStatus, "not-ready">;
+    trainerId: number;
+    storedTrainerIds: readonly number[];
+    generation: FactoryBrainOpponentGenerationResult;
+  }>;
 
 export type FactoryFacilityRngSegment = Readonly<{
   kind:
@@ -287,7 +331,7 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   battlePresentationBoundaries: FactoryBattlePresentationBoundaries | null;
   aiHistory: FactoryAiBattleHistory | null;
   initialRentalGeneration: FactoryInitialRentalGenerationResult | null;
-  opponentGenerations: readonly FactoryOpponentGenerationResult[];
+  opponentGenerations: readonly FactoryScheduledOpponentGeneration[];
   /**
    * Source `AskSwapMon` ownership: `factory_generateopponentmons` runs before
    * the opponent type/style commentary and before the swap offer
@@ -299,7 +343,7 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
    * pre-generate still generate at swap resolution (see
    * `advanceFactoryRoundPresentation`).
    */
-  pendingNextOpponent: FactoryOpponentGenerationResult | null;
+  pendingNextOpponent: FactoryScheduledOpponentGeneration | null;
   rngSegments: readonly FactoryFacilityRngSegment[];
   /** Monotonic count across facility generation and every battle cursor. */
   facilityRngCalls: number;
@@ -416,11 +460,23 @@ function asBattleParty(records: FactoryRentalParty): BattleParty {
   }) as unknown as BattleParty;
 }
 
-function generatedOpponent(result: FactoryOpponentGenerationResult): BattleOpponent {
-  const records = result.opponents as FactoryRentalParty;
+function generatedOpponent(scheduled: FactoryScheduledOpponentGeneration): BattleOpponent {
+  const records = scheduled.generation.opponents as FactoryRentalParty;
+  if (scheduled.kind === "frontier-brain") {
+    return Object.freeze({
+      id: `factory-trainer-${scheduled.trainerId}`,
+      // Real name/sprite/commentary is the presentation seam's job (a later
+      // rung); this placeholder is never read back for logic decisions --
+      // downstream code keys off `frontierBrain`, not this string.
+      trainerName: "Frontier Brain",
+      party: asBattleParty(records),
+      rentalRecords: records,
+      frontierBrain: Object.freeze({ status: scheduled.status }),
+    });
+  }
   return Object.freeze({
-    id: `factory-trainer-${result.trainerId}`,
-    trainerName: result.trainerName,
+    id: `factory-trainer-${scheduled.trainerId}`,
+    trainerName: scheduled.generation.trainerName,
     party: asBattleParty(records),
     rentalRecords: records,
   });
@@ -457,21 +513,99 @@ function generationSegment(
   });
 }
 
+/**
+ * Source `frontier_getbrainstatus` gate (`pre-battle-room scripts.inc:61,
+ * 80-81`): checked BEFORE `factory_generateopponentmons` (`GenerateOpponentMons`,
+ * `battle_factory.c:303`) ever runs, so a brain-eligible upcoming battle
+ * never draws the ordinary trainer-selection/species-selection RNG at all --
+ * this is a real branch point, not a discarded-then-overwritten draw.
+ */
 function generateOpponentFor(
   config: FactoryRoundBattleOrchestratorConfig,
   battleIndex: number,
   rngValue: number,
   storedTrainerIds: readonly number[],
   savedRentalRecords: readonly FactoryRentalRecord[],
-): FactoryOpponentGenerationResult {
-  return generateFactoryOpponent({
+): FactoryScheduledOpponentGeneration {
+  const factoryWinStreak = config.factoryWinStreak + battleIndex;
+  const brainStatus = getFactoryFrontierBrainStatus({
+    battleMode: "singles",
+    winStreak: factoryWinStreak,
+    symbolsCount: config.factorySymbolsCount ?? 0,
+  });
+  if (brainStatus !== "not-ready") {
+    const generation = generateFactoryBrainOpponent({
+      rngValue,
+      factoryWinStreak,
+      playerRentalSetIds: savedRentalRecords.map((record) => record.setId),
+      playerTrainerId: config.playerTrainerId,
+    });
+    return Object.freeze({
+      kind: "frontier-brain",
+      status: brainStatus,
+      trainerId: TRAINER_FRONTIER_BRAIN,
+      storedTrainerIds,
+      generation,
+    });
+  }
+  const generation = generateFactoryOpponent({
     rngValue,
-    factoryWinStreak: config.factoryWinStreak + battleIndex,
+    factoryWinStreak,
     battleIndex,
     storedTrainerIds,
     savedRentalSetIds: savedRentalRecords.map((record) => record.setId),
     playerTrainerId: config.playerTrainerId,
     battleTowerLevel50WinStreak: config.battleTowerLevel50WinStreak,
+  });
+  return Object.freeze({
+    kind: "ordinary",
+    trainerId: generation.trainerId,
+    storedTrainerIds: generation.storedTrainerIds,
+    generation,
+  });
+}
+
+/**
+ * `adoptedNextOpponent` only carries an ordinary `FactoryOpponentGenerationResult`
+ * (probed set-selection + per-mon construction cursors). If the real
+ * upcoming battle turns out to be Frontier-Brain eligible, adopting that
+ * ordinary schedule anyway would silently play the wrong opponent -- reject
+ * instead so the mismatch surfaces at the call site, not mid-battle.
+ */
+function adoptNextOpponentOrGenerate(
+  state: FactoryRoundBattleOrchestratorState,
+  battleIndex: number,
+  rngBefore: number,
+  previous: FactoryScheduledOpponentGeneration,
+): FactoryScheduledOpponentGeneration {
+  const adoptedNext = state.config.adoptedNextOpponent;
+  if (adoptedNext === undefined || adoptedNext.battleIndex !== battleIndex) {
+    return generateOpponentFor(
+      state.config,
+      battleIndex,
+      rngBefore,
+      previous.storedTrainerIds,
+      nextSavedRentalRecords(state),
+    );
+  }
+  const brainStatus = getFactoryFrontierBrainStatus({
+    battleMode: "singles",
+    winStreak: state.config.factoryWinStreak + battleIndex,
+    symbolsCount: state.config.factorySymbolsCount ?? 0,
+  });
+  if (brainStatus !== "not-ready") {
+    return fail(
+      `adoptedNextOpponent for battleIndex ${battleIndex} is an ordinary opponent schedule, `
+      + `but the effective win streak at that battle is a Frontier Brain battle `
+      + `(status "${brainStatus}"); adopting an ordinary schedule for a brain battle `
+      + "would silently misadopt the wrong opponent",
+    );
+  }
+  return Object.freeze({
+    kind: "ordinary",
+    trainerId: adoptedNext.generation.trainerId,
+    storedTrainerIds: adoptedNext.generation.storedTrainerIds,
+    generation: adoptedNext.generation,
   });
 }
 
@@ -520,31 +654,37 @@ export function createFactoryRoundBattleOrchestrator(
   }
 
   const adopted = config.adoptedInitialOpponent;
-  const firstOpponent = adopted?.generation
-    ?? generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
+  const firstOpponent: FactoryScheduledOpponentGeneration = adopted !== undefined
+    ? Object.freeze({
+      kind: "ordinary",
+      trainerId: adopted.generation.trainerId,
+      storedTrainerIds: adopted.generation.storedTrainerIds,
+      generation: adopted.generation,
+    })
+    : generateOpponentFor(config, 0, rngValue, [], savedRentalRecords);
   if (adopted === undefined) {
     rngSegments.push(generationSegment(
       "opponent-generation",
       0,
       facilityRngCalls,
       rngValue,
-      firstOpponent.rngValue,
-      firstOpponent.drawLedger.length,
+      firstOpponent.generation.rngValue,
+      firstOpponent.generation.drawLedger.length,
     ));
-    facilityRngCalls += firstOpponent.drawLedger.length;
+    facilityRngCalls += firstOpponent.generation.drawLedger.length;
   } else {
-    const selection = firstOpponent.drawLedger.filter(({ phase }) => phase !== "personality");
+    const selection = adopted.generation.drawLedger.filter(({ phase }) => phase !== "personality");
     rngSegments.push(generationSegment(
       "opponent-selection",
       0,
       facilityRngCalls,
       selection[0]!.rngBefore,
-      firstOpponent.selectionRngValue,
+      adopted.generation.selectionRngValue,
       selection.length,
     ));
     facilityRngCalls += selection.length;
     for (let opponentIndex = 0; opponentIndex < 3; opponentIndex += 1) {
-      const construction = firstOpponent.drawLedger.filter(
+      const construction = adopted.generation.drawLedger.filter(
         (draw) => draw.phase === "personality" && draw.opponentIndex === opponentIndex,
       );
       rngSegments.push(generationSegment(
@@ -559,7 +699,7 @@ export function createFactoryRoundBattleOrchestrator(
     }
   }
   const opponent = generatedOpponent(firstOpponent);
-  rngValue = adopted?.freshBattleRngValue ?? firstOpponent.rngValue;
+  rngValue = adopted?.freshBattleRngValue ?? firstOpponent.generation.rngValue;
   const round = createGeneratedFactoryRoundController({
     id: config.id,
     playerParty: asBattleParty(playerRentalRecords),
@@ -797,23 +937,14 @@ export function preGenerateFactoryRoundNextOpponent(
   }
   const previous = state.opponentGenerations.at(-1)!;
   const rngBefore = state.round.rules.rngValue;
-  const adoptedNext = state.config.adoptedNextOpponent;
-  const generated = adoptedNext !== undefined && adoptedNext.battleIndex === battleIndex
-    ? adoptedNext.generation
-    : generateOpponentFor(
-      state.config,
-      battleIndex,
-      rngBefore,
-      previous.storedTrainerIds,
-      nextSavedRentalRecords(state),
-    );
+  const generated = adoptNextOpponentOrGenerate(state, battleIndex, rngBefore, previous);
   const segment = generationSegment(
     "opponent-generation",
     battleIndex,
     state.facilityRngCalls,
     rngBefore,
-    generated.rngValue,
-    generated.drawLedger.length,
+    generated.generation.rngValue,
+    generated.generation.drawLedger.length,
   );
   return Object.freeze({
     ...state,
@@ -836,7 +967,7 @@ export function advanceFactoryRoundPresentation(
         ...state,
         round: advanceRoundControllerWithGeneratedOpponent(state.round, {
           opponent: generatedOpponent(pending),
-          rngValue: pending.rngValue,
+          rngValue: pending.generation.rngValue,
         }),
         opponentGenerations: Object.freeze([...state.opponentGenerations, pending]),
         pendingNextOpponent: null,
@@ -860,14 +991,14 @@ export function advanceFactoryRoundPresentation(
       battleIndex,
       state.facilityRngCalls,
       rngBefore,
-      generated.rngValue,
-      generated.drawLedger.length,
+      generated.generation.rngValue,
+      generated.generation.drawLedger.length,
     );
     return Object.freeze({
       ...state,
       round: advanceRoundControllerWithGeneratedOpponent(state.round, {
         opponent: generatedOpponent(generated),
-        rngValue: generated.rngValue,
+        rngValue: generated.generation.rngValue,
       }),
       opponentGenerations: Object.freeze([...state.opponentGenerations, generated]),
       rngSegments: Object.freeze([...state.rngSegments, segment]),

@@ -367,11 +367,11 @@ describe("interactive battle routing", () => {
       before.draftScreen.rentals[2]!.source,
     ]);
     expect(orchestrator.opponentGenerations[0]!.trainerId).toBe(50);
-    expect(orchestrator.opponentGenerations[0]!.opponents.map(({ setId }) => setId))
+    expect(orchestrator.opponentGenerations[0]!.generation.opponents.map(({ setId }) => setId))
       .toEqual([188, 184, 135]);
-    expect(orchestrator.opponentGenerations[0]!.opponents.map(({ personality }) => personality))
+    expect(orchestrator.opponentGenerations[0]!.generation.opponents.map(({ personality }) => personality))
       .toEqual(ANCHOR_BATTLE_1_PERSONALITIES);
-    expect(orchestrator.opponentGenerations[0]!.opponents.map((opponent) => ({
+    expect(orchestrator.opponentGenerations[0]!.generation.opponents.map((opponent) => ({
       setId: opponent.setId,
       personality: opponent.personality,
       fixedIv: opponent.fixedIv,
@@ -424,7 +424,7 @@ describe("interactive battle routing", () => {
       trainerName: "DESTIN",
     });
     expect(orchestrator.round.rules.currentOpponent.rentalRecords)
-      .toEqual(orchestrator.opponentGenerations[0]!.opponents);
+      .toEqual(orchestrator.opponentGenerations[0]!.generation.opponents);
     expect(orchestrator.round.rules.rngValue).toBe(
       ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
     );
@@ -520,7 +520,7 @@ describe("interactive battle routing", () => {
       ],
       freshBattleRngValue: ANCHOR_BATTLE_1_HANDOFF_RNG_VALUE,
     });
-    expect(shifted.opponentGenerations[0]!.opponents.map(({ personality }) => personality))
+    expect(shifted.opponentGenerations[0]!.generation.opponents.map(({ personality }) => personality))
       .not.toEqual(ANCHOR_BATTLE_1_PERSONALITIES);
     expect(() => createFactoryAnchorSession({
       playerRentalRecords,

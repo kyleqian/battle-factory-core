@@ -167,7 +167,7 @@ function createOpponentLockedFlyPresentationBattle(): FactoryRoundBattleOrchestr
       savedRentalRecords: [...playerRecords, record(1), record(2), record(3)],
     },
   }));
-  expect(carrier.opponentGenerations[0]?.opponents.map(({ setId }) => setId))
+  expect(carrier.opponentGenerations[0]?.generation.opponents.map(({ setId }) => setId))
     .toEqual([196, 184, 143]);
   const resolution = resolveTurn15FlyResolutionAdapter().chargeResolution;
   const fields = [resolution.field.player, resolution.field.opponent] as const;
@@ -1724,11 +1724,13 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       .toEqual([278, 213, 206, 205, 212, 246]);
     expect(next.opponentGenerations[0]).toMatchObject({
       trainerId: 99,
-      opponents: [
-        { setId: 224 },
-        { setId: 243 },
-        { setId: 236 },
-      ],
+      generation: {
+        opponents: [
+          { setId: 224 },
+          { setId: 243 },
+          { setId: 236 },
+        ],
+      },
     });
     expect(next.facilityRngCalls).toBe(487);
     expect(next.round.rules.rngValue).toBe(782337733);
@@ -1835,10 +1837,10 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
         rngAfter: 3788765155,
       },
     ]);
-    expect(state.opponentGenerations.map((generation) => ({
-      trainerId: generation.trainerId,
-      setIds: generation.opponents.map((opponent) => opponent.setId),
-      draws: generation.drawLedger.length,
+    expect(state.opponentGenerations.map((scheduled) => ({
+      trainerId: scheduled.trainerId,
+      setIds: scheduled.generation.opponents.map((opponent) => opponent.setId),
+      draws: scheduled.generation.drawLedger.length,
     }))).toEqual([
       { trainerId: 17, setIds: [122, 118, 110], draws: 152 },
       { trainerId: 90, setIds: [132, 187, 127], draws: 214 },
@@ -1847,11 +1849,12 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       expect(state.rngSegments[index]!.callStart).toBe(state.rngSegments[index - 1]!.callEnd);
       expect(state.rngSegments[index]!.rngBefore).toBe(state.rngSegments[index - 1]!.rngAfter);
     }
-    for (const generation of state.opponentGenerations) {
-      generation.drawLedger.forEach((draw, index) => {
+    for (const scheduled of state.opponentGenerations) {
+      const { drawLedger } = scheduled.generation;
+      drawLedger.forEach((draw, index) => {
         expect(draw.position).toBe(index);
         expect(draw.rngAfter).toBe(advanceRngValue(draw.rngBefore));
-        if (index > 0) expect(draw.rngBefore).toBe(generation.drawLedger[index - 1]!.rngAfter);
+        if (index > 0) expect(draw.rngBefore).toBe(drawLedger[index - 1]!.rngAfter);
       });
     }
     expect(state.battle!.rng).toEqual({ calls: 2, value: 4029920645 });
@@ -2367,16 +2370,18 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     state = preGenerateFactoryRoundNextOpponent(state);
     const pending = state.pendingNextOpponent;
     expect(pending).not.toBeNull();
+    expect(pending!.kind).toBe("ordinary");
+    if (pending!.kind !== "ordinary") throw new Error("unreachable: asserted above");
     expect(pending!.trainerId).toBe(9);
-    expect(pending!.trainerName).toBe("LILIANA");
-    expect(pending!.opponents.map((o) => o.setId).join(",")).toBe("169,170,130");
-    expect(pending!.opponents.map((o) => o.speciesName).join(","))
+    expect(pending!.generation.trainerName).toBe("LILIANA");
+    expect(pending!.generation.opponents.map((o) => o.setId).join(",")).toBe("169,170,130");
+    expect(pending!.generation.opponents.map((o) => o.speciesName).join(","))
       .toBe("SPECIES_KADABRA,SPECIES_WAILMER,SPECIES_NUZLEAF");
-    expect(pending!.opponents.map((o) => o.itemId).join(",")).toBe("214,221,142");
-    expect(pending!.opponents.map((o) => o.personality)).toEqual([
+    expect(pending!.generation.opponents.map((o) => o.itemId).join(",")).toBe("214,221,142");
+    expect(pending!.generation.opponents.map((o) => o.personality)).toEqual([
       0x801d2ed7, 0x0ffc69a4, 0x1ae16fda,
     ]);
-    expect(pending!.selectionRngValue).toBe(0x50f04e72);
+    expect(pending!.generation.selectionRngValue).toBe(0x50f04e72);
 
     const segment = state.rngSegments.at(-1)!;
     expect(segment.kind).toBe("opponent-generation");

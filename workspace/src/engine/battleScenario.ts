@@ -7,6 +7,7 @@ import {
   type FactoryCorpusPartyInstance,
   type FactoryCorpusPartyMemberState,
 } from "./factoryCorpusParty.ts";
+import type { FrontierBrainStatus } from "./frontierBrainStatus.ts";
 
 export const BATTLES_PER_ROUND = 7;
 
@@ -57,6 +58,13 @@ export interface BattleOpponent {
   readonly party: BattleParty;
   /** Present for generated Factory opponents; absent on simplified fixtures. */
   readonly rentalRecords?: FactoryRentalParty;
+  /**
+   * Present when this opponent is a Frontier Brain (Noland) battle
+   * (`GetFrontierBrainStatus`, `frontier_util.c:1657-1698`) instead of an
+   * ordinary trainer. Downstream code and the presentation seam key off this
+   * instead of string-sniffing `id`/`trainerName`.
+   */
+  readonly frontierBrain?: Readonly<{ status: Exclude<FrontierBrainStatus, "not-ready"> }>;
 }
 
 /**
