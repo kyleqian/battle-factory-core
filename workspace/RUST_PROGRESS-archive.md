@@ -5,6 +5,42 @@ full history regardless.
 
 ---
 
+## R31 — [supervised session, 2026-08-14] **M30 Battle Script Thrash-family post-lock confusion-byte leaf**
+
+- **State:** `rust-main` = current master `b1ddefa6` plus the verified
+  confuse-if-repeating-attack-ends worker through merge `be7add4c`. The
+  complete pure `battleScriptConfuseifrepeatingattackendsOpcode.ts`
+  state/control projection is native and wasm32-compilable. No ABI or adapter
+  surface was widened.
+- **Did:** ported exact missing-attacker resolution and the source
+  `STATUS2_LOCK_CONFUSE` predicate. When either packed status2 lock bit is set,
+  the complete narrow state is preserved; when both are clear, only
+  `moveEffectByte` is overwritten with `MOVE_EFFECT_THRASH |
+  MOVE_EFFECT_AFFECTS_USER` (**117**). Both successful branches `Advance`.
+  Canonical TypeScript execution supplies **4,229 cases**, including the full
+  256-byte effect domain for all four attackers and all four lock-bit
+  combinations, packed-u32 edges, sibling preservation, missing role, and
+  repetition; corpus sha256
+  `a6481812ddbea8b97208ad1c0954c749fa1ce742bebe2e538d8f258198bb2966`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited source constants,
+  exact error ordering, canonical handler execution, and the bounded 4.0 MB
+  generated corpus; regenerated twice byte-identically (generated sha256
+  `fd41471d601b4d31f51f9fd49a4670f3b5ebed299eb7872d3d31f4ab586a6653`),
+  and reran focused **5/5**, cargo **842/842**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,018 passed files / 44 grind files skipped; 9,802
+  passed / 223 skipped tests**, and build **670 modules**. Artifact is
+  **509,475 bytes**, sha256
+  `08436ef1c1760ad3cf409fd733aed6d1266b4f4db37c53acf5cb3103c9fb67c4`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: the fresh worker lacked Cargo on login PATH and the ignored WASM
+  artifact; the supervisor also corrected one stale local WASM script name,
+  ~4 min total.
+
 ## R30 — [supervised session, 2026-08-14] **M29 Battle Script Bide setup state leaf**
 
 - **State:** `rust-main` = current master `732e6339` plus the verified Bide
