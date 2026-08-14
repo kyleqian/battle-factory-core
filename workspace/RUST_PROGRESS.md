@@ -5,6 +5,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R19 — [supervised session, 2026-08-14] **M18 Battle Script Minimize state leaf**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15-R19
+  through `a921e290`. The complete pure
+  `battleScriptSetminimizeOpcode.ts` state projection is native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported the exact `HITMARKER_OBEYS` gate ordering: a clear gate is a
+  complete no-op before attacker resolution, while a set gate requires the
+  attacker and ORs `STATUS3_MINIMIZED` into only that battler. Exact role
+  error, hit marker, unrelated bits, siblings, and idempotence are retained.
+  Canonical TypeScript execution supplies **51 cases** across all attackers,
+  both gates, clear/set state, two applications, and u32 status/hit-marker
+  edges; corpus sha256
+  `d3760ba077c31a99adb30d27642450f8de055ca72a00abed711bf91f0e334a49`.
+- **Next:** select the next conflict-free pure Battle Script leaf only if a
+  full worker verification still leaves the required wind-down margin. M7c
+  opponent generation remains deferred while Issue #55 is open.
+- **Notes:** Sol/high worker, one commit. Supervisor audited the no-op-before-
+  role-resolution branch against the pinned source, regenerated twice
+  byte-identically (generated sha256
+  `ef4143b2254024205f3f33c775f7934847310420b86371c9aea9e06efe78a5ce`),
+  and reran focused **5/5**, cargo **780/780**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, and smoke **375/375**.
+  Worker same-commit full npm was **1,047 files / 9,864 passed / 1 skip**;
+  build was **664 modules**. Artifact is **509,818 bytes**, sha256
+  `d72d7fa77bea0d961ffc0279233c0d616ee30e4852cabd295544706555e8b3d5`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: cargo was absent from the worker login PATH; explicit toolchain
+  setup cost ~1 min.
+
 ## R18 — [supervised session, 2026-08-14] **M17 Battle Script Destiny Bond state leaf**
 
 - **State:** `rust-main` = current master `438d06ba` plus verified R15-R18
