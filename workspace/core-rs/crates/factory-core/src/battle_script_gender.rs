@@ -10,8 +10,8 @@
 //! native leaf deliberately has no lossy `f64` facade and does not widen WASM.
 
 use crate::{
-    gen_tables,
     gender::{get_mon_gender, MonGender},
+    species_gender_ratios_gen,
 };
 use core::fmt;
 
@@ -43,7 +43,7 @@ pub fn resolve_battle_script_mon_gender(
     species: u16,
     personality: u32,
 ) -> Result<MonGender, BattleScriptGenderError> {
-    let species_row = gen_tables::switch_policy_species_row(species)
+    let gender_ratio = species_gender_ratios_gen::species_gender_ratio(species)
         .ok_or(BattleScriptGenderError { species })?;
-    Ok(get_mon_gender(species_row.gender_ratio, personality))
+    Ok(get_mon_gender(gender_ratio, personality))
 }
