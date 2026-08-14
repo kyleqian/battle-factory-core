@@ -1633,6 +1633,32 @@
    ]
   },
   {
+   "move": "MOVE_FLAIL",
+   "status": "exact",
+   "covered": [
+    "complete legal Scene-ON KRABBY/ONIX parties cover all six source power bands 20/40/80/100/150/200 in both player-back and opponent-front orientations through first inactive cleanup; real Super Fang turns stage the five natural reduced-HP bands without transient state injection",
+    "the pure source-relative reducer ports AnimTask_FlailMovement task data, live battler offsets and affine matrix, fixed-animation random hitsplat, move-power ShakeMon amplitude, sound, monbg/alpha, waits, and cleanup; the typed seam carries immutable visual Random2 inputs and never reads or advances gameplay RNG",
+    "the source-derived KRABBY/ONIX compositor applies the measured preceding-software OAM transfer, RAM+2 live-attacker offset/matrix latch, ordinary RAM+1 hitsplat OAM plus fresh-affine RAM+2 paint and RAM+1 teardown, and preceding-faded hardware palette with same-row age-4 monbg setup",
+    "all retained natural powers pass 1,140/1,140 reducer/seam/raw-RGB/production-framebuffer rows; full-band power 20 passes 456/456 rows twice freshly across both orientations, with zero residual rows through cleanup and raw sequences dcad7a27b3f0d59a02717dd9652ac34f863e2033762042f473ff8e393a1e3900 / c0eb1a48e0466dce2d7b8daeed2ad186e1a98d04c0163ebdcea5bce2a7e15c2e",
+    "MOVE_LUSTER_PURGE remains independently unsupported and receives no Flail reducer, seam, compositor, receipt, or coverage credit; no damage, HP calculation, gameplay RNG, AI, turn, controller, round, facility state, absolute tick, recorded-frame lookup, or boundary/barrier changed"
+   ],
+   "evidence": [
+    "tools/compare/fixtures/flail-full-hp-evidence.json",
+    "tools/compare/fixtures/flail-natural-hp-evidence.json",
+    "tools/compare/flailProbe.py",
+    "tools/compare/flailSourceAudit.ts",
+    "tools/compare/flailPortable.ts",
+    "tools/compare/flailFreshPortable.ts",
+    "src/animation/flail.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/flailReducer.test.ts",
+    "tests/animation/flailSourceCheckpoint.test.ts",
+    "tests/animation/flailEvidenceCheckpoint.test.ts",
+    "tests/animation/flailNaturalHpEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_FOCUS_ENERGY",
    "status": "exact",
    "covered": [
