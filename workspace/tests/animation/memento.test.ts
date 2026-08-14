@@ -16,7 +16,7 @@ const archives = [
 ] as const;
 
 function battlerConfig(row: SourceRow, which: "attacker" | "target"): MementoBattlerConfig {
-  const battler = row.animationBattlers[which] as number;
+  const battler = row.animationBattlers[which] as 0 | 1;
   const opponent = (battler & 1) !== 0;
   const sprite = row.battlerSprites[which];
   const isWeezing = sprite.data[2] === 110;
