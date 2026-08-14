@@ -127,6 +127,13 @@ Current exports:
   field-level layout is documented beside the export and mirrored by
   `adapter/factorySwapEngine.ts`, which calls it directly in forced WASM mode
   with no TypeScript fallback.
+- `fw_apply_factory_draft_selection_operation(input_ptr, input_len) -> ptr` —
+  all 12 presentation-free rental-draft helpers behind one checked additive
+  ABI-v1 operation packet. It preserves six projection inputs, exact
+  pick-routing errors, UTF-8 species/redraw messages, and optional `otId`
+  presence (including present zero). Its full layout is below and beside the
+  Rust export; `adapter/factoryDraftSelectionEngine.ts` directly invokes it in
+  forced WASM mode with no TypeScript fallback.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes
@@ -141,6 +148,46 @@ loader in `adapter/`:
 node --experimental-strip-types adapter/smoke.mts   # from core-rs/
 # or: node --experimental-strip-types core-rs/adapter/smoke.mts   # from the workspace root
 ```
+
+## Factory draft-selection WASM boundary (M10c)
+
+`fw_apply_factory_draft_selection_operation(input_ptr,input_len)` accepts an
+exact-width variable little-endian packet beginning `version:u8=1,operation:u8`.
+Operation tags 0 through 11 are, in order, `selectMonMessage`, `applySelect`,
+`applyDeselect`, `isMonsConfirmed`, `chosenMonSpecies`,
+`selectedRentalParty`, `cursorMoveStallsBalls`, `moveCursor`,
+`moveMenuCursor`, `advanceCursorRedraw`, `advanceMenuHighlightRedraw`, and
+`advanceRentConfirmRedraw`. Their exact suffixes are:
+
+```text
+0,3: selecting_mons_state:u8
+1,2: selected_ids:u8[6],selecting_mons_state:u8,slot_index:u8
+4:   selected_ids:u8[6],species:string[6]
+5:   selected_ids:u8[6],rentals:rental[6]
+6:   entering_species:string
+7,8: cursor:u8,direction:u8 (0=forward,1=backward)
+9:   presence:u8,[from_cursor:u8,elapsed:u8,fast:u8]
+10:  presence:u8,[from_menu:u8,elapsed:u8]
+11:  presence:u8,[from_message:string,from_selected:u8,elapsed:u8]
+
+string = byte_len:u32,utf8[byte_len]
+rental = set_id:u32,personality:u32,fixed_iv:u32,ability_slot:u8,
+         ot_id_presence:u8,[ot_id:u32]
+```
+
+All booleans and presence tags are exactly 0/1; direction, controller ranks,
+states, slots/cursors, redraw elapsed values, UTF-8, lengths, operation suffix,
+and final consumption are checked before any helper executes. Projection rank
+cells retain the full `u8` domain so `selectedRentalParty` invalid/duplicate/
+missing-rank failures remain semantic rather than structural.
+
+Results begin `total_len:u32,status:u8`. Status 0 adds `value_kind:u8`:
+0=string, 1=selection change (`selected_ids:u8[6],state:u8`), 2=bool,
+3=species (`count:u8,string[count]`), 4=three full rental records, 5=cursor,
+6=optional cursor redraw, 7=optional menu redraw, and 8=optional rent-confirm
+redraw. Status 1 carries `message:string` for the exact native routing error;
+status 2 carries the single stable malformed-packet message. The returned
+buffer is freed with its exact `(ptr,total_len)` pair.
 
 ## Differential harness
 

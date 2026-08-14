@@ -51,6 +51,11 @@ use factory_core::factory_ai_switch_policy::{
     self, FactoryAiSwitchBattler, FactoryAiSwitchChoice, FactoryAiSwitchPartyMember,
     FactoryAiSwitchPolicyInput, FactoryAiSwitchPolicyResult, FactoryAiSwitchRules,
 };
+use factory_core::factory_draft_selection::{
+    self as factory_draft_selection, FactoryDraftCursorRedrawState, FactoryDraftDirection,
+    FactoryDraftMenuHighlightRedrawState, FactoryDraftRentConfirmRedrawState,
+    FactoryDraftSelectedIds, FactoryDraftSelectionChange, FACTORY_DRAFT_SLOT_COUNT,
+};
 use factory_core::factory_swap::{
     self as factory_swap, FactoryRentalMon, FactorySwapBattleStatus, FactorySwapInput,
     FactorySwapMon, FactorySwapPartyIndex, FactorySwapPhase, FactorySwapQuitReturnPhase,
@@ -5072,6 +5077,479 @@ pub unsafe extern "C" fn fw_apply_factory_swap_operation(
             Err(message) => encode_factory_swap_message(1, &message),
             Ok(value) => encode_factory_swap_value(value).unwrap_or_else(|()| {
                 encode_factory_swap_message(2, FACTORY_SWAP_MALFORMED_MESSAGE)
+            }),
+        },
+    };
+    alloc_and_copy(&output)
+}
+
+// --- Factory draft-selection operation packet (additive ABI v1) ----------
+
+const FACTORY_DRAFT_SELECTION_PACKET_VERSION: u8 = 1;
+const FACTORY_DRAFT_SELECTION_MALFORMED_MESSAGE: &str =
+    "factory-wasm factoryDraftSelectionEngine: malformed operation packet";
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct FactoryDraftRentalSource {
+    set_id: u32,
+    personality: u32,
+    fixed_iv: u32,
+    ability_slot: u8,
+    ot_id: Option<u32>,
+}
+
+#[derive(Debug)]
+enum FactoryDraftSelectionPacket {
+    SelectMonMessage(u8),
+    ApplySelect(FactoryDraftSelectedIds, u8, u8),
+    ApplyDeselect(FactoryDraftSelectedIds, u8, u8),
+    IsMonsConfirmed(u8),
+    ChosenMonSpecies(FactoryDraftSelectedIds, [String; FACTORY_DRAFT_SLOT_COUNT]),
+    SelectedRentalParty(
+        FactoryDraftSelectedIds,
+        [FactoryDraftRentalSource; FACTORY_DRAFT_SLOT_COUNT],
+    ),
+    CursorMoveStallsBalls(String),
+    MoveCursor(u8, FactoryDraftDirection),
+    MoveMenuCursor(u8, FactoryDraftDirection),
+    AdvanceCursorRedraw(Option<FactoryDraftCursorRedrawState>),
+    AdvanceMenuHighlightRedraw(Option<FactoryDraftMenuHighlightRedrawState>),
+    AdvanceRentConfirmRedraw(Option<(String, bool, u8)>),
+}
+
+#[derive(Debug)]
+enum FactoryDraftSelectionValue {
+    String(String),
+    SelectionChange(FactoryDraftSelectionChange),
+    Bool(bool),
+    Species(Vec<String>),
+    RentalParty([FactoryDraftRentalSource; 3]),
+    Cursor(u8),
+    CursorRedraw(Option<FactoryDraftCursorRedrawState>),
+    MenuHighlightRedraw(Option<FactoryDraftMenuHighlightRedrawState>),
+    RentConfirmRedraw(Option<(String, bool, u8)>),
+}
+
+fn factory_draft_selection_message(status: u8, message: &str) -> Vec<u8> {
+    let mut buf = vec![0; 5];
+    buf[4] = status;
+    if factory_swap_write_string(&mut buf, message).is_err() {
+        return vec![5, 0, 0, 0, 2];
+    }
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn factory_draft_bool(reader: &mut CheckedReader<'_>) -> Result<bool, ()> {
+    match reader.u8()? {
+        0 => Ok(false),
+        1 => Ok(true),
+        _ => Err(()),
+    }
+}
+
+fn factory_draft_selected_ids(
+    reader: &mut CheckedReader<'_>,
+    controller_domain: bool,
+) -> Result<FactoryDraftSelectedIds, ()> {
+    let mut values = [0; FACTORY_DRAFT_SLOT_COUNT];
+    for value in &mut values {
+        *value = reader.u8()?;
+        if controller_domain && *value > 3 {
+            return Err(());
+        }
+    }
+    Ok(values)
+}
+
+fn factory_draft_selecting_state(reader: &mut CheckedReader<'_>) -> Result<u8, ()> {
+    let value = reader.u8()?;
+    (1..=4).contains(&value).then_some(value).ok_or(())
+}
+
+fn factory_draft_slot(reader: &mut CheckedReader<'_>) -> Result<u8, ()> {
+    let value = reader.u8()?;
+    (value < FACTORY_DRAFT_SLOT_COUNT as u8)
+        .then_some(value)
+        .ok_or(())
+}
+
+fn factory_draft_direction(reader: &mut CheckedReader<'_>) -> Result<FactoryDraftDirection, ()> {
+    match reader.u8()? {
+        0 => Ok(FactoryDraftDirection::Forward),
+        1 => Ok(FactoryDraftDirection::Backward),
+        _ => Err(()),
+    }
+}
+
+fn factory_draft_presence(reader: &mut CheckedReader<'_>) -> Result<bool, ()> {
+    match reader.u8()? {
+        0 => Ok(false),
+        1 => Ok(true),
+        _ => Err(()),
+    }
+}
+
+fn decode_factory_draft_rental(
+    reader: &mut CheckedReader<'_>,
+) -> Result<FactoryDraftRentalSource, ()> {
+    let set_id = reader.u32()?;
+    let personality = reader.u32()?;
+    let fixed_iv = reader.u32()?;
+    let ability_slot = reader.u8()?;
+    if ability_slot > 1 {
+        return Err(());
+    }
+    let ot_id = if factory_draft_presence(reader)? {
+        Some(reader.u32()?)
+    } else {
+        None
+    };
+    Ok(FactoryDraftRentalSource { set_id, personality, fixed_iv, ability_slot, ot_id })
+}
+
+fn decode_factory_draft_packet(bytes: &[u8]) -> Result<FactoryDraftSelectionPacket, ()> {
+    let mut reader = CheckedReader::new(bytes);
+    if reader.u8()? != FACTORY_DRAFT_SELECTION_PACKET_VERSION {
+        return Err(());
+    }
+    let operation = match reader.u8()? {
+        0 => FactoryDraftSelectionPacket::SelectMonMessage(factory_draft_selecting_state(
+            &mut reader,
+        )?),
+        1 => {
+            let selected_ids = factory_draft_selected_ids(&mut reader, true)?;
+            let selecting_mons_state = factory_draft_selecting_state(&mut reader)?;
+            if selecting_mons_state == 4 {
+                return Err(());
+            }
+            FactoryDraftSelectionPacket::ApplySelect(
+                selected_ids,
+                selecting_mons_state,
+                factory_draft_slot(&mut reader)?,
+            )
+        }
+        2 => {
+            let selected_ids = factory_draft_selected_ids(&mut reader, true)?;
+            let selecting_mons_state = factory_draft_selecting_state(&mut reader)?;
+            if selecting_mons_state == 1 {
+                return Err(());
+            }
+            FactoryDraftSelectionPacket::ApplyDeselect(
+                selected_ids,
+                selecting_mons_state,
+                factory_draft_slot(&mut reader)?,
+            )
+        }
+        3 => FactoryDraftSelectionPacket::IsMonsConfirmed(factory_draft_selecting_state(
+            &mut reader,
+        )?),
+        4 => {
+            let selected_ids = factory_draft_selected_ids(&mut reader, false)?;
+            let species = [
+                reader.string()?,
+                reader.string()?,
+                reader.string()?,
+                reader.string()?,
+                reader.string()?,
+                reader.string()?,
+            ];
+            FactoryDraftSelectionPacket::ChosenMonSpecies(selected_ids, species)
+        }
+        5 => {
+            let selected_ids = factory_draft_selected_ids(&mut reader, false)?;
+            let rentals = [
+                decode_factory_draft_rental(&mut reader)?,
+                decode_factory_draft_rental(&mut reader)?,
+                decode_factory_draft_rental(&mut reader)?,
+                decode_factory_draft_rental(&mut reader)?,
+                decode_factory_draft_rental(&mut reader)?,
+                decode_factory_draft_rental(&mut reader)?,
+            ];
+            FactoryDraftSelectionPacket::SelectedRentalParty(selected_ids, rentals)
+        }
+        6 => FactoryDraftSelectionPacket::CursorMoveStallsBalls(reader.string()?),
+        7 => FactoryDraftSelectionPacket::MoveCursor(
+            factory_draft_slot(&mut reader)?,
+            factory_draft_direction(&mut reader)?,
+        ),
+        8 => {
+            let cursor = reader.u8()?;
+            if cursor > 2 {
+                return Err(());
+            }
+            FactoryDraftSelectionPacket::MoveMenuCursor(
+                cursor,
+                factory_draft_direction(&mut reader)?,
+            )
+        }
+        9 => {
+            let state = if factory_draft_presence(&mut reader)? {
+                let from_cursor_pos = factory_draft_slot(&mut reader)?;
+                let elapsed = reader.u8()?;
+                let fast = factory_draft_bool(&mut reader)?;
+                if elapsed > if fast { 1 } else { 2 } {
+                    return Err(());
+                }
+                Some(FactoryDraftCursorRedrawState { from_cursor_pos, elapsed, fast })
+            } else {
+                None
+            };
+            FactoryDraftSelectionPacket::AdvanceCursorRedraw(state)
+        }
+        10 => {
+            let state = if factory_draft_presence(&mut reader)? {
+                let from_menu_cursor_pos = reader.u8()?;
+                let elapsed = reader.u8()?;
+                if from_menu_cursor_pos > 2 || elapsed > 1 {
+                    return Err(());
+                }
+                Some(FactoryDraftMenuHighlightRedrawState { from_menu_cursor_pos, elapsed })
+            } else {
+                None
+            };
+            FactoryDraftSelectionPacket::AdvanceMenuHighlightRedraw(state)
+        }
+        11 => {
+            let state = if factory_draft_presence(&mut reader)? {
+                let from_message = reader.string()?;
+                let from_selected = factory_draft_bool(&mut reader)?;
+                let elapsed = reader.u8()?;
+                if elapsed > 1 {
+                    return Err(());
+                }
+                Some((from_message, from_selected, elapsed))
+            } else {
+                None
+            };
+            FactoryDraftSelectionPacket::AdvanceRentConfirmRedraw(state)
+        }
+        _ => return Err(()),
+    };
+    reader.finish()?;
+    Ok(operation)
+}
+
+fn execute_factory_draft_selection(
+    packet: FactoryDraftSelectionPacket,
+) -> Result<FactoryDraftSelectionValue, String> {
+    Ok(match packet {
+        FactoryDraftSelectionPacket::SelectMonMessage(state) => FactoryDraftSelectionValue::String(
+            factory_draft_selection::select_mon_message(state).to_owned(),
+        ),
+        FactoryDraftSelectionPacket::ApplySelect(ids, state, slot) => {
+            FactoryDraftSelectionValue::SelectionChange(factory_draft_selection::apply_select(
+                &ids, state, slot,
+            ))
+        }
+        FactoryDraftSelectionPacket::ApplyDeselect(ids, state, slot) => {
+            FactoryDraftSelectionValue::SelectionChange(factory_draft_selection::apply_deselect(
+                &ids, state, slot,
+            ))
+        }
+        FactoryDraftSelectionPacket::IsMonsConfirmed(state) => {
+            FactoryDraftSelectionValue::Bool(factory_draft_selection::is_mons_confirmed(state))
+        }
+        FactoryDraftSelectionPacket::ChosenMonSpecies(ids, species) => {
+            let borrowed = std::array::from_fn(|index| species[index].as_str());
+            FactoryDraftSelectionValue::Species(
+                factory_draft_selection::chosen_mon_species(&ids, &borrowed)
+                    .into_iter()
+                    .map(str::to_owned)
+                    .collect(),
+            )
+        }
+        FactoryDraftSelectionPacket::SelectedRentalParty(ids, rentals) => {
+            FactoryDraftSelectionValue::RentalParty(
+                factory_draft_selection::selected_rental_party(&ids, &rentals)
+                    .map_err(|error| error.to_string())?,
+            )
+        }
+        FactoryDraftSelectionPacket::CursorMoveStallsBalls(species) => {
+            FactoryDraftSelectionValue::Bool(factory_draft_selection::cursor_move_stalls_balls(
+                &species,
+            ))
+        }
+        FactoryDraftSelectionPacket::MoveCursor(cursor, direction) => {
+            FactoryDraftSelectionValue::Cursor(factory_draft_selection::move_cursor(
+                cursor, direction,
+            ))
+        }
+        FactoryDraftSelectionPacket::MoveMenuCursor(cursor, direction) => {
+            FactoryDraftSelectionValue::Cursor(factory_draft_selection::move_menu_cursor(
+                cursor, direction,
+            ))
+        }
+        FactoryDraftSelectionPacket::AdvanceCursorRedraw(state) => {
+            FactoryDraftSelectionValue::CursorRedraw(
+                factory_draft_selection::advance_cursor_redraw(state),
+            )
+        }
+        FactoryDraftSelectionPacket::AdvanceMenuHighlightRedraw(state) => {
+            FactoryDraftSelectionValue::MenuHighlightRedraw(
+                factory_draft_selection::advance_menu_highlight_redraw(state),
+            )
+        }
+        FactoryDraftSelectionPacket::AdvanceRentConfirmRedraw(state) => {
+            let borrowed = state.as_ref().map(|(message, from_selected, elapsed)| {
+                FactoryDraftRentConfirmRedrawState {
+                    from_message: message.as_str(),
+                    from_selected: *from_selected,
+                    elapsed: *elapsed,
+                }
+            });
+            FactoryDraftSelectionValue::RentConfirmRedraw(
+                factory_draft_selection::advance_rent_confirm_redraw(borrowed).map(|result| {
+                    (
+                        result.from_message.to_owned(),
+                        result.from_selected,
+                        result.elapsed,
+                    )
+                }),
+            )
+        }
+    })
+}
+
+fn encode_factory_draft_rental(buf: &mut Vec<u8>, rental: &FactoryDraftRentalSource) {
+    buf.extend_from_slice(&rental.set_id.to_le_bytes());
+    buf.extend_from_slice(&rental.personality.to_le_bytes());
+    buf.extend_from_slice(&rental.fixed_iv.to_le_bytes());
+    buf.push(rental.ability_slot);
+    match rental.ot_id {
+        None => buf.push(0),
+        Some(value) => {
+            buf.push(1);
+            buf.extend_from_slice(&value.to_le_bytes());
+        }
+    }
+}
+
+fn encode_factory_draft_value(value: FactoryDraftSelectionValue) -> Result<Vec<u8>, ()> {
+    let mut buf = vec![0; 6];
+    match value {
+        FactoryDraftSelectionValue::String(value) => {
+            buf[5] = 0;
+            factory_swap_write_string(&mut buf, &value)?;
+        }
+        FactoryDraftSelectionValue::SelectionChange(value) => {
+            buf[5] = 1;
+            buf.extend_from_slice(&value.selected_ids);
+            buf.push(value.selecting_mons_state);
+        }
+        FactoryDraftSelectionValue::Bool(value) => {
+            buf[5] = 2;
+            buf.push(u8::from(value));
+        }
+        FactoryDraftSelectionValue::Species(values) => {
+            buf[5] = 3;
+            buf.push(u8::try_from(values.len()).map_err(|_| ())?);
+            for value in values {
+                factory_swap_write_string(&mut buf, &value)?;
+            }
+        }
+        FactoryDraftSelectionValue::RentalParty(values) => {
+            buf[5] = 4;
+            for value in &values {
+                encode_factory_draft_rental(&mut buf, value);
+            }
+        }
+        FactoryDraftSelectionValue::Cursor(value) => {
+            buf[5] = 5;
+            buf.push(value);
+        }
+        FactoryDraftSelectionValue::CursorRedraw(value) => {
+            buf[5] = 6;
+            match value {
+                None => buf.push(0),
+                Some(value) => buf.extend_from_slice(&[
+                    1,
+                    value.from_cursor_pos,
+                    value.elapsed,
+                    u8::from(value.fast),
+                ]),
+            }
+        }
+        FactoryDraftSelectionValue::MenuHighlightRedraw(value) => {
+            buf[5] = 7;
+            match value {
+                None => buf.push(0),
+                Some(value) => {
+                    buf.extend_from_slice(&[1, value.from_menu_cursor_pos, value.elapsed]);
+                }
+            }
+        }
+        FactoryDraftSelectionValue::RentConfirmRedraw(value) => {
+            buf[5] = 8;
+            match value {
+                None => buf.push(0),
+                Some((message, selected, elapsed)) => {
+                    buf.push(1);
+                    factory_swap_write_string(&mut buf, &message)?;
+                    buf.extend_from_slice(&[u8::from(selected), elapsed]);
+                }
+            }
+        }
+    }
+    patch_total_len(&mut buf);
+    Ok(buf)
+}
+
+/// Executes one of the twelve presentation-free Factory draft-selection
+/// helpers through one additive ABI-v1 packet. Input begins
+/// `version:u8=1,operation:u8`, with tags 0..11 in this order:
+/// selectMonMessage, applySelect, applyDeselect, isMonsConfirmed,
+/// chosenMonSpecies, selectedRentalParty, cursorMoveStallsBalls, moveCursor,
+/// moveMenuCursor, advanceCursorRedraw, advanceMenuHighlightRedraw,
+/// advanceRentConfirmRedraw.
+///
+/// Suffixes are operation-specific: selection changes carry
+/// `selected_ids:u8[6],selecting_state:u8,slot:u8`; confirmation/message carry
+/// `selecting_state:u8`; chosen species carries `selected_ids:u8[6]` then six
+/// strings; selected rentals carries `selected_ids:u8[6]` then six records;
+/// stall carries one string; cursor moves carry `cursor:u8,direction:u8`
+/// (0=forward,1=backward). Redraws carry `presence:u8`; present cursor redraw
+/// is `from_cursor:u8,elapsed:u8,fast:u8`, menu redraw is
+/// `from_menu:u8,elapsed:u8`, and rent redraw is
+/// `from_message:string,from_selected:u8,elapsed:u8`.
+///
+/// A string is `byte_len:u32,utf8`. A rental record is
+/// `set_id:u32,personality:u32,fixed_iv:u32,ability_slot:u8,
+/// ot_id_presence:u8,[ot_id:u32]`, preserving absent versus present zero.
+/// Controller ranks/cursors/states/elapsed values, directions, booleans,
+/// presence tags, UTF-8, lengths, exact suffixes, and full consumption are
+/// checked before execution. Projection rank cells intentionally retain the
+/// full u8 domain so native semantic rank errors cross as status 1.
+///
+/// Output is `total_len:u32,status:u8`. Status 0 adds `value_kind:u8`:
+/// 0=string, 1=selection change (`selected_ids:u8[6],state:u8`), 2=bool,
+/// 3=species (`count:u8,string[count]`), 4=exactly three rental records,
+/// 5=cursor, 6=optional cursor redraw, 7=optional menu redraw, 8=optional
+/// rent redraw. Status 1 is an exact native selectedRentalParty semantic
+/// error; status 2 is the single stable malformed-packet message. Both error
+/// statuses carry `message:string`. The caller frees `(ptr,total_len)`.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes.
+#[no_mangle]
+pub unsafe extern "C" fn fw_apply_factory_draft_selection_operation(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_len == 0 {
+        return alloc_and_copy(&factory_draft_selection_message(
+            2,
+            FACTORY_DRAFT_SELECTION_MALFORMED_MESSAGE,
+        ));
+    }
+    // SAFETY: the caller contract supplies exactly input_len readable bytes.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len as usize) };
+    let output = match decode_factory_draft_packet(bytes) {
+        Err(()) => factory_draft_selection_message(2, FACTORY_DRAFT_SELECTION_MALFORMED_MESSAGE),
+        Ok(packet) => match execute_factory_draft_selection(packet) {
+            Err(message) => factory_draft_selection_message(1, &message),
+            Ok(value) => encode_factory_draft_value(value).unwrap_or_else(|()| {
+                factory_draft_selection_message(2, FACTORY_DRAFT_SELECTION_MALFORMED_MESSAGE)
             }),
         },
     };
