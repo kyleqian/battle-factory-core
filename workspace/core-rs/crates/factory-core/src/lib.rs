@@ -17,6 +17,8 @@ pub mod battle_script_ai_reveal;
 pub mod battle_script_ai_reveal_vectors_gen;
 pub mod battle_script_battler_positions;
 pub mod battle_script_battler_positions_vectors_gen;
+pub mod battle_script_doubledamageifdamaged;
+pub mod battle_script_doubledamageifdamaged_vectors_gen;
 pub mod battle_script_gender;
 pub mod battle_script_gender_vectors_gen;
 pub mod battle_script_negativedamage;
