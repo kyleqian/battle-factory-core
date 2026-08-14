@@ -1,0 +1,299 @@
+/**
+ * Noland rung 2c: proves the Frontier Brain fires exactly at the seventh
+ * battle of a REAL round shape through the full orchestrator/round-controller
+ * win path — six real generated-battle wins (battleIndex 0..5), then the
+ * pre-generation seam at the post-win/scouting transition schedules
+ * battleIndex 6. Rung 2 (`factoryRoundBattleOrchestrator.test.ts`'s "Noland
+ * rung 2" describe block) proved the same wiring at battleIndex 1 with a
+ * synthetic mid-round starting streak (one real win, not six) to keep that
+ * step's RNG-cursor-handoff assertion fast; this file closes that noted
+ * deviation by driving the genuine six-real-win round shape instead.
+ */
+import { describe, expect, it } from "vitest";
+import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
+import naturesData from "../src/data/gen/natures.json" with { type: "json" };
+import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
+import type { BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
+import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
+import { TRAINER_FRONTIER_BRAIN } from "../src/engine/factoryAiMaskSelection.ts";
+import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus.ts";
+import {
+  advanceFactoryRoundPresentation,
+  chooseFactoryRoundSwap,
+  completeFactoryRoundPresentation,
+  createFactoryRoundBattleOrchestrator,
+  preGenerateFactoryRoundNextOpponent,
+  submitFactoryRoundPlayerDecision,
+  type FactoryRoundBattleOrchestratorConfig,
+  type FactoryRoundBattleOrchestratorState,
+} from "../src/engine/factoryRoundBattleOrchestrator.ts";
+
+const PLAYER_TRAINER_ID = 0x89ab_cdef;
+const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
+
+function record(setId: number, fixedIv = 31): FactoryRentalRecord {
+  const set = frontierMonsData.entries[setId]!;
+  const personality = natureByName.get(set.nature)!;
+  const input = {
+    setId,
+    personality,
+    fixedIv,
+    abilitySlot: (personality & 1) as 0 | 1,
+    otId: PLAYER_TRAINER_ID,
+  };
+  return Object.freeze({
+    ...input,
+    abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot,
+  });
+}
+
+function acknowledgeAndAdvance(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  const commandId = state.round.presentation?.command.commandId;
+  if (commandId === undefined) throw new Error("expected a presentation command");
+  return advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(state, { commandId }),
+  );
+}
+
+// Mirrors `choosePlayerDecision` in `factoryRoundBattleOrchestrator.test.ts`:
+// a "move slot 0" policy that the pinned round-shape seeds below win with
+// reliably against six consecutive ordinary Factory opponents.
+function choosePlayerDecision(
+  state: FactoryRoundBattleOrchestratorState,
+): BattleSubmittedDecision {
+  const boundary = state.battle?.boundary;
+  if (boundary?.kind !== "decision-required" || boundary.request.side !== "player") {
+    throw new Error("expected a player decision");
+  }
+  if (boundary.request.kind === "forced-switch") {
+    return { kind: "switch", partyIndex: boundary.request.legalPartyIndexes[0]! };
+  }
+  const active = state.battle!.rules.rulesContext.battlers[0];
+  const preferredSlot = active.partyIndex === 1 && active.isFirstTurn === 2 ? 3 : 0;
+  return boundary.request.legalDecisions.find(
+    (decision) => decision.kind === "use-move" && decision.moveSlot === preferredSlot,
+  ) ?? boundary.request.legalDecisions.find(
+    (decision) => decision.kind === "use-move",
+  )!;
+}
+
+function roundConfig(
+  id: string,
+  seed: number,
+  factoryWinStreak: number,
+  factorySymbolsCount: 0 | 1 | 2,
+): FactoryRoundBattleOrchestratorConfig {
+  const playerRecords = [record(664), record(678), record(527)] as const;
+  const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+  return {
+    id,
+    rngValue: seed,
+    factoryWinStreak,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: playerRecords,
+      savedRentalRecords,
+    },
+    factorySymbolsCount,
+  };
+}
+
+/**
+ * Drives real generated battles, declining every swap offer, until battle 5
+ * (the sixth real win) resolves — stopping the instant `presentingBattleWin`
+ * is reached at battleIndex 5, before the round loop's lazy
+ * `AskSwapMon`-seam generation would otherwise spend battleIndex 6's RNG
+ * receipt at swap resolution. Reusing this stop point (rather than
+ * `driveGeneratedRoundToCompletion`'s run-to-`roundComplete` shape) is what
+ * lets every case below call `preGenerateFactoryRoundNextOpponent` itself and
+ * inspect the seventh-battle schedule before it publishes.
+ */
+function driveToSixthWin(
+  config: FactoryRoundBattleOrchestratorConfig,
+): FactoryRoundBattleOrchestratorState {
+  let state = createFactoryRoundBattleOrchestrator(config);
+  const atSixthWin = (current: FactoryRoundBattleOrchestratorState) =>
+    current.round.rules.phase === "presentingBattleWin" && current.round.rules.battleIndex === 5;
+
+  for (let budget = 0; budget < 2_000 && !atSixthWin(state); budget += 1) {
+    if (state.round.rules.phase === "roundLost") {
+      throw new Error("round-shape seed lost before the sixth win; pick a different seed");
+    }
+    if (state.battle !== null) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+      continue;
+    }
+    if (
+      state.round.rules.phase === "presentingBattleStart"
+      || state.round.rules.phase === "presentingBattleWin"
+      || state.round.rules.phase === "presentingSwapResult"
+    ) {
+      state = acknowledgeAndAdvance(state);
+      continue;
+    }
+    if (state.round.rules.phase === "awaitingSwapDecision") {
+      const commandId = state.round.presentation?.command.commandId;
+      if (commandId === undefined) throw new Error("expected swap-offer presentation command");
+      state = completeFactoryRoundPresentation(state, { commandId });
+      state = chooseFactoryRoundSwap(state, { type: "decline" });
+      continue;
+    }
+    throw new Error(`unexpected round-shape phase ${state.round.rules.phase}`);
+  }
+  if (!atSixthWin(state)) throw new Error("did not reach the sixth win within budget");
+  return state;
+}
+
+function assertOrdinaryThroughBattle5(
+  state: FactoryRoundBattleOrchestratorState,
+  enteringStreak: number,
+  symbolsCount: 0 | 1 | 2,
+): void {
+  for (let battleIndex = 0; battleIndex <= 5; battleIndex += 1) {
+    expect(state.opponentGenerations[battleIndex]!.kind).toBe("ordinary");
+    expect(getFactoryFrontierBrainStatus({
+      battleMode: "singles",
+      winStreak: enteringStreak + battleIndex,
+      symbolsCount,
+    })).toBe("not-ready");
+  }
+}
+
+// Silver: entering factoryWinStreak 14 (challenge index 2), symbols 0 —
+// battleIndex 6's effective streak is 20, the silver threshold.
+const SILVER_SEED = 4;
+const SILVER_STREAK = 14;
+// Gold: entering factoryWinStreak 35 (challenge index 5), symbols 1 —
+// battleIndex 6's effective streak is 41, the gold threshold.
+const GOLD_SEED = 2;
+const GOLD_STREAK = 35;
+
+describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)", () => {
+  it("silver round: battles 0..5 are ordinary, battleIndex 6 is the silver brain with a real RNG-cursor handoff", () => {
+    let state = driveToSixthWin(
+      roundConfig("brain-round-shape-silver", SILVER_SEED, SILVER_STREAK, 0),
+    );
+    assertOrdinaryThroughBattle5(state, SILVER_STREAK, 0);
+
+    const preWinRng = state.round.rules.rngValue;
+    const playerSetIds = state.round.rules.playerRentalRecords!.map((r) => r.setId);
+
+    state = preGenerateFactoryRoundNextOpponent(state);
+    const pending = state.pendingNextOpponent;
+    expect(pending).not.toBeNull();
+    expect(pending!.kind).toBe("frontier-brain");
+    if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
+    expect(pending!.status).toBe("silver");
+    expect(pending!.trainerId).toBe(TRAINER_FRONTIER_BRAIN);
+    expect(pending!.generation.challengeNum).toBe(2);
+    expect(pending!.generation.fixedIv).toBe(15);
+
+    // storedTrainerIds carries through untouched: the brain is never folded
+    // into the ordinary no-repeat-trainer history.
+    expect(pending!.storedTrainerIds).toEqual(state.opponentGenerations[5]!.storedTrainerIds);
+    expect(pending!.storedTrainerIds).not.toContain(TRAINER_FRONTIER_BRAIN);
+
+    // RNG cursor continuity: the generation seam picks up exactly where
+    // battle 5's own resolution left the cursor, not a hand-derived constant.
+    const segment = state.rngSegments.at(-1)!;
+    expect(segment.kind).toBe("opponent-generation");
+    expect(segment.battleIndex).toBe(6);
+    expect(segment.rngBefore).toBe(preWinRng);
+    expect(pending!.generation.drawLedger[0]!.rngBefore).toBe(preWinRng);
+
+    // Structural party rules against the round's own current rentals.
+    const brainOpponents = pending!.generation.opponents;
+    for (const opponent of brainOpponents) {
+      expect(playerSetIds).not.toContain(opponent.setId);
+      expect(opponent.fixedIv).toBe(pending!.generation.fixedIv);
+    }
+    expect(new Set(brainOpponents.map((o) => o.speciesName)).size).toBe(3);
+    expect(new Set(brainOpponents.map((o) => o.itemId)).size).toBe(3);
+
+    // Publish and confirm the round itself carries the brain marker.
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+
+    expect(state.round.rules.battleIndex).toBe(6);
+    expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
+    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+  });
+
+  it("the same silver round with factorySymbolsCount 1 schedules an ordinary opponent at battleIndex 6", () => {
+    const state = driveToSixthWin(
+      roundConfig("brain-round-shape-silver-symbols-1", SILVER_SEED, SILVER_STREAK, 1),
+    );
+    assertOrdinaryThroughBattle5(state, SILVER_STREAK, 1);
+
+    const generated = preGenerateFactoryRoundNextOpponent(state);
+    const pending = generated.pendingNextOpponent;
+    expect(pending).not.toBeNull();
+    expect(pending!.kind).toBe("ordinary");
+    expect(getFactoryFrontierBrainStatus({
+      battleMode: "singles",
+      winStreak: SILVER_STREAK + 6,
+      symbolsCount: 1,
+    })).toBe("not-ready");
+  });
+
+  it("gold round: battles 0..5 are ordinary, battleIndex 6 is the gold brain", () => {
+    let state = driveToSixthWin(
+      roundConfig("brain-round-shape-gold", GOLD_SEED, GOLD_STREAK, 1),
+    );
+    assertOrdinaryThroughBattle5(state, GOLD_STREAK, 1);
+
+    const preWinRng = state.round.rules.rngValue;
+    const playerSetIds = state.round.rules.playerRentalRecords!.map((r) => r.setId);
+
+    state = preGenerateFactoryRoundNextOpponent(state);
+    const pending = state.pendingNextOpponent;
+    expect(pending).not.toBeNull();
+    expect(pending!.kind).toBe("frontier-brain");
+    if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
+    expect(pending!.status).toBe("gold");
+    expect(pending!.trainerId).toBe(TRAINER_FRONTIER_BRAIN);
+    expect(pending!.generation.challengeNum).toBe(5);
+    expect(pending!.generation.fixedIv).toBe(31);
+
+    expect(pending!.storedTrainerIds).toEqual(state.opponentGenerations[5]!.storedTrainerIds);
+    expect(pending!.storedTrainerIds).not.toContain(TRAINER_FRONTIER_BRAIN);
+
+    const segment = state.rngSegments.at(-1)!;
+    expect(segment.kind).toBe("opponent-generation");
+    expect(segment.battleIndex).toBe(6);
+    expect(segment.rngBefore).toBe(preWinRng);
+    expect(pending!.generation.drawLedger[0]!.rngBefore).toBe(preWinRng);
+
+    const brainOpponents = pending!.generation.opponents;
+    for (const opponent of brainOpponents) {
+      expect(playerSetIds).not.toContain(opponent.setId);
+      expect(opponent.fixedIv).toBe(pending!.generation.fixedIv);
+    }
+    expect(new Set(brainOpponents.map((o) => o.speciesName)).size).toBe(3);
+    expect(new Set(brainOpponents.map((o) => o.itemId)).size).toBe(3);
+
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+
+    expect(state.round.rules.battleIndex).toBe(6);
+    expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
+    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "gold" });
+  });
+});
