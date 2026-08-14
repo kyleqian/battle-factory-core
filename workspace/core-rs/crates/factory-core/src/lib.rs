@@ -27,6 +27,8 @@ pub mod battle_script_setdefensecurlbit;
 pub mod battle_script_setdefensecurlbit_vectors_gen;
 pub mod battle_script_setdestinybond;
 pub mod battle_script_setdestinybond_vectors_gen;
+pub mod battle_script_setfocusenergy;
+pub mod battle_script_setfocusenergy_vectors_gen;
 pub mod battle_script_setforesight;
 pub mod battle_script_setforesight_vectors_gen;
 pub mod battle_script_setminimize;
