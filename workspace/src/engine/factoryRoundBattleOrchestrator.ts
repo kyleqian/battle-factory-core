@@ -100,7 +100,10 @@ import {
   getFactoryFrontierBrainStatus,
   type FrontierBrainStatus,
 } from "./frontierBrainStatus.ts";
-import { factoryTrainerPresentationForOpponent } from "./factoryTrainerPresentation.ts";
+import {
+  factoryTrainerPresentationForOpponent,
+  getFactoryTrainerPresentation,
+} from "./factoryTrainerPresentation.ts";
 import {
   createFactoryBattleStartPresentationCommand,
   type FactoryBattleStartPresentationCommand,
@@ -465,10 +468,11 @@ function generatedOpponent(scheduled: FactoryScheduledOpponentGeneration): Battl
   if (scheduled.kind === "frontier-brain") {
     return Object.freeze({
       id: `factory-trainer-${scheduled.trainerId}`,
-      // Real name/sprite/commentary is the presentation seam's job (a later
-      // rung); this placeholder is never read back for logic decisions --
-      // downstream code keys off `frontierBrain`, not this string.
-      trainerName: "Frontier Brain",
+      // The presentation seam resolves TRAINER_FRONTIER_BRAIN to NOLAND's
+      // real identity (getFactoryTrainerPresentation,
+      // factoryTrainerPresentation.ts); this is that same name, sourced
+      // once so the two never drift.
+      trainerName: getFactoryTrainerPresentation(scheduled.trainerId).name,
       party: asBattleParty(records),
       rentalRecords: records,
       frontierBrain: Object.freeze({ status: scheduled.status }),
