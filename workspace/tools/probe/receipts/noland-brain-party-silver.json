@@ -1,0 +1,3744 @@
+{
+  "case": "silver",
+  "canonicalScreenSha256": "9c89c74113f29e7d4595571c3aceb728417c4fe441b644ec0022fb498463f297",
+  "fixture": "tools/battle-lab/scratch-win-go-on-swap-offer-no-guide-dismiss-probe.json",
+  "prePoke": {
+    "factoryWinStreakSingles50": 1,
+    "curChallengeBattleNum": 1,
+    "lvlModeBits": 0,
+    "battleModeVar": 0,
+    "trainerBattleOpponentA": 9,
+    "rentalMons": [
+      156,
+      149,
+      180,
+      188,
+      184,
+      135
+    ],
+    "playerTrainerId": 416049562,
+    "gRngValue": 28447473
+  },
+  "staged": {
+    "factoryWinStreakSingles50": 20,
+    "curChallengeBattleNum": 6,
+    "lvlModeBits": 0,
+    "battleModeVar": 0,
+    "trainerBattleOpponentA": 1022,
+    "rentalMons": [
+      156,
+      149,
+      180,
+      188,
+      184,
+      135
+    ],
+    "playerTrainerId": 416049562,
+    "gRngValueAtStaging": 28447473
+  },
+  "derived": {
+    "challengeNum": 2,
+    "expectedFixedIV": 15,
+    "monIdRange": {
+      "lo": 267,
+      "hi": 371
+    }
+  },
+  "fillEntry": {
+    "frame": 11313,
+    "lr": 135673503,
+    "rngAtEntry": 798334452
+  },
+  "fillReturn": {
+    "frame": 11341,
+    "rngAtReturn": 2643602241,
+    "returnPc": "0x081636a0"
+  },
+  "rngValueBeforeFirstFactoryDraw": 798334452,
+  "rngValueAfterLastConstructionDraw": 2643602241,
+  "randomCallCount": 271,
+  "randomCalls": [
+    {
+      "frame": 11311,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 1500461635,
+      "post": 183408890
+    },
+    {
+      "frame": 11312,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 183408890,
+      "post": 630173413
+    },
+    {
+      "frame": 11313,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 630173413,
+      "post": 798334452
+    },
+    {
+      "frame": 11313,
+      "caller": "GetFactoryMonId+0x61",
+      "lr": "0x081a6f51",
+      "pre": 798334452,
+      "post": 4153211223
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4153211223,
+      "post": 1263078526
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1263078526,
+      "post": 4150072857
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4150072857,
+      "post": 531916568
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 531916568,
+      "post": 1271502251
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1271502251,
+      "post": 3719377986
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3719377986,
+      "post": 2406202509
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2406202509,
+      "post": 2254478972
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2254478972,
+      "post": 3075842879
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3075842879,
+      "post": 1760433222
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1760433222,
+      "post": 2880460353
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2880460353,
+      "post": 195225632
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 195225632,
+      "post": 1071052307
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1071052307,
+      "post": 3543330954
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3543330954,
+      "post": 2260129589
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2260129589,
+      "post": 4184483844
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4184483844,
+      "post": 2172428839
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2172428839,
+      "post": 1822641422
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1822641422,
+      "post": 701920105
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 701920105,
+      "post": 330269224
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 330269224,
+      "post": 2924673915
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2924673915,
+      "post": 1041690066
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1041690066,
+      "post": 2930089693
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2930089693,
+      "post": 3470416524
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3470416524,
+      "post": 785880591
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 785880591,
+      "post": 2149439190
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2149439190,
+      "post": 598609297
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 598609297,
+      "post": 2288276784
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2288276784,
+      "post": 3083683299
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3083683299,
+      "post": 2118405146
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2118405146,
+      "post": 140555141
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 140555141,
+      "post": 2780648980
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2780648980,
+      "post": 3914342135
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3914342135,
+      "post": 1788268958
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1788268958,
+      "post": 2487862457
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2487862457,
+      "post": 3178201400
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3178201400,
+      "post": 3408491851
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3408491851,
+      "post": 3848678242
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3848678242,
+      "post": 1032107309
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1032107309,
+      "post": 780352156
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 780352156,
+      "post": 3127106783
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3127106783,
+      "post": 1028349286
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1028349286,
+      "post": 846215393
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 846215393,
+      "post": 3391301184
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3391301184,
+      "post": 2619287987
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2619287987,
+      "post": 2875960234
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2875960234,
+      "post": 3131196373
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3131196373,
+      "post": 1937778724
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1937778724,
+      "post": 1772384199
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1772384199,
+      "post": 268212782
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 268212782,
+      "post": 3004959241
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3004959241,
+      "post": 3656737864
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3656737864,
+      "post": 1773798171
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1773798171,
+      "post": 4077382898
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4077382898,
+      "post": 2579365757
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2579365757,
+      "post": 2976661164
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2976661164,
+      "post": 2872539055
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2872539055,
+      "post": 3446646774
+    },
+    {
+      "frame": 11313,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3446646774,
+      "post": 3690715185
+    },
+    {
+      "frame": 11314,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 3690715185,
+      "post": 218127184
+    },
+    {
+      "frame": 11315,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 218127184,
+      "post": 2497290627
+    },
+    {
+      "frame": 11316,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 2497290627,
+      "post": 3727822650
+    },
+    {
+      "frame": 11317,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 3727822650,
+      "post": 1557170213
+    },
+    {
+      "frame": 11318,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 1557170213,
+      "post": 3219365428
+    },
+    {
+      "frame": 11319,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 3219365428,
+      "post": 2656474263
+    },
+    {
+      "frame": 11319,
+      "caller": "GetFactoryMonId+0x61",
+      "lr": "0x081a6f51",
+      "pre": 2656474263,
+      "post": 267232958
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 267232958,
+      "post": 1710375769
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1710375769,
+      "post": 3900844888
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3900844888,
+      "post": 2259789035
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2259789035,
+      "post": 2997170818
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2997170818,
+      "post": 2017885645
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2017885645,
+      "post": 166094524
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 166094524,
+      "post": 2614060671
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2614060671,
+      "post": 230930054
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 230930054,
+      "post": 2945837953
+    },
+    {
+      "frame": 11319,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2945837953,
+      "post": 1465709664
+    },
+    {
+      "frame": 11320,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 1465709664,
+      "post": 3880365395
+    },
+    {
+      "frame": 11321,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 3880365395,
+      "post": 241202890
+    },
+    {
+      "frame": 11322,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 241202890,
+      "post": 2910879861
+    },
+    {
+      "frame": 11323,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 2910879861,
+      "post": 374913092
+    },
+    {
+      "frame": 11324,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 374913092,
+      "post": 1417907559
+    },
+    {
+      "frame": 11325,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 1417907559,
+      "post": 2512582478
+    },
+    {
+      "frame": 11326,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 2512582478,
+      "post": 1068593321
+    },
+    {
+      "frame": 11327,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 1068593321,
+      "post": 982963816
+    },
+    {
+      "frame": 11328,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 982963816,
+      "post": 603806395
+    },
+    {
+      "frame": 11329,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 603806395,
+      "post": 740752402
+    },
+    {
+      "frame": 11329,
+      "caller": "GetFactoryMonId+0x61",
+      "lr": "0x081a6f51",
+      "pre": 740752402,
+      "post": 894644253
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 894644253,
+      "post": 2692920012
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2692920012,
+      "post": 1072212303
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1072212303,
+      "post": 465602838
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 465602838,
+      "post": 398684881
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 398684881,
+      "post": 2312761712
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2312761712,
+      "post": 1174162723
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1174162723,
+      "post": 939516506
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 939516506,
+      "post": 3129420997
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3129420997,
+      "post": 1083209300
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1083209300,
+      "post": 1518885431
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1518885431,
+      "post": 3574959070
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3574959070,
+      "post": 3598619129
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3598619129,
+      "post": 66348408
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 66348408,
+      "post": 415900811
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 415900811,
+      "post": 3015068066
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3015068066,
+      "post": 609818221
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 609818221,
+      "post": 2752651996
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2752651996,
+      "post": 880820255
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 880820255,
+      "post": 3844022182
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3844022182,
+      "post": 2856939041
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2856939041,
+      "post": 1868059264
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1868059264,
+      "post": 2696839411
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2696839411,
+      "post": 3948499434
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3948499434,
+      "post": 821660949
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 821660949,
+      "post": 1450956900
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1450956900,
+      "post": 1342307079
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1342307079,
+      "post": 2579391598
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2579391598,
+      "post": 331261769
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 331261769,
+      "post": 1788598408
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1788598408,
+      "post": 3783590491
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3783590491,
+      "post": 2042370866
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2042370866,
+      "post": 3758960829
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3758960829,
+      "post": 430290668
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 430290668,
+      "post": 3486722799
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3486722799,
+      "post": 3084417590
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3084417590,
+      "post": 2016206193
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2016206193,
+      "post": 3438876560
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3438876560,
+      "post": 4103948483
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4103948483,
+      "post": 3707094394
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3707094394,
+      "post": 2905383269
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2905383269,
+      "post": 3461078644
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3461078644,
+      "post": 1976397783
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1976397783,
+      "post": 3621159166
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3621159166,
+      "post": 2216079513
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2216079513,
+      "post": 2530095000
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2530095000,
+      "post": 1876620331
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1876620331,
+      "post": 450982082
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 450982082,
+      "post": 2590277389
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2590277389,
+      "post": 3968757500
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3968757500,
+      "post": 4049496511
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4049496511,
+      "post": 3525679302
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3525679302,
+      "post": 1571995841
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1571995841,
+      "post": 1914519712
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1914519712,
+      "post": 468034707
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 468034707,
+      "post": 1973304586
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1973304586,
+      "post": 179661237
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 179661237,
+      "post": 2356250756
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2356250756,
+      "post": 2114435239
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2114435239,
+      "post": 1001841038
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1001841038,
+      "post": 2808851945
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2808851945,
+      "post": 3272370856
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3272370856,
+      "post": 4206426619
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4206426619,
+      "post": 806308434
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 806308434,
+      "post": 1821639005
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1821639005,
+      "post": 4267526924
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4267526924,
+      "post": 3521051791
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3521051791,
+      "post": 4068440918
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4068440918,
+      "post": 1382029329
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1382029329,
+      "post": 1214631344
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1214631344,
+      "post": 2653197411
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2653197411,
+      "post": 1650178202
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1650178202,
+      "post": 3026773509
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3026773509,
+      "post": 4087207572
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4087207572,
+      "post": 1544410487
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1544410487,
+      "post": 3120072222
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3120072222,
+      "post": 1088593721
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1088593721,
+      "post": 1276611000
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1276611000,
+      "post": 3461092299
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3461092299,
+      "post": 3731793890
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3731793890,
+      "post": 2802890669
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2802890669,
+      "post": 920865564
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 920865564,
+      "post": 3545359199
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3545359199,
+      "post": 3885965798
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3885965798,
+      "post": 3103384417
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3103384417,
+      "post": 1672724160
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1672724160,
+      "post": 2150045747
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2150045747,
+      "post": 611792938
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 611792938,
+      "post": 4099675733
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4099675733,
+      "post": 4106340516
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4106340516,
+      "post": 343721543
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 343721543,
+      "post": 527724206
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 527724206,
+      "post": 2799731849
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2799731849,
+      "post": 3236990152
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3236990152,
+      "post": 469844379
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 469844379,
+      "post": 1734904178
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1734904178,
+      "post": 563061245
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 563061245,
+      "post": 2486267692
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2486267692,
+      "post": 1358175791
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1358175791,
+      "post": 545098870
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 545098870,
+      "post": 2944737969
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2944737969,
+      "post": 304616400
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 304616400,
+      "post": 335163395
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 335163395,
+      "post": 2709109690
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2709109690,
+      "post": 1139014309
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1139014309,
+      "post": 521035444
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 521035444,
+      "post": 2368834327
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2368834327,
+      "post": 2705562430
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2705562430,
+      "post": 319446489
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 319446489,
+      "post": 4074271704
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4074271704,
+      "post": 3397747563
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3397747563,
+      "post": 3097882370
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3097882370,
+      "post": 2332409933
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2332409933,
+      "post": 983086908
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 983086908,
+      "post": 1866640639
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1866640639,
+      "post": 1012120326
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1012120326,
+      "post": 1598477825
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1598477825,
+      "post": 3961769184
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3961769184,
+      "post": 3370834899
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3370834899,
+      "post": 3006022474
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3006022474,
+      "post": 2610270965
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2610270965,
+      "post": 2952042692
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2952042692,
+      "post": 1565074407
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1565074407,
+      "post": 1824459726
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1824459726,
+      "post": 4064619305
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4064619305,
+      "post": 89145064
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 89145064,
+      "post": 1170594107
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1170594107,
+      "post": 4228896914
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 4228896914,
+      "post": 3114799773
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3114799773,
+      "post": 2225742668
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2225742668,
+      "post": 3959066575
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3959066575,
+      "post": 2593828246
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2593828246,
+      "post": 1287912785
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1287912785,
+      "post": 3829918192
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3829918192,
+      "post": 4219870115
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4219870115,
+      "post": 3080179418
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3080179418,
+      "post": 3276136261
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3276136261,
+      "post": 2737141460
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2737141460,
+      "post": 2636157111
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2636157111,
+      "post": 931119198
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 931119198,
+      "post": 884337785
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 884337785,
+      "post": 2115563000
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2115563000,
+      "post": 1324303115
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1324303115,
+      "post": 667895330
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 667895330,
+      "post": 4209744109
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 4209744109,
+      "post": 322351964
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 322351964,
+      "post": 3994601119
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3994601119,
+      "post": 3943392294
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3943392294,
+      "post": 2814482593
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2814482593,
+      "post": 1467312896
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1467312896,
+      "post": 3315134323
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3315134323,
+      "post": 553999978
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 553999978,
+      "post": 2718556053
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2718556053,
+      "post": 3264346340
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3264346340,
+      "post": 3059011975
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3059011975,
+      "post": 3479091438
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3479091438,
+      "post": 2646712777
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2646712777,
+      "post": 1429438728
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 1429438728,
+      "post": 3429810395
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3429810395,
+      "post": 2387425202
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 2387425202,
+      "post": 1669681981
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 1669681981,
+      "post": 3712968556
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3712968556,
+      "post": 3587854703
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3587854703,
+      "post": 3181305526
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 3181305526,
+      "post": 2604967921
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 2604967921,
+      "post": 483217424
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 483217424,
+      "post": 3459274563
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+      "lr": "0x08068669",
+      "pre": 3459274563,
+      "post": 100528634
+    },
+    {
+      "frame": 11329,
+      "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+      "lr": "0x0806866f",
+      "pre": 100528634,
+      "post": 2385941477
+    },
+    {
+      "frame": 11330,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 2385941477,
+      "post": 3060473588
+    },
+    {
+      "frame": 11331,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 3060473588,
+      "post": 868410967
+    },
+    {
+      "frame": 11332,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 868410967,
+      "post": 2859791742
+    },
+    {
+      "frame": 11333,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 2859791742,
+      "post": 336415513
+    },
+    {
+      "frame": 11334,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 336415513,
+      "post": 81852440
+    },
+    {
+      "frame": 11335,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 81852440,
+      "post": 2582729387
+    },
+    {
+      "frame": 11336,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 2582729387,
+      "post": 1848814914
+    },
+    {
+      "frame": 11337,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 1848814914,
+      "post": 527057293
+    },
+    {
+      "frame": 11338,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 527057293,
+      "post": 1078280060
+    },
+    {
+      "frame": 11339,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 1078280060,
+      "post": 213659711
+    },
+    {
+      "frame": 11340,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 213659711,
+      "post": 311303494
+    },
+    {
+      "frame": 11341,
+      "caller": "VBlankIntr+0x87",
+      "lr": "0x080007bf",
+      "pre": 311303494,
+      "post": 2643602241
+    },
+    {
+      "frame": 11341,
+      "caller": "GetSpecialBattleTransition+0xd1",
+      "lr": "0x080b10dd",
+      "pre": 2643602241,
+      "post": 2511378720
+    }
+  ],
+  "drawLedger": [
+    {
+      "drawIndex": 0,
+      "frame": 11313,
+      "monId": 324,
+      "species": 117,
+      "heldItem": 219,
+      "outcome": "accept",
+      "personalityAttempts": [
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4153211223,
+          "post": 1263078526
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1263078526,
+          "post": 4150072857
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4150072857,
+          "post": 531916568
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 531916568,
+          "post": 1271502251
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1271502251,
+          "post": 3719377986
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3719377986,
+          "post": 2406202509
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2406202509,
+          "post": 2254478972
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2254478972,
+          "post": 3075842879
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3075842879,
+          "post": 1760433222
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1760433222,
+          "post": 2880460353
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2880460353,
+          "post": 195225632
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 195225632,
+          "post": 1071052307
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1071052307,
+          "post": 3543330954
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3543330954,
+          "post": 2260129589
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2260129589,
+          "post": 4184483844
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4184483844,
+          "post": 2172428839
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2172428839,
+          "post": 1822641422
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1822641422,
+          "post": 701920105
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 701920105,
+          "post": 330269224
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 330269224,
+          "post": 2924673915
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2924673915,
+          "post": 1041690066
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1041690066,
+          "post": 2930089693
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2930089693,
+          "post": 3470416524
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3470416524,
+          "post": 785880591
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 785880591,
+          "post": 2149439190
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2149439190,
+          "post": 598609297
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 598609297,
+          "post": 2288276784
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2288276784,
+          "post": 3083683299
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3083683299,
+          "post": 2118405146
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2118405146,
+          "post": 140555141
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 140555141,
+          "post": 2780648980
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2780648980,
+          "post": 3914342135
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3914342135,
+          "post": 1788268958
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1788268958,
+          "post": 2487862457
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2487862457,
+          "post": 3178201400
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3178201400,
+          "post": 3408491851
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3408491851,
+          "post": 3848678242
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3848678242,
+          "post": 1032107309
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1032107309,
+          "post": 780352156
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 780352156,
+          "post": 3127106783
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3127106783,
+          "post": 1028349286
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1028349286,
+          "post": 846215393
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 846215393,
+          "post": 3391301184
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3391301184,
+          "post": 2619287987
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2619287987,
+          "post": 2875960234
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2875960234,
+          "post": 3131196373
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3131196373,
+          "post": 1937778724
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1937778724,
+          "post": 1772384199
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1772384199,
+          "post": 268212782
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 268212782,
+          "post": 3004959241
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3004959241,
+          "post": 3656737864
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3656737864,
+          "post": 1773798171
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1773798171,
+          "post": 4077382898
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4077382898,
+          "post": 2579365757
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2579365757,
+          "post": 2976661164
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2976661164,
+          "post": 2872539055
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2872539055,
+          "post": 3446646774
+        },
+        {
+          "frame": 11313,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3446646774,
+          "post": 3690715185
+        }
+      ],
+      "acceptSlot": 0
+    },
+    {
+      "drawIndex": 1,
+      "frame": 11319,
+      "monId": 354,
+      "species": 327,
+      "heldItem": 183,
+      "outcome": "accept",
+      "personalityAttempts": [
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 267232958,
+          "post": 1710375769
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1710375769,
+          "post": 3900844888
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3900844888,
+          "post": 2259789035
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2259789035,
+          "post": 2997170818
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2997170818,
+          "post": 2017885645
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2017885645,
+          "post": 166094524
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 166094524,
+          "post": 2614060671
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2614060671,
+          "post": 230930054
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 230930054,
+          "post": 2945837953
+        },
+        {
+          "frame": 11319,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2945837953,
+          "post": 1465709664
+        }
+      ],
+      "acceptSlot": 1
+    },
+    {
+      "drawIndex": 2,
+      "frame": 11329,
+      "monId": 268,
+      "species": 322,
+      "heldItem": 141,
+      "outcome": "accept",
+      "personalityAttempts": [
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 894644253,
+          "post": 2692920012
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2692920012,
+          "post": 1072212303
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1072212303,
+          "post": 465602838
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 465602838,
+          "post": 398684881
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 398684881,
+          "post": 2312761712
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2312761712,
+          "post": 1174162723
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1174162723,
+          "post": 939516506
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 939516506,
+          "post": 3129420997
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3129420997,
+          "post": 1083209300
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1083209300,
+          "post": 1518885431
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1518885431,
+          "post": 3574959070
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3574959070,
+          "post": 3598619129
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3598619129,
+          "post": 66348408
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 66348408,
+          "post": 415900811
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 415900811,
+          "post": 3015068066
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3015068066,
+          "post": 609818221
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 609818221,
+          "post": 2752651996
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2752651996,
+          "post": 880820255
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 880820255,
+          "post": 3844022182
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3844022182,
+          "post": 2856939041
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2856939041,
+          "post": 1868059264
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1868059264,
+          "post": 2696839411
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2696839411,
+          "post": 3948499434
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3948499434,
+          "post": 821660949
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 821660949,
+          "post": 1450956900
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1450956900,
+          "post": 1342307079
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1342307079,
+          "post": 2579391598
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2579391598,
+          "post": 331261769
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 331261769,
+          "post": 1788598408
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1788598408,
+          "post": 3783590491
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3783590491,
+          "post": 2042370866
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2042370866,
+          "post": 3758960829
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3758960829,
+          "post": 430290668
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 430290668,
+          "post": 3486722799
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3486722799,
+          "post": 3084417590
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3084417590,
+          "post": 2016206193
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2016206193,
+          "post": 3438876560
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3438876560,
+          "post": 4103948483
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4103948483,
+          "post": 3707094394
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3707094394,
+          "post": 2905383269
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2905383269,
+          "post": 3461078644
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3461078644,
+          "post": 1976397783
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1976397783,
+          "post": 3621159166
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3621159166,
+          "post": 2216079513
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2216079513,
+          "post": 2530095000
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2530095000,
+          "post": 1876620331
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1876620331,
+          "post": 450982082
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 450982082,
+          "post": 2590277389
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2590277389,
+          "post": 3968757500
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3968757500,
+          "post": 4049496511
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4049496511,
+          "post": 3525679302
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3525679302,
+          "post": 1571995841
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1571995841,
+          "post": 1914519712
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1914519712,
+          "post": 468034707
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 468034707,
+          "post": 1973304586
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1973304586,
+          "post": 179661237
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 179661237,
+          "post": 2356250756
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2356250756,
+          "post": 2114435239
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2114435239,
+          "post": 1001841038
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1001841038,
+          "post": 2808851945
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2808851945,
+          "post": 3272370856
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3272370856,
+          "post": 4206426619
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4206426619,
+          "post": 806308434
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 806308434,
+          "post": 1821639005
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1821639005,
+          "post": 4267526924
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4267526924,
+          "post": 3521051791
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3521051791,
+          "post": 4068440918
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4068440918,
+          "post": 1382029329
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1382029329,
+          "post": 1214631344
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1214631344,
+          "post": 2653197411
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2653197411,
+          "post": 1650178202
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1650178202,
+          "post": 3026773509
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3026773509,
+          "post": 4087207572
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4087207572,
+          "post": 1544410487
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1544410487,
+          "post": 3120072222
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3120072222,
+          "post": 1088593721
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1088593721,
+          "post": 1276611000
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1276611000,
+          "post": 3461092299
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3461092299,
+          "post": 3731793890
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3731793890,
+          "post": 2802890669
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2802890669,
+          "post": 920865564
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 920865564,
+          "post": 3545359199
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3545359199,
+          "post": 3885965798
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3885965798,
+          "post": 3103384417
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3103384417,
+          "post": 1672724160
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1672724160,
+          "post": 2150045747
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2150045747,
+          "post": 611792938
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 611792938,
+          "post": 4099675733
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4099675733,
+          "post": 4106340516
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4106340516,
+          "post": 343721543
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 343721543,
+          "post": 527724206
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 527724206,
+          "post": 2799731849
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2799731849,
+          "post": 3236990152
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3236990152,
+          "post": 469844379
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 469844379,
+          "post": 1734904178
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1734904178,
+          "post": 563061245
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 563061245,
+          "post": 2486267692
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2486267692,
+          "post": 1358175791
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1358175791,
+          "post": 545098870
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 545098870,
+          "post": 2944737969
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2944737969,
+          "post": 304616400
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 304616400,
+          "post": 335163395
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 335163395,
+          "post": 2709109690
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2709109690,
+          "post": 1139014309
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1139014309,
+          "post": 521035444
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 521035444,
+          "post": 2368834327
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2368834327,
+          "post": 2705562430
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2705562430,
+          "post": 319446489
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 319446489,
+          "post": 4074271704
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4074271704,
+          "post": 3397747563
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3397747563,
+          "post": 3097882370
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3097882370,
+          "post": 2332409933
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2332409933,
+          "post": 983086908
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 983086908,
+          "post": 1866640639
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1866640639,
+          "post": 1012120326
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1012120326,
+          "post": 1598477825
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1598477825,
+          "post": 3961769184
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3961769184,
+          "post": 3370834899
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3370834899,
+          "post": 3006022474
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3006022474,
+          "post": 2610270965
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2610270965,
+          "post": 2952042692
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2952042692,
+          "post": 1565074407
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1565074407,
+          "post": 1824459726
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1824459726,
+          "post": 4064619305
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4064619305,
+          "post": 89145064
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 89145064,
+          "post": 1170594107
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1170594107,
+          "post": 4228896914
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 4228896914,
+          "post": 3114799773
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3114799773,
+          "post": 2225742668
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2225742668,
+          "post": 3959066575
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3959066575,
+          "post": 2593828246
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2593828246,
+          "post": 1287912785
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1287912785,
+          "post": 3829918192
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3829918192,
+          "post": 4219870115
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4219870115,
+          "post": 3080179418
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3080179418,
+          "post": 3276136261
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3276136261,
+          "post": 2737141460
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2737141460,
+          "post": 2636157111
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2636157111,
+          "post": 931119198
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 931119198,
+          "post": 884337785
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 884337785,
+          "post": 2115563000
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2115563000,
+          "post": 1324303115
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1324303115,
+          "post": 667895330
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 667895330,
+          "post": 4209744109
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 4209744109,
+          "post": 322351964
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 322351964,
+          "post": 3994601119
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3994601119,
+          "post": 3943392294
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3943392294,
+          "post": 2814482593
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2814482593,
+          "post": 1467312896
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1467312896,
+          "post": 3315134323
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3315134323,
+          "post": 553999978
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 553999978,
+          "post": 2718556053
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2718556053,
+          "post": 3264346340
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3264346340,
+          "post": 3059011975
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3059011975,
+          "post": 3479091438
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3479091438,
+          "post": 2646712777
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2646712777,
+          "post": 1429438728
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 1429438728,
+          "post": 3429810395
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3429810395,
+          "post": 2387425202
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 2387425202,
+          "post": 1669681981
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 1669681981,
+          "post": 3712968556
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3712968556,
+          "post": 3587854703
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3587854703,
+          "post": 3181305526
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 3181305526,
+          "post": 2604967921
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 2604967921,
+          "post": 483217424
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 483217424,
+          "post": 3459274563
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x35",
+          "lr": "0x08068669",
+          "pre": 3459274563,
+          "post": 100528634
+        },
+        {
+          "frame": 11329,
+          "caller": "CreateMonWithEVSpreadNatureOTID+0x3b",
+          "lr": "0x0806866f",
+          "pre": 100528634,
+          "post": 2385941477
+        }
+      ],
+      "acceptSlot": 2
+    }
+  ],
+  "enemyParty": [
+    {
+      "personality": 3690712431,
+      "otId": 416049562,
+      "species": 117,
+      "item": 219,
+      "nature": 6,
+      "abilitySlot": 0,
+      "friendship": 0,
+      "moves": [
+        56,
+        218,
+        225,
+        349
+      ],
+      "evs": {
+        "hp": 255,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 0,
+        "spDefense": 255
+      },
+      "ivs": {
+        "hp": 15,
+        "attack": 15,
+        "defense": 15,
+        "speed": 15,
+        "spAttack": 15,
+        "spDefense": 15
+      },
+      "checksumValid": true
+    },
+    {
+      "personality": 1465692053,
+      "otId": 416049562,
+      "species": 327,
+      "item": 183,
+      "nature": 3,
+      "abilitySlot": 1,
+      "friendship": 0,
+      "moves": [
+        12,
+        218,
+        246,
+        332
+      ],
+      "evs": {
+        "hp": 255,
+        "attack": 0,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 0,
+        "spDefense": 255
+      },
+      "ivs": {
+        "hp": 15,
+        "attack": 15,
+        "defense": 15,
+        "speed": 15,
+        "spAttack": 15,
+        "spDefense": 15
+      },
+      "checksumValid": true
+    },
+    {
+      "personality": 2385905149,
+      "otId": 416049562,
+      "species": 322,
+      "item": 141,
+      "nature": 24,
+      "abilitySlot": 0,
+      "friendship": 0,
+      "moves": [
+        247,
+        185,
+        109,
+        105
+      ],
+      "evs": {
+        "hp": 170,
+        "attack": 170,
+        "defense": 0,
+        "speed": 0,
+        "spAttack": 170,
+        "spDefense": 0
+      },
+      "ivs": {
+        "hp": 15,
+        "attack": 15,
+        "defense": 15,
+        "speed": 15,
+        "spAttack": 15,
+        "spDefense": 15
+      },
+      "checksumValid": true
+    }
+  ]
+}
