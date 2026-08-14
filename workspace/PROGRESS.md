@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1247 — [MAIN worker, 2026-08-13] **CGB4 v43 fifth clear-route decrement/exit decision green**
+
+- **State:** #55 is source-exact through the mixed selected-row **6,234-cycle**
+  CGB4 prefix. The 0x83 nonzero-mask row remains frozen at v42 before its
+  body; the two clear rows stop before both possible successor bodies.
+- **Did:** source-only v43 freezes v42/v41 evidence, reports, packets, and
+  inherited v37-v40 artifacts byte-for-byte, then joins only the two clear
+  v42 rows by `sourceStateDigest`. Retained v39 evidence proves r2=7 before
+  the fourth decrement; source/ELF/ROM prove r2 reaches the fifth clear
+  decrement as 6, then `subs r2, 1; ble` leaves 5 and is not taken: **4×2 =
+  8 cycles** (**6,226 → 6,234**). Exact bytes are `01 3a 02 dd`.
+- **Next:** No follow-on started. Keep positive continuation/exit bodies,
+  other loop work, MPlay/service/arbitration, live clock wiring, production,
+  presentation, animation, Rust, and retired canonical Battle-2 work out of
+  scope.
+- **Notes:** evidence/doc `856457b1…` / `709625f7…`; focused v42/v43
+  **12/12**, smoke **375/375**, full npm **1,046 files / 9,858 passed / 1
+  skipped**, build **664 modules**. No oracle capture, `src/**` change,
+  ratchet/barrier, ROADMAP/DEFERRED/ISSUES, or canonical-Battle-2 change.
+
 ## 1246 — [supervisor, 2026-08-13] **CGB4 v42 and final lane union verified**
 
 - **State:** #55 is source-exact through the selected-row **6,226-cycle**
@@ -44,22 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   smoke **375/375**, full npm **1,043 files / 9,845 passed / 1 skipped**,
   build **664 modules**. No oracle capture, src change, ratchet/barrier,
   ROADMAP/DEFERRED/ISSUES, or canonical-Battle-2 change; #55 remains open.
-
-## 1244 — [supervisor, 2026-08-13] **CGB4 v41 and Rust draft boundary union verified**
-
-- **State:** #55 is source-exact through the selected-row **6,196-cycle**
-  CGB4 prefix. The generic seven-battle controller remains the governing S8
-  path. `rust-main` is folded through the complete draft-selection WASM
-  boundary.
-- **Did:** independently audited v41 containment and accepted the fifth-track
-  EXIST-set route for flags `0x83/0x80/0x80` (**8x3 = 24** cycles,
-  **6,172 -> 6,196**). Folded Rust M10c (`d608104f`), ran native Rust,
-  rebuilt WASM, and forced every parity suite through the artifact.
-- **Next:** continue #55 in a separate bounded step at only the fifth-track
-  volume/pitch-mask decision. Stop before either body. Keep wider
-  MPlay/service/arbitration, live construction-clock wiring, production,
-  presentation, animation, Rust, and the retired Battle-2 march out of scope.
-- **Notes:** native Rust green; WASM **507,934 B**, `f1882396...`; forced WASM
-  **18 files / 804 tests**. Final union full npm **1,042 files / 9,839 passed /
-  1 skipped**; build **664 modules**. No new unsupported barrier or DEFERRED
-  entry.

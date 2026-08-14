@@ -42997,3 +42997,21 @@ git; the current live ledger keeps the three load-bearing entries only.
   **12/12**, smoke **375/375**, full npm **1,041 files / 9,835 passed / 1
   skipped**, build **664 modules**. No `src/**`, ratchet/barrier, ISSUES, or
   oracle-pixel change; #55 remains open.
+## 1244 — [supervisor, 2026-08-13] **CGB4 v41 and Rust draft boundary union verified**
+
+- **State:** #55 is source-exact through the selected-row **6,196-cycle**
+  CGB4 prefix. The generic seven-battle controller remains the governing S8
+  path. `rust-main` is folded through the complete draft-selection WASM
+  boundary.
+- **Did:** independently audited v41 containment and accepted the fifth-track
+  EXIST-set route for flags `0x83/0x80/0x80` (**8x3 = 24** cycles,
+  **6,172 -> 6,196**). Folded Rust M10c (`d608104f`), ran native Rust,
+  rebuilt WASM, and forced every parity suite through the artifact.
+- **Next:** continue #55 in a separate bounded step at only the fifth-track
+  volume/pitch-mask decision. Stop before either body. Keep wider
+  MPlay/service/arbitration, live construction-clock wiring, production,
+  presentation, animation, Rust, and the retired Battle-2 march out of scope.
+- **Notes:** native Rust green; WASM **507,934 B**, `f1882396...`; forced WASM
+  **18 files / 804 tests**. Final union full npm **1,042 files / 9,839 passed /
+  1 skipped**; build **664 modules**. No new unsupported barrier or DEFERRED
+  entry.
