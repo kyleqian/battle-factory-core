@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 const scenarios = [
@@ -67,7 +69,7 @@ describe("MOVE_MEMENTO source/staging checkpoint", () => {
 
   it("records an honest unsupported checkpoint with no inherited Dig acceptance", () => {
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/memento-source-staging-checkpoint.json", "utf8"));
-    expect(receipt).toMatchObject({ schema: "memento-source-staging-checkpoint/v2", oracleProfile: "battle-scene-on", move: "MOVE_MEMENTO", status: "unsupported", components: 8, denseEvidence: false, productionFramebuffer: false });
+    expect(receipt).toMatchObject({ schema: "memento-source-staging-checkpoint/v3", oracleProfile: "battle-scene-on", move: "MOVE_MEMENTO", status: "unsupported", components: 8, denseEvidence: true, productionFramebuffer: false });
     expect(receipt.bilateralScenarioSha256).toEqual([
       "46e863718477712ddff003f26419a8d72277fa14a2bd5dee365c2e224bb051c0",
       "bf85f2697af73cdf2d56af0b6c6b9641f4f7d7f7614169d20dedda8be8000c1b",
@@ -77,5 +79,33 @@ describe("MOVE_MEMENTO source/staging checkpoint", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.some((entry: { move: string }) => entry.move === "MOVE_MEMENTO")).toBe(false);
     expect(coverage.entries.some((entry: { move: string }) => entry.move === "MOVE_DIG")).toBe(false);
+  });
+
+  it("retains the twice-fresh bilateral dense source/hardware/RGB evidence without claiming a reducer or seam", () => {
+    const sha256 = (bytes: Buffer): string => createHash("sha256").update(bytes).digest("hex");
+    const receipt = JSON.parse(readFileSync("tools/compare/fixtures/memento-dense-evidence.json", "utf8"));
+    expect(receipt).toMatchObject({
+      schema: "memento-dense-evidence/v1", status: "unsupported",
+      acceptance: { sourceRows: 353, rawRgbRows: 353, freshRuns: 2, reducerRows: 0, seamRows: 0, framebufferRows: 0 },
+      siblingAudit: { move: "MOVE_DIG", status: "unsupported", inherited: false },
+      freshness: { coarseGate: "failed", pathScopedOracleBootstrapToolingDiff: [], materiallyFresh: true },
+    });
+    for (const orientation of ["player-back", "opponent-front"] as const) {
+      const config = receipt.orientations[orientation];
+      const compressed = readFileSync(config.stateGzip);
+      expect(sha256(compressed)).toBe(config.stateGzipSha256);
+      expect(sha256(readFileSync(config.rawRgbArchive))).toBe(config.rawRgbArchiveSha256);
+      expect(sha256(readFileSync(config.changeMap))).toBe(config.changeMapSha256);
+      const probe = JSON.parse(gunzipSync(compressed).toString("utf8"));
+      expect(probe.sourceWindow).toEqual(config.sourceWindow);
+      expect(probe.frames).toHaveLength(config.sourceWindow.frameCount);
+      expect(probe.frames[0]).toMatchObject({ scriptOffset: 0, scriptEven: true });
+      expect(probe.frames.at(-1)).toMatchObject({ gAnimScriptActive: false });
+      expect(probe.frames.every((row: { tasks: { raw: string; data: unknown[] }[]; scanlineBuffers: unknown[][]; parties: { player: unknown[]; opponent: unknown[] } }) =>
+        row.tasks.every((task) => task.raw.length === 0x50 && task.data.length === 16)
+          && row.scanlineBuffers.length === 2 && row.scanlineBuffers.every((buffer) => buffer.length === 320)
+          && row.parties.player.length === 3 && row.parties.opponent.length === 3,
+      )).toBe(true);
+    }
   });
 });

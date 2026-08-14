@@ -1,0 +1,48 @@
+{
+  "schema": "memento-dense-evidence/v1",
+  "status": "unsupported",
+  "move": "MOVE_MEMENTO",
+  "profile": "battle-scene-on",
+  "sourceBounds": {"start": "0x082cdcf2", "endExclusive": "0x082cdd36"},
+  "freshness": {
+    "coarseGate": "failed",
+    "sceneOnStarted": "2026-08-13 12:50:32",
+    "harnessHead": "39ca5d64ee461e59c62c46cb90b948da06be65b2",
+    "pathScopedOracleBootstrapToolingDiff": [],
+    "materiallyFresh": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-memento-player-weezing-opponent-onix.json",
+      "sourceWindow": {"startFrame": 70, "endFrame": 247, "frameCount": 178},
+      "probeJsonSha256": "3f423ec8bfa8cf087b15e25b4b8a51fd7b4efb6e45b5c8a219e87bba44f5307f",
+      "stateGzip": "tools/compare/evidence/memento-player-dense-state.json.gz",
+      "stateGzipSha256": "3101cd6d58258258947d1a70acf91c21e90f23a919d3a31f65081e452e8891fd",
+      "rawRgbSha256": "a9604de7908429270b3e12b7b8ec8baba1a193f0ef68dffe59a0918d6c915bd5",
+      "rawRgbArchive": "tools/compare/evidence/memento-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "54de53085dc7c043780d8eae1e9b9b22fdd7167898d7bd4e248dd3f6912caea6",
+      "changeMap": "tools/compare/evidence/memento-changemap-player.txt",
+      "changeMapSha256": "adb0e7cfb4ef50f3d7f8da10302397cadb0377307ab6cc838237da9c741f81f1",
+      "latches": {"precedingOamRows": 177, "precedingMatrixRows": 177, "precedingPaletteRows": 175, "comparableRows": 177, "sameRowPaletteAges": [4], "monbgPaletteExceptionAges": [91]}
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-memento-opponent-weezing-player-onix.json",
+      "sourceWindow": {"startFrame": 74, "endFrame": 248, "frameCount": 175},
+      "probeJsonSha256": "224db6ea8e553849fabf83d65cb7f480da2fccdc2968a97e00da8bd26ac10349",
+      "stateGzip": "tools/compare/evidence/memento-opponent-dense-state.json.gz",
+      "stateGzipSha256": "fae93e8909d4d05296739ba3d6cb88d8ff2571e226682c6d715c035c156ef011",
+      "rawRgbSha256": "c115ea0c6e3e6310bab4725aaae170b64bfe0628a21e59ceacccd4e865d9e506",
+      "rawRgbArchive": "tools/compare/evidence/memento-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "19a7bf860706e41bed0cc1fbe16d46332d29eb2b6430390b794617b466b7d5bf",
+      "changeMap": "tools/compare/evidence/memento-changemap-opponent.txt",
+      "changeMapSha256": "f5086737ad3bac6f559dc09e6330adb3c38be1753e3555191b7329703dd125b9",
+      "latches": {"precedingOamRows": 174, "precedingMatrixRows": 174, "precedingPaletteRows": 172, "comparableRows": 174, "sameRowPaletteAges": [4], "monbgPaletteExceptionAges": [90]}
+    }
+  },
+  "topology": {
+    "tasks": ["AnimTask_MementoHandleBg", "AnimTask_MoveAttackerMementoShadow_Step", "AnimTask_MoveTargetMementoShadow", "AnimTask_MoveTargetMementoShadow_Step", "Task_ClearMonBgStatic"],
+    "moveSprites": []
+  },
+  "acceptance": {"sourceRows": 353, "rawRgbRows": 353, "freshRuns": 2, "reducerRows": 0, "seamRows": 0, "framebufferRows": 0},
+  "siblingAudit": {"move": "MOVE_DIG", "status": "unsupported", "inherited": false}
+}
