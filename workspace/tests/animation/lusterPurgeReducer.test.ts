@@ -29,8 +29,8 @@ describe("Move_LUSTER_PURGE pure source-relative reducer", () => {
       "--experimental-strip-types", "tools/compare/lusterPurgePortable.ts",
     ], { encoding: "utf8" });
     expect(output).toContain("player-back: 333/333 reducer topology rows; phase/palette/audio starts exact; gameplay RNG stable");
-    expect(output).toContain("opponent-front: 332/332 reducer topology rows; phase/palette/audio starts exact; gameplay RNG stable");
-    expect(output).toContain("665/665 retained rows exact; no framebuffer or audio-sample claim");
+    expect(output).toContain("opponent-front: 333/333 reducer topology rows; phase/palette/audio starts exact; gameplay RNG stable");
+    expect(output).toContain("666/666 retained rows exact; no framebuffer or audio-sample claim");
   });
 
   it("takes immutable visual RNG input without consuming or rewriting it", () => {

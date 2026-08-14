@@ -114,6 +114,15 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
       },
       coverageCounts: "Level 50: 184/276 exact, 0 partial, 0 staged, 92 unsupported",
     });
+    expect(fixture.speciesIdentity).toEqual({
+      internalSpeciesIds: { SPECIES_RELICANTH: 381, SPECIES_LATIOS: 408 },
+      sourceCarrier: "FRONTIER_MON_LATIOS_4", sourceName: "LATIOS",
+      types: [16, 14], ability: 26,
+      stats: { attack: 99, defense: 100, speed: 130, spAttack: 188, spDefense: 130 },
+      hp: 176, maxHp: 176,
+      activeSpriteTemplate: "gMultiuseSpriteTemplate", activeSpriteDataSpecies: 408,
+      healthboxTemplates: ["sHealthboxPlayerSpriteTemplates", "sHealthboxOpponentSpriteTemplates", "sHealthbarSpriteTemplates"],
+    });
     expect(fixture.batchSiblingAudit).toMatchObject({
       MOVE_MIST_BALL: "independent control",
       MOVE_FLAIL: "independent control",
@@ -123,7 +132,7 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
     });
   });
 
-  it.each(orientationEntries)("pins full retained state and RGB/change-map receipts for %s", (_orientation, evidence) => {
+  it.each(orientationEntries)("pins full retained state and RGB/change-map receipts for %s", (orientation, evidence) => {
     const stateBytes = readFileSync(evidence.denseState);
     expect(sha256(stateBytes)).toBe(evidence.denseStateSha256);
     expect(sha256(readFileSync(evidence.rawRgbArchive))).toBe(evidence.rawRgbArchiveSha256);
@@ -138,6 +147,7 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
     expect(sha256(probeBytes)).toBe(evidence.probeJsonSha256);
     const probe = JSON.parse(probeBytes.toString("utf8")) as Record<string, any>;
     const rows = probe.frames as Row[];
+    const activeSide = evidence.attacker === 0 ? "player" : "opponent";
     expect(probe).toMatchObject({
       schema: "luster-purge-dense-evidence/v1",
       moveId: 295,
@@ -150,6 +160,21 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
     });
     expect(rows).toHaveLength(evidence.sourceWindow.frameCount);
     rows.forEach(expectDenseRow);
+    const active = rows[0]!.battlers[activeSide];
+    expect(active).toMatchObject({
+      species: 408, types: [16, 14], ability: 26,
+      stats: { attack: 99, defense: 100, speed: 130, spAttack: 188, spDefense: 130 },
+      hp: 176, maxHp: 176,
+    });
+    expect(rows[0]!.parties[activeSide][0]).toMatchObject({ species: 408, types: [16, 14], ability: 26, hp: 176, maxHp: 176 });
+    expect(rows.every((row) => {
+      const sprite = activeSide === "player" ? row.playerSprite : row.opponentSprite;
+      return sprite.template.symbol === "gMultiuseSpriteTemplate" && sprite.data[2] === 408;
+    })).toBe(true);
+    const healthboxTemplates = rows[0]!.sprites
+      .map((sprite: Row) => sprite.template?.symbol)
+      .filter((symbol: string | undefined) => symbol && /Healthbox|Healthbar/.test(symbol));
+    expect(healthboxTemplates).toEqual(expect.arrayContaining(fixture.speciesIdentity.healthboxTemplates));
     expect(rows[0]).toMatchObject({
       frame: evidence.sourceWindow.startFrame,
       scriptPtr: 0x082ce516,
@@ -170,7 +195,7 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
       row.scriptOffset >= 0 && row.scriptOffset <= 278)).toBe(true);
     expect(rows.every((row) => row.animationBattlers.attacker === evidence.attacker &&
       row.animationBattlers.target === evidence.target)).toBe(true);
-    expect(probe.topology).toEqual(fixture.topology);
+    expect(probe.topology).toEqual(fixture.orientationTopology[orientation]);
     expect(rows.filter((row) => row.sprites.some((sprite: Row) =>
       sprite.template.symbol === "gLusterPurgeCircleSpriteTemplate")).length).toBe(evidence.visualEvents.circleRows);
     expect(rows.filter((row) => row.sprites.some((sprite: Row) =>
@@ -235,7 +260,8 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
     expect(stage.overrides).not.toHaveProperty("weather");
     expect(stage.overrides).not.toHaveProperty("outcome");
     expect(stage.overrides).not.toHaveProperty("sideConditions");
-    const carrier = [...parties.player, ...parties.opponent].find((mon) => mon.species === 381)!;
-    expect(carrier).toMatchObject({ species: 381, level: 50, nature: 15, item: 141, moves: [295, 295, 295, 295] });
+    const carrier = [...parties.player, ...parties.opponent].find((mon) => mon.species === 408)!;
+    expect(carrier).toMatchObject({ species: 408, level: 50, nature: 15, item: 141, moves: [295, 295, 295, 295] });
+    expect([...parties.player, ...parties.opponent].some((mon) => mon.species === 381)).toBe(false);
   });
 });

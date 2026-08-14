@@ -72,7 +72,7 @@ export interface LusterPurgeState {
 
 export const LUSTER_PURGE_HIT_START_AGES = [170, 175, 180, 185, 190, 195] as const;
 export const LUSTER_PURGE_PLAYER_FRAME_COUNT = 333;
-export const LUSTER_PURGE_OPPONENT_FRAME_COUNT = 332;
+export const LUSTER_PURGE_OPPONENT_FRAME_COUNT = 333;
 
 const zeroData = (): number[] => Array<number>(16).fill(0);
 

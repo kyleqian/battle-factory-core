@@ -7,7 +7,7 @@
   "coverageCredit": false,
   "carrier": {
     "lowestLegalLevel50": "FRONTIER_MON_LATIOS_4",
-    "species": 381,
+    "species": 408,
     "nature": 15,
     "item": 141,
     "moves": [295, 295, 295, 295]
@@ -25,6 +25,19 @@
     },
     "soundTaskPlaySE1WithPanningCalls": 6,
     "blendParticleTasks": 2
+  },
+  "speciesIdentity": {
+    "internalSpeciesIds": { "SPECIES_RELICANTH": 381, "SPECIES_LATIOS": 408 },
+    "sourceCarrier": "FRONTIER_MON_LATIOS_4",
+    "sourceName": "LATIOS",
+    "types": [16, 14],
+    "ability": 26,
+    "stats": { "attack": 99, "defense": 100, "speed": 130, "spAttack": 188, "spDefense": 130 },
+    "hp": 176,
+    "maxHp": 176,
+    "activeSpriteTemplate": "gMultiuseSpriteTemplate",
+    "activeSpriteDataSpecies": 408,
+    "healthboxTemplates": ["sHealthboxPlayerSpriteTemplates", "sHealthboxOpponentSpriteTemplates", "sHealthbarSpriteTemplates"]
   },
   "stateContract": {
     "requiredFrameFields": [
@@ -55,25 +68,25 @@
   "orientations": {
     "player-back": {
       "scenario": "tools/battle-lab/mechanic-luster-purge-player-latios-opponent-onix.json",
-      "scenarioSha256": "62f8a7b837afb6e339b86d15ebedf1836b0d94a5fbfb293801eb595b1ee1a37f",
-      "sourceWindow": { "startFrame": 301, "endFrame": 633, "frameCount": 333 },
+      "scenarioSha256": "48e4cc6a61261242a9a46942ba22746a50c3c2e04066fcdcd775b0a369dbad8a",
+      "sourceWindow": { "startFrame": 78, "endFrame": 410, "frameCount": 333 },
       "attacker": 0,
       "target": 1,
-      "probeJsonSha256": "38e6af968fe89e53e6379b4d18528bcbe68df0afc3e28cdee5417c38a5378f12",
-      "repeatProbeJsonSha256": "38e6af968fe89e53e6379b4d18528bcbe68df0afc3e28cdee5417c38a5378f12",
-      "rawRgbSequenceSha256": "111e05ee0f93e81a6fc308ed3664694e94b5322c30aa522edae3f12bf121895d",
+      "probeJsonSha256": "89a1306e11410b1790d44c7906d88c68f0cfe45d7b3f94aae17ac463040a1d71",
+      "repeatProbeJsonSha256": "89a1306e11410b1790d44c7906d88c68f0cfe45d7b3f94aae17ac463040a1d71",
+      "rawRgbSequenceSha256": "ff5ac134bdcb50824cd85fde1520136b7213615586d7d512520e704cc3c220c8",
       "rawRgbFrameCount": 333,
       "rawRgbArchive": "tools/compare/evidence/luster-purge-player-raw-rgb.tar.gz",
-      "rawRgbArchiveSha256": "b5994aecd378bdd498a1929725057b7fb175d9eea7772aa75079953704259f38",
+      "rawRgbArchiveSha256": "f036e99bf0301aabd40131becefca6582aefdaa69aa8e40cbe8bbe27e200141d",
       "rawRgbArchiveMemberCount": 333,
       "denseState": "tools/compare/evidence/luster-purge-player-dense-state.json.gz",
-      "denseStateSha256": "b122421f41777ea8d0d802f268ae9567ccd6f8654bcda7dcb7bbf7174e2b2ee5",
+      "denseStateSha256": "4bdc1cbdc65800927cbe534ca22d403e6b7792b847aa2be8837ad5ff54d40f01",
       "changeMap": "tools/compare/evidence/luster-purge-changemap-player.txt",
-      "changeMapSha256": "e52ca59a820342afff7fa5f22d4f61c8287f9432622165dd280619192773408a",
+      "changeMapSha256": "9f30efc362c8ad94b3224aff4d9df99b44be3d7bccc2c581a6ff7f9e2e515df7",
       "latches": {
         "hardwareOamEqualsPrecedingSoftware": "332/332",
         "hardwareMatricesEqualsPrecedingSoftware": "332/332",
-        "hardwarePaletteEqualsPrecedingFaded": "332/332",
+        "hardwarePaletteEqualsPrecedingFaded": "331/332",
         "activeBackground": "BG2",
         "activeBackgroundOffsetsEqualPrecedingSource": "332/332",
         "activeBackgroundFirstSourceRow": 46,
@@ -105,27 +118,27 @@
     },
     "opponent-front": {
       "scenario": "tools/battle-lab/mechanic-luster-purge-opponent-latios-player-onix.json",
-      "scenarioSha256": "43a00360cb5235dd693cda9a45f28aaa8b31ffd7484a51a1c95be26619dc3c7b",
-      "sourceWindow": { "startFrame": 302, "endFrame": 633, "frameCount": 332 },
+      "scenarioSha256": "49716a33647e9d217a51b62f29ac33e17ac4b171d4888b86adc86d7ffb574aae",
+      "sourceWindow": { "startFrame": 82, "endFrame": 414, "frameCount": 333 },
       "attacker": 1,
       "target": 0,
-      "probeJsonSha256": "f8b3547749048ac522d5c01d6062f0a53ddaa31495e18e63e6bb0eaeed4420db",
-      "repeatProbeJsonSha256": "f8b3547749048ac522d5c01d6062f0a53ddaa31495e18e63e6bb0eaeed4420db",
-      "rawRgbSequenceSha256": "52cad34fd334accc7923d791be85022a13d09d8c5632a48550448276d6ba6b18",
-      "rawRgbFrameCount": 332,
+      "probeJsonSha256": "d30bf9ad0a58156ee0b7b38c9af3955435bbaab3c4d627b1fc056a63a93668aa",
+      "repeatProbeJsonSha256": "d30bf9ad0a58156ee0b7b38c9af3955435bbaab3c4d627b1fc056a63a93668aa",
+      "rawRgbSequenceSha256": "9ffb3355d17563ac33fbf868480c7b81ca967ecabb9b789b2c4c855ce67d410d",
+      "rawRgbFrameCount": 333,
       "rawRgbArchive": "tools/compare/evidence/luster-purge-opponent-raw-rgb.tar.gz",
-      "rawRgbArchiveSha256": "15bbfc9ae2a739c1849a9b73073153c9e15f6b8c07be7151cd836d8502ec0080",
-      "rawRgbArchiveMemberCount": 332,
+      "rawRgbArchiveSha256": "6e8a46c0bf5ff7402d18f4bd705c382015397eff9376b27715e10ac49b625628",
+      "rawRgbArchiveMemberCount": 333,
       "denseState": "tools/compare/evidence/luster-purge-opponent-dense-state.json.gz",
-      "denseStateSha256": "3ab721a8c108585e179a72bcc1fea170a7cf559afa5329f2a02644cd4e844cb2",
+      "denseStateSha256": "b2493b9123f1d9c4309253495a26d7f62a72ebb620ccb6b83fc9159d15c266e0",
       "changeMap": "tools/compare/evidence/luster-purge-changemap-opponent.txt",
-      "changeMapSha256": "aa08aefd17eb5b8d70c81111f07bc50dc5258798d8dfa7a4521d7265179f0724",
+      "changeMapSha256": "4cc4bf0adea7b6e6a5ca5868d6cb70425416848c725d6dc6bc98797216eb75d5",
       "latches": {
-        "hardwareOamEqualsPrecedingSoftware": "331/331",
-        "hardwareMatricesEqualsPrecedingSoftware": "331/331",
-        "hardwarePaletteEqualsPrecedingFaded": "331/331",
+        "hardwareOamEqualsPrecedingSoftware": "332/332",
+        "hardwareMatricesEqualsPrecedingSoftware": "332/332",
+        "hardwarePaletteEqualsPrecedingFaded": "331/332",
         "activeBackground": "BG1",
-        "activeBackgroundOffsetsEqualPrecedingSource": "331/331",
+        "activeBackgroundOffsetsEqualPrecedingSource": "332/332",
         "activeBackgroundFirstSourceRow": 46,
         "activeBackgroundFirstSourceCoordinates": [-144, -19],
         "activeBackgroundHardwareRegisters": [368, 493],
@@ -133,7 +146,7 @@
         "blendCntChanges": 6,
         "blendAlphaChanges": 2,
         "blendYChanges": 64,
-        "blendCntTransitionRows": [8, 44, 48, 291, 292, 330],
+        "blendCntTransitionRows": [8, 44, 48, 291, 292, 331],
         "blendAlphaTransitionRows": [48, 291],
         "activeBackgroundTransitionRows": [46, 295]
       },
@@ -171,7 +184,7 @@
     ],
     "callbacks": [
       "AnimSpriteOnMonPos", "DestroySpriteAndMatrix",
-      "RunStoredCallbackWhenAffineAnimEnds", "SpriteCB_HealthBar",
+      "RunStoredCallbackWhenAffineAnimEnds", "SpriteCB_EnemyShadow", "SpriteCB_HealthBar",
       "SpriteCB_HealthBoxOther", "SpriteCB_SetInvisible", "SpriteCallbackDummy"
     ],
     "tasks": [
@@ -179,6 +192,18 @@
       "FadeScreenToWhite_Step", "Task_ClearMonBg", "Task_FadeToBg",
       "Task_UpdateMonBg"
     ]
+  },
+  "orientationTopology": {
+    "player-back": {
+      "templates": ["gLusterPurgeCircleSpriteTemplate", "gMultiuseSpriteTemplate", "gRandomPosHitSplatSpriteTemplate", "gSpriteTemplate_EnemyShadow", "sHealthbarSpriteTemplates", "sHealthboxOpponentSpriteTemplates", "sHealthboxPlayerSpriteTemplates"],
+      "callbacks": ["AnimSpriteOnMonPos", "DestroySpriteAndMatrix", "RunStoredCallbackWhenAffineAnimEnds", "SpriteCB_HealthBar", "SpriteCB_HealthBoxOther", "SpriteCB_SetInvisible", "SpriteCallbackDummy"],
+      "tasks": ["AnimTask_BlendSpriteColor_Step2", "AnimTask_ShakeBattlers", "FadeScreenToWhite_Step", "Task_ClearMonBg", "Task_FadeToBg", "Task_UpdateMonBg"]
+    },
+    "opponent-front": {
+      "templates": ["gLusterPurgeCircleSpriteTemplate", "gMultiuseSpriteTemplate", "gRandomPosHitSplatSpriteTemplate", "gSpriteTemplate_EnemyShadow", "sHealthbarSpriteTemplates", "sHealthboxOpponentSpriteTemplates", "sHealthboxPlayerSpriteTemplates"],
+      "callbacks": ["AnimSpriteOnMonPos", "DestroySpriteAndMatrix", "RunStoredCallbackWhenAffineAnimEnds", "SpriteCB_EnemyShadow", "SpriteCB_HealthBar", "SpriteCB_HealthBoxOther", "SpriteCallbackDummy"],
+      "tasks": ["AnimTask_BlendSpriteColor_Step2", "AnimTask_ShakeBattlers", "FadeScreenToWhite_Step", "Task_ClearMonBg", "Task_FadeToBg", "Task_UpdateMonBg"]
+    }
   },
   "batchSiblingAudit": {
     "MOVE_MIST_BALL": "independent control",
@@ -199,12 +224,12 @@
   },
   "reducerAcceptance": {
     "playerBackRows": 333,
-    "opponentFrontRows": 332,
-    "totalRows": 665,
+    "opponentFrontRows": 333,
+    "totalRows": 666,
     "gameplayRngStable": true,
     "typedSeamRows": 0,
     "framebufferRows": 0
   },
   "coverageCounts": "Level 50: 184/276 exact, 0 partial, 0 staged, 92 unsupported",
-  "boundedRemainder": "Pure reducer checkpoint only. Luster Purge remains independently unsupported: no typed presentation seam, production compositor, framebuffer acceptance, or coverage credit was added. Mist Ball, Flail, Heat Wave, Calm Mind, and every shared-component sibling remain independent controls."
+  "boundedRemainder": "Corrected evidence checkpoint: the rejected Relicanth staging (internal species 381) was replaced with true Latios (internal species 408). Pure reducer acceptance is complete for 333 player-back + 333 opponent-front rows; Luster Purge remains independently unsupported with no typed presentation seam, production compositor, framebuffer acceptance, or coverage credit. Mist Ball, Flail, Heat Wave, Calm Mind, and every shared-component sibling remain independent controls."
 }

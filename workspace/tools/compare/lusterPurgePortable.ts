@@ -219,5 +219,5 @@ let total = 0;
 for (const [orientation, evidence] of Object.entries(fixture.orientations) as Array<[Orientation, Evidence]>) {
   total += verifyOrientation(orientation, evidence);
 }
-if (total !== 665) throw new Error(`incomplete bilateral rows ${total}/665`);
-console.log(`MOVE_LUSTER_PURGE reducer checkpoint: ${total}/665 retained rows exact; no framebuffer or audio-sample claim`);
+if (total !== 666) throw new Error(`incomplete bilateral rows ${total}/666`);
+console.log(`MOVE_LUSTER_PURGE reducer checkpoint: ${total}/666 retained rows exact; no framebuffer or audio-sample claim`);
