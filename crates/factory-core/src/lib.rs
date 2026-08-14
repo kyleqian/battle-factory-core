@@ -15,6 +15,8 @@ pub mod battle_ai_switch_into;
 pub mod battle_ai_switch_into_vectors_gen;
 pub mod battle_script_ai_reveal;
 pub mod battle_script_ai_reveal_vectors_gen;
+pub mod battle_script_gender;
+pub mod battle_script_gender_vectors_gen;
 pub mod damage_calc;
 pub mod damage_vectors_gen;
 pub mod factory_ai_battle_history;
