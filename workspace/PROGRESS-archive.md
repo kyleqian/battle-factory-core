@@ -43644,3 +43644,54 @@ git; the current live ledger keeps the three load-bearing entries only.
   **18 files / 804 tests**. Final union full npm **1,042 files / 9,839 passed /
   1 skipped**; build **664 modules**. No new unsupported barrier or DEFERRED
   entry.
+
+## 1261 — [MAIN worker, 2026-08-14] **Brain-reveal send-out window: 350/701 → 648/701; 1260's attribution corrected (missing trace A-press, not a cry-duration gap); new construction-route ready-lag finding named, not fixed**
+
+- **State:** `factory-round-battle7-noland-reveal-off` compare now
+  **648/701** (92.4%), up from 1260's 350/701. Root cause of the frame-350
+  divergence was **not** the §D cry-duration family 1260 suspected — it was
+  that the compare trace itself had zero `A` presses
+  (`"segments": [{"frames": 700, "buttons": []}]`), unlike every other
+  send-out-reaching fixture, so the app never left the pre-acknowledgement
+  "wants to battle!" hold while the oracle's own scripted capture pressed
+  `A` and moved on. Fixed the trace (`tools/compare/traces/`, dev-time
+  only — press placed via dense oracle/app self-diff bisection, same
+  method §D round 5 used): 0-646 now pixel-exact, including opponent
+  TANGELA's full send-out (the first live species with
+  `dispatchDelay < 101`, confirmed the existing generic formula needs no
+  change for it).
+- **Did:** After the trace fix, found and double-confirmed a genuine new
+  residual: `generatedBattleStartCommandReady` fires 7 ticks early (app
+  647 vs oracle-PNG-confirmed 654). Built an independent oracle-only probe
+  (`tools/battle-lab/factory-mechanic-pupitar-delcatty-readylag-probe.json`,
+  PUPITAR opponent, cry 24, `dispatchDelay=67` — further below baseline
+  than TANGELA) and found the **identical +7**, ruling out a
+  species/cry-proportional cause (67 vs 86 dispatchDelay, same +7). What
+  the two +7 fixtures share instead: both are built via `overrides.parties`
+  (mechanicLab / factoryBrain-with-pinned-parties); all three previously-
+  validated 0-residual points (GRIMER/YOSHI, KADABRA/SHIZUKA,
+  DELCATTY/MAGNETON) use real `factoryLegal` rental generation. This is the
+  same *shape* as the already-landed `isCanonicalAnchorIntro` route
+  correction — but **not fixable the same way**: the app's own
+  construction for this fixture (`generatedRoundRevealProofStage`) uses its
+  real generation path, not `overrides.parties` — only the *oracle* side
+  uses the override (to sidestep `factoryBrain`'s un-ported RNG history,
+  1260's own documented reason) — so there is no app-side signal to key a
+  route flag on without inventing one. Full writeup:
+  `docs/trainer-pic-off-window-scout.md` §D round 11.
+- **Next:** closing the +7 needs either (a) confirming it's a pure
+  oracle-harness `overrides.parties` RAM-injection artifact (real play
+  never hits it — likely not a `src/` fix at all) or (b) porting
+  `factoryBrain`'s real RNG history so the oracle side stops needing
+  `overrides.parties` in the first place (ties into 1260's own deferred
+  RNG-cursor item). Frames 420/503 (single-frame, sub-100px tint dots) are
+  the same unmechanized residual family as the existing 444/536 in Yoshi's
+  own fixture — not new, not chased.
+- **Notes:** own commits this step (trace fix, docs). Regression-verified
+  unaffected (trace-only + docs change, no `src/` touched):
+  `factory-round-battle6-lukas-reveal-off` **154/154**,
+  `factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke`
+  **375/375**. Finish gate (full `npm test` + `npm run build`) recorded
+  below this entry's commit. Did not trim the compare window to exclude
+  the 647-700 mismatches (explicitly disallowed by the step brief) — the
+  648/701 count is the honest, un-trimmed result.

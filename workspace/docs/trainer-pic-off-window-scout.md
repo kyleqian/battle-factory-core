@@ -1210,3 +1210,152 @@ fix (`tools/compare/traces/factory-round-battle7-noland-gold-reveal-off.json`:
 Regression-checked unaffected: `factory-round-battle7-noland-reveal-off`
 (silver) **648/701**, `factory-round-battle6-lukas-reveal-off` **154/154**,
 `factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke` **375/375**.
+
+### Round 13 (2026-08-14): ready-lag `dispatchDelay(opponent)<101` discriminator FALSIFIED with clean RAM evidence; real missing ROM span located precisely; no validated `src/` fix landed (honest-stop)
+
+**Assignment:** crack and fix the construction-route ready-lag +7/+5 family
+named in `docs/ready-lag-discriminator-scout.md` and PROGRESS 1263's gold
++5 finding, source-first, generic (no per-fixture constants).
+
+**Step 0 — read the discriminator dossier's own formula citation.**
+`generatedPlayerDispatchDelay` (battleScene.ts:4463-4466) already models the
+opponent's cry-gated span linearly (`101 + cryDuration(opp) - cryDuration
+(GROVYLE=58)`); `generatedPlayerReadyLagSpeciesFormula` (battleScene.ts:
+4539-4546) models the player's own span as `visualLag(player) + 98 +
+cryDuration(player)`. Neither term, nor anything else in
+`generatedBattleStartCommandReady` (battleScene.ts:4590-4600), models
+anything past the point the player's OWN send-out animation finishes.
+
+**Step 1 — falsify the discriminator with a clean, non-confounded fixture.**
+The existing dossier's own §3 flagged an unresolved confound: every
+`dispatchDelay<101` fixture tested so far (TANGELA/silver, PUPITAR/probe) is
+ALSO `overrides.parties`-constructed, and every `overrides.parties`-free
+fixture tested so far (GRIMER/YOSHI, KADABRA/SHIZUKA, DELCATTY/MAGNETON) is
+ALSO `dispatchDelay>=101` — the two candidate causes were never tested apart.
+`tools/battle-lab/factory-brain-gold-intro-dense-off.json` (the pre-existing
+gold ground-truth doc's own dense fixture, `docs/noland-brain-intro-gold-
+ground-truth.md`) breaks the confound directly: `mode: "factoryBrain"`,
+**no `overrides` key at all** — a genuine, un-staged oracle RNG walk — with
+opponent lead BLAZIKEN (cry 89t, `dispatchDelay = 101+(89-58) = 132`, deep in
+the "safe, should-be-exact" regime) and player lead DUGTRIO (cry 55t). This
+is the exact untested cell: override-free AND `dispatchDelay>=101`.
+
+**Step 2 — measure it, and two "confirmed-exact" fixtures, on the same ruler.**
+Built `tools/probe/probe-ready-lag-chooseaction-handshake.ts` (committed,
+rerunnable): runs a fixture dense (`preCheckpointCaptureAllFrames: true`)
+against a live oracle and reads `state.engine.{controllerExecFlags,
+playerControllerCommand,opponentControllerCommand}` directly — the same RAM
+fields and ready predicate (`playerControllerCommand===18 &&
+controllerExecFlags===1`) `tools/probe/probe-overrides-ready-lag.ts` already
+established. Ran it against the gold-dense fixture AND, for comparison, the
+two `factoryLegal`/no-override fixtures the discriminator dossier calls
+"confirmed 0-residual" (GRIMER/YOSHI, KADABRA/SHIZUKA):
+
+| Fixture | Construction | `dispatchDelay`(opp) | handoff→player-throw-dispatch (RAM vs. formula) | player-throw→player-intro-complete (RAM vs. formula `98+cry`) | RAM-ready − naive-formula-predicted-ready |
+| --- | --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | `factoryLegal`, no override | 125 (>=101) | 1720 vs. 1720 (exact) | 1847 vs. 1848 (−1) | **+5** |
+| KADABRA/SHIZUKA | `factoryLegal`, no override | 111 (>=101) | 1707 vs. 1707 (exact) | 1880 vs. 1881 (−1) | **+4** |
+| DUGTRIO/gold-dense | `factoryBrain`, **no override** | 132 (>=101) | 1729 vs. 1729 (exact) | 1881 vs. 1882 (−1) | **+5** |
+
+Every row's `dispatchDelay` and the resulting `handoff→player-throw-dispatch`
+tick are exact to the current formula (0 residual) — confirming, again, that
+`generatedPlayerDispatchDelay` and the opponent-cry math are not the bug.
+Every row's player-cry-wait (`98+cryDuration(player)`) also matches to
+within 1 tick, the same tolerance already noted for the PUPITAR probe.
+**But every row also shows a further +4/+5 gap between "player's own
+send-out animation completes" (RAM `controllerExecFlags` 1→0) and "the
+action menu predicate is actually true"** — including the two fixtures the
+existing dossier calls exact, and including a fixture that is BOTH
+`overrides.parties`-free AND `dispatchDelay>=101`.
+
+**This falsifies `dispatchDelay(opponent)<101` as the discriminator.**
+GRIMER/YOSHI and KADABRA/SHIZUKA's "0 residual" status rests on an older,
+PNG/pixel-based ready landmark (`docs/intro-cry-shadow-evidence.md` Part 1);
+this round's RAM-predicate measurement — the same predicate the newer PUPITAR
+probe and gold diagnostic (PROGRESS 1261/1263) used — puts a real, previously
+uncounted +4/+5 tick gap on those same "exact" fixtures too. The regime split
+named in `ready-lag-discriminator-scout.md` §3 is best explained as a
+**measurement-convention split** (old PNG landmark vs. new RAM predicate),
+not a real regime boundary in the ROM.
+
+**Step 3 — locate the real missing span in source.** It is not a new
+discovery that `generatedBattleStartCommandReady` stops modeling at "player's
+own send-out completes" — that IS everywhere the formula's own terms end.
+What was missing was proof the ROM keeps running after that point before the
+menu is interactive. `reference/pokeemerald/src/battle_main.c` traces it
+exactly: `BattleIntroPlayer1SendsOutMonAnimation` (:3776) hands off to
+`TryDoEventsBeforeFirstTurn` (:3841) — which waits out a switch-in
+ability/item/weather-check loop (`switchInAbilitiesCounter`/
+`switchInItemsCounter`, both battlers) — before calling
+`HandleTurnActionSelectionState` (:4126), whose `STATE_BEFORE_ACTION_CHOSEN`
+case (:4168) is what actually calls `BtlController_EmitChooseAction` +
+`MarkBattlerForControllerExec` for both battlers. The RAM traces show this
+concretely: player-intro-complete → both-battlers-`ChooseAction`-dispatch is
++3 ticks (the ability/item/weather loop, both battlers, no switch-in effects
+triggering for any of GRIMER/KADABRA/DUGTRIO here), then dispatch →
+predicate-true is +3 more (the AI's own instant "choose an action" decision
+completing and the opponent's ack clearing `controllerExecFlags`'s bit 1,
+leaving bit 0 — the player, mid-menu, still "controller-active" because the
+player controller's own `ChooseAction` doesn't complete until a button press
+— hence `controllerExecFlags===1` IS the "menu displayed, waiting on input"
+state, not a bug in the predicate). This is a real, always-present,
+species-and-route-generic ROM span with zero representation in the current
+formula.
+
+**Step 4 — tried the generic fix, it does not clear the validation bar.**
+Added a single new constant, `GENERATED_CHOOSE_ACTION_HANDSHAKE_DELAY`, as a
+flat additive term in `generatedBattleStartCommandReady` (unconditional, no
+regime gate — consistent with the finding above that the gap is universal,
+not regime-tied) and bisected it empirically against
+`factory-round-battle7-noland-reveal-off.json` (silver, baseline 648/701):
+K=5→673, K=6→677, K=7→682, K=8→685, **K=9→690 (best)**, K=10→683, K=12→674.
+This is a real, broad improvement (92.4%→98.4%) but **does not reach the
+~699+/701 the goal requires at any tested K**, and — unlike round 12's sharp
+single-frame A-press optimum — the curve is noisy, not a clean peak, with a
+K-insensitive residual persisting at frames 647-653 (402px/1.05%, bbox
+16,123-85,133, present at every tested K) that no flat constant touches.
+`factory-round-battle7-noland-gold-reveal-off.json` stays 700/701 at every
+tested K (its committed window ends before the ready transition, so it
+cannot discriminate this fix — consistent with PROGRESS 1263). Two readings:
+either (a) the RAM `predicate-true` tick measured here does not map 1:1 onto
+the specific pixel frame the compare harness renders as "menu ready" (some
+rounding/jitter between a RAM tick and its visible pixel consequence this
+dossier's existing "RAM leads pixel by ~1 tick" convention does not fully
+capture at this remove), or (b) the 647-653 bbox is a second, independent,
+not-yet-named defect that has to be fixed before the ChooseAction-handshake
+correction can show a clean optimum the way the A-press bisection did.
+**Reverted the speculative `src/` edit** rather than land a fitted constant
+that both fails the step's own bar and the "no fitted constants" instruction
+— `src/` is unchanged this round.
+
+**Honest-stop.** Source archaeology converged on a real, precisely-located,
+generically-applicable missing ROM mechanism (`TryDoEventsBeforeFirstTurn` +
+`HandleTurnActionSelectionState`'s `ChooseAction` dispatch) and definitively
+falsified the leading `dispatchDelay<101` discriminator with a clean,
+triple-triangulated, non-fitted RAM measurement — but the exact formula shape
+needed to turn that into a passing generic fix did not converge inside
+budget. Landing the evidence per the step's own honest-stop clause instead of
+a fitted constant.
+
+**Sharpest next instrument.** (1) Resolve the 647-653 bbox residual first —
+it's present regardless of the ChooseAction-handshake correction and may be
+masking the true single-frame optimum for the latter. (2) Re-run this
+round's probe (`tools/probe/probe-ready-lag-chooseaction-handshake.ts`)
+against a real, un-staged `factoryLegal` fixture with genuinely low
+`dispatchDelay` once the concurrent side worker's promised fixture lands
+(per this step's own brief) — if ITS residual is ALSO ~+4/+5 (not +7), that
+confirms the +7 TANGELA/PUPITAR readings carry a *second*, additional
+~+2-3-tick effect on top of this round's universal handshake gap, genuinely
+tied to override-construction or the low-`dispatchDelay` regime after all
+(a two-term fix, not one). (3) Consider whether the compare harness's own
+framebuffer-freeze semantics introduce a systematic RAM-tick-to-pixel-frame
+offset distinct from the already-documented "RAM leads pixel by 1" rule,
+before trusting any future bisection against this fixture family.
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-ready-lag-chooseaction-handshake.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only (no `src/` or fixture writes); ran twice this session,
+byte-identical output both times.
