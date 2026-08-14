@@ -2456,3 +2456,256 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
   });
 });
+
+/**
+ * Noland rung 2: `getFactoryFrontierBrainStatus` wired into the round-loop's
+ * opponent-generation seam. `driveGeneratedRoundToCompletion`-style helpers
+ * above prove ordinary streak-0 rounds already win reliably with
+ * `record(664), record(678), record(527)` against a "move slot 0" policy;
+ * these brain-scheduling cases stage ONE ordinary battle at a nonzero
+ * `factoryWinStreak` immediately below a brain threshold (rather than the
+ * six preceding ordinary wins a from-streak-0 round would require) to keep
+ * the real pre-generation RNG-cursor-handoff assertion fast and reliable
+ * while still exercising the live seam, not just construction-time
+ * generation. `challengeNum`/`fixedIv` do not depend on which battleIndex
+ * within a round reaches a given effective streak, so this remains a
+ * faithful pin of `battle_factory.c:759-772`'s `challengeNum + 2` IV rule.
+ */
+describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
+  it("streak-0 round: adding factorySymbolsCount: 0 is byte-identical to omitting it", () => {
+    const seed = 17;
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    const baseConfig = {
+      id: "brain-inertness",
+      rngValue: seed,
+      factoryWinStreak: 0,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords" as const,
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+    };
+    function drive(
+      config: Parameters<typeof createFactoryRoundBattleOrchestrator>[0],
+    ): FactoryRoundBattleOrchestratorState {
+      let state = createFactoryRoundBattleOrchestrator(config);
+      for (
+        let budget = 0;
+        budget < 1_000
+          && state.round.rules.phase !== "roundComplete"
+          && state.round.rules.phase !== "roundLost";
+        budget += 1
+      ) {
+        if (state.battle !== null) {
+          state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+          continue;
+        }
+        if (
+          state.round.rules.phase === "presentingBattleStart"
+          || state.round.rules.phase === "presentingBattleWin"
+          || state.round.rules.phase === "presentingSwapResult"
+        ) {
+          state = acknowledgeAndAdvance(state);
+          continue;
+        }
+        if (state.round.rules.phase === "awaitingSwapDecision") {
+          const commandId = state.round.presentation?.command.commandId;
+          if (commandId === undefined) throw new Error("expected swap-offer presentation command");
+          state = completeFactoryRoundPresentation(state, { commandId });
+          state = chooseFactoryRoundSwap(state, { type: "decline" });
+          continue;
+        }
+        throw new Error(`unexpected carrier phase ${state.round.rules.phase}`);
+      }
+      return state;
+    }
+    const without = drive(baseConfig);
+    const withField = drive({ ...baseConfig, factorySymbolsCount: 0 });
+    expect(without.round.rules.phase).toBe("roundComplete");
+    expect({ ...without, config: undefined }).toEqual({ ...withField, config: undefined });
+    expect(without.opponentGenerations.every((o) => o.kind === "ordinary")).toBe(true);
+  });
+
+  it("schedules the silver Frontier Brain battle at the pre-generation seam with a real RNG-cursor handoff", () => {
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    let state = createFactoryRoundBattleOrchestrator({
+      id: "brain-silver-handoff",
+      rngValue: RNG_SEED,
+      factoryWinStreak: 19,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+      factorySymbolsCount: 0,
+    });
+    expect(state.opponentGenerations[0]!.kind).toBe("ordinary");
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("battleActive");
+    for (let budget = 0; budget < 60 && state.battle !== null; budget += 1) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+    }
+    expect(state.battle).toBeNull();
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+
+    const preWinRng = state.round.rules.rngValue;
+    state = preGenerateFactoryRoundNextOpponent(state);
+    const pending = state.pendingNextOpponent;
+    expect(pending).not.toBeNull();
+    expect(pending!.kind).toBe("frontier-brain");
+    if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
+    expect(pending!.status).toBe("silver");
+    expect(pending!.trainerId).toBe(1022); // TRAINER_FRONTIER_BRAIN
+    expect(pending!.generation.challengeNum).toBe(2);
+    expect(pending!.generation.fixedIv).toBe(15);
+    expect(pending!.generation.drawLedger.length).toBeGreaterThan(0);
+    for (const draw of pending!.generation.drawLedger) {
+      expect(draw.phase === "set-selection" || draw.phase === "personality").toBe(true);
+    }
+
+    const segment = state.rngSegments.at(-1)!;
+    expect(segment.kind).toBe("opponent-generation");
+    expect(segment.battleIndex).toBe(1);
+    expect(segment.rngBefore).toBe(preWinRng);
+    expect(segment.rngBefore).toBe(pending!.generation.drawLedger[0]!.rngBefore);
+
+    // Swap resolution only publishes the already-generated opponent; it must
+    // not re-roll (the pre-generation above already spent this receipt).
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+
+    expect(state.round.rules.battleIndex).toBe(1);
+    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(state.round.rules.rngValue).toBe(pending!.generation.rngValue);
+  });
+
+  it("schedules the gold Frontier Brain battle at the pre-generation seam", () => {
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    let state = createFactoryRoundBattleOrchestrator({
+      id: "brain-gold-handoff",
+      rngValue: RNG_SEED,
+      factoryWinStreak: 40,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+      factorySymbolsCount: 1,
+    });
+    expect(state.opponentGenerations[0]!.kind).toBe("ordinary");
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("battleActive");
+    for (let budget = 0; budget < 60 && state.battle !== null; budget += 1) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+    }
+    expect(state.battle).toBeNull();
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+
+    state = preGenerateFactoryRoundNextOpponent(state);
+    const pending = state.pendingNextOpponent;
+    expect(pending).not.toBeNull();
+    expect(pending!.kind).toBe("frontier-brain");
+    if (pending!.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
+    expect(pending!.status).toBe("gold");
+    expect(pending!.generation.challengeNum).toBe(5);
+    expect(pending!.generation.fixedIv).toBe(31);
+  });
+
+  it("reports STREAK (not gold) once both symbols are held, at the same silver streak threshold", () => {
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    const state = createFactoryRoundBattleOrchestrator({
+      id: "brain-streak-symbols-2",
+      rngValue: RNG_SEED,
+      factoryWinStreak: 20,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+      factorySymbolsCount: 2,
+    });
+    const first = state.opponentGenerations[0]!;
+    expect(first.kind).toBe("frontier-brain");
+    if (first.kind !== "frontier-brain") throw new Error("unreachable: asserted above");
+    expect(first.status).toBe("streak");
+    expect(first.generation.challengeNum).toBe(2);
+    expect(first.generation.fixedIv).toBe(15);
+    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "streak" });
+  });
+
+  it("rejects an adoptedNextOpponent ordinary schedule for a battleIndex that turns out brain-eligible", () => {
+    // Same adopted ordinary schedule used by the LILIANA provenance test
+    // above, but staged at factoryWinStreak 19 so battleIndex 1's effective
+    // streak (20) is actually the silver Frontier Brain battle. Adopting an
+    // ordinary schedule there would silently play the wrong opponent.
+    const selection = generateFactoryOpponent({
+      rngValue: 0x7399e3ae,
+      factoryWinStreak: 1,
+      battleIndex: 1,
+      storedTrainerIds: [50] as const,
+      savedRentalSetIds: [156, 149, 180, 188, 184, 135] as const,
+      playerTrainerId: 416_049_562,
+      battleTowerLevel50WinStreak: 0,
+    });
+    const adoptedNext = adoptFactoryOpponentSchedule({
+      factoryWinStreak: 1,
+      battleIndex: 1,
+      storedTrainerIds: [50] as const,
+      savedRentalSetIds: [156, 149, 180, 188, 184, 135] as const,
+      playerTrainerId: 416_049_562,
+      battleTowerLevel50WinStreak: 0,
+      trainerId: 9,
+      setIds: [169, 170, 130] as const,
+      selectionDrawLedger: selection.drawLedger.filter((draw) => draw.phase !== "personality"),
+      constructionRngValues: [0x2f959df4, 0xbd6f8138, 0xde320f3a] as const,
+    });
+
+    const playerRecords = [record(664), record(678), record(527)] as const;
+    const savedRentalRecords = [...playerRecords, record(1), record(2), record(3)] as const;
+    let state = createFactoryRoundBattleOrchestrator({
+      id: "brain-adopted-next-mismatch",
+      rngValue: RNG_SEED,
+      factoryWinStreak: 19,
+      playerTrainerId: PLAYER_TRAINER_ID,
+      battleTowerLevel50WinStreak: 0,
+      facilityState: { rentsCount: 0 },
+      rentals: {
+        type: "currentRecords",
+        playerRentalRecords: playerRecords,
+        savedRentalRecords,
+      },
+      adoptedNextOpponent: { generation: adoptedNext, battleIndex: 1 },
+    });
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("battleActive");
+    for (let budget = 0; budget < 60 && state.battle !== null; budget += 1) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+    }
+    expect(state.battle).toBeNull();
+    expect(state.round.rules.phase).toBe("presentingBattleWin");
+
+    expect(() => preGenerateFactoryRoundNextOpponent(state)).toThrow(/[Ff]rontier [Bb]rain/);
+  });
+});
