@@ -5,6 +5,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R18 — [supervised session, 2026-08-14] **M17 Battle Script Destiny Bond state leaf**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15-R18
+  through `d048dc24`. The complete pure
+  `battleScriptSetdestinybondOpcode.ts` state projection is native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported the exact four-battler attacker-only transformation: require
+  the optional attacker role, OR `STATUS2_DESTINY_BOND` into only that
+  battler's `status2`, preserve all unrelated bits, siblings, and role state,
+  and retain the exact missing-attacker error. Canonical TypeScript execution
+  supplies **25 cases** covering every attacker, clear/set and idempotent
+  inputs, full-u32 edges, and the missing role; corpus sha256
+  `b024fb02d948ecbf7e5417738eaf53704d811466b6f069ef915e6aa263e73315`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation remains deferred while Issue #55 is open; keep opcode
+  registration, generic BattleState reduction, presentation, and callback
+  expansion out.
+- **Notes:** Luna/max worker, one commit. Supervisor audited target-only OR
+  semantics and exact error text; regenerated twice byte-identically
+  (generated sha256
+  `28ec30a71e35ffce6d85e2ed5e90af4990c8bfdc80e2549f6c9360105164cdba`);
+  and reran focused **4/4**, cargo **775/775**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, and smoke **375/375**.
+  Worker same-commit full npm was **1,047 files / 9,864 passed / 1 skip**;
+  build was **664 modules**. Artifact is **509,812 bytes**, sha256
+  `444bb310b590eaccb09184f86b2f41cd3a26884a81a0485a1a43e8875872d7ad`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: the worker ran a redundant baseline full suite before materializing
+  the gitignored WASM artifact, costing ~18 min before the required final run.
+
 ## R17 — [supervised session, 2026-08-14] **M16 Battle Script always-hit state leaf**
 
 - **State:** `rust-main` = current master `438d06ba` plus verified R15-R17
