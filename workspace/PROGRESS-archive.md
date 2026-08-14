@@ -1,3 +1,27 @@
+## 1242 — [supervisor, 2026-08-13] **CGB4 v40 and final lane union verified**
+
+- **State:** #55 is source-exact through the selected-row **6,172-cycle**
+  CGB4 prefix and stops before the fifth-track flags load. The generic
+  seven-battle controller remains the governing S8 path. Both persistent lane
+  heads are folded; Icy Wind remains an honest unsupported presentation
+  checkpoint, and the complete presentation-free draft selection surface is
+  native Rust.
+- **Did:** independently audited v39/v40 containment and accepted exact ROM
+  `50 20 2d 18 ad dc` for the fourth-track continuation (**12×3 = 36**,
+  **6,136 → 6,172**). Folded Icy Wind dense evidence plus its source-exact
+  compositor and Rust M9c–M9d plus M10a–M10b. Native Rust is **750/750**;
+  rebuilt WASM is forced-green across **17 parity files / 800 tests**.
+- **Next:** continue #55 in a separate bounded step at only the fifth-track
+  flags load/EXIST decision. Keep later fifth-track bodies, the exit body,
+  wider MPlay/service/arbitration, live construction-clock wiring, and the
+  retired canonical Battle-2 march out of scope.
+- **Notes:** final full npm **1,040 files / 9,829 passed / 1 skipped**; build
+  **664 modules**. WASM **493,998 B**, `206c9979…`. Icy Wind focused **7/7**;
+  coverage remains **180/276 exact**, 96 unsupported. Production soaks are
+  vanilla **20/20** and full **60/60**, with **0 crashes / 0 hangs**. No new
+  unsupported barrier or DEFERRED entry. Worker full-suite regeneration cost
+  about 24 minutes (papercut).
+
 ## 1240 — [MAIN worker, 2026-08-13] **CGB4 v39 fourth-track decrement/exit decision green**
 
 - **State:** #55 is source-exact through the selected-row **6,136-cycle** CGB4 prefix, stopping at `_081DDA62` before either successor body.

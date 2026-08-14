@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1245 — [MAIN worker, 2026-08-13] **CGB4 v42 fifth-track volume/pitch decision green**
+
+- **State:** #55 is source-exact through the selected-row **6,226-cycle**
+  CGB4 prefix. One frozen fifth-track mask is nonzero and two are clear; both
+  routes stop before their respective bodies.
+- **Did:** source-only v42 freezes v41 evidence/report/packets and inherited
+  evidence byte-for-byte, then joins only by sourceStateDigest. Frozen flags
+  0x83/0x80/0x80 against mask 0x0f price the nonzero/no-refill route at 6 and
+  the two clear/taken-refill routes at 12 each: **30 aggregate cycles**
+  (**6,196 → 6,226**). Exact source/ELF/ROM bytes are 0f 21 01 42 45 d0.
+- **Next:** Assigned v42 is complete; do not start a follow-on. Keep the
+  mask-nonzero body, clear-route decrement/exit body, later loop,
+  MPlay/service/arbitration, construction-clock wiring, production,
+  presentation, animation, Rust, and retired Battle-2 work out of scope.
+- **Notes:** evidence/doc b18d54cc… / 07e866c8…; focused v41/v42 **12/12**,
+  smoke **375/375**, full npm **1,043 files / 9,845 passed / 1 skipped**,
+  build **664 modules**. No oracle capture, src change, ratchet/barrier,
+  ROADMAP/DEFERRED/ISSUES, or canonical-Battle-2 change; #55 remains open.
+
 ## 1244 — [supervisor, 2026-08-13] **CGB4 v41 and Rust draft boundary union verified**
 
 - **State:** #55 is source-exact through the selected-row **6,196-cycle**
@@ -42,27 +61,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **12/12**, smoke **375/375**, full npm **1,041 files / 9,835 passed / 1
   skipped**, build **664 modules**. No `src/**`, ratchet/barrier, ISSUES, or
   oracle-pixel change; #55 remains open.
-
-## 1242 — [supervisor, 2026-08-13] **CGB4 v40 and final lane union verified**
-
-- **State:** #55 is source-exact through the selected-row **6,172-cycle**
-  CGB4 prefix and stops before the fifth-track flags load. The generic
-  seven-battle controller remains the governing S8 path. Both persistent lane
-  heads are folded; Icy Wind remains an honest unsupported presentation
-  checkpoint, and the complete presentation-free draft selection surface is
-  native Rust.
-- **Did:** independently audited v39/v40 containment and accepted exact ROM
-  `50 20 2d 18 ad dc` for the fourth-track continuation (**12×3 = 36**,
-  **6,136 → 6,172**). Folded Icy Wind dense evidence plus its source-exact
-  compositor and Rust M9c–M9d plus M10a–M10b. Native Rust is **750/750**;
-  rebuilt WASM is forced-green across **17 parity files / 800 tests**.
-- **Next:** continue #55 in a separate bounded step at only the fifth-track
-  flags load/EXIST decision. Keep later fifth-track bodies, the exit body,
-  wider MPlay/service/arbitration, live construction-clock wiring, and the
-  retired canonical Battle-2 march out of scope.
-- **Notes:** final full npm **1,040 files / 9,829 passed / 1 skipped**; build
-  **664 modules**. WASM **493,998 B**, `206c9979…`. Icy Wind focused **7/7**;
-  coverage remains **180/276 exact**, 96 unsupported. Production soaks are
-  vanilla **20/20** and full **60/60**, with **0 crashes / 0 hangs**. No new
-  unsupported barrier or DEFERRED entry. Worker full-suite regeneration cost
-  about 24 minutes (papercut).
