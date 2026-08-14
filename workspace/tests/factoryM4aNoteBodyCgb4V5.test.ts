@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   CGB4_CALLER_HELPER_GAP_STATE,
   makeEvidence,
@@ -12,7 +13,7 @@ import {
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v5.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v5.md";
 
-describe("Issue #55 CGB4 caller edge + TrkVolPitSet prologue v5", () => {
+describeCgb4Evidence("Issue #55 CGB4 caller edge + TrkVolPitSet prologue v5", () => {
   it("source-counts the exact caller edge and complete helper prologue", () => {
     expect(reduceMPlayCgb4CallerHelperGapTiming(CGB4_CALLER_HELPER_GAP_STATE)).toEqual({
       route: "_081DDC66-call-edge-and-TrkVolPitSet-prologue",

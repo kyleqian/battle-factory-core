@@ -2,14 +2,15 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import { makeEvidence, reduceMPlayTrkVolPitSetTiming } from "../tools/report/factory-m4a-note-body-cgb4-v4.ts";
 
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v4.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v4.md";
 const observedVolume = { vol: 47, volX: 64, pan: 63, panX: 0, modT: 0 } as const;
 
-describe("Issue #55 ply_note CGB-channel-4 TrkVolPitSet helper v4", () => {
+describeCgb4Evidence("Issue #55 ply_note CGB-channel-4 TrkVolPitSet helper v4", () => {
   it("source-counts only the two observed helper routes", () => {
     expect(reduceMPlayTrkVolPitSetTiming({ flags: 0x80 })).toEqual({
       route: "flags-clear",

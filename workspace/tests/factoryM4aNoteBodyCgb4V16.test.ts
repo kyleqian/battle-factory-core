@@ -2,13 +2,14 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import { makeEvidence, reduceCgb4TrackLoopExitMovesTiming } from "../tools/report/factory-m4a-note-body-cgb4-v16.ts";
 
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v16.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v16.md";
 
-describe("Issue #55 CGB4 track-loop exit moves v16", () => {
+describeCgb4Evidence("Issue #55 CGB4 track-loop exit moves v16", () => {
   it("prices only mov-r3-from-sl then mov-r4-from-fp", () => {
     expect(reduceCgb4TrackLoopExitMovesTiming()).toEqual({
       route: "restore-track-loop-registers",

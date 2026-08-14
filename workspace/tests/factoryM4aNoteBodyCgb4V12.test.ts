@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4PostPlyNoteDispatcherTiming,
@@ -20,7 +21,7 @@ const state = () => ({
   waitAtCallbackEntry: 0,
 } as const);
 
-describe("Issue #55 CGB4 post-ply_note dispatcher slice v12", () => {
+describeCgb4Evidence("Issue #55 CGB4 post-ply_note dispatcher slice v12", () => {
   it("proves the dedicated note return route through the next command-pointer load", () => {
     expect(reduceCgb4PostPlyNoteDispatcherTiming(state())).toEqual({
       route: "ply-note-return-to-next-command-pointer",

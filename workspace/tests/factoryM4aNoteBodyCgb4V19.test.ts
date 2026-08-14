@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4NextTrackExistTiming,
@@ -52,7 +53,7 @@ const clearState = {
   },
 } as const;
 
-describe("Issue #55 CGB4 next-track MPT_FLG_EXIST v19", () => {
+describeCgb4Evidence("Issue #55 CGB4 next-track MPT_FLG_EXIST v19", () => {
   it("prices exactly the two direct branch routes and the red-first aggregate", () => {
     expect(reduceCgb4NextTrackExistTiming(takenState)).toEqual({
       route: "exist-set-bne-taken",
