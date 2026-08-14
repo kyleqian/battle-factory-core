@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R15 — [supervised session, 2026-08-13] **M14 Battle Script battler-position resolver**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15
+  `14003781`. The complete pure `battleScriptBattlerPositions.ts` resolver is
+  native and wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported the typed `2 | 4` battler-count domain, both canonical left
+  positions, the raw `BS_ATTACKER -> opponent-left` byte collision, exact
+  string matching, unknown-expression nulls, and the retained count gate.
+  Canonical TypeScript execution supplies **20 cases** across all four result
+  branches and six categories; corpus sha256
+  `2539d9c708156a52587e8413abde4b379fa3839923b251212104307ab45d45eb`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation remains deferred while Issue #55 is open; keep the
+  generic BattleState reducer, presentation, and callback-stack expansion out.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the complete
+  string/count mapping, regenerated twice byte-identically (generated sha256
+  `2108f517abbca8ec800ab4d0641ac202c9d8256eacb9e7c00210b3882c5c766c`),
+  and reran focused **3/3**, cargo **764/764**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, and smoke. Worker
+  same-commit full npm was **1,047 files / 9,864 passed / 1 skip**; build was
+  **664 modules**. Artifact is **507,847 bytes**, sha256
+  `4e540a351abe19b3d4205a128d174c9bf357e85959aa58411cff834c725216a8`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: recursive CGB4 evidence made the worker full suite take ~29 min.
+
 ## R14 — [supervised session, 2026-08-13] **M13 Battle Script gender resolver**
 
 - **State:** `rust-main` = current master `b8b7986a` plus this ledger-only
