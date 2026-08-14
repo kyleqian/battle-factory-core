@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4SubtractionResultTiming,
@@ -26,7 +27,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 post-subs store/compare/branch v23", () => {
+describeCgb4Evidence("Issue #55 CGB4 post-subs store/compare/branch v23", () => {
   it("prices the observed bcc-taken route using the scalar alone", () => {
     expect(reduceCgb4SubtractionResultTiming({ subtractionResult: 72 })).toEqual({
       route: "bcc-taken-to-_081DD9C4",

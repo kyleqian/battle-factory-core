@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4TrackLoopDecrementTiming,
@@ -11,7 +12,7 @@ import {
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v17.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v17.md";
 
-describe("Issue #55 CGB4 track-loop decrement and decision v17", () => {
+describeCgb4Evidence("Issue #55 CGB4 track-loop decrement and decision v17", () => {
   it("prices the exact continuation and exit instruction-pair routes", () => {
     expect(reduceCgb4TrackLoopDecrementTiming({ r6BeforeDecrement: 3 })).toEqual({
       route: "continue-to-next-track",

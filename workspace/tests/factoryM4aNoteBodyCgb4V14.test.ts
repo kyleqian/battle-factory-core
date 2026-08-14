@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4PostPlyNoteLfoSpeedTiming,
@@ -11,7 +12,7 @@ import {
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v14.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v14.md";
 
-describe("Issue #55 CGB4 post-ply_note lfoSpeed discriminator v14", () => {
+describeCgb4Evidence("Issue #55 CGB4 post-ply_note lfoSpeed discriminator v14", () => {
   it("prices the observed nonzero-lfoSpeed decision without reading mod", () => {
     expect(reduceCgb4PostPlyNoteLfoSpeedTiming({ lfoSpeed: 0x2c })).toEqual({
       route: "nonzero-lfo-speed-continues",

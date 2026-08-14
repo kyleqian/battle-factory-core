@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4FourthTrackContinuationTiming,
@@ -33,7 +34,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 fourth-track positive continuation v40", () => {
+describeCgb4Evidence("Issue #55 CGB4 fourth-track positive continuation v40", () => {
   it("source-prices only the positive _081DDA66 continuation with its taken refill", () => {
     expect(reduceCgb4FourthTrackContinuationTiming({})).toEqual({
       route: "movs-MusicPlayerTrack_size; adds-r5-r0; bgt-taken-_081DD9C8",

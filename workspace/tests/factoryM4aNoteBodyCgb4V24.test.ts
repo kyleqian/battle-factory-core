@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4SourceOnlySuccessorPrefixTiming,
@@ -23,7 +24,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 source-only successor prefix v24", () => {
+describeCgb4Evidence("Issue #55 CGB4 source-only successor prefix v24", () => {
   it("prices the fixed two-halfword successor prefix without a runtime operand", () => {
     expect(reduceCgb4SourceOnlySuccessorPrefixTiming({})).toEqual({
       sequentialThumbHalfwords: 2,

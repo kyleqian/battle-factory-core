@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4SecondTrackVolPitchTiming,
@@ -33,7 +34,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 second-track volume/pitch-mask decision v30", () => {
+describeCgb4Evidence("Issue #55 CGB4 second-track volume/pitch-mask decision v30", () => {
   it("prices the observed mask-clear route and fails closed on widened input", () => {
     expect(reduceCgb4SecondTrackVolPitchTiming({ secondTrackFlags: 0x80 })).toEqual({
       route: "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",
