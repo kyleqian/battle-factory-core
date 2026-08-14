@@ -25,6 +25,8 @@ pub mod battle_script_setalwayshitflag;
 pub mod battle_script_setalwayshitflag_vectors_gen;
 pub mod battle_script_setdestinybond;
 pub mod battle_script_setdestinybond_vectors_gen;
+pub mod battle_script_setforesight;
+pub mod battle_script_setforesight_vectors_gen;
 pub mod battle_script_setminimize;
 pub mod battle_script_setminimize_vectors_gen;
 pub mod battle_script_settaunt;
