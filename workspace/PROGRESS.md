@@ -5,6 +5,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1261 — [MAIN worker, 2026-08-14] **Brain-reveal send-out window: 350/701 → 648/701; 1260's attribution corrected (missing trace A-press, not a cry-duration gap); new construction-route ready-lag finding named, not fixed**
+
+- **State:** `factory-round-battle7-noland-reveal-off` compare now
+  **648/701** (92.4%), up from 1260's 350/701. Root cause of the frame-350
+  divergence was **not** the §D cry-duration family 1260 suspected — it was
+  that the compare trace itself had zero `A` presses
+  (`"segments": [{"frames": 700, "buttons": []}]`), unlike every other
+  send-out-reaching fixture, so the app never left the pre-acknowledgement
+  "wants to battle!" hold while the oracle's own scripted capture pressed
+  `A` and moved on. Fixed the trace (`tools/compare/traces/`, dev-time
+  only — press placed via dense oracle/app self-diff bisection, same
+  method §D round 5 used): 0-646 now pixel-exact, including opponent
+  TANGELA's full send-out (the first live species with
+  `dispatchDelay < 101`, confirmed the existing generic formula needs no
+  change for it).
+- **Did:** After the trace fix, found and double-confirmed a genuine new
+  residual: `generatedBattleStartCommandReady` fires 7 ticks early (app
+  647 vs oracle-PNG-confirmed 654). Built an independent oracle-only probe
+  (`tools/battle-lab/factory-mechanic-pupitar-delcatty-readylag-probe.json`,
+  PUPITAR opponent, cry 24, `dispatchDelay=67` — further below baseline
+  than TANGELA) and found the **identical +7**, ruling out a
+  species/cry-proportional cause (67 vs 86 dispatchDelay, same +7). What
+  the two +7 fixtures share instead: both are built via `overrides.parties`
+  (mechanicLab / factoryBrain-with-pinned-parties); all three previously-
+  validated 0-residual points (GRIMER/YOSHI, KADABRA/SHIZUKA,
+  DELCATTY/MAGNETON) use real `factoryLegal` rental generation. This is the
+  same *shape* as the already-landed `isCanonicalAnchorIntro` route
+  correction — but **not fixable the same way**: the app's own
+  construction for this fixture (`generatedRoundRevealProofStage`) uses its
+  real generation path, not `overrides.parties` — only the *oracle* side
+  uses the override (to sidestep `factoryBrain`'s un-ported RNG history,
+  1260's own documented reason) — so there is no app-side signal to key a
+  route flag on without inventing one. Full writeup:
+  `docs/trainer-pic-off-window-scout.md` §D round 11.
+- **Next:** closing the +7 needs either (a) confirming it's a pure
+  oracle-harness `overrides.parties` RAM-injection artifact (real play
+  never hits it — likely not a `src/` fix at all) or (b) porting
+  `factoryBrain`'s real RNG history so the oracle side stops needing
+  `overrides.parties` in the first place (ties into 1260's own deferred
+  RNG-cursor item). Frames 420/503 (single-frame, sub-100px tint dots) are
+  the same unmechanized residual family as the existing 444/536 in Yoshi's
+  own fixture — not new, not chased.
+- **Notes:** own commits this step (trace fix, docs). Regression-verified
+  unaffected (trace-only + docs change, no `src/` touched):
+  `factory-round-battle6-lukas-reveal-off` **154/154**,
+  `factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke`
+  **375/375**. Finish gate (full `npm test` + `npm run build`) recorded
+  below this entry's commit. Did not trim the compare window to exclude
+  the 647-700 mismatches (explicitly disallowed by the step brief) — the
+  648/701 count is the honest, un-trimmed result.
+
 ## 1260 — [MAIN worker, 2026-08-14] **Rung D landed: first live Brain-battle compare, 350/701 frames exact, honest mismatch inventory recorded**
 
 - **State:** the Brain battle-start presentation is now compared end-to-end
@@ -150,35 +201,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tools/battle-lab/factory-brain-intro-*` fixture (side lane's concurrent
   scout territory, per this step's OUT OF SCOPE).
 
-## 1258 — [supervisor, 2026-08-14] **Round 1 folded: §5.2 rungs 1-3 (main) + CGB4 family gated (side salvage)**
-
-- **State:** supervisor session, deadline 17:54. Baseline re-verified at
-  orient (build green; full suite 1056 files / 9934 passed / 1 skipped,
-  1147 s — CGB4-dominated). Both round-1 steps are on master (merge
-  `dc57b7c3`).
-- **Did:** (1) Verified the MAIN worker's 1257 result — reran
-  `tools/probe/verify-factory-brain-lab.ts` live myself: **82/82**. (2)
-  SIDE lane: CGB4 gating came back complete but uncommitted (worker
-  self-suspended awaiting a background run — the known ScheduleWakeup
-  class). Salvaged per the commit-tail recipe: verified in the worktree
-  (gated default: family skips at collection, digest pin 45/45; flag-on
-  `npm run test:cgb4` **44 files / 222 tests green**; typecheck + build
-  green; full default suite green after restoring the gitignored
-  `artifacts/wasm/factory_wasm.wasm` `7e23d1bf` — the 6-file/19-test
-  failure class in a fresh worktree is that missing artifact, not the
-  change), committed `a2fe03c9` with provenance, merged, union smoke
-  375/375 + gate/digest spot-check green, worktree cleaned.
-- **Next:** round 2 (dispatched): MAIN — Brain presentation seam
-  (`getFactoryTrainerPresentation` 1022 entry from `gTrainers
-  [TRAINER_NOLAND]` per design §2.3, proof-stage battleIndex-6 widening,
-  Tier-1 pins, stretch: 1257's rung-4 remainder); SIDE — new-files-only
-  scout banking the Brain intro window ground truth (dense captures, tick
-  table, verify script) off the silver fixture.
-- **Notes:** `check-oracle-freshness.sh` FAILs both ports; :8014 is a
-  false positive (started from the edited tree 48 s before commit
-  `33354440`; it advertises `factoryBrain` — verified) and :8012 is the
-  animation lane's to restart by design. Animation and rust supervisors
-  are live this session (their lane branches are ahead of master); folds
-  happen at wind-down. Default `npm test` no longer runs the 44-file CGB4
-  family — set `POKEBENCH_CGB4_EVIDENCE=1` (or `npm run test:cgb4`) for
-  the full grind evidence.

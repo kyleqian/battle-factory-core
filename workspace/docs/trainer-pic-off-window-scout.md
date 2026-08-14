@@ -994,3 +994,122 @@ way. Reported explicitly per the brief rather than left silent.
 Frames 444/536 (trainer-exit/shadow region; opponent healthbox/summary
 region) not reached this round - remain single-frame, unisolated, unchanged
 from round 7's own characterization above.
+
+### Round 11 resolution (2026-08-14): Brain-reveal send-out window closed 350→648/701; missing-A-press root cause corrected the 1260 attribution; a new `overrides.parties`-construction ready-lag gap found and characterized, not fixed
+
+**Correction to PROGRESS 1260's own attribution.** 1260 attributed the
+`factory-round-battle7-noland-reveal-off` compare's frame-350-onward
+divergence to "the known species-dependent cry-duration dispatch/visual-lag
+family," i.e., assumed the §D mechanism itself needed new per-species
+constants for TANGELA/JUMPLUFF/PUPITAR/DELCATTY. That diagnosis does not
+survive contact with the trace: `tools/compare/traces/factory-round-
+battle7-noland-reveal-off.json`'s `segments` was `[{"frames": 700,
+"buttons": []}]` — **no `A` press anywhere in the trace**, unlike every
+other send-out-reaching fixture (`factory-arbitrary-intro-yoshi-off.json`,
+`factory-arbitrary-intro-magneton-off.json`, both of which press `A` at a
+specific mid-trace frame to acknowledge the "wants to battle!" `PAUSE_
+UNTIL_PRESS` prompt, `factoryBattleStartIntro.ts`'s `advanceFactoryBattle
+StartIntro`). Without that press, `acknowledgedElapsed` never leaves
+`null`, so the app render never leaves the pre-acknowledgement "trainer-
+message" hold — while the oracle's own capture (built by a scripted probe
+that *does* press `A`) proceeds through the transition-out/send-out
+sequence. The cry-duration family was never live at frame 350; it only
+starts mattering once acknowledgement is modeled at all.
+
+**Fix.** Added the missing press to the trace (`{"frames": 345, "buttons":
+[]}, {"frames": 1, "buttons": ["A"]}, {"frames": 354, "buttons": []}`,
+still summing to 700). The exact tick was found the same way §D round 5's
+slice-2 alignment was: dense per-frame **oracle self-diff** (consecutive
+`oracle-NNNNN.png` captures from one `npm run compare` run, not app-vs-
+oracle) to find the real "box clears, first new glyph" jump (a
+`generatedBattleStartAcknowledgementVisibleStarted`-documented ~1200px
+event, distinct from the ~30-50px/frame typewriter increments before and
+after it) landed at frame 350 — then bisecting the trace's press-tick
+placement (via the same self-diff, now on the app's own captures) until
+the app's own "first new glyph" jump also lands at 350. This is a
+**fixture correction** (`tools/compare/traces/`, dev-time only), not a
+`src/` change — the render mechanism itself needed nothing new to get
+here.
+
+**Result: 350/701 → 648/701.** Every frame from 0 through 646 is now
+pixel-exact (the full transition-out, opponent TANGELA send-out text and
+materialize, dispatch to the player's own release, and DELCATTY's own
+materialize) — confirming, for a never-before-exercised opponent
+(TANGELA, cry 43 ticks, `dispatchDelay = 101+(43-58) = 86`, the first
+live-compared species with `dispatchDelay < 101`) that the existing
+generic `generatedPlayerDispatchDelay`/`generatedPlayerVisualLag` formulas
+already predict its timing exactly (oracle self-diff: box-clear/text-start
+at frame 474 = handoff(388)+86 exactly; throw-visible at 489 =
+474+visualLag(15) exactly) — **no §D formula change was needed for this
+species pairing**, contra 1260's own prediction that the magnitude here
+would need re-triangulation.
+
+**Remaining 53 frames (647-700): a real, double-confirmed, but
+app-unreachable gap in the ready-lag gate — named, not fixed.** After the
+A-press fix, the sole remaining structural mismatch is
+`generatedBattleStartCommandReady` firing 7 ticks early: app frame 647
+already shows the settled `FIGHT/BAG/POKéMON/RUN` menu (oracle PNG-
+confirmed at 654), matching `docs/intro-cry-shadow-evidence.md` Part 1's
+own formula (`readyTick = throwVisible + 98 + cryDurationTicks(player)`)
+exactly (throwVisible(489) + 98 + cryDuration(DELCATTY=60) = 647) — i.e.
+the formula is arithmetically self-consistent, just short of this
+fixture's own oracle ground truth by a flat +7.
+
+Built one fresh, independent oracle-only probe to test whether this is a
+species effect (as 1260 assumed) or something else:
+`tools/battle-lab/factory-mechanic-pupitar-delcatty-readylag-probe.json`
+(`mechanicLab`, `overrides.parties`, opponent lead **PUPITAR** — cry 24,
+`dispatchDelay = 101+(24-58) = 67`, further below baseline than TANGELA —
+player lead DELCATTY, same as the target fixture). Dense oracle self-diff
+of its own `preCheckpointCaptureAllFrames` output reproduces the **exact
+same +7**: handoff 1583 (matches the already-published cross-fixture
+constant), dispatch-complete 1649 (=1583+67 within 1 tick), throw-visible
+1664 (=1649+15 exactly), formula-predicted ready `1664+98+60=1822`, but
+the oracle's own menu-open jump is at **1829** — `1829-1822=7`, identical
+to the TANGELA fixture's own +7, despite a completely different opponent
+species/cry value (67 vs. 86 `dispatchDelay`, a 19-tick spread that a
+species-proportional theory would have to reflect and does not). **What
+the two fixtures share instead is construction method**: both are built
+via `overrides.parties` (mechanicLab and factoryBrain-with-pinned-parties
+respectively); all three of the ALREADY-validated 0-residual points
+(GRIMER/YOSHI, KADABRA/SHIZUKA, DELCATTY/MAGNETON) use real `factoryLegal`
+rental generation, no override. This is the same *shape* of finding as
+the already-landed `isCanonicalAnchorIntro` route-level correction (round
+10 above) and ISSUES #55's "real-vs-staged construction-timing gap" —
+**a construction-route fact, not a species/cry fact.**
+
+**Not fixed, and not a curve-fit refusal — a genuine reachability gap.**
+The existing `isCanonicalAnchorIntro`-style fix works because the app's
+own orchestrator *knows* which route it took (`config.adoptedInitialOpponent`
+is real app state). This case is different: the app side of
+`factory-round-battle7-noland-reveal-off` builds its command through the
+app's own **real** generation path (`generatedRoundRevealProofStage`,
+`createFactoryRoundBattleOrchestrator` + `advanceProofWin`, no
+`overrides.parties` anywhere in `tools/compare/factoryRoundIntroGeneralizationStage.ts`)
+— `overrides.parties` is used **only** on the oracle side, to force the
+oracle to reproduce the app's already-computed party without replaying
+`factoryBrain`'s own un-ported RNG history (1260's own documented reason).
+The app therefore has no field, config, or command data that distinguishes
+this fixture from an ordinary one — there is nothing to key a route flag
+on without inventing a signal that does not exist in production state,
+which the render code cannot do without becoming a per-fixture special
+case in spirit. Two readings, neither actionable from `src/` alone this
+session: (a) `overrides.parties` is a **harness-only** RAM-injection
+artifact (skips the real rental-generation RNG walk, leaving some
+background task's phase counter at a different offset than a real game
+would ever produce) — real play would never hit this +7 at all, and the
+"fix" belongs in the oracle harness or in accepting the gap as a
+compare-fixture-only cost; or (b) it is a real, RNG-cursor-dependent
+timing effect that would require porting `factoryBrain`'s real RNG
+history (1260's own out-of-scope item) to reproduce authentically. Either
+way, closing it is not a `battleScene.ts` render fix.
+
+**Final count for this window: 648/701 (92.4%)**, up from 350/701.
+Remaining mismatches: frames 420 and 503 (single-frame, sparse
+sub-100px-scale tint/blend dots in the opponent-materialize and
+player-throw regions respectively — the same unmechanized, un-isolated
+residual family as the existing frames 444/536 named in rounds 5-7 above,
+not new), and frames 647-700 (the ready-lag construction-route gap just
+characterized). Regression-checked unaffected by the trace-only fix:
+`factory-round-battle6-lukas-reveal-off` **154/154**,
+`factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke` **375/375**.

@@ -1,3 +1,36 @@
+## 1258 — [supervisor, 2026-08-14] **Round 1 folded: §5.2 rungs 1-3 (main) + CGB4 family gated (side salvage)**
+
+- **State:** supervisor session, deadline 17:54. Baseline re-verified at
+  orient (build green; full suite 1056 files / 9934 passed / 1 skipped,
+  1147 s — CGB4-dominated). Both round-1 steps are on master (merge
+  `dc57b7c3`).
+- **Did:** (1) Verified the MAIN worker's 1257 result — reran
+  `tools/probe/verify-factory-brain-lab.ts` live myself: **82/82**. (2)
+  SIDE lane: CGB4 gating came back complete but uncommitted (worker
+  self-suspended awaiting a background run — the known ScheduleWakeup
+  class). Salvaged per the commit-tail recipe: verified in the worktree
+  (gated default: family skips at collection, digest pin 45/45; flag-on
+  `npm run test:cgb4` **44 files / 222 tests green**; typecheck + build
+  green; full default suite green after restoring the gitignored
+  `artifacts/wasm/factory_wasm.wasm` `7e23d1bf` — the 6-file/19-test
+  failure class in a fresh worktree is that missing artifact, not the
+  change), committed `a2fe03c9` with provenance, merged, union smoke
+  375/375 + gate/digest spot-check green, worktree cleaned.
+- **Next:** round 2 (dispatched): MAIN — Brain presentation seam
+  (`getFactoryTrainerPresentation` 1022 entry from `gTrainers
+  [TRAINER_NOLAND]` per design §2.3, proof-stage battleIndex-6 widening,
+  Tier-1 pins, stretch: 1257's rung-4 remainder); SIDE — new-files-only
+  scout banking the Brain intro window ground truth (dense captures, tick
+  table, verify script) off the silver fixture.
+- **Notes:** `check-oracle-freshness.sh` FAILs both ports; :8014 is a
+  false positive (started from the edited tree 48 s before commit
+  `33354440`; it advertises `factoryBrain` — verified) and :8012 is the
+  animation lane's to restart by design. Animation and rust supervisors
+  are live this session (their lane branches are ahead of master); folds
+  happen at wind-down. Default `npm test` no longer runs the 44-file CGB4
+  family — set `POKEBENCH_CGB4_EVIDENCE=1` (or `npm run test:cgb4`) for
+  the full grind evidence.
+
 ## 1257 — [MAIN worker, 2026-08-14] **factoryBrain §5.2 workspace consumers: rungs 1-3 landed green; rung 4 precisely blocked**
 
 - **State:** design §5.2's workspace-consumer worklist is landed through
