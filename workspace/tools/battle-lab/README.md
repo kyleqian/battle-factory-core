@@ -73,7 +73,13 @@ a known Brain roster for deterministic replays — the AI still thinks with the
 Brain's real, more aggressive aggression mask either way, since
 `gTrainerBattleOpponent_A` stays `TRAINER_FRONTIER_BRAIN` regardless of the
 party override; `overrides.battlers` is rejected outright (staging the live
-generation is the entire point).
+generation is the entire point). **Cursor caveat (2026-08-14, PROGRESS
+1260):** a free-run `seed` does NOT replay the six preceding battles' RNG
+consumption the way `factoryLegal`'s `battleNum` does, so a bare-`seed`
+`factoryBrain` request generates a different Brain party than the app's own
+post-six-battle cursor for the same seed. When comparing against a live
+six-win round, pin the party via `overrides.parties` with the app's own
+generated roster — that is the sanctioned pattern, not just a convenience.
 
 None of the modes permit transient battle-state injection. HP damage, status,
 volatile effects, stat stages, weather/timers, side conditions, delayed
