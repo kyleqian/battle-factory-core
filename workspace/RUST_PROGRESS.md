@@ -7,8 +7,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## R14 — [supervised session, 2026-08-13] **M13 Battle Script gender resolver**
 
-- **State:** `rust-main` = current master `4802c419` plus verified M13 through
-  merge head `a51fef82` and target-portability repair `1108053b`. The complete
+- **State:** `rust-main` = current master `b8b7986a` plus this ledger-only
+  wind-down, including verified M13 merge `a51fef82`, target-portability
+  repair `1108053b`, and the final v44 master union. The complete
   pure `battleScriptGender.ts` lookup surface is native and wasm32-compilable;
   no ABI or adapter surface was widened.
 - **Did:** added an isolated generated **411-pair** species/gender-ratio table
@@ -30,7 +31,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `b002662ce399a3c90b3e163b63e77d4e8aed92234d6fe50a290f8ff172e7d418`.
   Supervisor reran focused **2/2**, cargo **761/761**, fmt, strict Clippy,
   wasm32 release, forced-WASM union **19 files / 807/807**, smoke **375/375**,
-  full npm **1,046 files / 9,858 passed / 1 skip**, and build **664 modules**.
+  full npm **1,047 files / 9,864 passed / 1 skip**, and build **664 modules**.
   Wind-down soaks are vanilla **20/20 OK** and full **60/60 OK** with zero
   crashes or hangs.
   Target-portable artifact is **509,805 bytes**, sha256
