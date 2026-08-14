@@ -5,6 +5,42 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R35 — [supervised session, 2026-08-14] **M34 Battle Script Destiny Bond hit-marker leaf + wind-down**
+
+- **State:** `rust-main` = current master `9b368bd8` plus the verified Destiny
+  Bond worker through `4f611578`. The complete pure
+  `battleScriptTrysetdestinybondtohappenOpcode.ts` state/control projection and
+  its shared helper are native and wasm32-compilable. No ABI or adapter surface
+  was widened; the session ended committed and green.
+- **Did:** ported attacker-then-target role resolution and the exact three-part
+  marker predicate. Only `HITMARKER_DESTINYBOND` (bit 6) is ORed into the full
+  u32 hit marker when the target has `STATUS2_DESTINY_BOND` (bit 25), attacker
+  and target are on opposite sides, and `HITMARKER_GRUDGE` (bit 24) is clear.
+  All other state is preserved and every valid path `Advance`s. Canonical
+  TypeScript execution supplies **48 cases** across all role pairs, both sides,
+  packed-u32 edges, predicate branches, ordered missing-role errors, siblings,
+  aliases, and repetition. It pins both concrete source opcode sites (OHKO and
+  Pursuit); corpus sha256
+  `537b2986185b3c2cf07e96ec3087d249e9713338e8acb79d79278f13dc106bcb`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited source constants,
+  both registered call sites, full-width preservation, predicate precedence,
+  and exact canonical errors; regenerated twice byte-identically (generated
+  file **82,469 bytes**, sha256
+  `87ea3904816dece1df91ca15607b08232c421354dcde6a66e6a1608501824473`),
+  and reran focused **7/7**, cargo **866/866**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,018 passed files / 44 grind files skipped; 9,802
+  passed / 223 skipped tests**, and build **670 modules**. Final soak gates
+  passed vanilla **20/20** and full-policy **60/60**, with **0 crashes** and
+  **0 hangs**. Artifact is **509,620 bytes**, sha256
+  `412773e10d2a88b646f80dfafa62c998f2462d21b28f430173789ec298c81ae1`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: the fresh worker needed the ignored WASM artifact rebuilt, ~2 min.
+
 ## R34 — [supervised session, 2026-08-14] **M33 Battle Script Role Play ability-copy leaf**
 
 - **State:** `rust-main` = current master `9b368bd8` plus the verified Role
@@ -75,41 +111,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   deferral was added.
   PAPERCUT: the fresh worker initially lacked the ignored WASM artifact and
   repeated its full baseline after building it, ~3 min.
-
-## R32 — [supervised session, 2026-08-14] **M31 Battle Script Psych Up stat-stage copy leaf**
-
-- **State:** `rust-main` = current master `9b368bd8` plus the verified Psych Up
-  worker through merge `60da5305`. The complete pure
-  `battleScriptCopyFoeStatsOpcode.ts` state/control projection is native and
-  wasm32-compilable. No ABI or adapter surface was widened.
-- **Did:** ported exact attacker-then-target role resolution and the source
-  loop copying all eight signed-s8 `statStages` cells from target to attacker.
-  Neutral rows and all four attacker=target aliases succeed; sibling rows and
-  both roles are preserved; every valid path returns typed `Advance`. The
-  dead encoded failure pointer remains in the omitted machine layer.
-  Canonical TypeScript execution supplies **2,075 cases**: one non-alias pair
-  exhaustively covers all 256 signed-s8 values at every stage position, while
-  an orthogonal matrix covers all 16 role pairs plus ordered missing roles,
-  mixed boundaries, siblings, aliases, neutral rows, and repetition; corpus
-  sha256
-  `e1f1cb9ea7e97c5536fd9b0ebecfa2512e5ec12da6356a24e550762feaf570f9`.
-- **Next:** select the next conflict-free pure Battle Script leaf. M7c
-  opponent generation waits on the canonical TS live-generation port; keep
-  the construction clock and modules under active TS work excluded.
-- **Notes:** Terra/max worker, one accepted commit. Supervisor rejected and
-  discarded an earlier uncommitted 32,813-case Cartesian corpus because its
-  42.8 MB generated file exceeded the entire existing Rust source tree, then
-  required orthogonal coverage capped below 5 MB. The accepted generator was
-  rerun twice byte-identically; generated file **2,688,749 bytes**, sha256
-  `a688c00f155d0427eeb5f4fe06641d06a34936be32121b3e40220f4c3be1622d`.
-  Supervisor reran focused **5/5**, cargo **847/847**, fmt, strict Clippy,
-  wasm32 release, forced-WASM union **19 files / 807/807**, smoke **8 files /
-  375/375**, full npm **1,018 passed files / 44 grind files skipped; 9,802
-  passed / 223 skipped tests**, and build **670 modules**. Artifact is
-  **509,700 bytes**, sha256
-  `c285e0a94dab2602aefc91f789d2e077d9b32071500608efbfbe85fc1bd0814d`.
-  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
-  deferral was added.
-  PAPERCUT: the first worker's overlarge evidence design was caught before
-  compilation and replaced; Cargo still needed the documented PATH, ~10 min
-  total.
