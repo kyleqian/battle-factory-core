@@ -29,6 +29,8 @@ pub mod battle_script_setdestinybond;
 pub mod battle_script_setdestinybond_vectors_gen;
 pub mod battle_script_setfocusenergy;
 pub mod battle_script_setfocusenergy_vectors_gen;
+pub mod battle_script_setforcedtarget;
+pub mod battle_script_setforcedtarget_vectors_gen;
 pub mod battle_script_setforesight;
 pub mod battle_script_setforesight_vectors_gen;
 pub mod battle_script_setminimize;
