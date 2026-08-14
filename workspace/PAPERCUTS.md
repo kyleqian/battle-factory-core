@@ -1022,3 +1022,15 @@ current app stage should be rejected before replay.
   through `python3 tools/run-mgba-probe.py <out> -- <probe command>`.
 - **Real fix:** provide a small shared probe-loader/helper that installs the
   probe module path and writes newline-terminated JSON safely.
+
+## Recursive CGB4 evidence checks dominate every full npm run
+
+- **What:** each CGB4 version regenerates retained predecessors, and the full
+  suite runs many versions in parallel. A source-only leaf can therefore make
+  `npm test` take 10–15 minutes even when ordinary engine tests finish quickly.
+- **Hits:** 4 (2026-08-13, v44 supervisor/worker acceptance).
+- **Cost each:** ~10–15 min; one worker reached its cap during the final run.
+- **Workaround:** use focused plus smoke checks during development and reserve
+  one full run for acceptance.
+- **Real fix:** validate the shared ancestry once per suite, then let each leaf
+  pin only its own output and immediate predecessor.
