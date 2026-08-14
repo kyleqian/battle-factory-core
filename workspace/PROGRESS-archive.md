@@ -1,3 +1,29 @@
+## 1250 — [solo session, 2026-08-13] **#55 check-in: grind PARKED, main lane redirected to the Noland program**
+
+- **State:** the #55 opinion check-in promised on 2026-08-10 happened. User
+  decision: distribution parity is the product bar; the cycle-pricing grind
+  is parked at the clean CGB4 v44 checkpoint (6,258-cycle prefix; every
+  receipt stands, nothing half-wired). Live generation is unblocked on the
+  clean-stream contract, documented as not hardware-stream-exact.
+- **Did:** two-agent audit of all 77 `issue55-*` docs, the grind timeline
+  (44 versions / 47.6 h / ~26 cycles per round), the probe tooling, and the
+  gated work; recorded the superseding user decision in `ROADMAP.md`
+  (2026-08-13 block) and `ISSUES.md` #55 (new decision block + updated
+  Lead). No `src/**`, test, or lane-file change; animation and rust worker
+  rounds were live and untouched throughout.
+- **Next:** the next MAIN supervisor session briefs the Noland program:
+  port `FillFactoryBrainParty` (`battle_factory.c:759`) via the
+  `GetFactoryMonId` rejection loop (no Unown, no species/item duplicates,
+  excludes the player's current rentals), fixed IVs
+  `GetFactoryMonFixedIV(challengeNum + 2)`, the battles-21/42 round-loop
+  branch, and the Frontier-Brain staging representation. Verification bar:
+  pool/rules/odds receipts plus differential structure checks — not stream
+  exactness. The Rust charter note (M7c waits on the TS port, not #55)
+  lands at the next rust supervisor session.
+- **Notes:** docs-only change; no suites required per standing cadence.
+  #55 stays open as a parked, resumable program; `serviceCostMasterCycles`
+  stays null and the construction clock stays unwired.
+
 ## 1249 — [supervisor, 2026-08-13] **CGB4 v44 and final lane union verified**
 
 - **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**
