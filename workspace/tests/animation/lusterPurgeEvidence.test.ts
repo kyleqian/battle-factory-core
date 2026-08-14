@@ -10,6 +10,7 @@ type Orientation = Record<string, any>;
 const fixture = JSON.parse(readFileSync(
   "tools/compare/fixtures/luster-purge-evidence.json", "utf8",
 )) as Record<string, any>;
+const orientationEntries = Object.entries(fixture.orientations) as Array<[string, Orientation]>;
 const sha256 = (bytes: Uint8Array): string => createHash("sha256").update(bytes).digest("hex");
 const stable = (value: unknown): string => JSON.stringify(value);
 const signed9 = (value: number): number => value >= 0x100 ? value - 0x200 : value;
@@ -122,7 +123,7 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
     });
   });
 
-  it.each(Object.entries(fixture.orientations))("pins full retained state and RGB/change-map receipts for %s", (orientation, evidence: Orientation) => {
+  it.each(orientationEntries)("pins full retained state and RGB/change-map receipts for %s", (_orientation, evidence) => {
     const stateBytes = readFileSync(evidence.denseState);
     expect(sha256(stateBytes)).toBe(evidence.denseStateSha256);
     expect(sha256(readFileSync(evidence.rawRgbArchive))).toBe(evidence.rawRgbArchiveSha256);
@@ -187,7 +188,7 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
     expect(new Set(rows.map((row) => row.animationRng)).size).toBe(evidence.stateProof.animationRngUniqueValues);
   });
 
-  it.each(Object.entries(fixture.orientations))("pins exact source/display latches for %s", (orientation, evidence: Orientation) => {
+  it.each(orientationEntries)("pins exact source/display latches for %s", (_orientation, evidence) => {
     const rows = JSON.parse(gunzipSync(readFileSync(evidence.denseState)).toString("utf8")).frames as Row[];
     let oam = 0;
     let matrices = 0;
@@ -208,16 +209,17 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
     expect(palettes).toBe(Number(evidence.latches.hardwarePaletteEqualsPrecedingFaded.split("/")[0]));
     expect(background).toBe(Number(evidence.latches.activeBackgroundOffsetsEqualPrecedingSource.split("/")[0]));
     for (const field of ["bldcnt", "bldalpha", "bldy"]) {
-      expect(transitionRows(rows, field)).toHaveLength(evidence.latches[{
-        bldcnt: "blendCntChanges", bldalpha: "blendAlphaChanges", bldy: "blendYChanges",
-      }[field]]);
+      const expectedChanges = field === "bldcnt"
+        ? evidence.latches.blendCntChanges
+        : field === "bldalpha" ? evidence.latches.blendAlphaChanges : evidence.latches.blendYChanges;
+      expect(transitionRows(rows, field)).toHaveLength(expectedChanges);
     }
     expect(transitionRows(rows, "bldcnt")).toEqual(evidence.latches.blendCntTransitionRows);
     expect(transitionRows(rows, "bldalpha")).toEqual(evidence.latches.blendAlphaTransitionRows);
     expect(transitionRows(rows, `bg${bank}hofs`)).toEqual(evidence.latches.activeBackgroundTransitionRows);
   });
 
-  it.each(Object.entries(fixture.orientations))("retains only legal complete parties and no transient staging for %s", (orientation, evidence: Orientation) => {
+  it.each(orientationEntries)("retains only legal complete parties and no transient staging for %s", (_orientation, evidence) => {
     const stage = JSON.parse(readFileSync(evidence.scenario, "utf8")) as Record<string, any>;
     expect(sha256(readFileSync(evidence.scenario))).toBe(evidence.scenarioSha256);
     expect(stage).toMatchObject({ mode: "mechanicLab", profile: "battle-scene-on", level: 50, seed: 305419897 });
