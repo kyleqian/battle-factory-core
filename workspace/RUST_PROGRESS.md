@@ -7,9 +7,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## R14 — [supervised session, 2026-08-13] **M13 Battle Script gender resolver**
 
-- **State:** `rust-main` = current master `b8b7986a`, including verified M13
-  merge `a51fef82`, target-portability repair `1108053b`, and the final v44
-  master union. The complete
+- **State:** `rust-main` = current master `b8b7986a` plus this ledger-only
+  wind-down, including verified M13 merge `a51fef82`, target-portability
+  repair `1108053b`, and the final v44 master union. The complete
   pure `battleScriptGender.ts` lookup surface is native and wasm32-compilable;
   no ABI or adapter surface was widened.
 - **Did:** added an isolated generated **411-pair** species/gender-ratio table
