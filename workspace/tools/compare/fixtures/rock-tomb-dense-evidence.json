@@ -19,7 +19,7 @@
     },
     "opponent-front": {
       "scenario": "tools/battle-lab/mechanic-rock-tomb-opponent-grimer-player-onix.json",
-      "scenarioSha256": "e9daeec4dd4055a6f1428bee8572dcda9cca3afd69d18b4237e793f1a54586c",
+      "scenarioSha256": "e9daeec4dd4055a6f1428bee85722dcda9cca3afd69d18b4237e793f1a54586c",
       "sourceWindow": { "startFrame": 229, "endFrame": 402, "frameCount": 174 },
       "stateGzip": "tools/compare/evidence/rock-tomb-opponent-dense-state.json.gz",
       "stateGzipSha256": "af616bc3c654d91af1c251fa143d20d0fbbc95100f8cf792b42b47eeced02a53",
