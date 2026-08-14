@@ -157,3 +157,13 @@ export function generatedRoundBattle6LukasStatusSummaryMessageStage(
 ): EngineState {
   return generatedRoundRevealProofStage(state, 5);
 }
+
+// Challenge 2, battle index 6 (Battle 7): the Frontier Brain, NOLAND.
+// Entering factoryWinStreak 14, six ordinary wins land the silver threshold
+// (docs/noland-brain-intro-ground-truth.md) -- same seed-70 chain as the
+// Lukas stage above, one battle further. Every mechanism this reaches
+// (transition selection, command construction) is the same generalized path;
+// only the resolved trainer identity/party differ, per rung B (PROGRESS 1259).
+export function generatedRoundBattle7NolandRevealStage(state: EngineState): EngineState {
+  return generatedRoundRevealProofStage(state, 6);
+}
