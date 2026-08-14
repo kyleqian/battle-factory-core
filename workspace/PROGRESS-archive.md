@@ -1,3 +1,59 @@
+## 1254 — [MAIN worker, 2026-08-14] **Noland rung 2c: Frontier Brain scheduling pinned against real six-real-win round shapes**
+
+- **State:** rung 2's noted deviation is closed. New
+  `tests/factoryBrainRoundShape.test.ts` (3 tests) drives the real
+  `factoryRoundBattleOrchestrator`/round-controller win path through six
+  actual generated-battle wins (battleIndex 0..5) at a nonzero starting
+  streak, then proves battleIndex 6 schedules the Frontier Brain — not a
+  synthetic mid-round streak requiring only one real win, as rung 2 shipped.
+- **Did:** silver case: `factoryWinStreak: 14` (challenge index 2),
+  `factorySymbolsCount: 0`, seed 4 — asserts every battleIndex 0..5
+  generation is `"ordinary"` and `getFactoryFrontierBrainStatus` independently
+  reports `"not-ready"` at effective streaks 14..19; battleIndex 6 is
+  `"frontier-brain"`, status `"silver"`, `challengeNum` 2, `fixedIv` 15,
+  `trainerId` `TRAINER_FRONTIER_BRAIN`; `storedTrainerIds` equals battle 5's
+  own (the brain never enters the no-repeat-trainer window); the
+  pre-generation RNG segment's `rngBefore` equals the cursor `state.round.
+  rules.rngValue` held right after battle 5 resolved (continuity, not a
+  constant); the three brain-party members' `setId`s exclude the player's
+  three current rental `setId`s and share one `fixedIv`; publishing through
+  the swap-decline path lands `currentOpponent.frontierBrain` = `{status:
+  "silver"}`. Gold case mirrors this at `factoryWinStreak: 35` (challenge
+  index 5), `factorySymbolsCount: 1`, seed 2 → `challengeNum` 5, `fixedIv`
+  31. Negative case: the identical silver round (seed 4, streak 14) with
+  `factorySymbolsCount: 1` instead schedules an `"ordinary"` battleIndex-6
+  opponent — symbol gating is real at the round level, not just in
+  `getFactoryFrontierBrainStatus` isolation. All three seeds were found by a
+  throwaway `node --experimental-strip-types` seed search against the real
+  orchestrator (not committed) — the existing "move slot 0" policy from
+  `factoryRoundBattleOrchestrator.test.ts`'s `driveGeneratedRoundToCompletion`
+  wins six straight ordinary Factory battles reliably at nonzero streaks too
+  (roughly half of seeds 0-40 tried), so the six-real-win shape was NOT
+  structurally blocked — the rung-2 deviation was a time-budget call, not a
+  hard limit. New file rather than extending `factoryRoundBattleOrchestrator.
+  test.ts` (already 2,711 lines with its own streak-0-only carrier): fits the
+  existing `factoryBrain*`-named pin family instead
+  (`factoryBrainOpponentGeneration.test.ts`, `factoryBrainOpponentRomReceipts.
+  test.ts`, `frontierBrainStatus.test.ts`). `npm run typecheck` and
+  `test:smoke` green; full `npm test` **1,051 files / 9,920 passed / 1
+  skipped** (up from the 1,050/9,917 baseline by exactly this file); `npm run
+  build` green (666 modules). The full-suite run took ~24 min this session
+  (vs. the usual ~5-7 min) purely from three concurrent worktree lanes
+  competing for CPU/IO on one machine — not a regression; every file passed.
+- **Next:** the differential structure check consuming both ts-lane and
+  side-lane (mGBA) receipts (1251's original dispatch, still open), then the
+  Brain presentation seam (name/sprite/commentary) — a design doc for this
+  landed at `docs/noland-brain-staging-design.md` via a side-lane merge
+  during this session, unread by this worker.
+- **Notes:** out of scope and untouched: `src/**`, presentation,
+  mechanicLab/staging, oracle captures, receipts/probe files, ISSUES/ROADMAP,
+  animation/rust lanes, #55. No `executableFrontierRatchet` pin moved (both
+  barrier counts and the recording-import allowlist are unchanged).
+  PAPERCUT: the full `npm test` run took ~24 min instead of the documented
+  ~5-7 min under concurrent animation+rust worktree load on this machine;
+  worth flagging to the supervisor if this becomes a recurring pattern for
+  main-lane finish-line verification.
+
 ## 1252 — [MAIN worker, 2026-08-14] **Noland rung 1: FillFactoryBrainParty ported as generateFactoryBrainOpponent**
 
 - **State:** `src/engine/factoryBrainOpponentGeneration.ts` is a new pure
