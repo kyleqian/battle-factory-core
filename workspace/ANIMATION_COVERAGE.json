@@ -2060,6 +2060,35 @@
    ]
   },
   {
+   "move": "MOVE_ICY_WIND",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-31 SWINUB versus ONIX parties stage Icy Wind in both orientations; twice-fresh Scene-ON frames 220..506 pass all 287/287 source-reducer, typed-seam, software/hardware OAM, affine-matrix, palette, register, audio, immutable-state, raw-RGB, change-map, and production shared-framebuffer rows through first inactive cleanup",
+    "the source-relative reducer ports both five-snowball batches, all 320 signed pre-increment Step2 writes, all thirteen AnimWaveFromCenterOfTarget ice spikes, BG_ICE/monbg, both palette ramps, blend-register lifetime, four audio commands, and cleanup without owning damage, RNG, controller, turn, round, or facility state",
+    "the staged production compositor derives persistent source allocator slots and stable BuildOamBuffer ordering for the nine healthbox parts, battlers/monbg visibility, ice spikes, and snowballs; player and opponent spike-slot variants follow their observed creation/destruction topology, including the opponent snowball occupying slot 13 when the late spikes allocate",
+    "all staged OBJ entries run through the shared generic 1210-cycle GBA scanline evaluator before snowball pixels are committed, resolving every overlap without move-specific masks, per-age/frame/hash/RGB tables, absolute battle ticks, coordinate fitting, or capture thinning",
+    "the portable verifier pins all 287 source sSpriteOrder topology rows per orientation plus complete retained source/latch/raw-RGB/map gates; Blizzard remains an independent unsupported control with its retained 448/448 Step2 rows and 371/371 plus 360/360 OAM/matrix transfers and receives no inherited acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-icy-wind-player-swinub-opponent-onix.json",
+    "tools/battle-lab/mechanic-icy-wind-opponent-swinub-player-onix.json",
+    "tools/compare/fixtures/icy-wind-dense-evidence.json",
+    "tools/compare/icyWindProbe.py",
+    "tools/compare/verifyIcyWindEvidence.ts",
+    "tools/compare/icyWindSourceAudit.ts",
+    "tools/compare/extractIcyWindAssets.ts",
+    "src/animation/assets/icy-wind.json",
+    "src/animation/icyWind.ts",
+    "src/animation/gbaObjCompositor.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/icyWind.test.ts",
+    "tests/animation/icyWindAssets.test.ts",
+    "tests/animation/icyWindEvidence.test.ts",
+    "tests/animation/animationBoundaryRatchet.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_IRON_DEFENSE",
    "status": "exact",
    "covered": [

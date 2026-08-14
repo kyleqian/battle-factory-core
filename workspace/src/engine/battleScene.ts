@@ -536,6 +536,7 @@ import {
   compositeGbaObjScanlines,
   type GbaObjRaster,
 } from "../animation/gbaObjCompositor.ts";
+import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -17383,7 +17384,6 @@ export function renderSceneOnMovePresentation(
     const snowballTile: Tileset = {
       columns: 1, rows: 1, tiles: [battleAnimIceCrystals.tileset.tiles[7]!],
     };
-    const snowballsInPaintOrder = [...displayed.snowballs].sort((a, b) => b.oamSlot - a.oamSlot);
     drawSpriteSheet(
       fb,
       onix.tileset,
@@ -17412,25 +17412,131 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
-    for (const snowball of snowballsInPaintOrder) {
-      drawSpriteSheet(
-        fb,
-        snowballTile,
-        battleAnimIceCrystals.palette,
-        snowball.x + snowball.x2 - 4,
-        snowball.y + snowball.y2 - 4,
-      );
-    }
     const profile = state.config.fieldProfile;
-    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+    const opponentHealthbox = composeOpponentHealthbox(healthboxAssemblyAssets, {
       name: playerToOpponent ? "ONIX" : "SWINUB", level: 50, gender: "male",
       hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
-    }));
-    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+    });
+    const playerHealthbox = composePlayerHealthbox(playerHealthboxAssets, {
       name: playerToOpponent ? "SWINUB" : "ONIX", level: 50, gender: "male",
       hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
       currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
-    }));
+    });
+    const transparent = (width: number, height: number): readonly null[] =>
+      new Array<null>(width * height).fill(null);
+    const cycleOnly = (
+      oamIndex: number,
+      declaredWidth: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+    ): GbaObjRaster<RgbColor> => ({
+      oamIndex,
+      priority: 2,
+      mode: "normal",
+      declaredWidth,
+      x,
+      y,
+      width,
+      height,
+      pixels: transparent(width, height),
+    });
+    // BuildOamBuffer's fixed prefix: player HP bar (2 subsprites), opponent
+    // HP/status bar (3), then the two 64x32 halves of each healthbox. These
+    // nine entries consume their real scanline budget before any move OBJ.
+    const rasters: GbaObjRaster<RgbColor>[] = [
+      cycleOnly(0, 32, 158, 88, 32, 8),
+      cycleOnly(1, 32, 190, 88, 32, 8),
+      cycleOnly(2, 32, 36, 30, 32, 8),
+      cycleOnly(3, 32, 68, 30, 32, 8),
+      cycleOnly(4, 8, 20, 30, 8, 8),
+      cycleOnly(5, 64, 126, 72, 64, 32),
+      cycleOnly(6, 64, 190, 72, 64, 32),
+      cycleOnly(7, 64, 12, 14, 64, 32),
+      cycleOnly(8, 64, 76, 14, 64, 32),
+    ];
+    const effectOrder = icyWindEffectOamOrderAtAge(
+      displayed.age,
+      view.attacker.geometry.side,
+      state.config.effectGeometry,
+    );
+    const snowballOrder = effectOrder.filter(({ kind }) => kind === "snowball");
+    const spikeOrder = effectOrder.filter(({ kind }) => kind === "spike");
+    const oamIndexByEffect = new Map<string, number>();
+    let nextOamIndex = 9;
+    const admit = (kind: "snowball" | "spike", callIndex: number): void => {
+      oamIndexByEffect.set(`${kind}:${callIndex}`, nextOamIndex);
+      nextOamIndex += 1;
+    };
+    for (const entry of snowballOrder) admit("snowball", entry.callIndex);
+    // Target-relative spike subpriority is 38 for a player attacker and 28
+    // for an opponent attacker. It therefore sits after/before the player
+    // battler's subpriority-30 OBJ respectively.
+    if (playerToOpponent) nextOamIndex += 1; // visible attacker
+    for (const entry of spikeOrder) admit("spike", entry.callIndex);
+    const targetObjVisible = !displayed.monBgActive;
+    if (opponentToPlayer && targetObjVisible) nextOamIndex += 1;
+    if (opponentToPlayer) nextOamIndex += 1; // visible attacker
+    if (playerToOpponent && targetObjVisible) nextOamIndex += 1;
+    const shadowOamIndex = nextOamIndex;
+
+    for (const snowball of displayed.snowballs) {
+      const oamIndex = oamIndexByEffect.get(`snowball:${snowball.callIndex}`);
+      if (oamIndex === undefined) throw new Error(`missing Icy Wind snowball OAM ${snowball.callIndex}`);
+      rasters.push({
+        oamIndex,
+        priority: 2,
+        mode: "normal",
+        declaredWidth: 8,
+        x: snowball.x + snowball.x2 - 4,
+        y: snowball.y + snowball.y2 - 4,
+        ...spriteSheetRaster(snowballTile, battleAnimIceCrystals.palette),
+      });
+    }
+    for (const spike of displayed.spikes) {
+      const oamIndex = oamIndexByEffect.get(`spike:${spike.callIndex}`);
+      if (oamIndex === undefined) throw new Error(`missing Icy Wind spike OAM ${spike.callIndex}`);
+      rasters.push(cycleOnly(oamIndex, 8, spike.x - 4, spike.y - 8, 8, 16));
+    }
+    const snowballCount = snowballOrder.length;
+    const spikeCount = spikeOrder.length;
+    const attackerOamIndex = playerToOpponent
+      ? 9 + snowballCount
+      : 9 + snowballCount + spikeCount + (targetObjVisible ? 1 : 0);
+    rasters.push(cycleOnly(
+      attackerOamIndex,
+      64,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+      64,
+      64,
+    ));
+    if (targetObjVisible) {
+      const targetOamIndex = playerToOpponent
+        ? 9 + snowballCount + 1 + spikeCount
+        : 9 + snowballCount + spikeCount;
+      rasters.push(cycleOnly(
+        targetOamIndex,
+        64,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+        64,
+        64,
+      ));
+    }
+    rasters.push(cycleOnly(shadowOamIndex, 64, 144, 28, 64, 32));
+    const composite = compositeGbaObjScanlines(240, 160, rasters);
+    for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+      const color = composite.normalPixels[pixel];
+      if (!color) continue;
+      const offset = pixel * 4;
+      fb[offset] = color.r;
+      fb[offset + 1] = color.g;
+      fb[offset + 2] = color.b;
+    }
+    drawSendOutHealthbox(fb, 0, opponentHealthbox);
+    drawComposedPlayerHealthbox(fb, playerHealthbox);
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb,

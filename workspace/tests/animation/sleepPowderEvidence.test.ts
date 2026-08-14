@@ -10,7 +10,7 @@ const contracts = [
 describe("MOVE_SLEEP_POWDER dense Scene-ON evidence", () => {
   it("promotes only Sleep Powder", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(180);
+    expect(coverage.entries).toHaveLength(181);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SLEEP_POWDER"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_POISON_POWDER"))

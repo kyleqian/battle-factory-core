@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
-import { icyWindAtAge, icyWindSnowballStep2State } from "../../src/animation/icyWind.ts";
+import { icyWindAtAge, icyWindEffectOamOrderAtAge, icyWindSnowballStep2State } from "../../src/animation/icyWind.ts";
 import { createSceneOnMovePresentation, sceneOnIcyWindView, type SceneOnPresentationBattler } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 
@@ -49,7 +49,7 @@ function legalScenario(path: string, side: "player" | "opponent"): void {
   const swinub = parties[side][0]; invariant(swinub.species === 220 && swinub.nature === 21 && same(swinub.moves, [196, 196, 196, 196]), `${side}: Swinub carrier`);
 }
 
-export interface IcyWindEvidenceResult { readonly orientation: string; readonly frames: number; readonly snowballs: number; readonly step2Rows: number; readonly spikes: number; readonly oamRows: number; readonly matrixRows: number; readonly paletteRows: number; readonly rgbRows: number; readonly seamRows: number; readonly framebufferRows: number; readonly residuals: readonly string[] }
+export interface IcyWindEvidenceResult { readonly orientation: string; readonly frames: number; readonly snowballs: number; readonly step2Rows: number; readonly spikes: number; readonly oamTopologyRows: number; readonly oamRows: number; readonly matrixRows: number; readonly paletteRows: number; readonly rgbRows: number; readonly seamRows: number; readonly framebufferRows: number; readonly residuals: readonly string[] }
 
 function verifyOrientation(root: string, orientation: string, receipt: any): IcyWindEvidenceResult {
   const side = orientation === "player-back" ? "player" : "opponent";
@@ -98,6 +98,7 @@ function verifyOrientation(root: string, orientation: string, receipt: any): Icy
   const geometry = side === "player"
     ? { attackerCenter: { x: 72, y: 104 }, targetCenter: { x: 176, y: 42 }, spikeTargetCenter: { x: 176, y: 40 } }
     : { attackerCenter: { x: 176, y: 60 }, targetCenter: { x: 72, y: 88 }, spikeTargetCenter: { x: 72, y: 80 } };
+  let oamTopologyRows = 0;
   for (let age = 0; age < frames.length; age += 1) {
     const expected = icyWindAtAge(age, side, geometry);
     const actualSnowballs = frames[age].sprites.filter((sprite: any) => sprite.template.symbol === "gSwirlingSnowballSpriteTemplate");
@@ -109,9 +110,14 @@ function verifyOrientation(root: string, orientation: string, receipt: any): Icy
     const actualSpikes = frames[age].sprites.filter((sprite: any) => sprite.template.symbol === "gIceGroundSpikeSpriteTemplate");
     invariant(actualSpikes.length === expected.spikes.length, `${orientation}: reducer spike count age ${age}`);
     for (const [index, spike] of expected.spikes.entries()) {
-      const actual = actualSpikes.find((candidate: any) => candidate.x === spike.x && candidate.y === spike.y);
+      const actual = actualSpikes.find((candidate: any) => candidate.slot === spike.oamSlot && candidate.x === spike.x && candidate.y === spike.y);
       invariant(actual, `${orientation}: reducer spike ${index} age ${age}: ${JSON.stringify({ expected:spike})}`);
     }
+    const expectedEffectOrder = icyWindEffectOamOrderAtAge(age, side, geometry).map(({ oamSlot }) => oamSlot);
+    const liveEffectSlots = new Set([...actualSnowballs, ...actualSpikes].map((sprite: any) => sprite.slot));
+    const actualEffectOrder = frames[age].spriteOrder.filter((slot: number) => liveEffectSlots.has(slot));
+    invariant(same(actualEffectOrder, expectedEffectOrder), `${orientation}: persistent effect OAM order age ${age}`);
+    oamTopologyRows += 1;
   }
 
   let oamRows = 0; let matrixRows = 0; let paletteRows = 0;
@@ -161,12 +167,12 @@ function verifyOrientation(root: string, orientation: string, receipt: any): Icy
       residuals.push(`age ${age}: ${changed}px bbox ${minX},${minY}-${maxX},${maxY} sample app=${app[aa]},${app[aa + 1]},${app[aa + 2]} ref=${rgb[age]![rr]},${rgb[age]![rr + 1]},${rgb[age]![rr + 2]}`);
     }
   }
-  return { orientation, frames: 287, snowballs: 10, step2Rows, spikes: 13, oamRows, matrixRows, paletteRows, rgbRows: rgb.length, seamRows, framebufferRows, residuals };
+  return { orientation, frames: 287, snowballs: 10, step2Rows, spikes: 13, oamTopologyRows, oamRows, matrixRows, paletteRows, rgbRows: rgb.length, seamRows, framebufferRows, residuals };
 }
 
 export function verifyIcyWindEvidence(root = resolve(".")): readonly IcyWindEvidenceResult[] {
   const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/icy-wind-dense-evidence.json"), "utf8"));
-  invariant(receipt.status === "unsupported-source-exact-partial-compositor" && receipt.acceptance.seamRows === "287/287 + 287/287" && receipt.acceptance.framebufferRows === "209/287 + 281/287", "Icy Wind partial acceptance drift");
+  invariant(receipt.status === "exact" && receipt.acceptance.seamRows === "287/287 + 287/287" && receipt.acceptance.framebufferRows === "287/287 + 287/287", "Icy Wind exact acceptance drift");
   return Object.entries(receipt.orientations).map(([orientation, row]) => verifyOrientation(root, orientation, row));
 }
 
