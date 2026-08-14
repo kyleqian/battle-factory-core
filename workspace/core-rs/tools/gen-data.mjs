@@ -294,6 +294,7 @@ const switchPolicySpeciesRows = speciesStats.map((stats, index) => {
   return {
     speciesId: stats.id,
     types: types.types.map((type) => requireLookup(typeIdByName, type, "type")),
+    genderRatio: stats.genderRatio,
     abilities: stats.abilities.map((ability) => requireLookup(abilityIdByName, ability, "ability")),
   };
 });
@@ -578,7 +579,7 @@ const typeEffectivenessLines = typeEffectivenessRows
 const switchPolicySpeciesLines = switchPolicySpeciesRows
   .map(
     (row) =>
-      `    SwitchPolicySpeciesRow { species_id: ${row.speciesId}, types: [${row.types.join(", ")}], abilities: [${row.abilities.join(", ")}] },`,
+      `    SwitchPolicySpeciesRow { species_id: ${row.speciesId}, types: [${row.types.join(", ")}], gender_ratio: ${row.genderRatio}, abilities: [${row.abilities.join(", ")}] },`,
   )
   .join("\n");
 
@@ -680,12 +681,13 @@ pub fn species_second_ability(species_id: u16) -> u16 {
 /// \`speciesTypes\` and \`partyAbility\` helpers
 /// (\`src/engine/factoryAiSwitchPolicy.ts\`). Source:
 /// src/data/gen/species-types.json \`.species[]\` and species-stats.json
-/// \`.species[].abilities\`, with ability symbols resolved through
+/// \`.species[].genderRatio\`/\`.species[].abilities\`, with ability symbols resolved through
 /// ability-item-hooks.json \`.universes.abilities\`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwitchPolicySpeciesRow {
     pub species_id: u16,
     pub types: [u8; 2],
+    pub gender_ratio: u8,
     pub abilities: [u16; 2],
 }
 
