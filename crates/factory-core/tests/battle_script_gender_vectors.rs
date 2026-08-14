@@ -11,7 +11,7 @@ use factory_core::battle_script_gender_vectors_gen::{
     BATTLE_SCRIPT_GENDER_CATEGORY_CENSUS, BATTLE_SCRIPT_GENDER_DOMAIN_CENSUS,
     BATTLE_SCRIPT_GENDER_SPECIES_DOMAIN, BATTLE_SCRIPT_GENDER_VECTOR_CORPUS_SHA256,
 };
-use factory_core::gen_tables::switch_policy_species_row;
+use factory_core::species_gender_ratios_gen::species_gender_ratio;
 
 #[test]
 fn canonical_typescript_outputs_cover_every_species_and_missing_id() {
@@ -22,14 +22,14 @@ fn canonical_typescript_outputs_cover_every_species_and_missing_id() {
         match (case.gender_ratio, case.expected_gender, case.expected_error) {
             (Some(expected_ratio), Some(expected_gender), None) => {
                 canonical_species.insert(case.species);
-                let table_row = switch_policy_species_row(case.species).unwrap_or_else(|| {
+                let generated_ratio = species_gender_ratio(case.species).unwrap_or_else(|| {
                     panic!(
                         "case {index} {}: canonical species absent from generated table",
                         case.label
                     )
                 });
                 assert_eq!(
-                    table_row.gender_ratio, expected_ratio,
+                    generated_ratio, expected_ratio,
                     "case {index} {}: generated table gender ratio",
                     case.label,
                 );
@@ -44,7 +44,7 @@ fn canonical_typescript_outputs_cover_every_species_and_missing_id() {
             }
             (None, None, Some(expected_error)) => {
                 assert!(
-                    switch_policy_species_row(case.species).is_none(),
+                    species_gender_ratio(case.species).is_none(),
                     "case {index} {}: missing-id vector unexpectedly exists in generated table",
                     case.label,
                 );
