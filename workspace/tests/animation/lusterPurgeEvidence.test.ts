@@ -108,7 +108,7 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
         soundTaskPlaySE1WithPanningCalls: 6, blendParticleTasks: 2,
       },
       productionScope: {
-        productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false,
+        productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: false,
         compositorAdded: false, framebufferLookupAdded: false, coveragePromotion: false,
         boundaryOrBarrierChanged: false, gameplayStateOwned: false,
       },

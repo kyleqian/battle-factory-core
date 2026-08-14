@@ -188,8 +188,8 @@
     "coverageCredit": false
   },
   "productionScope": {
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
     "typedSeamAdded": false,
     "compositorAdded": false,
     "framebufferLookupAdded": false,
@@ -197,6 +197,14 @@
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false
   },
+  "reducerAcceptance": {
+    "playerBackRows": 333,
+    "opponentFrontRows": 332,
+    "totalRows": 665,
+    "gameplayRngStable": true,
+    "typedSeamRows": 0,
+    "framebufferRows": 0
+  },
   "coverageCounts": "Level 50: 184/276 exact, 0 partial, 0 staged, 92 unsupported",
-  "boundedRemainder": "Evidence-only checkpoint. Luster Purge remains independently unsupported: no reducer, typed seam, production compositor, or coverage credit was added. Mist Ball, Flail, Heat Wave, Calm Mind, and every shared-component sibling remain independent controls."
+  "boundedRemainder": "Pure reducer checkpoint only. Luster Purge remains independently unsupported: no typed presentation seam, production compositor, framebuffer acceptance, or coverage credit was added. Mist Ball, Flail, Heat Wave, Calm Mind, and every shared-component sibling remain independent controls."
 }
