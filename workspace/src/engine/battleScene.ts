@@ -976,6 +976,7 @@ import {
   sceneOnSwordsDanceView,
   sceneOnDizzyPunchView,
   sceneOnFurySwipesView,
+  sceneOnFlailView,
   sceneOnMeteorMashView,
   sceneOnAstonishView,
   sceneOnFakeOutView,
@@ -1144,6 +1145,7 @@ import {
   type SceneOnAgilityPresentationState,
   type SceneOnDizzyPunchConfig,
   type SceneOnFurySwipesConfig,
+  type SceneOnFlailConfig,
   type SceneOnMeteorMashConfig,
   type SceneOnCosmicPowerConfig,
   type SceneOnAncientPowerConfig,
@@ -20320,6 +20322,128 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "AIPOM used" : "Foe AIPOM used",
       "FURY SWIPES!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "FLAIL") {
+    const flailState = state as SceneOnMovePresentationState<SceneOnFlailConfig>;
+    const view = sceneOnFlailView(flailState);
+    // BuildOamBuffer consumes preceding software OAM. The live battler's
+    // rot-scale matrix has the separately measured two-row transfer latch.
+    const displayed = sceneOnFlailView({ ...flailState, age: state.age - 1 });
+    const displayedAttacker = sceneOnFlailView({
+      ...flailState,
+      age: state.age - 2,
+    });
+    const playerToOpponent = view.attacker.species === "KRABBY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "KRABBY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FLAIL pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const krabbySource = playerToOpponent
+      ? mudShotArt.krabbyBack
+      : mudShotArt.krabbyFront;
+    const krabby = playerToOpponent
+      ? krabbySource
+      : {
+          ...krabbySource,
+          tileset: subTileset(krabbySource.tileset, 0, 8),
+        };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + displayed.targetShakeX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    // `monbg ANIM_TARGET` is the alpha target-2 copy. Preserve field+target
+    // independently of the ordinary attacker OBJ drawn above that layer.
+    const targetBackdrop = fb.slice();
+    const attackerCenterX = view.attacker.geometry.animationCenter.x
+      + displayedAttacker.attackerOffset.x2;
+    const attackerCenterY = view.attacker.geometry.animationCenter.y
+      + displayedAttacker.attackerOffset.y2;
+    drawSpriteSheetAffineRotate(
+      fb,
+      krabby.tileset,
+      krabby.palette,
+      attackerCenterX,
+      attackerCenterY,
+      displayedAttacker.attackerMatrix.a,
+      displayedAttacker.attackerMatrix.b,
+      displayedAttacker.attackerMatrix.c,
+      displayedAttacker.attackerMatrix.d,
+      undefined,
+      true,
+    );
+    if (displayed.hitsplat && view.alpha) {
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        targetBackdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        displayed.hitsplat.center.x + displayed.hitsplat.offset.x2,
+        displayed.hitsplat.center.y + displayed.hitsplat.offset.y2,
+        displayed.hitsplat.matrix.a,
+        displayed.hitsplat.matrix.b,
+        displayed.hitsplat.matrix.c,
+        displayed.hitsplat.matrix.d,
+        view.alpha.eva,
+        view.alpha.evb,
+        false,
+      );
+    }
+    const profile = flailState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "KRABBY",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "KRABBY" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "KRABBY used" : "Foe KRABBY used",
+      "FLAIL!",
       99,
     );
     return;

@@ -8,9 +8,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 4:
-    raise SystemExit("usage: flailProbe.py <scenario> <output.json> <rgb-dir>")
-SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:])
+if len(sys.argv) not in (4, 5):
+    raise SystemExit("usage: flailProbe.py <scenario> <output.json> <rgb-dir> [expected-power]")
+SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:4])
+EXPECTED_POWER = int(sys.argv[4]) if len(sys.argv) == 5 else None
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(path for path in (ROOT, *ROOT.parents)
                if (path / "oracle" / "emerald_core.py").is_file())
@@ -120,8 +121,11 @@ def main() -> None:
         pointer = oracle.read_u32(script_ptr)
         active = bool(oracle.read_u8(active_ptr))
         snap = lab.snapshot()
+        move_power = u16(nm["gAnimMovePower"])
         if not started:
-            if snap["engine"]["currentMove"] != MOVE_ID or not active or not START <= pointer < END:
+            if (snap["engine"]["currentMove"] != MOVE_ID or not active
+                    or not START <= pointer < END
+                    or EXPECTED_POWER is not None and move_power != EXPECTED_POWER):
                 return
             started = True
         rgb = oracle.screen_rgb()
@@ -135,7 +139,7 @@ def main() -> None:
             "sprites": live_sprites(), "battlerSpriteIds": [oracle.read_u8(battler_ids + i) for i in range(4)],
             "animationRng": oracle.read_u32(nm["gRng2Value"]),
             "gameplayRng": oracle.read_u32(nm["gRngValue"]),
-            "animMovePower": u16(nm["gAnimMovePower"]), "animMoveDmg": s16(nm["gAnimMoveDmg"]),
+            "animMovePower": move_power, "animMoveDmg": s16(nm["gAnimMoveDmg"]),
             "animArgs": [s16(nm["gBattleAnimArgs"] + i * 2) for i in range(8)],
             "battlers": snap["battlers"], "parties": snap["parties"], "engine": snap["engine"],
             "immutableState": {key: snap[key] for key in ("battleOutcome", "weather",
@@ -180,7 +184,8 @@ def main() -> None:
     if rows[-1]["animScriptActive"] or rows[-1]["visualTaskCount"] or rows[-1]["soundTaskCount"]:
         raise RuntimeError("FLAIL first inactive cleanup retained a task")
     song_table = nm["gSongTable"]
-    result = {"schema": "flail-dense-evidence/v1", "moveId": MOVE_ID, "setup": setup,
+    result = {"schema": "flail-dense-evidence/v2", "moveId": MOVE_ID,
+              "expectedPower": EXPECTED_POWER, "setup": setup,
               "sourceWindow": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"], "frameCount": len(rows)},
               "sourceSymbols": {"Move_FLAIL": START, "Move_SPITE": END}, "topology": topology,
               "componentSymbols": {name: nm[name] for name in ("AnimTask_FlailMovement", "AnimTask_FlailMovement_Step",

@@ -35,6 +35,12 @@ import {
   type MementoState,
 } from "./memento.ts";
 import {
+  flailAtAge,
+  type FlailPower,
+  type FlailState,
+  type FlailVisualRandom,
+} from "./flail.ts";
+import {
   rockTombAtAge,
   type RockTombConfig,
   type RockTombState,
@@ -2440,6 +2446,21 @@ export interface SceneOnFurySwipesConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow immutable Scene-ON seam for `Move_FLAIL`. */
+export interface SceneOnFlailConfig {
+  readonly move: "FLAIL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly movePower: FlailPower;
+  /** Target sprite `x2` captured by the source shake task. */
+  readonly targetInitialX2: number;
+  /** `InitSpritePosToAnimTarget(FALSE)` anchor for the fixed hitsplat. */
+  readonly hitsplatCenter: Readonly<{ x: number; y: number }>;
+  /** Two ordinary `Random2()` results dedicated to the fixed hitsplat. */
+  readonly visualRandom: Readonly<FlailVisualRandom>;
+}
+
 export interface SceneOnAstonishConfig {
   readonly move: "ASTONISH";
   readonly attacker: SceneOnPresentationBattler;
@@ -2949,6 +2970,7 @@ export type SceneOnMoveConfig =
   | SceneOnDynamicPunchConfig
   | SceneOnDizzyPunchConfig
   | SceneOnFurySwipesConfig
+  | SceneOnFlailConfig
   | SceneOnAstonishConfig
   | SceneOnFakeOutConfig
   | SceneOnSubstituteConfig
@@ -3632,6 +3654,12 @@ export interface SceneOnDizzyPunchView extends DizzyPunchState {
 }
 
 export interface SceneOnFurySwipesView extends FurySwipesState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnFlailView extends FlailState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7199,6 +7227,26 @@ export function sceneOnFurySwipesView(
       attackerSide: attacker.geometry.side,
       targetSide: target.geometry.side,
       targetCenter: target.geometry.animationCenter,
+    }),
+  };
+}
+
+export function sceneOnFlailView(
+  state: SceneOnMovePresentationState<SceneOnFlailConfig>,
+): SceneOnFlailView {
+  if (state.config.move !== "FLAIL") {
+    throw new Error(`expected FLAIL presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...flailAtAge(state.age, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetCenter: state.config.hitsplatCenter,
+      targetInitialX2: state.config.targetInitialX2,
+      power: state.config.movePower,
+      visualRandom: state.config.visualRandom,
     }),
   };
 }

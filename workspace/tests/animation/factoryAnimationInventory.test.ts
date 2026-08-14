@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 93,
+        unsupported: 92,
         staged: 0,
         partial: 0,
-        exact: 183,
+        exact: 184,
       },
       {
         tier: "openOnly",
@@ -208,6 +208,6 @@ describe("animation coverage ledger", () => {
       item.provenBy.includes("MOVE_FIRE_PUNCH") &&
       item.provenBy.includes("MOVE_ICE_PUNCH")
     )).toBe(true);
-    expect(leverage.unproven.length).toBeGreaterThan(0);
+    expect(leverage.unproven).toHaveLength(0);
   });
 });
