@@ -1000,6 +1000,29 @@ session-trace-driven pacing fixes).
    #55. The Rust charter note is updated at the next Rust supervisor
    session (lane files deliberately untouched while its round ran).
 
+**Noland program status (supervisor, 2026-08-14):** decision-3 items are
+landed through the workspace layer. `generateFactoryBrainOpponent`
+(`factoryBrainOpponentGeneration.ts`) ports `FillFactoryBrainParty` with
+10 Tier-1 receipts; twice-fresh mGBA ground truth exists for silver AND
+gold (`tools/probe/receipts/noland-brain-party-*.json`, dossier
+`docs/noland-brain-ground-truth.md`) with every draw LR-attributed, and
+`tests/factoryBrainOpponentRomReceipts.test.ts` replays both ledgers
+against the engine with zero discrepancies (per-mon adopted-cursor
+byte-exact; whole-stream exactness is impossible because the fill spans
+~28 frames and ambient VBlank draws interleave — the empirical
+confirmation of the 2026-08-13 captured-seeds-only bar).
+`frontierBrainStatus.ts` + the orchestrator branch schedule the brain at
+battles 21/42 (symbol-gated, singles; `tests/factoryBrainRoundShape.test.ts`
+drives six real wins into the battleIndex-6 brain for both shapes).
+`docs/noland-brain-staging-design.md` designs the mechanic-lab staging
+representation (`factoryBrain` mode; `overrides.parties` alone proven
+deficient — the AI mask reads the trainer id). **Remaining, in order:**
+(a) the harness-side lab implementation (USER-level: harness changes go
+through the user — handoff list in the design doc §5); (b) post-brain-battle
+consequences (BP/symbol/streak bookkeeping — audit doc
+`docs/noland-brain-post-battle-audit.md`); (c) brain-battle presentation,
+which waits on (a) for its oracle ground truth.
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.

@@ -1067,3 +1067,19 @@ current app stage should be rejected before replay.
 - **Real fix:** make the parity file's absent-artifact probe treat a missing
   `artifacts/` directory the same as a missing file (skip, not throw), or
   have the worktree setup script build the artifact.
+
+## Full `npm test` wall time is 3-5x under concurrent multi-lane load
+
+- **What:** with three lanes hot (main + animation + rust supervisors each
+  running workers), the ~5-7 min full suite took ~18 min (side worktree,
+  2026-08-14 receipts worker) and ~24 min (main tree, 2026-08-14 round-shape
+  worker). Every file passed; pure CPU/IO contention. Workers sized to a
+  45-60 min cap can lose a third of it to one full-suite run.
+- **Hits:** 2.
+- **Cost each:** ~12-18 min of worker cap.
+- **Workaround:** brief workers to run focused suites while iterating and
+  exactly ONE full suite at the end (standing rule); supervisors budget
+  caps assuming the loaded timing, and use POKEBENCH_VITEST_MAX_WORKERS to
+  bound their own verification runs.
+- **Real fix:** none cheap — this is one machine running three programs;
+  scheduling full-suite runs to avoid overlap is the lever that exists.
