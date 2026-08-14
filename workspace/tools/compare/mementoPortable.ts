@@ -26,7 +26,7 @@ type ReceiptRow = {
   rawRgbArchive: string; rawRgbArchiveSha256: string;
   latches: { precedingOamRows: number; precedingMatrixRows: number; precedingPaletteRows: number; comparableRows: number; sameRowPaletteAges: number[]; monbgPaletteExceptionAges: number[] };
 };
-type Receipt = { schema: string; status: string; orientations: Record<Orientation, ReceiptRow>; topology: { tasks: string[]; moveSprites: string[] }; acceptance: { reducerRows: number } };
+type Receipt = { schema: string; status: string; orientations: Record<Orientation, ReceiptRow>; topology: { tasks: string[]; moveSprites: string[] }; acceptance: { reducerRows: number; seamRows: number; framebufferRows: number } };
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
 const receiptPath = process.argv.slice(2).find((arg) => !arg.startsWith("--")
@@ -162,7 +162,7 @@ function reducerProjection(state: MementoState): unknown {
 
 function validate(orientation: Orientation, config: ReceiptRow, probe: Row, rgbDir: string): void {
   const frames = probe.frames as Row[];
-  if (probe.schema !== "memento-dense-evidence/v1" || receipt.status !== "unsupported"
+  if (probe.schema !== "memento-dense-evidence/v1" || receipt.status !== "exact"
     || !same(probe.sourceWindow, config.sourceWindow) || frames.length !== config.sourceWindow.frameCount
     || frames[0]?.scriptOffset !== 0 || frames.at(-1)?.gAnimScriptActive !== false) throw new Error(`${orientation}: pointer window`);
   if (!same(probe.topology.tasks, receipt.topology.tasks) || probe.topology.templates.some((name: string) => name.includes("Memento"))) throw new Error(`${orientation}: topology`);
@@ -249,7 +249,12 @@ function verifyFresh(orientation: Orientation): void {
   console.log(`${orientation}: ${config.sourceWindow.frameCount}/${config.sourceWindow.frameCount} source/hardware/raw-RGB rows; ${hash}`);
 }
 
-if (receipt.schema !== "memento-dense-evidence/v1" || receipt.acceptance.reducerRows !== 353) throw new Error("receipt schema/reducer count");
+if (receipt.schema !== "memento-dense-evidence/v1"
+  || receipt.acceptance.reducerRows !== 353
+  || receipt.acceptance.seamRows !== 353
+  || receipt.acceptance.framebufferRows !== 353) {
+  throw new Error("receipt schema/production acceptance count");
+}
 if (selected) {
   if (selected !== "player-back" && selected !== "opponent-front") throw new Error("invalid orientation");
   verifyFresh(selected);

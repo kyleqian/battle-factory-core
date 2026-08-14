@@ -1,3 +1,11 @@
+# MOVE_MEMENTO exact — bilateral static-monbg scanline compositor (2026-08-14 worker)
+
+- **State:** Coverage advances **181→182/276 Level-50 exact**, 0 partial, 0 staged, and **95→94 unsupported**. Memento alone moves; Dig remains independently unsupported.
+- **Did:** Added the narrow typed Memento Scene-ON seam and production compositor for InitMementoShadow, both attacker/target scanline phases, MementoHandleBg, static monbg/clear, window/blend/palette/priority lifecycle, black copied battler art, alpha, and cleanup. The compositor reuses source-derived WEEZING/ONIX, healthbox, background, and battle-window assets; no recorded pixels enter production.
+- **Verified:** Player-back frames **70..247** pass **178/178 reducer/seam/raw-RGB/production framebuffer**, and opponent-front frames **74..248** pass **175/175**, twice fresh with zero residual rows/px. Digests remain player `3f423ec8… / a9604de7… / adb0e7cf…`, opponent `224db6ea… / c115ea0c… / f5086737…`; OAM/matrix transfer is **177/177 + 174/174**, palette **175/177 + 172/174** with the retained age-4 and static-monbg exceptions.
+- **Next:** Supervisor merges this Memento-only promotion. MOVE_DIG inherits no seam, receipt, latch, or acceptance.
+- **Notes:** New bilateral display rule: copied mon/scanline bank uses the preceding source row; current hardware window/blend gates it; BG1 begins at scanline 1 while BG2 can affect scanline 0. No gameplay/RNG/outcome/controller/turn/round/facility state, boundary list, unsupported barrier, canonical import, absolute-tick/frame/hash/RGB lookup, coordinate fit, or sibling promotion changed.
+
 # MOVE_MEMENTO pure reducer checkpoint — remains unsupported (2026-08-14 worker)
 
 - **State:** Coverage remains **181/276 Level-50 exact**, 0 partial, 0 staged, and 95 unsupported. Memento and Dig remain independently unsupported; explicit source/reducer equality is **178/178 + 175/175**, while seam/framebuffer acceptance remains **0/178 + 0/175**.

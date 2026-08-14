@@ -1,6 +1,6 @@
 {
   "schema": "memento-dense-evidence/v1",
-  "status": "unsupported",
+  "status": "exact",
   "move": "MOVE_MEMENTO",
   "profile": "battle-scene-on",
   "sourceBounds": {"start": "0x082cdcf2", "endExclusive": "0x082cdd36"},
@@ -43,6 +43,6 @@
     "tasks": ["AnimTask_MementoHandleBg", "AnimTask_MoveAttackerMementoShadow_Step", "AnimTask_MoveTargetMementoShadow", "AnimTask_MoveTargetMementoShadow_Step", "Task_ClearMonBgStatic"],
     "moveSprites": []
   },
-  "acceptance": {"sourceRows": 353, "rawRgbRows": 353, "freshRuns": 2, "reducerRows": 353, "seamRows": 0, "framebufferRows": 0},
+  "acceptance": {"sourceRows": 353, "rawRgbRows": 353, "freshRuns": 2, "reducerRows": 353, "seamRows": 353, "framebufferRows": 353},
   "siblingAudit": {"move": "MOVE_DIG", "status": "unsupported", "inherited": false}
 }

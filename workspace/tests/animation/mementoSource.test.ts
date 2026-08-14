@@ -9,7 +9,7 @@ const scenarios = [
   "tools/battle-lab/mechanic-memento-opponent-weezing-player-onix.json",
 ];
 
-describe("MOVE_MEMENTO source/staging checkpoint", () => {
+describe("MOVE_MEMENTO exact Scene-ON presentation", () => {
   it("pins its exclusive interval, complete graph, sole carrier, and distinct Dig sibling", () => {
     const result = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/mementoSourceAudit.ts",
@@ -67,9 +67,9 @@ describe("MOVE_MEMENTO source/staging checkpoint", () => {
     });
   });
 
-  it("records an honest unsupported checkpoint with no inherited Dig acceptance", () => {
+  it("records exact Memento production acceptance with no inherited Dig acceptance", () => {
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/memento-source-staging-checkpoint.json", "utf8"));
-    expect(receipt).toMatchObject({ schema: "memento-source-staging-checkpoint/v3", oracleProfile: "battle-scene-on", move: "MOVE_MEMENTO", status: "unsupported", components: 8, denseEvidence: true, productionFramebuffer: false });
+    expect(receipt).toMatchObject({ schema: "memento-source-staging-checkpoint/v3", oracleProfile: "battle-scene-on", move: "MOVE_MEMENTO", status: "exact", components: 8, denseEvidence: true, productionFramebuffer: true });
     expect(receipt.bilateralScenarioSha256).toEqual([
       "46e863718477712ddff003f26419a8d72277fa14a2bd5dee365c2e224bb051c0",
       "bf85f2697af73cdf2d56af0b6c6b9641f4f7d7f7614169d20dedda8be8000c1b",
@@ -77,16 +77,16 @@ describe("MOVE_MEMENTO source/staging checkpoint", () => {
     expect(receipt.sourceRom.scanlineReducer).toBe("756a5493abdba842ece2aca0a5b37484ed74c4dd4dd1ce460710e3351c5d6bed");
     expect(receipt.siblingAudit).toEqual({ move: "MOVE_DIG", components: 17, shared: ["visualCommand:clearmonbg_static", "visualCommand:monbg_static"], promoted: false });
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.some((entry: { move: string }) => entry.move === "MOVE_MEMENTO")).toBe(false);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_MEMENTO")?.status).toBe("exact");
     expect(coverage.entries.some((entry: { move: string }) => entry.move === "MOVE_DIG")).toBe(false);
   });
 
-  it("retains the twice-fresh bilateral dense evidence and reducer without claiming a seam", () => {
+  it("retains twice-fresh bilateral reducer, seam, and production framebuffer acceptance", () => {
     const sha256 = (bytes: Buffer): string => createHash("sha256").update(bytes).digest("hex");
     const receipt = JSON.parse(readFileSync("tools/compare/fixtures/memento-dense-evidence.json", "utf8"));
     expect(receipt).toMatchObject({
-      schema: "memento-dense-evidence/v1", status: "unsupported",
-      acceptance: { sourceRows: 353, rawRgbRows: 353, freshRuns: 2, reducerRows: 353, seamRows: 0, framebufferRows: 0 },
+      schema: "memento-dense-evidence/v1", status: "exact",
+      acceptance: { sourceRows: 353, rawRgbRows: 353, freshRuns: 2, reducerRows: 353, seamRows: 353, framebufferRows: 353 },
       siblingAudit: { move: "MOVE_DIG", status: "unsupported", inherited: false },
       freshness: { coarseGate: "failed", pathScopedOracleBootstrapToolingDiff: [], materiallyFresh: true },
     });
