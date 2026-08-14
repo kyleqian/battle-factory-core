@@ -1113,3 +1113,100 @@ not new), and frames 647-700 (the ready-lag construction-route gap just
 characterized). Regression-checked unaffected by the trace-only fix:
 `factory-round-battle6-lukas-reveal-off` **154/154**,
 `factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke` **375/375**.
+
+### Round 12 resolution (2026-08-14): gold Brain-reveal alignment bisected (478/701 → 700/701); PROGRESS 1262's transplanted offset/press-tick and its ready-lag non-recurrence claim both corrected
+
+**The frame-34-onward divergence was hypothesis (a), a genuine one-frame
+alignment error — confirmed, not just favored.** PROGRESS 1262 computed
+`factory-round-battle7-noland-gold-reveal-off`'s `preCheckpointFrameOffset`
+(1152) from a **re-probed** `speciesPopulateFrame` of 1186, but that probe
+used a **pixel** self-diff (first frame whose `sha256` differs from the
+preceding black-hold frames) rather than the §C-established **RAM-state**
+definition of the landmark (`state.battlers.player.species`/`opponent.species`
+first nonzero — the same field §C's SHIZUKA table and 1260's own silver-Brain
+derivation both used). Re-ran `bin/oracle lab` dense
+(`preCheckpointCaptureAllFrames`, already `true` in the committed scenario)
+directly against this fixture's own
+`tools/battle-lab/factory-round-battle7-noland-gold-reveal-off.json` and read
+the RAM field frame-by-frame: `state.battlers.{player,opponent}.species`
+are both already nonzero (51/227 — DUGTRIO/SKARMORY) at **frame 1185**,
+one frame *before* the first pixel change (1186, still a solid-black
+`d8b44303` frame at 1185, first different sha at 1186) — the same one-frame
+RAM-vs-pixel lag §C's own SHIZUKA table implicitly established (species
+populate happens on the RAM side one callback before it's visible on
+screen). **`speciesPopulateFrame` is 1185, not 1186.**
+
+**Corrected offset, re-bisected press tick, re-verified by direct compare
+sweep (not curve-fit).** `preCheckpointFrameOffset = speciesPopulateFrame -
+26 - 8 = 1185 - 34 = 1151` (was 1152). The pic-reveal-hold-end anchor
+(oracle-absolute 1544, `c465f040` cycling through 1544, first new sha
+`5931d952` at 1545) was independently re-verified dense on this exact
+fixture's own captures — sha-for-sha identical to 1262's own citation and to
+`docs/noland-brain-intro-gold-ground-truth.md`'s cited cycling shas, so that
+half of 1262's derivation stood unchanged. Re-deriving the press tick from
+the corrected offset via 1262's own applied relation (`press = hold-end
+(app-relative) − 4`) gives `(1544 − 1151) − 4 = 389` (was 388) — a
+**one-frame shift in the same direction as the offset**, as expected. Swept
+all three adjacent press ticks against the corrected offset by direct
+`npm run compare --summary` (the same bisection-by-execution method §D round
+5's slice 2 and round 11 used, not algebra alone): **388 → 481/701, 389 →
+700/701, 390 → 482/701** — a sharp, single-frame optimum on both sides
+confirms 389 is a true local maximum, not an artifact of one lucky
+combination.
+
+**Result: 478/701 → 700/701 (99.86%)**, entirely from the one-frame
+offset/press correction — no other trace field changed, no `src/` change,
+no per-fixture special case. The growing-horizontal-bar signature 1262
+described (thin bar at frame 34, widening into a symmetric band by ~78,
+subsiding by ~189) is now gone start to finish; it was exactly the
+misalignment artifact hypothesis (a) predicted, not a new render defect in
+the fade-in mechanism.
+
+**Sole remaining residual: frame 465 (oracle-absolute 1616), 16px (0.04%),
+bbox 0,40-167,43** — inside the opponent send-out entrance/materialize span
+(oracle-absolute 1545–1643 per the gold ground-truth doc, "SKARMORY jumping
+in"). Diff render shows a faint magenta highlight over the opponent sprite's
+own materialize silhouette for exactly one frame — the same unmechanized,
+un-isolated single-frame tint/materialize residual family already named
+repeatedly in this doc (silver's 420/503 above, MAGNETON/YOSHI's 444/536 in
+rounds 5-7): a real, tiny, single-frame gap in the species-materialize
+sequence, not chased or fixed here per the same reasoning those rounds gave
+(would need a third/fourth species data point to isolate, out of this step's
+scope).
+
+**Ready-lag tail verdict: corrects PROGRESS 1262's claim — gold DOES
+exhibit the construction-route ready-lag family, just not at silver's exact
++7 magnitude.** 1262 read "465–700 fully exact" as gold *not* reproducing
+silver's tail gap, but the committed 701-frame compare window ends at
+oracle-absolute 1851 (`app-relative 700 + offset 1151`) — and this fixture's
+own true action-menu-ready RAM predicate
+(`playerControllerCommand===18 && controllerExecFlags===1`, same predicate
+§C used) doesn't fire until oracle-absolute **1865** (app-relative 714, +2
+to the pixel-settled menu per §C's own RAM-vs-pixel convention). **The
+committed window simply never reaches the ready transition** — frame 700's
+own oracle PNG still shows the player-send-out hold ("Go! DUGTRIO!"), not
+the menu. Built a throwaway (uncommitted) diagnostic extension of the trace
+to 730 frames/captureWindow to actually observe it: the app's own FIGHT/BAG
+menu becomes visible (pixel onset, first frame differing from the prior
+exact match) at **app-relative 711**; the oracle's own settles at
+**app-relative 716** (`715` still shows the empty post-dismiss box, `716`
+shows the full menu). **Delta: 5 ticks, app fires early** — same *direction*
+as silver's own +7 (`docs/trainer-pic-off-window-scout.md` round 11) and the
+PUPITAR probe's +7, but a **different magnitude**, not a flat cross-fixture
+constant. This is a genuinely new, more precise data point for the
+concurrent ready-lag discriminator side-probe: the gap scales with
+*something* fixture-specific (species pairing? cry lengths? — not
+determined here, out of this step's scope and explicitly not to be fixed
+this round), not just "always +7" for every `overrides.parties`-constructed
+Brain-reveal fixture. The diagnostic 730-frame extension was **not**
+committed to the trace file — the official comparison window stays the
+established 701-frame convention shared with silver/Lukas, so the headline
+count above (700/701) is against the same window shape as every other
+fixture in this family.
+
+**Final count for this window: 700/701 (99.86%)**, up from 478/701. Trace-only
+fix (`tools/compare/traces/factory-round-battle7-noland-gold-reveal-off.json`:
+`preCheckpointFrameOffset` 1152→1151, press tick 388→389); no `src/` change.
+Regression-checked unaffected: `factory-round-battle7-noland-reveal-off`
+(silver) **648/701**, `factory-round-battle6-lukas-reveal-off` **154/154**,
+`factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke` **375/375**.
