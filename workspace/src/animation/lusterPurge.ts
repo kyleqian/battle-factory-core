@@ -65,7 +65,6 @@ export interface LusterPurgeState {
     psychicCycleCounter: number | null;
     excludedBlend: number | null;
     circleBlend: number | null;
-    impactBlend: 12 | null;
   }>;
   readonly targetX2: number;
   readonly audio: readonly Readonly<{ song: "SE_M_SOLAR_BEAM" | "SE_M_HYPER_BEAM"; pan: "attacker" | "target" }>[];
@@ -251,7 +250,6 @@ export function lusterPurgeAtAge(age: number, config: LusterPurgeConfig): Luster
   const offset = scriptOffset(age, frameCount);
   const active = age >= 0 && age < frameCount - 1;
   const bgActive = age >= 45 && age <= 293;
-  const restore = age >= 291;
   const bldcnt = age >= 8 && age <= 43 ? 232
     : age >= 48 && age <= 290 ? 16192
       : age >= 292 && age <= restoreLast ? 232 : 0;
@@ -276,7 +274,6 @@ export function lusterPurgeAtAge(age: number, config: LusterPurgeConfig): Luster
         : null,
       excludedBlend,
       circleBlend: age >= 70 && age <= 118 ? excludedBlend : null,
-      impactBlend: age >= 119 && age <= 205 ? 12 : null,
     },
     targetX2: shake.x2, audio,
   };
