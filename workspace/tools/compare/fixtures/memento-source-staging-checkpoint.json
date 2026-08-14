@@ -1,8 +1,8 @@
 {
-  "schema": "memento-source-staging-checkpoint/v2",
+  "schema": "memento-source-staging-checkpoint/v3",
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_MEMENTO",
-  "status": "unsupported",
+  "status": "exact",
   "sourceBounds": {"start": "0x082cdcf2", "endExclusive": "0x082cdd36", "bytes": "0x44"},
   "components": 8,
   "carrier": {"index": 501, "label": "FRONTIER_MON_WEEZING_2", "species": 110},
@@ -22,8 +22,9 @@
     "initShadowHandleBg": ["ed9bc69ac4b8eeaae8a0002cc5b93334487e33bcfad20f7ce2ad7b363f739492", "4f7b93f5d2ff326155a953d461d3bc75d5a2e26cc76761663cde16234acede30"],
     "monbgStaticClear": ["6fcb03243457da34f408415518bfc4313b975f6fd02a5e56b1034b708a267092", "2a883ace1b59ae33872a3ce364578cdd6f9cdc06a0a08f532ab74a258b97c5de"]
   },
-  "denseEvidence": false,
-  "productionFramebuffer": false,
+  "denseEvidence": true,
+  "denseEvidenceReceipt": "tools/compare/fixtures/memento-dense-evidence.json",
+  "productionFramebuffer": true,
   "siblingAudit": {"move": "MOVE_DIG", "components": 17, "shared": ["visualCommand:clearmonbg_static", "visualCommand:monbg_static"], "promoted": false},
-  "next": "Capture each complete pointer-bounded Move_MEMENTO..Move_FACADE Scene-ON window twice fresh through first inactive cleanup, retaining source/task/scanline/OAM/matrix/palette/BG/window/blend/audio/immutable-state/raw-RGB/map rows; only then derive and gate a source-relative reducer, typed seam, and compositor."
+  "next": "None for MOVE_MEMENTO; MOVE_DIG remains independently unsupported."
 }

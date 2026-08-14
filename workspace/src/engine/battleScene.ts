@@ -912,6 +912,7 @@ import {
   sceneOnDisableView,
   sceneOnHazeView,
   sceneOnSpiteView,
+  sceneOnMementoView,
   sceneOnNightShadeView,
   sceneOnMirrorCoatView,
   sceneOnAromatherapyView,
@@ -1107,6 +1108,7 @@ import {
   type SceneOnDisableConfig,
   type SceneOnHazePresentationState,
   type SceneOnSpitePresentationState,
+  type SceneOnMementoPresentationState,
   type SceneOnNightShadePresentationState,
   type SceneOnMirrorCoatPresentationState,
   type SceneOnBiteConfig,
@@ -12385,6 +12387,54 @@ function drawSpiteWaveMonBg(
       fb[offset] = blendChannel(color.r, fb[offset]!, eva, evb);
       fb[offset + 1] = blendChannel(color.g, fb[offset + 1]!, eva, evb);
       fb[offset + 2] = blendChannel(color.b, fb[offset + 2]!, eva, evb);
+      fb[offset + 3] = 255;
+    }
+  }
+}
+
+/**
+ * Memento's static battler BG copy after the scanline DMA has supplied the
+ * selected BG's per-row VOFS.  The copied tilemap starts at map coordinate
+ * zero; the source-owned negative BG offsets therefore place the copy at the
+ * battler's ordinary screen position.  Palette zero remains transparent just
+ * like the copied mon tiles, while every opaque entry is black and alpha
+ * blends over the layer already selected by the PPU.
+ */
+function drawMementoShadowMonBg(
+  fb: Uint8Array,
+  tileset: Tileset,
+  bg: "BG1" | "BG2",
+  bgX: number,
+  scanlineVofs: readonly number[],
+  win0h: number,
+  win0v: number,
+  eva: number,
+  evb: number,
+): void {
+  const left = (win0h >>> 8) & 0xff;
+  const right = win0h & 0xff;
+  const top = (win0v >>> 8) & 0xff;
+  const bottom = win0v & 0xff;
+  if (left >= right || top >= bottom) return;
+  // The retained bilateral display maps prove BG1's first visible copied row
+  // is scanline 1, while BG2's CopyValue16Bit path can affect scanline 0.
+  // This is a BG/register rule, not a species or age special case.
+  const firstScanline = bg === "BG1" ? 1 : 0;
+  for (let screenY = Math.max(firstScanline, top); screenY < Math.min(160, bottom); screenY += 1) {
+    const sourceY = screenY + (scanlineVofs[screenY] ?? 0);
+    if (sourceY < 0 || sourceY >= tileset.rows * 8) continue;
+    for (let screenX = Math.max(0, left); screenX < Math.min(240, right); screenX += 1) {
+      const sourceX = screenX + bgX;
+      if (sourceX < 0 || sourceX >= tileset.columns * 8) continue;
+      const tile = tileset.tiles[
+        Math.floor(sourceY / 8) * tileset.columns + Math.floor(sourceX / 8)
+      ];
+      const index = tile?.[(sourceY % 8) * 8 + (sourceX % 8)] ?? 0;
+      if (index === 0) continue;
+      const offset = (screenY * 240 + screenX) * 4;
+      fb[offset] = blendChannel(0, fb[offset]!, eva, evb);
+      fb[offset + 1] = blendChannel(0, fb[offset + 1]!, eva, evb);
+      fb[offset + 2] = blendChannel(0, fb[offset + 2]!, eva, evb);
       fb[offset + 3] = 255;
     }
   }
@@ -23710,6 +23760,101 @@ export function renderSceneOnMovePresentation(
     drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
     drawMessageTextLines(
       fb, playerToOpponent ? "ARIADOS used" : "Foe ARIADOS used", "NIGHT SHADE!", 99,
+    );
+    return;
+  }
+  if (state.config.move === "MEMENTO") {
+    const mementoState = state as SceneOnMementoPresentationState;
+    const view = sceneOnMementoView(mementoState);
+    // Static monbg tile/palette work and scanline buffers reach display from
+    // the preceding source row. Window/blend registers are already the
+    // reducer's hardware-facing values for the current row.
+    const displayed = sceneOnMementoView({
+      ...mementoState,
+      age: Math.max(0, mementoState.age - 1),
+    });
+    const playerToOpponent = view.attacker.species === "WEEZING"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "WEEZING"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(`unsupported staged MEMENTO pair ${view.attacker.species}->${view.target.species}`);
+    }
+    const weezingSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WEEZING!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WEEZING!;
+    const weezing = playerToOpponent
+      ? weezingSource
+      : { ...weezingSource, tileset: subTileset(weezingSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const onixIdle = playerToOpponent
+      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      : { x2: 0, y2: 0 };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+
+    const alpha = view.registers.bldalpha;
+    const eva = alpha & 0x1f;
+    const evb = (alpha >>> 8) & 0x1f;
+    const shadow = (which: "attacker" | "target", tileset: Tileset): void => {
+      const config = mementoState.config.reducer[which];
+      const enabled = displayed.monbg[which];
+      if (!enabled || displayed.scanline.state === 0) return;
+      const bank = displayed.scanline.buffers[displayed.scanline.srcBuffer];
+      drawMementoShadowMonBg(
+        fb, tileset, config.bg, config.bgX, bank,
+        view.registers.win0h, view.registers.win0v, eva, evb,
+      );
+    };
+    // Attacker copy has equal/lower priority than its live OBJ; target copy
+    // is promoted in front after SetAnimBattlerSpriteOamPriority(3).
+    shadow("attacker", weezing.tileset);
+    if (playerToOpponent) {
+      drawSpriteSheet(
+        fb, onix.tileset, onix.palette,
+        view.target.geometry.spriteCorner.x + onixIdle.x2,
+        view.target.geometry.spriteCorner.y + onixIdle.y2,
+      );
+      drawSpriteSheet(
+        fb, weezing.tileset, weezing.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    } else {
+      drawSpriteSheet(
+        fb, weezing.tileset, weezing.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+      drawSpriteSheet(
+        fb, onix.tileset, onix.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+      );
+    }
+    shadow("target", onix.tileset);
+
+    const profile = mementoState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "WEEZING", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "WEEZING" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb, playerToOpponent ? "WEEZING used" : "Foe WEEZING used", "MEMENTO!", 99,
     );
     return;
   }

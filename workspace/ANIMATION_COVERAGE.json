@@ -2462,6 +2462,33 @@
    ]
   },
   {
+   "move": "MOVE_MEMENTO",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-501 WEEZING/ONIX Scene-ON parties pass the complete source-pointer window through first inactive cleanup twice fresh: player-back frames 70..247 at 178/178 and opponent-front frames 74..248 at 175/175 source reducer, typed seam, retained hardware, raw-RGB, normalized-map, and production-framebuffer rows",
+    "the pure source-relative reducer and narrow presentation seam port InitMementoShadow, attacker and target Memento shadow phases, MementoHandleBg, static monbg/clear, both 320-entry scanline VOFS banks, WIN0H/WIN0V/WININ/WINOUT, BLDCNT/BLDALPHA, battler priority, black BG palettes, alpha ramps, audio-inert visual timing, and complete cleanup without gameplay ownership",
+    "the production compositor reuses source-derived WEEZING/ONIX art, healthboxes, field background and battle window; copied mon pixels sample the preceding source row's selected scanline bank while current hardware window/blend registers gate the copy, with BG1 beginning at scanline 1 and BG2 at scanline 0 as independently proved by both change maps",
+    "stable player evidence/raw/map digests are 3f423ec8bfa8cf087b15e25b4b8a51fd7b4efb6e45b5c8a219e87bba44f5307f / a9604de7908429270b3e12b7b8ec8baba1a193f0ef68dffe59a0918d6c915bd5 / adb0e7cfb4ef50f3d7f8da10302397cadb0377307ab6cc838237da9c741f81f1; opponent digests are 224db6ea8e553849fabf83d65cb7f480da2fccdc2968a97e00da8bd26ac10349 / c115ea0c6e3e6310bab4725aaae170b64bfe0628a21e59ceacccd4e865d9e506 / f5086737ad3bac6f559dc09e6330adb3c38be1753e3555191b7329703dd125b9",
+    "hardware OAM/matrix transfer remains 177/177 plus 174/174 and preceding faded-palette transfer remains 175/177 plus 172/174 with age-4 same-row and player-age-91/opponent-age-90 static-monbg exceptions; MOVE_DIG remains independently unsupported and inherits no acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-memento-player-weezing-opponent-onix.json",
+    "tools/battle-lab/mechanic-memento-opponent-weezing-player-onix.json",
+    "tools/compare/fixtures/memento-source-staging-checkpoint.json",
+    "tools/compare/fixtures/memento-dense-evidence.json",
+    "tools/compare/mementoSourceAudit.ts",
+    "tools/compare/mementoProbe.py",
+    "tools/compare/mementoPortable.ts",
+    "tools/compare/evidence/memento-changemap-player.txt",
+    "tools/compare/evidence/memento-changemap-opponent.txt",
+    "src/animation/memento.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/memento.test.ts",
+    "tests/animation/mementoSource.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_METRONOME",
    "status": "exact",
    "covered": [
