@@ -5,6 +5,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1255 — [supervisor, 2026-08-14] **Wind-down: Noland program items 1-3 landed and verified; all gates green**
+
+- **State:** the 2026-08-13 decision-3 program is complete through the
+  workspace layer. Noland's party generation, the battles-21/42 scheduling
+  branch, ROM ground truth with a zero-discrepancy differential, the
+  staging-representation design, and the post-battle remainder audit are
+  all on master. DEFERRED.md remains empty; the one cross-layer item is a
+  recorded USER handoff, not an open supervisor question.
+- **Did:** 7 worker rounds, all green, zero failed steps. Orient fold
+  (animation Memento test strengthening + rust battler positions) and
+  wind-down fold (animation Memento **exact** promotion chain + rust
+  negative-damage/always-hit/destiny-bond/minimize state-leaf ports), each
+  verified on the union. Noland: `factoryBrainOpponentGeneration.ts` (10
+  receipts), silver+gold mGBA receipts with every draw LR-attributed
+  (`docs/noland-brain-ground-truth.md`),
+  `tests/factoryBrainOpponentRomReceipts.test.ts` (zero discrepancies;
+  fill spans ~28 frames so ambient VBlank draws interleave — captured-
+  cursor exactness confirmed as the only honest bar),
+  `frontierBrainStatus.ts` + orchestrator branch + real-round-shape pins,
+  `docs/noland-brain-staging-design.md` (overrides.parties alone proven
+  deficient: brain AI mask 7 vs ordinary 1 at challenge 2), and
+  `docs/noland-brain-post-battle-audit.md` (brain BP = table + flat +10:
+  14/15 BP; symbols are event flags; loss ordinary; two-site claim
+  re-confirmed). Two PAPERCUTS entries + ROADMAP status note.
+- **Next:** (a) **USER:** implement the `factoryBrain` mechanic-lab mode
+  harness-side per design §5 (harness changes go through the user);
+  (b) next main session: pick from the audit's §5 worklist — noting
+  reward/symbol bookkeeping keeps its existing out-of-scope status per the
+  2026-08-10 decision; (c) brain-battle presentation waits on (a) for its
+  oracle ground truth.
+- **Notes:** final union: full npm **1,052 files / 9,925 passed / 1
+  skipped**; build green; cargo native green; WASM **509,818 B**
+  `d72d7fa7…`; forced-WASM **18 files / 803 tests**. Soaks: vanilla
+  **20/20 OK**, full **60/60 OK**, 0 crashes / 0 hangs. Sibling
+  supervisors were live all session; lane branches folded at ~03:00 —
+  a final pre-deadline re-check will fold any tail, else it is the next
+  orient's fold.
+
 ## 1254 — [MAIN worker, 2026-08-14] **Noland rung 2c: Frontier Brain scheduling pinned against real six-real-win round shapes**
 
 - **State:** rung 2's noted deviation is closed. New
@@ -113,38 +151,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   scope and untouched: presentation/rendering, mechanicLab/oracle staging,
   the differential receipt check, `src/animation/**`, `core-rs/**`. No
   `executableFrontierRatchet` pin moved.
-
-## 1252 — [MAIN worker, 2026-08-14] **Noland rung 1: FillFactoryBrainParty ported as generateFactoryBrainOpponent**
-
-- **State:** `src/engine/factoryBrainOpponentGeneration.ts` is a new pure
-  module exporting `generateFactoryBrainOpponent`, covering the Level-50
-  singles Frontier Brain (Noland) opponent party — the pure-generation half
-  of the Noland program's round-1 ts-lane task.
-- **Did:** ported `FillFactoryBrainParty` (`battle_factory.c:759-826`)
-  exactly: no trainer-selection phase (unlike the ordinary opponent), and
-  selection/personality-construction interleave per mon in source order
-  rather than batching into two epochs. Five rejection rules in source
-  order — unown, high-tier (source-real, proven unreachable), saved-rental
-  **set-id** equality (not species), duplicate species, duplicate item —
-  reusing `getLevel50FactoryRentalRange`, `randomU16`,
-  `natureFromPersonality`, and `createFactoryCorpusPartyMember` from
-  `factoryOpponentGeneration.ts`/`factoryCorpusParty.ts` rather than
-  duplicating them. New `tests/factoryBrainOpponentGeneration.test.ts` (10
-  tests) pins each rejection rule individually via forced RNG seeds, the
-  rejection-order priority for two multi-rule collisions, fixed-IV receipts
-  (15 @ challengeNum 2, 31 @ challengeNum 5, retail challenge-6 OOB
-  rejection), draw-range receipts matching the ordinary opponent's range
-  helper, determinism, and one full three-mon walk with a hand-derived
-  10-entry ledger checked entry by entry. `npm run typecheck` and
-  `test:smoke` green before the full run; full npm **1,048 files / 9,874
-  passed / 1 skipped**; build **664 modules**, green.
-- **Next:** rung 2 — the battles-21/42 round-loop branch that calls into
-  this module, plus the differential structure check consuming both ts-lane
-  and side-lane (mGBA) receipts per 1251's dispatch.
-- **Notes:** out of scope and untouched: roundController/battle scheduling,
-  mechanicLab/oracle staging, presentation, `src/animation/**`,
-  `core-rs/**`. No `executableFrontierRatchet` pin moved (both barrier
-  counts and the recording-import allowlist are unchanged). No oracle
-  service touched.
-
-
