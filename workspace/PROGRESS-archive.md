@@ -1,3 +1,24 @@
+## 1246 — [supervisor, 2026-08-13] **CGB4 v42 and final lane union verified**
+
+- **State:** #55 is source-exact through the selected-row **6,226-cycle**
+  CGB4 prefix. The generic seven-battle controller remains the governing S8
+  path. Both persistent lane heads are folded.
+- **Did:** audited v42's mixed fifth-track mask routes and both body stop
+  boundaries. Folded exact bilateral Icy Wind, the Memento source checkpoint,
+  Rust M10c, and the key-repeat WASM boundary. Rebuilt and forced the complete
+  Rust parity surface.
+- **Next:** continue #55 in a separate bounded step at only the two clear-route
+  fifth-track decrement decisions. Keep the nonzero-mask row stopped before
+  its body, and stop the clear rows before continuation/exit. Keep wider
+  MPlay/service/arbitration, live clock wiring, production, presentation,
+  animation, Rust, and the retired Battle-2 march out of scope.
+- **Notes:** final full npm **1,045 files / 9,852 passed / 1 skipped**; build
+  **664 modules**. Native Rust green; WASM **509,825 B**, `d7344e1c...`;
+  forced WASM **19 files / 807 tests**. Animation is **181/276 exact**;
+  Memento source **3/3**. Production soaks are vanilla **20/20** and full
+  **60/60**, with **0 crashes / 0 hangs**. No new unsupported barrier or
+  DEFERRED entry.
+
 ## 1245 — [MAIN worker, 2026-08-13] **CGB4 v42 fifth-track volume/pitch decision green**
 
 - **State:** #55 is source-exact through the selected-row **6,226-cycle**
