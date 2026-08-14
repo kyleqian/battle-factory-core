@@ -5,6 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1258 — [supervisor, 2026-08-14] **Round 1 folded: §5.2 rungs 1-3 (main) + CGB4 family gated (side salvage)**
+
+- **State:** supervisor session, deadline 17:54. Baseline re-verified at
+  orient (build green; full suite 1056 files / 9934 passed / 1 skipped,
+  1147 s — CGB4-dominated). Both round-1 steps are on master (merge
+  `dc57b7c3`).
+- **Did:** (1) Verified the MAIN worker's 1257 result — reran
+  `tools/probe/verify-factory-brain-lab.ts` live myself: **82/82**. (2)
+  SIDE lane: CGB4 gating came back complete but uncommitted (worker
+  self-suspended awaiting a background run — the known ScheduleWakeup
+  class). Salvaged per the commit-tail recipe: verified in the worktree
+  (gated default: family skips at collection, digest pin 45/45; flag-on
+  `npm run test:cgb4` **44 files / 222 tests green**; typecheck + build
+  green; full default suite green after restoring the gitignored
+  `artifacts/wasm/factory_wasm.wasm` `7e23d1bf` — the 6-file/19-test
+  failure class in a fresh worktree is that missing artifact, not the
+  change), committed `a2fe03c9` with provenance, merged, union smoke
+  375/375 + gate/digest spot-check green, worktree cleaned.
+- **Next:** round 2 (dispatched): MAIN — Brain presentation seam
+  (`getFactoryTrainerPresentation` 1022 entry from `gTrainers
+  [TRAINER_NOLAND]` per design §2.3, proof-stage battleIndex-6 widening,
+  Tier-1 pins, stretch: 1257's rung-4 remainder); SIDE — new-files-only
+  scout banking the Brain intro window ground truth (dense captures, tick
+  table, verify script) off the silver fixture.
+- **Notes:** `check-oracle-freshness.sh` FAILs both ports; :8014 is a
+  false positive (started from the edited tree 48 s before commit
+  `33354440`; it advertises `factoryBrain` — verified) and :8012 is the
+  animation lane's to restart by design. Animation and rust supervisors
+  are live this session (their lane branches are ahead of master); folds
+  happen at wind-down. Default `npm test` no longer runs the 44-file CGB4
+  family — set `POKEBENCH_CGB4_EVIDENCE=1` (or `npm run test:cgb4`) for
+  the full grind evidence.
+
 ## 1257 — [MAIN worker, 2026-08-14] **factoryBrain §5.2 workspace consumers: rungs 1-3 landed green; rung 4 precisely blocked**
 
 - **State:** design §5.2's workspace-consumer worklist is landed through
@@ -119,45 +152,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   restart-before-staging is genuinely required (only :8012 remains on the
   old code). No `workspace/src/**`, test, or lane-file change; the two
   worker lanes were idle throughout.
-
-## 1255 — [supervisor, 2026-08-14] **Wind-down: Noland program items 1-3 landed and verified; all gates green**
-
-- **State:** the 2026-08-13 decision-3 program is complete through the
-  workspace layer. Noland's party generation, the battles-21/42 scheduling
-  branch, ROM ground truth with a zero-discrepancy differential, the
-  staging-representation design, and the post-battle remainder audit are
-  all on master. DEFERRED.md remains empty; the one cross-layer item is a
-  recorded USER handoff, not an open supervisor question.
-- **Did:** 7 worker rounds, all green, zero failed steps. Orient fold
-  (animation Memento test strengthening + rust battler positions) and
-  wind-down fold (animation Memento **exact** promotion chain + rust
-  negative-damage/always-hit/destiny-bond/minimize state-leaf ports), each
-  verified on the union. Noland: `factoryBrainOpponentGeneration.ts` (10
-  receipts), silver+gold mGBA receipts with every draw LR-attributed
-  (`docs/noland-brain-ground-truth.md`),
-  `tests/factoryBrainOpponentRomReceipts.test.ts` (zero discrepancies;
-  fill spans ~28 frames so ambient VBlank draws interleave — captured-
-  cursor exactness confirmed as the only honest bar),
-  `frontierBrainStatus.ts` + orchestrator branch + real-round-shape pins,
-  `docs/noland-brain-staging-design.md` (overrides.parties alone proven
-  deficient: brain AI mask 7 vs ordinary 1 at challenge 2), and
-  `docs/noland-brain-post-battle-audit.md` (brain BP = table + flat +10:
-  14/15 BP; symbols are event flags; loss ordinary; two-site claim
-  re-confirmed). Two PAPERCUTS entries + ROADMAP status note.
-- **Next:** (a) **USER:** implement the `factoryBrain` mechanic-lab mode
-  harness-side per design §5 (harness changes go through the user);
-  (b) next main session: pick from the audit's §5 worklist — noting
-  reward/symbol bookkeeping keeps its existing out-of-scope status per the
-  2026-08-10 decision; (c) brain-battle presentation waits on (a) for its
-  oracle ground truth.
-- **Notes:** a final 06:10 re-check folded both lane tails (animation:
-  Rock Tomb **exact** promotion + Flail evidence; rust: yawn + taunt
-  decision leaves and its clean wind-down) and the whole union was
-  re-verified: full npm **1,056 files / 9,934 passed / 1 skipped**; build
-  green; cargo native green (42 green suites); WASM **509,791 B**
-  `7e23d1bf…`; forced-WASM **18 files / 803 tests**. Soaks re-run on the
-  final union: vanilla **20/20 OK**, full **60/60 OK**, 0 crashes /
-  0 hangs. Both persistent lane branches are fully folded at session end
-  (the animation supervisor may still be live; any post-06:45 tail is the
-  next orient's fold).
 

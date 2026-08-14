@@ -1,3 +1,45 @@
+## 1255 — [supervisor, 2026-08-14] **Wind-down: Noland program items 1-3 landed and verified; all gates green**
+
+- **State:** the 2026-08-13 decision-3 program is complete through the
+  workspace layer. Noland's party generation, the battles-21/42 scheduling
+  branch, ROM ground truth with a zero-discrepancy differential, the
+  staging-representation design, and the post-battle remainder audit are
+  all on master. DEFERRED.md remains empty; the one cross-layer item is a
+  recorded USER handoff, not an open supervisor question.
+- **Did:** 7 worker rounds, all green, zero failed steps. Orient fold
+  (animation Memento test strengthening + rust battler positions) and
+  wind-down fold (animation Memento **exact** promotion chain + rust
+  negative-damage/always-hit/destiny-bond/minimize state-leaf ports), each
+  verified on the union. Noland: `factoryBrainOpponentGeneration.ts` (10
+  receipts), silver+gold mGBA receipts with every draw LR-attributed
+  (`docs/noland-brain-ground-truth.md`),
+  `tests/factoryBrainOpponentRomReceipts.test.ts` (zero discrepancies;
+  fill spans ~28 frames so ambient VBlank draws interleave — captured-
+  cursor exactness confirmed as the only honest bar),
+  `frontierBrainStatus.ts` + orchestrator branch + real-round-shape pins,
+  `docs/noland-brain-staging-design.md` (overrides.parties alone proven
+  deficient: brain AI mask 7 vs ordinary 1 at challenge 2), and
+  `docs/noland-brain-post-battle-audit.md` (brain BP = table + flat +10:
+  14/15 BP; symbols are event flags; loss ordinary; two-site claim
+  re-confirmed). Two PAPERCUTS entries + ROADMAP status note.
+- **Next:** (a) **USER:** implement the `factoryBrain` mechanic-lab mode
+  harness-side per design §5 (harness changes go through the user);
+  (b) next main session: pick from the audit's §5 worklist — noting
+  reward/symbol bookkeeping keeps its existing out-of-scope status per the
+  2026-08-10 decision; (c) brain-battle presentation waits on (a) for its
+  oracle ground truth.
+- **Notes:** a final 06:10 re-check folded both lane tails (animation:
+  Rock Tomb **exact** promotion + Flail evidence; rust: yawn + taunt
+  decision leaves and its clean wind-down) and the whole union was
+  re-verified: full npm **1,056 files / 9,934 passed / 1 skipped**; build
+  green; cargo native green (42 green suites); WASM **509,791 B**
+  `7e23d1bf…`; forced-WASM **18 files / 803 tests**. Soaks re-run on the
+  final union: vanilla **20/20 OK**, full **60/60 OK**, 0 crashes /
+  0 hangs. Both persistent lane branches are fully folded at session end
+  (the animation supervisor may still be live; any post-06:45 tail is the
+  next orient's fold).
+
+
 ## 1254 — [MAIN worker, 2026-08-14] **Noland rung 2c: Frontier Brain scheduling pinned against real six-real-win round shapes**
 
 - **State:** rung 2's noted deviation is closed. New
