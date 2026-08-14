@@ -1,3 +1,75 @@
+## 1262 — [MAIN worker, 2026-08-14] **Gold Brain-reveal compare built (478/701, new fade-in-onset residual named); three audit-driven pins landed**
+
+- **State:** first-ever GOLD Brain-battle compare (`factory-round-battle7-noland-gold-reveal-off`,
+  seed 2/challengeNum 5/factorySymbolsCount 1, the gold-eligible config from
+  `tests/factoryBrainRoundShape.test.ts`'s `GOLD_SEED`/`GOLD_STREAK` case)
+  replicates the silver r4 recipe: new app stage
+  (`generatedGoldRoundRevealProofStage`/`generatedRoundBattle7NolandGoldRevealStage`,
+  `factoryRoundIntroGeneralizationStage.ts`) + oracle `factoryBrain` scenario
+  with `overrides.parties` pinned to the app's own generated party on both
+  sides (player DUGTRIO/MEDICHAM/MISDREAVUS — setIds 564/565/566, reused
+  from the scout's own legal gold triple since the round-shape test's
+  664/678/527 fails the oracle's real challenge-5/rank-0 legality check even
+  though the app's pure `currentRecords` path lets it through; opponent
+  SKARMORY/JOLTEON/ELECTRODE, the app's real `generateFactoryOpponent`
+  output for this seed — differs from the scout's BLAZIKEN-led roster as
+  expected, same seed-mismatch reason 1260 documented). Trace includes an
+  `A` press this time (the r4 lesson) at app-relative tick 388, estimated by
+  transplanting silver's own hold-end-relative delta (press ≈ pic-reveal-
+  hold-end − 4) onto gold's own dense-capture-verified pic-reveal-hold end
+  (frame 1544, sha-identical to the existing gold ground-truth doc's
+  independent fixture) rather than a full app-vs-oracle bisection — time
+  budget did not allow the multi-pass bisection r4 used.
+  `preCheckpointFrameOffset` (1152) derived the same way as every prior
+  fixture (`speciesPopulateFrame(1186) − 26 − 8`), with `speciesPopulateFrame`
+  itself re-probed fresh for this fixture (not borrowed from the scout's
+  dossier): a live dense self-diff showed this fixture's own pre-transition
+  swirl/black-flash-hold lengths differ from the scout's gold fixture (black
+  hold 39f here vs their 44f) even though the *downstream* pic-reveal
+  window (1404–1544) is sha-identical to theirs — confirming the "per-fixture
+  landmark re-probe" caveat is load-bearing: upstream transition timing is
+  seed-sensitive, downstream message/reveal timing is not.
+- **Did:** **Result: 478/701 (68.2%).** Frames 0–33 exact (post-checkpoint
+  handoff through the tail of the black-flash hold). First divergence at
+  frame 34 — oracle-absolute 1186, exactly `speciesPopulateFrame`, the fade-in
+  span's own first frame: a thin horizontal bar (bbox 0,80-239,80) growing
+  over ~15 frames into a symmetric vertical band before subsiding — distinct
+  in character from silver's missing-A-press mistake (an A press is present
+  here) and from silver's known 420/503 tint-dot residuals (this is
+  wider/earlier/growing, not a sparse single-frame dot). Intermittent small
+  residuals (mostly <1%, a few 2-7% patches around frames 178-231, matching
+  where the opponent send-out sequence would sit) continue through frame
+  464; **465-700 are fully exact** (the ready-menu cycle matches, unlike
+  silver's +7 tail — a different residual shape, not the same construction-
+  route gap).
+  **Rung 2 (three audit-driven pins, each its own commit):** (a) new test
+  `factoryBrainRoundShape.test.ts` "losing to the silver Frontier Brain at
+  battleIndex 6" — drives to the sixth win, publishes the silver Brain at
+  battleIndex 6, resolves via the public `resolveRoundBattle({outcome:
+  "loss"})` seam (mirrors `advanceProofWin`'s technique, swapped to loss),
+  asserts `roundLost` fires with `battleIndex 6` and `frontierBrain
+  {status: "silver"}` intact on both the command and `round.rules`
+  end-to-end; red-verified (flipped the command-side expectation to "gold",
+  saw the real `AssertionError`, reverted). (b) `TRAINER_FRONTIER_BRAIN`
+  deduped: `factoryRoundBattleOrchestrator.ts` now imports it from its
+  exported owner `factoryAiMaskSelection.ts` instead of a local redeclare.
+  (c) streak%7 invariant: documented (not enforced) on
+  `FactoryRoundBattleOrchestratorConfig.factoryWinStreak` — a validation
+  throw was rejected because `factoryRoundBattleOrchestrator.test.ts`'s
+  "Noland rung 2" cases deliberately pass non-multiple-of-7 streaks (19/20/
+  40) to exercise brain eligibility at battleIndex 0/1 with a synthetic
+  mid-round streak; a throw would break those legitimate callers.
+- **Notes:** own commits this step: dedup+comment pin (b+c), loss-pin test
+  (a), gold trace/stage/fixture (rung 1) — each green at commit
+  (`npm run typecheck` + targeted suites, then `test:smoke` 375/375).
+  Zero `src/` engine changes for rung 1 (new `tools/compare/`,
+  `tools/battle-lab/`, `tools/probe/` files only) — regression fixtures
+  re-verified unaffected by construction, not just by inference: silver
+  **648/701**, Lukas **154/154**, Yoshi **700/751**, `test:smoke`
+  **375/375**.
+
+---
+
 ## 1260 — [MAIN worker, 2026-08-14] **Rung D landed: first live Brain-battle compare, 350/701 frames exact, honest mismatch inventory recorded**
 
 - **State:** the Brain battle-start presentation is now compared end-to-end

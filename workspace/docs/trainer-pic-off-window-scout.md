@@ -1359,3 +1359,152 @@ node --experimental-strip-types tools/probe/probe-ready-lag-chooseaction-handsha
 Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
 `:8014`). Read-only (no `src/` or fixture writes); ran twice this session,
 byte-identical output both times.
+
+### Round 14 (2026-08-14): source archaeology rules out switch-in ability/item procs as the driver of BOTH the +4/+5 split and the +7 tail; `overrides.parties` construction now cleanly separates all 6 confirmed data points from real generation — no validated `src/` fix landed (honest-stop, per this step's own ~30 min clause)
+
+**Assignment:** model `TryDoEventsBeforeFirstTurn`'s span length from source
+per-fixture (what varies: switch-in abilities/items/weather, or the
+`ChooseAction`-dispatch sub-state-machine's own tick costs) and check it
+predicts the confirmed +7/+7/+5/+4 residual table *before* touching
+`src/`; corroborate with a live RAM probe if source reading alone can't
+settle per-state tick costs.
+
+**Step 1 — read `TryDoEventsBeforeFirstTurn` for what can add ticks.**
+(`reference/pokeemerald/src/battle_main.c:3841-3910`.) The function is
+called once per VBlank tick (`gBattleMainFunc`). Its ability loop
+(`while switchInAbilitiesCounter < gBattlersCount: AbilityBattleEffects
+(ABILITYEFFECT_ON_SWITCHIN, ...)`) and item loop (same shape,
+`ITEMEFFECT_ON_SWITCH_IN`) only `return` (ending that tick, resuming next
+tick from the saved counter) when `AbilityBattleEffects`/`ItemBattleEffects`
+report a real effect (`effect != 0`) — i.e. something that would print a
+message or play an animation (Intimidate, Drought/Drizzle/Sand Stream,
+Trace, a stat-restoring/message-worthy held item, etc.,
+`battle_util.c:2485-2530` for the ability cases,
+`battle_util.c:3305-3330`+ for `ITEMEFFECT_ON_SWITCH_IN`). If **nothing**
+procs for either lead, both loops (2 battlers × 2 loops) complete inside a
+**single** call/tick, and the state falls straight through into
+`HandleTurnActionSelectionState`'s own first tick in the same call. So the
+model this predicts: the switch-in span is either "1 tick" (nothing procs)
+or "1 tick + N extra ticks" (N = number of procs, each proc costing at
+least the message/animation's own duration) — a genuinely party-derived
+term, exactly as the step brief hypothesized.
+
+**Step 2 — check the four+two confirmed fixtures' leads for anything that
+procs.** Cross-referenced every active-lead ability/held-item against
+`reference/pokeemerald/src/battle_util.c`'s switch-in cases for all six
+confirmed-residual fixtures (both `factoryLegal`-real-gen and
+`overrides.parties`-staged):
+
+| fixture | player lead (ability/item) | opponent lead (ability/item) | residual |
+| --- | --- | --- | --- |
+| GRIMER/YOSHI | GRIMER Stench / Pecha Berry | COMBUSKEN Blaze / Scope Lens | +5 |
+| KADABRA/SHIZUKA | KADABRA Synchronize / Twisted Spoon | MAGNETON (Magnet Pull\*) / Lum Berry | +4 |
+| DUGTRIO/gold-dense | DUGTRIO Arena Trap\* / (n/a) | BLAZIKEN Blaze / (n/a) | +5 |
+| WEEPINBELL/QUINN | GRIMER Stench / Pecha Berry | WEEPINBELL Chlorophyll / (n/a) | +4 |
+| TANGELA/silver (`overrides.parties`) | DELCATTY Cute Charm / Magost Berry | TANGELA Chlorophyll / Gold Teeth | +7 |
+| PUPITAR/probe (`overrides.parties`) | DELCATTY Cute Charm / Magost Berry | PUPITAR Shed Skin / Moon Stone | +7 |
+
+(\*Arena Trap/Magnet Pull are entry-trap abilities with no switch-in
+message of their own.) **None of the twelve leads across all six fixtures
+has a switch-in-announcing ability or a held item with a real
+`ITEMEFFECT_ON_SWITCH_IN` trigger at full HP/no status** (no Intimidate,
+no weather-setter, no Trace, no stat-restore/cure needed). This rules out
+"switch-in proc count" as the source of *either* the +4-vs-+5 split among
+the real-gen fixtures *or* the +5-vs-+7 jump into the `overrides.parties`
+fixtures — the span-length model from Step 1 alone is insufficient; per
+this step's own instruction, corroborated live instead of guessing further
+from source.
+
+**Step 3 — live tick-by-tick RAM trace to localize the +5-vs-+4 split.**
+Built `tools/probe/probe-readylag-span-tickbytick.ts` (committed,
+rerunnable): reruns GRIMER/YOSHI (+5) and KADABRA/SHIZUKA (+4) dense and
+prints every `state.engine.{controllerExecFlags,playerControllerCommand,
+opponentControllerCommand,activeBattler}` change between "player intro
+complete" (`execFlags` 1→0) and "ready predicate true". Result (both
+independently re-measured, matching Round 13's own residuals exactly — a
+clean cross-check):
+
+```
+GRIMER/YOSHI:    1847 (complete) -> 1850 (ChooseAction dispatch, +3) -> 1853 (ready, +3 more)  = span 6
+KADABRA/SHIZUKA: 1880 (complete) -> 1883 (ChooseAction dispatch, +3) -> 1885 (ready, +2 more)   = span 5
+```
+
+The "player-intro-complete → both-battlers-dispatched" leg is **identical**
+(+3 ticks) in both fixtures — confirming Step 1's "no procs, 1 tick"
+prediction for the switch-in loop itself is right and this leg is not the
+variable one. **The entire +5-vs-+4 split lives in the "dispatch →
+opponent's own ChooseAction ack clears its exec bit" leg** (3 ticks for
+COMBUSKEN, 2 ticks for MAGNETON) — i.e. the Factory AI's own decision-making
+tick count, not the switch-in loop. This is a real, opponent-dependent ROM
+span (`HandleTurnActionSelectionState` + the opponent controller's AI
+call), but its length is **not** reducible to "party contents" the way
+Step 1 hypothesized — it plausibly depends on the AI's own move-scoring
+branch count per trainer class/moveset, which is a much deeper vein
+(`battle_ai_switch_items.c`) than this step's budget covers.
+
+**Step 4 — the `overrides.parties`-vs-real-generation split correlates with
+all 6 points, but the mechanism itself was already cleared.** Re-reading the
+Step 2 table by construction method instead of species: **every** confirmed
+`overrides.parties`-staged fixture (silver TANGELA, PUPITAR probe) reads
++7; **every** confirmed real-generation fixture (`factoryLegal` YOSHI/
+SHIZUKA/QUINN, `factoryBrain`-no-override gold-dense) reads +4 or +5. But
+`docs/overrides-ready-lag-probe.md` (side lane, same day) already ran the
+controlled ± differential this correlation calls for — a byte-identical
+roster staged both via real generation and via `overrides.parties` at the
+**exact route** (`trainerId 109`, `challengeNum 2`, `battleNum 0`,
+`seed 70`) the PUPITAR probe uses, `preCheckpointCaptureAllFrames` dense —
+and found the ready-gate frame offset **zero**, twice reproduced. That
+result stands: the staging mechanism itself is tick-faithful, at least for
+the roster that differential happened to use (whatever `factoryLegal`'s own
+free RNG walk generates at that seed — species 82/368/354, NOT DELCATTY).
+**That differential never actually tested the specific DELCATTY/SABLEYE/
+LICKITUNG roster both +7 fixtures share** (they are byte-identical
+`overrides.parties` blocks, copy-built from the same source) **under real
+generation** — so the correlation in this round's 6-point table is
+real but its cause is still open between two candidates: (a) something
+about this *specific* roster that only manifests when combined with
+`overrides.parties` staging (an edge case the simpler differential's
+roster didn't hit), or (b) something about this specific roster
+independent of construction method (ruled back in, since Cute Charm
+(DELCATTY's only Gen-3 ability) has **no `ABILITYEFFECT_ON_SWITCHIN` case
+at all** — confirmed by grep, `battle_util.c:2851` — it only triggers from
+`ABILITYEFFECT_MOVE_END` on a contact hit, so it cannot run during the
+switch-in loop either way; ruling DELCATTY's ability out again, by a
+different route than Step 2's per-fixture item/ability table).
+
+**Honest-stop.** No `src/` edit was attempted this round (Step 2's clean
+kill of the switch-in-proc theory, for both residual families, made a
+generic party-derived flat-span term provably wrong before any bisection —
+landing one would repeat Round 13's already-reverted mistake). Neither
+surviving +7 candidate (roster-times-staging interaction, or a route/
+species property this round didn't isolate) is confirmed, and — per this
+step's own ~30 min source-model clause — that is where this round stops
+rather than fitting a constant to close the gap on faith.
+
+**Sharpest next instrument.** (1) The real minimal differential the prior
+probe did not run: stage the *exact* DELCATTY(316)/SABLEYE(322)/
+LICKITUNG(108) roster (items 183/141/133, `abilitySlot` 0/0/1 — copy from
+either +7 fixture's `overrides.parties.parties.player` block) against a
+real `factoryLegal`/`factoryBrain` opponent with **no** `overrides.parties`
+on the player side if the harness supports a player-only override, or find
+a real seed where free rental generation independently lands this exact
+triple (unlikely but decisive if found) — if it's still +7, staging is
+cleared for good and the cause is roster/route-specific; if it drops to
++4/+5, the interaction is specifically between this roster and
+`overrides.parties`, meaning the earlier general differential's roster
+choice was too simple to catch it. (2) Independently, the opponent side
+(TANGELA vs. PUPITAR, both +7) still needs the same tick-by-tick trace Step
+3 used on YOSHI/SHIZUKA, since Step 3 only exercised the +4-vs-+5 family —
+it is not yet known whether the +7 fixtures' extra ticks live in the same
+"dispatch → AI-ack" leg or somewhere earlier. (3) The dispatch→AI-ack leg's
+2-vs-3-tick variance (Step 3) still needs its own source-derived model
+(likely in `battle_ai_switch_items.c`'s move-scoring loop) before even the
++4/+5 baseline family has a fully generic (not just empirically-bisected)
+fix.
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only (no `src/` or fixture writes); ran once this session.

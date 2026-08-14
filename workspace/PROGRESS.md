@@ -5,6 +5,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1265 — [MAIN worker, 2026-08-14] **Ready-lag #87: switch-in ability/item procs ruled out as the driver of BOTH residual families (source audit + live tick-by-tick RAM trace); `overrides.parties` correlation found but its general mechanism was already cleared by a prior differential — honest-stop, no validated `src/` fix**
+
+- **State:** no `src/` change this round (source archaeology + a live RAM
+  probe disproved the leading hypothesis before any bisection was
+  attempted — nothing to revert). All committed windows unchanged: silver
+  `factory-round-battle7-noland-reveal-off` **648/701**, gold
+  `factory-round-battle7-noland-gold-reveal-off` **700/701**, Lukas
+  **154/154**, Yoshi **700/751**, `test:smoke` **375/375**.
+- **Did:** Assigned to model `TryDoEventsBeforeFirstTurn`'s span length
+  from source per-fixture and check it predicts the confirmed +7/+7/+5/+4
+  residual table. Read the switch-in ability/item loop
+  (`battle_main.c:3841-3910`): it only costs extra ticks when
+  `AbilityBattleEffects`/`ItemBattleEffects` report a real effect;
+  otherwise both battlers' loops complete in a single tick. Audited all 12
+  active-lead abilities/held-items across all 6 confirmed fixtures
+  (real-gen: GRIMER/YOSHI, KADABRA/SHIZUKA, DUGTRIO/gold-dense,
+  WEEPINBELL/QUINN; `overrides.parties`: TANGELA/silver, PUPITAR/probe)
+  against `battle_util.c`'s switch-in cases — **none trigger a real
+  effect** (including DELCATTY's Cute Charm, which has no
+  `ABILITYEFFECT_ON_SWITCHIN` case in Gen 3 at all, contact-only per
+  `battle_util.c:2851`). This rules out switch-in procs as the cause of
+  either the +4-vs-+5 split or the +5-vs-+7 jump. Built
+  `tools/probe/probe-readylag-span-tickbytick.ts` (committed, rerunnable)
+  to localize the +5-vs-+4 split live: re-ran GRIMER/YOSHI and
+  KADABRA/SHIZUKA dense and found the switch-in-loop leg is an **identical
+  +3 ticks in both** (confirming the "no procs → 1 tick" source read); the
+  entire split lives in the opponent's own `ChooseAction`-ack tick count
+  (3 ticks for COMBUSKEN, 2 for MAGNETON) — a real span, but in the AI's
+  own decision logic (`battle_ai_switch_items.c`, unread this round), not
+  the switch-in loop. Separately noticed both confirmed +7 fixtures share
+  a byte-identical `overrides.parties` player roster (DELCATTY/SABLEYE/
+  LICKITUNG) — but `docs/overrides-ready-lag-probe.md` (same day, side
+  lane) already ran a byte-matched ± differential at the exact PUPITAR
+  route and found the staging mechanism innocent (offset 0) for an
+  *arbitrary* roster — so this round's correlation is real but its cause
+  is still open (roster×staging interaction vs. a roster/route property
+  independent of staging), not a new, confirmed discriminator. Full
+  writeup: `docs/trainer-pic-off-window-scout.md` round 14.
+- **Next:** (1) the still-untested decisive cell: stage the exact
+  DELCATTY/SABLEYE/LICKITUNG roster under real generation (not
+  `overrides.parties`) and see if it's still +7. (2) run the
+  tick-by-tick trace on a +7 fixture (TANGELA or PUPITAR) — unknown
+  whether its extra ticks live in the same AI-ack leg Step 3 found for the
+  +4/+5 family or somewhere earlier. (3) read
+  `battle_ai_switch_items.c`'s move-scoring loop to source-model the
+  AI-ack leg's own tick count — needed even for the +4/+5 baseline before
+  either family has a non-empirical fix.
+- **Notes:** commits this round: probe script + dossier/ISSUES/PROGRESS
+  append only (no `src/`, no fixture/trace changes). ISSUES #87 updated in
+  place (trimmed eliminated theories, added this round's audit + open
+  lead) per the "never mark closed in place, trim to open remainder"
+  convention — not deleted, since the defect is still open.
+
 ## 1264 — [MAIN worker, 2026-08-14] **Ready-lag `dispatchDelay(opponent)<101` discriminator FALSIFIED with clean RAM triangulation; real missing ROM span located precisely (`TryDoEventsBeforeFirstTurn`/`ChooseAction` handshake); no validated `src/` fix — honest-stop, evidence landed**
 
 - **State:** No `src/` change this round (a speculative flat-constant fix
@@ -117,72 +170,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   green (669 modules). Archived 1260 to `PROGRESS-archive.md` to keep this
   ledger at 3 entries.
 
-## 1262 — [MAIN worker, 2026-08-14] **Gold Brain-reveal compare built (478/701, new fade-in-onset residual named); three audit-driven pins landed**
-
-- **State:** first-ever GOLD Brain-battle compare (`factory-round-battle7-noland-gold-reveal-off`,
-  seed 2/challengeNum 5/factorySymbolsCount 1, the gold-eligible config from
-  `tests/factoryBrainRoundShape.test.ts`'s `GOLD_SEED`/`GOLD_STREAK` case)
-  replicates the silver r4 recipe: new app stage
-  (`generatedGoldRoundRevealProofStage`/`generatedRoundBattle7NolandGoldRevealStage`,
-  `factoryRoundIntroGeneralizationStage.ts`) + oracle `factoryBrain` scenario
-  with `overrides.parties` pinned to the app's own generated party on both
-  sides (player DUGTRIO/MEDICHAM/MISDREAVUS — setIds 564/565/566, reused
-  from the scout's own legal gold triple since the round-shape test's
-  664/678/527 fails the oracle's real challenge-5/rank-0 legality check even
-  though the app's pure `currentRecords` path lets it through; opponent
-  SKARMORY/JOLTEON/ELECTRODE, the app's real `generateFactoryOpponent`
-  output for this seed — differs from the scout's BLAZIKEN-led roster as
-  expected, same seed-mismatch reason 1260 documented). Trace includes an
-  `A` press this time (the r4 lesson) at app-relative tick 388, estimated by
-  transplanting silver's own hold-end-relative delta (press ≈ pic-reveal-
-  hold-end − 4) onto gold's own dense-capture-verified pic-reveal-hold end
-  (frame 1544, sha-identical to the existing gold ground-truth doc's
-  independent fixture) rather than a full app-vs-oracle bisection — time
-  budget did not allow the multi-pass bisection r4 used.
-  `preCheckpointFrameOffset` (1152) derived the same way as every prior
-  fixture (`speciesPopulateFrame(1186) − 26 − 8`), with `speciesPopulateFrame`
-  itself re-probed fresh for this fixture (not borrowed from the scout's
-  dossier): a live dense self-diff showed this fixture's own pre-transition
-  swirl/black-flash-hold lengths differ from the scout's gold fixture (black
-  hold 39f here vs their 44f) even though the *downstream* pic-reveal
-  window (1404–1544) is sha-identical to theirs — confirming the "per-fixture
-  landmark re-probe" caveat is load-bearing: upstream transition timing is
-  seed-sensitive, downstream message/reveal timing is not.
-- **Did:** **Result: 478/701 (68.2%).** Frames 0–33 exact (post-checkpoint
-  handoff through the tail of the black-flash hold). First divergence at
-  frame 34 — oracle-absolute 1186, exactly `speciesPopulateFrame`, the fade-in
-  span's own first frame: a thin horizontal bar (bbox 0,80-239,80) growing
-  over ~15 frames into a symmetric vertical band before subsiding — distinct
-  in character from silver's missing-A-press mistake (an A press is present
-  here) and from silver's known 420/503 tint-dot residuals (this is
-  wider/earlier/growing, not a sparse single-frame dot). Intermittent small
-  residuals (mostly <1%, a few 2-7% patches around frames 178-231, matching
-  where the opponent send-out sequence would sit) continue through frame
-  464; **465-700 are fully exact** (the ready-menu cycle matches, unlike
-  silver's +7 tail — a different residual shape, not the same construction-
-  route gap).
-  **Rung 2 (three audit-driven pins, each its own commit):** (a) new test
-  `factoryBrainRoundShape.test.ts` "losing to the silver Frontier Brain at
-  battleIndex 6" — drives to the sixth win, publishes the silver Brain at
-  battleIndex 6, resolves via the public `resolveRoundBattle({outcome:
-  "loss"})` seam (mirrors `advanceProofWin`'s technique, swapped to loss),
-  asserts `roundLost` fires with `battleIndex 6` and `frontierBrain
-  {status: "silver"}` intact on both the command and `round.rules`
-  end-to-end; red-verified (flipped the command-side expectation to "gold",
-  saw the real `AssertionError`, reverted). (b) `TRAINER_FRONTIER_BRAIN`
-  deduped: `factoryRoundBattleOrchestrator.ts` now imports it from its
-  exported owner `factoryAiMaskSelection.ts` instead of a local redeclare.
-  (c) streak%7 invariant: documented (not enforced) on
-  `FactoryRoundBattleOrchestratorConfig.factoryWinStreak` — a validation
-  throw was rejected because `factoryRoundBattleOrchestrator.test.ts`'s
-  "Noland rung 2" cases deliberately pass non-multiple-of-7 streaks (19/20/
-  40) to exercise brain eligibility at battleIndex 0/1 with a synthetic
-  mid-round streak; a throw would break those legitimate callers.
-- **Notes:** own commits this step: dedup+comment pin (b+c), loss-pin test
-  (a), gold trace/stage/fixture (rung 1) — each green at commit
-  (`npm run typecheck` + targeted suites, then `test:smoke` 375/375).
-  Zero `src/` engine changes for rung 1 (new `tools/compare/`,
-  `tools/battle-lab/`, `tools/probe/` files only) — regression fixtures
-  re-verified unaffected by construction, not just by inference: silver
-  **648/701**, Lukas **154/154**, Yoshi **700/751**, `test:smoke`
-  **375/375**.
