@@ -15,9 +15,7 @@ pub mod battle_ai_switch_into;
 pub mod battle_ai_switch_into_vectors_gen;
 pub mod battle_script_ai_reveal;
 pub mod battle_script_ai_reveal_vectors_gen;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod battle_script_gender;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod battle_script_gender_vectors_gen;
 pub mod damage_calc;
 pub mod damage_vectors_gen;
@@ -67,7 +65,6 @@ pub mod mon_construction;
 pub mod rental_data;
 pub mod rental_generation;
 pub mod rng;
-#[cfg(not(target_arch = "wasm32"))]
 pub mod species_gender_ratios_gen;
 pub mod stats;
 pub mod turn_order;
