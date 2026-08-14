@@ -1,3 +1,61 @@
+## 1263 — [MAIN worker, 2026-08-14] **Gold Brain-reveal alignment bisected: 478/701 → 700/701; corrected two of PROGRESS 1262's claims (its transplanted offset AND its ready-lag non-recurrence read)**
+
+- **State:** `factory-round-battle7-noland-gold-reveal-off` compare now
+  **700/701 (99.86%)**, up from 1262's 478/701. Root cause was exactly
+  1262's own favored hypothesis (a) — a genuine alignment error, not a
+  render bug — but the actual bug was more precise than "transplanted from
+  silver": 1262's own re-probed `speciesPopulateFrame` (1186) used a
+  **pixel** self-diff (first sha-differing frame) instead of the §C-defined
+  **RAM-state** landmark (`state.battlers.{player,opponent}.species` first
+  nonzero) that every prior fixture's offset (SHIZUKA/YOSHI/MAGNETON, and
+  silver's own Brain fixture per 1260) was actually keyed to. Re-ran
+  `bin/oracle lab` dense against this fixture's own scenario and read the
+  RAM field directly: species populate at **frame 1185**, one frame before
+  the first visible pixel change (1186) — the same one-frame RAM-vs-pixel
+  lag §C's own SHIZUKA table already implies but 1262 didn't re-check.
+- **Did:** Corrected `preCheckpointFrameOffset` 1152→**1151**
+  (`1185-26-8`) and, via 1262's own applied `press = hold-end-4` relation,
+  the A-press tick 388→**389**. Verified by direct `npm run compare`
+  sweep, not algebra alone: **388→481/701, 389→700/701, 390→482/701** — a
+  sharp single-frame optimum, confirming a true alignment fix rather than a
+  lucky combination. **Result: 700/701.** The frame-34-onward growing
+  horizontal-bar mismatch 1262 named is gone entirely. Sole remaining
+  residual: **frame 465** (oracle-absolute 1616), 16px/0.04%, inside the
+  opponent send-out materialize span — the same unmechanized single-frame
+  tint residual family as silver's 420/503 and Yoshi/Magneton's 444/536;
+  not chased, per the step's no-pixel-fitting/no-per-fixture-special-case
+  hard stop. **Also corrected 1262's ready-lag tail claim:** the committed
+  701-frame window ends (oracle-absolute 1851) *before* this fixture's own
+  true ready-menu transition (RAM predicate fires at 1865); 1262's "465-700
+  exact, unlike silver's +7" reading examined a window that never reached
+  the ready state at all. A throwaway (uncommitted) 730-frame diagnostic
+  extension shows gold **does** have the same construction-route ready-lag
+  family as silver — app's own menu appears at app-relative 711, oracle's
+  settles at 716, a **5-tick early-fire gap**, same direction as silver's
+  +7 but a different magnitude (not a flat cross-fixture constant) — a new,
+  more precise data point left for the concurrent ready-lag side-probe to
+  consume. Full writeup: `docs/trainer-pic-off-window-scout.md` §D round 12
+  (this worker's doc round, as assigned).
+- **Next:** the +7-family ready-lag fix itself is explicitly out of scope
+  this step (side worker's discriminator dossier lands first). Frame 465's
+  tint-materialize residual would need a third/fourth species data point to
+  isolate, same as the existing 420/503/444/536 family. The gold ground
+  truth doc's own dense-probe fixture (`factory-brain-gold-intro-dense-off`)
+  still has different upstream transition timing than this reveal-off
+  fixture's real generated-orchestrator construction (black-hold 39f vs
+  44f, per 1262) — a reminder that landmark re-probing per fixture stays
+  load-bearing, not a one-time constant.
+- **Notes:** trace-only fix (`tools/compare/traces/factory-round-battle7-
+  noland-gold-reveal-off.json`), zero `src/` changes. Regression matrix
+  held: `factory-round-battle7-noland-reveal-off` (silver) **648/701**,
+  `factory-round-battle6-lukas-reveal-off` **154/154**,
+  `factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke` **375/375**.
+  Finish gate: full `npm test` **1,014 files / 9,765 passed, 44 files / 223
+  skipped** (pre-existing CGB4 gating, not a regression); `npm run build`
+  green (669 modules). Archived 1260 to `PROGRESS-archive.md` to keep this
+  ledger at 3 entries.
+
+
 ## 1262 — [MAIN worker, 2026-08-14] **Gold Brain-reveal compare built (478/701, new fade-in-onset residual named); three audit-driven pins landed**
 
 - **State:** first-ever GOLD Brain-battle compare (`factory-round-battle7-noland-gold-reveal-off`,
