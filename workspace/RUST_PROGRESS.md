@@ -5,6 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R12 — [supervised session, 2026-08-13] **M11 key-repeat core + WASM boundary**
+
+- **State:** `rust-main` = current master `17164d1d` plus verified M11 through
+  merge head `3d0e1bc1`. The complete pure `keyRepeat.ts` surface is native and
+  forced-WASM reachable with no TypeScript fallback.
+- **Did:** ported the canonical ten-button mask, bounded shared counter,
+  `INITIAL_KEY_REPEAT_STATE`, `readKeys`, and `hasButton`; added one checked
+  additive ABI-v1 packet, adapter, and both-mode parity. Canonical TS execution
+  supplies **1,580 read cases + 20 membership cases** across all 1,024 masks,
+  every reachable counter, and full singleton repeat timelines; corpus sha256
+  `f67e38c085fdbb74fc600b9ef7622197295e1919020148bcc3356ce00ebf7482`.
+- **Next:** select the next conflict-free pure leaf. M7c opponent generation
+  remains deferred while Issue #55 is still open; presentation and generic
+  BattleState reducer ownership remain outside the completed M11 surface.
+- **Notes:** Terra/max worker plus one supervisor regeneration-hygiene repair.
+  Supervisor audited semantics and packet validation, regenerated twice to a
+  clean byte-identical tree, and reran cargo **756/756**, fmt, strict Clippy,
+  focused parity **3/3** both modes, forced union **19 files / 807/807**, smoke
+  **375/375**, full npm **1,044 files / 9,849 passed / 1 skip**, and build **664
+  modules** on the current-master union. Artifact is **509,825 bytes**, sha256
+  `d7344e1cb390ef88600227bb164e1732d39f4bab8cb39dee10d79709b0c430e4`.
+  Scope stayed `core-rs/**` plus only `tests/keyRepeatParity.test.ts`.
+
 ## R11 — [supervised session, 2026-08-13] **M10c draft-selection WASM boundary**
 
 - **State:** `rust-main` = current master `d7250c24` plus verified M10c
