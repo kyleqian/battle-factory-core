@@ -1034,3 +1034,36 @@ current app stage should be rejected before replay.
   one full run for acceptance.
 - **Real fix:** validate the shared ancestry once per suite, then let each leaf
   pin only its own output and immediate predecessor.
+
+## `EmeraldOracle.read_u32` silently word-aligns unaligned addresses
+
+- **What:** a `read_u32` at an address that is not 4-byte aligned rounds the
+  address DOWN to the word boundary and returns that word with no error —
+  the caller gets a plausible-looking wrong value. Bit the 2026-08-14
+  Noland receipt probe reading `playerTrainerId` at SaveBlock2+0x0A
+  (offset 2 mod 4); only a raw memory scan cross-check exposed the misread.
+- **Hits:** 1.
+- **Cost each:** ~10 min to notice and disprove.
+- **Workaround:** compose unaligned reads from `read_u8` bytes (see
+  `tools/probe/dump-noland-brain-party.py`).
+- **Real fix:** make `read_u32`/`read_u16` either honor unaligned addresses
+  or raise on them.
+
+## Fresh side worktrees fail 19 wasm-parity tests (missing gitignored artifact)
+
+- **What:** `artifacts/wasm/factory_wasm.wasm` is a gitignored build product,
+  so a fresh side worktree has no `artifacts/` at all and the full
+  `npm test` fails 19 wasm-parity tests with ENOENT instead of skipping
+  (the documented `describe.skipIf` absent-artifact skip did not engage
+  when the directory itself is missing). Cost the 2026-08-14 side receipt
+  worker an 18-minute full-suite run that ended red for reasons unrelated
+  to its change.
+- **Hits:** 1.
+- **Cost each:** ~20 min (run + triage).
+- **Workaround:** in a fresh worktree either run `./core-rs/build-wasm.sh`
+  first (needs the rustup toolchain PATH) or scope verification to the
+  suites the step touches; supervisors should treat exactly this 19-test
+  ENOENT set as the known-benign signature for new-files-only side branches.
+- **Real fix:** make the parity file's absent-artifact probe treat a missing
+  `artifacts/` directory the same as a missing file (skip, not throw), or
+  have the worktree setup script build the artifact.
