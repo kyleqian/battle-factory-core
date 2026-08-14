@@ -31,6 +31,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Supervisor reran focused **2/2**, cargo **761/761**, fmt, strict Clippy,
   wasm32 release, forced-WASM union **19 files / 807/807**, smoke **375/375**,
   full npm **1,046 files / 9,858 passed / 1 skip**, and build **664 modules**.
+  Wind-down soaks are vanilla **20/20 OK** and full **60/60 OK** with zero
+  crashes or hangs.
   Target-portable artifact is **509,805 bytes**, sha256
   `d415fea6f766bdeebfc7d678b72609adfebe5ea720de43e38f50746714b0552d`.
   Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
