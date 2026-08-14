@@ -1,0 +1,1794 @@
+{
+  "schema": "flail-natural-hp-bilateral-evidence/v1",
+  "status": "unsupported",
+  "move": "MOVE_FLAIL",
+  "moveId": 175,
+  "oracleProfile": "battle-scene-on",
+  "probe": "tools/compare/flailProbe.py",
+  "coverageCredit": false,
+  "coveredBranch": {
+    "naturalHpBand": "full",
+    "power": 20,
+    "shakeAmplitude": 1,
+    "coveredBy": "tools/compare/fixtures/flail-full-hp-evidence.json"
+  },
+  "requiredBranches": [
+    {
+      "power": 20,
+      "shakeAmplitude": 1,
+      "covered": true,
+      "coverageCredit": false,
+      "coveredBy": "tools/compare/fixtures/flail-full-hp-evidence.json"
+    },
+    {
+      "power": 40,
+      "shakeAmplitude": 3,
+      "covered": true,
+      "coverageCredit": false
+    },
+    {
+      "power": 80,
+      "shakeAmplitude": 6,
+      "covered": true,
+      "coverageCredit": false
+    },
+    {
+      "power": 100,
+      "shakeAmplitude": 8,
+      "covered": true,
+      "coverageCredit": false
+    },
+    {
+      "power": 150,
+      "shakeAmplitude": 12,
+      "covered": true,
+      "coverageCredit": false
+    },
+    {
+      "power": 200,
+      "shakeAmplitude": 16,
+      "covered": true,
+      "coverageCredit": false
+    }
+  ],
+  "staging": {
+    "partiesCompleteAndLegal": true,
+    "scene": "on",
+    "attackerSpecies": 98,
+    "targetSpecies": 95,
+    "attackerMove": 175,
+    "hpReducerMove": 162,
+    "hpReducer": "real Super Fang turns; no transient HP, outcome, stage, weather, side-condition, or RNG injection",
+    "attackerAttackEv": 0,
+    "attackerHpEv": 255,
+    "attackerMaxHp": 137,
+    "targetMaxHp": 142,
+    "naturalHpByPower": {
+      "20": 137,
+      "40": 69,
+      "80": 35,
+      "100": 18,
+      "150": 9,
+      "200": 5
+    },
+    "naturalReducerTurnsByPower": {"40": 1, "80": 2, "100": 3, "150": 4, "200": 5},
+    "firstInactiveCleanupCaptured": true,
+    "scenarioTracesUseOnlyRealMoves": true
+  },
+  "stateContract": {
+    "rowsPerBranchOrientation": 114,
+    "runsPerBranchOrientation": 2,
+    "rawRgbFrameSize": "240x160 RGB888",
+    "requiredFields": [
+      "tasks",
+      "sprites",
+      "battlerSpriteIds",
+      "animationRng",
+      "gameplayRng",
+      "battlers",
+      "parties",
+      "engine",
+      "immutableState",
+      "softwareOam",
+      "hardwareOam",
+      "softwareMatrices",
+      "hardwareMatrices",
+      "fadedPalette",
+      "unfadedPalette",
+      "hardwarePalette",
+      "paletteTags",
+      "tileTags",
+      "registers",
+      "se1",
+      "se2"
+    ],
+    "completeShape": {
+      "softwareOam": 128,
+      "hardwareOam": 128,
+      "softwareMatrices": 32,
+      "hardwareMatrices": 32,
+      "fadedPalette": 512,
+      "unfadedPalette": 512,
+      "hardwarePalette": 512,
+      "paletteTags": 16,
+      "tileTags": 128,
+      "registers": 10,
+      "audio": [
+        "se1",
+        "se2"
+      ],
+      "battlers": [
+        "player",
+        "opponent"
+      ],
+      "parties": [
+        "player",
+        "opponent"
+      ],
+      "rng": [
+        "gameplayRng",
+        "animationRng"
+      ]
+    },
+    "allBranchesCompleteShape": true,
+    "allBranchesRequiredFieldsRepeatStable": true,
+    "allBranchesByteStableRawRgb": true
+  },
+  "orientations": {
+    "player-back": {
+      "id": "player-back-krabby-to-opponent-front-onix",
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-player-krabby-opponent-onix.json",
+      "scenarioSha256": "d703cb46fb65a80cd39c7d51b35a7692059d062b07ebd6c693543ead4993cec8",
+      "branchCount": 5,
+      "frameCounts": [
+        114,
+        114,
+        114,
+        114,
+        114
+      ],
+      "sourceWindows": [
+        {
+          "startFrame": 429,
+          "endFrame": 542,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 1863,
+          "endFrame": 1976,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 3314,
+          "endFrame": 3427,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 4040,
+          "endFrame": 4153,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 4769,
+          "endFrame": 4882,
+          "frameCount": 114
+        }
+      ],
+      "completeStateFields": true,
+      "repeatStable": true,
+      "rawRgbStable": true
+    },
+    "opponent-front": {
+      "id": "opponent-front-krabby-to-player-back-onix",
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+      "scenarioSha256": "1dd81d7c662ae84d3974d4b2322b62cab657f883b67c6f28f7f68e46ee6de4a2",
+      "branchCount": 5,
+      "frameCounts": [
+        114,
+        114,
+        114,
+        114,
+        114
+      ],
+      "sourceWindows": [
+        {
+          "startFrame": 429,
+          "endFrame": 542,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 1863,
+          "endFrame": 1976,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 2580,
+          "endFrame": 2693,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 3306,
+          "endFrame": 3419,
+          "frameCount": 114
+        },
+        {
+          "startFrame": 4035,
+          "endFrame": 4148,
+          "frameCount": 114
+        }
+      ],
+      "completeStateFields": true,
+      "repeatStable": true,
+      "rawRgbStable": true
+    }
+  },
+  "latches": {
+    "expected": {
+      "wholeHardwareOam": "preceding software on 113/113 comparable rows per orientation",
+      "liveAttackerRotationMatrix": "RAM+2",
+      "hitsplatOam": "ordinary OAM RAM+1",
+      "hitsplatAffinePaint": "fresh-affine paint RAM+2",
+      "hitsplatTeardown": "RAM+1",
+      "hardwarePalette": "preceding faded with same-row monbg setup at age 4"
+    },
+    "measuredAcrossAllBranches": {
+      "wholeHardwareOam": "113/113 every branch and orientation",
+      "liveAttackerRotationMatrix": "112/112 comparable rows every branch and orientation",
+      "hitsplat": "ordinary OAM RAM+1; fresh-affine paint RAM+2; teardown RAM+1 every branch and orientation",
+      "hardwarePalette": "preceding faded 112/113 for power 40; 113/113 for powers 80/100/150/200; same-row setup age 4 in every branch",
+      "paletteNote": "Power 40 exposes a value-changing same-row setup at row index 4; powers 80/100/150/200 retain the same mechanism but their setup words are value-equal."
+    }
+  },
+  "repeatability": {
+    "branches": 10,
+    "orientations": 2,
+    "runsPerBranchOrientation": 2,
+    "evidenceAndRawRgbByteStable": true,
+    "completeStateAndRawRgbStable": true
+  },
+  "batchSiblingAudit": {
+    "move": "MOVE_LUSTER_PURGE",
+    "status": "unsupported",
+    "coverageCredit": false,
+    "receipt": false,
+    "reducer": false,
+    "note": "Independent psychic/white background, luster circle, particle blend, six hitsplats/sounds, target shake, and restore body receives no Flail credit."
+  },
+  "branches": {
+    "player-back-power-40": {
+      "power": 40,
+      "shakeAmplitude": 3,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-player-krabby-opponent-onix.json",
+      "scenarioSha256": "d703cb46fb65a80cd39c7d51b35a7692059d062b07ebd6c693543ead4993cec8",
+      "sourceWindow": {
+        "startFrame": 429,
+        "endFrame": 542,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 69,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 142,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-player-back-power-40-dense-state.json.gz",
+        "stateGzipSha256": "7debcdf9e80c6e9a0965769d8f257c836b7ce3a27a8ea9f3794e4ea3295f1b53",
+        "probeJsonSha256": "3ccc83f45da7e43e32d726be47c86d5ba8b200c6553aec587eacbffac52c6fb2",
+        "repeatProbeJsonSha256": "3ccc83f45da7e43e32d726be47c86d5ba8b200c6553aec587eacbffac52c6fb2",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-player-back-power-40-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "20ffd64c35fc87b8586c6c45898b6ed2b890c7868021a9453888ccdccc037107",
+        "rawRgbSequenceSha256": "eaecfb2974f42042ed88f1a4dc21196da296cb2b06a861246119344a2ed16b41",
+        "repeatRawRgbSequenceSha256": "eaecfb2974f42042ed88f1a4dc21196da296cb2b06a861246119344a2ed16b41",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-player-back-power-40-changemap.txt",
+        "changeMapSha256": "5abc65a8d4a81854c09a7336ed1673575328a5879669d69cc25def34b043d2f6",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 177,
+        "y": 43,
+        "x2": -20,
+        "y2": -9,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "112/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [
+          4
+        ],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "d1f4cbe8a5f23d5a1cd5d9624f3e6d97fb44cc41308df6fef92a670e5323be07",
+        "gameplayRngSequenceSha256": "b61baf2ed78d0a3819aaf6b329c3c974a684193c25a626e191ce137d2bf79a2c",
+        "animMovePower": [
+          40
+        ],
+        "animMoveDamage": [
+          5
+        ]
+      }
+    },
+    "player-back-power-80": {
+      "power": 80,
+      "shakeAmplitude": 6,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-player-krabby-opponent-onix.json",
+      "scenarioSha256": "d703cb46fb65a80cd39c7d51b35a7692059d062b07ebd6c693543ead4993cec8",
+      "sourceWindow": {
+        "startFrame": 1863,
+        "endFrame": 1976,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 35,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 132,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-player-back-power-80-dense-state.json.gz",
+        "stateGzipSha256": "0be1e686e7a86269bcb0fc494cc71665b58ab3671ec5571960be182b694e8ead",
+        "probeJsonSha256": "a4c78a39ff23bb48ae5977c12ab25a71db3308484377516ff731ffc121d9d5da",
+        "repeatProbeJsonSha256": "a4c78a39ff23bb48ae5977c12ab25a71db3308484377516ff731ffc121d9d5da",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-player-back-power-80-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "5c49e3df7ab3e776917d52ca5f1d97039f8c4986a84c790476215012e6496e13",
+        "rawRgbSequenceSha256": "f43329e6ed9d3d1d820013691706ed2e6bbc213e512e6c70609316471099101d",
+        "repeatRawRgbSequenceSha256": "f43329e6ed9d3d1d820013691706ed2e6bbc213e512e6c70609316471099101d",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-player-back-power-80-changemap.txt",
+        "changeMapSha256": "11864100adf8bd00946fe8ac77f64025a310073a13989879b37d41e7aa2d76fb",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 177,
+        "y": 43,
+        "x2": 22,
+        "y2": 2,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "e66e0b6d4bae65324d42ab4222c17496a5940a1bf395aef250747c26f0ad361e",
+        "gameplayRngSequenceSha256": "8f9f8ec89ffcec9e9c395ff326b996b4e24a07adccb9163b286b730a19ac419c",
+        "animMovePower": [
+          80
+        ],
+        "animMoveDamage": [
+          10
+        ]
+      }
+    },
+    "player-back-power-100": {
+      "power": 100,
+      "shakeAmplitude": 8,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-player-krabby-opponent-onix.json",
+      "scenarioSha256": "d703cb46fb65a80cd39c7d51b35a7692059d062b07ebd6c693543ead4993cec8",
+      "sourceWindow": {
+        "startFrame": 3314,
+        "endFrame": 3427,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 18,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 112,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-player-back-power-100-dense-state.json.gz",
+        "stateGzipSha256": "16aa6e309dc7236103780e3f148b8f1685a8452544f89ce82952ca0e968d6d88",
+        "probeJsonSha256": "e72afe192677a895f4359f1c60bb1553ff45ad32423faa7e6645e4d8e19c2c12",
+        "repeatProbeJsonSha256": "e72afe192677a895f4359f1c60bb1553ff45ad32423faa7e6645e4d8e19c2c12",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-player-back-power-100-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "5cc77542f057111f98f93fc8ac2821120a5a36cf0aba8b5247c515f9781852bf",
+        "rawRgbSequenceSha256": "5e5ab2eae15bb8e5611a8a02622cb47c40b861841d707759bace8811912d1ef1",
+        "repeatRawRgbSequenceSha256": "5e5ab2eae15bb8e5611a8a02622cb47c40b861841d707759bace8811912d1ef1",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-player-back-power-100-changemap.txt",
+        "changeMapSha256": "9068bf0b53690338e60391b4827b9cde7eeb24e08c203217f14c36e3ca913fe9",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 177,
+        "y": 43,
+        "x2": -2,
+        "y2": -5,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "a4ad895ea298fe4302224dbe19d12237d9ada8ff42a1efb5abf690f918a7228b",
+        "gameplayRngSequenceSha256": "ec3fb1f74194c366795bfbb16cbfd4de7c5ae47a7ef23675fe79eb11de45b9ee",
+        "animMovePower": [
+          100
+        ],
+        "animMoveDamage": [
+          12
+        ]
+      }
+    },
+    "player-back-power-150": {
+      "power": 150,
+      "shakeAmplitude": 12,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-player-krabby-opponent-onix.json",
+      "scenarioSha256": "d703cb46fb65a80cd39c7d51b35a7692059d062b07ebd6c693543ead4993cec8",
+      "sourceWindow": {
+        "startFrame": 4040,
+        "endFrame": 4153,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 9,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 100,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-player-back-power-150-dense-state.json.gz",
+        "stateGzipSha256": "6be6ce22bd05c07beef430013eb1e971a4ab56b531df54b92983c0b480679406",
+        "probeJsonSha256": "a489c9eb226decf98026ba2f5b98499ad709a86345690f48fb14a92a7f861e32",
+        "repeatProbeJsonSha256": "a489c9eb226decf98026ba2f5b98499ad709a86345690f48fb14a92a7f861e32",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-player-back-power-150-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "7a4b6654d140c0300522ec11c560537a7110b3bc53ddb23ae74dcce087ac2453",
+        "rawRgbSequenceSha256": "470d10801c7946a1ab7637e270177ab5cf9b98fdc639a94750528a9d3fa0b5a4",
+        "repeatRawRgbSequenceSha256": "470d10801c7946a1ab7637e270177ab5cf9b98fdc639a94750528a9d3fa0b5a4",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-player-back-power-150-changemap.txt",
+        "changeMapSha256": "8f600f3c39ca9e1b457aaf3f4ad3023a8fbf3bb9811a0b928ffbc5bef55283d6",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 177,
+        "y": 43,
+        "x2": -10,
+        "y2": -11,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "bba09b0b557c9d17af4689a97c662da98182e61fd5157c8a8f84338ea21cc80f",
+        "gameplayRngSequenceSha256": "46eff899d08f6d667a14590a5473c51c6700f5da09905edf05a8899b0974d74b",
+        "animMovePower": [
+          150
+        ],
+        "animMoveDamage": [
+          19
+        ]
+      }
+    },
+    "player-back-power-200": {
+      "power": 200,
+      "shakeAmplitude": 16,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-player-krabby-opponent-onix.json",
+      "scenarioSha256": "d703cb46fb65a80cd39c7d51b35a7692059d062b07ebd6c693543ead4993cec8",
+      "sourceWindow": {
+        "startFrame": 4769,
+        "endFrame": 4882,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 5,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 81,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-player-back-power-200-dense-state.json.gz",
+        "stateGzipSha256": "a4ba456de67455e703b6005656c1f24854100e0b772fe1a4a46d35815c2d9282",
+        "probeJsonSha256": "d871f82f64460190d2e380c9cea78a9d6f53705f4fc10bd954a26d61459773f6",
+        "repeatProbeJsonSha256": "d871f82f64460190d2e380c9cea78a9d6f53705f4fc10bd954a26d61459773f6",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-player-back-power-200-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "777afefaf1dcc22973adc138f18aacf262793f79b3e3b0c3e4888af295863e63",
+        "rawRgbSequenceSha256": "2c33292001498bd461898b376a7db1d4a8af5c510024b94444ebab408cde838a",
+        "repeatRawRgbSequenceSha256": "2c33292001498bd461898b376a7db1d4a8af5c510024b94444ebab408cde838a",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-player-back-power-200-changemap.txt",
+        "changeMapSha256": "3d1c902757ec0f09383909beb66d5e6944c97b0b5732b5c5fb3d35762e34c258",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 177,
+        "y": 43,
+        "x2": 10,
+        "y2": -8,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "86d29e03e953d056c76ffd4644fe2d947c8371fff6f76b42721e1422479ce234",
+        "gameplayRngSequenceSha256": "f23470f34ca433bafd369e98a8c08510b814fd72ddffc27ce5513f3ecaa88398",
+        "animMovePower": [
+          200
+        ],
+        "animMoveDamage": [
+          24
+        ]
+      }
+    },
+    "opponent-front-power-40": {
+      "power": 40,
+      "shakeAmplitude": 3,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+      "scenarioSha256": "1dd81d7c662ae84d3974d4b2322b62cab657f883b67c6f28f7f68e46ee6de4a2",
+      "sourceWindow": {
+        "startFrame": 429,
+        "endFrame": 542,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 69,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 142,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-opponent-front-power-40-dense-state.json.gz",
+        "stateGzipSha256": "163b1637450360839a491d87e546246e802ba2ec35ae7745219a00266b899146",
+        "probeJsonSha256": "99327345e29ff30b962bc8098ddc93d30a0076d57a3a0f0a3d6300a9e3fe745b",
+        "repeatProbeJsonSha256": "99327345e29ff30b962bc8098ddc93d30a0076d57a3a0f0a3d6300a9e3fe745b",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-opponent-front-power-40-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "1eb87adb7e0b835e75b0da245c3271dfd614d1b92481512cc1780bdae549d604",
+        "rawRgbSequenceSha256": "174e48e8e0110c98cd64d465250c0bacb96a92d13772fe6051421bf4b1237e81",
+        "repeatRawRgbSequenceSha256": "174e48e8e0110c98cd64d465250c0bacb96a92d13772fe6051421bf4b1237e81",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-opponent-front-power-40-changemap.txt",
+        "changeMapSha256": "0934d3c27766bec21278eeae287ad6b81f8c1338514eb846ff9acebca3891a75",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 71,
+        "y": 83,
+        "x2": -20,
+        "y2": -9,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "112/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [
+          4
+        ],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "d1f4cbe8a5f23d5a1cd5d9624f3e6d97fb44cc41308df6fef92a670e5323be07",
+        "gameplayRngSequenceSha256": "4409fd8fe30f2854af21b6052fe1a8026bf3323718513399c75c26eb5fec8a07",
+        "animMovePower": [
+          40
+        ],
+        "animMoveDamage": [
+          10
+        ]
+      }
+    },
+    "opponent-front-power-80": {
+      "power": 80,
+      "shakeAmplitude": 6,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+      "scenarioSha256": "1dd81d7c662ae84d3974d4b2322b62cab657f883b67c6f28f7f68e46ee6de4a2",
+      "sourceWindow": {
+        "startFrame": 1863,
+        "endFrame": 1976,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 35,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 132,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-opponent-front-power-80-dense-state.json.gz",
+        "stateGzipSha256": "a7eb9f0eac6f44ac3fc9bef46c154451cd75424889bab73d79f9f687824edbbb",
+        "probeJsonSha256": "b1ee8f25b65328f77065a2def04c4aaaa750d631bb00ba3cbd5c16404d48f257",
+        "repeatProbeJsonSha256": "b1ee8f25b65328f77065a2def04c4aaaa750d631bb00ba3cbd5c16404d48f257",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-opponent-front-power-80-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "2425e78aa11d19a763cbcc4562f9f3b01f6b6a422632316c8b0342ada8fe9089",
+        "rawRgbSequenceSha256": "317a268122fde1c1c9b54861a7aad9fb0b74f528663625e25c593844afcd4cae",
+        "repeatRawRgbSequenceSha256": "317a268122fde1c1c9b54861a7aad9fb0b74f528663625e25c593844afcd4cae",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-opponent-front-power-80-changemap.txt",
+        "changeMapSha256": "c0d894fb23f0395bedaa63064e3550996d69d1c0d096690df0733607a6468dc8",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 71,
+        "y": 83,
+        "x2": 21,
+        "y2": 2,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "2bd42863180337dd4984c6a8e94752002a95d84085dde2741cd9ad9ddb30c395",
+        "gameplayRngSequenceSha256": "559720758bedb924fc1e5a306c7d55b0422151783c87a56e5d13141de4a49c7d",
+        "animMovePower": [
+          80
+        ],
+        "animMoveDamage": [
+          10
+        ]
+      }
+    },
+    "opponent-front-power-100": {
+      "power": 100,
+      "shakeAmplitude": 8,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+      "scenarioSha256": "1dd81d7c662ae84d3974d4b2322b62cab657f883b67c6f28f7f68e46ee6de4a2",
+      "sourceWindow": {
+        "startFrame": 2580,
+        "endFrame": 2693,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 18,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 122,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-opponent-front-power-100-dense-state.json.gz",
+        "stateGzipSha256": "f13631923d69590c9e60c0e97e87f82c171a6bec8de41a14c57f055d997747cb",
+        "probeJsonSha256": "8865c71896a081bf726f0ab8862558c84add41525f5c496efb64b4fd8ed7ca9c",
+        "repeatProbeJsonSha256": "8865c71896a081bf726f0ab8862558c84add41525f5c496efb64b4fd8ed7ca9c",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-opponent-front-power-100-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "a7591ff6d0df942f8500996fbb60809fc938339a965daab63f307b5a134d96d4",
+        "rawRgbSequenceSha256": "c0c6646b186bcae1bba78bda61cd44aea00fd2e1a6a13226f24ab38d66b1cad7",
+        "repeatRawRgbSequenceSha256": "c0c6646b186bcae1bba78bda61cd44aea00fd2e1a6a13226f24ab38d66b1cad7",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-opponent-front-power-100-changemap.txt",
+        "changeMapSha256": "3de8be6f4bd28c5d3b8ba3637a1581644998513f142f384b48032b77d952e771",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 71,
+        "y": 83,
+        "x2": -4,
+        "y2": 9,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "e0842b7d2cd5018ce6f95fd88f045a60779388c3307c79f4f192ee21e24c8a4b",
+        "gameplayRngSequenceSha256": "cb743f738adc76955d7679028300fe024e6eb3ee7d31f86b301cb9995e06ada5",
+        "animMovePower": [
+          100
+        ],
+        "animMoveDamage": [
+          12
+        ]
+      }
+    },
+    "opponent-front-power-150": {
+      "power": 150,
+      "shakeAmplitude": 12,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+      "scenarioSha256": "1dd81d7c662ae84d3974d4b2322b62cab657f883b67c6f28f7f68e46ee6de4a2",
+      "sourceWindow": {
+        "startFrame": 3306,
+        "endFrame": 3419,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 9,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 110,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-opponent-front-power-150-dense-state.json.gz",
+        "stateGzipSha256": "2dc2b3b199f9c90c630166d33e39b567d698f6e4d6a5d13618a132f55f06ee24",
+        "probeJsonSha256": "9366ef060a22fc13ca3b63ce6afa46096206d700a38663df5e5e07e44748e2b6",
+        "repeatProbeJsonSha256": "9366ef060a22fc13ca3b63ce6afa46096206d700a38663df5e5e07e44748e2b6",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-opponent-front-power-150-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "eab60df8efe50e9fc2558eb585b1368ce5683989c6087ceeab01f5ea7196df3f",
+        "rawRgbSequenceSha256": "a4f8553d611a5ece06a29b4281724991c202a2214bda36623dd3aaf519b986d3",
+        "repeatRawRgbSequenceSha256": "a4f8553d611a5ece06a29b4281724991c202a2214bda36623dd3aaf519b986d3",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-opponent-front-power-150-changemap.txt",
+        "changeMapSha256": "355d7233bcad75ebd70f950f9b6c2d7592a91c22ef4ea8bcc49e26044ae2aa6c",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 71,
+        "y": 83,
+        "x2": -11,
+        "y2": 10,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "d097d61b3b4aa879f798f423e8d5486efcaae717ec43c7b28f6a792351ed8e05",
+        "gameplayRngSequenceSha256": "78ca71c0f988f5e50a55f7481ce6d95539b67efe5530f2f91c282d533ff6b232",
+        "animMovePower": [
+          150
+        ],
+        "animMoveDamage": [
+          17
+        ]
+      }
+    },
+    "opponent-front-power-200": {
+      "power": 200,
+      "shakeAmplitude": 16,
+      "covered": true,
+      "coverageCredit": false,
+      "scenario": "tools/battle-lab/mechanic-flail-natural-hp-opponent-krabby-player-onix.json",
+      "scenarioSha256": "1dd81d7c662ae84d3974d4b2322b62cab657f883b67c6f28f7f68e46ee6de4a2",
+      "sourceWindow": {
+        "startFrame": 4035,
+        "endFrame": 4148,
+        "frameCount": 114
+      },
+      "attacker": {
+        "species": 98,
+        "hp": 5,
+        "maxHp": 137
+      },
+      "target": {
+        "species": 95,
+        "hp": 93,
+        "maxHp": 142
+      },
+      "state": {
+        "schema": "flail-dense-evidence/v2",
+        "stateFields": [
+          "tasks",
+          "sprites",
+          "battlerSpriteIds",
+          "animationRng",
+          "gameplayRng",
+          "battlers",
+          "parties",
+          "engine",
+          "immutableState",
+          "softwareOam",
+          "hardwareOam",
+          "softwareMatrices",
+          "hardwareMatrices",
+          "fadedPalette",
+          "unfadedPalette",
+          "hardwarePalette",
+          "paletteTags",
+          "tileTags",
+          "registers",
+          "se1",
+          "se2"
+        ],
+        "allRequiredFieldsRepeatStable": true,
+        "rowShapeComplete": true,
+        "rowShape": {
+          "tasks": true,
+          "sprites": true,
+          "softwareOam": true,
+          "hardwareOam": true,
+          "softwareMatrices": true,
+          "hardwareMatrices": true,
+          "fadedPalette": true,
+          "unfadedPalette": true,
+          "hardwarePalette": true,
+          "paletteTags": true,
+          "tileTags": true,
+          "registers": true,
+          "audio": true,
+          "battlers": true,
+          "parties": true,
+          "gameplayRng": true,
+          "animationRng": true,
+          "rawRgbSha256": true
+        },
+        "rows": 114,
+        "tasksAndSpritesCaptured": true,
+        "oamAndMatricesCaptured": true,
+        "palettesAndTagsCaptured": true,
+        "registersAndAudioCaptured": true,
+        "battlersPartiesAndEngineCaptured": true,
+        "rngCaptured": true,
+        "rawRgbCaptured": true
+      },
+      "evidence": {
+        "stateGzip": "tools/compare/evidence/flail-natural-hp-opponent-front-power-200-dense-state.json.gz",
+        "stateGzipSha256": "0f4c3423ffd8b0a44359a4434bb5851a55e0e67b696c82e5ad4c512265d65f29",
+        "probeJsonSha256": "e7e989eb0b18c629d9c6826afd6043f23b4fa938efca1ce3f8eb15ad399f8615",
+        "repeatProbeJsonSha256": "e7e989eb0b18c629d9c6826afd6043f23b4fa938efca1ce3f8eb15ad399f8615",
+        "rawRgbArchive": "tools/compare/evidence/flail-natural-hp-opponent-front-power-200-raw-rgb.tar.gz",
+        "rawRgbArchiveSha256": "9c20c50c0d9283a09d821933833922c74cdf57402d2aa610d2350c292b861d3f",
+        "rawRgbSequenceSha256": "eaeb11c2851778a2e568ca0e3c9810b06589a69d5a3884ee9fe4dedc83e57522",
+        "repeatRawRgbSequenceSha256": "eaeb11c2851778a2e568ca0e3c9810b06589a69d5a3884ee9fe4dedc83e57522",
+        "rawRgbFrameCount": 114,
+        "rawRgbFrameBytes": 115200,
+        "changeMap": "tools/compare/evidence/flail-natural-hp-opponent-front-power-200-changemap.txt",
+        "changeMapSha256": "c381d8d316430831dfef1b5e9135df4cf423ef2b3ae49b8f4295d374c1893088",
+        "rawRgbArchiveMemberCount": 114
+      },
+      "hitsplat": {
+        "sourceRowIndex": 49,
+        "sourceAge": 49,
+        "slot": 3,
+        "template": "gRandomPosHitSplatSpriteTemplate",
+        "callback": "RunStoredCallbackWhenAffineAnimEnds",
+        "x": 71,
+        "y": 83,
+        "x2": 11,
+        "y2": 1,
+        "matrixNum": 0,
+        "matrix": [
+          512,
+          0,
+          0,
+          512
+        ],
+        "animation": 3,
+        "liveRows": 10
+      },
+      "latches": {
+        "wholeHardwareOamEqualsPrecedingSoftware": "113/113",
+        "liveAttackerMatrixEqualsSoftwareTwoRowsEarlier": "112/112",
+        "liveAttackerMatrixLag": "RAM+2",
+        "hardwarePaletteEqualsPrecedingFaded": "113/113",
+        "hardwarePaletteEqualsCurrentFadedComparableRows": "112/113",
+        "sameRowMonbgSetupAge": 4,
+        "sameRowMonbgSetupObserved": true,
+        "sameRowSetupOnlyRowIndexes": [],
+        "precedingOnlyRowIndexes": [
+          1
+        ],
+        "paletteMechanism": "preceding faded transfer; same-row monbg setup at age 4; p80+ setup is value-equal in this capture",
+        "hitsplatOamLag": "ordinary OAM RAM+1",
+        "hitsplatAffinePaintLag": "fresh-affine paint RAM+2",
+        "hitsplatTeardownLag": "RAM+1"
+      },
+      "rng": {
+        "animationWithinWindowUniqueValues": 112,
+        "gameplayWithinWindowUniqueValues": 1,
+        "immutableStateWithinWindow": true,
+        "battlersWithinWindow": true,
+        "partiesWithinWindow": true,
+        "engineWithinWindow": true,
+        "gameplayRngUnchangedWithinWindow": true,
+        "repeatStable": true
+      },
+      "source": {
+        "scriptPointerSha256": "69ea9054f09c49d0c1ee2f9b883315c812c6ff7db37c1c7b6fee7b758c7ea491",
+        "scriptOffsetSha256": "9b24f74f7fe7aaf16ae5b0710033fb44fb255f352c2663bc11eccb0b5d764b52",
+        "animationRngSequenceSha256": "c0bf6223005651adcf0115448ce58748c7c8f8d155ac459da9b89e83be2574d6",
+        "gameplayRngSequenceSha256": "2be9e9c7343ddd6a317da51342b1f2c766ebbab427cb417a369240835d50f8b4",
+        "animMovePower": [
+          200
+        ],
+        "animMoveDamage": [
+          25
+        ]
+      }
+    }
+  },
+  "boundedRemainder": "Natural Flail HP/power evidence is complete for power 40/80/100/150/200 in both orientations, but no reducer, typed seam, compositor, production framebuffer acceptance, or coverage promotion is claimed. Power 20 remains in the full-HP checkpoint. Luster Purge remains independently unsupported and receives no reducer, receipt, or coverage credit."
+}
