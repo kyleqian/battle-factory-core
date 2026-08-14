@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1244 — [supervisor, 2026-08-13] **CGB4 v41 and Rust draft boundary union verified**
+
+- **State:** #55 is source-exact through the selected-row **6,196-cycle**
+  CGB4 prefix. The generic seven-battle controller remains the governing S8
+  path. `rust-main` is folded through the complete draft-selection WASM
+  boundary.
+- **Did:** independently audited v41 containment and accepted the fifth-track
+  EXIST-set route for flags `0x83/0x80/0x80` (**8x3 = 24** cycles,
+  **6,172 -> 6,196**). Folded Rust M10c (`d608104f`), ran native Rust,
+  rebuilt WASM, and forced every parity suite through the artifact.
+- **Next:** continue #55 in a separate bounded step at only the fifth-track
+  volume/pitch-mask decision. Stop before either body. Keep wider
+  MPlay/service/arbitration, live construction-clock wiring, production,
+  presentation, animation, Rust, and the retired Battle-2 march out of scope.
+- **Notes:** native Rust green; WASM **507,934 B**, `f1882396...`; forced WASM
+  **18 files / 804 tests**. Final union full npm **1,042 files / 9,839 passed /
+  1 skipped**; build **664 modules**. No new unsupported barrier or DEFERRED
+  entry.
+
 ## 1243 — [MAIN worker, 2026-08-13] **CGB4 v41 fifth-track EXIST decision green**
 
 - **State:** #55 is source-exact through the selected-row **6,196-cycle**
@@ -47,10 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   vanilla **20/20** and full **60/60**, with **0 crashes / 0 hangs**. No new
   unsupported barrier or DEFERRED entry. Worker full-suite regeneration cost
   about 24 minutes (papercut).
-
-## 1241 — [MAIN worker, 2026-08-13] **CGB4 v40 fourth-track positive continuation green**
-
-- **State:** #55 is source-exact through the selected-row **6,172-cycle** CGB4 prefix, stopping before `_081DD9C8`'s fifth-track flags load.
-- **Did:** v40 freezes v39 evidence/report, v39 OFF packets, and inherited v37 OFF packets byte-for-byte; source-only digest joins strip v39's `r2` scalar. Source/ELF/ROM close `_081DDA66.._081DDA6C` / `50 20 2d 18 ad dc`: `movs MusicPlayerTrack_size; adds r5,r0; bgt _081DD9C8`; IWRAM signed-positive stride proof prices **12×3 = 36** cycles (**6,136 → 6,172**) including all three taken refills.
-- **Next:** no fifth-track load, decision, or body began. A separate bounded step may scope only that next flags load/decision; retain exit body, wider loop, MPlay/service/arbitration, live construction-clock wiring, production, presentation, animation, Rust, and retired canonical Battle-2 work as null.
-- **Notes:** v40 evidence/doc `2bd6f1b5…` / `459acae2…`; focused v39/v40 **14/14**, smoke **375/375**, full npm **1,038 files / 9,823 passed / 1 skipped**, build **661 modules**. Exact-key schemas reject predecessor/runtime/fifth-track state; no `src/**`, ratchet/barrier, ROADMAP/DEFERRED, ISSUES, or oracle-pixel change.

@@ -42949,3 +42949,9 @@ git; the current live ledger keeps the three load-bearing entries only.
   `806b5582…` / `61fe1034…`. Focused v34/v33 **10/10**, smoke **375/375**,
   final npm **1,026 files / 9,755 passed / 1 skipped**, build **660 modules**.
   No `src/**`, ratchet, unsupported-barrier, or canonical Battle-2 change.
+## 1241 — [MAIN worker, 2026-08-13] **CGB4 v40 fourth-track positive continuation green**
+
+- **State:** #55 is source-exact through the selected-row **6,172-cycle** CGB4 prefix, stopping before `_081DD9C8`'s fifth-track flags load.
+- **Did:** v40 freezes v39 evidence/report, v39 OFF packets, and inherited v37 OFF packets byte-for-byte; source-only digest joins strip v39's `r2` scalar. Source/ELF/ROM close `_081DDA66.._081DDA6C` / `50 20 2d 18 ad dc`: `movs MusicPlayerTrack_size; adds r5,r0; bgt _081DD9C8`; IWRAM signed-positive stride proof prices **12×3 = 36** cycles (**6,136 → 6,172**) including all three taken refills.
+- **Next:** no fifth-track load, decision, or body began. A separate bounded step may scope only that next flags load/decision; retain exit body, wider loop, MPlay/service/arbitration, live construction-clock wiring, production, presentation, animation, Rust, and retired canonical Battle-2 work as null.
+- **Notes:** v40 evidence/doc `2bd6f1b5…` / `459acae2…`; focused v39/v40 **14/14**, smoke **375/375**, full npm **1,038 files / 9,823 passed / 1 skipped**, build **661 modules**. Exact-key schemas reject predecessor/runtime/fifth-track state; no `src/**`, ratchet/barrier, ROADMAP/DEFERRED, ISSUES, or oracle-pixel change.
