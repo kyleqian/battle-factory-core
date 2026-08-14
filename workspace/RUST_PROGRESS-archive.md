@@ -5,6 +5,38 @@ full history regardless.
 
 ---
 
+## R27 — [supervised session, 2026-08-14] **M26 Battle Script Revenge damage-receipt multiplier leaf**
+
+- **State:** `rust-main` = current master `aff0e782` plus the verified Revenge
+  worker through merge `672d1c0e` and current union merge `4edb9494`. The
+  complete pure `battleScriptDoubleDamageIfDamagedOpcode.ts` decision/state
+  projection is native and wasm32-compilable. No ABI or adapter surface was
+  widened.
+- **Did:** ported exact attacker-then-target role resolution and the source
+  predicate over the attacker's physical/special damage receipts: a nonzero
+  receipt owned by the target overwrites `dmgMultiplier` with 2; otherwise the
+  multiplier is preserved. All successful paths `Advance`; receipts and roles
+  are immutable. Canonical TypeScript execution supplies **383 cases** across
+  all owner pairs, receipt-state combinations, multiplier edges, both ordered
+  missing-role errors, sibling preservation, repetition, and signed-i32 damage
+  edges; corpus sha256
+  `c50345ebb61ac605ed28f85ddebae7fa82aa2e42657f95c5a6a5f3e763896fdd`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the source and
+  canonical-handler projection, regenerated twice byte-identically (generated
+  sha256
+  `e2b2ae84ea9c6ca40e23c23cb45ed38a57ce5822a5123f9c447763327cbd2e46`),
+  and reran focused **5/5**, cargo **820/820**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,014 passed files / 44 grind files skipped; 9,765
+  passed / 223 skipped tests**, and build **669 modules**. Artifact is
+  **509,713 bytes**, sha256
+  `17fb3dc429e2b058dd9f513f89692cf33e3440471df41b5a0b44bf5e8dc37dc9`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier, Rust
+  deferral, or session papercut was added.
+
 ## R26 — [supervised session, 2026-08-14] **M25 Battle Script Haze stat-stage normalization leaf**
 
 - **State:** `rust-main` = current master `f12a66e6` plus the verified Haze
