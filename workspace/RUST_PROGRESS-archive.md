@@ -5,6 +5,40 @@ full history regardless.
 
 ---
 
+## R22 — [supervised session, 2026-08-14] **M21 Battle Script Foresight state leaf**
+
+- **State:** `rust-main` = current master `9deb3cae` plus the verified
+  Foresight worker through merge `84874b0c`. The complete pure
+  `battleScriptSetforesightOpcode.ts` state projection is native and
+  wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported exact missing-target ordering and the unconditional,
+  idempotent target-only `STATUS2_FORESIGHT` OR with `Advance`. Absolute
+  program counters, opcode registration, generic BattleState reduction, RNG,
+  scheduling, and presentation remain outside the narrow result. Canonical
+  TypeScript execution supplies **27 cases** across all four targets,
+  clear/set inputs, u32 edges, sibling preservation, missing target, and
+  repeated application; corpus sha256
+  `fbb38fbd92d927a35a2f5f57e35fb518d7eaae23cb3912ffe5580be972a355cc`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation now waits on the canonical TS live-generation port,
+  not Issue #55; continue excluding the construction clock and every module
+  the TS lane is actively changing.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the source and
+  canonical-handler execution, regenerated twice byte-identically (generated
+  sha256
+  `10f107f4781a650027c74ff1c5203c37ef0464dc018504dd36a2552a2267bdda`),
+  and reran focused **5/5**, cargo **795/795**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, and build **668 modules**. Worker same-commit full npm was
+  **1,056 files / 9,934 passed / 1 skip**. Artifact is **509,825 bytes**,
+  sha256
+  `97ba284228ab5aaf76238bc0c0857e1b7e2b8ead0fde915bf17e2683e1142160`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: the worker's full npm gate took ~671 s in the recursive CGB4
+  tail; a missing ignored WASM artifact and yielded-runner duplication added
+  one discarded full-suite attempt.
+
 ## R21 — [supervised session, 2026-08-14] **M20 Battle Script Taunt decision/state leaf + clean wind-down**
 
 - **State:** `rust-main` started from master `438d06ba` and now contains the

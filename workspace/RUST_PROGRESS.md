@@ -5,6 +5,39 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R25 — [supervised session, 2026-08-14] **M24 Battle Script Follow Me forced-target state leaf**
+
+- **State:** `rust-main` = current master `33e440dc` plus the verified Follow
+  Me worker through merge `e15bfadc`. The complete pure
+  `battleScriptSetforcedtargetOpcode.ts` state projection is native and
+  wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported exact missing-attacker ordering, attacker-record side
+  routing, and the unconditional acting-side overwrite of
+  `followmeTimer = 1` and `followmeTarget = attacker` with `Advance`. Every
+  other acting-side timer/id/amount field and the opposite side are preserved.
+  Canonical TypeScript execution supplies **57 cases** across all four
+  attackers and canonical sides, prior timer u8 edges, every prior target,
+  sibling u8 boundaries, same-side partner replacement, missing role, and
+  repetition; corpus sha256
+  `b64cdf4492cb810c7d89098e301efd9b21fad5f4798a36bc237c62a336cf3f91`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited source and
+  canonical-handler execution, regenerated twice byte-identically (generated
+  sha256
+  `414089df9a79f97748642f3f5a550a1935b6f7807dce49dc0c60fb081b93943f`),
+  and reran focused **5/5**, cargo **810/810**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,014 passed files / 44 grind files skipped; 9,764
+  passed / 223 skipped tests**, and build **669 modules**. Artifact is
+  **507,850 bytes**, sha256
+  `fa3857122b32c2f43dfd411b875ab6bd6fc89ef02ab5862ac60da837612cbf90`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: the fresh worker lacked the ignored WASM artifact and repeated its
+  full npm gate while diagnosing the initial missing-artifact run, ~3 min.
+
 ## R24 — [supervised session, 2026-08-14] **M23 Battle Script Focus Energy decision/state leaf**
 
 - **State:** `rust-main` = current master `85fca820` plus the verified Focus
@@ -70,37 +103,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   deferral was added.
   PAPERCUT: before the CGB4 gate reached this worktree, the worker's repeated
   full npm verification took ~20m45s under shared-machine contention.
-
-## R22 — [supervised session, 2026-08-14] **M21 Battle Script Foresight state leaf**
-
-- **State:** `rust-main` = current master `9deb3cae` plus the verified
-  Foresight worker through merge `84874b0c`. The complete pure
-  `battleScriptSetforesightOpcode.ts` state projection is native and
-  wasm32-compilable. No ABI or adapter surface was widened.
-- **Did:** ported exact missing-target ordering and the unconditional,
-  idempotent target-only `STATUS2_FORESIGHT` OR with `Advance`. Absolute
-  program counters, opcode registration, generic BattleState reduction, RNG,
-  scheduling, and presentation remain outside the narrow result. Canonical
-  TypeScript execution supplies **27 cases** across all four targets,
-  clear/set inputs, u32 edges, sibling preservation, missing target, and
-  repeated application; corpus sha256
-  `fbb38fbd92d927a35a2f5f57e35fb518d7eaae23cb3912ffe5580be972a355cc`.
-- **Next:** select the next conflict-free pure Battle Script leaf. M7c
-  opponent generation now waits on the canonical TS live-generation port,
-  not Issue #55; continue excluding the construction clock and every module
-  the TS lane is actively changing.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the source and
-  canonical-handler execution, regenerated twice byte-identically (generated
-  sha256
-  `10f107f4781a650027c74ff1c5203c37ef0464dc018504dd36a2552a2267bdda`),
-  and reran focused **5/5**, cargo **795/795**, fmt, strict Clippy, wasm32
-  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
-  375/375**, and build **668 modules**. Worker same-commit full npm was
-  **1,056 files / 9,934 passed / 1 skip**. Artifact is **509,825 bytes**,
-  sha256
-  `97ba284228ab5aaf76238bc0c0857e1b7e2b8ead0fde915bf17e2683e1142160`.
-  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
-  deferral was added.
-  PAPERCUT: the worker's full npm gate took ~671 s in the recursive CGB4
-  tail; a missing ignored WASM artifact and yielded-runner duplication added
-  one discarded full-suite attempt.
