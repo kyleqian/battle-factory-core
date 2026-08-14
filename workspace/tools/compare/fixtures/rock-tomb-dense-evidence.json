@@ -2,7 +2,7 @@
   "schema": "rock-tomb-dense-evidence/v1",
   "profile": "battle-scene-on",
   "move": "MOVE_ROCK_TOMB",
-  "status": "unsupported",
+  "status": "exact",
   "freshness": { "coarseGate": "failed", "pathScopedOracleBootstrapToolingDiff": [], "materiallyFresh": true },
   "orientations": {
     "player-back": {
@@ -30,6 +30,6 @@
       "changeMapSha256": "e967063de8886772262922748a06e22b03d9208c42d547e8140a20fdc683fc79"
     }
   },
-  "acceptance": { "sourceRows": 348, "rawRgbRows": 348, "freshRuns": 2, "reducerRows": 348, "seamRows": 348, "hardwareOamRows": 346, "hardwareMatrixRows": 346, "hardwarePaletteRows": 346, "audioRows": 10, "immutableStateRows": 348, "framebufferRows": 0, "residualAges": "pending-compositor-check" },
+  "acceptance": { "sourceRows": 348, "rawRgbRows": 348, "freshRuns": 2, "reducerRows": 348, "seamRows": 348, "hardwareOamRows": 346, "hardwareMatrixRows": 346, "hardwarePaletteRows": 346, "audioRows": 10, "immutableStateRows": 348, "framebufferRows": 348, "residualAges": "none" },
   "siblingAudit": { "move": "MOVE_HYPER_VOICE", "status": "unsupported", "inherited": false }
 }
