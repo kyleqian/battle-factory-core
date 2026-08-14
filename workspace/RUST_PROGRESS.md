@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R26 — [supervised session, 2026-08-14] **M25 Battle Script Haze stat-stage normalization leaf**
+
+- **State:** `rust-main` = current master `f12a66e6` plus the verified Haze
+  worker through merge `85e5cf27`. The complete pure
+  `battleScriptNormalisebuffsOpcode.ts` state projection is native and
+  wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported the unconditional four-battler by eight-stage signed-s8
+  reset to source `DEFAULT_STAT_STAGE = 6` with `Advance`. Canonical
+  TypeScript execution supplies **35 cases**: a 32-cell position matrix plus
+  mixed signed edges, all-neutral idempotence, and repeated application;
+  corpus sha256
+  `294dac1f672c6888bbc0d7bfe2adebc4c8b0928e22abfaf9860efd08a85cd602`.
+  Statuses, roles, disable fields, absolute PCs, opcode registration, generic
+  BattleState reduction, RNG, scheduling, and presentation remain excluded.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited source and
+  canonical-handler execution, regenerated twice byte-identically (generated
+  sha256
+  `4ee5ef51e3a4d9dce1b63f16f85cf2ee7ca9cad2569eb08cc650e80af8a5d570`),
+  and reran focused **5/5**, cargo **815/815**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,014 passed files / 44 grind files skipped; 9,764
+  passed / 223 skipped tests**, and build **669 modules**. Artifact is
+  **509,722 bytes**, sha256
+  `4309014e9499263753c284ad1f48444dc950f7dc8f4a103b87889f54b698fc47`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: the fresh worker lacked the ignored WASM artifact, requiring one
+  explicit artifact build before its initial npm gate, ~1 min.
+
 ## R25 — [supervised session, 2026-08-14] **M24 Battle Script Follow Me forced-target state leaf**
 
 - **State:** `rust-main` = current master `33e440dc` plus the verified Follow
@@ -70,36 +102,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   deferral was added.
   PAPERCUT: cargo was absent from the worker login PATH; the documented
   explicit toolchain setup cost ~1 min.
-
-## R23 — [supervised session, 2026-08-14] **M22 Battle Script Defense Curl state leaf**
-
-- **State:** `rust-main` = current master `58a818fd` plus the verified Defense
-  Curl worker through merge `6f1b4f88`. The complete pure
-  `battleScriptSetDefenseCurlBitOpcode.ts` state projection is native and
-  wasm32-compilable. No ABI or adapter surface was widened.
-- **Did:** ported exact missing-attacker ordering and the unconditional,
-  idempotent attacker-only `STATUS2_DEFENSE_CURL` OR with `Advance`. Stat
-  changes, absolute program counters, opcode registration, generic
-  BattleState reduction, RNG, scheduling, and presentation remain outside the
-  narrow result. Canonical TypeScript execution supplies **27 cases** across
-  all four attackers, clear/set inputs, u32 edges, sibling preservation,
-  missing attacker, and repeated application; corpus sha256
-  `39dd1fb0a8d96809508adfd1282eef87c6fc202f49920bb009d80ce61b839825`.
-- **Next:** select the next conflict-free pure Battle Script leaf. M7c
-  opponent generation waits on the canonical TS live-generation port; keep
-  the construction clock and modules under active TS work excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited source and
-  canonical-handler execution, regenerated twice byte-identically (generated
-  sha256
-  `904047b8ffa00588b42c813709536dd7e5b397e59291f7c994a6c3847e1fdb93`),
-  and reran focused **5/5**, cargo **800/800**, fmt, strict Clippy, wasm32
-  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
-  375/375**, full npm **1,013 passed files / 44 grind files skipped; 9,757
-  passed / 223 skipped tests**, and build **668 modules**. The main fold's
-  CGB4 opt-in gate reduced the supervisor full suite to **84.53 s**. Artifact
-  is **510,065 bytes**, sha256
-  `62a2a1a4baa70500da6f5465fb75beb54acd8901a9a8ff3ce1cc45f1ec4ecd34`.
-  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
-  deferral was added.
-  PAPERCUT: before the CGB4 gate reached this worktree, the worker's repeated
-  full npm verification took ~20m45s under shared-machine contention.
