@@ -5,6 +5,125 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R19 — [supervised session, 2026-08-14] **M18 Battle Script Minimize state leaf**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15-R19
+  through `a921e290`. The complete pure
+  `battleScriptSetminimizeOpcode.ts` state projection is native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported the exact `HITMARKER_OBEYS` gate ordering: a clear gate is a
+  complete no-op before attacker resolution, while a set gate requires the
+  attacker and ORs `STATUS3_MINIMIZED` into only that battler. Exact role
+  error, hit marker, unrelated bits, siblings, and idempotence are retained.
+  Canonical TypeScript execution supplies **51 cases** across all attackers,
+  both gates, clear/set state, two applications, and u32 status/hit-marker
+  edges; corpus sha256
+  `d3760ba077c31a99adb30d27642450f8de055ca72a00abed711bf91f0e334a49`.
+- **Next:** select the next conflict-free pure Battle Script leaf only if a
+  full worker verification still leaves the required wind-down margin. M7c
+  opponent generation remains deferred while Issue #55 is open.
+- **Notes:** Sol/high worker, one commit. Supervisor audited the no-op-before-
+  role-resolution branch against the pinned source, regenerated twice
+  byte-identically (generated sha256
+  `ef4143b2254024205f3f33c775f7934847310420b86371c9aea9e06efe78a5ce`),
+  and reran focused **5/5**, cargo **780/780**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, and smoke **375/375**.
+  Worker same-commit full npm was **1,047 files / 9,864 passed / 1 skip**;
+  build was **664 modules**. Artifact is **509,818 bytes**, sha256
+  `d72d7fa77bea0d961ffc0279233c0d616ee30e4852cabd295544706555e8b3d5`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: cargo was absent from the worker login PATH; explicit toolchain
+  setup cost ~1 min.
+
+## R18 — [supervised session, 2026-08-14] **M17 Battle Script Destiny Bond state leaf**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15-R18
+  through `d048dc24`. The complete pure
+  `battleScriptSetdestinybondOpcode.ts` state projection is native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported the exact four-battler attacker-only transformation: require
+  the optional attacker role, OR `STATUS2_DESTINY_BOND` into only that
+  battler's `status2`, preserve all unrelated bits, siblings, and role state,
+  and retain the exact missing-attacker error. Canonical TypeScript execution
+  supplies **25 cases** covering every attacker, clear/set and idempotent
+  inputs, full-u32 edges, and the missing role; corpus sha256
+  `b024fb02d948ecbf7e5417738eaf53704d811466b6f069ef915e6aa263e73315`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation remains deferred while Issue #55 is open; keep opcode
+  registration, generic BattleState reduction, presentation, and callback
+  expansion out.
+- **Notes:** Luna/max worker, one commit. Supervisor audited target-only OR
+  semantics and exact error text; regenerated twice byte-identically
+  (generated sha256
+  `28ec30a71e35ffce6d85e2ed5e90af4990c8bfdc80e2549f6c9360105164cdba`);
+  and reran focused **4/4**, cargo **775/775**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, and smoke **375/375**.
+  Worker same-commit full npm was **1,047 files / 9,864 passed / 1 skip**;
+  build was **664 modules**. Artifact is **509,812 bytes**, sha256
+  `444bb310b590eaccb09184f86b2f41cd3a26884a81a0485a1a43e8875872d7ad`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: the worker ran a redundant baseline full suite before materializing
+  the gitignored WASM artifact, costing ~18 min before the required final run.
+
+## R17 — [supervised session, 2026-08-14] **M16 Battle Script always-hit state leaf**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15-R17
+  through `22b46762`. The complete pure
+  `battleScriptSetalwayshitflagOpcode.ts` state projection is native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported the exact four-battler attacker/target transformation: clear
+  both packed `STATUS3_ALWAYS_HITS` bits, set turn 2, overwrite the target's
+  `battlerWithSureHit` owner with the attacker, preserve all unrelated bits
+  and non-target state, and retain attacker-first missing-role error
+  precedence. Canonical TypeScript execution supplies **71 cases** across all
+  16 role pairs, all four incoming counters, u32 edges, prior owners, and the
+  three missing-role combinations; corpus sha256
+  `9a69a8a8336fd55fcbec4ad7866585239d47fe0af32f43638636fe321c9ee106`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation remains deferred while Issue #55 is open; keep opcode
+  registration, generic BattleState reduction, presentation, and callback
+  expansion out.
+- **Notes:** Terra/max worker, one commit. Supervisor audited role ordering,
+  target-only mutation, and packed-field replacement; regenerated twice
+  byte-identically (generated sha256
+  `0fbc089c4cf87c2c32bfa7931344edd57d06778d763c9d3ebb6bf2a6c1356159`);
+  and reran focused **4/4**, cargo **771/771**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **375/375**, full
+  npm **1,047 files / 9,864 passed / 1 skip**, and build **664 modules**.
+  Artifact is **509,811 bytes**, sha256
+  `c2ea109ccadc9f2849d508de3134fe996a905d7e38e080ef812755602bfe5a52`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: the worker lost its full-npm command handle and falsely reported
+  completion; supervisor reran the full suite correctly, costing ~15 min.
+
+## R16 — [supervised session, 2026-08-14] **M15 Battle Script negative-damage arithmetic**
+
+- **State:** `rust-main` = current master `438d06ba` plus verified R15 and R16
+  `f28a20e6`. The complete pure `battleScriptNegativedamageOpcode.ts`
+  arithmetic surface is native and wasm32-compilable; no ABI or adapter
+  surface was widened.
+- **Did:** ported signed-`i32` `-Math.floor(hpDealt / 2)` plus the exact
+  zero-result-to-`-1` guard. The Rust implementation explicitly corrects
+  truncation for negative odd inputs, preserving the complete typed-reachable
+  TypeScript domain. Canonical TypeScript execution supplies **24 cases**;
+  corpus sha256
+  `fc4526fac0345c329ede2f2ce2072f207a7096c75e1461da89bc8451a318fe46`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation remains deferred while Issue #55 is open; keep opcode
+  registration, the generic BattleState reducer, presentation, and callback
+  stack expansion out.
+- **Notes:** Luna/max worker, one commit. Supervisor audited the signed-domain
+  floor correction, regenerated twice byte-identically (generated sha256
+  `8538ed4437b6aa272771fd03b27d993722293df053dcde8e74c58b5f62d83a20`),
+  and reran focused **3/3**, cargo **767/767**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, and smoke **375/375**.
+  Worker same-commit full npm was **1,047 files / 9,864 passed / 1 skip**;
+  build was **664 modules**. Artifact is **507,846 bytes**, sha256
+  `66c35cdc1b2f2b1222322dcd08a2926bea800212ebd54721e19dd165e33e651d`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+  PAPERCUT: the first full npm attempt lacked the gitignored WASM artifact;
+  after `build-wasm.sh`, the required rerun took ~20 min.
+
 ## R15 — [supervised session, 2026-08-13] **M14 Battle Script battler-position resolver**
 
 - **State:** `rust-main` = current master `438d06ba` plus verified R15
