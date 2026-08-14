@@ -25,6 +25,8 @@ pub mod battle_script_doubledamageifdamaged;
 pub mod battle_script_doubledamageifdamaged_vectors_gen;
 pub mod battle_script_gender;
 pub mod battle_script_gender_vectors_gen;
+pub mod battle_script_givepaydaymoney;
+pub mod battle_script_givepaydaymoney_vectors_gen;
 pub mod battle_script_jumpifnotfirstturn;
 pub mod battle_script_jumpifnotfirstturn_vectors_gen;
 pub mod battle_script_negativedamage;
