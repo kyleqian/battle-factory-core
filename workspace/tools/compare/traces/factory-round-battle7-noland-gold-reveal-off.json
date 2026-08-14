@@ -1,0 +1,18 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-round-battle7-noland-gold-reveal-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-round-battle7-noland-gold-reveal-off.json",
+    "preCheckpointFrameOffset": 1152
+  },
+  "segments": [
+    { "frames": 388, "buttons": [] },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 311, "buttons": [] }
+  ],
+  "captureWindow": { "start": 0, "end": 700 }
+}
