@@ -1,3 +1,10 @@
+# MOVE_LUSTER_PURGE pure reducer checkpoint — remains unsupported (2026-08-14 worker)
+
+- **State:** Coverage remains **184/276 Level-50 exact**, 0 partial, 0 staged, and **92 unsupported**. Luster Purge has a pure source-relative reducer only; typed seam/framebuffer acceptance remains **0/665** and no sibling receives credit.
+- **Did:** Modeled the full retained script/task/sprite/resource/palette-task/GPU/audio topology for player-back and opponent-front, including psychic/white fades, circle affine lifecycle, both palette blends, six explicitly supplied visual-`Random2()` hitsplats, six panned sound starts, HorizontalShake, monbg, restore, and cleanup. The portable verifier matches **333/333 + 332/332 = 665/665** retained rows and pins immutable gameplay state/RNG.
+- **Next:** Add the narrow typed presentation seam and source-derived compositor, then require twice-fresh complete production framebuffer equality before promoting Luster Purge alone.
+- **Notes:** Commit `5bb930f7`; focused source/evidence/reducer/boundary **17/17**, portable verifier, animation audit/coverage, typecheck, full `npm test` **1,061 files / 9,974 passed / 1 skipped**, and build are green. No coverage/latch ledger, animation boundary, unsupported barrier, canonical recording import, gameplay/RNG/turn/controller/facility state, absolute-tick/frame/hash/RGB lookup, fitting, or sibling status changed.
+
 # MOVE_LUSTER_PURGE bilateral dense Scene-ON evidence checkpoint — remains unsupported (2026-08-14 worker)
 
 - **State:** Coverage remains **184/276 Level-50 exact**, 0 partial, 0 staged, and **92 unsupported**. This is an evidence-only checkpoint: Luster Purge has `coverageCredit: false`; Mist Ball, Flail, Heat Wave, Calm Mind, and every shared-component sibling remain independent controls.
