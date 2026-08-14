@@ -23,6 +23,8 @@ pub mod battle_script_negativedamage;
 pub mod battle_script_negativedamage_vectors_gen;
 pub mod battle_script_setalwayshitflag;
 pub mod battle_script_setalwayshitflag_vectors_gen;
+pub mod battle_script_setdefensecurlbit;
+pub mod battle_script_setdefensecurlbit_vectors_gen;
 pub mod battle_script_setdestinybond;
 pub mod battle_script_setdestinybond_vectors_gen;
 pub mod battle_script_setforesight;
