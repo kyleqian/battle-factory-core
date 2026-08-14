@@ -5,6 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R11 — [supervised session, 2026-08-13] **M10c draft-selection WASM boundary**
+
+- **State:** `rust-main` = current master `d7250c24` plus verified M10c
+  `ae564d1e` (merge head `d608104f`). The complete 12-helper pure draft
+  selection surface is native and forced-WASM reachable with no TS fallback.
+- **Did:** added one checked additive ABI-v1 operation packet preserving UTF-8
+  species/messages, six full rental sources, u32 boundaries, and optional
+  `otId` absence versus present zero. Status 1 owns exact routing errors;
+  status 2 owns **56 structural malformed classes** after complete validation.
+  Both-mode parity covers **180 cases / 23 categories** and all 12 operations.
+- **Next:** select the next conflict-free pure leaf; M7c opponent generation
+  still waits on #55, and draft state construction/presentation remain outside
+  the completed M10 selection family.
+- **Notes:** Sol/high worker, one commit. Supervisor audited all packet suffixes,
+  validation order, result tags, optional-field preservation, and no-fallback
+  routing; reran cargo **750/750**, fmt, strict clippy, focused parity **4/4**
+  both modes, forced union **18 files / 804/804**, release WASM, and post-fold
+  smoke **375/375**. Worker exact-commit full npm was **1,041 files / 9,833
+  passed / 1 skip**; build was **664 modules**. Artifact is **507,934 bytes**,
+  sha256 `f1882396b33623622cd5e90aff7531c335a7b8d71574a647064cccb487ebf471`.
+
 ## R10 — [supervised session, 2026-08-13] **M10b draft projections**
 
 - **State:** `rust-main` = current master `cc8e1d3f` plus verified M10b
