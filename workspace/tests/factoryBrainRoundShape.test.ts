@@ -19,6 +19,7 @@ import { TRAINER_FRONTIER_BRAIN } from "../src/engine/factoryAiMaskSelection.ts"
 import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus.ts";
 import {
   advanceFactoryRoundPresentation,
+  beginFactoryRoundBattleStartIntro,
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
@@ -164,6 +165,39 @@ function assertOrdinaryThroughBattle5(
   }
 }
 
+/**
+ * Rung C pin: proves `beginFactoryRoundBattleStartIntro` constructs the real
+ * battle-start command for the scheduled Brain battle, carrying NOLAND's
+ * source-cited identity (docs/noland-brain-staging-design.md §2.3,
+ * re-verified against reference/pokeemerald), and that the existing
+ * `frontierBrain` status plumbing ({status: silver/gold}) on
+ * `currentOpponent` stays consistent with the command that was just built
+ * from that very opponent.
+ */
+function assertBrainBattleStartCommand(
+  state: FactoryRoundBattleOrchestratorState,
+  status: "silver" | "gold",
+): void {
+  expect(state.round.rules.phase).toBe("presentingBattleStart");
+  expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status });
+
+  const started = beginFactoryRoundBattleStartIntro(state);
+  const command = started.battleStartIntro!.command;
+  expect(command.battleIndex).toBe(6);
+  expect(command.opponentTrainer).toMatchObject({
+    trainerId: TRAINER_FRONTIER_BRAIN,
+    name: "NOLAND",
+    trainerClass: "TRAINER_CLASS_FACTORY_HEAD",
+    className: "FACTORY HEAD",
+    trainerPicIndex: 86,
+    trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
+  });
+  // The battle-start command is trainer-identity-only; the silver/gold
+  // status itself keeps living on `currentOpponent.frontierBrain`, unchanged
+  // by constructing the intro.
+  expect(started.round.rules.currentOpponent.frontierBrain).toEqual({ status });
+}
+
 // Silver: entering factoryWinStreak 14 (challenge index 2), symbols 0 —
 // battleIndex 6's effective streak is 20, the silver threshold.
 const SILVER_SEED = 4;
@@ -228,6 +262,7 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
     expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    assertBrainBattleStartCommand(state, "silver");
   });
 
   it("the same silver round with factorySymbolsCount 1 schedules an ordinary opponent at battleIndex 6", () => {
@@ -295,5 +330,6 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
     expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "gold" });
+    assertBrainBattleStartCommand(state, "gold");
   });
 });

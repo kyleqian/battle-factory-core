@@ -95,10 +95,17 @@ function advanceProofWin(
   );
 }
 
-/** Stages seed 70's challenge-2 intro at any generated battle index 0..5. */
+/**
+ * Stages seed 70's challenge-2 intro at any generated battle index 0..6.
+ * Index 6 is the Frontier Brain (Noland): entering factoryWinStreak 14, six
+ * ordinary wins (index 0..5) land `getFactoryFrontierBrainStatus`'s input at
+ * 20, `+1` modifier makes 21 -- exactly the silver threshold with the
+ * default `factorySymbolsCount` 0 this config leaves unset -- so index 6 is
+ * always the silver Brain here, not an ordinary opponent.
+ */
 export function generatedRoundRevealProofStage(
   state: EngineState,
-  targetBattleIndex: 0 | 1 | 2 | 3 | 4 | 5,
+  targetBattleIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ): EngineState {
   const playerRentalRecords = [record(267), record(268), record(269)] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({

@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import trainerPicsData from "../src/assets/gen/frontier-trainer-pics.json" with { type: "json" };
+import frontierBrainTrainerPicData from "../src/assets/gen/frontier-brain-trainer-pic.json" with { type: "json" };
 import legacyBugCatcherData from "../src/assets/gen/trainer-pic-bug-catcher.json" with { type: "json" };
 import legacyFishermanData from "../src/assets/gen/trainer-pic-fisherman.json" with { type: "json" };
 import trainersData from "../src/data/gen/battle-frontier-trainers.json" with { type: "json" };
@@ -88,5 +89,33 @@ describe("frontier-trainer-pics.json (ordinary 300-trainer front-picture surface
   it("throws loudly instead of falling back when an extracted picture is missing", () => {
     expect(() => resolveFrontierTrainerPic("TRAINER_PIC_NOT_EXTRACTED"))
       .toThrowError("missing extracted Frontier trainer picture TRAINER_PIC_NOT_EXTRACTED");
+  });
+});
+
+describe("frontier-brain-trainer-pic.json (Noland's front picture, additive/out-of-corpus)", () => {
+  const brainCatalog = frontierBrainTrainerPicData as { schema: string; count: number; entries: TrainerPic[] };
+
+  it("reproduces the committed source-derived catalog byte-for-byte", () => {
+    const path = "src/assets/gen/frontier-brain-trainer-pic.json";
+    const before = readFileSync(path, "utf8");
+    execFileSync(process.execPath, ["--experimental-strip-types", "tools/extract/extract-frontier-brain-trainer-pic.ts"], { stdio: "pipe" });
+    expect(readFileSync(path, "utf8")).toBe(before);
+  });
+
+  it("extracts exactly TRAINER_PIC_FACTORY_HEAD_NOLAND (id 86), not folded into the ordinary catalog", () => {
+    expect(brainCatalog.schema).toBe("frontier-brain-trainer-pic/v1");
+    expect(brainCatalog.count).toBe(1);
+    expect(catalog.entries.map((entry) => entry.id)).not.toContain(86);
+    const [noland] = brainCatalog.entries;
+    expect(noland).toMatchObject({ id: 86, symbol: "TRAINER_PIC_FACTORY_HEAD_NOLAND", width: 64, height: 64, yOffsetPx: 8 });
+    expect(noland!.tileset).toMatchObject({ columns: 8, rows: 8 });
+    expect(noland!.tileset.tiles).toHaveLength(64);
+    expect(noland!.palette).toHaveLength(16);
+  });
+
+  it("resolves through the same production selector as the ordinary corpus", () => {
+    const [expected] = brainCatalog.entries;
+    const resolved = resolveFrontierTrainerPic("TRAINER_PIC_FACTORY_HEAD_NOLAND");
+    expect(resolved).toEqual(expected);
   });
 });
