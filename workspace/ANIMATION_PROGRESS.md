@@ -1,3 +1,11 @@
+# MOVE_MEMENTO pure reducer checkpoint — remains unsupported (2026-08-14 worker)
+
+- **State:** Coverage remains **181/276 Level-50 exact**, 0 partial, 0 staged, and 95 unsupported. Memento and Dig remain independently unsupported; explicit source/reducer equality is **178/178 + 175/175**, while seam/framebuffer acceptance remains **0/178 + 0/175**.
+- **Did:** Added a pure source-relative reducer for the complete Memento task/data topology: attacker and target phases, `DoMementoShadowEffect` scanline control and both 320-entry banks, battler priority, static-monbg/register/alpha lifecycle, cleanup, and first inactive row. Portable and Tier-1 acceptance now compare every projected row explicitly, including monbg state, and fail closed under source-surface mutation; gameplay/RNG/outcome inputs remain immutable.
+- **Verified:** Bilateral portable replay passes twice at **178/178 + 175/175**. State/raw/map digests remain player `3f423ec8… / a9604de7… / adb0e7cf…`, opponent `224db6ea… / c115ea0c… / f5086737…`; retained OAM/matrix transfer is **177/177 + 174/174** and palette transfer **175/177 + 172/174**, including age-4 same-row transfer and the player-age-91/opponent-age-90 monbg exceptions. Source audit, focused reducer/source/boundary **11/11**, animation audit/coverage, typecheck, smoke **375/375**, and the **664-module** build are green.
+- **Next:** Add the narrow typed bilateral presentation seam and source-derived compositor, then require complete twice-fresh production framebuffer equality before promoting Memento alone.
+- **Notes:** No coverage/latch ledger, animation boundary, unsupported barrier, canonical production import, gameplay/RNG/turn/controller/facility state, absolute-tick/frame/hash/RGB lookup, coordinate fitting, capture thinning, or Dig reducer/seam/receipt/promotion changed.
+
 # MOVE_MEMENTO bilateral dense evidence checkpoint — remains unsupported (2026-08-13 worker)
 
 - **State:** Coverage remains **181/276 Level-50 exact**, 0 partial, 0 staged, and 95 unsupported. Memento and Dig remain independently unsupported; reducer/seam/framebuffer acceptance is **0/178 + 0/175**.
