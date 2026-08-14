@@ -19,6 +19,8 @@ pub mod battle_script_battler_positions;
 pub mod battle_script_battler_positions_vectors_gen;
 pub mod battle_script_gender;
 pub mod battle_script_gender_vectors_gen;
+pub mod battle_script_negativedamage;
+pub mod battle_script_negativedamage_vectors_gen;
 pub mod damage_calc;
 pub mod damage_vectors_gen;
 pub mod factory_ai_battle_history;
