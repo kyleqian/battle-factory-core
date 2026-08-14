@@ -5,6 +5,98 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1262 — [MAIN worker, 2026-08-14] **Gold Brain-reveal compare built (478/701, new fade-in-onset residual named); three audit-driven pins landed**
+
+- **State:** first-ever GOLD Brain-battle compare (`factory-round-battle7-noland-gold-reveal-off`,
+  seed 2/challengeNum 5/factorySymbolsCount 1, the gold-eligible config from
+  `tests/factoryBrainRoundShape.test.ts`'s `GOLD_SEED`/`GOLD_STREAK` case)
+  replicates the silver r4 recipe: new app stage
+  (`generatedGoldRoundRevealProofStage`/`generatedRoundBattle7NolandGoldRevealStage`,
+  `factoryRoundIntroGeneralizationStage.ts`) + oracle `factoryBrain` scenario
+  with `overrides.parties` pinned to the app's own generated party on both
+  sides (player DUGTRIO/MEDICHAM/MISDREAVUS — setIds 564/565/566, reused
+  from the scout's own legal gold triple since the round-shape test's
+  664/678/527 fails the oracle's real challenge-5/rank-0 legality check even
+  though the app's pure `currentRecords` path lets it through; opponent
+  SKARMORY/JOLTEON/ELECTRODE, the app's real `generateFactoryOpponent`
+  output for this seed — differs from the scout's BLAZIKEN-led roster as
+  expected, same seed-mismatch reason 1260 documented). Trace includes an
+  `A` press this time (the r4 lesson) at app-relative tick 388, estimated by
+  transplanting silver's own hold-end-relative delta (press ≈ pic-reveal-
+  hold-end − 4) onto gold's own dense-capture-verified pic-reveal-hold end
+  (frame 1544, sha-identical to the existing gold ground-truth doc's
+  independent fixture) rather than a full app-vs-oracle bisection — time
+  budget did not allow the multi-pass bisection r4 used.
+  `preCheckpointFrameOffset` (1152) derived the same way as every prior
+  fixture (`speciesPopulateFrame(1186) − 26 − 8`), with `speciesPopulateFrame`
+  itself re-probed fresh for this fixture (not borrowed from the scout's
+  dossier): a live dense self-diff showed this fixture's own pre-transition
+  swirl/black-flash-hold lengths differ from the scout's gold fixture (black
+  hold 39f here vs. their 44f) even though the *downstream* pic-reveal
+  window (1404–1544) is sha-identical to theirs — confirming the "per-fixture
+  landmark re-probe" caveat is load-bearing: upstream transition timing is
+  seed-sensitive, downstream message/reveal timing is not.
+- **Did:** **Result: 478/701 (68.2%).** Frames 0–33 exact (post-checkpoint
+  handoff through the tail of the black-flash hold). First divergence at
+  frame 34 — oracle-absolute 1186, exactly `speciesPopulateFrame`, the fade-in
+  span's own first frame: a thin horizontal bar (bbox 0,80-239,80) growing
+  over ~15 frames into a symmetric vertical band before subsiding — distinct
+  in character from silver's missing-A-press mistake (an A press is present
+  here) and from silver's known 420/503 tint-dot residuals (this is
+  wider/earlier/growing, not a sparse single-frame dot). Intermittent small
+  residuals (mostly <1%, a few 2-7% patches around frames 178-231, matching
+  where the opponent send-out sequence would sit) continue through frame
+  464; **465-700 are fully exact** (the ready-menu cycle matches, unlike
+  silver's +7 tail — a different residual shape, not the same construction-
+  route gap). **Not investigated further — named, not fixed, per the step's
+  explicit "do not fix-by-fitting" instruction and the time budget spent on
+  landmark re-derivation.** Two live hypotheses, neither chased: (a) the
+  fade-in bar onset is a genuine alignment error in this session's estimated
+  A-press tick or `preCheckpointFrameOffset` (both computed by formula/
+  transplant, not bisected against this specific fixture's own oracle
+  captures the way r4 bisected silver's); (b) a real, new rendering gap in
+  the fade-in mechanism specific to this species/party combination. Hypothesis
+  (a) is favored: the divergence's onset lands exactly on the formula-derived
+  landmark frame, the classic signature of an off-by-a-few-frames alignment
+  issue rather than a mechanism bug. The expected **silver +7 ready-lag
+  tail was explicitly not chased** (out of scope, concurrent side probe owns
+  it) and does not appear to recur in gold's own tail (465-700 exact) — worth
+  noting as a data point for that side probe, not interpreted further here.
+  **Rung 2 (three audit-driven pins, each its own commit):** (a) new test
+  `factoryBrainRoundShape.test.ts` "losing to the silver Frontier Brain at
+  battleIndex 6" — drives to the sixth win, publishes the silver Brain at
+  battleIndex 6, resolves via the public `resolveRoundBattle({outcome:
+  "loss"})` seam (mirrors `advanceProofWin`'s technique, swapped to loss),
+  asserts `roundLost` fires with `battleIndex 6` and `frontierBrain
+  {status: "silver"}` intact on both the command and `round.rules`
+  end-to-end; red-verified (flipped the command-side expectation to "gold",
+  saw the real `AssertionError`, reverted). (b) `TRAINER_FRONTIER_BRAIN`
+  deduped: `factoryRoundBattleOrchestrator.ts` now imports it from its
+  exported owner `factoryAiMaskSelection.ts` instead of a local redeclare.
+  (c) streak%7 invariant: documented (not enforced) on
+  `FactoryRoundBattleOrchestratorConfig.factoryWinStreak` — a validation
+  throw was rejected because `factoryRoundBattleOrchestrator.test.ts`'s
+  "Noland rung 2" cases deliberately pass non-multiple-of-7 streaks (19/20/
+  40) to exercise brain eligibility at battleIndex 0/1 with a synthetic
+  mid-round streak; a throw would break those legitimate callers.
+- **Next:** closing gold's 34-onward gap needs the same oracle self-diff
+  bisection method r4 used for silver's A-press (multi-pass, app-vs-oracle
+  and oracle-self, not attempted this step — time). If hypothesis (a) is
+  right, a few frames of `preCheckpointFrameOffset`/press-tick adjustment
+  may close most of the window at once; re-derive independently rather than
+  curve-fitting to this session's specific numbers. The gold +7-tail
+  non-recurrence (465-700 exact here) is a data point the concurrent +7 side
+  probe may want.
+- **Notes:** own commits this step: dedup+comment pin (b+c), loss-pin test
+  (a), gold trace/stage/fixture (rung 1) — each green at commit
+  (`npm run typecheck` + targeted suites, then `test:smoke` 375/375).
+  Zero `src/` engine changes for rung 1 (new `tools/compare/`,
+  `tools/battle-lab/`, `tools/probe/` files only) — regression fixtures
+  re-verified unaffected by construction, not just by inference: silver
+  **648/701**, Lukas **154/154**, Yoshi **700/751**, `test:smoke`
+  **375/375**. Finish gate (full `npm test` + `npm run build`) recorded
+  below this entry's commit.
+
 ## 1261 — [MAIN worker, 2026-08-14] **Brain-reveal send-out window: 350/701 → 648/701; 1260's attribution corrected (missing trace A-press, not a cry-duration gap); new construction-route ready-lag finding named, not fixed**
 
 - **State:** `factory-round-battle7-noland-reveal-off` compare now
@@ -128,76 +220,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   moved. Nothing outside `workspace/` touched; no oracle service restarted;
   did not create or read any `factory-brain-gold-intro-*`/gold-dossier file
   (side lane's concurrent territory).
-
-## 1259 — [MAIN worker, 2026-08-14] **Brain presentation seam landed: rungs A-C green (data, wiring, pins); rung D not attempted (time)**
-
-- **State:** `getFactoryTrainerPresentation(1022)` now resolves NOLAND's
-  real identity instead of throwing; `beginFactoryRoundBattleStartIntro`
-  constructs a real battle-start command for the Frontier Brain. The rung-4
-  blocker 1257 found (`factoryTrainerPresentation.ts:78` throwing `missing
-  Battle Frontier trainer 1022`) is closed.
-- **Did:** **Rung A (data)** — every §2.3 field re-derived directly against
-  `reference/pokeemerald` this session (not just the design doc's
-  citations): `GetFrontierBrainTrainerPicIndex`/`…Class`/
-  `CopyFrontierBrainTrainerName` (`frontier_util.c:2443-2481`) all read
-  `gTrainers[TRAINER_NOLAND]` (`src/data/trainers.h:9712-9722`) via
-  `sFrontierBrainTrainerIds[FRONTIER_FACILITY_FACTORY] = TRAINER_NOLAND`
-  (`frontier_util.c:719-728`): `trainerPic = TRAINER_PIC_FACTORY_HEAD_NOLAND`
-  (86, `include/constants/trainers.h:105`; size 8/yOffset 1,
-  `front_pic_tables.h:89`), `trainerClass = TRAINER_CLASS_FACTORY_HEAD`
-  (0x3e=62, `include/constants/trainers.h:350`; display name "FACTORY HEAD",
-  `trainer_class_names.h:64`), `trainerName = "NOLAND"`; gender via
-  `IsFrontierBrainFemale` (`frontier_util.c:2483-2487`) reads
-  `sFrontierBrainObjEventGfx[FACTORY][1] = FALSE` (`frontier_util.c:674`) —
-  male. **Architecture decision:** ported as a source-cited special case in
-  `factoryTrainerPresentation.ts`, NOT injected into the generated 300-row
-  `battle-frontier-trainers.json` — the ROM itself never routes the brain
-  through `gFacilityTrainers`, and folding him in would corrupt that table's
-  "ordinary corpus" invariant the same way design §1 argues against widening
-  the `trainerId` field itself. Same reasoning applied to the pic asset:
-  Noland's `FACTORY_HEAD_NOLAND` sprite sheet was missing from
-  `frontier-trainer-pics.json` (that catalog's own test suite pins it as
-  "all and only" the ordinary 50-picture surface), so a new sibling
-  extractor (`extract-frontier-brain-trainer-pic.ts`, reusing the same
-  PNG/tile helpers) writes a separate additive file
-  (`frontier-brain-trainer-pic.json`); `battleScene.ts`'s
-  `resolveFrontierTrainerPic` now unions both catalogs so callers stay
-  provenance-agnostic. Also fixed `generatedOpponent`'s frontier-brain
-  placeholder `trainerName` (was `"Frontier Brain"`, now sourced from the
-  real presentation) — the identity mismatch check in
-  `factoryTrainerPresentationForOpponent` would otherwise reject it now that
-  1022 resolves to real data. **Rung B (wiring)** —
-  `generatedRoundRevealProofStage`'s `targetBattleIndex` union now admits
-  `6`; live-verified seed 70 / entering streak 14 lands battleIndex 6 at
-  effective streak 21 (silver) with `factorySymbolsCount` defaulted 0, so
-  this exact proof-stage config reaches the Brain deterministically. New
-  test in `factoryRoundIntroGeneralization.test.ts` proves the command
-  builds without throwing. **Rung C (pins)** —
-  `tests/factoryBrainPresentation.test.ts` (new) pins every
-  `CANONICAL_NOLAND_PRESENTATION` field + the special-case-only reachability
-  (1021/300 still throw) + the real pic resolution; extended both existing
-  real-round-shape cases (silver seed 4, gold seed 2) in
-  `factoryBrainRoundShape.test.ts` to drive to battleIndex 6 through the
-  genuine six-real-win orchestrator path and assert the battle-start command
-  carries NOLAND's identity while `currentOpponent.frontierBrain`
-  ({status: silver}/{status: gold}) stays consistent before/after.
-- **Next:** rung D (stretch) was not attempted — time budget. The real next
-  step is exactly what 1257 deferred: a Brain-reveal `APP_STAGES` entry in
-  `tools/compare/appTrace.ts` (the proof-stage plumbing for battleIndex 6 now
-  exists, see rung B) + a paired oracle-side `factoryBrain` scenario (reuse
-  `tools/battle-lab/factory-brain-silver-turn1-off.json` or a dense variant)
-  + a live `npm run compare` FIRST-frame probe. Acceptance is the compare
-  running with an honest mismatch inventory, not pixel exactness — Brain
-  pixels have never been rendered app-side, so a nonzero mismatch count on
-  the first attempt is expected and is the deliverable, not a failure.
-- **Notes:** each rung its own commit (`feat: ... data`, `feat: ... wiring`,
-  `test: ... rung C`), tree green at each; `npm run typecheck` +
-  `test:smoke` between rungs. Finish gate: full `npm test` **1,014 files /
-  9,764 passed, 44 skipped** (the gated CGB4 family per merge `dc57b7c3` —
-  not a regression) in ~2 min; `npm run build` green (669 modules, +1 for
-  the new brain-pic asset/test module). No `unsupported-branch` barrier
-  moved. Nothing outside `workspace/` touched; no oracle service restarted;
-  did not read/edit any `docs/noland-brain-intro-*` doc or
-  `tools/battle-lab/factory-brain-intro-*` fixture (side lane's concurrent
-  scout territory, per this step's OUT OF SCOPE).
 
