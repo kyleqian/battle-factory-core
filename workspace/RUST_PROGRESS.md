@@ -5,6 +5,41 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R33 — [supervised session, 2026-08-14] **M32 Battle Script Pay Day payout leaf**
+
+- **State:** `rust-main` = current master `9b368bd8` plus the verified Pay Day
+  worker through `8aa5e68f`. The complete pure
+  `battleScriptGivepaydaymoneyOpcode.ts` state/control projection is native
+  and wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported the source-ordered suppression predicate for `BATTLE_TYPE_LINK`,
+  `BATTLE_TYPE_RECORDED_LINK`, and zero Pay Day money. Suppression preserves
+  the full narrow state and `Advance`s; payout computes exact u16×u8 unsigned
+  bonus money, caps player money at **999,999**, overwrites the nullable full
+  u32 prepared-money buffer, and returns typed `PayoutCall`. Absolute label
+  and pushed return address remain machine-owned. Canonical TypeScript
+  execution supplies **149 finite cases**, a separate exhaustive **65,536**
+  value u16 Pay Day sweep, and an exhaustive **256** value u8 multiplier
+  sweep; corpus sha256
+  `546867571e961b089407fb8caf2970b3f4288cc89d53acb8710b1237e7bede88`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited source AddMoney,
+  branch precedence, arithmetic bounds, compact packed sweep results, and
+  complete buffer preservation/overwrite; regenerated twice byte-identically
+  (generated file **1,707,596 bytes**, sha256
+  `78f3ac15fe6a9e50e704ce4b3b1c0ef72a24d68b434190b8cb7f6c22d3011c8e`),
+  and reran focused **6/6**, cargo **853/853**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,018 passed files / 44 grind files skipped; 9,802
+  passed / 223 skipped tests**, and build **670 modules**. Artifact is
+  **509,249 bytes**, sha256
+  `60d3a569b3fbb76a4769aad1bd7c4dd1668d6dcbd0c332fe9afe2163b8b43645`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: the fresh worker initially lacked the ignored WASM artifact and
+  repeated its full baseline after building it, ~3 min.
+
 ## R32 — [supervised session, 2026-08-14] **M31 Battle Script Psych Up stat-stage copy leaf**
 
 - **State:** `rust-main` = current master `9b368bd8` plus the verified Psych Up
@@ -78,37 +113,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   PAPERCUT: the fresh worker lacked Cargo on login PATH and the ignored WASM
   artifact; the supervisor also corrected one stale local WASM script name,
   ~4 min total.
-
-## R30 — [supervised session, 2026-08-14] **M29 Battle Script Bide setup state leaf**
-
-- **State:** `rust-main` = current master `732e6339` plus the verified Bide
-  setup worker through `68601406`. The complete pure
-  `battleScriptSetbideOpcode.ts` state/control projection is native and
-  wasm32-compilable. No ABI or adapter surface was widened.
-- **Did:** ported exact missing-attacker resolution and the source-ordered
-  setup writes: OR attacker `status2` with `STATUS2_MULTIPLETURNS` and
-  `STATUS2_BIDE_TURN(2)`, overwrite its locked move with `currentMove`, zero
-  its signed Bide-damage accumulator, and `Advance`. Siblings, all selector
-  roles, current move, and all saved Bide targets are preserved. Canonical
-  TypeScript execution supplies **273 cases** across packed-u32 status/Bide
-  counters, current/locked u16 edges, signed-i32 damage edges, all battlers and
-  saved targets, selector roles, overwrite boundaries, and repetition; corpus
-  sha256
-  `ce9554d3269b3760cffc0605b69472636027f500f843303d0f05740c03f83234`.
-- **Next:** select the next conflict-free pure Battle Script leaf. M7c
-  opponent generation waits on the canonical TS live-generation port; keep
-  the construction clock and modules under active TS work excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited source writes,
-  canonical domains, and non-write of `gBideTarget`; regenerated twice
-  byte-identically (generated sha256
-  `5954c9f2c8f6850c409f287ecc2bab3b0e49bad163a22c26dc7871198e83d511`),
-  and reran focused **5/5**, cargo **837/837**, fmt, strict Clippy, wasm32
-  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
-  375/375**, full npm **1,014 passed files / 44 grind files skipped; 9,765
-  passed / 223 skipped tests**, and build **669 modules**. Artifact is
-  **509,839 bytes**, sha256
-  `968ddd966352ff5095b52a22a3a6aa8032f89ba9e8352c8f72fbf0586f2a2b5b`.
-  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
-  deferral was added.
-  PAPERCUT: the worker rerouted absent login-PATH Cargo and repeated one full
-  npm run after its terminal bridge lost the summary, ~3 min total.
