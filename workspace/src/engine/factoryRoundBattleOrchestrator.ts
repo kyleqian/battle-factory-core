@@ -133,9 +133,7 @@ import {
   type SwapDecision,
 } from "./roundController.ts";
 import type { BattlePresentationCompletion } from "./battlePresentation.ts";
-
-/** `TRAINER_FRONTIER_BRAIN` (`include/constants/trainers.h:12`). */
-const TRAINER_FRONTIER_BRAIN = 1022;
+import { TRAINER_FRONTIER_BRAIN } from "./factoryAiMaskSelection.ts";
 
 const EMPTY_PARTY_MEMBER: BattleScriptPartyMemberState = Object.freeze({
   species: 0,
@@ -187,6 +185,21 @@ export type FactoryFacilityState = Readonly<{
 export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   id: string;
   rngValue: number;
+  /**
+   * `GetCurrentFacilityWinStreak()` entering this round. In real play this is
+   * always a multiple of 7 (each completed round banks exactly 7 wins), which
+   * is what guarantees the Frontier Brain, when eligible, always lands on
+   * battleIndex 6 (the round's last battle) and never earlier — every
+   * `getFactoryFrontierBrainStatus` check inside a round adds `battleIndex` to
+   * this value, so a non-multiple entering streak can cross the silver/gold
+   * threshold at an earlier index instead. This module does not enforce the
+   * multiple-of-7 invariant itself: several tests (e.g.
+   * `factoryRoundBattleOrchestrator.test.ts`'s "Noland rung 2" cases,
+   * `factoryWinStreak` 19/20/40) deliberately pass non-multiple synthetic
+   * streaks to exercise brain eligibility at battleIndex 0/1 without replaying
+   * a full six-win round, so a validation throw here would reject those
+   * legitimate callers.
+   */
   factoryWinStreak: number;
   playerTrainerId: number;
   battleTowerLevel50WinStreak: number;
