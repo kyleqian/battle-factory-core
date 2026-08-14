@@ -106,6 +106,7 @@ describe("Move_FLAIL pure source-relative reducer", () => {
       fieldProfile: { playerHp: 69, playerMaxHp: 137, opponentHp: 142, opponentMaxHp: 142 },
       movePower: 40,
       targetInitialX2: 1,
+      hitsplatCenter: { x: 177, y: 43 },
       visualRandom: { x: 4, y: 3 },
     });
     expect(sceneOnFlailView({ ...stage, age: 49 })).toMatchObject({

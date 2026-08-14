@@ -2455,6 +2455,8 @@ export interface SceneOnFlailConfig {
   readonly movePower: FlailPower;
   /** Target sprite `x2` captured by the source shake task. */
   readonly targetInitialX2: number;
+  /** `InitSpritePosToAnimTarget(FALSE)` anchor for the fixed hitsplat. */
+  readonly hitsplatCenter: Readonly<{ x: number; y: number }>;
   /** Two ordinary `Random2()` results dedicated to the fixed hitsplat. */
   readonly visualRandom: Readonly<FlailVisualRandom>;
 }
@@ -7241,7 +7243,7 @@ export function sceneOnFlailView(
     target: state.config.target,
     ...flailAtAge(state.age, {
       attackerSide: state.config.attacker.geometry.side,
-      targetCenter: state.config.target.geometry.animationCenter,
+      targetCenter: state.config.hitsplatCenter,
       targetInitialX2: state.config.targetInitialX2,
       power: state.config.movePower,
       visualRandom: state.config.visualRandom,
