@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "mode": "factoryBrain",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 5,
+  "playerSetIds": [564, 565, 566],
+  "rentalSwapCount": 0,
+  "seed": 305419896,
+  "trace": {
+    "segments": [
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 30, "buttons": []},
+      {"frames": 2, "buttons": ["A"]},
+      {"frames": 700, "buttons": []}
+    ],
+    "captureFrames": [0, 734]
+  }
+}
