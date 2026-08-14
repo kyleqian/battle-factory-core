@@ -5,6 +5,41 @@ full history regardless.
 
 ---
 
+## R21 — [supervised session, 2026-08-14] **M20 Battle Script Taunt decision/state leaf + clean wind-down**
+
+- **State:** `rust-main` started from master `438d06ba` and now contains the
+  verified R15-R21 sequence through `669b5606`. The complete pure
+  `battleScriptSettauntOpcode.ts` decision/state projection is native and
+  wasm32-compilable. No ABI or adapter surface was widened. Master advanced
+  independently to `ad9152bb` during validation; its normal supervisor fold
+  remains the union point.
+- **Did:** ported exact missing-target ordering, the unchanged nonzero-timer
+  `FailJump`, and the zero-timer target-only write of `2` with `Advance`.
+  Absolute program counters and the source-dead adjacent `tauntTimer2` stay
+  outside the narrow result. Canonical TypeScript execution supplies **70
+  cases** across all four targets, every four-bit timer `0..15`, boundaries,
+  target-only mutation, missing role, and repeated application; corpus sha256
+  `8a33204cf0d64ca843cc542d079fea16ca33e2231e1a1f6da49f7aa4a6a0b426`.
+- **Next:** after the main supervisor folds `669b5606`, select the next
+  conflict-free pure Battle Script leaf. M7c opponent generation remains
+  deferred while Issue #55 is open. Keep opcode registration, generic
+  BattleState reduction, presentation, and callback expansion out.
+- **Notes:** Luna/max worker, one commit. Supervisor audited source and TS
+  behavior, retained the worker test handle through completion, and
+  regenerated twice byte-identically (generated sha256
+  `0b4783094fa1f5fc0f55dfb1d398f269c9c12070e4cb95c3cafd86d89df1d079`).
+  Final folded-head gates: focused **5/5**, cargo **790/790**, fmt, strict
+  Clippy, wasm32 release, forced-WASM union **19 files / 807/807**, smoke **8
+  files / 375/375**, full npm **1,047 files / 9,864 passed / 1 skip**, build
+  **664 modules**, vanilla soak **20/20**, and full-policy soak **60/60** with
+  zero crashes and hangs. Artifact is **509,791 bytes**, sha256
+  `7e23d1bfe97fa2674fb932bffb99f585c9af434ffbaba34c8e99524828b7a7fc`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added. The Rust worker branch and worktree were removed, and
+  the Battle Scene OFF oracle remained healthy.
+  PAPERCUT: recursive CGB4 evidence dominated both required full npm runs;
+  worker and supervisor runs cost ~22 min combined.
+
 ## R20 — [supervised session, 2026-08-14] **M19 Battle Script Yawn decision/state leaf**
 
 - **State:** `rust-main` = current master `438d06ba` plus verified R15-R20
