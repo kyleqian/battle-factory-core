@@ -35,13 +35,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   reward/symbol bookkeeping keeps its existing out-of-scope status per the
   2026-08-10 decision; (c) brain-battle presentation waits on (a) for its
   oracle ground truth.
-- **Notes:** final union: full npm **1,052 files / 9,925 passed / 1
-  skipped**; build green; cargo native green; WASM **509,818 B**
-  `d72d7fa7…`; forced-WASM **18 files / 803 tests**. Soaks: vanilla
-  **20/20 OK**, full **60/60 OK**, 0 crashes / 0 hangs. Sibling
-  supervisors were live all session; lane branches folded at ~03:00 —
-  a final pre-deadline re-check will fold any tail, else it is the next
-  orient's fold.
+- **Notes:** a final 06:10 re-check folded both lane tails (animation:
+  Rock Tomb **exact** promotion + Flail evidence; rust: yawn + taunt
+  decision leaves and its clean wind-down) and the whole union was
+  re-verified: full npm **1,056 files / 9,934 passed / 1 skipped**; build
+  green; cargo native green (42 green suites); WASM **509,791 B**
+  `7e23d1bf…`; forced-WASM **18 files / 803 tests**. Soaks re-run on the
+  final union: vanilla **20/20 OK**, full **60/60 OK**, 0 crashes /
+  0 hangs. Both persistent lane branches are fully folded at session end
+  (the animation supervisor may still be live; any post-06:45 tail is the
+  next orient's fold).
 
 ## 1254 — [MAIN worker, 2026-08-14] **Noland rung 2c: Frontier Brain scheduling pinned against real six-real-win round shapes**
 
