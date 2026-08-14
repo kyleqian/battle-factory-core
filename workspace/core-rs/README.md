@@ -134,6 +134,13 @@ Current exports:
   presence (including present zero). Its full layout is below and beside the
   Rust export; `adapter/factoryDraftSelectionEngine.ts` directly invokes it in
   forced WASM mode with no TypeScript fallback.
+- `fw_apply_key_repeat_operation(input_ptr, input_len) -> ptr` — the complete
+  pure `keyRepeat.ts` surface (`INITIAL_KEY_REPEAT_STATE`, `readKeys`, and
+  `hasButton`) behind one checked additive ABI-v1 packet. Ten canonical GBA
+  buttons cross as validated low-ten-bit `u16` masks; the shared repeat
+  counter is constrained to its reachable `1..=40` state domain. Its full
+  layout is below and beside the Rust export; `adapter/keyRepeatEngine.ts`
+  invokes it directly in forced WASM mode with no TypeScript fallback.
 
 Build the artifact with `./build-wasm.sh` (from `core-rs/`, or any cwd —
 it resolves its own directory). It writes
@@ -188,6 +195,41 @@ Results begin `total_len:u32,status:u8`. Status 0 adds `value_kind:u8`:
 redraw. Status 1 carries `message:string` for the exact native routing error;
 status 2 carries the single stable malformed-packet message. The returned
 buffer is freed with its exact `(ptr,total_len)` pair.
+
+## Key-repeat WASM boundary (M11)
+
+`fw_apply_key_repeat_operation(input_ptr,input_len)` accepts a checked
+little-endian additive ABI-v1 packet beginning `version:u8=1,operation:u8`.
+The three operations are:
+
+```text
+0 readKeys:  buttons:u16, previous_held_keys_raw:u16, previous_counter:u8
+1 hasButton: keys:u16, button:u8
+2 initial:   no suffix
+```
+
+Mask bits follow `src/input.ts`'s canonical `GBA_BUTTONS` order: bit 0=A,
+1=B, 2=SELECT, 3=START, 4=RIGHT, 5=LEFT, 6=UP, 7=DOWN, 8=R, 9=L. Thus only
+`0x0000..0x03ff` are valid masks; any high `u16` bit is a structural error.
+`previous_counter` is intentionally not a loose JavaScript number: only the
+reachable native controller range `1..=40` is accepted (initial is 40; a
+firing value of 1 stores continue delay 5 instead of zero). `button` is the
+same canonical index 0..=9. Version, operation, masks, counter, button,
+truncation, append/suffix shape, and final consumption all validate before a
+pure helper runs.
+
+Results begin `total_len:u32,status:u8`. Status 0 adds `value_kind:u8`:
+
+```text
+0 readKeys: new_keys:u16, new_and_repeated_keys:u16,
+            next_held_keys_raw:u16, next_counter:u8
+1 hasButton: value:u8 (exactly 0 or 1)
+2 initial:  held_keys_raw:u16, counter:u8
+```
+
+Status 2 carries `message_len:u32,message:utf8` and is the sole stable
+malformed-packet response; this pure surface has no semantic-error status.
+The caller frees the result using the returned `(ptr,total_len)` pair.
 
 ## Differential harness
 

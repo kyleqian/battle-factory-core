@@ -67,6 +67,9 @@ use factory_core::factory_trainer_schedule::{
 };
 use factory_core::gen_tables;
 use factory_core::gender::MonGender;
+use factory_core::key_repeat::{
+    self as key_repeat, GbaButton, GbaButtonMask, KeyFrame, KeyRepeatCounter, KeyRepeatState,
+};
 use factory_core::mon_construction::{
     self, FactoryCorpusPartyInstance, FactoryCorpusPartyMemberState, PartyMemberError,
 };
@@ -5552,6 +5555,171 @@ pub unsafe extern "C" fn fw_apply_factory_draft_selection_operation(
                 factory_draft_selection_message(2, FACTORY_DRAFT_SELECTION_MALFORMED_MESSAGE)
             }),
         },
+    };
+    alloc_and_copy(&output)
+}
+
+// --- Key-repeat operation packet (additive ABI v1) -----------------------
+
+const KEY_REPEAT_PACKET_VERSION: u8 = 1;
+const KEY_REPEAT_MALFORMED_MESSAGE: &str =
+    "factory-wasm keyRepeatEngine: malformed operation packet";
+
+#[derive(Debug)]
+enum KeyRepeatPacket {
+    ReadKeys {
+        buttons: GbaButtonMask,
+        previous: KeyRepeatState,
+    },
+    HasButton {
+        keys: GbaButtonMask,
+        button: GbaButton,
+    },
+    InitialState,
+}
+
+#[derive(Debug)]
+enum KeyRepeatBoundaryValue {
+    KeyFrame(KeyFrame),
+    Bool(bool),
+    State(KeyRepeatState),
+}
+
+fn key_repeat_message(status: u8, message: &str) -> Vec<u8> {
+    let bytes = message.as_bytes();
+    let mut buf = Vec::with_capacity(9 + bytes.len());
+    buf.extend_from_slice(&0u32.to_le_bytes());
+    buf.push(status);
+    buf.extend_from_slice(&u32::try_from(bytes.len()).unwrap_or(u32::MAX).to_le_bytes());
+    buf.extend_from_slice(bytes);
+    patch_total_len(&mut buf);
+    buf
+}
+
+fn key_repeat_mask(reader: &mut CheckedReader<'_>) -> Result<GbaButtonMask, ()> {
+    GbaButtonMask::try_from(reader.u16()?).map_err(|_| ())
+}
+
+fn key_repeat_counter(reader: &mut CheckedReader<'_>) -> Result<KeyRepeatCounter, ()> {
+    KeyRepeatCounter::try_from(reader.u8()?).map_err(|_| ())
+}
+
+fn key_repeat_button(reader: &mut CheckedReader<'_>) -> Result<GbaButton, ()> {
+    GbaButton::try_from(reader.u8()?).map_err(|_| ())
+}
+
+fn decode_key_repeat_packet(bytes: &[u8]) -> Result<KeyRepeatPacket, ()> {
+    let mut reader = CheckedReader::new(bytes);
+    if reader.u8()? != KEY_REPEAT_PACKET_VERSION {
+        return Err(());
+    }
+    let packet = match reader.u8()? {
+        // `readKeys(buttons, { heldKeysRaw, keyRepeatCounter })`.
+        0 => KeyRepeatPacket::ReadKeys {
+            buttons: key_repeat_mask(&mut reader)?,
+            previous: KeyRepeatState {
+                held_keys_raw: key_repeat_mask(&mut reader)?,
+                key_repeat_counter: key_repeat_counter(&mut reader)?,
+            },
+        },
+        // `hasButton(keys, button)`.
+        1 => KeyRepeatPacket::HasButton {
+            keys: key_repeat_mask(&mut reader)?,
+            button: key_repeat_button(&mut reader)?,
+        },
+        // The complete `INITIAL_KEY_REPEAT_STATE` surface has no suffix.
+        2 => KeyRepeatPacket::InitialState,
+        _ => return Err(()),
+    };
+    reader.finish()?;
+    Ok(packet)
+}
+
+fn execute_key_repeat(packet: KeyRepeatPacket) -> KeyRepeatBoundaryValue {
+    match packet {
+        KeyRepeatPacket::ReadKeys { buttons, previous } => {
+            KeyRepeatBoundaryValue::KeyFrame(key_repeat::read_keys(buttons, previous))
+        }
+        KeyRepeatPacket::HasButton { keys, button } => {
+            KeyRepeatBoundaryValue::Bool(key_repeat::has_button(keys, button))
+        }
+        KeyRepeatPacket::InitialState => {
+            KeyRepeatBoundaryValue::State(key_repeat::INITIAL_KEY_REPEAT_STATE)
+        }
+    }
+}
+
+fn encode_key_repeat_value(value: KeyRepeatBoundaryValue) -> Vec<u8> {
+    // total_len:u32, status:u8=0, value_kind:u8
+    let mut buf = vec![0; 6];
+    match value {
+        // kind 0: newKeys, newAndRepeatedKeys, next held mask, next counter.
+        KeyRepeatBoundaryValue::KeyFrame(frame) => {
+            buf[5] = 0;
+            buf.extend_from_slice(&frame.new_keys.bits().to_le_bytes());
+            buf.extend_from_slice(&frame.new_and_repeated_keys.bits().to_le_bytes());
+            buf.extend_from_slice(&frame.next.held_keys_raw.bits().to_le_bytes());
+            buf.push(frame.next.key_repeat_counter.get());
+        }
+        // kind 1: canonical boolean as exactly 0/1.
+        KeyRepeatBoundaryValue::Bool(value) => {
+            buf[5] = 1;
+            buf.push(u8::from(value));
+        }
+        // kind 2: `INITIAL_KEY_REPEAT_STATE` / state-shaped result.
+        KeyRepeatBoundaryValue::State(state) => {
+            buf[5] = 2;
+            buf.extend_from_slice(&state.held_keys_raw.bits().to_le_bytes());
+            buf.push(state.key_repeat_counter.get());
+        }
+    }
+    patch_total_len(&mut buf);
+    buf
+}
+
+/// Runs the complete pure `src/engine/keyRepeat.ts` surface through one
+/// checked additive ABI-v1 operation packet. Input begins
+/// `version:u8=1, operation:u8`; operation 0 is `readKeys`, operation 1 is
+/// `hasButton`, and operation 2 returns `INITIAL_KEY_REPEAT_STATE`.
+///
+/// ```text
+/// 0 readKeys: buttons:u16, prev_held_keys_raw:u16, prev_counter:u8
+/// 1 hasButton: keys:u16, button:u8 (GBA_BUTTONS index)
+/// 2 initial: no suffix
+/// ```
+///
+/// Button masks are exactly the ten low bits in canonical `GBA_BUTTONS`
+/// order A, B, SELECT, START, RIGHT, LEFT, UP, DOWN, R, L; any unused u16
+/// bit is structural. `prev_counter` is exactly the reachable 1..=40 native
+/// controller-state domain, and button indexes are 0..=9. Version, operation,
+/// masks, counter, button, truncation, append, suffix shape, and complete
+/// consumption are all checked before pure execution.
+///
+/// Output is `total_len:u32,status:u8`. Status 0 adds `value_kind:u8`:
+/// 0=`readKeys` (`new_keys:u16,new_and_repeated_keys:u16,next_held:u16,
+/// next_counter:u8`), 1=`hasButton` (`value:u8` exactly 0/1), and 2=initial
+/// state (`held_keys_raw:u16,counter:u8`). Status 2 is the one stable
+/// malformed-packet message (`message_len:u32,message:utf8`); this surface
+/// has no semantic status because every valid packet has a typed result. The
+/// caller frees the result with `fw_free(ptr,total_len)`.
+///
+/// # Safety
+/// `input_ptr` must point to `input_len` readable initialized bytes whenever
+/// `input_len` is nonzero. Null or empty input is rejected without dereference.
+#[no_mangle]
+pub unsafe extern "C" fn fw_apply_key_repeat_operation(
+    input_ptr: *const u8,
+    input_len: u32,
+) -> *mut u8 {
+    if input_len == 0 || input_ptr.is_null() {
+        return alloc_and_copy(&key_repeat_message(2, KEY_REPEAT_MALFORMED_MESSAGE));
+    }
+    // SAFETY: the non-null/width guards above plus caller contract establish
+    // exactly `input_len` readable initialized bytes.
+    let bytes = unsafe { std::slice::from_raw_parts(input_ptr, input_len as usize) };
+    let output = match decode_key_repeat_packet(bytes) {
+        Err(()) => key_repeat_message(2, KEY_REPEAT_MALFORMED_MESSAGE),
+        Ok(packet) => encode_key_repeat_value(execute_key_repeat(packet)),
     };
     alloc_and_copy(&output)
 }
