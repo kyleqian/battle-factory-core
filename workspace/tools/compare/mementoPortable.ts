@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFileSync, realpathSync } from "node:fs";
+import { mkdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 import {
@@ -9,6 +9,12 @@ import {
   type MementoConfig,
   type MementoState,
 } from "../../src/animation/memento.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnMementoView,
+  type SceneOnMementoConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 type Orientation = "player-back" | "opponent-front";
@@ -17,15 +23,19 @@ type ReceiptRow = {
   scenario: string; sourceWindow: { startFrame: number; endFrame: number; frameCount: number };
   probeJsonSha256: string; stateGzip: string; stateGzipSha256: string;
   rawRgbSha256: string; changeMap: string; changeMapSha256: string;
+  rawRgbArchive: string; rawRgbArchiveSha256: string;
   latches: { precedingOamRows: number; precedingMatrixRows: number; precedingPaletteRows: number; comparableRows: number; sameRowPaletteAges: number[]; monbgPaletteExceptionAges: number[] };
 };
 type Receipt = { schema: string; status: string; orientations: Record<Orientation, ReceiptRow>; topology: { tasks: string[]; moveSprites: string[] }; acceptance: { reducerRows: number } };
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
-const receiptPath = process.argv[2] ?? "tools/compare/fixtures/memento-dense-evidence.json";
+const receiptPath = process.argv.slice(2).find((arg) => !arg.startsWith("--")
+  && arg !== "player-back" && arg !== "opponent-front")
+  ?? "tools/compare/fixtures/memento-dense-evidence.json";
 const selected = process.argv.includes("--orientation")
   ? process.argv[process.argv.indexOf("--orientation") + 1] as Orientation
   : undefined;
+const retainedOnly = process.argv.includes("--retained");
 const receipt = JSON.parse(readFileSync(resolve(root, receiptPath), "utf8")) as Receipt;
 const sha256 = (value: Buffer | string): string => createHash("sha256").update(value).digest("hex");
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
@@ -61,6 +71,51 @@ function reducerConfig(first: Row): MementoConfig {
     initialScanlineBuffers: first.scanlineBuffers,
     initialWindow: { win0h: first.registers.win0h, win0v: first.registers.win0v },
   };
+}
+
+function sceneConfig(first: Row): SceneOnMementoConfig {
+  const makeBattler = (which: "attacker" | "target") => {
+    const sprite = first.battlerSprites[which];
+    const side = (first.animationBattlers[which] & 1) !== 0 ? "opponent" : "player";
+    return {
+      species: (sprite.data[2] === 110 ? "WEEZING" : "ONIX") as "WEEZING" | "ONIX",
+      geometry: {
+        side,
+        spriteCorner: { x: sprite.x - 32, y: sprite.y - 32 },
+        animationCenter: { x: sprite.x, y: sprite.y },
+        battlePositionCenter: { x: sprite.x, y: side === "player" ? 80 : 40 },
+      },
+    };
+  };
+  return {
+    move: "MEMENTO",
+    attacker: makeBattler("attacker"),
+    target: makeBattler("target"),
+    fieldProfile: {
+      playerHp: first.battlers.player.hp,
+      playerMaxHp: first.battlers.player.maxHp,
+      opponentHp: first.battlers.opponent.hp,
+      opponentMaxHp: first.battlers.opponent.maxHp,
+      playerGender: "male",
+      opponentGender: "male",
+    },
+    reducer: reducerConfig(first),
+  };
+}
+
+function framebufferDiff(app: Uint8ClampedArray, raw: Buffer): { count: number; bbox: string; sample: string } {
+  let count = 0, minX = 240, minY = 160, maxX = -1, maxY = -1;
+  const examples: string[] = [];
+  for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+    const a = pixel * 4, r = pixel * 3;
+    if (app[a] === raw[r] && app[a + 1] === raw[r + 1] && app[a + 2] === raw[r + 2]) continue;
+    count++;
+    const x = pixel % 240, y = Math.floor(pixel / 240);
+    if (examples.length < 3) examples.push(`${x},${y} app=${app[a]},${app[a + 1]},${app[a + 2]} raw=${raw[r]},${raw[r + 1]},${raw[r + 2]}`);
+    minX = Math.min(minX, x); minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+  }
+  return { count, bbox: count ? `${minX},${minY}-${maxX},${maxY}` : "none", sample: examples.join("; ") };
 }
 
 function sourceProjection(row: Row, config: MementoConfig): unknown {
@@ -113,9 +168,11 @@ function validate(orientation: Orientation, config: ReceiptRow, probe: Row, rgbD
   if (!same(probe.topology.tasks, receipt.topology.tasks) || probe.topology.templates.some((name: string) => name.includes("Memento"))) throw new Error(`${orientation}: topology`);
   const first = frames[0]!; const rawHash = createHash("sha256");
   let priorOam = 0, priorMatrices = 0, priorPalette = 0;
-  let reducerRows = 0;
+  let reducerRows = 0, seamRows = 0, framebufferRows = 0, peakDiff = 0;
+  const failures: string[] = [];
   const sourceConfig = reducerConfig(first);
   const reduced = reduceMemento(sourceConfig);
+  const stage = createSceneOnMovePresentation<SceneOnMementoConfig>(sceneConfig(first));
   if (reduced.length !== frames.length) throw new Error(`${orientation}: reducer window ${reduced.length}/${frames.length}`);
   const sameRowPaletteAges: number[] = [], monbgPaletteExceptionAges: number[] = [];
   for (const [age, row] of frames.entries()) {
@@ -133,6 +190,17 @@ function validate(orientation: Orientation, config: ReceiptRow, probe: Row, rgbD
     reducerRows++;
     const raw = readFileSync(join(rgbDir, `${String(row.frame).padStart(5, "0")}.rgb`)); rawHash.update(raw);
     if (sha256(raw) !== row.sha256) throw new Error(`${orientation} age ${age}: raw RGB`);
+    const view = sceneOnMementoView({ ...stage, age });
+    const { attacker: _attacker, target: _target, ...viewState } = view;
+    if (sameValue(reducerProjection(viewState), reducerProjection(reduced[age]!))) seamRows++;
+    const engine: EngineState = {
+      ...createInitialState(), rngMode: "frontierBattle",
+      sceneOnPresentation: { ...stage, age },
+    };
+    const diff = framebufferDiff(render(engine), raw);
+    if (diff.count === 0) framebufferRows++;
+    else failures.push(`${row.frame}/age${age}: ${diff.count}px ${diff.bbox}; ${diff.sample}`);
+    peakDiff = Math.max(peakDiff, diff.count);
     if (age === 0) continue;
     const prior = frames[age - 1]!;
     if (same(row.hardwareOam, prior.softwareOam)) priorOam++;
@@ -149,6 +217,11 @@ function validate(orientation: Orientation, config: ReceiptRow, probe: Row, rgbD
   const mapRun = spawnSync("python3", [join(root, "tools/compare/frame-changemap.py"), rgbDir], { cwd: root, encoding: "utf8" });
   const map = mapRun.stdout.replace(/^# .* —/, `# memento ${orientation} — raw RGB888 —`);
   if (mapRun.status !== 0 || sha256(map) !== config.changeMapSha256 || map !== readFileSync(resolve(root, config.changeMap), "utf8")) throw new Error(`${orientation}: normalized map`);
+  console.log(`${orientation}: reducer ${reducerRows}/${frames.length}; seam ${seamRows}/${frames.length}; framebuffer ${framebufferRows}/${frames.length}; residual ${failures.length} rows; peak ${peakDiff}px`);
+  if (failures.length) console.log(failures.slice(0, 60).join("\n"));
+  if (seamRows !== frames.length || framebufferRows !== frames.length) {
+    throw new Error(`${orientation}: production acceptance ${seamRows}/${frames.length} seam, ${framebufferRows}/${frames.length} framebuffer`);
+  }
 }
 
 function verifyFresh(orientation: Orientation): void {
@@ -157,6 +230,15 @@ function verifyFresh(orientation: Orientation): void {
   if (sha256(retainedGzip) !== config.stateGzipSha256) throw new Error(`${orientation}: retained state archive`);
   const retained = JSON.parse(gunzipSync(retainedGzip).toString());
   const scratch = createScratchDir(`pokebench-memento-${orientation}-`); const output = join(scratch, "probe.json"); const rgbDir = join(scratch, "rgb");
+  if (retainedOnly) {
+    mkdirSync(rgbDir);
+    const archive = readFileSync(resolve(root, config.rawRgbArchive));
+    if (sha256(archive) !== config.rawRgbArchiveSha256) throw new Error(`${orientation}: retained RGB archive`);
+    const extract = spawnSync("tar", ["-xzf", resolve(root, config.rawRgbArchive), "-C", rgbDir], { cwd: root, encoding: "utf8" });
+    if (extract.status !== 0) throw new Error(`${orientation}: retained RGB extract`);
+    validate(orientation, config, retained, rgbDir);
+    return;
+  }
   const vendor = dirname(realpathSync(join(root, "reference/pokeemerald")));
   const run = spawnSync("python3", [join(root, "tools/run-mgba-probe.py"), output, "--", join(vendor, "mgba-venv/bin/python"), join(root, "tools/compare/mementoProbe.py"), resolve(root, config.scenario), output, rgbDir], { cwd: root, encoding: "utf8" });
   if (run.stdout) process.stdout.write(run.stdout); if (run.stderr) process.stderr.write(run.stderr);
@@ -164,7 +246,7 @@ function verifyFresh(orientation: Orientation): void {
   const bytes = readFileSync(output); const hash = sha256(bytes);
   if (hash !== config.probeJsonSha256 || !same(JSON.parse(bytes.toString()), retained)) throw new Error(`${orientation}: fresh state drift ${hash}`);
   validate(orientation, config, retained, rgbDir);
-  console.log(`${orientation}: ${config.sourceWindow.frameCount}/${config.sourceWindow.frameCount} source/hardware/raw-RGB rows; ${hash}; reducer ${config.sourceWindow.frameCount}/${config.sourceWindow.frameCount}; seam 0; framebuffer 0 (unsupported)`);
+  console.log(`${orientation}: ${config.sourceWindow.frameCount}/${config.sourceWindow.frameCount} source/hardware/raw-RGB rows; ${hash}`);
 }
 
 if (receipt.schema !== "memento-dense-evidence/v1" || receipt.acceptance.reducerRows !== 353) throw new Error("receipt schema/reducer count");
@@ -173,7 +255,9 @@ if (selected) {
   verifyFresh(selected);
 } else {
   for (const orientation of ["player-back", "opponent-front"] as const) {
-    const run = spawnSync(process.execPath, ["--experimental-strip-types", import.meta.filename, receiptPath, "--orientation", orientation], { cwd: root, encoding: "utf8" });
+    const args = ["--experimental-strip-types", import.meta.filename, receiptPath, "--orientation", orientation];
+    if (retainedOnly) args.push("--retained");
+    const run = spawnSync(process.execPath, args, { cwd: root, encoding: "utf8" });
     if (run.stdout) process.stdout.write(run.stdout);
     if (run.stderr) process.stderr.write(run.stderr);
     if (run.status !== 0) throw new Error(`${orientation} failed`);

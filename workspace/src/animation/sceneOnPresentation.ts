@@ -29,6 +29,11 @@ import {
   spiteAtAge,
   type SpiteState,
 } from "./spite.ts";
+import {
+  mementoAtAge,
+  type MementoConfig,
+  type MementoState,
+} from "./memento.ts";
 import { nightShadeAtAge, type NightShadeState } from "./nightShade.ts";
 import {
   headbuttAtAge,
@@ -863,6 +868,7 @@ export interface SceneOnPresentationBattler {
     | "MAGBY"
     | "QUILAVA"
     | "MAREEP"
+    | "WEEZING"
     | "GROVYLE"
     | "SCEPTILE"
     | "PIDGEOTTO"
@@ -1537,6 +1543,15 @@ export interface SceneOnSpiteConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Narrow Scene-ON seam for Memento's source-relative monbg/scanline body. */
+export interface SceneOnMementoConfig {
+  readonly move: "MEMENTO";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly reducer: Readonly<MementoConfig>;
 }
 
 export interface SceneOnNightShadeConfig {
@@ -2816,6 +2831,7 @@ export type SceneOnMoveConfig =
   | SceneOnDisableConfig
   | SceneOnHazeConfig
   | SceneOnSpiteConfig
+  | SceneOnMementoConfig
   | SceneOnNightShadeConfig
   | SceneOnMirrorCoatConfig
   | SceneOnSynthesisConfig
@@ -3016,6 +3032,8 @@ export type SceneOnHazePresentationState =
   SceneOnMovePresentationState<SceneOnHazeConfig>;
 export type SceneOnSpitePresentationState =
   SceneOnMovePresentationState<SceneOnSpiteConfig>;
+export type SceneOnMementoPresentationState =
+  SceneOnMovePresentationState<SceneOnMementoConfig>;
 export type SceneOnNightShadePresentationState =
   SceneOnMovePresentationState<SceneOnNightShadeConfig>;
 export type SceneOnMirrorCoatPresentationState =
@@ -4976,6 +4994,11 @@ export interface SceneOnSpiteView extends SpiteState {
   readonly displayedAlpha: Readonly<{ eva: number; evb: number }>;
 }
 
+export interface SceneOnMementoView extends MementoState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnNightShadeView extends NightShadeState {
   readonly attacker: SceneOnNightShadeConfig["attacker"];
   readonly target: SceneOnNightShadeConfig["target"];
@@ -5012,6 +5035,20 @@ export function sceneOnSpiteView(
       state.config.attacker.geometry.side,
     ),
     ...spiteAtAge(state.age - SPITE_TASK_SOURCE_AGE_OFFSET),
+  };
+}
+
+/** `age=0` is Move_MEMENTO's first in-bounds script pointer. */
+export function sceneOnMementoView(
+  state: SceneOnMementoPresentationState,
+): SceneOnMementoView {
+  if (state.config.move !== "MEMENTO") {
+    throw new Error(`expected MEMENTO presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...mementoAtAge(state.age, state.config.reducer),
   };
 }
 
