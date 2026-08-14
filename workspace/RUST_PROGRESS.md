@@ -5,6 +5,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R14 — [supervised session, 2026-08-13] **M13 Battle Script gender resolver**
+
+- **State:** `rust-main` = current master `4802c419` plus verified M13 through
+  merge head `a51fef82` and target-portability repair `1108053b`. The complete
+  pure `battleScriptGender.ts` lookup surface is native and wasm32-compilable;
+  no ABI or adapter surface was widened.
+- **Did:** added an isolated generated **411-pair** species/gender-ratio table
+  and binary-search resolver over the source-shaped `u16` species / `u32`
+  personality domains, preserving the exact missing-species message. Canonical
+  TypeScript execution supplies **2,306 cases** covering every extracted
+  species, both u32 edges, low-byte threshold boundaries in low and high words,
+  all fixed-gender branches, and three missing IDs; corpus sha256
+  `bb2aaff65e2c88fa5074fbd544be1cba6be22bdbad75e91259f03af752576edc`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c opponent
+  generation remains deferred while Issue #55 is open; keep native core logic
+  target-portable even before an ABI boundary is added.
+- **Notes:** Terra/max implementation plus Sol/high corrective isolation and a
+  supervisor target-portability repair. Audit rejected coupling the ratio into
+  `SwitchPolicySpeciesRow`; final `gen_tables.rs` is byte-identical to M12, and
+  the standalone generated table sha256 is
+  `c802372450ae0e5904c8393e27ce59d9055f29f37356f18951a01279f3b3e9ba`.
+  Regenerated twice cleanly; generated vectors sha256
+  `b002662ce399a3c90b3e163b63e77d4e8aed92234d6fe50a290f8ff172e7d418`.
+  Supervisor reran focused **2/2**, cargo **761/761**, fmt, strict Clippy,
+  wasm32 release, forced-WASM union **19 files / 807/807**, smoke **375/375**,
+  full npm **1,046 files / 9,858 passed / 1 skip**, and build **664 modules**.
+  Target-portable artifact is **509,805 bytes**, sha256
+  `d415fea6f766bdeebfc7d678b72609adfebe5ea720de43e38f50746714b0552d`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+
 ## R13 — [supervised session, 2026-08-13] **M12 Battle Script AI reveal leaf**
 
 - **State:** `rust-main` = current master `0a45638e` plus verified M12 through
