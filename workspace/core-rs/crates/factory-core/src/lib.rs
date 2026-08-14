@@ -55,6 +55,8 @@ pub mod factory_trainer_schedule;
 pub mod factory_trainer_schedule_vectors_gen;
 pub mod gen_tables;
 pub mod gender;
+pub mod key_repeat;
+pub mod key_repeat_vectors_gen;
 pub mod mon_construction;
 pub mod rental_data;
 pub mod rental_generation;
