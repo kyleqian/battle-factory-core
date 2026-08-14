@@ -937,6 +937,29 @@ clock problem, not a presentation branch.
 
 ## #55 — Rental-construction RNG stream contract cannot represent ambient VBlank interleaving
 
+**User decision (2026-08-13): PARKED — distribution parity is the product
+bar.** At the promised check-in, after a two-agent audit of all 77
+`issue55-*` docs, the grind ledger (44 CGB4 versions / 47.6 h / ~26 proven
+cycles per round, with SoundMainRAM, CgbSound, and CreateMon effectively
+unpriced and no completion estimate recorded anywhere), the user ruled:
+hardware-stream personality-exactness is a verification capability no
+player can observe — normal play samples the distribution on real hardware
+too. The cycle-pricing program is parked at its clean CGB4 v44 checkpoint
+(6,258-cycle prefix; every receipt stands unretracted, nothing
+half-wired). Consequences: (1) the "personality-exact construction stays
+unwired until the model closes" prerequisite is LIFTED — live generation
+may wire the engine's clean back-to-back stream, documented as
+distribution-accurate (same pools, same rejection rules, same odds), NOT
+hardware-stream-exact; (2) byte-exact verification continues only against
+captured/adopted seeds (the `anchor-state.json` class); (3) the
+no-fitted-constants rule still protects the parked clock's evidence —
+`serviceCostMasterCycles` stays null and no fitted clock may pose as the
+real one; (4) Noland (`FillFactoryBrainParty`) is unblocked as ordinary
+engine work and becomes the main lane's next program; (5) Rust M7c now
+waits on the TS live-generation implementation, not on #55 closure. This
+supersedes the 2026-08-10 authorization below, which is retained as
+history.
+
 **User decision (2026-08-10): GRIND IT OUT.** The user explicitly
 authorized pursuing the full construction-clock model ("I would like to
 grind that out. I would like to attempt to."), with a progress/opinion
@@ -1634,13 +1657,16 @@ v2 refutation above. No fitted cursor, per-frame schedule, or construction-
 clock wiring was landed. The canonical window therefore remains 248/248
 through 10177; its attempted 10214 extension is 277/285, ball 2 only.
 
-**Lead:** continue only with source/cycle-model slices for the remaining
-CreateMon/EV/stat/post budgets and deterministic VBlank/audio/DMA
-workload plus interrupt/event-entry latency. Do not wire the clock until those
-are source-general. Per-mon cursors and per-frame fixture schedules are
-evidence-refuted as production designs. Until then, keep the clean-stream
-contract and document personality-exactness as out of model when construction
-spans more than one frame. Supervisor decision 2026-07-30 (entry 758):
+**Lead (updated 2026-08-13):** the cycle-pricing program is PARKED per the
+2026-08-13 user decision at the head of this entry; schedule no further
+pricing slices. Live generation wires the clean-stream contract, with
+personality-exactness versus hardware documented as out of model when
+construction spans more than one frame — distribution parity is the
+accepted bar. Per-mon cursors and per-frame fixture schedules remain
+evidence-refuted as production designs; captured/adopted seeds remain the
+only byte-exact route. If the program is ever re-authorized, resume from
+the CGB4 v44 checkpoint — every receipt stands and regenerates.
+Supervisor decision 2026-07-30 (entry 758):
 Gate-5 clause (a) is receipt-linked at the rules level (selection byte-exact
 from the probed cursor; construction proven via filtered ledger); this entry
 tracks the remaining stream-model boundary, not a Gate-5 blocker.

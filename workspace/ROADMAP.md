@@ -971,6 +971,35 @@ session-trace-driven pacing fixes).
    Unchanged: the Gate-2 tick and its close-time disposition record stand;
    symbol/BP/reward bookkeeping keeps its existing scope.
 
+**User decisions (2026-08-13, planning session — the promised #55 check-in):**
+
+1. **#55 grind: PARKED (supersedes decision 1 above).** After a deep audit
+   of pace (~26 proven cycles per ~65-minute round) against the remaining
+   surface (mixer/CgbSound at zero cycles priced, CreateMon 1.24M–2.36M
+   cycles ×12 unresolved, no completion estimate recorded anywhere), the
+   user ruled the remaining payoff — byte-exact stream parity for
+   arbitrary seeds — is a verification capability no player can observe,
+   and not worth an unbounded opaque grind now. Parked at the clean CGB4
+   v44 checkpoint; all evidence stands; resumable if ever re-authorized.
+2. **Distribution parity is the product bar for live generation.** Same
+   candidate pools, same rejection rules, same odds as hardware — the
+   ported algorithms already meet it (the filtered-ledger proof stands).
+   Live generation may now wire the engine's clean RNG stream, with
+   personality-exactness versus hardware documented as out of model.
+   Byte-exact verification continues against captured seeds only. The
+   no-fitted-constants discipline still guards anything claiming hardware
+   timing.
+3. **The Noland program is the main lane's next objective**, unblocked
+   from #55: port `FillFactoryBrainParty`
+   (`reference/pokeemerald/src/battle_factory.c:759`) with the
+   `GetFactoryMonId` rejection loop, `GetFactoryMonFixedIV(challengeNum +
+   2)`, the battles-21/42 round-loop branch, and the Frontier-Brain
+   staging representation per decision 6 above — verified by
+   pool/rules/odds receipts, not stream exactness.
+4. **Rust M7c** consequently waits on the TS live-generation port, not on
+   #55. The Rust charter note is updated at the next Rust supervisor
+   session (lane files deliberately untouched while its round ran).
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.

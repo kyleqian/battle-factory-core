@@ -5,6 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1250 — [solo session, 2026-08-13] **#55 check-in: grind PARKED, main lane redirected to the Noland program**
+
+- **State:** the #55 opinion check-in promised on 2026-08-10 happened. User
+  decision: distribution parity is the product bar; the cycle-pricing grind
+  is parked at the clean CGB4 v44 checkpoint (6,258-cycle prefix; every
+  receipt stands, nothing half-wired). Live generation is unblocked on the
+  clean-stream contract, documented as not hardware-stream-exact.
+- **Did:** two-agent audit of all 77 `issue55-*` docs, the grind timeline
+  (44 versions / 47.6 h / ~26 cycles per round), the probe tooling, and the
+  gated work; recorded the superseding user decision in `ROADMAP.md`
+  (2026-08-13 block) and `ISSUES.md` #55 (new decision block + updated
+  Lead). No `src/**`, test, or lane-file change; animation and rust worker
+  rounds were live and untouched throughout.
+- **Next:** the next MAIN supervisor session briefs the Noland program:
+  port `FillFactoryBrainParty` (`battle_factory.c:759`) via the
+  `GetFactoryMonId` rejection loop (no Unown, no species/item duplicates,
+  excludes the player's current rentals), fixed IVs
+  `GetFactoryMonFixedIV(challengeNum + 2)`, the battles-21/42 round-loop
+  branch, and the Frontier-Brain staging representation. Verification bar:
+  pool/rules/odds receipts plus differential structure checks — not stream
+  exactness. The Rust charter note (M7c waits on the TS port, not #55)
+  lands at the next rust supervisor session.
+- **Notes:** docs-only change; no suites required per standing cadence.
+  #55 stays open as a parked, resumable program; `serviceCostMasterCycles`
+  stays null and the construction clock stays unwired.
+
 ## 1249 — [supervisor, 2026-08-13] **CGB4 v44 and final lane union verified**
 
 - **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**
@@ -46,23 +72,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** evidence/doc `f5dc524a…` / `a1cd1558…`; isolated regeneration
   matches both byte-for-byte and focused v44 is **6/6**. No oracle capture,
   `src/**` change, ratchet/barrier, ROADMAP/DEFERRED/ISSUES, or animation change.
-
-## 1247 — [MAIN worker, 2026-08-13] **CGB4 v43 fifth clear-route decrement/exit decision green**
-
-- **State:** #55 is source-exact through the mixed selected-row **6,234-cycle**
-  CGB4 prefix. The 0x83 nonzero-mask row remains frozen at v42 before its
-  body; the two clear rows stop before both possible successor bodies.
-- **Did:** source-only v43 freezes v42/v41 evidence, reports, packets, and
-  inherited v37-v40 artifacts byte-for-byte, then joins only the two clear
-  v42 rows by `sourceStateDigest`. Retained v39 evidence proves r2=7 before
-  the fourth decrement; source/ELF/ROM prove r2 reaches the fifth clear
-  decrement as 6, then `subs r2, 1; ble` leaves 5 and is not taken: **4×2 =
-  8 cycles** (**6,226 → 6,234**). Exact bytes are `01 3a 02 dd`.
-- **Next:** No follow-on started. Keep positive continuation/exit bodies,
-  other loop work, MPlay/service/arbitration, live clock wiring, production,
-  presentation, animation, Rust, and retired canonical Battle-2 work out of
-  scope.
-- **Notes:** evidence/doc `856457b1…` / `709625f7…`; focused v42/v43
-  **12/12**, smoke **375/375**, full npm **1,046 files / 9,858 passed / 1
-  skipped**, build **664 modules**. No oracle capture, `src/**` change,
-  ratchet/barrier, ROADMAP/DEFERRED/ISSUES, or canonical-Battle-2 change.
