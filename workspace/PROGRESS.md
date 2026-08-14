@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1248 — [MAIN worker, 2026-08-13] **CGB4 v44 fifth clear-route positive continuation checkpoint**
+
+- **State:** #55 is source-exact through the mixed selected-row **6,258-cycle**
+  CGB4 prefix. The frozen 0x83 nonzero-mask row remains at v42 before its
+  body; the two clear rows stop immediately before the sixth-track flags load.
+- **Did:** source-only v44 freezes v43/v42 and inherited artifacts byte-for-byte,
+  joins only the two v43 clear rows by `sourceStateDigest`, and proves the exact
+  `movs r0, MusicPlayerTrack_size; adds r5, r0; bgt _081DD9C8` body at
+  `50 20 2d 18 ad dc`. Static MPlay/cry storage is IWRAM, so the taken `bgt`
+  costs **12×2 = 24** cycles (**6,234 → 6,258**); no sixth-track scalar,
+  flags decision/body, exit, or broader loop is claimed.
+- **Next:** finish the required smoke/full/build verification from this clean
+  checkpoint; keep all follow-on body, MPlay/service/arbitration, live clock,
+  production, presentation, animation, Rust, and canonical Battle-2 work out
+  of scope.
+- **Notes:** evidence/doc `f5dc524a…` / `a1cd1558…`; isolated regeneration
+  matches both byte-for-byte and focused v44 is **6/6**. No oracle capture,
+  `src/**` change, ratchet/barrier, ROADMAP/DEFERRED/ISSUES, or animation change.
+
 ## 1247 — [MAIN worker, 2026-08-13] **CGB4 v43 fifth clear-route decrement/exit decision green**
 
 - **State:** #55 is source-exact through the mixed selected-row **6,234-cycle**
@@ -45,22 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Memento source **3/3**. Production soaks are vanilla **20/20** and full
   **60/60**, with **0 crashes / 0 hangs**. No new unsupported barrier or
   DEFERRED entry.
-
-## 1245 — [MAIN worker, 2026-08-13] **CGB4 v42 fifth-track volume/pitch decision green**
-
-- **State:** #55 is source-exact through the selected-row **6,226-cycle**
-  CGB4 prefix. One frozen fifth-track mask is nonzero and two are clear; both
-  routes stop before their respective bodies.
-- **Did:** source-only v42 freezes v41 evidence/report/packets and inherited
-  evidence byte-for-byte, then joins only by sourceStateDigest. Frozen flags
-  0x83/0x80/0x80 against mask 0x0f price the nonzero/no-refill route at 6 and
-  the two clear/taken-refill routes at 12 each: **30 aggregate cycles**
-  (**6,196 → 6,226**). Exact source/ELF/ROM bytes are 0f 21 01 42 45 d0.
-- **Next:** Assigned v42 is complete; do not start a follow-on. Keep the
-  mask-nonzero body, clear-route decrement/exit body, later loop,
-  MPlay/service/arbitration, construction-clock wiring, production,
-  presentation, animation, Rust, and retired Battle-2 work out of scope.
-- **Notes:** evidence/doc b18d54cc… / 07e866c8…; focused v41/v42 **12/12**,
-  smoke **375/375**, full npm **1,043 files / 9,845 passed / 1 skipped**,
-  build **664 modules**. No oracle capture, src change, ratchet/barrier,
-  ROADMAP/DEFERRED/ISSUES, or canonical-Battle-2 change; #55 remains open.
