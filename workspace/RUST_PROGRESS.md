@@ -5,6 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R13 — [supervised session, 2026-08-13] **M12 Battle Script AI reveal leaf**
+
+- **State:** `rust-main` = current master `0a45638e` plus verified M12 through
+  merge head `8fb5aeb6`. The complete pure `battleScriptAiReveal.ts` surface is
+  native; no ABI or adapter surface was widened.
+- **Did:** ported immutable AI knowledge overlays for revealed abilities and
+  held-item effects using two four-battler arrays and a bounded battler enum.
+  Canonical TypeScript execution supplies **20 cases / 33 operations** across
+  all four slots, changed and unchanged values, u8 edges, chains, non-mutation,
+  and sibling preservation; corpus sha256
+  `8d7732702b8d372a71d60683471429a6285966deb6ee95e87302c44abe7e3652`.
+- **Next:** select one final conflict-free, native-only Battle Script leaf if
+  the session clock retains a safe full-verification margin. M7c opponent
+  generation remains deferred while Issue #55 is open.
+- **Notes:** Terra/max worker, one commit. Supervisor audited bounded indexing
+  and copy semantics, regenerated twice byte-identically, and reran focused
+  vectors **3/3**, cargo **759/759**, fmt, strict Clippy, release WASM, smoke
+  **375/375**, full npm **1,045 files / 9,852 passed / 1 skip**, and build
+  **664 modules**. Artifact is **509,804 bytes**, sha256
+  `d3fc75987621a85bf3b9f5a5110138351cb6863226e50c12d20ea28ee2f8e573`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier was added.
+
 ## R12 — [supervised session, 2026-08-13] **M11 key-repeat core + WASM boundary**
 
 - **State:** `rust-main` = current master `17164d1d` plus verified M11 through
