@@ -43,6 +43,8 @@ pub mod battle_script_settaunt;
 pub mod battle_script_settaunt_vectors_gen;
 pub mod battle_script_setyawn;
 pub mod battle_script_setyawn_vectors_gen;
+pub mod battle_script_trysetgrudge;
+pub mod battle_script_trysetgrudge_vectors_gen;
 pub mod damage_calc;
 pub mod damage_vectors_gen;
 pub mod factory_ai_battle_history;
