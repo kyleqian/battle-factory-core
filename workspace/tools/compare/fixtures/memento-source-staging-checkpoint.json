@@ -1,0 +1,17 @@
+{
+  "schema": "memento-source-staging-checkpoint/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_MEMENTO",
+  "status": "unsupported",
+  "sourceBounds": {"start": "0x082cdcf2", "endExclusive": "0x082cdd36", "bytes": "0x44"},
+  "components": 8,
+  "carrier": {"index": 501, "label": "FRONTIER_MON_WEEZING_2", "species": 110},
+  "bilateralScenarios": [
+    "tools/battle-lab/mechanic-memento-player-weezing-opponent-onix.json",
+    "tools/battle-lab/mechanic-memento-opponent-weezing-player-onix.json"
+  ],
+  "denseEvidence": false,
+  "productionFramebuffer": false,
+  "siblingAudit": {"move": "MOVE_DIG", "components": 17, "shared": ["visualCommand:clearmonbg_static", "visualCommand:monbg_static"], "promoted": false},
+  "next": "Capture each complete pointer-bounded Move_MEMENTO..Move_FACADE Scene-ON window twice fresh through first inactive cleanup, retaining source/task/scanline/OAM/matrix/palette/BG/window/blend/audio/immutable-state/raw-RGB/map rows; only then derive and gate a source-relative reducer, typed seam, and compositor."
+}
