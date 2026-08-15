@@ -1102,6 +1102,12 @@ distribution-parity breadth. **#87(c) calibration DONE** (2026-08-15,
 PROGRESS 1276): silver Brain-reveal 648/701 → 690/701, gold + pre-ready
 windows unaffected; ISSUES #87 trimmed to a settled mechanism record.
 
+**FAITHFUL walk-up program progress:** step B1 (BattleRoom entrance —
+Noland visible-from-start, "Get a move on!", simultaneous walk-in,
+scientist turn) is **DONE** (2026-08-15, PROGRESS 1277); its own oracle
+dense-compare leg is queued, not yet run (see that entry's residual).
+Next: B2 (silver/gold speech).
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.
