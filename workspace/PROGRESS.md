@@ -34,10 +34,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (5) Lane folds at orient AND wind-down (animation: Flail 184 +
   Luster Purge 185 promotions, Mega Drain evidence; rust: 6 script
   leaves) — both lanes at zero unfolded commits at close.
-- **Gates (final union):** full npm **1,024 files / 9,833 passed /
-  224 skipped**; build green; cargo native green (61 ok-suites); wasm
-  rebuilt **509,806 B** `3f77c7a3…`; forced-WASM **18 files / 803
-  tests**; soak vanilla **20/20 OK**; soak full 0:60 **50/60** — all
+- **Gates (final union, re-run after a last rust-main tail fold —
+  settorment + snatch leaves, core-rs only):** full npm **1,024 files /
+  9,833 passed / 224 skipped**; build green; cargo native green (62
+  ok-suites); wasm rebuilt **496,864 B** `8b489813…`; forced-WASM
+  **18 files / 803 tests**; soak vanilla **20/20 OK** (run before the
+  core-rs-only tail, which soaks do not exercise); soak full 0:60
+  **50/60** — all
   9 crashes are the single #89 class (seeds 1,19,21,25,27,37,40,41,57,
   mostly round-1 surface: full-policy play selects Baton Pass), 1 HANG
   is #90. NOTE: the prior 60/60 full-soak baseline predates chaining
