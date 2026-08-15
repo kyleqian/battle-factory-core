@@ -11,6 +11,19 @@
 // This is docs/overrides-ready-lag-probe.md's own PUPITAR probe fixture and
 // ISSUES #87's confirmed +7 datapoint.
 //
+// Round 16 addition (SIDE lane, decisive roster×staging cell): also traces
+// factory-legal-delcatty-sableye-lickitung-readylag-probe.json — the exact
+// same route tuple (trainerId 109, challengeNum 2, battleNum 0, seed 70,
+// playerSetIds [267,268,269]) but plain `factoryLegal` (real generation, no
+// `overrides.parties`). `docs/overrides-ready-lag-probe.md`'s own
+// `factoryLegal-vs-mechanicLab-matched-+7-route` differential already noted
+// this route's real-gen player roster is species 316/322/108 — the exact
+// same DELCATTY/SABLEYE/LICKITUNG identity the PUPITAR/DELCATTY +7 fixture
+// pins via `overrides.parties` — but never ran the leg-split probe on it.
+// This settles whether the +7 is a roster/route property (this fixture
+// also shows 4/x/7) or a roster×staging interaction (this fixture reverts
+// to the 3/x baseline).
+//
 // Read-only against a live oracle (POKEBENCH_ORACLE_URL, default :8014).
 // Usage:
 //   node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts
@@ -137,6 +150,14 @@ async function main(): Promise<void> {
   await trace("PUPITAR/DELCATTY probe (residual +7)", "factory-mechanic-pupitar-delcatty-readylag-probe.json");
   await trace("GRIMER/YOSHI (residual +5, baseline)", "factory-arbitrary-intro-yoshi-off.json");
   await trace("KADABRA/SHIZUKA (residual +4, baseline)", "factory-trainer-pic-shizuka-off.json");
+  await trace(
+    "DELCATTY/SABLEYE/LICKITUNG real-gen, matched route (decisive roster×staging cell)",
+    "factory-legal-delcatty-sableye-lickitung-readylag-probe.json",
+  );
+  await trace(
+    "DUGTRIO/BLAZIKEN gold Noland dense (residual +5, no Quick Claw, falsification check)",
+    "factory-brain-gold-intro-dense-off.json",
+  );
 }
 
 main().catch((error) => {
