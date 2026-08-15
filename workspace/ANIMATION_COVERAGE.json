@@ -5121,6 +5121,32 @@
     "src/engine/battleScene.ts",
     "tests/animation/cosmicPower.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_PAIN_SPLIT",
+   "status": "exact",
+   "covered": [
+    "complete legal Misdreavus/Gengar Scene-ON windows pass player-back frames 445-525 and opponent-front frames 446-526 through first inactive cleanup at 81/81 each and 162/162 total component, typed-seam, raw-RGB, and shared production framebuffer rows with zero residual pixels",
+    "the pure source-relative reducer ports all six ballistic projectiles, their literal 0/4/8 tile animation and bounce callback, three paired AnimTask_PainSplitMovement affine phases, x2 cadence, side-specific pic-coordinate y offsets, three centered SE_M_SWAGGER2 restarts, resource tags, and cleanup",
+    "the narrow typed seam and source-derived bilateral Misdreavus/Gengar compositor retain ordinary OAM/palette RAM+1 transfer plus the measured task-specific affine setup RAM+1 and neutral reset RAM+2 behavior without owning Pain Split HP calculation, damage, PP, RNG, AI, turn, controller, round, or facility state",
+    "the literal PAIN_SPLIT sheet and palette regenerate byte-for-byte from pinned source; the complete retained source/task/sprite/software+hardware-OAM/matrix/palette/tag/register/audio/party/engine/RNG evidence and change maps remain independently pinned twice fresh, and no sibling receives coverage"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-pain-split-player-misdreavus-opponent-gengar.json",
+    "tools/battle-lab/mechanic-pain-split-opponent-misdreavus-player-gengar.json",
+    "tools/compare/fixtures/pain-split-evidence.json",
+    "tools/compare/painSplitSourceAudit.ts",
+    "tools/compare/painSplitEvidence.ts",
+    "tools/compare/painSplitFramebuffer.ts",
+    "tools/compare/extractPainSplitAssets.ts",
+    "src/animation/assets/pain-split.json",
+    "src/animation/painSplit.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/painSplit.test.ts",
+    "tests/animation/painSplitFramebuffer.test.ts",
+    "tests/animation/painSplitEvidenceCheckpoint.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -6011,7 +6037,8 @@
    "representatives": [
     "MOVE_PAIN_SPLIT"
    ],
-   "goal": "MOVE_PAIN_SPLIT evidence checkpoint: complete legal Misdreavus/Gengar player-back 445..525 and opponent-front 446..526 windows retain all 162 source/task/sprite/software+hardware-OAM/matrix/palette/tag/register/audio/party/engine/RNG/raw-RGB rows twice fresh through first inactive cleanup. The three projectile-pair phases start at ages 4/29/54, movement-pair phases and Swagger2 cues at 16/41/66, and the live affine setup is RAM+1 while reset is RAM+2. A pure reducer, typed seam, compositor, production framebuffer acceptance, and MOVE_PAIN_SPLIT coverage promotion remain open; the track conveys no sibling credit."
+   "fulfilled": true,
+   "goal": "MOVE_PAIN_SPLIT independently proves its complete legal Misdreavus/Gengar player-back 445..525 and opponent-front 446..526 windows at 162/162 source reducer, typed seam, raw-RGB, and shared production framebuffer rows with zero residual pixels. All six projectiles, three paired movement/affine phases, Swagger2 restarts, task-specific RAM+1 setup and RAM+2 neutral reset, resources, field chrome, and first inactive cleanup are retained. The track conveys no sibling credit."
   }
  ],
  "variantAudits": {

@@ -3,9 +3,9 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_PAIN_SPLIT",
   "moveId": 220,
-  "status": "unsupported",
-  "coverageCredit": false,
-  "coverageCounts": "Level 50: 189/276 exact, 0 partial, 0 staged, 87 unsupported",
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 190/276 exact, 0 partial, 0 staged, 86 unsupported",
   "carrier": {"setId":374,"label":"FRONTIER_MON_MISDREAVUS_1","species":200},
   "source": {
     "audit": "tools/compare/painSplitSourceAudit.ts",
@@ -18,7 +18,7 @@
     "projectileCallbackSha256": "5b5ac6b83f234e067a8374082736385125da2abc38532d7ada6a44c6f450c989",
     "movementTaskSha256": "20bef8a7a8cb48888b0a82d4db6f7d01854673f661fc13da6005bab0c30e08dd"
   },
-  "evidenceScope": {"productionAnimationChanged":false,"reducerAdded":false,"typedSeamAdded":false,"compositorAdded":false,"framebufferLookupAdded":false,"coveragePromotion":false,"boundaryOrBarrierChanged":false,"gameplayStateOwned":false,"fullDenseRowsRetained":true,"twiceFreshByteIdentical":true},
+  "evidenceScope": {"productionAnimationChanged":true,"reducerAdded":true,"typedSeamAdded":true,"compositorAdded":true,"framebufferLookupAdded":false,"coveragePromotion":true,"boundaryOrBarrierChanged":false,"gameplayStateOwned":false,"fullDenseRowsRetained":true,"twiceFreshByteIdentical":true},
   "orientations": {
     "player-back": {
       "scenario":"tools/battle-lab/mechanic-pain-split-player-misdreavus-opponent-gengar.json","scenarioSha256":"b07e2776af7efeb1885382eecbca69e022d7666a7982fe3e15d8fc024ff6c43b",
@@ -35,6 +35,6 @@
       "changeMap":"tools/compare/evidence/pain-split-changemap-opponent.json","changeMapSha256":"6351650f1948fd797356ffb6c0ef58aaff9d2654aa162aeb0de9094cce4a11a3"
     }
   },
-  "acceptance": {"sourceRows":162,"rawRgbRows":162,"freshRuns":2,"projectilePairStarts":[4,29,54],"movementPairStarts":[16,41,66],"audioStarts":[16,41,66],"firstInactiveCleanupAge":80},
-  "next": "Implement a pure source-relative reducer, typed Scene-ON seam, and source-derived bilateral compositor, then require complete twice-fresh production framebuffer equality before promoting Pain Split alone."
+  "acceptance": {"sourceRows":162,"rawRgbRows":162,"productionFramebufferRows":162,"freshRuns":2,"projectilePairStarts":[4,29,54],"movementPairStarts":[16,41,66],"audioStarts":[16,41,66],"firstInactiveCleanupAge":80},
+  "next": "Fulfilled: retain MOVE_PAIN_SPLIT as an independent exact acceptance unit; shared components convey no sibling credit."
 }

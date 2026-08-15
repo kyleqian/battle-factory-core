@@ -1,3 +1,10 @@
+# MOVE_PAIN_SPLIT bilateral exact production presentation (2026-08-15 worker)
+
+- **State:** Coverage advances **189→190/276 Level-50 exact**, with 0 partial, 0 staged, and **87→86 unsupported**. MOVE_PAIN_SPLIT alone promotes and the `pain-split-projectile-affine` track is fulfilled; no sibling receives credit.
+- **Did:** Added a pure source-relative reducer for all six ballistic projectiles and three paired `AnimTask_PainSplitMovement` phases, reproducible literal PAIN_SPLIT gfx/palette extraction, a narrow typed Scene-ON seam, and source-derived bilateral Misdreavus/Gengar field compositor. It models callback bounce/frame geometry, side-specific front/back pic-coordinate offsets, affine/x2 phases, three centered `SE_M_SWAGGER2` restarts, tags, field chrome, and cleanup without gameplay ownership.
+- **Verified:** The retained complete player-back **445..525 (81/81)** and opponent-front **446..526 (81/81)** windows pass **162/162** component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels. Ordinary OAM/palette remains RAM+1; each affine setup displays RAM+1 and each neutral reset RAM+2. Source/evidence/change-map digests remain pinned twice fresh, the literal asset regenerates byte-for-byte, and the boundary ratchet is unchanged.
+- **Checks/next:** Focused evidence/framebuffer/boundary/count checks **42/42**, typecheck, animation audit/coverage, `git diff --check`, full `npm test` (**1,040 files / 9,890 passed / 224 skipped**), and production build (**682 modules**) pass. Resume the next supervisor-selected unsupported move; do not infer acceptance from Pain Split's shared affine/resource mechanisms.
+
 # MOVE_PAIN_SPLIT bilateral source/staging/evidence checkpoint — remains unsupported (2026-08-15 worker)
 
 - **State:** Coverage remains **189/276 Level-50 exact**, 0 partial, 0 staged, and **87 unsupported**. Pain Split has no reducer, typed seam, compositor, production draw/wiring, framebuffer acceptance, or coverage entry. Added the non-exclusive `pain-split-projectile-affine` evidence track; no sibling credit exists.

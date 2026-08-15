@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 const fixture = JSON.parse(readFileSync("tools/compare/fixtures/pain-split-evidence.json", "utf8")) as Record<string, any>;
 const sha = (path: string): string => createHash("sha256").update(readFileSync(path)).digest("hex");
 
-describe("MOVE_PAIN_SPLIT source/staging and bilateral evidence checkpoint", () => {
+describe("MOVE_PAIN_SPLIT exact source and bilateral evidence", () => {
   it("pins the complete exclusive script, callbacks, literal resources, audio, and carrier", () => {
     const audit = JSON.parse(execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/painSplitSourceAudit.ts"], { encoding: "utf8" }));
     expect(audit).toMatchObject({
@@ -55,9 +55,9 @@ describe("MOVE_PAIN_SPLIT source/staging and bilateral evidence checkpoint", () 
 
   it("pins twice-fresh complete retained rows, natural HP difference, and cleanup", () => {
     expect(fixture).toMatchObject({
-      schema: "pain-split-bilateral-evidence/v1", status: "unsupported", coverageCredit: false,
-      evidenceScope: { productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferLookupAdded: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
-      acceptance: { sourceRows: 162, rawRgbRows: 162, freshRuns: 2, projectilePairStarts: [4,29,54], movementPairStarts: [16,41,66], audioStarts: [16,41,66], firstInactiveCleanupAge: 80 },
+      schema: "pain-split-bilateral-evidence/v1", status: "exact", coverageCredit: true,
+      evidenceScope: { productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferLookupAdded: false, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
+      acceptance: { sourceRows: 162, rawRgbRows: 162, productionFramebufferRows: 162, freshRuns: 2, projectilePairStarts: [4,29,54], movementPairStarts: [16,41,66], audioStarts: [16,41,66], firstInactiveCleanupAge: 80 },
     });
     expect(sha(fixture.source.audit)).toBe(fixture.source.auditSha256);
     expect(sha(fixture.source.probe)).toBe(fixture.source.probeSha256);
@@ -93,13 +93,15 @@ describe("MOVE_PAIN_SPLIT source/staging and bilateral evidence checkpoint", () 
     }
   });
 
-  it("keeps Pain Split unsupported at the fixed 189/87 coverage gate", () => {
+  it("promotes only Pain Split at the fixed 190/86 coverage gate", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(189);
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PAIN_SPLIT")).toBeUndefined();
+    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(190);
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PAIN_SPLIT"))
+      .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: any) => track.id === "pain-split-projectile-affine")).toMatchObject({
       components: ["asset:ANIM_TAG_PAIN_SPLIT", "sprite:gPainSplitProjectileSpriteTemplate", "task:AnimTask_PainSplitMovement"],
       representatives: ["MOVE_PAIN_SPLIT"],
+      fulfilled: true,
     });
   });
 });
