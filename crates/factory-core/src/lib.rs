@@ -33,6 +33,8 @@ pub mod battle_script_negativedamage;
 pub mod battle_script_negativedamage_vectors_gen;
 pub mod battle_script_normalisebuffs;
 pub mod battle_script_normalisebuffs_vectors_gen;
+pub mod battle_script_remaininghptopower;
+pub mod battle_script_remaininghptopower_vectors_gen;
 pub mod battle_script_setalwayshitflag;
 pub mod battle_script_setalwayshitflag_vectors_gen;
 pub mod battle_script_setbide;
