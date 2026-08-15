@@ -379,3 +379,14 @@ before that point.
 
 This is the user's call per the step brief; the above is the case for TRIM,
 not a unilateral decision.
+
+## 4. USER DECISION (2026-08-14 eve): FAITHFUL
+
+The user picked FAITHFUL with §2's costs on the table, superseding §3's
+TRIM recommendation. Scope notes recorded with the decision (ROADMAP
+2026-08-14-eve block): the PreBattleRoom ready/swap/retire menu + attendant
+call-scene is built as the GENERAL pre-battle feature ordinary matches
+share, not a brain-only fork; the per-tier heard-speech flags are
+in-session only (cross-session saving stays out of scope); resolve §1.6's
+gold-discrepancy probe before writing gold's disputed box. Estimated 4-6
+worker steps; sequenced after #89/#90/#87(c) per the same block.

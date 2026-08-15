@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1274 — [planning session, 2026-08-14 eve] **Both waiting user decisions made: walk-up = FAITHFUL (supersedes the TRIM recommendation), #87 = option (c) calibrate-crossing-windows-only; next-run order set**
+
+- **State:** Docs/ledger only. Both of 1273's blockers-on-the-user are
+  resolved and recorded (ROADMAP 2026-08-14-eve decision block, ISSUES
+  #87 decision line, `docs/noland-walkup-dialogue-scoping.md` §4).
+- **Did:** Presented 1273's two waiting decisions with the memos'
+  options and costs; the user picked: (1) **FAITHFUL walk-up** — full
+  attendant call-scene + PreBattleRoom ready/swap/retire menu + Noland
+  placement/entrance + both speeches, accepting that the menu/call-scene
+  is a general pre-battle feature shared by ordinary matches (~4-6
+  worker steps; the memo's §1.6 gold-discrepancy probe comes first;
+  heard-speech flags in-session only — the no-save scope stands).
+  (2) **#87 option (c)** — committed windows ending before their ready
+  transition stay exactly as-is; calibrate only crossing windows
+  (today: the silver Brain-reveal tail), constants labeled
+  measured-not-derived and probe-validated.
+- **Next (order for the next runs, stability first):** (a) #89 Baton
+  Pass `openpartyscreen` fix; (b) #90 seed-51 hang triage; (c) #87(c)
+  silver-tail calibration (small); (d) the FAITHFUL walk-up program;
+  (e) chained-round distribution-parity breadth.
+- **Notes:** Top-layer session; workspace edits limited to
+  ROADMAP/ISSUES/PROGRESS + the scoping memo's decision section.
+  Commits local only — pushing is Kyle's step.
+
 ## 1273 — [supervisor, 2026-08-14 eve] **Wind-down: entire 1267 queue closed + continuous play LIVE (battle 21 reachable by natural play); #88 root-caused same-session; all gates green, full-soak baseline re-based post-chaining**
 
 - **State:** 8 worker steps across 2 lanes, zero unresolved failures.

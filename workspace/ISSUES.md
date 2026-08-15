@@ -207,7 +207,12 @@ ready transition as-is (unaffected) and only calibrate windows that
 must cross it (currently just the silver reveal tail, 648/701).
 Deciding between these is a supervisor/user-visible trade (exactness
 vs. honesty of a fitted constant); no further instrument is named —
-the evidence program (rounds 13-17) is complete. Instruments:
+the evidence program (rounds 13-17) is complete.
+**USER DECISION (2026-08-14 eve): option (c).** Committed windows
+ending before their ready transition stay exactly as-is; only windows
+that must cross it are calibrated (today: the silver Brain-reveal
+tail, 648/701), each constant labeled measured-not-derived and
+validated by the RAM-handshake probe before adoption. Instruments:
 `tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`,
 fixtures `factory-legal-delcatty-sableye-lickitung-readylag-probe.json`,
 `factory-legal-sandslash-venomoth-chansey-readylag-probe.json`.
