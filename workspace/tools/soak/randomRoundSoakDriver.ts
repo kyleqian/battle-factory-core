@@ -733,9 +733,15 @@ export type RunOptions = {
 export const DEFAULT_RUN_OPTIONS: RunOptions = {
   // In-session round chaining (PROGRESS ~1271) lets a single seed play
   // arbitrarily many rounds back to back; 200_000 was sized for one round.
-  // 300_000 comfortably covers the deepest observed default-sweep seed
-  // (seed 0, vanilla: settles at 226_630).
-  maxFrames: 300_000,
+  // 300_000 was believed to comfortably cover the deepest observed
+  // default-sweep seed, but ISSUES #90's triage (docs/
+  // issue90-seed51-hang-triage.md) falsified that for the "full" policy:
+  // seed 51 is not a hang, just a crash-free playthrough that settles at
+  // frame 361,216 -- over the old budget. The #89 Baton Pass fix (which
+  // used to crash before reaching this point) makes the same-class seed 37
+  // run even longer, settling at frame 398,088. 600_000 covers both with
+  // real margin.
+  maxFrames: 600_000,
   renderEvery: 8,
   verbose: false,
   policy: "full",
