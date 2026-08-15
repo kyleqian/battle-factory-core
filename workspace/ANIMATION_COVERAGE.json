@@ -5098,6 +5098,17 @@
  "queue": [],
  "componentTracks": [
   {
+   "id": "seed-projectile-leech-seed",
+   "components": [
+    "asset:ANIM_TAG_SEED",
+    "visualCommand:createleechseedsprite"
+   ],
+   "representatives": [
+    "MOVE_LEECH_SEED"
+   ],
+   "goal": "MOVE_LEECH_SEED is the sole Factory acceptance unit: independently prove the complete three projectile-hidden-sprout lifecycles, sounds, source callbacks, ordinary display latches, and cleanup in both orientations twice fresh, plus the real naturally scheduled B_ANIM_LEECH_SEED_DRAIN body through General_LeechSeedDrain -> AnimTask_GetBattlersFromArg -> Move_ABSORB with its measured role swap and complete cleanup. MOVE_ABSORB is an exact regression control only and transfers no Leech Seed timing, geometry, outcome, latch, or coverage credit. MOVE_BULLET_SEED remains an outside-Factory asset/source sibling, never a coverage sibling."
+  },
+  {
    "id": "water-orb-hydro-pump-whirlpool",
    "components": [
     "asset:ANIM_TAG_WATER_ORB",
