@@ -119,6 +119,35 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(second.lastActions).toEqual(first.lastActions);
   });
 
+  it("also reaches the milestone under the winning policy", () => {
+    const result = runSeed(12, {
+      maxFrames: 6_000,
+      renderEvery: 8,
+      policy: "winning",
+      stopAtFirstActionMenu: true,
+    });
+    expect(result).toMatchObject({
+      outcome: "OK",
+      endState: "milestone:first-action-menu",
+    });
+  });
+
+  it("is deterministic per seed under the winning policy", () => {
+    // A deeper run than the milestone determinism pin above: the winning
+    // policy's two overrides (fight-move power ranking, voluntary-switch
+    // decline) both live well past battle 1's first action menu, so this
+    // exercises them across a whole round's worth of ticks.
+    const options = {
+      maxFrames: 600_000,
+      renderEvery: 0,
+      policy: "winning" as const,
+      stopAtFirstRoundDecision: true,
+    } as const;
+    const first = runSeed(12, options);
+    const second = runSeed(12, options);
+    expect(second).toEqual(first);
+  });
+
   it("earns all seven generated wins through the live tick/render and terminal seams", () => {
     const options = {
       maxFrames: 200_000,
