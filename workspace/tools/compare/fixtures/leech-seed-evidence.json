@@ -1,0 +1,79 @@
+{
+  "schema": "leech-seed-bilateral-main-residual-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_LEECH_SEED",
+  "moveId": 73,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "coverageCounts": "Level 50: 188/276 exact, 0 partial, 0 staged, 88 unsupported",
+  "source": {
+    "probe": "tools/compare/leechSeedProbe.py",
+    "probeSha256": "b8bc5a7ad0a90d557db6df55ed8d81c0630d83fe534f427e10aaa05b49238d8a",
+    "main": "0x082ca083..0x082ca0d9",
+    "residual": "0x082d82fd..0x082d830b -> Move_ABSORB/AbsorbEffect/HealingEffect"
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-leech-seed-player-exeggcute-opponent-onix.json",
+      "scenarioSha256": "0e52e79d02c223436d73fccc3359dc2a47749ec40623ff3d7b83e0ce8869fdd9",
+      "probeJsonSha256": "c90f08b19bdea3dc3a83e7313f16cec9ca0f065c1f7860350d153a18c66fc0b0",
+      "repeatProbeJsonSha256": "c90f08b19bdea3dc3a83e7313f16cec9ca0f065c1f7860350d153a18c66fc0b0",
+      "denseState": "tools/compare/evidence/leech-seed-player-dense-state.json.gz",
+      "denseStateSha256": "27981c33d5e7e1a9d74dd2d099b112c15b005678e284df243284a7ee44c408f2",
+      "rawRgbArchive": "tools/compare/evidence/leech-seed-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "78469d52aafc2c6dc9ac64997402a2e5d374ae01b29d4c1d1cb246f57380a61d",
+      "main": { "startFrame": 246, "endFrame": 386, "frameCount": 141,
+        "rawRgbSha256": "a361049431b69015253fb2285f3d7887c8b8cb782fe62556f8b60e9b0bddd353",
+        "changeMap": "tools/compare/evidence/leech-seed-main-changemap-player.txt",
+        "changeMapSha256": "8f645ab9e502613830a62403a135d88c270621ae5964863fda6706bca839e9d5" },
+      "residual": { "startFrame": 485, "endFrame": 691, "frameCount": 207,
+        "rawRgbSha256": "d124f6396a1093a768c7ef2a547bd968249f02b221624454a1ab61823afb9d17",
+        "changeMap": "tools/compare/evidence/leech-seed-residual-changemap-player.txt",
+        "changeMapSha256": "0148672f4c2953c8ff69698a8008b2af4ad9435c0b6b6f18257aa791d492b458" }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-leech-seed-opponent-exeggcute-player-onix.json",
+      "scenarioSha256": "6b65c703100796a09abca58b33049550ea93faad5c4d0a3d53d711c0c783f468",
+      "probeJsonSha256": "9a59920b417e15b250beac43150d3d2b37a400aab6b07725a9b48e39cde5a156",
+      "repeatProbeJsonSha256": "9a59920b417e15b250beac43150d3d2b37a400aab6b07725a9b48e39cde5a156",
+      "denseState": "tools/compare/evidence/leech-seed-opponent-dense-state.json.gz",
+      "denseStateSha256": "a99680f521ad25f00e158957787e57361215250e8fecd726743ce5c5af122619",
+      "rawRgbArchive": "tools/compare/evidence/leech-seed-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "a04360e82827f73c47f6abb5de4d91cc8c3d02136f8e0db2c948a698f551a5a9",
+      "main": { "startFrame": 245, "endFrame": 385, "frameCount": 141,
+        "rawRgbSha256": "83e9553e02fcd7fb91ded34085818e16213b016869e412529fabaa00aa0d3669",
+        "changeMap": "tools/compare/evidence/leech-seed-main-changemap-opponent.txt",
+        "changeMapSha256": "eb2fb6e7a933c7e005d1abac1aeec444764124987c14bda61e11c7eb944b4dbc" },
+      "residual": { "startFrame": 480, "endFrame": 686, "frameCount": 207,
+        "rawRgbSha256": "f5b256e9ca2399728c2c05a24694cf9062a50b615ccaec7adc2a018a3e8799c0",
+        "changeMap": "tools/compare/evidence/leech-seed-residual-changemap-opponent.txt",
+        "changeMapSha256": "e06887ac6ddd55d8d577fd52fdde36307eea612a023ffa71f5ff46378f95580e" }
+    }
+  },
+  "measured": {
+    "mainLifecycle": "three seed sprites start at ages 4/14/24; arcs end and hide at 39/49/59; sprout callbacks occur at 50/60/70; first visible looping sprout rows are 51/61/71; destroy callbacks are 112/122/132; first inactive cleanup is age 140",
+    "mainLatches": "hardware OAM, matrices, and palette equal the preceding software/faded row on 140/140 comparable rows in both orientations; creation is default-visible and displayed via ordinary RAM+1 transfer",
+    "residualOwners": "General_LeechSeedDrain ages 0..1, Move_ABSORB 2..44, AbsorbEffect 45..92, Move_ABSORB 93..139, HealingEffect 140..175, Move_ABSORB 176..206 inactive cleanup",
+    "residualLifecycle": "8 absorption orbs and 4 healing stars; complete 207-row real Absorb body in each orientation",
+    "residualLatches": "hardware OAM is preceding software 206/206; palette is preceding faded 205/206 with age-11 monbg same-row exception; full matrix table differs at ages 28/46/52/58/64/70/76/82/88 because active Absorb affine slots transfer independently",
+    "roleSwap": "at the first observable General row (pointer offset 9), animation attacker is the natural seeder and target is the seeded Onix in both orientations, opposite BattleScript_LeechSeedTurnDrain's BS_ATTACKER before AnimTask_GetBattlersFromArg; the snapshot concurrently retains leechSeededBy provenance",
+    "shadow": "the enemy-shadow sprite is already SpriteCB_SetInvisible for every retained main and residual row; no entry or teardown edge is claimed"
+  },
+  "controls": {
+    "MOVE_ABSORB": "independently exact regression control only; no Leech Seed acceptance transfer",
+    "MOVE_BULLET_SEED": "outside-Factory asset/source sibling; unsupported and no coverage credit"
+  },
+  "remaining": "implement a pure source-relative reducer, typed Scene-ON seam, Exeggcute/Onix compositor, and production draw/wiring; require all 696 main+residual rows to pass component/seam/raw-RGB/shared-framebuffer equality twice fresh with zero residual pixels before promotion"
+}
