@@ -5,6 +5,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1273 — [supervisor, 2026-08-14 eve] **Wind-down: entire 1267 queue closed + continuous play LIVE (battle 21 reachable by natural play); #88 root-caused same-session; all gates green, full-soak baseline re-based post-chaining**
+
+- **State:** 8 worker steps across 2 lanes, zero unresolved failures.
+  Queue (i)/(ii)/(iii) all COMPLETE (ROADMAP annotations updated);
+  continuous-play wiring live. DEFERRED.md remains EMPTY. Two user
+  decisions are ready and waiting (not blockers): walk-up dialogue
+  FAITHFUL/TRIM/SKIP (`docs/noland-walkup-dialogue-scoping.md`,
+  recommendation TRIM) and #87's fix shape (three options in ISSUES).
+- **Did (headlines):** (1) Queue (i): `applyFactoryBrainRoundOutcome`
+  (ROM-table cross-checked: silver 14/gold 15/+10 bonus/symbol grant) +
+  orchestrator `roundOutcome` outputs + brain congrats text; live
+  verification: BP **0→14** + silver symbol flag RAM-pinned
+  (`docs/brain-terminal-live-verification.md`), both congrats
+  scroll-gate ages live-bisected (98, release+32; supervisor applied
+  the off-by-1/off-by-3 src correction). (2) Queue (ii): #87 rounds
+  15-17 — residual = two independent additive legs; ack leg is
+  `AI_TrySwitchOrUseItem` (not move-scoring); Quick-Claw and
+  opponent-identity predicates both FALSIFIED; evidence program
+  complete, fix-shape decision recorded in #87. (3) Queue (iii):
+  walk-up scoping memo (3 maps, ~17/~8 boxes end-to-end). (4)
+  Continuous play: `factoryRoundChaining.ts` + terminal→next-draft
+  path (decision: re-enter fresh generated draft after the record
+  menu, no new lobby surfaces); exposed pre-existing #88 → fixed at
+  root cause (`FaintClearSetData` zeroes status2 on faint;
+  battle_main.c:3272), vanilla soak 14/20→**20/20**; #89 filed
+  (Baton Pass `openpartyscreen`), #90 filed (seed-51 presenting HANG).
+  (5) Lane folds at orient AND wind-down (animation: Flail 184 +
+  Luster Purge 185 promotions, Mega Drain evidence; rust: 6 script
+  leaves) — both lanes at zero unfolded commits at close.
+- **Gates (final union, re-run after a last rust-main tail fold —
+  settorment + snatch leaves, core-rs only):** full npm **1,024 files /
+  9,833 passed / 224 skipped**; build green; cargo native green (62
+  ok-suites); wasm rebuilt **496,864 B** `8b489813…`; forced-WASM
+  **18 files / 803 tests**; soak vanilla **20/20 OK** (run before the
+  core-rs-only tail, which soaks do not exercise); soak full 0:60
+  **50/60** — all
+  9 crashes are the single #89 class (seeds 1,19,21,25,27,37,40,41,57,
+  mostly round-1 surface: full-policy play selects Baton Pass), 1 HANG
+  is #90. NOTE: the prior 60/60 full-soak baseline predates chaining
+  AND this session's driver changes — input streams shifted; vanilla
+  20/20 is the standing regression bar, and #89/#90 are the honest
+  full-policy remainder, not regressions of previously-green behavior.
+- **Next:** (a) #89 — player-side mid-turn Baton Pass switch-in
+  through `beginCommandResolution` (the opcode exists; the wiring
+  gap is diagnosed in the entry); (b) #90 triage (seed 51); (c) the
+  two waiting user decisions above; (d) distribution-parity breadth
+  for chained rounds once #89 lands.
+- **Notes:** oracle freshness FAILs on :8014/:8012 were the known
+  timestamp false positive (verified against commit contents + live
+  `bin/oracle info`). Wasm-artifact papercut hit 3× more this session
+  (now 5; every fresh side worktree). Commits local only — pushing is
+  Kyle's step.
+
 ## 1272 — [main worker, 2026-08-14] **#88 fixed: locked multi-turn continuation now falls back to a fresh resolution when the locked battler faints first; soak 20/20 OK**
 
 - **State:** #88 is fixed and deleted from ISSUES.md. `npm run soak --
@@ -67,105 +120,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the session's one deviation from "pass as originally written" — surfaced
   explicitly per the brief rather than hidden. No committed compare trace
   touched; no `executableFrontierRatchet` barrier counts moved.
-
-## 1271 — [main worker, 2026-08-14] **Continuous-play step 1: generated-draft round entry + in-session chaining WIRED; blocked green by newly-exposed #88**
-
-- **State:** Round-chaining wiring (ROADMAP "User decisions 2026-08-14" #2)
-  is implemented and committed (`b7ae30de`), green under typecheck,
-  `test:smoke`, `npm run build`, and 8 new Tier-1 scenario tests
-  (`tests/factoryRoundChaining.test.ts`). Running it end-to-end via
-  `npm run soak` surfaced a genuine pre-existing engine bug (**new #88**)
-  that blocks the full `npm test` + soak acceptance gates — did NOT attempt
-  a fix (out of a bounded wiring step's scope; see #88). **STOPPING at this
-  green-commit boundary per the brief's explicit permission** rather than
-  forcing the gate.
-- **Did:** (1) `src/engine/factoryRoundChaining.ts`: pure `FactoryCarry`
-  (win streak/symbols/BP/rents, in-session only) + `advanceFactoryCarry`
-  (streak +7 on win, reset on loss; symbols/BP/rents from the round's
-  already-computed `roundOutcome`) + `generateFactoryChallengeDraft`
-  (builds the next draft screen from `generateInitialFactoryRentals`,
-  flowing straight into the existing `createDraftScreenStateFromRentalRecords`
-  with zero anchor-record special-casing, structural typing already
-  compatible). (2) `core.ts` wiring: the terminal record menu's accepted
-  default-NO input (`recordChoice` newly "no", both roundCompleted/roundLost)
-  now short-circuits into a freshly generated draft screen + resets
-  transient state, instead of falling through to the decline-farewell →
-  free-roam-Lobby chain (no new lobby-dialogue surfaces, per the supervisor
-  design decision recorded in the step brief). The subsequent battleRoom
-  handoff, when a `pendingGeneratedRound` snapshot is present, constructs
-  the next round via `createFactoryRoundBattleOrchestrator`'s **already-proven**
-  `generateInitial` path (no `adoptedInitialOpponent` — confirmed exercised
-  by `factoryRoundBattleOrchestrator.test.ts`'s own "uninterrupted
-  orchestrator cursor" case) instead of the anchor-only
-  `createFactoryAnchorSession`; the RNG seed threaded through is the
-  finishing round's own `round.rules.rngValue` ("the ROM's Random() is one
-  continuous global", per that same test's doc). `factoryDraftScreen.ts`
-  gained `selectedRentalSlotIndexes` (mirrors `selectedRentalParty` but
-  returns pool-slot indexes, since `generateInitial` selects by slot not by
-  resolved record). Boot path (challenge 1) untouched — still
-  `ANCHOR_DRAFT_RENTAL_RECORDS`/`createFactoryAnchorSession` unconditionally
-  at `pendingGeneratedRound === null`. (3) Discovered + cataloged **#88**:
-  driving a live-generated round's battle 1 through the real
-  tick()-level command/resolution presentation state machine (only
-  reachable now that round 2 exists) throws "locked action continuation
-  receipt has no immutable matching action snapshot"
-  (`battleResolutionPresentation.ts:3898`) — 6/20 seeds in
-  `npm run soak -- --policy vanilla --seeds 0:20` (14/20 OK), plus 2
-  pre-existing pinned cases in `tests/randomRoundSoak.test.ts` (seed 21,
-  seed 27) whose own original concerns did NOT regress but which no longer
-  stop cleanly at round 1's own terminal now that the driver keeps playing.
-- **Next:** #88 first (it blocks this program's own acceptance gates and
-  any further round-2+ soak work); then continue the continuous-play
-  program (queue item 2's remaining reach: challenge 3+/battle 21 Noland
-  natural-play verification) once unblocked. Queue (ii)/(iii) from 1267/1268
-  (#87 instrument, Brain walk-up scoping) remain untouched/parallel-lane.
-- **Notes:** `npm run typecheck` green throughout. `npm run test:smoke`
-  green (375/375). `npm run build` green. Full `npm test`: **2 failed
-  (both #88-attributable, both in `tests/randomRoundSoak.test.ts`) / 9,819
-  passed / 223 skipped** — did not weaken or paper over those two
-  pre-existing pinned tests; left them red and documented, since silently
-  loosening a regression pin to hide a fresh discovery would be worse than
-  an honest red. No committed compare trace touched; no barrier counts
-  touched. PAPERCUT: none beyond the time cost of discovering #88 itself.
-
-## 1270 — [main worker, 2026-08-14] **Queue (i) step 3: brain-aware Lobby congrats text**
-
-- **State:** All 3 steps of `docs/noland-brain-post-battle-audit.md` §5's
-  worklist done (each its own green commit). Queue (i) "consequences" is
-  complete; next is queue (ii)/(iii) per PROGRESS 1268 (#87's ack-timing
-  instrument, Brain walk-up scoping), then the continuous-play program.
-- **Did:** `EventScript_WonChallenge`'s `frontier_isbrain` branch
-  (`BattleFrontier_BattleFactoryLobby/scripts.inc:38-46`,
-  `Text_CongratsForDefeatingHead:447-450`, re-verified against the reference
-  decomp, not just the audit doc) is now selected in
-  `factoryTerminalPresentation.ts`/`factoryTerminalRender.ts` iff the final
-  opponent carries `frontierBrain` — matching `IsTrainerFrontierBrain`
-  (`gTrainerBattleOpponent_A == TRAINER_FRONTIER_BRAIN`) exactly, independent
-  of symbol status. Threaded `currentOpponent` through the `roundCompleted`
-  presentation command (previously `playerParty`-only) so the terminal can
-  key off it, same as `roundLost` already did. The Brain text's `\n`+`\l`
-  shape (3 lines with a mid-message scroll) reuses the generic scroll
-  mechanic the `award` box already implements (same `awardScrollTicks`(4)/
-  `awardThirdLineTextDelay`(7) constants — generic printer animation, not
-  award-text-specific), with its own two gate ages derived via the "input
-  accepted exactly on the tick the last glyph draws" rule that reproduces
-  `congratulationsInputReadyAge`/`awardScrollInputDelay`/
-  `awardDefaultInputDelay` (102/69/41) with zero slack against the three
-  existing pinned constants — flagged in a doc comment as formula-derived,
-  since no live oracle trace of a Brain win reaching the terminal exists yet
-  (blocked on queue-item-4's not-yet-built harness `factoryBrain` staging
-  mode) to probe fresh timing against.
-- **Next:** queue (ii) — #87's opponent-AI `ChooseAction` ack-timing
-  instrument (`battle_ai_switch_items.c`); queue (iii) — Brain walk-up
-  dialogue scoping only; then the continuous-play program (generated-draft
-  round entry + round chaining, PROGRESS 1267).
-- **Notes:** `tests/factoryTerminalPresentation.test.ts` — new case pins the
-  Brain congrats' byte sequence (encoded via the same `charmap.json` table
-  the renderer uses, cross-validated char-by-char against every known code
-  in the existing `encodedBytes` tables since `factory-terminal-messages.json`
-  has no pre-expanded encoding for this string yet); negative case pins the
-  ordinary text's bytes straight from the JSON's own pre-expanded
-  `regularCongrats.encodedBytes`, unchanged. Full `npm test` green (1020
-  files / 9,813 passed / 223 skipped, up 2 from 1269), `npm run build`
-  green, `npm run typecheck` green throughout. No barrier counts touched.
-  PAPERCUT: none this session.

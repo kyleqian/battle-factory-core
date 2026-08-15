@@ -17,12 +17,30 @@ backlog.
 
 # Open
 
+## #90 — "full"-policy soak seed 51 HANGs at `resolution:presenting` (frame-budget stall, distinct from #89)
+
+**Symptom (wind-down full soak, 2026-08-14 eve, final tree):**
+`npm run soak -- --seeds 0:60` seed 51 reaches the 300,000-frame budget
+stuck at surface `resolution:presenting` (battle 1, turn 14) — no crash,
+no progress. Signature is distinct from #89's Baton Pass barrier (that
+one throws). Not yet triaged: unknown whether a presentation wait never
+completes (a #88-adjacent continuation/receipt stall that falls into a
+wait instead of throwing) or an input-gate deadlock. Repro:
+`npm run soak -- --seed 51` (policy full). Same-session context: vanilla
+0:20 is 20/20 OK; this is the only HANG in 60 full-policy seeds.
+
 ## #89 — "full"-policy soak seed 27 hits an unimplemented Baton Pass `openpartyscreen` machine-barrier, unrelated to and predating #88/chaining
 
 **Symptom:** `tests/randomRoundSoak.test.ts`'s "ISSUES #86: presents a
 forced replacement's terminal sandstorm continuation" pin (seed 27, no
 policy override i.e. `"full"`) CRASHes at round 1 battle 1 turn 10, frame
-30798, well before its documented "battle 4 turn 16" scenario:
+30798, well before its documented "battle 4 turn 16" scenario.
+**Breadth (wind-down full soak, 2026-08-14 eve, final tree):** the same
+signature accounts for ALL 9 crashes in `--seeds 0:60` — seeds 1, 19,
+21, 25, 27, 37, 40, 41, 57, most inside round 1 (so pre-existing
+surface, not chaining territory; full-policy play just selects Baton
+Pass often). This is now the dominant playable-path gap: full soak is
+50/60 OK with this class + #90's single HANG the only failures.
 
 ```
 FactoryRoundOrchestratorError: battle kernel reached {"kind":"battle-script","entryLabel":"BattleScript_EffectBatonPass","programCounter":1157,"opcodeId":80,"opcodeName":"B_SCR_OP_OPENPARTYSCREEN","dispatcher":"Cmd_openpartyscreen",...}
