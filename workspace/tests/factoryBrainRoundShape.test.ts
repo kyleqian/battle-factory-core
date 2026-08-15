@@ -23,6 +23,7 @@ import {
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
+  factoryRoundOutcomeForResolution,
   preGenerateFactoryRoundNextOpponent,
   submitFactoryRoundPlayerDecision,
   type FactoryRoundBattleOrchestratorConfig,
@@ -203,6 +204,40 @@ function assertBrainBattleStartCommand(
   expect(started.round.rules.currentOpponent.frontierBrain).toEqual({ status });
 }
 
+/**
+ * Step 2 (round-controller BP/symbol outputs): resolves the pending Brain
+ * battle-start command straight to its outcome through the same public
+ * `resolveRoundBattle` seam the loss case below uses (scripting a real
+ * kernel win/loss against a generated Brain party is out of scope here),
+ * then confirms `factoryRoundOutcomeForResolution` -- the same function
+ * `finishBattle` calls to populate `state.roundOutcome` on a real terminal
+ * boundary -- reports the audit doc's §1a/§3 BP/symbol result.
+ */
+function assertBrainRoundOutcome(
+  state: FactoryRoundBattleOrchestratorState,
+  outcome: "win" | "loss",
+  expected: ReturnType<typeof factoryRoundOutcomeForResolution>,
+): void {
+  const start = state.round.presentation?.command;
+  if (start?.type !== "battleStart") throw new Error("expected a pending battle-start command");
+  let round = advanceRoundController(
+    completeBattlePresentation(state.round, { commandId: start.commandId }),
+  );
+  round = resolveRoundBattle(round, {
+    outcome,
+    playerParty: round.rules.playerParty,
+    opponentParty: round.rules.currentOpponent.party,
+    rngValue: round.rules.rngValue,
+  });
+  expect(round.rules.phase).toBe(outcome === "win" ? "roundComplete" : "roundLost");
+  expect(factoryRoundOutcomeForResolution(
+    state.config,
+    round.rules.battleIndex,
+    outcome,
+    round.rules.currentOpponent.frontierBrain,
+  )).toEqual(expected);
+}
+
 // Silver: entering factoryWinStreak 14 (challenge index 2), symbols 0 —
 // battleIndex 6's effective streak is 20, the silver threshold.
 const SILVER_SEED = 4;
@@ -268,6 +303,11 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
     expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
     assertBrainBattleStartCommand(state, "silver");
+    assertBrainRoundOutcome(state, "win", {
+      battlePointsAwarded: 14,
+      symbolGranted: true,
+      newSymbolsCount: 1,
+    });
   });
 
   it("the same silver round with factorySymbolsCount 1 schedules an ordinary opponent at battleIndex 6", () => {
@@ -336,6 +376,11 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
     expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "gold" });
     assertBrainBattleStartCommand(state, "gold");
+    assertBrainRoundOutcome(state, "win", {
+      battlePointsAwarded: 15,
+      symbolGranted: true,
+      newSymbolsCount: 2,
+    });
   });
 
   // No existing test exercised a LOSS at the Brain's own battleIndex 6 --
@@ -387,5 +432,15 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     // own opponent snapshot, not just the round's live rules state.
     expect(command.opponent.frontierBrain).toEqual({ status: "silver" });
     expect(round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+
+    // Step 2's round-controller output on the negative path: a Brain loss
+    // is identical to an ordinary loss (audit doc §2) -- no BP, no symbol,
+    // symbol count untouched.
+    expect(factoryRoundOutcomeForResolution(
+      state.config,
+      round.rules.battleIndex,
+      "loss",
+      round.rules.currentOpponent.frontierBrain,
+    )).toEqual({ battlePointsAwarded: 0, symbolGranted: false, newSymbolsCount: 0 });
   });
 });
