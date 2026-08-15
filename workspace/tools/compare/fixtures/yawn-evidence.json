@@ -1,0 +1,37 @@
+{
+  "schema": "yawn-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_YAWN",
+  "moveId": 281,
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "coverageCounts": "Level 50: 190/276 exact, 0 partial, 0 staged, 86 unsupported",
+  "carrier": {"setId":288,"label":"FRONTIER_MON_TOGETIC_2","species":176},
+  "source": {
+    "audit": "tools/compare/yawnSourceAudit.ts", "auditSha256": "13aaa0b2a9bcac00e113f915891d7fcedfbf5289c2609dd6e73dc4c0c6bf13fe",
+    "probe": "tools/compare/yawnProbe.py", "probeSha256": "17567b95c3cd80d066143598a451dea519e83a4656d7dd312aa3eda7b1332f6d",
+    "evidenceReplay": "tools/compare/yawnEvidence.ts", "evidenceReplaySha256": "4209f89beb588867892127fda59cd9a390c4c8c9c3519e68f3c05f1a471db64d",
+    "moveBody": {"start":"0x082ce253","endExclusive":"0x082ce296","bytes":67,"sha256":"0bf8b045e9ef520f16c367dc0ce7dd09929bcf9757316ef2dc91285c839fb128"},
+    "deepInhaleStepSha256": "dc03762b711b89a83c694e4af8760e964cecce924292866d1be7c7c00f58c91a",
+    "cloudStepSha256": "a67e682de100dd97826123ceb14d8653143f09c92915bbd5ea8215977ba1292e"
+  },
+  "evidenceScope": {"productionAnimationChanged":false,"reducerAdded":false,"typedSeamAdded":false,"compositorAdded":false,"framebufferLookupAdded":false,"coveragePromotion":false,"boundaryOrBarrierChanged":false,"gameplayStateOwned":false,"fullDenseRowsRetained":true,"twiceFreshByteIdentical":true},
+  "orientations": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-yawn-player-togetic-opponent-gengar.json","scenarioSha256":"b9f0a71471e6b1ac166db3b427248685470ff39bb0c765a0b2e4a045165cbe9d",
+      "sourceWindow":{"startFrame":250,"endFrame":462,"frameCount":213},"probeJsonSha256":"c4b4f20f11d74d5f78b9240826f306d0394e07c8a375b3d8e7bef91ebc0dcd96","repeatProbeJsonSha256":"c4b4f20f11d74d5f78b9240826f306d0394e07c8a375b3d8e7bef91ebc0dcd96",
+      "denseState":"tools/compare/evidence/yawn-player-dense-state.json.gz","denseStateSha256":"77652f7d33c04d937d4215eda756d2fac7487237a5f240a379c4d5c97949b24c",
+      "rawRgbArchive":"tools/compare/evidence/yawn-player-raw-rgb.tar.gz","rawRgbArchiveSha256":"2e4fed09a2913d203e5b84f137acc0b0efc5f96a6c28d727fef3655180b7a985","rawRgbSequenceSha256":"8bf0a0648105959326285696118ac5cb1faa61e1cd185da589f2a5f44835f3a3",
+      "changeMap":"tools/compare/evidence/yawn-changemap-player.json","changeMapSha256":"66793ca4c927f14bad6d735fe256a67cf2af16992f9eccc0e9d4896fdc397aa4"
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-yawn-opponent-togetic-player-gengar.json","scenarioSha256":"051a17a9fd985266ed2f366d15b6fed8b23cfe1a4f3d621b2cd91f8ba5a505a3",
+      "sourceWindow":{"startFrame":254,"endFrame":466,"frameCount":213},"probeJsonSha256":"e9ff912cd37578f271a6a5f6ec9ec6a93ef82c199557583c32d4cf59549714c4","repeatProbeJsonSha256":"e9ff912cd37578f271a6a5f6ec9ec6a93ef82c199557583c32d4cf59549714c4",
+      "denseState":"tools/compare/evidence/yawn-opponent-dense-state.json.gz","denseStateSha256":"59de553a84c55ad56f2994c13fb7175aa168139eb550e020f861c87d85956da5",
+      "rawRgbArchive":"tools/compare/evidence/yawn-opponent-raw-rgb.tar.gz","rawRgbArchiveSha256":"697486c7da8b012c48f21d22933dd4873c1b9b3356a255ac54072971993b2194","rawRgbSequenceSha256":"900396b096a43dd9a351a19f557948a4498fb7f9c0d737cbf555d667c8a7697a",
+      "changeMap":"tools/compare/evidence/yawn-changemap-opponent.json","changeMapSha256":"1518f0c9cf483c967d209a42129de70c3c0024c50cdfa95b01e1725b361bb335"
+    }
+  },
+  "acceptance": {"sourceRows":426,"rawRgbRows":426,"productionFramebufferRows":0,"freshRuns":2,"deepInhaleStarts":[4,147],"cloudCreates":[69,75,81],"cloudDestroys":[134,140,146],"audioStarts":[4,69,147],"firstInactiveCleanupAge":212},
+  "next": "Implement no behavior from this checkpoint. A later independent round must add a pure reducer, narrow seam, compositor, and 426/426 production framebuffer acceptance before Yawn alone can promote."
+}

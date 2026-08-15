@@ -6039,6 +6039,20 @@
    ],
    "fulfilled": true,
    "goal": "MOVE_PAIN_SPLIT independently proves its complete legal Misdreavus/Gengar player-back 445..525 and opponent-front 446..526 windows at 162/162 source reducer, typed seam, raw-RGB, and shared production framebuffer rows with zero residual pixels. All six projectiles, three paired movement/affine phases, Swagger2 restarts, task-specific RAM+1 setup and RAM+2 neutral reset, resources, field chrome, and first inactive cleanup are retained. The track conveys no sibling credit."
+  },
+  {
+   "id": "pink-cloud-yawn-deep-inhale",
+   "components": [
+    "asset:ANIM_TAG_PINK_CLOUD",
+    "sprite:gYawnCloudSpriteTemplate",
+    "task:AnimTask_DeepInhale"
+   ],
+   "representatives": [
+    "MOVE_YAWN",
+    "MOVE_HOWL"
+   ],
+   "fulfilled": false,
+   "goal": "Evidence checkpoint only. MOVE_YAWN independently retains its complete legal Togetic/Gengar bilateral 213-row source windows twice fresh: both DeepInhale phases, three PINK_CLOUD affine lifecycles, Yawn/Spit Up/Yawn audio, resource tags, hardware transfers, RNG/state, raw RGB, and first inactive cleanup. It remains unsupported without a reducer, seam, compositor, or production framebuffer acceptance. Exact MOVE_HOWL is a shared DeepInhale control only and conveys no Yawn credit."
   }
  ],
  "variantAudits": {

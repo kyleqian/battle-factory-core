@@ -1,3 +1,10 @@
+# MOVE_YAWN bilateral source/staging/evidence checkpoint — remains unsupported (2026-08-15 worker)
+
+- **State:** Coverage remains **190/276 Level-50 exact**, 0 partial, 0 staged, and **86 unsupported**. Yawn has no reducer, typed seam, compositor, draw/wiring, production-framebuffer acceptance, or coverage entry; exact Howl is only a shared DeepInhale control.
+- **Source/staging:** Audited the complete odd **0x082ce253..0x082ce296 (67 bytes, `0bf8b045…`)** body, both DeepInhale phases, all three cloud affine programs/template/OAM/callbacks, literal 316-byte PINK_CLOUD gfx + 36-byte palette, Yawn/Spit Up audio, tag lifecycle, and cleanup. Complete legal challenge-2 set-288 Togetic/Gengar parties use only ordinary A input and stock AI; no transient state or legacy battler injection.
+- **Fresh evidence:** Four direct local-mGBA runs through `tools/run-mgba-probe.py` reproduce byte-for-byte. Player-back **250..462 (213 rows)** is `c4b4f20f…`, RGB `8bf0a064…`; opponent-front **254..466 (213 rows)** is `e9ff912c…`, RGB `900396b0…`. All **426** rows retain task/sprite/software+hardware OAM/matrix/palette/tag/register/audio/battler/party/engine/gameplay-RNG/animation-RNG/raw-RGB state and compact change maps through first inactive cleanup.
+- **Measured/next:** DeepInhale starts ages **4/147**; clouds create **69/75/81**, destroy **134/140/146**, and peak at 3; audio is Yawn/Spit Up/Yawn at **4/69/147**. Whole OAM and palette are preceding-source **212/212** per orientation; cloud affine matrices are preceding-source **192/192**. Tags live ages 1..211 and clear at 212; gameplay RNG is invariant and animation RNG advances every row. These agree with existing latch classes, so `ANIMATION_LATCHES.md` is unchanged. A later round must add the production path and pass **426/426** framebuffer rows before promoting only Yawn.
+
 # MOVE_PAIN_SPLIT bilateral exact production presentation (2026-08-15 worker)
 
 - **State:** Coverage advances **189→190/276 Level-50 exact**, with 0 partial, 0 staged, and **87→86 unsupported**. MOVE_PAIN_SPLIT alone promotes and the `pain-split-projectile-affine` track is fulfilled; no sibling receives credit.
