@@ -11,9 +11,12 @@
 // Options:
 //   --seeds A:B        run seeds A..B-1 (default 0:50)
 //   --seed N           run a single seed
-//   --policy P         "full" (default: arbitrary-but-legal play) or
-//                      "vanilla" (plainest play: FIGHT first legal move,
-//                      decline swaps, GO ON)
+//   --policy P         "full" (default: arbitrary-but-legal play), "vanilla"
+//                      (plainest play: FIGHT first legal move, decline
+//                      swaps, GO ON), or "winning" (opt-in: full's
+//                      exploration, but biases fight-move selection to the
+//                      highest-power legal damaging move and declines
+//                      voluntary switches, for deep-streak crash coverage)
 //   --max-frames N     per-seed tick budget before reporting HANG (default: DEFAULT_RUN_OPTIONS.maxFrames)
 //   --render-every N   call render() every N frames (0 disables; default 8)
 //   --milestone        stop each seed at battle 1's first action menu (the
@@ -45,8 +48,8 @@ function main(): void {
   const renderEvery = Number(getFlag("--render-every") ?? 8);
   const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
   const jsonPath = getFlag("--json");
-  if (policy !== "full" && policy !== "vanilla") {
-    console.error(`bad --policy: ${policy} (want full|vanilla)`);
+  if (policy !== "full" && policy !== "vanilla" && policy !== "winning") {
+    console.error(`bad --policy: ${policy} (want full|vanilla|winning)`);
     process.exit(2);
   }
 
