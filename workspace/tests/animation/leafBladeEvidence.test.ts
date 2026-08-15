@@ -32,7 +32,7 @@ describe("MOVE_LEAF_BLADE source and asset checkpoint", () => {
         .toBe(fixture.changeMapSha256);
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries).toHaveLength(185);
+    expect(coverage.entries).toHaveLength(186);
     expect(coverage.entries.filter((entry: { move: string }) => entry.move === "MOVE_LEAF_BLADE"))
       .toEqual([expect.objectContaining({ status: "exact" })]);
   });

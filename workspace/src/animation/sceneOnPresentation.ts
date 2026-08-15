@@ -322,6 +322,11 @@ import {
   type AbsorbState,
 } from "./absorb.ts";
 import {
+  megaDrainAtAge,
+  type MegaDrainAllocatorProfile,
+  type MegaDrainState,
+} from "./megaDrain.ts";
+import {
   reflectAtAge,
   type ReflectState,
 } from "./reflect.ts";
@@ -1484,6 +1489,23 @@ export interface SceneOnAbsorbConfig {
     readonly stars: readonly number[];
     readonly paletteController: number;
   }>;
+}
+
+/**
+ * Presentation-only geometry and allocator facts for `Move_MEGA_DRAIN`.
+ * Battle resolution supplies all mutable battle outcomes outside this seam.
+ */
+export interface SceneOnMegaDrainConfig {
+  readonly move: "MEGA_DRAIN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `InitSpritePosToAnimAttacker(TRUE)` center used by HealingEffect. */
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+  /** `BATTLER_COORD_X_2/Y_PIC_OFFSET` endpoint used by absorption arcs. */
+  readonly absorptionCenter: Readonly<{ x: number; y: number }>;
+  /** Fresh-probed occupied slots, retained as presentation topology only. */
+  readonly allocatorProfile: Readonly<MegaDrainAllocatorProfile>;
 }
 
 export interface SceneOnReflectConfig {
@@ -2886,6 +2908,7 @@ export type SceneOnMoveConfig =
   | SceneOnMoonlightConfig
   | SceneOnPresentConfig
   | SceneOnAbsorbConfig
+  | SceneOnMegaDrainConfig
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
@@ -3043,6 +3066,7 @@ export type SceneOnMoveConfig =
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
+    | SceneOnMegaDrainConfig
     | SceneOnBiteConfig
     = SceneOnMoveConfig,
 > {
@@ -3077,6 +3101,8 @@ export type SceneOnGlarePresentationState =
   SceneOnMovePresentationState<SceneOnGlareConfig>;
 export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
+export type SceneOnMegaDrainPresentationState =
+  SceneOnMovePresentationState<SceneOnMegaDrainConfig>;
 export type SceneOnMoonlightPresentationState =
   SceneOnMovePresentationState<SceneOnMoonlightConfig>;
 export type SceneOnPresentPresentationState =
@@ -4282,6 +4308,12 @@ export interface SceneOnAbsorbView extends AbsorbState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnMegaDrainView extends MegaDrainState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSynthesisView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4469,7 +4501,7 @@ export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
+    | SceneOnAbsorbConfig | SceneOnMegaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBarrierConfig
     | SceneOnHazeConfig
     | SceneOnBiteConfig
@@ -4964,6 +4996,27 @@ export function sceneOnAbsorbView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...absorbAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.absorptionCenter,
+      state.config.attacker.geometry.side,
+      state.config.healingCenter,
+    ),
+  };
+}
+
+/** `age` is relative to Move_MEGA_DRAIN's source `monbg ANIM_DEF_PARTNER`. */
+export function sceneOnMegaDrainView(
+  state: SceneOnMovePresentationState<SceneOnMegaDrainConfig>,
+): SceneOnMegaDrainView {
+  if (state.config.move !== "MEGA_DRAIN") {
+    throw new Error(`expected MEGA_DRAIN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...megaDrainAtAge(
       state.age,
       state.config.target.geometry.animationCenter,
       state.config.absorptionCenter,
