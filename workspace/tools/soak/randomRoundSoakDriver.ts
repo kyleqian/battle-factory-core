@@ -150,6 +150,17 @@ export type RunDiagnostics = Readonly<{
   terminalRecordMenuInputReadyReached: boolean;
   terminalRecordChoice: "yes" | "no" | "cancel" | null;
   renderCalls: number;
+  /**
+   * The win streak carried INTO the current orchestrator's round
+   * (`config.factoryWinStreak`, `factoryRoundChaining.ts`'s carry — +7 per
+   * completed round win, 0 after a loss). Combined with `battleIndex`, this
+   * is exactly the internal `config.factoryWinStreak + battleIndex` formula
+   * (`factoryRoundBattleOrchestrator.ts:559`) — the deepest chained-streak
+   * value this run reached before its outcome, used by the soak depth
+   * report (chained-round distribution-parity plan §4 step 3), not read by
+   * ordinary CLI/full/vanilla runs.
+   */
+  carriedWinStreak: number | null;
 }>;
 
 // ---------------------------------------------------------------------------
@@ -837,6 +848,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       terminalRecordMenuInputReadyReached,
       terminalRecordChoice: state.factoryTerminal?.recordChoice ?? null,
       renderCalls,
+      carriedWinStreak: orchestrator?.config.factoryWinStreak ?? null,
     });
   };
 
