@@ -1,3 +1,56 @@
+## 1265 — [MAIN worker, 2026-08-14] **Ready-lag #87: switch-in ability/item procs ruled out as the driver of BOTH residual families (source audit + live tick-by-tick RAM trace); `overrides.parties` correlation found but its general mechanism was already cleared by a prior differential — honest-stop, no validated `src/` fix**
+
+- **State:** no `src/` change this round (source archaeology + a live RAM
+  probe disproved the leading hypothesis before any bisection was
+  attempted — nothing to revert). All committed windows unchanged: silver
+  `factory-round-battle7-noland-reveal-off` **648/701**, gold
+  `factory-round-battle7-noland-gold-reveal-off` **700/701**, Lukas
+  **154/154**, Yoshi **700/751**, `test:smoke` **375/375**.
+- **Did:** Assigned to model `TryDoEventsBeforeFirstTurn`'s span length
+  from source per-fixture and check it predicts the confirmed +7/+7/+5/+4
+  residual table. Read the switch-in ability/item loop
+  (`battle_main.c:3841-3910`): it only costs extra ticks when
+  `AbilityBattleEffects`/`ItemBattleEffects` report a real effect;
+  otherwise both battlers' loops complete in a single tick. Audited all 12
+  active-lead abilities/held-items across all 6 confirmed fixtures
+  (real-gen: GRIMER/YOSHI, KADABRA/SHIZUKA, DUGTRIO/gold-dense,
+  WEEPINBELL/QUINN; `overrides.parties`: TANGELA/silver, PUPITAR/probe)
+  against `battle_util.c`'s switch-in cases — **none trigger a real
+  effect** (including DELCATTY's Cute Charm, which has no
+  `ABILITYEFFECT_ON_SWITCHIN` case in Gen 3 at all, contact-only per
+  `battle_util.c:2851`). This rules out switch-in procs as the cause of
+  either the +4-vs-+5 split or the +5-vs-+7 jump. Built
+  `tools/probe/probe-readylag-span-tickbytick.ts` (committed, rerunnable)
+  to localize the +5-vs-+4 split live: re-ran GRIMER/YOSHI and
+  KADABRA/SHIZUKA dense and found the switch-in-loop leg is an **identical
+  +3 ticks in both** (confirming the "no procs → 1 tick" source read); the
+  entire split lives in the opponent's own `ChooseAction`-ack tick count
+  (3 ticks for COMBUSKEN, 2 for MAGNETON) — a real span, but in the AI's
+  own decision logic (`battle_ai_switch_items.c`, unread this round), not
+  the switch-in loop. Separately noticed both confirmed +7 fixtures share
+  a byte-identical `overrides.parties` player roster (DELCATTY/SABLEYE/
+  LICKITUNG) — but `docs/overrides-ready-lag-probe.md` (same day, side
+  lane) already ran a byte-matched ± differential at the exact PUPITAR
+  route and found the staging mechanism innocent (offset 0) for an
+  *arbitrary* roster — so this round's correlation is real but its cause
+  is still open (roster×staging interaction vs. a roster/route property
+  independent of staging), not a new, confirmed discriminator. Full
+  writeup: `docs/trainer-pic-off-window-scout.md` round 14.
+- **Next:** (1) the still-untested decisive cell: stage the exact
+  DELCATTY/SABLEYE/LICKITUNG roster under real generation (not
+  `overrides.parties`) and see if it's still +7. (2) run the
+  tick-by-tick trace on a +7 fixture (TANGELA or PUPITAR) — unknown
+  whether its extra ticks live in the same AI-ack leg Step 3 found for the
+  +4/+5 family or somewhere earlier. (3) read
+  `battle_ai_switch_items.c`'s move-scoring loop to source-model the
+  AI-ack leg's own tick count — needed even for the +4/+5 baseline before
+  either family has a non-empirical fix.
+- **Notes:** commits this round: probe script + dossier/ISSUES/PROGRESS
+  append only (no `src/`, no fixture/trace changes). ISSUES #87 updated in
+  place (trimmed eliminated theories, added this round's audit + open
+  lead) per the "never mark closed in place, trim to open remainder"
+  convention — not deleted, since the defect is still open.
+
 ## 1264 — [MAIN worker, 2026-08-14] **Ready-lag `dispatchDelay(opponent)<101` discriminator FALSIFIED with clean RAM triangulation; real missing ROM span located precisely (`TryDoEventsBeforeFirstTurn`/`ChooseAction` handshake); no validated `src/` fix — honest-stop, evidence landed**
 
 - **State:** No `src/` change this round (a speculative flat-constant fix
