@@ -93,6 +93,11 @@ describe("MOVE_LEECH_SEED twice-fresh main and natural residual evidence", () =>
       expect(residual[0].animationBattlers.target).toBe(orientation === "player-back" ? 1 : 0);
       expect(Object.values(residual[0].battlers).some((mon: any) =>
         mon.volatile.leechSeededBy !== null)).toBe(true);
+      const shakeRows = residual.map((row: any, age: number) => ({ age,
+        task: row.tasks.find((task: any) => task.func.symbol === "AnimTask_ShakeMon_Step") }))
+        .filter(({ task }: any) => task !== undefined);
+      expect(shakeRows.map(({ age }: any) => age)).toEqual([31, 32, 33, 34, 35, 36, 37, 38, 39]);
+      expect(shakeRows[0].task.data.slice(1, 6)).toEqual([5, 1, 0, 0, 5]);
       for (let age = 1; age < residual.length; age += 1)
         expect(residual[age].hardwareOam).toEqual(residual[age - 1].softwareOam);
       expect(residual.filter((row: any, age: number) => age > 0

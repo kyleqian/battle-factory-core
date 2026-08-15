@@ -39,6 +39,7 @@ const sha = (start: number, end: number): string => createHash("sha256")
 
 const move = block(scripts, "Move_LEECH_SEED", "Move_EMBER");
 const general = block(scripts, "General_LeechSeedDrain", "General_MonHit");
+const absorb = block(scripts, "Move_ABSORB", "AbsorbEffect");
 const expectedMove = [
   "loadspritegfx ANIM_TAG_SEED",
   "playsewithpan SE_M_POISON_POWDER, SOUND_PAN_ATTACKER",
@@ -61,6 +62,10 @@ if (JSON.stringify(commands(move)) !== JSON.stringify(expectedMove))
   throw new Error("Move_LEECH_SEED command stream changed");
 if (JSON.stringify(commands(general)) !== JSON.stringify(expectedGeneral))
   throw new Error("General_LeechSeedDrain graph changed");
+const absorbShakeCommand =
+  "createvisualtask AnimTask_ShakeMon, 5, ANIM_TARGET, 0, 5, 5, 1";
+if (commands(absorb).filter((command) => command === absorbShakeCommand).length !== 1)
+  throw new Error("Move_ABSORB ShakeMon arguments changed");
 
 for (const needle of [
   ".tileTag = ANIM_TAG_SEED", ".paletteTag = ANIM_TAG_SEED",
@@ -133,6 +138,8 @@ console.log(JSON.stringify({
     sprouts: "SE_M_TAIL_WHIP/SOUND_PAN_TARGET every 10 frames, 8 plays" },
   residualGraph: ["BattleScript_LeechSeedTurnDrain", "B_ANIM_LEECH_SEED_DRAIN",
     "General_LeechSeedDrain", "AnimTask_GetBattlersFromArg", "Move_ABSORB"],
+  residualShake: { task: "AnimTask_ShakeMon", target: "ANIM_TARGET",
+    xOffset: 0, yOffset: 5, numTimes: 5, frameDelay: 1 },
   components: moveGraph!.componentIds,
   carrier: { range, lowestLevel50: carriers[0], allLevel50: carriers.map(({ index, label }) => ({ index, label })) },
   sibling: { move: "MOVE_BULLET_SEED", tier: bulletGraph!.tier,

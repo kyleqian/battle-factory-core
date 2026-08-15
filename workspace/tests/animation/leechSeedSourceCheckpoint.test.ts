@@ -36,6 +36,8 @@ describe("MOVE_LEECH_SEED source and natural-residual staging checkpoint", () =>
         sproutFrames: 60, sproutAnimation: "4/8 tile frames, 7 ticks each, looping" },
       components: ["asset:ANIM_TAG_SEED", "visualCommand:createleechseedsprite"],
       sibling: { move: "MOVE_BULLET_SEED", tier: "outsideFactory" },
+      residualShake: { task: "AnimTask_ShakeMon", target: "ANIM_TARGET",
+        xOffset: 0, yOffset: 5, numTimes: 5, frameDelay: 1 },
     });
     expect(audit.projectiles).toEqual([
       { targetX: 0, targetY: 24, duration: 35, waveAmplitude: -32 },

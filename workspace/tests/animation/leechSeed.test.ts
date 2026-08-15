@@ -6,9 +6,11 @@ import { describe, expect, it } from "vitest";
 import leechSeedAsset from "../../src/animation/assets/leech-seed.json" with { type: "json" };
 import {
   LEECH_SEED_PROJECTILES,
+  LEECH_SEED_RESIDUAL_SHAKE,
   leechSeedMainAtAge,
   leechSeedResidualAtAge,
 } from "../../src/animation/leechSeed.ts";
+import { shakeMonOffsetAtTick } from "../../src/animation/shakeMon.ts";
 import {
   createSceneOnMovePresentation,
   sceneOnLeechSeedView,
@@ -44,6 +46,28 @@ describe("MOVE_LEECH_SEED source-relative reducer", () => {
     expect(state(140).sprites).toContainEqual(expect.objectContaining({ kind: "star", spawnIndex: 0 }));
     expect(state(2).loadedTags).toEqual(["ANIM_TAG_ORBS", "ANIM_TAG_BLUE_STAR", "ANIM_TAG_IMPACT"]);
     expect(state(206)).toMatchObject({ sprites: [], loadedTags: [], active: false });
+  });
+
+  it("hands the residual target from its rest offset to the shared Absorb ShakeMon sequence", () => {
+    expect(LEECH_SEED_RESIDUAL_SHAKE).toEqual({
+      creationAge: 31, xOffset: 0, yOffset: 5, numTimes: 5, frameDelay: 1,
+    });
+    const targetRestOffset = { x2: 7, y2: -3 };
+    for (let age = 0; age <= 41; age += 1) {
+      const state = leechSeedResidualAtAge(
+        age, { x: 176, y: 42 }, { x: 72, y: 101 }, "player", targetRestOffset,
+      );
+      const expected = age < LEECH_SEED_RESIDUAL_SHAKE.creationAge
+        ? targetRestOffset
+        : shakeMonOffsetAtTick(
+          LEECH_SEED_RESIDUAL_SHAKE.xOffset,
+          LEECH_SEED_RESIDUAL_SHAKE.yOffset,
+          LEECH_SEED_RESIDUAL_SHAKE.numTimes,
+          LEECH_SEED_RESIDUAL_SHAKE.frameDelay,
+          age - LEECH_SEED_RESIDUAL_SHAKE.creationAge,
+        );
+      expect({ x2: state.targetX2, y2: state.targetY2 }).toEqual(expected);
+    }
   });
 
   it("threads the body discriminant and immutable natural geometry through the typed seam", () => {

@@ -5,6 +5,7 @@ import {
   type AbsorbSound,
   type AbsorbSprite,
 } from "./absorb.ts";
+import { shakeMonOffsetAtTick } from "./shakeMon.ts";
 
 export type LeechSeedSide = "player" | "opponent";
 export type LeechSeedBody = "main" | "residual";
@@ -58,6 +59,18 @@ export const LEECH_SEED_PROJECTILES = Object.freeze([
   Object.freeze({ spawnAge: 14, targetX: -16, targetY: 24, duration: 35, waveAmplitude: -40 }),
   Object.freeze({ spawnAge: 24, targetX: 16, targetY: 24, duration: 35, waveAmplitude: -37 }),
 ] as const);
+
+/**
+ * `Move_ABSORB`'s `AnimTask_ShakeMon` arguments, at the creation age exposed
+ * by the natural `General_LeechSeedDrain` scheduler path.
+ */
+export const LEECH_SEED_RESIDUAL_SHAKE = Object.freeze({
+  creationAge: 31,
+  xOffset: 0,
+  yOffset: 5,
+  numTimes: 5,
+  frameDelay: 1,
+} as const);
 
 function gbaSin(index: number, amplitude: number): number {
   return (GBA_SINE_TABLE_256[index & 0xff]! * amplitude) >> 8;
@@ -197,9 +210,16 @@ export function leechSeedResidualAtAge(
     );
     if (star) sprites.push(star);
   }
-  const targetY2 = age === 31 || (age >= 34 && age <= 35)
-      || (age >= 38 && age <= 39) ? 5 : 0;
-  const targetX2 = age < 31 ? targetRestOffset.x2 : 0;
+  const shake = shakeMonOffsetAtTick(
+    LEECH_SEED_RESIDUAL_SHAKE.xOffset,
+    LEECH_SEED_RESIDUAL_SHAKE.yOffset,
+    LEECH_SEED_RESIDUAL_SHAKE.numTimes,
+    LEECH_SEED_RESIDUAL_SHAKE.frameDelay,
+    age - LEECH_SEED_RESIDUAL_SHAKE.creationAge,
+  );
+  const shakeOwnsTarget = age >= LEECH_SEED_RESIDUAL_SHAKE.creationAge;
+  const targetX2 = shakeOwnsTarget ? shake.x2 : targetRestOffset.x2;
+  const targetY2 = shakeOwnsTarget ? shake.y2 : targetRestOffset.y2;
   const orbRestart = age >= 45 && age <= 87 && (age - 45) % 6 === 0;
   return {
     body: "residual",
