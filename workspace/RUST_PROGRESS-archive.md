@@ -5,6 +5,41 @@ full history regardless.
 
 ---
 
+## R44 — [supervised session, 2026-08-14] **M43 Battle Script Fury Cutter counter/power leaf**
+
+- **State:** `rust-main` = current master `b4097e84` plus R43 and verified
+  `Cmd_furycuttercalc` worker `81f7817d`. The complete pure
+  `battleScriptFuryCutterOpcode.ts` registration/state/control projection is
+  native and wasm32-compilable; no ABI, adapter, or animation surface was
+  widened. The session remains active and committed.
+- **Did:** ported attacker-first resolution; the full-u32 no-effect-mask miss
+  branch that resets only the attacker counter and jumps after late label
+  resolution; and the success branch's exact counter-5 fixed point, wrapping
+  u8 increment, source-u16 power assignment, wrapping doublings, overwrite,
+  and Advance control. Canonical TypeScript execution supplies **2,278 cases**:
+  every counter u8 for all attackers (**1,024**), the full **500** selector
+  matrix, **357** power/doubling cases, **104** mask edges, **68** miss resets,
+  **125** ordered missing-attacker probes, unresolved-label cases, registration
+  shape/cardinality, immutable siblings, and repeated paths; corpus sha256
+  `5f73545665073ab151ebd3c4d55d558e80916473d6eff98a190ea7e56a341c34`.
+- **Next:** fold any newer master, recheck active work, and select another
+  conflict-free pure Battle Script leaf. M7c opponent generation still waits
+  on canonical TS live generation; main and animation moving targets remain
+  excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  dispatch table, opcode/macro and script loop, mask/counter/power widths,
+  validation and label order, preservation and repetition; regenerated twice
+  byte-identically (canonical corpus **6,068,742 bytes**; generated file
+  **16,336,817 bytes**, sha256
+  `834df15407dc13cf3a913f4ba650efe9c003910aea0da30541547c2ffe4c42ee`;
+  generator **53,855 bytes**, sha256
+  `36a22601be63b1bf07698c50cb88b40fa74787390048b1f418479a4fd6afa743`),
+  and reran focused **6/6**, cargo **940/940**, fmt, strict Clippy, and wasm32
+  release. Artifact is **497,814 bytes**, sha256
+  `ddce90064ded1e9ef29ad27f1e44ba4f14331bb25ad7c54ff0579652013a0242`.
+  Scope stayed inside `core-rs/**`; no unsupported barrier, deferral, or
+  papercut was added.
+
 ## R43 — [supervised session, 2026-08-14] **M42 Battle Script Return/Frustration friendship-power leaf**
 
 - **State:** `rust-main` = current master `b4097e84` plus verified

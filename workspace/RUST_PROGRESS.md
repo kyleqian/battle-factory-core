@@ -5,6 +5,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R47 — [supervised session, 2026-08-15] **M46 Battle Script half-health heal setup leaf**
+
+- **State:** `rust-main` = current master `2d2c2c81` plus R43-R46 and verified
+  `Cmd_tryhealhalfhealth` worker `341caa2b`. The complete pure
+  `battleScriptTryhealhalfhealthOpcode.ts` registration/state/control
+  projection is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session remains active and committed.
+- **Did:** ported operand-before-role selection, `BS_ATTACKER` target rebinding
+  versus `BS_TARGET` preservation, exact `-max(1, floor(maxHP / 2))` damage,
+  the exact `hp == maxHP` failure branch, and failure-only late label
+  resolution. Canonical TypeScript execution supplies **1,810 complete cases**
+  plus **196,606** applications spanning every maxHP u16 at full, lower, and
+  corrupt-higher HP where representable, normalized to **32,769** intervals;
+  both concrete call sites, the two complete **500** selector matrices,
+  ordered errors, signed prior damage, preservation, repetitions, and
+  permissive first-match registration are pinned. Corpus sha256
+  `7df2575257c50006c5afc225062d834fe6f0ad6399e71bb92dd0c69564ce2fc5`.
+- **Next:** recheck active work and select another conflict-free pure Battle
+  Script leaf. M7c opponent generation still waits on canonical TS live
+  generation; main walk-up and animation moving targets remain excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  dispatch/opcode/macro and both script sites, source widths, validation order,
+  target rebinding, exact equality branch, immutable siblings and repetitions;
+  regenerated twice byte-identically (canonical corpus **12,548,796 bytes**;
+  raw exhaustive evidence **4,881,873 bytes**, sha256
+  `abcd6a03d79e5807726f678894121524f2efebfbb25a74e12bd5af4cb5824ff8`;
+  generated file **14,585,217 bytes**, sha256
+  `c8adefff849e6862ad7784510a4c71556c9adee293b7c0511fe277ef15d4e32e`;
+  generator **67,530 bytes**, sha256
+  `f3c27decf00ae9aecd598e8ef79e800bfbde216354514ff1aad61b6eb77b96cf`),
+  and reran focused **7/7**, cargo **969/969**, fmt, strict Clippy, and wasm32
+  release. Artifact is **510,202 bytes**, sha256
+  `b9c87f425837a9e0744f69acee78dabd0ff37029faf803d41582a7621d302718`.
+  Latest-master smoke is **375/375** and build is green at **676 modules**.
+  Scope stayed inside `core-rs/**`; no unsupported barrier, deferral, or
+  papercut was added.
+
 ## R46 — [supervised session, 2026-08-15] **M45 Battle Script Substitute state-construction leaf**
 
 - **State:** `rust-main` = current master `e106866a` plus R43-R45 and verified
@@ -79,38 +116,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   test's actual **1,788** during review. Latest-master smoke is **375/375** and
   build is green at **676 modules**. Scope stayed inside `core-rs/**`; no
   unsupported barrier, deferral, or papercut was added.
-
-## R44 — [supervised session, 2026-08-14] **M43 Battle Script Fury Cutter counter/power leaf**
-
-- **State:** `rust-main` = current master `b4097e84` plus R43 and verified
-  `Cmd_furycuttercalc` worker `81f7817d`. The complete pure
-  `battleScriptFuryCutterOpcode.ts` registration/state/control projection is
-  native and wasm32-compilable; no ABI, adapter, or animation surface was
-  widened. The session remains active and committed.
-- **Did:** ported attacker-first resolution; the full-u32 no-effect-mask miss
-  branch that resets only the attacker counter and jumps after late label
-  resolution; and the success branch's exact counter-5 fixed point, wrapping
-  u8 increment, source-u16 power assignment, wrapping doublings, overwrite,
-  and Advance control. Canonical TypeScript execution supplies **2,278 cases**:
-  every counter u8 for all attackers (**1,024**), the full **500** selector
-  matrix, **357** power/doubling cases, **104** mask edges, **68** miss resets,
-  **125** ordered missing-attacker probes, unresolved-label cases, registration
-  shape/cardinality, immutable siblings, and repeated paths; corpus sha256
-  `5f73545665073ab151ebd3c4d55d558e80916473d6eff98a190ea7e56a341c34`.
-- **Next:** fold any newer master, recheck active work, and select another
-  conflict-free pure Battle Script leaf. M7c opponent generation still waits
-  on canonical TS live generation; main and animation moving targets remain
-  excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
-  dispatch table, opcode/macro and script loop, mask/counter/power widths,
-  validation and label order, preservation and repetition; regenerated twice
-  byte-identically (canonical corpus **6,068,742 bytes**; generated file
-  **16,336,817 bytes**, sha256
-  `834df15407dc13cf3a913f4ba650efe9c003910aea0da30541547c2ffe4c42ee`;
-  generator **53,855 bytes**, sha256
-  `36a22601be63b1bf07698c50cb88b40fa74787390048b1f418479a4fd6afa743`),
-  and reran focused **6/6**, cargo **940/940**, fmt, strict Clippy, and wasm32
-  release. Artifact is **497,814 bytes**, sha256
-  `ddce90064ded1e9ef29ad27f1e44ba4f14331bb25ad7c54ff0579652013a0242`.
-  Scope stayed inside `core-rs/**`; no unsupported barrier, deferral, or
-  papercut was added.
