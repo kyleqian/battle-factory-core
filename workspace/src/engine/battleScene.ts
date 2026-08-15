@@ -43819,7 +43819,7 @@ export function renderBattleResolutionForcedPartySelect(
           fb[o + 2] = blendComponentToWhite(fb[o + 2]!, bldy);
         }
       }
-      if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START) {
+      if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START && view.switchIn.partyStates !== null) {
         drawTypedPartyStatusSummary(
           fb,
           view.switchIn.battler,

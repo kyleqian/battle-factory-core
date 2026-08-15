@@ -175,7 +175,7 @@ LONG` jumps straight to `:148`) — repeat walk-ups are **one box shorter**
 than either first encounter (line 8 "Get a move on!" + line 10/10′ only:
 "Shake out…"/"All right…").
 
-### 1.6 Text-box count — correcting the brief's "~12 silver / 2 gold", with one open item
+### 1.6 Text-box count — correcting the brief's "~12 silver / 2 gold" (gold discrepancy resolved)
 
 The brief's numbers are **not a guess** — they trace to this session's own
 prior side-lane oracle work, already committed:
@@ -197,40 +197,67 @@ local portion only, not "the walk-up" as a player experiences it end to end:
   measured ack-chunk delta instead — see that doc's §3 closing note).
   Adding §1.1's 7 PreBattleRoom boxes: **~17 total boxes, first silver
   encounter, front door to `DoSpecialTrainerBattle`.**
-- **Gold, BattleRoom-local:** per the gold doc, **zero** Noland speech, only
-  two "Right this way, please!" instances (§1.1 line 7's shared string, its
-  wording is `"Right this way, please!$"`, matching exactly). Adding §1.1's
-  7 boxes (one of which, "Right this way, please!", the gold doc counts as
-  its own "instance 1"): **~8 total boxes** (7 from §1.1, "Get a move on"/
-  line-9′/line-10′ from §1.2–1.4 not observed in the gold doc's own frame
-  table at all — see below).
+- **Gold, BattleRoom-local:** the prior gold doc read **zero** Noland speech
+  and **two** "Right this way, please!" instances here — **now known wrong**,
+  a lab-staging artifact, not the real ROM sequence; see the resolved
+  discrepancy immediately below for the corrected reading (line 8 "Get a
+  move on!" + gated 4-page first-timer speech + line 10′ "Bring it on!", not
+  a second "Right this way").
 
-**Open discrepancy, live-checked this session, not fully resolved:** I ran
-`bin/oracle lab tools/battle-lab/factory-brain-gold-intro-dense-off.json`
-and visually confirmed both `pre-checkpoint-frame-00500.png` (§1.1 line 7,
-"Right this way, please!", background matches PreBattleRoom's shop-counter
-layout) **and** `pre-checkpoint-frame-00915.png` — which shows the **same**
-"Right this way, please!" text again, over a background that visually
-matches the BattleRoom's hex arena floor and 6-scientist ring (§1.2), not
-line 8's "Hey, hey! Get a move on!" that a static read of `:52`
-(`EnterRoomFactoryHeadBattle`, unconditional whenever brain-ready) predicts.
-I was not able to reconcile this from source alone in this session's
-budget — either (a) the compiled ROM the oracle serves takes a branch this
-decomp checkout's script labels don't make obvious (e.g. a persistent
-`VAR_TEMP_0`/`VAR_TEMP_1` guard already primed by the battle-lab harness's
-own state-jump machinery, suppressing `EnterRoomFactoryHeadBattle`'s frame-
-script on this particular staged entry), or (b) "Right this way, please!"
-is genuinely reused a second time somewhere this read didn't find. **If
-FAITHFUL is chosen, resolve this with a fresh stride-1 probe + a natural
-(non-lab-shortcut) save-state trace before writing the gold entrance
-message** — it changes gold's box-8 content, not the overall shape.
+**Discrepancy resolved this session (was "open," §1.6 prior revision):
+verdict (a), LAB ARTIFACT — the second "Right this way, please!" is a
+battle-lab overworld-staging bug, not genuine ROM behavior; a faithful gold
+walk-up shows line 8 "Get a move on!" exactly as the decomp predicts.**
+Fresh evidence: a stride-1 dense re-probe
+(`tools/battle-lab/factory-brain-gold-entrance-dense-off.json`, frames
+715–970) confirms the PNG content byte-for-byte against the prior doc — the
+box at ~frame 861–962 does say "Right this way, please!" again, over
+BattleRoom's own hex-arena/6-scientist background, with the player+decoy
+walk-in animation completing *before* the box (not after, as
+`EnterRoomFactoryHeadBattle`'s script orders it). The tiebreaker is a RAM
+probe (`tools/probe/probe-factory-brain-gold-entrance-ram.py`, run via
+`tools/run-mgba-probe.py`) reading the exact vars BattleRoom's map scripts
+gate on, at every frame 715–970 of this same staged run:
+`VAR_TEMP_0 == 0` (the `OnFrame`→`EnterRoom` dispatch gate is open, so the
+frame-script *did* fire — ruling out the "stale guard suppresses the
+script entirely" half of the original hypothesis (a)) but
+`VAR_TEMP_F == FRONTIER_BRAIN_NOT_READY` (0) throughout, not
+`FRONTIER_BRAIN_GOLD` (2) as the staged battle number implies — even though
+`VAR_FRONTIER_FACILITY`/`VAR_FRONTIER_BATTLE_MODE` read correctly (4/0,
+`FACTORY`/`SINGLES`). `EnterRoom` therefore takes its *ordinary*-opponent
+branch (walk-in movement first, matching what's observed) and falls through
+to the *ordinary* opponent-intro box (`msgbox gStringVar4`, built by
+`GetOpponentIntroSpeech`, `src/battle_tower.c:1936`) instead of
+`EnterRoomFactoryHeadBattle` — `gStringVar4` reads "Right this way, please!"
+at this specific staged frame, explaining both the reversed order and the
+duplicated string in one mechanism. Root cause:
+`GetFrontierBrainStatus`(`src/frontier_util.c:1651-1672`)'s readiness check
+is a **strict equality** against
+`sFrontierBrainStreakAppearances[FACTORY][symbolsCount]`, where
+`symbolsCount` comes from the player's *actual* saved symbol flag bits
+(`GetPlayerSymbolCountForFacility`) — a field `BattleLab.prepare()`'s
+`factoryBrain` staging (`oracle/battle_lab.py:565-670`) never writes, only
+the win-streak/battle-num SaveBlock2 fields — so on the shared "canonical
+rental checkpoint" savestate (0 symbols), the equality targets the *silver*
+threshold, which a gold-tier streak value doesn't hit, yielding NOT_READY.
+This is a narrow gap in the harness's overworld-side staging (its
+battle-side Brain detection, e.g. `FillFactoryBrainParty`, is unaffected —
+`opponentParty` in the setup descriptor is still genuinely Noland's roster)
+— out of scope for this docs-only step to fix. No natural-play trace was
+needed: the RAM evidence on the existing staged run alone is dispositive.
 
 **Bottom line for planning purposes:** budget **silver ≈ 17 boxes / gold ≈
-8 boxes** end-to-end (front-of-queue "call from the boss" through
-`DoSpecialTrainerBattle`), not "12 / 2" — those numbers were real but scoped
-to the BattleRoom's own Noland-monologue portion, which is genuinely
-asymmetric (silver has a personality speech, gold's first-timer line is
-4 pages vs. silver's 8, and gold's repeat-encounter case has none). The
+13 boxes (first encounter), 9 boxes (repeat)** end-to-end (front-of-queue
+"call from the boss" through `DoSpecialTrainerBattle`) — revised up from
+this doc's prior "≈8" now that the discrepancy above is resolved: gold's
+BattleRoom-local portion is line 8 (1) + line 9′'s gated 4-page first-timer
+speech (first encounter only) + line 10′ (1) = 6 boxes first-time / 2 boxes
+repeat, plus §1.1's shared 7 PreBattleRoom boxes. Neither "12 / 2" nor the
+prior revision's "17 / 8" were right for gold; this is the source-correct
+figure. Silver's 17 is unaffected — its own discrepancy-free BattleRoom
+portion (§1.3) was never in question. Both are genuinely asymmetric (silver
+has an 8-page personality speech every first encounter vs. gold's 4, and
+gold's repeat case is 4 boxes shorter than its first-time case). The
 PreBattleRoom half (7 boxes) is shared, symmetric, and not brain-flavor-
 specific at all.
 

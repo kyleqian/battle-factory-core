@@ -615,7 +615,13 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     elapsed: number;
     phase: PartySendOutPhase;
     battler: 0 | 1;
-    partyStates: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
+    /**
+     * Null when this switch-in's own script never called
+     * `drawpartystatussummary` -- e.g. `BattleScript_EffectBatonPass`
+     * (ISSUES #89), unlike `BattleScript_HandleFaintedMon`'s forced-switch
+     * dance, which always draws the tray. Source-genuine absence, not a gap.
+     */
+    partyStates: readonly import("./battleResolutionPresentation.ts").PartyBallState[] | null;
   }> | null;
   /**
    * ISSUES #78: the mid-battle voluntary switch-in presentation, populated
@@ -997,9 +1003,9 @@ export function createBattleResolutionPresentationRenderView(
         { type: "message" }
       > => candidate.type === "message",
     );
-    if (!switchCommand || !summary || !message) {
+    if (!switchCommand || !message) {
       throw new Error(
-        "battle resolution switch-in lifecycle requires summary, message, and switch commands",
+        "battle resolution switch-in lifecycle requires message and switch commands",
       );
     }
     field = replaceFieldBattler(
@@ -1012,7 +1018,7 @@ export function createBattleResolutionPresentationRenderView(
       elapsed: state.lifecycle.phaseElapsed,
       phase: partySendOutPhase(state.lifecycle.phaseElapsed),
       battler: switchCommand.battler,
-      partyStates: summary.states,
+      partyStates: summary?.states ?? null,
     });
   }
   for (let index = 0; index < state.commandIndex; index += 1) {
@@ -1214,6 +1220,12 @@ export function createBattleResolutionPresentationRenderView(
     && state.lifecycle.phase !== "terminal-handoff"
     && state.lifecycle.phase !== "presenting-switch-in"
     && state.lifecycle.phase !== "presenting"
+    // ISSUES #89: a forced switch with no fainted message to intercept (e.g.
+    // Baton Pass) reaches "forced-party-handoff" only once its segment's
+    // commands are exhausted (`command` is null here, same as the classic
+    // dance's "presenting" no-command edge above) -- render the already-
+    // settled field, same as every other *-handoff phase.
+    && state.lifecycle.phase !== "forced-party-handoff"
   ) {
     throw new Error(
       `battle resolution non-KO renderer cannot render ${state.lifecycle.phase}`,
