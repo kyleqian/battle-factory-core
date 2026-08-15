@@ -130,19 +130,21 @@ describe("MOVE_MEGA_DRAIN source and legal staging checkpoint", () => {
     );
   });
 
-  it("keeps Mega Drain and both source-audit siblings uncredited", () => {
+  it("credits only Mega Drain after its complete bilateral acceptance", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as {
       entries: Array<{ move: string; status: string }>;
       queue: string[];
     };
     expect(coverage.entries.find((entry) => entry.move === "MOVE_ABSORB"))
       .toMatchObject({ status: "exact" });
-    for (const move of ["MOVE_MEGA_DRAIN", "MOVE_DREAM_EATER", "MOVE_GIGA_DRAIN"]) {
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_MEGA_DRAIN"))
+      .toMatchObject({ status: "exact" });
+    for (const move of ["MOVE_DREAM_EATER", "MOVE_GIGA_DRAIN"]) {
       expect(coverage.entries.find((entry) => entry.move === move)).toBeUndefined();
     }
-    expect(coverage.queue).toEqual(["MOVE_MEGA_DRAIN"]);
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(185);
+    expect(coverage.queue).toEqual([]);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(186);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 185/276 exact, 0 partial, 0 staged, 91 unsupported");
+    expect(report).toContain("Level 50: 186/276 exact, 0 partial, 0 staged, 90 unsupported");
   });
 });
