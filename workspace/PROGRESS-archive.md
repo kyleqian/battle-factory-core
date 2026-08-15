@@ -1,3 +1,47 @@
+## 1275 — [supervisor, 2026-08-14 night] **#89 FIXED + #90 FIXED: full-policy soak 0:60 = 60/60 OK (first time); walk-up program started (gold discrepancy resolved, script data extracted)**
+
+- **State:** Queue items (a) #89 and (b) #90 are CLOSED (both deleted
+  from ISSUES.md this commit). Full soak `--seeds 0:60` is **60/60 OK**
+  — zero crashes, zero hangs, the first fully-green full-policy soak
+  since chaining landed. Vanilla 0:20 stays 20/20. Union gates at the
+  orient folds and after every step: full npm 1,028 files / 9,856
+  passed / 223 skipped; build 676 modules; cargo green; wasm 509,811 B
+  `5ed2c97a…`; forced-WASM 18 files / 803 tests.
+- **Did:** (1) Orient folds: animation-main (Mega Drain 185→186 exact +
+  Giga Drain checkpoint) and rust-main (remaininghptopower leaf) merged;
+  union gates re-run green. (2) **#90**: side triage proved the seed-51
+  "HANG" is a soak BUDGET shortfall, not a stall — completes OK at
+  361,216 frames (`docs/issue90-seed51-hang-triage.md`; supervisor
+  re-verified independently). Fix: `DEFAULT_RUN_OPTIONS.maxFrames`
+  300k→600k (post-#89 seed 37 needs 398,088). (3) **#89**: mid-action
+  player `openpartyscreen` (Baton Pass) now halts as a resumable
+  player-choice (`resumeAt run-action1/2` + `pendingSecondAction`, no
+  RNG re-consumption), orchestrator hands off to the forced party
+  selector, partySelect gets source-true live-slot refusal
+  ("is already in battle!", party_menu.c:5811-5823). All 9 crashing
+  seeds now complete. NOTE: both #89 workers hit their caps
+  pre-commit/pre-docs; supervisor salvaged, verified (typecheck, smoke,
+  full suite — zero existing pins moved — vanilla soak, 9 seeds), and
+  committed `61b0a3c1` + finished docs. The original #86 sandstorm
+  fixture is unreachable post-fix (RNG trajectory diverges); a ~3,700-
+  trial search found no fresh terminal-boundary repro — documented
+  inline in the pin, 3 sibling #86 pins still cover non-terminal.
+  (4) **Walk-up program (user pick: FAITHFUL) started**: §1.6 gold
+  discrepancy RESOLVED — lab artifact (factoryBrain staging writes no
+  symbol flags → GetFrontierBrainStatus misses GOLD → ordinary-opponent
+  branch; RAM-probed); faithful gold entrance = "Get a move on!" per
+  decomp; gold ≈ 13 first/9 repeat boxes (memo updated). Script ground
+  truth extracted to `src/data/gen/factory-brain-walkup-script.json`
+  (extractor byte-identical `916c9c01…`, 10-test Tier-1 pin).
+- **Next:** (a) #87(c) silver-tail calibration (brief ready); (b)
+  walk-up build steps in main (PreBattleRoom general pre-battle menu
+  first; silver dense evidence leg in flight side-lane at write time);
+  (c) chained-round distribution-parity breadth.
+- **Notes:** Gold-brain overworld staging via the lab is KNOWN-BROKEN
+  (symbol-flag gap) — walk-up gold acceptance must lean on source +
+  the committed RAM probe, not lab traces. Commits local only —
+  pushing is Kyle's step.
+
 ## 1274 — [planning session, 2026-08-14 eve] **Both waiting user decisions made: walk-up = FAITHFUL (supersedes the TRIM recommendation), #87 = option (c) calibrate-crossing-windows-only; next-run order set**
 
 - **State:** Docs/ledger only. Both of 1273's blockers-on-the-user are

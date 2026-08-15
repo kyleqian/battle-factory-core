@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { BRAIN_MOVEMENT_SETTLE_ELAPSED, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 import { drawMessageBoxFrame, drawMessageBoxText } from "./prebattleRoomRender.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
@@ -366,7 +366,13 @@ export function renderBattleRoomBrainEntranceScene(
     drawNpcFrame(fb, roomNpcs.scientist, turn.frame, pos, hFlip, objFadeY);
   }
   drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
-  const noland = nolandStep(movementElapsed);
+  // Noland's own walk (nolandStep) only starts once "brainMoving" begins -
+  // before that he holds his resting player-facing pose (NOLAND_IDLE_FRAME),
+  // not the decoy's own north-facing idle frame reused during the walk
+  // itself (see NOLAND_IDLE_FRAME's own doc).
+  const noland = state.phase === "brainMoving" || state.phase === "brainSettled"
+    ? nolandStep(movementElapsed)
+    : { frame: NOLAND_IDLE_FRAME, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
   drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);
   drawOpponentMsgbox(fb, msgboxVisual(state), battleRoomQuote(state));
 }
