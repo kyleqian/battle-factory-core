@@ -5,13 +5,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R48 — [supervised session, 2026-08-15] **M47 Battle Script Pain Split leaf + final wind-down**
+## R49 — [supervised session, 2026-08-15] **M48 Battle Script Low Kick weight-damage leaf**
+
+- **State:** `rust-main` = current master `5b9a12af` plus verified
+  `Cmd_weightdamagecalculation` worker `d51a4db2`. The complete pure
+  `battleScriptWeightDamageOpcode.ts` registration/catalog/scalar/state/control
+  projection is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session remains active and committed.
+- **Did:** ported exact singleton/operand-free registration, target-first role
+  resolution, source species-to-Pokédex-weight lookup, all **25** legacy null
+  compatibility IDs, exact catalog errors, and strict Low Kick weight bands
+  `<100/<250/<500/<1000/<2000/else` to power
+  `20/40/60/80/100/120`. Success overwrites only dynamic base power and
+  advances. Canonical TypeScript execution supplies **1,132 handler cases**,
+  **66 scalar cases**, and **7 registration cases** across all **411** source
+  catalog rows, the complete **500** target/selector matrix, threshold and
+  safe-integer domains, malformed values, prior u16 power edges, ordered
+  errors, repetitions, and immutability. Corpus sha256
+  `5c970efa033a8fc982e81f962ed1372cf63166d1c842346445c51d2c7904fb6c`.
+- **Next:** recheck active work and select one final conflict-free pure Battle
+  Script leaf if the deadline reserve permits; otherwise perform the required
+  final full npm/build, soak, Rust, ledger, and clean-tree wind-down.
+- **Notes:** Terra/max worker, one commit. Supervisor audited decomp dispatch,
+  table/body, operand-free macro, single Low Kick site, extracted Pokédex
+  authority, all catalog IDs/nulls, registration and target ordering, scalar
+  errors, write set and repetitions; regenerated twice byte-identically
+  (catalog input **3,981 bytes**, sha256
+  `8831e5a6e21a42ab71dce857243f008a4efdac72e97cdf83148763e25ad6d85f`;
+  catalog Rust **11,788 bytes**, sha256
+  `d0f6e93d8d4e178eb23f091b16bdc9ad43b952d263fab163a082af35ae85215b`;
+  canonical corpus **490,486 bytes**; vectors **1,327,310 bytes**, sha256
+  `6a4bac03fa2a104056d2a37448c686556ad6ed24922723a51c409feaccb82376`;
+  generator **38,279 bytes**, sha256
+  `76d97de4b94527e7a777c2339c6311c4a8242ee364becdbeec9c7adee6d4897e`).
+  Focused **2/2 + 7/7**, cargo **983/983**, fmt, strict Clippy, and wasm32
+  release pass. Artifact is **492,690 bytes**, sha256
+  `223b5323d42125df2de7922e1b7ee4334db0cb620c8dbe6fa13b759974ac6f58`.
+  Latest-master npm is green at **1,029 files / 9,871 passed / 223 skipped**;
+  build is green at **677 modules**. Scope stayed inside `core-rs/**`; no
+  unsupported barrier or Rust deferral was added. PAPERCUT: long-command
+  completion detached from live subprocess reporting, ~4 min.
+
+## R48 — [supervised session, 2026-08-15] **M47 Battle Script Pain Split leaf + green checkpoint**
 
 - **State:** `rust-main` = current master `d23e6e3a` plus verified Pain Split
   worker `4aa27ce8` and metadata-ratchet repair `d69b464d`. The complete pure
   `battleScriptPainSplitOpcode.ts` registration/state/control projection is
   native and wasm32-compilable; no ABI or adapter surface was widened. The
-  session ends committed and green.
+  session reached a committed green checkpoint and then continued.
 - **Did:** ported exact singleton registration and instruction-shape checks,
   instruction-before-attacker-before-target error order, target-Substitute
   no-write failure with late label resolution, and the successful u16 HP
@@ -81,42 +122,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Latest-master smoke is **375/375** and build is green at **676 modules**.
   Scope stayed inside `core-rs/**`; no unsupported barrier, deferral, or
   papercut was added.
-
-## R46 — [supervised session, 2026-08-15] **M45 Battle Script Substitute state-construction leaf**
-
-- **State:** `rust-main` = current master `e106866a` plus R43-R45 and verified
-  `Cmd_setsubstitute` worker `1d0fb8bc`. The complete pure
-  `battleScriptSetsubstituteOpcode.ts` registration/state/control projection is
-  native and wasm32-compilable; no ABI or adapter surface was widened. The
-  session remains active and committed.
-- **Did:** ported attacker-first resolution and exact quarter-HP floor/minimum;
-  the failure-only damage-zero/chooser write set; and the success-only attacker
-  `STATUS2_SUBSTITUTE` OR + wrapped-mask clear, substitute-HP write, damage and
-  chooser overwrite, and ignore-substitute hit-marker OR. HP debit remains
-  correctly outside this leaf. Canonical TypeScript execution supplies
-  **1,397 complete cases** plus **131,072** boundary applications covering
-  every maxHP u16 on both sides of its threshold, normalized to **16,383**
-  intervals; the complete **500** selector matrix, **125** missing-attacker
-  probes, full-width packed edges, preservation, repetitions, and permissive
-  registration are pinned. Corpus sha256
-  `8e1e63f440ff847cc2e888805041e378383b726a74ae0f054d1a8df6108b0fd8`.
-- **Next:** recheck active work and select another conflict-free pure Battle
-  Script leaf. M7c opponent generation still waits on canonical TS live
-  generation; main walk-up and animation moving targets remain excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
-  dispatch/opcode/macro/script, source masks/messages, later HP-debit ownership,
-  validation order and write sets; regenerated twice byte-identically
-  (canonical corpus **13,503,050 bytes**; raw threshold evidence **22,048,947
-  bytes**, sha256
-  `abcd70b385df94da84e99bb005d4a6b03819847adabd3d7bd205a4c263dd2ae8`;
-  generated file **26,250,057 bytes**, sha256
-  `ca7e45ff14b838f7655e23ddfa080cd041ad57a98c975d68e49ac1f8fd97448b`;
-  generator **60,417 bytes**, sha256
-  `1dd196eae78453e5d8f9f6a344cd7d6b8b7afd8a5b53a185ed35b237ac652882`),
-  and reran focused **6/6**, cargo **958/958**, fmt, strict Clippy, and wasm32
-  release. Artifact is **510,306 bytes**, sha256
-  `d5d91c5aca162087d2fc1d30989a976411fa785813e503627770bf81d4dd48b1`.
-  Latest-master smoke is **375/375** and build is green at **676 modules**.
-  Scope stayed inside `core-rs/**`; no unsupported barrier or deferral was
-  added. PAPERCUT: fresh worker lacked the ignored WASM artifact and rebuilt it
-  before browser parity, ~2 min.
