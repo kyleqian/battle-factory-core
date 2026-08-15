@@ -50,6 +50,7 @@ import {
   advanceBattleResolutionConfirmHandoff,
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
+  hasRetainedLockedActionReceipt,
   type BattleResolutionPresentationCommand,
   type BattleResolutionLockedActionIdentity,
   type BattleResolutionPresentationState,
@@ -1432,12 +1433,11 @@ function beginCommandResolution(
   });
   const retained = state.retainedLockedActionPresentationOwner;
   const drivenTransition = transitionFromDriveReceipt(receipt);
-  let resolution: BattleResolutionPresentationState;
-  if (retained === null) {
-    resolution = createBattleResolutionPresentation({
+  const freshResolution = (): BattleResolutionPresentationState =>
+    createBattleResolutionPresentation({
       sourceRequest: presentation.request,
-      sourceDecision: presentation.pendingDecision,
-      beforeRules: state.battle.rules,
+      sourceDecision: presentation.pendingDecision!,
+      beforeRules: state.battle!.rules,
       transition: drivenTransition,
       fieldBoundary: presentation.field,
       confirmHandoff: Object.freeze({
@@ -1449,6 +1449,9 @@ function beginCommandResolution(
         state.round.rules.currentOpponent,
       ),
     });
+  let resolution: BattleResolutionPresentationState;
+  if (retained === null) {
+    resolution = freshResolution();
   } else {
     if (
       retained.resolution.pendingBattle !== state.battle
@@ -1476,12 +1479,21 @@ function beginCommandResolution(
     ) {
       return fail("retained locked action identity no longer matches the kernel");
     }
-    resolution = appendBattleResolutionLockedActionContinuation({
-      resolution: retained.resolution,
-      transition: drivenTransition,
-      fieldBoundary: presentation.field,
-      lockedAction: action,
-    });
+    // FaintClearSetData (battle_main.c:3272) unconditionally zeroes status2 on
+    // faint, so the locked battler can still be KO'd by this very transition
+    // (the other battler simply moved first) before its continuation ever
+    // prints. That is a genuine game outcome, not a stale retained snapshot —
+    // fall back to a fresh resolution identity exactly as the no-retained-
+    // owner branch above would, rather than forcing a continuation receipt
+    // that this transition was never going to produce.
+    resolution = hasRetainedLockedActionReceipt(drivenTransition.events, action)
+      ? appendBattleResolutionLockedActionContinuation({
+          resolution: retained.resolution,
+          transition: drivenTransition,
+          fieldBoundary: presentation.field,
+          lockedAction: action,
+        })
+      : freshResolution();
   }
   return Object.freeze({
     ...state,

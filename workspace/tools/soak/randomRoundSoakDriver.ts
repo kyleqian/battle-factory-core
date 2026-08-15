@@ -716,10 +716,26 @@ export type RunOptions = {
    * first command boundary path, driven by real button presses.
    */
   stopAtFirstActionMenu?: boolean;
+  /**
+   * Report the FIRST round's own decided outcome (roundComplete/roundLost)
+   * even if in-session chaining (factoryRoundChaining.ts) continues playing
+   * a freshly generated round past it. Without this, the default grace
+   * window's countdown only accumulates frames while SOME round sits
+   * decided, so a policy that keeps declining the record menu (and thus
+   * keeps re-chaining) can run far longer than one round before the window
+   * empties. Pins that care only about a single round's own mechanics
+   * (crash-free to its own terminal) want this; the crash-hunting sweep
+   * across arbitrarily many chained rounds does not.
+   */
+  stopAtFirstRoundDecision?: boolean;
 };
 
 export const DEFAULT_RUN_OPTIONS: RunOptions = {
-  maxFrames: 200_000,
+  // In-session round chaining (PROGRESS ~1271) lets a single seed play
+  // arbitrarily many rounds back to back; 200_000 was sized for one round.
+  // 300_000 comfortably covers the deepest observed default-sweep seed
+  // (seed 0, vanilla: settles at 226_630).
+  maxFrames: 300_000,
   renderEvery: 8,
   verbose: false,
   policy: "full",
@@ -740,6 +756,11 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   let state = options.stateFactory?.() ?? createInitialState();
   let frame = 0;
   let terminalGrace = -1;
+  let firstEndState: string | null = null;
+  let chainingCommitted = false;
+  let firstDecisionSnapshot:
+    | { frames: number; battle: number; turn: number; diagnostics: RunDiagnostics }
+    | null = null;
   let lastSurface = "";
   let renderCalls = 0;
   let terminalRecordMenuInputReadyReached = false;
@@ -784,7 +805,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       ...extra,
     };
     return options.collectDiagnostics === true
-      ? { ...result, diagnostics: diagnostics() }
+      ? { ...result, diagnostics: extra.diagnostics ?? diagnostics() }
       : result;
   };
 
@@ -826,13 +847,35 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
     }
 
     const end = endStateOf(state);
-    if (end !== null || state.lobbyFreeRoam !== null) {
+    if (end !== null && firstEndState === null) firstEndState = end;
+    if (state.pendingGeneratedRound !== null) chainingCommitted = true;
+    if (options.stopAtFirstRoundDecision === true && firstEndState !== null && !chainingCommitted) {
+      // Keep refreshing the snapshot every tick the FIRST round's own
+      // terminal dialogue still runs (factoryRoundBattleOrchestrator gets
+      // cleared partway through it, before pendingGeneratedRound commits —
+      // see core.ts's terminal-decline handoff — so endStateOf() alone
+      // can't tell "still this round's terminal" from "already chained").
+      // pendingGeneratedRound flips non-null at the exact chaining commit,
+      // so this freezes the snapshot at the last genuine pre-chain value.
+      firstDecisionSnapshot = {
+        frames: frame,
+        battle: player.battle,
+        turn: player.turn,
+        diagnostics: diagnostics(),
+      };
+    }
+    const graceActive = options.stopAtFirstRoundDecision === true
+      ? firstEndState !== null
+      : (end !== null || state.lobbyFreeRoam !== null);
+    if (graceActive) {
       // Round decided. Keep ticking a grace window so the terminal/lobby
       // presentations (their own crash surface) still run, then stop.
       if (terminalGrace < 0) terminalGrace = 9_000;
       terminalGrace -= 1;
       if (terminalGrace === 0 || state.lobbyFreeRoam !== null) {
-        return finish("OK", { endState: end ?? "roundLost" });
+        return options.stopAtFirstRoundDecision === true
+          ? finish("OK", { endState: firstEndState!, ...firstDecisionSnapshot! })
+          : finish("OK", { endState: end ?? "roundLost" });
       }
     }
   }

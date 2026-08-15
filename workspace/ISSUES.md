@@ -17,65 +17,56 @@ backlog.
 
 # Open
 
-## #88 — A freshly-generated round's battle 1, driven through the live command/resolution UI, hits "locked action continuation receipt has no immutable matching action snapshot"
+## #89 — "full"-policy soak seed 27 hits an unimplemented Baton Pass `openpartyscreen` machine-barrier, unrelated to and predating #88/chaining
 
-**Symptom:** `npm run soak -- --policy vanilla --seeds 0:20` CRASHes 6/20
-seeds (0, 4, 12, 14, 16, 18), all with the identical signature and all at
-the **second battle the driver ever plays** (round 1 loses on its own
-battle 1 under the vanilla policy, so this is chained round 2's battle 1),
-consistently at turn 5:
+**Symptom:** `tests/randomRoundSoak.test.ts`'s "ISSUES #86: presents a
+forced replacement's terminal sandstorm continuation" pin (seed 27, no
+policy override i.e. `"full"`) CRASHes at round 1 battle 1 turn 10, frame
+30798, well before its documented "battle 4 turn 16" scenario:
 
 ```
-[engine/tick] Error: locked action continuation receipt has no immutable matching action snapshot
-  appendBattleResolutionLockedActionContinuation (src/engine/battleResolutionPresentation.ts:3898)
-  beginCommandResolution (src/engine/factoryRoundBattleOrchestrator.ts:1479)
-  advanceFactoryRoundBattleCommand (src/engine/factoryRoundBattleOrchestrator.ts:2300)
+FactoryRoundOrchestratorError: battle kernel reached {"kind":"battle-script","entryLabel":"BattleScript_EffectBatonPass","programCounter":1157,"opcodeId":80,"opcodeName":"B_SCR_OP_OPENPARTYSCREEN","dispatcher":"Cmd_openpartyscreen",...}
+  fail (src/engine/factoryRoundBattleOrchestrator.ts:427)
+  driveTrainerBoundary (src/engine/factoryRoundBattleOrchestrator.ts:1271)
+  beginCommandResolution (src/engine/factoryRoundBattleOrchestrator.ts:1430)
 ```
 
-Two pre-existing pinned cases in `tests/randomRoundSoak.test.ts` now fail
-because the driver no longer stops at a round's own decided terminal (see
-below) and wanders into this: seed 21 ("earns all seven generated wins…")
-now HANGs at 200000 frames inside chained round 2 battle 6 instead of
-stopping at round 1's `roundComplete`; seed 27 ("ISSUES #86: presents a
-forced replacement's terminal sandstorm continuation") now CRASHes with
-this exact signature instead of reaching `roundLost` cleanly. Neither
-test's own original concern (round 1's specific slice-3/forced-switch
-mechanics) regressed — both still pass their `errorMessage` regex guard;
-what changed is that the driver now continues past round 1 into round 2,
-per queue item 2's continuous-play chaining (PROGRESS ~1271).
+The player selects Baton Pass (move 226, fight slot 2); the resulting
+transition's boundary is `machine-barrier` instead of a genuine decision
+boundary, and `driveTrainerBoundary`'s auto-AI-drive loop (which only
+expects to cross opposing-trainer command boundaries) has no handling for
+it, so it hard-fails. `B_SCR_OP_OPENPARTYSCREEN` itself has a real opcode
+implementation (`battleScriptOpenPartyScreenOpcode.ts`) — this looks like a
+gap in wiring a **player-side mid-turn Baton Pass switch-in** through
+`beginCommandResolution`'s command-resolution path specifically, not a
+missing opcode.
 
-**Confirmed:** this is reachable ONLY through the real tick()-level battle
-command/resolution presentation state machine
-(`advanceFactoryRoundBattleCommand`/`beginCommandResolution` in
-`factoryRoundBattleOrchestrator.ts`), not through the lower-level
-`submitFactoryRoundPlayerDecision` API the orchestrator's own unit tests
-and this session's new `tests/factoryRoundChaining.test.ts` drive directly
-— both of those reach real `roundComplete`/`roundLost` for a
-`generateInitial`-sourced round (including its battle 1) with zero
-discrepancies. The crash is specific to a round's battle 1 when it is
-**live-generated** (`createFactoryRoundBattleOrchestrator` with no
-`adoptedInitialOpponent`, `pendingBattlePreCommandRngCalls` defaulting to
-0) and driven end-to-end through the presentation layer — a code path that
-was categorically unreachable before this session, since previously only
-the canonical anchor session (`createFactoryAnchorSession`,
-`preCommandRngCalls: ANCHOR_BATTLE_1_PRE_COMMAND_RNG_CALLS = 27`) ever
-reached a battle 1 via that presentation layer; every other live-generated
-opponent driven through it so far has been battle 2+ of an already-active
-round. The `preCommandRngCalls` discrepancy (0 vs. the anchor's pinned 27)
-is the leading suspect but is unconfirmed.
+**Confirmed independent of #88 and round-chaining (2026-08-14, this
+session):** reproduces byte-for-byte identically (same frame 30798, same
+signature) on the commit this session started from (`da55e159`, before any
+#88 fix or driver changes) and is unaffected by `stopAtFirstRoundDecision`
+(the crash is inside round 1 itself, before any terminal/chaining decision
+point is ever reached). ISSUES' prior text for the old #88 entry claimed
+seed 27 crashed with #88's exact locked-action-continuation signature
+instead — that was stale/inaccurate; re-verify claims like this against a
+fresh repro rather than trusting the prior write-up, per this session's own
+mandate to verify unconfirmed leads before building on them. Likely
+introduced by a concurrent side-lane commit that changed opponent-AI move
+selection for the `"full"` policy's random exploration (candidates:
+`1ce3189d`/`58eade13`, "brain seventh-win terminal RAM pins"), not by
+anything in the round-chaining feature itself.
 
-**Leads:** reproduce narrowly with a `generateInitial`, no-`adoptedInitialOpponent`
-round driven through `tick()`/`createInitialState` (this session's
-`stateAtDecidedRound` + `driveTerminalToNextDraft` helpers in
-`tests/factoryRoundChaining.test.ts` already reach the constructed round;
-extend to actually play its battle 1 via real button presses, e.g. via
-`tools/soak/randomRoundSoakDriver.ts`'s `RandomPlayer`, to get a minimal
-repro trace); inspect what `beginCommandResolution` expects
-`hasRetainedLockedActionReceipt` to find for a fresh-battle-1
-`activeBattleCallStart`/`pendingBattlePreCommandRngCalls` vs. the anchor's.
-Blocks the continuous-play program's soak acceptance gate
-(`npm run soak -- --policy vanilla --seeds 0:20` must be 20/20 OK) —
-next main-lane action once picked up.
+**Leads:** narrow with `runSeed(27, { maxFrames: 30_799 })` (`tools/soak/
+randomRoundSoakDriver.ts`) — crashes immediately at the budget edge; drop
+`maxFrames` further via binary search to isolate the exact turn-10 command
+sequence. Compare `driveTrainerBoundary`'s trainer-boundary loop against
+whatever code path DOES correctly resolve a **voluntary** player switch
+(`battlePartySelect`) to find the missing wire-up for a switch initiated
+mid-resolution by Baton Pass rather than by the action-menu POKéMON
+option. The pinned test itself is `it.skip`-ed with a comment pointing
+here until this lands; unskip and restore its original assertions once
+fixed (or replace the now-unreachable seed 27 fixture with a fresh repro
+if the fix changes which turn/seed exhibits the original #86 concern).
 
 ## #87 — Battle-start ready-frame formula is missing the ROM's pre-first-turn span (universal +4..+7 tick late-fire)
 

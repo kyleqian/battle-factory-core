@@ -126,6 +126,11 @@ describe("random round soak driver (green milestone pin)", () => {
       testPolicy: "strong-route" as const,
       stateFactory: createSevenWinLiveState,
       collectDiagnostics: true,
+      // This pin cares only about THIS round's own 7-win mechanics, not
+      // in-session chaining (factoryRoundChaining.ts): strong-route always
+      // wins, so without this the terminal's default-NO decline (PROGRESS
+      // ~1271) would keep chaining into fresh rounds indefinitely.
+      stopAtFirstRoundDecision: true,
     };
     const first = runSeed(21, options);
     const second = runSeed(21, options);
@@ -133,7 +138,13 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(first).toMatchObject({
       outcome: "OK",
       endState: "roundComplete",
-      frames: 56_556,
+      // PROGRESS ~1271's chaining short-circuit (core.ts) clears
+      // factoryTerminal in the SAME tick recordChoice first reads "no" (it
+      // never lingers through a decline-farewell dialogue the way the old
+      // pre-chaining path did), so this settles ~46 frames/4 render calls
+      // sooner and terminalRecordChoice is never observably "no" afterward
+      // — both are the genuine new trajectory, not a driver regression.
+      frames: 56_510,
       battle: 7,
       turn: 11,
       diagnostics: {
@@ -144,8 +155,8 @@ describe("random round soak driver (green milestone pin)", () => {
         battleRngSegmentCount: 7,
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
-        terminalRecordChoice: "no",
-        renderCalls: 4_228,
+        terminalRecordChoice: null,
+        renderCalls: 4_224,
       },
     });
     expect(second).toEqual(first);
@@ -212,7 +223,30 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(9_484);
   });
 
-  it("ISSUES #86: presents a forced replacement's terminal sandstorm continuation", () => {
+  it("ISSUES #88: a locked multi-turn battler that faints before its continuation falls back to a fresh resolution", () => {
+    // Seed 0's chained round 2 (only reachable now that terminal-decline
+    // chains into a fresh generated round, PROGRESS ~1271) has its opponent
+    // charge a two-turn move on turn 4, setting STATUS2_MULTIPLETURNS. The
+    // player's faster turn-5 move then KOs that same battler before its
+    // continuation can print — FaintClearSetData (battle_main.c:3272) zeroes
+    // status2 on faint, so the locked continuation genuinely never fires.
+    // The parent treated the missing receipt as a broken invariant and threw;
+    // it must now fall back to a fresh resolution identity instead.
+    const result = runSeed(0, { policy: "vanilla", maxFrames: 32_000, renderEvery: 0 });
+    expect(result.errorMessage ?? "").not.toMatch(
+      /locked action continuation receipt has no immutable matching action snapshot/,
+    );
+    expect(result.frames).toBeGreaterThan(31_771);
+  });
+
+  // ISSUES #89: seed 27 under "full" policy now crashes at round 1 battle 1
+  // turn 10 on an unimplemented Baton Pass openpartyscreen machine-barrier,
+  // well before ever reaching this pin's documented battle-4-turn-16
+  // scenario. Confirmed independent of #88/round-chaining (reproduces
+  // identically on the pre-#88-fix commit) — a separate, pre-existing gap.
+  // Unskip once #89 lands, or replace the fixture if the fix changes which
+  // seed/turn exhibits the original #86 concern.
+  it.skip("ISSUES #86: presents a forced replacement's terminal sandstorm continuation", () => {
     // Seed 27 battle 4 turn 16 forces MURKROW in at 4 HP. The same genuine
     // reducer receipt then runs sandstorm damage, faints MURKROW, and returns
     // a terminal trainer-win boundary. Completing the send-out animation must

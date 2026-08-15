@@ -1,3 +1,38 @@
+## 1269 — [main worker, 2026-08-14] **Queue (i) steps 1+2: `applyFactoryBrainRoundOutcome` ported + wired as round-controller outputs**
+
+- **State:** Steps 1-2 of `docs/noland-brain-post-battle-audit.md` §5's
+  worklist done, each its own green commit. Step 3 (brain congrats text) is
+  explicitly next and untouched, per the brief's OUT OF SCOPE list.
+- **Did:** (1) `src/engine/factoryBrainRoundOutcome.ts`:
+  `applyFactoryBrainRoundOutcome` ports `GiveBattlePoints` +
+  `GiveFacilitySymbol` (`frontier_util.c:1853-1925`) exactly — BP table row
+  keyed off the post-win streak (÷7, decrement-unless-zero, clamp), the +10
+  brain bonus, and silver/gold symbol grant with the STREAK/STREAK_LONG
+  no-symbol branch, sourced from the already-verified
+  `factory-ending-policy.json` extraction (not hand-transcribed). Pinned in
+  `tests/factoryBrainRoundOutcome.test.ts`: silver 14 BP/symbol, gold 15
+  BP/symbol, streak 14 BP/no symbol, streak-long 17 BP/no symbol, ordinary
+  first win 3 BP (unchanged from the existing fixture), brain loss 0 BP/no
+  symbol. (2) Wired into `factoryRoundBattleOrchestrator.ts`: new
+  `roundOutcome` state field, set by `finishBattle` at the two real
+  round-terminal phases via a new exported `factoryRoundOutcomeForResolution`
+  helper (same computation, callable without a real kernel battle). Extended
+  `tests/factoryBrainRoundShape.test.ts`'s silver/gold/negative(loss) cases to
+  assert the new output fields via the same `resolveRoundBattle`-bypass
+  technique that file's own loss test already used (a real kernel win against
+  a generated Brain party wasn't scripted — out of a bounded session's
+  budget).
+- **Next:** step 3 — consume `factory-terminal-messages.json`'s
+  `factoryHeadCongrats` in `factoryTerminalPresentation.ts`/
+  `factoryTerminalRender.ts` behind a `frontierBrain`-aware branch; then
+  queue items (ii)/(iii) per PROGRESS 1268.
+- **Notes:** Full `npm test` green (1020 files / 9,811 passed / 223 skipped),
+  `npm run build` green, `npm run typecheck` green throughout. No barrier
+  counts touched. The ordinary seventh-win terminal presentation
+  (`battlePointAward: 3` fixture) is untouched — verified unmodified and its
+  own tests stayed green; the ordinary-first-win case in the new pure
+  function reproduces the same 3 BP value independently.
+
 ## 1268 — [supervisor, 2026-08-14 eve] **Session start: both lane branches folded; union gates green; queue (i) dispatched**
 
 - **State:** Orient + folds done; working the 1267 queue. Main worker on

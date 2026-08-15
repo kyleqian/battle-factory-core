@@ -14,7 +14,7 @@
 //   --policy P         "full" (default: arbitrary-but-legal play) or
 //                      "vanilla" (plainest play: FIGHT first legal move,
 //                      decline swaps, GO ON)
-//   --max-frames N     per-seed tick budget before reporting HANG (default 200000)
+//   --max-frames N     per-seed tick budget before reporting HANG (default: DEFAULT_RUN_OPTIONS.maxFrames)
 //   --render-every N   call render() every N frames (0 disables; default 8)
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
@@ -23,6 +23,7 @@
 
 import { writeFileSync } from "node:fs";
 import {
+  DEFAULT_RUN_OPTIONS,
   runSeed,
   type RunOptions,
   type SeedOutcome,
@@ -40,7 +41,7 @@ function main(): void {
   const milestone = args.includes("--milestone");
   const singleSeed = getFlag("--seed");
   const seedsRange = getFlag("--seeds") ?? "0:50";
-  const maxFrames = Number(getFlag("--max-frames") ?? 200_000);
+  const maxFrames = Number(getFlag("--max-frames") ?? DEFAULT_RUN_OPTIONS.maxFrames);
   const renderEvery = Number(getFlag("--render-every") ?? 8);
   const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
   const jsonPath = getFlag("--json");

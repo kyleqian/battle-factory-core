@@ -5,6 +5,69 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1272 — [main worker, 2026-08-14] **#88 fixed: locked multi-turn continuation now falls back to a fresh resolution when the locked battler faints first; soak 20/20 OK**
+
+- **State:** #88 is fixed and deleted from ISSUES.md. `npm run soak --
+  policy vanilla --seeds 0:20` is **20/20 OK** (was 14/20 OK + 6 CRASH).
+  Full `npm test` green (1022 files / 9,822 passed / 224 skipped) and
+  `npm run build` green. One NEW, unrelated pre-existing bug surfaced and is
+  cataloged as **#89** (see Notes) rather than fixed — out of this step's
+  scope.
+- **Did:** (1) Root cause (confirmed, not the preCommandRngCalls red
+  herring #88 flagged as unconfirmed): `beginCommandResolution`
+  (`factoryRoundBattleOrchestrator.ts:1418`) retains a "locked action"
+  presentation owner whenever the non-acting battler carries
+  `STATUS2_MULTIPLETURNS`/`STATUS2_RECHARGE`, on the assumption its
+  continuation will survive to print. `FaintClearSetData`
+  (`battle_main.c:3272`) unconditionally zeroes `status2` on faint, so a
+  faster opposing move can legitimately KO that same locked battler before
+  its continuation ever fires — a real, reachable game outcome (repro:
+  seed 0 vanilla, chained round 2 battle 1 turn 5, opponent charges
+  Razor Wind turn 4, player's turn-5 move KOs it first). The parent treated
+  the missing receipt as a broken invariant and threw. Fix: exported
+  `hasRetainedLockedActionReceipt` from `battleResolutionPresentation.ts`;
+  `beginCommandResolution` now checks it against the driven transition
+  before committing to `appendBattleResolutionLockedActionContinuation`,
+  falling back to a fresh `createBattleResolutionPresentation` (identical
+  to the `retained === null` branch) when the receipt is absent. No
+  battle-number/turn-number/tick branch added; anchor-path behavior
+  untouched (the branch only changes what happens where the parent
+  previously threw). (2) Repro pinned as a new Tier-1 test in
+  `tests/randomRoundSoak.test.ts` ("ISSUES #88: ..."). (3) Two
+  pre-existing pinned tests: seed 21 ("earns all seven wins") — added
+  `stopAtFirstRoundDecision` to `randomRoundSoakDriver.ts` (freezes a
+  snapshot the instant `pendingGeneratedRound` commits) so it again reports
+  the first round's own outcome instead of wandering into endless
+  auto-rechained rounds (strong-route never stops winning); its numeric
+  pins moved by a genuinely correct amount (~46 frames / 4 render calls,
+  `terminalRecordChoice` now `null` not `"no"`) because the new chaining
+  short-circuit clears `factoryTerminal` in the same tick `recordChoice`
+  reads "no", so it never lingers through the old decline-farewell dialogue
+  — documented inline, not silently loosened. Seed 27 — see Notes, not
+  fixed, `it.skip`-ed with a pointer to #89. (4) Bumped
+  `DEFAULT_RUN_OPTIONS.maxFrames` 200_000 → 300_000 (chaining makes a
+  single seed's run legitimately longer than one round) and fixed
+  `randomRoundSoak.ts`'s CLI to read that constant instead of its own
+  stale hardcoded 200_000 default — the CLI default was silently out of
+  sync with the driver's exported default.
+- **Next:** continuous-play program: challenge 3+/battle 21 Noland
+  natural-play verification (queue item 2's remaining reach). #89 (Baton
+  Pass `openpartyscreen` machine-barrier) is unclaimed backlog. Queue
+  (ii)/(iii) from 1267/1268 remain untouched/parallel-lane.
+- **Notes:** Investigating seed 27's pinned test (documented in the old
+  #88 entry as crashing with #88's own signature) revealed that claim was
+  stale: on the actual starting commit (`da55e159`, pre-fix), seed 27
+  crashes with an UNRELATED, pre-existing "full"-policy bug (Baton Pass ->
+  `openpartyscreen` -> `machine-barrier`, unhandled by
+  `driveTrainerBoundary`) at round 1 battle 1 turn 10 — well before #88 or
+  chaining are ever in play. Confirmed independent by reproducing
+  byte-for-byte identically before touching any code this session. Filed
+  as **#89**; the seed-27 pin is `it.skip`-ed pending that fix (its
+  documented battle-4-turn-16 scenario is currently unreachable). This is
+  the session's one deviation from "pass as originally written" — surfaced
+  explicitly per the brief rather than hidden. No committed compare trace
+  touched; no `executableFrontierRatchet` barrier counts moved.
+
 ## 1271 — [main worker, 2026-08-14] **Continuous-play step 1: generated-draft round entry + in-session chaining WIRED; blocked green by newly-exposed #88**
 
 - **State:** Round-chaining wiring (ROADMAP "User decisions 2026-08-14" #2)
@@ -106,39 +169,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   files / 9,813 passed / 223 skipped, up 2 from 1269), `npm run build`
   green, `npm run typecheck` green throughout. No barrier counts touched.
   PAPERCUT: none this session.
-
-## 1269 — [main worker, 2026-08-14] **Queue (i) steps 1+2: `applyFactoryBrainRoundOutcome` ported + wired as round-controller outputs**
-
-- **State:** Steps 1-2 of `docs/noland-brain-post-battle-audit.md` §5's
-  worklist done, each its own green commit. Step 3 (brain congrats text) is
-  explicitly next and untouched, per the brief's OUT OF SCOPE list.
-- **Did:** (1) `src/engine/factoryBrainRoundOutcome.ts`:
-  `applyFactoryBrainRoundOutcome` ports `GiveBattlePoints` +
-  `GiveFacilitySymbol` (`frontier_util.c:1853-1925`) exactly — BP table row
-  keyed off the post-win streak (÷7, decrement-unless-zero, clamp), the +10
-  brain bonus, and silver/gold symbol grant with the STREAK/STREAK_LONG
-  no-symbol branch, sourced from the already-verified
-  `factory-ending-policy.json` extraction (not hand-transcribed). Pinned in
-  `tests/factoryBrainRoundOutcome.test.ts`: silver 14 BP/symbol, gold 15
-  BP/symbol, streak 14 BP/no symbol, streak-long 17 BP/no symbol, ordinary
-  first win 3 BP (unchanged from the existing fixture), brain loss 0 BP/no
-  symbol. (2) Wired into `factoryRoundBattleOrchestrator.ts`: new
-  `roundOutcome` state field, set by `finishBattle` at the two real
-  round-terminal phases via a new exported `factoryRoundOutcomeForResolution`
-  helper (same computation, callable without a real kernel battle). Extended
-  `tests/factoryBrainRoundShape.test.ts`'s silver/gold/negative(loss) cases to
-  assert the new output fields via the same `resolveRoundBattle`-bypass
-  technique that file's own loss test already used (a real kernel win against
-  a generated Brain party wasn't scripted — out of a bounded session's
-  budget).
-- **Next:** step 3 — consume `factory-terminal-messages.json`'s
-  `factoryHeadCongrats` in `factoryTerminalPresentation.ts`/
-  `factoryTerminalRender.ts` behind a `frontierBrain`-aware branch; then
-  queue items (ii)/(iii) per PROGRESS 1268.
-- **Notes:** Full `npm test` green (1020 files / 9,811 passed / 223 skipped),
-  `npm run build` green, `npm run typecheck` green throughout. No barrier
-  counts touched. The ordinary seventh-win terminal presentation
-  (`battlePointAward: 3` fixture) is untouched — verified unmodified and its
-  own tests stayed green; the ordinary-first-win case in the new pure
-  function reproduces the same 3 BP value independently.
-
