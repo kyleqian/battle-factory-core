@@ -1090,6 +1090,19 @@ picks from PROGRESS 1273):**
    once for all Factory matches, not as a brain-only fork. The memo's
    sequencing note stands: resolve its §1.6 gold-discrepancy probe
    before writing gold's disputed box. Estimated 4-6 worker steps.
+   **PROGRESS (2026-08-15 supervisor session):** §1.6 probe RESOLVED
+   (lab artifact; faithful gold = "Get a move on!" per decomp); script
+   ground truth extracted (`factory-brain-walkup-script.json`); silver
+   dense evidence banked (`noland-silver-walkup-presentation-map.md`);
+   BattleRoom brain entrance BUILT + app-side staged-compare harness
+   (B1/B1b, entrance window 256/256); silver 8-page speech + battle-cry
+   + in-session heard-flag + handoff BUILT (B2, four speech windows
+   exact). REMAINING: Noland brainMoving walk/pan cadence residual
+   (documented in battleRoom.ts); PreBattleRoom call-scene + menu =
+   step A (design memo `docs/walkup-step-a-design.md`, dispatchable);
+   gold entrance/speech; the top-layer `BattleLab.prepare()` brain
+   staging gap blocks oracle acceptance for the call-scene + gold
+   (recommend fixing oracle-side before step A ships).
 2. **#87 = option (c)**: every committed window that ends before its
    ready transition stays exactly as-is; calibrate only windows that
    must cross it (today: the silver Brain-reveal tail, 648/701), each
