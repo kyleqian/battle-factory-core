@@ -17782,10 +17782,10 @@ export function renderSceneOnMovePresentation(
     // SortSprites orders equal-priority OBJ by descending OAM y and retains
     // creation order for an equal y. Draw that order backwards because direct
     // raster writes overwrite, while the first hardware OAM entry wins.
-    const oamOrderedSprites = displayed.sprites.toSorted((left, right) =>
+    const oamOrderedSprites = displayed.sprites.slice().sort((left, right) =>
       right.center.y + right.offset.y2 - (left.center.y + left.offset.y2)
       || hitCreationIndex(left) - hitCreationIndex(right));
-    for (const sprite of oamOrderedSprites.toReversed()) {
+    for (const sprite of oamOrderedSprites.slice().reverse()) {
       // The hardware affine table equals the preceding software table on
       // every comparable row. `displayed` is already that preceding row;
       // a freshly admitted sprite naturally retains its creation matrix.
