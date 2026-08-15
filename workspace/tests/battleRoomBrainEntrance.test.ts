@@ -29,6 +29,7 @@ import {
   INITIAL_BATTLE_2_ROOM_STATE,
   MSGBOX_CLOSE_TICKS,
   msgboxVisual,
+  NOLAND_IDLE_FRAME,
   NOLAND_INITIAL_SCREEN_Y,
   NOLAND_WALK_PX,
   nolandStep,
@@ -124,9 +125,9 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(battleRoomStateForOpponent(undefined).frontierBrainWalkup).toBeUndefined();
   });
 
-  it("box appears immediately (elapsed 0), prints, then holds idle until the player's A press - no movement happens yet", () => {
+  it("box stays hidden through the room fade-in, appears at BRAIN_MSGBOX_APPEAR_ELAPSED, prints, then holds idle until the player's A press - no movement happens yet", () => {
     let state: BattleRoomState = createBrainWalkupBattleRoomState();
-    expect(msgboxVisual(state)).toEqual({ visible: true, chars: 0 });
+    expect(msgboxVisual(state)).toEqual({ visible: false, chars: 0 });
     expect(entryStep(0).camPanY).toBe(0);
 
     for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) {
@@ -164,6 +165,10 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(msgboxVisual(aged)).toEqual({ visible: false, chars: 0 });
   });
 
+  it("Noland faces the player (frame 0), not the decoy's own north-facing idle frame, before his own walk begins (dense-compare-measured)", () => {
+    expect(NOLAND_IDLE_FRAME).toBe(0);
+  });
+
   it("Noland's own walk stays in lockstep with the decoy's camera-pan clock, then settles at the ordinary opponent's own settle Y (both park at tile (7,6))", () => {
     expect(nolandStep(0)).toEqual({ frame: entryStep(0).decoyFrame, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y });
     // While Noland's own 3-tile walk is still in progress, he mirrors the
@@ -186,9 +191,9 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(scientistTurnFrame(BRAIN_MOVEMENT_SETTLE_ELAPSED)).toEqual({ frame: 2, turned: true });
   });
 
-  it("brain box print duration matches 1 tick/char over the JSON text, appearing at elapsed 0", () => {
-    expect(BRAIN_MSGBOX_APPEAR_ELAPSED).toBe(0);
+  it("brain box print duration matches 1 tick/char over the JSON text, appearing once the room fade-in settles (dense-compare-measured, see battleRoom.ts doc)", () => {
+    expect(BRAIN_MSGBOX_APPEAR_ELAPSED).toBe(24);
     expect(BRAIN_MSGBOX_PRINT_TICKS).toBe(BRAIN_MSGBOX_LINE1.length + BRAIN_MSGBOX_LINE2.length);
-    expect(BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED).toBe(BRAIN_MSGBOX_PRINT_TICKS);
+    expect(BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED).toBe(BRAIN_MSGBOX_APPEAR_ELAPSED + BRAIN_MSGBOX_PRINT_TICKS);
   });
 });

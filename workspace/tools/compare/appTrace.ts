@@ -81,6 +81,7 @@ import {
   generatedRoundBattle6LukasStatusSummaryMessageStage,
   generatedRoundBattle7NolandGoldRevealStage,
   generatedRoundBattle7NolandRevealStage,
+  generatedRoundBattle7NolandRoomEntranceStage,
 } from "./factoryRoundIntroGeneralizationStage.ts";
 
 export interface AppCapture {
@@ -1494,6 +1495,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
     generatedRoundBattle6LukasStatusSummaryMessageStage,
   "factory-round-battle7-noland-reveal-off": generatedRoundBattle7NolandRevealStage,
   "factory-round-battle7-noland-gold-reveal-off": generatedRoundBattle7NolandGoldRevealStage,
+  "factory-round-battle7-noland-room-entrance-off": generatedRoundBattle7NolandRoomEntranceStage,
   "factory-postwin-canonical-opponent-party":
     createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
   "factory-postwin-generated-rock-unrestrained-opponent-party":

@@ -22,6 +22,9 @@ import {
   battleIntroSceneAssemblyDisplayLag,
   selectFrontierTransition,
 } from "../../src/engine/battleTransition.ts";
+import { battleRoomStateForOpponent } from "../../src/engine/battleRoom.ts";
+import { factoryTrainerPresentationForOpponent } from "../../src/engine/factoryTrainerPresentation.ts";
+import { createPostwinState } from "../../src/engine/postwin.ts";
 
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const CHALLENGE2_FIXED_IV = getLevel50InitialRentalFixedIv(2, false);
@@ -166,6 +169,79 @@ export function generatedRoundBattle6LukasStatusSummaryMessageStage(
 // only the resolved trainer identity/party differ, per rung B (PROGRESS 1259).
 export function generatedRoundBattle7NolandRevealStage(state: EngineState): EngineState {
   return generatedRoundRevealProofStage(state, 6);
+}
+
+/**
+ * A postwin `elapsed` this far past `POSTWIN_COUNTER_ROOM_FIRST_AGE` (115)
+ * is permanently in `postwinPhase`'s terminal "counterRoom" bucket, and every
+ * one of `postwinRngSteps`'s special-cased equality checks (43/45/46/105/106,
+ * `continuationConfirmElapsed+1`, `rightThisWayDismissElapsed+109/110`) is
+ * already behind it -- so `advancePostwin`/`postwinRngSteps` just increment
+ * forever, never throwing or branching. Room-entrance placeholder only: once
+ * `battleRoom` is set, `core.ts`'s `if (postwin) { if (prebattleRoom) {}
+ * else if (battleRoom) {} else if (...postwin dialogue...) {} }` chain never
+ * re-enters the dialogue branches (an `else if` sibling of `battleRoom`,
+ * unreachable once it's set) -- this object exists only to satisfy
+ * `renderPostwinState`'s own precedence check (`rightThisWayDismissElapsed
+ * !== null` -> defer to `state.battleRoom`, core.ts:2512-2514) and `render`'s
+ * outer `postwinPhase(...) !== "counterRoom"` gate, not to model a real
+ * dialogue traversal.
+ */
+const ROOM_ENTRANCE_INERT_POSTWIN_ELAPSED = 10_000;
+const ROOM_ENTRANCE_INERT_POSTWIN_RIGHT_THIS_WAY_ELAPSED = 0;
+
+/**
+ * Walk-up build step B1b: stages the SAME seed-70/challenge-2 Battle-7
+ * (Noland, silver) round `generatedRoundRevealProofStage` reaches, but stops
+ * at the real `battleRoom` construction seam (`core.ts`'s postwin ->
+ * prebattleRoom -> battleRoom chained-round handoff, wired in d60ca1b3) --
+ * `battleRoomStateForOpponent`, the SAME call core.ts itself makes -- rather
+ * than jumping straight past the room into `beginFactoryRoundBattleStartIntro`
+ * the way the reveal stage above does. `prebattleRoom: null` and a
+ * `battleRoom` already at `elapsed: 0` matches app frame 0 to the entrance's
+ * own "first visible room frame" (battleRoom.ts's own `elapsed` convention,
+ * shared with the ordinary path's `WARP_FADE_TO_ROOM_ELAPSED` handoff).
+ */
+export function generatedRoundBattle7NolandRoomEntranceStage(
+  state: EngineState,
+): EngineState {
+  const playerRentalRecords = [record(267), record(268), record(269)] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "factory-round-battle7-noland-room-entrance-off",
+    rngValue: 70,
+    factoryWinStreak: 14,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 14,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        record(270),
+        record(271),
+        record(272),
+      ],
+    },
+  });
+  for (let battleIndex = 0; battleIndex < 6; battleIndex += 1) {
+    orchestrator = advanceProofWin(orchestrator);
+  }
+  const currentOpponent = orchestrator.round.rules.currentOpponent;
+  const trainerPresentation = factoryTrainerPresentationForOpponent(currentOpponent) ?? undefined;
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: orchestrator,
+    postwin: {
+      ...createPostwinState(),
+      elapsed: ROOM_ENTRANCE_INERT_POSTWIN_ELAPSED,
+      rightThisWayDismissElapsed: ROOM_ENTRANCE_INERT_POSTWIN_RIGHT_THIS_WAY_ELAPSED,
+    },
+    prebattleRoom: null,
+    battleRoom: battleRoomStateForOpponent(currentOpponent, trainerPresentation),
+    rngMode: "vblank",
+    rngValue: orchestrator.round.rules.rngValue,
+  };
 }
 
 const CHALLENGE5_FIXED_IV = getLevel50InitialRentalFixedIv(5, false);

@@ -561,25 +561,62 @@ export function opponentStep(elapsed: number): OpponentStep {
 // the ordinary opponent's own `face_left` settle convention
 // (`OPPONENT_WALK_END_ELAPSED`'s doc above).
 //
-// **Caveat (not independently RAM-probed this session):** `NOLAND_INITIAL_
-// SCREEN_Y` (24) is derived algebraically from already-pinned constants
-// (`OPPONENT_SETTLED_SCREEN_Y` 56 minus the 32px this derivation implies for
-// the settle-relative drift, cross-checked against this module's own
-// documented `initialCameraOriginPx.y` of 104 - see doc point 2 above), not
-// read fresh from RAM/pixels for this specific route. `BRAIN_MSGBOX_APPEAR_
-// ELAPSED` (0, box visible from the very first room frame) and `BRAIN_
-// MOVEMENT_SETTLE_ELAPSED` (108, reusing `scientistTurnFrame`'s own settle
-// threshold) are the best-available source-structural inference, not
-// dense-compare-calibrated numbers - `docs/noland-silver-walkup-
-// presentation-map.md` §2 row 6 flags this same window's camera motion as
-// visually complex ("zooms/pans") in a way this straight-line model may not
-// fully capture; see this step's own compare notes for the resulting
-// residual.
+// **Walk-up build step B1b (dense-compare calibration against the committed
+// `factory-brain-silver-walkup-02/03-*-dense-off.json` fixtures,
+// `docs/noland-silver-walkup-presentation-map.md` §5 - `tools/compare/traces/
+// factory-brain-silver-walkup-entrance-0{2,3}-off.json`, staged via
+// `generatedRoundBattle7NolandRoomEntranceStage`):** the room's own fade-in
+// curve starts exactly at fixture 02's own first captured frame (pixel-
+// sampled: 24,24,57,...,255 from that frame on, matching this module's own
+// documented ramp) - this pins `elapsed 0` to that fixture's frame numbering
+// (`preCheckpointFrameOffset` in the committed traces) independent of the
+// OTHER reference trace's own tick-520 numbering used elsewhere in this file.
+// `BRAIN_MSGBOX_APPEAR_ELAPSED` MEASURED at 24 (was algebraically guessed at
+// 0): the box border/fill is not drawn at all - not even empty - until the
+// fade settles, not concurrently with it; fixture 02 closes 256/256 exact
+// once corrected. `NOLAND_IDLE_FRAME` MEASURED at 0 (see its own doc) fixes
+// the remaining fixture-02 residual (Noland's face must be visible, not the
+// decoy's own north-facing idle pose).
+//
+// **Residual NOT closed this step, flagged honestly rather than relabeled
+// "measured":** fixture 03's own `brainMoving` window (Noland/decoy walk +
+// camera pan, the ~103 elapsed ticks from the box-close dismiss through
+// shortly before `BRAIN_MOVEMENT_SETTLE_ELAPSED`) still mismatches
+// substantially against fresh dense-compare evidence - `entryStep`'s own
+// per-tick table (built for the ORDINARY path's own decoy-only walk, S6
+// slice 2a's module doc above) does not reproduce this branch's real
+// camera-pan cadence when reused verbatim for the simultaneous Noland+decoy
+// walk; a same-shape lookup shifted earlier was tried and made the mismatch
+// worse, not better, so the true per-tick schedule is NOT simply a phase
+// shift of `ENTRY_STEPS` and needs its own RAM/pixel derivation, out of this
+// step's remaining time budget. `NOLAND_INITIAL_SCREEN_Y` (24) and the
+// `camPanY`/`decoyFrame` reuse inside `nolandStep`/`renderBattleRoomBrain
+// EntranceScene` therefore REMAIN the prior algebraic/structural guess, NOT
+// dense-compare-measured - do not trust this window's exact pixels until a
+// future step re-derives the walk cadence. `BRAIN_MOVEMENT_SETTLE_ELAPSED`
+// (108) is comparatively well-supported: the residual's own far boundary
+// (oracle's real speech-box onset, B2's job, unimplemented here) lines up
+// with this constant's predicted `brainSettled` entry to within a handful of
+// frames, so it is kept as the best-available value but not re-derived
+// independently this step either.
 
 /** Noland's own walk distance in px (`walk_up`x3, this game's established 16-ticks/tile object-movement rate - see module doc points 2/3 above). */
 export const NOLAND_WALK_PX = 48;
 /** Noland's screen Y at `elapsed` 0 (spawn tile (7,9), zero pan) - see the derivation note above. */
 export const NOLAND_INITIAL_SCREEN_Y = 24;
+/**
+ * Noland's own resting pose before `brainMoving` starts (`brainEntering`/
+ * `brainMsgboxIdle`/`brainMsgboxClosing`) - facing the player (picture frame
+ * 0, matching `object_event_anims.h`'s `STD_FACE_SOUTH`), NOT the decoy's
+ * own idle frame (1, `STD_FACE_NORTH` - correct for the decoy, which is
+ * already oriented to walk north/away, but wrong for Noland, who stands
+ * facing the player until his own walk begins). Dense-compare-measured
+ * (`docs/noland-silver-walkup-presentation-map.md` fixture 02, oracle frame
+ * 664 = elapsed 0 onward through the "Get a move on!" hold: Noland's face is
+ * clearly visible the whole span, not the hat-only back-of-head pose
+ * `decoyFrame`(1) renders).
+ */
+export const NOLAND_IDLE_FRAME = 0;
 
 export interface NolandStep {
   /** Picture frame index into Noland's 9-frame sheet (same numbering as `EntryStep.decoyFrame`). */
@@ -612,8 +649,8 @@ export { BRAIN_MSGBOX_LINE1, BRAIN_MSGBOX_LINE2 };
 
 /** Total printable characters across both lines of "Hey, hey!\nGet a move on!" - same 1-tick/char convention as `MSGBOX_PRINT_TICKS`. */
 export const BRAIN_MSGBOX_PRINT_TICKS = BRAIN_MSGBOX_LINE1.length + BRAIN_MSGBOX_LINE2.length;
-/** First elapsed tick the box is visible - appears immediately, before any movement (see module doc caveat above). */
-export const BRAIN_MSGBOX_APPEAR_ELAPSED = 0;
+/** First elapsed tick the box (border+fill) is visible - MEASURED against fixture 02's dense compare (closes 256/256 exact at this value): the box does not appear at all until the room's own fade-in curve settles, not concurrently with it (see module doc above). */
+export const BRAIN_MSGBOX_APPEAR_ELAPSED = 24;
 /** First elapsed tick of "brainMsgboxIdle" (fully printed, static, awaiting A). */
 export const BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED = BRAIN_MSGBOX_APPEAR_ELAPSED + BRAIN_MSGBOX_PRINT_TICKS;
 
