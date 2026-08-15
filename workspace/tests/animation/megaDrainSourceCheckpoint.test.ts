@@ -62,7 +62,7 @@ describe("MOVE_MEGA_DRAIN source and legal staging checkpoint", () => {
       controls: {
         MOVE_ABSORB: "exact control only; no latch, timeline, or acceptance inheritance",
         MOVE_DREAM_EATER: "source-audit control only; remains independently unsupported",
-        MOVE_GIGA_DRAIN: "source-audit control only; remains independently unsupported",
+        MOVE_GIGA_DRAIN: "exact independent control; no latch, timeline, or acceptance inheritance",
       },
     });
     expect(audit.components).toEqual([
@@ -130,7 +130,7 @@ describe("MOVE_MEGA_DRAIN source and legal staging checkpoint", () => {
     );
   });
 
-  it("credits only Mega Drain after its complete bilateral acceptance", () => {
+  it("retains Mega Drain alongside each independently accepted drain move", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as {
       entries: Array<{ move: string; status: string }>;
       queue: string[];
@@ -139,12 +139,13 @@ describe("MOVE_MEGA_DRAIN source and legal staging checkpoint", () => {
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry) => entry.move === "MOVE_MEGA_DRAIN"))
       .toMatchObject({ status: "exact" });
-    for (const move of ["MOVE_DREAM_EATER", "MOVE_GIGA_DRAIN"]) {
-      expect(coverage.entries.find((entry) => entry.move === move)).toBeUndefined();
-    }
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_GIGA_DRAIN"))
+      .toMatchObject({ status: "exact" });
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_DREAM_EATER"))
+      .toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(186);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(189);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 186/276 exact, 0 partial, 0 staged, 90 unsupported");
+    expect(report).toContain("Level 50: 189/276 exact, 0 partial, 0 staged, 87 unsupported");
   });
 });

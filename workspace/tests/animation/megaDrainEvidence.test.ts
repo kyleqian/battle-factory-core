@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 const fixture = JSON.parse(readFileSync(
@@ -43,10 +44,27 @@ describe("MOVE_MEGA_DRAIN dense Scene-ON evidence", () => {
       batchSiblingAudit: {
         MOVE_ABSORB: expect.stringContaining("no evidence, latch, or acceptance inheritance"),
         MOVE_DREAM_EATER: "independently unsupported",
-        MOVE_GIGA_DRAIN: "independently unsupported",
+        MOVE_GIGA_DRAIN: "independently exact; no evidence, latch, timeline, or acceptance inheritance",
         coverageCredit: false,
       },
     });
+  });
+
+  it("keeps the shared probe's Mega Drain branch source-identical in meaning", () => {
+    const probe = readFileSync(fixture.source.probe, "utf8");
+    for (const [, evidence] of orientationEntries) {
+      expect(evidence.scenario).not.toContain("giga-drain");
+    }
+    expect(probe).toContain('IS_GIGA = "giga-drain" in SCENARIO.name');
+    expect(probe).toContain("MOVE_ID = 202 if IS_GIGA else 72");
+    expect(probe).toContain('MOVE_NAME = "Move_GIGA_DRAIN" if IS_GIGA else "Move_MEGA_DRAIN"');
+    expect(probe).toContain('MOVE_END_NAME = "GigaDrainAbsorbEffect" if IS_GIGA else "MegaDrainAbsorbEffect"');
+    for (const [, evidence] of orientationEntries) {
+      const dense = JSON.parse(gunzipSync(readFileSync(evidence.denseState)).toString("utf8"));
+      expect(Object.keys(dense.songHeaders)).toEqual([
+        "SE_M_ABSORB", "SE_M_BUBBLE3", "SE_M_ABSORB_2",
+      ]);
+    }
   });
 
   it.each(orientationEntries)("pins repeatable source/state/RGB/map receipts for %s", (_orientation, evidence) => {

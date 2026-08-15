@@ -107,7 +107,7 @@ describe("MOVE_DOUBLE_KICK dense acceptance", () => {
 
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const exact = coverage.entries.filter((entry: { status?: string }) => entry.status === "exact");
-    expect(exact).toHaveLength(186);
+    expect(exact).toHaveLength(189);
     expect(exact.find((entry: { move: string }) => entry.move === "MOVE_DOUBLE_KICK"))
       .toMatchObject({ status: "exact" });
   });

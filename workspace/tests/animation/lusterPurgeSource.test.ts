@@ -131,8 +131,8 @@ describe("MOVE_LUSTER_PURGE source and legal staging checkpoint", () => {
     const luster = entries.find((entry) => entry.move === "MOVE_LUSTER_PURGE");
     expect(luster).toMatchObject({ move: "MOVE_LUSTER_PURGE", status: "exact" });
     const exact = entries.filter((entry) => entry.status === "exact").length;
-    expect(exact).toBe(186);
+    expect(exact).toBe(189);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 186/276 exact, 0 partial, 0 staged, 90 unsupported");
+    expect(report).toContain("Level 50: 189/276 exact, 0 partial, 0 staged, 87 unsupported");
   });
 });

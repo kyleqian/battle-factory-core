@@ -3,6 +3,11 @@ import {
   type AncientPowerState,
 } from "./ancientPower.ts";
 import {
+  leechSeedAtAge,
+  type LeechSeedBody,
+  type LeechSeedState,
+} from "./leechSeed.ts";
+import {
   FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
   firePunchBurnFlames,
   firePunchParticlesInDrawOrder,
@@ -326,6 +331,16 @@ import {
   type MegaDrainAllocatorProfile,
   type MegaDrainState,
 } from "./megaDrain.ts";
+import {
+  gigaDrainAtAge,
+  type GigaDrainAllocatorProfile,
+  type GigaDrainState,
+} from "./gigaDrain.ts";
+import {
+  dreamEaterAtAge,
+  type DreamEaterAllocatorProfile,
+  type DreamEaterState,
+} from "./dreamEater.ts";
 import {
   reflectAtAge,
   type ReflectState,
@@ -930,6 +945,7 @@ export interface SceneOnPresentationBattler {
     | "ILLUMISE"
     | "MASQUERAIN"
     | "WAILMER"
+    | "WIGGLYTUFF"
     | "POLITOED"
     | "POLIWRATH"
     | "POLIWHIRL"
@@ -1491,6 +1507,27 @@ export interface SceneOnAbsorbConfig {
   }>;
 }
 
+/** Presentation-only source geometry for either retained Leech Seed body. */
+export interface SceneOnLeechSeedConfig {
+  readonly move: "LEECH_SEED";
+  readonly body: LeechSeedBody;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Main launch or residual absorption endpoint, both source Y_PIC_OFFSET. */
+  readonly effectCenter: Readonly<{ x: number; y: number }>;
+  /** Natural pre-script idle OAM offset retained until General's shake. */
+  readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
+  /** Measured natural occupied-slot topology; never controls outcomes. */
+  readonly allocatorProfile: Readonly<{
+    readonly seeds: readonly [number, number, number];
+    readonly hitsplat: number;
+    readonly orbs: readonly number[];
+    readonly stars: readonly number[];
+    readonly paletteController: number;
+  }>;
+}
+
 /**
  * Presentation-only geometry and allocator facts for `Move_MEGA_DRAIN`.
  * Battle resolution supplies all mutable battle outcomes outside this seam.
@@ -1506,6 +1543,30 @@ export interface SceneOnMegaDrainConfig {
   readonly absorptionCenter: Readonly<{ x: number; y: number }>;
   /** Fresh-probed occupied slots, retained as presentation topology only. */
   readonly allocatorProfile: Readonly<MegaDrainAllocatorProfile>;
+}
+
+/** Presentation-only geometry and allocator facts for `Move_GIGA_DRAIN`. */
+export interface SceneOnGigaDrainConfig {
+  readonly move: "GIGA_DRAIN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+  readonly absorptionCenter: Readonly<{ x: number; y: number }>;
+  readonly allocatorProfile: Readonly<GigaDrainAllocatorProfile>;
+}
+
+/** Presentation-only geometry and allocator facts for Move_DREAM_EATER. */
+export interface SceneOnDreamEaterConfig {
+  readonly move: "DREAM_EATER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+  readonly absorptionCenter: Readonly<{ x: number; y: number }>;
+  /** Settled species animation offset before Dream Eater's tasks take over. */
+  readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
+  readonly allocatorProfile: Readonly<DreamEaterAllocatorProfile>;
 }
 
 export interface SceneOnReflectConfig {
@@ -2908,7 +2969,10 @@ export type SceneOnMoveConfig =
   | SceneOnMoonlightConfig
   | SceneOnPresentConfig
   | SceneOnAbsorbConfig
+  | SceneOnLeechSeedConfig
   | SceneOnMegaDrainConfig
+  | SceneOnGigaDrainConfig
+  | SceneOnDreamEaterConfig
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
@@ -3066,7 +3130,10 @@ export type SceneOnMoveConfig =
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
+    | SceneOnLeechSeedConfig
     | SceneOnMegaDrainConfig
+    | SceneOnGigaDrainConfig
+    | SceneOnDreamEaterConfig
     | SceneOnBiteConfig
     = SceneOnMoveConfig,
 > {
@@ -3101,8 +3168,14 @@ export type SceneOnGlarePresentationState =
   SceneOnMovePresentationState<SceneOnGlareConfig>;
 export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
+export type SceneOnLeechSeedPresentationState =
+  SceneOnMovePresentationState<SceneOnLeechSeedConfig>;
 export type SceneOnMegaDrainPresentationState =
   SceneOnMovePresentationState<SceneOnMegaDrainConfig>;
+export type SceneOnGigaDrainPresentationState =
+  SceneOnMovePresentationState<SceneOnGigaDrainConfig>;
+export type SceneOnDreamEaterPresentationState =
+  SceneOnMovePresentationState<SceneOnDreamEaterConfig>;
 export type SceneOnMoonlightPresentationState =
   SceneOnMovePresentationState<SceneOnMoonlightConfig>;
 export type SceneOnPresentPresentationState =
@@ -4308,7 +4381,25 @@ export interface SceneOnAbsorbView extends AbsorbState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnLeechSeedView extends LeechSeedState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMegaDrainView extends MegaDrainState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnGigaDrainView extends GigaDrainState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnDreamEaterView extends DreamEaterState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -4501,7 +4592,7 @@ export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnMegaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
+    | SceneOnAbsorbConfig | SceneOnLeechSeedConfig | SceneOnMegaDrainConfig | SceneOnGigaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBarrierConfig
     | SceneOnHazeConfig
     | SceneOnBiteConfig
@@ -5005,6 +5096,29 @@ export function sceneOnAbsorbView(
   };
 }
 
+/** `age=0` is each retained body's first source-owned frame. */
+export function sceneOnLeechSeedView(
+  state: SceneOnMovePresentationState<SceneOnLeechSeedConfig>,
+): SceneOnLeechSeedView {
+  if (state.config.move !== "LEECH_SEED") {
+    throw new Error(`expected LEECH_SEED presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...leechSeedAtAge(
+      state.config.body,
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.effectCenter,
+      state.config.target.geometry.animationCenter,
+      state.config.target.geometry.battlePositionCenter,
+      state.config.targetRestOffset,
+    ),
+  };
+}
+
 /** `age` is relative to Move_MEGA_DRAIN's source `monbg ANIM_DEF_PARTNER`. */
 export function sceneOnMegaDrainView(
   state: SceneOnMovePresentationState<SceneOnMegaDrainConfig>,
@@ -5022,6 +5136,49 @@ export function sceneOnMegaDrainView(
       state.config.absorptionCenter,
       state.config.attacker.geometry.side,
       state.config.healingCenter,
+    ),
+  };
+}
+
+/** `age` is relative to Move_GIGA_DRAIN's source `monbg ANIM_DEF_PARTNER`. */
+export function sceneOnGigaDrainView(
+  state: SceneOnMovePresentationState<SceneOnGigaDrainConfig>,
+): SceneOnGigaDrainView {
+  if (state.config.move !== "GIGA_DRAIN") {
+    throw new Error(`expected GIGA_DRAIN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...gigaDrainAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.absorptionCenter,
+      state.config.attacker.geometry.side,
+      state.config.healingCenter,
+    ),
+  };
+}
+
+/** `age` is relative to Move_DREAM_EATER's first active source row. */
+export function sceneOnDreamEaterView(
+  state: SceneOnMovePresentationState<SceneOnDreamEaterConfig>,
+): SceneOnDreamEaterView {
+  if (state.config.move !== "DREAM_EATER") {
+    throw new Error(`expected DREAM_EATER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...dreamEaterAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.absorptionCenter,
+      state.config.attacker.geometry.side,
+      state.config.healingCenter,
+      state.config.targetRestOffset,
     ),
   };
 }

@@ -484,7 +484,7 @@ console.log(JSON.stringify({
   controls: {
     MOVE_ABSORB: "exact control only; no latch, timeline, or acceptance inheritance",
     MOVE_DREAM_EATER: "source-audit control only; remains independently unsupported",
-    MOVE_GIGA_DRAIN: "source-audit control only; remains independently unsupported",
+    MOVE_GIGA_DRAIN: "exact independent control; no latch, timeline, or acceptance inheritance",
   },
   latchRequirement: "No Absorb latch is inherited. Later-evidence hypotheses only: plain script-created sprite OAM/palette writes normally display RAM+1, AnimTask_ShakeMon normally displays RAM+1, and default visible events are one frame after RAM. After Scene-ON freshness is restored, measure every mechanism against Mega Drain's own bilateral banked change maps.",
 }, null, 2));

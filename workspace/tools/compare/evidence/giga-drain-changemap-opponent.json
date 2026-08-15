@@ -1,0 +1,3186 @@
+{
+  "schema": "giga-drain-normalized-change-map/v1",
+  "orientation": "opponent-front",
+  "sourceWindow": {
+    "startFrame": 214,
+    "endFrame": 443,
+    "frameCount": 230
+  },
+  "rows": [
+    {
+      "age": 0,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 0,
+      "scriptOffset": 0,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 1,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 3,
+      "scriptOffset": 3,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 2,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 3,
+      "scriptOffset": 3,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 3,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 3,
+      "scriptOffset": 3,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 4,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 6,
+      "scriptOffset": 6,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 5,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 6,
+      "scriptOffset": 6,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 6,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 6,
+      "scriptOffset": 6,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 7,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 9,
+      "scriptOffset": 9,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 8,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 9,
+      "scriptOffset": 9,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 9,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 9,
+      "scriptOffset": 9,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 10,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 11,
+      "scriptOffset": 11,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 11,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 11,
+      "scriptOffset": 11,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 12,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 11,
+      "scriptOffset": 11,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 13,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 14,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 15,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 16,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "a572140d7b86029221504e1b04399c3f70c92d4aff39c42e3b4cefbf3eb0a4b5",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 17,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "a572140d7b86029221504e1b04399c3f70c92d4aff39c42e3b4cefbf3eb0a4b5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 18,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "a572140d7b86029221504e1b04399c3f70c92d4aff39c42e3b4cefbf3eb0a4b5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 19,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "dca96c0ef5ffccdcfb604455221bb7854fc082095f6a6aa7ceff8527ed1eefb2",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 20,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "dca96c0ef5ffccdcfb604455221bb7854fc082095f6a6aa7ceff8527ed1eefb2",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 21,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "dca96c0ef5ffccdcfb604455221bb7854fc082095f6a6aa7ceff8527ed1eefb2",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 22,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "af36ce795dd54c77c7b2547514acbd153cbfa0ac00b857c394be95a9e735bce4",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 23,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "af36ce795dd54c77c7b2547514acbd153cbfa0ac00b857c394be95a9e735bce4",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 24,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "af36ce795dd54c77c7b2547514acbd153cbfa0ac00b857c394be95a9e735bce4",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 25,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "59cd5995097c8948d8e6ecf158b0f7c0ee33a2fabc2e8f29909fd45f83b8b53d",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 26,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "59cd5995097c8948d8e6ecf158b0f7c0ee33a2fabc2e8f29909fd45f83b8b53d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 27,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "59cd5995097c8948d8e6ecf158b0f7c0ee33a2fabc2e8f29909fd45f83b8b53d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 28,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "8f82a726f9bbbebec8a3ac72f2968cfede5788d18af08e3003032d318035c7fd",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 29,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "8f82a726f9bbbebec8a3ac72f2968cfede5788d18af08e3003032d318035c7fd",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 30,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "8f82a726f9bbbebec8a3ac72f2968cfede5788d18af08e3003032d318035c7fd",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 31,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 32,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 33,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 34,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 35,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 36,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 37,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 33,
+      "scriptOffset": 33,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 38,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": 55,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 39,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": 55,
+      "animScriptActive": true,
+      "sha256": "95fcfce2f5d6c5283c879bc18e261026402884d1f3bc2338d0a5a59678f20c14",
+      "changedPixels": 600,
+      "bounds": [
+        56,
+        72,
+        87,
+        103
+      ]
+    },
+    {
+      "age": 40,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": 55,
+      "animScriptActive": true,
+      "sha256": "95fcfce2f5d6c5283c879bc18e261026402884d1f3bc2338d0a5a59678f20c14",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 41,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": 55,
+      "animScriptActive": true,
+      "sha256": "95fcfce2f5d6c5283c879bc18e261026402884d1f3bc2338d0a5a59678f20c14",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 42,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "95fcfce2f5d6c5283c879bc18e261026402884d1f3bc2338d0a5a59678f20c14",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 43,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "95fcfce2f5d6c5283c879bc18e261026402884d1f3bc2338d0a5a59678f20c14",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 44,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "95fcfce2f5d6c5283c879bc18e261026402884d1f3bc2338d0a5a59678f20c14",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 45,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "a2229c6cf24c6448d542b1b2d515ba01b72ef89fd37f2c351e05e69633546b6d",
+      "changedPixels": 1476,
+      "bounds": [
+        44,
+        49,
+        99,
+        111
+      ]
+    },
+    {
+      "age": 46,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "a2229c6cf24c6448d542b1b2d515ba01b72ef89fd37f2c351e05e69633546b6d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 47,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "95fcfce2f5d6c5283c879bc18e261026402884d1f3bc2338d0a5a59678f20c14",
+      "changedPixels": 1476,
+      "bounds": [
+        44,
+        49,
+        99,
+        111
+      ]
+    },
+    {
+      "age": 48,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 600,
+      "bounds": [
+        56,
+        72,
+        87,
+        103
+      ]
+    },
+    {
+      "age": 49,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "b047330cce7beacdac147103a822bb893adbd344d238feb5ff29a58fdd964296",
+      "changedPixels": 1476,
+      "bounds": [
+        44,
+        49,
+        99,
+        111
+      ]
+    },
+    {
+      "age": 50,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": 72,
+      "animScriptActive": true,
+      "sha256": "b047330cce7beacdac147103a822bb893adbd344d238feb5ff29a58fdd964296",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 51,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 75,
+      "scriptOffset": 75,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 1476,
+      "bounds": [
+        44,
+        49,
+        99,
+        111
+      ]
+    },
+    {
+      "age": 52,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 75,
+      "scriptOffset": 75,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 53,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 75,
+      "scriptOffset": 75,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 54,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 75,
+      "scriptOffset": 75,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 55,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 75,
+      "scriptOffset": 75,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 56,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 51,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 57,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 51,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "6ce536af6debf67a1a9c8aa8a35eec97c3664124885dba33ab9cc610b29ceb62",
+      "changedPixels": 257,
+      "bounds": [
+        65,
+        62,
+        89,
+        111
+      ]
+    },
+    {
+      "age": 58,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 51,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "d708f70db01d3cc5317b14bd5dab595695dba10a3a9877f6b5b0084bb54adc40",
+      "changedPixels": 309,
+      "bounds": [
+        65,
+        57,
+        91,
+        111
+      ]
+    },
+    {
+      "age": 59,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 51,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "c6ef8c12aba762e8760a544ad92408b224cacf7d79d69b0e242f7044100c1321",
+      "changedPixels": 302,
+      "bounds": [
+        68,
+        54,
+        94,
+        111
+      ]
+    },
+    {
+      "age": 60,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 51,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "5aca0b98daecd4ed15ef3fe702d5140acc06615492e44b9e2c60983a66d783a0",
+      "changedPixels": 309,
+      "bounds": [
+        71,
+        49,
+        96,
+        111
+      ]
+    },
+    {
+      "age": 61,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 51,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "0786413a14dd558ade70000fb7528852d6925a7cf2133372f7b0c5f1b1a31429",
+      "changedPixels": 329,
+      "bounds": [
+        74,
+        44,
+        99,
+        111
+      ]
+    },
+    {
+      "age": 62,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 102,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "8fa19bc36f9d6836095f58aa843b67a9fd51dbd6b61f860368aec9b5f50d0e1e",
+      "changedPixels": 263,
+      "bounds": [
+        77,
+        44,
+        101,
+        111
+      ]
+    },
+    {
+      "age": 63,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 102,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "0b0c61984b93d39f4e6936fcedcef5332e2a7a038286cc90383babfc8f56c985",
+      "changedPixels": 506,
+      "bounds": [
+        61,
+        44,
+        105,
+        111
+      ]
+    },
+    {
+      "age": 64,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 102,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "1eac5541924ae578593059cc5af90267c7d8511886ea7ac07cd006c35300fe74",
+      "changedPixels": 501,
+      "bounds": [
+        61,
+        44,
+        108,
+        111
+      ]
+    },
+    {
+      "age": 65,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 102,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "1c3951b70e5f2145ecaad93c28a398427b5fc45da127430350676e091f32f7b9",
+      "changedPixels": 461,
+      "bounds": [
+        65,
+        71,
+        112,
+        111
+      ]
+    },
+    {
+      "age": 66,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 102,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "7b9ae73dcc9b5c0a0a84671f06cfc0812c33baae5c2ef0c26c523e69843d62fa",
+      "changedPixels": 431,
+      "bounds": [
+        70,
+        69,
+        116,
+        111
+      ]
+    },
+    {
+      "age": 67,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 102,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "2cd41ce522e65188fa5d72da126d2e2b11aa6a3990c9db43e923fbca585cafe6",
+      "changedPixels": 385,
+      "bounds": [
+        74,
+        29,
+        120,
+        111
+      ]
+    },
+    {
+      "age": 68,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 153,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "61364ec57529d490f718e02b467339c0509af7f524af62d60a8f88b489c59137",
+      "changedPixels": 414,
+      "bounds": [
+        78,
+        24,
+        124,
+        111
+      ]
+    },
+    {
+      "age": 69,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 153,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "d43fa4ca6c1ad05a375abe10a206cdf39ab4af49776d6b74c4f995cbccef9aec",
+      "changedPixels": 639,
+      "bounds": [
+        61,
+        21,
+        128,
+        111
+      ]
+    },
+    {
+      "age": 70,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 153,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "1a24910f0cfbc461e73ffbe053614e2d89ca1e4d2e4ed2b486250f4e538cff03",
+      "changedPixels": 700,
+      "bounds": [
+        61,
+        20,
+        132,
+        110
+      ]
+    },
+    {
+      "age": 71,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 153,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "791f8490b9f142524c8af23f1ca955af523e2ad617e2b740894d1f8d78b91647",
+      "changedPixels": 754,
+      "bounds": [
+        65,
+        18,
+        136,
+        108
+      ]
+    },
+    {
+      "age": 72,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 153,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "c928091d410569247a91d9ad2592081fb403885654a9fb43f0de4624fc9a7b28",
+      "changedPixels": 698,
+      "bounds": [
+        70,
+        16,
+        140,
+        107
+      ]
+    },
+    {
+      "age": 73,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 153,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "71093601b1ff110a535ece1d1bd993129f11d81f7ad567c1aedcf8a4c17f33ba",
+      "changedPixels": 678,
+      "bounds": [
+        74,
+        16,
+        143,
+        107
+      ]
+    },
+    {
+      "age": 74,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 204,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "b210dbba60ac0ed848e42ee512c89f24d1032313af8d9bcae60e35c44604b2f8",
+      "changedPixels": 691,
+      "bounds": [
+        78,
+        16,
+        147,
+        107
+      ]
+    },
+    {
+      "age": 75,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 204,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "4c9c6aefb60295e6c6aba91d7235ccea7ae1d636dee4b59c344eb5015e05059e",
+      "changedPixels": 921,
+      "bounds": [
+        61,
+        16,
+        151,
+        106
+      ]
+    },
+    {
+      "age": 76,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 204,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "9aea787d782a317804f5f03b392a38fc3c4e119cdf36eaef86a51e29104be098",
+      "changedPixels": 961,
+      "bounds": [
+        61,
+        16,
+        155,
+        106
+      ]
+    },
+    {
+      "age": 77,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 204,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "c8f5dcd12bb9f3d1d51eb30ed95171d4273da64681c78232053e9a0b642e6b6c",
+      "changedPixels": 870,
+      "bounds": [
+        65,
+        15,
+        159,
+        105
+      ]
+    },
+    {
+      "age": 78,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 204,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "1ad8a64eafed7df7798f7f0ec2449604fe40b5a4c2b0a836bb755ea5a92f5755",
+      "changedPixels": 748,
+      "bounds": [
+        70,
+        15,
+        163,
+        103
+      ]
+    },
+    {
+      "age": 79,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 204,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "618b704fa81dcf0bab3712eee81eb7d486ebcd10163a68c58706cb7f9a55c133",
+      "changedPixels": 731,
+      "bounds": [
+        74,
+        17,
+        167,
+        103
+      ]
+    },
+    {
+      "age": 80,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 255,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "eea57cb175098a67f4be564cd5c0b5bb391db2d162e103f27102e0fbc9a02e82",
+      "changedPixels": 735,
+      "bounds": [
+        78,
+        17,
+        171,
+        102
+      ]
+    },
+    {
+      "age": 81,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 255,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "b5e037bb67bec64c35733e7a2cc61b75add17777b2ff07ced16ca5fc298eeac0",
+      "changedPixels": 986,
+      "bounds": [
+        69,
+        18,
+        174,
+        108
+      ]
+    },
+    {
+      "age": 82,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 255,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "652a004149f03f6736b41588a5de60980afde16bed1be77982de391b214de997",
+      "changedPixels": 1014,
+      "bounds": [
+        69,
+        21,
+        178,
+        108
+      ]
+    },
+    {
+      "age": 83,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 255,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "9a8a974071b57673fb76ab44042225490051a7572a8deff3a68aa974b09a3deb",
+      "changedPixels": 960,
+      "bounds": [
+        72,
+        23,
+        178,
+        107
+      ]
+    },
+    {
+      "age": 84,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 255,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "611318aed7c70b177ca6104ec90f2617d4d010cb546223e4b1199e80418f3ae5",
+      "changedPixels": 988,
+      "bounds": [
+        75,
+        25,
+        163,
+        111
+      ]
+    },
+    {
+      "age": 85,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 255,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "66e013ef4813aacd0924c8105c048fb6f2aaa9c9daeb8284507de115debc20ee",
+      "changedPixels": 968,
+      "bounds": [
+        78,
+        27,
+        167,
+        111
+      ]
+    },
+    {
+      "age": 86,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 306,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "f7a6c22ab5f4febe0ab66a53b1431727750555bf6053ead66a5c58202532d8df",
+      "changedPixels": 920,
+      "bounds": [
+        81,
+        29,
+        171,
+        111
+      ]
+    },
+    {
+      "age": 87,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 306,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "95c00755c540b072393c4b8de55fb07627e2e169e8fd66449fcb53fb2c34f433",
+      "changedPixels": 1155,
+      "bounds": [
+        61,
+        29,
+        174,
+        111
+      ]
+    },
+    {
+      "age": 88,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 306,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "5e242c647277237a051e7154ef7245e3ec707b83d4e428cd8a4c39e34e48461b",
+      "changedPixels": 1176,
+      "bounds": [
+        61,
+        30,
+        178,
+        108
+      ]
+    },
+    {
+      "age": 89,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 306,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "85af4bb3e868b239c03c9ba4fdd6b8308fa855fa20cc606bfdb24e6f7a87dab0",
+      "changedPixels": 1084,
+      "bounds": [
+        65,
+        32,
+        178,
+        107
+      ]
+    },
+    {
+      "age": 90,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 306,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "a2166926e5950fc8a01efb5b314d16753f22323b398edd54da4c5f76d016454b",
+      "changedPixels": 1007,
+      "bounds": [
+        70,
+        33,
+        173,
+        107
+      ]
+    },
+    {
+      "age": 91,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 306,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "e2bbfe6b79f53328bd12f349b13c7d26d61a5944f9978203bc0f4ad94d6f644d",
+      "changedPixels": 959,
+      "bounds": [
+        74,
+        36,
+        176,
+        107
+      ]
+    },
+    {
+      "age": 92,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 357,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "6d46d66d288f69113587011e1b61d78ff9daf44d18787e02512985e84ca79a6f",
+      "changedPixels": 935,
+      "bounds": [
+        78,
+        38,
+        176,
+        107
+      ]
+    },
+    {
+      "age": 93,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 357,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "dbd18ba96f9ab7ca11da6e8085b68a717507fa12cdc32728353db9334e960112",
+      "changedPixels": 1088,
+      "bounds": [
+        61,
+        40,
+        173,
+        111
+      ]
+    },
+    {
+      "age": 94,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 357,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "ab7d7e8ebf1594773dd665c896d14c91b71ce5cae4c41743d2bdb2384de55e5c",
+      "changedPixels": 975,
+      "bounds": [
+        61,
+        41,
+        177,
+        111
+      ]
+    },
+    {
+      "age": 95,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 357,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "e521943d9c70394abe69060d3738cc1f2ce1ebf02825235dad92381710dc001b",
+      "changedPixels": 904,
+      "bounds": [
+        65,
+        32,
+        177,
+        111
+      ]
+    },
+    {
+      "age": 96,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 357,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "fe49682419ccc4924be27366766d3a048f315687f8e6864b8d4ad019f7a5fb51",
+      "changedPixels": 837,
+      "bounds": [
+        70,
+        28,
+        176,
+        111
+      ]
+    },
+    {
+      "age": 97,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 357,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "90254e244790b972a1c042914acba353f1fad845fc27e914b6baaf1697ceaace",
+      "changedPixels": 862,
+      "bounds": [
+        74,
+        26,
+        167,
+        111
+      ]
+    },
+    {
+      "age": 98,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 408,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "c619065c5b7c1fc1bc9cb991364ddb1b6894fd59236ad2a340447f4718f60954",
+      "changedPixels": 845,
+      "bounds": [
+        78,
+        23,
+        171,
+        111
+      ]
+    },
+    {
+      "age": 99,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 408,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "168af4f22083704b89e94b188448d2ad57d0f8130e7cc6801b01ade6a2dfd682",
+      "changedPixels": 924,
+      "bounds": [
+        65,
+        22,
+        174,
+        111
+      ]
+    },
+    {
+      "age": 100,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 408,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "c238b5592a7495042f47c76edbd1841d65cc12ddd18d7c596572dbb73ad1c3ea",
+      "changedPixels": 931,
+      "bounds": [
+        65,
+        21,
+        178,
+        111
+      ]
+    },
+    {
+      "age": 101,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 408,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "3f6f5b0ef291bb170ae78fb1e1be87b8f5a5effaf629be1ead9e8b300a3a8098",
+      "changedPixels": 809,
+      "bounds": [
+        68,
+        20,
+        178,
+        111
+      ]
+    },
+    {
+      "age": 102,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 408,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "cd5b049e4b34f6cba7b7a19e349d451da428ed698c7ff4312b324eb386e006b7",
+      "changedPixels": 783,
+      "bounds": [
+        71,
+        20,
+        178,
+        111
+      ]
+    },
+    {
+      "age": 103,
+      "scriptOwner": "GigaDrainAbsorbEffect",
+      "scriptOwnerOffset": 408,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "a50f876b01de5527b8013e395ebcb17b6d5dcc86ce1e81e5ee742e06af108af4",
+      "changedPixels": 723,
+      "bounds": [
+        74,
+        20,
+        167,
+        111
+      ]
+    },
+    {
+      "age": 104,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "7508733c765aacfed5baea6f939fdc3c588c733e7580902deaa058caa5406950",
+      "changedPixels": 702,
+      "bounds": [
+        77,
+        22,
+        171,
+        111
+      ]
+    },
+    {
+      "age": 105,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "c38efe13ccbeb92e5ce5df51ed095f847e5651fb4e74e0a6c5cf3e9019855f61",
+      "changedPixels": 713,
+      "bounds": [
+        80,
+        22,
+        174,
+        111
+      ]
+    },
+    {
+      "age": 106,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "95a7c6a6ec5ccf906c8a0e0c69cac681fe0d66fcd773071c83332b0b6bb29576",
+      "changedPixels": 662,
+      "bounds": [
+        83,
+        24,
+        178,
+        111
+      ]
+    },
+    {
+      "age": 107,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "fb5e00138b4d417dbc258b2304a5df4045b4bf67d98bf06fbccb5d6eb9e58fc9",
+      "changedPixels": 609,
+      "bounds": [
+        87,
+        27,
+        178,
+        111
+      ]
+    },
+    {
+      "age": 108,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "8edd69b34be1abc46bc0b61d2f384aac088ea6cd7c254be9acc73a1f68cccb53",
+      "changedPixels": 587,
+      "bounds": [
+        90,
+        29,
+        171,
+        111
+      ]
+    },
+    {
+      "age": 109,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "02c3b670b2d230b57511a1b982c62e12ccad14701cd659e8639dab7a0194361f",
+      "changedPixels": 520,
+      "bounds": [
+        94,
+        32,
+        173,
+        111
+      ]
+    },
+    {
+      "age": 110,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "93fd8d1b758384d670940cee41831da0458f077623f4a3c0a03e44c1cff47d04",
+      "changedPixels": 510,
+      "bounds": [
+        97,
+        35,
+        176,
+        111
+      ]
+    },
+    {
+      "age": 111,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "aedbe23cd05be1b31f3b45d4bbcc99508acd7148b60701f5289579af2579c4c7",
+      "changedPixels": 446,
+      "bounds": [
+        100,
+        38,
+        176,
+        111
+      ]
+    },
+    {
+      "age": 112,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "8759af58cb2f10c29718c7cf62cffe6b51f3bacaafec96ad8be4eff0503911fa",
+      "changedPixels": 389,
+      "bounds": [
+        103,
+        39,
+        178,
+        110
+      ]
+    },
+    {
+      "age": 113,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "f1f82c0d8ae969d0d40b3dc315f3ea81160928bccd214563d89ef9ddfda02597",
+      "changedPixels": 354,
+      "bounds": [
+        106,
+        37,
+        178,
+        100
+      ]
+    },
+    {
+      "age": 114,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "2169d18422c67ac64530f907aabad3f626dcb84f5355ea5b2461e15fe23ac692",
+      "changedPixels": 295,
+      "bounds": [
+        110,
+        36,
+        178,
+        98
+      ]
+    },
+    {
+      "age": 115,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "72dd9c9e84bbd40cae39d9673caa55c21730c88db5c23e756f4e9bab183a4995",
+      "changedPixels": 264,
+      "bounds": [
+        112,
+        36,
+        173,
+        97
+      ]
+    },
+    {
+      "age": 116,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "4519fa29af1b285afb91662f47145fd8b0183bf8b74bedbe1b55122d571e5492",
+      "changedPixels": 254,
+      "bounds": [
+        116,
+        36,
+        176,
+        93
+      ]
+    },
+    {
+      "age": 117,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "c4e7d02d4acd0749febadd671b40a715790c78a3e085806f4c7cd70dbed60f83",
+      "changedPixels": 219,
+      "bounds": [
+        119,
+        36,
+        176,
+        71
+      ]
+    },
+    {
+      "age": 118,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "b7579e862a3f0ac627164c1a905d95e6e5c92f1d0e07f7013138463e2fab43da",
+      "changedPixels": 190,
+      "bounds": [
+        123,
+        35,
+        177,
+        70
+      ]
+    },
+    {
+      "age": 119,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "84d7a549662bbfb426fbcbe168ae913bcbfc8afeec467d16ee7ee56450885bb8",
+      "changedPixels": 152,
+      "bounds": [
+        126,
+        34,
+        178,
+        67
+      ]
+    },
+    {
+      "age": 120,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "9f70b47a81b3d390aca23382ce4194eee20bd005c0739779a2ed919669ed64ea",
+      "changedPixels": 145,
+      "bounds": [
+        129,
+        34,
+        178,
+        73
+      ]
+    },
+    {
+      "age": 121,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "860fd112a0019ab14ef96a5670fe8ed8cf4ced7f8ccfa233383c5f07fadd4fd3",
+      "changedPixels": 147,
+      "bounds": [
+        132,
+        35,
+        167,
+        73
+      ]
+    },
+    {
+      "age": 122,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "82212b8d9bb17157384be551f78dbe473cf7a77af0b2415edc04eb009d116c13",
+      "changedPixels": 152,
+      "bounds": [
+        135,
+        35,
+        171,
+        73
+      ]
+    },
+    {
+      "age": 123,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "5fa1037a67ce40184d201ff67db166504aedbf5e4ea6ae17a01903fea60ee849",
+      "changedPixels": 135,
+      "bounds": [
+        138,
+        35,
+        174,
+        73
+      ]
+    },
+    {
+      "age": 124,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "b9a52aa7af11cefc7f68781a18897e9093d29f7a8f55cdc4ff5874f7d6e6416f",
+      "changedPixels": 120,
+      "bounds": [
+        142,
+        37,
+        178,
+        73
+      ]
+    },
+    {
+      "age": 125,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "e09643761cf1177c9d7510ae1f007b67c32157ff92241ff7149c479a50e3c774",
+      "changedPixels": 79,
+      "bounds": [
+        145,
+        37,
+        178,
+        71
+      ]
+    },
+    {
+      "age": 126,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "12e219a88136ca60491070a1bb20ea483858e53d0d25c6caa0add44bba15c9b1",
+      "changedPixels": 75,
+      "bounds": [
+        148,
+        38,
+        178,
+        69
+      ]
+    },
+    {
+      "age": 127,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "7ebb7b87e24088d8af693f1fb170fdf826c6f7ca09c6ce87a6cdddde56d80d8a",
+      "changedPixels": 53,
+      "bounds": [
+        152,
+        39,
+        167,
+        65
+      ]
+    },
+    {
+      "age": 128,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "f9cf7e7bea9bc319f55b3a9d9f8015d8bb2821eb230f36c934255cc3609c2408",
+      "changedPixels": 49,
+      "bounds": [
+        155,
+        39,
+        169,
+        62
+      ]
+    },
+    {
+      "age": 129,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "82599029fcf21210a01d72f01163d46ef21aecbe3c89d6386507d60b0817d612",
+      "changedPixels": 42,
+      "bounds": [
+        158,
+        41,
+        172,
+        58
+      ]
+    },
+    {
+      "age": 130,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "9909c2924a424877faa0297564c282c28423cac5a78f604acf31952a40a536bf",
+      "changedPixels": 38,
+      "bounds": [
+        161,
+        41,
+        174,
+        56
+      ]
+    },
+    {
+      "age": 131,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "35822aa30e4f99f27d76a7e16dfb3ebf48944ac6ea9fdc7ce49106461e856f5d",
+      "changedPixels": 36,
+      "bounds": [
+        164,
+        42,
+        176,
+        52
+      ]
+    },
+    {
+      "age": 132,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "9a4bfb93396ca28445b366e04014e1336ab094db9b680c6fb53300ec9a065e40",
+      "changedPixels": 26,
+      "bounds": [
+        167,
+        44,
+        176,
+        50
+      ]
+    },
+    {
+      "age": 133,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 80,
+      "scriptOffset": 80,
+      "animScriptActive": true,
+      "sha256": "1fb600b656d96065713968192d2969188aca329ff9652c5b7bab95a82e13e3c6",
+      "changedPixels": 18,
+      "bounds": [
+        171,
+        46,
+        176,
+        48
+      ]
+    },
+    {
+      "age": 134,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 9,
+      "bounds": [
+        174,
+        46,
+        176,
+        48
+      ]
+    },
+    {
+      "age": 135,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 136,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 137,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 138,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 139,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 140,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 141,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 142,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 143,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 144,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 145,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 146,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 147,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 148,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 149,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 150,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 83,
+      "scriptOffset": 83,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 151,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 152,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "ee1b37dbd18e49d82b623237233accaa8dda4abb9ece0e9cc5563fa5b0c311bb",
+      "changedPixels": 31,
+      "bounds": [
+        172,
+        37,
+        180,
+        49
+      ]
+    },
+    {
+      "age": 153,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "374455f8a44c1413bfa676c344841e5c24e97364b321e52324e7649ca7ba15b0",
+      "changedPixels": 44,
+      "bounds": [
+        168,
+        35,
+        183,
+        51
+      ]
+    },
+    {
+      "age": 154,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "374455f8a44c1413bfa676c344841e5c24e97364b321e52324e7649ca7ba15b0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 155,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "5d75ee8712200964adfc4bbdc5ebac42a8d0dc2d901a825562e00e4117698e7f",
+      "changedPixels": 111,
+      "bounds": [
+        163,
+        30,
+        187,
+        55
+      ]
+    },
+    {
+      "age": 156,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "5d75ee8712200964adfc4bbdc5ebac42a8d0dc2d901a825562e00e4117698e7f",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 157,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "0dcdb322854242ad592b966ee68f4ab2b14f326052ee503b3c7b1ee0f7d4f446",
+      "changedPixels": 169,
+      "bounds": [
+        161,
+        28,
+        190,
+        57
+      ]
+    },
+    {
+      "age": 158,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "0dcdb322854242ad592b966ee68f4ab2b14f326052ee503b3c7b1ee0f7d4f446",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 159,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "0dcdb322854242ad592b966ee68f4ab2b14f326052ee503b3c7b1ee0f7d4f446",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 160,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "8906c6e9003ed14fcdb3cba4af20c8b80c541651d58e3597fb495c72bd3b32de",
+      "changedPixels": 194,
+      "bounds": [
+        163,
+        28,
+        190,
+        57
+      ]
+    },
+    {
+      "age": 161,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "1f771f7449fb8b21a3afdcbaa0220071b9e5f306cae4b5a3cab9ce1468c286e5",
+      "changedPixels": 33,
+      "bounds": [
+        187,
+        52,
+        195,
+        64
+      ]
+    },
+    {
+      "age": 162,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "12fdcc689b6f02201b856a16cad1fdeb958a4cd90681b7bf6e15540d802703bc",
+      "changedPixels": 44,
+      "bounds": [
+        183,
+        50,
+        198,
+        66
+      ]
+    },
+    {
+      "age": 163,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "12fdcc689b6f02201b856a16cad1fdeb958a4cd90681b7bf6e15540d802703bc",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 164,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "484e5147b7a91b1b774844ee4e9f8f537fceeffb0e38277281e73a1a06e382dd",
+      "changedPixels": 111,
+      "bounds": [
+        178,
+        45,
+        202,
+        70
+      ]
+    },
+    {
+      "age": 165,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "ee612c2c12d3f20bd95106c970f23871b840a9b66d3801b35624715222dae5a0",
+      "changedPixels": 188,
+      "bounds": [
+        161,
+        31,
+        189,
+        54
+      ]
+    },
+    {
+      "age": 166,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "fe1cc3b98545adc1c5d15a6af3f3f6509064679d582a591be27139d9d71901ba",
+      "changedPixels": 169,
+      "bounds": [
+        176,
+        43,
+        205,
+        72
+      ]
+    },
+    {
+      "age": 167,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "fe1cc3b98545adc1c5d15a6af3f3f6509064679d582a591be27139d9d71901ba",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 168,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "ce481a5b2db2f022ca76f5d075701d10724a0ff6c6c862a164f237824f0e847f",
+      "changedPixels": 148,
+      "bounds": [
+        168,
+        33,
+        187,
+        51
+      ]
+    },
+    {
+      "age": 169,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "db6286fd4ea2e485e49e0a32f92a88135716816eae6dd8cb6a47080918f91f18",
+      "changedPixels": 194,
+      "bounds": [
+        178,
+        43,
+        205,
+        72
+      ]
+    },
+    {
+      "age": 170,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "6e4568370e6222f27b7e2f96f0eb7a0ca7734e2519523074f5d044dec7b6a8f5",
+      "changedPixels": 86,
+      "bounds": [
+        171,
+        27,
+        195,
+        50
+      ]
+    },
+    {
+      "age": 171,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "676bc5fa6c82f5e19ba53d9690855e5d6c1d27175aa81ef81f6ed14d79bf4f6f",
+      "changedPixels": 44,
+      "bounds": [
+        183,
+        25,
+        198,
+        41
+      ]
+    },
+    {
+      "age": 172,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "676bc5fa6c82f5e19ba53d9690855e5d6c1d27175aa81ef81f6ed14d79bf4f6f",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 173,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "a361b750ef2d60f40b312dbce5dd56d7bbba1384d37314c9e50775966a9aecba",
+      "changedPixels": 142,
+      "bounds": [
+        172,
+        20,
+        202,
+        49
+      ]
+    },
+    {
+      "age": 174,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "e2cd67c3b366daf7d334f517acd81050278c874988749580af8b9cdd91db3291",
+      "changedPixels": 188,
+      "bounds": [
+        176,
+        46,
+        204,
+        69
+      ]
+    },
+    {
+      "age": 175,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "8f9b0ab3e317e3415cf9083893b1a95c94494ba4b58335c3d2fc5dabd716f9a9",
+      "changedPixels": 169,
+      "bounds": [
+        176,
+        18,
+        205,
+        47
+      ]
+    },
+    {
+      "age": 176,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "8f9b0ab3e317e3415cf9083893b1a95c94494ba4b58335c3d2fc5dabd716f9a9",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 177,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "e41dcfd57010a5dc61ac4876c749a4deaaad72af8f040c63980ebbdc03dabd99",
+      "changedPixels": 148,
+      "bounds": [
+        183,
+        48,
+        202,
+        66
+      ]
+    },
+    {
+      "age": 178,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "0f83e51fc764d1b48467d19272635e3d5bc53cb48ec7b46df6d2f5372d50bcc5",
+      "changedPixels": 194,
+      "bounds": [
+        178,
+        18,
+        205,
+        47
+      ]
+    },
+    {
+      "age": 179,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "e01456256e198d2e8978b59a1c0a15c7dfa5ad0b60f52ced060ef54c881274d2",
+      "changedPixels": 88,
+      "bounds": [
+        162,
+        37,
+        202,
+        65
+      ]
+    },
+    {
+      "age": 180,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "301b96202de55274b999c1388f7dca8f4c49dd135f6dfdd7edfd1187a5618f34",
+      "changedPixels": 44,
+      "bounds": [
+        158,
+        35,
+        173,
+        51
+      ]
+    },
+    {
+      "age": 181,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "301b96202de55274b999c1388f7dca8f4c49dd135f6dfdd7edfd1187a5618f34",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 182,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "565865f61f53857da566eff248e5190d3268b46af906da38315d8bb8d1a9e884",
+      "changedPixels": 144,
+      "bounds": [
+        153,
+        30,
+        195,
+        64
+      ]
+    },
+    {
+      "age": 183,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "66f12cc84c891be71925ae19187525fe9577b2b85a89c43c901b180fae3f5451",
+      "changedPixels": 188,
+      "bounds": [
+        176,
+        21,
+        204,
+        44
+      ]
+    },
+    {
+      "age": 184,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "1b6ad3be876e98840e5823717558e9d0b13cdb4d57ccf231f08be40271f1d8b7",
+      "changedPixels": 169,
+      "bounds": [
+        151,
+        28,
+        180,
+        57
+      ]
+    },
+    {
+      "age": 185,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "1b6ad3be876e98840e5823717558e9d0b13cdb4d57ccf231f08be40271f1d8b7",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 186,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "scriptOffset": null,
+      "animScriptActive": true,
+      "sha256": "301db73d5c4aa2fd87564e2fd270acbfc59a34b52582c19537552e2f866245c6",
+      "changedPixels": 148,
+      "bounds": [
+        183,
+        23,
+        202,
+        41
+      ]
+    },
+    {
+      "age": 187,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "0d38efe5e4d4a658a97d6a023076eb077e88b635351fb9c2a098e8a662020ed8",
+      "changedPixels": 194,
+      "bounds": [
+        153,
+        28,
+        180,
+        57
+      ]
+    },
+    {
+      "age": 188,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "24d43772c5bdf55dff939f86e86c4a4a7bd7179f9b80a9a63d5f9aa7294b4e45",
+      "changedPixels": 55,
+      "bounds": [
+        186,
+        25,
+        202,
+        40
+      ]
+    },
+    {
+      "age": 189,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "24d43772c5bdf55dff939f86e86c4a4a7bd7179f9b80a9a63d5f9aa7294b4e45",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 190,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "24d43772c5bdf55dff939f86e86c4a4a7bd7179f9b80a9a63d5f9aa7294b4e45",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 191,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "2e0ef284ef157710f40be41f19ba09829d120d22bc5e7795879b1c31d09c4f2e",
+      "changedPixels": 33,
+      "bounds": [
+        187,
+        27,
+        195,
+        39
+      ]
+    },
+    {
+      "age": 192,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "a117d376d70c21406bdf007837b3240fa99e50fd4aa1ae195f2ac0600fdb4856",
+      "changedPixels": 188,
+      "bounds": [
+        151,
+        31,
+        179,
+        54
+      ]
+    },
+    {
+      "age": 193,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "a117d376d70c21406bdf007837b3240fa99e50fd4aa1ae195f2ac0600fdb4856",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 194,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "a117d376d70c21406bdf007837b3240fa99e50fd4aa1ae195f2ac0600fdb4856",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 195,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "76d8559bd254ddcd8bd57a31dfa8f0a85ae622cce4435f0a42b750ac4a66a9bf",
+      "changedPixels": 148,
+      "bounds": [
+        158,
+        33,
+        177,
+        51
+      ]
+    },
+    {
+      "age": 196,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "76d8559bd254ddcd8bd57a31dfa8f0a85ae622cce4435f0a42b750ac4a66a9bf",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 197,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "40c86581fbcbd6dfaa75b8b2065ee4620a8dbc9ddcf89086ab0693f5d3fa5fd9",
+      "changedPixels": 55,
+      "bounds": [
+        161,
+        35,
+        177,
+        50
+      ]
+    },
+    {
+      "age": 198,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "40c86581fbcbd6dfaa75b8b2065ee4620a8dbc9ddcf89086ab0693f5d3fa5fd9",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 199,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 88,
+      "scriptOffset": 88,
+      "animScriptActive": true,
+      "sha256": "40c86581fbcbd6dfaa75b8b2065ee4620a8dbc9ddcf89086ab0693f5d3fa5fd9",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 200,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 33,
+      "bounds": [
+        162,
+        37,
+        170,
+        49
+      ]
+    },
+    {
+      "age": 201,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 202,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "46b0220bf3c72c7c021cf0e3d4c8f50f4cdb4e9e10092b6e52196eb68b1789c6",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 203,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "8f82a726f9bbbebec8a3ac72f2968cfede5788d18af08e3003032d318035c7fd",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 204,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "8f82a726f9bbbebec8a3ac72f2968cfede5788d18af08e3003032d318035c7fd",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 205,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "8f82a726f9bbbebec8a3ac72f2968cfede5788d18af08e3003032d318035c7fd",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 206,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "59cd5995097c8948d8e6ecf158b0f7c0ee33a2fabc2e8f29909fd45f83b8b53d",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 207,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "59cd5995097c8948d8e6ecf158b0f7c0ee33a2fabc2e8f29909fd45f83b8b53d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 208,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "59cd5995097c8948d8e6ecf158b0f7c0ee33a2fabc2e8f29909fd45f83b8b53d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 209,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "af36ce795dd54c77c7b2547514acbd153cbfa0ac00b857c394be95a9e735bce4",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 210,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "af36ce795dd54c77c7b2547514acbd153cbfa0ac00b857c394be95a9e735bce4",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 211,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "af36ce795dd54c77c7b2547514acbd153cbfa0ac00b857c394be95a9e735bce4",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 212,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "dca96c0ef5ffccdcfb604455221bb7854fc082095f6a6aa7ceff8527ed1eefb2",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 213,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "dca96c0ef5ffccdcfb604455221bb7854fc082095f6a6aa7ceff8527ed1eefb2",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 214,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "dca96c0ef5ffccdcfb604455221bb7854fc082095f6a6aa7ceff8527ed1eefb2",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 215,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "a572140d7b86029221504e1b04399c3f70c92d4aff39c42e3b4cefbf3eb0a4b5",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 216,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "a572140d7b86029221504e1b04399c3f70c92d4aff39c42e3b4cefbf3eb0a4b5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 217,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "a572140d7b86029221504e1b04399c3f70c92d4aff39c42e3b4cefbf3eb0a4b5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 218,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 18154,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 219,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 220,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 221,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 222,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 223,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 224,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 106,
+      "scriptOffset": 106,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 225,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 110,
+      "scriptOffset": 110,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 226,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 110,
+      "scriptOffset": 110,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 227,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 110,
+      "scriptOffset": 110,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 228,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 110,
+      "scriptOffset": 110,
+      "animScriptActive": true,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 229,
+      "scriptOwner": "Move_GIGA_DRAIN",
+      "scriptOwnerOffset": 110,
+      "scriptOffset": 110,
+      "animScriptActive": false,
+      "sha256": "47e49d27a9e9eb34b59a149646fc383e3cf71f8d89c3016b8865931d64d9ddf5",
+      "changedPixels": 0,
+      "bounds": null
+    }
+  ],
+  "events": {
+    "sourceOwners": [
+      {
+        "startAge": 0,
+        "endAge": 55,
+        "owner": "Move_GIGA_DRAIN"
+      },
+      {
+        "startAge": 56,
+        "endAge": 103,
+        "owner": "GigaDrainAbsorbEffect"
+      },
+      {
+        "startAge": 104,
+        "endAge": 150,
+        "owner": "Move_GIGA_DRAIN"
+      },
+      {
+        "startAge": 151,
+        "endAge": 186,
+        "owner": "HealingEffect"
+      },
+      {
+        "startAge": 187,
+        "endAge": 229,
+        "owner": "Move_GIGA_DRAIN"
+      }
+    ],
+    "spriteStarts": {
+      "impactAnimation0": [
+        38
+      ],
+      "absorptionOrbs": [
+        56
+      ],
+      "healingStars": [
+        151
+      ],
+      "simplePaletteBlend": [
+        13,
+        200
+      ]
+    },
+    "taskStarts": {
+      "shakeMon": [
+        42
+      ],
+      "monbg": [
+        10
+      ],
+      "clearMonbg": [
+        225
+      ]
+    },
+    "targetSoftwareTransitions": [
+      44,
+      46,
+      48,
+      50,
+      229
+    ],
+    "targetBackground": {
+      "bank": "BG2",
+      "sourceTransitions": [
+        10,
+        44,
+        46,
+        48,
+        50,
+        228
+      ],
+      "hardwareTransitions": [
+        11,
+        45,
+        47,
+        49,
+        51,
+        229
+      ]
+    },
+    "palette": {
+      "fadedTransitions": [
+        1,
+        4,
+        7,
+        10,
+        15,
+        18,
+        21,
+        24,
+        27,
+        30,
+        202,
+        205,
+        208,
+        211,
+        214,
+        217
+      ],
+      "hardwareTransitions": [
+        2,
+        5,
+        8,
+        10,
+        16,
+        19,
+        22,
+        25,
+        28,
+        31,
+        203,
+        206,
+        209,
+        212,
+        215,
+        218
+      ]
+    },
+    "blend": {
+      "bldcntTransitions": [
+        13,
+        225
+      ],
+      "bldalphaTransitions": [
+        13,
+        225
+      ],
+      "bldyTransitions": []
+    },
+    "audioRestarts": {
+      "se1": [
+        {
+          "age": 38,
+          "identity": "se_m_absorb",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 56,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 62,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 68,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 74,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 80,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 86,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 92,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 98,
+          "identity": "se_m_giga_drain",
+          "panX": [
+            -63,
+            63,
+            0,
+            0
+          ]
+        },
+        {
+          "age": 151,
+          "identity": "se_m_absorb_2",
+          "panX": [
+            63,
+            63,
+            0,
+            0
+          ]
+        }
+      ],
+      "se2": []
+    }
+  }
+}
