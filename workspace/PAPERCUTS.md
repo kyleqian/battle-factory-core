@@ -1058,9 +1058,15 @@ current app stage should be rejected before replay.
   when the directory itself is missing). Cost the 2026-08-14 side receipt
   worker an 18-minute full-suite run that ended red for reasons unrelated
   to its change.
-- **Hits:** 5 (2026-08-14: also the CGB4-gating salvage verification, the
+- **Hits:** 7 (2026-08-14: also the CGB4-gating salvage verification, the
   Brain-intro scout, and the #87 round-15 + walk-up-scoping side workers —
-  each ~2-5 min via the copy-in or rebuild workaround).
+  each ~2-5 min via the copy-in or rebuild workaround; 2026-08-14 night:
+  the #90-triage and walk-up-extraction side workers, ~2 min each).
+- **FIXED (2026-08-15 supervisor):** `tools/run-subagent.sh`'s worktree
+  setup now copies the main tree's artifact into every fresh worktree
+  after `npm install` (skips silently if the main tree has none). First
+  worker launch after this change verifies; delete this entry once a
+  clean side-lane full suite confirms it.
 - **Cost each:** ~20 min first hit (run + triage); ~3-5 min once known.
 - **Workaround:** cheapest and now proven twice: copy the main checkout's
   artifact in (`mkdir -p artifacts/wasm && cp <main>/artifacts/wasm/
