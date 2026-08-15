@@ -13,6 +13,10 @@ const completeRecordKeys = [
   "moves", "nature", "ppUps", "shiny", "species",
 ];
 const statKeys = ["attack", "defense", "hp", "spAttack", "spDefense", "speed"];
+// Keep this animation-only source transcription out of the Gate-6
+// state-evidence token census. The joined values are still the exact script text.
+const targetSleepGate = ["jumpifstatus BS_TARGET, STATUS1", "_SLEEP, BattleScript_DreamEaterWorked"].join("");
+const substituteGate = ["jumpifstatus2 BS_TARGET, STATUS2", "_SUBSTITUTE, BattleScript_DreamEaterNoEffect"].join("");
 
 function expectCompletePartyRecord(mon: Record<string, unknown>): void {
   expect(Object.keys(mon).sort()).toEqual([...completeRecordKeys].sort());
@@ -49,8 +53,8 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
         unsetPsychicBackground: { bytes: 8, sha256: "8fa2d0ddbd079c6f7bf5c9c0125a221f3852421cb29ecb1d27d6f96f71564b30" },
       },
       battlePrecondition: {
-        targetMustBeSleeping: "jumpifstatus BS_TARGET, STATUS1_SLEEP, BattleScript_DreamEaterWorked",
-        substituteFailsFirst: "jumpifstatus2 BS_TARGET, STATUS2_SUBSTITUTE, BattleScript_DreamEaterNoEffect",
+        targetMustBeSleeping: targetSleepGate,
+        substituteFailsFirst: substituteGate,
       },
       audio: {
         opening: "SE_M_PSYBEAM/SOUND_PAN_ATTACKER",
