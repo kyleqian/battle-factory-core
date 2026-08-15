@@ -25,6 +25,8 @@ pub mod battle_script_doubledamageifdamaged;
 pub mod battle_script_doubledamageifdamaged_vectors_gen;
 pub mod battle_script_friendshiptodamage;
 pub mod battle_script_friendshiptodamage_vectors_gen;
+pub mod battle_script_furycutter;
+pub mod battle_script_furycutter_vectors_gen;
 pub mod battle_script_gender;
 pub mod battle_script_gender_vectors_gen;
 pub mod battle_script_givepaydaymoney;
