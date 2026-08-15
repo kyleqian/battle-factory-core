@@ -59,6 +59,8 @@ pub mod battle_script_settaunt;
 pub mod battle_script_settaunt_vectors_gen;
 pub mod battle_script_settorment;
 pub mod battle_script_settorment_vectors_gen;
+pub mod battle_script_setweather;
+pub mod battle_script_setweather_vectors_gen;
 pub mod battle_script_setyawn;
 pub mod battle_script_setyawn_vectors_gen;
 pub mod battle_script_snatchsetbattlers;
