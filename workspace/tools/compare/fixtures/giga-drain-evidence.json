@@ -16,7 +16,7 @@
     "orbs": 24,
     "greenBlend": "0->12->0",
     "probe": "tools/compare/megaDrainProbe.py",
-    "probeSha256": "24c245f578c473309e76d2a26c9fc64569aa428108fb9c76f0d424e625a269b2"
+    "probeSha256": "4716bd5e2951127fc8ac3d3d1b4e30f0c0ae4900a778914d434f2e3a5f018f73"
   },
   "evidenceScope": {
     "productionAnimationChanged": true,

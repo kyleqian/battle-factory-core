@@ -1,0 +1,82 @@
+{
+  "schema": "dream-eater-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_DREAM_EATER",
+  "moveId": 138,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "coverageCounts": "Level 50: 187/276 exact, 0 partial, 0 staged, 89 unsupported",
+  "source": {
+    "moveBody": "0x082d2de7..0x082d2e51",
+    "moveBodySha256": "479855bf78ffa9d93353622f52771ab1a4607adfaff642f3b76c2dba2c795dc7",
+    "dreamEaterAbsorb": "0x082d2e51..0x082d2fea",
+    "dreamEaterAbsorbSha256": "590e635828b78577a8d0f637edf77d0934b28393bd903e8d7b37195d44d793fd",
+    "healingEffect": "0x082d79df..0x082d7a28",
+    "setPsychicBackground": "0x082d7cd1..0x082d7cdd",
+    "unsetPsychicBackground": "0x082d7cdd..0x082d7ce5",
+    "literalOrbs": 24,
+    "probe": "tools/compare/megaDrainProbe.py",
+    "probeSha256": "4716bd5e2951127fc8ac3d3d1b4e30f0c0ae4900a778914d434f2e3a5f018f73"
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "latchHypotheses": {
+    "plainCreateSpriteAndX2": "confirmed RAM+1: whole hardware OAM equals preceding software on all 531 bilateral comparable rows; 24 ORBS and 4 BLUE_STAR creates are source-mapped",
+    "fadedPalette": "confirmed RAM+1: hardware palette equals preceding faded palette on all 531 bilateral comparable rows",
+    "animTaskShakeMon": "confirmed RAM+1: x2 source changes at ages 48,50..76 and y2 source changes at 80,82..126 transfer through the complete preceding-software OAM map",
+    "scaleWobbleAffine": "confirmed RAM+2: target hardware matrix equals two-back live-sprite matrix on all 529 bilateral comparable rows; source changes 48..77 display 50..79",
+    "outgoingEnemyShadow": "not a Dream Eater teardown edge: both windows enter with slot 2 already invisible under SpriteCB_SetInvisible; the first comparable whole-OAM row at age 1 equals source age 0",
+    "equalSubprioritySemiTransparentOverlap": "confirmed ordering input: age-99 ORBS are equal-subpriority ObjBlend and sSpriteOrder is descending y in both orientations; hardware age 100 equals source software OAM, so lower hardware rank remains the PPU overlap winner",
+    "defaultVisibleEvents": "confirmed RAM+1 by complete whole-OAM transfer; source-created ORBS at 78/84/90/96/102/108/114/120 and BLUE_STAR at 173/182/191/200 first reach hardware one display later"
+  },
+  "batchSiblingAudit": {
+    "MOVE_ABSORB": "independently exact control; zero new credit",
+    "MOVE_MEGA_DRAIN": "independently exact control; zero new credit",
+    "MOVE_GIGA_DRAIN": "independently exact control; zero new credit",
+    "MOVE_DREAM_EATER": "evidence only; remains unsupported"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-dream-eater-player-wigglytuff-opponent-onix.json",
+      "scenarioSha256": "9171707be0a3ad4a6d602b6d238121adf891e89d011323b1e890f18947c08513",
+      "attacker": 0,
+      "target": 1,
+      "sourceWindow": {"startFrame": 1308, "endFrame": 1573, "frameCount": 266},
+      "denseState": "tools/compare/evidence/dream-eater-player-dense-state.json.gz",
+      "denseStateSha256": "8df1a36b51ad8bdb6d8021fcce8c8bb80ed425127ed0ca9ce4846d3b8d3496f3",
+      "probeJsonSha256": "5d7abe615647d4103749f01b2d4c9f59bab29174a1a83f4a2002e04e25a8ba13",
+      "repeatProbeJsonSha256": "5d7abe615647d4103749f01b2d4c9f59bab29174a1a83f4a2002e04e25a8ba13",
+      "rawRgbArchive": "tools/compare/evidence/dream-eater-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "769e188a2f5ecc1a7891bb38ce374adacb02b35593040e7aea2b52c9b47b81e8",
+      "rawRgbSequenceSha256": "728a437bd1f5c98b0f6fbce0ddf8dc6726f258d03afa9caf3452bc456c731404",
+      "changeMap": "tools/compare/evidence/dream-eater-changemap-player.json",
+      "changeMapSha256": "2e18f3ce54708d4ffaa86abeaf39574d000c61ac24c73e42e1e7113bcdcde4aa"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-dream-eater-opponent-wigglytuff-player-onix.json",
+      "scenarioSha256": "15d14016609af95730486d56c5c1331b7fe5d44f4d37913b8a79f9841fd40e08",
+      "attacker": 1,
+      "target": 0,
+      "sourceWindow": {"startFrame": 2146, "endFrame": 2412, "frameCount": 267},
+      "denseState": "tools/compare/evidence/dream-eater-opponent-dense-state.json.gz",
+      "denseStateSha256": "0ac7d8e06e2673cd6496c59f81bb7b1d4d264ec89f658c535671286a6dcc1d74",
+      "probeJsonSha256": "ecac5feef28b2e86ed899d539dc23f61095d583a70ddcf4418c9cbe75c45bfbb",
+      "repeatProbeJsonSha256": "ecac5feef28b2e86ed899d539dc23f61095d583a70ddcf4418c9cbe75c45bfbb",
+      "rawRgbArchive": "tools/compare/evidence/dream-eater-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "8b8e00b3f06d3e8ea4d8825d9a72908428d2fcba9d4e153a603cbb882705819a",
+      "rawRgbSequenceSha256": "6866c7ce788d356b7db437d850bca2455e34de6922c731430ffd93c07189f2ec",
+      "changeMap": "tools/compare/evidence/dream-eater-changemap-opponent.json",
+      "changeMapSha256": "f5cb7a03a71674b7cee85b137ffe25bc549c8ac4b31f8023ab91e4e302544c03"
+    }
+  }
+}

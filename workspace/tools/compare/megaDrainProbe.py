@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Capture a complete pointer-owned Scene-ON MOVE_MEGA_DRAIN evidence window.
+"""Capture a complete pointer-owned Scene-ON drain-move evidence window.
 
-The retained interval begins at the first real `Move_MEGA_DRAIN` pointer and
-contains every subsequent animation row, including the MegaDrainAbsorbEffect
-and HealingEffect calls, through the first inactive cleanup row.  This is a
-capture-only instrument: it makes no staged transient battle-state changes.
+The retained interval begins at the first real move pointer and contains every
+subsequent animation row, including owned helper scripts, through the first
+inactive cleanup row. This is a capture-only instrument: it makes no staged
+transient battle-state changes.
 """
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ if len(sys.argv) != 4:
 
 SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:])
 IS_GIGA = "giga-drain" in SCENARIO.name
+IS_DREAM = "dream-eater" in SCENARIO.name
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(path for path in (ROOT, *ROOT.parents)
                if (path / "oracle" / "emerald_core.py").is_file())
@@ -32,8 +33,12 @@ from emerald_core import EmeraldOracle  # noqa: E402
 MOVE_ID = 202 if IS_GIGA else 72
 MOVE_NAME = "Move_GIGA_DRAIN" if IS_GIGA else "Move_MEGA_DRAIN"
 MOVE_END_NAME = "GigaDrainAbsorbEffect" if IS_GIGA else "MegaDrainAbsorbEffect"
+if IS_DREAM:
+    MOVE_ID = 138
+    MOVE_NAME = "Move_DREAM_EATER"
+    MOVE_END_NAME = "DreamEaterAbsorb"
 EFFECT_NAME = MOVE_END_NAME
-EFFECT_END_NAME = "Move_LEECH_LIFE" if IS_GIGA else "Move_GIGA_DRAIN"
+EFFECT_END_NAME = "Move_POISON_GAS" if IS_DREAM else ("Move_LEECH_LIFE" if IS_GIGA else "Move_GIGA_DRAIN")
 HEALING_NAME = "HealingEffect"
 HEALING_END_NAME = "HealingEffect2"
 
@@ -69,23 +74,35 @@ def main() -> None:
     move_symbol, move_start, move_end = nm[MOVE_NAME], nm[MOVE_NAME], nm[MOVE_END_NAME]
     effect_symbol, effect_start, effect_end = nm[EFFECT_NAME], nm[EFFECT_NAME], nm[EFFECT_END_NAME]
     healing_symbol, healing_start, healing_end = nm[HEALING_NAME], nm[HEALING_NAME], nm[HEALING_END_NAME]
-    expected = (
+    owned_intervals = [
         (move_symbol, move_start, move_end),
         (effect_symbol, effect_start, effect_end),
         (healing_symbol, healing_start, healing_end),
-    )
-    expected_bounds = (
+    ]
+    expected_bounds = [
         (
             (0x082D1242, 0x082D1242, 0x082D12B1),
             (0x082D12B1, 0x082D12B1, 0x082D144A),
         ) if IS_GIGA else (
+            (0x082D2DE7, 0x082D2DE7, 0x082D2E51),
+            (0x082D2E51, 0x082D2E51, 0x082D2FEA),
+        ) if IS_DREAM else (
             (0x082D10B2, 0x082D10B2, 0x082D1121),
             (0x082D1121, 0x082D1121, 0x082D1242),
         )
-    ) + ((0x082D79DF, 0x082D79DF, 0x082D7A28),)
-    if expected != expected_bounds:
-        label = "GIGA_DRAIN" if IS_GIGA else "MEGA_DRAIN"
-        raise RuntimeError(f"{label} source pointer bounds changed: {expected!r}")
+    ][0]
+    expected_bounds = [*expected_bounds, (0x082D79DF, 0x082D79DF, 0x082D7A28)]
+    if IS_DREAM:
+        for start_name, end_name, expected_start, expected_end in (
+            ("SetPsychicBackground", "UnsetPsychicBackground", 0x082D7CD1, 0x082D7CDD),
+            ("UnsetPsychicBackground", "SetSkyBg", 0x082D7CDD, 0x082D7CE5),
+        ):
+            start, end = nm[start_name], nm[end_name]
+            owned_intervals.append((start, start, end))
+            expected_bounds.append((expected_start, expected_start, expected_end))
+    if owned_intervals != expected_bounds:
+        label = "DREAM_EATER" if IS_DREAM else ("GIGA_DRAIN" if IS_GIGA else "MEGA_DRAIN")
+        raise RuntimeError(f"{label} source pointer bounds changed: {owned_intervals!r}")
 
     sy = oracle.symbols
     sprites, matrices, tasks = sy["gSprites"], sy["gOamMatrices"], sy["gTasks"]
@@ -110,6 +127,9 @@ def main() -> None:
         "SE_M_BUBBLE3": nm["se_m_bubble3"],
         "SE_M_GIGA_DRAIN": nm["se_m_giga_drain"],
         "SE_M_ABSORB_2": nm["se_m_absorb_2"],
+        "SE_M_PSYBEAM": nm["se_m_psybeam"],
+        "SE_M_MINIMIZE": nm["se_m_minimize"],
+        "SE_M_SWAGGER": nm["se_m_swagger"],
     }
 
     def u8(address: int) -> int:
@@ -228,6 +248,10 @@ def main() -> None:
             return EFFECT_NAME
         if healing_start <= pointer < healing_end:
             return HEALING_NAME
+        if IS_DREAM and nm["SetPsychicBackground"] <= pointer < nm["UnsetPsychicBackground"]:
+            return "SetPsychicBackground"
+        if IS_DREAM and nm["UnsetPsychicBackground"] <= pointer < nm["SetSkyBg"]:
+            return "UnsetPsychicBackground"
         return None
 
     def script_owner_offset(pointer: int) -> int | None:
@@ -237,6 +261,10 @@ def main() -> None:
             return pointer - effect_start
         if healing_start <= pointer < healing_end:
             return pointer - healing_start
+        if IS_DREAM and nm["SetPsychicBackground"] <= pointer < nm["UnsetPsychicBackground"]:
+            return pointer - nm["SetPsychicBackground"]
+        if IS_DREAM and nm["UnsetPsychicBackground"] <= pointer < nm["SetSkyBg"]:
+            return pointer - nm["UnsetPsychicBackground"]
         return None
 
     rows: list[dict] = []
@@ -305,7 +333,7 @@ def main() -> None:
         if complete:
             break
     if not rows or not complete:
-        raise RuntimeError("MOVE_MEGA_DRAIN complete pointer-owned window was not captured")
+        raise RuntimeError(f"{MOVE_NAME} complete pointer-owned window was not captured")
     topology = {
         "templates": sorted({item["template"]["symbol"] for row in rows for item in row["sprites"]
                              if item["template"]["symbol"]}),
@@ -315,13 +343,19 @@ def main() -> None:
                          if item["func"]["symbol"]}),
     }
     OUTPUT.write_text(json.dumps({
-        "schema": "mega-drain-dense-evidence/v1", "moveId": MOVE_ID, "setup": setup,
+        "schema": "dream-eater-dense-evidence/v1" if IS_DREAM else "mega-drain-dense-evidence/v1",
+        "moveId": MOVE_ID, "setup": setup,
         "sourceWindow": {"startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"],
                          "frameCount": len(rows)},
         "sourceSymbols": {
             MOVE_NAME: move_symbol, "evenPointerStart": move_start, MOVE_END_NAME: move_end,
             EFFECT_NAME: effect_symbol, EFFECT_END_NAME: effect_end,
             HEALING_NAME: healing_symbol, HEALING_END_NAME: healing_end,
+            **({
+                "SetPsychicBackground": nm["SetPsychicBackground"],
+                "UnsetPsychicBackground": nm["UnsetPsychicBackground"],
+                "SetSkyBg": nm["SetSkyBg"],
+            } if IS_DREAM else {}),
         },
         "songHeaders": song_headers, "topology": topology, "frames": rows,
     }, separators=(",", ":")) + "\n")

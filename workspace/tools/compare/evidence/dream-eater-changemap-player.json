@@ -1,0 +1,4345 @@
+{
+  "schema": "dream-eater-normalized-change-map/v1",
+  "side": "player-back",
+  "sourceWindow": {
+    "startFrame": 1308,
+    "endFrame": 1573,
+    "frameCount": 266
+  },
+  "pointerOwners": [
+    [
+      0,
+      9,
+      "Move_DREAM_EATER"
+    ],
+    [
+      10,
+      47,
+      "SetPsychicBackground"
+    ],
+    [
+      48,
+      77,
+      "Move_DREAM_EATER"
+    ],
+    [
+      78,
+      125,
+      "DreamEaterAbsorb"
+    ],
+    [
+      126,
+      172,
+      "Move_DREAM_EATER"
+    ],
+    [
+      173,
+      208,
+      "HealingEffect"
+    ],
+    [
+      209,
+      226,
+      "Move_DREAM_EATER"
+    ],
+    [
+      227,
+      264,
+      "UnsetPsychicBackground"
+    ],
+    [
+      265,
+      265,
+      "Move_DREAM_EATER"
+    ]
+  ],
+  "pointerOffsets": [
+    [
+      0,
+      0,
+      [
+        "Move_DREAM_EATER",
+        0
+      ]
+    ],
+    [
+      1,
+      3,
+      [
+        "Move_DREAM_EATER",
+        3
+      ]
+    ],
+    [
+      4,
+      6,
+      [
+        "Move_DREAM_EATER",
+        6
+      ]
+    ],
+    [
+      7,
+      9,
+      [
+        "Move_DREAM_EATER",
+        8
+      ]
+    ],
+    [
+      10,
+      28,
+      [
+        "SetPsychicBackground",
+        2
+      ]
+    ],
+    [
+      29,
+      47,
+      [
+        "SetPsychicBackground",
+        10
+      ]
+    ],
+    [
+      48,
+      77,
+      [
+        "Move_DREAM_EATER",
+        60
+      ]
+    ],
+    [
+      78,
+      83,
+      [
+        "DreamEaterAbsorb",
+        51
+      ]
+    ],
+    [
+      84,
+      89,
+      [
+        "DreamEaterAbsorb",
+        102
+      ]
+    ],
+    [
+      90,
+      95,
+      [
+        "DreamEaterAbsorb",
+        153
+      ]
+    ],
+    [
+      96,
+      101,
+      [
+        "DreamEaterAbsorb",
+        204
+      ]
+    ],
+    [
+      102,
+      107,
+      [
+        "DreamEaterAbsorb",
+        255
+      ]
+    ],
+    [
+      108,
+      113,
+      [
+        "DreamEaterAbsorb",
+        306
+      ]
+    ],
+    [
+      114,
+      119,
+      [
+        "DreamEaterAbsorb",
+        357
+      ]
+    ],
+    [
+      120,
+      125,
+      [
+        "DreamEaterAbsorb",
+        408
+      ]
+    ],
+    [
+      126,
+      155,
+      [
+        "Move_DREAM_EATER",
+        86
+      ]
+    ],
+    [
+      156,
+      172,
+      [
+        "Move_DREAM_EATER",
+        89
+      ]
+    ],
+    [
+      173,
+      181,
+      [
+        "HealingEffect",
+        21
+      ]
+    ],
+    [
+      182,
+      190,
+      [
+        "HealingEffect",
+        38
+      ]
+    ],
+    [
+      191,
+      199,
+      [
+        "HealingEffect",
+        55
+      ]
+    ],
+    [
+      200,
+      208,
+      [
+        "HealingEffect",
+        72
+      ]
+    ],
+    [
+      209,
+      221,
+      [
+        "Move_DREAM_EATER",
+        94
+      ]
+    ],
+    [
+      222,
+      226,
+      [
+        "Move_DREAM_EATER",
+        100
+      ]
+    ],
+    [
+      227,
+      245,
+      [
+        "UnsetPsychicBackground",
+        1
+      ]
+    ],
+    [
+      246,
+      264,
+      [
+        "UnsetPsychicBackground",
+        6
+      ]
+    ],
+    [
+      265,
+      265,
+      [
+        "Move_DREAM_EATER",
+        105
+      ]
+    ]
+  ],
+  "taskRuns": {
+    "Task_UpdateMonBg": [
+      [
+        7,
+        224,
+        true
+      ]
+    ],
+    "Task_FadeToBg": [
+      [
+        10,
+        46,
+        true
+      ],
+      [
+        227,
+        263,
+        true
+      ]
+    ],
+    "SetPsychicBackground_Step": [
+      [
+        29,
+        245,
+        true
+      ]
+    ],
+    "AnimTask_ShakeMon_Step": [
+      [
+        48,
+        75,
+        true
+      ],
+      [
+        78,
+        125,
+        true
+      ]
+    ],
+    "AnimTask_ScaleMonAndRestore_Step": [
+      [
+        48,
+        76,
+        true
+      ]
+    ],
+    "Task_ClearMonBg": [
+      [
+        222,
+        224,
+        true
+      ]
+    ]
+  },
+  "spriteCreates": {
+    "absorptionOrbs": [
+      78,
+      78,
+      78,
+      84,
+      84,
+      84,
+      90,
+      90,
+      90,
+      96,
+      96,
+      96,
+      102,
+      102,
+      102,
+      108,
+      108,
+      108,
+      114,
+      114,
+      114,
+      120,
+      120,
+      120
+    ],
+    "healingBlueStars": [
+      173,
+      182,
+      191,
+      200
+    ]
+  },
+  "latches": {
+    "hardwareOamEqualsPrecedingSoftware": "265/265",
+    "hardwarePaletteEqualsPrecedingFaded": "265/265",
+    "targetMatrixEqualsPrecedingSource": "235/265",
+    "targetMatrixEqualsTwoBackSource": "264/264",
+    "activeBackgroundOffsetsEqualPrecedingSource": "265/265",
+    "targetX2SourceChanges": [
+      48,
+      50,
+      52,
+      54,
+      56,
+      58,
+      60,
+      62,
+      64,
+      66,
+      68,
+      70,
+      72,
+      74,
+      76
+    ],
+    "targetY2SourceChanges": [
+      80,
+      82,
+      84,
+      86,
+      88,
+      90,
+      92,
+      94,
+      96,
+      98,
+      100,
+      102,
+      104,
+      106,
+      108,
+      110,
+      112,
+      114,
+      116,
+      118,
+      120,
+      122,
+      124,
+      126
+    ],
+    "targetMatrixSourceChanges": [
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77
+    ],
+    "targetMatrixHardwareChanges": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79
+    ],
+    "fadedPaletteChanges": [
+      1,
+      4,
+      29,
+      32,
+      36,
+      40,
+      44,
+      48,
+      52,
+      56,
+      60,
+      64,
+      68,
+      72,
+      76,
+      80,
+      84,
+      88,
+      92,
+      96,
+      100,
+      104,
+      108,
+      112,
+      116,
+      120,
+      124,
+      128,
+      132,
+      136,
+      140,
+      144,
+      148,
+      152,
+      156,
+      160,
+      164,
+      168,
+      172,
+      176,
+      180,
+      184,
+      188,
+      192,
+      196,
+      200,
+      204,
+      208,
+      212,
+      216,
+      220,
+      226,
+      230,
+      234,
+      238,
+      242,
+      246
+    ],
+    "hardwarePaletteChanges": [
+      2,
+      5,
+      30,
+      33,
+      37,
+      41,
+      45,
+      49,
+      53,
+      57,
+      61,
+      65,
+      69,
+      73,
+      77,
+      81,
+      85,
+      89,
+      93,
+      97,
+      101,
+      105,
+      109,
+      113,
+      117,
+      121,
+      125,
+      129,
+      133,
+      137,
+      141,
+      145,
+      149,
+      153,
+      157,
+      161,
+      165,
+      169,
+      173,
+      177,
+      181,
+      185,
+      189,
+      193,
+      197,
+      201,
+      205,
+      209,
+      213,
+      217,
+      221,
+      227,
+      231,
+      235,
+      239,
+      243,
+      247
+    ],
+    "initialShadow": {
+      "slot": 2,
+      "callback": "SpriteCB_SetInvisible",
+      "invisible": true,
+      "firstComparableWholeOamAge": 1,
+      "row1EqualsRow0Software": true
+    },
+    "sortWitness": {
+      "sourceAge": 99,
+      "hardwareDisplayAge": 100,
+      "slots": [
+        10,
+        7,
+        5,
+        3,
+        12,
+        9,
+        15,
+        11,
+        16,
+        4,
+        13,
+        14
+      ],
+      "y": [
+        113,
+        103,
+        100,
+        91,
+        80,
+        65,
+        57,
+        51,
+        42,
+        32,
+        29,
+        28
+      ],
+      "allEqualSubpriority": true,
+      "allSemiTransparent": true,
+      "hardwareEqualsSourceSoftware": true
+    }
+  },
+  "gpuTransitions": {
+    "bldcnt": [
+      11,
+      47,
+      48,
+      222,
+      228,
+      264
+    ],
+    "bldalpha": [
+      48,
+      78,
+      222
+    ],
+    "bldy": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      229,
+      230,
+      231,
+      232,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263
+    ],
+    "bg1hofs": [
+      8,
+      49,
+      51,
+      53,
+      55,
+      57,
+      59,
+      61,
+      63,
+      65,
+      67,
+      69,
+      71,
+      73,
+      75,
+      77,
+      226
+    ],
+    "bg1vofs": [
+      8,
+      81,
+      83,
+      85,
+      87,
+      89,
+      91,
+      93,
+      95,
+      97,
+      99,
+      101,
+      103,
+      105,
+      107,
+      109,
+      111,
+      113,
+      115,
+      117,
+      119,
+      121,
+      123,
+      125,
+      127,
+      226
+    ]
+  },
+  "audio": [
+    {
+      "age": 10,
+      "identity": "se_m_psybeam",
+      "panX": [
+        -64,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 48,
+      "identity": "se_m_minimize",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 78,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 84,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 90,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 96,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 102,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 108,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 114,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 120,
+      "identity": "se_m_swagger",
+      "panX": [
+        63,
+        -64,
+        0,
+        0
+      ]
+    },
+    {
+      "age": 173,
+      "identity": "se_m_absorb_2",
+      "panX": [
+        -64,
+        -64,
+        0,
+        0
+      ]
+    }
+  ],
+  "cleanup": {
+    "age": 265,
+    "pointer": 137178704,
+    "owner": "Move_DREAM_EATER",
+    "ownerOffset": 105,
+    "active": false,
+    "visualTasks": 0,
+    "soundTasks": 0,
+    "absorptionOrbs": 0,
+    "healingBlueStars": 0
+  },
+  "rows": [
+    {
+      "age": 0,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 0,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 1,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 3,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 2,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 3,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 3,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 3,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 4,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 5,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 6,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 7,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 8,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 8,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 8,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 9,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 8,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 10,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 11,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "4fa53fa00c491ba72011e754acfd3fb2e663e6c16284bb77385daba2341c1190",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 12,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "786be9ae99bd2eb337e8693f4ebc5f802a7e9ba9ae9ecdbf6f9bd3b942340413",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 13,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "53f71952b75e17bbdd784ba71c7adbd0c777c6b7c97282fbff7415896efe848a",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 14,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "3c1d282b1d631a5d6c26feb19a943d4a9dfd9b62158bae67e368ec77c5f0907f",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 15,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "0212bca5a7531950a7b384b729e1cb929edd13ba865cc9ba18a2bfad6f789ce2",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 16,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "9806b2db333b915657820d5f2a226ef395d7e4439ffc0769e7bf07939419b035",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 17,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "58ec009292421a55195ae347f75439292f62a3fee758baebdcfca02b1992e419",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 18,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "a0f35c66adf34731fcab41a0e8d1ad98bbad2cbbea219271f4d54f7bbbb74343",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 19,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "a91b3f2d5981d7177ab59de4b4913825c438e1460dd9ed0224570c9c369f0013",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 20,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "1c450e97392f9c1de94f8cb3b9d0e4d48879e94df3c274baeb00d14020c9b6bc",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 21,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "987e54d61840de8a115df6624bf7a9c0b9ed5bdda7c8978c20fe3499d8530027",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 22,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "0fa2594b36060f7a0372397bac093e12e674c2a33733490b4f24ba3208d2ca2a",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 23,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "c2cf649c27f44b20943f429cf24b86f471e89bde1c5c8f9eed4323091b8c6c06",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 24,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "0fdd097ce2dc05a92759637ce2a5dbb358e2e5f41cb350cb75331f94206aa606",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 25,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "5698285b55d6b530789f244210790ee042b5390c146855e1546c6023f3933f15",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 26,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "ff913fd275c54e56b1a6fc3cbabc8a82cfeec9e1b7edc301cfeaaa1023bd025a",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 27,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "813cc305d1363e059b4d63d7e5b42f024e022c56e5285e92508c29e34bf35a40",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 28,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 2,
+      "animScriptActive": true,
+      "sha256": "813cc305d1363e059b4d63d7e5b42f024e022c56e5285e92508c29e34bf35a40",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 29,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "813cc305d1363e059b4d63d7e5b42f024e022c56e5285e92508c29e34bf35a40",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 30,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "813cc305d1363e059b4d63d7e5b42f024e022c56e5285e92508c29e34bf35a40",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 31,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "0bd54766bfc26f548860a93fcdfa3fc3adc035ec8111d54852423b20464778ca",
+      "changedPixels": 15795,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 32,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "2800aa5ee6f4b3de2c65d74c7f9f6893a37164ea9c9942b4c4110c3c9b08aa84",
+      "changedPixels": 15795,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 33,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "b232f64a56daa1f1cb0d6df7fef68eb982aec4aa9fb121c6a210f75de57f9df4",
+      "changedPixels": 15717,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 34,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "bfec111ba648c5a9dcaebd052314235de3137a1908156cd043699af0f0781757",
+      "changedPixels": 15726,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 35,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "3e43f59c300bb9ea00b75b9afae4493c4df6f1397098d219fa5a3410698a8a12",
+      "changedPixels": 15726,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 36,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "21812ff6ae27211c5a41740aad7ba9562c1fcd6e9c2698d7cbe6b4b90d4f9b6f",
+      "changedPixels": 15726,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 37,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "504726521f9c56c7707f37843a5bfbbebd916933a120bdc83320892b64c8827b",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 38,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "da279dfc7313cbd643e52d8c30bf9b02b68140ffe8653b7fa690ffe469e4d4a3",
+      "changedPixels": 15689,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 39,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "22c934276adc739f7bffc7c648cb8882634582d8ba95ece77351cec174bccf26",
+      "changedPixels": 15689,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 40,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "09cc691a7dd53793790addacf441e7a1df62201d3f587b4510445f7d85fe91de",
+      "changedPixels": 15689,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 41,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "88d93a0cfa16a387e8889f9622d4ec32a302fc4435052717f0616fd0cbf04e3f",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 42,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "5a6da5b2a27dd037ff5d555ccce503e47ab7c769fc66f4827ca0779c57faf498",
+      "changedPixels": 15717,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 43,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "1a07bab012ae9f12b8e62f0b6750111488034dba369c1a8c6ed718160cf4697d",
+      "changedPixels": 15717,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 44,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "ea11c2454121105a4c86fb44adcf01ec65e80590d6301b030437be6a419de678",
+      "changedPixels": 15717,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 45,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "f8a4d150160ba4ec971de80fb5204c2ffa19f34b2ab995b1e9091ed654f60b26",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 46,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "f5d677fe5e2768468d94e2255e970eb092043da115eaa6bf399680af013710e9",
+      "changedPixels": 15802,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 47,
+      "scriptOwner": "SetPsychicBackground",
+      "scriptOwnerOffset": 10,
+      "animScriptActive": true,
+      "sha256": "f5d677fe5e2768468d94e2255e970eb092043da115eaa6bf399680af013710e9",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 48,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "f5d677fe5e2768468d94e2255e970eb092043da115eaa6bf399680af013710e9",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 49,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "555b43339e974bb8d760bebb0b76728792b03774da1f56091b49727e1e4aabf8",
+      "changedPixels": 19071,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 50,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "97a1ec00f362545d8bc6a8eab6099805533ef53183b9266cd13fca7db98a9860",
+      "changedPixels": 1731,
+      "bounds": [
+        149,
+        12,
+        208,
+        72
+      ]
+    },
+    {
+      "age": 51,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "378acaffd5b8f22ff5a4d998cefe6cf5f26bd2e712e9b893e9a2fa880ff22f35",
+      "changedPixels": 2170,
+      "bounds": [
+        148,
+        11,
+        208,
+        73
+      ]
+    },
+    {
+      "age": 52,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "8a14a4f1859fd20a531663f3b29f110761ab6e51659dcd79f2cd044d690fb71f",
+      "changedPixels": 2164,
+      "bounds": [
+        148,
+        10,
+        211,
+        73
+      ]
+    },
+    {
+      "age": 53,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "a39da3bf785d1920e6d4e0c99c55f940ad0ece790a2863b5ad6f4d7b56b59742",
+      "changedPixels": 19188,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 54,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "9187167649be3c0a4dcff1119987cfc3c00ab3bd7bd18376179b60da878d646b",
+      "changedPixels": 2347,
+      "bounds": [
+        146,
+        9,
+        211,
+        73
+      ]
+    },
+    {
+      "age": 55,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "dc99c8236b7d1e14f6923fb0b3795d92c9d46c5d7c6b1d3bef1c066063d5e719",
+      "changedPixels": 2385,
+      "bounds": [
+        145,
+        8,
+        208,
+        73
+      ]
+    },
+    {
+      "age": 56,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "14a05424f6efbd6dba0461436ca14a7359d1774164f2a2a095c86d27cf21c3db",
+      "changedPixels": 2640,
+      "bounds": [
+        145,
+        7,
+        214,
+        73
+      ]
+    },
+    {
+      "age": 57,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "edffd3708f5ea930b553c622df70ab015418c011d03fd92cd32232ae36308306",
+      "changedPixels": 19189,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 58,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "3f9578073ed4fd920fc827def67d80ecf152cd781a7102c7d290f021c2b0366a",
+      "changedPixels": 2798,
+      "bounds": [
+        142,
+        4,
+        215,
+        73
+      ]
+    },
+    {
+      "age": 59,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "0bcc6ffb49e6cea5e4f6e12b47f566f42ca5a88c8a7a224d9bf6aebec7550bee",
+      "changedPixels": 2629,
+      "bounds": [
+        141,
+        3,
+        212,
+        73
+      ]
+    },
+    {
+      "age": 60,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "c714e970804d1022e0134d40bb4b963bc7bb40634a5cf057ec2f2c6c89219887",
+      "changedPixels": 3156,
+      "bounds": [
+        141,
+        2,
+        218,
+        73
+      ]
+    },
+    {
+      "age": 61,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "832504e61b851b5d5bd1bd44d33f81018ed2fd5d5a22d0919f986cc1f0777541",
+      "changedPixels": 19180,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 62,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "37c35c86cfac036167d1cc27180a5cfe81d11d04e7f79dad3f7fd45ca6db7c68",
+      "changedPixels": 3332,
+      "bounds": [
+        138,
+        0,
+        219,
+        74
+      ]
+    },
+    {
+      "age": 63,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "163544b6bd672df4200070e70ecbd34b9b6f20699a66bdec70d65b8dbcaeb964",
+      "changedPixels": 2899,
+      "bounds": [
+        136,
+        0,
+        217,
+        75
+      ]
+    },
+    {
+      "age": 64,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "68b503728b822d3e58ce090ca41d7835a894c3b6893998ca1e8873ec8a748797",
+      "changedPixels": 3733,
+      "bounds": [
+        136,
+        0,
+        224,
+        75
+      ]
+    },
+    {
+      "age": 65,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "4e5bd636fc58db24377eb0d8b46034ef19c75161899c888928dfdf1e870e0e89",
+      "changedPixels": 19195,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 66,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "ce05ef135fb48fe4c7715772e0bdbbc4645e706e25f7d08b2a18c135c6c424d4",
+      "changedPixels": 3511,
+      "bounds": [
+        138,
+        0,
+        222,
+        74
+      ]
+    },
+    {
+      "age": 67,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "c65b52bf2c33a91aefd5b82125212e9f4f7324534b78c454b7371086d90c1415",
+      "changedPixels": 2885,
+      "bounds": [
+        138,
+        0,
+        216,
+        74
+      ]
+    },
+    {
+      "age": 68,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "96605554b5ba50754f6d41041356a5a082d1e672a76ff580061825e74cee0fef",
+      "changedPixels": 3265,
+      "bounds": [
+        139,
+        1,
+        218,
+        73
+      ]
+    },
+    {
+      "age": 69,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "44887a6da67ff0b6adc2292fd2b7ae777ca77e54e22ef17bf818c8c690b7c7ba",
+      "changedPixels": 19204,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 70,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "ceb00cdc9858d0ea4d93cdf2105d160d95fd4d7b2dac3b02bcb84219c20f5000",
+      "changedPixels": 2986,
+      "bounds": [
+        142,
+        3,
+        217,
+        73
+      ]
+    },
+    {
+      "age": 71,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "60949b6cc4474932c1ca5e8f34090586c80c45596a28baf82352e17fe9e047ac",
+      "changedPixels": 2592,
+      "bounds": [
+        142,
+        4,
+        211,
+        73
+      ]
+    },
+    {
+      "age": 72,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "d02d39b18ba65584502fcdcedd0a19c0e180ed3986b5c949a102484e11f0c9f4",
+      "changedPixels": 2743,
+      "bounds": [
+        143,
+        6,
+        214,
+        73
+      ]
+    },
+    {
+      "age": 73,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "c233a1c0855fbf9e2a0694c0c70f883841529dff88334772fb4ecc4da03cc50d",
+      "changedPixels": 19172,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 74,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "35bc740becce77aa3bfb4dc46ee767464de207e8cbc1b320f931fda086eafe99",
+      "changedPixels": 2475,
+      "bounds": [
+        146,
+        8,
+        213,
+        73
+      ]
+    },
+    {
+      "age": 75,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "5177951d89d8bda8758d4ef01dfb23c12b290aa05b6b871cb580f893bf739c9d",
+      "changedPixels": 2318,
+      "bounds": [
+        146,
+        11,
+        208,
+        73
+      ]
+    },
+    {
+      "age": 76,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "074da9e7e5bbd255800efb4185528eab5dc2f6638e68deea1f9ad9cde6bf3b86",
+      "changedPixels": 2257,
+      "bounds": [
+        147,
+        9,
+        211,
+        73
+      ]
+    },
+    {
+      "age": 77,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 60,
+      "animScriptActive": true,
+      "sha256": "3ec4316139ffe9f55c8556a42d1871592d6ed3ed88b3c0374b4a8f673b31dc60",
+      "changedPixels": 19149,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 78,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 51,
+      "animScriptActive": true,
+      "sha256": "a950bc0988faea37e9bcf94a86ed5977a633fb913469b25f1da36b7b0282dfd2",
+      "changedPixels": 2513,
+      "bounds": [
+        149,
+        11,
+        210,
+        73
+      ]
+    },
+    {
+      "age": 79,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 51,
+      "animScriptActive": true,
+      "sha256": "e7c779223d6c2eaaf4de049f3a25db4c4507aea1374cf313337ef0396a192cb9",
+      "changedPixels": 2016,
+      "bounds": [
+        149,
+        12,
+        204,
+        73
+      ]
+    },
+    {
+      "age": 80,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 51,
+      "animScriptActive": true,
+      "sha256": "b8c0ed6e73aaf16ab8a5fbd5337cc22674d85d9bd41a5dff37839dfc4b01ed7e",
+      "changedPixels": 1335,
+      "bounds": [
+        149,
+        14,
+        203,
+        73
+      ]
+    },
+    {
+      "age": 81,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 51,
+      "animScriptActive": true,
+      "sha256": "5048f5801e3e43943eec75968563c91207612731aaa74a1aa94fd9334c756821",
+      "changedPixels": 17817,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 82,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 51,
+      "animScriptActive": true,
+      "sha256": "e74c6a47e45f933350d48a1eeaa2df1fc963ff0b12fec741b73f2d643d98e2be",
+      "changedPixels": 1346,
+      "bounds": [
+        149,
+        12,
+        203,
+        73
+      ]
+    },
+    {
+      "age": 83,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 51,
+      "animScriptActive": true,
+      "sha256": "c63bf3d42026416b846baab27ef50e2686c368d5be8a70a0fcdc297c0c7e422c",
+      "changedPixels": 450,
+      "bounds": [
+        149,
+        11,
+        203,
+        73
+      ]
+    },
+    {
+      "age": 84,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 102,
+      "animScriptActive": true,
+      "sha256": "5129b207cccc2d2165ef6bb3c32d8e2bcace98bca35557653d0ae731af1a8eac",
+      "changedPixels": 1423,
+      "bounds": [
+        147,
+        11,
+        203,
+        73
+      ]
+    },
+    {
+      "age": 85,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 102,
+      "animScriptActive": true,
+      "sha256": "e4c1e0e1d44c58de5bb50a1191851a441ae3e4668fe925ccca09265ab762e5a1",
+      "changedPixels": 17797,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 86,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 102,
+      "animScriptActive": true,
+      "sha256": "5b9ab298d17f0a5e530e1d2ef3ae66762fb0d9ab02db36a8037e5209790708ce",
+      "changedPixels": 1605,
+      "bounds": [
+        140,
+        9,
+        203,
+        73
+      ]
+    },
+    {
+      "age": 87,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 102,
+      "animScriptActive": true,
+      "sha256": "75c7936f5c530d12bc01c1c3150694ff400d5ebae581d4940f8ccde530d27a9e",
+      "changedPixels": 701,
+      "bounds": [
+        136,
+        9,
+        203,
+        74
+      ]
+    },
+    {
+      "age": 88,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 102,
+      "animScriptActive": true,
+      "sha256": "9b80c0693431170543e8ccd0fff20e92deb6f33591e577e5c28b91e70ea8ebae",
+      "changedPixels": 1497,
+      "bounds": [
+        132,
+        9,
+        203,
+        76
+      ]
+    },
+    {
+      "age": 89,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 102,
+      "animScriptActive": true,
+      "sha256": "1d0a3898ca32b37e97bb7d0641cf865957b0bcab3413505ac4d39486ca5c141c",
+      "changedPixels": 17715,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 90,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 153,
+      "animScriptActive": true,
+      "sha256": "58e9a9402b901bad575cec3f22ae72462f9ae419f241a37ddf0fd82833cafc02",
+      "changedPixels": 1482,
+      "bounds": [
+        124,
+        8,
+        203,
+        89
+      ]
+    },
+    {
+      "age": 91,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 153,
+      "animScriptActive": true,
+      "sha256": "db9e9ba26ccea542c3c2abf70db21b79c5c3f76e64f06aa6b88b0a81680fb62a",
+      "changedPixels": 677,
+      "bounds": [
+        120,
+        9,
+        203,
+        94
+      ]
+    },
+    {
+      "age": 92,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 153,
+      "animScriptActive": true,
+      "sha256": "cf857c801097206f724344286dc8577a7f45c75da64766808bb319d1f9c4d20a",
+      "changedPixels": 1616,
+      "bounds": [
+        116,
+        9,
+        203,
+        95
+      ]
+    },
+    {
+      "age": 93,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 153,
+      "animScriptActive": true,
+      "sha256": "cb5ad739da669a87c07b2bdb64d935d6f4786d52ab098965a946750d76296b60",
+      "changedPixels": 17798,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 94,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 153,
+      "animScriptActive": true,
+      "sha256": "1c6ca33a4d9a471a7f5d123a037586869e4c3ea0731834339f9aac3fca0f105f",
+      "changedPixels": 1663,
+      "bounds": [
+        108,
+        11,
+        203,
+        98
+      ]
+    },
+    {
+      "age": 95,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 153,
+      "animScriptActive": true,
+      "sha256": "e12b28b5cca738d69b64c3a9f291af5335af1498560036210c0196a45ba98ad7",
+      "changedPixels": 812,
+      "bounds": [
+        105,
+        12,
+        203,
+        98
+      ]
+    },
+    {
+      "age": 96,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 204,
+      "animScriptActive": true,
+      "sha256": "b8cb898a57a2b3c91576fa278bdc23bc0602e6cca809048f7c6dffa385c14805",
+      "changedPixels": 1690,
+      "bounds": [
+        101,
+        14,
+        203,
+        100
+      ]
+    },
+    {
+      "age": 97,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 204,
+      "animScriptActive": true,
+      "sha256": "927c7bd95d944a09e3ff5320f908de5e2105ec4646055be29999ecc28357d3e4",
+      "changedPixels": 17937,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 98,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 204,
+      "animScriptActive": true,
+      "sha256": "f02896070409126f732d9a172b6928a4d049dd3e28b18755c3a5b46217fa24db",
+      "changedPixels": 1909,
+      "bounds": [
+        93,
+        12,
+        203,
+        111
+      ]
+    },
+    {
+      "age": 99,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 204,
+      "animScriptActive": true,
+      "sha256": "c19d003cd3570d4714884ad4f40e77ae2b2381a0bebbb9f31581d3c5cd5650c8",
+      "changedPixels": 1013,
+      "bounds": [
+        89,
+        12,
+        203,
+        111
+      ]
+    },
+    {
+      "age": 100,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 204,
+      "animScriptActive": true,
+      "sha256": "3807ec9caaf1e95d34e417c47196fb446f57f6f6753ad13edcbc14229246f5ef",
+      "changedPixels": 1884,
+      "bounds": [
+        85,
+        14,
+        203,
+        111
+      ]
+    },
+    {
+      "age": 101,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 204,
+      "animScriptActive": true,
+      "sha256": "8067e6a228480fb480117bd41780548a8d55807c6be6366e199fac1a50b17610",
+      "changedPixels": 17827,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 102,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 255,
+      "animScriptActive": true,
+      "sha256": "bb3f22e54ec6d014cc18397c9e7333028caf16aa0165965fa54ae8c2760db3a4",
+      "changedPixels": 1854,
+      "bounds": [
+        77,
+        12,
+        203,
+        111
+      ]
+    },
+    {
+      "age": 103,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 255,
+      "animScriptActive": true,
+      "sha256": "2511a432424a8b8972eb7e0401109a7578091e0f04110db774443a778643020b",
+      "changedPixels": 1228,
+      "bounds": [
+        74,
+        12,
+        203,
+        106
+      ]
+    },
+    {
+      "age": 104,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 255,
+      "animScriptActive": true,
+      "sha256": "206f766d43881fb3b67179c89a74d33f3edd23c89137c329a3956296aed3058e",
+      "changedPixels": 2063,
+      "bounds": [
+        70,
+        14,
+        203,
+        106
+      ]
+    },
+    {
+      "age": 105,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 255,
+      "animScriptActive": true,
+      "sha256": "c516c3ba81d567740c0f3174e9f289402105d0b725cb8ff308e1faba8ad002ee",
+      "changedPixels": 17852,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 106,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 255,
+      "animScriptActive": true,
+      "sha256": "bb5187df1635b962ecf6f5cc79a0fc8fd1bd0cc602704c761d45825c0700aff6",
+      "changedPixels": 2025,
+      "bounds": [
+        85,
+        12,
+        203,
+        105
+      ]
+    },
+    {
+      "age": 107,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 255,
+      "animScriptActive": true,
+      "sha256": "3968c54cfe189881203a7d59e9e893f1ec6e1d6a9db0dbc48a0c7e07c37e4e75",
+      "changedPixels": 1156,
+      "bounds": [
+        81,
+        12,
+        203,
+        104
+      ]
+    },
+    {
+      "age": 108,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 306,
+      "animScriptActive": true,
+      "sha256": "64c5a4a88919c45df760a52f998c456737aae531d914f83df38c3b1ac6fb629d",
+      "changedPixels": 2018,
+      "bounds": [
+        77,
+        14,
+        203,
+        103
+      ]
+    },
+    {
+      "age": 109,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 306,
+      "animScriptActive": true,
+      "sha256": "4871644f9d2024f436328d0912546e28fd78d999b51cbe440f981d5a4281584c",
+      "changedPixels": 17938,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 110,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 306,
+      "animScriptActive": true,
+      "sha256": "a372dea1c639dc51d4bcb36ac50fab7a9d7191243246d11dfd9b3b0c346262d5",
+      "changedPixels": 2130,
+      "bounds": [
+        70,
+        12,
+        203,
+        102
+      ]
+    },
+    {
+      "age": 111,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 306,
+      "animScriptActive": true,
+      "sha256": "009775f6cd2d00610f2265750b1f4191e19f7b342562bd48a664f69e20619b2b",
+      "changedPixels": 1189,
+      "bounds": [
+        70,
+        12,
+        203,
+        101
+      ]
+    },
+    {
+      "age": 112,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 306,
+      "animScriptActive": true,
+      "sha256": "efb131637e5404555181d5c957133c8fe72664617e5e5e7c8213a1ece2596a42",
+      "changedPixels": 1964,
+      "bounds": [
+        75,
+        14,
+        203,
+        101
+      ]
+    },
+    {
+      "age": 113,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 306,
+      "animScriptActive": true,
+      "sha256": "bd74b15f18f4048ed902ea6fbc655b495a6931f17cb3cbb59186035a5e448497",
+      "changedPixels": 17947,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 114,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 357,
+      "animScriptActive": true,
+      "sha256": "8a4a41736b4459fa9472d9062191a0073d8805fd5e3ab4392c90b69fc9f3126b",
+      "changedPixels": 2002,
+      "bounds": [
+        72,
+        12,
+        203,
+        100
+      ]
+    },
+    {
+      "age": 115,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 357,
+      "animScriptActive": true,
+      "sha256": "1b7661cee592827b98f6f5f090c5c8cb55a2c4f01917501f03b0256a4464510c",
+      "changedPixels": 1213,
+      "bounds": [
+        75,
+        12,
+        203,
+        111
+      ]
+    },
+    {
+      "age": 116,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 357,
+      "animScriptActive": true,
+      "sha256": "c295f441cd636e297e54df14538c34e910ae2e50ad32cd6723197cd3eff5936e",
+      "changedPixels": 2103,
+      "bounds": [
+        70,
+        14,
+        203,
+        111
+      ]
+    },
+    {
+      "age": 117,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 357,
+      "animScriptActive": true,
+      "sha256": "b4772f3383a6a0ff7c69b8c174fbc272696bb418dd767c30f8c723c889fd4521",
+      "changedPixels": 17799,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 118,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 357,
+      "animScriptActive": true,
+      "sha256": "7637585634a60a45f293b931c4fb9fa20e191e74dd4b69d92dcb3ff30e8f1c2c",
+      "changedPixels": 1972,
+      "bounds": [
+        72,
+        12,
+        203,
+        110
+      ]
+    },
+    {
+      "age": 119,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 357,
+      "animScriptActive": true,
+      "sha256": "cf5e8c803fe334504613bcd5702069e0a4913c47d244c3ba10d4084cdb574359",
+      "changedPixels": 983,
+      "bounds": [
+        81,
+        12,
+        203,
+        108
+      ]
+    },
+    {
+      "age": 120,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 408,
+      "animScriptActive": true,
+      "sha256": "a16bad99ece6d5f5f52cb8d41279748c5b2fe495b4e8aa844ebe19951d69bee1",
+      "changedPixels": 1864,
+      "bounds": [
+        77,
+        14,
+        203,
+        106
+      ]
+    },
+    {
+      "age": 121,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 408,
+      "animScriptActive": true,
+      "sha256": "3f3873e88b09f45cbcb5aababc2c553cbccb534d154d3c806d208a28d5edcde4",
+      "changedPixels": 17902,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 122,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 408,
+      "animScriptActive": true,
+      "sha256": "a4105e1a483c98cd5b013eac579fb19ab70e5aced918ff9a50824090b96bec97",
+      "changedPixels": 1922,
+      "bounds": [
+        70,
+        12,
+        203,
+        101
+      ]
+    },
+    {
+      "age": 123,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 408,
+      "animScriptActive": true,
+      "sha256": "15b56d40f38dd8fef9c566ad16113535283e6bae1b1490f10171ee7b22672379",
+      "changedPixels": 966,
+      "bounds": [
+        70,
+        12,
+        203,
+        98
+      ]
+    },
+    {
+      "age": 124,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 408,
+      "animScriptActive": true,
+      "sha256": "cfc7c57add00b76703e52a21ddda410eb1a0230655c0e98b719ca8a67896d7ec",
+      "changedPixels": 1873,
+      "bounds": [
+        70,
+        14,
+        203,
+        98
+      ]
+    },
+    {
+      "age": 125,
+      "scriptOwner": "DreamEaterAbsorb",
+      "scriptOwnerOffset": 408,
+      "animScriptActive": true,
+      "sha256": "2b293924b017fd0eeb8704b27042fbc3b0715eab30e744512af312644acd762a",
+      "changedPixels": 17773,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 126,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "735df4fd7524188b91cc96cb98cc020e11dd6271f3e9791e5b3f466e48db8e7c",
+      "changedPixels": 1811,
+      "bounds": [
+        77,
+        12,
+        203,
+        104
+      ]
+    },
+    {
+      "age": 127,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "9aa288e7b05a3c04500c3fad253b113c50be63fd74af91fcfa56705bcd17aa74",
+      "changedPixels": 874,
+      "bounds": [
+        74,
+        12,
+        203,
+        106
+      ]
+    },
+    {
+      "age": 128,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "09f35a80279c318d9967aecc37042fad5feaf6d229f378489b60a77b8901e736",
+      "changedPixels": 1882,
+      "bounds": [
+        70,
+        14,
+        203,
+        111
+      ]
+    },
+    {
+      "age": 129,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "252a773dd63b80bb3987845cfa01da103ebc3be2af32365e8cc4b032c8386fc0",
+      "changedPixels": 17610,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 130,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "524ef6a9db37c53e2c36157a9c52c78577336eb75f461b082480a411067a7417",
+      "changedPixels": 633,
+      "bounds": [
+        77,
+        23,
+        157,
+        111
+      ]
+    },
+    {
+      "age": 131,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "2238b4559566b1fe58cac834b17b112982ede5f78c9bd15d2191009df69f0291",
+      "changedPixels": 594,
+      "bounds": [
+        74,
+        24,
+        154,
+        111
+      ]
+    },
+    {
+      "age": 132,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "1fa54da4c866484bcd2c193f1074ff7ac2cce8568ac005fd5e4b0c3c024dfdb5",
+      "changedPixels": 567,
+      "bounds": [
+        72,
+        25,
+        151,
+        111
+      ]
+    },
+    {
+      "age": 133,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "0a565d518b5b9c851092ec907a1018957907e6e381bc5f43a15205cd264577cb",
+      "changedPixels": 17705,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 134,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "6f547a963bc5453b8fb6c40a9ecccf071377b839415eb4584ccb05d0d828fa7b",
+      "changedPixels": 418,
+      "bounds": [
+        70,
+        27,
+        145,
+        111
+      ]
+    },
+    {
+      "age": 135,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "ad103c56d5e1d21023589b84e503abcf016dd1b835d5cd67d4f267174e6768c2",
+      "changedPixels": 365,
+      "bounds": [
+        70,
+        29,
+        142,
+        111
+      ]
+    },
+    {
+      "age": 136,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "59f7c954b4f156fd7c7832963c52d447e55ffca0fe9c1614a930a001874cf663",
+      "changedPixels": 357,
+      "bounds": [
+        70,
+        30,
+        139,
+        111
+      ]
+    },
+    {
+      "age": 137,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "255873051c51685164f804b2e40b5a6ac5217742f5dccef6cf9f7fb4c0babac1",
+      "changedPixels": 17640,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 138,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "d484bb7cfa59b0225fd26177808647f699e95d1ed61af8c7ad9677daeb79dc98",
+      "changedPixels": 313,
+      "bounds": [
+        72,
+        35,
+        132,
+        111
+      ]
+    },
+    {
+      "age": 139,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "55f12f1caa88b24e939c9753f8fc1305cb1ce19c30b1dc5d8330b7ad3dd8769e",
+      "changedPixels": 296,
+      "bounds": [
+        72,
+        37,
+        128,
+        111
+      ]
+    },
+    {
+      "age": 140,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "27ee3ddbc39e2d11427f47cf480bede511068e7d68e8be48e6fb1f841f89d2bc",
+      "changedPixels": 235,
+      "bounds": [
+        70,
+        40,
+        125,
+        111
+      ]
+    },
+    {
+      "age": 141,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "da909d438f0617efd3140b38284e237ef598e36d683a1caaf5c348a4a0d11241",
+      "changedPixels": 17618,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 142,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "151c579de11bf599773a53136632b12a39feed3c4deadb51460c9d564fd62e5c",
+      "changedPixels": 192,
+      "bounds": [
+        70,
+        44,
+        119,
+        109
+      ]
+    },
+    {
+      "age": 143,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "43659c868da54e990307dd2c48ecb950bb86ef356f3aa840c49ed9191fc7faa8",
+      "changedPixels": 184,
+      "bounds": [
+        81,
+        47,
+        116,
+        108
+      ]
+    },
+    {
+      "age": 144,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "8aa556197de4d1967710e42a52cef3405c7c58aaf9549938badb36be0cb30c62",
+      "changedPixels": 181,
+      "bounds": [
+        77,
+        50,
+        113,
+        106
+      ]
+    },
+    {
+      "age": 145,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "609e202fa203c70b94dbe20580ba0131113ac8bbe268106ff5d97f30b4a4169b",
+      "changedPixels": 17635,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 146,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "1728b954c1801ecfb2850f06b7c56b5970fbb45a21583230aafd83aeaf2a6f65",
+      "changedPixels": 123,
+      "bounds": [
+        70,
+        57,
+        106,
+        102
+      ]
+    },
+    {
+      "age": 147,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "e6cd03a32566c3179acee96c86015fce85f704534465389f59352ff9117830ad",
+      "changedPixels": 83,
+      "bounds": [
+        70,
+        60,
+        103,
+        101
+      ]
+    },
+    {
+      "age": 148,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "080832993b8f7fadf4457e2c03b7c14e6459a20fb6e03d405dbc219d38a0558f",
+      "changedPixels": 72,
+      "bounds": [
+        70,
+        63,
+        99,
+        101
+      ]
+    },
+    {
+      "age": 149,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "6b42ee433c177925e439b3efb05673dd25d5014b43f99866ed2db8a9bbdf9bbb",
+      "changedPixels": 17605,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 150,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "2849428a1f9e1b382373c35bb7c88e67338dd198b5f364d70efb98233e4cd180",
+      "changedPixels": 49,
+      "bounds": [
+        79,
+        70,
+        93,
+        99
+      ]
+    },
+    {
+      "age": 151,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "156dfee106b52b599dccda1177d9cb1b5e8e0464b763167d006e1f792d69c059",
+      "changedPixels": 44,
+      "bounds": [
+        76,
+        74,
+        90,
+        98
+      ]
+    },
+    {
+      "age": 152,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "e939565a78843f1dd6b78d181c272ae939ff05d30f5cb511abf9eeb33ba45ee6",
+      "changedPixels": 40,
+      "bounds": [
+        74,
+        77,
+        87,
+        98
+      ]
+    },
+    {
+      "age": 153,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "ce24387768c30a2f05ebcda25f6c3af55c5a1469e53a46a34c6e3e1c21b5e75b",
+      "changedPixels": 17591,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 154,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "1c565ac99abf504b403034e541d267c958c9f96ad4e3dcf1239d1d6220af87a7",
+      "changedPixels": 27,
+      "bounds": [
+        72,
+        85,
+        81,
+        96
+      ]
+    },
+    {
+      "age": 155,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 86,
+      "animScriptActive": true,
+      "sha256": "94c8798b2a92917c7bc2a64b777ea4a7f9553f90e68918845335d3019b9c6d9c",
+      "changedPixels": 18,
+      "bounds": [
+        72,
+        90,
+        77,
+        95
+      ]
+    },
+    {
+      "age": 156,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "612e494a295c378cb2b8313d2d424803a283590884606dfa737d1aed64850003",
+      "changedPixels": 9,
+      "bounds": [
+        72,
+        93,
+        74,
+        95
+      ]
+    },
+    {
+      "age": 157,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "6887de1f8dde406c785014b827fc44b626d3e4ffe19939dc9bc2f36d83a9edca",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 158,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "6887de1f8dde406c785014b827fc44b626d3e4ffe19939dc9bc2f36d83a9edca",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 159,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "6887de1f8dde406c785014b827fc44b626d3e4ffe19939dc9bc2f36d83a9edca",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 160,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "6887de1f8dde406c785014b827fc44b626d3e4ffe19939dc9bc2f36d83a9edca",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 161,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "b1954ae7b886240525dfdcdef2d09380ff62b783bd28fc0d4b75c60e9d2b7a9d",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 162,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "b1954ae7b886240525dfdcdef2d09380ff62b783bd28fc0d4b75c60e9d2b7a9d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 163,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "b1954ae7b886240525dfdcdef2d09380ff62b783bd28fc0d4b75c60e9d2b7a9d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 164,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "b1954ae7b886240525dfdcdef2d09380ff62b783bd28fc0d4b75c60e9d2b7a9d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 165,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "77b9fe1d9025d66c02612113111d6b56364b74437d289c95b8169eb91b779397",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 166,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "77b9fe1d9025d66c02612113111d6b56364b74437d289c95b8169eb91b779397",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 167,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "77b9fe1d9025d66c02612113111d6b56364b74437d289c95b8169eb91b779397",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 168,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "77b9fe1d9025d66c02612113111d6b56364b74437d289c95b8169eb91b779397",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 169,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "fb7069b18f404424b98ecfc1218a8cc0f338ffe723ff24fd4b5ce5acac31d51b",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 170,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "fb7069b18f404424b98ecfc1218a8cc0f338ffe723ff24fd4b5ce5acac31d51b",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 171,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "fb7069b18f404424b98ecfc1218a8cc0f338ffe723ff24fd4b5ce5acac31d51b",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 172,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 89,
+      "animScriptActive": true,
+      "sha256": "fb7069b18f404424b98ecfc1218a8cc0f338ffe723ff24fd4b5ce5acac31d51b",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 173,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "0bac6529a8374da40f27f5d9803b767200e1a8e110d2aa9a7e043567e1b07c1f",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 174,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "25573ce124b9db1fece9a83ebc860a14334f0606f4e958dee221a0703ce67f65",
+      "changedPixels": 33,
+      "bounds": [
+        68,
+        85,
+        76,
+        97
+      ]
+    },
+    {
+      "age": 175,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "edefad16dc8d36c2e162c3104fdd1f4bfc92369f26bdc19a28d04536aea629ee",
+      "changedPixels": 44,
+      "bounds": [
+        64,
+        83,
+        79,
+        99
+      ]
+    },
+    {
+      "age": 176,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "edefad16dc8d36c2e162c3104fdd1f4bfc92369f26bdc19a28d04536aea629ee",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 177,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "da494e6639d9ffc9e71ccb6ec0ada11fc0ebd5418177be3828be9184152c2042",
+      "changedPixels": 17667,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 178,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "da494e6639d9ffc9e71ccb6ec0ada11fc0ebd5418177be3828be9184152c2042",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 179,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "1fe8b650b0ca564b9d8f8cb345a44597ff4eed0e02e515abb3a3a65d399a1a35",
+      "changedPixels": 169,
+      "bounds": [
+        57,
+        76,
+        86,
+        105
+      ]
+    },
+    {
+      "age": 180,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "1fe8b650b0ca564b9d8f8cb345a44597ff4eed0e02e515abb3a3a65d399a1a35",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 181,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 21,
+      "animScriptActive": true,
+      "sha256": "cc0e2cfd0b7bcdd4e00867c68e12ba3a06091d89238701c7ba386c39a19e0a85",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 182,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "be1d19415042b339084facecba5df0963109729eed15c6a9bb85cc04514abfa2",
+      "changedPixels": 194,
+      "bounds": [
+        59,
+        76,
+        86,
+        105
+      ]
+    },
+    {
+      "age": 183,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "21da9533e9e3b05d0d88f0bb12a0d713baf3a61ed5ed508377062ab44ba6af38",
+      "changedPixels": 32,
+      "bounds": [
+        53,
+        100,
+        61,
+        111
+      ]
+    },
+    {
+      "age": 184,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "0374be5ea81ee024340c163da8cfc5438ca3b687719c5bc1c6d96ffd2a0cdcda",
+      "changedPixels": 41,
+      "bounds": [
+        49,
+        98,
+        64,
+        111
+      ]
+    },
+    {
+      "age": 185,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "a3fb707f4f9fb474ad04e9773b4472ec8192a891d3ed5c4253bb04581072f0bf",
+      "changedPixels": 17552,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 186,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "c163c4ef22a05baa990c078251e52401aa8f917a35706ac9cf68dc8c9c17f964",
+      "changedPixels": 103,
+      "bounds": [
+        44,
+        93,
+        68,
+        111
+      ]
+    },
+    {
+      "age": 187,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "6aa92bbe0fef4449c6c6dd0c3398104dd887fbffa0e1cd82d7c3035e962e02e6",
+      "changedPixels": 188,
+      "bounds": [
+        57,
+        79,
+        85,
+        102
+      ]
+    },
+    {
+      "age": 188,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "fd092ea4bc317c08b5f4a2d74af7dc5aa09ef9a93c7ff185bbf10bd19ba3f21f",
+      "changedPixels": 142,
+      "bounds": [
+        42,
+        91,
+        71,
+        111
+      ]
+    },
+    {
+      "age": 189,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "75a829e6cebea2342dd515b978fe679576882705a5c11893c8e57ec7d85e9032",
+      "changedPixels": 17543,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 190,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 38,
+      "animScriptActive": true,
+      "sha256": "dfbbc5fef2c4b6e62d3abf940dc817908b7cfdfaee2d9900c1816bf9cc28d73c",
+      "changedPixels": 148,
+      "bounds": [
+        64,
+        81,
+        83,
+        99
+      ]
+    },
+    {
+      "age": 191,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "ec8f9ca0ace989d3d0ed7a90da780810dd91e4ea2d524e6e1d5c5bb4e40132ed",
+      "changedPixels": 167,
+      "bounds": [
+        44,
+        91,
+        71,
+        111
+      ]
+    },
+    {
+      "age": 192,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "8f3f142735632ca2d043496bdc5232af78ec2f01e78538309c7a1df3ac6203d7",
+      "changedPixels": 88,
+      "bounds": [
+        53,
+        75,
+        83,
+        98
+      ]
+    },
+    {
+      "age": 193,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "583f8fb8459dc86fc0d7f7f83bf5f04f19cdd3f771da4918d79195943f86b05d",
+      "changedPixels": 17578,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 194,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "583f8fb8459dc86fc0d7f7f83bf5f04f19cdd3f771da4918d79195943f86b05d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 195,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "e1c81ca1be488ffeb6ffa14f43229c4797dc4329cd0b32738b17e5fc4475879d",
+      "changedPixels": 144,
+      "bounds": [
+        44,
+        68,
+        76,
+        97
+      ]
+    },
+    {
+      "age": 196,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "c1355cd3938faeea0d3d997972d1ac75ebde54ecde8eb66b8139264edd0758d5",
+      "changedPixels": 163,
+      "bounds": [
+        42,
+        94,
+        70,
+        111
+      ]
+    },
+    {
+      "age": 197,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "ede8ac92bd2248bec5ac8844a74e40f3d53ea245c0e52d928c671738788feb5d",
+      "changedPixels": 17661,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 198,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "ede8ac92bd2248bec5ac8844a74e40f3d53ea245c0e52d928c671738788feb5d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 199,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 55,
+      "animScriptActive": true,
+      "sha256": "772e1f5a7a7e01155a5a8d4f91b9658fa7fd4d70e028817cad478e6f932e2e7b",
+      "changedPixels": 126,
+      "bounds": [
+        49,
+        96,
+        68,
+        111
+      ]
+    },
+    {
+      "age": 200,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "91c52b6b1d14211af399c0c5852009ceff2cee7eb9ffed8de8a4fc733b1ddc1e",
+      "changedPixels": 194,
+      "bounds": [
+        44,
+        66,
+        71,
+        95
+      ]
+    },
+    {
+      "age": 201,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "881612d64d57495b449f606c942246dfda7dba90e70551dc0972cfded8ec4db8",
+      "changedPixels": 17597,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 202,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "b5ed0c29efb37baa6fb0e32876f88ef3c530ee24ae242887bdecc06dc991a863",
+      "changedPixels": 44,
+      "bounds": [
+        74,
+        83,
+        89,
+        99
+      ]
+    },
+    {
+      "age": 203,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "b5ed0c29efb37baa6fb0e32876f88ef3c530ee24ae242887bdecc06dc991a863",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 204,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "847ff2c35c49d57d5a39e9905e456338e649b9a6570902811cf74f1e49cd1a46",
+      "changedPixels": 143,
+      "bounds": [
+        53,
+        78,
+        93,
+        111
+      ]
+    },
+    {
+      "age": 205,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "1be1838ee6729218555a9f53b8c0d8b0778fda34f3cf812af302820aea6c9b90",
+      "changedPixels": 17685,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 206,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "d5296d490b29fe14368b64ffac0f7ddf8f7061a22a90f1d47f6f31f28324e191",
+      "changedPixels": 169,
+      "bounds": [
+        67,
+        76,
+        96,
+        105
+      ]
+    },
+    {
+      "age": 207,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "d5296d490b29fe14368b64ffac0f7ddf8f7061a22a90f1d47f6f31f28324e191",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 208,
+      "scriptOwner": "HealingEffect",
+      "scriptOwnerOffset": 72,
+      "animScriptActive": true,
+      "sha256": "8d28f2a416de971eebc4cca6cd737f3b3da29eec515cfb6d961267bb782fef4f",
+      "changedPixels": 148,
+      "bounds": [
+        49,
+        71,
+        68,
+        89
+      ]
+    },
+    {
+      "age": 209,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "c06beb872e6dc3d024431d3970576db5d1b8ddf33b26fe2ebf4f54c5184a4804",
+      "changedPixels": 17652,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 210,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "b5a4816f873ac873d925c81508822f52fce10a76a778d0a8e10452087fd31529",
+      "changedPixels": 55,
+      "bounds": [
+        52,
+        73,
+        68,
+        88
+      ]
+    },
+    {
+      "age": 211,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "b5a4816f873ac873d925c81508822f52fce10a76a778d0a8e10452087fd31529",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 212,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "b5a4816f873ac873d925c81508822f52fce10a76a778d0a8e10452087fd31529",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 213,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "f7de42dc42fe37a23c6f85a4419c835e7d4dc00cfb582917fd350ccd5e031c97",
+      "changedPixels": 17511,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 214,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "d7d4a1807e1066aad0d48d5733c75ffd51c153bd4cde4f60af23d0d48bfc9867",
+      "changedPixels": 188,
+      "bounds": [
+        67,
+        79,
+        95,
+        102
+      ]
+    },
+    {
+      "age": 215,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "d7d4a1807e1066aad0d48d5733c75ffd51c153bd4cde4f60af23d0d48bfc9867",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 216,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "d7d4a1807e1066aad0d48d5733c75ffd51c153bd4cde4f60af23d0d48bfc9867",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 217,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "e5e3ada3ab403cd524df369f5089b6d07c2a4b3d0088451764a1e4d7a9c52a4f",
+      "changedPixels": 17671,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 218,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "e5e3ada3ab403cd524df369f5089b6d07c2a4b3d0088451764a1e4d7a9c52a4f",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 219,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "f7d265e165e8ca252124f11ecfd612fe74ea9cdbf2af1079b1ee7b5a7cbacc46",
+      "changedPixels": 55,
+      "bounds": [
+        77,
+        83,
+        93,
+        98
+      ]
+    },
+    {
+      "age": 220,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "f7d265e165e8ca252124f11ecfd612fe74ea9cdbf2af1079b1ee7b5a7cbacc46",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 221,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 94,
+      "animScriptActive": true,
+      "sha256": "55586b7c96c49676fc1857307291606eacfea2e9fb6c19b92bce2a2a99ed075e",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 222,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 100,
+      "animScriptActive": true,
+      "sha256": "a88794ee43afee96fcc02122a66b5506d6c69ce70c38ae217d60c26d7e84ed8d",
+      "changedPixels": 33,
+      "bounds": [
+        78,
+        85,
+        86,
+        97
+      ]
+    },
+    {
+      "age": 223,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 100,
+      "animScriptActive": true,
+      "sha256": "a88794ee43afee96fcc02122a66b5506d6c69ce70c38ae217d60c26d7e84ed8d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 224,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 100,
+      "animScriptActive": true,
+      "sha256": "a88794ee43afee96fcc02122a66b5506d6c69ce70c38ae217d60c26d7e84ed8d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 225,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 100,
+      "animScriptActive": true,
+      "sha256": "a88794ee43afee96fcc02122a66b5506d6c69ce70c38ae217d60c26d7e84ed8d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 226,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 100,
+      "animScriptActive": true,
+      "sha256": "a88794ee43afee96fcc02122a66b5506d6c69ce70c38ae217d60c26d7e84ed8d",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 227,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "12820994f55053e43fbeaf75c8e0ba146b747373a8407abfbd9e4c3c1e94dfcd",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 228,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "12820994f55053e43fbeaf75c8e0ba146b747373a8407abfbd9e4c3c1e94dfcd",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 229,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "bb23aa4071541908ef649e71e9d765e2ef783cfdeda9f0c768f08bbfda0c9c9b",
+      "changedPixels": 16023,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 230,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "8a09ede5a482e71dea7262c533b2118dc56a68271b19e2d0d7cd49eee2973e68",
+      "changedPixels": 16023,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 231,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "8222b9ebef0812f930b0ba7a21a9b8bb16e89ef342ab795a417e38605ee46122",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 232,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "652fc4bef07a07b9a92ad5b5faff390da24f4cd376a69fc49cab95c844be3f6c",
+      "changedPixels": 16109,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 233,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "3afeb31305739b6341fe39f6ffc27f043b7b24143f624b4aa953009775aa5342",
+      "changedPixels": 16109,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 234,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "0191a4495c327ccd3c5b2678837d9564b2dfff814eeebf1de7bef1f14ba02d56",
+      "changedPixels": 16109,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 235,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "666e924b85187f33c55d173aa10716547d36f4621dca25f2eb7eff3214e64ee6",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 236,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "02f21d52f51bd4d96218cd5b50028a409aca5313f9a6241b743811568cccd48d",
+      "changedPixels": 16296,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 237,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "f532877ac2cea160196f0412e5a0d74d76e01797876c160c33efb7d0ab653c2f",
+      "changedPixels": 16296,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 238,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "05557928c6a00b22f5de8908302e8bff78b60980586bfe15b3896e82624c5b40",
+      "changedPixels": 16296,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 239,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "862846ffdc29a9d3df34ebfdee46029e430c54624b2849291c82a1a5c5d41e9d",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 240,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "871d5921156b302bbd0e4a904fb484f87c292ff02f576162b9c9cbac7cac6313",
+      "changedPixels": 16303,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 241,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "5c9f4452a85707d11f2d396faafe8eb7a77c1d6cf6bffcd94f896119b9ce0cdf",
+      "changedPixels": 16303,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 242,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "8db294db27f3d6a51914e07b7d2155747db9b92464598059f75e6a75da11573b",
+      "changedPixels": 16303,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 243,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "9cfcd787f54cfb7e9a539c0831b0a6efb18e96cb07592bf45f4606217e9dd2a5",
+      "changedPixels": 16296,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 244,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "15218d1fbe2f9c42df4b81ef075f9de8e3f7c26646310414293fc5d4243e71c0",
+      "changedPixels": 16078,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 245,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 1,
+      "animScriptActive": true,
+      "sha256": "15218d1fbe2f9c42df4b81ef075f9de8e3f7c26646310414293fc5d4243e71c0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 246,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "15218d1fbe2f9c42df4b81ef075f9de8e3f7c26646310414293fc5d4243e71c0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 247,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "15218d1fbe2f9c42df4b81ef075f9de8e3f7c26646310414293fc5d4243e71c0",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 248,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "fbd62743616bcbe414b7b4d338566f472ae0ba40f71a0f690f67d32065552a05",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 249,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "e8c3a7a16f353f9b498d2fae1b5c253b92c5c5a803fbd0ef3aa47f5da6e1a0f4",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 250,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "e377301a9e4cfeffc5ce91650b56409c9b962c4db5ae104072a031f381f3fbb5",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 251,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "b2a07c375e1d49616a0ec854bad974c00155072ee9ea69c0c553ad46845357c7",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 252,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "b1cdce27969cdac67dfef442d2896b6b71b35b04fefae625637a7acf1cad3bee",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 253,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "0044e965bbd1bdf05f355d7b50f08bc0f1c181c90c68cab0b47158e3bcc9e56d",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 254,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "197b858e8a14def2aad729e56883a705a69d45daa252e021285425b935cb208c",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 255,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "04101119d3b0e18d606802438c00dcc5dfbd8580d1a0390c927d2d038a81ab3b",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 256,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "a939f0d2d73378d2f14da4f5d948bf4af3dfc86959824e45410fe0eab1ffe73d",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 257,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "633fd6c587a99f9147b0e7cea803a55043c671614d00ed3c8794816e2b019e28",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 258,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "364d71de6713924f562be3c5924c492d7d7e50854c93ceb33eff1a111b08f874",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 259,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "7d223720c40cc957927253559b8593c92aac61ea86bf1514580b4b0eee1a2e3e",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 260,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "420303af4210a41bd730360abcbccdd9e73960374fa79acc74a1e0a75cb25b73",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 261,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "330ecfee2666492c6d6309b09e82fe12d74a130f10db0423989f841b46bf9071",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 262,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "931a727b88bc49df44566afd40c373d186b1bbd1e52c066d0b19b132fc10d337",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 263,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "f6a6aa6e47601987c4dee323c817f0e8c5c463165b8d1a76d022a353efca9f77",
+      "changedPixels": 17556,
+      "bounds": [
+        0,
+        0,
+        239,
+        111
+      ]
+    },
+    {
+      "age": 264,
+      "scriptOwner": "UnsetPsychicBackground",
+      "scriptOwnerOffset": 6,
+      "animScriptActive": true,
+      "sha256": "f6a6aa6e47601987c4dee323c817f0e8c5c463165b8d1a76d022a353efca9f77",
+      "changedPixels": 0,
+      "bounds": null
+    },
+    {
+      "age": 265,
+      "scriptOwner": "Move_DREAM_EATER",
+      "scriptOwnerOffset": 105,
+      "animScriptActive": false,
+      "sha256": "f6a6aa6e47601987c4dee323c817f0e8c5c463165b8d1a76d022a353efca9f77",
+      "changedPixels": 0,
+      "bounds": null
+    }
+  ]
+}
