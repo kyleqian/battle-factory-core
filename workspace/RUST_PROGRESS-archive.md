@@ -5,6 +5,41 @@ full history regardless.
 
 ---
 
+## R43 — [supervised session, 2026-08-14] **M42 Battle Script Return/Frustration friendship-power leaf**
+
+- **State:** `rust-main` = current master `b4097e84` plus verified
+  `Cmd_friendshiptodamagecalculation` worker `9e69bb13`. The complete pure
+  `battleScriptFriendshipToDamageOpcode.ts` registration/scalar/state/control
+  projection is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session remains active and committed.
+- **Did:** ported exact Return `(10 * friendship) / 25` and Frustration
+  `(10 * (255 - friendship)) / 25` integer arithmetic, attacker-first
+  resolution, friendship-before-effect validation, dynamic-power-only
+  overwrite, immutable siblings, and unconditional Advance control. Canonical
+  TypeScript execution supplies **1,437 cases** across both effects and every
+  friendship u8 (**512**), the complete **500** selector-role matrix, prior
+  u16 dynamic-power edges, malformed-number and unreachable-effect ordering,
+  **125** missing-attacker probes, registration shape/cardinality, and
+  repetitions; corpus sha256
+  `458a2c01c29322f17bee7ad9bb3d6f478c77a722e87aed272737d328c357dbaa`.
+- **Next:** recheck active work, then select another conflict-free pure Battle
+  Script leaf. M7c opponent generation still waits on canonical TS live
+  generation; main-owned `openpartyscreen` and presentation work stay excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  dispatch table, opcode/macro, aliased Return/Frustration site, validation
+  order, arithmetic, state preservation and repetition; regenerated twice
+  byte-identically (canonical corpus **878,850 bytes**; generated file
+  **2,153,463 bytes**, sha256
+  `030abe9b342997e0540f56d04e232fc181e34da0ef5e1faad4d1f9723149394f`;
+  generator **37,249 bytes**, sha256
+  `3318803cd374a4b2a791f6fed40f2ecd7c0c1395723f3bec13f983da9541300e`),
+  and reran focused **6/6**, cargo **929/929**, fmt, strict Clippy, and wasm32
+  release. Artifact is **508,338 bytes**, sha256
+  `65e90d675fb5f0b38778124b6be2439b3256b643018b172e7120014ee18d74b1`.
+  Scope stayed inside `core-rs/**`; no unsupported barrier or Rust deferral was
+  added. PAPERCUT: fresh worker lacked the gitignored WASM artifact and had to
+  rebuild it before adapter parity, ~2 min.
+
 ## R42 — [supervised session, 2026-08-14] **M41 Battle Script Flail/Reversal HP-power leaf + final wind-down**
 
 - **State:** `rust-main` = current master `e9b256c2` plus verified
