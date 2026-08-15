@@ -6,8 +6,10 @@
 // battle-room-layout.json (the scientist positions the ordinary path's own
 // renderer already ground-truths - reused verbatim by this branch, see
 // scripts.inc: `ScientistsFaceBattle` is the SAME call for both paths).
-// Silver/gold speech (B2) is explicitly out of scope - this pin only
-// verifies the entrance settles into a named seam ("brainSettled").
+// Silver/gold speech itself is pinned separately in
+// tests/battleRoomBrainSpeech.test.ts (walk-up build step B2) - this file's
+// own "settles into 'brainSettled'" test now also confirms the seam hands
+// off into that step's speech machine, since B2 built on top of it.
 import { describe, expect, it } from "vitest";
 import walkup from "../src/data/gen/factory-brain-walkup-script.json" with { type: "json" };
 import layout from "../src/data/gen/battle-room-layout.json" with { type: "json" };
@@ -158,11 +160,11 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     for (let i = 0; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) state = advanceBattleRoom(state);
     expect(state.phase).toBe("brainSettled");
     expect(state.elapsed).toBe(0);
-    // The seam is stable - ticking further just ages it, no speech starts.
+    // Walk-up build step B2 hooked this seam: ticking further now hands off
+    // into the speech machine (tests/battleRoomBrainSpeech.test.ts owns its
+    // own pin) instead of aging "brainSettled" forever.
     const aged = advanceBattleRoom(state);
-    expect(aged.phase).toBe("brainSettled");
-    expect(aged.elapsed).toBe(1);
-    expect(msgboxVisual(aged)).toEqual({ visible: false, chars: 0 });
+    expect(aged.phase).toBe("brainSpeech");
   });
 
   it("Noland faces the player (frame 0), not the decoy's own north-facing idle frame, before his own walk begins (dense-compare-measured)", () => {
