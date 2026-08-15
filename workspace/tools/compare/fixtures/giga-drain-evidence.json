@@ -1,0 +1,103 @@
+{
+  "schema": "giga-drain-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_GIGA_DRAIN",
+  "moveId": 202,
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 187/276 exact, 0 partial, 0 staged, 89 unsupported",
+  "source": {
+    "scriptStart": "0x082d1242",
+    "exclusiveEnd": "0x082d12b1",
+    "gigaDrainAbsorbEffect": "0x082d12b1..0x082d144a",
+    "healingEffect": "0x082d79df..0x082d7a28",
+    "pointerOwners": ["Move_GIGA_DRAIN", "GigaDrainAbsorbEffect", "HealingEffect"],
+    "impactAnimation": 0,
+    "orbs": 24,
+    "greenBlend": "0->12->0",
+    "probe": "tools/compare/megaDrainProbe.py",
+    "probeSha256": "24c245f578c473309e76d2a26c9fc64569aa428108fb9c76f0d424e625a269b2"
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": true,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "batchSiblingAudit": {
+    "MOVE_ABSORB": "exact control only; no evidence, latch, or acceptance inheritance",
+    "MOVE_MEGA_DRAIN": "independently exact; no Giga Drain acceptance inheritance",
+    "MOVE_DREAM_EATER": "independently unsupported",
+    "MOVE_GIGA_DRAIN": "sole promotion candidate",
+    "coverageCredit": "MOVE_GIGA_DRAIN only"
+  },
+  "stateContract": {
+    "requiredFrameFields": [
+      "frame", "sha256", "scriptPtr", "scriptEven", "scriptOwner", "scriptOffset", "scriptOwnerOffset",
+      "animScriptActive", "visualTaskCount", "soundTaskCount", "battleAnimArgs", "tasks", "sprites",
+      "animationBattlers", "playerSprite", "opponentSprite", "battlers", "parties", "engine",
+      "immutableState", "animationRng", "softwareOam", "hardwareOam", "spriteOrder", "matrices",
+      "fadedPalette", "unfadedPalette", "hardwarePalette", "paletteTags", "tileTags", "registers",
+      "backgroundPositions", "backgroundMemory", "scanline", "se1", "se2"
+    ],
+    "rgbBytesPerFrame": 115200,
+    "gameplayRngUniqueValues": 1,
+    "animationRngUniqueValues": 228
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-giga-drain-player-roselia-opponent-onix.json",
+      "scenarioSha256": "0991d630b159bd62343a2b27ec077a3fb1e0f5714e6e2f449d13f2a9ef785f60",
+      "attacker": 0,
+      "target": 1,
+      "sourceWindow": {"startFrame": 214, "endFrame": 443, "frameCount": 230},
+      "denseState": "tools/compare/evidence/giga-drain-player-dense-state.json.gz",
+      "denseStateSha256": "5dbf9feaddfc2d651b0a98b113697e23c3e050b543ee51266d80fa1869d737f0",
+      "probeJsonSha256": "18439decf82ce7d8c3e1900dad7fb6498c93487a1b846c7851a67aec3dcb6272",
+      "repeatProbeJsonSha256": "18439decf82ce7d8c3e1900dad7fb6498c93487a1b846c7851a67aec3dcb6272",
+      "rawRgbArchive": "tools/compare/evidence/giga-drain-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "28158c65bda19219df55759e1a538afe7378b7cd6581e0c2f3817441463a6795",
+      "rawRgbArchiveMemberCount": 230,
+      "changeMap": "tools/compare/evidence/giga-drain-changemap-player.json",
+      "changeMapSha256": "20ba32c47b80b2b529e1fd5aada00746cc73fdfa37fcfa3da37028f1b7ea737f",
+      "latches": {
+        "hardwareOamEqualsPrecedingSoftware": "229/229",
+        "hardwareMatricesEqualsPrecedingSoftware": "229/229",
+        "hardwarePaletteEqualsPrecedingFaded": "228/229",
+        "hardwarePaletteSameRowMonbgExceptionAges": [10],
+        "activeBackground": "BG1",
+        "activeBackgroundOffsetsEqualPrecedingSource": "229/229"
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-giga-drain-opponent-roselia-player-onix.json",
+      "scenarioSha256": "a35d5c3e4152a7e35199f8edc52694e8cccab2ec3cf937191c0052085567de56",
+      "attacker": 1,
+      "target": 0,
+      "sourceWindow": {"startFrame": 214, "endFrame": 443, "frameCount": 230},
+      "denseState": "tools/compare/evidence/giga-drain-opponent-dense-state.json.gz",
+      "denseStateSha256": "5680c278aea319c8783454c6b49ac22c3341f5cb616a531fcb6cc4d6cc7a3d9d",
+      "probeJsonSha256": "54989251ec0099ee2ede40b7830f616503e6e16a0b400ef67b2d17d6be16981a",
+      "repeatProbeJsonSha256": "54989251ec0099ee2ede40b7830f616503e6e16a0b400ef67b2d17d6be16981a",
+      "rawRgbArchive": "tools/compare/evidence/giga-drain-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "92c2785319e198387d0161352358d0f50312d2dfd1e676e39148fb23a878e50c",
+      "rawRgbArchiveMemberCount": 230,
+      "changeMap": "tools/compare/evidence/giga-drain-changemap-opponent.json",
+      "changeMapSha256": "63d9275ffb766970d39755c96306a0e11b15609f025a4449c6de686eda4c892f",
+      "latches": {
+        "hardwareOamEqualsPrecedingSoftware": "229/229",
+        "hardwareMatricesEqualsPrecedingSoftware": "229/229",
+        "hardwarePaletteEqualsPrecedingFaded": "228/229",
+        "hardwarePaletteSameRowMonbgExceptionAges": [10],
+        "activeBackground": "BG2",
+        "activeBackgroundOffsetsEqualPrecedingSource": "229/229"
+      }
+    }
+  }
+}

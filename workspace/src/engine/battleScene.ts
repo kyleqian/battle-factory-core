@@ -35361,7 +35361,9 @@ export function renderSceneOnMovePresentation(
     const targetIdle = playerToOpponent
       ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
       : { x2: 0, y2: 0 };
-    const targetX2 = playerToOpponent && gigaDrainState.age < 10
+    // The front ONIX idle x2 survives until ShakeMon's creation callback at
+    // source age 42; the display transfer exposes that preceding value.
+    const targetX2 = playerToOpponent && gigaDrainState.age < 43
       ? targetIdle.x2
       : targetDisplayed.targetX2;
     drawSpriteSheet(
@@ -35379,15 +35381,6 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
-    if (opponentToPlayer && gigaDrainState.age === 0) {
-      drawSpriteSheet(
-        fb,
-        sonicBoomArt.enemyShadow.tileset,
-        sonicBoomArt.enemyShadow.palette,
-        view.attacker.geometry.animationCenter.x - 16,
-        view.attacker.geometry.battlePositionCenter.y + 25,
-      );
-    }
     const orbTileset: Tileset = {
       columns: 2,
       rows: 2,

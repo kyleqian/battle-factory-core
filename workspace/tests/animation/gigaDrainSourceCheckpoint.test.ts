@@ -148,7 +148,7 @@ describe("MOVE_GIGA_DRAIN source and legal staging checkpoint", () => {
     );
   });
 
-  it("leaves Giga Drain unsupported without inheriting exact-control credit", () => {
+  it("promotes Giga Drain alone without inheriting sibling acceptance", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as {
       entries: Array<{ move: string; status: string }>;
       queue: string[];
@@ -156,10 +156,10 @@ describe("MOVE_GIGA_DRAIN source and legal staging checkpoint", () => {
     for (const move of ["MOVE_ABSORB", "MOVE_MEGA_DRAIN"]) {
       expect(coverage.entries.find((entry) => entry.move === move)).toMatchObject({ status: "exact" });
     }
-    expect(coverage.entries.find((entry) => entry.move === "MOVE_GIGA_DRAIN")).toBeUndefined();
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_GIGA_DRAIN")).toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(186);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(187);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 186/276 exact, 0 partial, 0 staged, 90 unsupported");
+    expect(report).toContain("Level 50: 187/276 exact, 0 partial, 0 staged, 89 unsupported");
   });
 });
