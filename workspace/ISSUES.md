@@ -17,6 +17,66 @@ backlog.
 
 # Open
 
+## #88 — A freshly-generated round's battle 1, driven through the live command/resolution UI, hits "locked action continuation receipt has no immutable matching action snapshot"
+
+**Symptom:** `npm run soak -- --policy vanilla --seeds 0:20` CRASHes 6/20
+seeds (0, 4, 12, 14, 16, 18), all with the identical signature and all at
+the **second battle the driver ever plays** (round 1 loses on its own
+battle 1 under the vanilla policy, so this is chained round 2's battle 1),
+consistently at turn 5:
+
+```
+[engine/tick] Error: locked action continuation receipt has no immutable matching action snapshot
+  appendBattleResolutionLockedActionContinuation (src/engine/battleResolutionPresentation.ts:3898)
+  beginCommandResolution (src/engine/factoryRoundBattleOrchestrator.ts:1479)
+  advanceFactoryRoundBattleCommand (src/engine/factoryRoundBattleOrchestrator.ts:2300)
+```
+
+Two pre-existing pinned cases in `tests/randomRoundSoak.test.ts` now fail
+because the driver no longer stops at a round's own decided terminal (see
+below) and wanders into this: seed 21 ("earns all seven generated wins…")
+now HANGs at 200000 frames inside chained round 2 battle 6 instead of
+stopping at round 1's `roundComplete`; seed 27 ("ISSUES #86: presents a
+forced replacement's terminal sandstorm continuation") now CRASHes with
+this exact signature instead of reaching `roundLost` cleanly. Neither
+test's own original concern (round 1's specific slice-3/forced-switch
+mechanics) regressed — both still pass their `errorMessage` regex guard;
+what changed is that the driver now continues past round 1 into round 2,
+per queue item 2's continuous-play chaining (PROGRESS ~1271).
+
+**Confirmed:** this is reachable ONLY through the real tick()-level battle
+command/resolution presentation state machine
+(`advanceFactoryRoundBattleCommand`/`beginCommandResolution` in
+`factoryRoundBattleOrchestrator.ts`), not through the lower-level
+`submitFactoryRoundPlayerDecision` API the orchestrator's own unit tests
+and this session's new `tests/factoryRoundChaining.test.ts` drive directly
+— both of those reach real `roundComplete`/`roundLost` for a
+`generateInitial`-sourced round (including its battle 1) with zero
+discrepancies. The crash is specific to a round's battle 1 when it is
+**live-generated** (`createFactoryRoundBattleOrchestrator` with no
+`adoptedInitialOpponent`, `pendingBattlePreCommandRngCalls` defaulting to
+0) and driven end-to-end through the presentation layer — a code path that
+was categorically unreachable before this session, since previously only
+the canonical anchor session (`createFactoryAnchorSession`,
+`preCommandRngCalls: ANCHOR_BATTLE_1_PRE_COMMAND_RNG_CALLS = 27`) ever
+reached a battle 1 via that presentation layer; every other live-generated
+opponent driven through it so far has been battle 2+ of an already-active
+round. The `preCommandRngCalls` discrepancy (0 vs. the anchor's pinned 27)
+is the leading suspect but is unconfirmed.
+
+**Leads:** reproduce narrowly with a `generateInitial`, no-`adoptedInitialOpponent`
+round driven through `tick()`/`createInitialState` (this session's
+`stateAtDecidedRound` + `driveTerminalToNextDraft` helpers in
+`tests/factoryRoundChaining.test.ts` already reach the constructed round;
+extend to actually play its battle 1 via real button presses, e.g. via
+`tools/soak/randomRoundSoakDriver.ts`'s `RandomPlayer`, to get a minimal
+repro trace); inspect what `beginCommandResolution` expects
+`hasRetainedLockedActionReceipt` to find for a fresh-battle-1
+`activeBattleCallStart`/`pendingBattlePreCommandRngCalls` vs. the anchor's.
+Blocks the continuous-play program's soak acceptance gate
+(`npm run soak -- --policy vanilla --seeds 0:20` must be 20/20 OK) —
+next main-lane action once picked up.
+
 ## #87 — Battle-start ready-frame formula is missing the ROM's pre-first-turn span (universal +4..+7 tick late-fire)
 
 **Symptom:** the app's predicted first-action-menu-ready frame

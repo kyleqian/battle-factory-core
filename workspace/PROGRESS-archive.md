@@ -1,3 +1,22 @@
+## 1268 — [supervisor, 2026-08-14 eve] **Session start: both lane branches folded; union gates green; queue (i) dispatched**
+
+- **State:** Orient + folds done; working the 1267 queue. Main worker on
+  queue (i) steps 1+2 (`applyFactoryBrainRoundOutcome` + orchestrator
+  outputs); side worker on queue (ii) (#87 ChooseAction ack-timing model,
+  `battle_ai_switch_items.c`).
+- **Did:** Folded `animation-main` (Flail exact 183→184/276 promotion +
+  Luster Purge evidence/reducer checkpoints, presentation-only) and
+  `rust-main` (4 script leaves: copyfoestats, Pay Day, Role Play,
+  Destiny Bond) into master. Union gates: full npm **1,019 files /
+  9,805 passed / 223 skipped**, build green; cargo native green; wasm
+  rebuilt **509,620 B** `412773e1…`; forced-WASM **18 files / 803
+  tests** green. Oracle freshness FAIL on :8014/:8012 re-confirmed as
+  the known timestamp false positive (all commits since process start
+  are docs/probes/core-rs; `bin/oracle info` serves scene-off v5).
+- **Next:** verify + fold worker results; then queue (i) step 3 (brain
+  congrats text), (iii) walk-up scoping (side), continuous-play program.
+- **Notes:** entry updated at wind-down with final gates/soaks.
+
 ## 1267 — [planning session, 2026-08-14] **Next-run queue set (user decision): Noland post-battle consequences → #87 instrument → walk-up scoping; continuous-play bar audited — two wiring gaps named**
 
 - **State:** Docs/ledger only — no `src/`, oracle, or test changes. The
