@@ -5,6 +5,66 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1271 — [main worker, 2026-08-14] **Continuous-play step 1: generated-draft round entry + in-session chaining WIRED; blocked green by newly-exposed #88**
+
+- **State:** Round-chaining wiring (ROADMAP "User decisions 2026-08-14" #2)
+  is implemented and committed (`b7ae30de`), green under typecheck,
+  `test:smoke`, `npm run build`, and 8 new Tier-1 scenario tests
+  (`tests/factoryRoundChaining.test.ts`). Running it end-to-end via
+  `npm run soak` surfaced a genuine pre-existing engine bug (**new #88**)
+  that blocks the full `npm test` + soak acceptance gates — did NOT attempt
+  a fix (out of a bounded wiring step's scope; see #88). **STOPPING at this
+  green-commit boundary per the brief's explicit permission** rather than
+  forcing the gate.
+- **Did:** (1) `src/engine/factoryRoundChaining.ts`: pure `FactoryCarry`
+  (win streak/symbols/BP/rents, in-session only) + `advanceFactoryCarry`
+  (streak +7 on win, reset on loss; symbols/BP/rents from the round's
+  already-computed `roundOutcome`) + `generateFactoryChallengeDraft`
+  (builds the next draft screen from `generateInitialFactoryRentals`,
+  flowing straight into the existing `createDraftScreenStateFromRentalRecords`
+  with zero anchor-record special-casing, structural typing already
+  compatible). (2) `core.ts` wiring: the terminal record menu's accepted
+  default-NO input (`recordChoice` newly "no", both roundCompleted/roundLost)
+  now short-circuits into a freshly generated draft screen + resets
+  transient state, instead of falling through to the decline-farewell →
+  free-roam-Lobby chain (no new lobby-dialogue surfaces, per the supervisor
+  design decision recorded in the step brief). The subsequent battleRoom
+  handoff, when a `pendingGeneratedRound` snapshot is present, constructs
+  the next round via `createFactoryRoundBattleOrchestrator`'s **already-proven**
+  `generateInitial` path (no `adoptedInitialOpponent` — confirmed exercised
+  by `factoryRoundBattleOrchestrator.test.ts`'s own "uninterrupted
+  orchestrator cursor" case) instead of the anchor-only
+  `createFactoryAnchorSession`; the RNG seed threaded through is the
+  finishing round's own `round.rules.rngValue` ("the ROM's Random() is one
+  continuous global", per that same test's doc). `factoryDraftScreen.ts`
+  gained `selectedRentalSlotIndexes` (mirrors `selectedRentalParty` but
+  returns pool-slot indexes, since `generateInitial` selects by slot not by
+  resolved record). Boot path (challenge 1) untouched — still
+  `ANCHOR_DRAFT_RENTAL_RECORDS`/`createFactoryAnchorSession` unconditionally
+  at `pendingGeneratedRound === null`. (3) Discovered + cataloged **#88**:
+  driving a live-generated round's battle 1 through the real
+  tick()-level command/resolution presentation state machine (only
+  reachable now that round 2 exists) throws "locked action continuation
+  receipt has no immutable matching action snapshot"
+  (`battleResolutionPresentation.ts:3898`) — 6/20 seeds in
+  `npm run soak -- --policy vanilla --seeds 0:20` (14/20 OK), plus 2
+  pre-existing pinned cases in `tests/randomRoundSoak.test.ts` (seed 21,
+  seed 27) whose own original concerns did NOT regress but which no longer
+  stop cleanly at round 1's own terminal now that the driver keeps playing.
+- **Next:** #88 first (it blocks this program's own acceptance gates and
+  any further round-2+ soak work); then continue the continuous-play
+  program (queue item 2's remaining reach: challenge 3+/battle 21 Noland
+  natural-play verification) once unblocked. Queue (ii)/(iii) from 1267/1268
+  (#87 instrument, Brain walk-up scoping) remain untouched/parallel-lane.
+- **Notes:** `npm run typecheck` green throughout. `npm run test:smoke`
+  green (375/375). `npm run build` green. Full `npm test`: **2 failed
+  (both #88-attributable, both in `tests/randomRoundSoak.test.ts`) / 9,819
+  passed / 223 skipped** — did not weaken or paper over those two
+  pre-existing pinned tests; left them red and documented, since silently
+  loosening a regression pin to hide a fresh discovery would be worse than
+  an honest red. No committed compare trace touched; no barrier counts
+  touched. PAPERCUT: none beyond the time cost of discovering #88 itself.
+
 ## 1270 — [main worker, 2026-08-14] **Queue (i) step 3: brain-aware Lobby congrats text**
 
 - **State:** All 3 steps of `docs/noland-brain-post-battle-audit.md` §5's
@@ -81,24 +141,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`battlePointAward: 3` fixture) is untouched — verified unmodified and its
   own tests stayed green; the ordinary-first-win case in the new pure
   function reproduces the same 3 BP value independently.
-
-## 1268 — [supervisor, 2026-08-14 eve] **Session start: both lane branches folded; union gates green; queue (i) dispatched**
-
-- **State:** Orient + folds done; working the 1267 queue. Main worker on
-  queue (i) steps 1+2 (`applyFactoryBrainRoundOutcome` + orchestrator
-  outputs); side worker on queue (ii) (#87 ChooseAction ack-timing model,
-  `battle_ai_switch_items.c`).
-- **Did:** Folded `animation-main` (Flail exact 183→184/276 promotion +
-  Luster Purge evidence/reducer checkpoints, presentation-only) and
-  `rust-main` (4 script leaves: copyfoestats, Pay Day, Role Play,
-  Destiny Bond) into master. Union gates: full npm **1,019 files /
-  9,805 passed / 223 skipped**, build green; cargo native green; wasm
-  rebuilt **509,620 B** `412773e1…`; forced-WASM **18 files / 803
-  tests** green. Oracle freshness FAIL on :8014/:8012 re-confirmed as
-  the known timestamp false positive (all commits since process start
-  are docs/probes/core-rs; `bin/oracle info` serves scene-off v5).
-- **Next:** verify + fold worker results; then queue (i) step 3 (brain
-  congrats text), (iii) walk-up scoping (side), continuous-play program.
-- **Notes:** entry updated at wind-down with final gates/soaks.
-
 
