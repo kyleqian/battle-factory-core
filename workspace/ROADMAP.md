@@ -1098,7 +1098,9 @@ picks from PROGRESS 1273):**
 
 Order for the next runs (stability first): #89 → #90 triage → #87(c)
 calibration (small) → the FAITHFUL walk-up program → chained-round
-distribution-parity breadth.
+distribution-parity breadth. **#87(c) calibration DONE** (2026-08-15,
+PROGRESS 1276): silver Brain-reveal 648/701 → 690/701, gold + pre-ready
+windows unaffected; ISSUES #87 trimmed to a settled mechanism record.
 
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary

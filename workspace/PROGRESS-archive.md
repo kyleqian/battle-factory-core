@@ -1,3 +1,56 @@
+## 1273 — [supervisor, 2026-08-14 eve] **Wind-down: entire 1267 queue closed + continuous play LIVE (battle 21 reachable by natural play); #88 root-caused same-session; all gates green, full-soak baseline re-based post-chaining**
+
+- **State:** 8 worker steps across 2 lanes, zero unresolved failures.
+  Queue (i)/(ii)/(iii) all COMPLETE (ROADMAP annotations updated);
+  continuous-play wiring live. DEFERRED.md remains EMPTY. Two user
+  decisions are ready and waiting (not blockers): walk-up dialogue
+  FAITHFUL/TRIM/SKIP (`docs/noland-walkup-dialogue-scoping.md`,
+  recommendation TRIM) and #87's fix shape (three options in ISSUES).
+- **Did (headlines):** (1) Queue (i): `applyFactoryBrainRoundOutcome`
+  (ROM-table cross-checked: silver 14/gold 15/+10 bonus/symbol grant) +
+  orchestrator `roundOutcome` outputs + brain congrats text; live
+  verification: BP **0→14** + silver symbol flag RAM-pinned
+  (`docs/brain-terminal-live-verification.md`), both congrats
+  scroll-gate ages live-bisected (98, release+32; supervisor applied
+  the off-by-1/off-by-3 src correction). (2) Queue (ii): #87 rounds
+  15-17 — residual = two independent additive legs; ack leg is
+  `AI_TrySwitchOrUseItem` (not move-scoring); Quick-Claw and
+  opponent-identity predicates both FALSIFIED; evidence program
+  complete, fix-shape decision recorded in #87. (3) Queue (iii):
+  walk-up scoping memo (3 maps, ~17/~8 boxes end-to-end). (4)
+  Continuous play: `factoryRoundChaining.ts` + terminal→next-draft
+  path (decision: re-enter fresh generated draft after the record
+  menu, no new lobby surfaces); exposed pre-existing #88 → fixed at
+  root cause (`FaintClearSetData` zeroes status2 on faint;
+  battle_main.c:3272), vanilla soak 14/20→**20/20**; #89 filed
+  (Baton Pass `openpartyscreen`), #90 filed (seed-51 presenting HANG).
+  (5) Lane folds at orient AND wind-down (animation: Flail 184 +
+  Luster Purge 185 promotions, Mega Drain evidence; rust: 6 script
+  leaves) — both lanes at zero unfolded commits at close.
+- **Gates (final union, re-run after a last rust-main tail fold —
+  settorment + snatch leaves, core-rs only):** full npm **1,024 files /
+  9,833 passed / 224 skipped**; build green; cargo native green (62
+  ok-suites); wasm rebuilt **496,864 B** `8b489813…`; forced-WASM
+  **18 files / 803 tests**; soak vanilla **20/20 OK** (run before the
+  core-rs-only tail, which soaks do not exercise); soak full 0:60
+  **50/60** — all
+  9 crashes are the single #89 class (seeds 1,19,21,25,27,37,40,41,57,
+  mostly round-1 surface: full-policy play selects Baton Pass), 1 HANG
+  is #90. NOTE: the prior 60/60 full-soak baseline predates chaining
+  AND this session's driver changes — input streams shifted; vanilla
+  20/20 is the standing regression bar, and #89/#90 are the honest
+  full-policy remainder, not regressions of previously-green behavior.
+- **Next:** (a) #89 — player-side mid-turn Baton Pass switch-in
+  through `beginCommandResolution` (the opcode exists; the wiring
+  gap is diagnosed in the entry); (b) #90 triage (seed 51); (c) the
+  two waiting user decisions above; (d) distribution-parity breadth
+  for chained rounds once #89 lands.
+- **Notes:** oracle freshness FAILs on :8014/:8012 were the known
+  timestamp false positive (verified against commit contents + live
+  `bin/oracle info`). Wasm-artifact papercut hit 3× more this session
+  (now 5; every fresh side worktree). Commits local only — pushing is
+  Kyle's step.
+
 ## 1271 — [main worker, 2026-08-14] **Continuous-play step 1: generated-draft round entry + in-session chaining WIRED; blocked green by newly-exposed #88**
 
 - **State:** Round-chaining wiring (ROADMAP "User decisions 2026-08-14" #2)

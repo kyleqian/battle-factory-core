@@ -5,6 +5,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1276 — [main worker, 2026-08-15] **#87(c) EXECUTED: silver Brain-reveal ready-lag window calibrated (648/701 → 690/701); gold + pre-ready windows untouched; ISSUES #87 trimmed to durable mechanism record + standing rule**
+
+- **State:** #87's queued next-step is done for the one window that
+  currently crosses the ready transition. ISSUES #87 trimmed (not
+  deleted — the mechanism isn't source-predictable and a future
+  crossing window will need the same recipe; kept as a settled-record
+  entry with the standing rule). Full `npm test` (1028 files / 9857
+  passed / 223 skipped) + `npm run build` + `npm run typecheck` green.
+- **Did:** (1) Measured the silver Noland reveal fixture
+  (`factory-round-battle7-noland-reveal-off`, TANGELA/DELCATTY) with
+  the RAM-handshake instrument: formula-relative residual +6; leg-split
+  raw span 4 (switch-in-loop) + 3 (AI-ack) = 7, matching PUPITAR's own
+  +7 split (both probes extended with this fixture as a new scenario,
+  not forked). (2) Threaded a new route-level `isSilverBrainReveal`
+  fact (`frontierBrain.status === "silver"`) through
+  `FactoryBattleStartIntroState`, mirroring `isCanonicalAnchorIntro`'s
+  existing pattern — no battle-number/trace-name branch.
+  `generatedPlayerReadyLag` adds a `MEASURED_SILVER_BRAIN_REVEAL_READY_
+  LAG_OFFSET` (9, resolved against this window's own dense compare —
+  the two RAM probes bound the neighborhood but not the exact tick,
+  same "value the pin needs" convention `GENERATED_PLAYER_READY_LAG`
+  already uses) only on that route. (3) Silver dense compare
+  **648/701 → 690/701**; gold Noland dense compare unchanged at
+  **700/701** (different `frontierBrain.status`, offset never fires);
+  `npm run compare:differential` on Yoshi/Lukas/Magneton (pre-ready
+  windows) vs. parent commit: **PASS, 1656/1656 byte-identical**. (4)
+  Fixed `tools/compare/app-differential.ts`, which still assumed
+  `workspace/` was the git repo root (broke on every commit since the
+  2026-08-11 layout migration — needed to run (3)); now resolves paths
+  relative to `process.cwd()`'s position under the repo root. (5)
+  Pinned with a new Tier-1 test
+  (`tests/factoryRoundIntroGeneralization.test.ts`) asserting the flag
+  is keyed off `frontierBrain.status` correctly (silver true, gold
+  false) and the ready tick shifts by exactly the offset only on that
+  route.
+- **Remaining silver residual (11/701, out of #87's scope):** frames
+  420/503 are present identically with the offset at 0 (pre-existing,
+  unrelated to readiness); frames 647-655 are a render seam right at
+  the not-ready/ready boundary whose width didn't change across every
+  offset value tried (5-10) — an honest cap from a separate,
+  unidentified issue, not a #87 residual.
+- **Next:** walk-up build steps in main (PreBattleRoom general
+  pre-battle menu first); chained-round distribution-parity breadth.
+- **Notes:** PAPERCUT — `app-differential.ts`'s repo-root assumption,
+  ~15 min lost bisecting before finding the fix (item 4 above; fixed in
+  this session, not just worked around). Commits local only — pushing
+  is Kyle's step.
+
 ## 1275 — [supervisor, 2026-08-14 night] **#89 FIXED + #90 FIXED: full-policy soak 0:60 = 60/60 OK (first time); walk-up program started (gold discrepancy resolved, script data extracted)**
 
 - **State:** Queue items (a) #89 and (b) #90 are CLOSED (both deleted
@@ -73,55 +121,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ROADMAP/ISSUES/PROGRESS + the scoping memo's decision section.
   Commits local only — pushing is Kyle's step.
 
-## 1273 — [supervisor, 2026-08-14 eve] **Wind-down: entire 1267 queue closed + continuous play LIVE (battle 21 reachable by natural play); #88 root-caused same-session; all gates green, full-soak baseline re-based post-chaining**
-
-- **State:** 8 worker steps across 2 lanes, zero unresolved failures.
-  Queue (i)/(ii)/(iii) all COMPLETE (ROADMAP annotations updated);
-  continuous-play wiring live. DEFERRED.md remains EMPTY. Two user
-  decisions are ready and waiting (not blockers): walk-up dialogue
-  FAITHFUL/TRIM/SKIP (`docs/noland-walkup-dialogue-scoping.md`,
-  recommendation TRIM) and #87's fix shape (three options in ISSUES).
-- **Did (headlines):** (1) Queue (i): `applyFactoryBrainRoundOutcome`
-  (ROM-table cross-checked: silver 14/gold 15/+10 bonus/symbol grant) +
-  orchestrator `roundOutcome` outputs + brain congrats text; live
-  verification: BP **0→14** + silver symbol flag RAM-pinned
-  (`docs/brain-terminal-live-verification.md`), both congrats
-  scroll-gate ages live-bisected (98, release+32; supervisor applied
-  the off-by-1/off-by-3 src correction). (2) Queue (ii): #87 rounds
-  15-17 — residual = two independent additive legs; ack leg is
-  `AI_TrySwitchOrUseItem` (not move-scoring); Quick-Claw and
-  opponent-identity predicates both FALSIFIED; evidence program
-  complete, fix-shape decision recorded in #87. (3) Queue (iii):
-  walk-up scoping memo (3 maps, ~17/~8 boxes end-to-end). (4)
-  Continuous play: `factoryRoundChaining.ts` + terminal→next-draft
-  path (decision: re-enter fresh generated draft after the record
-  menu, no new lobby surfaces); exposed pre-existing #88 → fixed at
-  root cause (`FaintClearSetData` zeroes status2 on faint;
-  battle_main.c:3272), vanilla soak 14/20→**20/20**; #89 filed
-  (Baton Pass `openpartyscreen`), #90 filed (seed-51 presenting HANG).
-  (5) Lane folds at orient AND wind-down (animation: Flail 184 +
-  Luster Purge 185 promotions, Mega Drain evidence; rust: 6 script
-  leaves) — both lanes at zero unfolded commits at close.
-- **Gates (final union, re-run after a last rust-main tail fold —
-  settorment + snatch leaves, core-rs only):** full npm **1,024 files /
-  9,833 passed / 224 skipped**; build green; cargo native green (62
-  ok-suites); wasm rebuilt **496,864 B** `8b489813…`; forced-WASM
-  **18 files / 803 tests**; soak vanilla **20/20 OK** (run before the
-  core-rs-only tail, which soaks do not exercise); soak full 0:60
-  **50/60** — all
-  9 crashes are the single #89 class (seeds 1,19,21,25,27,37,40,41,57,
-  mostly round-1 surface: full-policy play selects Baton Pass), 1 HANG
-  is #90. NOTE: the prior 60/60 full-soak baseline predates chaining
-  AND this session's driver changes — input streams shifted; vanilla
-  20/20 is the standing regression bar, and #89/#90 are the honest
-  full-policy remainder, not regressions of previously-green behavior.
-- **Next:** (a) #89 — player-side mid-turn Baton Pass switch-in
-  through `beginCommandResolution` (the opcode exists; the wiring
-  gap is diagnosed in the entry); (b) #90 triage (seed 51); (c) the
-  two waiting user decisions above; (d) distribution-parity breadth
-  for chained rounds once #89 lands.
-- **Notes:** oracle freshness FAILs on :8014/:8012 were the known
-  timestamp false positive (verified against commit contents + live
-  `bin/oracle info`). Wasm-artifact papercut hit 3× more this session
-  (now 5; every fresh side worktree). Commits local only — pushing is
-  Kyle's step.
