@@ -1,3 +1,11 @@
+# MOVE_GIGA_DRAIN source/staging checkpoint — remains unsupported (2026-08-14 worker)
+
+- **State:** Coverage remains **186/276 Level-50 exact**, 0 partial, 0 staged, and **90 unsupported**. Giga Drain has no coverage entry or dynamic evidence; Absorb and Mega Drain remain exact controls with no inherited acceptance.
+- **Did:** Added deterministic `gigaDrainSourceAudit.ts`, a Tier-1 source/staging ratchet, and complete legal three-Pokémon bilateral Roselia→Onix `mechanicLab` fixtures. The audit pins the even **0x082d1242..0x082d12b1** root through cleanup, 409-byte `GigaDrainAbsorbEffect`, shared `HealingEffect`, complete 15-node graph, blend-12/animation-0/monbg/alpha/register paths, eight Giga Drain-audio groups with **24** literal variable-amplitude ORBS, and the lowest legal Level-50 carrier `FRONTIER_MON_ROSELIA_2` (set 276).
+- **Source correction:** Giga Drain owns **zero** `gFireSpreadSpriteTemplate` commands; the seven source commands belong to `FireSpreadEffect`. The stale three-FireSpread wording in the absorption-orb goal is corrected, while Giga Drain remains unsupported.
+- **Verified:** Standalone audit, focused Giga/Mega/boundary tests **11/11**, `npm run animation:audit`, `npm run animation:coverage` (**186/276 exact, 90 unsupported**), and `npm run typecheck` are green. After rebuilding the gitignored WASM prerequisite (`08436ef1…`, 509,475 bytes), full `npm test` passes **1,024 files / 9,827 tests / 223 skipped** and `npm run build` passes (**673 modules**). No oracle command, probe, capture, reducer, presentation seam, compositor, runtime code, latch claim, or coverage credit was added.
+- **Next:** Collect Giga Drain’s own fresh bilateral dense Scene-ON evidence through the shared seam, then independently derive/accept any reducer and compositor before promotion. No sibling receives this checkpoint.
+
 # MOVE_MEGA_DRAIN exact — bilateral Scene-ON promotion (2026-08-14 worker)
 
 - **State:** Coverage advances **185→186/276 Level-50 exact**, with 0 partial, 0 staged, and **91→90 unsupported**. Mega Drain alone promotes; Absorb remains a source-identity control, while Dream Eater and Giga Drain remain independently unsupported.
