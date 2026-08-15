@@ -554,6 +554,11 @@ import {
   type MistBallState,
 } from "./mistBall.ts";
 import {
+  lusterPurgeAtAge,
+  type LusterPurgeState,
+  type LusterPurgeVisualRandom,
+} from "./lusterPurge.ts";
+import {
   tailGlowAtAge,
   type TailGlowState,
 } from "./tailGlow.ts";
@@ -893,6 +898,7 @@ export interface SceneOnPresentationBattler {
     | "IVYSAUR"
     | "KADABRA"
     | "LATIAS"
+    | "LATIOS"
     | "REGISTEEL"
     | "LOMBRE"
     | "SHUPPET"
@@ -2378,6 +2384,24 @@ export interface SceneOnMistBallConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Narrow immutable Scene-ON seam for the legal Latios Luster Purge body. */
+export interface SceneOnLusterPurgeConfig {
+  readonly move: "LUSTER_PURGE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly attackerBattlerId: 0 | 1;
+  readonly attackerSpriteSlot: number;
+  readonly targetSpriteSlot: number;
+  readonly targetInitialX2: number;
+  readonly circleCenter: Readonly<{ x: number; y: number }>;
+  readonly monbgCenter: Readonly<{ x: number; y: number }>;
+  readonly monbgPosition: Readonly<{ x: number; y: number }>;
+  readonly hitsplatCenter: Readonly<{ x: number; y: number }>;
+  /** Six controller-owned pairs of visual Random2 inputs; never consumed here. */
+  readonly visualRandom: Readonly<LusterPurgeVisualRandom>;
+}
+
 export interface SceneOnTailGlowConfig {
   readonly move: "TAIL_GLOW";
   readonly attacker: SceneOnPresentationBattler;
@@ -2961,6 +2985,7 @@ export type SceneOnMoveConfig =
   | SceneOnSandstormConfig
   | SceneOnHeatWaveConfig
   | SceneOnMistBallConfig
+  | SceneOnLusterPurgeConfig
   | SceneOnTailGlowConfig
   | SceneOnTailWhipConfig
   | SceneOnAgilityConfig
@@ -3138,6 +3163,8 @@ export type SceneOnHeatWavePresentationState =
   SceneOnMovePresentationState<SceneOnHeatWaveConfig>;
 export type SceneOnMistBallPresentationState =
   SceneOnMovePresentationState<SceneOnMistBallConfig>;
+export type SceneOnLusterPurgePresentationState =
+  SceneOnMovePresentationState<SceneOnLusterPurgeConfig>;
 export type SceneOnTailGlowPresentationState =
   SceneOnMovePresentationState<SceneOnTailGlowConfig>;
 export type SceneOnTailWhipPresentationState =
@@ -3607,6 +3634,11 @@ export interface SceneOnHeatWaveView extends HeatWaveState {
 
 export interface SceneOnMistBallView extends MistBallState {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnLusterPurgeView extends LusterPurgeState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -7054,6 +7086,31 @@ export function sceneOnMistBallView(
     ...mistBallAtAge(state.age, {
       attacker: state.config.attacker.geometry.animationCenter,
       target: state.config.target.geometry.animationCenter,
+    }),
+  };
+}
+
+/** `age=0` is Move_LUSTER_PURGE's first retained source-script frame. */
+export function sceneOnLusterPurgeView(
+  state: SceneOnLusterPurgePresentationState,
+): SceneOnLusterPurgeView {
+  if (state.config.move !== "LUSTER_PURGE") {
+    throw new Error(`expected LUSTER_PURGE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...lusterPurgeAtAge(state.age, {
+      attackerSide: state.config.attacker.geometry.side,
+      attackerBattlerId: state.config.attackerBattlerId,
+      attackerSpriteSlot: state.config.attackerSpriteSlot,
+      targetSpriteSlot: state.config.targetSpriteSlot,
+      targetInitialX2: state.config.targetInitialX2,
+      circleCenter: state.config.circleCenter,
+      monbgCenter: state.config.monbgCenter,
+      targetCenter: state.config.hitsplatCenter,
+      monbgPosition: state.config.monbgPosition,
+      visualRandom: state.config.visualRandom,
     }),
   };
 }
