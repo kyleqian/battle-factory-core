@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { BRAIN_MOVEMENT_SETTLE_ELAPSED, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 import { drawMessageBoxFrame, drawMessageBoxText } from "./prebattleRoomRender.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
@@ -82,7 +82,7 @@ interface NpcSprite {
 
 const roomLayout = layout as RoomLayout;
 const roomTileset = tileset as RoomTileset;
-const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponents: Record<string, NpcSprite> };
+const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; noland: NpcSprite; opponents: Record<string, NpcSprite> };
 
 function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, screenY: number, fadeY: number): void {
   for (let i = 0; i < 4; i += 1) {
@@ -331,3 +331,42 @@ export function renderBattleRoomEntryScene(
 }
 
 const INITIAL_RENDER_STATE: BattleRoomState = { phase: "entering", elapsed: 0 };
+
+/**
+ * Walk-up build step B1: renders the Frontier-Brain BattleRoom entrance
+ * branch (battleRoom.ts's `brain*` phases) - Noland already visible at
+ * (7,9) from the first frame (no hidden-then-walked-in ordinary-opponent
+ * path runs), the "Get a move on!" box appears BEFORE any movement, and
+ * only once dismissed does Noland's own walk run simultaneously with the
+ * decoy/scientists (see battleRoom.ts's module doc for the full mechanism
+ * and its "not independently RAM-probed this session" caveat). No camera
+ * pan happens until `brainMoving` - the room/Noland/scientists all render
+ * at the static initial origin through `brainEntering`/`brainMsgboxIdle`/
+ * `brainMsgboxClosing`, since `entryStep`/`scientistTurnFrame`/`nolandStep`
+ * all naturally hold their `elapsed=0` values there.
+ */
+export function renderBattleRoomBrainEntranceScene(
+  fb: Uint8Array,
+  state: BattleRoomState,
+  bgFadeY = 0,
+  objFadeY = 0,
+): void {
+  const movementElapsed = state.phase === "brainMoving"
+    ? state.elapsed
+    : state.phase === "brainSettled"
+      ? BRAIN_MOVEMENT_SETTLE_ELAPSED
+      : 0;
+  const step = entryStep(movementElapsed);
+  const origin = { x: roomLayout.initialCameraOriginPx.x, y: roomLayout.initialCameraOriginPx.y - step.camPanY };
+  drawRoomTiles(fb, origin, bgFadeY);
+  const turn = scientistTurnFrame(movementElapsed);
+  for (const scientist of roomLayout.objects.scientists) {
+    const pos = tileScreenPos(scientist.tile, origin);
+    const hFlip = turn.turned && scientist.turn === "east";
+    drawNpcFrame(fb, roomNpcs.scientist, turn.frame, pos, hFlip, objFadeY);
+  }
+  drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
+  const noland = nolandStep(movementElapsed);
+  drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);
+  drawOpponentMsgbox(fb, msgboxVisual(state), battleRoomQuote(state));
+}
