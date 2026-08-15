@@ -32,6 +32,20 @@ pixel hashes are unchanged.
   `overrides.parties` is permitted, to pin a known Brain roster for
   deterministic replays — the AI still thinks with the Brain's real
   aggression mask either way; `overrides.battlers` is rejected.
+  For `challengeNum` 5 the lab also sets the Factory silver symbol flag
+  before the route runs: gold is unreachable in the real game without it,
+  and `GetFrontierBrainStatus` otherwise reads NOT_READY at streak 41, so
+  the overworld would present the ordinary-trainer entrance instead of gold
+  Noland's (the battle itself was always the Brain's — party generation
+  keys on the trainer ID — but the entrance, intro text, and any
+  presentation content around the battle were the ordinary trainer's).
+  Challenge-5 fixtures captured before this derivation existed carry that
+  mis-staged presentation and must be re-run.
+- `factoryBrain` with `walkup: true` stages the *approach* to that battle
+  instead of the battle itself — the post-battle-20/41 PreBattleRoom
+  re-entry: heal line, Noland's phone call, the GO ON/RECORD/REST/RETIRE
+  ask-ready menu, and the pre-head swap prompt. See "Frontier-Brain walk-up
+  staging" below.
 
 In Emerald's Battle Factory, trainer identity and opponent set generation are
 separate selections within the current challenge band. The Factory does not
@@ -135,6 +149,80 @@ This does not reach the pre-battle attendant scouting-report dialogue itself
 — that happens *before* `new_session()`'s canonical anchor. `BattleLab.
 preview_report()` (below) reaches it from a separate, earlier anchor, with a
 real constraint: it can pick a seed, not a specific opponent.
+
+## Frontier-Brain walk-up staging (`factoryBrain` + `walkup: true`)
+
+The ordinary `factoryBrain` staging cannot reach the walk-up scene: the
+canonical checkpoint's parked field script is the *fresh-draft* PreBattleRoom
+entry, which resumes after the rental draft directly at `EnterBattleRoom`
+("Right this way, please!") and never runs the post-battle re-entry the map's
+OnFrame handler gates on `VAR_0x8006 == 1` (the heal line, the phone call,
+the ask-ready menu, the pre-head swap prompt).
+
+`walkup: true` closes that gap without inventing any content. While the
+rental draft runs, the lab redirects the parked script pointer from its
+fresh-draft resume point to the ROM's own post-win fragment (the
+BattleRoom's `DefeatedOpponent` label). When the draft confirm returns to
+the field, the ROM itself performs the genuine post-win bookkeeping (the
+win-streak-swaps stat, the streak increment, the battle-number increment —
+the lab stages the *pre-win* values, so the increments land on the same
+final values the plain staging writes directly), sets `VAR_0x8006 = 1`, and
+warps back into the PreBattleRoom at (8, 8) — from where OnWarp positions
+the attendant and OnFrame runs the genuine `ReturnToRoomFromBattle` scene,
+byte-for-byte the ROM's own 21st/42nd-battle path.
+
+The route stops at the first input the caller should own: **frame zero is
+the open ask-ready multichoice** (GO ON/RECORD/REST/RETIRE, cursor on
+GO ON, "The FACTORY HEAD is demanding you." box behind it). Everything
+before it — draft, warp-back, heal line, phone call — is reachable through
+`preCheckpointCaptureFrames`; everything after it (GO ON, the swap YES/NO,
+RECORD, REST, RETIRE, the guided walk into the BattleRoom Brain entrance,
+the speech, the battle itself) is driven by the request's own `trace`.
+
+The response omits `opponentParty` (no battle has initialized — Noland's
+party generates later, when a GO ON trace actually reaches
+`FillFactoryBrainParty`; it stays seed-deterministic) and instead echoes the
+staged overworld facts: `walkup: true`, `factoryWinStreak` and
+`curChallengeBattleNum` (both read back after the ROM's own increments, so
+they double as proof the post-win fragment executed), `factorySymbols` (0
+silver / 1 gold), and `askReadyMenuVariant` (`"record"` for the real
+four-option menu — the lab clears `disableRecordBattle`, matching the
+genuine post-battle-20 state — or `"noRecord"` if a future staging ever
+lands on the three-option variant).
+
+Boundaries, stated honestly:
+
+- **No `overrides`.** The party-staging hooks poll for battle
+  initialization, which never happens before this checkpoint; rejected at
+  validation.
+- **The swap pool's per-mon details are not staged.** `ReturnToRoomFromBattle`'s
+  own `factory_setopponentmons` copies `gFrontierTempParty` and the beaten
+  opponent's `gEnemyParty` records into the swap pool; on this staged path
+  no battle 20 happened, so those records hold whatever the checkpoint
+  holds (deterministic, but not a genuine beaten-opponent party). Answering
+  the swap prompt with YES shows a swap screen whose contents are therefore
+  not acceptance-grade; the No path is unaffected.
+- **RECORD's save flow is not genuine.** The menu itself and the RECORD
+  YES/NO prompt text are the real scripts, but no battle was recorded on
+  this route, so what a RECORD-YES actually saves reflects staged
+  recording-buffer state, not a genuine battle-20 recording.
+- **The pre-warp frames differ from real play.** Genuine play warps back
+  from the BattleRoom; this staging warps PreBattleRoom-to-PreBattleRoom
+  out of the draft fade, so the frames *before* the warp completes (and the
+  music transition into it) are staging artifacts. Everything from the
+  warp-in onward is the genuine path.
+
+The walk-up internal route is shorter than the ordinary one (worst case
+2706 frames, pinned by test), so `preCheckpointCaptureFrames` keeps its
+ordinary bound.
+
+With a Battle Scene OFF service running, verify the walk-up staging live
+with:
+
+```sh
+POKEBENCH_ORACLE_URL=http://127.0.0.1:8014 \
+  python3 oracle/battle-lab-walkup-smoke-test.py
+```
 
 ## Report preview (attendant scouting-report dialogue)
 

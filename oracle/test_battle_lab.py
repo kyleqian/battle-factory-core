@@ -15,8 +15,11 @@ from battle_lab import (
     PRE_REPORT_ANCHOR_SHA256,
     BattleLab,
     FacilityCatalog,
+    SELECT_CONFIRM_ACCEPT,
+    SELECT_CONFIRM_TO_ACTION_MENU,
     SELECT_TO_ACTION_MENU,
     SUBSTRUCT_POSITIONS,
+    WALKUP_MAX_ACKS,
     rental_selection_route,
     validate_request,
 )
@@ -417,6 +420,52 @@ class ValidationTests(unittest.TestCase):
                 "battle-scene-off",
             )
 
+    def test_walkup_defaults_false_and_normalizes(self):
+        self.assertFalse(
+            validate_request(brain_request(), "battle-scene-off")["walkup"]
+        )
+        value = validate_request(brain_request(walkup=True), "battle-scene-off")
+        self.assertTrue(value["walkup"])
+        # The identity stays the brain battle's; prepare() stages the
+        # pre-win values and lets the ROM's own post-win fragment increment.
+        self.assertEqual(value["battleNum"], 6)
+        self.assertEqual(value["trainerId"], 1022)
+
+    def test_walkup_accepts_gold_encounter(self):
+        value = validate_request(
+            brain_request(challengeNum=5, walkup=True), "battle-scene-off"
+        )
+        self.assertEqual(value["challengeNum"], 5)
+        self.assertTrue(value["walkup"])
+
+    def test_walkup_rejects_non_boolean(self):
+        with self.assertRaisesRegex(ValueError, "walkup must be a boolean"):
+            validate_request(brain_request(walkup=1), "battle-scene-off")
+
+    def test_walkup_is_factory_brain_only(self):
+        with self.assertRaisesRegex(ValueError, "only available in mode 'factoryBrain'"):
+            validate_request(request(walkup=True), "battle-scene-off")
+        with self.assertRaisesRegex(ValueError, "only available in mode 'factoryBrain'"):
+            validate_request(
+                request(mode="mechanicLab", walkup=True), "battle-scene-off"
+            )
+
+    def test_walkup_rejects_all_overrides(self):
+        with self.assertRaisesRegex(ValueError, "walkup does not permit overrides"):
+            validate_request(
+                brain_request(
+                    walkup=True,
+                    overrides={
+                        "parties": {
+                            "player": [custom_mon(1), custom_mon(2), custom_mon(3)],
+                            "opponent": [custom_mon(4), custom_mon(5), custom_mon(6)],
+                        }
+                    },
+                ),
+                "battle-scene-off",
+            )
+
+
     def test_pre_checkpoint_capture_frames_default_empty(self):
         value = validate_request(request(), "battle-scene-off")
         self.assertEqual(value["preCheckpointCaptureFrames"], [])
@@ -595,6 +644,27 @@ class CatalogAndLegalityTests(unittest.TestCase):
         worst_case_internal_frame = 120 + max(lengths) + ACTION_MENU_MAX_ACKS * (120 + 2 + 12)
         self.assertEqual(worst_case_internal_frame, 3664)
         self.assertLess(worst_case_internal_frame, MAX_PRE_CHECKPOINT_FRAME)
+
+    def test_walkup_route_length_stays_under_its_own_frame_bound(self):
+        # The walk-up route swaps the fresh-draft intro drive for the
+        # confirm-accept slice plus the ask-ready acknowledgement loop; the
+        # shared pre-checkpoint frame bound must stay above its worst case.
+        self.assertEqual(
+            SELECT_CONFIRM_TO_ACTION_MENU[: len(SELECT_CONFIRM_ACCEPT)],
+            SELECT_CONFIRM_ACCEPT,
+        )
+        confirm_lengths = {
+            sum(
+                frames
+                for frames, _ in rental_selection_route(
+                    combo, through_confirm_only=True
+                )
+            )
+            for combo in permutations(range(6), 3)
+        }
+        worst_case = 120 + max(confirm_lengths) + WALKUP_MAX_ACKS * (120 + 2 + 12)
+        self.assertEqual(worst_case, 2706)
+        self.assertLess(worst_case, MAX_PRE_CHECKPOINT_FRAME)
 
     def test_attendant_dialogue_route_length_is_pinned(self):
         # A literal extraction of bootstrap/factory.json's segments[193:225]
