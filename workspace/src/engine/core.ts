@@ -99,9 +99,10 @@ import {
 } from "./prebattleRoomRender.ts";
 import {
   advanceBattleRoom,
+  battleRoomMsgboxClosingPhase,
   battleRoomQuoteInputReady,
+  battleRoomStateForOpponent,
   entryStep,
-  INITIAL_BATTLE_2_ROOM_STATE,
   INITIAL_BATTLE_ROOM_STATE,
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
   msgboxVisual,
@@ -110,7 +111,7 @@ import {
   WARP_FADE_TO_ROOM_ELAPSED,
   type BattleRoomState,
 } from "./battleRoom.ts";
-import { renderBattleRoomEntryScene } from "./battleRoomRender.ts";
+import { renderBattleRoomBrainEntranceScene, renderBattleRoomEntryScene } from "./battleRoomRender.ts";
 import {
   applyBattleTransitionOverlay,
   battleIntroSceneAssemblyDisplayLag,
@@ -657,9 +658,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   let factoryTerminal = state.factoryTerminal;
   let factoryRoundBattleOrchestrator =
     state.factoryRoundBattleOrchestrator;
-  const currentTrainerPresentation = factoryTrainerPresentationForOpponent(
+  const currentOpponent =
     state.factoryRoundBattleOrchestrator?.round.rules.currentOpponent
-      ?? state.roundController?.rules.currentOpponent,
+      ?? state.roundController?.rules.currentOpponent;
+  const currentTrainerPresentation = factoryTrainerPresentationForOpponent(
+    currentOpponent,
   ) ?? undefined;
   const pendingTerminalCommand = pendingFactoryTerminalCommand(
     factoryRoundBattleOrchestrator,
@@ -1026,16 +1029,18 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         advancedPrebattleRoom.elapsed === WARP_FADE_TO_ROOM_ELAPSED
       ) {
         prebattleRoom = null;
-        battleRoom = {
-          ...INITIAL_BATTLE_2_ROOM_STATE,
-          trainerPresentation: currentTrainerPresentation,
-        };
+        // Walk-up build step B1: the round state's own opponent.frontierBrain
+        // field (not a battle-number/trace check) selects the brain-ready
+        // entrance branch here - see battleRoom.ts's battleRoomStateForOpponent
+        // doc. Behaviorally identical to the old hardcoded shape whenever
+        // frontierBrain is unset (every ordinary opponent).
+        battleRoom = battleRoomStateForOpponent(currentOpponent, currentTrainerPresentation);
       }
     } else if (battleRoom) {
       if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
         battleRoom = {
           ...battleRoom,
-          phase: "msgboxClosing",
+          phase: battleRoomMsgboxClosingPhase(battleRoom),
           elapsed: 0,
         };
       } else {
@@ -1053,6 +1058,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             rngValue = advanceRngValue(rngValue);
           }
         }
+        // Walk-up build step B1's own handoff stops here: "brainSettled" is
+        // the named seam for B2's speech step, deliberately left un-hooked
+        // (no auto-transition into beginFactoryRoundBattleStartIntro, which
+        // is the BATTLE SCENE's own intro and only starts after
+        // DoSpecialTrainerBattle - the silver/gold personality speech runs
+        // BEFORE that, still inside this room scene, per
+        // docs/noland-walkup-dialogue-scoping.md §1.3/1.4).
         if (
           battleRoom.phase === "settled" &&
           battleRoom.elapsed === BATTLE_2_SCENE_HANDOFF_ELAPSED
@@ -2363,6 +2375,18 @@ function blackFrame(): Uint8Array {
  */
 function renderBattleRoomState(state: EngineState): Uint8Array {
   const b = state.battleRoom!;
+  if (b.frontierBrainWalkup) {
+    // Walk-up build step B1: the brain branch never reaches a "settled"
+    // Frontier-circle transition this session (that belongs after B2's
+    // speech, out of scope) - just the fade-in during brainEntering, same
+    // FADE_IN table/convention as the ordinary path.
+    const fadeElapsed = b.phase === "brainEntering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
+    const bgY = bgFadeY(fadeElapsed, FADE_IN);
+    const objY = objFadeY(fadeElapsed, FADE_IN);
+    const fb = createFramebuffer();
+    renderBattleRoomBrainEntranceScene(fb, b, bgY, objY);
+    return fb;
+  }
   const fallbackTransition = b.encounter === "jenson"
     ? "asymmetricSpiralInSeq"
     : "circlesMeet";
