@@ -5,6 +5,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1270 — [main worker, 2026-08-14] **Queue (i) step 3: brain-aware Lobby congrats text**
+
+- **State:** All 3 steps of `docs/noland-brain-post-battle-audit.md` §5's
+  worklist done (each its own green commit). Queue (i) "consequences" is
+  complete; next is queue (ii)/(iii) per PROGRESS 1268 (#87's ack-timing
+  instrument, Brain walk-up scoping), then the continuous-play program.
+- **Did:** `EventScript_WonChallenge`'s `frontier_isbrain` branch
+  (`BattleFrontier_BattleFactoryLobby/scripts.inc:38-46`,
+  `Text_CongratsForDefeatingHead:447-450`, re-verified against the reference
+  decomp, not just the audit doc) is now selected in
+  `factoryTerminalPresentation.ts`/`factoryTerminalRender.ts` iff the final
+  opponent carries `frontierBrain` — matching `IsTrainerFrontierBrain`
+  (`gTrainerBattleOpponent_A == TRAINER_FRONTIER_BRAIN`) exactly, independent
+  of symbol status. Threaded `currentOpponent` through the `roundCompleted`
+  presentation command (previously `playerParty`-only) so the terminal can
+  key off it, same as `roundLost` already did. The Brain text's `\n`+`\l`
+  shape (3 lines with a mid-message scroll) reuses the generic scroll
+  mechanic the `award` box already implements (same `awardScrollTicks`(4)/
+  `awardThirdLineTextDelay`(7) constants — generic printer animation, not
+  award-text-specific), with its own two gate ages derived via the "input
+  accepted exactly on the tick the last glyph draws" rule that reproduces
+  `congratulationsInputReadyAge`/`awardScrollInputDelay`/
+  `awardDefaultInputDelay` (102/69/41) with zero slack against the three
+  existing pinned constants — flagged in a doc comment as formula-derived,
+  since no live oracle trace of a Brain win reaching the terminal exists yet
+  (blocked on queue-item-4's not-yet-built harness `factoryBrain` staging
+  mode) to probe fresh timing against.
+- **Next:** queue (ii) — #87's opponent-AI `ChooseAction` ack-timing
+  instrument (`battle_ai_switch_items.c`); queue (iii) — Brain walk-up
+  dialogue scoping only; then the continuous-play program (generated-draft
+  round entry + round chaining, PROGRESS 1267).
+- **Notes:** `tests/factoryTerminalPresentation.test.ts` — new case pins the
+  Brain congrats' byte sequence (encoded via the same `charmap.json` table
+  the renderer uses, cross-validated char-by-char against every known code
+  in the existing `encodedBytes` tables since `factory-terminal-messages.json`
+  has no pre-expanded encoding for this string yet); negative case pins the
+  ordinary text's bytes straight from the JSON's own pre-expanded
+  `regularCongrats.encodedBytes`, unchanged. Full `npm test` green (1020
+  files / 9,813 passed / 223 skipped, up 2 from 1269), `npm run build`
+  green, `npm run typecheck` green throughout. No barrier counts touched.
+  PAPERCUT: none this session.
+
 ## 1269 — [main worker, 2026-08-14] **Queue (i) steps 1+2: `applyFactoryBrainRoundOutcome` ported + wired as round-controller outputs**
 
 - **State:** Steps 1-2 of `docs/noland-brain-post-battle-audit.md` §5's
@@ -59,39 +101,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   congrats text), (iii) walk-up scoping (side), continuous-play program.
 - **Notes:** entry updated at wind-down with final gates/soaks.
 
-## 1267 — [planning session, 2026-08-14] **Next-run queue set (user decision): Noland post-battle consequences → #87 instrument → walk-up scoping; continuous-play bar audited — two wiring gaps named**
-
-- **State:** Docs/ledger only — no `src/`, oracle, or test changes. The
-  user ordered the next main-lane work and named the follow-on
-  objective; both recorded in ROADMAP.md's "User decisions (2026-08-14,
-  planning session)" block.
-- **Did:** (1) Verified the Brain program's remaining-list status:
-  (a) harness lab mode LIVE (top-layer `33354440`; §5.2 consumers per
-  1266) and (c) presentation ran end-to-end — only (b) post-battle
-  consequences remains. (2) Queued, in order: (i) consequences — steps
-  1-3 of `docs/noland-brain-post-battle-audit.md` §5 (BP award table +
-  the +10 brain bonus, symbol grant + BP as round-controller OUTPUTS,
-  brain congrats text; the step-4 harness seam now exists, so the
-  numbers are live-verifiable); (ii) #87's named instrument (the
-  opponent-AI `ChooseAction` ack-timing model,
-  `battle_ai_switch_items.c`); (iii) Brain walk-up dialogue — SCOPING
-  ONLY (present faithful/trim/skip options; do not build). (3) Audited
-  the user's continuous-play bar ("boot and play rounds indefinitely at
-  distribution parity") against the code: TWO wiring gaps — the draft
-  screen is built exactly once, at boot, from the captured anchor
-  records (`core.ts:581` is the only construction site;
-  `factoryRentalGeneration.ts` is proven but unwired into any
-  next-round entry), and the roundCompleted terminal has no continue
-  path into a next round's draft (no challenge advance, no in-session
-  streak carry — battle 21/silver Noland is unreachable by natural
-  play).
-- **Next:** (a) run queue item (i) — the pure outcome function first
-  (audit doc §5 step 1 acceptance), then orchestrator wiring, then the
-  congrats text; (b) items (ii)/(iii) in order; (c) after (i): the
-  continuous-play program (generated-draft round entry + round chaining
-  with in-session streak/symbol/BP carry; cross-session saving stays
-  OUT of scope).
-- **Notes:** Top-layer session; workspace edits limited to
-  ROADMAP/PROGRESS per the user's queue request. Entry 1264 rotated to
-  the archive. Commits local only — pushing is the user's step.
 
