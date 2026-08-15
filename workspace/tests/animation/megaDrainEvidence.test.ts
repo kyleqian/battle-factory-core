@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 const fixture = JSON.parse(readFileSync(
@@ -58,6 +59,12 @@ describe("MOVE_MEGA_DRAIN dense Scene-ON evidence", () => {
     expect(probe).toContain("MOVE_ID = 202 if IS_GIGA else 72");
     expect(probe).toContain('MOVE_NAME = "Move_GIGA_DRAIN" if IS_GIGA else "Move_MEGA_DRAIN"');
     expect(probe).toContain('MOVE_END_NAME = "GigaDrainAbsorbEffect" if IS_GIGA else "MegaDrainAbsorbEffect"');
+    for (const [, evidence] of orientationEntries) {
+      const dense = JSON.parse(gunzipSync(readFileSync(evidence.denseState)).toString("utf8"));
+      expect(Object.keys(dense.songHeaders)).toEqual([
+        "SE_M_ABSORB", "SE_M_BUBBLE3", "SE_M_ABSORB_2",
+      ]);
+    }
   });
 
   it.each(orientationEntries)("pins repeatable source/state/RGB/map receipts for %s", (_orientation, evidence) => {

@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 const fixture = JSON.parse(readFileSync("tools/compare/fixtures/dream-eater-evidence.json", "utf8")) as Record<string, any>;
@@ -25,6 +26,11 @@ describe("MOVE_DREAM_EATER bilateral Scene-ON evidence checkpoint", () => {
       expect(sha(evidence.rawRgbArchive)).toBe(evidence.rawRgbArchiveSha256);
       expect(sha(evidence.changeMap)).toBe(evidence.changeMapSha256);
       expect(evidence.repeatProbeJsonSha256).toBe(evidence.probeJsonSha256);
+      const dense = JSON.parse(gunzipSync(readFileSync(evidence.denseState)).toString("utf8"));
+      expect(Object.keys(dense.songHeaders)).toEqual([
+        "SE_M_ABSORB", "SE_M_BUBBLE3", "SE_M_GIGA_DRAIN", "SE_M_ABSORB_2",
+        "SE_M_PSYBEAM", "SE_M_MINIMIZE", "SE_M_SWAGGER",
+      ]);
     }
   });
 

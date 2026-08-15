@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 const fixture = JSON.parse(readFileSync(
@@ -62,6 +63,10 @@ describe("MOVE_GIGA_DRAIN bilateral Scene-ON evidence", () => {
       expect(evidence.repeatProbeJsonSha256).toBe(evidence.probeJsonSha256);
       expect(evidence.sourceWindow).toMatchObject({ frameCount: 230 });
       expect(evidence.rawRgbArchiveMemberCount).toBe(230);
+      const dense = JSON.parse(gunzipSync(readFileSync(evidence.denseState)).toString("utf8"));
+      expect(Object.keys(dense.songHeaders)).toEqual([
+        "SE_M_ABSORB", "SE_M_BUBBLE3", "SE_M_GIGA_DRAIN", "SE_M_ABSORB_2",
+      ]);
       expect(evidence.latches).toMatchObject({
         hardwareOamEqualsPrecedingSoftware: "229/229",
         hardwareMatricesEqualsPrecedingSoftware: "229/229",

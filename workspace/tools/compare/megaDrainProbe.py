@@ -125,12 +125,16 @@ def main() -> None:
     song_headers = {
         "SE_M_ABSORB": nm["se_m_absorb"],
         "SE_M_BUBBLE3": nm["se_m_bubble3"],
-        "SE_M_GIGA_DRAIN": nm["se_m_giga_drain"],
-        "SE_M_ABSORB_2": nm["se_m_absorb_2"],
-        "SE_M_PSYBEAM": nm["se_m_psybeam"],
-        "SE_M_MINIMIZE": nm["se_m_minimize"],
-        "SE_M_SWAGGER": nm["se_m_swagger"],
     }
+    if IS_GIGA or IS_DREAM:
+        song_headers["SE_M_GIGA_DRAIN"] = nm["se_m_giga_drain"]
+    song_headers["SE_M_ABSORB_2"] = nm["se_m_absorb_2"]
+    if IS_DREAM:
+        song_headers.update({
+            "SE_M_PSYBEAM": nm["se_m_psybeam"],
+            "SE_M_MINIMIZE": nm["se_m_minimize"],
+            "SE_M_SWAGGER": nm["se_m_swagger"],
+        })
 
     def u8(address: int) -> int:
         return oracle.read_u8(address)
