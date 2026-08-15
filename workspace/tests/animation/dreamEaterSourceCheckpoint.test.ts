@@ -33,7 +33,7 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
     ], { encoding: "utf8" }));
     expect(audit).toMatchObject({
       move: "MOVE_DREAM_EATER",
-      status: "unsupported",
+      status: "exact",
       sourceBounds: {
         start: "0x082d2de7", endExclusive: "0x082d2e51", bytes: 106,
         rawSymbolType: "d",
@@ -67,7 +67,7 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
         MOVE_ABSORB: "exact control only; no Dream Eater latch, timeline, or acceptance inheritance",
         MOVE_MEGA_DRAIN: "exact control only; no Dream Eater latch, timeline, or acceptance inheritance",
         MOVE_GIGA_DRAIN: "exact control only; no Dream Eater latch, timeline, or acceptance inheritance",
-        MOVE_DREAM_EATER: "source/staging checkpoint only; remains independently unsupported",
+        MOVE_DREAM_EATER: "independently exact at 533/533 dense production framebuffer rows",
       },
     });
     expect(audit.scripts.Move_DREAM_EATER).toEqual([
@@ -152,7 +152,7 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
         "src/data/gen/battle-frontier-mons.json:entries",
       ],
     });
-    expect(audit.latchRequirement).toContain("No display latch is measured here");
+    expect(audit.latchRequirement).toContain("ScaleMonAndRestore affine at RAM+2");
   });
 
   it.each(scenarios)("keeps complete legal, capture-free bilateral staging in %s", (path) => {
@@ -193,7 +193,7 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
       : "15d14016609af95730486d56c5c1331b7fe5d44f4d37913b8a79f9841fd40e08");
   });
 
-  it("leaves Dream Eater unsupported while its exact siblings are controls only", () => {
+  it("promotes only Dream Eater while its exact siblings remain controls", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as {
       entries: Array<{ move: string; status: string }>;
       queue: string[];
@@ -201,10 +201,10 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
     for (const move of ["MOVE_ABSORB", "MOVE_MEGA_DRAIN", "MOVE_GIGA_DRAIN"]) {
       expect(coverage.entries.find((entry) => entry.move === move)).toMatchObject({ status: "exact" });
     }
-    expect(coverage.entries.find((entry) => entry.move === "MOVE_DREAM_EATER")).toBeUndefined();
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_DREAM_EATER")).toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(187);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(188);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 187/276 exact, 0 partial, 0 staged, 89 unsupported");
+    expect(report).toContain("Level 50: 188/276 exact, 0 partial, 0 staged, 88 unsupported");
   });
 });

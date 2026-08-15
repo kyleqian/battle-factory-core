@@ -602,7 +602,7 @@ if (failed.length) throw new Error(`MOVE_DREAM_EATER source/staging contract cha
 
 console.log(JSON.stringify({
   move: "MOVE_DREAM_EATER",
-  status: "unsupported",
+  status: "exact",
   sourceBounds: {
     start: "0x082d2de7",
     endExclusive: "0x082d2e51",
@@ -669,7 +669,7 @@ console.log(JSON.stringify({
     MOVE_ABSORB: "exact control only; no Dream Eater latch, timeline, or acceptance inheritance",
     MOVE_MEGA_DRAIN: "exact control only; no Dream Eater latch, timeline, or acceptance inheritance",
     MOVE_GIGA_DRAIN: "exact control only; no Dream Eater latch, timeline, or acceptance inheritance",
-    MOVE_DREAM_EATER: "source/staging checkpoint only; remains independently unsupported",
+    MOVE_DREAM_EATER: "independently exact at 533/533 dense production framebuffer rows",
   },
-  latchRequirement: "No display latch is measured here. Future Dream Eater evidence must measure its own plain OAM/palette and ShakeMon RAM+1 hypotheses, ScaleMonAndRestore affine RAM+2 hypothesis, psychic-BG/monbg/split priority, shadow teardown, and equal-subpriority SortSprites/OAM ordering before any visual claim.",
+  latchRequirement: "Dream Eater's bilateral dense evidence proves whole OAM/palette and ShakeMon at RAM+1, ScaleMonAndRestore affine at RAM+2, psychic-BG offsets at RAM+1, and equal-priority SortSprites/OAM ordering; both windows enter with the enemy shadow already invisible and claim no teardown edge.",
 }, null, 2));

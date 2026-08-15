@@ -1,3 +1,11 @@
+# MOVE_DREAM_EATER exact — bilateral Scene-ON promotion (2026-08-15 worker)
+
+- **State:** Coverage advances **187→188/276 Level-50 exact**, with 0 partial, 0 staged, and **89→88 unsupported**. Dream Eater alone promotes; Absorb, Mega Drain, and Giga Drain remain independent regression controls.
+- **Did:** Added the pure odd-pointer source-relative reducer, narrow typed presentation seam, persistent ORBS/BLUE_STAR order, and Wigglytuff↔Onix compositor. It ports Set/UnsetPsychicBackground, both ShakeMon tasks, ScaleMonAndRestore, 24 literal Swagger absorption orbs, HealingEffect, monbg/splitbgprio_foes, 8:8→12:8 alpha, audio, palettes, field chrome, and cleanup without gameplay ownership.
+- **Verified:** The complete twice-fresh evidence banks replay through reducer/seam and the shared production framebuffer at **533/533 zero-residual rows**: player-back **1308..1573, 266/266** (`5d7abe61…` / RGB `728a437b…`) and opponent-front **2146..2412, 267/267** (`ecac5fee…` / RGB `6866c7ce…`). The compositor honors ordinary OAM/palette RAM+1, target affine RAM+2, psychic-BG RAM+1, the distinct ShakeMon live-OAM versus mon-BG callback order, and orientation-specific equal-priority target/orb OAM overlap. Both windows enter with enemy shadow already invisible; no teardown edge is claimed and `ANIMATION_LATCHES.md` is unchanged.
+- **Controls:** Mega Drain remains **436/436** and Giga Drain **460/460** production/evidence exact; Absorb focused checks remain green. No sibling promotion, gameplay/RNG ownership, animation-boundary widening, unsupported-branch barrier, or canonical-recording production import was added.
+- **Next:** Supervisor verifies and merges this Dream Eater-only promotion; the next unsupported move remains a separate acceptance unit.
+
 # MOVE_DREAM_EATER bilateral dense evidence checkpoint — remains unsupported (2026-08-15 worker)
 
 - **State:** Coverage remains **187/276 Level-50 exact**, with 0 partial, 0 staged, and **89 unsupported**. This round adds evidence only: no Dream Eater reducer, typed seam, compositor, production draw/wiring, coverage entry, boundary/barrier change, or visual acceptance claim.

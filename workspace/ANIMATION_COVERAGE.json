@@ -10,7 +10,7 @@
     "the strengthened portable proof pins software sprite identity/geometry/affine state and allocator slots; source sSpriteOrder to hardware OAM transfer; affine matrices; faded, unfaded, and hardware palette transfer plus ORBS/BLUE_STAR/IMPACT tags; BG1 and blend registers; task counts; all three live sound identities/restarts/pans; raw RGB digest; and shared framebuffer equality",
     "source/probe-specific BATTLER_COORD semantics remain typed inputs: player LOMBRE arcs/heals at 72,96 while opponent LOMBRE arcs/heals at 176,49; opponent ONIX impact starts at 176,42 and player ONIX at 72,88; framebuffer evidence corrects the player-back ONIX art corner to 40,48 and pins legal in-window HP as LOMBRE 152/167 and ONIX 110/110",
     "legal set-131 LOMBRE back/front art and literal ORBS, IMPACT, and BLUE_STAR sheets regenerate byte-for-byte from pinned source; the effect sheets equal the exact RECOVER/DYNAMIC_PUNCH assets by source identity, and exact shared ONIX battle-mon art remains reused",
-    "RECOVER remains exact at 169/169 and SYNTHESIS at 130/130 in both orientations after the change; MEGA_DRAIN is independently exact at 436/436 bilateral frames, while DREAM_EATER remains unsupported because its audited script differs in orb multiplicity/arguments, impact/background/scale bodies, and audio"
+    "RECOVER remains exact at 169/169 and SYNTHESIS at 130/130 in both orientations after the change; MEGA_DRAIN is independently exact at 436/436 bilateral frames, and DREAM_EATER now has its own independent 533/533 acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-absorb-player-lombre-opponent-onix.json",
@@ -35,7 +35,7 @@
     "the pure source-relative reducer independently ports the animation-1 affine IMPACT, AnimTask_ShakeMon +5 cadence, setalpha 12:8, simple_palette_blend 0->8->0, monbg/splitbgprio_foes lifecycle, eight literal paired target-to-attacker absorption-orb commands (16 total), each Bubble3 restart, and shared HealingEffect stars before cleanup",
     "the narrow typed Scene-ON seam carries only immutable battler geometry, legal field chrome, absorption/healing centers, and source allocator/order topology; the compositor derives persistent SortSprites painter order and retains no damage, HP/healing, RNG, status, turn, controller, round, or facility ownership",
     "dense source/software/hardware OAM and matrices, palettes/tags, registers/BG, audio, immutable party/RNG state, raw RGB, and shared production framebuffer all close at zero residual; ordinary OAM/matrix/BG/palette latches are source-owned, including the one initial opponent elevated-shadow hardware row",
-    "MOVE_ABSORB is a source-identity asset/control only: Mega Drain does not inherit its ages, coordinates, timeline, latches, or acceptance. DREAM_EATER remains independently unsupported; GIGA_DRAIN has its own acceptance entry."
+    "MOVE_ABSORB is a source-identity asset/control only: Mega Drain does not inherit its ages, coordinates, timeline, latches, or acceptance. DREAM_EATER and GIGA_DRAIN each retain their own independent acceptance entries."
    ],
    "evidence": [
     "tools/battle-lab/mechanic-mega-drain-player-skiploom-opponent-onix.json",
@@ -64,7 +64,7 @@
     "the pure source-relative reducer independently ports the even 0x082d1242 root, animation-0 IMPACT, eight literal three-orb groups (24 total), six-pass spawn cadence, variable source amplitudes, eight Giga Drain audio restarts, shared HealingEffect stars, +5 ShakeMon windows, monbg/splitbgprio_foes, 12:8 alpha, green BG blend 0->12->0, and cleanup",
     "the narrow typed Scene-ON seam and source-derived compositor carry only Roselia/Onix presentation geometry, legal HP/gender chrome, source allocator/order topology, and immutable field inputs; production framebuffer equality is 460/460 with zero residual pixels and the compositor uses generated Roselia/Onix art plus shared source-identical ORBS/IMPACT/BLUE_STAR assets",
     "dense task/sprite/OAM/matrix/palette/tag/register/BG/audio/party/engine/gameplay-RNG/animation-RNG/raw-RGB state is retained and portable-verified; hardware OAM, matrices, and active BG offsets equal preceding source rows 229/229, and hardware palette equals preceding faded rows 228/229 with the measured age-10 monbg setup exception",
-    "MOVE_ABSORB and MOVE_MEGA_DRAIN remain independent controls with no inherited ages, coordinates, latches, receipts, or acceptance; MOVE_DREAM_EATER remains independently unsupported and receives no Giga Drain credit"
+    "MOVE_ABSORB and MOVE_MEGA_DRAIN remain independent controls with no inherited ages, coordinates, latches, receipts, or acceptance; MOVE_DREAM_EATER has its own independent 533/533 acceptance and receives no Giga Drain credit"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-giga-drain-player-roselia-opponent-onix.json",
@@ -85,6 +85,35 @@
     "src/engine/battleScene.ts",
     "tests/animation/gigaDrain.test.ts",
     "tests/animation/gigaDrainEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_DREAM_EATER",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Wigglytuff-to-sleeping-Onix Scene-ON bodies pass through first inactive cleanup twice fresh: player-back frames 1308-1573 at 266/266 rows and opponent-front frames 2146-2412 at 267/267 rows, 533/533 total",
+    "the pure source-relative reducer ports the exact odd 0x082d2de7 root, SetPsychicBackground/UnsetPsychicBackground, 24 literal variable-wave absorption ORBS in eight Swagger groups, four HealingEffect stars, both ShakeMon tasks, ScaleMonAndRestore, psychic fade/rotation, monbg/splitbgprio_foes, 8:8 then 12:8 alpha, audio, and cleanup",
+    "the narrow typed Scene-ON seam and source-derived Wigglytuff/Onix compositor reproduce all 533 retained component/seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels, including register/background state, palette transfer, persistent SortSprites order, equal-priority OAM overlap, affine state, mon pixels, field chrome, and cleanup",
+    "hardware OAM and palette are RAM+1; ordinary ShakeMon live-OBJ OAM and mon-BG update ordering remain distinct source callbacks; the live target affine matrix is RAM+2; psychic BG offsets are RAM+1; both evidence windows enter with the enemy shadow already invisible and claim no outgoing-shadow teardown edge",
+    "MOVE_ABSORB, MOVE_MEGA_DRAIN, and MOVE_GIGA_DRAIN remain independently exact regression controls only and confer no Dream Eater acceptance; production owns no sleep gate, damage, HP/healing result, gameplay RNG, AI, turn order, controller, round, or facility state"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-dream-eater-player-wigglytuff-opponent-onix.json",
+    "tools/battle-lab/mechanic-dream-eater-opponent-wigglytuff-player-onix.json",
+    "tools/compare/fixtures/dream-eater-evidence.json",
+    "tools/compare/dreamEaterSourceAudit.ts",
+    "tools/compare/dreamEaterProbe.py",
+    "tools/compare/dreamEaterEvidence.ts",
+    "tools/compare/dreamEaterFramebuffer.ts",
+    "tools/compare/evidence/dream-eater-player-dense-state.json.gz",
+    "tools/compare/evidence/dream-eater-opponent-dense-state.json.gz",
+    "tools/compare/evidence/dream-eater-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/dream-eater-opponent-raw-rgb.tar.gz",
+    "src/animation/dreamEater.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/dreamEater.test.ts",
+    "tests/animation/dreamEaterFramebuffer.test.ts"
    ]
   },
   {
@@ -5851,7 +5880,7 @@
     "MOVE_GIGA_DRAIN",
     "MOVE_WILL_O_WISP"
    ],
-    "goal": "MOVE_SUPERSONIC independently proves its six-ring, side-relative translation/affine body and splitbgprio_foes seam in both orientations at 51/51 component/RAM and framebuffer frames, reproduced twice. MOVE_FLAME_WHEEL independently proves its outward-fire-spiral, lunge/return, FireSpread, ShakeMon, and BlendMonInAndOut body at 170/170 complete bilateral frames twice fresh. ShakeMon2, BIND, ABSORB, MEGA DRAIN, and GIGA DRAIN are exact independent controls. DREAM EATER now has complete evidence-only player-back 266-row and opponent-front 267-row maps twice fresh: its raw odd-pointer five-script body measures psychic background, ScaleMonAndRestore RAM+2, ShakeMon/OAM RAM+1, 24-orb Swagger drain, SortSprites order, registers, audio, and cleanup. It remains unsupported pending its own reducer, typed seam, compositor, and 533/533 production framebuffer equality. METAL SOUND and WILL-O-WISP likewise retain distinct complete bodies and remain unsupported pending independent dense evidence."
+   "goal": "MOVE_SUPERSONIC independently proves its six-ring, side-relative translation/affine body and splitbgprio_foes seam in both orientations at 51/51 component/RAM and framebuffer frames, reproduced twice. MOVE_FLAME_WHEEL independently proves its outward-fire-spiral, lunge/return, FireSpread, ShakeMon, and BlendMonInAndOut body at 170/170 complete bilateral frames twice fresh. ShakeMon2, BIND, ABSORB, MEGA DRAIN, and GIGA DRAIN are exact independent controls. DREAM EATER independently proves its odd-pointer psychic background, ScaleMonAndRestore RAM+2, ShakeMon/OAM RAM+1, 24-orb Swagger drain, split BG priority and equal-OAM-priority orientation edge, SortSprites order, registers, audio, cleanup, typed seam, and 533/533 zero-residual production framebuffer rows. METAL SOUND and WILL-O-WISP retain distinct complete bodies and remain unsupported pending independent dense evidence."
   },
   {
    "id": "sparkle-2-granting-stars",
@@ -5900,7 +5929,7 @@
     "MOVE_MOONLIGHT",
     "MOVE_SWALLOW"
    ],
-    "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_DRAIN independently proves its 16 paired-orb/impact/green-field/HealingEffect body at 436/436 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_GIGA_DRAIN independently proves its 24 variable-amplitude-orb/impact/green-field/HealingEffect body at 460/460 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. MOVE_PRESENT independently proves its target HealingEffect2 tail within both 252-frame healing orientations, alongside its separately accepted damage branch. MOVE_SWALLOW independently proves its move-turn-dependent deform/shake/5/10/15 BLUE_ORB plus HealingEffect body across all six natural branches. DREAM_EATER now has complete 266/267-row evidence-only maps through its four BLUE_STAR creates and first inactive cleanup, twice fresh bilaterally; it remains unsupported until a reducer, typed seam, compositor, and full production framebuffer acceptance close all 533 rows. SOFT_BOILED remains independently unsupported."
+   "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_DRAIN independently proves its 16 paired-orb/impact/green-field/HealingEffect body at 436/436 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_GIGA_DRAIN independently proves its 24 variable-amplitude-orb/impact/green-field/HealingEffect body at 460/460 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_DREAM_EATER independently proves its four BLUE_STAR HealingEffect creates inside a complete 533/533 psychic-background, affine, drain-orb, typed-seam, and zero-residual production-framebuffer acceptance. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. MOVE_PRESENT independently proves its target HealingEffect2 tail within both 252-frame healing orientations, alongside its separately accepted damage branch. MOVE_SWALLOW independently proves its move-turn-dependent deform/shake/5/10/15 BLUE_ORB plus HealingEffect body across all six natural branches. SOFT_BOILED remains independently unsupported."
   },
   {
    "id": "absorption-orb-drain",
@@ -5915,7 +5944,7 @@
     "MOVE_DREAM_EATER",
     "MOVE_GIGA_DRAIN"
    ],
-    "goal": "MOVE_ABSORB is exact at 195/195 complete source/software/typed-seam, hardware OAM/matrix/order, palette/register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh: all eight target-to-attacker arcs, green field lifecycle, impact/shake, HealingEffect, and cleanup. MOVE_MEGA_DRAIN independently closes its own complete legal Skiploom/Onix 75..292 and 79..296 windows at 436/436 source, reducer/seam, hardware, raw-RGB, and shared-framebuffer frames twice fresh: 16 paired orbs, animation-1 IMPACT, own ShakeMon/palette cadence, persistent SortSprites order, HealingEffect, first-row elevated-shadow latch, and cleanup. MOVE_GIGA_DRAIN independently closes its own complete legal Roselia/Onix 214..443 windows at 460/460 source, reducer/seam, hardware, raw-RGB, and shared-framebuffer frames twice fresh: animation-0 IMPACT, eight Giga Drain-audio groups of 24 literal variable-amplitude orbs, HealingEffect, monbg/alpha/register cleanup, and zero FireSpread sprites. DREAM EATER independently banks complete evidence-only player-back 1308..1573 and opponent-front 2146..2412 windows: psychic background, target ScaleMonAndRestore plus ShakeMon, eight Swagger-audio groups of 24 ORBS, HealingEffect, no IMPACT, RAM+1 OAM/palette, RAM+2 affine, SortSprites, and cleanup. It remains unsupported pending its own reducer, typed seam, compositor, and full 533-row framebuffer acceptance; exact siblings confer no acceptance. LEECH LIFE is not Level-50 Factory scope."
+   "goal": "MOVE_ABSORB is exact at 195/195 complete source/software/typed-seam, hardware OAM/matrix/order, palette/register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh: all eight target-to-attacker arcs, green field lifecycle, impact/shake, HealingEffect, and cleanup. MOVE_MEGA_DRAIN independently closes its own complete legal Skiploom/Onix 75..292 and 79..296 windows at 436/436 source, reducer/seam, hardware, raw-RGB, and shared-framebuffer frames twice fresh: 16 paired orbs, animation-1 IMPACT, own ShakeMon/palette cadence, persistent SortSprites order, HealingEffect, first-row elevated-shadow latch, and cleanup. MOVE_GIGA_DRAIN independently closes its own complete legal Roselia/Onix 214..443 windows at 460/460 source, reducer/seam, hardware, raw-RGB, and shared-framebuffer frames twice fresh: animation-0 IMPACT, eight Giga Drain-audio groups of 24 literal variable-amplitude orbs, HealingEffect, monbg/alpha/register cleanup, and zero FireSpread sprites. MOVE_DREAM_EATER independently closes player-back 1308..1573 and opponent-front 2146..2412 at 533/533 source reducer, typed seam, hardware, raw-RGB, and production framebuffer rows: psychic background, ScaleMonAndRestore plus both ShakeMon tasks, eight Swagger groups of 24 ORBS, HealingEffect, no IMPACT, RAM+1 OAM/palette, RAM+2 affine, stable SortSprites and orientation-specific equal-priority OAM overlap. Exact siblings confer no acceptance. LEECH LIFE is not Level-50 Factory scope."
   },
   {
    "id": "fist-foot-random-position-thrash",

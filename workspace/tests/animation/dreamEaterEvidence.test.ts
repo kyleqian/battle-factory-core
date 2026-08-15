@@ -86,12 +86,12 @@ describe("MOVE_DREAM_EATER bilateral Scene-ON evidence checkpoint", () => {
     expect(output).toContain('"frameCount":267');
   });
 
-  it("retains all three independently exact sibling controls while Dream Eater stays unsupported", () => {
+  it("retains all three independently exact sibling controls after Dream Eater promotion", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     for (const move of ["MOVE_ABSORB", "MOVE_MEGA_DRAIN", "MOVE_GIGA_DRAIN"]) {
       expect(coverage.entries.find((entry: any) => entry.move === move)).toMatchObject({ status: "exact" });
     }
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_DREAM_EATER")).toBeUndefined();
-    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(187);
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_DREAM_EATER")).toMatchObject({ status: "exact" });
+    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(188);
   });
 });
