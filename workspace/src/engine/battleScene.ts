@@ -557,6 +557,7 @@ import knockOffAsset from "../animation/assets/knock-off.json" with { type: "jso
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import leechSeedAsset from "../animation/assets/leech-seed.json" with { type: "json" };
+import painSplitAsset from "../animation/assets/pain-split.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import brickBreakAsset from "../animation/assets/brick-break.json" with { type: "json" };
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
@@ -882,6 +883,7 @@ import {
   dreamEaterSpritesBackToFrontAtAge,
   dreamEaterTargetOamOffsetAtSourceAge,
 } from "../animation/dreamEater.ts";
+import { painSplitDisplayedMatrixTransform } from "../animation/painSplit.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -917,6 +919,7 @@ import {
   sceneOnMegaDrainView,
   sceneOnGigaDrainView,
   sceneOnDreamEaterView,
+  sceneOnPainSplitView,
   sceneOnReflectView,
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
@@ -1121,6 +1124,7 @@ import {
   type SceneOnMegaDrainPresentationState,
   type SceneOnGigaDrainPresentationState,
   type SceneOnDreamEaterPresentationState,
+  type SceneOnPainSplitPresentationState,
   type SceneOnReflectPresentationState,
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
@@ -1592,6 +1596,9 @@ const absorbArt = absorbAsset as {
 };
 const leechSeedArt = leechSeedAsset as {
   seed: { tileset: Tileset; palette: RgbColor[] };
+};
+const painSplitArt = painSplitAsset as {
+  projectile: { tileset: Tileset; palette: RgbColor[] };
 };
 const reflectArt = reflectAsset as {
   blueLightWall: { tileset: Tileset; palette: RgbColor[] };
@@ -35678,6 +35685,128 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ROSELIA used" : "Foe ROSELIA used",
       "GIGA DRAIN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PAIN_SPLIT") {
+    const painState = state as SceneOnPainSplitPresentationState;
+    const view = sceneOnPainSplitView(painState);
+    // Projectile pixels and ordinary battler OAM are the preceding source
+    // pass. The task helper separately preserves ResetSpriteRotScale's
+    // measured extra matrix-transfer pass.
+    const displayed = sceneOnPainSplitView({ ...painState, age: painState.age - 1 });
+    const playerToOpponent = view.attacker.geometry.side === "player"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.geometry.side === "opponent"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error("PAIN_SPLIT requires opposite battle sides");
+    }
+    const misdreavusSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).MISDREAVUS!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MISDREAVUS!;
+    const gengarSource = playerToOpponent
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GENGAR!
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GENGAR!;
+    const misdreavus = playerToOpponent ? misdreavusSource : {
+      ...misdreavusSource,
+      tileset: subTileset(misdreavusSource.tileset, 0, 8),
+    };
+    const gengar = playerToOpponent ? {
+      ...gengarSource,
+      tileset: subTileset(gengarSource.tileset, 0, 8),
+    } : gengarSource;
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (opponentToPlayer && painState.age === 0) {
+      const shadowX = 176 - battleEnemyShadow.width / 2;
+      const shadowY = 40 + 29 - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(fb, shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width), battleEnemyShadow.color);
+      }
+    }
+    const attackerTransform = painSplitDisplayedMatrixTransform(
+      painState.age,
+      view.attacker.geometry.side,
+      "MISDREAVUS",
+    );
+    const targetTransform = painSplitDisplayedMatrixTransform(
+      painState.age,
+      view.target.geometry.side,
+      "GENGAR",
+    );
+    const drawBattler = (
+      sprite: { tileset: Tileset; palette: RgbColor[] },
+      battler: typeof view.attacker,
+      transform: typeof attackerTransform,
+    ): void => {
+      if (transform.affine) {
+        drawSpriteSheetAffineRotate(
+          fb, sprite.tileset, sprite.palette,
+          battler.geometry.spriteCorner.x + 32 + transform.x2,
+          battler.geometry.spriteCorner.y + 32 + transform.y2,
+          ...transform.matrix,
+        );
+      } else {
+        drawSpriteSheet(
+          fb, sprite.tileset, sprite.palette,
+          battler.geometry.spriteCorner.x + transform.x2,
+          battler.geometry.spriteCorner.y + transform.y2,
+        );
+      }
+    };
+    drawBattler(misdreavus, view.attacker, attackerTransform);
+    drawBattler(gengar, view.target, targetTransform);
+    // Lower source subpriority wins the equal-priority OBJ overlap, so the
+    // projectile pair is composited over its battlers.
+    for (const projectile of displayed.projectiles) {
+      drawSpriteSheet(
+        fb,
+        { columns: 2, rows: 2, tiles: painSplitArt.projectile.tileset.tiles.slice(
+          projectile.tileOffset, projectile.tileOffset + 4,
+        ) },
+        painSplitArt.projectile.palette,
+        projectile.x + projectile.x2 - 8,
+        projectile.y + projectile.y2 - 8,
+      );
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "GENGAR" : "MISDREAVUS",
+        level: 50,
+        gender: playerToOpponent
+          ? (state.config.fieldProfile.opponentGender ?? "male")
+          : (state.config.fieldProfile.opponentGender ?? "female"),
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "MISDREAVUS" : "GENGAR",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender
+          ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "MISDREAVUS used" : "Foe MISDREAVUS used",
+      "PAIN SPLIT!",
       99,
     );
     return;

@@ -342,6 +342,10 @@ import {
   type DreamEaterState,
 } from "./dreamEater.ts";
 import {
+  painSplitAtAge,
+  type PainSplitState,
+} from "./painSplit.ts";
+import {
   reflectAtAge,
   type ReflectState,
 } from "./reflect.ts";
@@ -1013,7 +1017,9 @@ export interface SceneOnPresentationBattler {
     | "HOPPIP"
     | "DRAGONAIR"
     | "GLIGAR"
-    | "METANG";
+    | "METANG"
+    | "MISDREAVUS"
+    | "GENGAR";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1567,6 +1573,14 @@ export interface SceneOnDreamEaterConfig {
   /** Settled species animation offset before Dream Eater's tasks take over. */
   readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
   readonly allocatorProfile: Readonly<DreamEaterAllocatorProfile>;
+}
+
+/** Presentation-only geometry for Move_PAIN_SPLIT's bilateral body. */
+export interface SceneOnPainSplitConfig {
+  readonly move: "PAIN_SPLIT";
+  readonly attacker: SceneOnPresentationBattler & { readonly species: "MISDREAVUS" };
+  readonly target: SceneOnPresentationBattler & { readonly species: "GENGAR" };
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
 export interface SceneOnReflectConfig {
@@ -2973,6 +2987,7 @@ export type SceneOnMoveConfig =
   | SceneOnMegaDrainConfig
   | SceneOnGigaDrainConfig
   | SceneOnDreamEaterConfig
+  | SceneOnPainSplitConfig
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
@@ -3134,6 +3149,7 @@ export interface SceneOnMovePresentationState<
     | SceneOnMegaDrainConfig
     | SceneOnGigaDrainConfig
     | SceneOnDreamEaterConfig
+    | SceneOnPainSplitConfig
     | SceneOnBiteConfig
     = SceneOnMoveConfig,
 > {
@@ -3176,6 +3192,8 @@ export type SceneOnGigaDrainPresentationState =
   SceneOnMovePresentationState<SceneOnGigaDrainConfig>;
 export type SceneOnDreamEaterPresentationState =
   SceneOnMovePresentationState<SceneOnDreamEaterConfig>;
+export type SceneOnPainSplitPresentationState =
+  SceneOnMovePresentationState<SceneOnPainSplitConfig>;
 export type SceneOnMoonlightPresentationState =
   SceneOnMovePresentationState<SceneOnMoonlightConfig>;
 export type SceneOnPresentPresentationState =
@@ -4405,6 +4423,12 @@ export interface SceneOnDreamEaterView extends DreamEaterState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnPainSplitView extends PainSplitState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSynthesisView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5179,6 +5203,33 @@ export function sceneOnDreamEaterView(
       state.config.attacker.geometry.side,
       state.config.healingCenter,
       state.config.targetRestOffset,
+    ),
+  };
+}
+
+/** `age` is relative to Move_PAIN_SPLIT's first active source row. */
+export function sceneOnPainSplitView(
+  state: SceneOnMovePresentationState<SceneOnPainSplitConfig>,
+): SceneOnPainSplitView {
+  if (state.config.move !== "PAIN_SPLIT") {
+    throw new Error(`expected PAIN_SPLIT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...painSplitAtAge(
+      state.age,
+      {
+        side: state.config.attacker.geometry.side,
+        species: state.config.attacker.species,
+        center: state.config.attacker.geometry.animationCenter,
+      },
+      {
+        side: state.config.target.geometry.side,
+        species: state.config.target.species,
+        center: state.config.target.geometry.animationCenter,
+      },
     ),
   };
 }
