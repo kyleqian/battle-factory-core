@@ -38,6 +38,9 @@ type Stage = Readonly<{
   mode: string;
   profile: string;
   level: number;
+  challengeNum: number;
+  battleNum: number;
+  trainerId: number;
   playerSetIds: number[];
   opponentSetIds: number[];
   seed: number;
@@ -56,6 +59,7 @@ const animation = read("reference/pokeemerald/src/battle_anim.c");
 const battleCommands = read("reference/pokeemerald/src/battle_script_commands.c");
 const graphics = read("reference/pokeemerald/src/data/battle_anim.h");
 const moveData = read("reference/pokeemerald/src/data/battle_moves.h");
+const factorySource = read("reference/pokeemerald/src/battle_factory.c");
 const frontierSource = read("reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h");
 const speciesInfo = read("reference/pokeemerald/src/data/pokemon/species_info.h");
 const speciesConstants = read("reference/pokeemerald/include/constants/species.h");
@@ -69,6 +73,11 @@ const graph = JSON.parse(read("src/data/gen/battle-animation-components.json")) 
 const inventory = JSON.parse(read("src/data/gen/factory-animation-inventory.json")) as {
   tiers: { level50: { monIndices: { first: number; last: number } } };
 };
+const factoryPolicy = JSON.parse(read("src/data/gen/factory-round-policy.json")) as {
+  rentalSelection: {
+    ranges: { level50: Array<{ start: number; end: number; startLabel: string; endLabel: string }> };
+  };
+};
 const frontierMons = JSON.parse(read("src/data/gen/battle-frontier-mons.json")) as {
   entries: Array<{ index: number; label: string; species: string; moves: string[]; nature: string }>;
 };
@@ -80,6 +89,24 @@ const nm = execFileSync("arm-none-eabi-nm", [
 const STAGE_PATHS = [
   "tools/battle-lab/mechanic-dream-eater-player-wigglytuff-opponent-onix.json",
   "tools/battle-lab/mechanic-dream-eater-opponent-wigglytuff-player-onix.json",
+] as const;
+
+const CHALLENGE_2_RANGE = {
+  challengeNum: 2,
+  start: 267,
+  end: 371,
+  startLabel: "FRONTIER_MON_DELCATTY_2",
+  endLabel: "FRONTIER_MON_CLOYSTER_2",
+} as const;
+const WIGGLYTUFF_SIDE_SET_IDS = [312, 313, 314] as const;
+const ONIX_SIDE_SET_IDS = [267, 268, 269] as const;
+const LEGAL_STAGE_INVENTORY = [
+  { index: 267, label: "FRONTIER_MON_DELCATTY_2" },
+  { index: 268, label: "FRONTIER_MON_SABLEYE_2" },
+  { index: 269, label: "FRONTIER_MON_LICKITUNG_2" },
+  { index: 312, label: "FRONTIER_MON_WIGGLYTUFF_2" },
+  { index: 313, label: "FRONTIER_MON_SUNFLORA_2" },
+  { index: 314, label: "FRONTIER_MON_CHIMECHO_2" },
 ] as const;
 
 // This is DreamEaterAbsorb's source-owned Swagger cadence, not a capture
@@ -248,11 +275,14 @@ const playerWigglytuffActions = [
   { frames: 2, buttons: ["RIGHT"] }, { frames: 30, buttons: [] },
   { frames: 2, buttons: ["A"] }, { frames: 900, buttons: [] },
   { frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] },
+  { frames: 2, buttons: ["LEFT"] }, { frames: 30, buttons: [] },
   { frames: 2, buttons: ["DOWN"] }, { frames: 30, buttons: [] },
   { frames: 2, buttons: ["A"] }, { frames: 1200, buttons: [] },
 ] as const;
 
 const opponentWigglytuffActions = [
+  { frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] },
+  { frames: 2, buttons: ["A"] }, { frames: 900, buttons: [] },
   { frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] },
   { frames: 2, buttons: ["A"] }, { frames: 900, buttons: [] },
   { frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] },
@@ -345,6 +375,8 @@ const constants = {
   DOCILE: numericConstant(natureConstants, "NATURE_DOCILE"),
   SITRUS_BERRY: numericConstant(itemConstants, "ITEM_SITRUS_BERRY"),
   NONE: numericConstant(itemConstants, "ITEM_NONE"),
+  DELCATTY_2: numericConstant(frontierMonConstants, "FRONTIER_MON_DELCATTY_2"),
+  CLOYSTER_2: numericConstant(frontierMonConstants, "FRONTIER_MON_CLOYSTER_2"),
   WIGGLYTUFF_2: numericConstant(frontierMonConstants, "FRONTIER_MON_WIGGLYTUFF_2"),
 };
 
@@ -362,14 +394,16 @@ function isCompleteRecord(mon: StageMon): boolean {
     && mon.ppUps.length === 4;
 }
 
-function isWigglytuffStage(mon: StageMon): boolean {
+function isWigglytuffStage(mon: StageMon, constrainedForStockAi: boolean): boolean {
   return mon.species === constants.WIGGLYTUFF
     && mon.level === 50
     && mon.nature === constants.DOCILE
     && mon.item === constants.SITRUS_BERRY
     && mon.abilitySlot === 0
     && mon.friendship === 0
-    && sameJson(mon.moves, [constants.FAKE_TEARS, constants.SING, constants.DREAM_EATER, constants.BRICK_BREAK])
+    && sameJson(mon.moves, constrainedForStockAi
+      ? [constants.SING, constants.SING, constants.DREAM_EATER, constants.DREAM_EATER]
+      : [constants.FAKE_TEARS, constants.SING, constants.DREAM_EATER, constants.BRICK_BREAK])
     && sameJson(mon.ppUps, [0, 0, 0, 0]);
 }
 
@@ -393,22 +427,28 @@ const stagedScenarios = STAGE_PATHS.map((path) => {
   const attackerParty = playerAttacker ? stage.overrides.parties.player : stage.overrides.parties.opponent;
   const defenderParty = playerAttacker ? stage.overrides.parties.opponent : stage.overrides.parties.player;
   const level50Ids = [...stage.playerSetIds, ...stage.opponentSetIds];
+  const expectedPlayerSetIds = playerAttacker ? WIGGLYTUFF_SIDE_SET_IDS : ONIX_SIDE_SET_IDS;
+  const expectedOpponentSetIds = playerAttacker ? ONIX_SIDE_SET_IDS : WIGGLYTUFF_SIDE_SET_IDS;
   const expectedSegments = playerAttacker ? playerWigglytuffActions : opponentWigglytuffActions;
   const valid = stage.mode === "mechanicLab"
     && stage.profile === "battle-scene-on"
     && stage.level === 50
-    && stage.seed === 305419897
+    && stage.challengeNum === CHALLENGE_2_RANGE.challengeNum
+    && stage.battleNum === 2
+    && stage.trainerId === 110
+    && stage.seed === (playerAttacker ? 305419897 : 305419899)
     && Object.keys(stage.overrides).length === 1
     && Object.keys(stage.overrides)[0] === "parties"
     && forbiddenTransientKeys.every((key) => !(key in stage.overrides))
     && !("captureFrames" in stage.trace)
     && attackerParty.length === 3
     && defenderParty.length === 3
-    && attackerParty.every((mon) => isCompleteRecord(mon) && isWigglytuffStage(mon))
+    && attackerParty.every((mon) => isCompleteRecord(mon) && isWigglytuffStage(mon, !playerAttacker))
     && defenderParty.every((mon) => isCompleteRecord(mon) && isOnixStage(mon))
     && sameJson(stage.trace.segments, expectedSegments)
-    && level50Ids.every((id) => id >= inventory.tiers.level50.monIndices.first
-      && id <= inventory.tiers.level50.monIndices.last);
+    && sameJson(stage.playerSetIds, expectedPlayerSetIds)
+    && sameJson(stage.opponentSetIds, expectedOpponentSetIds)
+    && level50Ids.every((id) => LEGAL_STAGE_INVENTORY.some((entry) => entry.index === id));
   return {
     path,
     orientation: playerAttacker ? "player-back" : "opponent-front",
@@ -418,7 +458,7 @@ const stagedScenarios = STAGE_PATHS.map((path) => {
     valid,
     realInputRoute: playerAttacker
       ? "player selects source slot 1 SING, waits for the ROM to apply sleep, then selects source slot 2 DREAM_EATER"
-      : "player submits ordinary TACKLE choices while stock Factory AI receives Wigglytuff's untouched source slots; no opponent action or status is injected",
+      : "player submits ordinary TACKLE choices while stock Factory AI chooses among duplicated source-set SING/DREAM_EATER slots; no opponent decision or status is injected",
   };
 });
 
@@ -536,6 +576,24 @@ const sourceChecks: Record<string, boolean> = {
       ".baseSpeed     = 45", ".baseSpAttack  = 75", ".baseSpDefense = 50",
       ".types = { TYPE_NORMAL, TYPE_NORMAL }",
     ].every((token) => wigglytuffSpecies.includes(token)),
+  challenge2LegalSelection: sameJson(factoryPolicy.rentalSelection.ranges.level50[2], {
+    start: CHALLENGE_2_RANGE.start,
+    end: CHALLENGE_2_RANGE.end,
+    startLabel: CHALLENGE_2_RANGE.startLabel,
+    endLabel: CHALLENGE_2_RANGE.endLabel,
+  })
+    && constants.DELCATTY_2 === CHALLENGE_2_RANGE.start
+    && constants.CLOYSTER_2 === CHALLENGE_2_RANGE.end
+    && factorySource.includes(
+      "{FRONTIER_MON_DELCATTY_2, FRONTIER_MON_CLOYSTER_2}, // 267 - 371",
+    )
+    && LEGAL_STAGE_INVENTORY.every(({ index, label }) => {
+      const generated = frontierMons.entries[index];
+      return generated?.index === index
+        && generated.label === label
+        && numericConstant(frontierMonConstants, label) === index
+        && frontierSource.includes(`[${label}] =`);
+    }),
   staging: stagedScenarios.every((scenario) => scenario.valid),
 };
 
@@ -592,6 +650,19 @@ console.log(JSON.stringify({
     lowestLevel50: level50Carriers[0],
     allLevel50: level50Carriers,
     stageConstants: constants,
+  },
+  legalSelection: {
+    challenge2Range: CHALLENGE_2_RANGE,
+    wigglytuffSideSetIds: WIGGLYTUFF_SIDE_SET_IDS,
+    onixSideSetIds: ONIX_SIDE_SET_IDS,
+    inventory: LEGAL_STAGE_INVENTORY,
+    provenance: [
+      "reference/pokeemerald/src/battle_factory.c:sInitialRentalMonRanges[2]",
+      "reference/pokeemerald/include/constants/battle_frontier_mons.h",
+      "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h",
+      "src/data/gen/factory-round-policy.json:rentalSelection.ranges.level50[2]",
+      "src/data/gen/battle-frontier-mons.json:entries",
+    ],
   },
   staging: stagedScenarios,
   controls: {

@@ -129,6 +129,29 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
     });
     expect(audit.carrier.allLevel50.map((entry: { index: number }) => entry.index))
       .toEqual([312, 314, 421, 437, 497, 569]);
+    expect(audit.legalSelection).toEqual({
+      challenge2Range: {
+        challengeNum: 2, start: 267, end: 371,
+        startLabel: "FRONTIER_MON_DELCATTY_2", endLabel: "FRONTIER_MON_CLOYSTER_2",
+      },
+      wigglytuffSideSetIds: [312, 313, 314],
+      onixSideSetIds: [267, 268, 269],
+      inventory: [
+        { index: 267, label: "FRONTIER_MON_DELCATTY_2" },
+        { index: 268, label: "FRONTIER_MON_SABLEYE_2" },
+        { index: 269, label: "FRONTIER_MON_LICKITUNG_2" },
+        { index: 312, label: "FRONTIER_MON_WIGGLYTUFF_2" },
+        { index: 313, label: "FRONTIER_MON_SUNFLORA_2" },
+        { index: 314, label: "FRONTIER_MON_CHIMECHO_2" },
+      ],
+      provenance: [
+        "reference/pokeemerald/src/battle_factory.c:sInitialRentalMonRanges[2]",
+        "reference/pokeemerald/include/constants/battle_frontier_mons.h",
+        "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h",
+        "src/data/gen/factory-round-policy.json:rentalSelection.ranges.level50[2]",
+        "src/data/gen/battle-frontier-mons.json:entries",
+      ],
+    });
     expect(audit.latchRequirement).toContain("No display latch is measured here");
   });
 
@@ -136,7 +159,13 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
     const bytes = readFileSync(path);
     const stage = JSON.parse(bytes.toString("utf8")) as Record<string, any>;
     const playerAttacker = path.includes("player-wigglytuff");
-    expect(stage).toMatchObject({ mode: "mechanicLab", profile: "battle-scene-on", level: 50, seed: 305419897 });
+    expect(stage).toMatchObject({
+      mode: "mechanicLab", profile: "battle-scene-on", level: 50,
+      challengeNum: 2, battleNum: 2, trainerId: 110,
+      seed: playerAttacker ? 305419897 : 305419899,
+      playerSetIds: playerAttacker ? [312, 313, 314] : [267, 268, 269],
+      opponentSetIds: playerAttacker ? [267, 268, 269] : [312, 313, 314],
+    });
     expect(stage.trace).not.toHaveProperty("captureFrames");
     expect(Object.keys(stage.overrides)).toEqual(["parties"]);
     for (const transient of ["battlers", "hp", "outcome", "sideConditions", "stages", "status", "weather"]) {
@@ -148,19 +177,20 @@ describe("MOVE_DREAM_EATER source and legal staging checkpoint", () => {
     [...parties.player, ...parties.opponent].forEach(expectCompletePartyRecord);
     const attacker = playerAttacker ? parties.player : parties.opponent;
     const defender = playerAttacker ? parties.opponent : parties.player;
+    const expectedAttackerMoves = playerAttacker ? [313, 47, 138, 280] : [47, 47, 138, 138];
     expect(attacker.every((mon) => mon.species === 40 && mon.level === 50 && mon.nature === 6
       && mon.item === 142 && mon.abilitySlot === 0 && mon.friendship === 0
-      && JSON.stringify(mon.moves) === JSON.stringify([313, 47, 138, 280]))).toBe(true);
+      && JSON.stringify(mon.moves) === JSON.stringify(expectedAttackerMoves))).toBe(true);
     expect(defender.every((mon) => mon.species === 95 && mon.level === 50 && mon.nature === 0
       && mon.item === 0 && mon.abilitySlot === 0
       && JSON.stringify(mon.moves) === JSON.stringify([33, 33, 33, 33]))).toBe(true);
     const buttons = (stage.trace.segments as Array<{ buttons: string[] }>).map(({ buttons }) => buttons);
     expect(buttons).toEqual(playerAttacker
-      ? [["A"], [], ["RIGHT"], [], ["A"], [], ["A"], [], ["DOWN"], [], ["A"], []]
-      : [["A"], [], ["A"], [], ["A"], [], ["A"], []]);
+      ? [["A"], [], ["RIGHT"], [], ["A"], [], ["A"], [], ["LEFT"], [], ["DOWN"], [], ["A"], []]
+      : [["A"], [], ["A"], [], ["A"], [], ["A"], [], ["A"], [], ["A"], []]);
     expect(createHash("sha256").update(bytes).digest("hex")).toBe(playerAttacker
-      ? "2e5e77e906e55f60b22d914eaa17001e1ed5a33937570ca84c0fb4df5ebd63ae"
-      : "ac3cfec3c4b4c108287e25749e8f05791686705568a8edab9c2d1933e1cfac61");
+      ? "9171707be0a3ad4a6d602b6d238121adf891e89d011323b1e890f18947c08513"
+      : "15d14016609af95730486d56c5c1331b7fe5d44f4d37913b8a79f9841fd40e08");
   });
 
   it("leaves Dream Eater unsupported while its exact siblings are controls only", () => {

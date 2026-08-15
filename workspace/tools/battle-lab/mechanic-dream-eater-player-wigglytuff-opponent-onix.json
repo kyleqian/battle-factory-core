@@ -6,8 +6,8 @@
   "challengeNum": 2,
   "battleNum": 2,
   "trainerId": 110,
-  "playerSetIds": [312, 376, 377],
-  "opponentSetIds": [394, 372, 375],
+  "playerSetIds": [312, 313, 314],
+  "opponentSetIds": [267, 268, 269],
   "seed": 305419897,
   "overrides": {
     "parties": {
@@ -26,7 +26,7 @@
   "trace": {
     "segments": [
       {"frames":2,"buttons":["A"]}, {"frames":30,"buttons":[]}, {"frames":2,"buttons":["RIGHT"]}, {"frames":30,"buttons":[]}, {"frames":2,"buttons":["A"]}, {"frames":900,"buttons":[]},
-      {"frames":2,"buttons":["A"]}, {"frames":30,"buttons":[]}, {"frames":2,"buttons":["DOWN"]}, {"frames":30,"buttons":[]}, {"frames":2,"buttons":["A"]}, {"frames":1200,"buttons":[]}
+      {"frames":2,"buttons":["A"]}, {"frames":30,"buttons":[]}, {"frames":2,"buttons":["LEFT"]}, {"frames":30,"buttons":[]}, {"frames":2,"buttons":["DOWN"]}, {"frames":30,"buttons":[]}, {"frames":2,"buttons":["A"]}, {"frames":1200,"buttons":[]}
     ]
   }
 }
