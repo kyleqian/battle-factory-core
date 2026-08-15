@@ -273,7 +273,7 @@ function isRoseliaStage(mon: StageMon): boolean {
   return mon.species === constants.ROSELIA
     && mon.level === 50
     && mon.nature === constants.DOCILE
-    && mon.item === constants.QUICK_CLAW
+    && mon.item > constants.NONE
     && mon.abilitySlot === 0
     && sameJson(mon.moves, Array(4).fill(constants.GIGA_DRAIN))
     && sameJson(mon.ppUps, [0, 0, 0, 0]);
@@ -283,7 +283,7 @@ function isOnixStage(mon: StageMon): boolean {
   return mon.species === constants.ONIX
     && mon.level === 50
     && mon.nature === 0
-    && mon.item === constants.NONE
+    && mon.item > constants.NONE
     && mon.abilitySlot === 0
     && sameJson(mon.moves, Array(4).fill(constants.TACKLE))
     && sameJson(mon.ppUps, [0, 0, 0, 0]);
@@ -309,6 +309,8 @@ const stagedScenarios = STAGE_PATHS.map((path) => {
     && !("captureFrames" in stage.trace)
     && attackerParty.length === 3
     && defenderParty.length === 3
+    && new Set([...attackerParty, ...defenderParty].map((mon) => mon.item)).size === 6
+    && attackerParty[0]?.item === constants.QUICK_CLAW
     && attackerParty.every((mon) => isCompleteRecord(mon) && isRoseliaStage(mon))
     && defenderParty.every((mon) => isCompleteRecord(mon) && isOnixStage(mon))
     && level50Ids.every((id) => id >= inventory.tiers.level50.monIndices.first

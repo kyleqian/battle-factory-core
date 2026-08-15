@@ -134,15 +134,17 @@ describe("MOVE_GIGA_DRAIN source and legal staging checkpoint", () => {
     const attacker = path.includes("player-roselia") ? parties.player : parties.opponent;
     const defender = path.includes("player-roselia") ? parties.opponent : parties.player;
     expect(attacker.every((mon) => mon.species === 363 && mon.level === 50
-      && mon.nature === 6 && mon.item === 183 && mon.abilitySlot === 0
+      && mon.nature === 6 && mon.item > 0 && mon.abilitySlot === 0
       && JSON.stringify(mon.moves) === JSON.stringify([202, 202, 202, 202]))).toBe(true);
+    expect(attacker[0]?.item).toBe(183);
     expect(defender.every((mon) => mon.species === 95 && mon.level === 50
-      && mon.item === 0 && mon.abilitySlot === 0
+      && mon.item > 0 && mon.abilitySlot === 0
       && JSON.stringify(mon.moves) === JSON.stringify([33, 33, 33, 33]))).toBe(true);
+    expect(new Set([...attacker, ...defender].map((mon) => mon.item)).size).toBe(6);
     expect(createHash("sha256").update(bytes).digest("hex")).toBe(
       path.includes("player-roselia")
-        ? "d9a789c858fecd7f2c92f136caa158c9a4640c508f9acb43a6dad4d2fb454aba"
-        : "2d07397dc982b3f69f6b27b0e79e46229ed14a2ea23ae2ea12141d9814afbb2a",
+        ? "0991d630b159bd62343a2b27ec077a3fb1e0f5714e6e2f449d13f2a9ef785f60"
+        : "a35d5c3e4152a7e35199f8edc52694e8cccab2ec3cf937191c0052085567de56",
     );
   });
 

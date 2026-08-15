@@ -327,6 +327,11 @@ import {
   type MegaDrainState,
 } from "./megaDrain.ts";
 import {
+  gigaDrainAtAge,
+  type GigaDrainAllocatorProfile,
+  type GigaDrainState,
+} from "./gigaDrain.ts";
+import {
   reflectAtAge,
   type ReflectState,
 } from "./reflect.ts";
@@ -1506,6 +1511,17 @@ export interface SceneOnMegaDrainConfig {
   readonly absorptionCenter: Readonly<{ x: number; y: number }>;
   /** Fresh-probed occupied slots, retained as presentation topology only. */
   readonly allocatorProfile: Readonly<MegaDrainAllocatorProfile>;
+}
+
+/** Presentation-only geometry and allocator facts for `Move_GIGA_DRAIN`. */
+export interface SceneOnGigaDrainConfig {
+  readonly move: "GIGA_DRAIN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+  readonly absorptionCenter: Readonly<{ x: number; y: number }>;
+  readonly allocatorProfile: Readonly<GigaDrainAllocatorProfile>;
 }
 
 export interface SceneOnReflectConfig {
@@ -2909,6 +2925,7 @@ export type SceneOnMoveConfig =
   | SceneOnPresentConfig
   | SceneOnAbsorbConfig
   | SceneOnMegaDrainConfig
+  | SceneOnGigaDrainConfig
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
@@ -3067,6 +3084,7 @@ export type SceneOnMoveConfig =
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
     | SceneOnMegaDrainConfig
+    | SceneOnGigaDrainConfig
     | SceneOnBiteConfig
     = SceneOnMoveConfig,
 > {
@@ -3103,6 +3121,8 @@ export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
 export type SceneOnMegaDrainPresentationState =
   SceneOnMovePresentationState<SceneOnMegaDrainConfig>;
+export type SceneOnGigaDrainPresentationState =
+  SceneOnMovePresentationState<SceneOnGigaDrainConfig>;
 export type SceneOnMoonlightPresentationState =
   SceneOnMovePresentationState<SceneOnMoonlightConfig>;
 export type SceneOnPresentPresentationState =
@@ -4314,6 +4334,12 @@ export interface SceneOnMegaDrainView extends MegaDrainState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnGigaDrainView extends GigaDrainState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSynthesisView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4501,7 +4527,7 @@ export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnMegaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
+    | SceneOnAbsorbConfig | SceneOnMegaDrainConfig | SceneOnGigaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBarrierConfig
     | SceneOnHazeConfig
     | SceneOnBiteConfig
@@ -5017,6 +5043,27 @@ export function sceneOnMegaDrainView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...megaDrainAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.absorptionCenter,
+      state.config.attacker.geometry.side,
+      state.config.healingCenter,
+    ),
+  };
+}
+
+/** `age` is relative to Move_GIGA_DRAIN's source `monbg ANIM_DEF_PARTNER`. */
+export function sceneOnGigaDrainView(
+  state: SceneOnMovePresentationState<SceneOnGigaDrainConfig>,
+): SceneOnGigaDrainView {
+  if (state.config.move !== "GIGA_DRAIN") {
+    throw new Error(`expected GIGA_DRAIN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...gigaDrainAtAge(
       state.age,
       state.config.target.geometry.animationCenter,
       state.config.absorptionCenter,

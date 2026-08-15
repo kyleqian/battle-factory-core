@@ -19,6 +19,7 @@ if len(sys.argv) != 4:
     raise SystemExit("usage: megaDrainProbe.py <scenario> <output.json> <rgb-dir>")
 
 SCENARIO, OUTPUT, RGB_DIR = map(Path, sys.argv[1:])
+IS_GIGA = "giga-drain" in SCENARIO.name
 ROOT = Path(__file__).resolve().parents[2]
 HARNESS = next(path for path in (ROOT, *ROOT.parents)
                if (path / "oracle" / "emerald_core.py").is_file())
@@ -28,11 +29,11 @@ from battle_lab import BattleLab, validate_request  # noqa: E402
 from emerald_core import EmeraldOracle  # noqa: E402
 
 
-MOVE_ID = 72
-MOVE_NAME = "Move_MEGA_DRAIN"
-MOVE_END_NAME = "MegaDrainAbsorbEffect"
-EFFECT_NAME = "MegaDrainAbsorbEffect"
-EFFECT_END_NAME = "Move_GIGA_DRAIN"
+MOVE_ID = 202 if IS_GIGA else 72
+MOVE_NAME = "Move_GIGA_DRAIN" if IS_GIGA else "Move_MEGA_DRAIN"
+MOVE_END_NAME = "GigaDrainAbsorbEffect" if IS_GIGA else "MegaDrainAbsorbEffect"
+EFFECT_NAME = MOVE_END_NAME
+EFFECT_END_NAME = "Move_LEECH_LIFE" if IS_GIGA else "Move_GIGA_DRAIN"
 HEALING_NAME = "HealingEffect"
 HEALING_END_NAME = "HealingEffect2"
 
@@ -73,12 +74,18 @@ def main() -> None:
         (effect_symbol, effect_start, effect_end),
         (healing_symbol, healing_start, healing_end),
     )
-    if expected != (
-        (0x082D10B2, 0x082D10B2, 0x082D1121),
-        (0x082D1121, 0x082D1121, 0x082D1242),
-        (0x082D79DF, 0x082D79DF, 0x082D7A28),
-    ):
-        raise RuntimeError(f"MEGA_DRAIN source pointer bounds changed: {expected!r}")
+    expected_bounds = (
+        (
+            (0x082D1242, 0x082D1242, 0x082D12B1),
+            (0x082D12B1, 0x082D12B1, 0x082D144A),
+        ) if IS_GIGA else (
+            (0x082D10B2, 0x082D10B2, 0x082D1121),
+            (0x082D1121, 0x082D1121, 0x082D1242),
+        )
+    ) + ((0x082D79DF, 0x082D79DF, 0x082D7A28),)
+    if expected != expected_bounds:
+        label = "GIGA_DRAIN" if IS_GIGA else "MEGA_DRAIN"
+        raise RuntimeError(f"{label} source pointer bounds changed: {expected!r}")
 
     sy = oracle.symbols
     sprites, matrices, tasks = sy["gSprites"], sy["gOamMatrices"], sy["gTasks"]
@@ -101,6 +108,7 @@ def main() -> None:
     song_headers = {
         "SE_M_ABSORB": nm["se_m_absorb"],
         "SE_M_BUBBLE3": nm["se_m_bubble3"],
+        "SE_M_GIGA_DRAIN": nm["se_m_giga_drain"],
         "SE_M_ABSORB_2": nm["se_m_absorb_2"],
     }
 

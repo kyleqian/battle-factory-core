@@ -875,6 +875,7 @@ import { stunSporeParticleDrawOrderAtAge } from "../animation/stunSpore.ts";
 import { sleepPowderParticleDrawOrderAtAge } from "../animation/sleepPowder.ts";
 import { ancientPowerRockPainterOrder } from "../animation/ancientPower.ts";
 import { megaDrainSpritesBackToFrontAtAge } from "../animation/megaDrain.ts";
+import { gigaDrainSpritesBackToFrontAtAge } from "../animation/gigaDrain.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -907,6 +908,7 @@ import {
   sceneOnPresentView,
   sceneOnAbsorbView,
   sceneOnMegaDrainView,
+  sceneOnGigaDrainView,
   sceneOnReflectView,
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
@@ -1108,6 +1110,7 @@ import {
   type SceneOnGlarePresentationState,
   type SceneOnAbsorbPresentationState,
   type SceneOnMegaDrainPresentationState,
+  type SceneOnGigaDrainPresentationState,
   type SceneOnReflectPresentationState,
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
@@ -35311,6 +35314,180 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SKIPLOOM used" : "Foe SKIPLOOM used",
       "MEGA DRAIN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "GIGA_DRAIN") {
+    const gigaDrainState = state as SceneOnGigaDrainPresentationState;
+    const view = sceneOnGigaDrainView(gigaDrainState);
+    const displayed = sceneOnGigaDrainView({
+      ...gigaDrainState,
+      age: gigaDrainState.age - 1,
+    });
+    const targetDisplayed = displayed;
+    const playerToOpponent =
+      view.attacker.species === "ROSELIA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "ROSELIA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged GIGA_DRAIN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const roseliaSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ROSELIA!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ROSELIA!;
+    const roselia = playerToOpponent
+      ? roseliaSource
+      : { ...roseliaSource, tileset: subTileset(roseliaSource.tileset, 0, 8) };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const green = { r: 107, g: 255, b: 99 };
+    const bgPalettes = battleBg.palette.map((palette) =>
+      blendPaletteToward(palette, green, displayed.bgPaletteBlendY));
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgPalettes,
+    );
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    const targetX2 = playerToOpponent && gigaDrainState.age < 10
+      ? targetIdle.x2
+      : targetDisplayed.targetX2;
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2 + targetDisplayed.targetY2,
+    );
+    const nonObjTarget2 = fb.slice();
+    drawSpriteSheet(
+      fb,
+      roselia.tileset,
+      roselia.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    if (opponentToPlayer && gigaDrainState.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    const orbTileset: Tileset = {
+      columns: 2,
+      rows: 2,
+      tiles: absorbArt.orbs.tileset.tiles.slice(8, 12),
+    };
+    const displayedSprites = gigaDrainSpritesBackToFrontAtAge(
+      displayed.age,
+      view.target.geometry.animationCenter,
+      gigaDrainState.config.absorptionCenter,
+      view.attacker.geometry.side,
+      gigaDrainState.config.healingCenter,
+      gigaDrainState.config.allocatorProfile,
+    );
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "hitsplat") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          absorbArt.impact.tileset,
+          absorbArt.impact.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else if (sprite.kind === "orb") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          orbTileset,
+          absorbArt.orbs.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 4,
+            rows: 4,
+            tiles: absorbArt.blueStar.tileset.tiles.slice(
+              sprite.frame * 16,
+              sprite.frame * 16 + 16,
+            ),
+          },
+          absorbArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    const opponentSpecies = playerToOpponent ? "ONIX" : "ROSELIA";
+    const playerSpecies = playerToOpponent ? "ROSELIA" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "ROSELIA used" : "Foe ROSELIA used",
+      "GIGA DRAIN!",
       99,
     );
     return;
