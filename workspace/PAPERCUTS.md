@@ -1058,8 +1058,9 @@ current app stage should be rejected before replay.
   when the directory itself is missing). Cost the 2026-08-14 side receipt
   worker an 18-minute full-suite run that ended red for reasons unrelated
   to its change.
-- **Hits:** 3 (2026-08-14: also the CGB4-gating salvage verification and the
-  Brain-intro scout, ~3-5 min each).
+- **Hits:** 4 (2026-08-14: also the CGB4-gating salvage verification, the
+  Brain-intro scout, and the #87 round-15 side worker — each ~2-5 min via
+  the copy-in workaround).
 - **Cost each:** ~20 min first hit (run + triage); ~3-5 min once known.
 - **Workaround:** cheapest and now proven twice: copy the main checkout's
   artifact in (`mkdir -p artifacts/wasm && cp <main>/artifacts/wasm/

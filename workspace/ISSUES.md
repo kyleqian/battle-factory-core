@@ -32,23 +32,43 @@ per-fixture magnitude. Confirmed table (2026-08-14, four probes):
 | QUINN low-dispatch | factoryLegal real-gen | WEEPINBELL (85) | +4 |
 | GRIMER/YOSHI, KADABRA/SHIZUKA | factoryLegal | (≥101) | +4/+5 by RAM predicate |
 
-**Confirmed mechanism (source-located, span decomposed further, not yet
-modeled to a formula):** `TryDoEventsBeforeFirstTurn`'s switch-in ability/
-item/weather loop plus `HandleTurnActionSelectionState`'s `ChooseAction`
-dispatch (`reference/pokeemerald/src/battle_main.c`) run between send-out
+**Confirmed mechanism (source-located, both legs decomposed; round 15
+shows a closed-form source model is NOT attainable with current tools):**
+`TryDoEventsBeforeFirstTurn`'s switch-in ability/item/weather loop plus
+`HandleTurnActionSelectionState`'s `ChooseAction` dispatch
+(`reference/pokeemerald/src/battle_main.c`) run between send-out
 completion and menu interactivity — a real ROM span the current formula
-has NO term for. A live tick-by-tick RAM trace
-(`tools/probe/probe-readylag-span-tickbytick.ts`, GRIMER/YOSHI +5 vs.
-KADABRA/SHIZUKA +4) localizes the split further: the switch-in-loop leg
-("player intro complete" → "both battlers dispatched `ChooseAction`") is a
-**constant +3 ticks in both**, confirming it costs exactly 1 tick per
-call when nothing procs (source-derived, matches the "no switch-in
-ability/item has a real trigger on any of these leads" audit below); the
-entire +5-vs-+4 split instead lives in the **opponent's own AI-decision
-ack** ("dispatch" → "opponent's exec bit clears": 3 ticks for COMBUSKEN, 2
-for MAGNETON) — a real, opponent-dependent span, but in
-`battle_ai_switch_items.c`'s move-scoring logic, not the switch-in loop
-Step 1 of this issue originally pointed at.
+has NO term for. Tick-by-tick RAM traces
+(`tools/probe/probe-readylag-span-tickbytick.ts` and
+`...-plus7.ts`) split the span into two named legs, now measured on all
+three families:
+
+| fixture | family | switch-in-loop leg | AI-ack leg | total |
+| --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | +5 | 3 | 3 (COMBUSKEN) | 6 |
+| KADABRA/SHIZUKA | +4 | 3 | 2 (MAGNETON) | 5 |
+| PUPITAR/DELCATTY | +7 | **4** | 3 (PUPITAR) | 7 |
+
+Round 15 (`docs/trainer-pic-off-window-scout.md`) corrects two earlier
+characterizations: (1) the AI-ack leg is `AI_TrySwitchOrUseItem`
+(`battle_ai_switch_items.c:528-603` — the switch/item decision), NOT
+move-scoring; `BattleAI_ChooseMoveOrAction` runs under a separate later
+`CONTROLLER_CHOOSEMOVE` (=20) command, provably outside the residual
+window (opponent cmd stays 18 through ready in every fixture). (2) The
++7 family's extra tick lives in the **switch-in-loop leg** (4 vs. the
+baseline's constant 3), NOT the AI-ack leg. The AI-ack leg's whole call
+graph is one non-yielding call (`OpponentHandleChooseAction` →
+`AI_TrySwitchOrUseItem` → immediate `OpponentBufferExecCompleted`) — no
+counter/yield state machine — so its 2-vs-3-tick spread is raw
+ARM7TDMI cycle cost spilling past the ~280,896-cycle frame budget.
+Modeling that from source needs instruction-cycle counting the harness
+has no tool for; the one nameable mechanism (super-effective-move
+short-circuit in `ShouldSwitch`, which cleanly separated
+COMBUSKEN 3 / MAGNETON 2) is FALSIFIED by PUPITAR (no super-effective
+move, still 3 ticks). Weather carryover ruled out via RAM
+(`gBattleWeather` 0 throughout all three fixtures); `ShouldUseItem` is
+an opponent-invariant no-op for Factory-synthesized trainers (no
+`trainerItems` populated).
 
 **Eliminated with committed instruments:** `overrides.parties` staging as a
 *general* mechanism (± differential at a matched route with an arbitrary
@@ -87,14 +107,21 @@ last 53 frames) and will shave the tail of any future battle-start window
 extended to the true ready frame. Committed windows that end before their
 ready transition (gold 700/701, Lukas, Yoshi, shizuka) are unaffected.
 
-**Next instrument:** (1) the roster×staging differential named above —
-the single most decisive untested cell. (2) tick-by-tick trace
-(`probe-readylag-span-tickbytick.ts`'s method) applied to a +7 fixture to
-locate which leg carries the extra ticks. (3) once the +4/+5 family's own
-AI-ack leg has a source-derived model (`battle_ai_switch_items.c`'s
-move-scoring loop — not yet read this round), the two families may turn
-out to be the same mechanism at different magnitudes rather than a
-two-term fix. All instruments above are committed and rerunnable.
+**Next instrument (post-round-15):** (1) the roster×staging
+differential — stage the exact DELCATTY/SABLEYE/LICKITUNG roster under
+REAL generation and measure its residual (still the decisive untested
+cell; round 15 skipped it as a stretch — a legal seed search is the
+cost). (2) find what makes the +7 family's switch-in-loop leg take 4
+ticks instead of 3 (`TryDoEventsBeforeFirstTurn`'s loop with nothing
+proc'ing — round 14's audit says no ability/item triggers, yet the leg
+is one tick longer; the cause is unresolved and now THE open mechanism
+question). (3) decide the fix shape: with both legs shown to be
+cycle-cost spill rather than designed per-tick state machines, a
+source-derived closed-form formula may be unattainable — an empirical
+per-leg bound (e.g. ready-at-earliest + confirm-by-RAM-predicate, or a
+calibrated per-fixture constant) may be the realistic engine-side
+answer. All instruments are committed and rerunnable
+(`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
