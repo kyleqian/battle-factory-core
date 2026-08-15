@@ -5,6 +5,43 @@ full history regardless.
 
 ---
 
+## R40 — [supervised session, 2026-08-14] **M39 Battle Script Spikes setup leaf**
+
+- **State:** `rust-main` = current master `87038ec0` plus verified
+  `Cmd_trysetspikes` worker `e101e3c2`. The complete pure
+  `battleScriptTrysetspikesOpcode.ts` decision/state/control projection is
+  native and wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported handler operand validation, ordered attacker resolution,
+  attacker-side inversion, the exact `spikesAmount == 3` failure branch and
+  late label resolution, attacker-only Pressure exemption on failure, and the
+  success-only opposing-side Spikes-status OR plus wrapping source-u8 layer
+  increment. Canonical TypeScript execution supplies **1,262 cases** across
+  both sides, all aliases, the complete u8 layer domain, full-u32 status edges,
+  every selector combination, side-timer siblings, all four prior Pressure
+  bits, ordered errors, corrupt wrapping, and repeated paths; corpus sha256
+  `212c83c5ac0d130511f93fba2772f855450056e761449bf3c51ff61c4631dba0`.
+- **Next:** while main-owned #88 remains the only shared-suite baseline
+  regression, select another conflict-free pure Battle Script leaf that does
+  not overlap active TS work. M7c opponent generation still waits on
+  canonical TS live generation.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  opcode/macro/call site, source constants, handler error order, exact-equality
+  branch, full-width status preservation, immutable siblings, and repetitions;
+  regenerated twice byte-identically (generated file **4,719,009 bytes**,
+  sha256
+  `5913da3b2e768e344e608d24f5288603d7f4bfa0e44951037414cb5eddb715ac`;
+  generator **46,346 bytes**, sha256
+  `a40c0955e1d6d8c3c3a0037f94b1f4d5b3f55d8afca912310c29b8e20b7d6b36`),
+  and reran focused **9/9**, cargo **905/905**, fmt, strict Clippy, and wasm32
+  release. Artifact is **509,806 bytes**, sha256
+  `3f77c7a3993610e23303787e0da2a4d00ad2de3a0fc32946c6a144b8a4901ba2`;
+  build is green. Full npm reproduced exactly current master's two main-owned
+  #88 `randomRoundSoak.test.ts` failures with **1,021 files / 9,820 passed /
+  223 skipped**. Scope stayed inside `core-rs/**`; no unsupported barrier or
+  Rust deferral was added.
+  PAPERCUT: long npm terminal output required log-based completion tracking,
+  ~2 min.
+
 ## R39 — [supervised session, 2026-08-14] **M38 Battle Script attacker/target swap leaf**
 
 - **State:** `rust-main` = current master `da55e159` plus verified
