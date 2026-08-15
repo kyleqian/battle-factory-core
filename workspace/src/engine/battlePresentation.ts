@@ -38,6 +38,7 @@ export type BattlePresentationCommand =
   | (PresentationCommandBase & {
       readonly type: "roundCompleted";
       readonly playerParty: BattleParty;
+      readonly opponent: BattleOpponent;
     });
 
 export interface BattlePresentationCompletion {

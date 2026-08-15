@@ -1,3 +1,39 @@
+## 1267 — [planning session, 2026-08-14] **Next-run queue set (user decision): Noland post-battle consequences → #87 instrument → walk-up scoping; continuous-play bar audited — two wiring gaps named**
+
+- **State:** Docs/ledger only — no `src/`, oracle, or test changes. The
+  user ordered the next main-lane work and named the follow-on
+  objective; both recorded in ROADMAP.md's "User decisions (2026-08-14,
+  planning session)" block.
+- **Did:** (1) Verified the Brain program's remaining-list status:
+  (a) harness lab mode LIVE (top-layer `33354440`; §5.2 consumers per
+  1266) and (c) presentation ran end-to-end — only (b) post-battle
+  consequences remains. (2) Queued, in order: (i) consequences — steps
+  1-3 of `docs/noland-brain-post-battle-audit.md` §5 (BP award table +
+  the +10 brain bonus, symbol grant + BP as round-controller OUTPUTS,
+  brain congrats text; the step-4 harness seam now exists, so the
+  numbers are live-verifiable); (ii) #87's named instrument (the
+  opponent-AI `ChooseAction` ack-timing model,
+  `battle_ai_switch_items.c`); (iii) Brain walk-up dialogue — SCOPING
+  ONLY (present faithful/trim/skip options; do not build). (3) Audited
+  the user's continuous-play bar ("boot and play rounds indefinitely at
+  distribution parity") against the code: TWO wiring gaps — the draft
+  screen is built exactly once, at boot, from the captured anchor
+  records (`core.ts:581` is the only construction site;
+  `factoryRentalGeneration.ts` is proven but unwired into any
+  next-round entry), and the roundCompleted terminal has no continue
+  path into a next round's draft (no challenge advance, no in-session
+  streak carry — battle 21/silver Noland is unreachable by natural
+  play).
+- **Next:** (a) run queue item (i) — the pure outcome function first
+  (audit doc §5 step 1 acceptance), then orchestrator wiring, then the
+  congrats text; (b) items (ii)/(iii) in order; (c) after (i): the
+  continuous-play program (generated-draft round entry + round chaining
+  with in-session streak/symbol/BP carry; cross-session saving stays
+  OUT of scope).
+- **Notes:** Top-layer session; workspace edits limited to
+  ROADMAP/PROGRESS per the user's queue request. Entry 1264 rotated to
+  the archive. Commits local only — pushing is the user's step.
+
 ## 1266 — [supervisor, 2026-08-14] **Wind-down: Brain presentation program built end-to-end in one session; silver 648/701 + gold 700/701 live compares; #87 parked with full forensics; all gates green**
 
 - **State:** 8 rounds / 15 worker steps, zero unresolved failures (two

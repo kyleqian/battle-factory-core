@@ -505,6 +505,7 @@ export function resolveRoundBattle(
         type: "roundCompleted",
         battleIndex: rules.battleIndex,
         playerParty,
+        opponent: rules.currentOpponent,
       },
     );
   }
