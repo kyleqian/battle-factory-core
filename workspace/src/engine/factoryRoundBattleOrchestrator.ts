@@ -185,7 +185,46 @@ export type FactoryRoundRentalSource =
 export type FactoryFacilityState = Readonly<{
   /** Source factoryRentsCount for the selected battle/level mode. */
   rentsCount: number;
+  /**
+   * Walk-up build step B2: FRONTIER_DATA_HEARD_BRAIN_SPEECH, per docs/
+   * noland-walkup-dialogue-scoping.md §1.5 - independent per tier (silver's
+   * own bit, gold's own; they never collide since gold only becomes
+   * reachable once silver's is already set). In-session only by user
+   * decision (no save/persistence in this build) - lives here alongside
+   * rentsCount, the other piece of facility state the round-to-round
+   * chaining already threads unmodified across every
+   * createFactoryRoundBattleOrchestrator call for the same challenge.
+   * Optional/undefined reads as "not heard yet" (factoryHeardBrainSpeech)
+   * so every existing construction site compiles and behaves unchanged;
+   * gold is plumbed as a tier but nothing sets it yet (gold speech is a
+   * later step).
+   */
+  heardBrainSpeech?: Readonly<{ silver: boolean; gold: boolean }>;
 }>;
+
+/** Reads a tier's "have I heard the personality speech this session" bit (see FactoryFacilityState.heardBrainSpeech's own doc) - defaults false so every existing caller that never touched this field reads as "first encounter", matching the real flag's own default (no symbol yet -> bit unset). */
+export function factoryHeardBrainSpeech(
+  facilityState: FactoryFacilityState,
+  tier: "silver" | "gold",
+): boolean {
+  return facilityState.heardBrainSpeech?.[tier] ?? false;
+}
+
+/** Sets a tier's heard-speech bit. Idempotent - a second call for an already-heard tier returns the same state unchanged, matching the source flag's own one-way behavior (SetFrontierData only ever sets this bit, never clears it). */
+export function markFactoryBrainSpeechHeard(
+  state: FactoryRoundBattleOrchestratorState,
+  tier: "silver" | "gold",
+): FactoryRoundBattleOrchestratorState {
+  if (factoryHeardBrainSpeech(state.facilityState, tier)) return state;
+  const heardBrainSpeech = state.facilityState.heardBrainSpeech ?? { silver: false, gold: false };
+  return {
+    ...state,
+    facilityState: Object.freeze({
+      ...state.facilityState,
+      heardBrainSpeech: Object.freeze({ ...heardBrainSpeech, [tier]: true }),
+    }),
+  };
+}
 
 export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   id: string;

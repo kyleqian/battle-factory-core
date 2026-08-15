@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 import { drawMessageBoxFrame, drawMessageBoxText } from "./prebattleRoomRender.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
@@ -351,9 +351,14 @@ export function renderBattleRoomBrainEntranceScene(
   bgFadeY = 0,
   objFadeY = 0,
 ): void {
+  // Walk-up build step B2: the speech phases (brainSpeech/-Idle/-Closing/
+  // -Settled) all continue holding the exact same settled scene brainSettled
+  // itself renders - only the message box content changes - so they share
+  // brainSettled's own "settled" pose branch below (brainEntranceMovementSettled).
+  const settled = brainEntranceMovementSettled(state.phase);
   const movementElapsed = state.phase === "brainMoving"
     ? state.elapsed
-    : state.phase === "brainSettled"
+    : settled
       ? BRAIN_MOVEMENT_SETTLE_ELAPSED
       : 0;
   const step = entryStep(movementElapsed);
@@ -370,7 +375,7 @@ export function renderBattleRoomBrainEntranceScene(
   // before that he holds his resting player-facing pose (NOLAND_IDLE_FRAME),
   // not the decoy's own north-facing idle frame reused during the walk
   // itself (see NOLAND_IDLE_FRAME's own doc).
-  const noland = state.phase === "brainMoving" || state.phase === "brainSettled"
+  const noland = state.phase === "brainMoving" || settled
     ? nolandStep(movementElapsed)
     : { frame: NOLAND_IDLE_FRAME, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
   drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);
