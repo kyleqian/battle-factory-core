@@ -5,6 +5,40 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R39 — [supervised session, 2026-08-14] **M38 Battle Script attacker/target swap leaf**
+
+- **State:** `rust-main` = current master `da55e159` plus verified
+  `Cmd_swapattackerwithtarget` worker `3ace7c14`. The complete three-command
+  pure projection of `battleScriptSnatchOpcode.ts` is now native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported ordered attacker-then-target resolution, exact role exchange,
+  and full-u32 XOR of only `HITMARKER_SWAP_ATTACKER_TARGET` (bit 12), while
+  preserving `effectBattler`, `fainted`, and `scriptingBattler`. Every valid
+  path `Advance`s and a second application restores the complete input.
+  Canonical TypeScript execution supplies **579 cases**, including the full
+  **400-cell** role/effect/fainted matrix, **160** full-u32 hit-marker edges,
+  all aliases, ordered errors, siblings, and involution checks; corpus sha256
+  `eb72926f0c8b959deb7766603f8978b8ab219e0ae9abc191646a02ef181ff76e`.
+- **Next:** after main-lane #88 restores the shared full-suite baseline, select
+  the next conflict-free pure Battle Script leaf. M7c opponent generation
+  still waits on canonical TS live generation; active TS modules remain
+  excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  opcode/macro, all three concrete source sites, full-width marker semantics,
+  ordered errors, aliases, and involution; regenerated twice byte-identically
+  (generated file **906,706 bytes**, sha256
+  `4c6cff4ce3f39deadd7c395be17ae8fb13efba1b9f8e1f60d5bd95cd7d2ed12f`),
+  and reran focused **8/8**, cargo **896/896**, fmt, strict Clippy, and wasm32
+  release. Artifact is **496,765 bytes**, sha256
+  `8a361d0e8b30227781045d6efab09c2ab9d9e3d597da46ab889c60d15fd11272`;
+  build is green at **673 modules**. The full npm union reached **1,021 passed
+  files / 9,820 passed / 223 skipped**, with only the two pre-existing
+  `randomRoundSoak.test.ts` failures that current master already records as
+  main-owned #88; this Rust-only fold did not touch their code or tests. Scope
+  stayed inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+  PAPERCUT: fresh worker artifact provisioning plus one mistyped artifact
+  filename in supervisor verification, ~3 min.
+
 ## R38 — [supervised session, 2026-08-14] **M37 Battle Script Snatch role-rebinding leaf**
 
 - **State:** `rust-main` = current master `edb54f4f` plus verified
@@ -71,36 +105,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Scope stayed inside `core-rs/**`; no unsupported barrier or Rust deferral
   was added.
   PAPERCUT: the fresh worker lacked the ignored WASM artifact, ~2 min.
-
-## R36 — [supervised session, 2026-08-14] **M35 Battle Script Magic Coat setup leaf**
-
-- **State:** `rust-main` = current master `b47d45a7` plus verified Magic Coat
-  worker `4af4026c`. The complete pure
-  `battleScriptTrysetmagiccoatOpcode.ts` decision/state/control projection is
-  native and wasm32-compilable. No ABI or adapter surface was widened.
-- **Did:** ported the source-ordered target=attacker and PP Pressure-exemption
-  writes, then the exact `gCurrentTurnActionNumber == gBattlersCount - 1`
-  branch. Acting last preserves the prior bounce bit and returns typed
-  `FailJump`; every other full-u8 action value arms `bounceMove` and
-  `Advance`s. Canonical TypeScript execution supplies **1,302 cases** across
-  singles/doubles topology, all four attackers, the complete u8 action
-  domain, all selector-role combinations, all eight prior battler bits, u32
-  topology-flag edges, missing attacker, aliases, and repetition; corpus
-  sha256 `df02734139e4e83d3272769c3a85d99a576395342ee3c9617f626f6a4f439794`.
-- **Next:** port the conflict-free pure `Cmd_trysetsnatch` setup leaf using
-  the Magic Coat topology/action recipe, without widening to the module's two
-  role-swap commands or an ABI surface. M7c opponent generation still waits
-  on the canonical TS live-generation port; keep active TS modules excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp and
-  concrete Snatch-adjacent Magic Coat script site, exact write/branch order,
-  role preservation, and machine-owned failure pointer; regenerated twice
-  byte-identically (generated file **1,900,104 bytes**, sha256
-  `f3b023f6075b38722c49e77808a87af0628fc0f39b153932a30a07aadbb71584`),
-  and reran focused **8/8**, fmt, strict Clippy, and wasm32 release. Worker
-  gates passed cargo **874/874**, full npm **1,018 files / 9,802 passed / 223
-  skipped**, and build **670 modules**. Fresh-worktree artifact is **496,779
-  bytes**, sha256
-  `a89a85d9715a50cf7cc8dee2fce74a0c374439ad8d1dd3d91ea9b1066885f34e`;
-  the persistent-tree full gates remain for wind-down. Scope stayed entirely
-  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
-  PAPERCUT: the fresh worker lacked the ignored WASM artifact, ~4 min.

@@ -5,6 +5,39 @@ full history regardless.
 
 ---
 
+## R36 — [supervised session, 2026-08-14] **M35 Battle Script Magic Coat setup leaf**
+
+- **State:** `rust-main` = current master `b47d45a7` plus verified Magic Coat
+  worker `4af4026c`. The complete pure
+  `battleScriptTrysetmagiccoatOpcode.ts` decision/state/control projection is
+  native and wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported the source-ordered target=attacker and PP Pressure-exemption
+  writes, then the exact `gCurrentTurnActionNumber == gBattlersCount - 1`
+  branch. Acting last preserves the prior bounce bit and returns typed
+  `FailJump`; every other full-u8 action value arms `bounceMove` and
+  `Advance`s. Canonical TypeScript execution supplies **1,302 cases** across
+  singles/doubles topology, all four attackers, the complete u8 action
+  domain, all selector-role combinations, all eight prior battler bits, u32
+  topology-flag edges, missing attacker, aliases, and repetition; corpus
+  sha256 `df02734139e4e83d3272769c3a85d99a576395342ee3c9617f626f6a4f439794`.
+- **Next:** port the conflict-free pure `Cmd_trysetsnatch` setup leaf using
+  the Magic Coat topology/action recipe, without widening to the module's two
+  role-swap commands or an ABI surface. M7c opponent generation still waits
+  on the canonical TS live-generation port; keep active TS modules excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp and
+  concrete Snatch-adjacent Magic Coat script site, exact write/branch order,
+  role preservation, and machine-owned failure pointer; regenerated twice
+  byte-identically (generated file **1,900,104 bytes**, sha256
+  `f3b023f6075b38722c49e77808a87af0628fc0f39b153932a30a07aadbb71584`),
+  and reran focused **8/8**, fmt, strict Clippy, and wasm32 release. Worker
+  gates passed cargo **874/874**, full npm **1,018 files / 9,802 passed / 223
+  skipped**, and build **670 modules**. Fresh-worktree artifact is **496,779
+  bytes**, sha256
+  `a89a85d9715a50cf7cc8dee2fce74a0c374439ad8d1dd3d91ea9b1066885f34e`;
+  the persistent-tree full gates remain for wind-down. Scope stayed entirely
+  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+  PAPERCUT: the fresh worker lacked the ignored WASM artifact, ~4 min.
+
 ## R35 — [supervised session, 2026-08-14] **M34 Battle Script Destiny Bond hit-marker leaf + wind-down**
 
 - **State:** `rust-main` = current master `9b368bd8` plus the verified Destiny
