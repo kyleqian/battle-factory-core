@@ -1036,16 +1036,21 @@ residual is ISSUES #87). Only (b) remains.
    worklist (award table incl. the +10 brain bonus, symbol grant and BP
    as round-controller OUTPUTS, brain congrats text). Its step-4
    prerequisite exists now, so the numbers are end-to-end verifiable
-   against the real ROM. **Steps 1-2 landed** (PROGRESS 1269):
-   `applyFactoryBrainRoundOutcome` (`factoryBrainRoundOutcome.ts`) ports
-   `GiveBattlePoints`/`GiveFacilitySymbol` exactly and is wired into
-   `factoryRoundBattleOrchestrator.ts`'s round-completion path as a
-   `roundOutcome` state output; step 3 (brain congrats text) remains.
-   (ii) ISSUES #87's named next instrument (the
-   opponent-AI `ChooseAction` ack-timing model,
-   `battle_ai_switch_items.c`). (iii) The Brain walk-up dialogue
-   surface: SCOPING ONLY — present faithful/trim/skip options with
-   costs; the user decides before any build.
+   against the real ROM. **(i) COMPLETE** (2026-08-14 eve session,
+   PROGRESS 1269-1272): `applyFactoryBrainRoundOutcome`
+   (`factoryBrainRoundOutcome.ts`) ports
+   `GiveBattlePoints`/`GiveFacilitySymbol` exactly, wired into
+   `factoryRoundBattleOrchestrator.ts` as a `roundOutcome` output;
+   brain congrats text landed with its two scroll-gate ages
+   live-bisected against the ROM; BP 0→14 + silver symbol flag
+   live-pinned (`docs/brain-terminal-live-verification.md`).
+   **(ii) COMPLETE as an evidence program** (rounds 15-17,
+   `docs/trainer-pic-off-window-scout.md`): the ack model is built and
+   honestly bounded — no source-predictable formula exists; ISSUES #87
+   records the three fix-shape options awaiting a pick.
+   **(iii) COMPLETE**: `docs/noland-walkup-dialogue-scoping.md`
+   presents FAITHFUL/TRIM/SKIP with costs (recommendation: TRIM); the
+   user decides before any build.
 2. **Follow-on objective — continuous play.** The user's bar: boot the
    app and play round after round indefinitely, matching what a real
    Emerald player would see at distribution parity. Audited gaps
@@ -1060,7 +1065,15 @@ residual is ISSUES #87). Only (b) remains.
    generated-draft round entry + round-to-round chaining with
    in-session streak/symbol/BP carry. Cross-session persistence
    (saving) stays OUT of scope; the standing lobby trims stand
-   unchanged.
+   unchanged. **WIRED (2026-08-14 eve, PROGRESS 1271-1272):**
+   `factoryRoundChaining.ts` + the terminal→next-draft path are live
+   (supervisor decision: continue re-enters a fresh generated draft
+   directly after the record menu, no new lobby-dialogue surfaces);
+   the newly-reachable generated-battle-1 crash it exposed (#88) was
+   fixed at root cause same-session (vanilla soak 14/20→20/20).
+   Battle 21 is now reachable by natural play. Remaining under this
+   objective: #89 (pre-existing Baton Pass `openpartyscreen` gap, hit
+   by full-policy soak seed 27) and distribution-parity soak breadth.
 
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
