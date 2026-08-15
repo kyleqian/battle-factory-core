@@ -5,104 +5,109 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## R31 — [supervised session, 2026-08-14] **M30 Battle Script Thrash-family post-lock confusion-byte leaf**
+## R35 — [supervised session, 2026-08-14] **M34 Battle Script Destiny Bond hit-marker leaf + wind-down**
 
-- **State:** `rust-main` = current master `b1ddefa6` plus the verified
-  confuse-if-repeating-attack-ends worker through merge `be7add4c`. The
-  complete pure `battleScriptConfuseifrepeatingattackendsOpcode.ts`
-  state/control projection is native and wasm32-compilable. No ABI or adapter
-  surface was widened.
-- **Did:** ported exact missing-attacker resolution and the source
-  `STATUS2_LOCK_CONFUSE` predicate. When either packed status2 lock bit is set,
-  the complete narrow state is preserved; when both are clear, only
-  `moveEffectByte` is overwritten with `MOVE_EFFECT_THRASH |
-  MOVE_EFFECT_AFFECTS_USER` (**117**). Both successful branches `Advance`.
-  Canonical TypeScript execution supplies **4,229 cases**, including the full
-  256-byte effect domain for all four attackers and all four lock-bit
-  combinations, packed-u32 edges, sibling preservation, missing role, and
-  repetition; corpus sha256
-  `a6481812ddbea8b97208ad1c0954c749fa1ce742bebe2e538d8f258198bb2966`.
+- **State:** `rust-main` = current master `9b368bd8` plus the verified Destiny
+  Bond worker through `4f611578`. The complete pure
+  `battleScriptTrysetdestinybondtohappenOpcode.ts` state/control projection and
+  its shared helper are native and wasm32-compilable. No ABI or adapter surface
+  was widened; the session ended committed and green.
+- **Did:** ported attacker-then-target role resolution and the exact three-part
+  marker predicate. Only `HITMARKER_DESTINYBOND` (bit 6) is ORed into the full
+  u32 hit marker when the target has `STATUS2_DESTINY_BOND` (bit 25), attacker
+  and target are on opposite sides, and `HITMARKER_GRUDGE` (bit 24) is clear.
+  All other state is preserved and every valid path `Advance`s. Canonical
+  TypeScript execution supplies **48 cases** across all role pairs, both sides,
+  packed-u32 edges, predicate branches, ordered missing-role errors, siblings,
+  aliases, and repetition. It pins both concrete source opcode sites (OHKO and
+  Pursuit); corpus sha256
+  `537b2986185b3c2cf07e96ec3087d249e9713338e8acb79d79278f13dc106bcb`.
 - **Next:** select the next conflict-free pure Battle Script leaf. M7c
   opponent generation waits on the canonical TS live-generation port; keep
   the construction clock and modules under active TS work excluded.
 - **Notes:** Terra/max worker, one commit. Supervisor audited source constants,
-  exact error ordering, canonical handler execution, and the bounded 4.0 MB
-  generated corpus; regenerated twice byte-identically (generated sha256
-  `fd41471d601b4d31f51f9fd49a4670f3b5ebed299eb7872d3d31f4ab586a6653`),
-  and reran focused **5/5**, cargo **842/842**, fmt, strict Clippy, wasm32
+  both registered call sites, full-width preservation, predicate precedence,
+  and exact canonical errors; regenerated twice byte-identically (generated
+  file **82,469 bytes**, sha256
+  `87ea3904816dece1df91ca15607b08232c421354dcde6a66e6a1608501824473`),
+  and reran focused **7/7**, cargo **866/866**, fmt, strict Clippy, wasm32
+  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
+  375/375**, full npm **1,018 passed files / 44 grind files skipped; 9,802
+  passed / 223 skipped tests**, and build **670 modules**. Final soak gates
+  passed vanilla **20/20** and full-policy **60/60**, with **0 crashes** and
+  **0 hangs**. Artifact is **509,620 bytes**, sha256
+  `412773e10d2a88b646f80dfafa62c998f2462d21b28f430173789ec298c81ae1`.
+  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added.
+  PAPERCUT: the fresh worker needed the ignored WASM artifact rebuilt, ~2 min.
+
+## R34 — [supervised session, 2026-08-14] **M33 Battle Script Role Play ability-copy leaf**
+
+- **State:** `rust-main` = current master `9b368bd8` plus the verified Role
+  Play worker through `f170adba`. The complete pure
+  `battleScriptTrycopyabilityOpcode.ts` decision/state/control projection is
+  native and wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported attacker-then-target role resolution with the canonical
+  shared helper's exact (grammatically awkward) errors. Target abilities
+  `ABILITY_NONE` (**0**) and `ABILITY_WONDER_GUARD` (**25**) preserve complete
+  narrow state and return typed `FailJump`; every other u8 ability overwrites
+  the active attacker's ability and `lastUsedAbility`, then `Advance`s.
+  Siblings and roles are preserved and attacker=target aliases are valid.
+  Canonical TypeScript execution supplies **359 cases** across a full
+  256-ability non-alias sweep, all 16 attacker/target pairs × two failures and
+  four success boundaries, ordered errors, siblings, aliases, and repetition;
+  corpus sha256
+  `afbfd05ca218aa26d69aca4c8f6f771368c6a59b1b1be4bade6ccf65fc4cb536`.
+- **Next:** select the next conflict-free pure Battle Script leaf. M7c
+  opponent generation waits on the canonical TS live-generation port; keep
+  the construction clock and modules under active TS work excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited source constants,
+  full u8 domains, fail-jump preservation, and exact canonical error
+  `Battle Script hit-chain command requires a attacker role`; regenerated
+  twice byte-identically (generated file **338,858 bytes**, sha256
+  `b071615aa660fc0e5c305c59d2f1a20664681776ff97319c43f8a5cd8fe026d4`),
+  and reran focused **6/6**, cargo **859/859**, fmt, strict Clippy, wasm32
   release, forced-WASM union **19 files / 807/807**, smoke **8 files /
   375/375**, full npm **1,018 passed files / 44 grind files skipped; 9,802
   passed / 223 skipped tests**, and build **670 modules**. Artifact is
-  **509,475 bytes**, sha256
-  `08436ef1c1760ad3cf409fd733aed6d1266b4f4db37c53acf5cb3103c9fb67c4`.
+  **509,840 bytes**, sha256
+  `1a734cc209ef4d756a4839515f60dc6fc9296f91559e3be5c2e181a3fbb2d27a`.
   Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
   deferral was added.
-  PAPERCUT: the fresh worker lacked Cargo on login PATH and the ignored WASM
-  artifact; the supervisor also corrected one stale local WASM script name,
-  ~4 min total.
+  PAPERCUT: the fresh worker lacked the ignored WASM artifact and rebuilt it
+  before the final application gates, ~3 min.
 
-## R30 — [supervised session, 2026-08-14] **M29 Battle Script Bide setup state leaf**
+## R33 — [supervised session, 2026-08-14] **M32 Battle Script Pay Day payout leaf**
 
-- **State:** `rust-main` = current master `732e6339` plus the verified Bide
-  setup worker through `68601406`. The complete pure
-  `battleScriptSetbideOpcode.ts` state/control projection is native and
-  wasm32-compilable. No ABI or adapter surface was widened.
-- **Did:** ported exact missing-attacker resolution and the source-ordered
-  setup writes: OR attacker `status2` with `STATUS2_MULTIPLETURNS` and
-  `STATUS2_BIDE_TURN(2)`, overwrite its locked move with `currentMove`, zero
-  its signed Bide-damage accumulator, and `Advance`. Siblings, all selector
-  roles, current move, and all saved Bide targets are preserved. Canonical
-  TypeScript execution supplies **273 cases** across packed-u32 status/Bide
-  counters, current/locked u16 edges, signed-i32 damage edges, all battlers and
-  saved targets, selector roles, overwrite boundaries, and repetition; corpus
-  sha256
-  `ce9554d3269b3760cffc0605b69472636027f500f843303d0f05740c03f83234`.
+- **State:** `rust-main` = current master `9b368bd8` plus the verified Pay Day
+  worker through `8aa5e68f`. The complete pure
+  `battleScriptGivepaydaymoneyOpcode.ts` state/control projection is native
+  and wasm32-compilable. No ABI or adapter surface was widened.
+- **Did:** ported the source-ordered suppression predicate for `BATTLE_TYPE_LINK`,
+  `BATTLE_TYPE_RECORDED_LINK`, and zero Pay Day money. Suppression preserves
+  the full narrow state and `Advance`s; payout computes exact u16×u8 unsigned
+  bonus money, caps player money at **999,999**, overwrites the nullable full
+  u32 prepared-money buffer, and returns typed `PayoutCall`. Absolute label
+  and pushed return address remain machine-owned. Canonical TypeScript
+  execution supplies **149 finite cases**, a separate exhaustive **65,536**
+  value u16 Pay Day sweep, and an exhaustive **256** value u8 multiplier
+  sweep; corpus sha256
+  `546867571e961b089407fb8caf2970b3f4288cc89d53acb8710b1237e7bede88`.
 - **Next:** select the next conflict-free pure Battle Script leaf. M7c
   opponent generation waits on the canonical TS live-generation port; keep
   the construction clock and modules under active TS work excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited source writes,
-  canonical domains, and non-write of `gBideTarget`; regenerated twice
-  byte-identically (generated sha256
-  `5954c9f2c8f6850c409f287ecc2bab3b0e49bad163a22c26dc7871198e83d511`),
-  and reran focused **5/5**, cargo **837/837**, fmt, strict Clippy, wasm32
+- **Notes:** Terra/max worker, one commit. Supervisor audited source AddMoney,
+  branch precedence, arithmetic bounds, compact packed sweep results, and
+  complete buffer preservation/overwrite; regenerated twice byte-identically
+  (generated file **1,707,596 bytes**, sha256
+  `78f3ac15fe6a9e50e704ce4b3b1c0ef72a24d68b434190b8cb7f6c22d3011c8e`),
+  and reran focused **6/6**, cargo **853/853**, fmt, strict Clippy, wasm32
   release, forced-WASM union **19 files / 807/807**, smoke **8 files /
-  375/375**, full npm **1,014 passed files / 44 grind files skipped; 9,765
-  passed / 223 skipped tests**, and build **669 modules**. Artifact is
-  **509,839 bytes**, sha256
-  `968ddd966352ff5095b52a22a3a6aa8032f89ba9e8352c8f72fbf0586f2a2b5b`.
+  375/375**, full npm **1,018 passed files / 44 grind files skipped; 9,802
+  passed / 223 skipped tests**, and build **670 modules**. Artifact is
+  **509,249 bytes**, sha256
+  `60d3a569b3fbb76a4769aad1bd7c4dd1668d6dcbd0c332fe9afe2163b8b43645`.
   Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
   deferral was added.
-  PAPERCUT: the worker rerouted absent login-PATH Cargo and repeated one full
-  npm run after its terminal bridge lost the summary, ~3 min total.
-
-## R29 — [supervised session, 2026-08-14] **M28 Battle Script Fake Out first-turn decision leaf**
-
-- **State:** `rust-main` = current master `732e6339` plus the verified Fake Out
-  first-turn worker through merge `376d6de8`. The complete pure
-  `battleScriptJumpifnotfirstturnOpcode.ts` decision projection is native and
-  wasm32-compilable. No ABI or adapter surface was widened.
-- **Did:** ported exact missing-attacker resolution and the source truth test
-  over canonical `isFirstTurn` values: `0` returns typed `FailJump`, while `1`
-  and `2` return `Advance`. Both branches preserve the entire narrow state;
-  absolute failure PCs remain in the omitted machine layer. Canonical
-  TypeScript execution supplies **20 cases** across the full four-attacker by
-  three-value matrix, sibling preservation, missing role, and repeated paths;
-  corpus sha256
-  `c48ced85f5c875b299bbdde39fbfe55471ffa51077eacc3a4f6bce9a971b3d02`.
-- **Next:** select the next conflict-free pure Battle Script leaf. M7c
-  opponent generation waits on the canonical TS live-generation port; keep
-  the construction clock and modules under active TS work excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited source lifecycle
-  `2 -> 1 -> 0`, canonical `0..2` validation, and handler execution;
-  regenerated twice byte-identically (generated sha256
-  `71efb5e8a1be9757a4387ce088ea34a425b4f6e713c0e3788c95088c8f5d9128`),
-  and reran focused **6/6**, cargo **832/832**, fmt, strict Clippy, wasm32
-  release, forced-WASM union **19 files / 807/807**, smoke **8 files /
-  375/375**, full npm **1,014 passed files / 44 grind files skipped; 9,765
-  passed / 223 skipped tests**, and build **669 modules**. Artifact is
-  **509,708 bytes**, sha256
-  `9c5fcb5166201d63d422440d613e2d5de22364586f5b62dcf09142e95136be6d`.
-  Scope stayed entirely inside `core-rs/**`; no unsupported barrier or Rust
-  deferral was added.
-  PAPERCUT: the fresh worker lacked the ignored WASM artifact, so its initial
-  full npm baseline failed before the required build supplied it, ~2 min.
+  PAPERCUT: the fresh worker initially lacked the ignored WASM artifact and
+  repeated its full baseline after building it, ~3 min.
