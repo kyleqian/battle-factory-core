@@ -109,21 +109,31 @@ three families:
 | KADABRA/SHIZUKA | +4 | 3 | 2 (MAGNETON) | 5 |
 | PUPITAR/DELCATTY | +7 | **4** | 3 (PUPITAR) | 7 |
 | DELCATTY/… real-gen (round 16) | +5 | **4** | 2 (MAGNETON) | 6 |
+| SANDSLASH/… real-gen (round 17) | +5 | 3 | **3** (MAGNETON) | 6 |
 
-**Round 16 (decisive cell resolved): the two legs are INDEPENDENT and
-ADDITIVE — there are not two "families."** The exact
+**Round 16 (decisive cell resolved): the residual is the SUM of two
+legs, and staging is fully innocent** — the exact
 DELCATTY/SABLEYE/LICKITUNG roster under real `factoryLegal` generation
-(no `overrides.parties`) measures +5, but its switch-in-loop leg is
-**4, exactly reproducing the +7 fixtures'** — so that leg is a genuine
-player-roster property (staging fully innocent), while the total moved
-only because the AI-ack leg is opponent-driven (PUPITAR 3 vs. MAGNETON
-2). Named candidate for the roster leg: **`GetWhoStrikesFirst`'s
-`HOLD_EFFECT_QUICK_CLAW` conditional multiply/divide** — DELCATTY holds
-Quick Claw in the ROM's own `FRONTIER_MON_DELCATTY_2` rental data, and
-the predicate splits all five measured fixtures cleanly (2-for-2
-Quick-Claw lead → leg 4; 3-for-3 no Quick Claw → leg 3). Candidate, not
-cycle-counted proof. Round 16 also corrected two stale "0-residual
-DELCATTY/MAGNETON" doc citations (pre-RAM-predicate) to +5.
+measures +5 with its switch-in-loop leg at **4, exactly reproducing the
++7 fixtures'**, so that leg is a genuine player-roster property. Round
+16 also corrected two stale "0-residual DELCATTY/MAGNETON" doc
+citations (pre-RAM-predicate) to +5.
+
+**Round 17 (falsification sweep): BOTH single-factor predicates are
+dead.** The Quick-Claw candidate (`GetWhoStrikesFirst`'s
+`HOLD_EFFECT_QUICK_CLAW` branch) is FALSIFIED: a second Quick-Claw lead
+(SANDSLASH_2) measures leg 3, and a `SwapTurnOrder`-call hypothesis
+also fails (DELCATTY never needs the swap yet shows 4). And the "ack
+leg is opponent-driven" framing broke too: the SAME opponent
+(MAGNETON, same route) shows ack 2 in one fixture and 3 in another —
+the two totals coincidentally matched at 6 via offsetting leg shifts.
+`GetWhoStrikesFirst` has only two conditional hold-effect branches
+(Quick Claw, Macho Brace — the latter on zero Factory rentals,
+structurally untestable); the weather-ability branch is dead code at
+this call. Both legs vary within {3,4} and {2,3} with NO validated
+source-visible predicate; per round 15 the underlying quantity is raw
+cycle-cost spill against the frame boundary, which this harness cannot
+count.
 
 Round 15 (`docs/trainer-pic-off-window-scout.md`) corrects two earlier
 characterizations: (1) the AI-ack leg is `AI_TrySwitchOrUseItem`
@@ -173,21 +183,25 @@ last 53 frames) and will shave the tail of any future battle-start window
 extended to the true ready frame. Committed windows that end before their
 ready transition (gold 700/701, Lukas, Yoshi, shizuka) are unaffected.
 
-**Next step (post-round-16): the fix-shape decision.** The residual now
-decomposes as `switchInLoopLeg + aiAckLeg` where the first is modelable
-from rental data (3 + 1 iff the player's lead holds Quick Claw —
-candidate predicate, 5/5 fixtures) and the second is opponent-driven
-cycle-cost spill observed only as 2 or 3, with no source-derivable
-formula available to this harness. Options for the engine: (a) model
-the Quick-Claw term exactly and bound the ack leg (fire ready at the
-earliest tick, confirm by RAM-predicate-style acceptance in compares);
-(b) calibrate the ack leg per committed fixture; (c) accept ±1 on
-battle-start windows. Before committing to (a)'s predicate, cheap
-falsification sweep: measure 2-3 more fixtures whose leads hold OTHER
-items with `GetWhoStrikesFirst`-visible branches, and at least one more
-Quick-Claw lead. All instruments committed and rerunnable
-(`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`,
-fixture `tools/battle-lab/factory-legal-delcatty-sableye-lickitung-readylag-probe.json`).
+**Next step (post-round-17): the fix-shape decision, now with no
+predictive model on the table.** Both legs are measurable per fixture
+(instruments below) but neither is predictable from source-visible
+properties; totals span +4..+7 (sum of {3,4}+{2,3}). Realistic engine
+options: (a) per-committed-fixture calibrated ready constants,
+validated by the RAM-handshake predicate
+(`tools/probe/probe-ready-lag-chooseaction-handshake.ts`) — honest for
+compare windows, but generalizes to nothing; (b) an engine-side
+uncertainty band: predict ready-at-earliest (+4) and let acceptance
+treat the 0..3-tick tail as the known #88-adjacent tolerance for
+battle-start windows; (c) leave committed windows ending before their
+ready transition as-is (unaffected) and only calibrate windows that
+must cross it (currently just the silver reveal tail, 648/701).
+Deciding between these is a supervisor/user-visible trade (exactness
+vs. honesty of a fitted constant); no further instrument is named —
+the evidence program (rounds 13-17) is complete. Instruments:
+`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`,
+fixtures `factory-legal-delcatty-sableye-lickitung-readylag-probe.json`,
+`factory-legal-sandslash-venomoth-chansey-readylag-probe.json`.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
