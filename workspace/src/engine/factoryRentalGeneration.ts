@@ -227,7 +227,15 @@ export function generateInitialFactoryRentals(
   const factoryWinStreak = requireNonnegativeInteger(input.factoryWinStreak, "factoryWinStreak");
   const challengeNum = Math.floor(factoryWinStreak / STAGES_PER_CHALLENGE);
   // See getLevel50InitialRentalFixedIv: avoid pretending the retail OOB read
-  // for challenge 8+ is a stable rule.
+  // for challenge 8+ is a stable rule. GetFactoryMonFixedIV's bound check
+  // (`challengeNum > ARRAY_COUNT(sFixedIVTable)`, should be `>=`,
+  // battle_factory.c:748-750) is only corrected behind `#ifdef BUGFIX`; the
+  // pinned reference build defines neither BUGFIX (commented out,
+  // reference/pokeemerald/include/config.h:48) nor MODERN (defaults to 0,
+  // reference/pokeemerald/Makefile:6), so this build takes the unpatched
+  // `#else` branch and challengeNum==8 genuinely reads `sFixedIVTable[8]`,
+  // one row past the declared 8-row table, on real hardware -- there is no
+  // stable value to port, so this throws instead of guessing at one.
   if (challengeNum > 7) {
     throw new Error(`Level-50 initial rental generation supports source challenges 0..7, got ${challengeNum}`);
   }
