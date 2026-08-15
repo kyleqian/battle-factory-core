@@ -48,6 +48,22 @@ three families:
 | GRIMER/YOSHI | +5 | 3 | 3 (COMBUSKEN) | 6 |
 | KADABRA/SHIZUKA | +4 | 3 | 2 (MAGNETON) | 5 |
 | PUPITAR/DELCATTY | +7 | **4** | 3 (PUPITAR) | 7 |
+| DELCATTY/… real-gen (round 16) | +5 | **4** | 2 (MAGNETON) | 6 |
+
+**Round 16 (decisive cell resolved): the two legs are INDEPENDENT and
+ADDITIVE — there are not two "families."** The exact
+DELCATTY/SABLEYE/LICKITUNG roster under real `factoryLegal` generation
+(no `overrides.parties`) measures +5, but its switch-in-loop leg is
+**4, exactly reproducing the +7 fixtures'** — so that leg is a genuine
+player-roster property (staging fully innocent), while the total moved
+only because the AI-ack leg is opponent-driven (PUPITAR 3 vs. MAGNETON
+2). Named candidate for the roster leg: **`GetWhoStrikesFirst`'s
+`HOLD_EFFECT_QUICK_CLAW` conditional multiply/divide** — DELCATTY holds
+Quick Claw in the ROM's own `FRONTIER_MON_DELCATTY_2` rental data, and
+the predicate splits all five measured fixtures cleanly (2-for-2
+Quick-Claw lead → leg 4; 3-for-3 no Quick Claw → leg 3). Candidate, not
+cycle-counted proof. Round 16 also corrected two stale "0-residual
+DELCATTY/MAGNETON" doc citations (pre-RAM-predicate) to +5.
 
 Round 15 (`docs/trainer-pic-off-window-scout.md`) corrects two earlier
 characterizations: (1) the AI-ack leg is `AI_TrySwitchOrUseItem`
@@ -87,41 +103,31 @@ historical "0-residual" points were PNG-landmark reads; the RAM handshake
 predicate (`tools/probe/probe-ready-lag-chooseaction-handshake.ts`) shows
 they carry +4/+5 too — the late-fire is universal, not route-gated.
 
-**Open lead (round 14, unresolved):** every confirmed +7 fixture
-(silver TANGELA, PUPITAR probe) shares the *exact same* `overrides.parties`
-player roster (DELCATTY/SABLEYE/LICKITUNG, species 316/322/108); every
-confirmed +4/+5 fixture is real generation. But the general
-`overrides.parties`-vs-real-generation differential above already tested a
-*different* (arbitrary) roster at a matched route and found it innocent —
-so this specific roster, staged via `overrides.parties`, has never been
-compared against the same roster under real generation. That is the
-decisive untested cell: does this exact DELCATTY/SABLEYE/LICKITUNG triple
-show +7 or +4/+5 under real rental generation (if a legal seed lands it) —
-confirming either a roster×staging interaction or a roster/route-specific
-cause independent of staging. The opponent-side leg (TANGELA/PUPITAR) also
-still needs the same tick-by-tick trace already run for YOSHI/SHIZUKA —
-unknown whether its extra ticks land in the same AI-ack leg or elsewhere.
+**Round-14 open lead RESOLVED by round 16** (see the table above): the
+shared DELCATTY/SABLEYE/LICKITUNG roster correlation was real but its
+mechanism is the roster itself (Quick Claw lead), not staging; the
+overrides-vs-real question is closed for this issue.
 
 **Why it matters:** caps the silver Brain-reveal compare at 648/701 (its
 last 53 frames) and will shave the tail of any future battle-start window
 extended to the true ready frame. Committed windows that end before their
 ready transition (gold 700/701, Lukas, Yoshi, shizuka) are unaffected.
 
-**Next instrument (post-round-15):** (1) the roster×staging
-differential — stage the exact DELCATTY/SABLEYE/LICKITUNG roster under
-REAL generation and measure its residual (still the decisive untested
-cell; round 15 skipped it as a stretch — a legal seed search is the
-cost). (2) find what makes the +7 family's switch-in-loop leg take 4
-ticks instead of 3 (`TryDoEventsBeforeFirstTurn`'s loop with nothing
-proc'ing — round 14's audit says no ability/item triggers, yet the leg
-is one tick longer; the cause is unresolved and now THE open mechanism
-question). (3) decide the fix shape: with both legs shown to be
-cycle-cost spill rather than designed per-tick state machines, a
-source-derived closed-form formula may be unattainable — an empirical
-per-leg bound (e.g. ready-at-earliest + confirm-by-RAM-predicate, or a
-calibrated per-fixture constant) may be the realistic engine-side
-answer. All instruments are committed and rerunnable
-(`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`).
+**Next step (post-round-16): the fix-shape decision.** The residual now
+decomposes as `switchInLoopLeg + aiAckLeg` where the first is modelable
+from rental data (3 + 1 iff the player's lead holds Quick Claw —
+candidate predicate, 5/5 fixtures) and the second is opponent-driven
+cycle-cost spill observed only as 2 or 3, with no source-derivable
+formula available to this harness. Options for the engine: (a) model
+the Quick-Claw term exactly and bound the ack leg (fire ready at the
+earliest tick, confirm by RAM-predicate-style acceptance in compares);
+(b) calibrate the ack leg per committed fixture; (c) accept ±1 on
+battle-start windows. Before committing to (a)'s predicate, cheap
+falsification sweep: measure 2-3 more fixtures whose leads hold OTHER
+items with `GetWhoStrikesFirst`-visible branches, and at least one more
+Quick-Claw lead. All instruments committed and rerunnable
+(`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`,
+fixture `tools/battle-lab/factory-legal-delcatty-sableye-lickitung-readylag-probe.json`).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
