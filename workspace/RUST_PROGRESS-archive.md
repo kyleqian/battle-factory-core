@@ -5,6 +5,42 @@ full history regardless.
 
 ---
 
+## R45 — [supervised session, 2026-08-14] **M44 Battle Script four-weather setter family**
+
+- **State:** `rust-main` = current master `3c913c8a` plus R43-R44 and verified
+  weather worker `d9d0c4ac`. The complete pure
+  `battleScriptSetWeatherOpcode.ts` four-opcode registration/state/control
+  family is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session remains active and committed.
+- **Did:** ported Rain/Sun/Sandstorm/Hail's exact active masks, temporary bits,
+  success choosers, same-weather failure OR/chooser/preservation path, and
+  success-only full weather-word replacement plus five-turn duration. The
+  native factory retains canonical Rain→Sun→Sandstorm→Hail validation order
+  and JavaScript dynamic-id collision behavior without inventing dispatcher/id
+  predicates. Canonical TypeScript execution supplies **1,788 cases** across
+  all **1,024** low-weather-bit cells, **648** timer/chooser edges, **64**
+  result-flag edges, high-u32 bits, cross-weather replacement, alternating and
+  repeated paths, plus **17** registration cases; corpus sha256
+  `7b590b8f3b669c00f943087d24f9618d118ef9d87f75bc202baa0f8f08ab5e03`.
+- **Next:** recheck active work and select another conflict-free pure Battle
+  Script leaf. M7c opponent generation still waits on canonical TS live
+  generation; main and animation moving targets remain excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited all four decomp
+  bodies, dispatch entries, macros, scripts, weather/message constants,
+  registration order/collisions, state preservation and sequences;
+  regenerated twice byte-identically (canonical corpus **2,086,704 bytes**;
+  generated file **3,073,560 bytes**, sha256
+  `d7a227d605e64845ff0d6a08b859186f2b6ba27461706d57fab0417cfabd09d1`;
+  generator **45,125 bytes**, sha256
+  `613cde8f52961fbceee7617c8c3cc40353e117a4c558f3d7b6db0b38ff21b772`),
+  and reran focused **5/5**, cargo **948/948**, fmt, strict Clippy, and wasm32
+  release. Artifact is **497,795 bytes**, sha256
+  `21b35dbdac8b48bcd331a4d119ce77ba8cc7ef5ec927edb1a27315736517cd39`.
+  The worker summary's stale **1,173** count was corrected to the generated
+  test's actual **1,788** during review. Latest-master smoke is **375/375** and
+  build is green at **676 modules**. Scope stayed inside `core-rs/**`; no
+  unsupported barrier, deferral, or papercut was added.
+
 ## R44 — [supervised session, 2026-08-14] **M43 Battle Script Fury Cutter counter/power leaf**
 
 - **State:** `rust-main` = current master `b4097e84` plus R43 and verified

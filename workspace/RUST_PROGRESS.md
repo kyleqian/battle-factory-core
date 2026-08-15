@@ -5,6 +5,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R48 — [supervised session, 2026-08-15] **M47 Battle Script Pain Split leaf + final wind-down**
+
+- **State:** `rust-main` = current master `d23e6e3a` plus verified Pain Split
+  worker `4aa27ce8` and metadata-ratchet repair `d69b464d`. The complete pure
+  `battleScriptPainSplitOpcode.ts` registration/state/control projection is
+  native and wasm32-compilable; no ABI or adapter surface was widened. The
+  session ends committed and green.
+- **Did:** ported exact singleton registration and instruction-shape checks,
+  instruction-before-attacker-before-target error order, target-Substitute
+  no-write failure with late label resolution, and the successful u16 HP
+  average. Success writes only `painSplitHp = targetHP - average`,
+  `battleMoveDamage = attackerHP - average`, and target
+  `specialStatus.shellBellDmg = 0xffff`. Canonical TypeScript execution
+  supplies **922 cases**: the complete **625** optional-selector matrix,
+  **196** endpoint/parity/sign arithmetic pairs, packed Substitute edges,
+  ordered errors, full signed scratch/status siblings, repetitions, and
+  **13** exact registration cases. Corpus sha256
+  `636cff5a1ac7934a7e9aea36eabe93d69092a54648665dfc5791d91f03dc8f3a`.
+- **Next:** at the next session, merge current master, recheck active work, and
+  select another conflict-free pure Battle Script leaf. M7c opponent
+  generation still waits on canonical TS live generation; main walk-up and
+  animation moving targets remain excluded.
+- **Notes:** Terra/max implementation worker plus one Sol/high audit-repair
+  commit. Supervisor found and closed the initially missing independent corpus
+  metadata ratchet, audited decomp/dispatch/macro/single script site, widths,
+  shape and role ordering, substitute write set, signed averaging, sibling
+  preservation, and repetitions; regenerated twice byte-identically
+  (canonical corpus **5,351,849 bytes**; generated file **12,583,953 bytes**,
+  sha256
+  `beaff9112bc43ec7f0821bc0c3eee40c4b72dea9391d1c9755ebbdc61771f1fb`;
+  generator **50,220 bytes**, sha256
+  `585a963bbb61adc0cce3c0879ecda9c64af15b176b7cfc1ae73cdb1480468aef`).
+  Final cargo is **973/973**, fmt and strict Clippy pass, and wasm32 release is
+  **497,717 bytes**, sha256
+  `e9f227f2162fddfc8592cff07629856837ce5661f4f6efe5e3dc90c400a20c37`.
+  Final npm is green at **1,029 files / 9,870 passed / 223 skipped**; build is
+  green at **677 modules**. Wind-down soaks are vanilla **20/20 OK** and full
+  policy **60/60 OK**, both with zero crashes and zero hangs. Scope stayed
+  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+
 ## R47 — [supervised session, 2026-08-15] **M46 Battle Script half-health heal setup leaf**
 
 - **State:** `rust-main` = current master `2d2c2c81` plus R43-R46 and verified
@@ -80,39 +120,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Scope stayed inside `core-rs/**`; no unsupported barrier or deferral was
   added. PAPERCUT: fresh worker lacked the ignored WASM artifact and rebuilt it
   before browser parity, ~2 min.
-
-## R45 — [supervised session, 2026-08-14] **M44 Battle Script four-weather setter family**
-
-- **State:** `rust-main` = current master `3c913c8a` plus R43-R44 and verified
-  weather worker `d9d0c4ac`. The complete pure
-  `battleScriptSetWeatherOpcode.ts` four-opcode registration/state/control
-  family is native and wasm32-compilable; no ABI or adapter surface was
-  widened. The session remains active and committed.
-- **Did:** ported Rain/Sun/Sandstorm/Hail's exact active masks, temporary bits,
-  success choosers, same-weather failure OR/chooser/preservation path, and
-  success-only full weather-word replacement plus five-turn duration. The
-  native factory retains canonical Rain→Sun→Sandstorm→Hail validation order
-  and JavaScript dynamic-id collision behavior without inventing dispatcher/id
-  predicates. Canonical TypeScript execution supplies **1,788 cases** across
-  all **1,024** low-weather-bit cells, **648** timer/chooser edges, **64**
-  result-flag edges, high-u32 bits, cross-weather replacement, alternating and
-  repeated paths, plus **17** registration cases; corpus sha256
-  `7b590b8f3b669c00f943087d24f9618d118ef9d87f75bc202baa0f8f08ab5e03`.
-- **Next:** recheck active work and select another conflict-free pure Battle
-  Script leaf. M7c opponent generation still waits on canonical TS live
-  generation; main and animation moving targets remain excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited all four decomp
-  bodies, dispatch entries, macros, scripts, weather/message constants,
-  registration order/collisions, state preservation and sequences;
-  regenerated twice byte-identically (canonical corpus **2,086,704 bytes**;
-  generated file **3,073,560 bytes**, sha256
-  `d7a227d605e64845ff0d6a08b859186f2b6ba27461706d57fab0417cfabd09d1`;
-  generator **45,125 bytes**, sha256
-  `613cde8f52961fbceee7617c8c3cc40353e117a4c558f3d7b6db0b38ff21b772`),
-  and reran focused **5/5**, cargo **948/948**, fmt, strict Clippy, and wasm32
-  release. Artifact is **497,795 bytes**, sha256
-  `21b35dbdac8b48bcd331a4d119ce77ba8cc7ef5ec927edb1a27315736517cd39`.
-  The worker summary's stale **1,173** count was corrected to the generated
-  test's actual **1,788** during review. Latest-master smoke is **375/375** and
-  build is green at **676 modules**. Scope stayed inside `core-rs/**`; no
-  unsupported barrier, deferral, or papercut was added.
