@@ -1023,6 +1023,40 @@ consequences (BP/symbol/streak bookkeeping — audit doc
 `docs/noland-brain-post-battle-audit.md`); (c) brain-battle presentation,
 which waits on (a) for its oracle ground truth.
 
+**User decisions (2026-08-14, planning session — the post-Brain queue):**
+
+Status update to the remaining-list above: (a) the harness-side lab mode
+is LIVE (top-layer commit `33354440`; workspace §5.2 consumers landed per
+PROGRESS 1266) and (c) the brain-battle presentation program ran
+end-to-end (silver 648/701, gold 700/701 dense live compares; the
+residual is ISSUES #87). Only (b) remains.
+
+1. **Next main-lane order:** (i) post-brain-battle consequences — steps
+   1-3 of `docs/noland-brain-post-battle-audit.md` §5's prioritized
+   worklist (award table incl. the +10 brain bonus, symbol grant and BP
+   as round-controller OUTPUTS, brain congrats text). Its step-4
+   prerequisite exists now, so the numbers are end-to-end verifiable
+   against the real ROM. (ii) ISSUES #87's named next instrument (the
+   opponent-AI `ChooseAction` ack-timing model,
+   `battle_ai_switch_items.c`). (iii) The Brain walk-up dialogue
+   surface: SCOPING ONLY — present faithful/trim/skip options with
+   costs; the user decides before any build.
+2. **Follow-on objective — continuous play.** The user's bar: boot the
+   app and play round after round indefinitely, matching what a real
+   Emerald player would see at distribution parity. Audited gaps
+   (2026-08-14 planning session): the draft screen is built exactly
+   once, at boot, from the captured anchor records (`core.ts:581` is
+   the only construction site — the canonical S1 start state; live
+   rental generation `factoryRentalGeneration.ts` is proven but unwired
+   into any next-round entry), and the roundCompleted terminal has no
+   continue path into a next round's draft (no challenge advance, no
+   in-session streak carry) — so battle 21 (silver Noland) is
+   unreachable by natural play. After 1(i) lands, wire both:
+   generated-draft round entry + round-to-round chaining with
+   in-session streak/symbol/BP carry. Cross-session persistence
+   (saving) stays OUT of scope; the standing lobby trims stand
+   unchanged.
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.

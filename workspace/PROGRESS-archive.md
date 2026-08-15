@@ -1,3 +1,58 @@
+## 1264 — [MAIN worker, 2026-08-14] **Ready-lag `dispatchDelay(opponent)<101` discriminator FALSIFIED with clean RAM triangulation; real missing ROM span located precisely (`TryDoEventsBeforeFirstTurn`/`ChooseAction` handshake); no validated `src/` fix — honest-stop, evidence landed**
+
+- **State:** No `src/` change this round (a speculative flat-constant fix
+  was tried, empirically bisected, found insufficient, and reverted).
+  `factory-round-battle7-noland-reveal-off` (silver) stays **648/701**;
+  `factory-round-battle7-noland-gold-reveal-off` (gold) stays **700/701**;
+  no regressions anywhere, since nothing shipped.
+- **Did:** Assigned to fix the ready-lag +7/+5 family
+  (`docs/ready-lag-discriminator-scout.md`'s `dispatchDelay(opponent)<101`
+  discriminator). Instead **falsified that discriminator** with a clean,
+  non-confounded data point: `tools/battle-lab/factory-brain-gold-intro-
+  dense-off.json` is `factoryBrain` mode with **no `overrides.parties` at
+  all** (a genuine, un-staged oracle RNG walk) and opponent lead BLAZIKEN
+  gives `dispatchDelay=132` (deep in the "safe, should-be-exact" regime) —
+  the exact untested cell the discriminator dossier's own §3 flagged. Built
+  `tools/probe/probe-ready-lag-chooseaction-handshake.ts` (committed,
+  rerunnable, byte-identical across 3 runs) to measure it, plus two fixtures
+  the dossier calls "confirmed 0-residual" (GRIMER/YOSHI, KADABRA/SHIZUKA),
+  all via live RAM (`state.engine.{controllerExecFlags,
+  playerControllerCommand,opponentControllerCommand}`), not PNG citations.
+  **All three show a +4/+5 tick residual**, including the two "exact" ones
+  and the override-free/high-dispatchDelay one — the regime split in the
+  existing dossier is best explained as an old-PNG-landmark-vs-new-RAM-
+  predicate measurement-convention split, not a real ROM regime boundary.
+  Traced the real missing span in `reference/pokeemerald/src/battle_main.c`:
+  `TryDoEventsBeforeFirstTurn` (:3841, switch-in ability/item/weather-check
+  loop) + `HandleTurnActionSelectionState`'s `ChooseAction` dispatch (:4168)
+  run AFTER the player's own send-out completes and BEFORE the menu is
+  interactive — a real, generic, always-present ROM span
+  `generatedBattleStartCommandReady` (battleScene.ts:4590-4600) has zero
+  term for. Tried it as one flat additive constant (unconditional, no
+  regime gate) and bisected empirically against silver: K=9 peaks at
+  690/701 (98.4%, up from 648/701) but falls short of the ~699+/701 the step
+  required, with a K-insensitive residual persisting at frames 647-653
+  unrelated to the correction. **Reverted the `src/` edit** — a
+  non-converging fitted constant is an explicitly failed outcome per this
+  step's own brief. Full writeup: `docs/trainer-pic-off-window-scout.md`
+  round 13.
+- **Next:** (1) the 647-653 bbox residual may be masking the true
+  ChooseAction-handshake optimum — resolve it first. (2) re-run this
+  round's probe against the concurrent side worker's promised real
+  `factoryLegal`/low-`dispatchDelay` fixture once it lands; if its residual
+  is also ~+4/+5 (not +7), the TANGELA/PUPITAR +7 carries a second,
+  additional ~+2-3-tick effect on top of this round's universal gap (a
+  two-term fix). (3) double check whether the compare harness has its own
+  RAM-tick-to-pixel-frame offset beyond the documented "RAM leads pixel by
+  1" convention before trusting a future bisection here.
+- **Notes:** commits this round: probe script + dossier/PROGRESS append
+  only (no `src/`, no fixture/trace changes). Regression-verified
+  unaffected (nothing shipped to regress): silver **648/701**, gold
+  **700/701**, `factory-round-battle6-lukas-reveal-off` **154/154**,
+  `factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke`
+  **375/375**. Finish gate (full `npm test` + `npm run build`) recorded
+  below this entry's commit.
+
 ## 1263 — [MAIN worker, 2026-08-14] **Gold Brain-reveal alignment bisected: 478/701 → 700/701; corrected two of PROGRESS 1262's claims (its transplanted offset AND its ready-lag non-recurrence read)**
 
 - **State:** `factory-round-battle7-noland-gold-reveal-off` compare now
