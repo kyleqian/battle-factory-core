@@ -41,6 +41,41 @@ import {
 import { renderFactoryTerminalField, renderFactoryTerminalPresentation } from "../src/engine/factoryTerminalRender.ts";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
+import charmapData from "../src/data/gen/charmap.json" with { type: "json" };
+import terminalMessages from "../src/data/gen/factory-terminal-messages.json" with { type: "json" };
+
+const terminalCharmap = new Map<string, number>(
+  (charmapData as { entries: [string, number][] }).entries,
+);
+
+/** Same char->code lookup `factoryTerminalRender.ts` uses. */
+function charmapCode(ch: string): number {
+  const code = terminalCharmap.get(ch);
+  if (code === undefined) throw new Error(`no charmap entry for ${JSON.stringify(ch)}`);
+  return code;
+}
+
+/** Plain `\n`-joined 2-line MSGBOX_DEFAULT, e.g. `regularCongrats`. */
+function encodeTwoLineMessage(lines: readonly [string, string]): number[] {
+  return [
+    ...[...lines[0]].map(charmapCode),
+    0xfe, // \n newline
+    ...[...lines[1]].map(charmapCode),
+    0xff, // $ EOS
+  ];
+}
+
+/** `\n`+`\l`-joined 3-line MSGBOX_DEFAULT with a mid-message scroll, e.g. `award`/`frontierBrainCongratulations`. */
+function encodeThreeLineScrollMessage(lines: readonly [string, string, string]): number[] {
+  return [
+    ...[...lines[0]].map(charmapCode),
+    0xfe, // \n newline
+    ...[...lines[1]].map(charmapCode),
+    0xfa, // \l promptScroll
+    ...[...lines[2]].map(charmapCode),
+    0xff, // $ EOS
+  ];
+}
 
 function mon(id: string): BattleMon {
   return { id, species: id.toUpperCase(), maxHp: 100, hp: 100, status: "none" };
@@ -77,11 +112,14 @@ function lossController() {
   });
 }
 
-function roundWonController() {
+function roundWonController(finalOpponentIsBrain = false) {
   const opponents: BattleOpponent[] = Array.from({ length: 7 }, (_, index) => ({
     id: `win-opponent-${index}`,
     trainerName: `TRAINER ${index}`,
     party: party(`win-opponent-${index}`),
+    ...(finalOpponentIsBrain && index === 6
+      ? { frontierBrain: { status: "silver" as const } }
+      : {}),
   }));
   const scenario: FixtureBattleScenario = {
     id: "terminal-round-won",
@@ -618,6 +656,55 @@ describe("Factory Scene-OFF roundWon terminal adapter", () => {
     expect(Object.isFrozen(terminal.profile.congratulations)).toBe(true);
     expect(Object.isFrozen(terminal.profile.award)).toBe(true);
     expect(Object.isFrozen(terminal.profile.exchange)).toBe(true);
+  });
+
+  it("selects the Brain congratulations text (byte-pinned) iff the final opponent is a Frontier Brain", () => {
+    const command = roundWonController(true).presentation!.command;
+    if (command.type !== "roundCompleted") {
+      throw new Error("expected roundCompleted");
+    }
+    expect(command.opponent.frontierBrain).toEqual({ status: "silver" });
+    const terminal = createFactoryTerminalRoundWonPresentation(command);
+    expect(terminal.frontierBrain).toBe(true);
+    // BattleFrontier_BattleFactoryLobby/scripts.inc:447-450
+    // (Text_CongratsForDefeatingHead), reachable only via
+    // EventScript_WonChallenge's frontier_isbrain branch (:38-46).
+    expect(terminal.profile.frontierBrainCongratulations.lines).toEqual([
+      "Congratulations for defeating",
+      "the FACTORY HEAD and winning",
+      "seven matches in a row!",
+    ]);
+    expect(encodeThreeLineScrollMessage(terminal.profile.frontierBrainCongratulations.lines))
+      .toEqual([
+        189, 227, 226, 219, 230, 213, 232, 233, 224, 213, 232, 221, 227, 226, 231,
+        0, 218, 227, 230, 0, 216, 217, 218, 217, 213, 232, 221, 226, 219, 254,
+        232, 220, 217, 0, 192, 187, 189, 206, 201, 204, 211, 0, 194, 191, 187, 190,
+        0, 213, 226, 216, 0, 235, 221, 226, 226, 221, 226, 219, 250, 231, 217, 234,
+        217, 226, 0, 225, 213, 232, 215, 220, 217, 231, 0, 221, 226, 0, 213, 0,
+        230, 227, 235, 171, 255,
+      ]);
+    // The ordinary text still lives on the same shared profile object,
+    // unselected -- confirms the branch is additive, not a text swap.
+    expect(terminal.profile.congratulations).toEqual([
+      "Congratulations! You’ve won seven",
+      "straight Battle Swap matches!",
+    ]);
+  });
+
+  it("leaves the ordinary congrats text (byte-pinned from the extraction JSON) unchanged for a non-Brain seventh win", () => {
+    const command = roundWonController().presentation!.command;
+    if (command.type !== "roundCompleted") {
+      throw new Error("expected roundCompleted");
+    }
+    expect(command.opponent.frontierBrain).toBeUndefined();
+    const terminal = createFactoryTerminalRoundWonPresentation(command);
+    expect(terminal.frontierBrain).toBe(false);
+    const expected = (
+      terminalMessages as {
+        regularLevel50: { expandedMessages: { regularCongrats: { encodedBytes: number[] } } };
+      }
+    ).regularLevel50.expandedMessages.regularCongrats.encodedBytes;
+    expect(encodeTwoLineMessage(terminal.profile.congratulations)).toEqual(expected);
   });
 
   it("stores all three source input gates and rejects every early edge", () => {

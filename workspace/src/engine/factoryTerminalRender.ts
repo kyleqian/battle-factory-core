@@ -499,6 +499,57 @@ function drawDeclineFarewell(
   }
 }
 
+/**
+ * `frontierBrainCongratulations`'s own `\n`+`\l` shape -- the same generic
+ * "type first two lines, gate on a press, scroll 4 ticks, type the third
+ * line" mechanic `drawRoundWonMessage`'s award branch below already
+ * implements for `award`'s own `\n`+`\l` text, just against a different
+ * string and its own scroll-release edge (`congratsScrollReleaseAge`,
+ * distinct from `awardScrollReleaseAge`).
+ */
+function drawFrontierBrainCongratulations(
+  fb: Uint8Array,
+  state: FactoryTerminalRoundWonPresentationState,
+): void {
+  const profile = state.profile;
+  const brain = profile.frontierBrainCongratulations;
+  const textFirstAge = profile.congratulationsTextDelay;
+  const scrollRelease = state.congratsScrollReleaseAge;
+  if (scrollRelease === null) {
+    const chars = Math.max(
+      0,
+      Math.min(
+        brain.lines[0].length + brain.lines[1].length,
+        state.age - textFirstAge + 1,
+      ),
+    );
+    drawPageText(fb, [brain.lines[0], brain.lines[1]], chars);
+    const cursorStart = textFirstAge + brain.lines[0].length + brain.lines[1].length + 1;
+    if (state.age >= cursorStart) {
+      drawDownArrow(fb, brain.lines[1], MESSAGE_ORIGIN.y2, state.age - cursorStart);
+    }
+    return;
+  }
+
+  const elapsed = Math.max(0, state.age - scrollRelease - 1);
+  const scroll = Math.min(brain.scrollTicks, elapsed) * 4;
+  if (elapsed < brain.scrollTicks) {
+    drawClippedMessageText(fb, brain.lines[0], MESSAGE_ORIGIN.x, MESSAGE_ORIGIN.y1 - scroll);
+  }
+  drawClippedMessageText(fb, brain.lines[1], MESSAGE_ORIGIN.x, MESSAGE_ORIGIN.y2 - scroll);
+  const thirdTextAge = scrollRelease + brain.thirdLineTextDelay;
+  const thirdChars = Math.max(
+    0,
+    Math.min(brain.lines[2].length, state.age - thirdTextAge + 1),
+  );
+  drawClippedMessageText(
+    fb,
+    brain.lines[2].slice(0, thirdChars),
+    MESSAGE_ORIGIN.x,
+    MESSAGE_ORIGIN.y2,
+  );
+}
+
 function drawRoundWonMessage(
   fb: Uint8Array,
   state: FactoryTerminalRoundWonPresentationState,
@@ -509,6 +560,10 @@ function drawRoundWonMessage(
     congratulationsRelease === null ||
     state.age < congratulationsRelease + profile.awardTextDelay - 1
   ) {
+    if (state.frontierBrain) {
+      drawFrontierBrainCongratulations(fb, state);
+      return;
+    }
     const chars = Math.max(
       0,
       Math.min(
