@@ -5,6 +5,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1275 — [supervisor, 2026-08-14 night] **#89 FIXED + #90 FIXED: full-policy soak 0:60 = 60/60 OK (first time); walk-up program started (gold discrepancy resolved, script data extracted)**
+
+- **State:** Queue items (a) #89 and (b) #90 are CLOSED (both deleted
+  from ISSUES.md this commit). Full soak `--seeds 0:60` is **60/60 OK**
+  — zero crashes, zero hangs, the first fully-green full-policy soak
+  since chaining landed. Vanilla 0:20 stays 20/20. Union gates at the
+  orient folds and after every step: full npm 1,028 files / 9,856
+  passed / 223 skipped; build 676 modules; cargo green; wasm 509,811 B
+  `5ed2c97a…`; forced-WASM 18 files / 803 tests.
+- **Did:** (1) Orient folds: animation-main (Mega Drain 185→186 exact +
+  Giga Drain checkpoint) and rust-main (remaininghptopower leaf) merged;
+  union gates re-run green. (2) **#90**: side triage proved the seed-51
+  "HANG" is a soak BUDGET shortfall, not a stall — completes OK at
+  361,216 frames (`docs/issue90-seed51-hang-triage.md`; supervisor
+  re-verified independently). Fix: `DEFAULT_RUN_OPTIONS.maxFrames`
+  300k→600k (post-#89 seed 37 needs 398,088). (3) **#89**: mid-action
+  player `openpartyscreen` (Baton Pass) now halts as a resumable
+  player-choice (`resumeAt run-action1/2` + `pendingSecondAction`, no
+  RNG re-consumption), orchestrator hands off to the forced party
+  selector, partySelect gets source-true live-slot refusal
+  ("is already in battle!", party_menu.c:5811-5823). All 9 crashing
+  seeds now complete. NOTE: both #89 workers hit their caps
+  pre-commit/pre-docs; supervisor salvaged, verified (typecheck, smoke,
+  full suite — zero existing pins moved — vanilla soak, 9 seeds), and
+  committed `61b0a3c1` + finished docs. The original #86 sandstorm
+  fixture is unreachable post-fix (RNG trajectory diverges); a ~3,700-
+  trial search found no fresh terminal-boundary repro — documented
+  inline in the pin, 3 sibling #86 pins still cover non-terminal.
+  (4) **Walk-up program (user pick: FAITHFUL) started**: §1.6 gold
+  discrepancy RESOLVED — lab artifact (factoryBrain staging writes no
+  symbol flags → GetFrontierBrainStatus misses GOLD → ordinary-opponent
+  branch; RAM-probed); faithful gold entrance = "Get a move on!" per
+  decomp; gold ≈ 13 first/9 repeat boxes (memo updated). Script ground
+  truth extracted to `src/data/gen/factory-brain-walkup-script.json`
+  (extractor byte-identical `916c9c01…`, 10-test Tier-1 pin).
+- **Next:** (a) #87(c) silver-tail calibration (brief ready); (b)
+  walk-up build steps in main (PreBattleRoom general pre-battle menu
+  first; silver dense evidence leg in flight side-lane at write time);
+  (c) chained-round distribution-parity breadth.
+- **Notes:** Gold-brain overworld staging via the lab is KNOWN-BROKEN
+  (symbol-flag gap) — walk-up gold acceptance must lean on source +
+  the committed RAM probe, not lab traces. Commits local only —
+  pushing is Kyle's step.
+
 ## 1274 — [planning session, 2026-08-14 eve] **Both waiting user decisions made: walk-up = FAITHFUL (supersedes the TRIM recommendation), #87 = option (c) calibrate-crossing-windows-only; next-run order set**
 
 - **State:** Docs/ledger only. Both of 1273's blockers-on-the-user are
@@ -81,66 +125,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `bin/oracle info`). Wasm-artifact papercut hit 3× more this session
   (now 5; every fresh side worktree). Commits local only — pushing is
   Kyle's step.
-
-## 1272 — [main worker, 2026-08-14] **#88 fixed: locked multi-turn continuation now falls back to a fresh resolution when the locked battler faints first; soak 20/20 OK**
-
-- **State:** #88 is fixed and deleted from ISSUES.md. `npm run soak --
-  policy vanilla --seeds 0:20` is **20/20 OK** (was 14/20 OK + 6 CRASH).
-  Full `npm test` green (1022 files / 9,822 passed / 224 skipped) and
-  `npm run build` green. One NEW, unrelated pre-existing bug surfaced and is
-  cataloged as **#89** (see Notes) rather than fixed — out of this step's
-  scope.
-- **Did:** (1) Root cause (confirmed, not the preCommandRngCalls red
-  herring #88 flagged as unconfirmed): `beginCommandResolution`
-  (`factoryRoundBattleOrchestrator.ts:1418`) retains a "locked action"
-  presentation owner whenever the non-acting battler carries
-  `STATUS2_MULTIPLETURNS`/`STATUS2_RECHARGE`, on the assumption its
-  continuation will survive to print. `FaintClearSetData`
-  (`battle_main.c:3272`) unconditionally zeroes `status2` on faint, so a
-  faster opposing move can legitimately KO that same locked battler before
-  its continuation ever fires — a real, reachable game outcome (repro:
-  seed 0 vanilla, chained round 2 battle 1 turn 5, opponent charges
-  Razor Wind turn 4, player's turn-5 move KOs it first). The parent treated
-  the missing receipt as a broken invariant and threw. Fix: exported
-  `hasRetainedLockedActionReceipt` from `battleResolutionPresentation.ts`;
-  `beginCommandResolution` now checks it against the driven transition
-  before committing to `appendBattleResolutionLockedActionContinuation`,
-  falling back to a fresh `createBattleResolutionPresentation` (identical
-  to the `retained === null` branch) when the receipt is absent. No
-  battle-number/turn-number/tick branch added; anchor-path behavior
-  untouched (the branch only changes what happens where the parent
-  previously threw). (2) Repro pinned as a new Tier-1 test in
-  `tests/randomRoundSoak.test.ts` ("ISSUES #88: ..."). (3) Two
-  pre-existing pinned tests: seed 21 ("earns all seven wins") — added
-  `stopAtFirstRoundDecision` to `randomRoundSoakDriver.ts` (freezes a
-  snapshot the instant `pendingGeneratedRound` commits) so it again reports
-  the first round's own outcome instead of wandering into endless
-  auto-rechained rounds (strong-route never stops winning); its numeric
-  pins moved by a genuinely correct amount (~46 frames / 4 render calls,
-  `terminalRecordChoice` now `null` not `"no"`) because the new chaining
-  short-circuit clears `factoryTerminal` in the same tick `recordChoice`
-  reads "no", so it never lingers through the old decline-farewell dialogue
-  — documented inline, not silently loosened. Seed 27 — see Notes, not
-  fixed, `it.skip`-ed with a pointer to #89. (4) Bumped
-  `DEFAULT_RUN_OPTIONS.maxFrames` 200_000 → 300_000 (chaining makes a
-  single seed's run legitimately longer than one round) and fixed
-  `randomRoundSoak.ts`'s CLI to read that constant instead of its own
-  stale hardcoded 200_000 default — the CLI default was silently out of
-  sync with the driver's exported default.
-- **Next:** continuous-play program: challenge 3+/battle 21 Noland
-  natural-play verification (queue item 2's remaining reach). #89 (Baton
-  Pass `openpartyscreen` machine-barrier) is unclaimed backlog. Queue
-  (ii)/(iii) from 1267/1268 remain untouched/parallel-lane.
-- **Notes:** Investigating seed 27's pinned test (documented in the old
-  #88 entry as crashing with #88's own signature) revealed that claim was
-  stale: on the actual starting commit (`da55e159`, pre-fix), seed 27
-  crashes with an UNRELATED, pre-existing "full"-policy bug (Baton Pass ->
-  `openpartyscreen` -> `machine-barrier`, unhandled by
-  `driveTrainerBoundary`) at round 1 battle 1 turn 10 — well before #88 or
-  chaining are ever in play. Confirmed independent by reproducing
-  byte-for-byte identically before touching any code this session. Filed
-  as **#89**; the seed-27 pin is `it.skip`-ed pending that fix (its
-  documented battle-4-turn-16 scenario is currently unreachable). This is
-  the session's one deviation from "pass as originally written" — surfaced
-  explicitly per the brief rather than hidden. No committed compare trace
-  touched; no `executableFrontierRatchet` barrier counts moved.
