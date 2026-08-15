@@ -212,12 +212,12 @@ function verifyOrientation(orientation: Orientation, evidence: Evidence): number
 }
 
 if (fixture.schema !== "luster-purge-bilateral-evidence/v1"
-  || fixture.status !== "unsupported" || fixture.coverageCredit !== false) {
-  throw new Error("Luster Purge checkpoint must remain unsupported");
+  || fixture.status !== "exact" || fixture.coverageCredit !== true) {
+  throw new Error("Luster Purge exact receipt drift");
 }
 let total = 0;
 for (const [orientation, evidence] of Object.entries(fixture.orientations) as Array<[Orientation, Evidence]>) {
   total += verifyOrientation(orientation, evidence);
 }
 if (total !== 666) throw new Error(`incomplete bilateral rows ${total}/666`);
-console.log(`MOVE_LUSTER_PURGE reducer checkpoint: ${total}/666 retained rows exact; no framebuffer or audio-sample claim`);
+console.log(`MOVE_LUSTER_PURGE reducer: ${total}/666 retained rows exact; framebuffer acceptance is independently gated`);

@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   LUSTER_PURGE_HIT_START_AGES,
@@ -7,6 +8,12 @@ import {
   lusterPurgeAtAge,
   type LusterPurgeConfig,
 } from "../../src/animation/lusterPurge.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnLusterPurgeView,
+  type SceneOnLusterPurgeConfig,
+} from "../../src/animation/sceneOnPresentation.ts";
+import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 const visualRandom = {
   hitsplats: [
@@ -18,8 +25,8 @@ const visualRandom = {
 const player: LusterPurgeConfig = {
   attackerSide: "player", attackerBattlerId: 0,
   attackerSpriteSlot: 6, targetSpriteSlot: 8, targetInitialX2: 1,
-  circleCenter: { x: 72, y: 98 }, monbgCenter: { x: 72, y: 90 },
-  targetCenter: { x: 177, y: 42 }, monbgPosition: { x: -40, y: -58 },
+  circleCenter: { x: 72, y: 91 }, monbgCenter: { x: 72, y: 83 },
+  targetCenter: { x: 177, y: 42 }, monbgPosition: { x: -40, y: -51 },
   visualRandom,
 };
 
@@ -30,8 +37,17 @@ describe("Move_LUSTER_PURGE pure source-relative reducer", () => {
     ], { encoding: "utf8" });
     expect(output).toContain("player-back: 333/333 reducer topology rows; phase/palette/audio starts exact; gameplay RNG stable");
     expect(output).toContain("opponent-front: 333/333 reducer topology rows; phase/palette/audio starts exact; gameplay RNG stable");
-    expect(output).toContain("666/666 retained rows exact; no framebuffer or audio-sample claim");
+    expect(output).toContain("666/666 retained rows exact; framebuffer acceptance is independently gated");
   });
+
+  it("matches the complete bilateral production framebuffer with zero residual pixels", () => {
+    const output = execFileSync(process.execPath, [
+      "--experimental-strip-types", "tools/compare/lusterPurgeFramebuffer.ts",
+    ], { encoding: "utf8" });
+    expect(output).toContain("player-back: 333/333 seam/component/raw-RGB/production framebuffer rows exact");
+    expect(output).toContain("opponent-front: 333/333 seam/component/raw-RGB/production framebuffer rows exact");
+    expect(output).toContain("MOVE_LUSTER_PURGE: 666/666 rows exact with zero residual pixels");
+  }, 30_000);
 
   it("takes immutable visual RNG input without consuming or rewriting it", () => {
     const before = structuredClone(player);
@@ -57,12 +73,64 @@ describe("Move_LUSTER_PURGE pure source-relative reducer", () => {
     const opponent: LusterPurgeConfig = {
       ...player, attackerSide: "opponent", attackerBattlerId: 1,
       attackerSpriteSlot: 8, targetSpriteSlot: 6, targetInitialX2: 0,
-      circleCenter: { x: 176, y: 51 }, monbgCenter: { x: 176, y: 51 },
-      targetCenter: { x: 71, y: 82 }, monbgPosition: { x: -144, y: -19 },
+      circleCenter: { x: 176, y: 36 }, monbgCenter: { x: 176, y: 36 },
+      targetCenter: { x: 71, y: 82 }, monbgPosition: { x: -144, y: -4 },
     };
     expect(lusterPurgeAtAge(LUSTER_PURGE_OPPONENT_FRAME_COUNT - 1, opponent)).toMatchObject({
       active: false, scriptOffset: 278, tasks: [], resources: { circle: false, impact: false },
       monbg: { bg: "BG1" }, gpu: { bldcnt: 0, bldalpha: 0, bldy: 0 },
     });
+  });
+
+  it("carries the six immutable visual Random2 pairs through the Latios-only typed seam", () => {
+    const config: SceneOnLusterPurgeConfig = {
+      move: "LUSTER_PURGE",
+      attacker: {
+        species: "LATIOS",
+        geometry: {
+          side: "player", spriteCorner: { x: 40, y: 51 },
+          animationCenter: { x: 72, y: 83 },
+          battlePositionCenter: { x: 72, y: 80 },
+        },
+      },
+      target: {
+        species: "ONIX",
+        geometry: {
+          side: "opponent", spriteCorner: { x: 144, y: 10 },
+          animationCenter: { x: 177, y: 42 },
+          battlePositionCenter: { x: 176, y: 40 },
+        },
+      },
+      fieldProfile: {
+        playerHp: 176, playerMaxHp: 176,
+        opponentHp: 110, opponentMaxHp: 110,
+        playerGender: "male", opponentGender: "male",
+      },
+      attackerBattlerId: 0, attackerSpriteSlot: 6,
+      targetSpriteSlot: 8, targetInitialX2: 1,
+      circleCenter: player.circleCenter,
+      monbgCenter: player.monbgCenter,
+      monbgPosition: player.monbgPosition,
+      hitsplatCenter: player.targetCenter,
+      visualRandom,
+    };
+    const stage = createSceneOnMovePresentation(config);
+    expect(sceneOnLusterPurgeView({ ...stage, age: 170 }).sprites[0]).toMatchObject({
+      kind: "hitsplat", offset: { x2: 0, y2: -7 },
+    });
+    expect(config.visualRandom).toEqual(visualRandom);
+  });
+
+  it("re-extracts the unique circle asset byte-for-byte from pinned source", () => {
+    const scratch = createScratchDir("pokebench-luster-purge-assets-");
+    const output = `${scratch}/luster-purge.json`;
+    execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/extractLusterPurgeAssets.ts",
+      "--out", output,
+    ]);
+    expect(readFileSync(output)).toEqual(
+      readFileSync("src/animation/assets/luster-purge.json"),
+    );
   });
 });

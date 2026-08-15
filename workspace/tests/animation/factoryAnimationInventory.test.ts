@@ -68,10 +68,10 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 92,
+        unsupported: 91,
         staged: 0,
         partial: 0,
-        exact: 184,
+        exact: 185,
       },
       {
         tier: "openOnly",
@@ -92,14 +92,15 @@ describe("animation coverage ledger", () => {
     ]);
   });
 
-  it("keeps the explicit queue inside Level 50 coverage", () => {
+  it("keeps the manual acceptance queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue).toHaveLength(2);
-    expect(queue[0]).toMatchObject({
-      move: "MOVE_DRAGON_BREATH",
-      status: "exact",
-    });
-    expect(queue.at(-1)).toMatchObject({ move: "MOVE_BIND", status: "exact" });
+    // DRAGON_BREATH and BIND are already exact entries, so they cannot be
+    // forward work. Mega Drain is the source/staging-ready next acceptance
+    // unit, but remains unsupported until its own fresh bilateral evidence.
+    expect(queue).toEqual([expect.objectContaining({
+      move: "MOVE_MEGA_DRAIN",
+      status: "unsupported",
+    })]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,

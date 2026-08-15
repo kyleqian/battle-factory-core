@@ -29,9 +29,9 @@ describe("MOVE_GUILLOTINE bilateral exact evidence", () => {
       "ShakeMon2 task lifetime", "software/hardware shape", "blend/background registers",
       "asset tag", "audio", "immutable", "production framebuffer", "twice-fresh byte stability"])
       expect(portable).toContain(token);
-    expect(coverage.entries).toHaveLength(184);
+    expect(coverage.entries).toHaveLength(185);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GUILLOTINE"))
       .toEqual([expect.objectContaining({ status: "exact" })]);
-    expect(276 - coverage.entries.length).toBe(92);
+    expect(276 - coverage.entries.length).toBe(91);
   });
 });
