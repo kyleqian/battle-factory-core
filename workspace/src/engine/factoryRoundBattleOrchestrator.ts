@@ -1542,6 +1542,35 @@ function completedResolutionPhase(
 }
 
 /**
+ * A resolution segment can run out of commands to present while a
+ * `forcedRequest` is still pending -- not just via the typed fainted
+ * message's own button-dismiss intercept (`isForcedSwitchHandoffMessage`),
+ * but also, ISSUES #89, when the forced switch has no fainted message at
+ * all (Baton Pass's own "used move" line auto-advances; there is nothing
+ * to dismiss). Whichever way a segment ends, a still-pending forced-switch
+ * boundary must always hand off to the party selector, never the ordinary
+ * next-command tail.
+ */
+function completedResolutionUpdate(
+  state: FactoryRoundBattleOrchestratorState,
+  resolution: BattleResolutionPresentationState,
+): Readonly<{
+  phase: "next-command-handoff" | "terminal-handoff" | "forced-party-handoff";
+  battleForcedPartySelect: PartySelectState | null;
+}> {
+  if (resolution.forcedRequest !== null) {
+    return Object.freeze({
+      phase: "forced-party-handoff" as const,
+      battleForcedPartySelect: createForcedPartySelect(state, resolution),
+    });
+  }
+  return Object.freeze({
+    phase: completedResolutionPhase(resolution),
+    battleForcedPartySelect: null,
+  });
+}
+
+/**
  * A full source turn may contain an earlier opposing faint/replacement before
  * ending at a player forced-switch request. Only the requested battler's own
  * typed faint message transfers presentation ownership to the party selector;
@@ -1894,12 +1923,12 @@ export function advanceFactoryRoundBattleResolution(
       });
     }
     const nextCommandIndex = resolution.commandIndex + 1;
+    const reachedSegmentEnd = nextCommandIndex >= segment.commands.length;
+    const completion = reachedSegmentEnd ? completedResolutionUpdate(state, resolution) : null;
     const nextResolution = withResolutionLifecycle(
       resolution,
       nextCommandIndex,
-      nextCommandIndex >= segment.commands.length
-        ? completedResolutionPhase(resolution)
-        : "presenting",
+      completion?.phase ?? "presenting",
       0,
     );
     return Object.freeze({
@@ -1910,6 +1939,7 @@ export function advanceFactoryRoundBattleResolution(
         nextResolution,
         command,
       ),
+      ...(completion !== null ? { battleForcedPartySelect: completion.battleForcedPartySelect } : {}),
     });
   }
   if (resolution.lifecycle.phase === "awaiting-message-dismiss") {

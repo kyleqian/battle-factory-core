@@ -352,12 +352,29 @@ export type FactoryFullTurnDecisionRules = BattleJsonObject & Readonly<{
   pendingPlayerDecision: null | BattleCommandDecision;
   rulesContext: BattleScriptRulesContext;
   /**
-   * Only present in phase "forced-switch-pending": the halted
-   * `BattleScript_HandleFaintedMon` script's resumable machine state
-   * (`factoryBattleScriptTerminalDecision.ts`'s own `pendingScript` precedent) --
-   * see `pendingForcedSwitchAt`.
+   * Only present in phase "forced-switch-pending": the halted script's
+   * resumable machine state -- either `BattleScript_HandleFaintedMon`
+   * (`factoryBattleScriptTerminalDecision.ts`'s own `pendingScript` precedent)
+   * or a mid-action move script halted on its own `openpartyscreen` (e.g.
+   * `BattleScript_EffectBatonPass`, ISSUES #89) -- see `pendingForcedSwitchAt`.
    */
   pendingScript?: PendingForcedSwitchScript;
+}>;
+
+/**
+ * The still-unresolved second mover's action, captured once per turn
+ * (alongside speed/priority order) so a mid-action1 player-choice halt (a
+ * move like Baton Pass reaching `openpartyscreen`) can resume straight into
+ * action2 without re-deriving trainer AI decisions -- which would re-consume
+ * RNG and diverge from the original turn.
+ */
+type PendingSecondFullTurnAction = Readonly<{
+  mover: BattleScriptBattlerId;
+  switchPartyIndex: BattlePartyIndex | null;
+  moveId: number;
+  moveSlot: BattleMoveSlot;
+  target: BattleScriptBattlerId;
+  forcedStruggle: boolean;
 }>;
 
 type PendingForcedSwitchScript = Readonly<{
@@ -368,9 +385,13 @@ type PendingForcedSwitchScript = Readonly<{
    * Source continuation owned by the caller of HandleFaintedMonActions.
    * Action KOs still enter BattleTurnPassed from its start; an end-turn KO
    * has already completed DoField/DoBattler and resumes at the delayed-
-   * attack/Perish tail (`battle_main.c:3963-3974`).
+   * attack/Perish tail (`battle_main.c:3963-3974`). "run-action1"/"run-action2"
+   * are this reducer's own addition (ISSUES #89): a move script (not the
+   * HandleFaintedMon dance) halted on `openpartyscreen` mid-action1/action2.
    */
-  resumeAt: "run-end-turn" | "finish-end-turn-after-faints";
+  resumeAt: "run-end-turn" | "finish-end-turn-after-faints" | "run-action1" | "run-action2";
+  /** Present only for resumeAt "run-action1" -- see `PendingSecondFullTurnAction`. */
+  pendingSecondAction?: PendingSecondFullTurnAction;
 }>;
 
 export function createFactoryEmptyBattlerState(side: 0 | 1): BattleScriptRulesBattlerState {
@@ -713,9 +734,50 @@ function buildForcedSwitchPendingRules(
   });
 }
 
+function pendingSecondActionAt(value: unknown): PendingSecondFullTurnAction {
+  const record = value as
+    | Readonly<{
+      mover?: unknown;
+      switchPartyIndex?: unknown;
+      moveId?: unknown;
+      moveSlot?: unknown;
+      target?: unknown;
+      forcedStruggle?: unknown;
+    }>
+    | null
+    | undefined;
+  if (
+    record === null
+    || record === undefined
+    || typeof record !== "object"
+    || (record.mover !== 0 && record.mover !== 1)
+    || (record.switchPartyIndex !== null && !Number.isSafeInteger(record.switchPartyIndex))
+    || !Number.isSafeInteger(record.moveId)
+    || !Number.isSafeInteger(record.moveSlot)
+    || (record.target !== 0 && record.target !== 1)
+    || typeof record.forcedStruggle !== "boolean"
+  ) {
+    throw new Error("factory full-turn decision pendingScript.pendingSecondAction must be a valid resolved action");
+  }
+  return Object.freeze({
+    mover: record.mover as BattleScriptBattlerId,
+    switchPartyIndex: record.switchPartyIndex as BattlePartyIndex | null,
+    moveId: record.moveId as number,
+    moveSlot: record.moveSlot as BattleMoveSlot,
+    target: record.target as BattleScriptBattlerId,
+    forcedStruggle: record.forcedStruggle,
+  });
+}
+
 function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
   const record = value as
-    | Readonly<{ programCounter?: unknown; callStack?: unknown; scheduler?: unknown; resumeAt?: unknown }>
+    | Readonly<{
+      programCounter?: unknown;
+      callStack?: unknown;
+      scheduler?: unknown;
+      resumeAt?: unknown;
+      pendingSecondAction?: unknown;
+    }>
     | null
     | undefined;
   if (
@@ -728,6 +790,8 @@ function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
     || (
       record.resumeAt !== "run-end-turn"
       && record.resumeAt !== "finish-end-turn-after-faints"
+      && record.resumeAt !== "run-action1"
+      && record.resumeAt !== "run-action2"
     )
   ) {
     throw new Error("factory full-turn decision pendingScript must be a valid halted-script bundle");
@@ -735,11 +799,15 @@ function pendingScriptAt(value: unknown): PendingForcedSwitchScript {
   const scheduler = createBattleScriptSchedulerState(
     record.scheduler as Parameters<typeof createBattleScriptSchedulerState>[0],
   );
+  const pendingSecondAction = record.resumeAt === "run-action1"
+    ? pendingSecondActionAt(record.pendingSecondAction)
+    : undefined;
   return Object.freeze({
     programCounter: record.programCounter as number,
     callStack: Object.freeze([...(record.callStack as readonly number[])]),
     scheduler,
     resumeAt: record.resumeAt,
+    ...(pendingSecondAction !== undefined ? { pendingSecondAction } : {}),
   });
 }
 
@@ -1262,7 +1330,14 @@ function acknowledgeAllPendingControllers(state: MachineState): MachineState {
 
 type RunToOwnEndResult =
   | Readonly<{ kind: "terminal"; state: MachineState }>
-  | Readonly<{ kind: "barrier"; state: MachineState; instruction: BattleScriptInstruction }>;
+  | Readonly<{ kind: "barrier"; state: MachineState; instruction: BattleScriptInstruction }>
+  | Readonly<{
+    kind: "player-choice";
+    state: MachineState;
+    battler: BattleScriptBattlerId;
+    faintedPartyIndex: number;
+    legalPartyIndexes: readonly number[];
+  }>;
 
 /** Runs one already-started BattleScriptExecute script to its own end/end2 halt (same shape as the fainted-actions/end-turn precedents' own helper). */
 function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, initialState: MachineState): RunToOwnEndResult {
@@ -1293,6 +1368,20 @@ function runScriptToOwnEnd(program: BattleScriptProgram, handlers: Handlers, ini
     if (stepped.kind === "halted") {
       if (stepped.state.haltReason?.kind === "terminal") {
         return Object.freeze({ kind: "terminal", state: stepped.state });
+      }
+      // A move script (not the HandleFaintedMon dance) halting on
+      // openpartyscreen's player branch, e.g. BattleScript_EffectBatonPass
+      // (ISSUES #89) -- the same real, human-timescale halt the fainted-
+      // actions orchestration already surfaces, just reached mid-action here.
+      if (stepped.state.haltReason?.kind === "player-choice-required") {
+        const reason = stepped.state.haltReason;
+        return Object.freeze({
+          kind: "player-choice",
+          state: stepped.state,
+          battler: reason.battler,
+          faintedPartyIndex: reason.faintedPartyIndex,
+          legalPartyIndexes: reason.legalPartyIndexes,
+        });
       }
       return Object.freeze({ kind: "barrier", state: stepped.state, instruction });
     }
@@ -1390,7 +1479,14 @@ function buildActionContext(
 
 type ActionResult =
   | Readonly<{ kind: "complete"; state: MachineState }>
-  | Readonly<{ kind: "barrier"; state: MachineState; instruction: BattleScriptInstruction }>;
+  | Readonly<{ kind: "barrier"; state: MachineState; instruction: BattleScriptInstruction }>
+  | Readonly<{
+    kind: "player-choice";
+    state: MachineState;
+    battler: BattleScriptBattlerId;
+    faintedPartyIndex: number;
+    legalPartyIndexes: readonly number[];
+  }>;
 
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
 function runMoveAction(
@@ -1418,6 +1514,15 @@ function runMoveAction(
     rulesContext: actionContext,
   });
   const run = runScriptToOwnEnd(program, handlers, started);
+  if (run.kind === "player-choice") {
+    return Object.freeze({
+      kind: "player-choice",
+      state: run.state,
+      battler: run.battler,
+      faintedPartyIndex: run.faintedPartyIndex,
+      legalPartyIndexes: run.legalPartyIndexes,
+    });
+  }
   if (run.kind === "barrier") return Object.freeze({ kind: "barrier", state: run.state, instruction: run.instruction });
   return Object.freeze({ kind: "complete", state: run.state });
 }
@@ -2292,15 +2397,19 @@ function runEndTurnTail(
 /**
  * Resumes a `"forced-switch"` request (item 3, mirroring
  * `factoryBattleScriptTerminalDecision.ts`'s own `resumeForcedSwitchDecision`):
- * reconstructs the halted `BattleScript_HandleFaintedMon` script from
- * `pendingForcedSwitchAt`'s durable bundle, writes the submitted
- * (already-validated-legal, per `submitBattleDecision`'s own
- * `legalPartyIndexes` gate) party index into `monToSwitchIntoId`, and drives
- * the same slice-1-9 machinery the AI-side dance already uses. A "resumed"
- * result (the only non-terminal, non-barrier outcome possible here) always
- * continues straight into `runEndTurnTail` -- `cancelallactions` already
- * cancelled any still-pending second action inside the dance itself, so there
- * is nothing left of this turn's two-action shape to resume.
+ * reconstructs the halted script from `pendingForcedSwitchAt`'s durable
+ * bundle, writes the submitted (already-validated-legal, per
+ * `submitBattleDecision`'s own `legalPartyIndexes` gate) party index into
+ * `monToSwitchIntoId`, and resumes it. For `resumeAt` "run-end-turn"/
+ * "finish-end-turn-after-faints" that halted script is
+ * `BattleScript_HandleFaintedMon`, driven by the same slice-1-9 machinery the
+ * AI-side dance already uses; a "resumed" result (the only non-terminal,
+ * non-barrier outcome possible there) always continues straight into
+ * `runEndTurnTail` -- `cancelallactions` already cancelled any still-pending
+ * second action inside the dance itself. For "run-action1"/"run-action2"
+ * (ISSUES #89) the halted script is instead a mid-action move script (e.g.
+ * `BattleScript_EffectBatonPass`) halted on its own `openpartyscreen` --
+ * resumed via the shared `continueFullTurnAfterAction` tail below.
  */
 function resumeFullTurnForcedSwitch(
   ctx: BattleDecisionReducerContext<FactoryFullTurnDecisionRules>,
@@ -2351,6 +2460,47 @@ function resumeFullTurnForcedSwitch(
 
   const ports = externalPorts();
   const handlers = createBattleScriptStatusRulesHandlers(PROGRAM, ports);
+
+  if (pending.pendingScript.resumeAt === "run-action1" || pending.pendingScript.resumeAt === "run-action2") {
+    // A move script (not the HandleFaintedMon dance) halted mid-action on
+    // openpartyscreen's player branch -- e.g. Baton Pass (ISSUES #89). Write
+    // the chosen replacement and resume the SAME script from its own halted
+    // program counter, exactly as `battleScriptOpenPartyScreenOpcode.ts`'s own
+    // resume contract documents, then fall into the same post-action
+    // continuation the fresh two-action flow already uses.
+    const chosenPartyIndex = ctx.decision.partyIndex;
+    const monToSwitchIntoId = Object.freeze(
+      pending.rulesContext.monToSwitchIntoId.map((value, index) =>
+        index === ctx.request.battler ? chosenPartyIndex : value
+      ),
+    ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
+    const resumedState: MachineState = Object.freeze({
+      ...haltedState,
+      haltReason: null,
+      rulesContext: Object.freeze({ ...pending.rulesContext, monToSwitchIntoId }),
+    });
+    const run = runScriptToOwnEnd(PROGRAM, handlers, resumedState);
+    if (run.kind === "player-choice") {
+      throw new Error(
+        "factory full-turn decision move-action resume unexpectedly halted on a second player-choice-required opcode",
+      );
+    }
+    if (run.kind === "barrier") {
+      return finishFullTurn(
+        ctx.rng, rngBefore.calls, run.state,
+        buildRules(run.state.rulesContext, "awaiting-player-command", null),
+        machineBarrierBoundary(run.instruction, run.state.instructionsExecuted),
+      );
+    }
+    return continueFullTurnAfterAction(
+      ctx, rngBefore.calls, handlers, run.state, ctx.request.battler as BattleScriptBattlerId,
+      "awaiting-player-command", null,
+      pending.pendingScript.resumeAt === "run-action1" && pending.pendingScript.pendingSecondAction !== undefined
+        ? pending.pendingScript.pendingSecondAction
+        : null,
+    );
+  }
+
   const orchestration = resumeBattleScriptFaintedActionsAfterPlayerChoice(
     PROGRAM,
     handlers,
@@ -2413,6 +2563,163 @@ function resumeFullTurnForcedSwitch(
     ),
     ctx.request.requestId + 1,
   );
+}
+
+/**
+ * Shared tail once one mover's action script has completed its own halt
+ * (fresh or resumed from a mid-action player-choice pause, ISSUES #89):
+ * runs fainted-actions orchestration, then either the still-pending second
+ * mover's action (`second`, only on the first of the turn's two actions) or
+ * straight to the end-turn tail. Recurses once, for the second action, with
+ * `second: null` -- unifying the original two-action flow with a resume from
+ * either action1 or action2's own openpartyscreen halt.
+ */
+function continueFullTurnAfterAction(
+  ctx: BattleDecisionReducerContext<FactoryFullTurnDecisionRules>,
+  rngBeforeCalls: number,
+  handlers: Handlers,
+  actionState: MachineState,
+  actingMover: BattleScriptBattlerId,
+  phase: FactoryFullTurnDecisionRules["phase"],
+  pendingPlayerDecision: FactoryFullTurnDecisionRules["pendingPlayerDecision"],
+  second: PendingSecondFullTurnAction | null,
+): BattleDecisionReducerOutput<FactoryFullTurnDecisionRules> {
+  const faint = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, actionState);
+  if (faint.kind === "terminal") {
+    const finished = handleBattleActionFinished(faint.state, actingMover);
+    return finishFullTurn(
+      ctx.rng, rngBeforeCalls, finished,
+      buildRules(finished.rulesContext, phase, pendingPlayerDecision),
+      Object.freeze({
+        kind: "terminal",
+        outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
+      }),
+    );
+  }
+  if (faint.kind === "non-terminal-barrier") {
+    return finishFullTurn(
+      ctx.rng, rngBeforeCalls, faint.state,
+      buildRules(faint.state.rulesContext, phase, pendingPlayerDecision),
+      machineBarrierBoundary(faint.instruction, faint.state.instructionsExecuted),
+    );
+  }
+  if (faint.kind === "player-choice-required") {
+    // The fainted battler is player-side and its own bench still has a legal
+    // replacement (item 3): surface it as a real "forced-switch" decision-
+    // required boundary, not a throw -- cancelallactions inside the dance
+    // itself already handles any still-pending second action.
+    return finishFullTurn(
+      ctx.rng, rngBeforeCalls, faint.state,
+      buildForcedSwitchPendingRules(faint.state.rulesContext, {
+        programCounter: faint.state.programCounter,
+        callStack: faint.state.callStack,
+        scheduler: faint.state.scheduler,
+        resumeAt: "run-end-turn",
+      }),
+      Object.freeze({
+        kind: "decision-required",
+        request: Object.freeze({
+          kind: "forced-switch",
+          requestId: ctx.request.requestId + 1,
+          side: faint.battler === 0 ? "player" as const : "trainer" as const,
+          battler: faint.battler as BattleSinglesBattler,
+          faintedPartyIndex: faint.faintedPartyIndex as BattlePartyIndex,
+          legalPartyIndexes: faint.legalPartyIndexes as readonly BattlePartyIndex[],
+        }),
+      }),
+    );
+  }
+
+  // faint.kind is "no-fainted-battlers" (run the second action, if any) or
+  // "resumed" (skip it, per cancelallactions).
+  let preEndTurnState = handleBattleActionFinished(faint.state, actingMover);
+  if (second !== null && faint.kind === "no-fainted-battlers") {
+    // RunTurnActionsFunctions clears these action-local bits when advancing
+    // gCurrentTurnActionNumber (battle_main.c:4949-4954). In particular, a
+    // first mover stopped by Disable must not make the second mover disobey.
+    const betweenActionsRules = createBattleScriptRulesContext({
+      ...preEndTurnState.rulesContext,
+      hitMarker: (
+        preEndTurnState.rulesContext.hitMarker
+        & ~BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING
+        & ~BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
+      ) >>> 0,
+    });
+    if (betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_TRY_FINISH) {
+      // Pursuit interception during action 1 rewrote mover2's turn-order slot
+      // to B_ACTION_TRY_FINISH (Cmd_jumpifnopursuitswitchdmg,
+      // battle_script_commands.c:8751-8753), so RunTurnActionsFunctions never
+      // dispatches mover2's own move -- the switch script already landed the
+      // double-power Pursuit hit. Skip straight to end-turn.
+      preEndTurnState = Object.freeze({ ...preEndTurnState, rulesContext: betweenActionsRules });
+    } else {
+      const preAction2State: MachineState = Object.freeze({
+        ...preEndTurnState,
+        rulesContext: withTurnOrderPositions(
+          betweenActionsRules,
+          1,
+          actingMover,
+          second.mover,
+        ),
+      });
+      const action2 = second.switchPartyIndex !== null
+        ? runVoluntarySwitchAction(
+          preAction2State,
+          second.mover as BattleSinglesBattler,
+          second.switchPartyIndex,
+          second.moveId,
+          second.target,
+          handlers,
+        )
+        : runMoveAction(
+          PROGRAM,
+          handlers,
+          preAction2State,
+          second.mover,
+          second.moveId,
+          second.moveSlot,
+          second.target,
+          second.forcedStruggle,
+        );
+      if (action2.kind === "barrier") {
+        return finishFullTurn(
+          ctx.rng, rngBeforeCalls, action2.state,
+          buildRules(action2.state.rulesContext, phase, pendingPlayerDecision),
+          machineBarrierBoundary(action2.instruction, action2.state.instructionsExecuted),
+        );
+      }
+      if (action2.kind === "player-choice") {
+        // Same fork as action1's own player-choice halt above, just arising
+        // from the SECOND (final) action of the turn instead -- no third
+        // action remains, so there is nothing left to persist for the resume.
+        return finishFullTurn(
+          ctx.rng, rngBeforeCalls, action2.state,
+          buildForcedSwitchPendingRules(action2.state.rulesContext, {
+            programCounter: action2.state.programCounter,
+            callStack: action2.state.callStack,
+            scheduler: action2.state.scheduler,
+            resumeAt: "run-action2",
+          }),
+          Object.freeze({
+            kind: "decision-required",
+            request: Object.freeze({
+              kind: "forced-switch",
+              requestId: ctx.request.requestId + 1,
+              side: action2.battler === 0 ? "player" as const : "trainer" as const,
+              battler: action2.battler as BattleSinglesBattler,
+              faintedPartyIndex: action2.faintedPartyIndex as BattlePartyIndex,
+              legalPartyIndexes: action2.legalPartyIndexes as readonly BattlePartyIndex[],
+            }),
+          }),
+        );
+      }
+      return continueFullTurnAfterAction(
+        ctx, rngBeforeCalls, handlers, action2.state, second.mover, phase, pendingPlayerDecision, null,
+      );
+    }
+  }
+
+  return runEndTurnTail(ctx.rng, rngBeforeCalls, handlers, preEndTurnState, ctx.request.requestId + 1);
 }
 
 export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTurnDecisionRules> = (
@@ -2615,161 +2922,55 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       machineBarrierBoundary(action1.instruction, action1.state.instructionsExecuted),
     );
   }
-
-  const faint1 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action1.state);
-  if (faint1.kind === "terminal") {
-    const finished = handleBattleActionFinished(faint1.state, mover1);
+  if (action1.kind === "player-choice") {
+    // A move script (not the HandleFaintedMon dance) halted mid-action1 on
+    // openpartyscreen's player branch -- e.g. Baton Pass (ISSUES #89).
+    // Surface the same "forced-switch" decision-required boundary the
+    // fainted-mon dance already publishes, carrying mover2's already-
+    // resolved action so the resume can finish the turn without re-deriving
+    // trainer AI (below, `continueFullTurnAfterAction`'s "run-action1" caller).
     return finishFullTurn(
-      ctx.rng, rngBefore.calls, finished,
-      buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
-      Object.freeze({
-        kind: "terminal",
-        outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
-      }),
-    );
-  }
-  if (faint1.kind === "non-terminal-barrier") {
-    return finishFullTurn(
-      ctx.rng, rngBefore.calls, faint1.state,
-      buildRules(faint1.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-      machineBarrierBoundary(faint1.instruction, faint1.state.instructionsExecuted),
-    );
-  }
-  if (faint1.kind === "player-choice-required") {
-    // The fainted battler is player-side and its own bench still has a legal
-    // replacement (item 3): surface it as a real "forced-switch" decision-
-    // required boundary, not a throw -- cancelallactions inside the dance
-    // itself already handles the still-pending second action (mover2 never
-    // runs once resumed, matching item 2's own non-terminal fork).
-    return finishFullTurn(
-      ctx.rng, rngBefore.calls, faint1.state,
-      buildForcedSwitchPendingRules(faint1.state.rulesContext, {
-        programCounter: faint1.state.programCounter,
-        callStack: faint1.state.callStack,
-        scheduler: faint1.state.scheduler,
-        resumeAt: "run-end-turn",
+      ctx.rng, rngBefore.calls, action1.state,
+      buildForcedSwitchPendingRules(action1.state.rulesContext, {
+        programCounter: action1.state.programCounter,
+        callStack: action1.state.callStack,
+        scheduler: action1.state.scheduler,
+        resumeAt: "run-action1",
+        pendingSecondAction: Object.freeze({
+          mover: mover2,
+          switchPartyIndex: mover2SwitchPartyIndex,
+          moveId: mover2MoveId,
+          moveSlot: mover2MoveSlot,
+          target: mover2Target,
+          forcedStruggle: mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+        }),
       }),
       Object.freeze({
         kind: "decision-required",
         request: Object.freeze({
           kind: "forced-switch",
           requestId: ctx.request.requestId + 1,
-          side: faint1.battler === 0 ? "player" as const : "trainer" as const,
-          battler: faint1.battler as BattleSinglesBattler,
-          faintedPartyIndex: faint1.faintedPartyIndex as BattlePartyIndex,
-          legalPartyIndexes: faint1.legalPartyIndexes as readonly BattlePartyIndex[],
+          side: action1.battler === 0 ? "player" as const : "trainer" as const,
+          battler: action1.battler as BattleSinglesBattler,
+          faintedPartyIndex: action1.faintedPartyIndex as BattlePartyIndex,
+          legalPartyIndexes: action1.legalPartyIndexes as readonly BattlePartyIndex[],
         }),
       }),
     );
   }
 
-  // faint1.kind is "no-fainted-battlers" (run action 2) or "resumed" (skip action 2, per cancelallactions).
-  let preEndTurnState = handleBattleActionFinished(faint1.state, mover1);
-  if (faint1.kind === "no-fainted-battlers") {
-    // RunTurnActionsFunctions clears these action-local bits when advancing
-    // gCurrentTurnActionNumber (battle_main.c:4949-4954). In particular, a
-    // first mover stopped by Disable must not make the second mover disobey.
-    const betweenActionsRules = createBattleScriptRulesContext({
-      ...preEndTurnState.rulesContext,
-      hitMarker: (
-        preEndTurnState.rulesContext.hitMarker
-        & ~BATTLE_SCRIPT_HITMARKER_NO_ATTACKSTRING
-        & ~BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
-      ) >>> 0,
-    });
-    if (betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_TRY_FINISH) {
-      // Pursuit interception during action 1 rewrote mover2's turn-order slot
-      // to B_ACTION_TRY_FINISH (Cmd_jumpifnopursuitswitchdmg,
-      // battle_script_commands.c:8751-8753), so RunTurnActionsFunctions never
-      // dispatches mover2's own move -- the switch script already landed the
-      // double-power Pursuit hit. Skip straight to end-turn.
-      preEndTurnState = Object.freeze({ ...preEndTurnState, rulesContext: betweenActionsRules });
-    } else {
-      const preAction2State: MachineState = Object.freeze({
-        ...preEndTurnState,
-        rulesContext: withTurnOrderPositions(
-          betweenActionsRules,
-          1,
-          mover1,
-          mover2,
-        ),
-      });
-      const action2 = mover2SwitchPartyIndex !== null
-        ? runVoluntarySwitchAction(
-          preAction2State,
-          mover2 as BattleSinglesBattler,
-          mover2SwitchPartyIndex,
-          mover2 === 0 ? trainerMoveId : playerMoveId,
-          mover2 === 0 ? trainerTarget : playerTarget,
-          handlers,
-        )
-        : runMoveAction(
-          PROGRAM,
-          handlers,
-          preAction2State,
-          mover2,
-          mover2MoveId,
-          mover2MoveSlot,
-          mover2Target,
-          mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
-        );
-      if (action2.kind === "barrier") {
-        return finishFullTurn(
-          ctx.rng, rngBefore.calls, action2.state,
-          buildRules(action2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-          machineBarrierBoundary(action2.instruction, action2.state.instructionsExecuted),
-        );
-      }
-      const faint2 = runBattleScriptFaintedActionsOrchestration(PROGRAM, handlers, action2.state);
-      if (faint2.kind === "terminal") {
-        const finished = handleBattleActionFinished(faint2.state, mover2);
-        return finishFullTurn(
-          ctx.rng, rngBefore.calls, finished,
-          buildRules(finished.rulesContext, rules.phase, rules.pendingPlayerDecision),
-          Object.freeze({
-            kind: "terminal",
-            outcome: mapFactoryBattleOutcome(finished.rulesContext.battleOutcome),
-          }),
-        );
-      }
-      if (faint2.kind === "non-terminal-barrier") {
-        return finishFullTurn(
-          ctx.rng, rngBefore.calls, faint2.state,
-          buildRules(faint2.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
-          machineBarrierBoundary(faint2.instruction, faint2.state.instructionsExecuted),
-        );
-      }
-      if (faint2.kind === "player-choice-required") {
-        // Same fork as faint1 above, just arising from the SECOND (final) action of the turn instead.
-        return finishFullTurn(
-          ctx.rng, rngBefore.calls, faint2.state,
-          buildForcedSwitchPendingRules(faint2.state.rulesContext, {
-            programCounter: faint2.state.programCounter,
-            callStack: faint2.state.callStack,
-            scheduler: faint2.state.scheduler,
-            resumeAt: "run-end-turn",
-          }),
-          Object.freeze({
-            kind: "decision-required",
-            request: Object.freeze({
-              kind: "forced-switch",
-              requestId: ctx.request.requestId + 1,
-              side: faint2.battler === 0 ? "player" as const : "trainer" as const,
-              battler: faint2.battler as BattleSinglesBattler,
-              faintedPartyIndex: faint2.faintedPartyIndex as BattlePartyIndex,
-              legalPartyIndexes: faint2.legalPartyIndexes as readonly BattlePartyIndex[],
-            }),
-          }),
-        );
-      }
-      preEndTurnState = handleBattleActionFinished(
-        faint2.state,
-        mover2,
-      ); // "no-fainted-battlers" or "resumed"
-    }
-  }
-
-  return runEndTurnTail(ctx.rng, rngBefore.calls, handlers, preEndTurnState, ctx.request.requestId + 1);
+  return continueFullTurnAfterAction(
+    ctx, rngBefore.calls, handlers, action1.state, mover1,
+    rules.phase, rules.pendingPlayerDecision,
+    Object.freeze({
+      mover: mover2,
+      switchPartyIndex: mover2SwitchPartyIndex,
+      moveId: mover2MoveId,
+      moveSlot: mover2MoveSlot,
+      target: mover2Target,
+      forcedStruggle: mover2 === 0 ? playerForcedStruggle : trainerForcedStruggle,
+    }),
+  );
 };
 
 export function submitFactoryFullTurnDecision(
