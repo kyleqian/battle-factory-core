@@ -5,6 +5,42 @@ full history regardless.
 
 ---
 
+## R41 — [supervised session, 2026-08-14] **M40 Battle Script Torment status leaf + wind-down**
+
+- **State:** `rust-main` = current master `77cc08e1` plus verified
+  `Cmd_settorment` worker `b4d693e1`. The complete pure
+  `battleScriptSettormentOpcode.ts` handler/state/control projection is native
+  and wasm32-compilable; no ABI or adapter surface was widened. The session
+  ends committed and green.
+- **Did:** ported exact opcode/dispatcher/operand shape validation before target
+  resolution, full-u32 `STATUS2_TORMENT` inspection, success-only target bit
+  OR, already-set no-write failure jump, and deliberately late failure-label
+  resolution. Canonical TypeScript execution supplies **560 cases** across all
+  four targets, the full **500** selector-role matrix, packed-u32 bit-31 edges,
+  complete target/sibling state, ordered malformed/missing/unresolved errors,
+  resolution skipped on success, and repeated advance-to-failure/idempotent
+  paths; corpus sha256
+  `2bc252582eb5971f3965826a44f7fec60e045794749f6a3645acc02f5e31b916`.
+- **Next:** select the next conflict-free pure Battle Script leaf after
+  re-orienting against master and active TS work. M7c opponent generation still
+  waits on canonical TS live generation; keep moving targets excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  opcode/macro/call site, bit-31 constant, handler error order, expression-bound
+  resolution, full-width state preservation, and repetition; regenerated twice
+  byte-identically (canonical corpus **1,443,119 bytes**; generated file
+  **3,977,003 bytes**, sha256
+  `49e8fdd4ed4d02e89150defa8271363c696a662dd9b050c3c2418682517ffb66`;
+  generator **40,663 bytes**, sha256
+  `ec9d9d5213f2e1585e57b96bd46c97a631b535ffa77c7aceb01e5c05619daab4`),
+  and reran focused **9/9**, cargo **914/914**, fmt, strict Clippy, and wasm32
+  release. Final artifact is **496,864 bytes**, sha256
+  `8b4898136c07cab628c486f485adcc52c66f120361622f99b1fd1688543da9ad`.
+  After folding master's #88 fix, full npm is green at **1,024 files / 9,833
+  passed / 224 skipped** and build is green at **675 modules**. Scope stayed
+  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+  PAPERCUT: worker's long npm/build sessions yielded several ambiguous runner
+  receipts before their terminal results, ~4 min.
+
 ## R40 — [supervised session, 2026-08-14] **M39 Battle Script Spikes setup leaf**
 
 - **State:** `rust-main` = current master `87038ec0` plus verified
