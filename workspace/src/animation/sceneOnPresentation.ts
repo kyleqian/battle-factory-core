@@ -332,6 +332,11 @@ import {
   type GigaDrainState,
 } from "./gigaDrain.ts";
 import {
+  dreamEaterAtAge,
+  type DreamEaterAllocatorProfile,
+  type DreamEaterState,
+} from "./dreamEater.ts";
+import {
   reflectAtAge,
   type ReflectState,
 } from "./reflect.ts";
@@ -935,6 +940,7 @@ export interface SceneOnPresentationBattler {
     | "ILLUMISE"
     | "MASQUERAIN"
     | "WAILMER"
+    | "WIGGLYTUFF"
     | "POLITOED"
     | "POLIWRATH"
     | "POLIWHIRL"
@@ -1522,6 +1528,19 @@ export interface SceneOnGigaDrainConfig {
   readonly healingCenter: Readonly<{ x: number; y: number }>;
   readonly absorptionCenter: Readonly<{ x: number; y: number }>;
   readonly allocatorProfile: Readonly<GigaDrainAllocatorProfile>;
+}
+
+/** Presentation-only geometry and allocator facts for Move_DREAM_EATER. */
+export interface SceneOnDreamEaterConfig {
+  readonly move: "DREAM_EATER";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+  readonly absorptionCenter: Readonly<{ x: number; y: number }>;
+  /** Settled species animation offset before Dream Eater's tasks take over. */
+  readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
+  readonly allocatorProfile: Readonly<DreamEaterAllocatorProfile>;
 }
 
 export interface SceneOnReflectConfig {
@@ -2926,6 +2945,7 @@ export type SceneOnMoveConfig =
   | SceneOnAbsorbConfig
   | SceneOnMegaDrainConfig
   | SceneOnGigaDrainConfig
+  | SceneOnDreamEaterConfig
   | SceneOnReflectConfig
   | SceneOnBrickBreakConfig
   | SceneOnLightScreenConfig
@@ -3085,6 +3105,7 @@ export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
     | SceneOnMegaDrainConfig
     | SceneOnGigaDrainConfig
+    | SceneOnDreamEaterConfig
     | SceneOnBiteConfig
     = SceneOnMoveConfig,
 > {
@@ -3123,6 +3144,8 @@ export type SceneOnMegaDrainPresentationState =
   SceneOnMovePresentationState<SceneOnMegaDrainConfig>;
 export type SceneOnGigaDrainPresentationState =
   SceneOnMovePresentationState<SceneOnGigaDrainConfig>;
+export type SceneOnDreamEaterPresentationState =
+  SceneOnMovePresentationState<SceneOnDreamEaterConfig>;
 export type SceneOnMoonlightPresentationState =
   SceneOnMovePresentationState<SceneOnMoonlightConfig>;
 export type SceneOnPresentPresentationState =
@@ -4340,6 +4363,12 @@ export interface SceneOnGigaDrainView extends GigaDrainState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnDreamEaterView extends DreamEaterState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnSynthesisView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5069,6 +5098,28 @@ export function sceneOnGigaDrainView(
       state.config.absorptionCenter,
       state.config.attacker.geometry.side,
       state.config.healingCenter,
+    ),
+  };
+}
+
+/** `age` is relative to Move_DREAM_EATER's first active source row. */
+export function sceneOnDreamEaterView(
+  state: SceneOnMovePresentationState<SceneOnDreamEaterConfig>,
+): SceneOnDreamEaterView {
+  if (state.config.move !== "DREAM_EATER") {
+    throw new Error(`expected DREAM_EATER presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...dreamEaterAtAge(
+      state.age,
+      state.config.target.geometry.animationCenter,
+      state.config.absorptionCenter,
+      state.config.attacker.geometry.side,
+      state.config.healingCenter,
+      state.config.targetRestOffset,
     ),
   };
 }

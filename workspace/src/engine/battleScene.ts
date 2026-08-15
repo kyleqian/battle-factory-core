@@ -877,6 +877,11 @@ import { ancientPowerRockPainterOrder } from "../animation/ancientPower.ts";
 import { megaDrainSpritesBackToFrontAtAge } from "../animation/megaDrain.ts";
 import { gigaDrainSpritesBackToFrontAtAge } from "../animation/gigaDrain.ts";
 import {
+  dreamEaterPsychicBgPaletteRowAtAge,
+  dreamEaterSpritesBackToFrontAtAge,
+  dreamEaterTargetOamOffsetAtSourceAge,
+} from "../animation/dreamEater.ts";
+import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnWrapView,
@@ -909,6 +914,7 @@ import {
   sceneOnAbsorbView,
   sceneOnMegaDrainView,
   sceneOnGigaDrainView,
+  sceneOnDreamEaterView,
   sceneOnReflectView,
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
@@ -1111,6 +1117,7 @@ import {
   type SceneOnAbsorbPresentationState,
   type SceneOnMegaDrainPresentationState,
   type SceneOnGigaDrainPresentationState,
+  type SceneOnDreamEaterPresentationState,
   type SceneOnReflectPresentationState,
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
@@ -35481,6 +35488,229 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "ROSELIA used" : "Foe ROSELIA used",
       "GIGA DRAIN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "DREAM_EATER") {
+    const dreamState = state as SceneOnDreamEaterPresentationState;
+    const view = sceneOnDreamEaterView(dreamState);
+    // Whole OAM, ordinary offsets and palette transfer are RAM+1. The live
+    // target affine matrix is the independently measured RAM+2 exception.
+    const displayed = sceneOnDreamEaterView({ ...dreamState, age: dreamState.age - 1 });
+    const matrixDisplayed = sceneOnDreamEaterView({ ...dreamState, age: dreamState.age - 2 });
+    // ScaleMonAndRestore's final callback restores the matrix before its
+    // semi-transparent OAM attribute reaches hardware. The 8:8 alpha command
+    // remains the honest owner of that one-row transition.
+    const blendDisplayed = displayed.alpha?.eva === 8;
+    const playerToOpponent =
+      view.attacker.species === "WIGGLYTUFF"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WIGGLYTUFF"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged DREAM_EATER pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const wigglytuffSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WIGGLYTUFF!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WIGGLYTUFF!;
+    const wigglytuff = playerToOpponent
+      ? wigglytuffSource
+      : { ...wigglytuffSource, tileset: subTileset(wigglytuffSource.tileset, 0, 8) };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bgBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.bgIsPsychic) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        subpalettes: [gpuDarken(dreamEaterPsychicBgPaletteRowAtAge(
+          battleAnimPsychicBg.palette,
+          view.age - 1,
+        ))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+
+    const targetX2 = displayed.targetX2;
+    const targetY2 = displayed.targetY2;
+    const targetOamOffset = dreamEaterTargetOamOffsetAtSourceAge(
+      displayed.age,
+      dreamState.config.targetRestOffset,
+    );
+    // monbg is a real BG duplicate, updated after the shake task. Keep it as
+    // the semi-transparent OBJ target-2 surface even when the live target OBJ
+    // was captured earlier in the same source pass at a different offset.
+    const nonObjTarget2 = fb.slice();
+    if (displayed.targetOnMonBg) {
+      drawSpriteSheet(
+        nonObjTarget2,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x + targetX2,
+        view.target.geometry.spriteCorner.y + targetY2,
+      );
+      fb.set(nonObjTarget2);
+    }
+    if (blendDisplayed) {
+      // monbg's unscaled target is target 2 underneath the semi-transparent
+      // ScaleMonAndRestore OBJ during the 8:8 psychic window.
+      drawSpriteSheetAffineStretchTintedBlend(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y + targetOamOffset.y2,
+        matrixDisplayed.targetScale.xScale,
+        matrixDisplayed.targetScale.yScale,
+        { r: 255, g: 255, b: 255 },
+        0,
+        view.alpha?.eva ?? 8,
+        8,
+        true,
+        targetOamOffset.x2,
+      );
+    } else {
+      drawSpriteSheetAffineStretch(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x,
+        view.target.geometry.spriteCorner.y,
+        matrixDisplayed.targetScale.xScale,
+        matrixDisplayed.targetScale.yScale,
+        targetOamOffset.y2,
+        { r: 255, g: 255, b: 255 },
+        0,
+        matrixDisplayed.targetScale.active,
+        targetOamOffset.x2,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      wigglytuff.tileset,
+      wigglytuff.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+
+    const orbTileset: Tileset = {
+      columns: 2,
+      rows: 2,
+      tiles: absorbArt.orbs.tileset.tiles.slice(8, 12),
+    };
+    const displayedSprites = dreamEaterSpritesBackToFrontAtAge(
+      displayed.age,
+      view.target.geometry.animationCenter,
+      dreamState.config.absorptionCenter,
+      view.attacker.geometry.side,
+      dreamState.config.healingCenter,
+      dreamState.config.allocatorProfile,
+    );
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "orb") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          orbTileset,
+          absorbArt.orbs.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 4,
+            rows: 4,
+            tiles: absorbArt.blueStar.tileset.tiles.slice(
+              sprite.frame * 16,
+              sprite.frame * 16 + 16,
+            ),
+          },
+          absorbArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    // Equal OBJ priority falls through to hardware OAM order. In the
+    // opponent-front allocation the player target precedes the ORBS, so its
+    // opaque OBJ wins their overlap; the player-back allocation places the
+    // target after them and therefore needs no repaint.
+    if (opponentToPlayer && displayedSprites.some((sprite) => sprite.kind === "orb")) {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        view.target.geometry.spriteCorner.x + targetOamOffset.x2,
+        view.target.geometry.spriteCorner.y + targetOamOffset.y2,
+      );
+    }
+
+    const opponentSpecies = playerToOpponent ? "ONIX" : "WIGGLYTUFF";
+    const playerSpecies = playerToOpponent ? "WIGGLYTUFF" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: playerToOpponent ? "sleep" : "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: opponentToPlayer ? "sleep" : "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "WIGGLYTUFF used" : "Foe WIGGLYTUFF used",
+      "DREAM EATER!",
       99,
     );
     return;
