@@ -5,6 +5,38 @@ full history regardless.
 
 ---
 
+## R37 — [supervised session, 2026-08-14] **M36 Battle Script Snatch setup leaf**
+
+- **State:** `rust-main` = current master `770a40ee` plus verified Snatch
+  worker `93453150`. The pure `Cmd_trysetsnatch` decision/state/control
+  projection is native and wasm32-compilable. The module's two role commands
+  remain intentionally unported; no ABI or adapter surface was widened.
+- **Did:** ported exact attacker resolution, attacker-only PP
+  Pressure-exemption, and the full-u8 action equality branch. Acting last
+  preserves `stealMove` and returns typed `FailJump`; every other action value
+  arms only the attacker `stealMove` and `Advance`s. All selector roles and
+  sibling battlers remain exact. Canonical TypeScript execution supplies
+  **1,302 cases** across singles/doubles topology, all attackers, the complete
+  u8 action domain, all selector combinations, all eight prior battler bits,
+  u32 topology flags, missing attacker, aliases, and repetition; corpus
+  sha256 `c97e457c24d5747fd5e6c51479d8467d6c73a6d4e2a97be0b10b7a0bca8d1dd3`.
+- **Next:** select the next conflict-free pure Battle Script leaf; the two
+  remaining role commands in `battleScriptSnatchOpcode.ts` are now natural
+  candidates but must remain bounded independently. M7c opponent generation
+  still waits on canonical TS live generation; keep active TS modules out.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the exact source
+  write/branch order, opcode macro and concrete `BattleScript_EffectSnatch`
+  call site; regenerated twice byte-identically (generated file **1,863,320
+  bytes**, sha256
+  `95e03df2408aad5b2da7a6abd724a2a7c08e9e03b5baeb69dabb386cd22cb4e7`),
+  and reran focused **7/7**, fmt, strict Clippy, and wasm32 release. Worker
+  gates passed cargo **881/881**, full npm **1,020 files / 9,811 passed**, and
+  build **670 modules**. Artifact is **509,767 bytes**, sha256
+  `879e604eea0a7eef93e3141f1bf4e59a500d5cedddeb7d9409965e974aee683d`.
+  Scope stayed inside `core-rs/**`; no unsupported barrier or Rust deferral
+  was added.
+  PAPERCUT: the fresh worker lacked the ignored WASM artifact, ~2 min.
+
 ## R36 — [supervised session, 2026-08-14] **M35 Battle Script Magic Coat setup leaf**
 
 - **State:** `rust-main` = current master `b47d45a7` plus verified Magic Coat
