@@ -874,6 +874,7 @@ import {
 import { stunSporeParticleDrawOrderAtAge } from "../animation/stunSpore.ts";
 import { sleepPowderParticleDrawOrderAtAge } from "../animation/sleepPowder.ts";
 import { ancientPowerRockPainterOrder } from "../animation/ancientPower.ts";
+import { megaDrainSpritesBackToFrontAtAge } from "../animation/megaDrain.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -905,6 +906,7 @@ import {
   sceneOnMoonlightView,
   sceneOnPresentView,
   sceneOnAbsorbView,
+  sceneOnMegaDrainView,
   sceneOnReflectView,
   sceneOnBrickBreakView,
   sceneOnLightScreenView,
@@ -1105,6 +1107,7 @@ import {
   type SceneOnScaryFacePresentationState,
   type SceneOnGlarePresentationState,
   type SceneOnAbsorbPresentationState,
+  type SceneOnMegaDrainPresentationState,
   type SceneOnReflectPresentationState,
   type SceneOnBrickBreakPresentationState,
   type SceneOnLightScreenPresentationState,
@@ -35113,6 +35116,201 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOMBRE used" : "Foe LOMBRE used",
       "ABSORB!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "MEGA_DRAIN") {
+    const megaDrainState = state as SceneOnMegaDrainPresentationState;
+    const view = sceneOnMegaDrainView(megaDrainState);
+    // The OAM/matrix transfer and ordinary battler-offset latches expose the
+    // preceding callback state.  Mega Drain has its own source schedule; it
+    // intentionally does not borrow Absorb's ages.
+    const displayed = sceneOnMegaDrainView({
+      ...megaDrainState,
+      age: megaDrainState.age - 1,
+    });
+    const targetDisplayed = sceneOnMegaDrainView({
+      ...megaDrainState,
+      age: megaDrainState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SKIPLOOM"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SKIPLOOM"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged MEGA_DRAIN pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const attackerSource = playerToOpponent
+      ? synthesisArt.skiploomBack : synthesisArt.skiploomFront;
+    const attacker = playerToOpponent
+      ? attackerSource
+      : {
+          ...attackerSource,
+          tileset: subTileset(attackerSource.tileset, 0, 8),
+        };
+    const target = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    // `simple_palette_blend F_PAL_BG` writes the software-faded palette; the
+    // display transfer sees the prior row.  0x33ED expands to RGB(107,255,99).
+    const green = { r: 107, g: 255, b: 99 };
+    const bgPalettes = battleBg.palette.map((palette) =>
+      blendPaletteToward(palette, green, displayed.bgPaletteBlendY));
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgPalettes,
+    );
+
+    const targetIdle = playerToOpponent
+      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      : { x2: 0, y2: 0 };
+    // The front ONIX idle x2=1 survives until ShakeMon's creation callback
+    // clears it at source age 36.  Its subsequent Y offsets are RAM+1-latched.
+    const targetX2 = playerToOpponent && megaDrainState.age < 37
+      ? targetIdle.x2
+      : targetDisplayed.targetX2;
+    drawSpriteSheet(
+      fb,
+      target.tileset,
+      target.palette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y + targetIdle.y2 + targetDisplayed.targetY2,
+    );
+    // `monbg` promotes the target to the target-2 layer before the blend
+    // sprites are composited.  Keep a pre-attacker copy for PPU-correct alpha.
+    const nonObjTarget2 = fb.slice();
+    drawSpriteSheet(
+      fb,
+      attacker.tileset,
+      attacker.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // SpriteCB_EnemyShadow first observes gAnimScriptActive after this source
+    // row's OAM transfer.  The opponent's elevated battler shadow is therefore
+    // still present for this one displayed row, in front of its lower tiles.
+    if (opponentToPlayer && megaDrainState.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+
+    const orbTileset: Tileset = {
+      columns: 2,
+      rows: 2,
+      tiles: absorbArt.orbs.tileset.tiles.slice(8, 12),
+    };
+    const displayedSprites = megaDrainSpritesBackToFrontAtAge(
+      displayed.age,
+      view.target.geometry.animationCenter,
+      megaDrainState.config.absorptionCenter,
+      view.attacker.geometry.side,
+      megaDrainState.config.healingCenter,
+      megaDrainState.config.allocatorProfile,
+    );
+    for (const sprite of displayedSprites) {
+      if (sprite.kind === "hitsplat") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          absorbArt.impact.tileset,
+          absorbArt.impact.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else if (sprite.kind === "orb") {
+        drawSpriteSheetAffineRotateBlendedOverFb(
+          fb,
+          nonObjTarget2,
+          orbTileset,
+          absorbArt.orbs.palette,
+          sprite.x + sprite.x2,
+          sprite.y + sprite.y2,
+          sprite.xScale,
+          0,
+          0,
+          sprite.yScale,
+          12,
+          8,
+          false,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 4,
+            rows: 4,
+            tiles: absorbArt.blueStar.tileset.tiles.slice(
+              sprite.frame * 16,
+              sprite.frame * 16 + 16,
+            ),
+          },
+          absorbArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+
+    const opponentSpecies = playerToOpponent ? "ONIX" : "SKIPLOOM";
+    const playerSpecies = playerToOpponent ? "SKIPLOOM" : "ONIX";
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerSpecies,
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "SKIPLOOM used" : "Foe SKIPLOOM used",
+      "MEGA DRAIN!",
       99,
     );
     return;
