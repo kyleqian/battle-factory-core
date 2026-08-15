@@ -130,7 +130,7 @@ describe("MOVE_MEGA_DRAIN source and legal staging checkpoint", () => {
     );
   });
 
-  it("credits only Mega Drain after its complete bilateral acceptance", () => {
+  it("retains Mega Drain alongside each independently accepted drain move", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as {
       entries: Array<{ move: string; status: string }>;
       queue: string[];
@@ -141,7 +141,8 @@ describe("MOVE_MEGA_DRAIN source and legal staging checkpoint", () => {
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry) => entry.move === "MOVE_GIGA_DRAIN"))
       .toMatchObject({ status: "exact" });
-    expect(coverage.entries.find((entry) => entry.move === "MOVE_DREAM_EATER")).toBeUndefined();
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_DREAM_EATER"))
+      .toMatchObject({ status: "exact" });
     expect(coverage.queue).toEqual([]);
     expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(188);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
