@@ -2358,6 +2358,33 @@
    ]
   },
   {
+   "move": "MOVE_LUSTER_PURGE",
+   "status": "exact",
+   "covered": [
+    "corrected complete legal Scene-ON parties stage internal species 408 LATIOS from FRONTIER_MON_LATIOS_4 against ONIX; player-back frames 78-410 and opponent-front frames 82-414 each retain 333 rows through first inactive cleanup and reproduce byte-for-byte twice fresh",
+    "the pure source-relative reducer and Latios-only typed seam match all 666 task, sprite, resource, monbg, register, palette-task, six visual-Random2-pair hitsplat, six panned sound, HorizontalShake, cleanup, and immutable gameplay/RNG rows",
+    "the source-derived compositor uses extracted WHITE_CIRCLE_OF_LIGHT plus shared IMPACT, psychic BG, Latios/Onix, healthbox, field, and text assets; it reproduces raw RGB and production framebuffer pixels on 666/666 rows with zero residual pixels and contains no recording, per-age RGB/hash table, absolute tick, or fitted coordinate lookup",
+    "move-owned maps prove preceding-row OAM/matrix/BG transfer on 332/332 comparable rows per orientation, preceding faded palette on 331/332 with only same-row monbg setup age 45, corrected BG2 -40,-51 to 472,461 and BG1 -144,-4 to 368,508 offsets, clear age 295, six BLDCNT, two BLDALPHA, and 64 BLDY changes ending age 331",
+    "the six controller-owned visual Random2 pairs remain immutable presentation inputs; damage, Special Defense effect, gameplay RNG, AI, outcome, turn, controller, round, and facility state are unchanged",
+    "DRAGON_CLAW, SKY_ATTACK, RETURN, FLATTER, COSMIC_POWER, CALM_MIND, DESTINY_BOND, HEAL_BELL, SILVER_WIND, EARTHQUAKE, FISSURE, MAGNITUDE, and ERUPTION remain independent acceptance units and receive no Luster Purge coverage credit"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-luster-purge-player-latios-opponent-onix.json",
+    "tools/battle-lab/mechanic-luster-purge-opponent-latios-player-onix.json",
+    "tools/compare/fixtures/luster-purge-evidence.json",
+    "tools/compare/lusterPurgeSourceAudit.ts",
+    "tools/compare/lusterPurgePortable.ts",
+    "tools/compare/lusterPurgeFramebuffer.ts",
+    "tools/compare/extractLusterPurgeAssets.ts",
+    "src/animation/assets/luster-purge.json",
+    "src/animation/lusterPurge.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/lusterPurgeReducer.test.ts",
+    "tests/animation/lusterPurgeSource.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_MAGIC_COAT",
    "status": "exact",
    "covered": [
@@ -5429,7 +5456,7 @@
     "MOVE_LUSTER_PURGE",
     "MOVE_COSMIC_POWER"
    ],
-   "goal": "MOVE_DRAGON_CLAW independently proves SoundTask_PlaySE1WithPanning and its complete palette/shake/lunge/FireSpin/claw/cleanup body in both orientations at 137/137 strengthened source component/task/sprite/OAM/global-coordinate/palette/audio and shared-seam framebuffer frames, reproduced twice. MOVE_COSMIC_POWER independently proves its non-attacker blend, BG_COSMIC slide/restore, two granting stars, and distinct centered/attacker-pan sounds at 241/241 complete bilateral source/hardware/raw-RGB/framebuffer rows twice fresh. No sibling is promoted. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. LUSTER PURGE needs psychic/white BG transitions, circle and particle blends, six RNG-positioned hitsplats/sounds, target shake, and restore. Each remaining sibling stays unsupported pending independent complete dense framebuffer evidence."
+   "goal": "MOVE_DRAGON_CLAW independently proves SoundTask_PlaySE1WithPanning and its complete palette/shake/lunge/FireSpin/claw/cleanup body in both orientations at 137/137 strengthened source component/task/sprite/OAM/global-coordinate/palette/audio and shared-seam framebuffer frames, reproduced twice. MOVE_COSMIC_POWER independently proves its non-attacker blend, BG_COSMIC slide/restore, two granting stars, and distinct centered/attacker-pan sounds at 241/241 complete bilateral source/hardware/raw-RGB/framebuffer rows twice fresh. MOVE_LUSTER_PURGE independently proves six target-panned SoundTask_PlaySE1WithPanning calls and its complete psychic/white BG, circle/particle blend, six visual-RNG hitsplat, target-shake, and restore body at 333/333 complete bilateral rows twice fresh. SKY ATTACK retains both two-turn selector branches, black/white charge blends and shake, plus sky BG/bird/fade/impact strike. RETURN requires every friendship-power branch, repeated Tail Whip sound tasks, dips/lunges/hitsplats/shakes, and branch-specific timing. FLATTER needs spotlight create/remove, hardware palette fades, vertical dips, 38 confetti sprites, and both attacker/target sound events. Each remaining sibling stays unsupported pending independent complete dense framebuffer evidence."
   },
   {
    "id": "loop-se-adjust-panning",
@@ -5470,7 +5497,7 @@
     "MOVE_LUSTER_PURGE",
     "MOVE_SILVER_WIND"
    ],
-   "goal": "MOVE_CALM_MIND independently proves its complete exclude-attacker BG/non-attacker black blend, attacker-partner monbg, non-attacker hide/reveal, three delay-14 shrinking affine/OBJ-alpha thin rings, reverse blend, and cleanup in both orientations at 101/101 task/palette/software+hardware-OAM/register/raw-RGB and framebuffer frames, reproduced twice. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact in both orientations after the renderer change. No sibling is promoted. SKY ATTACK needs independent evidence for both two-turn branches: its normal-opponent setup uses ordinary palette selectors rather than Exclude, while the attacker-partner setup uses Exclude around monbg/alpha, attacker black/white blends, HorizontalShake, and the separate sky-BG/bird/impact/fade strike body. DESTINY BOND needs the BG_GHOST fade/restore pipeline, gDestinyBondWhiteShadow task, attacker ShakeMonInPlace, its partner-excluding two-leg gray palette body, and cleanup. HEAL BELL needs its bell, twelve palette-managed music notes, three HealBellRing expanding-ring/palette groups, two distinct sparkling stars, asset unload/reload boundaries, and the final blended expanding ring with its separate Exclude selector/colors. LUSTER PURGE needs the psychic BG and screen-to-white pipeline, luster circle, white-alpha particle/palette blends, six random hitsplats with sound tasks, target HorizontalShake, reverse blend, and cleanup. SILVER WIND needs side-specific BUG BGs, sliding BG, splitbgprio/monbg, eighteen independently parameterized big/medium/small sparkle sprites, initial and reverse target-excluding black blends, and restore cleanup. Every sibling remains unsupported pending its own complete dense move evidence."
+   "goal": "MOVE_CALM_MIND independently proves its complete exclude-attacker BG/non-attacker black blend, attacker-partner monbg, non-attacker hide/reveal, three delay-14 shrinking affine/OBJ-alpha thin rings, reverse blend, and cleanup in both orientations at 101/101 task/palette/software+hardware-OAM/register/raw-RGB and framebuffer frames, reproduced twice. MOVE_LUSTER_PURGE independently proves its BG-selected BlendBattleAnimPalExclude ramp and complete psychic BG/screen-white, luster-circle, particle, six-hit, HorizontalShake, reverse-blend, and cleanup body at 333/333 complete bilateral rows twice fresh. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact in both orientations after the renderer change. SKY ATTACK needs independent evidence for both two-turn branches: its normal-opponent setup uses ordinary palette selectors rather than Exclude, while the attacker-partner setup uses Exclude around monbg/alpha, attacker black/white blends, HorizontalShake, and the separate sky-BG/bird/impact/fade strike body. DESTINY BOND needs the BG_GHOST fade/restore pipeline, gDestinyBondWhiteShadow task, attacker ShakeMonInPlace, its partner-excluding two-leg gray palette body, and cleanup. HEAL BELL needs its bell, twelve palette-managed music notes, three HealBellRing thin-ring/palette groups, two distinct sparkling stars, asset unload/reload boundaries, and the final blended expanding ring with its separate Exclude selector/colors. SILVER WIND needs side-specific BUG BGs, sliding BG, splitbgprio/monbg, eighteen independently parameterized big/medium/small sparkle sprites, initial and reverse target-excluding black blends, and restore cleanup. Every remaining sibling stays unsupported pending its own complete dense move evidence."
   },
   {
    "id": "metallic-shine",
@@ -5513,7 +5540,7 @@
     "MOVE_ERUPTION",
     "MOVE_LUSTER_PURGE"
    ],
-   "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH and MOVE_MEGA_KICK independently prove their complex-palette bodies. MOVE_FISSURE independently proves its target/platform (10,50) shake, two BG-only palette pulses, three stable-OAM dirt groups, BG_FISSURE pipeline, and cleanup at 254/254 complete bilateral source/component/framebuffer rows twice fresh. SKY ATTACK, MAGNITUDE, ERUPTION, and LUSTER PURGE retain their distinct unsupported bodies. Every named unsupported move remains unsupported pending independent complete dense evidence."
+   "goal": "MOVE_EARTHQUAKE independently proves its complete dual literal (10,50) platform/all-battler HorizontalShake body and two delay-3/count-1 BG-only black14-to-white14 palette pulses in both orientations at 197/197 task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MEGA_PUNCH and MOVE_MEGA_KICK independently prove their complex-palette bodies. MOVE_FISSURE independently proves its target/platform (10,50) shake, two BG-only palette pulses, three stable-OAM dirt groups, BG_FISSURE pipeline, and cleanup at 254/254 complete bilateral source/component/framebuffer rows twice fresh. MOVE_LUSTER_PURGE independently proves its target-only (5,14) HorizontalShake and distinct BlendBattleAnimPalExclude/BlendParticle psychic body at 333/333 complete bilateral rows twice fresh; it inherits no Fissure argument-set behavior. SKY ATTACK, MAGNITUDE, and ERUPTION retain their distinct unsupported bodies. Every named unsupported move remains unsupported pending independent complete dense evidence."
   },
   {
    "id": "elemental-punch",

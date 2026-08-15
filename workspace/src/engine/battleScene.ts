@@ -627,6 +627,7 @@ import perishSongAsset from "../animation/assets/perish-song.json" with { type: 
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
 import mistBallAsset from "../animation/assets/mist-ball.json" with { type: "json" };
+import lusterPurgeAsset from "../animation/assets/luster-purge.json" with { type: "json" };
 import selfDestructAsset from "../animation/assets/selfDestruct.json" with { type: "json" };
 import explosionAsset from "../animation/assets/explosion.json" with { type: "json" };
 import dynamicPunchAsset from "../animation/assets/dynamicPunch.json" with { type: "json" };
@@ -1036,6 +1037,7 @@ import {
   sceneOnSandstormView,
   sceneOnHeatWaveView,
   sceneOnMistBallView,
+  sceneOnLusterPurgeView,
   sceneOnDragonClawView,
   sceneOnFireSpinView,
   sceneOnMetalClawView,
@@ -1060,6 +1062,7 @@ import {
   sceneOnPsychicView,
   sceneOnKnockOffView,
   type SceneOnMovePresentationState,
+  type SceneOnLusterPurgePresentationState,
   type SceneOnMetalSoundConfig,
   type SceneOnLeerConfig,
   type SceneOnHiJumpKickConfig,
@@ -1511,6 +1514,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const latiosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LATIOS!;
 const baltoyFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).BALTOY!;
 const lunatoneFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LUNATONE!;
 const metangFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).METANG!;
@@ -1611,6 +1615,9 @@ const mistBallArt = mistBallAsset as {
   latiasFront: { tileset: Tileset; palette: RgbColor[] };
   registeelBack: { tileset: Tileset; palette: RgbColor[] };
   registeelFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const lusterPurgeArt = lusterPurgeAsset as {
+  circle: { tileset: Tileset; palette: RgbColor[] };
 };
 const biteArt = biteAsset as {
   sharpTeeth: { tileset: Tileset; palette: RgbColor[] };
@@ -2757,6 +2764,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const latiosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LATIOS!;
 const baltoyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).BALTOY!;
 const lunatoneBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LUNATONE!;
 const metangBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).METANG!;
@@ -17610,6 +17618,242 @@ export function renderSceneOnMovePresentation(
     );
     return;
   }
+  if (state.config.move === "LUSTER_PURGE") {
+    const lusterState = state as SceneOnLusterPurgePresentationState;
+    const view = sceneOnLusterPurgeView(lusterState);
+    // OAM, affine matrices, palette DMA, and monbg scroll all scan out from
+    // the preceding software row in the corrected bilateral Latios maps.
+    const displayed = sceneOnLusterPurgeView({
+      ...lusterState,
+      age: lusterState.age - 1,
+    });
+    const oamBuilt = sceneOnLusterPurgeView({
+      ...lusterState,
+      age: lusterState.age - 2,
+    });
+    const playerToOpponent = view.attacker.species === "LATIOS"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "LATIOS"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LUSTER_PURGE pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const attacker = playerToOpponent ? latiosBackSprite : latiosFrontSprite;
+    const target = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const white = { r: 255, g: 255, b: 255 };
+    const impactTint = { r: 0, g: 0, b: 189 };
+    const paletteCoefficient = (age: number): number => {
+      // Step2 writes one coefficient every three callbacks. Its first write
+      // follows task creation and the result reaches scanout through palette
+      // DMA: 0 at rows 72..74, 1 at 75..77, and symmetrically on restore.
+      if (age < 72) return 0;
+      if (age <= 119) return Math.floor((age - 72) / 3);
+      if (age <= 210) return 16;
+      if (age <= 256) return 16 - Math.floor((age - 208) / 3);
+      return 0;
+    };
+    const circleCoefficient = (age: number): number => {
+      if (age < 72) return 0;
+      if (age <= 119) return Math.floor((age - 72) / 3);
+      return 16;
+    };
+    const psychicRotations = (age: number): number => {
+      if (age < 29) return 0;
+      if (age <= 292) return Math.floor((age - 25) / 4);
+      if (age <= 294) return 66;
+      return 67 + Math.floor((age - 295) / 4);
+    };
+    const rotatePsychicPalette = (
+      palette: readonly RgbColor[],
+      count: number,
+    ): RgbColor[] => {
+      const result = palette.slice();
+      const ring = palette.slice(1, 12);
+      for (let i = 0; i < ring.length; i += 1) {
+        result[1 + ((i + count) % ring.length)] = ring[i]!;
+      }
+      return result;
+    };
+    const darken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | color.g << 8 | color.b << 16,
+          view.gpu.bldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: packed >>> 8 & 0xff,
+          b: packed >>> 16 & 0xff,
+        };
+      });
+    const displayAge = lusterState.age - 1;
+    // BlendPalette consumes the task's prior coefficient before advancing
+    // data[10], then palette DMA adds its ordinary one-row transfer.
+    const paletteDisplayAge = lusterState.age - 2;
+    const fieldBlend = paletteCoefficient(lusterState.age);
+    const psychicActive = lusterState.age >= 26 && lusterState.age <= 311;
+    if (psychicActive) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        subpalettes: [darken(blendPaletteToward(
+          rotatePsychicPalette(
+            battleAnimPsychicBg.palette,
+            psychicRotations(displayAge),
+          ),
+          white,
+          fieldBlend,
+        ))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: blendPaletteBanksToward(
+          battleBg.palette,
+          white,
+          fieldBlend,
+        ).map(darken),
+      });
+    }
+    if (displayed.monbg.active) {
+      // monbg is a normal BG layer. setalpha's lower target-1 mask is empty;
+      // its purpose is enabling semi-transparent particle OBJ, not blending
+      // the battler copy itself. As BG, the copy participates in Exclude's
+      // all-background white palette ramp.
+      drawSpriteSheet(
+        fb,
+        attacker.tileset,
+        blendPaletteToward(attacker.palette, white, fieldBlend),
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+    const nonObjBackdrop = fb.slice();
+    // The first retained opponent row still contains the pre-window enemy
+    // shadow in hardware OAM. Every comparable row after it uses the prior
+    // software OAM entry, which is already invisible.
+    if (opponentToPlayer && lusterState.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+    if (!displayed.monbg.active) {
+      drawSpriteSheet(
+        fb,
+        attacker.tileset,
+        attacker.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+    const targetPalette = blendPaletteToward(
+      target.palette,
+      white,
+      fieldBlend,
+    );
+    drawSpriteSheet(
+      fb,
+      target.tileset,
+      targetPalette,
+      // HorizontalShake runs after the current row's OAM build. Combined
+      // with OAM DMA, its sprite x2 reaches scanout two source rows later.
+      view.target.geometry.spriteCorner.x + oamBuilt.targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    // Semi-transparent OBJ pixels select the already-rendered BG stack as
+    // target 2; lower OAM slots win over battler OBJ pixels.
+    const hitCreationIndex = (sprite: (typeof displayed.sprites)[number]): number => {
+      if (sprite.kind === "circle") return -1;
+      return lusterState.config.visualRandom.hitsplats.findIndex((random) =>
+        random.x % 48 - 24 === sprite.offset.x2
+        && random.y % 24 - 12 === sprite.offset.y2);
+    };
+    // SortSprites orders equal-priority OBJ by descending OAM y and retains
+    // creation order for an equal y. Draw that order backwards because direct
+    // raster writes overwrite, while the first hardware OAM entry wins.
+    const oamOrderedSprites = displayed.sprites.toSorted((left, right) =>
+      right.center.y + right.offset.y2 - (left.center.y + left.offset.y2)
+      || hitCreationIndex(left) - hitCreationIndex(right));
+    for (const sprite of oamOrderedSprites.toReversed()) {
+      // The hardware affine table equals the preceding software table on
+      // every comparable row. `displayed` is already that preceding row;
+      // a freshly admitted sprite naturally retains its creation matrix.
+      const matrix = sprite.matrix;
+      const art = sprite.kind === "circle"
+        ? lusterPurgeArt.circle : battleAnimHitsplat;
+      const palette = sprite.kind === "circle"
+        ? blendPaletteToward(
+            art.palette,
+            white,
+            circleCoefficient(lusterState.age),
+          )
+        : blendPaletteToward(
+            art.palette,
+            impactTint,
+            paletteDisplayAge >= 119 ? 12 : 0,
+          );
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        nonObjBackdrop,
+        art.tileset,
+        palette,
+        sprite.center.x + sprite.offset.x2,
+        sprite.center.y + sprite.offset.y2,
+        matrix[0], matrix[1], matrix[2], matrix[3],
+        12, 8,
+        sprite.kind === "circle",
+      );
+    }
+    const profile = lusterState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "LATIOS",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "LATIOS" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "LATIOS used" : "Foe LATIOS used",
+      "LUSTER PURGE!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "MIST_BALL") {
     const mistState = state as SceneOnMistBallPresentationState;
     const view = sceneOnMistBallView(mistState);

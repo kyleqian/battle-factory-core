@@ -125,14 +125,14 @@ describe("MOVE_LUSTER_PURGE source and legal staging checkpoint", () => {
     expect(sha256(bytes)).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it("keeps coverage credit and the bilateral controls unchanged", () => {
+  it("promotes only Luster Purge and keeps bilateral controls independent", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     const entries = coverage.entries as Array<Record<string, unknown>>;
     const luster = entries.find((entry) => entry.move === "MOVE_LUSTER_PURGE");
-    expect(luster).toBeUndefined();
+    expect(luster).toMatchObject({ move: "MOVE_LUSTER_PURGE", status: "exact" });
     const exact = entries.filter((entry) => entry.status === "exact").length;
-    expect(exact).toBe(184);
+    expect(exact).toBe(185);
     const report = execFileSync("npm", ["run", "animation:coverage", "--silent"], { encoding: "utf8" });
-    expect(report).toContain("Level 50: 184/276 exact, 0 partial, 0 staged, 92 unsupported");
+    expect(report).toContain("Level 50: 185/276 exact, 0 partial, 0 staged, 91 unsupported");
   });
 });

@@ -3,8 +3,8 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_LUSTER_PURGE",
   "moveId": 295,
-  "status": "unsupported",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "carrier": {
     "lowestLegalLevel50": "FRONTIER_MON_LATIOS_4",
     "species": 408,
@@ -90,8 +90,8 @@
         "activeBackground": "BG2",
         "activeBackgroundOffsetsEqualPrecedingSource": "332/332",
         "activeBackgroundFirstSourceRow": 46,
-        "activeBackgroundFirstSourceCoordinates": [-40, -58],
-        "activeBackgroundHardwareRegisters": [472, 454],
+        "activeBackgroundFirstSourceCoordinates": [-40, -51],
+        "activeBackgroundHardwareRegisters": [472, 461],
         "activeBackgroundClearRow": 295,
         "blendCntChanges": 6,
         "blendAlphaChanges": 2,
@@ -140,8 +140,8 @@
         "activeBackground": "BG1",
         "activeBackgroundOffsetsEqualPrecedingSource": "332/332",
         "activeBackgroundFirstSourceRow": 46,
-        "activeBackgroundFirstSourceCoordinates": [-144, -19],
-        "activeBackgroundHardwareRegisters": [368, 493],
+        "activeBackgroundFirstSourceCoordinates": [-144, -4],
+        "activeBackgroundHardwareRegisters": [368, 508],
         "activeBackgroundClearRow": 295,
         "blendCntChanges": 6,
         "blendAlphaChanges": 2,
@@ -215,10 +215,10 @@
   "productionScope": {
     "productionAnimationChanged": true,
     "reducerAdded": true,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
     "framebufferLookupAdded": false,
-    "coveragePromotion": false,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false
   },
@@ -227,9 +227,9 @@
     "opponentFrontRows": 333,
     "totalRows": 666,
     "gameplayRngStable": true,
-    "typedSeamRows": 0,
-    "framebufferRows": 0
+    "typedSeamRows": 666,
+    "framebufferRows": 666
   },
-  "coverageCounts": "Level 50: 184/276 exact, 0 partial, 0 staged, 92 unsupported",
-  "boundedRemainder": "Corrected evidence checkpoint: the rejected Relicanth staging (internal species 381) was replaced with true Latios (internal species 408). Pure reducer acceptance is complete for 333 player-back + 333 opponent-front rows; Luster Purge remains independently unsupported with no typed presentation seam, production compositor, framebuffer acceptance, or coverage credit. Mist Ball, Flail, Heat Wave, Calm Mind, and every shared-component sibling remain independent controls."
+  "coverageCounts": "Level 50: 185/276 exact, 0 partial, 0 staged, 91 unsupported",
+  "boundedRemainder": "Luster Purge alone is exact for corrected internal-species-408 Latios in both complete 333-row orientations. All named component siblings remain independent acceptance units and receive no coverage credit."
 }

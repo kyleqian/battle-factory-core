@@ -37,8 +37,17 @@ describe("Move_LUSTER_PURGE pure source-relative reducer", () => {
     ], { encoding: "utf8" });
     expect(output).toContain("player-back: 333/333 reducer topology rows; phase/palette/audio starts exact; gameplay RNG stable");
     expect(output).toContain("opponent-front: 333/333 reducer topology rows; phase/palette/audio starts exact; gameplay RNG stable");
-    expect(output).toContain("666/666 retained rows exact; no framebuffer or audio-sample claim");
+    expect(output).toContain("666/666 retained rows exact; framebuffer acceptance is independently gated");
   });
+
+  it("matches the complete bilateral production framebuffer with zero residual pixels", () => {
+    const output = execFileSync(process.execPath, [
+      "--experimental-strip-types", "tools/compare/lusterPurgeFramebuffer.ts",
+    ], { encoding: "utf8" });
+    expect(output).toContain("player-back: 333/333 seam/component/raw-RGB/production framebuffer rows exact");
+    expect(output).toContain("opponent-front: 333/333 seam/component/raw-RGB/production framebuffer rows exact");
+    expect(output).toContain("MOVE_LUSTER_PURGE: 666/666 rows exact with zero residual pixels");
+  }, 30_000);
 
   it("takes immutable visual RNG input without consuming or rewriting it", () => {
     const before = structuredClone(player);

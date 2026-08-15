@@ -92,15 +92,15 @@ function transitionRows(rows: Row[], field: string): number[] {
     .filter((index) => index >= 0);
 }
 
-describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
-  it("remains evidence-only and leaves coverage/siblings independent", () => {
+describe("MOVE_LUSTER_PURGE dense Scene-ON evidence", () => {
+  it("pins exact production scope while leaving siblings independent", () => {
     expect(fixture).toMatchObject({
       schema: "luster-purge-bilateral-evidence/v1",
       oracleProfile: "battle-scene-on",
       move: "MOVE_LUSTER_PURGE",
       moveId: 295,
-      status: "unsupported",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       source: {
         scriptStart: "0x082ce517", evenPointerStart: "0x082ce516", exclusiveEnd: "0x082ce62e",
         unsetPsychicBackground: "0x082d7cdd..0x082d7ce5", componentCount: 19,
@@ -108,11 +108,11 @@ describe("MOVE_LUSTER_PURGE dense Scene-ON evidence checkpoint", () => {
         soundTaskPlaySE1WithPanningCalls: 6, blendParticleTasks: 2,
       },
       productionScope: {
-        productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: false,
-        compositorAdded: false, framebufferLookupAdded: false, coveragePromotion: false,
+        productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true,
+        compositorAdded: true, framebufferLookupAdded: false, coveragePromotion: true,
         boundaryOrBarrierChanged: false, gameplayStateOwned: false,
       },
-      coverageCounts: "Level 50: 184/276 exact, 0 partial, 0 staged, 92 unsupported",
+      coverageCounts: "Level 50: 185/276 exact, 0 partial, 0 staged, 91 unsupported",
     });
     expect(fixture.speciesIdentity).toEqual({
       internalSpeciesIds: { SPECIES_RELICANTH: 381, SPECIES_LATIOS: 408 },
