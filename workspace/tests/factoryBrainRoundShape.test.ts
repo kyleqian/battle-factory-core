@@ -19,6 +19,7 @@ import { TRAINER_FRONTIER_BRAIN } from "../src/engine/factoryAiMaskSelection.ts"
 import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus.ts";
 import {
   advanceFactoryRoundPresentation,
+  beginFactoryRoundBattleStartIntro,
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
@@ -27,6 +28,11 @@ import {
   type FactoryRoundBattleOrchestratorConfig,
   type FactoryRoundBattleOrchestratorState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
+import {
+  advanceRoundController,
+  completeBattlePresentation,
+  resolveRoundBattle,
+} from "../src/engine/roundController.ts";
 
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
@@ -164,6 +170,39 @@ function assertOrdinaryThroughBattle5(
   }
 }
 
+/**
+ * Rung C pin: proves `beginFactoryRoundBattleStartIntro` constructs the real
+ * battle-start command for the scheduled Brain battle, carrying NOLAND's
+ * source-cited identity (docs/noland-brain-staging-design.md §2.3,
+ * re-verified against reference/pokeemerald), and that the existing
+ * `frontierBrain` status plumbing ({status: silver/gold}) on
+ * `currentOpponent` stays consistent with the command that was just built
+ * from that very opponent.
+ */
+function assertBrainBattleStartCommand(
+  state: FactoryRoundBattleOrchestratorState,
+  status: "silver" | "gold",
+): void {
+  expect(state.round.rules.phase).toBe("presentingBattleStart");
+  expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status });
+
+  const started = beginFactoryRoundBattleStartIntro(state);
+  const command = started.battleStartIntro!.command;
+  expect(command.battleIndex).toBe(6);
+  expect(command.opponentTrainer).toMatchObject({
+    trainerId: TRAINER_FRONTIER_BRAIN,
+    name: "NOLAND",
+    trainerClass: "TRAINER_CLASS_FACTORY_HEAD",
+    className: "FACTORY HEAD",
+    trainerPicIndex: 86,
+    trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
+  });
+  // The battle-start command is trainer-identity-only; the silver/gold
+  // status itself keeps living on `currentOpponent.frontierBrain`, unchanged
+  // by constructing the intro.
+  expect(started.round.rules.currentOpponent.frontierBrain).toEqual({ status });
+}
+
 // Silver: entering factoryWinStreak 14 (challenge index 2), symbols 0 —
 // battleIndex 6's effective streak is 20, the silver threshold.
 const SILVER_SEED = 4;
@@ -228,6 +267,7 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
     expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    assertBrainBattleStartCommand(state, "silver");
   });
 
   it("the same silver round with factorySymbolsCount 1 schedules an ordinary opponent at battleIndex 6", () => {
@@ -295,5 +335,57 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
     expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "gold" });
+    assertBrainBattleStartCommand(state, "gold");
+  });
+
+  // No existing test exercised a LOSS at the Brain's own battleIndex 6 --
+  // every other round-shape test only proves the WIN path. Resolves the
+  // battle through the same public `resolveRoundBattle` seam
+  // `tools/compare/factoryRoundIntroGeneralizationStage.ts`'s `advanceProofWin`
+  // uses for wins (`completeBattlePresentation` + `advanceRoundController` to
+  // reach `battleActive`, then `resolveRoundBattle` with the real outcome),
+  // swapped to "loss" instead of scripting out an actual battle loss.
+  it("losing to the silver Frontier Brain at battleIndex 6 reports roundLost with frontierBrain status intact", () => {
+    let state = driveToSixthWin(
+      roundConfig("brain-round-shape-silver-loss", SILVER_SEED, SILVER_STREAK, 0),
+    );
+    state = preGenerateFactoryRoundNextOpponent(state);
+    state = acknowledgeAndAdvance(state);
+    expect(state.round.rules.phase).toBe("awaitingSwapDecision");
+    const offerId = state.round.presentation?.command.commandId;
+    if (offerId === undefined) throw new Error("expected swap offer");
+    state = completeFactoryRoundPresentation(state, { commandId: offerId });
+    state = chooseFactoryRoundSwap(state, { type: "decline" });
+    expect(state.round.rules.phase).toBe("presentingSwapResult");
+    state = acknowledgeAndAdvance(state);
+
+    expect(state.round.rules.battleIndex).toBe(6);
+    expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
+    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(state.round.rules.phase).toBe("presentingBattleStart");
+
+    const start = state.round.presentation?.command;
+    if (start?.type !== "battleStart") {
+      throw new Error("expected a pending battle-start command");
+    }
+    let round = advanceRoundController(
+      completeBattlePresentation(state.round, { commandId: start.commandId }),
+    );
+    round = resolveRoundBattle(round, {
+      outcome: "loss",
+      playerParty: round.rules.playerParty,
+      opponentParty: round.rules.currentOpponent.party,
+      rngValue: round.rules.rngValue,
+    });
+
+    expect(round.rules.phase).toBe("roundLost");
+    const command = round.presentation?.command;
+    if (command?.type !== "roundLost") throw new Error("expected a roundLost command");
+    expect(command.battleIndex).toBe(6);
+    expect(command.opponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
+    // frontierBrain end-to-end: carried by the emitted roundLost command's
+    // own opponent snapshot, not just the round's live rules state.
+    expect(command.opponent.frontierBrain).toEqual({ status: "silver" });
+    expect(round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
   });
 });

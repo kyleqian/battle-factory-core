@@ -95,10 +95,17 @@ function advanceProofWin(
   );
 }
 
-/** Stages seed 70's challenge-2 intro at any generated battle index 0..5. */
+/**
+ * Stages seed 70's challenge-2 intro at any generated battle index 0..6.
+ * Index 6 is the Frontier Brain (Noland): entering factoryWinStreak 14, six
+ * ordinary wins (index 0..5) land `getFactoryFrontierBrainStatus`'s input at
+ * 20, `+1` modifier makes 21 -- exactly the silver threshold with the
+ * default `factorySymbolsCount` 0 this config leaves unset -- so index 6 is
+ * always the silver Brain here, not an ordinary opponent.
+ */
 export function generatedRoundRevealProofStage(
   state: EngineState,
-  targetBattleIndex: 0 | 1 | 2 | 3 | 4 | 5,
+  targetBattleIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ): EngineState {
   const playerRentalRecords = [record(267), record(268), record(269)] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
@@ -149,4 +156,87 @@ export function generatedRoundBattle6LukasStatusSummaryMessageStage(
   state: EngineState,
 ): EngineState {
   return generatedRoundRevealProofStage(state, 5);
+}
+
+// Challenge 2, battle index 6 (Battle 7): the Frontier Brain, NOLAND.
+// Entering factoryWinStreak 14, six ordinary wins land the silver threshold
+// (docs/noland-brain-intro-ground-truth.md) -- same seed-70 chain as the
+// Lukas stage above, one battle further. Every mechanism this reaches
+// (transition selection, command construction) is the same generalized path;
+// only the resolved trainer identity/party differ, per rung B (PROGRESS 1259).
+export function generatedRoundBattle7NolandRevealStage(state: EngineState): EngineState {
+  return generatedRoundRevealProofStage(state, 6);
+}
+
+const CHALLENGE5_FIXED_IV = getLevel50InitialRentalFixedIv(5, false);
+
+/**
+ * Gold sibling of `generatedRoundRevealProofStage`: seed 2 / entering
+ * factoryWinStreak 35 (challenge index 5) / factorySymbolsCount 1 -- the
+ * known-good gold round shape pinned by
+ * `tests/factoryBrainRoundShape.test.ts`'s "gold round" case
+ * (`GOLD_SEED`/`GOLD_STREAK`). Player set IDs 564/565/566 (not that test's
+ * 664/678/527) -- the test's pure app-only `currentRecords` construction
+ * skips the source rental-range legality check, but the oracle's own
+ * `factoryBrain` request validates `playerSetIds` against the real
+ * challenge-5/rank-0 range regardless of `overrides.parties`, and 664/678/
+ * 527 fail that check; 564/565/566 are the already-oracle-verified legal
+ * gold triple `factory-brain-gold-turn1-off.json` uses. Six ordinary wins
+ * (index 0..5) land `getFactoryFrontierBrainStatus`'s input at 41, `+1` modifier
+ * makes 42 -- the gold threshold -- so index 6 is always the gold Brain
+ * here, not an ordinary opponent. A separate function (not a parameter on
+ * `generatedRoundRevealProofStage`) because every field here differs from
+ * the silver recipe (seed, streak, symbols, player set IDs, rental fixed
+ * IV); only the shared win-advancement/transition-selection machinery is
+ * reused.
+ */
+export function generatedGoldRoundRevealProofStage(
+  state: EngineState,
+  targetBattleIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+): EngineState {
+  const playerRentalRecords = [
+    record(564, CHALLENGE5_FIXED_IV),
+    record(565, CHALLENGE5_FIXED_IV),
+    record(566, CHALLENGE5_FIXED_IV),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: `factory-round-battle${targetBattleIndex + 1}-gold-reveal-off`,
+    rngValue: 2,
+    factoryWinStreak: 35,
+    factorySymbolsCount: 1,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        record(1, CHALLENGE5_FIXED_IV),
+        record(2, CHALLENGE5_FIXED_IV),
+        record(3, CHALLENGE5_FIXED_IV),
+      ],
+    },
+  });
+  for (let battleIndex = 0; battleIndex < targetBattleIndex; battleIndex += 1) {
+    orchestrator = advanceProofWin(orchestrator);
+  }
+  const transition = selectFrontierTransition(orchestrator.round.rules.rngValue);
+  orchestrator = beginFactoryRoundBattleStartIntro(
+    orchestrator,
+    battleIntroSceneAssemblyDisplayLag(transition.presentation),
+  );
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: orchestrator,
+    rngMode: "frontierBattle",
+    rngValue: transition.rngValue,
+  };
+}
+
+// Challenge 5, battle index 6 (Battle 7): the Frontier Brain, NOLAND, gold.
+// Same generalized mechanism as the silver stage above; only the resolved
+// trainer party/gold status and the underlying round-shape config differ.
+export function generatedRoundBattle7NolandGoldRevealStage(state: EngineState): EngineState {
+  return generatedGoldRoundRevealProofStage(state, 6);
 }

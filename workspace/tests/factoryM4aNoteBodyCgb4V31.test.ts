@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4SecondTrackDecrementTiming,
@@ -33,7 +34,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 second-track decrement/exit decision v31", () => {
+describeCgb4Evidence("Issue #55 CGB4 second-track decrement/exit decision v31", () => {
   it("derives the expected non-exit route from the one r2 operand", () => {
     expect(reduceCgb4SecondTrackDecrementTiming({ r2BeforeDecrement: 9 })).toEqual({
       route: "subs-r2-1; ble-not-taken",

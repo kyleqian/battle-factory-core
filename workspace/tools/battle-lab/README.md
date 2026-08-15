@@ -18,7 +18,7 @@ statuses, weather, side conditions, RNG, and controller state. Timed state is
 named explicitly, including weather duration, confusion, Leech Seed, Perish
 Song, Reflect, Light Screen, Mist, Safeguard, and Spikes.
 
-## The two modes
+## The three modes
 
 `factoryLegal` is a real Battle Factory setup. Choose three player Frontier
 set IDs, three opponent set IDs, a legal trainer ID, challenge/battle numbers,
@@ -59,7 +59,29 @@ captured battler state is authoritative after construction, including
 Emerald's intentional replacement of Return with Frustration for
 zero-friendship rentals.
 
-Neither mode permits transient battle-state injection. HP damage, status,
+`factoryBrain` stages Noland, the Factory's Frontier Brain, at one of his two
+real encounters: `challengeNum` 2 (silver, fixed IV 15) or 5 (gold, fixed IV
+31) — the request rejects any other value. The request has no `trainerId`,
+`battleNum`, or `opponentSetIds` fields: the trainer is structurally
+`TRAINER_FRONTIER_BRAIN`, the battle is always the challenge's final one, and
+the opponent party is generated live by the ROM's `FillFactoryBrainParty`
+(the real rejection rules, excluding the staged player rentals, at the fixed
+IV). The response omits `trainerId`/`rangeIndex` and instead echoes `fixedIv`
+and `opponentParty`, the ROM-generated roster read back after battle
+initialization. `overrides.parties` is permitted under `factoryBrain`, to pin
+a known Brain roster for deterministic replays — the AI still thinks with the
+Brain's real, more aggressive aggression mask either way, since
+`gTrainerBattleOpponent_A` stays `TRAINER_FRONTIER_BRAIN` regardless of the
+party override; `overrides.battlers` is rejected outright (staging the live
+generation is the entire point). **Cursor caveat (2026-08-14, PROGRESS
+1260):** a free-run `seed` does NOT replay the six preceding battles' RNG
+consumption the way `factoryLegal`'s `battleNum` does, so a bare-`seed`
+`factoryBrain` request generates a different Brain party than the app's own
+post-six-battle cursor for the same seed. When comparing against a live
+six-win round, pin the party via `overrides.parties` with the app's own
+generated roster — that is the sanctioned pattern, not just a convenience.
+
+None of the modes permit transient battle-state injection. HP damage, status,
 volatile effects, stat stages, weather/timers, side conditions, delayed
 effects, faint state, and outcomes must be created by actual ROM-executed
 moves, items, abilities, switching, and end-turn processing. The nested
@@ -69,10 +91,12 @@ state read-only.
 That builder is no longer future work — see `overrides.parties` above and
 `../../../../oracle/BATTLE_LAB.md` for the authoritative contract.
 
-Version 1 is Level-50 singles. It stages regular trainers rather than Noland,
-and applies interim loadout choices only to active battlers rather than
-constructing bench Pokémon. Its checkpoint is after the attendant's scouting
-speech, so it does not regenerate that earlier dialogue.
+Version 1 is Level-50 singles. `factoryLegal`/`mechanicLab`'s `overrides.battlers`
+form applies interim loadout choices only to active battlers rather than
+constructing bench Pokémon; Noland is staged through the dedicated
+`factoryBrain` mode above rather than an ordinary `trainerId`, which stays
+rejected for him. The checkpoint for every mode is after the attendant's
+scouting speech, so none regenerate that earlier dialogue.
 
 The complete schema and source-level implementation live in the umbrella
 harness at `oracle/BATTLE_LAB.md` and `oracle/battle_lab.py`.

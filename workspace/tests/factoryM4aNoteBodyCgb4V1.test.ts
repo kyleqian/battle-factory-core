@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import { makeEvidence, reduceMPlayCgb4AllocationPrefixTiming } from "../tools/report/factory-m4a-note-body-cgb4-v1.ts";
 import type { NoteCallback } from "../tools/report/factory-m4a-note-census-v1.ts";
 
@@ -16,7 +17,7 @@ const callback = {
 } satisfies NoteCallback;
 const input = { playerPriority: 0, trackPriority: 0, cgbChannelCount: 4 } as const;
 
-describe("Issue #55 ply_note CGB-channel-4 allocation prefix v1", () => {
+describeCgb4Evidence("Issue #55 ply_note CGB-channel-4 allocation prefix v1", () => {
   it("counts the exact post-selection route through channel pointer selection", () => {
     expect(reduceMPlayCgb4AllocationPrefixTiming(callback, input)).toEqual({
       route: "cgb-channel-4-allocation-prefix", selectedToneType: 12, selectedCgbChannelIndex: 3, effectivePriority: 0,

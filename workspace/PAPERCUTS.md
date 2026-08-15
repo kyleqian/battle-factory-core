@@ -1058,12 +1058,16 @@ current app stage should be rejected before replay.
   when the directory itself is missing). Cost the 2026-08-14 side receipt
   worker an 18-minute full-suite run that ended red for reasons unrelated
   to its change.
-- **Hits:** 1.
-- **Cost each:** ~20 min (run + triage).
-- **Workaround:** in a fresh worktree either run `./core-rs/build-wasm.sh`
-  first (needs the rustup toolchain PATH) or scope verification to the
-  suites the step touches; supervisors should treat exactly this 19-test
-  ENOENT set as the known-benign signature for new-files-only side branches.
+- **Hits:** 3 (2026-08-14: also the CGB4-gating salvage verification and the
+  Brain-intro scout, ~3-5 min each).
+- **Cost each:** ~20 min first hit (run + triage); ~3-5 min once known.
+- **Workaround:** cheapest and now proven twice: copy the main checkout's
+  artifact in (`mkdir -p artifacts/wasm && cp <main>/artifacts/wasm/
+  factory_wasm.wasm artifacts/wasm/`, then verify its sha against the ledger,
+  currently `7e23d1bf…`). Alternatives: run `./core-rs/build-wasm.sh` (needs
+  the rustup toolchain PATH) or scope verification to the suites the step
+  touches; supervisors should treat exactly this 19-test ENOENT set as the
+  known-benign signature for new-files-only side branches.
 - **Real fix:** make the parity file's absent-artifact probe treat a missing
   `artifacts/` directory the same as a missing file (skip, not throw), or
   have the worktree setup script build the artifact.

@@ -6,6 +6,7 @@
 
 import frontierTrainersData from "../data/gen/battle-frontier-trainers.json" with { type: "json" };
 import facilityClassLookupsData from "../data/gen/facility-class-lookups.json" with { type: "json" };
+import { TRAINER_FRONTIER_BRAIN } from "./factoryAiMaskSelection.ts";
 
 type EasyChatWord = Readonly<{
   source: string;
@@ -41,6 +42,8 @@ export interface FactoryTrainerPresentation {
   readonly className: string;
   readonly trainerPicIndex: number;
   readonly trainerPic: string;
+  /** Trainer (not battler-mon) gender, for message pronoun text. Only sourced for the Frontier Brain today (`IsFrontierBrainFemale`, §2.3); `null` for the ordinary corpus, which carries no such field. */
+  readonly gender: "male" | "female" | null;
   readonly speechBefore: readonly [string, string];
   readonly speechWin: readonly [string, string];
   readonly speechLose: readonly [string, string];
@@ -70,9 +73,53 @@ export function formatFactoryEasyChatSpeech(
   return Object.freeze([line(0), line(3)] as const);
 }
 
+/**
+ * `TRAINER_FRONTIER_BRAIN` (1022, `include/constants/trainers.h:12`) is not a
+ * row of the ordinary 300-trainer `gFacilityTrainers` corpus above -- the ROM
+ * itself routes the Factory's brain through `gTrainers[TRAINER_NOLAND]`
+ * directly (`sFrontierBrainTrainerIds[FRONTIER_FACILITY_FACTORY] =
+ * TRAINER_NOLAND`, `frontier_util.c:719-728`), a structurally distinct table
+ * (`TRAINERS_COUNT` 855 vs the Factory's 300). Ported here as a source-cited
+ * special case rather than folded into the generated corpus, per
+ * `docs/noland-brain-staging-design.md` §1/§2.3, and re-verified directly
+ * against `reference/pokeemerald` this session:
+ * - pic/class/name: `GetFrontierBrainTrainerPicIndex`/`…Class`/
+ *   `CopyFrontierBrainTrainerName` (`frontier_util.c:2443-2481`) all read
+ *   `gTrainers[TRAINER_NOLAND]` (`src/data/trainers.h:9712-9722`):
+ *   `.trainerPic = TRAINER_PIC_FACTORY_HEAD_NOLAND` (86,
+ *   `include/constants/trainers.h:105`; `.size = 8, .y_offset = 1`,
+ *   `src/data/trainer_graphics/front_pic_tables.h:89`), `.trainerClass =
+ *   TRAINER_CLASS_FACTORY_HEAD` (0x3e = 62,
+ *   `include/constants/trainers.h:350`; display name "FACTORY HEAD",
+ *   `src/data/text/trainer_class_names.h:64`), `.trainerName = "NOLAND"`.
+ * - gender: `IsFrontierBrainFemale()` (`frontier_util.c:2483-2487`) reads
+ *   `sFrontierBrainObjEventGfx[FRONTIER_FACILITY_FACTORY][1]` = `FALSE`
+ *   (`frontier_util.c:674`) -- male.
+ * Noland carries no Easy Chat speech rows (that table is exclusive to the
+ * ordinary corpus); the empty speech tuples reflect genuinely absent source
+ * data, not an omission.
+ */
+const FRONTIER_BRAIN_PRESENTATION: FactoryTrainerPresentation = Object.freeze({
+  trainerId: TRAINER_FRONTIER_BRAIN,
+  trainerSourceId: "TRAINER_NOLAND",
+  name: "NOLAND",
+  facilityClassId: -1,
+  facilityClass: "N/A",
+  trainerClassId: 0x3e,
+  trainerClass: "TRAINER_CLASS_FACTORY_HEAD",
+  className: "FACTORY HEAD",
+  trainerPicIndex: 86,
+  trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
+  gender: "male",
+  speechBefore: Object.freeze(["", ""]) as readonly [string, string],
+  speechWin: Object.freeze(["", ""]) as readonly [string, string],
+  speechLose: Object.freeze(["", ""]) as readonly [string, string],
+});
+
 export function getFactoryTrainerPresentation(
   trainerId: number,
 ): FactoryTrainerPresentation {
+  if (trainerId === TRAINER_FRONTIER_BRAIN) return FRONTIER_BRAIN_PRESENTATION;
   const trainer = TRAINERS[trainerId];
   if (trainer === undefined || trainer.id !== trainerId) {
     throw new Error(`missing Battle Frontier trainer ${trainerId}`);
@@ -96,6 +143,7 @@ export function getFactoryTrainerPresentation(
     className: facilityClass.trainerClass.displayName,
     trainerPicIndex: facilityClass.trainerPic.id,
     trainerPic: facilityClass.trainerPic.symbol,
+    gender: null,
     speechBefore: formatFactoryEasyChatSpeech(trainer.speeches.speechBefore),
     speechWin: formatFactoryEasyChatSpeech(trainer.speeches.speechWin),
     speechLose: formatFactoryEasyChatSpeech(trainer.speeches.speechLose),
@@ -134,3 +182,5 @@ export function factoryTrainerPresentationForOpponent(
 
 export const CANONICAL_DESTIN_PRESENTATION = getFactoryTrainerPresentation(50);
 export const CANONICAL_JENSON_PRESENTATION = getFactoryTrainerPresentation(58);
+export const CANONICAL_NOLAND_PRESENTATION =
+  getFactoryTrainerPresentation(TRAINER_FRONTIER_BRAIN);

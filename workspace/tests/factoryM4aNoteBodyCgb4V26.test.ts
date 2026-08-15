@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4FirstTrackVolPitchTiming,
@@ -28,7 +29,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 first-track volume/pitch-mask decision v26", () => {
+describeCgb4Evidence("Issue #55 CGB4 first-track volume/pitch-mask decision v26", () => {
   it("prices the frozen v25 mask-clear route including the taken refill", () => {
     expect(reduceCgb4FirstTrackVolPitchTiming({ firstTrackFlags: 0x80 })).toEqual({
       route: "MPT_FLG_VOLCHG|MPT_FLG_PITCHG-clear-beq-taken",

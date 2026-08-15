@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceMPlayCgb4MidiKeyToCgbFreqTiming,
@@ -19,7 +20,7 @@ const state = (keyAfter: 64 | 91) => ({
   keyM: 0,
 } as const);
 
-describe("Issue #55 CGB4 MidiKeyToCgbFreq slice v10", () => {
+describeCgb4Evidence("Issue #55 CGB4 MidiKeyToCgbFreq slice v10", () => {
   it("source-counts distinct key=64 and key=91 type-4 routes", () => {
     expect(reduceMPlayCgb4MidiKeyToCgbFreqTiming(state(64))).toEqual({
       route: "cgb4-type4-noise-table",

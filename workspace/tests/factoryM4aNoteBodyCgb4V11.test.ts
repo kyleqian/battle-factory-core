@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4PlyNoteReturnTiming,
@@ -20,7 +21,7 @@ const state = () => ({
   stackStorage: "iwram",
 } as const);
 
-describe("Issue #55 CGB4 ply_note return slice v11", () => {
+describeCgb4Evidence("Issue #55 CGB4 ply_note return slice v11", () => {
   it("source-counts the fixed continuation and complete ply_note epilogue", () => {
     expect(reduceCgb4PlyNoteReturnTiming(state())).toEqual({
       route: "midi-key-to-cgb-freq-return-through-ply-note-return",

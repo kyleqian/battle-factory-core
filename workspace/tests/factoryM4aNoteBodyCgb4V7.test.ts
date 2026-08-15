@@ -2,14 +2,15 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import { makeEvidence, reduceMPlayChnVolSetAsmTiming } from "../tools/report/factory-m4a-note-body-cgb4-v7.ts";
 
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v7.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v7.md";
 const observed = { velocity: 64, rhythmPan: 0, volMR: 93, volML: 0 } as const;
 
-describe("Issue #55 CGB4 ChnVolSetAsm observed routes v7", () => {
+describeCgb4Evidence("Issue #55 CGB4 ChnVolSetAsm observed routes v7", () => {
   it("prices the complete observed both-unclamped helper route", () => {
     expect(reduceMPlayChnVolSetAsmTiming(observed)).toEqual({
       route: "both-unclamped-observed",

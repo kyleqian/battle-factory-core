@@ -2,7 +2,8 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4PostPlyNoteModTiming,
@@ -11,7 +12,7 @@ import {
 const EVIDENCE = "tests/fixtures/factory-m4a-note-body-cgb4-evidence-v15.json";
 const DOC = "docs/issue55-m4a-note-body-cgb4-v15.md";
 
-describe("Issue #55 CGB4 post-ply_note mod discriminator v15", () => {
+describeCgb4Evidence("Issue #55 CGB4 post-ply_note mod discriminator v15", () => {
   it("prices the observed zero-mod decision without reading lfoDelayC", () => {
     expect(reduceCgb4PostPlyNoteModTiming({ mod: 0 })).toEqual({
       route: "zero-mod-exits",

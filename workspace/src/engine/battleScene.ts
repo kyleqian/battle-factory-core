@@ -546,6 +546,7 @@ import battleEnemyShadowAsset from "../assets/gen/battle-enemy-shadow.json" with
 import statAnimBannerAsset from "../assets/gen/stat-anim-banner.json" with { type: "json" };
 import battleWindowAsset from "../assets/gen/battle-window.json" with { type: "json" };
 import frontierTrainerPicsAsset from "../assets/gen/frontier-trainer-pics.json" with { type: "json" };
+import frontierBrainTrainerPicAsset from "../assets/gen/frontier-brain-trainer-pic.json" with { type: "json" };
 import brendanAsset from "../assets/gen/trainer-pic-brendan-back.json" with { type: "json" };
 import ballDisplayAsset from "../assets/gen/battle-interface-ball-display.json" with { type: "json" };
 import battleHealthboxAsset from "../assets/gen/battle-healthbox.json" with { type: "json" };
@@ -1488,8 +1489,13 @@ const battleEnemyShadow = battleEnemyShadowAsset as Readonly<{
 const elevatedEnemyShadowSpecies = new Set(battleEnemyShadow.elevatedSpecies);
 const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
-const frontierTrainerPics =
-  (frontierTrainerPicsAsset as { entries: FrontierTrainerPicAsset[] }).entries;
+const frontierTrainerPics = [
+  ...(frontierTrainerPicsAsset as { entries: FrontierTrainerPicAsset[] }).entries,
+  // The Frontier Brain (Noland) is presentation-routed outside the ordinary
+  // 300-trainer corpus (frontier-trainer-pics.json's own scope) -- see that
+  // catalog's extractor comment and docs/noland-brain-staging-design.md §2.3.
+  ...(frontierBrainTrainerPicAsset as { entries: FrontierTrainerPicAsset[] }).entries,
+];
 const frontierTrainerPicBySymbol = new Map(
   frontierTrainerPics.map((asset) => [asset.symbol, asset]),
 );

@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
+import { describeCgb4Evidence } from "./factoryM4aNoteBodyCgb4Gate.ts";
 import {
   makeEvidence,
   reduceCgb4FirstTrackFlagsTiming,
@@ -28,7 +29,7 @@ function sha256(path: string): string {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
-describe("Issue #55 CGB4 first-track MPT_FLG_EXIST decision v25", () => {
+describeCgb4Evidence("Issue #55 CGB4 first-track MPT_FLG_EXIST decision v25", () => {
   it("prices the observed EXIST-set route from the one flags scalar", () => {
     expect(reduceCgb4FirstTrackFlagsTiming({ firstTrackFlags: 0x80 })).toEqual({
       route: "MPT_FLG_EXIST-set-beq-not-taken",

@@ -994,3 +994,517 @@ way. Reported explicitly per the brief rather than left silent.
 Frames 444/536 (trainer-exit/shadow region; opponent healthbox/summary
 region) not reached this round - remain single-frame, unisolated, unchanged
 from round 7's own characterization above.
+
+### Round 11 resolution (2026-08-14): Brain-reveal send-out window closed 350→648/701; missing-A-press root cause corrected the 1260 attribution; a new `overrides.parties`-construction ready-lag gap found and characterized, not fixed
+
+**Correction to PROGRESS 1260's own attribution.** 1260 attributed the
+`factory-round-battle7-noland-reveal-off` compare's frame-350-onward
+divergence to "the known species-dependent cry-duration dispatch/visual-lag
+family," i.e., assumed the §D mechanism itself needed new per-species
+constants for TANGELA/JUMPLUFF/PUPITAR/DELCATTY. That diagnosis does not
+survive contact with the trace: `tools/compare/traces/factory-round-
+battle7-noland-reveal-off.json`'s `segments` was `[{"frames": 700,
+"buttons": []}]` — **no `A` press anywhere in the trace**, unlike every
+other send-out-reaching fixture (`factory-arbitrary-intro-yoshi-off.json`,
+`factory-arbitrary-intro-magneton-off.json`, both of which press `A` at a
+specific mid-trace frame to acknowledge the "wants to battle!" `PAUSE_
+UNTIL_PRESS` prompt, `factoryBattleStartIntro.ts`'s `advanceFactoryBattle
+StartIntro`). Without that press, `acknowledgedElapsed` never leaves
+`null`, so the app render never leaves the pre-acknowledgement "trainer-
+message" hold — while the oracle's own capture (built by a scripted probe
+that *does* press `A`) proceeds through the transition-out/send-out
+sequence. The cry-duration family was never live at frame 350; it only
+starts mattering once acknowledgement is modeled at all.
+
+**Fix.** Added the missing press to the trace (`{"frames": 345, "buttons":
+[]}, {"frames": 1, "buttons": ["A"]}, {"frames": 354, "buttons": []}`,
+still summing to 700). The exact tick was found the same way §D round 5's
+slice-2 alignment was: dense per-frame **oracle self-diff** (consecutive
+`oracle-NNNNN.png` captures from one `npm run compare` run, not app-vs-
+oracle) to find the real "box clears, first new glyph" jump (a
+`generatedBattleStartAcknowledgementVisibleStarted`-documented ~1200px
+event, distinct from the ~30-50px/frame typewriter increments before and
+after it) landed at frame 350 — then bisecting the trace's press-tick
+placement (via the same self-diff, now on the app's own captures) until
+the app's own "first new glyph" jump also lands at 350. This is a
+**fixture correction** (`tools/compare/traces/`, dev-time only), not a
+`src/` change — the render mechanism itself needed nothing new to get
+here.
+
+**Result: 350/701 → 648/701.** Every frame from 0 through 646 is now
+pixel-exact (the full transition-out, opponent TANGELA send-out text and
+materialize, dispatch to the player's own release, and DELCATTY's own
+materialize) — confirming, for a never-before-exercised opponent
+(TANGELA, cry 43 ticks, `dispatchDelay = 101+(43-58) = 86`, the first
+live-compared species with `dispatchDelay < 101`) that the existing
+generic `generatedPlayerDispatchDelay`/`generatedPlayerVisualLag` formulas
+already predict its timing exactly (oracle self-diff: box-clear/text-start
+at frame 474 = handoff(388)+86 exactly; throw-visible at 489 =
+474+visualLag(15) exactly) — **no §D formula change was needed for this
+species pairing**, contra 1260's own prediction that the magnitude here
+would need re-triangulation.
+
+**Remaining 53 frames (647-700): a real, double-confirmed, but
+app-unreachable gap in the ready-lag gate — named, not fixed.** After the
+A-press fix, the sole remaining structural mismatch is
+`generatedBattleStartCommandReady` firing 7 ticks early: app frame 647
+already shows the settled `FIGHT/BAG/POKéMON/RUN` menu (oracle PNG-
+confirmed at 654), matching `docs/intro-cry-shadow-evidence.md` Part 1's
+own formula (`readyTick = throwVisible + 98 + cryDurationTicks(player)`)
+exactly (throwVisible(489) + 98 + cryDuration(DELCATTY=60) = 647) — i.e.
+the formula is arithmetically self-consistent, just short of this
+fixture's own oracle ground truth by a flat +7.
+
+Built one fresh, independent oracle-only probe to test whether this is a
+species effect (as 1260 assumed) or something else:
+`tools/battle-lab/factory-mechanic-pupitar-delcatty-readylag-probe.json`
+(`mechanicLab`, `overrides.parties`, opponent lead **PUPITAR** — cry 24,
+`dispatchDelay = 101+(24-58) = 67`, further below baseline than TANGELA —
+player lead DELCATTY, same as the target fixture). Dense oracle self-diff
+of its own `preCheckpointCaptureAllFrames` output reproduces the **exact
+same +7**: handoff 1583 (matches the already-published cross-fixture
+constant), dispatch-complete 1649 (=1583+67 within 1 tick), throw-visible
+1664 (=1649+15 exactly), formula-predicted ready `1664+98+60=1822`, but
+the oracle's own menu-open jump is at **1829** — `1829-1822=7`, identical
+to the TANGELA fixture's own +7, despite a completely different opponent
+species/cry value (67 vs. 86 `dispatchDelay`, a 19-tick spread that a
+species-proportional theory would have to reflect and does not). **What
+the two fixtures share instead is construction method**: both are built
+via `overrides.parties` (mechanicLab and factoryBrain-with-pinned-parties
+respectively); all three of the ALREADY-validated 0-residual points
+(GRIMER/YOSHI, KADABRA/SHIZUKA, DELCATTY/MAGNETON) use real `factoryLegal`
+rental generation, no override. This is the same *shape* of finding as
+the already-landed `isCanonicalAnchorIntro` route-level correction (round
+10 above) and ISSUES #55's "real-vs-staged construction-timing gap" —
+**a construction-route fact, not a species/cry fact.**
+
+**Not fixed, and not a curve-fit refusal — a genuine reachability gap.**
+The existing `isCanonicalAnchorIntro`-style fix works because the app's
+own orchestrator *knows* which route it took (`config.adoptedInitialOpponent`
+is real app state). This case is different: the app side of
+`factory-round-battle7-noland-reveal-off` builds its command through the
+app's own **real** generation path (`generatedRoundRevealProofStage`,
+`createFactoryRoundBattleOrchestrator` + `advanceProofWin`, no
+`overrides.parties` anywhere in `tools/compare/factoryRoundIntroGeneralizationStage.ts`)
+— `overrides.parties` is used **only** on the oracle side, to force the
+oracle to reproduce the app's already-computed party without replaying
+`factoryBrain`'s own un-ported RNG history (1260's own documented reason).
+The app therefore has no field, config, or command data that distinguishes
+this fixture from an ordinary one — there is nothing to key a route flag
+on without inventing a signal that does not exist in production state,
+which the render code cannot do without becoming a per-fixture special
+case in spirit. Two readings, neither actionable from `src/` alone this
+session: (a) `overrides.parties` is a **harness-only** RAM-injection
+artifact (skips the real rental-generation RNG walk, leaving some
+background task's phase counter at a different offset than a real game
+would ever produce) — real play would never hit this +7 at all, and the
+"fix" belongs in the oracle harness or in accepting the gap as a
+compare-fixture-only cost; or (b) it is a real, RNG-cursor-dependent
+timing effect that would require porting `factoryBrain`'s real RNG
+history (1260's own out-of-scope item) to reproduce authentically. Either
+way, closing it is not a `battleScene.ts` render fix.
+
+**Final count for this window: 648/701 (92.4%)**, up from 350/701.
+Remaining mismatches: frames 420 and 503 (single-frame, sparse
+sub-100px-scale tint/blend dots in the opponent-materialize and
+player-throw regions respectively — the same unmechanized, un-isolated
+residual family as the existing frames 444/536 named in rounds 5-7 above,
+not new), and frames 647-700 (the ready-lag construction-route gap just
+characterized). Regression-checked unaffected by the trace-only fix:
+`factory-round-battle6-lukas-reveal-off` **154/154**,
+`factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke` **375/375**.
+
+### Round 12 resolution (2026-08-14): gold Brain-reveal alignment bisected (478/701 → 700/701); PROGRESS 1262's transplanted offset/press-tick and its ready-lag non-recurrence claim both corrected
+
+**The frame-34-onward divergence was hypothesis (a), a genuine one-frame
+alignment error — confirmed, not just favored.** PROGRESS 1262 computed
+`factory-round-battle7-noland-gold-reveal-off`'s `preCheckpointFrameOffset`
+(1152) from a **re-probed** `speciesPopulateFrame` of 1186, but that probe
+used a **pixel** self-diff (first frame whose `sha256` differs from the
+preceding black-hold frames) rather than the §C-established **RAM-state**
+definition of the landmark (`state.battlers.player.species`/`opponent.species`
+first nonzero — the same field §C's SHIZUKA table and 1260's own silver-Brain
+derivation both used). Re-ran `bin/oracle lab` dense
+(`preCheckpointCaptureAllFrames`, already `true` in the committed scenario)
+directly against this fixture's own
+`tools/battle-lab/factory-round-battle7-noland-gold-reveal-off.json` and read
+the RAM field frame-by-frame: `state.battlers.{player,opponent}.species`
+are both already nonzero (51/227 — DUGTRIO/SKARMORY) at **frame 1185**,
+one frame *before* the first pixel change (1186, still a solid-black
+`d8b44303` frame at 1185, first different sha at 1186) — the same one-frame
+RAM-vs-pixel lag §C's own SHIZUKA table implicitly established (species
+populate happens on the RAM side one callback before it's visible on
+screen). **`speciesPopulateFrame` is 1185, not 1186.**
+
+**Corrected offset, re-bisected press tick, re-verified by direct compare
+sweep (not curve-fit).** `preCheckpointFrameOffset = speciesPopulateFrame -
+26 - 8 = 1185 - 34 = 1151` (was 1152). The pic-reveal-hold-end anchor
+(oracle-absolute 1544, `c465f040` cycling through 1544, first new sha
+`5931d952` at 1545) was independently re-verified dense on this exact
+fixture's own captures — sha-for-sha identical to 1262's own citation and to
+`docs/noland-brain-intro-gold-ground-truth.md`'s cited cycling shas, so that
+half of 1262's derivation stood unchanged. Re-deriving the press tick from
+the corrected offset via 1262's own applied relation (`press = hold-end
+(app-relative) − 4`) gives `(1544 − 1151) − 4 = 389` (was 388) — a
+**one-frame shift in the same direction as the offset**, as expected. Swept
+all three adjacent press ticks against the corrected offset by direct
+`npm run compare --summary` (the same bisection-by-execution method §D round
+5's slice 2 and round 11 used, not algebra alone): **388 → 481/701, 389 →
+700/701, 390 → 482/701** — a sharp, single-frame optimum on both sides
+confirms 389 is a true local maximum, not an artifact of one lucky
+combination.
+
+**Result: 478/701 → 700/701 (99.86%)**, entirely from the one-frame
+offset/press correction — no other trace field changed, no `src/` change,
+no per-fixture special case. The growing-horizontal-bar signature 1262
+described (thin bar at frame 34, widening into a symmetric band by ~78,
+subsiding by ~189) is now gone start to finish; it was exactly the
+misalignment artifact hypothesis (a) predicted, not a new render defect in
+the fade-in mechanism.
+
+**Sole remaining residual: frame 465 (oracle-absolute 1616), 16px (0.04%),
+bbox 0,40-167,43** — inside the opponent send-out entrance/materialize span
+(oracle-absolute 1545–1643 per the gold ground-truth doc, "SKARMORY jumping
+in"). Diff render shows a faint magenta highlight over the opponent sprite's
+own materialize silhouette for exactly one frame — the same unmechanized,
+un-isolated single-frame tint/materialize residual family already named
+repeatedly in this doc (silver's 420/503 above, MAGNETON/YOSHI's 444/536 in
+rounds 5-7): a real, tiny, single-frame gap in the species-materialize
+sequence, not chased or fixed here per the same reasoning those rounds gave
+(would need a third/fourth species data point to isolate, out of this step's
+scope).
+
+**Ready-lag tail verdict: corrects PROGRESS 1262's claim — gold DOES
+exhibit the construction-route ready-lag family, just not at silver's exact
++7 magnitude.** 1262 read "465–700 fully exact" as gold *not* reproducing
+silver's tail gap, but the committed 701-frame compare window ends at
+oracle-absolute 1851 (`app-relative 700 + offset 1151`) — and this fixture's
+own true action-menu-ready RAM predicate
+(`playerControllerCommand===18 && controllerExecFlags===1`, same predicate
+§C used) doesn't fire until oracle-absolute **1865** (app-relative 714, +2
+to the pixel-settled menu per §C's own RAM-vs-pixel convention). **The
+committed window simply never reaches the ready transition** — frame 700's
+own oracle PNG still shows the player-send-out hold ("Go! DUGTRIO!"), not
+the menu. Built a throwaway (uncommitted) diagnostic extension of the trace
+to 730 frames/captureWindow to actually observe it: the app's own FIGHT/BAG
+menu becomes visible (pixel onset, first frame differing from the prior
+exact match) at **app-relative 711**; the oracle's own settles at
+**app-relative 716** (`715` still shows the empty post-dismiss box, `716`
+shows the full menu). **Delta: 5 ticks, app fires early** — same *direction*
+as silver's own +7 (`docs/trainer-pic-off-window-scout.md` round 11) and the
+PUPITAR probe's +7, but a **different magnitude**, not a flat cross-fixture
+constant. This is a genuinely new, more precise data point for the
+concurrent ready-lag discriminator side-probe: the gap scales with
+*something* fixture-specific (species pairing? cry lengths? — not
+determined here, out of this step's scope and explicitly not to be fixed
+this round), not just "always +7" for every `overrides.parties`-constructed
+Brain-reveal fixture. The diagnostic 730-frame extension was **not**
+committed to the trace file — the official comparison window stays the
+established 701-frame convention shared with silver/Lukas, so the headline
+count above (700/701) is against the same window shape as every other
+fixture in this family.
+
+**Final count for this window: 700/701 (99.86%)**, up from 478/701. Trace-only
+fix (`tools/compare/traces/factory-round-battle7-noland-gold-reveal-off.json`:
+`preCheckpointFrameOffset` 1152→1151, press tick 388→389); no `src/` change.
+Regression-checked unaffected: `factory-round-battle7-noland-reveal-off`
+(silver) **648/701**, `factory-round-battle6-lukas-reveal-off` **154/154**,
+`factory-arbitrary-intro-yoshi-off` **700/751**, `test:smoke` **375/375**.
+
+### Round 13 (2026-08-14): ready-lag `dispatchDelay(opponent)<101` discriminator FALSIFIED with clean RAM evidence; real missing ROM span located precisely; no validated `src/` fix landed (honest-stop)
+
+**Assignment:** crack and fix the construction-route ready-lag +7/+5 family
+named in `docs/ready-lag-discriminator-scout.md` and PROGRESS 1263's gold
++5 finding, source-first, generic (no per-fixture constants).
+
+**Step 0 — read the discriminator dossier's own formula citation.**
+`generatedPlayerDispatchDelay` (battleScene.ts:4463-4466) already models the
+opponent's cry-gated span linearly (`101 + cryDuration(opp) - cryDuration
+(GROVYLE=58)`); `generatedPlayerReadyLagSpeciesFormula` (battleScene.ts:
+4539-4546) models the player's own span as `visualLag(player) + 98 +
+cryDuration(player)`. Neither term, nor anything else in
+`generatedBattleStartCommandReady` (battleScene.ts:4590-4600), models
+anything past the point the player's OWN send-out animation finishes.
+
+**Step 1 — falsify the discriminator with a clean, non-confounded fixture.**
+The existing dossier's own §3 flagged an unresolved confound: every
+`dispatchDelay<101` fixture tested so far (TANGELA/silver, PUPITAR/probe) is
+ALSO `overrides.parties`-constructed, and every `overrides.parties`-free
+fixture tested so far (GRIMER/YOSHI, KADABRA/SHIZUKA, DELCATTY/MAGNETON) is
+ALSO `dispatchDelay>=101` — the two candidate causes were never tested apart.
+`tools/battle-lab/factory-brain-gold-intro-dense-off.json` (the pre-existing
+gold ground-truth doc's own dense fixture, `docs/noland-brain-intro-gold-
+ground-truth.md`) breaks the confound directly: `mode: "factoryBrain"`,
+**no `overrides` key at all** — a genuine, un-staged oracle RNG walk — with
+opponent lead BLAZIKEN (cry 89t, `dispatchDelay = 101+(89-58) = 132`, deep in
+the "safe, should-be-exact" regime) and player lead DUGTRIO (cry 55t). This
+is the exact untested cell: override-free AND `dispatchDelay>=101`.
+
+**Step 2 — measure it, and two "confirmed-exact" fixtures, on the same ruler.**
+Built `tools/probe/probe-ready-lag-chooseaction-handshake.ts` (committed,
+rerunnable): runs a fixture dense (`preCheckpointCaptureAllFrames: true`)
+against a live oracle and reads `state.engine.{controllerExecFlags,
+playerControllerCommand,opponentControllerCommand}` directly — the same RAM
+fields and ready predicate (`playerControllerCommand===18 &&
+controllerExecFlags===1`) `tools/probe/probe-overrides-ready-lag.ts` already
+established. Ran it against the gold-dense fixture AND, for comparison, the
+two `factoryLegal`/no-override fixtures the discriminator dossier calls
+"confirmed 0-residual" (GRIMER/YOSHI, KADABRA/SHIZUKA):
+
+| Fixture | Construction | `dispatchDelay`(opp) | handoff→player-throw-dispatch (RAM vs. formula) | player-throw→player-intro-complete (RAM vs. formula `98+cry`) | RAM-ready − naive-formula-predicted-ready |
+| --- | --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | `factoryLegal`, no override | 125 (>=101) | 1720 vs. 1720 (exact) | 1847 vs. 1848 (−1) | **+5** |
+| KADABRA/SHIZUKA | `factoryLegal`, no override | 111 (>=101) | 1707 vs. 1707 (exact) | 1880 vs. 1881 (−1) | **+4** |
+| DUGTRIO/gold-dense | `factoryBrain`, **no override** | 132 (>=101) | 1729 vs. 1729 (exact) | 1881 vs. 1882 (−1) | **+5** |
+
+Every row's `dispatchDelay` and the resulting `handoff→player-throw-dispatch`
+tick are exact to the current formula (0 residual) — confirming, again, that
+`generatedPlayerDispatchDelay` and the opponent-cry math are not the bug.
+Every row's player-cry-wait (`98+cryDuration(player)`) also matches to
+within 1 tick, the same tolerance already noted for the PUPITAR probe.
+**But every row also shows a further +4/+5 gap between "player's own
+send-out animation completes" (RAM `controllerExecFlags` 1→0) and "the
+action menu predicate is actually true"** — including the two fixtures the
+existing dossier calls exact, and including a fixture that is BOTH
+`overrides.parties`-free AND `dispatchDelay>=101`.
+
+**This falsifies `dispatchDelay(opponent)<101` as the discriminator.**
+GRIMER/YOSHI and KADABRA/SHIZUKA's "0 residual" status rests on an older,
+PNG/pixel-based ready landmark (`docs/intro-cry-shadow-evidence.md` Part 1);
+this round's RAM-predicate measurement — the same predicate the newer PUPITAR
+probe and gold diagnostic (PROGRESS 1261/1263) used — puts a real, previously
+uncounted +4/+5 tick gap on those same "exact" fixtures too. The regime split
+named in `ready-lag-discriminator-scout.md` §3 is best explained as a
+**measurement-convention split** (old PNG landmark vs. new RAM predicate),
+not a real regime boundary in the ROM.
+
+**Step 3 — locate the real missing span in source.** It is not a new
+discovery that `generatedBattleStartCommandReady` stops modeling at "player's
+own send-out completes" — that IS everywhere the formula's own terms end.
+What was missing was proof the ROM keeps running after that point before the
+menu is interactive. `reference/pokeemerald/src/battle_main.c` traces it
+exactly: `BattleIntroPlayer1SendsOutMonAnimation` (:3776) hands off to
+`TryDoEventsBeforeFirstTurn` (:3841) — which waits out a switch-in
+ability/item/weather-check loop (`switchInAbilitiesCounter`/
+`switchInItemsCounter`, both battlers) — before calling
+`HandleTurnActionSelectionState` (:4126), whose `STATE_BEFORE_ACTION_CHOSEN`
+case (:4168) is what actually calls `BtlController_EmitChooseAction` +
+`MarkBattlerForControllerExec` for both battlers. The RAM traces show this
+concretely: player-intro-complete → both-battlers-`ChooseAction`-dispatch is
++3 ticks (the ability/item/weather loop, both battlers, no switch-in effects
+triggering for any of GRIMER/KADABRA/DUGTRIO here), then dispatch →
+predicate-true is +3 more (the AI's own instant "choose an action" decision
+completing and the opponent's ack clearing `controllerExecFlags`'s bit 1,
+leaving bit 0 — the player, mid-menu, still "controller-active" because the
+player controller's own `ChooseAction` doesn't complete until a button press
+— hence `controllerExecFlags===1` IS the "menu displayed, waiting on input"
+state, not a bug in the predicate). This is a real, always-present,
+species-and-route-generic ROM span with zero representation in the current
+formula.
+
+**Step 4 — tried the generic fix, it does not clear the validation bar.**
+Added a single new constant, `GENERATED_CHOOSE_ACTION_HANDSHAKE_DELAY`, as a
+flat additive term in `generatedBattleStartCommandReady` (unconditional, no
+regime gate — consistent with the finding above that the gap is universal,
+not regime-tied) and bisected it empirically against
+`factory-round-battle7-noland-reveal-off.json` (silver, baseline 648/701):
+K=5→673, K=6→677, K=7→682, K=8→685, **K=9→690 (best)**, K=10→683, K=12→674.
+This is a real, broad improvement (92.4%→98.4%) but **does not reach the
+~699+/701 the goal requires at any tested K**, and — unlike round 12's sharp
+single-frame A-press optimum — the curve is noisy, not a clean peak, with a
+K-insensitive residual persisting at frames 647-653 (402px/1.05%, bbox
+16,123-85,133, present at every tested K) that no flat constant touches.
+`factory-round-battle7-noland-gold-reveal-off.json` stays 700/701 at every
+tested K (its committed window ends before the ready transition, so it
+cannot discriminate this fix — consistent with PROGRESS 1263). Two readings:
+either (a) the RAM `predicate-true` tick measured here does not map 1:1 onto
+the specific pixel frame the compare harness renders as "menu ready" (some
+rounding/jitter between a RAM tick and its visible pixel consequence this
+dossier's existing "RAM leads pixel by ~1 tick" convention does not fully
+capture at this remove), or (b) the 647-653 bbox is a second, independent,
+not-yet-named defect that has to be fixed before the ChooseAction-handshake
+correction can show a clean optimum the way the A-press bisection did.
+**Reverted the speculative `src/` edit** rather than land a fitted constant
+that both fails the step's own bar and the "no fitted constants" instruction
+— `src/` is unchanged this round.
+
+**Honest-stop.** Source archaeology converged on a real, precisely-located,
+generically-applicable missing ROM mechanism (`TryDoEventsBeforeFirstTurn` +
+`HandleTurnActionSelectionState`'s `ChooseAction` dispatch) and definitively
+falsified the leading `dispatchDelay<101` discriminator with a clean,
+triple-triangulated, non-fitted RAM measurement — but the exact formula shape
+needed to turn that into a passing generic fix did not converge inside
+budget. Landing the evidence per the step's own honest-stop clause instead of
+a fitted constant.
+
+**Sharpest next instrument.** (1) Resolve the 647-653 bbox residual first —
+it's present regardless of the ChooseAction-handshake correction and may be
+masking the true single-frame optimum for the latter. (2) Re-run this
+round's probe (`tools/probe/probe-ready-lag-chooseaction-handshake.ts`)
+against a real, un-staged `factoryLegal` fixture with genuinely low
+`dispatchDelay` once the concurrent side worker's promised fixture lands
+(per this step's own brief) — if ITS residual is ALSO ~+4/+5 (not +7), that
+confirms the +7 TANGELA/PUPITAR readings carry a *second*, additional
+~+2-3-tick effect on top of this round's universal handshake gap, genuinely
+tied to override-construction or the low-`dispatchDelay` regime after all
+(a two-term fix, not one). (3) Consider whether the compare harness's own
+framebuffer-freeze semantics introduce a systematic RAM-tick-to-pixel-frame
+offset distinct from the already-documented "RAM leads pixel by 1" rule,
+before trusting any future bisection against this fixture family.
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-ready-lag-chooseaction-handshake.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only (no `src/` or fixture writes); ran twice this session,
+byte-identical output both times.
+
+### Round 14 (2026-08-14): source archaeology rules out switch-in ability/item procs as the driver of BOTH the +4/+5 split and the +7 tail; `overrides.parties` construction now cleanly separates all 6 confirmed data points from real generation — no validated `src/` fix landed (honest-stop, per this step's own ~30 min clause)
+
+**Assignment:** model `TryDoEventsBeforeFirstTurn`'s span length from source
+per-fixture (what varies: switch-in abilities/items/weather, or the
+`ChooseAction`-dispatch sub-state-machine's own tick costs) and check it
+predicts the confirmed +7/+7/+5/+4 residual table *before* touching
+`src/`; corroborate with a live RAM probe if source reading alone can't
+settle per-state tick costs.
+
+**Step 1 — read `TryDoEventsBeforeFirstTurn` for what can add ticks.**
+(`reference/pokeemerald/src/battle_main.c:3841-3910`.) The function is
+called once per VBlank tick (`gBattleMainFunc`). Its ability loop
+(`while switchInAbilitiesCounter < gBattlersCount: AbilityBattleEffects
+(ABILITYEFFECT_ON_SWITCHIN, ...)`) and item loop (same shape,
+`ITEMEFFECT_ON_SWITCH_IN`) only `return` (ending that tick, resuming next
+tick from the saved counter) when `AbilityBattleEffects`/`ItemBattleEffects`
+report a real effect (`effect != 0`) — i.e. something that would print a
+message or play an animation (Intimidate, Drought/Drizzle/Sand Stream,
+Trace, a stat-restoring/message-worthy held item, etc.,
+`battle_util.c:2485-2530` for the ability cases,
+`battle_util.c:3305-3330`+ for `ITEMEFFECT_ON_SWITCH_IN`). If **nothing**
+procs for either lead, both loops (2 battlers × 2 loops) complete inside a
+**single** call/tick, and the state falls straight through into
+`HandleTurnActionSelectionState`'s own first tick in the same call. So the
+model this predicts: the switch-in span is either "1 tick" (nothing procs)
+or "1 tick + N extra ticks" (N = number of procs, each proc costing at
+least the message/animation's own duration) — a genuinely party-derived
+term, exactly as the step brief hypothesized.
+
+**Step 2 — check the four+two confirmed fixtures' leads for anything that
+procs.** Cross-referenced every active-lead ability/held-item against
+`reference/pokeemerald/src/battle_util.c`'s switch-in cases for all six
+confirmed-residual fixtures (both `factoryLegal`-real-gen and
+`overrides.parties`-staged):
+
+| fixture | player lead (ability/item) | opponent lead (ability/item) | residual |
+| --- | --- | --- | --- |
+| GRIMER/YOSHI | GRIMER Stench / Pecha Berry | COMBUSKEN Blaze / Scope Lens | +5 |
+| KADABRA/SHIZUKA | KADABRA Synchronize / Twisted Spoon | MAGNETON (Magnet Pull\*) / Lum Berry | +4 |
+| DUGTRIO/gold-dense | DUGTRIO Arena Trap\* / (n/a) | BLAZIKEN Blaze / (n/a) | +5 |
+| WEEPINBELL/QUINN | GRIMER Stench / Pecha Berry | WEEPINBELL Chlorophyll / (n/a) | +4 |
+| TANGELA/silver (`overrides.parties`) | DELCATTY Cute Charm / Magost Berry | TANGELA Chlorophyll / Gold Teeth | +7 |
+| PUPITAR/probe (`overrides.parties`) | DELCATTY Cute Charm / Magost Berry | PUPITAR Shed Skin / Moon Stone | +7 |
+
+(\*Arena Trap/Magnet Pull are entry-trap abilities with no switch-in
+message of their own.) **None of the twelve leads across all six fixtures
+has a switch-in-announcing ability or a held item with a real
+`ITEMEFFECT_ON_SWITCH_IN` trigger at full HP/no status** (no Intimidate,
+no weather-setter, no Trace, no stat-restore/cure needed). This rules out
+"switch-in proc count" as the source of *either* the +4-vs-+5 split among
+the real-gen fixtures *or* the +5-vs-+7 jump into the `overrides.parties`
+fixtures — the span-length model from Step 1 alone is insufficient; per
+this step's own instruction, corroborated live instead of guessing further
+from source.
+
+**Step 3 — live tick-by-tick RAM trace to localize the +5-vs-+4 split.**
+Built `tools/probe/probe-readylag-span-tickbytick.ts` (committed,
+rerunnable): reruns GRIMER/YOSHI (+5) and KADABRA/SHIZUKA (+4) dense and
+prints every `state.engine.{controllerExecFlags,playerControllerCommand,
+opponentControllerCommand,activeBattler}` change between "player intro
+complete" (`execFlags` 1→0) and "ready predicate true". Result (both
+independently re-measured, matching Round 13's own residuals exactly — a
+clean cross-check):
+
+```
+GRIMER/YOSHI:    1847 (complete) -> 1850 (ChooseAction dispatch, +3) -> 1853 (ready, +3 more)  = span 6
+KADABRA/SHIZUKA: 1880 (complete) -> 1883 (ChooseAction dispatch, +3) -> 1885 (ready, +2 more)   = span 5
+```
+
+The "player-intro-complete → both-battlers-dispatched" leg is **identical**
+(+3 ticks) in both fixtures — confirming Step 1's "no procs, 1 tick"
+prediction for the switch-in loop itself is right and this leg is not the
+variable one. **The entire +5-vs-+4 split lives in the "dispatch →
+opponent's own ChooseAction ack clears its exec bit" leg** (3 ticks for
+COMBUSKEN, 2 ticks for MAGNETON) — i.e. the Factory AI's own decision-making
+tick count, not the switch-in loop. This is a real, opponent-dependent ROM
+span (`HandleTurnActionSelectionState` + the opponent controller's AI
+call), but its length is **not** reducible to "party contents" the way
+Step 1 hypothesized — it plausibly depends on the AI's own move-scoring
+branch count per trainer class/moveset, which is a much deeper vein
+(`battle_ai_switch_items.c`) than this step's budget covers.
+
+**Step 4 — the `overrides.parties`-vs-real-generation split correlates with
+all 6 points, but the mechanism itself was already cleared.** Re-reading the
+Step 2 table by construction method instead of species: **every** confirmed
+`overrides.parties`-staged fixture (silver TANGELA, PUPITAR probe) reads
++7; **every** confirmed real-generation fixture (`factoryLegal` YOSHI/
+SHIZUKA/QUINN, `factoryBrain`-no-override gold-dense) reads +4 or +5. But
+`docs/overrides-ready-lag-probe.md` (side lane, same day) already ran the
+controlled ± differential this correlation calls for — a byte-identical
+roster staged both via real generation and via `overrides.parties` at the
+**exact route** (`trainerId 109`, `challengeNum 2`, `battleNum 0`,
+`seed 70`) the PUPITAR probe uses, `preCheckpointCaptureAllFrames` dense —
+and found the ready-gate frame offset **zero**, twice reproduced. That
+result stands: the staging mechanism itself is tick-faithful, at least for
+the roster that differential happened to use (whatever `factoryLegal`'s own
+free RNG walk generates at that seed — species 82/368/354, NOT DELCATTY).
+**That differential never actually tested the specific DELCATTY/SABLEYE/
+LICKITUNG roster both +7 fixtures share** (they are byte-identical
+`overrides.parties` blocks, copy-built from the same source) **under real
+generation** — so the correlation in this round's 6-point table is
+real but its cause is still open between two candidates: (a) something
+about this *specific* roster that only manifests when combined with
+`overrides.parties` staging (an edge case the simpler differential's
+roster didn't hit), or (b) something about this specific roster
+independent of construction method (ruled back in, since Cute Charm
+(DELCATTY's only Gen-3 ability) has **no `ABILITYEFFECT_ON_SWITCHIN` case
+at all** — confirmed by grep, `battle_util.c:2851` — it only triggers from
+`ABILITYEFFECT_MOVE_END` on a contact hit, so it cannot run during the
+switch-in loop either way; ruling DELCATTY's ability out again, by a
+different route than Step 2's per-fixture item/ability table).
+
+**Honest-stop.** No `src/` edit was attempted this round (Step 2's clean
+kill of the switch-in-proc theory, for both residual families, made a
+generic party-derived flat-span term provably wrong before any bisection —
+landing one would repeat Round 13's already-reverted mistake). Neither
+surviving +7 candidate (roster-times-staging interaction, or a route/
+species property this round didn't isolate) is confirmed, and — per this
+step's own ~30 min source-model clause — that is where this round stops
+rather than fitting a constant to close the gap on faith.
+
+**Sharpest next instrument.** (1) The real minimal differential the prior
+probe did not run: stage the *exact* DELCATTY(316)/SABLEYE(322)/
+LICKITUNG(108) roster (items 183/141/133, `abilitySlot` 0/0/1 — copy from
+either +7 fixture's `overrides.parties.parties.player` block) against a
+real `factoryLegal`/`factoryBrain` opponent with **no** `overrides.parties`
+on the player side if the harness supports a player-only override, or find
+a real seed where free rental generation independently lands this exact
+triple (unlikely but decisive if found) — if it's still +7, staging is
+cleared for good and the cause is roster/route-specific; if it drops to
++4/+5, the interaction is specifically between this roster and
+`overrides.parties`, meaning the earlier general differential's roster
+choice was too simple to catch it. (2) Independently, the opponent side
+(TANGELA vs. PUPITAR, both +7) still needs the same tick-by-tick trace Step
+3 used on YOSHI/SHIZUKA, since Step 3 only exercised the +4-vs-+5 family —
+it is not yet known whether the +7 fixtures' extra ticks live in the same
+"dispatch → AI-ack" leg or somewhere earlier. (3) The dispatch→AI-ack leg's
+2-vs-3-tick variance (Step 3) still needs its own source-derived model
+(likely in `battle_ai_switch_items.c`'s move-scoring loop) before even the
++4/+5 baseline family has a fully generic (not just empirically-bisected)
+fix.
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only (no `src/` or fixture writes); ran once this session.

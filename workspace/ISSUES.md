@@ -17,6 +17,85 @@ backlog.
 
 # Open
 
+## #87 — Battle-start ready-frame formula is missing the ROM's pre-first-turn span (universal +4..+7 tick late-fire)
+
+**Symptom:** the app's predicted first-action-menu-ready frame
+(`generatedBattleStartCommandReady` family, `src/engine/battleScene.ts:4437-4600`)
+fires 4-7 ticks EARLY relative to the oracle's real menu-open, with a
+per-fixture magnitude. Confirmed table (2026-08-14, four probes):
+
+| fixture | route | opponent (dispatchDelay) | residual |
+| --- | --- | --- | --- |
+| silver Noland reveal | factoryBrain + overrides | TANGELA (86) | +7 |
+| PUPITAR/DELCATTY probe | mechanicLab (109, ch2) | PUPITAR (67) | +7 |
+| gold Noland dense | factoryBrain free-run | BLAZIKEN (132) | +5 |
+| QUINN low-dispatch | factoryLegal real-gen | WEEPINBELL (85) | +4 |
+| GRIMER/YOSHI, KADABRA/SHIZUKA | factoryLegal | (≥101) | +4/+5 by RAM predicate |
+
+**Confirmed mechanism (source-located, span decomposed further, not yet
+modeled to a formula):** `TryDoEventsBeforeFirstTurn`'s switch-in ability/
+item/weather loop plus `HandleTurnActionSelectionState`'s `ChooseAction`
+dispatch (`reference/pokeemerald/src/battle_main.c`) run between send-out
+completion and menu interactivity — a real ROM span the current formula
+has NO term for. A live tick-by-tick RAM trace
+(`tools/probe/probe-readylag-span-tickbytick.ts`, GRIMER/YOSHI +5 vs.
+KADABRA/SHIZUKA +4) localizes the split further: the switch-in-loop leg
+("player intro complete" → "both battlers dispatched `ChooseAction`") is a
+**constant +3 ticks in both**, confirming it costs exactly 1 tick per
+call when nothing procs (source-derived, matches the "no switch-in
+ability/item has a real trigger on any of these leads" audit below); the
+entire +5-vs-+4 split instead lives in the **opponent's own AI-decision
+ack** ("dispatch" → "opponent's exec bit clears": 3 ticks for COMBUSKEN, 2
+for MAGNETON) — a real, opponent-dependent span, but in
+`battle_ai_switch_items.c`'s move-scoring logic, not the switch-in loop
+Step 1 of this issue originally pointed at.
+
+**Eliminated with committed instruments:** `overrides.parties` staging as a
+*general* mechanism (± differential at a matched route with an arbitrary
+roster, offsets all zero — `docs/overrides-ready-lag-probe.md`); the
+`dispatchDelay(opponent)<101` regime discriminator (gold BLAZIKEN 132 shows
++5, QUINN/WEEPINBELL 85 shows +4 — `docs/ready-lag-discriminator-scout.md`
++ the falsification round in `docs/trainer-pic-off-window-scout.md`
+round 13); species/cry-proportional scaling (+7 identical across
+dispatchDelay 86 and 67); **switch-in ability/item procs as the driver of
+either residual family** (round 14: audited all 12 active-lead
+abilities/items across all 6 confirmed fixtures against
+`battle_util.c`'s switch-in cases — none trigger a real effect at full
+HP/no status, including DELCATTY's Cute Charm, which has no
+`ABILITYEFFECT_ON_SWITCHIN` case at all in Gen 3, contact-only). NOTE the
+historical "0-residual" points were PNG-landmark reads; the RAM handshake
+predicate (`tools/probe/probe-ready-lag-chooseaction-handshake.ts`) shows
+they carry +4/+5 too — the late-fire is universal, not route-gated.
+
+**Open lead (round 14, unresolved):** every confirmed +7 fixture
+(silver TANGELA, PUPITAR probe) shares the *exact same* `overrides.parties`
+player roster (DELCATTY/SABLEYE/LICKITUNG, species 316/322/108); every
+confirmed +4/+5 fixture is real generation. But the general
+`overrides.parties`-vs-real-generation differential above already tested a
+*different* (arbitrary) roster at a matched route and found it innocent —
+so this specific roster, staged via `overrides.parties`, has never been
+compared against the same roster under real generation. That is the
+decisive untested cell: does this exact DELCATTY/SABLEYE/LICKITUNG triple
+show +7 or +4/+5 under real rental generation (if a legal seed lands it) —
+confirming either a roster×staging interaction or a roster/route-specific
+cause independent of staging. The opponent-side leg (TANGELA/PUPITAR) also
+still needs the same tick-by-tick trace already run for YOSHI/SHIZUKA —
+unknown whether its extra ticks land in the same AI-ack leg or elsewhere.
+
+**Why it matters:** caps the silver Brain-reveal compare at 648/701 (its
+last 53 frames) and will shave the tail of any future battle-start window
+extended to the true ready frame. Committed windows that end before their
+ready transition (gold 700/701, Lukas, Yoshi, shizuka) are unaffected.
+
+**Next instrument:** (1) the roster×staging differential named above —
+the single most decisive untested cell. (2) tick-by-tick trace
+(`probe-readylag-span-tickbytick.ts`'s method) applied to a +7 fixture to
+locate which leg carries the extra ticks. (3) once the +4/+5 family's own
+AI-ack leg has a source-derived model (`battle_ai_switch_items.c`'s
+move-scoring loop — not yet read this round), the two families may turn
+out to be the same mechanism at different magnitudes rather than a
+two-term fix. All instruments above are committed and rerunnable.
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **User decision (2026-08-10): the playable path stays FAITHFUL — no

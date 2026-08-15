@@ -100,6 +100,28 @@ describe("noncanonical generated-round intro generalization", () => {
     expect(state).toEqual(before);
   });
 
+  it("reaches battleIndex 6 -- the Frontier Brain -- and constructs a real battle-start command without throwing", () => {
+    const state = generatedRoundRevealProofStage(
+      createInitialState({ appRoute: "generated-orchestrator" }),
+      6,
+    );
+    const orchestrator = state.factoryRoundBattleOrchestrator!;
+    const command = orchestrator.battleStartIntro!.command;
+
+    expect(orchestrator.round.rules).toMatchObject({
+      phase: "presentingBattleStart",
+      battleIndex: 6,
+    });
+    expect(command.battleIndex).toBe(6);
+    expect(command.opponentTrainer).toMatchObject({
+      trainerId: 1022,
+      name: "NOLAND",
+      className: "FACTORY HEAD",
+      trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
+    });
+    expect(orchestrator.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+  });
+
   it("pins LUKAS's complete source-relative summary boundary and status/fainted summary identity", () => {
     let state = generatedRoundBattle6LukasStatusSummaryMessageStage(
       createInitialState({ appRoute: "generated-orchestrator" }),

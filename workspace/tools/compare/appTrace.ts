@@ -79,6 +79,8 @@ import { BATTLE_SCRIPT_STATUS2_MASKS } from "../../src/engine/battleScriptSource
 import {
   generatedRoundBattle6LukasRevealStage,
   generatedRoundBattle6LukasStatusSummaryMessageStage,
+  generatedRoundBattle7NolandGoldRevealStage,
+  generatedRoundBattle7NolandRevealStage,
 } from "./factoryRoundIntroGeneralizationStage.ts";
 
 export interface AppCapture {
@@ -1490,6 +1492,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "factory-round-battle6-lukas-reveal-off": generatedRoundBattle6LukasRevealStage,
   "factory-round-battle6-lukas-status-summary-message-off":
     generatedRoundBattle6LukasStatusSummaryMessageStage,
+  "factory-round-battle7-noland-reveal-off": generatedRoundBattle7NolandRevealStage,
+  "factory-round-battle7-noland-gold-reveal-off": generatedRoundBattle7NolandGoldRevealStage,
   "factory-postwin-canonical-opponent-party":
     createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
   "factory-postwin-generated-rock-unrestrained-opponent-party":
