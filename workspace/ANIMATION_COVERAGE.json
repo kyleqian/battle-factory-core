@@ -5006,10 +5006,9 @@
    ]
   }
  ],
- "queue": [
-  "MOVE_DRAGON_BREATH",
-  "MOVE_BIND"
- ],
+  "queue": [
+    "MOVE_MEGA_DRAIN"
+  ],
  "componentTracks": [
   {
    "id": "water-orb-hydro-pump-whirlpool",
@@ -5858,7 +5857,7 @@
     "MOVE_DREAM_EATER",
     "MOVE_GIGA_DRAIN"
    ],
-   "goal": "MOVE_ABSORB is exact at 195/195 complete source/software/typed-seam, hardware OAM/matrix/order, palette/register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh: all eight target-to-attacker arcs, green field lifecycle, impact/shake, HealingEffect, and cleanup. No sibling is promoted: MEGA DRAIN has 16 paired orbs, blend 8, hitsplat animation 1 and Bubble3; GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
+   "goal": "MOVE_ABSORB is exact at 195/195 complete source/software/typed-seam, hardware OAM/matrix/order, palette/register/audio, raw-RGB, and shared-framebuffer frames in both orientations twice fresh: all eight target-to-attacker arcs, green field lifecycle, impact/shake, HealingEffect, and cleanup. Mega Drain is source/staging-ready only: its exclusive 0x082d10b2..0x082d1121 body, 16 paired target-to-attacker orbs, 0->8->0 green blend, impact animation 1, Bubble3 per-pair audio, shared HealingEffect tail, and complete legal bilateral Skiploom/Onix mechanicLab stages are reproducibly pinned; it receives no status or coverage credit until a fresh Scene-ON restart then twice-fresh complete bilateral capture measures its own OAM/palette/ShakeMon/default-visible latches. No sibling is promoted: GIGA DRAIN has blend 12, 24 variable-amplitude orbs, three FireSpread sprites and Giga Drain audio; DREAM EATER adds psychic background/scale/shake, omits IMPACT, and has 24-orb Swagger body. LEECH LIFE is not Level-50 Factory scope."
   },
   {
    "id": "fist-foot-random-position-thrash",
