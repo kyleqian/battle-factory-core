@@ -1049,35 +1049,6 @@ current app stage should be rejected before replay.
 - **Real fix:** make `read_u32`/`read_u16` either honor unaligned addresses
   or raise on them.
 
-## Fresh side worktrees fail 19 wasm-parity tests (missing gitignored artifact)
-
-- **What:** `artifacts/wasm/factory_wasm.wasm` is a gitignored build product,
-  so a fresh side worktree has no `artifacts/` at all and the full
-  `npm test` fails 19 wasm-parity tests with ENOENT instead of skipping
-  (the documented `describe.skipIf` absent-artifact skip did not engage
-  when the directory itself is missing). Cost the 2026-08-14 side receipt
-  worker an 18-minute full-suite run that ended red for reasons unrelated
-  to its change.
-- **Hits:** 7 (2026-08-14: also the CGB4-gating salvage verification, the
-  Brain-intro scout, and the #87 round-15 + walk-up-scoping side workers —
-  each ~2-5 min via the copy-in or rebuild workaround; 2026-08-14 night:
-  the #90-triage and walk-up-extraction side workers, ~2 min each).
-- **FIXED (2026-08-15 supervisor):** `tools/run-subagent.sh`'s worktree
-  setup now copies the main tree's artifact into every fresh worktree
-  after `npm install` (skips silently if the main tree has none). First
-  worker launch after this change verifies; delete this entry once a
-  clean side-lane full suite confirms it.
-- **Cost each:** ~20 min first hit (run + triage); ~3-5 min once known.
-- **Workaround:** cheapest and now proven twice: copy the main checkout's
-  artifact in (`mkdir -p artifacts/wasm && cp <main>/artifacts/wasm/
-  factory_wasm.wasm artifacts/wasm/`, then verify its sha against the ledger,
-  currently `7e23d1bf…`). Alternatives: run `./core-rs/build-wasm.sh` (needs
-  the rustup toolchain PATH) or scope verification to the suites the step
-  touches; supervisors should treat exactly this 19-test ENOENT set as the
-  known-benign signature for new-files-only side branches.
-- **Real fix:** make the parity file's absent-artifact probe treat a missing
-  `artifacts/` directory the same as a missing file (skip, not throw), or
-  have the worktree setup script build the artifact.
 
 ## Full `npm test` wall time is 3-5x under concurrent multi-lane load
 
