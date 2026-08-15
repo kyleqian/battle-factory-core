@@ -9,8 +9,8 @@ import { describe, expect, it } from "vitest";
 const fixture = JSON.parse(readFileSync("tools/compare/fixtures/leech-seed-evidence.json", "utf8"));
 const sha = (value: Uint8Array): string => createHash("sha256").update(value).digest("hex");
 
-describe("MOVE_LEECH_SEED twice-fresh main and natural residual evidence checkpoint", () => {
-  it("keeps the probe and every retained artifact pinned while coverage stays unsupported", () => {
+describe("MOVE_LEECH_SEED twice-fresh main and natural residual evidence", () => {
+  it("keeps the probe and every retained artifact pinned after exact promotion", () => {
     expect(sha(readFileSync(fixture.source.probe))).toBe(fixture.source.probeSha256);
     for (const evidence of Object.values(fixture.orientations) as any[]) {
       expect(sha(readFileSync(evidence.scenario))).toBe(evidence.scenarioSha256);
@@ -23,7 +23,8 @@ describe("MOVE_LEECH_SEED twice-fresh main and natural residual evidence checkpo
       }
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_LEECH_SEED")).toBeUndefined();
+    expect(coverage.entries.find((entry: any) => entry.move === "MOVE_LEECH_SEED"))
+      .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_ABSORB"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_BULLET_SEED"))

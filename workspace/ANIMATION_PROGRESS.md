@@ -1,3 +1,10 @@
+# MOVE_LEECH_SEED bilateral main+natural-residual exact (2026-08-15 worker)
+
+- **State:** Coverage advances **188→189/276 Level-50 exact**, with 0 partial, 0 staged, and **88→87 unsupported**. MOVE_LEECH_SEED alone promotes; exact MOVE_ABSORB remains an independent regression control and outside-Factory MOVE_BULLET_SEED receives no credit. The `seed-projectile-leech-seed` track is fulfilled.
+- **Did:** Added a pure source-relative two-body reducer, narrow typed `body` seam, literal reproducible SEED asset, and shared Scene-ON draw case. Main derives all three arcs, hidden waits, sprout animation/lifecycle, audio, tags and cleanup from callbacks; natural residual independently owns General ages 0..1, measured seeder/seeded roles, nested Move_ABSORB/AbsorbEffect/HealingEffect ages, 8 orbs, 4 stars and cleanup. Source BuildOamBuffer screen-Y ties and nested post-OAM creation passes are modeled without absolute oracle ticks or recordings.
+- **Verified:** Complete production acceptance closes with zero residual pixels: player-back main **246..386 = 141/141**, residual **485..691 = 207/207**; opponent-front main **245..385 = 141/141**, residual **480..686 = 207/207**; **696/696 total** component/reducer/typed-seam/raw-RGB/shared-framebuffer rows. Literal asset extraction reproduces byte-for-byte. MOVE_ABSORB complete focused tests remain exact; boundary lists, unsupported barriers, recording allowlists, gameplay outcomes, RNG, AI, controller/round/facility state are unchanged.
+- **Next:** Resume the next supervisor-selected unsupported Level-50 move/component track; do not infer Leech Seed acceptance for Bullet Seed or another drain body.
+
 # MOVE_LEECH_SEED bilateral main+residual evidence checkpoint — remains unsupported (2026-08-15 worker)
 
 - **State:** Coverage remains **188/276 Level-50 exact**, with 0 partial, 0 staged, and **88 unsupported**. MOVE_LEECH_SEED now has complete twice-fresh bilateral main+natural-residual evidence, but no reducer, typed seam, compositor, production draw/wiring, or coverage entry; exact MOVE_ABSORB remains a regression control only, and outside-Factory MOVE_BULLET_SEED receives no credit.

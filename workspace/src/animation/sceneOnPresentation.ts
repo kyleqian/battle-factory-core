@@ -3,6 +3,11 @@ import {
   type AncientPowerState,
 } from "./ancientPower.ts";
 import {
+  leechSeedAtAge,
+  type LeechSeedBody,
+  type LeechSeedState,
+} from "./leechSeed.ts";
+import {
   FIRE_PUNCH_BURN_FLAME_FIRST_AGE,
   firePunchBurnFlames,
   firePunchParticlesInDrawOrder,
@@ -1502,6 +1507,27 @@ export interface SceneOnAbsorbConfig {
   }>;
 }
 
+/** Presentation-only source geometry for either retained Leech Seed body. */
+export interface SceneOnLeechSeedConfig {
+  readonly move: "LEECH_SEED";
+  readonly body: LeechSeedBody;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Main launch or residual absorption endpoint, both source Y_PIC_OFFSET. */
+  readonly effectCenter: Readonly<{ x: number; y: number }>;
+  /** Natural pre-script idle OAM offset retained until General's shake. */
+  readonly targetRestOffset: Readonly<{ x2: number; y2: number }>;
+  /** Measured natural occupied-slot topology; never controls outcomes. */
+  readonly allocatorProfile: Readonly<{
+    readonly seeds: readonly [number, number, number];
+    readonly hitsplat: number;
+    readonly orbs: readonly number[];
+    readonly stars: readonly number[];
+    readonly paletteController: number;
+  }>;
+}
+
 /**
  * Presentation-only geometry and allocator facts for `Move_MEGA_DRAIN`.
  * Battle resolution supplies all mutable battle outcomes outside this seam.
@@ -2943,6 +2969,7 @@ export type SceneOnMoveConfig =
   | SceneOnMoonlightConfig
   | SceneOnPresentConfig
   | SceneOnAbsorbConfig
+  | SceneOnLeechSeedConfig
   | SceneOnMegaDrainConfig
   | SceneOnGigaDrainConfig
   | SceneOnDreamEaterConfig
@@ -3103,6 +3130,7 @@ export type SceneOnMoveConfig =
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
+    | SceneOnLeechSeedConfig
     | SceneOnMegaDrainConfig
     | SceneOnGigaDrainConfig
     | SceneOnDreamEaterConfig
@@ -3140,6 +3168,8 @@ export type SceneOnGlarePresentationState =
   SceneOnMovePresentationState<SceneOnGlareConfig>;
 export type SceneOnAbsorbPresentationState =
   SceneOnMovePresentationState<SceneOnAbsorbConfig>;
+export type SceneOnLeechSeedPresentationState =
+  SceneOnMovePresentationState<SceneOnLeechSeedConfig>;
 export type SceneOnMegaDrainPresentationState =
   SceneOnMovePresentationState<SceneOnMegaDrainConfig>;
 export type SceneOnGigaDrainPresentationState =
@@ -4351,6 +4381,12 @@ export interface SceneOnAbsorbView extends AbsorbState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnLeechSeedView extends LeechSeedState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMegaDrainView extends MegaDrainState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4556,7 +4592,7 @@ export function createSceneOnMovePresentation<
   TConfig extends SceneOnMoveConfig | SceneOnRazorLeafConfig | SceneOnTauntConfig
     | SceneOnSparkConfig | SceneOnCharmConfig | SceneOnTailGlowConfig
     | SceneOnScaryFaceConfig
-    | SceneOnAbsorbConfig | SceneOnMegaDrainConfig | SceneOnGigaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
+    | SceneOnAbsorbConfig | SceneOnLeechSeedConfig | SceneOnMegaDrainConfig | SceneOnGigaDrainConfig | SceneOnReflectConfig | SceneOnLightScreenConfig
     | SceneOnBarrierConfig
     | SceneOnHazeConfig
     | SceneOnBiteConfig
@@ -5056,6 +5092,29 @@ export function sceneOnAbsorbView(
       state.config.absorptionCenter,
       state.config.attacker.geometry.side,
       state.config.healingCenter,
+    ),
+  };
+}
+
+/** `age=0` is each retained body's first source-owned frame. */
+export function sceneOnLeechSeedView(
+  state: SceneOnMovePresentationState<SceneOnLeechSeedConfig>,
+): SceneOnLeechSeedView {
+  if (state.config.move !== "LEECH_SEED") {
+    throw new Error(`expected LEECH_SEED presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...leechSeedAtAge(
+      state.config.body,
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.effectCenter,
+      state.config.target.geometry.animationCenter,
+      state.config.target.geometry.battlePositionCenter,
+      state.config.targetRestOffset,
     ),
   };
 }

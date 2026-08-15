@@ -65,17 +65,15 @@ function bgPaletteBlendYAtAge(age: number): number {
   return 2;
 }
 
-function absorptionOrbAtAge(
-  age: number,
+export function absorptionOrbAtCallbacks(
   index: number,
+  callbacks: number,
   targetCenter: Readonly<{ x: number; y: number }>,
   attackerCenter: Readonly<{ x: number; y: number }>,
   attackerSide: "player" | "opponent",
 ): AbsorbSprite | null {
-  const local = age - ABSORB_ORB_FIRST_AGE - index * ABSORB_ORB_SPAWN_PERIOD;
   const args = ABSORB_ORB_ARGS[index]!;
-  if (local < 0 || local >= args.wavePeriod) return null;
-  const callbacks = local + 1;
+  if (callbacks < 0 || callbacks > args.wavePeriod) return null;
   const startX = targetCenter.x + (attackerSide === "player" ? args.x : -args.x);
   const startY = targetCenter.y + args.y;
   const x2 = linearTranslationOffsetAfterCallbacks(
@@ -104,6 +102,25 @@ function absorptionOrbAtAge(
     xScale: matrix,
     yScale: matrix,
   };
+}
+
+function absorptionOrbAtAge(
+  age: number,
+  index: number,
+  targetCenter: Readonly<{ x: number; y: number }>,
+  attackerCenter: Readonly<{ x: number; y: number }>,
+  attackerSide: "player" | "opponent",
+): AbsorbSprite | null {
+  const local = age - ABSORB_ORB_FIRST_AGE - index * ABSORB_ORB_SPAWN_PERIOD;
+  const args = ABSORB_ORB_ARGS[index]!;
+  if (local < 0 || local >= args.wavePeriod) return null;
+  return absorptionOrbAtCallbacks(
+    index,
+    local + 1,
+    targetCenter,
+    attackerCenter,
+    attackerSide,
+  );
 }
 
 /** Complete source-owned `Move_ABSORB` visual body, relative to `monbg`. */

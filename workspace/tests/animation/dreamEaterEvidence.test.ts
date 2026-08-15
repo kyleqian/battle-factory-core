@@ -92,6 +92,6 @@ describe("MOVE_DREAM_EATER bilateral Scene-ON evidence checkpoint", () => {
       expect(coverage.entries.find((entry: any) => entry.move === move)).toMatchObject({ status: "exact" });
     }
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_DREAM_EATER")).toMatchObject({ status: "exact" });
-    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(188);
+    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(189);
   });
 });

@@ -28,6 +28,34 @@
    ]
   },
   {
+   "move": "MOVE_LEECH_SEED",
+   "status": "exact",
+   "covered": [
+    "complete legal Scene-ON set-112 EXEGGCUTE versus ONIX main windows pass player-back frames 246-386 and opponent-front frames 245-385 at 141/141 each; natural General_LeechSeedDrain residual windows pass player-back 485-691 and opponent-front 480-686 at 207/207 each, 696/696 total component/seam/raw-RGB/shared-framebuffer rows with zero residual pixels",
+    "the pure source-relative reducer ports all three literal projectile arcs, creation at ages 4/14/24, hidden waits, looping 4/8-tile sprout frames, destroy callbacks, poison-powder/tail-whip audio restarts and cleanup directly from callbacks; equal-subpriority overlap follows source BuildOamBuffer screen-Y and allocator order",
+    "the independent residual top-level state owns General ages 0-1, natural seeder/seeded role swap, its own nested Move_ABSORB/AbsorbEffect/HealingEffect relative ages, eight orbs, four stars, green field palette, monbg/alpha/shake/audio and cleanup; nested post-OAM creation passes remain source-software-visible one pass before production hardware",
+    "the typed body-discriminated Scene-ON seam accepts only immutable battler/effect geometry, legal HP/gender chrome, natural rest offset and source allocator topology; it owns no damage, healing, Leech Seed status/outcome, RNG, AI, turn, round, controller, or facility state",
+    "literal SEED tiles/palette regenerate byte-for-byte from pinned source; exact shared Exeggcute front/back and Onix art plus ORBS/IMPACT/BLUE_STAR primitives are reused by source identity without transferring MOVE_ABSORB acceptance",
+    "MOVE_ABSORB independently remains exact under its complete focused tests; MOVE_BULLET_SEED remains outside-Factory unsupported with no sibling promotion"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-leech-seed-player-exeggcute-opponent-onix.json",
+    "tools/battle-lab/mechanic-leech-seed-opponent-exeggcute-player-onix.json",
+    "tools/compare/fixtures/leech-seed-evidence.json",
+    "tools/compare/leechSeedSourceAudit.ts",
+    "tools/compare/leechSeedProbe.py",
+    "tools/compare/leechSeedFramebuffer.ts",
+    "tools/compare/extractLeechSeedAssets.ts",
+    "src/animation/assets/leech-seed.json",
+    "src/animation/leechSeed.ts",
+    "src/animation/absorb.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/leechSeed.test.ts",
+    "tests/animation/leechSeedFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_MEGA_DRAIN",
    "status": "exact",
    "covered": [
@@ -5106,7 +5134,7 @@
    "representatives": [
     "MOVE_LEECH_SEED"
    ],
-   "goal": "MOVE_LEECH_SEED is the sole Factory acceptance unit: independently prove the complete three projectile-hidden-sprout lifecycles, sounds, source callbacks, ordinary display latches, and cleanup in both orientations twice fresh, plus the real naturally scheduled B_ANIM_LEECH_SEED_DRAIN body through General_LeechSeedDrain -> AnimTask_GetBattlersFromArg -> Move_ABSORB with its measured role swap and complete cleanup. MOVE_ABSORB is an exact regression control only and transfers no Leech Seed timing, geometry, outcome, latch, or coverage credit. MOVE_BULLET_SEED remains an outside-Factory asset/source sibling, never a coverage sibling."
+   "goal": "FULFILLED: MOVE_LEECH_SEED independently passes all four complete main and natural residual windows at 696/696 source-relative reducer, typed-seam, raw-RGB, and production-framebuffer rows with zero residual pixels. It proves all three projectile-hidden-sprout lifecycles and the naturally role-swapped General_LeechSeedDrain -> Move_ABSORB body through cleanup. MOVE_ABSORB remains an independently exact regression control only; MOVE_BULLET_SEED remains outside-Factory unsupported with no sibling credit."
   },
   {
    "id": "water-orb-hydro-pump-whirlpool",

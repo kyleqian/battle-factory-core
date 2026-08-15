@@ -556,6 +556,7 @@ import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" wit
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
+import leechSeedAsset from "../animation/assets/leech-seed.json" with { type: "json" };
 import reflectAsset from "../animation/assets/reflect.json" with { type: "json" };
 import brickBreakAsset from "../animation/assets/brick-break.json" with { type: "json" };
 import lightScreenAsset from "../animation/assets/light-screen.json" with { type: "json" };
@@ -912,6 +913,7 @@ import {
   sceneOnMoonlightView,
   sceneOnPresentView,
   sceneOnAbsorbView,
+  sceneOnLeechSeedView,
   sceneOnMegaDrainView,
   sceneOnGigaDrainView,
   sceneOnDreamEaterView,
@@ -1115,6 +1117,7 @@ import {
   type SceneOnScaryFacePresentationState,
   type SceneOnGlarePresentationState,
   type SceneOnAbsorbPresentationState,
+  type SceneOnLeechSeedPresentationState,
   type SceneOnMegaDrainPresentationState,
   type SceneOnGigaDrainPresentationState,
   type SceneOnDreamEaterPresentationState,
@@ -1586,6 +1589,9 @@ const absorbArt = absorbAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
   impact: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const leechSeedArt = leechSeedAsset as {
+  seed: { tileset: Tileset; palette: RgbColor[] };
 };
 const reflectArt = reflectAsset as {
   blueLightWall: { tileset: Tileset; palette: RgbColor[] };
@@ -34959,6 +34965,190 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "MINUN used" : "Foe MINUN used",
       "ENCORE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "LEECH_SEED") {
+    const leechState = state as SceneOnLeechSeedPresentationState;
+    const view = sceneOnLeechSeedView(leechState);
+    // Both retained source bodies expose ordinary OAM and palette writes on
+    // the following display transfer (RAM+1 in the dense natural probes).
+    const displayed = sceneOnLeechSeedView({
+      ...leechState,
+      age: leechState.age - 1,
+    });
+    const playerToOpponent = view.attacker.geometry.side === "player"
+      && view.attacker.species === "EXEGGCUTE"
+      && view.target.geometry.side === "opponent"
+      && view.target.species === "ONIX";
+    const opponentToPlayer = view.attacker.geometry.side === "opponent"
+      && view.attacker.species === "EXEGGCUTE"
+      && view.target.geometry.side === "player"
+      && view.target.species === "ONIX";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged LEECH_SEED pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const exeggcuteSource = playerToOpponent
+      ? lightScreenArt.exeggcuteBack : lightScreenArt.exeggcuteFront;
+    const exeggcute = playerToOpponent ? exeggcuteSource : {
+      ...exeggcuteSource,
+      tileset: subTileset(exeggcuteSource.tileset, 0, 8),
+    };
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const green = { r: 107, g: 255, b: 99 };
+    const bgPalettes = battleBg.palette.map((palette) =>
+      blendPaletteToward(palette, green, displayed.bgPaletteBlendY));
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      bgPalettes,
+    );
+
+    const drawExeggcute = () => drawSpriteSheet(
+      fb,
+      exeggcute.tileset,
+      exeggcute.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawOnix = () => drawSpriteSheet(
+      fb, onix.tileset, onix.palette,
+      view.target.geometry.spriteCorner.x + displayed.targetX2,
+      view.target.geometry.spriteCorner.y + displayed.targetY2,
+    );
+    const drawSeeds = () => {
+      // BuildOamBuffer's equal-subpriority linked order is bottom-to-top by
+      // screen Y for these sprites, then lower source slot on an exact tie.
+      const ordered = [...displayed.sprites].sort((left, right) => {
+        if ("kind" in left || "kind" in right) return 0;
+        return (left.y + left.y2) - (right.y + right.y2)
+          || right.spawnIndex - left.spawnIndex;
+      });
+      for (const sprite of ordered) {
+        if ("kind" in sprite || !sprite.visible) continue;
+        drawSpriteSheet(
+          fb,
+          {
+            columns: 2,
+            rows: 2,
+            tiles: leechSeedArt.seed.tileset.tiles.slice(
+              sprite.frameOffset,
+              sprite.frameOffset + 4,
+            ),
+          },
+          leechSeedArt.seed.palette,
+          sprite.x + sprite.x2 - 8,
+          sprite.y + sprite.y2 - 8,
+        );
+      }
+    };
+
+    if (view.body === "main") {
+      // Source subpriorities: front 40, seed 38/back target 30/seed 28.
+      if (playerToOpponent) {
+        drawOnix();
+        drawSeeds();
+        drawExeggcute();
+      } else {
+        drawExeggcute();
+        drawOnix();
+        drawSeeds();
+      }
+    } else {
+      // Monbg captures the target before semi-transparent effect objects.
+      drawOnix();
+      const nonObjTarget2 = fb.slice();
+      drawExeggcute();
+      const orbTileset: Tileset = {
+        columns: 2,
+        rows: 2,
+        tiles: absorbArt.orbs.tileset.tiles.slice(8, 12),
+      };
+      for (const sprite of displayed.sprites) {
+        if (!("kind" in sprite)) continue;
+        // General's nested creates run after this pass's OAM build. The
+        // reducer retains their source-software creation row; production's
+        // first hardware-visible row is the following pass.
+        const creationPass = sprite.kind === "hitsplat"
+          ? displayed.age === 27
+          : sprite.kind === "orb"
+            ? displayed.age === 45 + sprite.spawnIndex * 6
+            : displayed.age === 140 + sprite.spawnIndex * 9;
+        if (creationPass) continue;
+        if (sprite.kind === "hitsplat") {
+          drawSpriteSheetAffineRotateBlendedOverFb(
+            fb, nonObjTarget2, absorbArt.impact.tileset,
+            absorbArt.impact.palette, sprite.x + sprite.x2,
+            sprite.y + sprite.y2, sprite.xScale, 0, 0, sprite.yScale,
+            12, 8, false,
+          );
+        } else if (sprite.kind === "orb") {
+          drawSpriteSheetAffineRotateBlendedOverFb(
+            fb, nonObjTarget2, orbTileset, absorbArt.orbs.palette,
+            sprite.x + sprite.x2, sprite.y + sprite.y2,
+            sprite.xScale, 0, 0, sprite.yScale, 12, 8, false,
+          );
+        } else {
+          drawSpriteSheet(
+            fb,
+            {
+              columns: 4,
+              rows: 4,
+              tiles: absorbArt.blueStar.tileset.tiles.slice(
+                sprite.frame * 16,
+                sprite.frame * 16 + 16,
+              ),
+            },
+            absorbArt.blueStar.palette,
+            sprite.x - 16,
+            sprite.y - 16,
+          );
+        }
+      }
+    }
+
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "EXEGGCUTE",
+        level: 50,
+        gender: state.config.fieldProfile.opponentGender ?? "male",
+        hpFraction: state.config.fieldProfile.opponentHp
+          / state.config.fieldProfile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "EXEGGCUTE" : "ONIX",
+        level: 50,
+        gender: state.config.fieldProfile.playerGender ?? "male",
+        hpFraction: state.config.fieldProfile.playerHp
+          / state.config.fieldProfile.playerMaxHp,
+        status: "none",
+        currentHp: state.config.fieldProfile.playerHp,
+        maxHp: state.config.fieldProfile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      view.body === "main"
+        ? (playerToOpponent ? "EXEGGCUTE used" : "Foe EXEGGCUTE used")
+        : (playerToOpponent ? "Foe ONIX was seeded!" : "ONIX was seeded!"),
+      view.body === "main" ? "LEECH SEED!" : "",
       99,
     );
     return;

@@ -85,10 +85,10 @@ describe("MOVE_LEECH_SEED source and natural-residual staging checkpoint", () =>
         : "6b65c703100796a09abca58b33049550ea93faad5c4d0a3d53d711c0c783f468");
   });
 
-  it("records a non-exclusive track without granting Leech Seed or Bullet Seed coverage", () => {
+  it("fulfills the non-exclusive Leech Seed track without granting Bullet Seed coverage", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_LEECH_SEED"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_BULLET_SEED"))
       .toBeUndefined();
     expect(coverage.componentTracks.find((track: any) =>

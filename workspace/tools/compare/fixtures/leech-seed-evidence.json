@@ -3,9 +3,9 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_LEECH_SEED",
   "moveId": 73,
-  "status": "unsupported",
-  "coverageCredit": false,
-  "coverageCounts": "Level 50: 188/276 exact, 0 partial, 0 staged, 88 unsupported",
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 189/276 exact, 0 partial, 0 staged, 87 unsupported",
   "source": {
     "probe": "tools/compare/leechSeedProbe.py",
     "probeSha256": "b8bc5a7ad0a90d557db6df55ed8d81c0630d83fe534f427e10aaa05b49238d8a",
@@ -13,12 +13,12 @@
     "residual": "0x082d82fd..0x082d830b -> Move_ABSORB/AbsorbEffect/HealingEffect"
   },
   "evidenceScope": {
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
     "framebufferLookupAdded": false,
-    "coveragePromotion": false,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -75,5 +75,5 @@
     "MOVE_ABSORB": "independently exact regression control only; no Leech Seed acceptance transfer",
     "MOVE_BULLET_SEED": "outside-Factory asset/source sibling; unsupported and no coverage credit"
   },
-  "remaining": "implement a pure source-relative reducer, typed Scene-ON seam, Exeggcute/Onix compositor, and production draw/wiring; require all 696 main+residual rows to pass component/seam/raw-RGB/shared-framebuffer equality twice fresh with zero residual pixels before promotion"
+  "remaining": "none: all four retained main and natural residual windows pass 696/696 source-relative reducer, typed-seam, raw-RGB, and shared production-framebuffer rows with zero residual pixels"
 }
