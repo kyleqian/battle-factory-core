@@ -708,27 +708,33 @@ function advanceFactoryTerminalRecordPrompt<
 }
 
 /**
- * `\l` mid-`frontierBrainCongratulations` scroll gate: the first two lines'
- * last glyph age, by the same "input accepted exactly on the tick the last
- * glyph draws" rule `congratulationsInputReadyAge`/`awardScrollInputDelay`/
- * `awardDefaultInputDelay` already reproduce with zero slack (see the field
- * doc on `frontierBrainCongratulations`).
+ * `\l` mid-`frontierBrainCongratulations` scroll gate. Live-bisected against
+ * the real ROM at age 98 — one tick AFTER the "input accepted exactly on the
+ * tick the last glyph draws" rule's 97 (T-1/T pair: 97 rejected, 98 accepted;
+ * `tools/probe/bisect-factory-brain-congrats-gates-off.py`,
+ * `docs/brain-terminal-live-verification.md`). The `+ 0`-vs-`- 1` term below
+ * encodes that measured offset; the last-glyph rule alone under-shoots here.
  */
 function frontierBrainCongratsScrollGateReadyAge(
   profile: FactoryTerminalRoundWonProfile,
 ): number {
   const [line0, line1] = profile.frontierBrainCongratulations.lines;
-  return profile.congratulationsTextDelay + line0.length + line1.length - 1;
+  return profile.congratulationsTextDelay + line0.length + line1.length;
 }
 
-/** Third line's last glyph age, same rule, relative to the scroll gate's own release. */
+/**
+ * Third line's dismiss gate, relative to the scroll gate's own release.
+ * Live-bisected at release + 32 — three ticks after the last-glyph rule's
+ * + 29 (T-1/T pair: 129 rejected, 130 accepted; same probe/doc as above);
+ * the `+ 2` term encodes the measured offset.
+ */
 function frontierBrainCongratsFinalGateReadyAge(
   profile: FactoryTerminalRoundWonProfile,
   congratsScrollReleaseAge: number,
 ): number {
   const line2 = profile.frontierBrainCongratulations.lines[2];
   return congratsScrollReleaseAge +
-    profile.frontierBrainCongratulations.thirdLineTextDelay + line2.length - 1;
+    profile.frontierBrainCongratulations.thirdLineTextDelay + line2.length + 2;
 }
 
 export function advanceFactoryTerminalRoundWonPresentation(
