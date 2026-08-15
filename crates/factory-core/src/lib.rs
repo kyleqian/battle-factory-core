@@ -53,6 +53,8 @@ pub mod battle_script_settaunt;
 pub mod battle_script_settaunt_vectors_gen;
 pub mod battle_script_setyawn;
 pub mod battle_script_setyawn_vectors_gen;
+pub mod battle_script_snatchsetbattlers;
+pub mod battle_script_snatchsetbattlers_vectors_gen;
 pub mod battle_script_trycopyability;
 pub mod battle_script_trycopyability_vectors_gen;
 pub mod battle_script_trysetdestinybondtohappen;
