@@ -1036,7 +1036,12 @@ residual is ISSUES #87). Only (b) remains.
    worklist (award table incl. the +10 brain bonus, symbol grant and BP
    as round-controller OUTPUTS, brain congrats text). Its step-4
    prerequisite exists now, so the numbers are end-to-end verifiable
-   against the real ROM. (ii) ISSUES #87's named next instrument (the
+   against the real ROM. **Steps 1-2 landed** (PROGRESS 1269):
+   `applyFactoryBrainRoundOutcome` (`factoryBrainRoundOutcome.ts`) ports
+   `GiveBattlePoints`/`GiveFacilitySymbol` exactly and is wired into
+   `factoryRoundBattleOrchestrator.ts`'s round-completion path as a
+   `roundOutcome` state output; step 3 (brain congrats text) remains.
+   (ii) ISSUES #87's named next instrument (the
    opponent-AI `ChooseAction` ack-timing model,
    `battle_ai_switch_items.c`). (iii) The Brain walk-up dialogue
    surface: SCOPING ONLY — present faithful/trim/skip options with

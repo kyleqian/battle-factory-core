@@ -1,3 +1,50 @@
+## 1266 — [supervisor, 2026-08-14] **Wind-down: Brain presentation program built end-to-end in one session; silver 648/701 + gold 700/701 live compares; #87 parked with full forensics; all gates green**
+
+- **State:** 8 rounds / 15 worker steps, zero unresolved failures (two
+  honest-stops and one salvage, each strictly narrowing). The Noland arc
+  went from "no app frame reachable" at orient to two committed live
+  compares. DEFERRED.md remains EMPTY — no open supervisor questions.
+- **Did (headlines):** (1) factoryBrain §5.2 consumers: README, silver+gold
+  lab fixtures, live integration proof 82/82 (`verify-factory-brain-lab.ts`).
+  (2) Brain presentation seam: `getFactoryTrainerPresentation(1022)` real
+  NOLAND identity (source-re-derived), new additive
+  `frontier-brain-trainer-pic.json` catalog + extractor, proof-stage
+  battleIndex-6 widening, Tier-1 pins incl. a brain-LOSS pin. (3) Ground
+  truth: silver + gold intro dossiers (49/49 + 44/44 sha verify scripts,
+  PNG-verified labels; the whole battle-start window is PRE-checkpoint).
+  (4) Live compares: silver 648/701 (transition/pic-reveal/battle-text/
+  send-out exact), gold 700/701 (single tint-dot frame remains).
+  (5) #87 filed then twice-narrowed: ready-frame formula misses the ROM's
+  `TryDoEventsBeforeFirstTurn`/`ChooseAction` span; +7/+7/+5/+4 across four
+  committed fixtures; staging, regime-discriminator, and switch-in-proc
+  hypotheses each killed by committed instruments; variance localized to
+  opponent-AI ChooseAction-ack timing (next instrument named in #87).
+  (6) CGB4 papercut retired: 44-file family gated behind
+  POKEBENCH_CGB4_EVIDENCE=1 (`npm run test:cgb4`), 88-artifact digest pin
+  stays default — full suite 19 min → ~2-3 min. (7) Read-only Noland audit:
+  7/8 seams CLEAN, 1 doc defect fixed same-hour (cursor-gap caveats in
+  battle-lab README + design doc).
+- **Gates (final union, after the last rust fold):** full npm **1,018
+  files / 9,802 passed / 223 skipped** (CGB4-gated); build green; cargo
+  native green (52 ok-suites); WASM **509,839 B** rebuilt twice, final
+  `08436ef1…`; forced-WASM **18 files / 803 tests** (rerun on the final
+  artifact); soaks vanilla **20/20 OK**, full **60/60 OK**, 0 crashes /
+  0 hangs (run after the last workspace/src change; only core-rs moved
+  afterward, which soaks do not exercise). Both lane branches folded at
+  wind-down (animation: Flail + Luster Purge; rust: ~38 commits of script
+  leaves); both sibling supervisors were LIVE throughout — any post-15:00
+  tail is the next orient's fold.
+- **Next:** (a) #87's named instrument (opponent-AI ack-timing model —
+  battle_ai_switch_items.c unread); (b) the Brain walk-up dialogue surface
+  (silver ~12 monologue boxes, gold 2 usher boxes — no app surface yet,
+  scoping decision for a fresh session); (c) extending the gold window past
+  its ready frame waits on #87.
+- **Notes:** oracle freshness FAIL on :8014 was the known timestamp false
+  positive (verified serving factoryBrain); :8012 left to the animation
+  lane by design. One side worker self-suspended (ScheduleWakeup class) and
+  was salvaged via the commit-tail recipe; fresh-worktree wasm-artifact
+  papercut bumped to 3 hits with the copy-in workaround recorded.
+
 ## 1265 — [MAIN worker, 2026-08-14] **Ready-lag #87: switch-in ability/item procs ruled out as the driver of BOTH residual families (source audit + live tick-by-tick RAM trace); `overrides.parties` correlation found but its general mechanism was already cleared by a prior differential — honest-stop, no validated `src/` fix**
 
 - **State:** no `src/` change this round (source archaeology + a live RAM
