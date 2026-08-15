@@ -24,6 +24,21 @@
 // also shows 4/x/7) or a roster×staging interaction (this fixture reverts
 // to the 3/x baseline).
 //
+// Round 17 addition (SIDE lane, falsification sweep): also traces (a)
+// factory-legal-sandslash-venomoth-chansey-readylag-probe.json — a SECOND
+// Quick-Claw lead (FRONTIER_MON_SANDSLASH_2, index 330, distinct species
+// from DELCATTY), same route family/opponent (MAGNETON) as round 16's
+// decisive cell, to test whether the switch-in-loop leg=4 predicate is a
+// DELCATTY-specific accident or a genuine Quick-Claw property; and (b) the
+// already-committed factory-readylag-lowdispatch-legal-off.json, whose
+// opponent lead WEEPINBELL has a single, guaranteed ability (Chlorophyll,
+// no secondary slot) — GetWhoStrikesFirst's ability speed-doubling branch
+// (battle_main.c:4604-4622) is gated on WEATHER_HAS_EFFECT, and this
+// specific call fires before any switch-in weather ability can run
+// (battle_main.c:3850-3868), so gBattleWeather==0 here always; prediction is
+// this ability branch contributes nothing regardless of which weather
+// ability the lead has, i.e. switch-in-loop leg stays 3.
+//
 // Read-only against a live oracle (POKEBENCH_ORACLE_URL, default :8014).
 // Usage:
 //   node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts
@@ -157,6 +172,16 @@ async function main(): Promise<void> {
   await trace(
     "DUGTRIO/BLAZIKEN gold Noland dense (residual +5, no Quick Claw, falsification check)",
     "factory-brain-gold-intro-dense-off.json",
+  );
+
+  // Round 17 additions (SIDE lane, ISSUES #87 falsification sweep):
+  await trace(
+    "SANDSLASH/VENOMOTH/CHANSEY real-gen, SECOND Quick-Claw lead, matched MAGNETON route (Goal 1)",
+    "factory-legal-sandslash-venomoth-chansey-readylag-probe.json",
+  );
+  await trace(
+    "GRIMER/WEEPINBELL real-gen, opponent lead has guaranteed Chlorophyll (single-ability species) but weather==0 predicts NO extra tick (Goal 2, ability-branch control)",
+    "factory-readylag-lowdispatch-legal-off.json",
   );
 }
 
