@@ -1,0 +1,325 @@
+{
+  "schema": "factory-brain-silver-terminal-off/v1",
+  "oracleProfile": "battle-scene-off",
+  "sourceTrace": "tools/compare/traces-groundtruth/battle1-postwin-dense.json",
+  "relativeTo": "the staged source-owned Noland-silver seventh-win Factory Lobby CB2_LoadMap handoff after canonical prefix tick 29601",
+  "construction": {
+    "writes": [
+      {
+        "target": "frontier.challengeStatus",
+        "offset": "0xCA8",
+        "value": 3,
+        "source": "BattleFrontier_BattleFactoryBattleRoom/scripts.inc:109-111 (WarpToLobbyWon)"
+      },
+      {
+        "target": "frontier.curChallengeBattleNum",
+        "offset": "0xCB2",
+        "value": 7,
+        "source": "BattleFrontier_BattleFactoryBattleRoom/scripts.inc:100-105"
+      },
+      {
+        "target": "frontier.factoryWinStreaks[SINGLES][LEVEL_50]",
+        "offset": "0xDE2",
+        "value": 21,
+        "source": "docs/noland-brain-staging-design.md S3.2 current_streak=challengeNum*7+battleNum (=20 entering, +1 this win)"
+      },
+      {
+        "target": "frontier.battlePoints",
+        "offset": "0xEB8",
+        "value": 0,
+        "source": "pre-award baseline so the 0->14 mutation is observable"
+      },
+      {
+        "target": "gTrainerBattleOpponent_A",
+        "offset": "0x02038bca (bin/oracle symbols)",
+        "value": 1022,
+        "source": "frontier_util.c:1839-1845 IsTrainerFrontierBrain / :1892,1902 GiveBattlePoints brain bonus gate"
+      },
+      {
+        "target": "SaveBlock1.flags bit (FLAG_SYS_TOWER_SILVER + FRONTIER_FACILITY_FACTORY*2)",
+        "offset": "byte 281 bit 4 (flag id 2252)",
+        "value": true,
+        "source": "frontier_util.c:1918-1925 GiveFacilitySymbol; already granted by the real BattleRoom DefeatedNolandSilver branch (scripts.inc:128-141) BEFORE this checkpoint's warp, so it is pre-existing state here, not a Lobby mutation"
+      },
+      {
+        "target": "SaveBlock1.location/gLastUsedWarp/gMain.callback2",
+        "value": "Factory Lobby 4,8 / Factory Battle Room provenance / CB2_LoadMap",
+        "source": "BattleFrontier_BattleFactoryBattleRoom/scripts.inc:222-227; overworld.c:540-546,1572-1587"
+      }
+    ],
+    "notWritten": [
+      "field script",
+      "message/text printer",
+      "tasks/windows",
+      "party",
+      "sound/fanfare",
+      "record result",
+      "renderer/framebuffer"
+    ],
+    "sourceContinuation": "BattleFrontier_BattleFactoryBattleRoom -> CB2_LoadMap -> BattleFrontier_BattleFactoryLobby WonChallenge (frontier_isbrain branch) -> GiveBattlePoints (+10 brain bonus) -> AskRecordBattle"
+  },
+  "controls": [
+    {
+      "relativeTick": 300,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "relativeTick": 700,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "relativeTick": 1600,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "relativeTick": 2700,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "relativeTick": 4000,
+      "buttons": [
+        "A"
+      ]
+    },
+    {
+      "relativeTick": 4900,
+      "buttons": [
+        "A"
+      ]
+    }
+  ],
+  "timeline": {
+    "printer": [
+      {
+        "value": [
+          0,
+          0
+        ],
+        "start": 1,
+        "end": 37
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 38,
+        "end": 96
+      },
+      {
+        "value": [
+          1,
+          3
+        ],
+        "start": 97,
+        "end": 299
+      },
+      {
+        "value": [
+          1,
+          4
+        ],
+        "start": 300,
+        "end": 304
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 305,
+        "end": 328
+      },
+      {
+        "value": [
+          0,
+          0
+        ],
+        "start": 329,
+        "end": 702
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 703,
+        "end": 768
+      },
+      {
+        "value": [
+          1,
+          3
+        ],
+        "start": 769,
+        "end": 1599
+      },
+      {
+        "value": [
+          1,
+          4
+        ],
+        "start": 1600,
+        "end": 1604
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 1605,
+        "end": 1640
+      },
+      {
+        "value": [
+          0,
+          0
+        ],
+        "start": 1641,
+        "end": 2700
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 2701,
+        "end": 2737
+      },
+      {
+        "value": [
+          0,
+          0
+        ],
+        "start": 2738,
+        "end": 3017
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 3018,
+        "end": 3070
+      },
+      {
+        "value": [
+          1,
+          2
+        ],
+        "start": 3071,
+        "end": 3999
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 4000,
+        "end": 4046
+      },
+      {
+        "value": [
+          0,
+          0
+        ],
+        "start": 4047,
+        "end": 4221
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 4222,
+        "end": 4285
+      },
+      {
+        "value": [
+          1,
+          3
+        ],
+        "start": 4286,
+        "end": 4899
+      },
+      {
+        "value": [
+          1,
+          4
+        ],
+        "start": 4900,
+        "end": 4904
+      },
+      {
+        "value": [
+          1,
+          0
+        ],
+        "start": 4905,
+        "end": 4919
+      },
+      {
+        "value": [
+          0,
+          0
+        ],
+        "start": 4920,
+        "end": 4924
+      }
+    ],
+    "recordMenu": [
+      {
+        "value": null,
+        "start": 1,
+        "end": 4921
+      },
+      {
+        "value": 1,
+        "start": 4922,
+        "end": 4922
+      },
+      {
+        "value": 0,
+        "start": 4923,
+        "end": 4924
+      }
+    ],
+    "firstBattlePointMutation": 2701,
+    "firstPartyRestore": 4049,
+    "firstChallengeStatusClear": 4049,
+    "recordMenuDraw": 4922,
+    "recordMenuDelayZero": 4923,
+    "silverSymbolFlagStaysSet": true,
+    "trainerBattleOpponentAStaysBrain": true
+  },
+  "recordMenuControls": {
+    "drawFrameRejectedA": {
+      "tick": 4922,
+      "nextFrame": {
+        "menuAlive": true,
+        "result": 255
+      }
+    },
+    "firstAcceptedDefaultNoA": {
+      "tick": 4924,
+      "nextFrame": {
+        "menuAlive": false,
+        "result": 1
+      }
+    }
+  },
+  "limits": {
+    "noPngOrRgbAssets": true,
+    "noProductionRendererUse": true,
+    "framebufferEvidence": "raw RGB888 SHA-256 only",
+    "roomyScheduledInputs": true
+  }
+}
