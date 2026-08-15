@@ -61,6 +61,8 @@ pub mod battle_script_trysetgrudge;
 pub mod battle_script_trysetgrudge_vectors_gen;
 pub mod battle_script_trysetmagiccoat;
 pub mod battle_script_trysetmagiccoat_vectors_gen;
+pub mod battle_script_trysetsnatch;
+pub mod battle_script_trysetsnatch_vectors_gen;
 pub mod damage_calc;
 pub mod damage_vectors_gen;
 pub mod factory_ai_battle_history;
