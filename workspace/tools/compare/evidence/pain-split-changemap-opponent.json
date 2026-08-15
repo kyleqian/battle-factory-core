@@ -1,0 +1,1287 @@
+{
+  "schema": "pain-split-normalized-change-map/v1",
+  "side": "opponent-front",
+  "sourceWindow": {
+    "startFrame": 446,
+    "endFrame": 526,
+    "frameCount": 81
+  },
+  "creation": {
+    "projectilePairStarts": [
+      4,
+      29,
+      54
+    ],
+    "movementPairStarts": [
+      16,
+      41,
+      66
+    ],
+    "projectilePeak": 2
+  },
+  "audio": [
+    {
+      "age": 16,
+      "panX": [
+        0,
+        63,
+        0,
+        0
+      ],
+      "status": 0
+    },
+    {
+      "age": 41,
+      "panX": [
+        0,
+        63,
+        0,
+        0
+      ],
+      "status": 0
+    },
+    {
+      "age": 66,
+      "panX": [
+        0,
+        63,
+        0,
+        0
+      ],
+      "status": 0
+    }
+  ],
+  "changedRegisters": {},
+  "latches": {
+    "hardwareOamEqualsPrecedingSoftware": "80/80",
+    "hardwareMatricesEqualPrecedingSoftware": "77/80",
+    "hardwarePaletteEqualsPrecedingFaded": "80/80",
+    "attackerMatrixEqualsPriorSource": "77/80",
+    "attackerMatrixEqualsTwoBackSource": "76/79",
+    "targetMatrixEqualsPriorSource": "77/80",
+    "targetMatrixEqualsTwoBackSource": "76/79",
+    "attackerSourceMatrixChanges": [
+      16,
+      28,
+      41,
+      53,
+      66,
+      78
+    ],
+    "attackerHardwareMatrixChanges": [
+      17,
+      30,
+      42,
+      55,
+      67,
+      80
+    ],
+    "targetSourceMatrixChanges": [
+      16,
+      28,
+      41,
+      53,
+      66,
+      78
+    ],
+    "targetHardwareMatrixChanges": [
+      17,
+      30,
+      42,
+      55,
+      67,
+      80
+    ]
+  },
+  "state": {
+    "attacker": 1,
+    "target": 0,
+    "startHp": {
+      "player": 156,
+      "opponent": 117
+    },
+    "painSplitPp": 19,
+    "gameplayRngTransitions": [],
+    "animationRngTransitions": {
+      "first": 1,
+      "last": 80,
+      "count": 80,
+      "everyComparableRow": true
+    },
+    "partyRowsComplete": true
+  },
+  "resourceTags": {
+    "tag": 10239,
+    "palettePresent": {
+      "first": 1,
+      "last": 79,
+      "count": 79
+    },
+    "tilePresent": {
+      "first": 1,
+      "last": 79,
+      "count": 79
+    }
+  },
+  "cleanup": {
+    "age": 80,
+    "active": false,
+    "visualTasks": 0,
+    "soundTasks": 0,
+    "projectileCount": 0,
+    "painSplitPaletteTagPresent": false,
+    "painSplitTileTagPresent": false
+  },
+  "rows": [
+    {
+      "age": 0,
+      "frame": 446,
+      "scriptOffset": 0,
+      "active": true,
+      "sha256": "2e67154ad6a8ccb9add953e80efce4817eb3fa563d23303f1c4336a92118f5df",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 1,
+      "frame": 447,
+      "scriptOffset": 3,
+      "active": true,
+      "sha256": "9fa7b53a73eefc06d9787f2d86e9aaf16e13522f5982ccb887069dee3e3bcc1e",
+      "changedPixels": 200,
+      "bounds": [
+        160,
+        65,
+        191,
+        72
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 2,
+      "frame": 448,
+      "scriptOffset": 3,
+      "active": true,
+      "sha256": "9fa7b53a73eefc06d9787f2d86e9aaf16e13522f5982ccb887069dee3e3bcc1e",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 3,
+      "frame": 449,
+      "scriptOffset": 3,
+      "active": true,
+      "sha256": "9fa7b53a73eefc06d9787f2d86e9aaf16e13522f5982ccb887069dee3e3bcc1e",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 4,
+      "frame": 450,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "9fa7b53a73eefc06d9787f2d86e9aaf16e13522f5982ccb887069dee3e3bcc1e",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 2
+    },
+    {
+      "age": 5,
+      "frame": 451,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "3a19c8b50cf598034b94288d2c680dac7c929777bc3baf07b501adca131e2f06",
+      "changedPixels": 72,
+      "bounds": [
+        60,
+        0,
+        173,
+        63
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 6,
+      "frame": 452,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "eb1c83e7af05f97625624aa556119df130e66a78b63add7a7c13847dc2f7a7c5",
+      "changedPixels": 112,
+      "bounds": [
+        60,
+        0,
+        174,
+        66
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 7,
+      "frame": 453,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "5199007da6938a7847c38e38cd63bc6d85bb88cd697a11b324e43473e64e333f",
+      "changedPixels": 116,
+      "bounds": [
+        61,
+        3,
+        175,
+        70
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 8,
+      "frame": 454,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "e001d55008c82dcd433e2b1924a9742ccb84654a2553e8aab9f016c78b7da780",
+      "changedPixels": 111,
+      "bounds": [
+        62,
+        7,
+        175,
+        74
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 9,
+      "frame": 455,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "d1d25bf26d27d990dfadac9446c61e6b20a354cb3b4603358e1e98915d0fbcab",
+      "changedPixels": 223,
+      "bounds": [
+        60,
+        11,
+        177,
+        81
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 10,
+      "frame": 456,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "03d668b713c4e0b22a41f75f33b18f99c0e2e83ab6b3b93e25dd2853c26f92e8",
+      "changedPixels": 294,
+      "bounds": [
+        60,
+        14,
+        178,
+        86
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 11,
+      "frame": 457,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "2f34e346349c109b6ecb64e2452ec208d759fa56f32ffd5d599128f657547b6c",
+      "changedPixels": 302,
+      "bounds": [
+        61,
+        19,
+        179,
+        92
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 12,
+      "frame": 458,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "14a6352856626a688d5f3e580b35d45f4530b6e7d10c67d9cade248a05b475de",
+      "changedPixels": 294,
+      "bounds": [
+        62,
+        25,
+        179,
+        98
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 13,
+      "frame": 459,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "013bbe4dab9b9e4e055eab1b2b5c43bff0d9b964e4b545c8c7f23ff8ef9491d4",
+      "changedPixels": 316,
+      "bounds": [
+        62,
+        31,
+        180,
+        105
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 14,
+      "frame": 460,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "184d14659ecb8ff5024addb5d72f16d7e07d10b452d8e21d22e59a121765e190",
+      "changedPixels": 280,
+      "bounds": [
+        63,
+        33,
+        181,
+        105
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 15,
+      "frame": 461,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "3762b7a851f524193b17d375745552e1ac3588c844dfaf17e04a57583e41ce02",
+      "changedPixels": 272,
+      "bounds": [
+        64,
+        29,
+        182,
+        100
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 16,
+      "frame": 462,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "accacde1124bf920dbeb2351ead88934cdb249f8bf2bd5843d24ee1e79588d56",
+      "changedPixels": 284,
+      "bounds": [
+        65,
+        25,
+        182,
+        96
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 17,
+      "frame": 463,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "56185b9ba5cf35f1bf9bae6e9d6dd0907e02bef901d638ea50434b7e1f320d4e",
+      "changedPixels": 2241,
+      "bounds": [
+        45,
+        22,
+        197,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 18,
+      "frame": 464,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "d63fc8fdb2b1d90593ce1c0c006a7d1c000ee2fe288d90fe50b12d32d2e742c9",
+      "changedPixels": 268,
+      "bounds": [
+        66,
+        18,
+        185,
+        89
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 19,
+      "frame": 465,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "32843f3b482aed54d4e48394e926384b514ac0438dc9a3a56682b75b7368621f",
+      "changedPixels": 174,
+      "bounds": [
+        66,
+        16,
+        186,
+        86
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 20,
+      "frame": 466,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "3c23e18b9d0f1ea0fe7d931ee3d531949e98748fe75dabce6104385c14d34780",
+      "changedPixels": 1814,
+      "bounds": [
+        41,
+        14,
+        197,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 21,
+      "frame": 467,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "9443f37cd54f09900abc1ea94c44478f40e65ff5b34e1819c32d66eae07564ea",
+      "changedPixels": 154,
+      "bounds": [
+        67,
+        13,
+        187,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 22,
+      "frame": 468,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "5a991968cb2c52926c40a282c76bc50a9a366bce4418543c96b2a3ed7f79f3f4",
+      "changedPixels": 154,
+      "bounds": [
+        68,
+        12,
+        188,
+        81
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 23,
+      "frame": 469,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "d5e27dbb1fe54be5c3aba12f8fcb0a255dbc245c3dc773e80ca6d982c520458d",
+      "changedPixels": 1811,
+      "bounds": [
+        41,
+        12,
+        197,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 24,
+      "frame": 470,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "c37829de187ee96840e7afb9bceb1add319935990d23304c080a519f4673269c",
+      "changedPixels": 106,
+      "bounds": [
+        70,
+        12,
+        189,
+        80
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 25,
+      "frame": 471,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "c37829de187ee96840e7afb9bceb1add319935990d23304c080a519f4673269c",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 26,
+      "frame": 472,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "489dc6bedbc8c9d9e006d3b1ea0b3eb3ac44f1369dd66c6d8a129143bdfcc5d9",
+      "changedPixels": 1665,
+      "bounds": [
+        41,
+        33,
+        197,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 27,
+      "frame": 473,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "489dc6bedbc8c9d9e006d3b1ea0b3eb3ac44f1369dd66c6d8a129143bdfcc5d9",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 28,
+      "frame": 474,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "489dc6bedbc8c9d9e006d3b1ea0b3eb3ac44f1369dd66c6d8a129143bdfcc5d9",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 29,
+      "frame": 475,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "c37829de187ee96840e7afb9bceb1add319935990d23304c080a519f4673269c",
+      "changedPixels": 1665,
+      "bounds": [
+        41,
+        33,
+        197,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 30,
+      "frame": 476,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "67c4ca60cc090e41a9f29ad5be999965acc14c9fb6a7366494f5f25b395b0969",
+      "changedPixels": 2217,
+      "bounds": [
+        44,
+        0,
+        197,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 31,
+      "frame": 477,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "eba8c8e0eddae38d4dba2dc9eb083e16461998ca9f8ff2ec3c04e065f35be277",
+      "changedPixels": 112,
+      "bounds": [
+        44,
+        0,
+        158,
+        66
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 32,
+      "frame": 478,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "f447873f117e6971587af561553c0a6c1d52af12d5d2b783fe43e809cf97ed35",
+      "changedPixels": 116,
+      "bounds": [
+        45,
+        3,
+        159,
+        70
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 33,
+      "frame": 479,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "5b4c58c2f9dfeba5240cc867c132bbfd6870eefdcd719acf04715f4b71537419",
+      "changedPixels": 111,
+      "bounds": [
+        46,
+        7,
+        159,
+        74
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 34,
+      "frame": 480,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "2629683a7afe2842a592a5204eca4ff21516b9e4b1f2bb700c055223429b923e",
+      "changedPixels": 223,
+      "bounds": [
+        44,
+        11,
+        161,
+        81
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 35,
+      "frame": 481,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "0f61c292004a126267945c6a7102b19968a5d48cdc01e9b2fabd8189d47f763a",
+      "changedPixels": 294,
+      "bounds": [
+        44,
+        14,
+        162,
+        86
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 36,
+      "frame": 482,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "04bf0192b23553211dbaf4f9e7c9072168661e8eee9430e59b37e72be184fa27",
+      "changedPixels": 302,
+      "bounds": [
+        45,
+        19,
+        163,
+        92
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 37,
+      "frame": 483,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "787c8a616c7555de8a7396d86a01b15d84331afbd1c29268a74058b1855ea49c",
+      "changedPixels": 294,
+      "bounds": [
+        46,
+        25,
+        163,
+        98
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 38,
+      "frame": 484,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "5a572b481a823a82a8ad2648e921c62adbe99aa8d386b78d76d0f7688a535643",
+      "changedPixels": 316,
+      "bounds": [
+        46,
+        31,
+        164,
+        105
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 39,
+      "frame": 485,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "f9d6b8f93d024fab75fa5b34ad403f53c4fb8dbf7ba4a6e9c8f66e13b089ad15",
+      "changedPixels": 280,
+      "bounds": [
+        47,
+        33,
+        165,
+        105
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 40,
+      "frame": 486,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "b98d58dd9078eda6c742c47b57b069c86e314e59457f2fd15e3015481c3967c4",
+      "changedPixels": 272,
+      "bounds": [
+        48,
+        29,
+        166,
+        100
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 41,
+      "frame": 487,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "b051d4fd20f35cd56501b8d79c1a0dfb3143c6e9d9eaeb6ea8b83eefe877e1f1",
+      "changedPixels": 284,
+      "bounds": [
+        49,
+        25,
+        166,
+        96
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 42,
+      "frame": 488,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "6707ae16a17a1e5e35950be3c9a0d49f1dab034641a499d5a507a780ed580cf8",
+      "changedPixels": 2530,
+      "bounds": [
+        46,
+        22,
+        196,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 43,
+      "frame": 489,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "bb975d77d39b7904c1dced865a96a35da36dbcaacaf44584f96998536fb4aa5f",
+      "changedPixels": 268,
+      "bounds": [
+        50,
+        18,
+        169,
+        89
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 44,
+      "frame": 490,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "8ef40d0b162360cd49404be042e4df6d03677a2f5cc2f410e630ac79fdc56d83",
+      "changedPixels": 174,
+      "bounds": [
+        50,
+        16,
+        170,
+        86
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 45,
+      "frame": 491,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "c8ea8410009749bee86acf45a7f55e1aed77abe39f079f0f27c2b5d9f92d8a0f",
+      "changedPixels": 1631,
+      "bounds": [
+        42,
+        14,
+        196,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 46,
+      "frame": 492,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "7312689fb355a54c7e4a525ee3421cbfe5ca335d384fd7dafb65001059c60761",
+      "changedPixels": 154,
+      "bounds": [
+        51,
+        13,
+        171,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 47,
+      "frame": 493,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "1380a08eb26437c48d3cd680231e29f89d7989d7bfed14001b3ceb6d689088fd",
+      "changedPixels": 154,
+      "bounds": [
+        52,
+        12,
+        172,
+        81
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 48,
+      "frame": 494,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "b41f71c0437135bdc432094219c781093a5f273ebf1d406f4b7c64b05c780425",
+      "changedPixels": 1607,
+      "bounds": [
+        42,
+        12,
+        196,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 49,
+      "frame": 495,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "389d1dc6e2b9b1a8b980c4e820d39b9657ef6a3548f594d0145a1da5fb887350",
+      "changedPixels": 106,
+      "bounds": [
+        54,
+        12,
+        173,
+        80
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 50,
+      "frame": 496,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "389d1dc6e2b9b1a8b980c4e820d39b9657ef6a3548f594d0145a1da5fb887350",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 51,
+      "frame": 497,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "78d1e5ee24bcd26778d88d23eb606eda58d1c7f38c1c3a0dd93c60280f69cb54",
+      "changedPixels": 1457,
+      "bounds": [
+        42,
+        29,
+        196,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 52,
+      "frame": 498,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "78d1e5ee24bcd26778d88d23eb606eda58d1c7f38c1c3a0dd93c60280f69cb54",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 53,
+      "frame": 499,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "78d1e5ee24bcd26778d88d23eb606eda58d1c7f38c1c3a0dd93c60280f69cb54",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 54,
+      "frame": 500,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "389d1dc6e2b9b1a8b980c4e820d39b9657ef6a3548f594d0145a1da5fb887350",
+      "changedPixels": 1457,
+      "bounds": [
+        42,
+        29,
+        196,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 55,
+      "frame": 501,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "aeb78a0e2c8a9a0b918c20cf834dbc8d4877e8949e5de9650a5607b3de1b453a",
+      "changedPixels": 2502,
+      "bounds": [
+        46,
+        0,
+        196,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 56,
+      "frame": 502,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "b375f620f18376c17f7173c1a525b2f68a3312bc13657d3149c37f6749b860bf",
+      "changedPixels": 112,
+      "bounds": [
+        76,
+        0,
+        190,
+        66
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 57,
+      "frame": 503,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "5bb33085d2aa73c5384ec8a9f422cdbb4fb4dcb1e9debdbfc460e4930849f4e6",
+      "changedPixels": 116,
+      "bounds": [
+        77,
+        3,
+        191,
+        70
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 58,
+      "frame": 504,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "bbc6f8b9d4c9ec271ae1d7e871e111e12a9074a6fe69089ed1b214ae04c62720",
+      "changedPixels": 111,
+      "bounds": [
+        78,
+        7,
+        191,
+        74
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 59,
+      "frame": 505,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "be0efe425f1a18620b88e30758f3616fea1a4b9e817beae1354bd1e5ad26e484",
+      "changedPixels": 223,
+      "bounds": [
+        76,
+        11,
+        193,
+        81
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 60,
+      "frame": 506,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "f8c1a6be906337cece00e7fa322962885eb25b18e49e2da4ac7150c5ef80cf0e",
+      "changedPixels": 294,
+      "bounds": [
+        76,
+        14,
+        194,
+        86
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 61,
+      "frame": 507,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "8c0a4cb210e008d121bfd2c94bff14cc4abc0f9a5bf1d7a7a74b43e756e65d0c",
+      "changedPixels": 302,
+      "bounds": [
+        77,
+        19,
+        195,
+        92
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 62,
+      "frame": 508,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "df11857dd3be491d6a3d169b196f01088885b334584605ff73a8fd3553f4be85",
+      "changedPixels": 294,
+      "bounds": [
+        78,
+        25,
+        195,
+        98
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 63,
+      "frame": 509,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "058d99b4c41b650705a972a8ecfc7224af2ece6b5a9eba35a0a0d878e4ec2b70",
+      "changedPixels": 316,
+      "bounds": [
+        78,
+        31,
+        196,
+        105
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 64,
+      "frame": 510,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "ed88798ce43dc4b38ca9a4f2599d5c4f46d17414b2f6a2a92f738c33df121ac1",
+      "changedPixels": 280,
+      "bounds": [
+        79,
+        33,
+        197,
+        105
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 65,
+      "frame": 511,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "5d1a33a2f340828832780aa06853b410f2dab08e8753f2be69b3973d8760fd86",
+      "changedPixels": 272,
+      "bounds": [
+        80,
+        29,
+        198,
+        100
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 66,
+      "frame": 512,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "6756acd4d6f13043bd47f510ed2e4321a7506531a2787838f9c881bddb34b8fd",
+      "changedPixels": 284,
+      "bounds": [
+        81,
+        25,
+        198,
+        96
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 67,
+      "frame": 513,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "21b828c4165fabebb52b7bf546096c62e399146a34e9f17e123efc0865661645",
+      "changedPixels": 2435,
+      "bounds": [
+        39,
+        22,
+        199,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 68,
+      "frame": 514,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "831c2b0b949f9069b50670b9099ca1fedae646c788ee8e5840ddbe4664a3d021",
+      "changedPixels": 268,
+      "bounds": [
+        82,
+        18,
+        201,
+        89
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 69,
+      "frame": 515,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "f1852e4a8c31f35f885e62b776bde53756a793765a40c589a6700f1692bf5827",
+      "changedPixels": 174,
+      "bounds": [
+        82,
+        16,
+        202,
+        86
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 70,
+      "frame": 516,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "17907afc8672cc2969ac9c7a943733263d7f1941368f631afac33549ae1b89b9",
+      "changedPixels": 1658,
+      "bounds": [
+        35,
+        14,
+        202,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 71,
+      "frame": 517,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "d8c3dbd7d89b8273a19be51fd0cec6874e022ec016156a2b54242c23adfd4be5",
+      "changedPixels": 154,
+      "bounds": [
+        83,
+        13,
+        203,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 72,
+      "frame": 518,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "713f863f12f29e0187555530273287a04628ae131bca1daad83b445d703a4682",
+      "changedPixels": 154,
+      "bounds": [
+        84,
+        12,
+        204,
+        81
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 73,
+      "frame": 519,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "7304e24e4e0ff32e8432ffaac7a5cc918d66844b4a5ab25e25dcb58fba26753b",
+      "changedPixels": 1634,
+      "bounds": [
+        35,
+        12,
+        205,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 74,
+      "frame": 520,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "1036c10bb5b7b25755d1b783eb887003d047743d3d7cfe5600cbd7e64ece88d3",
+      "changedPixels": 106,
+      "bounds": [
+        86,
+        12,
+        205,
+        80
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 75,
+      "frame": 521,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "1036c10bb5b7b25755d1b783eb887003d047743d3d7cfe5600cbd7e64ece88d3",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 76,
+      "frame": 522,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "ef4c4835cf7e6b7d4f60c41c58539617ccefc6ae2f8956d455314f8f8f4ab225",
+      "changedPixels": 1484,
+      "bounds": [
+        35,
+        26,
+        199,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 77,
+      "frame": 523,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "ef4c4835cf7e6b7d4f60c41c58539617ccefc6ae2f8956d455314f8f8f4ab225",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 78,
+      "frame": 524,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "ef4c4835cf7e6b7d4f60c41c58539617ccefc6ae2f8956d455314f8f8f4ab225",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 79,
+      "frame": 525,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "1036c10bb5b7b25755d1b783eb887003d047743d3d7cfe5600cbd7e64ece88d3",
+      "changedPixels": 1484,
+      "bounds": [
+        35,
+        26,
+        199,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 80,
+      "frame": 526,
+      "scriptOffset": 167,
+      "active": false,
+      "sha256": "9fa7b53a73eefc06d9787f2d86e9aaf16e13522f5982ccb887069dee3e3bcc1e",
+      "changedPixels": 2328,
+      "bounds": [
+        39,
+        25,
+        199,
+        111
+      ],
+      "projectiles": 0
+    }
+  ]
+}

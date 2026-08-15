@@ -1,0 +1,40 @@
+{
+  "schema": "pain-split-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_PAIN_SPLIT",
+  "moveId": 220,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "coverageCounts": "Level 50: 189/276 exact, 0 partial, 0 staged, 87 unsupported",
+  "carrier": {"setId":374,"label":"FRONTIER_MON_MISDREAVUS_1","species":200},
+  "source": {
+    "audit": "tools/compare/painSplitSourceAudit.ts",
+    "auditSha256": "cc9b010e589e1a5b3bb0f7266cc0e2058f6aa1d2d9db964e07629954c29b9af9",
+    "probe": "tools/compare/painSplitProbe.py",
+    "probeSha256": "c1dacca2687e85334d2d230a42c863595f4a042c4b56666d707b5e6b2df35fd1",
+    "evidenceReplay": "tools/compare/painSplitEvidence.ts",
+    "evidenceReplaySha256": "dd5d1d07e665f65cde415c97fb1c880732a29965a70e0b70f15869358bcbbb9b",
+    "moveBody": {"start":"0x082cb739","endExclusive":"0x082cb7e1","bytes":168,"sha256":"176594e217e7f5116ce5fe1f7821bc109e8ba1d3b368c505b1cd47a93b32fb5b"},
+    "projectileCallbackSha256": "5b5ac6b83f234e067a8374082736385125da2abc38532d7ada6a44c6f450c989",
+    "movementTaskSha256": "20bef8a7a8cb48888b0a82d4db6f7d01854673f661fc13da6005bab0c30e08dd"
+  },
+  "evidenceScope": {"productionAnimationChanged":false,"reducerAdded":false,"typedSeamAdded":false,"compositorAdded":false,"framebufferLookupAdded":false,"coveragePromotion":false,"boundaryOrBarrierChanged":false,"gameplayStateOwned":false,"fullDenseRowsRetained":true,"twiceFreshByteIdentical":true},
+  "orientations": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-pain-split-player-misdreavus-opponent-gengar.json","scenarioSha256":"b07e2776af7efeb1885382eecbca69e022d7666a7982fe3e15d8fc024ff6c43b",
+      "sourceWindow":{"startFrame":445,"endFrame":525,"frameCount":81},"probeJsonSha256":"f3af15c631ca13a2979aaa76b581bc89d207b3b927303c969e76486d74816d44","repeatProbeJsonSha256":"f3af15c631ca13a2979aaa76b581bc89d207b3b927303c969e76486d74816d44",
+      "denseState":"tools/compare/evidence/pain-split-player-dense-state.json.gz","denseStateSha256":"045f1be0dd4cbb22a25bdfb032151b45930a36f137ee17f3122eb95e88e49422",
+      "rawRgbArchive":"tools/compare/evidence/pain-split-player-raw-rgb.tar.gz","rawRgbArchiveSha256":"918c50bceb6758dfd23001c9d8e7eb98b16f4ff038d1e23435a84e09b47fa0df","rawRgbSequenceSha256":"137d9e032709d491a53ffdbb75d552d7535ee5dd1d7fa1ad320cb15116d767ee",
+      "changeMap":"tools/compare/evidence/pain-split-changemap-player.json","changeMapSha256":"229aac9f36b9508dd93aedaf5d92ccf5c84743811cde5b975ca2515be4399f78"
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-pain-split-opponent-misdreavus-player-gengar.json","scenarioSha256":"8289cd7768d2d9706fae404af3571e64af04effedb4a1981c2a7017747f48820",
+      "sourceWindow":{"startFrame":446,"endFrame":526,"frameCount":81},"probeJsonSha256":"6a7e5771bffecff592685f2830d6ab760d44106b6079d6583f330ebd317fdb08","repeatProbeJsonSha256":"6a7e5771bffecff592685f2830d6ab760d44106b6079d6583f330ebd317fdb08",
+      "denseState":"tools/compare/evidence/pain-split-opponent-dense-state.json.gz","denseStateSha256":"5508ce318f1042be835c6caf15166488c7ef90f3a147f650cae33e44006b4146",
+      "rawRgbArchive":"tools/compare/evidence/pain-split-opponent-raw-rgb.tar.gz","rawRgbArchiveSha256":"a58e706148eeea2ff3086ab8eab34cc412329fe3c5d226ebab40b478e5766d0b","rawRgbSequenceSha256":"e2804b16559581fb84145b69ebf56e3b3e586bc72a3d0fbce2fb17306e1c8b2d",
+      "changeMap":"tools/compare/evidence/pain-split-changemap-opponent.json","changeMapSha256":"6351650f1948fd797356ffb6c0ef58aaff9d2654aa162aeb0de9094cce4a11a3"
+    }
+  },
+  "acceptance": {"sourceRows":162,"rawRgbRows":162,"freshRuns":2,"projectilePairStarts":[4,29,54],"movementPairStarts":[16,41,66],"audioStarts":[16,41,66],"firstInactiveCleanupAge":80},
+  "next": "Implement a pure source-relative reducer, typed Scene-ON seam, and source-derived bilateral compositor, then require complete twice-fresh production framebuffer equality before promoting Pain Split alone."
+}

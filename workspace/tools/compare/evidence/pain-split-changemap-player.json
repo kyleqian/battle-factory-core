@@ -1,0 +1,1282 @@
+{
+  "schema": "pain-split-normalized-change-map/v1",
+  "side": "player-back",
+  "sourceWindow": {
+    "startFrame": 445,
+    "endFrame": 525,
+    "frameCount": 81
+  },
+  "creation": {
+    "projectilePairStarts": [
+      4,
+      29,
+      54
+    ],
+    "movementPairStarts": [
+      16,
+      41,
+      66
+    ],
+    "projectilePeak": 2
+  },
+  "audio": [
+    {
+      "age": 16,
+      "panX": [
+        0,
+        -64,
+        0,
+        0
+      ],
+      "status": 0
+    },
+    {
+      "age": 41,
+      "panX": [
+        0,
+        -64,
+        0,
+        0
+      ],
+      "status": 0
+    },
+    {
+      "age": 66,
+      "panX": [
+        0,
+        -64,
+        0,
+        0
+      ],
+      "status": 0
+    }
+  ],
+  "changedRegisters": {},
+  "latches": {
+    "hardwareOamEqualsPrecedingSoftware": "80/80",
+    "hardwareMatricesEqualPrecedingSoftware": "77/80",
+    "hardwarePaletteEqualsPrecedingFaded": "80/80",
+    "attackerMatrixEqualsPriorSource": "77/80",
+    "attackerMatrixEqualsTwoBackSource": "76/79",
+    "targetMatrixEqualsPriorSource": "77/80",
+    "targetMatrixEqualsTwoBackSource": "76/79",
+    "attackerSourceMatrixChanges": [
+      16,
+      28,
+      41,
+      53,
+      66,
+      78
+    ],
+    "attackerHardwareMatrixChanges": [
+      17,
+      30,
+      42,
+      55,
+      67,
+      80
+    ],
+    "targetSourceMatrixChanges": [
+      16,
+      28,
+      41,
+      53,
+      66,
+      78
+    ],
+    "targetHardwareMatrixChanges": [
+      17,
+      30,
+      42,
+      55,
+      67,
+      80
+    ]
+  },
+  "state": {
+    "attacker": 0,
+    "target": 1,
+    "startHp": {
+      "player": 117,
+      "opponent": 156
+    },
+    "painSplitPp": 19,
+    "gameplayRngTransitions": [],
+    "animationRngTransitions": {
+      "first": 1,
+      "last": 80,
+      "count": 80,
+      "everyComparableRow": true
+    },
+    "partyRowsComplete": true
+  },
+  "resourceTags": {
+    "tag": 10239,
+    "palettePresent": {
+      "first": 1,
+      "last": 79,
+      "count": 79
+    },
+    "tilePresent": {
+      "first": 1,
+      "last": 79,
+      "count": 79
+    }
+  },
+  "cleanup": {
+    "age": 80,
+    "active": false,
+    "visualTasks": 0,
+    "soundTasks": 0,
+    "projectileCount": 0,
+    "painSplitPaletteTagPresent": false,
+    "painSplitTileTagPresent": false
+  },
+  "rows": [
+    {
+      "age": 0,
+      "frame": 445,
+      "scriptOffset": 0,
+      "active": true,
+      "sha256": "5a6be8750540f9d4d8bedaf23ffe4729ee475b9a88da08d8a88c14a3851c0e7c",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 1,
+      "frame": 446,
+      "scriptOffset": 3,
+      "active": true,
+      "sha256": "5a6be8750540f9d4d8bedaf23ffe4729ee475b9a88da08d8a88c14a3851c0e7c",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 2,
+      "frame": 447,
+      "scriptOffset": 3,
+      "active": true,
+      "sha256": "5a6be8750540f9d4d8bedaf23ffe4729ee475b9a88da08d8a88c14a3851c0e7c",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 3,
+      "frame": 448,
+      "scriptOffset": 3,
+      "active": true,
+      "sha256": "5a6be8750540f9d4d8bedaf23ffe4729ee475b9a88da08d8a88c14a3851c0e7c",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 4,
+      "frame": 449,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "5a6be8750540f9d4d8bedaf23ffe4729ee475b9a88da08d8a88c14a3851c0e7c",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 2
+    },
+    {
+      "age": 5,
+      "frame": 450,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "b6f7a089d9d269bef5d6e1fd33ccef9f336f3b1326bc72ae421133704613580f",
+      "changedPixels": 72,
+      "bounds": [
+        60,
+        1,
+        173,
+        64
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 6,
+      "frame": 451,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "a5683a91b457f80061620b0a54f414903339c764a511c2436c5f1d0a25205b52",
+      "changedPixels": 113,
+      "bounds": [
+        60,
+        1,
+        174,
+        67
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 7,
+      "frame": 452,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "18c91f67a4fba970881f879f40443855a41b7104a6a0b05f102f6eb73dae4906",
+      "changedPixels": 119,
+      "bounds": [
+        61,
+        4,
+        175,
+        71
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 8,
+      "frame": 453,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "35970a78f3f67a9e3d78d6fabc125de1582c27c1e6339cfdedc7ebbc717ed7a9",
+      "changedPixels": 114,
+      "bounds": [
+        62,
+        8,
+        175,
+        75
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 9,
+      "frame": 454,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "c6f075ac1df6697014a241068fd5a33c3e0611e19ca0a7cd20d47bf18690013d",
+      "changedPixels": 224,
+      "bounds": [
+        60,
+        12,
+        177,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 10,
+      "frame": 455,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "144dea4333ab4fed49555a239073a64f64c0a390ee2fb9c672cf50c4ffdf0aad",
+      "changedPixels": 294,
+      "bounds": [
+        60,
+        15,
+        178,
+        87
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 11,
+      "frame": 456,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "fef9a1bdc35e382e3ea8944356cbc12ac7a984bbe444e093fc0741ff3fe98789",
+      "changedPixels": 302,
+      "bounds": [
+        61,
+        20,
+        179,
+        93
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 12,
+      "frame": 457,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "95b803f78e4a12b1b163379e8743c20cd8173d13c3e8b0e79ee5d91c2a6c6b4f",
+      "changedPixels": 294,
+      "bounds": [
+        62,
+        26,
+        179,
+        99
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 13,
+      "frame": 458,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "d69f8428a0f7ec561ed1336dbdc185a3ab7d669d5ddd47f9a1b40ca398db5653",
+      "changedPixels": 316,
+      "bounds": [
+        62,
+        32,
+        180,
+        106
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 14,
+      "frame": 459,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "d72d2d3b908d286972ffec2ca19231ef74c21e49cc9acc9f33c4b36c905b3a5d",
+      "changedPixels": 280,
+      "bounds": [
+        63,
+        34,
+        181,
+        106
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 15,
+      "frame": 460,
+      "scriptOffset": 31,
+      "active": true,
+      "sha256": "ed6e32f025aaf25101ece19fc39947a3bb368039c53a493e1f5f3425b84b00c2",
+      "changedPixels": 272,
+      "bounds": [
+        64,
+        30,
+        182,
+        101
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 16,
+      "frame": 461,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "bd07481a432d17896d8271e1c6650f1797b68f4ab26f9a2d970498d8cc57d7cd",
+      "changedPixels": 284,
+      "bounds": [
+        65,
+        26,
+        182,
+        97
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 17,
+      "frame": 462,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "53833acd075a22296c37e40ea18803dbe5ec8f36d1dcd8d20513bd833456ef38",
+      "changedPixels": 2878,
+      "bounds": [
+        48,
+        21,
+        208,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 18,
+      "frame": 463,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "caebba542ac2f1b700e4ce57037c4987fda33cef14a13bfc459ce953e1535bf9",
+      "changedPixels": 268,
+      "bounds": [
+        66,
+        19,
+        185,
+        90
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 19,
+      "frame": 464,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "f40b3c4ca6f8420f2fc2c116c3141baab1bb1b934dd1f5d2a6fc34a621a7aeb7",
+      "changedPixels": 174,
+      "bounds": [
+        66,
+        17,
+        186,
+        87
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 20,
+      "frame": 465,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "cdcc5dc7b52b07bb4bd24c4da1caec270220e77b4c9db8879dfb77ec7cae7b24",
+      "changedPixels": 2451,
+      "bounds": [
+        44,
+        15,
+        208,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 21,
+      "frame": 466,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "860a340abc73a47dd740fc320ac4f61128c15921481cd3892e0f96ae720676e2",
+      "changedPixels": 154,
+      "bounds": [
+        67,
+        14,
+        187,
+        83
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 22,
+      "frame": 467,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "76d45b60a065afcc88273746d08886a21220ff9bc89561c6338abbaea7589b57",
+      "changedPixels": 154,
+      "bounds": [
+        68,
+        13,
+        188,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 23,
+      "frame": 468,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "eccaf3bebfb9eece8ea93cef0c8ce1eff6669acc9da41f7a71d6f3b800c02f69",
+      "changedPixels": 2444,
+      "bounds": [
+        44,
+        13,
+        208,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 24,
+      "frame": 469,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "3e783c5a628d3ba2ca8a7f6b8de217cc9e1a2b2a9d8bf64cb55fd22cf2856354",
+      "changedPixels": 106,
+      "bounds": [
+        70,
+        13,
+        189,
+        81
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 25,
+      "frame": 470,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "3e783c5a628d3ba2ca8a7f6b8de217cc9e1a2b2a9d8bf64cb55fd22cf2856354",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 26,
+      "frame": 471,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "310cd69a14137b3a2041377789a5d03f57b84832262e2e8f25a5fae0448d8100",
+      "changedPixels": 2307,
+      "bounds": [
+        44,
+        31,
+        208,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 27,
+      "frame": 472,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "310cd69a14137b3a2041377789a5d03f57b84832262e2e8f25a5fae0448d8100",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 28,
+      "frame": 473,
+      "scriptOffset": 57,
+      "active": true,
+      "sha256": "310cd69a14137b3a2041377789a5d03f57b84832262e2e8f25a5fae0448d8100",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 29,
+      "frame": 474,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "3e783c5a628d3ba2ca8a7f6b8de217cc9e1a2b2a9d8bf64cb55fd22cf2856354",
+      "changedPixels": 2307,
+      "bounds": [
+        44,
+        31,
+        208,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 30,
+      "frame": 475,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "4914ca70e443e8614321d97cbb4b6f1675ccdf72848f0091dd59603a6e6cc48b",
+      "changedPixels": 2911,
+      "bounds": [
+        44,
+        1,
+        208,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 31,
+      "frame": 476,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "9b6941502c4a260195253fd291fc30523e3536488388b16f75a49f7a53b1264f",
+      "changedPixels": 113,
+      "bounds": [
+        44,
+        1,
+        158,
+        67
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 32,
+      "frame": 477,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "4282a029dd41da5ece86c1b294b81c3e4b2b58f3bd905cb9b21f06e275db759b",
+      "changedPixels": 119,
+      "bounds": [
+        45,
+        4,
+        159,
+        71
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 33,
+      "frame": 478,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "20c6fe214fdc10ec2e7a35ba0412f0ef2f4b93c14a0a0904aa51f68c66edcd2b",
+      "changedPixels": 114,
+      "bounds": [
+        46,
+        8,
+        159,
+        75
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 34,
+      "frame": 479,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "4c6b17f68227d9c6fcad318f932ecd1adaa292a2e50cddac3a947dddfb65c1f8",
+      "changedPixels": 224,
+      "bounds": [
+        44,
+        12,
+        161,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 35,
+      "frame": 480,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "944f0fc277cf87ca85f1605b78f0dfff798a53fe8059b6c2a1e49cfa8dca3a4f",
+      "changedPixels": 294,
+      "bounds": [
+        44,
+        15,
+        162,
+        87
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 36,
+      "frame": 481,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "ea1dafaf011d1f3171730c6c79e1b8dfecc356b540ad0261c8bb23ce07e7e63a",
+      "changedPixels": 302,
+      "bounds": [
+        45,
+        20,
+        163,
+        93
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 37,
+      "frame": 482,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "8c74a5a24d989662794f82886ae36480013e031325b7932a4411b710ef58b71b",
+      "changedPixels": 294,
+      "bounds": [
+        46,
+        26,
+        163,
+        99
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 38,
+      "frame": 483,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "3e76ab96cdded821d7385797e480cb313cd1ba852fcde4d3db02b64ea81de431",
+      "changedPixels": 316,
+      "bounds": [
+        46,
+        32,
+        164,
+        106
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 39,
+      "frame": 484,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "cd6d830f5e61e40df3f13cd26f3051a396f62d74b62ddb3f574b20265131e2f7",
+      "changedPixels": 280,
+      "bounds": [
+        47,
+        34,
+        165,
+        106
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 40,
+      "frame": 485,
+      "scriptOffset": 86,
+      "active": true,
+      "sha256": "48cae70ad5b9e255bcb4cfd1a26b2311a0f2ce86582f49291eeed57890c1b1d5",
+      "changedPixels": 272,
+      "bounds": [
+        48,
+        30,
+        166,
+        101
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 41,
+      "frame": 486,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "5acc804641767eac4302e7fec604dc65983507b67ddd019fc9d68489d1af31f6",
+      "changedPixels": 284,
+      "bounds": [
+        49,
+        26,
+        166,
+        97
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 42,
+      "frame": 487,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "c9790e84e4acd598ed186b632b02fd07518aba6f0faf586c61038a61f1f72639",
+      "changedPixels": 3385,
+      "bounds": [
+        49,
+        20,
+        209,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 43,
+      "frame": 488,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "ee400bd93c9697c5b111dd28565b05af93bee32da89ab4f15fea25a58a74a6db",
+      "changedPixels": 268,
+      "bounds": [
+        50,
+        19,
+        169,
+        90
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 44,
+      "frame": 489,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "10c43ec641c5bdbd1d6e575025aa463b079f2568539c7b5ddabc07f476eb9d7f",
+      "changedPixels": 174,
+      "bounds": [
+        50,
+        17,
+        170,
+        87
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 45,
+      "frame": 490,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "f62628f63aecbad07cda3a020c76931d8ed7418259e8c9f600d05e1c6660a8ae",
+      "changedPixels": 2229,
+      "bounds": [
+        51,
+        15,
+        209,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 46,
+      "frame": 491,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "23bf437c8e6aadc563d4888ac2498539488113d6b78db089c51b2d735403f3af",
+      "changedPixels": 154,
+      "bounds": [
+        51,
+        14,
+        171,
+        83
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 47,
+      "frame": 492,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "034cbb06c51cae36549eb792702bcf51f93a06751ca714202698f8294c7678a8",
+      "changedPixels": 154,
+      "bounds": [
+        52,
+        13,
+        172,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 48,
+      "frame": 493,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "48fca3a0dea3fd6c2e8c7a8aaf901d54fced2730a933ed6d436f4f40ffa93be9",
+      "changedPixels": 2211,
+      "bounds": [
+        51,
+        13,
+        209,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 49,
+      "frame": 494,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "c4a4bab0a382216d4a5341b116eb038e16b852f7347237db02a31fedb064e4e4",
+      "changedPixels": 106,
+      "bounds": [
+        54,
+        13,
+        173,
+        81
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 50,
+      "frame": 495,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "c4a4bab0a382216d4a5341b116eb038e16b852f7347237db02a31fedb064e4e4",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 51,
+      "frame": 496,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "651227620fa9b51be417c3c1b1d2d9a9641410c19a800faaad6a62744b122953",
+      "changedPixels": 2061,
+      "bounds": [
+        51,
+        20,
+        209,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 52,
+      "frame": 497,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "651227620fa9b51be417c3c1b1d2d9a9641410c19a800faaad6a62744b122953",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 53,
+      "frame": 498,
+      "scriptOffset": 112,
+      "active": true,
+      "sha256": "651227620fa9b51be417c3c1b1d2d9a9641410c19a800faaad6a62744b122953",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 54,
+      "frame": 499,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "c4a4bab0a382216d4a5341b116eb038e16b852f7347237db02a31fedb064e4e4",
+      "changedPixels": 2061,
+      "bounds": [
+        51,
+        20,
+        209,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 55,
+      "frame": 500,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "304526144fc936c56ac62d661500a3698b51bb493661cbfeb0315d238db5f8e0",
+      "changedPixels": 3355,
+      "bounds": [
+        49,
+        1,
+        209,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 56,
+      "frame": 501,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "b5ae57ff9e630bea55a97d7a77835f0877e73195edbe888740ef0d5654dc6c07",
+      "changedPixels": 113,
+      "bounds": [
+        76,
+        1,
+        190,
+        67
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 57,
+      "frame": 502,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "0cf018e15770f291c71ba3d7630e51e0da68e8fd67debe727c3f5862b9dac6a8",
+      "changedPixels": 119,
+      "bounds": [
+        77,
+        4,
+        191,
+        71
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 58,
+      "frame": 503,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "c6d146c4f6aa3e024746b2abba70feff6f915be9c7f4b416905445e6c2915467",
+      "changedPixels": 115,
+      "bounds": [
+        78,
+        8,
+        191,
+        75
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 59,
+      "frame": 504,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "7082db8e5c94e1afa0f099e99f0e1b416d3cf8698045134643aeefc149458302",
+      "changedPixels": 225,
+      "bounds": [
+        76,
+        12,
+        193,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 60,
+      "frame": 505,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "6e8731fb42e11396d5d92d86bac582d667dae25cda9a0c3860b5fc70a30bf4d4",
+      "changedPixels": 294,
+      "bounds": [
+        76,
+        15,
+        194,
+        87
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 61,
+      "frame": 506,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "f36cbeeac7c94611acce1395b5065a17e5dcd3f84e0ec215f1ae33b66f00e931",
+      "changedPixels": 302,
+      "bounds": [
+        77,
+        20,
+        195,
+        93
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 62,
+      "frame": 507,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "8b6f69da564c43a6061ca8424784826cf708f04987c95260752395a73ac447df",
+      "changedPixels": 294,
+      "bounds": [
+        78,
+        26,
+        195,
+        99
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 63,
+      "frame": 508,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "4d2923b5194295a51dc043fa4112ea4b508eb5ee600f8e7dca54327c18f608dd",
+      "changedPixels": 316,
+      "bounds": [
+        78,
+        32,
+        196,
+        106
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 64,
+      "frame": 509,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "acf5cded4db3d5c695a1c993943d6704371a9252fa4fc4bebaa6aa5bd44f8191",
+      "changedPixels": 280,
+      "bounds": [
+        79,
+        34,
+        197,
+        106
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 65,
+      "frame": 510,
+      "scriptOffset": 141,
+      "active": true,
+      "sha256": "bb52bf29a0965945fedf175d67f215332ceef5e0f922276179b4153b61378ecf",
+      "changedPixels": 272,
+      "bounds": [
+        80,
+        30,
+        198,
+        101
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 66,
+      "frame": 511,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "07af797344ddbcb81281b8ee40fc464ae250e30886bf830b6e9092687db24cba",
+      "changedPixels": 284,
+      "bounds": [
+        81,
+        26,
+        198,
+        97
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 67,
+      "frame": 512,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "7eba6ef0e98b44e4c742fc6bc0f11f21de31bd03af95827b82db1785973ff1d8",
+      "changedPixels": 3109,
+      "bounds": [
+        43,
+        20,
+        211,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 68,
+      "frame": 513,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "f68a6a1c2998d14efbaedc66e3b57c26bd3ede1bbf394495221e4c0c3c1ec8d8",
+      "changedPixels": 268,
+      "bounds": [
+        82,
+        19,
+        201,
+        90
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 69,
+      "frame": 514,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "64ceb57c012b33840fa2f77511a8549044781b1ffb546361422beb849bc1ebbc",
+      "changedPixels": 174,
+      "bounds": [
+        82,
+        17,
+        202,
+        87
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 70,
+      "frame": 515,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "5c7e60390f3842fcc1adaa5d2fb7b378328397eefb47fdc4ae802332051b2b67",
+      "changedPixels": 2133,
+      "bounds": [
+        39,
+        15,
+        211,
+        111
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 71,
+      "frame": 516,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "83ad94aed8aa596d1b80cdeb0d3ab1a692a3ec639131f30444f26d5bd27eca03",
+      "changedPixels": 154,
+      "bounds": [
+        83,
+        14,
+        203,
+        83
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 72,
+      "frame": 517,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "5be2ea0f2920148ca08cc9f85427d27dfbb9d66497d2b1bdd53c6e874dd45ffb",
+      "changedPixels": 154,
+      "bounds": [
+        84,
+        13,
+        204,
+        82
+      ],
+      "projectiles": 2
+    },
+    {
+      "age": 73,
+      "frame": 518,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "c83703ec5dbbd87cae53f41635fdb114c8d0ad3837f67595c3e6fbc165440a67",
+      "changedPixels": 2109,
+      "bounds": [
+        39,
+        13,
+        211,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 74,
+      "frame": 519,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "141a9267f89ee70fcc026bdba09b19f2d51f19c1d7052887144d56e9b8f01706",
+      "changedPixels": 106,
+      "bounds": [
+        86,
+        13,
+        205,
+        81
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 75,
+      "frame": 520,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "141a9267f89ee70fcc026bdba09b19f2d51f19c1d7052887144d56e9b8f01706",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 76,
+      "frame": 521,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "4cfce6ce2140211d03fe7fc670843b708fe2edaba93194aa1d36714b2279f840",
+      "changedPixels": 1959,
+      "bounds": [
+        39,
+        20,
+        211,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 77,
+      "frame": 522,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "4cfce6ce2140211d03fe7fc670843b708fe2edaba93194aa1d36714b2279f840",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 78,
+      "frame": 523,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "4cfce6ce2140211d03fe7fc670843b708fe2edaba93194aa1d36714b2279f840",
+      "changedPixels": 0,
+      "bounds": null,
+      "projectiles": 0
+    },
+    {
+      "age": 79,
+      "frame": 524,
+      "scriptOffset": 167,
+      "active": true,
+      "sha256": "141a9267f89ee70fcc026bdba09b19f2d51f19c1d7052887144d56e9b8f01706",
+      "changedPixels": 1959,
+      "bounds": [
+        39,
+        20,
+        211,
+        111
+      ],
+      "projectiles": 0
+    },
+    {
+      "age": 80,
+      "frame": 525,
+      "scriptOffset": 167,
+      "active": false,
+      "sha256": "5a6be8750540f9d4d8bedaf23ffe4729ee475b9a88da08d8a88c14a3851c0e7c",
+      "changedPixels": 3051,
+      "bounds": [
+        43,
+        20,
+        211,
+        111
+      ],
+      "projectiles": 0
+    }
+  ]
+}

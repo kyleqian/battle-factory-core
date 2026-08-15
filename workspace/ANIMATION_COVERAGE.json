@@ -6000,6 +6000,18 @@
     "MOVE_DOUBLE_KICK"
    ],
    "goal": "MOVE_THRASH exact: its sole legal Level-50 set-408 TAUROS body passes twice-fresh 103/103 bilateral source reducer, typed seam, task/sprite allocator, software/hardware OAM/matrix/palette/tag/register/audio, immutable-state, raw-RGB/change-map, and production framebuffer acceptance through first inactive cleanup. Its own maps retain plain fist/foot and child OAM plus vertical position at RAM+1, the horizontal affine task at RAM+2, and all three ShakeMonInPlace target outlines at RAM+2 (94.2-98.1% target-palette witness fit versus 60.5-70.6% at RAM+1). MOVE_DOUBLE_KICK independently passes its distinct 36/36 bilateral fist/foot, AnimTask_ShakeMon, monbg/alpha/wait/cleanup acceptance unit twice fresh. Shared sprite source transfers no acceptance."
+  },
+  {
+   "id": "pain-split-projectile-affine",
+   "components": [
+    "asset:ANIM_TAG_PAIN_SPLIT",
+    "sprite:gPainSplitProjectileSpriteTemplate",
+    "task:AnimTask_PainSplitMovement"
+   ],
+   "representatives": [
+    "MOVE_PAIN_SPLIT"
+   ],
+   "goal": "MOVE_PAIN_SPLIT evidence checkpoint: complete legal Misdreavus/Gengar player-back 445..525 and opponent-front 446..526 windows retain all 162 source/task/sprite/software+hardware-OAM/matrix/palette/tag/register/audio/party/engine/RNG/raw-RGB rows twice fresh through first inactive cleanup. The three projectile-pair phases start at ages 4/29/54, movement-pair phases and Swagger2 cues at 16/41/66, and the live affine setup is RAM+1 while reset is RAM+2. A pure reducer, typed seam, compositor, production framebuffer acceptance, and MOVE_PAIN_SPLIT coverage promotion remain open; the track conveys no sibling credit."
   }
  ],
  "variantAudits": {
