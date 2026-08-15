@@ -503,7 +503,7 @@ console.log(JSON.stringify({
   controls: {
     MOVE_ABSORB: "exact control only; no latch, timeline, or acceptance inheritance",
     MOVE_MEGA_DRAIN: "exact control only; no latch, timeline, or acceptance inheritance",
-    MOVE_GIGA_DRAIN: "source/staging checkpoint only; remains independently unsupported",
+    MOVE_GIGA_DRAIN: "exact after independent bilateral dense acceptance",
   },
-  latchRequirement: "No Absorb or Mega Drain latch is inherited. No dynamic evidence, reducer, seam, compositor, or coverage credit is claimed by this source-only checkpoint.",
+  latchRequirement: "No Absorb or Mega Drain latch is inherited; Giga Drain's exact credit comes only from its independent bilateral dense evidence, reducer, seam, and compositor.",
 }));

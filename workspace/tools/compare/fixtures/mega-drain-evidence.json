@@ -16,7 +16,7 @@
     "pairedOrbs": 16,
     "greenBlend": "0->8->0",
     "probe": "tools/compare/megaDrainProbe.py",
-    "probeSha256": "d59fd32b80d3b1dc124add7f0ed6890e613cc2325c1328d029cfb91a32994cac"
+    "probeSha256": "24c245f578c473309e76d2a26c9fc64569aa428108fb9c76f0d424e625a269b2"
   },
   "evidenceScope": {
     "productionAnimationChanged": false,
@@ -33,7 +33,7 @@
   "batchSiblingAudit": {
     "MOVE_ABSORB": "exact control only; no evidence, latch, or acceptance inheritance",
     "MOVE_DREAM_EATER": "independently unsupported",
-    "MOVE_GIGA_DRAIN": "independently unsupported",
+    "MOVE_GIGA_DRAIN": "independently exact; no evidence, latch, timeline, or acceptance inheritance",
     "coverageCredit": false
   },
   "stateContract": {

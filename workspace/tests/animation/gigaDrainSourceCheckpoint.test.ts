@@ -71,7 +71,7 @@ describe("MOVE_GIGA_DRAIN source and legal staging checkpoint", () => {
       controls: {
         MOVE_ABSORB: "exact control only; no latch, timeline, or acceptance inheritance",
         MOVE_MEGA_DRAIN: "exact control only; no latch, timeline, or acceptance inheritance",
-        MOVE_GIGA_DRAIN: "source/staging checkpoint only; remains independently unsupported",
+        MOVE_GIGA_DRAIN: "exact after independent bilateral dense acceptance",
       },
     });
     expect(audit.components).toEqual([
@@ -134,11 +134,11 @@ describe("MOVE_GIGA_DRAIN source and legal staging checkpoint", () => {
     const attacker = path.includes("player-roselia") ? parties.player : parties.opponent;
     const defender = path.includes("player-roselia") ? parties.opponent : parties.player;
     expect(attacker.every((mon) => mon.species === 363 && mon.level === 50
-      && mon.nature === 6 && mon.item > 0 && mon.abilitySlot === 0
+      && mon.nature === 6 && typeof mon.item === "number" && mon.item > 0 && mon.abilitySlot === 0
       && JSON.stringify(mon.moves) === JSON.stringify([202, 202, 202, 202]))).toBe(true);
     expect(attacker[0]?.item).toBe(183);
     expect(defender.every((mon) => mon.species === 95 && mon.level === 50
-      && mon.item > 0 && mon.abilitySlot === 0
+      && typeof mon.item === "number" && mon.item > 0 && mon.abilitySlot === 0
       && JSON.stringify(mon.moves) === JSON.stringify([33, 33, 33, 33]))).toBe(true);
     expect(new Set([...attacker, ...defender].map((mon) => mon.item)).size).toBe(6);
     expect(createHash("sha256").update(bytes).digest("hex")).toBe(
