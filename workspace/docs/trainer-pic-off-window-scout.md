@@ -1508,3 +1508,671 @@ node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick.ts
 ```
 Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
 `:8014`). Read-only (no `src/` or fixture writes); ran once this session.
+
+### Round 15 (2026-08-14, SIDE lane): source-derived AI-ack model built (structural, not a closed-form tick formula — its one testable prediction is FALSIFIED by a 3rd fixture); +7 family's extra tick(s) decisively located in the switch-in-loop leg, NOT the AI-ack leg — corrects the "not yet read" note on `battle_ai_switch_items.c` and the "move-scoring logic" characterization in ISSUES #87/PROGRESS 1265
+
+**Assignment (queue item (ii), user decision 2026-08-14):** source-model the
+opponent-AI `ChooseAction` ack-timing leg from `battle_ai_switch_items.c` (+
+the dispatch/ack plumbing in `battle_main.c` and the AI entry point), predict
+COMBUSKEN=3/MAGNETON=2 from source-visible properties alone, then run the
+tick-by-tick trace on one +7 fixture and report which leg carries its extra
+ticks.
+
+**Step 1 — locate the AI-ack leg in source exactly, correcting a
+mischaracterization.** `HandleTurnActionSelectionState`'s
+`STATE_BEFORE_ACTION_CHOSEN` case (`battle_main.c:4143-4174`) dispatches
+`BtlController_EmitChooseAction` + `MarkBattlerForControllerExec` for *both*
+battlers inside the same call (no early return in that branch), matching the
+RAM trace's `execFlags==3` dispatch tick showing both `playerCmd` and
+`opponentCmd` flip to 18 (`CONTROLLER_CHOOSEACTION`,
+`battle_controllers.h:204`) simultaneously. On the opponent side,
+`SetControllerToOpponent` (`battle_controller_opponent.c:175-178`) wires the
+per-battler dispatcher to `OpponentBufferRunCommand`
+(`battle_controller_opponent.c:180-189`), which for command 18 calls
+`OpponentHandleChooseAction` (`battle_controller_opponent.c:1540-1544`) —
+**`AI_TrySwitchOrUseItem()` then an immediate
+`OpponentBufferExecCompleted()`, both inside one non-yielding call.** This is
+the whole leg: **not** `battle_ai_switch_items.c`'s *move-scoring* logic
+(ISSUES #87 and PROGRESS 1265's phrasing) — that's a different function,
+`BattleAI_ChooseMoveOrAction` (`battle_ai_script_commands.c:382`), dispatched
+by a *separate later* controller command, `CONTROLLER_CHOOSEMOVE` (=20,
+`battle_controllers.h:206`), only once `AI_TrySwitchOrUseItem` has already
+committed to `B_ACTION_USE_MOVE`. Confirmed directly in the RAM trace: in
+every fixture below, `opponentControllerCommand` stays pinned at **18** for
+the *entire* measured dispatch→ready span and only flips to **20** on the
+frame *after* ready (GRIMER/YOSHI: cmd 20 first appears at frame 1854, one
+tick past readyTick 1853; KADABRA/SHIZUKA: frame 1886 vs. readyTick 1885) —
+`BattleAI_ChooseMoveOrAction`'s own cost is provably outside this leg and
+outside this issue's residual window entirely.
+
+**Step 2 — the leg is switch/item AI decision-making, not a hand-built
+multi-tick state machine.** `AI_TrySwitchOrUseItem`
+(`battle_ai_switch_items.c:528-603`) is: `if (BATTLE_TYPE_TRAINER) { if
+(ShouldSwitch()) {...; return;} else if (ShouldUseItem()) {return;} }
+BtlController_EmitTwoReturnValues(B_ACTION_USE_MOVE, ...)`. Unlike the
+switch-in ability/item loop (`switchInAbilitiesCounter`/
+`switchInItemsCounter`, explicit counters that persist across calls and
+`return` after each battler to yield a tick), nothing in this call graph
+saves state and returns early to resume next tick — `ShouldSwitch`,
+`ShouldUseItem`, and every helper they call run to completion inside one
+`BattleMainCB1` iteration (`battle_main.c:3026-3032`: `gBattleMainFunc()`
+then every battler's controller func run in the same call). So a tick-level
+gap between dispatch and ack can only come from raw ARM7TDMI cycle cost
+spilling past the fixed ~280,896-cycle (~1/59.7275s) VBlank boundary the
+oracle's frame counter is keyed to — not a designed per-tick delay. This is
+corroborated by the trace itself: when the *following* CHOOSEMOVE step is
+cheap enough (as it evidently is for COMBUSKEN, whose `B_ACTION_USE_MOVE`
+decision was already visible one tick after ready), dispatch and ack for
+*that* command land in the **same** captured frame (cmd flips 18→20 with
+`execFlags` already back down to 1, i.e. re-completed within the frame it was
+issued) — proving same-frame dispatch+ack is achievable when the underlying
+work is cheap, so `ChooseAction`'s multi-tick gap is real computed cost, not
+an artifact of the capture method.
+
+**Step 3 — what's opponent-dependent in `ShouldSwitch`'s chain, and where
+that theory breaks.** `ShouldSwitch` (`battle_ai_switch_items.c:429-526`)
+gates entry on `availableToSwitch>0` (always true turn 1 for a full-HP
+3-mon Factory roster), then runs a fixed sequence of heuristics, several of
+which call `HasSuperEffectiveMoveAgainstOpponents`
+(`battle_ai_switch_items.c:258-312`) — which loops the **active battler's own
+4 moves** through `AI_TypeCalc` (`battle_script_commands.c:1594-1636`)
+against the **player's active species**. `AI_TypeCalc` always scans the
+*entire* fixed-length `gTypeEffectiveness` table (`battle_main.c:335`, 336
+entries, `while (TYPE_EFFECT_ATK_TYPE(i) != TYPE_ENDTABLE)`,
+`battle_script_commands.c:1612-1629`) regardless of the types involved or
+whether the move has power — so each call costs the same, and (confirmed by
+reading the table directly, not assumed) it does **not** exempt status
+moves: a 0-power Ground move is flagged super-effective against a
+pure-Poison target exactly like a damaging one. On a hit, `ShouldSwitch`
+short-circuits (`if (HasSuperEffectiveMoveAgainstOpponents(FALSE)) return
+FALSE;`, skipping `AreStatsRaised` + two `FindMonWithFlagsAndSuperEffective`
+calls downstream); on a miss it runs the full chain. This looked like a
+promising differentiator for the two measured baseline fixtures:
+
+| fixture | opponent lead (type) | player lead (type) | opponent's moves vs. player's type (`gTypeEffectiveness`, cited) | `HasSuperEffectiveMoveAgainstOpponents` | AI-ack ticks |
+| --- | --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | COMBUSKEN (Fire/Fighting) | GRIMER (Poison) | SAND_ATTACK (Ground) super-effective (`:395`); DOUBLE_KICK (Fighting) resisted (`:379`) | **TRUE** (short-circuits) | **3** |
+| KADABRA/SHIZUKA | MAGNETON (Electric/Steel) | KADABRA (Psychic) | none of THUNDER/RAIN_DANCE/THUNDER_WAVE/METAL_SOUND super-effective vs. Psychic (only Bug/Ghost/Dark are, `:416,428,435`) | FALSE (full chain) | **2** |
+
+A clean "found-a-super-effective-move short-circuits to +1 extra tick"
+story — **falsified by the Step 4 fixture below**, which has *no*
+super-effective move (like KADABRA/SHIZUKA's FALSE case) but still measures
+**3** ticks, matching COMBUSKEN's short-circuit case, not MAGNETON's.
+`ShouldUseItem` (`battle_ai_switch_items.c:808-944`) was checked as an
+alternate source of variation and ruled out for all Factory fixtures: it
+loops `gBattleResources->battleHistory->trainerItems[MAX_TRAINER_ITEMS]`,
+which only real, table-defined trainers with a `.items` field populate
+(confirmed by grep: no hit for `trainerItems[` in `battle_factory.c`,
+`battle_tower.c`, or `battle_setup.c`) — Factory-synthesized trainers never
+populate it, so every entry is `ITEM_NONE` and the loop is a fast,
+opponent-invariant no-op for every fixture in this dossier (the mons' own
+held berries/items — Scope Lens, Lum Berry, etc. — are a *different*,
+switch-in-triggered system, already ruled out in Round 14).
+
+**Step 3 verdict (Goal 2 of this step's brief):** the model correctly
+locates *which function runs* (`AI_TrySwitchOrUseItem`'s switch/item
+decision, not move-scoring) and *what's opponent-dependent in principle*
+(the opponent's own moveset's type match against the player's active
+species, gating how much of `ShouldSwitch`'s heuristic chain executes/
+short-circuits) — but **does not reduce to a formula that predicts "3" and
+"2" specifically**, and the one concrete mechanism this round could name
+(super-effective-move short-circuit) is directly falsified by a third data
+point (below). Resolving the exact tick count would need ARM-instruction
+cycle counting against the ~280,896-cycle frame budget, which this harness's
+RAM-snapshot probes cannot do (no disassembly/cycle-profiler tool available)
+— stating this explicitly per the step's own permission rather than fitting
+a story to two points.
+
+**Step 4 — tick-by-tick trace on the +7 PUPITAR fixture (Goal 3).** Extended
+the Round-14 probe as
+`tools/probe/probe-readylag-span-tickbytick-plus7.ts` (committed): same
+method, plus an explicit `dispatchTick` marker (`execFlags==3` with both
+commands at 18) so the total span splits into the same two named legs
+(switch-in-loop: `playerIntroComplete → dispatchTick`; AI-ack:
+`dispatchTick → readyTick`), and prints `state.weather`
+(`gBattleWeather`, already exposed by `oracle/battle_lab.py`'s existing
+`snapshot()` — no oracle/engine changes needed) alongside the existing
+engine fields, to test a weather-carryover hypothesis raised below. Ran
+against `factory-mechanic-pupitar-delcatty-readylag-probe.json` (the
+existing `mechanicLab`/`overrides.parties` PUPITAR/DELCATTY probe fixture
+`docs/overrides-ready-lag-probe.md` and ISSUES #87 already use, confirmed
++7) and, for a same-ruler comparison, re-ran the two baseline fixtures
+through the identical leg split:
+
+| fixture | family | switch-in-loop leg | AI-ack leg | total span | opponent lead |
+| --- | --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | +5 baseline | 3 | 3 | 6 | COMBUSKEN |
+| KADABRA/SHIZUKA | +4 baseline | 3 | 2 | 5 | MAGNETON |
+| **PUPITAR/DELCATTY** | **+7** | **4** | 3 | **7** | PUPITAR |
+
+**The +7 family's extra tick, relative to the +5/+4 baseline, is entirely in
+the switch-in-loop leg (4 vs. the baseline's constant 3) — the AI-ack leg
+(3) sits inside the already-observed 2-3 baseline range, not above it.**
+This directly answers Goal 3: the extra ticks are earlier, not in the
+AI-ack leg. Raw tick-by-tick output (`weather` = `gBattleWeather`, 0
+throughout every fixture, both before and through the whole span):
+
+```
+=== PUPITAR/DELCATTY probe (residual +7) ===
+  playerIntroComplete: 1820   dispatchTick: 1824   readyTick: 1827
+    frame 1819: execFlags=1 playerCmd=47 opponentCmd=47 activeBattler=2 weather=0
+    frame 1820: execFlags=0 playerCmd=47 opponentCmd=47 activeBattler=2 weather=0
+    frame 1824: execFlags=3 playerCmd=18 opponentCmd=18 activeBattler=0 weather=0
+    frame 1826: execFlags=3 playerCmd=18 opponentCmd=18 activeBattler=1 weather=0
+    frame 1827: execFlags=1 playerCmd=18 opponentCmd=18 activeBattler=2 weather=0
+    frame 1828: execFlags=3 playerCmd=18 opponentCmd=20 activeBattler=1 weather=0
+
+=== GRIMER/YOSHI (+5 baseline) ===
+  playerIntroComplete: 1847   dispatchTick: 1850   readyTick: 1853
+    frame 1846: execFlags=1 playerCmd=47 opponentCmd=47 activeBattler=2 weather=0
+    frame 1847: execFlags=0 playerCmd=47 opponentCmd=47 activeBattler=2 weather=0
+    frame 1850: execFlags=3 playerCmd=18 opponentCmd=18 activeBattler=0 weather=0
+    frame 1851: execFlags=3 playerCmd=18 opponentCmd=18 activeBattler=1 weather=0
+    frame 1853: execFlags=1 playerCmd=18 opponentCmd=18 activeBattler=2 weather=0
+    frame 1854: execFlags=1 playerCmd=18 opponentCmd=20 activeBattler=2 weather=0
+
+=== KADABRA/SHIZUKA (+4 baseline) ===
+  playerIntroComplete: 1880   dispatchTick: 1883   readyTick: 1885
+    frame 1879: execFlags=1 playerCmd=47 opponentCmd=47 activeBattler=2 weather=0
+    frame 1880: execFlags=0 playerCmd=47 opponentCmd=47 activeBattler=2 weather=0
+    frame 1883: execFlags=3 playerCmd=18 opponentCmd=18 activeBattler=0 weather=0
+    frame 1884: execFlags=3 playerCmd=18 opponentCmd=18 activeBattler=1 weather=0
+    frame 1885: execFlags=1 playerCmd=18 opponentCmd=18 activeBattler=2 weather=0
+    frame 1886: execFlags=3 playerCmd=18 opponentCmd=20 activeBattler=1 weather=0
+```
+
+Note PUPITAR's `dispatchTick` (1824) is 4 ticks after `playerIntroComplete`
+(1820) where both baselines are 3 — the leg split named above.
+
+**Step 5 — the switch-in-loop leg's extra tick is not explained by anything
+this round could read or measure.** Round 14 modeled this leg from
+`TryDoEventsBeforeFirstTurn` (`battle_main.c:3841-3910`) as "1 tick if
+nothing procs," and its own audit found no real switch-in ability/item
+trigger for *any* of the 6 confirmed fixtures, including PUPITAR/DELCATTY —
+predicting a constant leg length, which the two baseline fixtures confirm
+(3 and 3) but PUPITAR contradicts (4). Read the function's *full* body this
+round (Round 14 cited only the ability/item loop) for anything else
+opponent- or construction-dependent: the one-time turn-order sort
+(`switchInAbilitiesCounter==0` branch, `:3850-3862`) is an O(1) 2-battler
+comparison, not tick-costing; `ABILITYEFFECT_INTIMIDATE1` and
+`ABILITYEFFECT_TRACE` (`:3880-3883`) both loop all `gBattlersCount` battlers
+*inside a single call* with no persistent counter
+(`battle_util.c:3003-3015`, `:3017+`) — same O(1)-per-call cost for every
+fixture, not a source of a fixture-specific extra tick. The remaining
+candidate, an `overworldWeatherDone`-gated carryover check
+(`ABILITYEFFECT_SWITCH_IN_WEATHER`, `battle_util.c:2490-2531`, which reads
+`GetCurrentWeather()` — the *overworld map's* weather at battle start, not
+an ability) that could plausibly differ between `overrides.parties`
+construction and real `factoryLegal` generation, was tested directly rather
+than assumed: `state.weather` (`gBattleWeather`) reads **0 throughout** the
+entire measured window for all three fixtures (see the tick-by-tick log
+below) — ruling this out empirically, not just structurally. **This leaves
+the switch-in-loop leg's extra tick unexplained by this round's source
+reading**; the two-tick `HandleTurnActionSelectionState` transition
+(`STATE_TURN_START_RECORD`→`STATE_BEFORE_ACTION_CHOSEN`→dispatch, always
+exactly 2 calls for a singles battle, `:4139-4174`) is mechanical and
+identical across all three fixtures, so the extra tick must sit inside
+`TryDoEventsBeforeFirstTurn`'s own single productive call — but nothing
+this round could read in source or observe via the exposed RAM fields
+localizes it further than that. Honest gap, not a guess.
+
+**Honest-stop.** Two real, source-grounded, non-speculative results land
+this round: (1) a structural (not formulaic) model of the AI-ack leg,
+correcting the prior mischaracterization of *which* AI logic runs there,
+with its one falsifiable prediction explicitly tested and falsified rather
+than left standing; (2) a decisive, three-fixture-comparable leg-split
+measurement proving the +7 family's extra tick lives in the switch-in-loop
+leg, not the AI-ack leg — closing the "unknown whether its extra ticks land
+in the same AI-ack leg" question Round 14 left open. Neither result reaches
+a closed-form tick formula; both are stated as such rather than dressed up
+as one. No `src/` changes, no formula edit, per this step's scope.
+
+**Sharpest next instrument.** (1) The switch-in-loop leg's extra tick
+(Step 5) needs a raw RAM probe reading `gBattleStruct`'s
+`switchInAbilitiesCounter`/`switchInItemsCounter`/`overworldWeatherDone`
+fields directly (not yet exposed by `oracle/battle_lab.py`'s `snapshot()`)
+to see exactly which sub-step of `TryDoEventsBeforeFirstTurn` PUPITAR/
+DELCATTY takes an extra call at — the struct-offset reverse-engineering for
+that is its own bounded probe, not attempted this round. (2) The still-open
+roster×staging cell named in ISSUES #87 and re-raised by this round's own
+data: PUPITAR/DELCATTY is `overrides.parties` on *both* sides (unlike either
+baseline fixture, which is pure `factoryLegal`) — worth checking whether the
+extra switch-in-loop tick is a `overrides.parties`-construction artifact
+(same open question as the roster×staging cell, just located to a specific
+leg now) rather than anything about PUPITAR or DELCATTY themselves; the
+decisive test is still the named real-generation differential for the exact
+DELCATTY/SABLEYE/LICKITUNG roster (this step's stretch goal, not attempted —
+a legal seed search was judged not worth the remaining budget this round).
+(3) The AI-ack leg's true tick-count driver (Step 3's open question) likely
+needs either ARM cycle-level tooling this harness doesn't have, or a much
+larger fixture sample to find a pattern by brute force rather than
+mechanism.
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only (no `src/`, oracle, or fixture writes); ran twice this
+session (with and without the `weather` field), consistent both times.
+
+### Round 16 (2026-08-14, SIDE lane): decisive roster×staging cell resolved — the exact DELCATTY/SABLEYE/LICKITUNG roster under REAL generation does NOT reproduce +7 (it reproduces +5); the switch-in-loop leg's extra tick is confirmed a player-roster property, staging-independent — and a named, non-falsified source-level candidate for it is found: DELCATTY's held Quick Claw, checked inside `GetWhoStrikesFirst`
+
+**Assignment:** ISSUES #87's decisive untested cell — does the exact
+DELCATTY/SABLEYE/LICKITUNG player roster (species 316/322/108) show +7
+under *real* rental generation (a roster/route property, staging innocent)
+or +4/+5 (a roster×staging interaction)? Then chase the +7 family's
+switch-in-loop leg (4 ticks vs. baseline 3) to a named cause.
+
+**Step 1 — building the decisive fixture turned out to be nearly free.**
+`docs/overrides-ready-lag-probe.md`'s own `factoryLegal-vs-mechanicLab-
+matched-+7-route` differential (`tools/probe/probe-overrides-ready-lag.ts`)
+already ran a plain `factoryLegal` (real generation, no `overrides.parties`)
+scenario at the *exact* route tuple the PUPITAR/DELCATTY +7 fixture uses
+(`trainerId 109, challengeNum 2, battleNum 0, playerSetIds [267,268,269],
+opponentSetIds [349,353,292], seed 70`) and its write-up's prose noted in
+passing that the real-generated roster there is species 316/322/108 — the
+same DELCATTY/SABLEYE/LICKITUNG identity — without anyone connecting that
+to the decisive-cell question. Re-queried the oracle directly to confirm:
+
+```
+player species: [316, 322, 108]   (DELCATTY, SABLEYE, LICKITUNG)
+opponent species: [82, 368, 354]  (MAGNETON, CORSOLA, ...)
+```
+
+Comparing the player mon's full echoed data against the PUPITAR/DELCATTY
+probe's `overrides.parties` pin shows species, nature, IVs, EVs, moves,
+item, and `abilitySlot` are all byte-identical (only personality-derived
+cosmetic fields — personality itself, gender, OT id — differ) confirming
+the override pin *was* built by echoing this exact real-generation output,
+so this is a clean, controlled "same mon, staged vs. real" comparison, not
+an approximation. Committed the fixture as
+`tools/battle-lab/factory-legal-delcatty-sableye-lickitung-readylag-probe.json`
+(`factoryLegal`, no overrides) and extended
+`tools/probe/probe-readylag-span-tickbytick-plus7.ts` to trace it with the
+same method as round 15's three fixtures, plus a fourth cross-check fixture
+(Step 3 below). `factoryLegal` pinned the exact roster on the first try —
+no seed search was needed, so the brief's fallback clause did not apply.
+
+**Step 2 — the leg split, and the formula residual.** Ran
+`node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts`:
+
+| fixture | construction | player lead (item) | opponent lead | switch-in-loop leg | AI-ack leg | total span | formula residual |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | real gen | GRIMER (Pecha Berry) | COMBUSKEN | 3 | 3 | 6 | **+5** |
+| KADABRA/SHIZUKA | real gen | KADABRA (Twisted Spoon) | MAGNETON | 3 | 2 | 5 | **+4** |
+| DUGTRIO/BLAZIKEN gold Noland dense | real gen (`factoryBrain`) | DUGTRIO (King's Rock) | BLAZIKEN (Salac Berry) | 3 | 3 | 6 | **+5** |
+| PUPITAR/DELCATTY probe | `overrides.parties` (staged) | DELCATTY (**Quick Claw**) | PUPITAR | **4** | 3 | 7 | **+7** |
+| **DELCATTY/SABLEYE/LICKITUNG, matched route (this round)** | **real gen, no overrides** | **DELCATTY (Quick Claw)** | MAGNETON | **4** | 2 | 6 | **+5** |
+
+The formula-residual column uses the exact method
+`tools/probe/probe-ready-lag-chooseaction-handshake.ts` established
+(`residual = readyTick − (handoffTick + dispatchDelay(opponent) +
+playerVisualLag + 98 + cryDuration(player))`); re-derived it by hand for
+GRIMER/YOSHI and KADABRA/SHIZUKA first and got exactly their already-known
++5/+4 (cross-validating the arithmetic), then applied it to the new
+fixture: `handoffTick=1582`, `dispatchDelay(MAGNETON)=111`,
+`playerVisualLag("DELCATTY")=15`, `cryDuration(DELCATTY)=60` →
+predicted 1866, measured `readyTick=1871` → **residual +5**, not +7.
+
+**Verdict (Goal 1, decisive cell): the exact DELCATTY/SABLEYE/LICKITUNG
+roster under real generation does NOT show +7 — it shows +5.** But the
+table's structure shows this isn't a clean "staging guilty" verdict either:
+the **switch-in-loop leg (4, vs. the 3-tick baseline) reproduces exactly**
+under real generation with no `overrides.parties` staging at all — proving
+*that* leg's anomaly is a genuine player-roster property, not a staging
+artifact, closing round 15's "next instrument" item (2) in the negative
+(staging is innocent, again, now for this specific roster and this specific
+leg — not just the general mechanism `docs/overrides-ready-lag-probe.md`
+already cleared). What changed the total from +7 to +5 is the **AI-ack
+leg**, which round 15 already showed is opponent-dependent (2 for MAGNETON,
+3 for PUPITAR/COMBUSKEN/BLAZIKEN) — this fixture's real-generated opponent
+at this route is MAGNETON (AI-ack 2), not PUPITAR (AI-ack 3), so the total
+lands at 4+2=6 (residual +5) instead of 4+3=7. **The "+7 family" is the sum
+of two independent, already-separately-characterized effects — a
+player-roster-driven switch-in-loop leg (+1 over baseline, staging-innocent)
+and an opponent-driven AI-ack leg (2 or 3) — not a single roster/route
+property and not a roster×staging interaction.** +7 specifically requires
+pairing a switch-in-loop=4 player lead with a 3-tick-AI-ack opponent; this
+round's real-gen route pairs the same switch-in-loop=4 player lead with a
+2-tick-AI-ack opponent and gets +5 instead.
+
+**Side finding — corrects a stale "0-residual" citation.** This round's
+fixture is the *exact* route `docs/ready-lag-discriminator-scout.md`
+(row "DELCATTY/MAGNETON") and `docs/overrides-ready-lag-probe.md`'s Context
+section cite as a "previously-validated 0-residual" point. Both citations
+predate the RAM-handshake predicate; ISSUES #87's own "Eliminated" section
+already flagged that the historical 0-residual points were PNG-landmark
+reads later shown to carry +4/+5 under RAM measurement — this round's
+formula-validated **+5** for that same route is the first RAM-based
+re-measurement of that specific citation, and confirms the correction:
+DELCATTY/MAGNETON is not 0, it's +5, consistent with "the late-fire is
+universal."
+
+**Step 3 — Goal 2: chasing the switch-in-loop leg's extra tick to a named
+cause.** Re-read `TryDoEventsBeforeFirstTurn`
+(`reference/pokeemerald/src/battle_main.c:3841-3910`) once more, this time
+cross-referencing every held item in every measured fixture, not just
+abilities. The function's very first branch (`switchInAbilitiesCounter==0`,
+`:3850-3862`) runs a turn-order sort calling
+`GetWhoStrikesFirst(gBattlerByTurnOrder[i], gBattlerByTurnOrder[j], TRUE)`
+once for the two battlers in a singles battle — and `GetWhoStrikesFirst`
+(`battle_main.c:4595-4696`) checks **`HOLD_EFFECT_QUICK_CLAW`** for *both*
+battlers:
+
+```c
+if (holdEffect == HOLD_EFFECT_QUICK_CLAW && gRandomTurnNumber < (0xFFFF * holdEffectParam) / 100)
+    speedBattler1 = UINT_MAX;
+...
+if (holdEffect == HOLD_EFFECT_QUICK_CLAW && gRandomTurnNumber < (0xFFFF * holdEffectParam) / 100)
+    speedBattler2 = UINT_MAX;
+```
+(`battle_main.c:4653`, `:4687`). Confirmed via `grep` this is the *only*
+place `HOLD_EFFECT_QUICK_CLAW` is read anywhere in `battle_main.c`/
+`battle_util.c` — Quick Claw is not one of the `ItemBattleEffects`
+`ITEMEFFECT_ON_SWITCH_IN` cases round 14 already audited, so it was never
+on that round's radar. The multiply-then-divide (`0xFFFF * holdEffectParam
+/ 100`) is genuine extra ARM7TDMI work — a software division on hardware
+with no divide instruction — paid *only* when `holdEffect ==
+HOLD_EFFECT_QUICK_CLAW`, inside the turn-order sort's single call at the
+very top of the switch-in-loop leg's one productive
+`TryDoEventsBeforeFirstTurn` invocation (the same call round 15's step 5
+already narrowed the extra tick down to, without finding what filled it).
+
+**DELCATTY holds Quick Claw in every measured +7-family fixture, and this
+is not a staging accident**: the Factory's own rental-mon table defines
+`FRONTIER_MON_DELCATTY_2` (index 267 — the exact `playerSetIds[0]` both the
+staged and real-gen fixtures use) with
+`itemName: "BATTLE_FRONTIER_ITEM_QUICK_CLAW"`
+(`src/data/gen/battle-frontier-mons.json`, sourced from
+`reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h`) —
+Quick Claw is baked into this specific rental slot's canonical definition,
+not an artifact of how either fixture pinned it. Cross-checked every
+battler's held item across all five fixtures in the table above (item IDs
+resolved against `reference/pokeemerald/include/constants/items.h`):
+
+| fixture | player lead item | opponent lead item | switch-in-loop leg |
+| --- | --- | --- | --- |
+| GRIMER/YOSHI | Pecha Berry (135) | Scope Lens (198) | 3 |
+| KADABRA/SHIZUKA | Twisted Spoon (214) | Lum Berry (141) | 3 |
+| DUGTRIO/BLAZIKEN gold dense | King's Rock (187) | Salac Berry (170) | 3 |
+| PUPITAR/DELCATTY probe | **Quick Claw (183)** | Scope Lens (198) | **4** |
+| DELCATTY/SABLEYE/LICKITUNG real-gen | **Quick Claw (183)** | Lum Berry (141) | **4** |
+
+**Non-falsified, clean 2-for-2 / 3-for-3 split**: every fixture with a
+Quick-Claw-holding active battler measures switch-in-loop leg 4; every
+fixture with neither active battler holding Quick Claw measures 3. Bench
+mons' items (SABLEYE/LICKITUNG here) are structurally irrelevant —
+`TryDoEventsBeforeFirstTurn`'s turn-order sort and switch-in loops only
+ever touch the `gBattlersCount` *active* battlers (2, in a singles battle),
+never the bench.
+
+**Goal 2 verdict: a named, source-level, non-falsified candidate mechanism
+— DELCATTY's held Quick Claw is checked inside `GetWhoStrikesFirst`'s
+turn-order sort at the top of `TryDoEventsBeforeFirstTurn`, adding a
+conditional multiply+divide that plausibly pushes that call's total
+ARM7TDMI cycle cost past the ~280,896-cycle VBlank boundary into an extra
+tick.** This is stated as a strong candidate, not a proof: same caveat as
+round 15's AI-ack leg — confirming the exact cycle math needs
+instruction-level profiling this harness doesn't have. But unlike round
+15's falsified super-effective-move theory, this one is checked against
+*five* fixtures (not two) and survives cleanly, and it is the *only*
+source-level property this or the prior round found that differs between
+every switch-in-loop=4 fixture and every switch-in-loop=3 fixture.
+
+**Stretch goal (fix shape, not implemented per scope):** if this mechanism
+holds, a discriminating predicate for an engine-side fix would be
+"does either active battler's held item resolve to `HOLD_EFFECT_QUICK_CLAW`
+at battle start" — a data lookup already available via
+`src/data/gen/item-hold-effects.json` (per this run's `find` — not
+inspected further, no `src/` changes made). This is a candidate shape only;
+per this step's side-lane scope, no formula/`src/` change was made or
+attempted.
+
+**Honest-stop.** Two decisive, source-grounded results: (1) the decisive
+roster×staging cell is resolved — real generation of the exact
+DELCATTY/SABLEYE/LICKITUNG roster does not reproduce +7, but *does*
+reproduce the switch-in-loop leg's anomaly exactly, proving that piece
+staging-innocent and re-framing "+7" as a sum of two independent,
+already-partially-understood legs rather than one roster/route property;
+(2) a named, non-falsified (5-fixture) candidate source mechanism for the
+switch-in-loop leg's extra tick — Quick Claw's hold-effect check inside
+`GetWhoStrikesFirst`. Neither result is dressed up beyond what it is:
+mechanism (2) is a strong candidate, not a cycle-counted proof, and no
+`src/` change was made.
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only against the oracle; the one new fixture
+(`tools/battle-lab/factory-legal-delcatty-sableye-lickitung-readylag-probe.json`)
+and the probe script extension are both committed. No `src/` changes.
+
+### Round 17 (2026-08-14, SIDE lane): Quick-Claw-predicate falsification sweep — the switch-in-loop-leg predicate is FALSIFIED by a second Quick-Claw lead (SANDSLASH: leg 3, not the predicted 4); the round-16 "AI-ack leg is opponent-driven" claim falls with it (same MAGNETON opponent measures ack 2 in one fixture, 3 in another); Macho Brace — the only other item branch in `GetWhoStrikesFirst` — is confirmed structurally unreachable in the Factory rental pool; ability branches confirmed dead at this call site (weather==0) with a live Chlorophyll-lead control
+
+**Assignment:** stress-test round 16's candidate before anyone builds a
+`src/` fix on it. Three legs: (1) a second Quick-Claw lead, different
+species, predicting switch-in-loop leg = 4; (2) every other
+`GetWhoStrikesFirst`-visible hold-effect/ability branch, with 1-2 legal
+rentals carrying one, predicting leg = 3 unless the model generalizes; (3)
+extend the observed AI-ack range table.
+
+**Step 0 — how `factoryLegal` set-ID selection actually works (needed to
+build new fixtures cheaply).** Read `oracle/BATTLE_LAB.md` and
+`battle_factory.c`'s `GetFactoryMonId`/`sInitialRentalMonRanges`
+(`:169-186`, `:825-862`): a `factoryLegal` request's `playerSetIds` and
+`opponentSetIds` are **not** RNG-drafted — the lab "replaces the semantic
+Factory IDs" directly, so any three legal set IDs (species/held-item
+uniqueness enforced per side, no cross-side check) within the
+`challengeNum`-indexed band (`sInitialRentalMonRanges[challengeNum]`) build
+a real fixture on the first try, same as round 16's DELCATTY tuple. Cross-
+checked against `src/data/gen/battle-frontier-mons.json` (mirrors
+`battle_frontier_mons.h`): for `challengeNum=2` the band is
+`FRONTIER_MON_DELCATTY_2..FRONTIER_MON_CLOYSTER_2` (index 267-371), which
+round 16's tuple (267/268/269) already sits at the very start of — and
+which contains **eight** other Quick-Claw entries (276 ROSELIA_2, 299
+MAGCARGO_2, 315 GLIGAR_2, 330 SANDSLASH_2, 333 SEAKING_2, 344 SEVIPER_2,
+354 CRAWDAUNT_2, plus 267 itself), all Level-50-legal
+(`monId <= FRONTIER_MONS_HIGH_TIER` = 849, `battle_frontier_mons.h:862`).
+Confirmed the `opponentSetIds` field works identically (round 16's own
+`[349, 353, 292]` decodes to species `[MAGNETON, SWALOT, MINUN]`, an exact
+1:1 match against the requested set IDs — its "roster/route" framing was
+real-generation of a **directly chosen** set, not RNG-drafted, correcting
+an implicit assumption this round almost repeated).
+
+**Step 1 (Goal 1) — second Quick-Claw lead.** Built
+`tools/battle-lab/factory-legal-sandslash-venomoth-chansey-readylag-probe.json`:
+same route as round 16's decisive cell (`trainerId=109, challengeNum=2,
+battleNum=0, seed=70`), same opponent tuple `[349, 353, 292]`
+(MAGNETON/SWALOT/MINUN, to hold the opponent constant), player
+`playerSetIds: [330, 331, 332]` = SANDSLASH_2 (**Quick Claw**, lead) /
+VENOMOTH_2 (Lum Berry) / CHANSEY_2 (Leftovers) — no species/item
+collisions on either side. `bin/oracle lab` accepts it with no legality
+rejection. Extended
+`tools/probe/probe-readylag-span-tickbytick-plus7.ts` to trace it:
+
+```sh
+node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts
+```
+
+| fixture | player lead (item) | opponent lead (item) | switch-in-loop leg | AI-ack leg | total span |
+| --- | --- | --- | --- | --- | --- |
+| DELCATTY/SABLEYE/LICKITUNG (round 16) | DELCATTY (Quick Claw) | MAGNETON (Lum Berry) | 4 | 2 | 6 |
+| **SANDSLASH/VENOMOTH/CHANSEY (this round)** | **SANDSLASH (Quick Claw)** | **MAGNETON (Lum Berry)** | **3** | **3** | 6 |
+
+**Verdict (Goal 1): FALSIFIED.** The prediction was switch-in-loop leg = 4;
+measured **3** (the plain baseline) — identical Quick-Claw hold, identical
+opponent, identical route, only the player's *other two* rental slots plus
+the lead's species changed, and the leg the predicate claims to explain
+dropped back to baseline. The total span still lands on 6 (residual +5,
+same as round 16's cell) but for a **different reason** — the AI-ack leg
+absorbed the difference (3 instead of 2) against the *same* MAGNETON
+opponent (see Step 3): the two legs are not independently reproducing:
+their sum landing in the same place here is coincidence, not corroboration.
+
+**Why this matters for the mechanism, not just the predicate:** re-read
+`GetWhoStrikesFirst`'s Quick-Claw check (`battle_main.c:4653`,
+`holdEffect == HOLD_EFFECT_QUICK_CLAW && gRandomTurnNumber < (0xFFFF *
+holdEffectParam) / 100`) — `&&` short-circuits on the *type* of the check
+(`holdEffect == HOLD_EFFECT_QUICK_CLAW`), so the multiply+divide the
+round-16 candidate blamed for the extra tick executes on **every** call
+where the active battler holds Quick Claw, regardless of the RNG roll's
+outcome. SANDSLASH and DELCATTY both hold Quick Claw, so that exact
+instruction sequence runs identically in both fixtures — yet the leg
+differs. The multiply/divide cannot be the (sole) explanation; whatever
+drives the extra tick is not simply "does the lead hold Quick Claw."
+Checked and ruled out one alternative before writing this up: whether the
+turn-order sort's `SwapTurnOrder(0, 1)` call itself (only reached if
+`GetWhoStrikesFirst` returns nonzero) is the real cost — pulled each
+fixture's raw pre-Quick-Claw speed via a checkpoint capture
+(`bin/oracle lab ... -o /tmp/...`, `state.battlers.*.stats.speed`):
+SANDSLASH 74 vs. MAGNETON 79 (naturally slower — Quick Claw proc or not,
+a real speed comparison/possible swap is live every run), but **DELCATTY
+111 vs. MAGNETON 79 (naturally faster already)** — DELCATTY never needs
+`SwapTurnOrder` called at all (order 0,1 is already correct on raw speed),
+yet still measures leg 4. So the swap-call hypothesis is also falsified.
+No alternative source-level cause was found in this round's budget; the
+extra tick's true driver is unresolved, not just unmodeled.
+
+**Step 2 (Goal 2) — every other `GetWhoStrikesFirst`-visible branch.**
+Re-read the full function (`battle_main.c:4595-4754`) exhaustively, not
+just the item-lookup lines round 16 already quoted:
+
+- **Ability branch** (`:4604-4622`): `ABILITY_SWIFT_SWIM` doubles speed
+  under `B_WEATHER_RAIN`, `ABILITY_CHLOROPHYLL` under `B_WEATHER_SUN` —
+  but both are gated behind `WEATHER_HAS_EFFECT`, and this specific call
+  (the turn-order sort inside `TryDoEventsBeforeFirstTurn`'s
+  `switchInAbilitiesCounter==0` branch, `:3850-3862`) is the *first* thing
+  the function does on its first invocation, strictly before the weather-
+  setting-ability check (`:3863-3868`) or any switch-in ability loop
+  (`:3869-3879`) — so `gBattleWeather` is guaranteed 0 here (round 15
+  already RAM-confirmed this across three fixtures; true again in both new
+  fixtures below). **Structurally dead at this call site regardless of
+  which weather ability the lead holds.**
+- **Badge-boost branch** (`:4640-4645`): gated on
+  `!(BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_FRONTIER)`
+  — the Factory sets `BATTLE_TYPE_FRONTIER` unconditionally, so this
+  branch is **always false** in every Factory fixture; not a candidate.
+- **`HOLD_EFFECT_MACHO_BRACE`** (`:4647-4648`, `:4681-4682`): `speed /= 2`
+  — a genuine conditional extra op, same shape as the Quick-Claw branch.
+  Grepped `src/data/gen/battle-frontier-mons.json` (all 882 entries) and
+  `battle_frontier_mons.h` directly for `BATTLE_FRONTIER_ITEM_MACHO_BRACE`
+  (itemTableId 10, confirmed present in the frontier's held-item catalog
+  at `src/data/gen/battle-frontier-held-items.json`): **zero hits.** No
+  Battle Factory rental, at any rank, holds Macho Brace. **Untestable via
+  a legal rental — the branch exists in source but is dead code from the
+  Factory's own data, not just this harness's reach.**
+- **`STATUS1_PARALYSIS`** (`:4650-4651`, `:4684-4685`): `speed /= 4` — a
+  status condition, not a hold-effect/ability, and no battler starts
+  paralyzed at battle start; out of scope for a "lead's held item/ability"
+  sweep.
+- **`ITEM_ENIGMA_BERRY`** (`:4628-4637`, `:4662-4671`): an *alternate
+  fetch path* for `holdEffect`/`holdEffectParam` (from `gEnigmaBerries[]`
+  instead of `GetItemHoldEffect()`/`GetItemHoldEffectParam()`), not
+  conditional *extra* work — one of the two paths always executes. Not a
+  candidate for "extra work only when X."
+
+**Exhaustive result: `GetWhoStrikesFirst` has exactly two conditional
+hold-effect branches capable of adding work beyond the always-executed
+path (Quick Claw, Macho Brace) and one ability-pair capable of it in
+principle (Swift Swim/Chlorophyll) — Macho Brace is unreachable via any
+legal Factory rental, and the ability pair is structurally inert at this
+specific call site because weather is always 0 here.** This is a complete
+list, not a sample — no other `HOLD_EFFECT_*`/`ABILITY_*` token appears
+anywhere in the function body (verified by reading all 160 lines, not
+grepping for a subset).
+
+Since Macho Brace is untestable and the ability branches are provably
+inert, pivoted to an ability-branch **control**: does a guaranteed-
+Chlorophyll lead (no secondary ability slot, so no personality/seed
+dependence) in fact show no extra tick, confirming the "weather==0 kills
+it" prediction rather than just asserting it? The already-committed
+`tools/battle-lab/factory-readylag-lowdispatch-legal-off.json`
+(`factoryLegal`, trainerId 38, challengeNum 0, seed 1) has opponent lead
+WEEPINBELL — `species_info.h:2133` gives WEEPINBELL
+`.abilities = {ABILITY_CHLOROPHYLL, ABILITY_NONE}`, a single-ability
+species, so this fixture already has a Chlorophyll lead with zero
+construction needed. Added it to the same probe run:
+
+| fixture | lead with the branch | branch | switch-in-loop leg | weather (RAM) |
+| --- | --- | --- | --- | --- |
+| GRIMER/WEEPINBELL (existing fixture, this round's trace) | WEEPINBELL (opponent) | Chlorophyll, guaranteed single ability | **3** | 0 throughout |
+
+**Verdict (Goal 2): the ability branch's prediction holds (leg 3, matching
+baseline) — consistent with, not proof of, the weather==0 read of the
+source.** Given Goal 1's result, this is one non-falsifying data point, not
+a second confirmed mechanism; it is offered as a control, not a new
+candidate. Macho Brace could not be tested (unreachable in the Factory's
+own data) — that negative result is itself the answer for the "other
+items" half of Goal 2: **there are no other reachable item branches to
+test.**
+
+**Step 3 (Goal 3) — extended AI-ack range table.** Both new fixtures'
+tick-by-tick traces (weather stayed 0 throughout every fixture's window,
+all seven now traced):
+
+| fixture | opponent lead | AI-ack leg |
+| --- | --- | --- |
+| PUPITAR/DELCATTY probe | PUPITAR | 3 |
+| GRIMER/YOSHI | COMBUSKEN | 3 |
+| KADABRA/SHIZUKA | MAGNETON | 2 |
+| DELCATTY/SABLEYE/LICKITUNG (round 16) | MAGNETON | 2 |
+| DUGTRIO/BLAZIKEN gold dense | BLAZIKEN | 3 |
+| **SANDSLASH/VENOMOTH/CHANSEY (this round)** | **MAGNETON** | **3** |
+| **GRIMER/WEEPINBELL (this round)** | **WEEPINBELL** | **3** |
+
+**Range unchanged (still 2 or 3, no new extreme) but the "opponent-driven"
+label is now known to be an oversimplification, not just an
+under-determination**: the *same* opponent (MAGNETON, same held Lum Berry,
+same route family) measures ack 2 against a DELCATTY-led player party and
+ack 3 against a SANDSLASH-led one. `AI_TrySwitchOrUseItem`/`ShouldSwitch`
+(`battle_ai_switch_items.c`, round 15's own citation) evaluates the
+*matchup* against whichever mon is actually active on the other side, so
+this is not necessarily surprising in hindsight — but round 16's table
+never controlled for it, and this round is the first fixture pair that
+isolates "same opponent, different player lead" cleanly enough to show the
+leg is not opponent-invariant. No new source-level model is proposed here;
+this is a scope correction to what "the AI-ack leg" table means, cited for
+whoever picks up the fix-shape decision next.
+
+**Formula cross-check (same method as round 16, `residual = readyTick −
+(handoffTick + dispatchDelay(opponent) + playerVisualLag + 98 +
+cryDuration(player))`):** SANDSLASH/VENOMOTH/CHANSEY —
+`handoffTick=1582`, `dispatchDelay(MAGNETON)=111` (identical opponent to
+round 16's cell), `playerVisualLag("SANDSLASH")=16`,
+`cryDuration(SANDSLASH)=39` → predicted 1846, measured `readyTick=1851` →
+**residual +5**, matching the leg table's 3+3=6 total and round 16's own
++5 for this same opponent/route (again, same total, different leg split —
+the coincidence flagged in Goal 1).
+
+**Honest-stop.** This was a falsification sweep, not a fix-shape round,
+and it did its job: the round-16 Quick-Claw predicate does not survive a
+second data point, and the "independent, additive legs" framing it leaned
+on doesn't either (Step 3). Two structural facts *do* survive and are
+now closed, not just candidates: (1) `GetWhoStrikesFirst`'s conditional-
+branch surface is completely enumerated and none of the untested branches
+are both reachable and live at this call site (Macho Brace: unreachable;
+Swift Swim/Chlorophyll: weather-gated dead code here) — Goal 2 needs no
+further fixture sweeps, only a genuinely new hypothesis; (2) the swap-call
+and multiply-divide explanations for the switch-in-loop leg's origin are
+both individually ruled out by the DELCATTY/SANDSLASH contrast. **Next
+step is not "measure more fixtures with items" — it is either (a) find a
+different source-level driver for the switch-in-loop leg's variance (something
+DELCATTY has that SANDSLASH doesn't, beyond Quick Claw and raw speed
+ordering — species-specific move data touched during the same tick's
+processing is untried), or (b) accept per-fixture ack/switch-in-loop
+calibration (option (b) from ISSUES #87's own "fix-shape decision" list)
+since a single clean predicate has now failed twice.**
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only against the oracle except for the one new fixture
+(`tools/battle-lab/factory-legal-sandslash-venomoth-chansey-readylag-probe.json`,
+`"profile": "battle-scene-off"`) and the probe script extension, both
+committed and rerunnable; the ability-branch control reused an existing
+fixture with no new file. No `src/` changes.

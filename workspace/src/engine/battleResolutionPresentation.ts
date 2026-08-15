@@ -3753,7 +3753,16 @@ function matchesRetainedLockedActionSnapshot(
     && snapshot.currentMovePosition === lockedAction.currentMovePosition;
 }
 
-function hasRetainedLockedActionReceipt(
+/**
+ * Exported so a caller about to retain a resolution owner across a command
+ * boundary (factoryRoundBattleOrchestrator.ts's beginCommandResolution) can
+ * check the receipt before committing to the continuation: FaintClearSetData
+ * (battle_main.c:3272) unconditionally zeroes status2 on faint, so a locked
+ * battler that had STATUS2_MULTIPLETURNS/STATUS2_RECHARGE set can still be
+ * KO'd by the other battler's own turn before its continuation ever prints —
+ * a real, reachable game outcome, not a stale snapshot.
+ */
+export function hasRetainedLockedActionReceipt(
   events: readonly BattleKernelSemanticEvent[],
   lockedAction: BattleResolutionLockedActionIdentity,
 ): boolean {

@@ -322,6 +322,30 @@ export function selectedRentalParty(state: DraftScreenState): FactoryRentalParty
 }
 
 /**
+ * The three chosen rental-pool slot indexes (0..5) in pick-rank order -
+ * `FactoryRoundBattleOrchestratorConfig`'s `generateInitial` rentals source
+ * selects by slot index rather than by resolved record, so a caller
+ * regenerating this same draft (byte-identical, same generation inputs)
+ * needs the slots, not `selectedRentalParty`'s resolved records.
+ */
+export function selectedRentalSlotIndexes(
+  state: DraftScreenState,
+): readonly [number, number, number] {
+  const bySlot: Array<number | undefined> = Array.from({ length: FRONTIER_PARTY_SIZE });
+  state.selectedIds.forEach((rank, slot) => {
+    if (rank === 0) return;
+    if (rank < 1 || rank > FRONTIER_PARTY_SIZE || bySlot[rank - 1] !== undefined) {
+      throw new Error(`invalid draft pick rank ${rank} at rental slot ${slot}`);
+    }
+    bySlot[rank - 1] = slot;
+  });
+  if (bySlot.some((slot) => slot === undefined)) {
+    throw new Error("draft routing requires exactly three ranked rental picks");
+  }
+  return bySlot as unknown as readonly [number, number, number];
+}
+
+/**
  * ISSUES #7 (sixth worker update, RAM-derived, 12/12 data points across all
  * counts/directions/origins tried, zero exceptions): a LEFT/RIGHT cursor
  * move only stalls every other currently-active ball when the ENTERING

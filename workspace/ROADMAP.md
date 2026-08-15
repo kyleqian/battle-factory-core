@@ -1036,11 +1036,21 @@ residual is ISSUES #87). Only (b) remains.
    worklist (award table incl. the +10 brain bonus, symbol grant and BP
    as round-controller OUTPUTS, brain congrats text). Its step-4
    prerequisite exists now, so the numbers are end-to-end verifiable
-   against the real ROM. (ii) ISSUES #87's named next instrument (the
-   opponent-AI `ChooseAction` ack-timing model,
-   `battle_ai_switch_items.c`). (iii) The Brain walk-up dialogue
-   surface: SCOPING ONLY — present faithful/trim/skip options with
-   costs; the user decides before any build.
+   against the real ROM. **(i) COMPLETE** (2026-08-14 eve session,
+   PROGRESS 1269-1272): `applyFactoryBrainRoundOutcome`
+   (`factoryBrainRoundOutcome.ts`) ports
+   `GiveBattlePoints`/`GiveFacilitySymbol` exactly, wired into
+   `factoryRoundBattleOrchestrator.ts` as a `roundOutcome` output;
+   brain congrats text landed with its two scroll-gate ages
+   live-bisected against the ROM; BP 0→14 + silver symbol flag
+   live-pinned (`docs/brain-terminal-live-verification.md`).
+   **(ii) COMPLETE as an evidence program** (rounds 15-17,
+   `docs/trainer-pic-off-window-scout.md`): the ack model is built and
+   honestly bounded — no source-predictable formula exists; ISSUES #87
+   records the three fix-shape options awaiting a pick.
+   **(iii) COMPLETE**: `docs/noland-walkup-dialogue-scoping.md`
+   presents FAITHFUL/TRIM/SKIP with costs (recommendation: TRIM); the
+   user decides before any build.
 2. **Follow-on objective — continuous play.** The user's bar: boot the
    app and play round after round indefinitely, matching what a real
    Emerald player would see at distribution parity. Audited gaps
@@ -1055,7 +1065,40 @@ residual is ISSUES #87). Only (b) remains.
    generated-draft round entry + round-to-round chaining with
    in-session streak/symbol/BP carry. Cross-session persistence
    (saving) stays OUT of scope; the standing lobby trims stand
-   unchanged.
+   unchanged. **WIRED (2026-08-14 eve, PROGRESS 1271-1272):**
+   `factoryRoundChaining.ts` + the terminal→next-draft path are live
+   (supervisor decision: continue re-enters a fresh generated draft
+   directly after the record menu, no new lobby-dialogue surfaces);
+   the newly-reachable generated-battle-1 crash it exposed (#88) was
+   fixed at root cause same-session (vanilla soak 14/20→20/20).
+   Battle 21 is now reachable by natural play. Remaining under this
+   objective: #89 (pre-existing Baton Pass `openpartyscreen` gap, hit
+   by full-policy soak seed 27) and distribution-parity soak breadth.
+
+**User decisions (2026-08-14 eve, planning session — the two waiting
+picks from PROGRESS 1273):**
+
+1. **Walk-up = FAITHFUL** (supersedes the memo's TRIM recommendation —
+   user pick with the costs on the table). Full sequence per
+   `docs/noland-walkup-dialogue-scoping.md`'s FAITHFUL option: the
+   attendant call-scene + PreBattleRoom ready/swap/retire menu, Noland
+   placement/entrance in the battle room, silver 8-page + gold 4-page
+   speeches gated by the per-tier heard-speech flags (in-session only —
+   cross-session saving stays out of scope). Consequence accepted: the
+   PreBattleRoom menu + call-scene is a GENERAL pre-battle feature
+   (ordinary matches 2-6 show the same menu), so this program builds it
+   once for all Factory matches, not as a brain-only fork. The memo's
+   sequencing note stands: resolve its §1.6 gold-discrepancy probe
+   before writing gold's disputed box. Estimated 4-6 worker steps.
+2. **#87 = option (c)**: every committed window that ends before its
+   ready transition stays exactly as-is; calibrate only windows that
+   must cross it (today: the silver Brain-reveal tail, 648/701), each
+   constant labeled measured-not-derived and validated by the
+   RAM-handshake probe. Recorded in ISSUES #87.
+
+Order for the next runs (stability first): #89 → #90 triage → #87(c)
+calibration (small) → the FAITHFUL walk-up program → chained-round
+distribution-parity breadth.
 
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary

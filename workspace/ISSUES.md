@@ -17,6 +17,75 @@ backlog.
 
 # Open
 
+## #90 — "full"-policy soak seed 51 HANGs at `resolution:presenting` (frame-budget stall, distinct from #89)
+
+**Symptom (wind-down full soak, 2026-08-14 eve, final tree):**
+`npm run soak -- --seeds 0:60` seed 51 reaches the 300,000-frame budget
+stuck at surface `resolution:presenting` (battle 1, turn 14) — no crash,
+no progress. Signature is distinct from #89's Baton Pass barrier (that
+one throws). Not yet triaged: unknown whether a presentation wait never
+completes (a #88-adjacent continuation/receipt stall that falls into a
+wait instead of throwing) or an input-gate deadlock. Repro:
+`npm run soak -- --seed 51` (policy full). Same-session context: vanilla
+0:20 is 20/20 OK; this is the only HANG in 60 full-policy seeds.
+
+## #89 — "full"-policy soak seed 27 hits an unimplemented Baton Pass `openpartyscreen` machine-barrier, unrelated to and predating #88/chaining
+
+**Symptom:** `tests/randomRoundSoak.test.ts`'s "ISSUES #86: presents a
+forced replacement's terminal sandstorm continuation" pin (seed 27, no
+policy override i.e. `"full"`) CRASHes at round 1 battle 1 turn 10, frame
+30798, well before its documented "battle 4 turn 16" scenario.
+**Breadth (wind-down full soak, 2026-08-14 eve, final tree):** the same
+signature accounts for ALL 9 crashes in `--seeds 0:60` — seeds 1, 19,
+21, 25, 27, 37, 40, 41, 57, most inside round 1 (so pre-existing
+surface, not chaining territory; full-policy play just selects Baton
+Pass often). This is now the dominant playable-path gap: full soak is
+50/60 OK with this class + #90's single HANG the only failures.
+
+```
+FactoryRoundOrchestratorError: battle kernel reached {"kind":"battle-script","entryLabel":"BattleScript_EffectBatonPass","programCounter":1157,"opcodeId":80,"opcodeName":"B_SCR_OP_OPENPARTYSCREEN","dispatcher":"Cmd_openpartyscreen",...}
+  fail (src/engine/factoryRoundBattleOrchestrator.ts:427)
+  driveTrainerBoundary (src/engine/factoryRoundBattleOrchestrator.ts:1271)
+  beginCommandResolution (src/engine/factoryRoundBattleOrchestrator.ts:1430)
+```
+
+The player selects Baton Pass (move 226, fight slot 2); the resulting
+transition's boundary is `machine-barrier` instead of a genuine decision
+boundary, and `driveTrainerBoundary`'s auto-AI-drive loop (which only
+expects to cross opposing-trainer command boundaries) has no handling for
+it, so it hard-fails. `B_SCR_OP_OPENPARTYSCREEN` itself has a real opcode
+implementation (`battleScriptOpenPartyScreenOpcode.ts`) — this looks like a
+gap in wiring a **player-side mid-turn Baton Pass switch-in** through
+`beginCommandResolution`'s command-resolution path specifically, not a
+missing opcode.
+
+**Confirmed independent of #88 and round-chaining (2026-08-14, this
+session):** reproduces byte-for-byte identically (same frame 30798, same
+signature) on the commit this session started from (`da55e159`, before any
+#88 fix or driver changes) and is unaffected by `stopAtFirstRoundDecision`
+(the crash is inside round 1 itself, before any terminal/chaining decision
+point is ever reached). ISSUES' prior text for the old #88 entry claimed
+seed 27 crashed with #88's exact locked-action-continuation signature
+instead — that was stale/inaccurate; re-verify claims like this against a
+fresh repro rather than trusting the prior write-up, per this session's own
+mandate to verify unconfirmed leads before building on them. Likely
+introduced by a concurrent side-lane commit that changed opponent-AI move
+selection for the `"full"` policy's random exploration (candidates:
+`1ce3189d`/`58eade13`, "brain seventh-win terminal RAM pins"), not by
+anything in the round-chaining feature itself.
+
+**Leads:** narrow with `runSeed(27, { maxFrames: 30_799 })` (`tools/soak/
+randomRoundSoakDriver.ts`) — crashes immediately at the budget edge; drop
+`maxFrames` further via binary search to isolate the exact turn-10 command
+sequence. Compare `driveTrainerBoundary`'s trainer-boundary loop against
+whatever code path DOES correctly resolve a **voluntary** player switch
+(`battlePartySelect`) to find the missing wire-up for a switch initiated
+mid-resolution by Baton Pass rather than by the action-menu POKéMON
+option. The pinned test itself is `it.skip`-ed with a comment pointing
+here until this lands; unskip and restore its original assertions once
+fixed (or replace the now-unreachable seed 27 fixture with a fresh repro
+if the fix changes which turn/seed exhibits the original #86 concern).
+
 ## #87 — Battle-start ready-frame formula is missing the ROM's pre-first-turn span (universal +4..+7 tick late-fire)
 
 **Symptom:** the app's predicted first-action-menu-ready frame
@@ -32,23 +101,69 @@ per-fixture magnitude. Confirmed table (2026-08-14, four probes):
 | QUINN low-dispatch | factoryLegal real-gen | WEEPINBELL (85) | +4 |
 | GRIMER/YOSHI, KADABRA/SHIZUKA | factoryLegal | (≥101) | +4/+5 by RAM predicate |
 
-**Confirmed mechanism (source-located, span decomposed further, not yet
-modeled to a formula):** `TryDoEventsBeforeFirstTurn`'s switch-in ability/
-item/weather loop plus `HandleTurnActionSelectionState`'s `ChooseAction`
-dispatch (`reference/pokeemerald/src/battle_main.c`) run between send-out
+**Confirmed mechanism (source-located, both legs decomposed; round 15
+shows a closed-form source model is NOT attainable with current tools):**
+`TryDoEventsBeforeFirstTurn`'s switch-in ability/item/weather loop plus
+`HandleTurnActionSelectionState`'s `ChooseAction` dispatch
+(`reference/pokeemerald/src/battle_main.c`) run between send-out
 completion and menu interactivity — a real ROM span the current formula
-has NO term for. A live tick-by-tick RAM trace
-(`tools/probe/probe-readylag-span-tickbytick.ts`, GRIMER/YOSHI +5 vs.
-KADABRA/SHIZUKA +4) localizes the split further: the switch-in-loop leg
-("player intro complete" → "both battlers dispatched `ChooseAction`") is a
-**constant +3 ticks in both**, confirming it costs exactly 1 tick per
-call when nothing procs (source-derived, matches the "no switch-in
-ability/item has a real trigger on any of these leads" audit below); the
-entire +5-vs-+4 split instead lives in the **opponent's own AI-decision
-ack** ("dispatch" → "opponent's exec bit clears": 3 ticks for COMBUSKEN, 2
-for MAGNETON) — a real, opponent-dependent span, but in
-`battle_ai_switch_items.c`'s move-scoring logic, not the switch-in loop
-Step 1 of this issue originally pointed at.
+has NO term for. Tick-by-tick RAM traces
+(`tools/probe/probe-readylag-span-tickbytick.ts` and
+`...-plus7.ts`) split the span into two named legs, now measured on all
+three families:
+
+| fixture | family | switch-in-loop leg | AI-ack leg | total |
+| --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | +5 | 3 | 3 (COMBUSKEN) | 6 |
+| KADABRA/SHIZUKA | +4 | 3 | 2 (MAGNETON) | 5 |
+| PUPITAR/DELCATTY | +7 | **4** | 3 (PUPITAR) | 7 |
+| DELCATTY/… real-gen (round 16) | +5 | **4** | 2 (MAGNETON) | 6 |
+| SANDSLASH/… real-gen (round 17) | +5 | 3 | **3** (MAGNETON) | 6 |
+
+**Round 16 (decisive cell resolved): the residual is the SUM of two
+legs, and staging is fully innocent** — the exact
+DELCATTY/SABLEYE/LICKITUNG roster under real `factoryLegal` generation
+measures +5 with its switch-in-loop leg at **4, exactly reproducing the
++7 fixtures'**, so that leg is a genuine player-roster property. Round
+16 also corrected two stale "0-residual DELCATTY/MAGNETON" doc
+citations (pre-RAM-predicate) to +5.
+
+**Round 17 (falsification sweep): BOTH single-factor predicates are
+dead.** The Quick-Claw candidate (`GetWhoStrikesFirst`'s
+`HOLD_EFFECT_QUICK_CLAW` branch) is FALSIFIED: a second Quick-Claw lead
+(SANDSLASH_2) measures leg 3, and a `SwapTurnOrder`-call hypothesis
+also fails (DELCATTY never needs the swap yet shows 4). And the "ack
+leg is opponent-driven" framing broke too: the SAME opponent
+(MAGNETON, same route) shows ack 2 in one fixture and 3 in another —
+the two totals coincidentally matched at 6 via offsetting leg shifts.
+`GetWhoStrikesFirst` has only two conditional hold-effect branches
+(Quick Claw, Macho Brace — the latter on zero Factory rentals,
+structurally untestable); the weather-ability branch is dead code at
+this call. Both legs vary within {3,4} and {2,3} with NO validated
+source-visible predicate; per round 15 the underlying quantity is raw
+cycle-cost spill against the frame boundary, which this harness cannot
+count.
+
+Round 15 (`docs/trainer-pic-off-window-scout.md`) corrects two earlier
+characterizations: (1) the AI-ack leg is `AI_TrySwitchOrUseItem`
+(`battle_ai_switch_items.c:528-603` — the switch/item decision), NOT
+move-scoring; `BattleAI_ChooseMoveOrAction` runs under a separate later
+`CONTROLLER_CHOOSEMOVE` (=20) command, provably outside the residual
+window (opponent cmd stays 18 through ready in every fixture). (2) The
++7 family's extra tick lives in the **switch-in-loop leg** (4 vs. the
+baseline's constant 3), NOT the AI-ack leg. The AI-ack leg's whole call
+graph is one non-yielding call (`OpponentHandleChooseAction` →
+`AI_TrySwitchOrUseItem` → immediate `OpponentBufferExecCompleted`) — no
+counter/yield state machine — so its 2-vs-3-tick spread is raw
+ARM7TDMI cycle cost spilling past the ~280,896-cycle frame budget.
+Modeling that from source needs instruction-cycle counting the harness
+has no tool for; the one nameable mechanism (super-effective-move
+short-circuit in `ShouldSwitch`, which cleanly separated
+COMBUSKEN 3 / MAGNETON 2) is FALSIFIED by PUPITAR (no super-effective
+move, still 3 ticks). Weather carryover ruled out via RAM
+(`gBattleWeather` 0 throughout all three fixtures); `ShouldUseItem` is
+an opponent-invariant no-op for Factory-synthesized trainers (no
+`trainerItems` populated).
 
 **Eliminated with committed instruments:** `overrides.parties` staging as a
 *general* mechanism (± differential at a matched route with an arbitrary
@@ -67,34 +182,40 @@ historical "0-residual" points were PNG-landmark reads; the RAM handshake
 predicate (`tools/probe/probe-ready-lag-chooseaction-handshake.ts`) shows
 they carry +4/+5 too — the late-fire is universal, not route-gated.
 
-**Open lead (round 14, unresolved):** every confirmed +7 fixture
-(silver TANGELA, PUPITAR probe) shares the *exact same* `overrides.parties`
-player roster (DELCATTY/SABLEYE/LICKITUNG, species 316/322/108); every
-confirmed +4/+5 fixture is real generation. But the general
-`overrides.parties`-vs-real-generation differential above already tested a
-*different* (arbitrary) roster at a matched route and found it innocent —
-so this specific roster, staged via `overrides.parties`, has never been
-compared against the same roster under real generation. That is the
-decisive untested cell: does this exact DELCATTY/SABLEYE/LICKITUNG triple
-show +7 or +4/+5 under real rental generation (if a legal seed lands it) —
-confirming either a roster×staging interaction or a roster/route-specific
-cause independent of staging. The opponent-side leg (TANGELA/PUPITAR) also
-still needs the same tick-by-tick trace already run for YOSHI/SHIZUKA —
-unknown whether its extra ticks land in the same AI-ack leg or elsewhere.
+**Round-14 open lead RESOLVED by round 16** (see the table above): the
+shared DELCATTY/SABLEYE/LICKITUNG roster correlation was real but its
+mechanism is the roster itself (Quick Claw lead), not staging; the
+overrides-vs-real question is closed for this issue.
 
 **Why it matters:** caps the silver Brain-reveal compare at 648/701 (its
 last 53 frames) and will shave the tail of any future battle-start window
 extended to the true ready frame. Committed windows that end before their
 ready transition (gold 700/701, Lukas, Yoshi, shizuka) are unaffected.
 
-**Next instrument:** (1) the roster×staging differential named above —
-the single most decisive untested cell. (2) tick-by-tick trace
-(`probe-readylag-span-tickbytick.ts`'s method) applied to a +7 fixture to
-locate which leg carries the extra ticks. (3) once the +4/+5 family's own
-AI-ack leg has a source-derived model (`battle_ai_switch_items.c`'s
-move-scoring loop — not yet read this round), the two families may turn
-out to be the same mechanism at different magnitudes rather than a
-two-term fix. All instruments above are committed and rerunnable.
+**Next step (post-round-17): the fix-shape decision, now with no
+predictive model on the table.** Both legs are measurable per fixture
+(instruments below) but neither is predictable from source-visible
+properties; totals span +4..+7 (sum of {3,4}+{2,3}). Realistic engine
+options: (a) per-committed-fixture calibrated ready constants,
+validated by the RAM-handshake predicate
+(`tools/probe/probe-ready-lag-chooseaction-handshake.ts`) — honest for
+compare windows, but generalizes to nothing; (b) an engine-side
+uncertainty band: predict ready-at-earliest (+4) and let acceptance
+treat the 0..3-tick tail as the known #88-adjacent tolerance for
+battle-start windows; (c) leave committed windows ending before their
+ready transition as-is (unaffected) and only calibrate windows that
+must cross it (currently just the silver reveal tail, 648/701).
+Deciding between these is a supervisor/user-visible trade (exactness
+vs. honesty of a fitted constant); no further instrument is named —
+the evidence program (rounds 13-17) is complete.
+**USER DECISION (2026-08-14 eve): option (c).** Committed windows
+ending before their ready transition stay exactly as-is; only windows
+that must cross it are calibrated (today: the silver Brain-reveal
+tail, 648/701), each constant labeled measured-not-derived and
+validated by the RAM-handshake probe before adoption. Instruments:
+`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`,
+fixtures `factory-legal-delcatty-sableye-lickitung-readylag-probe.json`,
+`factory-legal-sandslash-venomoth-chansey-readylag-probe.json`.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

@@ -84,6 +84,36 @@ export interface FactoryTerminalRoundWonProfile
   readonly exchangeNextPageVisualDelay: number;
   readonly restoreDelayFromExchangeRelease: number;
   readonly congratulations: readonly [string, string];
+  /**
+   * `EventScript_WonChallenge`'s brain branch
+   * (`BattleFrontier_BattleFactoryLobby/scripts.inc:38-46`, text
+   * `Text_CongratsForDefeatingHead:44-46`) -- selected instead of
+   * `congratulations` iff the final opponent carries `frontierBrain`
+   * (`frontier_isbrain`, itself `gTrainerBattleOpponent_A ==
+   * TRAINER_FRONTIER_BRAIN`, `frontier_util.c:1839-1845`), independent of
+   * symbol count/status. Every other Lobby mechanic (box-open handshake,
+   * `AwardBattlePoints`/`ExchangeMonsAndSave`/`AskRecordBattle` tail) is
+   * identical between branches (audit `noland-brain-post-battle-audit.md`
+   * §1d) -- only this string differs. `scrollTicks`/`thirdLineTextDelay`
+   * reuse `awardScrollTicks`/`awardThirdLineTextDelay` verbatim: the
+   * `\l` (CHAR_PROMPT_SCROLL) mid-message scroll this text also contains
+   * is the same generic printer animation `award`'s own `\n\l` text
+   * already exercises, not something specific to award's string. The two
+   * gate ages this shape needs beyond that (when the first two lines
+   * finish typing; when the third does) are computed at advance-time from
+   * these lines' lengths via the same "input accepted exactly on the tick
+   * the last glyph draws" rule that reproduces `congratulationsInputReadyAge`
+   * (102) and `awardScrollInputDelay`/`awardDefaultInputDelay` (69/41)
+   * with zero slack -- unlike those three, this shape has no live oracle
+   * trace to confirm against yet (blocked on the not-yet-built harness
+   * `factoryBrain` staging mode, `noland-brain-post-battle-audit.md` §5
+   * worklist item 4), so treat it as formula-derived pending that.
+   */
+  readonly frontierBrainCongratulations: Readonly<{
+    readonly lines: readonly [string, string, string];
+    readonly scrollTicks: number;
+    readonly thirdLineTextDelay: number;
+  }>;
   readonly award: readonly [string, string, string];
   readonly getPoints: readonly [string, string];
   readonly exchange: readonly [
@@ -208,6 +238,15 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
       "Congratulations! You’ve won seven",
       "straight Battle Swap matches!",
     ] as const),
+    frontierBrainCongratulations: Object.freeze({
+      lines: Object.freeze([
+        "Congratulations for defeating",
+        "the FACTORY HEAD and winning",
+        "seven matches in a row!",
+      ] as const),
+      scrollTicks: 4,
+      thirdLineTextDelay: 7,
+    }),
     award: Object.freeze([
       "In recognition of your wealth of",
       "knowledge and keen intelligence,",
@@ -257,6 +296,10 @@ export interface FactoryTerminalRoundWonPresentationState {
   readonly profile: FactoryTerminalRoundWonProfile;
   /** Terminal-local age; zero is the staged CB2_LoadMap handoff. */
   readonly age: number;
+  /** `frontier_isbrain` result for the final opponent (§ `frontierBrainCongratulations`). */
+  readonly frontierBrain: boolean;
+  /** Age the implicit `\l` mid-congratulations scroll gate was accepted; stays null when `!frontierBrain`. */
+  readonly congratsScrollReleaseAge: number | null;
   readonly congratulationsReleaseAge: number | null;
   readonly awardScrollReleaseAge: number | null;
   readonly awardReleaseAge: number | null;
@@ -314,7 +357,7 @@ export function createFactoryTerminalLossPresentation(
 export function createFactoryTerminalRoundWonPresentation(
   command: Pick<
     Extract<BattlePresentationCommand, { readonly type: "roundCompleted" }>,
-    "type" | "commandId" | "battleIndex"
+    "type" | "commandId" | "battleIndex" | "opponent"
   >,
   battlePointsBeforeAward = 0,
 ): FactoryTerminalRoundWonPresentationState {
@@ -323,6 +366,8 @@ export function createFactoryTerminalRoundWonPresentation(
     battleIndex: command.battleIndex,
     profile: FACTORY_ROUND_WON_TERMINAL_PROFILE,
     age: 0,
+    frontierBrain: command.opponent.frontierBrain !== undefined,
+    congratsScrollReleaseAge: null,
     congratulationsReleaseAge: null,
     awardScrollReleaseAge: null,
     awardReleaseAge: null,
@@ -662,6 +707,36 @@ function advanceFactoryTerminalRecordPrompt<
   };
 }
 
+/**
+ * `\l` mid-`frontierBrainCongratulations` scroll gate. Live-bisected against
+ * the real ROM at age 98 — one tick AFTER the "input accepted exactly on the
+ * tick the last glyph draws" rule's 97 (T-1/T pair: 97 rejected, 98 accepted;
+ * `tools/probe/bisect-factory-brain-congrats-gates-off.py`,
+ * `docs/brain-terminal-live-verification.md`). The `+ 0`-vs-`- 1` term below
+ * encodes that measured offset; the last-glyph rule alone under-shoots here.
+ */
+function frontierBrainCongratsScrollGateReadyAge(
+  profile: FactoryTerminalRoundWonProfile,
+): number {
+  const [line0, line1] = profile.frontierBrainCongratulations.lines;
+  return profile.congratulationsTextDelay + line0.length + line1.length;
+}
+
+/**
+ * Third line's dismiss gate, relative to the scroll gate's own release.
+ * Live-bisected at release + 32 — three ticks after the last-glyph rule's
+ * + 29 (T-1/T pair: 129 rejected, 130 accepted; same probe/doc as above);
+ * the `+ 2` term encodes the measured offset.
+ */
+function frontierBrainCongratsFinalGateReadyAge(
+  profile: FactoryTerminalRoundWonProfile,
+  congratsScrollReleaseAge: number,
+): number {
+  const line2 = profile.frontierBrainCongratulations.lines[2];
+  return congratsScrollReleaseAge +
+    profile.frontierBrainCongratulations.thirdLineTextDelay + line2.length + 2;
+}
+
 export function advanceFactoryTerminalRoundWonPresentation(
   state: FactoryTerminalRoundWonPresentationState,
   input: {
@@ -673,31 +748,31 @@ export function advanceFactoryTerminalRoundWonPresentation(
 ): FactoryTerminalRoundWonPresentationState {
   const age = state.age + 1;
   const pressed = input.pressedA || input.pressedB;
+  let congratsScrollReleaseAge = state.congratsScrollReleaseAge;
   let congratulationsReleaseAge = state.congratulationsReleaseAge;
   let awardScrollReleaseAge = state.awardScrollReleaseAge;
   let awardReleaseAge = state.awardReleaseAge;
   let exchangeReleaseAge = state.exchangeReleaseAge;
 
-  if (
-    pressed &&
-    congratulationsReleaseAge === null &&
-    age >= state.profile.congratulationsInputReadyAge
-  ) {
-    congratulationsReleaseAge = age;
-  } else if (
-    pressed &&
-    congratulationsReleaseAge !== null &&
-    awardScrollReleaseAge === null &&
-    age >= congratulationsReleaseAge + state.profile.awardScrollInputDelay
-  ) {
-    awardScrollReleaseAge = age;
-  } else if (
-    pressed &&
-    awardScrollReleaseAge !== null &&
-    awardReleaseAge === null &&
-    age >= awardScrollReleaseAge + state.profile.awardDefaultInputDelay
-  ) {
-    awardReleaseAge = age;
+  if (state.frontierBrain && congratsScrollReleaseAge === null) {
+    if (pressed && age >= frontierBrainCongratsScrollGateReadyAge(state.profile)) {
+      congratsScrollReleaseAge = age;
+    }
+  } else if (congratulationsReleaseAge === null) {
+    const readyAge = state.frontierBrain
+      ? frontierBrainCongratsFinalGateReadyAge(state.profile, congratsScrollReleaseAge!)
+      : state.profile.congratulationsInputReadyAge;
+    if (pressed && age >= readyAge) {
+      congratulationsReleaseAge = age;
+    }
+  } else if (awardScrollReleaseAge === null) {
+    if (pressed && age >= congratulationsReleaseAge + state.profile.awardScrollInputDelay) {
+      awardScrollReleaseAge = age;
+    }
+  } else if (awardReleaseAge === null) {
+    if (pressed && age >= awardScrollReleaseAge + state.profile.awardDefaultInputDelay) {
+      awardReleaseAge = age;
+    }
   }
 
   const mutationAge = awardReleaseAge === null
@@ -741,6 +816,7 @@ export function advanceFactoryTerminalRoundWonPresentation(
   return {
     ...state,
     age,
+    congratsScrollReleaseAge,
     congratulationsReleaseAge,
     awardScrollReleaseAge,
     awardReleaseAge,

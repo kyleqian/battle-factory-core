@@ -24,6 +24,7 @@ import {
   renderFactoryDraftScreen,
   renderFactoryDraftScreenFaded,
   selectedRentalParty,
+  selectedRentalSlotIndexes,
   selectMonMessage,
   type DraftScreenState,
 } from "./factoryDraftScreen.ts";
@@ -329,8 +330,15 @@ import {
   FACTORY_LOSS_TERMINAL_PROFILE,
   factoryTerminalCompletion,
   factoryTerminalDeclineBoxGoneAge,
+  isFactoryTerminalRoundWon,
   type FactoryTerminalPresentationState,
 } from "./factoryTerminalPresentation.ts";
+import {
+  advanceFactoryCarry,
+  createInitialFactoryCarry,
+  generateFactoryChallengeDraft,
+  type FactoryCarry,
+} from "./factoryRoundChaining.ts";
 import {
   advanceFactoryLobbyFreeRoam,
   createFactoryLobbyFreeRoamState,
@@ -355,11 +363,13 @@ import {
   beginFactoryRoundBattleStartIntro,
   chooseFactoryRoundSwap,
   completeFactoryRoundPresentation,
+  createFactoryRoundBattleOrchestrator,
   preGenerateFactoryRoundNextOpponent,
   type FactoryRoundBattleOrchestratorState,
 } from "./factoryRoundBattleOrchestrator.ts";
 import {
   ANCHOR_BATTLE_1_BATTLE_INIT_RNG_VALUE,
+  ANCHOR_FACTORY_METADATA,
   createFactoryAnchorSession,
 } from "./factoryAnchorSession.ts";
 import { CANONICAL_DESTIN_PRESENTATION } from "./factoryTrainerPresentation.ts";
@@ -513,6 +523,17 @@ export interface EngineState {
    * the loss timeline). Null until that handoff; see factoryLobbyFreeRoam.ts.
    */
   lobbyFreeRoam: FactoryLobbyFreeRoamState | null;
+  /** In-session Factory progression carried across chained rounds; see factoryRoundChaining.ts. */
+  factoryCarry: FactoryCarry;
+  /**
+   * Set for exactly one draft screen: the generation inputs a chained
+   * challenge's battleRoom handoff must reproduce byte-identically
+   * (`generateInitial` rentals, see factoryRoundChaining.ts) so the
+   * confirmed party matches what the draft screen displayed. Null for the
+   * canonical anchor boot round, whose battle 1 instead adopts the pinned
+   * anchor schedule (createFactoryAnchorSession).
+   */
+  pendingGeneratedRound: Readonly<{ rngValueBefore: number; carry: FactoryCarry }> | null;
 }
 
 /** battleRoom "settled" phase's own elapsed (0 = trace tick 843, see battleTransition.ts) at which core.ts hands off to battleScene.ts - trace tick 1040 (battleScene.ts's own TICK0), the ground-truth trace's own window start. Ticks 1030-1039 are flat black either way (battleTransition's own exit-fade hold and battleScene's own pre-reveal hold render byte-identical solid black), so the exact handoff point within that range is inconsequential to pixels. */
@@ -598,6 +619,8 @@ export function createInitialState(
     factoryTerminal: null,
     factoryRoundBattleOrchestrator: null,
     lobbyFreeRoam: null,
+    factoryCarry: createInitialFactoryCarry(ANCHOR_FACTORY_METADATA.playerTrainerId),
+    pendingGeneratedRound: null,
   };
 }
 
@@ -776,6 +799,62 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // timeline). From that box-gone age the app hands input/rendering to the
     // walkable-lobby overworld (factoryLobbyFreeRoam.ts); until then the
     // terminal presentation still owns the screen.
+    // Continuous-play chaining (queue item 2, ROADMAP "User decisions
+    // 2026-08-14" #2): the terminal record menu's accepted default-NO input
+    // (recordChoice newly "no" this tick) re-enters a fresh GENERATED draft
+    // screen directly, carrying win streak/symbols/BP/rents forward, instead
+    // of continuing into the decline-farewell -> free-roam Lobby chain below.
+    // Supervisor design decision: no new lobby-dialogue surfaces for this
+    // step; faithful attendant re-entry chrome layers on later. Scoped to the
+    // production generated-orchestrator route, whose roundOutcome carries the
+    // real BP/symbol award this carry needs.
+    if (
+      state.appRoute === "generated-orchestrator" &&
+      factoryRoundBattleOrchestrator !== null &&
+      factoryRoundBattleOrchestrator.roundOutcome !== null &&
+      state.factoryTerminal?.recordChoice !== "no" &&
+      factoryTerminal.recordChoice === "no"
+    ) {
+      const nextCarry = advanceFactoryCarry(
+        state.factoryCarry,
+        isFactoryTerminalRoundWon(factoryTerminal),
+        factoryRoundBattleOrchestrator.roundOutcome,
+        factoryRoundBattleOrchestrator.facilityState.rentsCount,
+      );
+      // The ROM's Random() cursor is one continuous global: the just-finished
+      // round's ending orchestrator cursor is the source-faithful seed for
+      // the next challenge's generation (factoryRoundChaining.ts's doc; see
+      // factoryRoundBattleOrchestrator.test.ts's "uninterrupted orchestrator
+      // cursor" case).
+      const rngValueBefore = factoryRoundBattleOrchestrator.round.rules.rngValue;
+      const { generation, draftScreen: nextDraftScreen } =
+        generateFactoryChallengeDraft(nextCarry, rngValueBefore);
+      return {
+        ...state,
+        frame: state.frame + 1,
+        battle1OpponentConstructionRngValues: Object.freeze([]),
+        draftScreen: nextDraftScreen,
+        keyRepeat,
+        summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
+        prebattleRoom: null,
+        battleRoom: null,
+        battleScene: null,
+        postwin: null,
+        battleSetup: null,
+        rngMode: "vblank",
+        rngValue: generation.rngValue,
+        battleControllerExecFlags: 0,
+        roundController: null,
+        stagedBattleTurn: null,
+        sceneOnPresentation: null,
+        factorySwap: null,
+        factoryTerminal: null,
+        factoryRoundBattleOrchestrator: null,
+        lobbyFreeRoam: null,
+        factoryCarry: nextCarry,
+        pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
+      };
+    }
     const freeRoamBoxGoneAge = factoryTerminalDeclineBoxGoneAge(factoryTerminal);
     const lobbyFreeRoam =
       freeRoamBoxGoneAge !== null && factoryTerminal.age >= freeRoamBoxGoneAge
@@ -1831,7 +1910,49 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       // indefinite on its own - this is the fixed elapsed count matching
       // the ground-truth trace's own window start (trace tick 1040).
       if (battleRoom?.phase === "settled" && battleRoom.elapsed === BATTLE_SCENE_HANDOFF_ELAPSED) {
-        if (state.appRoute === "generated-orchestrator") {
+        if (state.appRoute === "generated-orchestrator" && state.pendingGeneratedRound !== null) {
+          // Chained (post-boot) round: every construction input is already
+          // pinned in pendingGeneratedRound (factoryRoundChaining.ts) from
+          // the terminal-decline transition, so no live construction-cursor
+          // capture is needed here - this route generates battle 1's
+          // opponent fresh too, exactly like every later in-round battle
+          // (beginFactoryRoundBattleStartIntro's own "every other caller"
+          // doc).
+          const pending = state.pendingGeneratedRound;
+          const selectedRentalIndexes = selectedRentalSlotIndexes(draftScreen);
+          const sceneAssemblyDisplayLag = battleIntroSceneAssemblyDisplayLag(
+            battleRoom.transitionPresentation,
+          );
+          battleRoom = null;
+          return {
+            ...state,
+            frame: state.frame + 1,
+            draftScreen,
+            keyRepeat,
+            summaryScreen,
+            prebattleRoom,
+            battleRoom,
+            battleScene: null,
+            battleSetup: null,
+            factoryRoundBattleOrchestrator: beginFactoryRoundBattleStartIntro(
+              createFactoryRoundBattleOrchestrator({
+                id: `generated-round-streak-${pending.carry.factoryWinStreak}`,
+                rngValue: pending.rngValueBefore,
+                factoryWinStreak: pending.carry.factoryWinStreak,
+                playerTrainerId: pending.carry.playerTrainerId,
+                battleTowerLevel50WinStreak: ANCHOR_FACTORY_METADATA.battleTowerLevel50WinStreak,
+                factorySymbolsCount: pending.carry.factorySymbolsCount,
+                facilityState: { rentsCount: pending.carry.rentsCount },
+                rentals: { type: "generateInitial", selectedRentalIndexes },
+              }),
+              sceneAssemblyDisplayLag,
+            ),
+            battle1OpponentConstructionRngValues,
+            pendingGeneratedRound: null,
+            rngMode,
+            rngValue,
+          };
+        } else if (state.appRoute === "generated-orchestrator") {
           if (battle1OpponentConstructionRngValues.length !== 3) {
             throw new Error(
               "generated-orchestrator route requires three live construction cursors",

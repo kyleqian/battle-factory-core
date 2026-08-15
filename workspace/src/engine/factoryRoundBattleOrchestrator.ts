@@ -50,6 +50,7 @@ import {
   advanceBattleResolutionConfirmHandoff,
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
+  hasRetainedLockedActionReceipt,
   type BattleResolutionPresentationCommand,
   type BattleResolutionLockedActionIdentity,
   type BattleResolutionPresentationState,
@@ -100,6 +101,10 @@ import {
   getFactoryFrontierBrainStatus,
   type FrontierBrainStatus,
 } from "./frontierBrainStatus.ts";
+import {
+  applyFactoryBrainRoundOutcome,
+  type FactoryBrainRoundOutcomeResult,
+} from "./factoryBrainRoundOutcome.ts";
 import {
   factoryTrainerPresentationForOpponent,
   getFactoryTrainerPresentation,
@@ -377,6 +382,13 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
    * it via the staging context.
    */
   usedMessageHoldFrames: number;
+  /**
+   * `GiveBattlePoints`/`GiveFacilitySymbol` (`frontier_util.c:1853-1925`) run
+   * from the Lobby only once a round resolves -- win (`roundComplete`) or
+   * loss (`roundLost`) -- never after an intra-round battle win. Null until
+   * `round.rules.phase` reaches one of those two terminal phases.
+   */
+  roundOutcome: FactoryBrainRoundOutcomeResult | null;
 }>;
 
 export class FactoryRoundOrchestratorError extends Error {
@@ -749,6 +761,7 @@ export function createFactoryRoundBattleOrchestrator(
     pendingBattlePreCommandRngCalls: adopted?.preCommandRngCalls ?? 0,
     nextBattleRequestId: 1,
     usedMessageHoldFrames: 0,
+    roundOutcome: null,
   });
 }
 
@@ -1039,6 +1052,30 @@ export function chooseFactoryRoundSwap(
   });
 }
 
+/**
+ * `GiveBattlePoints`/`GiveFacilitySymbol` (`frontier_util.c:1853-1925`) as a
+ * round-controller output: given the config a round started with, the
+ * battleIndex just resolved, its win/loss outcome, and the opponent just
+ * fought (for its `frontierBrain` marker), returns the BP/symbol result the
+ * real Lobby script would compute. `finishBattle` calls this at the two real
+ * round-terminal phases (`roundComplete`/`roundLost`); exported so callers
+ * that resolve a round without a real kernel battle (e.g. a scripted loss)
+ * can compute the same output from the same round-controller inputs.
+ */
+export function factoryRoundOutcomeForResolution(
+  config: FactoryRoundBattleOrchestratorConfig,
+  battleIndex: number,
+  outcome: "win" | "loss",
+  frontierBrain: BattleOpponent["frontierBrain"],
+): FactoryBrainRoundOutcomeResult {
+  return applyFactoryBrainRoundOutcome({
+    outcome,
+    factoryWinStreak: config.factoryWinStreak + battleIndex,
+    factorySymbolsCount: config.factorySymbolsCount ?? 0,
+    frontierBrain,
+  });
+}
+
 function finishBattle(
   state: FactoryRoundBattleOrchestratorState,
   battle: BattleState<FactoryFullTurnDecisionRules>,
@@ -1082,6 +1119,14 @@ function finishBattle(
   });
   const persistRentalSwap = round.rules.phase === "roundComplete"
     && state.performedRentalSwap;
+  const roundOutcome = round.rules.phase === "roundComplete" || round.rules.phase === "roundLost"
+    ? factoryRoundOutcomeForResolution(
+      state.config,
+      round.rules.battleIndex,
+      round.rules.phase === "roundComplete" ? "win" : "loss",
+      round.rules.currentOpponent.frontierBrain,
+    )
+    : state.roundOutcome;
   return Object.freeze({
     ...state,
     facilityState: persistRentalSwap
@@ -1091,6 +1136,7 @@ function finishBattle(
       : state.facilityState,
     performedRentalSwap: persistRentalSwap ? false : state.performedRentalSwap,
     round,
+    roundOutcome,
     battle: null,
     battleCommandPresentation: null,
     battleResolutionPresentation: null,
@@ -1387,12 +1433,11 @@ function beginCommandResolution(
   });
   const retained = state.retainedLockedActionPresentationOwner;
   const drivenTransition = transitionFromDriveReceipt(receipt);
-  let resolution: BattleResolutionPresentationState;
-  if (retained === null) {
-    resolution = createBattleResolutionPresentation({
+  const freshResolution = (): BattleResolutionPresentationState =>
+    createBattleResolutionPresentation({
       sourceRequest: presentation.request,
-      sourceDecision: presentation.pendingDecision,
-      beforeRules: state.battle.rules,
+      sourceDecision: presentation.pendingDecision!,
+      beforeRules: state.battle!.rules,
       transition: drivenTransition,
       fieldBoundary: presentation.field,
       confirmHandoff: Object.freeze({
@@ -1404,6 +1449,9 @@ function beginCommandResolution(
         state.round.rules.currentOpponent,
       ),
     });
+  let resolution: BattleResolutionPresentationState;
+  if (retained === null) {
+    resolution = freshResolution();
   } else {
     if (
       retained.resolution.pendingBattle !== state.battle
@@ -1431,12 +1479,21 @@ function beginCommandResolution(
     ) {
       return fail("retained locked action identity no longer matches the kernel");
     }
-    resolution = appendBattleResolutionLockedActionContinuation({
-      resolution: retained.resolution,
-      transition: drivenTransition,
-      fieldBoundary: presentation.field,
-      lockedAction: action,
-    });
+    // FaintClearSetData (battle_main.c:3272) unconditionally zeroes status2 on
+    // faint, so the locked battler can still be KO'd by this very transition
+    // (the other battler simply moved first) before its continuation ever
+    // prints. That is a genuine game outcome, not a stale retained snapshot —
+    // fall back to a fresh resolution identity exactly as the no-retained-
+    // owner branch above would, rather than forcing a continuation receipt
+    // that this transition was never going to produce.
+    resolution = hasRetainedLockedActionReceipt(drivenTransition.events, action)
+      ? appendBattleResolutionLockedActionContinuation({
+          resolution: retained.resolution,
+          transition: drivenTransition,
+          fieldBoundary: presentation.field,
+          lockedAction: action,
+        })
+      : freshResolution();
   }
   return Object.freeze({
     ...state,
