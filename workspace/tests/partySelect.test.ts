@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { advancePartySelect, CANONICAL_FORCED_SWITCH_PARTY, CANONICAL_FORCED_SWITCH_RENTAL_RECORDS, CANONICAL_FORCED_SWITCH_REQUEST, createPartySelectStateFromForcedSwitch, fullPartyIconFrame, INITIAL_PARTY_SELECT_STATE, onixSelectedHopY2, partyMenuLayers, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutBattleMenuReady, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_BLACK_START, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_ENTRY_SETTLED_START, PARTY_LIST_INPUT_ELAPSED, PARTY_SENDOUT_ACTION_MENU_START, PARTY_SENDOUT_BALL_LAST_VISIBLE, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_BATTLE_FADE_IN_START, PARTY_SENDOUT_BLACK_START, PARTY_SENDOUT_BLANK_MESSAGE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, PARTY_SENDOUT_GO_TEXT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, partySelectEntryPhase, submitPartySelectBattleDecision } from "../src/engine/partySelect.ts";
 import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
-import { createBattleState, type BattleDecisionReducer } from "../src/engine/battleDecisionBoundary.ts";
+import { createBattleForcedSwitchRequest, createBattleState, type BattleDecisionReducer } from "../src/engine/battleDecisionBoundary.ts";
 import { battlePartySelectStateForForcedParty, renderBattlePartySelect } from "../src/engine/battlePartySelect.ts";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
@@ -173,6 +173,39 @@ describe("forced turn-15 party select", () => {
     )).toBeNull();
     expect(advancePartySelect(refused, new Set()).message)
       .toBe("ONIX has no energy\nleft to battle!");
+  });
+
+  it("ISSUES #89: a live outgoing slot (Baton Pass) refuses 'is already in battle!' instead of 'has no energy'", () => {
+    // party_menu.c:5811-5823's TrySwitchInPokemon: a zero-HP outgoing slot
+    // (the classic forced-switch dance, pinned above) refuses with "has no
+    // energy"; a still-living outgoing slot -- Baton Pass's own mid-action
+    // openpartyscreen halt -- refuses with "is already in battle!" instead.
+    const request = createBattleForcedSwitchRequest({
+      kind: "forced-switch",
+      requestId: 0,
+      side: "player",
+      battler: 0,
+      faintedPartyIndex: 0,
+      legalPartyIndexes: [1, 2],
+    });
+    const livingOutgoingParty = CANONICAL_FORCED_SWITCH_PARTY.map((member, index) =>
+      index === 0 ? { ...member, hp: 1 } : member
+    ) as unknown as typeof CANONICAL_FORCED_SWITCH_PARTY;
+    const state = createPartySelectStateFromForcedSwitch(
+      request,
+      CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
+      livingOutgoingParty,
+    );
+    expect(state.party[0]).toMatchObject({ hp: 1, fainted: false, legal: false });
+    const onixSubmenu = advancePartySelect(
+      { ...state, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 },
+      new Set(["A"]),
+    );
+    expect(onixSubmenu).toMatchObject({ cursor: "onix", submenuOpen: true, sendOutElapsed: null });
+    const refused = advancePartySelect(onixSubmenu, new Set(["A"]));
+    expect(refused.sendOutElapsed).toBeNull();
+    expect(refused.submenuOpen).toBe(false);
+    expect(refused.message).toBe("ONIX is already\nin battle!");
   });
 
   it("keeps the SEND OUT exit clock relative to its own confirmation edge", () => {
