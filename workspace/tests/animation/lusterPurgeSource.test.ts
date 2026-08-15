@@ -71,9 +71,20 @@ describe("MOVE_LUSTER_PURGE source and legal staging checkpoint", () => {
       "visualCommand:waitbgfadeout",
     ]);
     expect(audit.carrier).toEqual([
-      { index: 799, label: "FRONTIER_MON_LATIOS_4", species: "SPECIES_LATIOS", nature: "NATURE_MODEST" },
-      { index: 847, label: "FRONTIER_MON_LATIOS_6", species: "SPECIES_LATIOS", nature: "NATURE_DOCILE" },
+      { index: 799, label: "FRONTIER_MON_LATIOS_4", species: "SPECIES_LATIOS", speciesId: 408, nature: "NATURE_MODEST" },
+      { index: 847, label: "FRONTIER_MON_LATIOS_6", species: "SPECIES_LATIOS", speciesId: 408, nature: "NATURE_DOCILE" },
     ]);
+    expect(audit.speciesIdentity).toMatchObject({
+      internalIds: { SPECIES_RELICANTH: 381, SPECIES_LATIOS: 408 },
+      names: { relicanth: true, latios: true },
+      latios: {
+        types: [16, 14], ability: 26,
+        baseStats: { hp: 80, attack: 90, defense: 80, speed: 110, spAttack: 130, spDefense: 110 },
+        sourceInfo: true,
+        art: { back: true, front: true, palette: true },
+        healthbox: { player: true, opponent: true, bar: true },
+      },
+    });
     expect(audit.sourceRom).toMatchObject({
       moveScript: { bytes: 279, sha256: "cf068f899a65b6a097c6e6fd144d0746f4ee1da48fb379432c1b3bc18c974178" },
       unsetPsychicBackground: { bytes: 8, sha256: "8fa2d0ddbd079c6f7bf5c9c0125a221f3852421cb29ecb1d27d6f96f71564b30" },
@@ -101,11 +112,12 @@ describe("MOVE_LUSTER_PURGE source and legal staging checkpoint", () => {
     expect(parties.player).toHaveLength(3);
     expect(parties.opponent).toHaveLength(3);
     [...parties.player, ...parties.opponent].forEach(expectCompletePartyRecord);
-    const latios = [...parties.player, ...parties.opponent].find((mon) => mon.species === 381)!;
+    const latios = [...parties.player, ...parties.opponent].find((mon) => mon.species === 408)!;
     expect(latios).toMatchObject({
-      species: 381, level: 50, nature: 15, item: 141,
+      species: 408, level: 50, nature: 15, item: 141,
       moves: [295, 295, 295, 295], ppUps: [0, 0, 0, 0], abilitySlot: 0,
     });
+    expect([...parties.player, ...parties.opponent].some((mon) => mon.species === 381)).toBe(false);
     const opponentMoves = path.includes("player-latios") ? parties.opponent : parties.player;
     expect(opponentMoves[0]!.moves).toEqual([33, 33, 33, 33]);
     expect(opponentMoves.every((mon) => mon.moves === opponentMoves[0]!.moves ||

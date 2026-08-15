@@ -101,6 +101,10 @@ import {
   type FrontierBrainStatus,
 } from "./frontierBrainStatus.ts";
 import {
+  applyFactoryBrainRoundOutcome,
+  type FactoryBrainRoundOutcomeResult,
+} from "./factoryBrainRoundOutcome.ts";
+import {
   factoryTrainerPresentationForOpponent,
   getFactoryTrainerPresentation,
 } from "./factoryTrainerPresentation.ts";
@@ -377,6 +381,13 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
    * it via the staging context.
    */
   usedMessageHoldFrames: number;
+  /**
+   * `GiveBattlePoints`/`GiveFacilitySymbol` (`frontier_util.c:1853-1925`) run
+   * from the Lobby only once a round resolves -- win (`roundComplete`) or
+   * loss (`roundLost`) -- never after an intra-round battle win. Null until
+   * `round.rules.phase` reaches one of those two terminal phases.
+   */
+  roundOutcome: FactoryBrainRoundOutcomeResult | null;
 }>;
 
 export class FactoryRoundOrchestratorError extends Error {
@@ -749,6 +760,7 @@ export function createFactoryRoundBattleOrchestrator(
     pendingBattlePreCommandRngCalls: adopted?.preCommandRngCalls ?? 0,
     nextBattleRequestId: 1,
     usedMessageHoldFrames: 0,
+    roundOutcome: null,
   });
 }
 
@@ -1039,6 +1051,30 @@ export function chooseFactoryRoundSwap(
   });
 }
 
+/**
+ * `GiveBattlePoints`/`GiveFacilitySymbol` (`frontier_util.c:1853-1925`) as a
+ * round-controller output: given the config a round started with, the
+ * battleIndex just resolved, its win/loss outcome, and the opponent just
+ * fought (for its `frontierBrain` marker), returns the BP/symbol result the
+ * real Lobby script would compute. `finishBattle` calls this at the two real
+ * round-terminal phases (`roundComplete`/`roundLost`); exported so callers
+ * that resolve a round without a real kernel battle (e.g. a scripted loss)
+ * can compute the same output from the same round-controller inputs.
+ */
+export function factoryRoundOutcomeForResolution(
+  config: FactoryRoundBattleOrchestratorConfig,
+  battleIndex: number,
+  outcome: "win" | "loss",
+  frontierBrain: BattleOpponent["frontierBrain"],
+): FactoryBrainRoundOutcomeResult {
+  return applyFactoryBrainRoundOutcome({
+    outcome,
+    factoryWinStreak: config.factoryWinStreak + battleIndex,
+    factorySymbolsCount: config.factorySymbolsCount ?? 0,
+    frontierBrain,
+  });
+}
+
 function finishBattle(
   state: FactoryRoundBattleOrchestratorState,
   battle: BattleState<FactoryFullTurnDecisionRules>,
@@ -1082,6 +1118,14 @@ function finishBattle(
   });
   const persistRentalSwap = round.rules.phase === "roundComplete"
     && state.performedRentalSwap;
+  const roundOutcome = round.rules.phase === "roundComplete" || round.rules.phase === "roundLost"
+    ? factoryRoundOutcomeForResolution(
+      state.config,
+      round.rules.battleIndex,
+      round.rules.phase === "roundComplete" ? "win" : "loss",
+      round.rules.currentOpponent.frontierBrain,
+    )
+    : state.roundOutcome;
   return Object.freeze({
     ...state,
     facilityState: persistRentalSwap
@@ -1091,6 +1135,7 @@ function finishBattle(
       : state.facilityState,
     performedRentalSwap: persistRentalSwap ? false : state.performedRentalSwap,
     round,
+    roundOutcome,
     battle: null,
     battleCommandPresentation: null,
     battleResolutionPresentation: null,

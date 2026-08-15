@@ -15,6 +15,15 @@ const sound = read("reference/pokeemerald/src/battle_anim_sound_tasks.c");
 const psychic = read("reference/pokeemerald/src/battle_anim_psychic.c");
 const random = read("reference/pokeemerald/src/random.c");
 const graphics = read("reference/pokeemerald/src/data/battle_anim.h");
+const speciesConstants = read("reference/pokeemerald/include/constants/species.h");
+const pokemonConstants = read("reference/pokeemerald/include/constants/pokemon.h");
+const abilityConstants = read("reference/pokeemerald/include/constants/abilities.h");
+const speciesInfo = read("reference/pokeemerald/src/data/pokemon/species_info.h");
+const speciesNames = read("reference/pokeemerald/src/data/text/species_names.h");
+const backPicTable = read("reference/pokeemerald/src/data/pokemon_graphics/back_pic_table.h");
+const frontPicTable = read("reference/pokeemerald/src/data/pokemon_graphics/still_front_pic_table.h");
+const pokemonGraphics = read("reference/pokeemerald/src/data/graphics/pokemon.h");
+const battleInterface = read("reference/pokeemerald/src/battle_interface.c");
 const rom = readFileSync(resolve(root, "reference/pokeemerald/pokeemerald.gba"));
 const mons = JSON.parse(read("src/data/gen/battle-frontier-mons.json"));
 const graph = JSON.parse(read("src/data/gen/battle-animation-components.json"));
@@ -29,6 +38,17 @@ const address = (symbol: string): number => {
   return Number.parseInt(match[1]!, 16);
 };
 const sha256 = (bytes: Uint8Array): string => createHash("sha256").update(bytes).digest("hex");
+const numericConstant = (source: string, name: string): number => {
+  const match = source.match(new RegExp(`^#define ${name}\\s+(\\d+)$`, "m"));
+  if (!match) throw new Error(`missing numeric constant ${name}`);
+  return Number(match[1]);
+};
+const blockFrom = (source: string, start: string, end: string): string => {
+  const from = source.indexOf(start);
+  const to = source.indexOf(end, from + start.length);
+  if (from < 0 || to < 0) throw new Error(`missing source identity block ${start}/${end}`);
+  return source.slice(from, to);
+};
 const sourceBytes = (start: number, endExclusive: number): string => sha256(
   rom.subarray(start - 0x08000000, endExclusive - 0x08000000),
 );
@@ -46,6 +66,42 @@ const lusterMove = graph.moves.find((entry: { move: string }) => entry.move === 
 const level50 = inventory.tiers.level50.monIndices;
 const carriers = mons.entries.filter((entry: { index: number; moves: string[] }) =>
   entry.index >= level50.first && entry.index <= level50.last && entry.moves.includes("MOVE_LUSTER_PURGE"));
+
+const speciesIds = {
+  RELICANTH: numericConstant(speciesConstants, "SPECIES_RELICANTH"),
+  LATIOS: numericConstant(speciesConstants, "SPECIES_LATIOS"),
+};
+const latiosInfo = blockFrom(speciesInfo, "[SPECIES_LATIOS]", "[SPECIES_JIRACHI]");
+const speciesIdentity = {
+  internalIds: {
+    SPECIES_RELICANTH: speciesIds.RELICANTH,
+    SPECIES_LATIOS: speciesIds.LATIOS,
+  },
+  names: {
+    relicanth: speciesNames.includes("[SPECIES_RELICANTH] = _(\"RELICANTH\")"),
+    latios: speciesNames.includes("[SPECIES_LATIOS] = _(\"LATIOS\")"),
+  },
+  latios: {
+    types: [numericConstant(pokemonConstants, "TYPE_DRAGON"), numericConstant(pokemonConstants, "TYPE_PSYCHIC")],
+    ability: numericConstant(abilityConstants, "ABILITY_LEVITATE"),
+    baseStats: { hp: 80, attack: 90, defense: 80, speed: 110, spAttack: 130, spDefense: 110 },
+    sourceInfo: [
+      ".baseHP        = 80", ".baseAttack    = 90", ".baseDefense   = 80",
+      ".baseSpeed     = 110", ".baseSpAttack  = 130", ".baseSpDefense = 110",
+      ".types = { TYPE_DRAGON, TYPE_PSYCHIC }", ".abilities = {ABILITY_LEVITATE, ABILITY_NONE}",
+    ].every((needle) => latiosInfo.includes(needle)),
+    art: {
+      back: backPicTable.includes("SPECIES_SPRITE(LATIOS, gMonBackPic_Latios)"),
+      front: frontPicTable.includes("SPECIES_SPRITE(LATIOS,        gMonStillFrontPic_Latios)"),
+      palette: pokemonGraphics.includes("gMonPalette_Latios[]"),
+    },
+    healthbox: {
+      player: battleInterface.includes("sHealthboxPlayerSpriteTemplates"),
+      opponent: battleInterface.includes("sHealthboxOpponentSpriteTemplates"),
+      bar: battleInterface.includes("sHealthbarSpriteTemplates"),
+    },
+  },
+};
 
 const expectedComponents = [
   "asset:ANIM_TAG_IMPACT", "asset:ANIM_TAG_WHITE_CIRCLE_OF_LIGHT",
@@ -123,6 +179,14 @@ const checks: Record<string, boolean> = {
     && JSON.stringify(carriers[0]?.moves) === JSON.stringify([
       "MOVE_LUSTER_PURGE", "MOVE_THUNDERBOLT", "MOVE_ICE_BEAM", "MOVE_DRAGON_CLAW",
     ]),
+  speciesIdentity: speciesIds.RELICANTH === 381 && speciesIds.LATIOS === 408
+    && speciesIdentity.names.relicanth && speciesIdentity.names.latios
+    && JSON.stringify(speciesIdentity.latios.types) === JSON.stringify([16, 14])
+    && speciesIdentity.latios.ability === 26
+    && JSON.stringify(speciesIdentity.latios.baseStats) === JSON.stringify({ hp: 80, attack: 90, defense: 80, speed: 110, spAttack: 130, spDefense: 110 })
+    && speciesIdentity.latios.sourceInfo
+    && Object.values(speciesIdentity.latios.art).every(Boolean)
+    && Object.values(speciesIdentity.latios.healthbox).every(Boolean),
   assets: graphics.includes("gBattleAnimSpriteGfx_CircleOfLight")
     && graphics.includes("ANIM_TAG_WHITE_CIRCLE_OF_LIGHT")
     && graphics.includes("gBattleAnimSpriteGfx_Impact")
@@ -154,7 +218,8 @@ console.log(JSON.stringify({
   move: "MOVE_LUSTER_PURGE", sourceBounds: { start: "0x082ce517", endExclusive: "0x082ce62e", evenPointerStart: "0x082ce516", bytes: 0x117 },
   unsetBounds: { start: "0x082d7cdd", endExclusive: "0x082d7ce5", bytes: 8 },
   scriptCommands: expectedScriptCommands, unsetCommands: expectedUnsetCommands,
-  sourceRom, components: expectedComponents, carrier: carriers.map((entry: { index: number; label: string; species: string; nature: string }) => ({ index: entry.index, label: entry.label, species: entry.species, nature: entry.nature })),
+  sourceRom, components: expectedComponents, speciesIdentity,
+  carrier: carriers.map((entry: { index: number; label: string; species: string; nature: string }) => ({ index: entry.index, label: entry.label, species: entry.species, speciesId: entry.species === "SPECIES_LATIOS" ? speciesIds.LATIOS : speciesIds.RELICANTH, nature: entry.nature })),
   randomDraws: { hitsplats: 6, visualRandom2PerHitsplat: 2 },
   siblings: { MOVE_MIST_BALL: "independent control", MOVE_FLAIL: "independent control", MOVE_HEAT_WAVE: "independent control", MOVE_CALM_MIND: "independent control" },
 }));
