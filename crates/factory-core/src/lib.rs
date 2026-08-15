@@ -55,6 +55,8 @@ pub mod battle_script_setforesight;
 pub mod battle_script_setforesight_vectors_gen;
 pub mod battle_script_setminimize;
 pub mod battle_script_setminimize_vectors_gen;
+pub mod battle_script_setsubstitute;
+pub mod battle_script_setsubstitute_vectors_gen;
 pub mod battle_script_settaunt;
 pub mod battle_script_settaunt_vectors_gen;
 pub mod battle_script_settorment;
