@@ -29,12 +29,17 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
-import { drawMessageBoxFrame, drawMessageBoxText } from "./prebattleRoomRender.ts";
+import { BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechCursorVisible, brainSpeechCursorYOffset, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { drawMessageBoxFrame, drawMessageBoxText, MESSAGE_PALETTE } from "./prebattleRoomRender.ts";
+import { measureText, type FontData } from "./font.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
 import tileset from "../assets/gen/battle-room-tileset.json" with { type: "json" };
 import npcs from "../assets/gen/battle-room-npcs.json" with { type: "json" };
+import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
+import charmapData from "../data/gen/charmap.json" with { type: "json" };
+import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
+import msgboxAssetData from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
 
 import { OBJ_EVENT_GFX, type ObjectEventGfxId, facilityTrainerGfxIdForClass } from "./factoryTrainerOverworldGfx.ts";
 
@@ -203,20 +208,70 @@ const opponentScreenX = tileScreenPos(roomLayout.objects.opponent.settleTile, IN
 const MSGBOX_LINE1_ORIGIN = { x: 16, y: 121 };
 const MSGBOX_LINE2_ORIGIN = { x: 16, y: 137 };
 
+const cursorFont = fontNormalData as unknown as FontData;
+const cursorCharmap = new Map<string, number>(
+  (charmapData as { entries: [string, number][] }).entries,
+);
+interface DownArrowAsset {
+  indices: number[][];
+  blitWidth: number;
+  blitHeight: number;
+}
+const downArrow = downArrowAsset as DownArrowAsset;
+/**
+ * The glyph's own index 1/2 (border/fill) mapped against the box's own
+ * msgbox palette (msgbox.json's own indices - msgboxPalette[2] is this same
+ * asset's text-shadow gray, prebattleRoomRender.ts's MESSAGE_PALETTE[1];
+ * msgboxPalette[4] is its dedicated red, unused by ordinary message text
+ * and dense-compare-caught for this glyph specifically - MESSAGE_PALETTE's
+ * own compact 3-entry reindexing doesn't carry it). Index 0 is transparent.
+ */
+const CURSOR_PALETTE: readonly [RgbColor, RgbColor, RgbColor] = [
+  { r: 0, g: 0, b: 0 },
+  MESSAGE_PALETTE[1]!,
+  (msgboxAssetData as { palette: RgbColor[] }).palette[4]!,
+];
+
+/**
+ * The brain speech's own "waiting for input, more text follows" cursor -
+ * same glyph/mechanism as battleScene.ts's drawCursor (see
+ * brainSpeechCursorVisible's own doc for which boxes show it), positioned
+ * right after line 2's own last printed glyph like that function's own
+ * X placement, at this box's fixed Y (dense-compare-caught: coincides with
+ * the box's own MSGBOX_LINE2_ORIGIN.y, the same window template).
+ */
+function drawBrainSpeechCursor(fb: Uint8Array, line2: string, yOffset: number): void {
+  const x = MSGBOX_LINE2_ORIGIN.x + measureText(cursorFont, cursorCharmap, line2);
+  const y = MSGBOX_LINE2_ORIGIN.y - yOffset;
+  for (let py = 0; py < downArrow.blitHeight; py += 1) {
+    for (let px = 0; px < downArrow.blitWidth; px += 1) {
+      const index = downArrow.indices[py]?.[px] ?? 0;
+      if (index === 0) continue;
+      const color = CURSOR_PALETTE[index];
+      if (!color) continue;
+      setPixel(fb, x + px, y + py, color.r, color.g, color.b);
+    }
+  }
+}
+
 function drawOpponentMsgbox(
   fb: Uint8Array,
   msgbox: MsgboxVisual,
-  lines: readonly [string, string],
+  state: BattleRoomState,
 ): void {
   if (!msgbox.visible) return;
   drawMessageBoxFrame(fb);
   if (msgbox.chars <= 0) return;
-  const [messageLine1, messageLine2] = lines;
+  const [messageLine1, messageLine2] = battleRoomQuote(state);
   const line1 = messageLine1.slice(0, Math.min(msgbox.chars, messageLine1.length));
   drawMessageBoxText(fb, line1, MSGBOX_LINE1_ORIGIN.x, MSGBOX_LINE1_ORIGIN.y);
+  let line2 = "";
   if (msgbox.chars > messageLine1.length) {
-    const line2 = messageLine2.slice(0, msgbox.chars - messageLine1.length);
+    line2 = messageLine2.slice(0, msgbox.chars - messageLine1.length);
     drawMessageBoxText(fb, line2, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y);
+  }
+  if (brainSpeechCursorVisible(state)) {
+    drawBrainSpeechCursor(fb, line2, brainSpeechCursorYOffset(state));
   }
 }
 
@@ -327,7 +382,7 @@ export function renderBattleRoomEntryScene(
         : roomNpcs.opponents[GENERIC_OPPONENT_SHEET]!;
     drawNpcFrame(fb, npc, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
   }
-  drawOpponentMsgbox(fb, msgbox, battleRoomQuote(state));
+  drawOpponentMsgbox(fb, msgbox, state);
 }
 
 const INITIAL_RENDER_STATE: BattleRoomState = { phase: "entering", elapsed: 0 };
@@ -379,5 +434,5 @@ export function renderBattleRoomBrainEntranceScene(
     ? nolandStep(movementElapsed)
     : { frame: NOLAND_IDLE_FRAME, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
   drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);
-  drawOpponentMsgbox(fb, msgboxVisual(state), battleRoomQuote(state));
+  drawOpponentMsgbox(fb, msgboxVisual(state), state);
 }

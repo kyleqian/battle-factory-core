@@ -20,6 +20,7 @@ import {
   BRAIN_MOVEMENT_SETTLE_ELAPSED,
   BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED,
   BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED,
+  brainSpeechCursorVisible,
   createBrainWalkupBattleRoomState,
   MSGBOX_CLOSE_TICKS,
   msgboxVisual,
@@ -96,18 +97,18 @@ describe("silver Noland speech (walk-up build step B2)", () => {
     expect(cry.pages).toEqual(["Shake out every last bit of your\\nknowledge and bring it on!"]);
   });
 
-  it("flattens the 8 pages to 9 boxes (page 1's internal \\l scroll splits into 2) - text verbatim spot-checked", () => {
+  it("flattens the 8 pages to 9 boxes (page 1's internal \\l scroll splits into 2) - text verbatim spot-checked (apostrophes normalized to the font's own curly glyph - factoryTrainerPresentation.ts's displayEasyChatWord precedent, since the extraction JSON's plain ASCII apostrophe has no charmap entry)", () => {
     expect(SILVER_PERSONALITY_SPEECH_BOXES).toHaveLength(9);
     expect(SILVER_PERSONALITY_BOX_COUNT).toBe(9);
     expect(SILVER_PERSONALITY_SPEECH_BOXES[0]).toEqual([
-      "Hey, my name's NOLAND!",
-      "I'm basically in charge of this place,",
+      "Hey, my name’s NOLAND!",
+      "I’m basically in charge of this place,",
     ]);
     expect(SILVER_PERSONALITY_SPEECH_BOXES[1]).toEqual([
-      "I'm basically in charge of this place,",
-      "which is why I'm the FACTORY HEAD!",
+      "I’m basically in charge of this place,",
+      "which is why I’m the FACTORY HEAD!",
     ]);
-    expect(SILVER_PERSONALITY_SPEECH_BOXES[8]).toEqual(["I'll be using rental POKéMON, too!", ""]);
+    expect(SILVER_PERSONALITY_SPEECH_BOXES[8]).toEqual(["I’ll be using rental POKéMON, too!", ""]);
     // First-encounter queue is the 9 personality boxes plus the cry.
     expect(SILVER_FIRST_ENCOUNTER_SPEECH_BOXES).toHaveLength(10);
     expect(SILVER_FIRST_ENCOUNTER_SPEECH_BOXES[9]).toEqual([
@@ -148,9 +149,12 @@ describe("silver Noland speech (walk-up build step B2)", () => {
     expect(printed.phase).toBe("brainSpeechIdle");
     expect(msgboxVisual(printed)).toEqual({ visible: true, chars: box0PrintTicks });
     expect(battleRoomQuoteInputReady(printed)).toBe(true);
-    // Idling holds byte-identical (no timer-driven auto-advance), matching
-    // every other msgbox-idle phase's own convention in this module.
-    expect(advanceBattleRoom(printed)).toEqual(printed);
+    // Idling holds the same phase/text/print state (no timer-driven page
+    // auto-advance) - only `elapsed` keeps ticking, driving the wait-
+    // cursor's own bob animation (brainSpeechCursorYOffset).
+    const held = advanceBattleRoom(printed);
+    expect(held).toEqual({ ...printed, elapsed: printed.elapsed + 1 });
+    expect(msgboxVisual(held)).toEqual({ visible: true, chars: box0PrintTicks });
   });
 
   it("walks through all 10 first-encounter boxes in order, then settles into 'brainSpeechSettled' and becomes handoff-ready at BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED", () => {
@@ -162,6 +166,11 @@ describe("silver Noland speech (walk-up build step B2)", () => {
       expect(state.speechStep).toBe(box);
       seenBoxes.push(battleRoomQuote(state));
       let next = advanceThroughFullyPrinted(state);
+      // The wait cursor shows on every box except the last personality page
+      // (string-terminated, no more \p/\l pending) and the cry (a standalone
+      // msgbox, same shape as the entrance's own cursor-less "Get a move
+      // on!" box) - dense-compare-caught (this step's own box0/cry traces).
+      expect(brainSpeechCursorVisible(next)).toBe(box < SILVER_PERSONALITY_BOX_COUNT - 1);
       next = { ...next, phase: battleRoomMsgboxClosingPhase(next), elapsed: 0 };
       for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) {
         const prev = next;

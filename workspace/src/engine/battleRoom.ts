@@ -305,8 +305,13 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
     case "brainSpeechIdle":
       // Same idiom as "brainMsgboxIdle"/"msgboxIdle" above: core.ts detects
       // the A press and starts "brainSpeechClosing" directly; this case
-      // only covers ticks with no press yet.
-      return state;
+      // only covers ticks with no press yet. Unlike those two (fully
+      // static), `elapsed` keeps ticking here - it drives the "waiting for
+      // input, more text follows" cursor's own bob animation
+      // (brainSpeechCursorVisible/brainSpeechCursorYOffset below), which a
+      // non-terminal box's own idle hold shows in every dense fixture this
+      // step spot-checked.
+      return { ...state, elapsed: state.elapsed + 1 };
     case "brainSpeechClosing": {
       const elapsed = state.elapsed + 1;
       if (elapsed >= MSGBOX_CLOSE_TICKS) {
@@ -765,7 +770,14 @@ function splitSpeechBoxes(pageText: string): readonly (readonly [string, string]
     }
   }
   boxes.push([line1, line2]);
-  return boxes;
+  // The extraction JSON preserves source spelling with a plain ASCII
+  // apostrophe; the font's own apostrophe glyph is the localized right-
+  // single-quote character (same normalization factoryTrainerPresentation.
+  // ts's displayEasyChatWord already applies for this exact class of
+  // extracted text - a straight apostrophe has no charmap entry and renders
+  // as a blank, dense-compare-caught via the box0 "name's"/"I'm" spot-check
+  // trace this step's own compare work added).
+  return boxes.map(([a, b]) => [a.replaceAll("'", "’"), b.replaceAll("'", "’")]);
 }
 
 const silverFirstEncounterScene = walkupScript.scenes.silverFirstEncounter as {
@@ -843,6 +855,36 @@ export const SPEECH_APPEAR_ELAPSED = 0;
  * same reuse discipline as BRAIN_MOVEMENT_SETTLE_ELAPSED's own doc above.
  */
 export const BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED = 28;
+
+/**
+ * True while the currently-shown speech box should draw the "waiting for
+ * input, more text follows" cursor - dense-compare-caught (this step's own
+ * box0/cry spot-check traces): every box still mid-string (joined to the
+ * next by the source `\l`/`\p` control codes) shows it while idle, matching
+ * this engine's own existing battle-scene wait-cursor mechanism
+ * (battleScene.ts's drawCursor/CURSOR_Y_OFFSETS - same glyph, reused here).
+ * The personality speech's LAST box (page 8, string-terminated by `$` with
+ * no further `\p`) and the standalone cry box (a separate msgbox call, same
+ * shape as the entrance's own cursor-less "Get a move on!" box) do NOT -
+ * both close straight to the next scene with no more text pending.
+ */
+export function brainSpeechCursorVisible(state: BattleRoomState): boolean {
+  return (
+    (state.phase === "brainSpeechIdle" || state.phase === "brainSpeechClosing")
+    && (state.speechStep ?? 0) < SILVER_PERSONALITY_BOX_COUNT - 1
+  );
+}
+
+/**
+ * Bob-animation Y offset for the wait cursor, keyed by the SAME idle
+ * `elapsed` clock the box's own idle hold ages on - reuses battleScene.ts's
+ * own cycle (0,1,2,1 px, one step every 9 ticks) rather than inventing a
+ * fresh one, since it is the same glyph/mechanism.
+ */
+const CURSOR_Y_BOB_OFFSETS = [0, 1, 2, 1] as const;
+export function brainSpeechCursorYOffset(state: BattleRoomState): number {
+  return CURSOR_Y_BOB_OFFSETS[Math.floor(state.elapsed / 9) % CURSOR_Y_BOB_OFFSETS.length]!;
+}
 
 /**
  * True for every brain-entrance phase from "brainSettled" onward - the
