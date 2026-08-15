@@ -1755,3 +1755,197 @@ node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7
 Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
 `:8014`). Read-only (no `src/`, oracle, or fixture writes); ran twice this
 session (with and without the `weather` field), consistent both times.
+
+### Round 16 (2026-08-14, SIDE lane): decisive roster×staging cell resolved — the exact DELCATTY/SABLEYE/LICKITUNG roster under REAL generation does NOT reproduce +7 (it reproduces +5); the switch-in-loop leg's extra tick is confirmed a player-roster property, staging-independent — and a named, non-falsified source-level candidate for it is found: DELCATTY's held Quick Claw, checked inside `GetWhoStrikesFirst`
+
+**Assignment:** ISSUES #87's decisive untested cell — does the exact
+DELCATTY/SABLEYE/LICKITUNG player roster (species 316/322/108) show +7
+under *real* rental generation (a roster/route property, staging innocent)
+or +4/+5 (a roster×staging interaction)? Then chase the +7 family's
+switch-in-loop leg (4 ticks vs. baseline 3) to a named cause.
+
+**Step 1 — building the decisive fixture turned out to be nearly free.**
+`docs/overrides-ready-lag-probe.md`'s own `factoryLegal-vs-mechanicLab-
+matched-+7-route` differential (`tools/probe/probe-overrides-ready-lag.ts`)
+already ran a plain `factoryLegal` (real generation, no `overrides.parties`)
+scenario at the *exact* route tuple the PUPITAR/DELCATTY +7 fixture uses
+(`trainerId 109, challengeNum 2, battleNum 0, playerSetIds [267,268,269],
+opponentSetIds [349,353,292], seed 70`) and its write-up's prose noted in
+passing that the real-generated roster there is species 316/322/108 — the
+same DELCATTY/SABLEYE/LICKITUNG identity — without anyone connecting that
+to the decisive-cell question. Re-queried the oracle directly to confirm:
+
+```
+player species: [316, 322, 108]   (DELCATTY, SABLEYE, LICKITUNG)
+opponent species: [82, 368, 354]  (MAGNETON, CORSOLA, ...)
+```
+
+Comparing the player mon's full echoed data against the PUPITAR/DELCATTY
+probe's `overrides.parties` pin shows species, nature, IVs, EVs, moves,
+item, and `abilitySlot` are all byte-identical (only personality-derived
+cosmetic fields — personality itself, gender, OT id — differ) confirming
+the override pin *was* built by echoing this exact real-generation output,
+so this is a clean, controlled "same mon, staged vs. real" comparison, not
+an approximation. Committed the fixture as
+`tools/battle-lab/factory-legal-delcatty-sableye-lickitung-readylag-probe.json`
+(`factoryLegal`, no overrides) and extended
+`tools/probe/probe-readylag-span-tickbytick-plus7.ts` to trace it with the
+same method as round 15's three fixtures, plus a fourth cross-check fixture
+(Step 3 below). `factoryLegal` pinned the exact roster on the first try —
+no seed search was needed, so the brief's fallback clause did not apply.
+
+**Step 2 — the leg split, and the formula residual.** Ran
+`node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts`:
+
+| fixture | construction | player lead (item) | opponent lead | switch-in-loop leg | AI-ack leg | total span | formula residual |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| GRIMER/YOSHI | real gen | GRIMER (Pecha Berry) | COMBUSKEN | 3 | 3 | 6 | **+5** |
+| KADABRA/SHIZUKA | real gen | KADABRA (Twisted Spoon) | MAGNETON | 3 | 2 | 5 | **+4** |
+| DUGTRIO/BLAZIKEN gold Noland dense | real gen (`factoryBrain`) | DUGTRIO (King's Rock) | BLAZIKEN (Salac Berry) | 3 | 3 | 6 | **+5** |
+| PUPITAR/DELCATTY probe | `overrides.parties` (staged) | DELCATTY (**Quick Claw**) | PUPITAR | **4** | 3 | 7 | **+7** |
+| **DELCATTY/SABLEYE/LICKITUNG, matched route (this round)** | **real gen, no overrides** | **DELCATTY (Quick Claw)** | MAGNETON | **4** | 2 | 6 | **+5** |
+
+The formula-residual column uses the exact method
+`tools/probe/probe-ready-lag-chooseaction-handshake.ts` established
+(`residual = readyTick − (handoffTick + dispatchDelay(opponent) +
+playerVisualLag + 98 + cryDuration(player))`); re-derived it by hand for
+GRIMER/YOSHI and KADABRA/SHIZUKA first and got exactly their already-known
++5/+4 (cross-validating the arithmetic), then applied it to the new
+fixture: `handoffTick=1582`, `dispatchDelay(MAGNETON)=111`,
+`playerVisualLag("DELCATTY")=15`, `cryDuration(DELCATTY)=60` →
+predicted 1866, measured `readyTick=1871` → **residual +5**, not +7.
+
+**Verdict (Goal 1, decisive cell): the exact DELCATTY/SABLEYE/LICKITUNG
+roster under real generation does NOT show +7 — it shows +5.** But the
+table's structure shows this isn't a clean "staging guilty" verdict either:
+the **switch-in-loop leg (4, vs. the 3-tick baseline) reproduces exactly**
+under real generation with no `overrides.parties` staging at all — proving
+*that* leg's anomaly is a genuine player-roster property, not a staging
+artifact, closing round 15's "next instrument" item (2) in the negative
+(staging is innocent, again, now for this specific roster and this specific
+leg — not just the general mechanism `docs/overrides-ready-lag-probe.md`
+already cleared). What changed the total from +7 to +5 is the **AI-ack
+leg**, which round 15 already showed is opponent-dependent (2 for MAGNETON,
+3 for PUPITAR/COMBUSKEN/BLAZIKEN) — this fixture's real-generated opponent
+at this route is MAGNETON (AI-ack 2), not PUPITAR (AI-ack 3), so the total
+lands at 4+2=6 (residual +5) instead of 4+3=7. **The "+7 family" is the sum
+of two independent, already-separately-characterized effects — a
+player-roster-driven switch-in-loop leg (+1 over baseline, staging-innocent)
+and an opponent-driven AI-ack leg (2 or 3) — not a single roster/route
+property and not a roster×staging interaction.** +7 specifically requires
+pairing a switch-in-loop=4 player lead with a 3-tick-AI-ack opponent; this
+round's real-gen route pairs the same switch-in-loop=4 player lead with a
+2-tick-AI-ack opponent and gets +5 instead.
+
+**Side finding — corrects a stale "0-residual" citation.** This round's
+fixture is the *exact* route `docs/ready-lag-discriminator-scout.md`
+(row "DELCATTY/MAGNETON") and `docs/overrides-ready-lag-probe.md`'s Context
+section cite as a "previously-validated 0-residual" point. Both citations
+predate the RAM-handshake predicate; ISSUES #87's own "Eliminated" section
+already flagged that the historical 0-residual points were PNG-landmark
+reads later shown to carry +4/+5 under RAM measurement — this round's
+formula-validated **+5** for that same route is the first RAM-based
+re-measurement of that specific citation, and confirms the correction:
+DELCATTY/MAGNETON is not 0, it's +5, consistent with "the late-fire is
+universal."
+
+**Step 3 — Goal 2: chasing the switch-in-loop leg's extra tick to a named
+cause.** Re-read `TryDoEventsBeforeFirstTurn`
+(`reference/pokeemerald/src/battle_main.c:3841-3910`) once more, this time
+cross-referencing every held item in every measured fixture, not just
+abilities. The function's very first branch (`switchInAbilitiesCounter==0`,
+`:3850-3862`) runs a turn-order sort calling
+`GetWhoStrikesFirst(gBattlerByTurnOrder[i], gBattlerByTurnOrder[j], TRUE)`
+once for the two battlers in a singles battle — and `GetWhoStrikesFirst`
+(`battle_main.c:4595-4696`) checks **`HOLD_EFFECT_QUICK_CLAW`** for *both*
+battlers:
+
+```c
+if (holdEffect == HOLD_EFFECT_QUICK_CLAW && gRandomTurnNumber < (0xFFFF * holdEffectParam) / 100)
+    speedBattler1 = UINT_MAX;
+...
+if (holdEffect == HOLD_EFFECT_QUICK_CLAW && gRandomTurnNumber < (0xFFFF * holdEffectParam) / 100)
+    speedBattler2 = UINT_MAX;
+```
+(`battle_main.c:4653`, `:4687`). Confirmed via `grep` this is the *only*
+place `HOLD_EFFECT_QUICK_CLAW` is read anywhere in `battle_main.c`/
+`battle_util.c` — Quick Claw is not one of the `ItemBattleEffects`
+`ITEMEFFECT_ON_SWITCH_IN` cases round 14 already audited, so it was never
+on that round's radar. The multiply-then-divide (`0xFFFF * holdEffectParam
+/ 100`) is genuine extra ARM7TDMI work — a software division on hardware
+with no divide instruction — paid *only* when `holdEffect ==
+HOLD_EFFECT_QUICK_CLAW`, inside the turn-order sort's single call at the
+very top of the switch-in-loop leg's one productive
+`TryDoEventsBeforeFirstTurn` invocation (the same call round 15's step 5
+already narrowed the extra tick down to, without finding what filled it).
+
+**DELCATTY holds Quick Claw in every measured +7-family fixture, and this
+is not a staging accident**: the Factory's own rental-mon table defines
+`FRONTIER_MON_DELCATTY_2` (index 267 — the exact `playerSetIds[0]` both the
+staged and real-gen fixtures use) with
+`itemName: "BATTLE_FRONTIER_ITEM_QUICK_CLAW"`
+(`src/data/gen/battle-frontier-mons.json`, sourced from
+`reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h`) —
+Quick Claw is baked into this specific rental slot's canonical definition,
+not an artifact of how either fixture pinned it. Cross-checked every
+battler's held item across all five fixtures in the table above (item IDs
+resolved against `reference/pokeemerald/include/constants/items.h`):
+
+| fixture | player lead item | opponent lead item | switch-in-loop leg |
+| --- | --- | --- | --- |
+| GRIMER/YOSHI | Pecha Berry (135) | Scope Lens (198) | 3 |
+| KADABRA/SHIZUKA | Twisted Spoon (214) | Lum Berry (141) | 3 |
+| DUGTRIO/BLAZIKEN gold dense | King's Rock (187) | Salac Berry (170) | 3 |
+| PUPITAR/DELCATTY probe | **Quick Claw (183)** | Scope Lens (198) | **4** |
+| DELCATTY/SABLEYE/LICKITUNG real-gen | **Quick Claw (183)** | Lum Berry (141) | **4** |
+
+**Non-falsified, clean 2-for-2 / 3-for-3 split**: every fixture with a
+Quick-Claw-holding active battler measures switch-in-loop leg 4; every
+fixture with neither active battler holding Quick Claw measures 3. Bench
+mons' items (SABLEYE/LICKITUNG here) are structurally irrelevant —
+`TryDoEventsBeforeFirstTurn`'s turn-order sort and switch-in loops only
+ever touch the `gBattlersCount` *active* battlers (2, in a singles battle),
+never the bench.
+
+**Goal 2 verdict: a named, source-level, non-falsified candidate mechanism
+— DELCATTY's held Quick Claw is checked inside `GetWhoStrikesFirst`'s
+turn-order sort at the top of `TryDoEventsBeforeFirstTurn`, adding a
+conditional multiply+divide that plausibly pushes that call's total
+ARM7TDMI cycle cost past the ~280,896-cycle VBlank boundary into an extra
+tick.** This is stated as a strong candidate, not a proof: same caveat as
+round 15's AI-ack leg — confirming the exact cycle math needs
+instruction-level profiling this harness doesn't have. But unlike round
+15's falsified super-effective-move theory, this one is checked against
+*five* fixtures (not two) and survives cleanly, and it is the *only*
+source-level property this or the prior round found that differs between
+every switch-in-loop=4 fixture and every switch-in-loop=3 fixture.
+
+**Stretch goal (fix shape, not implemented per scope):** if this mechanism
+holds, a discriminating predicate for an engine-side fix would be
+"does either active battler's held item resolve to `HOLD_EFFECT_QUICK_CLAW`
+at battle start" — a data lookup already available via
+`src/data/gen/item-hold-effects.json` (per this run's `find` — not
+inspected further, no `src/` changes made). This is a candidate shape only;
+per this step's side-lane scope, no formula/`src/` change was made or
+attempted.
+
+**Honest-stop.** Two decisive, source-grounded results: (1) the decisive
+roster×staging cell is resolved — real generation of the exact
+DELCATTY/SABLEYE/LICKITUNG roster does not reproduce +7, but *does*
+reproduce the switch-in-loop leg's anomaly exactly, proving that piece
+staging-innocent and re-framing "+7" as a sum of two independent,
+already-partially-understood legs rather than one roster/route property;
+(2) a named, non-falsified (5-fixture) candidate source mechanism for the
+switch-in-loop leg's extra tick — Quick Claw's hold-effect check inside
+`GetWhoStrikesFirst`. Neither result is dressed up beyond what it is:
+mechanism (2) is a strong candidate, not a cycle-counted proof, and no
+`src/` change was made.
+
+**Reproduce:**
+```sh
+node --experimental-strip-types tools/probe/probe-readylag-span-tickbytick-plus7.ts
+```
+Needs a live Battle Scene OFF oracle (`POKEBENCH_ORACLE_URL`, default
+`:8014`). Read-only against the oracle; the one new fixture
+(`tools/battle-lab/factory-legal-delcatty-sableye-lickitung-readylag-probe.json`)
+and the probe script extension are both committed. No `src/` changes.
