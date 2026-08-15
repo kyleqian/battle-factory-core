@@ -1075,6 +1075,31 @@ residual is ISSUES #87). Only (b) remains.
    objective: #89 (pre-existing Baton Pass `openpartyscreen` gap, hit
    by full-policy soak seed 27) and distribution-parity soak breadth.
 
+**User decisions (2026-08-14 eve, planning session — the two waiting
+picks from PROGRESS 1273):**
+
+1. **Walk-up = FAITHFUL** (supersedes the memo's TRIM recommendation —
+   user pick with the costs on the table). Full sequence per
+   `docs/noland-walkup-dialogue-scoping.md`'s FAITHFUL option: the
+   attendant call-scene + PreBattleRoom ready/swap/retire menu, Noland
+   placement/entrance in the battle room, silver 8-page + gold 4-page
+   speeches gated by the per-tier heard-speech flags (in-session only —
+   cross-session saving stays out of scope). Consequence accepted: the
+   PreBattleRoom menu + call-scene is a GENERAL pre-battle feature
+   (ordinary matches 2-6 show the same menu), so this program builds it
+   once for all Factory matches, not as a brain-only fork. The memo's
+   sequencing note stands: resolve its §1.6 gold-discrepancy probe
+   before writing gold's disputed box. Estimated 4-6 worker steps.
+2. **#87 = option (c)**: every committed window that ends before its
+   ready transition stays exactly as-is; calibrate only windows that
+   must cross it (today: the silver Brain-reveal tail, 648/701), each
+   constant labeled measured-not-derived and validated by the
+   RAM-handshake probe. Recorded in ISSUES #87.
+
+Order for the next runs (stability first): #89 → #90 triage → #87(c)
+calibration (small) → the FAITHFUL walk-up program → chained-round
+distribution-parity breadth.
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.
