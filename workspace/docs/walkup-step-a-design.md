@@ -203,14 +203,15 @@ build the presentation (menu shows, RETIRE warps through the existing
 loss-lobby flow) and explicitly leave any symbol/progression bookkeeping on
 brain-retire as a follow-up for whichever lane owns `round`/`rules` state.
 
-**OPEN QUESTION (needs a user decision before or during step A):** does
-RETIRE against the Frontier Brain need different underlying round/streak
-consequences than an ordinary-match RETIRE, or is reusing the existing
-loss-lobby warp presentation with no special-cased facility-state handling
-acceptable for this step? The source (`AskRetireChallenge`,
-§1.1's branch table) doesn't obviously special-case it, but this memo did
-not chase that script label down — flagging rather than assuming per the
-step brief's instruction.
+**RESOLVED BY SOURCE EVIDENCE (2026-08-15 supervisor, same session):**
+RETIRE against the Frontier Brain needs NO brain-specific handling. Both
+menus route cases 1/2/3 to byte-identical script labels
+(`AskRecordBattle`/`AskPauseChallenge`/`AskRetireChallenge` — compare
+`scripts.inc:92-98` (ordinary) with `:354-359` (brain); the ONLY case-0
+divergence is `AskSwapMon` vs `AskSwapBeforeHead`, plus the intro
+message). The ROM has no brain-flavored retire path, so FAITHFUL means
+the user's existing RECORD-stub/REST-unselectable/RETIRE-loss-lobby
+decisions carry over verbatim; no new user decision is needed.
 
 ## 4. Acceptance plan
 
