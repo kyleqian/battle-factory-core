@@ -183,6 +183,13 @@ async function main(): Promise<void> {
     "GRIMER/WEEPINBELL real-gen, opponent lead has guaranteed Chlorophyll (single-ability species) but weather==0 predicts NO extra tick (Goal 2, ability-branch control)",
     "factory-readylag-lowdispatch-legal-off.json",
   );
+
+  // ISSUES #87 option (c): leg split for the one committed compare window
+  // that crosses the ready transition (silver Brain-reveal tail, 648/701).
+  await trace(
+    "TANGELA/DELCATTY silver Noland reveal, the committed compare-window fixture (handshake probe measured total +6)",
+    "factory-round-battle7-noland-reveal-off.json",
+  );
 }
 
 main().catch((error) => {

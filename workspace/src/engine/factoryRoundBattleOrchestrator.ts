@@ -787,6 +787,13 @@ export function beginFactoryRoundBattleStartIntro(
   // the same session) generates its opponent fresh at this battleIndex.
   const isCanonicalAnchorIntro =
     state.config.adoptedInitialOpponent !== undefined && command.battleIndex === 0;
+  // Route-level fact (ISSUES #87 option (c)), not a species/trainer/trace-
+  // name check: `getFactoryFrontierBrainStatus` already resolved this
+  // battle's opponent to "silver" (frontier_util.c's GetFrontierBrainStatus
+  // port) when the round advanced to it. See `isSilverBrainReveal`'s doc on
+  // `FactoryBattleStartIntroState`.
+  const isSilverBrainReveal =
+    state.round.rules.currentOpponent.frontierBrain?.status === "silver";
   return Object.freeze({
     ...state,
     battleStartIntro: Object.freeze({
@@ -794,6 +801,7 @@ export function beginFactoryRoundBattleStartIntro(
         command,
         isCanonicalAnchorIntro,
         sceneAssemblyDisplayLag,
+        isSilverBrainReveal,
       ),
       elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
     }),

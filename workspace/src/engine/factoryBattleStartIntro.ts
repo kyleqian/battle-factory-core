@@ -57,12 +57,24 @@ export type FactoryBattleStartIntroState = Readonly<{
    * `GENERATED_PLAYER_READY_LAG`'s doc there for both.
    */
   isCanonicalAnchorIntro: boolean;
+  /**
+   * True only when `currentOpponent.frontierBrain.status === "silver"`
+   * (`GetFrontierBrainStatus`, `frontier_util.c:1657-1698`) — the silver
+   * Frontier-Brain reveal, which fires exactly once in a real playthrough
+   * (streak 21, zero symbols). ISSUES #87 option (c): this is the one
+   * committed compare window whose capture range crosses the ready
+   * transition, so `battleScene.ts` adds a measured (not derived) offset to
+   * `generatedPlayerReadyLag` only for this route-level identity; see
+   * `MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET`'s doc there.
+   */
+  isSilverBrainReveal: boolean;
 }>;
 
 export function createFactoryBattleStartIntro(
   command: FactoryBattleStartPresentationCommand,
   isCanonicalAnchorIntro: boolean,
   sceneAssemblyDisplayLag: 0 | 1 = 0,
+  isSilverBrainReveal = false,
 ): FactoryBattleStartIntroState {
   return Object.freeze({
     command,
@@ -70,6 +82,7 @@ export function createFactoryBattleStartIntro(
     sceneAssemblyDisplayLag,
     acknowledgedElapsed: null,
     isCanonicalAnchorIntro,
+    isSilverBrainReveal,
   });
 }
 
