@@ -17,6 +17,64 @@ backlog.
 
 # Open
 
+## #91 — Opponent generation after a Frontier Brain win never appends a `storedTrainerIds` placeholder, crashing the NEXT battle's pre-generation
+
+Found via the soak driver while validating walk-up build step A, Brief 2
+(`docs/walkup-step-a-design.md`): a soak run configured with an elevated
+`factoryWinStreak` so battleIndex 0 is immediately Frontier-Brain-eligible
+(silver) reliably **wins** the brain battle (several rngValues under both
+`strong-route` and `winning` policy), then reaches and correctly drives the
+brain postwin's call-scene (all 5 boxes) and the `AskReadyForHead`
+continuation menu (`GO ON` accepted) with zero issues — confirming step A's
+own new code (Briefs 1-2) is solid. Immediately on `GO ON` acceptance,
+`core.ts`'s pre-generation seam (`preGenerateFactoryRoundNextOpponent`,
+triggered every GO ON to generate the next opponent ahead of the scouting
+text) throws:
+
+```
+Error: storedTrainerIds must contain the 1 prior battle selections
+    Module.selectFactoryTrainer (src/engine/factoryTrainerSchedule.ts:145)
+    Module.generateFactoryOpponent (src/engine/factoryOpponentGeneration.ts:412)
+    generateOpponentFor (src/engine/factoryRoundBattleOrchestrator.ts:619)
+```
+
+**Root cause:** `generateOpponentFor`'s frontier-brain branch
+(`factoryRoundBattleOrchestrator.ts:530-548`) returns
+`storedTrainerIds` **passed through unchanged** from the caller (Noland
+isn't drawn from the ordinary ranged trainer pool, so nothing is appended).
+Every *ordinary* opponent generation instead returns a `storedTrainerIds`
+array with the newly-selected trainer id appended (`selectFactoryTrainer`'s
+own history mechanism, `factoryTrainerSchedule.ts:145`'s
+`storedTrainerIds.length >= battleIndexValue` guard expects exactly one
+entry per prior battle, brain or not). So any battle immediately following
+a brain win generates its opponent with a `storedTrainerIds` array one
+entry short, and `selectFactoryTrainer` fatally rejects it. This is
+general: it reproduces for a brain win at **any** battleIndex 0-5 (not just
+0), whenever the round continues past it — the only reason no existing
+soak/regression pin caught this earlier is that the brain postwin branch
+itself was unreachable before this session's step A build.
+
+**Repro (Tier-1, not committed as a pin since this entry documents rather
+than fixes it):** build a `factoryRoundBattleOrchestrator` with
+`factoryWinStreak: 20` (battleIndex 0 becomes silver-brain-eligible per
+`getFactoryFrontierBrainStatus`), win battle 0 via
+`testPolicy: "strong-route"` or `policy: "winning"` through
+`tools/soak/randomRoundSoakDriver.ts`'s `runSeed`, and accept `GO ON` at
+the resulting `AskReadyForHead` menu — the pre-generation throw fires on
+that same tick, in `src/engine/` (an ENGINE-origin crash per the soak
+driver's own convention, not a `postwin.ts`/`core.ts`/driver defect).
+
+**Consequence for walk-up build step A:** `AskSwapBeforeHead`'s own
+one-liner + swap prompt content (Brief 2) is fully pinned and verified at
+the Tier-1 (`postwin.ts`) level (`tests/postwin.test.ts`), but cannot
+currently be *live-reached* via a real win against the brain through the
+soak driver's tick/render path in a round that continues afterward — this
+bug fires one tick earlier, at the `GO ON` pre-generation seam, before
+`dialoguePage` ever advances to the one-liner. Not attempted here: fixing
+`generateOpponentFor`'s frontier-brain branch to append a placeholder (or
+equivalent) `storedTrainerIds` entry — that's `factoryRoundBattleOrchestrator.ts`
+core generation logic, outside step A's `postwin.ts`/soak-driver-only scope.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for

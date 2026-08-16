@@ -1,3 +1,52 @@
+## 1279 — [supervisor wind-down, 2026-08-15] **B2 LANDED (silver Noland speech, four dense windows EXACT) + session wind-down: every 1274 queue item advanced, all gates green, full soak 60/60, DEFERRED empty**
+
+- **State:** Session over (12 worker steps, 2 lanes). The silver
+  walk-up is BUILT end-to-end from the BattleRoom entrance through the
+  8-page speech, battle-cry, and battle handoff. Whole 1274 queue
+  advanced: #89 FIXED, #90 FIXED, #87(c) EXECUTED, walk-up B1/B1b/B2 +
+  step-A design, parity plan + steps 1-3. DEFERRED.md EMPTY.
+- **B2 (cap-killed at its own ledger edit; tree clean, both feature
+  commits landed — supervisor verified + wrote this entry):** silver
+  speech machine in `battleRoom.ts` (JSON-verbatim 8 pages + battle-cry
+  + repeat variant), per-tier in-session heard-flag
+  (`factoryHeardBrainSpeech`/`markFactoryBrainSpeechHeard`, facility
+  state), handoff into the existing brain battle start; compare-harness
+  extension + 4 committed speech traces. Supervisor re-ran all four on
+  the final tree: **39/39, 39/39, 74/74, 28/28 — exact**; downstream
+  reveal window re-checked **690/701** (unmoved); differential 228/228
+  byte-identical; apostrophe + wait-cursor renderer fixes landed with
+  their windows.
+- **Wind-down gates (final union, after folding animation-main — Dream
+  Eater 187→189 exact incl. Leech Seed — and rust-main — weightdamage +
+  tryhealhalfhealth + Pain Split leaves):** full npm **1,040 files /
+  9,915 passed / 223 skipped**; build green; cargo **73** ok-suites;
+  wasm rebuilt **492,683 B** `782c1b2a…`; forced-WASM **18 files / 803
+  tests**; soak vanilla **20/20 OK**; soak full 0:60 **60/60 OK**
+  (the standing gates). Informational: new opt-in `winning` policy
+  0:60 = 59/60 + seed 49 budget-HANG at 600k — completes OK at
+  693,051f with a bigger budget (deep chains legitimately run long;
+  policy is opt-in, pass `--max-frames`; not an engine bug).
+- **Next (ordered):** (a) Noland brainMoving walk/pan cadence residual
+  (~frames 961-1112; documented in `battleRoom.ts` module doc) — fresh
+  RAM/pixel derivation; (b) walk-up step A per
+  `docs/walkup-step-a-design.md` (dispatchable; RETIRE question
+  resolved from source — postwin semantics carry over verbatim);
+  (c) gold entrance/speech (source-pinned, oracle-blocked, see Notes);
+  (d) parity plan step 4 (deferred-by-design memo) + wider winning-
+  policy sweeps as supervisor calls.
+- **Notes:** **Recommendation for Kyle:** the top-layer
+  `BattleLab.prepare()` brain staging gap (writes no symbol flags +
+  fresh-draft fallthrough skips the PreBattleRoom call-scene, silver
+  AND gold — RAM-probed, `docs/noland-silver-walkup-presentation-map
+  .md`) blocks ALL oracle acceptance for the call-scene and gold
+  content; fixing it oracle-side before step A ships is the honest
+  order. Two open questions recorded there and in the step-A memo; no
+  DEFERRED.md blockers. Launcher now seeds worktrees with the wasm
+  artifact (papercut retired). Commits local only — pushing is Kyle's
+  step.
+
+---
+
 ## 1278 — [main worker, 2026-08-15] **Walk-up build step B1b: app-side room-entrance compare harness built + 2 of 3 flagged constants MEASURED (fixture 02 closes 256/256 exact); fixture 03's walk/pan window left an honest, un-closed residual**
 
 - **State:** B1's oracle-dense-compare debt (flagged in 1277) is
