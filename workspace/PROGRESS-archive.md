@@ -1,3 +1,76 @@
+## 1277 — [main worker, 2026-08-15] **Walk-up build step B1 LANDED: Frontier-Brain BattleRoom entrance (Noland visible-from-start, "Get a move on!", simultaneous walk-in, scientist turn) — machine + Tier-1 + differential proof green; oracle dense compare NOT run this session (honest residual, see Next)**
+
+- **State:** B1 (entrance settled, speech not started — B2's job) is
+  implemented as an additive branch of the existing BattleRoom entrance
+  machine, keyed off `BattleOpponent.frontierBrain` (never a battle-
+  number/trace check). Full `npm test` (1029 files / 9870 passed / 223
+  skipped) + `npm run build` + `npm run typecheck` green. Ordinary path
+  proven byte-stable via differential compare (below); oracle dense
+  compare against the committed silver-walkup fixtures is the one
+  acceptance item **not completed this session** — flagged honestly
+  under Next/Notes rather than fabricated.
+- **Did:** (1) Extracted Noland's overworld walk sprite (`OBJ_EVENT_GFX_
+  NOLAND`, `frontier_brains/noland.png` + `npc_3.pal`) into
+  `battle-room-npcs.json` (additive key, existing battleRoom/
+  battleRoomOpponentSheets tests untouched). (2) Built the brain-branch
+  state machine in `battleRoom.ts`: new phases `brainEntering ->
+  brainMsgboxIdle -> brainMsgboxClosing -> brainMoving -> brainSettled`
+  alongside (not replacing) the ordinary `entering/msgboxIdle/
+  msgboxClosing/settled` sequence. Box text sourced directly from
+  `factory-brain-walkup-script.json` (`BRAIN_MSGBOX_LINE1/2`). Noland's
+  own walk (`nolandStep`) reuses `entryStep`'s camera-pan clock and
+  frame column directly (same `waitmovement 0`, same `sAnimTable_
+  Standard` per source) rather than a second independent counter;
+  scientists reuse `scientistTurnFrame` verbatim (literally the same
+  `ScientistsFaceBattle` call both paths make). `battleRoomStateForOpponent`
+  is the single branch-selection seam. (3) Renderer:
+  `renderBattleRoomBrainEntranceScene` in `battleRoomRender.ts`, wired
+  into `core.ts` at the one real construction site (the postwin ->
+  prebattleRoom warpFade -> battleRoom chained-round handoff) plus its
+  advancement/render dispatch — all changes gated on
+  `frontierBrainWalkup`/`frontierBrain` so the ordinary path's code path
+  is provably untouched. (4) Tier-1: new
+  `tests/battleRoomBrainEntrance.test.ts` (11 tests) pins text verbatim,
+  Noland's/decoy's/scientists' movement step counts and positions
+  against the JSON (and scientist positions cross-checked against
+  `battle-room-layout.json`), branch selection (brain vs. ordinary vs.
+  no-opponent), and the full phase settle sequence ending at the named
+  `brainSettled` seam. (5) `npm run compare:differential` on 3 committed
+  ordinary traces crossing the BattleRoom entrance (`room-entry.json`,
+  `battle2-room-a.json`, `s6-acceptance.json`) vs. parent commit
+  `2d2c2c81`: **PASS, 563/563 captures byte-identical** — the ordinary
+  path did not move a pixel.
+- **Not done — honest residual (acceptance item 2, oracle dense
+  compare):** the existing staging tool
+  (`tools/compare/factoryRoundIntroGeneralizationStage.ts`) jumps
+  straight to `beginFactoryRoundBattleStartIntro`, bypassing
+  `BattleRoom` entirely — there is currently no app-side harness that
+  stages a live battle 21 through the room-entrance render path at all,
+  brain or ordinary. Building one (mirror the existing stage function up
+  through `advanceProofWin`x6, then set `battleRoom =
+  battleRoomStateForOpponent(...)` instead of calling
+  `beginFactoryRoundBattleStartIntro`, then tick/capture/diff against
+  fresh `bin/oracle lab` PNGs for fixtures 02/03) did not fit this
+  session's remaining time after landing the machine + Tier-1 + the
+  differential proof. Three constants are therefore derived, not
+  dense-compare-calibrated, and flagged as such in `battleRoom.ts`'s own
+  doc comments: `BRAIN_MSGBOX_APPEAR_ELAPSED` (0, box visible from the
+  very first room frame), `NOLAND_INITIAL_SCREEN_Y`/`nolandStep`'s
+  lockstep-with-camera-pan model (algebraically self-consistent with
+  already-pinned constants, not RAM-probed this route), and
+  `BRAIN_MOVEMENT_SETTLE_ELAPSED` (108, reusing `scientistTurnFrame`'s
+  own threshold). `docs/noland-silver-walkup-presentation-map.md` §2 row
+  6 also flags this window's camera motion as visually complex ("zooms/
+  pans") in a way the straight-line pan model here may not fully
+  capture — the likely source of any residual a future dense compare
+  finds.
+- **Next:** B2 (silver/gold speech, consumes the `brainSettled` seam);
+  the oracle dense-compare harness above (small, scoped); chained-round
+  distribution-parity breadth.
+- **Notes:** Commits local only — pushing is Kyle's step.
+
+---
+
 ## 1275 — [supervisor, 2026-08-14 night] **#89 FIXED + #90 FIXED: full-policy soak 0:60 = 60/60 OK (first time); walk-up program started (gold discrepancy resolved, script data extracted)**
 
 - **State:** Queue items (a) #89 and (b) #90 are CLOSED (both deleted

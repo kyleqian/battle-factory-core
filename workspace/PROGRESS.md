@@ -5,6 +5,82 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1280 — [main worker, 2026-08-16] **Walk-up build step B1c: brainMoving walk/pan cadence re-derived from a fresh RAM probe (fixture 03: 43/256 → 162/256 exact); a smaller, honestly-flagged mid-ramp pixel residual remains**
+
+- **State:** B1b's own diagnosis (`entryStep`'s per-tick table doesn't
+  reproduce this branch's cadence) is now known to have been wrong: RAM
+  shows the decoy/camera in this window follow the EXACT same per-tick
+  shape as `ENTRY_STEPS`, just re-based onto a different zero point (a
+  new `BRAIN_MOVEMENT_CLOCK_OFFSET` constant, 22, RAM-measured). Full
+  `npm test` (1044 files / 9931 passed / 223 skipped), build, and
+  typecheck green. Differential PASS. A smaller mid-ramp pixel residual
+  remains and is flagged honestly (not relabeled measured) per this
+  step's own acceptance rule.
+- **Did:** (1) `tools/probe/probe-factory-brain-silver-entrance-movement-
+  ram.py` — reads `gTotalCameraPixelOffsetY`/`gSprites`/`gObjectEvents`
+  directly (same offsets S6 slice 2a already established) every frame
+  896-1151 of the committed dense fixture 03, not pixel curve-fitting.
+  Findings: pan is flat through frame 959, then a clean 1px/tick ramp to
+  80 by frame 1039, settling one tick later (1040) — the identical shape
+  `ENTRY_STEPS` already encodes, just starting 22 ticks later in that
+  table (the ordinary path's own leading 23-flat-tick stall is a warp
+  fade-in artifact, irrelevant to this msgbox-close-triggered window).
+  Noland's own `nolandStep` formulas (screenY 24 flat, then
+  `24 + (camPanY - 48)`) were ALREADY correct — only the elapsed value
+  feeding `entryStep`/`scientistTurnFrame`/`nolandStep` was wrong; fixed
+  by shifting at the `renderBattleRoomBrainEntranceScene` call site
+  (`historicElapsed = movementElapsed + BRAIN_MOVEMENT_CLOCK_OFFSET`),
+  not inside those pure functions (kept reusable/unchanged for the
+  ordinary path). (2) Separately found and fixed: `SPEECH_APPEAR_ELAPSED`
+  (`brainSettled` → `brainSpeech` handoff) was an unmeasured structural 0;
+  RAM/pixel evidence measured it at 5 (the speech box was appearing 5
+  ticks before oracle's real one, a distinct mismatch the walk/pan bug
+  had been masking). (3) The compare trace itself
+  (`factory-brain-silver-walkup-entrance-03-off.json`) had its own bug:
+  its A-press landed ~20 ticks before oracle's real dismissal point (a
+  B1b tuning artifact) — corrected its segment counts (314/1/196).
+  (4) Updated 4 existing Tier-1 assertions in
+  `tests/battleRoomBrainEntrance.test.ts`/`battleRoomBrainSpeech.test.ts`
+  that called `nolandStep`/`entryStep`/`scientistTurnFrame` with the
+  now-two-clocks-conflated raw `BRAIN_MOVEMENT_SETTLE_ELAPSED`, plus new
+  tests pinning `BRAIN_MOVEMENT_CLOCK_OFFSET` itself against the RAM
+  samples (elapsed 1/71/80 → pan 1/71/80).
+- **Not closed — honest residual:** fixture 03 improves from a broad
+  ~26-65% full-frame mismatch to a bounded ~5-13%-of-frame residual
+  confined to the mid-ramp window only — **162/256 frames now exact
+  (up from 43/256)**; every frame before the ramp and every frame once
+  the room is genuinely settled (including all of B2's speech content)
+  is exact. Direct RAM cross-checks at multiple ramp ticks (not just the
+  endpoints) show `camPanY`/decoy-animation/Noland-position all matching
+  oracle's real RAM exactly at those ticks — yet the rendered pixels
+  still diverge mid-ramp. Cross-correlating diff frames against a pure
+  vertical shift finds a best-fit +1px offset with only ~98-99%
+  background-tile agreement (not 100%), and retrying
+  `BRAIN_MOVEMENT_CLOCK_OFFSET` at 21/23 both regressed the overall
+  match count — so it isn't a uniform clock-offset or simple render-lag
+  fix. True mechanism undetermined; full detail + a concrete next-probe
+  suggestion (`gSpriteCoordOffsetY`/OAM-buffer state across the ramp) in
+  `battleRoom.ts`'s own module doc (search "Walk-up build step B1c").
+- **Acceptance numbers (this step's own gate):** fixture 03
+  `--summary` → **162/256** (was 0/256 effectively, honest residual
+  remains, not closed). Fixture 02 `--summary` → **256/256** (unmoved).
+  All 4 B2 speech windows `--summary` → **39/39, 39/39, 74/74, 28/28**
+  (unmoved). Downstream reveal `--summary` → **690/701** (unmoved, the
+  known #87 residual). Differential (`room-entry.json battle2-room-a.json
+  s6-acceptance.json --base HEAD^`) → **PASS, 563/563 byte-identical**.
+  Full `npm test` **1044 files / 9931 passed / 223 skipped**; build and
+  typecheck green.
+- **Next:** re-derive the remaining mid-ramp sub-tile residual (probe
+  `gSpriteCoordOffsetY`/OAM state directly, not `camPanY` alone) if a
+  future step's time budget allows; walk-up step A per
+  `docs/walkup-step-a-design.md`; gold entrance/speech (oracle-blocked,
+  see PROGRESS-archive.md 1279's own notes on the `BattleLab.prepare()`
+  call-scene gap).
+- **Notes:** Commits local only — pushing is Kyle's step.
+  PAPERCUT: none new this session.
+
+---
+
 ## 1279 — [supervisor wind-down, 2026-08-15] **B2 LANDED (silver Noland speech, four dense windows EXACT) + session wind-down: every 1274 queue item advanced, all gates green, full soak 60/60, DEFERRED empty**
 
 - **State:** Session over (12 worker steps, 2 lanes). The silver
@@ -77,7 +153,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   walkup-presentation-map.md` §5) against it. (2) **Calibrated against
   fixture 02 (closes 256/256 exact):** `BRAIN_MSGBOX_APPEAR_ELAPSED` 0→
   **24 MEASURED** (the box doesn't appear at all until the room's fade-
-  in settles, not concurrently); new `NOLAND_IDLE_FRAME` constant **0
+  in settles, not concurrently with it); new `NOLAND_IDLE_FRAME` constant **0
   MEASURED** (Noland faces the player before his own walk starts, not
   the decoy's own north-facing idle frame `nolandStep` was reusing for
   him — `renderBattleRoomBrainEntranceScene` now only calls
@@ -110,76 +186,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** re-derive the brainMoving walk/pan cadence from fresh
   RAM/pixel evidence (fixture 03) before B2's speech work builds on
   this seam; B2 (silver/gold speech) itself; chained-round
-  distribution-parity breadth.
-- **Notes:** Commits local only — pushing is Kyle's step.
-
-## 1277 — [main worker, 2026-08-15] **Walk-up build step B1 LANDED: Frontier-Brain BattleRoom entrance (Noland visible-from-start, "Get a move on!", simultaneous walk-in, scientist turn) — machine + Tier-1 + differential proof green; oracle dense compare NOT run this session (honest residual, see Next)**
-
-- **State:** B1 (entrance settled, speech not started — B2's job) is
-  implemented as an additive branch of the existing BattleRoom entrance
-  machine, keyed off `BattleOpponent.frontierBrain` (never a battle-
-  number/trace check). Full `npm test` (1029 files / 9870 passed / 223
-  skipped) + `npm run build` + `npm run typecheck` green. Ordinary path
-  proven byte-stable via differential compare (below); oracle dense
-  compare against the committed silver-walkup fixtures is the one
-  acceptance item **not completed this session** — flagged honestly
-  under Next/Notes rather than fabricated.
-- **Did:** (1) Extracted Noland's overworld walk sprite (`OBJ_EVENT_GFX_
-  NOLAND`, `frontier_brains/noland.png` + `npc_3.pal`) into
-  `battle-room-npcs.json` (additive key, existing battleRoom/
-  battleRoomOpponentSheets tests untouched). (2) Built the brain-branch
-  state machine in `battleRoom.ts`: new phases `brainEntering ->
-  brainMsgboxIdle -> brainMsgboxClosing -> brainMoving -> brainSettled`
-  alongside (not replacing) the ordinary `entering/msgboxIdle/
-  msgboxClosing/settled` sequence. Box text sourced directly from
-  `factory-brain-walkup-script.json` (`BRAIN_MSGBOX_LINE1/2`). Noland's
-  own walk (`nolandStep`) reuses `entryStep`'s camera-pan clock and
-  frame column directly (same `waitmovement 0`, same `sAnimTable_
-  Standard` per source) rather than a second independent counter;
-  scientists reuse `scientistTurnFrame` verbatim (literally the same
-  `ScientistsFaceBattle` call both paths make). `battleRoomStateForOpponent`
-  is the single branch-selection seam. (3) Renderer:
-  `renderBattleRoomBrainEntranceScene` in `battleRoomRender.ts`, wired
-  into `core.ts` at the one real construction site (the postwin ->
-  prebattleRoom warpFade -> battleRoom chained-round handoff) plus its
-  advancement/render dispatch — all changes gated on
-  `frontierBrainWalkup`/`frontierBrain` so the ordinary path's code path
-  is provably untouched. (4) Tier-1: new
-  `tests/battleRoomBrainEntrance.test.ts` (11 tests) pins text verbatim,
-  Noland's/decoy's/scientists' movement step counts and positions
-  against the JSON (and scientist positions cross-checked against
-  `battle-room-layout.json`), branch selection (brain vs. ordinary vs.
-  no-opponent), and the full phase settle sequence ending at the named
-  `brainSettled` seam. (5) `npm run compare:differential` on 3 committed
-  ordinary traces crossing the BattleRoom entrance (`room-entry.json`,
-  `battle2-room-a.json`, `s6-acceptance.json`) vs. parent commit
-  `2d2c2c81`: **PASS, 563/563 captures byte-identical** — the ordinary
-  path did not move a pixel.
-- **Not done — honest residual (acceptance item 2, oracle dense
-  compare):** the existing staging tool
-  (`tools/compare/factoryRoundIntroGeneralizationStage.ts`) jumps
-  straight to `beginFactoryRoundBattleStartIntro`, bypassing
-  `BattleRoom` entirely — there is currently no app-side harness that
-  stages a live battle 21 through the room-entrance render path at all,
-  brain or ordinary. Building one (mirror the existing stage function up
-  through `advanceProofWin`x6, then set `battleRoom =
-  battleRoomStateForOpponent(...)` instead of calling
-  `beginFactoryRoundBattleStartIntro`, then tick/capture/diff against
-  fresh `bin/oracle lab` PNGs for fixtures 02/03) did not fit this
-  session's remaining time after landing the machine + Tier-1 + the
-  differential proof. Three constants are therefore derived, not
-  dense-compare-calibrated, and flagged as such in `battleRoom.ts`'s own
-  doc comments: `BRAIN_MSGBOX_APPEAR_ELAPSED` (0, box visible from the
-  very first room frame), `NOLAND_INITIAL_SCREEN_Y`/`nolandStep`'s
-  lockstep-with-camera-pan model (algebraically self-consistent with
-  already-pinned constants, not RAM-probed this route), and
-  `BRAIN_MOVEMENT_SETTLE_ELAPSED` (108, reusing `scientistTurnFrame`'s
-  own threshold). `docs/noland-silver-walkup-presentation-map.md` §2 row
-  6 also flags this window's camera motion as visually complex ("zooms/
-  pans") in a way the straight-line pan model here may not fully
-  capture — the likely source of any residual a future dense compare
-  finds.
-- **Next:** B2 (silver/gold speech, consumes the `brainSettled` seam);
-  the oracle dense-compare harness above (small, scoped); chained-round
   distribution-parity breadth.
 - **Notes:** Commits local only — pushing is Kyle's step.
