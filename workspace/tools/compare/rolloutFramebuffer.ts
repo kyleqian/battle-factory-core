@@ -59,8 +59,6 @@ function configFor(
       playerMaxHp: first.battlers.player.maxHp,
       opponentHp: first.battlers.opponent.hp,
       opponentMaxHp: first.battlers.opponent.maxHp,
-      playerGender: playerAttacker ? "none" : "male",
-      opponentGender: playerAttacker ? "male" : "none",
     },
     counter,
     animationProfile: {
