@@ -71,9 +71,9 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
   });
 
   it("keeps GLARE exact after the Sleep Powder promotion at 154/154", () => {
-    expect(coverage.entries).toHaveLength(192);
+    expect(coverage.entries).toHaveLength(193);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(84);
+    expect(276 - coverage.entries.length).toBe(83);
   });
 });

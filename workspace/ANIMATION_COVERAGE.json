@@ -2962,7 +2962,7 @@
     "the pure relative reducer ports MUSIC_NOTES_2 load/cleanup, all sixteen gPerishSongMusicNoteSpriteTemplate fixed-point cosine/sine paths, animation selection, affine half-turn, hold and four-bounce teardown, the invisible gPerishSongMusicNote2SpriteTemplate palette sentinel, side-relative panse, both simple BG-to-black palette fades, battler grayscale/original palette transitions, OAM/VBlank ordering, and first inactive cleanup",
     "the typed Scene-ON seam carries only resolved MURKROW/ONIX presentation geometry and immutable HP/item/perish-timer state; source-extracted Murkrow front/back and MUSIC_NOTES_2 art plus shared ONIX/chrome pass software sprites, hardware OAM/matrices, palette/tag buffers, callbacks, registers, audio, raw RGB, and every production framebuffer without applying timers, consuming gameplay RNG, or changing battle/controller/turn/facility outcomes",
     "perishSongPortable.ts reruns both committed probes through tools/run-mgba-probe.py and proves all 259 immutable source/OAM/VBlank/register/audio/palette/seam/raw-RGB/framebuffer frames twice fresh in both orientations through first inactive cleanup; MOVE_SING remains the independently exact shared note/compositor control",
-    "MOVE_HEAL_BELL remains unsupported: its distinct BELL load/body, explicit MUSIC_NOTES_2 palette load/free, twelve HealBellMusicNote paths, three HealBellRing thin-ring/palette groups, healing particles, two star families, unload/reload boundaries, BlendBattleAnimPalExclude finale, and cleanup lack independent complete legal both-orientation twice-fresh dense acceptance",
+    "MOVE_HEAL_BELL is now independently exact at 522/522 bilateral rows; it retains its own BELL, MUSIC_NOTES_2 palette/load-free, HealBellRing, SPARKLE_2, palette-task, unload/reload, and cleanup acceptance and conveys no Perish Song credit",
     "no damage, gameplay RNG, controller selection, turn order, round/facility state, animation boundary list, canonical-recording allowlist, or unsupported barrier changed"
    ],
    "evidence": [
@@ -2980,6 +2980,35 @@
     "src/engine/battleScene.ts",
     "tests/animation/perishSongEvidence.test.ts",
     "tests/animation/perishSong.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_HEAL_BELL",
+   "status": "exact",
+   "covered": [
+    "fresh complete legal challenge-2 Level-50 set-314 FRONTIER_MON_CHIMECHO_2 versus ONIX Scene-ON parties pass the entire 261-row source body through first inactive cleanup in both orientations twice fresh: player-back frames 209-469 preserve dense evidence/raw-RGB receipts 179cf071c946cae731590392719e78c7a48a002a0d886d93cde4bba80850abd6 / d07944237c203e29358fcce6d7d6d2391df86d45a91c1a5e684b35ea7869cabe; opponent-front frames 210-470 preserve aed2169ed9f8cc8b30e0bdaf4f6dcb5b56d3363c6dbebd28f12f645624b9de68 / 3b74295bf3bca06cc9c9a6e5f80c40b1435e8ebfd5a899f6067ad1eb1a16035b",
+    "the pure source-relative reducer and typed Scene-ON seam port BELL, all twelve MUSIC_NOTES_2 fixed-point paths and three runtime palette allocations, three normal THIN_RING affine passes, two SPARKLE_2 SparklingStars, the final ObjBlend thin ring, both palette-task families, side-relative audio, allocator unload/reload lifecycle, and first inactive cleanup without owning healing, status, RNG, controller, turn, or facility state",
+    "the source-derived production renderer uses extracted Chimecho front/back and move art, faded-bank-to-hardware palette timing, self-target exclude selection, affine-double ring geometry, persistent BuildOamBuffer ordering across destroyed/reused slots, the first-row elevated-shadow latch, source palette allocation rows, and existing GBA OBJ scanline/composition rules",
+    "healBellEvidence.ts and healBellFramebuffer.ts prove 261/261 player-back and 261/261 opponent-front component/reducer, typed seam, software/hardware OAM and matrices, palette/tasks/tags, registers/audio, immutable state, raw RGB, and shared production framebuffer rows with zero residual pixels; the first inactive cleanup row is included",
+    "MOVE_PERISH_SONG, MOVE_AROMATHERAPY, MOVE_SYNTHESIS, MOVE_REFRESH, and every shared-component sibling remain independently accepted controls; this entry promotes MOVE_HEAL_BELL alone and changes no boundary, barrier, latch, gameplay, or canonical-recording ratchet"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-heal-bell-player-chimecho-opponent-onix.json",
+    "tools/battle-lab/mechanic-heal-bell-opponent-chimecho-player-onix.json",
+    "tools/compare/fixtures/heal-bell-evidence.json",
+    "tools/compare/healBellProbe.py",
+    "tools/compare/healBellSourceAudit.ts",
+    "tools/compare/healBellEvidence.ts",
+    "tools/compare/healBellFramebuffer.ts",
+    "tools/compare/extractHealBellAssets.ts",
+    "src/animation/assets/heal-bell.json",
+    "src/animation/healBell.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/animation/gbaObjCompositor.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/healBellAssets.test.ts",
+    "tests/animation/healBellEvidenceCheckpoint.test.ts",
+    "tests/animation/healBellFramebuffer.test.ts"
    ]
   },
   {
@@ -5642,13 +5671,15 @@
    "components": [
     "asset:ANIM_TAG_MUSIC_NOTES_2",
     "sprite:gPerishSongMusicNoteSpriteTemplate",
-    "sprite:gPerishSongMusicNote2SpriteTemplate"
+    "sprite:gPerishSongMusicNote2SpriteTemplate",
+    "sprite:gHealBellMusicNoteSpriteTemplate"
    ],
    "representatives": [
     "MOVE_PERISH_SONG",
     "MOVE_HEAL_BELL"
    ],
-   "goal": "MOVE_PERISH_SONG independently proves MUSIC_NOTES_2 and its complete sixteen-note fixed-point/affine/bounce body, invisible grayscale-palette sentinel, side-relative panse, two BG black fades, four-battler grayscale/original transitions, and cleanup in both orientations at 259/259 complete source/OAM/VBlank/register/audio/palette/raw-RGB/shared-framebuffer frames, reproduced twice fresh. MOVE_SING remains an exact shared note/compositor control. MOVE_HEAL_BELL remains unsupported: it adds BELL, explicit MUSIC_NOTES_2 palette load/free, twelve distinct HealBellMusicNote paths, three HealBellRing thin-ring/palette groups, healing particles, sparkling and granting stars, asset unload/reload boundaries, BlendBattleAnimPalExclude, and independent timing; it needs its own complete legal both-orientation twice-fresh dense acceptance."
+   "fulfilled": true,
+   "goal": "MOVE_PERISH_SONG independently proves MUSIC_NOTES_2 and its complete sixteen-note fixed-point/affine/bounce body, invisible grayscale-palette sentinel, side-relative panse, two BG black fades, four-battler grayscale/original transitions, and cleanup in both orientations at 259/259 complete source/OAM/VBlank/register/audio/palette/raw-RGB/shared-framebuffer frames, reproduced twice fresh. MOVE_SING remains an exact shared note/compositor control. MOVE_HEAL_BELL is independently exact at 522/522 bilateral rows for its distinct BELL, explicit MUSIC_NOTES_2 palette load/free, twelve HealBellMusicNote paths, three HealBellRing groups, SPARKLE_2 stars, palette finale, unload/reload, and cleanup; neither move transfers acceptance to the other."
   },
   {
    "id": "play-se1-with-panning",
@@ -5704,7 +5735,7 @@
     "MOVE_LUSTER_PURGE",
     "MOVE_SILVER_WIND"
    ],
-   "goal": "MOVE_CALM_MIND independently proves its complete exclude-attacker BG/non-attacker black blend, attacker-partner monbg, non-attacker hide/reveal, three delay-14 shrinking affine/OBJ-alpha thin rings, reverse blend, and cleanup in both orientations at 101/101 task/palette/software+hardware-OAM/register/raw-RGB and framebuffer frames, reproduced twice. MOVE_LUSTER_PURGE independently proves its BG-selected BlendBattleAnimPalExclude ramp and complete psychic BG/screen-white, luster-circle, particle, six-hit, HorizontalShake, reverse-blend, and cleanup body at 333/333 complete bilateral rows twice fresh. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact in both orientations after the renderer change. SKY ATTACK needs independent evidence for both two-turn branches: its normal-opponent setup uses ordinary palette selectors rather than Exclude, while the attacker-partner setup uses Exclude around monbg/alpha, attacker black/white blends, HorizontalShake, and the separate sky-BG/bird/impact/fade strike body. DESTINY BOND needs the BG_GHOST fade/restore pipeline, gDestinyBondWhiteShadow task, attacker ShakeMonInPlace, its partner-excluding two-leg gray palette body, and cleanup. HEAL BELL needs its bell, twelve palette-managed music notes, three HealBellRing thin-ring/palette groups, two distinct sparkling stars, asset unload/reload boundaries, and the final blended expanding ring with its separate Exclude selector/colors. SILVER WIND needs side-specific BUG BGs, sliding BG, splitbgprio/monbg, eighteen independently parameterized big/medium/small sparkle sprites, initial and reverse target-excluding black blends, and restore cleanup. Every remaining sibling stays unsupported pending its own complete dense move evidence."
+   "goal": "MOVE_CALM_MIND independently proves its complete exclude-attacker BG/non-attacker black blend, attacker-partner monbg, non-attacker hide/reveal, three delay-14 shrinking affine/OBJ-alpha thin rings, reverse blend, and cleanup in both orientations at 101/101 task/palette/software+hardware-OAM/register/raw-RGB and framebuffer frames, reproduced twice. MOVE_LUSTER_PURGE independently proves its BG-selected BlendBattleAnimPalExclude ramp and complete psychic BG/screen-white, luster-circle, particle, six-hit, HorizontalShake, reverse-blend, and cleanup body at 333/333 complete bilateral rows twice fresh. HEAL BELL independently proves its own bell, twelve palette-managed music notes, three normal rings, SPARKLE_2 phase, asset unload/reload, and final blended ring at 522/522 bilateral rows. HARDEN 101/101, SYNTHESIS 130/130, and BIND 45/45 remain exact controls. SKY ATTACK needs independent evidence for both two-turn branches; DESTINY BOND needs its BG_GHOST, white-shadow, shake, gray-palette, and cleanup body; SILVER WIND needs its side-specific BUG BGs, sliding BG, split priority, eighteen sparkles, exclude blends, and restoration. Every remaining sibling stays unsupported pending its own complete dense move evidence."
   },
   {
    "id": "metallic-shine",
@@ -6020,7 +6051,7 @@
     "MOVE_AROMATHERAPY",
     "MOVE_COSMIC_POWER"
    ],
-   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_AROMATHERAPY independently proves its complete nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front source/hardware/raw-RGB/framebuffer frames, reproduced twice. MOVE_REFRESH independently proves its StatusClearedEffect mask, two GrantingStarsEffect stars, field/battler palette-restoration blend, and thin-ring body at 209/209 in both orientations, reproduced twice. MOVE_COSMIC_POWER independently proves its complete non-attacker blend, BG_COSMIC/BLDY/slide schedule, two GrantingStarsEffect stars, audio and cleanup body at 241/241 complete bilateral source/hardware/raw-RGB/framebuffer rows twice fresh. No sibling is promoted. HEAL BELL needs its bell, twelve music-note sprites with palette allocation/free, three HealBellRing thin-ring/palette tasks, and its own blended finale. WISH needs ANIM_TAG_GOLD_STARS, black-BG fade, panning, gWishStarSpriteTemplate, and delay before GrantingStarsEffect. Each move remains an independent acceptance unit."
+   "goal": "MOVE_SYNTHESIS independently proves its complete delay-2 attacker blend, two GrantingStarsEffect stars, unload/delay/load boundary, and shared HealingEffect in both orientations at 130/130 rows. MOVE_AROMATHERAPY independently proves its nine-FLOWER, green blend/monbg, StatusClearedEffect, two SparklingStars, thin-ring, and cleanup body at 400/400 player-back and 396/396 opponent-front. MOVE_REFRESH independently proves its StatusClearedEffect, two GrantingStarsEffect stars, palette restoration, and thin ring at 209/209 bilateral rows. MOVE_COSMIC_POWER independently proves its non-attacker blend, BG_COSMIC/BLDY/slide, two stars, audio, and cleanup at 241/241 bilateral rows. MOVE_HEAL_BELL independently proves its bell, twelve runtime-palette music notes, three HealBellRing groups, two SparklingStars, final blended ring, and allocator cleanup at 522/522 bilateral rows. WISH remains unsupported pending its distinct GOLD_STARS, black-BG fade, panning, WishStar, and delay acceptance. Each move remains an independent acceptance unit."
   },
   {
    "id": "healing-blue-star",

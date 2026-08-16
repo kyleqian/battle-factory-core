@@ -1,14 +1,14 @@
 {
   "schema": "heal-bell-bilateral-evidence/v1",
-  "status": "unsupported",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "evidenceScope": {
-    "productionAnimationChanged": false,
+    "productionAnimationChanged": true,
     "reducerAdded": true,
     "typedSeamAdded": true,
-    "compositorAdded": false,
+    "compositorAdded": true,
     "framebufferLookupAdded": false,
-    "coveragePromotion": false,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -18,14 +18,20 @@
     "audit": "tools/compare/healBellSourceAudit.ts",
     "auditSha256": "b037605244791ebfd81647959d7a944485a7e58b101a438b7e385139b3ec9163",
     "probe": "tools/compare/healBellProbe.py",
-    "probeSha256": "4d236ce1700080bb3db4b0fc4657e753dda55fdd0d596ff98e86ee01be33fafc"
+    "probeSha256": "4d236ce1700080bb3db4b0fc4657e753dda55fdd0d596ff98e86ee01be33fafc",
+    "assetExtractor": "tools/compare/extractHealBellAssets.ts",
+    "assetExtractorSha256": "bd8c085131e63fcabe16da5036e9001d2c2d4588aa5f886f7a4ba48a5b768903",
+    "assets": "src/animation/assets/heal-bell.json",
+    "assetsSha256": "2ef4094980a7440d9fd171665721bc01aa6d32053cc8522c89dc4432e0adee2c",
+    "framebufferVerifier": "tools/compare/healBellFramebuffer.ts",
+    "framebufferVerifierSha256": "0e7b21d9cbdcf3dbe6d505079a1e18ab5e3bb4204b763bf4c8a0b8e60e2b66a9"
   },
   "acceptance": {
     "sourceRows": 522,
     "rawRgbRows": 522,
     "reducerRows": 522,
     "typedSeamRows": 522,
-    "productionFramebufferRows": 0,
+    "productionFramebufferRows": 522,
     "freshRuns": 2,
     "rootCommands": 44,
     "ringCalls": 3,
@@ -94,5 +100,5 @@
       }
     }
   },
-  "boundedRemainder": "No shared framebuffer compositor/draw wiring exists, so production framebuffer acceptance is 0/522. MOVE_HEAL_BELL remains unsupported and receives no coverage or latch credit."
+  "boundedRemainder": "None for MOVE_HEAL_BELL: all 522 bilateral source/reducer/typed-seam/raw-RGB/shared-framebuffer rows pass with zero residual pixels through first inactive cleanup. Perish Song, Aromatherapy, Synthesis, and every sibling retain independent acceptance."
 }

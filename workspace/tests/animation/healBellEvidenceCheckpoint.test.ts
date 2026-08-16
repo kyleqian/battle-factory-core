@@ -26,17 +26,22 @@ describe("MOVE_HEAL_BELL dense evidence and pure presentation checkpoint", () =>
   it("retains twice-fresh complete legal bilateral source and raw-RGB rows", () => {
     expect(fixture).toMatchObject({
       schema: "heal-bell-bilateral-evidence/v1",
-      status: "unsupported",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       acceptance: {
         sourceRows: 522, rawRgbRows: 522, reducerRows: 522,
-        typedSeamRows: 522, productionFramebufferRows: 0,
+        typedSeamRows: 522, productionFramebufferRows: 522,
         freshRuns: 2, rootCommands: 44, ringCalls: 3,
         notePaths: 12, firstInactiveCleanupAge: 260,
       },
     });
     expect(fileSha(fixture.source.audit)).toBe(fixture.source.auditSha256);
     expect(fileSha(fixture.source.probe)).toBe(fixture.source.probeSha256);
+    expect(fileSha(fixture.source.assetExtractor))
+      .toBe(fixture.source.assetExtractorSha256);
+    expect(fileSha(fixture.source.assets)).toBe(fixture.source.assetsSha256);
+    expect(fileSha(fixture.source.framebufferVerifier))
+      .toBe(fixture.source.framebufferVerifierSha256);
     for (const orientation of ["player-back", "opponent-front"] as const) {
       const entry = fixture.orientations[orientation];
       expect(entry.probeJsonSha256).toBe(entry.repeatProbeJsonSha256);
@@ -129,7 +134,7 @@ describe("MOVE_HEAL_BELL dense evidence and pure presentation checkpoint", () =>
     })).toBe(false);
   });
 
-  it("replays every retained component/seam/raw-RGB row without sibling credit", () => {
+  it("replays every retained row and promotes Heal Bell alone", () => {
     const output = execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/healBellEvidence.ts",
     ], { encoding: "utf8" });
@@ -150,9 +155,9 @@ describe("MOVE_HEAL_BELL dense evidence and pure presentation checkpoint", () =>
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(192);
+      .toHaveLength(193);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HEAL_BELL"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PERISH_SONG"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_AROMATHERAPY"))

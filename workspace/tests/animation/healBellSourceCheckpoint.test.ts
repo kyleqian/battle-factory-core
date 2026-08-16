@@ -142,7 +142,7 @@ describe("MOVE_HEAL_BELL authoritative-source and legal bilateral staging checkp
     expect(stageFixture.endpoint).toMatchObject({ frame: 1234, allPartyChecksumsValid: true });
   });
 
-  it("keeps Heal Bell unsupported and clearly delimits the shared exact controls", () => {
+  it("retains the stage-only receipt and independent exact controls after promotion", () => {
     const audit = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/healBellSourceAudit.ts",
     ], { encoding: "utf8" }));
@@ -151,7 +151,9 @@ describe("MOVE_HEAL_BELL authoritative-source and legal bilateral staging checkp
     expect(audit.sharedControls.thinRing).toContain("do not prove Heal Bell");
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_HEAL_BELL"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
+    // This older endpoint-only receipt remains honest; the later bilateral
+    // dense fixture owns the exact promotion instead of rewriting history.
     expect(fixture.coverageCredit).toBe(false);
     expect(fixture.boundedRemainder).toContain("No reducer");
   });
