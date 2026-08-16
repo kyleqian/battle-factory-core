@@ -17,9 +17,12 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 2 (2026-08-16: FAILed because services started 09:45:59 on the
+- **Hits:** 3 (2026-08-16: FAILed because services started 09:45:59 on the
   new working tree, 6 min before the commit was recorded at 09:51:59 — the
-  services were NEWER than their own code's commit date).
+  services were NEWER than their own code's commit date; hit again at the
+  2026-08-16 afternoon orient against the same 09:45:59 processes,
+  disproved in ~3 min via the `/v1/info` `factoryBrainWalkup` capability
+  probe).
 - **Cost each:** ~5 min to disprove, plus a genuine near-miss: the documented
   response is "restart it before staging anything", and restarting port 8012
   would have killed the animation lane's live worker mid-round.

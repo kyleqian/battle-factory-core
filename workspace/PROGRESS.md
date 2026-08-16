@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1291 — [supervisor orient, 2026-08-16] **Fold: animation-main → master (ff `f44eabff`) — Heal Bell + Fire Blast exact, coverage 194/276; union gates green**
+
+- **State:** master fast-forwarded to animation-main's head `f44eabff`
+  (29 lane commits: Heal Bell 192→193 and Fire Blast 193→194/276
+  Level-50 exact, unsupported 84→82; the animation supervisor had
+  already merged master in at its own 11:24 session start, so the fold
+  is a clean ff — that lane is LIVE again this afternoon, expect more
+  unfolded commits at wind-down). Union gates: full npm **1,056 files /
+  9,978 passed / 223 skipped**; build green. rust-main: nothing to
+  fold. DEFERRED.md empty. Oracle freshness FAIL re-disproved (live
+  8014 serves `factoryBrainWalkup` — the 3e29880b schema; PAPERCUTS
+  freshness entry bumped to hit 3; services NOT restarted, 8012 carries
+  the live animation lane).
+- **Next:** the 1288 queue minus (d): dispatching **(a) call-scene
+  accept-semantics calibration** (main lane) and **(e) winning-policy
+  soak sweep** (side lane) in parallel; then (c) B1c latch probe and
+  (b) gold speech dense closure.
+
+---
+
 ## 1290 — [supervisor final, 2026-08-16] **Late round M9 verified + final gates re-run green — session closed**
 
 - **State:** M9 (13th worker) closed the RECORD/RETIRE app-side compare
@@ -101,73 +121,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Commits local only — pushing is Kyle's step. No PAPERCUT
   this session (tooling worked as documented throughout).
 
-## 1288 — [supervisor wind-down, 2026-08-16] **Walk-up step A BUILT + calibrated end-to-end, gold post-fix program executed (reveal 0/701→690/701, tier-aware 4-page speech), B1c cadence largely closed, #91 found+fixed — 12 worker steps, 2 lanes, all gates green**
-
-- **State:** The 1279 queue is fully advanced on the fixed oracle
-  (harness `3e29880b`, walkup staging + gold symbol flag — services
-  verified current via `/v1/info` capability probe; the freshness
-  check's FAIL was a timestamp false positive, PAPERCUTS hit 2).
-  DEFERRED.md still EMPTY. Orient fold: animation-main (Pain Split
-  190 exact + Yawn evidence) + rust-main (docs-only) → union gates
-  npm 1,044/9,930/223, build, cargo 73 ok, wasm byte-identical
-  `782c1b2a…`, forced-WASM 18/803.
-- **Walk-up step A (design memo briefs 1+2 + calibration + movement):**
-  postwin.ts brain branch — 5-box call-scene, AskReadyForHead (menu
-  machinery reused, text-only divergence), AskSwapBeforeHead short
-  path, soak-driver coverage, core.ts win-trigger fix (dialoguePage
-  ===3 would stall brain rounds). Attendant walk-away/return movement
-  rendered (measured boundaries + source pose cadence). Dense (vs the
-  walkup fixtures banked this session): askready-menu **21/21**,
-  swapask-no **194/194** EXACT; callscene-01 **89/131**, callscene-02
-  **69/199** honest residuals (box-1 typewriter per-char drift,
-  blink-cursor phase, page-turn delays — biggest lever callscene-02).
-  RECORD/RETIRE menu windows banked (full-circle sha proof), corridor
-  drift re-derived (attendant visible 432+, map doc §2 fixed).
-- **B1c (queue (a)):** brainMoving cadence = ordinary ENTRY_STEPS
-  rebased by a fixed 22-tick offset (fresh RAM probe; B1b's "not a
-  shifted table" was wrong — the ordinary lead-in stall is a warp-fade
-  artifact). Fixture 03 43→**162/256**; residual ~1px mid-ramp, RAM
-  exact — next probe `gSpriteCoordOffsetY`/OAM latch. Fixture 02
-  256/256 + all four B2 speech windows + reveal 690/701 unmoved.
-- **Gold (queue (c), post-symbol-flag-fix reality):** ground truth
-  REFRESHED (gold has its own 4-page speech, previously masked by the
-  staging bug; escort text = silver's "Get a move on!" hold
-  `7d806624…`; ready frame 1889→3370; pre-fix history preserved in the
-  doc appendix). Reveal compare recalibrated (offset 2732, sha-search)
-  + app-fixed **0/701 → 690/701** (= silver's precedent residual; the
-  mechanism was the trace's A-press tick + missing gold ready-lag
-  calibration, NOT a hold-duration constant). Gold 4-page speech wired
-  tier-aware (`brainSpeechTier` + heard-flag tier fix), Tier-1 pinned;
-  gold dense speech windows honestly bounded (58/256, 20/177, 58/126 —
-  levers: park-phase alignment, generic msgbox close-wipe model,
-  B1c-class entrance cadence).
-- **#91 (found by M3's soak validation, FIXED by M6):** brain-win left
-  storedTrainerIds one short for the NEXT generation. Source-proofed
-  the ROM stores nothing for brain battles; fix folds the brain id into
-  the next generation's input only — natural battleIndex-6 shape
-  byte-identical (existing pin unchanged), staged/soak config fixed,
-  new Tier-1 pin reproduces the pre-fix throw. ISSUES #91 removed.
-  (Natural play cannot hit it: streak at round start ≡ 0 mod 7.)
-- **Also:** parity-plan step 4 retired (satisfied by `3e29880b` —
-  recorded in the plan doc); ROADMAP walk-up annotation updated;
-  PAPERCUTS +2 (walkup input-swallow trap; freshness-check hit 2 with
-  the `/v1/info` capability-probe workaround).
-- **Wind-down gates (final tree `c2c5b898`+ledger):** full npm
-  **1,045 files / 9,950 passed / 223 skipped**; build green; soak vanilla **20/20**; soak full 0:60
-  **60/60**. (Cargo/wasm gates ran at the orient fold; no rust
-  changes since — rust-main fully folded.)
-- **Next (ordered):** (a) call-scene window calibration (typewriter
-  drift + page-turn delays; also correct walkup-call-scene doc's box-1
-  hold row — M7 found it wrong by pixel inspection); (b) gold speech
-  dense closure (park-phase alignment + close-wipe model); (c) B1c
-  ~1px mid-ramp latch probe; (d) RECORD/RETIRE app-side compare traces
-  (fixtures banked, expected cheap); (e) wider winning-policy sweeps
-  (skipped this session). **Fold at next orient: animation-main left
-  unfolded (Heal Bell exact + census pin, ≥5 commits; the animation
-  supervisor was LIVE at wind-down with a running worker — deliberate
-  leave per protocol).** rust-main: nothing unfolded.
-- **Notes:** No deferred questions (DEFERRED.md empty). Worker trap for
-  next supervisor: a side-lane worker edited a MAIN-tree file via
-  absolute path (S3, gold doc) leaving an uncommitted duplicate —
-  check `git status` before merging side branches. Commits local only —
-  pushing is Kyle's step.
