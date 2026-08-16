@@ -69,6 +69,7 @@ import {
   POSTWIN_NEXT_BOX_CLEAR_DELAY,
   POSTWIN_NEXT_TEXT_FIRST_DELAY,
   POSTWIN_NEXT_TEXT_SETTLED_DELAY,
+  POSTWIN_NEXT_TEXT_TOTAL,
   POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_CONTINUATION_INPUT_READY_DELAY,
   POSTWIN_SCOUTING_INPUT_READY_DELAYS,
@@ -121,7 +122,18 @@ import {
   POSTWIN_RETIRE_FADE_FIRST_DELAY,
   POSTWIN_RETIRE_BLACK_AGE_DELAY,
   POSTWIN_RETIRE_FADE_IN_DELAY,
+  acceptPostwinCallScenePage,
+  postwinCallSceneInputReady,
+  postwinCallSceneVisibleChars,
+  CALL_SCENE_BOX_TEXTS,
+  CALL_SCENE_HEAD_PROMPT_LINE1,
+  CALL_SCENE_HEAD_PROMPT_LINE2,
+  CALL_SCENE_HEAD_PROMPT_TOTAL,
+  CALL_SCENE_TRAILING_DELAY,
+  CALL_SCENE_HEAD_MENU_READY_DELAY,
+  type PostwinState,
 } from "../src/engine/postwin.ts";
+import walkupScript from "../src/data/gen/factory-brain-walkup-script.json" with { type: "json" };
 
 describe("S8 Battle-1 postwin transition", () => {
   const outcomeDismiss = 10_000;
@@ -1382,5 +1394,176 @@ describe("S8 Battle-1 postwin transition", () => {
         question: { kind: "retire" as const, edgeElapsed: edge },
       }))).not.toBeNull();
     });
+  });
+});
+
+describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyForHead (docs/walkup-step-a-design.md)", () => {
+  function brainRoundOpponent(frontierBrain: boolean) {
+    const generated = generateFactoryOpponent({
+      rngValue: 3,
+      factoryWinStreak: 20,
+      battleIndex: 0,
+      storedTrainerIds: [],
+      savedRentalSetIds: [110, 155, 140, 168, 197, 147],
+      playerTrainerId: 0x1234_5678,
+      battleTowerLevel50WinStreak: 0,
+    });
+    const battleParty = (prefix: string): BattleParty =>
+      generated.party.map((member, index) => ({
+        id: `${prefix}-${index}`,
+        species: member.speciesName,
+        maxHp: member.maxHP,
+        hp: member.hp,
+        status: "none" as const,
+      })) as unknown as BattleParty;
+    let round = createGeneratedFactoryRoundController({
+      id: `walkup-step-a-postwin-${frontierBrain ? "brain" : "ordinary"}`,
+      playerParty: battleParty("player"),
+      playerRentalRecords: generated.opponents,
+      opponent: {
+        id: "walkup-step-a-opponent",
+        trainerName: generated.trainerName,
+        party: battleParty("opponent"),
+        rentalRecords: generated.opponents,
+        ...(frontierBrain ? { frontierBrain: { status: "silver" as const } } : {}),
+      },
+      rngValue: generated.rngValue,
+    });
+    round = completeBattlePresentation(round, {
+      commandId: round.presentation!.command.commandId,
+    });
+    round = advanceRoundController(round);
+    round = resolveRoundBattle(round, {
+      outcome: "win",
+      playerParty: round.rules.playerParty,
+      opponentParty: round.rules.currentOpponent.party,
+      rngValue: round.rules.rngValue,
+    });
+    return createPostwinStateFromRound(
+      round,
+      {} as unknown as BattleResolutionPresentationRenderView,
+    );
+  }
+
+  it("createPostwinStateFromRound sets frontierBrain from the UPCOMING opponent's frontierBrain field alone (§2.2), status tier not needed", () => {
+    expect(brainRoundOpponent(true).frontierBrain).toBe(true);
+    expect(brainRoundOpponent(false).frontierBrain).toBe(false);
+  });
+
+  it("pins CALL_SCENE_BOX_TEXTS/AskReadyForHead prompt text against the JSON verbatim, never retyped", () => {
+    const callSceneEvents = (
+      walkupScript.scenes.preBattleRoomCallScene.events as readonly {
+        readonly kind: string;
+        readonly pages?: readonly string[];
+        readonly nonBrainSpecific?: boolean;
+        readonly frames?: number;
+      }[]
+    );
+    const expectedBoxes = callSceneEvents
+      .filter((event) => event.kind === "message" && !event.nonBrainSpecific)
+      .flatMap((event) =>
+        event.pages!.map(
+          (page) => page.split("\\n").map((line) => line.replaceAll("'", "’")) as [string, string],
+        ),
+      );
+    expect(CALL_SCENE_BOX_TEXTS.length).toBe(5);
+    expect(CALL_SCENE_BOX_TEXTS.map((box) => [...box])).toEqual(expectedBoxes);
+    // Box index 3 (the boss message's own page 2) is the one containing the
+    // source's straight apostrophe ("facility's") - confirms the same
+    // apostrophe normalization battleRoom.ts's splitSpeechBoxes applies ran
+    // here too, not just that the raw JSON text was copied verbatim.
+    expect(CALL_SCENE_BOX_TEXTS[3]![0]).toContain("facility’s");
+
+    const expectedPrompt = (
+      walkupScript.scenes.askReadyForHead.events[0] as { readonly pages: readonly string[] }
+    ).pages[0]!.split("\\n");
+    expect([CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]).toEqual(expectedPrompt);
+    expect(CALL_SCENE_HEAD_PROMPT_TOTAL).toBe(
+      CALL_SCENE_HEAD_PROMPT_LINE1.length + CALL_SCENE_HEAD_PROMPT_LINE2.length,
+    );
+
+    expect(callSceneEvents.at(-1)).toEqual({ kind: "delay", frames: 16 });
+    expect(CALL_SCENE_TRAILING_DELAY).toBe(16);
+  });
+
+  it("advances the call scene box-by-box (index/text transitions), then AskReadyForHead reuses the ordinary continuation-menu machinery unchanged", () => {
+    const healDismiss = 5_000;
+    let state: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      elapsed: healDismiss,
+      healDismissElapsed: healDismiss,
+    };
+    expect(state.callScenePage).toBe(0);
+
+    // Box 1 arms automatically at healDismiss + POSTWIN_NEXT_TEXT_FIRST_DELAY
+    // - the same post-heal box-clear boundary the ordinary route's own
+    // "next text" starts typing at - no player input needed to open it.
+    while (state.elapsed < healDismiss + POSTWIN_NEXT_TEXT_FIRST_DELAY) {
+      state = advancePostwin(state);
+    }
+    expect(state.callScenePage).toBe(1);
+    expect(state.callScenePageEdgeElapsed).toBe(healDismiss);
+
+    for (let page = 1; page <= 5; page += 1) {
+      const [line1, line2] = CALL_SCENE_BOX_TEXTS[page - 1]!;
+      expect(state.callScenePage).toBe(page);
+      expect(state.callSceneDismissElapsed).toBeNull();
+      while (!postwinCallSceneInputReady(state)) {
+        state = advancePostwin(state);
+      }
+      expect(postwinCallSceneVisibleChars(state)).toBe(line1.length + line2.length);
+      const edgeBeforeAccept = state.elapsed;
+      // Not-yet-ready A presses (one tick earlier) are swallowed.
+      expect(acceptPostwinCallScenePage({ ...state, elapsed: state.elapsed - 1 }).callScenePage)
+        .toBe(page);
+      const accepted = acceptPostwinCallScenePage(state);
+      if (page < 5) {
+        expect(accepted.callScenePage).toBe(page + 1);
+        expect(accepted.callScenePageEdgeElapsed).toBe(edgeBeforeAccept);
+        expect(accepted.callSceneDismissElapsed).toBeNull();
+      } else {
+        expect(accepted.callScenePage).toBe(5);
+        expect(accepted.callSceneDismissElapsed).toBe(edgeBeforeAccept);
+      }
+      state = accepted;
+    }
+
+    // AskReadyForHead's own prompt clock starts at the call scene's own
+    // dismiss edge + its trailing delay, not at healDismissElapsed.
+    expect(postwinContinuationInputReady(state)).toBe(false);
+    expect(postwinNextVisibleChars(state)).toBe(0);
+    const menuReadyAge =
+      state.callSceneDismissElapsed! + CALL_SCENE_TRAILING_DELAY + CALL_SCENE_HEAD_MENU_READY_DELAY;
+    while (state.elapsed < menuReadyAge) {
+      state = advancePostwin(state);
+    }
+    expect(postwinContinuationInputReady(state)).toBe(true);
+    expect(state.continuationCursorPos).toBe(0);
+    expect(postwinNextVisibleChars(state)).toBe(CALL_SCENE_HEAD_PROMPT_TOTAL);
+
+    // The SAME acceptPostwinContinuation/dialoguePage machinery the ordinary
+    // route uses, unchanged - only the preceding prompt text differed.
+    const goOn = acceptPostwinContinuation(state);
+    expect(goOn.dialoguePage).toBe(1);
+    expect(goOn.continuationConfirmElapsed).toBe(state.elapsed);
+
+    // RECORD/REST/RETIRE also carry over verbatim (docs/walkup-step-a-
+    // design.md §3 RESOLVED): RETIRE opens the same question machinery.
+    const cursorOnRetire = { ...state, continuationCursorPos: 3 as const };
+    const retire = acceptPostwinContinuation(cursorOnRetire);
+    expect(retire.question).toEqual({ kind: "retire", edgeElapsed: state.elapsed - 1 });
+  });
+
+  it("leaves the ordinary (non-brain) route's menu-visible/input-ready/next-text computations byte-identical", () => {
+    const healDismiss = 3_000;
+    const ordinary: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      elapsed: healDismiss + POSTWIN_CONTINUATION_INPUT_READY_DELAY,
+      healDismissElapsed: healDismiss,
+    };
+    expect(ordinary.frontierBrain).toBe(false);
+    expect(postwinContinuationInputReady(ordinary)).toBe(true);
+    expect(postwinNextVisibleChars(ordinary)).toBe(POSTWIN_NEXT_TEXT_TOTAL);
   });
 });

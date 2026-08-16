@@ -295,6 +295,14 @@ import {
   postwinRightThisWayVisibleChars,
   postwinRightThisWayInputReady,
   postwinRngSteps,
+  acceptPostwinCallScenePage,
+  postwinCallSceneInputReady,
+  postwinCallSceneVisibleChars,
+  CALL_SCENE_BOX_TEXTS,
+  CALL_SCENE_HEAD_PROMPT_LINE1,
+  CALL_SCENE_HEAD_PROMPT_LINE2,
+  CALL_SCENE_HEAD_MENU_VISIBLE_DELAY,
+  CALL_SCENE_TRAILING_DELAY,
   type PostwinState,
 } from "./postwin.ts";
 import type { BattleScenario } from "./battleScenario.ts";
@@ -1164,6 +1172,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       newKeys.has("A")
     ) {
       nextPostwin = acceptPostwinHealDismiss(nextPostwin);
+    } else if (
+      // Walk-up build step A: the brain route's call-scene boxes (phone SE,
+      // attendant walk-away/return, 3-page boss message) - each advances on
+      // A the same way the ordinary route's own scouting pages 1-3 do.
+      nextPostwin.frontierBrain &&
+      nextPostwin.callScenePage !== 0 &&
+      nextPostwin.callSceneDismissElapsed === null &&
+      postwinCallSceneInputReady(nextPostwin) &&
+      newKeys.has("A")
+    ) {
+      nextPostwin = acceptPostwinCallScenePage(nextPostwin);
     } else if (
       nextPostwin.swapDeclineElapsed !== null &&
       nextPostwin.rightThisWayDismissElapsed === null &&
@@ -2741,12 +2760,17 @@ function renderPostwinState(state: EngineState): Uint8Array {
         POSTWIN_HEAL_LINE2,
         postwinHealVisibleChars(age),
       );
+    } else if (postwin.frontierBrain && postwin.callScenePage !== 0 && postwin.callSceneDismissElapsed === null) {
+      // Walk-up build step A: the call-scene boxes - structural text-and-
+      // index fidelity only (no oracle evidence for this window's exact
+      // pixel transitions yet, docs/walkup-step-a-design.md §4).
+      const box = CALL_SCENE_BOX_TEXTS[postwin.callScenePage - 1]!;
+      drawLines(box[0], box[1], postwinCallSceneVisibleChars(postwin));
     } else if (postwin.dialoguePage === 0) {
-      drawLines(
-        POSTWIN_NEXT_LINE1,
-        POSTWIN_NEXT_LINE2,
-        postwinNextVisibleChars(postwin),
-      );
+      const [line1, line2] = postwin.frontierBrain
+        ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
+        : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
+      drawLines(line1, line2, postwinNextVisibleChars(postwin));
     } else if (postwin.swapDeclineElapsed !== null) {
       const declineDelay = age - postwin.swapDeclineElapsed;
       if (declineDelay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
@@ -2807,9 +2831,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
         ) ||
         postwinQuestionMenuReady(postwin)
       );
+    // AskReadyForHead's menu becomes visible relative to the call scene's
+    // own last-box dismiss edge, never healDismiss directly - the ordinary
+    // route's fixed POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY has no bearing
+    // on brain's much longer call-scene content (advancePostwin's own
+    // menuVisible computation, mirrored here for rendering).
+    const continuationMenuVisibleAge = postwin.frontierBrain
+      ? (postwin.callSceneDismissElapsed !== null
+          ? postwin.callSceneDismissElapsed + CALL_SCENE_TRAILING_DELAY + CALL_SCENE_HEAD_MENU_VISIBLE_DELAY
+          : Number.POSITIVE_INFINITY)
+      : (healDismiss !== null
+          ? healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY
+          : Number.POSITIVE_INFINITY);
     if (
-      healDismiss !== null &&
-      age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY &&
+      age >= continuationMenuVisibleAge &&
       (normalMenuVisible || questionMenuVisible)
     ) {
       // The 3-option GO ON / REST / RETIRE variant after a successful
