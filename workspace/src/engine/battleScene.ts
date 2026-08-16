@@ -30356,37 +30356,48 @@ export function renderSceneOnMovePresentation(
     const drawAttacker = () => drawBattler(
       togetic,
       view.attacker,
-      displayed.attackerTransform,
+      affineDisplayed.attackerTransform,
       affineDisplayed.attackerTransform,
     );
     const drawTarget = () => drawBattler(
       gengar,
       view.target,
-      displayed.targetTransform,
+      affineDisplayed.targetTransform,
       affineDisplayed.targetTransform,
     );
+    const drawClouds = () => {
+      // BuildOamBuffer sorts equal-subpriority normal OBJs by descending OAM
+      // Y. The PPU's tie winner is the earlier OAM entry, so paint the
+      // reverse order here. Include source y2: the wavy callback can reorder
+      // clouds while their integer y positions remain unchanged.
+      const clouds = [...displayed.clouds].sort(
+        (left, right) => (left.y + left.y2) - (right.y + right.y2),
+      );
+      for (const cloud of clouds) {
+        if (cloud.invisible) continue;
+        drawSpriteSheetAffineRotate(
+          fb,
+          yawnArt.cloud.tileset,
+          yawnArt.cloud.palette,
+          cloud.x + cloud.x2,
+          cloud.y + cloud.y2,
+          cloud.matrix.a,
+          cloud.matrix.b,
+          cloud.matrix.c,
+          cloud.matrix.d,
+          undefined,
+          false,
+        );
+      }
+    };
     if (playerToOpponent) {
       drawTarget();
+      drawClouds();
       drawAttacker();
     } else {
-      drawAttacker();
       drawTarget();
-    }
-    for (const cloud of displayed.clouds) {
-      if (cloud.invisible) continue;
-      drawSpriteSheetAffineRotate(
-        fb,
-        yawnArt.cloud.tileset,
-        yawnArt.cloud.palette,
-        cloud.x + cloud.x2,
-        cloud.y + cloud.y2,
-        cloud.matrix.a,
-        cloud.matrix.b,
-        cloud.matrix.c,
-        cloud.matrix.d,
-        undefined,
-        false,
-      );
+      drawAttacker();
+      drawClouds();
     }
     const profile = yawnState.config.fieldProfile;
     drawSendOutHealthbox(

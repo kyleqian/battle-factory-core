@@ -62,8 +62,13 @@ function inhaleAtAge(age: number, startAge: number, pictureHeight: number): Howl
 }
 
 function cloudMatrix(kind: 0 | 1 | 2, callbackCount: number): number {
-  const phase = callbackCount & 15;
-  const ramp = phase <= 8 ? phase : 16 - phase;
+  // Each source affine command has an initial zero-duration frame followed
+  // by the two eight-frame ramps. The runner visits that initial frame again
+  // for one callback at each jump, so the observable cycle is 17 callbacks:
+  // 1..8, 7..0, 0. Keep this closed form source-relative; it is not a frame
+  // lookup table.
+  const phase = (callbackCount - 1) % 17;
+  const ramp = phase <= 7 ? phase + 1 : phase <= 15 ? 15 - phase : 0;
   const scale = 128 + kind * 64 + (kind === 0 ? -8 : 8) * ramp;
   return Math.trunc(0x10000 / scale);
 }
@@ -104,11 +109,23 @@ function cloudAtAge(
 /** Pure source-relative port of Move_YAWN's complete Scene-ON body. */
 export function yawnAtAge(
   age: number,
-  _attackerSide: YawnSide,
+  attackerSide: YawnSide,
   attackerCenter: Readonly<{ x: number; y: number }>,
   targetCenter: Readonly<{ x: number; y: number }>,
 ): YawnState {
   const active = age >= 0 && age < YAWN_CLEANUP_AGE;
+  // Yawn's InitYawnCloudPosition uses the battler picture-offset pair rather
+  // than the battle-position pair. The source endpoints are 96 -> 48 for a
+  // player attacker and 49 -> 97 for an opponent attacker; the battler
+  // animation centers remain their art anchors at the typed seam.
+  const cloudFrom = {
+    x: attackerCenter.x,
+    y: attackerSide === "player" ? 96 : 49,
+  };
+  const cloudTo = {
+    x: targetCenter.x,
+    y: attackerSide === "player" ? 48 : 97,
+  };
   const clouds = active
     ? CLOUD_STARTS.flatMap((entry) => {
         const cloud = cloudAtAge(
@@ -116,17 +133,17 @@ export function yawnAtAge(
           entry.age,
           entry.kind,
           entry.slot,
-          attackerCenter,
-          targetCenter,
+          cloudFrom,
+          cloudTo,
         );
         return cloud ? [cloud] : [];
       })
     : [];
   const attackerTransform = active
-    ? inhaleAtAge(age, 4, 48)
+    ? inhaleAtAge(age, 4, attackerSide === "player" ? 48 : 46)
     : inactiveTransform();
   const targetTransform = active
-    ? inhaleAtAge(age, YAWN_SECOND_INHALE_AGE, 0)
+    ? inhaleAtAge(age, YAWN_SECOND_INHALE_AGE, attackerSide === "player" ? 54 : 46)
     : inactiveTransform();
   return {
     active,
