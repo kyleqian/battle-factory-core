@@ -1,0 +1,52 @@
+{
+  "schema": "fire-blast-bilateral-evidence/v1",
+  "status": "unsupported-evidence-checkpoint",
+  "coverageCredit": false,
+  "acceptance": {
+    "sourceRows": 394,
+    "rawRgbRows": 394,
+    "freshRunsPerOrientation": 2,
+    "ringGroups": 3,
+    "ringSprites": 15,
+    "crossGroups": 9,
+    "crossSprites": 45,
+    "firstInactiveCleanupAge": 196
+  },
+  "source": {
+    "audit": "tools/compare/fireBlastSourceAudit.ts",
+    "auditSha256": "21af215fcff9d91de38809903aef79ffc08530381ed44689ca8a6b6f2cd006cf",
+    "probe": "tools/compare/fireBlastProbe.py",
+    "probeSha256": "f4063b32dd93baed2c64652c0ffd8149cbf8a8e69827aa1dda4c907e951fec7d",
+    "verifier": "tools/compare/fireBlastEvidence.ts",
+    "verifierSha256": "d24988a7ec35213314703a45e6e398be70ec681ebb50b20f2de8bae0903aa429",
+    "stagingFixture": "tests/fixtures/fire-blast-animation-source-staging.json",
+    "stagingFixtureSha256": "7d7882bee8ca86612a15f2d4c7a44540f388966740186f3f70d3ccabb93e1749"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-fire-blast-player-octillery-opponent-onix.json",
+      "scenarioSha256": "144553b2f508dfebe652cf882cd0b379fe09a637cd8a52d9c80f6bb95038bce7",
+      "sourceWindow": { "startFrame": 215, "endFrame": 411, "frameCount": 197 },
+      "probeJsonSha256": "cb238202c79e632aba0816bb4bc574a181ef153d46b11ff7273687144a1ca6e5",
+      "repeatProbeJsonSha256": "cb238202c79e632aba0816bb4bc574a181ef153d46b11ff7273687144a1ca6e5",
+      "denseState": "tools/compare/evidence/fire-blast-player-dense-state.json.gz",
+      "denseStateSha256": "378acacba18961c852c29a5e33474d34fbb2203b4bdb534a5a935dc72a1d68b3",
+      "rawRgbArchive": "tools/compare/evidence/fire-blast-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "1b3f210c8fb685267883d691db819d98e56adb16c713426c81c5ddda68136ffa",
+      "rawRgbSha256": "f36e165d5db17c03dd81c63a6704b0591a0d229942d6108fe7bd288ed920ef8d"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-fire-blast-opponent-octillery-player-onix.json",
+      "scenarioSha256": "2fb51bb13a18d46d32373690b45de9bafa7f7b894556385322612172df7a29be",
+      "sourceWindow": { "startFrame": 1147, "endFrame": 1343, "frameCount": 197 },
+      "probeJsonSha256": "a5a45685742382056b2b35f612fadf7de380b7d5e40d6d112790f09ecfe6dc92",
+      "repeatProbeJsonSha256": "a5a45685742382056b2b35f612fadf7de380b7d5e40d6d112790f09ecfe6dc92",
+      "denseState": "tools/compare/evidence/fire-blast-opponent-dense-state.json.gz",
+      "denseStateSha256": "d09c68aedecc0b15035d28a6a3d349ce248023ceada84f90546943cb9c17640f",
+      "rawRgbArchive": "tools/compare/evidence/fire-blast-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "ecab23c85ab0c1c80e4fefb2cd68f9e2656f88b0a1e46db34ea0acde0d5dcdb6",
+      "rawRgbSha256": "4376d40d83c631fef7e4a630b0fe784664a8d16f7645d97d210e7ec4a4611aed"
+    }
+  },
+  "boundedRemainder": "Fire Blast remains unsupported: no reducer, typed seam, compositor, framebuffer acceptance, coverage promotion, latch edit, or sibling credit."
+}
