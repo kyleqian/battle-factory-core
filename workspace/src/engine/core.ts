@@ -95,6 +95,7 @@ import {
   drawStandardWindowFrame,
   drawStandardWindowText,
   renderPrebattleRoomScene,
+  renderPrebattleRoomSceneWithAttendantOffset,
   renderPrebattleRoomWalkScene,
 } from "./prebattleRoomRender.ts";
 import {
@@ -296,6 +297,8 @@ import {
   postwinRightThisWayInputReady,
   postwinRngSteps,
   acceptPostwinCallScenePage,
+  callSceneAttendantVisual,
+  callSceneBoxHidden,
   postwinCallSceneInputReady,
   postwinCallSceneVisibleChars,
   CALL_SCENE_BOX_TEXTS,
@@ -2644,12 +2647,19 @@ function renderPostwinState(state: EngineState): Uint8Array {
   if (retireYesDelay >= POSTWIN_RETIRE_FADE_FIRST_DELAY) {
     return renderPostwinRetireWarp(retireYesDelay);
   }
-  renderPrebattleRoomScene(
+  const attendantVisual = callSceneAttendantVisual(postwin);
+  renderPrebattleRoomSceneWithAttendantOffset(
     fb,
+    attendantVisual.dx,
+    attendantVisual.frame,
+    attendantVisual.hFlip,
     bgFadeY(fadeLocal, FADE_IN),
     objFadeY(fadeLocal, FADE_IN),
   );
-  if (age >= POSTWIN_HEAL_BOX_AGE) {
+  // Walk-up build step A: while the call-scene attendant is mid-movement,
+  // the message box is fully closed (ground-truth doc's Window 1: no box
+  // visible for either walk's full span) - skip the box/text draw entirely.
+  if (age >= POSTWIN_HEAL_BOX_AGE && !callSceneBoxHidden(postwin)) {
     drawMessageBoxFrame(fb);
     const healDismiss = postwin.healDismissElapsed;
     const beforeContinuation =

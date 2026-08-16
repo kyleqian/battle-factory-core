@@ -125,6 +125,9 @@ import {
   acceptPostwinCallScenePage,
   postwinCallSceneInputReady,
   postwinCallSceneVisibleChars,
+  callSceneAttendantVisual,
+  callSceneBoxHidden,
+  CALL_SCENE_PAGE_TRANSITION_DELAY,
   CALL_SCENE_BOX_TEXTS,
   CALL_SCENE_HEAD_PROMPT_LINE1,
   CALL_SCENE_HEAD_PROMPT_LINE2,
@@ -1523,14 +1526,38 @@ describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyF
         .toBe(page);
       const accepted = acceptPostwinCallScenePage(state);
       if (page < 5) {
-        expect(accepted.callScenePage).toBe(page + 1);
-        expect(accepted.callScenePageEdgeElapsed).toBe(edgeBeforeAccept);
-        expect(accepted.callSceneDismissElapsed).toBeNull();
+        // Boxes 1/2 gate the next box behind the attendant's walk-away/
+        // walk-back movement (a pending transition, not an instant bump);
+        // boxes 3/4 (the boss message's own page turns, no movement) still
+        // turn over instantly, unchanged.
+        const gated = page === 1 || page === 2;
+        if (gated) {
+          expect(accepted.callScenePage).toBe(page);
+          expect(accepted.callScenePendingElapsed).toBe(
+            edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
+          );
+          let settled = accepted;
+          while (settled.callScenePendingElapsed !== null) {
+            settled = advancePostwin(settled);
+          }
+          expect(settled.callScenePage).toBe(page + 1);
+          expect(settled.callScenePageEdgeElapsed).toBe(
+            edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
+          );
+          expect(settled.callSceneDismissElapsed).toBeNull();
+          state = settled;
+        } else {
+          expect(accepted.callScenePage).toBe(page + 1);
+          expect(accepted.callScenePageEdgeElapsed).toBe(edgeBeforeAccept);
+          expect(accepted.callScenePendingElapsed).toBeNull();
+          expect(accepted.callSceneDismissElapsed).toBeNull();
+          state = accepted;
+        }
       } else {
         expect(accepted.callScenePage).toBe(5);
         expect(accepted.callSceneDismissElapsed).toBe(edgeBeforeAccept);
+        state = accepted;
       }
-      state = accepted;
     }
 
     // AskReadyForHead's own prompt clock starts at the call scene's own
@@ -1557,6 +1584,84 @@ describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyF
     const cursorOnRetire = { ...state, continuationCursorPos: 3 as const };
     const retire = acceptPostwinContinuation(cursorOnRetire);
     expect(retire.question).toEqual({ kind: "retire", edgeElapsed: state.elapsed - 1 });
+  });
+
+  it("renders the attendant's walk-away/walk-back movement, MEASURED against docs/walkup-call-scene-ground-truth.md Window 1", () => {
+    // Box 1 dismiss-A (the walk-away trigger). Mirrors the fixture-01 press:
+    // oracle frame 895's registered dismiss, 903 the first visible pixel.
+    const dismissEdge = 10_000;
+    const pendingAfterBox1: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      elapsed: dismissEdge,
+      callScenePage: 1,
+      callScenePageEdgeElapsed: dismissEdge - 500,
+      callScenePendingElapsed: dismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[0],
+    };
+    // The 8-tick closemessage/task-dispatch lead-in: box 1 still fully held
+    // (box visible), attendant not yet moved.
+    expect(callSceneAttendantVisual(pendingAfterBox1)).toEqual({ dx: 0, frame: 0, hFlip: false });
+    expect(callSceneBoxHidden(pendingAfterBox1)).toBe(false);
+    const leadInEnd = { ...pendingAfterBox1, elapsed: dismissEdge + 7 };
+    expect(callSceneAttendantVisual(leadInEnd)).toEqual({ dx: 0, frame: 0, hFlip: false });
+    expect(callSceneBoxHidden(leadInEnd)).toBe(false);
+
+    // First visible movement pixel (oracle 903 = dismissEdge + 8): box now
+    // hidden, attendant shifted 1px west, leading-leg pose (GoWest frame 7).
+    const firstPixel = { ...pendingAfterBox1, elapsed: dismissEdge + 8 };
+    expect(callSceneBoxHidden(firstPixel)).toBe(true);
+    expect(callSceneAttendantVisual(firstPixel)).toEqual({ dx: -1, frame: 7, hFlip: false });
+
+    // Last movement tick (oracle 950 = dismissEdge + 55): 3 full tiles (48px) west.
+    const lastPixel = { ...pendingAfterBox1, elapsed: dismissEdge + 55 };
+    expect(callSceneAttendantVisual(lastPixel)).toEqual({ dx: -48, frame: 2, hFlip: false });
+
+    // Deferred bump fires exactly at the pending edge (dismissEdge + 56).
+    let settled = pendingAfterBox1;
+    while (settled.callScenePendingElapsed !== null) settled = advancePostwin(settled);
+    expect(settled.elapsed).toBe(dismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[0]);
+    expect(settled.callScenePage).toBe(2);
+    // Box 2's own reopen lag (3 ticks, MEASURED: oracle 951 edge -> 954 frame
+    // visible) keeps the box hidden a moment after the bump too.
+    expect(callSceneBoxHidden(settled)).toBe(true);
+    expect(callSceneAttendantVisual(settled)).toEqual({ dx: -48, frame: 2, hFlip: false });
+    const reopened = { ...settled, elapsed: settled.elapsed + 3 };
+    expect(callSceneBoxHidden(reopened)).toBe(false);
+    expect(callSceneAttendantVisual(reopened)).toEqual({ dx: -48, frame: 2, hFlip: false });
+
+    // Box 2 dismiss-A (the walk-back trigger, immediate lead-in - MEASURED
+    // fixture 02: oracle 1037 dismiss edge, first pixel the SAME tick).
+    const box2DismissEdge = 20_000;
+    const pendingAfterBox2: PostwinState = {
+      ...settled,
+      elapsed: box2DismissEdge,
+      callScenePendingElapsed: box2DismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[1],
+    };
+    const firstBackPixel = pendingAfterBox2;
+    expect(callSceneBoxHidden(firstBackPixel)).toBe(true);
+    expect(callSceneAttendantVisual(firstBackPixel)).toEqual({ dx: -47, frame: 7, hFlip: true });
+    const lastBackPixel = { ...pendingAfterBox2, elapsed: box2DismissEdge + 47 };
+    expect(callSceneAttendantVisual(lastBackPixel)).toEqual({ dx: 0, frame: 2, hFlip: true });
+
+    let home = pendingAfterBox2;
+    while (home.callScenePendingElapsed !== null) home = advancePostwin(home);
+    expect(home.elapsed).toBe(box2DismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[1]);
+    expect(home.callScenePage).toBe(3);
+    // Box 3's own reopen lag is 4 ticks (MEASURED: oracle 1085 edge -> 1089
+    // frame visible, the same tick its first glyph appears).
+    expect(callSceneBoxHidden(home)).toBe(true);
+    const homeReopened = { ...home, elapsed: home.elapsed + 4 };
+    expect(callSceneBoxHidden(homeReopened)).toBe(false);
+    expect(callSceneAttendantVisual(homeReopened)).toEqual({ dx: 0, frame: 0, hFlip: false });
+
+    // Boxes 3->4 and 4->5 (the boss message's own page turns) have no
+    // attendant movement - still instant, unchanged.
+    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[2]).toBe(0);
+    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[3]).toBe(0);
+
+    // Non-brain / pre-movement states always render the rest visual.
+    expect(callSceneAttendantVisual(INITIAL_POSTWIN_STATE)).toEqual({ dx: 0, frame: 0, hFlip: false });
+    expect(callSceneBoxHidden(INITIAL_POSTWIN_STATE)).toBe(false);
   });
 
   it("leaves the ordinary (non-brain) route's menu-visible/input-ready/next-text computations byte-identical", () => {

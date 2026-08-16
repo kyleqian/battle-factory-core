@@ -149,6 +149,18 @@ export interface PostwinState {
    */
   callScenePageEdgeElapsed: number | null;
   /**
+   * Walk-up build step A follow-on: the accepted dismiss-A of boxes 1/2,
+   * pending the attendant's own walk-away/walk-back movement -- the CURRENT
+   * box (`callScenePage`/`callScenePageEdgeElapsed`) stays put and keeps
+   * rendering its already-fully-typed content (matching the ground-truth
+   * doc's own "box 1 held" span after its dismiss-A) until `advancePostwin`
+   * performs the deferred bump once `elapsed` reaches this value, mirroring
+   * box 1's own `healDismissElapsed`-armed deferred activation. Null outside
+   * a pending box-1/2 transition (always null on every other box turn,
+   * which stays instant).
+   */
+  callScenePendingElapsed: number | null;
+  /**
    * Accepted dismiss edge of the call scene's last box (box 5) -- starts
    * the `AskReadyForHead` prompt's own clock, mirroring `swapDeclineElapsed`
    * 's role for the ordinary route's "Right this way" text.
@@ -399,6 +411,7 @@ function createPostwinStateFromSnapshot(
     frontierBrain: false,
     callScenePage: 0,
     callScenePageEdgeElapsed: null,
+    callScenePendingElapsed: null,
     callSceneDismissElapsed: null,
     frozenSceneView: null,
   };
@@ -574,6 +587,7 @@ export function createBattleReturnHoldState(
     frontierBrain: false,
     callScenePage: 0,
     callScenePageEdgeElapsed: null,
+    callScenePendingElapsed: null,
     callSceneDismissElapsed: null,
     frozenSceneView,
   };
@@ -741,6 +755,12 @@ export function advancePostwin(state: PostwinState): PostwinState {
     state.callScenePage === 0 &&
     state.healDismissElapsed !== null &&
     elapsed >= state.healDismissElapsed + POSTWIN_NEXT_TEXT_FIRST_DELAY;
+  // Walk-up build step A follow-on: boxes 1/2's deferred bump (see
+  // `callScenePendingElapsed`'s own doc) fires once the attendant's
+  // walk-away/walk-back movement has run its full course.
+  const callScenePendingReady =
+    state.callScenePendingElapsed !== null &&
+    elapsed >= state.callScenePendingElapsed;
   // The AskReadyForHead prompt/menu becomes visible relative to the call
   // scene's own last-box dismiss edge (+ its trailing delay), never relative
   // to healDismissElapsed directly -- the ordinary route's fixed
@@ -848,10 +868,17 @@ export function advancePostwin(state: PostwinState): PostwinState {
     continuationCursorMoveElapsed: state.continuationCursorMoveElapsed,
     rightThisWayDismissElapsed: state.rightThisWayDismissElapsed,
     frontierBrain: state.frontierBrain,
-    callScenePage: callSceneFirstBoxReady ? 1 : state.callScenePage,
+    callScenePage: callSceneFirstBoxReady
+      ? 1
+      : callScenePendingReady
+        ? ((state.callScenePage + 1) as 2 | 3 | 4 | 5)
+        : state.callScenePage,
     callScenePageEdgeElapsed: callSceneFirstBoxReady
       ? state.healDismissElapsed
-      : state.callScenePageEdgeElapsed,
+      : callScenePendingReady
+        ? state.callScenePendingElapsed
+        : state.callScenePageEdgeElapsed,
+    callScenePendingElapsed: callScenePendingReady ? null : state.callScenePendingElapsed,
     callSceneDismissElapsed: state.callSceneDismissElapsed,
     frozenSceneView: state.frozenSceneView,
   };
@@ -925,25 +952,182 @@ export function postwinCallSceneInputReady(state: PostwinState): boolean {
   return delay >= firstDelay + total + 1;
 }
 
+// Walk-up step A follow-on (docs/walkup-call-scene-ground-truth.md Window 1):
+// the attendant's walk-away (box 1 dismiss -> box 2) and walk-back (box 2
+// dismiss -> box 3) movements, `EventScript_ReturnToRoomFromBattle`'s
+// `applymovement ...MoveToReceiveCall`/`applymovement ...ReturnToPlayer`
+// (scripts.inc:67/71) - each 3 tiles (`walk_left`/`walk_right` x3,
+// scripts.inc:437-448). Pixel-probed directly against the committed
+// fixtures (tools/battle-lab/factory-brain-silver-walkup-callscene-0{1,2}-
+// off.json), tracking the attendant sprite's own hair-color marker frame by
+// frame (not the ground-truth doc's own coarser box-level table, which folds
+// the pre-movement message hold into the same row):
+// - Away (fixture 01): box1's dismiss-A registers at oracle frame 895; the
+//   attendant sprite is still at rest through frame 902 (closemessage/task-
+//   dispatch lead-in, MEASURED 8 ticks); it then shifts exactly 1px/tick
+//   left from frame 903 (-1px) through frame 950 (-48px = 3 tiles), holding
+//   at -48 from then on.
+// - Back (fixture 02): box2's dismiss-A registers at oracle frame 1037 and
+//   the attendant shifts the SAME tick (MEASURED 0-tick lead-in, unlike the
+//   away leg) - 1px/tick right from frame 1037 (-47px) through frame 1084
+//   (0px, home), holding there.
+// Both legs move at the same already-established 16-ticks/tile rate
+// (prebattleRoom.ts's WALK_STEPS module doc) - 3 tiles = 48 ticks, MEASURED
+// identical on both fixtures.
+/** Ticks from box 1's dismiss edge to the walk-away's first visible pixel (closemessage/task-dispatch lead-in). MEASURED (fixture 01: 895 -> 903). */
+const CALL_SCENE_MOVE_AWAY_START_DELAY = 8;
+/** Ticks from box 2's dismiss edge to the walk-back's first visible pixel: starts the same tick (MEASURED, fixture 02: 1037 -> 1037). */
+const CALL_SCENE_MOVE_BACK_START_DELAY = 0;
+/** Continuous 1px/tick walk duration, either direction: 3 tiles * 16 ticks/tile. MEASURED identical on both fixtures (48 ticks each). */
+const CALL_SCENE_MOVE_DURATION = 48;
+/** Total px displacement at rest, either direction: 3 tiles * 16px/tile (MEASURED, matches CALL_SCENE_MOVE_DURATION 1:1 - a clean 1px/tick rate). */
+const CALL_SCENE_MOVE_DISTANCE = 48;
+const CALL_SCENE_MOVE_AWAY_TOTAL_DELAY =
+  CALL_SCENE_MOVE_AWAY_START_DELAY + CALL_SCENE_MOVE_DURATION;
+const CALL_SCENE_MOVE_BACK_TOTAL_DELAY =
+  CALL_SCENE_MOVE_BACK_START_DELAY + CALL_SCENE_MOVE_DURATION;
 /**
- * Advances the call scene's current box on an accepted A-press: boxes 1-4
- * arm the next box's clock at this edge (mirrors `acceptPostwinDialoguePage`);
- * box 5 (the boss message's last page) instead records
- * `callSceneDismissElapsed`, starting `AskReadyForHead`'s own prompt clock.
+ * Per-callScenePage-transition delay from the accepted dismiss edge to the
+ * next box's own content edge (index = `callScenePage - 1` BEFORE the
+ * transition). Boxes 3->4 and 4->5 (the boss message's own page turns) have
+ * no attendant movement (ground-truth doc: no walk listed between them) so
+ * stay instant, same as every other MSGBOX_DEFAULT page turn in this file.
+ */
+export const CALL_SCENE_PAGE_TRANSITION_DELAY: readonly [number, number, number, number] = [
+  CALL_SCENE_MOVE_AWAY_TOTAL_DELAY,
+  CALL_SCENE_MOVE_BACK_TOTAL_DELAY,
+  0,
+  0,
+];
+
+/**
+ * Picture-table pose during the walk, cycling every 8 ticks: stand(2) then
+ * lead-leg(7 west/8 east), matching `sAnim_GoWest`/`sAnim_GoEast`
+ * (reference/pokeemerald/src/data/object_events/object_event_anims.h:220-
+ * 235: `ANIMCMD_FRAME(7,8)`, `ANIMCMD_FRAME(2,8)`, `ANIMCMD_FRAME(8,8)`,
+ * `ANIMCMD_FRAME(2,8)`, loop - GoEast is the same table with `hFlip=TRUE`).
+ * Source-derived, not independently pixel-probed frame-by-frame.
+ */
+function callSceneWalkFrame(walkTick: number): 2 | 7 | 8 {
+  const cyclePos = walkTick % 32;
+  if (cyclePos < 8) return 7;
+  if (cyclePos < 16) return 2;
+  if (cyclePos < 24) return 8;
+  return 2;
+}
+
+export interface CallSceneAttendantVisual {
+  /** Signed px offset from the attendant's rest position (negative = west/away). */
+  readonly dx: number;
+  /** Picture-table frame (prebattle-room-npcs.json indexing): 0 = face south (rest), 2 = face west/east stand, 7/8 = west/east walk legs. */
+  readonly frame: 0 | 2 | 7 | 8;
+  readonly hFlip: boolean;
+}
+const CALL_SCENE_HOME_VISUAL: CallSceneAttendantVisual = { dx: 0, frame: 0, hFlip: false };
+/** Held pose once the walk-away settles (MEASURED: the last GoWest cycle tick before `waitmovement 0` returns is frame 2, west-stand - matches `callSceneWalkFrame`'s own last value). */
+const CALL_SCENE_AWAY_HOLD_VISUAL: CallSceneAttendantVisual = { dx: -CALL_SCENE_MOVE_DISTANCE, frame: 2, hFlip: false };
+
+/**
+ * Ticks the just-arrived box's own frame graphic stays hidden past its edge
+ * before it visibly reopens (index 0 = box 2, after the walk-away; index 1 =
+ * box 3, after the walk-back) -- both boxes fully `closemessage`d before
+ * their `applymovement` (scripts.inc:66/70), unlike every other box turn in
+ * this file, which reuses an already-open box (no closemessage between
+ * them) and so has no such gap. MEASURED (fixture 01: box 2's frame
+ * reappears oracle frame 954, edge 951, gap 3; fixture 02: box 3's frame
+ * reappears oracle frame 1089, edge 1085, gap 4 -- the same tick its first
+ * glyph appears, i.e. zero extra blank-frame hold that time).
+ */
+const CALL_SCENE_BOX_REOPEN_LAG: readonly [number, number] = [3, 4];
+
+/** The attendant's current on-screen offset/pose for the brain call scene - null-safe for every non-brain / pre-movement state (returns the rest visual). */
+export function callSceneAttendantVisual(state: PostwinState): CallSceneAttendantVisual {
+  if (!state.frontierBrain || state.callScenePage === 0) return CALL_SCENE_HOME_VISUAL;
+  if (state.callScenePage === 1) {
+    if (state.callScenePendingElapsed === null) return CALL_SCENE_HOME_VISUAL;
+    const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_AWAY_TOTAL_DELAY;
+    const localTick = state.elapsed - dismissEdge;
+    if (localTick < CALL_SCENE_MOVE_AWAY_START_DELAY) return CALL_SCENE_HOME_VISUAL;
+    const walkTick = Math.min(
+      localTick - CALL_SCENE_MOVE_AWAY_START_DELAY,
+      CALL_SCENE_MOVE_DURATION - 1,
+    );
+    return { dx: -(walkTick + 1), frame: callSceneWalkFrame(walkTick), hFlip: false };
+  }
+  if (state.callScenePage === 2) {
+    if (state.callScenePendingElapsed === null) return CALL_SCENE_AWAY_HOLD_VISUAL;
+    const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_BACK_TOTAL_DELAY;
+    const localTick = Math.max(0, state.elapsed - dismissEdge - CALL_SCENE_MOVE_BACK_START_DELAY);
+    const walkTick = Math.min(localTick, CALL_SCENE_MOVE_DURATION - 1);
+    return {
+      dx: -CALL_SCENE_MOVE_DISTANCE + (walkTick + 1),
+      frame: callSceneWalkFrame(walkTick),
+      hFlip: true,
+    };
+  }
+  return CALL_SCENE_HOME_VISUAL;
+}
+
+/**
+ * True while the call-scene message box is fully hidden: the attendant's
+ * walk-away/walk-back movement span itself (box already dismissed, still
+ * displaying the OLD page number until the deferred bump -- see
+ * `callScenePendingElapsed`), plus the just-arrived box's own short reopen
+ * lag (`CALL_SCENE_BOX_REOPEN_LAG`). Ground-truth doc: no message box
+ * visible for either walk's full span.
+ */
+export function callSceneBoxHidden(state: PostwinState): boolean {
+  if (!state.frontierBrain || state.callScenePage === 0 || state.callSceneDismissElapsed !== null) {
+    return false;
+  }
+  if (state.callScenePendingElapsed !== null) {
+    if (state.callScenePage === 1) {
+      const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_AWAY_TOTAL_DELAY;
+      return state.elapsed - dismissEdge >= CALL_SCENE_MOVE_AWAY_START_DELAY;
+    }
+    if (state.callScenePage === 2) {
+      const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_BACK_TOTAL_DELAY;
+      return state.elapsed - dismissEdge >= CALL_SCENE_MOVE_BACK_START_DELAY;
+    }
+    return false;
+  }
+  if (state.callScenePage === 2 || state.callScenePage === 3) {
+    const edge = state.callScenePageEdgeElapsed;
+    if (edge === null) return false;
+    return state.elapsed - edge < CALL_SCENE_BOX_REOPEN_LAG[state.callScenePage - 2]!;
+  }
+  return false;
+}
+
+/**
+ * Advances the call scene's current box on an accepted A-press. Boxes 1 and
+ * 2 arm a PENDING transition (`callScenePendingElapsed`) gated behind the
+ * attendant's walk-away/walk-back movement instead of turning over
+ * instantly -- the box itself stays put (still fully typed/held, matching
+ * the ground-truth doc's own post-dismiss hold) until `advancePostwin`
+ * performs the deferred bump. Boxes 3/4 (no movement) still turn over
+ * instantly, mirroring `acceptPostwinDialoguePage`; box 5 (the boss
+ * message's last page) instead records `callSceneDismissElapsed`, starting
+ * `AskReadyForHead`'s own prompt clock.
  */
 export function acceptPostwinCallScenePage(state: PostwinState): PostwinState {
   if (
     !state.frontierBrain ||
     state.callScenePage === 0 ||
     state.callSceneDismissElapsed !== null ||
+    state.callScenePendingElapsed !== null ||
     !postwinCallSceneInputReady(state)
   ) return state;
   if (state.callScenePage < 5) {
-    return {
-      ...state,
-      callScenePage: (state.callScenePage + 1) as 2 | 3 | 4 | 5,
-      callScenePageEdgeElapsed: state.elapsed,
-    };
+    const transitionDelay = CALL_SCENE_PAGE_TRANSITION_DELAY[state.callScenePage - 1]!;
+    if (transitionDelay === 0) {
+      return {
+        ...state,
+        callScenePage: (state.callScenePage + 1) as 2 | 3 | 4 | 5,
+        callScenePageEdgeElapsed: state.elapsed,
+      };
+    }
+    return { ...state, callScenePendingElapsed: state.elapsed + transitionDelay };
   }
   return { ...state, callSceneDismissElapsed: state.elapsed };
 }
