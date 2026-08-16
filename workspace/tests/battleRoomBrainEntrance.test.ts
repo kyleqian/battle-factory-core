@@ -41,6 +41,7 @@ import {
   SPEECH_APPEAR_ELAPSED,
   type BattleRoomState,
 } from "../src/engine/battleRoom.ts";
+import { renderBattleRoomBrainEntranceScene } from "../src/engine/battleRoomRender.ts";
 import type { BattleOpponent } from "../src/engine/battleScenario.ts";
 
 const entranceScene = walkup.scenes.battleRoomEntrance;
@@ -218,6 +219,27 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     // Pan caps at 80 (NOLAND_WALK_PX * 5/3) once the decoy/player's own
     // 5-tile walk finishes, one tick before ENTRY_STEPS' own settle row.
     expect(entryStep(80 + BRAIN_MOVEMENT_CLOCK_OFFSET).camPanY).toBe(80);
+  });
+
+  it("walk-up build step B1c mid-ramp fix: the render's own movementElapsed clock is one tick AHEAD of state.elapsed while brainMoving is in progress - RAM-measured (tools/probe/probe-factory-brain-silver-entrance-movement-ram.py's extended OAM/coordOffset fields): the walk/pan stays flat for the FIRST TWO brainMoving ticks (state.elapsed 0 and 1 both RAM-measure camPanY=0), so those two ticks render byte-identical, still-flat frames; the ramp's first real +1px tick is state.elapsed 2, not 1", () => {
+    let state: BattleRoomState = createBrainWalkupBattleRoomState();
+    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    state = { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
+    for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
+    expect(state.phase).toBe("brainMoving");
+    expect(state.elapsed).toBe(0);
+
+    const tick0 = { ...state, elapsed: 0 };
+    const tick1 = { ...state, elapsed: 1 };
+    const tick2 = { ...state, elapsed: 2 };
+    const fb0 = new Uint8Array(240 * 160 * 4);
+    const fb1 = new Uint8Array(240 * 160 * 4);
+    const fb2 = new Uint8Array(240 * 160 * 4);
+    renderBattleRoomBrainEntranceScene(fb0, tick0);
+    renderBattleRoomBrainEntranceScene(fb1, tick1);
+    renderBattleRoomBrainEntranceScene(fb2, tick2);
+    expect(fb1).toEqual(fb0);
+    expect(fb2).not.toEqual(fb1);
   });
 
   it("brain box print duration matches 1 tick/char over the JSON text, appearing once the room fade-in settles (dense-compare-measured, see battleRoom.ts doc)", () => {

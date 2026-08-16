@@ -719,6 +719,58 @@ export function opponentStep(elapsed: number): OpponentStep {
 // (unshifted) 108 threshold, just expressed in this window's own un-shifted
 // clock instead of `entryStep`'s.
 
+// **Residual CLOSED (walk-up build step B1c mid-ramp probe, this session):**
+// extended `tools/probe/probe-factory-brain-silver-entrance-movement-ram.py`
+// to surface (previously read but dropped from its own output rows)
+// `gSpriteCoordOffsetX/Y`, plus new fields it didn't read at all: each
+// tracked sprite's actual hardware-visible OAM y/x (`sprite->oam.y/x`,
+// struct OamData bitfields) and the `x2`/`y2`/`centerToCornerVecX/Y` terms
+// `UpdateOamCoords`/`BuildOamBuffer` (src/sprite.c:322-352) sum into them.
+// Cross-checking `oamY` against `spriteY + y2 + centerToCornerVecY +
+// spriteCoordOffsetY` computed from the SAME captured frame, at every one
+// of the 256 frames 896-1151, found EXACT agreement throughout - ruling out
+// a same-frame OAM/coord-offset latch (the C source's own single-iteration
+// `RunTasks->AnimateSprites->CameraUpdate->UpdateCameraPanning->
+// BuildOamBuffer` order, confirmed in `field_camera.c`/`sprite.c`, means
+// there's no cross-task lag to find within one already-captured RAM sample).
+// The real mechanism was a harness-adjacent ONE-TICK COUNTING bug instead:
+// a whole-frame pixel cross-correlation of the entrance-03 fixture (shifting
+// the app's rendered frame N by dy and finding the dy that zeroes the diff)
+// found a CONSTANT dy=+1 (app drawn one row too far down, i.e. one tick's
+// worth of EXTRA pan) uniformly across the entire ramp (compare frames
+// 321-399) - not growing, not present before or after. Re-deriving
+// `entryStep`'s table lookup against the FRESH per-tick RAM camPanY trace
+// (which is a clean, zero-deviation 1px/tick ramp - the earlier "not a
+// uniform clock-offset" verdict above was right that the OFFSET constant
+// itself doesn't need to change, but didn't isolate WHERE the remaining
+// tick was hiding) showed: `entryStep`'s shared table has exactly ONE flat
+// (`camPanY=0`) tick at `historicElapsed` 22 before ramping at 23, but this
+// window's real RAM stays flat for TWO ticks after the
+// `brainMsgboxClosing`->`brainMoving` transition (`state.elapsed` 0 AND 1
+// both RAM-measure `camPanY=0`; the first real +1px tick is `state.elapsed`
+// 2, not 1) - i.e. `state.elapsed` runs one tick AHEAD of the shared
+// `entryStep`/`scientistTurnFrame`/`nolandStep` clock while `brainMoving` is
+// in progress. Fixed at the render call site
+// (`battleRoomRender.ts`'s `renderBattleRoomBrainEntranceScene`): feed those
+// functions `state.elapsed - 1` instead of `state.elapsed` during
+// `brainMoving` (`BRAIN_MOVEMENT_CLOCK_OFFSET`'s own +22 already lands the
+// corrected clock on the right table row - no change needed to that
+// constant or to `BRAIN_MOVEMENT_SETTLE_ELAPSED`, both of which stay
+// correct as originally RAM-derived). The settled/pre-phase render branches
+// need no correction (settled already feeds a comfortably-clamped constant;
+// the pre-phase branch's forced `elapsed=0` already renders the correct
+// still-flat pose). Verified: fixture 03 162/256 -> **242/256**
+// (`--summary`, rerun live this session) - every mid-ramp frame is now
+// exact; entrance-02 stays 256/256, all four B2 speech windows stay at
+// their recorded counts, reveal stays 690/701 (all rerun live, unmoved).
+// **Remaining bounded residual (NOT this mechanism, left honest):** frames
+// 319-320 (the msgbox-close wipe transition itself, a pre-existing generic
+// `MSGBOX_CLOSE` gap this step didn't touch) and frame 368 (a single-tick,
+// 156px Noland walk-cycle picture-frame boundary mismatch - `nolandStep`
+// picks a different frame than oracle for exactly one 8-tick animation-cycle
+// edge; not investigated further this session, small enough to bound
+// honestly rather than fit).
+
 /** Noland's own walk distance in px (`walk_up`x3, this game's established 16-ticks/tile object-movement rate - see module doc points 2/3 above). */
 export const NOLAND_WALK_PX = 48;
 /** Noland's screen Y at `elapsed` 0 (spawn tile (7,9), zero pan) - RAM-confirmed this step (B1c, see module doc above): matches the RAM-sampled screen position formula (`nolY + spriteCoordOffsetY - 16`) exactly for every `camPanY < NOLAND_WALK_PX` tick sampled, not just algebraically derived. */

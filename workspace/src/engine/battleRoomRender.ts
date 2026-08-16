@@ -411,8 +411,27 @@ export function renderBattleRoomBrainEntranceScene(
   // itself renders - only the message box content changes - so they share
   // brainSettled's own "settled" pose branch below (brainEntranceMovementSettled).
   const settled = brainEntranceMovementSettled(state.phase);
+  // Walk-up build step B1c mid-ramp fix (162/256 -> dense-verified via
+  // tools/probe/probe-factory-brain-silver-entrance-movement-ram.py's
+  // extended OAM/coordOffset fields + a whole-frame pixel cross-correlation
+  // of the entrance-03 fixture, see battleRoom.ts's module doc below for the
+  // full evidence): entryStep's shared table has exactly ONE flat (camPanY=0)
+  // tick at historicElapsed 22 before it starts ramping at 23 - but RAM shows
+  // THIS window's real pan stays flat for TWO ticks after the
+  // brainMsgboxClosing->brainMoving transition (state.elapsed 0 AND 1 both
+  // RAM-measure camPanY=0; the ramp's first real +1px tick is state.elapsed
+  // 2, not 1). So `state.elapsed` runs one tick AHEAD of the shared
+  // entryStep/scientistTurnFrame/nolandStep clock while brainMoving is in
+  // progress - feed them state.elapsed-1, not state.elapsed (BRAIN_MOVEMENT_
+  // CLOCK_OFFSET's own +22 already lands the corrected clock on the right
+  // table row: historicElapsed 21/22/23 at state.elapsed 0/1/2 exactly
+  // reproduce RAM's flat/flat/camPanY=1 shape). The settled/pre-phase
+  // branches below need no such correction - settled already feeds a
+  // comfortably-clamped constant (both entryStep and scientistTurnFrame
+  // saturate well before it either way) and the pre-phase branch's forced
+  // elapsed=0 already renders the correct (still-flat) pose.
   const movementElapsed = state.phase === "brainMoving"
-    ? state.elapsed
+    ? state.elapsed - 1
     : settled
       ? BRAIN_MOVEMENT_SETTLE_ELAPSED
       : 0;
