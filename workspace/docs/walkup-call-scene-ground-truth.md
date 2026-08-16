@@ -290,6 +290,70 @@ papercut note (`../PAPERCUTS.md`) that the trap specifically bites when a
 button is sent before a *box's own typewriter* has settled, not plain cursor
 navigation within an already-open list.
 
+## Per-tick printer semantics behind the call-scene boxes (2026-08-16, calibration pass 3)
+
+The two constant-shift attempts PROGRESS 1289 recorded both failed because
+the app's own residuals are **not** one uniform offset: they are three
+distinct `reference/pokeemerald/src/text.c` behaviours the engine was not
+modelling. Written down here because the compare fixtures carry FIXED press
+frames, so any change that moves a *ready boundary* across a press edge
+swallows a whole press cycle (`core.tick` advances the postwin state first,
+then gates input on the advanced state).
+
+**1. Typing rate.** `RENDER_STATE_HANDLE_CHAR` prints one glyph per frame,
+and `CHAR_NEWLINE` returns `RENDER_REPEAT` — the `\n` is free. Re-measured
+pixel-by-pixel on fixture 01's box 1: 65 chars over exactly 65 frames
+(830…894), no pause at the line break.
+
+**2. Two different message endings, two different accept ticks.**
+
+| Ending | Printer path | First `JOY_NEW(A\|B)` poll | Down arrow |
+| --- | --- | --- | --- |
+| `$` (EOS) | `RENDER_FINISH` → `waitmessage` releases → the script's own `waitbuttonpress` | last glyph **+1** | none |
+| `\p` (`CHAR_PROMPT_CLEAR`) | one whole frame returns `RENDER_UPDATE`, the next enters `RENDER_STATE_CLEAR` → `TextPrinterWaitWithDownArrow` | last glyph **+2** | yes, every waiting frame |
+
+MEASURED for `$`: box 1's last glyph is oracle 894, its dismiss-A registers
+895. MEASURED for `\p`: boss-message page 1's last glyph is oracle 1122, its
+arrow first appears 1124. Only the boss message
+(`Text_MessageFromHeadComeRightNow`) is multi-page, so of the five call-scene
+boxes exactly boxes 3 and 4 take the `\p` column.
+
+**3. The arrow itself.** `DrawDownArrow` (`text.c:902-931`) redraws every 9th
+waiting frame, cycling `sDownArrowYCoords` `(0,1,2,1)`, blitted right after
+line 2's last glyph. Confirmed frame-for-frame on fixture 02's page-1 hold:
+y-offset 0 for oracle 1124–1132, 1 for 1133–1141, 2 for 1142–1150, 1 for
+1151–1159, 0 for 1160–1168. The x is text-relative (page 1's arrow occupies
+x 153–159, page 2's x 140–146), never a fixed box position.
+
+**4. Where the app's own one-tick skews entered.**
+
+| Box | Edge | Oracle frame graphic | Oracle first glyph | App's old first glyph |
+| --- | --- | --- | --- | --- |
+| 1 (`Text_WaitFewMoments`) | heal dismiss | 829 (empty) | 830 | 829 |
+| 2 (`Text_UnderstoodSirWillDo`) | +8+48 walk-away | 954 | 955 | 955 |
+| 3 (boss page 1) | +0+48 walk-back | 1089 | 1090 | 1089 |
+
+So each reopened box's first glyph is exactly its own already-measured
+frame-reopen lag **+1**, and box 1 additionally carries the brain branch's
+own extra `playse SE_POKENAV_CALL; waitse` command pair (+1 over the
+ordinary route's post-heal schedule — the same +1 also moves the brain
+route's box *clear* from oracle 828 to 829). Boxes 4/5 are `\p` page turns
+inside one already-open window: `RENDER_STATE_CLEAR` clears the pixel buffer
+on the accept frame but returns `RENDER_UPDATE`, which does **not**
+`CopyWindowToVram`, so the clear only becomes visible on the next frame's
+`RENDER_PRINT` — i.e. old page and new page 1st glyph swap in a single
+visible frame, at accept **+1**.
+
+**Still open (page turns).** Fixture 02's own boss-message page 2/3 residual
+is not a modelling gap in the accept rule above but a fixture one: the
+harness's canned pre-checkpoint route accepts page 1's turn at oracle **1170**
+(page 2's first glyph is 1171, pixel-derived from the glyph-width table),
+while `tools/compare/traces/factory-brain-silver-walkup-callscene-02-off.json`
+presses at 1172/1173. Same 2-frame lead at page 2→3 (oracle accept 1303,
+first glyph 1304, fixture presses 1305) and at page 3's dismiss. Closing
+that needs the fixture's press frames re-derived against the canned route,
+which is a separate step from this one.
+
 ## Out of scope (per step brief)
 
 - REST's own menu answer (`AskPauseChallenge`, the save-and-quit path) —
