@@ -131,6 +131,10 @@ import {
   CALL_SCENE_HEAD_PROMPT_TOTAL,
   CALL_SCENE_TRAILING_DELAY,
   CALL_SCENE_HEAD_MENU_READY_DELAY,
+  POSTWIN_BRAIN_CANT_TELL_TEXT,
+  POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
+  POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY,
+  POSTWIN_SCOUTING_LINES,
   type PostwinState,
 } from "../src/engine/postwin.ts";
 import walkupScript from "../src/data/gen/factory-brain-walkup-script.json" with { type: "json" };
@@ -1565,5 +1569,126 @@ describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyF
     expect(ordinary.frontierBrain).toBe(false);
     expect(postwinContinuationInputReady(ordinary)).toBe(true);
     expect(postwinNextVisibleChars(ordinary)).toBe(POSTWIN_NEXT_TEXT_TOTAL);
+  });
+});
+
+describe("Walk-up build step A, Brief 2: postwin.ts AskSwapBeforeHead short path (docs/walkup-step-a-design.md §2.1 item 3)", () => {
+  it("pins AskSwapBeforeHead's one-liner text against the JSON verbatim, never retyped", () => {
+    const expectedOneLiner = (
+      walkupScript.scenes.askSwapBeforeHead.events[0] as { readonly pages: readonly string[] }
+    ).pages[0]!.split("\\n").map((line) => line.replaceAll("'", "’"));
+    expect([...POSTWIN_BRAIN_CANT_TELL_TEXT]).toEqual(expectedOneLiner);
+    expect(POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL).toBe(
+      POSTWIN_BRAIN_CANT_TELL_TEXT[0].length + POSTWIN_BRAIN_CANT_TELL_TEXT[1].length,
+    );
+    // Contains the source's straight apostrophe ("I'm"), confirming the same
+    // normalization convention (splitCallSceneBoxLines) applies here too.
+    expect(POSTWIN_BRAIN_CANT_TELL_TEXT[0]).toContain("I’m");
+
+    // The swap yesno text itself is untouched, shared verbatim between both
+    // routes (design memo §2.1 item 3's own "existing swap-offer step").
+    const expectedSwapAsk = (
+      walkupScript.scenes.askSwapBeforeHead.events[1] as { readonly pages: readonly string[] }
+    ).pages[0]!.split("\\n");
+    expect(POSTWIN_SCOUTING_LINES[3]).toEqual(expectedSwapAsk);
+  });
+
+  it("GO ON's short path types the one-liner then jumps dialoguePage 1 -> 4 directly, skipping scouting pages 2-3", () => {
+    const edge = 40_000;
+    const at = (delay: number): PostwinState => ({
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      elapsed: edge + delay,
+      continuationConfirmElapsed: edge,
+      dialoguePage: 1,
+      dialoguePageEdgeElapsed: edge,
+    });
+    expect(postwinDialogueVisibleChars(at(3))).toBe(0);
+    expect(postwinDialogueVisibleChars(at(4))).toBe(1);
+    expect(postwinDialogueVisibleChars(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY)))
+      .toBe(POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL);
+
+    expect(postwinDialogueInputReady(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY - 1)))
+      .toBe(false);
+    expect(acceptPostwinDialoguePage(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY - 1)))
+      .toEqual(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY - 1));
+    expect(postwinDialogueInputReady(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY)))
+      .toBe(true);
+
+    const accepted = acceptPostwinDialoguePage(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY));
+    expect(accepted.dialoguePage).toBe(4);
+    expect(accepted.dialoguePageEdgeElapsed)
+      .toBe(edge + POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY);
+    // Same page-4 reset fields as the ordinary route's own transition.
+    expect(accepted.swapCursorPos).toBeNull();
+    expect(accepted.swapDeclineElapsed).toBeNull();
+
+    // Sanity: the identical raw state with frontierBrain false instead
+    // advances one page at a time (existing behavior, unchanged).
+    const ordinaryAccepted = acceptPostwinDialoguePage({
+      ...at(POSTWIN_SCOUTING_INPUT_READY_DELAYS[0]!),
+      frontierBrain: false,
+    });
+    expect(ordinaryAccepted.dialoguePage).toBe(2);
+  });
+
+  it("converges the short path's swap prompt (default YES, input gated until settled) -> NO -> \"Right this way, please!\" -> dismiss, unchanged from the ordinary route", () => {
+    const pageEdge = 60_000;
+    const swapReady: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      continuationConfirmElapsed: pageEdge - 1_000,
+      dialoguePage: 4,
+      dialoguePageEdgeElapsed: pageEdge,
+      elapsed: pageEdge + POSTWIN_SWAP_MENU_VISIBLE_DELAY,
+      swapCursorPos: null,
+    };
+    // Menu becomes visible (cursor defaults to YES, position 0) before it
+    // accepts input -- matching the ground-truth finding that the swap
+    // yesno's default cursor is YES.
+    const visible = advancePostwin(swapReady);
+    expect(visible.swapCursorPos).toBe(0);
+
+    // A DOWN sent before the box is genuinely input-ready is swallowed (ROM
+    // ground truth, docs/walkup-call-scene-ground-truth.md Window 3): the
+    // existing ordinary swap-offer gating idiom (postwinDialogueInputReady)
+    // already enforces this, reused unchanged for the brain route.
+    const stillGated = { ...visible, elapsed: pageEdge + POSTWIN_SWAP_INPUT_READY_DELAY - 1 };
+    expect(postwinDialogueInputReady(stillGated)).toBe(false);
+    expect(movePostwinSwapCursor(stillGated, 1)).toEqual(stillGated);
+
+    const gateOpen = { ...visible, elapsed: pageEdge + POSTWIN_SWAP_INPUT_READY_DELAY };
+    expect(postwinDialogueInputReady(gateOpen)).toBe(true);
+    const movedToNo = movePostwinSwapCursor(gateOpen, 1);
+    expect(movedToNo.swapCursorPos).toBe(1);
+
+    const declined = acceptPostwinSwapDecline(movedToNo);
+    expect(declined.swapDeclineElapsed).toBe(movedToNo.elapsed);
+
+    const dismissReady = {
+      ...declined,
+      elapsed: declined.swapDeclineElapsed! + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY,
+    };
+    expect(postwinRightThisWayVisibleChars(dismissReady)).toBe(POSTWIN_RIGHT_THIS_WAY.length);
+    expect(postwinRightThisWayInputReady(dismissReady)).toBe(true);
+    const dismissed = acceptPostwinRightThisWayDismiss(dismissReady);
+    expect(dismissed.rightThisWayDismissElapsed).toBe(dismissReady.elapsed);
+  });
+
+  it("leaves the ordinary route's dialoguePage sequencing (1->2->3->4, all three scouting pages) byte-identical", () => {
+    for (let page = 1; page <= 3; page += 1) {
+      const edge = 10_000 + page * 1_000;
+      const readyDelay = POSTWIN_SCOUTING_INPUT_READY_DELAYS[page - 1]!;
+      const state: PostwinState = {
+        ...INITIAL_POSTWIN_STATE,
+        frontierBrain: false,
+        elapsed: edge + readyDelay,
+        continuationConfirmElapsed: page === 1 ? edge : edge - 500,
+        dialoguePage: page as 1 | 2 | 3,
+        dialoguePageEdgeElapsed: edge,
+      };
+      const accepted = acceptPostwinDialoguePage(state);
+      expect(accepted.dialoguePage).toBe(page + 1);
+    }
   });
 });

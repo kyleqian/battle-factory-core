@@ -303,6 +303,8 @@ import {
   CALL_SCENE_HEAD_PROMPT_LINE2,
   CALL_SCENE_HEAD_MENU_VISIBLE_DELAY,
   CALL_SCENE_TRAILING_DELAY,
+  POSTWIN_BRAIN_CANT_TELL_TEXT,
+  POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
   type PostwinState,
 } from "./postwin.ts";
 import type { BattleScenario } from "./battleScenario.ts";
@@ -1255,7 +1257,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       postwinDialogueInputReady(nextPostwin) &&
       newKeys.has("A")
     ) {
-      const completingBattleWin = nextPostwin.dialoguePage === 3;
+      // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead short path
+      // completes the battle win at dialoguePage 1 (its only scouting-page
+      // analogue), not page 3 -- the ordinary route's own last scouting page.
+      const completingBattleWin = nextPostwin.frontierBrain
+        ? nextPostwin.dialoguePage === 1
+        : nextPostwin.dialoguePage === 3;
       nextPostwin = acceptPostwinDialoguePage(nextPostwin);
       if (completingBattleWin && nextPostwin.dialoguePage === 4) {
         const generatedPending =
@@ -2791,10 +2798,18 @@ function renderPostwinState(state: EngineState): Uint8Array {
       const delay = postwinDialogueDelay(postwin)!;
       if (delay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
         if (postwin.dialoguePage === 1) {
+          const [line1, line2] = postwin.frontierBrain
+            ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
+            : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
+          drawLines(line1, line2, line1.length + line2.length);
+        } else if (postwin.frontierBrain && postwin.dialoguePage === 4) {
+          // Brain's short path (Brief 2): page 4's own "old text" lingering
+          // window is the AskSwapBeforeHead one-liner it jumped from, not
+          // the ordinary route's page-3 scouting commentary.
           drawLines(
-            POSTWIN_NEXT_LINE1,
-            POSTWIN_NEXT_LINE2,
-            POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
+            POSTWIN_BRAIN_CANT_TELL_TEXT[0],
+            POSTWIN_BRAIN_CANT_TELL_TEXT[1],
+            POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
           );
         } else {
           const previous = postwin.scoutingLines[postwin.dialoguePage - 2]!;
@@ -2805,7 +2820,9 @@ function renderPostwinState(state: EngineState): Uint8Array {
           );
         }
       } else if (delay !== POSTWIN_DIALOGUE_BLANK_DELAY) {
-        const lines = postwin.scoutingLines[postwin.dialoguePage - 1]!;
+        const lines = postwin.frontierBrain && postwin.dialoguePage === 1
+          ? POSTWIN_BRAIN_CANT_TELL_TEXT
+          : postwin.scoutingLines[postwin.dialoguePage - 1]!;
         drawLines(
           lines[0],
           lines[1],

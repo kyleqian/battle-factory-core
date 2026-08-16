@@ -253,6 +253,33 @@ export { CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2 };
 export const CALL_SCENE_HEAD_PROMPT_TOTAL =
   CALL_SCENE_HEAD_PROMPT_LINE1.length + CALL_SCENE_HEAD_PROMPT_LINE2.length;
 
+// Walk-up build step A, Brief 2 (docs/walkup-step-a-design.md §2.1 item 3):
+// `AskSwapBeforeHead`'s one-liner, pulled from the same JSON as the call
+// scene/prompt above rather than retyped. Brain's post-GO ON path shows
+// this single box in place of the three ordinary scouting pages
+// (`dialoguePage` 1-3 have no brain analogue at all -- see the short-path
+// wiring on `postwinDialogueVisibleChars`/`acceptPostwinDialoguePage` below).
+const [POSTWIN_BRAIN_CANT_TELL_LINE1, POSTWIN_BRAIN_CANT_TELL_LINE2] = splitCallSceneBoxLines(
+  (walkupScript.scenes.askSwapBeforeHead.events[0] as WalkupMessageEvent).pages![0]!,
+);
+export const POSTWIN_BRAIN_CANT_TELL_TEXT: readonly [string, string] =
+  [POSTWIN_BRAIN_CANT_TELL_LINE1, POSTWIN_BRAIN_CANT_TELL_LINE2];
+export const POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL =
+  POSTWIN_BRAIN_CANT_TELL_LINE1.length + POSTWIN_BRAIN_CANT_TELL_LINE2.length;
+/**
+ * `AskSwapBeforeHead`'s one-liner accept-ready delay: same structural
+ * "first-glyph +4, then +2-after-settle" MSGBOX_DEFAULT convention as the
+ * call-scene boxes (`postwinCallSceneInputReady`), not an oracle-measured
+ * tick. docs/walkup-call-scene-ground-truth.md's Window 3 confirms this box
+ * types out over exactly this text's char count then holds well past any
+ * plausible accept boundary before the fixture's own dismiss press, but
+ * that fixture used a generous margin (not a tight accept-boundary probe),
+ * so this constant is evidence-aligned-not-calibrated, same honesty label
+ * Brief 1 already applied to the call-scene boxes.
+ */
+export const POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY =
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL + 1;
+
 /**
  * Per-box first-glyph delay, relative to the box's own edge. Box 1's edge is
  * `healDismissElapsed` itself, reusing `POSTWIN_NEXT_TEXT_FIRST_DELAY` -- the
@@ -1179,7 +1206,11 @@ export function postwinDialogueDelay(state: PostwinState): number | null {
 export function postwinDialogueVisibleChars(state: PostwinState): number {
   const delay = postwinDialogueDelay(state);
   if (delay === null || delay < POSTWIN_DIALOGUE_TEXT_FIRST_DELAY) return 0;
-  const lines = state.scoutingLines[state.dialoguePage - 1];
+  // Brain's short path (Brief 2): dialoguePage 1 is the AskSwapBeforeHead
+  // one-liner instead of the ordinary route's first scouting page.
+  const lines = state.frontierBrain && state.dialoguePage === 1
+    ? POSTWIN_BRAIN_CANT_TELL_TEXT
+    : state.scoutingLines[state.dialoguePage - 1];
   if (!lines) return 0;
   return Math.min(
     lines[0].length + lines[1].length,
@@ -1190,6 +1221,9 @@ export function postwinDialogueVisibleChars(state: PostwinState): number {
 export function postwinDialogueInputReady(state: PostwinState): boolean {
   const delay = postwinDialogueDelay(state);
   if (delay === null) return false;
+  if (state.frontierBrain && state.dialoguePage === 1) {
+    return delay >= POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY;
+  }
   if (state.dialoguePage >= 1 && state.dialoguePage <= 3) {
     return delay >= POSTWIN_SCOUTING_INPUT_READY_DELAYS[state.dialoguePage - 1]!;
   }
@@ -1203,9 +1237,15 @@ export function acceptPostwinDialoguePage(state: PostwinState): PostwinState {
     state.dialoguePage > 3 ||
     !postwinDialogueInputReady(state)
   ) return state;
+  // Brain's short path (Brief 2, docs/walkup-step-a-design.md §2.1 item 3):
+  // AskSwapBeforeHead's one-liner goes straight to the swap ask, skipping
+  // the ordinary route's scouting pages 2-3 entirely.
+  const nextPage: 2 | 3 | 4 = state.frontierBrain && state.dialoguePage === 1
+    ? 4
+    : (state.dialoguePage + 1) as 2 | 3 | 4;
   return {
     ...state,
-    dialoguePage: (state.dialoguePage + 1) as 2 | 3 | 4,
+    dialoguePage: nextPage,
     dialoguePageEdgeElapsed: state.elapsed,
     swapCursorPos: null,
     swapCursorDisplayPos: null,
