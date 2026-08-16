@@ -325,6 +325,8 @@ describe("noncanonical generated-round intro generalization", () => {
     );
     const goldIntro = goldState.factoryRoundBattleOrchestrator!.battleStartIntro!;
     expect(goldIntro.isSilverBrainReveal).toBe(false);
+    expect(goldIntro.isGoldBrainReveal).toBe(true);
+    expect(silverIntro.isGoldBrainReveal).toBe(false);
 
     // Step an intro through its own PAUSE_UNTIL_PRESS A edge (as soon as
     // input-ready, matching every other fixture's timing) to the first
@@ -347,12 +349,24 @@ describe("noncanonical generated-round intro generalization", () => {
     // dense-compare-calibrated constant this exact window needs.
     expect(silverReadyElapsed - unflaggedReadyElapsed).toBe(9);
 
-    // The gold reveal (a different frontierBrain.status) is untouched: its
-    // own ready tick is identical whether or not isSilverBrainReveal could
-    // apply to it.
+    // The gold reveal (a different frontierBrain.status) gets its own,
+    // independently-calibrated offset (MEASURED_GOLD_BRAIN_REVEAL_READY_
+    // LAG_OFFSET) -- not silver's constant, and not zero.
     const goldReadyElapsed = firstReadyElapsed(goldIntro);
-    const goldUnflaggedReadyElapsed = firstReadyElapsed({ ...goldIntro, isSilverBrainReveal: true });
-    expect(goldReadyElapsed).not.toBe(goldUnflaggedReadyElapsed);
-    expect(goldUnflaggedReadyElapsed - goldReadyElapsed).toBe(9);
+    const goldUnflaggedElapsed = firstReadyElapsed({ ...goldIntro, isGoldBrainReveal: false });
+    expect(goldReadyElapsed - goldUnflaggedElapsed).toBe(7);
+
+    // The two flags are keyed independently: forcing the *other* status's
+    // flag onto a gold intro (with its own flag cleared) must not pull in
+    // silver's constant -- proving this is a frontierBrain.status lookup,
+    // not a battle-number/trace-name check the two routes could smuggle
+    // past each other.
+    const goldWithSilverFlag = firstReadyElapsed({
+      ...goldIntro,
+      isGoldBrainReveal: false,
+      isSilverBrainReveal: true,
+    });
+    expect(goldWithSilverFlag - goldUnflaggedElapsed).toBe(9);
+    expect(goldWithSilverFlag).not.toBe(goldReadyElapsed);
   });
 });

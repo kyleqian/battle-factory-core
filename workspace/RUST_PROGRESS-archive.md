@@ -5,6 +5,22 @@ full history regardless.
 
 ---
 
+## R47 — [supervised session, 2026-08-15] **M46 Battle Script half-health heal setup leaf**
+
+- **State:** verified `Cmd_tryhealhalfhealth` worker `341caa2b`; the complete
+  pure registration/state/control projection is native and wasm32-compilable.
+- **Did:** ported operand-before-role selection, attacker target rebinding,
+  exact `-max(1, floor(maxHP / 2))` damage, full-HP failure, and failure-only
+  late label resolution. Evidence includes **1,810 cases**, **196,606
+  applications**, and **32,769 intervals**; corpus sha256
+  `7df2575257c50006c5afc225062d834fe6f0ad6399e71bb92dd0c69564ce2fc5`.
+- **Next:** select another conflict-free pure Battle Script leaf.
+- **Notes:** Terra/max worker. Generated evidence was reproduced twice. Cargo
+  **969/969**, fmt, strict Clippy, and wasm32 release passed. Artifact was
+  **510,202 bytes**, sha256
+  `b9c87f425837a9e0744f69acee78dabd0ff37029faf803d41582a7621d302718`.
+  Scope stayed inside `core-rs/**`; no barrier or deferral was added.
+
 ## R46 — [supervised session, 2026-08-15] **M45 Battle Script Substitute state-construction leaf**
 
 - **State:** `rust-main` = current master `e106866a` plus R43-R45 and verified

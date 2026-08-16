@@ -5,6 +5,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R50 — [supervised session, 2026-08-15] **M49 Battle Script weather-scaled recovery leaf + final wind-down**
+
+- **State:** `rust-main` = current master `ab862ad1`, including verified
+  `Cmd_recoverbasedonsunlight` worker `34be47ca`. The complete pure
+  `battleScriptRecoverBasedOnSunlightOpcode.ts` registration/state/control
+  projection is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session ends committed and green.
+- **Did:** ported exact first-match registration, attacker/target role
+  resolution and target rebinding, full-HP failure with late label resolution,
+  and success damage for neutral or suppressed weather, sun, and other
+  weather. Recovery is respectively `-max(1, maxHP / 2)`,
+  `-max(1, 20 * maxHP / 30)`, or `-max(1, maxHP / 4)`. Canonical TypeScript
+  execution supplies **808 handler cases** and **5 registration cases** plus
+  **786,424 applications** covering every maxHP u16 at full, lower, and
+  corrupt-higher HP across all four weather regimes, normalized to **125,607
+  intervals**. Corpus sha256
+  `7c3adaca45202f2f310eabccb3023344ca4acbed2bbaeaeb268bff4f600fdfe4`.
+- **Next:** merge current master at the next Rust session, recheck active work,
+  and select another conflict-free pure Battle Script leaf. M7c opponent
+  generation still waits on canonical TypeScript live generation; main and
+  animation moving targets remain excluded.
+- **Notes:** Sol/high worker, one commit. Supervisor audited decomp dispatch,
+  singleton registration, instruction/role/label ordering, full-HP equality,
+  weather suppression across living battlers, arithmetic, write set, and
+  repetitions; regenerated twice byte-identically (canonical corpus
+  **9,065,263 bytes**; exhaustive evidence **10,557,911 bytes**, sha256
+  `1b0e5b8f555a7b0ec7c60c9b2e97fa8b82a376afffd67d58ecee9e7992333599`;
+  generated file **8,516,856 bytes**, sha256
+  `ee8b01c1381f84684fe5dbbbb2c49a0fde14c3491d38532c8eca33acd52e0746`;
+  generator **19,904 bytes**, sha256
+  `128e9a6823732b5669ad163ea7d25ec1035288e593dd25d40faef288e75fb0b7`). Focused **5/5 +
+  3/3**, cargo **991/991**, fmt, strict Clippy, and wasm32 release pass. The
+  artifact is **492,683 bytes**, sha256
+  `782c1b2aa3addb23d4db916cf9c00d461fe6533875550e2513127c948c0d7728`.
+  Final latest-master npm is green at **1,040 files / 9,915 passed / 223
+  skipped**; build is green at **681 modules**. Final soaks are vanilla
+  **20/20 OK** and full policy **60/60 OK**, both with zero crashes and zero
+  hangs. Scope stayed inside `core-rs/**`; no unsupported barrier or Rust
+  deferral was added. PAPERCUT: `cargo clippy --all-targets` exposed an older
+  test-only `op_ref` lint outside this step; the required strict library
+  Clippy gate remained green, ~2 min.
+
 ## R49 — [supervised session, 2026-08-15] **M48 Battle Script Low Kick weight-damage leaf**
 
 - **State:** `rust-main` = current master `5b9a12af` plus verified
@@ -85,40 +127,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   green at **677 modules**. Wind-down soaks are vanilla **20/20 OK** and full
   policy **60/60 OK**, both with zero crashes and zero hangs. Scope stayed
   inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
-
-## R47 — [supervised session, 2026-08-15] **M46 Battle Script half-health heal setup leaf**
-
-- **State:** `rust-main` = current master `2d2c2c81` plus R43-R46 and verified
-  `Cmd_tryhealhalfhealth` worker `341caa2b`. The complete pure
-  `battleScriptTryhealhalfhealthOpcode.ts` registration/state/control
-  projection is native and wasm32-compilable; no ABI or adapter surface was
-  widened. The session remains active and committed.
-- **Did:** ported operand-before-role selection, `BS_ATTACKER` target rebinding
-  versus `BS_TARGET` preservation, exact `-max(1, floor(maxHP / 2))` damage,
-  the exact `hp == maxHP` failure branch, and failure-only late label
-  resolution. Canonical TypeScript execution supplies **1,810 complete cases**
-  plus **196,606** applications spanning every maxHP u16 at full, lower, and
-  corrupt-higher HP where representable, normalized to **32,769** intervals;
-  both concrete call sites, the two complete **500** selector matrices,
-  ordered errors, signed prior damage, preservation, repetitions, and
-  permissive first-match registration are pinned. Corpus sha256
-  `7df2575257c50006c5afc225062d834fe6f0ad6399e71bb92dd0c69564ce2fc5`.
-- **Next:** recheck active work and select another conflict-free pure Battle
-  Script leaf. M7c opponent generation still waits on canonical TS live
-  generation; main walk-up and animation moving targets remain excluded.
-- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
-  dispatch/opcode/macro and both script sites, source widths, validation order,
-  target rebinding, exact equality branch, immutable siblings and repetitions;
-  regenerated twice byte-identically (canonical corpus **12,548,796 bytes**;
-  raw exhaustive evidence **4,881,873 bytes**, sha256
-  `abcd6a03d79e5807726f678894121524f2efebfbb25a74e12bd5af4cb5824ff8`;
-  generated file **14,585,217 bytes**, sha256
-  `c8adefff849e6862ad7784510a4c71556c9adee293b7c0511fe277ef15d4e32e`;
-  generator **67,530 bytes**, sha256
-  `f3c27decf00ae9aecd598e8ef79e800bfbde216354514ff1aad61b6eb77b96cf`),
-  and reran focused **7/7**, cargo **969/969**, fmt, strict Clippy, and wasm32
-  release. Artifact is **510,202 bytes**, sha256
-  `b9c87f425837a9e0744f69acee78dabd0ff37029faf803d41582a7621d302718`.
-  Latest-master smoke is **375/375** and build is green at **676 modules**.
-  Scope stayed inside `core-rs/**`; no unsupported barrier, deferral, or
-  papercut was added.

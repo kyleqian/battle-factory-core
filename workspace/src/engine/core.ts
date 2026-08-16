@@ -95,6 +95,7 @@ import {
   drawStandardWindowFrame,
   drawStandardWindowText,
   renderPrebattleRoomScene,
+  renderPrebattleRoomSceneWithAttendantOffset,
   renderPrebattleRoomWalkScene,
 } from "./prebattleRoomRender.ts";
 import {
@@ -295,6 +296,18 @@ import {
   postwinRightThisWayVisibleChars,
   postwinRightThisWayInputReady,
   postwinRngSteps,
+  acceptPostwinCallScenePage,
+  callSceneAttendantVisual,
+  callSceneBoxHidden,
+  postwinCallSceneInputReady,
+  postwinCallSceneVisibleChars,
+  CALL_SCENE_BOX_TEXTS,
+  CALL_SCENE_HEAD_PROMPT_LINE1,
+  CALL_SCENE_HEAD_PROMPT_LINE2,
+  CALL_SCENE_HEAD_MENU_VISIBLE_DELAY,
+  CALL_SCENE_TRAILING_DELAY,
+  POSTWIN_BRAIN_CANT_TELL_TEXT,
+  POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
   type PostwinState,
 } from "./postwin.ts";
 import type { BattleScenario } from "./battleScenario.ts";
@@ -1038,14 +1051,20 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         // entrance branch here - see battleRoom.ts's battleRoomStateForOpponent
         // doc. Behaviorally identical to the old hardcoded shape whenever
         // frontierBrain is unset (every ordinary opponent). Walk-up build
-        // step B2: the silver-tier in-session heard-speech flag (never save-
-        // persisted - user decision, out of scope) picks the gated 8-page
-        // personality speech vs. the short repeat variant.
+        // steps B2/B3: each tier's own in-session heard-speech flag (never
+        // save-persisted - user decision, out of scope) picks that tier's
+        // gated personality speech vs. its short repeat variant -
+        // battleRoomStateForOpponent itself derives WHICH tier's content
+        // from currentOpponent.frontierBrain.status, so this call only needs
+        // to read the matching tier's own flag.
         battleRoom = battleRoomStateForOpponent(
           currentOpponent,
           currentTrainerPresentation,
           factoryRoundBattleOrchestrator !== null
-            && factoryHeardBrainSpeech(factoryRoundBattleOrchestrator.facilityState, "silver"),
+            && factoryHeardBrainSpeech(
+              factoryRoundBattleOrchestrator.facilityState,
+              currentOpponent?.frontierBrain?.status === "gold" ? "gold" : "silver",
+            ),
         );
       }
     } else if (battleRoom) {
@@ -1058,18 +1077,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else {
         const prevBattleRoom = battleRoom;
         battleRoom = advanceBattleRoom(battleRoom);
-        // Walk-up build step B2: the JSON's own frontier_set FRONTIER_DATA_
-        // HEARD_BRAIN_SPEECH moment - fires once, between the personality
-        // speech's last box and the always-shown cry box (see
-        // battleRoomJustFinishedBrainPersonalitySpeech's own doc for why
-        // exact-tick fidelity is inconsequential here).
+        // Walk-up build steps B2/B3: the JSON's own frontier_set
+        // FRONTIER_DATA_HEARD_BRAIN_SPEECH moment - fires once, between the
+        // personality speech's last box and the always-shown close/cry box
+        // (see battleRoomJustFinishedBrainPersonalitySpeech's own doc for
+        // why exact-tick fidelity is inconsequential here). Marks the SAME
+        // tier `prevBattleRoom` was showing (`brainSpeechTier`, set once at
+        // brain-room construction) - never hardcoded, so gold and silver
+        // each mark only their own independent flag.
         if (
           factoryRoundBattleOrchestrator !== null
           && battleRoomJustFinishedBrainPersonalitySpeech(prevBattleRoom, battleRoom)
         ) {
           factoryRoundBattleOrchestrator = markFactoryBrainSpeechHeard(
             factoryRoundBattleOrchestrator,
-            "silver",
+            prevBattleRoom.brainSpeechTier === "gold" ? "gold" : "silver",
           );
         }
         const extraRngSteps = opponentSetupExtraRngSteps(battleRoom);
@@ -1165,6 +1187,17 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     ) {
       nextPostwin = acceptPostwinHealDismiss(nextPostwin);
     } else if (
+      // Walk-up build step A: the brain route's call-scene boxes (phone SE,
+      // attendant walk-away/return, 3-page boss message) - each advances on
+      // A the same way the ordinary route's own scouting pages 1-3 do.
+      nextPostwin.frontierBrain &&
+      nextPostwin.callScenePage !== 0 &&
+      nextPostwin.callSceneDismissElapsed === null &&
+      postwinCallSceneInputReady(nextPostwin) &&
+      newKeys.has("A")
+    ) {
+      nextPostwin = acceptPostwinCallScenePage(nextPostwin);
+    } else if (
       nextPostwin.swapDeclineElapsed !== null &&
       nextPostwin.rightThisWayDismissElapsed === null &&
       postwinRightThisWayInputReady(postwin) &&
@@ -1236,7 +1269,12 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       postwinDialogueInputReady(nextPostwin) &&
       newKeys.has("A")
     ) {
-      const completingBattleWin = nextPostwin.dialoguePage === 3;
+      // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead short path
+      // completes the battle win at dialoguePage 1 (its only scouting-page
+      // analogue), not page 3 -- the ordinary route's own last scouting page.
+      const completingBattleWin = nextPostwin.frontierBrain
+        ? nextPostwin.dialoguePage === 1
+        : nextPostwin.dialoguePage === 3;
       nextPostwin = acceptPostwinDialoguePage(nextPostwin);
       if (completingBattleWin && nextPostwin.dialoguePage === 4) {
         const generatedPending =
@@ -2618,12 +2656,19 @@ function renderPostwinState(state: EngineState): Uint8Array {
   if (retireYesDelay >= POSTWIN_RETIRE_FADE_FIRST_DELAY) {
     return renderPostwinRetireWarp(retireYesDelay);
   }
-  renderPrebattleRoomScene(
+  const attendantVisual = callSceneAttendantVisual(postwin);
+  renderPrebattleRoomSceneWithAttendantOffset(
     fb,
+    attendantVisual.dx,
+    attendantVisual.frame,
+    attendantVisual.hFlip,
     bgFadeY(fadeLocal, FADE_IN),
     objFadeY(fadeLocal, FADE_IN),
   );
-  if (age >= POSTWIN_HEAL_BOX_AGE) {
+  // Walk-up build step A: while the call-scene attendant is mid-movement,
+  // the message box is fully closed (ground-truth doc's Window 1: no box
+  // visible for either walk's full span) - skip the box/text draw entirely.
+  if (age >= POSTWIN_HEAL_BOX_AGE && !callSceneBoxHidden(postwin)) {
     drawMessageBoxFrame(fb);
     const healDismiss = postwin.healDismissElapsed;
     const beforeContinuation =
@@ -2652,6 +2697,13 @@ function renderPostwinState(state: EngineState): Uint8Array {
       const qText = q.kind === "record"
         ? POSTWIN_QUESTION_RECORD_TEXT
         : POSTWIN_QUESTION_RETIRE_TEXT;
+      // The RECORD/RETIRE re-ask falls through AskReadyForOpponent on EITHER
+      // route (docs/postwin-record-retire-ground-truth.md §1/§7b) -- the
+      // reprint is whichever prompt that route's own AskReadyForHead/
+      // ReadyFor2ndOpponent shows, not always the ordinary one.
+      const [reprintLine1, reprintLine2] = postwin.frontierBrain
+        ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
+        : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
       const dismissed = postwin.questionDismissElapsed !== null;
       const qDelay = age - q.edgeElapsed;
       const dDelay = dismissed ? age - postwin.questionDismissElapsed! : -1;
@@ -2670,8 +2722,8 @@ function renderPostwinState(state: EngineState): Uint8Array {
           );
         } else if (rDelay !== 4) {
           drawLines(
-            POSTWIN_NEXT_LINE1,
-            POSTWIN_NEXT_LINE2,
+            reprintLine1,
+            reprintLine2,
             postwinQuestionReprintVisibleChars(postwin),
           );
         }
@@ -2698,18 +2750,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
           drawLines(qText[0], qText[1], qText[0].length + qText[1].length);
         } else if (dDelay !== 4) {
           drawLines(
-            POSTWIN_NEXT_LINE1,
-            POSTWIN_NEXT_LINE2,
+            reprintLine1,
+            reprintLine2,
             postwinQuestionReprintVisibleChars(postwin),
           );
         }
       } else if (qDelay <= 3) {
         // Select-close visual: the 4-choice menu window clears while the
-        // "2nd match" message is still in the box (ground-truth §1 6641-6642).
+        // preceding prompt message is still in the box (ground-truth §1
+        // 6641-6642) -- whichever prompt this route's own AskReadyForHead/
+        // "2nd match" box was already showing underneath the menu.
         drawLines(
-          POSTWIN_NEXT_LINE1,
-          POSTWIN_NEXT_LINE2,
-          POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
+          reprintLine1,
+          reprintLine2,
+          reprintLine1.length + reprintLine2.length,
         );
       } else if (qDelay !== 4) {
         drawLines(qText[0], qText[1], postwinQuestionVisibleChars(postwin));
@@ -2741,12 +2795,17 @@ function renderPostwinState(state: EngineState): Uint8Array {
         POSTWIN_HEAL_LINE2,
         postwinHealVisibleChars(age),
       );
+    } else if (postwin.frontierBrain && postwin.callScenePage !== 0 && postwin.callSceneDismissElapsed === null) {
+      // Walk-up build step A: the call-scene boxes - structural text-and-
+      // index fidelity only (no oracle evidence for this window's exact
+      // pixel transitions yet, docs/walkup-step-a-design.md §4).
+      const box = CALL_SCENE_BOX_TEXTS[postwin.callScenePage - 1]!;
+      drawLines(box[0], box[1], postwinCallSceneVisibleChars(postwin));
     } else if (postwin.dialoguePage === 0) {
-      drawLines(
-        POSTWIN_NEXT_LINE1,
-        POSTWIN_NEXT_LINE2,
-        postwinNextVisibleChars(postwin),
-      );
+      const [line1, line2] = postwin.frontierBrain
+        ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
+        : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
+      drawLines(line1, line2, postwinNextVisibleChars(postwin));
     } else if (postwin.swapDeclineElapsed !== null) {
       const declineDelay = age - postwin.swapDeclineElapsed;
       if (declineDelay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
@@ -2767,10 +2826,18 @@ function renderPostwinState(state: EngineState): Uint8Array {
       const delay = postwinDialogueDelay(postwin)!;
       if (delay <= POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY) {
         if (postwin.dialoguePage === 1) {
+          const [line1, line2] = postwin.frontierBrain
+            ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
+            : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
+          drawLines(line1, line2, line1.length + line2.length);
+        } else if (postwin.frontierBrain && postwin.dialoguePage === 4) {
+          // Brain's short path (Brief 2): page 4's own "old text" lingering
+          // window is the AskSwapBeforeHead one-liner it jumped from, not
+          // the ordinary route's page-3 scouting commentary.
           drawLines(
-            POSTWIN_NEXT_LINE1,
-            POSTWIN_NEXT_LINE2,
-            POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
+            POSTWIN_BRAIN_CANT_TELL_TEXT[0],
+            POSTWIN_BRAIN_CANT_TELL_TEXT[1],
+            POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
           );
         } else {
           const previous = postwin.scoutingLines[postwin.dialoguePage - 2]!;
@@ -2781,7 +2848,9 @@ function renderPostwinState(state: EngineState): Uint8Array {
           );
         }
       } else if (delay !== POSTWIN_DIALOGUE_BLANK_DELAY) {
-        const lines = postwin.scoutingLines[postwin.dialoguePage - 1]!;
+        const lines = postwin.frontierBrain && postwin.dialoguePage === 1
+          ? POSTWIN_BRAIN_CANT_TELL_TEXT
+          : postwin.scoutingLines[postwin.dialoguePage - 1]!;
         drawLines(
           lines[0],
           lines[1],
@@ -2807,9 +2876,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
         ) ||
         postwinQuestionMenuReady(postwin)
       );
+    // AskReadyForHead's menu becomes visible relative to the call scene's
+    // own last-box dismiss edge, never healDismiss directly - the ordinary
+    // route's fixed POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY has no bearing
+    // on brain's much longer call-scene content (advancePostwin's own
+    // menuVisible computation, mirrored here for rendering).
+    const continuationMenuVisibleAge = postwin.frontierBrain
+      ? (postwin.callSceneDismissElapsed !== null
+          ? postwin.callSceneDismissElapsed + CALL_SCENE_TRAILING_DELAY + CALL_SCENE_HEAD_MENU_VISIBLE_DELAY
+          : Number.POSITIVE_INFINITY)
+      : (healDismiss !== null
+          ? healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY
+          : Number.POSITIVE_INFINITY);
     if (
-      healDismiss !== null &&
-      age >= healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY &&
+      age >= continuationMenuVisibleAge &&
       (normalMenuVisible || questionMenuVisible)
     ) {
       // The 3-option GO ON / REST / RETIRE variant after a successful

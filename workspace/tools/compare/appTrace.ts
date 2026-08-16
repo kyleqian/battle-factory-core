@@ -80,6 +80,13 @@ import {
   generatedRoundBattle6LukasRevealStage,
   generatedRoundBattle6LukasStatusSummaryMessageStage,
   generatedRoundBattle7NolandGoldRevealStage,
+  generatedRoundBattle7NolandGoldSpeechBox0HeldStage,
+  generatedRoundBattle7NolandGoldSpeechClosePauseStage,
+  generatedRoundBattle7NolandGoldSpeechCloseHeldStage,
+  generatedRoundBattle7NolandGoldSpeechOpenStage,
+  generatedRoundBattle7NolandGoldSpeechPage4HeldStage,
+  generatedRoundBattle7NolandPostwinAskReadyMenuOpenStage,
+  generatedRoundBattle7NolandPostwinCallSceneStartStage,
   generatedRoundBattle7NolandRevealStage,
   generatedRoundBattle7NolandRoomEntranceStage,
   generatedRoundBattle7NolandSilverSpeechBox0HeldStage,
@@ -1500,6 +1507,10 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "factory-round-battle7-noland-reveal-off": generatedRoundBattle7NolandRevealStage,
   "factory-round-battle7-noland-gold-reveal-off": generatedRoundBattle7NolandGoldRevealStage,
   "factory-round-battle7-noland-room-entrance-off": generatedRoundBattle7NolandRoomEntranceStage,
+  "factory-round-battle7-noland-postwin-call-scene-start-off":
+    generatedRoundBattle7NolandPostwinCallSceneStartStage,
+  "factory-round-battle7-noland-postwin-askready-menu-open-off":
+    generatedRoundBattle7NolandPostwinAskReadyMenuOpenStage,
   "factory-round-battle7-noland-silver-speech-box0-held-off":
     generatedRoundBattle7NolandSilverSpeechBox0HeldStage,
   "factory-round-battle7-noland-silver-speech-cry-held-off":
@@ -1508,6 +1519,16 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
     generatedRoundBattle7NolandSilverSpeechPage8HeldStage,
   "factory-round-battle7-noland-silver-speech-close-pause-off":
     generatedRoundBattle7NolandSilverSpeechClosePauseStage,
+  "factory-round-battle7-noland-gold-speech-open-off":
+    generatedRoundBattle7NolandGoldSpeechOpenStage,
+  "factory-round-battle7-noland-gold-speech-box0-held-off":
+    generatedRoundBattle7NolandGoldSpeechBox0HeldStage,
+  "factory-round-battle7-noland-gold-speech-page4-held-off":
+    generatedRoundBattle7NolandGoldSpeechPage4HeldStage,
+  "factory-round-battle7-noland-gold-speech-close-held-off":
+    generatedRoundBattle7NolandGoldSpeechCloseHeldStage,
+  "factory-round-battle7-noland-gold-speech-close-pause-off":
+    generatedRoundBattle7NolandGoldSpeechClosePauseStage,
   "factory-postwin-canonical-opponent-party":
     createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
   "factory-postwin-generated-rock-unrestrained-opponent-party":

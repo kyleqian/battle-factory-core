@@ -1097,12 +1097,21 @@ picks from PROGRESS 1273):**
    BattleRoom brain entrance BUILT + app-side staged-compare harness
    (B1/B1b, entrance window 256/256); silver 8-page speech + battle-cry
    + in-session heard-flag + handoff BUILT (B2, four speech windows
-   exact). REMAINING: Noland brainMoving walk/pan cadence residual
-   (documented in battleRoom.ts); PreBattleRoom call-scene + menu =
-   step A (design memo `docs/walkup-step-a-design.md`, dispatchable);
-   gold entrance/speech; the top-layer `BattleLab.prepare()` brain
-   staging gap blocks oracle acceptance for the call-scene + gold
-   (recommend fixing oracle-side before step A ships).
+   exact). **UPDATE (2026-08-16 supervisor session):** the top-layer
+   `BattleLab.prepare()` staging gap is FIXED (harness commit
+   `3e29880b`, `factoryBrain` + `walkup: true` + gold symbol flag;
+   services serve it) — oracle acceptance for the call-scene + gold is
+   UNBLOCKED. brainMoving cadence largely closed by B1c (fixture 03
+   43/256 → 162/256; bounded ~1px mid-ramp residual honestly flagged
+   in battleRoom.ts). Gold ground truth REFRESHED post-fix
+   (`docs/noland-brain-intro-gold-ground-truth.md`: gold has its own
+   4-page speech, escort text = silver's "Get a move on!", ready frame
+   1889→3370; app gold reveal compare honestly 0/701 pending gold
+   presentation work). REMAINING: step A build (design memo
+   `docs/walkup-step-a-design.md`; its §4 "no oracle evidence" note is
+   stale — walkup staging provides it); gold entrance/speech +
+   compare-trace recalibration; the B1c mid-ramp residual (next probe:
+   `gSpriteCoordOffsetY`/OAM latch).
 2. **#87 = option (c)**: every committed window that ends before its
    ready transition stays exactly as-is; calibrate only windows that
    must cross it (today: the silver Brain-reveal tail, 648/701), each

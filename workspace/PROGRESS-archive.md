@@ -1,3 +1,797 @@
+## 1287 — [main worker, 2026-08-16] **ISSUES #91 fixed: brain-win opponent generation no longer leaves storedTrainerIds one entry short**
+
+- **State:** Landed and green. `npm test` **1045 files / 9950 passed /
+  223 skipped**, `npm run build` green.
+- **Did:** Source check first (`reference/pokeemerald`): the ROM writes
+  `gSaveBlock2Ptr->frontier.trainerIds` only from `GenerateOpponentMons`
+  (`battle_factory.c:303-330`), and the pre-battle-room script never
+  calls it for a Frontier Brain battle — `frontier_getbrainstatus`
+  (`BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:80-81`) jumps
+  straight to `AskReadyForHead`, bypassing `AskSwapMon`'s
+  `factory_generateopponentmons` call (scripts.inc:137-138) entirely; the
+  brain's own party builder `FillFactoryBrainParty`
+  (`battle_factory.c:759-822`) never touches the array either. Since the
+  brain is always the round's 7th and final battle in natural play, this
+  is genuinely a "the ROM stores nothing" case (option 2 of the brief) —
+  confirmed, not guessed. Fix: added
+  `storedTrainerIdsForNextGeneration()` (`factoryRoundBattleOrchestrator.ts`,
+  after `generateOpponentFor`) that folds the brain's own `trainerId`
+  (`TRAINER_FRONTIER_BRAIN` = 1022, verified never overlapping the
+  ordinary 0-299 id range) into the **next** battle's generation input
+  only — never into the brain's own scheduled `storedTrainerIds` — so the
+  natural battleIndex-6 shape stays byte-identical (proven: the existing
+  `factoryBrainRoundShape.test.ts` pins that exact field and needed zero
+  changes). Both call sites that read `previous.storedTrainerIds` for the
+  next generation (`adoptNextOpponentOrGenerate`, and
+  `advanceFactoryRoundPresentation`'s simplified-round fallback) now go
+  through the helper. Pure array composition — no RNG port/draw call
+  added or touched on any path (confirmed by inspection: the diff never
+  references `rngPort`/`draw`/`rngValue` construction, only the
+  already-computed `storedTrainerIds`/`trainerId` fields).
+- **Pin:** new `tests/factoryBrainWinOpponentHistory.test.ts` — builds
+  the exact #91 repro (`factoryWinStreak: 20`, brain silver-eligible at
+  battleIndex 0), wins it, drives `preGenerateFactoryRoundNextOpponent`
+  (previously threw `storedTrainerIds must contain the 1 prior battle
+  selections`; verified by re-running the test against the pre-fix tree
+  via `git stash`), asserts the ordinary battleIndex-1 generation's
+  `storedTrainerIds` is `[TRAINER_FRONTIER_BRAIN, <drawn id>]`, and
+  confirms the round actually continues to battleIndex 1. Natural shape
+  (brain at battleIndex 6 still terminates the round unchanged) is
+  covered by the pre-existing, **unmodified** `factoryBrainRoundShape.test.ts`
+  — re-ran green this session, not touched by the fix.
+- **Soak slice:** `node --experimental-strip-types <ad-hoc script using
+  tools/soak/randomRoundSoakDriver.ts's runSeed with factoryWinStreak: 20,
+  testPolicy: "strong-route", stopAtFirstRoundDecision: true>` — 7 of 10
+  tried orchestrator `rngValue`s reach `roundComplete` (full 7-battle win
+  including the brain-then-continue path) with zero engine crash; the
+  other 3 lose battle 1 outright (a real brain-battle loss, unrelated to
+  this fix). No standing script committed (ad hoc, out of scope per the
+  brief's "no wide soak sweep").
+- **Regression check:** `factoryBrainRoundShape.test.ts`,
+  `factoryRoundBattleOrchestrator.test.ts`, `factoryRoundChaining.test.ts`,
+  `factoryOpponentGeneration.test.ts`, `factoryTrainerSchedule.test.ts` —
+  all unmodified, all green. `executableFrontierRatchet.test.ts` barrier
+  counts unwidened.
+- **Next:** resume the walk-up build step A track (ISSUES #91 was
+  blocking `AskSwapBeforeHead`'s live-reach through the soak driver past
+  a brain win — that path should now be reachable) or continue gold
+  speech dense-calibration residuals per PROGRESS-archive 1286.
+- **Notes:** none. No PAPERCUT this session.
+
+---
+
+## 1286 — [main worker, 2026-08-16] **Gold Frontier-Brain 4-page speech wired (tier-aware brainSpeechBoxes); dense-calibrated against the three banked gold speech fixtures — hold/pause windows close exact, movement+typewriter+transition-handoff spans left as characterized residuals**
+
+- **State:** Goal 1 (wire gold's 4-page speech, PROGRESS 1284's seam) is
+  **landed and Tier-1 pinned**. Goal 2 (dense-calibrate against the three
+  `factory-brain-gold-speech-{open,pages,close}-off.json` fixtures) is
+  **done with honestly-characterized bounded residuals**, not full
+  closure — see Acceptance numbers. Full `npm test` **1044 files / 9949
+  passed / 223 skipped**, `npm run build` green. Differential PASS
+  (563/563 byte-identical, `--base 2d73d3c8`, the commit before this
+  step's first change).
+- **Did:** `battleRoom.ts`: parsed `goldFirstEncounter`/`goldRepeat` from
+  the walkup JSON into `GOLD_*_SPEECH_BOXES` (4 pages, no `\l` scroll →
+  1:1 box flattening; no battle-cry box — a separate "All right! Bring it
+  on!" close line instead), mirroring silver's shape. `BattleRoomState`
+  gained `brainSpeechTier` ("silver"|"gold", default silver — every
+  pre-existing caller unaffected), set from
+  `opponent.frontierBrain.status` in `battleRoomStateForOpponent`
+  (`"gold"` only; streak/streak-long default silver, out of scope).
+  `brainSpeechBoxes`/`brainSpeechCursorVisible`/
+  `battleRoomJustFinishedBrainPersonalitySpeech` generalized off the tier
+  instead of hardcoding silver's box counts — page 4's "static, no blink"
+  ground-truth fact (docs §7′) fell out of the existing "last personality
+  box never shows the cursor" rule for free, no special-case needed.
+  `core.ts`'s two call sites (initial tier selection, heard-flag marking)
+  now read the matching tier via the same `factoryHeardBrainSpeech`/
+  `markFactoryBrainSpeechHeard` machinery B2 built, instead of always
+  `"silver"`. Compare harness: `goldNolandRoundReadyState` (challenge-5
+  gold round, gold sibling of `nolandRoundReadyState`) plus gold
+  speech-window stages (open/box-held/settled, gold sibling of B2's
+  silver stages) in `factoryRoundIntroGeneralizationStage.ts`; three new
+  compare traces replay the three fixtures live against
+  `http://127.0.0.1:8014`.
+- **Acceptance numbers:** **open 58/256**, **pages 20/177**, **close
+  58/126** (all rerun live this session). Residual shapes, all
+  characterized: (1) **open** — frames 0-10 (escort-box hold tail) exact,
+  then the dismiss→movement→typewriter span mismatches heavily (30-40%
+  diff, whole-scene bbox) — this is the SAME B1c mid-ramp entrance-cadence
+  class PROGRESS 1278/1283 already left open for silver (entrance-03
+  162/256, never closed) reappearing on gold's own timeline, not a new
+  bug; by frame ~178 (page-1 held) it settles to a small persistent 24px
+  cursor-bob-phase diff (ssimMean 0.999, cosmetic). (2) **pages** — the
+  parked-`elapsed:0` box-held shortcut (B2's own idiom) doesn't happen to
+  land on the real cursor's bob phase at this fixture's chosen anchor
+  frame (unlike silver's own fixtures, which apparently do by
+  construction) — a small ~38-74px cursor-position offset present from
+  frame 0, plus the same generic MSGBOX-close/page-advance wipe animation
+  (never modeled by `msgboxVisual`'s constant-during-close shape, for
+  EITHER tier) at each of the 3 page-advance edges. (3) **close** — the
+  in-scope portion (box-hold + real dismiss + `brainSpeechSettled` pause)
+  is **58/62 exact** (only the 4-tick MSGBOX_CLOSE wipe gap misses, same
+  generic class as above); frames 62-125 are the downstream
+  battle-transition handoff (post `BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED`),
+  a different subsystem this stage's minimal state never populates
+  (`transitionPresentation` unset) — already covered elsewhere by the
+  gold/silver reveal windows' own 690/701 acceptance, not a speech-scene
+  gap. None of these residuals are new src/ bugs surfaced by this step;
+  each is either inherited-and-already-disclosed (B1c) or a compare-
+  harness calibration artifact (bob phase, wipe animation, transition
+  handoff) — the actual **content** (JSON-exact text, page count, static
+  page 4, no-cry close line, per-tier heard-flag gating) is what this
+  step's Tier-1 tests pin, and those are exact.
+- **Regression bars unmoved (all re-run live this session):** silver's
+  four B2 speech windows **39/39, 74/74, 39/39, 28/28**, entrance-02
+  **256/256**, gold reveal **690/701**.
+  `executableFrontierRatchet.test.ts` barrier counts: unwidened.
+- **Next:** if a future step wants the gold speech windows fully closed:
+  (a) re-derive the movement+typewriter-open span from the real B1c fix
+  (shared with silver, not gold-specific — fix once, benefits both); (b)
+  re-anchor the "pages" fixture's box-held park to a cursor-bob-phase-
+  aligned oracle frame (or thread an explicit `elapsed` override through
+  the gold box-held stage) to clear the small cosmetic residual; (c)
+  model the MSGBOX-close wipe animation (currently a constant-content
+  gap in `msgboxVisual`, present for both tiers) if a step ever needs
+  page-advance-edge frames, not just held pages.
+- **Notes:** Commits local only — pushing is Kyle's step.
+
+
+---
+
+## 1285 — [main worker, 2026-08-16] **Call-scene attendant walk-away/walk-back rendered (MEASURED movement model); callscene-01 45/131 → 89/131, callscene-02 40/199 → 69/199 — remaining residual is unrelated pre-existing typewriter/menu-approach timing**
+
+- **State:** `postwin.ts`'s brain call scene renders the attendant's
+  walk-away (box 1→2, `Movement_AttendantMoveToReceiveCall`) and
+  walk-back (box 2→3, `Movement_AttendantReturnToPlayer`) instead of an
+  instant box-to-box cut — the residual PROGRESS 1283 left open. Full
+  `npm test` **1044 files / 9940 passed / 223 skipped**, `npm run build`
+  green. Differential PASS (563/563 byte-identical, `--base 704e685a`,
+  the commit before this step). Committed at `5dcff9fd`.
+- **Did:** Pixel-probed the attendant's own hair-color marker frame by
+  frame against dense (stride-1) re-fetches of both committed fixtures
+  (not the ground-truth doc's own coarser per-box table, which folds the
+  pre-movement hold into the same row) to get exact tick boundaries:
+  away — dismiss-A registers oracle frame 895, attendant still at rest
+  through 902 (8-tick closemessage/task-dispatch lead-in, MEASURED),
+  then 1px/tick left through 950 (3 tiles = 48px), holding at −48; back
+  — dismiss-A at 1037, attendant moves the SAME tick (0-tick lead-in,
+  MEASURED), 1px/tick right through 1084, home. Walk pose cycles
+  frame 7/2/8/2 every 8 ticks, source-derived from
+  `object_event_anims.h`'s `sAnim_GoWest`/`sAnim_GoEast` (GoEast is the
+  same table `hFlip`d). `postwin.ts`: box 1/2 dismissal now arms a
+  `callScenePendingElapsed` (deferred bump, mirroring box 1's own
+  `healDismissElapsed`-armed activation) instead of bumping the page
+  instantly — the OLD box stays rendered (already fully typed) through
+  the lead-in, then hides for the walk + a short MEASURED box-reopen lag
+  (3 ticks after the away leg, 4 after the back leg — both boxes
+  `closemessage`d before their `applymovement`, unlike every other box
+  turn in this file, which reuses an already-open box). `core.ts`/
+  `prebattleRoomRender.ts`: `renderPrebattleRoomSceneWithAttendantOffset`
+  (new) draws the attendant at a signed px offset with `hFlip` support
+  (added to `drawNpcFrame`), replacing the always-rest `renderPrebattle
+  RoomScene` call in the counter-room render path.
+- **Acceptance numbers:** callscene-01 **45/131 → 89/131**, callscene-02
+  **40/199 → 69/199** acceptance-grade frames exact. Remaining residual
+  (both fixtures) is **not movement**: (a) box 1's own typewriter cadence
+  has small pre-existing per-character timing drift (≤50px diffs, present
+  in the pre-this-step baseline too, oracle frames ~828-892 — box 1
+  visibly keeps printing past the ground-truth doc's own claimed "850
+  held" boundary, a doc/reality mismatch worth a future note); (b) a
+  9-frame blink-cursor phase offset during the held boss-message pages;
+  (c) a large late-window mismatch approaching the menu-open transition
+  (oracle ~1439+, callscene-02 only) — the boss-message page-turn/menu
+  delays were flagged "structural, not oracle-measured" since Brief 1
+  landed (PROGRESS 1281) and are unchanged this session. None of these
+  are new; all pre-date this step's diff (confirmed via the differential
+  PASS covering unrelated routes, and by re-diffing the same frame
+  ranges before/after this session's changes).
+- **Regression bars unmoved (all re-run live this session):** askready-
+  menu **21/21**, swapask-no **194/194**, entrance-02 **256/256**,
+  entrance-03 **162/256**, all four B2 speech windows **39/39, 74/74,
+  39/39, 28/28**, reveal **690/701**. `executableFrontierRatchet.test.ts`
+  barrier counts: unwidened. New Tier-1 pin: one test in
+  `tests/postwin.test.ts` exercises the full movement model (lead-in,
+  per-tick dx/pose, hold, reopen lag, both legs) against the MEASURED
+  tick values above; the pre-existing box-by-box test updated for the
+  new deferred-bump shape (boxes 1/2 gated, 3/4 still instant).
+- **Next:** the box 1 typewriter drift (a) and blink-cursor phase (b)
+  above, if a future step wants callscene-01/02 fully closed; the
+  boss-message page-turn/menu-approach constants (c) need their own
+  dense calibration pass (never done since Brief 1, per that step's own
+  disclosure) — likely the bigger lever on callscene-02's count. Stretch
+  item 5 (menu-record/menu-retire compare traces) not attempted — no
+  time left after the movement work.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT: the
+  ground-truth doc's own table row ("850–893 Held — PNG-verified at
+  850") does not match direct pixel inspection (text is still mid-type
+  at 850, continuing to ~894) — cost time to notice via a fresh dense
+  pixel probe before trusting the doc's coarser table for tick
+  boundaries; worth a doc correction in a future session. Building the
+  movement model required fetching non-committed dense (stride-1)
+  battle-lab re-runs of the two fixtures directly (temp files under
+  `/tmp`, not committed) to get per-tick sprite position — the committed
+  fixtures' own capture lists are stride-2 in the movement span, enough
+  for compare acceptance but not enough to derive the movement model
+  from alone.
+
+## 1284 — [main worker, 2026-08-16] **Gold Frontier-Brain reveal hold fixed (334/701 → 690/701, parity with silver); speech wiring (goal 2) not started — out of time this session**
+
+- **State:** Goal 1 of this step's brief (pic-reveal hold fix) is
+  **landed and green**. Goal 2 (wire gold's 4-page speech into
+  `battleRoom.ts`) and goal 3 (stretch dense calibration) were **not
+  started** — the goal-1 root cause took the whole session to pin down
+  correctly (see Did). `npm test` **1044 files / 9939 passed / 223
+  skipped**, `npm run build` green, differential PASS (563/563
+  byte-identical, `--base 2cf29e81`, the merge before this step's first
+  change). Committed at `2790e02b`.
+- **Did:** The "~142f hold" in the brief's framing turned out to be
+  **emergent, not a hardcoded duration** — the gold pic-reveal box
+  (`FACTORY HEAD NOLAND would like to battle!♥`) is a genuine
+  PAUSE_UNTIL_PRESS wait (confirmed by `docs/battle-bringup-notes.md`'s
+  existing Destin evidence), so its on-screen length is purely a
+  function of *when* the A-press arrives — both in the app (from the
+  compare trace's scripted `segments`) and in the oracle (from the
+  battle-lab's internal `prepare()` auto-navigator, whose own press
+  timing shifted once `3e29880b` shortened gold's walk-up). Root cause
+  was two independently-stale calibrations, not one: (1) the compare
+  trace's own A-press position (`tools/compare/traces/factory-round-
+  battle7-noland-gold-reveal-off.json`) was tuned against the *old*
+  oracle's later transition and needed to move earlier — re-derived by
+  the same exhaustive-search-over-candidates method §6′ used for the
+  frame offset (tried every integer press tick 328-338 against the live
+  oracle; 333 is a sharp, unique match-count peak, 334/701 → 663/701 on
+  its own). (2) The later ready-lag boundary (ISSUES #87 option (c)'s
+  class — the source-unpredictable switch-in/AI-ack span before the
+  action menu reads ready) had **no gold-specific calibration at all**,
+  only silver's `MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET`.
+  `FactoryBattleStartIntroState` gained a parallel `isGoldBrainReveal`
+  flag (keyed off `frontierBrain.status === "gold"`, same route-level-
+  fact convention as `isSilverBrainReveal`, wired in
+  `factoryRoundBattleOrchestrator.ts`'s `beginFactoryRoundBattleStartIntro`)
+  and `battleScene.ts` gained `MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET`,
+  same search method, independently derived: **7** (not silver's 9 —
+  different lead-species cry duration, as expected). Updated the one
+  pre-existing test that pinned the *bug* as correct behavior
+  (`tests/factoryRoundIntroGeneralization.test.ts`'s ISSUES #87 test
+  previously asserted gold was permanently unaffected by any offset;
+  rewritten to pin both flags' independent, correctly-keyed offsets and
+  their non-interference).
+- **Acceptance numbers:** gold reveal **334/701 → 690/701** — frame-for-
+  frame identical residual *count* to silver's own already-accepted
+  baseline (silver unmoved at 690/701, confirmed re-run). Residual
+  shape: frames 334-336 (a 3-frame box-clear-transition lag, same
+  1287px/bbox regardless of press tick tried — looks like a small fixed
+  rendering lag distinct from the press-timing fix, not further chased
+  this session) + frame 408 (16px, isolated) + frames ~654-660ish (the
+  same render-drift shape silver's own `MEASURED_SILVER_..._OFFSET` doc
+  comment already describes as untouched by any offset value). This is
+  **more than "a single settled #87-class frame"** the brief flagged as
+  the expected ceiling, but it exactly matches silver's own precedent
+  count (11 residual frames each), so characterized as parity-with-
+  silver rather than further investigated given the time this step's
+  root-cause hunt already consumed — a legitimate stopping point per
+  the brief's own "more frames means investigate" bar being read against
+  silver's own accepted shape, not zero.
+- **Regression bars unmoved (all re-run live this session):**
+  entrance-02 **256/256**, entrance-03 **162/256** (known B1c residual),
+  all four silver speech windows **39/39, 74/74, 39/39, 28/28**, silver
+  reveal **690/701**. `executableFrontierRatchet.test.ts` barrier counts:
+  unwidened.
+- **Next:** Goal 2 (gold's 4-page speech wiring into `battleRoom.ts`,
+  JSON-verbatim from `src/data/gen/factory-brain-walkup-script.json`, no
+  battle-cry, Tier-1 pinned per `tests/battleRoomBrainSpeech.test.ts`'s
+  idiom — `brainSpeechBoxes(state)` currently always returns
+  `SILVER_FIRST_ENCOUNTER_SPEECH_BOXES` regardless of trainer identity,
+  that's the seam) is the immediate next action, still first in the
+  brief's own priority order. Goal 3 (dense gold-speech calibration
+  against the three `factory-brain-gold-speech-*-off.json` fixtures) is
+  stretch, after goal 2. The 334-336 box-clear-transition residual and
+  the ~654-660 ready-lag tail are both open, minor, not investigated
+  further this session.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT: the
+  brief's own framing ("find where the app derives the ~142f hold, fix
+  it") suggested a single `src/` constant; the actual mechanism was a
+  PAUSE_UNTIL_PRESS wait whose apparent "duration" is an artifact of
+  *when* a scripted A-press lands on both sides, not a duration formula
+  — cost real time (most of the session) to establish via direct PNG
+  inspection (`app-NNNNN.png` vs `oracle-NNNNN.png` at the first
+  mismatch frame) before the fix location became obvious. Worth
+  remembering for future PAUSE_UNTIL_PRESS-adjacent bugs: check whether
+  the compare trace's own button schedule is stale before assuming a
+  `src/` duration constant is wrong.
+
+## 1283 — [main worker, 2026-08-16] **Walk-up step A dense calibration: app-side postwin brain compare harness built, 2/4 fixture windows close exact; call-scene windows leave an honest attendant-movement residual**
+
+- **State:** `tools/compare/factoryRoundIntroGeneralizationStage.ts` gains
+  two new postwin stages (idiom: B1b's room-entrance stage) and four
+  committed compare traces replay the side lane's dense fixtures
+  (`docs/walkup-call-scene-ground-truth.md`) live against
+  `http://127.0.0.1:8014`. Full `npm test` **1044 files / 9939 passed /
+  223 skipped**, `npm run build` green. Differential PASS (563/563
+  byte-identical, `--base 1fd9b21c`, the commit before this step).
+- **Did:** (1) `generatedRoundBattle7NolandPostwinCallSceneStartStage`
+  parks `postwin` at `elapsed: POSTWIN_COUNTER_ROOM_FIRST_AGE` (115),
+  `frontierBrain: true` — the first tick of the already-pinned
+  counter-room fade-in, anchored to the doc's own first acceptance-grade
+  pre-checkpoint frame (490), past its two documented staging-artifact
+  fades. The anchor is corroborated, not fit: the shared
+  `FADE_IN_TICKS`/`POSTWIN_HEAL_TEXT_FIRST_AGE` spacing already lands
+  within one frame of the oracle's own measured 24-tick fade-to-first-
+  glyph span, so no existing shared (Battle-1-pinned) constant moved.
+  (2) `generatedRoundBattle7NolandPostwinAskReadyMenuOpenStage` parks
+  `postwin` directly in the `AskReadyForHead` menu's held state
+  (`callScenePage: 5`, `callSceneDismissElapsed: 0`, cursor on GO ON) —
+  the post-checkpoint frame-0 anchor, sidestepping the call scene the
+  same way B2's speech stages sidestep `brainMoving`. Found + fixed a
+  real gap while building it: `renderPostwinState`'s `beforeContinuation`
+  gate reads `healDismissElapsed`, not `callSceneDismissElapsed` — a
+  hand-parked state needs both non-null or it silently renders nothing.
+- **Acceptance numbers (live, this session):** `askready-menu-off`
+  (window 2) **21/21 exact**; `swapask-no-off` (window 3) **194/194
+  exact** — both closed on the first attempt once the menu-open anchor
+  was fixed. `callscene-01-off`/`callscene-02-off` (window 1, the 5-box
+  call scene): **45/131** and **40/199** acceptance-grade frames (the
+  doc's own 13 pre-490 frames are staging artifacts, never chased, so
+  144/199 total shrinks to 131 acceptance-grade for fixture 01). **Not
+  closed — honest residual:** the attendant's walk-away/return movement
+  (oracle frames 894–949, 1037–1084) has no rendered animation in the
+  current model; `postwin.ts`'s own box-to-box transition is instant
+  (`acceptPostwinCallScenePage` arms the next box's typewriter a few
+  ticks later), matching this file's own prior disclosure that movement
+  is "folded into the transition, not separately timed" — a missing
+  render feature, not a mistunable constant, so left honest rather than
+  fitted. Every captured frame before the first movement gap (heal fade/
+  typewriter/held, box 1's own typed content) and the tail of each held
+  box that survives past its own movement gap already matches; the
+  gap itself and its immediate aftermath do not. The button-press
+  schedule driving these two traces was derived directly from the doc's
+  own measured transition frames (each box's own dismiss point), not
+  independently oracle-probed for ITS OWN accept-ready boundary — same
+  "generous margin, not a tight probe" caveat the doc's own window 3
+  entry already discloses for its DOWN press.
+- **Regression bars unmoved (all re-run live this session):**
+  entrance-02 **256/256**, entrance-03 **162/256** (known B1c residual,
+  unmoved), all four B2 speech windows **39/39, 74/74, 39/39, 28/28**,
+  reveal **690/701**. `executableFrontierRatchet.test.ts` barrier counts:
+  unwidened (no new `unsupportedBranch(...)` sites).
+- **Next:** building attendant-movement rendering for the call scene (a
+  real feature, not a calibration — likely the biggest remaining lever
+  on window 1's two counts) if this step continues; `ISSUES #91`
+  (post-brain-win `storedTrainerIds`, blocks live soak reachability); the
+  B1c mid-ramp pixel residual; gold entrance/speech.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT: the
+  `beforeContinuation`/`healDismissElapsed` render gate (see above) cost
+  real time to find via a screenshot diff rather than reading — worth
+  remembering that a hand-parked `PostwinState` must satisfy every field
+  a render branch's `else if` chain reads, not just the ones a stage's
+  own docstring names.
+
+---
+
+## 1282 — [main worker, 2026-08-16] **Walk-up build step A, Brief 2 LANDED: postwin.ts AskSwapBeforeHead short path + soak driver brain-branch recognition; found + cataloged an unrelated post-brain-win opponent-generation crash (#91)**
+
+- **State:** `docs/walkup-step-a-design.md` Brief 2 is built: a brain
+  postwin's `GO ON` now skips the three ordinary scouting pages, types
+  the JSON-exact "I'm terribly sorry, but I can't tell you anything
+  about the FACTORY HEAD." one-liner (`dialoguePage` 1), then jumps
+  straight to the swap YES/NO prompt (`dialoguePage` 4) — closing the
+  gap Brief 1 left open. Every pre-existing `postwin.test.ts` assertion
+  passes unmodified, plus 4 new tests (47 total). Full `npm test`
+  **1044 files / 9939 passed / 223 skipped**, `npm run build`, and
+  `npm run typecheck` green. Differential PASS (563/563 byte-identical,
+  `--base 74013f83`, the merge before this step's first change).
+- **Did:** (1) `postwin.ts`: new `POSTWIN_BRAIN_CANT_TELL_TEXT`
+  (pulled from `askSwapBeforeHead` in the walkup-script JSON, never
+  retyped) plus a structural "+2-after-settle" accept-ready delay
+  (same convention Brief 1's call-scene boxes already use, explicitly
+  flagged evidence-aligned-not-calibrated per the brief — no dense
+  pixel compare attempted). `postwinDialogueVisibleChars`/
+  `postwinDialogueInputReady`/`acceptPostwinDialoguePage` gained a
+  `frontierBrain && dialoguePage===1` branch; the jump target is
+  `dialoguePage=4` instead of `+1`. Page 4 itself (swap offer text,
+  cursor, decline, "Right this way") is reused byte-for-byte unchanged
+  for both routes — verified (not assumed) the default-YES cursor and
+  the DOWN-swallowed-while-settling gating already fall out correctly
+  from the existing `swapCursorPos===null`/`postwinDialogueInputReady`
+  idiom, no new gating code needed. (2) `core.ts`: the battle-win-
+  completion trigger (which advances the round controller /
+  orchestrator) now fires off `dialoguePage===1` for brain instead of
+  `===3` — **a real functional fix**, not just rendering: unchanged,
+  a brain round would never advance past its first postwin. Also fixed
+  two render branches that would have shown the ORDINARY route's text
+  during brain's dialoguePage-1 typing and the lingering-old-text
+  window at the 1→4 transition. (3) `tools/soak/randomRoundSoakDriver.ts`
+  (:665-714 region): the call-scene/one-liner surfaces get explicit
+  soak-log labels (they already advanced correctly via the pre-existing
+  generic `pressAdvance` fallback); the continuation-menu and swap-offer
+  blocks were already brain-route-agnostic (shared machinery), confirmed
+  by tracing, not assumed — only the log label gained a `brain ` prefix.
+- **Soak evidence (short runs only, per the brief's own house rule —
+  each ~2-3s via `runSeed` in a scratch vitest probe, not committed):**
+  a `factoryRoundBattleOrchestrator` seeded with `factoryWinStreak: 20`
+  (battleIndex 0 immediately silver-brain-eligible) won battle 0 under
+  both `strong-route` and `winning` policy across several `rngValue`s,
+  then drove the **entire call-scene (all 5 boxes) and the
+  `AskReadyForHead` GO-ON-menu accept with zero issues** — confirming
+  this step's own new code. Immediately after, a **pre-existing,
+  unrelated engine bug** (now `ISSUES #91`) fires: `core.ts`'s
+  `preGenerateFactoryRoundNextOpponent` seam (triggered every `GO ON`,
+  unconditionally, to pre-generate the next opponent) throws
+  `storedTrainerIds must contain the 1 prior battle selections` in
+  `factoryTrainerSchedule.ts`, because a Frontier-Brain opponent
+  generation never appends its own `storedTrainerIds` history entry.
+  This blocks live-reaching `AskSwapBeforeHead`'s own one-liner content
+  via a real soak win (it fires one tick before `dialoguePage` would
+  advance to 1) — filed as `ISSUES #91` with full repro/root-cause,
+  **not fixed** (out of scope: `factoryRoundBattleOrchestrator.ts`
+  opponent-generation logic, not `postwin.ts`/soak-driver). The short
+  path's own sequencing is still fully proven at the Tier-1 level
+  (below), independent of this blocker.
+- **Acceptance numbers:** 4 new Tier-1 tests in `postwin.test.ts` pin:
+  the one-liner text against the JSON verbatim (incl. the shared swap-
+  ask text, byte-identical between routes), the `dialoguePage` 1→4
+  jump (skipping 2/3) with its input-gate boundary, the swap prompt's
+  default-YES + input-gated-until-settled behavior converging into the
+  unchanged decline/dismiss/handoff flow, and an explicit ordinary-
+  route-unchanged (1→2→3→4) sanity check. Full `npm test`
+  **1044/9939/223**; build + typecheck green; differential **PASS,
+  563/563 byte-identical**. `executableFrontierRatchet.test.ts` barrier
+  counts: **unwidened**.
+- **Next:** `ISSUES #91` (post-brain-win `storedTrainerIds` fix, in
+  `factoryRoundBattleOrchestrator.ts`/`factoryTrainerSchedule.ts` —
+  blocks live soak reachability of `AskSwapBeforeHead`'s one-liner and
+  any battle after a mid-round brain win); dense oracle calibration of
+  step A's brain-specific timing once the side lane's fixtures are
+  banked; the B1c mid-ramp pixel residual; gold entrance/speech.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT:
+  the soak-driver reachability investigation (tracing exactly when
+  `round.rules.currentOpponent` advances relative to the postwin flow)
+  took a large share of this step's budget before an empirical probe
+  settled it faster than the static source trace — worth remembering
+  that `runSeed()` + a scratch vitest file is the fast path for this
+  class of "what does the state machine actually do" question.
+
+---
+## 1281 — [main worker, 2026-08-16] **Walk-up build step A, Brief 1 LANDED: postwin.ts brain call-scene + AskReadyForHead menu (Tier-1 + differential; dense oracle calibration deferred as scoped)**
+
+- **State:** `docs/walkup-step-a-design.md` Brief 1 is built: `postwin.ts`'s
+  state machine now has a `frontierBrain`-gated branch inserted after the
+  shared heal line, replacing the ordinary route's direct fall-through
+  into the continuation menu. Non-brain path untouched — every existing
+  `postwin.test.ts` assertion passes unmodified, plus 4 new tests (43
+  total). Full `npm test` **1044 files / 9935 passed / 223 skipped**,
+  `npm run build`, and `npm run typecheck` green. Differential PASS
+  (below). No oracle evidence attempted this step, per the brief's own
+  scoping (Tier-1 + differential only; a side-lane worker is banking
+  dense fixtures in parallel for a later calibration step).
+- **Did:** (1) `PostwinState` gained `frontierBrain`/`callScenePage`
+  (0-5)/`callScenePageEdgeElapsed`/`callSceneDismissElapsed`.
+  `createPostwinStateFromRound` derives `frontierBrain` from the
+  upcoming opponent's `frontierBrain` field alone (memo §2.2; `.status`
+  tier not needed) — no call-site signature change needed. (2) The
+  5-box call scene (phone SE wait message / attendant-return message /
+  3-page boss message) is pulled **directly from
+  `factory-brain-walkup-script.json`** at module load (import + `.split`,
+  same idiom `battleRoom.ts`'s silver-speech box queue already uses) —
+  never retyped, including the apostrophe-normalization convention
+  (`facility's` → `facility’s`). Each box advances on A via
+  `acceptPostwinCallScenePage`, mirroring `dialoguePage`'s own index
+  convention. (3) `AskReadyForHead` reuses `continuationCursorPos`/
+  `acceptPostwinContinuation`/`beginPostwinQuestion`
+  **completely unchanged** — only `postwinNextVisibleChars`/
+  `postwinContinuationInputReady`/`advancePostwin`'s `menuVisible` gain a
+  `frontierBrain` branch computing the prompt's own visible-chars/menu-
+  visible/menu-ready timing from the call scene's own dismiss edge
+  instead of `healDismissElapsed` (RECORD/REST/RETIRE therefore carry
+  over verbatim with zero new code, confirming the design memo's §3
+  RESOLVED note). (4) `core.ts` wired: input routing for call-scene A-
+  presses (mirrors the existing scouting-page 1-3 wiring) and minimal
+  rendering (call-scene box text via the existing `drawLines` helper;
+  the AskReadyForHead multichoice window's visibility gate branches off
+  the call scene's own dismiss edge instead of `healDismiss` directly).
+  **Timing honesty:** every new delay constant reuses this file's own
+  established MSGBOX_DEFAULT conventions (4-tick first-glyph delay,
+  +2-after-settle accept-ready, the same "+4 visible/+5 ready after
+  settle" shape `POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY`/
+  `_INPUT_READY_DELAY` already derive) rather than inventing new
+  numbers — structural defaults, explicitly flagged as NOT
+  independently oracle-measured for this window (module-doc comments
+  cite this, matching the `SPEECH_APPEAR_ELAPSED`-was-an-unmeasured-0
+  precedent). Attendant walk-away/return movement is not separately
+  timed (folded into the box-to-box transition, same simplification
+  `battleRoom.ts`'s own brain-speech box queue documents for its own
+  unmeasured window) — a presentation-only gap, not a state-machine one.
+- **Acceptance numbers:** New Tier-1 tests (4, in `postwin.test.ts`)
+  pin: `createPostwinStateFromRound`'s brain-flag derivation (both
+  true/false), `CALL_SCENE_BOX_TEXTS`/prompt text against the raw JSON
+  byte-for-byte, the full box-by-box index/text-transition walk through
+  all 5 boxes into `AskReadyForHead`'s menu (incl. an early-A-swallowed
+  check and a RETIRE-still-works check), and an explicit ordinary-path-
+  unchanged sanity check. Differential
+  (`compare:differential room-entry.json battle2-room-a.json
+  s6-acceptance.json --base HEAD^`) → **PASS, 563/563 byte-identical**.
+  Full `npm test` **1044/9935/223**; build + typecheck green.
+  `executableFrontierRatchet.test.ts` barrier counts: **unwidened** (no
+  new `unsupportedBranch(...)` call sites added).
+- **Not built this step (by design, per the brief):** `AskSwapBeforeHead`
+  's short path past GO ON (Brief 2 — a brain postwin selecting GO ON
+  today falls through to the ordinary scouting-page 1-3 content, a
+  known documented gap, not a crash); the soak driver's brain-branch
+  exercise (also Brief 2); any brain-specific RETIRE bookkeeping
+  (explicitly out of scope per memo §3); dense oracle pixel calibration
+  of the call-scene/menu window (blocked on the same `BattleLab.
+  prepare()` staging gap the memo's §4 flagged, now fixed per harness
+  commit 3e29880b — reachable, but calibrating against it is scoped to
+  a later step, not this one).
+- **Next:** Brief 2 (`AskSwapBeforeHead` short path + soak driver
+  update); dense-oracle calibration of step A's brain-specific timing
+  once the side lane's fixtures are banked; the B1c mid-ramp pixel
+  residual (`battleRoom.ts` module doc); gold entrance/speech.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT:
+  none new this session.
+
+---
+
+## 1280 — [main worker, 2026-08-16] **Walk-up build step B1c: brainMoving walk/pan cadence re-derived from a fresh RAM probe (fixture 03: 43/256 → 162/256 exact); a smaller, honestly-flagged mid-ramp pixel residual remains**
+
+- **State:** B1b's own diagnosis (`entryStep`'s per-tick table doesn't
+  reproduce this branch's cadence) is now known to have been wrong: RAM
+  shows the decoy/camera in this window follow the EXACT same per-tick
+  shape as `ENTRY_STEPS`, just re-based onto a different zero point (a
+  new `BRAIN_MOVEMENT_CLOCK_OFFSET` constant, 22, RAM-measured). Full
+  `npm test` (1044 files / 9931 passed / 223 skipped), build, and
+  typecheck green. Differential PASS. A smaller mid-ramp pixel residual
+  remains and is flagged honestly (not relabeled measured) per this
+  step's own acceptance rule.
+- **Did:** (1) `tools/probe/probe-factory-brain-silver-entrance-movement-
+  ram.py` — reads `gTotalCameraPixelOffsetY`/`gSprites`/`gObjectEvents`
+  directly (same offsets S6 slice 2a already established) every frame
+  896-1151 of the committed dense fixture 03, not pixel curve-fitting.
+  Findings: pan is flat through frame 959, then a clean 1px/tick ramp to
+  80 by frame 1039, settling one tick later (1040) — the identical shape
+  `ENTRY_STEPS` already encodes, just starting 22 ticks later in that
+  table (the ordinary path's own leading 23-flat-tick stall is a warp
+  fade-in artifact, irrelevant to this msgbox-close-triggered window).
+  Noland's own `nolandStep` formulas (screenY 24 flat, then
+  `24 + (camPanY - 48)`) were ALREADY correct — only the elapsed value
+  feeding `entryStep`/`scientistTurnFrame`/`nolandStep` was wrong; fixed
+  by shifting at the `renderBattleRoomBrainEntranceScene` call site
+  (`historicElapsed = movementElapsed + BRAIN_MOVEMENT_CLOCK_OFFSET`),
+  not inside those pure functions (kept reusable/unchanged for the
+  ordinary path). (2) Separately found and fixed: `SPEECH_APPEAR_ELAPSED`
+  (`brainSettled` → `brainSpeech` handoff) was an unmeasured structural 0;
+  RAM/pixel evidence measured it at 5 (the speech box was appearing 5
+  ticks before oracle's real one, a distinct mismatch the walk/pan bug
+  had been masking). (3) The compare trace itself
+  (`factory-brain-silver-walkup-entrance-03-off.json`) had its own bug:
+  its A-press landed ~20 ticks before oracle's real dismissal point (a
+  B1b tuning artifact) — corrected its segment counts (314/1/196).
+  (4) Updated 4 existing Tier-1 assertions in
+  `tests/battleRoomBrainEntrance.test.ts`/`battleRoomBrainSpeech.test.ts`
+  that called `nolandStep`/`entryStep`/`scientistTurnFrame` with the
+  now-two-clocks-conflated raw `BRAIN_MOVEMENT_SETTLE_ELAPSED`, plus new
+  tests pinning `BRAIN_MOVEMENT_CLOCK_OFFSET` itself against the RAM
+  samples (elapsed 1/71/80 → pan 1/71/80).
+- **Not closed — honest residual:** fixture 03 improves from a broad
+  ~26-65% full-frame mismatch to a bounded ~5-13%-of-frame residual
+  confined to the mid-ramp window only — **162/256 frames now exact
+  (up from 43/256)**; every frame before the ramp and every frame once
+  the room is genuinely settled (including all of B2's speech content)
+  is exact. Direct RAM cross-checks at multiple ramp ticks (not just the
+  endpoints) show `camPanY`/decoy-animation/Noland-position all matching
+  oracle's real RAM exactly at those ticks — yet the rendered pixels
+  still diverge mid-ramp. Cross-correlating diff frames against a pure
+  vertical shift finds a best-fit +1px offset with only ~98-99%
+  background-tile agreement (not 100%), and retrying
+  `BRAIN_MOVEMENT_CLOCK_OFFSET` at 21/23 both regressed the overall
+  match count — so it isn't a uniform clock-offset or simple render-lag
+  fix. True mechanism undetermined; full detail + a concrete next-probe
+  suggestion (`gSpriteCoordOffsetY`/OAM-buffer state across the ramp) in
+  `battleRoom.ts`'s own module doc (search "Walk-up build step B1c").
+- **Acceptance numbers (this step's own gate):** fixture 03
+  `--summary` → **162/256** (was 0/256 effectively, honest residual
+  remains, not closed). Fixture 02 `--summary` → **256/256** (unmoved).
+  All 4 B2 speech windows `--summary` → **39/39, 39/39, 74/74, 28/28**
+  (unmoved). Downstream reveal `--summary` → **690/701** (unmoved, the
+  known #87 residual). Differential (`room-entry.json battle2-room-a.json
+  s6-acceptance.json --base HEAD^`) → **PASS, 563/563 byte-identical**.
+  Full `npm test` **1044 files / 9931 passed / 223 skipped**; build and
+  typecheck green.
+- **Next:** re-derive the remaining mid-ramp sub-tile residual (probe
+  `gSpriteCoordOffsetY`/OAM state directly, not `camPanY` alone) if a
+  future step's time budget allows; walk-up step A per
+  `docs/walkup-step-a-design.md`; gold entrance/speech (oracle-blocked,
+  see PROGRESS-archive.md 1279's own notes on the `BattleLab.prepare()`
+  call-scene gap).
+- **Notes:** Commits local only — pushing is Kyle's step.
+  PAPERCUT: none new this session.
+
+---
+
+## 1279 — [supervisor wind-down, 2026-08-15] **B2 LANDED (silver Noland speech, four dense windows EXACT) + session wind-down: every 1274 queue item advanced, all gates green, full soak 60/60, DEFERRED empty**
+
+- **State:** Session over (12 worker steps, 2 lanes). The silver
+  walk-up is BUILT end-to-end from the BattleRoom entrance through the
+  8-page speech, battle-cry, and battle handoff. Whole 1274 queue
+  advanced: #89 FIXED, #90 FIXED, #87(c) EXECUTED, walk-up B1/B1b/B2 +
+  step-A design, parity plan + steps 1-3. DEFERRED.md EMPTY.
+- **B2 (cap-killed at its own ledger edit; tree clean, both feature
+  commits landed — supervisor verified + wrote this entry):** silver
+  speech machine in `battleRoom.ts` (JSON-verbatim 8 pages + battle-cry
+  + repeat variant), per-tier in-session heard-flag
+  (`factoryHeardBrainSpeech`/`markFactoryBrainSpeechHeard`, facility
+  state), handoff into the existing brain battle start; compare-harness
+  extension + 4 committed speech traces. Supervisor re-ran all four on
+  the final tree: **39/39, 39/39, 74/74, 28/28 — exact**; downstream
+  reveal window re-checked **690/701** (unmoved); differential 228/228
+  byte-identical; apostrophe + wait-cursor renderer fixes landed with
+  their windows.
+- **Wind-down gates (final union, after folding animation-main — Dream
+  Eater 187→189 exact incl. Leech Seed — and rust-main — weightdamage +
+  tryhealhalfhealth + Pain Split leaves):** full npm **1,040 files /
+  9,915 passed / 223 skipped**; build green; cargo **73** ok-suites;
+  wasm rebuilt **492,683 B** `782c1b2a…`; forced-WASM **18 files / 803
+  tests**; soak vanilla **20/20 OK**; soak full 0:60 **60/60 OK**
+  (the standing gates). Informational: new opt-in `winning` policy
+  0:60 = 59/60 + seed 49 budget-HANG at 600k — completes OK at
+  693,051f with a bigger budget (deep chains legitimately run long;
+  policy is opt-in, pass `--max-frames`; not an engine bug).
+- **Next (ordered):** (a) Noland brainMoving walk/pan cadence residual
+  (~frames 961-1112; documented in `battleRoom.ts` module doc) — fresh
+  RAM/pixel derivation; (b) walk-up step A per
+  `docs/walkup-step-a-design.md` (dispatchable; RETIRE question
+  resolved from source — postwin semantics carry over verbatim);
+  (c) gold entrance/speech (source-pinned, oracle-blocked, see Notes);
+  (d) parity plan step 4 (deferred-by-design memo) + wider winning-
+  policy sweeps as supervisor calls.
+- **Notes:** **Recommendation for Kyle:** the top-layer
+  `BattleLab.prepare()` brain staging gap (writes no symbol flags +
+  fresh-draft fallthrough skips the PreBattleRoom call-scene, silver
+  AND gold — RAM-probed, `docs/noland-silver-walkup-presentation-map
+  .md`) blocks ALL oracle acceptance for the call-scene and gold
+  content; fixing it oracle-side before step A ships is the honest
+  order. Two open questions recorded there and in the step-A memo; no
+  DEFERRED.md blockers. Launcher now seeds worktrees with the wasm
+  artifact (papercut retired). Commits local only — pushing is Kyle's
+  step.
+
+---
+
+## 1278 — [main worker, 2026-08-15] **Walk-up build step B1b: app-side room-entrance compare harness built + 2 of 3 flagged constants MEASURED (fixture 02 closes 256/256 exact); fixture 03's walk/pan window left an honest, un-closed residual**
+
+- **State:** B1's oracle-dense-compare debt (flagged in 1277) is
+  partially retired. The harness now exists and is re-runnable; two of
+  the three flagged constants are genuinely dense-compare-measured.
+  The third (`NOLAND_INITIAL_SCREEN_Y`/`nolandStep`'s walk-cadence
+  reuse) is **not** closed and is **not** relabeled — per this step's
+  own acceptance rule, an honest residual beats a false "measured".
+  Full `npm test` (1029 files / 9871 passed / 223 skipped), build, and
+  typecheck green; differential PASS.
+- **Did:** (1) `generatedRoundBattle7NolandRoomEntranceStage`
+  (`tools/compare/factoryRoundIntroGeneralizationStage.ts`) — the same
+  seed-70/challenge-2 Battle-7 staging `generatedRoundRevealProofStage`
+  uses, stopped at the real `battleRoomStateForOpponent()` seam
+  (core.ts's postwin→prebattleRoom→battleRoom handoff, d60ca1b3)
+  instead of jumping past the room. A synthetic `postwin` parked in
+  `postwinPhase`'s terminal "counterRoom" bucket with
+  `rightThisWayDismissElapsed` set satisfies `renderPostwinState`'s own
+  precedence gate so it steps aside for `battleRoom` — no postwin
+  dialogue replayed. Two new compare traces
+  (`tools/compare/traces/factory-brain-silver-walkup-entrance-0{2,3}-
+  off.json`) replay the committed dense fixtures (`docs/noland-silver-
+  walkup-presentation-map.md` §5) against it. (2) **Calibrated against
+  fixture 02 (closes 256/256 exact):** `BRAIN_MSGBOX_APPEAR_ELAPSED` 0→
+  **24 MEASURED** (the box doesn't appear at all until the room's fade-
+  in settles, not concurrently with it); new `NOLAND_IDLE_FRAME` constant **0
+  MEASURED** (Noland faces the player before his own walk starts, not
+  the decoy's own north-facing idle frame `nolandStep` was reusing for
+  him — `renderBattleRoomBrainEntranceScene` now only calls
+  `nolandStep` during `brainMoving`/`brainSettled`). Also found: fixture
+  02's own first captured frame is elapsed 0's true anchor (fade ramp
+  24,24,57,…,255 pixel-sampled to start exactly there), a more precise
+  anchor than the tick-520-relative numbering the rest of the module
+  doc uses for the other reference trace. (3) Differential
+  (`compare:differential room-entry.json battle2-room-a.json
+  s6-acceptance.json --base HEAD^`): **PASS, 563/563 byte-identical**
+  — the ordinary path didn't move. (4) Re-checked
+  `factory-round-battle7-noland-reveal-off --summary`: still
+  **690/701** (downstream window, untouched as expected).
+- **Not closed — honest residual:** fixture 03's `brainMoving` window
+  (Noland/decoy walk + camera pan, ~103 elapsed ticks from box-close
+  dismiss to shortly before settle) still mismatches substantially
+  (up to ~26% of pixels) against fresh dense-compare evidence.
+  `entryStep`'s per-tick table (built for the ordinary path's own
+  decoy-only walk) doesn't reproduce this branch's simultaneous
+  Noland+decoy cadence reused verbatim; a phase-shifted reuse was tried
+  and made the mismatch *worse*, so the real schedule isn't simply a
+  shifted `ENTRY_STEPS` and needs its own RAM/pixel derivation.
+  `NOLAND_INITIAL_SCREEN_Y` (24) therefore stays the prior algebraic
+  guess. `BRAIN_MOVEMENT_SETTLE_ELAPSED` (108) is comparatively
+  well-supported (the residual's far boundary — oracle's real
+  speech-box onset, B2's unimplemented job — lines up with this
+  constant's predicted `brainSettled` entry within a few frames) but
+  wasn't independently re-derived either. Full detail in
+  `battleRoom.ts`'s own module doc (search "Walk-up build step B1b").
+- **Next:** re-derive the brainMoving walk/pan cadence from fresh
+  RAM/pixel evidence (fixture 03) before B2's speech work builds on
+  this seam; B2 (silver/gold speech) itself; chained-round
+  distribution-parity breadth.
+- **Notes:** Commits local only — pushing is Kyle's step.
+
+## 1277 — [main worker, 2026-08-15] **Walk-up build step B1 LANDED: Frontier-Brain BattleRoom entrance (Noland visible-from-start, "Get a move on!", simultaneous walk-in, scientist turn) — machine + Tier-1 + differential proof green; oracle dense compare NOT run this session (honest residual, see Next)**
+
+- **State:** B1 (entrance settled, speech not started — B2's job) is
+  implemented as an additive branch of the existing BattleRoom entrance
+  machine, keyed off `BattleOpponent.frontierBrain` (never a battle-
+  number/trace check). Full `npm test` (1029 files / 9870 passed / 223
+  skipped) + `npm run build` + `npm run typecheck` green. Ordinary path
+  proven byte-stable via differential compare (below); oracle dense
+  compare against the committed silver-walkup fixtures is the one
+  acceptance item **not completed this session** — flagged honestly
+  under Next/Notes rather than fabricated.
+- **Did:** (1) Extracted Noland's overworld walk sprite (`OBJ_EVENT_GFX_
+  NOLAND`, `frontier_brains/noland.png` + `npc_3.pal`) into
+  `battle-room-npcs.json` (additive key, existing battleRoom/
+  battleRoomOpponentSheets tests untouched). (2) Built the brain-branch
+  state machine in `battleRoom.ts`: new phases `brainEntering ->
+  brainMsgboxIdle -> brainMsgboxClosing -> brainMoving -> brainSettled`
+  alongside (not replacing) the ordinary `entering/msgboxIdle/
+  msgboxClosing/settled` sequence. Box text sourced directly from
+  `factory-brain-walkup-script.json` (`BRAIN_MSGBOX_LINE1/2`). Noland's
+  own walk (`nolandStep`) reuses `entryStep`'s camera-pan clock and
+  frame column directly (same `waitmovement 0`, same `sAnimTable_
+  Standard` per source) rather than a second independent counter;
+  scientists reuse `scientistTurnFrame` verbatim (literally the same
+  `ScientistsFaceBattle` call both paths make). `battleRoomStateForOpponent`
+  is the single branch-selection seam. (3) Renderer:
+  `renderBattleRoomBrainEntranceScene` in `battleRoomRender.ts`, wired
+  into `core.ts` at the one real construction site (the postwin ->
+  prebattleRoom warpFade -> battleRoom chained-round handoff) plus its
+  advancement/render dispatch — all changes gated on
+  `frontierBrainWalkup`/`frontierBrain` so the ordinary path's code path
+  is provably untouched. (4) Tier-1: new
+  `tests/battleRoomBrainEntrance.test.ts` (11 tests) pins text verbatim,
+  Noland's/decoy's/scientists' movement step counts and positions
+  against the JSON (and scientist positions cross-checked against
+  `battle-room-layout.json`), branch selection (brain vs. ordinary vs.
+  no-opponent), and the full phase settle sequence ending at the named
+  `brainSettled` seam. (5) `npm run compare:differential` on 3 committed
+  ordinary traces crossing the BattleRoom entrance (`room-entry.json`,
+  `battle2-room-a.json`, `s6-acceptance.json`) vs. parent commit
+  `2d2c2c81`: **PASS, 563/563 captures byte-identical** — the ordinary
+  path did not move a pixel.
+- **Not done — honest residual (acceptance item 2, oracle dense
+  compare):** the existing staging tool
+  (`tools/compare/factoryRoundIntroGeneralizationStage.ts`) jumps
+  straight to `beginFactoryRoundBattleStartIntro`, bypassing
+  `BattleRoom` entirely — there is currently no app-side harness that
+  stages a live battle 21 through the room-entrance render path at all,
+  brain or ordinary. Building one (mirror the existing stage function up
+  through `advanceProofWin`x6, then set `battleRoom =
+  battleRoomStateForOpponent(...)` instead of calling
+  `beginFactoryRoundBattleStartIntro`, then tick/capture/diff against
+  fresh `bin/oracle lab` PNGs for fixtures 02/03) did not fit this
+  session's remaining time after landing the machine + Tier-1 + the
+  differential proof. Three constants are therefore derived, not
+  dense-compare-calibrated, and flagged as such in `battleRoom.ts`'s own
+  doc comments: `BRAIN_MSGBOX_APPEAR_ELAPSED` (0, box visible from the
+  very first room frame), `NOLAND_INITIAL_SCREEN_Y`/`nolandStep`'s
+  lockstep-with-camera-pan model (algebraically self-consistent with
+  already-pinned constants, not RAM-probed this route), and
+  `BRAIN_MOVEMENT_SETTLE_ELAPSED` (108, reusing `scientistTurnFrame`'s
+  own threshold). `docs/noland-silver-walkup-presentation-map.md` §2 row
+  6 also flags this window's camera motion as visually complex ("zooms/
+  pans") in a way the straight-line pan model here may not fully
+  capture — the likely source of any residual a future dense compare
+  finds.
+- **Next:** B2 (silver/gold speech, consumes the `brainSettled` seam);
+  the oracle dense-compare harness above (small, scoped); chained-round
+  distribution-parity breadth.
+- **Notes:** Commits local only — pushing is Kyle's step.
+
+---
+
 ## 1275 — [supervisor, 2026-08-14 night] **#89 FIXED + #90 FIXED: full-policy soak 0:60 = 60/60 OK (first time); walk-up program started (gold discrepancy resolved, script data extracted)**
 
 - **State:** Queue items (a) #89 and (b) #90 are CLOSED (both deleted

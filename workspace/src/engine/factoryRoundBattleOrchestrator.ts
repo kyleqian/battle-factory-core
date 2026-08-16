@@ -634,6 +634,38 @@ function generateOpponentFor(
 }
 
 /**
+ * `GenerateOpponentMons` (`battle_factory.c:303-330`) is the only code that
+ * ever writes `gSaveBlock2Ptr->frontier.trainerIds`, and the pre-battle-room
+ * script never calls it for a Frontier Brain battle: `frontier_getbrainstatus`
+ * (`pre-battle-room scripts.inc:80-81`) jumps straight from the
+ * ready-for-opponent prompt to `AskReadyForHead`, bypassing `AskSwapMon`'s
+ * `factory_generateopponentmons` call (scripts.inc:137-138) entirely, and
+ * `FillFactoryBrainParty` (`battle_factory.c:759-822`, the brain's own party
+ * builder, called from `battle_tower.c:1857`) never touches the array
+ * either. In natural play the brain is always the round's 7th and final
+ * battle, so this omission is never observed: `trainerIds` resets every
+ * challenge (`SetFactoryChallengeVars`, `frontier_util.c:1835-1836`) before
+ * it could ever be read again -- the ROM genuinely stores nothing for the
+ * brain. A staged round that reaches the brain at an earlier battleIndex has
+ * no such protection: the following battle's `selectFactoryTrainer` call
+ * demands one history entry per prior battle
+ * (`factoryTrainerSchedule.ts:144-148`). Folding the brain's own id into the
+ * *next* generation's input only -- never into the brain's own scheduled
+ * `storedTrainerIds`, which stays exactly what the ROM would carry -- keeps
+ * the natural (battleIndex 6) shape byte-identical while satisfying that
+ * invariant for the staged case. The id can never collide with an ordinary
+ * trainer id: `TRAINER_FRONTIER_BRAIN` is 1022, ordinary ids never exceed
+ * 299 (`factory-round-policy.json`'s `trainerSelection` ranges).
+ */
+function storedTrainerIdsForNextGeneration(
+  previous: FactoryScheduledOpponentGeneration,
+): readonly number[] {
+  return previous.kind === "frontier-brain"
+    ? Object.freeze([...previous.storedTrainerIds, previous.trainerId])
+    : previous.storedTrainerIds;
+}
+
+/**
  * `adoptedNextOpponent` only carries an ordinary `FactoryOpponentGenerationResult`
  * (probed set-selection + per-mon construction cursors). If the real
  * upcoming battle turns out to be Frontier-Brain eligible, adopting that
@@ -652,7 +684,7 @@ function adoptNextOpponentOrGenerate(
       state.config,
       battleIndex,
       rngBefore,
-      previous.storedTrainerIds,
+      storedTrainerIdsForNextGeneration(previous),
       nextSavedRentalRecords(state),
     );
   }
@@ -833,6 +865,10 @@ export function beginFactoryRoundBattleStartIntro(
   // `FactoryBattleStartIntroState`.
   const isSilverBrainReveal =
     state.round.rules.currentOpponent.frontierBrain?.status === "silver";
+  // Gold sibling of the same route-level fact — see `isGoldBrainReveal`'s
+  // doc on `FactoryBattleStartIntroState`.
+  const isGoldBrainReveal =
+    state.round.rules.currentOpponent.frontierBrain?.status === "gold";
   return Object.freeze({
     ...state,
     battleStartIntro: Object.freeze({
@@ -841,6 +877,7 @@ export function beginFactoryRoundBattleStartIntro(
         isCanonicalAnchorIntro,
         sceneAssemblyDisplayLag,
         isSilverBrainReveal,
+        isGoldBrainReveal,
       ),
       elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
     }),
@@ -1060,7 +1097,7 @@ export function advanceFactoryRoundPresentation(
       state.config,
       battleIndex,
       rngBefore,
-      previous.storedTrainerIds,
+      storedTrainerIdsForNextGeneration(previous),
       nextSavedRentalRecords(state),
     );
     const segment = generationSegment(

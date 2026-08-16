@@ -19,6 +19,7 @@ import {
   battleRoomQuoteInputReady,
   battleRoomStateForOpponent,
   battleRoomMsgboxClosingPhase,
+  BRAIN_MOVEMENT_CLOCK_OFFSET,
   BRAIN_MOVEMENT_SETTLE_ELAPSED,
   BRAIN_MSGBOX_APPEAR_ELAPSED,
   BRAIN_MSGBOX_LINE1,
@@ -37,18 +38,19 @@ import {
   nolandStep,
   OPPONENT_SETTLED_SCREEN_Y,
   scientistTurnFrame,
+  SPEECH_APPEAR_ELAPSED,
   type BattleRoomState,
 } from "../src/engine/battleRoom.ts";
 import type { BattleOpponent } from "../src/engine/battleScenario.ts";
 
 const entranceScene = walkup.scenes.battleRoomEntrance;
 
-function brainOpponent(): BattleOpponent {
+function brainOpponent(status: Exclude<BattleOpponent["frontierBrain"], undefined>["status"] = "silver"): BattleOpponent {
   return {
     id: "noland",
     trainerName: "NOLAND",
     party: [] as unknown as BattleOpponent["party"],
-    frontierBrain: { status: "silver" },
+    frontierBrain: { status },
   };
 }
 
@@ -127,6 +129,13 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(battleRoomStateForOpponent(undefined).frontierBrainWalkup).toBeUndefined();
   });
 
+  it("walk-up build step B3: brainSpeechTier is derived from opponent.frontierBrain.status - only 'gold' selects the gold speech, every other status (including the not-yet-presentation-wired streak/streak-long repeats) keeps the pre-B3 silver default", () => {
+    expect(battleRoomStateForOpponent(brainOpponent("silver")).brainSpeechTier).toBe("silver");
+    expect(battleRoomStateForOpponent(brainOpponent("gold")).brainSpeechTier).toBe("gold");
+    expect(battleRoomStateForOpponent(brainOpponent("streak")).brainSpeechTier).toBe("silver");
+    expect(battleRoomStateForOpponent(brainOpponent("streak-long")).brainSpeechTier).toBe("silver");
+  });
+
   it("box stays hidden through the room fade-in, appears at BRAIN_MSGBOX_APPEAR_ELAPSED, prints, then holds idle until the player's A press - no movement happens yet", () => {
     let state: BattleRoomState = createBrainWalkupBattleRoomState();
     expect(msgboxVisual(state)).toEqual({ visible: false, chars: 0 });
@@ -160,10 +169,12 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     for (let i = 0; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) state = advanceBattleRoom(state);
     expect(state.phase).toBe("brainSettled");
     expect(state.elapsed).toBe(0);
-    // Walk-up build step B2 hooked this seam: ticking further now hands off
-    // into the speech machine (tests/battleRoomBrainSpeech.test.ts owns its
-    // own pin) instead of aging "brainSettled" forever.
-    const aged = advanceBattleRoom(state);
+    // Walk-up build step B2 hooked this seam: ticking SPEECH_APPEAR_ELAPSED+1
+    // further now hands off into the speech machine
+    // (tests/battleRoomBrainSpeech.test.ts owns its own pin) instead of aging
+    // "brainSettled" forever.
+    let aged = state;
+    for (let i = 0; i <= SPEECH_APPEAR_ELAPSED; i += 1) aged = advanceBattleRoom(aged);
     expect(aged.phase).toBe("brainSpeech");
   });
 
@@ -180,17 +191,33 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(entryStep(20).camPanY).toBeLessThan(NOLAND_WALK_PX);
     expect(midWalk).toEqual({ frame: entryStep(20).decoyFrame, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y });
     // Once the camera pan outruns Noland's own (now-finished) walk, he holds
-    // his face_left settle pose and drifts by the remaining pan.
-    expect(BRAIN_MOVEMENT_SETTLE_ELAPSED).toBeGreaterThan(ENTRY_SETTLE_ELAPSED);
-    const settled = nolandStep(BRAIN_MOVEMENT_SETTLE_ELAPSED);
+    // his face_left settle pose and drifts by the remaining pan. Renderer
+    // callers feed `entryStep`/`nolandStep`/`scientistTurnFrame` the SHIFTED
+    // clock (`elapsed + BRAIN_MOVEMENT_CLOCK_OFFSET`, see that constant's own
+    // doc) - the settle boundary only lines up past `ENTRY_SETTLE_ELAPSED`
+    // once shifted the same way.
+    expect(BRAIN_MOVEMENT_SETTLE_ELAPSED + BRAIN_MOVEMENT_CLOCK_OFFSET).toBeGreaterThan(ENTRY_SETTLE_ELAPSED);
+    const settled = nolandStep(BRAIN_MOVEMENT_SETTLE_ELAPSED + BRAIN_MOVEMENT_CLOCK_OFFSET);
     expect(settled.frame).toBe(2);
     expect(settled.hFlip).toBe(false);
     expect(settled.screenY).toBe(OPPONENT_SETTLED_SCREEN_Y);
   });
 
-  it("scientists turn during brainMoving via the exact same scientistTurnFrame the ordinary path already ground-truths", () => {
+  it("scientists turn during brainMoving via the exact same scientistTurnFrame the ordinary path already ground-truths (fed the shifted clock, same as the settle check above)", () => {
     expect(scientistTurnFrame(0)).toEqual({ frame: 0, turned: false });
-    expect(scientistTurnFrame(BRAIN_MOVEMENT_SETTLE_ELAPSED)).toEqual({ frame: 2, turned: true });
+    expect(scientistTurnFrame(BRAIN_MOVEMENT_SETTLE_ELAPSED + BRAIN_MOVEMENT_CLOCK_OFFSET)).toEqual({ frame: 2, turned: true });
+  });
+
+  it("BRAIN_MOVEMENT_CLOCK_OFFSET re-bases this window's own elapsed=0 (closemessage dismiss) onto entryStep's RAM-tick clock - RAM-measured (tools/probe/probe-factory-brain-silver-entrance-movement-ram.py): pan is flat through the tick before movement starts, then a clean 1px/tick ramp identical to the ordinary path's own ENTRY_STEPS shape, just starting BRAIN_MOVEMENT_CLOCK_OFFSET ticks later in that shared table", () => {
+    expect(BRAIN_MOVEMENT_CLOCK_OFFSET).toBe(22);
+    // elapsed=0 (this window) and elapsed=1 both land on the still-flat lead-in.
+    expect(entryStep(0 + BRAIN_MOVEMENT_CLOCK_OFFSET).camPanY).toBe(0);
+    expect(entryStep(1 + BRAIN_MOVEMENT_CLOCK_OFFSET).camPanY).toBe(1);
+    // RAM-sampled mid-ramp point (frame 1030 of the dense fixture): pan 71.
+    expect(entryStep(71 + BRAIN_MOVEMENT_CLOCK_OFFSET).camPanY).toBe(71);
+    // Pan caps at 80 (NOLAND_WALK_PX * 5/3) once the decoy/player's own
+    // 5-tile walk finishes, one tick before ENTRY_STEPS' own settle row.
+    expect(entryStep(80 + BRAIN_MOVEMENT_CLOCK_OFFSET).camPanY).toBe(80);
   });
 
   it("brain box print duration matches 1 tick/char over the JSON text, appearing once the room fade-in settles (dense-compare-measured, see battleRoom.ts doc)", () => {

@@ -667,6 +667,18 @@ class RandomPlayer {
     if (state.battleRoom || state.prebattleRoom) {
       return this.pressAdvance(state, "postwin room advance");
     }
+    // Walk-up build step A, Brief 2: brain's call-scene boxes (phone SE,
+    // attendant move, 3-page boss message) advance the same generic way
+    // every other postwin message box does (the fallback `pressAdvance`
+    // below already covers it) -- this branch exists only so soak logs
+    // name the surface explicitly instead of falling through unlabeled.
+    if (
+      postwin.frontierBrain
+      && postwin.callScenePage !== 0
+      && postwin.callSceneDismissElapsed === null
+    ) {
+      return this.pressAdvance(state, `postwin brain call-scene box ${postwin.callScenePage}`);
+    }
     // RECORD/RETIRE YES/NO question.
     if (
       postwin.question !== null
@@ -685,7 +697,11 @@ class RandomPlayer {
       this.note(state, `postwin ${postwin.question.kind}: ${wantYes ? "YES" : "NO"}`);
       return this.press("A", 10);
     }
-    // Continuation menu (GO ON / RECORD / REST / RETIRE).
+    // Continuation menu (GO ON / RECORD / REST / RETIRE) -- shared machinery
+    // for both the ordinary AskReadyForOpponent menu and brain's own
+    // AskReadyForHead (walk-up build step A, Brief 1): the same GO ON/
+    // RECORD/REST/RETIRE random exploration already exercises brain's menu
+    // too whenever continuationCursorPos is live, no separate branch needed.
     if (postwin.question === null && postwin.continuationCursorPos !== null) {
       const roll = this.rng.float();
       const target = !this.explores
@@ -694,10 +710,23 @@ class RandomPlayer {
       if (postwin.continuationCursorPos !== target) {
         return this.press(postwin.continuationCursorPos < target ? "DOWN" : "UP", 6);
       }
-      this.note(state, `postwin continuation: ${["GO ON", "RECORD", "REST", "RETIRE"][target]}`);
+      this.note(
+        state,
+        `postwin ${postwin.frontierBrain ? "brain " : ""}continuation: `
+          + `${["GO ON", "RECORD", "REST", "RETIRE"][target]}`,
+      );
       return this.press("A", 12);
     }
-    // Swap offer YES/NO menu (dialogue page 4).
+    // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead one-liner
+    // (dialoguePage 1) has no scouting pages to cycle through -- it advances
+    // generically (the fallback `pressAdvance` below) then jumps straight to
+    // the swap prompt (dialoguePage 4, handled next). Explicit branch only
+    // for a clearer soak-log label.
+    if (postwin.frontierBrain && postwin.dialoguePage === 1) {
+      return this.pressAdvance(state, "postwin brain one-liner (AskSwapBeforeHead)");
+    }
+    // Swap offer YES/NO menu (dialogue page 4) -- shared for both routes
+    // (brain's short path lands here directly from dialoguePage 1).
     if (
       postwin.dialoguePage === 4
       && postwin.swapDeclineElapsed === null

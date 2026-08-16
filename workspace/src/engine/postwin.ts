@@ -16,6 +16,7 @@ import type {
 } from "./battleScenario.ts";
 import type { RoundControllerState } from "./roundController.ts";
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
+import walkupScript from "../data/gen/factory-brain-walkup-script.json" with { type: "json" };
 
 export type FactoryPostwinOpponentRentalRecords = readonly [
   FactoryCorpusPartyInstance,
@@ -122,6 +123,50 @@ export interface PostwinState {
   /** Accepted "Right this way" dismiss edge; walk/warp clocks derive from it. */
   rightThisWayDismissElapsed: number | null;
   /**
+   * True when `round.rules.currentOpponent.frontierBrain` was set at
+   * creation (walk-up build step A, `docs/walkup-step-a-design.md` Brief 1).
+   * Selects the call-scene + `AskReadyForHead` branch below in place of the
+   * ordinary route's direct heal -> continuation-menu fall-through; the
+   * continuation-menu machinery itself (`continuationCursorPos`,
+   * `acceptPostwinContinuation`, RECORD/REST/RETIRE) is reused unchanged.
+   * Always false on every existing construction path (`createPostwinState`,
+   * `createBattleReturnHoldState`) so the ordinary flow stays byte-identical.
+   */
+  frontierBrain: boolean;
+  /**
+   * Brain-only call-scene box index: 0 = inactive (ordinary path, or the
+   * brain path before the heal-dismiss box-clear boundary), 1-5 = the five
+   * JSON-sourced boxes (`CALL_SCENE_BOX_TEXTS`: "wait a few moments" /
+   * "understood, sir" / boss-message pages 1-3). Mirrors `dialoguePage`'s
+   * own index convention. Unused (stays 0) when `frontierBrain` is false.
+   */
+  callScenePage: 0 | 1 | 2 | 3 | 4 | 5;
+  /**
+   * Accepted edge that opened the CURRENT call-scene box. Box 1 is armed
+   * directly off `healDismissElapsed` (see `advancePostwin`); boxes 2-5 are
+   * armed at the prior box's accepted A edge, mirroring
+   * `dialoguePageEdgeElapsed`.
+   */
+  callScenePageEdgeElapsed: number | null;
+  /**
+   * Walk-up build step A follow-on: the accepted dismiss-A of boxes 1/2,
+   * pending the attendant's own walk-away/walk-back movement -- the CURRENT
+   * box (`callScenePage`/`callScenePageEdgeElapsed`) stays put and keeps
+   * rendering its already-fully-typed content (matching the ground-truth
+   * doc's own "box 1 held" span after its dismiss-A) until `advancePostwin`
+   * performs the deferred bump once `elapsed` reaches this value, mirroring
+   * box 1's own `healDismissElapsed`-armed deferred activation. Null outside
+   * a pending box-1/2 transition (always null on every other box turn,
+   * which stays instant).
+   */
+  callScenePendingElapsed: number | null;
+  /**
+   * Accepted dismiss edge of the call scene's last box (box 5) -- starts
+   * the `AskReadyForHead` prompt's own clock, mirroring `swapDeclineElapsed`
+   * 's role for the ordinary route's "Right this way" text.
+   */
+  callSceneDismissElapsed: number | null;
+  /**
    * Battle Scene OFF only (docs/post-terminal-return-to-lobby-ground-truth.md
    * §3): a frozen snapshot of the terminal message's own last rendered scene,
    * held then BeginFastPaletteFade(3)'d to black by the shared battleHold/
@@ -172,6 +217,117 @@ export const POSTWIN_NEXT_TEXT_TOTAL =
 export const POSTWIN_DIALOGUE_TEXT_FIRST_DELAY = 4;
 export const POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY = 2;
 export const POSTWIN_DIALOGUE_BLANK_DELAY = 3;
+
+// Walk-up build step A, Brief 1 (docs/walkup-step-a-design.md): the brain
+// call-scene + AskReadyForHead menu text, pulled directly from
+// factory-brain-walkup-script.json rather than retyped (its own extraction
+// is source-pinned by tests/factoryBrainWalkupScript.test.ts). Per-box
+// timing reuses this file's own established MSGBOX_DEFAULT conventions
+// (first-glyph delay, 1 tick/char, +2-after-settle accept-ready) rather than
+// inventing new magic numbers -- structural defaults, NOT independently
+// oracle-measured for this specific window (no oracle evidence exists yet
+// for the brain call-scene, docs/walkup-step-a-design.md §4; dense
+// calibration is a later step -- same reuse discipline battleRoom.ts's own
+// brain-speech box queue already documents for its own unmeasured window).
+type WalkupMessageEvent = Readonly<{
+  kind: string;
+  pages?: readonly string[];
+  nonBrainSpecific?: boolean;
+  frames?: number;
+}>;
+const callSceneEvents =
+  walkupScript.scenes.preBattleRoomCallScene.events as readonly WalkupMessageEvent[];
+const callSceneMessageEvents = callSceneEvents.filter(
+  (event): event is Readonly<{ kind: string; pages: readonly string[] }> =>
+    event.kind === "message" && !event.nonBrainSpecific,
+);
+// The extraction JSON preserves source spelling with a plain ASCII
+// apostrophe; the font's own apostrophe glyph is the localized right-single-
+// quote character (same normalization battleRoom.ts's splitSpeechBoxes /
+// factoryTrainerPresentation.ts's displayEasyChatWord already apply).
+function normalizeCallSceneApostrophe(text: string): string {
+  return text.replaceAll("'", "’");
+}
+function splitCallSceneBoxLines(page: string): readonly [string, string] {
+  const [line1, line2] = page.split("\\n") as [string, string];
+  return [normalizeCallSceneApostrophe(line1), normalizeCallSceneApostrophe(line2)];
+}
+/** The five call-scene boxes in order: "wait a few moments" / "understood, sir" / boss-message pages 1-3. */
+export const CALL_SCENE_BOX_TEXTS: readonly (readonly [string, string])[] =
+  callSceneMessageEvents.flatMap((event) => event.pages.map(splitCallSceneBoxLines));
+/** `EventScript_ReturnToRoomFromBattle`'s trailing `delay 16` (scripts.inc:54-77), between the boss message closing and `AskReadyForHead`'s own prompt. */
+export const CALL_SCENE_TRAILING_DELAY = callSceneEvents.at(-1)!.frames!;
+
+const [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2] = splitCallSceneBoxLines(
+  (walkupScript.scenes.askReadyForHead.events[0] as WalkupMessageEvent).pages![0]!,
+);
+export { CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2 };
+export const CALL_SCENE_HEAD_PROMPT_TOTAL =
+  CALL_SCENE_HEAD_PROMPT_LINE1.length + CALL_SCENE_HEAD_PROMPT_LINE2.length;
+
+// Walk-up build step A, Brief 2 (docs/walkup-step-a-design.md §2.1 item 3):
+// `AskSwapBeforeHead`'s one-liner, pulled from the same JSON as the call
+// scene/prompt above rather than retyped. Brain's post-GO ON path shows
+// this single box in place of the three ordinary scouting pages
+// (`dialoguePage` 1-3 have no brain analogue at all -- see the short-path
+// wiring on `postwinDialogueVisibleChars`/`acceptPostwinDialoguePage` below).
+const [POSTWIN_BRAIN_CANT_TELL_LINE1, POSTWIN_BRAIN_CANT_TELL_LINE2] = splitCallSceneBoxLines(
+  (walkupScript.scenes.askSwapBeforeHead.events[0] as WalkupMessageEvent).pages![0]!,
+);
+export const POSTWIN_BRAIN_CANT_TELL_TEXT: readonly [string, string] =
+  [POSTWIN_BRAIN_CANT_TELL_LINE1, POSTWIN_BRAIN_CANT_TELL_LINE2];
+export const POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL =
+  POSTWIN_BRAIN_CANT_TELL_LINE1.length + POSTWIN_BRAIN_CANT_TELL_LINE2.length;
+/**
+ * `AskSwapBeforeHead`'s one-liner accept-ready delay: same structural
+ * "first-glyph +4, then +2-after-settle" MSGBOX_DEFAULT convention as the
+ * call-scene boxes (`postwinCallSceneInputReady`), not an oracle-measured
+ * tick. docs/walkup-call-scene-ground-truth.md's Window 3 confirms this box
+ * types out over exactly this text's char count then holds well past any
+ * plausible accept boundary before the fixture's own dismiss press, but
+ * that fixture used a generous margin (not a tight accept-boundary probe),
+ * so this constant is evidence-aligned-not-calibrated, same honesty label
+ * Brief 1 already applied to the call-scene boxes.
+ */
+export const POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY =
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL + 1;
+
+/**
+ * Per-box first-glyph delay, relative to the box's own edge. Box 1's edge is
+ * `healDismissElapsed` itself, reusing `POSTWIN_NEXT_TEXT_FIRST_DELAY` -- the
+ * same post-heal box-clear boundary the ordinary route's own "next text"
+ * reuses, not a new number (the source branches on `frontier_getbrainstatus`
+ * at exactly this point, per the JSON's own event order). Boxes 2-5 reuse
+ * the generic `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY` MSGBOX_DEFAULT convention
+ * already applied to all three ordinary scouting pages.
+ */
+const CALL_SCENE_TEXT_FIRST_DELAYS: readonly number[] = [
+  POSTWIN_NEXT_TEXT_FIRST_DELAY,
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
+];
+
+function callSceneBoxTotal(page: 1 | 2 | 3 | 4 | 5): number {
+  const [line1, line2] = CALL_SCENE_BOX_TEXTS[page - 1]!;
+  return line1.length + line2.length;
+}
+
+/**
+ * `AskReadyForHead`'s own prompt text-settle -> menu-appear/menu-ready
+ * shape, reusing the exact same "+4 visible / +5 ready" convention
+ * `POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY`/`POSTWIN_CONTINUATION_INPUT_
+ * READY_DELAY` already derive from `POSTWIN_NEXT_TEXT_SETTLED_DELAY` for the
+ * ordinary route's own menu (206 = settled(202)+4, 207 = settled+5) -- same
+ * shape, computed from this prompt's own (JSON-exact) character count
+ * instead of a re-guessed absolute tick.
+ */
+const CALL_SCENE_HEAD_PROMPT_SETTLED_DELAY =
+  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + CALL_SCENE_HEAD_PROMPT_TOTAL - 1;
+export const CALL_SCENE_HEAD_MENU_VISIBLE_DELAY = CALL_SCENE_HEAD_PROMPT_SETTLED_DELAY + 4;
+export const CALL_SCENE_HEAD_MENU_READY_DELAY = CALL_SCENE_HEAD_PROMPT_SETTLED_DELAY + 5;
+
 const POSTWIN_SCOUTING_INTRO =
   ["I’ve conducted a little investigation", "about your upcoming opponent."] as const;
 const POSTWIN_SCOUTING_SWAP_OFFER =
@@ -252,6 +408,11 @@ function createPostwinStateFromSnapshot(
     disableRecordBattle: false,
     recordedMessageDismissElapsed: null,
     rightThisWayDismissElapsed: null,
+    frontierBrain: false,
+    callScenePage: 0,
+    callScenePageEdgeElapsed: null,
+    callScenePendingElapsed: null,
+    callSceneDismissElapsed: null,
     frozenSceneView: null,
   };
 }
@@ -371,6 +532,10 @@ export function createPostwinStateFromRound(
       healedPlayerPartyHp: partyHp(lastBattle.playerParty, "maxHp"),
     }),
     elapsed: GENERATED_ROUTE_INITIAL_ELAPSED,
+    // Walk-up build step A (docs/walkup-step-a-design.md §2.2): presence of
+    // the UPCOMING opponent's `frontierBrain` alone selects the call-scene +
+    // AskReadyForHead branch; the `.status` tier is not needed by this step.
+    frontierBrain: round.rules.currentOpponent.frontierBrain !== undefined,
     frozenSceneView,
   };
 }
@@ -419,6 +584,11 @@ export function createBattleReturnHoldState(
     disableRecordBattle: false,
     recordedMessageDismissElapsed: null,
     rightThisWayDismissElapsed: null,
+    frontierBrain: false,
+    callScenePage: 0,
+    callScenePageEdgeElapsed: null,
+    callScenePendingElapsed: null,
+    callSceneDismissElapsed: null,
     frozenSceneView,
   };
 }
@@ -575,9 +745,36 @@ export function advancePostwin(state: PostwinState): PostwinState {
   const healed =
     state.healDismissElapsed !== null &&
     elapsed >= state.healDismissElapsed + POSTWIN_PARTY_HEAL_DELAY;
-  const menuVisible =
+  // Walk-up build step A: the brain route's call-scene box 1 is armed at the
+  // exact same post-heal boundary the ordinary route's own "next text"
+  // starts typing at (`POSTWIN_NEXT_TEXT_FIRST_DELAY`) -- the JSON's own
+  // `frontier_getbrainstatus` branch sits right there, before either route's
+  // divergent content begins.
+  const callSceneFirstBoxReady =
+    state.frontierBrain &&
+    state.callScenePage === 0 &&
     state.healDismissElapsed !== null &&
-    elapsed >= state.healDismissElapsed + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY;
+    elapsed >= state.healDismissElapsed + POSTWIN_NEXT_TEXT_FIRST_DELAY;
+  // Walk-up build step A follow-on: boxes 1/2's deferred bump (see
+  // `callScenePendingElapsed`'s own doc) fires once the attendant's
+  // walk-away/walk-back movement has run its full course.
+  const callScenePendingReady =
+    state.callScenePendingElapsed !== null &&
+    elapsed >= state.callScenePendingElapsed;
+  // The AskReadyForHead prompt/menu becomes visible relative to the call
+  // scene's own last-box dismiss edge (+ its trailing delay), never relative
+  // to healDismissElapsed directly -- the ordinary route's fixed
+  // POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY has no bearing on brain's much
+  // longer call-scene content.
+  const brainMenuBaseElapsed =
+    state.callSceneDismissElapsed !== null
+      ? state.callSceneDismissElapsed + CALL_SCENE_TRAILING_DELAY
+      : null;
+  const menuVisible = state.frontierBrain
+    ? brainMenuBaseElapsed !== null &&
+      elapsed >= brainMenuBaseElapsed + CALL_SCENE_HEAD_MENU_VISIBLE_DELAY
+    : state.healDismissElapsed !== null &&
+      elapsed >= state.healDismissElapsed + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY;
   const swapMenuVisible =
     state.dialoguePage === 4 &&
     state.dialoguePageEdgeElapsed !== null &&
@@ -590,7 +787,7 @@ export function advancePostwin(state: PostwinState): PostwinState {
   const reAskElapsed = postwinReaskElapsed(state);
   const reAskMenuReady =
     reAskElapsed !== null &&
-    elapsed >= reAskElapsed + POSTWIN_QUESTION_MENU_READY_DELAY;
+    elapsed >= reAskElapsed + postwinQuestionReprintMenuReadyDelay(state);
   return {
     elapsed,
     challengeBattleNum:
@@ -670,6 +867,19 @@ export function advancePostwin(state: PostwinState): PostwinState {
             : state.continuationCursorDisplayPos,
     continuationCursorMoveElapsed: state.continuationCursorMoveElapsed,
     rightThisWayDismissElapsed: state.rightThisWayDismissElapsed,
+    frontierBrain: state.frontierBrain,
+    callScenePage: callSceneFirstBoxReady
+      ? 1
+      : callScenePendingReady
+        ? ((state.callScenePage + 1) as 2 | 3 | 4 | 5)
+        : state.callScenePage,
+    callScenePageEdgeElapsed: callSceneFirstBoxReady
+      ? state.healDismissElapsed
+      : callScenePendingReady
+        ? state.callScenePendingElapsed
+        : state.callScenePageEdgeElapsed,
+    callScenePendingElapsed: callScenePendingReady ? null : state.callScenePendingElapsed,
+    callSceneDismissElapsed: state.callSceneDismissElapsed,
     frozenSceneView: state.frozenSceneView,
   };
 }
@@ -681,7 +891,21 @@ export function acceptPostwinHealDismiss(state: PostwinState): PostwinState {
   return { ...state, healDismissElapsed: state.elapsed };
 }
 
+/** Delay since `AskReadyForHead`'s own base edge (the call scene's last-box dismiss + its trailing delay); null while that edge hasn't happened yet. */
+function postwinHeadPromptDelay(state: PostwinState): number | null {
+  if (state.callSceneDismissElapsed === null) return null;
+  return state.elapsed - state.callSceneDismissElapsed - CALL_SCENE_TRAILING_DELAY;
+}
+
 export function postwinNextVisibleChars(state: PostwinState): number {
+  if (state.frontierBrain) {
+    const delay = postwinHeadPromptDelay(state);
+    if (delay === null || delay < POSTWIN_DIALOGUE_TEXT_FIRST_DELAY) return 0;
+    return Math.min(
+      CALL_SCENE_HEAD_PROMPT_TOTAL,
+      delay - POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + 1,
+    );
+  }
   if (state.healDismissElapsed === null) return 0;
   const delay = state.elapsed - state.healDismissElapsed;
   if (delay < POSTWIN_NEXT_TEXT_FIRST_DELAY) return 0;
@@ -692,9 +916,220 @@ export function postwinNextVisibleChars(state: PostwinState): number {
 }
 
 export function postwinContinuationInputReady(state: PostwinState): boolean {
+  if (state.frontierBrain) {
+    const delay = postwinHeadPromptDelay(state);
+    return delay !== null && delay >= CALL_SCENE_HEAD_MENU_READY_DELAY;
+  }
   return state.healDismissElapsed !== null &&
     state.elapsed >=
       state.healDismissElapsed + POSTWIN_CONTINUATION_INPUT_READY_DELAY;
+}
+
+/** Delay since the current call-scene box's own edge; null while no box is active. */
+function postwinCallSceneDelay(state: PostwinState): number | null {
+  if (state.callScenePage === 0) return null;
+  const edge = state.callScenePageEdgeElapsed;
+  if (edge === null) return null;
+  return state.elapsed - edge;
+}
+
+export function postwinCallSceneVisibleChars(state: PostwinState): number {
+  const delay = postwinCallSceneDelay(state);
+  if (delay === null) return 0;
+  const firstDelay = CALL_SCENE_TEXT_FIRST_DELAYS[state.callScenePage - 1]!;
+  if (delay < firstDelay) return 0;
+  const total = callSceneBoxTotal(state.callScenePage as 1 | 2 | 3 | 4 | 5);
+  return Math.min(total, delay - firstDelay + 1);
+}
+
+export function postwinCallSceneInputReady(state: PostwinState): boolean {
+  const delay = postwinCallSceneDelay(state);
+  if (delay === null) return false;
+  const firstDelay = CALL_SCENE_TEXT_FIRST_DELAYS[state.callScenePage - 1]!;
+  const total = callSceneBoxTotal(state.callScenePage as 1 | 2 | 3 | 4 | 5);
+  // Same "settled + 2" MSGBOX_DEFAULT accept-ready convention as
+  // POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY/POSTWIN_RECORDED_INPUT_READY_DELAY.
+  return delay >= firstDelay + total + 1;
+}
+
+// Walk-up step A follow-on (docs/walkup-call-scene-ground-truth.md Window 1):
+// the attendant's walk-away (box 1 dismiss -> box 2) and walk-back (box 2
+// dismiss -> box 3) movements, `EventScript_ReturnToRoomFromBattle`'s
+// `applymovement ...MoveToReceiveCall`/`applymovement ...ReturnToPlayer`
+// (scripts.inc:67/71) - each 3 tiles (`walk_left`/`walk_right` x3,
+// scripts.inc:437-448). Pixel-probed directly against the committed
+// fixtures (tools/battle-lab/factory-brain-silver-walkup-callscene-0{1,2}-
+// off.json), tracking the attendant sprite's own hair-color marker frame by
+// frame (not the ground-truth doc's own coarser box-level table, which folds
+// the pre-movement message hold into the same row):
+// - Away (fixture 01): box1's dismiss-A registers at oracle frame 895; the
+//   attendant sprite is still at rest through frame 902 (closemessage/task-
+//   dispatch lead-in, MEASURED 8 ticks); it then shifts exactly 1px/tick
+//   left from frame 903 (-1px) through frame 950 (-48px = 3 tiles), holding
+//   at -48 from then on.
+// - Back (fixture 02): box2's dismiss-A registers at oracle frame 1037 and
+//   the attendant shifts the SAME tick (MEASURED 0-tick lead-in, unlike the
+//   away leg) - 1px/tick right from frame 1037 (-47px) through frame 1084
+//   (0px, home), holding there.
+// Both legs move at the same already-established 16-ticks/tile rate
+// (prebattleRoom.ts's WALK_STEPS module doc) - 3 tiles = 48 ticks, MEASURED
+// identical on both fixtures.
+/** Ticks from box 1's dismiss edge to the walk-away's first visible pixel (closemessage/task-dispatch lead-in). MEASURED (fixture 01: 895 -> 903). */
+const CALL_SCENE_MOVE_AWAY_START_DELAY = 8;
+/** Ticks from box 2's dismiss edge to the walk-back's first visible pixel: starts the same tick (MEASURED, fixture 02: 1037 -> 1037). */
+const CALL_SCENE_MOVE_BACK_START_DELAY = 0;
+/** Continuous 1px/tick walk duration, either direction: 3 tiles * 16 ticks/tile. MEASURED identical on both fixtures (48 ticks each). */
+const CALL_SCENE_MOVE_DURATION = 48;
+/** Total px displacement at rest, either direction: 3 tiles * 16px/tile (MEASURED, matches CALL_SCENE_MOVE_DURATION 1:1 - a clean 1px/tick rate). */
+const CALL_SCENE_MOVE_DISTANCE = 48;
+const CALL_SCENE_MOVE_AWAY_TOTAL_DELAY =
+  CALL_SCENE_MOVE_AWAY_START_DELAY + CALL_SCENE_MOVE_DURATION;
+const CALL_SCENE_MOVE_BACK_TOTAL_DELAY =
+  CALL_SCENE_MOVE_BACK_START_DELAY + CALL_SCENE_MOVE_DURATION;
+/**
+ * Per-callScenePage-transition delay from the accepted dismiss edge to the
+ * next box's own content edge (index = `callScenePage - 1` BEFORE the
+ * transition). Boxes 3->4 and 4->5 (the boss message's own page turns) have
+ * no attendant movement (ground-truth doc: no walk listed between them) so
+ * stay instant, same as every other MSGBOX_DEFAULT page turn in this file.
+ */
+export const CALL_SCENE_PAGE_TRANSITION_DELAY: readonly [number, number, number, number] = [
+  CALL_SCENE_MOVE_AWAY_TOTAL_DELAY,
+  CALL_SCENE_MOVE_BACK_TOTAL_DELAY,
+  0,
+  0,
+];
+
+/**
+ * Picture-table pose during the walk, cycling every 8 ticks: stand(2) then
+ * lead-leg(7 west/8 east), matching `sAnim_GoWest`/`sAnim_GoEast`
+ * (reference/pokeemerald/src/data/object_events/object_event_anims.h:220-
+ * 235: `ANIMCMD_FRAME(7,8)`, `ANIMCMD_FRAME(2,8)`, `ANIMCMD_FRAME(8,8)`,
+ * `ANIMCMD_FRAME(2,8)`, loop - GoEast is the same table with `hFlip=TRUE`).
+ * Source-derived, not independently pixel-probed frame-by-frame.
+ */
+function callSceneWalkFrame(walkTick: number): 2 | 7 | 8 {
+  const cyclePos = walkTick % 32;
+  if (cyclePos < 8) return 7;
+  if (cyclePos < 16) return 2;
+  if (cyclePos < 24) return 8;
+  return 2;
+}
+
+export interface CallSceneAttendantVisual {
+  /** Signed px offset from the attendant's rest position (negative = west/away). */
+  readonly dx: number;
+  /** Picture-table frame (prebattle-room-npcs.json indexing): 0 = face south (rest), 2 = face west/east stand, 7/8 = west/east walk legs. */
+  readonly frame: 0 | 2 | 7 | 8;
+  readonly hFlip: boolean;
+}
+const CALL_SCENE_HOME_VISUAL: CallSceneAttendantVisual = { dx: 0, frame: 0, hFlip: false };
+/** Held pose once the walk-away settles (MEASURED: the last GoWest cycle tick before `waitmovement 0` returns is frame 2, west-stand - matches `callSceneWalkFrame`'s own last value). */
+const CALL_SCENE_AWAY_HOLD_VISUAL: CallSceneAttendantVisual = { dx: -CALL_SCENE_MOVE_DISTANCE, frame: 2, hFlip: false };
+
+/**
+ * Ticks the just-arrived box's own frame graphic stays hidden past its edge
+ * before it visibly reopens (index 0 = box 2, after the walk-away; index 1 =
+ * box 3, after the walk-back) -- both boxes fully `closemessage`d before
+ * their `applymovement` (scripts.inc:66/70), unlike every other box turn in
+ * this file, which reuses an already-open box (no closemessage between
+ * them) and so has no such gap. MEASURED (fixture 01: box 2's frame
+ * reappears oracle frame 954, edge 951, gap 3; fixture 02: box 3's frame
+ * reappears oracle frame 1089, edge 1085, gap 4 -- the same tick its first
+ * glyph appears, i.e. zero extra blank-frame hold that time).
+ */
+const CALL_SCENE_BOX_REOPEN_LAG: readonly [number, number] = [3, 4];
+
+/** The attendant's current on-screen offset/pose for the brain call scene - null-safe for every non-brain / pre-movement state (returns the rest visual). */
+export function callSceneAttendantVisual(state: PostwinState): CallSceneAttendantVisual {
+  if (!state.frontierBrain || state.callScenePage === 0) return CALL_SCENE_HOME_VISUAL;
+  if (state.callScenePage === 1) {
+    if (state.callScenePendingElapsed === null) return CALL_SCENE_HOME_VISUAL;
+    const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_AWAY_TOTAL_DELAY;
+    const localTick = state.elapsed - dismissEdge;
+    if (localTick < CALL_SCENE_MOVE_AWAY_START_DELAY) return CALL_SCENE_HOME_VISUAL;
+    const walkTick = Math.min(
+      localTick - CALL_SCENE_MOVE_AWAY_START_DELAY,
+      CALL_SCENE_MOVE_DURATION - 1,
+    );
+    return { dx: -(walkTick + 1), frame: callSceneWalkFrame(walkTick), hFlip: false };
+  }
+  if (state.callScenePage === 2) {
+    if (state.callScenePendingElapsed === null) return CALL_SCENE_AWAY_HOLD_VISUAL;
+    const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_BACK_TOTAL_DELAY;
+    const localTick = Math.max(0, state.elapsed - dismissEdge - CALL_SCENE_MOVE_BACK_START_DELAY);
+    const walkTick = Math.min(localTick, CALL_SCENE_MOVE_DURATION - 1);
+    return {
+      dx: -CALL_SCENE_MOVE_DISTANCE + (walkTick + 1),
+      frame: callSceneWalkFrame(walkTick),
+      hFlip: true,
+    };
+  }
+  return CALL_SCENE_HOME_VISUAL;
+}
+
+/**
+ * True while the call-scene message box is fully hidden: the attendant's
+ * walk-away/walk-back movement span itself (box already dismissed, still
+ * displaying the OLD page number until the deferred bump -- see
+ * `callScenePendingElapsed`), plus the just-arrived box's own short reopen
+ * lag (`CALL_SCENE_BOX_REOPEN_LAG`). Ground-truth doc: no message box
+ * visible for either walk's full span.
+ */
+export function callSceneBoxHidden(state: PostwinState): boolean {
+  if (!state.frontierBrain || state.callScenePage === 0 || state.callSceneDismissElapsed !== null) {
+    return false;
+  }
+  if (state.callScenePendingElapsed !== null) {
+    if (state.callScenePage === 1) {
+      const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_AWAY_TOTAL_DELAY;
+      return state.elapsed - dismissEdge >= CALL_SCENE_MOVE_AWAY_START_DELAY;
+    }
+    if (state.callScenePage === 2) {
+      const dismissEdge = state.callScenePendingElapsed - CALL_SCENE_MOVE_BACK_TOTAL_DELAY;
+      return state.elapsed - dismissEdge >= CALL_SCENE_MOVE_BACK_START_DELAY;
+    }
+    return false;
+  }
+  if (state.callScenePage === 2 || state.callScenePage === 3) {
+    const edge = state.callScenePageEdgeElapsed;
+    if (edge === null) return false;
+    return state.elapsed - edge < CALL_SCENE_BOX_REOPEN_LAG[state.callScenePage - 2]!;
+  }
+  return false;
+}
+
+/**
+ * Advances the call scene's current box on an accepted A-press. Boxes 1 and
+ * 2 arm a PENDING transition (`callScenePendingElapsed`) gated behind the
+ * attendant's walk-away/walk-back movement instead of turning over
+ * instantly -- the box itself stays put (still fully typed/held, matching
+ * the ground-truth doc's own post-dismiss hold) until `advancePostwin`
+ * performs the deferred bump. Boxes 3/4 (no movement) still turn over
+ * instantly, mirroring `acceptPostwinDialoguePage`; box 5 (the boss
+ * message's last page) instead records `callSceneDismissElapsed`, starting
+ * `AskReadyForHead`'s own prompt clock.
+ */
+export function acceptPostwinCallScenePage(state: PostwinState): PostwinState {
+  if (
+    !state.frontierBrain ||
+    state.callScenePage === 0 ||
+    state.callSceneDismissElapsed !== null ||
+    state.callScenePendingElapsed !== null ||
+    !postwinCallSceneInputReady(state)
+  ) return state;
+  if (state.callScenePage < 5) {
+    const transitionDelay = CALL_SCENE_PAGE_TRANSITION_DELAY[state.callScenePage - 1]!;
+    if (transitionDelay === 0) {
+      return {
+        ...state,
+        callScenePage: (state.callScenePage + 1) as 2 | 3 | 4 | 5,
+        callScenePageEdgeElapsed: state.elapsed,
+      };
+    }
+    return { ...state, callScenePendingElapsed: state.elapsed + transitionDelay };
+  }
+  return { ...state, callSceneDismissElapsed: state.elapsed };
 }
 
 /**
@@ -887,14 +1322,34 @@ export function postwinReaskElapsed(state: PostwinState): number | null {
     : state.recordedMessageDismissElapsed;
 }
 
-/** Re-ask "2nd match is next!" visible glyph count after a question dismiss. */
+/**
+ * Re-ask prompt total glyph count: the ordinary route's "2nd match is next!"
+ * (`POSTWIN_NEXT_TEXT_TOTAL`, matches the standalone `POSTWIN_QUESTION_
+ * REPRINT_SETTLED_DELAY`/`POSTWIN_QUESTION_MENU_READY_DELAY` constants below
+ * via the same `firstDelay+total-1[+4]` shape those were fit from) or the
+ * brain route's own longer `AskReadyForHead` prompt
+ * (`CALL_SCENE_HEAD_PROMPT_TOTAL`) -- `AskRecordBattle`/`AskRetireChallenge`'s
+ * NO branch falls through `AskReadyForOpponent` on EITHER route, so the
+ * re-ask always re-prints whichever prompt that route's own AskReadyForHead/
+ * ReadyFor2ndOpponent uses, not always the ordinary one. Walk-up build step A
+ * follow-on: this branch didn't exist when `postwinQuestionReprintVisibleChars`
+ * was first written (ordinary-route-only at the time), so the brain route's
+ * RECORD/RETIRE re-ask rendered the wrong (short) text -- found this session
+ * via the RECORD/RETIRE compare traces
+ * (docs/walkup-call-scene-ground-truth.md Windows 4-5).
+ */
+function postwinQuestionReprintTotal(state: PostwinState): number {
+  return state.frontierBrain ? CALL_SCENE_HEAD_PROMPT_TOTAL : POSTWIN_NEXT_TEXT_TOTAL;
+}
+
+/** Re-ask "2nd match is next!" (or brain's AskReadyForHead) visible glyph count after a question dismiss. */
 export function postwinQuestionReprintVisibleChars(state: PostwinState): number {
   const reAsk = postwinReaskElapsed(state);
   if (state.question === null || reAsk === null) return 0;
   const delay = state.elapsed - reAsk;
   if (delay < POSTWIN_QUESTION_REPRINT_FIRST_DELAY) return 0;
   return Math.min(
-    POSTWIN_NEXT_TEXT_TOTAL,
+    postwinQuestionReprintTotal(state),
     delay - POSTWIN_QUESTION_REPRINT_FIRST_DELAY + 1,
   );
 }
@@ -903,14 +1358,31 @@ export function postwinQuestionReprintSettled(state: PostwinState): boolean {
   const reAsk = postwinReaskElapsed(state);
   if (state.question === null || reAsk === null) return false;
   return state.elapsed - reAsk >=
-    POSTWIN_QUESTION_REPRINT_SETTLED_DELAY;
+    (state.frontierBrain
+      ? POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1
+      : POSTWIN_QUESTION_REPRINT_SETTLED_DELAY);
+}
+
+/**
+ * Same "settled + 4" shape `POSTWIN_QUESTION_MENU_READY_DELAY` (44) already
+ * encodes for the ordinary route (`5 + POSTWIN_NEXT_TEXT_TOTAL(36) - 1 + 4`)
+ * -- re-derived per-route instead of a second hardcoded constant so it stays
+ * correct for whichever prompt `postwinQuestionReprintTotal` selects. Brain:
+ * `5 + 63 - 1 + 4 = 71`, structural (same reuse discipline as
+ * `CALL_SCENE_HEAD_MENU_VISIBLE_DELAY`/`READY_DELAY`), not independently
+ * oracle-measured for this specific re-ask window.
+ */
+function postwinQuestionReprintMenuReadyDelay(state: PostwinState): number {
+  return state.frontierBrain
+    ? POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1 + 4
+    : POSTWIN_QUESTION_MENU_READY_DELAY;
 }
 
 export function postwinQuestionMenuReady(state: PostwinState): boolean {
   const reAsk = postwinReaskElapsed(state);
   if (state.question === null || reAsk === null) return false;
   return state.elapsed - reAsk >=
-    POSTWIN_QUESTION_MENU_READY_DELAY;
+    postwinQuestionReprintMenuReadyDelay(state);
 }
 
 export function acceptPostwinContinuation(
@@ -955,7 +1427,11 @@ export function postwinDialogueDelay(state: PostwinState): number | null {
 export function postwinDialogueVisibleChars(state: PostwinState): number {
   const delay = postwinDialogueDelay(state);
   if (delay === null || delay < POSTWIN_DIALOGUE_TEXT_FIRST_DELAY) return 0;
-  const lines = state.scoutingLines[state.dialoguePage - 1];
+  // Brain's short path (Brief 2): dialoguePage 1 is the AskSwapBeforeHead
+  // one-liner instead of the ordinary route's first scouting page.
+  const lines = state.frontierBrain && state.dialoguePage === 1
+    ? POSTWIN_BRAIN_CANT_TELL_TEXT
+    : state.scoutingLines[state.dialoguePage - 1];
   if (!lines) return 0;
   return Math.min(
     lines[0].length + lines[1].length,
@@ -966,6 +1442,9 @@ export function postwinDialogueVisibleChars(state: PostwinState): number {
 export function postwinDialogueInputReady(state: PostwinState): boolean {
   const delay = postwinDialogueDelay(state);
   if (delay === null) return false;
+  if (state.frontierBrain && state.dialoguePage === 1) {
+    return delay >= POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY;
+  }
   if (state.dialoguePage >= 1 && state.dialoguePage <= 3) {
     return delay >= POSTWIN_SCOUTING_INPUT_READY_DELAYS[state.dialoguePage - 1]!;
   }
@@ -979,9 +1458,15 @@ export function acceptPostwinDialoguePage(state: PostwinState): PostwinState {
     state.dialoguePage > 3 ||
     !postwinDialogueInputReady(state)
   ) return state;
+  // Brain's short path (Brief 2, docs/walkup-step-a-design.md §2.1 item 3):
+  // AskSwapBeforeHead's one-liner goes straight to the swap ask, skipping
+  // the ordinary route's scouting pages 2-3 entirely.
+  const nextPage: 2 | 3 | 4 = state.frontierBrain && state.dialoguePage === 1
+    ? 4
+    : (state.dialoguePage + 1) as 2 | 3 | 4;
   return {
     ...state,
-    dialoguePage: (state.dialoguePage + 1) as 2 | 3 | 4,
+    dialoguePage: nextPage,
     dialoguePageEdgeElapsed: state.elapsed,
     swapCursorPos: null,
     swapCursorDisplayPos: null,

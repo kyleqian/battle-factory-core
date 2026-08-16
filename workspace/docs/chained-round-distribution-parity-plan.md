@@ -316,10 +316,20 @@ cost is known); touching engine code for any crash the new policy
 surfaces (file it in ISSUES.md/report it, per the "soak driver never
 fixes engine behavior" convention — this step is coverage, not fixing).
 
-**Step 4 (only after 1-3 land and only if the user wants oracle-backed
-deep-streak walk-up evidence, not just engine-arithmetic evidence) — Design
-(do not build) the harness-side `battle_lab.py` fix for `factoryBrain`
-staging's overworld bookkeeping gap.**
+**Step 4 — SATISFIED BY LANDED INFRASTRUCTURE (2026-08-16 supervisor
+note): no memo needed.** Top-layer harness commit `3e29880b`
+(2026-08-15) implemented exactly what this step would have designed:
+`factoryBrain` + `walkup: true` staging redirects the parked field
+script to the ROM's own post-win fragment (so `VAR_0x8006 = 1` and the
+streak/battle-number bookkeeping land genuinely), and challengeNum 5 now
+sets the silver symbol flag `GetFrontierBrainStatus` reads. See
+`../oracle/BATTLE_LAB.md` "Frontier-Brain walk-up staging". Gap 2 is
+closed; the original step text is preserved below for the record.
+
+**Step 4 (original text; only after 1-3 land and only if the user wants
+oracle-backed deep-streak walk-up evidence, not just engine-arithmetic
+evidence) — Design (do not build) the harness-side `battle_lab.py` fix
+for `factoryBrain` staging's overworld bookkeeping gap.**
 Goal: a design memo (not code — `oracle/` is USER-level per the
 established Noland-program handoff pattern) specifying what
 `BattleLab.prepare()` needs to write (silver: `VAR_0x8006`; gold: the

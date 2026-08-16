@@ -108,14 +108,26 @@ export interface BattleRoomState {
   frontierBrainWalkup?: true;
   /**
    * Walk-up build step B2: true when this brain encounter shows the full
-   * gated first-time personality speech (`silverFirstEncounter` - 8 pages +
-   * cry); false selects the 2-event repeat variant (`silverRepeat` - cry
-   * only). Set once at construction from the silver-tier heard-speech flag
-   * (`factoryHeardBrainSpeech`/`markFactoryBrainSpeechHeard`,
+   * gated first-time personality speech (`silverFirstEncounter`/
+   * `goldFirstEncounter` - see `brainSpeechTier` for which); false selects
+   * the short repeat variant (`silverRepeat`/`goldRepeat` - the always-shown
+   * close line only). Set once at construction from the tier's own heard-
+   * speech flag (`factoryHeardBrainSpeech`/`markFactoryBrainSpeechHeard`,
    * factoryRoundBattleOrchestrator.ts) and never re-read afterward - only
    * meaningful when `frontierBrainWalkup` is set.
    */
   brainSpeechFirstEncounter?: boolean;
+  /**
+   * Walk-up build step B3: which Frontier-Brain tier's speech content
+   * applies (`goldFirstEncounter`/`goldRepeat` vs `silverFirstEncounter`/
+   * `silverRepeat`, both from `factory-brain-walkup-script.json`) - set once
+   * at construction from `opponent.frontierBrain.status`
+   * (`battleRoomStateForOpponent`), never re-read afterward. Defaults to
+   * `"silver"` so every pre-B3 caller (silver's own tests/traces, and any
+   * caller that never touched this field) is unchanged. Only meaningful
+   * when `frontierBrainWalkup` is set.
+   */
+  brainSpeechTier?: "silver" | "gold";
   /**
    * Index into `brainSpeechBoxes(state)` for the box currently printing/
    * idle ("brainSpeech"/"brainSpeechIdle") or just dismissed
@@ -145,12 +157,14 @@ export const INITIAL_BATTLE_2_ROOM_STATE: BattleRoomState = {
 export function createBrainWalkupBattleRoomState(
   trainerPresentation?: FactoryTrainerPresentation,
   heardBrainSpeechBefore = false,
+  brainSpeechTier: "silver" | "gold" = "silver",
 ): BattleRoomState {
   return Object.freeze({
     phase: "brainEntering",
     elapsed: 0,
     frontierBrainWalkup: true,
     brainSpeechFirstEncounter: !heardBrainSpeechBefore,
+    brainSpeechTier,
     trainerPresentation,
   });
 }
@@ -172,7 +186,17 @@ export function battleRoomStateForOpponent(
   heardBrainSpeechBefore = false,
 ): BattleRoomState {
   if (opponent?.frontierBrain !== undefined) {
-    return createBrainWalkupBattleRoomState(trainerPresentation, heardBrainSpeechBefore);
+    // Only "gold" selects the gold speech content; every other status
+    // (silver, and the not-yet-presentation-wired streak/streak-long
+    // repeats) keeps the pre-existing silver default - out of scope for
+    // this step, same non-regression as before B3 touched this seam.
+    const brainSpeechTier: "silver" | "gold" =
+      opponent.frontierBrain.status === "gold" ? "gold" : "silver";
+    return createBrainWalkupBattleRoomState(
+      trainerPresentation,
+      heardBrainSpeechBefore,
+      brainSpeechTier,
+    );
   }
   return { ...INITIAL_BATTLE_2_ROOM_STATE, trainerPresentation };
 }
@@ -640,31 +664,64 @@ export function opponentStep(elapsed: number): OpponentStep {
 // the remaining fixture-02 residual (Noland's face must be visible, not the
 // decoy's own north-facing idle pose).
 //
+// **Walk-up build step B1c (RAM re-derivation of the brainMoving walk/pan
+// cadence, `tools/probe/probe-factory-brain-silver-entrance-movement-ram.py`
+// - direct `gTotalCameraPixelOffsetY`/`gSprites`/`gObjectEvents` reads every
+// frame 896-1151 of the same staged fixture 03 uses, not pixel curve-
+// fitting):** B1b's own diagnosis (`entryStep`'s per-tick table doesn't
+// reproduce this branch's cadence) was wrong in its root cause. RAM shows
+// the decoy/camera in THIS window follow the exact SAME per-tick shape as
+// `ENTRY_STEPS` (same clean 1px/tick pan, same animCmdIndex phase at every
+// sampled tick, same one-tick-after-pan-stops settle) - just re-based onto a
+// different zero point. `ENTRY_STEPS`' own leading 23 flat-pan ticks
+// (indices 0-22) are an artifact of THAT window's warp fade-in still
+// settling (S6 slice 2a finding 1/2 above) - irrelevant here, since
+// `brainMoving` starts from a closed msgbox, not a fade. Re-based by
+// `BRAIN_MOVEMENT_CLOCK_OFFSET` (22, RAM-measured - see its own doc),
+// `entryStep`/`scientistTurnFrame`/`nolandStep` reproduce this window's real
+// decoy/Noland position and animation at every RAM-sampled tick, not just
+// the endpoints - `nolandStep`'s existing screenY/frame formulas (24 flat,
+// then `24 + (camPanY - 48)` past the walk) were themselves ALREADY correct;
+// only the elapsed value feeding them was wrong. Separately,
+// `SPEECH_APPEAR_ELAPSED` (the `brainSettled` -> `brainSpeech` handoff,
+// previously an unmeasured structural 0) is now MEASURED at 5, closing a
+// distinct ~5-tick speech-box-appears-too-early mismatch this step also
+// found once the walk/pan cadence stopped masking it. The compare trace's
+// own A-press timing (`tools/compare/traces/factory-brain-silver-walkup-
+// entrance-03-off.json`) was also corrected - it dismissed the msgbox ~20
+// ticks before oracle's real dismissal point, an artifact of B1b's own
+// (mis-scoped) tuning attempt, not a app-code bug.
+//
 // **Residual NOT closed this step, flagged honestly rather than relabeled
-// "measured":** fixture 03's own `brainMoving` window (Noland/decoy walk +
-// camera pan, the ~103 elapsed ticks from the box-close dismiss through
-// shortly before `BRAIN_MOVEMENT_SETTLE_ELAPSED`) still mismatches
-// substantially against fresh dense-compare evidence - `entryStep`'s own
-// per-tick table (built for the ORDINARY path's own decoy-only walk, S6
-// slice 2a's module doc above) does not reproduce this branch's real
-// camera-pan cadence when reused verbatim for the simultaneous Noland+decoy
-// walk; a same-shape lookup shifted earlier was tried and made the mismatch
-// worse, not better, so the true per-tick schedule is NOT simply a phase
-// shift of `ENTRY_STEPS` and needs its own RAM/pixel derivation, out of this
-// step's remaining time budget. `NOLAND_INITIAL_SCREEN_Y` (24) and the
-// `camPanY`/`decoyFrame` reuse inside `nolandStep`/`renderBattleRoomBrain
-// EntranceScene` therefore REMAIN the prior algebraic/structural guess, NOT
-// dense-compare-measured - do not trust this window's exact pixels until a
-// future step re-derives the walk cadence. `BRAIN_MOVEMENT_SETTLE_ELAPSED`
-// (108) is comparatively well-supported: the residual's own far boundary
-// (oracle's real speech-box onset, B2's job, unimplemented here) lines up
-// with this constant's predicted `brainSettled` entry to within a handful of
-// frames, so it is kept as the best-available value but not re-derived
-// independently this step either.
+// "measured":** fixture 03 improves from a broad ~26-65% full-frame
+// mismatch (0/256 in its own ramp+speech-onset region) to a bounded
+// ~5-13%-of-frame residual confined to the mid-ramp window only (162/256
+// frames now exact, up from 43/256; every frame before the ramp and every
+// frame once the room is genuinely settled, including all of B2's speech
+// content, is exact). Direct RAM cross-checks at multiple ramp ticks (not
+// just the endpoints) show `camPanY`/decoy-animation/Noland-position all
+// matching oracle's real RAM exactly at those sampled ticks - yet the
+// rendered PIXELS still diverge mid-ramp (a small, sub-tile-scale
+// misalignment: cross-correlating diff frames against a pure vertical pixel
+// shift finds a best-fit +1px offset with ~98-99% background-tile
+// agreement, not 100%, so it isn't simply a further one-tick lag either -
+// `BRAIN_MOVEMENT_CLOCK_OFFSET` values of 21 and 23 were both tried and
+// both regressed the OVERALL match count, so the fix isn't a uniform
+// elapsed-clock shift). The true mechanism (likely a sub-tile easing/
+// interpolation this room's own camera applies that `gTotalCameraPixelOffsetY`
+// alone doesn't capture, or a second camera-adjacent RAM field this probe
+// didn't read) is undetermined - a future step should RAM-probe
+// `gSpriteCoordOffsetY`/OAM-buffer state directly across the ramp (this
+// step's probe already reads `gSpriteCoordOffsetX/Y`, see its own source)
+// rather than re-deriving further from `camPanY` alone.
+// `BRAIN_MOVEMENT_SETTLE_ELAPSED` is now 86 (down from the prior 108) -
+// still the same real-tick distance from `scientistTurnFrame`'s own
+// (unshifted) 108 threshold, just expressed in this window's own un-shifted
+// clock instead of `entryStep`'s.
 
 /** Noland's own walk distance in px (`walk_up`x3, this game's established 16-ticks/tile object-movement rate - see module doc points 2/3 above). */
 export const NOLAND_WALK_PX = 48;
-/** Noland's screen Y at `elapsed` 0 (spawn tile (7,9), zero pan) - see the derivation note above. */
+/** Noland's screen Y at `elapsed` 0 (spawn tile (7,9), zero pan) - RAM-confirmed this step (B1c, see module doc above): matches the RAM-sampled screen position formula (`nolY + spriteCoordOffsetY - 16`) exactly for every `camPanY < NOLAND_WALK_PX` tick sampled, not just algebraically derived. */
 export const NOLAND_INITIAL_SCREEN_Y = 24;
 /**
  * Noland's own resting pose before `brainMoving` starts (`brainEntering`/
@@ -696,8 +753,36 @@ export function nolandStep(elapsed: number): NolandStep {
   return { frame: 2, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y + (camPanY - NOLAND_WALK_PX) };
 }
 
-/** Elapsed tick `brainMoving` settles (scientists fully turned - see `scientistTurnFrame`'s own threshold; strictly later than `ENTRY_SETTLE_ELAPSED`, which only covers the camera pan). */
-export const BRAIN_MOVEMENT_SETTLE_ELAPSED = 108;
+/**
+ * Ticks to add to `brainMoving`'s own `elapsed` (0 = the tick `closemessage`
+ * dismisses "Get a move on!") before feeding `entryStep`/`scientistTurnFrame`
+ * - both keyed by the ORDINARY path's RAM-tick clock (S6 slice 2a/2b's
+ * `elapsed` = trace tick - 520), which has its own ~22-tick pre-pan stall
+ * baked in (`ENTRY_STEPS` indices 0-22, camera flat) that belongs to THAT
+ * window's warp fade-in settling, not to this one (no fade here - just a
+ * closed msgbox). RAM-measured this step (`tools/probe/probe-factory-brain-
+ * silver-entrance-movement-ram.py`, `gTotalCameraPixelOffsetY`/`gSprites`/
+ * `gObjectEvents` sampled every frame 896-1151 of the same staged route the
+ * committed fixture 03 uses): the pan is flat at 0 through oracle frame 959,
+ * becomes 1 at frame 960, and free-runs the SAME clean 1px/tick this file's
+ * slice-2a doc already established - i.e. this window's OWN elapsed=1 lands
+ * on oracle frame 960, matching `ENTRY_STEPS` index 23 (`entryStep(1 + 22)`)
+ * exactly, including the decoy's animCmdIndex phase (RAM cmdIdx 2 at frame
+ * 960, the same phase `ENTRY_STEPS[23]`'s frame value 6 implies per this
+ * file's own point-3 finding). Verified across the whole window, not just
+ * the boundary: decoy/Noland's raw sprite Y at every sampled pan value
+ * matches `nolandStep`'s existing formula exactly (see its own doc), and the
+ * decoy's settle transition (raw animNum 5->7, a walking-cycle freeze, not a
+ * dedicated "face" table - same mechanism this file's slice-2b doc already
+ * documents for the ordinary opponent's own settle) lands on oracle frame
+ * 1040 = elapsed 81 in this shifted numbering, i.e. exactly one tick after
+ * pan reaches 80 (frame 1039, elapsed 80) - the identical "settle one tick
+ * after the pan itself stops" pattern `ENTRY_STEPS`'s own row 103 encodes.
+ */
+export const BRAIN_MOVEMENT_CLOCK_OFFSET = 22;
+
+/** Elapsed tick `brainMoving` settles (scientists fully turned - see `scientistTurnFrame`'s own threshold, fed `elapsed + BRAIN_MOVEMENT_CLOCK_OFFSET`; strictly later than the decoy/pan/Noland settle at elapsed 81, which only covers the camera pan + walk). RAM-measured (same probe as `BRAIN_MOVEMENT_CLOCK_OFFSET`): scientists start their own turn only once `waitmovement 0` for the walk itself resolves (`ScientistsFaceBattle` is a separate, sequential `call` in source, scripts.inc:58) - `scientistTurnFrame`'s own threshold (108, unshifted) minus this window's `BRAIN_MOVEMENT_CLOCK_OFFSET` (22) = 86. */
+export const BRAIN_MOVEMENT_SETTLE_ELAPSED = 86;
 
 const getAMoveOnEvent = walkupScript.scenes.battleRoomEntrance.events[0] as {
   readonly pages: readonly string[];
@@ -819,7 +904,57 @@ export const SILVER_REPEAT_SPEECH_BOXES: readonly (readonly [string, string])[] 
   splitSpeechBoxes(silverRepeatCryMessage!.pages[0]!)[0]!,
 ];
 
+// Walk-up build step B3: the gold Noland speech (goldFirstEncounter/
+// goldRepeat), same box-queue idiom as B2's silver machinery above but with
+// two structural differences the dense gold ground truth pins (docs/noland-
+// brain-intro-gold-ground-truth.md §7'): (1) 4 pages, none containing a \l
+// scroll (unlike silver's page 1), so the personality speech flattens 1:1 to
+// 4 boxes rather than 9; (2) no battle-cry message event at all - the gated
+// speech's own `frontier_set` is followed directly by a separate, always-
+// shown "All right!\nBring it on!" close line, structurally the same
+// position (and reuse point in brainSpeechBoxes/brainSpeechCursorVisible/
+// battleRoomJustFinishedBrainPersonalitySpeech below) as silver's cry box,
+// just not called "cry" in the JSON.
+const goldFirstEncounterScene = walkupScript.scenes.goldFirstEncounter as {
+  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
+};
+const goldRepeatScene = walkupScript.scenes.goldRepeat as {
+  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
+};
+
+const [goldPersonalityMessage, goldCloseMessage] = onlyMessageEvents(goldFirstEncounterScene.events);
+const [goldRepeatCloseMessage] = onlyMessageEvents(goldRepeatScene.events);
+
+/** The 4-page gated personality speech, flattened 1:1 to 4 boxes (no \l scroll in any gold page). */
+export const GOLD_PERSONALITY_SPEECH_BOXES: readonly (readonly [string, string])[] =
+  goldPersonalityMessage!.pages.flatMap(splitSpeechBoxes);
+
+/** Index one past the personality speech's last box - the close box ("All right! Bring it on!") sits here. */
+export const GOLD_PERSONALITY_BOX_COUNT = GOLD_PERSONALITY_SPEECH_BOXES.length;
+
+const GOLD_CLOSE_BOX = splitSpeechBoxes(goldCloseMessage!.pages[0]!)[0]!;
+
+/** First-encounter box queue: the 4 personality boxes, then the close line - no battle-cry box for gold (module doc above). */
+export const GOLD_FIRST_ENCOUNTER_SPEECH_BOXES: readonly (readonly [string, string])[] = [
+  ...GOLD_PERSONALITY_SPEECH_BOXES,
+  GOLD_CLOSE_BOX,
+];
+
+/** Repeat-encounter box queue (goldRepeat.events: the close message + the DoNolandBattle call) - just the close box, same text as the first-encounter variant's own final box. */
+export const GOLD_REPEAT_SPEECH_BOXES: readonly (readonly [string, string])[] = [
+  splitSpeechBoxes(goldRepeatCloseMessage!.pages[0]!)[0]!,
+];
+
+function brainSpeechPersonalityBoxCount(state: BattleRoomState): number {
+  return state.brainSpeechTier === "gold" ? GOLD_PERSONALITY_BOX_COUNT : SILVER_PERSONALITY_BOX_COUNT;
+}
+
 function brainSpeechBoxes(state: BattleRoomState): readonly (readonly [string, string])[] {
+  if (state.brainSpeechTier === "gold") {
+    return state.brainSpeechFirstEncounter
+      ? GOLD_FIRST_ENCOUNTER_SPEECH_BOXES
+      : GOLD_REPEAT_SPEECH_BOXES;
+  }
   return state.brainSpeechFirstEncounter
     ? SILVER_FIRST_ENCOUNTER_SPEECH_BOXES
     : SILVER_REPEAT_SPEECH_BOXES;
@@ -836,15 +971,16 @@ function brainSpeechPrintTicks(box: readonly [string, string]): number {
 
 /**
  * Elapsed tick "brainSettled" hands off into the speech's first box.
- * Structural default (0 = immediately) - NOT yet dense-compare-measured:
- * the speech-open boundary (docs/noland-silver-walkup-presentation-map.md
- * puts it around oracle frame ~1113) sits just past B1b's own not-yet-
- * closed brainMoving walk/pan cadence residual (PROGRESS 1278), so this
- * module's own `elapsed` numbering for the "brainSettled" boundary itself
- * isn't independently pinned yet either. Revisit once that cadence is
- * re-derived from fresh RAM/pixel evidence.
+ * MEASURED (this step, alongside `BRAIN_MOVEMENT_CLOCK_OFFSET`): dense
+ * compare against fixture 03 with the walk/pan cadence corrected showed the
+ * app's speech box appearing 5 ticks before oracle's real one (a static
+ * empty-box-shaped mismatch, oracle frames matching this module's own
+ * `preCheckpointFrameOffset`-relative numbering 1046-1050 - `docs/noland-
+ * silver-walkup-presentation-map.md`'s own "~1113" estimate was a rough
+ * typewriter-visibility read, not a tick-exact appear boundary); 5 closes it
+ * exactly.
  */
-export const SPEECH_APPEAR_ELAPSED = 0;
+export const SPEECH_APPEAR_ELAPSED = 5;
 
 /**
  * Elapsed tick "brainSpeechSettled" (the cry box just closed) hands off to
@@ -863,15 +999,20 @@ export const BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED = 28;
  * next by the source `\l`/`\p` control codes) shows it while idle, matching
  * this engine's own existing battle-scene wait-cursor mechanism
  * (battleScene.ts's drawCursor/CURSOR_Y_OFFSETS - same glyph, reused here).
- * The personality speech's LAST box (page 8, string-terminated by `$` with
- * no further `\p`) and the standalone cry box (a separate msgbox call, same
- * shape as the entrance's own cursor-less "Get a move on!" box) do NOT -
- * both close straight to the next scene with no more text pending.
+ * The personality speech's LAST box (page 8 silver / page 4 gold, string-
+ * terminated by `$` with no further `\p`) and the standalone close/cry box
+ * (a separate msgbox call, same shape as the entrance's own cursor-less
+ * "Get a move on!" box) do NOT - both close straight to the next scene with
+ * no more text pending. Tier-general (`brainSpeechPersonalityBoxCount`):
+ * gold's dense ground truth (docs/noland-brain-intro-gold-ground-truth.md
+ * §7') independently confirms the same rule - page 4 is static, matching
+ * this function's existing "last personality box never shows the cursor"
+ * shape rather than needing a gold-specific carve-out.
  */
 export function brainSpeechCursorVisible(state: BattleRoomState): boolean {
   return (
     (state.phase === "brainSpeechIdle" || state.phase === "brainSpeechClosing")
-    && (state.speechStep ?? 0) < SILVER_PERSONALITY_BOX_COUNT - 1
+    && (state.speechStep ?? 0) < brainSpeechPersonalityBoxCount(state) - 1
   );
 }
 
@@ -906,17 +1047,17 @@ export function brainEntranceMovementSettled(phase: BattleRoomPhase): boolean {
 
 /**
  * True the exact tick `advanceBattleRoom` transitions out of the gated
- * personality speech's LAST box into the always-shown cry box - the JSON's
- * own `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` moment
- * (silverFirstEncounter.events order: the 8-page speech, THEN the flag set,
- * THEN the cry line). Not independently visible in pixels (the flag has no
- * on-screen effect - docs/noland-silver-walkup-presentation-map.md §1), so
- * exact-tick fidelity only needs to preserve this ORDER, not a specific
- * frame. Repeat encounters (`brainSpeechFirstEncounter` false) never
- * satisfy this - they only ever show the cry box, so there is no
- * personality speech to have just finished. core.ts is the caller: it
- * marks the silver-tier heard flag (markFactoryBrainSpeechHeard) the same
- * tick this returns true.
+ * personality speech's LAST box into the always-shown close/cry box - the
+ * JSON's own `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` moment (both
+ * tiers' events order: the gated speech, THEN the flag set, THEN the close/
+ * cry line). Not independently visible in pixels (the flag has no on-screen
+ * effect - docs/noland-silver-walkup-presentation-map.md §1), so exact-tick
+ * fidelity only needs to preserve this ORDER, not a specific frame. Repeat
+ * encounters (`brainSpeechFirstEncounter` false) never satisfy this - they
+ * only ever show the close/cry box, so there is no personality speech to
+ * have just finished. Tier-general (`brainSpeechPersonalityBoxCount`): the
+ * caller (core.ts) marks the SAME tier's heard flag (markFactoryBrainSpeech
+ * Heard, keyed off `prev.brainSpeechTier`) the same tick this returns true.
  */
 export function battleRoomJustFinishedBrainPersonalitySpeech(
   prev: BattleRoomState,
@@ -927,7 +1068,7 @@ export function battleRoomJustFinishedBrainPersonalitySpeech(
     && prev.brainSpeechFirstEncounter === true
     && prev.phase === "brainSpeechClosing"
     && next.phase !== "brainSpeechClosing"
-    && (prev.speechStep ?? 0) === SILVER_PERSONALITY_BOX_COUNT - 1
+    && (prev.speechStep ?? 0) === brainSpeechPersonalityBoxCount(prev) - 1
   );
 }
 

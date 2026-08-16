@@ -153,20 +153,29 @@ function drawRoomTiles(fb: Uint8Array, origin: { x: number; y: number }, fadeY: 
   }
 }
 
-function drawNpcFrame(fb: Uint8Array, npc: NpcSprite, frameIndex: number, pos: { x: number; y: number }, fadeY: number): void {
+function drawNpcFrame(
+  fb: Uint8Array,
+  npc: NpcSprite,
+  frameIndex: number,
+  pos: { x: number; y: number },
+  fadeY: number,
+  hFlip = false,
+): void {
   const frame = npc.frames[frameIndex]!;
   for (let ty = 0; ty < frame.rows; ty += 1) {
     for (let tx = 0; tx < frame.columns; tx += 1) {
+      const drawTx = hFlip ? frame.columns - 1 - tx : tx;
       const tile = frame.tiles[ty * frame.columns + tx];
       if (!tile) continue;
       for (let py = 0; py < 8; py += 1) {
         for (let px = 0; px < 8; px += 1) {
-          const colorIndex = tile[py * 8 + px]!;
+          const sx = hFlip ? 7 - px : px;
+          const colorIndex = tile[py * 8 + sx]!;
           if (colorIndex === 0) continue;
           const color = npc.palette[colorIndex];
           if (!color) continue;
           const faded = fadeY > 0 ? fadeColor(color, fadeY) : color;
-          setPixel(fb, pos.x + tx * 8 + px, pos.y + ty * 8 + py, faded.r, faded.g, faded.b);
+          setPixel(fb, pos.x + drawTx * 8 + px, pos.y + ty * 8 + py, faded.r, faded.g, faded.b);
         }
       }
     }
@@ -193,13 +202,49 @@ export function renderPrebattleRoomWalkScene(
   fb: Uint8Array,
   origin: { x: number; y: number },
   playerFrameIndex: number,
-  attendant: { x: number; y: number; frameIndex: number; visible: boolean },
+  attendant: { x: number; y: number; frameIndex: number; visible: boolean; hFlip?: boolean },
   bgFadeY = 0,
   objFadeY = 0,
 ): void {
   drawRoomTiles(fb, origin, bgFadeY);
-  if (attendant.visible) drawNpcFrame(fb, roomNpcs.attendant, attendant.frameIndex, { x: attendant.x, y: attendant.y }, objFadeY);
+  if (attendant.visible) {
+    drawNpcFrame(
+      fb,
+      roomNpcs.attendant,
+      attendant.frameIndex,
+      { x: attendant.x, y: attendant.y },
+      objFadeY,
+      attendant.hFlip ?? false,
+    );
+  }
   drawNpcFrame(fb, roomNpcs.player, playerFrameIndex, PLAYER_POS, objFadeY);
+}
+
+/**
+ * Walk-up build step A: the call-scene attendant walk-away/return
+ * (postwin.ts's `callSceneAttendantVisual`) - same fixed room/camera as
+ * `renderPrebattleRoomScene`, only the attendant's own on-screen X shifts by
+ * `dxPx` (measured, docs/walkup-call-scene-ground-truth.md Window 1) and its
+ * picture-table frame follows the walk's own pose.
+ */
+export function renderPrebattleRoomSceneWithAttendantOffset(
+  fb: Uint8Array,
+  dxPx: number,
+  attendantFrame: number,
+  attendantHFlip: boolean,
+  bgFadeY = 0,
+  objFadeY = 0,
+): void {
+  drawRoomTiles(fb, roomLayout.cameraOriginPx, bgFadeY);
+  drawNpcFrame(
+    fb,
+    roomNpcs.attendant,
+    attendantFrame,
+    { x: ATTENDANT_POS.x + dxPx, y: ATTENDANT_POS.y },
+    objFadeY,
+    attendantHFlip,
+  );
+  drawNpcFrame(fb, roomNpcs.player, PLAYER_SETTLED_FRAME, PLAYER_POS, objFadeY);
 }
 
 interface MsgboxAsset {

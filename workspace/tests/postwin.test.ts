@@ -69,6 +69,7 @@ import {
   POSTWIN_NEXT_BOX_CLEAR_DELAY,
   POSTWIN_NEXT_TEXT_FIRST_DELAY,
   POSTWIN_NEXT_TEXT_SETTLED_DELAY,
+  POSTWIN_NEXT_TEXT_TOTAL,
   POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_CONTINUATION_INPUT_READY_DELAY,
   POSTWIN_SCOUTING_INPUT_READY_DELAYS,
@@ -121,7 +122,25 @@ import {
   POSTWIN_RETIRE_FADE_FIRST_DELAY,
   POSTWIN_RETIRE_BLACK_AGE_DELAY,
   POSTWIN_RETIRE_FADE_IN_DELAY,
+  acceptPostwinCallScenePage,
+  postwinCallSceneInputReady,
+  postwinCallSceneVisibleChars,
+  callSceneAttendantVisual,
+  callSceneBoxHidden,
+  CALL_SCENE_PAGE_TRANSITION_DELAY,
+  CALL_SCENE_BOX_TEXTS,
+  CALL_SCENE_HEAD_PROMPT_LINE1,
+  CALL_SCENE_HEAD_PROMPT_LINE2,
+  CALL_SCENE_HEAD_PROMPT_TOTAL,
+  CALL_SCENE_TRAILING_DELAY,
+  CALL_SCENE_HEAD_MENU_READY_DELAY,
+  POSTWIN_BRAIN_CANT_TELL_TEXT,
+  POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL,
+  POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY,
+  POSTWIN_SCOUTING_LINES,
+  type PostwinState,
 } from "../src/engine/postwin.ts";
+import walkupScript from "../src/data/gen/factory-brain-walkup-script.json" with { type: "json" };
 
 describe("S8 Battle-1 postwin transition", () => {
   const outcomeDismiss = 10_000;
@@ -1382,5 +1401,399 @@ describe("S8 Battle-1 postwin transition", () => {
         question: { kind: "retire" as const, edgeElapsed: edge },
       }))).not.toBeNull();
     });
+  });
+});
+
+describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyForHead (docs/walkup-step-a-design.md)", () => {
+  function brainRoundOpponent(frontierBrain: boolean) {
+    const generated = generateFactoryOpponent({
+      rngValue: 3,
+      factoryWinStreak: 20,
+      battleIndex: 0,
+      storedTrainerIds: [],
+      savedRentalSetIds: [110, 155, 140, 168, 197, 147],
+      playerTrainerId: 0x1234_5678,
+      battleTowerLevel50WinStreak: 0,
+    });
+    const battleParty = (prefix: string): BattleParty =>
+      generated.party.map((member, index) => ({
+        id: `${prefix}-${index}`,
+        species: member.speciesName,
+        maxHp: member.maxHP,
+        hp: member.hp,
+        status: "none" as const,
+      })) as unknown as BattleParty;
+    let round = createGeneratedFactoryRoundController({
+      id: `walkup-step-a-postwin-${frontierBrain ? "brain" : "ordinary"}`,
+      playerParty: battleParty("player"),
+      playerRentalRecords: generated.opponents,
+      opponent: {
+        id: "walkup-step-a-opponent",
+        trainerName: generated.trainerName,
+        party: battleParty("opponent"),
+        rentalRecords: generated.opponents,
+        ...(frontierBrain ? { frontierBrain: { status: "silver" as const } } : {}),
+      },
+      rngValue: generated.rngValue,
+    });
+    round = completeBattlePresentation(round, {
+      commandId: round.presentation!.command.commandId,
+    });
+    round = advanceRoundController(round);
+    round = resolveRoundBattle(round, {
+      outcome: "win",
+      playerParty: round.rules.playerParty,
+      opponentParty: round.rules.currentOpponent.party,
+      rngValue: round.rules.rngValue,
+    });
+    return createPostwinStateFromRound(
+      round,
+      {} as unknown as BattleResolutionPresentationRenderView,
+    );
+  }
+
+  it("createPostwinStateFromRound sets frontierBrain from the UPCOMING opponent's frontierBrain field alone (§2.2), status tier not needed", () => {
+    expect(brainRoundOpponent(true).frontierBrain).toBe(true);
+    expect(brainRoundOpponent(false).frontierBrain).toBe(false);
+  });
+
+  it("pins CALL_SCENE_BOX_TEXTS/AskReadyForHead prompt text against the JSON verbatim, never retyped", () => {
+    const callSceneEvents = (
+      walkupScript.scenes.preBattleRoomCallScene.events as readonly {
+        readonly kind: string;
+        readonly pages?: readonly string[];
+        readonly nonBrainSpecific?: boolean;
+        readonly frames?: number;
+      }[]
+    );
+    const expectedBoxes = callSceneEvents
+      .filter((event) => event.kind === "message" && !event.nonBrainSpecific)
+      .flatMap((event) =>
+        event.pages!.map(
+          (page) => page.split("\\n").map((line) => line.replaceAll("'", "’")) as [string, string],
+        ),
+      );
+    expect(CALL_SCENE_BOX_TEXTS.length).toBe(5);
+    expect(CALL_SCENE_BOX_TEXTS.map((box) => [...box])).toEqual(expectedBoxes);
+    // Box index 3 (the boss message's own page 2) is the one containing the
+    // source's straight apostrophe ("facility's") - confirms the same
+    // apostrophe normalization battleRoom.ts's splitSpeechBoxes applies ran
+    // here too, not just that the raw JSON text was copied verbatim.
+    expect(CALL_SCENE_BOX_TEXTS[3]![0]).toContain("facility’s");
+
+    const expectedPrompt = (
+      walkupScript.scenes.askReadyForHead.events[0] as { readonly pages: readonly string[] }
+    ).pages[0]!.split("\\n");
+    expect([CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]).toEqual(expectedPrompt);
+    expect(CALL_SCENE_HEAD_PROMPT_TOTAL).toBe(
+      CALL_SCENE_HEAD_PROMPT_LINE1.length + CALL_SCENE_HEAD_PROMPT_LINE2.length,
+    );
+
+    expect(callSceneEvents.at(-1)).toEqual({ kind: "delay", frames: 16 });
+    expect(CALL_SCENE_TRAILING_DELAY).toBe(16);
+  });
+
+  it("advances the call scene box-by-box (index/text transitions), then AskReadyForHead reuses the ordinary continuation-menu machinery unchanged", () => {
+    const healDismiss = 5_000;
+    let state: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      elapsed: healDismiss,
+      healDismissElapsed: healDismiss,
+    };
+    expect(state.callScenePage).toBe(0);
+
+    // Box 1 arms automatically at healDismiss + POSTWIN_NEXT_TEXT_FIRST_DELAY
+    // - the same post-heal box-clear boundary the ordinary route's own
+    // "next text" starts typing at - no player input needed to open it.
+    while (state.elapsed < healDismiss + POSTWIN_NEXT_TEXT_FIRST_DELAY) {
+      state = advancePostwin(state);
+    }
+    expect(state.callScenePage).toBe(1);
+    expect(state.callScenePageEdgeElapsed).toBe(healDismiss);
+
+    for (let page = 1; page <= 5; page += 1) {
+      const [line1, line2] = CALL_SCENE_BOX_TEXTS[page - 1]!;
+      expect(state.callScenePage).toBe(page);
+      expect(state.callSceneDismissElapsed).toBeNull();
+      while (!postwinCallSceneInputReady(state)) {
+        state = advancePostwin(state);
+      }
+      expect(postwinCallSceneVisibleChars(state)).toBe(line1.length + line2.length);
+      const edgeBeforeAccept = state.elapsed;
+      // Not-yet-ready A presses (one tick earlier) are swallowed.
+      expect(acceptPostwinCallScenePage({ ...state, elapsed: state.elapsed - 1 }).callScenePage)
+        .toBe(page);
+      const accepted = acceptPostwinCallScenePage(state);
+      if (page < 5) {
+        // Boxes 1/2 gate the next box behind the attendant's walk-away/
+        // walk-back movement (a pending transition, not an instant bump);
+        // boxes 3/4 (the boss message's own page turns, no movement) still
+        // turn over instantly, unchanged.
+        const gated = page === 1 || page === 2;
+        if (gated) {
+          expect(accepted.callScenePage).toBe(page);
+          expect(accepted.callScenePendingElapsed).toBe(
+            edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
+          );
+          let settled = accepted;
+          while (settled.callScenePendingElapsed !== null) {
+            settled = advancePostwin(settled);
+          }
+          expect(settled.callScenePage).toBe(page + 1);
+          expect(settled.callScenePageEdgeElapsed).toBe(
+            edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
+          );
+          expect(settled.callSceneDismissElapsed).toBeNull();
+          state = settled;
+        } else {
+          expect(accepted.callScenePage).toBe(page + 1);
+          expect(accepted.callScenePageEdgeElapsed).toBe(edgeBeforeAccept);
+          expect(accepted.callScenePendingElapsed).toBeNull();
+          expect(accepted.callSceneDismissElapsed).toBeNull();
+          state = accepted;
+        }
+      } else {
+        expect(accepted.callScenePage).toBe(5);
+        expect(accepted.callSceneDismissElapsed).toBe(edgeBeforeAccept);
+        state = accepted;
+      }
+    }
+
+    // AskReadyForHead's own prompt clock starts at the call scene's own
+    // dismiss edge + its trailing delay, not at healDismissElapsed.
+    expect(postwinContinuationInputReady(state)).toBe(false);
+    expect(postwinNextVisibleChars(state)).toBe(0);
+    const menuReadyAge =
+      state.callSceneDismissElapsed! + CALL_SCENE_TRAILING_DELAY + CALL_SCENE_HEAD_MENU_READY_DELAY;
+    while (state.elapsed < menuReadyAge) {
+      state = advancePostwin(state);
+    }
+    expect(postwinContinuationInputReady(state)).toBe(true);
+    expect(state.continuationCursorPos).toBe(0);
+    expect(postwinNextVisibleChars(state)).toBe(CALL_SCENE_HEAD_PROMPT_TOTAL);
+
+    // The SAME acceptPostwinContinuation/dialoguePage machinery the ordinary
+    // route uses, unchanged - only the preceding prompt text differed.
+    const goOn = acceptPostwinContinuation(state);
+    expect(goOn.dialoguePage).toBe(1);
+    expect(goOn.continuationConfirmElapsed).toBe(state.elapsed);
+
+    // RECORD/REST/RETIRE also carry over verbatim (docs/walkup-step-a-
+    // design.md §3 RESOLVED): RETIRE opens the same question machinery.
+    const cursorOnRetire = { ...state, continuationCursorPos: 3 as const };
+    const retire = acceptPostwinContinuation(cursorOnRetire);
+    expect(retire.question).toEqual({ kind: "retire", edgeElapsed: state.elapsed - 1 });
+  });
+
+  it("renders the attendant's walk-away/walk-back movement, MEASURED against docs/walkup-call-scene-ground-truth.md Window 1", () => {
+    // Box 1 dismiss-A (the walk-away trigger). Mirrors the fixture-01 press:
+    // oracle frame 895's registered dismiss, 903 the first visible pixel.
+    const dismissEdge = 10_000;
+    const pendingAfterBox1: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      elapsed: dismissEdge,
+      callScenePage: 1,
+      callScenePageEdgeElapsed: dismissEdge - 500,
+      callScenePendingElapsed: dismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[0],
+    };
+    // The 8-tick closemessage/task-dispatch lead-in: box 1 still fully held
+    // (box visible), attendant not yet moved.
+    expect(callSceneAttendantVisual(pendingAfterBox1)).toEqual({ dx: 0, frame: 0, hFlip: false });
+    expect(callSceneBoxHidden(pendingAfterBox1)).toBe(false);
+    const leadInEnd = { ...pendingAfterBox1, elapsed: dismissEdge + 7 };
+    expect(callSceneAttendantVisual(leadInEnd)).toEqual({ dx: 0, frame: 0, hFlip: false });
+    expect(callSceneBoxHidden(leadInEnd)).toBe(false);
+
+    // First visible movement pixel (oracle 903 = dismissEdge + 8): box now
+    // hidden, attendant shifted 1px west, leading-leg pose (GoWest frame 7).
+    const firstPixel = { ...pendingAfterBox1, elapsed: dismissEdge + 8 };
+    expect(callSceneBoxHidden(firstPixel)).toBe(true);
+    expect(callSceneAttendantVisual(firstPixel)).toEqual({ dx: -1, frame: 7, hFlip: false });
+
+    // Last movement tick (oracle 950 = dismissEdge + 55): 3 full tiles (48px) west.
+    const lastPixel = { ...pendingAfterBox1, elapsed: dismissEdge + 55 };
+    expect(callSceneAttendantVisual(lastPixel)).toEqual({ dx: -48, frame: 2, hFlip: false });
+
+    // Deferred bump fires exactly at the pending edge (dismissEdge + 56).
+    let settled = pendingAfterBox1;
+    while (settled.callScenePendingElapsed !== null) settled = advancePostwin(settled);
+    expect(settled.elapsed).toBe(dismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[0]);
+    expect(settled.callScenePage).toBe(2);
+    // Box 2's own reopen lag (3 ticks, MEASURED: oracle 951 edge -> 954 frame
+    // visible) keeps the box hidden a moment after the bump too.
+    expect(callSceneBoxHidden(settled)).toBe(true);
+    expect(callSceneAttendantVisual(settled)).toEqual({ dx: -48, frame: 2, hFlip: false });
+    const reopened = { ...settled, elapsed: settled.elapsed + 3 };
+    expect(callSceneBoxHidden(reopened)).toBe(false);
+    expect(callSceneAttendantVisual(reopened)).toEqual({ dx: -48, frame: 2, hFlip: false });
+
+    // Box 2 dismiss-A (the walk-back trigger, immediate lead-in - MEASURED
+    // fixture 02: oracle 1037 dismiss edge, first pixel the SAME tick).
+    const box2DismissEdge = 20_000;
+    const pendingAfterBox2: PostwinState = {
+      ...settled,
+      elapsed: box2DismissEdge,
+      callScenePendingElapsed: box2DismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[1],
+    };
+    const firstBackPixel = pendingAfterBox2;
+    expect(callSceneBoxHidden(firstBackPixel)).toBe(true);
+    expect(callSceneAttendantVisual(firstBackPixel)).toEqual({ dx: -47, frame: 7, hFlip: true });
+    const lastBackPixel = { ...pendingAfterBox2, elapsed: box2DismissEdge + 47 };
+    expect(callSceneAttendantVisual(lastBackPixel)).toEqual({ dx: 0, frame: 2, hFlip: true });
+
+    let home = pendingAfterBox2;
+    while (home.callScenePendingElapsed !== null) home = advancePostwin(home);
+    expect(home.elapsed).toBe(box2DismissEdge + CALL_SCENE_PAGE_TRANSITION_DELAY[1]);
+    expect(home.callScenePage).toBe(3);
+    // Box 3's own reopen lag is 4 ticks (MEASURED: oracle 1085 edge -> 1089
+    // frame visible, the same tick its first glyph appears).
+    expect(callSceneBoxHidden(home)).toBe(true);
+    const homeReopened = { ...home, elapsed: home.elapsed + 4 };
+    expect(callSceneBoxHidden(homeReopened)).toBe(false);
+    expect(callSceneAttendantVisual(homeReopened)).toEqual({ dx: 0, frame: 0, hFlip: false });
+
+    // Boxes 3->4 and 4->5 (the boss message's own page turns) have no
+    // attendant movement - still instant, unchanged.
+    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[2]).toBe(0);
+    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[3]).toBe(0);
+
+    // Non-brain / pre-movement states always render the rest visual.
+    expect(callSceneAttendantVisual(INITIAL_POSTWIN_STATE)).toEqual({ dx: 0, frame: 0, hFlip: false });
+    expect(callSceneBoxHidden(INITIAL_POSTWIN_STATE)).toBe(false);
+  });
+
+  it("leaves the ordinary (non-brain) route's menu-visible/input-ready/next-text computations byte-identical", () => {
+    const healDismiss = 3_000;
+    const ordinary: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      elapsed: healDismiss + POSTWIN_CONTINUATION_INPUT_READY_DELAY,
+      healDismissElapsed: healDismiss,
+    };
+    expect(ordinary.frontierBrain).toBe(false);
+    expect(postwinContinuationInputReady(ordinary)).toBe(true);
+    expect(postwinNextVisibleChars(ordinary)).toBe(POSTWIN_NEXT_TEXT_TOTAL);
+  });
+});
+
+describe("Walk-up build step A, Brief 2: postwin.ts AskSwapBeforeHead short path (docs/walkup-step-a-design.md §2.1 item 3)", () => {
+  it("pins AskSwapBeforeHead's one-liner text against the JSON verbatim, never retyped", () => {
+    const expectedOneLiner = (
+      walkupScript.scenes.askSwapBeforeHead.events[0] as { readonly pages: readonly string[] }
+    ).pages[0]!.split("\\n").map((line) => line.replaceAll("'", "’"));
+    expect([...POSTWIN_BRAIN_CANT_TELL_TEXT]).toEqual(expectedOneLiner);
+    expect(POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL).toBe(
+      POSTWIN_BRAIN_CANT_TELL_TEXT[0].length + POSTWIN_BRAIN_CANT_TELL_TEXT[1].length,
+    );
+    // Contains the source's straight apostrophe ("I'm"), confirming the same
+    // normalization convention (splitCallSceneBoxLines) applies here too.
+    expect(POSTWIN_BRAIN_CANT_TELL_TEXT[0]).toContain("I’m");
+
+    // The swap yesno text itself is untouched, shared verbatim between both
+    // routes (design memo §2.1 item 3's own "existing swap-offer step").
+    const expectedSwapAsk = (
+      walkupScript.scenes.askSwapBeforeHead.events[1] as { readonly pages: readonly string[] }
+    ).pages[0]!.split("\\n");
+    expect(POSTWIN_SCOUTING_LINES[3]).toEqual(expectedSwapAsk);
+  });
+
+  it("GO ON's short path types the one-liner then jumps dialoguePage 1 -> 4 directly, skipping scouting pages 2-3", () => {
+    const edge = 40_000;
+    const at = (delay: number): PostwinState => ({
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      elapsed: edge + delay,
+      continuationConfirmElapsed: edge,
+      dialoguePage: 1,
+      dialoguePageEdgeElapsed: edge,
+    });
+    expect(postwinDialogueVisibleChars(at(3))).toBe(0);
+    expect(postwinDialogueVisibleChars(at(4))).toBe(1);
+    expect(postwinDialogueVisibleChars(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY)))
+      .toBe(POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL);
+
+    expect(postwinDialogueInputReady(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY - 1)))
+      .toBe(false);
+    expect(acceptPostwinDialoguePage(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY - 1)))
+      .toEqual(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY - 1));
+    expect(postwinDialogueInputReady(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY)))
+      .toBe(true);
+
+    const accepted = acceptPostwinDialoguePage(at(POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY));
+    expect(accepted.dialoguePage).toBe(4);
+    expect(accepted.dialoguePageEdgeElapsed)
+      .toBe(edge + POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY);
+    // Same page-4 reset fields as the ordinary route's own transition.
+    expect(accepted.swapCursorPos).toBeNull();
+    expect(accepted.swapDeclineElapsed).toBeNull();
+
+    // Sanity: the identical raw state with frontierBrain false instead
+    // advances one page at a time (existing behavior, unchanged).
+    const ordinaryAccepted = acceptPostwinDialoguePage({
+      ...at(POSTWIN_SCOUTING_INPUT_READY_DELAYS[0]!),
+      frontierBrain: false,
+    });
+    expect(ordinaryAccepted.dialoguePage).toBe(2);
+  });
+
+  it("converges the short path's swap prompt (default YES, input gated until settled) -> NO -> \"Right this way, please!\" -> dismiss, unchanged from the ordinary route", () => {
+    const pageEdge = 60_000;
+    const swapReady: PostwinState = {
+      ...INITIAL_POSTWIN_STATE,
+      frontierBrain: true,
+      continuationConfirmElapsed: pageEdge - 1_000,
+      dialoguePage: 4,
+      dialoguePageEdgeElapsed: pageEdge,
+      elapsed: pageEdge + POSTWIN_SWAP_MENU_VISIBLE_DELAY,
+      swapCursorPos: null,
+    };
+    // Menu becomes visible (cursor defaults to YES, position 0) before it
+    // accepts input -- matching the ground-truth finding that the swap
+    // yesno's default cursor is YES.
+    const visible = advancePostwin(swapReady);
+    expect(visible.swapCursorPos).toBe(0);
+
+    // A DOWN sent before the box is genuinely input-ready is swallowed (ROM
+    // ground truth, docs/walkup-call-scene-ground-truth.md Window 3): the
+    // existing ordinary swap-offer gating idiom (postwinDialogueInputReady)
+    // already enforces this, reused unchanged for the brain route.
+    const stillGated = { ...visible, elapsed: pageEdge + POSTWIN_SWAP_INPUT_READY_DELAY - 1 };
+    expect(postwinDialogueInputReady(stillGated)).toBe(false);
+    expect(movePostwinSwapCursor(stillGated, 1)).toEqual(stillGated);
+
+    const gateOpen = { ...visible, elapsed: pageEdge + POSTWIN_SWAP_INPUT_READY_DELAY };
+    expect(postwinDialogueInputReady(gateOpen)).toBe(true);
+    const movedToNo = movePostwinSwapCursor(gateOpen, 1);
+    expect(movedToNo.swapCursorPos).toBe(1);
+
+    const declined = acceptPostwinSwapDecline(movedToNo);
+    expect(declined.swapDeclineElapsed).toBe(movedToNo.elapsed);
+
+    const dismissReady = {
+      ...declined,
+      elapsed: declined.swapDeclineElapsed! + POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY,
+    };
+    expect(postwinRightThisWayVisibleChars(dismissReady)).toBe(POSTWIN_RIGHT_THIS_WAY.length);
+    expect(postwinRightThisWayInputReady(dismissReady)).toBe(true);
+    const dismissed = acceptPostwinRightThisWayDismiss(dismissReady);
+    expect(dismissed.rightThisWayDismissElapsed).toBe(dismissReady.elapsed);
+  });
+
+  it("leaves the ordinary route's dialoguePage sequencing (1->2->3->4, all three scouting pages) byte-identical", () => {
+    for (let page = 1; page <= 3; page += 1) {
+      const edge = 10_000 + page * 1_000;
+      const readyDelay = POSTWIN_SCOUTING_INPUT_READY_DELAYS[page - 1]!;
+      const state: PostwinState = {
+        ...INITIAL_POSTWIN_STATE,
+        frontierBrain: false,
+        elapsed: edge + readyDelay,
+        continuationConfirmElapsed: page === 1 ? edge : edge - 500,
+        dialoguePage: page as 1 | 2 | 3,
+        dialoguePageEdgeElapsed: edge,
+      };
+      const accepted = acceptPostwinDialoguePage(state);
+      expect(accepted.dialoguePage).toBe(page + 1);
+    }
   });
 });

@@ -24,13 +24,20 @@ import {
 } from "../../src/engine/battleTransition.ts";
 import {
   battleRoomStateForOpponent,
+  GOLD_FIRST_ENCOUNTER_SPEECH_BOXES,
   SILVER_FIRST_ENCOUNTER_SPEECH_BOXES,
 } from "../../src/engine/battleRoom.ts";
 import {
   factoryTrainerPresentationForOpponent,
   type FactoryTrainerPresentation,
 } from "../../src/engine/factoryTrainerPresentation.ts";
-import { createPostwinState } from "../../src/engine/postwin.ts";
+import {
+  CALL_SCENE_HEAD_MENU_READY_DELAY,
+  CALL_SCENE_TRAILING_DELAY,
+  createPostwinState,
+  POSTWIN_COUNTER_ROOM_FIRST_AGE,
+  POSTWIN_NEXT_BOX_CLEAR_DELAY,
+} from "../../src/engine/postwin.ts";
 
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const CHALLENGE2_FIXED_IV = getLevel50InitialRentalFixedIv(2, false);
@@ -298,6 +305,95 @@ function nolandRoundReadyState(state: EngineState): {
 }
 
 /**
+ * Walk-up build step A dense calibration: parks `postwin` at the brain
+ * route's call-scene start -- `elapsed: POSTWIN_COUNTER_ROOM_FIRST_AGE`, the
+ * first tick of the shared (already oracle-pinned, docs/postwin-notes.md)
+ * counter-room fade-in, with `frontierBrain: true` and every call-scene/
+ * AskReadyForHead/AskSwapBeforeHead field at its pre-heal-dismiss rest value.
+ * This is the same "park directly in a real, reachable state" idiom as the
+ * room-entrance stage above, not a simulated walk-up: the round itself has
+ * genuinely resolved 6 wins (factoryWinStreak 14->20) landing
+ * `currentOpponent` on Noland/silver, matching "battle-20 win resolved,
+ * about to face the brain" -- only the postwin *presentation* clock is
+ * hand-set rather than ticked there from `elapsed: 0`, exactly as the room-
+ * entrance stage hand-sets `battleRoom` rather than ticking through
+ * `prebattleRoom`.
+ *
+ * Anchor: docs/walkup-call-scene-ground-truth.md's own boundary note -- two
+ * staging-artifact fades precede the genuine call scene; only pre-checkpoint
+ * frame 490 onward ("fade-in to PreBattleRoom, attendant already present, no
+ * box yet") is acceptance-grade. `POSTWIN_COUNTER_ROOM_FIRST_AGE` (115) is
+ * `renderPostwinState`'s own first tick of that exact fade
+ * (`fadeLocal = age - POSTWIN_COUNTER_ROOM_FIRST_AGE` -> 0, `FADE_IN`'s
+ * darkest step) -- confirmed by the shared fade's own settle boundary:
+ * `POSTWIN_COUNTER_ROOM_SETTLED_AGE` (130) is exactly `FADE_IN_TICKS` (15)
+ * after 115, and `POSTWIN_HEAL_TEXT_FIRST_AGE` (140) lands 25 ticks after
+ * 115 -- within one frame of the oracle's own measured 24-tick fade-to-
+ * first-glyph span (490 -> 514), i.e. app elapsed 115 = oracle frame 490
+ * agrees with the ALREADY-PINNED shared fade constants to within the
+ * fixture's own frame-indexing convention, not a new fit.
+ */
+export function generatedRoundBattle7NolandPostwinCallSceneStartStage(
+  state: EngineState,
+): EngineState {
+  const ready = nolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    postwin: {
+      ...createPostwinState(),
+      elapsed: POSTWIN_COUNTER_ROOM_FIRST_AGE,
+      frontierBrain: true,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+/**
+ * Walk-up build step A dense calibration: parks `postwin` directly in the
+ * `AskReadyForHead` menu's own held state (frame 0 of
+ * docs/walkup-call-scene-ground-truth.md's post-checkpoint numbering --
+ * "the checkpoint IS the open ask-ready menu, cursor on GO ON", confirmed
+ * live sha-identical to the pre-checkpoint route's own frame 1570). Reached
+ * by hand-setting the call scene's own terminal fields
+ * (`callScenePage: 5`, `callSceneDismissElapsed: 0`) rather than replaying
+ * the call scene's own five boxes -- the same "park past a not-yet-exercised
+ * upstream window" sidestep the B2 speech-box stages already use, since
+ * windows 2/3 (this stage's own compare targets) start fresh at the
+ * checkpoint regardless of how window 1's own call scene got there.
+ * `elapsed` is set generously past `CALL_SCENE_HEAD_MENU_READY_DELAY` so the
+ * menu is already fully held/settled at frame 0 -- the oracle's own window 2
+ * shows this exact content held unchanged for 121 frames, so any
+ * sufficiently-elapsed value renders identically.
+ */
+export function generatedRoundBattle7NolandPostwinAskReadyMenuOpenStage(
+  state: EngineState,
+): EngineState {
+  const ready = nolandRoundReadyState(state);
+  const callSceneDismissElapsed = 0;
+  return {
+    ...ready.state,
+    postwin: {
+      ...createPostwinState(),
+      // Past every render gate on the path to the menu: the shared
+      // beforeContinuation heal-box gate (healDismiss + POSTWIN_NEXT_BOX_
+      // CLEAR_DELAY) as well as the brain-specific menu-ready delay -- both
+      // relative to elapsed 0 here since healDismissElapsed/
+      // callSceneDismissElapsed are both pinned to 0.
+      elapsed:
+        POSTWIN_NEXT_BOX_CLEAR_DELAY
+        + CALL_SCENE_TRAILING_DELAY + CALL_SCENE_HEAD_MENU_READY_DELAY + 50,
+      frontierBrain: true,
+      healDismissElapsed: callSceneDismissElapsed,
+      callScenePage: 5,
+      callSceneDismissElapsed,
+      continuationCursorPos: 0,
+      continuationCursorDisplayPos: 0,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+/**
  * Walk-up build step B2: parks `battleRoom` directly in a fully-printed
  * `brainSpeechIdle` box (`speechStep`, 0-indexed into
  * `SILVER_FIRST_ENCOUNTER_SPEECH_BOXES`) rather than simulating
@@ -465,4 +561,173 @@ export function generatedGoldRoundRevealProofStage(
 // trainer party/gold status and the underlying round-shape config differ.
 export function generatedRoundBattle7NolandGoldRevealStage(state: EngineState): EngineState {
   return generatedGoldRoundRevealProofStage(state, 6);
+}
+
+/**
+ * Walk-up build step B3: gold sibling of `nolandRoundReadyState` - the same
+ * "park past a not-yet-exercised upstream window" idiom, seeded with the
+ * gold round shape (`generatedGoldRoundRevealProofStage`'s own recipe:
+ * seed 2, factoryWinStreak 35, factorySymbolsCount 1, player set IDs
+ * 564/565/566 - the already-oracle-verified legal gold triple, not the
+ * silver stage's 267/268/269) so `currentOpponent.frontierBrain.status`
+ * resolves to `"gold"` at battleIndex 6, landing `battleRoomStateForOpponent`
+ * on the gold speech content (`brainSpeechTier: "gold"`).
+ */
+function goldNolandRoundReadyState(state: EngineState): {
+  readonly state: EngineState;
+  readonly orchestrator: FactoryRoundBattleOrchestratorState;
+  readonly trainerPresentation: FactoryTrainerPresentation | undefined;
+} {
+  const playerRentalRecords = [
+    record(564, CHALLENGE5_FIXED_IV),
+    record(565, CHALLENGE5_FIXED_IV),
+    record(566, CHALLENGE5_FIXED_IV),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "factory-round-battle7-noland-gold-speech-off",
+    rngValue: 2,
+    factoryWinStreak: 35,
+    factorySymbolsCount: 1,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        record(1, CHALLENGE5_FIXED_IV),
+        record(2, CHALLENGE5_FIXED_IV),
+        record(3, CHALLENGE5_FIXED_IV),
+      ],
+    },
+  });
+  for (let battleIndex = 0; battleIndex < 6; battleIndex += 1) {
+    orchestrator = advanceProofWin(orchestrator);
+  }
+  const currentOpponent = orchestrator.round.rules.currentOpponent;
+  const trainerPresentation = factoryTrainerPresentationForOpponent(currentOpponent) ?? undefined;
+  return {
+    state: {
+      ...state,
+      factoryRoundBattleOrchestrator: orchestrator,
+      postwin: {
+        ...createPostwinState(),
+        elapsed: ROOM_ENTRANCE_INERT_POSTWIN_ELAPSED,
+        rightThisWayDismissElapsed: ROOM_ENTRANCE_INERT_POSTWIN_RIGHT_THIS_WAY_ELAPSED,
+      },
+      prebattleRoom: null,
+      rngMode: "vblank",
+    },
+    orchestrator,
+    trainerPresentation,
+  };
+}
+
+/**
+ * Walk-up build step B3 dense calibration: parks `battleRoom` directly in
+ * gold's escort box ("Hey, hey! Get a move on!" - the SAME entrance box
+ * silver shows, `battleRoomEntrance` is not tier-gated), already fully
+ * printed and idle-held - sidesteps the entrance's own print-timing cadence
+ * (the not-yet-closed B1c mid-ramp residual, same rationale as B2's own
+ * speech-box-held stages) so the compare trace below can drive the box's
+ * REAL dismiss -> brainMoving -> brainSettled -> brainSpeech handoff for
+ * real via scripted segments, rather than re-simulating the approach to it.
+ */
+export function generatedRoundBattle7NolandGoldSpeechOpenStage(
+  state: EngineState,
+): EngineState {
+  const ready = goldNolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    battleRoom: {
+      phase: "brainMsgboxIdle",
+      elapsed: 0,
+      frontierBrainWalkup: true,
+      brainSpeechFirstEncounter: true,
+      brainSpeechTier: "gold",
+      trainerPresentation: ready.trainerPresentation,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+/**
+ * Walk-up build step B3: gold sibling of
+ * `generatedRoundBattle7NolandSilverSpeechBoxHeldStage` - parks `battleRoom`
+ * directly in a fully-printed `brainSpeechIdle` box (`speechStep`, 0-indexed
+ * into `GOLD_FIRST_ENCOUNTER_SPEECH_BOXES`), same sidestep rationale.
+ */
+export function generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
+  state: EngineState,
+  speechStep: number,
+): EngineState {
+  const ready = goldNolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    battleRoom: {
+      phase: "brainSpeechIdle",
+      elapsed: 0,
+      frontierBrainWalkup: true,
+      brainSpeechFirstEncounter: true,
+      brainSpeechTier: "gold",
+      speechStep,
+      trainerPresentation: ready.trainerPresentation,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+/** Gold sibling of `generatedRoundBattle7NolandSilverSpeechSettledStage`. */
+export function generatedRoundBattle7NolandGoldSpeechSettledStage(
+  state: EngineState,
+  speechBoxCount: number,
+): EngineState {
+  const ready = goldNolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    battleRoom: {
+      phase: "brainSpeechSettled",
+      elapsed: 0,
+      frontierBrainWalkup: true,
+      brainSpeechFirstEncounter: true,
+      brainSpeechTier: "gold",
+      speechStep: speechBoxCount,
+      trainerPresentation: ready.trainerPresentation,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+// Named, zero-arg wrappers - same convention as the silver box0/cry/page8/
+// close-pause wrappers above (appTrace.ts's APP_STAGES registry only calls
+// stages with a single `state` argument).
+export function generatedRoundBattle7NolandGoldSpeechBox0HeldStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(state, 0);
+}
+export function generatedRoundBattle7NolandGoldSpeechPage4HeldStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
+    state,
+    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length - 2,
+  );
+}
+export function generatedRoundBattle7NolandGoldSpeechCloseHeldStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
+    state,
+    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length - 1,
+  );
+}
+export function generatedRoundBattle7NolandGoldSpeechClosePauseStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechSettledStage(
+    state,
+    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length,
+  );
 }
