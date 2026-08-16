@@ -17,15 +17,36 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 1.
+- **Hits:** 2 (2026-08-16: FAILed because services started 09:45:59 on the
+  new working tree, 6 min before the commit was recorded at 09:51:59 — the
+  services were NEWER than their own code's commit date).
 - **Cost each:** ~5 min to disprove, plus a genuine near-miss: the documented
   response is "restart it before staging anything", and restarting port 8012
   would have killed the animation lane's live worker mid-round.
 - **Workaround:** before believing a FAIL, run
   `git -C ../.. log --oneline --since=<process start date> -- oracle/`. Empty
-  output means the process is current and the failure is spurious.
+  output means the process is current and the failure is spurious. Since
+  3e29880b there is also a positive probe: `/v1/info`'s
+  `capabilities.battleLab` block (e.g. `factoryBrainWalkup: true`) proves
+  which schema the live process serves.
 - **Real fix:** compare the process start time against the last commit that
   touched `oracle/`, not against harness HEAD.
+
+## Walk-up lab staging: multichoice/YES-NO boxes silently swallow inputs sent before their typewriter settles
+
+- **What:** in `factoryBrain` + `walkup: true` traces, a D-pad/A input sent
+  while the preceding message box is still typing (or settling) is silently
+  dropped, not queued — a DOWN aimed at the swap YES/NO prompt instead did
+  nothing, and the trace fell through to the accidental swap-mon screen.
+  Neither `../oracle/BATTLE_LAB.md` nor the walkup smoke test's comments call
+  this out (the smoke test's own trace happens to idle long enough to avoid
+  it, without saying why).
+- **Hits:** 1 (2026-08-16, side worker banking the swap-ask window).
+- **Cost each:** ~10 min of trial-and-error via a wrong-branch trace.
+- **Workaround:** pad generous idle frames before any menu/prompt answer in
+  walkup traces; verify the landed branch by content sha, not by input count.
+- **Real fix:** one sentence in `BATTLE_LAB.md`'s walk-up section (top-layer
+  edit — goes through Kyle).
 
 ## `tools/report/*.ts` census scripts write their generated doc with no read-only mode
 
