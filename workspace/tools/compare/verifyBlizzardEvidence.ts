@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 import {
   blizzardAtAge,
+  blizzardEffectOamOrderAtAge,
   blizzardSnowballSwirlState,
   type BlizzardAttackerSide,
   type BlizzardGeometry,
@@ -13,6 +14,7 @@ import {
   sceneOnBlizzardView,
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { verifyBlizzardFramebuffer } from "./blizzardFramebuffer.ts";
 
 interface TarMember { readonly name: string; readonly size: number; readonly data: Buffer }
 
@@ -104,15 +106,21 @@ export interface BlizzardEvidenceVerification {
   readonly largeCrystalRows: number;
   readonly impactCrystalRows: number;
   readonly reducerRows: number;
+  readonly oamTopologyRows: number;
   readonly oamLatchMatchedRows: number;
   readonly matrixLatchMatchedRows: number;
   readonly paletteLatchMatchedRows: number;
   readonly rgbFrames: number;
   readonly seamRows: number;
-  readonly framebufferRows: 0;
+  readonly framebufferRows: number;
 }
 
-function verifyOrientation(root: string, orientation: string, row: any): BlizzardEvidenceVerification {
+function verifyOrientation(
+  root: string,
+  orientation: string,
+  row: any,
+  framebufferRows: number,
+): BlizzardEvidenceVerification {
   const scenarioPath = resolve(root, row.scenario);
   const statePath = resolve(root, row.stateGzip);
   const rgbPath = resolve(root, row.rawRgbArchive);
@@ -196,6 +204,7 @@ function verifyOrientation(root: string, orientation: string, row: any): Blizzar
   let impactCrystalRows = 0;
   let reducerRows = 0;
   let seamRows = 0;
+  let oamTopologyRows = 0;
   for (let age = 0; age < frames.length; age += 1) {
     const frame = frames[age];
     const expected = blizzardAtAge(age, side, geometry);
@@ -268,6 +277,21 @@ function verifyOrientation(root: string, orientation: string, row: any): Blizzar
       impactCrystalRows += 1;
     }
 
+    const effectSlots = new Set([
+      ...actualSnowballs, ...actualLarge, ...actualImpacts,
+    ].map((sprite: any) => sprite.slot));
+    const actualEffectOrder = frame.spriteOrder.filter(
+      (slot: number) => effectSlots.has(slot),
+    );
+    const expectedEffectOrder = blizzardEffectOamOrderAtAge(
+      age,
+      side,
+      geometry,
+    ).map(({ oamSlot }) => oamSlot);
+    invariant(jsonEqual(actualEffectOrder, expectedEffectOrder),
+      `${orientation}: effect OAM order age ${age}`);
+    oamTopologyRows += 1;
+
     const seam = sceneOnBlizzardView({ ...stage, age });
     const { attacker: seamAttacker, target: seamTarget, ...seamState } = seam;
     invariant(seamAttacker === attacker && seamTarget === target && jsonEqual(seamState, expected), `${orientation}: seam age ${age}`);
@@ -331,21 +355,29 @@ function verifyOrientation(root: string, orientation: string, row: any): Blizzar
     largeCrystalRows,
     impactCrystalRows,
     reducerRows,
+    oamTopologyRows,
     oamLatchMatchedRows,
     matrixLatchMatchedRows,
     paletteLatchMatchedRows,
     rgbFrames: rgbMembers.length,
     seamRows,
-    framebufferRows: 0,
+    framebufferRows,
   };
 }
 
 export function verifyBlizzardEvidence(root = resolve(".")): readonly BlizzardEvidenceVerification[] {
   const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/blizzard-dense-evidence.json"), "utf8"));
-  invariant(receipt.status === "unsupported-evidence-checkpoint", "receipt status must remain unsupported");
+  invariant(receipt.status === "exact", "receipt status must remain exact");
   invariant(receipt.acceptance.seamRows === "372/372 + 361/361", "receipt must pin the complete bilateral seam");
-  invariant(receipt.acceptance.framebufferRows === "0/372 + 0/361", "receipt must preserve zero framebuffer acceptance");
-  return Object.entries(receipt.orientations).map(([orientation, row]) => verifyOrientation(root, orientation, row));
+  invariant(receipt.acceptance.framebufferRows === "372/372 + 361/361", "receipt must pin the complete bilateral framebuffer");
+  const framebuffer = new Map(
+    verifyBlizzardFramebuffer().map(({ orientation, rows }) => [orientation, rows]),
+  );
+  return (Object.entries(receipt.orientations) as Array<[
+    "player-back" | "opponent-front",
+    any,
+  ]>).map(([orientation, row]) =>
+    verifyOrientation(root, orientation, row, framebuffer.get(orientation) ?? 0));
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(new URL(import.meta.url).pathname)) {

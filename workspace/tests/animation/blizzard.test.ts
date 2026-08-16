@@ -25,7 +25,7 @@ const root = resolve(".");
 const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/blizzard-dense-evidence.json"), "utf8")) as any;
 const sha256 = (path: string): string => createHash("sha256").update(readFileSync(resolve(root, path))).digest("hex");
 
-describe("MOVE_BLIZZARD source checkpoint", () => {
+describe("MOVE_BLIZZARD source-derived compositor", () => {
   it("pins the exclusive generated graph and keeps Icy Wind separate", () => {
     const generated = animationComponents.moves.find((move) => move.move === "MOVE_BLIZZARD");
     const icyWind = animationComponents.moves.find((move) => move.move === "MOVE_ICY_WIND");
@@ -109,18 +109,17 @@ describe("MOVE_BLIZZARD Scene-ON evidence receipts", () => {
   it("strictly replays retained state, reducer, OAM latch, and every archived RGB row", () => {
     const verified = verifyBlizzardEvidence(root);
     expect(verified).toEqual([
-      { orientation: "player-back", windowFrames: 372, sourceIntervalObservedFrames: 312, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, snowballRows: 1358, largeCrystalRows: 752, impactCrystalRows: 407, reducerRows: 372, oamLatchMatchedRows: 371, matrixLatchMatchedRows: 371, paletteLatchMatchedRows: 371, rgbFrames: 372, seamRows: 372, framebufferRows: 0 },
-      { orientation: "opponent-front", windowFrames: 361, sourceIntervalObservedFrames: 301, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, snowballRows: 1270, largeCrystalRows: 726, impactCrystalRows: 407, reducerRows: 361, oamLatchMatchedRows: 360, matrixLatchMatchedRows: 360, paletteLatchMatchedRows: 360, rgbFrames: 361, seamRows: 361, framebufferRows: 0 },
+      { orientation: "player-back", windowFrames: 372, sourceIntervalObservedFrames: 312, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, snowballRows: 1358, largeCrystalRows: 752, impactCrystalRows: 407, reducerRows: 372, oamLatchMatchedRows: 371, matrixLatchMatchedRows: 371, paletteLatchMatchedRows: 371, oamTopologyRows: 372, rgbFrames: 372, seamRows: 372, framebufferRows: 372 },
+      { orientation: "opponent-front", windowFrames: 361, sourceIntervalObservedFrames: 301, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, snowballRows: 1270, largeCrystalRows: 726, impactCrystalRows: 407, reducerRows: 361, oamLatchMatchedRows: 360, matrixLatchMatchedRows: 360, paletteLatchMatchedRows: 360, oamTopologyRows: 361, rgbFrames: 361, seamRows: 361, framebufferRows: 361 },
     ]);
     for (const [orientation, row] of Object.entries(receipt.orientations) as Array<[string, any]>) {
       expect(sha256(row.scenario)).toBe(row.scenarioSha256);
       expect(row.seamRows).toBe(row.denseWindow.frameCount);
-      expect(row.framebufferRows).toBe(0);
-      expect(row.residuals[0].component).toBe("production battleScene Blizzard compositor");
-      expect(row.residuals[0].rows).toBe(row.denseWindow.frameCount);
+      expect(row.framebufferRows).toBe(row.denseWindow.frameCount);
+      expect(row.residuals).toEqual([]);
       expect(orientation).toMatch(/player-back|opponent-front/);
     }
-    expect(receipt.status).toBe("unsupported-evidence-checkpoint");
+    expect(receipt.status).toBe("exact");
     expect(receipt.carrier).toMatchObject({ setId: 318, speciesId: 310, label: "FRONTIER_MON_PELIPPER_2" });
     expect(receipt.captureFreshness).toMatch(/one retained capture per orientation/u);
   });

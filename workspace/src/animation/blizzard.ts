@@ -1,4 +1,14 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import {
+  createOrderedSprite,
+  createSpriteOrderState,
+  destroyOrderedSprite,
+  sortSpriteOrder,
+  spriteSlotForOwner,
+  updateOrderedSprite,
+  type SpriteOrderKey,
+  type SpriteOrderState,
+} from "./spriteOrder.ts";
 
 export type BlizzardAttackerSide = "player" | "opponent";
 
@@ -445,6 +455,147 @@ export const BLIZZARD_IMPACT_CRYSTALS: readonly BlizzardImpactCrystalCall[] = [
 
 const BLIZZARD_IMPACT_CREATE_OFFSETS = [0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60] as const;
 const BLIZZARD_IMPACT_OAM_SLOTS = [3, 4, 5, 7, 9, 10, 11, 3, 4, 5, 7] as const;
+
+/** The move-owned projection of the live pre-Blizzard `sSpriteOrder`. */
+export const BLIZZARD_EFFECT_SPRITE_ORDER_SEED = [
+  3, 4, 21, 20, 5, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 7,
+  23, 22, 24, 25, 26, 27, 28, 29,
+] as const;
+
+export interface BlizzardEffectOamEntry {
+  readonly kind: "snowball" | "traveling" | "impact";
+  readonly callIndex: number;
+  readonly oamSlot: number;
+}
+
+function blizzardEffectOwner(
+  kind: BlizzardEffectOamEntry["kind"],
+  callIndex: number,
+): number {
+  if (kind === "snowball") return callIndex * 2;
+  if (kind === "traveling") return callIndex * 2 + 1;
+  return 100 + callIndex;
+}
+
+function blizzardEffectEntries(
+  frame: Readonly<BlizzardState>,
+): readonly BlizzardEffectOamEntry[] {
+  return [
+    ...frame.snowballs.map(({ callIndex, oamSlot }) => ({
+      kind: "snowball" as const, callIndex, oamSlot,
+    })),
+    ...frame.largeCrystals.map(({ callIndex, oamSlot }) => ({
+      kind: "traveling" as const, callIndex, oamSlot,
+    })),
+    ...frame.impactCrystals.map(({ callIndex, oamSlot }) => ({
+      kind: "impact" as const, callIndex, oamSlot,
+    })),
+  ].sort((left, right) =>
+    blizzardEffectOwner(left.kind, left.callIndex)
+      - blizzardEffectOwner(right.kind, right.callIndex));
+}
+
+function blizzardEffectOrderKey(
+  entry: Readonly<BlizzardEffectOamEntry>,
+  frame: Readonly<BlizzardState>,
+): SpriteOrderKey {
+  if (entry.kind === "snowball") {
+    const sprite = frame.snowballs.find(({ callIndex }) => callIndex === entry.callIndex)!;
+    return { priority: 2, subpriority: 0, oamY: sprite.y + sprite.y2 - 4 };
+  }
+  if (entry.kind === "traveling") {
+    const sprite = frame.largeCrystals.find(({ callIndex }) => callIndex === entry.callIndex)!;
+    return { priority: 2, subpriority: 0, oamY: sprite.y + sprite.y2 - 8 };
+  }
+  const sprite = frame.impactCrystals.find(({ callIndex }) => callIndex === entry.callIndex)!;
+  return {
+    priority: 2,
+    subpriority: 0,
+    oamY: sprite.y - (sprite.kind === "large" ? 8 : 4),
+    affineMode: "normal",
+    oamSize: 0,
+    oamShape: sprite.kind === "large" ? "vertical" : "square",
+  };
+}
+
+/**
+ * Replays Blizzard's source CreateSprite/DestroySprite lifecycle and the
+ * stable `SortSprites` pass. This is a source-relative OAM order, not an
+ * age-indexed painter table.
+ */
+export function blizzardEffectOamOrderAtAge(
+  age: number,
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+): readonly BlizzardEffectOamEntry[] {
+  if (!Number.isInteger(age)) throw new RangeError(`Blizzard age must be an integer, got ${age}`);
+  if (age < 0) return [];
+  const cacheKey = `${side}:${geometry.attackerCenter.x},${geometry.attackerCenter.y}`
+    + `:${geometry.targetCenter.x},${geometry.targetCenter.y}`;
+  let cache = blizzardOamOrderCache.get(cacheKey);
+  if (!cache) {
+    cache = {
+      scheduler: createSpriteOrderState(
+        BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
+        BLIZZARD_EFFECT_SPRITE_ORDER_SEED,
+      ),
+      nextAge: 0,
+      orders: new Map(),
+    };
+    blizzardOamOrderCache.set(cacheKey, cache);
+  }
+  const cached = cache.orders.get(age);
+  if (cached) return cached;
+  for (let tick = cache.nextAge; tick <= age; tick += 1) {
+    const frame = blizzardAtAge(tick, side, geometry);
+    const desired = blizzardEffectEntries(frame);
+    const desiredOwners = new Set(desired.map((entry) =>
+      blizzardEffectOwner(entry.kind, entry.callIndex)));
+    for (const entry of desired) {
+      const owner = blizzardEffectOwner(entry.kind, entry.callIndex);
+      const key = blizzardEffectOrderKey(entry, frame);
+      if (spriteSlotForOwner(cache.scheduler, owner) === null) {
+        cache.scheduler = createOrderedSprite(cache.scheduler, owner, key);
+        const allocated = spriteSlotForOwner(cache.scheduler, owner);
+        if (allocated !== entry.oamSlot) {
+          throw new Error(
+            `Blizzard ${entry.kind} ${entry.callIndex} allocated slot ${allocated}, expected ${entry.oamSlot}`,
+          );
+        }
+      } else {
+        cache.scheduler = updateOrderedSprite(cache.scheduler, owner, key);
+      }
+    }
+    for (const occupant of [...cache.scheduler.occupants]) {
+      if (!desiredOwners.has(occupant.owner)) {
+        cache.scheduler = destroyOrderedSprite(cache.scheduler, occupant.owner);
+      }
+    }
+    cache.scheduler = sortSpriteOrder(cache.scheduler);
+    const entryByOwner = new Map(desired.map((entry) => [
+      blizzardEffectOwner(entry.kind, entry.callIndex), entry,
+    ]));
+    const ownerBySlot = new Map(
+      cache.scheduler.occupants.map(({ owner, slot }) => [slot, owner]),
+    );
+    const order = cache.scheduler.order.flatMap((slot) => {
+      const owner = ownerBySlot.get(slot);
+      const entry = owner === undefined ? undefined : entryByOwner.get(owner);
+      return entry ? [entry] : [];
+    });
+    cache.orders.set(tick, order);
+    cache.nextAge = tick + 1;
+  }
+  return cache.orders.get(age)!;
+}
+
+interface BlizzardOamOrderCache {
+  scheduler: SpriteOrderState;
+  nextAge: number;
+  readonly orders: Map<number, readonly BlizzardEffectOamEntry[]>;
+}
+
+const blizzardOamOrderCache = new Map<string, BlizzardOamOrderCache>();
 
 function impactCrystalAtAge(
   callIndex: number,

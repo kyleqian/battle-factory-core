@@ -1,6 +1,6 @@
 {
   "schema": "blizzard-dense-evidence/v1",
-  "status": "unsupported-evidence-checkpoint",
+  "status": "exact",
   "move": "MOVE_BLIZZARD",
   "moveId": 59,
   "oracleProfile": "battle-scene-on",
@@ -49,10 +49,8 @@
       "rawRgbMemberCount": 372,
       "rawRgbMemberOrderSha256": "beb9a26b1e7c8698a9f8c6d1f289840241ac5d517c1ba7314aa374e235e3301b",
       "seamRows": 372,
-      "framebufferRows": 0,
-      "residuals": [
-        { "component": "production battleScene Blizzard compositor", "ages": "0-371", "rows": 372 }
-      ]
+      "framebufferRows": 372,
+      "residuals": []
     },
     "opponent-front": {
       "scenario": "tools/battle-lab/mechanic-blizzard-opponent-pelipper-player-onix.json",
@@ -76,22 +74,20 @@
       "rawRgbMemberCount": 361,
       "rawRgbMemberOrderSha256": "96b7ccc19330793dab1733944ed18e0a22f2bbeedc546c2b7c23721b73a814c7",
       "seamRows": 361,
-      "framebufferRows": 0,
-      "residuals": [
-        { "component": "production battleScene Blizzard compositor", "ages": "0-360", "rows": 361 }
-      ]
+      "framebufferRows": 361,
+      "residuals": []
     }
   },
   "captureFreshness": "one retained capture per orientation; no duplicate archive is claimed",
   "acceptance": {
-    "status": "unsupported-evidence-checkpoint",
+    "status": "exact",
     "sourceIntervalObservedFrames": "312/372 + 301/361",
     "swirlReducerMatchedSpriteRows": "448/448 + 448/448",
     "completeReducerRows": "372/372 + 361/361",
     "oamLatchRows": "371/371 + 360/360 with one-frame transfer",
     "seamRows": "372/372 + 361/361",
-    "framebufferRows": "0/372 + 0/361",
+    "framebufferRows": "372/372 + 361/361",
     "freshRuns": 2
   },
-  "residual": "No production battleScene Blizzard framebuffer compositor is implemented; MOVE_ICY_WIND remains independently unpromoted."
+  "residual": "None: the source-relative scheduler and shared GBA OBJ scanline compositor reproduce both complete dense windows; MOVE_ICY_WIND remains independently exact as the regression control."
 }

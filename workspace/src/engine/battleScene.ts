@@ -537,6 +537,7 @@ import {
   type GbaObjRaster,
 } from "../animation/gbaObjCompositor.ts";
 import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
+import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -1030,6 +1031,7 @@ import {
   sceneOnThunderWaveView,
   sceneOnThunderView,
   sceneOnIcyWindView,
+  sceneOnBlizzardView,
   sceneOnSurfView,
   sceneOnCharmView,
   sceneOnCovetView,
@@ -1095,6 +1097,7 @@ import {
   type SceneOnThunderWavePresentationState,
   type SceneOnThunderPresentationState,
   type SceneOnIcyWindPresentationState,
+  type SceneOnBlizzardPresentationState,
   type SceneOnSurfPresentationState,
   type SceneOnCharmPresentationState,
   type SceneOnCovetPresentationState,
@@ -17475,6 +17478,281 @@ export function renderSceneOnMovePresentation(
   fb: Uint8Array,
   state: SceneOnMovePresentationState,
 ): void {
+  if (state.config.move === "BLIZZARD") {
+    const blizzardState = state as SceneOnBlizzardPresentationState;
+    const view = sceneOnBlizzardView(blizzardState);
+    // Blizzard's complete bilateral maps prove ordinary OBJ, affine-matrix,
+    // and palette DMA from the preceding source buffer. Registers and the
+    // selected BG3 scroll are already the displayed same-row values.
+    const displayed = sceneOnBlizzardView({
+      ...blizzardState,
+      age: blizzardState.age - 1,
+    });
+    const playerToOpponent = view.attacker.species === "PELIPPER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "PELIPPER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged BLIZZARD pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const pelipperSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).PELIPPER!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PELIPPER!;
+    const pelipper = playerToOpponent
+      ? pelipperSource
+      : { ...pelipperSource, tileset: subTileset(pelipperSource.tileset, 0, 8) };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const darken = (palette: readonly RgbColor[]): RgbColor[] =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | color.g << 8 | color.b << 16,
+          view.blendY,
+        );
+        return {
+          r: packed & 0xff,
+          g: packed >>> 8 & 0xff,
+          b: packed >>> 16 & 0xff,
+        };
+      });
+    if (view.background === "field") {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(darken),
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: extremeSpeedBg.tileset,
+        // BG_HIGHSPEED_* names the side being attacked. Blizzard's reducer
+        // names its state by attacker side, so the source tilemap is the
+        // opposite label (the same source rule used by Extreme Speed).
+        tilemap: view.background === "highspeed-player"
+          ? extremeSpeedBg.opponentTilemap : extremeSpeedBg.playerTilemap,
+        subpalettes: [darken(extremeSpeedBg.palette)],
+      }, ((view.displayedBackgroundScrollX % 256) + 256) % 256);
+    }
+
+    // monbg copies the partner battler into BG1/BG2 and hides its live OBJ.
+    // Its palette is not selected by Blizzard's BG3-only brightness fade.
+    drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.x
+          + (speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0)
+        : ONIX_MATERIALIZE_CORNER.x,
+      playerToOpponent
+        ? view.target.geometry.spriteCorner.y
+        : ONIX_MATERIALIZE_CORNER.y,
+    );
+
+    // The opponent-attacker capture begins on the one retained hardware-OAM
+    // row before SpriteCB_SetInvisible removes the enemy shadow.
+    if (opponentToPlayer && blizzardState.age === 0) {
+      drawSpriteSheet(
+        fb,
+        sonicBoomArt.enemyShadow.tileset,
+        sonicBoomArt.enemyShadow.palette,
+        view.attacker.geometry.animationCenter.x - 16,
+        view.attacker.geometry.battlePositionCenter.y + 25,
+      );
+    }
+
+    type BlizzardPaint = Readonly<{
+      slot: number;
+      topY: number;
+      draw: () => void;
+    }>;
+    const paints: BlizzardPaint[] = [];
+    const snowballTile: Tileset = {
+      columns: 1, rows: 1, tiles: [battleAnimIceCrystals.tileset.tiles[7]!],
+    };
+    const travelingTile: Tileset = {
+      columns: 2, rows: 2, tiles: battleAnimIceCrystals.tileset.tiles.slice(8, 12),
+    };
+    for (const crystal of displayed.impactCrystals) {
+      if (crystal.invisible) continue;
+      const tileset = crystal.kind === "large"
+        ? battleAnimIceCrystalLarge : battleAnimIceCrystalSmall;
+      const [pa, pb, pc, pd] = crystal.matrix;
+      paints.push({
+        slot: crystal.oamSlot,
+        topY: crystal.y - tileset.rows * 4,
+        draw: () => drawSpriteSheetAffineRotate(
+          fb,
+          tileset,
+          battleAnimIceCrystals.palette,
+          crystal.x,
+          crystal.y,
+          pa,
+          pb,
+          pc,
+          pd,
+          undefined,
+          false,
+        ),
+      });
+    }
+    const travelingActive = displayed.snowballs.length > 0
+      || displayed.largeCrystals.length > 0;
+    if (travelingActive) {
+      const transparent = (width: number, height: number): readonly null[] =>
+        new Array<null>(width * height).fill(null);
+      const cycleOnly = (
+        oamIndex: number,
+        declaredWidth: number,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+      ): GbaObjRaster<RgbColor> => ({
+        oamIndex, priority: 2, mode: "normal", declaredWidth,
+        x, y, width, height, pixels: transparent(width, height),
+      });
+      const rasters: GbaObjRaster<RgbColor>[] = [
+        cycleOnly(0, 32, 158, 88, 32, 8),
+        cycleOnly(1, 32, 190, 88, 32, 8),
+        cycleOnly(2, 32, 36, 30, 32, 8),
+        cycleOnly(3, 32, 68, 30, 32, 8),
+        cycleOnly(4, 8, 20, 30, 8, 8),
+        cycleOnly(5, 64, 126, 72, 64, 32),
+        cycleOnly(6, 64, 190, 72, 64, 32),
+        cycleOnly(7, 64, 12, 14, 64, 32),
+        cycleOnly(8, 64, 76, 14, 64, 32),
+      ];
+      const effectOrder = blizzardEffectOamOrderAtAge(
+        displayed.age,
+        view.attacker.geometry.side,
+        blizzardState.config.effectGeometry,
+      );
+      const topY = (entry: (typeof effectOrder)[number]): number => {
+        if (entry.kind === "snowball") {
+          const sprite = displayed.snowballs.find(
+            ({ callIndex }) => callIndex === entry.callIndex,
+          )!;
+          return sprite.y + sprite.y2 - 4;
+        }
+        const sprite = displayed.largeCrystals.find(
+          ({ callIndex }) => callIndex === entry.callIndex,
+        )!;
+        return sprite.y + sprite.y2 - 8;
+      };
+      // Player Pelipper shares subpriority 0 with the particles. Its fixed
+      // slot precedes every move allocation on an exact Y tie. Opponent
+      // Pelipper has subpriority 8 and therefore follows all particles.
+      const attackerTopY = view.attacker.geometry.spriteCorner.y;
+      const attackerOrderIndex = playerToOpponent
+        ? effectOrder.findIndex((entry) => topY(entry) <= attackerTopY)
+        : effectOrder.length;
+      const attackerInsert = attackerOrderIndex < 0
+        ? effectOrder.length : attackerOrderIndex;
+      const effectOamIndex = new Map(effectOrder.map((entry, index) => [
+        `${entry.kind}:${entry.callIndex}`,
+        9 + index + (index >= attackerInsert ? 1 : 0),
+      ]));
+      for (const snowball of displayed.snowballs) {
+        rasters.push({
+          oamIndex: effectOamIndex.get(`snowball:${snowball.callIndex}`)!,
+          priority: 2,
+          mode: "normal",
+          declaredWidth: 8,
+          x: snowball.x + snowball.x2 - 4,
+          y: snowball.y + snowball.y2 - 4,
+          ...spriteSheetRaster(snowballTile, battleAnimIceCrystals.palette),
+        });
+      }
+      for (const crystal of displayed.largeCrystals) {
+        rasters.push({
+          oamIndex: effectOamIndex.get(`traveling:${crystal.callIndex}`)!,
+          priority: 2,
+          mode: "normal",
+          declaredWidth: 16,
+          x: crystal.x + crystal.x2 - 8,
+          y: crystal.y + crystal.y2 - 8,
+          ...spriteSheetRaster(travelingTile, battleAnimIceCrystals.palette),
+        });
+      }
+      rasters.push({
+        oamIndex: 9 + attackerInsert,
+        priority: 2,
+        mode: "normal",
+        declaredWidth: 64,
+        x: view.attacker.geometry.spriteCorner.x,
+        y: view.attacker.geometry.spriteCorner.y,
+        ...spriteSheetRaster(pelipper.tileset, pelipper.palette),
+      });
+      rasters.push(cycleOnly(
+        10 + effectOrder.length,
+        64,
+        144,
+        28,
+        64,
+        32,
+      ));
+      const composite = compositeGbaObjScanlines(240, 160, rasters);
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        const color = composite.normalPixels[pixel];
+        if (!color) continue;
+        const offset = pixel * 4;
+        fb[offset] = color.r;
+        fb[offset + 1] = color.g;
+        fb[offset + 2] = color.b;
+      }
+    } else {
+      // The impact sequence never reaches the OBJ scanline budget. Its
+      // source-stable equal-subpriority painter order is sufficient while
+      // retaining each source-derived affine matrix and flicker state.
+      paints.sort((left, right) => left.topY - right.topY || right.slot - left.slot);
+      for (const paint of paints) paint.draw();
+      drawSpriteSheet(
+        fb,
+        pelipper.tileset,
+        pelipper.palette,
+        view.attacker.geometry.spriteCorner.x,
+        view.attacker.geometry.spriteCorner.y,
+      );
+    }
+
+    const profile = blizzardState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "PELIPPER",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "PELIPPER" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "PELIPPER used" : "Foe PELIPPER used",
+      "BLIZZARD!",
+      99,
+    );
+    return;
+  }
   if (state.config.move === "ICY_WIND") {
     const icyState = state as SceneOnIcyWindPresentationState;
     const view = sceneOnIcyWindView(icyState);
