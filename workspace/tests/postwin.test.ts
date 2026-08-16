@@ -1607,10 +1607,12 @@ describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyF
     expect(callSceneBoxHidden(leadInEnd)).toBe(false);
 
     // First visible movement pixel (oracle 903 = dismissEdge + 8): box now
-    // hidden, attendant shifted 1px west, leading-leg pose (GoWest frame 7).
+    // hidden, attendant shifted 1px west, leading-leg pose (GoWest cycle
+    // step 1 - PROGRESS 1293 pixel-verified this is picture-table frame 8,
+    // not the literal ANIMCMD_FRAME(7,8) reading - see callSceneWalkFrame).
     const firstPixel = { ...pendingAfterBox1, elapsed: dismissEdge + 8 };
     expect(callSceneBoxHidden(firstPixel)).toBe(true);
-    expect(callSceneAttendantVisual(firstPixel)).toEqual({ dx: -1, frame: 7, hFlip: false });
+    expect(callSceneAttendantVisual(firstPixel)).toEqual({ dx: -1, frame: 8, hFlip: false });
 
     // Last movement tick (oracle 950 = dismissEdge + 55): 3 full tiles (48px) west.
     const lastPixel = { ...pendingAfterBox1, elapsed: dismissEdge + 55 };

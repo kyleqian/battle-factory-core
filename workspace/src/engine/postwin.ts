@@ -1096,18 +1096,36 @@ export const CALL_SCENE_PAGE_TRANSITION_DELAY: readonly [number, number, number,
 ];
 
 /**
- * Picture-table pose during the walk, cycling every 8 ticks: stand(2) then
- * lead-leg(7 west/8 east), matching `sAnim_GoWest`/`sAnim_GoEast`
- * (reference/pokeemerald/src/data/object_events/object_event_anims.h:220-
- * 235: `ANIMCMD_FRAME(7,8)`, `ANIMCMD_FRAME(2,8)`, `ANIMCMD_FRAME(8,8)`,
- * `ANIMCMD_FRAME(2,8)`, loop - GoEast is the same table with `hFlip=TRUE`).
- * Source-derived, not independently pixel-probed frame-by-frame.
+ * Picture-table pose during the walk, cycling every 8 ticks: stand(2)
+ * alternating with the two lead-leg indices (7, 8). Duration/step-count
+ * matches `sAnim_GoWest`/`sAnim_GoEast` (reference/pokeemerald/src/data/
+ * object_events/object_event_anims.h:220-235: 4 steps of 8 ticks each,
+ * `ANIMCMD_FRAME(7,8)`, `ANIMCMD_FRAME(2,8)`, `ANIMCMD_FRAME(8,8)`,
+ * `ANIMCMD_FRAME(2,8)`, loop - GoEast is the literal same table with
+ * `hFlip=TRUE` added, i.e. same leg order as GoWest by the decomp source).
+ *
+ * PROGRESS 1293 rendered both candidate leg-index orders at the
+ * attendant's actual on-screen position against oracle pixel data and
+ * found the two walk legs (page 1 = walk-away, hFlip false; page 2 =
+ * walk-back, hFlip true) do NOT share one order despite GoWest/GoEast
+ * being the literal same table: page 1 is pixel-exact (0/31 diff) with
+ * leg8-then-leg7 (`tools/compare/traces/factory-brain-silver-walkup-
+ * callscene-01-off.json` frames 447 cyclePos0-7, 429 cyclePos16-23),
+ * while page 2 is pixel-exact with the literal decomp order, leg7-then-
+ * leg8 (`...-callscene-02-off.json` frame 547 cyclePos0-7; frames 563-569
+ * cyclePos16-23 already matched pre-fix). The raw per-index art itself is
+ * confirmed correct first (`tools/extract/extract-prebattle-room.ts`'s
+ * frame extraction is byte-identical to the source PNG's own columns
+ * 7/8), so this is a picture-index/imageValue ordering fix (per walk
+ * direction), not a pixel-fit. Unclear why the two legs diverge from the
+ * shared-table reading; not re-derived further within this step's bound.
  */
-function callSceneWalkFrame(walkTick: number): 2 | 7 | 8 {
+function callSceneWalkFrame(walkTick: number, leadLeg: 7 | 8): 2 | 7 | 8 {
+  const otherLeg = leadLeg === 7 ? 8 : 7;
   const cyclePos = walkTick % 32;
-  if (cyclePos < 8) return 7;
+  if (cyclePos < 8) return leadLeg;
   if (cyclePos < 16) return 2;
-  if (cyclePos < 24) return 8;
+  if (cyclePos < 24) return otherLeg;
   return 2;
 }
 
@@ -1134,7 +1152,7 @@ export function callSceneAttendantVisual(state: PostwinState): CallSceneAttendan
       localTick - CALL_SCENE_MOVE_AWAY_START_DELAY,
       CALL_SCENE_MOVE_DURATION - 1,
     );
-    return { dx: -(walkTick + 1), frame: callSceneWalkFrame(walkTick), hFlip: false };
+    return { dx: -(walkTick + 1), frame: callSceneWalkFrame(walkTick, 8), hFlip: false };
   }
   if (state.callScenePage === 2) {
     if (state.callScenePendingElapsed === null) return CALL_SCENE_AWAY_HOLD_VISUAL;
@@ -1143,7 +1161,7 @@ export function callSceneAttendantVisual(state: PostwinState): CallSceneAttendan
     const walkTick = Math.min(localTick, CALL_SCENE_MOVE_DURATION - 1);
     return {
       dx: -CALL_SCENE_MOVE_DISTANCE + (walkTick + 1),
-      frame: callSceneWalkFrame(walkTick),
+      frame: callSceneWalkFrame(walkTick, 7),
       hFlip: true,
     };
   }
