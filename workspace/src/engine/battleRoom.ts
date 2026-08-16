@@ -640,31 +640,64 @@ export function opponentStep(elapsed: number): OpponentStep {
 // the remaining fixture-02 residual (Noland's face must be visible, not the
 // decoy's own north-facing idle pose).
 //
+// **Walk-up build step B1c (RAM re-derivation of the brainMoving walk/pan
+// cadence, `tools/probe/probe-factory-brain-silver-entrance-movement-ram.py`
+// - direct `gTotalCameraPixelOffsetY`/`gSprites`/`gObjectEvents` reads every
+// frame 896-1151 of the same staged fixture 03 uses, not pixel curve-
+// fitting):** B1b's own diagnosis (`entryStep`'s per-tick table doesn't
+// reproduce this branch's cadence) was wrong in its root cause. RAM shows
+// the decoy/camera in THIS window follow the exact SAME per-tick shape as
+// `ENTRY_STEPS` (same clean 1px/tick pan, same animCmdIndex phase at every
+// sampled tick, same one-tick-after-pan-stops settle) - just re-based onto a
+// different zero point. `ENTRY_STEPS`' own leading 23 flat-pan ticks
+// (indices 0-22) are an artifact of THAT window's warp fade-in still
+// settling (S6 slice 2a finding 1/2 above) - irrelevant here, since
+// `brainMoving` starts from a closed msgbox, not a fade. Re-based by
+// `BRAIN_MOVEMENT_CLOCK_OFFSET` (22, RAM-measured - see its own doc),
+// `entryStep`/`scientistTurnFrame`/`nolandStep` reproduce this window's real
+// decoy/Noland position and animation at every RAM-sampled tick, not just
+// the endpoints - `nolandStep`'s existing screenY/frame formulas (24 flat,
+// then `24 + (camPanY - 48)` past the walk) were themselves ALREADY correct;
+// only the elapsed value feeding them was wrong. Separately,
+// `SPEECH_APPEAR_ELAPSED` (the `brainSettled` -> `brainSpeech` handoff,
+// previously an unmeasured structural 0) is now MEASURED at 5, closing a
+// distinct ~5-tick speech-box-appears-too-early mismatch this step also
+// found once the walk/pan cadence stopped masking it. The compare trace's
+// own A-press timing (`tools/compare/traces/factory-brain-silver-walkup-
+// entrance-03-off.json`) was also corrected - it dismissed the msgbox ~20
+// ticks before oracle's real dismissal point, an artifact of B1b's own
+// (mis-scoped) tuning attempt, not a app-code bug.
+//
 // **Residual NOT closed this step, flagged honestly rather than relabeled
-// "measured":** fixture 03's own `brainMoving` window (Noland/decoy walk +
-// camera pan, the ~103 elapsed ticks from the box-close dismiss through
-// shortly before `BRAIN_MOVEMENT_SETTLE_ELAPSED`) still mismatches
-// substantially against fresh dense-compare evidence - `entryStep`'s own
-// per-tick table (built for the ORDINARY path's own decoy-only walk, S6
-// slice 2a's module doc above) does not reproduce this branch's real
-// camera-pan cadence when reused verbatim for the simultaneous Noland+decoy
-// walk; a same-shape lookup shifted earlier was tried and made the mismatch
-// worse, not better, so the true per-tick schedule is NOT simply a phase
-// shift of `ENTRY_STEPS` and needs its own RAM/pixel derivation, out of this
-// step's remaining time budget. `NOLAND_INITIAL_SCREEN_Y` (24) and the
-// `camPanY`/`decoyFrame` reuse inside `nolandStep`/`renderBattleRoomBrain
-// EntranceScene` therefore REMAIN the prior algebraic/structural guess, NOT
-// dense-compare-measured - do not trust this window's exact pixels until a
-// future step re-derives the walk cadence. `BRAIN_MOVEMENT_SETTLE_ELAPSED`
-// (108) is comparatively well-supported: the residual's own far boundary
-// (oracle's real speech-box onset, B2's job, unimplemented here) lines up
-// with this constant's predicted `brainSettled` entry to within a handful of
-// frames, so it is kept as the best-available value but not re-derived
-// independently this step either.
+// "measured":** fixture 03 improves from a broad ~26-65% full-frame
+// mismatch (0/256 in its own ramp+speech-onset region) to a bounded
+// ~5-13%-of-frame residual confined to the mid-ramp window only (162/256
+// frames now exact, up from 43/256; every frame before the ramp and every
+// frame once the room is genuinely settled, including all of B2's speech
+// content, is exact). Direct RAM cross-checks at multiple ramp ticks (not
+// just the endpoints) show `camPanY`/decoy-animation/Noland-position all
+// matching oracle's real RAM exactly at those sampled ticks - yet the
+// rendered PIXELS still diverge mid-ramp (a small, sub-tile-scale
+// misalignment: cross-correlating diff frames against a pure vertical pixel
+// shift finds a best-fit +1px offset with ~98-99% background-tile
+// agreement, not 100%, so it isn't simply a further one-tick lag either -
+// `BRAIN_MOVEMENT_CLOCK_OFFSET` values of 21 and 23 were both tried and
+// both regressed the OVERALL match count, so the fix isn't a uniform
+// elapsed-clock shift). The true mechanism (likely a sub-tile easing/
+// interpolation this room's own camera applies that `gTotalCameraPixelOffsetY`
+// alone doesn't capture, or a second camera-adjacent RAM field this probe
+// didn't read) is undetermined - a future step should RAM-probe
+// `gSpriteCoordOffsetY`/OAM-buffer state directly across the ramp (this
+// step's probe already reads `gSpriteCoordOffsetX/Y`, see its own source)
+// rather than re-deriving further from `camPanY` alone.
+// `BRAIN_MOVEMENT_SETTLE_ELAPSED` is now 86 (down from the prior 108) -
+// still the same real-tick distance from `scientistTurnFrame`'s own
+// (unshifted) 108 threshold, just expressed in this window's own un-shifted
+// clock instead of `entryStep`'s.
 
 /** Noland's own walk distance in px (`walk_up`x3, this game's established 16-ticks/tile object-movement rate - see module doc points 2/3 above). */
 export const NOLAND_WALK_PX = 48;
-/** Noland's screen Y at `elapsed` 0 (spawn tile (7,9), zero pan) - see the derivation note above. */
+/** Noland's screen Y at `elapsed` 0 (spawn tile (7,9), zero pan) - RAM-confirmed this step (B1c, see module doc above): matches the RAM-sampled screen position formula (`nolY + spriteCoordOffsetY - 16`) exactly for every `camPanY < NOLAND_WALK_PX` tick sampled, not just algebraically derived. */
 export const NOLAND_INITIAL_SCREEN_Y = 24;
 /**
  * Noland's own resting pose before `brainMoving` starts (`brainEntering`/
