@@ -35,6 +35,32 @@ history.
 - **Real fix:** compare the process start time against the last commit that
   touched `oracle/`, not against harness HEAD.
 
+## Side-worktree Claude workers: Edit/Write tool calls can land in the MAIN tree via absolute paths — the worker perceives it as "my edits silently don't reach disk"
+
+- **What:** a side-lane Claude worker whose Edit/Write tool calls use (or
+  resolve to) absolute paths under the main tree writes THERE, not in its
+  worktree. From inside the worktree the symptom is gaslighting: the tool
+  reports success and a follow-up Read shows the change (same absolute
+  path), but `git diff`/`grep` in the worktree show nothing. The worker
+  concludes "Edit/Write silently fails" and routes around it with shell
+  writes; meanwhile the main tree accumulates stray uncommitted duplicates
+  of its early drafts.
+- **Hits:** 2 (2026-08-16 morning, S3 gold-doc worker — caught by
+  `git status` before merge, PROGRESS 1288 notes; 2026-08-16 afternoon,
+  B1c worker — two stray files in the main tree, diagnosed via diff
+  against the branch's committed versions as superseded early drafts and
+  discarded; the worker itself lost ~10 min and misdiagnosed it as a
+  broken Edit tool).
+- **Cost each:** ~10 min worker time + supervisor forensics at merge.
+- **Workaround (supervisor):** `git status` the MAIN tree whenever a side
+  worker was live; diff any stray against the side branch's committed
+  version before discarding. (Both hits so far: strays were early drafts,
+  committed branch superseded them, `git checkout --` was safe.)
+- **Real fix:** launcher/brief-level — pin the worker's cwd-relative
+  discipline (e.g. a pre-commit guard in the worktree that fails on a
+  clean `git status` after claimed edits, or an Edit-tool path guard
+  refusing paths outside the worktree root).
+
 ## Walk-up lab staging: multichoice/YES-NO boxes silently swallow inputs sent before their typewriter settles
 
 - **What:** in `factoryBrain` + `walkup: true` traces, a D-pad/A input sent

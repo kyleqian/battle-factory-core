@@ -5,6 +5,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1296 — [supervisor, 2026-08-16] **B1c folded: entrance-03 162→242/256 (render clock, not OAM latch); #93 fix verified; side absolute-path trap recurred — papercut filed**
+
+- **State:** B1c branch merged (worker `0efe8e15`); union checks green
+  (smoke 375/375, orchestrator+soak pins 65/65, new B1c pin 15/15,
+  build; entrance-03 re-confirmed **242/256** on the merged tree).
+  Mechanism: `brainMoving`'s render clock ran ONE TICK AHEAD of
+  `entryStep`'s shared table (RAM stays flat two ticks after the
+  `brainMsgboxClosing→brainMoving` transition); the 1288 OAM/
+  `gSpriteCoordOffsetY` latch hypothesis was RULED OUT by an extended
+  RAM probe (`oam.y` equals its same-frame computed sum at every tick).
+  Bounded residual: frames 319-320 (msgbox-close wipe artifact — same
+  close-wipe lever as gold speech) + 368 (single-tick Noland walk-cycle
+  frame-index boundary, same family as 1293's lead-leg fix). Bars
+  unmoved: entrance-02 256/256, B2 speech 39/39·28/28·74/74·39/39,
+  reveal 690/701. **#93 fix (1295) supervisor-verified:** seed 109
+  clean, orchestrator suite 51/51, winning 100:120 was 20/20 in the
+  worker's run.
+- **Trap recurred with mechanism found:** the side worker's Edit/Write
+  calls landed in the MAIN tree via absolute paths (worker perceived
+  "edits silently don't reach disk" and fell back to shell writes; two
+  stray main-tree files were superseded early drafts, diff-checked
+  against the branch and discarded). New PAPERCUTS entry filed.
+- **Next:** dispatching **(b) gold speech dense closure** (main lane —
+  now carrying the B1c clock mechanism + the close-wipe and walk-cycle
+  residual leads) and a **post-#93 winning 0:60 re-sweep + full-policy
+  60:120 first sweep** (side lane). Remaining parked: callscene-02
+  second page-turn + box-5 dismiss (1293), entrance-03 frames
+  319-320/368.
+
+---
+
 ## 1295 — [main worker, 2026-08-16] **ISSUES #93 fixed: forced-switch handoff no longer preempts a fainted battler's own trailing `Cmd_moveend` item-effect commands (Shell Bell etc.) — seed 109 clean, winning soak 100:120 20/20 OK**
 
 - **State:** Landed and green. `npm test` **1,056 files / 9,980 passed /
@@ -98,63 +129,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   doc) — park unless evidence improves.
 
 ---
-
-## 1293 — [main worker, 2026-08-16] **Both named call-scene residuals closed/advanced — attendant walk lead-leg pose fixed exact (callscene-01 119→131/131), boss-message page-turn render bug found + fixed (callscene-02 120→171/199)**
-
-- **State:** Landed and green in two commits. `npm test` **1,056 files /
-  9,978 passed / 223 skipped**, `npm run build` + `npm run typecheck`
-  green.
-- **Did (Goal 1, walk lead-leg pose — CLOSED exact):** `callSceneWalkFrame`
-  assumed the walk-away (hFlip false) and walk-back (hFlip true) legs
-  shared `sAnim_GoWest`/`GoEast`'s literal `ANIMCMD_FRAME(7,...)`-then-8
-  order. Rendering both candidate leg-index orders against oracle pixel
-  data (callscene-01 frames 447/429) showed the two legs actually diverge:
-  walk-away is pixel-exact with 8-then-7, walk-back stays pixel-exact with
-  the literal 7-then-8. Made the lead leg a per-direction parameter.
-  callscene-01 dense compare **119/131 → 131/131** (was 89/131 pre-1292).
-  Commit `7214005d`.
-- **Did (Goal 2, page-turn press re-derivation — ADVANCED, not exact):**
-  found the callscene-02 residual was not purely a fixture press-frame
-  issue as 1292 concluded — a second, independent render bug:
-  `CALL_SCENE_TEXT_FIRST_DELAYS[3]`/`[4]` (boxes 4/5's own first-glyph
-  delay) used the generic 4-tick `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY`
-  instead of the same-window `\p` swap's real accept+1 rule (1292's own
-  point 4), leaving the app blank 3 extra ticks after every page turn and
-  skewing that whole page's typewriter schedule. Fixed by giving boxes
-  3→4/4→5 their own 1-tick deferred bump (`CALL_SCENE_PAGE_TRANSITION_
-  DELAY[2]`/`[3]`, reusing boxes 1/2's existing `callScenePendingElapsed`
-  machinery) + firstDelay 0, oracle-confirmed via byte-identical capture
-  hashes across local 805–813 (box 4 held) then a change at 814 (new
-  content). Combined with re-deriving the box-3→4 press's own idle segment
-  (`idle133`→`idle131`, -2 ticks, matching the canned route's oracle
-  accept 1170) this closes the **entire** page-1→2 turn cluster to 0 diff.
-  The page-2→3 turn (box 4→5) was tried the same way (segment -2) but only
-  partially closed (improved, not exact) and over-shifting past it
-  regressed further downstream; the box-5 dismiss press (page 3's own
-  dismiss, a different accept path — `callSceneDismissElapsed`, not
-  `acceptPostwinCallScenePage`) was tried and reverted after it cascaded
-  into large new mismatches through the rest of the trace, so it was left
-  at its original position. callscene-02 dense compare **120/199 →
-  171/199** (net +51, no regression anywhere re-checked). Two residual
-  clusters remain, bounded in the ground-truth doc: page-2→3 turn (local
-  814, 816–866, shrunk but not zero) and box-5 dismiss/menu-handoff (local
-  948–966, unchanged, pre-existing per 1289/1292). Commit pending (this
-  entry's docs commit lands with the code).
-- **Bars (all re-run live this session, unmoved):** askready-menu
-  **21/21**, swapask-no **194/194**, entrance-02 **256/256**, record
-  **178/178**, retire **174/174**, silver reveal (`...noland-reveal-off`)
-  **690/701**, entrance-03 **162/256**, gold speech **58/256 · 20/177 ·
-  58/126**. `executableFrontierRatchet` barrier counts unwidened; no new
-  barrier.
-- **Next:** page-2→3 turn + box-5 dismiss residuals are the honest
-  remainder for a future step (both bounded above with exact frame
-  ranges); box-5's own accept path likely needs its own separate
-  derivation rather than reusing the -2 that worked for the other two
-  presses. Otherwise the 1291 queue's (c)/(b) items stand.
-- **Notes:** Commits local only. No PAPERCUT (tooling worked as
-  documented; the `--capture-range` flag plus rendering isolated candidate
-  frame-index variants directly was the key diagnostic move both times).
-
----
-
 
