@@ -115,7 +115,7 @@ describe("MOVE_ROLLOUT authoritative-source staging checkpoint", () => {
       challengeNum: 0, battleNum: 2, trainerId: 50,
       playerSetIds: playerAttacker ? [113, 114, 115] : [110, 111, 112],
       opponentSetIds: playerAttacker ? [110, 111, 112] : [113, 114, 115],
-      seed: playerAttacker ? 305420101 : 305420103,
+      seed: playerAttacker ? 305420102 : 305420104,
     });
     expect(stage.trace).not.toHaveProperty("captureFrames");
     expect(stage).not.toHaveProperty("preCheckpointCaptureAllFrames");

@@ -1,0 +1,49 @@
+{
+  "schema": "rollout-evidence-fixture/v1",
+  "move": "MOVE_ROLLOUT",
+  "status": "unsupported",
+  "coverageCredit": false,
+  "probe": "tools/compare/rolloutProbe.py",
+  "verifier": "tools/compare/rolloutEvidence.ts",
+  "repeatability": {"runsPerOrientation": 2, "comparison": "byte-identical dense JSON and every raw RGB frame", "allMatched": true},
+  "expected": {
+    "counters": [1, 2, 3, 4, 5],
+    "remainingTimers": [4, 3, 2, 1, 0],
+    "dynamicPowers": [30, 60, 120, 240, 480],
+    "defenseCurlPowersFromPinnedSource": [60, 120, 240, 480, 960],
+    "shakeAmplitudes": [2, 5, 10, 16, 16],
+    "particleCreations": [10, 10, 12, 16, 8],
+    "frameCounts": [167, 167, 161, 153, 145]
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-rollout-player-voltorb-opponent-onix.json",
+      "scenarioSha256": "fec0d054f4d11ad112d365e34c77886c3185c3b3dbd7f5792609033b0a99f14a",
+      "seed": 305420102,
+      "denseState": "tools/compare/evidence/rollout-player-dense-state.json.gz",
+      "probeJsonSha256": "78b134e9f9ee263cbecd4299702f3015cae0283585596a7f2f773094675d05c4",
+      "denseStateSha256": "ea74a98b94e8e46b72f10c8cd747bc85f7334138b0b3853941b596dbdf70c2a6",
+      "rawRgb": "tools/compare/evidence/rollout-player-raw-rgb.tar.gz",
+      "rawRgbSha256": "9b64cf700e54591a4ab88c5094cc4e48c153243e439ed46c21d6ae4e6cd7d1c1",
+      "rawRgbSequenceSha256": "4b9f1c6c1bcef82a850218a883e019565a0f39546a63e1417fc9c291aca77e8d",
+      "changeMap": "tools/compare/evidence/rollout-changemap-player.json",
+      "changeMapSha256": "02d9e909e98bc2f67146ef913f42cde563cacea3bb8145d8fb0947e0c7c8859c",
+      "sourceWindows": [[75,241],[575,741],[1079,1239],[1578,1730],[2074,2218]]
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-rollout-opponent-voltorb-player-onix.json",
+      "scenarioSha256": "63ea8bbc6ee8dd0dabbc22b20305f0d9d7fa5aaf82166035c1697c40b258dd1f",
+      "seed": 305420104,
+      "denseState": "tools/compare/evidence/rollout-opponent-dense-state.json.gz",
+      "probeJsonSha256": "29e1ba8daa1a8ebef84cced74852d77277a4a0db739f1450233ad59d75ab4eff",
+      "denseStateSha256": "b3d85881988b232b1ecd059845dff07a03cfe56773c8c57dc0bcb8a2f5d97a16",
+      "rawRgb": "tools/compare/evidence/rollout-opponent-raw-rgb.tar.gz",
+      "rawRgbSha256": "6e589a1caaf8dbc296c7ff7d6546f7a647a325228b28b674ef75611aa9f98bc6",
+      "rawRgbSequenceSha256": "7451551f52d745ed6694a4b030d3064a1481edb8e58033df6924d8926114aac5",
+      "changeMap": "tools/compare/evidence/rollout-changemap-opponent.json",
+      "changeMapSha256": "b91085be2c246d6db33da1890880dcf58338a5da45afde4bd972327963fff0fe",
+      "sourceWindows": [[79,245],[1010,1176],[1580,1740],[2120,2272],[2660,2804]]
+    }
+  },
+  "boundedRemainder": "Complete twice-fresh dense bilateral counter-1-through-5 evidence is retained, but no reducer, typed seam, production compositor, zero-residual shared-framebuffer acceptance, move coverage entry, or sibling credit is claimed. MOVE_ICE_BALL remains independent and unsupported."
+}

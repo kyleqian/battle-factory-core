@@ -96,14 +96,14 @@
   "stages": {
     "playerBack": {
       "scenario":"tools/battle-lab/mechanic-rollout-player-voltorb-opponent-onix.json",
-      "scenarioSha256":"fbde04180c4c409320b8994be167986aedd72308a1f3a3646ca67c728d69e5fc",
-      "endpoint":{"frame":934,"framebufferSha256":"aae08a47d7d209b8c1f2f26d3389aff346866f643337eb7d078df2d6dce29e53","rolloutPp":[19,20,20,20],"consumedRolloutPpSlot":0,"partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},"allPartyChecksumsValid":true}
+      "scenarioSha256":"fec0d054f4d11ad112d365e34c77886c3185c3b3dbd7f5792609033b0a99f14a",
+      "endpoint":{"frame":934,"framebufferSha256":"1eaac04a9e761c1b6db9c61c6603163b0b7a8afda602eb4055d9366499e4a2a3","rolloutPp":[19,20,20,20],"consumedRolloutPpSlot":0,"partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},"allPartyChecksumsValid":true}
     },
     "opponentFront": {
       "scenario":"tools/battle-lab/mechanic-rollout-opponent-voltorb-player-onix.json",
-      "scenarioSha256":"482d5e26b1226bf7b5263b09dfe3d787d391fa710c95ea7f2db8fa3e2c0d2528",
-      "endpoint":{"frame":934,"framebufferSha256":"7095b4dd690dfcde91cc63a562bd0d8cd931c57b78f020e68689cc54f9bb90f7","rolloutPp":[20,20,19,20],"consumedRolloutPpSlot":2,"partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},"allPartyChecksumsValid":true}
+      "scenarioSha256":"63ea8bbc6ee8dd0dabbc22b20305f0d9d7fa5aaf82166035c1697c40b258dd1f",
+      "endpoint":{"frame":934,"framebufferSha256":"3f6707f91af1b6c0b44ef791dfbded4cec5038fc0ec8047e88bc6512930d7028","rolloutPp":[20,19,20,20],"consumedRolloutPpSlot":1,"partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},"allPartyChecksumsValid":true}
     }
   },
-  "boundedRemainder":"The two twice-fresh, capture-free legal Scene-ON endpoints prove only bilateral party staging and one consumed Rollout PP slot. No animation implementation, dense capture, latch result, framebuffer comparison through the shared seam, exact/partial/staged move coverage, or sibling credit is claimed. The next action is complete twice-fresh dense player-back and opponent-front windows through the shared presentation seam, with Rollout's own banked change maps before any latch conclusion."
+  "boundedRemainder":"The legal Scene-ON stages now use seeds that naturally sustain all five Rollout hits, and the separate rollout-evidence fixture retains their complete twice-fresh bilateral bodies and measured change maps. No animation reducer, typed seam, production compositor, zero-residual shared-framebuffer acceptance, exact/partial/staged move coverage, or sibling credit is claimed."
 }
