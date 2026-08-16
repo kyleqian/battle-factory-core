@@ -5,6 +5,77 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1295 — [main worker, 2026-08-16] **ISSUES #93 fixed: forced-switch handoff no longer preempts a fainted battler's own trailing `Cmd_moveend` item-effect commands (Shell Bell etc.) — seed 109 clean, winning soak 100:120 20/20 OK**
+
+- **State:** Landed and green. `npm test` **1,056 files / 9,980 passed /
+  223 skipped**, `npm run build` + `npm run typecheck` green. `npm run soak
+  -- --policy winning --seed 109` completes clean (`b4 t24 146761f
+  roundLost`, was a deterministic crash). `npm run soak -- --policy winning
+  --seeds 100:120` **20/20 OK, 0 CRASH, 0 HANG**.
+- **Did (root cause):** `factoryRoundBattleOrchestrator.ts`'s resolution
+  advance had a hardcoded early intercept (`isForcedSwitchHandoffMessage`)
+  that jumped straight to `forced-party-handoff` the instant a fainted
+  battler's own typed message was dismissed — before any later commands in
+  that same segment ever presented. Real source never does this: `tryfaintmon`
+  prints the fainted message from `BattleScript_FaintTarget`
+  (`data/battle_scripts_1.s:2817-2822`) *inside* the attacking move's own
+  script, strictly before that script reaches `goto BattleScript_MoveEnd`
+  and runs its `MOVEEND_KINGSROCK_SHELLBELL` item-effect case
+  (`battle_script_commands.c:4210-4494`); the party-menu open
+  (`BattleScript_HandleFaintedMon`) is a wholly separate later pass
+  (`HandleFaintedMonActions`, `battle_util.c:1899-1946`) that only starts
+  once the whole move script — including those `MOVEEND_*` effects — has
+  returned to the turn loop. Seed 109 hits exactly this: Staryu's Bubblebeam
+  faints the player's active (fainted message), then `Cmd_moveend`'s Shell
+  Bell heals Staryu (message + `"hp"` command) in the *same* segment,
+  *after* the fainted message. The premature handoff captured the forced-
+  switch continuation's field boundary before that heal ever applied, so
+  the continuation segment's own `field.opponent.hp` stayed at the stale
+  pre-heal value; a later real event (here, Staryu's own end-of-turn burn
+  tick, built fresh against the real un-stale kernel HP) then disagreed with
+  that stale displayed value and threw the renderer's consistency guard
+  (which is correct behavior — it caught a real desync and stays armed,
+  unchanged). Fix: removed the early intercept; a still-pending
+  `forcedRequest` now hands off only at the segment's own true end
+  (`completedResolutionUpdate`, already used by ISSUES #89's no-message
+  case), regardless of whether the fainted message happened to be last.
+  Two other call sites that used the non-forced-aware `completedResolutionPhase`
+  when a button message ended a segment were folded into the same
+  `completedResolutionUpdate` path for consistency.
+- **Pin:** `tests/factoryRoundBattleOrchestrator.test.ts`, direct
+  construction (not soak-based) — a real Factory battle (`createFreshFactoryBattle`)
+  with the player's active at 1 HP and the opponent a real Shell-Bell-holding
+  Frontier rental (set 128, STARYU, `MOVE_BUBBLE_BEAM` slot 0, burned) that
+  1-hit-KOs the player, matching seed 109's own mechanism exactly. Asserts
+  (1) the fainted message's dismiss does NOT jump to `forced-party-handoff`
+  while segment commands remain, (2) the handoff's own field boundary
+  reflects the Shell Bell heal once it finally does trigger, (3) the
+  appended continuation segment's field carries the post-heal HP forward,
+  and (4) that segment's own burn-tick `"hp"` command's `from` matches it.
+  Confirmed this pin fails pre-fix (`expected 7 to be 8`, i.e. the handoff
+  fires one command early) by reverting just the orchestrator file and
+  rerunning.
+- **Downstream note:** this legitimately changes presentation frame
+  timing (and, since the `winning`/`strong-route` soak policies read
+  presentation state, occasionally which move a driven battle ends up
+  taking) for any battle that hits a forced switch with trailing
+  `Cmd_moveend` commands — those commands used to be silently skipped from
+  presentation entirely. Updated the one Tier-1 pin this touched
+  (`tests/randomRoundSoak.test.ts` seed 21 strong-route frame/turn/render
+  counts) with the new genuine numbers; regenerated
+  `docs/gate6-coverage-manifest.{json,md}` (byte-identity ratchet, picked up
+  the new pin's own evidence rows, no coverage change). Change is scoped to
+  `factoryRoundBattleOrchestrator.ts`'s resolution command-building path
+  only — no shared presentation-render file touched, so no compare-window
+  rerun is required per the step brief's own out clause.
+- **Next:** side lane's (c) B1c entrance-03 latch probe is mid-edit in this
+  shared tree (uncommitted `battleRoomRender.ts` / probe script changes
+  observed, untouched — out of scope here) then (b) gold speech dense
+  closure.
+- **Notes:** No PAPERCUT.
+
+---
+
 ## 1294 — [supervisor, 2026-08-16] **Side lane folded: winning-policy soak swept 0:120, seed-49 HANG closed by per-policy frame budget, seed-109 engine crash filed as #93**
 
 - **State:** Both side branches merged (`96d51c3f`, `84170428`); union
@@ -86,44 +157,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1292 — [main worker, 2026-08-16] **Call-scene calibration closed by modelling `text.c`'s per-box accept/arrow semantics — callscene-01 89→119/131, callscene-02 69→120/199, every bar unmoved**
-
-- **State:** Landed and green. `npm test` **1,056 files / 9,978 passed /
-  223 skipped**, `npm run build` + `npm run typecheck` green. Committed at
-  `56b18bac` (code) + this docs commit.
-- **Did (the mechanism, per the step's prerequisite):** `core.tick` advances
-  the postwin state *first* and gates input on the advanced state, so a
-  ready boundary that crosses a fixture's fixed 2-frame press edge swallows
-  a whole press cycle — 1289's two failures. The real residuals were three
-  `reference/pokeemerald/src/text.c` behaviours, not one offset: (a) 1
-  glyph/frame with `CHAR_NEWLINE` free (`RENDER_REPEAT`) — box 1 types 65
-  chars in 65 frames; (b) `$`/EOS accepts at last-glyph **+1** (via
-  `waitmessage`→`waitbuttonpress`; MEASURED 894→895) while `\p`/
-  `CHAR_PROMPT_CLEAR` burns a frame and accepts at **+2** inside
-  `RENDER_STATE_CLEAR`, which *also* draws the bobbing down arrow
-  (`DrawDownArrow`, 9-frame `sDownArrowYCoords` 0,1,2,1 — the app drew no
-  arrow at all); (c) each reopened box's first glyph is its own measured
-  frame-reopen lag **+1**, and box 1 carries the brain branch's extra
-  `playse SE_POKENAV_CALL; waitse` tick (its box clear too: oracle 828 vs
-  829). Fix keeps **every box's absolute accept tick unmoved** (box 1's
-  first glyph moved +1 and the `$` accept rule moved −1, cancelling), so no
-  press is swallowed. `\p`-vs-`$` is derived structurally from the walkup
-  JSON's own per-event `pages` split, not hardcoded. Full write-up appended
-  to `docs/walkup-call-scene-ground-truth.md`.
-- **Bars (all re-run live this session):** askready-menu **21/21**,
-  swapask-no **194/194**, entrance-02 **256/256**, record **178/178**,
-  retire **174/174**, silver reveal **690/701**, entrance-03 **162/256**,
-  gold speech **58/256 · 20/177 · 58/126** (all unmoved).
-  `executableFrontierRatchet` barrier counts unwidened; no new barrier.
-- **Next:** two residuals remain, both named in the doc. (1) callscene-01's
-  12 remaining diffs are the attendant walk's lead-leg pose only (walkTick
-  0–7 and 16–23, i.e. `callSceneWalkFrame`'s 7/8 frames; the stand frame 2
-  matches) — an anim-table question, not timing. (2) callscene-02's page-2/3
-  residual is a **fixture** gap: the harness's canned route accepts each
-  boss-message page turn 2 frames before the compare trace presses (oracle
-  accept 1170/1303, fixture 1172/1305), so its press frames need re-deriving
-  against the canned route. Otherwise the 1288 queue stands.
-- **Notes:** Commits local only. No PAPERCUT (tooling worked as documented).
-
----
 

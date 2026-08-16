@@ -1,3 +1,44 @@
+## 1292 — [main worker, 2026-08-16] **Call-scene calibration closed by modelling `text.c`'s per-box accept/arrow semantics — callscene-01 89→119/131, callscene-02 69→120/199, every bar unmoved**
+
+- **State:** Landed and green. `npm test` **1,056 files / 9,978 passed /
+  223 skipped**, `npm run build` + `npm run typecheck` green. Committed at
+  `56b18bac` (code) + this docs commit.
+- **Did (the mechanism, per the step's prerequisite):** `core.tick` advances
+  the postwin state *first* and gates input on the advanced state, so a
+  ready boundary that crosses a fixture's fixed 2-frame press edge swallows
+  a whole press cycle — 1289's two failures. The real residuals were three
+  `reference/pokeemerald/src/text.c` behaviours, not one offset: (a) 1
+  glyph/frame with `CHAR_NEWLINE` free (`RENDER_REPEAT`) — box 1 types 65
+  chars in 65 frames; (b) `$`/EOS accepts at last-glyph **+1** (via
+  `waitmessage`→`waitbuttonpress`; MEASURED 894→895) while `\p`/
+  `CHAR_PROMPT_CLEAR` burns a frame and accepts at **+2** inside
+  `RENDER_STATE_CLEAR`, which *also* draws the bobbing down arrow
+  (`DrawDownArrow`, 9-frame `sDownArrowYCoords` 0,1,2,1 — the app drew no
+  arrow at all); (c) each reopened box's first glyph is its own measured
+  frame-reopen lag **+1**, and box 1 carries the brain branch's extra
+  `playse SE_POKENAV_CALL; waitse` tick (its box clear too: oracle 828 vs
+  829). Fix keeps **every box's absolute accept tick unmoved** (box 1's
+  first glyph moved +1 and the `$` accept rule moved −1, cancelling), so no
+  press is swallowed. `\p`-vs-`$` is derived structurally from the walkup
+  JSON's own per-event `pages` split, not hardcoded. Full write-up appended
+  to `docs/walkup-call-scene-ground-truth.md`.
+- **Bars (all re-run live this session):** askready-menu **21/21**,
+  swapask-no **194/194**, entrance-02 **256/256**, record **178/178**,
+  retire **174/174**, silver reveal **690/701**, entrance-03 **162/256**,
+  gold speech **58/256 · 20/177 · 58/126** (all unmoved).
+  `executableFrontierRatchet` barrier counts unwidened; no new barrier.
+- **Next:** two residuals remain, both named in the doc. (1) callscene-01's
+  12 remaining diffs are the attendant walk's lead-leg pose only (walkTick
+  0–7 and 16–23, i.e. `callSceneWalkFrame`'s 7/8 frames; the stand frame 2
+  matches) — an anim-table question, not timing. (2) callscene-02's page-2/3
+  residual is a **fixture** gap: the harness's canned route accepts each
+  boss-message page turn 2 frames before the compare trace presses (oracle
+  accept 1170/1303, fixture 1172/1305), so its press frames need re-deriving
+  against the canned route. Otherwise the 1288 queue stands.
+- **Notes:** Commits local only. No PAPERCUT (tooling worked as documented).
+
+---
+
 ## 1291 — [supervisor orient, 2026-08-16] **Fold: animation-main → master (ff `f44eabff`) — Heal Bell + Fire Blast exact, coverage 194/276; union gates green**
 
 - **State:** master fast-forwarded to animation-main's head `f44eabff`
