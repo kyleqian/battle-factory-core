@@ -167,15 +167,18 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(first).toMatchObject({
       outcome: "OK",
       endState: "roundComplete",
-      // PROGRESS ~1271's chaining short-circuit (core.ts) clears
-      // factoryTerminal in the SAME tick recordChoice first reads "no" (it
-      // never lingers through a decline-farewell dialogue the way the old
-      // pre-chaining path did), so this settles ~46 frames/4 render calls
-      // sooner and terminalRecordChoice is never observably "no" afterward
-      // — both are the genuine new trajectory, not a driver regression.
-      frames: 56_510,
+      // ISSUES #93's fix (factoryRoundBattleOrchestrator.ts) stopped handing
+      // a forced-switch resolution off to the party selector at the fainted
+      // battler's own message -- real Cmd_moveend item effects (this seed's
+      // own trailing commands) now present in full first, matching source's
+      // actual HandleFaintedMonActions ordering. That is strictly more
+      // frames/render calls per forced switch this seed hits, and the
+      // battle/turn counters below are this seed's genuine new trajectory
+      // (not a driver regression) -- both settled re-runs are still
+      // deterministic (`expect(second).toEqual(first)` below).
+      frames: 43_775,
       battle: 7,
-      turn: 11,
+      turn: 5,
       diagnostics: {
         roundPhase: "roundComplete",
         battleIndex: 6,
@@ -185,7 +188,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 4_224,
+        renderCalls: 3_235,
       },
     });
     expect(second).toEqual(first);

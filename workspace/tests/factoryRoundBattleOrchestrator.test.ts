@@ -11,13 +11,19 @@ import {
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import { PARTY_SELECT_CLOSE_MENU_FRAMES } from "../src/engine/battlePartySelect.ts";
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
-import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
+import {
+  createBattleResolutionPresentation,
+  type BattleResolutionPresentationCommand,
+} from "../src/engine/battleResolutionPresentation.ts";
 import {
   battleResolutionCommandDuration,
   createBattleResolutionPresentationRenderView,
 } from "../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionForcedPartySelect } from "../src/engine/battleScene.ts";
-import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../src/engine/battleScriptSourceConstants.ts";
+import {
+  BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
+  BATTLE_SCRIPT_STATUS1_BURN,
+} from "../src/engine/battleScriptSourceConstants.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import { createFreshFactoryBattle } from "../src/engine/factoryBattleStart.ts";
@@ -529,6 +535,159 @@ function createOpponentLockedActionPresentationBattle(input: Readonly<{
   });
 }
 
+/**
+ * ISSUES #93 repro. A single real turn: BATTLE_FRONTIER_ITEM_SHELL_BELL's
+ * own holder (Frontier set 128, STARYU, MOVE_BUBBLE_BEAM slot 0 -- a real
+ * 100%-accuracy 1-hit KO against the player's 1 HP active) both faints the
+ * player's active AND (via `Cmd_moveend`'s MOVEEND_KINGSROCK_SHELLBELL,
+ * which runs strictly after `tryfaintmon`'s own `BattleScript_FaintTarget`
+ * message -- `battle_script_commands.c:4210-4494`,
+ * `data/battle_scripts_1.s:2817-2822`) heals itself in the SAME segment,
+ * after the fainted message. STARYU is also burned so its end-of-turn
+ * residual damage lands in the segment appended after the forced switch,
+ * matching seed 109's own real desync shape exactly.
+ */
+/** A real Factory party is 3 rental records padded to the fixed 6-slot kernel shape (`asBattleScriptParty`, factoryRoundBattleOrchestrator.ts). */
+const SHELL_BELL_EMPTY_PARTY_MEMBER = Object.freeze({
+  species: 0,
+  isEgg: false,
+  abilityNum: 0,
+  ivs: Object.freeze({ hp: 0, attack: 0, defense: 0, speed: 0, spAttack: 0, spDefense: 0 }),
+  personality: 0,
+  experience: 0,
+  level: 0,
+  friendship: 0,
+  maxHP: 0,
+  attack: 0,
+  defense: 0,
+  speed: 0,
+  spAttack: 0,
+  spDefense: 0,
+  hp: 0,
+  status1: 0,
+  item: 0,
+  moves: Object.freeze([0, 0, 0, 0]),
+  pp: Object.freeze([0, 0, 0, 0]),
+  ppBonuses: 0,
+});
+
+function shellBellForcedSwitchParty(): BattleScriptPartyState {
+  // Full, un-overridden HP -- `createForcedPartySelect` validates this
+  // party's live maxHP against `createFactoryCorpusPartyMember` of the
+  // carrier's matching rental record.
+  const bench = (setId: number) => createFactoryCorpusPartyMember(record(setId, 3));
+  const active = Object.freeze({
+    ...createFactoryCorpusPartyMember(record(8, 3)),
+    hp: 1,
+  });
+  return Object.freeze([
+    active,
+    bench(300),
+    bench(301),
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+  ]) as unknown as BattleScriptPartyState;
+}
+
+function shellBellOpponentParty(): BattleScriptPartyState {
+  const staryu = createFactoryCorpusPartyMember(record(128, 3));
+  const active = Object.freeze({
+    ...staryu,
+    hp: staryu.maxHP - 30,
+    status1: BATTLE_SCRIPT_STATUS1_BURN,
+  });
+  return Object.freeze([
+    active,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+  ]) as unknown as BattleScriptPartyState;
+}
+
+function createShellBellForcedSwitchBattle(): Readonly<{
+  state: FactoryRoundBattleOrchestratorState;
+  chargeResolution: ReturnType<typeof createBattleResolutionPresentation>;
+}> {
+  const initial = createFreshFactoryBattle({
+    requestId: 1,
+    rngSeed: 0,
+    battleScene: "off",
+    playerParty: shellBellForcedSwitchParty(),
+    opponentParty: shellBellOpponentParty(),
+  });
+  const player = submitStagedLockedActionMove(initial, "player", 0);
+  const charge = submitStagedLockedActionMove(player.transition.state, "trainer", 0);
+  const chargeResolution = createBattleResolutionPresentation({
+    sourceRequest: player.request,
+    sourceDecision: player.decision,
+    beforeRules: initial.rules,
+    transition: charge.transition,
+    fieldBoundary: createBattleCommandPresentation(
+      player.request,
+      initial.rules.rulesContext,
+      player.decision.moveSlot,
+    ).field,
+    confirmHandoff: { fightDisplayCursor: player.decision.moveSlot, idleBounceElapsed: 0 },
+  });
+  if (chargeResolution.forcedRequest === null) {
+    throw new Error("staged Shell Bell scenario did not publish a forced switch request");
+  }
+  // The carrier's own rental identities must match the staged party's real
+  // slots (0-2) -- `createForcedPartySelect` validates the live battle's
+  // maxHP against `createFactoryCorpusPartyMember` of these same records.
+  const carrierPlayerRecords = [record(8, 3), record(300, 3), record(301, 3)] as const;
+  const carrier = acknowledgeAndAdvance(createFactoryRoundBattleOrchestrator({
+    id: "shell-bell-forced-switch",
+    rngValue: RNG_SEED,
+    factoryWinStreak: 0,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords: carrierPlayerRecords,
+      savedRentalRecords: [...carrierPlayerRecords, record(1), record(2), record(3)],
+    },
+  }));
+  const fields = [chargeResolution.field.player, chargeResolution.field.opponent] as const;
+  const moveSelectionCursors = Object.freeze([0, 0, 0, 0] as const);
+  const battlePresentationBoundaries = Object.freeze(fields.map((field, battler) =>
+    Object.freeze({
+      battler: battler as 0 | 1,
+      partyIndex: field.partyIndex,
+      field,
+      displayedHp: field.hp,
+      displayedStatus1:
+        chargeResolution.segments[0]!.beforeRules.rulesContext.battlers[battler]!.status1,
+      spriteVisible: true,
+      idleEpoch: 0,
+      moveCursor: moveSelectionCursors[battler]!,
+    })
+  )) as FactoryRoundBattleOrchestratorState["battlePresentationBoundaries"];
+  return Object.freeze({
+    state: Object.freeze({
+      ...carrier,
+      battle: chargeResolution.pendingBattle,
+      battleCommandPresentation: null,
+      battleResolutionPresentation: chargeResolution,
+      retainedLockedActionPresentationOwner: null,
+      battlePartySelect: null,
+      battleForcedPartySelect: null,
+      moveSelectionCursors,
+      battlePresentationBoundaries,
+      aiHistory: createFactoryAiBattleHistory(
+        chargeResolution.pendingBattle.rules.rulesContext,
+      ),
+      facilityRngCalls:
+        carrier.activeBattleCallStart! + chargeResolution.pendingBattle.rng.calls,
+    }),
+    chargeResolution,
+  });
+}
+
 function advanceCommandToPhase(
   state: FactoryRoundBattleOrchestratorState,
   phase: NonNullable<
@@ -638,6 +797,96 @@ function driveGeneratedRoundToCompletion(
 }
 
 describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
+  it("ISSUES #93: a Cmd_moveend item effect (Shell Bell) after the fainted message keeps the forced-switch continuation's field boundary in sync", () => {
+    const { state: initial, chargeResolution } = createShellBellForcedSwitchBattle();
+    expect(chargeResolution.segments[0]!.field.opponent).toMatchObject({ hp: 93, maxHP: 123 });
+    expect(chargeResolution.segments[0]!.commands[7]).toMatchObject({
+      type: "message",
+      faintBattler: 0,
+      advance: "button",
+    });
+    expect(chargeResolution.segments[0]!.commands[11]).toMatchObject({
+      type: "hp",
+      battler: 1,
+      from: 93,
+      to: 94,
+    });
+
+    let state = initial;
+    for (
+      let budget = 0;
+      budget < 500 && !(
+        state.battleResolutionPresentation?.commandIndex === 7
+        && state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss"
+      );
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(7);
+    expect(state.battleResolutionPresentation?.lifecycle.phase).toBe("awaiting-message-dismiss");
+
+    // Dismiss "METAPOD fainted!". ISSUES #93: this used to jump straight to
+    // "forced-party-handoff" here, before Shell Bell's own trailing
+    // sprite-visibility/message/hp commands (indices 8-11) ever presented --
+    // real source runs those `Cmd_moveend` item effects strictly before
+    // `HandleFaintedMonActions` ever opens the party menu.
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    expect(state.battleResolutionPresentation?.commandIndex).toBe(8);
+    expect(state.battleResolutionPresentation?.lifecycle.phase).toBe("presenting");
+
+    for (
+      let budget = 0;
+      budget < 500 && state.battleResolutionPresentation?.lifecycle.phase !== "forced-party-handoff";
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    }
+    expect(state.battleResolutionPresentation?.lifecycle.phase).toBe("forced-party-handoff");
+    expect(state.battleForcedPartySelect).not.toBeNull();
+    // The Shell Bell heal (segment 0's own command 11, 93 -> 94) must have
+    // fully applied before the handoff's own field boundary is captured --
+    // this is the exact value the pre-fix bug got wrong.
+    expect(
+      createBattleResolutionPresentationRenderView(state.battleResolutionPresentation!)
+        .field.opponent.hp,
+    ).toBe(94);
+
+    for (
+      let budget = 0;
+      budget < 400 && state.battleForcedPartySelect!.elapsed < 140;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    state = advanceFactoryRoundBattleResolution(state, new Set(["DOWN"]));
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    expect(state.battleForcedPartySelect?.submenuOpen).toBe(true);
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    expect(state.battleForcedPartySelect?.sendOutElapsed).toBe(0);
+    expect(state.battleResolutionPresentation?.segments).toHaveLength(2);
+    // The pre-fix bug carried the STALE pre-heal 93 into this appended
+    // segment's own field boundary; a real end-of-turn burn tick against
+    // the real (94-based) kernel state then threw the exact ISSUES #93
+    // signature ("battle resolution HP command starts at 94, displayed 93")
+    // once this segment's own commands were built against it.
+    expect(state.battleResolutionPresentation?.segments[1]!.field.opponent.hp).toBe(94);
+    const burnTick = state.battleResolutionPresentation?.segments[1]!.commands.find(
+      (command): command is Extract<BattleResolutionPresentationCommand, { type: "hp" }> =>
+        command.type === "hp" && command.battler === 1,
+    );
+    expect(burnTick).toMatchObject({ from: 94 });
+
+    for (
+      let budget = 0;
+      budget < 2_000 && state.battleCommandPresentation === null;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    }
+    expect(state.battleCommandPresentation).not.toBeNull();
+    expect(state.battleForcedPartySelect).toBeNull();
+  });
   it.each([
     ["TORMENT", 2, "STRINGID_PKMNSUBJECTEDTOTORMENT"],
     ["TAUNT", 3, "STRINGID_PKMNFELLFORTAUNT"],

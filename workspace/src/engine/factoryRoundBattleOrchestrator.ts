@@ -1627,13 +1627,21 @@ function completedResolutionPhase(
 
 /**
  * A resolution segment can run out of commands to present while a
- * `forcedRequest` is still pending -- not just via the typed fainted
- * message's own button-dismiss intercept (`isForcedSwitchHandoffMessage`),
- * but also, ISSUES #89, when the forced switch has no fainted message at
- * all (Baton Pass's own "used move" line auto-advances; there is nothing
- * to dismiss). Whichever way a segment ends, a still-pending forced-switch
- * boundary must always hand off to the party selector, never the ordinary
- * next-command tail.
+ * `forcedRequest` is still pending, whether or not the fainted battler's
+ * own typed faint message was the segment's last command -- ISSUES #89's
+ * Baton Pass case has no fainted message at all (its "used move" line
+ * auto-advances; there is nothing to dismiss), and ISSUES #93's
+ * Cmd_moveend-item-effect case (e.g. Shell Bell) publishes real commands
+ * *after* the fainted message inside the same segment (source: the
+ * fainted message prints from `tryfaintmon`'s `BattleScript_FaintTarget`,
+ * strictly before `goto BattleScript_MoveEnd` runs
+ * `MOVEEND_KINGSROCK_SHELLBELL`; `HandleFaintedMonActions`'s own
+ * `BattleScript_HandleFaintedMon` party-menu call is a separate later pass
+ * that only starts once the whole move script -- including those
+ * MOVEEND_* item effects -- has returned to the turn loop). So a fainted
+ * message can never be trusted as an early handoff signal on its own;
+ * only the segment's own true end may hand off to the party selector,
+ * never the ordinary next-command tail.
  */
 function completedResolutionUpdate(
   state: FactoryRoundBattleOrchestratorState,
@@ -1652,21 +1660,6 @@ function completedResolutionUpdate(
     phase: completedResolutionPhase(resolution),
     battleForcedPartySelect: null,
   });
-}
-
-/**
- * A full source turn may contain an earlier opposing faint/replacement before
- * ending at a player forced-switch request. Only the requested battler's own
- * typed faint message transfers presentation ownership to the party selector;
- * earlier button messages must finish their intervening command sequence.
- */
-function isForcedSwitchHandoffMessage(
-  resolution: BattleResolutionPresentationState,
-  command: BattleResolutionPresentationCommand,
-): boolean {
-  return resolution.forcedRequest !== null
-    && command.type === "message"
-    && command.faintBattler === resolution.forcedRequest.battler;
 }
 
 function commitCompletedResolutionCommand(
@@ -1938,14 +1931,16 @@ export function advanceFactoryRoundBattleResolution(
     if (!segment) return fail(`resolution has no segment ${resolution.segmentIndex}`);
     const command = segment.commands[resolution.commandIndex];
     if (command === undefined) {
+      const completion = completedResolutionUpdate(state, resolution);
       return Object.freeze({
         ...state,
         battleResolutionPresentation: withResolutionLifecycle(
           resolution,
           resolution.commandIndex,
-          completedResolutionPhase(resolution),
+          completion.phase,
           0,
         ),
+        battleForcedPartySelect: completion.battleForcedPartySelect,
       });
     }
     if (
@@ -1954,35 +1949,26 @@ export function advanceFactoryRoundBattleResolution(
       && isBattleResolutionButtonMessageReady(resolution)
     ) {
       if (newKeys.has("A")) {
-        if (!isForcedSwitchHandoffMessage(resolution, command)) {
-          const nextCommandIndex = resolution.commandIndex + 1;
-          const nextResolution = withResolutionLifecycle(
-            resolution,
-            nextCommandIndex,
-            nextCommandIndex >= segment.commands.length
-              ? completedResolutionPhase(resolution)
-              : "presenting",
-            0,
-          );
-          return Object.freeze({
-            ...state,
-            battleResolutionPresentation: nextResolution,
-            battlePresentationBoundaries: commitCompletedResolutionCommand(
-              boundaries,
-              nextResolution,
-              command,
-            ),
-          });
-        }
+        const nextCommandIndex = resolution.commandIndex + 1;
+        const reachedSegmentEnd = nextCommandIndex >= segment.commands.length;
+        const completion = reachedSegmentEnd
+          ? completedResolutionUpdate(state, resolution)
+          : null;
+        const nextResolution = withResolutionLifecycle(
+          resolution,
+          nextCommandIndex,
+          completion?.phase ?? "presenting",
+          0,
+        );
         return Object.freeze({
           ...state,
-          battleResolutionPresentation: withResolutionLifecycle(
-            resolution,
-            resolution.commandIndex,
-            "forced-party-handoff",
-            resolution.lifecycle.phaseElapsed,
+          battleResolutionPresentation: nextResolution,
+          battlePresentationBoundaries: commitCompletedResolutionCommand(
+            boundaries,
+            nextResolution,
+            command,
           ),
-          battleForcedPartySelect: createForcedPartySelect(state, resolution),
+          ...(completion !== null ? { battleForcedPartySelect: completion.battleForcedPartySelect } : {}),
         });
       }
       return Object.freeze({
@@ -2040,35 +2026,26 @@ export function advanceFactoryRoundBattleResolution(
     }
     const segment = resolution.segments[resolution.segmentIndex]!;
     const command = segment.commands[resolution.commandIndex]!;
-    if (!isForcedSwitchHandoffMessage(resolution, command)) {
-      const nextCommandIndex = resolution.commandIndex + 1;
-      const nextResolution = withResolutionLifecycle(
-        resolution,
-        nextCommandIndex,
-        nextCommandIndex >= segment.commands.length
-          ? completedResolutionPhase(resolution)
-          : "presenting",
-        0,
-      );
-      return Object.freeze({
-        ...state,
-        battleResolutionPresentation: nextResolution,
-        battlePresentationBoundaries: commitCompletedResolutionCommand(
-          boundaries,
-          nextResolution,
-          command,
-        ),
-      });
-    }
+    const nextCommandIndex = resolution.commandIndex + 1;
+    const reachedSegmentEnd = nextCommandIndex >= segment.commands.length;
+    const completion = reachedSegmentEnd
+      ? completedResolutionUpdate(state, resolution)
+      : null;
+    const nextResolution = withResolutionLifecycle(
+      resolution,
+      nextCommandIndex,
+      completion?.phase ?? "presenting",
+      0,
+    );
     return Object.freeze({
       ...state,
-      battleResolutionPresentation: withResolutionLifecycle(
-        resolution,
-        resolution.commandIndex,
-        "forced-party-handoff",
-        resolution.lifecycle.phaseElapsed,
+      battleResolutionPresentation: nextResolution,
+      battlePresentationBoundaries: commitCompletedResolutionCommand(
+        boundaries,
+        nextResolution,
+        command,
       ),
-      battleForcedPartySelect: createForcedPartySelect(state, resolution),
+      ...(completion !== null ? { battleForcedPartySelect: completion.battleForcedPartySelect } : {}),
     });
   }
   if (resolution.lifecycle.phase === "forced-party-handoff") {

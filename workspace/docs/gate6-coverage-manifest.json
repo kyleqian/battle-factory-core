@@ -92324,6 +92324,10 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/factoryRoundBattleOrchestrator.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/gate6KernelInteractions.test.ts",
             "kind": "tier-1-test"
           },
