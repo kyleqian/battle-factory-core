@@ -538,6 +538,7 @@ import {
 } from "../animation/gbaObjCompositor.ts";
 import { icyWindEffectOamOrderAtAge } from "../animation/icyWind.ts";
 import { blizzardEffectOamOrderAtAge } from "../animation/blizzard.ts";
+import { healBellNotesInPainterOrder } from "../animation/healBell.ts";
 
 import battleAnimRocksAsset from "../assets/gen/battle-anim-rocks.json" with { type: "json" };
 import battleAnimMudSandAsset from "../assets/gen/battle-anim-mud-sand.json" with { type: "json" };
@@ -628,6 +629,7 @@ import stunSporeAsset from "../animation/assets/stunSpore.json" with { type: "js
 import sleepPowderAsset from "../animation/assets/sleepPowder.json" with { type: "json" };
 import hypnosisAsset from "../animation/assets/hypnosis.json" with { type: "json" };
 import perishSongAsset from "../animation/assets/perish-song.json" with { type: "json" };
+import healBellAsset from "../animation/assets/heal-bell.json" with { type: "json" };
 import needleArmAsset from "../animation/assets/needle-arm.json" with { type: "json" };
 import sandstormAsset from "../animation/assets/sandstorm.json" with { type: "json" };
 import mistBallAsset from "../animation/assets/mist-ball.json" with { type: "json" };
@@ -941,6 +943,7 @@ import {
   sceneOnWishView,
   sceneOnMilkDrinkView,
   sceneOnRefreshView,
+  sceneOnHealBellView,
   sceneOnSupersonicView,
   sceneOnMetalSoundView,
   sceneOnLeerView,
@@ -1119,6 +1122,7 @@ import {
   type SceneOnSleepPowderPresentationState,
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
+  type SceneOnHealBellConfig,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
   type SceneOnHeatWavePresentationState,
@@ -2077,6 +2081,18 @@ const perishSongArt = perishSongAsset as {
   murkrowBack: { tileset: Tileset; palette: RgbColor[] };
   murkrowFront: { tileset: Tileset; palette: RgbColor[] };
   musicNotes2: { tileset: Tileset; palette: RgbColor[] };
+};
+const healBellArt = healBellAsset as {
+  bell: { tileset: Tileset; palette: RgbColor[] };
+  musicNotes2: {
+    tileset: Tileset;
+    palette: RgbColor[];
+    palettes: RgbColor[][];
+  };
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  sparkle2: { tileset: Tileset; palette: RgbColor[] };
+  chimechoBack: { tileset: Tileset; palette: RgbColor[] };
+  chimechoFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const needleArmArt = needleArmAsset as {
   cacneaBack: { tileset: Tileset; palette: RgbColor[] };
@@ -29246,6 +29262,190 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "SEAKING used" : "Foe SEAKING used",
       "SLEEP TALK!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HEAL_BELL") {
+    const healState = state as SceneOnMovePresentationState<SceneOnHealBellConfig>;
+    const view = sceneOnHealBellView(healState);
+    // Heal Bell's complete bilateral evidence proves that ordinary OBJ,
+    // affine matrices, and faded palettes all reach display from the
+    // preceding source buffer. This remains relative to the move body.
+    const displayed = sceneOnHealBellView({
+      ...healState,
+      age: healState.age - 1,
+    });
+    const playerToOpponent = view.attacker.species === "CHIMECHO"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer = view.attacker.species === "CHIMECHO"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged HEAL_BELL pair ${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const backgroundPalette = blendPaletteBanksToward(
+      battleBg.palette,
+      displayed.palette.backgroundTarget,
+      displayed.palette.backgroundCoefficient,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalette,
+    );
+
+    const chimechoSource = playerToOpponent
+      ? healBellArt.chimechoBack : healBellArt.chimechoFront;
+    const chimecho = playerToOpponent ? chimechoSource : {
+      ...chimechoSource,
+      tileset: subTileset(chimechoSource.tileset, 0, 8),
+    };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const attackerPalette = blendPaletteToward(
+      chimecho.palette,
+      { r: 255, g: 255, b: 255 },
+      displayed.palette.attackerCoefficient,
+    );
+    // HEAL_BELL is self-targeted, so source selector 4 excludes the same
+    // Chimecho twice. The visible opposing Onix is therefore part of the
+    // exclude-task selection along with the three battle BG palette banks.
+    const onixPalette = blendPaletteToward(
+      onix.palette,
+      displayed.palette.backgroundTarget,
+      displayed.palette.backgroundCoefficient,
+    );
+    const onixCorner = playerToOpponent ? {
+      x: view.target.geometry.spriteCorner.x
+        + (speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0),
+      y: view.target.geometry.spriteCorner.y
+        + (speciesFrontIdleRestOffset("ONIX")?.y2 ?? 0),
+    } : ONIX_MATERIALIZE_CORNER;
+
+    // Every move OBJ has priority 2. The fixed battlers follow all Heal Bell
+    // allocations in BuildOamBuffer, so effects win their overlaps.
+    drawSpriteSheet(fb, onix.tileset, onixPalette, onixCorner.x, onixCorner.y);
+    drawSpriteSheet(
+      fb,
+      chimecho.tileset,
+      attackerPalette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    // Chimecho is elevated. SpriteCB_EnemyShadow observes the newly active
+    // script after the first BuildOamBuffer pass, leaving its pre-animation
+    // hardware OBJ visible on source age zero only.
+    if (opponentToPlayer && healState.age === 0) {
+      const shadowX = view.attacker.geometry.animationCenter.x
+        - battleEnemyShadow.width / 2;
+      const shadowY = view.attacker.geometry.battlePositionCenter.y + 29
+        - battleEnemyShadow.height / 2;
+      for (const pixel of battleEnemyShadow.mask) {
+        setPixel(
+          fb,
+          shadowX + pixel % battleEnemyShadow.width,
+          shadowY + Math.floor(pixel / battleEnemyShadow.width),
+          battleEnemyShadow.color,
+        );
+      }
+    }
+
+    if (displayed.bell) {
+      drawSpriteSheetFlipped(
+        fb,
+        subTileset(healBellArt.bell.tileset, displayed.bell.frame * 4, 4),
+        healBellArt.bell.palette,
+        displayed.bell.x - 16,
+        displayed.bell.y - 16,
+        displayed.bell.hFlip,
+        false,
+      );
+    }
+    for (const ring of displayed.rings) {
+      drawSpriteSheetAffineRotate(
+        fb,
+        healBellArt.thinRing.tileset,
+        healBellArt.thinRing.palette,
+        ring.x,
+        ring.y,
+        ring.matrixScale,
+        0,
+        0,
+        ring.matrixScale,
+        undefined,
+        true,
+      );
+    }
+    const notes = healBellNotesInPainterOrder(
+      healState.age - 1,
+      view.attacker.geometry.side,
+      view.attacker.geometry.animationCenter,
+      view.attacker.geometry.battlePositionCenter,
+    );
+    for (const note of notes) {
+      const frame = note.tileVariant + (note.paletteVariant & 1) * 8;
+      drawSpriteSheet(
+        fb,
+        subTileset(healBellArt.musicNotes2.tileset, frame * 2, 2),
+        // The compressed source sheet contains alternating tile-bank rows;
+        // LoadMusicNotesPals copies runtime rows 0, 2, and 4.
+        healBellArt.musicNotes2.palettes[
+          Math.floor(note.paletteVariant / 2) * 2
+        ]!,
+        note.x + note.x2 - 8,
+        note.y + note.y2 - 8,
+      );
+    }
+    for (const sparkle of displayed.sparkles.slice().reverse()) {
+      drawSpriteSheet(
+        fb,
+        subTileset(healBellArt.sparkle2.tileset, sparkle.frame * 4, 4),
+        healBellArt.sparkle2.palette,
+        sparkle.x - 16,
+        sparkle.y + sparkle.y2 - 16,
+      );
+    }
+
+    const profile = healState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CHIMECHO",
+        level: 50,
+        gender: profile.opponentGender ?? (playerToOpponent ? "male" : "female"),
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CHIMECHO" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? (playerToOpponent ? "female" : "male"),
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CHIMECHO used" : "Foe CHIMECHO used",
+      "HEAL BELL!",
       99,
     );
     return;

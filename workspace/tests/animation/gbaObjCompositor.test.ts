@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   compositeGbaObjScanlines,
+  sortGbaSpriteOrder,
   type GbaObjRaster,
 } from "../../src/animation/gbaObjCompositor.ts";
 
@@ -20,6 +21,24 @@ function obj(
 }
 
 describe("GBA OBJ/OBJ-window scanline compositor", () => {
+  it("retains persistent source order across equal-Y slot reuse", () => {
+    const inactive = (slot: number) => ({
+      slot, priority: 3 as const, subpriority: 255, y: -96,
+    });
+    const active = (slot: number, y: number) => ({
+      slot, priority: 2 as const, subpriority: 40, y,
+    });
+    const first = sortGbaSpriteOrder([4, 7, 10, 11], [
+      active(4, 49), active(7, 48), inactive(10), inactive(11),
+    ]);
+    const reset = sortGbaSpriteOrder(first, [4, 7, 10, 11].map(inactive));
+    const reused = sortGbaSpriteOrder(reset, [
+      active(4, 49), active(7, 48), active(10, 49), active(11, 48),
+    ]);
+    expect(reused).toEqual([4, 10, 7, 11]);
+    expect([...reused].reverse()).toEqual([11, 7, 10, 4]);
+  });
+
   it("arbitrates normal and OBJ-window texels by priority then OAM index", () => {
     const higherPriorityNormal = compositeGbaObjScanlines(1, 1, [
       obj({ oamIndex: 9, mode: "normal", priority: 0 }),

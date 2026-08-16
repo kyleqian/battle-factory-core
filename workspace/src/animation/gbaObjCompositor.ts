@@ -42,6 +42,39 @@ export interface GbaObjComposite<T> {
   readonly evaluatedOamByScanline: readonly (readonly number[])[];
 }
 
+/** Source-shaped key used by pokeemerald's persistent `sSpriteOrder` sort. */
+export interface GbaSpriteOrderKey {
+  readonly slot: number;
+  readonly priority: 0 | 1 | 2 | 3;
+  readonly subpriority: number;
+  /** OAM top coordinate after the source's signed-wrap correction. */
+  readonly y: number;
+}
+
+/**
+ * Apply one stable BuildSpritePriorities/SortSprites pass. Equal keys retain
+ * their order from the preceding frame, which matters when sprite slots are
+ * destroyed and later reused by a move.
+ */
+export function sortGbaSpriteOrder(
+  precedingOrder: readonly number[],
+  keys: readonly Readonly<GbaSpriteOrderKey>[],
+): number[] {
+  const bySlot = new Map(keys.map((key) => [key.slot, key] as const));
+  if (bySlot.size !== keys.length
+    || precedingOrder.some((slot) => !bySlot.has(slot))
+    || precedingOrder.length !== keys.length) {
+    throw new Error("GBA sprite-order keys must cover each preceding slot exactly once");
+  }
+  return [...precedingOrder].sort((leftSlot, rightSlot) => {
+    const left = bySlot.get(leftSlot)!;
+    const right = bySlot.get(rightSlot)!;
+    const leftPriority = left.subpriority | (left.priority << 8);
+    const rightPriority = right.subpriority | (right.priority << 8);
+    return leftPriority - rightPriority || right.y - left.y;
+  });
+}
+
 function assertRaster<T>(raster: Readonly<GbaObjRaster<T>>): void {
   if (!Number.isInteger(raster.oamIndex) || raster.oamIndex < 0 || raster.oamIndex >= 128) {
     throw new Error(`OAM index must be an integer in [0, 127], got ${raster.oamIndex}`);

@@ -3,6 +3,7 @@ import {
   linearTranslationOffsetAfterCallbacks,
 } from "./animLinearTranslation.ts";
 import { grantingStarFrameAtLocalAge } from "./synthesis.ts";
+import { sortGbaSpriteOrder } from "./gbaObjCompositor.ts";
 
 /** Complete Move_HEAL_BELL pointer window, including first inactive cleanup. */
 export const HEAL_BELL_FRAME_COUNT = 261;
@@ -129,6 +130,13 @@ export interface HealBellState {
   readonly rings: readonly HealBellRing[];
   readonly sparkles: readonly HealBellSparkle[];
   readonly paletteTasks: readonly HealBellPaletteTask[];
+  readonly palette: Readonly<{
+    /** F_PAL_BG, excluding the two visible battlers. */
+    backgroundCoefficient: number;
+    readonly backgroundTarget: Readonly<{ r: 99; g: 198; b: 247 }>;
+    /** F_PAL_ATK_SIDE; the single-battle carrier is the only visible member. */
+    attackerCoefficient: number;
+  }>;
   readonly resources: HealBellResources;
   readonly audio: "SE_M_HEAL_BELL" | "SE_M_MORNING_SUN" | "SE_SHINY" | null;
   readonly audioPan: -64 | 63 | null;
@@ -313,6 +321,24 @@ export function healBellAtAge(
     paletteTask(age, 217, "final-exclude", 3, 10, 0),
     paletteTask(age, 217, "final-attacker", 3, 10, 0),
   ].filter((task): task is HealBellPaletteTask => task !== null);
+  // AnimTask_BlendSpriteColor_Step2 writes the current coefficient to the
+  // faded bank before advancing data[10]. Its initializer and first task pass
+  // account for the two callbacks at creation; the palette then reaches
+  // hardware through the ordinary one-row GBA palette latch. These formulas
+  // expose the faded-bank result, including its hold after task destruction.
+  let backgroundCoefficient = 0;
+  let attackerCoefficient = age < 10 ? 0 : age < 19 ? age - 9 : 10;
+  for (const startAge of HEAL_BELL_RING_STARTS) {
+    if (age < startAge + 2) continue;
+    const step = Math.floor((age - startAge - 2) / 4);
+    backgroundCoefficient = Math.max(0, 8 - step);
+    attackerCoefficient = Math.min(10, 2 + step);
+  }
+  if (age >= 219) {
+    const step = Math.floor((age - 219) / 4);
+    backgroundCoefficient = Math.max(0, 10 - step);
+    attackerCoefficient = Math.max(0, 10 - step);
+  }
   const bell = bellAtAge(age, noteOrigin);
   const audio = HEAL_BELL_RING_STARTS.includes(age as 34 | 69 | 104)
     ? "SE_M_HEAL_BELL" as const
@@ -329,10 +355,54 @@ export function healBellAtAge(
     rings,
     sparkles,
     paletteTasks,
+    palette: {
+      backgroundCoefficient,
+      backgroundTarget: { r: 99, g: 198, b: 247 },
+      attackerCoefficient,
+    },
     resources: resourcesAtAge(age),
     audio,
     audioPan: audio === null ? null : side === "player" ? -64 : 63,
     visualTaskCount: Number(bell !== null) + notes.length + rings.length
       + sparkles.length + paletteTasks.length,
   };
+}
+
+const HEAL_BELL_REUSED_ORDER_SLOTS = [4, 5, 7, 9, 10, 11] as const;
+
+/**
+ * Back-to-front note order after replaying the source's persistent stable OAM
+ * sort. Ring slots 10/11 participate before being reused, and inactive slots
+ * retain ResetSprite's priority, so a same-Y crossing cannot be reduced to a
+ * stateless coordinate tie-break.
+ */
+export function healBellNotesInPainterOrder(
+  age: number,
+  side: "player" | "opponent",
+  animationCenter: Readonly<{ x: number; y: number }>,
+  battlePositionCenter: Readonly<{ x: number; y: number }>,
+): readonly HealBellNote[] {
+  let order: number[] = [...HEAL_BELL_REUSED_ORDER_SLOTS];
+  for (let tick = 0; tick <= age; tick += 1) {
+    const state = healBellAtAge(tick, side, animationCenter, battlePositionCenter);
+    order = sortGbaSpriteOrder(order, order.map((slot) => {
+      const note = state.notes.find((candidate) => candidate.slot === slot);
+      if (note) return {
+        slot, priority: 2 as const, subpriority: 40,
+        y: note.y + note.y2 - 8,
+      };
+      const ring = state.rings.find((candidate) => candidate.slot === slot);
+      if (ring) return {
+        slot, priority: 2 as const, subpriority: 40,
+        y: ring.y - 64,
+      };
+      return { slot, priority: 3 as const, subpriority: 255, y: -96 };
+    }));
+  }
+  const state = healBellAtAge(age, side, animationCenter, battlePositionCenter);
+  const bySlot = new Map(state.notes.map((note) => [note.slot, note] as const));
+  return order.slice().reverse().flatMap((slot) => {
+    const note = bySlot.get(slot);
+    return note ? [note] : [];
+  });
 }
