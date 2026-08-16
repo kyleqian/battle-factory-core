@@ -202,4 +202,3 @@ for (const orientation of ["player-back", "opponent-front"] as const) {
   };
 }
 console.log(JSON.stringify(result));
-
