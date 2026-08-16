@@ -17,7 +17,7 @@
 //                      exploration, but biases fight-move selection to the
 //                      highest-power legal damaging move and declines
 //                      voluntary switches, for deep-streak crash coverage)
-//   --max-frames N     per-seed tick budget before reporting HANG (default: DEFAULT_RUN_OPTIONS.maxFrames)
+//   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --render-every N   call render() every N frames (0 disables; default 8)
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
@@ -26,7 +26,7 @@
 
 import { writeFileSync } from "node:fs";
 import {
-  DEFAULT_RUN_OPTIONS,
+  resolveMaxFrames,
   runSeed,
   type RunOptions,
   type SeedOutcome,
@@ -44,7 +44,6 @@ function main(): void {
   const milestone = args.includes("--milestone");
   const singleSeed = getFlag("--seed");
   const seedsRange = getFlag("--seeds") ?? "0:50";
-  const maxFrames = Number(getFlag("--max-frames") ?? DEFAULT_RUN_OPTIONS.maxFrames);
   const renderEvery = Number(getFlag("--render-every") ?? 8);
   const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
   const jsonPath = getFlag("--json");
@@ -52,6 +51,8 @@ function main(): void {
     console.error(`bad --policy: ${policy} (want full|vanilla|winning)`);
     process.exit(2);
   }
+  const maxFramesFlag = getFlag("--max-frames");
+  const maxFrames = resolveMaxFrames(policy, maxFramesFlag !== null ? Number(maxFramesFlag) : undefined);
 
   let seeds: number[];
   if (singleSeed !== null) {

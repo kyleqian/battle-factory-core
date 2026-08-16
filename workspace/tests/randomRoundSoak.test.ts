@@ -20,7 +20,7 @@ import {
   createFactoryRoundBattleOrchestrator,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 import { createInitialState, type EngineState } from "../src/engine/core.ts";
-import { runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
+import { resolveMaxFrames, runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
 
 const PIN_SEEDS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
@@ -311,4 +311,23 @@ describe("random round soak driver (green milestone pin)", () => {
   // natural repro. Left unpinned rather than fabricating a synthetic/injected
   // state the game could never actually reach — see PROGRESS.md for the
   // search performed and this as an explicit open follow-up.
+
+  it("ISSUES #92: winning gets a larger default frame budget than full/vanilla", () => {
+    // "winning" chains multiple complete rounds back-to-back (its
+    // continuation roll keeps re-entering GO ON), so per-seed frame cost
+    // stacks across rounds and can legitimately exceed a single round's
+    // budget without stalling. docs/soak-winning-sweep-2026-08-16.md (seeds
+    // 0:60) found seed 49 HANGing at the old flat 600_000 default despite
+    // settling cleanly at frame 693,051 given more room; docs/
+    // soak-winning-sweep-2026-08-16-part2.md (seeds 60:120) confirmed no
+    // seed needs more than that. "full"/"vanilla" soak a single round, so
+    // ISSUES #90's 600_000 stays their default.
+    expect(resolveMaxFrames("full")).toBe(600_000);
+    expect(resolveMaxFrames("vanilla")).toBe(600_000);
+    expect(resolveMaxFrames("winning")).toBe(1_000_000);
+    expect(resolveMaxFrames("winning")).toBeGreaterThan(693_051);
+    // An explicit maxFrames always overrides the policy default.
+    expect(resolveMaxFrames("winning", 42)).toBe(42);
+    expect(resolveMaxFrames("full", 42)).toBe(42);
+  });
 });
