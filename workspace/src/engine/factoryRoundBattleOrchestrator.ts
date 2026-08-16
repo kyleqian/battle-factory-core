@@ -833,6 +833,10 @@ export function beginFactoryRoundBattleStartIntro(
   // `FactoryBattleStartIntroState`.
   const isSilverBrainReveal =
     state.round.rules.currentOpponent.frontierBrain?.status === "silver";
+  // Gold sibling of the same route-level fact — see `isGoldBrainReveal`'s
+  // doc on `FactoryBattleStartIntroState`.
+  const isGoldBrainReveal =
+    state.round.rules.currentOpponent.frontierBrain?.status === "gold";
   return Object.freeze({
     ...state,
     battleStartIntro: Object.freeze({
@@ -841,6 +845,7 @@ export function beginFactoryRoundBattleStartIntro(
         isCanonicalAnchorIntro,
         sceneAssemblyDisplayLag,
         isSilverBrainReveal,
+        isGoldBrainReveal,
       ),
       elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
     }),

@@ -4630,12 +4630,30 @@ export function generatedPlayerReadyLagSpeciesFormula(
  */
 const MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET = 9;
 
+/**
+ * Gold sibling of `MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET` — same
+ * measured-not-derived convention, same committed compare window shape
+ * (`factory-round-battle7-noland-gold-reveal-off`, 701-frame capture
+ * crossing the ready transition), keyed off `isGoldBrainReveal` instead of
+ * `isSilverBrainReveal`. Calibrated against that window's own dense
+ * compare after the `3e29880b` gold-symbol-flag fix (which shrank the
+ * pic-reveal hold from 142f to 82f but left this later ready-lag boundary
+ * untouched); re-derived independently rather than assumed equal to
+ * silver's 9 because the two windows carry different opponent/lead-species
+ * cry durations.
+ */
+const MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET = 7;
+
 function generatedPlayerReadyLag(state: FactoryBattleStartIntroState): number {
   if (state.isCanonicalAnchorIntro) return GENERATED_PLAYER_READY_LAG;
   const speciesFormula = generatedPlayerReadyLagSpeciesFormula(state);
-  return state.isSilverBrainReveal
-    ? speciesFormula + MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET
-    : speciesFormula;
+  if (state.isSilverBrainReveal) {
+    return speciesFormula + MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET;
+  }
+  if (state.isGoldBrainReveal) {
+    return speciesFormula + MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET;
+  }
+  return speciesFormula;
 }
 /** First Scene-OFF render after the release callback leaves player OAM y2=0. */
 const GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK = 1670;

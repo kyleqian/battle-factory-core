@@ -68,6 +68,14 @@ export type FactoryBattleStartIntroState = Readonly<{
    * `MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET`'s doc there.
    */
   isSilverBrainReveal: boolean;
+  /**
+   * True only when `currentOpponent.frontierBrain.status === "gold"` — the
+   * gold sibling of `isSilverBrainReveal` (same ISSUES #87 option (c)
+   * mechanism, same committed compare window shape:
+   * `factory-round-battle7-noland-gold-reveal-off`). See
+   * `MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET`'s doc in `battleScene.ts`.
+   */
+  isGoldBrainReveal: boolean;
 }>;
 
 export function createFactoryBattleStartIntro(
@@ -75,6 +83,7 @@ export function createFactoryBattleStartIntro(
   isCanonicalAnchorIntro: boolean,
   sceneAssemblyDisplayLag: 0 | 1 = 0,
   isSilverBrainReveal = false,
+  isGoldBrainReveal = false,
 ): FactoryBattleStartIntroState {
   return Object.freeze({
     command,
@@ -83,6 +92,7 @@ export function createFactoryBattleStartIntro(
     acknowledgedElapsed: null,
     isCanonicalAnchorIntro,
     isSilverBrainReveal,
+    isGoldBrainReveal,
   });
 }
 
