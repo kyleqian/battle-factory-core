@@ -696,8 +696,36 @@ export function nolandStep(elapsed: number): NolandStep {
   return { frame: 2, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y + (camPanY - NOLAND_WALK_PX) };
 }
 
-/** Elapsed tick `brainMoving` settles (scientists fully turned - see `scientistTurnFrame`'s own threshold; strictly later than `ENTRY_SETTLE_ELAPSED`, which only covers the camera pan). */
-export const BRAIN_MOVEMENT_SETTLE_ELAPSED = 108;
+/**
+ * Ticks to add to `brainMoving`'s own `elapsed` (0 = the tick `closemessage`
+ * dismisses "Get a move on!") before feeding `entryStep`/`scientistTurnFrame`
+ * - both keyed by the ORDINARY path's RAM-tick clock (S6 slice 2a/2b's
+ * `elapsed` = trace tick - 520), which has its own ~22-tick pre-pan stall
+ * baked in (`ENTRY_STEPS` indices 0-22, camera flat) that belongs to THAT
+ * window's warp fade-in settling, not to this one (no fade here - just a
+ * closed msgbox). RAM-measured this step (`tools/probe/probe-factory-brain-
+ * silver-entrance-movement-ram.py`, `gTotalCameraPixelOffsetY`/`gSprites`/
+ * `gObjectEvents` sampled every frame 896-1151 of the same staged route the
+ * committed fixture 03 uses): the pan is flat at 0 through oracle frame 959,
+ * becomes 1 at frame 960, and free-runs the SAME clean 1px/tick this file's
+ * slice-2a doc already established - i.e. this window's OWN elapsed=1 lands
+ * on oracle frame 960, matching `ENTRY_STEPS` index 23 (`entryStep(1 + 22)`)
+ * exactly, including the decoy's animCmdIndex phase (RAM cmdIdx 2 at frame
+ * 960, the same phase `ENTRY_STEPS[23]`'s frame value 6 implies per this
+ * file's own point-3 finding). Verified across the whole window, not just
+ * the boundary: decoy/Noland's raw sprite Y at every sampled pan value
+ * matches `nolandStep`'s existing formula exactly (see its own doc), and the
+ * decoy's settle transition (raw animNum 5->7, a walking-cycle freeze, not a
+ * dedicated "face" table - same mechanism this file's slice-2b doc already
+ * documents for the ordinary opponent's own settle) lands on oracle frame
+ * 1040 = elapsed 81 in this shifted numbering, i.e. exactly one tick after
+ * pan reaches 80 (frame 1039, elapsed 80) - the identical "settle one tick
+ * after the pan itself stops" pattern `ENTRY_STEPS`'s own row 103 encodes.
+ */
+export const BRAIN_MOVEMENT_CLOCK_OFFSET = 22;
+
+/** Elapsed tick `brainMoving` settles (scientists fully turned - see `scientistTurnFrame`'s own threshold, fed `elapsed + BRAIN_MOVEMENT_CLOCK_OFFSET`; strictly later than the decoy/pan/Noland settle at elapsed 81, which only covers the camera pan + walk). RAM-measured (same probe as `BRAIN_MOVEMENT_CLOCK_OFFSET`): scientists start their own turn only once `waitmovement 0` for the walk itself resolves (`ScientistsFaceBattle` is a separate, sequential `call` in source, scripts.inc:58) - `scientistTurnFrame`'s own threshold (108, unshifted) minus this window's `BRAIN_MOVEMENT_CLOCK_OFFSET` (22) = 86. */
+export const BRAIN_MOVEMENT_SETTLE_ELAPSED = 86;
 
 const getAMoveOnEvent = walkupScript.scenes.battleRoomEntrance.events[0] as {
   readonly pages: readonly string[];
@@ -836,15 +864,16 @@ function brainSpeechPrintTicks(box: readonly [string, string]): number {
 
 /**
  * Elapsed tick "brainSettled" hands off into the speech's first box.
- * Structural default (0 = immediately) - NOT yet dense-compare-measured:
- * the speech-open boundary (docs/noland-silver-walkup-presentation-map.md
- * puts it around oracle frame ~1113) sits just past B1b's own not-yet-
- * closed brainMoving walk/pan cadence residual (PROGRESS 1278), so this
- * module's own `elapsed` numbering for the "brainSettled" boundary itself
- * isn't independently pinned yet either. Revisit once that cadence is
- * re-derived from fresh RAM/pixel evidence.
+ * MEASURED (this step, alongside `BRAIN_MOVEMENT_CLOCK_OFFSET`): dense
+ * compare against fixture 03 with the walk/pan cadence corrected showed the
+ * app's speech box appearing 5 ticks before oracle's real one (a static
+ * empty-box-shaped mismatch, oracle frames matching this module's own
+ * `preCheckpointFrameOffset`-relative numbering 1046-1050 - `docs/noland-
+ * silver-walkup-presentation-map.md`'s own "~1113" estimate was a rough
+ * typewriter-visibility read, not a tick-exact appear boundary); 5 closes it
+ * exactly.
  */
-export const SPEECH_APPEAR_ELAPSED = 0;
+export const SPEECH_APPEAR_ELAPSED = 5;
 
 /**
  * Elapsed tick "brainSpeechSettled" (the cry box just closed) hands off to

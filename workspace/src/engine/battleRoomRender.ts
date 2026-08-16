@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechCursorVisible, brainSpeechCursorYOffset, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { BRAIN_MOVEMENT_CLOCK_OFFSET, BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechCursorVisible, brainSpeechCursorYOffset, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 import { drawMessageBoxFrame, drawMessageBoxText, MESSAGE_PALETTE } from "./prebattleRoomRender.ts";
 import { measureText, type FontData } from "./font.ts";
 
@@ -416,10 +416,14 @@ export function renderBattleRoomBrainEntranceScene(
     : settled
       ? BRAIN_MOVEMENT_SETTLE_ELAPSED
       : 0;
-  const step = entryStep(movementElapsed);
+  // BRAIN_MOVEMENT_CLOCK_OFFSET re-bases this window's own elapsed clock
+  // (0 = closemessage dismiss) onto entryStep/scientistTurnFrame's shared
+  // RAM-tick clock (S6 slice 2a/2b) - see that constant's own doc.
+  const historicElapsed = movementElapsed + BRAIN_MOVEMENT_CLOCK_OFFSET;
+  const step = entryStep(historicElapsed);
   const origin = { x: roomLayout.initialCameraOriginPx.x, y: roomLayout.initialCameraOriginPx.y - step.camPanY };
   drawRoomTiles(fb, origin, bgFadeY);
-  const turn = scientistTurnFrame(movementElapsed);
+  const turn = scientistTurnFrame(historicElapsed);
   for (const scientist of roomLayout.objects.scientists) {
     const pos = tileScreenPos(scientist.tile, origin);
     const hFlip = turn.turned && scientist.turn === "east";
@@ -431,7 +435,7 @@ export function renderBattleRoomBrainEntranceScene(
   // not the decoy's own north-facing idle frame reused during the walk
   // itself (see NOLAND_IDLE_FRAME's own doc).
   const noland = state.phase === "brainMoving" || settled
-    ? nolandStep(movementElapsed)
+    ? nolandStep(historicElapsed)
     : { frame: NOLAND_IDLE_FRAME, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
   drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);
   drawOpponentMsgbox(fb, msgboxVisual(state), state);

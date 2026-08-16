@@ -28,6 +28,7 @@ import {
   SILVER_PERSONALITY_BOX_COUNT,
   SILVER_PERSONALITY_SPEECH_BOXES,
   SILVER_REPEAT_SPEECH_BOXES,
+  SPEECH_APPEAR_ELAPSED,
   type BattleRoomState,
 } from "../src/engine/battleRoom.ts";
 import {
@@ -82,7 +83,8 @@ function settledFirstEncounterState(): BattleRoomState {
   for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
   for (let i = 0; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) state = advanceBattleRoom(state);
   expect(state.phase).toBe("brainSettled");
-  return advanceBattleRoom(state);
+  for (let i = 0; i <= SPEECH_APPEAR_ELAPSED; i += 1) state = advanceBattleRoom(state);
+  return state;
 }
 
 describe("silver Noland speech (walk-up build step B2)", () => {
@@ -198,7 +200,7 @@ describe("silver Noland speech (walk-up build step B2)", () => {
     state = { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
     for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
     for (let i = 0; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) state = advanceBattleRoom(state);
-    state = advanceBattleRoom(state);
+    for (let i = 0; i <= SPEECH_APPEAR_ELAPSED; i += 1) state = advanceBattleRoom(state);
     expect(state.phase).toBe("brainSpeech");
     expect(state.speechStep).toBe(0);
     expect(battleRoomQuote(state)).toEqual(SILVER_REPEAT_SPEECH_BOXES[0]);
