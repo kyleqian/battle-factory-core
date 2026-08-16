@@ -1,0 +1,18 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-round-battle7-noland-gold-speech-close-held-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-brain-gold-speech-close-off.json",
+    "preCheckpointFrameOffset": 2495
+  },
+  "segments": [
+    { "frames": 35, "buttons": [] },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 90, "buttons": [] }
+  ],
+  "captureWindow": { "start": 0, "end": 125 }
+}

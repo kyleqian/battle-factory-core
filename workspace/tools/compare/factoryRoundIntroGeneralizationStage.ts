@@ -24,6 +24,7 @@ import {
 } from "../../src/engine/battleTransition.ts";
 import {
   battleRoomStateForOpponent,
+  GOLD_FIRST_ENCOUNTER_SPEECH_BOXES,
   SILVER_FIRST_ENCOUNTER_SPEECH_BOXES,
 } from "../../src/engine/battleRoom.ts";
 import {
@@ -560,4 +561,173 @@ export function generatedGoldRoundRevealProofStage(
 // trainer party/gold status and the underlying round-shape config differ.
 export function generatedRoundBattle7NolandGoldRevealStage(state: EngineState): EngineState {
   return generatedGoldRoundRevealProofStage(state, 6);
+}
+
+/**
+ * Walk-up build step B3: gold sibling of `nolandRoundReadyState` - the same
+ * "park past a not-yet-exercised upstream window" idiom, seeded with the
+ * gold round shape (`generatedGoldRoundRevealProofStage`'s own recipe:
+ * seed 2, factoryWinStreak 35, factorySymbolsCount 1, player set IDs
+ * 564/565/566 - the already-oracle-verified legal gold triple, not the
+ * silver stage's 267/268/269) so `currentOpponent.frontierBrain.status`
+ * resolves to `"gold"` at battleIndex 6, landing `battleRoomStateForOpponent`
+ * on the gold speech content (`brainSpeechTier: "gold"`).
+ */
+function goldNolandRoundReadyState(state: EngineState): {
+  readonly state: EngineState;
+  readonly orchestrator: FactoryRoundBattleOrchestratorState;
+  readonly trainerPresentation: FactoryTrainerPresentation | undefined;
+} {
+  const playerRentalRecords = [
+    record(564, CHALLENGE5_FIXED_IV),
+    record(565, CHALLENGE5_FIXED_IV),
+    record(566, CHALLENGE5_FIXED_IV),
+  ] as const;
+  let orchestrator = createFactoryRoundBattleOrchestrator({
+    id: "factory-round-battle7-noland-gold-speech-off",
+    rngValue: 2,
+    factoryWinStreak: 35,
+    factorySymbolsCount: 1,
+    playerTrainerId: PLAYER_TRAINER_ID,
+    battleTowerLevel50WinStreak: 0,
+    facilityState: { rentsCount: 0 },
+    rentals: {
+      type: "currentRecords",
+      playerRentalRecords,
+      savedRentalRecords: [
+        ...playerRentalRecords,
+        record(1, CHALLENGE5_FIXED_IV),
+        record(2, CHALLENGE5_FIXED_IV),
+        record(3, CHALLENGE5_FIXED_IV),
+      ],
+    },
+  });
+  for (let battleIndex = 0; battleIndex < 6; battleIndex += 1) {
+    orchestrator = advanceProofWin(orchestrator);
+  }
+  const currentOpponent = orchestrator.round.rules.currentOpponent;
+  const trainerPresentation = factoryTrainerPresentationForOpponent(currentOpponent) ?? undefined;
+  return {
+    state: {
+      ...state,
+      factoryRoundBattleOrchestrator: orchestrator,
+      postwin: {
+        ...createPostwinState(),
+        elapsed: ROOM_ENTRANCE_INERT_POSTWIN_ELAPSED,
+        rightThisWayDismissElapsed: ROOM_ENTRANCE_INERT_POSTWIN_RIGHT_THIS_WAY_ELAPSED,
+      },
+      prebattleRoom: null,
+      rngMode: "vblank",
+    },
+    orchestrator,
+    trainerPresentation,
+  };
+}
+
+/**
+ * Walk-up build step B3 dense calibration: parks `battleRoom` directly in
+ * gold's escort box ("Hey, hey! Get a move on!" - the SAME entrance box
+ * silver shows, `battleRoomEntrance` is not tier-gated), already fully
+ * printed and idle-held - sidesteps the entrance's own print-timing cadence
+ * (the not-yet-closed B1c mid-ramp residual, same rationale as B2's own
+ * speech-box-held stages) so the compare trace below can drive the box's
+ * REAL dismiss -> brainMoving -> brainSettled -> brainSpeech handoff for
+ * real via scripted segments, rather than re-simulating the approach to it.
+ */
+export function generatedRoundBattle7NolandGoldSpeechOpenStage(
+  state: EngineState,
+): EngineState {
+  const ready = goldNolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    battleRoom: {
+      phase: "brainMsgboxIdle",
+      elapsed: 0,
+      frontierBrainWalkup: true,
+      brainSpeechFirstEncounter: true,
+      brainSpeechTier: "gold",
+      trainerPresentation: ready.trainerPresentation,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+/**
+ * Walk-up build step B3: gold sibling of
+ * `generatedRoundBattle7NolandSilverSpeechBoxHeldStage` - parks `battleRoom`
+ * directly in a fully-printed `brainSpeechIdle` box (`speechStep`, 0-indexed
+ * into `GOLD_FIRST_ENCOUNTER_SPEECH_BOXES`), same sidestep rationale.
+ */
+export function generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
+  state: EngineState,
+  speechStep: number,
+): EngineState {
+  const ready = goldNolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    battleRoom: {
+      phase: "brainSpeechIdle",
+      elapsed: 0,
+      frontierBrainWalkup: true,
+      brainSpeechFirstEncounter: true,
+      brainSpeechTier: "gold",
+      speechStep,
+      trainerPresentation: ready.trainerPresentation,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+/** Gold sibling of `generatedRoundBattle7NolandSilverSpeechSettledStage`. */
+export function generatedRoundBattle7NolandGoldSpeechSettledStage(
+  state: EngineState,
+  speechBoxCount: number,
+): EngineState {
+  const ready = goldNolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    battleRoom: {
+      phase: "brainSpeechSettled",
+      elapsed: 0,
+      frontierBrainWalkup: true,
+      brainSpeechFirstEncounter: true,
+      brainSpeechTier: "gold",
+      speechStep: speechBoxCount,
+      trainerPresentation: ready.trainerPresentation,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+// Named, zero-arg wrappers - same convention as the silver box0/cry/page8/
+// close-pause wrappers above (appTrace.ts's APP_STAGES registry only calls
+// stages with a single `state` argument).
+export function generatedRoundBattle7NolandGoldSpeechBox0HeldStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(state, 0);
+}
+export function generatedRoundBattle7NolandGoldSpeechPage4HeldStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
+    state,
+    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length - 2,
+  );
+}
+export function generatedRoundBattle7NolandGoldSpeechCloseHeldStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
+    state,
+    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length - 1,
+  );
+}
+export function generatedRoundBattle7NolandGoldSpeechClosePauseStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandGoldSpeechSettledStage(
+    state,
+    GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length,
+  );
 }

@@ -1,3 +1,71 @@
+## 1283 — [main worker, 2026-08-16] **Walk-up step A dense calibration: app-side postwin brain compare harness built, 2/4 fixture windows close exact; call-scene windows leave an honest attendant-movement residual**
+
+- **State:** `tools/compare/factoryRoundIntroGeneralizationStage.ts` gains
+  two new postwin stages (idiom: B1b's room-entrance stage) and four
+  committed compare traces replay the side lane's dense fixtures
+  (`docs/walkup-call-scene-ground-truth.md`) live against
+  `http://127.0.0.1:8014`. Full `npm test` **1044 files / 9939 passed /
+  223 skipped**, `npm run build` green. Differential PASS (563/563
+  byte-identical, `--base 1fd9b21c`, the commit before this step).
+- **Did:** (1) `generatedRoundBattle7NolandPostwinCallSceneStartStage`
+  parks `postwin` at `elapsed: POSTWIN_COUNTER_ROOM_FIRST_AGE` (115),
+  `frontierBrain: true` — the first tick of the already-pinned
+  counter-room fade-in, anchored to the doc's own first acceptance-grade
+  pre-checkpoint frame (490), past its two documented staging-artifact
+  fades. The anchor is corroborated, not fit: the shared
+  `FADE_IN_TICKS`/`POSTWIN_HEAL_TEXT_FIRST_AGE` spacing already lands
+  within one frame of the oracle's own measured 24-tick fade-to-first-
+  glyph span, so no existing shared (Battle-1-pinned) constant moved.
+  (2) `generatedRoundBattle7NolandPostwinAskReadyMenuOpenStage` parks
+  `postwin` directly in the `AskReadyForHead` menu's held state
+  (`callScenePage: 5`, `callSceneDismissElapsed: 0`, cursor on GO ON) —
+  the post-checkpoint frame-0 anchor, sidestepping the call scene the
+  same way B2's speech stages sidestep `brainMoving`. Found + fixed a
+  real gap while building it: `renderPostwinState`'s `beforeContinuation`
+  gate reads `healDismissElapsed`, not `callSceneDismissElapsed` — a
+  hand-parked state needs both non-null or it silently renders nothing.
+- **Acceptance numbers (live, this session):** `askready-menu-off`
+  (window 2) **21/21 exact**; `swapask-no-off` (window 3) **194/194
+  exact** — both closed on the first attempt once the menu-open anchor
+  was fixed. `callscene-01-off`/`callscene-02-off` (window 1, the 5-box
+  call scene): **45/131** and **40/199** acceptance-grade frames (the
+  doc's own 13 pre-490 frames are staging artifacts, never chased, so
+  144/199 total shrinks to 131 acceptance-grade for fixture 01). **Not
+  closed — honest residual:** the attendant's walk-away/return movement
+  (oracle frames 894–949, 1037–1084) has no rendered animation in the
+  current model; `postwin.ts`'s own box-to-box transition is instant
+  (`acceptPostwinCallScenePage` arms the next box's typewriter a few
+  ticks later), matching this file's own prior disclosure that movement
+  is "folded into the transition, not separately timed" — a missing
+  render feature, not a mistunable constant, so left honest rather than
+  fitted. Every captured frame before the first movement gap (heal fade/
+  typewriter/held, box 1's own typed content) and the tail of each held
+  box that survives past its own movement gap already matches; the
+  gap itself and its immediate aftermath do not. The button-press
+  schedule driving these two traces was derived directly from the doc's
+  own measured transition frames (each box's own dismiss point), not
+  independently oracle-probed for ITS OWN accept-ready boundary — same
+  "generous margin, not a tight probe" caveat the doc's own window 3
+  entry already discloses for its DOWN press.
+- **Regression bars unmoved (all re-run live this session):**
+  entrance-02 **256/256**, entrance-03 **162/256** (known B1c residual,
+  unmoved), all four B2 speech windows **39/39, 74/74, 39/39, 28/28**,
+  reveal **690/701**. `executableFrontierRatchet.test.ts` barrier counts:
+  unwidened (no new `unsupportedBranch(...)` sites).
+- **Next:** building attendant-movement rendering for the call scene (a
+  real feature, not a calibration — likely the biggest remaining lever
+  on window 1's two counts) if this step continues; `ISSUES #91`
+  (post-brain-win `storedTrainerIds`, blocks live soak reachability); the
+  B1c mid-ramp pixel residual; gold entrance/speech.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT: the
+  `beforeContinuation`/`healDismissElapsed` render gate (see above) cost
+  real time to find via a screenshot diff rather than reading — worth
+  remembering that a hand-parked `PostwinState` must satisfy every field
+  a render branch's `else if` chain reads, not just the ones a stage's
+  own docstring names.
+
+---
+
 ## 1282 — [main worker, 2026-08-16] **Walk-up build step A, Brief 2 LANDED: postwin.ts AskSwapBeforeHead short path + soak driver brain-branch recognition; found + cataloged an unrelated post-brain-win opponent-generation crash (#91)**
 
 - **State:** `docs/walkup-step-a-design.md` Brief 2 is built: a brain
