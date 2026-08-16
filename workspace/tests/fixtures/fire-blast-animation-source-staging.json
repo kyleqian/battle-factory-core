@@ -1,0 +1,95 @@
+{
+  "schema": "fire-blast-animation-source-staging/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_FIRE_BLAST",
+  "moveId": 126,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "source": {
+    "moveScript": {"start":"0x082c9f55","endExclusive":"0x082c9fe9","bytes":148,"sha256":"7a777dbd65cf2e2199a2b74fd253bd9058584ef5752a049f1a81ad9db23424da"},
+    "fireBlastRing": {"start":"0x082c9fe9","endExclusive":"0x082ca02d","bytes":68,"sha256":"2a09bd0cac541c96b45f9a1fe4e05d31e6222f4394ac127c168c3a3e260e57d3"},
+    "fireBlastCross": {"start":"0x082ca02d","endExclusive":"0x082ca083","bytes":86,"sha256":"938790f5f24ddf97868adb9579e751190c52eef04ce22c8d2d8751d910d8d418"},
+    "ringTemplate": {"start":"0x0859551c","endExclusive":"0x08595534","bytes":24,"sha256":"efc9b6a24b5877a85b72b35ec159b8ca5e70fad9b2c4cf0be0824685d4cee4e7"},
+    "crossAnimCmds": {"start":"0x08595534","endExclusive":"0x08595540","bytes":12,"sha256":"44814d6757210d35daec60bd30557a442b0c33efd61b023904a5553df8576f6d"},
+    "crossTemplate": {"start":"0x0859556c","endExclusive":"0x08595584","bytes":24,"sha256":"e9f408432f92d44845244b8d80bf9861e0ca614452459900fb97d773ba6f39bd"},
+    "ringCallbacks": {"start":"0x0810921c","endExclusive":"0x08109364","bytes":328,"sha256":"1ac822875560c6fb213907e7b60ee5d90b2949ddbc92576bf3c8c44f9e0423c3"},
+    "fireCrossCallback": {"start":"0x08109364","endExclusive":"0x081093a4","bytes":64,"sha256":"a47e2781166e979d11e4587ddc5c0704a8f39904a11d2b2026c10b74bf3a1e88"},
+    "soundTask": {"start":"0x08158b30","endExclusive":"0x08158b98","bytes":104,"sha256":"c1ba65704afbab63800739bc7f3c3e12317a6d98ff28a3ac2d70b4fde7bd4616"},
+    "soundTaskStep1": {"start":"0x08158b98","endExclusive":"0x08158c04","bytes":108,"sha256":"a60b45f7af5ce721f7d8593d7e22ce4f22497281dd4360ccb80ac14f45b60da4"},
+    "soundTaskStep2": {"start":"0x08158c04","endExclusive":"0x08158c58","bytes":84,"sha256":"4099739d212b4a4035ec800ec9e02099087daca6db9256ad456df397a79d5c2d"},
+    "shakeMon": {"start":"0x080d51ac","endExclusive":"0x080d5220","bytes":116,"sha256":"329fdfe484d8dce4dda384af512c29d8618d55ccb53d2bd44aea75c4cc465269"},
+    "blendBattleAnimPal": {"start":"0x08116620","endExclusive":"0x08116664","bytes":68,"sha256":"975e324bde253daeee7691503316df123b98c1269fb52a92f887476d321b21f7"},
+    "basicFireAnims": {"start":"0x085954d0","endExclusive":"0x085954d4","bytes":4,"sha256":"73e872c05089b765f2a160cba392e77b327fffecc0245031a63c2f6123495d0a"},
+    "smallEmberGfx": {"start":"0x08c04e90","endExclusive":"0x08c05148","bytes":696,"sha256":"f3b018a18e41d2652f212a6bcad4b39f3bcd52877da09669c5538cd60f9da851"},
+    "smallEmberPalette": {"start":"0x08c05148","endExclusive":"0x08c05170","bytes":40,"sha256":"56bdc62c34971f80bd8ce1f30dab84e5241235da4bc251dab73f8534df57049e"}
+  },
+  "sourceHashes": {
+    "reference/pokeemerald/pokeemerald.gba":"a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+    "reference/pokeemerald/pokeemerald.elf":"cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b",
+    "reference/pokeemerald/data/battle_anim_scripts.s":"76ad47e87abab7bf16f1606eb2cefb69fa39945d07458348623419f00404552d",
+    "reference/pokeemerald/src/battle_anim_fire.c":"e44d567abc2ac1c0b5efb9e42412c7edfa701a8d5d898eac2dfd02ed73cd7331",
+    "reference/pokeemerald/src/battle_anim_sound_tasks.c":"9fb056ab8710dc552c20851ba8ce899957fa6d4d0137121bb55f2bc5cef8ad30",
+    "reference/pokeemerald/src/battle_anim_utility_funcs.c":"33a92148dbdf3ca44a454eac3ced42cf07814acf85667b37685131408b13de9f",
+    "reference/pokeemerald/src/battle_anim_mon_movement.c":"d5cc40ee986326a87a694c72f873f2dc0bdef38102f005582bbc8b838e3643a4",
+    "reference/pokeemerald/src/data/battle_anim.h":"f47d2e572285ec1e4ff975f05a14d4ce133d69dbd3613b5a5ec016c30eef59de",
+    "reference/pokeemerald/src/graphics.c":"00af45f19b811fe75c2d2196c66bb427695178a6808648426d30d286318667f1",
+    "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h":"557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "reference/pokeemerald/include/constants/battle_frontier_mons.h":"00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "reference/pokeemerald/src/battle_factory.c":"7762bf366045ed91a3c280a7e4d20ccc9df9bba305c529ad6b24df2250a072f6",
+    "src/data/gen/factory-animation-inventory.json":"60c3d2e0a78511bcc97b48bad011590fc4f06b3fa1661a6075042e7b794f3418",
+    "src/data/gen/battle-animation-components.json":"aa5890455d932c35aa1ea80cb9e6c79ea278571cc445c8661f64379a0846af1a",
+    "src/data/gen/battle-frontier-mons.json":"6f7e9b57201ca8d513dab853c53aa7e23d35329ea52df6a464e7fe311d9fe21c",
+    "src/data/gen/factory-round-policy.json":"0e62d9a116210cf43bd5b024f8f6ff02334624f9fed107112403dfbe9ef0ce6b"
+  },
+  "scripts": {
+    "Move_FIRE_BLAST": [
+      "loadspritegfx ANIM_TAG_SMALL_EMBER",
+      "createsoundtask SoundTask_FireBlast, SE_M_FLAME_WHEEL, SE_M_FLAME_WHEEL2",
+      "call FireBlastRing", "call FireBlastRing", "call FireBlastRing", "delay 24",
+      "createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 3, 0, 8, RGB_BLACK",
+      "waitforvisualfinish", "delay 19",
+      "createvisualtask AnimTask_ShakeMon, 2, ANIM_TARGET, 5, 0, 20, 1",
+      "call FireBlastCross", "delay 3", "call FireBlastCross", "delay 3", "call FireBlastCross", "delay 3",
+      "call FireBlastCross", "delay 3", "call FireBlastCross", "delay 3", "call FireBlastCross", "delay 3",
+      "call FireBlastCross", "delay 3", "call FireBlastCross", "delay 3", "call FireBlastCross",
+      "waitforvisualfinish",
+      "createvisualtask AnimTask_BlendBattleAnimPal, 10, F_PAL_BG, 2, 8, 0, RGB_BLACK",
+      "waitforvisualfinish", "end"
+    ],
+    "FireBlastRing": [
+      "createsprite gFireBlastRingSpriteTemplate, ANIM_TARGET, 2, 0, 0, 0",
+      "createsprite gFireBlastRingSpriteTemplate, ANIM_TARGET, 2, 0, 0, 51",
+      "createsprite gFireBlastRingSpriteTemplate, ANIM_TARGET, 2, 0, 0, 102",
+      "createsprite gFireBlastRingSpriteTemplate, ANIM_TARGET, 2, 0, 0, 153",
+      "createsprite gFireBlastRingSpriteTemplate, ANIM_TARGET, 2, 0, 0, 204",
+      "delay 5", "return"
+    ],
+    "FireBlastCross": [
+      "createsprite gFireBlastCrossSpriteTemplate, ANIM_TARGET, 2, 0, 0, 10, 0, -2",
+      "createsprite gFireBlastCrossSpriteTemplate, ANIM_TARGET, 2, 0, 0, 13, -2, 0",
+      "createsprite gFireBlastCrossSpriteTemplate, ANIM_TARGET, 2, 0, 0, 13, 2, 0",
+      "createsprite gFireBlastCrossSpriteTemplate, ANIM_TARGET, 2, 0, 0, 15, -2, 2",
+      "createsprite gFireBlastCrossSpriteTemplate, ANIM_TARGET, 2, 0, 0, 15, 2, 2",
+      "return"
+    ]
+  },
+  "ringPhases": [0, 51, 102, 153, 204],
+  "crossVectors": [
+    {"duration":10,"x":0,"y":-2}, {"duration":13,"x":-2,"y":0},
+    {"duration":13,"x":2,"y":0}, {"duration":15,"x":-2,"y":2},
+    {"duration":15,"x":2,"y":2}
+  ],
+  "carrier": {
+    "lowestLegal": {
+      "index":361,
+      "label":"FRONTIER_MON_OCTILLERY_2",
+      "species":"SPECIES_OCTILLERY",
+      "moves":["MOVE_OCTAZOOKA","MOVE_FIRE_BLAST","MOVE_THUNDER_WAVE","MOVE_MUD_SLAP"],
+      "item":"BATTLE_FRONTIER_ITEM_LAX_INCENSE",
+      "evSpread":["F_EV_SPREAD_SP_DEFENSE","F_EV_SPREAD_DEFENSE","F_EV_SPREAD_HP"],
+      "nature":"NATURE_QUIRKY"
+    },
+    "challenge2Range":{"start":267,"end":371,"startLabel":"FRONTIER_MON_DELCATTY_2","endLabel":"FRONTIER_MON_CLOYSTER_2"}
+  },
+  "boundedRemainder":"No reducer, typed seam, production compositor/renderer, dense oracle capture, latch measurement, framebuffer comparison, coverage promotion, latch update, or renderer change is claimed. The next required evidence is a complete dense bilateral Scene-ON window through the shared presentation seam."
+}
