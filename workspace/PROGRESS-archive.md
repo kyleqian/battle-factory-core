@@ -1,3 +1,83 @@
+## 1281 — [main worker, 2026-08-16] **Walk-up build step A, Brief 1 LANDED: postwin.ts brain call-scene + AskReadyForHead menu (Tier-1 + differential; dense oracle calibration deferred as scoped)**
+
+- **State:** `docs/walkup-step-a-design.md` Brief 1 is built: `postwin.ts`'s
+  state machine now has a `frontierBrain`-gated branch inserted after the
+  shared heal line, replacing the ordinary route's direct fall-through
+  into the continuation menu. Non-brain path untouched — every existing
+  `postwin.test.ts` assertion passes unmodified, plus 4 new tests (43
+  total). Full `npm test` **1044 files / 9935 passed / 223 skipped**,
+  `npm run build`, and `npm run typecheck` green. Differential PASS
+  (below). No oracle evidence attempted this step, per the brief's own
+  scoping (Tier-1 + differential only; a side-lane worker is banking
+  dense fixtures in parallel for a later calibration step).
+- **Did:** (1) `PostwinState` gained `frontierBrain`/`callScenePage`
+  (0-5)/`callScenePageEdgeElapsed`/`callSceneDismissElapsed`.
+  `createPostwinStateFromRound` derives `frontierBrain` from the
+  upcoming opponent's `frontierBrain` field alone (memo §2.2; `.status`
+  tier not needed) — no call-site signature change needed. (2) The
+  5-box call scene (phone SE wait message / attendant-return message /
+  3-page boss message) is pulled **directly from
+  `factory-brain-walkup-script.json`** at module load (import + `.split`,
+  same idiom `battleRoom.ts`'s silver-speech box queue already uses) —
+  never retyped, including the apostrophe-normalization convention
+  (`facility's` → `facility’s`). Each box advances on A via
+  `acceptPostwinCallScenePage`, mirroring `dialoguePage`'s own index
+  convention. (3) `AskReadyForHead` reuses `continuationCursorPos`/
+  `acceptPostwinContinuation`/`beginPostwinQuestion`
+  **completely unchanged** — only `postwinNextVisibleChars`/
+  `postwinContinuationInputReady`/`advancePostwin`'s `menuVisible` gain a
+  `frontierBrain` branch computing the prompt's own visible-chars/menu-
+  visible/menu-ready timing from the call scene's own dismiss edge
+  instead of `healDismissElapsed` (RECORD/REST/RETIRE therefore carry
+  over verbatim with zero new code, confirming the design memo's §3
+  RESOLVED note). (4) `core.ts` wired: input routing for call-scene A-
+  presses (mirrors the existing scouting-page 1-3 wiring) and minimal
+  rendering (call-scene box text via the existing `drawLines` helper;
+  the AskReadyForHead multichoice window's visibility gate branches off
+  the call scene's own dismiss edge instead of `healDismiss` directly).
+  **Timing honesty:** every new delay constant reuses this file's own
+  established MSGBOX_DEFAULT conventions (4-tick first-glyph delay,
+  +2-after-settle accept-ready, the same "+4 visible/+5 ready after
+  settle" shape `POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY`/
+  `_INPUT_READY_DELAY` already derive) rather than inventing new
+  numbers — structural defaults, explicitly flagged as NOT
+  independently oracle-measured for this window (module-doc comments
+  cite this, matching the `SPEECH_APPEAR_ELAPSED`-was-an-unmeasured-0
+  precedent). Attendant walk-away/return movement is not separately
+  timed (folded into the box-to-box transition, same simplification
+  `battleRoom.ts`'s own brain-speech box queue documents for its own
+  unmeasured window) — a presentation-only gap, not a state-machine one.
+- **Acceptance numbers:** New Tier-1 tests (4, in `postwin.test.ts`)
+  pin: `createPostwinStateFromRound`'s brain-flag derivation (both
+  true/false), `CALL_SCENE_BOX_TEXTS`/prompt text against the raw JSON
+  byte-for-byte, the full box-by-box index/text-transition walk through
+  all 5 boxes into `AskReadyForHead`'s menu (incl. an early-A-swallowed
+  check and a RETIRE-still-works check), and an explicit ordinary-path-
+  unchanged sanity check. Differential
+  (`compare:differential room-entry.json battle2-room-a.json
+  s6-acceptance.json --base HEAD^`) → **PASS, 563/563 byte-identical**.
+  Full `npm test` **1044/9935/223**; build + typecheck green.
+  `executableFrontierRatchet.test.ts` barrier counts: **unwidened** (no
+  new `unsupportedBranch(...)` call sites added).
+- **Not built this step (by design, per the brief):** `AskSwapBeforeHead`
+  's short path past GO ON (Brief 2 — a brain postwin selecting GO ON
+  today falls through to the ordinary scouting-page 1-3 content, a
+  known documented gap, not a crash); the soak driver's brain-branch
+  exercise (also Brief 2); any brain-specific RETIRE bookkeeping
+  (explicitly out of scope per memo §3); dense oracle pixel calibration
+  of the call-scene/menu window (blocked on the same `BattleLab.
+  prepare()` staging gap the memo's §4 flagged, now fixed per harness
+  commit 3e29880b — reachable, but calibrating against it is scoped to
+  a later step, not this one).
+- **Next:** Brief 2 (`AskSwapBeforeHead` short path + soak driver
+  update); dense-oracle calibration of step A's brain-specific timing
+  once the side lane's fixtures are banked; the B1c mid-ramp pixel
+  residual (`battleRoom.ts` module doc); gold entrance/speech.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT:
+  none new this session.
+
+---
+
 ## 1280 — [main worker, 2026-08-16] **Walk-up build step B1c: brainMoving walk/pan cadence re-derived from a fresh RAM probe (fixture 03: 43/256 → 162/256 exact); a smaller, honestly-flagged mid-ramp pixel residual remains**
 
 - **State:** B1b's own diagnosis (`entryStep`'s per-tick table doesn't
