@@ -1,0 +1,43 @@
+{
+  "schema": "heal-bell-animation-source-staging/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_HEAL_BELL",
+  "moveId": 215,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "source": {
+    "moveScript": {"start":"0x082d3d34","endExclusive":"0x082d3ef8","bytes":452,"sha256":"01091fd74bddc888c0576cf1e7c9b0c0de266e8828a8db8044b1766c9342bd41"},
+    "healBellRing": {"start":"0x082d3ef8","endExclusive":"0x082d3f2e","bytes":54,"sha256":"a01a131df220a6c6e8a09c6bb0a80f857b96a9a615c4f87350a27f28699063bf"},
+    "bellAnimCmds": {"start":"0x085938fc","endExclusive":"0x08593934","bytes":56,"sha256":"f54f3d7c2bbbd27835bd5d1b76c4c6f2076f65811e6acb174b240a52bddf1fef"},
+    "bellTemplate": {"start":"0x08593938","endExclusive":"0x08593950","bytes":24,"sha256":"4e45576663727cd6cd7a2ffe3d5c554a3cb61428894b007f1b6600c34dad93cd"},
+    "noteTemplate": {"start":"0x08593958","endExclusive":"0x08593970","bytes":24,"sha256":"2caedc5407191c60863f793c472b72d1c91003bc1af65721f1de281cbf1acccd"},
+    "noteCallback": {"start":"0x08105de8","endExclusive":"0x08105e60","bytes":120,"sha256":"c8f66441519b428050b8b7d842fd7c5cecf86dcf236bf76a8f1a2d0842071642"},
+    "loadMusicNotesPals": {"start":"0x08105cb4","endExclusive":"0x08105d60","bytes":172,"sha256":"7a246b79127027f608d200e90a2877230bc69ed744cca114d2cf3c56eb34de1d"},
+    "freeMusicNotesPals": {"start":"0x08105d60","endExclusive":"0x08105d88","bytes":40,"sha256":"ff108aa0b5e8bac4bf16cdc5fe56a9d7b4d1923d8b93601907c329cbfdf84484"},
+    "musicNotePaletteTags": {"start":"0x08593950","endExclusive":"0x08593956","bytes":6,"sha256":"7ae7abd8e010e344ffae2f3490f1b5ab6d6947ac6b0b5ce55f1da646b3237b55"},
+    "thinRingTemplate": {"start":"0x0859381c","endExclusive":"0x08593834","bytes":24,"sha256":"ace9c35c66e073f95fc60720ed5330453937adacfd7c5906fed099ea3cc833df"},
+    "blendThinRingTemplate": {"start":"0x08593868","endExclusive":"0x08593880","bytes":24,"sha256":"21fd916785b2f853a9c33e308e7732305c70d0f0137b70d2d8eb46415c6b2ba1"},
+    "sparklingStarsTemplate": {"start":"0x08592b94","endExclusive":"0x08592bac","bytes":24,"sha256":"3c3d46391269f2a16d598f696c66d276e3635bca5b39f3ee1a3629f950767b2c"},
+    "sparklingStarsCallback": {"start":"0x0810135c","endExclusive":"0x08101440","bytes":228,"sha256":"4faca4cb31d2c464b4eabb7044527013478dc7c7bd03051b9c422662e85c9cdd"},
+    "bellGfx": {"start":"0x08c226a4","endExclusive":"0x08c228d8","bytes":564,"sha256":"98489a084550cc4c76a31e05bdec6fd4dc00516f12c6ad636b5319f72e301d6d"},
+    "bellPalette": {"start":"0x08c228d8","endExclusive":"0x08c228fc","bytes":36,"sha256":"6504c1455300a0b9b4ecdbb794d8d1c2fe56e2ba0a36271c5bd9533c43940a03"},
+    "musicNotesGfx": {"start":"0x08c22404","endExclusive":"0x08c22610","bytes":524,"sha256":"d9ff0a504fbb9226ff599b73e15224c643e9230f9c9dc4527409f1b8778e05eb"},
+    "musicNotesPalette": {"start":"0x08c22610","endExclusive":"0x08c226a4","bytes":148,"sha256":"f1b6ecfea60c4ae91720142ce477d0ac18411763f65124c2d8841088fc9a2f01"},
+    "thinRingGfx": {"start":"0x08c22234","endExclusive":"0x08c223e0","bytes":428,"sha256":"e7d6945594e8f1bf50c324a5be3754c4ddcdc5c85b5cb81f7c9b7a8d2e63e0dd"},
+    "thinRingPalette": {"start":"0x08c223e0","endExclusive":"0x08c22404","bytes":36,"sha256":"291e6ed30c91b23ef7ecf300b8906ba5d0fcb176f02e2c5d9b2f4f7aa33d5a0a"},
+    "sparkle2Palette": {"start":"0x08c09fb0","endExclusive":"0x08c09fd8","bytes":40,"sha256":"bdaa64a242e1abc402504f7fc1e35d34df2aa70497a9a151bae42dd5568ac9b1"}
+  },
+  "stages": {
+    "playerBack": {
+      "scenario": "tools/battle-lab/mechanic-heal-bell-player-chimecho-opponent-onix.json",
+      "scenarioSha256": "b924d41ea2e394dbe48c107d64fc1c157164bf9b3a927410ccdab375c209749c",
+      "endpoint": {"frame":1234,"framebufferSha256":"0526e96c3a753803d05ef124e2e6dc500571f353c0d461d2a95f9ec9b0373779","healBellPp":[4,5,5,5],"allPartyChecksumsValid":true}
+    },
+    "opponentFront": {
+      "scenario": "tools/battle-lab/mechanic-heal-bell-opponent-chimecho-player-onix.json",
+      "scenarioSha256": "2dcfd3c0a232fa1c4d63cb959b5cad8423a056b595a531be0c9d4fce004dba7f",
+      "endpoint": {"frame":1234,"framebufferSha256":"1ffc9a947b2f44c02c818a71c9cdd1ee323da06e56ac4dd56b9e812695729305","healBellPp":[5,5,5,4],"allPartyChecksumsValid":true}
+    }
+  },
+  "boundedRemainder": "No reducer, typed seam, compositor, dense oracle capture, latch measurement, framebuffer comparison, or coverage promotion is claimed. The two endpoint-only Scene-ON lab runs prove legal bilateral staging and a consumed Heal Bell PP slot, not exact presentation."
+}
