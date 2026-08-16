@@ -127,7 +127,7 @@ describe("MOVE_HEAL_BELL authoritative-source and legal bilateral staging checkp
     [...parties.player, ...parties.opponent].forEach(expectCompletePartyRecord);
     const attacker = playerAttacker ? parties.player : parties.opponent;
     const defender = playerAttacker ? parties.opponent : parties.player;
-    expect(attacker.every((mon) => mon.species === 358 && mon.level === 50
+    expect(attacker.every((mon) => mon.species === 411 && mon.level === 50
       && mon.nature === 17 && mon.item === 214 && mon.abilitySlot === 0
       && JSON.stringify(mon.evs) === JSON.stringify({ hp: 170, attack: 0, defense: 170, speed: 0, spAttack: 0, spDefense: 170 })
       && JSON.stringify(mon.moves) === JSON.stringify([215, 215, 215, 215]))).toBe(true);

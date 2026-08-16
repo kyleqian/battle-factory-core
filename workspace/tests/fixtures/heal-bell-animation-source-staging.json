@@ -30,13 +30,13 @@
   "stages": {
     "playerBack": {
       "scenario": "tools/battle-lab/mechanic-heal-bell-player-chimecho-opponent-onix.json",
-      "scenarioSha256": "b924d41ea2e394dbe48c107d64fc1c157164bf9b3a927410ccdab375c209749c",
-      "endpoint": {"frame":1234,"framebufferSha256":"0526e96c3a753803d05ef124e2e6dc500571f353c0d461d2a95f9ec9b0373779","healBellPp":[4,5,5,5],"allPartyChecksumsValid":true}
+      "scenarioSha256": "d29ac4d03fe4e0190d70f42b4d4d21aa89b09479596df3a91b16b7d47446c169",
+      "endpoint": {"frame":1234,"framebufferSha256":"1056d533fcc2fdde05342f311d020d63dffd93d0a32aad3037a99e1de4ea1b91","healBellPp":[4,5,5,5],"allPartyChecksumsValid":true}
     },
     "opponentFront": {
       "scenario": "tools/battle-lab/mechanic-heal-bell-opponent-chimecho-player-onix.json",
-      "scenarioSha256": "2dcfd3c0a232fa1c4d63cb959b5cad8423a056b595a531be0c9d4fce004dba7f",
-      "endpoint": {"frame":1234,"framebufferSha256":"1ffc9a947b2f44c02c818a71c9cdd1ee323da06e56ac4dd56b9e812695729305","healBellPp":[5,5,5,4],"allPartyChecksumsValid":true}
+      "scenarioSha256": "336c57e980430a562a17bfa2cf2e9b7017e3482fd6ff33f48b5ab073d183c250",
+      "endpoint": {"frame":1234,"framebufferSha256":"ea78b2b4292cce71ce667e65f44c5632c775f7852587a9dd7a3b9eb5b9733d06","healBellPp":[5,5,5,4],"allPartyChecksumsValid":true}
     }
   },
   "boundedRemainder": "No reducer, typed seam, compositor, dense oracle capture, latch measurement, framebuffer comparison, or coverage promotion is claimed. The two endpoint-only Scene-ON lab runs prove legal bilateral staging and a consumed Heal Bell PP slot, not exact presentation."
