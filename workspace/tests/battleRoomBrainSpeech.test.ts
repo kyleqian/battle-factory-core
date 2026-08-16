@@ -14,6 +14,7 @@ import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import {
   advanceBattleRoom,
+  battleRoomAcceptedState,
   battleRoomJustFinishedBrainPersonalitySpeech,
   battleRoomMsgboxClosingPhase,
   battleRoomQuote,
@@ -342,6 +343,47 @@ describe("gold Noland speech (walk-up build step B3)", () => {
     for (let i = 0; i < BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED; i += 1) state = advanceBattleRoom(state);
     expect(state.phase).toBe("brainSpeechSettled");
     expect(msgboxVisual(state)).toEqual({ visible: false, chars: 0 });
+  });
+
+  it("battleRoomAcceptedState (core.ts's real accept seam): an internal \\p page turn skips brainSpeechClosing entirely - lands directly on the next page at elapsed 0, same tick as the accept, no empty-box delay - while the LAST personality page still closes for real into the close box, and the repeat variant (single box, already the close box) never takes the direct-continuation shortcut", () => {
+    let state = settledFirstEncounterState("gold");
+    for (let box = 0; box < GOLD_PERSONALITY_BOX_COUNT - 1; box += 1) {
+      const held = advanceThroughFullyPrinted(state);
+      const accepted = battleRoomAcceptedState(held);
+      // Direct continuation: still "brainSpeech" (never "brainSpeechClosing"),
+      // next box, elapsed reset to 0 - the accept tick itself already shows
+      // the next page's window cleared (msgboxVisual chars 0).
+      expect(accepted.phase).toBe("brainSpeech");
+      expect(accepted.speechStep).toBe(box + 1);
+      expect(accepted.elapsed).toBe(0);
+      expect(msgboxVisual(accepted)).toEqual({ visible: true, chars: 0 });
+      expect(battleRoomQuote(accepted)).toEqual(GOLD_FIRST_ENCOUNTER_SPEECH_BOXES[box + 1]);
+      state = accepted;
+    }
+    // Now on the last personality page (index GOLD_PERSONALITY_BOX_COUNT - 1)
+    // - accepting it is a genuine box close (a real new message() call for
+    // the close box), unaffected by the direct-continuation shortcut.
+    expect(state.speechStep).toBe(GOLD_PERSONALITY_BOX_COUNT - 1);
+    const heldLast = advanceThroughFullyPrinted(state);
+    const acceptedLast = battleRoomAcceptedState(heldLast);
+    expect(acceptedLast.phase).toBe("brainSpeechClosing");
+    expect(acceptedLast.elapsed).toBe(0);
+
+    // Repeat variant: speechStep 0 IS the close box itself
+    // (brainSpeechFirstEncounter false) - must not be mistaken for an
+    // internal personality-page continuation even though
+    // GOLD_PERSONALITY_BOX_COUNT - 1 (3) is still > 0.
+    let repeatState: BattleRoomState = createBrainWalkupBattleRoomState(undefined, true, "gold");
+    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) repeatState = advanceBattleRoom(repeatState);
+    repeatState = battleRoomAcceptedState(repeatState);
+    for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) repeatState = advanceBattleRoom(repeatState);
+    for (let i = 0; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) repeatState = advanceBattleRoom(repeatState);
+    for (let i = 0; i <= SPEECH_APPEAR_ELAPSED; i += 1) repeatState = advanceBattleRoom(repeatState);
+    expect(repeatState.phase).toBe("brainSpeech");
+    expect(repeatState.speechStep).toBe(0);
+    const repeatHeld = advanceThroughFullyPrinted(repeatState);
+    const repeatAccepted = battleRoomAcceptedState(repeatHeld);
+    expect(repeatAccepted.phase).toBe("brainSpeechClosing");
   });
 
   it("the repeat variant walks through exactly 1 box (no personality speech, no heard-flag transition) straight to brainSpeechSettled", () => {

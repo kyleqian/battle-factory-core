@@ -366,6 +366,40 @@ export function battleRoomMsgboxClosingPhase(state: BattleRoomState): BattleRoom
 }
 
 /**
+ * The state `battleRoomQuoteInputReady`'s A-press gate transitions to -
+ * core.ts's single accept seam for every `battleRoom` branch. Ordinarily a
+ * box CLOSE (`battleRoomMsgboxClosingPhase` above, unchanged - entrance-03's
+ * `brainMsgboxClosing` span is RAM-calibrated against `MSGBOX_CLOSE_TICKS`
+ * already, see `BRAIN_MOVEMENT_CLOCK_OFFSET`'s own doc, so this seam must
+ * not perturb it), but a brain personality-speech page that still has more
+ * gated pages queued (`\p`, not the terminating `$` that hands off to the
+ * close/cry box) never actually closes its window at all: `text.c`'s
+ * `RENDER_STATE_CLEAR` clears and reprints the SAME already-open window one
+ * tick later (docs/walkup-call-scene-ground-truth.md's own already-landed
+ * `\p` mechanism for the call-scene's boxes 3/4/5, PROGRESS 1292/1293) - so
+ * this case skips the close phase entirely and lands directly on the next
+ * page at elapsed 0, the same "elapsed 0 renders the same tick" shape every
+ * other phase entry already uses. Oracle-confirmed this session (fresh
+ * `bin/oracle lab` rerun of `factory-brain-gold-speech-pages-off.json`,
+ * cross-checked against that compare trace's own calibrated accept ticks):
+ * the accept frame itself already shows the window CLEARED (0 chars, no
+ * held old text), with the next page's first glyph exactly one tick later -
+ * no separate close-wipe span, no extra delay constant needed beyond this
+ * direct transition. The gated speech's LAST page (handing off to the
+ * close/cry box, a genuine new `message()` call) is unaffected - still a
+ * real close via `battleRoomMsgboxClosingPhase` below.
+ */
+export function battleRoomAcceptedState(state: BattleRoomState): BattleRoomState {
+  if (state.phase === "brainSpeechIdle" && state.brainSpeechFirstEncounter === true) {
+    const nextStep = (state.speechStep ?? 0) + 1;
+    if (nextStep < brainSpeechPersonalityBoxCount(state)) {
+      return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: nextStep };
+    }
+  }
+  return { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
+}
+
+/**
  * Per-elapsed-tick table (RAM-probed, RAM ticks 519..622 -> elapsed 0..103 -
  * see module doc points 2/3), one row per tick: [camPanY, decoyFrame,
  * decoyHFlip]. `camPanY` is how many pixels the camera (and every
@@ -1035,14 +1069,38 @@ function brainSpeechPrintTicks(box: readonly [string, string]): number {
 export const SPEECH_APPEAR_ELAPSED = 5;
 
 /**
- * Elapsed tick "brainSpeechSettled" (the cry box just closed) hands off to
- * the battle-start intro - sourced directly from the already-committed
- * dense map's own pinned frames (docs/noland-silver-walkup-presentation-map.
- * md §3: "box closes; empty arena pause" 3201-3228 (28 frames), then
- * "pre-transition flash onset" at 3229) rather than re-derived this step,
- * same reuse discipline as BRAIN_MOVEMENT_SETTLE_ELAPSED's own doc above.
+ * Elapsed tick "brainSpeechSettled" (the cry/close box just closed) hands
+ * off to the battle-start intro - sourced directly from the already-
+ * committed dense map's own pinned frames (docs/noland-silver-walkup-
+ * presentation-map.md §3: "box closes; empty arena pause" 3201-3228 (28
+ * frames), then "pre-transition flash onset" at 3229) rather than re-derived
+ * this step, same reuse discipline as BRAIN_MOVEMENT_SETTLE_ELAPSED's own
+ * doc above. Silver-specific value - see `brainSpeechSceneHandoffElapsed`
+ * for gold's own (shorter) pause.
  */
 export const BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED = 28;
+
+/**
+ * Gold's own version of `BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED` above - NOT the
+ * same duration (a route-derived input, not a hardcoded gold branch of the
+ * mechanism: both tiers share the identical "free-run brainSpeechSettled
+ * until this many ticks, then hand off" rule, just measured against each
+ * tier's own dense ground truth). docs/noland-brain-intro-gold-ground-
+ * truth.md §7' ("factory-brain-gold-speech-close-off.json", stride-1
+ * confirmed for every frame in that section): "2531–2556 | 26f hold
+ * (`31aec4d68fe629cb`) | Dialogue box dismissed, empty-arena pause" - 26
+ * frames, not silver's 28 (the doc's own §3′ table independently corroborates
+ * this: "Dialogue-dismissed pause | 3201–3228 (28f) silver | 2531–~2557
+ * (≥27f) gold | Same (±1f)").
+ */
+export const BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED_GOLD = 26;
+
+/** Tier-general accessor for the two constants above - see their own docs. */
+export function brainSpeechSceneHandoffElapsed(state: BattleRoomState): number {
+  return state.brainSpeechTier === "gold"
+    ? BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED_GOLD
+    : BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED;
+}
 
 /**
  * True while the currently-shown speech box should draw the "waiting for

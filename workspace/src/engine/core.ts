@@ -101,11 +101,11 @@ import {
 } from "./prebattleRoomRender.ts";
 import {
   advanceBattleRoom,
+  battleRoomAcceptedState,
   battleRoomJustFinishedBrainPersonalitySpeech,
-  battleRoomMsgboxClosingPhase,
   battleRoomQuoteInputReady,
   battleRoomStateForOpponent,
-  BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED,
+  brainSpeechSceneHandoffElapsed,
   entryStep,
   INITIAL_BATTLE_ROOM_STATE,
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
@@ -1072,11 +1072,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       }
     } else if (battleRoom) {
       if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
-        battleRoom = {
-          ...battleRoom,
-          phase: battleRoomMsgboxClosingPhase(battleRoom),
-          elapsed: 0,
-        };
+        battleRoom = battleRoomAcceptedState(battleRoom);
       } else {
         const prevBattleRoom = battleRoom;
         battleRoom = advanceBattleRoom(battleRoom);
@@ -1165,7 +1161,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         if (
           battleRoom !== null &&
           battleRoom.phase === "brainSpeechSettled" &&
-          battleRoom.elapsed === BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED
+          battleRoom.elapsed === brainSpeechSceneHandoffElapsed(battleRoom)
         ) {
           const generatedPending =
             factoryRoundBattleOrchestrator?.round.presentation?.command;
