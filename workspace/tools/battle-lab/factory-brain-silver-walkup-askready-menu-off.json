@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "mode": "factoryBrain",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 2,
+  "walkup": true,
+  "playerSetIds": [
+    267,
+    268,
+    269
+  ],
+  "rentalSwapCount": 0,
+  "seed": 305419896,
+  "trace": {
+    "segments": [
+      {
+        "frames": 120,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 260,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 120,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 8,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 200,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 10,
+        "buttons": []
+      }
+    ],
+    "captureFrames": [
+      0,
+      30,
+      60,
+      90,
+      119,
+      120,
+      121,
+      122,
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132,
+      133,
+      134,
+      135
+    ]
+  }
+}
