@@ -55,4 +55,3 @@ describe("MOVE_SOFT_BOILED source-age reducer and typed Scene-ON seam", () => {
       .some((sprite) => sprite.kind === "star")).toBe(true);
   });
 });
-
