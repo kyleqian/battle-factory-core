@@ -87,7 +87,7 @@ describe("MOVE_ROLLOUT authoritative-source staging checkpoint", () => {
       .toMatchObject(fixture.componentTrack);
     const rolloutTrack = coverage.componentTracks.find((track: { id: string }) => track.id === fixture.componentTrack.id);
     expect(rolloutTrack.goal).toMatch(/non-exclusive/iu);
-    expect(rolloutTrack.goal).toContain("No move coverage");
+    expect(rolloutTrack.goal).toContain("no exact/partial/staged move entry");
     expect(rolloutTrack).not.toHaveProperty("fulfilled");
     expect(coverageFor("MOVE_ROLLOUT")).toBeUndefined();
 

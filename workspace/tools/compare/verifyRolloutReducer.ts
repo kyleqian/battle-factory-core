@@ -102,6 +102,32 @@ function assertRow(
   if (!same(actualParticles, expectedParticles)) {
     throw new Error(`${prefix}: particle topology/axes drift`);
   }
+  const actualImpact = row.sprites.find(
+    (sprite: any) => sprite.template?.symbol === "gBasicHitSplatSpriteTemplate",
+  );
+  const expectedImpact = reduced.impact;
+  if (!same(
+    actualImpact === undefined ? null : {
+      slot: actualImpact.slot,
+      x: actualImpact.x,
+      y: actualImpact.y,
+      x2: actualImpact.x2,
+      y2: actualImpact.y2,
+      subpriority: actualImpact.subpriority,
+      data: actualImpact.data,
+      matrix: actualImpact.matrix,
+    },
+    expectedImpact === null ? null : {
+      slot: expectedImpact.slot,
+      x: expectedImpact.x,
+      y: expectedImpact.y,
+      x2: expectedImpact.x2,
+      y2: expectedImpact.y2,
+      subpriority: expectedImpact.subpriority,
+      data: expectedImpact.data,
+      matrix: expectedImpact.matrix,
+    },
+  )) throw new Error(`${prefix}: IMPACT topology/affine drift`);
 
   const geometry = geometryFor(orientation, body);
   const attacker = row.sprites.find((sprite: any) => sprite.slot === geometry.attackerSpriteSlot);

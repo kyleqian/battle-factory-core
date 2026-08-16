@@ -58,7 +58,8 @@ describe("MOVE_ROLLOUT complete natural counter lifecycle evidence", () => {
     expect(fixture).toMatchObject({ move: "MOVE_ROLLOUT", status: "unsupported", coverageCredit: false });
     expect(fixture.repeatability).toEqual({ runsPerOrientation: 2, comparison: "byte-identical dense JSON and every raw RGB frame", allMatched: true });
     expect(sourceFixture.counterBranches.map((row) => row.defenseCurlPower)).toEqual(fixture.expected.defenseCurlPowersFromPinnedSource);
-    expect(fixture.boundedRemainder).toContain("no production compositor");
+    expect(fixture.boundedRemainder).toContain("1,581/1,586");
+    expect(fixture.boundedRemainder).toContain("1,000 pixels total");
     expect(fixture.boundedRemainder).toContain("MOVE_ICE_BALL");
   });
 });

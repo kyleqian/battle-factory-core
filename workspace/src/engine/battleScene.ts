@@ -889,6 +889,7 @@ import {
 } from "../animation/dreamEater.ts";
 import { painSplitDisplayedMatrixTransform } from "../animation/painSplit.ts";
 import { fireBlastSpritesInPainterOrderAtAge } from "../animation/fireBlast.ts";
+import { rolloutParticlesInPainterOrderAtAge } from "../animation/rollout.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -896,6 +897,7 @@ import {
   sceneOnDragonBreathView,
   sceneOnEmberView,
   sceneOnFireBlastView,
+  sceneOnRolloutView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
   sceneOnFlameWheelView,
@@ -1125,6 +1127,7 @@ import {
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
+  type SceneOnRolloutConfig,
   type SceneOnHealBellConfig,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
@@ -38991,6 +38994,178 @@ export function renderSceneOnMovePresentation(
       LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
     drawText(fb, font, charmap, "FIRE BLAST!", LINE2_ORIGIN.x, LINE2_ORIGIN.y,
       MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+    return;
+  }
+
+  if (state.config.move === "ROLLOUT") {
+    const rolloutState =
+      state as SceneOnMovePresentationState<SceneOnRolloutConfig>;
+    const live = sceneOnRolloutView(rolloutState);
+    const playerToOpponent = live.attacker.species === "VOLTORB"
+      && live.attacker.geometry.side === "player"
+      && live.target.species === "ONIX"
+      && live.target.geometry.side === "opponent";
+    const opponentToPlayer = live.attacker.species === "VOLTORB"
+      && live.attacker.geometry.side === "opponent"
+      && live.target.species === "ONIX"
+      && live.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ROLLOUT pair ${live.attacker.species}->${live.target.species}`,
+      );
+    }
+
+    // The retained bilateral corpus separates the display pipelines. Live
+    // attacker axes reach hardware OAM two rows after their task callback.
+    // A newly allocated debris OBJ first reaches hardware after two rows, but
+    // that first scanout contains its next callback state, hence age - 1 for
+    // all visible debris. Target monbg and the script-created IMPACT reach
+    // scanout after one row.
+    const displayedOam = sceneOnRolloutView({
+      ...rolloutState,
+      age: rolloutState.age - 2,
+    });
+    const displayedTarget = sceneOnRolloutView({
+      ...rolloutState,
+      age: rolloutState.age - 1,
+    });
+    const allocatedParticles = rolloutParticlesInPainterOrderAtAge(
+      rolloutState.age - 2,
+      rolloutState.config.counter,
+      rolloutState.config.animationProfile,
+    );
+    const callbackParticles = rolloutParticlesInPainterOrderAtAge(
+      rolloutState.age - 1,
+      rolloutState.config.counter,
+      rolloutState.config.animationProfile,
+    );
+    // Allocation enters software OAM after one row and hardware after two;
+    // AnimateSprites has advanced the callback once before that first OAM
+    // build. Preserve age-2 membership/order while painting age-1 axes.
+    const allocatedSlots = new Set(allocatedParticles.map((particle) => particle.slot));
+    const particles = callbackParticles.filter((particle) => allocatedSlots.has(particle.slot));
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    const voltorb = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).VOLTORB!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).VOLTORB!;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      voltorb.tileset,
+      voltorb.palette,
+      live.attacker.geometry.spriteCorner.x + displayedOam.attackerOffset.x,
+      live.attacker.geometry.spriteCorner.y + displayedOam.attackerOffset.y,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      live.target.geometry.spriteCorner.x + displayedTarget.targetOffset.x,
+      live.target.geometry.spriteCorner.y + displayedTarget.targetOffset.y,
+    );
+    const drawParticles = (): void => {
+      for (const particle of particles) {
+        if (particle.template === "gRolloutMudSpriteTemplate") {
+          drawSpriteSheet(
+            fb,
+            battleAnimMudSand.tileset,
+            battleAnimMudSand.palette,
+            particle.x + particle.x2 - 4,
+            particle.y + particle.y2 - 4,
+          );
+        } else {
+          drawSpriteSheet(
+            fb,
+            subTileset(
+              battleAnimRocks.tileset,
+              particle.tileOffset / battleAnimRocks.tileset.columns,
+              4,
+            ),
+            battleAnimRocks.palette,
+            particle.x + particle.x2 - 16,
+            particle.y + particle.y2 - 16,
+          );
+        }
+      }
+    };
+    const impact = displayedTarget.impact;
+    // monbg supplies the target as target-2 beneath all priority-2 OBJ. Keep
+    // that pre-OBJ stack separate because semi-transparent OBJ pixels always
+    // blend with target-2, never a previously painted OBJ pixel.
+    drawTarget();
+    const target2Backdrop = fb.slice();
+    const drawImpact = (): void => {
+      if (impact === null) return;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        impact.x,
+        impact.y,
+        impact.matrix[0],
+        impact.matrix[1],
+        impact.matrix[2],
+        impact.matrix[3],
+        12,
+        8,
+        false,
+      );
+    };
+    // With the monbg target removed from OBJ order, source subpriorities are
+    // player attacker 30 / debris 35 / IMPACT 26, and opponent attacker 40 /
+    // IMPACT 36 / debris 35. Paint back-to-front so the lower rank wins.
+    if (playerToOpponent) {
+      drawParticles();
+      drawAttacker();
+      drawImpact();
+    } else {
+      drawAttacker();
+      drawImpact();
+      drawParticles();
+    }
+
+    const profile = rolloutState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: playerToOpponent ? "ONIX" : "VOLTORB",
+        level: 50,
+        gender: playerToOpponent ? "male" : "none",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      },
+    ));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(
+      playerHealthboxAssets,
+      {
+        name: playerToOpponent ? "VOLTORB" : "ONIX",
+        level: 50,
+        gender: playerToOpponent ? "none" : "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      },
+    ));
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "VOLTORB used" : "Foe VOLTORB used",
+      "ROLLOUT!",
+      99,
+    );
     return;
   }
 

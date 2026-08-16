@@ -1,4 +1,9 @@
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import {
+  createSpriteOrderState,
+  sortSpriteOrder,
+  spriteOwnersBackToFront,
+} from "./spriteOrder.ts";
 
 export type RolloutCounter = 1 | 2 | 3 | 4 | 5;
 
@@ -49,6 +54,20 @@ export interface RolloutParticle {
   readonly lifecycle: "active";
 }
 
+export interface RolloutImpact {
+  readonly slot: 3;
+  readonly template: "gBasicHitSplatSpriteTemplate";
+  readonly x: number;
+  readonly y: number;
+  readonly x2: 0;
+  readonly y2: 0;
+  readonly subpriority: 26 | 36;
+  readonly data: readonly [0, 0, 0, 0, 0, 0, 15357, 2058];
+  readonly matrix: readonly [372, 0, 0, 372];
+  readonly age: number;
+  readonly lifecycle: "active";
+}
+
 export interface RolloutTask {
   readonly callback:
     | "AnimTask_Rollout_Step"
@@ -88,6 +107,7 @@ export interface RolloutState {
   readonly defenseCurlPower: number;
   readonly shakeAmplitude: number;
   readonly particles: readonly RolloutParticle[];
+  readonly impact: RolloutImpact | null;
   readonly rolloutTask: RolloutTask | null;
   readonly shakeTask: RolloutTask | null;
   readonly monbgTask: RolloutTask | null;
@@ -115,6 +135,14 @@ const ANIM_TAG_MUD_SAND = 10074;
 const ANIM_TAG_IMPACT = 10135;
 const PARTICLE_SLOT_POOL = Array.from({ length: 57 }, (_, index) => index + 3)
   .filter((slot) => slot !== 6 && slot !== 8);
+/** Live `sSpriteOrder` at the retained Voltorb/Onix Rollout seam. Both
+ * orientations and all five natural counter bodies share this source seed. */
+const ROLLOUT_SPRITE_ORDER_SEED = [
+  62, 60, 0, 63, 1, 61, 6, 8, 2, 4, 3, 21, 20, 5, 19, 18, 17, 16,
+  15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22,
+  48, 49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+  34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+] as const;
 const SCHEDULES: Readonly<Record<RolloutCounter, readonly number[]>> = {
   1: [55, 58, 61, 64, 67, 70, 73, 76, 79, 82],
   2: [55, 58, 61, 64, 67, 70, 73, 76, 79, 82],
@@ -136,6 +164,31 @@ const TASK_LAST: Readonly<Record<RolloutCounter, number>> = {
   4: 86,
   5: 78,
 };
+
+function impactAtAge(
+  counter: RolloutCounter,
+  age: number,
+  geometry: RolloutGeometry,
+): RolloutImpact | null {
+  const start = TASK_LAST[counter] + 2;
+  if (age < start || age >= start + 10) return null;
+  const center = geometry.side === "player"
+    ? { x: 176, y: 42 }
+    : { x: 72, y: 88 };
+  return {
+    slot: 3,
+    template: "gBasicHitSplatSpriteTemplate",
+    x: center.x,
+    y: center.y,
+    x2: 0,
+    y2: 0,
+    subpriority: geometry.side === "player" ? 26 : 36,
+    data: [0, 0, 0, 0, 0, 0, 15357, 2058],
+    matrix: [372, 0, 0, 372],
+    age: age - start,
+    lifecycle: "active",
+  };
+}
 
 export const ROLLOUT_DYNAMIC_POWERS: Readonly<Record<RolloutCounter, number>> = {
   1: 30,
@@ -304,6 +357,51 @@ function particleAtAge(
     });
   }
   return rows.sort((left, right) => left.slot - right.slot);
+}
+
+/** Back-to-front output of the source's persistent stable `SortSprites`
+ * pass. Owner identity is the source creation index rather than the reused
+ * allocator slot, so a destroyed particle cannot donate its stable order to
+ * a later particle that happens to reuse the same slot. */
+export function rolloutParticlesInPainterOrderAtAge(
+  age: number,
+  counter: RolloutCounter,
+  geometry: RolloutGeometry,
+): readonly RolloutParticle[] {
+  let order = createSpriteOrderState(
+    PARTICLE_SLOT_POOL,
+    ROLLOUT_SPRITE_ORDER_SEED.filter((slot) => PARTICLE_SLOT_POOL.includes(slot)),
+  );
+  let current: readonly RolloutParticle[] = [];
+  for (let sourceAge = 0; sourceAge <= age; sourceAge += 1) {
+    current = particleAtAge(counter, sourceAge, geometry);
+    const creationBySlot = new Map(
+      [...particleSlotsAtAge(counter, sourceAge)].map(([slot, creationIndex]) => [
+        slot,
+        creationIndex,
+      ] as const),
+    );
+    order = sortSpriteOrder({
+      ...order,
+      occupants: current.map((particle) => ({
+        owner: creationBySlot.get(particle.slot)!,
+        slot: particle.slot,
+        priority: 2,
+        subpriority: particle.subpriority,
+        oamY: particle.y + particle.y2 - (particle.template === "gRolloutMudSpriteTemplate" ? 4 : 16),
+      })),
+    });
+  }
+  const byOwner = new Map(
+    current.map((particle) => [
+      particleSlotsAtAge(counter, age).get(particle.slot)!,
+      particle,
+    ] as const),
+  );
+  return spriteOwnersBackToFront(order).flatMap((owner) => {
+    const particle = byOwner.get(owner);
+    return particle === undefined ? [] : [particle];
+  });
 }
 
 function taskInitialData(counter: RolloutCounter, geometry: RolloutGeometry): number[] {
@@ -582,6 +680,7 @@ export function rolloutAtAge(
     defenseCurlPower: ROLLOUT_DEFENSE_CURL_POWERS[counter],
     shakeAmplitude: ROLLOUT_SHAKE_AMPLITUDES[counter],
     particles: age >= 0 && age < cleanupAge ? particleAtAge(counter, age, geometry) : [],
+    impact: impactAtAge(counter, age, geometry),
     rolloutTask: rollout.task,
     shakeTask: shake.task,
     monbgTask: monbgActive ? { callback: "Task_UpdateMonBg", slot: 1, data: monbgData } : null,
