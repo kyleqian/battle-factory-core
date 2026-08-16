@@ -558,6 +558,10 @@ import {
   type HowlState,
 } from "./howl.ts";
 import {
+  yawnAtAge,
+  type YawnState,
+} from "./yawn.ts";
+import {
   perishSongAtAge,
   type PerishSongState,
 } from "./perishSong.ts";
@@ -2382,6 +2386,14 @@ export interface SceneOnHowlConfig {
   readonly fieldProfile: Readonly<SceneOnHowlFieldProfile>;
 }
 
+/** Narrow Scene-ON seam for Yawn's bilateral Togetic/Gengar body. */
+export interface SceneOnYawnConfig {
+  readonly move: "YAWN";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnRoarConfig {
   readonly move: "ROAR";
   readonly attacker: SceneOnPresentationBattler;
@@ -3074,6 +3086,7 @@ export type SceneOnMoveConfig =
   | SceneOnRestConfig
   | SceneOnSleepTalkConfig
   | SceneOnHowlConfig
+  | SceneOnYawnConfig
   | SceneOnRoarConfig
   | SceneOnSweetKissConfig
   | SceneOnAttractConfig
@@ -3250,6 +3263,8 @@ export type SceneOnSleepTalkPresentationState =
   SceneOnMovePresentationState<SceneOnSleepTalkConfig>;
 export type SceneOnHowlPresentationState =
   SceneOnMovePresentationState<SceneOnHowlConfig>;
+export type SceneOnYawnPresentationState =
+  SceneOnMovePresentationState<SceneOnYawnConfig>;
 export type SceneOnRoarPresentationState =
   SceneOnMovePresentationState<SceneOnRoarConfig>;
 export type SceneOnSweetKissPresentationState =
@@ -3714,6 +3729,12 @@ export interface SceneOnSleepTalkView extends SleepTalkState {
 }
 
 export interface SceneOnHowlView extends HowlState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnYawnView extends YawnState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -7044,6 +7065,26 @@ export function sceneOnHowlView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_YAWN's first displayed source-script frame. */
+export function sceneOnYawnView(
+  state: SceneOnYawnPresentationState,
+): SceneOnYawnView {
+  if (state.config.move !== "YAWN") {
+    throw new Error(`expected YAWN presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...yawnAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.animationCenter,
     ),
   };
 }

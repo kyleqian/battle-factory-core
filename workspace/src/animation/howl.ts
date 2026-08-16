@@ -58,9 +58,9 @@ function scriptOffsetAtAge(age: number): HowlState["scriptOffset"] {
   return 33;
 }
 
-function attackerTransformAtAge(
+export function deepInhaleTransformAtAge(
   age: number,
-  side: HowlSide,
+  pictureHeight: number,
 ): HowlAttackerTransform {
   if (age < HOWL_INHALE_FIRST_AGE || age > HOWL_INHALE_LAST_AGE) {
     return {
@@ -93,15 +93,21 @@ function attackerTransformAtAge(
   if (step >= 22 && step <= 43) {
     x2 = Math.floor((step - 20) / 2) % 2 === 1 ? 1 : -1;
   }
-  // Loudred's source picture y-offset is 9 back / 3 front. This is the exact
-  // `SetBattlerSpriteYOffsetFromYScale` integer program used by DeepInhale.
-  const pictureHeight = 64 - (side === "player" ? 9 : 3) * 2;
+  // This is the exact `SetBattlerSpriteYOffsetFromYScale` integer program used
+  // by DeepInhale. Callers supply the source battler's picture height.
   const inverseHeight = Math.min(
     128,
     Math.trunc((pictureHeight << 8) / d),
   );
   const y2 = Math.trunc((pictureHeight - inverseHeight) / 2);
   return { active: true, x2, y2, matrix: { a, b: 0, c: 0, d } };
+}
+
+function attackerTransformAtAge(
+  age: number,
+  side: HowlSide,
+): HowlAttackerTransform {
+  return deepInhaleTransformAtAge(age, 64 - (side === "player" ? 9 : 3) * 2);
 }
 
 function noiseWaveAtAge(
