@@ -54,10 +54,72 @@ const entries: ReadonlyArray<Readonly<{
 
 const same = (left: unknown, right: unknown): boolean =>
   JSON.stringify(left) === JSON.stringify(right);
+
+function sourceComponentExact(
+  row: Record<string, any>,
+  component: ReturnType<typeof yawnAtAge>,
+  entry: (typeof entries)[number],
+): boolean {
+  const sourceSprites = row.sprites as Array<Record<string, any>>;
+  const sourceMatrix = (sprite: Record<string, any>): ReturnType<typeof yawnAtAge>["attackerTransform"]["matrix"] => ({
+    a: sprite.matrix[0],
+    b: sprite.matrix[1],
+    c: sprite.matrix[2],
+    d: sprite.matrix[3],
+  });
+  const matchesTransform = (
+    sprite: Record<string, any> | undefined,
+    transform: ReturnType<typeof yawnAtAge>["attackerTransform"],
+    center: Readonly<{ x: number; y: number }>,
+  ): boolean => sprite?.template?.symbol === "gMultiuseSpriteTemplate"
+    && sprite.x === center.x && sprite.y === center.y
+    && sprite.x2 === transform.x2 && sprite.y2 === transform.y2
+    && (!transform.active || same(sourceMatrix(sprite), transform.matrix));
+  const attackerSlot = entry.id === "player-back" ? 6 : 8;
+  const targetSlot = entry.id === "player-back" ? 8 : 6;
+  const attackerSprite = sourceSprites.find((sprite) => sprite.slot === attackerSlot);
+  const targetSprite = sourceSprites.find((sprite) => sprite.slot === targetSlot);
+  if (row.animScriptActive !== component.active
+    || row.scriptOwner !== "Move_YAWN"
+    || row.scriptOffset !== component.scriptOffset
+    || !matchesTransform(attackerSprite, component.attackerTransform,
+      entry.config.attacker.geometry.animationCenter)
+    || !matchesTransform(targetSprite, component.targetTransform,
+      entry.config.target.geometry.animationCenter)
+    || row.paletteTags.includes(10242) !== component.tagsLoaded
+    || row.tileTags.includes(10242) !== component.tagsLoaded) return false;
+
+  const sourceClouds = sourceSprites.filter(
+    (sprite) => sprite.template?.symbol === "gYawnCloudSpriteTemplate",
+  );
+  if (sourceClouds.length !== component.clouds.length
+    || !component.clouds.every((cloud) => {
+      const sprite = sourceClouds.find((candidate) => candidate.slot === cloud.slot);
+      return sprite !== undefined
+        && sprite.x === cloud.x && sprite.y === cloud.y
+        && sprite.x2 === cloud.x2 && sprite.y2 === cloud.y2
+        && Boolean(sprite.invisible) === cloud.invisible
+        && same(sourceMatrix(sprite), cloud.matrix);
+    })) return false;
+
+  const deepInhaleTasks = (row.tasks as Array<Record<string, any>>).filter(
+    (task) => task.func?.symbol === "AnimTask_DeepInhale_Step",
+  );
+  if (deepInhaleTasks.length !== Number(component.attackerTransform.active)
+    + Number(component.targetTransform.active)) return false;
+
+  if (component.sound !== null) {
+    const symbol = component.sound === "SE_M_YAWN" ? "se_m_yawn" : "se_m_spit_up";
+    const audioPlayers = Object.values(row.audio ?? {}) as Array<Record<string, any> | null>;
+    if (!audioPlayers.some((player) => player?.songHeaderIdentity?.symbol === symbol)) return false;
+  }
+  return true;
+}
+
 let total = 0;
 for (const entry of entries) {
   const evidence = JSON.parse(gunzipSync(readFileSync(entry.dense)).toString());
-  const rows = evidence.frames as Array<Record<string, number>>;
+  const rows = evidence.frames as Array<Record<string, any>>;
   const scratch = createScratchDir(`pokebench-yawn-${entry.id}-`);
   const unpack = spawnSync("tar", ["-xzf", entry.rgb, "-C", scratch]);
   if (unpack.status !== 0) throw new Error(`${entry.id}: RGB archive unpack failed`);
@@ -75,6 +137,7 @@ for (const entry of entries) {
       { ...seam, age: undefined, attacker: undefined, target: undefined },
       component,
     );
+    const sourceExact = sourceComponentExact(row, component, entry);
     const engine: EngineState = { ...createInitialState(), rngMode: "frontierBattle",
       sceneOnPresentation: { ...stage, age } };
     const app = render(engine);
@@ -89,15 +152,15 @@ for (const entry of entries) {
       minX = Math.min(minX, x); minY = Math.min(minY, y);
       maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
     }
-    if (!seamExact || residual !== 0) failures.push(
-      `${age}:${residual}:${minX},${minY}-${maxX},${maxY}:${seamExact}`,
+    if (!sourceExact || !seamExact || residual !== 0) failures.push(
+      `${age}:${residual}:${minX},${minY}-${maxX},${maxY}:${sourceExact}:${seamExact}`,
     );
   }
   if (failures.length) throw new Error(
     `${entry.id}: ${failures.length}/${rows.length} failures (${failures.slice(0, 24).join(",")})`,
   );
   total += rows.length;
-  console.log(`${entry.id}: ${rows.length}/${rows.length} reducer/component/seam/raw-RGB/framebuffer exact`);
+  console.log(`${entry.id}: ${rows.length}/${rows.length} reducer/source-component/typed-seam/raw-RGB/framebuffer exact`);
 }
 if (total !== 426) throw new Error(`incomplete bilateral proof ${total}/426`);
 console.log(`MOVE_YAWN: ${total}/${total} exact with zero residual pixels`);

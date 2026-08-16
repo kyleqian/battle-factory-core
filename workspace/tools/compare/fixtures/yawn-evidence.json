@@ -3,9 +3,9 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_YAWN",
   "moveId": 281,
-  "status": "unsupported-evidence-checkpoint",
-  "coverageCredit": false,
-  "coverageCounts": "Level 50: 190/276 exact, 0 partial, 0 staged, 86 unsupported",
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 191/276 exact, 0 partial, 0 staged, 85 unsupported",
   "carrier": {"setId":288,"label":"FRONTIER_MON_TOGETIC_2","species":176},
   "source": {
     "audit": "tools/compare/yawnSourceAudit.ts", "auditSha256": "13aaa0b2a9bcac00e113f915891d7fcedfbf5289c2609dd6e73dc4c0c6bf13fe",
@@ -15,7 +15,7 @@
     "deepInhaleStepSha256": "dc03762b711b89a83c694e4af8760e964cecce924292866d1be7c7c00f58c91a",
     "cloudStepSha256": "a67e682de100dd97826123ceb14d8653143f09c92915bbd5ea8215977ba1292e"
   },
-  "evidenceScope": {"productionAnimationChanged":false,"reducerAdded":false,"typedSeamAdded":false,"compositorAdded":false,"framebufferLookupAdded":false,"coveragePromotion":false,"boundaryOrBarrierChanged":false,"gameplayStateOwned":false,"fullDenseRowsRetained":true,"twiceFreshByteIdentical":true},
+  "evidenceScope": {"productionAnimationChanged":true,"reducerAdded":true,"typedSeamAdded":true,"compositorAdded":true,"framebufferLookupAdded":false,"coveragePromotion":true,"boundaryOrBarrierChanged":false,"gameplayStateOwned":false,"fullDenseRowsRetained":true,"twiceFreshByteIdentical":true},
   "orientations": {
     "player-back": {
       "scenario":"tools/battle-lab/mechanic-yawn-player-togetic-opponent-gengar.json","scenarioSha256":"b9f0a71471e6b1ac166db3b427248685470ff39bb0c765a0b2e4a045165cbe9d",
@@ -32,6 +32,6 @@
       "changeMap":"tools/compare/evidence/yawn-changemap-opponent.json","changeMapSha256":"1518f0c9cf483c967d209a42129de70c3c0024c50cdfa95b01e1725b361bb335"
     }
   },
-  "acceptance": {"sourceRows":426,"rawRgbRows":426,"productionFramebufferRows":0,"freshRuns":2,"deepInhaleStarts":[4,147],"cloudCreates":[69,75,81],"cloudDestroys":[134,140,146],"audioStarts":[4,69,147],"firstInactiveCleanupAge":212},
-  "next": "Implement no behavior from this checkpoint. A later independent round must add a pure reducer, narrow seam, compositor, and 426/426 production framebuffer acceptance before Yawn alone can promote."
+  "acceptance": {"sourceRows":426,"rawRgbRows":426,"productionFramebufferRows":426,"freshRuns":2,"deepInhaleStarts":[4,147],"cloudCreates":[69,75,81],"cloudDestroys":[134,140,146],"audioStarts":[4,69,147],"firstInactiveCleanupAge":212},
+  "next": "Yawn is exact at 426/426 reducer/component/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels through cleanup. MOVE_HOWL remains an independent exact DeepInhale regression control; no sibling credit is inferred."
 }

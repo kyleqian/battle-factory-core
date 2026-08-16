@@ -5147,6 +5147,36 @@
     "tests/animation/painSplitFramebuffer.test.ts",
     "tests/animation/painSplitEvidenceCheckpoint.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_YAWN",
+   "status": "exact",
+   "covered": [
+    "complete legal Scene-ON Togetic/Gengar windows pass player-back frames 250-462 and opponent-front 254-466 through first inactive cleanup at 213/213 each and 426/426 total source/component/reducer/typed-seam/raw-RGB/shared production framebuffer rows with zero residual pixels twice-fresh",
+    "the pure source-relative reducer ports Move_YAWN's two DeepInhale phases, three pink-cloud affine callback lifecycles, source picture-offset y2, side-specific cloud endpoints, audio/tags/script offsets and cleanup; the compositor reuses generated PINK_CLOUD and legal Togetic/Gengar art and follows BuildOamBuffer y ordering",
+    "MOVE_HOWL remains an independent exact 102/102 DeepInhale regression control; shared component credit does not waive Yawn's own acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-yawn-player-togetic-opponent-gengar.json",
+    "tools/battle-lab/mechanic-yawn-opponent-togetic-player-gengar.json",
+    "tools/compare/fixtures/yawn-evidence.json",
+    "tools/compare/yawnSourceAudit.ts",
+    "tools/compare/yawnProbe.py",
+    "tools/compare/yawnEvidence.ts",
+    "tools/compare/yawnFramebuffer.ts",
+    "tools/compare/extractYawnAssets.ts",
+    "tools/compare/evidence/yawn-player-dense-state.json.gz",
+    "tools/compare/evidence/yawn-opponent-dense-state.json.gz",
+    "tools/compare/evidence/yawn-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/yawn-opponent-raw-rgb.tar.gz",
+    "src/animation/assets/yawn.json",
+    "src/animation/yawn.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/yawn.test.ts",
+    "tests/animation/yawnFramebuffer.test.ts",
+    "tests/animation/yawnEvidenceCheckpoint.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -6047,12 +6077,12 @@
     "sprite:gYawnCloudSpriteTemplate",
     "task:AnimTask_DeepInhale"
    ],
-   "representatives": [
+  "representatives": [
     "MOVE_YAWN",
     "MOVE_HOWL"
-   ],
-   "fulfilled": false,
-   "goal": "Evidence checkpoint only. MOVE_YAWN independently retains its complete legal Togetic/Gengar bilateral 213-row source windows twice fresh: both DeepInhale phases, three PINK_CLOUD affine lifecycles, Yawn/Spit Up/Yawn audio, resource tags, hardware transfers, RNG/state, raw RGB, and first inactive cleanup. It remains unsupported without a reducer, seam, compositor, or production framebuffer acceptance. Exact MOVE_HOWL is a shared DeepInhale control only and conveys no Yawn credit."
+  ],
+  "fulfilled": true,
+  "goal": "FULFILLED: MOVE_YAWN independently proves its complete legal Togetic/Gengar bilateral player-back 250..462 and opponent-front 254..466 windows at 426/426 source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels through first inactive cleanup, twice fresh. The source-relative pink-cloud/DeepInhale reducer and compositor follow picture offsets and BuildOamBuffer ordering; MOVE_HOWL remains an independent exact regression control and receives no Yawn credit."
   }
  ],
  "variantAudits": {

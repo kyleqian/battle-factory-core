@@ -38,9 +38,9 @@ describe("MOVE_YAWN source/staging and twice-fresh evidence checkpoint", () => {
   });
 
   it("pins all 426 twice-fresh state/RGB rows through first inactive cleanup", () => {
-    expect(fixture).toMatchObject({ schema: "yawn-bilateral-evidence/v1", status: "unsupported-evidence-checkpoint", coverageCredit: false,
-      evidenceScope: { productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferLookupAdded: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
-      acceptance: { sourceRows: 426, rawRgbRows: 426, productionFramebufferRows: 0, freshRuns: 2, deepInhaleStarts: [4,147], cloudCreates: [69,75,81], cloudDestroys: [134,140,146], audioStarts: [4,69,147], firstInactiveCleanupAge: 212 } });
+    expect(fixture).toMatchObject({ schema: "yawn-bilateral-evidence/v1", status: "exact", coverageCredit: true,
+      evidenceScope: { productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferLookupAdded: false, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
+      acceptance: { sourceRows: 426, rawRgbRows: 426, productionFramebufferRows: 426, freshRuns: 2, deepInhaleStarts: [4,147], cloudCreates: [69,75,81], cloudDestroys: [134,140,146], audioStarts: [4,69,147], firstInactiveCleanupAge: 212 } });
     for (const key of ["audit", "probe", "evidenceReplay"]) expect(sha(fixture.source[key])).toBe(fixture.source[`${key}Sha256`]);
     for (const side of ["player-back", "opponent-front"]) {
       const config = fixture.orientations[side]; expect(config.repeatProbeJsonSha256).toBe(config.probeJsonSha256);
@@ -59,8 +59,8 @@ describe("MOVE_YAWN source/staging and twice-fresh evidence checkpoint", () => {
     expect(summary["player-back"].audio.map((event: any) => [event.age,event.symbol])).toEqual([[4,"se_m_yawn"],[69,"se_m_spit_up"],[147,"se_m_yawn"]]);
   });
 
-  it("keeps Yawn unsupported at 190/276 exact while Howl remains an independent DeepInhale control", () => {
-    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")); expect(coverage.entries).toHaveLength(190); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_YAWN")).toBeUndefined(); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HOWL")).toMatchObject({ status: "exact" });
-    expect(coverage.componentTracks.find((track: any) => track.id === "pink-cloud-yawn-deep-inhale")).toMatchObject({ components: ["asset:ANIM_TAG_PINK_CLOUD", "sprite:gYawnCloudSpriteTemplate", "task:AnimTask_DeepInhale"], representatives: ["MOVE_YAWN", "MOVE_HOWL"], fulfilled: false });
+  it("promotes Yawn alone while Howl remains an independent DeepInhale control", () => {
+    const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")); expect(coverage.entries).toHaveLength(191); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_YAWN")).toMatchObject({ status: "exact" }); expect(coverage.entries.find((entry: any) => entry.move === "MOVE_HOWL")).toMatchObject({ status: "exact" });
+    expect(coverage.componentTracks.find((track: any) => track.id === "pink-cloud-yawn-deep-inhale")).toMatchObject({ components: ["asset:ANIM_TAG_PINK_CLOUD", "sprite:gYawnCloudSpriteTemplate", "task:AnimTask_DeepInhale"], representatives: ["MOVE_YAWN", "MOVE_HOWL"], fulfilled: true });
   });
 });
