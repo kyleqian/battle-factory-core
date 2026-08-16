@@ -174,10 +174,104 @@ sha256-for-sha256 across two independent fresh runs — zero diffs.
 No text mismatches found against the JSON's `askSwapBeforeHead`/`enterBattleRoom`
 strings.
 
+## Window 4 — RECORD answer NO, then the re-asked menu (post-checkpoint frames 0–885)
+
+Goal: from the open ask-ready menu, navigate down to RECORD, confirm, answer
+the record YES/NO prompt with NO (the RECORD-YES save path is staged-not-
+genuine — see boundary note below), and capture whatever follows in-window.
+
+Trace (full, from frame 0): `[120f idle, 2f DOWN, 60f idle, 2f A, 300f idle,
+2f A, 400f idle]` — wait on the settled menu, move cursor to RECORD, wait,
+confirm RECORD, wait out the record prompt's typewriter + hold, confirm NO
+(cursor already defaults to NO), wait out whatever follows.
+
+**RECORD's save flow is not genuine, per `../oracle/BATTLE_LAB.md`'s own
+boundary note:** the menu and the record-prompt text are the real scripts,
+but no battle was actually recorded on this staged route, so a RECORD-YES
+answer would save staged recording-buffer state, not a genuine battle-20
+recording. This window therefore only exercises the NO branch — the
+acceptance-grade one for a route that never took a real battle 20.
+
+Repro:
+```sh
+bin/oracle lab tools/battle-lab/factory-brain-silver-walkup-askready-menu-record-off.json -o /tmp/seg-askready-record
+```
+
+**Re-run twice fresh, byte-identical:** all 178 captured frames matched
+sha256-for-sha256 across two independent fresh runs — zero diffs.
+
+| Frames | Content | Text (verbatim) |
+| --- | --- | --- |
+| 0–119 | Menu held (checkpoint state): "The FACTORY HEAD is demanding you.\nAre you prepared to face him?", GO ON/RECORD/REST/RETIRE, cursor on GO ON — sha `86ec0c2e0ad0…`, identical to the checkpoint/Window 2 frame 0 | same |
+| 120–121 | DOWN registers; cursor moves GO ON → RECORD | same |
+| 122–181 | Held, cursor on RECORD — sha `b6fdb1e5a343…` | same |
+| 182–183 | A confirms RECORD; menu closes, revealing the still-open "FACTORY HEAD is demanding you" box underneath for one frame (sha `6267d3d8715b…`, matches this same box's fully-typed state elsewhere in this window — see 552–554 below) | — |
+| 184–253 | Typewriter: `Text_RecordLatestBattle` | "Would you like to record your latest\nbattle on your FRONTIER PASS?" YES/NO |
+| 254–483 | Held (230f), cursor on NO (default — `multichoicedefault … MULTI_YESNO, 1, FALSE`, index 1 = NO) — sha `c4a646b52a88…` | same, fully typed |
+| 484–485 | A confirms NO; `AskRecordBattle`'s NO branch falls through `AskReadyForOpponent` → (brain ready) → `AskReadyForHead`, which re-issues its own opening message | — |
+| 486–551 | Typewriter: `Text_PreparedToFaceHead` (re-asked) | "The FACTORY HEAD is demanding you.\nAre you prepared to face him?" |
+| 552–554 | Held briefly, message box only, multichoice not yet reopened — sha `6267d3d8715b…` | same, fully typed |
+| 555–885 | Multichoice reopens, cursor back on GO ON — sha `86ec0c2e0ad0d23781097e6091eb27159b37fc8af91a812dccec284cb6a6019a`, **byte-identical to frame 0 / the checkpoint itself** (full round-trip confirmed, PNG-verified at 700 and 885) | same |
+
+No text mismatches found against the reference source
+(`data/maps/BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc`)'s
+`Text_RecordLatestBattle`/`Text_PreparedToFaceHead` strings.
+
+## Window 5 — RETIRE answer NO, then the re-asked menu (post-checkpoint frames 0–449)
+
+Goal: from the open ask-ready menu, navigate down to RETIRE (three DOWN
+presses past GO ON, through RECORD and REST), confirm, answer the retire
+YES/NO prompt with NO, and confirm return to the menu — a bounded prompt
+window, not the full loss-lobby path a RETIRE-YES would take.
+
+Trace (full, from frame 0): `[120f idle, 2f DOWN, 30f idle, 2f DOWN, 30f
+idle, 2f DOWN, 40f idle, 2f A, 110f idle, 2f A, 110f idle]` — wait, cursor to
+RECORD, wait, cursor to REST, wait, cursor to RETIRE, wait, confirm RETIRE,
+wait out the retire prompt, confirm NO, wait out whatever follows.
+
+Repro:
+```sh
+bin/oracle lab tools/battle-lab/factory-brain-silver-walkup-askready-menu-retire-off.json -o /tmp/seg-askready-retire
+```
+
+**Re-run twice fresh, byte-identical:** all 174 captured frames matched
+sha256-for-sha256 across two independent fresh runs — zero diffs.
+
+| Frames | Content | Text (verbatim) |
+| --- | --- | --- |
+| 0–119 | Menu held (checkpoint state), cursor on GO ON — sha `86ec0c2e0ad0…` | same |
+| 120–121 | DOWN #1 registers; cursor GO ON → RECORD | — |
+| 122–151 | Held, cursor on RECORD — sha `b6fdb1e5a343…`, **byte-identical to Window 4's own 122–181 cursor-on-RECORD hold** (same menu state reached the same way) | — |
+| 152–153 | DOWN #2 registers; cursor RECORD → REST | — |
+| 154–183 | Held, cursor on REST — sha `6dc3a34f6daa…` | — |
+| 184–185 | DOWN #3 registers; cursor REST → RETIRE | — |
+| 186–225 | Held, cursor on RETIRE — sha `358cd6a56d10…` — **PNG-verified** at 186 (menu) | — |
+| 226–227 | A confirms RETIRE; menu closes, revealing the still-open "FACTORY HEAD is demanding you" box for one frame (sha `6267d3d8715b…`, same sha as Window 4's equivalent transition frame) | — |
+| 228–289 | Typewriter: `Text_RetireFromChallenge` | "Would you like to retire from your\nBattle Swap challenge?" YES/NO |
+| 290–337 | Held, cursor on NO (default) — sha `49f0426b65c1…` — **PNG-verified** at 294 | same, fully typed |
+| 338–339 | A confirms NO; `AskRetireChallenge`'s NO branch falls through `AskReadyForOpponent` → (brain ready) → `AskReadyForHead`, same re-ask as Window 4 | — |
+| 340–405 | Typewriter: `Text_PreparedToFaceHead` (re-asked) — frame-for-frame sha-identical to Window 4's 486–551 typewriter, just offset 146 frames earlier | "The FACTORY HEAD is demanding you.\nAre you prepared to face him?" |
+| 406–408 | Held briefly, message box only — sha `6267d3d8715b…` | same, fully typed |
+| 409–449 | Multichoice reopens, cursor back on GO ON — sha `86ec0c2e0ad0d23781097e6091eb27159b37fc8af91a812dccec284cb6a6019a`, **byte-identical to frame 0 / the checkpoint itself** — **PNG-verified** at 409 | same |
+
+No text mismatches found against the reference source's
+`Text_RetireFromChallenge`/`Text_PreparedToFaceHead` strings. RETIRE's own
+YES branch (`WarpToLobbyLost`, the full loss-lobby sequence) was
+deliberately not exercised — out of scope per the step brief's own bound
+("do NOT take retire-YES through the whole loss lobby").
+
+**Input-swallow trap avoided:** all three DOWN presses in this window land
+on an already-fully-settled, static multichoice list (no typewriter running
+on any of the three cursor moves), so the ~30–40-frame gaps between them are
+comfortably generous, not minimal — consistent with this session's own
+papercut note (`../PAPERCUTS.md`) that the trap specifically bites when a
+button is sent before a *box's own typewriter* has settled, not plain cursor
+navigation within an already-open list.
+
 ## Out of scope (per step brief)
 
-- RECORD/REST/RETIRE menu answers (goal item 4, optional — not attempted
-  this session; time-boxed out).
+- REST's own menu answer (`AskPauseChallenge`, the save-and-quit path) —
+  not part of this step's goal item 2, which scoped only RECORD and RETIRE.
 - The swap-YES path's swap-screen contents (staged-not-genuine per
   `BATTLE_LAB.md`'s boundary note — `ReturnToRoomFromBattle`'s own
   `factory_setopponentmons` never ran on this route, so the pool reflects
@@ -194,8 +288,10 @@ strings.
 | `factory-brain-silver-walkup-callscene-02-off.json` | pre-checkpoint | 1037–1570 | 199 |
 | `factory-brain-silver-walkup-askready-menu-off.json` | post-checkpoint | 0–135 | 21 |
 | `factory-brain-silver-walkup-swapask-no-off.json` | post-checkpoint | 122–722 | 194 |
+| `factory-brain-silver-walkup-askready-menu-record-off.json` | post-checkpoint | 0–885 | 178 |
+| `factory-brain-silver-walkup-askready-menu-retire-off.json` | post-checkpoint | 0–449 | 174 |
 
-All four set `"profile": "battle-scene-off"` explicitly (the battle-lab
+All six set `"profile": "battle-scene-off"` explicitly (the battle-lab
 request's actual profile field — matching every other committed
 `tools/battle-lab/*.json` fixture; the harness's own trace-level
 `"oracleProfile"` field belongs to the separate `/v1/run` contract, not
