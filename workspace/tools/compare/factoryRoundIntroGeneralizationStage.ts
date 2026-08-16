@@ -657,17 +657,21 @@ export function generatedRoundBattle7NolandGoldSpeechOpenStage(
  * `generatedRoundBattle7NolandSilverSpeechBoxHeldStage` - parks `battleRoom`
  * directly in a fully-printed `brainSpeechIdle` box (`speechStep`, 0-indexed
  * into `GOLD_FIRST_ENCOUNTER_SPEECH_BOXES`), same sidestep rationale.
+ * `elapsed` defaults to a true onset (0) but callers may park mid-hold
+ * instead - see `generatedRoundBattle7NolandGoldSpeechBox0HeldStage`'s own
+ * doc for why the pages fixture needs that.
  */
 export function generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
   state: EngineState,
   speechStep: number,
+  elapsed = 0,
 ): EngineState {
   const ready = goldNolandRoundReadyState(state);
   return {
     ...ready.state,
     battleRoom: {
       phase: "brainSpeechIdle",
-      elapsed: 0,
+      elapsed,
       frontierBrainWalkup: true,
       brainSpeechFirstEncounter: true,
       brainSpeechTier: "gold",
@@ -702,10 +706,35 @@ export function generatedRoundBattle7NolandGoldSpeechSettledStage(
 // Named, zero-arg wrappers - same convention as the silver box0/cry/page8/
 // close-pause wrappers above (appTrace.ts's APP_STAGES registry only calls
 // stages with a single `state` argument).
+//
+// `factory-brain-gold-walkup-speech-pages-off.json` (the only trace that
+// uses this wrapper) parks at `preCheckpointFrameOffset` 1535, which is
+// deep in page 1's hold tail (docs/noland-brain-intro-gold-ground-truth.md
+// §7'/§9'), not the hold's true onset - unlike the silver Box0Held stage's
+// own guard fixture, which parks exactly at onset. Page 1's `elapsed` clock
+// only drives `brainSpeechCursorVisible`/`brainSpeechCursorYOffset`
+// (battleRoom.ts) since every phase transition after it resets `elapsed`
+// fresh, so parking at 0 here rendered the cursor as if the box had just
+// appeared instead of already having bobbed for a while - MEASURED this
+// step by instrumenting the already-verified (254/256)
+// `factory-brain-gold-walkup-speech-open-off.json` trace
+// (`createInitialState`/`tick` stepped through its own segments): that
+// trace's own `battleRoom.phase` first reaches `brainSpeechIdle` (`elapsed`
+// 0, `speechStep` 0) at its own local tick 167, i.e. oracle absolute frame
+// 950 (its own `preCheckpointFrameOffset`) + 167 = 1117 - the same
+// derivation this doc's own `speech-box0-held` guard-fixture fix used
+// (`other-trace's-confirmed-local-tick + its-own-offset`). The pages
+// fixture's local frame 0 is therefore `elapsed` 1535 - 1117 = 418 ticks
+// into that same hold, not 0.
+const GOLD_SPEECH_PAGES_PAGE1_HOLD_ELAPSED = 418;
 export function generatedRoundBattle7NolandGoldSpeechBox0HeldStage(
   state: EngineState,
 ): EngineState {
-  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(state, 0);
+  return generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
+    state,
+    0,
+    GOLD_SPEECH_PAGES_PAGE1_HOLD_ELAPSED,
+  );
 }
 export function generatedRoundBattle7NolandGoldSpeechPage4HeldStage(
   state: EngineState,

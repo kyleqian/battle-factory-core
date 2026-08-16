@@ -236,13 +236,25 @@ const CURSOR_PALETTE: readonly [RgbColor, RgbColor, RgbColor] = [
  * The brain speech's own "waiting for input, more text follows" cursor -
  * same glyph/mechanism as battleScene.ts's drawCursor (see
  * brainSpeechCursorVisible's own doc for which boxes show it), positioned
- * right after line 2's own last printed glyph like that function's own
- * X placement, at this box's fixed Y (dense-compare-caught: coincides with
- * the box's own MSGBOX_LINE2_ORIGIN.y, the same window template).
+ * right after the LAST NON-EMPTY line's own last printed glyph, at that
+ * line's own fixed Y (dense-compare-caught: coincides with that line's own
+ * origin.y, the same window template). Every guard fixture prior to gold's
+ * page 2 ("…Oh?", two-line box0/cry/page8/close-pause) only ever exercised
+ * a full two-line box, so `line2` was always non-empty whenever the cursor
+ * showed; gold's own dense ground truth
+ * (docs/noland-brain-intro-gold-ground-truth.md §7'/§9') is the first fixture
+ * to pin a cursor-visible box whose second line is empty (`GOLD_FIRST_
+ * ENCOUNTER_SPEECH_BOXES[1]`), and the oracle draws the cursor inline after
+ * line 1 there, not line 2's own (empty) origin.
  */
-function drawBrainSpeechCursor(fb: Uint8Array, line2: string, yOffset: number): void {
-  const x = MSGBOX_LINE2_ORIGIN.x + measureText(cursorFont, cursorCharmap, line2);
-  const y = MSGBOX_LINE2_ORIGIN.y - yOffset;
+function drawBrainSpeechCursor(
+  fb: Uint8Array,
+  activeLine: string,
+  origin: { x: number; y: number },
+  yOffset: number,
+): void {
+  const x = origin.x + measureText(cursorFont, cursorCharmap, activeLine);
+  const y = origin.y - yOffset;
   for (let py = 0; py < downArrow.blitHeight; py += 1) {
     for (let px = 0; px < downArrow.blitWidth; px += 1) {
       const index = downArrow.indices[py]?.[px] ?? 0;
@@ -271,7 +283,11 @@ function drawOpponentMsgbox(
     drawMessageBoxText(fb, line2, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y);
   }
   if (brainSpeechCursorVisible(state)) {
-    drawBrainSpeechCursor(fb, line2, brainSpeechCursorYOffset(state));
+    if (line2.length > 0) {
+      drawBrainSpeechCursor(fb, line2, MSGBOX_LINE2_ORIGIN, brainSpeechCursorYOffset(state));
+    } else {
+      drawBrainSpeechCursor(fb, line1, MSGBOX_LINE1_ORIGIN, brainSpeechCursorYOffset(state));
+    }
   }
 }
 

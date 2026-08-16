@@ -534,6 +534,89 @@ Full `npm test` (9984 passed, 223 skipped, 0 failed — 2 pre-existing
 oracle-correct 2-tick cursor delay), `npm run build`, `npm run typecheck`, and
 `tests/executableFrontierRatchet.test.ts` all green; no barrier widened.
 
+### 9″. Gold-pages window: page-1 onset re-derivation + single-line cursor placement (2026-08-16, main worker)
+
+Picked up §9′'s own "needs per-page onset re-derivation" pointer. Two
+distinct defects, both tier-general, both MEASURED (not fitted):
+
+**Fix A — page 1's park `elapsed` was not onset-aligned.**
+`generatedRoundBattle7NolandGoldSpeechBoxHeldStage` (the stage
+`factory-brain-gold-walkup-speech-pages-off.json` parks into) hardcoded
+`elapsed: 0` for every `speechStep`, i.e. "just entered this hold." But this
+trace's own `preCheckpointFrameOffset` (1535) is deep in page 1's hold tail,
+not its onset (§7′: onset is where the typewriter finishes and the box
+settles). Derived the true onset the same way §9′'s own `speech-box0-held`
+fix did — instrumented the already-verified (254/256)
+`factory-brain-gold-walkup-speech-open-off.json` trace
+(`createInitialState`/`tick` stepped through its own segments, logging
+`battleRoom.phase`/`elapsed` per tick): `battleRoomIdle` first reaches
+`elapsed 0` for `speechStep 0` at that trace's own local tick 167 (matches
+this doc's own already-committed `CURSOR_APPEAR_DELAY_TICKS` doc comment,
+which independently cites "frames 167-168" for the same event). True onset
+= 950 (`speech-open`'s own offset) + 167 = abs frame 1117. So the pages
+trace's local frame 0 is `elapsed` 1535 − 1117 = **418** ticks into that
+hold, not 0. Since `elapsed` in `brainSpeechIdle` only ever drives the
+cursor (every later phase transition resets it fresh — confirmed by
+reading `advanceBattleRoom`'s own reducer), this is a self-contained,
+citable constant with no knock-on effect on timing elsewhere. Added an
+`elapsed` parameter to the shared stage helper (default 0, preserving every
+other caller — `page4-held`/`close-held` are untouched, still park at true
+onset) and passed 418 from the `box0-held` wrapper only, with the full
+derivation cited inline.
+
+**Fix B — the wait-cursor always anchored to line 2, even when line 2 was
+empty.** `drawBrainSpeechCursor` (`battleRoomRender.ts`) unconditionally
+measured and positioned against `MSGBOX_LINE2_ORIGIN` + line 2's printed
+text. Every previously-dense-checked cursor-visible box (`entrance-03`,
+`speech-open`, B2's `box0-held`/`cry-held`) happens to fill both lines, so
+this never showed up. Gold's own page 2 (`GOLD_FIRST_ENCOUNTER_SPEECH_BOXES[1]`
+= `["…Oh?", ""]`) is the first dense fixture with a cursor-visible box whose
+second line is empty, and direct pixel inspection
+(`app-00013.png`/`oracle-00013.png`) showed the oracle drawing the cursor
+inline right after "…Oh?" on line 1, while the app drew it at line 2's
+fixed (empty) position — a full line low and flush left. Fixed
+`drawOpponentMsgbox` to pick whichever line actually holds the last printed
+glyph (`line2` if non-empty, else `line1`) and pass that line's own text and
+origin to the cursor draw call. Tier-general: silver's own
+`SILVER_FIRST_ENCOUNTER_SPEECH_BOXES[2]` (`"I had a look at your Battle Swap
+data."`, `""`) is the same shape and was never guarded before either — this
+fix covers it too, though no dense silver fixture exists yet to confirm it
+pixel-for-pixel.
+
+**Verified results (fresh `npm run compare -- <trace> --summary` reruns):**
+
+| Window | Before this step | After |
+| --- | --- | --- |
+| gold-pages (`factory-brain-gold-walkup-speech-pages-off.json`) | 55/177 | **85/177** |
+| gold-open (guard) | 254/256 | 254/256 |
+| entrance-03 (guard) | 254/256 | 254/256 |
+| gold-close (guard, untouched mechanism) | 80/126 | 80/126 |
+| B2 speech box0-held / cry-held / page8-held / close-pause (guards) | 39/39 · 74/74 · 39/39 · 28/28 | unchanged |
+| callscene-01 (guard) | 131/131 | 131/131 |
+| entrance-02 (guard) | 256/256 | 256/256 |
+
+Pages 1 and 2 (local frames 0–593, i.e. every captured frame through page
+2's own hold tail) now match byte-for-byte. The remaining 92/177 residual is
+confined to the page 2→3 and 3→4 **typewriter edges** (local ~594–653 and
+~728–776) plus two isolated single-tick frames inside page 3's hold (716,
+725) — a *different* mechanism than either fix above: direct pixel check at
+local frame 594 (abs 2129, the edge's first captured frame) shows the app's
+box still empty while the oracle already shows "Y" (page 3's first
+character) printed — the app's typewriter is a tick or so behind oracle's
+through these two edges specifically, even though the page 1→2 edge (local
+7–12, a short single-line page) matches exactly. This looks like the same
+class of press/wipe-timing miscalibration §9′'s mechanism 1 fixed for
+gold-open (a trace-side wait recalibration, not an engine defect), but
+re-deriving it needs its own oracle-frame cross-reference and was not
+attempted this step — left honest per the brief rather than guessed. The
+716/725 pair matches the already-named "single-tick frame-index boundary"
+residual family (gold-open frames 58/95, entrance-03 frame 368) — not
+chased.
+
+Full `npm test` (1056 files, 9984 passed, 223 skipped, 0 failed), `npm run
+build`, `npm run typecheck` all green; `tests/executableFrontierRatchet.test.ts`
+barrier counts unmoved.
+
 ## Appendix: pre-fix (stale, oracle bug: missing gold Frontier-Brain symbol flag) history — captured 2026-08-14
 
 Everything below this line is the **original, unedited** capture from one
