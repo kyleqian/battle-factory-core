@@ -1,3 +1,10 @@
+# MOVE_FIRE_BLAST authoritative-source + legal bilateral Scene-ON staging checkpoint — remains unsupported (2026-08-16 worker)
+
+- **State:** Coverage remains **193/276 Level-50 exact**, 0 partial, 0 staged, and **83 unsupported**. Fire Blast receives no reducer, typed seam, production compositor/renderer, coverage, latch, or sibling credit.
+- **Source:** Hermetic audit pins ROM/ELF and 15 source/generated hashes; the full root **0x082c9f55..0x082c9fe9 (148 bytes, `7a777dbd…`)**, `FireBlastRing` **0x082c9fe9..0x082ca02d (68 bytes, `2a09bd0c…`)**, and `FireBlastCross` **0x082ca02d..0x082ca083 (86 bytes, `938790f5…`)**; all 3×5 ring spawns, 9×5 cross bursts, waits, target ShakeMon, F_PAL_BG black fades, Small Ember asset/OAM lifecycle, ring/cross callbacks, side coordinate dependencies, and hard-coded attacker→target SoundTask timing. The complete generated graph has eight components. Dragon Breath, Flamethrower, Blaze Kick, Ember, Fire Spin, and shared fire projectile primitives remain independent exact controls only.
+- **Carrier/stages:** Earliest legal Level-50 Factory carrier is challenge-2 **FRONTIER_MON_OCTILLERY_2** (index 361, range 267–371), source-pinned as Quirky/Lax Incense/HP+Def+SpDef. Capture-free three-complete-party Scene-ON stages reran twice fresh byte-identically: player-back frame 934 `1545e05e…`, Fire Blast PP `[4,5,5,5]` (slot 0); opponent-front `bedfdd49…`, `[5,4,5,5]` (slot 1); every constructed party checksum is valid.
+- **Next:** Collect a complete dense bilateral Fire Blast window through the shared presentation seam, including full source/OAM/palette/register/audio/resource lifecycle and post-cleanup, measure move-owned display latches, then (only if zero-residual production framebuffer evidence succeeds) consider Fire Blast alone for promotion.
+
 # MOVE_HEAL_BELL bilateral exact production presentation (2026-08-16 worker)
 
 - **State:** Coverage advances **192→193/276 Level-50 exact**, 0 partial, 0 staged, and **84→83 unsupported**. Heal Bell alone promotes; Perish Song, Aromatherapy, Synthesis, Refresh, and every other sibling remain independent controls.

@@ -91,5 +91,31 @@
     },
     "challenge2Range":{"start":267,"end":371,"startLabel":"FRONTIER_MON_DELCATTY_2","endLabel":"FRONTIER_MON_CLOYSTER_2"}
   },
-  "boundedRemainder":"No reducer, typed seam, production compositor/renderer, dense oracle capture, latch measurement, framebuffer comparison, coverage promotion, latch update, or renderer change is claimed. The next required evidence is a complete dense bilateral Scene-ON window through the shared presentation seam."
+  "stages": {
+    "playerBack": {
+      "scenario":"tools/battle-lab/mechanic-fire-blast-player-octillery-opponent-onix.json",
+      "scenarioSha256":"144553b2f508dfebe652cf882cd0b379fe09a637cd8a52d9c80f6bb95038bce7",
+      "endpoint": {
+        "frame":934,
+        "framebufferSha256":"1545e05e53986fa94d53d56371f26fb0e8d172f423a8b42ed7e433ac4ca51069",
+        "fireBlastPp":[4,5,5,5],
+        "consumedFireBlastPpSlot":0,
+        "partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},
+        "allPartyChecksumsValid":true
+      }
+    },
+    "opponentFront": {
+      "scenario":"tools/battle-lab/mechanic-fire-blast-opponent-octillery-player-onix.json",
+      "scenarioSha256":"2fb51bb13a18d46d32373690b45de9bafa7f7b894556385322612172df7a29be",
+      "endpoint": {
+        "frame":934,
+        "framebufferSha256":"bedfdd4944c736159d2416aeed65da6c449aea5ddf15807391c346448f187684",
+        "fireBlastPp":[5,4,5,5],
+        "consumedFireBlastPpSlot":1,
+        "partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},
+        "allPartyChecksumsValid":true
+      }
+    }
+  },
+  "boundedRemainder":"The two capture-free endpoints prove only legal bilateral Scene-ON staging and a consumed Fire Blast PP slot. No reducer, typed seam, production compositor/renderer, dense oracle capture, latch measurement, framebuffer comparison, coverage promotion, latch update, or renderer change is claimed. The next required evidence is a complete dense bilateral Scene-ON window through the shared presentation seam."
 }
