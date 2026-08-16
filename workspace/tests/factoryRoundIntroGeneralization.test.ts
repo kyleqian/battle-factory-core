@@ -6,13 +6,21 @@ import {
 } from "../src/engine/battleTransition.ts";
 import { createFactoryBattleStartPresentationCommand } from "../src/engine/factoryBattleStartPresentation.ts";
 import {
+  advanceFactoryBattleStartIntro,
   factoryBattleStartIntroPhase,
   factoryBattleStartStatusSummaryMessageComplete,
+  type FactoryBattleStartIntroState,
 } from "../src/engine/factoryBattleStartIntro.ts";
-import { generatedBattleIntroSourceClock } from "../src/engine/battleScene.ts";
+import {
+  generatedBattleIntroSourceClock,
+  generatedBattleStartCommandReady,
+  isGeneratedBattleIntroInputReady,
+} from "../src/engine/battleScene.ts";
 import {
   generatedRoundBattle6LukasRevealStage,
   generatedRoundBattle6LukasStatusSummaryMessageStage,
+  generatedRoundBattle7NolandGoldRevealStage,
+  generatedRoundBattle7NolandRevealStage,
   generatedRoundRevealProofStage,
 } from "../tools/compare/factoryRoundIntroGeneralizationStage.ts";
 
@@ -299,5 +307,52 @@ describe("noncanonical generated-round intro generalization", () => {
       .toEqual(initial.factoryRoundBattleOrchestrator!.round.rules.playerParty);
     expect(state.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party)
       .toEqual(initial.factoryRoundBattleOrchestrator!.round.rules.currentOpponent.party);
+  });
+
+  // ISSUES #87 option (c): the silver Frontier-Brain reveal is the one
+  // committed compare window whose capture range crosses the ready
+  // transition; only that route-level identity gets a calibrated offset.
+  it("keys the silver-brain ready-lag offset off frontierBrain.status, not a battle-number/trace-name check", () => {
+    const silverState = generatedRoundBattle7NolandRevealStage(
+      createInitialState({ appRoute: "generated-orchestrator" }),
+    );
+    const silverIntro = silverState.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(silverIntro.isSilverBrainReveal).toBe(true);
+    expect(silverIntro.isCanonicalAnchorIntro).toBe(false);
+
+    const goldState = generatedRoundBattle7NolandGoldRevealStage(
+      createInitialState({ appRoute: "generated-orchestrator" }),
+    );
+    const goldIntro = goldState.factoryRoundBattleOrchestrator!.battleStartIntro!;
+    expect(goldIntro.isSilverBrainReveal).toBe(false);
+
+    // Step an intro through its own PAUSE_UNTIL_PRESS A edge (as soon as
+    // input-ready, matching every other fixture's timing) to the first
+    // elapsed tick where the command menu reads ready.
+    function firstReadyElapsed(start: FactoryBattleStartIntroState): number {
+      let intro = start;
+      let pressed = false;
+      for (let step = 0; step < 2000; step += 1) {
+        if (generatedBattleStartCommandReady(intro)) return intro.elapsed;
+        const pressA: boolean = !pressed && isGeneratedBattleIntroInputReady(intro);
+        if (pressA) pressed = true;
+        intro = advanceFactoryBattleStartIntro(intro, pressA ? new Set(["A"]) : new Set());
+      }
+      throw new Error("command-ready never fired within 2000 ticks");
+    }
+
+    const silverReadyElapsed = firstReadyElapsed(silverIntro);
+    const unflaggedReadyElapsed = firstReadyElapsed({ ...silverIntro, isSilverBrainReveal: false });
+    // MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET (battleScene.ts): the
+    // dense-compare-calibrated constant this exact window needs.
+    expect(silverReadyElapsed - unflaggedReadyElapsed).toBe(9);
+
+    // The gold reveal (a different frontierBrain.status) is untouched: its
+    // own ready tick is identical whether or not isSilverBrainReveal could
+    // apply to it.
+    const goldReadyElapsed = firstReadyElapsed(goldIntro);
+    const goldUnflaggedReadyElapsed = firstReadyElapsed({ ...goldIntro, isSilverBrainReveal: true });
+    expect(goldReadyElapsed).not.toBe(goldUnflaggedReadyElapsed);
+    expect(goldUnflaggedReadyElapsed - goldReadyElapsed).toBe(9);
   });
 });

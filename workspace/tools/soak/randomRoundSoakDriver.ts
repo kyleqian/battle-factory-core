@@ -36,6 +36,17 @@ import {
   isMonPicInputReady,
 } from "../../src/engine/monPic.ts";
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
+import movesData from "../../src/data/gen/moves.json" with { type: "json" };
+
+// ---------------------------------------------------------------------------
+// Move power lookup (for the "winning" policy's fight-move bias only)
+// ---------------------------------------------------------------------------
+
+const MOVE_POWER_BY_ID = new Map<number, number>(
+  (movesData as { moves: { id: number; power: number }[] }).moves.map(
+    (move) => [move.id, move.power],
+  ),
+);
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32)
@@ -139,6 +150,17 @@ export type RunDiagnostics = Readonly<{
   terminalRecordMenuInputReadyReached: boolean;
   terminalRecordChoice: "yes" | "no" | "cancel" | null;
   renderCalls: number;
+  /**
+   * The win streak carried INTO the current orchestrator's round
+   * (`config.factoryWinStreak`, `factoryRoundChaining.ts`'s carry — +7 per
+   * completed round win, 0 after a loss). Combined with `battleIndex`, this
+   * is exactly the internal `config.factoryWinStreak + battleIndex` formula
+   * (`factoryRoundBattleOrchestrator.ts:559`) — the deepest chained-streak
+   * value this run reached before its outcome, used by the soak depth
+   * report (chained-round distribution-parity plan §4 step 3), not read by
+   * ordinary CLI/full/vanilla runs.
+   */
+  carriedWinStreak: number | null;
 }>;
 
 // ---------------------------------------------------------------------------
@@ -204,8 +226,18 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * "vanilla": the plainest player — rent slots 0/1/2, always FIGHT with the
  * first legal move, forced switches take the offered legal pick, swap offers
  * declined, continuation always GO ON. Press timing stays seed-jittered.
+ * "winning": opt-in, deep-streak crash coverage (chained-round distribution-
+ * parity plan §4 step 3, addressing gap 3 — neither "full" nor "vanilla"
+ * biases toward winning, so a soak's natural chained depth almost never
+ * strings together consecutive round wins). Reuses "full"'s menu/target
+ * exploration verbatim (same draft/summary/postwin/swap/terminal rolls) for
+ * every decision EXCEPT two: the fight-menu commits the highest-power legal
+ * damaging move instead of a uniform-random slot, and a voluntary POKéMON
+ * party-select (forced switches are unaffected — they're not voluntary)
+ * always declines rather than "full"'s random target/cancel roll. Biased,
+ * not guaranteed-win — arbitrary-but-legal play in spirit, not an AI oracle.
  */
-export type SoakPolicy = "full" | "vanilla";
+export type SoakPolicy = "full" | "vanilla" | "winning";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
 type PlayerPolicy = SoakPolicy | "strong-route";
 
@@ -232,13 +264,18 @@ class RandomPlayer {
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
 
+  /** "full" and "winning" share the same menu/target exploration rolls. */
+  private get explores(): boolean {
+    return this.policy === "full" || this.policy === "winning";
+  }
+
   constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
     this.rng = rng;
     this.log = log;
     this.policy = policy;
     // Random 3 distinct rental slots, random order (vanilla: first three).
     const slots = [0, 1, 2, 3, 4, 5];
-    if (policy === "full") {
+    if (this.explores) {
       for (let i = slots.length - 1; i > 0; i -= 1) {
         const j = rng.int(i + 1);
         [slots[i], slots[j]] = [slots[j]!, slots[i]!];
@@ -247,7 +284,7 @@ class RandomPlayer {
     this.draft = {
       picks: slots.slice(0, 3),
       rented: 0,
-      peekedSummary: policy === "full" && rng.chance(0.25),
+      peekedSummary: this.explores && rng.chance(0.25),
     };
   }
 
@@ -337,7 +374,7 @@ class RandomPlayer {
   private pressAdvance(state: EngineState, label: string): ReadonlySet<GbaButton> {
     // Message-advance mash with jittered gaps; occasionally B (harmless
     // everywhere A-advance surfaces live, and it exercises B paths).
-    const useB = this.policy === "full" && this.rng.chance(0.06);
+    const useB = this.explores && this.rng.chance(0.06);
     this.note(state, `${label}${useB ? " (B)" : ""}`);
     return this.press(useB ? "B" : "A", 22);
   }
@@ -352,7 +389,7 @@ class RandomPlayer {
       // YES/NO confirm for the 3 rentals. Mostly YES; a rare NO exercises the
       // decline/un-reveal path (drops the 3rd pick, which we then re-rent).
       if (draft.yesNoCursorPos === 0) {
-        if (this.policy === "full" && this.rng.chance(0.06)) {
+        if (this.explores && this.rng.chance(0.06)) {
           this.note(state, "draft confirm: toggle to NO");
           return this.press("DOWN", 8);
         }
@@ -416,7 +453,7 @@ class RandomPlayer {
     if (state.summaryScreen.transition || state.summaryScreen.pageTransition
       || state.summaryScreen.monTransition) return NO_BUTTONS;
     // Wander a little, then leave with B.
-    if (this.policy === "full" && this.rng.chance(0.3)) {
+    if (this.explores && this.rng.chance(0.3)) {
       return this.press(this.rng.pick(["UP", "DOWN", "LEFT", "RIGHT"] as const), 12);
     }
     this.note(state, "summary: exit (B)");
@@ -445,7 +482,7 @@ class RandomPlayer {
       if (this.actionIntent === null || this.actionIntent.key !== this.lastCommandKey) {
         // FIGHT 0.60 / POKéMON 0.22 / BAG 0.06 / RUN 0.06 / re-roll wander 0.06
         const roll = this.rng.float();
-        const target = this.policy !== "full"
+        const target = !this.explores
           ? 0
           : roll < 0.60 ? 0 : roll < 0.82 ? 2 : roll < 0.88 ? 1 : roll < 0.94 ? 3 : this.rng.int(4);
         this.actionIntent = { key: this.lastCommandKey, target, futile: 0 };
@@ -480,6 +517,20 @@ class RandomPlayer {
           0,
           presentation.legalMoveBySlot.findIndex((slot) => slot !== null),
         );
+        // "winning" only: highest-power LEGAL move, ties toward the lower slot.
+        const bestDamagingSlot = (): number => {
+          let bestSlot = firstLegal;
+          let bestPower = -1;
+          for (let slot = 0; slot < 4; slot += 1) {
+            if (presentation.legalMoveBySlot[slot] === null) continue;
+            const power = MOVE_POWER_BY_ID.get(presentation.field.player.moveIds[slot]) ?? 0;
+            if (power > bestPower) {
+              bestPower = power;
+              bestSlot = slot;
+            }
+          }
+          return bestSlot;
+        };
         const target = this.policy === "strong-route"
           && active?.partyIndex === 1
           && active.isFirstTurn === 2
@@ -487,7 +538,9 @@ class RandomPlayer {
           ? 3
           : this.policy === "vanilla" || this.policy === "strong-route"
             ? firstLegal
-            : this.rng.int(4);
+            : this.policy === "winning"
+              ? bestDamagingSlot()
+              : this.rng.int(4);
         this.fightIntent = {
           key,
           target,
@@ -541,9 +594,11 @@ class RandomPlayer {
     }
     if (this.partyIntent === null || this.partyIntent.key !== this.lastCommandKey) {
       // Any row the UI can cursor to, including fainted rows (their SEND OUT
-      // shows the no-energy message), plus cancel.
-      const roll = this.rng.float();
-      const target: 0 | 1 | 2 | "cancel" = roll < 0.25 ? "cancel" : ([0, 1, 2] as const)[this.rng.int(3)]!;
+      // shows the no-energy message), plus cancel. "winning" always declines
+      // a voluntary switch (forced switches never route through here).
+      const target: 0 | 1 | 2 | "cancel" = this.policy === "winning"
+        ? "cancel"
+        : this.rng.float() < 0.25 ? "cancel" : ([0, 1, 2] as const)[this.rng.int(3)]!;
       this.partyIntent = { key: this.lastCommandKey, target };
       this.note(state, `party intent: ${target === "cancel" ? "cancel" : `row ${target}`}`);
     }
@@ -593,7 +648,7 @@ class RandomPlayer {
     // The forced selector's cursor model: default rests on the fainted slot
     // (A there shows the no-energy message), DOWN moves onto the legal pick.
     if (selector.cursor === "onix") {
-      if (this.policy === "full" && this.rng.chance(0.3)) {
+      if (this.explores && this.rng.chance(0.3)) {
         this.note(state, "forced party: A on fainted slot");
         return this.press("A", 10);
       }
@@ -618,7 +673,7 @@ class RandomPlayer {
       && postwin.questionDismissElapsed === null
       && postwin.questionYesElapsed === null
     ) {
-      const wantYes = this.policy !== "full"
+      const wantYes = !this.explores
         ? false
         : postwin.question.kind === "retire"
           ? this.rng.chance(0.15)
@@ -633,7 +688,7 @@ class RandomPlayer {
     // Continuation menu (GO ON / RECORD / REST / RETIRE).
     if (postwin.question === null && postwin.continuationCursorPos !== null) {
       const roll = this.rng.float();
-      const target = this.policy !== "full"
+      const target = !this.explores
         ? 0
         : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
       if (postwin.continuationCursorPos !== target) {
@@ -648,7 +703,7 @@ class RandomPlayer {
       && postwin.swapDeclineElapsed === null
       && postwin.swapCursorPos !== null
     ) {
-      const accept = this.policy === "full" && this.rng.chance(0.5);
+      const accept = this.explores && this.rng.chance(0.5);
       const targetPos = accept ? 0 : 1;
       if (postwin.swapCursorPos !== targetPos) {
         return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
@@ -733,9 +788,15 @@ export type RunOptions = {
 export const DEFAULT_RUN_OPTIONS: RunOptions = {
   // In-session round chaining (PROGRESS ~1271) lets a single seed play
   // arbitrarily many rounds back to back; 200_000 was sized for one round.
-  // 300_000 comfortably covers the deepest observed default-sweep seed
-  // (seed 0, vanilla: settles at 226_630).
-  maxFrames: 300_000,
+  // 300_000 was believed to comfortably cover the deepest observed
+  // default-sweep seed, but ISSUES #90's triage (docs/
+  // issue90-seed51-hang-triage.md) falsified that for the "full" policy:
+  // seed 51 is not a hang, just a crash-free playthrough that settles at
+  // frame 361,216 -- over the old budget. The #89 Baton Pass fix (which
+  // used to crash before reaching this point) makes the same-class seed 37
+  // run even longer, settling at frame 398,088. 600_000 covers both with
+  // real margin.
+  maxFrames: 600_000,
   renderEvery: 8,
   verbose: false,
   policy: "full",
@@ -787,6 +848,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       terminalRecordMenuInputReadyReached,
       terminalRecordChoice: state.factoryTerminal?.recordChoice ?? null,
       renderCalls,
+      carriedWinStreak: orchestrator?.config.factoryWinStreak ?? null,
     });
   };
 

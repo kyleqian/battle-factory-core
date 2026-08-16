@@ -81,6 +81,11 @@ import {
   generatedRoundBattle6LukasStatusSummaryMessageStage,
   generatedRoundBattle7NolandGoldRevealStage,
   generatedRoundBattle7NolandRevealStage,
+  generatedRoundBattle7NolandRoomEntranceStage,
+  generatedRoundBattle7NolandSilverSpeechBox0HeldStage,
+  generatedRoundBattle7NolandSilverSpeechClosePauseStage,
+  generatedRoundBattle7NolandSilverSpeechCryHeldStage,
+  generatedRoundBattle7NolandSilverSpeechPage8HeldStage,
 } from "./factoryRoundIntroGeneralizationStage.ts";
 
 export interface AppCapture {
@@ -1494,6 +1499,15 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
     generatedRoundBattle6LukasStatusSummaryMessageStage,
   "factory-round-battle7-noland-reveal-off": generatedRoundBattle7NolandRevealStage,
   "factory-round-battle7-noland-gold-reveal-off": generatedRoundBattle7NolandGoldRevealStage,
+  "factory-round-battle7-noland-room-entrance-off": generatedRoundBattle7NolandRoomEntranceStage,
+  "factory-round-battle7-noland-silver-speech-box0-held-off":
+    generatedRoundBattle7NolandSilverSpeechBox0HeldStage,
+  "factory-round-battle7-noland-silver-speech-cry-held-off":
+    generatedRoundBattle7NolandSilverSpeechCryHeldStage,
+  "factory-round-battle7-noland-silver-speech-page8-held-off":
+    generatedRoundBattle7NolandSilverSpeechPage8HeldStage,
+  "factory-round-battle7-noland-silver-speech-close-pause-off":
+    generatedRoundBattle7NolandSilverSpeechClosePauseStage,
   "factory-postwin-canonical-opponent-party":
     createFactoryPostwinStage(CANONICAL_POSTWIN_OPPONENT_RECORDS),
   "factory-postwin-generated-rock-unrestrained-opponent-party":

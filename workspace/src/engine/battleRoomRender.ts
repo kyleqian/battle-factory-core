@@ -29,12 +29,17 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
-import { drawMessageBoxFrame, drawMessageBoxText } from "./prebattleRoomRender.ts";
+import { BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechCursorVisible, brainSpeechCursorYOffset, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { drawMessageBoxFrame, drawMessageBoxText, MESSAGE_PALETTE } from "./prebattleRoomRender.ts";
+import { measureText, type FontData } from "./font.ts";
 
 import layout from "../data/gen/battle-room-layout.json" with { type: "json" };
 import tileset from "../assets/gen/battle-room-tileset.json" with { type: "json" };
 import npcs from "../assets/gen/battle-room-npcs.json" with { type: "json" };
+import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
+import charmapData from "../data/gen/charmap.json" with { type: "json" };
+import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
+import msgboxAssetData from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
 
 import { OBJ_EVENT_GFX, type ObjectEventGfxId, facilityTrainerGfxIdForClass } from "./factoryTrainerOverworldGfx.ts";
 
@@ -82,7 +87,7 @@ interface NpcSprite {
 
 const roomLayout = layout as RoomLayout;
 const roomTileset = tileset as RoomTileset;
-const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; opponents: Record<string, NpcSprite> };
+const roomNpcs = npcs as { player: NpcSprite; scientist: NpcSprite; noland: NpcSprite; opponents: Record<string, NpcSprite> };
 
 function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, screenY: number, fadeY: number): void {
   for (let i = 0; i < 4; i += 1) {
@@ -203,20 +208,70 @@ const opponentScreenX = tileScreenPos(roomLayout.objects.opponent.settleTile, IN
 const MSGBOX_LINE1_ORIGIN = { x: 16, y: 121 };
 const MSGBOX_LINE2_ORIGIN = { x: 16, y: 137 };
 
+const cursorFont = fontNormalData as unknown as FontData;
+const cursorCharmap = new Map<string, number>(
+  (charmapData as { entries: [string, number][] }).entries,
+);
+interface DownArrowAsset {
+  indices: number[][];
+  blitWidth: number;
+  blitHeight: number;
+}
+const downArrow = downArrowAsset as DownArrowAsset;
+/**
+ * The glyph's own index 1/2 (border/fill) mapped against the box's own
+ * msgbox palette (msgbox.json's own indices - msgboxPalette[2] is this same
+ * asset's text-shadow gray, prebattleRoomRender.ts's MESSAGE_PALETTE[1];
+ * msgboxPalette[4] is its dedicated red, unused by ordinary message text
+ * and dense-compare-caught for this glyph specifically - MESSAGE_PALETTE's
+ * own compact 3-entry reindexing doesn't carry it). Index 0 is transparent.
+ */
+const CURSOR_PALETTE: readonly [RgbColor, RgbColor, RgbColor] = [
+  { r: 0, g: 0, b: 0 },
+  MESSAGE_PALETTE[1]!,
+  (msgboxAssetData as { palette: RgbColor[] }).palette[4]!,
+];
+
+/**
+ * The brain speech's own "waiting for input, more text follows" cursor -
+ * same glyph/mechanism as battleScene.ts's drawCursor (see
+ * brainSpeechCursorVisible's own doc for which boxes show it), positioned
+ * right after line 2's own last printed glyph like that function's own
+ * X placement, at this box's fixed Y (dense-compare-caught: coincides with
+ * the box's own MSGBOX_LINE2_ORIGIN.y, the same window template).
+ */
+function drawBrainSpeechCursor(fb: Uint8Array, line2: string, yOffset: number): void {
+  const x = MSGBOX_LINE2_ORIGIN.x + measureText(cursorFont, cursorCharmap, line2);
+  const y = MSGBOX_LINE2_ORIGIN.y - yOffset;
+  for (let py = 0; py < downArrow.blitHeight; py += 1) {
+    for (let px = 0; px < downArrow.blitWidth; px += 1) {
+      const index = downArrow.indices[py]?.[px] ?? 0;
+      if (index === 0) continue;
+      const color = CURSOR_PALETTE[index];
+      if (!color) continue;
+      setPixel(fb, x + px, y + py, color.r, color.g, color.b);
+    }
+  }
+}
+
 function drawOpponentMsgbox(
   fb: Uint8Array,
   msgbox: MsgboxVisual,
-  lines: readonly [string, string],
+  state: BattleRoomState,
 ): void {
   if (!msgbox.visible) return;
   drawMessageBoxFrame(fb);
   if (msgbox.chars <= 0) return;
-  const [messageLine1, messageLine2] = lines;
+  const [messageLine1, messageLine2] = battleRoomQuote(state);
   const line1 = messageLine1.slice(0, Math.min(msgbox.chars, messageLine1.length));
   drawMessageBoxText(fb, line1, MSGBOX_LINE1_ORIGIN.x, MSGBOX_LINE1_ORIGIN.y);
+  let line2 = "";
   if (msgbox.chars > messageLine1.length) {
-    const line2 = messageLine2.slice(0, msgbox.chars - messageLine1.length);
+    line2 = messageLine2.slice(0, msgbox.chars - messageLine1.length);
     drawMessageBoxText(fb, line2, MSGBOX_LINE2_ORIGIN.x, MSGBOX_LINE2_ORIGIN.y);
+  }
+  if (brainSpeechCursorVisible(state)) {
+    drawBrainSpeechCursor(fb, line2, brainSpeechCursorYOffset(state));
   }
 }
 
@@ -327,7 +382,57 @@ export function renderBattleRoomEntryScene(
         : roomNpcs.opponents[GENERIC_OPPONENT_SHEET]!;
     drawNpcFrame(fb, npc, opponent.frame, { x: opponentScreenX, y: opponent.screenY }, false, objFadeY);
   }
-  drawOpponentMsgbox(fb, msgbox, battleRoomQuote(state));
+  drawOpponentMsgbox(fb, msgbox, state);
 }
 
 const INITIAL_RENDER_STATE: BattleRoomState = { phase: "entering", elapsed: 0 };
+
+/**
+ * Walk-up build step B1: renders the Frontier-Brain BattleRoom entrance
+ * branch (battleRoom.ts's `brain*` phases) - Noland already visible at
+ * (7,9) from the first frame (no hidden-then-walked-in ordinary-opponent
+ * path runs), the "Get a move on!" box appears BEFORE any movement, and
+ * only once dismissed does Noland's own walk run simultaneously with the
+ * decoy/scientists (see battleRoom.ts's module doc for the full mechanism
+ * and its "not independently RAM-probed this session" caveat). No camera
+ * pan happens until `brainMoving` - the room/Noland/scientists all render
+ * at the static initial origin through `brainEntering`/`brainMsgboxIdle`/
+ * `brainMsgboxClosing`, since `entryStep`/`scientistTurnFrame`/`nolandStep`
+ * all naturally hold their `elapsed=0` values there.
+ */
+export function renderBattleRoomBrainEntranceScene(
+  fb: Uint8Array,
+  state: BattleRoomState,
+  bgFadeY = 0,
+  objFadeY = 0,
+): void {
+  // Walk-up build step B2: the speech phases (brainSpeech/-Idle/-Closing/
+  // -Settled) all continue holding the exact same settled scene brainSettled
+  // itself renders - only the message box content changes - so they share
+  // brainSettled's own "settled" pose branch below (brainEntranceMovementSettled).
+  const settled = brainEntranceMovementSettled(state.phase);
+  const movementElapsed = state.phase === "brainMoving"
+    ? state.elapsed
+    : settled
+      ? BRAIN_MOVEMENT_SETTLE_ELAPSED
+      : 0;
+  const step = entryStep(movementElapsed);
+  const origin = { x: roomLayout.initialCameraOriginPx.x, y: roomLayout.initialCameraOriginPx.y - step.camPanY };
+  drawRoomTiles(fb, origin, bgFadeY);
+  const turn = scientistTurnFrame(movementElapsed);
+  for (const scientist of roomLayout.objects.scientists) {
+    const pos = tileScreenPos(scientist.tile, origin);
+    const hFlip = turn.turned && scientist.turn === "east";
+    drawNpcFrame(fb, roomNpcs.scientist, turn.frame, pos, hFlip, objFadeY);
+  }
+  drawNpcFrame(fb, roomNpcs.player, step.decoyFrame, decoyScreenPos, step.decoyHFlip, objFadeY);
+  // Noland's own walk (nolandStep) only starts once "brainMoving" begins -
+  // before that he holds his resting player-facing pose (NOLAND_IDLE_FRAME),
+  // not the decoy's own north-facing idle frame reused during the walk
+  // itself (see NOLAND_IDLE_FRAME's own doc).
+  const noland = state.phase === "brainMoving" || settled
+    ? nolandStep(movementElapsed)
+    : { frame: NOLAND_IDLE_FRAME, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
+  drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);
+  drawOpponentMsgbox(fb, msgboxVisual(state), state);
+}

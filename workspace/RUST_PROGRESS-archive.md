@@ -5,6 +5,331 @@ full history regardless.
 
 ---
 
+## R46 — [supervised session, 2026-08-15] **M45 Battle Script Substitute state-construction leaf**
+
+- **State:** `rust-main` = current master `e106866a` plus R43-R45 and verified
+  `Cmd_setsubstitute` worker `1d0fb8bc`. The complete pure
+  `battleScriptSetsubstituteOpcode.ts` registration/state/control projection is
+  native and wasm32-compilable; no ABI or adapter surface was widened. The
+  session remains active and committed.
+- **Did:** ported attacker-first resolution and exact quarter-HP floor/minimum;
+  the failure-only damage-zero/chooser write set; and the success-only attacker
+  `STATUS2_SUBSTITUTE` OR + wrapped-mask clear, substitute-HP write, damage and
+  chooser overwrite, and ignore-substitute hit-marker OR. HP debit remains
+  correctly outside this leaf. Canonical TypeScript execution supplies
+  **1,397 complete cases** plus **131,072** boundary applications covering
+  every maxHP u16 on both sides of its threshold, normalized to **16,383**
+  intervals; the complete **500** selector matrix, **125** missing-attacker
+  probes, full-width packed edges, preservation, repetitions, and permissive
+  registration are pinned. Corpus sha256
+  `8e1e63f440ff847cc2e888805041e378383b726a74ae0f054d1a8df6108b0fd8`.
+- **Next:** recheck active work and select another conflict-free pure Battle
+  Script leaf. M7c opponent generation still waits on canonical TS live
+  generation; main walk-up and animation moving targets remain excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  dispatch/opcode/macro/script, source masks/messages, later HP-debit ownership,
+  validation order and write sets; regenerated twice byte-identically
+  (canonical corpus **13,503,050 bytes**; raw threshold evidence **22,048,947
+  bytes**, sha256
+  `abcd70b385df94da84e99bb005d4a6b03819847adabd3d7bd205a4c263dd2ae8`;
+  generated file **26,250,057 bytes**, sha256
+  `ca7e45ff14b838f7655e23ddfa080cd041ad57a98c975d68e49ac1f8fd97448b`;
+  generator **60,417 bytes**, sha256
+  `1dd196eae78453e5d8f9f6a344cd7d6b8b7afd8a5b53a185ed35b237ac652882`),
+  and reran focused **6/6**, cargo **958/958**, fmt, strict Clippy, and wasm32
+  release. Artifact is **510,306 bytes**, sha256
+  `d5d91c5aca162087d2fc1d30989a976411fa785813e503627770bf81d4dd48b1`.
+  Latest-master smoke is **375/375** and build is green at **676 modules**.
+  Scope stayed inside `core-rs/**`; no unsupported barrier or deferral was
+  added. PAPERCUT: fresh worker lacked the ignored WASM artifact and rebuilt it
+  before browser parity, ~2 min.
+
+## R45 — [supervised session, 2026-08-14] **M44 Battle Script four-weather setter family**
+
+- **State:** `rust-main` = current master `3c913c8a` plus R43-R44 and verified
+  weather worker `d9d0c4ac`. The complete pure
+  `battleScriptSetWeatherOpcode.ts` four-opcode registration/state/control
+  family is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session remains active and committed.
+- **Did:** ported Rain/Sun/Sandstorm/Hail's exact active masks, temporary bits,
+  success choosers, same-weather failure OR/chooser/preservation path, and
+  success-only full weather-word replacement plus five-turn duration. The
+  native factory retains canonical Rain→Sun→Sandstorm→Hail validation order
+  and JavaScript dynamic-id collision behavior without inventing dispatcher/id
+  predicates. Canonical TypeScript execution supplies **1,788 cases** across
+  all **1,024** low-weather-bit cells, **648** timer/chooser edges, **64**
+  result-flag edges, high-u32 bits, cross-weather replacement, alternating and
+  repeated paths, plus **17** registration cases; corpus sha256
+  `7b590b8f3b669c00f943087d24f9618d118ef9d87f75bc202baa0f8f08ab5e03`.
+- **Next:** recheck active work and select another conflict-free pure Battle
+  Script leaf. M7c opponent generation still waits on canonical TS live
+  generation; main and animation moving targets remain excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited all four decomp
+  bodies, dispatch entries, macros, scripts, weather/message constants,
+  registration order/collisions, state preservation and sequences;
+  regenerated twice byte-identically (canonical corpus **2,086,704 bytes**;
+  generated file **3,073,560 bytes**, sha256
+  `d7a227d605e64845ff0d6a08b859186f2b6ba27461706d57fab0417cfabd09d1`;
+  generator **45,125 bytes**, sha256
+  `613cde8f52961fbceee7617c8c3cc40353e117a4c558f3d7b6db0b38ff21b772`),
+  and reran focused **5/5**, cargo **948/948**, fmt, strict Clippy, and wasm32
+  release. Artifact is **497,795 bytes**, sha256
+  `21b35dbdac8b48bcd331a4d119ce77ba8cc7ef5ec927edb1a27315736517cd39`.
+  The worker summary's stale **1,173** count was corrected to the generated
+  test's actual **1,788** during review. Latest-master smoke is **375/375** and
+  build is green at **676 modules**. Scope stayed inside `core-rs/**`; no
+  unsupported barrier, deferral, or papercut was added.
+
+## R44 — [supervised session, 2026-08-14] **M43 Battle Script Fury Cutter counter/power leaf**
+
+- **State:** `rust-main` = current master `b4097e84` plus R43 and verified
+  `Cmd_furycuttercalc` worker `81f7817d`. The complete pure
+  `battleScriptFuryCutterOpcode.ts` registration/state/control projection is
+  native and wasm32-compilable; no ABI, adapter, or animation surface was
+  widened. The session remains active and committed.
+- **Did:** ported attacker-first resolution; the full-u32 no-effect-mask miss
+  branch that resets only the attacker counter and jumps after late label
+  resolution; and the success branch's exact counter-5 fixed point, wrapping
+  u8 increment, source-u16 power assignment, wrapping doublings, overwrite,
+  and Advance control. Canonical TypeScript execution supplies **2,278 cases**:
+  every counter u8 for all attackers (**1,024**), the full **500** selector
+  matrix, **357** power/doubling cases, **104** mask edges, **68** miss resets,
+  **125** ordered missing-attacker probes, unresolved-label cases, registration
+  shape/cardinality, immutable siblings, and repeated paths; corpus sha256
+  `5f73545665073ab151ebd3c4d55d558e80916473d6eff98a190ea7e56a341c34`.
+- **Next:** fold any newer master, recheck active work, and select another
+  conflict-free pure Battle Script leaf. M7c opponent generation still waits
+  on canonical TS live generation; main and animation moving targets remain
+  excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  dispatch table, opcode/macro and script loop, mask/counter/power widths,
+  validation and label order, preservation and repetition; regenerated twice
+  byte-identically (canonical corpus **6,068,742 bytes**; generated file
+  **16,336,817 bytes**, sha256
+  `834df15407dc13cf3a913f4ba650efe9c003910aea0da30541547c2ffe4c42ee`;
+  generator **53,855 bytes**, sha256
+  `36a22601be63b1bf07698c50cb88b40fa74787390048b1f418479a4fd6afa743`),
+  and reran focused **6/6**, cargo **940/940**, fmt, strict Clippy, and wasm32
+  release. Artifact is **497,814 bytes**, sha256
+  `ddce90064ded1e9ef29ad27f1e44ba4f14331bb25ad7c54ff0579652013a0242`.
+  Scope stayed inside `core-rs/**`; no unsupported barrier, deferral, or
+  papercut was added.
+
+## R43 — [supervised session, 2026-08-14] **M42 Battle Script Return/Frustration friendship-power leaf**
+
+- **State:** `rust-main` = current master `b4097e84` plus verified
+  `Cmd_friendshiptodamagecalculation` worker `9e69bb13`. The complete pure
+  `battleScriptFriendshipToDamageOpcode.ts` registration/scalar/state/control
+  projection is native and wasm32-compilable; no ABI or adapter surface was
+  widened. The session remains active and committed.
+- **Did:** ported exact Return `(10 * friendship) / 25` and Frustration
+  `(10 * (255 - friendship)) / 25` integer arithmetic, attacker-first
+  resolution, friendship-before-effect validation, dynamic-power-only
+  overwrite, immutable siblings, and unconditional Advance control. Canonical
+  TypeScript execution supplies **1,437 cases** across both effects and every
+  friendship u8 (**512**), the complete **500** selector-role matrix, prior
+  u16 dynamic-power edges, malformed-number and unreachable-effect ordering,
+  **125** missing-attacker probes, registration shape/cardinality, and
+  repetitions; corpus sha256
+  `458a2c01c29322f17bee7ad9bb3d6f478c77a722e87aed272737d328c357dbaa`.
+- **Next:** recheck active work, then select another conflict-free pure Battle
+  Script leaf. M7c opponent generation still waits on canonical TS live
+  generation; main-owned `openpartyscreen` and presentation work stay excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  dispatch table, opcode/macro, aliased Return/Frustration site, validation
+  order, arithmetic, state preservation and repetition; regenerated twice
+  byte-identically (canonical corpus **878,850 bytes**; generated file
+  **2,153,463 bytes**, sha256
+  `030abe9b342997e0540f56d04e232fc181e34da0ef5e1faad4d1f9723149394f`;
+  generator **37,249 bytes**, sha256
+  `3318803cd374a4b2a791f6fed40f2ecd7c0c1395723f3bec13f983da9541300e`),
+  and reran focused **6/6**, cargo **929/929**, fmt, strict Clippy, and wasm32
+  release. Artifact is **508,338 bytes**, sha256
+  `65e90d675fb5f0b38778124b6be2439b3256b643018b172e7120014ee18d74b1`.
+  Scope stayed inside `core-rs/**`; no unsupported barrier or Rust deferral was
+  added. PAPERCUT: fresh worker lacked the gitignored WASM artifact and had to
+  rebuild it before adapter parity, ~2 min.
+
+## R42 — [supervised session, 2026-08-14] **M41 Battle Script Flail/Reversal HP-power leaf + final wind-down**
+
+- **State:** `rust-main` = current master `e9b256c2` plus verified
+  `Cmd_remaininghptopower` worker `49e74474`. The complete pure
+  `battleScriptRemainingHpToPowerOpcode.ts` scalar/state/control projection is
+  native and wasm32-compilable; no ABI or adapter surface was widened. The
+  session ends committed and green.
+- **Did:** ported the source `GetScaledHPFraction(hp, maxHP, 48)` floor and
+  living-minimum correction, all six inclusive Flail/Reversal power bands,
+  attacker-first resolution, dynamic-power-only overwrite, immutable siblings,
+  and unconditional Advance control. Canonical TypeScript execution supplies
+  **888 cases** across every exact scaled fraction 0–48, **100** varied-maxHP
+  threshold pairs, the complete **500** selector-role matrix, prior u16 dynamic
+  power edges, HP zero/living-min/full boundaries, all aliases, **125** ordered
+  missing-attacker probes, and repetitions; corpus sha256
+  `d6c872d3676d7029e4cb8a6448b77b6ce8d2a36b799af3fc3ed9f4956bb531fa`.
+- **Next:** select the next conflict-free pure Battle Script leaf after a fresh
+  master orient and active-work conflict check. M7c opponent generation still
+  waits on canonical TS live generation; keep moving targets excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the source helper,
+  table, opcode/dispatch, macro and shared Flail/Reversal effect site, u16/u32
+  arithmetic, thresholds, role ordering, state preservation and repetition;
+  regenerated twice byte-identically (canonical corpus **404,901 bytes**;
+  generated file **1,142,734 bytes**, sha256
+  `e7d933f56944aa60db37f53153c846adf509464a53cdd4363137414fba1c050a`;
+  generator **28,427 bytes**, sha256
+  `a137c6485b305f3df8a79490912b6d0e58b3423701a6df8fceaa3c911689e0b4`),
+  and reran focused **6/6**, cargo **920/920**, fmt, strict Clippy, and wasm32
+  release. Final artifact is **509,811 bytes**, sha256
+  `5ed2c97a0f28c304ea43dde9dc5b39be53210365eb86bbe33f9832b546f12c0c`.
+  Full npm is green at **1,024 files / 9,833 passed / 224 skipped** and build
+  is green at **675 modules**. Wind-down soaks: vanilla **20/20 OK**; full
+  policy **50/60 OK, 9 CRASH, 1 HANG**, exactly the main ledger's open #89
+  Baton Pass nine-seed set and #90 seed-51 presentation hang. Scope stayed
+  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+  PAPERCUT: fresh worker reported Cargo's fmt subcommand unavailable despite a
+  direct rustfmt installation, ~1 min.
+
+## R41 — [supervised session, 2026-08-14] **M40 Battle Script Torment status leaf + wind-down**
+
+- **State:** `rust-main` = current master `77cc08e1` plus verified
+  `Cmd_settorment` worker `b4d693e1`. The complete pure
+  `battleScriptSettormentOpcode.ts` handler/state/control projection is native
+  and wasm32-compilable; no ABI or adapter surface was widened. The session
+  ends committed and green.
+- **Did:** ported exact opcode/dispatcher/operand shape validation before target
+  resolution, full-u32 `STATUS2_TORMENT` inspection, success-only target bit
+  OR, already-set no-write failure jump, and deliberately late failure-label
+  resolution. Canonical TypeScript execution supplies **560 cases** across all
+  four targets, the full **500** selector-role matrix, packed-u32 bit-31 edges,
+  complete target/sibling state, ordered malformed/missing/unresolved errors,
+  resolution skipped on success, and repeated advance-to-failure/idempotent
+  paths; corpus sha256
+  `2bc252582eb5971f3965826a44f7fec60e045794749f6a3645acc02f5e31b916`.
+- **Next:** select the next conflict-free pure Battle Script leaf after
+  re-orienting against master and active TS work. M7c opponent generation still
+  waits on canonical TS live generation; keep moving targets excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  opcode/macro/call site, bit-31 constant, handler error order, expression-bound
+  resolution, full-width state preservation, and repetition; regenerated twice
+  byte-identically (canonical corpus **1,443,119 bytes**; generated file
+  **3,977,003 bytes**, sha256
+  `49e8fdd4ed4d02e89150defa8271363c696a662dd9b050c3c2418682517ffb66`;
+  generator **40,663 bytes**, sha256
+  `ec9d9d5213f2e1585e57b96bd46c97a631b535ffa77c7aceb01e5c05619daab4`),
+  and reran focused **9/9**, cargo **914/914**, fmt, strict Clippy, and wasm32
+  release. Final artifact is **496,864 bytes**, sha256
+  `8b4898136c07cab628c486f485adcc52c66f120361622f99b1fd1688543da9ad`.
+  After folding master's #88 fix, full npm is green at **1,024 files / 9,833
+  passed / 224 skipped** and build is green at **675 modules**. Scope stayed
+  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+  PAPERCUT: worker's long npm/build sessions yielded several ambiguous runner
+  receipts before their terminal results, ~4 min.
+
+## R40 — [supervised session, 2026-08-14] **M39 Battle Script Spikes setup leaf**
+
+- **State:** `rust-main` = current master `87038ec0` plus verified
+  `Cmd_trysetspikes` worker `e101e3c2`. The complete pure
+  `battleScriptTrysetspikesOpcode.ts` decision/state/control projection is
+  native and wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported handler operand validation, ordered attacker resolution,
+  attacker-side inversion, the exact `spikesAmount == 3` failure branch and
+  late label resolution, attacker-only Pressure exemption on failure, and the
+  success-only opposing-side Spikes-status OR plus wrapping source-u8 layer
+  increment. Canonical TypeScript execution supplies **1,262 cases** across
+  both sides, all aliases, the complete u8 layer domain, full-u32 status edges,
+  every selector combination, side-timer siblings, all four prior Pressure
+  bits, ordered errors, corrupt wrapping, and repeated paths; corpus sha256
+  `212c83c5ac0d130511f93fba2772f855450056e761449bf3c51ff61c4631dba0`.
+- **Next:** while main-owned #88 remains the only shared-suite baseline
+  regression, select another conflict-free pure Battle Script leaf that does
+  not overlap active TS work. M7c opponent generation still waits on
+  canonical TS live generation.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  opcode/macro/call site, source constants, handler error order, exact-equality
+  branch, full-width status preservation, immutable siblings, and repetitions;
+  regenerated twice byte-identically (generated file **4,719,009 bytes**,
+  sha256
+  `5913da3b2e768e344e608d24f5288603d7f4bfa0e44951037414cb5eddb715ac`;
+  generator **46,346 bytes**, sha256
+  `a40c0955e1d6d8c3c3a0037f94b1f4d5b3f55d8afca912310c29b8e20b7d6b36`),
+  and reran focused **9/9**, cargo **905/905**, fmt, strict Clippy, and wasm32
+  release. Artifact is **509,806 bytes**, sha256
+  `3f77c7a3993610e23303787e0da2a4d00ad2de3a0fc32946c6a144b8a4901ba2`;
+  build is green. Full npm reproduced exactly current master's two main-owned
+  #88 `randomRoundSoak.test.ts` failures with **1,021 files / 9,820 passed /
+  223 skipped**. Scope stayed inside `core-rs/**`; no unsupported barrier or
+  Rust deferral was added.
+  PAPERCUT: long npm terminal output required log-based completion tracking,
+  ~2 min.
+
+## R39 — [supervised session, 2026-08-14] **M38 Battle Script attacker/target swap leaf**
+
+- **State:** `rust-main` = current master `da55e159` plus verified
+  `Cmd_swapattackerwithtarget` worker `3ace7c14`. The complete three-command
+  pure projection of `battleScriptSnatchOpcode.ts` is now native and
+  wasm32-compilable; no ABI or adapter surface was widened.
+- **Did:** ported ordered attacker-then-target resolution, exact role exchange,
+  and full-u32 XOR of only `HITMARKER_SWAP_ATTACKER_TARGET` (bit 12), while
+  preserving `effectBattler`, `fainted`, and `scriptingBattler`. Every valid
+  path `Advance`s and a second application restores the complete input.
+  Canonical TypeScript execution supplies **579 cases**, including the full
+  **400-cell** role/effect/fainted matrix, **160** full-u32 hit-marker edges,
+  all aliases, ordered errors, siblings, and involution checks; corpus sha256
+  `eb72926f0c8b959deb7766603f8978b8ab219e0ae9abc191646a02ef181ff76e`.
+- **Next:** after main-lane #88 restores the shared full-suite baseline, select
+  the next conflict-free pure Battle Script leaf. M7c opponent generation
+  still waits on canonical TS live generation; active TS modules remain
+  excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  opcode/macro, all three concrete source sites, full-width marker semantics,
+  ordered errors, aliases, and involution; regenerated twice byte-identically
+  (generated file **906,706 bytes**, sha256
+  `4c6cff4ce3f39deadd7c395be17ae8fb13efba1b9f8e1f60d5bd95cd7d2ed12f`),
+  and reran focused **8/8**, cargo **896/896**, fmt, strict Clippy, and wasm32
+  release. Artifact is **496,765 bytes**, sha256
+  `8a361d0e8b30227781045d6efab09c2ab9d9e3d597da46ab889c60d15fd11272`;
+  build is green at **673 modules**. The full npm union reached **1,021 passed
+  files / 9,820 passed / 223 skipped**, with only the two pre-existing
+  `randomRoundSoak.test.ts` failures that current master already records as
+  main-owned #88; this Rust-only fold did not touch their code or tests. Scope
+  stayed inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+  PAPERCUT: fresh worker artifact provisioning plus one mistyped artifact
+  filename in supervisor verification, ~3 min.
+
+## R38 — [supervised session, 2026-08-14] **M37 Battle Script Snatch role-rebinding leaf**
+
+- **State:** `rust-main` = current master `edb54f4f` plus verified
+  `Cmd_snatchsetbattlers` worker `cc70dc78`. The complete pure selector-role
+  and scripting-battler projection is native and wasm32-compilable. Only the
+  final attacker/target swap sibling remains in this TS module; no ABI or
+  adapter surface was widened.
+- **Did:** ported exact attacker-then-target resolution, original-attacker
+  capture into `effectBattler`, self-target conditional rebinding, target
+  replacement with the original scripting battler, and scripting-battler
+  handoff to the original attacker. `fainted` is preserved and every valid
+  path `Advance`s. Canonical TypeScript execution supplies **1,622 cases**,
+  including the full **1,600-cell** attacker/target/scripting/effect/fainted
+  matrix, ordered errors, all aliases, and repeated paths whose second call
+  changes from non-self to self-targeted; corpus sha256
+  `53c9f9d8642180e20c6cd2f75e0eb11a1632d52894bb070f2c6342f81bbd517e`.
+- **Next:** port only the final conflict-free pure
+  `Cmd_swapattackerwithtarget` sibling, preserving full-u32 hit-marker XOR
+  semantics and ordered role errors. M7c opponent generation still waits on
+  canonical TS live generation; active TS modules remain excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp,
+  opcode/macro and sole concrete call site, exact role write order, aliases,
+  and branch-changing repetition; regenerated twice byte-identically
+  (generated file **2,109,170 bytes**, sha256
+  `5c39688746cb1b69507e192fff3b7f892c8b5799c67bcb1f5360094806579c9b`),
+  and reran focused **7/7**, fmt, strict Clippy, and wasm32 release. Worker
+  Rust gates passed cargo **888/888**. The worker's optional npm run lacked
+  the ignored artifact; supervisor rebuilt it and proved the merged union:
+  full npm **1,020 files / 9,813 passed / 223 skipped**, build **672 modules**.
+  Artifact is **509,840 bytes**, sha256
+  `34d424497e3966379b6b03f46d6082bb7a6d8d0e00275b1922899c13f7ffc07c`.
+  Scope stayed inside `core-rs/**`; no unsupported barrier or Rust deferral
+  was added.
+  PAPERCUT: worker invoked Cargo formatting once outside `core-rs/`, ~1 min.
+
 ## R37 — [supervised session, 2026-08-14] **M36 Battle Script Snatch setup leaf**
 
 - **State:** `rust-main` = current master `770a40ee` plus verified Snatch

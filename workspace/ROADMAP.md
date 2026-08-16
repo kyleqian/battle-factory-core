@@ -1090,6 +1090,19 @@ picks from PROGRESS 1273):**
    once for all Factory matches, not as a brain-only fork. The memo's
    sequencing note stands: resolve its §1.6 gold-discrepancy probe
    before writing gold's disputed box. Estimated 4-6 worker steps.
+   **PROGRESS (2026-08-15 supervisor session):** §1.6 probe RESOLVED
+   (lab artifact; faithful gold = "Get a move on!" per decomp); script
+   ground truth extracted (`factory-brain-walkup-script.json`); silver
+   dense evidence banked (`noland-silver-walkup-presentation-map.md`);
+   BattleRoom brain entrance BUILT + app-side staged-compare harness
+   (B1/B1b, entrance window 256/256); silver 8-page speech + battle-cry
+   + in-session heard-flag + handoff BUILT (B2, four speech windows
+   exact). REMAINING: Noland brainMoving walk/pan cadence residual
+   (documented in battleRoom.ts); PreBattleRoom call-scene + menu =
+   step A (design memo `docs/walkup-step-a-design.md`, dispatchable);
+   gold entrance/speech; the top-layer `BattleLab.prepare()` brain
+   staging gap blocks oracle acceptance for the call-scene + gold
+   (recommend fixing oracle-side before step A ships).
 2. **#87 = option (c)**: every committed window that ends before its
    ready transition stays exactly as-is; calibrate only windows that
    must cross it (today: the silver Brain-reveal tail, 648/701), each
@@ -1098,7 +1111,15 @@ picks from PROGRESS 1273):**
 
 Order for the next runs (stability first): #89 → #90 triage → #87(c)
 calibration (small) → the FAITHFUL walk-up program → chained-round
-distribution-parity breadth.
+distribution-parity breadth. **#87(c) calibration DONE** (2026-08-15,
+PROGRESS 1276): silver Brain-reveal 648/701 → 690/701, gold + pre-ready
+windows unaffected; ISSUES #87 trimmed to a settled mechanism record.
+
+**FAITHFUL walk-up program progress:** step B1 (BattleRoom entrance —
+Noland visible-from-start, "Get a move on!", simultaneous walk-in,
+scientist turn) is **DONE** (2026-08-15, PROGRESS 1277); its own oracle
+dense-compare leg is queued, not yet run (see that entry's residual).
+Next: B2 (silver/gold speech).
 
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary

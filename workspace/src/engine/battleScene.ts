@@ -4581,10 +4581,61 @@ export function generatedPlayerReadyLagSpeciesFormula(
     + cryDurationTicks(generatedPlayerSpeciesId(state));
 }
 
+/**
+ * MEASURED, NOT DERIVED (ISSUES #87 option (c), 2026-08-14 night decision).
+ * Neither leg of the real pre-ready ROM span
+ * (`TryDoEventsBeforeFirstTurn`'s switch-in ability/item/weather loop, then
+ * `HandleTurnActionSelectionState`'s `ChooseAction` dispatch/AI-ack round
+ * trip — both in `reference/pokeemerald/src/battle_main.c`) is predictable
+ * from source (rounds 13-17, ISSUES #87); per the user's decision, only the
+ * ONE committed compare window whose capture range crosses the ready
+ * transition (the silver Frontier-Brain reveal tail,
+ * `factory-round-battle7-noland-reveal-off`, 648/701) gets a calibrated
+ * offset, keyed off the route-level `isSilverBrainReveal` fact (see its doc
+ * on `FactoryBattleStartIntroState`) rather than a battle-number/trace-name
+ * check.
+ *
+ * Measured directly against that fixture's own dense oracle capture with
+ * `tools/probe/probe-ready-lag-chooseaction-handshake.ts` (TANGELA/DELCATTY
+ * scenario): the RAM ready predicate
+ * (`playerControllerCommand===18 && controllerExecFlags===1`) fires 6 ticks
+ * after this formula's own (species-formula) prediction — the same
+ * formula-relative convention the +4/+5 baseline fixtures in that probe
+ * measure by. Cross-checked with the leg-split instrument
+ * (`tools/probe/probe-readylag-span-tickbytick-plus7.ts`): the raw
+ * playerIntroComplete-to-ready span is switch-in-loop leg 4 + AI-ack leg 3
+ * = 7 ticks, the same {4,3} split as the PUPITAR/DELCATTY +7 fixture — both
+ * probes agree this window sits at the top of the already-documented +4..+7
+ * range, confirming a per-fixture offset in that neighborhood is the right
+ * mechanism, not a formula defect.
+ *
+ * The exact integer adopted below (9, same convention `GENERATED_PLAYER_
+ * READY_LAG` itself already uses: "the value the committed pin needs", not
+ * a value re-derivable from the RAM ticks by hand) is calibrated the same
+ * way — against this window's own dense compare
+ * (`factory-round-battle7-noland-reveal-off`) — because the RAM probes'
+ * oracle-tick numbering and this reducer's own button-press-relative
+ * `elapsed` clock carry a few ticks of unmodeled domain skew that neither
+ * probe resolves alone (their figures bound the offset to roughly this
+ * fixture's own {4,3}-leg neighborhood; the compare pins the exact tick).
+ * 9 is the value that (a) sits inside that measured neighborhood and (b)
+ * empirically zeroes the downstream post-ready periodic-render drift for
+ * every later captured frame, which a wrong tick count does not (7 and 8
+ * both leave that drift visible; 10 overshoots and reintroduces it). The
+ * remaining residual after adopting it (11 of 701 frames: 420, 503 —
+ * present identically at offset 0, i.e. before this fix, so unrelated to
+ * readiness — and 647-655, an offset-invariant-width pre-existing render
+ * seam right at the not-ready/ready boundary) is untouched by this
+ * constant at any value tried and is out of this step's scope.
+ */
+const MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET = 9;
+
 function generatedPlayerReadyLag(state: FactoryBattleStartIntroState): number {
-  return state.isCanonicalAnchorIntro
-    ? GENERATED_PLAYER_READY_LAG
-    : generatedPlayerReadyLagSpeciesFormula(state);
+  if (state.isCanonicalAnchorIntro) return GENERATED_PLAYER_READY_LAG;
+  const speciesFormula = generatedPlayerReadyLagSpeciesFormula(state);
+  return state.isSilverBrainReveal
+    ? speciesFormula + MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET
+    : speciesFormula;
 }
 /** First Scene-OFF render after the release callback leaves player OAM y2=0. */
 const GENERATED_PLAYER_NEUTRAL_Y_VISUAL_TICK = 1670;
@@ -44538,7 +44589,7 @@ export function renderBattleResolutionForcedPartySelect(
           fb[o + 2] = blendComponentToWhite(fb[o + 2]!, bldy);
         }
       }
-      if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START) {
+      if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START && view.switchIn.partyStates !== null) {
         drawTypedPartyStatusSummary(
           fb,
           view.switchIn.battler,

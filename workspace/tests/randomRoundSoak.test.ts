@@ -119,6 +119,35 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(second.lastActions).toEqual(first.lastActions);
   });
 
+  it("also reaches the milestone under the winning policy", () => {
+    const result = runSeed(12, {
+      maxFrames: 6_000,
+      renderEvery: 8,
+      policy: "winning",
+      stopAtFirstActionMenu: true,
+    });
+    expect(result).toMatchObject({
+      outcome: "OK",
+      endState: "milestone:first-action-menu",
+    });
+  });
+
+  it("is deterministic per seed under the winning policy", () => {
+    // A deeper run than the milestone determinism pin above: the winning
+    // policy's two overrides (fight-move power ranking, voluntary-switch
+    // decline) both live well past battle 1's first action menu, so this
+    // exercises them across a whole round's worth of ticks.
+    const options = {
+      maxFrames: 600_000,
+      renderEvery: 0,
+      policy: "winning" as const,
+      stopAtFirstRoundDecision: true,
+    } as const;
+    const first = runSeed(12, options);
+    const second = runSeed(12, options);
+    expect(second).toEqual(first);
+  });
+
   it("earns all seven generated wins through the live tick/render and terminal seams", () => {
     const options = {
       maxFrames: 200_000,
@@ -239,22 +268,47 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  // ISSUES #89: seed 27 under "full" policy now crashes at round 1 battle 1
-  // turn 10 on an unimplemented Baton Pass openpartyscreen machine-barrier,
-  // well before ever reaching this pin's documented battle-4-turn-16
-  // scenario. Confirmed independent of #88/round-chaining (reproduces
-  // identically on the pre-#88-fix commit) — a separate, pre-existing gap.
-  // Unskip once #89 lands, or replace the fixture if the fix changes which
-  // seed/turn exhibits the original #86 concern.
-  it.skip("ISSUES #86: presents a forced replacement's terminal sandstorm continuation", () => {
-    // Seed 27 battle 4 turn 16 forces MURKROW in at 4 HP. The same genuine
-    // reducer receipt then runs sandstorm damage, faints MURKROW, and returns
-    // a terminal trainer-win boundary. Completing the send-out animation must
-    // resume those queued typed commands rather than demand a player command.
-    const result = runSeed(27, { maxFrames: 71_107, renderEvery: 0 });
-    expect(result.errorMessage ?? "").not.toMatch(
-      /Slice 3 resolution completed without a player command boundary/,
-    );
+  it("ISSUES #89: seed 27's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+    // Seed 27 (full policy) selects Baton Pass mid-turn and used to crash at
+    // round 1 battle 1 turn 10, frame 30798, on an unimplemented
+    // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
+    // (driveTrainerBoundary had no handling for a player-side mid-action
+    // openpartyscreen halt). It's now a resumable player-choice halt that
+    // hands off to the forced party selector instead of hard-failing, so the
+    // whole round plays out to a genuine finish. Pin the meaningful outcome
+    // shape (progressed past the old crash point, no throw, real endState),
+    // not the exact settling frame/turn — those drift with unrelated
+    // downstream RNG-consumption changes.
+    const result = runSeed(27, { maxFrames: 80_000, renderEvery: 0 });
+    expect(result.errorMessage ?? "").not.toMatch(/openpartyscreen|machine-barrier/i);
+    expect(result.frames).toBeGreaterThan(30_798);
     expect(result).toMatchObject({ outcome: "OK", endState: "roundLost" });
   });
+
+  // ISSUES #86's original concern (a forced replacement's terminal weather
+  // continuation) was pinned at seed 27 battle 4 turn 16: MURKROW forced in
+  // at 4 HP, then the same genuine reducer receipt runs sandstorm damage,
+  // faints MURKROW, and returns a terminal trainer-win boundary without
+  // demanding an intervening player command. The #89 fix changes seed 27's
+  // RNG-consumption trajectory from turn 10 onward (Baton Pass's switch no
+  // longer crashes, so it now actually happens and consumes RNG); post-fix,
+  // seed 27 loses in battle 1 itself (confirmed via runSeed(27, {maxFrames:
+  // 80_000, collectDiagnostics: true}) -> battleIndex 0, never reaches
+  // battle 4) and never revisits the documented scenario. A bounded search
+  // for a fresh repro of the same mechanism — an instrumented sweep of
+  // seeds 0:350 (full policy) and 0:150 (vanilla) through the production
+  // soak driver, plus seeds 0:3200 through a second, decision-level harness
+  // (driveGeneratedRoundToCompletion-style: deterministic first-legal-move/
+  // first-legal-switch policy, no rendering), all checking the exact source
+  // condition (a forced-switch segment with commands after the last typed
+  // switch-in whose overall receipt is a terminal boundary) — found no
+  // fresh occurrence in ~3,700 seed/policy trials. The underlying fix itself
+  // (advanceFactoryRoundBattleResolution's nextCommandIndex resume branch,
+  // factoryRoundBattleOrchestrator.ts ~2090-2114) is untouched and still
+  // guarded by the three sibling ISSUES #86 pins above (seeds 45/16/14, each
+  // exercising the same "commands after switch-in" resume path for a
+  // non-terminal continuation); only the terminal-specific variant lost its
+  // natural repro. Left unpinned rather than fabricating a synthetic/injected
+  // state the game could never actually reach — see PROGRESS.md for the
+  // search performed and this as an explicit open follow-up.
 });

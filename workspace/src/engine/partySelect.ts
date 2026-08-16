@@ -206,16 +206,18 @@ export function createPartySelectStateFromForcedSwitch(
       personality: corpusMember.personality,
       abilitySlot: corpusMember.abilitySlot,
       friendship: corpusMember.friendship,
-      fainted: partyIndex === request.faintedPartyIndex,
+      // `faintedPartyIndex` names the outgoing slot generically (`Cmd_
+      // openpartyscreen`'s own convention, `battleScriptOpenPartyScreenOpcode
+      // .ts`) -- ISSUES #89's Baton Pass switch opens this same screen for a
+      // still-living outgoing member, matching `createBattlePartySelectState`
+      // (`battlePartySelect.ts`)'s own `fainted: member.hp === 0`: only a
+      // genuine zero-HP outgoing slot renders as fainted.
+      fainted: partyIndex === request.faintedPartyIndex && battleMember.hp === 0,
       legal: legalIndexes.has(partyIndex),
       item: corpusMember.item,
     });
   }) as unknown as readonly [PartySelectMember, PartySelectMember, PartySelectMember];
 
-  const faintedPartyIndex = request.faintedPartyIndex as 0 | 1 | 2;
-  if (party[faintedPartyIndex].hp !== 0) {
-    throw new Error("party-select presentation requires the requested fainted member to have zero HP");
-  }
   for (const legalPartyIndex of request.legalPartyIndexes) {
     if (
       legalPartyIndex > 2
@@ -492,14 +494,22 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
   if (newKeys.has("A")) {
     if (!next.submenuOpen) return { ...next, submenuOpen: true };
     const selected = next.party.find((member) => member.partyIndex === selectedPartyIndex(next));
-    if (!selected?.legal) {
-      return selected?.fainted
-        ? {
-            ...next,
-            submenuOpen: false,
-            message: `${selected.species} has no energy\nleft to battle!`,
-          }
-        : next;
+    if (selected === undefined) return next;
+    if (!selected.legal) {
+      // TrySwitchInPokemon (party_menu.c:5811-5823): a zero-HP outgoing slot
+      // (the classic forced-switch dance) refuses with "has no energy"; a
+      // live outgoing slot -- ISSUES #89, Baton Pass's own still-living
+      // switch -- refuses with "is already in battle" instead. Either way
+      // the submenu must close and show a real message, not silently no-op
+      // (a no-op here left the driver's DOWN/A cycle permanently stuck,
+      // since DOWN is refused while the submenu is open).
+      return {
+        ...next,
+        submenuOpen: false,
+        message: selected.fainted
+          ? `${selected.species} has no energy\nleft to battle!`
+          : `${selected.species} is already\nin battle!`,
+      };
     }
     return { ...next, sendOutElapsed: 0 };
   }

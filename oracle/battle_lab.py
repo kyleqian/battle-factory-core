@@ -9,7 +9,12 @@ the legacy active-battler loadout overrides.  ``factoryBrain`` stages Noland's
 challenge-2 (silver) or challenge-5 (gold) final battle: the trainer identity
 is structural (always ``TRAINER_FRONTIER_BRAIN``) and his party is generated
 live by the ROM's ``FillFactoryBrainParty``, with ``overrides.parties``
-optionally pinning a known roster.  It never writes HP, status,
+optionally pinning a known roster.  ``factoryBrain`` with ``walkup: true``
+stages the *approach* to that battle instead of the battle itself: the ROM's
+own post-win script increments the streak and warps back into the
+PreBattleRoom, playing the genuine heal line, Noland phone call, and
+GO ON/RECORD/REST/RETIRE menu; the checkpoint lands with that menu open and
+the caller's trace answers it.  It never writes HP, status,
 volatile, stat-stage, weather, side-condition, or other transient battle state.
 
 Raw addresses and C-structure offsets stay private to this module.  The HTTP
@@ -112,6 +117,79 @@ SB2_FACTORY_WIN_STREAK_SINGLES_50 = 0xDE2
 SB2_FACTORY_RENTS_SINGLES_50 = 0xDF6
 SB2_RENTAL_MONS = 0xE70
 
+# --- Frontier-Brain walk-up staging (`factoryBrain` + `walkup: true`) -------
+# The ordinary staging re-enters the rental draft over the canonical
+# checkpoint, whose parked field script is the *fresh-draft* PreBattleRoom
+# entry: after the draft it resumes directly at EnterBattleRoom ("Right this
+# way, please!") and never plays the post-battle re-entry content — the heal
+# line, Noland's phone call, the GO ON/RECORD/REST/RETIRE menu, and the
+# pre-head swap prompt (RAM-probed in the workspace's
+# docs/noland-silver-walkup-presentation-map.md §0: the map's OnFrame
+# dispatch needs VAR_0x8006 == 1, which nothing on the staged path writes).
+# The walk-up staging redirects that parked script pointer to the ROM's own
+# post-win fragment (the BattleRoom's DefeatedOpponent label), so the ROM
+# itself performs the genuine bookkeeping (win-streak-swaps stat, streak
+# increment, battle-number increment), sets VAR_0x8006 = 1, and warps back
+# into the PreBattleRoom — from where OnWarp/OnFrame run the real
+# ReturnToRoomFromBattle scene, byte-for-byte the ROM's own 21st/42nd-battle
+# path. The route stops with the ask-ready multichoice open (cursor on
+# GO ON); the caller's post-checkpoint trace chooses the answer.
+#
+# struct ScriptContext field offsets (include/script.h) and the script-mode
+# enum (src/script.c). sGlobalScriptContext itself is file-static and absent
+# from the linker map, so prepare() locates it by scanning IWRAM for the
+# unique struct whose cmdTable/cmdTableEnd point at gScriptCmdTable and
+# whose parked scriptPtr is the fresh-draft resume label.
+SCRIPT_CTX_MODE = 0x1
+SCRIPT_CTX_NATIVE_PTR = 0x4
+SCRIPT_CTX_SCRIPT_PTR = 0x8
+SCRIPT_CTX_CMD_TABLE = 0x5C
+SCRIPT_CTX_CMD_TABLE_END = 0x60
+# ScriptContext_Stop (waitstate, multichoice) only flips the separate
+# file-static status byte; the context's own mode stays BYTECODE while
+# parked, and only native waits (waitmessage, waitbuttonpress, movement)
+# switch it to NATIVE. Verified live against the canonical checkpoint.
+SCRIPT_MODE_BYTECODE = 1
+SCRIPT_MODE_NATIVE = 2
+IWRAM_RANGE = (0x03000000, 0x03008000)
+# Exported script labels (data symbols, present in the linker map).
+WALKUP_PARKED_LABEL = (
+    "BattleFrontier_BattleFactoryPreBattleRoom_EventScript_EnterBattleRoom"
+)
+WALKUP_REDIRECT_LABEL = (
+    "BattleFrontier_BattleFactoryBattleRoom_EventScript_DefeatedOpponent"
+)
+WALKUP_ASK_READY_LABEL = (
+    "BattleFrontier_BattleFactoryPreBattleRoom_EventScript_AskReadyForHead"
+)
+WALKUP_ASK_READY_NO_RECORD_LABEL = (
+    "BattleFrontier_BattleFactoryPreBattleRoom_EventScript_AskReadyForHeadNoRecord"
+)
+WALKUP_ASK_SWAP_LABEL = (
+    "BattleFrontier_BattleFactoryPreBattleRoom_EventScript_AskSwapBeforeHead"
+)
+# SaveBlock1.flags (include/global.h 0x1270) and the Factory symbol flags
+# (include/constants/flags.h). GetFrontierBrainStatus needs the silver
+# symbol set before the challenge-5 (gold) encounter reads as GOLD — the
+# real game can never reach battle 42 without it. Both factoryBrain
+# stagings (battle and walk-up) derive it from challengeNum.
+SB1_FLAGS = 0x1270
+FLAG_SYS_FACTORY_SILVER = 0x8CC
+FLAG_SYS_FACTORY_GOLD = 0x8CD
+# Bit 3 of the 0xCA9 bitfield byte (global.h: lvlMode:2, challengePaused:1,
+# disableRecordBattle:1). The walk-up clears it: the genuine path re-enables
+# recording before every regular battle, so battle 20's aftermath has it
+# clear and the ask-ready menu is the four-option GO ON/RECORD/REST/RETIRE.
+SB2_DISABLE_RECORD_BATTLE_BIT = 0x8
+# Walk-up ack budget: four boxes need an A (heal line, "wait a few
+# moments", "understood, sir", "message from the head") and the fanfare/
+# attendant-movement waits burn a few more inert cycles; 16 doubles the
+# need. The whole walk-up internal route (120 lead-in + 442 worst-case
+# confirm-only rental selection + 16 * 134 ack loop = 2706 frames, pinned
+# by test_walkup_route_length_stays_under_its_own_frame_bound) stays under
+# MAX_PRE_CHECKPOINT_FRAME, so walk-up requests share the ordinary bound.
+WALKUP_MAX_ACKS = 16
+
 REGULAR_TRAINER_RANGES = (
     (0, 99),
     (80, 119),
@@ -152,8 +230,14 @@ RENTAL_RANK_THRESHOLDS = (15, 22, 29, 36, 43)
 SELECT_MON_AT_CURSOR = (
     (2, ("A",)), (28, ()), (2, ("DOWN",)), (4, ()), (2, ("A",)),
 )
-SELECT_CONFIRM_TO_ACTION_MENU = (
+# The confirm-accept prefix ("Are these three POKéMON OK?" -> YES plus the
+# fade-out) is also the walk-up staging's hand-off point: everything after
+# it drives the fresh-draft path's own intro, which the walk-up redirect
+# replaces with the post-win warp back into the PreBattleRoom.
+SELECT_CONFIRM_ACCEPT = (
     (70, ()), (2, ("A",)), (130, ()),
+)
+SELECT_CONFIRM_TO_ACTION_MENU = SELECT_CONFIRM_ACCEPT + (
     (8, ()), (2, ("A",)), (96, ()), (24, ()), (162, ()), (54, ()), (100, ()),
     (2, ("A",)), (196, ()), (14, ()), (210, ()), (60, ()), (100, ()),
     (2, ("A",)), (144, ()), (180, ()), (60, ()), (80, ()),
@@ -162,6 +246,7 @@ SELECT_CONFIRM_TO_ACTION_MENU = (
 
 def rental_selection_route(
     selected_positions: tuple[int, int, int],
+    through_confirm_only: bool = False,
 ) -> tuple[tuple[int, tuple[str, ...]], ...]:
     route: list[tuple[int, tuple[str, ...]]] = []
     cursor = 0
@@ -175,7 +260,10 @@ def rental_selection_route(
         cursor = target
         if index < len(selected_positions) - 1:
             route.append((36, ()))
-    route.extend(SELECT_CONFIRM_TO_ACTION_MENU)
+    route.extend(
+        SELECT_CONFIRM_ACCEPT if through_confirm_only
+        else SELECT_CONFIRM_TO_ACTION_MENU
+    )
     return tuple(route)
 
 
@@ -384,7 +472,7 @@ def validate_request(value: object, profile: str) -> dict:
     allowed = {
         "schemaVersion", "mode", "profile", "level", "challengeNum",
         "battleNum", "trainerId", "playerSetIds", "opponentSetIds",
-        "rentalSwapCount", "seed", "overrides", "trace",
+        "rentalSwapCount", "seed", "overrides", "trace", "walkup",
         "preCheckpointCaptureFrames", "preCheckpointCaptureAllFrames",
     }
     unknown = set(value) - allowed
@@ -406,6 +494,15 @@ def validate_request(value: object, profile: str) -> dict:
         )
     level = _integer(value.get("level", 50), "level", 50, 50)
     max_set_id = LEVEL_50_MAX_SET_ID
+    walkup = value.get("walkup", False)
+    if not isinstance(walkup, bool):
+        raise ValueError("walkup must be a boolean")
+    if walkup and mode != "factoryBrain":
+        raise ValueError(
+            "walkup is only available in mode 'factoryBrain'; the "
+            "post-battle PreBattleRoom re-entry it stages is the "
+            "Frontier-Brain walk-up"
+        )
     if mode == "factoryBrain":
         forbidden = {"trainerId", "battleNum", "opponentSetIds"} & set(value)
         if forbidden:
@@ -452,6 +549,13 @@ def validate_request(value: object, profile: str) -> dict:
     if mode == "mechanicLab":
         _validate_loadout_overrides(overrides)
     if mode == "factoryBrain" and overrides:
+        if walkup:
+            raise ValueError(
+                "walkup does not permit overrides: the checkpoint lands at "
+                "the ask-ready menu, before any battle initializes, so the "
+                "party-staging hooks never run; the eventual battle is "
+                "seed-deterministic instead"
+            )
         if "battlers" in overrides:
             raise ValueError(
                 "factoryBrain does not permit overrides.battlers; the Brain "
@@ -491,6 +595,7 @@ def validate_request(value: object, profile: str) -> dict:
         "seed": seed,
         "overrides": overrides,
         "trace": trace,
+        "walkup": walkup,
         "preCheckpointCaptureFrames": pre_checkpoint_capture_frames,
         "preCheckpointCaptureAllFrames": pre_checkpoint_capture_all_frames,
     }
@@ -561,6 +666,9 @@ class BattleLab:
         self.oracle = oracle
         self.profile = profile
         self.catalog = FacilityCatalog(oracle)
+        # IWRAM address of the file-static sGlobalScriptContext, discovered
+        # on first walk-up staging and stable for the process lifetime.
+        self._script_context_addr: int | None = None
 
     def prepare(self, request: dict) -> dict:
         """Stage a battle and return the semantic setup descriptor."""
@@ -603,23 +711,39 @@ class BattleLab:
 
         capture_pre_checkpoint()
 
+        walkup = request["walkup"]
         save2 = self.oracle.read_u32(self.oracle.symbols["gSaveBlock2Ptr"])
         challenge_index = min(request["challengeNum"], 7)
+        lvl_mode_clear = 0x3 | (SB2_DISABLE_RECORD_BATTLE_BIT if walkup else 0)
         self.oracle.write_u8(
             save2 + SB2_FRONTIER_LVL_MODE,
-            self.oracle.read_u8(save2 + SB2_FRONTIER_LVL_MODE) & ~0x3,
+            self.oracle.read_u8(save2 + SB2_FRONTIER_LVL_MODE) & ~lvl_mode_clear,
         )
-        self.oracle.write_u16(save2 + SB2_FRONTIER_BATTLE_NUM, request["battleNum"])
         current_streak = request["challengeNum"] * 7 + request["battleNum"]
+        # The walk-up stages the state right after the *previous* battle's
+        # win: the redirected post-win fragment then performs the ROM's own
+        # streak and battle-number increments to the final values.
+        self.oracle.write_u16(
+            save2 + SB2_FRONTIER_BATTLE_NUM,
+            request["battleNum"] - 1 if walkup else request["battleNum"],
+        )
         self.oracle.write_u16(
             save2 + SB2_FACTORY_WIN_STREAK_SINGLES_50,
-            current_streak,
+            current_streak - 1 if walkup else current_streak,
         )
         # The stock Emerald bug reads the Tower streak for opponent IVs.
+        # Nothing on the walk-up path increments it, so it is staged at the
+        # final value in both stagings and the eventual battle state matches
+        # the plain factoryBrain staging exactly.
         self.oracle.write_u16(
             save2 + SB2_TOWER_WIN_STREAK_SINGLES_50,
             current_streak,
         )
+        if request["mode"] == "factoryBrain" and request["challengeNum"] == 5:
+            # Gold is only reachable with the silver symbol earned;
+            # GetFrontierBrainStatus otherwise reads NOT_READY at streak 41
+            # and the ROM stages an ordinary trainer instead of gold Noland.
+            self._set_factory_symbol_flag(FLAG_SYS_FACTORY_SILVER)
         self.oracle.write_u16(
             save2 + SB2_FACTORY_RENTS_SINGLES_50,
             request["rentalSwapCount"],
@@ -642,6 +766,13 @@ class BattleLab:
             self.oracle.symbols["gMain"] + 4,
             self.oracle.symbols["DoBattleFactorySelectScreen"] | 1,
         )
+        if walkup:
+            # While the draft runs, the checkpoint's field script sits
+            # parked at its post-draft resume point. Redirect it to the
+            # ROM's own post-win fragment so that, when the draft confirm
+            # returns to the field, the ROM performs its genuine post-win
+            # bookkeeping and warps back into the PreBattleRoom re-entry.
+            self._redirect_parked_script_to_post_win()
         custom_parties = request["overrides"].get("parties")
         party_builder_applied = custom_parties is None
         active_overrides_applied = (
@@ -670,24 +801,49 @@ class BattleLab:
             capture_pre_checkpoint()
 
         self._advance(120, (), after_frame)
-        for frames, buttons in rental_selection_route(rental_plan.selected_positions):
-            self._advance(frames, buttons, after_frame)
-        self._finish_intro_to_action_menu(
-            after_frame,
-            max_acks=(
-                ACTION_MENU_MAX_ACKS_BRAIN
-                if request["mode"] == "factoryBrain"
-                else ACTION_MENU_MAX_ACKS
-            ),
-        )
-
-        if self.oracle.read_u8(self.oracle.symbols["gBattlersCount"]) != 2:
-            raise RuntimeError("battle lab route did not reach a singles battle")
-        battle_mons = self.oracle.symbols["gBattleMons"]
-        if not self.oracle.read_u16(battle_mons) or not self.oracle.read_u16(
-            battle_mons + BATTLE_MON_SIZE
+        for frames, buttons in rental_selection_route(
+            rental_plan.selected_positions,
+            through_confirm_only=walkup,
         ):
-            raise RuntimeError("battle lab route did not initialize both active battlers")
+            self._advance(frames, buttons, after_frame)
+        if walkup:
+            self._finish_walkup_to_ask_ready(after_frame)
+        else:
+            self._finish_intro_to_action_menu(
+                after_frame,
+                max_acks=(
+                    ACTION_MENU_MAX_ACKS_BRAIN
+                    if request["mode"] == "factoryBrain"
+                    else ACTION_MENU_MAX_ACKS
+                ),
+            )
+
+        if walkup:
+            # The redirected fragment's own increments prove it executed:
+            # the fresh-draft fallthrough would have left both fields at
+            # their staged pre-win values. Re-read the SaveBlock2 pointer —
+            # the ROM periodically DMA-relocates the save blocks, so the
+            # staging-time pointer is stale after the route.
+            save2_after = self.oracle.read_u32(self.oracle.symbols["gSaveBlock2Ptr"])
+            battle_num_after = self.oracle.read_u16(
+                save2_after + SB2_FRONTIER_BATTLE_NUM
+            )
+            streak_after = self.oracle.read_u16(
+                save2_after + SB2_FACTORY_WIN_STREAK_SINGLES_50
+            )
+            if battle_num_after != request["battleNum"] or streak_after != current_streak:
+                raise RuntimeError(
+                    "walk-up route did not run the ROM's post-win increments "
+                    f"(battleNum {battle_num_after}, streak {streak_after})"
+                )
+        elif self.oracle.read_u8(self.oracle.symbols["gBattlersCount"]) != 2:
+            raise RuntimeError("battle lab route did not reach a singles battle")
+        if not walkup:
+            battle_mons = self.oracle.symbols["gBattleMons"]
+            if not self.oracle.read_u16(battle_mons) or not self.oracle.read_u16(
+                battle_mons + BATTLE_MON_SIZE
+            ):
+                raise RuntimeError("battle lab route did not initialize both active battlers")
 
         if not party_builder_applied:
             raise RuntimeError(
@@ -731,7 +887,17 @@ class BattleLab:
             del descriptor["trainerId"]
             del descriptor["rangeIndex"]
             descriptor["fixedIv"] = FACTORY_BRAIN_FIXED_IVS[request["challengeNum"]]
-            descriptor["opponentParty"] = self._party("opponent")
+            if walkup:
+                # No battle initialized yet, so there is no opponentParty to
+                # read back; echo the staged overworld facts instead so
+                # callers can assert the walk-up staging semantically.
+                descriptor["walkup"] = True
+                descriptor["factoryWinStreak"] = streak_after
+                descriptor["curChallengeBattleNum"] = battle_num_after
+                descriptor["factorySymbols"] = self._factory_symbol_count()
+                descriptor["askReadyMenuVariant"] = self._walkup_ask_ready_state()
+            else:
+                descriptor["opponentParty"] = self._party("opponent")
         return descriptor
 
     def preview_report(
@@ -1713,3 +1879,122 @@ class BattleLab:
             if ready():
                 return
         raise RuntimeError("battle lab route did not reach the player action menu")
+
+    # -- Frontier-Brain walk-up staging helpers -----------------------------
+
+    def _locate_global_script_context(self, parked_script_ptr: int) -> int:
+        """Find sGlobalScriptContext by structural signature.
+
+        The context is file-static (absent from the linker map), so scan
+        IWRAM for the struct whose cmdTable/cmdTableEnd fields point at the
+        exported gScriptCmdTable pair AND whose scriptPtr holds the known
+        parked resume label. The cmdTable pair alone also matches
+        sImmediateScriptContext; the parked pointer disambiguates.
+        """
+        symbols = self.oracle.symbols
+        cmd_table = symbols["gScriptCmdTable"]
+        cmd_table_end = symbols["gScriptCmdTableEnd"]
+        low, high = IWRAM_RANGE
+        matches = []
+        for addr in range(low, high - SCRIPT_CTX_CMD_TABLE_END - 4, 4):
+            if (
+                self.oracle.read_u32(addr + SCRIPT_CTX_CMD_TABLE) == cmd_table
+                and self.oracle.read_u32(addr + SCRIPT_CTX_CMD_TABLE_END)
+                == cmd_table_end
+                and self.oracle.read_u32(addr + SCRIPT_CTX_SCRIPT_PTR)
+                == parked_script_ptr
+            ):
+                matches.append(addr)
+        if len(matches) != 1:
+            raise RuntimeError(
+                "could not locate the parked global script context "
+                f"({len(matches)} structural matches); the canonical "
+                "checkpoint's field-script state changed"
+            )
+        return matches[0]
+
+    def _redirect_parked_script_to_post_win(self) -> None:
+        symbols = self.oracle.symbols
+        parked = symbols[WALKUP_PARKED_LABEL]
+        target = symbols[WALKUP_REDIRECT_LABEL]
+        ctx = self._script_context_addr
+        if (
+            ctx is None
+            or self.oracle.read_u32(ctx + SCRIPT_CTX_SCRIPT_PTR) != parked
+        ):
+            ctx = self._locate_global_script_context(parked)
+            self._script_context_addr = ctx
+        if self.oracle.read_u8(ctx + SCRIPT_CTX_MODE) != SCRIPT_MODE_BYTECODE:
+            raise RuntimeError(
+                "the checkpoint's parked field script is not waiting at the "
+                "draft waitstate; refusing to redirect it"
+            )
+        self.oracle.write_u32(ctx + SCRIPT_CTX_SCRIPT_PTR, target)
+
+    def _set_factory_symbol_flag(self, flag: int) -> None:
+        save1 = self.oracle.read_u32(self.oracle.symbols["gSaveBlock1Ptr"])
+        addr = save1 + SB1_FLAGS + (flag >> 3)
+        self.oracle.write_u8(addr, self.oracle.read_u8(addr) | (1 << (flag & 7)))
+
+    def _factory_symbol_count(self) -> int:
+        save1 = self.oracle.read_u32(self.oracle.symbols["gSaveBlock1Ptr"])
+        count = 0
+        for flag in (FLAG_SYS_FACTORY_SILVER, FLAG_SYS_FACTORY_GOLD):
+            byte = self.oracle.read_u8(save1 + SB1_FLAGS + (flag >> 3))
+            count += (byte >> (flag & 7)) & 1
+        return count
+
+    def _walkup_ask_ready_state(self) -> str | None:
+        """Return the open ask-ready menu variant, or None if not waiting.
+
+        A parked pointer inside the AskReadyForHead script region with the
+        context still in BYTECODE mode can only be the multichoice's
+        ScriptContext_Stop: the region's other between-frame waits
+        (waitmessage) park in NATIVE mode, and a running script never rests
+        between frames mid-region otherwise.
+        """
+        ctx = self._script_context_addr
+        if ctx is None:
+            return None
+        if self.oracle.read_u8(ctx + SCRIPT_CTX_MODE) != SCRIPT_MODE_BYTECODE:
+            return None
+        pointer = self.oracle.read_u32(ctx + SCRIPT_CTX_SCRIPT_PTR)
+        symbols = self.oracle.symbols
+        if symbols[WALKUP_ASK_READY_LABEL] <= pointer < symbols[
+            WALKUP_ASK_READY_NO_RECORD_LABEL
+        ]:
+            return "record"
+        if symbols[WALKUP_ASK_READY_NO_RECORD_LABEL] <= pointer < symbols[
+            WALKUP_ASK_SWAP_LABEL
+        ]:
+            return "noRecord"
+        return None
+
+    def _finish_walkup_to_ask_ready(
+        self,
+        after_frame: Callable[[], None] | None = None,
+    ) -> None:
+        """Acknowledge the re-entry scene until the ask-ready menu opens.
+
+        The same blind 120/2/12 ack cadence every committed fixture's route
+        already uses (a state-guarded "don't tap while printing" variant was
+        tried and deadlocks: the multi-page boss message parks the printer
+        on waitmessage's native wait at each page prompt, waiting for the
+        very button the guard withholds). The one guard that matters is the
+        stop condition: the loop checks for the open multichoice before
+        every tap, so no A can reach the menu and select GO ON before the
+        caller's trace gets to answer it.
+        """
+        if self._walkup_ask_ready_state():
+            return
+        for _ in range(WALKUP_MAX_ACKS):
+            self._advance(120, (), after_frame)
+            if self._walkup_ask_ready_state():
+                return
+            self._advance(2, ("A",), after_frame)
+            self._advance(12, (), after_frame)
+            if self._walkup_ask_ready_state():
+                return
+        raise RuntimeError(
+            "battle lab walk-up route did not reach the ask-ready menu"
+        )

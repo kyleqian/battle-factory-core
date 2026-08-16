@@ -31,7 +31,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { renderAppTrace } from "./appTrace.ts";
 import { withCaptureRange } from "./cli.ts";
 import { resolveCompareTracePath } from "./paths.ts";
@@ -113,6 +113,19 @@ function git(args: readonly string[], cwd = process.cwd()): string {
   return execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
 }
 
+/**
+ * Path of a file inside this app tree, relative to the git repo root — e.g.
+ * `"package.json"` when the repo root IS this app tree (the old layout), or
+ * `"workspace/package.json"` since the 2026-08-11 promotion put this app
+ * tree at `<repo root>/workspace/` alongside the top (planning) layer. Used
+ * for `git show <sha>:<path>` reads against a commit, where there is no cwd
+ * to resolve relative to.
+ */
+function workspaceGitPath(fileName: string): string {
+  const workspaceRelative = relative(repoRoot, process.cwd());
+  return workspaceRelative ? join(workspaceRelative, fileName) : fileName;
+}
+
 const DEPENDENCY_FIELDS = [
   "dependencies",
   "devDependencies",
@@ -134,8 +147,8 @@ function dependencyManifest(packageJson: string): string {
  * version edit to package.json does not invalidate node_modules.
  */
 function assertDependenciesUnchanged(baseSha: string): void {
-  const base = dependencyManifest(git(["show", `${baseSha}:package.json`]));
-  const head = dependencyManifest(readFileSync(join(repoRoot, "package.json"), "utf8"));
+  const base = dependencyManifest(git(["show", `${baseSha}:${workspaceGitPath("package.json")}`]));
+  const head = dependencyManifest(readFileSync(join(process.cwd(), "package.json"), "utf8"));
   if (base !== head) {
     throw new Error(
       `package.json dependencies differ between the working tree and ` +
@@ -258,9 +271,12 @@ try {
   );
   git(["worktree", "add", "--detach", "--quiet", baseTree, baseSha], repoRoot);
   worktreeAdded = true;
-  symlinkSync(join(repoRoot, "node_modules"), join(baseTree, "node_modules"));
+  // The worktree mirrors the whole repo (both layers); this app tree's own
+  // root sits at the same sub-path within it as `process.cwd()` does at HEAD.
+  const baseWorkspaceTree = join(baseTree, relative(repoRoot, process.cwd()));
+  symlinkSync(join(process.cwd(), "node_modules"), join(baseWorkspaceTree, "node_modules"));
 
-  const driverPath = join(baseTree, "app-differential-driver.mts");
+  const driverPath = join(baseWorkspaceTree, "app-differential-driver.mts");
   writeFileSync(driverPath, BASE_DRIVER);
 
   for (const { input, trace, frames } of traces) {
@@ -273,7 +289,7 @@ try {
       execFileSync(
         process.execPath,
         ["--experimental-strip-types", "--no-warnings", driverPath, traceJsonPath, baseOutDir],
-        { cwd: baseTree, stdio: ["ignore", "ignore", "inherit"] },
+        { cwd: baseWorkspaceTree, stdio: ["ignore", "ignore", "inherit"] },
       );
     } catch {
       console.log(

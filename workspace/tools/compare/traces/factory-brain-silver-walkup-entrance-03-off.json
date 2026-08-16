@@ -1,0 +1,18 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-round-battle7-noland-room-entrance-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-brain-silver-walkup-03-movement-and-speech-open-dense-off.json",
+    "preCheckpointFrameOffset": 640
+  },
+  "segments": [
+    { "frames": 294, "buttons": [] },
+    { "frames": 1, "buttons": ["A"] },
+    { "frames": 216, "buttons": [] }
+  ],
+  "captureWindow": { "start": 256, "end": 511 }
+}

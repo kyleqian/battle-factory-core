@@ -114,6 +114,15 @@ const SCENARIOS: Scenario[] = [
     playerCryDuration: 76, // KADABRA
     playerLineVisualLag: 14, // "Go! KADABRA!" len 12 -> 12-1+3
   },
+  {
+    // ISSUES #87 option (c): the one committed compare window that crosses
+    // the ready transition (silver Brain-reveal tail, 648/701).
+    label: "TANGELA/DELCATTY silver Noland reveal (factoryBrain+overrides, dispatchDelay=86)",
+    fixtureFile: "factory-round-battle7-noland-reveal-off.json",
+    opponentDispatchDelay: 86,
+    playerCryDuration: 60, // DELCATTY
+    playerLineVisualLag: 15, // "Go! DELCATTY!" len 13 -> 13-1+3
+  },
 ];
 
 async function main(): Promise<void> {

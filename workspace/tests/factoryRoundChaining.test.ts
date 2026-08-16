@@ -21,6 +21,8 @@ import {
   type FactoryCarry,
 } from "../src/engine/factoryRoundChaining.ts";
 import { getFactoryRentalRank } from "../src/engine/factoryRentalGeneration.ts";
+import { TRAINER_FRONTIER_BRAIN } from "../src/engine/factoryAiMaskSelection.ts";
+import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus.ts";
 
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
@@ -279,25 +281,73 @@ describe("factory round chaining (tick() scenario)", () => {
     expect(expected.generation.rentalRank).toBe(getFactoryRentalRank(chained.factoryCarry.rentsCount));
   });
 
-  it("(b) streak/symbols/BP/rents carry across two consecutive completed rounds", () => {
+  it("(b) streak/symbols/BP/rents carry across four consecutive completed rounds, reaching the silver Frontier Brain at hop 3", () => {
+    // seed 0 is a curated starting rngValue: unlike this file's other cases
+    // (seed 17), it happens to string together four real wins in a row with
+    // the 664/678/527 scripted-win recipe, including against the silver
+    // Frontier Brain's generated party at hop 3 - found by scanning starting
+    // seeds for one whose *natural* battle outcomes (not scripted swap
+    // decisions) chain that deep. The streak values below (7/14/21/28) are
+    // pure carry arithmetic and hold for ANY winning seed; only reaching
+    // hop 3/4 at all depends on this specific seed's battle outcomes.
     const carry0 = createInitialFactoryCarry(PLAYER_TRAINER_ID);
-    const round1 = driveGeneratedRoundToCompletion(carry0, 17);
+    const round1 = driveGeneratedRoundToCompletion(carry0, 0);
+    expect(round1.round.rules.phase).toBe("roundComplete");
     const chained1 = driveTerminalToNextDraft(stateAtDecidedRound(round1, carry0));
     const carry1 = chained1.factoryCarry;
+    const seed2 = chained1.pendingGeneratedRound!.rngValueBefore;
     expect(carry1.factoryWinStreak).toBe(7);
+    expect(generateFactoryChallengeDraft(carry1, seed2).generation.challengeNum)
+      .toBe(Math.floor(carry1.factoryWinStreak / 7));
 
-    const round2 = driveGeneratedRoundToCompletion(
-      carry1,
-      chained1.pendingGeneratedRound!.rngValueBefore,
-    );
+    const round2 = driveGeneratedRoundToCompletion(carry1, seed2);
     expect(round2.round.rules.phase).toBe("roundComplete");
     const chained2 = driveTerminalToNextDraft(stateAtDecidedRound(round2, carry1));
     const carry2 = chained2.factoryCarry;
-
+    const seed3 = chained2.pendingGeneratedRound!.rngValueBefore;
     expect(carry2.factoryWinStreak).toBe(14);
     expect(carry2.battlePoints).toBeGreaterThan(carry1.battlePoints);
     expect(carry2.rentsCount).toBe(round2.facilityState.rentsCount);
     expect(carry2.factorySymbolsCount).toBe(round2.roundOutcome!.newSymbolsCount);
+    expect(generateFactoryChallengeDraft(carry2, seed3).generation.challengeNum)
+      .toBe(Math.floor(carry2.factoryWinStreak / 7));
+
+    // hop 3: entering streak 14 + battleIndex 6 + the source's +1 modifier
+    // (getFactoryFrontierBrainStatus) = 21, the silver threshold - this
+    // round's seventh battle is a genuine Frontier Brain encounter reached
+    // via real carried streak, not a synthetic starting-streak override.
+    const round3 = driveGeneratedRoundToCompletion(carry2, seed3);
+    expect(round3.round.rules.phase).toBe("roundComplete");
+    expect(round3.round.rules.battleIndex).toBe(6);
+    expect(round3.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
+    expect(round3.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(getFactoryFrontierBrainStatus({
+      battleMode: "singles",
+      winStreak: carry2.factoryWinStreak + round3.round.rules.battleIndex,
+      symbolsCount: carry2.factorySymbolsCount,
+    })).toBe("silver");
+    const chained3 = driveTerminalToNextDraft(stateAtDecidedRound(round3, carry2));
+    const carry3 = chained3.factoryCarry;
+    const seed4 = chained3.pendingGeneratedRound!.rngValueBefore;
+    expect(carry3.factoryWinStreak).toBe(21);
+    expect(carry3.battlePoints).toBeGreaterThan(carry2.battlePoints);
+    expect(carry3.rentsCount).toBe(round3.facilityState.rentsCount);
+    expect(carry3.factorySymbolsCount).toBe(round3.roundOutcome!.newSymbolsCount);
+    expect(generateFactoryChallengeDraft(carry3, seed4).generation.challengeNum)
+      .toBe(Math.floor(carry3.factoryWinStreak / 7));
+
+    const round4 = driveGeneratedRoundToCompletion(carry3, seed4);
+    expect(round4.round.rules.phase).toBe("roundComplete");
+    const chained4 = driveTerminalToNextDraft(stateAtDecidedRound(round4, carry3));
+    const carry4 = chained4.factoryCarry;
+    expect(carry4.factoryWinStreak).toBe(28);
+    expect(carry4.battlePoints).toBeGreaterThan(carry3.battlePoints);
+    expect(carry4.rentsCount).toBe(round4.facilityState.rentsCount);
+    expect(carry4.factorySymbolsCount).toBe(round4.roundOutcome!.newSymbolsCount);
+    expect(generateFactoryChallengeDraft(
+      carry4,
+      chained4.pendingGeneratedRound!.rngValueBefore,
+    ).generation.challengeNum).toBe(Math.floor(carry4.factoryWinStreak / 7));
   });
 
   it("(c) a loss resets the streak but keeps symbols/BP, and still re-enters a draft", () => {

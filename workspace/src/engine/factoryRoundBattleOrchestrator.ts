@@ -185,7 +185,46 @@ export type FactoryRoundRentalSource =
 export type FactoryFacilityState = Readonly<{
   /** Source factoryRentsCount for the selected battle/level mode. */
   rentsCount: number;
+  /**
+   * Walk-up build step B2: FRONTIER_DATA_HEARD_BRAIN_SPEECH, per docs/
+   * noland-walkup-dialogue-scoping.md §1.5 - independent per tier (silver's
+   * own bit, gold's own; they never collide since gold only becomes
+   * reachable once silver's is already set). In-session only by user
+   * decision (no save/persistence in this build) - lives here alongside
+   * rentsCount, the other piece of facility state the round-to-round
+   * chaining already threads unmodified across every
+   * createFactoryRoundBattleOrchestrator call for the same challenge.
+   * Optional/undefined reads as "not heard yet" (factoryHeardBrainSpeech)
+   * so every existing construction site compiles and behaves unchanged;
+   * gold is plumbed as a tier but nothing sets it yet (gold speech is a
+   * later step).
+   */
+  heardBrainSpeech?: Readonly<{ silver: boolean; gold: boolean }>;
 }>;
+
+/** Reads a tier's "have I heard the personality speech this session" bit (see FactoryFacilityState.heardBrainSpeech's own doc) - defaults false so every existing caller that never touched this field reads as "first encounter", matching the real flag's own default (no symbol yet -> bit unset). */
+export function factoryHeardBrainSpeech(
+  facilityState: FactoryFacilityState,
+  tier: "silver" | "gold",
+): boolean {
+  return facilityState.heardBrainSpeech?.[tier] ?? false;
+}
+
+/** Sets a tier's heard-speech bit. Idempotent - a second call for an already-heard tier returns the same state unchanged, matching the source flag's own one-way behavior (SetFrontierData only ever sets this bit, never clears it). */
+export function markFactoryBrainSpeechHeard(
+  state: FactoryRoundBattleOrchestratorState,
+  tier: "silver" | "gold",
+): FactoryRoundBattleOrchestratorState {
+  if (factoryHeardBrainSpeech(state.facilityState, tier)) return state;
+  const heardBrainSpeech = state.facilityState.heardBrainSpeech ?? { silver: false, gold: false };
+  return {
+    ...state,
+    facilityState: Object.freeze({
+      ...state.facilityState,
+      heardBrainSpeech: Object.freeze({ ...heardBrainSpeech, [tier]: true }),
+    }),
+  };
+}
 
 export type FactoryRoundBattleOrchestratorConfig = Readonly<{
   id: string;
@@ -787,6 +826,13 @@ export function beginFactoryRoundBattleStartIntro(
   // the same session) generates its opponent fresh at this battleIndex.
   const isCanonicalAnchorIntro =
     state.config.adoptedInitialOpponent !== undefined && command.battleIndex === 0;
+  // Route-level fact (ISSUES #87 option (c)), not a species/trainer/trace-
+  // name check: `getFactoryFrontierBrainStatus` already resolved this
+  // battle's opponent to "silver" (frontier_util.c's GetFrontierBrainStatus
+  // port) when the round advanced to it. See `isSilverBrainReveal`'s doc on
+  // `FactoryBattleStartIntroState`.
+  const isSilverBrainReveal =
+    state.round.rules.currentOpponent.frontierBrain?.status === "silver";
   return Object.freeze({
     ...state,
     battleStartIntro: Object.freeze({
@@ -794,6 +840,7 @@ export function beginFactoryRoundBattleStartIntro(
         command,
         isCanonicalAnchorIntro,
         sceneAssemblyDisplayLag,
+        isSilverBrainReveal,
       ),
       elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
     }),
@@ -1542,6 +1589,35 @@ function completedResolutionPhase(
 }
 
 /**
+ * A resolution segment can run out of commands to present while a
+ * `forcedRequest` is still pending -- not just via the typed fainted
+ * message's own button-dismiss intercept (`isForcedSwitchHandoffMessage`),
+ * but also, ISSUES #89, when the forced switch has no fainted message at
+ * all (Baton Pass's own "used move" line auto-advances; there is nothing
+ * to dismiss). Whichever way a segment ends, a still-pending forced-switch
+ * boundary must always hand off to the party selector, never the ordinary
+ * next-command tail.
+ */
+function completedResolutionUpdate(
+  state: FactoryRoundBattleOrchestratorState,
+  resolution: BattleResolutionPresentationState,
+): Readonly<{
+  phase: "next-command-handoff" | "terminal-handoff" | "forced-party-handoff";
+  battleForcedPartySelect: PartySelectState | null;
+}> {
+  if (resolution.forcedRequest !== null) {
+    return Object.freeze({
+      phase: "forced-party-handoff" as const,
+      battleForcedPartySelect: createForcedPartySelect(state, resolution),
+    });
+  }
+  return Object.freeze({
+    phase: completedResolutionPhase(resolution),
+    battleForcedPartySelect: null,
+  });
+}
+
+/**
  * A full source turn may contain an earlier opposing faint/replacement before
  * ending at a player forced-switch request. Only the requested battler's own
  * typed faint message transfers presentation ownership to the party selector;
@@ -1894,12 +1970,12 @@ export function advanceFactoryRoundBattleResolution(
       });
     }
     const nextCommandIndex = resolution.commandIndex + 1;
+    const reachedSegmentEnd = nextCommandIndex >= segment.commands.length;
+    const completion = reachedSegmentEnd ? completedResolutionUpdate(state, resolution) : null;
     const nextResolution = withResolutionLifecycle(
       resolution,
       nextCommandIndex,
-      nextCommandIndex >= segment.commands.length
-        ? completedResolutionPhase(resolution)
-        : "presenting",
+      completion?.phase ?? "presenting",
       0,
     );
     return Object.freeze({
@@ -1910,6 +1986,7 @@ export function advanceFactoryRoundBattleResolution(
         nextResolution,
         command,
       ),
+      ...(completion !== null ? { battleForcedPartySelect: completion.battleForcedPartySelect } : {}),
     });
   }
   if (resolution.lifecycle.phase === "awaiting-message-dismiss") {

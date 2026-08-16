@@ -230,6 +230,18 @@ function writeJson(path: string, data: unknown): void {
   const scientistFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "scientist_1.png"), 2, 4);
   const scientistPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_3.pal"));
 
+  // Frontier Brain NOLAND (OBJ_EVENT_GFX_NOLAND, walk-up build step B1) -
+  // sFrontierBrainObjEventGfx[FRONTIER_FACILITY_FACTORY] (src/frontier_util.c
+  // :674), gObjectEventGraphicsInfo_Noland (object_event_graphics_info.h
+  // :4523-4540): paletteTag OBJ_EVENT_PAL_TAG_NPC_3 (same npc_3.pal as the
+  // scientists), sPicTable_Noland (2x4, object_event_pic_tables.h:2092-2102),
+  // anims sAnimTable_Standard (the SAME table every other standard NPC here
+  // uses - see src/data/gen/factory-brain-walkup-script.json's placement
+  // block and src/engine/battleRoom.ts's nolandStep doc for why this lets
+  // Noland's walk-up frame numbers reuse the decoy's own ENTRY_STEPS column).
+  const nolandFrames = extractSheet(join(REF, "graphics", "object_events", "pics", "people", "frontier_brains", "noland.png"), 2, 4);
+  const nolandPalette = loadJascPal(join(REF, "graphics", "object_events", "palettes", "npc_3.pal"));
+
   // Generated round opponents resolve their walk-in sprite through the
   // facility-class lookup (see src/engine/factoryTrainerOverworldGfx.ts, a
   // port of SetBattleFacilityTrainerGfxId, battle_tower.c:1161-1251). Each
@@ -289,6 +301,7 @@ function writeJson(path: string, data: unknown): void {
   writeJson(join(ASSETS_GEN, "battle-room-npcs.json"), {
     player: { frames: playerFrames, palette: playerPalette },
     scientist: { frames: scientistFrames, palette: scientistPalette },
+    noland: { frames: nolandFrames, palette: nolandPalette },
     opponents: opponentsOut,
   });
 }
