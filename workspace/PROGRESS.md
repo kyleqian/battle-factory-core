@@ -5,6 +5,68 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1287 — [main worker, 2026-08-16] **ISSUES #91 fixed: brain-win opponent generation no longer leaves storedTrainerIds one entry short**
+
+- **State:** Landed and green. `npm test` **1045 files / 9950 passed /
+  223 skipped**, `npm run build` green.
+- **Did:** Source check first (`reference/pokeemerald`): the ROM writes
+  `gSaveBlock2Ptr->frontier.trainerIds` only from `GenerateOpponentMons`
+  (`battle_factory.c:303-330`), and the pre-battle-room script never
+  calls it for a Frontier Brain battle — `frontier_getbrainstatus`
+  (`BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:80-81`) jumps
+  straight to `AskReadyForHead`, bypassing `AskSwapMon`'s
+  `factory_generateopponentmons` call (scripts.inc:137-138) entirely; the
+  brain's own party builder `FillFactoryBrainParty`
+  (`battle_factory.c:759-822`) never touches the array either. Since the
+  brain is always the round's 7th and final battle in natural play, this
+  is genuinely a "the ROM stores nothing" case (option 2 of the brief) —
+  confirmed, not guessed. Fix: added
+  `storedTrainerIdsForNextGeneration()` (`factoryRoundBattleOrchestrator.ts`,
+  after `generateOpponentFor`) that folds the brain's own `trainerId`
+  (`TRAINER_FRONTIER_BRAIN` = 1022, verified never overlapping the
+  ordinary 0-299 id range) into the **next** battle's generation input
+  only — never into the brain's own scheduled `storedTrainerIds` — so the
+  natural battleIndex-6 shape stays byte-identical (proven: the existing
+  `factoryBrainRoundShape.test.ts` pins that exact field and needed zero
+  changes). Both call sites that read `previous.storedTrainerIds` for the
+  next generation (`adoptNextOpponentOrGenerate`, and
+  `advanceFactoryRoundPresentation`'s simplified-round fallback) now go
+  through the helper. Pure array composition — no RNG port/draw call
+  added or touched on any path (confirmed by inspection: the diff never
+  references `rngPort`/`draw`/`rngValue` construction, only the
+  already-computed `storedTrainerIds`/`trainerId` fields).
+- **Pin:** new `tests/factoryBrainWinOpponentHistory.test.ts` — builds
+  the exact #91 repro (`factoryWinStreak: 20`, brain silver-eligible at
+  battleIndex 0), wins it, drives `preGenerateFactoryRoundNextOpponent`
+  (previously threw `storedTrainerIds must contain the 1 prior battle
+  selections`; verified by re-running the test against the pre-fix tree
+  via `git stash`), asserts the ordinary battleIndex-1 generation's
+  `storedTrainerIds` is `[TRAINER_FRONTIER_BRAIN, <drawn id>]`, and
+  confirms the round actually continues to battleIndex 1. Natural shape
+  (brain at battleIndex 6 still terminates the round unchanged) is
+  covered by the pre-existing, **unmodified** `factoryBrainRoundShape.test.ts`
+  — re-ran green this session, not touched by the fix.
+- **Soak slice:** `node --experimental-strip-types <ad-hoc script using
+  tools/soak/randomRoundSoakDriver.ts's runSeed with factoryWinStreak: 20,
+  testPolicy: "strong-route", stopAtFirstRoundDecision: true>` — 7 of 10
+  tried orchestrator `rngValue`s reach `roundComplete` (full 7-battle win
+  including the brain-then-continue path) with zero engine crash; the
+  other 3 lose battle 1 outright (a real brain-battle loss, unrelated to
+  this fix). No standing script committed (ad hoc, out of scope per the
+  brief's "no wide soak sweep").
+- **Regression check:** `factoryBrainRoundShape.test.ts`,
+  `factoryRoundBattleOrchestrator.test.ts`, `factoryRoundChaining.test.ts`,
+  `factoryOpponentGeneration.test.ts`, `factoryTrainerSchedule.test.ts` —
+  all unmodified, all green. `executableFrontierRatchet.test.ts` barrier
+  counts unwidened.
+- **Next:** resume the walk-up build step A track (ISSUES #91 was
+  blocking `AskSwapBeforeHead`'s live-reach through the soak driver past
+  a brain win — that path should now be reachable) or continue gold
+  speech dense-calibration residuals per PROGRESS-archive 1286.
+- **Notes:** none. No PAPERCUT this session.
+
+---
+
 ## 1286 — [main worker, 2026-08-16] **Gold Frontier-Brain 4-page speech wired (tier-aware brainSpeechBoxes); dense-calibrated against the three banked gold speech fixtures — hold/pause windows close exact, movement+typewriter+transition-handoff spans left as characterized residuals**
 
 - **State:** Goal 1 (wire gold's 4-page speech, PROGRESS 1284's seam) is
@@ -158,92 +220,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   fixtures' own capture lists are stride-2 in the movement span, enough
   for compare acceptance but not enough to derive the movement model
   from alone.
-
----
-
-## 1284 — [main worker, 2026-08-16] **Gold Frontier-Brain reveal hold fixed (334/701 → 690/701, parity with silver); speech wiring (goal 2) not started — out of time this session**
-
-- **State:** Goal 1 of this step's brief (pic-reveal hold fix) is
-  **landed and green**. Goal 2 (wire gold's 4-page speech into
-  `battleRoom.ts`) and goal 3 (stretch dense calibration) were **not
-  started** — the goal-1 root cause took the whole session to pin down
-  correctly (see Did). `npm test` **1044 files / 9939 passed / 223
-  skipped**, `npm run build` green, differential PASS (563/563
-  byte-identical, `--base 2cf29e81`, the merge before this step's first
-  change). Committed at `2790e02b`.
-- **Did:** The "~142f hold" in the brief's framing turned out to be
-  **emergent, not a hardcoded duration** — the gold pic-reveal box
-  (`FACTORY HEAD NOLAND would like to battle!♥`) is a genuine
-  PAUSE_UNTIL_PRESS wait (confirmed by `docs/battle-bringup-notes.md`'s
-  existing Destin evidence), so its on-screen length is purely a
-  function of *when* the A-press arrives — both in the app (from the
-  compare trace's scripted `segments`) and in the oracle (from the
-  battle-lab's internal `prepare()` auto-navigator, whose own press
-  timing shifted once `3e29880b` shortened gold's walk-up). Root cause
-  was two independently-stale calibrations, not one: (1) the compare
-  trace's own A-press position (`tools/compare/traces/factory-round-
-  battle7-noland-gold-reveal-off.json`) was tuned against the *old*
-  oracle's later transition and needed to move earlier — re-derived by
-  the same exhaustive-search-over-candidates method §6′ used for the
-  frame offset (tried every integer press tick 328-338 against the live
-  oracle; 333 is a sharp, unique match-count peak, 334/701 → 663/701 on
-  its own). (2) The later ready-lag boundary (ISSUES #87 option (c)'s
-  class — the source-unpredictable switch-in/AI-ack span before the
-  action menu reads ready) had **no gold-specific calibration at all**,
-  only silver's `MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET`.
-  `FactoryBattleStartIntroState` gained a parallel `isGoldBrainReveal`
-  flag (keyed off `frontierBrain.status === "gold"`, same route-level-
-  fact convention as `isSilverBrainReveal`, wired in
-  `factoryRoundBattleOrchestrator.ts`'s `beginFactoryRoundBattleStartIntro`)
-  and `battleScene.ts` gained `MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET`,
-  same search method, independently derived: **7** (not silver's 9 —
-  different lead-species cry duration, as expected). Updated the one
-  pre-existing test that pinned the *bug* as correct behavior
-  (`tests/factoryRoundIntroGeneralization.test.ts`'s ISSUES #87 test
-  previously asserted gold was permanently unaffected by any offset;
-  rewritten to pin both flags' independent, correctly-keyed offsets and
-  their non-interference).
-- **Acceptance numbers:** gold reveal **334/701 → 690/701** — frame-for-
-  frame identical residual *count* to silver's own already-accepted
-  baseline (silver unmoved at 690/701, confirmed re-run). Residual
-  shape: frames 334-336 (a 3-frame box-clear-transition lag, same
-  1287px/bbox regardless of press tick tried — looks like a small fixed
-  rendering lag distinct from the press-timing fix, not further chased
-  this session) + frame 408 (16px, isolated) + frames ~654-660ish (the
-  same render-drift shape silver's own `MEASURED_SILVER_..._OFFSET` doc
-  comment already describes as untouched by any offset value). This is
-  **more than "a single settled #87-class frame"** the brief flagged as
-  the expected ceiling, but it exactly matches silver's own precedent
-  count (11 residual frames each), so characterized as parity-with-
-  silver rather than further investigated given the time this step's
-  root-cause hunt already consumed — a legitimate stopping point per
-  the brief's own "more frames means investigate" bar being read against
-  silver's own accepted shape, not zero.
-- **Regression bars unmoved (all re-run live this session):**
-  entrance-02 **256/256**, entrance-03 **162/256** (known B1c residual),
-  all four silver speech windows **39/39, 74/74, 39/39, 28/28**, silver
-  reveal **690/701**. `executableFrontierRatchet.test.ts` barrier counts:
-  unwidened.
-- **Next:** Goal 2 (gold's 4-page speech wiring into `battleRoom.ts`,
-  JSON-verbatim from `src/data/gen/factory-brain-walkup-script.json`, no
-  battle-cry, Tier-1 pinned per `tests/battleRoomBrainSpeech.test.ts`'s
-  idiom — `brainSpeechBoxes(state)` currently always returns
-  `SILVER_FIRST_ENCOUNTER_SPEECH_BOXES` regardless of trainer identity,
-  that's the seam) is the immediate next action, still first in the
-  brief's own priority order. Goal 3 (dense gold-speech calibration
-  against the three `factory-brain-gold-speech-*-off.json` fixtures) is
-  stretch, after goal 2. The 334-336 box-clear-transition residual and
-  the ~654-660 ready-lag tail are both open, minor, not investigated
-  further this session.
-- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT: the
-  brief's own framing ("find where the app derives the ~142f hold, fix
-  it") suggested a single `src/` constant; the actual mechanism was a
-  PAUSE_UNTIL_PRESS wait whose apparent "duration" is an artifact of
-  *when* a scripted A-press lands on both sides, not a duration formula
-  — cost real time (most of the session) to establish via direct PNG
-  inspection (`app-NNNNN.png` vs `oracle-NNNNN.png` at the first
-  mismatch frame) before the fix location became obvious. Worth
-  remembering for future PAUSE_UNTIL_PRESS-adjacent bugs: check whether
-  the compare trace's own button schedule is stale before assuming a
-  `src/` duration constant is wrong.
-
