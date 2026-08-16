@@ -328,16 +328,19 @@ export { CALL_SCENE_BRAIN_BRANCH_LAG };
  *   frame 1089 / glyph 1090 = edge+5). Box 2's value coincides with the
  *   generic `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY` it used before; box 3's is
  *   one tick later, which that shared constant could not express.
- * - Boxes 4/5 are `\p` page turns inside one already-open message, so they
- *   keep the generic MSGBOX_DEFAULT convention (see the note on
- *   `postwinCallSceneInputReady` for the page-turn residual still open).
+ * - Boxes 4/5 are `\p` page turns inside one already-open message: their own
+ *   edge is the 1-tick-deferred bump (`CALL_SCENE_PAGE_TRANSITION_DELAY[2]`/
+ *   `[3]`, see that constant's doc), so the first glyph lands right on the
+ *   edge itself - firstDelay 0, not the generic MSGBOX_DEFAULT constant
+ *   (PROGRESS 1293: the generic value produced a several-tick-too-long
+ *   blank box after each page turn, this step's real residual).
  */
 const CALL_SCENE_TEXT_FIRST_DELAYS: readonly number[] = [
   POSTWIN_NEXT_TEXT_FIRST_DELAY + CALL_SCENE_BRAIN_BRANCH_LAG,
   CALL_SCENE_BOX_REOPEN_LAG[0] + 1,
   CALL_SCENE_BOX_REOPEN_LAG[1] + 1,
-  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
-  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
+  0,
+  0,
 ];
 
 /**
@@ -1084,15 +1087,25 @@ const CALL_SCENE_MOVE_BACK_TOTAL_DELAY =
 /**
  * Per-callScenePage-transition delay from the accepted dismiss edge to the
  * next box's own content edge (index = `callScenePage - 1` BEFORE the
- * transition). Boxes 3->4 and 4->5 (the boss message's own page turns) have
- * no attendant movement (ground-truth doc: no walk listed between them) so
- * stay instant, same as every other MSGBOX_DEFAULT page turn in this file.
+ * transition). Boxes 3->4 and 4->5 (the boss message's own `\p` page turns)
+ * have no attendant movement, but are NOT instant either: PROGRESS 1293
+ * pixel-derived (oracle hashes identical across local 805-813, changed at
+ * 814) that the OLD page's fully-typed content stays on screen through the
+ * accept tick itself, and the new page's first glyph appears exactly one
+ * tick later (`text.c`'s `RENDER_STATE_CLEAR` clears off-screen and returns
+ * `RENDER_UPDATE`, so the clear/new-first-glyph swap is invisible until the
+ * next frame's `RENDER_PRINT` - see the ground-truth doc's per-tick printer
+ * write-up). Modelled as a 1-tick deferred bump via the same
+ * `callScenePendingElapsed` mechanism boxes 1/2 already use for their own
+ * (much longer) walk-gated transitions, paired with `CALL_SCENE_TEXT_FIRST_
+ * DELAYS[3]/[4]` = 0 so the new page's first glyph lands exactly on the
+ * bump tick (accept + 1 total, matching the measurement).
  */
 export const CALL_SCENE_PAGE_TRANSITION_DELAY: readonly [number, number, number, number] = [
   CALL_SCENE_MOVE_AWAY_TOTAL_DELAY,
   CALL_SCENE_MOVE_BACK_TOTAL_DELAY,
-  0,
-  0,
+  1,
+  1,
 ];
 
 /**

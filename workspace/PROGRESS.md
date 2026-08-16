@@ -5,6 +5,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1293 — [main worker, 2026-08-16] **Both named call-scene residuals closed/advanced — attendant walk lead-leg pose fixed exact (callscene-01 119→131/131), boss-message page-turn render bug found + fixed (callscene-02 120→171/199)**
+
+- **State:** Landed and green in two commits. `npm test` **1,056 files /
+  9,978 passed / 223 skipped**, `npm run build` + `npm run typecheck`
+  green.
+- **Did (Goal 1, walk lead-leg pose — CLOSED exact):** `callSceneWalkFrame`
+  assumed the walk-away (hFlip false) and walk-back (hFlip true) legs
+  shared `sAnim_GoWest`/`GoEast`'s literal `ANIMCMD_FRAME(7,...)`-then-8
+  order. Rendering both candidate leg-index orders against oracle pixel
+  data (callscene-01 frames 447/429) showed the two legs actually diverge:
+  walk-away is pixel-exact with 8-then-7, walk-back stays pixel-exact with
+  the literal 7-then-8. Made the lead leg a per-direction parameter.
+  callscene-01 dense compare **119/131 → 131/131** (was 89/131 pre-1292).
+  Commit `7214005d`.
+- **Did (Goal 2, page-turn press re-derivation — ADVANCED, not exact):**
+  found the callscene-02 residual was not purely a fixture press-frame
+  issue as 1292 concluded — a second, independent render bug:
+  `CALL_SCENE_TEXT_FIRST_DELAYS[3]`/`[4]` (boxes 4/5's own first-glyph
+  delay) used the generic 4-tick `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY`
+  instead of the same-window `\p` swap's real accept+1 rule (1292's own
+  point 4), leaving the app blank 3 extra ticks after every page turn and
+  skewing that whole page's typewriter schedule. Fixed by giving boxes
+  3→4/4→5 their own 1-tick deferred bump (`CALL_SCENE_PAGE_TRANSITION_
+  DELAY[2]`/`[3]`, reusing boxes 1/2's existing `callScenePendingElapsed`
+  machinery) + firstDelay 0, oracle-confirmed via byte-identical capture
+  hashes across local 805–813 (box 4 held) then a change at 814 (new
+  content). Combined with re-deriving the box-3→4 press's own idle segment
+  (`idle133`→`idle131`, -2 ticks, matching the canned route's oracle
+  accept 1170) this closes the **entire** page-1→2 turn cluster to 0 diff.
+  The page-2→3 turn (box 4→5) was tried the same way (segment -2) but only
+  partially closed (improved, not exact) and over-shifting past it
+  regressed further downstream; the box-5 dismiss press (page 3's own
+  dismiss, a different accept path — `callSceneDismissElapsed`, not
+  `acceptPostwinCallScenePage`) was tried and reverted after it cascaded
+  into large new mismatches through the rest of the trace, so it was left
+  at its original position. callscene-02 dense compare **120/199 →
+  171/199** (net +51, no regression anywhere re-checked). Two residual
+  clusters remain, bounded in the ground-truth doc: page-2→3 turn (local
+  814, 816–866, shrunk but not zero) and box-5 dismiss/menu-handoff (local
+  948–966, unchanged, pre-existing per 1289/1292). Commit pending (this
+  entry's docs commit lands with the code).
+- **Bars (all re-run live this session, unmoved):** askready-menu
+  **21/21**, swapask-no **194/194**, entrance-02 **256/256**, record
+  **178/178**, retire **174/174**, silver reveal (`...noland-reveal-off`)
+  **690/701**, entrance-03 **162/256**, gold speech **58/256 · 20/177 ·
+  58/126**. `executableFrontierRatchet` barrier counts unwidened; no new
+  barrier.
+- **Next:** page-2→3 turn + box-5 dismiss residuals are the honest
+  remainder for a future step (both bounded above with exact frame
+  ranges); box-5's own accept path likely needs its own separate
+  derivation rather than reusing the -2 that worked for the other two
+  presses. Otherwise the 1291 queue's (c)/(b) items stand.
+- **Notes:** Commits local only. No PAPERCUT (tooling worked as
+  documented; the `--capture-range` flag plus rendering isolated candidate
+  frame-index variants directly was the key diagnostic move both times).
+
+---
+
 ## 1292 — [main worker, 2026-08-16] **Call-scene calibration closed by modelling `text.c`'s per-box accept/arrow semantics — callscene-01 89→119/131, callscene-02 69→120/199, every bar unmoved**
 
 - **State:** Landed and green. `npm test` **1,056 files / 9,978 passed /
@@ -89,76 +147,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   animation-main unfolded (Heal Bell + Fire Blast rounds; its
   supervisor session was live through this wind-down). rust-main:
   nothing unfolded. DEFERRED.md EMPTY.
-
----
-
-## 1289 — [main worker, 2026-08-16] **RECORD/RETIRE compare traces found + fixed a real brain-route bug (wrong re-ask prompt) — both close 178/178, 174/174; box-1 hold-boundary doc row pixel-corrected; call-scene 89/131 & 69/199 investigated, left unmoved**
-
-- **State:** Landed and green. `npm test` **1045 files / 9950 passed /
-  223 skipped**, `npm run build` + `npm run typecheck` green.
-  Differential PASS (563/563 byte-identical, `--base 56ef0edf`).
-  Committed at `6ab494fc`. **Note for the supervisor:** the wind-down
-  gates in 1288 predate this step — re-run them at the next fold.
-- **Did (goal 3, RECORD/RETIRE traces):** added
-  `tools/compare/traces/factory-brain-silver-walkup-askready-menu-
-  {record,retire}-off.json` (segments/captureFrames copied verbatim from
-  the two banked read-only fixtures), replaying against the existing
-  `...-askready-menu-open-off` stage. First runs surfaced a **real bug**,
-  not just a timing residual: the RECORD/RETIRE re-ask (after a NO
-  dismiss or a RECORD-YES-then-dismiss) unconditionally drew the
-  ordinary route's short "The 2nd match is next!" prompt with its
-  timing constants, even on the brain route, which has a different,
-  longer `AskReadyForHead` prompt. Fixed in `postwin.ts`
-  (`postwinQuestionReprintVisibleChars`/`Settled`/`MenuReady` +
-  `advancePostwin`'s `reAskMenuReady` now select the right prompt/total
-  per `state.frontierBrain` and re-derive settled/menu-ready delays from
-  its own length, same `firstDelay+total-1[+4]` shape the ordinary
-  constants were fit from — structural, not independently oracle-
-  measured for this specific reprint) and `core.ts` (three `drawLines`
-  call sites branch on `frontierBrain`). Both traces now close **full:
-  178/178, 174/174** (was 0/178, 0/174 pre-fix).
-- **Did (goal 2, doc correction):** `docs/walkup-call-scene-ground-
-  truth.md`'s box-1 hold row ("850–893 Held — PNG-verified at 850"),
-  flagged suspect by PROGRESS 1285 but never re-derived, was corrected
-  via a fresh dense (stride-1) pixel probe of frames 815–905 (temp, not
-  committed): the box is still mid-typewriter at 850 and only completes
-  at 894, one frame before the already-known dismiss-A at 895. Dated
-  correction note added inline; old value preserved in the note.
-- **Did (goal 1, calibration — not closed):** investigated both
-  fixtures' residuals with fresh dense oracle probes. Box-1's typewriter
-  "drift" (callscene-01) and box-5's dismiss→menu handoff (callscene-02,
-  the "biggest lever" the brief flagged) were both root-caused to
-  specific oracle frames, but **two independent single-constant
-  experiments regressed the fixtures badly** when tested live: shifting
-  box-1's first-glyph delay by +1/+2 dropped callscene-01 from 89/131 to
-  77/131 and 53/131 (a huge new 22%-diff region appeared past frame
-  413); shifting box-5's dismiss edge by +1 dropped callscene-02 from
-  69/199 to 44/199. Both regressions land past the point where the
-  trace's own FIXED button-press timing lives — a shift that moves a
-  ready-boundary across a fixed press edge triggers the documented
-  input-swallow trap (a whole press cycle gets lost, not just the shifted
-  span), so a naive single-constant fit makes things worse, not better.
-  Both experiments were reverted; callscene-01/02 are **unmoved at
-  89/131 and 69/199** (re-confirmed live this session) rather than risk
-  landing a net-negative "fix." The precise oracle-frame evidence
-  gathered this session (box-1: box reopens empty at 829, first glyph
-  830, fully typed 894, dismiss 895 — all pixel-confirmed; box-5: app
-  clears one tick before oracle at the box5→menu handoff) is recorded
-  here for whoever picks this up next; it needs `core.ts`'s actual
-  per-tick input-acceptance semantics understood before a safe fix,
-  not just another constant guess.
-- **Regression bars unmoved (all re-run live this session):**
-  askready-menu **21/21**, swapask-no **194/194**, entrance-02
-  **256/256**, silver reveal **690/701**, callscene-01 **89/131**,
-  callscene-02 **69/199**. `executableFrontierRatchet.test.ts` barrier
-  counts: unwidened. New coverage: `postwin.test.ts` (48 tests,
-  unmodified, all still green — the reprint fix didn't touch any
-  ordinary-route-tested behavior, confirmed by re-run).
-- **Next:** call-scene calibration remains open — a future step should
-  read `core.ts`'s actual button-accept tick semantics (not just
-  `postwin.ts`'s state functions) before attempting another constant
-  shift, given this session's two failed attempts. Otherwise the 1288
-  queue's (b)/(c)/(e) items stand as before.
-- **Notes:** Commits local only — pushing is Kyle's step. No PAPERCUT
-  this session (tooling worked as documented throughout).
 

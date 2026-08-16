@@ -1526,33 +1526,28 @@ describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyF
         .toBe(page);
       const accepted = acceptPostwinCallScenePage(state);
       if (page < 5) {
-        // Boxes 1/2 gate the next box behind the attendant's walk-away/
-        // walk-back movement (a pending transition, not an instant bump);
-        // boxes 3/4 (the boss message's own page turns, no movement) still
-        // turn over instantly, unchanged.
-        const gated = page === 1 || page === 2;
-        if (gated) {
-          expect(accepted.callScenePage).toBe(page);
-          expect(accepted.callScenePendingElapsed).toBe(
-            edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
-          );
-          let settled = accepted;
-          while (settled.callScenePendingElapsed !== null) {
-            settled = advancePostwin(settled);
-          }
-          expect(settled.callScenePage).toBe(page + 1);
-          expect(settled.callScenePageEdgeElapsed).toBe(
-            edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
-          );
-          expect(settled.callSceneDismissElapsed).toBeNull();
-          state = settled;
-        } else {
-          expect(accepted.callScenePage).toBe(page + 1);
-          expect(accepted.callScenePageEdgeElapsed).toBe(edgeBeforeAccept);
-          expect(accepted.callScenePendingElapsed).toBeNull();
-          expect(accepted.callSceneDismissElapsed).toBeNull();
-          state = accepted;
+        // Every box gates the next box behind a deferred bump
+        // (`callScenePendingElapsed`), not an instant callScenePage bump:
+        // boxes 1/2 behind the attendant's own walk-away/walk-back
+        // movement, boxes 3/4 (the boss message's own `\p` page turns,
+        // no movement) behind their own 1-tick accept-to-first-glyph swap
+        // (PROGRESS 1293 - the old page's content stays visible through
+        // the accept tick itself; see CALL_SCENE_PAGE_TRANSITION_DELAY's
+        // doc).
+        expect(accepted.callScenePage).toBe(page);
+        expect(accepted.callScenePendingElapsed).toBe(
+          edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
+        );
+        let settled = accepted;
+        while (settled.callScenePendingElapsed !== null) {
+          settled = advancePostwin(settled);
         }
+        expect(settled.callScenePage).toBe(page + 1);
+        expect(settled.callScenePageEdgeElapsed).toBe(
+          edgeBeforeAccept + CALL_SCENE_PAGE_TRANSITION_DELAY[page - 1],
+        );
+        expect(settled.callSceneDismissElapsed).toBeNull();
+        state = settled;
       } else {
         expect(accepted.callScenePage).toBe(5);
         expect(accepted.callSceneDismissElapsed).toBe(edgeBeforeAccept);
@@ -1657,9 +1652,10 @@ describe("Walk-up build step A, Brief 1: postwin.ts brain call-scene + AskReadyF
     expect(callSceneAttendantVisual(homeReopened)).toEqual({ dx: 0, frame: 0, hFlip: false });
 
     // Boxes 3->4 and 4->5 (the boss message's own page turns) have no
-    // attendant movement - still instant, unchanged.
-    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[2]).toBe(0);
-    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[3]).toBe(0);
+    // attendant movement, but still defer by the 1-tick accept-to-first-
+    // glyph swap (PROGRESS 1293), not an instant bump.
+    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[2]).toBe(1);
+    expect(CALL_SCENE_PAGE_TRANSITION_DELAY[3]).toBe(1);
 
     // Non-brain / pre-movement states always render the rest visual.
     expect(callSceneAttendantVisual(INITIAL_POSTWIN_STATE)).toEqual({ dx: 0, frame: 0, hFlip: false });

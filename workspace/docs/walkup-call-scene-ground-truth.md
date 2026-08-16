@@ -344,15 +344,51 @@ on the accept frame but returns `RENDER_UPDATE`, which does **not**
 `RENDER_PRINT` — i.e. old page and new page 1st glyph swap in a single
 visible frame, at accept **+1**.
 
-**Still open (page turns).** Fixture 02's own boss-message page 2/3 residual
-is not a modelling gap in the accept rule above but a fixture one: the
-harness's canned pre-checkpoint route accepts page 1's turn at oracle **1170**
-(page 2's first glyph is 1171, pixel-derived from the glyph-width table),
-while `tools/compare/traces/factory-brain-silver-walkup-callscene-02-off.json`
-presses at 1172/1173. Same 2-frame lead at page 2→3 (oracle accept 1303,
-first glyph 1304, fixture presses 1305) and at page 3's dismiss. Closing
-that needs the fixture's press frames re-derived against the canned route,
-which is a separate step from this one.
+**Page-turn accept was ALSO a real modelling gap (PROGRESS 1293).** 1292's
+"not a modelling gap" verdict above was about *readiness* timing
+(`postwinCallSceneInputReady`); there was a second, independent bug in what
+gets *rendered* right after a `\p` page-turn accepts. `CALL_SCENE_TEXT_FIRST_
+DELAYS[3]`/`[4]` (boxes 4 and 5's own first-glyph delay) still used the
+generic `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY` (4 ticks) inherited from an
+ordinary freshly-opened dialogue box, not the same-window `\p` swap's real
+**accept+1** rule established in point 4 above. That left the app blank for
+3 extra ticks after every page turn, and skewed the new page's entire
+typewriter schedule by the same 4 ticks for the rest of that page's span.
+Fixed by giving boxes 3→4 and 4→5 their own 1-tick deferred bump
+(`CALL_SCENE_PAGE_TRANSITION_DELAY[2]`/`[3]`, reusing the same
+`callScenePendingElapsed` machinery boxes 1/2's walk-gated transitions
+already use) paired with `CALL_SCENE_TEXT_FIRST_DELAYS[3]`/`[4]` = 0, so the
+new page's first glyph lands exactly on the bump tick (accept+1 total,
+oracle-confirmed: fixture 02's oracle captures hash byte-identical across
+local frames 805–813 — box 4 held, unchanging — then change at 814, the
+first new-content frame).
+
+**Fixture press-frame re-derivation (PROGRESS 1293, partial).** Separately,
+the harness's canned pre-checkpoint route accepts page 1's turn at oracle
+**1170** (`preCheckpointFrameOffset` 490 ⇒ local 680), while
+`tools/compare/traces/factory-brain-silver-walkup-callscene-02-off.json`'s
+own press landed at local 682 (oracle 1172) — a 2-frame lead, same
+direction/magnitude as PROGRESS 1292 already measured. Re-deriving that one
+segment (`idle133` → `idle131` before the box-3→4 press, compensated by
+widening the very last idle segment `132` → `134` so the trace's total
+length and every later capture frame stay unchanged) plus the render fix
+above closes the **entire** page-1→2 turn cluster (local 682–742) to
+byte-identical, 0 diff. The page-2→3 turn (box 4→5, oracle accept 1303 ⇒
+local 813) was tried the same way but did not fully close — shifting that
+press earlier improved but did not zero the local 816–866 cluster, and
+shifting it further overshot the oracle's own real transition point
+(oracle hashes confirm the true old→new swap sits between local 813 and
+814, not earlier); a residual on the order of the render-fix's own
+remaining error survives there, smaller than before but not exact. The
+box-5 dismiss (local 948–949, doc's "page 3's dismiss") was **not**
+re-derived — shifting it the same way cascaded into new, large mismatches
+across the entire remainder of the trace (local 967–1033+), so it was left
+at its original, unshifted position pending a proper root-cause (its accept
+path is `callSceneDismissElapsed`, not the `acceptPostwinCallScenePage`
+page-bump path the other two presses use, so it likely needs its own,
+separate derivation, not the same -2). Net: callscene-02 dense compare
+**120/199 → 171/199**; the page-2→3 turn (local 814, 816–866) and the box-5
+dismiss/menu-handoff cluster (local 948–966) remain open for a future step.
 
 ## Out of scope (per step brief)
 
