@@ -92,6 +92,7 @@ import {
   drawMessageBoxFrameFaded,
   drawMessageBoxText,
   drawMessageBoxTextFaded,
+  drawMessageBoxWaitArrow,
   drawStandardWindowFrame,
   drawStandardWindowText,
   renderPrebattleRoomScene,
@@ -297,10 +298,12 @@ import {
   postwinRightThisWayInputReady,
   postwinRngSteps,
   acceptPostwinCallScenePage,
+  CALL_SCENE_BRAIN_BRANCH_LAG,
   callSceneAttendantVisual,
   callSceneBoxHidden,
   postwinCallSceneInputReady,
   postwinCallSceneVisibleChars,
+  postwinCallSceneWaitArrowYOffset,
   CALL_SCENE_BOX_TEXTS,
   CALL_SCENE_HEAD_PROMPT_LINE1,
   CALL_SCENE_HEAD_PROMPT_LINE2,
@@ -2671,9 +2674,14 @@ function renderPostwinState(state: EngineState): Uint8Array {
   if (age >= POSTWIN_HEAL_BOX_AGE && !callSceneBoxHidden(postwin)) {
     drawMessageBoxFrame(fb);
     const healDismiss = postwin.healDismissElapsed;
+    // The brain branch's own extra `playse SE_POKENAV_CALL; waitse` pair
+    // (CALL_SCENE_BRAIN_BRANCH_LAG) pushes its box clear one tick past the
+    // ordinary route's: MEASURED on fixture 01 (oracle still shows the heal
+    // text at 828 and only clears to an empty box at 829).
     const beforeContinuation =
       healDismiss === null ||
-      age < healDismiss + POSTWIN_NEXT_BOX_CLEAR_DELAY;
+      age < healDismiss + POSTWIN_NEXT_BOX_CLEAR_DELAY
+        + (postwin.frontierBrain ? CALL_SCENE_BRAIN_BRANCH_LAG : 0);
     const drawLines = (line1: string, line2: string, chars: number): void => {
       if (chars <= 0) return;
       drawMessageBoxText(
@@ -2800,7 +2808,16 @@ function renderPostwinState(state: EngineState): Uint8Array {
       // index fidelity only (no oracle evidence for this window's exact
       // pixel transitions yet, docs/walkup-step-a-design.md §4).
       const box = CALL_SCENE_BOX_TEXTS[postwin.callScenePage - 1]!;
-      drawLines(box[0], box[1], postwinCallSceneVisibleChars(postwin));
+      const chars = postwinCallSceneVisibleChars(postwin);
+      drawLines(box[0], box[1], chars);
+      // `TextPrinterWaitWithDownArrow` (text.c:865-882): a box stopped on a
+      // `\p` page break draws the bobbing arrow after its own last glyph
+      // while it waits; a `$`-terminated one, released to the script's
+      // `waitbuttonpress`, does not.
+      const waitArrowYOffset = postwinCallSceneWaitArrowYOffset(postwin);
+      if (waitArrowYOffset !== null) {
+        drawMessageBoxWaitArrow(fb, box[1].slice(0, Math.max(0, chars - box[0].length)), waitArrowYOffset);
+      }
     } else if (postwin.dialoguePage === 0) {
       const [line1, line2] = postwin.frontierBrain
         ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]

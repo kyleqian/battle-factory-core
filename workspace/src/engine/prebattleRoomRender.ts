@@ -44,9 +44,10 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { drawTextFaded, fadeColor } from "./fadeRender.ts";
-import { drawText, type FontData } from "./font.ts";
+import { drawText, measureText, type FontData } from "./font.ts";
 
 import layout from "../data/gen/prebattle-room-layout.json" with { type: "json" };
+import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with { type: "json" };
 import tileset from "../assets/gen/prebattle-room-tileset.json" with { type: "json" };
 import npcs from "../assets/gen/prebattle-room-npcs.json" with { type: "json" };
 import msgbox from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
@@ -256,6 +257,13 @@ const msgboxTiles = msgboxAsset.tileset.tiles;
 const msgboxPalette = msgboxAsset.palette;
 const stdWindowAsset = stdWindow as MsgboxAsset;
 
+interface DownArrowAsset {
+  indices: number[][];
+  blitWidth: number;
+  blitHeight: number;
+}
+const downArrow = downArrowAsset as DownArrowAsset;
+
 /** Screen origin of the box's top-left border tile (bottom-of-screen field message box). */
 const BOX_ORIGIN = { x: 0, y: 112 };
 /** WindowFunc_DrawDialogueFrame's own width/height params for this standard field window (reference/pokeemerald/src/menu.c). */
@@ -355,6 +363,47 @@ export const MESSAGE_TEXT_COLORS = { fg: 1, bg: 0, shadow: 2 };
 /** Draws `text` at the given screen position using the message box's own fg/shadow palette (msgboxPalette indices 2/3) - shared with battleRoomRender.ts's opponent-speech box, which reuses this literal same box asset (docs/battle-room-notes.md §8.1). */
 export function drawMessageBoxText(fb: Uint8Array, text: string, x: number, y: number): void {
   drawText(fb, font, charmap, text, x, y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+}
+
+const MESSAGE_TEXT_LINE2_ORIGIN = { x: 16, y: 137 };
+/**
+ * `sDownArrowTiles` glyph indices 1/2 (border/fill) against this box's own
+ * msgbox palette, mirroring battleRoomRender.ts's own `CURSOR_PALETTE` for
+ * the literally same asset over the literally same box template
+ * (docs/battle-room-notes.md §8.1): index 2 is the msgbox palette's
+ * dedicated red, which `MESSAGE_PALETTE`'s compact 3-entry reindexing does
+ * not carry. Index 0 is transparent.
+ */
+const WAIT_ARROW_PALETTE: readonly [RgbColor, RgbColor, RgbColor] = [
+  { r: 0, g: 0, b: 0 },
+  MESSAGE_PALETTE[1]!,
+  msgboxPalette[4]!,
+];
+
+/**
+ * `TextPrinterDrawDownArrow`'s "more text follows, waiting for A/B" glyph
+ * (`text.c:902-931`), for a field message box that stopped on a `\p`
+ * (`CHAR_PROMPT_CLEAR`) page break. Drawn right after line 2's own last
+ * printed glyph, at that line's own Y minus the bob offset - the same
+ * placement battleRoomRender.ts's `drawBrainSpeechCursor` already uses for
+ * this asset over this same box template.
+ */
+export function drawMessageBoxWaitArrow(
+  fb: Uint8Array,
+  line2: string,
+  yOffset: number,
+): void {
+  const x = MESSAGE_TEXT_LINE2_ORIGIN.x + measureText(font, charmap, line2);
+  const y = MESSAGE_TEXT_LINE2_ORIGIN.y - yOffset;
+  for (let py = 0; py < downArrow.blitHeight; py += 1) {
+    for (let px = 0; px < downArrow.blitWidth; px += 1) {
+      const index = downArrow.indices[py]?.[px] ?? 0;
+      if (index === 0) continue;
+      const color = WAIT_ARROW_PALETTE[index];
+      if (!color) continue;
+      setPixel(fb, x + px, y + py, color.r, color.g, color.b);
+    }
+  }
 }
 
 export function drawMessageBoxTextFaded(

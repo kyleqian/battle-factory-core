@@ -293,21 +293,74 @@ export const POSTWIN_BRAIN_CANT_TELL_INPUT_READY_DELAY =
   POSTWIN_DIALOGUE_TEXT_FIRST_DELAY + POSTWIN_BRAIN_CANT_TELL_TEXT_TOTAL + 1;
 
 /**
- * Per-box first-glyph delay, relative to the box's own edge. Box 1's edge is
- * `healDismissElapsed` itself, reusing `POSTWIN_NEXT_TEXT_FIRST_DELAY` -- the
- * same post-heal box-clear boundary the ordinary route's own "next text"
- * reuses, not a new number (the source branches on `frontier_getbrainstatus`
- * at exactly this point, per the JSON's own event order). Boxes 2-5 reuse
- * the generic `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY` MSGBOX_DEFAULT convention
- * already applied to all three ordinary scouting pages.
+ * Ticks the just-arrived box's own frame graphic stays hidden past its edge
+ * before it visibly reopens (index 0 = box 2, after the walk-away; index 1 =
+ * box 3, after the walk-back) -- both boxes fully `closemessage`d before
+ * their `applymovement` (scripts.inc:66/70), unlike every other box turn in
+ * this file, which reuses an already-open box (no closemessage between
+ * them) and so has no such gap. MEASURED (fixture 01: box 2's frame
+ * reappears oracle frame 954, edge 951, gap 3; fixture 02: box 3's frame
+ * reappears oracle frame 1089, edge 1085, gap 4).
+ */
+const CALL_SCENE_BOX_REOPEN_LAG: readonly [number, number] = [3, 4];
+
+/**
+ * Extra tick every call-scene box inherits relative to the ordinary route's
+ * own post-heal schedule: the brain branch runs one script command pair the
+ * ordinary branch does not (`playse SE_POKENAV_CALL; waitse`, the JSON's own
+ * event right after `frontier_getbrainstatus`) before its first `message`.
+ * MEASURED +1 on fixture 01 (oracle: heal text still up at 828, box clears
+ * empty at 829, first glyph 830, fully typed 894 -- the app's own
+ * `POSTWIN_NEXT_*` schedule lands each of those one tick early).
+ */
+const CALL_SCENE_BRAIN_BRANCH_LAG = 1;
+export { CALL_SCENE_BRAIN_BRANCH_LAG };
+
+/**
+ * Per-box first-glyph delay, relative to the box's own edge.
+ * - Box 1's edge is `healDismissElapsed`, so it reuses the ordinary route's
+ *   own post-heal `POSTWIN_NEXT_TEXT_FIRST_DELAY` plus the brain branch's
+ *   own extra `playse/waitse` tick (`CALL_SCENE_BRAIN_BRANCH_LAG`).
+ * - Boxes 2/3 arrive after a `closemessage` + `applymovement`, so their own
+ *   window is reopened from scratch: the first glyph lands exactly one tick
+ *   after the box frame itself reappears (`CALL_SCENE_BOX_REOPEN_LAG`),
+ *   MEASURED on both fixtures (box 2 frame 954 / glyph 955 = edge+4; box 3
+ *   frame 1089 / glyph 1090 = edge+5). Box 2's value coincides with the
+ *   generic `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY` it used before; box 3's is
+ *   one tick later, which that shared constant could not express.
+ * - Boxes 4/5 are `\p` page turns inside one already-open message, so they
+ *   keep the generic MSGBOX_DEFAULT convention (see the note on
+ *   `postwinCallSceneInputReady` for the page-turn residual still open).
  */
 const CALL_SCENE_TEXT_FIRST_DELAYS: readonly number[] = [
-  POSTWIN_NEXT_TEXT_FIRST_DELAY,
-  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
-  POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
+  POSTWIN_NEXT_TEXT_FIRST_DELAY + CALL_SCENE_BRAIN_BRANCH_LAG,
+  CALL_SCENE_BOX_REOPEN_LAG[0] + 1,
+  CALL_SCENE_BOX_REOPEN_LAG[1] + 1,
   POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
   POSTWIN_DIALOGUE_TEXT_FIRST_DELAY,
 ];
+
+/**
+ * Whether each call-scene box is a non-final page of its own source message
+ * (i.e. the printer stops on `\p`/`CHAR_PROMPT_CLEAR` rather than `$`/EOS).
+ * Derived structurally from the JSON's own per-event `pages` split, never
+ * hardcoded: only the boss message (`Text_MessageFromHeadComeRightNow`) is
+ * multi-page, so this is [false, false, true, true, false].
+ *
+ * The distinction is load-bearing twice over (`text.c`):
+ * - `CHAR_PROMPT_CLEAR` is consumed by one whole `RENDER_STATE_HANDLE_CHAR`
+ *   frame that returns `RENDER_UPDATE`, and only the frame after it enters
+ *   `RENDER_STATE_CLEAR`, where `TextPrinterWaitWithDownArrow` first polls
+ *   `JOY_NEW(A|B)`. `$`/EOS instead returns `RENDER_FINISH` immediately, so
+ *   `waitmessage` releases and the script's own `waitbuttonpress` polls one
+ *   tick after the last glyph. Hence the `+1` in the accept delay below.
+ * - `TextPrinterWaitWithDownArrow` also draws the bobbing down arrow every
+ *   frame it waits; `waitbuttonpress` does not (`postwinCallSceneWaitArrow`).
+ */
+const CALL_SCENE_BOX_PROMPT_PAGE: readonly boolean[] =
+  callSceneMessageEvents.flatMap((event) =>
+    event.pages.map((_page, index) => index < event.pages.length - 1),
+  );
 
 function callSceneBoxTotal(page: 1 | 2 | 3 | 4 | 5): number {
   const [line1, line2] = CALL_SCENE_BOX_TEXTS[page - 1]!;
@@ -942,14 +995,56 @@ export function postwinCallSceneVisibleChars(state: PostwinState): number {
   return Math.min(total, delay - firstDelay + 1);
 }
 
+/**
+ * Ticks from a call-scene box's own last glyph to the first tick that box
+ * polls `JOY_NEW(A|B)` -- `text.c`'s two distinct message endings (see
+ * `CALL_SCENE_BOX_PROMPT_PAGE`): `$`/EOS accepts at last-glyph + 1 (the
+ * printer finishes, `waitmessage` releases, `waitbuttonpress` polls), a `\p`
+ * page break at last-glyph + 2 (one frame consumes `CHAR_PROMPT_CLEAR`, the
+ * next enters `RENDER_STATE_CLEAR` and polls). MEASURED on fixture 01's own
+ * box 1: last glyph oracle 894, dismiss-A registers 895.
+ */
+function callSceneAcceptLagAfterLastGlyph(page: 1 | 2 | 3 | 4 | 5): number {
+  return CALL_SCENE_BOX_PROMPT_PAGE[page - 1] ? 2 : 1;
+}
+
 export function postwinCallSceneInputReady(state: PostwinState): boolean {
   const delay = postwinCallSceneDelay(state);
   if (delay === null) return false;
-  const firstDelay = CALL_SCENE_TEXT_FIRST_DELAYS[state.callScenePage - 1]!;
-  const total = callSceneBoxTotal(state.callScenePage as 1 | 2 | 3 | 4 | 5);
-  // Same "settled + 2" MSGBOX_DEFAULT accept-ready convention as
-  // POSTWIN_RIGHT_THIS_WAY_INPUT_READY_DELAY/POSTWIN_RECORDED_INPUT_READY_DELAY.
-  return delay >= firstDelay + total + 1;
+  const page = state.callScenePage as 1 | 2 | 3 | 4 | 5;
+  const firstDelay = CALL_SCENE_TEXT_FIRST_DELAYS[page - 1]!;
+  const total = callSceneBoxTotal(page);
+  // Last glyph lands at firstDelay + total - 1; the accept edge is that plus
+  // this ending's own lag. Boxes 3/4 (the `\p` pages) keep the old
+  // "settled + 2" value; the `$`-terminated boxes are one tick earlier, and
+  // since box 1's first glyph moved one tick LATER by the same amount, no
+  // call-scene box's absolute accept tick moves.
+  return delay >= firstDelay + total - 1 + callSceneAcceptLagAfterLastGlyph(page);
+}
+
+/**
+ * The bobbing down-arrow phase for a `\p`-terminated call-scene box that is
+ * waiting on input, or null when this box draws no arrow. `text.c`'s
+ * `DrawDownArrow` redraws it every 9th frame it is waiting, cycling
+ * `sDownArrowYCoords` (0,1,2,1) -- the same cycle battleScene.ts's
+ * `cursorState`/battleRoom.ts's `brainSpeechCursorYOffset` already model for
+ * this identical glyph, re-anchored to this box's own first waiting tick
+ * (which is also its own accept edge, both being `RENDER_STATE_CLEAR`'s
+ * first frame).
+ */
+const CALL_SCENE_WAIT_ARROW_Y_OFFSETS = [0, 1, 2, 1] as const;
+export function postwinCallSceneWaitArrowYOffset(state: PostwinState): number | null {
+  const delay = postwinCallSceneDelay(state);
+  if (delay === null) return null;
+  const page = state.callScenePage as 1 | 2 | 3 | 4 | 5;
+  if (!CALL_SCENE_BOX_PROMPT_PAGE[page - 1]) return null;
+  const firstDelay = CALL_SCENE_TEXT_FIRST_DELAYS[page - 1]!;
+  const waitStart = firstDelay + callSceneBoxTotal(page) - 1
+    + callSceneAcceptLagAfterLastGlyph(page);
+  if (delay < waitStart) return null;
+  const phase = Math.floor((delay - waitStart) / 9)
+    % CALL_SCENE_WAIT_ARROW_Y_OFFSETS.length;
+  return CALL_SCENE_WAIT_ARROW_Y_OFFSETS[phase]!;
 }
 
 // Walk-up step A follow-on (docs/walkup-call-scene-ground-truth.md Window 1):
@@ -1026,19 +1121,6 @@ export interface CallSceneAttendantVisual {
 const CALL_SCENE_HOME_VISUAL: CallSceneAttendantVisual = { dx: 0, frame: 0, hFlip: false };
 /** Held pose once the walk-away settles (MEASURED: the last GoWest cycle tick before `waitmovement 0` returns is frame 2, west-stand - matches `callSceneWalkFrame`'s own last value). */
 const CALL_SCENE_AWAY_HOLD_VISUAL: CallSceneAttendantVisual = { dx: -CALL_SCENE_MOVE_DISTANCE, frame: 2, hFlip: false };
-
-/**
- * Ticks the just-arrived box's own frame graphic stays hidden past its edge
- * before it visibly reopens (index 0 = box 2, after the walk-away; index 1 =
- * box 3, after the walk-back) -- both boxes fully `closemessage`d before
- * their `applymovement` (scripts.inc:66/70), unlike every other box turn in
- * this file, which reuses an already-open box (no closemessage between
- * them) and so has no such gap. MEASURED (fixture 01: box 2's frame
- * reappears oracle frame 954, edge 951, gap 3; fixture 02: box 3's frame
- * reappears oracle frame 1089, edge 1085, gap 4 -- the same tick its first
- * glyph appears, i.e. zero extra blank-frame hold that time).
- */
-const CALL_SCENE_BOX_REOPEN_LAG: readonly [number, number] = [3, 4];
 
 /** The attendant's current on-screen offset/pose for the brain call scene - null-safe for every non-brain / pre-movement state (returns the rest visual). */
 export function callSceneAttendantVisual(state: PostwinState): CallSceneAttendantVisual {
