@@ -86,10 +86,10 @@ describe("MOVE_ROLLOUT authoritative-source staging checkpoint", () => {
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === fixture.componentTrack.id))
       .toMatchObject(fixture.componentTrack);
     const rolloutTrack = coverage.componentTracks.find((track: { id: string }) => track.id === fixture.componentTrack.id);
-    expect(rolloutTrack.goal).toMatch(/non-exclusive/iu);
-    expect(rolloutTrack.goal).toContain("no exact/partial/staged move entry");
-    expect(rolloutTrack).not.toHaveProperty("fulfilled");
-    expect(coverageFor("MOVE_ROLLOUT")).toBeUndefined();
+    expect(rolloutTrack.goal).toMatch(/fulfilled/iu);
+    expect(rolloutTrack.goal).toContain("1,586/1,586");
+    expect(rolloutTrack).toMatchObject({ fulfilled: true });
+    expect(coverageFor("MOVE_ROLLOUT")).toMatchObject({ status: "exact" });
 
     expect(coverageFor("MOVE_SAND_ATTACK")).toMatchObject({ status: "exact" });
     expect(componentsFor("MOVE_SAND_ATTACK")).toContain("asset:ANIM_TAG_MUD_SAND");
@@ -102,6 +102,8 @@ describe("MOVE_ROLLOUT authoritative-source staging checkpoint", () => {
       "task:AnimTask_GetIceBallCounter", "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
     ]));
     expect(componentsFor("MOVE_ICE_BALL")).not.toContain("task:AnimTask_Rollout");
+    // The source-staging checkpoint remains historical; exact credit lives
+    // in the complete bilateral rollout-evidence fixture and coverage entry.
     expect(fixture.coverageCredit).toBe(false);
   });
 

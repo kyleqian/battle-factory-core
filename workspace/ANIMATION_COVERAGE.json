@@ -5266,6 +5266,39 @@
     "tests/animation/fireBlastReducer.test.ts",
     "tests/animation/fireBlastFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_ROLLOUT",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Voltorb versus Onix Scene-ON battles naturally progress all five locked Rollout hits without transient-state injection; player-back bodies 75..241, 575..741, 1079..1239, 1578..1730, and 2074..2218 plus opponent-front bodies 79..245, 1010..1176, 1580..1740, 2120..2272, and 2660..2804 retain 793 rows per orientation and 1,586 total through first inactive cleanup twice fresh",
+    "the source-relative reducer and typed Scene-ON seam replay all 1,586 rows: the 1..5 counter/timer and dynamic-power inputs, Rollout task path, 10/10/12/16/8 affine-off dirt or rock allocations, animation-2 IMPACT, power-scaled monbg shake, resource/register/audio lifecycle, stable SortSprites order, and cleanup",
+    "the shared production compositor reuses source-extracted Voltorb/Onix, MUD_SAND, ROCKS, IMPACT, battle field, chrome, and 32x8 enemy-shadow assets; it follows task callback/OAM/palette/BG latches and the elevated opponent VOLTORB pointer-entry shadow's preceding-hardware-OAM lifetime without any coordinate/RGB/framebuffer patch",
+    "rolloutFramebuffer.ts proves player-back 793/793 and opponent-front 793/793 raw-RGB/shared-production-framebuffer rows with zero residual pixels, 1,586/1,586 total; the focused source/evidence/reducer/framebuffer tests pin the enemy-shadow callback, source elevation, extracted 200-pixel mask, and all five hardware-OAM pointer-entry rows",
+    "MOVE_ROLLOUT alone promotes. MOVE_ICE_BALL remains independently unsupported; MOVE_SAND_ATTACK and MOVE_ANCIENT_POWER remain independent exact asset controls. Defense Curl gameplay state receives no presentation ownership or unsupported visual claim, and no damage, RNG, AI, controller, turn, round, or facility state is owned"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-rollout-player-voltorb-opponent-onix.json",
+    "tools/battle-lab/mechanic-rollout-opponent-voltorb-player-onix.json",
+    "tools/compare/fixtures/rollout-evidence.json",
+    "tools/compare/rolloutSourceAudit.ts",
+    "tools/compare/rolloutProbe.py",
+    "tools/compare/rolloutEvidence.ts",
+    "tools/compare/verifyRolloutReducer.ts",
+    "tools/compare/rolloutFramebuffer.ts",
+    "tools/compare/evidence/rollout-player-dense-state.json.gz",
+    "tools/compare/evidence/rollout-opponent-dense-state.json.gz",
+    "tools/compare/evidence/rollout-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/rollout-opponent-raw-rgb.tar.gz",
+    "src/assets/gen/battle-enemy-shadow.json",
+    "src/animation/rollout.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/rolloutSourceCheckpoint.test.ts",
+    "tests/animation/rolloutEvidenceCheckpoint.test.ts",
+    "tests/animation/rolloutReducer.test.ts",
+    "tests/animation/rolloutFramebuffer.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -6183,7 +6216,8 @@
    "representatives": [
     "MOVE_ROLLOUT"
    ],
-   "goal": "NON-EXCLUSIVE production compositor checkpoint only: task:AnimTask_Rollout remains a singleton Level-50 component represented only by MOVE_ROLLOUT. Complete legal Voltorb/Onix Scene-ON lifecycles retain all five naturally progressed counter bodies twice fresh in both orientations (793 rows per side, 1,586 total) through first inactive cleanup. The reducer/typed seam replay all 1,586 rows; the shared production framebuffer is zero-residual for 793/793 player-back and 788/793 opponent-front rows (1,581/1,586). The bounded remainder is exactly each counter body's opponent-front age-0 row: 200 field-layer pixels at x=160..191,y=65..72, 1,000 pixels total. MOVE_ROLLOUT stays unsupported, the track stays unfulfilled, no exact/partial/staged move entry is granted, and no sibling receives coverage. MOVE_SAND_ATTACK and MOVE_ANCIENT_POWER remain independent exact MUD_SAND/ROCKS/IMPACT controls; MOVE_ICE_BALL remains independent unsupported. Remaining: port the missing source-owned layered field state and prove 1,586/1,586 zero-residual rows before MOVE_ROLLOUT alone may promote."
+   "fulfilled": true,
+   "goal": "FULFILLED: task:AnimTask_Rollout is a singleton Level-50 component represented only by MOVE_ROLLOUT. Complete legal Voltorb/Onix Scene-ON lifecycles naturally progress all five counter bodies twice fresh in both orientations through first inactive cleanup. The source-relative reducer, typed seam, and shared production framebuffer pass player-back 793/793 plus opponent-front 793/793, 1,586/1,586 total with zero residual pixels. The five opponent pointer-entry rows use the source-extracted elevated enemy-shadow OAM layer and its preceding-hardware-buffer lifetime. MOVE_ROLLOUT alone is exact; MOVE_ICE_BALL remains independently unsupported. MOVE_SAND_ATTACK and MOVE_ANCIENT_POWER remain independent exact controls, and Defense Curl gameplay state receives no presentation ownership or unsupported visual claim."
   }
  ],
  "variantAudits": {

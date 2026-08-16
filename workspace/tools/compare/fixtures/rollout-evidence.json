@@ -1,10 +1,11 @@
 {
   "schema": "rollout-evidence-fixture/v1",
   "move": "MOVE_ROLLOUT",
-  "status": "unsupported",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "probe": "tools/compare/rolloutProbe.py",
   "verifier": "tools/compare/rolloutEvidence.ts",
+  "framebufferVerifier": "tools/compare/rolloutFramebuffer.ts",
   "repeatability": {"runsPerOrientation": 2, "comparison": "byte-identical dense JSON and every raw RGB frame", "allMatched": true},
   "expected": {
     "counters": [1, 2, 3, 4, 5],
@@ -45,5 +46,5 @@
       "sourceWindows": [[79,245],[1010,1176],[1580,1740],[2120,2272],[2660,2804]]
     }
   },
-  "boundedRemainder": "Complete twice-fresh dense bilateral counter-1-through-5 evidence is retained, and the source-relative reducer plus typed seam replay all 1,586 rows. The production compositor is zero-residual for player-back 793/793 and opponent-front 788/793 (1,581/1,586): each opponent-front counter body's age-0 row retains exactly 200 field-layer pixels at x=160..191,y=65..72, 1,000 pixels total. MOVE_ROLLOUT remains unsupported with no move coverage entry or sibling credit; MOVE_ICE_BALL remains independent unsupported."
+  "boundedRemainder": "Complete twice-fresh dense bilateral counter-1-through-5 evidence, source-relative reducer, typed seam, and shared production framebuffer pass all 1,586 rows with zero residual pixels. The five opponent-front pointer-entry rows use the source-extracted elevated enemy-shadow OAM layer and its measured preceding-buffer lifetime. MOVE_ROLLOUT alone is exact; MOVE_ICE_BALL remains independently unsupported. Defense Curl gameplay state receives no presentation ownership or unsupported visual claim."
 }

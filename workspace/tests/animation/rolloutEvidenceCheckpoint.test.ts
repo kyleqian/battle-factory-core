@@ -54,12 +54,13 @@ describe("MOVE_ROLLOUT complete natural counter lifecycle evidence", () => {
     }
   });
 
-  it("remains an evidence-only unsupported move with independent controls", () => {
-    expect(fixture).toMatchObject({ move: "MOVE_ROLLOUT", status: "unsupported", coverageCredit: false });
+  it("retains exact bilateral acceptance with independent controls", () => {
+    expect(fixture).toMatchObject({ move: "MOVE_ROLLOUT", status: "exact", coverageCredit: true });
     expect(fixture.repeatability).toEqual({ runsPerOrientation: 2, comparison: "byte-identical dense JSON and every raw RGB frame", allMatched: true });
     expect(sourceFixture.counterBranches.map((row) => row.defenseCurlPower)).toEqual(fixture.expected.defenseCurlPowersFromPinnedSource);
-    expect(fixture.boundedRemainder).toContain("1,581/1,586");
-    expect(fixture.boundedRemainder).toContain("1,000 pixels total");
+    expect(fixture.boundedRemainder).toContain("all 1,586 rows with zero residual pixels");
+    expect(fixture.boundedRemainder).toContain("enemy-shadow OAM layer");
     expect(fixture.boundedRemainder).toContain("MOVE_ICE_BALL");
+    expect(fixture.boundedRemainder).toContain("Defense Curl gameplay state");
   });
 });
