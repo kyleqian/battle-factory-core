@@ -1,3 +1,9 @@
+# MOVE_FIRE_BLAST pure reducer + typed seam exact checkpoint — remains unsupported (2026-08-16 worker)
+
+- **State:** Coverage remains **193/276 Level-50 exact**, 0 partial, 0 staged, and **83 unsupported**. Fire Blast remains unsupported and receives no compositor/draw wiring, framebuffer acceptance, coverage promotion, latch edit, or sibling/component credit.
+- **Verified:** The source-relative 197-age reducer and narrow typed Scene-ON seam each match **394/394 retained bilateral rows** through first inactive cleanup: root command/wait cursor, **3×5 rings + 9×5 crosses**, callbacks/positions/frames/slots/allocation order/destruction, target ShakeMon, both F_PAL_BG black tasks and coefficient state, SMALL_EMBER tag lifetime, hard-coded attacker→target sound sweep/pan, neutral matrices/registers, task/resource counts, and cleanup. Each side independently reports **197/197 reducer + 197/197 seam**, 15 ring and 45 cross creations, and preceding-buffer OAM/matrix/palette latches **196/196**.
+- **Receipts / next:** Reducer `f91c0a70…`, verifier `b2a83db8…`, fixture `6587dbf9…`; retained JSON/raw-RGB hashes remain player `cb238202… / f36e165d…`, opponent `a5a45685… / 4376d40d…`. Remaining gap is explicit: extract only the required art, wire a source-relative production compositor/draw case, and prove twice-fresh **zero-residual 394-row framebuffer equality** before Fire Blast alone can promote. Dragon Breath, Flamethrower, Blaze Kick, Ember, Fire Spin, and other fire siblings remain independent exact regression controls.
+
 # MOVE_FIRE_BLAST complete bilateral dense evidence checkpoint — remains unsupported (2026-08-16 worker)
 
 - **State:** Coverage remains **193/276 Level-50 exact**, 0 partial, 0 staged, and **83 unsupported**. Fire Blast has complete retained evidence but no reducer, typed seam, compositor/draw wiring, framebuffer acceptance, coverage promotion, latch edit, or sibling/component credit.
