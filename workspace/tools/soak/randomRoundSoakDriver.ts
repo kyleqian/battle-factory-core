@@ -824,12 +824,37 @@ export const DEFAULT_RUN_OPTIONS: RunOptions = {
   // frame 361,216 -- over the old budget. The #89 Baton Pass fix (which
   // used to crash before reaching this point) makes the same-class seed 37
   // run even longer, settling at frame 398,088. 600_000 covers both with
-  // real margin.
+  // real margin. (Superseded per-policy by DEFAULT_MAX_FRAMES_BY_POLICY
+  // below; this field is the fallback for a policy absent from that map.)
   maxFrames: 600_000,
   renderEvery: 8,
   verbose: false,
   policy: "full",
 };
+
+/**
+ * Per-policy default frame budget before an unresolved seed reports HANG.
+ * "full"/"vanilla" soak a single round, so 600_000 (ISSUES #90 triage)
+ * still applies. "winning" chains multiple complete rounds back-to-back
+ * (its continuation roll keeps re-entering GO ON), so per-seed frame cost
+ * stacks across rounds and can legitimately exceed a single-round budget
+ * without stalling. docs/soak-winning-sweep-2026-08-16.md (seeds 0:60) and
+ * docs/soak-winning-sweep-2026-08-16-part2.md (seeds 60:120) swept 120
+ * seeds at --max-frames 1_200_000 with zero truncation; the deepest
+ * observed completion was seed 49 at frame 693,051. 1_000_000 keeps ~44%
+ * headroom over that observed max, matching the proportional margin
+ * DEFAULT_RUN_OPTIONS.maxFrames used for "full" (~51% over its 398,088 max).
+ */
+export const DEFAULT_MAX_FRAMES_BY_POLICY: Record<SoakPolicy, number> = {
+  full: 600_000,
+  vanilla: 600_000,
+  winning: 1_000_000,
+};
+
+/** An explicit `maxFrames` always wins; otherwise resolve per policy. */
+export function resolveMaxFrames(policy: SoakPolicy, explicit?: number): number {
+  return explicit ?? DEFAULT_MAX_FRAMES_BY_POLICY[policy] ?? DEFAULT_RUN_OPTIONS.maxFrames;
+}
 
 function endStateOf(state: EngineState): string | null {
   const phase = state.factoryRoundBattleOrchestrator?.round.rules.phase;
@@ -839,7 +864,9 @@ function endStateOf(state: EngineState): string | null {
 }
 
 export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): SeedResult {
-  const options: RunOptions = { ...DEFAULT_RUN_OPTIONS, ...optionsIn };
+  const policy = optionsIn.policy ?? DEFAULT_RUN_OPTIONS.policy;
+  const maxFrames = resolveMaxFrames(policy, optionsIn.maxFrames);
+  const options: RunOptions = { ...DEFAULT_RUN_OPTIONS, ...optionsIn, maxFrames };
   const rng = new Rng(seed);
   const log = new ActionLog(options.verbose);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
