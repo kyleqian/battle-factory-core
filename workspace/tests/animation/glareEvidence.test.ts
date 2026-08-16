@@ -74,6 +74,6 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
     expect(coverage.entries).toHaveLength(196);
     expect(coverage.entries.every((entry) => entry.status === "exact")).toBe(true);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(81);
+    expect(276 - coverage.entries.length).toBe(80);
   });
 });

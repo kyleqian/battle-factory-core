@@ -32,6 +32,6 @@ describe("MOVE_GUILLOTINE bilateral exact evidence", () => {
     expect(coverage.entries).toHaveLength(196);
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GUILLOTINE"))
       .toEqual([expect.objectContaining({ status: "exact" })]);
-    expect(276 - coverage.entries.length).toBe(81);
+    expect(276 - coverage.entries.length).toBe(80);
   });
 });
