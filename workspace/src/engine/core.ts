@@ -1158,10 +1158,25 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         // branch settles into "brainSpeechSettled", never "settled".
         // battleRoom may already be null here (the ordinary-path handoff
         // just above just nulled it this same tick).
+        //
+        // CLOSE WIPE follow-up (gold-close ground truth, docs/noland-brain-
+        // intro-gold-ground-truth.md §7'): brainSpeechSceneHandoffElapsed
+        // only covers the dialogue-dismissed EMPTY-ARENA PAUSE (26/28
+        // ticks) - the screen-flicker + circle-transition that follows it
+        // still needs to render (renderBattleRoomState's own brain branch
+        // below layers it on starting exactly at this elapsed, same
+        // frontierTransitionBgFadeY/ObjFadeY/applyBattleTransitionOverlay
+        // the ordinary non-brain "settled" phase already uses for the SAME
+        // shared circle-transition art), so battleRoom must stay alive
+        // through the transition's own full run, not just the pause -
+        // BATTLE_2_SCENE_HANDOFF_ELAPSED is that already-calibrated full
+        // duration (same constant the ordinary "settled" phase's own
+        // handoff above already waits out for this shared transition).
         if (
           battleRoom !== null &&
           battleRoom.phase === "brainSpeechSettled" &&
-          battleRoom.elapsed === brainSpeechSceneHandoffElapsed(battleRoom)
+          battleRoom.elapsed
+            === brainSpeechSceneHandoffElapsed(battleRoom) + BATTLE_2_SCENE_HANDOFF_ELAPSED
         ) {
           const generatedPending =
             factoryRoundBattleOrchestrator?.round.presentation?.command;
@@ -2468,15 +2483,33 @@ function blackFrame(): Uint8Array {
 function renderBattleRoomState(state: EngineState): Uint8Array {
   const b = state.battleRoom!;
   if (b.frontierBrainWalkup) {
-    // Walk-up build step B1: the brain branch never reaches a "settled"
-    // Frontier-circle transition this session (that belongs after B2's
-    // speech, out of scope) - just the fade-in during brainEntering, same
-    // FADE_IN table/convention as the ordinary path.
+    // Walk-up build step B1: fade-in during brainEntering, same FADE_IN
+    // table/convention as the ordinary path.
     const fadeElapsed = b.phase === "brainEntering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
-    const bgY = bgFadeY(fadeElapsed, FADE_IN);
-    const objY = objFadeY(fadeElapsed, FADE_IN);
+    // CLOSE WIPE follow-up (partial, characterized honestly - see docs/
+    // noland-brain-intro-gold-ground-truth.md's own new §8' section): once
+    // brainSpeechSettled's own empty-arena pause ends
+    // (brainSpeechSceneHandoffElapsed, itself probe-derived per its own
+    // doc), the SAME shared Frontier circle-transition overlay the ordinary
+    // (non-brain) "settled" phase plays below starts layering on top here
+    // too, `te` re-based to 0 at that same pause-end tick. This closes most
+    // of the gap (factory-brain-gold-walkup-speech-close-off.json:
+    // 62->80/126, reproduce via `npm run compare -- factory-brain-gold-
+    // walkup-speech-close-off.json --summary`) but leaves a residual in the
+    // flicker's own later ticks and the swirl-build sub-stage (frames
+    // 93-116, then a small-to-growing mismatch from ~117) not fully pinned
+    // this session - flagged honestly rather than chased into a second
+    // fitted offset (see this file's own doc note on the prior worker's
+    // regression from guessing this exact shape).
+    const transitionElapsed = b.elapsed - brainSpeechSceneHandoffElapsed(b);
+    const transition = b.phase === "brainSpeechSettled" && transitionElapsed >= 0
+      ? frontierTransitionRenderKind(b.transitionPresentation, "circlesMeet")
+      : null;
+    const bgY = transition !== null ? frontierTransitionBgFadeY(transitionElapsed, transition) : bgFadeY(fadeElapsed, FADE_IN);
+    const objY = transition !== null ? frontierTransitionObjFadeY(transitionElapsed, transition) : objFadeY(fadeElapsed, FADE_IN);
     const fb = createFramebuffer();
     renderBattleRoomBrainEntranceScene(fb, b, bgY, objY);
+    if (transition !== null) applyBattleTransitionOverlay(fb, transitionElapsed, transition);
     return fb;
   }
   const fallbackTransition = b.encounter === "jenson"

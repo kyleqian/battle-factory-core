@@ -22,6 +22,7 @@ import {
   BRAIN_MOVEMENT_CLOCK_OFFSET,
   BRAIN_MOVEMENT_SETTLE_ELAPSED,
   BRAIN_MSGBOX_APPEAR_ELAPSED,
+  BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS,
   BRAIN_MSGBOX_LINE1,
   BRAIN_MSGBOX_LINE2,
   BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED,
@@ -165,9 +166,22 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
 
     for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
     expect(state.phase).toBe("brainMoving");
+    // CLOSE WIPE (battleRoom.ts's BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS
+    // doc, oracle-probed against factory-brain-silver-walkup-entrance-03-off
+    // .json): the box's own on-screen clear lags this phase's own state
+    // transition by two elapsed ticks - it lingers through brainMoving's own
+    // still-RAM-flat elapsed 0-1, only clearing once the room visibly starts
+    // moving at elapsed 2.
+    expect(state.elapsed).toBe(0);
+    expect(msgboxVisual(state)).toEqual({ visible: true, chars: BRAIN_MSGBOX_PRINT_TICKS });
+    state = advanceBattleRoom(state);
+    expect(state.elapsed).toBe(1);
+    expect(msgboxVisual(state)).toEqual({ visible: true, chars: BRAIN_MSGBOX_PRINT_TICKS });
+    state = advanceBattleRoom(state);
+    expect(state.elapsed).toBe(BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS);
     expect(msgboxVisual(state)).toEqual({ visible: false, chars: 0 });
 
-    for (let i = 0; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    for (let i = state.elapsed; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) state = advanceBattleRoom(state);
     expect(state.phase).toBe("brainSettled");
     expect(state.elapsed).toBe(0);
     // Walk-up build step B2 hooked this seam: ticking SPEECH_APPEAR_ELAPSED+1

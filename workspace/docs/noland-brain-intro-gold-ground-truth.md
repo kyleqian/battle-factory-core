@@ -347,6 +347,85 @@ bin/oracle lab tools/battle-lab/factory-brain-gold-speech-pages-off.json -o /tmp
 bin/oracle lab tools/battle-lab/factory-brain-gold-speech-close-off.json -o /tmp/c --quiet
 ```
 
+### 8′. CLOSE WIPE model (2026-08-16, side lane) — generic msgbox close + flicker overlay
+
+Two things were previously missing/wrong, both now fixed in `src/`:
+
+1. **The msgbox's own on-screen clear was coupled to its owning phase's
+   elapsed-based STATE transition** (`MSGBOX_CLOSE_TICKS`), when the real
+   game decouples the two. Two probe-derived, per-phase corrections (see
+   `src/engine/battleRoom.ts`'s `BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS`
+   doc for the full citations):
+   - `brainMsgboxClosing`→`brainMoving` (the entrance escort box): the box
+     lingers through `brainMoving`'s own first two (still RAM-flat) elapsed
+     ticks, clearing exactly when the room starts visibly panning — fixed
+     `factory-brain-silver-walkup-entrance-03-off.json` 242→**244/256**
+     (frames 319-320 closed).
+   - `brainSpeechClosing`→`brainSpeechSettled` (the close/cry box, both
+     tiers): clears immediately, matching `DoNolandBattle`'s `closemessage`
+     running as the very next script command with no intervening
+     `waitmessage`/`applymovement` (unlike the escort box's own script
+     shape) — fixed the first 4 frames of this section's own
+     `factory-brain-gold-walkup-speech-close-off.json` residual.
+2. **The screen-flicker + circle-transition overlay (§7′'s row
+   2557–2611/2612–2620) was never wired into the brain walk-up's render
+   path at all** — `renderBattleRoomState`'s `frontierBrainWalkup` branch
+   (`src/engine/core.ts`) only ever drew the flat post-fade-in scene, never
+   the shared `battleTransition.ts` overlay the ordinary (non-brain)
+   `"settled"` phase already plays for every other Frontier encounter. Now
+   wired: `brainSpeechSettled` layers the same `frontierTransitionBgFadeY`/
+   `ObjFadeY`/`applyBattleTransitionOverlay` calls, `te` re-based to 0 at
+   `brainSpeechSceneHandoffElapsed` (the tick the empty-arena pause ends);
+   `battleRoom` also now stays alive through the transition's own full run
+   (`BATTLE_2_SCENE_HANDOFF_ELAPSED` past that point, the same constant the
+   ordinary path already waits out for this shared transition) instead of
+   nulling out the instant the pause ends, which previously cut the
+   transition off before it could render at all.
+
+**Result:** `factory-brain-gold-walkup-speech-close-off.json` 58→**80/126**
+(reproduce: `npm run compare -- factory-brain-gold-walkup-speech-close-off
+.json --capture-range 0:125`, stride-1). Frames 0–61 (idle hold through the
+empty-arena pause) are exact. From frame 62 (flicker onset) the picture is
+a clean, periodic near-miss, not noise: frames 62–76 and 78–92 mismatch at
+100% (a full-frame gray-blend-level difference) except frame 77, which
+matches exactly; frames 93–109 (17 consecutive frames) match exactly, then
+110–124 mismatch the same way 62–92 did, and 125 is close but not exact
+(4.28% diff). This shape (mismatch, one clean hit, mismatch, a longer
+clean run, mismatch again) is consistent with our own `grayFlickerY`
+16-tick-period oscillation running slightly OUT OF PHASE with oracle's -
+periodically crossing into alignment rather than being wrong in kind. Two
+explicit realignments were tried this session to close the phase gap and
+BOTH scored worse than the untouched version (`te = b.elapsed -
+brainSpeechSceneHandoffElapsed(b)`, no further correction, 80/126):
+- `te = b.elapsed` (no pause offset at all, relying on `battleTransition
+  .ts`'s own `FLICKER_START_TE=28` to gate the pause): 69/126.
+- `te = b.elapsed + 2` (28-vs-26 gold/silver pause-length correction,
+  aligning gold's shorter empty-arena pause to the shared `FLICKER_START_TE`
+  constant): 71/126.
+
+Since guessing further offsets is exactly the failure mode this step's own
+brief warned against (a prior attempt regressed gold-close to 37/126 this
+way), the best-scoring, simplest form (no `FLICKER_START_TE` realignment)
+is what's committed, and the remaining phase gap is left for a follow-up
+that dense-probes `factory-brain-gold-speech-close-off.json`'s oracle
+frames 2557–2620 at stride 1 against `grayFlickerY`'s own tick-by-tick
+gray-blend coefficient (not just sha-compare) to find the true phase
+origin, rather than bisecting compare-tool match counts blind.
+
+Both residuals are left honest rather than fitted further — per this
+step's own brief, a prior attempt at this exact model regressed gold-close
+to 37/126 by guessing the wipe's shape instead of deriving it; the
+improvements above (58→80/126, entrance-03 242→244/256) are the portion
+that is fully probe/source-grounded, and every cited bar (gold open
+58/256, gold pages 53/177, entrance-02 256/256, all four B2 speech
+windows, speech-close-pause 28/28, callscene-01 131/131, both reveal
+fixtures 690/701) was reverified unmoved after this change (full `npm
+test` + `npm run build` + `executableFrontierRatchet` also green). A
+follow-up step should dense-probe `factory-brain-gold-speech-close-off
+.json`'s own oracle frames 2557–2620 at stride 1 against the app's
+`grayFlickerY`/circle-sprite math tick-by-tick (not just sha-compare) to
+isolate the two remaining mechanisms precisely.
+
 ## Appendix: pre-fix (stale, oracle bug: missing gold Frontier-Brain symbol flag) history — captured 2026-08-14
 
 Everything below this line is the **original, unedited** capture from one

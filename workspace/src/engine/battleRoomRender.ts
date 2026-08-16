@@ -29,7 +29,7 @@
 import { setPixel } from "./framebuffer.ts";
 import type { RgbColor } from "./bg.ts";
 import { fadeColor } from "./fadeRender.ts";
-import { BRAIN_MOVEMENT_CLOCK_OFFSET, BRAIN_MOVEMENT_SETTLE_ELAPSED, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechCursorVisible, brainSpeechCursorYOffset, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
+import { BRAIN_MOVEMENT_CLOCK_OFFSET, BRAIN_MOVEMENT_SETTLE_ELAPSED, BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS, NOLAND_IDLE_FRAME, NOLAND_INITIAL_SCREEN_Y, type BattleRoomState, type EntryStep, type MsgboxVisual, battleRoomQuote, brainEntranceMovementSettled, brainSpeechCursorVisible, brainSpeechCursorYOffset, entryStep, msgboxVisual, nolandStep, opponentStep, scientistTurnFrame } from "./battleRoom.ts";
 import { drawMessageBoxFrame, drawMessageBoxText, MESSAGE_PALETTE } from "./prebattleRoomRender.ts";
 import { measureText, type FontData } from "./font.ts";
 
@@ -452,8 +452,16 @@ export function renderBattleRoomBrainEntranceScene(
   // Noland's own walk (nolandStep) only starts once "brainMoving" begins -
   // before that he holds his resting player-facing pose (NOLAND_IDLE_FRAME),
   // not the decoy's own north-facing idle frame reused during the walk
-  // itself (see NOLAND_IDLE_FRAME's own doc).
-  const noland = state.phase === "brainMoving" || settled
+  // itself (see NOLAND_IDLE_FRAME's own doc). Same CLOSE WIPE window as the
+  // escort box's own hold (battleRoom.ts's BRAIN_MSGBOX_CLOSE_WIPE_MOVING_
+  // HOLD_TICKS doc): `brainMoving`'s own first two elapsed ticks are still
+  // RAM-flat (camPanY unchanged, B1c's own finding), and pixel-probed this
+  // step (factory-brain-silver-walkup-entrance-03-off.json, trace frames
+  // 319-320) Noland still holds his idle pose there too, not decoyFrame -
+  // he only switches once the room visibly starts moving.
+  const noland = (state.phase === "brainMoving"
+      && state.elapsed >= BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS)
+      || settled
     ? nolandStep(historicElapsed)
     : { frame: NOLAND_IDLE_FRAME, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
   drawNpcFrame(fb, roomNpcs.noland, noland.frame, { x: opponentScreenX, y: noland.screenY }, noland.hFlip, objFadeY);

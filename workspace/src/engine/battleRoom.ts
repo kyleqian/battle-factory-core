@@ -1303,7 +1303,55 @@ function enteringMsgboxVisual(elapsed: number): MsgboxVisual {
   return { visible: true, chars: elapsed - MSGBOX_APPEAR_ELAPSED };
 }
 
-/** Per-phase message-box visual (battleRoomRender.ts/core.ts consume this directly - see module doc for the per-phase derivation). */
+/**
+ * Generic brain-room msgbox CLOSE WIPE: the box's own on-screen clear does
+ * NOT coincide with its owning phase's elapsed-based state transition (that
+ * boundary stays exactly as already RAM/pixel-calibrated elsewhere - moving
+ * it would perturb BRAIN_MOVEMENT_CLOCK_OFFSET/entryStep sync or
+ * brainSpeechSceneHandoffElapsed). Instead each closing phase has its own
+ * measured lead/lag, both re-derived this step via fresh `bin/oracle`
+ * reruns of already-committed fixtures (sha-probed frame-by-frame, not
+ * fitted):
+ *
+ * - `brainMsgboxClosing`->`brainMoving` (the entrance escort box,
+ *   `factory-brain-silver-walkup-entrance-03-off.json`, press at trace
+ *   frame 314): oracle holds the box (sha `7d8066240c8e6514...`) through
+ *   frame 320 - TWO ticks into `brainMoving` - and only clears at frame 321
+ *   (sha `b7b33c16283c...`), the SAME tick `brainMoving`'s own camPanY
+ *   first leaves 0 (battleRoom.ts's own B1c doc: "RAM stays flat two ticks
+ *   after the brainMsgboxClosing->brainMoving transition"). The box does
+ *   not clear on `brainMsgboxClosing`'s own fixed schedule - it clears when
+ *   the room itself starts visibly moving, two `brainMoving`-elapsed ticks
+ *   after the state transition already puts it there unconditionally
+ *   hidden. Reproduce: `npm run compare -- factory-brain-silver-walkup-
+ *   entrance-03-off.json --summary` (frames 319-320 were the only
+ *   msgbox-class residual before this fix).
+ * - `brainSpeechClosing`->`brainSpeechSettled` (the close/cry box that
+ *   follows the gated personality speech in BOTH tiers -
+ *   `factory-brain-gold-walkup-speech-close-off.json`, press at trace frame
+ *   35): oracle clears the box (sha `f0d9bf0629eb...` -> `31aec4d68fe6...`)
+ *   on `brainSpeechClosing`'s own very first elapsed tick (trace frame 36) -
+ *   FOUR ticks before `MSGBOX_CLOSE_TICKS` ends the state's own hold. Unlike
+ *   the escort box, this box's script (`BattleFrontier_BattleFactoryBattle
+ *   Room_EventScript_DoNolandBattle`: `closemessage` is the very next
+ *   command after the box's own `msgbox ..., MSGBOX_DEFAULT` macro returns,
+ *   no intervening `applymovement`/`waitmessage`) closes essentially
+ *   instantly - modeled as always-hidden through the whole phase. Tier-
+ *   general: silver's own `BattleNolandSilver` label calls the identical
+ *   `msgbox ..., MSGBOX_DEFAULT` -> (via `call DoNolandBattle`)
+ *   `closemessage` shape (scripts.inc), so the immediate-clear applies to
+ *   silver's close/cry box too, not just gold's (no committed silver bar
+ *   exercises this transition to confirm pixel-for-pixel, but the source
+ *   shape is identical - see the module's own "tier-general" convention
+ *   elsewhere in this file).
+ *
+ * The two are NOT the same offset (+2 ticks vs. immediate/-4 ticks) because
+ * they come from different script shapes, not because one is a mistake -
+ * see each box's own script citation above.
+ */
+export const BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS = 2;
+
+/** Per-phase message-box visual (battleRoomRender.ts/core.ts consume this directly - see module doc for the per-phase derivation, and the CLOSE WIPE doc above for the two closing-adjacent overrides). */
 export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
   switch (state.phase) {
     case "entering":
@@ -1319,6 +1367,11 @@ export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
     case "brainMsgboxClosing":
       return { visible: true, chars: BRAIN_MSGBOX_PRINT_TICKS };
     case "brainMoving":
+      // CLOSE WIPE: the escort box lingers through this phase's own first
+      // two elapsed ticks - see BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS's doc.
+      return state.elapsed < BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS
+        ? { visible: true, chars: BRAIN_MSGBOX_PRINT_TICKS }
+        : MSGBOX_HIDDEN;
     case "brainSettled":
       return MSGBOX_HIDDEN;
     case "brainSpeech": {
@@ -1326,11 +1379,14 @@ export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
       return { visible: true, chars: Math.min(state.elapsed, brainSpeechPrintTicks(box)) };
     }
     case "brainSpeechIdle":
-    case "brainSpeechClosing":
       return {
         visible: true,
         chars: brainSpeechPrintTicks(brainSpeechBoxAt(state, state.speechStep ?? 0)),
       };
+    case "brainSpeechClosing":
+      // CLOSE WIPE: the close/cry box clears immediately (see doc above),
+      // well before MSGBOX_CLOSE_TICKS' own state-transition boundary.
+      return MSGBOX_HIDDEN;
     case "brainSpeechSettled":
       return MSGBOX_HIDDEN;
   }
