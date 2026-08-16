@@ -152,9 +152,9 @@ committed `tools/battle-lab/factory-brain-silver-walkup-*.json` file.
 | - | --- | --- | --- | --- | --- |
 | — | 384–417 | 34f, 2f cursor-blink cycle | 01 | Tail of the rental-draft confirm screen (not walk-up; pre-existing feature, out of scope) | "Are these three POKéMON OK?" YES/NO — **PNG-verified** at 410 |
 | — | 418–431 | 14f hold (`d8b44303`) | 01 | Fade-to-black warp (draft screen → PreBattleRoom); same sha as the later pre-transition black flash (§4 caveat) | — |
-| — | 432–455 | 24f, unique-then-9f-hold | 01 | Fade-in to PreBattleRoom corridor; no attendant NPC, no phone-call box | — |
+| — | 432–455 | 24f, unique-then-9f-hold | 01 | Fade-in to PreBattleRoom corridor; **attendant NPC visible on screen** throughout (no phone-call box) — **corrected 2026-08-16**, see note below | — |
 | 1 | 456–478 | 23f, unique every frame | 01 | Typewriter: `Text_RightThisWay` | "Right this way, please!" (typing) |
-| — | 479–522 | 44f hold (`5e853338`) | 01 | `Text_RightThisWay` held | "Right this way, please!" — **PNG-verified** at 480, 500 |
+| — | 479–522 | 44f hold (`5e8a5333`) | 01 | `Text_RightThisWay` held | "Right this way, please!" — **PNG-verified** at 480, 500 |
 | — | 523–620 | ~98f, unique every frame | 01 | `closemessage`; guided walk (`Movement_GuideWalkToBattleRoomLv50` + `Movement_PlayerWalkToBattleRoomLv50`, both 5-step) | (movement only) |
 | — | 621–626 | 6f (part of `d8b44303` hold, extends past segment boundary) | 01/02 | Warp fade begins (PreBattleRoom side) | — |
 | — | **627** | boundary | RAM probe | **Warp completes** — `gSaveBlock1Ptr->location.mapNum` flips PreBattleRoom→BattleRoom exactly here (RAM-probe-confirmed, §0) | `warp MAP_BATTLE_FRONTIER_BATTLE_FACTORY_BATTLE_ROOM, 6, 11` |
@@ -175,6 +175,34 @@ same window makes the scientists' small in-place turn hard to distinguish
 frame-by-frame from mGBA PNGs at this resolution; their presence (flanking
 the arena, unmoved position) is confirmed, their turn animation's exact
 sub-frame timing is not separately broken out.
+
+**2026-08-16 re-derivation note (the 432–455 and 479–522 rows above only —
+the rest of this doc is unchanged):** this session re-ran
+`factory-brain-silver-walkup-01-entry-and-guided-walk-dense-off.json` twice
+fresh; both reruns matched byte-for-byte across all 256 captured frames
+(zero diffs). The corridor-hold sha originally cited for the 479–522 row on
+2026-08-14 (`5e853338…`, logged with "no attendant") no longer reproduces —
+per the step brief this drift was already observed on 2026-08-15 under both
+old and new oracle code; this session's own twice-fresh reruns (byte-identical
+to each other, current oracle code only — this session did not itself
+re-check the old oracle code) confirm the new value,
+`5e8a53338048580102ec0a5ab86d5cfa85ac7413625b44544ceb2b51a9b8b16e`, instead,
+with the attendant NPC clearly visible from frame 432 onward (PNG-confirmed
+at frames 440 and 500), contradicting the original "no attendant"
+observation the 432–455 row also carried. This is environmental/pre-existing
+drift, not a side effect of the walk-up fix — the immediately preceding
+warp-fade sha (`d8b44303…`, frames 418–431/621–639) still matches exactly,
+unchanged. This rerun's own tail (frames 621–639, the run-up to the frame-627
+warp-completion boundary) is unaffected — still `d8b44303…`, byte-identical;
+frames 640 onward (fixture 02+, the BattleRoom-entrance/speech windows
+PROGRESS 1280 built against) were not re-run this session (out of this
+step's scope) but were not implicated by this drift either, since it's
+confined to frames before the warp completes. No app-side compare trace
+under `tools/compare/traces/` covers this fixture's window (frames
+384–639) — the two silver-walkup entrance compare traces
+(`factory-brain-silver-walkup-entrance-02-off.json`,
+`-entrance-03-off.json`) both start at pre-checkpoint frame 640 — so nothing
+in `npm test`/the compare harness is affected by this drift either way.
 
 ## 3. Frame-exact timing map — the 8-page silver speech + battle cry (frames 1113–3231)
 
