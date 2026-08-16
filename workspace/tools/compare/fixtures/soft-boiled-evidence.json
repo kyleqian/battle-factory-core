@@ -1,0 +1,68 @@
+{
+  "schema": "soft-boiled-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SOFT_BOILED",
+  "moveId": 135,
+  "status": "unsupported-dense-evidence-checkpoint",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "source": {
+    "audit": "tools/compare/softBoiledSourceAudit.ts",
+    "auditSha256": "cf5f47f23bc513177964920f039da8f4666779d77256efefd66fc42f469632aa",
+    "probe": "tools/compare/softBoiledProbe.py",
+    "probeSha256": "219da92a6f8df5740471de770f4e6e7dd0ad327835e659aeaffa92a303fa624d",
+    "evidenceVerifier": "tools/compare/softBoiledEvidence.ts",
+    "evidenceVerifierSha256": "1e3410fb969f878673acdbbf385998e24aa509342991ac7901662dc04b9d7279"
+  },
+  "acceptance": {
+    "sourceRows": 544,
+    "rawRgbRows": 544,
+    "freshRunsPerOrientation": 2,
+    "firstInactiveCleanupAge": 271,
+    "reducerRows": 0,
+    "typedSeamRows": 0,
+    "productionFramebufferRows": 0
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-soft-boiled-player-chansey-opponent-onix.json",
+      "scenarioSha256": "b119b5cb880a52261fd98667d1f72090e1fb42df512d3c4e985e0a86306becc9",
+      "sourceWindow": {"startFrame":227,"endFrame":498,"frameCount":272},
+      "probeJsonSha256": "b3fd865e3435c388f979823ae1ba8b8c4e595eb8a5482e7a3da73a6dc49d6377",
+      "repeatProbeJsonSha256": "b3fd865e3435c388f979823ae1ba8b8c4e595eb8a5482e7a3da73a6dc49d6377",
+      "denseState": "tools/compare/evidence/soft-boiled-player-dense-state.json.gz",
+      "denseStateSha256": "dcb37950090e50086e503dafda03b71332c920b29aec43db68bf85f50d4d921d",
+      "rawRgbArchive": "tools/compare/evidence/soft-boiled-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "1c6278a82107edbc2151acd6fab2e9c3129882fed72a9d97b3f07527c55752ca",
+      "rawRgbSequenceSha256": "b67418dcff1f92856f7c7d8c228dc20dfda52e1098616dbff0bc54becf9ae630",
+      "changeMap": "tools/compare/evidence/soft-boiled-changemap-player.json",
+      "changeMapSha256": "1ab47f8b39a312e880e42e9e6aa19f2a2c270ab19a367ba6b76b2387980cfaa8"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-soft-boiled-opponent-chansey-player-onix.json",
+      "scenarioSha256": "0791d50654c14a69a64e3a8039ca283f0123d0bf719fa1405601957c218970e7",
+      "sourceWindow": {"startFrame":228,"endFrame":499,"frameCount":272},
+      "probeJsonSha256": "74b2317a954c636ca04616b44e9022ff493d90cc7988e91f091b0f2573c8d1e5",
+      "repeatProbeJsonSha256": "74b2317a954c636ca04616b44e9022ff493d90cc7988e91f091b0f2573c8d1e5",
+      "denseState": "tools/compare/evidence/soft-boiled-opponent-dense-state.json.gz",
+      "denseStateSha256": "b68924cb09032f60a5cc92b602b69367e0b242294eee1ca877fa22c045e7df65",
+      "rawRgbArchive": "tools/compare/evidence/soft-boiled-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "84cf38fa6fef3be3796ec72da7aa865899930d1dae8c005f4caf5f04c68b57f9",
+      "rawRgbSequenceSha256": "ba40c156358c355a00b9473d83387afd3a902cf6528dcc659be94d7d20182cae",
+      "changeMap": "tools/compare/evidence/soft-boiled-changemap-opponent.json",
+      "changeMapSha256": "34b390fcea64a6315663b57cae1dd8ce4f2fa991e90f25be914b0b7aca9a330d"
+    }
+  },
+  "boundedRemainder": "MOVE_SOFT_BOILED remains unsupported. Next add only a source-relative reducer and narrow typed Scene-ON seam replaying all 544 retained rows; compositor, renderer, coverage promotion, and sibling credit remain separate later work."
+}
