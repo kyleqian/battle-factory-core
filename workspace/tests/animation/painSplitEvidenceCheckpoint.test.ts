@@ -93,9 +93,9 @@ describe("MOVE_PAIN_SPLIT exact source and bilateral evidence", () => {
     }
   });
 
-  it("promotes only Pain Split at the fixed 190/86 coverage gate", () => {
+  it("promotes only Pain Split at the fixed 191/85 coverage gate", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(190);
+    expect(coverage.entries.filter((entry: any) => entry.status === "exact")).toHaveLength(191);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PAIN_SPLIT"))
       .toMatchObject({ status: "exact" });
     expect(coverage.componentTracks.find((track: any) => track.id === "pain-split-projectile-affine")).toMatchObject({

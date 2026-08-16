@@ -51,7 +51,7 @@ describe("MOVE_MIST_BALL bounded bilateral exact acceptance", () => {
       expect(createHash("sha256").update(readFileSync(fixture.changeMap)).digest("hex")).toBe(fixture.changeMapSha256);
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
-    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(190);
+    expect(coverage.entries.filter((entry: { status?: string }) => entry.status === "exact")).toHaveLength(191);
     expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_MIST_BALL")?.status).toBe("exact");
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "white-feather")?.checkpoint).toContain("213/213 required evidence and framebuffer frames");
   });
