@@ -103,7 +103,7 @@ describe("MOVE_FIRE_BLAST pure reducer and typed presentation seam", () => {
     expect("rng" in playerView).toBe(false);
   });
 
-  it("matches all 394 retained reducer and typed-seam rows without coverage or sibling credit", () => {
+  it("matches all 394 retained reducer and typed-seam rows with Fire Blast-only credit", () => {
     const summary = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/verifyFireBlastReducer.ts",
     ], { encoding: "utf8" }));
@@ -121,9 +121,9 @@ describe("MOVE_FIRE_BLAST pure reducer and typed presentation seam", () => {
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(193);
+      .toHaveLength(194);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_FIRE_BLAST"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     for (const move of ["MOVE_DRAGON_BREATH", "MOVE_FLAMETHROWER",
       "MOVE_BLAZE_KICK", "MOVE_EMBER", "MOVE_FIRE_SPIN"]) {
       expect(coverage.entries.find((entry: any) => entry.move === move))

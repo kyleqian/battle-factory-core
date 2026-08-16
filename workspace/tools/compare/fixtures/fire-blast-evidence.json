@@ -1,12 +1,13 @@
 {
   "schema": "fire-blast-bilateral-evidence/v1",
-  "status": "unsupported-evidence-checkpoint",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "acceptance": {
     "sourceRows": 394,
     "rawRgbRows": 394,
     "reducerRows": 394,
     "typedSeamRows": 394,
+    "framebufferRows": 394,
     "freshRunsPerOrientation": 2,
     "ringGroups": 3,
     "ringSprites": 15,
@@ -23,6 +24,10 @@
     "verifierSha256": "d24988a7ec35213314703a45e6e398be70ec681ebb50b20f2de8bae0903aa429",
     "reducerVerifier": "tools/compare/verifyFireBlastReducer.ts",
     "reducerVerifierSha256": "b2a83db8585d26d6180e651a354aeff0220161e351a1075647aac3c51aa750f5",
+    "framebufferVerifier": "tools/compare/fireBlastFramebuffer.ts",
+    "framebufferVerifierSha256": "f986979c9062c1db7dfa5047f3cbd244153f42cd92808bfa6a212d5a35e89fbb",
+    "smallEmberAsset": "src/assets/gen/battle-anim-small-ember.json",
+    "smallEmberAssetSha256": "63f1fc4381673f60ccfd660d75089026e8df5113da4e8bba852f61b50d4262db",
     "stagingFixture": "tests/fixtures/fire-blast-animation-source-staging.json",
     "stagingFixtureSha256": "7d7882bee8ca86612a15f2d4c7a44540f388966740186f3f70d3ccabb93e1749"
   },
@@ -52,5 +57,5 @@
       "rawRgbSha256": "4376d40d83c631fef7e4a630b0fe784664a8d16f7645d97d210e7ec4a4611aed"
     }
   },
-  "boundedRemainder": "Fire Blast remains unsupported: the reducer and typed seam are exact for 394/394 retained rows, but there is no asset extraction, production compositor/draw wiring, zero-residual framebuffer acceptance, coverage promotion, latch edit, or sibling credit."
+  "acceptanceVerdict": "Fire Blast alone is exact: the retained reducer/typed seam and shared production framebuffer pass all 394/394 bilateral rows with zero residual pixels through first inactive cleanup. Existing exact SMALL_EMBER art regenerates from its source extractor and is reused without modification. No sibling or component coverage credit is inferred."
 }

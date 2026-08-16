@@ -14,11 +14,11 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
   it("retains two fresh complete Scene-ON runs per orientation through cleanup", () => {
     expect(fixture).toMatchObject({
       schema: "fire-blast-bilateral-evidence/v1",
-      status: "unsupported-evidence-checkpoint",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       acceptance: {
         sourceRows: 394, rawRgbRows: 394, freshRunsPerOrientation: 2,
-        reducerRows: 394, typedSeamRows: 394,
+        reducerRows: 394, typedSeamRows: 394, framebufferRows: 394,
         ringGroups: 3, ringSprites: 15, crossGroups: 9, crossSprites: 45,
         firstInactiveCleanupAge: 196,
       },
@@ -28,6 +28,8 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
     expect(sha(fixture.source.verifier)).toBe(fixture.source.verifierSha256);
     expect(sha(fixture.source.reducerVerifier))
       .toBe(fixture.source.reducerVerifierSha256);
+    expect(sha(fixture.source.framebufferVerifier))
+      .toBe(fixture.source.framebufferVerifierSha256);
     expect(sha(fixture.source.stagingFixture))
       .toBe(fixture.source.stagingFixtureSha256);
     for (const orientation of ["player-back", "opponent-front"] as const) {
@@ -52,7 +54,7 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
     }
   });
 
-  it("replays every retained source/state/RGB row without promoting Fire Blast or siblings", () => {
+  it("replays every retained source/state/RGB row and promotes Fire Blast alone", () => {
     const summary = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/fireBlastEvidence.ts",
     ], { encoding: "utf8" }));
@@ -69,16 +71,15 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(193);
+      .toHaveLength(194);
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_FIRE_BLAST"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     for (const move of ["MOVE_DRAGON_BREATH", "MOVE_FLAMETHROWER", "MOVE_BLAZE_KICK",
       "MOVE_EMBER", "MOVE_FIRE_SPIN"]) {
       expect(coverage.entries.find((entry: any) => entry.move === move))
         .toMatchObject({ status: "exact" });
     }
-    expect(fixture.boundedRemainder).toContain("reducer and typed seam are exact");
-    expect(fixture.boundedRemainder).toContain("no asset extraction");
-    expect(fixture.boundedRemainder).toContain("sibling credit");
+    expect(fixture.acceptanceVerdict).toContain("394/394");
+    expect(fixture.acceptanceVerdict).toContain("No sibling");
   });
 });

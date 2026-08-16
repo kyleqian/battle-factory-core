@@ -888,12 +888,14 @@ import {
   dreamEaterTargetOamOffsetAtSourceAge,
 } from "../animation/dreamEater.ts";
 import { painSplitDisplayedMatrixTransform } from "../animation/painSplit.ts";
+import { fireBlastSpritesInPainterOrderAtAge } from "../animation/fireBlast.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnWrapView,
   sceneOnDragonBreathView,
   sceneOnEmberView,
+  sceneOnFireBlastView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
   sceneOnFlameWheelView,
@@ -1122,6 +1124,7 @@ import {
   type SceneOnSleepPowderPresentationState,
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
+  type SceneOnFireBlastConfig,
   type SceneOnHealBellConfig,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
@@ -1544,6 +1547,7 @@ const KABUTO_CORNER = { x: 144, y: 25 };
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
 const onixFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).ONIX!;
+const octilleryFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).OCTILLERY!;
 const latiosFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LATIOS!;
 const baltoyFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).BALTOY!;
 const lunatoneFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).LUNATONE!;
@@ -2815,6 +2819,7 @@ const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
 const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
 const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+const octilleryBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).OCTILLERY!;
 const latiosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LATIOS!;
 const baltoyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).BALTOY!;
 const lunatoneBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LUNATONE!;
@@ -38857,6 +38862,117 @@ export function renderSceneOnMovePresentation(
       "PSYCHIC!",
       99,
     );
+    return;
+  }
+
+  if (state.config.move === "FIRE_BLAST") {
+    const fireState = state as SceneOnMovePresentationState<SceneOnFireBlastConfig>;
+    const live = sceneOnFireBlastView(fireState);
+    // BuildOamBuffer and the palette transfer expose the preceding callback
+    // row.  The reducer keeps that latch explicit instead of shifting the
+    // move's source age or its allocation lifecycle.
+    const playerToOpponent = live.attacker.species === "OCTILLERY"
+      && live.attacker.geometry.side === "player"
+      && live.target.species === "ONIX"
+      && live.target.geometry.side === "opponent";
+    const opponentToPlayer = live.attacker.species === "OCTILLERY"
+      && live.attacker.geometry.side === "opponent"
+      && live.target.species === "ONIX"
+      && live.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged FIRE_BLAST pair ${live.attacker.species}->${live.target.species}`,
+      );
+    }
+    const attackerSprite = playerToOpponent ? octilleryBackSprite : octilleryFrontSprite;
+    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const black = { r: 0, g: 0, b: 0 };
+    const paletteDisplayLag = state.age < 170 ? 4 : 3;
+    const bgCoefficient = sceneOnFireBlastView({
+      ...fireState,
+      age: fireState.age - paletteDisplayLag,
+    }).palette.hardwareBackgroundCoefficient;
+    const fadedBgPalette = blendPaletteBanksToward(
+      battleBg.palette,
+      black,
+      bgCoefficient,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      fadedBgPalette,
+    );
+
+    const targetBaselineX2 = playerToOpponent && state.age < 114 ? 1 : 0;
+    const targetShake = shakeMonOffsetAtTick(5, 0, 20, 1, state.age - 114);
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetSprite.tileset,
+      targetSprite.palette,
+      live.target.geometry.spriteCorner.x + targetBaselineX2 + targetShake.x2,
+      live.target.geometry.spriteCorner.y,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerSprite.tileset,
+      attackerSprite.palette,
+      live.attacker.geometry.spriteCorner.x,
+      live.attacker.geometry.spriteCorner.y,
+    );
+    const effects = fireBlastSpritesInPainterOrderAtAge(
+      state.age - 1,
+      fireState.config.animationProfile,
+    );
+    const drawEffects = () => {
+      for (const sprite of effects) {
+        const sheetFrame = sprite.kind === "ring"
+          ? sprite.animationFrame
+          : sprite.animationFrame + 2;
+        drawSpriteSheet(
+          fb,
+          subTileset(battleAnimSmallEmber.tileset, sheetFrame * 4, 4),
+          battleAnimSmallEmber.palette,
+          sprite.x + sprite.x2 - 16,
+          sprite.y + sprite.y2 - 16,
+        );
+      }
+    };
+    // `createsprite ..., ANIM_TARGET, 2` gives every Fire Blast OBJ target
+    // subpriority -2.  Source SortSprites therefore places them between the
+    // two battlers in either side geometry.
+    if (playerToOpponent) {
+      drawTarget();
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawEffects();
+    }
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerToOpponent ? "ONIX" : "OCTILLERY", level: 50,
+      gender: profile.opponentGender ?? "male",
+      hpFraction: profile.opponentHp / profile.opponentMaxHp, status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerToOpponent ? "OCTILLERY" : "ONIX", level: 50,
+      gender: profile.playerGender ?? "male",
+      hpFraction: profile.playerHp / profile.playerMaxHp, status: "none",
+      currentHp: profile.playerHp, maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawText(fb, font, charmap,
+      playerToOpponent ? "OCTILLERY used" : "Foe OCTILLERY used",
+      LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+    drawText(fb, font, charmap, "FIRE BLAST!", LINE2_ORIGIN.x, LINE2_ORIGIN.y,
+      MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
     return;
   }
 

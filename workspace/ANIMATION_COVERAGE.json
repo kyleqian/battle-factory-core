@@ -1653,7 +1653,7 @@
     "the pure source-relative reducer ports ANIM_TAG_SMALL_EMBER, SE_M_SACRED_FIRE2 target pan, all three FireSpinEffect calls and their six literal gFireSpinSpriteTemplate/AnimParticleInVortex rows, target-side AnimTask_ShakeMon(0,2,47,1), source OAM-Y painter order, source asset reuse, field chrome, text, healthboxes, and cleanup",
     "the narrow typed Scene-ON seam and compositor preserve the distinct one-display vortex latch, the two-display ShakeMon cadence, and the task initializer's one-frame displayed {0,2} transient without absolute trace ticks or gameplay ownership",
     "both Fire Spin portables pass twice fresh at 104/104 source/component and 104/104 full RGB framebuffer frames; the mandatory shared gFireSpinSpriteTemplate control DRAGON_CLAW remains exact at 137/137 source/component and 137/137 framebuffer frames in both orientations",
-    "no damage, trapping, RNG, turn order, controller, round/facility state, animation-boundary list, unsupported barrier, or canonical-recording allowlist changed; FIRE_BLAST remains independently unsupported"
+    "no damage, trapping, RNG, turn order, controller, round/facility state, animation-boundary list, unsupported barrier, or canonical-recording allowlist changed; FIRE_BLAST remains an independently accepted control"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-fire-spin-player-charmeleon-opponent-onix.json",
@@ -5232,6 +5232,40 @@
     "tests/animation/yawnFramebuffer.test.ts",
     "tests/animation/yawnEvidenceCheckpoint.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_FIRE_BLAST",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-2 Level-50 set-361 FRONTIER_MON_OCTILLERY_2 versus ONIX Scene-ON parties pass the entire 197-row source body through first inactive cleanup twice fresh in both orientations: player-back frames 215-411 retain dense/raw-RGB hashes cb238202c79e632aba0816bb4bc574a181ef153d46b11ff7273687144a1ca6e5 / f36e165d5db17c03dd81c63a6704b0591a0d229942d6108fe7bd288ed920ef8d; opponent-front frames 1147-1343 retain a5a45685742382056b2b35f612fadf7de380b7d5e40d6d112790f09ecfe6dc92 / 4376d40d83c631fef7e4a630b0fe784664a8d16f7645d97d210e7ec4a4611aed",
+    "the pure source-relative reducer and typed Scene-ON seam port all three five-sprite rings, nine five-sprite crosses, callback translation and animation frames, source allocation/resource cleanup, target ShakeMon, both F_PAL_BG black fades, and the hard-coded bilateral Fire Blast sound sweep without owning damage, PP, RNG, AI, controller, turn, round, or facility state",
+    "the shared production compositor reuses the exact source-extracted SMALL_EMBER sheet and existing Octillery/Onix field assets; it follows the retained persistent SortSprites order, source-relative OAM and palette transfer, target shake, F_PAL_BG-only field fade, battle mons, healthboxes, message chrome, and first inactive cleanup",
+    "fireBlastFramebuffer.ts proves player-back 197/197 and opponent-front 197/197 retained raw-RGB/shared-production-framebuffer rows with zero residual pixels; fireBlastEvidence.ts and verifyFireBlastReducer.ts independently retain all 394 source/reducer/typed-seam/OAM/matrix/palette/register/resource/audio rows",
+    "MOVE_DRAGON_BREATH, MOVE_FLAMETHROWER, MOVE_BLAZE_KICK, MOVE_EMBER, and MOVE_FIRE_SPIN remain independent exact controls; this entry promotes MOVE_FIRE_BLAST alone and changes no shared boundary, barrier, latch, gameplay, or canonical-recording ratchet"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-fire-blast-player-octillery-opponent-onix.json",
+    "tools/battle-lab/mechanic-fire-blast-opponent-octillery-player-onix.json",
+    "tools/compare/fixtures/fire-blast-evidence.json",
+    "tools/compare/fireBlastProbe.py",
+    "tools/compare/fireBlastSourceAudit.ts",
+    "tools/compare/fireBlastEvidence.ts",
+    "tools/compare/verifyFireBlastReducer.ts",
+    "tools/compare/fireBlastFramebuffer.ts",
+    "tools/compare/evidence/fire-blast-player-dense-state.json.gz",
+    "tools/compare/evidence/fire-blast-opponent-dense-state.json.gz",
+    "tools/compare/evidence/fire-blast-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/fire-blast-opponent-raw-rgb.tar.gz",
+    "src/assets/gen/battle-anim-small-ember.json",
+    "src/animation/fireBlast.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/animation/spriteOrder.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/fireBlastSourceCheckpoint.test.ts",
+    "tests/animation/fireBlastEvidenceCheckpoint.test.ts",
+    "tests/animation/fireBlastReducer.test.ts",
+    "tests/animation/fireBlastFramebuffer.test.ts"
+   ]
   }
  ],
  "queue": [],
@@ -5873,7 +5907,7 @@
     "MOVE_EMBER",
     "MOVE_FIRE_SPIN"
    ],
-   "goal": "DRAGON BREATH proves its eleven-spawn gDragonBreathFireSpriteTemplate body at 85/85 in both orientations. DRAGON RAGE independently proves its source-scheduled shake/slide/fire-spit/eight-plume body, including the hardware-composed target creation write, at 150/150 complete component/typed/hardware/raw-RGB/shared-framebuffer frames in both orientations twice fresh. FLAMETHROWER remains exact at 126/126, BLAZE KICK at 78/78, and EMBER at 63/63 in both orientations. FIRE BLAST and FIRE SPIN use distinct sprite templates and remain unsupported without their own complete dense acceptance."
+   "goal": "DRAGON BREATH proves its eleven-spawn gDragonBreathFireSpriteTemplate body at 85/85 in both orientations. DRAGON RAGE independently proves its source-scheduled shake/slide/fire-spit/eight-plume body at 150/150 complete bilateral rows. FLAMETHROWER remains exact at 126/126, BLAZE KICK at 78/78, EMBER at 63/63, FIRE SPIN at 104/104, and FIRE BLAST independently proves its distinct 15-ring/45-cross/F_PAL_BG body at 197/197 in both orientations. Every move remains an independent acceptance unit."
   },
   {
    "id": "two-turn-semi-invulnerable",

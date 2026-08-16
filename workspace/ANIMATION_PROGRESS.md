@@ -1,3 +1,10 @@
+# MOVE_FIRE_BLAST bilateral exact production presentation (2026-08-16 worker)
+
+- **State:** Coverage advances **193→194/276 Level-50 exact**, 0 partial, 0 staged, and **83→82 unsupported**. Fire Blast alone promotes; Dragon Breath, Flamethrower, Blaze Kick, Ember, Fire Spin, and every other sibling remain independent exact controls.
+- **Did:** Reused the exact generated SMALL_EMBER sheet/palette and wired the pure source-relative reducer/typed seam into the shared Scene-ON framebuffer. The compositor renders all **15 rings + 45 crosses** with source allocation and stable OAM order, correct frames/palette, bilateral geometry, target ShakeMon, both F_PAL_BG black fades, battle mons/chrome, GBA OBJ/palette transfer behavior, and first-inactive resource/register cleanup. It owns no gameplay, damage, RNG, AI, controller, turn, round, or facility state.
+- **Verified:** Retained player-back **197/197** and opponent-front **197/197** rows pass production raw-RGB equality through first inactive cleanup: **394/394 total, zero residual pixels**. Twice-fresh evidence/raw-RGB hashes remain player `cb238202… / f36e165d…` and opponent `a5a45685… / 4376d40d…`; framebuffer verifier `f986979c…`, reused SMALL_EMBER asset `63f1fc43…`.
+- **Checks:** Focused Fire Blast source/evidence/reducer/assets/framebuffer, sibling controls, boundary and inventory tests; typecheck, animation audit/coverage, full `npm test` (**1,055 files / 9,958 passed / 223 skipped**), production build (**688 modules**), and `git diff --check` pass. `ANIMATION_LATCHES.md`, shared animation boundaries, unsupported barriers, and canonical-recording production imports remain unchanged.
+
 # MOVE_FIRE_BLAST pure reducer + typed seam exact checkpoint — remains unsupported (2026-08-16 worker)
 
 - **State:** Coverage remains **193/276 Level-50 exact**, 0 partial, 0 staged, and **83 unsupported**. Fire Blast remains unsupported and receives no compositor/draw wiring, framebuffer acceptance, coverage promotion, latch edit, or sibling/component credit.

@@ -74,7 +74,7 @@ describe("MOVE_FIRE_BLAST authoritative-source checkpoint", () => {
     });
   });
 
-  it("keeps Fire Blast distinct from its exact fire controls and unsupported in coverage", () => {
+  it("keeps Fire Blast distinct from its exact fire controls after its independent promotion", () => {
     const audit = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", "tools/compare/fireBlastSourceAudit.ts",
     ], { encoding: "utf8" }));
@@ -86,9 +86,8 @@ describe("MOVE_FIRE_BLAST authoritative-source checkpoint", () => {
     expect(audit.sharedControls.projectilePrimitives).toContain("no Fire Blast acceptance credit");
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: { move: string }) => entry.move === fixture.move))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     expect(fixture.coverageCredit).toBe(false);
-    expect(fixture.boundedRemainder).toContain("No reducer");
   });
 
   it.each([

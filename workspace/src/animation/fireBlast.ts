@@ -3,6 +3,12 @@ import {
   linearTranslationDeltaQ8,
   linearTranslationOffsetAfterCallbacks,
 } from "./animLinearTranslation.ts";
+import {
+  createSpriteOrderState,
+  sortSpriteOrder,
+  spriteOwnersBackToFront,
+  type SpriteOrderState,
+} from "./spriteOrder.ts";
 
 /** Full Move_FIRE_BLAST source window, including first inactive cleanup. */
 export const FIRE_BLAST_FRAME_COUNT = 197;
@@ -20,6 +26,17 @@ export const FIRE_BLAST_CROSS_VECTORS = [
 ] as const;
 
 const RESERVED_SPRITE_SLOTS = new Set([0, 1, 2, 6, 8, 60, 61, 62, 63]);
+const FIRE_BLAST_SPRITE_SLOTS = Array.from(
+  { length: 64 }, (_unused, slot) => slot,
+).filter((slot) => !RESERVED_SPRITE_SLOTS.has(slot));
+/** Live scene `sSpriteOrder` at the typed Fire Blast seam, filtered to the
+ * slots this move can allocate. Both retained legal orientations share it. */
+const FIRE_BLAST_ORDER_SEED = [
+  62, 60, 0, 63, 1, 61, 6, 8, 2, 3, 4, 21, 20, 5, 19, 18, 17, 16,
+  15, 14, 13, 12, 11, 10, 9, 7, 54, 55, 56, 57, 58, 59, 23, 22, 48,
+  49, 50, 51, 52, 53, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+  36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+].filter((slot) => !RESERVED_SPRITE_SLOTS.has(slot));
 
 export interface FireBlastGeometry {
   readonly attackerPictureCenter: Readonly<{ x: number; y: number }>;
@@ -282,6 +299,44 @@ function allocateSprites(
     crosses: [...active.values()].filter((sprite): sprite is FireBlastCross =>
       sprite.kind === "cross").sort((a, b) => a.slot - b.slot),
   };
+}
+
+type FireBlastSprite = FireBlastRing | FireBlastCross;
+
+function fireBlastSpriteOwner(sprite: FireBlastSprite): number {
+  return sprite.kind === "ring"
+    ? sprite.group * FIRE_BLAST_RING_PHASES.length + sprite.index
+    : 15 + sprite.group * FIRE_BLAST_CROSS_VECTORS.length + sprite.index;
+}
+
+/** Back-to-front output of the source's persistent stable SortSprites pass. */
+export function fireBlastSpritesInPainterOrderAtAge(
+  age: number,
+  geometry: FireBlastGeometry,
+): readonly FireBlastSprite[] {
+  let order: SpriteOrderState = createSpriteOrderState(
+    FIRE_BLAST_SPRITE_SLOTS,
+    FIRE_BLAST_ORDER_SEED,
+  );
+  let current: FireBlastSprite[] = [];
+  for (let tick = 0; tick <= age; tick += 1) {
+    const sprites = allocateSprites(tick, geometry);
+    current = [...sprites.rings, ...sprites.crosses];
+    order = sortSpriteOrder({
+      ...order,
+      occupants: current.map((sprite) => ({
+        owner: fireBlastSpriteOwner(sprite),
+        slot: sprite.slot,
+        priority: 2,
+        subpriority: 0,
+        oamY: sprite.y + sprite.y2 - 16,
+      })),
+    });
+  }
+  const byOwner = new Map(current.map((sprite) => [
+    fireBlastSpriteOwner(sprite), sprite,
+  ]));
+  return spriteOwnersBackToFront(order).map((owner) => byOwner.get(owner)!);
 }
 
 function paletteTaskAtAge(
