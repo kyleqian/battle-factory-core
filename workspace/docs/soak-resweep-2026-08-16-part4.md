@@ -153,4 +153,139 @@ both filed against `full 60:120`) are outside this session's `0:60` range and
 already covered by PROGRESS 1298's #94/#95 acceptance sweep, so not repeated
 here.
 
-## Range: `winning` 20:60 (previously uncovered)
+## Range: `winning` 20:60 (previously uncovered) — 40/40 OK, 0 CRASH, 0 HANG
+
+Part 3 only swept `winning 0:60` post-#93 but pre-#94/#95; part 1/part 2 only
+covered `winning 0:20` post-fix per PROGRESS 1298's acceptance sweep. This is
+the first time `winning 20:60` runs on the post-#94/#95 tree.
+
+```
+seed   20  OK     b7 t6   149922f  21.6s  roundComplete
+seed   21  OK     b1 t31  124979f  17.8s  roundLost
+seed   22  OK     b7 t18  101162f  14.1s  roundComplete
+seed   23  OK     b1 t14  679272f  96.6s  roundLost
+seed   24  OK     b7 t22  253645f  37.5s  roundComplete
+seed   25  OK     b4 t10   40639f   5.6s  roundLost
+seed   26  OK     b1 t31  206075f  29.2s  roundLost
+seed   27  OK     b7 t17  188459f  26.6s  roundComplete
+seed   28  OK     b4 t14  135945f  18.9s  roundLost
+seed   29  OK     b1 t16  172583f  25.0s  roundLost
+=== chunk 20:30: OK 10  CRASH 0  HANG 0 ===
+
+seed   30  OK     b2 t11  132314f  19.1s  roundLost
+seed   31  OK     b3 t17  133560f  18.8s  roundLost
+seed   32  OK     b7 t16  149294f  22.2s  roundComplete
+seed   33  OK     b1 t19  107872f  15.7s  roundLost
+seed   34  OK     b2 t16  157456f  23.4s  roundLost
+seed   35  OK     b1 t29    64370f   9.4s  roundLost
+seed   36  OK     b1 t27    26056f   3.6s  roundLost
+seed   37  OK     b2 t19    46132f   6.7s  roundLost
+seed   38  OK     b3 t15   151641f  24.0s  roundLost
+seed   39  OK     b5 t11   217209f  32.6s  roundLost
+=== chunk 30:40: OK 10  CRASH 0  HANG 0 ===
+
+seed   40  OK     b4 t11   196676f  29.5s  roundLost
+seed   41  OK     b5 t18   339202f  49.2s  roundLost
+seed   42  OK     b7 t13   153666f  21.6s  roundComplete
+seed   43  OK     b1 t25   121691f  17.2s  roundLost
+seed   44  OK     b1 t38   117814f  17.3s  roundLost
+seed   45  OK     b7 t17    94471f  13.4s  roundComplete
+seed   46  OK     b3 t24    44436f   6.2s  roundLost
+seed   47  OK     b2 t9     23475f   2.9s  roundLost
+seed   48  OK     b1 t35   102077f  14.8s  roundLost
+seed   49  OK     b6 t23    70927f   9.9s  roundLost
+=== chunk 40:50: OK 10  CRASH 0  HANG 0 ===
+
+seed   50  OK     b4 t25   137949f  20.5s  roundLost
+seed   51  OK     b7 t13    85550f  12.0s  roundComplete
+seed   52  OK     b3 t15   270264f  38.7s  roundLost
+seed   53  OK     b1 t26    20808f   2.6s  roundLost
+seed   54  OK     b1 t31   140979f  20.2s  roundLost
+seed   55  OK     b7 t6     62324f   7.9s  roundComplete
+seed   56  OK     b1 t25   277254f  39.5s  roundLost
+seed   57  OK     b2 t33   148239f  22.4s  roundLost
+seed   58  OK     b3 t21   201423f  28.9s  roundLost
+seed   59  OK     b3 t10   180500f  25.7s  roundLost
+=== chunk 50:60: OK 10  CRASH 0  HANG 0 ===
+```
+
+| outcome | count |
+| --- | --- |
+| OK — `roundLost` | 31 |
+| OK — `roundComplete` (full 7-win streak) | 9 (seeds 20, 22, 24, 27, 32, 42, 45, 51, 55) |
+| HANG | 0 |
+| CRASH | 0 |
+
+Wall clock: ~869s (~14.5 min) across the four 10-seed chunks. Max frame count
+observed: **679,272** (seed 23), under `winning`'s 1,000,000 default with
+room to spare — nothing in this range is budget-limited.
+
+### Outcome-shift vs. part 3's pre-#94/#95 `winning` 0:60 sweep
+
+Part 3's post-#93 (pre-#94/#95) `winning` 0:60 sweep gives, for the 20:59
+subrange, `roundComplete` at seeds `{20, 26, 27, 30, 32, 39, 41, 42, 45, 56,
+57}` (11 seeds) and `roundLost` at the other 29. Comparing to this session's
+post-#94/#95 results:
+
+| seed | pre-#94/#95 | post-#94/#95 | |
+| --- | --- | --- | --- |
+| 22, 24, 51, 55 | roundLost | roundComplete | 4 seeds newly reach the 7-win streak |
+| 26, 30, 39, 41, 56, 57 | roundComplete | roundLost | 6 seeds no longer reach it |
+| 20, 27, 32, 42, 45 | roundComplete | roundComplete | 5 seeds unchanged, still reach the streak |
+| all other 25 seeds | roundLost | roundLost | unchanged |
+
+**10 of 40 seeds (25%) changed terminal category**, all ordinary
+`roundComplete`↔`roundLost` flips — no crash, no hang. This is the expected
+outcome per the step brief: #94 and #95 both changed presentation-frame
+timing/pairing (a resolution-boundary handoff fix and an attack/hit
+animation-pairing fix respectively), and `winning`'s menu/target/switch
+choices read that same presentation state, so a different frame trace can
+flip which move `winning` picks turns later, cascading into a different
+round outcome. No new crash signature and no hang anywhere in this range —
+this is a clean re-shuffle, not a regression.
+
+## Combined summary
+
+| range | policy | OK | CRASH | HANG |
+| --- | --- | --- | --- | --- |
+| 0:20 | vanilla (gate) | 20/20 | 0 | 0 |
+| 0:60 | full (gate) | 60/60 | 0 | 0 |
+| 20:60 | winning (previously uncovered) | 40/40 | 0 | 0 |
+
+**All three ranges are fully green — zero crashes, zero hangs, 120/120
+seeds OK across the session.** Neither #94's signature
+(`FactoryRoundOrchestratorError: Slice 3 resolution completed without a
+player command boundary`) nor #95's signature (mispaired attack/hit
+animation) reproduced anywhere in this sweep, including at `full` seed 16
+(part 3's #94 occurrence, now inside the `full 0:60` gate range and clean).
+No other new signature appeared. **This is the early wind-down-gate signal
+the step brief asked for: both standing gates (`vanilla 0:20`, `full 0:60`)
+hold, and the previously-uncovered `winning 20:60` range is clean too, with
+no unexpected crash/hang class turning up under the wider seed coverage.**
+
+Combined with PROGRESS 1298's existing acceptance sweep (`winning 0:20`,
+`full 60:70` + `110:120`, seeds 16/69/113/109), the post-#94/#95 tree now has
+gate coverage across `vanilla 0:20`, `full 0:60`, `full 60:70`, `full
+110:120`, and `winning 0:60` in full (0:20 gate + this session's 20:60) —
+no gaps in the ranges this step was asked to validate.
+
+## Repro commands reference
+
+```sh
+# Vanilla gate (single invocation; this session chunked it for the
+# per-command time cap only — behavior is identical either way):
+npm run soak -- --policy vanilla --seeds 0:20
+
+# Full gate:
+npm run soak -- --policy full --seeds 0:60
+
+# Winning, previously-uncovered range:
+npm run soak -- --policy winning --seeds 20:60
+```
+
+## Verification
+
+No `tools/soak/**` or `src/**` change this session — no failures to triage,
+nothing to fix. `npm run test:smoke` (375/375), the full `npm test`
+(9984 passed, 223 skipped across 1056 test files), and `npm run build` are
+all green, satisfying this step's no-code-change acceptance bar.
