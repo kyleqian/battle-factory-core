@@ -411,6 +411,12 @@ import {
   type FireBlastState,
 } from "./fireBlast.ts";
 import {
+  rolloutAtAge,
+  type RolloutCounter,
+  type RolloutGeometry,
+  type RolloutState,
+} from "./rollout.ts";
+import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
 } from "./supersonic.ts";
@@ -938,6 +944,7 @@ export interface SceneOnPresentationBattler {
     | "IVYSAUR"
     | "KADABRA"
     | "LATIAS"
+    | "VOLTORB"
     | "LATIOS"
     | "REGISTEEL"
     | "LOMBRE"
@@ -1783,6 +1790,16 @@ export interface SceneOnFireBlastConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly animationProfile: Readonly<FireBlastGeometry>;
+}
+
+/** Rollout presentation only; damage, timers, and battle state remain battle-owned. */
+export interface SceneOnRolloutConfig {
+  readonly move: "ROLLOUT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly counter: RolloutCounter;
+  readonly animationProfile: Readonly<RolloutGeometry>;
 }
 
 export interface SceneOnSupersonicConfig {
@@ -3060,6 +3077,7 @@ export type SceneOnMoveConfig =
   | SceneOnRefreshConfig
   | SceneOnHealBellConfig
   | SceneOnFireBlastConfig
+  | SceneOnRolloutConfig
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
   | SceneOnLeerConfig
@@ -4541,6 +4559,11 @@ export interface SceneOnFireBlastView extends FireBlastState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnRolloutView extends RolloutState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMilkDrinkView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5766,6 +5789,24 @@ export function sceneOnFireBlastView(
     ...fireBlastAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.animationProfile,
+    ),
+  };
+}
+
+/** `age=0` is the first active Move_ROLLOUT source-script row. */
+export function sceneOnRolloutView(
+  state: SceneOnMovePresentationState<SceneOnRolloutConfig>,
+): SceneOnRolloutView {
+  if (state.config.move !== "ROLLOUT") {
+    throw new Error(`expected ROLLOUT presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...rolloutAtAge(
+      state.age,
+      state.config.counter,
       state.config.animationProfile,
     ),
   };
