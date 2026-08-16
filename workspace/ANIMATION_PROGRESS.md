@@ -1,3 +1,10 @@
+# MOVE_ROLLOUT authoritative-source + legal bilateral Scene-ON staging checkpoint — remains unsupported (2026-08-16 worker)
+
+- **State:** Coverage remains **194/276 Level-50 exact**, 0 partial, 0 staged, and **82 unsupported**. The new non-exclusive `task-animtask-rollout` track names **MOVE_ROLLOUT only**; it creates no move coverage entry or sibling credit.
+- **Did:** Added a hermetic audit pinning the complete root **0x082cd75e..0x082cd79f (65 bytes, `c2750d78…`)**, all Rollout task/callback/template/arc/power-shake pointers, IMPACT/MUD_SAND/ROCKS resource bytes, audio constants, command order, 1–5 counter/dynamic-power/Defense-Curl branches, source counter fallback, and player/opponent side dependencies. The generated graph proves `task:AnimTask_Rollout` is a singleton Level-50 component. Sand Attack and Ancient Power remain independently exact MUD_SAND and ROCKS/IMPACT controls; Ice Ball remains an unsupported escalating-move control.
+- **Verified:** Lowest legal Level-50 carrier is challenge-0 **FRONTIER_MON_VOLTORB** (set 115; Docile/Lax Incense/HP+SpAtk). Capture-free complete-party Scene-ON stages with ordinary A input replayed twice fresh byte-identically: player-back frame **934** `aae08a47…`, Rollout PP `[19,20,20,20]`; opponent-front frame **934** `7095b4dd…`, `[20,20,19,20]`; all six party checksums are valid. Focused source/staging test **4/4**, direct audit, animation audit/coverage, and `git diff --check` pass.
+- **Next:** Retain complete twice-fresh dense player-back and opponent-front windows through the shared presentation seam, then measure Rollout-owned banked change maps (including any affine allocations) before any latch conclusion or implementation/coverage claim. `ANIMATION_LATCHES.md` remains unchanged; no Rollout latch is inferred.
+
 # MOVE_FIRE_BLAST bilateral exact production presentation (2026-08-16 worker)
 
 - **State:** Coverage advances **193→194/276 Level-50 exact**, 0 partial, 0 staged, and **83→82 unsupported**. Fire Blast alone promotes; Dragon Breath, Flamethrower, Blaze Kick, Ember, Fire Spin, and every other sibling remain independent exact controls.

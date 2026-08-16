@@ -6174,6 +6174,16 @@
   ],
   "fulfilled": true,
   "goal": "FULFILLED: MOVE_YAWN independently proves its complete legal Togetic/Gengar bilateral player-back 250..462 and opponent-front 254..466 windows at 426/426 source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels through first inactive cleanup, twice fresh. The source-relative pink-cloud/DeepInhale reducer and compositor follow picture offsets and BuildOamBuffer ordering; MOVE_HOWL remains an independent exact regression control and receives no Yawn credit."
+  },
+  {
+   "id": "task-animtask-rollout",
+   "components": [
+    "task:AnimTask_Rollout"
+   ],
+   "representatives": [
+    "MOVE_ROLLOUT"
+   ],
+   "goal": "NON-EXCLUSIVE source/staging checkpoint only: the generated graph proves task:AnimTask_Rollout is a singleton Level-50 component with MOVE_ROLLOUT as its sole representative. Capture-free complete legal Voltorb/Onix Scene-ON player-back and opponent-front stages exist, and MOVE_SAND_ATTACK plus MOVE_ANCIENT_POWER are exact independent MUD_SAND and ROCKS/IMPACT controls; MOVE_ICE_BALL is an unsupported escalating-move control sharing only the power-shake task. No move coverage entry or exact/partial/staged claim is granted, and no sibling receives coverage. Next: twice-fresh complete dense bilateral windows through the shared presentation seam, then Rollout-owned banked change maps before any latch conclusion."
   }
  ],
  "variantAudits": {
