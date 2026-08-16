@@ -18,6 +18,11 @@ import {
   type FirePunchResolutionState,
 } from "./firePunch.ts";
 import { icyWindAtAge, type IcyWindState } from "./icyWind.ts";
+import {
+  blizzardAtAge,
+  type BlizzardGeometry,
+  type BlizzardState,
+} from "./blizzard.ts";
 import { swordsDanceAtAge, type SwordsDanceState } from "./swordsDance.ts";
 import {
   biteEffectAtAge,
@@ -2260,6 +2265,15 @@ export interface SceneOnIcyWindConfig {
   }>;
 }
 
+export interface SceneOnBlizzardConfig {
+  readonly move: "BLIZZARD";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Source X_2/Y_PIC attacker and averaged target centers. */
+  readonly effectGeometry: Readonly<BlizzardGeometry>;
+}
+
 export interface SceneOnSurfConfig {
   /** `Move_MUDDY_WATER` is the muddy-palette sibling of `Move_SURF`. */
   readonly move: "SURF" | "MUDDY_WATER";
@@ -3076,6 +3090,7 @@ export type SceneOnMoveConfig =
   | SceneOnThunderWaveConfig
   | SceneOnThunderConfig
   | SceneOnIcyWindConfig
+  | SceneOnBlizzardConfig
   | SceneOnSurfConfig
   | SceneOnCharmConfig
   | SceneOnCovetConfig
@@ -3243,6 +3258,8 @@ export type SceneOnThunderPresentationState =
   SceneOnMovePresentationState<SceneOnThunderConfig>;
 export type SceneOnIcyWindPresentationState =
   SceneOnMovePresentationState<SceneOnIcyWindConfig>;
+export type SceneOnBlizzardPresentationState =
+  SceneOnMovePresentationState<SceneOnBlizzardConfig>;
 export type SceneOnSurfPresentationState =
   SceneOnMovePresentationState<SceneOnSurfConfig>;
 export type SceneOnCharmPresentationState =
@@ -3670,6 +3687,11 @@ export interface SceneOnThunderView extends ThunderState {
 }
 
 export interface SceneOnIcyWindView extends IcyWindState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnBlizzardView extends BlizzardState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6870,6 +6892,20 @@ export function sceneOnIcyWindView(
   }
   return {
     ...icyWindAtAge(state.age, state.config.attacker.geometry.side, state.config.effectGeometry),
+    attacker: state.config.attacker,
+    target: state.config.target,
+  };
+}
+
+/** `age=0` is Move_BLIZZARD's active source-script offset-zero display. */
+export function sceneOnBlizzardView(
+  state: SceneOnBlizzardPresentationState,
+): SceneOnBlizzardView {
+  if (state.config.move !== "BLIZZARD") {
+    throw new Error(`expected BLIZZARD presentation, got ${state.config.move}`);
+  }
+  return {
+    ...blizzardAtAge(state.age, state.config.attacker.geometry.side, state.config.effectGeometry),
     attacker: state.config.attacker,
     target: state.config.target,
   };

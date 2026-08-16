@@ -83,6 +83,80 @@ export interface BlizzardSnowballSwirlState {
   readonly data: readonly [number, number, number, number, number, number, number, number];
 }
 
+export interface BlizzardGeometry {
+  /** `InitSpritePosToAnimAttacker(TRUE)` result before the call offsets. */
+  readonly attackerCenter: Readonly<{ x: number; y: number }>;
+  /** `SetAverageBattlerPositions(target, TRUE)` result. */
+  readonly targetCenter: Readonly<{ x: number; y: number }>;
+}
+
+export type BlizzardSnowballCallback =
+  | "AnimFastTranslateLinearWaitEnd"
+  | "AnimSwirlingSnowball_Step1"
+  | "AnimSwirlingSnowball_Step2"
+  | "AnimSwirlingSnowball_End";
+
+export interface BlizzardSnowballState {
+  readonly callIndex: number;
+  readonly oamSlot: number;
+  readonly callback: BlizzardSnowballCallback;
+  readonly x: number;
+  readonly y: number;
+  readonly x2: number;
+  readonly y2: number;
+  readonly data: readonly [number, number, number, number, number, number, number, number];
+}
+
+export interface BlizzardLargeCrystalState {
+  readonly callIndex: number;
+  readonly oamSlot: number;
+  readonly callback: "AnimWiggleParticleTowardsTarget";
+  readonly x: number;
+  readonly y: number;
+  readonly x2: number;
+  readonly y2: number;
+  readonly data: readonly [number, number, number, number, number, number, number, number];
+}
+
+export interface BlizzardImpactCrystalState {
+  readonly callIndex: number;
+  readonly oamSlot: number;
+  readonly kind: "large" | "small";
+  readonly callback: "RunStoredCallbackWhenAffineAnimEnds" | "AnimFlickerIceEffectParticle";
+  readonly x: number;
+  readonly y: number;
+  readonly invisible: boolean;
+  readonly timer: number;
+  readonly matrix: readonly [number, 0, 0, number];
+}
+
+export interface BlizzardState {
+  readonly age: number;
+  readonly active: boolean;
+  readonly phase: "setup" | "background-in" | "snow" | "impact" | "delay" | "background-out" | "cleanup" | "inactive";
+  readonly scriptOffset: number | null;
+  readonly snowballs: readonly BlizzardSnowballState[];
+  readonly largeCrystals: readonly BlizzardLargeCrystalState[];
+  readonly impactCrystals: readonly BlizzardImpactCrystalState[];
+  readonly impactStartAge: number;
+  readonly visualTaskCount: number;
+  readonly soundTaskActive: boolean;
+  readonly backgroundFadeTaskActive: boolean;
+  readonly backgroundScrollTaskActive: boolean;
+  readonly audioStart: "SE_M_BLIZZARD" | "SE_M_BLIZZARD2" | "SE_M_ICY_WIND" | null;
+  readonly currentAudio: "pre-move" | "SE_M_BLIZZARD" | "SE_M_BLIZZARD2" | "SE_M_ICY_WIND";
+  readonly resourcesLoaded: boolean;
+  readonly monBgTaskActive: boolean;
+  readonly monBgClearTaskActive: boolean;
+  readonly monBgDisplayed: boolean;
+  readonly background: "field" | "highspeed-player" | "highspeed-opponent";
+  readonly backgroundScrollX: number;
+  readonly displayedBackgroundScrollX: number;
+  readonly blendCnt: 0 | 232;
+  readonly blendY: number;
+  readonly paletteTransfer: "same-row-monbg" | "previous-row" | "initial";
+}
+
 export function gbaSignedSin(angle: number, amplitude: number): number {
   const value = GBA_SINE_TABLE_256[((angle % 256) + 256) % 256]!;
   // pokeemerald's Sin/Cos use a signed C `>> 8`. JavaScript's bitwise shift
@@ -128,6 +202,223 @@ export function blizzardSnowballSwirlState(
   };
 }
 
+interface MutableFastParticle {
+  callback: BlizzardSnowballCallback | "AnimWiggleParticleTowardsTarget";
+  x: number;
+  y: number;
+  x2: number;
+  y2: number;
+  data: number[];
+  destroyed: boolean;
+}
+
+/** Port of `InitAnimFastLinearTranslationWithSpeed`. */
+function initFastTranslation(sprite: MutableFastParticle): void {
+  const xDiff = sprite.data[2]! - sprite.data[1]!;
+  const yDiff = sprite.data[4]! - sprite.data[3]!;
+  const duration = Math.trunc((Math.abs(xDiff) << 4) / sprite.data[0]!);
+  let dx = Math.trunc((Math.abs(xDiff) << 4) / duration);
+  let dy = Math.trunc((Math.abs(yDiff) << 4) / duration);
+  dx = xDiff < 0 ? (dx | 1) : (dx & ~1);
+  dy = yDiff < 0 ? (dy | 1) : (dy & ~1);
+  sprite.data[0] = duration;
+  sprite.data[1] = dx;
+  sprite.data[2] = dy;
+  sprite.data[3] = 0;
+  sprite.data[4] = 0;
+}
+
+/** Port of `AnimFastTranslateLinear`; returns the pre-decrement zero case. */
+function fastTranslate(sprite: MutableFastParticle): boolean {
+  if (sprite.data[0] === 0) return true;
+  sprite.data[3] = (sprite.data[3]! + sprite.data[1]!) & 0xffff;
+  sprite.data[4] = (sprite.data[4]! + sprite.data[2]!) & 0xffff;
+  sprite.x2 = (sprite.data[1]! & 1) !== 0 ? -(sprite.data[3]! >>> 4) : sprite.data[3]! >>> 4;
+  sprite.y2 = (sprite.data[2]! & 1) !== 0 ? -(sprite.data[4]! >>> 4) : sprite.data[4]! >>> 4;
+  sprite.data[0] = sprite.data[0]! - 1;
+  return false;
+}
+
+function createSnowball(callIndex: number, geometry: BlizzardGeometry): MutableFastParticle {
+  const call = BLIZZARD_SNOWBALL_CALLS[callIndex]!;
+  const saved = [
+    call.speed,
+    geometry.attackerCenter.x,
+    geometry.targetCenter.x,
+    geometry.attackerCenter.y + call.initialY,
+    geometry.targetCenter.y,
+    0,
+    // `StoreSpriteCallbackInData6(DestroyAnimSprite)` pointer halves in the
+    // pinned source build; callback behavior remains modeled symbolically.
+    -17567, 2064,
+  ];
+  const sprite: MutableFastParticle = {
+    callback: "AnimFastTranslateLinearWaitEnd",
+    x: saved[1]!, y: saved[3]!, x2: 0, y2: 0, data: [...saved], destroyed: false,
+  };
+  initFastTranslation(sprite);
+  sprite.data[1] = sprite.data[1]! ^ 1;
+  sprite.data[2] = sprite.data[2]! ^ 1;
+  while (true) {
+    sprite.data[0] = 1;
+    fastTranslate(sprite);
+    if (sprite.x + sprite.x2 > 256 || sprite.x + sprite.x2 < -16
+      || sprite.y + sprite.y2 > 160 || sprite.y + sprite.y2 < -16) break;
+  }
+  sprite.x += sprite.x2;
+  sprite.y += sprite.y2;
+  sprite.x2 = 0;
+  sprite.y2 = 0;
+  sprite.data = [...saved];
+  sprite.data[1] = sprite.x;
+  sprite.data[3] = sprite.y;
+  initFastTranslation(sprite);
+  // `InitAnimFastLinearTranslationWithSpeedAndPos` runs on the creation
+  // callback pass and leaves the first translated state in the retained row.
+  fastTranslate(sprite);
+  return sprite;
+}
+
+function advanceSnowball(sprite: MutableFastParticle, side: BlizzardAttackerSide): void {
+  switch (sprite.callback) {
+    case "AnimFastTranslateLinearWaitEnd":
+      if (fastTranslate(sprite)) sprite.callback = "AnimSwirlingSnowball_Step1";
+      return;
+    case "AnimSwirlingSnowball_Step1": {
+      sprite.x += sprite.x2;
+      sprite.y += sprite.y2;
+      sprite.x2 = 0;
+      sprite.y2 = 0;
+      const amplitude = side === "opponent" ? 20 : -20;
+      sprite.data[0] = 128;
+      sprite.data[3] = gbaSignedSin(128, amplitude);
+      sprite.data[4] = gbaSignedSin(192, 15);
+      sprite.data[5] = 0;
+      sprite.callback = "AnimSwirlingSnowball_Step2";
+      advanceSnowball(sprite, side);
+      return;
+    }
+    case "AnimSwirlingSnowball_Step2":
+      if (sprite.data[5]! <= 31) {
+        const amplitude = side === "opponent" ? 20 : -20;
+        sprite.x2 = gbaSignedSin(sprite.data[0]!, amplitude) - sprite.data[3]!;
+        sprite.y2 = gbaSignedSin(sprite.data[0]! + 64, 15) - sprite.data[4]!;
+        sprite.data[0] = (sprite.data[0]! + 16) & 0xff;
+        sprite.data[5] = sprite.data[5]! + 1;
+      } else {
+        sprite.x += sprite.x2;
+        sprite.y += sprite.y2;
+        sprite.x2 = 0;
+        sprite.y2 = 0;
+        sprite.data[3] = 0;
+        sprite.data[4] = 0;
+        sprite.callback = "AnimSwirlingSnowball_End";
+      }
+      return;
+    case "AnimSwirlingSnowball_End":
+      sprite.data[0] = 1;
+      fastTranslate(sprite);
+      sprite.destroyed = sprite.x + sprite.x2 > 256 || sprite.x + sprite.x2 < -16
+        || sprite.y + sprite.y2 > 256 || sprite.y + sprite.y2 < -16;
+      return;
+    case "AnimWiggleParticleTowardsTarget":
+      throw new Error("large Blizzard crystal passed to snowball callback");
+  }
+}
+
+const BLIZZARD_SNOWBALL_OAM_SLOTS = [3, 5, 9, 11, 13, 15, 17, 19, 21, 23, 25, 4, 7, 10] as const;
+const BLIZZARD_LARGE_CRYSTAL_Y = [0, -10, 10, -20, 15, -20, 20, 0, -10, 10, -20, 15, -20, 20] as const;
+const BLIZZARD_LARGE_CRYSTAL_OAM_SLOTS = {
+  player: [4, 7, 10, 12, 14, 16, 18, 20, 22, 24, 26, 27, 28, 29],
+  opponent: [4, 7, 10, 12, 14, 16, 18, 20, 22, 24, 26, 27, 28, 12],
+} as const;
+
+function snowballAtAge(
+  callIndex: number,
+  age: number,
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+): BlizzardSnowballState | null {
+  const localAge = age - BLIZZARD_SNOWBALL_CALLS[callIndex]!.sourceAge;
+  if (localAge < 0) return null;
+  const sprite = createSnowball(callIndex, geometry);
+  for (let tick = 0; tick < localAge && !sprite.destroyed; tick += 1) advanceSnowball(sprite, side);
+  if (sprite.destroyed) return null;
+  return {
+    callIndex,
+    oamSlot: BLIZZARD_SNOWBALL_OAM_SLOTS[callIndex]!,
+    callback: sprite.callback as BlizzardSnowballCallback,
+    x: sprite.x, y: sprite.y, x2: sprite.x2, y2: sprite.y2,
+    data: sprite.data as unknown as BlizzardSnowballState["data"],
+  };
+}
+
+function createLargeCrystal(callIndex: number, geometry: BlizzardGeometry): MutableFastParticle {
+  const initialY = BLIZZARD_LARGE_CRYSTAL_Y[callIndex]!;
+  const saved = [
+    80,
+    geometry.attackerCenter.x,
+    geometry.targetCenter.x,
+    geometry.attackerCenter.y + initialY,
+    geometry.targetCenter.y + initialY,
+    0, 0, 0,
+  ];
+  const sprite: MutableFastParticle = {
+    callback: "AnimWiggleParticleTowardsTarget",
+    x: saved[1]!, y: saved[3]!, x2: 0, y2: 0, data: [...saved], destroyed: false,
+  };
+  initFastTranslation(sprite);
+  const translated = [...sprite.data];
+  sprite.data[1] = sprite.data[1]! ^ 1;
+  sprite.data[2] = sprite.data[2]! ^ 1;
+  while (true) {
+    sprite.data[0] = 1;
+    fastTranslate(sprite);
+    if (sprite.x + sprite.x2 > 256 || sprite.x + sprite.x2 < -16
+      || sprite.y + sprite.y2 > 160 || sprite.y + sprite.y2 < -16) break;
+  }
+  sprite.x += sprite.x2;
+  sprite.y += sprite.y2;
+  sprite.x2 = 0;
+  sprite.y2 = 0;
+  sprite.data = translated;
+  sprite.data[5] = 0;
+  sprite.data[6] = 0;
+  advanceLargeCrystal(sprite);
+  return sprite;
+}
+
+function advanceLargeCrystal(sprite: MutableFastParticle): void {
+  fastTranslate(sprite);
+  if (sprite.data[0] === 0) sprite.data[0] = 1;
+  sprite.y2 += gbaSignedSin(sprite.data[7]!, sprite.data[5]!);
+  sprite.data[7] = (sprite.data[7]! + sprite.data[6]!) & 0xff;
+  if (sprite.data[0] === 1) {
+    sprite.destroyed = sprite.x + sprite.x2 > 256 || sprite.x + sprite.x2 < -16
+      || sprite.y + sprite.y2 > 160 || sprite.y + sprite.y2 < -16;
+  }
+}
+
+function largeCrystalAtAge(
+  callIndex: number,
+  age: number,
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+): BlizzardLargeCrystalState | null {
+  const localAge = age - BLIZZARD_SNOWBALL_CALLS[callIndex]!.sourceAge;
+  if (localAge < 0) return null;
+  const sprite = createLargeCrystal(callIndex, geometry);
+  for (let tick = 0; tick < localAge && !sprite.destroyed; tick += 1) advanceLargeCrystal(sprite);
+  if (sprite.destroyed) return null;
+  return {
+    callIndex,
+    oamSlot: BLIZZARD_LARGE_CRYSTAL_OAM_SLOTS[side][callIndex]!,
+    callback: "AnimWiggleParticleTowardsTarget",
+    x: sprite.x, y: sprite.y, x2: sprite.x2, y2: sprite.y2,
+    data: sprite.data as unknown as BlizzardLargeCrystalState["data"],
+  };
+}
+
 export interface BlizzardImpactCrystalCall {
   readonly index: number;
   readonly kind: "large" | "small";
@@ -151,6 +442,180 @@ export const BLIZZARD_IMPACT_CRYSTALS: readonly BlizzardImpactCrystalCall[] = [
   { index: 9, kind: "small", x: 0, y: 0, targetMode: 1, sourceDelayAfter: 4 },
   { index: 10, kind: "large", x: 20, y: 2, targetMode: 1, sourceDelayAfter: 4 },
 ] as const;
+
+const BLIZZARD_IMPACT_CREATE_OFFSETS = [0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60] as const;
+const BLIZZARD_IMPACT_OAM_SLOTS = [3, 4, 5, 7, 9, 10, 11, 3, 4, 5, 7] as const;
+
+function impactCrystalAtAge(
+  callIndex: number,
+  age: number,
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+  impactStartAge: number,
+): BlizzardImpactCrystalState | null {
+  const localAge = age - impactStartAge - BLIZZARD_IMPACT_CREATE_OFFSETS[callIndex]!;
+  if (localAge < 0 || localAge >= 37) return null;
+  const call = BLIZZARD_IMPACT_CRYSTALS[callIndex]!;
+  const xOffset = side === "opponent" ? -call.x : call.x;
+  const scale = localAge < 10 ? 211 + localAge * 5 : 256;
+  const matrixScale = Math.trunc(65536 / scale);
+  const flickerAge = localAge - 17;
+  return {
+    callIndex,
+    oamSlot: BLIZZARD_IMPACT_OAM_SLOTS[callIndex]!,
+    kind: call.kind,
+    callback: localAge <= 16
+      ? "RunStoredCallbackWhenAffineAnimEnds"
+      : "AnimFlickerIceEffectParticle",
+    x: geometry.targetCenter.x + xOffset,
+    y: geometry.targetCenter.y + call.y,
+    invisible: flickerAge > 0 && (flickerAge & 1) === 1,
+    timer: Math.max(0, flickerAge),
+    matrix: [matrixScale, 0, 0, matrixScale],
+  };
+}
+
+/**
+ * `waitforvisualfinish` releases when the final source-driven traveling
+ * particle has destroyed itself. The 11-row bilateral difference therefore
+ * falls out of the same callback simulation instead of an orientation age
+ * table.
+ */
+export function blizzardImpactStartAge(
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+): number {
+  for (let age = 115; age < 400; age += 1) {
+    const snowballs = BLIZZARD_SNOWBALL_CALLS.some((_, index) =>
+      snowballAtAge(index, age, side, geometry) !== null);
+    const largeCrystals = BLIZZARD_SNOWBALL_CALLS.some((_, index) =>
+      largeCrystalAtAge(index, age, side, geometry) !== null);
+    if (!snowballs && !largeCrystals) return age + 1;
+  }
+  throw new Error("Blizzard traveling particles did not clean up");
+}
+
+function backgroundBlendY(age: number, impactStartAge: number): number {
+  if (age >= 9 && age <= 24) return age - 8;
+  if (age >= 25 && age <= 27) return 16;
+  if (age >= 28 && age <= 43) return 43 - age;
+  const restore = age - impactStartAge;
+  if (restore >= 122 && restore <= 137) return restore - 121;
+  if (restore >= 138 && restore <= 141) return 16;
+  if (restore >= 142 && restore <= 157) return 157 - restore;
+  return 0;
+}
+
+function backgroundBlendCnt(age: number, impactStartAge: number): 0 | 232 {
+  if (age >= 8 && age <= 43) return 232;
+  const restore = age - impactStartAge;
+  return restore >= 121 && restore <= 157 ? 232 : 0;
+}
+
+function scriptOffsetAtAge(age: number, impactStartAge: number): number | null {
+  if (age === 0) return 0;
+  if (age <= 3) return 3;
+  if (age <= 6) return 5;
+  if (age <= 25) return 22;
+  if (age <= 44) return 38;
+  if (age <= 49) return 124;
+  if (age <= 54) return 168;
+  if (age <= 59) return 212;
+  if (age <= 64) return 256;
+  if (age <= 69) return 300;
+  if (age <= 74) return 344;
+  if (age <= 79) return 388;
+  if (age <= 84) return 124;
+  if (age <= 89) return 168;
+  if (age <= 94) return 212;
+  if (age <= 99) return 256;
+  if (age <= 104) return 300;
+  if (age <= 109) return 344;
+  if (age <= 114) return 388;
+  if (age < impactStartAge) return 61;
+  const local = age - impactStartAge;
+  if (local <= 59) return null;
+  if (local <= 97) return 67;
+  if (local <= 119) return 70;
+  if (local <= 138) return 71;
+  if (local <= 158) return 76;
+  return 79;
+}
+
+/** Complete source-relative Move_BLIZZARD reducer. */
+export function blizzardAtAge(
+  age: number,
+  side: BlizzardAttackerSide,
+  geometry: BlizzardGeometry,
+): BlizzardState {
+  if (!Number.isInteger(age)) throw new RangeError(`Blizzard age must be an integer, got ${age}`);
+  const impactStartAge = blizzardImpactStartAge(side, geometry);
+  const cleanupAge = impactStartAge + 163;
+  const snowballs = age < 0 ? [] : BLIZZARD_SNOWBALL_CALLS.flatMap((_, callIndex) => {
+    const state = snowballAtAge(callIndex, age, side, geometry);
+    return state ? [state] : [];
+  });
+  const largeCrystals = age < 0 ? [] : BLIZZARD_SNOWBALL_CALLS.flatMap((_, callIndex) => {
+    const state = largeCrystalAtAge(callIndex, age, side, geometry);
+    return state ? [state] : [];
+  });
+  const impactCrystals = age < impactStartAge ? [] : BLIZZARD_IMPACT_CRYSTALS.flatMap((_, callIndex) => {
+    const state = impactCrystalAtAge(callIndex, age, side, geometry, impactStartAge);
+    return state ? [state] : [];
+  });
+  const impactLocal = age - impactStartAge;
+  const active = age >= 0 && age < cleanupAge;
+  const phase: BlizzardState["phase"] = !active ? "inactive"
+    : age < 7 ? "setup"
+      : age < 45 ? "background-in"
+        : age < impactStartAge ? "snow"
+          : impactLocal <= 97 ? "impact"
+            : impactLocal <= 119 ? "delay"
+              : impactLocal <= 158 ? "background-out"
+                : "cleanup";
+  const scrollTaskActive = age >= 26 && impactLocal <= 138;
+  const backgroundScrollX = scrollTaskActive
+    ? (side === "player" ? -1 : 1) * 9 * (age - 25)
+    : 0;
+  const displayedBackgroundScrollX = age >= 27 && impactLocal <= 139
+    ? (side === "player" ? -1 : 1) * 9 * (age - 26)
+    : 0;
+  const audioStart = age === 45 ? "SE_M_BLIZZARD"
+    : age === 115 ? "SE_M_BLIZZARD2"
+      : impactCrystals.some(({ callIndex }) => age === impactStartAge + BLIZZARD_IMPACT_CREATE_OFFSETS[callIndex]!)
+        ? "SE_M_ICY_WIND" : null;
+  return {
+    age,
+    active,
+    phase,
+    scriptOffset: age < 0 ? null : scriptOffsetAtAge(age, impactStartAge),
+    snowballs,
+    largeCrystals,
+    impactCrystals,
+    impactStartAge,
+    visualTaskCount: snowballs.length + largeCrystals.length + impactCrystals.length,
+    soundTaskActive: age >= 45 && age < (side === "player" ? 108 : 107),
+    backgroundFadeTaskActive: (age >= 7 && age <= 43)
+      || (impactLocal >= 120 && impactLocal <= 157),
+    backgroundScrollTaskActive: scrollTaskActive,
+    audioStart,
+    currentAudio: age < 45 ? "pre-move"
+      : age < 115 ? "SE_M_BLIZZARD"
+        : age < impactStartAge ? "SE_M_BLIZZARD2" : "SE_M_ICY_WIND",
+    resourcesLoaded: age >= 1 && age < cleanupAge,
+    monBgTaskActive: age >= 4 && age < impactStartAge + 162,
+    monBgClearTaskActive: impactLocal >= 159 && impactLocal <= 161,
+    monBgDisplayed: age >= 5 && age < cleanupAge,
+    background: age >= 26 && impactLocal <= 139
+      ? (side === "player" ? "highspeed-player" : "highspeed-opponent")
+      : "field",
+    backgroundScrollX,
+    displayedBackgroundScrollX,
+    blendCnt: backgroundBlendCnt(age, impactStartAge),
+    blendY: backgroundBlendY(age, impactStartAge),
+    paletteTransfer: age === 0 ? "initial" : age === 4 ? "same-row-monbg" : "previous-row",
+  };
+}
 
 export const BLIZZARD_SOURCE_AUDIO = [
   "SE_M_BLIZZARD",

@@ -2,7 +2,17 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
-import { blizzardSnowballSwirlState, type BlizzardAttackerSide } from "../../src/animation/blizzard.ts";
+import {
+  blizzardAtAge,
+  blizzardSnowballSwirlState,
+  type BlizzardAttackerSide,
+  type BlizzardGeometry,
+} from "../../src/animation/blizzard.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnBlizzardView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 interface TarMember { readonly name: string; readonly size: number; readonly data: Buffer }
 
@@ -90,8 +100,16 @@ export interface BlizzardEvidenceVerification {
   readonly sourceIntervalObservedFrames: number;
   readonly reducerInitialRows: number;
   readonly reducerMatchedSpriteRows: number;
+  readonly snowballRows: number;
+  readonly largeCrystalRows: number;
+  readonly impactCrystalRows: number;
+  readonly reducerRows: number;
   readonly oamLatchMatchedRows: number;
+  readonly matrixLatchMatchedRows: number;
+  readonly paletteLatchMatchedRows: number;
   readonly rgbFrames: number;
+  readonly seamRows: number;
+  readonly framebufferRows: 0;
 }
 
 function verifyOrientation(root: string, orientation: string, row: any): BlizzardEvidenceVerification {
@@ -157,10 +175,116 @@ function verifyOrientation(root: string, orientation: string, row: any): Blizzar
   }
   invariant(reducerMatchedSpriteRows === row.reducerMatchedSpriteRows, `${orientation}: reducer matched row count`);
 
+  const geometry: BlizzardGeometry = side === "player"
+    ? { attackerCenter: { x: 72, y: 94 }, targetCenter: { x: 176, y: 42 } }
+    : { attackerCenter: { x: 176, y: 36 }, targetCenter: { x: 72, y: 88 } };
+  const attacker: SceneOnPresentationBattler = side === "player"
+    ? { species: "PELIPPER", geometry: { side, spriteCorner: { x: 40, y: 54 }, animationCenter: { x: 72, y: 86 }, battlePositionCenter: { x: 72, y: 80 } } }
+    : { species: "PELIPPER", geometry: { side, spriteCorner: { x: 144, y: 4 }, animationCenter: { x: 176, y: 36 }, battlePositionCenter: { x: 176, y: 40 } } };
+  const target: SceneOnPresentationBattler = side === "player"
+    ? { species: "ONIX", geometry: { side: "opponent", spriteCorner: { x: 144, y: 10 }, animationCenter: { x: 176, y: 42 }, battlePositionCenter: { x: 176, y: 40 } } }
+    : { species: "ONIX", geometry: { side: "player", spriteCorner: { x: 40, y: 56 }, animationCenter: { x: 72, y: 88 }, battlePositionCenter: { x: 72, y: 80 } } };
+  const fieldProfile = side === "player"
+    ? { playerHp: 158, playerMaxHp: 167, opponentHp: 110, opponentMaxHp: 110 }
+    : { playerHp: 110, playerMaxHp: 110, opponentHp: 158, opponentMaxHp: 167 };
+  const stage = createSceneOnMovePresentation({
+    move: "BLIZZARD", attacker, target, fieldProfile, effectGeometry: geometry,
+  });
+
+  let snowballRows = 0;
+  let largeCrystalRows = 0;
+  let impactCrystalRows = 0;
+  let reducerRows = 0;
+  let seamRows = 0;
+  for (let age = 0; age < frames.length; age += 1) {
+    const frame = frames[age];
+    const expected = blizzardAtAge(age, side, geometry);
+    invariant(expected.active === frame.gAnimScriptActive, `${orientation}: active mismatch age ${age}`);
+    invariant(expected.scriptOffset === frame.scriptOffset, `${orientation}: script offset mismatch age ${age}`);
+    invariant(expected.visualTaskCount === frame.visualTaskCount, `${orientation}: visual task count age ${age}`);
+    invariant(expected.soundTaskActive === (frame.soundTaskCount === 1), `${orientation}: sound task age ${age}`);
+
+    const tasks = new Set(frame.tasks.map((task: any) => task.func.symbol));
+    invariant(expected.backgroundFadeTaskActive === tasks.has("Task_FadeToBg"), `${orientation}: fade task age ${age}`);
+    invariant(expected.backgroundScrollTaskActive === tasks.has("AnimTask_UpdateSlidingBg"), `${orientation}: sliding task age ${age}`);
+    invariant(expected.monBgTaskActive === tasks.has("Task_UpdateMonBg"), `${orientation}: monbg task age ${age}`);
+    invariant(expected.monBgClearTaskActive === tasks.has("Task_ClearMonBg"), `${orientation}: clear monbg task age ${age}`);
+    invariant(expected.resourcesLoaded === frame.paletteTags.includes(10141), `${orientation}: palette resource age ${age}`);
+    invariant(expected.resourcesLoaded === frame.tileTags.includes(10141), `${orientation}: tile resource age ${age}`);
+    invariant(frame.battleBg3.x === expected.backgroundScrollX, `${orientation}: BG scroll state age ${age}`);
+    invariant(frame.registers.bg3hofs === (expected.displayedBackgroundScrollX & 0x1ff), `${orientation}: displayed BG scroll age ${age}`);
+    invariant(frame.registers.bg3cnt === (expected.background === "field" ? 23051 : 14859), `${orientation}: BG identity age ${age}`);
+    invariant(frame.registers.bldcnt === expected.blendCnt && frame.registers.bldy === expected.blendY, `${orientation}: blend registers age ${age}`);
+    const displayedMonBg = side === "player"
+      ? frame.registers.bg1hofs === 367 && frame.registers.bg1vofs === 502
+      : frame.registers.bg2hofs === 472 && frame.registers.bg2vofs === 464;
+    invariant(displayedMonBg === expected.monBgDisplayed, `${orientation}: displayed monbg age ${age}`);
+
+    const audioIdentity = frame.se1.songHeaderIdentity.symbol;
+    const expectedAudio = expected.currentAudio === "pre-move"
+      ? "se_effective"
+      : expected.currentAudio.toLowerCase();
+    invariant(audioIdentity === expectedAudio, `${orientation}: audio identity age ${age}`);
+    if (expected.audioStart !== null) {
+      invariant(audioIdentity === expected.audioStart.toLowerCase(), `${orientation}: audio start age ${age}`);
+    }
+
+    const actualSnowballs = frame.sprites.filter((sprite: any) => sprite.template.symbol === "gSwirlingSnowballSpriteTemplate");
+    invariant(actualSnowballs.length === expected.snowballs.length, `${orientation}: snowball count age ${age}`);
+    for (const sprite of expected.snowballs) {
+      const actual = actualSnowballs.find((candidate: any) => candidate.slot === sprite.oamSlot);
+      invariant(actual?.callback.symbol === sprite.callback
+        && actual.x === sprite.x && actual.y === sprite.y
+        && actual.x2 === sprite.x2 && actual.y2 === sprite.y2
+        && jsonEqual(actual.data, sprite.data), `${orientation}: snowball ${sprite.callIndex} age ${age}`);
+      snowballRows += 1;
+    }
+
+    const actualLarge = frame.sprites.filter((sprite: any) => sprite.template.symbol === "gBlizzardIceCrystalSpriteTemplate");
+    invariant(actualLarge.length === expected.largeCrystals.length, `${orientation}: large crystal count age ${age}`);
+    for (const sprite of expected.largeCrystals) {
+      const actual = actualLarge.find((candidate: any) => candidate.slot === sprite.oamSlot);
+      invariant(actual?.callback.symbol === sprite.callback
+        && actual.x === sprite.x && actual.y === sprite.y
+        && actual.x2 === sprite.x2 && actual.y2 === sprite.y2
+        && jsonEqual(actual.data, sprite.data), `${orientation}: large crystal ${sprite.callIndex} age ${age}`);
+      largeCrystalRows += 1;
+    }
+
+    const actualImpacts = frame.sprites.filter((sprite: any) =>
+      sprite.template.symbol === "gIceCrystalHitLargeSpriteTemplate"
+      || sprite.template.symbol === "gIceCrystalHitSmallSpriteTemplate");
+    invariant(actualImpacts.length === expected.impactCrystals.length, `${orientation}: impact count age ${age}`);
+    for (const sprite of expected.impactCrystals) {
+      const template = sprite.kind === "large"
+        ? "gIceCrystalHitLargeSpriteTemplate" : "gIceCrystalHitSmallSpriteTemplate";
+      const actual = actualImpacts.find((candidate: any) => candidate.slot === sprite.oamSlot
+        && candidate.template.symbol === template);
+      invariant(actual?.callback.symbol === sprite.callback
+        && actual.x === sprite.x && actual.y === sprite.y
+        && Boolean(actual.invisible) === sprite.invisible
+        && actual.data[0] === sprite.timer
+        && jsonEqual(actual.matrix, sprite.matrix), `${orientation}: impact ${sprite.callIndex} age ${age}`);
+      impactCrystalRows += 1;
+    }
+
+    const seam = sceneOnBlizzardView({ ...stage, age });
+    const { attacker: seamAttacker, target: seamTarget, ...seamState } = seam;
+    invariant(seamAttacker === attacker && seamTarget === target && jsonEqual(seamState, expected), `${orientation}: seam age ${age}`);
+    seamRows += 1;
+    reducerRows += 1;
+  }
+
   let oamLatchMatchedRows = 0;
+  let matrixLatchMatchedRows = 0;
+  let paletteLatchMatchedRows = 0;
   for (let index = 1; index < frames.length; index += 1) {
     invariant(jsonEqual(frames[index].hardwareOam, frames[index - 1].softwareOam), `${orientation}: OAM latch mismatch at ${frames[index].frame}`);
     invariant(jsonEqual(frames[index].hardwareMatrices, frames[index - 1].softwareMatrices), `${orientation}: matrix latch mismatch at ${frames[index].frame}`);
+    matrixLatchMatchedRows += 1;
+    const expectedPalette = index === 4 ? frames[index].fadedPalette : frames[index - 1].fadedPalette;
+    invariant(jsonEqual(frames[index].hardwarePalette, expectedPalette), `${orientation}: palette latch mismatch at ${frames[index].frame}`);
+    paletteLatchMatchedRows += 1;
     oamLatchMatchedRows += 1;
   }
   invariant(row.oamLatch.allowanceFrames === 1 && row.oamLatch.transfer === "hardware[n] == software[n-1]", `${orientation}: unexplained OAM allowance`);
@@ -203,15 +327,24 @@ function verifyOrientation(root: string, orientation: string, row: any): Blizzar
     sourceIntervalObservedFrames,
     reducerInitialRows: step1Rows.length,
     reducerMatchedSpriteRows,
+    snowballRows,
+    largeCrystalRows,
+    impactCrystalRows,
+    reducerRows,
     oamLatchMatchedRows,
+    matrixLatchMatchedRows,
+    paletteLatchMatchedRows,
     rgbFrames: rgbMembers.length,
+    seamRows,
+    framebufferRows: 0,
   };
 }
 
 export function verifyBlizzardEvidence(root = resolve(".")): readonly BlizzardEvidenceVerification[] {
   const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/blizzard-dense-evidence.json"), "utf8"));
   invariant(receipt.status === "unsupported-evidence-checkpoint", "receipt status must remain unsupported");
-  invariant(receipt.acceptance.seamRows === "0/372 + 0/361" && receipt.acceptance.framebufferRows === "0/372 + 0/361", "receipt must preserve zero seam/framebuffer acceptance");
+  invariant(receipt.acceptance.seamRows === "372/372 + 361/361", "receipt must pin the complete bilateral seam");
+  invariant(receipt.acceptance.framebufferRows === "0/372 + 0/361", "receipt must preserve zero framebuffer acceptance");
   return Object.entries(receipt.orientations).map(([orientation, row]) => verifyOrientation(root, orientation, row));
 }
 

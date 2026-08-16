@@ -48,14 +48,10 @@
       "rgbArchiveMemberCount": 1119,
       "rawRgbMemberCount": 372,
       "rawRgbMemberOrderSha256": "beb9a26b1e7c8698a9f8c6d1f289840241ac5d517c1ba7314aa374e235e3301b",
-      "seamRows": 0,
+      "seamRows": 372,
       "framebufferRows": 0,
       "residuals": [
-        { "component": "production battleScene Blizzard compositor", "ages": "0-371", "rows": 372 },
-        { "component": "sprite:gSwirlingSnowballSpriteTemplate linear/Step1/End", "ages": "45-206", "observedFrameCount": 162, "unreducedSpriteRows": 910 },
-        { "component": "sprite:gBlizzardIceCrystalSpriteTemplate", "ages": "45-163", "observedFrameCount": 119, "unreducedSpriteRows": 752 },
-        { "component": "sprite:gIceCrystalHitLargeSpriteTemplate", "ages": "208-304", "observedFrameCount": 97, "unreducedSpriteRows": 185 },
-        { "component": "sprite:gIceCrystalHitSmallSpriteTemplate", "ages": "214-298", "observedFrameCount": 85, "unreducedSpriteRows": 222 }
+        { "component": "production battleScene Blizzard compositor", "ages": "0-371", "rows": 372 }
       ]
     },
     "opponent-front": {
@@ -79,14 +75,10 @@
       "rgbArchiveMemberCount": 1086,
       "rawRgbMemberCount": 361,
       "rawRgbMemberOrderSha256": "96b7ccc19330793dab1733944ed18e0a22f2bbeedc546c2b7c23721b73a814c7",
-      "seamRows": 0,
+      "seamRows": 361,
       "framebufferRows": 0,
       "residuals": [
-        { "component": "production battleScene Blizzard compositor", "ages": "0-360", "rows": 361 },
-        { "component": "sprite:gSwirlingSnowballSpriteTemplate linear/Step1/End", "ages": "45-195", "observedFrameCount": 151, "unreducedSpriteRows": 822 },
-        { "component": "sprite:gBlizzardIceCrystalSpriteTemplate", "ages": "45-162", "observedFrameCount": 118, "unreducedSpriteRows": 726 },
-        { "component": "sprite:gIceCrystalHitLargeSpriteTemplate", "ages": "197-293", "observedFrameCount": 97, "unreducedSpriteRows": 185 },
-        { "component": "sprite:gIceCrystalHitSmallSpriteTemplate", "ages": "203-287", "observedFrameCount": 85, "unreducedSpriteRows": 222 }
+        { "component": "production battleScene Blizzard compositor", "ages": "0-360", "rows": 361 }
       ]
     }
   },
@@ -95,10 +87,11 @@
     "status": "unsupported-evidence-checkpoint",
     "sourceIntervalObservedFrames": "312/372 + 301/361",
     "swirlReducerMatchedSpriteRows": "448/448 + 448/448",
+    "completeReducerRows": "372/372 + 361/361",
     "oamLatchRows": "371/371 + 360/360 with one-frame transfer",
-    "seamRows": "0/372 + 0/361",
+    "seamRows": "372/372 + 361/361",
     "framebufferRows": "0/372 + 0/361",
     "freshRuns": 2
   },
-  "residual": "No production Blizzard compositor or bilateral presentation seam is implemented; MOVE_ICY_WIND remains independently unpromoted."
+  "residual": "No production battleScene Blizzard framebuffer compositor is implemented; MOVE_ICY_WIND remains independently unpromoted."
 }

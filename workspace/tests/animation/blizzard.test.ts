@@ -8,11 +8,18 @@ import {
   BLIZZARD_COMPONENTS,
   BLIZZARD_IMPACT_CRYSTALS,
   BLIZZARD_SNOWBALL_CALLS,
+  blizzardAtAge,
+  blizzardImpactStartAge,
   blizzardSnowballCallsAtSourceAge,
   blizzardSnowballSwirlState,
   gbaSignedSin,
 } from "../../src/animation/blizzard.ts";
 import { verifyBlizzardEvidence } from "../../tools/compare/verifyBlizzardEvidence.ts";
+import {
+  createSceneOnMovePresentation,
+  sceneOnBlizzardView,
+  type SceneOnPresentationBattler,
+} from "../../src/animation/sceneOnPresentation.ts";
 
 const root = resolve(".");
 const receipt = JSON.parse(readFileSync(resolve(root, "tools/compare/fixtures/blizzard-dense-evidence.json"), "utf8")) as any;
@@ -61,18 +68,53 @@ describe("MOVE_BLIZZARD source checkpoint", () => {
     expect(gbaSignedSin(16, -20)).toBe(-8);
     expect(() => blizzardSnowballSwirlState(initial, 32, "player")).toThrow(/0\.\.31/u);
   });
+
+  it("derives bilateral completion and exposes the complete reducer through the typed seam", () => {
+    const geometry = { attackerCenter: { x: 72, y: 94 }, targetCenter: { x: 176, y: 42 } };
+    expect(blizzardImpactStartAge("player", geometry)).toBe(208);
+    expect(blizzardImpactStartAge("opponent", {
+      attackerCenter: { x: 176, y: 36 }, targetCenter: { x: 72, y: 88 },
+    })).toBe(197);
+
+    const attacker: SceneOnPresentationBattler = {
+      species: "PELIPPER",
+      geometry: { side: "player", spriteCorner: { x: 40, y: 54 }, animationCenter: { x: 72, y: 86 }, battlePositionCenter: { x: 72, y: 80 } },
+    };
+    const target: SceneOnPresentationBattler = {
+      species: "ONIX",
+      geometry: { side: "opponent", spriteCorner: { x: 144, y: 10 }, animationCenter: { x: 176, y: 42 }, battlePositionCenter: { x: 176, y: 40 } },
+    };
+    const stage = createSceneOnMovePresentation({
+      move: "BLIZZARD", attacker, target, effectGeometry: geometry,
+      fieldProfile: { playerHp: 158, playerMaxHp: 167, opponentHp: 110, opponentMaxHp: 110 },
+    });
+    const expected = blizzardAtAge(208, "player", geometry);
+    const { attacker: actualAttacker, target: actualTarget, ...actual } = sceneOnBlizzardView({ ...stage, age: 208 });
+    expect(actualAttacker).toBe(attacker);
+    expect(actualTarget).toBe(target);
+    expect(actual).toEqual(expected);
+    expect(expected).toMatchObject({
+      active: true, phase: "impact", impactStartAge: 208,
+      background: "highspeed-player", resourcesLoaded: true,
+      monBgTaskActive: true, impactCrystals: [{ callIndex: 0, kind: "large" }],
+    });
+    expect(blizzardAtAge(371, "player", geometry)).toMatchObject({
+      active: false, phase: "inactive", resourcesLoaded: false,
+      monBgTaskActive: false, monBgDisplayed: false,
+    });
+  });
 });
 
 describe("MOVE_BLIZZARD Scene-ON evidence receipts", () => {
   it("strictly replays retained state, reducer, OAM latch, and every archived RGB row", () => {
     const verified = verifyBlizzardEvidence(root);
     expect(verified).toEqual([
-      { orientation: "player-back", windowFrames: 372, sourceIntervalObservedFrames: 312, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, oamLatchMatchedRows: 371, rgbFrames: 372 },
-      { orientation: "opponent-front", windowFrames: 361, sourceIntervalObservedFrames: 301, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, oamLatchMatchedRows: 360, rgbFrames: 361 },
+      { orientation: "player-back", windowFrames: 372, sourceIntervalObservedFrames: 312, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, snowballRows: 1358, largeCrystalRows: 752, impactCrystalRows: 407, reducerRows: 372, oamLatchMatchedRows: 371, matrixLatchMatchedRows: 371, paletteLatchMatchedRows: 371, rgbFrames: 372, seamRows: 372, framebufferRows: 0 },
+      { orientation: "opponent-front", windowFrames: 361, sourceIntervalObservedFrames: 301, reducerInitialRows: 14, reducerMatchedSpriteRows: 448, snowballRows: 1270, largeCrystalRows: 726, impactCrystalRows: 407, reducerRows: 361, oamLatchMatchedRows: 360, matrixLatchMatchedRows: 360, paletteLatchMatchedRows: 360, rgbFrames: 361, seamRows: 361, framebufferRows: 0 },
     ]);
     for (const [orientation, row] of Object.entries(receipt.orientations) as Array<[string, any]>) {
       expect(sha256(row.scenario)).toBe(row.scenarioSha256);
-      expect(row.seamRows).toBe(0);
+      expect(row.seamRows).toBe(row.denseWindow.frameCount);
       expect(row.framebufferRows).toBe(0);
       expect(row.residuals[0].component).toBe("production battleScene Blizzard compositor");
       expect(row.residuals[0].rows).toBe(row.denseWindow.frameCount);
