@@ -787,7 +787,7 @@ export function advancePostwin(state: PostwinState): PostwinState {
   const reAskElapsed = postwinReaskElapsed(state);
   const reAskMenuReady =
     reAskElapsed !== null &&
-    elapsed >= reAskElapsed + POSTWIN_QUESTION_MENU_READY_DELAY;
+    elapsed >= reAskElapsed + postwinQuestionReprintMenuReadyDelay(state);
   return {
     elapsed,
     challengeBattleNum:
@@ -1322,14 +1322,34 @@ export function postwinReaskElapsed(state: PostwinState): number | null {
     : state.recordedMessageDismissElapsed;
 }
 
-/** Re-ask "2nd match is next!" visible glyph count after a question dismiss. */
+/**
+ * Re-ask prompt total glyph count: the ordinary route's "2nd match is next!"
+ * (`POSTWIN_NEXT_TEXT_TOTAL`, matches the standalone `POSTWIN_QUESTION_
+ * REPRINT_SETTLED_DELAY`/`POSTWIN_QUESTION_MENU_READY_DELAY` constants below
+ * via the same `firstDelay+total-1[+4]` shape those were fit from) or the
+ * brain route's own longer `AskReadyForHead` prompt
+ * (`CALL_SCENE_HEAD_PROMPT_TOTAL`) -- `AskRecordBattle`/`AskRetireChallenge`'s
+ * NO branch falls through `AskReadyForOpponent` on EITHER route, so the
+ * re-ask always re-prints whichever prompt that route's own AskReadyForHead/
+ * ReadyFor2ndOpponent uses, not always the ordinary one. Walk-up build step A
+ * follow-on: this branch didn't exist when `postwinQuestionReprintVisibleChars`
+ * was first written (ordinary-route-only at the time), so the brain route's
+ * RECORD/RETIRE re-ask rendered the wrong (short) text -- found this session
+ * via the RECORD/RETIRE compare traces
+ * (docs/walkup-call-scene-ground-truth.md Windows 4-5).
+ */
+function postwinQuestionReprintTotal(state: PostwinState): number {
+  return state.frontierBrain ? CALL_SCENE_HEAD_PROMPT_TOTAL : POSTWIN_NEXT_TEXT_TOTAL;
+}
+
+/** Re-ask "2nd match is next!" (or brain's AskReadyForHead) visible glyph count after a question dismiss. */
 export function postwinQuestionReprintVisibleChars(state: PostwinState): number {
   const reAsk = postwinReaskElapsed(state);
   if (state.question === null || reAsk === null) return 0;
   const delay = state.elapsed - reAsk;
   if (delay < POSTWIN_QUESTION_REPRINT_FIRST_DELAY) return 0;
   return Math.min(
-    POSTWIN_NEXT_TEXT_TOTAL,
+    postwinQuestionReprintTotal(state),
     delay - POSTWIN_QUESTION_REPRINT_FIRST_DELAY + 1,
   );
 }
@@ -1338,14 +1358,31 @@ export function postwinQuestionReprintSettled(state: PostwinState): boolean {
   const reAsk = postwinReaskElapsed(state);
   if (state.question === null || reAsk === null) return false;
   return state.elapsed - reAsk >=
-    POSTWIN_QUESTION_REPRINT_SETTLED_DELAY;
+    (state.frontierBrain
+      ? POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1
+      : POSTWIN_QUESTION_REPRINT_SETTLED_DELAY);
+}
+
+/**
+ * Same "settled + 4" shape `POSTWIN_QUESTION_MENU_READY_DELAY` (44) already
+ * encodes for the ordinary route (`5 + POSTWIN_NEXT_TEXT_TOTAL(36) - 1 + 4`)
+ * -- re-derived per-route instead of a second hardcoded constant so it stays
+ * correct for whichever prompt `postwinQuestionReprintTotal` selects. Brain:
+ * `5 + 63 - 1 + 4 = 71`, structural (same reuse discipline as
+ * `CALL_SCENE_HEAD_MENU_VISIBLE_DELAY`/`READY_DELAY`), not independently
+ * oracle-measured for this specific re-ask window.
+ */
+function postwinQuestionReprintMenuReadyDelay(state: PostwinState): number {
+  return state.frontierBrain
+    ? POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1 + 4
+    : POSTWIN_QUESTION_MENU_READY_DELAY;
 }
 
 export function postwinQuestionMenuReady(state: PostwinState): boolean {
   const reAsk = postwinReaskElapsed(state);
   if (state.question === null || reAsk === null) return false;
   return state.elapsed - reAsk >=
-    POSTWIN_QUESTION_MENU_READY_DELAY;
+    postwinQuestionReprintMenuReadyDelay(state);
 }
 
 export function acceptPostwinContinuation(

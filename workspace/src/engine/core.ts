@@ -2697,6 +2697,13 @@ function renderPostwinState(state: EngineState): Uint8Array {
       const qText = q.kind === "record"
         ? POSTWIN_QUESTION_RECORD_TEXT
         : POSTWIN_QUESTION_RETIRE_TEXT;
+      // The RECORD/RETIRE re-ask falls through AskReadyForOpponent on EITHER
+      // route (docs/postwin-record-retire-ground-truth.md §1/§7b) -- the
+      // reprint is whichever prompt that route's own AskReadyForHead/
+      // ReadyFor2ndOpponent shows, not always the ordinary one.
+      const [reprintLine1, reprintLine2] = postwin.frontierBrain
+        ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
+        : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
       const dismissed = postwin.questionDismissElapsed !== null;
       const qDelay = age - q.edgeElapsed;
       const dDelay = dismissed ? age - postwin.questionDismissElapsed! : -1;
@@ -2715,8 +2722,8 @@ function renderPostwinState(state: EngineState): Uint8Array {
           );
         } else if (rDelay !== 4) {
           drawLines(
-            POSTWIN_NEXT_LINE1,
-            POSTWIN_NEXT_LINE2,
+            reprintLine1,
+            reprintLine2,
             postwinQuestionReprintVisibleChars(postwin),
           );
         }
@@ -2743,18 +2750,20 @@ function renderPostwinState(state: EngineState): Uint8Array {
           drawLines(qText[0], qText[1], qText[0].length + qText[1].length);
         } else if (dDelay !== 4) {
           drawLines(
-            POSTWIN_NEXT_LINE1,
-            POSTWIN_NEXT_LINE2,
+            reprintLine1,
+            reprintLine2,
             postwinQuestionReprintVisibleChars(postwin),
           );
         }
       } else if (qDelay <= 3) {
         // Select-close visual: the 4-choice menu window clears while the
-        // "2nd match" message is still in the box (ground-truth §1 6641-6642).
+        // preceding prompt message is still in the box (ground-truth §1
+        // 6641-6642) -- whichever prompt this route's own AskReadyForHead/
+        // "2nd match" box was already showing underneath the menu.
         drawLines(
-          POSTWIN_NEXT_LINE1,
-          POSTWIN_NEXT_LINE2,
-          POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length,
+          reprintLine1,
+          reprintLine2,
+          reprintLine1.length + reprintLine2.length,
         );
       } else if (qDelay !== 4) {
         drawLines(qText[0], qText[1], postwinQuestionVisibleChars(postwin));

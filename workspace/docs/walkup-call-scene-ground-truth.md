@@ -98,8 +98,30 @@ independent fresh runs each — zero diffs.
 | 514–565 | 01 | Typewriter: `Text_LetUsRestoreMons` | "Thank you for competing!\nLet us restore your POKéMON!" |
 | 566–828 | 01 | Held (263f) — **PNG-verified** at 700, 750, 800 | same, fully typed |
 | 829–849 | 01 | `playfanfare MUS_HEAL`/`waitfanfare`/heal special settle, then `playse SE_POKENAV_CALL; waitse` (silent — no visible SE), box reopens, typewriter begins — **PNG-verified** frame 830 mid-type ("E…") | `Text_WaitFewMoments` typing |
-| 850–893 | 01 | Held — **PNG-verified** at 850 | "Excuse me! Excuse me, please!\nMay I get you to wait a few moments?" |
-| 894–949 | 01 | `Movement_AttendantMoveToReceiveCall` (walk_left ×3) — unique every frame | (movement only) |
+| 850–894 | 01 | **Still mid-typewriter through this whole span** (see 2026-08-16 correction note below) | "Excuse me! Excuse me, please!\nMay I get you to wait a few moments?" (accumulating, not yet complete until 894) |
+| 894–895 | 01 | Held, fully typed (brief — a 2-frame hold, not ~44) | same, fully typed |
+| 895–902 | 01 | Dismiss-A registers at 895; attendant still at rest (8-tick closemessage/task-dispatch lead-in) | — |
+| 903–949 | 01 | `Movement_AttendantMoveToReceiveCall` (walk_left ×3) — unique every frame | (movement only) |
+
+**Correction (2026-08-16, call-scene calibration pass 2 session):** the row
+above previously read "850–893 | Held — PNG-verified at 850", carried over
+from this doc's own original authoring pass. PROGRESS 1285 (the movement
+step) already flagged this exact row as suspect ("box 1 visibly keeps
+printing past the ground-truth doc's own claimed '850 held' boundary") but
+did not re-derive the true boundary. This session did: a fresh dense
+(stride-1) pixel probe of pre-checkpoint frames 815–905 (temp battle-lab
+request, not committed — same discipline as 1285's own attendant probe)
+shows the box is genuinely still mid-typewriter at 850 (nowhere near fully
+typed) and only reaches its final glyph ("…moments?", the full 65-char
+`Text_WaitFewMoments` string) at frame **894**, one frame before the
+dismiss-A registers at 895 (PROGRESS 1285's own already-committed
+measurement, confirmed unchanged this session: frame 895 still shows the
+same fully-typed text as 894). The doc's "850 Held" claim was simply wrong —
+850 sits ~35 ticks before completion, not after it — likely an artifact of
+eyeballing the coarser original box-level table instead of a per-frame
+typewriter probe. The corrected rows above replace it; no other row in this
+document was affected (the 829–849 and 903–949 boundaries were already
+correct).
 | 950–1000 | 01 | Typewriter: `Text_UnderstoodSirWillDo` — **PNG-verified** fully typed at 1000 | "…Uh-huh? What?! …Whoa!\nUnderstood, sir! Will do!" |
 | 1001–1036 | 01 | Held | same, fully typed |
 | 1037–1084 | 02 | `Movement_AttendantReturnToPlayer` (walk_right ×3, face_down) — unique every frame | (movement only) |
