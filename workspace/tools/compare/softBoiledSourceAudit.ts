@@ -351,7 +351,7 @@ console.log(JSON.stringify({
     egg: "AnimSoftBoiledEgg anchors to ANIM_ATTACKER and reverses its 160-pixel Q8.8 horizontal impulse only when the attacker is not player-side.",
     shakeAndMonbg: "AnimTask_ShakeMon and monbg/clearmonbg select ANIM_ATTACKER / ANIM_ATK_PARTNER, so the active side is source-resolved rather than fixed coordinates.",
     rings: "Each thin ring is requested at ANIM_ATTACKER; AnimSpriteOnMonPos resolves its position from gBattleAnimArgs[2] and, for these zero args, selects the attacker with picture offsets.",
-    healingStars: "HealingEffect2 requests ANIM_TARGET with gBattleAnimArgs[2]=1, so AnimSpriteOnMonPos resolves the current target side; the EFFECT_SOFTBOILED battle script sets BS_TARGET for the real self-heal before attackanimation.",
+    healingStars: "HealingEffect2 requests ANIM_TARGET with gBattleAnimArgs[2]=1, so AnimSpriteOnMonPos resolves the current target side; MOVE_TARGET_USER target selection supplies that self target and the EFFECT_SOFTBOILED battle script consumes BS_TARGET before attackanimation.",
     palette: "F_PAL_BG | F_PAL_BATTLERS selects BG plus live attacker/target/partner OBJ palettes through UnpackSelectedBattlePalettes, not a fixed display region.",
     panning: "Root Tail Whip/Horn Attack use SOUND_PAN_ATTACKER; the called blue-star cue uses SOUND_PAN_TARGET, so both pan anchors reverse under bilateral staging.",
   },
