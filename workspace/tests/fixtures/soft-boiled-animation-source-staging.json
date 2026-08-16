@@ -1,0 +1,359 @@
+{
+  "schema": "soft-boiled-animation-source-staging/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_SOFT_BOILED",
+  "moveId": 135,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "source": {
+    "moveScript": {
+      "start": "0x082d3cb2",
+      "endExclusive": "0x082d3d34",
+      "bytes": 130,
+      "sha256": "1e681d4591a08cab0fd9a667a0dc8ef39a5c71662dab41a4f763231e99dd8bb8"
+    },
+    "healingEffect2": {
+      "start": "0x082d7a28",
+      "endExclusive": "0x082d7a71",
+      "bytes": 73,
+      "sha256": "26dd4029479bcf9497d7d7debee547978379223f39d4361b2487fc8035eda07e"
+    },
+    "eggAffine1": {
+      "start": "0x08593734",
+      "endExclusive": "0x08593754",
+      "bytes": 32,
+      "sha256": "07018f8a4d31d61df9d6f700ac5e6a065d044cb81ff64e5348d485750f6fcea4"
+    },
+    "eggAffine2": {
+      "start": "0x08593754",
+      "endExclusive": "0x08593764",
+      "bytes": 16,
+      "sha256": "345f121566cfd7aa5b7120c9d9a759b9ac9ae7734ff49fe2f8bb4781c34a7889"
+    },
+    "eggAffine3": {
+      "start": "0x08593764",
+      "endExclusive": "0x085937a4",
+      "bytes": 64,
+      "sha256": "c7486a3068795be79f0dd37fa774ea5fef2525a6d3070de3c03c99415cc4bc18"
+    },
+    "eggAffineTable": {
+      "start": "0x085937a4",
+      "endExclusive": "0x085937b0",
+      "bytes": 12,
+      "sha256": "051ff08c49ccf1825dd149764a85e09b9d3662c78898cbf3db9a5a4f29b2d133"
+    },
+    "eggTemplate": {
+      "start": "0x085937b0",
+      "endExclusive": "0x085937c8",
+      "bytes": 24,
+      "sha256": "05efa3e25cef3f4cb6f9c29a82c9afcd1d14e2c002693966e3838f78d4f8046c"
+    },
+    "eggInit": {
+      "start": "0x08105538",
+      "endExclusive": "0x0810557c",
+      "bytes": 68,
+      "sha256": "6f63733559711559b708f1cac853b37f16b6c1be3fcfb9e418b8c71d9335217f"
+    },
+    "eggStep1": {
+      "start": "0x0810557c",
+      "endExclusive": "0x081055f4",
+      "bytes": 120,
+      "sha256": "2cf9e434dfa44b176b93e6be98f73b68f6340e3eaaf1f1f707f2c7c804f3c6ee"
+    },
+    "eggStep2": {
+      "start": "0x081055f4",
+      "endExclusive": "0x0810561c",
+      "bytes": 40,
+      "sha256": "10dce942bfd63abb9e0378feb87c7bb286535006f345329434abc0c596d309da"
+    },
+    "eggStep3": {
+      "start": "0x0810561c",
+      "endExclusive": "0x08105694",
+      "bytes": 120,
+      "sha256": "ee6680fbe53c97e8982b8e9ea0e6acbf8fc0cc3f4f34b68cd88ae8bdfced918a"
+    },
+    "eggStep3Callback1": {
+      "start": "0x08105694",
+      "endExclusive": "0x081056d4",
+      "bytes": 64,
+      "sha256": "703db54c5cef2f456de60255c186abaa7f16e7aeeeef454b2b6fb1d879026756"
+    },
+    "eggStep3Callback2": {
+      "start": "0x081056d4",
+      "endExclusive": "0x0810571c",
+      "bytes": 72,
+      "sha256": "1e62802623045459af0c3240ac47c48273f831f383cc4f61b672f62325fb00ea"
+    },
+    "eggStep4": {
+      "start": "0x0810571c",
+      "endExclusive": "0x0810575c",
+      "bytes": 64,
+      "sha256": "e8062c62440804ffc4fdbc69b3794f0bb5503e1a0cc02c7ac1a353d344c9d944"
+    },
+    "eggStep4Callback": {
+      "start": "0x0810575c",
+      "endExclusive": "0x0810577c",
+      "bytes": 32,
+      "sha256": "84ba0b70cc0b03ff86809a5fa8e900150385cdbaeb5a6fd30a5c9c9a990e9755"
+    },
+    "thinRingAffine": {
+      "start": "0x08593810",
+      "endExclusive": "0x08593818",
+      "bytes": 8,
+      "sha256": "96ae74330b7567661748621e3cd4b113b23b481efaebe103a78c5dff0437460f"
+    },
+    "thinRingTemplate": {
+      "start": "0x0859381c",
+      "endExclusive": "0x08593834",
+      "bytes": 24,
+      "sha256": "ace9c35c66e073f95fc60720ed5330453937adacfd7c5906fed099ea3cc833df"
+    },
+    "blueStarAnimCmds": {
+      "start": "0x08592f04",
+      "endExclusive": "0x08592f28",
+      "bytes": 36,
+      "sha256": "dbe1e405b9361c74804209e3af1b473e332124a7c1ca530ac36d0bb48daab3ca"
+    },
+    "blueStarTemplate": {
+      "start": "0x08592f2c",
+      "endExclusive": "0x08592f44",
+      "bytes": 24,
+      "sha256": "532f8d0cdcbe5c5cff7b3000e3807496bcc54216da832b17016cccc532b7004f"
+    },
+    "shakeMon": {
+      "start": "0x080d51ac",
+      "endExclusive": "0x080d5220",
+      "bytes": 116,
+      "sha256": "329fdfe484d8dce4dda384af512c29d8618d55ccb53d2bd44aea75c4cc465269"
+    },
+    "shakeMonStep": {
+      "start": "0x080d5220",
+      "endExclusive": "0x080d52d0",
+      "bytes": 176,
+      "sha256": "abcd92f74299a0c194ce5c28a6abccf6b6a85e74630cef920a6b60e8d40baf9e"
+    },
+    "onMonPos": {
+      "start": "0x080a77c8",
+      "endExclusive": "0x080a7820",
+      "bytes": 88,
+      "sha256": "4499c813dbfd75cbef473750a24fd3c4ab72b8a69af1c0d47b272633d780f036"
+    },
+    "simplePaletteTemplate": {
+      "start": "0x08597274",
+      "endExclusive": "0x0859728c",
+      "bytes": 24,
+      "sha256": "9915ce43c80729f86d28cb408264fdc41157422f9a9ac79fa50f1b99f4f70dc8"
+    },
+    "simplePaletteBlend": {
+      "start": "0x081157fc",
+      "endExclusive": "0x0811583c",
+      "bytes": 64,
+      "sha256": "09108e4e1030310e584c9c008a8957607cd2696241533c36037e9d5a263bfca8"
+    },
+    "simplePaletteBlendStep": {
+      "start": "0x08115884",
+      "endExclusive": "0x081158a4",
+      "bytes": 32,
+      "sha256": "ef23031352036b92131f10531d448b1b04033ffb876f1fb5a991fadace789231"
+    },
+    "battleEffect": {
+      "start": "0x082d9ed8",
+      "endExclusive": "0x082d9f09",
+      "bytes": 49,
+      "sha256": "ebad63bfca740e77320380bf149c38d6b809049c63a611f571ed75b1f81a0302"
+    },
+    "tryHealHalfHealth": {
+      "start": "0x080500e8",
+      "endExclusive": "0x08050164",
+      "bytes": 124,
+      "sha256": "b967d5def1cb43c99fe4c25d8f9e6149aedf78f672519a7fcad291729f95f4f3"
+    },
+    "breakingEggGfx": {
+      "start": "0x08c220a8",
+      "endExclusive": "0x08c22210",
+      "bytes": 360,
+      "sha256": "a181c890cbb1a4a19b8aadc626140733becc0d8236669502bb732db7feb734ff"
+    },
+    "breakingEggPalette": {
+      "start": "0x08c22210",
+      "endExclusive": "0x08c22234",
+      "bytes": 36,
+      "sha256": "2d912f6571afb8af91dd82ed68c33bd723512570b66d7d67ae2cf66acec7be5c"
+    },
+    "thinRingGfx": {
+      "start": "0x08c22234",
+      "endExclusive": "0x08c223e0",
+      "bytes": 428,
+      "sha256": "e7d6945594e8f1bf50c324a5be3754c4ddcdc5c85b5cb81f7c9b7a8d2e63e0dd"
+    },
+    "thinRingPalette": {
+      "start": "0x08c223e0",
+      "endExclusive": "0x08c22404",
+      "bytes": 36,
+      "sha256": "291e6ed30c91b23ef7ecf300b8906ba5d0fcb176f02e2c5d9b2f4f7aa33d5a0a"
+    },
+    "blueStarGfx": {
+      "start": "0x08c03f80",
+      "endExclusive": "0x08c04360",
+      "bytes": 992,
+      "sha256": "5d34c1f33aa20bffaab6af748a75f1b37a84e7cd7d98af7d22db67a93a13d964"
+    },
+    "blueStarPalette": {
+      "start": "0x08c04360",
+      "endExclusive": "0x08c04380",
+      "bytes": 32,
+      "sha256": "2a557579d79e07ef176656ef715935154da2d14bf0786a4bbdca505247282136"
+    }
+  },
+  "sourceHashes": {
+    "reference/pokeemerald/pokeemerald.gba": "a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+    "reference/pokeemerald/pokeemerald.elf": "cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b",
+    "reference/pokeemerald/data/battle_anim_scripts.s": "76ad47e87abab7bf16f1606eb2cefb69fa39945d07458348623419f00404552d",
+    "reference/pokeemerald/data/battle_scripts_1.s": "4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "reference/pokeemerald/src/battle_anim_effects_1.c": "79744f3e50c5749fd2478c83c4954feb8803a9bf923e65ab7d5c8cf32792e82e",
+    "reference/pokeemerald/src/battle_anim_effects_2.c": "8e427e4f09e8b65119e02ff49514ae5b268878bc228fa9de1ff29a9e7b31d012",
+    "reference/pokeemerald/src/battle_anim_mon_movement.c": "d5cc40ee986326a87a694c72f873f2dc0bdef38102f005582bbc8b838e3643a4",
+    "reference/pokeemerald/src/battle_anim_mons.c": "93e653135430d35734763b640f7f5446bca2ce881f5781796b1f370fae213c9d",
+    "reference/pokeemerald/src/battle_anim_normal.c": "b461e4ea25d3926b5a84b9816ad32eda1da2b51222c3acddb3b74cf0721687ff",
+    "reference/pokeemerald/src/battle_script_commands.c": "e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "reference/pokeemerald/src/data/battle_anim.h": "f47d2e572285ec1e4ff975f05a14d4ce133d69dbd3613b5a5ec016c30eef59de",
+    "reference/pokeemerald/src/data/battle_moves.h": "8b3d4d143b807807af97ce7288e0cc0ccdd55b6b64ac45824e35a549836b3a0c",
+    "reference/pokeemerald/src/graphics.c": "00af45f19b811fe75c2d2196c66bb427695178a6808648426d30d286318667f1",
+    "reference/pokeemerald/include/constants/songs.h": "7f6a8dc6d99e7f2bfdbb1136ebba8286ec99bff30f3f9afe2df7868125154e14",
+    "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h": "557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "reference/pokeemerald/include/constants/battle_frontier_mons.h": "00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "reference/pokeemerald/src/battle_factory.c": "7762bf366045ed91a3c280a7e4d20ccc9df9bba305c529ad6b24df2250a072f6",
+    "src/data/gen/factory-animation-inventory.json": "60c3d2e0a78511bcc97b48bad011590fc4f06b3fa1661a6075042e7b794f3418",
+    "src/data/gen/battle-animation-components.json": "aa5890455d932c35aa1ea80cb9e6c79ea278571cc445c8661f64379a0846af1a",
+    "src/data/gen/battle-frontier-mons.json": "6f7e9b57201ca8d513dab853c53aa7e23d35329ea52df6a464e7fe311d9fe21c",
+    "src/data/gen/factory-round-policy.json": "0e62d9a116210cf43bd5b024f8f6ff02334624f9fed107112403dfbe9ef0ce6b"
+  },
+  "scripts": {
+    "Move_SOFT_BOILED": [
+      "loadspritegfx ANIM_TAG_BREAKING_EGG",
+      "loadspritegfx ANIM_TAG_THIN_RING",
+      "loadspritegfx ANIM_TAG_BLUE_STAR",
+      "monbg ANIM_ATK_PARTNER",
+      "playsewithpan SE_M_TAIL_WHIP, SOUND_PAN_ATTACKER",
+      "createvisualtask AnimTask_ShakeMon, 2, ANIM_ATTACKER, 0, 2, 6, 1",
+      "createsprite gSoftBoiledEggSpriteTemplate, ANIM_ATTACKER, 4, 0, 16, 0",
+      "createsprite gSoftBoiledEggSpriteTemplate, ANIM_ATTACKER, 4, 0, 16, 1",
+      "delay 120",
+      "delay 7",
+      "playsewithpan SE_M_HORN_ATTACK, SOUND_PAN_ATTACKER",
+      "simple_palette_blend selector=F_PAL_BG | F_PAL_BATTLERS, delay=3, initial_blend_y=10, target_blend_y=0, color=RGB(12, 24, 30)",
+      "createsprite gThinRingExpandingSpriteTemplate, ANIM_ATTACKER, 3, 31, 16, 0, 1",
+      "delay 8",
+      "createsprite gThinRingExpandingSpriteTemplate, ANIM_ATTACKER, 3, 31, 16, 0, 1",
+      "delay 60",
+      "setarg 7, 0xFFFF",
+      "waitforvisualfinish",
+      "clearmonbg ANIM_ATK_PARTNER",
+      "call HealingEffect2",
+      "end"
+    ],
+    "HealingEffect2": [
+      "playsewithpan SE_M_ABSORB_2, SOUND_PAN_TARGET",
+      "createsprite gHealingBlueStarSpriteTemplate, ANIM_TARGET, 2, 0, -5, 1, 0",
+      "delay 7",
+      "createsprite gHealingBlueStarSpriteTemplate, ANIM_TARGET, 2, -15, 10, 1, 0",
+      "delay 7",
+      "createsprite gHealingBlueStarSpriteTemplate, ANIM_TARGET, 2, -15, -15, 1, 0",
+      "delay 7",
+      "createsprite gHealingBlueStarSpriteTemplate, ANIM_TARGET, 2, 10, -5, 1, 0",
+      "delay 7",
+      "return"
+    ]
+  },
+  "components": [
+    "asset:ANIM_TAG_BLUE_STAR",
+    "asset:ANIM_TAG_BREAKING_EGG",
+    "asset:ANIM_TAG_THIN_RING",
+    "sprite:gHealingBlueStarSpriteTemplate",
+    "sprite:gSoftBoiledEggSpriteTemplate",
+    "sprite:gThinRingExpandingSpriteTemplate",
+    "subroutine:HealingEffect2",
+    "task:AnimTask_ShakeMon",
+    "visualCommand:clearmonbg",
+    "visualCommand:monbg",
+    "visualCommand:setarg",
+    "visualCommand:simple_palette_blend"
+  ],
+  "stages": {
+    "playerBack": {
+      "scenario": "tools/battle-lab/mechanic-soft-boiled-player-chansey-opponent-onix.json",
+      "scenarioSha256": "b119b5cb880a52261fd98667d1f72090e1fb42df512d3c4e985e0a86306becc9",
+      "endpoint": {
+        "frame": 934,
+        "framebufferSha256": "3e30a56921e4b3f91bc0b97571cc1e4d1b2ccadd00401bfd4d8f9ed8b607f350",
+        "softBoiledPp": [
+          9,
+          10,
+          10,
+          10
+        ],
+        "consumedSoftBoiledPpSlot": 0,
+        "attackerHp": 325,
+        "attackerMaxHp": 325,
+        "defenderPp": [
+          35,
+          35,
+          35,
+          34
+        ],
+        "partyChecksums": {
+          "player": [
+            true,
+            true,
+            true
+          ],
+          "opponent": [
+            true,
+            true,
+            true
+          ]
+        },
+        "battleOutcome": 0,
+        "allPartyChecksumsValid": true
+      }
+    },
+    "opponentFront": {
+      "scenario": "tools/battle-lab/mechanic-soft-boiled-opponent-chansey-player-onix.json",
+      "scenarioSha256": "0791d50654c14a69a64e3a8039ca283f0123d0bf719fa1405601957c218970e7",
+      "endpoint": {
+        "frame": 934,
+        "framebufferSha256": "59c86cd5116702fa07f42aeb0b23c376beb32eb17b6ced4996cfbe0994ac9cdf",
+        "softBoiledPp": [
+          10,
+          10,
+          9,
+          10
+        ],
+        "consumedSoftBoiledPpSlot": 2,
+        "attackerHp": 325,
+        "attackerMaxHp": 325,
+        "defenderPp": [
+          34,
+          35,
+          35,
+          35
+        ],
+        "partyChecksums": {
+          "player": [
+            true,
+            true,
+            true
+          ],
+          "opponent": [
+            true,
+            true,
+            true
+          ]
+        },
+        "battleOutcome": 0,
+        "allPartyChecksumsValid": true
+      }
+    }
+  },
+  "boundedRemainder": "No dense capture, reducer, typed presentation seam, compositor, renderer, latch conclusion, framebuffer comparison, coverage entry, or move promotion is claimed. The capture-free bilateral mechanicLab stages only prove legal source-driven Soft Boiled selection, PP consumption, full self-heal endpoint, valid checksums, and a non-terminal outcome."
+}
