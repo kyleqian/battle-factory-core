@@ -172,13 +172,21 @@ describe("random round soak driver (green milestone pin)", () => {
       // battler's own message -- real Cmd_moveend item effects (this seed's
       // own trailing commands) now present in full first, matching source's
       // actual HandleFaintedMonActions ordering. That is strictly more
-      // frames/render calls per forced switch this seed hits, and the
-      // battle/turn counters below are this seed's genuine new trajectory
-      // (not a driver regression) -- both settled re-runs are still
-      // deterministic (`expect(second).toEqual(first)` below).
-      frames: 43_775,
+      // frames/render calls per forced switch this seed hits.
+      //
+      // ISSUES #95's fix (battleResolutionPresentation.ts) then moved these
+      // counters again: an attack animation may no longer pair with a hit
+      // animation from a LATER script execution, so this seed's non-damaging
+      // moves stopped publishing bogus multi-frame move-animation commands
+      // built from an unrelated end-of-turn tick's hit. The strong-route
+      // policy reads presentation state, so the seed's own move choices --
+      // and with them the battle/turn counters below -- are a genuine new
+      // trajectory, not a driver regression. It still earns all seven wins,
+      // and both settled re-runs stay deterministic
+      // (`expect(second).toEqual(first)` below).
+      frames: 59_656,
       battle: 7,
-      turn: 5,
+      turn: 18,
       diagnostics: {
         roundPhase: "roundComplete",
         battleIndex: 6,
@@ -188,7 +196,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 3_235,
+        renderCalls: 4_397,
       },
     });
     expect(second).toEqual(first);

@@ -17,52 +17,6 @@ backlog.
 
 # Open
 
-## #94 — Slice resolution can settle on a boundary that isn't a player command request (`FactoryRoundOrchestratorError: Slice N resolution completed without a player command boundary`)
-
-`--policy winning --seed 16` (battle 1 turn 11, frame 401,474) and
-`--policy full --seed 69` (battle 6 turn 21, frame 245,688) — 2026-08-16
-resweep part 3, `docs/soak-resweep-2026-08-16-part3.md` — both throw inside
-`settledCommandForResolutionHandoff`
-(`src/engine/factoryRoundBattleOrchestrator.ts:1830`) once the slice's
-resolution finishes draining: `commandPresentationForBoundary` expects the
-kernel `battle.boundary` to be a `decision-required` player `"command"`
-request at that point and returns `null` otherwise, which the caller treats
-as fatal. Deterministic at both seeds (`npm run soak -- --policy winning
---seeds 16:17` / `--policy full --seeds 69:70`); reproduces under both
-policies, so not policy-specific.
-
-**Supervisor discriminator (2026-08-16, after the part-3 doc was written):
-this is #93-caused, not merely adjacent.** Swapping ONLY
-`factoryRoundBattleOrchestrator.ts` back to its pre-#93 version
-(`git show fd7d1944:workspace/src/engine/factoryRoundBattleOrchestrator.ts`)
-makes seeds 16 AND 69 run OK; restoring the post-#93 file re-crashes
-seed 69 on an identical full-policy trajectory. The #93 fix itself stays
-(it repaired a real, source-proven desync; its pin + seed 109 must remain
-green) — the bug is in what the new `completedResolutionUpdate`-only
-handoff path lets reach this invariant.
-
-## #95 — battle resolution attack/hit instruction-provenance ordering violation (`Error: battle resolution move/hit provenance is not ordered`)
-
-`--policy full --seed 113` (battle 1 turn 28, frame 61,240) — 2026-08-16
-resweep part 3, `docs/soak-resweep-2026-08-16-part3.md` — throws inside
-`projectBattleResolutionCommands`
-(`src/engine/battleResolutionPresentation.ts:3190`): the computed
-`interveningInstructions` (hit-receipt interpreter-execution index minus
-move-use receipt's, minus accounted Scene-OFF pause callbacks) is `<= 0`,
-i.e. the queued hit-animation receipt claims to have executed at or before
-the move-use receipt it must causally follow. Deterministic
-(`npm run soak -- --policy full --seeds 113:114`); `winning`/`vanilla` at
-the same seed resolve cleanly (policy-choice routing, same reasoning as
-#93's seed-109 finding). Suspected owner:
-`factoryRoundBattleOrchestrator.ts`'s `freshResolution` /
-resolution-command-building path (it constructs the interpreter-execution
-receipts the checker consumes), not the checker.
-
-**Supervisor discriminator (2026-08-16): #93-caused like #94.** With the
-pre-#93 orchestrator file swapped in, seed 113 runs OK; with the post-#93
-file it crashes. Possibly the same root cause as #94 — look for a single
-fix shape first.
-
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
