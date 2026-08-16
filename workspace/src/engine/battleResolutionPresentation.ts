@@ -3467,6 +3467,27 @@ export function projectBattleResolutionCommands(
   return Object.freeze(commands);
 }
 
+/**
+ * The player-side forced-switch request a freshly published boundary is
+ * waiting on, if any. Every resolution owner -- the fresh one and all three
+ * continuation appenders -- derives its `forcedRequest` from its own pending
+ * boundary through this one reading. `HandleFaintedMonActions` re-runs its
+ * whole battler scan after each replacement is sent out
+ * (`battle_util.c:1899-1946`), so a continuation receipt can publish the very
+ * next forced-switch request itself: the replacement can faint to an
+ * end-of-turn effect (poison, weather, Leftovers-less residual damage) inside
+ * the same receipt that sent it in, and the party menu must simply open again.
+ */
+function pendingPlayerForcedSwitchRequest(
+  boundary: BattleBoundary,
+): BattleForcedSwitchRequest | null {
+  return boundary.kind === "decision-required"
+    && boundary.request.kind === "forced-switch"
+    && boundary.request.side === "player"
+    ? boundary.request
+    : null;
+}
+
 export function createBattleResolutionPresentation(
   input: CreateBattleResolutionPresentationInput,
 ): BattleResolutionPresentationState {
@@ -3515,12 +3536,7 @@ export function createBattleResolutionPresentation(
     ),
   });
   const boundary = input.transition.state.boundary;
-  const forcedRequest =
-    boundary.kind === "decision-required"
-    && boundary.request.kind === "forced-switch"
-    && boundary.request.side === "player"
-      ? boundary.request
-      : null;
+  const forcedRequest = pendingPlayerForcedSwitchRequest(boundary);
   return Object.freeze({
     resolutionId: Object.freeze({
       requestId: input.sourceRequest.requestId,
@@ -3834,7 +3850,12 @@ export function appendBattleResolutionContinuation(
     field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,
-    forcedRequest: null,
+    // NOT unconditionally null: the replacement this receipt sends out can
+    // faint inside the very same receipt (end-of-turn poison etc.), which
+    // publishes the *next* player forced-switch request. Dropping it left the
+    // segment's own end routing to the ordinary next-command handoff, whose
+    // player-command boundary invariant then failed (ISSUES #94).
+    forcedRequest: pendingPlayerForcedSwitchRequest(transition.state.boundary),
   });
 }
 
@@ -3872,12 +3893,7 @@ export function appendBattleResolutionActionContinuation(
     field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,
-    forcedRequest:
-      transition.state.boundary.kind === "decision-required"
-      && transition.state.boundary.request.kind === "forced-switch"
-      && transition.state.boundary.request.side === "player"
-        ? transition.state.boundary.request
-        : null,
+    forcedRequest: pendingPlayerForcedSwitchRequest(transition.state.boundary),
   });
 }
 
@@ -3918,11 +3934,6 @@ export function appendBattleResolutionLockedActionContinuation(
     field: fieldBoundary,
     pendingBoundary: transition.state.boundary,
     pendingBattle: transition.state,
-    forcedRequest:
-      transition.state.boundary.kind === "decision-required"
-      && transition.state.boundary.request.kind === "forced-switch"
-      && transition.state.boundary.request.side === "player"
-        ? transition.state.boundary.request
-        : null,
+    forcedRequest: pendingPlayerForcedSwitchRequest(transition.state.boundary),
   });
 }

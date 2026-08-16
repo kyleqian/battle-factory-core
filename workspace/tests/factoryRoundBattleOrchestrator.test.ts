@@ -23,6 +23,7 @@ import { renderBattleResolutionForcedPartySelect } from "../src/engine/battleSce
 import {
   BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS,
   BATTLE_SCRIPT_STATUS1_BURN,
+  BATTLE_SCRIPT_STATUS1_POISON,
 } from "../src/engine/battleScriptSourceConstants.ts";
 import { loadBattleScriptProgram } from "../src/engine/battleScriptProgram.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
@@ -571,8 +572,23 @@ const SHELL_BELL_EMPTY_PARTY_MEMBER = Object.freeze({
   ppBonuses: 0,
 });
 
-function shellBellForcedSwitchParty(): BattleScriptPartyState {
-  // Full, un-overridden HP -- `createForcedPartySelect` validates this
+/**
+ * ISSUES #94 reuses this same staged battle with a different first bench
+ * slot, pre-damaged and statused so its own send-out faints to an end-of-turn
+ * effect inside the very receipt that sends it in.
+ */
+type ForcedSwitchFirstBench = Readonly<{
+  setId: number;
+  live?: Readonly<{ hp: number; status1: number }>;
+}>;
+
+/** PUPITAR, untouched -- the ISSUES #93 pin only ever switches into it. */
+const SHELL_BELL_FIRST_BENCH: ForcedSwitchFirstBench = Object.freeze({ setId: 300 });
+
+function shellBellForcedSwitchParty(
+  firstBench: ForcedSwitchFirstBench,
+): BattleScriptPartyState {
+  // Full, un-overridden max HP -- `createForcedPartySelect` validates this
   // party's live maxHP against `createFactoryCorpusPartyMember` of the
   // carrier's matching rental record.
   const bench = (setId: number) => createFactoryCorpusPartyMember(record(setId, 3));
@@ -582,7 +598,7 @@ function shellBellForcedSwitchParty(): BattleScriptPartyState {
   });
   return Object.freeze([
     active,
-    bench(300),
+    Object.freeze({ ...bench(firstBench.setId), ...firstBench.live }),
     bench(301),
     SHELL_BELL_EMPTY_PARTY_MEMBER,
     SHELL_BELL_EMPTY_PARTY_MEMBER,
@@ -607,7 +623,9 @@ function shellBellOpponentParty(): BattleScriptPartyState {
   ]) as unknown as BattleScriptPartyState;
 }
 
-function createShellBellForcedSwitchBattle(): Readonly<{
+function createShellBellForcedSwitchBattle(
+  firstBench: ForcedSwitchFirstBench = SHELL_BELL_FIRST_BENCH,
+): Readonly<{
   state: FactoryRoundBattleOrchestratorState;
   chargeResolution: ReturnType<typeof createBattleResolutionPresentation>;
 }> {
@@ -615,7 +633,7 @@ function createShellBellForcedSwitchBattle(): Readonly<{
     requestId: 1,
     rngSeed: 0,
     battleScene: "off",
-    playerParty: shellBellForcedSwitchParty(),
+    playerParty: shellBellForcedSwitchParty(firstBench),
     opponentParty: shellBellOpponentParty(),
   });
   const player = submitStagedLockedActionMove(initial, "player", 0);
@@ -638,7 +656,11 @@ function createShellBellForcedSwitchBattle(): Readonly<{
   // The carrier's own rental identities must match the staged party's real
   // slots (0-2) -- `createForcedPartySelect` validates the live battle's
   // maxHP against `createFactoryCorpusPartyMember` of these same records.
-  const carrierPlayerRecords = [record(8, 3), record(300, 3), record(301, 3)] as const;
+  const carrierPlayerRecords = [
+    record(8, 3),
+    record(firstBench.setId, 3),
+    record(301, 3),
+  ] as const;
   const carrier = acknowledgeAndAdvance(createFactoryRoundBattleOrchestrator({
     id: "shell-bell-forced-switch",
     rngValue: RNG_SEED,
@@ -877,6 +899,110 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     );
     expect(burnTick).toMatchObject({ from: 94 });
 
+    for (
+      let budget = 0;
+      budget < 2_000 && state.battleCommandPresentation === null;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    }
+    expect(state.battleCommandPresentation).not.toBeNull();
+    expect(state.battleForcedPartySelect).toBeNull();
+  });
+  it("ISSUES #94: a forced-switch continuation whose own send-out faints to an end-of-turn effect opens the party menu again", () => {
+    // Same staged turn as the ISSUES #93 pin, with the first bench slot at
+    // 1 HP and already poisoned. Source order (`battle_main.c:3956-3971`):
+    // `HandleAction_TryFinish` runs `HandleFaintedMonActions` for the
+    // attack's own faint, so the replacement is sent in; only THEN does
+    // `BattleTurnPassed` run `DoBattlerEndTurnEffects` (the poison tick),
+    // which faints that very replacement -- and `BattleTurnPassed`'s own
+    // second `HandleFaintedMonActions()` call opens the party menu again.
+    // Both switches therefore belong to one appended continuation receipt.
+    const { state: initial } = createShellBellForcedSwitchBattle(Object.freeze({
+      // POOCHYENA (Run Away, HOLD_EFFECT_SP_ATTACK_UP): no status-curing
+      // ability and no HP/status-restoring held item, so the poison tick
+      // genuinely lands. (PUPITAR's Shed Skin cures it; SEALEO's Sitrus
+      // Berry heals past it.)
+      setId: 20,
+      live: Object.freeze({ hp: 1, status1: BATTLE_SCRIPT_STATUS1_POISON }),
+    }));
+    let state = initial;
+    for (
+      let budget = 0;
+      budget < 2_000
+        && state.battleResolutionPresentation?.lifecycle.phase !== "forced-party-handoff";
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    }
+    const firstRequest = state.battleResolutionPresentation!.forcedRequest;
+    expect(firstRequest).toMatchObject({ faintedPartyIndex: 0, legalPartyIndexes: [1, 2] });
+
+    // Confirm the poisoned bench slot 1 as the replacement.
+    for (
+      let budget = 0;
+      budget < 400 && state.battleForcedPartySelect!.elapsed < 140;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    state = advanceFactoryRoundBattleResolution(state, new Set(["DOWN"]));
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    expect(state.battleForcedPartySelect?.sendOutElapsed).toBe(0);
+    expect(state.battleResolutionPresentation?.segments).toHaveLength(2);
+    // The appended continuation receipt already carries the SECOND forced
+    // switch. Pre-fix `appendBattleResolutionContinuation` hardcoded
+    // `forcedRequest: null` here, so this segment's own end routed to the
+    // ordinary next-command handoff and threw ISSUES #94's
+    // "Slice 3 resolution completed without a player command boundary".
+    expect(state.battleResolutionPresentation?.pendingBoundary).toMatchObject({
+      kind: "decision-required",
+      request: { kind: "forced-switch", side: "player", faintedPartyIndex: 1 },
+    });
+    expect(state.battleResolutionPresentation?.forcedRequest).not.toBeNull();
+    expect(state.battleResolutionPresentation?.forcedRequest?.requestId)
+      .not.toBe(firstRequest!.requestId);
+    const continuation = state.battleResolutionPresentation!.segments[1]!;
+    expect(continuation.commands.map((command) => command.type)).toEqual(
+      expect.arrayContaining(["switch-in", "faint"]),
+    );
+    expect(
+      continuation.commands.findIndex((command) => command.type === "faint"),
+    ).toBeGreaterThan(
+      continuation.commands.findIndex((command) => command.type === "switch-in"),
+    );
+
+    for (
+      let budget = 0;
+      budget < 2_000
+        && !(
+          state.battleResolutionPresentation?.lifecycle.phase === "forced-party-handoff"
+          && state.battleResolutionPresentation.segmentIndex === 1
+        );
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    }
+    expect(state.battleResolutionPresentation?.lifecycle.phase).toBe("forced-party-handoff");
+    expect(state.battleForcedPartySelect?.request).toMatchObject({
+      faintedPartyIndex: 1,
+      legalPartyIndexes: [2],
+    });
+
+    // The second replacement still reaches an ordinary player command.
+    for (
+      let budget = 0;
+      budget < 400 && state.battleForcedPartySelect!.elapsed < 140;
+      budget += 1
+    ) {
+      state = advanceFactoryRoundBattleResolution(state);
+    }
+    state = advanceFactoryRoundBattleResolution(state, new Set(["DOWN"]));
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
+    expect(state.battleForcedPartySelect?.sendOutElapsed).toBe(0);
+    expect(state.battleResolutionPresentation?.segments).toHaveLength(3);
     for (
       let budget = 0;
       budget < 2_000 && state.battleCommandPresentation === null;
