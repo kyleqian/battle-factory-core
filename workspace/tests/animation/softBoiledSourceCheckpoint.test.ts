@@ -133,15 +133,18 @@ describe("MOVE_SOFT_BOILED authoritative-source and legal bilateral Scene-ON sta
     });
   });
 
-  it("keeps Soft Boiled unsupported despite the exact Recover/Milk Drink controls", () => {
+  it("promotes Soft Boiled alone while Recover/Milk Drink remain controls", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as {
       entries: Array<{ move: string; status: string }>;
     };
-    expect(coverage.entries.find((entry) => entry.move === "MOVE_SOFT_BOILED")).toBeUndefined();
+    expect(coverage.entries.find((entry) => entry.move === "MOVE_SOFT_BOILED"))
+      .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry) => entry.move === "MOVE_RECOVER"))
       .toMatchObject({ status: "exact" });
     expect(coverage.entries.find((entry) => entry.move === "MOVE_MILK_DRINK"))
       .toMatchObject({ status: "exact" });
+    // This fixture remains the immutable stage-only receipt that preceded
+    // the later dense reducer/compositor acceptance.
     expect(fixture.coverageCredit).toBe(false);
     expect(fixture.boundedRemainder).toContain("No dense capture, reducer");
   });

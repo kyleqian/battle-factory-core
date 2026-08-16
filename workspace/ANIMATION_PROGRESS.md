@@ -1,3 +1,9 @@
+# MOVE_SOFT_BOILED bilateral exact production presentation (2026-08-16 worker)
+
+- **State:** Coverage advances **195→196/276 Level-50 exact**, 0 partial, 0 staged, and **81→80 unsupported**. MOVE_SOFT_BOILED alone promotes: player-back **272/272** plus opponent-front **272/272**, **544/544 total component/reducer/typed-seam/raw-RGB/shared-framebuffer rows with zero residual pixels**, through first inactive cleanup and backed by twice-fresh retained evidence.
+- **Did:** Added a reproducible bounded extractor for BREAKING_EGG, THIN_RING, BLUE_STAR, and legal set-332 Chansey art; source-identity tests pin exact reuse against Milk Drink and Metronome assets while shared exact Onix art remains reused. The shared Scene-ON compositor draws both affine egg bodies in source OAM order, ShakeMon/monbg and chrome, two rings, four target-side HealingEffect2 stars, BG/register state, the age-144 mixed BG-current/OBJ-preceding palette latch, resources/audio lifecycle, cleanup, and bilateral geometry. No absolute tick, framebuffer lookup, fitted RGB/coordinates, baked sprite, gameplay, damage, RNG, AI, controller, turn, round, or facility ownership was added.
+- **Verified:** Direct source, twice-fresh legal stage, dense evidence, reducer, asset, and framebuffer verifiers pass; focused Soft Boiled/Recover/Milk Drink/control/boundary/inventory tests **30/30**, animation audit/coverage, and typecheck pass. Final full-suite/build gates follow in the next commit. Recover, Milk Drink, and every sibling remain independent controls; `ANIMATION_LATCHES.md` and animation boundaries remain unchanged.
+
 # MOVE_SOFT_BOILED pure source-age reducer + typed Scene-ON seam — remains unsupported (2026-08-16 worker)
 
 - **State:** Coverage remains **195/276 Level-50 exact**, 0 partial, 0 staged, and **81 unsupported**. MOVE_SOFT_BOILED remains unsupported: no compositor/draw wiring, production framebuffer claim, coverage entry/promotion, or sibling credit.

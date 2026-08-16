@@ -557,6 +557,7 @@ import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprit
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
+import softBoiledAsset from "../animation/assets/soft-boiled.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import leechSeedAsset from "../animation/assets/leech-seed.json" with { type: "json" };
 import painSplitAsset from "../animation/assets/pain-split.json" with { type: "json" };
@@ -920,6 +921,7 @@ import {
   sceneOnShadowPunchView,
   sceneOnGrowthView,
   sceneOnRecoverView,
+  sceneOnSoftBoiledView,
   sceneOnMoonlightView,
   sceneOnPresentView,
   sceneOnAbsorbView,
@@ -1129,6 +1131,7 @@ import {
   type SceneOnFireBlastConfig,
   type SceneOnRolloutConfig,
   type SceneOnHealBellConfig,
+  type SceneOnSoftBoiledConfig,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
   type SceneOnHeatWavePresentationState,
@@ -1603,6 +1606,13 @@ const knockOffArt = knockOffAsset as {
 const recoverArt = recoverAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const softBoiledArt = softBoiledAsset as {
+  breakingEgg: { tileset: Tileset; palette: RgbColor[] };
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  chanseyBack: { tileset: Tileset; palette: RgbColor[] };
+  chanseyFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const absorbArt = absorbAsset as {
   lombreBack: { tileset: Tileset; palette: RgbColor[] };
@@ -38021,6 +38031,175 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "KADABRA used" : "Foe KADABRA used",
       "RECOVER!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SOFT_BOILED") {
+    const softBoiledState = state as SceneOnMovePresentationState<SceneOnSoftBoiledConfig>;
+    const view = sceneOnSoftBoiledView(softBoiledState);
+    const displayed = sceneOnSoftBoiledView({
+      ...softBoiledState,
+      age: softBoiledState.age - 1,
+    });
+    const playerBack = view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "CHANSEY"
+      && view.target.geometry.side === "player";
+    const opponentFront = view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "CHANSEY"
+      && view.target.geometry.side === "opponent";
+    if (!playerBack && !opponentFront) {
+      throw new Error(
+        `unsupported staged SOFT_BOILED self target ${view.attacker.species}/${view.attacker.geometry.side}`,
+      );
+    }
+
+    const paletteTarget = { r: 99, g: 198, b: 247 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        paletteTarget,
+        view.palette.backgroundCoefficient,
+      ),
+    );
+    const chanseySource = playerBack
+      ? softBoiledArt.chanseyBack
+      : softBoiledArt.chanseyFront;
+    const chansey = playerBack ? chanseySource : {
+      ...chanseySource,
+      tileset: subTileset(chanseySource.tileset, 0, 8),
+    };
+    const chanseyShakeY = playerBack
+      ? view.registers.bg2vofs === 0 ? 0 : 453 - view.registers.bg2vofs
+      : view.registers.bg1vofs === 0 ? 0 : 495 - view.registers.bg1vofs;
+    const onixCorner = playerBack
+      ? { x: 145, y: 10 }
+      : ONIX_MATERIALIZE_CORNER;
+    const onix = playerBack ? onixFrontSprite : onixBackSprite;
+
+    // Monbg makes the self-targeted Chansey a BG layer while the egg body
+    // is live. Drawing both battlers before the owned OAM list preserves
+    // that layer relation; the reducer supplies the source shake offset.
+    if (playerBack) {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        onixCorner.x,
+        onixCorner.y,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      chansey.tileset,
+      blendPaletteToward(
+        chansey.palette,
+        paletteTarget,
+        view.palette.battlerCoefficient,
+      ),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y + chanseyShakeY,
+    );
+    const nonObjTarget2 = fb.slice();
+    const bySlot = new Map<number, (typeof displayed.sprites)[number]>(
+      displayed.sprites.map((sprite) => [sprite.slot, sprite]),
+    );
+    // BuildOamBuffer's lower OAM index wins equal-priority overlaps. Paint
+    // the source list back-to-front so its first entry lands last.
+    for (const slot of displayed.sourceOrder.slice().reverse()) {
+      const sprite = bySlot.get(slot);
+      if (!sprite || sprite.invisible) continue;
+      if (sprite.kind === "egg") {
+        const frame = Math.trunc((sprite.tileIndex - 305) / 16);
+        const tileset = subTileset(softBoiledArt.breakingEgg.tileset, frame * 4, 4);
+        const [pa, pb, pc, pd] = sprite.matrix;
+        if (view.registers.bldcnt !== 0) {
+          drawSpriteSheetAffineRotateBlendedOverFb(
+            fb,
+            nonObjTarget2,
+            tileset,
+            softBoiledArt.breakingEgg.palette,
+            sprite.x + sprite.x2,
+            sprite.y + sprite.y2,
+            pa, pb, pc, pd,
+            view.palette.eva,
+            view.palette.evb,
+            true,
+          );
+        } else {
+          drawSpriteSheetAffineRotate(
+            fb,
+            tileset,
+            softBoiledArt.breakingEgg.palette,
+            sprite.x + sprite.x2,
+            sprite.y + sprite.y2,
+            pa, pb, pc, pd,
+          );
+        }
+      } else if (sprite.kind === "ring") {
+        const [pa, pb, pc, pd] = sprite.matrix;
+        drawSpriteSheetAffineRotate(
+          fb,
+          softBoiledArt.thinRing.tileset,
+          softBoiledArt.thinRing.palette,
+          sprite.x,
+          sprite.y,
+          pa, pb, pc, pd,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          subTileset(
+            softBoiledArt.blueStar.tileset,
+            Math.trunc((sprite.tileIndex - 601) / 16) * 4,
+            4,
+          ),
+          softBoiledArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    if (opponentFront) {
+      // The player-side Onix has subpriority 30, ahead of the opponent
+      // effect body's 36-38; its few ring-edge overlaps therefore win.
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        onixCorner.x,
+        onixCorner.y,
+      );
+    }
+
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerBack ? "ONIX" : "CHANSEY",
+      level: 50,
+      gender: profile.opponentGender ?? (playerBack ? "male" : "female"),
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerBack ? "CHANSEY" : "ONIX",
+      level: 50,
+      gender: profile.playerGender ?? (playerBack ? "female" : "male"),
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerBack ? "CHANSEY used" : "Foe CHANSEY used",
+      "SOFTBOILED!",
       99,
     );
     return;

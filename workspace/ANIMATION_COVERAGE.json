@@ -2,6 +2,33 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_SOFT_BOILED",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON FRONTIER_MON_CHANSEY_2 versus ONIX bodies pass twice fresh through first inactive cleanup: player-back frames 227-498 and opponent-front frames 228-499, 272 rows each and 544/544 total with zero residual pixels",
+    "the pure source-relative reducer, typed Scene-ON seam, and shared compositor reproduce both affine Breaking Egg bodies, source OAM order, ShakeMon/monbg/clear lifecycle, two thin rings, four target-side HealingEffect2 stars, BG/register state, the age-144 mixed BG-current/OBJ-preceding palette latch, audio, resources, battle chrome, and bilateral geometry",
+    "BREAKING_EGG, THIN_RING, BLUE_STAR, and legal Chansey art regenerate byte-for-byte from pinned source; thin-ring, blue-star, Chansey, and shared Onix source identities are pinned without inheriting acceptance from Recover, Milk Drink, Metronome, or any other sibling",
+    "the presentation seam owns no healing result, HP mutation, damage, gameplay RNG, AI, controller, turn, round, or facility state; Recover, Milk Drink, and all other healing siblings remain independent controls"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-soft-boiled-player-chansey-opponent-onix.json",
+    "tools/battle-lab/mechanic-soft-boiled-opponent-chansey-player-onix.json",
+    "tools/compare/fixtures/soft-boiled-evidence.json",
+    "tools/compare/softBoiledSourceAudit.ts",
+    "tools/compare/softBoiledEvidence.ts",
+    "tools/compare/verifySoftBoiledReducer.ts",
+    "tools/compare/softBoiledFramebuffer.ts",
+    "tools/compare/extractSoftBoiledAssets.ts",
+    "src/animation/assets/soft-boiled.json",
+    "src/animation/softBoiled.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/softBoiledAssets.test.ts",
+    "tests/animation/softBoiledFramebuffer.test.ts",
+    "tests/animation/softBoiledReducer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_ABSORB",
    "status": "exact",
    "covered": [
@@ -6148,7 +6175,7 @@
     "MOVE_MOONLIGHT",
     "MOVE_SWALLOW"
    ],
-   "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_DRAIN independently proves its 16 paired-orb/impact/green-field/HealingEffect body at 436/436 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_GIGA_DRAIN independently proves its 24 variable-amplitude-orb/impact/green-field/HealingEffect body at 460/460 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_DREAM_EATER independently proves its four BLUE_STAR HealingEffect creates inside a complete 533/533 psychic-background, affine, drain-orb, typed-seam, and zero-residual production-framebuffer acceptance. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. MOVE_PRESENT independently proves its target HealingEffect2 tail within both 252-frame healing orientations, alongside its separately accepted damage branch. MOVE_SWALLOW independently proves its move-turn-dependent deform/shake/5/10/15 BLUE_ORB plus HealingEffect body across all six natural branches. SOFT_BOILED remains independently unsupported."
+   "goal": "MOVE_RECOVER proves the complete three-wave RecoverAbsorbEffect plus attacker HealingEffect body in both orientations at 169/169 component/RAM and framebuffer frames, reproduced twice. MOVE_ABSORB independently proves its eight-orb drain/hitsplat/green-field body plus attacker HealingEffect at 195/195 complete hardware/framebuffer frames in both orientations, reproduced twice. MOVE_MEGA_DRAIN independently proves its 16 paired-orb/impact/green-field/HealingEffect body at 436/436 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_GIGA_DRAIN independently proves its 24 variable-amplitude-orb/impact/green-field/HealingEffect body at 460/460 bilateral source, seam, hardware, raw-RGB, and framebuffer frames twice fresh. MOVE_DREAM_EATER independently proves its four BLUE_STAR HealingEffect creates inside a complete 533/533 psychic-background, affine, drain-orb, typed-seam, and zero-residual production-framebuffer acceptance. MOVE_MILK_DRINK independently proves its complete bottle/thin-ring/target HealingEffect2 body in both orientations at 186/186 component/RAM and framebuffer frames, reproduced twice. MOVE_SYNTHESIS independently proves its complete GrantingStarsEffect/blend/load-boundary/attacker HealingEffect body in both orientations at 130/130 component/task/RAM/palette and framebuffer frames, reproduced twice. MOVE_MOONLIGHT independently proves its complete blackout/moon/alpha/five-GREEN_SPARKLE pipeline plus attacker HealingEffect at 352/352 source/hardware/audio/seam/raw-RGB/framebuffer frames in both orientations twice fresh. MOVE_PRESENT independently proves its target HealingEffect2 tail within both 252-frame healing orientations, alongside its separately accepted damage branch. MOVE_SWALLOW independently proves its move-turn-dependent deform/shake/5/10/15 BLUE_ORB plus HealingEffect body across all six natural branches. MOVE_SOFT_BOILED independently proves its two affine egg bodies, ShakeMon/monbg and palette fade, two rings, target HealingEffect2 stars, and cleanup at 544/544 bilateral source/seam/raw-RGB/shared-framebuffer rows twice fresh."
   },
   {
    "id": "absorption-orb-drain",

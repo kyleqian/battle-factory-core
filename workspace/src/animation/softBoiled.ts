@@ -203,6 +203,10 @@ export interface SoftBoiledState {
   }>;
   readonly palette: Readonly<{
     readonly color: Readonly<{ readonly r: 12; readonly g: 24; readonly b: 30 }>;
+    /** Hardware-visible F_PAL_BG blend from simple_palette_blend. */
+    readonly backgroundCoefficient: number;
+    /** Hardware-visible battler OBJ coefficient; age 144 retains prior OBJ. */
+    readonly battlerCoefficient: number;
     readonly bldcnt: number;
     readonly eva: number;
     readonly evb: number;
@@ -509,6 +513,11 @@ function bldalphaAtAge(age: number): Readonly<{ eva: number; evb: number; value:
   return { eva: 16 - step, evb: step, value: 16 - step + (step << 8) };
 }
 
+function paletteCoefficientAtAge(age: number): number {
+  if (age < 144 || age >= 169) return 0;
+  return 10 - Math.floor((age - 144) / 5) * 2;
+}
+
 function bgVramAtAge(age: number): SoftBoiledState["bgVram"] {
   return {
     generation: age < 11 ? 0 : age < 220 ? 1 : age < 222 ? 2 : 3,
@@ -642,6 +651,8 @@ export function softBoiledAtAge(
     bgVram: bgVramAtAge(age),
     palette: {
       color: { r: 12, g: 24, b: 30 },
+      backgroundCoefficient: paletteCoefficientAtAge(age),
+      battlerCoefficient: age === 144 ? 0 : paletteCoefficientAtAge(age - 1),
       bldcnt: registers.bldcnt,
       eva: alpha.eva,
       evb: alpha.evb,

@@ -11,7 +11,7 @@ const sha = (path: string): string =>
   createHash("sha256").update(readFileSync(path)).digest("hex");
 
 describe("MOVE_SOFT_BOILED bilateral dense evidence checkpoint", () => {
-  it("retains the reducer/seam checkpoint without renderer or coverage credit", () => {
+  it("retains the historical reducer/seam checkpoint and current exact promotion", () => {
     expect(fixture).toMatchObject({
       schema: "soft-boiled-bilateral-evidence/v1",
       oracleProfile: "battle-scene-on",
@@ -42,9 +42,9 @@ describe("MOVE_SOFT_BOILED bilateral dense evidence checkpoint", () => {
     expect(sha(fixture.source.evidenceVerifier)).toBe(fixture.source.evidenceVerifierSha256);
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_SOFT_BOILED"))
-      .toBeUndefined();
+      .toMatchObject({ status: "exact" });
     expect(coverage.entries.filter((entry: any) => entry.status === "exact"))
-      .toHaveLength(195);
+      .toHaveLength(196);
   });
 
   it("pins twice-fresh complete raw state and RGB archives through cleanup", () => {

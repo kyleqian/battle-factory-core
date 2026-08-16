@@ -41,6 +41,15 @@ describe("MOVE_SOFT_BOILED source-age reducer and typed Scene-ON seam", () => {
     expect(softBoiledAtAge(142, "player", geometry).sourceOrder).toEqual([4, 3]);
     expect(softBoiledAtAge(144, "player", geometry).sprites
       .filter((sprite) => sprite.kind === "ring")).toHaveLength(1);
+    expect(softBoiledAtAge(144, "player", geometry).palette).toMatchObject({
+      backgroundCoefficient: 10,
+      battlerCoefficient: 0,
+      hardwareLatch: "mixed-bg-current-obj-preceding",
+    });
+    expect(softBoiledAtAge(145, "player", geometry).palette)
+      .toMatchObject({ backgroundCoefficient: 10, battlerCoefficient: 10 });
+    expect(softBoiledAtAge(169, "player", geometry).palette)
+      .toMatchObject({ backgroundCoefficient: 0, battlerCoefficient: 2 });
     expect(softBoiledAtAge(SOFT_BOILED_EGG_LAST_AGE, "player", geometry)
       .sprites.filter((sprite) => sprite.kind === "egg").every((sprite) => sprite.invisible))
       .toBe(true);
