@@ -137,17 +137,13 @@ export function verifyRolloutFramebuffer(): RolloutFramebufferReport {
         }
       }
     }
-    const expectedFailures = orientation === "player-back"
-      ? []
-      : [1, 2, 3, 4, 5].map((counter) =>
-        `${counter}:0:200:160,65-191,72:169,65:app=189,189,156/ref=82,107,99`
-      );
+    const expectedFailures: string[] = [];
     if (JSON.stringify(failures) !== JSON.stringify(expectedFailures)) {
       throw new Error(`${orientation}: unexpected residuals ${failures.join(",")}`);
     }
   }
-  if (matched["player-back"] !== 793 || matched["opponent-front"] !== 788
-    || residualPixels !== 1_000) {
+  if (matched["player-back"] !== 793 || matched["opponent-front"] !== 793
+    || residualPixels !== 0) {
     throw new Error(
       `Rollout checkpoint drift ${JSON.stringify({ matched, residualRows, residualPixels })}`,
     );
@@ -160,6 +156,6 @@ if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
   console.log(`player-back: ${report.matched["player-back"]}/793`);
   console.log(`opponent-front: ${report.matched["opponent-front"]}/793`);
   console.log(
-    `MOVE_ROLLOUT: 1581/1586 zero-residual rows; ${report.residualPixels} residual pixels; unsupported`,
+    `MOVE_ROLLOUT: 1586/1586 zero-residual rows; ${report.residualPixels} residual pixels; exact`,
   );
 }

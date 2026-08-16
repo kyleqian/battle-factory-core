@@ -4725,6 +4725,30 @@ function drawGeneratedOpponentShadow(
   }
 }
 
+/**
+ * Source `SpriteCB_EnemyShadow` layer for an elevated opponent battler.
+ * The extracted mask comes from `enemy_mon_shadow.png`, while placement is
+ * relative to the ordinary singles battle-position center. Move draw cases
+ * decide whether the callback's preceding hardware-OAM row is still live.
+ */
+function drawSourceOpponentEnemyShadow(
+  fb: Uint8Array,
+  species: string,
+  battlePositionCenter: Readonly<{ x: number; y: number }>,
+): void {
+  if (!elevatedEnemyShadowSpecies.has(`SPECIES_${species}`)) return;
+  const x = battlePositionCenter.x - battleEnemyShadow.width / 2;
+  const y = battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
+  for (const pixel of battleEnemyShadow.mask) {
+    setPixel(
+      fb,
+      x + pixel % battleEnemyShadow.width,
+      y + Math.floor(pixel / battleEnemyShadow.width),
+      battleEnemyShadow.color,
+    );
+  }
+}
+
 export function generatedBattleStartCommandReady(
   state: FactoryBattleStartIntroState,
 ): boolean {
@@ -39050,6 +39074,18 @@ export function renderSceneOnMovePresentation(
       battleBg.static.tilemap,
       battleBg.palette,
     );
+
+    // The opponent VOLTORB is elevated. On the first source row, its shadow
+    // remains in the preceding hardware OAM buffer; SpriteCB_EnemyShadow has
+    // already hidden the software sprite and reaches scanout one row later.
+    // Draw the extracted source layer below every battler/effect OBJ.
+    if (opponentToPlayer && rolloutState.age === 0) {
+      drawSourceOpponentEnemyShadow(
+        fb,
+        live.attacker.species,
+        live.attacker.geometry.battlePositionCenter,
+      );
+    }
 
     const voltorb = playerToOpponent
       ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).VOLTORB!
