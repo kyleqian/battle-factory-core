@@ -947,12 +947,38 @@ function instructionExecutionOf(event: BattleKernelSemanticEvent): number {
   return event.provenance!.instructionExecution;
 }
 
+/**
+ * The `Cmd_hitanimation` receipt that pairs with this attack animation.
+ * Source pairs the two inside ONE script execution: `attackanimation` /
+ * `waitanimation` / `effectivenesssound` / `hitanimation BS_TARGET` are four
+ * consecutive instructions of `BattleScript_HitFromAtkAnimation`
+ * (`data/battle_scripts_1.s:253-258`), and Scene OFF only substitutes the
+ * first with `BattleScript_Pausex20`.
+ *
+ * So the scan must stop at that execution's end. A non-damaging move has an
+ * attack animation and NO hit animation at all (`BattleScript_
+ * MoveWeatherChange` -- Hail, Rain Dance), while a LATER execution in the
+ * same turn receipt can own a wholly unrelated `hitanimation`: the
+ * end-of-turn `BattleScript_DamagingWeatherLoop` hail/sandstorm tick is
+ * exactly that. `instructionExecution` counts within one execution and
+ * restarts at the next (`instructionsExecuted: 0`), so a drop in it IS the
+ * execution boundary. Pairing across it claimed a hit that had "executed"
+ * before its own move-use receipt -- ISSUES #95's fatal negative span.
+ */
 function nextHitAnimation(
   events: readonly BattleKernelSemanticEvent[],
   moveIndex: number,
 ): BattleKernelSemanticEvent | null {
+  // Staged/synthetic fixtures without interpreter provenance keep the plain
+  // forward scan; the caller's own ordering invariant stays their guard.
+  let execution = events[moveIndex]!.provenance?.instructionExecution ?? null;
   for (let index = moveIndex + 1; index < events.length; index += 1) {
     const candidate = events[index]!;
+    const candidateExecution = candidate.provenance?.instructionExecution ?? null;
+    if (execution !== null && candidateExecution !== null) {
+      if (candidateExecution < execution) break;
+      execution = candidateExecution;
+    }
     if (
       candidate.payload.kind === "animation"
       && candidate.payload.animationId === "HIT_ANIMATION"

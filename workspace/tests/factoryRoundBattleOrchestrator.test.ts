@@ -623,6 +623,22 @@ function shellBellOpponentParty(): BattleScriptPartyState {
   ]) as unknown as BattleScriptPartyState;
 }
 
+/**
+ * ISSUES #95: a one-mon staged side built from any Frontier rental set. Both
+ * sides are padded to the fixed 6-slot kernel shape like the ISSUES #93/#94
+ * scenario above.
+ */
+function hailWeatherParty(setId: number): BattleScriptPartyState {
+  return Object.freeze([
+    createFactoryCorpusPartyMember(record(setId, 3)),
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+    SHELL_BELL_EMPTY_PARTY_MEMBER,
+  ]) as unknown as BattleScriptPartyState;
+}
+
 function createShellBellForcedSwitchBattle(
   firstBench: ForcedSwitchFirstBench = SHELL_BELL_FIRST_BENCH,
 ): Readonly<{
@@ -1012,6 +1028,69 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     }
     expect(state.battleCommandPresentation).not.toBeNull();
     expect(state.battleForcedPartySelect).toBeNull();
+  });
+  it("ISSUES #95: a non-damaging weather move's attack pause never pairs with the end-of-turn weather tick's hit animation", () => {
+    // A real staged Factory turn: SEALEO (Frontier set 301) uses MOVE_HAIL
+    // (slot 3) against METAPOD (set 8, MOVE_HARDEN). `BattleScript_
+    // MoveWeatherChange` runs an attack animation and NO `hitanimation` at
+    // all; the SAME turn receipt then runs `BattleScript_DamagingWeather
+    // Loop`, whose hail tick owns an unrelated `hitanimation`. That is
+    // exactly seed 113's shape.
+    const initial = createFreshFactoryBattle({
+      requestId: 1,
+      rngSeed: 0,
+      battleScene: "off",
+      playerParty: hailWeatherParty(301),
+      opponentParty: hailWeatherParty(8),
+    });
+    const player = submitStagedLockedActionMove(initial, "player", 3);
+    const opponent = submitStagedLockedActionMove(player.transition.state, "trainer", 0);
+    // Pre-fix this construction itself threw
+    // "battle resolution move/hit provenance is not ordered": the scan walked
+    // past `BattleScript_MoveEnd` into the weather loop and claimed its hit.
+    const resolution = createBattleResolutionPresentation({
+      sourceRequest: player.request,
+      sourceDecision: player.decision,
+      beforeRules: initial.rules,
+      transition: opponent.transition,
+      fieldBoundary: createBattleCommandPresentation(
+        player.request,
+        initial.rules.rulesContext,
+        player.decision.moveSlot,
+      ).field,
+      confirmHandoff: { fightDisplayCursor: player.decision.moveSlot, idleBounceElapsed: 0 },
+    });
+    const events = resolution.segments[0]!.events;
+    const pauseIndex = events.findIndex((event) =>
+      event.payload.kind === "animation"
+      && event.payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
+      && event.provenance?.sourceLabel === "BattleScript_MoveWeatherChange"
+    );
+    expect(pauseIndex).toBeGreaterThanOrEqual(0);
+    const hitIndex = events.findIndex((event) =>
+      event.payload.kind === "animation" && event.payload.animationId === "HIT_ANIMATION"
+    );
+    // The only hit animation in the whole receipt belongs to the weather
+    // loop, a LATER script execution -- its own `instructionExecution`
+    // counter has restarted, so it reads as "before" the weather move's.
+    expect(hitIndex).toBeGreaterThan(pauseIndex);
+    expect(events[hitIndex]!.provenance?.sourceLabel).toBe("BattleScript_DamagingWeatherLoop");
+    // The weather loop is its own script execution: its counter has restarted
+    // below the preceding `BattleScript_MoveEnd` event's. That restart is the
+    // execution boundary the scan must not cross.
+    const loopStart = events.findIndex((event) =>
+      event.provenance?.sourceLabel === "BattleScript_DamagingWeatherContinues"
+    );
+    expect(loopStart).toBeGreaterThan(pauseIndex);
+    expect(events[loopStart]!.provenance!.instructionExecution)
+      .toBeLessThan(events[loopStart - 1]!.provenance!.instructionExecution);
+    // Neither move in this turn is damaging, so nothing may claim that hit:
+    // pre-fix the scan walked from MOVE_HARDEN's own `BattleScript_
+    // StatUpAttackAnim` pause into the weather loop and published a bogus
+    // 140-frame move-animation command from it.
+    expect(
+      resolution.segments[0]!.commands.some((command) => command.type === "move-animation"),
+    ).toBe(false);
   });
   it.each([
     ["TORMENT", 2, "STRINGID_PKMNSUBJECTEDTOTORMENT"],
