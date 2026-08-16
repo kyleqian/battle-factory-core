@@ -5,6 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1290 — [supervisor final, 2026-08-16] **Late round M9 verified + final gates re-run green — session closed**
+
+- **State:** M9 (13th worker) closed the RECORD/RETIRE app-side compare
+  traces **178/178 + 174/174**, fixing a real brain-route bug on the way
+  (the re-ask after RECORD/RETIRE-NO showed the ordinary "2nd match"
+  prompt instead of AskReadyForHead). Call-scene calibration left
+  UNMOVED deliberately (89/131 + 69/199): constant shifts regressed the
+  windows by pushing ready boundaries across the traces' fixed press
+  frames — 1289 records the pixel measurements; the fix needs core.ts's
+  per-tick accept semantics, not more constant guesses. Ground-truth
+  doc box-1 hold row corrected (typewriter completes at 894, not 850).
+- **Final gates (tree `ccd92136`, re-run AFTER M9 — supersede 1288's):**
+  full npm **1,045 files / 9,950 passed / 223 skipped**; build green;
+  soak vanilla **20/20 OK**; soak full 0:60 **60/60 OK**. Differential
+  PASS 563/563 (base `56ef0edf`); regression bars re-verified
+  (askready-menu 21/21, swapask-no 194/194, entrance-02 256/256,
+  silver reveal 690/701).
+- **Next:** unchanged from 1288's ordered list, minus (d) which M9
+  closed; call-scene item (a) now carries 1289's measurements and an
+  accept-semantics prerequisite. **Fold at next orient:**
+  animation-main unfolded (Heal Bell + Fire Blast rounds; its
+  supervisor session was live through this wind-down). rust-main:
+  nothing unfolded. DEFERRED.md EMPTY.
+
+---
+
 ## 1289 — [main worker, 2026-08-16] **RECORD/RETIRE compare traces found + fixed a real brain-route bug (wrong re-ask prompt) — both close 178/178, 174/174; box-1 hold-boundary doc row pixel-corrected; call-scene 89/131 & 69/199 investigated, left unmoved**
 
 - **State:** Landed and green. `npm test` **1045 files / 9950 passed /
@@ -145,65 +171,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   absolute path (S3, gold doc) leaving an uncommitted duplicate —
   check `git status` before merging side branches. Commits local only —
   pushing is Kyle's step.
-
-## 1287 — [main worker, 2026-08-16] **ISSUES #91 fixed: brain-win opponent generation no longer leaves storedTrainerIds one entry short**
-
-- **State:** Landed and green. `npm test` **1045 files / 9950 passed /
-  223 skipped**, `npm run build` green.
-- **Did:** Source check first (`reference/pokeemerald`): the ROM writes
-  `gSaveBlock2Ptr->frontier.trainerIds` only from `GenerateOpponentMons`
-  (`battle_factory.c:303-330`), and the pre-battle-room script never
-  calls it for a Frontier Brain battle — `frontier_getbrainstatus`
-  (`BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:80-81`) jumps
-  straight to `AskReadyForHead`, bypassing `AskSwapMon`'s
-  `factory_generateopponentmons` call (scripts.inc:137-138) entirely; the
-  brain's own party builder `FillFactoryBrainParty`
-  (`battle_factory.c:759-822`) never touches the array either. Since the
-  brain is always the round's 7th and final battle in natural play, this
-  is genuinely a "the ROM stores nothing" case (option 2 of the brief) —
-  confirmed, not guessed. Fix: added
-  `storedTrainerIdsForNextGeneration()` (`factoryRoundBattleOrchestrator.ts`,
-  after `generateOpponentFor`) that folds the brain's own `trainerId`
-  (`TRAINER_FRONTIER_BRAIN` = 1022, verified never overlapping the
-  ordinary 0-299 id range) into the **next** battle's generation input
-  only — never into the brain's own scheduled `storedTrainerIds` — so the
-  natural battleIndex-6 shape stays byte-identical (proven: the existing
-  `factoryBrainRoundShape.test.ts` pins that exact field and needed zero
-  changes). Both call sites that read `previous.storedTrainerIds` for the
-  next generation (`adoptNextOpponentOrGenerate`, and
-  `advanceFactoryRoundPresentation`'s simplified-round fallback) now go
-  through the helper. Pure array composition — no RNG port/draw call
-  added or touched on any path (confirmed by inspection: the diff never
-  references `rngPort`/`draw`/`rngValue` construction, only the
-  already-computed `storedTrainerIds`/`trainerId` fields).
-- **Pin:** new `tests/factoryBrainWinOpponentHistory.test.ts` — builds
-  the exact #91 repro (`factoryWinStreak: 20`, brain silver-eligible at
-  battleIndex 0), wins it, drives `preGenerateFactoryRoundNextOpponent`
-  (previously threw `storedTrainerIds must contain the 1 prior battle
-  selections`; verified by re-running the test against the pre-fix tree
-  via `git stash`), asserts the ordinary battleIndex-1 generation's
-  `storedTrainerIds` is `[TRAINER_FRONTIER_BRAIN, <drawn id>]`, and
-  confirms the round actually continues to battleIndex 1. Natural shape
-  (brain at battleIndex 6 still terminates the round unchanged) is
-  covered by the pre-existing, **unmodified** `factoryBrainRoundShape.test.ts`
-  — re-ran green this session, not touched by the fix.
-- **Soak slice:** `node --experimental-strip-types <ad-hoc script using
-  tools/soak/randomRoundSoakDriver.ts's runSeed with factoryWinStreak: 20,
-  testPolicy: "strong-route", stopAtFirstRoundDecision: true>` — 7 of 10
-  tried orchestrator `rngValue`s reach `roundComplete` (full 7-battle win
-  including the brain-then-continue path) with zero engine crash; the
-  other 3 lose battle 1 outright (a real brain-battle loss, unrelated to
-  this fix). No standing script committed (ad hoc, out of scope per the
-  brief's "no wide soak sweep").
-- **Regression check:** `factoryBrainRoundShape.test.ts`,
-  `factoryRoundBattleOrchestrator.test.ts`, `factoryRoundChaining.test.ts`,
-  `factoryOpponentGeneration.test.ts`, `factoryTrainerSchedule.test.ts` —
-  all unmodified, all green. `executableFrontierRatchet.test.ts` barrier
-  counts unwidened.
-- **Next:** resume the walk-up build step A track (ISSUES #91 was
-  blocking `AskSwapBeforeHead`'s live-reach through the soak driver past
-  a brain win — that path should now be reachable) or continue gold
-  speech dense-calibration residuals per PROGRESS-archive 1286.
-- **Notes:** none. No PAPERCUT this session.
-
----

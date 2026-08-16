@@ -1,3 +1,65 @@
+## 1287 — [main worker, 2026-08-16] **ISSUES #91 fixed: brain-win opponent generation no longer leaves storedTrainerIds one entry short**
+
+- **State:** Landed and green. `npm test` **1045 files / 9950 passed /
+  223 skipped**, `npm run build` green.
+- **Did:** Source check first (`reference/pokeemerald`): the ROM writes
+  `gSaveBlock2Ptr->frontier.trainerIds` only from `GenerateOpponentMons`
+  (`battle_factory.c:303-330`), and the pre-battle-room script never
+  calls it for a Frontier Brain battle — `frontier_getbrainstatus`
+  (`BattleFrontier_BattleFactoryPreBattleRoom/scripts.inc:80-81`) jumps
+  straight to `AskReadyForHead`, bypassing `AskSwapMon`'s
+  `factory_generateopponentmons` call (scripts.inc:137-138) entirely; the
+  brain's own party builder `FillFactoryBrainParty`
+  (`battle_factory.c:759-822`) never touches the array either. Since the
+  brain is always the round's 7th and final battle in natural play, this
+  is genuinely a "the ROM stores nothing" case (option 2 of the brief) —
+  confirmed, not guessed. Fix: added
+  `storedTrainerIdsForNextGeneration()` (`factoryRoundBattleOrchestrator.ts`,
+  after `generateOpponentFor`) that folds the brain's own `trainerId`
+  (`TRAINER_FRONTIER_BRAIN` = 1022, verified never overlapping the
+  ordinary 0-299 id range) into the **next** battle's generation input
+  only — never into the brain's own scheduled `storedTrainerIds` — so the
+  natural battleIndex-6 shape stays byte-identical (proven: the existing
+  `factoryBrainRoundShape.test.ts` pins that exact field and needed zero
+  changes). Both call sites that read `previous.storedTrainerIds` for the
+  next generation (`adoptNextOpponentOrGenerate`, and
+  `advanceFactoryRoundPresentation`'s simplified-round fallback) now go
+  through the helper. Pure array composition — no RNG port/draw call
+  added or touched on any path (confirmed by inspection: the diff never
+  references `rngPort`/`draw`/`rngValue` construction, only the
+  already-computed `storedTrainerIds`/`trainerId` fields).
+- **Pin:** new `tests/factoryBrainWinOpponentHistory.test.ts` — builds
+  the exact #91 repro (`factoryWinStreak: 20`, brain silver-eligible at
+  battleIndex 0), wins it, drives `preGenerateFactoryRoundNextOpponent`
+  (previously threw `storedTrainerIds must contain the 1 prior battle
+  selections`; verified by re-running the test against the pre-fix tree
+  via `git stash`), asserts the ordinary battleIndex-1 generation's
+  `storedTrainerIds` is `[TRAINER_FRONTIER_BRAIN, <drawn id>]`, and
+  confirms the round actually continues to battleIndex 1. Natural shape
+  (brain at battleIndex 6 still terminates the round unchanged) is
+  covered by the pre-existing, **unmodified** `factoryBrainRoundShape.test.ts`
+  — re-ran green this session, not touched by the fix.
+- **Soak slice:** `node --experimental-strip-types <ad-hoc script using
+  tools/soak/randomRoundSoakDriver.ts's runSeed with factoryWinStreak: 20,
+  testPolicy: "strong-route", stopAtFirstRoundDecision: true>` — 7 of 10
+  tried orchestrator `rngValue`s reach `roundComplete` (full 7-battle win
+  including the brain-then-continue path) with zero engine crash; the
+  other 3 lose battle 1 outright (a real brain-battle loss, unrelated to
+  this fix). No standing script committed (ad hoc, out of scope per the
+  brief's "no wide soak sweep").
+- **Regression check:** `factoryBrainRoundShape.test.ts`,
+  `factoryRoundBattleOrchestrator.test.ts`, `factoryRoundChaining.test.ts`,
+  `factoryOpponentGeneration.test.ts`, `factoryTrainerSchedule.test.ts` —
+  all unmodified, all green. `executableFrontierRatchet.test.ts` barrier
+  counts unwidened.
+- **Next:** resume the walk-up build step A track (ISSUES #91 was
+  blocking `AskSwapBeforeHead`'s live-reach through the soak driver past
+  a brain win — that path should now be reachable) or continue gold
+  speech dense-calibration residuals per PROGRESS-archive 1286.
+- **Notes:** none. No PAPERCUT this session.
+
+---
+
 ## 1286 — [main worker, 2026-08-16] **Gold Frontier-Brain 4-page speech wired (tier-aware brainSpeechBoxes); dense-calibrated against the three banked gold speech fixtures — hold/pause windows close exact, movement+typewriter+transition-handoff spans left as characterized residuals**
 
 - **State:** Goal 1 (wire gold's 4-page speech, PROGRESS 1284's seam) is
