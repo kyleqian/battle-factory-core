@@ -1,0 +1,98 @@
+{
+  "schema": "heal-bell-bilateral-evidence/v1",
+  "status": "unsupported",
+  "coverageCredit": false,
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": false,
+    "framebufferLookupAdded": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "source": {
+    "audit": "tools/compare/healBellSourceAudit.ts",
+    "auditSha256": "b037605244791ebfd81647959d7a944485a7e58b101a438b7e385139b3ec9163",
+    "probe": "tools/compare/healBellProbe.py",
+    "probeSha256": "4d236ce1700080bb3db4b0fc4657e753dda55fdd0d596ff98e86ee01be33fafc"
+  },
+  "acceptance": {
+    "sourceRows": 522,
+    "rawRgbRows": 522,
+    "reducerRows": 522,
+    "typedSeamRows": 522,
+    "productionFramebufferRows": 0,
+    "freshRuns": 2,
+    "rootCommands": 44,
+    "ringCalls": 3,
+    "notePaths": 12,
+    "firstInactiveCleanupAge": 260
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-heal-bell-player-chimecho-opponent-onix.json",
+      "scenarioSha256": "d29ac4d03fe4e0190d70f42b4d4d21aa89b09479596df3a91b16b7d47446c169",
+      "denseState": "tools/compare/evidence/heal-bell-player-dense-state.json.gz",
+      "denseStateSha256": "179cf071c946cae731590392719e78c7a48a002a0d886d93cde4bba80850abd6",
+      "probeJsonSha256": "01e2b6a3b2bf2057cab2fa0a64cc931e2472b21a437236699c762d00f1ebb2c9",
+      "repeatProbeJsonSha256": "01e2b6a3b2bf2057cab2fa0a64cc931e2472b21a437236699c762d00f1ebb2c9",
+      "rawRgbArchive": "tools/compare/evidence/heal-bell-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "d07944237c203e29358fcce6d7d6d2391df86d45a91c1a5e684b35ea7869cabe",
+      "rawRgbSha256": "ad03fd91ad0db44893540ede7403b59e03162e982704094d6d618607d9e59bc3",
+      "sourceWindow": {"startFrame": 209, "endFrame": 469, "frameCount": 261},
+      "attacker": {
+        "species": "CHIMECHO",
+        "geometry": {
+          "side": "player",
+          "spriteCorner": {"x": 40, "y": 55},
+          "animationCenter": {"x": 72, "y": 95},
+          "battlePositionCenter": {"x": 72, "y": 80}
+        }
+      },
+      "target": {
+        "species": "ONIX",
+        "geometry": {
+          "side": "opponent",
+          "spriteCorner": {"x": 144, "y": 10},
+          "animationCenter": {"x": 176, "y": 42},
+          "battlePositionCenter": {"x": 176, "y": 40}
+        }
+      }
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-heal-bell-opponent-chimecho-player-onix.json",
+      "scenarioSha256": "336c57e980430a562a17bfa2cf2e9b7017e3482fd6ff33f48b5ab073d183c250",
+      "denseState": "tools/compare/evidence/heal-bell-opponent-dense-state.json.gz",
+      "denseStateSha256": "aed2169ed9f8cc8b30e0bdaf4f6dcb5b56d3363c6dbebd28f12f645624b9de68",
+      "probeJsonSha256": "480c25ccabaeb4d860698496d91b5c175a23f02334cb59c94ca61cfe1e6a24f8",
+      "repeatProbeJsonSha256": "480c25ccabaeb4d860698496d91b5c175a23f02334cb59c94ca61cfe1e6a24f8",
+      "rawRgbArchive": "tools/compare/evidence/heal-bell-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "3b74295bf3bca06cc9c9a6e5f80c40b1435e8ebfd5a899f6067ad1eb1a16035b",
+      "rawRgbSha256": "b69aca352ba96284547383b28ea17c84ced1b92ff57c93b29aa59855322afa38",
+      "sourceWindow": {"startFrame": 210, "endFrame": 470, "frameCount": 261},
+      "attacker": {
+        "species": "CHIMECHO",
+        "geometry": {
+          "side": "opponent",
+          "spriteCorner": {"x": 144, "y": 2},
+          "animationCenter": {"x": 176, "y": 34},
+          "battlePositionCenter": {"x": 176, "y": 40}
+        }
+      },
+      "target": {
+        "species": "ONIX",
+        "geometry": {
+          "side": "player",
+          "spriteCorner": {"x": 40, "y": 53},
+          "animationCenter": {"x": 72, "y": 93},
+          "battlePositionCenter": {"x": 72, "y": 80}
+        }
+      }
+    }
+  },
+  "boundedRemainder": "No shared framebuffer compositor/draw wiring exists, so production framebuffer acceptance is 0/522. MOVE_HEAL_BELL remains unsupported and receives no coverage or latch credit."
+}

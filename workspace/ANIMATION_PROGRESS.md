@@ -1,3 +1,10 @@
+# MOVE_HEAL_BELL bilateral dense evidence + pure reducer/typed seam checkpoint — remains unsupported (2026-08-16 worker)
+
+- **State:** Coverage remains **192/276 Level-50 exact**, 0 partial, 0 staged, and **84 unsupported**. Heal Bell has no compositor/draw wiring, framebuffer acceptance, coverage entry, latch change, or sibling credit.
+- **Evidence:** Complete legal Scene-ON windows reproduce twice fresh byte-for-byte: player-back **209..469 (261 rows)** JSON/raw-RGB `01e2b6a3… / ad03fd91…`; opponent-front **210..470 (261 rows)** `480c25cc… / b69aca35…`. All **522** rows retain source/task/sprite/OAM/order/matrix/palette/allocator/register/audio/semantic/RNG/raw-RGB state through first inactive cleanup. Each side proves existing preceding-source hardware OAM/matrix/palette transfer **260/260**.
+- **Reducer/seam:** Pure age-relative code passes **522/522 reducer + typed-seam rows** for all 44 root commands, three HealBellRing groups, 12 side-mirrored Q8.8 notes and three palette variants, BELL/MUSIC_NOTES_2/THIN_RING unload, SPARKLE_2 reuse, final ObjBlend ring/palette work, five audio cues with bilateral pan, allocator slot reuse, and cleanup. Perish Song and Aromatherapy remain exact controls only and gain no Heal Bell/component credit.
+- **Next:** Implement the shared production framebuffer compositor/draw case and require twice-fresh **261/261 + 261/261 zero-residual** equality before promoting Heal Bell alone. No absolute battle tick, lookup framebuffer, gameplay/RNG/controller/turn/round/facility branch, coverage/latch/boundary/barrier change, or canonical-recording production import was added.
+
 # MOVE_HEAL_BELL authoritative-source + legal bilateral Scene-ON staging checkpoint — remains unsupported (2026-08-16 worker)
 
 - **State:** Coverage remains **192/276 Level-50 exact**, 0 partial, 0 staged, and **84 unsupported**. Heal Bell receives no component-track, latch, renderer, or coverage credit; MUSIC_NOTES_2, SPARKLE_2 / GrantingStars, thin-ring, and palette-task siblings remain independent controls.

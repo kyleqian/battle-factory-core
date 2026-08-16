@@ -404,6 +404,7 @@ import {
   refreshAtAge,
   type RefreshState,
 } from "./refresh.ts";
+import { healBellAtAge, type HealBellState } from "./healBell.ts";
 import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
@@ -1760,6 +1761,14 @@ export interface SceneOnRefreshConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Heal Bell presentation only; party status mutation remains battle-owned. */
+export interface SceneOnHealBellConfig {
+  readonly move: "HEAL_BELL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnSupersonicConfig {
   readonly move: "SUPERSONIC";
   readonly attacker: SceneOnPresentationBattler;
@@ -3033,6 +3042,7 @@ export type SceneOnMoveConfig =
   | SceneOnWishConfig
   | SceneOnMilkDrinkConfig
   | SceneOnRefreshConfig
+  | SceneOnHealBellConfig
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
   | SceneOnLeerConfig
@@ -4504,6 +4514,11 @@ export interface SceneOnRefreshView extends RefreshState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnHealBellView extends HealBellState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMilkDrinkView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5693,6 +5708,25 @@ export function sceneOnRefreshView(
       state.age,
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active Move_HEAL_BELL source-script row. */
+export function sceneOnHealBellView(
+  state: SceneOnMovePresentationState<SceneOnHealBellConfig>,
+): SceneOnHealBellView {
+  if (state.config.move !== "HEAL_BELL") {
+    throw new Error(`expected HEAL_BELL presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...healBellAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.attacker.geometry.battlePositionCenter,
     ),
   };
 }
