@@ -14,9 +14,13 @@
     "noteCallback": {"start":"0x08105de8","endExclusive":"0x08105e60","bytes":120,"sha256":"c8f66441519b428050b8b7d842fd7c5cecf86dcf236bf76a8f1a2d0842071642"},
     "loadMusicNotesPals": {"start":"0x08105cb4","endExclusive":"0x08105d60","bytes":172,"sha256":"7a246b79127027f608d200e90a2877230bc69ed744cca114d2cf3c56eb34de1d"},
     "freeMusicNotesPals": {"start":"0x08105d60","endExclusive":"0x08105d88","bytes":40,"sha256":"ff108aa0b5e8bac4bf16cdc5fe56a9d7b4d1923d8b93601907c329cbfdf84484"},
+    "blendBattleAnimPal": {"start":"0x08116620","endExclusive":"0x08116664","bytes":68,"sha256":"975e324bde253daeee7691503316df123b98c1269fb52a92f887476d321b21f7"},
+    "blendBattleAnimPalExclude": {"start":"0x08116664","endExclusive":"0x0811675c","bytes":248,"sha256":"48e20922730df327c553a6a3f6bdb60bfa7056e5d2ba82c73c46c7c4aea39d0f"},
     "musicNotePaletteTags": {"start":"0x08593950","endExclusive":"0x08593956","bytes":6,"sha256":"7ae7abd8e010e344ffae2f3490f1b5ab6d6947ac6b0b5ce55f1da646b3237b55"},
+    "thinRingExpandingAffine": {"start":"0x08593810","endExclusive":"0x08593818","bytes":8,"sha256":"96ae74330b7567661748621e3cd4b113b23b481efaebe103a78c5dff0437460f"},
     "thinRingTemplate": {"start":"0x0859381c","endExclusive":"0x08593834","bytes":24,"sha256":"ace9c35c66e073f95fc60720ed5330453937adacfd7c5906fed099ea3cc833df"},
     "blendThinRingTemplate": {"start":"0x08593868","endExclusive":"0x08593880","bytes":24,"sha256":"21fd916785b2f853a9c33e308e7732305c70d0f0137b70d2d8eb46415c6b2ba1"},
+    "sharedStarsAnimCmds": {"start":"0x08592b54","endExclusive":"0x08592b78","bytes":36,"sha256":"0507eed1e65e661d834e63a8f049989c2600e562ab6aaf947f98220c7ec21a85"},
     "sparklingStarsTemplate": {"start":"0x08592b94","endExclusive":"0x08592bac","bytes":24,"sha256":"3c3d46391269f2a16d598f696c66d276e3635bca5b39f3ee1a3629f950767b2c"},
     "sparklingStarsCallback": {"start":"0x0810135c","endExclusive":"0x08101440","bytes":228,"sha256":"4faca4cb31d2c464b4eabb7044527013478dc7c7bd03051b9c422662e85c9cdd"},
     "bellGfx": {"start":"0x08c226a4","endExclusive":"0x08c228d8","bytes":564,"sha256":"98489a084550cc4c76a31e05bdec6fd4dc00516f12c6ad636b5319f72e301d6d"},
@@ -25,6 +29,7 @@
     "musicNotesPalette": {"start":"0x08c22610","endExclusive":"0x08c226a4","bytes":148,"sha256":"f1b6ecfea60c4ae91720142ce477d0ac18411763f65124c2d8841088fc9a2f01"},
     "thinRingGfx": {"start":"0x08c22234","endExclusive":"0x08c223e0","bytes":428,"sha256":"e7d6945594e8f1bf50c324a5be3754c4ddcdc5c85b5cb81f7c9b7a8d2e63e0dd"},
     "thinRingPalette": {"start":"0x08c223e0","endExclusive":"0x08c22404","bytes":36,"sha256":"291e6ed30c91b23ef7ecf300b8906ba5d0fcb176f02e2c5d9b2f4f7aa33d5a0a"},
+    "sparkle2Gfx": {"start":"0x08c09cf0","endExclusive":"0x08c09f88","bytes":664,"sha256":"c21e2e5f015815d18a492220299ec880a5af7f9a063df71e9e69e15022a7276e"},
     "sparkle2Palette": {"start":"0x08c09fb0","endExclusive":"0x08c09fd8","bytes":40,"sha256":"bdaa64a242e1abc402504f7fc1e35d34df2aa70497a9a151bae42dd5568ac9b1"}
   },
   "stages": {
