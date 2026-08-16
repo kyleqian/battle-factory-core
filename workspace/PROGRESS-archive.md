@@ -1,3 +1,79 @@
+## 1285 — [main worker, 2026-08-16] **Call-scene attendant walk-away/walk-back rendered (MEASURED movement model); callscene-01 45/131 → 89/131, callscene-02 40/199 → 69/199 — remaining residual is unrelated pre-existing typewriter/menu-approach timing**
+
+- **State:** `postwin.ts`'s brain call scene renders the attendant's
+  walk-away (box 1→2, `Movement_AttendantMoveToReceiveCall`) and
+  walk-back (box 2→3, `Movement_AttendantReturnToPlayer`) instead of an
+  instant box-to-box cut — the residual PROGRESS 1283 left open. Full
+  `npm test` **1044 files / 9940 passed / 223 skipped**, `npm run build`
+  green. Differential PASS (563/563 byte-identical, `--base 704e685a`,
+  the commit before this step). Committed at `5dcff9fd`.
+- **Did:** Pixel-probed the attendant's own hair-color marker frame by
+  frame against dense (stride-1) re-fetches of both committed fixtures
+  (not the ground-truth doc's own coarser per-box table, which folds the
+  pre-movement hold into the same row) to get exact tick boundaries:
+  away — dismiss-A registers oracle frame 895, attendant still at rest
+  through 902 (8-tick closemessage/task-dispatch lead-in, MEASURED),
+  then 1px/tick left through 950 (3 tiles = 48px), holding at −48; back
+  — dismiss-A at 1037, attendant moves the SAME tick (0-tick lead-in,
+  MEASURED), 1px/tick right through 1084, home. Walk pose cycles
+  frame 7/2/8/2 every 8 ticks, source-derived from
+  `object_event_anims.h`'s `sAnim_GoWest`/`sAnim_GoEast` (GoEast is the
+  same table `hFlip`d). `postwin.ts`: box 1/2 dismissal now arms a
+  `callScenePendingElapsed` (deferred bump, mirroring box 1's own
+  `healDismissElapsed`-armed activation) instead of bumping the page
+  instantly — the OLD box stays rendered (already fully typed) through
+  the lead-in, then hides for the walk + a short MEASURED box-reopen lag
+  (3 ticks after the away leg, 4 after the back leg — both boxes
+  `closemessage`d before their `applymovement`, unlike every other box
+  turn in this file, which reuses an already-open box). `core.ts`/
+  `prebattleRoomRender.ts`: `renderPrebattleRoomSceneWithAttendantOffset`
+  (new) draws the attendant at a signed px offset with `hFlip` support
+  (added to `drawNpcFrame`), replacing the always-rest `renderPrebattle
+  RoomScene` call in the counter-room render path.
+- **Acceptance numbers:** callscene-01 **45/131 → 89/131**, callscene-02
+  **40/199 → 69/199** acceptance-grade frames exact. Remaining residual
+  (both fixtures) is **not movement**: (a) box 1's own typewriter cadence
+  has small pre-existing per-character timing drift (≤50px diffs, present
+  in the pre-this-step baseline too, oracle frames ~828-892 — box 1
+  visibly keeps printing past the ground-truth doc's own claimed "850
+  held" boundary, a doc/reality mismatch worth a future note); (b) a
+  9-frame blink-cursor phase offset during the held boss-message pages;
+  (c) a large late-window mismatch approaching the menu-open transition
+  (oracle ~1439+, callscene-02 only) — the boss-message page-turn/menu
+  delays were flagged "structural, not oracle-measured" since Brief 1
+  landed (PROGRESS 1281) and are unchanged this session. None of these
+  are new; all pre-date this step's diff (confirmed via the differential
+  PASS covering unrelated routes, and by re-diffing the same frame
+  ranges before/after this session's changes).
+- **Regression bars unmoved (all re-run live this session):** askready-
+  menu **21/21**, swapask-no **194/194**, entrance-02 **256/256**,
+  entrance-03 **162/256**, all four B2 speech windows **39/39, 74/74,
+  39/39, 28/28**, reveal **690/701**. `executableFrontierRatchet.test.ts`
+  barrier counts: unwidened. New Tier-1 pin: one test in
+  `tests/postwin.test.ts` exercises the full movement model (lead-in,
+  per-tick dx/pose, hold, reopen lag, both legs) against the MEASURED
+  tick values above; the pre-existing box-by-box test updated for the
+  new deferred-bump shape (boxes 1/2 gated, 3/4 still instant).
+- **Next:** the box 1 typewriter drift (a) and blink-cursor phase (b)
+  above, if a future step wants callscene-01/02 fully closed; the
+  boss-message page-turn/menu-approach constants (c) need their own
+  dense calibration pass (never done since Brief 1, per that step's own
+  disclosure) — likely the bigger lever on callscene-02's count. Stretch
+  item 5 (menu-record/menu-retire compare traces) not attempted — no
+  time left after the movement work.
+- **Notes:** Commits local only — pushing is Kyle's step. PAPERCUT: the
+  ground-truth doc's own table row ("850–893 Held — PNG-verified at
+  850") does not match direct pixel inspection (text is still mid-type
+  at 850, continuing to ~894) — cost time to notice via a fresh dense
+  pixel probe before trusting the doc's coarser table for tick
+  boundaries; worth a doc correction in a future session. Building the
+  movement model required fetching non-committed dense (stride-1)
+  battle-lab re-runs of the two fixtures directly (temp files under
+  `/tmp`, not committed) to get per-tick sprite position — the committed
+  fixtures' own capture lists are stride-2 in the movement span, enough
+  for compare acceptance but not enough to derive the movement model
+  from alone.
+
 ## 1284 — [main worker, 2026-08-16] **Gold Frontier-Brain reveal hold fixed (334/701 → 690/701, parity with silver); speech wiring (goal 2) not started — out of time this session**
 
 - **State:** Goal 1 of this step's brief (pic-reveal hold fix) is
