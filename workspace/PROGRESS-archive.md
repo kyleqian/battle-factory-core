@@ -1,3 +1,82 @@
+## 1286 — [main worker, 2026-08-16] **Gold Frontier-Brain 4-page speech wired (tier-aware brainSpeechBoxes); dense-calibrated against the three banked gold speech fixtures — hold/pause windows close exact, movement+typewriter+transition-handoff spans left as characterized residuals**
+
+- **State:** Goal 1 (wire gold's 4-page speech, PROGRESS 1284's seam) is
+  **landed and Tier-1 pinned**. Goal 2 (dense-calibrate against the three
+  `factory-brain-gold-speech-{open,pages,close}-off.json` fixtures) is
+  **done with honestly-characterized bounded residuals**, not full
+  closure — see Acceptance numbers. Full `npm test` **1044 files / 9949
+  passed / 223 skipped**, `npm run build` green. Differential PASS
+  (563/563 byte-identical, `--base 2d73d3c8`, the commit before this
+  step's first change).
+- **Did:** `battleRoom.ts`: parsed `goldFirstEncounter`/`goldRepeat` from
+  the walkup JSON into `GOLD_*_SPEECH_BOXES` (4 pages, no `\l` scroll →
+  1:1 box flattening; no battle-cry box — a separate "All right! Bring it
+  on!" close line instead), mirroring silver's shape. `BattleRoomState`
+  gained `brainSpeechTier` ("silver"|"gold", default silver — every
+  pre-existing caller unaffected), set from
+  `opponent.frontierBrain.status` in `battleRoomStateForOpponent`
+  (`"gold"` only; streak/streak-long default silver, out of scope).
+  `brainSpeechBoxes`/`brainSpeechCursorVisible`/
+  `battleRoomJustFinishedBrainPersonalitySpeech` generalized off the tier
+  instead of hardcoding silver's box counts — page 4's "static, no blink"
+  ground-truth fact (docs §7′) fell out of the existing "last personality
+  box never shows the cursor" rule for free, no special-case needed.
+  `core.ts`'s two call sites (initial tier selection, heard-flag marking)
+  now read the matching tier via the same `factoryHeardBrainSpeech`/
+  `markFactoryBrainSpeechHeard` machinery B2 built, instead of always
+  `"silver"`. Compare harness: `goldNolandRoundReadyState` (challenge-5
+  gold round, gold sibling of `nolandRoundReadyState`) plus gold
+  speech-window stages (open/box-held/settled, gold sibling of B2's
+  silver stages) in `factoryRoundIntroGeneralizationStage.ts`; three new
+  compare traces replay the three fixtures live against
+  `http://127.0.0.1:8014`.
+- **Acceptance numbers:** **open 58/256**, **pages 20/177**, **close
+  58/126** (all rerun live this session). Residual shapes, all
+  characterized: (1) **open** — frames 0-10 (escort-box hold tail) exact,
+  then the dismiss→movement→typewriter span mismatches heavily (30-40%
+  diff, whole-scene bbox) — this is the SAME B1c mid-ramp entrance-cadence
+  class PROGRESS 1278/1283 already left open for silver (entrance-03
+  162/256, never closed) reappearing on gold's own timeline, not a new
+  bug; by frame ~178 (page-1 held) it settles to a small persistent 24px
+  cursor-bob-phase diff (ssimMean 0.999, cosmetic). (2) **pages** — the
+  parked-`elapsed:0` box-held shortcut (B2's own idiom) doesn't happen to
+  land on the real cursor's bob phase at this fixture's chosen anchor
+  frame (unlike silver's own fixtures, which apparently do by
+  construction) — a small ~38-74px cursor-position offset present from
+  frame 0, plus the same generic MSGBOX-close/page-advance wipe animation
+  (never modeled by `msgboxVisual`'s constant-during-close shape, for
+  EITHER tier) at each of the 3 page-advance edges. (3) **close** — the
+  in-scope portion (box-hold + real dismiss + `brainSpeechSettled` pause)
+  is **58/62 exact** (only the 4-tick MSGBOX_CLOSE wipe gap misses, same
+  generic class as above); frames 62-125 are the downstream
+  battle-transition handoff (post `BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED`),
+  a different subsystem this stage's minimal state never populates
+  (`transitionPresentation` unset) — already covered elsewhere by the
+  gold/silver reveal windows' own 690/701 acceptance, not a speech-scene
+  gap. None of these residuals are new src/ bugs surfaced by this step;
+  each is either inherited-and-already-disclosed (B1c) or a compare-
+  harness calibration artifact (bob phase, wipe animation, transition
+  handoff) — the actual **content** (JSON-exact text, page count, static
+  page 4, no-cry close line, per-tier heard-flag gating) is what this
+  step's Tier-1 tests pin, and those are exact.
+- **Regression bars unmoved (all re-run live this session):** silver's
+  four B2 speech windows **39/39, 74/74, 39/39, 28/28**, entrance-02
+  **256/256**, gold reveal **690/701**.
+  `executableFrontierRatchet.test.ts` barrier counts: unwidened.
+- **Next:** if a future step wants the gold speech windows fully closed:
+  (a) re-derive the movement+typewriter-open span from the real B1c fix
+  (shared with silver, not gold-specific — fix once, benefits both); (b)
+  re-anchor the "pages" fixture's box-held park to a cursor-bob-phase-
+  aligned oracle frame (or thread an explicit `elapsed` override through
+  the gold box-held stage) to clear the small cosmetic residual; (c)
+  model the MSGBOX-close wipe animation (currently a constant-content
+  gap in `msgboxVisual`, present for both tiers) if a step ever needs
+  page-advance-edge frames, not just held pages.
+- **Notes:** Commits local only — pushing is Kyle's step.
+
+
+---
+
 ## 1285 — [main worker, 2026-08-16] **Call-scene attendant walk-away/walk-back rendered (MEASURED movement model); callscene-01 45/131 → 89/131, callscene-02 40/199 → 69/199 — remaining residual is unrelated pre-existing typewriter/menu-approach timing**
 
 - **State:** `postwin.ts`'s brain call scene renders the attendant's

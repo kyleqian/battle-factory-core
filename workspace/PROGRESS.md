@@ -5,6 +5,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1289 — [main worker, 2026-08-16] **RECORD/RETIRE compare traces found + fixed a real brain-route bug (wrong re-ask prompt) — both close 178/178, 174/174; box-1 hold-boundary doc row pixel-corrected; call-scene 89/131 & 69/199 investigated, left unmoved**
+
+- **State:** Landed and green. `npm test` **1045 files / 9950 passed /
+  223 skipped**, `npm run build` + `npm run typecheck` green.
+  Differential PASS (563/563 byte-identical, `--base 56ef0edf`).
+  Committed at `6ab494fc`. **Note for the supervisor:** the wind-down
+  gates in 1288 predate this step — re-run them at the next fold.
+- **Did (goal 3, RECORD/RETIRE traces):** added
+  `tools/compare/traces/factory-brain-silver-walkup-askready-menu-
+  {record,retire}-off.json` (segments/captureFrames copied verbatim from
+  the two banked read-only fixtures), replaying against the existing
+  `...-askready-menu-open-off` stage. First runs surfaced a **real bug**,
+  not just a timing residual: the RECORD/RETIRE re-ask (after a NO
+  dismiss or a RECORD-YES-then-dismiss) unconditionally drew the
+  ordinary route's short "The 2nd match is next!" prompt with its
+  timing constants, even on the brain route, which has a different,
+  longer `AskReadyForHead` prompt. Fixed in `postwin.ts`
+  (`postwinQuestionReprintVisibleChars`/`Settled`/`MenuReady` +
+  `advancePostwin`'s `reAskMenuReady` now select the right prompt/total
+  per `state.frontierBrain` and re-derive settled/menu-ready delays from
+  its own length, same `firstDelay+total-1[+4]` shape the ordinary
+  constants were fit from — structural, not independently oracle-
+  measured for this specific reprint) and `core.ts` (three `drawLines`
+  call sites branch on `frontierBrain`). Both traces now close **full:
+  178/178, 174/174** (was 0/178, 0/174 pre-fix).
+- **Did (goal 2, doc correction):** `docs/walkup-call-scene-ground-
+  truth.md`'s box-1 hold row ("850–893 Held — PNG-verified at 850"),
+  flagged suspect by PROGRESS 1285 but never re-derived, was corrected
+  via a fresh dense (stride-1) pixel probe of frames 815–905 (temp, not
+  committed): the box is still mid-typewriter at 850 and only completes
+  at 894, one frame before the already-known dismiss-A at 895. Dated
+  correction note added inline; old value preserved in the note.
+- **Did (goal 1, calibration — not closed):** investigated both
+  fixtures' residuals with fresh dense oracle probes. Box-1's typewriter
+  "drift" (callscene-01) and box-5's dismiss→menu handoff (callscene-02,
+  the "biggest lever" the brief flagged) were both root-caused to
+  specific oracle frames, but **two independent single-constant
+  experiments regressed the fixtures badly** when tested live: shifting
+  box-1's first-glyph delay by +1/+2 dropped callscene-01 from 89/131 to
+  77/131 and 53/131 (a huge new 22%-diff region appeared past frame
+  413); shifting box-5's dismiss edge by +1 dropped callscene-02 from
+  69/199 to 44/199. Both regressions land past the point where the
+  trace's own FIXED button-press timing lives — a shift that moves a
+  ready-boundary across a fixed press edge triggers the documented
+  input-swallow trap (a whole press cycle gets lost, not just the shifted
+  span), so a naive single-constant fit makes things worse, not better.
+  Both experiments were reverted; callscene-01/02 are **unmoved at
+  89/131 and 69/199** (re-confirmed live this session) rather than risk
+  landing a net-negative "fix." The precise oracle-frame evidence
+  gathered this session (box-1: box reopens empty at 829, first glyph
+  830, fully typed 894, dismiss 895 — all pixel-confirmed; box-5: app
+  clears one tick before oracle at the box5→menu handoff) is recorded
+  here for whoever picks this up next; it needs `core.ts`'s actual
+  per-tick input-acceptance semantics understood before a safe fix,
+  not just another constant guess.
+- **Regression bars unmoved (all re-run live this session):**
+  askready-menu **21/21**, swapask-no **194/194**, entrance-02
+  **256/256**, silver reveal **690/701**, callscene-01 **89/131**,
+  callscene-02 **69/199**. `executableFrontierRatchet.test.ts` barrier
+  counts: unwidened. New coverage: `postwin.test.ts` (48 tests,
+  unmodified, all still green — the reprint fix didn't touch any
+  ordinary-route-tested behavior, confirmed by re-run).
+- **Next:** call-scene calibration remains open — a future step should
+  read `core.ts`'s actual button-accept tick semantics (not just
+  `postwin.ts`'s state functions) before attempting another constant
+  shift, given this session's two failed attempts. Otherwise the 1288
+  queue's (b)/(c)/(e) items stand as before.
+- **Notes:** Commits local only — pushing is Kyle's step. No PAPERCUT
+  this session (tooling worked as documented throughout).
+
 ## 1288 — [supervisor wind-down, 2026-08-16] **Walk-up step A BUILT + calibrated end-to-end, gold post-fix program executed (reveal 0/701→690/701, tier-aware 4-page speech), B1c cadence largely closed, #91 found+fixed — 12 worker steps, 2 lanes, all gates green**
 
 - **State:** The 1279 queue is fully advanced on the fixed oracle
@@ -137,83 +207,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** none. No PAPERCUT this session.
 
 ---
-
-## 1286 — [main worker, 2026-08-16] **Gold Frontier-Brain 4-page speech wired (tier-aware brainSpeechBoxes); dense-calibrated against the three banked gold speech fixtures — hold/pause windows close exact, movement+typewriter+transition-handoff spans left as characterized residuals**
-
-- **State:** Goal 1 (wire gold's 4-page speech, PROGRESS 1284's seam) is
-  **landed and Tier-1 pinned**. Goal 2 (dense-calibrate against the three
-  `factory-brain-gold-speech-{open,pages,close}-off.json` fixtures) is
-  **done with honestly-characterized bounded residuals**, not full
-  closure — see Acceptance numbers. Full `npm test` **1044 files / 9949
-  passed / 223 skipped**, `npm run build` green. Differential PASS
-  (563/563 byte-identical, `--base 2d73d3c8`, the commit before this
-  step's first change).
-- **Did:** `battleRoom.ts`: parsed `goldFirstEncounter`/`goldRepeat` from
-  the walkup JSON into `GOLD_*_SPEECH_BOXES` (4 pages, no `\l` scroll →
-  1:1 box flattening; no battle-cry box — a separate "All right! Bring it
-  on!" close line instead), mirroring silver's shape. `BattleRoomState`
-  gained `brainSpeechTier` ("silver"|"gold", default silver — every
-  pre-existing caller unaffected), set from
-  `opponent.frontierBrain.status` in `battleRoomStateForOpponent`
-  (`"gold"` only; streak/streak-long default silver, out of scope).
-  `brainSpeechBoxes`/`brainSpeechCursorVisible`/
-  `battleRoomJustFinishedBrainPersonalitySpeech` generalized off the tier
-  instead of hardcoding silver's box counts — page 4's "static, no blink"
-  ground-truth fact (docs §7′) fell out of the existing "last personality
-  box never shows the cursor" rule for free, no special-case needed.
-  `core.ts`'s two call sites (initial tier selection, heard-flag marking)
-  now read the matching tier via the same `factoryHeardBrainSpeech`/
-  `markFactoryBrainSpeechHeard` machinery B2 built, instead of always
-  `"silver"`. Compare harness: `goldNolandRoundReadyState` (challenge-5
-  gold round, gold sibling of `nolandRoundReadyState`) plus gold
-  speech-window stages (open/box-held/settled, gold sibling of B2's
-  silver stages) in `factoryRoundIntroGeneralizationStage.ts`; three new
-  compare traces replay the three fixtures live against
-  `http://127.0.0.1:8014`.
-- **Acceptance numbers:** **open 58/256**, **pages 20/177**, **close
-  58/126** (all rerun live this session). Residual shapes, all
-  characterized: (1) **open** — frames 0-10 (escort-box hold tail) exact,
-  then the dismiss→movement→typewriter span mismatches heavily (30-40%
-  diff, whole-scene bbox) — this is the SAME B1c mid-ramp entrance-cadence
-  class PROGRESS 1278/1283 already left open for silver (entrance-03
-  162/256, never closed) reappearing on gold's own timeline, not a new
-  bug; by frame ~178 (page-1 held) it settles to a small persistent 24px
-  cursor-bob-phase diff (ssimMean 0.999, cosmetic). (2) **pages** — the
-  parked-`elapsed:0` box-held shortcut (B2's own idiom) doesn't happen to
-  land on the real cursor's bob phase at this fixture's chosen anchor
-  frame (unlike silver's own fixtures, which apparently do by
-  construction) — a small ~38-74px cursor-position offset present from
-  frame 0, plus the same generic MSGBOX-close/page-advance wipe animation
-  (never modeled by `msgboxVisual`'s constant-during-close shape, for
-  EITHER tier) at each of the 3 page-advance edges. (3) **close** — the
-  in-scope portion (box-hold + real dismiss + `brainSpeechSettled` pause)
-  is **58/62 exact** (only the 4-tick MSGBOX_CLOSE wipe gap misses, same
-  generic class as above); frames 62-125 are the downstream
-  battle-transition handoff (post `BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED`),
-  a different subsystem this stage's minimal state never populates
-  (`transitionPresentation` unset) — already covered elsewhere by the
-  gold/silver reveal windows' own 690/701 acceptance, not a speech-scene
-  gap. None of these residuals are new src/ bugs surfaced by this step;
-  each is either inherited-and-already-disclosed (B1c) or a compare-
-  harness calibration artifact (bob phase, wipe animation, transition
-  handoff) — the actual **content** (JSON-exact text, page count, static
-  page 4, no-cry close line, per-tier heard-flag gating) is what this
-  step's Tier-1 tests pin, and those are exact.
-- **Regression bars unmoved (all re-run live this session):** silver's
-  four B2 speech windows **39/39, 74/74, 39/39, 28/28**, entrance-02
-  **256/256**, gold reveal **690/701**.
-  `executableFrontierRatchet.test.ts` barrier counts: unwidened.
-- **Next:** if a future step wants the gold speech windows fully closed:
-  (a) re-derive the movement+typewriter-open span from the real B1c fix
-  (shared with silver, not gold-specific — fix once, benefits both); (b)
-  re-anchor the "pages" fixture's box-held park to a cursor-bob-phase-
-  aligned oracle frame (or thread an explicit `elapsed` override through
-  the gold box-held stage) to clear the small cosmetic residual; (c)
-  model the MSGBOX-close wipe animation (currently a constant-content
-  gap in `msgboxVisual`, present for both tiers) if a step ever needs
-  page-advance-edge frames, not just held pages.
-- **Notes:** Commits local only — pushing is Kyle's step.
-
-
----
-
