@@ -18,6 +18,7 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
       coverageCredit: false,
       acceptance: {
         sourceRows: 394, rawRgbRows: 394, freshRunsPerOrientation: 2,
+        reducerRows: 394, typedSeamRows: 394,
         ringGroups: 3, ringSprites: 15, crossGroups: 9, crossSprites: 45,
         firstInactiveCleanupAge: 196,
       },
@@ -25,6 +26,8 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
     expect(sha(fixture.source.audit)).toBe(fixture.source.auditSha256);
     expect(sha(fixture.source.probe)).toBe(fixture.source.probeSha256);
     expect(sha(fixture.source.verifier)).toBe(fixture.source.verifierSha256);
+    expect(sha(fixture.source.reducerVerifier))
+      .toBe(fixture.source.reducerVerifierSha256);
     expect(sha(fixture.source.stagingFixture))
       .toBe(fixture.source.stagingFixtureSha256);
     for (const orientation of ["player-back", "opponent-front"] as const) {
@@ -74,7 +77,8 @@ describe("MOVE_FIRE_BLAST bilateral dense evidence checkpoint", () => {
       expect(coverage.entries.find((entry: any) => entry.move === move))
         .toMatchObject({ status: "exact" });
     }
-    expect(fixture.boundedRemainder).toContain("no reducer");
+    expect(fixture.boundedRemainder).toContain("reducer and typed seam are exact");
+    expect(fixture.boundedRemainder).toContain("no asset extraction");
     expect(fixture.boundedRemainder).toContain("sibling credit");
   });
 });

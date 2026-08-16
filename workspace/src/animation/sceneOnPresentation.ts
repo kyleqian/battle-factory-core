@@ -406,6 +406,11 @@ import {
 } from "./refresh.ts";
 import { healBellAtAge, type HealBellState } from "./healBell.ts";
 import {
+  fireBlastAtAge,
+  type FireBlastGeometry,
+  type FireBlastState,
+} from "./fireBlast.ts";
+import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
 } from "./supersonic.ts";
@@ -1030,7 +1035,8 @@ export interface SceneOnPresentationBattler {
     | "GLIGAR"
     | "METANG"
     | "MISDREAVUS"
-    | "GENGAR";
+    | "GENGAR"
+    | "OCTILLERY";
   readonly geometry: SceneOnBattlerGeometry;
 }
 
@@ -1768,6 +1774,15 @@ export interface SceneOnHealBellConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Fire Blast presentation only; damage and battle state remain battle-owned. */
+export interface SceneOnFireBlastConfig {
+  readonly move: "FIRE_BLAST";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<FireBlastGeometry>;
 }
 
 export interface SceneOnSupersonicConfig {
@@ -3044,6 +3059,7 @@ export type SceneOnMoveConfig =
   | SceneOnMilkDrinkConfig
   | SceneOnRefreshConfig
   | SceneOnHealBellConfig
+  | SceneOnFireBlastConfig
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
   | SceneOnLeerConfig
@@ -4520,6 +4536,11 @@ export interface SceneOnHealBellView extends HealBellState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnFireBlastView extends FireBlastState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMilkDrinkView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5728,6 +5749,24 @@ export function sceneOnHealBellView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.attacker.geometry.battlePositionCenter,
+    ),
+  };
+}
+
+/** `age=0` is the first active Move_FIRE_BLAST source-script row. */
+export function sceneOnFireBlastView(
+  state: SceneOnMovePresentationState<SceneOnFireBlastConfig>,
+): SceneOnFireBlastView {
+  if (state.config.move !== "FIRE_BLAST") {
+    throw new Error(`expected FIRE_BLAST presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...fireBlastAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.animationProfile,
     ),
   };
 }
