@@ -45,12 +45,12 @@ import type { BattleOpponent } from "../src/engine/battleScenario.ts";
 
 const entranceScene = walkup.scenes.battleRoomEntrance;
 
-function brainOpponent(): BattleOpponent {
+function brainOpponent(status: Exclude<BattleOpponent["frontierBrain"], undefined>["status"] = "silver"): BattleOpponent {
   return {
     id: "noland",
     trainerName: "NOLAND",
     party: [] as unknown as BattleOpponent["party"],
-    frontierBrain: { status: "silver" },
+    frontierBrain: { status },
   };
 }
 
@@ -127,6 +127,13 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     // No opponent at all (undefined) also takes the ordinary shape - never a
     // battle-number/trace-name branch, only the field's presence matters.
     expect(battleRoomStateForOpponent(undefined).frontierBrainWalkup).toBeUndefined();
+  });
+
+  it("walk-up build step B3: brainSpeechTier is derived from opponent.frontierBrain.status - only 'gold' selects the gold speech, every other status (including the not-yet-presentation-wired streak/streak-long repeats) keeps the pre-B3 silver default", () => {
+    expect(battleRoomStateForOpponent(brainOpponent("silver")).brainSpeechTier).toBe("silver");
+    expect(battleRoomStateForOpponent(brainOpponent("gold")).brainSpeechTier).toBe("gold");
+    expect(battleRoomStateForOpponent(brainOpponent("streak")).brainSpeechTier).toBe("silver");
+    expect(battleRoomStateForOpponent(brainOpponent("streak-long")).brainSpeechTier).toBe("silver");
   });
 
   it("box stays hidden through the room fade-in, appears at BRAIN_MSGBOX_APPEAR_ELAPSED, prints, then holds idle until the player's A press - no movement happens yet", () => {

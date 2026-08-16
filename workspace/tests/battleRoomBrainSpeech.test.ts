@@ -1,10 +1,11 @@
-// Walk-up build step B2: Tier-1 tests for the silver Noland speech machine
-// (src/engine/battleRoom.ts's brainSpeech* phases) - the 8-page first-
-// encounter personality speech + battle-cry line, the 2-event repeat
-// variant, the in-session heard-speech flag gating which variant plays, and
-// the handoff seam into the existing brain battle-start path. Pinned
-// against src/data/gen/factory-brain-walkup-script.json (source truth,
-// already pinned structurally by tests/factoryBrainWalkupScript.test.ts).
+// Walk-up build steps B2/B3: Tier-1 tests for the silver and gold Noland
+// speech machine (src/engine/battleRoom.ts's brainSpeech* phases) - the
+// gated first-encounter personality speech + close/cry line, the short
+// repeat variant, the in-session heard-speech flag gating which variant
+// plays (independently per tier), and the handoff seam into the existing
+// brain battle-start path. Pinned against
+// src/data/gen/factory-brain-walkup-script.json (source truth, already
+// pinned structurally by tests/factoryBrainWalkupScript.test.ts).
 import { describe, expect, it } from "vitest";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
@@ -22,6 +23,10 @@ import {
   BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED,
   brainSpeechCursorVisible,
   createBrainWalkupBattleRoomState,
+  GOLD_FIRST_ENCOUNTER_SPEECH_BOXES,
+  GOLD_PERSONALITY_BOX_COUNT,
+  GOLD_PERSONALITY_SPEECH_BOXES,
+  GOLD_REPEAT_SPEECH_BOXES,
   MSGBOX_CLOSE_TICKS,
   msgboxVisual,
   SILVER_FIRST_ENCOUNTER_SPEECH_BOXES,
@@ -75,9 +80,11 @@ function minimalOrchestrator(id: string) {
 
 const silverFirstEncounter = walkup.scenes.silverFirstEncounter;
 const silverRepeat = walkup.scenes.silverRepeat;
+const goldFirstEncounter = walkup.scenes.goldFirstEncounter;
+const goldRepeat = walkup.scenes.goldRepeat;
 
-function settledFirstEncounterState(): BattleRoomState {
-  let state: BattleRoomState = createBrainWalkupBattleRoomState(undefined, false);
+function settledFirstEncounterState(tier: "silver" | "gold" = "silver"): BattleRoomState {
+  let state: BattleRoomState = createBrainWalkupBattleRoomState(undefined, false, tier);
   for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) state = advanceBattleRoom(state);
   state = { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
   for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
@@ -232,3 +239,137 @@ function advanceThroughFullyPrinted(state: BattleRoomState): BattleRoomState {
   while (!battleRoomQuoteInputReady(next)) next = advanceBattleRoom(next);
   return next;
 }
+
+describe("gold Noland speech (walk-up build step B3)", () => {
+  it("the JSON's goldFirstEncounter speech is 4 pages, verbatim, gated on the gold heard-speech flag (its own bit, independent of silver's)", () => {
+    const message = goldFirstEncounter.events[0] as { pages: readonly string[] };
+    expect(message.pages).toHaveLength(4);
+    expect(message.pages[0]).toBe("NOLAND: Hey, hey! How's it going?\\nYou keeping up with your studies?");
+    expect(message.pages[3]).toBe("Now, this should be fun!\\nI'm getting excited, hey!");
+    // No battle-cry event - the gated speech is followed directly by the
+    // always-shown close line (module doc in battleRoom.ts).
+    const close = goldFirstEncounter.events[2] as { pages: readonly string[] };
+    expect(close.pages).toEqual(["All right!\\nBring it on!"]);
+    expect((goldFirstEncounter.gate as { bit: string }).bit).toBe("1 << 9");
+    expect((walkup.scenes.silverFirstEncounter.gate as { bit: string }).bit).toBe("1 << 8");
+  });
+
+  it("flattens the 4 pages to 4 boxes 1:1 (no \\l scroll in any gold page, unlike silver's page 1) - text verbatim spot-checked", () => {
+    expect(GOLD_PERSONALITY_SPEECH_BOXES).toHaveLength(4);
+    expect(GOLD_PERSONALITY_BOX_COUNT).toBe(4);
+    expect(GOLD_PERSONALITY_SPEECH_BOXES[0]).toEqual([
+      "NOLAND: Hey, hey! How’s it going?",
+      "You keeping up with your studies?",
+    ]);
+    expect(GOLD_PERSONALITY_SPEECH_BOXES[1]).toEqual(["…Oh?", ""]);
+    expect(GOLD_PERSONALITY_SPEECH_BOXES[2]).toEqual([
+      "You’ve taken on a harder look than",
+      "the last time I saw you.",
+    ]);
+    expect(GOLD_PERSONALITY_SPEECH_BOXES[3]).toEqual([
+      "Now, this should be fun!",
+      "I’m getting excited, hey!",
+    ]);
+    // First-encounter queue is the 4 personality boxes plus the close line.
+    expect(GOLD_FIRST_ENCOUNTER_SPEECH_BOXES).toHaveLength(5);
+    expect(GOLD_FIRST_ENCOUNTER_SPEECH_BOXES[4]).toEqual(["All right!", "Bring it on!"]);
+  });
+
+  it("the repeat variant (goldRepeat.events: close message + DoNolandBattle call, 2 JSON events) is just the one close box - the same text either variant ends on", () => {
+    expect(goldRepeat.events).toHaveLength(2);
+    expect(goldRepeat.events[0]!.kind).toBe("message");
+    expect(goldRepeat.events[1]!.kind).toBe("call");
+    expect(GOLD_REPEAT_SPEECH_BOXES).toHaveLength(1);
+    expect(GOLD_REPEAT_SPEECH_BOXES[0]).toEqual(
+      GOLD_FIRST_ENCOUNTER_SPEECH_BOXES[GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length - 1],
+    );
+    // Gold's close line is textually distinct from silver's own cry line.
+    expect(GOLD_REPEAT_SPEECH_BOXES[0]).not.toEqual(SILVER_REPEAT_SPEECH_BOXES[0]);
+  });
+
+  it("flag gating: heardBrainSpeechBefore selects the repeat variant, unset selects the full first-encounter speech - same shape as silver, tier passed as the third arg", () => {
+    const first = createBrainWalkupBattleRoomState(undefined, false, "gold");
+    expect(first.brainSpeechFirstEncounter).toBe(true);
+    expect(first.brainSpeechTier).toBe("gold");
+    const repeat = createBrainWalkupBattleRoomState(undefined, true, "gold");
+    expect(repeat.brainSpeechFirstEncounter).toBe(false);
+    expect(repeat.brainSpeechTier).toBe("gold");
+    // Omitting the tier arg (every pre-B3 call site) still defaults silver.
+    expect(createBrainWalkupBattleRoomState(undefined, false).brainSpeechTier).toBe("silver");
+  });
+
+  it("brainSettled hands off into the gold speech; the first box's text/print-tick count matches box 0 and battleRoomQuote", () => {
+    const state = settledFirstEncounterState("gold");
+    expect(state.phase).toBe("brainSpeech");
+    expect(state.speechStep).toBe(0);
+    expect(battleRoomQuote(state)).toEqual(GOLD_PERSONALITY_SPEECH_BOXES[0]);
+    const box0PrintTicks = GOLD_PERSONALITY_SPEECH_BOXES[0]![0].length
+      + GOLD_PERSONALITY_SPEECH_BOXES[0]![1].length;
+    let printed = state;
+    for (let i = 0; i < box0PrintTicks; i += 1) printed = advanceBattleRoom(printed);
+    expect(printed.phase).toBe("brainSpeechIdle");
+    expect(msgboxVisual(printed)).toEqual({ visible: true, chars: box0PrintTicks });
+    expect(battleRoomQuoteInputReady(printed)).toBe(true);
+  });
+
+  it("walks through all 5 first-encounter boxes in order, then settles into 'brainSpeechSettled' - page 4 (the last personality box) is STATIC, no cursor blink, matching the dense gold ground truth (docs/noland-brain-intro-gold-ground-truth.md §7')", () => {
+    let state = settledFirstEncounterState("gold");
+    const seenBoxes: (readonly [string, string])[] = [];
+    let heardFired = 0;
+    for (let box = 0; box < GOLD_FIRST_ENCOUNTER_SPEECH_BOXES.length; box += 1) {
+      expect(state.phase).toBe("brainSpeech");
+      expect(state.speechStep).toBe(box);
+      seenBoxes.push(battleRoomQuote(state));
+      let next = advanceThroughFullyPrinted(state);
+      // Cursor shows on every box except the last personality page (page 4,
+      // index 3 - static per the dense ground truth) and the close line
+      // (a standalone msgbox, same shape as silver's cry box).
+      expect(brainSpeechCursorVisible(next)).toBe(box < GOLD_PERSONALITY_BOX_COUNT - 1);
+      next = { ...next, phase: battleRoomMsgboxClosingPhase(next), elapsed: 0 };
+      for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) {
+        const prev = next;
+        next = advanceBattleRoom(next);
+        if (battleRoomJustFinishedBrainPersonalitySpeech(prev, next)) heardFired += 1;
+      }
+      state = next;
+    }
+    expect(seenBoxes).toEqual(GOLD_FIRST_ENCOUNTER_SPEECH_BOXES);
+    // The heard-speech transition fires exactly once, between the last
+    // personality box (index 3) and the close box (index 4).
+    expect(heardFired).toBe(1);
+    expect(state.phase).toBe("brainSpeechSettled");
+    expect(state.elapsed).toBe(0);
+    for (let i = 0; i < BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    expect(state.phase).toBe("brainSpeechSettled");
+    expect(msgboxVisual(state)).toEqual({ visible: false, chars: 0 });
+  });
+
+  it("the repeat variant walks through exactly 1 box (no personality speech, no heard-flag transition) straight to brainSpeechSettled", () => {
+    let state: BattleRoomState = createBrainWalkupBattleRoomState(undefined, true, "gold");
+    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    state = { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
+    for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
+    for (let i = 0; i < BRAIN_MOVEMENT_SETTLE_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    for (let i = 0; i <= SPEECH_APPEAR_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    expect(state.phase).toBe("brainSpeech");
+    expect(state.speechStep).toBe(0);
+    expect(battleRoomQuote(state)).toEqual(GOLD_REPEAT_SPEECH_BOXES[0]);
+    let next = advanceThroughFullyPrinted(state);
+    next = { ...next, phase: battleRoomMsgboxClosingPhase(next), elapsed: 0 };
+    for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) {
+      const prev = next;
+      next = advanceBattleRoom(next);
+      expect(battleRoomJustFinishedBrainPersonalitySpeech(prev, next)).toBe(false);
+    }
+    expect(next.phase).toBe("brainSpeechSettled");
+  });
+
+  it("the heard-speech flag is per-tier and in-session only: marking gold never touches silver's own slot, matching B2's precedent for silver marking gold", () => {
+    const heard = markFactoryBrainSpeechHeard(minimalOrchestrator("brain-speech-heard-gold"), "gold");
+    expect(factoryHeardBrainSpeech(heard.facilityState, "gold")).toBe(true);
+    // Marking is idempotent.
+    expect(markFactoryBrainSpeechHeard(heard, "gold")).toBe(heard);
+    // Silver's own slot is independent and untouched by the gold mark.
+    expect(factoryHeardBrainSpeech(heard.facilityState, "silver")).toBe(false);
+  });
+});

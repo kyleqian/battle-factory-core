@@ -1051,14 +1051,20 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         // entrance branch here - see battleRoom.ts's battleRoomStateForOpponent
         // doc. Behaviorally identical to the old hardcoded shape whenever
         // frontierBrain is unset (every ordinary opponent). Walk-up build
-        // step B2: the silver-tier in-session heard-speech flag (never save-
-        // persisted - user decision, out of scope) picks the gated 8-page
-        // personality speech vs. the short repeat variant.
+        // steps B2/B3: each tier's own in-session heard-speech flag (never
+        // save-persisted - user decision, out of scope) picks that tier's
+        // gated personality speech vs. its short repeat variant -
+        // battleRoomStateForOpponent itself derives WHICH tier's content
+        // from currentOpponent.frontierBrain.status, so this call only needs
+        // to read the matching tier's own flag.
         battleRoom = battleRoomStateForOpponent(
           currentOpponent,
           currentTrainerPresentation,
           factoryRoundBattleOrchestrator !== null
-            && factoryHeardBrainSpeech(factoryRoundBattleOrchestrator.facilityState, "silver"),
+            && factoryHeardBrainSpeech(
+              factoryRoundBattleOrchestrator.facilityState,
+              currentOpponent?.frontierBrain?.status === "gold" ? "gold" : "silver",
+            ),
         );
       }
     } else if (battleRoom) {
@@ -1071,18 +1077,21 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       } else {
         const prevBattleRoom = battleRoom;
         battleRoom = advanceBattleRoom(battleRoom);
-        // Walk-up build step B2: the JSON's own frontier_set FRONTIER_DATA_
-        // HEARD_BRAIN_SPEECH moment - fires once, between the personality
-        // speech's last box and the always-shown cry box (see
-        // battleRoomJustFinishedBrainPersonalitySpeech's own doc for why
-        // exact-tick fidelity is inconsequential here).
+        // Walk-up build steps B2/B3: the JSON's own frontier_set
+        // FRONTIER_DATA_HEARD_BRAIN_SPEECH moment - fires once, between the
+        // personality speech's last box and the always-shown close/cry box
+        // (see battleRoomJustFinishedBrainPersonalitySpeech's own doc for
+        // why exact-tick fidelity is inconsequential here). Marks the SAME
+        // tier `prevBattleRoom` was showing (`brainSpeechTier`, set once at
+        // brain-room construction) - never hardcoded, so gold and silver
+        // each mark only their own independent flag.
         if (
           factoryRoundBattleOrchestrator !== null
           && battleRoomJustFinishedBrainPersonalitySpeech(prevBattleRoom, battleRoom)
         ) {
           factoryRoundBattleOrchestrator = markFactoryBrainSpeechHeard(
             factoryRoundBattleOrchestrator,
-            "silver",
+            prevBattleRoom.brainSpeechTier === "gold" ? "gold" : "silver",
           );
         }
         const extraRngSteps = opponentSetupExtraRngSteps(battleRoom);

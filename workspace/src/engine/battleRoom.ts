@@ -108,14 +108,26 @@ export interface BattleRoomState {
   frontierBrainWalkup?: true;
   /**
    * Walk-up build step B2: true when this brain encounter shows the full
-   * gated first-time personality speech (`silverFirstEncounter` - 8 pages +
-   * cry); false selects the 2-event repeat variant (`silverRepeat` - cry
-   * only). Set once at construction from the silver-tier heard-speech flag
-   * (`factoryHeardBrainSpeech`/`markFactoryBrainSpeechHeard`,
+   * gated first-time personality speech (`silverFirstEncounter`/
+   * `goldFirstEncounter` - see `brainSpeechTier` for which); false selects
+   * the short repeat variant (`silverRepeat`/`goldRepeat` - the always-shown
+   * close line only). Set once at construction from the tier's own heard-
+   * speech flag (`factoryHeardBrainSpeech`/`markFactoryBrainSpeechHeard`,
    * factoryRoundBattleOrchestrator.ts) and never re-read afterward - only
    * meaningful when `frontierBrainWalkup` is set.
    */
   brainSpeechFirstEncounter?: boolean;
+  /**
+   * Walk-up build step B3: which Frontier-Brain tier's speech content
+   * applies (`goldFirstEncounter`/`goldRepeat` vs `silverFirstEncounter`/
+   * `silverRepeat`, both from `factory-brain-walkup-script.json`) - set once
+   * at construction from `opponent.frontierBrain.status`
+   * (`battleRoomStateForOpponent`), never re-read afterward. Defaults to
+   * `"silver"` so every pre-B3 caller (silver's own tests/traces, and any
+   * caller that never touched this field) is unchanged. Only meaningful
+   * when `frontierBrainWalkup` is set.
+   */
+  brainSpeechTier?: "silver" | "gold";
   /**
    * Index into `brainSpeechBoxes(state)` for the box currently printing/
    * idle ("brainSpeech"/"brainSpeechIdle") or just dismissed
@@ -145,12 +157,14 @@ export const INITIAL_BATTLE_2_ROOM_STATE: BattleRoomState = {
 export function createBrainWalkupBattleRoomState(
   trainerPresentation?: FactoryTrainerPresentation,
   heardBrainSpeechBefore = false,
+  brainSpeechTier: "silver" | "gold" = "silver",
 ): BattleRoomState {
   return Object.freeze({
     phase: "brainEntering",
     elapsed: 0,
     frontierBrainWalkup: true,
     brainSpeechFirstEncounter: !heardBrainSpeechBefore,
+    brainSpeechTier,
     trainerPresentation,
   });
 }
@@ -172,7 +186,17 @@ export function battleRoomStateForOpponent(
   heardBrainSpeechBefore = false,
 ): BattleRoomState {
   if (opponent?.frontierBrain !== undefined) {
-    return createBrainWalkupBattleRoomState(trainerPresentation, heardBrainSpeechBefore);
+    // Only "gold" selects the gold speech content; every other status
+    // (silver, and the not-yet-presentation-wired streak/streak-long
+    // repeats) keeps the pre-existing silver default - out of scope for
+    // this step, same non-regression as before B3 touched this seam.
+    const brainSpeechTier: "silver" | "gold" =
+      opponent.frontierBrain.status === "gold" ? "gold" : "silver";
+    return createBrainWalkupBattleRoomState(
+      trainerPresentation,
+      heardBrainSpeechBefore,
+      brainSpeechTier,
+    );
   }
   return { ...INITIAL_BATTLE_2_ROOM_STATE, trainerPresentation };
 }
@@ -880,7 +904,57 @@ export const SILVER_REPEAT_SPEECH_BOXES: readonly (readonly [string, string])[] 
   splitSpeechBoxes(silverRepeatCryMessage!.pages[0]!)[0]!,
 ];
 
+// Walk-up build step B3: the gold Noland speech (goldFirstEncounter/
+// goldRepeat), same box-queue idiom as B2's silver machinery above but with
+// two structural differences the dense gold ground truth pins (docs/noland-
+// brain-intro-gold-ground-truth.md §7'): (1) 4 pages, none containing a \l
+// scroll (unlike silver's page 1), so the personality speech flattens 1:1 to
+// 4 boxes rather than 9; (2) no battle-cry message event at all - the gated
+// speech's own `frontier_set` is followed directly by a separate, always-
+// shown "All right!\nBring it on!" close line, structurally the same
+// position (and reuse point in brainSpeechBoxes/brainSpeechCursorVisible/
+// battleRoomJustFinishedBrainPersonalitySpeech below) as silver's cry box,
+// just not called "cry" in the JSON.
+const goldFirstEncounterScene = walkupScript.scenes.goldFirstEncounter as {
+  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
+};
+const goldRepeatScene = walkupScript.scenes.goldRepeat as {
+  readonly events: readonly { readonly kind: string; readonly pages?: readonly string[] }[];
+};
+
+const [goldPersonalityMessage, goldCloseMessage] = onlyMessageEvents(goldFirstEncounterScene.events);
+const [goldRepeatCloseMessage] = onlyMessageEvents(goldRepeatScene.events);
+
+/** The 4-page gated personality speech, flattened 1:1 to 4 boxes (no \l scroll in any gold page). */
+export const GOLD_PERSONALITY_SPEECH_BOXES: readonly (readonly [string, string])[] =
+  goldPersonalityMessage!.pages.flatMap(splitSpeechBoxes);
+
+/** Index one past the personality speech's last box - the close box ("All right! Bring it on!") sits here. */
+export const GOLD_PERSONALITY_BOX_COUNT = GOLD_PERSONALITY_SPEECH_BOXES.length;
+
+const GOLD_CLOSE_BOX = splitSpeechBoxes(goldCloseMessage!.pages[0]!)[0]!;
+
+/** First-encounter box queue: the 4 personality boxes, then the close line - no battle-cry box for gold (module doc above). */
+export const GOLD_FIRST_ENCOUNTER_SPEECH_BOXES: readonly (readonly [string, string])[] = [
+  ...GOLD_PERSONALITY_SPEECH_BOXES,
+  GOLD_CLOSE_BOX,
+];
+
+/** Repeat-encounter box queue (goldRepeat.events: the close message + the DoNolandBattle call) - just the close box, same text as the first-encounter variant's own final box. */
+export const GOLD_REPEAT_SPEECH_BOXES: readonly (readonly [string, string])[] = [
+  splitSpeechBoxes(goldRepeatCloseMessage!.pages[0]!)[0]!,
+];
+
+function brainSpeechPersonalityBoxCount(state: BattleRoomState): number {
+  return state.brainSpeechTier === "gold" ? GOLD_PERSONALITY_BOX_COUNT : SILVER_PERSONALITY_BOX_COUNT;
+}
+
 function brainSpeechBoxes(state: BattleRoomState): readonly (readonly [string, string])[] {
+  if (state.brainSpeechTier === "gold") {
+    return state.brainSpeechFirstEncounter
+      ? GOLD_FIRST_ENCOUNTER_SPEECH_BOXES
+      : GOLD_REPEAT_SPEECH_BOXES;
+  }
   return state.brainSpeechFirstEncounter
     ? SILVER_FIRST_ENCOUNTER_SPEECH_BOXES
     : SILVER_REPEAT_SPEECH_BOXES;
@@ -925,15 +999,20 @@ export const BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED = 28;
  * next by the source `\l`/`\p` control codes) shows it while idle, matching
  * this engine's own existing battle-scene wait-cursor mechanism
  * (battleScene.ts's drawCursor/CURSOR_Y_OFFSETS - same glyph, reused here).
- * The personality speech's LAST box (page 8, string-terminated by `$` with
- * no further `\p`) and the standalone cry box (a separate msgbox call, same
- * shape as the entrance's own cursor-less "Get a move on!" box) do NOT -
- * both close straight to the next scene with no more text pending.
+ * The personality speech's LAST box (page 8 silver / page 4 gold, string-
+ * terminated by `$` with no further `\p`) and the standalone close/cry box
+ * (a separate msgbox call, same shape as the entrance's own cursor-less
+ * "Get a move on!" box) do NOT - both close straight to the next scene with
+ * no more text pending. Tier-general (`brainSpeechPersonalityBoxCount`):
+ * gold's dense ground truth (docs/noland-brain-intro-gold-ground-truth.md
+ * §7') independently confirms the same rule - page 4 is static, matching
+ * this function's existing "last personality box never shows the cursor"
+ * shape rather than needing a gold-specific carve-out.
  */
 export function brainSpeechCursorVisible(state: BattleRoomState): boolean {
   return (
     (state.phase === "brainSpeechIdle" || state.phase === "brainSpeechClosing")
-    && (state.speechStep ?? 0) < SILVER_PERSONALITY_BOX_COUNT - 1
+    && (state.speechStep ?? 0) < brainSpeechPersonalityBoxCount(state) - 1
   );
 }
 
@@ -968,17 +1047,17 @@ export function brainEntranceMovementSettled(phase: BattleRoomPhase): boolean {
 
 /**
  * True the exact tick `advanceBattleRoom` transitions out of the gated
- * personality speech's LAST box into the always-shown cry box - the JSON's
- * own `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` moment
- * (silverFirstEncounter.events order: the 8-page speech, THEN the flag set,
- * THEN the cry line). Not independently visible in pixels (the flag has no
- * on-screen effect - docs/noland-silver-walkup-presentation-map.md §1), so
- * exact-tick fidelity only needs to preserve this ORDER, not a specific
- * frame. Repeat encounters (`brainSpeechFirstEncounter` false) never
- * satisfy this - they only ever show the cry box, so there is no
- * personality speech to have just finished. core.ts is the caller: it
- * marks the silver-tier heard flag (markFactoryBrainSpeechHeard) the same
- * tick this returns true.
+ * personality speech's LAST box into the always-shown close/cry box - the
+ * JSON's own `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` moment (both
+ * tiers' events order: the gated speech, THEN the flag set, THEN the close/
+ * cry line). Not independently visible in pixels (the flag has no on-screen
+ * effect - docs/noland-silver-walkup-presentation-map.md §1), so exact-tick
+ * fidelity only needs to preserve this ORDER, not a specific frame. Repeat
+ * encounters (`brainSpeechFirstEncounter` false) never satisfy this - they
+ * only ever show the close/cry box, so there is no personality speech to
+ * have just finished. Tier-general (`brainSpeechPersonalityBoxCount`): the
+ * caller (core.ts) marks the SAME tier's heard flag (markFactoryBrainSpeech
+ * Heard, keyed off `prev.brainSpeechTier`) the same tick this returns true.
  */
 export function battleRoomJustFinishedBrainPersonalitySpeech(
   prev: BattleRoomState,
@@ -989,7 +1068,7 @@ export function battleRoomJustFinishedBrainPersonalitySpeech(
     && prev.brainSpeechFirstEncounter === true
     && prev.phase === "brainSpeechClosing"
     && next.phase !== "brainSpeechClosing"
-    && (prev.speechStep ?? 0) === SILVER_PERSONALITY_BOX_COUNT - 1
+    && (prev.speechStep ?? 0) === brainSpeechPersonalityBoxCount(prev) - 1
   );
 }
 
