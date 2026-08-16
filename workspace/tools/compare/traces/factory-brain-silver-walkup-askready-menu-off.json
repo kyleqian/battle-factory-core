@@ -1,0 +1,20 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-round-battle7-noland-postwin-askready-menu-open-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-brain-silver-walkup-askready-menu-off.json"
+  },
+  "segments": [
+    { "frames": 120, "buttons": [] },
+    { "frames": 2, "buttons": ["A"] },
+    { "frames": 13, "buttons": [] }
+  ],
+  "captureFrames": [
+    0, 30, 60, 90, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+    131, 132, 133, 134, 135
+  ]
+}

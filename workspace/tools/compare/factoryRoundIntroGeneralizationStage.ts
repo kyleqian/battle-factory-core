@@ -30,7 +30,13 @@ import {
   factoryTrainerPresentationForOpponent,
   type FactoryTrainerPresentation,
 } from "../../src/engine/factoryTrainerPresentation.ts";
-import { createPostwinState } from "../../src/engine/postwin.ts";
+import {
+  CALL_SCENE_HEAD_MENU_READY_DELAY,
+  CALL_SCENE_TRAILING_DELAY,
+  createPostwinState,
+  POSTWIN_COUNTER_ROOM_FIRST_AGE,
+  POSTWIN_NEXT_BOX_CLEAR_DELAY,
+} from "../../src/engine/postwin.ts";
 
 const PLAYER_TRAINER_ID = 0x89ab_cdef;
 const CHALLENGE2_FIXED_IV = getLevel50InitialRentalFixedIv(2, false);
@@ -294,6 +300,95 @@ function nolandRoundReadyState(state: EngineState): {
     },
     orchestrator,
     trainerPresentation,
+  };
+}
+
+/**
+ * Walk-up build step A dense calibration: parks `postwin` at the brain
+ * route's call-scene start -- `elapsed: POSTWIN_COUNTER_ROOM_FIRST_AGE`, the
+ * first tick of the shared (already oracle-pinned, docs/postwin-notes.md)
+ * counter-room fade-in, with `frontierBrain: true` and every call-scene/
+ * AskReadyForHead/AskSwapBeforeHead field at its pre-heal-dismiss rest value.
+ * This is the same "park directly in a real, reachable state" idiom as the
+ * room-entrance stage above, not a simulated walk-up: the round itself has
+ * genuinely resolved 6 wins (factoryWinStreak 14->20) landing
+ * `currentOpponent` on Noland/silver, matching "battle-20 win resolved,
+ * about to face the brain" -- only the postwin *presentation* clock is
+ * hand-set rather than ticked there from `elapsed: 0`, exactly as the room-
+ * entrance stage hand-sets `battleRoom` rather than ticking through
+ * `prebattleRoom`.
+ *
+ * Anchor: docs/walkup-call-scene-ground-truth.md's own boundary note -- two
+ * staging-artifact fades precede the genuine call scene; only pre-checkpoint
+ * frame 490 onward ("fade-in to PreBattleRoom, attendant already present, no
+ * box yet") is acceptance-grade. `POSTWIN_COUNTER_ROOM_FIRST_AGE` (115) is
+ * `renderPostwinState`'s own first tick of that exact fade
+ * (`fadeLocal = age - POSTWIN_COUNTER_ROOM_FIRST_AGE` -> 0, `FADE_IN`'s
+ * darkest step) -- confirmed by the shared fade's own settle boundary:
+ * `POSTWIN_COUNTER_ROOM_SETTLED_AGE` (130) is exactly `FADE_IN_TICKS` (15)
+ * after 115, and `POSTWIN_HEAL_TEXT_FIRST_AGE` (140) lands 25 ticks after
+ * 115 -- within one frame of the oracle's own measured 24-tick fade-to-
+ * first-glyph span (490 -> 514), i.e. app elapsed 115 = oracle frame 490
+ * agrees with the ALREADY-PINNED shared fade constants to within the
+ * fixture's own frame-indexing convention, not a new fit.
+ */
+export function generatedRoundBattle7NolandPostwinCallSceneStartStage(
+  state: EngineState,
+): EngineState {
+  const ready = nolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    postwin: {
+      ...createPostwinState(),
+      elapsed: POSTWIN_COUNTER_ROOM_FIRST_AGE,
+      frontierBrain: true,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+/**
+ * Walk-up build step A dense calibration: parks `postwin` directly in the
+ * `AskReadyForHead` menu's own held state (frame 0 of
+ * docs/walkup-call-scene-ground-truth.md's post-checkpoint numbering --
+ * "the checkpoint IS the open ask-ready menu, cursor on GO ON", confirmed
+ * live sha-identical to the pre-checkpoint route's own frame 1570). Reached
+ * by hand-setting the call scene's own terminal fields
+ * (`callScenePage: 5`, `callSceneDismissElapsed: 0`) rather than replaying
+ * the call scene's own five boxes -- the same "park past a not-yet-exercised
+ * upstream window" sidestep the B2 speech-box stages already use, since
+ * windows 2/3 (this stage's own compare targets) start fresh at the
+ * checkpoint regardless of how window 1's own call scene got there.
+ * `elapsed` is set generously past `CALL_SCENE_HEAD_MENU_READY_DELAY` so the
+ * menu is already fully held/settled at frame 0 -- the oracle's own window 2
+ * shows this exact content held unchanged for 121 frames, so any
+ * sufficiently-elapsed value renders identically.
+ */
+export function generatedRoundBattle7NolandPostwinAskReadyMenuOpenStage(
+  state: EngineState,
+): EngineState {
+  const ready = nolandRoundReadyState(state);
+  const callSceneDismissElapsed = 0;
+  return {
+    ...ready.state,
+    postwin: {
+      ...createPostwinState(),
+      // Past every render gate on the path to the menu: the shared
+      // beforeContinuation heal-box gate (healDismiss + POSTWIN_NEXT_BOX_
+      // CLEAR_DELAY) as well as the brain-specific menu-ready delay -- both
+      // relative to elapsed 0 here since healDismissElapsed/
+      // callSceneDismissElapsed are both pinned to 0.
+      elapsed:
+        POSTWIN_NEXT_BOX_CLEAR_DELAY
+        + CALL_SCENE_TRAILING_DELAY + CALL_SCENE_HEAD_MENU_READY_DELAY + 50,
+      frontierBrain: true,
+      healDismissElapsed: callSceneDismissElapsed,
+      callScenePage: 5,
+      callSceneDismissElapsed,
+      continuationCursorPos: 0,
+      continuationCursorDisplayPos: 0,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
   };
 }
 
