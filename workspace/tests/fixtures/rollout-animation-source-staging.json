@@ -1,0 +1,109 @@
+{
+  "schema": "rollout-animation-source-staging/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_ROLLOUT",
+  "moveId": 205,
+  "status": "unsupported",
+  "coverageCredit": false,
+  "source": {
+    "moveScript": {"start":"0x082cd75e","endExclusive":"0x082cd79f","bytes":65,"sha256":"c2750d78fe18060182b3fb40befda950fcfadd6f2ac61435593fe0d89e00731f"},
+    "rolloutTaskInit": {"start":"0x08110f74","endExclusive":"0x081110a4","bytes":304,"sha256":"9dcee39b381cd4cbe5727dc60cc580acf48ba357212f1749f275cb267a805b73"},
+    "rolloutTaskStep": {"start":"0x081110a4","endExclusive":"0x08111214","bytes":368,"sha256":"4fc4934da640cefc6294dc692a18d15f2aebba0c88c56c88a03f9c37e2b51aa7"},
+    "createParticle": {"start":"0x08111214","endExclusive":"0x0811131c","bytes":264,"sha256":"265d78f73bf183d0b84d676f9b6fd82348e17fe5cc776d820147997d6298c530"},
+    "particleCallback": {"start":"0x0811131c","endExclusive":"0x0811135c","bytes":64,"sha256":"80b83b06bf70d9f9d4e5f7b9a8ad208b4540e2b5675cfc3524167eb97a041897"},
+    "rolloutCounter": {"start":"0x0811135c","endExclusive":"0x08111388","bytes":44,"sha256":"1d9c39afa09355af2032b0d4a68b93171357eac95015f79e3110788a6b349112"},
+    "mudTemplate": {"start":"0x08596c28","endExclusive":"0x08596c40","bytes":24,"sha256":"889a9cf816bab3e9e37fad3ba6da3cf84f11b9dcb12f47b7bb7eab3423c34188"},
+    "rockTemplate": {"start":"0x08596c40","endExclusive":"0x08596c58","bytes":24,"sha256":"450dc5f226a73554d6a6618b0b74fac1f4ad5f7c51e140bf4852b503a099e4ff"},
+    "powerShakeInit": {"start":"0x080d6388","endExclusive":"0x080d646c","bytes":228,"sha256":"c5cb44d3c8ea5ac00d8f4111dd63fbd6437d36d6b39f161a55334c890bc32688"},
+    "powerShakeStep": {"start":"0x080d646c","endExclusive":"0x080d6554","bytes":232,"sha256":"4ef97f573afed6dbe19ca51bec769b158915f38b53146f3f7fa8c6c5124cb411"},
+    "arcInit": {"start":"0x080a68d4","endExclusive":"0x080a68fe","bytes":42,"sha256":"f830e92cbf4535b1a57ea8bf2ce79a4cbce0f12f503365a2d5e333c938e0482a"},
+    "horizontalArc": {"start":"0x080a6900","endExclusive":"0x080a6934","bytes":52,"sha256":"54602c32afbf920075c765d7e6684b3346d56742deacfea9790dd974da0f5980"},
+    "impactGfx": {"start":"0x08c1a3a0","endExclusive":"0x08c1a478","bytes":216,"sha256":"6c59ae34e08142a15f02497aec2319c3e3012bb4228dfeb5b9b1c0511666c298"},
+    "impactPalette": {"start":"0x08c1a478","endExclusive":"0x08c1a490","bytes":24,"sha256":"c436b63ac10f37b7ec0733964d9e557e26c97b9ac7eb564bd756a8eb2f4d5cb1"},
+    "mudSandGfx": {"start":"0x08c1b29c","endExclusive":"0x08c1b304","bytes":104,"sha256":"aadd69fd6e91af9cca24581ff96c775eaab10d65ef8f30b6afee0583a791dcf8"},
+    "mudSandPalette": {"start":"0x08c1b304","endExclusive":"0x08c1b328","bytes":36,"sha256":"ee11bd775b1f77452af32f0569ac9a8e210e241d5677857ec4485e0889cf1300"},
+    "rocksGfx": {"start":"0x08c0aa2c","endExclusive":"0x08c0ae94","bytes":1128,"sha256":"dbd2a4a3fc367cc966efe78be967f5a8b201cf0283bbd7d27e26d7354747c9e2"},
+    "rocksPalette": {"start":"0x08c0ae94","endExclusive":"0x08c0aebc","bytes":40,"sha256":"f2221c18f736f1531100ed0b9f7d1d8435ef061b6f1b3799f433eb96551ecdc3"}
+  },
+  "sourceHashes": {
+    "reference/pokeemerald/pokeemerald.gba":"a9dec84dfe7f62ab2220bafaef7479da0929d066ece16a6885f6226db19085af",
+    "reference/pokeemerald/pokeemerald.elf":"cd28ec67b390f42bdb6f40820caf496ee2326c30149d67dd402fdd3930f0097b",
+    "reference/pokeemerald/data/battle_anim_scripts.s":"76ad47e87abab7bf16f1606eb2cefb69fa39945d07458348623419f00404552d",
+    "reference/pokeemerald/data/battle_scripts_1.s":"4ac3e610b68c11ef0f4e4c0fc62ddba7fda5a8400e43705428868978ec7551a6",
+    "reference/pokeemerald/src/battle_anim_rock.c":"30a3a34a4fa068ba47fa4c945bd64ffbbc42961048bd585f0cc39cfdc545b9e5",
+    "reference/pokeemerald/src/battle_anim_mon_movement.c":"d5cc40ee986326a87a694c72f873f2dc0bdef38102f005582bbc8b838e3643a4",
+    "reference/pokeemerald/src/battle_anim_mons.c":"93e653135430d35734763b640f7f5446bca2ce881f5781796b1f370fae213c9d",
+    "reference/pokeemerald/src/battle_script_commands.c":"e0847cd2aa83ee5e18134c32baad348b7c763095cf59efa33da67c4a4e90120c",
+    "reference/pokeemerald/src/battle_controllers.c":"019dfa02cb7d3219d1b3cb034053bbb76008220fd51d8b79d3eed809ff00dfb3",
+    "reference/pokeemerald/src/data/battle_anim.h":"f47d2e572285ec1e4ff975f05a14d4ce133d69dbd3613b5a5ec016c30eef59de",
+    "reference/pokeemerald/src/graphics.c":"00af45f19b811fe75c2d2196c66bb427695178a6808648426d30d286318667f1",
+    "reference/pokeemerald/include/constants/songs.h":"7f6a8dc6d99e7f2bfdbb1136ebba8286ec99bff30f3f9afe2df7868125154e14",
+    "reference/pokeemerald/src/data/battle_frontier/battle_frontier_mons.h":"557c1a97247cbb84357b99035fb11cf0bfe45abe8393a0992fe8146bfc51f67f",
+    "reference/pokeemerald/include/constants/battle_frontier_mons.h":"00fb47e144978d3a24a304047f5463217ac7b535ee6f8719e2adf47cc592387a",
+    "reference/pokeemerald/src/battle_factory.c":"7762bf366045ed91a3c280a7e4d20ccc9df9bba305c529ad6b24df2250a072f6",
+    "src/data/gen/factory-animation-inventory.json":"60c3d2e0a78511bcc97b48bad011590fc4f06b3fa1661a6075042e7b794f3418",
+    "src/data/gen/battle-animation-components.json":"aa5890455d932c35aa1ea80cb9e6c79ea278571cc445c8661f64379a0846af1a",
+    "src/data/gen/battle-frontier-mons.json":"6f7e9b57201ca8d513dab853c53aa7e23d35329ea52df6a464e7fe311d9fe21c",
+    "src/data/gen/factory-round-policy.json":"0e62d9a116210cf43bd5b024f8f6ff02334624f9fed107112403dfbe9ef0ce6b"
+  },
+  "scripts": {
+    "Move_ROLLOUT": [
+      "loadspritegfx ANIM_TAG_IMPACT", "loadspritegfx ANIM_TAG_MUD_SAND", "loadspritegfx ANIM_TAG_ROCKS",
+      "monbg ANIM_DEF_PARTNER", "splitbgprio ANIM_TARGET", "setalpha 12, 8",
+      "createvisualtask AnimTask_Rollout, 2", "waitforvisualfinish",
+      "createvisualtask AnimTask_ShakeTargetBasedOnMovePowerOrDmg, 2, FALSE, 1, 30, 1, 0",
+      "create_basic_hitsplat_sprite ANIM_ATTACKER, 4, x=0, y=0, relative_to=ANIM_TARGET, animation=2",
+      "playsewithpan SE_M_MEGA_KICK2, SOUND_PAN_TARGET", "waitforvisualfinish",
+      "clearmonbg ANIM_DEF_PARTNER", "blendoff", "end"
+    ],
+    "BattleScript_EffectRollout": [
+      "attackcanceler", "attackstring",
+      "jumpifstatus2 BS_ATTACKER, STATUS2_MULTIPLETURNS, BattleScript_RolloutCheckAccuracy", "ppreduce",
+      "BattleScript_RolloutCheckAccuracy::", "accuracycheck BattleScript_RolloutHit, ACC_CURR_MOVE",
+      "BattleScript_RolloutHit::", "typecalc2", "rolloutdamagecalculation", "goto BattleScript_HitFromCritCalc"
+    ]
+  },
+  "components": [
+    "asset:ANIM_TAG_IMPACT", "asset:ANIM_TAG_MUD_SAND", "asset:ANIM_TAG_ROCKS",
+    "task:AnimTask_Rollout", "task:AnimTask_ShakeTargetBasedOnMovePowerOrDmg",
+    "visualCommand:blendoff", "visualCommand:clearmonbg", "visualCommand:create_basic_hitsplat_sprite",
+    "visualCommand:monbg", "visualCommand:setalpha", "visualCommand:splitbgprio"
+  ],
+  "counterBranches": [
+    {"counter":1,"remainingTimer":4,"dynamicBasePower":30,"defenseCurlPower":60,"duration":32,"particlePeriod":3,"particleCount":10,"template":"gRolloutMudSpriteTemplate","tileOffset":0,"taskData10":3,"shakeIfAnimationReceivesDynamicPower":2,"shakeIfAnimationReceivesDefenseCurlPower":5},
+    {"counter":2,"remainingTimer":3,"dynamicBasePower":60,"defenseCurlPower":120,"duration":32,"particlePeriod":3,"particleCount":10,"template":"gRolloutRockSpriteTemplate","tileOffset":80,"taskData10":3,"shakeIfAnimationReceivesDynamicPower":5,"shakeIfAnimationReceivesDefenseCurlPower":10},
+    {"counter":3,"remainingTimer":2,"dynamicBasePower":120,"defenseCurlPower":240,"duration":24,"particlePeriod":2,"particleCount":12,"template":"gRolloutRockSpriteTemplate","tileOffset":80,"taskData10":2,"shakeIfAnimationReceivesDynamicPower":10,"shakeIfAnimationReceivesDefenseCurlPower":16},
+    {"counter":4,"remainingTimer":1,"dynamicBasePower":240,"defenseCurlPower":480,"duration":16,"particlePeriod":1,"particleCount":16,"template":"gRolloutRockSpriteTemplate","tileOffset":64,"taskData10":1,"shakeIfAnimationReceivesDynamicPower":16,"shakeIfAnimationReceivesDefenseCurlPower":16},
+    {"counter":5,"remainingTimer":0,"dynamicBasePower":480,"defenseCurlPower":960,"duration":8,"particlePeriod":0,"particleCount":8,"template":"gRolloutRockSpriteTemplate","tileOffset":48,"taskData10":0,"shakeIfAnimationReceivesDynamicPower":16,"shakeIfAnimationReceivesDefenseCurlPower":16}
+  ],
+  "carrier": {
+    "lowestLegal": {
+      "index":115,
+      "label":"FRONTIER_MON_VOLTORB",
+      "species":"SPECIES_VOLTORB",
+      "moves":["MOVE_SPARK","MOVE_SCREECH","MOVE_ROLLOUT","MOVE_LIGHT_SCREEN"],
+      "item":"BATTLE_FRONTIER_ITEM_LAX_INCENSE",
+      "evSpread":["F_EV_SPREAD_SP_ATTACK","F_EV_SPREAD_HP"],
+      "nature":"NATURE_DOCILE"
+    },
+    "challenge0Range":{"start":110,"end":199,"startLabel":"FRONTIER_MON_GRIMER","endLabel":"FRONTIER_MON_FURRET_1"}
+  },
+  "componentTrack": {
+    "id":"task-animtask-rollout",
+    "components":["task:AnimTask_Rollout"],
+    "representatives":["MOVE_ROLLOUT"]
+  },
+  "stages": {
+    "playerBack": {
+      "scenario":"tools/battle-lab/mechanic-rollout-player-voltorb-opponent-onix.json",
+      "scenarioSha256":"fec0d054f4d11ad112d365e34c77886c3185c3b3dbd7f5792609033b0a99f14a",
+      "endpoint":{"frame":934,"framebufferSha256":"1eaac04a9e761c1b6db9c61c6603163b0b7a8afda602eb4055d9366499e4a2a3","rolloutPp":[19,20,20,20],"consumedRolloutPpSlot":0,"partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},"allPartyChecksumsValid":true}
+    },
+    "opponentFront": {
+      "scenario":"tools/battle-lab/mechanic-rollout-opponent-voltorb-player-onix.json",
+      "scenarioSha256":"63ea8bbc6ee8dd0dabbc22b20305f0d9d7fa5aaf82166035c1697c40b258dd1f",
+      "endpoint":{"frame":934,"framebufferSha256":"3f6707f91af1b6c0b44ef791dfbded4cec5038fc0ec8047e88bc6512930d7028","rolloutPp":[20,19,20,20],"consumedRolloutPpSlot":1,"partyChecksums":{"player":[true,true,true],"opponent":[true,true,true]},"allPartyChecksumsValid":true}
+    }
+  },
+  "boundedRemainder":"The legal Scene-ON stages now use seeds that naturally sustain all five Rollout hits, and the separate rollout-evidence fixture retains their complete twice-fresh bilateral bodies and measured change maps. No animation reducer, typed seam, production compositor, zero-residual shared-framebuffer acceptance, exact/partial/staged move coverage, or sibling credit is claimed."
+}

@@ -557,6 +557,7 @@ import opponentFrontSpritesAsset from "../assets/gen/battle-opponent-front-sprit
 import kadabraFrontSpriteAsset from "../animation/assets/kadabra-front.json" with { type: "json" };
 import knockOffAsset from "../animation/assets/knock-off.json" with { type: "json" };
 import recoverAsset from "../animation/assets/recover.json" with { type: "json" };
+import softBoiledAsset from "../animation/assets/soft-boiled.json" with { type: "json" };
 import absorbAsset from "../animation/assets/absorb.json" with { type: "json" };
 import leechSeedAsset from "../animation/assets/leech-seed.json" with { type: "json" };
 import painSplitAsset from "../animation/assets/pain-split.json" with { type: "json" };
@@ -889,6 +890,7 @@ import {
 } from "../animation/dreamEater.ts";
 import { painSplitDisplayedMatrixTransform } from "../animation/painSplit.ts";
 import { fireBlastSpritesInPainterOrderAtAge } from "../animation/fireBlast.ts";
+import { rolloutParticlesInPainterOrderAtAge } from "../animation/rollout.ts";
 import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
@@ -896,6 +898,7 @@ import {
   sceneOnDragonBreathView,
   sceneOnEmberView,
   sceneOnFireBlastView,
+  sceneOnRolloutView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
   sceneOnFlameWheelView,
@@ -918,6 +921,7 @@ import {
   sceneOnShadowPunchView,
   sceneOnGrowthView,
   sceneOnRecoverView,
+  sceneOnSoftBoiledView,
   sceneOnMoonlightView,
   sceneOnPresentView,
   sceneOnAbsorbView,
@@ -1125,7 +1129,9 @@ import {
   type SceneOnHypnosisPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
+  type SceneOnRolloutConfig,
   type SceneOnHealBellConfig,
+  type SceneOnSoftBoiledConfig,
   type SceneOnNeedleArmPresentationState,
   type SceneOnSandstormPresentationState,
   type SceneOnHeatWavePresentationState,
@@ -1600,6 +1606,13 @@ const knockOffArt = knockOffAsset as {
 const recoverArt = recoverAsset as {
   orbs: { tileset: Tileset; palette: RgbColor[] };
   blueStar: { tileset: Tileset; palette: RgbColor[] };
+};
+const softBoiledArt = softBoiledAsset as {
+  breakingEgg: { tileset: Tileset; palette: RgbColor[] };
+  thinRing: { tileset: Tileset; palette: RgbColor[] };
+  blueStar: { tileset: Tileset; palette: RgbColor[] };
+  chanseyBack: { tileset: Tileset; palette: RgbColor[] };
+  chanseyFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const absorbArt = absorbAsset as {
   lombreBack: { tileset: Tileset; palette: RgbColor[] };
@@ -4712,6 +4725,30 @@ function drawGeneratedOpponentShadow(
   // Source singles coordinate (176,40), +29 y, centered 32x8 OAM shape.
   const x = 176 - battleEnemyShadow.width / 2;
   const y = 40 + 29 - battleEnemyShadow.height / 2;
+  for (const pixel of battleEnemyShadow.mask) {
+    setPixel(
+      fb,
+      x + pixel % battleEnemyShadow.width,
+      y + Math.floor(pixel / battleEnemyShadow.width),
+      battleEnemyShadow.color,
+    );
+  }
+}
+
+/**
+ * Source `SpriteCB_EnemyShadow` layer for an elevated opponent battler.
+ * The extracted mask comes from `enemy_mon_shadow.png`, while placement is
+ * relative to the ordinary singles battle-position center. Move draw cases
+ * decide whether the callback's preceding hardware-OAM row is still live.
+ */
+function drawSourceOpponentEnemyShadow(
+  fb: Uint8Array,
+  species: string,
+  battlePositionCenter: Readonly<{ x: number; y: number }>,
+): void {
+  if (!elevatedEnemyShadowSpecies.has(`SPECIES_${species}`)) return;
+  const x = battlePositionCenter.x - battleEnemyShadow.width / 2;
+  const y = battlePositionCenter.y + 29 - battleEnemyShadow.height / 2;
   for (const pixel of battleEnemyShadow.mask) {
     setPixel(
       fb,
@@ -37999,6 +38036,175 @@ export function renderSceneOnMovePresentation(
     return;
   }
 
+  if (state.config.move === "SOFT_BOILED") {
+    const softBoiledState = state as SceneOnMovePresentationState<SceneOnSoftBoiledConfig>;
+    const view = sceneOnSoftBoiledView(softBoiledState);
+    const displayed = sceneOnSoftBoiledView({
+      ...softBoiledState,
+      age: softBoiledState.age - 1,
+    });
+    const playerBack = view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "CHANSEY"
+      && view.target.geometry.side === "player";
+    const opponentFront = view.attacker.species === "CHANSEY"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "CHANSEY"
+      && view.target.geometry.side === "opponent";
+    if (!playerBack && !opponentFront) {
+      throw new Error(
+        `unsupported staged SOFT_BOILED self target ${view.attacker.species}/${view.attacker.geometry.side}`,
+      );
+    }
+
+    const paletteTarget = { r: 99, g: 198, b: 247 };
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      blendPaletteBanksToward(
+        battleBg.palette,
+        paletteTarget,
+        view.palette.backgroundCoefficient,
+      ),
+    );
+    const chanseySource = playerBack
+      ? softBoiledArt.chanseyBack
+      : softBoiledArt.chanseyFront;
+    const chansey = playerBack ? chanseySource : {
+      ...chanseySource,
+      tileset: subTileset(chanseySource.tileset, 0, 8),
+    };
+    const chanseyShakeY = playerBack
+      ? view.registers.bg2vofs === 0 ? 0 : 453 - view.registers.bg2vofs
+      : view.registers.bg1vofs === 0 ? 0 : 495 - view.registers.bg1vofs;
+    const onixCorner = playerBack
+      ? { x: 145, y: 10 }
+      : ONIX_MATERIALIZE_CORNER;
+    const onix = playerBack ? onixFrontSprite : onixBackSprite;
+
+    // Monbg makes the self-targeted Chansey a BG layer while the egg body
+    // is live. Drawing both battlers before the owned OAM list preserves
+    // that layer relation; the reducer supplies the source shake offset.
+    if (playerBack) {
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        onixCorner.x,
+        onixCorner.y,
+      );
+    }
+    drawSpriteSheet(
+      fb,
+      chansey.tileset,
+      blendPaletteToward(
+        chansey.palette,
+        paletteTarget,
+        view.palette.battlerCoefficient,
+      ),
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y + chanseyShakeY,
+    );
+    const nonObjTarget2 = fb.slice();
+    const bySlot = new Map<number, (typeof displayed.sprites)[number]>(
+      displayed.sprites.map((sprite) => [sprite.slot, sprite]),
+    );
+    // BuildOamBuffer's lower OAM index wins equal-priority overlaps. Paint
+    // the source list back-to-front so its first entry lands last.
+    for (const slot of displayed.sourceOrder.slice().reverse()) {
+      const sprite = bySlot.get(slot);
+      if (!sprite || sprite.invisible) continue;
+      if (sprite.kind === "egg") {
+        const frame = Math.trunc((sprite.tileIndex - 305) / 16);
+        const tileset = subTileset(softBoiledArt.breakingEgg.tileset, frame * 4, 4);
+        const [pa, pb, pc, pd] = sprite.matrix;
+        if (view.registers.bldcnt !== 0) {
+          drawSpriteSheetAffineRotateBlendedOverFb(
+            fb,
+            nonObjTarget2,
+            tileset,
+            softBoiledArt.breakingEgg.palette,
+            sprite.x + sprite.x2,
+            sprite.y + sprite.y2,
+            pa, pb, pc, pd,
+            view.palette.eva,
+            view.palette.evb,
+            true,
+          );
+        } else {
+          drawSpriteSheetAffineRotate(
+            fb,
+            tileset,
+            softBoiledArt.breakingEgg.palette,
+            sprite.x + sprite.x2,
+            sprite.y + sprite.y2,
+            pa, pb, pc, pd,
+          );
+        }
+      } else if (sprite.kind === "ring") {
+        const [pa, pb, pc, pd] = sprite.matrix;
+        drawSpriteSheetAffineRotate(
+          fb,
+          softBoiledArt.thinRing.tileset,
+          softBoiledArt.thinRing.palette,
+          sprite.x,
+          sprite.y,
+          pa, pb, pc, pd,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          subTileset(
+            softBoiledArt.blueStar.tileset,
+            Math.trunc((sprite.tileIndex - 601) / 16) * 4,
+            4,
+          ),
+          softBoiledArt.blueStar.palette,
+          sprite.x - 16,
+          sprite.y - 16,
+        );
+      }
+    }
+    if (opponentFront) {
+      // The player-side Onix has subpriority 30, ahead of the opponent
+      // effect body's 36-38; its few ring-edge overlaps therefore win.
+      drawSpriteSheet(
+        fb,
+        onix.tileset,
+        onix.palette,
+        onixCorner.x,
+        onixCorner.y,
+      );
+    }
+
+    const profile = state.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+      name: playerBack ? "ONIX" : "CHANSEY",
+      level: 50,
+      gender: profile.opponentGender ?? (playerBack ? "male" : "female"),
+      hpFraction: profile.opponentHp / profile.opponentMaxHp,
+      status: "none",
+    }));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, {
+      name: playerBack ? "CHANSEY" : "ONIX",
+      level: 50,
+      gender: profile.playerGender ?? (playerBack ? "female" : "male"),
+      hpFraction: profile.playerHp / profile.playerMaxHp,
+      status: "none",
+      currentHp: profile.playerHp,
+      maxHp: profile.playerMaxHp,
+    }));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerBack ? "CHANSEY used" : "Foe CHANSEY used",
+      "SOFTBOILED!",
+      99,
+    );
+    return;
+  }
+
   if (state.config.move === "MILK_DRINK") {
     const view = sceneOnMilkDrinkView(state);
     const displayed = sceneOnMilkDrinkView({ ...state, age: state.age - 1 });
@@ -38991,6 +39197,190 @@ export function renderSceneOnMovePresentation(
       LINE1_ORIGIN.x, LINE1_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
     drawText(fb, font, charmap, "FIRE BLAST!", LINE2_ORIGIN.x, LINE2_ORIGIN.y,
       MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+    return;
+  }
+
+  if (state.config.move === "ROLLOUT") {
+    const rolloutState =
+      state as SceneOnMovePresentationState<SceneOnRolloutConfig>;
+    const live = sceneOnRolloutView(rolloutState);
+    const playerToOpponent = live.attacker.species === "VOLTORB"
+      && live.attacker.geometry.side === "player"
+      && live.target.species === "ONIX"
+      && live.target.geometry.side === "opponent";
+    const opponentToPlayer = live.attacker.species === "VOLTORB"
+      && live.attacker.geometry.side === "opponent"
+      && live.target.species === "ONIX"
+      && live.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged ROLLOUT pair ${live.attacker.species}->${live.target.species}`,
+      );
+    }
+
+    // The retained bilateral corpus separates the display pipelines. Live
+    // attacker axes reach hardware OAM two rows after their task callback.
+    // A newly allocated debris OBJ first reaches hardware after two rows, but
+    // that first scanout contains its next callback state, hence age - 1 for
+    // all visible debris. Target monbg and the script-created IMPACT reach
+    // scanout after one row.
+    const displayedOam = sceneOnRolloutView({
+      ...rolloutState,
+      age: rolloutState.age - 2,
+    });
+    const displayedTarget = sceneOnRolloutView({
+      ...rolloutState,
+      age: rolloutState.age - 1,
+    });
+    const allocatedParticles = rolloutParticlesInPainterOrderAtAge(
+      rolloutState.age - 2,
+      rolloutState.config.counter,
+      rolloutState.config.animationProfile,
+    );
+    const callbackParticles = rolloutParticlesInPainterOrderAtAge(
+      rolloutState.age - 1,
+      rolloutState.config.counter,
+      rolloutState.config.animationProfile,
+    );
+    // Allocation enters software OAM after one row and hardware after two;
+    // AnimateSprites has advanced the callback once before that first OAM
+    // build. Preserve age-2 membership/order while painting age-1 axes.
+    const allocatedSlots = new Set(allocatedParticles.map((particle) => particle.slot));
+    const particles = callbackParticles.filter((particle) => allocatedSlots.has(particle.slot));
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      battleBg.palette,
+    );
+
+    // The opponent VOLTORB is elevated. On the first source row, its shadow
+    // remains in the preceding hardware OAM buffer; SpriteCB_EnemyShadow has
+    // already hidden the software sprite and reaches scanout one row later.
+    // Draw the extracted source layer below every battler/effect OBJ.
+    if (opponentToPlayer && rolloutState.age === 0) {
+      drawSourceOpponentEnemyShadow(
+        fb,
+        live.attacker.species,
+        live.attacker.geometry.battlePositionCenter,
+      );
+    }
+
+    const voltorb = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).VOLTORB!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).VOLTORB!;
+    const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const drawAttacker = (): void => drawSpriteSheet(
+      fb,
+      voltorb.tileset,
+      voltorb.palette,
+      live.attacker.geometry.spriteCorner.x + displayedOam.attackerOffset.x,
+      live.attacker.geometry.spriteCorner.y + displayedOam.attackerOffset.y,
+    );
+    const drawTarget = (): void => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onix.palette,
+      live.target.geometry.spriteCorner.x + displayedTarget.targetOffset.x,
+      live.target.geometry.spriteCorner.y + displayedTarget.targetOffset.y,
+    );
+    const drawParticles = (): void => {
+      for (const particle of particles) {
+        if (particle.template === "gRolloutMudSpriteTemplate") {
+          drawSpriteSheet(
+            fb,
+            battleAnimMudSand.tileset,
+            battleAnimMudSand.palette,
+            particle.x + particle.x2 - 4,
+            particle.y + particle.y2 - 4,
+          );
+        } else {
+          drawSpriteSheet(
+            fb,
+            subTileset(
+              battleAnimRocks.tileset,
+              particle.tileOffset / battleAnimRocks.tileset.columns,
+              4,
+            ),
+            battleAnimRocks.palette,
+            particle.x + particle.x2 - 16,
+            particle.y + particle.y2 - 16,
+          );
+        }
+      }
+    };
+    const impact = displayedTarget.impact;
+    // monbg supplies the target as target-2 beneath all priority-2 OBJ. Keep
+    // that pre-OBJ stack separate because semi-transparent OBJ pixels always
+    // blend with target-2, never a previously painted OBJ pixel.
+    drawTarget();
+    const target2Backdrop = fb.slice();
+    const drawImpact = (): void => {
+      if (impact === null) return;
+      drawSpriteSheetAffineRotateBlendedOverFb(
+        fb,
+        target2Backdrop,
+        battleAnimHitsplat.tileset,
+        battleAnimHitsplat.palette,
+        impact.x,
+        impact.y,
+        impact.matrix[0],
+        impact.matrix[1],
+        impact.matrix[2],
+        impact.matrix[3],
+        12,
+        8,
+        false,
+      );
+    };
+    // With the monbg target removed from OBJ order, source subpriorities are
+    // player attacker 30 / debris 35 / IMPACT 26, and opponent attacker 40 /
+    // IMPACT 36 / debris 35. Paint back-to-front so the lower rank wins.
+    if (playerToOpponent) {
+      drawParticles();
+      drawAttacker();
+      drawImpact();
+    } else {
+      drawAttacker();
+      drawImpact();
+      drawParticles();
+    }
+
+    const profile = rolloutState.config.fieldProfile;
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(
+      healthboxAssemblyAssets,
+      {
+        name: playerToOpponent ? "ONIX" : "VOLTORB",
+        level: 50,
+        gender: playerToOpponent ? "male" : "none",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      },
+    ));
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(
+      playerHealthboxAssets,
+      {
+        name: playerToOpponent ? "VOLTORB" : "ONIX",
+        level: 50,
+        gender: playerToOpponent ? "none" : "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      },
+    ));
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "VOLTORB used" : "Foe VOLTORB used",
+      "ROLLOUT!",
+      99,
+    );
     return;
   }
 

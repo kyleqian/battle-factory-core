@@ -315,6 +315,10 @@ import {
   type RecoverEffectSprite,
 } from "./recover.ts";
 import {
+  softBoiledAtAge,
+  type SoftBoiledState,
+} from "./softBoiled.ts";
+import {
   moonlightAtAge,
   type MoonlightState,
 } from "./moonlight.ts";
@@ -410,6 +414,12 @@ import {
   type FireBlastGeometry,
   type FireBlastState,
 } from "./fireBlast.ts";
+import {
+  rolloutAtAge,
+  type RolloutCounter,
+  type RolloutGeometry,
+  type RolloutState,
+} from "./rollout.ts";
 import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
@@ -938,6 +948,7 @@ export interface SceneOnPresentationBattler {
     | "IVYSAUR"
     | "KADABRA"
     | "LATIAS"
+    | "VOLTORB"
     | "LATIOS"
     | "REGISTEEL"
     | "LOMBRE"
@@ -1482,6 +1493,17 @@ export interface SceneOnRecoverConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Presentation-only source-age seam for Move_SOFT_BOILED. */
+export interface SceneOnSoftBoiledConfig {
+  readonly move: "SOFT_BOILED";
+  readonly attacker: SceneOnPresentationBattler;
+  /** Source target is `MOVE_TARGET_USER`, so this battler shares the side. */
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** `AnimSpriteOnMonPos`'s source target picture center for HealingEffect2. */
+  readonly healingCenter: Readonly<{ x: number; y: number }>;
+}
+
 export interface SceneOnMoonlightFieldProfile
   extends SceneOnDragonRageFieldProfile {
   readonly pendingHeal: Readonly<{
@@ -1783,6 +1805,16 @@ export interface SceneOnFireBlastConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly animationProfile: Readonly<FireBlastGeometry>;
+}
+
+/** Rollout presentation only; damage, timers, and battle state remain battle-owned. */
+export interface SceneOnRolloutConfig {
+  readonly move: "ROLLOUT";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly counter: RolloutCounter;
+  readonly animationProfile: Readonly<RolloutGeometry>;
 }
 
 export interface SceneOnSupersonicConfig {
@@ -3031,6 +3063,7 @@ export type SceneOnMoveConfig =
   | SceneOnShadowPunchConfig
   | SceneOnGrowthConfig
   | SceneOnRecoverConfig
+  | SceneOnSoftBoiledConfig
   | SceneOnMoonlightConfig
   | SceneOnPresentConfig
   | SceneOnAbsorbConfig
@@ -3060,6 +3093,7 @@ export type SceneOnMoveConfig =
   | SceneOnRefreshConfig
   | SceneOnHealBellConfig
   | SceneOnFireBlastConfig
+  | SceneOnRolloutConfig
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
   | SceneOnLeerConfig
@@ -3223,6 +3257,8 @@ export interface SceneOnMovePresentationState<
 
 export type SceneOnDynamicPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDynamicPunchConfig>;
+export type SceneOnSoftBoiledPresentationState =
+  SceneOnMovePresentationState<SceneOnSoftBoiledConfig>;
 export type SceneOnDizzyPunchPresentationState =
   SceneOnMovePresentationState<SceneOnDizzyPunchConfig>;
 export type SceneOnRazorLeafPresentationState =
@@ -4457,6 +4493,11 @@ export interface SceneOnRecoverView {
   readonly sprites: readonly RecoverEffectSprite[];
 }
 
+export interface SceneOnSoftBoiledView extends SoftBoiledState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMoonlightView extends MoonlightState {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -4537,6 +4578,11 @@ export interface SceneOnHealBellView extends HealBellState {
 }
 
 export interface SceneOnFireBlastView extends FireBlastState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnRolloutView extends RolloutState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -4727,7 +4773,8 @@ export function createSceneOnMovePresentation<
 >(
   config: TConfig,
 ): SceneOnMovePresentationState<TConfig> {
-  if (config.attacker.geometry.side === config.target.geometry.side) {
+  if (config.attacker.geometry.side === config.target.geometry.side
+    && config.move !== "SOFT_BOILED") {
     throw new Error("attacker and target must occupy opposite battle sides");
   }
   assertIntegerPoint("attacker spriteCorner", config.attacker.geometry.spriteCorner);
@@ -5133,6 +5180,25 @@ export function sceneOnRecoverView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...effect,
+  };
+}
+
+/** `age` is ticks since Move_SOFT_BOILED's first source-relative row. */
+export function sceneOnSoftBoiledView(
+  state: SceneOnMovePresentationState<SceneOnSoftBoiledConfig>,
+): SceneOnSoftBoiledView {
+  if (state.config.move !== "SOFT_BOILED") {
+    throw new Error(`expected SOFT_BOILED presentation, got ${state.config.move}`);
+  }
+  const config = state.config;
+  return {
+    ...softBoiledAtAge(state.age, config.attacker.geometry.side, {
+      attackerCenter: config.attacker.geometry.animationCenter,
+      targetCenter: config.healingCenter,
+      battlePositionCenter: config.attacker.geometry.battlePositionCenter,
+    }),
+    attacker: config.attacker,
+    target: config.target,
   };
 }
 
@@ -5766,6 +5832,24 @@ export function sceneOnFireBlastView(
     ...fireBlastAtAge(
       state.age,
       state.config.attacker.geometry.side,
+      state.config.animationProfile,
+    ),
+  };
+}
+
+/** `age=0` is the first active Move_ROLLOUT source-script row. */
+export function sceneOnRolloutView(
+  state: SceneOnMovePresentationState<SceneOnRolloutConfig>,
+): SceneOnRolloutView {
+  if (state.config.move !== "ROLLOUT") {
+    throw new Error(`expected ROLLOUT presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...rolloutAtAge(
+      state.age,
+      state.config.counter,
       state.config.animationProfile,
     ),
   };
