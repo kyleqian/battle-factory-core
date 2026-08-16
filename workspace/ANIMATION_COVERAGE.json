@@ -2234,6 +2234,32 @@
    ]
   },
   {
+   "move": "MOVE_BLIZZARD",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 set-318 PELIPPER versus ONIX parties stage Blizzard in both orientations; retained Scene-ON player-back frames 214..585 pass 372/372 and opponent-front frames 213..573 pass 361/361 component/reducer, typed-seam, source-OAM-topology, raw-RGB, and production shared-framebuffer rows through first inactive cleanup with zero residual pixels",
+    "the source-relative reducer and production compositor port the complete high-speed background fade, horizontal scroll, restore and palette/register lifecycle; partner monbg; Pelipper and Onix front/back art, healthboxes, move text and enemy-shadow edge; resource tags and audio-visible state; and cleanup without owning damage, RNG, AI, controller, turn, round, or facility state",
+    "all fourteen snowballs follow their literal staggered source batches through linear, Step1, signed pre-increment Step2 swirl, and teardown; all fourteen traveling large crystals and all eleven large/small impact crystals retain source callback geometry, affine matrices, flicker, creation/destruction slots, and stable BuildOamBuffer ordering",
+    "the persistent source allocator scheduler reproduces every retained software sprite-order projection, and all overlapping snowball/traveling-crystal OBJ entries run through the shared 1210-cycle GBA scanline evaluator; no age/frame/hash/RGB/framebuffer lookup table, absolute battle tick, coordinate fitting, pixel mask, or capture thinning is used",
+    "the retained verifier pins 733/733 complete bilateral source/component/reducer/seam/raw-RGB/framebuffer rows plus 372/372 and 361/361 OAM-topology rows and 371/371 plus 360/360 OAM/matrix/palette transfers; MOVE_ICY_WIND remains independently exact under its own legal carrier, assets, windows, scheduler, receipts, and acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-blizzard-player-pelipper-opponent-onix.json",
+    "tools/battle-lab/mechanic-blizzard-opponent-pelipper-player-onix.json",
+    "tools/compare/fixtures/blizzard-dense-evidence.json",
+    "tools/compare/blizzardSourceAudit.ts",
+    "tools/compare/verifyBlizzardEvidence.ts",
+    "tools/compare/blizzardFramebuffer.ts",
+    "src/animation/blizzard.ts",
+    "src/animation/gbaObjCompositor.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/blizzard.test.ts",
+    "tests/animation/blizzardFramebuffer.test.ts",
+    "tests/animation/animationBoundaryRatchet.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_ICY_WIND",
    "status": "exact",
    "covered": [
@@ -2241,7 +2267,7 @@
     "the source-relative reducer ports both five-snowball batches, all 320 signed pre-increment Step2 writes, all thirteen AnimWaveFromCenterOfTarget ice spikes, BG_ICE/monbg, both palette ramps, blend-register lifetime, four audio commands, and cleanup without owning damage, RNG, controller, turn, round, or facility state",
     "the staged production compositor derives persistent source allocator slots and stable BuildOamBuffer ordering for the nine healthbox parts, battlers/monbg visibility, ice spikes, and snowballs; player and opponent spike-slot variants follow their observed creation/destruction topology, including the opponent snowball occupying slot 13 when the late spikes allocate",
     "all staged OBJ entries run through the shared generic 1210-cycle GBA scanline evaluator before snowball pixels are committed, resolving every overlap without move-specific masks, per-age/frame/hash/RGB tables, absolute battle ticks, coordinate fitting, or capture thinning",
-    "the portable verifier pins all 287 source sSpriteOrder topology rows per orientation plus complete retained source/latch/raw-RGB/map gates; Blizzard remains an independent unsupported control with its retained 448/448 Step2 rows and 371/371 plus 360/360 OAM/matrix transfers and receives no inherited acceptance"
+    "the portable verifier pins all 287 source sSpriteOrder topology rows per orientation plus complete retained source/latch/raw-RGB/map gates; Blizzard is now independently exact under its own legal carrier, assets, windows, scheduler, receipts, and acceptance and receives no inherited Icy Wind credit"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-icy-wind-player-swinub-opponent-onix.json",
