@@ -7,7 +7,7 @@
   },
   "oracleBattleLab": {
     "scenario": "../../battle-lab/factory-brain-silver-walkup-03-movement-and-speech-open-dense-off.json",
-    "preCheckpointFrameOffset": 1113
+    "preCheckpointFrameOffset": 1111
   },
   "segments": [
     { "frames": 39, "buttons": [] }

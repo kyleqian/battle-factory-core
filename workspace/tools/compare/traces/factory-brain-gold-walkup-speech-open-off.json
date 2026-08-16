@@ -10,9 +10,9 @@
     "preCheckpointFrameOffset": 950
   },
   "segments": [
-    { "frames": 10, "buttons": [] },
+    { "frames": 4, "buttons": [] },
     { "frames": 1, "buttons": ["A"] },
-    { "frames": 245, "buttons": [] }
+    { "frames": 251, "buttons": [] }
   ],
   "captureWindow": { "start": 0, "end": 255 }
 }

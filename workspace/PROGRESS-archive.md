@@ -1,3 +1,36 @@
+## 1296 — [supervisor, 2026-08-16] **B1c folded: entrance-03 162→242/256 (render clock, not OAM latch); #93 fix verified; side absolute-path trap recurred — papercut filed**
+
+- **State:** B1c branch merged (worker `0efe8e15`); union checks green
+  (smoke 375/375, orchestrator+soak pins 65/65, new B1c pin 15/15,
+  build; entrance-03 re-confirmed **242/256** on the merged tree).
+  Mechanism: `brainMoving`'s render clock ran ONE TICK AHEAD of
+  `entryStep`'s shared table (RAM stays flat two ticks after the
+  `brainMsgboxClosing→brainMoving` transition); the 1288 OAM/
+  `gSpriteCoordOffsetY` latch hypothesis was RULED OUT by an extended
+  RAM probe (`oam.y` equals its same-frame computed sum at every tick).
+  Bounded residual: frames 319-320 (msgbox-close wipe artifact — same
+  close-wipe lever as gold speech) + 368 (single-tick Noland walk-cycle
+  frame-index boundary, same family as 1293's lead-leg fix). Bars
+  unmoved: entrance-02 256/256, B2 speech 39/39·28/28·74/74·39/39,
+  reveal 690/701. **#93 fix (1295) supervisor-verified:** seed 109
+  clean, orchestrator suite 51/51, winning 100:120 was 20/20 in the
+  worker's run.
+- **Trap recurred with mechanism found:** the side worker's Edit/Write
+  calls landed in the MAIN tree via absolute paths (worker perceived
+  "edits silently don't reach disk" and fell back to shell writes; two
+  stray main-tree files were superseded early drafts, diff-checked
+  against the branch and discarded). New PAPERCUTS entry filed.
+- **Next:** dispatching **(b) gold speech dense closure** (main lane —
+  now carrying the B1c clock mechanism + the close-wipe and walk-cycle
+  residual leads) and a **post-#93 winning 0:60 re-sweep + full-policy
+  60:120 first sweep** (side lane). Remaining parked: callscene-02
+  second page-turn + box-5 dismiss (1293), entrance-03 frames
+  319-320/368.
+
+---
+
+---
+
 ## 1295 — [main worker, 2026-08-16] **ISSUES #93 fixed: forced-switch handoff no longer preempts a fainted battler's own trailing `Cmd_moveend` item-effect commands (Shell Bell etc.) — seed 109 clean, winning soak 100:120 20/20 OK**
 
 - **State:** Landed and green. `npm test` **1,056 files / 9,980 passed /

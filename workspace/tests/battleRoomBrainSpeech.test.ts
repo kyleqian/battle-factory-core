@@ -24,6 +24,7 @@ import {
   BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED,
   brainSpeechCursorVisible,
   createBrainWalkupBattleRoomState,
+  CURSOR_APPEAR_DELAY_TICKS,
   GOLD_FIRST_ENCOUNTER_SPEECH_BOXES,
   GOLD_PERSONALITY_BOX_COUNT,
   GOLD_PERSONALITY_SPEECH_BOXES,
@@ -176,11 +177,17 @@ describe("silver Noland speech (walk-up build step B2)", () => {
       expect(state.speechStep).toBe(box);
       seenBoxes.push(battleRoomQuote(state));
       let next = advanceThroughFullyPrinted(state);
-      // The wait cursor shows on every box except the last personality page
-      // (string-terminated, no more \p/\l pending) and the cry (a standalone
-      // msgbox, same shape as the entrance's own cursor-less "Get a move
-      // on!" box) - dense-compare-caught (this step's own box0/cry traces).
-      expect(brainSpeechCursorVisible(next)).toBe(box < SILVER_PERSONALITY_BOX_COUNT - 1);
+      // The cursor never shows the instant print completes - oracle draws no
+      // cursor pixels at all for the first CURSOR_APPEAR_DELAY_TICKS ticks of
+      // every fresh brainSpeechIdle entry (battleRoom.ts's own doc, dense-
+      // compare-caught this session). Past that delay, the wait cursor shows
+      // on every box except the last personality page (string-terminated, no
+      // more \p/\l pending) and the cry (a standalone msgbox, same shape as
+      // the entrance's own cursor-less "Get a move on!" box).
+      expect(brainSpeechCursorVisible(next)).toBe(false);
+      let cursorCheck = next;
+      for (let i = 0; i < CURSOR_APPEAR_DELAY_TICKS; i += 1) cursorCheck = advanceBattleRoom(cursorCheck);
+      expect(brainSpeechCursorVisible(cursorCheck)).toBe(box < SILVER_PERSONALITY_BOX_COUNT - 1);
       next = { ...next, phase: battleRoomMsgboxClosingPhase(next), elapsed: 0 };
       for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) {
         const prev = next;
@@ -322,10 +329,15 @@ describe("gold Noland speech (walk-up build step B3)", () => {
       expect(state.speechStep).toBe(box);
       seenBoxes.push(battleRoomQuote(state));
       let next = advanceThroughFullyPrinted(state);
-      // Cursor shows on every box except the last personality page (page 4,
-      // index 3 - static per the dense ground truth) and the close line
-      // (a standalone msgbox, same shape as silver's cry box).
-      expect(brainSpeechCursorVisible(next)).toBe(box < GOLD_PERSONALITY_BOX_COUNT - 1);
+      // Same CURSOR_APPEAR_DELAY_TICKS onset delay as silver's own box loop
+      // above. Past that delay, cursor shows on every box except the last
+      // personality page (page 4, index 3 - static per the dense ground
+      // truth) and the close line (a standalone msgbox, same shape as
+      // silver's cry box).
+      expect(brainSpeechCursorVisible(next)).toBe(false);
+      let cursorCheck = next;
+      for (let i = 0; i < CURSOR_APPEAR_DELAY_TICKS; i += 1) cursorCheck = advanceBattleRoom(cursorCheck);
+      expect(brainSpeechCursorVisible(cursorCheck)).toBe(box < GOLD_PERSONALITY_BOX_COUNT - 1);
       next = { ...next, phase: battleRoomMsgboxClosingPhase(next), elapsed: 0 };
       for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) {
         const prev = next;

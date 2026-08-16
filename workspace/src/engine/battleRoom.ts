@@ -1119,22 +1119,51 @@ export function brainSpeechSceneHandoffElapsed(state: BattleRoomState): number {
  * this function's existing "last personality box never shows the cursor"
  * shape rather than needing a gold-specific carve-out.
  */
+/**
+ * The cursor does not appear the instant its owning phase's `elapsed` clock
+ * starts - MEASURED this session (gold-open-window step): dense pixel diffs
+ * of `factory-brain-gold-walkup-speech-open-off.json` (post accept-timing
+ * fix, see this file's `battleRoomAcceptedState`/CLOSE-WIPE-adjacent doc
+ * history) cross-referenced against a live `state.elapsed` trace
+ * (`createInitialState`/`tick` stepped through the same trace) show oracle
+ * draws NO cursor pixels at all - not offset-0, absent - for `elapsed` 0 and
+ * 1 of every fresh `brainSpeechIdle` entry (frames 167-168 relative to that
+ * fixture's own numbering, direct pixel readout: rows 142-148 all background
+ * in oracle, full glyph in the app). `factory-brain-silver-walkup-
+ * entrance-03-off.json` shows the byte-identical shape at its own box0 entry
+ * (frames 471-472) - tier-general, not a gold-only artifact. Every later
+ * bob-phase boundary is ALSO shifted exactly 2 ticks later than a raw
+ * `elapsed`-indexed table lookup predicts in both fixtures (gold: pairs at
+ * elapsed 9/10, 18/19, 27/28, ... every fixture-open bad frame closes under
+ * `elapsed - 2`; silver entrance-03: the identical pairs at elapsed 9/10,
+ * 18/19, 27/28, 36/37 relative to its own box0 entry close the same way) -
+ * i.e. the cursor's own internal timer starts 2 ticks after the box's
+ * `elapsed` clock, not concurrently with it.
+ */
+export const CURSOR_APPEAR_DELAY_TICKS = 2;
+
 export function brainSpeechCursorVisible(state: BattleRoomState): boolean {
   return (
     (state.phase === "brainSpeechIdle" || state.phase === "brainSpeechClosing")
     && (state.speechStep ?? 0) < brainSpeechPersonalityBoxCount(state) - 1
+    && state.elapsed >= CURSOR_APPEAR_DELAY_TICKS
   );
 }
 
 /**
  * Bob-animation Y offset for the wait cursor, keyed by the SAME idle
- * `elapsed` clock the box's own idle hold ages on - reuses battleScene.ts's
- * own cycle (0,1,2,1 px, one step every 9 ticks) rather than inventing a
- * fresh one, since it is the same glyph/mechanism.
+ * `elapsed` clock the box's own idle hold ages on (re-based by
+ * `CURSOR_APPEAR_DELAY_TICKS`'s own doc above, since the cursor's own timer
+ * starts 2 ticks later) - reuses battleScene.ts's own cycle (0,1,2,1 px, one
+ * step every 9 ticks) rather than inventing a fresh one, since it is the
+ * same glyph/mechanism. Only called from behind `brainSpeechCursorVisible`
+ * (battleRoomRender.ts), which already guarantees `elapsed >=
+ * CURSOR_APPEAR_DELAY_TICKS` - the subtraction below never goes negative.
  */
 const CURSOR_Y_BOB_OFFSETS = [0, 1, 2, 1] as const;
 export function brainSpeechCursorYOffset(state: BattleRoomState): number {
-  return CURSOR_Y_BOB_OFFSETS[Math.floor(state.elapsed / 9) % CURSOR_Y_BOB_OFFSETS.length]!;
+  const cursorElapsed = state.elapsed - CURSOR_APPEAR_DELAY_TICKS;
+  return CURSOR_Y_BOB_OFFSETS[Math.floor(cursorElapsed / 9) % CURSOR_Y_BOB_OFFSETS.length]!;
 }
 
 /**

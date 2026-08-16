@@ -426,6 +426,114 @@ follow-up step should dense-probe `factory-brain-gold-speech-close-off
 `grayFlickerY`/circle-sprite math tick-by-tick (not just sha-compare) to
 isolate the two remaining mechanisms precisely.
 
+### 9′. Gold-open window closed: two shared-clock mechanisms, not a park-phase constant (2026-08-16, main worker)
+
+The 58/256 gold-open residual this step inherited was **not** the box-corner/
+cursor artifact the step brief flagged as the "known sample" — that artifact
+was real but was only 22/256 frames of the total gap. The other 176 frames
+were a **compare-trace calibration bug**, not a `src/` defect, discovered by
+cross-referencing dense pixel diffs against a live `state.elapsed` instrumentation
+trace (stepping `createInitialState`/`tick` through the same trace and logging
+`battleRoom.phase`/`elapsed` per frame — the same technique used for B1c's own
+"render clock" finding, PROGRESS 1296).
+
+**Mechanism 1 — accept-timing miscalibration in the compare trace itself.**
+`factory-brain-gold-walkup-speech-open-off.json` parks `battleRoom` directly
+in `brainMsgboxIdle` (escort box 2, "Get a move on!", already fully printed —
+`generatedRoundBattle7NolandGoldSpeechOpenStage`) and presses A after only 10
+wait frames. But the app's own (already-correct, shared) CLOSE WIPE model
+(§8′) holds the box visible for exactly 7 ticks after accept (`state.elapsed`
+0 through `MSGBOX_CLOSE_TICKS`(4)+`BRAIN_MSGBOX_CLOSE_WIPE_MOVING_HOLD_TICKS`
+(2) = 6 more, i.e. accept-tick + 6) before hiding — confirmed algebraically
+against `factory-brain-silver-walkup-entrance-03-off.json`'s own already-
+committed press/clear pair (press at trace frame 314, clears at 321 = press+7,
+sha-cited in §8′'s own doc). Oracle's real gold recording dismisses the box
+at absolute frame 961 (this fixture's own `preCheckpointFrameOffset`-relative
+frame 11 — stride-1 confirmed, §1′/§7′), independent of when *our* trace
+presses A (oracle's pre-checkpoint captures are driven entirely by the
+battle-lab scenario's own internal walkthrough, not by the compare trace's
+`segments` — `tools/compare/oracleClient.ts`'s `runOracleBattleLab`). Solving
+`press + 7 = 11` gives `press = 4`, not 10. **Fix: reduced the trace's own
+first wait segment from 10 to 4 frames** (`10,1,245` → `4,1,251`, same total
+256) — a trace recalibration, not an engine change, same class of fix §8′'s
+own module doc already documents for `entrance-03`'s own A-press timing.
+Result: **58 → 234/256** on its own.
+
+**Mechanism 2 — the wait cursor's own onset delay (tier-general, was never
+measured).** The remaining 22/256 (the step brief's "known sample") is
+`brainSpeechCursorVisible`/`brainSpeechCursorYOffset` — MEASURED this step:
+oracle draws **zero** cursor pixels (not offset-0 — fully absent) for the
+first 2 ticks of every fresh `brainSpeechIdle` entry, and every later 9-tick
+bob-phase boundary is shifted exactly 2 ticks later than a raw
+`elapsed`-indexed table lookup predicts. Confirmed independently in **two**
+fixtures (ruling out a gold-only artifact): `factory-brain-gold-walkup-
+speech-open-off.json` (frames 167/168, 176/177, 185/186, ... every 9 frames)
+and `factory-brain-silver-walkup-entrance-03-off.json` (frames 471/472,
+480/481, 489/490, ... the identical shape, byte-for-byte pixel readout: rows
+142–148 all background in oracle where offset-0 rendering draws a full
+glyph). Fix: `CURSOR_APPEAR_DELAY_TICKS = 2`, gating `brainSpeechCursorVisible`
+and re-basing `brainSpeechCursorYOffset`'s table lookup onto `elapsed - 2`
+(`src/engine/battleRoom.ts`). Tier-general, no gold-only branch — the same
+constant closes both fixtures.
+
+**Fixing mechanism 2 exposed a THIRD, adjacent calibration bug**: the B2
+speech guard fixture `factory-brain-silver-walkup-speech-box0-held-off.json`
+parks `battleRoom` in `brainSpeechIdle` at `elapsed: 0` and pins
+`preCheckpointFrameOffset: 1113`, chosen (pre-fix) only to visually match a
+"settled" pose — but the true onset (`elapsed 0`, matching this trace's own
+park semantics) is oracle frame **1111**, not 1113 (cross-derived from
+`entrance-03`'s own now-254/256-confirmed clock: `brainSpeechIdle` begins at
+that trace's local tick 471, `preCheckpointFrameOffset` 640, so true onset =
+640+471 = 1111). Before mechanism 2's fix, the old (buggy) cursor formula
+coincidentally matched oracle's real state 2 ticks into the hold well enough
+to pass 39/39; after the fix, it needed the same 2-frame recalibration
+`entrance-03` itself already established as legitimate. Fixed: **1113 → 1111**,
+restoring 39/39.
+
+**Verified results (fresh `npm run compare -- <trace> --summary` reruns):**
+
+| Window | Before this step | After |
+| --- | --- | --- |
+| gold-open (`factory-brain-gold-walkup-speech-open-off.json`) | 58/256 | **254/256** |
+| entrance-03 (`factory-brain-silver-walkup-entrance-03-off.json`, guard) | 244/256 | **254/256** (bonus — shared fix) |
+| entrance-02 (guard) | 256/256 | 256/256 |
+| B2 speech box0-held (guard, offset recalibrated) | 39/39 | 39/39 |
+| B2 speech cry-held / page8-held / close-pause (guards) | 74/74 · 39/39 · 28/28 | unchanged |
+| gold-pages (`factory-brain-gold-walkup-speech-pages-off.json`) | 53/177 | **55/177** |
+| gold-close (`factory-brain-gold-walkup-speech-close-off.json`) | 80/126 | 80/126 (unchanged — different mechanism, §8′) |
+| callscene-01 (guard) | 131/131 | 131/131 |
+| swapask-no (guard) | 194/194 | 194/194 |
+| both reveal fixtures (guard) | 690/701 · 690/701 | unchanged |
+
+**Gold-open's remaining 2/256** (frames 58, 95): isolated single-tick
+walk-cycle animation-frame boundaries during the Noland/scientist movement
+(diff confined to one sprite's pose at one frame each — Noland's own walk
+frame at 58, a scientist's turn frame at 95) — the same "single-tick
+frame-index boundary" family already named as a parked residual for
+entrance-03 frame 368 (PROGRESS 1296), not a new class. Not chased further
+this step.
+
+**Gold-pages (53→55/177) does NOT close with mechanism 1 or 2 alone.**
+Classified, not fixed: nearly every one of its 177 frames carries a small
+(<1%) diff at the wait-cursor's own glyph position (confirmed by direct pixel
+inspection — e.g. frame 13's diff isolates exactly the "♥" cursor glyph after
+"…Oh?"), i.e. the SAME mechanism 2 defect, but this fixture's own multi-page
+`preCheckpointFrameOffset`/hold anchors (1535 for page 1's tail, plus the
+page-2/3/4 anchors in §7′) were themselves picked as arbitrary mid-hold
+points in one long natural recording, not onset-aligned the way `entrance-03`
+and `speech-open`/`speech-box0-held` are — so the cursor's bob phase at each
+of those arbitrary oracle frames doesn't line up with the app's own
+freshly-parked `elapsed`. Closing this needs per-page onset re-derivation
+(the same `true-onset = other-trace's-confirmed-local-tick + its-own-offset`
+technique used above for `speech-box0-held`, repeated for pages 2–4's own
+anchors) — left for a follow-up, not attempted here to avoid guessing offsets
+per the step brief's own caution.
+
+Full `npm test` (9984 passed, 223 skipped, 0 failed — 2 pre-existing
+`tests/battleRoomBrainSpeech.test.ts` assertions updated to expect the new,
+oracle-correct 2-tick cursor delay), `npm run build`, `npm run typecheck`, and
+`tests/executableFrontierRatchet.test.ts` all green; no barrier widened.
+
 ## Appendix: pre-fix (stale, oracle bug: missing gold Frontier-Brain symbol flag) history — captured 2026-08-14
 
 Everything below this line is the **original, unedited** capture from one
