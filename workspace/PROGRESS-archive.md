@@ -1,3 +1,47 @@
+## 1291 — [supervisor orient, 2026-08-16] **Fold: animation-main → master (ff `f44eabff`) — Heal Bell + Fire Blast exact, coverage 194/276; union gates green**
+
+- **State:** master fast-forwarded to animation-main's head `f44eabff`
+  (29 lane commits: Heal Bell 192→193 and Fire Blast 193→194/276
+  Level-50 exact, unsupported 84→82; the animation supervisor had
+  already merged master in at its own 11:24 session start, so the fold
+  is a clean ff — that lane is LIVE again this afternoon, expect more
+  unfolded commits at wind-down). Union gates: full npm **1,056 files /
+  9,978 passed / 223 skipped**; build green. rust-main: nothing to
+  fold. DEFERRED.md empty. Oracle freshness FAIL re-disproved (live
+  8014 serves `factoryBrainWalkup` — the 3e29880b schema; PAPERCUTS
+  freshness entry bumped to hit 3; services NOT restarted, 8012 carries
+  the live animation lane).
+- **Next:** the 1288 queue minus (d): dispatching **(a) call-scene
+  accept-semantics calibration** (main lane) and **(e) winning-policy
+  soak sweep** (side lane) in parallel; then (c) B1c latch probe and
+  (b) gold speech dense closure.
+
+---
+
+## 1290 — [supervisor final, 2026-08-16] **Late round M9 verified + final gates re-run green — session closed**
+
+- **State:** M9 (13th worker) closed the RECORD/RETIRE app-side compare
+  traces **178/178 + 174/174**, fixing a real brain-route bug on the way
+  (the re-ask after RECORD/RETIRE-NO showed the ordinary "2nd match"
+  prompt instead of AskReadyForHead). Call-scene calibration left
+  UNMOVED deliberately (89/131 + 69/199): constant shifts regressed the
+  windows by pushing ready boundaries across the traces' fixed press
+  frames — 1289 records the pixel measurements; the fix needs core.ts's
+  per-tick accept semantics, not more constant guesses. Ground-truth
+  doc box-1 hold row corrected (typewriter completes at 894, not 850).
+- **Final gates (tree `ccd92136`, re-run AFTER M9 — supersede 1288's):**
+  full npm **1,045 files / 9,950 passed / 223 skipped**; build green;
+  soak vanilla **20/20 OK**; soak full 0:60 **60/60 OK**. Differential
+  PASS 563/563 (base `56ef0edf`); regression bars re-verified
+  (askready-menu 21/21, swapask-no 194/194, entrance-02 256/256,
+  silver reveal 690/701).
+- **Next:** unchanged from 1288's ordered list, minus (d) which M9
+  closed; call-scene item (a) now carries 1289's measurements and an
+  accept-semantics prerequisite. **Fold at next orient:**
+  animation-main unfolded (Heal Bell + Fire Blast rounds; its
+  supervisor session was live through this wind-down). rust-main:
+  nothing unfolded. DEFERRED.md EMPTY.
+
 ---
 
 ## 1289 — [main worker, 2026-08-16] **RECORD/RETIRE compare traces found + fixed a real brain-route bug (wrong re-ask prompt) — both close 178/178, 174/174; box-1 hold-boundary doc row pixel-corrected; call-scene 89/131 & 69/199 investigated, left unmoved**

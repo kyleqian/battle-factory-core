@@ -17,6 +17,27 @@ backlog.
 
 # Open
 
+## #93 — winning-policy soak: seed 109 battle-resolution HP-command desync (`battle resolution HP command starts at #, displayed #`)
+
+`--policy winning --seed 109` (2026-08-16 sweep part 2,
+`docs/soak-winning-sweep-2026-08-16-part2.md`) throws inside
+`createBattleResolutionPresentationRenderView`
+(`src/engine/battleResolutionPresentationRender.ts:1098`) at battle 2 turn
+5, frame 81,000: a queued resolution `"hp"` presentation command expects
+the target battler to be displaying HP 22, but it's already at 11 — some
+earlier step in the resolution sequence changed the battler's HP without
+the queued command accounting for it. Deterministic
+(`npm run soak -- --policy winning --seed 109 --verbose`). Does not
+reproduce under `full` or `vanilla` at the same seed — likely because
+`winning`'s distinct fight-move/switch choices route seed 109's RNG stream
+through a resolution sequence (forced-replacement faints into some
+multi-step move) the other two policies' choices don't happen to reach,
+not evidence the underlying bug is `winning`-specific. Suspected owner:
+the resolution receipt/command-building path in
+`src/engine/factoryRoundBattleOrchestrator.ts` (the renderer is just the
+consumer that caught the inconsistency). Found+triaged by the 2026-08-16
+side-lane sweep; supervisor-reproduced same day.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
