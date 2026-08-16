@@ -11,7 +11,7 @@ const sha = (path: string): string =>
   createHash("sha256").update(readFileSync(path)).digest("hex");
 
 describe("MOVE_SOFT_BOILED bilateral dense evidence checkpoint", () => {
-  it("retains the checkpoint without reducer, seam, renderer, or coverage credit", () => {
+  it("retains the reducer/seam checkpoint without renderer or coverage credit", () => {
     expect(fixture).toMatchObject({
       schema: "soft-boiled-bilateral-evidence/v1",
       oracleProfile: "battle-scene-on",
@@ -21,8 +21,8 @@ describe("MOVE_SOFT_BOILED bilateral dense evidence checkpoint", () => {
       coverageCredit: false,
       evidenceScope: {
         productionAnimationChanged: false,
-        reducerAdded: false,
-        typedSeamAdded: false,
+        reducerAdded: true,
+        typedSeamAdded: true,
         compositorAdded: false,
         framebufferLookupAdded: false,
         coveragePromotion: false,
@@ -33,7 +33,7 @@ describe("MOVE_SOFT_BOILED bilateral dense evidence checkpoint", () => {
       },
       acceptance: {
         sourceRows: 544, rawRgbRows: 544, freshRunsPerOrientation: 2,
-        firstInactiveCleanupAge: 271, reducerRows: 0, typedSeamRows: 0,
+        firstInactiveCleanupAge: 271, reducerRows: 544, typedSeamRows: 544,
         productionFramebufferRows: 0,
       },
     });

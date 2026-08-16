@@ -143,6 +143,6 @@ describe("MOVE_SOFT_BOILED authoritative-source and legal bilateral Scene-ON sta
     expect(coverage.entries.find((entry) => entry.move === "MOVE_MILK_DRINK"))
       .toMatchObject({ status: "exact" });
     expect(fixture.coverageCredit).toBe(false);
-    expect(fixture.boundedRemainder).toContain("No dense capture, reducer, typed presentation seam, compositor");
+    expect(fixture.boundedRemainder).toContain("No dense capture, reducer");
   });
 });

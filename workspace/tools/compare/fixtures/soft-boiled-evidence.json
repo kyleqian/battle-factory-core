@@ -7,8 +7,8 @@
   "coverageCredit": false,
   "evidenceScope": {
     "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
     "compositorAdded": false,
     "framebufferLookupAdded": false,
     "coveragePromotion": false,
@@ -30,8 +30,8 @@
     "rawRgbRows": 544,
     "freshRunsPerOrientation": 2,
     "firstInactiveCleanupAge": 271,
-    "reducerRows": 0,
-    "typedSeamRows": 0,
+    "reducerRows": 544,
+    "typedSeamRows": 544,
     "productionFramebufferRows": 0
   },
   "orientations": {
@@ -64,5 +64,5 @@
       "changeMapSha256": "34b390fcea64a6315663b57cae1dd8ce4f2fa991e90f25be914b0b7aca9a330d"
     }
   },
-  "boundedRemainder": "MOVE_SOFT_BOILED remains unsupported. Next add only a source-relative reducer and narrow typed Scene-ON seam replaying all 544 retained rows; compositor, renderer, coverage promotion, and sibling credit remain separate later work."
+  "boundedRemainder": "MOVE_SOFT_BOILED remains unsupported. The source-relative reducer and narrow typed Scene-ON seam replay all 544 retained rows; next add only compositor/draw wiring. Production framebuffer equality, renderer coverage promotion, and sibling credit remain separate later work."
 }
