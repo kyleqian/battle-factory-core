@@ -619,6 +619,7 @@ import tickleAsset from "../animation/assets/tickle.json" with { type: "json" };
 import metronomeAsset from "../animation/assets/metronome.json" with { type: "json" };
 import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
+import yawnAsset from "../animation/assets/yawn.json" with { type: "json" };
 import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
 import attractAsset from "../animation/assets/attract.json" with { type: "json" };
 import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
@@ -1039,6 +1040,7 @@ import {
   sceneOnRestView,
   sceneOnSleepTalkView,
   sceneOnHowlView,
+  sceneOnYawnView,
   sceneOnRoarView,
   sceneOnSweetKissView,
   sceneOnAttractView,
@@ -1103,6 +1105,7 @@ import {
   type SceneOnRestPresentationState,
   type SceneOnSleepTalkPresentationState,
   type SceneOnHowlPresentationState,
+  type SceneOnYawnPresentationState,
   type SceneOnRoarPresentationState,
   type SceneOnSweetKissPresentationState,
   type SceneOnAttractPresentationState,
@@ -2034,6 +2037,9 @@ const howlArt = howlAsset as {
   loudredBack: { tileset: Tileset; palette: RgbColor[] };
   loudredFront: { tileset: Tileset; palette: RgbColor[] };
   noiseLine: { tileset: Tileset; palette: RgbColor[] };
+};
+const yawnArt = yawnAsset as {
+  cloud: { tileset: Tileset; palette: RgbColor[] };
 };
 const sweetKissArt = sweetKissAsset as {
   luvdiscBack: { tileset: Tileset; palette: RgbColor[] };
@@ -30273,6 +30279,141 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LOUDRED used" : "Foe LOUDRED used",
       "HOWL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "YAWN") {
+    const yawnState = state as SceneOnYawnPresentationState;
+    const view = sceneOnYawnView(yawnState);
+    // BuildOamBuffer copies ordinary sprite attributes from the preceding
+    // source row. DeepInhale's task and battler affine phases have their own
+    // matrix handoff, while cloud affine matrices follow the ordinary sprite
+    // row. All three views remain source-relative; no battle clock is used.
+    const displayed = sceneOnYawnView({ ...yawnState, age: yawnState.age - 1 });
+    const affineDisplayed = sceneOnYawnView({ ...yawnState, age: yawnState.age - 2 });
+    const playerToOpponent =
+      view.attacker.species === "TOGETIC"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "GENGAR"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "TOGETIC"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "GENGAR"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged YAWN pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+    const togeticSource = playerToOpponent
+      ? metronomeArt.togeticBack
+      : metronomeArt.togeticFront;
+    const togetic = playerToOpponent
+      ? togeticSource
+      : { ...togeticSource, tileset: subTileset(togeticSource.tileset, 0, 8) };
+    const gengarSource = playerToOpponent
+      ? (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GENGAR!
+      : (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).GENGAR!;
+    const gengar = playerToOpponent
+      ? { ...gengarSource, tileset: subTileset(gengarSource.tileset, 0, 8) }
+      : gengarSource;
+    const drawBattler = (
+      sprite: { tileset: Tileset; palette: RgbColor[] },
+      battler: typeof view.attacker,
+      sourceTransform: typeof view.attackerTransform,
+      matrixTransform: typeof view.attackerTransform,
+    ): void => {
+      if (matrixTransform.active) {
+        drawSpriteSheetAffineStretch(
+          fb,
+          sprite.tileset,
+          sprite.palette,
+          battler.geometry.spriteCorner.x,
+          battler.geometry.spriteCorner.y,
+          matrixTransform.matrix.a,
+          matrixTransform.matrix.d,
+          sourceTransform.y2,
+          { r: 0, g: 0, b: 0 },
+          0,
+          true,
+          sourceTransform.x2,
+        );
+      } else {
+        drawSpriteSheet(
+          fb,
+          sprite.tileset,
+          sprite.palette,
+          battler.geometry.spriteCorner.x + sourceTransform.x2,
+          battler.geometry.spriteCorner.y + sourceTransform.y2,
+        );
+      }
+    };
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const drawAttacker = () => drawBattler(
+      togetic,
+      view.attacker,
+      displayed.attackerTransform,
+      affineDisplayed.attackerTransform,
+    );
+    const drawTarget = () => drawBattler(
+      gengar,
+      view.target,
+      displayed.targetTransform,
+      affineDisplayed.targetTransform,
+    );
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+    for (const cloud of displayed.clouds) {
+      if (cloud.invisible) continue;
+      drawSpriteSheetAffineRotate(
+        fb,
+        yawnArt.cloud.tileset,
+        yawnArt.cloud.palette,
+        cloud.x + cloud.x2,
+        cloud.y + cloud.y2,
+        cloud.matrix.a,
+        cloud.matrix.b,
+        cloud.matrix.c,
+        cloud.matrix.d,
+        undefined,
+        false,
+      );
+    }
+    const profile = yawnState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "GENGAR" : "TOGETIC",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb, composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "TOGETIC" : "GENGAR",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "TOGETIC used" : "Foe TOGETIC used",
+      "YAWN!",
       99,
     );
     return;
