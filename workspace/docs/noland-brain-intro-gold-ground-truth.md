@@ -219,6 +219,134 @@ render the personality-speech scene at all yet).
   sub-stage precision — a future step doing exact-frame work on this
   window should re-probe that range at stride 1.
 
+### 6′. Reveal compare-trace recalibration (2026-08-16, side lane)
+
+`tools/compare/traces/factory-round-battle7-noland-gold-reveal-off.json`
+pins its own battle-lab scenario
+(`tools/battle-lab/factory-round-battle7-noland-gold-reveal-off.json`,
+**not** this doc's playerSetIds/seed — it uses `overrides.parties`
+(Dugtrio/Tropius/Misdreavus vs Skarmory/Jolteon/Electrode, `seed 2`) to pin
+a party matching `generatedGoldRoundRevealProofStage`'s own
+`record(564/565/566)` construction, per
+`tools/compare/factoryRoundIntroGeneralizationStage.ts`). Recalibration
+therefore needed a fresh dense self-diff of *that* scenario, not this doc's
+own fixtures — done via a throwaway `preCheckpointCaptureAllFrames: true`
+copy of the scenario (`bin/oracle lab`, not committed), confirmed
+byte-identical across two independent reruns (all 3467 frames, 0–3466).
+
+**Offset derivation, by content not arithmetic.** The app's own frame 0 for
+this trace is a solid-black frame (raw-RGB sha `d8b443032200e143…`, verified
+by hashing `app-00000.png`'s decoded pixels the same way the oracle hashes
+its framebuffer). That sha is content-ambiguous — five separate black holds
+share it in this scenario's timeline (frames 3–6, 8–70, 418–431, 621–639,
+2722–2766) — so sha alone can't fix the offset. Resolved by exhaustive
+search instead: for every candidate offset in the oracle's full pre-checkpoint
+range, count how many of the app's 701 captured frames (`app-00000.png`
+through `app-00700.png`, hashed the same way) sha-match the oracle frame at
+`offset + k`. **`offset = 2732` is the unique global maximum** (334/701),
+anchored inside the final black-flash hold (2722–2766) — confirmed by the
+app's own black hold lasting exactly 35 frames (0–34) and 2732+35 = 2767,
+the oracle's first post-black-flash frame. This also matches the fixture's
+prior history (`426a8535`): the old `preCheckpointFrameOffset: 1151` was
+likewise anchored inside that scenario's own final black-flash hold, not
+an arbitrary tick.
+
+**Result: 334/701, not ~700/701 — a genuine, honestly-characterized
+residual, not a forcing failure.** Frames 0–333 (the black flash tail plus
+the entire "unique every frame" battle-scene fade-in/send-out-pic-slide-in
+span) match **byte-for-byte**. The mismatch begins sharply at app frame 334
+(oracle frame 3066): the app is still holding "FACTORY HEAD NOLAND would
+like to battle!♥" (PNG-identical to app frame 333) while the fresh oracle
+has already moved on to the box-clearing transition. Root cause, pinned by
+direct frame-content inspection of the fresh self-diff: the **pic-reveal
+hold's own duration changed** as a side effect of the `3e29880b` fix, not
+just its absolute position. For this scenario the fresh oracle's hold
+(`c465f0`/`e7694d`/`a4c9ba` cycling) runs **82 frames** (2984–3065, 9
+sub-phases) before the transition-out begins at 3066; the app renders **142
+frames** (252–393 relative, i.e. 16 sub-phases) before it starts its own
+transition. This is not an artifact of this session's recalibration — it
+corroborates the doc's own §3′ table, which independently shows gold's
+pic-reveal hold at **134f pre-fix** (Appendix §1, a *different*
+non-overridden-party fixture) shrinking to **~84f post-fix** (§3′) — the
+same roughly-134→84 shrink this reveal-compare scenario shows (142→82,
+close given the differing party/text). So the §0′(c) headline claim that
+downstream presentation is "sha-identical shared code, unaffected by the
+fix" holds for the pic-reveal's *content* (same three cycling shas, same
+wording) but **not for this one hold's duration** — a real, reproducible
+(2 independent fresh reruns, byte-identical) behavior change, not a
+calibration error. Fixing the app to match requires an app-side (`src/`)
+change to `battleIntroSceneAssemblyDisplayLag` or wherever the gold
+pic-reveal hold length is derived — out of scope for this side-lane step
+(no `src/` edits) and left for a follow-up. The offset itself
+(`preCheckpointFrameOffset: 2732`) is correct and committed; the residual
+below it is a real app bug newly exposed by the oracle fix, not a
+mis-calibration.
+
+Reproduce: `npm run compare -- factory-round-battle7-noland-gold-reveal-off.json --summary`
+→ `334/701 frames matched`.
+
+### 7′. Gold 4-page speech dense ground truth (2026-08-16, side lane)
+
+Three new battle-lab fixtures, same reproduction params as this doc's §1′
+table (`playerSetIds [564, 565, 566]`, `seed 305419896`, `challengeNum 5`),
+each run twice fresh via `bin/oracle lab tools/battle-lab/<name>.json -o
+<dir> --quiet` and diffed frame-by-frame for byte-identity (0 diffs, all
+three) before being committed. Frame numbers are this doc's own
+pre-checkpoint coordinate space (§1′), stride-1 confirmed for every frame
+listed below (no `~` approximation in this section).
+
+**`factory-brain-gold-speech-open-off.json`** (256 frames, stride-1,
+950–1205) — escort box 2's hold tail through page 1 settling:
+
+| Frames | Len | Content |
+| --- | --- | --- |
+| 950–960 | 11f hold (`7d8066240c8e6514`) | Escort box 2 tail, "Hey, hey! Get a move on!" — same sha §1′ already cites for the full 690–960 hold. |
+| 961–1040 | 80f, unique every frame | Escort box dismissed, page 1 typewriter printing "NOLAND: Hey, hey! How's it going? You keeping up with your studies?". |
+| 1041–1045 | 5f, two short holds (`f316e3b9…` 3f, `d50c7abb…` 2f) | Brief pause mid-typewriter (name-box beat) — not individually explained this session, flagged as an observed sub-event. |
+| 1046–1050 | 5f hold (`31aec4d68fe629cb`) | Same sha as the post-speech dialogue-dismissed pause (§1′'s 2531–2557) — a content-independent "no box" frame recurring mid-print, not a second dismiss. |
+| 1051–1118 | 68f, unique every frame | Typewriter resumes, page 1 finishes printing. |
+| **1119–1205** | cycling `a25a760854eb915c`/`3647b6ae68b9631b`/`c1cddebfb075adfa`/`3647b6ae68b9631b`, 4-phase, 36f period | **Page 1 settled, held** (PNG-verified at 1200: "NOLAND: Hey, hey! How's it going? You keeping up with your studies?"). Window ends mid-hold (page 1's hold continues past 1205; full extent captured is 1119–1541, see below). |
+
+**`factory-brain-gold-speech-pages-off.json`** (177 frames, sparse +
+stride-1 edges, 1535–2390) — page 1→2→3→4 transitions and each page's hold:
+
+| Frames | Len | Content |
+| --- | --- | --- |
+| 1535–1541 | 7f (tail of page 1's hold) | Page 1 still held (same 4-phase cycle as above). |
+| 1542–1547 | 6f, unique every frame | **Page-advance edge 1→2** (box wipe). |
+| 1548+ (anchors 1548, 1600, 1700, 1800, 1900, 2000, 2100) | cycling `bdc11865141713ee`/`320337365e0525de`/`13a6bc29459a4c8f`/`320337365e0525de`, 4-phase, 36f period | **Page 2 settled, held** (PNG-verified at 1800: "...Oh?♥"). |
+| 2120–2128 | 9f (tail of page 2's hold) | Page 2 still held. |
+| 2129–2187 | 59f, unique every frame | **Page-advance edge 2→3** — longer than edge 1→2 (59f vs 6f), not explained further this session. |
+| 2188–2195, 2220, 2250–2259 | cycling `e12727286abcf09c`/`1947fc456729f02c`/`b8f4c2dea3e13f99`/`1947fc456729f02c`, 4-phase, 36f period | **Page 3 settled, held** (PNG-verified at 2220: "You've taken on a harder look than the last time I saw you.♥"). |
+| 2260–2262 | 3f (tail of page 3's hold) | Page 3 still held. |
+| 2263–2310 | 48f, unique every frame | **Page-advance edge 3→4**. |
+| **2311–2320, 2350, 2390** | static, single sha (`ab880d96dcf4c641`), no cycling | **Page 4 settled, held** (PNG-verified at 2350: "Now, this should be fun! I'm getting excited, hey!♥") — notably **does not blink/cycle** like pages 1–3 (one constant framebuffer the entire hold), an asymmetry not explained further this session. |
+
+No distinct "battle-cry" box exists between pages — the 4-page block
+(confirmed 4 pages: "Hey hey/how's it going", "...Oh?", "harder
+look/last time I saw you", "should be fun/getting excited") is immediately
+followed by the separate "All right! Bring it on!" line (§7′'s third
+fixture below), matching `factoryBrainWalkupScript.test.ts`'s "4-page"
+pin — there is no fifth pre-transition box.
+
+**`factory-brain-gold-speech-close-off.json`** (126 frames, stride-1,
+2495–2620) — final box settle → dismiss → pause → flicker onset (the
+close/handoff edge):
+
+| Frames | Len | Content |
+| --- | --- | --- |
+| 2495–2530 | 36f (tail of a longer hold; full extent 2420–2530 per this session's earlier all-frames probe) | **Final box settled**, "All right! Bring it on!" (sha `f0d9bf0629eb1c8a`, PNG-verified at 2450) — the distinct one-box line following the 4-page block, matching §1′'s citation exactly. |
+| **2531–2556** | 26f hold (`31aec4d68fe629cb`) | Dialogue box dismissed, empty-arena pause — exact stride-1 match to §1′'s "2531–~2557" estimate. |
+| 2557–2611 | 55f, 8-phase flicker (`ce3e94fa`/`1173fa84`/`0c9105c5`/`b27ee11b`/`322a51e5`/`ed2e01a0`/`9ea9d972`/`ec073b9c`, period 16f, with the same `31aec4d68fe629cb` "empty" sha recurring once per loop at the cycle's low point — coincidental reuse, not a second dismiss) | Pre-transition screen flicker; ends in a genuine 8-frame hold (2604–2611) at the same sha, then breaks into unique frames. |
+| 2612–2620 | 9f, unique every frame | Swirl transition building up (handoff out of the speech scene). |
+
+Re-run commands (twice each, byte-identical both times):
+```sh
+bin/oracle lab tools/battle-lab/factory-brain-gold-speech-open-off.json -o /tmp/a --quiet
+bin/oracle lab tools/battle-lab/factory-brain-gold-speech-pages-off.json -o /tmp/b --quiet
+bin/oracle lab tools/battle-lab/factory-brain-gold-speech-close-off.json -o /tmp/c --quiet
+```
+
 ## Appendix: pre-fix (stale, oracle bug: missing gold Frontier-Brain symbol flag) history — captured 2026-08-14
 
 Everything below this line is the **original, unedited** capture from one
