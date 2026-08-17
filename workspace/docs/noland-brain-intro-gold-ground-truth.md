@@ -738,6 +738,65 @@ build`, `npm run typecheck` all green; `tests/executableFrontierRatchet.test.ts`
 barrier counts unmoved (only `tools/compare/traces/factory-brain-gold-walkup-
 speech-pages-off.json` changed — no `src/` edit this step).
 
+### 9⁗. §9‴'s residual (frames 593/727) CLOSED: the window's 2nd+ accept-driven transition is one tick faster than the 1st (2026-08-17, main worker)
+
+Closed the "real, tier-general characterization" §9‴ asked for, cross-
+checked against a second, independent dense window
+(`docs/silver-speech-box2-evidence.md`, silver's box 1→2 edge) landed the
+same session. **Derived rule:** the window's FIRST accept-driven box
+transition (leaving box 0, the box the window opened directly into) shows
+the box CLEARED for one tick before the first new character — the existing
+uniform 2-tick model, unchanged. Every LATER accept-driven transition
+(leaving box ≥ 1) skips that cleared tick entirely — the accept tick itself
+already shows the first new character, no cleared frame ever visible at
+1-tick resolution. This refines §9‴'s own "first `\p` vs. later `\p`"
+framing (that framing was under-specified — it never named what a "later"
+`\p` compares against, or whether a `\l` scroll counts): the true
+discriminator is transition ORDER since the window opened, not the `\p`
+marker specifically — silver's box 0→1 edge uses `\l` (not `\p`) and is
+structurally the window's first transition, exactly parallel to gold's
+`\p`-driven page 1→2; both stay on the slow model. `splitSpeechBoxes`
+already treats `\l`/`\p` identically (module doc, `battleRoom.ts`), so
+nothing new needed to unify them here — only the ORDER within the flattened
+box queue needed to be added.
+
+**Fix.** New `BattleRoomState` field `speechAcceptedFast` (`battleRoom.ts`),
+set `true` only by `battleRoomAcceptedState`'s direct-continuation branch
+when the box being left has `speechStep >= 1`; explicitly `false` at the
+window-open entry (`brainSettled` → `brainSpeech`, box 0) and at every real
+close+reopen (`brainSpeechClosing`'s own re-entry into `brainSpeech`, e.g.
+the last personality page → close/cry box) — a structurally different
+transition, confirmed unaffected by the already-green `factory-brain-gold-
+walkup-speech-close-off.json` guard (80/126, unmoved). `msgboxVisual`/
+`advanceBattleRoom`'s `"brainSpeech"` case shift the chars-shown/exit-elapsed
+formula by exactly one tick when the flag is set — no other constant
+changed. The **trace-level compensation §9‴'s own fix added is now
+redundant and was reverted**: `factory-brain-gold-walkup-speech-pages-off.json`'s
+middle wait segment goes back `585→586` (and the trailing hold `128→127` to
+preserve the total), since the engine itself now supplies the one-tick
+correction natively — keeping both the trace shift and the engine fix would
+have double-shifted (verified empirically: applying the engine fix without
+reverting the trace regressed gold-pages to 85/177 before the revert was
+made).
+
+**Result:** `factory-brain-gold-walkup-speech-pages-off.json` **175/177 →
+177/177** (frames 593 and 727 both closed) with the reverted trace timing;
+`factory-brain-silver-walkup-speech-box2-off.json` (`docs/silver-speech-
+box2-evidence.md`) **63/100 → 100/100** (the 31-frame print-span residual
+AND all 6 period-9 cursor-bob blips both closed by the same one-tick model
+fix, confirming the bob-phase shift needed no separate mechanism, exactly as
+that doc's own §4 Group B predicted). Guard matrix unmoved (fresh
+`--summary` reruns): gold-open 254/256, gold-close 80/126, entrance-02
+256/256, entrance-03 254/256, callscene-01 131/131, callscene-02 199/199, B2
+speech box0-held 39/39 / cry-held 74/74 / page8-held 39/39 / close-pause
+28/28, askready 21/21, swapask-no 194/194, record 178/178, retire 174/174.
+`src/engine/postwin.ts` (call-scene) untouched, per PROGRESS 1303's guard.
+Full `npm test` (1065 files, 10010 passed, 223 skipped), `npm run build`,
+`npm run typecheck` green; `executableFrontierRatchet` barrier counts
+unmoved. One Tier-1 test updated (`tests/battleRoomBrainSpeech.test.ts`'s
+gold `\p` page-turn test pinned `chars: 0` for every internal page turn —
+now only the first turn keeps that; every later turn asserts `chars: 1`).
+
 ## Appendix: pre-fix (stale, oracle bug: missing gold Frontier-Brain symbol flag) history — captured 2026-08-14
 
 Everything below this line is the **original, unedited** capture from one

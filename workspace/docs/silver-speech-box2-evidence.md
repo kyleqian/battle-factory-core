@@ -170,3 +170,35 @@ tier-general, silver included, pixel-for-pixel.
 only gained new exports/registrations (`generatedRoundBattle7NolandSilverSpeechBoxOpeningStage`,
 `...Box2OpeningStage`, and the `factory-round-battle7-noland-silver-speech-box2-opening-off`
 stage id) — every existing helper and stage id is byte-unchanged.
+
+## 7. VERDICT (2026-08-17, main worker): §4's residual CLOSED — 63/100 → 100/100
+
+Picked up §4's own space-character proof and closed the mechanism it named,
+cross-checked against `docs/noland-brain-intro-gold-ground-truth.md` §9‴'s
+gold page 2→3/3→4 edges (landed the same session, same rule). **Derived
+rule** (stated in full, with citations, in `battleRoom.ts`'s new
+`speechAcceptedFast` field doc and in that doc's own §9⁗ addendum): the
+window's FIRST accept-driven box transition (leaving box 0) keeps the
+existing 2-tick clear-then-print model; every LATER one (leaving box ≥ 1 —
+box 1→2 here is the window's 2nd, counting box 0→1's own `\l` scroll as the
+1st) skips the cleared tick — the accept tick itself already shows the
+first new character. Implemented as a new `BattleRoomState` field
+(`speechAcceptedFast`), set by `battleRoomAcceptedState`'s direct-
+continuation branch; this fixture's own park helper
+(`generatedRoundBattle7NolandSilverSpeechBoxOpeningStage`) constructs
+`battleRoom` state directly rather than calling `battleRoomAcceptedState`,
+so it needed its own matching derivation (`speechStep - 1 >= 1`) to actually
+exercise the fixed model — done in the same commit.
+
+**Result:** `factory-brain-silver-walkup-speech-box2-off.json` **63/100 →
+100/100** — both Group A (the 31-frame print-span shift) and Group B (all 6
+period-9 cursor-bob blips) closed by the single one-tick fix, exactly as §4
+predicted ("No new mechanism, no engine edit needed to explain [Group B]
+- same root cause as Group A"): no separate bob-phase fix was needed.
+Guard reruns (§6's own table) unmoved: silver box0-held 39/39, cry-held
+74/74, page8-held 39/39, close-pause 28/28; gold-pages
+**175/177 → 177/177** (the sibling fix's own two frames, 593/727, closed
+by the same engine change — see the gold doc's §9⁗ for the trace-level
+compensation that had to be reverted alongside it). Full `npm test` (1065
+files, 10010 passed, 223 skipped), `npm run build`, `npm run typecheck`
+green; `executableFrontierRatchet` barrier counts unmoved.

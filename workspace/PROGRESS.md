@@ -4,6 +4,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1305 — [main worker, 2026-08-17] **Later-`\p`/`\l` accept model CLOSED: gold-pages 177/177, silver box-2 100/100 — the converged mechanism from 1304 is fixed**
+
+- **State:** Landed and green, commit `b14e2e25`. `npm test` **1065 files /
+  10010 passed / 223 skipped** (unmoved), `npm run build` + `npm run
+  typecheck` green, `executableFrontierRatchet` barrier counts unmoved.
+  `src/engine/postwin.ts` (call-scene) untouched, per PROGRESS 1303's guard.
+- **Did:** Closed 1304's converged open mechanism. Derived rule (from both
+  windows, cited in each doc — see Notes): the window's FIRST accept-driven
+  box transition (leaving box 0) keeps the existing 2-tick clear-then-print
+  model; every LATER one (leaving box ≥ 1, `\l` or `\p` alike — silver's
+  box 0→1 `\l` scroll counts as the 1st transition, making its box 1→2 `\p`
+  the 2nd) skips the cleared tick — the accept tick itself already shows
+  the first new character. Implemented as a new `BattleRoomState` field
+  `speechAcceptedFast`, set only by `battleRoomAcceptedState`'s direct
+  `\p`/`\l` continuation when the box being left has `speechStep >= 1`;
+  explicitly false at window-open and at every real close+reopen (a
+  structurally different transition — the gold-close guard, 80/126,
+  unmoved, confirms that path is untouched). Also reverted
+  `factory-brain-gold-walkup-speech-pages-off.json`'s PROGRESS-1302
+  press-timing shift (`585/128 → 586/127`) — that was a trace-level
+  compensation for the old uniformly-slow engine model, now redundant and
+  double-shifting if left in place (verified empirically: the engine fix
+  alone regressed gold-pages to 85/177 before the trace revert).
+- **Result:** `factory-brain-gold-walkup-speech-pages-off.json` **175/177 →
+  177/177** (frames 593/727 closed); `factory-brain-silver-walkup-speech-
+  box2-off.json` **63/100 → 100/100** (both the 31-frame print-span
+  residual and all 6 period-9 cursor-bob blips closed by the one fix, no
+  separate bob-phase mechanism needed). Guard matrix unmoved (fresh
+  `--summary` reruns): gold-open 254/256, gold-close 80/126, entrance-02
+  256/256, entrance-03 254/256, callscene-01 131/131, callscene-02
+  199/199, B2 speech box0-held 39/39 / cry-held 74/74 / page8-held 39/39 /
+  close-pause 28/28, askready 21/21, swapask-no 194/194, record 178/178,
+  retire 174/174.
+- **Next:** No open item from this mechanism. Pick up 1304's remaining
+  ordered list: (b) gold-close flicker/swirl phase derivation (§8′ recipe,
+  out of scope for this step); (c) soak remainder (vanilla 20:60 + winning
+  0:10 at 2× maxFrames); (d) entrance-03 368/508 single-tick family.
+- **Notes:** Full derivation + before/after tables in
+  `docs/noland-brain-intro-gold-ground-truth.md` §9⁗ and
+  `docs/silver-speech-box2-evidence.md` §7. One Tier-1 test updated
+  (`tests/battleRoomBrainSpeech.test.ts`'s gold `\p` page-turn test: was
+  `chars: 0` for every internal page turn, now only the first turn keeps
+  that — every later turn asserts `chars: 1`, stated in the commit
+  message). No PAPERCUT.
+
+---
 ## 1304 — [supervisor fold, 2026-08-17] **Rounds 1-2: gold-pages 175/177 + callscene-02 CLOSED 199/199 + soak 120:180 clean + silver box-2 fixture banked — later-`\p` one-tick model is now a two-window converged mechanism**
 
 - **State:** master `16cc1a14`, tree clean. Union after both folds: smoke
@@ -83,68 +129,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Full mechanism writeup and before/after table in
   `docs/walkup-call-scene-ground-truth.md`'s new "callscene-02 closed
   171/199 → 199/199" section. No PAPERCUT.
-
----
-
-## 1302 — [main worker, 2026-08-17] **gold-pages typewriter edges closed 85→175/177: trace recalibration, plus a newly-proven (not chased) engine residual**
-
-- **State:** Landed and green. `npm test` **1065 files / 10010 passed /
-  223 skipped**, `npm run build` + `npm run typecheck` green,
-  `executableFrontierRatchet` unmoved. Only
-  `tools/compare/traces/factory-brain-gold-walkup-speech-pages-off.json`
-  changed — no `src/` edit this step.
-- **Did:** Closed PROGRESS 1301's top "Next" item — the page 2→3/3→4
-  typewriter-edge residual. Direct pixel diff of the compare tool's own
-  saved `app-*.png`/`oracle-*.png` pairs (not just sha/bbox) proved the
-  app trails oracle by a constant, non-compounding **one tick** through
-  both edges' entire print span (self-healing by hold time, which is why
-  the holds already matched). Read `tools/compare/oracleClient.ts`'s
-  `runOracleBattleLab` to confirm — not assume — that post-checkpoint
-  oracle frames are a **fixed recording** (the battle-lab scenario's own
-  `preCheckpointCaptureFrames`), wholly independent of this trace's own
-  `segments`; only the app's timing depends on press placement. That
-  proves the class: mechanism (a), a trace-side press/wait
-  miscalibration, same as §9′'s gold-open mechanism 1 — not an engine
-  defect. Fix: the trace's middle wait segment (before the page 2→3
-  press) was one tick too long, `586→585`; the same tick was added back
-  onto the trailing wait (`127→128`, page 4's hold is a static
-  non-cycling sha, inert to pad) to keep `captureWindow.end: 855` and the
-  rest of the trace's local↔abs frame mapping unperturbed. The page 3→4
-  edge needed no separate edit — the single upstream shift, tested alone
-  first, already fixed both (oracle's fixed-recording independence from
-  wall-clock makes this a whole-tail shift, not two separate bugs).
-- **Result: gold-pages 85→175/177** — hits the brief's numeric target
-  exactly, and as a bonus the previously out-of-scope 716/725
-  "frame-index boundary" pair is now also exact (they were downstream
-  artifacts of this same offset). The new residual is **593 and 727
-  instead of the anticipated 716/725** — a different, newly-surfaced,
-  algebraically-proven-unavoidable-by-trace-edit pair: the app's shared,
-  already-oracle-confirmed-correct-for-page-1→2 2-tick
-  `brainSpeechIdle`→`brainSpeech` accept model (clear-tick, then
-  first-char-tick, `battleRoomAcceptedState`/`msgboxVisual` in
-  `src/engine/battleRoom.ts`) is genuinely one tick too slow for later
-  `\p` transitions within the same open window, which oracle shows
-  jumping straight to the first character with no visible clear tick.
-  Proven via direct pixel check + an algebraic proof (no single press
-  tick can satisfy both the pre-edge and post-edge frame under the
-  current uniform model) — not guessed. Closing it needs a real,
-  tier-general reason why the *first* `\p` in a first-encounter speech
-  differs from later ones (byte-identical `\p` markers in source), not a
-  `speechStep`-indexed branch (forbidden by the brief's own
-  no-per-page-special-case rule) — left honest rather than fitted.
-- **Guard bars, all reverified via fresh `npm run compare -- <trace>
-  --summary`:** gold-open 254/256, entrance-03 254/256, gold-close
-  80/126, callscene-01 131/131, entrance-02 256/256, B2 speech
-  39/39·74/74·39/39·28/28 — all unmoved.
-- **Next:** re-derive why the first-encounter speech's first `\p` needs a
-  2-tick clear-then-print gap while later `\p`'s in the same window need
-  only 1 (frames 593/727) — needs a principled, tier-general
-  characterization, not a page-index branch. Otherwise pick up 1301's
-  remaining list: callscene-02 (171/199), gold-close flicker/swirl
-  (§8′), entrance-03 frames 368/508.
-- **Notes:** Full mechanism writeup, the algebraic proof, and the
-  before/after table are in `docs/noland-brain-intro-gold-ground-truth.md`
-  §9‴. No PAPERCUT.
-
----
-

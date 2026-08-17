@@ -1,3 +1,65 @@
+## 1302 — [main worker, 2026-08-17] **gold-pages typewriter edges closed 85→175/177: trace recalibration, plus a newly-proven (not chased) engine residual**
+
+- **State:** Landed and green. `npm test` **1065 files / 10010 passed /
+  223 skipped**, `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` unmoved. Only
+  `tools/compare/traces/factory-brain-gold-walkup-speech-pages-off.json`
+  changed — no `src/` edit this step.
+- **Did:** Closed PROGRESS 1301's top "Next" item — the page 2→3/3→4
+  typewriter-edge residual. Direct pixel diff of the compare tool's own
+  saved `app-*.png`/`oracle-*.png` pairs (not just sha/bbox) proved the
+  app trails oracle by a constant, non-compounding **one tick** through
+  both edges' entire print span (self-healing by hold time, which is why
+  the holds already matched). Read `tools/compare/oracleClient.ts`'s
+  `runOracleBattleLab` to confirm — not assume — that post-checkpoint
+  oracle frames are a **fixed recording** (the battle-lab scenario's own
+  `preCheckpointCaptureFrames`), wholly independent of this trace's own
+  `segments`; only the app's timing depends on press placement. That
+  proves the class: mechanism (a), a trace-side press/wait
+  miscalibration, same as §9′'s gold-open mechanism 1 — not an engine
+  defect. Fix: the trace's middle wait segment (before the page 2→3
+  press) was one tick too long, `586→585`; the same tick was added back
+  onto the trailing wait (`127→128`, page 4's hold is a static
+  non-cycling sha, inert to pad) to keep `captureWindow.end: 855` and the
+  rest of the trace's local↔abs frame mapping unperturbed. The page 3→4
+  edge needed no separate edit — the single upstream shift, tested alone
+  first, already fixed both (oracle's fixed-recording independence from
+  wall-clock makes this a whole-tail shift, not two separate bugs).
+- **Result: gold-pages 85→175/177** — hits the brief's numeric target
+  exactly, and as a bonus the previously out-of-scope 716/725
+  "frame-index boundary" pair is now also exact (they were downstream
+  artifacts of this same offset). The new residual is **593 and 727
+  instead of the anticipated 716/725** — a different, newly-surfaced,
+  algebraically-proven-unavoidable-by-trace-edit pair: the app's shared,
+  already-oracle-confirmed-correct-for-page-1→2 2-tick
+  `brainSpeechIdle`→`brainSpeech` accept model (clear-tick, then
+  first-char-tick, `battleRoomAcceptedState`/`msgboxVisual` in
+  `src/engine/battleRoom.ts`) is genuinely one tick too slow for later
+  `\p` transitions within the same open window, which oracle shows
+  jumping straight to the first character with no visible clear tick.
+  Proven via direct pixel check + an algebraic proof (no single press
+  tick can satisfy both the pre-edge and post-edge frame under the
+  current uniform model) — not guessed. Closing it needs a real,
+  tier-general reason why the *first* `\p` in a first-encounter speech
+  differs from later ones (byte-identical `\p` markers in source), not a
+  `speechStep`-indexed branch (forbidden by the brief's own
+  no-per-page-special-case rule) — left honest rather than fitted.
+- **Guard bars, all reverified via fresh `npm run compare -- <trace>
+  --summary`:** gold-open 254/256, entrance-03 254/256, gold-close
+  80/126, callscene-01 131/131, entrance-02 256/256, B2 speech
+  39/39·74/74·39/39·28/28 — all unmoved.
+- **Next:** re-derive why the first-encounter speech's first `\p` needs a
+  2-tick clear-then-print gap while later `\p`'s in the same window need
+  only 1 (frames 593/727) — needs a principled, tier-general
+  characterization, not a page-index branch. Otherwise pick up 1301's
+  remaining list: callscene-02 (171/199), gold-close flicker/swirl
+  (§8′), entrance-03 frames 368/508.
+- **Notes:** Full mechanism writeup, the algebraic proof, and the
+  before/after table are in `docs/noland-brain-intro-gold-ground-truth.md`
+  §9‴. No PAPERCUT.
+
+---
+
 ## 1301 — [supervisor wind-down, 2026-08-16] **Nine worker steps + one salvage, two lanes: every open walk-up window advanced (two to exact/near-exact), two latent engine crashes found+fixed, soak coverage 0:120 green — all final gates green**
 
 - **Final gates (tree `f63ff8d3`, the animation Soft Boiled fold —
