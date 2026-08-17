@@ -17,6 +17,60 @@ backlog.
 
 # Open
 
+## #96 — battle1-swap trace family: 17 of 18 traces collapsed to ~0/N by the missing explicit `appRoute` field (pre-existing, surfaced by the 2026-08-17 full-fixture sweep)
+
+**Symptom:** every `battle1-swap-*.json` compare trace except
+`battle1-swap-enemy-accept-exit.json` scores ~0/N (e.g. `enemy-accept-b-return`
+0/69, `enemy-picker` 0/130, `player-picker` 0/101) against documented full
+bars from the S8 audit / rung-14 era. Full per-trace table:
+`docs/fixture-sweep-2026-08-17.md`.
+
+**Confirmed:** pre-existing, NOT a 2026-08-17 regression — a read-only
+baseline worker at `b229076a` (the 2026-08-16 wind-down commit, before any of
+this session's changes) reproduced `enemy-accept-b-return` at a byte-identical
+0/69. Root cause per the sweep: these traces predate the #53 production
+routing flip and never got the explicit `"appRoute": "canonical-recorded"`
+field, so they now silently replay against the `generated-orchestrator`
+default — the same appRoute papercut class PROGRESS-archive documents for
+other traces, just never applied to this family.
+`battle1-swap-enemy-accept-exit.json`, the one member WITH the explicit field,
+is still 43/43 EXACT — the strongest evidence the underlying canonical replay
+is intact.
+
+**Fix shape (mechanical):** add `"appRoute": "canonical-recorded"` to the 17
+traces, rerun each, and confirm restoration to its documented bar. Any member
+that does NOT restore after the field fix is a separate real drift and must be
+recorded individually (do not lump it back into this entry).
+
+## #97 — turn5/turn6 + loss-terminal-decline windows drifted below documented bars at an unknown pre-2026-08-17 commit (cursor-invisible: no active acceptance set runs them)
+
+**Symptom (counts identical on 2026-08-17 master AND at the `b229076a`
+baseline — so the drift predates this session):**
+- `turn5-action-off.json` **1/32** vs documented 32/32
+  (docs/turn4-fold-pp-freshness-design.md); first mismatch frame 5927;
+  small localized diffs (2-10%) in the message/menu-window region.
+- `turn6-reopen-off.json` **11/46** vs documented 46/46 (same doc); first
+  mismatch frame 7305; same small-diff signature.
+- `loss-terminal-decline-continuation-off.json` **50/155** vs the 155/155 bar
+  cited in #73 and PROGRESS-archive (×7); whole-frame mismatch (95.87%)
+  starting exactly at the documented decline-edge frame 4989.
+
+**Confirmed:** all three have the correct `appRoute` already (distinct from
+#96); reruns reproduce the counts deterministically; family control
+`turn5-reset-off.json` is still 256/256 on both trees. The regressing commit
+is unknown — these windows sit in no active acceptance set, so the drift was
+invisible until the 2026-08-17 exhaustive sweep (`docs/fixture-sweep-2026-08-17.md`).
+
+**Leads:** (a) pixel-first diagnosis at the three first-mismatch frames (the
+turn5/6 signature is a message/menu-window region delta — check redraw/latch
+classes before anything else; the loss-terminal one flips whole-frame at the
+decline edge — check the decline continuation's stage/scenario preconditions);
+(b) if pixels don't identify it, bisect b229076a..back toward the last
+commit where the documented bars were actually re-verified (the bars' own doc
+citations date them). Fix at the classified layer; if the truth is that the
+documented bar itself was recorded against a since-changed intended behavior,
+say so explicitly rather than restoring blind.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
