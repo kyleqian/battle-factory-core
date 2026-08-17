@@ -136,16 +136,17 @@ export interface BattleRoomState {
   speechStep?: number;
   /**
    * True only for a box entered via `battleRoomAcceptedState`'s direct
-   * `\p`/`\l` continuation (never a real close+reopen) whose PRIOR box was
-   * itself not the window's first box - i.e. this is the window's 2nd or
-   * later accept-driven transition. Selects the fast one-tick print model
-   * in `msgboxVisual`/`advanceBattleRoom`'s "brainSpeech" case below instead
+   * personality-to-personality continuation (`\p`/`\l`, never a real
+   * close+reopen) whose PRIOR box was itself not the window's first box -
+   * i.e. this is the window's 2nd or later accept-driven personality-page
+   * transition. Selects the fast one-tick print model in
+   * `msgboxVisual`/`advanceBattleRoom`'s "brainSpeech" case below instead
    * of the default clear-then-print one - see those call sites for the rule.
    *
-   * Derived, not guessed, from two independent dense oracle windows:
-   * `docs/noland-brain-intro-gold-ground-truth.md` §9‴ (gold's page 2→3 and
-   * 3→4 edges, both later `\p` transitions, one tick faster than page 1→2's
-   * own first transition - which stayed exact) and
+   * Derived, not guessed, from four independent dense oracle windows:
+   * `docs/noland-brain-intro-gold-ground-truth.md` §9‴/§9⁗ (gold's page 2→3
+   * and 3→4 edges, both later `\p` transitions, one tick faster than page
+   * 1→2's own first transition - which stayed exact) and
    * `docs/silver-speech-box2-evidence.md` (silver's box 1→2 edge, a `\p`
    * that is the window's SECOND accept-driven transition, counting box
    * 0→1's own `\l` scroll as the first - also one tick faster, plus its
@@ -156,14 +157,22 @@ export interface BattleRoomState {
    * cleared for one tick before the first new character
    * (`battleRoomAcceptedState`'s plain `elapsed: 0` entry, this flag left
    * false); every later one skips that cleared tick - the accept tick
-   * itself already shows the first new character, this flag set true. A
-   * box entered via a REAL close+reopen (`brainSpeechClosing`'s own
-   * `speechStep` advance, e.g. gold's page 4 -> close box, silver's page 8
-   * -> cry box) is a structurally different transition - unconditionally
-   * false there regardless of `speechStep`, confirmed by the already-green
-   * `factory-brain-gold-walkup-speech-close-off.json` guard (80/126,
-   * unmoved by this fix) already using the slow model correctly for that
-   * case.
+   * itself already shows the first new character, this flag set true.
+   *
+   * A box entered via a REAL close+reopen (leaving the last personality
+   * page for the close/cry box, e.g. gold's page 4 -> close box, silver's
+   * page 8 -> cry box) is a structurally different transition, but two more
+   * dense edge fixtures (`docs/speech-close-edge-evidence.md`,
+   * `docs/speech-close-edge-silver-evidence.md`) proved it renders under
+   * the SAME slow/cleared model as the window's first transition (not the
+   * fast one) - unconditionally false there regardless of `speechStep`.
+   * That is unrelated to `battleRoomAcceptedState`'s OWN mechanism change
+   * for this edge (skipping the `brainSpeechClosing` hidden wait entirely -
+   * see that function's own doc): the earlier claim that the pre-existing
+   * `factory-brain-gold-walkup-speech-close-off.json` guard had already
+   * confirmed the slow model on this specific edge was false (that fixture
+   * parks already inside the close box and never drives this transition at
+   * all) - the two new edge fixtures are what actually exercise it.
    */
   speechAcceptedFast?: boolean;
 }
@@ -375,17 +384,18 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
       // step spot-checked.
       return { ...state, elapsed: state.elapsed + 1 };
     case "brainSpeechClosing": {
+      // Only the window's FINAL box (the close/cry box's own dismiss, no
+      // next box left) ever reaches this phase - `battleRoomAcceptedState`
+      // intercepts every other box boundary (personality-to-personality AND
+      // the real close+reopen into the close/cry box alike) directly into
+      // "brainSpeech" on the accept tick itself, before this phase is ever
+      // entered (see that function's own doc for the two edge fixtures that
+      // proved the real-close-reopen case belongs there too). So there is
+      // always no next box by the time `elapsed` reaches `MSGBOX_CLOSE_TICKS`
+      // here - the hidden wait always ends in "brainSpeechSettled".
       const elapsed = state.elapsed + 1;
       if (elapsed >= MSGBOX_CLOSE_TICKS) {
-        const nextStep = (state.speechStep ?? 0) + 1;
-        if (nextStep < brainSpeechBoxes(state).length) {
-          // A real close+reopen (not the direct `\p`/`\l` continuation) -
-          // structurally distinct from the accept-driven case, always the
-          // slow model regardless of `nextStep` - see `speechAcceptedFast`'s
-          // own doc (the gold-close guard confirms this stays correct).
-          return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: nextStep, speechAcceptedFast: false };
-        }
-        return { ...state, phase: "brainSpeechSettled", elapsed: 0, speechStep: nextStep };
+        return { ...state, phase: "brainSpeechSettled", elapsed: 0, speechStep: (state.speechStep ?? 0) + 1 };
       }
       return { ...state, phase: "brainSpeechClosing", elapsed };
     }
@@ -421,37 +431,60 @@ export function battleRoomMsgboxClosingPhase(state: BattleRoomState): BattleRoom
  * `\p` mechanism for the call-scene's boxes 3/4/5, PROGRESS 1292/1293) - so
  * this case skips the close phase entirely and lands directly on the next
  * page at elapsed 0, the same "elapsed 0 renders the same tick" shape every
- * other phase entry already uses. The gated speech's LAST page (handing off
- * to the close/cry box, a genuine new `message()` call) is unaffected -
- * still a real close via `battleRoomMsgboxClosingPhase` below.
+ * other phase entry already uses.
+ *
+ * The gated speech's LAST page (handing off to the close/cry box, a genuine
+ * new `message()` call) turns out to render the SAME way pixel-for-pixel,
+ * even though it's a structurally real close+reopen, not a `\p`/`\l` direct
+ * continuation: two dense edge fixtures (`docs/speech-close-edge-evidence.md`
+ * gold box3->close abs 2397-2450, `docs/speech-close-edge-silver-evidence.md`
+ * silver box8->cry abs 3067-3141) both show the accept tick landing straight
+ * on the next box's own cleared (0-char) frame, first glyph one tick later -
+ * no `MSGBOX_HIDDEN` wait at all, i.e. `closemessage` and the next box's
+ * `msgbox` open back-to-back within the same tick the script executes them,
+ * same as every other page-turn's `RENDER_STATE_CLEAR`. So this function
+ * takes the direct branch for ANY next box, personality-to-personality or
+ * personality-to-close/cry alike - only `speechAcceptedFast` (see its own
+ * doc) distinguishes the two render models. Only the window's FINAL box
+ * (the close/cry box's own dismiss, no next box left) is still a real close
+ * via `battleRoomMsgboxClosingPhase` below - that transition's own
+ * `MSGBOX_CLOSE_TICKS` hidden wait is unchanged (gold-close/close-pause
+ * guards).
  *
  * The accept frame's own visible content is NOT uniform across every
  * direct continuation, though - see `speechAcceptedFast`'s own doc for the
- * full derivation (two independent dense oracle windows,
- * `docs/noland-brain-intro-gold-ground-truth.md` §9‴ and
- * `docs/silver-speech-box2-evidence.md`). Summary: the window's FIRST
- * accept-driven transition (`(state.speechStep ?? 0) === 0`, i.e. leaving
- * the window's very first box) still shows the window CLEARED (0 chars) on
- * the accept tick, with the next box's first glyph one tick later - gold's
- * page 1→2 edge is oracle-exact under exactly this model. Every LATER
- * accept-driven transition (`(state.speechStep ?? 0) >= 1`) is one tick
- * faster: the accept tick already shows the next box's first character,
- * with no cleared frame ever visible - gold's page 2→3/3→4 edges and
- * silver's box 1→2 edge (the window's 2nd accept-driven transition,
- * counting box 0→1's own `\l` scroll as the 1st) are both oracle-exact
- * under this model instead.
+ * full derivation (four independent dense oracle windows:
+ * `docs/noland-brain-intro-gold-ground-truth.md` §9‴/§9⁗,
+ * `docs/silver-speech-box2-evidence.md`, and the two real-close-edge docs
+ * cited above). Summary: the window's FIRST accept-driven transition
+ * (`(state.speechStep ?? 0) === 0`, i.e. leaving the window's very first
+ * box) and EVERY real close+reopen (leaving the last personality box into
+ * the close/cry box) still show the window CLEARED (0 chars) on the accept
+ * tick, with the next box's first glyph one tick later - gold's page 1→2
+ * and page 4→close edges are both oracle-exact under exactly this model.
+ * Every LATER personality-to-personality accept-driven transition
+ * (`(state.speechStep ?? 0) >= 1` AND the next box is still personality
+ * content) is one tick faster: the accept tick already shows the next box's
+ * first character, with no cleared frame ever visible - gold's page 2→3/3→4
+ * edges and silver's box 1→2 edge (the window's 2nd accept-driven
+ * transition, counting box 0→1's own `\l` scroll as the 1st) are both
+ * oracle-exact under this model instead.
  */
 export function battleRoomAcceptedState(state: BattleRoomState): BattleRoomState {
   if (state.phase === "brainSpeechIdle" && state.brainSpeechFirstEncounter === true) {
     const priorStep = state.speechStep ?? 0;
     const nextStep = priorStep + 1;
-    if (nextStep < brainSpeechPersonalityBoxCount(state)) {
+    if (nextStep < brainSpeechBoxes(state).length) {
+      const isPersonalityContinuation = nextStep < brainSpeechPersonalityBoxCount(state);
       return {
         ...state,
         phase: "brainSpeech",
         elapsed: 0,
         speechStep: nextStep,
-        speechAcceptedFast: priorStep >= 1,
+        // Real close+reopen (nextStep landed on the close/cry box, past the
+        // last personality page) always uses the slow/cleared model, same as
+        // the window's very first transition - see this function's own doc.
+        speechAcceptedFast: isPersonalityContinuation && priorStep >= 1,
       };
     }
   }
@@ -1244,18 +1277,27 @@ export function brainEntranceMovementSettled(phase: BattleRoomPhase): boolean {
 }
 
 /**
- * True the exact tick `advanceBattleRoom` transitions out of the gated
- * personality speech's LAST box into the always-shown close/cry box - the
- * JSON's own `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` moment (both
- * tiers' events order: the gated speech, THEN the flag set, THEN the close/
- * cry line). Not independently visible in pixels (the flag has no on-screen
- * effect - docs/noland-silver-walkup-presentation-map.md §1), so exact-tick
- * fidelity only needs to preserve this ORDER, not a specific frame. Repeat
- * encounters (`brainSpeechFirstEncounter` false) never satisfy this - they
- * only ever show the close/cry box, so there is no personality speech to
- * have just finished. Tier-general (`brainSpeechPersonalityBoxCount`): the
- * caller (core.ts) marks the SAME tier's heard flag (markFactoryBrainSpeech
+ * True the exact tick `battleRoomAcceptedState` transitions out of the
+ * gated personality speech's LAST box into the always-shown close/cry box -
+ * the JSON's own `frontier_set FRONTIER_DATA_HEARD_BRAIN_SPEECH` moment
+ * (both tiers' events order: the gated speech, THEN the flag set, THEN the
+ * close/cry line). Not independently visible in pixels (the flag has no
+ * on-screen effect - docs/noland-silver-walkup-presentation-map.md §1), so
+ * exact-tick fidelity only needs to preserve this ORDER, not a specific
+ * frame. Repeat encounters (`brainSpeechFirstEncounter` false) never satisfy
+ * this - they only ever show the close/cry box, so there is no personality
+ * speech to have just finished. Tier-general (`brainSpeechPersonalityBoxCount`):
+ * the caller (core.ts) marks the SAME tier's heard flag (markFactoryBrainSpeech
  * Heard, keyed off `prev.brainSpeechTier`) the same tick this returns true.
+ *
+ * Was keyed off `prev.phase === "brainSpeechClosing"` before the real-close
+ * edge fix (`docs/speech-close-edge-evidence.md`,
+ * `docs/speech-close-edge-silver-evidence.md`) - that phase is no longer
+ * ever entered for this transition (`battleRoomAcceptedState` now lands
+ * directly on "brainSpeech", see its own doc), so this checks the new
+ * accept-driven transition shape instead: leaving `speechStep ===
+ * personalityBoxCount - 1` (the last personality box) via the accept seam
+ * straight into "brainSpeech" (the close/cry box).
  */
 export function battleRoomJustFinishedBrainPersonalitySpeech(
   prev: BattleRoomState,
@@ -1264,8 +1306,8 @@ export function battleRoomJustFinishedBrainPersonalitySpeech(
   return (
     prev.frontierBrainWalkup === true
     && prev.brainSpeechFirstEncounter === true
-    && prev.phase === "brainSpeechClosing"
-    && next.phase !== "brainSpeechClosing"
+    && prev.phase === "brainSpeechIdle"
+    && next.phase === "brainSpeech"
     && (prev.speechStep ?? 0) === brainSpeechPersonalityBoxCount(prev) - 1
   );
 }

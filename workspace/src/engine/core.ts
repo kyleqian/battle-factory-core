@@ -1074,15 +1074,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       }
     } else if (battleRoom) {
       if (battleRoomQuoteInputReady(battleRoom) && newKeys.has("A")) {
-        battleRoom = battleRoomAcceptedState(battleRoom);
-      } else {
         const prevBattleRoom = battleRoom;
-        battleRoom = advanceBattleRoom(battleRoom);
+        battleRoom = battleRoomAcceptedState(battleRoom);
         // Walk-up build steps B2/B3: the JSON's own frontier_set
         // FRONTIER_DATA_HEARD_BRAIN_SPEECH moment - fires once, between the
         // personality speech's last box and the always-shown close/cry box
         // (see battleRoomJustFinishedBrainPersonalitySpeech's own doc for
-        // why exact-tick fidelity is inconsequential here). Marks the SAME
+        // why exact-tick fidelity is inconsequential here, and for why this
+        // now fires on the ACCEPT tick, not a later advanceBattleRoom tick -
+        // the real-close-edge fix landed the last personality box's own
+        // close+reopen directly in battleRoomAcceptedState). Marks the SAME
         // tier `prevBattleRoom` was showing (`brainSpeechTier`, set once at
         // brain-room construction) - never hardcoded, so gold and silver
         // each mark only their own independent flag.
@@ -1095,6 +1096,8 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
             prevBattleRoom.brainSpeechTier === "gold" ? "gold" : "silver",
           );
         }
+      } else {
+        battleRoom = advanceBattleRoom(battleRoom);
         const extraRngSteps = opponentSetupExtraRngSteps(battleRoom);
         if (extraRngSteps === 1 && battleRoom.transitionPresentation === undefined) {
           const selected = selectFrontierTransition(rngValue);

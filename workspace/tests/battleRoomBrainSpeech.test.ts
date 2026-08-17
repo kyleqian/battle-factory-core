@@ -188,11 +188,16 @@ describe("silver Noland speech (walk-up build step B2)", () => {
       let cursorCheck = next;
       for (let i = 0; i < CURSOR_APPEAR_DELAY_TICKS; i += 1) cursorCheck = advanceBattleRoom(cursorCheck);
       expect(brainSpeechCursorVisible(cursorCheck)).toBe(box < SILVER_PERSONALITY_BOX_COUNT - 1);
-      next = { ...next, phase: battleRoomMsgboxClosingPhase(next), elapsed: 0 };
-      for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) {
-        const prev = next;
-        next = advanceBattleRoom(next);
-        if (battleRoomJustFinishedBrainPersonalitySpeech(prev, next)) heardFired += 1;
+      const prev = next;
+      next = battleRoomAcceptedState(next);
+      if (battleRoomJustFinishedBrainPersonalitySpeech(prev, next)) heardFired += 1;
+      // Only the window's FINAL box (the cry box's own dismiss) is still a
+      // real close via "brainSpeechClosing" - every other box boundary
+      // (personality-to-personality AND the real close+reopen into the cry
+      // box) lands directly on "brainSpeech" with no hidden wait, see
+      // battleRoomAcceptedState's own doc.
+      if (next.phase === "brainSpeechClosing") {
+        for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) next = advanceBattleRoom(next);
       }
       state = next;
     }
@@ -338,11 +343,14 @@ describe("gold Noland speech (walk-up build step B3)", () => {
       let cursorCheck = next;
       for (let i = 0; i < CURSOR_APPEAR_DELAY_TICKS; i += 1) cursorCheck = advanceBattleRoom(cursorCheck);
       expect(brainSpeechCursorVisible(cursorCheck)).toBe(box < GOLD_PERSONALITY_BOX_COUNT - 1);
-      next = { ...next, phase: battleRoomMsgboxClosingPhase(next), elapsed: 0 };
-      for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) {
-        const prev = next;
-        next = advanceBattleRoom(next);
-        if (battleRoomJustFinishedBrainPersonalitySpeech(prev, next)) heardFired += 1;
+      const prev = next;
+      next = battleRoomAcceptedState(next);
+      if (battleRoomJustFinishedBrainPersonalitySpeech(prev, next)) heardFired += 1;
+      // Only the window's FINAL box (the close box's own dismiss) is still a
+      // real close via "brainSpeechClosing" - see the silver loop's own
+      // comment above for why every other box boundary skips it.
+      if (next.phase === "brainSpeechClosing") {
+        for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) next = advanceBattleRoom(next);
       }
       state = next;
     }
@@ -357,7 +365,7 @@ describe("gold Noland speech (walk-up build step B3)", () => {
     expect(msgboxVisual(state)).toEqual({ visible: false, chars: 0 });
   });
 
-  it("battleRoomAcceptedState (core.ts's real accept seam): an internal \\p page turn skips brainSpeechClosing entirely - lands directly on the next page at elapsed 0, same tick as the accept, no empty-box delay - while the LAST personality page still closes for real into the close box, and the repeat variant (single box, already the close box) never takes the direct-continuation shortcut", () => {
+  it("battleRoomAcceptedState (core.ts's real accept seam): an internal \\p page turn skips brainSpeechClosing entirely - lands directly on the next page at elapsed 0, same tick as the accept, no empty-box delay - the LAST personality page's real close+reopen into the close box does too (just under the slow/cleared model, not the fast one) - and the repeat variant (single box, already the close box) never takes the direct-continuation shortcut", () => {
     let state = settledFirstEncounterState("gold");
     for (let box = 0; box < GOLD_PERSONALITY_BOX_COUNT - 1; box += 1) {
       const held = advanceThroughFullyPrinted(state);
@@ -383,12 +391,31 @@ describe("gold Noland speech (walk-up build step B3)", () => {
     }
     // Now on the last personality page (index GOLD_PERSONALITY_BOX_COUNT - 1)
     // - accepting it is a genuine box close (a real new message() call for
-    // the close box), unaffected by the direct-continuation shortcut.
+    // the close box), but the two dense edge fixtures
+    // (docs/speech-close-edge-evidence.md, docs/speech-close-edge-silver-
+    // evidence.md) proved it renders identically to a direct continuation:
+    // straight onto "brainSpeech" on the accept tick, just under the slow/
+    // cleared model (speechAcceptedFast false, chars 0) rather than the fast
+    // one - never "brainSpeechClosing" (no MSGBOX_HIDDEN wait at all).
     expect(state.speechStep).toBe(GOLD_PERSONALITY_BOX_COUNT - 1);
     const heldLast = advanceThroughFullyPrinted(state);
     const acceptedLast = battleRoomAcceptedState(heldLast);
-    expect(acceptedLast.phase).toBe("brainSpeechClosing");
+    expect(acceptedLast.phase).toBe("brainSpeech");
+    expect(acceptedLast.speechStep).toBe(GOLD_PERSONALITY_BOX_COUNT);
     expect(acceptedLast.elapsed).toBe(0);
+    expect(acceptedLast.speechAcceptedFast).toBe(false);
+    expect(msgboxVisual(acceptedLast)).toEqual({ visible: true, chars: 0 });
+    expect(battleRoomQuote(acceptedLast)).toEqual(
+      GOLD_FIRST_ENCOUNTER_SPEECH_BOXES[GOLD_PERSONALITY_BOX_COUNT],
+    );
+    expect(battleRoomJustFinishedBrainPersonalitySpeech(heldLast, acceptedLast)).toBe(true);
+
+    // Only the close box's OWN dismiss (no next box left) is still a real
+    // close via "brainSpeechClosing".
+    const heldClose = advanceThroughFullyPrinted(acceptedLast);
+    const acceptedClose = battleRoomAcceptedState(heldClose);
+    expect(acceptedClose.phase).toBe("brainSpeechClosing");
+    expect(acceptedClose.elapsed).toBe(0);
 
     // Repeat variant: speechStep 0 IS the close box itself
     // (brainSpeechFirstEncounter false) - must not be mistaken for an
