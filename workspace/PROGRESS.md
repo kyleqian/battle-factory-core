@@ -5,6 +5,57 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1301 — [supervisor wind-down, 2026-08-16] **Nine worker steps + one salvage, two lanes: every open walk-up window advanced (two to exact/near-exact), two latent engine crashes found+fixed, soak coverage 0:120 green — all final gates green**
+
+- **Final gates (tree `f63ff8d3`, the animation Soft Boiled fold —
+  run AFTER every merge):** full npm **1,065 files / 10,010 passed /
+  223 skipped**; build green; soak vanilla 0:20 **20/20 OK**; soak
+  full 0:60 **60/60 OK** (30+30 chunks). Fold status: animation-main
+  folded TWICE this session (morning: Heal Bell + Fire Blast,
+  coverage 194/276; evening: Soft Boiled round + its supervisor
+  wind-down — `master..animation-main` now EMPTY). rust-main: nothing
+  all session. DEFERRED.md EMPTY — no deferred questions.
+- **Window scoreboard (session start → end, all supervisor-verified
+  live):** callscene-01 89/131 → **131/131 EXACT**; callscene-02
+  69/199 → **171/199**; entrance-03 162/256 → **254/256**; gold-open
+  58/256 → **254/256**; gold-pages 20/177 → **85/177**; gold-close
+  58/126 → **80/126**. Every previously-exact window re-verified
+  unmoved (askready 21/21, swapask-no 194/194, record 178/178, retire
+  174/174, entrance-02 256/256, B2 speech ×4, both reveals 690/701).
+  Mechanisms, not constants: text.c per-box accept/arrow semantics,
+  `\p` accept+1, walk lead-leg per-direction anim order, brainMoving
+  render clock −1, per-phase msgbox visibility, shared
+  circle-transition overlay in brainSpeechSettled, tier-general
+  2-tick cursor onset, per-page onset re-derivation.
+- **Engine bugs (soak-driven pipeline, all found AND fixed this
+  session):** **#93** Shell-Bell/forced-switch presentation desync
+  (source-proven vs `battle_main.c`/`battle_util.c`); **#94** double
+  forced-switch in one receipt dropped its pending request; **#95**
+  hit-animation scan crossed script-execution boundaries on no-hit
+  moves (Hail). #94/#95 are latent pre-#93 defects the #93 timing
+  shift routed trajectories onto (opus worker's provenance analysis
+  corrected the supervisor's initial "#93-caused" read; ISSUES text was
+  updated accordingly before closure). All three have direct-
+  construction Tier-1 pins proven failing pre-fix. **#92** (winning-
+  policy 600k frame budget) assigned + closed same-session via
+  `DEFAULT_MAX_FRAMES_BY_POLICY`. ISSUES.md: net zero new open
+  entries. Soak coverage: winning 0:120 + full 0:120 + vanilla 0:20
+  all green post-fix (parts 1-4 docs).
+- **Ops notes:** gold speech worker cap-killed at final gates —
+  salvaged after independent verification (commit `138b779d`), ~20 min
+  recovery per the standing recipe. Side-worktree absolute-path
+  Edit/Write trap recurred with the mechanism identified — new
+  PAPERCUTS entry (2 hits). Freshness-check false positive hit 3.
+- **Next (ordered):** (a) gold-pages page-2→3/3→4 typewriter-edge
+  timing (§9″ recipe documented, same class as gold-open mechanism 1);
+  (b) callscene-02 second page-turn + box-5 dismiss (171/199 →
+  ground-truth doc has the bounded evidence); (c) gold-close
+  flicker/swirl residual (§8′); (d) entrance-03 frames 368/508 class;
+  (e) next soak-crash-class sweep (wider seed ranges / longer
+  chains). No blockers; any of these is a clean single-worker brief.
+
+---
+
 ## 1300 — [main worker, 2026-08-16] **gold-pages window 55→85/177: page-1 onset re-derivation + single-line cursor placement fix, two tier-general defects**
 
 - **State:** Landed and green. `npm test` **1,056 files / 9,984 passed /
@@ -92,72 +143,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** Full mechanism writeup, per-region attribution, and the
   before/after table are in `docs/noland-brain-intro-gold-ground-truth.md`
   §9′. No PAPERCUT.
-
----
-
-## 1298 — [main worker, 2026-08-16] **ISSUES #94 + #95 both fixed and closed — seeds 16/69/113 clean, winning 0:20 20/20, full 60:70 + 110:120 20/20**
-
-- **State:** Landed and green. `npm test` **1,054+2 files / 9,982 passed /
-  223 skipped** (the two failures in the first full run were the two
-  expected downstream artifacts, both updated — see Notes), `npm run
-  build` + `npm run typecheck` green. Soak: seed 16 (winning), 69 (full),
-  113 (full) all complete **OK** (were deterministic crashes); seed 109
-  (winning) still OK; `--policy winning --seeds 0:20` **20/20 OK**;
-  `--policy full --seeds 60:70` **10/10 OK** and `110:120` **10/10 OK**.
-  Orchestrator suite 53/53. No frontier-ratchet barrier moved.
-- **#94 mechanism** (`FactoryRoundOrchestratorError: Slice N resolution
-  completed without a player command boundary`):
-  `appendBattleResolutionContinuation` hardcoded `forcedRequest: null` on
-  the segment appended after a confirmed forced-switch replacement. Wrong
-  whenever that same receipt also faints the replacement: source runs the
-  attack's own faint through `HandleAction_TryFinish`'s
-  `HandleFaintedMonActions` (so the replacement is sent in during the
-  action phase), and only then does `BattleTurnPassed` run
-  `DoBattlerEndTurnEffects` — the poison/burn tick can faint that very
-  replacement, and `BattleTurnPassed` calls `HandleFaintedMonActions()`
-  itself a second time (`battle_main.c:3956-3971`,
-  `battle_util.c:1894-1970`). Two consecutive forced switches in one
-  continuation receipt is ordinary source behavior. With the request
-  dropped, the segment's end routed to `next-command-handoff`, whose
-  player-command invariant then failed. Fix: derive `forcedRequest` from
-  the appended receipt's own pending boundary (one shared
-  `pendingPlayerForcedSwitchRequest` helper for all four readings).
-- **#95 mechanism** (`battle resolution move/hit provenance is not
-  ordered`): `nextHitAnimation` scanned past the end of the attack
-  animation's own script execution. Source pairs `attackanimation` /
-  `waitanimation` / `effectivenesssound` / `hitanimation BS_TARGET` as
-  four consecutive instructions of `BattleScript_HitFromAtkAnimation`
-  (`data/battle_scripts_1.s:253-258`; Scene OFF substitutes only the
-  first). A non-damaging move (`BattleScript_MoveWeatherChange` — Hail,
-  Rain Dance) has NO hit animation, so the scan claimed the end-of-turn
-  `BattleScript_DamagingWeatherLoop` tick's hit instead. Fix: stop at the
-  execution boundary — `instructionExecution` restarts per execution, so a
-  drop in it *is* the boundary. Both throwing invariants stay armed and
-  unweakened.
-- **Pins (both direct construction, both proven to fail pre-fix by
-  reverting only the fix):** #94 reuses 1295's staged Shell-Bell Factory
-  battle with its first bench slot swapped to a 1-HP poisoned POOCHYENA
-  (PUPITAR's Shed Skin cures the poison, SEALEO's Sitrus Berry heals past
-  it — neither reproduces), and walks BOTH forced selections through to
-  the next player command. #95 stages SEALEO's MOVE_HAIL vs METAPOD's
-  MOVE_HARDEN: pre-fix that receipt published a bogus 140-frame
-  move-animation from HARDEN's pause paired with the hail tick's hit.
-- **Provenance note:** both defects **predate** #93 — they live in code
-  paths #93 never touched. #93 legitimately shifts presentation frame
-  timing, and the winning/full soak policies read presentation state, so it
-  moved these seeds onto trajectories that reach two latent bugs. The
-  supervisor's orchestrator-swap discriminator is consistent with that
-  (swapping the file changes the trajectory, not the defect). #93's own fix
-  and pin are untouched.
-- **Next:** re-sweep for the next crash class (winning 20:60 and full
-  60:120 were only partly covered here); gold open/close rebrief still
-  parked.
-- **Notes:** Two expected downstream artifacts updated in the docs commit —
-  `docs/gate6-coverage-manifest.{json,md}` (byte-identity ratchet picking up
-  the new pins' evidence rows; no coverage change) and
-  `tests/randomRoundSoak.test.ts`'s seed-21 strong-route counters
-  (43,775f/t5/3,235 renders → 59,656f/t18/4,397 renders — still all seven
-  wins, still deterministic across re-runs). No PAPERCUT.
 
 ---
 
