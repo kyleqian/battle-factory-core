@@ -17,27 +17,42 @@ backlog.
 
 # Open
 
-## #96 — battle1-swap family: 3 traces remain narrowly short of their bars after the appRoute restoration (open remainder)
+## #96 — battle1-swap family: 3-trace remainder DIAGNOSED (two mechanisms, fix shapes named) — swap-screen ball-anim lag args hardcoded off + a 1-tick header-edge sliver
 
-**State (2026-08-17):** the mechanical fix landed (`cbc56d1b`): the 17 traces
-missing `"appRoute": "canonical-recorded"` got the field, 14 restored to their
-documented bars exactly, and the `LEGACY_TRACES_WITHOUT_APP_ROUTE` ratchet
-allowlist shrank accordingly (its intended direction). Per-trace table:
-`docs/fixture-sweep-2026-08-17.md` "#96 fix verification".
+**State (2026-08-17, post-appRoute-restoration `cbc56d1b` + read-only
+diagnosis):** 14 of 17 traces restored exactly. The 3-trace remainder is TWO
+mechanisms, both diagnosed pixel-first (probe report retained in the
+2026-08-17 supervisor transcript; counts reproduced fresh twice):
 
-**Open remainder — 3 traces with a narrow, likely-shared residual (distinct
-mechanism from the appRoute class, recorded per the fix step's instruction):**
-- `battle1-swap-enemy-picker.json`: 129/130 (bar 130/130), first mismatch
-  frame 29838, 5px (0.01%).
-- `battle1-swap-player-quit-b-return.json`: 61/67 (bar 67/67), first mismatch
-  frame 29774, 176px (0.46%).
-- `battle1-swap-player-quit-no-return.json`: 61/67 (bar 67/67), same frame
-  29774 / same bbox / same pixel count as the previous — likely one shared
-  root cause across the two quit-return traces.
+**(a) `player-quit-b-return` + `player-quit-no-return` (both 61/67, frames
+29774/78/82/86/90/94, bbox 61,54-81,73, byte-identical in both traces) —
+ONE shared root cause:** the swap screen's `advanceBallAnim` call site
+(`src/engine/factorySwapPresentation.ts:868`) hardcodes BOTH display-lag
+arguments off — `advanceBallAnim(next[i], rngValue, false, false, true)` —
+while the draft screen's two call sites (`core.ts:2157`, `core.ts:2245`)
+correctly thread `i === 0` for `isSlot0` and a computed
+`isRevealStallActive(...)` for `revealStallActive`. The mismatch is ball
+slot 0's lift-stage shading during the "Quit swapping?" popup hold — the
+popup is exactly the window-hold event `revealStallActive` exists to
+compensate for on the draft screen; the swap screen has no analog predicate.
+NOT the menuIdleBounce family (#97-B) — same shape, structurally distinct
+site. **Fix shape:** thread `i === 0` for `isSlot0` and implement a
+swap-screen stall predicate (analog of `confirmReveal.ts`'s
+`isRevealStallActive`, gated on the quit-prompt/popup hold) around
+factorySwapPresentation.ts:862-879. **Non-cascading check:**
+`tests/ballAnim.test.ts` draft-screen checkpoints stay green; rerun both
+quit traces AND the picker-revisiting traces (`enemy-accept-*`,
+`player-summary-return`) for no new regressions.
 
-**Lead:** pixel-first at frames 29838/29774 (the #97-A/B diagnosis recipe);
-the tiny counts and shared signature suggest a single localized redraw/timing
-class, possibly the same `menuIdleBounce` family as #97-B — check that first.
+**(b) `enemy-picker` (129/130, frame 29838 ONLY, 5px, bbox
+239,62-239,66) — separate minor mechanism:** a 1-column, 1-tick sliver at
+the screen's last column — oracle draws a dark border column of the
+ONIX name-box header one row further at the screen edge for exactly one
+tick; neighbors 29836-29840 are otherwise pixel-perfect. Plain enemy-list
+browsing path (`factorySwapRender.ts` header-box draw), shares nothing with
+(a). Fix shape not yet identified — **next instrument:** RAM-probe the
+name-box border sprite/BG draw at that tick to classify 1-tick-early/late
+reveal edge.
 
 ## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (real mechanism, bisect needed); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 
