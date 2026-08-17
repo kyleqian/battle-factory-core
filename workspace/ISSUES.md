@@ -17,6 +17,39 @@ backlog.
 
 # Open
 
+## #98 — Brain walk-up battles never fire the battle-transition RNG draw: hardcoded `circlesMeet` fallback renders the wrong transition family (owner of gold-close 113/126 + silver-flicker 79/100 residuals)
+
+**Symptom:** `factory-brain-gold-walkup-speech-close-off.json` stalls at
+113/126 (frames 113-125) and `factory-brain-silver-walkup-speech-flicker-off.json`
+at 79/100 (frames 79-99) — the circle-sprite spans. On each tier's
+waveform-verified te clock the residual shapes differ (gold: small sliver +6
+past `CIRCLE_ANCHOR_TE`; silver: abrupt 2568px full-width block in one tick),
+which is inconsistent with any single onset offset.
+
+**Root cause (identified 2026-08-17, source-cited in the evidence docs):**
+the real ROM draws the Frontier Brain's battle-start transition from the SAME
+random 12-entry table as ordinary Factory opponents
+(`sBattleTransitionTable_BattleFrontier`; `battle_tower.c`/`battle_setup.c` —
+no brain-specific override). The engine's `opponentSetupExtraRngSteps` only
+performs that selection when `battleRoom.phase === "settled"`; the brain
+room's equivalent phase is `"brainSpeechSettled"`, so `transitionPresentation`
+stays `undefined` on every brain battle and `renderBattleRoomState` falls back
+to hardcoded `"circlesMeet"` — the wrong family whenever the real draw picks
+one of the other 11.
+
+**Why not fixed same-session:** wiring the draw requires reconciling the
+orchestrator-level RNG replay (`factoryBrainOpponentGeneration.ts`) against
+`core.ts`'s tick-level cursor without desyncing the already-correct
+ordinary-path draw, and 9 of 12 real transition families have no renderer —
+a cross-cutting change beyond a bounded step (evidence + enumeration:
+docs/noland-brain-intro-gold-ground-truth.md §8″ addenda,
+docs/silver-flicker-evidence.md addenda, PROGRESS 1312).
+
+**Fix path:** (1) design pass: per-fixture identification of which family the
+canned recordings actually show (oracle PNGs are banked for both tiers),
+the RNG-cursor reconciliation plan, and the renderer inventory for exactly
+the families those two fixtures need; (2) bounded slices from that design.
+The two window counts above are the acceptance instruments.
 ## #96 — battle1-swap trace family: 17 of 18 traces collapsed to ~0/N by the missing explicit `appRoute` field (pre-existing, surfaced by the 2026-08-17 full-fixture sweep)
 
 **Symptom:** every `battle1-swap-*.json` compare trace except
