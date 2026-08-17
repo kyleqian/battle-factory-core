@@ -51,12 +51,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   restart). One launcher killed by `| head -2` SIGPIPE (the documented
   masking trap — relaunched clean). S1∥S2 same-file parallel merge
   resolved both-sides-additive, union suite before merge commit.
-- **Open (ordered for next session):** (a) #96 3-trace remainder
-  (frames 29838/29774, shared narrow signature, pixel-first recipe in
-  the entry); (b) #97-B turn5/6 bounce drift (re-derive against the
-  CURRENT oracle per the banked forward path — regression framing is
-  dead); (c) #71/#73-adjacent filler per standing priorities. No
-  deferred questions; no blockers.
+- **Open (ordered for next session):** (a) #96 remainder now fully
+  DIAGNOSED by a late read-only probe (bonus round): quit-pair = the
+  swap screen's `advanceBallAnim` lag args hardcoded false at
+  factorySwapPresentation.ts:868 (fix shape + non-cascading checks in
+  the entry — a ready-made ~30-min fix brief); enemy-picker = separate
+  1-tick header-edge sliver, next instrument named. (b) #97-B turn5/6
+  bounce drift (re-derive against the CURRENT oracle per the banked
+  forward path — regression framing is dead). (c) #71/#73-adjacent
+  filler per standing priorities. No deferred questions; no blockers.
 
 ---
 
