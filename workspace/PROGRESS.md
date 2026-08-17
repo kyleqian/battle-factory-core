@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1312 — [main worker, 2026-08-17] **Rung 3: SOURCE root cause found for the circle-sprite residual — brain walk-up never draws the real per-encounter transition selection, always hardcodes circlesMeet; fix enumerated as multi-piece, not implemented**
+
+- **State:** Docs-only, no `src/` edit. `npm test` **1065 files / 10011
+  passed / 223 skipped** (unmoved), `npm run build` + `npm run typecheck`
+  green, `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** This step's brief (method steps 1-3): identify the TRUE
+  battle-transition per tier from source, reconcile against what the app
+  models. Source (`battle_tower.c:2093-2100`'s `SPECIAL_BATTLE_FACTORY`
+  case) shows the Frontier Brain draws its transition from the exact same
+  random 12-entry table (`sBattleTransitionTable_BattleFrontier`,
+  `battle_setup.c:131-145`) as any ordinary Factory opponent — no
+  brain/tier override. But `src/engine/battleRoom.ts`'s
+  `opponentSetupExtraRngSteps` only fires the transition draw when
+  `state.phase === "settled"`, and the brain walk-up room's own
+  settled-equivalent phase is named `"brainSpeechSettled"` — never
+  `"settled"` — so `b.transitionPresentation` is **always** `undefined`
+  for brain battles, and `renderBattleRoomState` always falls back to the
+  hardcoded `"circlesMeet"` default (`core.ts:2528`), regardless of what
+  either fixture's real RNG stream drew. This reframes rung 2: silver's
+  abrupt full-width block isn't a second onset mechanism to unify with
+  gold's — it's the wrong transition family rendered through the
+  circlesMeet slide-in model. Ruled out one candidate (`FrontierSquares_
+  Draw`, `battle_transition.c:987-1004`, is a gradual 35-tick raster
+  sweep, not an instant full-width reveal — doesn't match silver's
+  one-tick abs-3279→3280 jump).
+- **Result:** No fix landed (correctly, per the brief's own decision
+  tree). The party-generation RNG replay this fix needs already exists
+  (`src/engine/factoryBrainOpponentGeneration.ts`'s
+  `generateFactoryBrainOpponent`, wired into
+  `factoryRoundBattleOrchestrator.ts:605`, exposing the correct
+  post-party RNG cursor as `generation.rngValue`) — but nothing calls
+  `pickFrontierTransition` on it, and `BattleOpponent`
+  (`battleScenario.ts:55`) has no field to carry a pre-computed
+  presentation through to `battleRoomStateForOpponent`. Wiring it up
+  requires reconciling that orchestrator-level RNG stream against
+  `core.ts`'s own *separate* tick-level `rngValue` cursor (the one the
+  ordinary walk-up room's own already-correct draw depends on) without
+  desyncing it — a cross-cutting change, not ≤2 bounded pieces, and
+  possibly a new renderer on top (9 of the 12 table entries have no
+  renderer implemented yet). Full derivation + citations in
+  `docs/noland-brain-intro-gold-ground-truth.md`'s new "Rung 3" section
+  and `docs/silver-flicker-evidence.md`'s matching addendum. Guards
+  unmoved (fresh reruns): gold-close 113/126, silver-flicker 79/100.
+- **Next:** Implement per the Rung 3 enumeration: (1) thread
+  `pickFrontierTransition` through `generateOpponentFor` on
+  `generation.rngValue` for both branches, giving `BattleOpponent` a
+  field to carry the presentation; (2) wire `battleRoomStateForOpponent`
+  to consume it for brain rooms without desyncing the ordinary room's own
+  tick-level draw (needs its own dense verification, not a guess); (3)
+  once each fixture's real `tableIndex` is knowable, implement whichever
+  renderer family it lands on if not already one of the 3 implemented
+  (circlesMeet/logoWave/asymmetricSpiralInSeq). Otherwise pick up: (b)
+  silver's own unfixtured post-te-99 top-row circle onset; (c) soak
+  remainder (vanilla 20:60 + winning 0:10 at 2× maxFrames).
+- **Notes:** No blind offset sweep attempted. PAPERCUT: none.
+
+---
 ## 1311 — [main worker, 2026-08-17] **Rung 2 attempted: circle-sprite onset residual documented, not fixed — gold's own onset is a small sliver (+6 from CIRCLE_ANCHOR_TE), silver's is an abrupt full-width block, not the same shape**
 
 - **State:** Docs/scratch-tooling only, no `src/` edit. `npm test` **1065
@@ -105,59 +162,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   realignment history is binding precedent, and this step's own dense
   evidence (banked last session, implemented this session) is what made
   rung 1 a clean derivation rather than a fit. No PAPERCUT.
-
----
-## 1309 — [main worker, 2026-08-17] **brainSpeech REAL-CLOSE edge FIXED, both tiers: gold close-edge 28/54→54/54, silver cry-edge 13/75→75/75 — MSGBOX_HIDDEN 4-tick wait was never real, oracle shows one cleared-border tick and lands straight on it**
-
-- **State:** Landed and green. `npm test` **1065 files / 10011 passed /
-  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
-  `executableFrontierRatchet` barrier counts unmoved.
-- **Did:** Fixed the edge two dense fixtures banked last step
-  (`docs/speech-close-edge-evidence.md` gold 28/54,
-  `docs/speech-close-edge-silver-evidence.md` silver 13/75) proved: leaving
-  the last personality box for the close/cry box, the oracle shows exactly
-  ONE cleared-border tick then prints immediately - the app instead ran
-  `brainSpeechClosing`'s `MSGBOX_HIDDEN` wait for `MSGBOX_CLOSE_TICKS` (4)
-  ticks (box fully absent) before reopening, printing 4 ticks late.
-  `battleRoomAcceptedState` (`battleRoom.ts`) now takes its direct
-  `elapsed: 0` branch for ANY next box, not only personality-to-personality
-  continuations - the real close+reopen lands straight on "brainSpeech"
-  cleared (chars 0) on the accept tick itself, `speechAcceptedFast: false`
-  (slow model, same shape as the window's first transition). Only the
-  window's FINAL box (close/cry box's own dismiss, no next box left) still
-  takes the real `brainSpeechClosing`/`MSGBOX_CLOSE_TICKS` path -
-  `advanceBattleRoom`'s own real-close-reopen branch there was dead code
-  post-fix, removed. `battleRoomJustFinishedBrainPersonalitySpeech` (the
-  heard-speech flag's detector) and its `core.ts` call site moved from an
-  `advanceBattleRoom` tick inside `brainSpeechClosing` to the
-  `battleRoomAcceptedState` accept branch, since that's now where the
-  transition it detects actually happens.
-- **Result:** gold close-edge (`factory-brain-gold-walkup-speech-close-edge-off.json`)
-  **28/54 → 54/54**; silver cry-edge
-  (`factory-brain-silver-walkup-speech-cry-edge-off.json`) **13/75 → 75/75**.
-  Guard matrix reverified unmoved (fresh `--summary` reruns): gold-pages
-  177/177, silver box-2 100/100, gold-open 256/256, entrance-03 256/256,
-  gold-close 113/126, entrance-02 256/256, callscene-01 131/131,
-  callscene-02 199/199, B2 speech box0-held 39/39 / cry-held 74/74 /
-  page8-held 39/39 / close-pause 28/28, askready 21/21. `speechAcceptedFast`
-  field doc, `battleRoomAcceptedState`'s own doc, and the falsified
-  `battleRoom.ts` comment (the deleted branch that cited the gold-close
-  guard as "confirming" this edge, which that guard's own fixture never
-  actually drove) all corrected/removed - see `docs/speech-close-edge-
-  evidence.md` §6 for the citation-correction note. `tests/
-  battleRoomBrainSpeech.test.ts` updated (red-verified against the pre-fix
-  code by construction - old code routed every box boundary through
-  `brainSpeechClosing`, new code only for the window's final box; old→new
-  stated in the commit message).
-- **Next:** Pick up 1306's remaining ordered list: (a) gold-close's 113-125
-  circle-onset residual; (b) silver's unfixtured post-pause flicker window;
-  (c) soak remainder (vanilla 20:60 + winning 0:10 at 2× maxFrames).
-- **Notes:** Live-route cascade analyzed, not fixture-verified (both new
-  edge fixtures stop ~15 ticks past the close/cry box's own settle, short of
-  a full route to battle-start): the fix is a pure removal of the app's
-  prior 4-tick-late start on this box, so every downstream state in a
-  played-through route now arrives exactly 4 ticks earlier in absolute
-  frame-time, matching the oracle - no other span's own duration changed,
-  full derivation in `docs/speech-close-edge-evidence.md` §6's own
-  "Live-route cascade" paragraph. No PAPERCUT.
 

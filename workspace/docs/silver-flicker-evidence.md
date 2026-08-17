@@ -183,3 +183,52 @@ write-up for the full reasoning and the recommended next step (cross-
 reference `battle_transition_frontier.c` before trying any offset here).
 `factory-brain-silver-walkup-speech-flicker-off.json` remains at rung 1's
 79/100, unmoved by this investigation (no `src/` edit).
+
+## Rung 3 (2026-08-17, main worker): SOURCE identification — silver draws no
+## transition selection at all; root cause found in the walk-up path, not
+## silver-specific
+
+Full derivation and citations live in
+`docs/noland-brain-intro-gold-ground-truth.md`'s own new "Rung 3" section
+(both tiers share one root cause, so it's written up once there). Summary
+for this doc: source (`battle_tower.c:2093-2100`'s `SPECIAL_BATTLE_FACTORY`
+case) shows the Frontier Brain draws its battle-start transition from the
+exact same random 12-entry table (`sBattleTransitionTable_BattleFrontier`,
+`battle_setup.c:131-145`) as any ordinary Factory opponent — no brain- or
+tier-specific override at the selection call site. But this engine's brain
+walk-up room never fires that draw at all:
+`opponentSetupExtraRngSteps` (`src/engine/battleRoom.ts:261`) only assigns
+`transitionPresentation` when `state.phase === "settled"`, and the brain
+room's own settled-equivalent phase is named `"brainSpeechSettled"`, never
+`"settled"` — so `b.transitionPresentation` stays `undefined` for every
+brain encounter and `renderBattleRoomState`'s brain branch
+(`core.ts:2528`) always falls back to the hardcoded `"circlesMeet"`
+default, independent of what either fixture's real RNG stream drew. This
+reframes rung 2's finding: silver's abrupt full-width block isn't a second,
+unrelated "circle onset" mechanism to unify with gold's — it's what
+rendering the *wrong* transition family through the circlesMeet slide-in
+model produces, because silver's real per-encounter draw was very likely
+never circlesMeet at all. (Checked and ruled out: `FrontierSquares_Draw`,
+`battle_transition.c:987-1004`, draws one 4×4 tile per tick in a gradual
+raster sweep, not an instant full-width reveal — so `B_TRANSITION_FRONTIER_
+SQUARES` does not explain the one-tick abs-3279→3280 jump either. The
+remaining 8 un-implemented table entries were not individually checked this
+session.)
+
+**Why not fixed this session:** the party-generation RNG replay this fix
+needs already exists (`src/engine/factoryBrainOpponentGeneration.ts`'s
+`generateFactoryBrainOpponent`, invoked from
+`factoryRoundBattleOrchestrator.ts:605`, exposing the correct post-party
+RNG cursor as `generation.rngValue`) — but nothing in that orchestrator
+ever calls `pickFrontierTransition` on it, and `BattleOpponent`
+(`battleScenario.ts:55`) has no field to carry a pre-computed presentation
+through to `battleRoomStateForOpponent`. Wiring it up safely requires
+reconciling that orchestrator-level RNG stream against `core.ts`'s own
+*separate* tick-level `rngValue` cursor (the one the ordinary, non-brain
+walk-up room's own already-correct draw depends on) without desyncing the
+latter — a cross-cutting change, not a 1-2 line fix, and exactly the kind
+of two-clock-desync risk this project's own blind-realignment history
+(gold ground-truth doc §8′/§8″) warns against guessing at. Left fully
+enumerated in the gold doc's Rung 3 section for the next session.
+`factory-brain-silver-walkup-speech-flicker-off.json` remains at rung 1's
+79/100, unmoved (no `src/` edit this session).

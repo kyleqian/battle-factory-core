@@ -672,6 +672,151 @@ own small `+6`-relative correction without touching silver.
 rung-1 result), `factory-brain-gold-walkup-speech-close-off.json` unmoved at
 113/126.
 
+### Rung 3 (2026-08-17, main worker): SOURCE identification — the walk-up path never draws the real per-encounter transition selection; root cause found, fix is genuinely multi-piece, not attempted
+
+Per this step's brief, method steps 2-3: found how the real ROM selects the
+Battle Factory's battle-start transition for an ordinary opponent vs. the
+Frontier Brain, and reconciled that against what this engine currently does.
+**Conclusion: this is category (a)/(b) hybrid — the SELECTION is unwired
+for brain battles (a confirmed, citable engine bug, independent of either
+tier's specific pixel shape), but wiring the correct fix touches enough
+surface area (a cross-cutting RNG-architecture reconciliation, plus possibly
+a new renderer) that it does not fit "≤2 bounded pieces reusing existing
+machinery" — documented and stopped per the brief's own (b) branch, not
+implemented.**
+
+**Source: brain battles and ordinary Factory battles draw from the
+identical random table, no brain-specific override.**
+`DoSpecialTrainerBattle`'s `SPECIAL_BATTLE_FACTORY` case
+(`reference/pokeemerald/src/battle_tower.c:2093-2100`) calls
+`FillFactoryTrainerParty()` then unconditionally
+`BattleTransition_StartOnField(GetSpecialBattleTransition(B_TRANSITION_GROUP_B_FACTORY))`
+— no `gTrainerBattleOpponent_A == TRAINER_FRONTIER_BRAIN` check at this call
+site (contrast `SPECIAL_BATTLE_DOME`'s own case three lines above, which
+*does* branch on `TRAINER_FRONTIER_BRAIN`, but only to resize the party fill,
+never to change the transition call). `GetSpecialBattleTransition`
+(`battle_setup.c:864-908`) for any non-Pyramid/Dome/TrainerHill/SecretBase/
+EReader group (which `B_TRANSITION_GROUP_B_FACTORY` is) returns
+`RANDOM_TRANSITION(sBattleTransitionTable_BattleFrontier)` =
+`table[Random() % 12]` — one `Random()` call against the same 12-entry table
+(`battle_setup.c:131-145`: LOGO_WIGGLE, LOGO_WAVE, SQUARES, SQUARES_SCROLL,
+CIRCLES_MEET, CIRCLES_CROSS, CIRCLES_ASYMMETRIC_SPIRAL,
+CIRCLES_SYMMETRIC_SPIRAL, CIRCLES_MEET_IN_SEQ, CIRCLES_CROSS_IN_SEQ,
+CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ, CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ) —
+regardless of whether the opponent is an ordinary trainer or the Brain. So
+per source, there is no tier- or brain-specific transition table; both
+gold's and silver's brain fights are single independent random draws from
+the exact same 12-entry pool any other Factory battle uses, and the app's
+own `selectFrontierTransition`/`pickFrontierTransition`
+(`src/engine/battleTransition.ts`/`opponentGen.ts`) already model that draw
+correctly — this table/RNG derivation is not the bug.
+
+**Engine bug: the walk-up path never fires that draw at all.**
+`renderBattleRoomState`'s brain branch (`src/engine/core.ts:2528`) reads
+`frontierTransitionRenderKind(b.transitionPresentation, "circlesMeet")` —
+correct in shape (reads the real presentation if set, else falls back), but
+`b.transitionPresentation` is set exactly once in the whole tick loop's
+brain-reachable code path, gated by `opponentSetupExtraRngSteps(battleRoom)
+=== 1` (`core.ts:1101-1109`, shared by both brain and non-brain rooms).
+`opponentSetupExtraRngSteps` (`src/engine/battleRoom.ts:261`) opens with
+`if (state.phase !== "settled") return 0;` — and the brain walk-up room's
+own settled-equivalent phase is named `"brainSpeechSettled"`, never
+`"settled"` (confirmed by this file's own comment at `core.ts:1163`, "the
+brain branch settles into 'brainSpeechSettled', never 'settled'"). So for
+every brain encounter, `opponentSetupExtraRngSteps` always returns 0,
+`transitionPresentation` is never assigned, and
+`renderBattleRoomState`'s brain branch always takes the hardcoded
+`"circlesMeet"` fallback — **regardless of what that encounter's real RNG
+stream actually drew.** Gold's own residual (a small 28px sliver, rung 2)
+being *close* to the circlesMeet model is therefore most parsimoniously
+explained as this fixture's real draw happening to land on circlesMeet (or
+a close relative) by chance, not as evidence the renderer/anchor is
+"almost right" — and silver's abrupt full-width block is exactly what a
+*wrong* transition family rendered through the *circlesMeet* sprite-slide
+model would produce: nonsense, because the model doesn't apply to whatever
+the real draw actually was.
+
+**Why the fix is not a small patch: two separately-derived RNG streams,
+one of which already has the party-generation machinery, neither of which
+currently draws or carries the transition pick for a brain room.**
+`FillFactoryTrainerParty` (`battle_tower.c:1815-1821`) routes
+`TRAINER_FRONTIER_BRAIN` to `FillFactoryBrainParty`
+(`battle_factory.c:759-826`), a *different* generator than ordinary
+trainers' `FillFactoryFrontierTrainerParty` — a `while` rejection loop over
+`GetFactoryMonId` (`battle_factory.c:829-865`, one `Random()` call per
+candidate) with five data-dependent rejection rules (species-is-Unown,
+Level-50 high-tier, saved-rental set-id, duplicate species, duplicate held
+item), so the RNG-call count before the post-party `GetSpecialBattleTransition`
+draw is not a fixed constant the way `opponentSetupExtraRngSteps`'s
+hardcoded `case 26: return 1` shape assumes for the ordinary path. **This
+generator already exists, fully source-derived, in this codebase**:
+`src/engine/factoryBrainOpponentGeneration.ts`'s `generateFactoryBrainOpponent`
+(invoked from `factoryRoundBattleOrchestrator.ts:605`'s `generateOpponentFor`,
+both the ordinary and brain branches), and its return value already exposes
+the correct post-party RNG cursor (`generation.rngValue`) — so the hard
+"how many Random() calls" derivation is *not* missing work. What's missing:
+`factoryRoundBattleOrchestrator.ts` never calls `pickFrontierTransition` on
+that cursor at all (grepped: zero hits), and `BattleOpponent`
+(`src/engine/battleScenario.ts:55-67`) has no field to carry a pre-computed
+presentation from the orchestrator's precomputed round data through to
+`battleRoomStateForOpponent` (`battleRoom.ts`), which is what actually
+constructs the room `core.ts` renders. Meanwhile `core.ts`'s *own*,
+separate, tick-level `rngValue` cursor (the one `opponentSetupExtraRngSteps`
+currently feeds for the *ordinary* walk-up room) has no visibility into the
+orchestrator's precomputed stream at all — these are two independently
+threaded RNG views over the same conceptual game RNG, and the existing
+ordinary-path guards (gold-open 256/256, entrance-02/03 256/256, etc.)
+already depend on the tick-level cursor's current draw *not* being touched.
+
+**Enumeration of what a real fix needs (why this isn't ≤2 bounded pieces):**
+1. Thread a `pickFrontierTransition` draw through `generateOpponentFor`
+   (`factoryRoundBattleOrchestrator.ts:589`) on `generation.rngValue`,
+   for both the ordinary and brain branches, and give `BattleOpponent` (or
+   its Factory-specific extension) a field to carry the resulting
+   presentation.
+2. Wire `battleRoomStateForOpponent` to consume that pre-computed
+   presentation for brain rooms, without double-drawing or desyncing the
+   *already-correct* ordinary walk-up room's own tick-level draw (the two
+   RNG-cursor systems above need reconciling, not just one extended) —
+   this is exactly the two-clock-desync failure shape this doc's own
+   §8′/§8″ blind-realignment history warns about, so it needs its own
+   dense verification, not a guessed wire-up.
+3. Once each fixture's real `tableIndex`/`transitionId` is knowable this
+   way, cross-check against the 3 render kinds this engine currently
+   implements (`circlesMeet` id 34, `logoWave` id 30,
+   `asymmetricSpiralInSeq` id 40, i.e. `CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ` —
+   `battleTransition.ts`'s `frontierTransitionRenderKind`). If either
+   fixture's real draw lands on one of the other 9 table entries
+   (LOGO_WIGGLE, SQUARES, SQUARES_SCROLL, CIRCLES_CROSS,
+   CIRCLES_ASYMMETRIC_SPIRAL, CIRCLES_SYMMETRIC_SPIRAL, CIRCLES_MEET_IN_SEQ,
+   CIRCLES_CROSS_IN_SEQ, CIRCLES_SYMMETRIC_SPIRAL_IN_SEQ), that family's
+   renderer needs its own asset extraction + `battle_transition.c`/
+   `battle_transition_frontier.c` task-function port — a separate, bounded
+   subsystem in its own right, not free once (1)/(2) land.
+
+**One candidate checked and ruled out for silver's shape.** Read
+`FrontierSquares_Draw` (`battle_transition.c:987-1004`, the
+`B_TRANSITION_FRONTIER_SQUARES` task function) end-to-end: it draws exactly
+one `SQUARE_SIZE`×`SQUARE_SIZE` (4×4 tile) block per task tick, raster order
+left-to-right/top-to-bottom, i.e. a gradual sweep over ~35 ticks — not an
+instant full-width reveal. This does **not** match silver's observed
+"zero circle-palette pixels at abs 3279, 2568 pixels spanning the full
+screen width at abs 3280" (rung 2) shape, so SQUARES is ruled out as
+silver's real transition. The other 8 not-yet-implemented table entries
+were not individually checked against source this session (out of time) —
+that per-candidate shape check is itself part of the follow-up enumerated
+above, once (1)/(2) make the real `tableIndex` for silver's own fixture
+computable rather than guessed.
+
+**No code changed.** Per the brief's own decision tree ("if implementing
+[the correct renderer] needs more [than ~2 bounded pieces], STOP after
+committing the identification + enumeration as docs — that stop is a
+successful outcome"), this session stops here: full identification with
+citations is committed, no offset or renderer was guessed.
+`factory-brain-gold-walkup-speech-close-off.json` and
+`factory-brain-silver-walkup-speech-flicker-off.json` remain unmoved at
+113/126 and 79/100 respectively (docs-only change, no `src/` edit).
+
 ### 9′. Gold-open window closed: two shared-clock mechanisms, not a park-phase constant (2026-08-16, main worker)
 
 The 58/256 gold-open residual this step inherited was **not** the box-corner/
