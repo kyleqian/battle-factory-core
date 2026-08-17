@@ -1,4 +1,5 @@
 {
+  "appRoute": "canonical-recorded",
   "sourceTrace": "../traces-groundtruth/battle1-swapyes-b.json",
   "sourceSegmentCount": 153,
   "appendSegments": [
