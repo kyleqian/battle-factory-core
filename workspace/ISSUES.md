@@ -50,30 +50,27 @@ canned recordings actually show (oracle PNGs are banked for both tiers),
 the RNG-cursor reconciliation plan, and the renderer inventory for exactly
 the families those two fixtures need; (2) bounded slices from that design.
 The two window counts above are the acceptance instruments.
-## #96 — battle1-swap trace family: 17 of 18 traces collapsed to ~0/N by the missing explicit `appRoute` field (pre-existing, surfaced by the 2026-08-17 full-fixture sweep)
+## #96 — battle1-swap family: 3 traces remain narrowly short of their bars after the appRoute restoration (open remainder)
 
-**Symptom:** every `battle1-swap-*.json` compare trace except
-`battle1-swap-enemy-accept-exit.json` scores ~0/N (e.g. `enemy-accept-b-return`
-0/69, `enemy-picker` 0/130, `player-picker` 0/101) against documented full
-bars from the S8 audit / rung-14 era. Full per-trace table:
-`docs/fixture-sweep-2026-08-17.md`.
+**State (2026-08-17):** the mechanical fix landed (`cbc56d1b`): the 17 traces
+missing `"appRoute": "canonical-recorded"` got the field, 14 restored to their
+documented bars exactly, and the `LEGACY_TRACES_WITHOUT_APP_ROUTE` ratchet
+allowlist shrank accordingly (its intended direction). Per-trace table:
+`docs/fixture-sweep-2026-08-17.md` "#96 fix verification".
 
-**Confirmed:** pre-existing, NOT a 2026-08-17 regression — a read-only
-baseline worker at `b229076a` (the 2026-08-16 wind-down commit, before any of
-this session's changes) reproduced `enemy-accept-b-return` at a byte-identical
-0/69. Root cause per the sweep: these traces predate the #53 production
-routing flip and never got the explicit `"appRoute": "canonical-recorded"`
-field, so they now silently replay against the `generated-orchestrator`
-default — the same appRoute papercut class PROGRESS-archive documents for
-other traces, just never applied to this family.
-`battle1-swap-enemy-accept-exit.json`, the one member WITH the explicit field,
-is still 43/43 EXACT — the strongest evidence the underlying canonical replay
-is intact.
+**Open remainder — 3 traces with a narrow, likely-shared residual (distinct
+mechanism from the appRoute class, recorded per the fix step's instruction):**
+- `battle1-swap-enemy-picker.json`: 129/130 (bar 130/130), first mismatch
+  frame 29838, 5px (0.01%).
+- `battle1-swap-player-quit-b-return.json`: 61/67 (bar 67/67), first mismatch
+  frame 29774, 176px (0.46%).
+- `battle1-swap-player-quit-no-return.json`: 61/67 (bar 67/67), same frame
+  29774 / same bbox / same pixel count as the previous — likely one shared
+  root cause across the two quit-return traces.
 
-**Fix shape (mechanical):** add `"appRoute": "canonical-recorded"` to the 17
-traces, rerun each, and confirm restoration to its documented bar. Any member
-that does NOT restore after the field fix is a separate real drift and must be
-recorded individually (do not lump it back into this entry).
+**Lead:** pixel-first at frames 29838/29774 (the #97-A/B diagnosis recipe);
+the tiny counts and shared signature suggest a single localized redraw/timing
+class, possibly the same `menuIdleBounce` family as #97-B — check that first.
 
 ## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (real mechanism, bisect needed); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 
