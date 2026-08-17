@@ -317,33 +317,6 @@ const CALL_SCENE_BRAIN_BRANCH_LAG = 1;
 export { CALL_SCENE_BRAIN_BRANCH_LAG };
 
 /**
- * Per-box first-glyph delay, relative to the box's own edge.
- * - Box 1's edge is `healDismissElapsed`, so it reuses the ordinary route's
- *   own post-heal `POSTWIN_NEXT_TEXT_FIRST_DELAY` plus the brain branch's
- *   own extra `playse/waitse` tick (`CALL_SCENE_BRAIN_BRANCH_LAG`).
- * - Boxes 2/3 arrive after a `closemessage` + `applymovement`, so their own
- *   window is reopened from scratch: the first glyph lands exactly one tick
- *   after the box frame itself reappears (`CALL_SCENE_BOX_REOPEN_LAG`),
- *   MEASURED on both fixtures (box 2 frame 954 / glyph 955 = edge+4; box 3
- *   frame 1089 / glyph 1090 = edge+5). Box 2's value coincides with the
- *   generic `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY` it used before; box 3's is
- *   one tick later, which that shared constant could not express.
- * - Boxes 4/5 are `\p` page turns inside one already-open message: their own
- *   edge is the 1-tick-deferred bump (`CALL_SCENE_PAGE_TRANSITION_DELAY[2]`/
- *   `[3]`, see that constant's doc), so the first glyph lands right on the
- *   edge itself - firstDelay 0, not the generic MSGBOX_DEFAULT constant
- *   (PROGRESS 1293: the generic value produced a several-tick-too-long
- *   blank box after each page turn, this step's real residual).
- */
-const CALL_SCENE_TEXT_FIRST_DELAYS: readonly number[] = [
-  POSTWIN_NEXT_TEXT_FIRST_DELAY + CALL_SCENE_BRAIN_BRANCH_LAG,
-  CALL_SCENE_BOX_REOPEN_LAG[0] + 1,
-  CALL_SCENE_BOX_REOPEN_LAG[1] + 1,
-  0,
-  0,
-];
-
-/**
  * Whether each call-scene box is a non-final page of its own source message
  * (i.e. the printer stops on `\p`/`CHAR_PROMPT_CLEAR` rather than `$`/EOS).
  * Derived structurally from the JSON's own per-event `pages` split, never
@@ -364,6 +337,69 @@ const CALL_SCENE_BOX_PROMPT_PAGE: readonly boolean[] =
   callSceneMessageEvents.flatMap((event) =>
     event.pages.map((_page, index) => index < event.pages.length - 1),
   );
+
+/** Boxes that fully `closemessage`+reopen before their own content (see `CALL_SCENE_BOX_REOPEN_LAG`'s doc) -- their arrival is never a `\p` continuation, whatever precedes them. */
+const CALL_SCENE_REOPENED_PAGES: readonly number[] = [2, 3];
+
+/**
+ * True when `page`'s own arrival is a LATER `\p` transition continuing an
+ * already-open run -- its source box (`page - 1`) was itself `\p`-arrived,
+ * not freshly (re)opened -- as opposed to a run's FIRST `\p` transition.
+ * Derived structurally from `CALL_SCENE_BOX_PROMPT_PAGE` (does the source
+ * end in `\p`?) and `CALL_SCENE_REOPENED_PAGES` (was the source itself a
+ * reopen, i.e. not a `\p` arrival?) -- not a page-number branch. Box 4's
+ * source (box 3) is a reopen, so box 4 = first `\p` in its run. Box 5's
+ * source (box 4) is itself `\p`-arrived and not a reopen, so box 5 =
+ * continuing the same run. See `CALL_SCENE_TEXT_FIRST_DELAYS`' own doc for
+ * the oracle evidence this asymmetry is built on.
+ */
+function callSceneIsLaterPromptArrival(page: 2 | 3 | 4 | 5): boolean {
+  if (CALL_SCENE_REOPENED_PAGES.includes(page)) return false;
+  const sourcePage = page - 1;
+  if (!CALL_SCENE_BOX_PROMPT_PAGE[sourcePage - 1]) return false;
+  return !CALL_SCENE_REOPENED_PAGES.includes(sourcePage);
+}
+
+/**
+ * Per-box first-glyph delay, relative to the box's own edge.
+ * - Box 1's edge is `healDismissElapsed`, so it reuses the ordinary route's
+ *   own post-heal `POSTWIN_NEXT_TEXT_FIRST_DELAY` plus the brain branch's
+ *   own extra `playse/waitse` tick (`CALL_SCENE_BRAIN_BRANCH_LAG`).
+ * - Boxes 2/3 arrive after a `closemessage` + `applymovement`, so their own
+ *   window is reopened from scratch: the first glyph lands exactly one tick
+ *   after the box frame itself reappears (`CALL_SCENE_BOX_REOPEN_LAG`),
+ *   MEASURED on both fixtures (box 2 frame 954 / glyph 955 = edge+4; box 3
+ *   frame 1089 / glyph 1090 = edge+5). Box 2's value coincides with the
+ *   generic `POSTWIN_DIALOGUE_TEXT_FIRST_DELAY` it used before; box 3's is
+ *   one tick later, which that shared constant could not express.
+ * - Boxes 4/5 are `\p` page turns inside one already-open message: their own
+ *   edge is the 1-tick-deferred bump (`CALL_SCENE_PAGE_TRANSITION_DELAY[2]`/
+ *   `[3]`, see that constant's doc). Box 4 is this window's FIRST `\p`
+ *   transition (its source, box 3, was freshly reopened, not `\p`-arrived):
+ *   the first glyph lands right on the edge itself, firstDelay 0 (PROGRESS
+ *   1293: the generic MSGBOX_DEFAULT value produced a several-tick-too-long
+ *   blank box after each page turn). Box 5 is the SAME window's SECOND `\p`
+ *   transition (its source, box 4, WAS itself `\p`-arrived) and MEASURED one
+ *   tick slower: a genuine cleared (0-char) frame precedes its first glyph,
+ *   so firstDelay 1, not 0 -- direct oracle PNG diff, this step: local 813
+ *   (box 4, fully typed, still held) -> 814 (cleared box, no text at all) ->
+ *   816 (2 chars already printed, so 815 is the first-glyph tick). This is
+ *   the mirror image of noland-brain-intro-gold-ground-truth.md's §9‴
+ *   finding (there, a window's FIRST `\p` needs the extra clear tick and
+ *   LATER ones don't); here the window's SECOND `\p` needs it. The two
+ *   windows are proven NOT the same engine-model class (§9‴'s fix,
+ *   `battleRoomAcceptedState`'s shared `brainSpeechIdle`->`brainSpeech`
+ *   accept/print model, is untouched by this box 4/5 asymmetry and vice
+ *   versa) -- see `callSceneIsLaterPromptArrival`'s own doc for the
+ *   structural (not page-number-hardcoded) derivation.
+ */
+const CALL_SCENE_TEXT_FIRST_DELAYS: readonly number[] = [
+  POSTWIN_NEXT_TEXT_FIRST_DELAY + CALL_SCENE_BRAIN_BRANCH_LAG,
+  CALL_SCENE_BOX_REOPEN_LAG[0] + 1,
+  CALL_SCENE_BOX_REOPEN_LAG[1] + 1,
+  0,
+  callSceneIsLaterPromptArrival(5) ? 1 : 0,
+];
 
 function callSceneBoxTotal(page: 1 | 2 | 3 | 4 | 5): number {
   const [line1, line2] = CALL_SCENE_BOX_TEXTS[page - 1]!;
@@ -1185,13 +1221,34 @@ export function callSceneAttendantVisual(state: PostwinState): CallSceneAttendan
  * True while the call-scene message box is fully hidden: the attendant's
  * walk-away/walk-back movement span itself (box already dismissed, still
  * displaying the OLD page number until the deferred bump -- see
- * `callScenePendingElapsed`), plus the just-arrived box's own short reopen
- * lag (`CALL_SCENE_BOX_REOPEN_LAG`). Ground-truth doc: no message box
- * visible for either walk's full span.
+ * `callScenePendingElapsed`), the just-arrived box's own short reopen lag
+ * (`CALL_SCENE_BOX_REOPEN_LAG`), and box 5's own dismiss -> `AskReadyForHead`
+ * reopen gap. Ground-truth doc: no message box visible for either walk's
+ * full span.
+ *
+ * Box 5's `$`-terminated dismiss runs `closemessage` (script's own trailing
+ * `delay 16`, `CALL_SCENE_TRAILING_DELAY`) before `AskReadyForHead`'s box
+ * reopens -- the SAME closemessage-then-reopen shape boxes 2/3 already use,
+ * reusing their own measured reopen lag rather than a new constant. MEASURED
+ * (this step, direct oracle PNG diff, fixture 02): dismiss registers local
+ * 948 (`He says...` still fully held, matching the app through that tick);
+ * oracle shows the room with NO box at all through local 966 (`closemessage`
+ * has already run: msgbox border gone, room fully visible); the box frame
+ * reappears (still textless) exactly at local 967 = dismiss(948) +
+ * `CALL_SCENE_TRAILING_DELAY`(16) + `CALL_SCENE_BOX_REOPEN_LAG[0]`(3). Before
+ * this fix the app kept drawing box 5's own frame (with a spurious 0-char
+ * head-prompt render underneath) for the entire gap instead of hiding it.
  */
 export function callSceneBoxHidden(state: PostwinState): boolean {
-  if (!state.frontierBrain || state.callScenePage === 0 || state.callSceneDismissElapsed !== null) {
-    return false;
+  if (!state.frontierBrain || state.callScenePage === 0) return false;
+  if (state.callSceneDismissElapsed !== null) {
+    // Box 5's own fully-typed content still renders through the dismiss
+    // (accept) tick itself, same "old content survives the accept tick"
+    // shape as every other call-scene turn -- only elapsed > dismiss enters
+    // the closemessage gap.
+    if (state.elapsed <= state.callSceneDismissElapsed) return false;
+    const edge = state.callSceneDismissElapsed + CALL_SCENE_TRAILING_DELAY;
+    return state.elapsed - edge < CALL_SCENE_BOX_REOPEN_LAG[0];
   }
   if (state.callScenePendingElapsed !== null) {
     if (state.callScenePage === 1) {

@@ -2832,7 +2832,10 @@ function renderPostwinState(state: EngineState): Uint8Array {
         POSTWIN_HEAL_LINE2,
         postwinHealVisibleChars(age),
       );
-    } else if (postwin.frontierBrain && postwin.callScenePage !== 0 && postwin.callSceneDismissElapsed === null) {
+    } else if (
+      postwin.frontierBrain && postwin.callScenePage !== 0 &&
+      (postwin.callSceneDismissElapsed === null || postwin.callSceneDismissElapsed === age)
+    ) {
       // Walk-up build step A: the call-scene boxes - structural text-and-
       // index fidelity only (no oracle evidence for this window's exact
       // pixel transitions yet, docs/walkup-step-a-design.md §4).

@@ -1,3 +1,45 @@
+## 1300 — [main worker, 2026-08-16] **gold-pages window 55→85/177: page-1 onset re-derivation + single-line cursor placement fix, two tier-general defects**
+
+- **State:** Landed and green. `npm test` **1,056 files / 9,984 passed /
+  223 skipped**, `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` unmoved.
+- **Did:** Two defects, both measured against oracle frames, neither a
+  fitted constant or gold-only branch:
+  (1) The pages fixture's park stage
+  (`generatedRoundBattle7NolandGoldSpeechBoxHeldStage`, gold speechStep 0)
+  hardcoded `elapsed: 0`, but the trace's `preCheckpointFrameOffset` (1535)
+  is 418 ticks into page 1's hold, not its onset. Derived the true onset
+  (abs frame 1117) by instrumenting the already-verified `speech-open`
+  trace's own tick-by-tick `battleRoom.phase`/`elapsed`, same technique
+  §9′ used for `speech-box0-held`. Added an `elapsed` param to the shared
+  stage helper (default 0, every other caller unaffected) and passed 418
+  from the `box0-held` wrapper only.
+  (2) `drawBrainSpeechCursor` (`battleRoomRender.ts`) always anchored to
+  line 2's origin, even when line 2 is empty — broke gold page 2
+  (`["…Oh?", ""]`, the first dense fixture with a cursor-visible
+  single-line box; every earlier guard fixture fills both lines). Fixed to
+  anchor on whichever line actually holds the last printed glyph.
+- **Result: gold-pages 55→85/177**, pages 1 and 2 (local frames 0–593)
+  now byte-identical. Residual (92/177) is the page 2→3 and 3→4
+  **typewriter edges** (local ~594–653/728–776, oracle's typewriter runs a
+  tick or so ahead of the app's there) plus two isolated single-tick frames
+  in page 3's hold (716, 725, same "frame-index boundary" family as
+  gold-open 58/95) — a different mechanism (press/wipe-timing, same class
+  as gold-open's own mechanism 1) not re-derived this step.
+- **Guard bars, all reverified via fresh `npm run compare -- <trace>
+  --summary`:** gold-open 254/256, entrance-03 254/256, gold-close
+  80/126 (unchanged, different mechanism), B2 speech
+  39/39·74/74·39/39·28/28, callscene-01 131/131, entrance-02 256/256 — all
+  unmoved.
+- **Next:** gold-pages edge typewriter-timing re-derivation (2→3, 3→4)
+  needs its own oracle-frame cross-reference, same class as gold-open's
+  mechanism 1 (trace/press recalibration, not an engine defect) — left
+  honest per the brief.
+- **Notes:** Full mechanism writeup and before/after table in
+  `docs/noland-brain-intro-gold-ground-truth.md` §9″. No PAPERCUT.
+
+---
+
 ## 1299 — [main worker, 2026-08-16] **gold-open window 58→254/256: two shared-clock mechanisms (compare-trace accept timing + wait-cursor onset delay), no gold-only branch**
 
 - **State:** Landed and green. `npm test` **1,056 files / 9,984 passed /

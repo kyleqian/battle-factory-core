@@ -402,6 +402,115 @@ dismiss/menu-handoff cluster (local 948–966) remain open for a future step.
   `docs/noland-silver-walkup-presentation-map.md`).
 - Gold walk-up (a later step per the brief).
 
+## callscene-02 closed 171/199 → 199/199 (2026-08-17, main worker)
+
+Picked up the two open clusters this doc's own "120/199 → 171/199" section
+left for a future step: the page 2→3 turn (box 4→5, local 814/816-866) and
+the box-5 dismiss/menu-handoff cluster (local 948-966). Both closed, by two
+distinct mechanisms — neither is the shared-model class the parent brief
+asked to check first (see below).
+
+**Cross-check against noland-brain-intro-gold-ground-truth.md §9‴ first.**
+That doc proved gold-pages' shared `brainSpeechIdle`→`brainSpeech`
+accept/print model (`battleRoomAcceptedState` in `src/engine/battleRoom.ts`)
+is correct for a window's FIRST `\p` transition but one tick too slow for
+LATER `\p` transitions in the same open window. Callscene-02's boss message
+(`Text_MessageFromHeadComeRightNow`, box 3→4→5) has exactly this shape: box
+3→4 is the window's first `\p` (box 3 arrives via a fresh reopen, not `\p`),
+box 4→5 is the second. But box 3→4 and box 4/5 don't route through
+`battleRoomAcceptedState` at all — they use call-scene-specific machinery
+(`acceptPostwinCallScenePage`/`CALL_SCENE_PAGE_TRANSITION_DELAY`/
+`CALL_SCENE_TEXT_FIRST_DELAYS`, all in `src/engine/postwin.ts`), and direct
+oracle PNG diffing (not sha-only) showed the OPPOSITE asymmetry from §9‴:
+box 3→4 (first `\p`) has NO visible cleared frame (oracle jumps straight
+from the old page's last held frame to the new page's first glyph, byte-
+exact under the existing bump+firstDelay-0 model — reconfirmed via a dense
+`--capture-range 678:686` recheck, 5/5 exact); box 4→5 (the SECOND `\p`)
+DOES show a genuine one-tick cleared frame (oracle local 813 old, fully
+typed → 814 cleared, no text at all → 816 already 2 chars, so 815 is the
+first-glyph tick). **Verdict: NOT the same engine-model class.** Gold-pages'
+fix and this fix are mirror-image shapes in two structurally different code
+paths; §9‴'s frames 593/727 are untouched by this step (reconfirmed:
+gold-pages still 175/177 after this step, unmoved), and this fix does not
+touch `battleRoomAcceptedState`.
+
+**Cluster 1 fix (box 4→5 turn, local 814/816-866 → 0 diff).**
+Two-part, both required together (each alone made things worse — verified
+empirically, not assumed):
+1. `factory-brain-silver-walkup-callscene-02-off.json`'s press-frame
+   re-derivation: the same "-2 shift" pattern that closed the page-1→2 turn
+   (PROGRESS 1293) but applied to the box-4→5 press this time. Instrumenting
+   the app's own per-tick `postwin` state (`callScenePage`/`edge`/`pending`/
+   `postwinCallSceneInputReady`) proved readiness was already `true` many
+   ticks before the press (box 4 fully typed and idle long before local
+   805) — the press itself, not the readiness gate, was the sole bottleneck,
+   so shifting it is legitimate (mechanism (a), same class as gold-pages'
+   own trace fix), not a masked engine gap. Old: wait segment 133 (press
+   lands local 815-816). New: wait segment 131 (press lands local 813-814,
+   matching the oracle-confirmed real accept tick). The very next wait
+   segment (between the box-4→5 press and the box-5 dismiss press) absorbed
+   the compensating `+2` (131→133) instead of the trace's *trailing* segment
+   — using the trailing segment (tried first) shifted the box-5 dismiss
+   press by the same amount and cascaded into a large new mismatch across
+   local 948-1033; compensating one segment sooner keeps every later
+   press's local frame number exactly where it was.
+2. `CALL_SCENE_TEXT_FIRST_DELAYS[4]` (box 5's own first-glyph delay,
+   relative to its edge): `0` → `1`, encoding the genuine one-tick cleared
+   frame. Derived structurally, not page-indexed: new helper
+   `callSceneIsLaterPromptArrival(page)` (`src/engine/postwin.ts`) returns
+   true when a box's *source* box was itself `\p`-arrived (not a fresh
+   reopen) — false for box 4 (source box 3 is a reopen), true for box 5
+   (source box 4 is `\p`-arrived) — so `CALL_SCENE_TEXT_FIRST_DELAYS[4] =
+   callSceneIsLaterPromptArrival(5) ? 1 : 0`. Generalizes cleanly if this
+   message ever grew another page; not a `if (page === 5)` special case.
+
+**Cluster 2 fix (box-5 dismiss/menu-handoff, local 948-966 → 0 diff), its
+own separate mechanism as anticipated.** Direct oracle PNG diff at the
+dismiss edge (local 948, `callSceneDismissElapsed` set) showed the real
+game's box fully *closes* (`closemessage`, no border at all, bare room
+visible with a small marker) for a stretch, only reopening — still
+textless — at local 967, then typing `AskReadyForHead`'s own prompt.
+`967 - 948(dismiss) - 16(CALL_SCENE_TRAILING_DELAY, the script's own
+trailing `delay 16`) = 3`, exactly `CALL_SCENE_BOX_REOPEN_LAG[0]` — box 5's
+dismiss→reopen gap reuses box 2's own already-measured reopen lag (same
+`closemessage`-then-reopen shape), not a new constant. The app instead kept
+drawing box 5's *frame* (border) with 0 chars underneath for the entire gap
+— a real rendering-gate bug, not a timing offset: `callSceneBoxHidden`
+(`src/engine/postwin.ts`) never covered box 5's post-dismiss span at all
+(its old top guard returned `false`/not-hidden the instant
+`callSceneDismissElapsed !== null`). Fixed by extending `callSceneBoxHidden`
+to also hide the box while `dismiss < elapsed < dismiss +
+CALL_SCENE_TRAILING_DELAY + CALL_SCENE_BOX_REOPEN_LAG[0]`, paired with a
+one-tick exemption (`elapsed === dismiss` still renders box 5's own held
+content, not hidden) so the old page's fully-typed text survives the accept
+tick itself — the same "old content persists through its own accept tick"
+shape every other call-scene turn already has. The render side needed a
+matching one-tick carve-out in `src/engine/core.ts`'s `renderPostwinState`
+(the box-5-content branch's guard was a hard `callSceneDismissElapsed ===
+null`, which — combined with the new hidden-gate — would have blanked the
+box one tick too early; changed to `=== null || === age`).
+
+**Verified results (fresh `npm run compare -- <trace> --summary` reruns):**
+
+| Window | Before this step | After |
+| --- | --- | --- |
+| callscene-02 (`...-callscene-02-off.json`) | 171/199 | **199/199** |
+| gold-pages (guard, shared-model cross-check) | 175/177 | 175/177 (unmoved; frames 593/727 untouched, as expected — different mechanism) |
+| callscene-01 (guard) | 131/131 | 131/131 |
+| gold-open (guard) | 254/256 | 254/256 |
+| entrance-02 (guard) | 256/256 | 256/256 |
+| entrance-03 (guard) | 254/256 | 254/256 |
+| askready (guard) | 21/21 | 21/21 |
+| swapask-no (guard) | 194/194 | 194/194 |
+| record (guard) | 178/178 | 178/178 |
+| retire (guard) | 174/174 | 174/174 |
+
+Full `npm test` (1065 files, 10010 passed, 223 skipped, 0 failed unmoved),
+`npm run build`, `npm run typecheck` all green;
+`tests/executableFrontierRatchet.test.ts` barrier counts unmoved. callscene-02
+is now the fourth walk-up window at full dense closure alongside callscene-01,
+entrance-02, and askready/swapask-no/record/retire.
+
 ## Fixture manifest
 
 | Fixture | Coordinate space | Frames | Count |
