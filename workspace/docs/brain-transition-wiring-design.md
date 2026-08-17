@@ -584,3 +584,135 @@ confirmed by fresh guard reruns, all unmoved: gold-close 113/126,
 silver-flicker 79/100, gold-pages 177/177. Full `npm test` (10021 passed),
 `npm run build`, `npm run typecheck` all green;
 `executableFrontierRatchet` barrier counts unmoved (no new barrier added).
+
+## 8. S3 result — brain-room wiring landed; both target windows CLOSED (100/100, 126/126)
+
+**Production wiring** (`§4`'s steps 1-2, exactly as scoped): `generateOpponentFor`'s
+`"frontier-brain"` branch (`factoryRoundBattleOrchestrator.ts`) now calls
+`selectFrontierTransition(generation.rngValue)` once — `generation.rngValue`
+is `FactoryBrainOpponentGenerationResult`'s own documented cursor immediately
+after the third opponent's personality is accepted, exactly the input
+`GetSpecialBattleTransition` needs per §2/§5's proof — and carries only the
+resulting `.presentation` forward on the new `transitionPresentation` field
+(`FactoryScheduledOpponentGeneration`'s `"frontier-brain"` variant, required;
+`BattleOpponent.frontierBrain`, optional — battleScenario.ts — so untouched
+fixture/test `BattleOpponent` literals elsewhere keep compiling). The
+post-draw `.rngValue` is deliberately discarded, never folded into any
+cursor the orchestrator tracks — the brain battle is always the round's
+last, so nothing downstream needs a "next generation" cursor from it, and
+folding it in would wire the two independent RNG systems together, which
+§4 forbids. `battleRoomStateForOpponent`/`createBrainWalkupBattleRoomState`
+(`battleRoom.ts`) now thread `opponent.frontierBrain.transitionPresentation`
+onto the constructed room's own `transitionPresentation` field at
+construction time — `opponentSetupExtraRngSteps` untouched, still gated on
+`state.phase !== "settled"` and still returning 0 for every brain phase, so
+the tick-level cursor is never consulted for brain rooms, exactly as
+designed. Tier-1 pin (red-verified against the pre-wiring tree):
+`tests/battleRoomBrainEntrance.test.ts` (construction-time threading,
+including the `undefined`-stays-`undefined` fixture-safety case) and
+`tests/factoryRoundBattleOrchestrator.test.ts` (the orchestrator-level draw
+matches `selectFrontierTransition(generation.rngValue)` exactly and is
+never re-drawn at publication).
+
+**Stage-builder seed mismatch (found live, not anticipated by §4).** Wiring
+alone reproduced neither target window — both stayed at their pre-wiring
+baseline. Root cause: `tools/compare/factoryRoundIntroGeneralizationStage.ts`'s
+`nolandRoundReadyState`/`goldNolandRoundReadyState` (shared by every silver/
+gold walk-up compare stage) use their own independently-pinned dev seeds
+(silver: `rngValue 70`/`streak 14`, chosen to match
+`tests/factoryBrainRoundShape.test.ts`'s shape; gold: `rngValue 2`/`streak 35`,
+this file's own "gold round" recipe) — never the real oracle battle-lab
+fixture's seed (305419896), because no app-side seed-mapping function exists
+(§2's own open gap, still open). Once wired, the live orchestrator faithfully
+computed a real transition draw for THOSE seeds — silver landed table index 9
+(`CIRCLES_CROSS_IN_SEQ`), gold landed table index 0 (`LOGO_WIGGLE`) — neither
+matching either fixture's oracle-proven family (§5: silver = table 5/id 35,
+gold = table 8/id 38). Every other guard window was blind to this the whole
+time because nothing they render depends on the opponent's generated content
+(Noland's identity/speech text are fixed, not RNG-drawn) — the transition
+draw is the FIRST thing in this whole walk-up surface that's seed-sensitive.
+Fix: a new `frontierTransitionPresentationForTableIndex(tableIndex)`
+(`battleTransition.ts`) — a non-drawing constructor for a known-proven table
+row, same shape `selectFrontierTransition` returns, `raw` unbacked by a real
+`Random()` call (documented; nothing downstream reads it) — used by both
+ready-state helpers to override the live (mismatched-seed) draw with the
+oracle-proven table index (5 silver / 8 gold), the same "hand-derived from
+oracle evidence, not replayed from a mismatched live seed" idiom
+`speechAcceptedFast` already established in this codebase. Applied at the
+shared ready-state level so every consuming stage (not just the two target
+fixtures) sees a consistent, correct family for its own round.
+
+**Two more bugs surfaced only by this session's first-ever real-pixel test
+of the CIRCLES_CROSS renderer (S1 landed unwired, so this is genuinely new
+evidence, not a re-check):**
+
+1. **Pre-creation leak.** `applyBattleTransitionOverlay`'s non-sequential
+   circle branch drew all 3 circles unconditionally at every `te`, relying on
+   `circleCenter`'s clamped `init` position being off-screen pre-anchor to
+   stay invisible — true for MEET (`init` far outside the 240×160 canvas on
+   both axes) but false for CROSS, whose `init` values are DELIBERATELY
+   near-edge (`(241,59)`/`(-1,59)`, §1's own "already almost fully on-screen"
+   finding) since that's the real spawn shape. Result: a chunk of circle
+   sprite pinned at the screen edge from `te` 0, tens of ticks before
+   `Circles_Init`'s wait ever hands off to `CreateSprites`. Fixed with a
+   `te > CIRCLE_ANCHOR_TE` gate before the draw calls (not inside
+   `circleCenter` itself, whose pre-anchor-returns-`init` contract stays
+   pinned by its own existing tests) — strict `>`, not `>=`, per dense
+   per-tick evidence from the silver fixture's own local frames 77-79: the
+   real circles are still absent at `te === CIRCLE_ANCHOR_TE` and first
+   visible one tick later, already at their `te+1` slid position (not held
+   an extra tick at `init`). Provably a no-op for MEET (off-screen at both
+   candidate onset ticks) and for `circlesMeetInSeq`/`asymmetricSpiralInSeq`
+   (already separately gated).
+2. **Fixed paint order breaks mid-slide for CROSS.** The established
+   top/left/right draw order is actually a Y-ascending back-to-front sort
+   that happens to be static for MEET/MEET_IN_SEQ (their top circle's Y stays
+   below left/right's Y for the ENTIRE slide) but CROSS's top circle starts
+   ABOVE left/right in Y and crosses below them partway through its own
+   38-tick slide (~k 27-28, algebraically from both linear Y formulas) — a
+   real z-order flip a fixed order can't reproduce. Caught as a ~1px
+   ring-edge mismatch at the silver fixture's own local frames 98-99, right
+   where the circles first begin to visibly overlap. Fixed with
+   `slidingCirclePainterOrder` — a dynamic Y-ascending sort (same
+   `sequentialCirclePainterOrder` shares) reused by MEET/CROSS/MEET_IN_SEQ
+   alike, ties (left vs. right, always equal by mirror-symmetric construction
+   for all three families) broken toward MEET's own already-oracle-verified
+   left-before-right convention rather than blindly reusing
+   `sequentialCirclePainterOrder`'s own reversed tie rule (specific to that
+   OTHER family's different creation order).
+
+Both fixes are shared code touched by MEET too; verified provably-inert for
+MEET (off-screen geometry / static Y-ordering respectively) and empirically
+inert by full guard-matrix reruns below, all unmoved.
+
+**Acceptance run (fresh oracle, all synchronous, all foreground):**
+- `npm run compare -- factory-brain-silver-walkup-speech-flicker-off.json --summary`
+  → **100/100** (was 79/100). §S3 CLOSED.
+- `npm run compare -- factory-brain-gold-walkup-speech-close-off.json --summary`
+  → **126/126** (was 113/126). §S3 CLOSED — the gold anchor caveat from §7
+  never needed re-deriving; the seed-mismatch + pre-creation-leak + paint-
+  order fixes above were sufficient on their own.
+- Guard matrix, all unmoved: gold-pages 177/177, silver box-2 100/100,
+  gold-open 256/256, entrance-03 256/256, entrance-02 256/256, callscene-01
+  131/131, callscene-02 199/199, gold close-edge 54/54, silver cry-edge
+  75/75, silver close-pause 28/28, and the two named canaries
+  factory-round-battle7-noland-reveal-off 690/701 + -gold-reveal-off 690/701
+  (the ordinary "settled" path's own `opponentSetupExtraRngSteps` draw,
+  confirmed untouched).
+- Full `npm test`: **1066 files / 10030 passed** (+9: 1 new construction-time
+  wiring test plus assertions added to 2 existing tests) **/ 223 skipped**.
+  `npm run build` and `npm run typecheck` green.
+  `executableFrontierRatchet` barrier counts unmoved (no new barrier added).
+- 7 pre-existing tests broke on first `npm test` after the wiring landed —
+  all asserted the exact shape of `BattleOpponent.frontierBrain` (`{status}`)
+  via `toEqual`, which the new optional `transitionPresentation` field
+  naturally widens; none were testing transition behavior. Fixed by
+  switching those specific assertions to `toMatchObject` (partial-shape
+  match on `status` alone) rather than hand-computing each seed's own
+  RNG-derived transition value into an unrelated round-shape test.
+
+**Both ISSUES #98 windows fully close this slice** — no open remainder;
+entry deleted (PROGRESS records the fix). S4 (soak) is supervisor-owned per
+the original slice plan; this session's own full-suite/build/guard-matrix
+reruns above already cover its acceptance surface, so S4 should be a
+confirmation pass, not new work.

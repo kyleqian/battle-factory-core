@@ -320,7 +320,7 @@ describe("factory round chaining (tick() scenario)", () => {
     expect(round3.round.rules.phase).toBe("roundComplete");
     expect(round3.round.rules.battleIndex).toBe(6);
     expect(round3.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
-    expect(round3.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(round3.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "silver" });
     expect(getFactoryFrontierBrainStatus({
       battleMode: "singles",
       winStreak: carry2.factoryWinStreak + round3.round.rules.battleIndex,

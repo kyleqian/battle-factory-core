@@ -61,6 +61,7 @@ import {
   POSTWIN_SWAP_INPUT_READY_DELAY,
 } from "../src/engine/postwin.ts";
 import { advanceRngValue } from "../src/engine/rng.ts";
+import { selectFrontierTransition } from "../src/engine/battleTransition.ts";
 import {
   adoptFactoryOpponentSchedule,
   generateFactoryOpponent,
@@ -3025,6 +3026,15 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
       expect(draw.phase === "set-selection" || draw.phase === "personality").toBe(true);
     }
 
+    // S3 (docs/brain-transition-wiring-design.md): GetSpecialBattleTransition's
+    // draw is precomputed here, once, from the cursor immediately after the
+    // third opponent's personality is accepted - never re-drawn later, and
+    // never touching `state.round.rules.rngValue` (asserted unchanged below,
+    // still exactly the pre-transition-draw `pending!.generation.rngValue`).
+    expect(pending!.transitionPresentation).toEqual(
+      selectFrontierTransition(pending!.generation.rngValue).presentation,
+    );
+
     const segment = state.rngSegments.at(-1)!;
     expect(segment.kind).toBe("opponent-generation");
     expect(segment.battleIndex).toBe(1);
@@ -3043,7 +3053,13 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
     state = acknowledgeAndAdvance(state);
 
     expect(state.round.rules.battleIndex).toBe(1);
-    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(state.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "silver" });
+    // generatedOpponent (factoryRoundBattleOrchestrator.ts) threads the same
+    // precomputed presentation onto the published BattleOpponent - not
+    // re-drawn a second time here.
+    expect(state.round.rules.currentOpponent.frontierBrain?.transitionPresentation).toBe(
+      pending!.transitionPresentation,
+    );
     expect(state.round.rules.rngValue).toBe(pending!.generation.rngValue);
   });
 
@@ -3106,7 +3122,7 @@ describe("Frontier Brain opponent scheduling (Noland rung 2)", () => {
     expect(first.status).toBe("streak");
     expect(first.generation.challengeNum).toBe(2);
     expect(first.generation.fixedIv).toBe(15);
-    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "streak" });
+    expect(state.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "streak" });
   });
 
   it("rejects an adoptedNextOpponent ordinary schedule for a battleIndex that turns out brain-eligible", () => {

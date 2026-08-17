@@ -20,7 +20,9 @@ import {
 } from "../../src/engine/roundController.ts";
 import {
   battleIntroSceneAssemblyDisplayLag,
+  frontierTransitionPresentationForTableIndex,
   selectFrontierTransition,
+  type FrontierTransitionPresentation,
 } from "../../src/engine/battleTransition.ts";
 import {
   battleRoomStateForOpponent,
@@ -262,6 +264,7 @@ function nolandRoundReadyState(state: EngineState): {
   readonly state: EngineState;
   readonly orchestrator: FactoryRoundBattleOrchestratorState;
   readonly trainerPresentation: FactoryTrainerPresentation | undefined;
+  readonly transitionPresentation: FrontierTransitionPresentation | undefined;
 } {
   const playerRentalRecords = [record(267), record(268), record(269)] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
@@ -301,6 +304,19 @@ function nolandRoundReadyState(state: EngineState): {
     },
     orchestrator,
     trainerPresentation,
+    // NOT `currentOpponent.frontierBrain?.transitionPresentation`: this
+    // helper's own pinned dev seed (rngValue 70/streak 14, chosen to match
+    // tests/factoryBrainRoundShape.test.ts's shape) does not reproduce the
+    // real oracle battle-lab fixture's seed (305419896) -- no app-side
+    // seed-mapping function exists yet (docs/brain-transition-wiring-
+    // design.md §2's own open gap) -- so the live orchestrator's own draw
+    // here lands on table index 9 (CIRCLES_CROSS_IN_SEQ), the WRONG family
+    // for every real silver walk-up fixture this ready-state feeds. Table
+    // index 5 (CIRCLES_CROSS, id 35) is the oracle-proven real family
+    // instead (§S0's RAM-verified `gRngValue` cross-check) -- hand-derived
+    // from that evidence the same way `speechAcceptedFast` is, not replayed
+    // from this mismatched seed.
+    transitionPresentation: frontierTransitionPresentationForTableIndex(5),
   };
 }
 
@@ -426,6 +442,7 @@ export function generatedRoundBattle7NolandSilverSpeechBoxHeldStage(
       brainSpeechFirstEncounter: true,
       speechStep,
       trainerPresentation: ready.trainerPresentation,
+      transitionPresentation: ready.transitionPresentation,
     },
     rngValue: ready.orchestrator.round.rules.rngValue,
   };
@@ -467,6 +484,7 @@ export function generatedRoundBattle7NolandSilverSpeechBoxOpeningStage(
       // model) only when that prior box was box 0 itself.
       speechAcceptedFast: speechStep - 1 >= 1,
       trainerPresentation: ready.trainerPresentation,
+      transitionPresentation: ready.transitionPresentation,
     },
     rngValue: ready.orchestrator.round.rules.rngValue,
   };
@@ -506,6 +524,7 @@ export function generatedRoundBattle7NolandSilverSpeechSettledStage(
       brainSpeechFirstEncounter: true,
       speechStep: speechBoxCount,
       trainerPresentation: ready.trainerPresentation,
+      transitionPresentation: ready.transitionPresentation,
     },
     rngValue: ready.orchestrator.round.rules.rngValue,
   };
@@ -632,6 +651,7 @@ function goldNolandRoundReadyState(state: EngineState): {
   readonly state: EngineState;
   readonly orchestrator: FactoryRoundBattleOrchestratorState;
   readonly trainerPresentation: FactoryTrainerPresentation | undefined;
+  readonly transitionPresentation: FrontierTransitionPresentation | undefined;
 } {
   const playerRentalRecords = [
     record(564, CHALLENGE5_FIXED_IV),
@@ -676,6 +696,19 @@ function goldNolandRoundReadyState(state: EngineState): {
     },
     orchestrator,
     trainerPresentation,
+    // NOT `currentOpponent.frontierBrain?.transitionPresentation`: this
+    // helper's own pinned dev seed (rngValue 2/streak 35, chosen to match
+    // this file's own "gold round" recipe, see `generatedGoldRoundReveal
+    // ProofStage`'s doc) does not reproduce the real oracle battle-lab
+    // fixture's seed (305419896) -- no app-side seed-mapping function
+    // exists yet (docs/brain-transition-wiring-design.md §2's own open
+    // gap) -- so the live orchestrator's own draw here lands on table
+    // index 0 (LOGO_WIGGLE), the WRONG family for every real gold walk-up
+    // fixture this ready-state feeds. Table index 8 (CIRCLES_MEET_IN_SEQ,
+    // id 38) is the oracle-proven real family instead (§S0's RAM-verified
+    // `gRngValue` cross-check) -- hand-derived from that evidence the same
+    // way `speechAcceptedFast` is, not replayed from this mismatched seed.
+    transitionPresentation: frontierTransitionPresentationForTableIndex(8),
   };
 }
 
@@ -702,6 +735,7 @@ export function generatedRoundBattle7NolandGoldSpeechOpenStage(
       brainSpeechFirstEncounter: true,
       brainSpeechTier: "gold",
       trainerPresentation: ready.trainerPresentation,
+      transitionPresentation: ready.transitionPresentation,
     },
     rngValue: ready.orchestrator.round.rules.rngValue,
   };
@@ -732,6 +766,7 @@ export function generatedRoundBattle7NolandGoldSpeechBoxHeldStage(
       brainSpeechTier: "gold",
       speechStep,
       trainerPresentation: ready.trainerPresentation,
+      transitionPresentation: ready.transitionPresentation,
     },
     rngValue: ready.orchestrator.round.rules.rngValue,
   };
@@ -753,6 +788,7 @@ export function generatedRoundBattle7NolandGoldSpeechSettledStage(
       brainSpeechTier: "gold",
       speechStep: speechBoxCount,
       trainerPresentation: ready.trainerPresentation,
+      transitionPresentation: ready.transitionPresentation,
     },
     rngValue: ready.orchestrator.round.rules.rngValue,
   };

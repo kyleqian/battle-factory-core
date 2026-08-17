@@ -127,7 +127,7 @@ describe("noncanonical generated-round intro generalization", () => {
       className: "FACTORY HEAD",
       trainerPic: "TRAINER_PIC_FACTORY_HEAD_NOLAND",
     });
-    expect(orchestrator.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(orchestrator.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "silver" });
   });
 
   it("pins LUKAS's complete source-relative summary boundary and status/fainted summary identity", () => {

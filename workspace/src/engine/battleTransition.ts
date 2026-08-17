@@ -171,6 +171,38 @@ export function selectFrontierTransition(rngValue: number): {
   };
 }
 
+/**
+ * Non-drawing constructor for a known table row -- for callers that already
+ * have an oracle-proven table index in hand (docs/brain-transition-wiring-
+ * design.md §S0's RAM-verified `gRngValue` cross-check) and need the same
+ * `FrontierTransitionPresentation` shape `selectFrontierTransition` returns,
+ * without a live `Random()` draw of their own. Compare-tooling's staged
+ * brain-room fixtures are the intended caller: their own pinned dev-time RNG
+ * seed does not reproduce the oracle battle-lab fixture's real seed (no
+ * app-side seed-mapping function exists yet, §2's own open gap), so replaying
+ * `selectFrontierTransition` there would draw the WRONG family for a real,
+ * already-identified fixture -- this lets them carry the proven family
+ * directly instead, the same "hand-derived from oracle evidence" idiom
+ * `speechAcceptedFast` already uses (battleRoom.ts). `raw` has no real
+ * `Random()` output behind it here (nothing downstream reads it --
+ * `frontierTransitionRenderKind` dispatches on `transitionId` alone).
+ */
+export function frontierTransitionPresentationForTableIndex(
+  tableIndex: number,
+): FrontierTransitionPresentation {
+  const entry = transitionMeta.table[tableIndex];
+  if (entry === undefined) {
+    throw new Error(`tableIndex ${tableIndex} is out of range for the frontier transition table`);
+  }
+  return Object.freeze({
+    tableIndex,
+    transitionId: entry.id,
+    transitionName: entry.name,
+    family: entry.family,
+    raw: entry.id,
+  });
+}
+
 export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq" | "circlesCross" | "circlesMeetInSeq";
 export type FrontierTransitionRenderKind = FrontierCircleTransition | "logoWave";
 
@@ -612,6 +644,51 @@ export function sequentialCirclePainterOrder(te: number): Array<"top" | "left" |
 }
 
 /**
+ * Y-ascending painter order (back to front) for CIRCLES_MEET/CIRCLES_CROSS/
+ * CIRCLES_MEET_IN_SEQ - the fixed top/left/right draw order these three
+ * families used before S3 (docs/brain-transition-wiring-design.md) only
+ * happens to be correct for MEET (and, by the same geometry, MEET_IN_SEQ)
+ * because their top circle's Y stays below left/right's Y for the WHOLE
+ * slide (init -51..45 vs 193..97, i.e. top < leftRight throughout).
+ * CROSS's top circle instead STARTS above left/right in Y (init 197 vs 59)
+ * and crosses below them partway through its own 38-tick slide (~k 27-28,
+ * derived algebraically from both families' own linear Y formulas) - a
+ * real z-order flip a fixed draw order can't reproduce; a dense per-tick
+ * silver fixture compare (factory-brain-silver-walkup-speech-flicker-
+ * off.json local frames 98-99, right where the circles first begin to
+ * visibly overlap) caught exactly this as a ~1px ring-edge mismatch at the
+ * top/left and top/right overlap boundaries. Ties (left vs right, which
+ * share the same Y formula by mirror-symmetric construction for every one
+ * of these three families, so always tie) keep the pre-existing oracle-
+ * verified relative order (left drawn before/behind right) via ascending
+ * name index - unlike `sequentialCirclePainterOrder`'s own reversed tie
+ * convention above, which is specific to that OTHER family's different
+ * creation order/task-timer stagger. A circle not yet created
+ * (`circlesMeetInSeqCircleCenter`'s own `null` before its `createOnTimer`
+ * tick) sorts last; `drawCircleSprite`'s own null-check already no-ops it
+ * regardless of position, so this can't reorder anything visible.
+ */
+function slidingCirclePainterOrder(
+  te: number,
+  transition: FrontierCircleTransition,
+): Array<"top" | "left" | "right"> {
+  const names: Array<"top" | "left" | "right"> = ["top", "left", "right"];
+  const y = (name: "top" | "left" | "right"): number => {
+    if (transition === "circlesMeetInSeq") {
+      const center = circlesMeetInSeqCircleCenter(name, te);
+      return center === null ? Number.POSITIVE_INFINITY : center.y;
+    }
+    return circleCenter(name, te, transition).y;
+  };
+  return names.slice().sort((a, b) => {
+    const ay = y(a);
+    const by = y(b);
+    if (ay !== by) return ay - by;
+    return names.indexOf(a) - names.indexOf(b);
+  });
+}
+
+/**
  * BLDALPHA-blends the assembled center-logo (BG0, `ChangeBgX(0,0,SET)` +
  * `ChangeBgY(0, 0x500, SUB)` = scrollX 0/scrollY -5, empirically confirmed
  * 0/6028 opaque-pixel mismatches against the dense trace at that exact
@@ -704,14 +781,44 @@ export function applyBattleTransitionOverlay(
     for (const name of sequentialCirclePainterOrder(te)) {
       drawCircleSprite(fb, name, te, transition);
     }
-  } else {
-    // Fixed top/left/right paint order - both CIRCLES_MEET (oracle-pinned)
-    // and CIRCLES_CROSS create their 3 sprites in that same order with no
-    // createOnTimer stagger (battle_transition_frontier.c:433-467), so the
-    // same z-order applies to both; no sequentialCirclePainterOrder needed.
-    drawCircleSprite(fb, "top", te, transition);
-    drawCircleSprite(fb, "left", te, transition);
-    drawCircleSprite(fb, "right", te, transition);
+  } else if (te > CIRCLE_ANCHOR_TE) {
+    // Y-ascending dynamic paint order (`slidingCirclePainterOrder` above) -
+    // see that function's own doc for why a fixed top/left/right order is
+    // wrong for CROSS partway through its slide.
+    //
+    // The `te > CIRCLE_ANCHOR_TE` guard (S3, docs/brain-transition-wiring-
+    // design.md): `circleCenter` is a pure position FORMULA and, by design
+    // (its own pinned tests), still returns each circle's clamped `init`
+    // position for te at/before the anchor - this gate is a separate
+    // decision, "is a sprite there to draw at all yet." MEET's `init`
+    // values are far enough off-screen (verified: originY clips for top;
+    // originY clips for left/right) that drawing them at te===
+    // CIRCLE_ANCHOR_TE was an invisible no-op - masking that this branch
+    // was missing the same "not created yet" gate
+    // `circlesMeetInSeqCircleCenter`/`asymmetricSpiralCircleCenter` already
+    // encode via their own null return. CROSS's own `init` values are
+    // deliberately near-edge (`(241,59)`/`(-1,59)`, design doc §1's own
+    // "already almost fully on-screen at the horizontal edges" finding) -
+    // the exact real spawn shape the source uses - so the missing gate
+    // produced a real, visible bug for CROSS specifically: a chunk of
+    // circle sprite pinned at the screen edge well before the real game
+    // ever creates it. Strict `>` (not `>=`), not just "not `te<anchor`":
+    // dense per-tick oracle evidence for CROSS's own fixture
+    // (factory-brain-silver-walkup-speech-flicker-off.json local frames
+    // 77-79) shows the real circles are STILL absent at te===
+    // CIRCLE_ANCHOR_TE (78) and first visible one tick later, at
+    // CIRCLE_ANCHOR_TE+1 (79) - already at their te=79 slid position (k=1
+    // via the unmodified `circleCenter` formula), not held an extra tick
+    // at init - i.e. creation and first paint are one tick apart, not the
+    // same tick. Adding the gate here (not to `circleCenter` itself, which
+    // stays a pure formula with its own already-pinned pre-anchor-returns-
+    // init tests unmoved) fixes CROSS while being a byte-identical no-op
+    // for MEET and every other already-guarded window (MEET is off-screen
+    // at both te===anchor and te===anchor+1 alike, so shifting which one
+    // is the first *drawn* tick changes zero visible pixels there).
+    for (const name of slidingCirclePainterOrder(te, transition)) {
+      drawCircleSprite(fb, name, te, transition);
+    }
   }
   applyCenterLogoBlend(fb, centerLogoEva(te, transition), exitFadeY(te, transition));
 }

@@ -8,6 +8,7 @@ import {
   type FactoryCorpusPartyMemberState,
 } from "./factoryCorpusParty.ts";
 import type { FrontierBrainStatus } from "./frontierBrainStatus.ts";
+import type { FrontierTransitionPresentation } from "./battleTransition.ts";
 
 export const BATTLES_PER_ROUND = 7;
 
@@ -64,7 +65,23 @@ export interface BattleOpponent {
    * ordinary trainer. Downstream code and the presentation seam key off this
    * instead of string-sniffing `id`/`trainerName`.
    */
-  readonly frontierBrain?: Readonly<{ status: Exclude<FrontierBrainStatus, "not-ready"> }>;
+  readonly frontierBrain?: Readonly<{
+    status: Exclude<FrontierBrainStatus, "not-ready">;
+    /**
+     * `GetSpecialBattleTransition`'s `Random()%12` draw
+     * (`pickFrontierTransition`), precomputed once at generation time from
+     * `FactoryBrainOpponentGenerationResult.rngValue` (the cursor
+     * immediately after the third opponent's personality is accepted -- the
+     * source has no intervening draws before this one). The brain path
+     * carries its own presentation this way instead of the ordinary path's
+     * tick-level `opponentSetupExtraRngSteps` draw; the two RNG systems
+     * never reconcile (docs/brain-transition-wiring-design.md §S3). Optional
+     * so fixture/test `BattleOpponent` literals that never generate a real
+     * brain opponent keep compiling unchanged; `battleRoomStateForOpponent`
+     * falls back to the pre-existing `circlesMeet` render when absent.
+     */
+    transitionPresentation?: FrontierTransitionPresentation;
+  }>;
 }
 
 /**

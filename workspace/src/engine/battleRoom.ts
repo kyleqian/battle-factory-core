@@ -194,11 +194,18 @@ export const INITIAL_BATTLE_2_ROOM_STATE: BattleRoomState = {
  * (`entering`/`opponentStep`) never runs for this branch. `trainerPresentation`
  * carries Noland's identity forward for B2's speech step; this step itself
  * never reads its `speechBefore` (see `battleRoomQuote`'s brain guard).
+ * `transitionPresentation` (S3, docs/brain-transition-wiring-design.md)
+ * carries the opponent's precomputed `GetSpecialBattleTransition` draw
+ * forward the same way -- set once here, at construction, never re-drawn;
+ * the ordinary path's own tick-level draw (`opponentSetupExtraRngSteps`)
+ * stays untouched and never fires for this branch (`state.phase !==
+ * "settled"` excludes every brain phase).
  */
 export function createBrainWalkupBattleRoomState(
   trainerPresentation?: FactoryTrainerPresentation,
   heardBrainSpeechBefore = false,
   brainSpeechTier: "silver" | "gold" = "silver",
+  transitionPresentation?: FrontierTransitionPresentation,
 ): BattleRoomState {
   return Object.freeze({
     phase: "brainEntering",
@@ -207,6 +214,7 @@ export function createBrainWalkupBattleRoomState(
     brainSpeechFirstEncounter: !heardBrainSpeechBefore,
     brainSpeechTier,
     trainerPresentation,
+    transitionPresentation,
   });
 }
 
@@ -237,6 +245,7 @@ export function battleRoomStateForOpponent(
       trainerPresentation,
       heardBrainSpeechBefore,
       brainSpeechTier,
+      opponent.frontierBrain.transitionPresentation,
     );
   }
   return { ...INITIAL_BATTLE_2_ROOM_STATE, trainerPresentation };

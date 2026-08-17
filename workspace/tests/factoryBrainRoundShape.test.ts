@@ -185,7 +185,7 @@ function assertBrainBattleStartCommand(
   status: "silver" | "gold",
 ): void {
   expect(state.round.rules.phase).toBe("presentingBattleStart");
-  expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status });
+  expect(state.round.rules.currentOpponent.frontierBrain).toMatchObject({ status });
 
   const started = beginFactoryRoundBattleStartIntro(state);
   const command = started.battleStartIntro!.command;
@@ -201,7 +201,7 @@ function assertBrainBattleStartCommand(
   // The battle-start command is trainer-identity-only; the silver/gold
   // status itself keeps living on `currentOpponent.frontierBrain`, unchanged
   // by constructing the intro.
-  expect(started.round.rules.currentOpponent.frontierBrain).toEqual({ status });
+  expect(started.round.rules.currentOpponent.frontierBrain).toMatchObject({ status });
 }
 
 /**
@@ -301,7 +301,7 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
 
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
-    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(state.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "silver" });
     assertBrainBattleStartCommand(state, "silver");
     assertBrainRoundOutcome(state, "win", {
       battlePointsAwarded: 14,
@@ -374,7 +374,7 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
 
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
-    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "gold" });
+    expect(state.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "gold" });
     assertBrainBattleStartCommand(state, "gold");
     assertBrainRoundOutcome(state, "win", {
       battlePointsAwarded: 15,
@@ -406,7 +406,7 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
 
     expect(state.round.rules.battleIndex).toBe(6);
     expect(state.round.rules.currentOpponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
-    expect(state.round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(state.round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "silver" });
     expect(state.round.rules.phase).toBe("presentingBattleStart");
 
     const start = state.round.presentation?.command;
@@ -430,8 +430,8 @@ describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)"
     expect(command.opponent.id).toBe(`factory-trainer-${TRAINER_FRONTIER_BRAIN}`);
     // frontierBrain end-to-end: carried by the emitted roundLost command's
     // own opponent snapshot, not just the round's live rules state.
-    expect(command.opponent.frontierBrain).toEqual({ status: "silver" });
-    expect(round.rules.currentOpponent.frontierBrain).toEqual({ status: "silver" });
+    expect(command.opponent.frontierBrain).toMatchObject({ status: "silver" });
+    expect(round.rules.currentOpponent.frontierBrain).toMatchObject({ status: "silver" });
 
     // Step 2's round-controller output on the negative path: a Brain loss
     // is identical to an ordinary loss (audit doc §2) -- no BP, no symbol,

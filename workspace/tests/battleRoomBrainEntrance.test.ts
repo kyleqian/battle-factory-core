@@ -44,15 +44,19 @@ import {
 } from "../src/engine/battleRoom.ts";
 import { renderBattleRoomBrainEntranceScene } from "../src/engine/battleRoomRender.ts";
 import type { BattleOpponent } from "../src/engine/battleScenario.ts";
+import { frontierTransitionPresentationForTableIndex } from "../src/engine/battleTransition.ts";
 
 const entranceScene = walkup.scenes.battleRoomEntrance;
 
-function brainOpponent(status: Exclude<BattleOpponent["frontierBrain"], undefined>["status"] = "silver"): BattleOpponent {
+function brainOpponent(
+  status: Exclude<BattleOpponent["frontierBrain"], undefined>["status"] = "silver",
+  transitionPresentation?: Exclude<BattleOpponent["frontierBrain"], undefined>["transitionPresentation"],
+): BattleOpponent {
   return {
     id: "noland",
     trainerName: "NOLAND",
     party: [] as unknown as BattleOpponent["party"],
-    frontierBrain: { status },
+    frontierBrain: { status, transitionPresentation },
   };
 }
 
@@ -136,6 +140,22 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(battleRoomStateForOpponent(brainOpponent("gold")).brainSpeechTier).toBe("gold");
     expect(battleRoomStateForOpponent(brainOpponent("streak")).brainSpeechTier).toBe("silver");
     expect(battleRoomStateForOpponent(brainOpponent("streak-long")).brainSpeechTier).toBe("silver");
+  });
+
+  it("S3 (docs/brain-transition-wiring-design.md): transitionPresentation is carried directly from opponent.frontierBrain.transitionPresentation onto the constructed room at construction time - never drawn here, and undefined (not defaulted to a fallback family) when the opponent never precomputed one", () => {
+    const presentation = frontierTransitionPresentationForTableIndex(5);
+    expect(
+      battleRoomStateForOpponent(brainOpponent("silver", presentation)).transitionPresentation,
+    ).toBe(presentation);
+    expect(
+      createBrainWalkupBattleRoomState(undefined, false, "silver", presentation).transitionPresentation,
+    ).toBe(presentation);
+
+    // No precomputed presentation (e.g. a fixture-only BattleOpponent that
+    // never ran generateOpponentFor) - stays undefined, not a fallback
+    // family, so core.ts's own `frontierTransitionRenderKind(undefined,
+    // "circlesMeet")` fallback is what applies downstream, unperturbed.
+    expect(battleRoomStateForOpponent(brainOpponent("silver")).transitionPresentation).toBeUndefined();
   });
 
   it("box stays hidden through the room fade-in, appears at BRAIN_MSGBOX_APPEAR_ELAPSED, prints, then holds idle until the player's A press - no movement happens yet", () => {

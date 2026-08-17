@@ -4,6 +4,50 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1316 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S3 landed: brain-room transition wiring — both target windows CLOSED (silver 100/100, gold 126/126); ISSUES #98 deleted**
+
+- **State:** `src/engine/battleTransition.ts`, `battleScenario.ts`,
+  `factoryRoundBattleOrchestrator.ts`, `battleRoom.ts`,
+  `tools/compare/factoryRoundIntroGeneralizationStage.ts` edited; 3 test
+  files gained/adjusted assertions. `npm test` **1066 files / 10030 passed
+  / 223 skipped** (+9), `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Wired `generateOpponentFor`'s frontier-brain branch to call
+  `selectFrontierTransition(generation.rngValue)` once and carry the result
+  on `FactoryScheduledOpponentGeneration`/`BattleOpponent.frontierBrain`'s
+  new `transitionPresentation` field; `battleRoomStateForOpponent`/
+  `createBrainWalkupBattleRoomState` now set it on the constructed room at
+  construction time (`opponentSetupExtraRngSteps` untouched — still 0 for
+  every brain phase). Found and fixed 3 issues the wiring alone didn't
+  cover: (1) the compare-tooling stage builders' own pinned dev seeds don't
+  reproduce the oracle fixtures' real seed (no app-side seed-mapping
+  exists), so the live draw picked the wrong family for both fixtures —
+  fixed with a new `frontierTransitionPresentationForTableIndex` hand-
+  derived override at the shared ready-state helpers, same idiom as
+  `speechAcceptedFast`; (2) `CIRCLES_CROSS`'s renderer (landed unwired in
+  S1, never real-pixel-tested until now) drew its edge circles from `te` 0,
+  tens of ticks before the real game creates them — MEET was invisibly safe
+  by off-screen geometry, CROSS's near-edge spawn position wasn't — fixed
+  with a `te > CIRCLE_ANCHOR_TE` draw gate (dense-evidence-derived, strict
+  `>`); (3) the fixed top/left/right paint order breaks once CROSS's top
+  circle crosses below left/right in Y partway through its slide — fixed
+  with a dynamic Y-ascending `slidingCirclePainterOrder`, shared by
+  MEET/CROSS/MEET_IN_SEQ, both fixes empirically provably inert for MEET.
+- **Result:** `factory-brain-silver-walkup-speech-flicker-off.json`
+  79/100 → **100/100**; `factory-brain-gold-walkup-speech-close-off.json`
+  113/126 → **126/126**. Full guard matrix unmoved (gold-pages 177/177,
+  silver box-2 100/100, gold-open 256/256, entrance-02/03 256/256,
+  callscene-01/02 131/131+199/199, gold close-edge 54/54, silver cry-edge
+  75/75, silver close-pause 28/28, both named canaries
+  battle7-noland-{,gold-}reveal-off 690/701). `ISSUES.md #98` deleted (both
+  windows fully closed, no open remainder). Full detail in
+  `docs/brain-transition-wiring-design.md` §8.
+- **Next:** S4 (soak, supervisor-owned) should be a confirmation pass, not
+  new work — this session's own full-suite/build/guard-matrix reruns
+  already cover its acceptance surface. #96/#97 remain open, untouched.
+- **Notes:** No PAPERCUT.
+
+---
 ## 1315 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S1 landed: `B_TRANSITION_FRONTIER_CIRCLES_CROSS` renderer (id 35), unwired by design — guards unmoved, red-verified Tier-1 coverage**
 
 - **State:** `src/engine/battleTransition.ts` +109/-12,
@@ -115,50 +159,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   implemented here (out of this step's scope).
 
 ---
-## 1313 — [main worker, 2026-08-17] **#97 split and closed: loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended `b7ae30de` continuous-play chaining, not a bug); turn5/turn6 bounce-tick drift mechanism identified, bisect recipe written (needs `c5563c72..HEAD`, 2697 commits)**
-
-- **State:** Docs-only, no `src/` edit (one scratch `console.error` added
-  and removed during diagnosis; `git diff src/` is empty). `npm test`
-  **1065 files / 10011 passed / 223 skipped** (unmoved), `npm run build`
-  green (includes typecheck), `executableFrontierRatchet` barrier counts
-  unmoved (6/6 ratchet tests pass).
-- **Did:** Pixel-first diagnosis of #97's three windows per the step
-  brief. **(A) loss-terminal-decline-continuation-off** (50/155): PNG
-  comparison at frames 4939-5093 shows the oracle correctly running the
-  documented decline→farewell→free-roam-Lobby chain the whole time, while
-  the app jumps straight to a fresh rental-draft screen at frame 4989.
-  Root cause: `core.ts:821-882`'s "continuous-play chaining" branch
-  (`state.appRoute === "generated-orchestrator" && recordChoice
-  newly "no"`), landed deliberately in `b7ae30de` (2026-08-14,
-  supervisor-approved per `ROADMAP.md`'s 2026-08-14 planning-session
-  decision) — an ancestor of the `b229076a` baseline. Verdict: the old
-  bar is obsolete, not regressed; the farewell/Lobby pixels are
-  unreachable by design under this route. Closed as documented (not
-  fixed — fixing would mean reverting a deliberate feature); honest
-  remaining bar is the pre-edge span, frames 4939-4988, **50/50** (holds).
-  **(B) turn5-action-off / turn6-reopen-off** (1/32, 11/46): pixel diff
-  confirms a real ~1px box/sprite displacement at each turn's FIGHT-reopen
-  edge (turn5: player status-box border, frame 5927; turn6: ONIX battler
-  sprite, frame 7305) — both driven by the shared `menuIdleBounce`
-  bounce-tick family (`battleScene.ts` turn5 legacy/shifted formulas).
-  Live-instrumented (scratch, reverted) both candidate formulas at the
-  mismatch window: they agree with each other and still disagree with
-  the oracle, ruling out the obvious branch-flip fix. Also affects
-  `turn5-confirm-off-{a,b}` and `turn5-resolve-off-{a,b,c,d}` per the
-  2026-08-17 sweep — a whole-family regression, not just these two.
-  Classified (c): genuinely needs bisection, NOT attempted live (shared,
-  heavily-tuned formula surface + 2697-commit-wide unknown window is too
-  large/risky for this session's remaining budget). Full mechanism,
-  ruled-out leads, and an executable `git bisect run` recipe (isolated
-  worktree, known-good `c5563c72`, known-bad `b229076a`) are written into
-  `ISSUES.md #97`.
-- **Result:** `ISSUES.md #97` rewritten with both findings (old leads that
-  died are trimmed). Guards reverified fresh: `turn5-reset-off` 256/256,
-  gold-pages 177/177, callscene-02 199/199.
-- **Next:** Whoever picks up #97 part B should first manually confirm
-  `c5563c72` is turn5-action-off-green (the recipe assumes it from the
-  design doc's own citation but this session didn't re-verify it), then
-  run the bisect recipe in `ISSUES.md #97` to find the exact regressing
-  commit before touching the shared bounce-tick formulas.
-- **Notes:** No `src/` edit landed (diagnose-only per the brief's own
-  decision tree for both findings). No PAPERCUT.

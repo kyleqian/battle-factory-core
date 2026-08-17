@@ -98,6 +98,10 @@ import {
   type FactoryBrainOpponentGenerationResult,
 } from "./factoryBrainOpponentGeneration.ts";
 import {
+  selectFrontierTransition,
+  type FrontierTransitionPresentation,
+} from "./battleTransition.ts";
+import {
   getFactoryFrontierBrainStatus,
   type FrontierBrainStatus,
 } from "./frontierBrainStatus.ts";
@@ -307,6 +311,14 @@ export type FactoryScheduledOpponentGeneration =
     trainerId: number;
     storedTrainerIds: readonly number[];
     generation: FactoryBrainOpponentGenerationResult;
+    /**
+     * `GetSpecialBattleTransition`'s draw, precomputed once here (from
+     * `generation.rngValue`, its cursor immediately after the third
+     * opponent's personality is accepted) rather than at the ordinary
+     * path's tick-level `opponentSetupExtraRngSteps` seam -- see
+     * `BattleOpponent.frontierBrain`'s own doc (battleScenario.ts).
+     */
+    transitionPresentation: FrontierTransitionPresentation;
   }>;
 
 export type FactoryFacilityRngSegment = Readonly<{
@@ -539,7 +551,10 @@ function generatedOpponent(scheduled: FactoryScheduledOpponentGeneration): Battl
       trainerName: getFactoryTrainerPresentation(scheduled.trainerId).name,
       party: asBattleParty(records),
       rentalRecords: records,
-      frontierBrain: Object.freeze({ status: scheduled.status }),
+      frontierBrain: Object.freeze({
+        status: scheduled.status,
+        transitionPresentation: scheduled.transitionPresentation,
+      }),
     });
   }
   return Object.freeze({
@@ -608,12 +623,25 @@ function generateOpponentFor(
       playerRentalSetIds: savedRentalRecords.map((record) => record.setId),
       playerTrainerId: config.playerTrainerId,
     });
+    // GetSpecialBattleTransition's own Random() call, source-immediate after
+    // the third opponent's personality is accepted (no intervening draws --
+    // docs/brain-transition-wiring-design.md §2/§5). Precomputed here, once,
+    // and carried on the opponent rather than drawn from the ordinary path's
+    // tick-level cursor -- only `.presentation` is kept; the post-draw
+    // `.rngValue` is intentionally discarded, not folded into any cursor
+    // this orchestrator tracks (the brain battle is always the round's last,
+    // so no "next generation" ever needs it, and folding it in would wire
+    // the two independent RNG systems together, which the design forbids).
+    const { presentation: transitionPresentation } = selectFrontierTransition(
+      generation.rngValue,
+    );
     return Object.freeze({
       kind: "frontier-brain",
       status: brainStatus,
       trainerId: TRAINER_FRONTIER_BRAIN,
       storedTrainerIds,
       generation,
+      transitionPresentation,
     });
   }
   const generation = generateFactoryOpponent({
