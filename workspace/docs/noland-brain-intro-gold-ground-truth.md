@@ -600,6 +600,78 @@ test` (1065 files / 10011 passed / 223 skipped, unmoved), `npm run build`,
 `npm run typecheck` green; `executableFrontierRatchet` barrier counts
 unmoved.
 
+### Rung 2 attempt (2026-08-17, main worker): circle-sprite onset residual NOT safely unifiable — documented, not fixed
+
+Attempted the circle-sprite onset residual (gold 113–125, silver's own
+79–99 from §8‴) per this step's brief: derive the true onset per tier from
+the already-banked oracle PNG sets and check whether both tiers show the
+SAME onset delta on their verified `te` clocks.
+
+**Method.** Full-frame scan (`tools/compare/scratch/circle-onset-probe.mjs`,
+then widened to `circle-onset-probe2.mjs`, both committed) of every banked
+PNG in gold's own §8″ span (`/tmp` re-run of `factory-brain-gold-speech-
+close-off.json`, abs 2495–2620) and silver's flicker fixture (`factory-
+brain-silver-walkup-speech-flicker-off.json`, abs 3195–3300) for pixels
+matching the circle sprite's own distinctive palette colors
+(`battle-transition-frontier-circles.json`), excluding black/white/gray
+(those three also occur in the baseline scene, so they're not
+discriminating). Cross-checked the exact `te` at each hit via a fresh direct
+engine probe (`tools/compare/scratch/gold-te-verify.ts`, committed) rather
+than trusting hand-converted numbers from §8″'s prose.
+
+**Findings — the two tiers' divergences are not the same shape, only
+coincidentally the same tick.**
+
+- **Gold:** first circle-palette pixel at abs 2613 (trace-relative 118).
+  Direct engine probe confirms `brainSpeechSettled` elapsed=78 at that
+  frame, so `te = elapsed + 6 = 84` (6 ticks past `CIRCLE_ANCHOR_TE=78`).
+  The hit is a **small 28-pixel sliver**, bbox `x=111–128, y=0–1` — exactly
+  the shape a slowly-arriving top sprite predicts (the circle's bottom tip
+  just poking onto row 0), consistent with the existing slide-in model
+  needing only a small `te` offset.
+- **Silver:** first circle-palette pixel at abs 3280 (elapsed/te 79
+  directly, this step's own verified silver clock). But the hit is **2568
+  pixels**, bbox spanning the **entire screen width** (`x=0–239, y=30–87`)
+  — not a sliver, a large block appearing between one frame and the next
+  (abs 3279 has zero circle-palette pixels; abs 3280 already has 2568).
+  This is not explainable by the same "sprite slides in from off-screen,
+  `te` just needs a constant shift" model gold's residual fits — no single
+  `CIRCLE_ANCHOR_TE` offset turns a sliver-onset model into an abrupt
+  full-width block.
+- **Coincidence, not evidence of a shared mechanism:** the render-level
+  compare tool's own full-frame mismatch (any pixel wrong, not just
+  circle-palette pixels) begins at **exactly `te=79` for both tiers** (gold:
+  compare-frame 113, elapsed 73, `te=79`; silver: compare-frame 79, `te=79`
+  directly) — one tick past `CIRCLE_ANCHOR_TE=78`. This looked at first like
+  the tier-general signal the brief asked for, but the underlying oracle
+  content at that tick has a different character per tier (gold: nothing
+  yet, matches the sliver's own slightly-later true onset; silver: already
+  a large block), so the shared tick number is not trustworthy as "the same
+  mechanism, fix once."
+
+**Conclusion: split documented, no numeric fix landed.** Per the rung's own
+decision tree ("if they differ ... document the split precisely and stop"),
+no `CIRCLE_ANCHOR_TE` or per-tier constant change was made this session —
+guessing a shift here without understanding silver's abrupt-block shape
+would repeat exactly the failure mode `MSGBOX_CLOSE_TICKS`/blind-realignment
+history (§8′/§8″) already warns against, and silver's own newly-landed
+flicker fixture (§8‴, `factory-brain-silver-walkup-speech-flicker-off.json`)
+is the regression canary any such attempt would need to clear. **Next
+session's honest starting point:** silver's abrupt full-width jump between
+abs 3279→3280 needs cross-referencing against
+`reference/pokeemerald/src/battle_transition_frontier.c`'s real sprite
+creation/movement code to identify what's actually different about silver's
+path (a genuinely distinct, not-yet-identified mechanism, not simply "the
+same slide-in circles a few ticks later") before any offset is tried;
+gold's own sliver-shaped residual (113–125) remains the better-understood,
+lower-risk piece if a future session wants to isolate and fix only gold's
+own small `+6`-relative correction without touching silver.
+
+**Guard reruns (fresh, this step, docs/scratch-only — no `src/` edit):**
+`factory-brain-silver-walkup-speech-flicker-off.json` unmoved at 79/100 (the
+rung-1 result), `factory-brain-gold-walkup-speech-close-off.json` unmoved at
+113/126.
+
 ### 9′. Gold-open window closed: two shared-clock mechanisms, not a park-phase constant (2026-08-16, main worker)
 
 The 58/256 gold-open residual this step inherited was **not** the box-corner/

@@ -1,4 +1,46 @@
 ---
+## 1308 — [main worker, 2026-08-17] **Single-tick boundary family CLOSED: gold-open 256/256, entrance-03 256/256 — local render-side one-tick lag at the brainSettled transition, no state-machine timing moved**
+
+- **State:** Landed and green. `npm test` **1065 files / 10011 passed /
+  223 skipped** (+1 new test), `npm run build` + `npm run typecheck`
+  green, `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Closed 1307's open remainder (pair B: gold-open 95 /
+  entrance-03 405, the scientist turn-in-place settle). Instrumented
+  first (`entryStep`/`nolandStep`/`scientistTurnFrame` at historicElapsed
+  106/107/108 via a direct node import — no scratch file needed): the
+  first two are already saturated/identical at 107 vs 108, only
+  `scientistTurnFrame` changes (frame 8 transient vs frame 2 settled),
+  proving any fix touching only that boundary tick is provably surgical.
+  Implemented shape (a) from the step brief: `battleRoomRender.ts`'s
+  `renderBattleRoomBrainEntranceScene` now special-cases
+  `state.phase === "brainSettled" && state.elapsed === 0` (the transition
+  tick's own first render, and only that tick) to feed
+  `BRAIN_MOVEMENT_SETTLE_ELAPSED - 1` instead of the general settled
+  clamp — mirroring `brainMoving`'s own pre-existing `-1` render-lag
+  convention (B1c). `BRAIN_MOVEMENT_SETTLE_ELAPSED` (86) and the
+  `"brainMoving"`→`"brainSettled"` transition tick itself were **not**
+  touched, unlike the reverted Fix B attempt.
+- **Result:** gold-open 255/256 → **256/256** (frame 95 closed).
+  entrance-03 255/256 → **256/256** (frame 405 closed). Guard matrix
+  reverified unmoved (fresh `--summary` reruns): gold-pages 177/177,
+  silver box-2 100/100, gold-close 113/126, entrance-02 256/256,
+  callscene-01 131/131, callscene-02 199/199, B2 speech box0-held 39/39 /
+  cry-held 74/74 / page8-held 39/39 / close-pause 28/28 — confirms the
+  fix's locality empirically (nothing in the downstream `brainSpeech`
+  window moved, unlike Fix B's cascade).
+- **Next:** Single-tick boundary family fully closed, nothing left open
+  from it. Pick up 1306's remaining ordered list: (a) gold-close's
+  113-125 circle-onset residual; (b) silver's unfixtured post-pause
+  flicker window; (c) soak remainder (vanilla 20:60 + winning 0:10 at 2×
+  maxFrames).
+- **Notes:** Full derivation in `docs/single-tick-boundary-family-probe.md`'s
+  new "RESOLVED (full)" section. Tier-1 test added and red-verified
+  against the pre-fix code (`tests/battleRoomBrainEntrance.test.ts`):
+  renders the last `brainMoving` tick + `brainSettled` ticks 0/1 to
+  framebuffers, asserts tick 0 matches the last moving tick and tick 1
+  differs. No PAPERCUT.
+
+---
 ## 1307 — [main worker, 2026-08-17] **Single-tick boundary family: Fix A landed (gold-open/entrance-03 both 255/256), Fix B reverted as a decisive negative — probe's fix shape was locally correct but globally wrong**
 
 - **State:** Landed and green. `npm test` **1065 files / 10010 passed /

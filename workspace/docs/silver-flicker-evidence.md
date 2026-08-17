@@ -161,3 +161,25 @@ callscene-01 131/131, callscene-02 199/199, gold-pages 177/177, gold-open
 box0-held 39/39, page8-held 39/39, askready 21/21. Full `npm test` (1065
 files / 10011 passed / 223 skipped, unmoved), `npm run build`, `npm run
 typecheck` green; `executableFrontierRatchet` barrier counts unmoved.
+
+## Rung 2 attempt (2026-08-17, main worker): correction to the "one tick
+## earlier" note above — silver's own onset shape is NOT a gradual sliver
+
+The "Landed" section above speculated the render-mismatch-vs-raw-pixel-onset
+gap (frame 79 vs elapsed 80) was just the sliver reaching some other pixel
+first. A full-frame palette-color scan of the already-banked flicker-fixture
+PNGs (`tools/compare/scratch/circle-onset-probe2.mjs`, committed) shows that
+guess was wrong: abs 3279 has **zero** circle-palette pixels anywhere in the
+frame, and abs 3280 (elapsed/te 79) already has **2568**, spanning the
+**entire screen width** (`x=0–239, y=30–87`) — an abrupt full-width block
+appearing in one tick, not a small sliver growing from an edge. Contrast
+gold's own onset (`docs/noland-brain-intro-gold-ground-truth.md`'s new
+"Rung 2 attempt" section): 28 pixels, a small corner sliver. The two tiers'
+divergences coincide on the tick (`te=79`, one past `CIRCLE_ANCHOR_TE=78`)
+but not on shape — silver's real transition does something at this point
+that the existing "circles slide in from off-screen" model doesn't predict
+at any single `te` offset. No fix attempted; see the gold doc's own
+write-up for the full reasoning and the recommended next step (cross-
+reference `battle_transition_frontier.c` before trying any offset here).
+`factory-brain-silver-walkup-speech-flicker-off.json` remains at rung 1's
+79/100, unmoved by this investigation (no `src/` edit).

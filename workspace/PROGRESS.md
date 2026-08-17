@@ -3,6 +3,55 @@
 Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
+---
+## 1311 — [main worker, 2026-08-17] **Rung 2 attempted: circle-sprite onset residual documented, not fixed — gold's own onset is a small sliver (+6 from CIRCLE_ANCHOR_TE), silver's is an abrupt full-width block, not the same shape**
+
+- **State:** Docs/scratch-tooling only, no `src/` edit. `npm test` **1065
+  files / 10011 passed / 223 skipped** (unmoved), `npm run build` + `npm
+  run typecheck` green, `executableFrontierRatchet` barrier counts
+  unmoved.
+- **Did:** 1310's rung 2: derive the true circle-sprite onset per tier
+  from the already-banked oracle PNG sets (gold's own §8″ span, silver's
+  new flicker fixture) and check whether both tiers show the same onset
+  delta on their now-verified `te` clocks. Full-frame scan for the
+  circle sprite's own distinctive palette colors (excluding black/white/
+  gray, which also occur in the baseline scene) plus a direct engine
+  probe to convert frame numbers to `te` without hand arithmetic
+  (`tools/compare/scratch/circle-onset-probe.mjs`, `circle-onset-
+  probe2.mjs`, `gold-te-verify.ts`, `silver-onset-diag.mjs`, all
+  committed). Found gold's onset (abs 2613, `te=84`, +6 past
+  `CIRCLE_ANCHOR_TE=78`) is a small 28-pixel sliver matching the existing
+  slide-in model; silver's onset (abs 3280, `te=79` directly, +1 past
+  anchor) is a 2568-pixel block spanning the full screen width, appearing
+  in a single tick (abs 3279 has zero circle-palette pixels) — not
+  explainable by the same "sprite slides in, `te` needs a constant shift"
+  model at any offset. The render-compare tool's own mismatch onset
+  happens to coincide at `te=79` for both tiers, but the underlying
+  content differs in kind, not just magnitude, so that coincidence isn't
+  trustworthy as a shared mechanism.
+- **Result:** No fix landed — per the rung's own decision tree ("if they
+  differ, document the split precisely and stop"), guessing an offset
+  for silver's unexplained abrupt-block shape would repeat the blind-
+  realignment failure mode `docs/noland-brain-intro-gold-ground-
+  truth.md` §8′/§8″ already warn against (two prior failures, one
+  37/126 regression). Full derivation in that doc's new "Rung 2 attempt"
+  section and `docs/silver-flicker-evidence.md`'s own matching addendum.
+  Guards unmoved: silver-flicker 79/100 (rung 1's result), gold-close
+  113/126.
+- **Next:** Silver's abrupt abs 3279→3280 full-width jump needs cross-
+  referencing against `reference/pokeemerald/src/
+  battle_transition_frontier.c`'s real sprite creation/movement code to
+  identify what's actually different about silver's path before any
+  offset is tried — not more pixel probing of the already-banked window
+  (already at stride-1, max resolution). Gold's own sliver-shaped
+  residual (113–125) is the lower-risk piece if a future session wants
+  to isolate and fix only gold's own small `+6`-relative correction
+  without touching silver. Otherwise pick up: (b) silver's own
+  unfixtured post-te-99 top-row circle onset (never observed in any
+  banked window); (c) soak remainder (vanilla 20:60 + winning 0:10 at 2×
+  maxFrames).
+- **Notes:** No blind offset sweep attempted, consistent with the step
+  brief's explicit instruction. No PAPERCUT.
 
 ---
 ## 1310 — [main worker, 2026-08-17] **Silver's own `te` origin landed: flicker fixture 32→79/100 (ENTIRE gray-flicker span exact), circle-sprite onset residual documented for rung 2**
@@ -112,44 +161,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full derivation in `docs/speech-close-edge-evidence.md` §6's own
   "Live-route cascade" paragraph. No PAPERCUT.
 
----
-## 1308 — [main worker, 2026-08-17] **Single-tick boundary family CLOSED: gold-open 256/256, entrance-03 256/256 — local render-side one-tick lag at the brainSettled transition, no state-machine timing moved**
-
-- **State:** Landed and green. `npm test` **1065 files / 10011 passed /
-  223 skipped** (+1 new test), `npm run build` + `npm run typecheck`
-  green, `executableFrontierRatchet` barrier counts unmoved.
-- **Did:** Closed 1307's open remainder (pair B: gold-open 95 /
-  entrance-03 405, the scientist turn-in-place settle). Instrumented
-  first (`entryStep`/`nolandStep`/`scientistTurnFrame` at historicElapsed
-  106/107/108 via a direct node import — no scratch file needed): the
-  first two are already saturated/identical at 107 vs 108, only
-  `scientistTurnFrame` changes (frame 8 transient vs frame 2 settled),
-  proving any fix touching only that boundary tick is provably surgical.
-  Implemented shape (a) from the step brief: `battleRoomRender.ts`'s
-  `renderBattleRoomBrainEntranceScene` now special-cases
-  `state.phase === "brainSettled" && state.elapsed === 0` (the transition
-  tick's own first render, and only that tick) to feed
-  `BRAIN_MOVEMENT_SETTLE_ELAPSED - 1` instead of the general settled
-  clamp — mirroring `brainMoving`'s own pre-existing `-1` render-lag
-  convention (B1c). `BRAIN_MOVEMENT_SETTLE_ELAPSED` (86) and the
-  `"brainMoving"`→`"brainSettled"` transition tick itself were **not**
-  touched, unlike the reverted Fix B attempt.
-- **Result:** gold-open 255/256 → **256/256** (frame 95 closed).
-  entrance-03 255/256 → **256/256** (frame 405 closed). Guard matrix
-  reverified unmoved (fresh `--summary` reruns): gold-pages 177/177,
-  silver box-2 100/100, gold-close 113/126, entrance-02 256/256,
-  callscene-01 131/131, callscene-02 199/199, B2 speech box0-held 39/39 /
-  cry-held 74/74 / page8-held 39/39 / close-pause 28/28 — confirms the
-  fix's locality empirically (nothing in the downstream `brainSpeech`
-  window moved, unlike Fix B's cascade).
-- **Next:** Single-tick boundary family fully closed, nothing left open
-  from it. Pick up 1306's remaining ordered list: (a) gold-close's
-  113-125 circle-onset residual; (b) silver's unfixtured post-pause
-  flicker window; (c) soak remainder (vanilla 20:60 + winning 0:10 at 2×
-  maxFrames).
-- **Notes:** Full derivation in `docs/single-tick-boundary-family-probe.md`'s
-  new "RESOLVED (full)" section. Tier-1 test added and red-verified
-  against the pre-fix code (`tests/battleRoomBrainEntrance.test.ts`):
-  renders the last `brainMoving` tick + `brainSettled` ticks 0/1 to
-  framebuffers, asserts tick 0 matches the last moving tick and tick 1
-  differs. No PAPERCUT.
