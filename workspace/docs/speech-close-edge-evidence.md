@@ -157,3 +157,95 @@ and `tools/compare/appTrace.ts` untouched — the app stage this fixture uses
 (`factory-round-battle7-noland-gold-speech-page4-held-off`) was already
 registered (unused by any trace until now). Only two new files were added:
 the battle-lab scenario and the compare trace above, plus this doc.
+
+## 6. RESOLVED (2026-08-17, main worker): fixed, both tiers, cross-verified
+
+Fixed per §4's own named edit sites, the second option: the real close+reopen
+skips `MSGBOX_CLOSE_TICKS`'s `MSGBOX_HIDDEN` wait entirely rather than
+rendering `brainSpeechClosing` as a bordered `chars: 0` box (rendering that
+phase as bordered would have needed a NEW timing constant for "how long does
+this bordered-empty box hold before printing starts"; skipping the phase
+needs none - the accept tick itself already lands on the ordinary
+"brainSpeech" cleared-tick render every other fresh box already produces,
+reusing `speechAcceptedFast: false`'s existing slow model verbatim).
+
+**Fix.** `battleRoomAcceptedState` (`battleRoom.ts`) now takes its direct
+`elapsed: 0` branch for ANY next box (`nextStep < brainSpeechBoxes(state)
+.length`), not only `nextStep < brainSpeechPersonalityBoxCount(state)` as
+before - personality-to-personality continuations keep their existing
+fast/slow split (`speechAcceptedFast`), while the real close+reopen
+(`nextStep` lands past the last personality box) is unconditionally slow
+(`speechAcceptedFast: false`), matching this doc's own §4 table exactly.
+`advanceBattleRoom`'s `"brainSpeechClosing"` case simplified to match: its
+own real-close-reopen branch is now dead code (that transition is
+intercepted in `battleRoomAcceptedState` before this phase is ever entered
+for it), so only the FINAL close (dismissing the close/cry box itself, no
+next box left) reaches it - unchanged mechanics, `MSGBOX_CLOSE_TICKS`-gated,
+same as before.
+
+`battleRoomJustFinishedBrainPersonalitySpeech` (the
+`FRONTIER_DATA_HEARD_BRAIN_SPEECH` flag's detector, previously keyed off a
+tick INSIDE `brainSpeechClosing`) moved with it, since the transition it
+detects no longer visits that phase: now checks the direct
+`brainSpeechIdle`->`brainSpeech` accept transition shape instead
+(`prev.speechStep === personalityBoxCount - 1`). `core.ts`'s own mark-heard
+call site moved from the `advanceBattleRoom` branch to the
+`battleRoomAcceptedState` branch (the flag now fires on the accept tick
+itself, one tick earlier than before in absolute terms - inconsequential per
+that function's own doc, since the flag has no on-screen effect and only
+ordering, not exact-tick fidelity, is load-bearing).
+
+**Result:** gold close-edge **28/54 → 54/54**; silver cry-edge **13/75 →
+75/75** (`docs/speech-close-edge-silver-evidence.md`). Guard matrix
+reverified unmoved (fresh `--summary` reruns): gold-pages 177/177, silver
+box-2 100/100, gold-open 256/256, entrance-03 256/256, gold-close 113/126,
+entrance-02 256/256, callscene-01 131/131, callscene-02 199/199, B2 speech
+box0-held 39/39 / cry-held 74/74 / page8-held 39/39 / close-pause 28/28,
+askready 21/21. Full `npm test` (1065 files, 10011 passed, 223 skipped),
+`npm run build`, `npm run typecheck` green; `executableFrontierRatchet`
+barrier counts unmoved. Tier-1 test updated:
+`tests/battleRoomBrainSpeech.test.ts` (old→new stated in the commit message
+- the two "walks through all N boxes" tests now drive transitions via
+`battleRoomAcceptedState` instead of manually forcing `brainSpeechClosing`
+for every box boundary, and the direct `battleRoomAcceptedState` unit test's
+`acceptedLast` assertions flipped from `phase: "brainSpeechClosing"` to
+`phase: "brainSpeech", speechStep: GOLD_PERSONALITY_BOX_COUNT, chars: 0,
+speechAcceptedFast: false`).
+
+**§386 citation correction** (this doc's own §4/§3 already flagged this):
+`battleRoom.ts`'s real-close branch used to cite
+`factory-brain-gold-walkup-speech-close-off.json` (the gold-close guard) as
+having "confirmed" the slow model on this specific edge - false, that
+fixture parks already inside the close box and never drives this transition
+at all (§3/§4 above). The comment site itself no longer exists post-fix
+(the branch it annotated was deleted as dead code), and every remaining
+doc comment that makes this claim now cites the two real dense edge
+fixtures (`docs/speech-close-edge-evidence.md`,
+`docs/speech-close-edge-silver-evidence.md`) instead - see
+`battleRoomAcceptedState`'s and `speechAcceptedFast`'s own updated docs in
+`battleRoom.ts`.
+
+**Live-route cascade (CASCADE CAUTION, not fixture-verified this step - see
+below for why).** The fix removes exactly the erroneous 4-tick
+(`MSGBOX_CLOSE_TICKS`) delay §4's table measured: the close/cry box's own
+`brainSpeech` phase now starts (cleared tick, elapsed 0) on the SAME
+absolute tick the accept fires, instead of 4 ticks later. Its internal print
+duration is unchanged (`speechAcceptedFast` was already `false` before and
+after - only WHEN that phase starts moved, not how long it runs), so every
+state downstream of this edge in a played-through route (the close/cry
+box's own idle/dismiss, `brainSpeechClosing`'s real final-close wait,
+`brainSpeechSettled`'s handoff pause, the shared circle-transition, and the
+battle-start intro itself) now arrives exactly 4 ticks earlier in absolute
+frame-time than before the fix - matching the oracle, which was always 4
+ticks ahead of the pre-fix app on this edge (§4's own "net effect is a
+constant 4-tick delay" line). This is a pure removal of a delay, not a
+change to any other span's own duration, so it does not perturb any
+`elapsed`-relative constant (`BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED`,
+`BATTLE_2_SCENE_HANDOFF_ELAPSED`, etc. - all still measured from their own
+phase's own start). The two new dense edge fixtures both stop ~15 ticks
+after the close/cry box settles (per their own §1/§2 windows), short of a
+full played-through route continuing all the way to the battle-start intro,
+so this downstream claim is a derivation from the fixed spans above, not
+independently re-verified against a longer committed oracle recording this
+step - flagged, not guessed, per the step brief's own instruction to state
+(not necessarily prove) this implication.

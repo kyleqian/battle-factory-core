@@ -122,3 +122,13 @@ registered (previously used only by the page8-held guard fixture). Only one
 new file was added: the compare trace above, plus this doc. No new
 battle-lab scenario was needed — the existing dense scenario already
 covered the target frame range.
+
+## 5. RESOLVED (2026-08-17, main worker)
+
+Fixed in the same step as the gold twin, one shared tier-general code path -
+see `docs/speech-close-edge-evidence.md` §6 for the full derivation and
+fix write-up (`battleRoomAcceptedState`'s direct-continuation branch now
+covers the real close+reopen too, `speechAcceptedFast: false`). **Result:
+this fixture 13/75 → 75/75.** Guard matrix (including this doc's own four
+fixtures above plus the gold twin) reverified unmoved by the fix; full
+`npm test`/`npm run build`/`npm run typecheck` green.
