@@ -372,3 +372,104 @@ fixtures for 126/126 and 100/100, full `npm test` + `npm run build` +
 `npm run typecheck`, `executableFrontierRatchet` barrier counts unmoved,
 and fold the two ISSUES #98 window counts into a closing PROGRESS entry
 (supervisor-owned, not this step).
+
+## 5. S0 result — RNG cross-check MATCH for both fixtures
+
+Method used: §2's option 2 (direct mGBA probe), via the frame-aligned
+RAM-read variant the S0 spec itself sanctions as an alternative to a
+breakpoint — no breakpoint capability was needed once the actual VBlank
+gating rule (below) was found. New committed probe:
+`tools/probe/probe-brain-transition-rng-cross-check.py`, run via
+`python3 tools/run-mgba-probe.py <fresh-output.json> --
+tools/probe/probe-brain-transition-rng-cross-check.py <fresh-output.json>`.
+Confirmed deterministic: two independent runs produced byte-identical
+`results` arrays.
+
+**Why a plain per-frame RAM read is sufficient (no breakpoint needed).**
+Two source facts, both reconfirmed this session, combine to make this
+work:
+
+1. `VBlankIntr` (`reference/pokeemerald/src/main.c:366`) calls `Random()`
+   unconditionally every frame **unless** `gMain.inBattle &&
+   (gBattleTypeFlags & (BATTLE_TYPE_LINK|BATTLE_TYPE_FRONTIER|
+   BATTLE_TYPE_RECORDED))`. `gMain.inBattle` does not flip true until
+   after the transition animation finishes (`BattleTransition_
+   StartOnField` still runs on the overworld `CB2`), so `gRngValue`
+   free-runs at exactly one LCG step (`ISO_RANDOMIZE1`,
+   `include/random.h:16`: `gRngValue = 1103515245*gRngValue + 24691`)
+   per frame through the **entire** walk-up **and** the entire visible
+   transition animation. A first probe attempt assumed the opposite (a
+   freeze at battle-start) and came back inconclusive — the corrected
+   model above is what the live data actually shows.
+2. `DoSpecialTrainerBattle`'s `SPECIAL_BATTLE_FACTORY` case
+   (`battle_tower.c:2092-2100`) calls `FillFactoryTrainerParty()` then
+   `GetSpecialBattleTransition(B_TRANSITION_GROUP_B_FACTORY)` back to
+   back, synchronously, no task yield between them.
+   `FillFactoryTrainerParty` → `FillFactoryFrontierTrainerParty` →
+   (`gTrainerBattleOpponent_A == TRAINER_FRONTIER_BRAIN`) →
+   `FillFactoryBrainParty(); return;` (`battle_tower.c:1849-1852`) — so
+   for a brain fight this one call chain performs the *whole* 3-mon
+   rejection-loop generation immediately followed by the one transition
+   draw, confirming source really does have "no intervening draws"
+   between them, exactly as §2 already argued from a different citation.
+
+So the transition draw is not invisible in a per-frame sample — it shows
+up as a short burst of **more than one** LCG step between two adjacent
+sampled frames (the rejection-loop draws collapse into however many
+frames mGBA schedules between two `preCheckpointCaptureFrames` samples),
+sitting inside an otherwise uniform one-step-per-frame stream, followed
+by a clean all-1-step run all the way through the transition's visible
+onset. `GetSpecialBattleTransition`'s `Random()` call is always the last
+draw in that chain, so the **value at the end of the last burst before
+the clean tail** is already `Random()`'s post-advance state — exactly
+what `randomU16`/`pickFrontierTransition`'s own convention calls `raw`
+(`src/engine/opponentGen.ts:48-51,110-115`): `tableIndex = (burstEndValue
+>>> 16) % 12` (`RANDOM_TRANSITION`, `battle_setup.c:863,885`,
+`ARRAY_COUNT(sBattleTransitionTable_BattleFrontier) == 12`).
+
+**Gold** (`factory-brain-gold-speech-close-off.json`, seed 305419896,
+challengeNum 5, probe window abs frames 2540–2630 — committed span is
+2495–2620, widened earlier to bracket the burst and later for a clean-tail
+margin):
+
+- Three bursts found: frame 2542→2543 (162 LCG steps), 2546→2547 (12
+  steps), 2554→2555 (2 steps) — plausibly three mons' selection+
+  personality rejection loops, though the exact per-mon attribution
+  wasn't required for the verdict.
+- Last burst: **frame 2555, `rngValue = 0x992cc3b2`** (raw decimal
+  2569847730). Clean 1-step run confirmed from frame 2555 through 2630
+  (spans past §1's abs-2612 transition-visual onset with no further
+  anomaly) — the "no intervening draws" assumption holds empirically,
+  not just by source citation.
+- `raw = (0x992cc3b2 >>> 16) & 0xffff = 39212`; `tableIndex = 39212 % 12
+  = 8`; table[8] = id 38 = **`B_TRANSITION_FRONTIER_CIRCLES_MEET_IN_SEQ`**.
+- §1's visual call: `B_TRANSITION_FRONTIER_CIRCLES_MEET_IN_SEQ`, table
+  index 8. **MATCH.**
+
+**Silver** (`factory-brain-silver-walkup-speech-flicker-off.json`, seed
+305419896, challengeNum 2, probe window abs frames 3220–3300 — committed
+span is 3195–3300, already fully banked; widened only slightly earlier
+than 3220 for a pre-burst margin):
+
+- One burst found: frame 3226→3227 (2 LCG steps) — the only anomaly in
+  the entire window, unambiguous.
+- Burst end: **frame 3227, `rngValue = 0x5f99c7c4`** (raw decimal
+  1603913668). Clean 1-step run confirmed from frame 3227 through 3300
+  (spans past §1's abs-3280 transition-visual onset with no further
+  anomaly).
+- `raw = (0x5f99c7c4 >>> 16) & 0xffff = 24473`; `tableIndex = 24473 % 12
+  = 5`; table[5] = id 35 = **`B_TRANSITION_FRONTIER_CIRCLES_CROSS`**.
+- §1's visual call: `B_TRANSITION_FRONTIER_CIRCLES_CROSS`, table index 5.
+  **MATCH.**
+
+**Verdict: MATCH for both fixtures.** The real ROM RNG stream, read
+directly from RAM at the moment `GetSpecialBattleTransition` draws,
+selects exactly the families §1 identified from pixels — gold lands on
+`CIRCLES_MEET_IN_SEQ` (table idx 8), silver on `CIRCLES_CROSS` (table idx
+5), with clean, reproducible (byte-identical across two independent
+mGBA runs), non-ambiguous evidence for both (silver had exactly one
+candidate burst in its window; gold had three, and the correct one is
+both the last-before-clean-tail by construction and the only one of the
+three whose derived index matches §1 — the other two candidates decode
+to unrelated families, ruling out a lucky 1-in-12 coincidence). **Decision
+gate: proceed to S1/S2 as scoped** — no re-opening of §1 needed.
