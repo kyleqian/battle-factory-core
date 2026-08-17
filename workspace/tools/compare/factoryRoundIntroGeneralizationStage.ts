@@ -432,6 +432,55 @@ export function generatedRoundBattle7NolandSilverSpeechBoxHeldStage(
 }
 
 /**
+ * Side lane, dense box-2 evidence step: sibling of
+ * `generatedRoundBattle7NolandSilverSpeechBoxHeldStage` above, but parked one
+ * state earlier — `phase: "brainSpeech"` (the printing phase itself, `elapsed:
+ * 0`) rather than the already-fully-printed `brainSpeechIdle` the held-box
+ * stages jump straight to. `battleRoomAcceptedState`'s own reducer
+ * (battleRoom.ts) produces exactly this state, verbatim, the instant a
+ * personality-speech page with more pages queued is accepted (`{...state,
+ * phase: "brainSpeech", elapsed: 0, speechStep: nextStep}` — no intervening
+ * close phase), so this is the same "park directly in a real, reachable
+ * engine state" idiom the held-box stages already use, just one step upstream
+ * — it exists so a dense trace can capture the turn edge and the typewriter
+ * print itself (both skipped by every existing held-box fixture, per their
+ * own "PRINT/TRANSITION timing... NOT exercised" disclosure above), not only
+ * the settled hold.
+ */
+export function generatedRoundBattle7NolandSilverSpeechBoxOpeningStage(
+  state: EngineState,
+  speechStep: number,
+): EngineState {
+  const ready = nolandRoundReadyState(state);
+  return {
+    ...ready.state,
+    battleRoom: {
+      phase: "brainSpeech",
+      elapsed: 0,
+      frontierBrainWalkup: true,
+      brainSpeechFirstEncounter: true,
+      speechStep,
+      trainerPresentation: ready.trainerPresentation,
+    },
+    rngValue: ready.orchestrator.round.rules.rngValue,
+  };
+}
+
+// Zero-arg wrapper, same convention as the box0/cry/page8/close-pause
+// wrappers below — appTrace.ts's APP_STAGES registry only calls stages with a
+// single `state` argument. Box 2 (`SILVER_FIRST_ENCOUNTER_SPEECH_BOXES[2]`,
+// "I had a look at your Battle Swap data.") is docs/noland-brain-intro-gold-
+// ground-truth.md §9″'s own named tier-generality target for the single-line
+// wait-cursor placement fix (`drawBrainSpeechCursor`/`drawOpponentMsgbox`,
+// battleRoomRender.ts) — see docs/silver-speech-box2-evidence.md for the
+// dense fixture this wrapper feeds and its compare verdict.
+export function generatedRoundBattle7NolandSilverSpeechBox2OpeningStage(
+  state: EngineState,
+): EngineState {
+  return generatedRoundBattle7NolandSilverSpeechBoxOpeningStage(state, 2);
+}
+
+/**
  * Walk-up build step B2: parks `battleRoom` in "brainSpeechSettled" (the
  * battle-cry box already closed, empty-arena pause) — the target of
  * `BRAIN_SPEECH_SCENE_HANDOFF_ELAPSED`'s own compare below. Same sidestep

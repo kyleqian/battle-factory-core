@@ -1,0 +1,16 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-round-battle7-noland-silver-speech-box2-opening-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-brain-silver-walkup-speech-box2-open-dense-off.json",
+    "preCheckpointFrameOffset": 2129
+  },
+  "segments": [
+    { "frames": 100, "buttons": [] }
+  ],
+  "captureWindow": { "start": 0, "end": 99 }
+}
