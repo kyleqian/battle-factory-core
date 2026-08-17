@@ -4,6 +4,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1317 — [supervisor wind-down, 2026-08-17] **13 worker steps + 4 probes/audits, two lanes: EVERY open walk-up window closed to its full bar (6 windows to exact), #98 found→designed→CLOSED same-session, fixture-estate audit filed+fixed #96/#97 — all final gates green**
+
+- **Final gates (tree `829b299b`, run independently AFTER the last merge):**
+  full npm **1,066 files / 10,030 passed / 223 skipped**; `npm run build`
+  green; soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**
+  (30+30). Fold status: animation-main and rust-main both EMPTY at orient
+  AND at wind-down (no sibling sessions today). DEFERRED.md EMPTY. Only
+  permanent worktrees remain; no orphan branches.
+- **Window scoreboard (session start → end, all supervisor-verified
+  live):** gold-pages 85/177 → **177/177**; callscene-02 171/199 →
+  **199/199**; gold-open 254/256 → **256/256**; entrance-03 254/256 →
+  **256/256**; gold-close 80/126 → **126/126**; NEW silver box-2 fixture
+  → **100/100**; NEW gold close-edge → **54/54**; NEW silver cry-edge →
+  **75/75**; NEW silver-flicker → **100/100**. Reveal canaries hold at
+  the accepted #87 bar (690/701 ×2). The brain walk-up program is now
+  pixel-exact at every fixtured window.
+- **Mechanisms landed (all tier-general, no fitted constants):**
+  later-`\p`/`\l` accept model (window's 2nd+ transition skips the
+  cleared tick — closed gold 593/727 AND silver box-2 in one rule);
+  real-close edge fix (mid-window box→box accept lands directly on the
+  cleared-box tick, spurious 4-tick MSGBOX_HIDDEN wait removed — the
+  read-only audit found the coverage hole, two dense edge fixtures
+  proved the defect on both tiers); brainSettled render-clock −1
+  (boundary family mech B) + nolandStep `<=` fence-post (mech A);
+  per-tier transition te origins (gold waveform-derived re-base, silver
+  = plain elapsed); **#98 end-to-end**: brain rooms never fired the
+  transition RNG draw (phase-name mismatch) — S0 mGBA cross-check
+  (gold→id 38 CIRCLES_MEET_IN_SEQ, silver→id 35 CIRCLES_CROSS, RAM-
+  proven MATCH with the pixel IDs), S1+S2 renderers ported literally,
+  S3 wiring via orchestrator-precomputed presentation (ordinary-path
+  cursor untouched) — both windows closed, 2 latent S1 renderer bugs
+  found at first pixel contact and fixed.
+- **Fixture-estate work:** exhaustive 201-trace sweep
+  (`docs/fixture-sweep-2026-08-17.md`) + b229076a baseline check proved
+  ALL 26 deviations pre-existing (today: zero regressions). #96 filed →
+  appRoute fix landed same-session (14/17 restored exactly; 3-trace
+  remainder trimmed into #96). #97 filed → diagnosed: loss-terminal bar
+  OBSOLETE (deliberate 2026-08-14 chaining), turn5/6 = real 1px
+  menuIdleBounce drift, bisect executed and DISPROVED its good ref
+  (range unbisectable; forward paths banked in #97-B). Soak coverage
+  extended: vanilla 0:60, full 0:180, winning 0:180 all clean + 2×
+  budget probe (no HANG masking).
+- **Ops notes:** freshness-check false positive #4 at orient (8014 FAIL
+  but all commits since service start are workspace-only — kept, no
+  restart). One launcher killed by `| head -2` SIGPIPE (the documented
+  masking trap — relaunched clean). S1∥S2 same-file parallel merge
+  resolved both-sides-additive, union suite before merge commit.
+- **Open (ordered for next session):** (a) #96 3-trace remainder
+  (frames 29838/29774, shared narrow signature, pixel-first recipe in
+  the entry); (b) #97-B turn5/6 bounce drift (re-derive against the
+  CURRENT oracle per the banked forward path — regression framing is
+  dead); (c) #71/#73-adjacent filler per standing priorities. No
+  deferred questions; no blockers.
+
+---
+
 ## 1316 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S3 landed: brain-room transition wiring — both target windows CLOSED (silver 100/100, gold 126/126); ISSUES #98 deleted**
 
 - **State:** `src/engine/battleTransition.ts`, `battleScenario.ts`,
@@ -90,72 +146,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   means it's safe to land now against just silver's window, with id 38
   falling through to the existing fallback until S2 also lands).
 - **Notes:** No PAPERCUT.
-
----
-## 1314 — [main worker, 2026-08-17] **#97-B bisect recipe executed: assumed-good ref `c5563c72` DISPROVED — bisect range `c5563c72..HEAD` is unbisectable (both endpoints identical), no code fix attempted**
-
-- **State:** Docs-only (`ISSUES.md`, `PROGRESS.md`); no `src/` edit. `npm
-  test` **1065 files / 10011 passed / 223 skipped** (unmoved), `npm run
-  build` (includes typecheck) green, `executableFrontierRatchet` barrier
-  counts unmoved. Isolated bisect worktree (`../bisect-97`) fully removed;
-  no bisect state left anywhere (`git bisect` was never even started —
-  the recipe's own pre-flight check failed first); no temp branch created.
-- **Did:** Followed `ISSUES.md #97-B`'s banked recipe exactly: isolated
-  worktree at `c5563c72` (sibling of `workspace/`, `reference/pokeemerald`
-  symlinked to the vendor checkout, `npm install`), then — per the
-  recipe's own flagged caveat — manually confirmed the assumed-good ref
-  **before** trusting the automated `git bisect run`. It failed: at
-  `c5563c72`, `turn5-action-off` scores **1/32** (first mismatch frame
-  5927, `bbox=127,74-229,110`) and `turn6-reopen-off` scores **11/46**
-  (first mismatch frame 7305, `bbox=44,49-99,110`) — byte-for-byte
-  identical to the HEAD symptom this bisect was meant to explain. Ruled
-  out artifacts before accepting that: control trace `turn5-reset-off`
-  still 256/256 at `c5563c72` (tooling/oracle not broadly broken); both
-  trace fixtures byte-identical between `c5563c72` and HEAD; the compare
-  harness renders the app in-process from the checked-out commit itself,
-  no dev server involved; the ROM (built 2026-07-16) and canonical save
-  (2026-07-18) both predate and are unchanged since `c5563c72`
-  (2026-08-02). Conclusion: `c5563c72` was never a valid "good" ref for
-  this symptom — the design doc's contemporaneous 32/32 verification was
-  real at the time (not fabricated; too well cross-checked to doubt), but
-  is not reproducible today, most likely because the 8014 oracle process
-  now running has only been up since ~2026-08-15 (a restart mentioned in
-  an unrelated oracle-side commit `3e29880b`'s message), replacing
-  whatever instance served the original verification — though the actual
-  code diff in that restart's commits only touches the separate
-  battle-lab endpoint, not plain `/v1/run`, so the mechanism of any shift
-  is not pinned down, only the fact that no commit in the proposed range
-  reproduces 32/32. Per this step's hard rule 2 ("if no good ref exists
-  within ~3 probes, record and stop"), did not run the automated
-  `git bisect` (it would have produced an arbitrary, meaningless commit
-  since the check fails uniformly across the whole range) and did not
-  touch any shared bounce-tick formula without a real regression boundary
-  to justify a change.
-- **Result:** `ISSUES.md #97-B` rewritten with the full disproof and two
-  concrete paths forward for whoever resumes (widen the backward search
-  past `c5563c72`, or drop the regression framing and calibrate the
-  bounce-tick constants directly against the current oracle the same way
-  `#87` did). Mechanism analysis from rung 1 (shared `menuIdleBounce`
-  formula family, legacy-vs-shifted branch already ruled out) stands
-  unchanged — still a real, reproducible pixel bug, just not one this
-  git range can localize. Guards reverified: `turn5-reset-off` 256/256,
-  gold-pages 177/177, callscene-02 199/199 (all spot-checked in the main
-  tree, unaffected by the disposable worktree).
-- **Next:** Either (1) probe further back than `c5563c72` for a real good
-  ref (first check whether the turn5-reopen bounce-tick code path even
-  existed that far back), or (2) treat this as a live tuning problem and
-  calibrate `TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG` /
-  `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` / `presentationEpoch.elapsed` directly
-  against the current oracle at frames 5927/7305, MEASURED-constant style
-  (`#87`'s convention), instead of chasing a git culprit. Do not re-run
-  this exact bisect recipe against `c5563c72..HEAD` without new evidence
-  `c5563c72` is actually good.
-- **Notes:** No PAPERCUT beyond the pre-existing gap this session
-  confirmed: nothing in this harness currently records *when* the shared
-  oracle process was last restarted independent of digging through git
-  commit messages and `ps` — a future session chasing oracle-vs-code
-  drift like this would benefit from the launcher stamping a start-time
-  file next to the service, but that's speculative tooling, not
-  implemented here (out of this step's scope).
 
 ---
