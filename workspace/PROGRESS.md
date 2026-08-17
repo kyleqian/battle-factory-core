@@ -4,6 +4,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1308 — [main worker, 2026-08-17] **Single-tick boundary family CLOSED: gold-open 256/256, entrance-03 256/256 — local render-side one-tick lag at the brainSettled transition, no state-machine timing moved**
+
+- **State:** Landed and green. `npm test` **1065 files / 10011 passed /
+  223 skipped** (+1 new test), `npm run build` + `npm run typecheck`
+  green, `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Closed 1307's open remainder (pair B: gold-open 95 /
+  entrance-03 405, the scientist turn-in-place settle). Instrumented
+  first (`entryStep`/`nolandStep`/`scientistTurnFrame` at historicElapsed
+  106/107/108 via a direct node import — no scratch file needed): the
+  first two are already saturated/identical at 107 vs 108, only
+  `scientistTurnFrame` changes (frame 8 transient vs frame 2 settled),
+  proving any fix touching only that boundary tick is provably surgical.
+  Implemented shape (a) from the step brief: `battleRoomRender.ts`'s
+  `renderBattleRoomBrainEntranceScene` now special-cases
+  `state.phase === "brainSettled" && state.elapsed === 0` (the transition
+  tick's own first render, and only that tick) to feed
+  `BRAIN_MOVEMENT_SETTLE_ELAPSED - 1` instead of the general settled
+  clamp — mirroring `brainMoving`'s own pre-existing `-1` render-lag
+  convention (B1c). `BRAIN_MOVEMENT_SETTLE_ELAPSED` (86) and the
+  `"brainMoving"`→`"brainSettled"` transition tick itself were **not**
+  touched, unlike the reverted Fix B attempt.
+- **Result:** gold-open 255/256 → **256/256** (frame 95 closed).
+  entrance-03 255/256 → **256/256** (frame 405 closed). Guard matrix
+  reverified unmoved (fresh `--summary` reruns): gold-pages 177/177,
+  silver box-2 100/100, gold-close 113/126, entrance-02 256/256,
+  callscene-01 131/131, callscene-02 199/199, B2 speech box0-held 39/39 /
+  cry-held 74/74 / page8-held 39/39 / close-pause 28/28 — confirms the
+  fix's locality empirically (nothing in the downstream `brainSpeech`
+  window moved, unlike Fix B's cascade).
+- **Next:** Single-tick boundary family fully closed, nothing left open
+  from it. Pick up 1306's remaining ordered list: (a) gold-close's
+  113-125 circle-onset residual; (b) silver's unfixtured post-pause
+  flicker window; (c) soak remainder (vanilla 20:60 + winning 0:10 at 2×
+  maxFrames).
+- **Notes:** Full derivation in `docs/single-tick-boundary-family-probe.md`'s
+  new "RESOLVED (full)" section. Tier-1 test added and red-verified
+  against the pre-fix code (`tests/battleRoomBrainEntrance.test.ts`):
+  renders the last `brainMoving` tick + `brainSettled` ticks 0/1 to
+  framebuffers, asserts tick 0 matches the last moving tick and tick 1
+  differs. No PAPERCUT.
+
+---
 ## 1307 — [main worker, 2026-08-17] **Single-tick boundary family: Fix A landed (gold-open/entrance-03 both 255/256), Fix B reverted as a decisive negative — probe's fix shape was locally correct but globally wrong**
 
 - **State:** Landed and green. `npm test` **1065 files / 10010 passed /
@@ -105,50 +147,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   kept formulas in `docs/noland-brain-intro-gold-ground-truth.md` §8″.
   Probe scripts: `tools/compare/scratch/gold-close-phase-probe.ts`
   (committed, engine-side 0/126-mismatch validation). No PAPERCUT.
-
----
-## 1305 — [main worker, 2026-08-17] **Later-`\p`/`\l` accept model CLOSED: gold-pages 177/177, silver box-2 100/100 — the converged mechanism from 1304 is fixed**
-
-- **State:** Landed and green. `npm test` **1065 files /
-  10010 passed / 223 skipped** (unmoved), `npm run build` + `npm run
-  typecheck` green, `executableFrontierRatchet` barrier counts unmoved.
-  `src/engine/postwin.ts` (call-scene) untouched, per PROGRESS 1303's guard.
-- **Did:** Closed 1304's converged open mechanism. Derived rule (from both
-  windows, cited in each doc — see Notes): the window's FIRST accept-driven
-  box transition (leaving box 0) keeps the existing 2-tick clear-then-print
-  model; every LATER one (leaving box ≥ 1, `\l` or `\p` alike — silver's
-  box 0→1 `\l` scroll counts as the 1st transition, making its box 1→2 `\p`
-  the 2nd) skips the cleared tick — the accept tick itself already shows
-  the first new character. Implemented as a new `BattleRoomState` field
-  `speechAcceptedFast`, set only by `battleRoomAcceptedState`'s direct
-  `\p`/`\l` continuation when the box being left has `speechStep >= 1`;
-  explicitly false at window-open and at every real close+reopen (a
-  structurally different transition — the gold-close guard, 80/126,
-  unmoved, confirms that path is untouched). Also reverted
-  `factory-brain-gold-walkup-speech-pages-off.json`'s PROGRESS-1302
-  press-timing shift (`585/128 → 586/127`) — that was a trace-level
-  compensation for the old uniformly-slow engine model, now redundant and
-  double-shifting if left in place (verified empirically: the engine fix
-  alone regressed gold-pages to 85/177 before the trace revert).
-- **Result:** `factory-brain-gold-walkup-speech-close-off.json` **175/177 →
-  177/177** (frames 593/727 closed); `factory-brain-silver-walkup-speech-
-  box2-off.json` **63/100 → 100/100** (both the 31-frame print-span
-  residual and all 6 period-9 cursor-bob blips closed by the one fix, no
-  separate bob-phase mechanism needed). Guard matrix unmoved (fresh
-  `--summary` reruns): gold-open 254/256, gold-close 80/126, entrance-02
-  256/256, entrance-03 254/256, callscene-01 131/131, callscene-02
-  199/199, B2 speech box0-held 39/39 / cry-held 74/74 / page8-held 39/39 /
-  close-pause 28/28, askready 21/21, swapask-no 194/194, record 178/178,
-  retire 174/174.
-- **Next:** No open item from this mechanism. Pick up 1304's remaining
-  ordered list: (b) gold-close flicker/swirl phase derivation (§8′ recipe,
-  out of scope for this step); (c) soak remainder (vanilla 20:60 + winning
-  0:10 at 2× maxFrames); (d) entrance-03 368/508 single-tick family.
-- **Notes:** Full derivation + before/after tables in
-  `docs/noland-brain-intro-gold-ground-truth.md` §9⁗ and
-  `docs/silver-speech-box2-evidence.md` §7. One Tier-1 test updated
-  (`tests/battleRoomBrainSpeech.test.ts`'s gold `\p` page-turn test: was
-  `chars: 0` for every internal page turn, now only the first turn keeps
-  that — every later turn asserts `chars: 1`, stated in the commit
-  message). No PAPERCUT.
 

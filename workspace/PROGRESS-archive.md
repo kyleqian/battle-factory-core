@@ -1,3 +1,50 @@
+---
+## 1305 — [main worker, 2026-08-17] **Later-`\p`/`\l` accept model CLOSED: gold-pages 177/177, silver box-2 100/100 — the converged mechanism from 1304 is fixed**
+
+- **State:** Landed and green. `npm test` **1065 files /
+  10010 passed / 223 skipped** (unmoved), `npm run build` + `npm run
+  typecheck` green, `executableFrontierRatchet` barrier counts unmoved.
+  `src/engine/postwin.ts` (call-scene) untouched, per PROGRESS 1303's guard.
+- **Did:** Closed 1304's converged open mechanism. Derived rule (from both
+  windows, cited in each doc — see Notes): the window's FIRST accept-driven
+  box transition (leaving box 0) keeps the existing 2-tick clear-then-print
+  model; every LATER one (leaving box ≥ 1, `\l` or `\p` alike — silver's
+  box 0→1 `\l` scroll counts as the 1st transition, making its box 1→2 `\p`
+  the 2nd) skips the cleared tick — the accept tick itself already shows
+  the first new character. Implemented as a new `BattleRoomState` field
+  `speechAcceptedFast`, set only by `battleRoomAcceptedState`'s direct
+  `\p`/`\l` continuation when the box being left has `speechStep >= 1`;
+  explicitly false at window-open and at every real close+reopen (a
+  structurally different transition — the gold-close guard, 80/126,
+  unmoved, confirms that path is untouched). Also reverted
+  `factory-brain-gold-walkup-speech-pages-off.json`'s PROGRESS-1302
+  press-timing shift (`585/128 → 586/127`) — that was a trace-level
+  compensation for the old uniformly-slow engine model, now redundant and
+  double-shifting if left in place (verified empirically: the engine fix
+  alone regressed gold-pages to 85/177 before the trace revert).
+- **Result:** `factory-brain-gold-walkup-speech-close-off.json` **175/177 →
+  177/177** (frames 593/727 closed); `factory-brain-silver-walkup-speech-
+  box2-off.json` **63/100 → 100/100** (both the 31-frame print-span
+  residual and all 6 period-9 cursor-bob blips closed by the one fix, no
+  separate bob-phase mechanism needed). Guard matrix unmoved (fresh
+  `--summary` reruns): gold-open 254/256, gold-close 80/126, entrance-02
+  256/256, entrance-03 254/256, callscene-01 131/131, callscene-02
+  199/199, B2 speech box0-held 39/39 / cry-held 74/74 / page8-held 39/39 /
+  close-pause 28/28, askready 21/21, swapask-no 194/194, record 178/178,
+  retire 174/174.
+- **Next:** No open item from this mechanism. Pick up 1304's remaining
+  ordered list: (b) gold-close flicker/swirl phase derivation (§8′ recipe,
+  out of scope for this step); (c) soak remainder (vanilla 20:60 + winning
+  0:10 at 2× maxFrames); (d) entrance-03 368/508 single-tick family.
+- **Notes:** Full derivation + before/after tables in
+  `docs/noland-brain-intro-gold-ground-truth.md` §9⁗ and
+  `docs/silver-speech-box2-evidence.md` §7. One Tier-1 test updated
+  (`tests/battleRoomBrainSpeech.test.ts`'s gold `\p` page-turn test: was
+  `chars: 0` for every internal page turn, now only the first turn keeps
+  that — every later turn asserts `chars: 1`, stated in the commit
+  message). No PAPERCUT.
+
+---
 ## 1304 — [supervisor fold, 2026-08-17] **Rounds 1-2: gold-pages 175/177 + callscene-02 CLOSED 199/199 + soak 120:180 clean + silver box-2 fixture banked — later-`\p` one-tick model is now a two-window converged mechanism**
 
 - **State:** master `16cc1a14`, tree clean. Union after both folds: smoke

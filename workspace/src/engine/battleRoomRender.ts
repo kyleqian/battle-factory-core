@@ -446,11 +446,25 @@ export function renderBattleRoomBrainEntranceScene(
   // comfortably-clamped constant (both entryStep and scientistTurnFrame
   // saturate well before it either way) and the pre-phase branch's forced
   // elapsed=0 already renders the correct (still-flat) pose.
+  // Single-tick boundary family, pair B (docs/single-tick-boundary-family-
+  // probe.md): BRAIN_MOVEMENT_SETTLE_ELAPSED's phase transition fires one
+  // tick before its own historicElapsed=108 clamp would naturally arrive
+  // (the transition predates the B1c `-1` fix above and was never re-
+  // derived - re-deriving it instead was tried and reverted, see the
+  // probe doc's RESOLVED section: it re-bases every later phase's own
+  // elapsed clock). So brainSettled's own FIRST render tick (elapsed 0)
+  // needs the same `-1` lag brainMoving's own movementElapsed already
+  // uses, rendering scientistTurnFrame's still-transient historicElapsed
+  // 107 instead of jumping straight to the settled clamp's 108 - RAM/
+  // oracle-confirmed (entryStep/nolandStep are already saturated by 107,
+  // so this affects only the scientists' picture frame, nothing else).
   const movementElapsed = state.phase === "brainMoving"
     ? state.elapsed - 1
-    : settled
-      ? BRAIN_MOVEMENT_SETTLE_ELAPSED
-      : 0;
+    : state.phase === "brainSettled" && state.elapsed === 0
+      ? BRAIN_MOVEMENT_SETTLE_ELAPSED - 1
+      : settled
+        ? BRAIN_MOVEMENT_SETTLE_ELAPSED
+        : 0;
   // BRAIN_MOVEMENT_CLOCK_OFFSET re-bases this window's own elapsed clock
   // (0 = closemessage dismiss) onto entryStep/scientistTurnFrame's shared
   // RAM-tick clock (S6 slice 2a/2b) - see that constant's own doc.

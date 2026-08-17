@@ -256,6 +256,27 @@ describe("Frontier-Brain BattleRoom entrance (walk-up build step B1)", () => {
     expect(fb2).not.toEqual(fb1);
   });
 
+  it("single-tick boundary family pair B (docs/single-tick-boundary-family-probe.md): brainSettled's own FIRST render tick lags its movement clock by -1, mirroring brainMoving's own convention above - the scientists still show scientistTurnFrame's transient pose (byte-identical to the last brainMoving tick) instead of jumping straight to the settled clamp; the transition tick itself (BRAIN_MOVEMENT_SETTLE_ELAPSED, unmoved) only settles visually on the NEXT tick", () => {
+    let state: BattleRoomState = createBrainWalkupBattleRoomState();
+    for (let i = 0; i < BRAIN_MSGBOX_PRINT_COMPLETE_ELAPSED; i += 1) state = advanceBattleRoom(state);
+    state = { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
+    for (let i = 0; i < MSGBOX_CLOSE_TICKS; i += 1) state = advanceBattleRoom(state);
+    expect(state.phase).toBe("brainMoving");
+
+    const tickLastMoving = { ...state, elapsed: BRAIN_MOVEMENT_SETTLE_ELAPSED - 1 };
+    const tickSettled0 = { ...state, phase: "brainSettled" as const, elapsed: 0 };
+    const tickSettled1 = { ...state, phase: "brainSettled" as const, elapsed: 1 };
+    const fbLastMoving = new Uint8Array(240 * 160 * 4);
+    const fbSettled0 = new Uint8Array(240 * 160 * 4);
+    const fbSettled1 = new Uint8Array(240 * 160 * 4);
+    renderBattleRoomBrainEntranceScene(fbLastMoving, tickLastMoving);
+    renderBattleRoomBrainEntranceScene(fbSettled0, tickSettled0);
+    renderBattleRoomBrainEntranceScene(fbSettled1, tickSettled1);
+
+    expect(fbSettled0).toEqual(fbLastMoving);
+    expect(fbSettled1).not.toEqual(fbSettled0);
+  });
+
   it("brain box print duration matches 1 tick/char over the JSON text, appearing once the room fade-in settles (dense-compare-measured, see battleRoom.ts doc)", () => {
     expect(BRAIN_MSGBOX_APPEAR_ELAPSED).toBe(24);
     expect(BRAIN_MSGBOX_PRINT_TICKS).toBe(BRAIN_MSGBOX_LINE1.length + BRAIN_MSGBOX_LINE2.length);

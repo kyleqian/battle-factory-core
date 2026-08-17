@@ -245,13 +245,87 @@ instructed (not landed together blind):
   (unmoved), `npm run build` + `npm run typecheck` green, ratchet barrier
   counts unmoved. No Tier-1 test pins the exact `camPanY===48` boundary or
   a numeric `BRAIN_MOVEMENT_SETTLE_ELAPSED` value, so none needed updating.
-- **Open remainder:** gold-open 95 / entrance-03 405 (the scientist
-  turn-in-place settle) still needs a real fix. The root cause read (stale
-  derivation predating the B1c `-1` render fix) still looks right; what's
-  missing is a fix shape that corrects the *render-side* `historicElapsed`
-  value read during the transition tick without moving the transition
-  itself (and thus without re-basing every later phase's own clock) — e.g.
-  a one-tick special case at the transition boundary, or decoupling
-  `historicElapsed`'s computation from `state.elapsed`'s own phase-relative
-  reset. Not attempted this step; left honestly open per the step brief's
-  instruction not to improvise a third change.
+- **Open remainder (now resolved, see below):** gold-open 95 / entrance-03
+  405 (the scientist turn-in-place settle) still needed a real fix. The
+  root cause read (stale derivation predating the B1c `-1` render fix)
+  still looked right; what was missing was a fix shape that corrects the
+  *render-side* `historicElapsed` value read during the transition tick
+  without moving the transition itself (and thus without re-basing every
+  later phase's own clock) — e.g. a one-tick special case at the
+  transition boundary, or decoupling `historicElapsed`'s computation from
+  `state.elapsed`'s own phase-relative reset. Not attempted that step;
+  left honestly open per the step brief's instruction not to improvise a
+  third change.
+
+## RESOLVED (full) — main worker, 2026-08-17 (second session)
+
+Closed the open remainder with the render-side fix shape the prior
+session's note anticipated: a one-tick special case at the transition
+boundary, mirroring `brainMoving`'s own already-existing `-1` render-lag
+convention (`battleRoomRender.ts`'s `movementElapsed = state.elapsed - 1`
+for the `"brainMoving"` branch, B1c). **The state machine (`battleRoom.ts`
+— `BRAIN_MOVEMENT_SETTLE_ELAPSED`, still 86, and the
+`"brainMoving"`→`"brainSettled"` transition tick) was not touched at all.**
+
+**Instrumentation before the fix** (`node --experimental-strip-types -e`
+importing `battleRoom.ts` directly, no scratch file needed — the existing
+exports were enough): `entryStep`/`nolandStep` at historicElapsed 106/107/
+108 are already byte-identical (the shared `ENTRY_STEPS` table saturates
+at its last row well before elapsed 106, per its own module doc, and
+`nolandStep` derives purely from `entryStep`'s `camPanY`), while
+`scientistTurnFrame` alone changes: 106→frame 8 (transient), 107→frame 8
+(transient), 108→frame 2 (settled). This proves the fix is provably
+surgical — moving the render clock from 108 to 107 at the transition tick
+touches only the scientists' picture frame, nothing else in the scene.
+
+**Fix landed** (`src/engine/battleRoomRender.ts`,
+`renderBattleRoomBrainEntranceScene`): `movementElapsed`'s ternary gained
+one more branch between the `"brainMoving"` case and the general `settled`
+clamp — when `state.phase === "brainSettled" && state.elapsed === 0` (the
+transition tick's own first render, and *only* that tick), it feeds
+`BRAIN_MOVEMENT_SETTLE_ELAPSED - 1` instead of the general settled clamp
+`BRAIN_MOVEMENT_SETTLE_ELAPSED`. Every other `"brainSettled"` tick
+(`elapsed >= 1`) and every later phase in the `settled` bucket
+(`brainSpeech`, etc. — `brainEntranceMovementSettled`) is untouched, since
+they don't hit the `elapsed === 0` special case; `historicElapsed` for
+them is still the same hardcoded 108 clamp as before. This is why the fix
+does not re-base any later phase's own clock the way Fix B's attempted
+`86→87` did — that constant lived in the state machine and shifted every
+downstream phase's `elapsed=0` origin; this one lives purely in the
+render call site and is keyed off a phase+elapsed pair that occurs
+exactly once per playthrough of this window.
+
+**Result:** gold-open 255/256 → **256/256** (frame 95 closed). entrance-03
+255/256 → **256/256** (frame 405 closed). Both traces now fully match.
+
+**Guard matrix, fresh `--summary` reruns, all unmoved:** gold-pages
+177/177, silver box-2 100/100, gold-close 113/126, entrance-02 256/256,
+callscene-01 131/131, callscene-02 199/199, B2 speech box0-held 39/39 /
+cry-held 74/74 / page8-held 39/39 / close-pause 28/28. Confirms the fix's
+locality claim empirically, not just by code inspection — nothing in the
+`brainSpeech` window (which follows `brainSettled` and would be the first
+casualty of any accidental clock shift, as Fix B's revert demonstrated)
+moved by even one frame.
+
+**Tier-1 test added** (`tests/battleRoomBrainEntrance.test.ts`, red-
+verified against the pre-fix code by temporarily stashing the render
+change — failed at exactly the assertion the fix makes true): renders the
+last `"brainMoving"` tick, `"brainSettled"` tick 0, and `"brainSettled"`
+tick 1 to three framebuffers and asserts tick 0 is byte-identical to the
+last moving tick (both show the transient pose) while tick 1 differs (the
+real settle). This pins the exact boundary-tick pose behavior without
+depending on pixel/oracle infrastructure.
+
+**Full verification:** `npm test` 1065 files / **10011** passed (was
+10010; +1 new test) / 223 skipped, `npm run build` + `npm run typecheck`
+green, `executableFrontierRatchet` barrier counts unmoved.
+
+**Verdict on the single-tick boundary family:** both frame pairs
+diagnosed by this probe are now closed. Pair A (`nolandStep`'s fence-post)
+closed in the first session (Fix A). Pair B
+(`BRAIN_MOVEMENT_SETTLE_ELAPSED`'s stale derivation) is closed not by
+re-deriving the constant (which cascades, per the first session's
+decisive negative) but by a **local render-side one-tick lag exactly at
+the transition boundary** — the fix shape the first session's notes
+predicted but didn't have time to implement. No further single-tick
+boundary-family work remains open in either trace.
