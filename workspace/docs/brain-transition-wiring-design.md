@@ -542,3 +542,45 @@ are load-bearing before restoring the correct implementation.
 landing first for gold's own window to close, though S3's own partial-
 credit guard means it could land now safely against just silver's window
 with a fallback no-op for id 38).
+
+## 7. S2 result — `CIRCLES_MEET_IN_SEQ` renderer landed, unwired [side lane]
+
+Implemented `circlesMeetInSeqCircleCenter` + `CIRCLES_MEET_IN_SEQ_SPECS`
+(`src/engine/battleTransition.ts`), ported from `CirclesMeetInSeq_CreateSprites`
+(`battle_transition_frontier.c:537-555`) and `transitionMeta.table[8].params.sprites`:
+same 3 targets as plain MEET, doubled per-tick speed (4px vs 2px, hence a
+halved 24-tick slide per circle), each circle gated `null` until its own
+16-tick-staggered creation tick (0/16/32 task-timer offsets from a shared
+anchor) — the "distinctive feature" §1's widened gold captures showed.
+Registered `transitionId === 38 → "circlesMeetInSeq"` in
+`frontierTransitionRenderKind` and one new ternary arm in `drawCircleSprite`'s
+center dispatch; `applyBattleTransitionOverlay` needed **no** change (its
+existing fixed-order else-branch + `drawCircleSprite`'s internal null-skip
+already handle a staggered-visibility kind), matching §3's own "pure
+position-formula addition, no new blend math, no new fade mechanism" framing
+— `grayFlickerY`/`centerLogoEva`/`exitFadeY` all fall through to their
+existing MEET-shaped default branch for this kind, untouched.
+
+**Anchor caveat (open, flagged for S3/S4):** the gate reuses `CIRCLE_ANCHOR_TE`
+(trace tick 921), plain MEET's own pixel-verified anchor — justified because
+`Circles_Init` (the state this family shares verbatim with MEET) hands off to
+`CreateSprites` at the same relative offset regardless of family, and no
+dense per-tick trace exists yet for gold's own fixture to fit an independent
+anchor (§1 used sparse ~5-15-tick eyeballing, not a per-tick derivation).
+This is a source-derived default, not yet pixel-verified for this specific
+family+fixture pairing.
+
+**Verification:** new `tests/battleTransitionCirclesMeetInSeq.test.ts`
+(10 tests, red-verified — failed against the pre-implementation tree with
+`circlesMeetInSeqCircleCenter is not a function` / wrong render-kind, then
+green after implementing), pinning per-te checkpoints against hand-derived
+source expectations plus the params JSON directly, the new
+`frontierTransitionRenderKind` case, and an `applyBattleTransitionOverlay`
+no-op-before-creation + deterministic-after smoke check. Landed **unwired**
+per this slice's scope (S3 wires the brain room's `transitionPresentation`;
+`battleRoom.ts`/`factoryRoundBattleOrchestrator.ts` untouched here), so
+nothing in production yet constructs a presentation with `transitionId 38` —
+confirmed by fresh guard reruns, all unmoved: gold-close 113/126,
+silver-flicker 79/100, gold-pages 177/177. Full `npm test` (10021 passed),
+`npm run build`, `npm run typecheck` all green;
+`executableFrontierRatchet` barrier counts unmoved (no new barrier added).

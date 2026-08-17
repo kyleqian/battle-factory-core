@@ -171,7 +171,7 @@ export function selectFrontierTransition(rngValue: number): {
   };
 }
 
-export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq" | "circlesCross";
+export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq" | "circlesCross" | "circlesMeetInSeq";
 export type FrontierTransitionRenderKind = FrontierCircleTransition | "logoWave";
 
 /** te (settled-phase elapsed) at which the corresponding trace tick (843+te) begins - named per the phase they gate. */
@@ -319,6 +319,7 @@ export function frontierTransitionRenderKind(
   if (presentation?.transitionId === 30) return "logoWave";
   if (presentation?.transitionId === 34) return "circlesMeet";
   if (presentation?.transitionId === 35) return "circlesCross";
+  if (presentation?.transitionId === 38) return "circlesMeetInSeq";
   if (presentation?.transitionId === 40) return "asymmetricSpiralInSeq";
   return fallback;
 }
@@ -467,6 +468,53 @@ export function asymmetricSpiralCircleCenter(
   return { x: spec.center[0] + x2, y: spec.center[1] + y2 };
 }
 
+interface SlideInSeqSpec {
+  init: readonly [number, number];
+  speed: readonly [number, number];
+  createOnTimer: number;
+}
+
+/**
+ * CirclesMeetInSeq_CreateSprites (battle_transition_frontier.c:537-555,
+ * params also pre-extracted at transitionMeta.table[8].params.sprites) -
+ * same 3 targets as plain CIRCLES_MEET (target implicit in ticks*speed, as
+ * CIRCLE_SPECS notes above), doubled per-tick speed, and each circle
+ * created on its own task-timer tick (0/16/32 - a real 16-tick stagger,
+ * `staggerFrames` in the params JSON) instead of all three at once.
+ */
+const CIRCLES_MEET_IN_SEQ_SPECS: Record<"top" | "left" | "right", SlideInSeqSpec> = {
+  top: { init: [120, -51], speed: [0, 4], createOnTimer: 0 },
+  left: { init: [-7, 193], speed: [4, -4], createOnTimer: 16 },
+  right: { init: [247, 193], speed: [-4, -4], createOnTimer: 32 },
+};
+
+/** Each circle's target-init distance is 96px at 4px/tick (doubled from CIRCLE_SLIDE_TICKS' 2px/tick over 48 ticks). */
+const CIRCLES_MEET_IN_SEQ_SLIDE_TICKS = 24;
+
+/**
+ * Sprite center at settled-elapsed `te`, gated per circle by its own
+ * creation tick (mirrors `asymmetricSpiralCircleCenter`'s `visibleTe` gate
+ * above, but for straight-line instead of spiral motion - design doc
+ * docs/brain-transition-wiring-design.md §3, S2). Anchored off
+ * `CIRCLE_ANCHOR_TE`: `Circles_Init` (the state this family shares
+ * verbatim with plain MEET) hands off to its family's `CreateSprites` at
+ * the same relative offset regardless of family; MEET's own anchor is the
+ * only one pixel-verified so far (module doc point 2) - this reuses it as
+ * the best available base absent a dense per-tick trace for this family's
+ * own fixture (design doc §1's identification was sparse-eyeballed, not
+ * per-tick fit) - S3/S4 tighten this once wired and oracle-comparable.
+ */
+export function circlesMeetInSeqCircleCenter(
+  name: "top" | "left" | "right",
+  te: number,
+): { x: number; y: number } | null {
+  const spec = CIRCLES_MEET_IN_SEQ_SPECS[name];
+  const createTe = CIRCLE_ANCHOR_TE + spec.createOnTimer;
+  if (te < createTe) return null;
+  const k = Math.min(te - createTe, CIRCLES_MEET_IN_SEQ_SLIDE_TICKS);
+  return { x: spec.init[0] + spec.speed[0] * k, y: spec.init[1] + spec.speed[1] * k };
+}
+
 /** FadeInCenterLogoCircle's BLDALPHA target-1 (BG0) weight, 0-16 (module doc). */
 export function centerLogoEva(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
   const start = transition === "asymmetricSpiralInSeq"
@@ -512,6 +560,8 @@ function drawCircleSprite(
 ): void {
   const center = transition === "asymmetricSpiralInSeq"
     ? asymmetricSpiralCircleCenter(name, te)
+    : transition === "circlesMeetInSeq"
+    ? circlesMeetInSeqCircleCenter(name, te)
     : circleCenter(name, te, transition);
   if (!center) return;
   const fadeY = exitFadeY(te - 1, transition);
