@@ -4,6 +4,73 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1314 — [main worker, 2026-08-17] **#97-B bisect recipe executed: assumed-good ref `c5563c72` DISPROVED — bisect range `c5563c72..HEAD` is unbisectable (both endpoints identical), no code fix attempted**
+
+- **State:** Docs-only (`ISSUES.md`, `PROGRESS.md`); no `src/` edit. `npm
+  test` **1065 files / 10011 passed / 223 skipped** (unmoved), `npm run
+  build` (includes typecheck) green, `executableFrontierRatchet` barrier
+  counts unmoved. Isolated bisect worktree (`../bisect-97`) fully removed;
+  no bisect state left anywhere (`git bisect` was never even started —
+  the recipe's own pre-flight check failed first); no temp branch created.
+- **Did:** Followed `ISSUES.md #97-B`'s banked recipe exactly: isolated
+  worktree at `c5563c72` (sibling of `workspace/`, `reference/pokeemerald`
+  symlinked to the vendor checkout, `npm install`), then — per the
+  recipe's own flagged caveat — manually confirmed the assumed-good ref
+  **before** trusting the automated `git bisect run`. It failed: at
+  `c5563c72`, `turn5-action-off` scores **1/32** (first mismatch frame
+  5927, `bbox=127,74-229,110`) and `turn6-reopen-off` scores **11/46**
+  (first mismatch frame 7305, `bbox=44,49-99,110`) — byte-for-byte
+  identical to the HEAD symptom this bisect was meant to explain. Ruled
+  out artifacts before accepting that: control trace `turn5-reset-off`
+  still 256/256 at `c5563c72` (tooling/oracle not broadly broken); both
+  trace fixtures byte-identical between `c5563c72` and HEAD; the compare
+  harness renders the app in-process from the checked-out commit itself,
+  no dev server involved; the ROM (built 2026-07-16) and canonical save
+  (2026-07-18) both predate and are unchanged since `c5563c72`
+  (2026-08-02). Conclusion: `c5563c72` was never a valid "good" ref for
+  this symptom — the design doc's contemporaneous 32/32 verification was
+  real at the time (not fabricated; too well cross-checked to doubt), but
+  is not reproducible today, most likely because the 8014 oracle process
+  now running has only been up since ~2026-08-15 (a restart mentioned in
+  an unrelated oracle-side commit `3e29880b`'s message), replacing
+  whatever instance served the original verification — though the actual
+  code diff in that restart's commits only touches the separate
+  battle-lab endpoint, not plain `/v1/run`, so the mechanism of any shift
+  is not pinned down, only the fact that no commit in the proposed range
+  reproduces 32/32. Per this step's hard rule 2 ("if no good ref exists
+  within ~3 probes, record and stop"), did not run the automated
+  `git bisect` (it would have produced an arbitrary, meaningless commit
+  since the check fails uniformly across the whole range) and did not
+  touch any shared bounce-tick formula without a real regression boundary
+  to justify a change.
+- **Result:** `ISSUES.md #97-B` rewritten with the full disproof and two
+  concrete paths forward for whoever resumes (widen the backward search
+  past `c5563c72`, or drop the regression framing and calibrate the
+  bounce-tick constants directly against the current oracle the same way
+  `#87` did). Mechanism analysis from rung 1 (shared `menuIdleBounce`
+  formula family, legacy-vs-shifted branch already ruled out) stands
+  unchanged — still a real, reproducible pixel bug, just not one this
+  git range can localize. Guards reverified: `turn5-reset-off` 256/256,
+  gold-pages 177/177, callscene-02 199/199 (all spot-checked in the main
+  tree, unaffected by the disposable worktree).
+- **Next:** Either (1) probe further back than `c5563c72` for a real good
+  ref (first check whether the turn5-reopen bounce-tick code path even
+  existed that far back), or (2) treat this as a live tuning problem and
+  calibrate `TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG` /
+  `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` / `presentationEpoch.elapsed` directly
+  against the current oracle at frames 5927/7305, MEASURED-constant style
+  (`#87`'s convention), instead of chasing a git culprit. Do not re-run
+  this exact bisect recipe against `c5563c72..HEAD` without new evidence
+  `c5563c72` is actually good.
+- **Notes:** No PAPERCUT beyond the pre-existing gap this session
+  confirmed: nothing in this harness currently records *when* the shared
+  oracle process was last restarted independent of digging through git
+  commit messages and `ps` — a future session chasing oracle-vs-code
+  drift like this would benefit from the launcher stamping a start-time
+  file next to the service, but that's speculative tooling, not
+  implemented here (out of this step's scope).
+
+---
 ## 1313 — [main worker, 2026-08-17] **#97 split and closed: loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended `b7ae30de` continuous-play chaining, not a bug); turn5/turn6 bounce-tick drift mechanism identified, bisect recipe written (needs `c5563c72..HEAD`, 2697 commits)**
 
 - **State:** Docs-only, no `src/` edit (one scratch `console.error` added
@@ -108,54 +175,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   silver's own unfixtured post-te-99 top-row circle onset; (c) soak
   remainder (vanilla 20:60 + winning 0:10 at 2× maxFrames).
 - **Notes:** No blind offset sweep attempted. PAPERCUT: none.
-
----
-## 1311 — [main worker, 2026-08-17] **Rung 2 attempted: circle-sprite onset residual documented, not fixed — gold's own onset is a small sliver (+6 from CIRCLE_ANCHOR_TE), silver's is an abrupt full-width block, not the same shape**
-
-- **State:** Docs/scratch-tooling only, no `src/` edit. `npm test` **1065
-  files / 10011 passed / 223 skipped** (unmoved), `npm run build` + `npm
-  run typecheck` green, `executableFrontierRatchet` barrier counts
-  unmoved.
-- **Did:** 1310's rung 2: derive the true circle-sprite onset per tier
-  from the already-banked oracle PNG sets (gold's own §8″ span, silver's
-  new flicker fixture) and check whether both tiers show the same onset
-  delta on their now-verified `te` clocks. Full-frame scan for the
-  circle sprite's own distinctive palette colors (excluding black/white/
-  gray, which also occur in the baseline scene) plus a direct engine
-  probe to convert frame numbers to `te` without hand arithmetic
-  (`tools/compare/scratch/circle-onset-probe.mjs`, `circle-onset-
-  probe2.mjs`, `gold-te-verify.ts`, `silver-onset-diag.mjs`, all
-  committed). Found gold's onset (abs 2613, `te=84`, +6 past
-  `CIRCLE_ANCHOR_TE=78`) is a small 28-pixel sliver matching the existing
-  slide-in model; silver's onset (abs 3280, `te=79` directly, +1 past
-  anchor) is a 2568-pixel block spanning the full screen width, appearing
-  in a single tick (abs 3279 has zero circle-palette pixels) — not
-  explainable by the same "sprite slides in, `te` needs a constant shift"
-  model at any offset. The render-compare tool's own mismatch onset
-  happens to coincide at `te=79` for both tiers, but the underlying
-  content differs in kind, not just magnitude, so that coincidence isn't
-  trustworthy as a shared mechanism.
-- **Result:** No fix landed — per the rung's own decision tree ("if they
-  differ, document the split precisely and stop"), guessing an offset
-  for silver's unexplained abrupt-block shape would repeat the blind-
-  realignment failure mode `docs/noland-brain-intro-gold-ground-
-  truth.md` §8′/§8″ already warn against (two prior failures, one
-  37/126 regression). Full derivation in that doc's new "Rung 2 attempt"
-  section and `docs/silver-flicker-evidence.md`'s own matching addendum.
-  Guards unmoved: silver-flicker 79/100 (rung 1's result), gold-close
-  113/126.
-- **Next:** Silver's abrupt abs 3279→3280 full-width jump needs cross-
-  referencing against `reference/pokeemerald/src/
-  battle_transition_frontier.c`'s real sprite creation/movement code to
-  identify what's actually different about silver's path before any
-  offset is tried — not more pixel probing of the already-banked window
-  (already at stride-1, max resolution). Gold's own sliver-shaped
-  residual (113–125) is the lower-risk piece if a future session wants
-  to isolate and fix only gold's own small `+6`-relative correction
-  without touching silver. Otherwise pick up: (b) silver's own
-  unfixtured post-te-99 top-row circle onset (never observed in any
-  banked window); (c) soak remainder (vanilla 20:60 + winning 0:10 at 2×
-  maxFrames).
-- **Notes:** No blind offset sweep attempted, consistent with the step
-  brief's explicit instruction. No PAPERCUT.
 

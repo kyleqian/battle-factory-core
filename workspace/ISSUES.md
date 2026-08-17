@@ -115,7 +115,7 @@ coverage again, it needs a **new trace** that doesn't cross the
 continuous-play edge (cap `captureFrames` before frame 4989), not a change
 to this one.
 
-### B. `turn5-action-off` / `turn6-reopen-off` — real mechanism identified, genuinely needs bisection
+### B. `turn5-action-off` / `turn6-reopen-off` — real mechanism identified; bisect DISPROVED the assumed-good ref, range is unbisectable as scoped
 
 **Symptom (reproduced twice fresh, 2026-08-17):**
 - `turn5-action-off.json` **1/32**, first mismatch frame 5927 — the
@@ -170,44 +170,83 @@ still turn-4-fresh"), and is red-verified by
 re-touching it is very unlikely to be the fix and risks unpinning those
 tests.
 
-**Classification: (c), genuinely needs bisection.** This formula family is
-shared by many other currently-passing pinned windows (the doc comments at
-`battleScene.ts:8257-8290` document a multi-session history of "1-in-256"
-extremum-tick tuning) — a guessed constant change here is exactly the kind
-of move that silently breaks something else. The regression window is wide
-(`c5563c72`, 2026-08-02, where the design doc's 32/32 and 46/46 bars were
-recorded, to `b229076a`/master, 2026-08-17 — **2697 commits**, `git
-rev-list --count c5563c72..HEAD`) and mostly unrelated animation-lane
-commits, exactly what `git bisect` is for (~12 steps for this range).
+**2026-08-17 rung 2 (bounded MAIN worker): assumed-good ref DISPROVED,
+bisect not run.** Per this recipe's own flagged caveat ("confirm with one
+manual run before trusting the automated range"), built the isolated
+worktree (`git worktree add ../bisect-97 c5563c72`, `reference/pokeemerald`
+symlinked to the vendor checkout, `npm install`, both against the live
+shared Battle Scene OFF oracle at 127.0.0.1:8014) and ran the manual
+confirmation **before** starting `git bisect`. It failed:
 
-**Bisect recipe for the next worker:**
-```sh
-# Isolated worktree — do NOT bisect in the shared main tree (other lanes
-# depend on it, and checkouts mid-bisect would be visible to them).
-git worktree add ../bisect-97 c5563c72
-cd ../bisect-97 && npm install   # reference/ symlink + node_modules per AGENTS.md
+- `turn5-action-off` at `c5563c72`: **1/32**, first mismatch **frame 5927**,
+  `bbox=127,74-229,110` — byte-for-byte the same score, same first-mismatch
+  frame, and same bbox as the HEAD symptom recorded above.
+- `turn6-reopen-off` at `c5563c72`: **11/46**, first mismatch **frame
+  7305**, `bbox=44,49-99,110` — again identical to the HEAD symptom.
+- Control `turn5-reset-off` at `c5563c72`: **256/256**, matching its
+  HEAD/family-control score — rules out a broken worktree, stale
+  `node_modules`, or a wedged oracle as the explanation; the compare
+  harness renders the app in-process directly from `tools/compare/appTrace.ts`
+  against the checked-out commit (no dev server, no browser, confirmed by
+  reading `run.ts`'s imports), so this is not a tooling artifact.
+- The trace fixtures themselves are byte-identical between `c5563c72` and
+  HEAD (`diff` empty for both `turn5-action-off.json` and
+  `turn6-reopen-off.json`).
+- The oracle's deterministic inputs are unchanged across the window: ROM
+  (`vendor/pokeemerald/pokeemerald.gba`, built 2026-07-16) and the canonical
+  save (`oracle/bootstrap/factory.sav`, 2026-07-18) both predate `c5563c72`
+  (2026-08-02) and are untouched since.
 
-git bisect start
-git bisect bad b229076a          # or HEAD of whichever tree is current
-git bisect good c5563c72         # unverified-but-highly-likely-good: this is the
-                                  # commit the 32/32 bar in turn4-fold-pp-freshness-design.md
-                                  # was recorded against; confirm with one manual run
-                                  # before trusting the automated range below
+**Conclusion: `c5563c72` was never actually a valid "good" ref for this
+symptom, so `git bisect c5563c72..HEAD` cannot converge to a real culprit**
+— both endpoints of the proposed 2697-commit range already exhibit the
+identical failure, byte-for-byte, on both windows. Running the automated
+bisect anyway would have produced an arbitrary, meaningless commit (the
+check script fails uniformly across the whole range), not a real answer;
+per this step's hard rule 2, stopping here with this finding recorded is
+the correct outcome instead. The `docs/turn4-fold-pp-freshness-design.md`
+"32/32 (was 6/32)" / "46/46" table (and the corroborating
+`PROGRESS-archive.md` entry 867/868, which cross-checked the same numbers
+against a 14-window differential and a per-field census) was thoroughly
+verified at the time and is not being second-guessed as fabricated — most
+likely explanation is that the oracle's answer for this exact FIGHT-reopen
+bounce-tick window shifted sometime between 2026-08-02 (when that 32/32 was
+recorded) and 2026-08-17 (today), even though neither the ROM nor the save
+changed: the 8014 process now running has been up continuously only since
+around 2026-08-15 (an oracle-side restart mentioned in commit `3e29880b`'s
+message, "verified live in-process and against restarted :8012/:8014
+services"), replacing whatever process served the original verification —
+though the code diff in that restart's commits (`33354440`, `3e29880b`)
+only touches the separate `battle-lab` endpoint, not the plain `/v1/run`
+canonical-replay path this compare uses, so the mechanism of the shift (if
+oracle-side at all) is NOT pinned down, only the fact that no in-range
+commit reproduces the recorded 32/32.
 
-cat > /tmp/bisect-97-check.sh <<'EOF'
-#!/bin/sh
-set -e
-cd "$(dirname "$0")/../bisect-97" 2>/dev/null || cd ../bisect-97
-npm run compare -- turn5-action-off --summary 2>&1 | tail -1 | grep -q "32/32 frames matched"
-EOF
-chmod +x /tmp/bisect-97-check.sh
-git bisect run /tmp/bisect-97-check.sh
-# Then: git bisect log > <evidence file>; git worktree remove ../bisect-97
-```
-Requires the shared Battle Scene OFF oracle (127.0.0.1:8014) to stay up
-throughout — do not stop/restart it mid-bisect. Once the culprit commit is
-found, re-run the pixel-first method (§B above) against that commit's own
-diff to classify it as revertable vs. needs-a-forward-fix.
+**Classification: (c) with the range now known to be wrong.** The
+mechanism analysis above (shared `menuIdleBounce` bounce-tick formula
+family, legacy-vs-shifted branch already ruled out) still stands — this is
+still a real, reproducible pixel bug, not noise (both windows fail the same
+specific way on every fresh run). What's disproven is only the *bisect
+range*: `c5563c72..HEAD` is not a valid regression window because the "good"
+endpoint isn't good. Options for whoever resumes this:
+1. **Widen the search further back** than `c5563c72` to hunt for an actual
+   passing commit (untried — this session's 2 direct probes plus the
+   corroborating checks above used its `~3 probes` budget without finding
+   one; a fresh session could probe e.g. a few weeks before `c5563c72`, but
+   should first check whether the turn5-reopen bounce-tick code path even
+   existed that far back — if not, there may be no valid comparison point
+   at all this side of a from-scratch mechanism reconstruction).
+2. **Treat it as a live design/tuning problem, not a regression** — use the
+   pixel evidence already banked in this doc (§B mechanism paragraph above:
+   `TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG`,
+   `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`, or `presentationEpoch.elapsed` as
+   candidate off-by-a-small-margin constants) and calibrate directly against
+   the current oracle at the two known mismatch frames (5927, 7305), the
+   same MEASURED-constant convention `#87` already uses — instead of
+   chasing a git culprit that may not exist.
+Do not re-run this exact bisect recipe against `c5563c72..HEAD` without new
+evidence that `c5563c72` is actually good; that specific question is now
+closed.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
