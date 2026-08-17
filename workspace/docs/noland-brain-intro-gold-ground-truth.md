@@ -557,6 +557,49 @@ windows 690/701. Full `npm test` (1065 files / 10010 passed / 223 skipped,
 unmoved), `npm run build`, `npm run typecheck` green;
 `executableFrontierRatchet` barrier counts unmoved.
 
+### 8‴. Silver's own `te` origin landed: 32→79/100, confirms "no re-basing" is not a scaled-down gold shape (2026-08-17, main worker)
+
+§8″'s own "Tried, reverted" paragraph left silver's flicker window unfixed
+pending its own dense post-pause capture. `docs/silver-flicker-evidence.md`
+(banked this session) supplies that capture
+(`factory-brain-silver-walkup-speech-flicker-off.json`, 100 stride-1 frames,
+abs 3201–3300) and derives silver's true `te` origin the same way §8″ derived
+gold's: per-frame gray-flicker coefficient inversion, not bisection. Verdict:
+`y = grayFlickerY(te)` matches exactly with `te = b.elapsed` **directly** —
+no re-basing at all, the SAME rule the ordinary non-brain "settled" path
+already uses (§8′'s own control step). This is a genuinely different shape
+from gold's `+6` correction, not a `+0`-coefficient instance of it: silver's
+own pause (28) happens to equal `FLICKER_START_TE` (28), so the closing-lag
+term gold needs (`MSGBOX_CLOSE_TICKS`) has nothing left to compensate for at
+this measurement — confirmed, not assumed, by the dense capture (silver-
+flicker-evidence.md's own Verdict (b) shows applying gold's structural form
+to silver instead regresses the close-pause guard 28→24/28).
+
+**Implemented:** `renderBattleRoomState` (`src/engine/core.ts`) now branches
+`transitionElapsed` on `b.brainSpeechTier`: gold keeps §8″'s `b.elapsed −
+brainSpeechSceneHandoffElapsed(b) + goldRebaseTe`; silver takes `b.elapsed`
+directly (no term at all, matching the ordinary path's own rule) rather than
+the previous `(tier === "gold" ? goldRebaseTe : 0)` single-ternary shape.
+
+**Result:** `factory-brain-silver-walkup-speech-flicker-off.json`
+**32→79/100** — frames 0–78 now exact, covering the ENTIRE gray-flicker span
+(elapsed 28–75 per silver-flicker-evidence.md's banked table) with zero
+mismatches. Mismatches resume at frame 79 onward (21 frames, 79–99) — past
+the flicker, in the circle-sprite build region (te 79+, one tick past
+`CIRCLE_ANCHOR_TE=78`) — the SAME distinct second mechanism §8″'s own
+Residual paragraph identified for gold (113–125), not a bug in this fix; left
+for rung 2 (see silver-flicker-evidence.md's own update for the cross-tier
+check).
+
+**Guard matrix, reverified fresh:** gold-pages 177/177, silver box-2
+100/100, gold-open 256/256, entrance-03 256/256, entrance-02 256/256,
+callscene-01 131/131, callscene-02 199/199, gold close-edge 54/54, silver
+cry-edge 75/75, B2 box0-held 39/39 / cry-held 74/74 / page8-held 39/39 /
+close-pause 28/28, askready 21/21, gold-close 113/126 (unmoved). Full `npm
+test` (1065 files / 10011 passed / 223 skipped, unmoved), `npm run build`,
+`npm run typecheck` green; `executableFrontierRatchet` barrier counts
+unmoved.
+
 ### 9′. Gold-open window closed: two shared-clock mechanisms, not a park-phase constant (2026-08-16, main worker)
 
 The 58/256 gold-open residual this step inherited was **not** the box-corner/

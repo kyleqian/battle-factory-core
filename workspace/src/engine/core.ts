@@ -2510,18 +2510,26 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
     // selected transition's own flicker-start `te`" reproduces the oracle's
     // per-frame gray-flicker coefficient with 0/126 mismatches (§8" - a
     // residual in the later swirl-build sub-stage remains, a distinct,
-    // not-yet-derived mechanism). GOLD-ONLY: silver has no dense fixture
-    // past its own pause boundary to verify the same correction (its one
-    // committed window, speech-close-pause-off.json, ends exactly at the
-    // pause) - applying it tier-generally regressed that guard 28->24/28
-    // (silver's pause exactly equals the shared FLICKER_START_TE, so the
-    // naive tier-general reduction predicted a same-shape correction, but
-    // the guard proves the real silver onset is NOT 2 ticks early like
-    // gold's - left as future work, not fitted blind).
+    // not-yet-derived mechanism). SILVER (docs/silver-flicker-evidence.md,
+    // banked this session): a dense 100-frame per-pixel gray-flicker probe
+    // (factory-brain-silver-walkup-speech-flicker-off.json) shows `y =
+    // grayFlickerY(te)` matches exactly with `te = b.elapsed` DIRECTLY - no
+    // re-basing at all, the same "no re-basing" rule the ordinary non-brain
+    // "settled" path already uses below. This is NOT gold's shape wearing a
+    // 0 coefficient: silver's own pause (brainSpeechSceneHandoffElapsed,28)
+    // happens to already equal the shared FLICKER_START_TE(28), so the
+    // subtract-then-shift the two terms above perform for gold cancels out
+    // to a no-op for silver by coincidence of that pause length, not by a
+    // shared structural formula - applying gold's own correction shape to
+    // silver (`te = b.elapsed - 28 + 32 = b.elapsed + 4`) was tried and
+    // regressed the close-pause guard 28->24/28 (flicker starting 4 ticks
+    // early); silver-flicker-evidence.md's own Verdict (b) has the full
+    // derivation of why the two tiers' corrections don't unify.
     const transitionKind = frontierTransitionRenderKind(b.transitionPresentation, "circlesMeet");
     const goldRebaseTe = MSGBOX_CLOSE_TICKS + frontierTransitionFlickerStartTe(transitionKind);
-    const transitionElapsed = b.elapsed - brainSpeechSceneHandoffElapsed(b)
-      + (b.brainSpeechTier === "gold" ? goldRebaseTe : 0);
+    const transitionElapsed = b.brainSpeechTier === "gold"
+      ? b.elapsed - brainSpeechSceneHandoffElapsed(b) + goldRebaseTe
+      : b.elapsed;
     const transition = b.phase === "brainSpeechSettled" && transitionElapsed >= 0
       ? transitionKind
       : null;

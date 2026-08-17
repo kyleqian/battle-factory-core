@@ -3,6 +3,60 @@
 Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
+
+---
+## 1310 — [main worker, 2026-08-17] **Silver's own `te` origin landed: flicker fixture 32→79/100 (ENTIRE gray-flicker span exact), circle-sprite onset residual documented for rung 2**
+
+- **State:** Landed and green. `npm test` **1065 files / 10011 passed /
+  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Rung 1 of this step's brief. Implemented the verdict
+  `docs/silver-flicker-evidence.md` banked last session (dense per-frame
+  gray-flicker coefficient inversion over
+  `factory-brain-silver-walkup-speech-flicker-off.json`, 100 stride-1
+  frames): silver's true transition `te` is `b.elapsed` **directly**, no
+  re-basing at all — NOT a `+0`-coefficient instance of gold's own §8″
+  `MSGBOX_CLOSE_TICKS + frontierTransitionFlickerStartTe` correction
+  (silver's pause happens to equal `FLICKER_START_TE`, so gold's
+  closing-lag term has nothing left to compensate for). Restructured
+  `renderBattleRoomState`'s (`src/engine/core.ts`) single
+  `(tier === "gold" ? goldRebaseTe : 0)` ternary into an honest per-tier
+  branch: gold keeps §8″'s formula unchanged, silver takes `b.elapsed`
+  bare. Docs extended: `docs/noland-brain-intro-gold-ground-truth.md` new
+  §8‴, `docs/silver-flicker-evidence.md` new "Landed" section — both cite
+  the banked evidence and the exact result.
+- **Result:** `factory-brain-silver-walkup-speech-flicker-off.json`
+  **32/100 → 79/100** — frames 0–78 exact, the ENTIRE gray-flicker span
+  (elapsed 28–75) with zero mismatches, matching the required acceptance
+  bar. Mismatches resume at frame 79 (elapsed 79, one tick past
+  `CIRCLE_ANCHOR_TE=78`) through frame 99 — the circle-sprite build
+  region, the same distinct second mechanism as gold's own unfixed
+  113–125 residual (§8″), not this fix's bug; that's rung 2's mechanism,
+  not attempted this step (ran out of budget after landing rung 1 +
+  docs; see Next). Guard matrix reverified unmoved (fresh `--summary`
+  reruns): gold-pages 177/177, silver box-2 100/100, gold-open 256/256,
+  entrance-03 256/256, entrance-02 256/256, callscene-01 131/131,
+  callscene-02 199/199, gold close-edge 54/54, silver cry-edge 75/75, B2
+  box0-held 39/39 / cry-held 74/74 / page8-held 39/39 / close-pause
+  28/28, askready 21/21, gold-close 113/126 (unmoved, its own residual
+  untouched by this step).
+- **Next:** Rung 2 (circle-sprite onset unification) — gold-close
+  113–125 and silver-flicker 79–99 are the same mechanism on different
+  tiers; cross-check whether both show the same onset delta on their own
+  verified `te` clocks (gold: real onset later than
+  `CIRCLE_ANCHOR_TE=78`, exact tick TBD from a fresh per-frame circle-
+  pixel probe of the banked gold §8″ PNGs; silver: raw-pixel bottom-row
+  probe in `silver-flicker-evidence.md` item (c) already puts onset at
+  elapsed 80, close to on-time, but top-row onset was never observed in
+  the banked 100-frame window). If both tiers share one onset delta, fix
+  the shared `CIRCLE_ANCHOR_TE`-relative anchor once; if not, land only
+  whichever piece is itself tier-safe (silver-flicker fixture is the
+  regression canary) or document the split precisely.
+- **Notes:** No blind offset sweep attempted — §8′/§8″'s own two-failed-
+  realignment history is binding precedent, and this step's own dense
+  evidence (banked last session, implemented this session) is what made
+  rung 1 a clean derivation rather than a fit. No PAPERCUT.
+
 ---
 ## 1309 — [main worker, 2026-08-17] **brainSpeech REAL-CLOSE edge FIXED, both tiers: gold close-edge 28/54→54/54, silver cry-edge 13/75→75/75 — MSGBOX_HIDDEN 4-tick wait was never real, oracle shows one cleared-border tick and lands straight on it**
 
@@ -99,50 +153,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   renders the last `brainMoving` tick + `brainSettled` ticks 0/1 to
   framebuffers, asserts tick 0 matches the last moving tick and tick 1
   differs. No PAPERCUT.
-
----
-## 1307 — [main worker, 2026-08-17] **Single-tick boundary family: Fix A landed (gold-open/entrance-03 both 255/256), Fix B reverted as a decisive negative — probe's fix shape was locally correct but globally wrong**
-
-- **State:** Landed and green. `npm test` **1065 files / 10010 passed /
-  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
-  `executableFrontierRatchet` barrier counts unmoved.
-- **Did:** Applied both fixes `docs/single-tick-boundary-family-probe.md`
-  derived, verified one at a time per the step brief. **Fix A**
-  (`nolandStep`'s `camPanY < NOLAND_WALK_PX` → `camPanY <=
-  NOLAND_WALK_PX`, `src/engine/battleRoom.ts`): red state was exactly
-  {58, 95} / {368, 405} as predicted; post-fix exactly {95} / {405}
-  remained, nothing else moved — landed clean. **Fix B**
-  (`BRAIN_MOVEMENT_SETTLE_ELAPSED` 86→87): applied verbatim, but instead
-  of clearing 95/405 alone it regressed gold-open to 189/256 and
-  entrance-03 to 199/256, with new mismatches cascading from frame 145 /
-  443 through the rest of the `brainSpeech` window. The probe's root-
-  cause read (the transition fires one tick early vs. the render site's
-  own `-1`-shifted clock) was right, but its fix shape wasn't local:
-  delaying the phase transition shifts every later phase's own `elapsed`
-  clock by one tick too, since each phase counts elapsed from its own
-  transition rather than a shared global clock. Reverted per the step
-  brief's explicit instruction ("if anything ELSE moved, stop and
-  revert — the probe's model is wrong, not a fixing opportunity");
-  confirmed clean revert (back to 255/256 / exactly {95}/{405} both
-  traces).
-- **Result:** gold-open 254/256 → **255/256** (frame 58 closed, 95 open).
-  entrance-03 254/256 → **255/256** (frame 368 closed, 405 open). Guard
-  matrix reverified unmoved (fresh `--summary` reruns): gold-pages
-  177/177, silver box2 100/100, gold-close 113/126, entrance-02 256/256,
-  callscene-01 131/131, callscene-02 199/199, B2 speech box0-held 39/39 /
-  cry-held 74/74 / page8-held 39/39 / close-pause 28/28, askready 21/21,
-  swapask-no 194/194. No Tier-1 test pinned the exact `camPanY===48`
-  boundary or a numeric `BRAIN_MOVEMENT_SETTLE_ELAPSED`, so none needed
-  updating.
-- **Next:** gold-open 95 / entrance-03 405 (scientist turn-in-place
-  settle) still open — needs a fix shape that corrects the render-side
-  `historicElapsed` at the transition tick without moving the transition
-  itself (a one-tick special case, or decoupling `historicElapsed` from
-  `state.elapsed`'s phase-relative reset), not attempted this step.
-  Otherwise pick up 1306's remaining ordered list: (a) gold-close's
-  113-125 circle-onset residual; (b) silver's unfixtured post-pause
-  flicker window; (c) soak remainder (vanilla 20:60 + winning 0:10 at 2×
-  maxFrames).
-- **Notes:** Full negative-result writeup in
-  `docs/single-tick-boundary-family-probe.md`'s new "RESOLVED (partial)"
-  section. No PAPERCUT.

@@ -1,4 +1,51 @@
 ---
+## 1307 — [main worker, 2026-08-17] **Single-tick boundary family: Fix A landed (gold-open/entrance-03 both 255/256), Fix B reverted as a decisive negative — probe's fix shape was locally correct but globally wrong**
+
+- **State:** Landed and green. `npm test` **1065 files / 10010 passed /
+  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Applied both fixes `docs/single-tick-boundary-family-probe.md`
+  derived, verified one at a time per the step brief. **Fix A**
+  (`nolandStep`'s `camPanY < NOLAND_WALK_PX` → `camPanY <=
+  NOLAND_WALK_PX`, `src/engine/battleRoom.ts`): red state was exactly
+  {58, 95} / {368, 405} as predicted; post-fix exactly {95} / {405}
+  remained, nothing else moved — landed clean. **Fix B**
+  (`BRAIN_MOVEMENT_SETTLE_ELAPSED` 86→87): applied verbatim, but instead
+  of clearing 95/405 alone it regressed gold-open to 189/256 and
+  entrance-03 to 199/256, with new mismatches cascading from frame 145 /
+  443 through the rest of the `brainSpeech` window. The probe's root-
+  cause read (the transition fires one tick early vs. the render site's
+  own `-1`-shifted clock) was right, but its fix shape wasn't local:
+  delaying the phase transition shifts every later phase's own `elapsed`
+  clock by one tick too, since each phase counts elapsed from its own
+  transition rather than a shared global clock. Reverted per the step
+  brief's explicit instruction ("if anything ELSE moved, stop and
+  revert — the probe's model is wrong, not a fixing opportunity");
+  confirmed clean revert (back to 255/256 / exactly {95}/{405} both
+  traces).
+- **Result:** gold-open 254/256 → **255/256** (frame 58 closed, 95 open).
+  entrance-03 254/256 → **255/256** (frame 368 closed, 405 open). Guard
+  matrix reverified unmoved (fresh `--summary` reruns): gold-pages
+  177/177, silver box2 100/100, gold-close 113/126, entrance-02 256/256,
+  callscene-01 131/131, callscene-02 199/199, B2 speech box0-held 39/39 /
+  cry-held 74/74 / page8-held 39/39 / close-pause 28/28, askready 21/21,
+  swapask-no 194/194. No Tier-1 test pinned the exact `camPanY===48`
+  boundary or a numeric `BRAIN_MOVEMENT_SETTLE_ELAPSED`, so none needed
+  updating.
+- **Next:** gold-open 95 / entrance-03 405 (scientist turn-in-place
+  settle) still open — needs a fix shape that corrects the render-side
+  `historicElapsed` at the transition tick without moving the transition
+  itself (a one-tick special case, or decoupling `historicElapsed` from
+  `state.elapsed`'s phase-relative reset), not attempted this step.
+  Otherwise pick up 1306's remaining ordered list: (a) gold-close's
+  113-125 circle-onset residual; (b) silver's unfixtured post-pause
+  flicker window; (c) soak remainder (vanilla 20:60 + winning 0:10 at 2×
+  maxFrames).
+- **Notes:** Full negative-result writeup in
+  `docs/single-tick-boundary-family-probe.md`'s new "RESOLVED (partial)"
+  section. No PAPERCUT.
+
+---
 ## 1306 — [main worker, 2026-08-17] **gold-close flicker phase gap CLOSED (gray component): 80→113/126, true `te` origin dense-probed from the oracle's own per-frame blend coefficient**
 
 - **State:** Landed and green. `npm test` **1065 files / 10010 passed /

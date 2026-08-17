@@ -131,3 +131,33 @@ bottom-row residual — but this is a partial, not a full, answer to (c).
 | `factory-brain-silver-walkup-entrance-03-off.json` | 256/256 |
 
 All unmoved by this step (new files only, no `src/` edits).
+
+## Landed (2026-08-17, main worker)
+
+Verdict (b) above implemented in `src/engine/core.ts`'s
+`renderBattleRoomState` — see `docs/noland-brain-intro-gold-ground-
+truth.md` §8‴ for the full derivation/implementation note. Silver's
+`transitionElapsed` now takes `b.elapsed` directly (no
+`brainSpeechSceneHandoffElapsed` subtraction at all); gold keeps its own
+§8″ correction unchanged.
+
+`factory-brain-silver-walkup-speech-flicker-off.json` **32→79/100** —
+frames 0–78 exact, the ENTIRE gray-flicker span (elapsed 28–75 per the
+banked table above) with zero mismatches. Mismatches resume at frame 79
+(elapsed 79, one tick past `CIRCLE_ANCHOR_TE=78`) through frame 99 (21
+frames) — the circle-sprite build region, not the flicker; consistent with
+this doc's own item (c) above (raw-pixel bottom-row circle onset observed
+at elapsed 80 — the render mismatch starts one tick earlier because
+`applyBattleTransitionOverlay` draws non-background circle pixels
+elsewhere in the frame before they reach the specific probe pixel used for
+item (c)'s onset read). This is the same second mechanism (circle-sprite
+onset, not flicker) that gold's own §8″ residual (frames 113–125) reports —
+left for a follow-up rung, not this step's fix.
+
+Guards reverified fresh after landing: close-pause 28/28, cry-held 74/74,
+gold-close 113/126 (unmoved), entrance-03 256/256, box2 100/100,
+callscene-01 131/131, callscene-02 199/199, gold-pages 177/177, gold-open
+256/256, entrance-02 256/256, gold close-edge 54/54, cry-edge 75/75,
+box0-held 39/39, page8-held 39/39, askready 21/21. Full `npm test` (1065
+files / 10011 passed / 223 skipped, unmoved), `npm run build`, `npm run
+typecheck` green; `executableFrontierRatchet` barrier counts unmoved.
