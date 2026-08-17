@@ -892,7 +892,7 @@ export interface NolandStep {
 /** Noland's per-tick walk-to-battle state within `brainMoving`, keyed by the SAME `elapsed` clock `entryStep`/`scientistTurnFrame` use (see module doc above). */
 export function nolandStep(elapsed: number): NolandStep {
   const { camPanY, decoyFrame } = entryStep(elapsed);
-  if (camPanY < NOLAND_WALK_PX) {
+  if (camPanY <= NOLAND_WALK_PX) {
     return { frame: decoyFrame, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y };
   }
   return { frame: 2, hFlip: false, screenY: NOLAND_INITIAL_SCREEN_Y + (camPanY - NOLAND_WALK_PX) };

@@ -205,3 +205,53 @@ never staged or committed; it can be regenerated from this document's
 excerpts if needed. No file under `src/`, `tools/` (outside the gitignored
 scratch dir), `tools/compare/traces/`, or any doc other than this new file
 was modified.
+
+## RESOLVED (partial) — main worker, 2026-08-17
+
+Applied verbatim per this probe's own fix shapes, verified one at a time as
+instructed (not landed together blind):
+
+- **Fix A landed, verified clean.** `nolandStep`'s `camPanY < NOLAND_WALK_PX`
+  → `camPanY <= NOLAND_WALK_PX` (`src/engine/battleRoom.ts`). Red state was
+  exactly {58, 95} (gold-open) / {368, 405} (entrance-03) as predicted;
+  post-fix, exactly {95} / {405} remained — nothing else moved. Matches the
+  probe's model precisely.
+- **Fix B attempted, reverted — the probe's model was incomplete.**
+  `BRAIN_MOVEMENT_SETTLE_ELAPSED` 86 → 87, applied exactly as prescribed.
+  Result was **not** the predicted "only 95/405 fixed": gold-open regressed
+  from 255/256 to **189/256** (new mismatches from frame 145 through 250+,
+  the entire rest of the `brainSpeech` page-scroll window) and entrance-03
+  regressed from 255/256 to **199/256** (new mismatches from frame 443
+  onward, same shape). The probe correctly diagnosed *that* the transition
+  fires one tick early and *why* (`historicElapsed` skips 106→108), but its
+  fix shape treated the +1 as a local, contained correction. It is not
+  local: delaying the `"brainMoving"` → `"brainSettled"` transition by one
+  tick shifts every subsequent phase's own `elapsed` clock (brainSettled,
+  brainSpeech, and its per-page scroll timing) by one tick for the rest of
+  the sequence, since each phase's `elapsed` restarts at its own transition
+  tick rather than tracking a global clock. The probe's own instrumentation
+  only checked the single boundary tick, not the cascade forward through
+  the rest of the window — the decisive negative the step brief anticipated
+  ("if anything ELSE moved, stop and revert — the probe's model is wrong").
+  Reverted cleanly (confirmed back to 255/256 / exactly {95} / {405} on
+  both traces after revert). `BRAIN_MOVEMENT_SETTLE_ELAPSED` stays 86.
+- **Net result:** gold-open 254/256 → **255/256** (frame 58 fixed, 95
+  remains open), entrance-03 254/256 → **255/256** (frame 368 fixed, 405
+  remains open). Guard matrix (gold-pages 177/177, silver box2 100/100,
+  gold-close 113/126, entrance-02 256/256, callscene-01 131/131,
+  callscene-02 199/199, B2 speech box0-held 39/39 / cry-held 74/74 /
+  page8-held 39/39 / close-pause 28/28, askready 21/21, swapask-no 194/194)
+  reverified unmoved. `npm test` 1065 files/10010 passed/223 skipped
+  (unmoved), `npm run build` + `npm run typecheck` green, ratchet barrier
+  counts unmoved. No Tier-1 test pins the exact `camPanY===48` boundary or
+  a numeric `BRAIN_MOVEMENT_SETTLE_ELAPSED` value, so none needed updating.
+- **Open remainder:** gold-open 95 / entrance-03 405 (the scientist
+  turn-in-place settle) still needs a real fix. The root cause read (stale
+  derivation predating the B1c `-1` render fix) still looks right; what's
+  missing is a fix shape that corrects the *render-side* `historicElapsed`
+  value read during the transition tick without moving the transition
+  itself (and thus without re-basing every later phase's own clock) — e.g.
+  a one-tick special case at the transition boundary, or decoupling
+  `historicElapsed`'s computation from `state.elapsed`'s own phase-relative
+  reset. Not attempted this step; left honestly open per the step brief's
+  instruction not to improvise a third change.
