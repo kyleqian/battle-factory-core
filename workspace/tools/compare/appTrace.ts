@@ -90,6 +90,7 @@ import {
   generatedRoundBattle7NolandRevealStage,
   generatedRoundBattle7NolandRoomEntranceStage,
   generatedRoundBattle7NolandSilverSpeechBox0HeldStage,
+  generatedRoundBattle7NolandSilverSpeechBox2OpeningStage,
   generatedRoundBattle7NolandSilverSpeechClosePauseStage,
   generatedRoundBattle7NolandSilverSpeechCryHeldStage,
   generatedRoundBattle7NolandSilverSpeechPage8HeldStage,
@@ -1513,6 +1514,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
     generatedRoundBattle7NolandPostwinAskReadyMenuOpenStage,
   "factory-round-battle7-noland-silver-speech-box0-held-off":
     generatedRoundBattle7NolandSilverSpeechBox0HeldStage,
+  "factory-round-battle7-noland-silver-speech-box2-opening-off":
+    generatedRoundBattle7NolandSilverSpeechBox2OpeningStage,
   "factory-round-battle7-noland-silver-speech-cry-held-off":
     generatedRoundBattle7NolandSilverSpeechCryHeldStage,
   "factory-round-battle7-noland-silver-speech-page8-held-off":
