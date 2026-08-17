@@ -211,6 +211,18 @@ const LOGO_WAVE_FLICKER_END_TE = LOGO_WAVE_FLICKER_START_TE + 48;
 const LOGO_WAVE_MAIN_START_TE = 84;
 const LOGO_WAVE_FADE_FIRST_MAIN_AGE = 101;
 
+/**
+ * The `te` value at which `grayFlickerY`/`logoWaveGrayFlickerY` starts
+ * producing a nonzero blend for the given render kind - callers that need to
+ * re-derive `te` from a different clock (e.g. `renderBattleRoomState`'s
+ * brain-walkup re-basing, docs/noland-brain-intro-gold-ground-truth.md §8″)
+ * read this instead of duplicating the per-family constant.
+ */
+export function frontierTransitionFlickerStartTe(transition: FrontierTransitionRenderKind): number {
+  if (transition === "logoWave") return LOGO_WAVE_FLICKER_START_TE;
+  return transition === "asymmetricSpiralInSeq" ? ASYMMETRIC_SEQ_FLICKER_START_TE : FLICKER_START_TE;
+}
+
 function logoWaveGrayFlickerY(te: number): number {
   if (te < LOGO_WAVE_FLICKER_START_TE || te >= LOGO_WAVE_FLICKER_END_TE) return 0;
   const k = (te - LOGO_WAVE_FLICKER_START_TE) % 16;

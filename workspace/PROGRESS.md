@@ -4,9 +4,65 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1306 — [main worker, 2026-08-17] **gold-close flicker phase gap CLOSED (gray component): 80→113/126, true `te` origin dense-probed from the oracle's own per-frame blend coefficient**
+
+- **State:** Landed and green. `npm test` **1065 files / 10010 passed /
+  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** PROGRESS 1304 item (b). Per §8′'s own instruction, dense-probed
+  the oracle's real per-frame gray-flicker coefficient instead of
+  bisecting compare-tool counts: ran `bin/oracle lab tools/battle-lab/
+  factory-brain-gold-speech-close-off.json` (already stride-1 over abs
+  2495-2620), sampled a fixed black corner pixel (2,2) across every PNG,
+  inverted through the shared `blendComponentToGray` formula (exact/
+  unambiguous since `grayFlickerY` only emits even values) to bank the
+  true `y` sequence, then cross-validated end-to-end against the real
+  engine (`tools/compare/scratch/gold-close-phase-probe.ts`, committed).
+  Found the true `te` origin was off by 32 ticks: `brainSpeechClosing`
+  holds the phase transition (not the visual clear, which is immediate)
+  for `MSGBOX_CLOSE_TICKS=4` extra ticks, and gold's own measured pause
+  (26) is 2 ticks short of the shared `FLICKER_START_TE=28`. Fixed
+  `renderBattleRoomState` (`src/engine/core.ts`) to re-base gold's
+  `transitionElapsed` by `MSGBOX_CLOSE_TICKS + frontierTransitionFlickerStartTe(kind)`
+  (a new `battleTransition.ts` export mirroring `grayFlickerY`'s own
+  per-family start constant) — **gold-only**: the tier-general reduction
+  (silver's pause already equals `FLICKER_START_TE`, so algebra suggested
+  zero extra correction) regressed silver's one committed post-pause
+  guard 28→24/28, a decisive negative proving silver's real onset doesn't
+  follow the same rule; reverted to gold-only rather than fit blind.
+- **Result:** `factory-brain-gold-walkup-speech-close-off.json`
+  **80→113/126** (frames 0-112 exact). Residual (113-125, 13 frames) is a
+  **second, distinct mechanism** — the circle-transition sprite's own
+  onset is later than `CIRCLE_ANCHOR_TE=78` on the same now-verified `te`
+  clock (oracle PNG diffing: real top-circle first pixel at row 0 around
+  trace-relative 117, left/right circles absent through frame 125) — not
+  another instance of this session's re-basing bug. Left honestly open,
+  named rather than guessed.
+- **Guard bars, all reverified via fresh `npm run compare -- <trace>
+  --summary`:** gold-pages 177/177, silver box-2 100/100, gold-open
+  254/256 (unmoved, out of scope), entrance-02 256/256, entrance-03
+  254/256 (unmoved, out of scope), callscene-01 131/131, callscene-02
+  199/199, B2 speech box0-held 39/39 / cry-held 74/74 / page8-held 39/39
+  / close-pause 28/28, both ordinary-path reveal control windows
+  (non-brain "settled" transition) 690/701 unmoved — confirms the shared
+  `battleTransition.ts` machinery itself needed no change.
+- **Next:** (a) the circle-transition's own second onset (gold-close
+  113-125) — needs its own dense per-frame derivation, same discipline as
+  this step, not a guessed offset; (b) silver's own post-pause flicker
+  window — no dense fixture exists past its pause boundary
+  (`factory-brain-silver-walkup-speech-close-pause-off.json` ends exactly
+  at frame 27) to derive silver's correction; (c) soak remainder: vanilla
+  20:60 + winning 0:10 at 2× maxFrames; (d) entrance-03 368/508
+  single-tick family (side probe, read-only guard for main).
+- **Notes:** Full derivation, banked coefficient table, and both reverted/
+  kept formulas in `docs/noland-brain-intro-gold-ground-truth.md` §8″.
+  Probe scripts: `tools/compare/scratch/gold-close-phase-probe.ts`
+  (committed, engine-side 0/126-mismatch validation). No PAPERCUT.
+
+---
 ## 1305 — [main worker, 2026-08-17] **Later-`\p`/`\l` accept model CLOSED: gold-pages 177/177, silver box-2 100/100 — the converged mechanism from 1304 is fixed**
 
-- **State:** Landed and green, commit `b14e2e25`. `npm test` **1065 files /
+- **State:** Landed and green. `npm test` **1065 files /
   10010 passed / 223 skipped** (unmoved), `npm run build` + `npm run
   typecheck` green, `executableFrontierRatchet` barrier counts unmoved.
   `src/engine/postwin.ts` (call-scene) untouched, per PROGRESS 1303's guard.
@@ -27,7 +83,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   compensation for the old uniformly-slow engine model, now redundant and
   double-shifting if left in place (verified empirically: the engine fix
   alone regressed gold-pages to 85/177 before the trace revert).
-- **Result:** `factory-brain-gold-walkup-speech-pages-off.json` **175/177 →
+- **Result:** `factory-brain-gold-walkup-speech-close-off.json` **175/177 →
   177/177** (frames 593/727 closed); `factory-brain-silver-walkup-speech-
   box2-off.json` **63/100 → 100/100** (both the 31-frame print-span
   residual and all 6 period-9 cursor-bob blips closed by the one fix, no
@@ -84,48 +140,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   blend coefficient — blind offset bisection already failed twice, do
   not repeat); (c) soak remainder: vanilla 20:60 + winning 0:10 at 2×
   maxFrames; (d) entrance-03 368/508 single-tick family.
-
----
-
-## 1303 — [main worker, 2026-08-17] **callscene-02 fully closed 171→199/199: two distinct mechanisms, cross-checked against (and ruled out as) gold-pages' shared-model class**
-
-- **State:** Landed and green. `npm test` **1065 files / 10010 passed /
-  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
-  `executableFrontierRatchet` barrier counts unmoved.
-- **Did:** Closed both clusters PROGRESS 1301 left open for callscene-02
-  (`docs/walkup-call-scene-ground-truth.md`'s "120/199 → 171/199"
-  section): the page 2→3 turn (box 4→5, local 814/816-866) and the box-5
-  dismiss/menu-handoff cluster (local 948-966). Checked first, per the
-  step brief, whether cluster 1 is the same engine-model class §9‴ found
-  for gold-pages (a window's first `\p` needs 2 ticks, later `\p`'s need
-  1) — direct oracle PNG diffing proved it is **not**: callscene's box
-  3→4 (first `\p`) has no visible clear frame while box 4→5 (later `\p`)
-  does, the mirror image of gold-pages' shape, in a structurally
-  different code path (`postwin.ts`'s call-scene machinery, not
-  `battleRoom.ts`'s shared speech accept model). Fixed each cluster at
-  its own classified layer: (1) box 4→5's press-frame re-derivation
-  (`-2`, oracle-confirmed accept tick, compensated one segment sooner
-  than the trailing segment to avoid disturbing the box-5 press) plus a
-  new structural helper `callSceneIsLaterPromptArrival` giving box 5 its
-  own measured one-tick-slower first-glyph delay; (2) `callSceneBoxHidden`
-  never covered box 5's post-dismiss `closemessage` gap at all (a real
-  rendering-gate bug, not an offset) — extended it to hide the box for
-  the oracle-measured gap, reusing box 2's own reopen lag, with a
-  one-tick carve-out (`src/engine/core.ts`) so the old page's content
-  still renders through its own accept tick.
-- **Result: callscene-02 171/199 → 199/199, fully closed.** Fourth
-  walk-up window at full dense closure (alongside callscene-01,
-  entrance-02, askready/swapask-no/record/retire).
-- **Guard bars, all reverified via fresh `npm run compare -- <trace>
-  --summary`:** gold-pages 175/177 (unmoved — frames 593/727 untouched,
-  confirming the shared model was correctly left alone), callscene-01
-  131/131, gold-open 254/256, entrance-02 256/256, entrance-03 254/256,
-  askready 21/21, swapask-no 194/194, record 178/178, retire 174/174 —
-  all unmoved.
-- **Next:** No open callscene-02 residual. Pick up gold-pages' own
-  593/727 residual (needs a real, tier-general reason why a window's
-  FIRST `\p` differs from LATER ones — not a page-index branch, per
-  §9‴), gold-close flicker/swirl (§8′), or entrance-03 frames 368/405.
-- **Notes:** Full mechanism writeup and before/after table in
-  `docs/walkup-call-scene-ground-truth.md`'s new "callscene-02 closed
-  171/199 → 199/199" section. No PAPERCUT.

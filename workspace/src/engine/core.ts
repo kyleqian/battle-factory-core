@@ -109,6 +109,7 @@ import {
   entryStep,
   INITIAL_BATTLE_ROOM_STATE,
   BATTLE_2_SCENE_HANDOFF_ELAPSED,
+  MSGBOX_CLOSE_TICKS,
   msgboxVisual,
   opponentSetupExtraRngSteps,
   SETTLED_SCENE_ELAPSED,
@@ -120,6 +121,7 @@ import {
   applyBattleTransitionOverlay,
   battleIntroSceneAssemblyDisplayLag,
   frontierTransitionBgFadeY,
+  frontierTransitionFlickerStartTe,
   frontierTransitionObjFadeY,
   frontierTransitionRenderKind,
   selectFrontierTransition,
@@ -2486,24 +2488,39 @@ function renderBattleRoomState(state: EngineState): Uint8Array {
     // Walk-up build step B1: fade-in during brainEntering, same FADE_IN
     // table/convention as the ordinary path.
     const fadeElapsed = b.phase === "brainEntering" ? b.elapsed : SETTLED_SCENE_ELAPSED;
-    // CLOSE WIPE follow-up (partial, characterized honestly - see docs/
-    // noland-brain-intro-gold-ground-truth.md's own new §8' section): once
-    // brainSpeechSettled's own empty-arena pause ends
-    // (brainSpeechSceneHandoffElapsed, itself probe-derived per its own
-    // doc), the SAME shared Frontier circle-transition overlay the ordinary
-    // (non-brain) "settled" phase plays below starts layering on top here
-    // too, `te` re-based to 0 at that same pause-end tick. This closes most
-    // of the gap (factory-brain-gold-walkup-speech-close-off.json:
-    // 62->80/126, reproduce via `npm run compare -- factory-brain-gold-
-    // walkup-speech-close-off.json --summary`) but leaves a residual in the
-    // flicker's own later ticks and the swirl-build sub-stage (frames
-    // 93-116, then a small-to-growing mismatch from ~117) not fully pinned
-    // this session - flagged honestly rather than chased into a second
-    // fitted offset (see this file's own doc note on the prior worker's
-    // regression from guessing this exact shape).
-    const transitionElapsed = b.elapsed - brainSpeechSceneHandoffElapsed(b);
+    // CLOSE WIPE (§8'/§8" - docs/noland-brain-intro-gold-ground-truth.md):
+    // the SAME shared Frontier circle-transition overlay the ordinary
+    // (non-brain) "settled" phase plays below also layers on top here once
+    // brainSpeechSettled starts. §8' re-based `te` to 0 at
+    // brainSpeechSceneHandoffElapsed (the pause-end tick), which closed most
+    // of the gap but left a periodic phase residual - §8" dense-probed the
+    // oracle's own per-frame gray level (a corner background pixel, inverted
+    // through the shared blend formula) for factory-brain-gold-walkup-
+    // speech-close-off.json's full 126-frame window and found the true
+    // origin: the box's REAL visual dismiss is MSGBOX_CLOSE_TICKS ticks
+    // before brainSpeechSettled's own elapsed=0 (msgboxVisual's
+    // brainSpeechClosing case clears immediately, but the phase transition
+    // itself lags MSGBOX_CLOSE_TICKS ticks behind), and gold's own measured
+    // pause (brainSpeechSceneHandoffElapsed) is 2 ticks shorter than the
+    // shared overlay's own flicker-start tick count - re-basing gold's `te`
+    // to "ticks since the real dismiss, minus gold's own pause, plus the
+    // selected transition's own flicker-start `te`" reproduces the oracle's
+    // per-frame gray-flicker coefficient with 0/126 mismatches (§8" - a
+    // residual in the later swirl-build sub-stage remains, a distinct,
+    // not-yet-derived mechanism). GOLD-ONLY: silver has no dense fixture
+    // past its own pause boundary to verify the same correction (its one
+    // committed window, speech-close-pause-off.json, ends exactly at the
+    // pause) - applying it tier-generally regressed that guard 28->24/28
+    // (silver's pause exactly equals the shared FLICKER_START_TE, so the
+    // naive tier-general reduction predicted a same-shape correction, but
+    // the guard proves the real silver onset is NOT 2 ticks early like
+    // gold's - left as future work, not fitted blind).
+    const transitionKind = frontierTransitionRenderKind(b.transitionPresentation, "circlesMeet");
+    const goldRebaseTe = MSGBOX_CLOSE_TICKS + frontierTransitionFlickerStartTe(transitionKind);
+    const transitionElapsed = b.elapsed - brainSpeechSceneHandoffElapsed(b)
+      + (b.brainSpeechTier === "gold" ? goldRebaseTe : 0);
     const transition = b.phase === "brainSpeechSettled" && transitionElapsed >= 0
-      ? frontierTransitionRenderKind(b.transitionPresentation, "circlesMeet")
+      ? transitionKind
       : null;
     const bgY = transition !== null ? frontierTransitionBgFadeY(transitionElapsed, transition) : bgFadeY(fadeElapsed, FADE_IN);
     const objY = transition !== null ? frontierTransitionObjFadeY(transitionElapsed, transition) : objFadeY(fadeElapsed, FADE_IN);

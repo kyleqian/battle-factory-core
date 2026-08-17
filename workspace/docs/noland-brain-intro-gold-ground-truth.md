@@ -426,6 +426,137 @@ follow-up step should dense-probe `factory-brain-gold-speech-close-off
 `grayFlickerY`/circle-sprite math tick-by-tick (not just sha-compare) to
 isolate the two remaining mechanisms precisely.
 
+### 8″. Gold-close flicker phase gap CLOSED (gray component): 80→113/126, true `te` origin derived from the oracle's own per-frame blend coefficient, not bisected (2026-08-17, main worker)
+
+Per §8′'s own explicit follow-up instruction: dense-probed the oracle's real
+per-frame gray-flicker coefficient (not sha-compare, not compare-count
+bisection) to find the true `te` origin.
+
+**Extraction.** `tools/battle-lab/factory-brain-gold-speech-close-off.json`
+already bakes a stride-1 `preCheckpointCaptureFrames` list for abs frames
+2495–2620 (matches the compare trace's own `preCheckpointFrameOffset:
+2495`), so one fresh `bin/oracle lab` run produces every PNG needed:
+```sh
+bin/oracle lab tools/battle-lab/factory-brain-gold-speech-close-off.json -o /tmp/gold-close-probe --quiet
+```
+Sampled pixel (2,2) - a pure-black corner background pixel, always outside
+the circle sprites' slide path for this whole window - from every PNG.
+`grayFlickerY`'s blend target is `blendComponentToGray`'s own formula
+(`faded5 = c5 + ((11-c5)*y)>>4`, GRAY_TARGET5=11) and `grayFlickerY` itself
+only ever emits **even** `y` (0-16), so for a pure-black pixel (`c5=0`) the
+map `y -> faded5` (`{0:0, 2:1, 4:2, 6:4, 8:5, 10:6, 12:8, 14:9, 16:11}`) is
+injective - the observed 8-bit red channel inverts to an *exact*, unambiguous
+`y` every frame, no interpolation needed. Cross-checked against a
+peak-brightness frame (abs 2564/2580/2596, all sampled `(90,90,90)` at
+several unrelated background/foreground points) confirming `y=16` drives
+every pixel to the identical target color regardless of original content -
+independent proof the formula/target used to invert is right.
+
+**Banked sequence** (abs frame → `y`, trace-relative = abs − 2495):
+| Abs range | Trace-relative | `y` |
+| --- | --- | --- |
+| 2495–2556 | 0–61 | flat 0 |
+| 2557–2572 | 62–77 | 2,4,6,8,10,12,14,16,14,12,10,8,6,4,2,0 (cycle 1) |
+| 2573–2588 | 78–93 | same 16-tick triangle (cycle 2) |
+| 2589–2604 | 94–109 | same 16-tick triangle (cycle 3) |
+| 2605–2620 | 110–125 | flat 0 (flicker over, stays off) |
+
+This is `grayFlickerY`'s own triangle shape exactly (3 full 16-tick cycles,
+`FLICKER_END_TE − FLICKER_START_TE = 48 = 3×16`), just starting at
+trace-relative frame 62, not wherever the committed `te` re-basing put it.
+
+**True origin.** A second probe
+(`tools/compare/scratch/gold-close-phase-probe.ts`, committed) replays this
+exact compare trace through the *real* engine
+(`createInitialState`/`tick`/`render`, the same path `tools/compare/
+appTrace.ts` uses) and confirms two things a doc-only read can't: (1)
+`brainSpeechSettled`'s own `elapsed=0` lands at trace-relative frame **40**,
+not 36 as a naive read of §7′'s "2531–2556 pause" table would suggest -
+`brainSpeechClosing` (whose box-clear is visually immediate, `msgboxVisual`'s
+existing `MSGBOX_HIDDEN` case) still holds the *phase transition* itself for
+`MSGBOX_CLOSE_TICKS=4` ticks (trace-relative 36–39) before handing off; (2)
+the previously-committed `transitionElapsed = b.elapsed −
+brainSpeechSceneHandoffElapsed(b)` therefore put `te=0` at trace-relative 66
+and `te=28` (`FLICKER_START_TE`, where `grayFlickerY` first goes nonzero) at
+trace-relative **94** - 32 frames later than the oracle's real onset (62).
+
+Reproducing "ticks since the box's real visual dismiss" (`b.elapsed +
+MSGBOX_CLOSE_TICKS`) and re-basing so gold's own shorter pause lines up with
+the shared overlay's flicker-start constant (`− handoff_gold(26) +
+FLICKER_START_TE(28)`, net **+32**, i.e. `te = b.elapsed + 6`) reproduces
+the ENTIRE banked sequence above with **0/126 mismatches** end-to-end
+through the real render path (probe script output: `checked 126 frames, 0
+mismatches`). Implemented as `goldRebaseTe = MSGBOX_CLOSE_TICKS +
+frontierTransitionFlickerStartTe(transitionKind)` in
+`renderBattleRoomState` (`src/engine/core.ts`), added only to gold's own
+`transitionElapsed`; `frontierTransitionFlickerStartTe` is a new small
+`battleTransition.ts` export mirroring `grayFlickerY`'s own per-family start
+constant (28 circlesMeet / 25 asymmetricSpiralInSeq / 34 logoWave) instead of
+hardcoding 28 in `core.ts`.
+
+**Result:** `factory-brain-gold-walkup-speech-close-off.json` **80→113/126**
+(frames 0–112 now exact; reproduce: `npm run compare -- factory-brain-gold-
+walkup-speech-close-off.json --summary`).
+
+**Tried, reverted (decisive negative, not blind):** applying the identical
+correction tier-generally (silver's `handoff` already equals
+`FLICKER_START_TE`, so the "clean" reduction is `te = b.elapsed +
+MSGBOX_CLOSE_TICKS` for silver too) regressed the one committed silver guard
+that reaches this codepath, `factory-brain-silver-walkup-speech-close-pause
+-off.json`, **28→24/28** (frames 26-27 started flickering while the real
+oracle is still flat) - silver's real onset does **not** track the same
+"pause exactly equals FLICKER_START_TE ⇒ zero extra correction beyond the
+closing lag" reduction the algebra suggested, even though the reduction's
+premise (pause=28=FLICKER_START_TE) is true. Silver has no dense fixture
+past its own pause boundary to derive its *own* correction (its one window
+ends exactly at frame 27), so the fix stays **gold-only**
+(`b.brainSpeechTier === "gold" ? goldRebaseTe : 0`) rather than fitted blind
+- a follow-up with its own dense post-pause silver capture (mirroring
+`factory-brain-gold-speech-close-off.json`) is the honest next step for
+silver's own flicker window, not attempted this session.
+
+**Residual (113–125, 13 frames): a second, distinct onset, not this
+session's mechanism.** The flicker component is now proven exact on the
+corrected `te` clock, and `applyBattleTransitionOverlay` uses that SAME `te`
+for the circle sprites (`CIRCLE_ANCHOR_TE=78`), so the circle slide should
+already be correctly timed by construction - it isn't. A raw PNG diff of
+consecutive oracle frames (abs 2611→2620, i.e. trace-relative 116-125) shows
+the real top-circle sprite's first pixel appearing at **row 0** around
+trace-relative **117** (12px at x=114-125, growing to a 660px, y=0-32 wedge
+by frame 125) - while the app, using `te = trace-relative_frame + 6 − 40
++ ...` = `CIRCLE_ANCHOR_TE`-relative math, already draws a sliver from
+trace-relative ~113. A companion check of oracle row 159 (the bottom row,
+where the faster-converging left/right circle sprites should appear first
+per `CIRCLE_SPECS`) found **zero** circle-sprite pixels through frame 125 -
+the real circle-transition onset in this brain-close context is later than
+`CIRCLE_ANCHOR_TE=78` on the very `te` clock that made the flicker exact,
+i.e. a genuine second mechanism (the circle overlay's own onset,
+independent of the flicker's), not another instance of this session's
+re-basing bug. Left honestly unfixed - the acceptance bar for this step was
+"strictly improved, remaining mismatch set listed," not full closure, and
+guessing a second offset here without its own dense per-frame derivation is
+exactly the failure mode both this step's brief and §8′ warned against.
+
+**Control (step 4 of the method): shared machinery reverified untouched.**
+The ordinary (non-brain) Frontier "settled" path plays the identical
+`battleTransition.ts` overlay with no re-basing (`b.elapsed` fed directly).
+Reran both its own exact committed windows after this change:
+`factory-round-battle7-noland-reveal-off.json` and `factory-round-battle7-
+noland-gold-reveal-off.json`, both **690/701 unmoved** (same bar §8′ cited) -
+confirms the shared machinery itself needed no change; only the brain-path
+re-basing layer did, as the step's own priors (two prior blind realignments
+both scoring worse) already pointed to.
+
+**Guard matrix, all reverified fresh via `npm run compare -- <trace>
+--summary` after this change:** gold-pages 177/177, silver box-2 100/100,
+gold-open 254/256 (unmoved, out of scope - frames 58/95, a side probe's
+own item), entrance-02 256/256, entrance-03 254/256 (unmoved, out of scope),
+callscene-01 131/131, callscene-02 199/199, B2 speech box0-held 39/39 /
+cry-held 74/74 / page8-held 39/39 / close-pause 28/28, both reveal control
+windows 690/701. Full `npm test` (1065 files / 10010 passed / 223 skipped,
+unmoved), `npm run build`, `npm run typecheck` green;
+`executableFrontierRatchet` barrier counts unmoved.
+
 ### 9′. Gold-open window closed: two shared-clock mechanisms, not a park-phase constant (2026-08-16, main worker)
 
 The 58/256 gold-open residual this step inherited was **not** the box-corner/

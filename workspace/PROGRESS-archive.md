@@ -1,3 +1,48 @@
+## 1303 — [main worker, 2026-08-17] **callscene-02 fully closed 171→199/199: two distinct mechanisms, cross-checked against (and ruled out as) gold-pages' shared-model class**
+
+- **State:** Landed and green. `npm test` **1065 files / 10010 passed /
+  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Closed both clusters PROGRESS 1301 left open for callscene-02
+  (`docs/walkup-call-scene-ground-truth.md`'s "120/199 → 171/199"
+  section): the page 2→3 turn (box 4→5, local 814/816-866) and the box-5
+  dismiss/menu-handoff cluster (local 948-966). Checked first, per the
+  step brief, whether cluster 1 is the same engine-model class §9‴ found
+  for gold-pages (a window's first `\p` needs 2 ticks, later `\p`'s need
+  1) — direct oracle PNG diffing proved it is **not**: callscene's box
+  3→4 (first `\p`) has no visible clear frame while box 4→5 (later `\p`)
+  does, the mirror image of gold-pages' shape, in a structurally
+  different code path (`postwin.ts`'s call-scene machinery, not
+  `battleRoom.ts`'s shared speech accept model). Fixed each cluster at
+  its own classified layer: (1) box 4→5's press-frame re-derivation
+  (`-2`, oracle-confirmed accept tick, compensated one segment sooner
+  than the trailing segment to avoid disturbing the box-5 press) plus a
+  new structural helper `callSceneIsLaterPromptArrival` giving box 5 its
+  own measured one-tick-slower first-glyph delay; (2) `callSceneBoxHidden`
+  never covered box 5's post-dismiss `closemessage` gap at all (a real
+  rendering-gate bug, not an offset) — extended it to hide the box for
+  the oracle-measured gap, reusing box 2's own reopen lag, with a
+  one-tick carve-out (`src/engine/core.ts`) so the old page's content
+  still renders through its own accept tick.
+- **Result: callscene-02 171/199 → 199/199, fully closed.** Fourth
+  walk-up window at full dense closure (alongside callscene-01,
+  entrance-02, askready/swapask-no/record/retire).
+- **Guard bars, all reverified via fresh `npm run compare -- <trace>
+  --summary`:** gold-pages 175/177 (unmoved — frames 593/727 untouched,
+  confirming the shared model was correctly left alone), callscene-01
+  131/131, gold-open 254/256, entrance-02 256/256, entrance-03 254/256,
+  askready 21/21, swapask-no 194/194, record 178/178, retire 174/174 —
+  all unmoved.
+- **Next:** No open callscene-02 residual. Pick up gold-pages' own
+  593/727 residual (needs a real, tier-general reason why a window's
+  FIRST `\p` differs from LATER ones — not a page-index branch, per
+  §9‴), gold-close flicker/swirl (§8′), or entrance-03 frames 368/405.
+- **Notes:** Full mechanism writeup and before/after table in
+  `docs/walkup-call-scene-ground-truth.md`'s new "callscene-02 closed
+  171/199 → 199/199" section. No PAPERCUT.
+
+---
+
 ## 1302 — [main worker, 2026-08-17] **gold-pages typewriter edges closed 85→175/177: trace recalibration, plus a newly-proven (not chased) engine residual**
 
 - **State:** Landed and green. `npm test` **1065 files / 10010 passed /
