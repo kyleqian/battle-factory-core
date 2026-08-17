@@ -1,0 +1,16 @@
+{
+  "appRoute": "generated-orchestrator",
+  "oracleProfile": "battle-scene-off",
+  "appStage": {
+    "id": "factory-round-battle7-noland-silver-speech-close-pause-off",
+    "frame": 0
+  },
+  "oracleBattleLab": {
+    "scenario": "../../battle-lab/factory-brain-silver-walkup-speech-flicker-off.json",
+    "preCheckpointFrameOffset": 3201
+  },
+  "segments": [
+    { "frames": 100, "buttons": [] }
+  ],
+  "captureWindow": { "start": 0, "end": 99 }
+}
