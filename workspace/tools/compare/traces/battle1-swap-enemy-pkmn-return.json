@@ -1,4 +1,5 @@
 {
+  "appRoute": "canonical-recorded",
   "oracleProfile": "battle-scene-off",
   "_comment": "derived from tools/compare/traces-groundtruth/battle1-swapyes-b.json; dense OFF acceptance window for enemy PKMN FOR SWAP returning to the first fresh player input",
   "segments": [

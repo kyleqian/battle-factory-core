@@ -250,3 +250,53 @@ All three finish-line checks are green on `1d22c07c` **despite** the 26
 DEVIATION rows above — those are `tools/compare/` (Tier 2, not part of
 `npm test`) fixtures the standing Tier-1 suite does not cover. Nothing in
 this sweep touched a file; the tree is byte-identical to `1d22c07c`.
+
+## #96 fix verification (2026-08-17)
+
+Applied ISSUES #96's mechanical fix: added the missing explicit
+`"appRoute": "canonical-recorded"` field (same position/style as
+`battle1-swap-enemy-accept-exit.json`, the one family member that already
+had it) to all 17 `battle1-swap-*` traces flagged DEVIATION in the table
+above. `battle1-swap-enemy-accept-exit.json` itself was not touched (already
+had the field, already 43/43 EXACT). Each of the 17 edited traces was rerun
+individually and serially against the Battle Scene OFF oracle
+(`npm run compare -- <trace> --summary`).
+
+| Trace | Post-fix count | Documented bar | Classification |
+| --- | --- | --- | --- |
+| battle1-swap-enemy-accept-b-return.json | 69/69 | 69/69 (s8 audit) | RESTORED |
+| battle1-swap-enemy-accept-no-return.json | 69/69 | 69/69 (s8 audit) | RESTORED |
+| battle1-swap-enemy-accept-prompt.json | 66/66 | 66/66 (s8 audit) | RESTORED |
+| battle1-swap-enemy-cancel-quit-yes.json | 65/65 | full (rung14) | RESTORED |
+| battle1-swap-enemy-picker.json | 129/130 | 130/130 (s8 audit) | **STILL-DEVIANT** — first mismatch frame 29838 (5px, 0.01%, bbox=239,62-239,66) |
+| battle1-swap-enemy-pkmn-return.json | 115/115 | 115/115 (s8 audit) | RESTORED |
+| battle1-swap-enemy-quit-b-no-return.json | 113/113 | full (rung14) | RESTORED |
+| battle1-swap-enemy-quit-b-return.json | 113/113 | full (rung14) | RESTORED |
+| battle1-swap-enemy-quit-b-yes.json | 65/65 | full (rung14) | RESTORED |
+| battle1-swap-player-cancel-quit-yes.json | 68/68 | 68/68 (s8 audit, "CANCEL+YES") | RESTORED |
+| battle1-swap-player-options-b-close.json | 59/59 | 59/59 (s8 audit) | RESTORED |
+| battle1-swap-player-options-popup.json | 44/44 | 44/44 (s8 audit) | RESTORED |
+| battle1-swap-player-options.json | 58/58 | 58/58 (s8 audit) | RESTORED |
+| battle1-swap-player-picker.json | 101/101 | 101/101 (s8 audit) | RESTORED |
+| battle1-swap-player-quit-b-return.json | 61/67 | 67/67 (s8 audit) | **STILL-DEVIANT** — first mismatch frame 29774 (176px, 0.46%, bbox=61,54-81,73) |
+| battle1-swap-player-quit-no-return.json | 61/67 | 67/67 (s8 audit) | **STILL-DEVIANT** — first mismatch frame 29774 (176px, 0.46%, bbox=61,54-81,73, identical signature to `player-quit-b-return`) |
+| battle1-swap-player-quit-yes.json | 31/31 | 31/31 (s8 audit) | RESTORED |
+| battle1-swap-player-summary-return.json | 147/147 | 147/147 (s8 audit) | RESTORED |
+
+**Tally: 14 RESTORED / 3 STILL-DEVIANT.** The still-deviant three are all
+massively improved from the pre-fix ~0/N whole-frame-mismatch collapse (the
+field fix clearly landed and is doing its job for all 17) but stop short of
+their documented full bar with small, localized per-frame diffs — a
+different, narrower mechanism than the appRoute papercut this entry fixes.
+Per #96's own fix-shape note ("Any member that does NOT restore after the
+field fix is a separate real drift and must be recorded individually — do
+not lump it back into this entry"), these three are left as-is here, not
+debugged further. `player-quit-b-return` and `player-quit-no-return` share
+an identical first-mismatch signature (same frame, same bbox, same pixel
+count) suggesting one shared root cause across both; `enemy-picker`'s is a
+much smaller, distinct 5px sprite-edge delta.
+
+Finish-line: `npm run test:smoke` green (trace JSONs are not part of the
+Tier-1 suite; only the doc + trace edits were made in this step, per the
+step brief's guidance that smoke suffices when nothing beyond trace JSONs
+and this one doc is touched).
