@@ -4,6 +4,43 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1304 — [supervisor fold, 2026-08-17] **Rounds 1-2: gold-pages 175/177 + callscene-02 CLOSED 199/199 + soak 120:180 clean + silver box-2 fixture banked — later-`\p` one-tick model is now a two-window converged mechanism**
+
+- **State:** master `16cc1a14`, tree clean. Union after both folds: smoke
+  375/375, callscene-02 **199/199**, callscene-01 131/131, swapask-no
+  194/194, gold-pages 175/177, silver box-2 63/100 (expected, open
+  mechanism below) — all supervisor-rerun live. Both workers ran full
+  `npm test` (1065 files / 10010 passed / 223 skipped) + build +
+  typecheck green on their own commits.
+- **Folds this session:** side `16aaa7fa` (soak part 5: full+winning
+  120:180 both 60/60 OK, zero signatures; vanilla 20:60 + longer-chain
+  probe not attempted, ready-to-run commands in
+  `docs/soak-sweep-2026-08-17-part5.md`) and side `5243b45a` (dense
+  silver box-2 fixture 63/100 + stage/registration; cursor Fix B
+  confirmed tier-general — all 54 non-blip hold frames byte-exact).
+  animation-main/rust-main: nothing to fold at orient (both empty).
+- **Converged open mechanism (next main step):** the shared brainSpeech
+  2-tick clear-then-print `\p` accept model is one tick slow for LATER
+  transitions in an open window — gold-pages 593/727 (§9‴, proven
+  unreachable by trace edits) + silver box-2 group A/B
+  (`docs/silver-speech-box2-evidence.md`, space-character proof; refines
+  the rule: silver's box1→2 edge is the 3rd transition counting the \l
+  scroll). callscene-02's page turn was cross-checked and is NOT this
+  class (distinct path, entry 1303) — the model fix must not touch
+  call-scene code.
+- **Ops:** freshness-check false positive #4 at orient (8014 FAIL but
+  every commit since service start is workspace-only — service kept, no
+  restart). DEFERRED.md still empty.
+- **Next (ordered):** (a) the later-`\p` model fix (acceptance:
+  gold-pages 177/177 AND silver box-2 100/100, full guard matrix
+  unmoved); (b) gold-close flicker phase derivation (§8′ recipe:
+  stride-1 dense probe of oracle 2557–2620 vs `grayFlickerY` per-tick
+  blend coefficient — blind offset bisection already failed twice, do
+  not repeat); (c) soak remainder: vanilla 20:60 + winning 0:10 at 2×
+  maxFrames; (d) entrance-03 368/508 single-tick family.
+
+---
+
 ## 1303 — [main worker, 2026-08-17] **callscene-02 fully closed 171→199/199: two distinct mechanisms, cross-checked against (and ruled out as) gold-pages' shared-model class**
 
 - **State:** Landed and green. `npm test` **1065 files / 10010 passed /
@@ -111,53 +148,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1301 — [supervisor wind-down, 2026-08-16] **Nine worker steps + one salvage, two lanes: every open walk-up window advanced (two to exact/near-exact), two latent engine crashes found+fixed, soak coverage 0:120 green — all final gates green**
-
-- **Final gates (tree `f63ff8d3`, the animation Soft Boiled fold —
-  run AFTER every merge):** full npm **1,065 files / 10,010 passed /
-  223 skipped**; build green; soak vanilla 0:20 **20/20 OK**; soak
-  full 0:60 **60/60 OK** (30+30 chunks). Fold status: animation-main
-  folded TWICE this session (morning: Heal Bell + Fire Blast,
-  coverage 194/276; evening: Soft Boiled round + its supervisor
-  wind-down — `master..animation-main` now EMPTY). rust-main: nothing
-  all session. DEFERRED.md EMPTY — no deferred questions.
-- **Window scoreboard (session start → end, all supervisor-verified
-  live):** callscene-01 89/131 → **131/131 EXACT**; callscene-02
-  69/199 → **171/199**; entrance-03 162/256 → **254/256**; gold-open
-  58/256 → **254/256**; gold-pages 20/177 → **85/177**; gold-close
-  58/126 → **80/126**. Every previously-exact window re-verified
-  unmoved (askready 21/21, swapask-no 194/194, record 178/178, retire
-  174/174, entrance-02 256/256, B2 speech ×4, both reveals 690/701).
-  Mechanisms, not constants: text.c per-box accept/arrow semantics,
-  `\p` accept+1, walk lead-leg per-direction anim order, brainMoving
-  render clock −1, per-phase msgbox visibility, shared
-  circle-transition overlay in brainSpeechSettled, tier-general
-  2-tick cursor onset, per-page onset re-derivation.
-- **Engine bugs (soak-driven pipeline, all found AND fixed this
-  session):** **#93** Shell-Bell/forced-switch presentation desync
-  (source-proven vs `battle_main.c`/`battle_util.c`); **#94** double
-  forced-switch in one receipt dropped its pending request; **#95**
-  hit-animation scan crossed script-execution boundaries on no-hit
-  moves (Hail). #94/#95 are latent pre-#93 defects the #93 timing
-  shift routed trajectories onto (opus worker's provenance analysis
-  corrected the supervisor's initial "#93-caused" read; ISSUES text was
-  updated accordingly before closure). All three have direct-
-  construction Tier-1 pins proven failing pre-fix. **#92** (winning-
-  policy 600k frame budget) assigned + closed same-session via
-  `DEFAULT_MAX_FRAMES_BY_POLICY`. ISSUES.md: net zero new open
-  entries. Soak coverage: winning 0:120 + full 0:120 + vanilla 0:20
-  all green post-fix (parts 1-4 docs).
-- **Ops notes:** gold speech worker cap-killed at final gates —
-  salvaged after independent verification (commit `138b779d`), ~20 min
-  recovery per the standing recipe. Side-worktree absolute-path
-  Edit/Write trap recurred with the mechanism identified — new
-  PAPERCUTS entry (2 hits). Freshness-check false positive hit 3.
-- **Next (ordered):** (a) gold-pages page-2→3/3→4 typewriter-edge
-  timing (§9″ recipe documented, same class as gold-open mechanism 1);
-  (b) callscene-02 second page-turn + box-5 dismiss (171/199 →
-  ground-truth doc has the bounded evidence); (c) gold-close
-  flicker/swirl residual (§8′); (d) entrance-03 frames 368/508 class;
-  (e) next soak-crash-class sweep (wider seed ranges / longer
-  chains). No blockers; any of these is a clean single-worker brief.
-
----

@@ -1,3 +1,53 @@
+## 1301 — [supervisor wind-down, 2026-08-16] **Nine worker steps + one salvage, two lanes: every open walk-up window advanced (two to exact/near-exact), two latent engine crashes found+fixed, soak coverage 0:120 green — all final gates green**
+
+- **Final gates (tree `f63ff8d3`, the animation Soft Boiled fold —
+  run AFTER every merge):** full npm **1,065 files / 10,010 passed /
+  223 skipped**; build green; soak vanilla 0:20 **20/20 OK**; soak
+  full 0:60 **60/60 OK** (30+30 chunks). Fold status: animation-main
+  folded TWICE this session (morning: Heal Bell + Fire Blast,
+  coverage 194/276; evening: Soft Boiled round + its supervisor
+  wind-down — `master..animation-main` now EMPTY). rust-main: nothing
+  all session. DEFERRED.md EMPTY — no deferred questions.
+- **Window scoreboard (session start → end, all supervisor-verified
+  live):** callscene-01 89/131 → **131/131 EXACT**; callscene-02
+  69/199 → **171/199**; entrance-03 162/256 → **254/256**; gold-open
+  58/256 → **254/256**; gold-pages 20/177 → **85/177**; gold-close
+  58/126 → **80/126**. Every previously-exact window re-verified
+  unmoved (askready 21/21, swapask-no 194/194, record 178/178, retire
+  174/174, entrance-02 256/256, B2 speech ×4, both reveals 690/701).
+  Mechanisms, not constants: text.c per-box accept/arrow semantics,
+  `\p` accept+1, walk lead-leg per-direction anim order, brainMoving
+  render clock −1, per-phase msgbox visibility, shared
+  circle-transition overlay in brainSpeechSettled, tier-general
+  2-tick cursor onset, per-page onset re-derivation.
+- **Engine bugs (soak-driven pipeline, all found AND fixed this
+  session):** **#93** Shell-Bell/forced-switch presentation desync
+  (source-proven vs `battle_main.c`/`battle_util.c`); **#94** double
+  forced-switch in one receipt dropped its pending request; **#95**
+  hit-animation scan crossed script-execution boundaries on no-hit
+  moves (Hail). #94/#95 are latent pre-#93 defects the #93 timing
+  shift routed trajectories onto (opus worker's provenance analysis
+  corrected the supervisor's initial "#93-caused" read; ISSUES text was
+  updated accordingly before closure). All three have direct-
+  construction Tier-1 pins proven failing pre-fix. **#92** (winning-
+  policy 600k frame budget) assigned + closed same-session via
+  `DEFAULT_MAX_FRAMES_BY_POLICY`. ISSUES.md: net zero new open
+  entries. Soak coverage: winning 0:120 + full 0:120 + vanilla 0:20
+  all green post-fix (parts 1-4 docs).
+- **Ops notes:** gold speech worker cap-killed at final gates —
+  salvaged after independent verification (commit `138b779d`), ~20 min
+  recovery per the standing recipe. Side-worktree absolute-path
+  Edit/Write trap recurred with the mechanism identified — new
+  PAPERCUTS entry (2 hits). Freshness-check false positive hit 3.
+- **Next (ordered):** (a) gold-pages page-2→3/3→4 typewriter-edge
+  timing (§9″ recipe documented, same class as gold-open mechanism 1);
+  (b) callscene-02 second page-turn + box-5 dismiss (171/199 →
+  ground-truth doc has the bounded evidence); (c) gold-close
+  flicker/swirl residual (§8′); (d) entrance-03 frames 368/508 class;
+  (e) next soak-crash-class sweep (wider seed ranges / longer
+  chains). No blockers; any of these is a clean single-worker brief.
+
+---
 ## 1300 — [main worker, 2026-08-16] **gold-pages window 55→85/177: page-1 onset re-derivation + single-line cursor placement fix, two tier-general defects**
 
 - **State:** Landed and green. `npm test` **1,056 files / 9,984 passed /
