@@ -1,3 +1,52 @@
+## 1299 — [main worker, 2026-08-16] **gold-open window 58→254/256: two shared-clock mechanisms (compare-trace accept timing + wait-cursor onset delay), no gold-only branch**
+
+- **State:** Landed and green. `npm test` **1,056 files / 9,984 passed /
+  223 skipped** (2 pre-existing `battleRoomBrainSpeech.test.ts` assertions
+  updated for the new, oracle-correct cursor delay), `npm run build` +
+  `npm run typecheck` green, `executableFrontierRatchet` unmoved.
+- **Did:** Classified gold-open's 58/256 diff by cross-referencing dense
+  pixel diffs against a live `state.elapsed` instrumentation trace (same
+  technique as B1c's render-clock finding). Found TWO stacked mechanisms,
+  both shared/tier-general, neither a park-phase constant:
+  (1) `factory-brain-gold-walkup-speech-open-off.json`'s own A-press timing
+  was miscalibrated (pressed at local frame 10; the app's already-correct
+  CLOSE WIPE model needs press+7 to reach oracle's real dismiss at local 11,
+  so press should be at local 4) — fixed by editing the trace's wait-segment
+  (10→4 frames), the same class of fix §8′ already used for entrance-03's
+  own A-press timing. **58→234/256** alone.
+  (2) The wait cursor (`brainSpeechCursorVisible`/`brainSpeechCursorYOffset`,
+  `src/engine/battleRoom.ts`) never onset-delays: oracle draws it fully
+  absent for the first 2 ticks of every fresh `brainSpeechIdle`, confirmed
+  identically in BOTH the gold-open fixture and the silver `entrance-03`
+  guard fixture (ruling out a gold-only cause). Added
+  `CURSOR_APPEAR_DELAY_TICKS = 2`, tier-general. **234→254/256**, plus
+  entrance-03 (guard) **244→254/256** as a bonus from the same fix. Exposed
+  and fixed one more calibration bug this created: B2 guard fixture
+  `speech-box0-held`'s own `preCheckpointFrameOffset` (1113) was 2 frames
+  into the hold, not the true onset (1111, cross-derived from entrance-03's
+  own confirmed clock) — corrected, restoring 39/39.
+- **Guard bars, all reverified via fresh `npm run compare -- <trace>
+  --summary`:** entrance-03 244→**254/256**, entrance-02 256/256, B2 speech
+  39/39·74/74·39/39·28/28 (box0-held offset recalibrated, see above),
+  callscene-01 131/131, swapask-no 194/194, both reveals 690/701 — all
+  unmoved or improved, none regressed.
+- **gold-pages 53→55/177** (mechanism 1/2 don't fully close it — see Notes);
+  **gold-close unchanged at 80/126** (different mechanism, §8′, untouched
+  this step per the brief's "do not burn the cap fishing" guidance).
+- **Next:** gold-pages needs per-page onset re-derivation (its own
+  `preCheckpointFrameOffset`/hold anchors for pages 2-4 are arbitrary
+  mid-hold points, not onset-aligned like `entrance-03`/`speech-open` now
+  are) — same technique as this step's box0-held fix, repeated per page;
+  left honest rather than guessed. gold-open's residual 2/256 (frames 58,
+  95) are isolated single-tick walk-cycle frame-index boundaries, same
+  family as entrance-03 frame 368 (PROGRESS 1296) — not chased.
+- **Notes:** Full mechanism writeup, per-region attribution, and the
+  before/after table are in `docs/noland-brain-intro-gold-ground-truth.md`
+  §9′. No PAPERCUT.
+
+
+---
+
 ## 1298 — [main worker, 2026-08-16] **ISSUES #94 + #95 both fixed and closed — seeds 16/69/113 clean, winning 0:20 20/20, full 60:70 + 110:120 20/20**
 
 - **State:** Landed and green. `npm test` **1,054+2 files / 9,982 passed /

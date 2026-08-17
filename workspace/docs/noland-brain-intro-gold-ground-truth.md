@@ -617,6 +617,127 @@ Full `npm test` (1056 files, 9984 passed, 223 skipped, 0 failed), `npm run
 build`, `npm run typecheck` all green; `tests/executableFrontierRatchet.test.ts`
 barrier counts unmoved.
 
+### 9‴. Gold-pages typewriter edges closed 85→175/177: trace recalibration (mechanism a), plus a newly-proven, unfixed engine residual (2026-08-17, main worker)
+
+Picked up §9″'s own "needs its own oracle-frame cross-reference" pointer for
+the page 2→3 and 3→4 typewriter edges. Cross-referenced by pulling the
+app/oracle PNG pairs the compare tool already writes to
+`tools/compare/out/<run>/` for the residual frames and diffing them directly
+(not just sha/bbox) — this is what actually proved the mechanism, rather than
+assuming it.
+
+**Diagnosis.** Direct pixel inspection of frames 592–601 (`oracle-00592.png`…
+`oracle-00601.png` vs the matching `app-*.png`) showed the app trailing
+oracle by **exactly one tick, uniformly, for the entire page-3 print** — not
+a growing drift: oracle frame 594 already reads "Y" while the app is still
+blank; oracle 595 reads "Yo" while the app reads "Y"; this exact one-frame
+lag persists through frame 653 (confirmed identically for the page 3→4 edge
+at frames 724–733: oracle 728 reads "N", app is blank). Because the diff is a
+constant, non-compounding one-tick offset rather than a drift, it self-heals
+once printing catches up to the full page text, which is exactly why page 3's
+*hold* (apart from the already-parked, out-of-scope 716/725 pair) was already
+byte-exact before this fix — only the print itself lagged.
+
+**Mechanism classification, proven not assumed.** `tools/compare/oracleClient.ts`'s
+`runOracleBattleLab` (read directly, not inferred) confirms that whenever a
+trace sets `oracleBattleLab.preCheckpointFrameOffset`, the oracle request body
+is `trace: { segments: [], captureFrames: [0] }` — the oracle's post-checkpoint
+frames come **entirely** from the battle-lab scenario's own pre-baked
+`preCheckpointCaptureFrames` walkthrough, never from this compare trace's own
+`segments`. So oracle's content at local frame N is a **fixed** recording,
+completely independent of when this trace's own segments choose to press A;
+only the **app's** frame-by-frame content depends on the trace's press
+timing. This is mechanically identical to §9′'s mechanism 1 (gold-open) — a
+pure trace-side press/wait miscalibration, not an engine defect — and the
+one-tick, non-compounding, self-healing shape (rather than a formula-level
+print-speed difference) confirms it: a text-*content* or print-speed bug
+would still show up throughout the held page, not just its print span.
+
+**Fix.** `factory-brain-gold-walkup-speech-pages-off.json`'s middle wait
+segment (before the page 2→3 press) was one tick too long: `586` frames
+where `585` lands the press exactly where oracle's fixed recording needs it.
+Reduced `586→585`; to keep the total segment-frame sum at 855 (so
+`captureWindow.end: 855` and the local-frame↔abs-frame mapping the rest of
+the trace already depends on stay unperturbed) the same one tick was added
+back onto the final (trailing, page-4-hold) wait segment: `127→128` — page
+4's hold is a static, non-cycling single sha (§7′), so padding it by one tick
+is inert. The page 2→3 press did not need its own separate correction: since
+oracle's post-checkpoint content is a pure fixed recording independent of
+absolute wall-clock, shifting the whole tail by one tick via the single
+upstream edit carried the identical one-tick fix through to the page 3→4
+edge automatically — confirmed by testing the single-segment edit alone
+before touching anything else, which already fixed both edges. Segment 4
+(`133`, the wait before the page 3→4 press) was left untouched.
+
+**Result:** `factory-brain-gold-walkup-speech-pages-off.json` **85→175/177**,
+hitting the exact numeric target the parent step set. As a bonus, the two
+previously out-of-scope "single-tick frame-index boundary" frames (716, 725)
+are now also exact — they were downstream artifacts of the same one-tick
+tail-wide offset, not an unrelated defect family as previously assumed.
+
+**The new residual (frames 593 and 727) is a different, newly-surfaced, and
+provably unavoidable-by-trace-edit defect — left honest, not chased.** Both
+are the transition tick immediately *before* each edge (last-still-held tick
+in the app's own timeline). Direct pixel check: oracle frame 593 still shows
+"…Oh?" fully held (identical to 592); the app shows a fully **cleared**
+(0-char) box. Same shape at frame 727 (oracle still shows page 3 held; app
+cleared). This is `battleRoomAcceptedState`'s existing, already-shared
+`brainSpeechIdle`→`brainSpeech` transition (`src/engine/battleRoom.ts`):
+on accept it sets `elapsed: 0` immediately, which `msgboxVisual`'s
+`"brainSpeech"` case renders as `chars: min(elapsed, printTicks)` = 0 (an
+explicitly cleared box) for exactly one tick before the first character
+appears the tick after. This same 2-tick (clear-tick, then first-char-tick)
+model is **oracle-confirmed correct** for the page 1→2 edge (frames 6–12,
+still exact, unperturbed by this step's fix, sha-verified via
+`npm run compare -- factory-brain-gold-walkup-speech-pages-off.json --summary`
+having zero mismatches before frame 593) — but is proven, by the same direct
+pixel method, to be **one tick too slow** for the page 2→3 and 3→4 edges:
+oracle's real recording shows the first new character exactly one tick after
+the last-held frame, with **no cleared frame ever visible** at 1-tick
+resolution. Algebraically this is unreachable by any trace edit alone: making
+frame 594/728 show the first character (pressing one tick earlier) requires
+frame 593/727 to already be the accept tick, which the app's own uniform
+2-tick model renders as cleared — but oracle's fixed recording still shows
+the *previous* page's held content there. No single press tick can satisfy
+both frames simultaneously under the current, uniform 2-tick model; this was
+verified empirically (this exact -1 trace edit) before being written up, not
+assumed. Since page 1→2's own 2-tick model is independently oracle-confirmed
+exact, the two edge classes are genuinely asymmetric — despite using
+byte-identical `\p` markers in the source script (`data/maps/BattleFrontier_
+BattleFactoryBattleRoom/scripts.inc`'s `..._Text_HarderLookThanLastTime`, one
+single string with three `\p` breaks, no script-level distinction between
+them). Closing this needs a real, tier-general characterization of *why* the
+first `\p` transition into an already-open, first-encounter personality
+speech takes 2 ticks while later `\p` transitions within the same open
+window take only 1 — not a `speechStep`-indexed branch, which the brief's own
+"no per-page special case" rule forbids, and not attempted this step to avoid
+exactly that kind of fitted-guess trap.
+
+**Verified results (fresh `npm run compare -- <trace> --summary` reruns):**
+
+| Window | Before this step | After |
+| --- | --- | --- |
+| gold-pages (`factory-brain-gold-walkup-speech-pages-off.json`) | 85/177 | **175/177** |
+| gold-open (guard) | 254/256 | 254/256 |
+| entrance-03 (guard) | 254/256 | 254/256 |
+| gold-close (guard, untouched mechanism) | 80/126 | 80/126 |
+| callscene-01 (guard) | 131/131 | 131/131 |
+| entrance-02 (guard) | 256/256 | 256/256 |
+| B2 speech box0-held / cry-held / page8-held / close-pause (guards) | 39/39 · 74/74 · 39/39 · 28/28 | unchanged |
+
+The task brief anticipated a 175/177 target "with only frames 716/725
+remaining" — the actual landed residual set is **593 and 727 instead**, a
+numerically identical count but a different (and, per the algebraic proof
+above, better-understood) pair of frames; 716/725 turned out to be
+downstream artifacts of the very offset this step fixed, not a separate
+family. This discrepancy from the brief's anticipated frame set is called out
+explicitly rather than silently substituted.
+
+Full `npm test` (1065 files, 10010 passed, 223 skipped, 0 failed), `npm run
+build`, `npm run typecheck` all green; `tests/executableFrontierRatchet.test.ts`
+barrier counts unmoved (only `tools/compare/traces/factory-brain-gold-walkup-
+speech-pages-off.json` changed — no `src/` edit this step).
+
 ## Appendix: pre-fix (stale, oracle bug: missing gold Frontier-Brain symbol flag) history — captured 2026-08-14
 
 Everything below this line is the **original, unedited** capture from one

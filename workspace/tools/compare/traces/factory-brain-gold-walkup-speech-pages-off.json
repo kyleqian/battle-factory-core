@@ -12,11 +12,11 @@
   "segments": [
     { "frames": 6, "buttons": [] },
     { "frames": 1, "buttons": ["A"] },
-    { "frames": 586, "buttons": [] },
+    { "frames": 585, "buttons": [] },
     { "frames": 1, "buttons": ["A"] },
     { "frames": 133, "buttons": [] },
     { "frames": 1, "buttons": ["A"] },
-    { "frames": 127, "buttons": [] }
+    { "frames": 128, "buttons": [] }
   ],
   "captureWindow": { "start": 0, "end": 855 }
 }
