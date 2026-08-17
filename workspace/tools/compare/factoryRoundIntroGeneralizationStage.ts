@@ -460,6 +460,12 @@ export function generatedRoundBattle7NolandSilverSpeechBoxOpeningStage(
       frontierBrainWalkup: true,
       brainSpeechFirstEncounter: true,
       speechStep,
+      // Mirrors `battleRoomAcceptedState`'s own derivation (battleRoom.ts,
+      // `speechAcceptedFast`'s doc): this park point represents having just
+      // left box `speechStep - 1` via a direct `\p`/`\l` continuation, so it
+      // is the window's first accept-driven transition (slow, cleared-tick
+      // model) only when that prior box was box 0 itself.
+      speechAcceptedFast: speechStep - 1 >= 1,
       trainerPresentation: ready.trainerPresentation,
     },
     rngValue: ready.orchestrator.round.rules.rngValue,

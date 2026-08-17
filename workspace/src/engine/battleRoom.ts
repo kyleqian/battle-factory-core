@@ -134,6 +134,38 @@ export interface BattleRoomState {
    * ("brainSpeechClosing"). Only meaningful during those phases.
    */
   speechStep?: number;
+  /**
+   * True only for a box entered via `battleRoomAcceptedState`'s direct
+   * `\p`/`\l` continuation (never a real close+reopen) whose PRIOR box was
+   * itself not the window's first box - i.e. this is the window's 2nd or
+   * later accept-driven transition. Selects the fast one-tick print model
+   * in `msgboxVisual`/`advanceBattleRoom`'s "brainSpeech" case below instead
+   * of the default clear-then-print one - see those call sites for the rule.
+   *
+   * Derived, not guessed, from two independent dense oracle windows:
+   * `docs/noland-brain-intro-gold-ground-truth.md` §9‴ (gold's page 2→3 and
+   * 3→4 edges, both later `\p` transitions, one tick faster than page 1→2's
+   * own first transition - which stayed exact) and
+   * `docs/silver-speech-box2-evidence.md` (silver's box 1→2 edge, a `\p`
+   * that is the window's SECOND accept-driven transition, counting box
+   * 0→1's own `\l` scroll as the first - also one tick faster, plus its
+   * six period-9 cursor-bob blips, the same shift propagated into the idle
+   * phase). Both windows agree: the window's first accept-driven transition
+   * (whether the source used `\l` or `\p` - the two are otherwise handled
+   * identically, see `splitSpeechBoxes`' own doc) still shows the box
+   * cleared for one tick before the first new character
+   * (`battleRoomAcceptedState`'s plain `elapsed: 0` entry, this flag left
+   * false); every later one skips that cleared tick - the accept tick
+   * itself already shows the first new character, this flag set true. A
+   * box entered via a REAL close+reopen (`brainSpeechClosing`'s own
+   * `speechStep` advance, e.g. gold's page 4 -> close box, silver's page 8
+   * -> cry box) is a structurally different transition - unconditionally
+   * false there regardless of `speechStep`, confirmed by the already-green
+   * `factory-brain-gold-walkup-speech-close-off.json` guard (80/126,
+   * unmoved by this fix) already using the slow model correctly for that
+   * case.
+   */
+  speechAcceptedFast?: boolean;
 }
 
 /** core.ts creates this the tick prebattleRoom's "warpFade" phase reaches the fixed elapsed count matching trace tick 520 (see core.ts's handoff). */
@@ -316,14 +348,20 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
       // constant's own doc for why this is a structural default, not yet
       // dense-compare-measured).
       if (state.elapsed >= SPEECH_APPEAR_ELAPSED) {
-        return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: 0 };
+        // Window opening, not an accept-driven transition - always the slow
+        // (clear-then-print) model, see `speechAcceptedFast`'s own doc.
+        return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: 0, speechAcceptedFast: false };
       }
       return { ...state, phase: "brainSettled", elapsed: state.elapsed + 1 };
     }
     case "brainSpeech": {
       const printTicks = brainSpeechPrintTicks(brainSpeechBoxAt(state, state.speechStep ?? 0));
+      // `speechAcceptedFast` boxes finish one tick sooner - see that field's
+      // own doc for the derivation (the accept tick already shows character
+      // 1, so full print is reached at elapsed printTicks-1, not printTicks).
+      const completeElapsed = state.speechAcceptedFast ? printTicks - 1 : printTicks;
       const elapsed = state.elapsed + 1;
-      if (elapsed >= printTicks) return { ...state, phase: "brainSpeechIdle", elapsed: 0 };
+      if (elapsed >= completeElapsed) return { ...state, phase: "brainSpeechIdle", elapsed: 0 };
       return { ...state, phase: "brainSpeech", elapsed };
     }
     case "brainSpeechIdle":
@@ -341,7 +379,11 @@ export function advanceBattleRoom(state: BattleRoomState): BattleRoomState {
       if (elapsed >= MSGBOX_CLOSE_TICKS) {
         const nextStep = (state.speechStep ?? 0) + 1;
         if (nextStep < brainSpeechBoxes(state).length) {
-          return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: nextStep };
+          // A real close+reopen (not the direct `\p`/`\l` continuation) -
+          // structurally distinct from the accept-driven case, always the
+          // slow model regardless of `nextStep` - see `speechAcceptedFast`'s
+          // own doc (the gold-close guard confirms this stays correct).
+          return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: nextStep, speechAcceptedFast: false };
         }
         return { ...state, phase: "brainSpeechSettled", elapsed: 0, speechStep: nextStep };
       }
@@ -379,21 +421,38 @@ export function battleRoomMsgboxClosingPhase(state: BattleRoomState): BattleRoom
  * `\p` mechanism for the call-scene's boxes 3/4/5, PROGRESS 1292/1293) - so
  * this case skips the close phase entirely and lands directly on the next
  * page at elapsed 0, the same "elapsed 0 renders the same tick" shape every
- * other phase entry already uses. Oracle-confirmed this session (fresh
- * `bin/oracle lab` rerun of `factory-brain-gold-speech-pages-off.json`,
- * cross-checked against that compare trace's own calibrated accept ticks):
- * the accept frame itself already shows the window CLEARED (0 chars, no
- * held old text), with the next page's first glyph exactly one tick later -
- * no separate close-wipe span, no extra delay constant needed beyond this
- * direct transition. The gated speech's LAST page (handing off to the
- * close/cry box, a genuine new `message()` call) is unaffected - still a
- * real close via `battleRoomMsgboxClosingPhase` below.
+ * other phase entry already uses. The gated speech's LAST page (handing off
+ * to the close/cry box, a genuine new `message()` call) is unaffected -
+ * still a real close via `battleRoomMsgboxClosingPhase` below.
+ *
+ * The accept frame's own visible content is NOT uniform across every
+ * direct continuation, though - see `speechAcceptedFast`'s own doc for the
+ * full derivation (two independent dense oracle windows,
+ * `docs/noland-brain-intro-gold-ground-truth.md` §9‴ and
+ * `docs/silver-speech-box2-evidence.md`). Summary: the window's FIRST
+ * accept-driven transition (`(state.speechStep ?? 0) === 0`, i.e. leaving
+ * the window's very first box) still shows the window CLEARED (0 chars) on
+ * the accept tick, with the next box's first glyph one tick later - gold's
+ * page 1→2 edge is oracle-exact under exactly this model. Every LATER
+ * accept-driven transition (`(state.speechStep ?? 0) >= 1`) is one tick
+ * faster: the accept tick already shows the next box's first character,
+ * with no cleared frame ever visible - gold's page 2→3/3→4 edges and
+ * silver's box 1→2 edge (the window's 2nd accept-driven transition,
+ * counting box 0→1's own `\l` scroll as the 1st) are both oracle-exact
+ * under this model instead.
  */
 export function battleRoomAcceptedState(state: BattleRoomState): BattleRoomState {
   if (state.phase === "brainSpeechIdle" && state.brainSpeechFirstEncounter === true) {
-    const nextStep = (state.speechStep ?? 0) + 1;
+    const priorStep = state.speechStep ?? 0;
+    const nextStep = priorStep + 1;
     if (nextStep < brainSpeechPersonalityBoxCount(state)) {
-      return { ...state, phase: "brainSpeech", elapsed: 0, speechStep: nextStep };
+      return {
+        ...state,
+        phase: "brainSpeech",
+        elapsed: 0,
+        speechStep: nextStep,
+        speechAcceptedFast: priorStep >= 1,
+      };
     }
   }
   return { ...state, phase: battleRoomMsgboxClosingPhase(state), elapsed: 0 };
@@ -1405,7 +1464,11 @@ export function msgboxVisual(state: BattleRoomState): MsgboxVisual {
       return MSGBOX_HIDDEN;
     case "brainSpeech": {
       const box = brainSpeechBoxAt(state, state.speechStep ?? 0);
-      return { visible: true, chars: Math.min(state.elapsed, brainSpeechPrintTicks(box)) };
+      // `speechAcceptedFast` boxes skip the cleared tick - the accept tick
+      // (elapsed 0) already shows character 1, not 0 - see that field's own
+      // doc for the two-window derivation.
+      const printElapsed = state.speechAcceptedFast ? state.elapsed + 1 : state.elapsed;
+      return { visible: true, chars: Math.min(printElapsed, brainSpeechPrintTicks(box)) };
     }
     case "brainSpeechIdle":
       return {

@@ -363,12 +363,21 @@ describe("gold Noland speech (walk-up build step B3)", () => {
       const held = advanceThroughFullyPrinted(state);
       const accepted = battleRoomAcceptedState(held);
       // Direct continuation: still "brainSpeech" (never "brainSpeechClosing"),
-      // next box, elapsed reset to 0 - the accept tick itself already shows
-      // the next page's window cleared (msgboxVisual chars 0).
+      // next box, elapsed reset to 0. The window's FIRST accept-driven
+      // transition (box === 0, leaving the window's very first box) still
+      // shows the accept tick cleared (chars 0, first glyph one tick later) -
+      // gold's page 1->2 edge is oracle-exact under this model
+      // (docs/noland-brain-intro-gold-ground-truth.md §9'''). Every LATER
+      // transition (box >= 1) is one tick faster: the accept tick already
+      // shows the next box's first character (chars 1) - gold's page 2->3/
+      // 3->4 edges and silver's box 1->2 edge are oracle-exact under this
+      // model instead (same doc + docs/silver-speech-box2-evidence.md; see
+      // `speechAcceptedFast`'s own doc in battleRoom.ts for the full
+      // two-window derivation this pins).
       expect(accepted.phase).toBe("brainSpeech");
       expect(accepted.speechStep).toBe(box + 1);
       expect(accepted.elapsed).toBe(0);
-      expect(msgboxVisual(accepted)).toEqual({ visible: true, chars: 0 });
+      expect(msgboxVisual(accepted)).toEqual({ visible: true, chars: box === 0 ? 0 : 1 });
       expect(battleRoomQuote(accepted)).toEqual(GOLD_FIRST_ENCOUNTER_SPEECH_BOXES[box + 1]);
       state = accepted;
     }
