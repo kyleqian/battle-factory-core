@@ -1,4 +1,57 @@
 ---
+## 1310 — [main worker, 2026-08-17] **Silver's own `te` origin landed: flicker fixture 32→79/100 (ENTIRE gray-flicker span exact), circle-sprite onset residual documented for rung 2**
+
+- **State:** Landed and green. `npm test` **1065 files / 10011 passed /
+  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Rung 1 of this step's brief. Implemented the verdict
+  `docs/silver-flicker-evidence.md` banked last session (dense per-frame
+  gray-flicker coefficient inversion over
+  `factory-brain-silver-walkup-speech-flicker-off.json`, 100 stride-1
+  frames): silver's true transition `te` is `b.elapsed` **directly**, no
+  re-basing at all — NOT a `+0`-coefficient instance of gold's own §8″
+  `MSGBOX_CLOSE_TICKS + frontierTransitionFlickerStartTe` correction
+  (silver's pause happens to equal `FLICKER_START_TE`, so gold's
+  closing-lag term has nothing left to compensate for). Restructured
+  `renderBattleRoomState`'s (`src/engine/core.ts`) single
+  `(tier === "gold" ? goldRebaseTe : 0)` ternary into an honest per-tier
+  branch: gold keeps §8″'s formula unchanged, silver takes `b.elapsed`
+  bare. Docs extended: `docs/noland-brain-intro-gold-ground-truth.md` new
+  §8‴, `docs/silver-flicker-evidence.md` new "Landed" section — both cite
+  the banked evidence and the exact result.
+- **Result:** `factory-brain-silver-walkup-speech-flicker-off.json`
+  **32/100 → 79/100** — frames 0–78 exact, the ENTIRE gray-flicker span
+  (elapsed 28–75) with zero mismatches, matching the required acceptance
+  bar. Mismatches resume at frame 79 (elapsed 79, one tick past
+  `CIRCLE_ANCHOR_TE=78`) through frame 99 — the circle-sprite build
+  region, the same distinct second mechanism as gold's own unfixed
+  113–125 residual (§8″), not this fix's bug; that's rung 2's mechanism,
+  not attempted this step (ran out of budget after landing rung 1 +
+  docs; see Next). Guard matrix reverified unmoved (fresh `--summary`
+  reruns): gold-pages 177/177, silver box-2 100/100, gold-open 256/256,
+  entrance-03 256/256, entrance-02 256/256, callscene-01 131/131,
+  callscene-02 199/199, gold close-edge 54/54, silver cry-edge 75/75, B2
+  box0-held 39/39 / cry-held 74/74 / page8-held 39/39 / close-pause
+  28/28, askready 21/21, gold-close 113/126 (unmoved, its own residual
+  untouched by this step).
+- **Next:** Rung 2 (circle-sprite onset unification) — gold-close
+  113–125 and silver-flicker 79–99 are the same mechanism on different
+  tiers; cross-check whether both show the same onset delta on their own
+  verified `te` clocks (gold: real onset later than
+  `CIRCLE_ANCHOR_TE=78`, exact tick TBD from a fresh per-frame circle-
+  pixel probe of the banked gold §8″ PNGs; silver: raw-pixel bottom-row
+  probe in `silver-flicker-evidence.md` item (c) already puts onset at
+  elapsed 80, close to on-time, but top-row onset was never observed in
+  the banked 100-frame window). If both tiers share one onset delta, fix
+  the shared `CIRCLE_ANCHOR_TE`-relative anchor once; if not, land only
+  whichever piece is itself tier-safe (silver-flicker fixture is the
+  regression canary) or document the split precisely.
+- **Notes:** No blind offset sweep attempted — §8′/§8″'s own two-failed-
+  realignment history is binding precedent, and this step's own dense
+  evidence (banked last session, implemented this session) is what made
+  rung 1 a clean derivation rather than a fit. No PAPERCUT.
+
+---
 ## 1309 — [main worker, 2026-08-17] **brainSpeech REAL-CLOSE edge FIXED, both tiers: gold close-edge 28/54→54/54, silver cry-edge 13/75→75/75 — MSGBOX_HIDDEN 4-tick wait was never real, oracle shows one cleared-border tick and lands straight on it**
 
 - **State:** Landed and green. `npm test` **1065 files / 10011 passed /

@@ -75,34 +75,142 @@ traces, rerun each, and confirm restoration to its documented bar. Any member
 that does NOT restore after the field fix is a separate real drift and must be
 recorded individually (do not lump it back into this entry).
 
-## #97 — turn5/turn6 + loss-terminal-decline windows drifted below documented bars at an unknown pre-2026-08-17 commit (cursor-invisible: no active acceptance set runs them)
+## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (real mechanism, bisect needed); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 
-**Symptom (counts identical on 2026-08-17 master AND at the `b229076a`
-baseline — so the drift predates this session):**
-- `turn5-action-off.json` **1/32** vs documented 32/32
-  (docs/turn4-fold-pp-freshness-design.md); first mismatch frame 5927;
-  small localized diffs (2-10%) in the message/menu-window region.
-- `turn6-reopen-off.json` **11/46** vs documented 46/46 (same doc); first
-  mismatch frame 7305; same small-diff signature.
-- `loss-terminal-decline-continuation-off.json` **50/155** vs the 155/155 bar
-  cited in #73 and PROGRESS-archive (×7); whole-frame mismatch (95.87%)
-  starting exactly at the documented decline-edge frame 4989.
+**2026-08-17 rung 1 (bounded MAIN worker, pixel-first per the standing
+method):** split into two independently-diagnosed findings.
 
-**Confirmed:** all three have the correct `appRoute` already (distinct from
-#96); reruns reproduce the counts deterministically; family control
-`turn5-reset-off.json` is still 256/256 on both trees. The regressing commit
-is unknown — these windows sit in no active acceptance set, so the drift was
-invisible until the 2026-08-17 exhaustive sweep (`docs/fixture-sweep-2026-08-17.md`).
+### A. `loss-terminal-decline-continuation-off` — CLOSED as an invalidated bar, not a bug
 
-**Leads:** (a) pixel-first diagnosis at the three first-mismatch frames (the
-turn5/6 signature is a message/menu-window region delta — check redraw/latch
-classes before anything else; the loss-terminal one flips whole-frame at the
-decline edge — check the decline continuation's stage/scenario preconditions);
-(b) if pixels don't identify it, bisect b229076a..back toward the last
-commit where the documented bars were actually re-verified (the bars' own doc
-citations date them). Fix at the classified layer; if the truth is that the
-documented bar itself was recorded against a since-changed intended behavior,
-say so explicitly rather than restoring blind.
+Root-caused, not fixed (fixing would mean reverting deliberate product
+behavior). Pixel evidence: at frame 4989 the oracle is still sitting on the
+"BATTLE FACTORY match on your FRONTIER PASS? YES/▶NO" record prompt
+(unchanged through frame 5093, where it has typed "We look forward to your
+next visit." and closed into the free-roam Lobby field — exactly the
+farewell chain the 155/155 bar was recorded against, `PROGRESS-archive.md`
+#938, 2026-08-05). The **app**, at the same frame 4989, has already jumped
+to a brand-new `RENTAL POKéMON / Select the first POKéMON` draft screen.
+
+This is `src/engine/core.ts:821-882`'s **"continuous-play chaining"**
+branch, landed deliberately in commit `b7ae30de` (2026-08-14, "feat:
+generated-draft round entry + in-session round chaining (continuous play
+step 1)"), a supervisor-approved design decision
+(`ROADMAP.md` "User decisions (2026-08-14, planning session)" item 2 /
+"2026-08-14 eve" update, PROGRESS 1271-1272): *"continue re-enters a fresh
+generated draft directly after the record menu, no new lobby-dialogue
+surfaces"*. The gate is explicit — `state.appRoute ===
+"generated-orchestrator" && ... && factoryTerminal.recordChoice === "no"`
+— and this trace declares exactly that `appRoute`. `b7ae30de` is an
+ancestor of the `b229076a` baseline (`git merge-base --is-ancestor b7ae30de
+b229076a` → true), which is why the drift already existed at that baseline.
+
+**Verdict: the old 155/155 bar is obsolete, not regressed.** Under
+`generated-orchestrator` the real farewell/Lobby pixels this trace's
+post-edge span (frames 4989-5093) checks are **unreachable by design** —
+the roadmap text itself flags this as a scoped shortcut ("no new
+lobby-dialogue surfaces for this step; faithful attendant re-entry chrome
+layers on later"), not full fidelity. Do not restore the old bar. The
+honest remaining bar for this trace is its **pre-edge span only: frames
+4939-4988, 50/50**, which still holds (identical to the "50" matched count
+in the current 50/155 run — every one of those 50 matches is pre-edge).
+Nothing to fix; if a future session wants byte-exact farewell/Lobby
+coverage again, it needs a **new trace** that doesn't cross the
+continuous-play edge (cap `captureFrames` before frame 4989), not a change
+to this one.
+
+### B. `turn5-action-off` / `turn6-reopen-off` — real mechanism identified, genuinely needs bisection
+
+**Symptom (reproduced twice fresh, 2026-08-17):**
+- `turn5-action-off.json` **1/32**, first mismatch frame 5927 — the
+  player's ONIX status-box border/HP-bar (`bbox=127,74-229,110`) sits ~1px
+  off from the oracle's, a classic box-shifted-by-one-row signature (traced
+  pixel-for-pixel: app has extra border color where oracle has background
+  at the box's top edge, and vice versa at the bottom edge).
+- `turn6-reopen-off.json` **11/46**, first mismatch frame 7305 — same
+  family, but this time it's the **ONIX battler sprite itself**
+  (`bbox=44,49-99,110`, the field graphic, not the status box) sitting ~1px
+  off.
+- Family control `turn5-reset-off.json` still **256/256** (this trace never
+  reopens FIGHT mid-turn, so it doesn't exercise the affected code path).
+- **Not isolated to these two:** the same 2026-08-17 sweep shows
+  `turn5-confirm-off-a` (8/132), `turn5-confirm-off-b` (0/132),
+  `turn5-resolve-off-{a,b,c,d}` (7/196, 71/196, 149/196, 0/196) all
+  DEVIATION too — this whole doc's family, not just the two windows
+  assigned this rung.
+
+**Mechanism, pixel-confirmed:** both sprite (`onixY2`) and status-box
+(`healthboxY2`) come from the same closed-form generator, `menuIdleBounce`
+(`src/engine/battleMenu.ts:825`), fed a `bounceTick` computed per-turn in
+`src/engine/battleScene.ts`. For turn 5's FIGHT reopen specifically, the
+tick comes from `turn5LegacyResettledBounceTickFromLatest` /
+`turn5SubmenuBounceTickFromLatest` (`battleScene.ts:10289-10306`), which
+special-cases the exact press-registering tick (`t ===
+turn5ReopenPressTick`, itself `TICK0 + sm.openElapsed`) to use the
+"legacy" unshifted formula and every other tick to use the
+`-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`-corrected one — a special case whose own
+comment cites this **exact** tick (5927) as the one it was built and probed
+against (`battleScene.ts:8285-8290`, "PROGRESS #183/cleanup ... tick
+5927"). Live-instrumented both candidate formulas at the mismatch window
+(scratch `console.error`, reverted, no diff left in the tree): at
+5927-5931 they produce **the same** `menuIdleBounce` output
+(`onixY2:1, healthboxY2:0` throughout) — so the legacy-vs-shifted branch
+choice is **not** the fork point; both branches already agree, and still
+disagree with the oracle. That rules out the "obvious" one-line fix
+(flipping or dropping the special case) and points instead at a shared
+upstream constant/epoch (`TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG`,
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`, or the `presentationEpoch.elapsed`
+input itself) that's landed the whole formula family in the wrong
+plateau of the amplitude-1 sine table by a small margin — not
+identifiable from pixels alone without a firm regression boundary.
+
+**Ruled out:** not the `#96` appRoute-missing class (both traces already
+carry `"appRoute": "canonical-recorded"`); not the turn4-fold PP-freshness
+gap (`docs/turn4-fold-pp-freshness-design.md`, commit `c5563c72`,
+2026-08-02) — that fix explicitly left `content` (HP/bounce/kickoff/
+`presentationEpoch`) untouched by design ("content ... is untouched and
+still turn-4-fresh"), and is red-verified by
+`turn4ResolutionAdapterEquivalence.test.ts` / `fightSubmenu.test.ts`, so
+re-touching it is very unlikely to be the fix and risks unpinning those
+tests.
+
+**Classification: (c), genuinely needs bisection.** This formula family is
+shared by many other currently-passing pinned windows (the doc comments at
+`battleScene.ts:8257-8290` document a multi-session history of "1-in-256"
+extremum-tick tuning) — a guessed constant change here is exactly the kind
+of move that silently breaks something else. The regression window is wide
+(`c5563c72`, 2026-08-02, where the design doc's 32/32 and 46/46 bars were
+recorded, to `b229076a`/master, 2026-08-17 — **2697 commits**, `git
+rev-list --count c5563c72..HEAD`) and mostly unrelated animation-lane
+commits, exactly what `git bisect` is for (~12 steps for this range).
+
+**Bisect recipe for the next worker:**
+```sh
+# Isolated worktree — do NOT bisect in the shared main tree (other lanes
+# depend on it, and checkouts mid-bisect would be visible to them).
+git worktree add ../bisect-97 c5563c72
+cd ../bisect-97 && npm install   # reference/ symlink + node_modules per AGENTS.md
+
+git bisect start
+git bisect bad b229076a          # or HEAD of whichever tree is current
+git bisect good c5563c72         # unverified-but-highly-likely-good: this is the
+                                  # commit the 32/32 bar in turn4-fold-pp-freshness-design.md
+                                  # was recorded against; confirm with one manual run
+                                  # before trusting the automated range below
+
+cat > /tmp/bisect-97-check.sh <<'EOF'
+#!/bin/sh
+set -e
+cd "$(dirname "$0")/../bisect-97" 2>/dev/null || cd ../bisect-97
+npm run compare -- turn5-action-off --summary 2>&1 | tail -1 | grep -q "32/32 frames matched"
+EOF
+chmod +x /tmp/bisect-97-check.sh
+git bisect run /tmp/bisect-97-check.sh
+# Then: git bisect log > <evidence file>; git worktree remove ../bisect-97
+```
+Requires the shared Battle Scene OFF oracle (127.0.0.1:8014) to stay up
+throughout — do not stop/restart it mid-bisect. Once the culprit commit is
+found, re-run the pixel-first method (§B above) against that commit's own
+diff to classify it as revertable vs. needs-a-forward-fix.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 

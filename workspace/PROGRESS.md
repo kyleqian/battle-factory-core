@@ -4,6 +4,55 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1313 — [main worker, 2026-08-17] **#97 split and closed: loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended `b7ae30de` continuous-play chaining, not a bug); turn5/turn6 bounce-tick drift mechanism identified, bisect recipe written (needs `c5563c72..HEAD`, 2697 commits)**
+
+- **State:** Docs-only, no `src/` edit (one scratch `console.error` added
+  and removed during diagnosis; `git diff src/` is empty). `npm test`
+  **1065 files / 10011 passed / 223 skipped** (unmoved), `npm run build`
+  green (includes typecheck), `executableFrontierRatchet` barrier counts
+  unmoved (6/6 ratchet tests pass).
+- **Did:** Pixel-first diagnosis of #97's three windows per the step
+  brief. **(A) loss-terminal-decline-continuation-off** (50/155): PNG
+  comparison at frames 4939-5093 shows the oracle correctly running the
+  documented decline→farewell→free-roam-Lobby chain the whole time, while
+  the app jumps straight to a fresh rental-draft screen at frame 4989.
+  Root cause: `core.ts:821-882`'s "continuous-play chaining" branch
+  (`state.appRoute === "generated-orchestrator" && recordChoice
+  newly "no"`), landed deliberately in `b7ae30de` (2026-08-14,
+  supervisor-approved per `ROADMAP.md`'s 2026-08-14 planning-session
+  decision) — an ancestor of the `b229076a` baseline. Verdict: the old
+  bar is obsolete, not regressed; the farewell/Lobby pixels are
+  unreachable by design under this route. Closed as documented (not
+  fixed — fixing would mean reverting a deliberate feature); honest
+  remaining bar is the pre-edge span, frames 4939-4988, **50/50** (holds).
+  **(B) turn5-action-off / turn6-reopen-off** (1/32, 11/46): pixel diff
+  confirms a real ~1px box/sprite displacement at each turn's FIGHT-reopen
+  edge (turn5: player status-box border, frame 5927; turn6: ONIX battler
+  sprite, frame 7305) — both driven by the shared `menuIdleBounce`
+  bounce-tick family (`battleScene.ts` turn5 legacy/shifted formulas).
+  Live-instrumented (scratch, reverted) both candidate formulas at the
+  mismatch window: they agree with each other and still disagree with
+  the oracle, ruling out the obvious branch-flip fix. Also affects
+  `turn5-confirm-off-{a,b}` and `turn5-resolve-off-{a,b,c,d}` per the
+  2026-08-17 sweep — a whole-family regression, not just these two.
+  Classified (c): genuinely needs bisection, NOT attempted live (shared,
+  heavily-tuned formula surface + 2697-commit-wide unknown window is too
+  large/risky for this session's remaining budget). Full mechanism,
+  ruled-out leads, and an executable `git bisect run` recipe (isolated
+  worktree, known-good `c5563c72`, known-bad `b229076a`) are written into
+  `ISSUES.md #97`.
+- **Result:** `ISSUES.md #97` rewritten with both findings (old leads that
+  died are trimmed). Guards reverified fresh: `turn5-reset-off` 256/256,
+  gold-pages 177/177, callscene-02 199/199.
+- **Next:** Whoever picks up #97 part B should first manually confirm
+  `c5563c72` is turn5-action-off-green (the recipe assumes it from the
+  design doc's own citation but this session didn't re-verify it), then
+  run the bisect recipe in `ISSUES.md #97` to find the exact regressing
+  commit before touching the shared bounce-tick formulas.
+- **Notes:** No `src/` edit landed (diagnose-only per the brief's own
+  decision tree for both findings). No PAPERCUT.
+
+---
 ## 1312 — [main worker, 2026-08-17] **Rung 3: SOURCE root cause found for the circle-sprite residual — brain walk-up never draws the real per-encounter transition selection, always hardcodes circlesMeet; fix enumerated as multi-piece, not implemented**
 
 - **State:** Docs-only, no `src/` edit. `npm test` **1065 files / 10011
@@ -109,57 +158,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   maxFrames).
 - **Notes:** No blind offset sweep attempted, consistent with the step
   brief's explicit instruction. No PAPERCUT.
-
----
-## 1310 — [main worker, 2026-08-17] **Silver's own `te` origin landed: flicker fixture 32→79/100 (ENTIRE gray-flicker span exact), circle-sprite onset residual documented for rung 2**
-
-- **State:** Landed and green. `npm test` **1065 files / 10011 passed /
-  223 skipped** (unmoved), `npm run build` + `npm run typecheck` green,
-  `executableFrontierRatchet` barrier counts unmoved.
-- **Did:** Rung 1 of this step's brief. Implemented the verdict
-  `docs/silver-flicker-evidence.md` banked last session (dense per-frame
-  gray-flicker coefficient inversion over
-  `factory-brain-silver-walkup-speech-flicker-off.json`, 100 stride-1
-  frames): silver's true transition `te` is `b.elapsed` **directly**, no
-  re-basing at all — NOT a `+0`-coefficient instance of gold's own §8″
-  `MSGBOX_CLOSE_TICKS + frontierTransitionFlickerStartTe` correction
-  (silver's pause happens to equal `FLICKER_START_TE`, so gold's
-  closing-lag term has nothing left to compensate for). Restructured
-  `renderBattleRoomState`'s (`src/engine/core.ts`) single
-  `(tier === "gold" ? goldRebaseTe : 0)` ternary into an honest per-tier
-  branch: gold keeps §8″'s formula unchanged, silver takes `b.elapsed`
-  bare. Docs extended: `docs/noland-brain-intro-gold-ground-truth.md` new
-  §8‴, `docs/silver-flicker-evidence.md` new "Landed" section — both cite
-  the banked evidence and the exact result.
-- **Result:** `factory-brain-silver-walkup-speech-flicker-off.json`
-  **32/100 → 79/100** — frames 0–78 exact, the ENTIRE gray-flicker span
-  (elapsed 28–75) with zero mismatches, matching the required acceptance
-  bar. Mismatches resume at frame 79 (elapsed 79, one tick past
-  `CIRCLE_ANCHOR_TE=78`) through frame 99 — the circle-sprite build
-  region, the same distinct second mechanism as gold's own unfixed
-  113–125 residual (§8″), not this fix's bug; that's rung 2's mechanism,
-  not attempted this step (ran out of budget after landing rung 1 +
-  docs; see Next). Guard matrix reverified unmoved (fresh `--summary`
-  reruns): gold-pages 177/177, silver box-2 100/100, gold-open 256/256,
-  entrance-03 256/256, entrance-02 256/256, callscene-01 131/131,
-  callscene-02 199/199, gold close-edge 54/54, silver cry-edge 75/75, B2
-  box0-held 39/39 / cry-held 74/74 / page8-held 39/39 / close-pause
-  28/28, askready 21/21, gold-close 113/126 (unmoved, its own residual
-  untouched by this step).
-- **Next:** Rung 2 (circle-sprite onset unification) — gold-close
-  113–125 and silver-flicker 79–99 are the same mechanism on different
-  tiers; cross-check whether both show the same onset delta on their own
-  verified `te` clocks (gold: real onset later than
-  `CIRCLE_ANCHOR_TE=78`, exact tick TBD from a fresh per-frame circle-
-  pixel probe of the banked gold §8″ PNGs; silver: raw-pixel bottom-row
-  probe in `silver-flicker-evidence.md` item (c) already puts onset at
-  elapsed 80, close to on-time, but top-row onset was never observed in
-  the banked 100-frame window). If both tiers share one onset delta, fix
-  the shared `CIRCLE_ANCHOR_TE`-relative anchor once; if not, land only
-  whichever piece is itself tier-safe (silver-flicker fixture is the
-  regression canary) or document the split precisely.
-- **Notes:** No blind offset sweep attempted — §8′/§8″'s own two-failed-
-  realignment history is binding precedent, and this step's own dense
-  evidence (banked last session, implemented this session) is what made
-  rung 1 a clean derivation rather than a fit. No PAPERCUT.
 
