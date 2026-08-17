@@ -1,4 +1,61 @@
 ---
+## 1312 — [main worker, 2026-08-17] **Rung 3: SOURCE root cause found for the circle-sprite residual — brain walk-up never draws the real per-encounter transition selection, always hardcodes circlesMeet; fix enumerated as multi-piece, not implemented**
+
+- **State:** Docs-only, no `src/` edit. `npm test` **1065 files / 10011
+  passed / 223 skipped** (unmoved), `npm run build` + `npm run typecheck`
+  green, `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** This step's brief (method steps 1-3): identify the TRUE
+  battle-transition per tier from source, reconcile against what the app
+  models. Source (`battle_tower.c:2093-2100`'s `SPECIAL_BATTLE_FACTORY`
+  case) shows the Frontier Brain draws its transition from the exact same
+  random 12-entry table (`sBattleTransitionTable_BattleFrontier`,
+  `battle_setup.c:131-145`) as any ordinary Factory opponent — no
+  brain/tier override. But `src/engine/battleRoom.ts`'s
+  `opponentSetupExtraRngSteps` only fires the transition draw when
+  `state.phase === "settled"`, and the brain walk-up room's own
+  settled-equivalent phase is named `"brainSpeechSettled"` — never
+  `"settled"` — so `b.transitionPresentation` is **always** `undefined`
+  for brain battles, and `renderBattleRoomState` always falls back to the
+  hardcoded `"circlesMeet"` default (`core.ts:2528`), regardless of what
+  either fixture's real RNG stream drew. This reframes rung 2: silver's
+  abrupt full-width block isn't a second onset mechanism to unify with
+  gold's — it's the wrong transition family rendered through the
+  circlesMeet slide-in model. Ruled out one candidate (`FrontierSquares_
+  Draw`, `battle_transition.c:987-1004`, is a gradual 35-tick raster
+  sweep, not an instant full-width reveal — doesn't match silver's
+  one-tick abs-3279→3280 jump).
+- **Result:** No fix landed (correctly, per the brief's own decision
+  tree). The party-generation RNG replay this fix needs already exists
+  (`src/engine/factoryBrainOpponentGeneration.ts`'s
+  `generateFactoryBrainOpponent`, wired into
+  `factoryRoundBattleOrchestrator.ts:605`, exposing the correct
+  post-party RNG cursor as `generation.rngValue`) — but nothing calls
+  `pickFrontierTransition` on it, and `BattleOpponent`
+  (`battleScenario.ts:55`) has no field to carry a pre-computed
+  presentation through to `battleRoomStateForOpponent`. Wiring it up
+  requires reconciling that orchestrator-level RNG stream against
+  `core.ts`'s own *separate* tick-level `rngValue` cursor (the one the
+  ordinary walk-up room's own already-correct draw depends on) without
+  desyncing it — a cross-cutting change, not ≤2 bounded pieces, and
+  possibly a new renderer on top (9 of the 12 table entries have no
+  renderer implemented yet). Full derivation + citations in
+  `docs/noland-brain-intro-gold-ground-truth.md`'s new "Rung 3" section
+  and `docs/silver-flicker-evidence.md`'s matching addendum. Guards
+  unmoved (fresh reruns): gold-close 113/126, silver-flicker 79/100.
+- **Next:** Implement per the Rung 3 enumeration: (1) thread
+  `pickFrontierTransition` through `generateOpponentFor` on
+  `generation.rngValue` for both branches, giving `BattleOpponent` a
+  field to carry the presentation; (2) wire `battleRoomStateForOpponent`
+  to consume it for brain rooms without desyncing the ordinary room's own
+  tick-level draw (needs its own dense verification, not a guess); (3)
+  once each fixture's real `tableIndex` is knowable, implement whichever
+  renderer family it lands on if not already one of the 3 implemented
+  (circlesMeet/logoWave/asymmetricSpiralInSeq). Otherwise pick up: (b)
+  silver's own unfixtured post-te-99 top-row circle onset; (c) soak
+  remainder (vanilla 20:60 + winning 0:10 at 2× maxFrames).
+- **Notes:** No blind offset sweep attempted. PAPERCUT: none.
+
+---
 ## 1311 — [main worker, 2026-08-17] **Rung 2 attempted: circle-sprite onset residual documented, not fixed — gold's own onset is a small sliver (+6 from CIRCLE_ANCHOR_TE), silver's is an abrupt full-width block, not the same shape**
 
 - **State:** Docs/scratch-tooling only, no `src/` edit. `npm test` **1065

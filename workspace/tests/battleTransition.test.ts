@@ -150,3 +150,70 @@ describe("B_TRANSITION_FRONTIER_CIRCLES_ASYMMETRIC_SPIRAL_IN_SEQ", () => {
     expect(exitFadeY(177)).toBe(3);
   });
 });
+
+describe("B_TRANSITION_FRONTIER_CIRCLES_CROSS (id 35, table idx 5 - docs/brain-transition-wiring-design.md S1)", () => {
+  const KIND = "circlesCross" as const;
+  const ANCHOR_TE = 921 - 843; // 78, shared with MEET - Circles_Init is family-independent code
+
+  it("reuses MEET's shared gray-flicker schedule verbatim (Circles_Init is the same code for every circle family)", () => {
+    expect(grayFlickerY(28, KIND)).toBe(2);
+    expect(grayFlickerY(35, KIND)).toBe(16);
+    expect(grayFlickerY(75, KIND)).toBe(0);
+    expect(grayFlickerY(76, KIND)).toBe(0);
+  });
+
+  it("sits at CirclesCross_CreateSprites' own off-screen creation position before the anchor tick", () => {
+    // battle_transition_frontier.c:461-463 - top enters from below, left/
+    // right are created already substantially on-screen at the horizontal
+    // edges (docs/brain-transition-wiring-design.md §1's silver call).
+    expect(circleCenter("top", ANCHOR_TE, KIND)).toEqual({ x: 120, y: 197 });
+    expect(circleCenter("left", ANCHOR_TE, KIND)).toEqual({ x: 241, y: 59 });
+    expect(circleCenter("right", ANCHOR_TE, KIND)).toEqual({ x: -1, y: 59 });
+    expect(circleCenter("top", 0, KIND)).toEqual({ x: 120, y: 197 });
+  });
+
+  it("moves top's Y every call (delay 0) - checkpoint at anchor+20", () => {
+    expect(circleCenter("top", ANCHOR_TE + 20, KIND)).toEqual({ x: 120, y: 117 });
+  });
+
+  it("throttles left/right's Y to every 2nd call (sTimerY==sDelayY==1) while X moves every call - checkpoints anchor+20/21/22", () => {
+    // X (delay 0) steps every call: 161,157,153. Y (delay 1) only steps on
+    // even call counts (SpriteCB_LogoCircleSlide, :267-291): 79,79,81 - flat
+    // between k=20 and k=21, this is the new-vs-MEET mechanism this slice adds.
+    expect(circleCenter("left", ANCHOR_TE + 20, KIND)).toEqual({ x: 161, y: 79 });
+    expect(circleCenter("left", ANCHOR_TE + 21, KIND)).toEqual({ x: 157, y: 79 });
+    expect(circleCenter("left", ANCHOR_TE + 22, KIND)).toEqual({ x: 153, y: 81 });
+    expect(circleCenter("right", ANCHOR_TE + 20, KIND)).toEqual({ x: 79, y: 79 });
+    expect(circleCenter("right", ANCHOR_TE + 21, KIND)).toEqual({ x: 83, y: 79 });
+    expect(circleCenter("right", ANCHOR_TE + 22, KIND)).toEqual({ x: 87, y: 81 });
+  });
+
+  it("reaches its fixed target simultaneously at anchor+38 (not MEET's +48) and holds", () => {
+    for (const te of [ANCHOR_TE + 38, ANCHOR_TE + 39, ANCHOR_TE + 200]) {
+      expect(circleCenter("top", te, KIND)).toEqual({ x: 120, y: 45 });
+      expect(circleCenter("left", te, KIND)).toEqual({ x: 89, y: 97 });
+      expect(circleCenter("right", te, KIND)).toEqual({ x: 151, y: 97 });
+    }
+  });
+
+  it("starts the center blend 1 tick after the shorter 38-tick slide (anchor+39, not MEET's +49)", () => {
+    const BLEND_START_TE = ANCHOR_TE + 38 + 1; // 117
+    expect(centerLogoEva(BLEND_START_TE, KIND)).toBe(0);
+    expect(centerLogoEva(BLEND_START_TE + 1, KIND)).toBe(1);
+    expect(centerLogoEva(BLEND_START_TE + 16, KIND)).toBe(16);
+  });
+
+  it("starts the exit-to-black fade 50 ticks after its own blend start (same fixed FadeInCenterLogoCircle delta as MEET)", () => {
+    const FADE_START_TE = ANCHOR_TE + 38 + 1 + 50; // 167
+    expect(exitFadeY(FADE_START_TE - 1, KIND)).toBe(0);
+    const expected = [3, 3, 6, 6, 9, 9, 12, 12, 15, 15, 16, 16];
+    for (let d = 0; d < expected.length; d += 1) expect(exitFadeY(FADE_START_TE + d, KIND)).toBe(expected[d]);
+  });
+
+  it("leaves the existing circles-meet defaults unchanged", () => {
+    expect(circleCenter("top", 78)).toEqual({ x: 120, y: -51 });
+    expect(circleCenter("top", ANCHOR_TE + 48)).toEqual({ x: 120, y: 45 });
+    expect(centerLogoEva(128)).toBe(1);
+    expect(exitFadeY(177)).toBe(3);
+  });
+});

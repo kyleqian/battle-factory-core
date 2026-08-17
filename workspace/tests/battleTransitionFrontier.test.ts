@@ -231,6 +231,22 @@ describe("source-owned Frontier transition selection", () => {
     });
     expect(frontierTransitionRenderKind(circlesMeet.presentation, "asymmetricSpiralInSeq"))
       .toBe("circlesMeet");
+
+    // seed 4 -> table idx 5, id 35, CIRCLES_CROSS (silver's real draw per
+    // docs/brain-transition-wiring-design.md §1/§5's oracle cross-check).
+    const circlesCross = selectFrontierTransition(4);
+    expect(circlesCross.presentation).toMatchObject({
+      tableIndex: 5,
+      transitionId: 35,
+      transitionName: "B_TRANSITION_FRONTIER_CIRCLES_CROSS",
+      raw: 1_817,
+    });
+    expect(frontierTransitionRenderKind(circlesCross.presentation, "circlesMeet"))
+      .toBe("circlesCross");
+    // Unwired this slice (S1): no production caller passes this presentation
+    // yet, so the fallback wins whenever the id-35 case isn't reached - only
+    // exercised here directly, per the design doc's own S1 scope.
+    expect(frontierTransitionRenderKind(undefined, "circlesMeet")).toBe("circlesMeet");
   });
 
   it("the live room seam consumes the selector once and preserves round/controller/parties", () => {

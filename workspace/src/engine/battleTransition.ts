@@ -16,6 +16,15 @@
 // battle_transition_frontier.c (Task_FrontierCirclesMeet /
 // sFrontierCirclesMeet_Funcs: Circles_Init -> CirclesMeet_CreateSprites ->
 // WaitForLogoCirclesAnim -> FadeInCenterLogoCircle -> CirclesMeet_End).
+// CIRCLES_CROSS (id 35, docs/brain-transition-wiring-design.md slice S1)
+// reuses the same Circles_Init/WaitForLogoCirclesAnim/FadeInCenterLogoCircle
+// state machine (sFrontierCirclesCross_Funcs, :131-138) with its own
+// CirclesCross_CreateSprites geometry (:459-467) - see CROSS_CIRCLE_SPECS.
+// Lands UNWIRED this slice: frontierTransitionRenderKind maps transitionId
+// 35 to "circlesCross" for callers that already carry a real presentation,
+// but no production path sets transitionPresentation to id 35 yet (brain
+// rooms' own opponentSetupExtraRngSteps gap, see the design doc's Rung 3) -
+// wiring is slice S3.
 // Every constant below was cross-derived from that source AND pixel-
 // verified against tools/compare/traces-groundtruth/battle1-transition-
 // dense.json's own 206 every-frame PNGs (bin/oracle run, scratch Python,
@@ -162,7 +171,7 @@ export function selectFrontierTransition(rngValue: number): {
   };
 }
 
-export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq";
+export type FrontierCircleTransition = "circlesMeet" | "asymmetricSpiralInSeq" | "circlesCross";
 export type FrontierTransitionRenderKind = FrontierCircleTransition | "logoWave";
 
 /** te (settled-phase elapsed) at which the corresponding trace tick (843+te) begins - named per the phase they gate. */
@@ -309,6 +318,7 @@ export function frontierTransitionRenderKind(
 ): FrontierTransitionRenderKind {
   if (presentation?.transitionId === 30) return "logoWave";
   if (presentation?.transitionId === 34) return "circlesMeet";
+  if (presentation?.transitionId === 35) return "circlesCross";
   if (presentation?.transitionId === 40) return "asymmetricSpiralInSeq";
   return fallback;
 }
@@ -330,20 +340,88 @@ export function battleIntroSceneAssemblyDisplayLag(
 interface CircleSpec {
   init: readonly [number, number];
   speed: readonly [number, number];
+  /**
+   * `CreateSlidingLogoCircleSprite`'s `delayX`/`delayY` (battle_transition_
+   * frontier.c:234): `SpriteCB_LogoCircleSlide` (:267-291) only steps an
+   * axis once every `delay+1` calls (`sTimerAxis` counts 0..delay, moves
+   * and resets on the match) - NOT a creation-order stagger (that's
+   * `createOnTimer`, the *_IN_SEQ families' own mechanism). MEET's three
+   * circles are all `(0,0)` (every axis steps every call, the plain rate
+   * `circleCenter` originally hardcoded); CROSS's left/right circles use
+   * `(0,1)` on Y (half-rate, gated one tick behind X) - see `slideMoves`.
+   */
+  delay: readonly [number, number];
 }
 
 /** CirclesMeet_CreateSprites (battle_transition_frontier.c:433-437) - target (120,45)/(89,97)/(151,97) is implicit in 48 ticks * speed. */
-const CIRCLE_SPECS: Record<"top" | "left" | "right", CircleSpec> = {
-  top: { init: [120, -51], speed: [0, 2] },
-  left: { init: [-7, 193], speed: [2, -2] },
-  right: { init: [247, 193], speed: [-2, -2] },
+const MEET_CIRCLE_SPECS: Record<"top" | "left" | "right", CircleSpec> = {
+  top: { init: [120, -51], speed: [0, 2], delay: [0, 0] },
+  left: { init: [-7, 193], speed: [2, -2], delay: [0, 0] },
+  right: { init: [247, 193], speed: [-2, -2], delay: [0, 0] },
 };
 
-/** Sprite center at settled-elapsed `te` (module doc point 2 - anchor tick 921, linear for 48 ticks then holds at target). */
-export function circleCenter(name: "top" | "left" | "right", te: number): { x: number; y: number } {
-  const spec = CIRCLE_SPECS[name];
-  const k = Math.max(0, Math.min(te - CIRCLE_ANCHOR_TE, CIRCLE_SLIDE_TICKS));
-  return { x: spec.init[0] + spec.speed[0] * k, y: spec.init[1] + spec.speed[1] * k };
+/**
+ * CirclesCross_CreateSprites (battle_transition_frontier.c:459-467; params
+ * also pre-extracted at src/data/gen/battle-transitions-frontier.json table
+ * index 5). Same shared targets (120,45)/(89,97)/(151,97) as MEET - `top`
+ * enters from below sliding up, `left`/`right` enter from the horizontal
+ * screen edges (already almost on-screen) and cross paths converging on
+ * the opposite target, per docs/brain-transition-wiring-design.md §1's
+ * silver identification.
+ */
+const CROSS_CIRCLE_SPECS: Record<"top" | "left" | "right", CircleSpec> = {
+  top: { init: [120, 197], speed: [0, -4], delay: [0, 0] },
+  left: { init: [241, 59], speed: [-4, 2], delay: [0, 1] },
+  right: { init: [-1, 59], speed: [4, 2], delay: [0, 1] },
+};
+
+/**
+ * Number of `SpriteCB_LogoCircleSlide` calls (relative to `CIRCLE_ANCHOR_TE`)
+ * until all three CROSS circles simultaneously reach their shared targets -
+ * the CROSS analog of `CIRCLE_SLIDE_TICKS`. Derived (not hand-fit) from
+ * CROSS_CIRCLE_SPECS' own geometry: `top` needs 152/4=38 Y-axis moves at
+ * delay 0 (steps every call, so 38 calls); `left`/`right` need 152/4=38
+ * X-axis moves at delay 0 (38 calls) and, independently, 38/2=19 Y-axis
+ * moves at delay 1 (steps every 2nd call, so 19*2=38 calls) - all three
+ * circles' both axes land on their target on the exact same 38th call
+ * (cross-checked call-by-call against the literal source algorithm, zero
+ * divergence through call 45).
+ */
+const CROSS_SLIDE_TICKS = 38;
+
+/**
+ * `WaitForLogoCirclesAnim`/`FadeInCenterLogoCircle` are shared, family-
+ * independent code (same `TransitionStateFunc` array entries for every
+ * `sFrontierCircles*_Funcs`, battle_transition_frontier.c:122-191) - only
+ * the slide's own duration (`CIRCLE_SLIDE_TICKS` vs `CROSS_SLIDE_TICKS`)
+ * differs per family. The "+1" (dummy-callback detection lag) and "+50"
+ * (`FadeInCenterLogoCircle`'s own fixed tBlend/tFadeTimer run) deltas are
+ * therefore the same constants MEET's own BLEND_START_TE/EXIT_FADE_START_TE
+ * already encode (127-78-48=1, 177-127=50) - reapplied here against
+ * CROSS_SLIDE_TICKS instead of re-derived from scratch.
+ */
+const CROSS_BLEND_START_TE = CIRCLE_ANCHOR_TE + CROSS_SLIDE_TICKS + 1;
+const CROSS_EXIT_FADE_START_TE = CROSS_BLEND_START_TE + 50;
+
+/** `moves(K)` for an axis stepped once every `delay+1` calls (module doc on `CircleSpec.delay`): floor(K/(delay+1)). Delay 0 reduces to K (steps every call). */
+function slideMoves(k: number, delay: number): number {
+  return Math.floor(k / (delay + 1));
+}
+
+/** Sprite center at settled-elapsed `te` (module doc point 2 - anchor tick 921, linear per `slideMoves` until each family's own slide duration, then holds at target). */
+export function circleCenter(
+  name: "top" | "left" | "right",
+  te: number,
+  transition: FrontierCircleTransition = "circlesMeet",
+): { x: number; y: number } {
+  const specs = transition === "circlesCross" ? CROSS_CIRCLE_SPECS : MEET_CIRCLE_SPECS;
+  const slideTicks = transition === "circlesCross" ? CROSS_SLIDE_TICKS : CIRCLE_SLIDE_TICKS;
+  const spec = specs[name];
+  const k = Math.max(0, Math.min(te - CIRCLE_ANCHOR_TE, slideTicks));
+  return {
+    x: spec.init[0] + spec.speed[0] * slideMoves(k, spec.delay[0]),
+    y: spec.init[1] + spec.speed[1] * slideMoves(k, spec.delay[1]),
+  };
 }
 
 interface SpiralSpec {
@@ -393,6 +471,8 @@ export function asymmetricSpiralCircleCenter(
 export function centerLogoEva(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
   const start = transition === "asymmetricSpiralInSeq"
     ? ASYMMETRIC_SEQ_BLEND_START_TE
+    : transition === "circlesCross"
+    ? CROSS_BLEND_START_TE
     : BLEND_START_TE;
   return Math.max(0, Math.min(te - start, 16));
 }
@@ -401,6 +481,8 @@ export function centerLogoEva(te: number, transition: FrontierCircleTransition =
 export function exitFadeY(te: number, transition: FrontierCircleTransition = "circlesMeet"): number {
   const start = transition === "asymmetricSpiralInSeq"
     ? ASYMMETRIC_SEQ_EXIT_FADE_START_TE
+    : transition === "circlesCross"
+    ? CROSS_EXIT_FADE_START_TE
     : EXIT_FADE_START_TE;
   const d = te - start;
   if (d < 0) return 0;
@@ -430,7 +512,7 @@ function drawCircleSprite(
 ): void {
   const center = transition === "asymmetricSpiralInSeq"
     ? asymmetricSpiralCircleCenter(name, te)
-    : circleCenter(name, te);
+    : circleCenter(name, te, transition);
   if (!center) return;
   const fadeY = exitFadeY(te - 1, transition);
   const originX = center.x - 32;
@@ -573,7 +655,10 @@ export function applyBattleTransitionOverlay(
       drawCircleSprite(fb, name, te, transition);
     }
   } else {
-    // Preserve the already oracle-pinned CIRCLES_MEET compositor verbatim.
+    // Fixed top/left/right paint order - both CIRCLES_MEET (oracle-pinned)
+    // and CIRCLES_CROSS create their 3 sprites in that same order with no
+    // createOnTimer stagger (battle_transition_frontier.c:433-467), so the
+    // same z-order applies to both; no sequentialCirclePainterOrder needed.
     drawCircleSprite(fb, "top", te, transition);
     drawCircleSprite(fb, "left", te, transition);
     drawCircleSprite(fb, "right", te, transition);

@@ -473,3 +473,72 @@ both the last-before-clean-tail by construction and the only one of the
 three whose derived index matches §1 — the other two candidates decode
 to unrelated families, ruling out a lucky 1-in-12 coincidence). **Decision
 gate: proceed to S1/S2 as scoped** — no re-opening of §1 needed.
+
+## 6. S1 result — `CIRCLES_CROSS` renderer landed, unwired, guards unmoved
+
+**DONE.** `battleTransition.ts`: generalized `CIRCLE_SPECS`/`circleCenter`
+into `MEET_CIRCLE_SPECS`/`CROSS_CIRCLE_SPECS` (table idx 5's own 3-row
+`init`/`speed`/`delay` triple, `battle_transition_frontier.c:459-467`) fed
+through the same linear-slide anchor (`CIRCLE_ANCHOR_TE`, shared —
+`Circles_Init` is family-independent code, same `TransitionStateFunc` array
+entry for every circle family). One correction the "no new timing
+mechanism" framing in §3/S1 missed: `CreateSlidingLogoCircleSprite`'s
+`delayX`/`delayY` (`SpriteCB_LogoCircleSlide`, :267-291) throttle CROSS's
+left/right circles' Y axis to one step per **2** calls (MEET's own 3
+circles are all `delay=(0,0)`, i.e. every axis steps every call — the case
+the original formula silently assumed universal). Confirmed this is load-
+bearing, not cosmetic, by literally simulating `SpriteCB_LogoCircleSlide`'s
+call-by-call algorithm in Python against the closed-form port (zero
+divergence through call 45) — a naive port ignoring `delay` overshoots the
+target by 38px. `centerLogoEva`/`exitFadeY` gained a third `"circlesCross"`
+branch using `CROSS_BLEND_START_TE`/`CROSS_EXIT_FADE_START_TE`, derived
+(not hand-fit) by reapplying MEET's own already-established "+1"/"+50"
+deltas (`WaitForLogoCirclesAnim`'s dummy-callback-detection lag,
+`FadeInCenterLogoCircle`'s fixed tBlend/tFadeTimer run — both family-
+independent code) against CROSS's own 38-tick slide duration (vs. MEET's
+48) instead of MEET's own 48-tick figure.
+`frontierTransitionRenderKind` now maps `transitionId === 35 →
+"circlesCross"`; `applyBattleTransitionOverlay`'s existing fixed top/left/
+right paint order already covers it (CROSS creates its 3 sprites in the
+same order as MEET, no `createOnTimer` stagger — confirmed by source,
+§1's own finding).
+
+**Tier-1 coverage** (`tests/battleTransition.test.ts`, new
+`describe("B_TRANSITION_FRONTIER_CIRCLES_CROSS...")` block, 8 tests;
+`tests/battleTransitionFrontier.test.ts`, extended selection test):
+pins the shared flicker schedule, off-screen creation position, the
+delay-throttle checkpoint (anchor+20/21/22 — the Y axis explicitly holds
+flat between +20 and +21, proving the throttle is exercised, not just the
+X axis), the 38-tick (not MEET's 48-tick) simultaneous convergence, the
+derived blend/exit-fade starts, and that MEET's own existing checkpoints
+are untouched. **Red-verified**: temporarily reverted `slideMoves` to
+ignore `delay` (the exact plausible-wrong port the "no new timing
+mechanism" framing invited) and reran — the new suite failed exactly 2/8
+tests (the delay-throttle-dependent convergence checks), confirming they
+are load-bearing before restoring the correct implementation.
+
+**Acceptance run (fresh oracle, all synchronous, all foreground):**
+- `npm run compare -- factory-brain-silver-walkup-speech-flicker-off.json --summary`
+  → **79/100, unmoved.** This is the correct, expected result for this
+  slice, not a shortfall against §4's "strictly improves" framing: S1
+  lands the renderer UNWIRED by design (S3's job) — `core.ts`'s brain-room
+  render path only ever calls `frontierTransitionRenderKind` with
+  `b.transitionPresentation`, which stays `undefined` for brain rooms
+  until S3 threads `pickFrontierTransition`'s result through
+  `generateOpponentFor`/`createBrainWalkupBattleRoomState` — so the
+  fallback (`"circlesMeet"`) wins unconditionally today regardless of this
+  slice's new `"circlesCross"` case existing. Confirmed by direct read of
+  `core.ts:2528-2540` before running, not assumed.
+- Guard matrix, all unmoved: gold-close **113/126**, silver-flicker
+  **79/100**, gold-pages **177/177**, callscene-02 **199/199**,
+  entrance-03 **256/256**.
+- `npm run test:smoke` green (375/375, including the
+  `executableFrontierRatchet` barrier). Full `npm test` green
+  (**1065 files / 10019 passed** [+8 new] **/ 223 skipped**, unmoved
+  shape). `npm run build` and `npm run typecheck` green.
+
+**Next:** S2 (`CIRCLES_MEET_IN_SEQ` renderer, independent of S1) or S3
+(wire both — the plumbing described in §4's S3 steps 1-2, contingent on S2
+landing first for gold's own window to close, though S3's own partial-
+credit guard means it could land now safely against just silver's window
+with a fallback no-op for id 38).
