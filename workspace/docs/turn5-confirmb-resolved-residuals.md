@@ -784,3 +784,169 @@ byte-identical, matching the "flat static" claim directly.
 `turn5-resolve-off-c`'s own mechanism-(iv) fix above); `npm run
 build`/`npm run typecheck` green. Full writeup: `PROGRESS.md` entry
 citing this section, `ISSUES.md` #97.
+
+## 8. Follow-up (2026-08-18, bounded SIDE worker, ISSUES #97 remainder): the 6953-7005 residual re-measured — the "ring/star" hypothesis is superseded by a live-climb HP-overlay finding; §6.3's own spike remains uninstrumented
+
+Scope per this step's brief: (B)'s two named remainders — the §2.5/§6.3
+transition spike (RAM-probe instrument named but not yet run) and the
+6953-6969 ring/star residual (never independently RAM-verified). Fresh
+baseline confirmed in THIS worktree: `npm run compare -- turn5-resolve-off-d
+--summary` → **142/196**, matching the brief's own cited number. Method:
+per the standing discipline, read the diff PNGs first, then direct RGB/
+digit pixel reads off fresh `npm run compare --capture-range` PNGs — no
+live RAM probe run this session (time; the named window-system probe for
+§6.3 specifically was not attempted — see §8.3).
+
+### 8.1 The mismatch span is ONE continuous 53-tick block, not the four sub-spans the stale pre-fix table implied
+
+`npm run compare -- turn5-resolve-off-d --summary` (full 196-frame capture,
+no range override) lists exactly 54 mismatched frames: **6850** (the
+already-understood single-tick ENDEAVOR-hold-adjacent transition edge,
+unrelated, not re-examined) plus **6953-7005 contiguous, no gaps** — every
+single tick in that 53-tick span mismatches. §6.1's own table (written
+*before* the §6.2 rotation fix landed) split this into four sub-spans by
+bbox shape; that table is now stale for the purpose of mechanism
+attribution — the span is genuinely one continuous run of mismatches, even
+though (per §8.2) it is NOT one continuous mechanism.
+
+### 8.2 6953-~6988: NOT the ring/star sparkle — Onix's own HP digit is live-climbing, and the currently-landed formula assumes a hard step
+
+Direct digit reads off fresh oracle PNGs (`turn5-resolve-off-d
+--capture-range 6952:6953` / `6959:6960` / `6979:6980`, this session):
+
+| tick | oracle ONIX hp (read) | linear-fit prediction (rate=1/tick from tick 6952=1) |
+|---|---|---|
+| 6952 | *(last matching tick — app already shows 1, so oracle is 1 or the diff is sub-pixel)* | 1 |
+| 6953 | **2** | 2 |
+| 6960 | **9** | 9 |
+| 6980 | **29** | 29 |
+
+All three read anchors land EXACTLY on a rate-1-HP/tick linear climb
+starting at tick 6952 — the same shape (and same 1-unit/tick rate) as
+`endeavorHp`'s own already-correct drain formula
+(`docs/turn5-confirm-pools-diagnosis.md` §2). Extrapolating to the cap
+(`31`): `1 + (t-6952) = 31 → t=6982` — two ticks before the RAM-exact
+proc/jump tick `TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK=6984` this family's own
+landed fix uses, well within the same class of small render-lag/anchor
+slop already seen everywhere else in this family (e.g. `SWITCHIN_SENTOUT_
+TEXT_START_TICK`'s own `+1`, `docs/turn5-family-class3-diagnosis.md` §15).
+
+**This reframes, not confirms, the brief's own "ring/star" framing for this
+sub-span**: the dominant, bulk pixel difference across 6953-~6988 (the
+`175,91-200,103`-family bbox — the SAME on-screen region, Onix's own status
+box, that `docs/turn5-confirm-pools-diagnosis.md` §2's ENDEAVOR-hold digit
+mismatch also occupies, since Onix's status box sits in the same screen
+position all battle long) is the **HP digit/bar itself failing to
+animate**, not the star/sparkle particle effect. `turn5OffSitrusOnixHp`
+(`battleScene.ts`, landed this same day per §5/§7 above) is a **hard step**
+(`t < TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK ? 1 : 31`) — correct for the RAM
+stat (§5's own pre-landing spot-check confirmed `gBattleMons[0].hp` is a
+genuine hard step in RAM, no intermediate values, across the *sampled*
+window `6975-6995`) but **the DISPLAYED bar is not simply mirroring the RAM
+stat** — exactly the same "RAM commits instantly, the animated bar chases
+it over subsequent frames" split already established for `endeavorHp`
+(`docs/turn5-confirm-pools-diagnosis.md` §2's own closing note). The
+6975-6995 RAM probe's own "flat 1 through 6983" finding is **not
+contradicted** — that is still the true internal stat every one of those
+ticks — but it does not describe what's drawn on screen, which this
+session's fresh pixel evidence shows is already climbing well before 6975.
+
+**Named mechanism, not yet fix-shaped**: `turn5OffSitrusOnixHp` needs a
+live linear-climb formula (mirroring `endeavorHp`'s own `Math.max(cap,
+start ± (t - (anchor+delay)))` shape, direction reversed for healing) in
+place of its current hard step, anchored so it reads `1` before ~6952-6953
+and climbs at 1 HP/tick to `31` by ~6982-6984. **Not written to an exact
+formula this session** (only 3 anchor points sampled, all consistent with
+the simplest linear fit, but the exact start tick/anchor relationship
+`(TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK` or its own `ONIX_SITRUS_PROC_TRIGGER_
+RAM_TICK`-family upstream epoch) was not re-derived from first principles —
+a fix worker should confirm the anchor against
+`ONIX_SITRUS_PROC_TRIGGER_RAM_TICK`/`TURN5_OFF_SITRUS_HEAL_TEXT_START_
+TICK`'s own already-established epoch family before picking the exact
+constant, per this family's own "mint a scoped constant matching the real
+anchor family" convention).
+
+**The ring/star consumers (`turn5SitrusRingMatrix`/`drawGrantingStars`) are
+still unverified** — this session's finding does not rule out a smaller,
+separate sparkle-timing defect layered on top of the HP-digit issue (the
+bbox does widen toward `x=200` in the later ticks of this span, §6.1's own
+observation, consistent with *something* near the status box's right edge
+contributing too) — but the DOMINANT signal is the HP digit, confirmed by
+direct reads, not the sparkle. A follow-up isolating the ring/star
+specifically should re-run AFTER the HP-climb fix lands, since the digit
+mismatch's own large, wide bbox currently masks whatever smaller
+contribution the sparkle makes (the same "fix the dominant bug first, then
+re-measure the residual" sequencing every other multi-mechanism trace in
+this family has needed).
+
+### 8.3 ~6989-7005: the already-flagged §6.3 menu-chrome spike, still NOT instrumented (RAM probe not run this session either)
+
+By tick 6995 the mismatch bbox has moved off Onix's own status box
+entirely (`43,71-98,106` — the field/sprite region, not `175,91-200,103`),
+consistent with the HP digit having already settled to its correct value
+by then (§8.2's own extrapolated climb reaches 31 at ~6982-6984, well
+before 6995) — the remaining 6989-7005 mismatch is a **different** region
+and, per §6.3's own already-recorded pixel evidence (unchanged, not
+re-derived this session), the same 4-tick-early menu-chrome button-grid
+blit already characterized: `drawTurn5SitrusSettledMenuChrome`
+(`battleScene.ts:11649-11658`) draws its own `menuIdleBase` bitmap as a
+single uniform blit at `t >= TURN5_OFF_SITRUS_MENU_REDRAW_TICK(6991)`, but
+real hardware's own button-grid sub-window redraw lags 4 ticks behind its
+own left/upper-portion redraw (`§6.3`'s own split-region RGB sampling,
+unchanged).
+
+**The named next instrument (a RAM probe of the window-system state —
+`gBattle_BG0_X`/the action-menu window's own `WindowId`/tilemap-write
+completion, the same class of instrument `dump-turn5-resolve-offc-tail-
+probe.py` already uses for `gPaletteFade`) was NOT run this session** —
+time; this step's own priority ordering put (A)'s two confirm windows
+first (167 unattributed frames vs. this residual's own ~17 unexplained
+ticks once §8.2's HP-climb finding is subtracted out), and the HP-digit
+finding in §8.2 turned out to need the bulk of this session's own remaining
+budget. Flagged, not attempted — the exact instrument description in §6.3
+above is unchanged and still the right next step.
+
+### 8.4 Predicted counts (not landed, no `src/` edit this session)
+
+If `turn5OffSitrusOnixHp` gets the live-climb formula §8.2 names (fix shape
+not fully nailed to an exact constant, see caveat above): the bulk of
+6953-6988 (36 of 53 ticks in the continuous block) is predicted to close,
+modulo whatever small, separately-unverified ring/star contribution
+remains layered on top (§8.2's own "widening toward x=200" observation) —
+an honest range, not an exact number, since the sparkle component was not
+isolated. 6989-7005 (17 ticks) stays open pending §8.3's own RAM probe.
+**`turn5-resolve-off-d`: 142/196 → predicted roughly 160-178/196** once the
+HP-climb fix lands (wide range reflects the unisolated ring/star
+component), with 6989-7005 requiring its own separate RAM-probed fix
+before the window can close further.
+
+### 8.5 Regression guards
+
+- `turn5OffSitrusOnixHp`'s only call site remains `drawTurn5RockSlideWindow`'s
+  own call to `drawTurn6FieldBase` (`battleScene.ts:14884`, per §2.2 above)
+  — a turn5-off-scoped function with one caller, same guard reasoning as
+  every other fix in this family.
+- `gBattleMons[0].hp`'s own RAM hard-step finding (§5's pre-landing
+  spot-check) is not disturbed by this follow-up — §8.2 is about the
+  DISPLAYED formula, not the RAM ground truth, and proposes no change to
+  any RAM-read anchor.
+- `TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK=6984` is not contradicted as a real
+  RAM event — only as the sole input to a hard-step DISPLAY formula; a
+  fix worker may still need it as the climb's own cap-reached anchor.
+
+### 8.6 Verdict
+
+**No landed anchor was contradicted.** The RAM hard-step finding (§5) and
+the rotation-suppression fix (§6.2/§7) both stand unchanged — this
+follow-up adds new evidence about a THIRD, previously-unswept consumer of
+the same Sitrus-heal event (the HP overlay's own display formula) that
+turned out to need a live-climb shape instead of a hard step, superseding
+(not contradicting) the brief's own "ring/star" naming for this residual's
+dominant component. §8.3's own transition-spike residual remains exactly
+as flagged in §6.3 — the named RAM-probe instrument still has not been run
+(this session's own time went to the higher-priority (A) census and to
+chasing §8.2's own pixel evidence once it turned out to be the dominant
+signal in 6953-6988). Honest partial, per this step's own "honest partials
+beat rushed pins" priority instruction: one mechanism newly characterized
+with a strong, three-point pixel fit and a named (if not fully nailed) fix
+shape; one mechanism named but genuinely untouched.
