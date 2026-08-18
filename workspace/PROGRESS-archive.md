@@ -1,3 +1,56 @@
+## 1323 — [main worker, 2026-08-18] **ISSUES #97-B rung 2 landed: window B's composed correction (+67 raw sine index + local display-basis t-1 shift) — turn6-reopen-off 11/46 → exactly 20/46, zero regressions**
+
+- **State:** `src/engine/battleMenu.ts`, `src/engine/battleScene.ts`,
+  `tests/fightSubmenu.test.ts` edited (new commits pending: fix, then
+  docs). `npm run typecheck`/`npm run build` green. `npm test` **1,066
+  files / 10,038 passed (+1, the new pin) / 223 skipped** — full suite
+  confirmed green, no regressions.
+- **Did:** implemented `docs/turn5-bounce-recalibration-probe.md` §8f
+  exactly. `menuIdleBounce` gained a defaulted `indexOffset = 0` param
+  (added to both raw sine indices before the mod/table lookup) — every
+  pre-existing caller unaffected. `drawTurn6FieldBase` (+ its internal
+  `drawTurn5RockSlideAttack` onix-Y2 call) thread a new
+  `bounceIndexOffset = 0` param through to that call. Exactly TWO call
+  sites pass `67`, both provably scoped local (§8e's own warning against
+  perturbing the unexplored `turn6KickoffBounceTick`/7318+ dispatch):
+  `drawTurn5RockSlideWindow`'s call (the ONLY caller that ever hits
+  `drawTurn6FieldBase`'s non-number `bounceTickOrLatest` branch, whose
+  fallback moved from `t` to `t - 1` — the §7a display-basis correction),
+  and `drawTurn6FightSubmenuWindow`'s DMA-wait branch (`t < revealTick`,
+  ~7313-7317 only — `turn6ReopenBounceTick(t - 1, ...)` instead of
+  `turn6ReopenBounceTick(t, ...)`). Per the step's hard order: ran §8h's
+  RAM-receipt PASS/FAIL check first (passed, no oracle call), then derived
+  the predicted per-tick output via `npx tsx` against the live formulas
+  BEFORE editing — reproduced §8e's exact predicted match set
+  (displayed frames 7305-7317: matches at {7305, 7307-7316}, mismatches at
+  {7306, 7317}) with zero deviation.
+- **Result:** `turn6-reopen-off` 11/46 → **exactly 20/46** (the best-case
+  number §8e predicted, not its 18/46 fallback), in-span mismatch set
+  exactly {7306, 7317} (both §8d's already-known sine-table-peak rounding
+  artifact), all 9 outside-span matches
+  (`{7326,7327,7335,7336,7344,7345,7348,7349,7350}`) unchanged. Zero
+  regressions: `turn5-reset-off` 256/256, `turn5-action-off` 1/32,
+  `turn5-confirm-off-a` 8/132, `turn5-confirm-off-b` 0/132,
+  `turn5-resolve-off-{a,b,c,d}` 7/196, 71/196, 149/196, 0/196 — all
+  byte-for-byte unchanged (their own windows sit entirely before
+  `turn5SitrusResettledBounceTick`'s bounce-onset tick ~7223, so this fix
+  is a structural no-op there, not just coincidentally unaffected).
+  Tier-1 pin added to `tests/fightSubmenu.test.ts`, red-verified (fails
+  with both `src/` files stashed).
+- **Next:** commit fix + docs (ISSUES.md #97-B already updated with the
+  rung-2 table) as two commits per the step brief. Remaining #97-B open
+  items unchanged in kind: (i) window A's own healthbox-lag correction,
+  (ii) §8d's table-peak artifact, (iii) `turn6KickoffBounceTick`/7318+,
+  (iv) the family's class-(iii) text/banner mechanism (§8g, ~85% of
+  `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining mismatches).
+- **Notes:** no PAPERCUT. The positional-param threading needed to keep
+  the offset "strictly local" (per the step brief's own warning) required
+  passing several `undefined` placeholders through `drawTurn6FieldBase`'s
+  already-long parameter list at both new call sites — ugly but matches
+  this file's own existing idiom for the same reason (see e.g. the
+  turn11/turn13 `drawTurn6FieldBase` callers already doing this).
+
+---
 ## 1322 — [main worker, 2026-08-17] **ISSUES #71 §1e retirement Rung 0 + Rung 1 landed: shared helper + first 14-move batch, zero FINDINGs**
 
 - **State:** `src/animation/speciesIdleAnim.ts`, `src/engine/battleScene.ts`,

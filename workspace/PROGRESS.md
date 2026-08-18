@@ -4,6 +4,68 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1326 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 2-4 landed: 50 more sites converted (94 of 121 total), zero FINDINGs, zero regressions**
+
+- **State:** three green commits, one per rung, each independently
+  verified (`d02ed8d9` Rung 2, `c9ce2d14` Rung 3, `0bd6b34e` Rung 4 —
+  the stretch goal). `src/engine/battleScene.ts` only edited each time.
+  `npm test` **1,066 files / 10,040 passed / 223 skipped** after every
+  commit — byte-for-byte identical to session start, matching entry
+  1325's own baseline exactly (pure refactor, zero test-count drift).
+  `npm run build`/`npm run typecheck` green after each commit.
+- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs
+  2-4 exactly, re-grepping every move's current line number first (doc's
+  own drift warning) and confirming every per-move Tier-1 test filename
+  with `find` before scoping (doc's rollingKick/healBell caveats both
+  reconfirmed). **Rung 2** (14 sites, BRICK_BREAK…IRON_TAIL): GROWTH
+  was already one of the pre-existing "dynamic in syntax" sites — only
+  its raw call swapped for the OrZero helper inside its existing
+  `side==="opponent" ? ... : null` ternary, value-identical by
+  inspection. **Rung 3** (16 sites, STEEL_WING…SLEEP_TALK): two
+  double-site branches (KARATE_CHOP's ONIX+PRIMEAPE, both proven by
+  their own half of the throw-guard). **Rung 4, stretch** (20 sites,
+  HEAL_BELL…BULK_UP): five double-site branches (PERISH_SONG/MURKROW,
+  COTTON_SPORE/MAREEP, SLEEP_POWDER/HOPPIP — shared branch with
+  STUN_SPORE, SWAGGER/RATTATA, BULK_UP/PRIMEAPE); SWAGGER's RATTATA
+  fallback was `?? {x2:1,y2:0}` (not the zero idiom, since RATTATA is
+  the only other species besides ONIX with a real nonzero table entry)
+  — confirmed by inspection that the real table lookup already returns
+  that value directly, so the fallback was already dead code and the
+  substitution is value-identical, per the doc's own explicit
+  diff-review caveat for this site. Every other site matched the
+  standard `view.target.species`/`view.attacker.species` substitution
+  the doc's §3 describes. Every rung's own site-count sanity check
+  (`grep -c speciesFrontIdleRestOffset(` vs
+  `speciesFrontIdleRestOffsetOrZero(`) summed to 123 unchanged — 0 (Rung
+  0) + 14 (Rung 1) + 14 (Rung 2) + 16 (Rung 3) + 20 (Rung 4) = 64 helper
+  sites, 59 raw remaining. Zero FINDINGs across all three rungs — every
+  substituted expression matched what its enclosing throw-guard already
+  proved, confirmed per-site by inspection, not assumed from the
+  pattern.
+- **Verification per rung (all three, independently):** named per-move
+  Tier-1 test files green (23/84 tests Rung 2, 26/97 Rung 3, 34/92+1skip
+  Rung 4), full `npm test` green and byte-identical to baseline each
+  time, `npm run build` + `npm run typecheck` green each time, and
+  `compare:differential -- battle-command-generated-off.json --base
+  <rung's parent sha>` **128/128 byte-identical** each time (expected —
+  none of these 108 ON-profile-legacy branches are reachable from that
+  trace's OFF-profile route, per the doc's own §5 framing; this is
+  insurance against the shared-import/helper change, not primary proof).
+- **Next:** Rungs 5-8 remain (TORMENT…DOUBLE_EDGE, ~50 more sites) —
+  same recipe, same per-rung verification bar. Rung 5's own doc row
+  flags HARDEN as having zero Tier-1 coverage; that gap needs a minimal
+  pin (mirroring `calmMind.test.ts`) *before* that site is touched, per
+  the doc's explicit instruction — not a mechanical grep-and-substitute
+  like every other site so far. Rung 9 (hand-fit swap-over) stays
+  blocked on the animation lane's not-yet-started rung-4 back dispatcher.
+- **Notes:** no PAPERCUT. Splitting each rung into its own commit meant
+  re-running the full `npm test`/build/typecheck three times instead of
+  once for the combined 50-site diff — the AGENTS.md-mandated
+  per-rung-commit discipline costs real wall-clock time (~5 min/rung)
+  but keeps every commit independently bisectable and green, which is
+  the point.
+
+---
 ## 1325 — [main worker, 2026-08-18] **ISSUES #97-B closed: PP-digit confound root-caused and fixed, rung 3 reapplied — turn5-action-off 1/32 → 26/32, zero regressions**
 
 - **State:** three green commits this session (`1a70ec69` PP fix,
@@ -135,56 +197,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   to its predicted number without a second, independent fix.
 
 ---
-## 1323 — [main worker, 2026-08-18] **ISSUES #97-B rung 2 landed: window B's composed correction (+67 raw sine index + local display-basis t-1 shift) — turn6-reopen-off 11/46 → exactly 20/46, zero regressions**
-
-- **State:** `src/engine/battleMenu.ts`, `src/engine/battleScene.ts`,
-  `tests/fightSubmenu.test.ts` edited (new commits pending: fix, then
-  docs). `npm run typecheck`/`npm run build` green. `npm test` **1,066
-  files / 10,038 passed (+1, the new pin) / 223 skipped** — full suite
-  confirmed green, no regressions.
-- **Did:** implemented `docs/turn5-bounce-recalibration-probe.md` §8f
-  exactly. `menuIdleBounce` gained a defaulted `indexOffset = 0` param
-  (added to both raw sine indices before the mod/table lookup) — every
-  pre-existing caller unaffected. `drawTurn6FieldBase` (+ its internal
-  `drawTurn5RockSlideAttack` onix-Y2 call) thread a new
-  `bounceIndexOffset = 0` param through to that call. Exactly TWO call
-  sites pass `67`, both provably scoped local (§8e's own warning against
-  perturbing the unexplored `turn6KickoffBounceTick`/7318+ dispatch):
-  `drawTurn5RockSlideWindow`'s call (the ONLY caller that ever hits
-  `drawTurn6FieldBase`'s non-number `bounceTickOrLatest` branch, whose
-  fallback moved from `t` to `t - 1` — the §7a display-basis correction),
-  and `drawTurn6FightSubmenuWindow`'s DMA-wait branch (`t < revealTick`,
-  ~7313-7317 only — `turn6ReopenBounceTick(t - 1, ...)` instead of
-  `turn6ReopenBounceTick(t, ...)`). Per the step's hard order: ran §8h's
-  RAM-receipt PASS/FAIL check first (passed, no oracle call), then derived
-  the predicted per-tick output via `npx tsx` against the live formulas
-  BEFORE editing — reproduced §8e's exact predicted match set
-  (displayed frames 7305-7317: matches at {7305, 7307-7316}, mismatches at
-  {7306, 7317}) with zero deviation.
-- **Result:** `turn6-reopen-off` 11/46 → **exactly 20/46** (the best-case
-  number §8e predicted, not its 18/46 fallback), in-span mismatch set
-  exactly {7306, 7317} (both §8d's already-known sine-table-peak rounding
-  artifact), all 9 outside-span matches
-  (`{7326,7327,7335,7336,7344,7345,7348,7349,7350}`) unchanged. Zero
-  regressions: `turn5-reset-off` 256/256, `turn5-action-off` 1/32,
-  `turn5-confirm-off-a` 8/132, `turn5-confirm-off-b` 0/132,
-  `turn5-resolve-off-{a,b,c,d}` 7/196, 71/196, 149/196, 0/196 — all
-  byte-for-byte unchanged (their own windows sit entirely before
-  `turn5SitrusResettledBounceTick`'s bounce-onset tick ~7223, so this fix
-  is a structural no-op there, not just coincidentally unaffected).
-  Tier-1 pin added to `tests/fightSubmenu.test.ts`, red-verified (fails
-  with both `src/` files stashed).
-- **Next:** commit fix + docs (ISSUES.md #97-B already updated with the
-  rung-2 table) as two commits per the step brief. Remaining #97-B open
-  items unchanged in kind: (i) window A's own healthbox-lag correction,
-  (ii) §8d's table-peak artifact, (iii) `turn6KickoffBounceTick`/7318+,
-  (iv) the family's class-(iii) text/banner mechanism (§8g, ~85% of
-  `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining mismatches).
-- **Notes:** no PAPERCUT. The positional-param threading needed to keep
-  the offset "strictly local" (per the step brief's own warning) required
-  passing several `undefined` placeholders through `drawTurn6FieldBase`'s
-  already-long parameter list at both new call sites — ugly but matches
-  this file's own existing idiom for the same reason (see e.g. the
-  turn11/turn13 `drawTurn6FieldBase` callers already doing this).
 
 ---
