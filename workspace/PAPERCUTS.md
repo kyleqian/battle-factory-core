@@ -17,7 +17,11 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 4 (2026-08-18 orient: both ports FAILed again; only non-workspace
+- **Hits:** 5 (2026-08-18 supervisor session 2 orient: both ports FAILed
+  again; every commit since both service starts touched only `workspace/`
+  paths, zero `oracle/` commits — disproved in ~3 min via
+  `git log --name-only --since`, kept both services, no restart.)
+  (2026-08-18 orient: both ports FAILed; only non-workspace
   commit since the 8014 start was `3e29880b`, whose own message says it was
   verified against these restarted services — kept, no restart, ~4 min.)
   (2026-08-16: FAILed because services started 09:45:59 on the

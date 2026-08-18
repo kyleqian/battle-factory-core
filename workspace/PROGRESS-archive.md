@@ -1,3 +1,68 @@
+## 1339 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED, plus `resolve-off-d`'s Onix Sitrus HP display-climb LANDED — 60/132→128/132, 37/132→131/132, 142/196→159/196**
+
+- **State:** two green commits (`02b82685` primary + `37a901db`
+  secondary, each fix+Tier-1 pins) plus this docs commit. `npm test`
+  **1,067 files / 10,075 passed (+7 total, 2 new describe blocks + 1
+  rewritten) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read `docs/turn5-confirm-pools-diagnosis.md` (committed
+  `6366f91a`) and `docs/turn5-confirmb-resolved-residuals.md` §8 in full.
+  **Primary, both classes landed byte-for-byte per the doc's own diffs:**
+  `drawTurn5EndeavorText` was the last remaining caller of
+  `drawEndeavorSquish` (turn 2/3 already dropped it, ISSUES #39, zero RAM
+  basis — pixel-reconfirmed for turn 5 too) — rewritten to mirror
+  `drawTurn3EndeavorText`'s own structure, threading three new turn5-off
+  scoped constants (`TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY`=116,
+  `_HEALTHBOX_BOUNCE_START`=81, `_FLICKER_START`=82 — all bit-for-bit the
+  turn2/3 precedent). Deleted `drawEndeavorSquish`/`drawEndeavorHitsplats`/
+  `ENDEAVOR_HITSPLAT_ROUNDS` (grep-confirmed genuinely dead post-rewrite —
+  the squish table/blend/shake/droplet helpers survive, still used by the
+  separate Scene-ON ENDEAVOR staged path, so not ALL of the doc's own
+  speculative cleanup list died). **Secondary landed too (budget
+  remained):** §8's own "ring/star" framing for `resolve-off-d`'s
+  6953-~6988 residual was superseded by a live-climb HP-overlay finding.
+  Per the brief's own MANDATORY verification instruction, did NOT just
+  trust the doc's 3-anchor curve fit — ran a fresh oracle-vs-oracle
+  per-tick pixel diff of the HP-digit crop, confirming the digit changes
+  on EVERY tick 6953-6982 (30 consecutive nonzero diffs, zero skips) then
+  holds flat, exactly matching `hp(t)=t-6951` and capping at t=6982 (not
+  the hedged ~6982-6984). Landed `turn5OffSitrusOnixHp`'s new live-climb
+  body plus a new `TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK`=6952
+  constant (pixel-confirmed absolute tick; no clean relative-offset
+  derivation from any existing epoch was found). Per the brief's "hard
+  lesson" (sub-entry J), reran the ENTIRE guard family after EACH landed
+  mechanism, not just the target traces.
+- **Result:** `turn5-confirm-off-a` 60/132 → **128/132** (predicted ~128,
+  exact). `turn5-confirm-off-b` 37/132 → **131/132** (predicted ~131,
+  exact). `turn5-resolve-off-d` 142/196 → **159/196** (+17, strict
+  improvement; 6953-6969 now exact, 6970-6988 keeps a much smaller
+  residual — a real, previously-masked ring/star sparkle defect, now
+  exposed and still open — and 6989-7005's already-flagged menu-chrome
+  spike is untouched). Zero decreases anywhere, verified after both
+  landings: `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
+  `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+  `turn5-resolve-off-a` 56/196, `-b` 88/196, `-c` 195/196,
+  `turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
+  256/256 each.
+- **Next:** confirm-off's class 3 (4-frame confirm-wait submenu bounce,
+  next instrument in the doc's own §3.2) and class 4 (1-frame accepted
+  edge) remain open. `resolve-off-d`'s newly-exposed 6970-6988 ring/star
+  residual and its already-flagged 6989-7005 menu-chrome spike both need
+  their own RAM-probe instruments (named in `docs/turn5-confirmb-
+  resolved-residuals.md` §8.3, unchanged). `resolve-off-a`/`-b`'s
+  remaining pools (sub-entry J, side-lane territory) untouched. #71 Rung
+  9 unchanged.
+- **Notes:** no PAPERCUT. The secondary's own MANDATORY "verify, don't
+  assume" instruction paid off exactly as intended — an independent
+  per-tick pixel diff (not just re-checking the doc's 3 anchor points)
+  pinned the cap tick one tick earlier than the doc's own hedge (6982 vs
+  "~6982-6984") and, just as importantly, revealed that the doc's own
+  predicted 160-178/196 range wouldn't fully land: the actual result
+  (159/196) is a strict improvement but undershoots the low end by one,
+  because a real second mechanism (ring/star) was hiding under the digit
+  bug the whole time — exactly the kind of thing a rushed "looks close
+  enough" landing would have missed.
+
+---
 ## 1338 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-a`'s Class A rock-slide hit-flash profile LANDED — 44/196→56/196; Class C reverted (hard-guard regression); Class B unresolved (new residual found)**
 
 - **State:** one green commit (`8372b6ab` fix+Tier-1 pins) plus this docs

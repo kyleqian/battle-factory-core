@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+
+## 1342 — [supervisor wind-down, 2026-08-18 session 2] **#97 near-CLOSED in one instrument→fix assembly line (10 fix + 8 instrument worker rounds): `resolve-off-b` 196/196 + both turn6 windows CLOSED, every trace verified after every round, zero guard decreases all session; one supervisor overturn (ON/OFF oracle-profile proof) unlocked turn6**
+
+- **Final gates (independent, after the last engine fold `758107d9`;
+  the two later folds `ca8e70d0`/`8127921e` are docs+probe-only):**
+  full npm test **1,067 files / 10,086 passed / 223 skipped**; `npm run
+  build` green; soak vanilla 0:20 **20/20 OK**; soak full 0:60
+  **60/60 OK**. animation-main and rust-main EMPTY at orient AND
+  wind-down. DEFERRED.md EMPTY. Only permanent worktrees remain; no
+  unmerged branches; freshness-check FAIL at orient was false-positive
+  #5 (PAPERCUTS bumped; zero `oracle/` commits since either service
+  start).
+- **Family scoreboard (session start → end, supervisor-verified after
+  every round):** `turn5-confirm-off-a` 15→**128**/132; `-b`
+  0→**131**/132; `turn5-resolve-off-a` 25→**58**/196; `-b`
+  88→**196/196 CLOSED**; `-c` 149→**195**/196; `-d` 0→**194**/196;
+  `turn6-reopen-off` 22→**46/46 CLOSED**; `turn6-menu-off` fixture
+  23→**47/47 CLOSED**; controls (`turn5-reset-off` 256/256,
+  `turn5-action-off` 32/32, turn4 pair 256/256, `turn13-switchin`
+  242/242) never moved.
+- **Supervisor decision (evidence-backed, recorded in
+  `docs/turn6-reopen-endstate-spec.md` §6 + commit `cb7cbee3`):**
+  overturned that spec's rejection of the turn6 [7318,1350] fix. Its
+  guard trace `turn6-menu.json` is a legacy Battle Scene ON trace with
+  byte-identical inputs to `turn6-reopen-off` (OFF); the two ORACLES'
+  PNGs differ at 34/44 overlapping ticks while the app's are identical
+  44/44 — one profile-blind render can never match both. Mission + lane
+  contract + precedent (`turn5-menu` 42/42→9/42 under earlier OFF
+  re-fits) say OFF wins; legacy-ON movement measured and recorded
+  (turn6-menu 34→10/44, featherdance 82→64/90, feathers 227→209/235).
+- **Root-cause classes landed:** three "spurious animation with zero
+  RAM basis" deletions (ENDEAVOR squish package, PIDGEOTTO
+  stretch/frame-flip, ONIX Sitrus rotation + granting stars); five
+  wrong-anchor retimings (healthbox slide 6763, text-clear 6989,
+  menu-redraw 6995, HP display-climb 6952, materialize coeff t-1); two
+  missing per-window parameter threads (rockslide text delay 355,
+  ENDEAVOR drain delay 116); one real state addition
+  (`turn5FaintDismissElapsed` dismiss+freeze, the turn6 kickoff shift).
+  The live-verification bar caught five would-be regressions before
+  they landed (shared BG-fade table → forked; cursor fix broke `-c`
+  through a shared path → reverted, re-instrumented, relanded; +1-off
+  hand-derived freeze offset; census Class-B misattribution; ring/star
+  hypothesis falsified by full OAM scan).
+- **Open (ordered for next session):** (a) `resolve-off-a`'s
+  static-background artifact (span 6248-6365, ~136 frames — the only
+  big pool left): shared scroll code PROVEN correct at turns 6/7;
+  BG2CNT-priority lead DISPROVED by the VRAM census (BG0/BG2
+  transparent, BG1 geometrically excluded, HBlank off); next named
+  instrument = OAM/sprite census over the static rows
+  (`docs/turn5-resolve-ab-pools-diagnosis.md`, final section). Do NOT
+  land the flat-shiftY candidate without it. (b) Named single-frame
+  residuals: `-c` 6763 (6px AA-class), `-d` 6850 + 6996 (cursor-
+  adjacent), confirm-off 4-frame bounce + 1-frame edge. (c) #71 Rung 9
+  still blocked on the animation lane's rung-4 back dispatcher.
+  (d) #73/#55 unchanged. No deferred questions; no blockers.
+
+---
 ## 1341 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-d`'s three §9-named fix shapes (star suppression + text-clear/menu-redraw retiming) LANDED — 159/196→194/196, exactly matching §9.5's own prediction**
 
 - **State:** one green commit (`7448000c` fix+Tier-1 pins) plus this docs
@@ -140,67 +197,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   #97-J's own standing lesson, confirmed `-c` genuinely holds this time.
 
 ---
-## 1339 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED, plus `resolve-off-d`'s Onix Sitrus HP display-climb LANDED — 60/132→128/132, 37/132→131/132, 142/196→159/196**
-
-- **State:** two green commits (`02b82685` primary + `37a901db`
-  secondary, each fix+Tier-1 pins) plus this docs commit. `npm test`
-  **1,067 files / 10,075 passed (+7 total, 2 new describe blocks + 1
-  rewritten) / 223 skipped**; `npm run build`/`npm run typecheck` green.
-- **Did:** read `docs/turn5-confirm-pools-diagnosis.md` (committed
-  `6366f91a`) and `docs/turn5-confirmb-resolved-residuals.md` §8 in full.
-  **Primary, both classes landed byte-for-byte per the doc's own diffs:**
-  `drawTurn5EndeavorText` was the last remaining caller of
-  `drawEndeavorSquish` (turn 2/3 already dropped it, ISSUES #39, zero RAM
-  basis — pixel-reconfirmed for turn 5 too) — rewritten to mirror
-  `drawTurn3EndeavorText`'s own structure, threading three new turn5-off
-  scoped constants (`TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY`=116,
-  `_HEALTHBOX_BOUNCE_START`=81, `_FLICKER_START`=82 — all bit-for-bit the
-  turn2/3 precedent). Deleted `drawEndeavorSquish`/`drawEndeavorHitsplats`/
-  `ENDEAVOR_HITSPLAT_ROUNDS` (grep-confirmed genuinely dead post-rewrite —
-  the squish table/blend/shake/droplet helpers survive, still used by the
-  separate Scene-ON ENDEAVOR staged path, so not ALL of the doc's own
-  speculative cleanup list died). **Secondary landed too (budget
-  remained):** §8's own "ring/star" framing for `resolve-off-d`'s
-  6953-~6988 residual was superseded by a live-climb HP-overlay finding.
-  Per the brief's own MANDATORY verification instruction, did NOT just
-  trust the doc's 3-anchor curve fit — ran a fresh oracle-vs-oracle
-  per-tick pixel diff of the HP-digit crop, confirming the digit changes
-  on EVERY tick 6953-6982 (30 consecutive nonzero diffs, zero skips) then
-  holds flat, exactly matching `hp(t)=t-6951` and capping at t=6982 (not
-  the hedged ~6982-6984). Landed `turn5OffSitrusOnixHp`'s new live-climb
-  body plus a new `TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK`=6952
-  constant (pixel-confirmed absolute tick; no clean relative-offset
-  derivation from any existing epoch was found). Per the brief's "hard
-  lesson" (sub-entry J), reran the ENTIRE guard family after EACH landed
-  mechanism, not just the target traces.
-- **Result:** `turn5-confirm-off-a` 60/132 → **128/132** (predicted ~128,
-  exact). `turn5-confirm-off-b` 37/132 → **131/132** (predicted ~131,
-  exact). `turn5-resolve-off-d` 142/196 → **159/196** (+17, strict
-  improvement; 6953-6969 now exact, 6970-6988 keeps a much smaller
-  residual — a real, previously-masked ring/star sparkle defect, now
-  exposed and still open — and 6989-7005's already-flagged menu-chrome
-  spike is untouched). Zero decreases anywhere, verified after both
-  landings: `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
-  `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
-  `turn5-resolve-off-a` 56/196, `-b` 88/196, `-c` 195/196,
-  `turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
-  256/256 each.
-- **Next:** confirm-off's class 3 (4-frame confirm-wait submenu bounce,
-  next instrument in the doc's own §3.2) and class 4 (1-frame accepted
-  edge) remain open. `resolve-off-d`'s newly-exposed 6970-6988 ring/star
-  residual and its already-flagged 6989-7005 menu-chrome spike both need
-  their own RAM-probe instruments (named in `docs/turn5-confirmb-
-  resolved-residuals.md` §8.3, unchanged). `resolve-off-a`/`-b`'s
-  remaining pools (sub-entry J, side-lane territory) untouched. #71 Rung
-  9 unchanged.
-- **Notes:** no PAPERCUT. The secondary's own MANDATORY "verify, don't
-  assume" instruction paid off exactly as intended — an independent
-  per-tick pixel diff (not just re-checking the doc's 3 anchor points)
-  pinned the cap tick one tick earlier than the doc's own hedge (6982 vs
-  "~6982-6984") and, just as importantly, revealed that the doc's own
-  predicted 160-178/196 range wouldn't fully land: the actual result
-  (159/196) is a strict improvement but undershoots the low end by one,
-  because a real second mechanism (ring/star) was hiding under the digit
-  bug the whole time — exactly the kind of thing a rushed "looks close
-  enough" landing would have missed.
 
