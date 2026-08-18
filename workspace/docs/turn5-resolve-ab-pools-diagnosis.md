@@ -1198,6 +1198,245 @@ instruction-level or multiple-reads-per-frame probe that this probe family
 has not yet built (not confirmed unavailable in the harness - just not
 attempted by any probe so far, this one included).
 
+## 15. Side-lane instrument session (2026-08-18, fourth): §14.4's own named
+OAM census run - it exposes an inherited bootstrap bug in the entire §13-14
+BG-register probe sub-chain; corrected, the mystery is CLOSED: turn 5's own
+real `BG3VOFS` never leaves 0 anywhere in the window (not merely
+"occluded"), pinning both the mechanism and the app-side fix
+
+ANALYSIS ONLY, side lane, Battle Scene OFF oracle - `git diff -- src/` is
+empty throughout this session. New committed probe,
+`tools/probe/dump-turn5-resolve-offa-oam-bg3rows-census.py`: a raw-hardware
+OAM census (all 128 OAM slots read directly from `0x07000000`, decoding
+shape/size/objMode/x/y/priority/tileNum, intersected against screen rows
+0/10 using the GBA's own mod-256/mod-512 wraparound rule - no app-`Sprite`-
+struct reconstruction needed) plus a direct BG3 tilemap/tile-pixel dump
+reusing `dump-turn5-resolve-offa-bg02-vram-census.py`'s own `record_layer`
+scroll-wraparound-correct method, generalized to BG3's own registers
+(`BG3CNT`/`BG3HOFS`/`BG3VOFS`). Baseline reconfirmed fresh, unchanged from
+8127921e: `turn5-resolve-off-a` 58/196, `turn6-rockslide-a` 255/255,
+`turn5-resolve-off-b` 196/196, `turn5-resolve-off-c` 195/196,
+`turn5-resolve-off-d` 194/196, `turn5-reset-off` 256/256, `turn5-action-off`
+32/32.
+
+### 15.1 The census surfaced a real bug before it could answer its own
+question: every BG-register probe in §13/§14 boots turn 5's own local
+replay from the WRONG save state
+
+Writing this probe required picking an `EmeraldOracle` bootstrap file for
+each of the two traces it replays (`turn5-resolve-off-a.json`,
+`turn6-rockslide-a.json`). `tools/compare/run.ts:74` resolves each trace's
+own **real** oracle profile via `trace.oracleProfile ?? "battle-scene-on"`;
+reading the two trace files directly confirms `turn5-resolve-off-a.json`
+declares `"oracleProfile": "battle-scene-off"` while `turn6-rockslide-a.json`
+carries **no** `oracleProfile` field at all, so it defaults to
+`"battle-scene-on"` - turn 5's own compare trace is genuinely captured
+against a Battle-Scene-OFF real oracle, turn 6's against Battle-Scene-ON,
+confirmed by `oracle/emerald_core.py`'s own bootstrap-loading code
+(`load_bootstrap_spec`'s `extends`/`pokes` mechanism - `factory-battle-
+scene-off.json` extends `factory.json` and pokes the `SaveBlock2` options
+byte that flips the in-game Battle Scene option, `oracle/bootstrap/
+factory-battle-scene-off.json`'s own description field spells this out).
+
+Every BG-register probe this doc's §13/§14 sessions wrote
+(`dump-turn5-resolve-offa-bglayer-census.py`,
+`dump-turn5-resolve-offa-bg02-vram-census.py`) hardcodes a single
+`BOOTSTRAP_PATH = ORACLE_DIR / "bootstrap" / "factory.json"` (**scene-ON**)
+regardless of which trace it's told to replay - correct for the turn-6 call
+(matches turn 6's own real profile), but **wrong for every turn-5 call**:
+`turn5-resolve-off-a.json`'s own button script was captured by a real
+Battle-Scene-OFF oracle, and Battle Scene Off is well known to skip
+move-animation-driven effects entirely (screen shakes among them) - a
+local replay bootstrapped from the scene-ON save state runs a materially
+different amount of animation logic during earlier turns, so by absolute
+tick 6258 it is no longer at the same battle-script position the real
+scene-OFF capture is at. `dump-turn5-resolve-offa-sprite-census.py`
+(§11.2) is the one exception - it already used `factory-battle-scene-
+off.json` correctly, which is why its own "no rock-shaped sprite ever
+active" finding held up across every later session while the BG-register
+readings didn't.
+
+Direct proof, reading only `REG_BG3VOFS` (`0x0400001E`) at turn 5's own
+named tick set, once per bootstrap:
+
+```
+factory.json (scene-ON, what every BG-register probe used):          {6258: 0, 6259: -7, 6263: -7, 6264: -7}
+factory-battle-scene-off.json (correct, matches the trace's own profile): {6258: 0, 6259: 0,  6263: 0,  6264: 0}
+```
+
+A follow-up single-register scan across the CORRECT bootstrap's entire
+6100-6376 range (every tick, not just the 4 named ones) finds `REG_BG3VOFS`
+at exactly 0 the whole time - not "mostly 0," zero exceptions across 277
+ticks. **§13.2's own headline finding - "the hardware register genuinely
+reads -7" - was itself a bootstrap artifact.** Turn 5's real BG3VOFS never
+leaves 0 anywhere near this window.
+
+### 15.2 With the correct bootstrap, this probe's own OAM and BG3-pixel
+census closes the mystery directly - no occlusion, no uniform-content
+coincidence, just a register that never moves
+
+Re-running this probe's own OAM/BG3 dump with the corrected per-trace
+bootstrap (turn 5: `factory-battle-scene-off.json`; turn 6: `factory.json`,
+unchanged - this is the mapping the probe now derives automatically from
+each trace's own `oracleProfile` field, not a hardcoded single path):
+
+**Turn 5** (`turn5-resolve-off-a.json`, ticks 6258/6259/6263/6264):
+- `BG3VOFS`/`BG3HOFS` = 0/0 at all 4 ticks (§15.1).
+- OAM: **zero** of the 128 hardware OAM slots overlap screen row 0 or row
+  10 at ANY of the 4 ticks (`staticRowHitSlots: {"0": [], "10": []}`
+  every time) - sprite occlusion was never live in the first place, for the
+  simplest possible reason: there is nothing to occlude.
+- BG3's own composited pixel content at rows 0 and 10 (full 240px width,
+  read via the scroll-aware `record_layer` method) is **byte-identical
+  across all 4 sampled ticks** - trivially, since the scroll register never
+  moves. This directly reproduces §13.3's own "exactly static, every tick"
+  finding, now with a mechanism instead of a mystery.
+
+**Turn 6** (`turn6-rockslide-a.json`, ticks 7801/7802/7806/7807, cross-
+check that the shared code and this probe both behave correctly when the
+shift is real):
+- `BG3VOFS` = 0 at 7801, 505 (i.e. -7 as a 9-bit field) at 7802/7806/7807 -
+  matches §13.2's own already-recorded cycle for this turn.
+- Row 0 and row 10's own BG3 pixel content genuinely changes between 7801
+  and 7802 (row 0: palette index 1 -> 11 across the full sampled width; row
+  10: index 13 -> 11) - confirming the shared `rockSlideBg3Y`/
+  `drawStaticBgShiftedY` code is not just "probably right" but produces the
+  exact real-hardware pixel value when Battle Scene is actually ON.
+- One OAM slot (slot 10, a 32x32 sprite at `y=225` i.e. wrapped rows
+  225-255+0-31, tileNum 585, priority 2) does overlap row 0 at tick 7802 -
+  flagged so a future reader doesn't have to re-derive it, but it is NOT
+  causal for the row-0 pixel change just confirmed: its own on-screen
+  column range is 155-186, and the sampled/changed pixels above are columns
+  0-15. Coincidental, not contributing.
+
+### 15.3 Mechanism PINNED (not a partial): turn 5's real hardware never
+applies the ROCK_SLIDE BG3 shake under Battle Scene Off at all; the app
+draws one anyway because `drawTurn5RockSlideAttack` doesn't gate `rockSlideBg3Y`
+on that fact
+
+This is not an occlusion story (§14's own BG0/BG2/BG1/OAM sweep was sound
+methodology, just applied to a false premise inherited from §13.2's own
+mis-bootstrapped register read). The real story: **Battle Scene Off skips
+the Rock Slide screen-shake entirely on real hardware** (consistent with
+the well-known Gen 3 behavior that the Options > Battle Scene toggle gates
+move-animation-driven effects, screen shakes included) - `REG_BG3VOFS`
+simply never leaves its resting value for this whole window, confirmed both
+at the 4 named ticks and via the full 6100-6376 scan (§15.1). This is the
+same bucket turns 3/4/9/10/11/13 already landed independently (§13.4's own
+citation: those turns' own `drawStaticBgShiftedY` calls already pass a
+hardcoded `0`, each with its own doc comment recording an independently
+RAM-confirmed "real background is flat" finding) - turn 5 belongs there
+too, now for a RAM-confirmed reason rather than a plausible guess.
+
+`drawTurn5RockSlideAttack` (`src/engine/battleScene.ts:10898-10901`) is the
+one remaining caller in this family that doesn't:
+
+```ts
+export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, ...): void {
+  const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
+  const shiftY = rockSlideBg3Y(t, pressTick);                                    // battleScene.ts:10900
+  drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), ...);      // battleScene.ts:10901
+  ...
+```
+
+`rockSlideBg3Y` (`src/engine/battleMenu.ts:1743-1752`) is a pure function of
+`t`/`pressTick`/`profile` - it has no Battle-Scene-Off awareness and cycles
+through `ROCK_SLIDE_SHAKE_SEQUENCE` (0,-7,-7,0,0,-7,-7,...) once `t` enters
+the active-shake window regardless of which profile is rendering. Every
+other Rock-Slide-adjacent turn in this file already drops this call and
+hardcodes `0` for its own scene-flat window (`battleScene.ts:9469,9873,
+10135,13081/13091,13439/13449,13694/13704,14007,15171,41001` - grep
+`drawStaticBgShiftedY(fb, 0` for the full list). Turn 5's own trace is
+exclusively the Battle-Scene-OFF profile (§15.1) - there is no scene-ON
+call site for `drawTurn5RockSlideAttack` in this codebase to preserve, so
+the minimal, precedent-matching fix is unconditional, not a runtime branch:
+
+```ts
+  // was: const shiftY = rockSlideBg3Y(t, pressTick);
+  //      drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
+  drawStaticBgShiftedY(fb, 0, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
+```
+
+(drop the now-unused `shiftY`/`pressTick` local and the `rockSlideBg3Y`
+call at `battleScene.ts:10899-10900`; `pressTick` may still be needed by
+the `rockSlideMonBlinkInvisible`/`rockSlideMonShakeY2` calls a few lines
+below - check before deleting it outright.)
+
+### 15.4 Predicted count - directionally strong, not independently verified
+this session (ANALYSIS ONLY, no `src/` edit)
+
+`rockSlideBg3Y` only returns nonzero during the active-shake sub-window
+(§13.3's own citation: ticks 6256-6265, sequence 0,-7,-7,0,0,-7,-7,...) -
+roughly half of those ~10 ticks currently draw a `-7` shift against
+hardware that (per §15.1) never moves. Landing §15.3's fix should convert
+every one of those ticks from a full-frame BG3-shift mismatch to a match.
+Beyond that specific sub-window, this session did not re-derive whether the
+"row-15-44 residual (~4.6-6.6%)" §13.4 named (from BEFORE this session's own
+bootstrap correction) has any real basis - since that number was also
+produced by the same mis-bootstrapped probe chain, it may shrink or
+evaporate once re-derived under the correct bootstrap, but that re-
+derivation is not this session's own instrument and should not be assumed
+without running it. Class B's own sink-transition tail (6360-6376, §5,
+independently diagnosed and explicitly NOT re-covered by this fix) remains
+a separate, already-known contributor to the region's residual mismatch
+count. **Do not assume this fix alone closes `turn5-resolve-off-a` to
+196/196** - it should close the shake sub-window's own mismatches with high
+confidence; the full post-fix count needs an actual `npm run compare`
+rerun, which this ANALYSIS-ONLY session cannot perform.
+
+### 15.5 Scope note for the next session
+
+This session's own instrument (OAM + BG3 rows) is complete and answers its
+own question. It did **not** re-run `dump-turn5-resolve-offa-bglayer-
+census.py` or `dump-turn5-resolve-offa-bg02-vram-census.py` themselves under
+the corrected bootstrap - §14.1/§14.2's own BG0/BG1/BG2 findings for turn 5
+were produced by the same mis-bootstrapped chain (§15.1) and were not
+re-verified this session. Given §15.1-§15.3 already closes the row-0/10
+mystery outright (the register never moves, so no occluding layer was ever
+needed to explain it), re-running those two probes is very unlikely to
+change the recommended fix, but a future session citing BG0/BG1/BG2's own
+specific tile-content claims from §14 should treat them as **produced under
+an unverified bootstrap** rather than re-confirmed.
+
+### 15.6 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 58/196, unchanged (ANALYSIS ONLY - no src/ edit this session)
+npm run compare -- turn6-rockslide-a --summary     # 255/255
+npm run compare -- turn5-resolve-off-b --summary   # 196/196
+npm run compare -- turn5-resolve-off-c --summary   # 195/196 (pre-existing 6763 residual)
+npm run compare -- turn5-resolve-off-d --summary   # 194/196
+npm run compare -- turn5-reset-off --summary       # 256/256
+npm run compare -- turn5-action-off --summary      # 32/32
+```
+
+Probe rerun (writes fresh JSON per turn; an mGBA teardown SIGSEGV after
+valid JSON is written is expected and benign per `tools/run-mgba-probe.py`'s
+own docstring):
+
+```sh
+python3 tools/run-mgba-probe.py /tmp/oam-bg3-turn5.json -- \
+  tools/probe/dump-turn5-resolve-offa-oam-bg3rows-census.py \
+  tools/compare/traces/turn5-resolve-off-a.json /tmp/oam-bg3-turn5.json \
+  6258 6259 6263 6264
+python3 tools/run-mgba-probe.py /tmp/oam-bg3-turn6.json -- \
+  tools/probe/dump-turn5-resolve-offa-oam-bg3rows-census.py \
+  tools/compare/traces/turn6-rockslide-a.json /tmp/oam-bg3-turn6.json \
+  7801 7802 7806 7807
+```
+
+**Not fixed.** `git diff -- src/` remains empty. This session's own
+instrument (§14.4's named OAM census) is run in full, plus the BG3-content
+half of the brief's ask; it surfaces and fixes a bootstrap bug that had
+been silently inherited since §13.1, and with that corrected, pins the
+mechanism outright: turn 5's real `BG3VOFS` never moves under Battle Scene
+Off, the row-0/10 mystery was never an occlusion problem, and the fix shape
+is precedent-matched and file:line-precise (§15.3). Predicted impact is
+directional, not counted (§15.4) - the next session's fix worker should
+land §15.3, rerun `npm run compare -- turn5-resolve-off-a`, and record the
+actual resulting count before considering this residual closed.
+
 ### 14.5 Rerunnable guards (fresh, this session)
 
 ```sh
