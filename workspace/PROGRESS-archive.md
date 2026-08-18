@@ -1,4 +1,60 @@
 ---
+## 1333 — [main worker, 2026-08-18] **ISSUES #97 CLOSED: turn6 [7318,7347] bounce correction lands under a supervisor overturn of `turn6-reopen-endstate-spec.md`'s §2/§3 rejection — `turn6-reopen-off` 22/46→46/46, `turn6-menu-off` 23/47→47/47, both FULL**
+
+- **State:** one green commit (`cb7cbee3` fix+Tier-1 pin) plus this docs
+  commit. `npm test` **1,067 files / 10,045 passed (+1, the new
+  [7318,7350] composed-model pin) / 223 skipped**; `npm run build` green.
+- **Did:** per a supervisor decision overturning `docs/turn6-reopen-
+  endstate-spec.md`'s own §2/§3 rejection (that doc's `turn6-menu.json`
+  regression premise was refuted: that trace has no `oracleProfile` field
+  — it's a legacy Battle Scene ON trace, not this lane's OFF ground truth;
+  byte-comparing the two compare runs' own oracle captures showed the
+  ORACLE PNGs differ at 34/44 overlapping ticks while the profile-blind
+  APP PNGs are identical at 44/44 — full evidence in that doc's own
+  2026-08-18 addendum). Landed the composed `[7318,7347]` correction:
+  `turn6KickoffBounceTick`'s raw branch gets its missing
+  `-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` term (§10b); `drawTurn6FightSubmenu
+  Window`'s post-reveal dispatch applies the shared `+60` raw-sine-index
+  offset + `t-1` display basis to both the idle-else regime and this raw
+  regime; the frozen tail `[7348,7350]` stays untouched (no dynamic RAM
+  ground truth there, already correct). Composition re-derived from
+  scratch against the receipt on the corrected (post-increment, `t-1`
+  basis) footing per this step's own arithmetic caution — NOT the spec's
+  own rejected `+67`/`t-1` combination — and proven exact (33/33 ticks)
+  against `src/data/gen/turn5-6-reopen-bounce-probe.json` before any live
+  compare. Two "content-owned presentation bridge" parity pins
+  (`turn5ResolutionAdapter.ts`, `LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION`
+  in `battleScene.ts`) updated in lockstep to keep reproducing the real,
+  now-fixed function.
+- **Result:** `turn6-reopen-off.json` 22/46 → **46/46** (full match, beats
+  the ≥40/46 target); `turn6-menu-off.json` 23/47 → **47/47** (full
+  match). Expected, accepted ON-profile movement (legacy traces, out of
+  this lane's oracle contract): `turn6-menu.json` 34/44→10/44,
+  `turn6-featherdance.json` 82/90→64/90, `turn6-feathers.json`
+  227/235→209/235 — all inside `[7307,7347]`, the exact touched span.
+  Zero regressions across every hard guard: `turn5-sitrus-d` 15/133,
+  `turn5-action-off` 32/32, `turn5-reset-off` 256/256,
+  `turn5-confirm-off-{a,b}` 60/132 and 0/132 (689px/1.79% unchanged),
+  `turn5-resolve-off-{a,b,c,d}` 25/196, 88/196, 149/196, 0/196
+  (258px/0.67% unchanged), `win-terminal-window-off` 3590/3590. ISSUES
+  #97's `turn6KickoffBounceTick`/7318+ dispatch remainder is fully closed
+  (new §E dated sub-entry); full before/after table in
+  `docs/turn6-reopen-endstate-spec.md`'s addendum.
+- **Next:** ISSUES #97 stays open only for its unrelated remainders:
+  `confirm-off-b`'s 689px residual (`drawTurn5RockSlideWindow` attack/text
+  phase), `resolve-off-d`'s 258px residual (settled-Sitrus-chrome ONIX
+  overlay), `resolve-off-c`'s trailing 47-frame secondary mechanism
+  (§3e/§7, untraced), and the Class-(iii) text/banner mechanism (§8g) —
+  none touched by this session. #71 Rung 9 unchanged (blocked on the
+  animation lane's rung-4 back dispatcher).
+- **Notes:** no PAPERCUT. The arithmetic-caution flag in this step's own
+  brief (receipt columns are post-increment) was worth the up-front
+  `npx tsx` modeling pass — it caught that the spec's own `+67` fit needed
+  the same `-7` correction window B's landed fix already applies, so the
+  composed formula matched the receipt exactly (33/33) on the first live
+  compare, no iteration needed.
+
+---
 ## 1332 — [main worker, 2026-08-18] **ISSUES #97 §17 item 5 landed: HP-overlay gate's turn4 arm closes turn5-confirm-off-a's frozen-HP frames (15→60/132), zero decreases across the guard family**
 
 - **State:** two green commits (`e7657a86` fix+Tier-1 pin, `0ac71a47`

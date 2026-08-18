@@ -397,13 +397,13 @@ frames, 6810-6828; its own out-of-scope 258px/0.67% residual, past tick
 addendum: `docs/turn5-resolve-offc-tail-diagnosis.md`.
 
 **Remaining, still open:** the third mechanism above
-(`drawTurn5PidgeottoMaterialize`'s settled-transition path never handing
-off before `TURN5_PIDGEOTTO_SETTLE_TICK`=6828, while the real sprite
-settles by RAM tick 6760) — needs its own instrument and is explicitly
-out of scope for this fix (touches the sprite's own animation, not the
-healthbox/bg-fade mechanisms this entry closes). `resolve-off-d`'s 258px
-residual and `confirm-off-b`'s 689px residual are **now landed, see the
-dated sub-entry G below**.
+(`drawTurn5PidgeottoMaterialize`'s settled-transition path) is **now
+landed, see the dated sub-entry H below** — closed `turn5-resolve-off-c`
+149/196 -> 173/196. A fourth, separate mechanism at renders 6763-6783
+(`TURN5_MATERIALIZE_RAMP_COEFF`'s own falling edge, sub-entry H's own
+§11e cite) stays open, needs its own instrument. `resolve-off-d`'s 258px
+residual and `confirm-off-b`'s 689px residual are **landed, see the dated
+sub-entry G below**.
 
 ### G. `confirm-off-b`'s rockslide-text-delay fix and `resolve-off-d`'s two Sitrus epoch fixes — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-confirmb-resolved-residuals.md`)
 
@@ -458,6 +458,78 @@ that span. The resolve-off-c settled-transition mechanism
 (`TURN5_PIDGEOTTO_SETTLE_TICK`/`drawTurn5PidgeottoMaterialize`, sub-entry
 F above) is untouched by this entry, per its own explicit out-of-scope
 note.
+
+### H. `resolve-off-c`'s third mechanism (materialize->settled sprite transition) — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-resolve-offc-tail-diagnosis.md` §11)
+
+Landed the fix a side-lane instrument session (§11) named: dropped
+`drawTurn5PidgeottoMaterialize`'s `TURN5_STRETCH_TICK` branch split
+entirely (`battleScene.ts`) — the tinted-blend formula now runs
+unconditionally for the whole materialize window instead of switching to
+a double-size-affine stretch table past render 6786. §11a's own fresh RAM
+probe (`gBattlerSpriteIds[1]`, window [6735,6835]) found the real sprite
+"dead static" from RAM 6756 clear through the probe's own end — no
+wobble, no double-affine mode, ever, for this switch-in; the removed
+table (`TURN5_STRETCH_TABLE`) had no RAM basis. `TURN5_STRETCH_TABLE`
+deleted (genuinely unreferenced after the branch removal); `TURN5_STRETCH_
+TICK` and `drawTurn5PidgeottoSettled` both kept — the former is still
+read by `tools/probe/analyze-turn5-resolve-offc-tail-app-series.ts`'s own
+receipt, the latter is still called by `drawTurn5SwitchinSprite` past
+`TURN5_PIDGEOTTO_SETTLE_TICK`.
+
+**Landing this alone held the count flat at 149/196**, contradicting
+§11f's own 173/196 prediction. Per this step's own mandatory "attribute
+before accepting" rule, direct RGB sampling of the fresh compare run's
+saved PNGs found a second, previously-masked bug in the SAME function:
+`turn5PidgeottoFrame(t)` (the front-sprite tileset selector, orthogonal to
+the affine/tint formula) flips to a second graphic frame
+(`pidgeottoFrontSprite.frame2`) at render 6786 (and 6766/6776/6821) — a
+claimed "RAM-confirmed `animCmdIndex` transition" this dossier's own
+earlier text asserted but that §11a's own denser, fresher RAM probe
+directly disproves (same "dead static... zero further change of any
+kind" finding covers every one of those claimed transition ticks). The
+old STRETCH_TABLE branch's own wobble had been masking this smaller,
+separate wrong-frame contribution in every session up to now. Confirmed
+by direct experiment (forcing the selector to always return frame 0 and
+rerunning the compare) before landing: exactly 173/196, §11f's own
+predicted count, all of it. `turn5PidgeottoFrame` deleted entirely (its
+own `frame2` branch was the only remaining consumer of
+`pidgeottoFrontSprite.frame2`); `drawTurn5PidgeottoMaterialize` now draws
+`pidgeottoFrontSprite.tileset` unconditionally.
+
+Also corrected in the same commit: `turn5ResolutionAdapter.ts`'s
+`materializeSettleTick` doc comment, which claimed "RAM tick 6827's idle
+callback flip" — §11a/§11b's own fresh probe found the real flip at RAM
+6760, sixty-seven ticks earlier (the constant's own value, 6828, is left
+unmoved since §11d proved the formula's own steady state is already
+pixel-identical by then, making the hand-off tick itself a no-op); and
+`battleSceneCanonical.ts`'s own "Wobble table"/"Front-sprite frame
+selection" doc comments above the deleted table/function, both marked
+corrected with the original (wrong) text kept for the forensic record.
+
+**Numbers:** `turn5-resolve-off-c` 149/196 -> **173/196** (exactly §11f's
+own prediction — every one of renders 6786-6809 now 0px; the remaining 23,
+6763-6783, are a separate, still-open fourth mechanism, see below). Zero
+decreases across the full guard family: `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-confirm-off-a` 60/132, `turn5-confirm-off-b` 37/132,
+`turn5-resolve-off-b` 88/196, `turn13-switchin` 242/242,
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each. One expected,
+unprescribed increase: `turn5-resolve-off-d` 50/196 -> **66/196** (shares
+the same `drawTurn5SwitchinSprite` draw path this fix touches, per §11f's
+own flagged reach — its own untouched, out-of-scope residual past tick
+7004 is unaffected). One new Tier-1 describe block in
+`tests/battleScene.test.ts` (`drawSpriteSheetAffineTintedBlend` exported,
+pinning its degenerate/static-end-state case against a hand-built
+fixture, the exact claim §11d's fix relies on). Full receipts and the
+dated addendum: `docs/turn5-resolve-offc-tail-diagnosis.md` §12.
+
+**Remaining, still open:** a fourth mechanism at renders 6763-6783
+(§11e's own flagged residual, `TURN5_MATERIALIZE_RAMP_COEFF`'s falling
+edge — direct experiment this session confirmed the frame-selector fix
+above only partially explains this span, 6766/6767 improved but
+6768-6783 stayed at essentially the same magnitude) — needs its own RAM
+instrument, out of this fix's scope. `resolve-off-d`'s own §2.4/§2.5
+(sub-entry G) remain untouched, unrelated to this entry.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 

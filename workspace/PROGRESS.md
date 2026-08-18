@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1336 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s third mechanism (materialize→settled sprite transition) LANDED per `docs/turn5-resolve-offc-tail-diagnosis.md` §11 — 149/196→173/196, exactly the prediction**
+
+- **State:** one green commit (fix+Tier-1 pin) plus this docs commit.
+  `npm test` **1,067 files / 10,058 passed (+2, one new Tier-1 describe
+  block) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read §11 fully (committed today at `b3497e0f`) and landed its
+  named fix: dropped `drawTurn5PidgeottoMaterialize`'s `TURN5_STRETCH_
+  TICK` branch split (`battleScene.ts`) — the tinted-blend formula now
+  runs unconditionally for the whole materialize window instead of
+  switching to a double-size-affine stretch table (`TURN5_STRETCH_TABLE`)
+  past render 6786, matching §11a's own fresh RAM probe (real sprite
+  "dead static" from RAM 6756 on, no wobble, no double-affine mode ever).
+  Landing that alone held the count flat at 149/196, contradicting §11f's
+  own 173/196 prediction — per the brief's own "attribute before
+  accepting" instruction, direct RGB sampling of the fresh compare run's
+  PNGs found a SECOND bug in the same function: `turn5PidgeottoFrame(t)`
+  (the front-sprite tileset selector) flipped to a second graphic frame at
+  render 6786, contradicted by the same §11a RAM table (dead static
+  spans every one of its claimed transition ticks). Confirmed by direct
+  experiment (forcing the selector to frame 0 and rerunning the compare)
+  before landing: exactly 173/196. Deleted `turn5PidgeottoFrame` entirely
+  (its `frame2` branch was the only remaining consumer of
+  `pidgeottoFrontSprite.frame2`) and `TURN5_STRETCH_TABLE` (genuinely
+  unreferenced after the branch removal); kept `TURN5_STRETCH_TICK`
+  (still read by `tools/probe/analyze-turn5-resolve-offc-tail-app-series.ts`)
+  and `drawTurn5PidgeottoSettled` (still called past `TURN5_PIDGEOTTO_
+  SETTLE_TICK`). Corrected the contradicted doc comments in both
+  `turn5ResolutionAdapter.ts` (`materializeSettleTick`, claimed "RAM tick
+  6827's idle callback flip" — real flip is RAM 6760) and
+  `battleSceneCanonical.ts` (the "Wobble table"/frame-selection comments),
+  original text kept for the forensic record. New Tier-1 pin: exported
+  `drawSpriteSheetAffineTintedBlend` and added a hand-built-fixture test
+  pinning its degenerate case (accumulator=256, coeff=0, y2=0 reproduces a
+  plain untransformed draw exactly) — the exact claim the fix relies on.
+- **Result:** `turn5-resolve-off-c` 149/196 → **173/196** (exactly §11f's
+  prediction; all 24 of renders 6786-6809 now 0px). Zero decreases:
+  `turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
+  46/46, `turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-a`
+  60/132, `turn5-confirm-off-b` 37/132, `turn5-resolve-off-b` 88/196,
+  `turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
+  256/256 each. Bonus, unprescribed increase: `turn5-resolve-off-d`
+  50/196 → **66/196** (shares the same draw path, per §11f's own flagged
+  reach; its own out-of-scope residual past tick 7004 unaffected).
+- **Next:** the remaining 23 of `resolve-off-c`'s 47 mismatched frames
+  (renders 6763-6783) are §11e's flagged FOURTH mechanism
+  (`TURN5_MATERIALIZE_RAMP_COEFF`'s own falling edge) — needs its own RAM
+  instrument, out of this step's scope. `resolve-off-d`'s §2.4/§2.5 (sub-
+  entry G) stay open, side-lane territory. #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The brief's own "attribute before accepting"
+  instruction was load-bearing this session — landing only the named fix
+  would have looked like a wash (149/196 unchanged) and could have been
+  mistaken for a failed prediction; one more RAM-consistent discovery
+  (the frame-selector bug, directly implied by §11a's own already-landed
+  "dead static" table, just not yet connected to that specific function)
+  was what actually made the predicted count real.
+
+---
 ## 1335 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-b`'s rockslide-text-delay fix and `resolve-off-d`'s two Sitrus epoch fixes LANDED per `docs/turn5-confirmb-resolved-residuals.md` — 0/132→37/132 and 0/196→50/196**
 
 - **State:** one green commit (`90edc2a6` fix+Tier-1 pins) plus this docs
@@ -122,58 +179,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   shared table/constant before treating a doc's literal edit-in-place
   suggestion as safe.
 
----
-## 1333 — [main worker, 2026-08-18] **ISSUES #97 CLOSED: turn6 [7318,7347] bounce correction lands under a supervisor overturn of `turn6-reopen-endstate-spec.md`'s §2/§3 rejection — `turn6-reopen-off` 22/46→46/46, `turn6-menu-off` 23/47→47/47, both FULL**
-
-- **State:** one green commit (`cb7cbee3` fix+Tier-1 pin) plus this docs
-  commit. `npm test` **1,067 files / 10,045 passed (+1, the new
-  [7318,7350] composed-model pin) / 223 skipped**; `npm run build` green.
-- **Did:** per a supervisor decision overturning `docs/turn6-reopen-
-  endstate-spec.md`'s own §2/§3 rejection (that doc's `turn6-menu.json`
-  regression premise was refuted: that trace has no `oracleProfile` field
-  — it's a legacy Battle Scene ON trace, not this lane's OFF ground truth;
-  byte-comparing the two compare runs' own oracle captures showed the
-  ORACLE PNGs differ at 34/44 overlapping ticks while the profile-blind
-  APP PNGs are identical at 44/44 — full evidence in that doc's own
-  2026-08-18 addendum). Landed the composed `[7318,7347]` correction:
-  `turn6KickoffBounceTick`'s raw branch gets its missing
-  `-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` term (§10b); `drawTurn6FightSubmenu
-  Window`'s post-reveal dispatch applies the shared `+60` raw-sine-index
-  offset + `t-1` display basis to both the idle-else regime and this raw
-  regime; the frozen tail `[7348,7350]` stays untouched (no dynamic RAM
-  ground truth there, already correct). Composition re-derived from
-  scratch against the receipt on the corrected (post-increment, `t-1`
-  basis) footing per this step's own arithmetic caution — NOT the spec's
-  own rejected `+67`/`t-1` combination — and proven exact (33/33 ticks)
-  against `src/data/gen/turn5-6-reopen-bounce-probe.json` before any live
-  compare. Two "content-owned presentation bridge" parity pins
-  (`turn5ResolutionAdapter.ts`, `LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION`
-  in `battleScene.ts`) updated in lockstep to keep reproducing the real,
-  now-fixed function.
-- **Result:** `turn6-reopen-off.json` 22/46 → **46/46** (full match, beats
-  the ≥40/46 target); `turn6-menu-off.json` 23/47 → **47/47** (full
-  match). Expected, accepted ON-profile movement (legacy traces, out of
-  this lane's oracle contract): `turn6-menu.json` 34/44→10/44,
-  `turn6-featherdance.json` 82/90→64/90, `turn6-feathers.json`
-  227/235→209/235 — all inside `[7307,7347]`, the exact touched span.
-  Zero regressions across every hard guard: `turn5-sitrus-d` 15/133,
-  `turn5-action-off` 32/32, `turn5-reset-off` 256/256,
-  `turn5-confirm-off-{a,b}` 60/132 and 0/132 (689px/1.79% unchanged),
-  `turn5-resolve-off-{a,b,c,d}` 25/196, 88/196, 149/196, 0/196
-  (258px/0.67% unchanged), `win-terminal-window-off` 3590/3590. ISSUES
-  #97's `turn6KickoffBounceTick`/7318+ dispatch remainder is fully closed
-  (new §E dated sub-entry); full before/after table in
-  `docs/turn6-reopen-endstate-spec.md`'s addendum.
-- **Next:** ISSUES #97 stays open only for its unrelated remainders:
-  `confirm-off-b`'s 689px residual (`drawTurn5RockSlideWindow` attack/text
-  phase), `resolve-off-d`'s 258px residual (settled-Sitrus-chrome ONIX
-  overlay), `resolve-off-c`'s trailing 47-frame secondary mechanism
-  (§3e/§7, untraced), and the Class-(iii) text/banner mechanism (§8g) —
-  none touched by this session. #71 Rung 9 unchanged (blocked on the
-  animation lane's rung-4 back dispatcher).
-- **Notes:** no PAPERCUT. The arithmetic-caution flag in this step's own
-  brief (receipt columns are post-increment) was worth the up-front
-  `npx tsx` modeling pass — it caught that the spec's own `+67` fit needed
-  the same `-7` correction window B's landed fix already applies, so the
-  composed formula matched the receipt exactly (33/33) on the first live
-  compare, no iteration needed.

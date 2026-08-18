@@ -747,3 +747,81 @@ uses here either. Fix: drop `drawTurn5PidgeottoMaterialize`'s
 (§11e) is evidenced but not fixed here, flagged as a probable fourth
 mechanism (`TURN5_MATERIALIZE_RAMP_COEFF`'s own falling edge) for a future
 instrument.
+
+## 12. Landed (2026-08-18, bounded MAIN worker, ISSUES #97 remainder)
+
+§11d's fix landed exactly as specified — `drawTurn5PidgeottoMaterialize`'s
+`TURN5_STRETCH_TICK` branch split dropped entirely, the tinted-blend
+formula now runs unconditionally for the whole materialize window. First
+rerun of `npm run compare -- turn5-resolve-off-c --summary` after landing
+**only** that change: **149/196, unchanged** — NOT §11f's own predicted
+173/196. Per this step's own mandatory "attribute before accepting" rule
+(the brief anticipated a possible miss), direct RGB sampling of the same
+two coordinates §11c used (`(175,30)`/`(190,50)`) on the fresh compare
+run's saved PNGs found the real cause: the oracle held pixel-identical at
+every sampled render 6784-6809 (as §11a's RAM table already proved it
+must), but the **app** now rendered a flat-but-WRONG static image from
+render 6786 on — `(214,49,24)` constant, not the oracle's `(90,57,41)`
+constant (the same value the app itself correctly showed one tick earlier,
+at 6784/6785).
+
+**Root cause of the miss**: `turn5PidgeottoFrame(t)` (the front-sprite
+frame selector `drawTurn5PidgeottoMaterialize` also calls, orthogonal to
+the affine/tint formula §11d's fix addressed) flips the drawn tileset from
+`pidgeottoFrontSprite.tileset` to `pidgeottoFrontSprite.frame2` at exactly
+render 6786 (and back and forth at 6766/6776/6821) — a claimed
+"RAM-confirmed `animCmdIndex` transition" this dossier's own original §7b
+text asserted but never re-verified against this session's denser probe.
+§11a's own fresh RAM table (window [6735,6835], the widest and most
+direct probe this whole dossier has run) already disproves it: the real
+sprite is "100% unchanged... zero further change of any kind... dead
+static" for the ENTIRE span RAM 6761-6835, which covers every one of
+`turn5PidgeottoFrame`'s claimed transition ticks. The old (pre-§11d-fix)
+code never exposed this, because the STRETCH_TABLE branch's own wobble
+dominated the diff at those same renders, masking a smaller, separate
+wrong-frame contribution underneath it.
+
+**Confirmed by direct experiment, not curve-fit**: temporarily forcing
+`turn5PidgeottoFrame` to return `0` unconditionally (reverted before
+landing) and rerunning `npm run compare -- turn5-resolve-off-c --summary`
+produced **exactly 173/196** — §11f's own predicted count, with renders
+6786-6809 now showing 0px diff at every tick and the remaining 23
+mismatches confined exactly to §11e's already-flagged, out-of-scope
+6763-6783 span (mid-span, 6766-6767 improved from 596px to ~165px with
+frame forced 0, but 6768-6783 stayed at essentially the same ~1100-1235px
+magnitude — confirming §11e's own attribution of that residual to
+`TURN5_MATERIALIZE_RAMP_COEFF`'s falling edge, not the frame selector).
+
+**Landed as part of this same fix, not deferred**: `turn5PidgeottoFrame`
+deleted entirely (was exported, now unused everywhere -
+`pidgeottoFrontSprite.frame2` was never consumed by any other call site);
+`drawTurn5PidgeottoMaterialize` now draws `pidgeottoFrontSprite.tileset`
+unconditionally. This one dossier's own §11a RAM table is sufficient
+justification on its own (the "dead static... no idle animation" finding
+directly contradicts a mid-window frame swap), and the fix is what
+actually makes §11d's own predicted count real — landing §11d alone
+without this would have left the count silently stuck at 149/196 with no
+externally-visible sign the RAM-justified branch removal had even taken
+effect. `battleSceneCanonical.ts`'s own doc comment above
+`turn5PidgeottoFrame`'s old location, and `turn5ResolutionAdapter.ts`'s
+`materializeSettleTick` doc comment (§11b's contradiction), were both
+corrected in the same commit, citing this section.
+
+**Numbers:** `turn5-resolve-off-c` 149/196 -> **173/196**, exactly §11f's
+own prediction, all 24 of renders 6786-6809 now 0px, the remaining 23
+(6763-6783) confirmed still §11e's own flagged fourth mechanism, untouched.
+Full guard family, zero decreases: `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-confirm-off-a` 60/132, `turn5-confirm-off-b` 37/132,
+`turn5-resolve-off-b` 88/196, `turn13-switchin` 242/242,
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each. One expected,
+unprescribed increase: `turn5-resolve-off-d` 50/196 -> **66/196** (the
+same shared `drawTurn5SwitchinSprite` draw path `turn5-resolve-off-c`'s
+own fix touches is reused for this trace's own later redraw of the settled
+scene, per §11f's own flagged reach — its own untouched, out-of-scope
+residual past tick 7004 is unaffected).
+
+`npm test` 1067 files / 10058 passed (+2, one new Tier-1 describe block
+pinning `drawSpriteSheetAffineTintedBlend`'s degenerate/static-end-state
+case, now exported for the test) / 223 skipped; `npm run build` green.
+Full writeup and per-trace numbers: `ISSUES.md` #97 sub-entry H.
