@@ -10901,7 +10901,21 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
   return sitrusRingMatrixAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
 }
 
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null, bounceIndexOffset: number = 0): void {
+/**
+ * docs/turn5-confirmb-resolved-residuals.md §6.2 (2026-08-18, ISSUES #97
+ * remainder): `suppressSitrusRotate` (default `false`, every pre-existing
+ * caller unaffected) - the real ONIX sprite is flat static at all 108
+ * RAM-sampled ticks/7 coordinates across `turn5-resolve-off-d`'s own
+ * 6810-7005 window; `onixSitrusRotateMatrix`'s own periodic curve there has
+ * zero RAM basis, the same "spurious animation" class already found and
+ * fixed for PIDGEOTTO's own stretch table (`docs/turn5-resolve-offc-tail-
+ * diagnosis.md` §11). Scoped to `drawTurn5RockSlideWindow`'s own call site
+ * (via `drawTurn6FieldBase`) rather than editing `onixSitrusRotateMatrix`/
+ * `ONIX_SITRUS_IDENTITY_RENDER_TICK` directly - both are shared with
+ * `turn5SitrusRingMatrix`/`drawGrantingStars`, neither independently
+ * verified this session.
+ */
+export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
@@ -10914,7 +10928,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     drawSpriteSheetTopRows(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + sink.y2, sink.keptRows);
   }
   beforeMonSprite?.();
-  const sitrusRotate = onixSitrusRotateMatrix(t);
+  const sitrusRotate = suppressSitrusRotate ? null : onixSitrusRotateMatrix(t);
   if (sitrusRotate) {
     if (!onixInvisible) {
       drawSpriteSheetAffineRotate(
@@ -11256,7 +11270,10 @@ function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {
   const local = t - materializeStart;
   const accumulator = affineEmergeAccumulator(local + 1);
   const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  const coeff = turn5MaterializeCoeff(t);
+  // docs/turn5-resolve-offc-tail-diagnosis.md §13f: this call site reads
+  // the coefficient one controller callback too early - same lag
+  // drawGeneratedOpponentRelease (:4807-4809) already corrects for.
+  const coeff = turn5MaterializeCoeff(t - 1);
   drawSpriteSheetAffineTintedBlend(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, coeff, y2);
 }
 
@@ -11303,7 +11320,7 @@ function drawTurn5PidgeottoSettled(fb: Uint8Array, x2: number = 0, sink: { keptR
  * `PARTICLE_MAX_AGE`, `sortAliveParticlesByScreenY`) - species/window-
  * independent per §8d.
  */
-function drawCleanSwitchinParticles(
+export function drawCleanSwitchinParticles(
   fb: Uint8Array,
   logicalT: number,
   origin: { x: number; y: number },
@@ -11327,16 +11344,32 @@ function drawCleanSwitchinParticles(
   }
 }
 
-function drawTurn5SwitchinParticles(fb: Uint8Array, t: number, handoffTick: number = TURN5_BALL_HANDOFF_TICK): void {
-  drawCleanSwitchinParticles(fb, t - handoffTick - BALL_OPEN_START_OFFSET - 1, PARTICLE_ORIGIN);
+function drawTurn5SwitchinParticles(fb: Uint8Array, t: number, handoffTick: number = TURN5_BALL_HANDOFF_TICK, stallLogicalTick: number | null = null): void {
+  drawCleanSwitchinParticles(fb, t - handoffTick - BALL_OPEN_START_OFFSET - 1, PARTICLE_ORIGIN, undefined, stallLogicalTick);
 }
+
+/**
+ * docs/turn5-resolve-offc-tail-diagnosis.md §13e/§13f Fix 3: turn5's own
+ * particle burst needs one extra tick of age past this logical tick - a
+ * one-time freeze, not a burst-wide shift (a uniform `-1` from spawn
+ * regresses renders 6746-6762, which already match without it). The
+ * threshold lines up exactly with `TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_
+ * TICK` (6763) - the same render tick where an unrelated component
+ * (§3c) already has its own independently-RAM-pinned anchor - consistent
+ * with a single shared controller-callback event at that tick, not a
+ * coincidence. Confirmed by direct experiment: this value uniquely
+ * resolves renders 6764-6785 to exact match while leaving 6746-6762
+ * untouched (one tick either side regresses or under-fixes).
+ */
+export const TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK =
+  TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK - (TURN5_BALL_HANDOFF_TICK + BALL_OPEN_START_OFFSET + 1);
 
 /** Ball prop (`drawSendOutBall`, reused verbatim, S6's own species-independent mechanism) + the switch-in's own particle burst plus Pidgeotto's own materialize/settle - a no-op before `TURN5_BALL_HANDOFF_TICK`. `pidgeottoX2`/`sink` - see `drawTurn5PidgeottoSettled`'s own doc. */
 function drawTurn5SwitchinSprite(fb: Uint8Array, t: number, pidgeottoX2: number = 0, sink: { keptRows: number; y2: number } | null = null): void {
   if (t < TURN5_BALL_HANDOFF_TICK) return;
   drawTurn5PidgeottoMaterialize(fb, t);
   drawSendOutBall(fb, t, TURN5_BALL_HANDOFF_TICK);
-  drawTurn5SwitchinParticles(fb, t);
+  drawTurn5SwitchinParticles(fb, t, TURN5_BALL_HANDOFF_TICK, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK);
   if (t >= TURN5_PIDGEOTTO_SETTLE_TICK) drawTurn5PidgeottoSettled(fb, pidgeottoX2, sink);
 }
 
@@ -14938,7 +14971,7 @@ function drawFaintedOpponentWindow(
  * same "generalize a hardcoded value into a defaulted param" idiom every
  * other reused mechanism in this file already uses.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: number | LatestCompletedCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true, bounceIndexOffset: number = 0): void {
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: number | LatestCompletedCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false): void {
   // ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §7a): the
   // non-number branch is reached ONLY by drawTurn5RockSlideWindow's own call
   // (the `latestCompletedCommandHandoff` object/null form) - every numeric
@@ -14950,7 +14983,7 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: numbe
   const latestCompletedCommandHandoff = typeof bounceTickOrLatest === "number"
     ? null
     : bounceTickOrLatest;
-  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, latestCompletedCommandHandoff, bounceIndexOffset);
+  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, latestCompletedCommandHandoff, bounceIndexOffset, suppressSitrusRotate);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t, pidgeottoX2, pidgeottoSink);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
@@ -14994,7 +15027,7 @@ function drawTurn5RockSlideWindow(
   // shared raw sine index (the true offset - the original `+67` fit was off
   // by one sDelta step, 7) - RAM-proven across 47 consecutive ticks
   // (7300-7346), the ONLY call site this correction targets.
-  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, turn5OffSitrusOnixHp(t), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 60);
+  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, turn5OffSitrusOnixHp(t), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 60, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {

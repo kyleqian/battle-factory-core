@@ -14,8 +14,10 @@ import {
   drawGeneratedOpponentRelease,
   drawKabutoHSlideWobble,
   drawPlayerMaterializeSettle,
+  drawCleanSwitchinParticles,
   drawSpriteSheetAffineRotate,
   drawSpriteSheetAffineTintedBlend,
+  drawTurn5RockSlideAttack,
   drawTurn15ForcedSwitchRelease,
   endeavorShakeSteps,
   evaEvb,
@@ -66,6 +68,7 @@ import {
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
   TURN5_OPPONENT_ICON_STATES,
   TURN5_ROCKSLIDE_PRESS_TICK,
+  TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK,
   turn3SubmenuBounceTickFromPresentationEpochAge,
   turn5BgFadeY,
   turn5IconBarEva,
@@ -1946,6 +1949,75 @@ describe("docs/turn5-resolve-offc-tail-diagnosis.md §11d/§11f (2026-08-18, ISS
     const fb = render(160, 8, -3);
     expect(pixelAt(fb, 6, 2 - 3)).not.toEqual([200, 50, 80]);
     expect(pixelAt(fb, 1, 5 - 3)).not.toEqual([10, 220, 30]);
+  });
+});
+
+describe("docs/turn5-resolve-offc-tail-diagnosis.md §13f Fix 1 (2026-08-18, ISSUES #97 remainder): drawTurn5PidgeottoMaterialize's own turn5MaterializeCoeff call site reads one render tick early - the oracle's own implied coefficient at render t equals turn5MaterializeCoeff(t-1) exactly, §13b's own coefficient-inversion table, reproduced here as a pin on the already-exported pure function", () => {
+  it("oracle_coeff(t) == turn5MaterializeCoeff(t-1) for every one of §13b's own 8 sampled render ticks", () => {
+    expect(turn5MaterializeCoeff(6775)).toBe(8); // render 6776's implied coeff
+    expect(turn5MaterializeCoeff(6776)).toBe(7); // render 6777
+    expect(turn5MaterializeCoeff(6777)).toBe(6); // render 6778
+    expect(turn5MaterializeCoeff(6778)).toBe(5); // render 6779
+    expect(turn5MaterializeCoeff(6779)).toBe(4); // render 6780
+    expect(turn5MaterializeCoeff(6780)).toBe(3); // render 6781
+    expect(turn5MaterializeCoeff(6781)).toBe(2); // render 6782
+    expect(turn5MaterializeCoeff(6782)).toBe(1); // render 6783
+  });
+});
+
+describe("docs/turn5-resolve-offc-tail-diagnosis.md §13e/§13f Fix 3 (2026-08-18, ISSUES #97 remainder): TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK and drawCleanSwitchinParticles' stall semantics - a one-time extra tick of particle age past a threshold, not a burst-wide shift (confirmed by direct experiment: a uniform shift regresses renders 6746-6762, which already match without it)", () => {
+  it("is exactly the logical-tick offset of TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK (6763), an independently RAM-pinned anchor for an unrelated component at the same render tick", () => {
+    expect(TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK).toBe(17);
+  });
+
+  it("before the stall threshold, rendering is byte-identical with or without a stallLogicalTick argument", () => {
+    const origin = { x: 40, y: 40 };
+    const before = new Uint8Array(240 * 160 * 4);
+    const unstalled = new Uint8Array(240 * 160 * 4);
+    drawCleanSwitchinParticles(before, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK - 1, origin, undefined, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK);
+    drawCleanSwitchinParticles(unstalled, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK - 1, origin, undefined, null);
+    expect(before).toEqual(unstalled);
+  });
+
+  it("at and past the stall threshold, rendering at logicalT with the stall equals rendering at logicalT-1 without it - a one-time freeze, not a re-triggering one", () => {
+    const origin = { x: 40, y: 40 };
+    for (const logicalT of [TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK + 1, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK + 5]) {
+      const stalled = new Uint8Array(240 * 160 * 4);
+      const shifted = new Uint8Array(240 * 160 * 4);
+      drawCleanSwitchinParticles(stalled, logicalT, origin, undefined, TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK);
+      drawCleanSwitchinParticles(shifted, logicalT - 1, origin, undefined, null);
+      expect(stalled).toEqual(shifted);
+    }
+  });
+});
+
+describe("docs/turn5-confirmb-resolved-residuals.md §6.2 (2026-08-18, ISSUES #97 remainder): drawTurn5RockSlideAttack's new suppressSitrusRotate gate falls through to the plain static ONIX draw instead of onixSitrusRotateMatrix's own periodic curve - the real sprite has zero RAM basis for any rotation in this window", () => {
+  const T = 6900; // inside the rotation's own live window, per docs/turn5-confirmb-resolved-residuals.md §6.2's own app-06889/app-06923 citation
+
+  it("sanity: onixSitrusRotateMatrix is genuinely non-null at this tick, so the gate below exercises a real branch choice, not a tautology", () => {
+    expect(onixSitrusRotateMatrix(T)).not.toBeNull();
+  });
+
+  it("suppressSitrusRotate=true renders a different image than the default (false) at the same tick - the gate has a real, visible effect", () => {
+    const unsuppressed = new Uint8Array(240 * 160 * 4);
+    const suppressed = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideAttack(unsuppressed, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, false);
+    drawTurn5RockSlideAttack(suppressed, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true);
+    expect(suppressed).not.toEqual(unsuppressed);
+  });
+
+  it("suppressSitrusRotate=true is deterministic and stable across repeated calls (the plain static path, not a time-varying curve)", () => {
+    const first = new Uint8Array(240 * 160 * 4);
+    const second = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideAttack(first, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true);
+    drawTurn5RockSlideAttack(second, T + 34, T + 34, undefined, 0, false, 0, false, undefined, 0, null, 0, true);
+    // 34 render ticks apart (docs/turn5-confirmb-resolved-residuals.md §6.2's
+    // own "app-06889.png and app-06923.png... read byte-identical" pair) -
+    // the tint coefficient and granting-star spawns are the only other
+    // time-varying elements this function draws, both already 0/absent by
+    // this point in the window, so the two full frames should match exactly
+    // once the rotation curve itself is suppressed.
+    expect(first).toEqual(second);
   });
 });
 
