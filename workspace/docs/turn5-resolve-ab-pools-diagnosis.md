@@ -385,3 +385,70 @@ not strictly improving.
   the two windows' own shared mechanism is entirely GROVYLE-side
   (classes A/B) plus the generic cursor helper (class C), not anything
   about the opponent's next mon.
+
+## 10. Landed addendum (2026-08-18, bounded MAIN worker, fix session)
+
+**Class A landed as specified** (§4b's literal fix shape, unmodified) —
+`turn5-resolve-off-a` 44/196 -> 56/196. `turn13-switchin` spot-checked
+FIRST per §4c, unaffected (242/242).
+
+**§4d's own >=156/196 prediction did NOT hold** — attributed, not a
+contradiction of §4a's blink-anchor math (independently RAM-reconfirmed
+this session, `tools/probe/dump-registers.py`). The dominant residual in
+Class A's own predicted window is a **previously-unknown, separate
+mechanism**: at render ticks 6259/6260/6263/6264/6267/6268 (exactly the
+ticks where `rockSlideBg3Y`'s own `-7` shake value is active), the app's
+whole-background pixels mismatch oracle by ~30% of the frame, small
+per-pixel deltas (dithered near-white shades). A live RAM probe of
+`gBattle_BG3_Y` at ticks 6245-6270 against `turn5-resolve-off-a.json`
+came back **bit-exact** against `rockSlideBg3Y`'s own formula (shared
+default `rockAnchorAge`, untouched by this session) at all 26 sampled
+ticks — ruling out a timing/anchor bug in that formula. A best-fit
+cross-correlation on a single background column suggested a ~1-row
+vertical misalignment, but no integer shift fully explained the observed
+deltas either. **This is NOT Class A, NOT Class B, and NOT named
+anywhere in §3's census** (the census's own "6 huge spikes... blink+shake
+compounding" bucket, §3's class-A row, mis-attributed this residual —
+its true cause is unrelated to GROVYLE's own blink/shake at all). Left
+unfixed per this family's "do not guess" discipline. **Next instrument:**
+check `staticBgPixel`'s own extracted JSON asset for the `-7`-shifted row
+range (possible extraction gap), or a denser per-pixel oracle sweep
+across ticks 6255-6270 to characterize the exact misalignment before
+touching `drawStaticBgShiftedY`.
+
+**Class B (§5) was not independently verified** — blocked by the same
+new residual above dominating its own 6360-6376 span.
+
+**Class C (§6) was implemented exactly per §6b, then reverted.** The
+`cursorState(t-1, cursorStart)` swap closed `resolve-off-b`'s own
+6426-6560 span exactly as §6d predicted (with the `t-1` correction §6c
+flagged as a likely need), but **regressed the hard guard
+`turn5-resolve-off-c` 195/196 -> 140/196**. §7's own PASS/FAIL table
+assumed `resolve-off-c` was a "disjoint window" unaffected by this fix —
+**that assumption is wrong**: `resolve-off-c`'s own capture window
+(6614-6958) reaches through the same cursor-active dispatch branch
+(`drawTurn5RockSlideWindow`, `t < TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK`)
+before the Sitrus-heal text ever starts. Root cause, confirmed before
+reverting: the trace's own button schedule has a KO-dismiss `A` press at
+tick 6561-6562 (right at the real fainted-text settle tick), and the
+real cursor's own phase visibly re-anchors/freezes past that point — a
+mismatch pattern that still varies by phase (ruling out a simple
+constant-offset freeze). This is the same class of mechanism turn 13's
+own analogous cursor already solves via
+`opponentFaintPresentationOwner.dismiss`/`frozenCursorTick`
+(`drawTurn13SwitchinWindow`) — genuinely NOT reproducible from a fixed
+pixel/RAM constant the way `turn5FaintedCursorYOffset`'s own table is,
+since the real freeze/re-anchor tick depends on when a per-session
+dismiss input actually lands, not a fixed offset from `pressTick`.
+Reverted the call site and function deletion; `turn5FaintedCursorYOffset`
+is back in place with this finding recorded in its own doc comment.
+**Next instrument:** thread `opponentFaintPresentationOwner`-style
+dismiss data into `drawTurn5RockSlideWindow` (mirroring turn 13's own
+`dismiss.cursor.frozenAtElapsed` pattern) before retrying the
+`cursorState` swap — and re-verify against `resolve-off-c`'s own window
+in the SAME session as any retry, not just `resolve-off-a`/`-b`.
+
+**Standing lesson for the next session:** §7's own PASS/FAIL table is
+necessary but not sufficient — always rerun the FULL guard family (not
+just the traces a diagnosis doc's predictions section names) before
+trusting a "disjoint window" claim.

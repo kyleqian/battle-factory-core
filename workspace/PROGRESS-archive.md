@@ -1,4 +1,62 @@
 ---
+## 1335 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-b`'s rockslide-text-delay fix and `resolve-off-d`'s two Sitrus epoch fixes LANDED per `docs/turn5-confirmb-resolved-residuals.md` — 0/132→37/132 and 0/196→50/196**
+
+- **State:** one green commit (`90edc2a6` fix+Tier-1 pins) plus this docs
+  commit. `npm test` **1,067 files / 10,056 passed (+7, new pins for both
+  fix shapes) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read `docs/turn5-confirmb-resolved-residuals.md` (committed at
+  `257fa559`) in full and landed both fix-ready mechanisms it pinned: (A)
+  `drawTurn5RockSlideWindow`'s attack/text branch was calling
+  `rockSlideTextVisibleChars(t, pressTick)` with no `delay` argument,
+  silently defaulting to the shared 393-tick delay instead of this
+  family's own `TURN5_OFF_ROCKSLIDE_TEXT_DELAY=355` already threaded into
+  the dispatch gate one call up — fixed to `rockSlideTextVisibleChars(t -
+  1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)`. (B) `turn5SitrusOnixHp`/
+  `turn5SitrusHealTextVisibleChars` still keyed off the stale, older
+  `ONIX_SITRUS_IDENTITY_RENDER_TICK` epoch (6874) that the prior session's
+  dispatch-gate fix never swept from these detail-render formulas; landed
+  two new turn5-off-scoped siblings, `turn5OffSitrusOnixHp` (hard step at
+  a new `TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK=6984`) and
+  `turn5SitrusOffHealTextVisibleChars` (anchored at the already-correct
+  `TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK=6850`, same `t-1` shape as (A)).
+  Per the brief's mandatory pre-landing spot-check, wrote a fresh RAM probe
+  (`tools/probe/dump-turn5-resolve-offd-onixhp-ram.py`, dense sweep
+  6975-6995 against `turn5-resolve-off-d.json`) BEFORE trusting the doc's
+  §2.2 given ground truth — confirmed ONIX's own `gBattleMons[0].hp` is a
+  genuine hard step (flat 1 through 6983, flat 31 from 6984 on, zero
+  intermediate values), matching the doc exactly; no contradiction, no
+  addendum needed.
+- **Result:** `turn5-confirm-off-b` 0/132 → **37/132** (exactly the doc's
+  own §1.5 prediction). `turn5-resolve-off-d` 0/196 → **50/196** (beats
+  the doc's own conservative ~13/196 tail-only floor since both (B)
+  sub-components landed, not just the tail — the doc had explicitly hedged
+  §2.3's own count as "no specific claim"). Cross-trace bonus,
+  independently predicted by the doc's own §1.5: `turn5-resolve-off-a`
+  25/196 → **44/196** (the fix lets more of that trace's own opening ticks,
+  which share the same call site, catch up sooner). Zero decreases across
+  the full guard family: `turn5-reset-off` 256/256, `turn5-action-off`
+  32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+  `turn5-confirm-off-a` 60/132, `turn5-resolve-off-b` 88/196,
+  `turn5-resolve-off-c` 149/196, `turn13-switchin` 242/242,
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** `confirm-off-b`'s own separate small pre-6184 ENDEAVOR-hold
+  residual (§1.1's table) stays open, needs its own instrument. `resolve-
+  off-d`'s §2.4 (sprite/particle overlay — ONIX's own tint/rotation and
+  granting-star placement, also keyed off the same stale epoch but not
+  independently isolated this session) and §2.5 (the 6991-6994 transition
+  spike, 4 frames) remain unexplained and untouched, per the diagnosis
+  doc's own explicit scope boundary. The resolve-off-c settled-transition
+  mechanism (`TURN5_PIDGEOTTO_SETTLE_TICK`/`drawTurn5PidgeottoMaterialize`)
+  was being instrumented by a side-lane worker in parallel this session,
+  untouched here per the brief. #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The mandatory RAM spot-check cost one small new
+  probe script but was worth it: it independently confirmed the doc's own
+  flagged "not independently re-probed" caveat rather than just trusting
+  the given fact, and the result (a clean hard step, zero ramp ticks in a
+  21-tick dense sweep) meant the doc's literal proposed fix shape could
+  land unmodified.
+
+---
 ## 1334 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s two named tail mechanisms FIXED per `docs/turn5-resolve-offc-tail-diagnosis.md` — count holds at 149/196, blocked by a third, newly-confirmed, out-of-scope mechanism**
 
 - **State:** three green commits (`6b9f1a12` fix+Tier-1 pins,

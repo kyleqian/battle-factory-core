@@ -574,6 +574,73 @@ unchased residuals. §2.5/§6.3 (the 6991-6994 transition spike,
 re-characterized as the app transitioning early) stays out of scope, next
 instrument named but not fix-ready.
 
+### J. `resolve-off-a`'s Class A rock-slide hit-flash profile — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-resolve-ab-pools-diagnosis.md` §4); Class C attempted and reverted (hard-guard regression); Class B unresolved (new residual found, not fixed)
+
+Landed §4's fix: `drawTurn5RockSlideAttack` was the one sibling turn
+still calling the shared hit-reaction helpers (`rockSlideMonBlinkInvisible`/
+`rockSlideMonShakeY2`/`rockSlideHealthboxWobbleY2`) with no scoped
+profile — added `TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE`
+(`hitFlashAnchorAge: 418`, matching all 8 RAM/pixel-measured blink
+transitions; shake disabled) and threaded it through all 3 call sites.
+`turn13-switchin` spot-checked first per §4c's own mandatory guard,
+unaffected (242/242).
+
+**§6's Class C (fainted-message cursor) was implemented then reverted.**
+Swapping `turn5FaintedCursorYOffset` for `cursorState(t-1, cursorStart)`
+closed `resolve-off-b`'s own targeted 6426-6560 span exactly as §6d
+predicted, but regressed the hard guard `turn5-resolve-off-c` 195/196 ->
+140/196 — that trace's own capture window (6614-6958) shares the same
+cursor-draw code path and is NOT disjoint from Class C's fix as the
+doc's own §7 PASS/FAIL table assumed. Root cause (confirmed before
+reverting, not guessed): the trace's own button list shows a KO-dismiss
+`A` press at tick 6561-6562, and the real cursor's phase visibly
+re-anchors/freezes past that point — the same class of mechanism turn
+13 already solves via `opponentFaintPresentationOwner.dismiss`/
+`frozenCursorTick`, not reproducible from a fixed pixel/RAM constant
+since the real freeze point depends on when a per-session dismiss input
+lands. Reverted byte-for-byte; the finding is recorded in
+`turn5FaintedCursorYOffset`'s own doc comment. **Next instrument:**
+thread `opponentFaintPresentationOwner`-style dismiss data into
+`drawTurn5RockSlideWindow`, mirroring turn 13's own pattern, before
+retrying the `cursorState` swap.
+
+**§5's Class B (17-frame sink tail) was not independently verified** —
+blocked by a newly-found, previously-unknown mechanism: Class A's own
+fix did not fully close its own predicted 6248-6365 window. Direct RAM
+probing (`tools/probe/dump-registers.py` against `gBattle_BG3_Y`)
+confirmed `rockSlideBg3Y`'s formula (shared `rockAnchorAge`, untouched by
+this fix) is RAM-exact at all 26 sampled ticks 6245-6270 — the dominant
+residual (huge ~30%-of-frame diffs at render ticks
+6259/6260/6263/6264/6267/6268) is a separate static-background rendering
+artifact, not a Class A/timing bug. A best-fit cross-correlation on a
+background column suggests a ~1-row misalignment, but a plain shift
+doesn't fully explain the observed color deltas either, pointing at a
+static-BG asset/extraction gap in the `-7`-shifted row range rather than
+a formula error. **Next instrument:** a `staticBgPixel` asset check in
+the `-7`-shifted row range, or a denser per-pixel oracle sweep across the
+shake window, before touching `drawStaticBgShiftedY`.
+
+**Numbers:** `turn5-resolve-off-a` 44/196 -> **56/196** (Class A alone;
+short of §4d's own >=156/196 floor, attributed above — not a
+contradiction of §4a's own RAM-confirmed blink-anchor finding).
+`turn5-resolve-off-b` **88/196 unchanged** (Class A's window ends at
+6365, before this trace's window starts, exactly as §7's table
+predicted; Class C reverted so no change here either). Zero decreases
+across the full guard family: `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-confirm-off-{a,b}` 60/132 and 37/132,
+`turn5-resolve-off-c` 195/196, `turn5-resolve-off-d` 142/196,
+`turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
+256/256 each. One new Tier-1 pin block (`tests/battleScene.test.ts`).
+
+**Remaining, still open:** the static-background artifact at render
+ticks [6259,6268] (own next instrument above); the dismiss-aware cursor
+freeze for Class C (own next instrument above); Class B's own 17-frame
+tail, still unverified in isolation, blocked on the same background
+artifact dominating that span. `resolve-off-c`'s 6763 residual and
+`resolve-off-d`'s 6953-6969 ring/star span (sub-entry I) remain
+unchanged, untouched by this entry.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
