@@ -1,3 +1,56 @@
+## 1319 — [main worker, 2026-08-17] **ISSUES #96 remainder fixed: enemy-picker ball-roll sliver — battle1-swap family now 19/19 EXACT, ISSUES #96 fully closed**
+
+- **State:** `src/engine/factorySwapPresentation.ts` +
+  `tests/factorySwapPresentation.test.ts` edited (`68235a08`). `npm test`
+  **1,066 files / 10,033 passed (+2) / 223 skipped**, `npm run build`
+  green, `tests/factorySwapPresentation.test.ts` + `tests/ballAnim.test.ts`
+  green in isolation too.
+- **Did:** implemented the probe-named fix from `docs/factory-swap-enemy-
+  picker-probe.md`'s 2026-08-17 section (citations verified against live
+  code first — line numbers had drifted slightly but the mechanism held
+  exactly as described). Replaced `advanceFactorySwapPresentation`'s single
+  `selectedPalette` boolean (which blanket-excluded ALL ball-roll RNG
+  consumption for the entire `enemySwitch`/`playerSwitch` transition) with
+  a per-ball `perBallRollEligible` array keyed off each ball's own
+  `cycledToEnemy` flag (`factorySwapEnemyBallCycleVisuals`/
+  `factorySwapPlayerSwitchBallCycleVisuals`, evaluated at the tick's own
+  `phaseElapsed`) — enemySwitch balls roll while NOT YET cycled to the gray
+  enemy side, playerSwitch balls roll once they HAVE cycled back to the
+  selected player side, matching `factorySwapRender.ts`'s own per-phase
+  `gray` sense exactly. Draw order (slot 0, 1, 2, after the caller's own
+  VBlank draw) preserved by keeping the existing single sequential loop,
+  now gated per-index instead of applying uniformly to all three. No
+  `factorySwapRender.ts` edit was needed: `enemySwitch`'s render branch
+  already reads `view.ballTiles[i]` (`factorySwapBallTiles(state)` →
+  `state.ballAnims`), which now advances correctly on its own; playerSwitch
+  keeps its already-exact, RNG-independent `factorySwapPlayerSwitchBallTiles`
+  formula untouched (its own rendering never reads `ballAnims`).
+- **Result:** `battle1-swap-enemy-picker.json` 129/130 → **130/130** (frame
+  29838 now exact). Full 19-trace `battle1-swap-*.json` family re-swept
+  end-to-end: **19/19 at their full bar**, zero drops anywhere (both
+  player-quit traces hold #96(a)'s 67/67). Two new Tier-1 tests pin the
+  per-ball eligibility semantics directly: one drives a real enemySwitch
+  transition and proves each ball keeps rolling (its internal
+  `advanceBallAnim` state changes tick-to-tick) right up to its own wrap
+  tick, then freezes dead the instant `cycledToEnemy` flips, independently
+  per ball; the other primes all three balls to a guaranteed same-tick roll
+  and proves the RNG draw order is exactly 0, 1, 2 (each ball's `pendingRest`
+  matches the corresponding link in a hand-chained `advanceRngValue` call).
+- **Docs:** `ISSUES.md #96` deleted in full (both parts (a) and (b) closed,
+  no remainder — git keeps the history). `PROGRESS.md` entry 1316 archived
+  to `PROGRESS-archive.md` to keep this ledger at 3 entries.
+- **Next:** #97 turn5/turn6 bounce-tick drift (a side probe was running on
+  it in parallel this session — check its findings before re-bisecting);
+  #71/#73-adjacent filler per standing priorities. No open battle1-swap
+  deviations remain.
+- **Notes:** the render-layer half of the probe's fix shape
+  (`factorySwapRender.ts:414-425`) turned out to be unnecessary once the
+  presentation-layer state producer was fixed — `view.ballTiles` already
+  routed through `ballAnims` for the affected phase, so the probe's
+  described *outcome* was right even though no render-layer edit was
+  required to get there. No PAPERCUT.
+
+---
 ## 1318 — [main worker, 2026-08-17] **ISSUES #96(a) fixed: swap-screen quit-return ball-slot-0 display stall — both player-quit traces 61/67 → 67/67, zero regressions across the 19-trace battle1-swap family**
 
 - **State:** `src/engine/factorySwapPresentation.ts` +
