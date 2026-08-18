@@ -1,4 +1,57 @@
 ---
+## 1332 — [main worker, 2026-08-18] **ISSUES #97 §17 item 5 landed: HP-overlay gate's turn4 arm closes turn5-confirm-off-a's frozen-HP frames (15→60/132), zero decreases across the guard family**
+
+- **State:** two green commits (`e7657a86` fix+Tier-1 pin, `0ac71a47`
+  docs) plus this docs commit. `npm test` **1,067 files / 10,044 passed
+  (+1, the new turn-4-arm pin) / 223 skipped**; `npm run build`/
+  `npm run typecheck` green.
+- **Did:** per-caller audit FIRST (required by the brief), all 12 real
+  call sites of `drawActionMenuIdleContentFromLatest` traced to their own
+  turn/window and checked for an override arg and today's gate outcome —
+  recorded as `docs/turn5-family-class3-diagnosis.md` §19. Confirmed §10a's
+  root cause exactly: `drawTurn5EndeavorText`'s ENDEAVOR-hold fallback is
+  the ONLY call site where the gate's `false` outcome wasn't already masked
+  by a manual redraw of the same value right after the call (two callers,
+  `drawTurn3/4RockSlideTurnEndSettledMenu` and `drawActionMenuIdleWindow`'s
+  two branches, already draw the identical override unconditionally, so
+  widening the gate there is provably a no-op, not a behavior change).
+  Chose fix shape (a) over (b) (§10a's two candidates): added a third OR
+  arm, `turn4FightCommandPresentationFromLatest(latest) !== null`,
+  mirroring the existing turn2/turn3 arms one turn further — the same
+  pattern `drawTurn3EndeavorText` already relies on via the turn2 arm one
+  turn earlier. Tier-1 pin: `battleSceneFightCommandPresentationTurn1
+  Through4.test.ts`'s "slice 3" describe block, previously asserting "turn
+  4: does NOT fire" for the generic shim — split into the retired
+  positional-ABI body's own unchanged historical pin plus a new case
+  pinning the current shim's turn-4 arm firing.
+- **Result:** `turn5-confirm-off-a` 15/132 → **60/132** (strict
+  improvement, oracle-verified). `turn5-confirm-off-b` and
+  `turn5-resolve-off-d` both held their prior 0-match count with their
+  cited residual magnitude UNCHANGED (689px/1.79% bbox=16,124-75,149 and
+  258px/0.67% bbox=44,71-195,104 respectively) — both attributed to
+  different, ungated code paths this fix cannot reach
+  (`drawTurn5RockSlideWindow`'s attack/text phase and its own
+  settled-Sitrus-chrome tail; traced, not guessed — see §19). Zero
+  decreases anywhere in the 9-trace guard family: `turn5-reset-off`
+  256/256, `turn5-action-off` 32/32, `turn6-reopen-off` 22/46, `turn6-menu`
+  34/44, `turn5-resolve-off-{a,b,c}` 25/196, 88/196, 149/196,
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each — all
+  byte-identical to the brief's own cited baselines.
+- **Next:** ISSUES #97 remainders, all still open, all now attributed to a
+  specific code path (not this gate): `confirm-off-b`'s 689px residual
+  (`drawTurn5RockSlideWindow` attack/text phase — item 1's own boundary,
+  possibly a text-timing recalibration, not an HP overlay); `resolve-off-d`'s
+  258px residual (settled-Sitrus-chrome ONIX overlay, needs its own
+  instrument); `resolve-off-c`'s trailing 47-frame secondary mechanism
+  (§3e/§7, untraced); `turn6KickoffBounceTick`/the 7318+ dispatch (side-lane
+  continuation, unchanged). #71 Rung 9 unchanged (blocked on the animation
+  lane's rung-4 back dispatcher).
+- **Notes:** no PAPERCUT. §19's per-caller audit (required before any edit)
+  took the bulk of the session but paid off — it predicted every trace's
+  outcome (including the two "stays at 0 but why" residuals) before a
+  single oracle rerun, and every prediction held exactly.
+
+---
 ## 1331 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement COMPLETE: Rungs 7-8 land the final 25 sites, closes 119/119 in-scope `battleScene.ts` call sites, zero FINDINGs across all 9 rungs**
 
 - **State:** two green commits (`a57d281b` Rung 7, `f70b6e67` Rung 8) plus

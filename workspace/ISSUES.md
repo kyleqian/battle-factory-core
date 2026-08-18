@@ -263,7 +263,9 @@ family)**:
   (`turn5SitrusOnixHp`, a separate anchor from the dispatch-gate ticks this
   session touched); the §8d/§9e sine-index offset (below) is now CLOSED and
   ruled out as a cause (`resolve-off-d`'s own count was unchanged, 0/196
-  before and after that fix) — needs its own instrument.
+  before and after that fix) — needs its own instrument. **The HP-overlay
+  half of this hypothesis LANDED, see the dated sub-entry G below** (a
+  sprite/particle-overlay component remains open).
 - `resolve-off-c`'s trailing 47-frame secondary mechanism — traced and
   both named sub-mechanisms fixed, see the dated sub-entry F below (a
   third, previously-flagged-but-unconfirmed mechanism now blocks the
@@ -400,8 +402,62 @@ off before `TURN5_PIDGEOTTO_SETTLE_TICK`=6828, while the real sprite
 settles by RAM tick 6760) — needs its own instrument and is explicitly
 out of scope for this fix (touches the sprite's own animation, not the
 healthbox/bg-fade mechanisms this entry closes). `resolve-off-d`'s 258px
-residual and `confirm-off-b`'s 689px residual remain open, untouched, per
-their own standing entries above.
+residual and `confirm-off-b`'s 689px residual are **now landed, see the
+dated sub-entry G below**.
+
+### G. `confirm-off-b`'s rockslide-text-delay fix and `resolve-off-d`'s two Sitrus epoch fixes — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-confirmb-resolved-residuals.md`)
+
+Landed both fix shapes a side-lane instrument session pinned: (A)
+`drawTurn5RockSlideWindow`'s attack/text branch was calling
+`rockSlideTextVisibleChars(t, pressTick)` with no `delay` argument,
+silently using the shared 393-tick default instead of this family's own
+`TURN5_OFF_ROCKSLIDE_TEXT_DELAY=355` already threaded into the dispatch
+gate one call up (item 1 above) — fixed to `rockSlideTextVisibleChars(t -
+1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)`, the codebase's standard
+`t-1` display-basis correction. (B) `turn5SitrusOnixHp`/
+`turn5SitrusHealTextVisibleChars` still keyed off the stale, older
+`ONIX_SITRUS_IDENTITY_RENDER_TICK` epoch (6874) that item 3's dispatch-gate
+fix never swept from these detail-render formulas; landed two new
+turn5-off-scoped siblings, `turn5OffSitrusOnixHp` (a hard step at
+`TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK=6984`) and
+`turn5SitrusOffHealTextVisibleChars` (anchored at the already-correct
+`TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK=6850`, same `t-1` shape as (A)).
+
+**Mandatory pre-landing spot-check** (the diagnosis doc's own §2.2
+caveat): a fresh RAM probe (`tools/probe/dump-turn5-resolve-offd-onixhp-
+ram.py`, dense sweep ticks 6975-6995 against `turn5-resolve-off-d.json`)
+confirmed ONIX's own `gBattleMons[0].hp` is a genuine hard step — flat 1
+through 6983, flat 31 from 6984 on, no intermediate values — matching the
+doc's given ground truth exactly. No contradiction found.
+
+**Numbers:** `turn5-confirm-off-b` 0/132 -> **37/132** (exactly the doc's
+own §1.5 prediction); `turn5-resolve-off-d` 0/196 -> **50/196** (beats the
+doc's own ~13/196 tail-only floor since both (B) sub-components landed,
+not just the tail). Cross-trace bonus: `turn5-resolve-off-a` 25/196 ->
+**44/196**, per the doc's own §1.5 prediction (the fix lets more of that
+trace's own opening ticks, which share the same call site, catch up
+sooner). Zero decreases across the full guard family: `turn5-reset-off`
+256/256, `turn5-action-off` 32/32, `turn6-reopen-off` 46/46,
+`turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-a` 60/132,
+`turn5-resolve-off-b` 88/196, `turn5-resolve-off-c` 149/196,
+`turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
+256/256 each. Tier-1 pins added (`tests/battleScene.test.ts`) for both new
+functions and the rockslide-text-delay call-site formula.
+
+**Remaining, still open:** `confirm-off-b`'s own separate, already-flagged
+small pre-6184 ENDEAVOR-hold residual (§1.1's table, out of this fix's
+scope, needs its own instrument — item 5's residual, not this one).
+`resolve-off-d`'s own §2.4 (sprite/particle overlay mismatch, ONIX's own
+tint/rotation and granting-star placement, also keyed off the same stale
+epoch but not independently isolated) and §2.5 (the 6991-6994 transition
+spike, 4 frames) remain unexplained and untouched, per the diagnosis doc's
+own explicit scope boundary — a future session should dense-capture
+6870-6990 and isolate `onixSitrusRotateMatrix`'s own render window against
+the oracle's real tint timing before claiming a full predicted count for
+that span. The resolve-off-c settled-transition mechanism
+(`TURN5_PIDGEOTTO_SETTLE_TICK`/`drawTurn5PidgeottoMaterialize`, sub-entry
+F above) is untouched by this entry, per its own explicit out-of-scope
+note.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 

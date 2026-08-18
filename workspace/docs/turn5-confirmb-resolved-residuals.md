@@ -482,3 +482,53 @@ age-offset consumers** (`heldItemHeal.ts`'s `SITRUS_ITEM_*_FIRST_AGE`
 constants, tuned for a different, longer real timeline) were not re-swept
 when item 3 added the OFF-family's own faster dispatch-gate boundaries —
 recorded here as new evidence, not a contradiction of prior work.
+
+## 5. Landed addendum (2026-08-18, bounded MAIN worker)
+
+Both fix shapes above landed exactly as this doc specified, commit
+`90edc2a6`. (A)'s `battleScene.ts:14888`-era one-line change (current line
+drifted with the file, re-grepped fresh) landed verbatim:
+`rockSlideTextVisibleChars(t - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_
+DELAY)`. (B)'s two new turn5-off-scoped siblings landed as §2.2/§2.3
+specified: `turn5OffSitrusOnixHp` (hard step at a new
+`TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK=6984`) and
+`turn5SitrusOffHealTextVisibleChars` (anchored at
+`TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK=6850`, same `t-1` shape).
+
+**§2.2's own mandatory pre-landing caveat was resolved, not skipped**: a
+fresh RAM probe (`tools/probe/dump-turn5-resolve-offd-onixhp-ram.py`,
+adapted from `dump-issue62-hpbar-battlemons-off.py`'s struct layout,
+dense sweep of `gBattleMons[0].hp` — ONIX is battler **0**, confirmed
+against `dump-turn5-resolve-grovyle-side-driver.py`'s own
+`battler0_onix` field name before writing the probe — across ticks
+6975-6995 against `turn5-resolve-off-d.json`) found HP flat at 1 through
+tick 6983, flat at 31 from tick 6984 on, with **zero intermediate
+values** at any sampled tick. This is a clean hard step, confirming
+§2.2's given ground truth exactly — no contradiction, no ramp, no
+addendum needed beyond this confirmation.
+
+**Live oracle numbers** (fresh `npm run compare` reruns, same commit):
+
+| trace | before this session | after | vs. this doc's own prediction |
+|---|---|---|---|
+| `turn5-confirm-off-b` | 0/132 | **37/132** | exactly §1.5's ~37/132 |
+| `turn5-resolve-off-d` | 0/196 | **50/196** | beats §2.6's ~13/196 tail-only floor — both (B) sub-components landed, not just the tail |
+| `turn5-resolve-off-a` | 25/196 | **44/196** | the cross-trace bonus §1.5 flagged, materialized |
+| `turn5-resolve-off-b` | 88/196 | 88/196 | unchanged, guard |
+| `turn5-resolve-off-c` | 149/196 | 149/196 | unchanged, guard |
+| `turn5-confirm-off-a` | 60/132 | 60/132 | unchanged, guard |
+| `turn5-reset-off` | 256/256 | 256/256 | unchanged, control |
+| `turn5-action-off` | 32/32 | 32/32 | unchanged, guard |
+| `turn6-reopen-off` | 46/46 | 46/46 | unchanged, guard |
+| `turn6-menu-off.json` fixture | 47/47 | 47/47 | unchanged, guard |
+| `turn13-switchin` | 242/242 | 242/242 | unchanged, guard |
+| `turn4-doubleteam-off` | 256/256 | 256/256 | unchanged, guard |
+| `turn4-rockslide-off` | 256/256 | 256/256 | unchanged, guard |
+
+Zero decreases anywhere. Two new Tier-1 describe blocks in
+`tests/battleScene.test.ts` pin both new functions and the
+rockslide-text-delay call-site formula against the same oracle-read
+anchors §1.3/§2.2/§2.3 used. §2.4 (sprite/particle overlay) and §2.5
+(the 6991-6994 transition spike) remain exactly as flagged above — not
+attempted this session, per the brief's own scope boundary — recorded in
+`ISSUES.md` #97 sub-entry G.

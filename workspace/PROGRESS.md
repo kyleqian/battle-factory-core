@@ -4,6 +4,64 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1335 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-b`'s rockslide-text-delay fix and `resolve-off-d`'s two Sitrus epoch fixes LANDED per `docs/turn5-confirmb-resolved-residuals.md` — 0/132→37/132 and 0/196→50/196**
+
+- **State:** one green commit (`90edc2a6` fix+Tier-1 pins) plus this docs
+  commit. `npm test` **1,067 files / 10,056 passed (+7, new pins for both
+  fix shapes) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read `docs/turn5-confirmb-resolved-residuals.md` (committed at
+  `257fa559`) in full and landed both fix-ready mechanisms it pinned: (A)
+  `drawTurn5RockSlideWindow`'s attack/text branch was calling
+  `rockSlideTextVisibleChars(t, pressTick)` with no `delay` argument,
+  silently defaulting to the shared 393-tick delay instead of this
+  family's own `TURN5_OFF_ROCKSLIDE_TEXT_DELAY=355` already threaded into
+  the dispatch gate one call up — fixed to `rockSlideTextVisibleChars(t -
+  1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)`. (B) `turn5SitrusOnixHp`/
+  `turn5SitrusHealTextVisibleChars` still keyed off the stale, older
+  `ONIX_SITRUS_IDENTITY_RENDER_TICK` epoch (6874) that the prior session's
+  dispatch-gate fix never swept from these detail-render formulas; landed
+  two new turn5-off-scoped siblings, `turn5OffSitrusOnixHp` (hard step at
+  a new `TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK=6984`) and
+  `turn5SitrusOffHealTextVisibleChars` (anchored at the already-correct
+  `TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK=6850`, same `t-1` shape as (A)).
+  Per the brief's mandatory pre-landing spot-check, wrote a fresh RAM probe
+  (`tools/probe/dump-turn5-resolve-offd-onixhp-ram.py`, dense sweep
+  6975-6995 against `turn5-resolve-off-d.json`) BEFORE trusting the doc's
+  §2.2 given ground truth — confirmed ONIX's own `gBattleMons[0].hp` is a
+  genuine hard step (flat 1 through 6983, flat 31 from 6984 on, zero
+  intermediate values), matching the doc exactly; no contradiction, no
+  addendum needed.
+- **Result:** `turn5-confirm-off-b` 0/132 → **37/132** (exactly the doc's
+  own §1.5 prediction). `turn5-resolve-off-d` 0/196 → **50/196** (beats
+  the doc's own conservative ~13/196 tail-only floor since both (B)
+  sub-components landed, not just the tail — the doc had explicitly hedged
+  §2.3's own count as "no specific claim"). Cross-trace bonus,
+  independently predicted by the doc's own §1.5: `turn5-resolve-off-a`
+  25/196 → **44/196** (the fix lets more of that trace's own opening ticks,
+  which share the same call site, catch up sooner). Zero decreases across
+  the full guard family: `turn5-reset-off` 256/256, `turn5-action-off`
+  32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+  `turn5-confirm-off-a` 60/132, `turn5-resolve-off-b` 88/196,
+  `turn5-resolve-off-c` 149/196, `turn13-switchin` 242/242,
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** `confirm-off-b`'s own separate small pre-6184 ENDEAVOR-hold
+  residual (§1.1's table) stays open, needs its own instrument. `resolve-
+  off-d`'s §2.4 (sprite/particle overlay — ONIX's own tint/rotation and
+  granting-star placement, also keyed off the same stale epoch but not
+  independently isolated this session) and §2.5 (the 6991-6994 transition
+  spike, 4 frames) remain unexplained and untouched, per the diagnosis
+  doc's own explicit scope boundary. The resolve-off-c settled-transition
+  mechanism (`TURN5_PIDGEOTTO_SETTLE_TICK`/`drawTurn5PidgeottoMaterialize`)
+  was being instrumented by a side-lane worker in parallel this session,
+  untouched here per the brief. #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The mandatory RAM spot-check cost one small new
+  probe script but was worth it: it independently confirmed the doc's own
+  flagged "not independently re-probed" caveat rather than just trusting
+  the given fact, and the result (a clean hard step, zero ramp ticks in a
+  21-tick dense sweep) meant the doc's literal proposed fix shape could
+  land unmodified.
+
+---
 ## 1334 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s two named tail mechanisms FIXED per `docs/turn5-resolve-offc-tail-diagnosis.md` — count holds at 149/196, blocked by a third, newly-confirmed, out-of-scope mechanism**
 
 - **State:** three green commits (`6b9f1a12` fix+Tier-1 pins,
@@ -119,57 +177,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the same `-7` correction window B's landed fix already applies, so the
   composed formula matched the receipt exactly (33/33) on the first live
   compare, no iteration needed.
-
-
----
-## 1332 — [main worker, 2026-08-18] **ISSUES #97 §17 item 5 landed: HP-overlay gate's turn4 arm closes turn5-confirm-off-a's frozen-HP frames (15→60/132), zero decreases across the guard family**
-
-- **State:** two green commits (`e7657a86` fix+Tier-1 pin, `0ac71a47`
-  docs) plus this docs commit. `npm test` **1,067 files / 10,044 passed
-  (+1, the new turn-4-arm pin) / 223 skipped**; `npm run build`/
-  `npm run typecheck` green.
-- **Did:** per-caller audit FIRST (required by the brief), all 12 real
-  call sites of `drawActionMenuIdleContentFromLatest` traced to their own
-  turn/window and checked for an override arg and today's gate outcome —
-  recorded as `docs/turn5-family-class3-diagnosis.md` §19. Confirmed §10a's
-  root cause exactly: `drawTurn5EndeavorText`'s ENDEAVOR-hold fallback is
-  the ONLY call site where the gate's `false` outcome wasn't already masked
-  by a manual redraw of the same value right after the call (two callers,
-  `drawTurn3/4RockSlideTurnEndSettledMenu` and `drawActionMenuIdleWindow`'s
-  two branches, already draw the identical override unconditionally, so
-  widening the gate there is provably a no-op, not a behavior change).
-  Chose fix shape (a) over (b) (§10a's two candidates): added a third OR
-  arm, `turn4FightCommandPresentationFromLatest(latest) !== null`,
-  mirroring the existing turn2/turn3 arms one turn further — the same
-  pattern `drawTurn3EndeavorText` already relies on via the turn2 arm one
-  turn earlier. Tier-1 pin: `battleSceneFightCommandPresentationTurn1
-  Through4.test.ts`'s "slice 3" describe block, previously asserting "turn
-  4: does NOT fire" for the generic shim — split into the retired
-  positional-ABI body's own unchanged historical pin plus a new case
-  pinning the current shim's turn-4 arm firing.
-- **Result:** `turn5-confirm-off-a` 15/132 → **60/132** (strict
-  improvement, oracle-verified). `turn5-confirm-off-b` and
-  `turn5-resolve-off-d` both held their prior 0-match count with their
-  cited residual magnitude UNCHANGED (689px/1.79% bbox=16,124-75,149 and
-  258px/0.67% bbox=44,71-195,104 respectively) — both attributed to
-  different, ungated code paths this fix cannot reach
-  (`drawTurn5RockSlideWindow`'s attack/text phase and its own
-  settled-Sitrus-chrome tail; traced, not guessed — see §19). Zero
-  decreases anywhere in the 9-trace guard family: `turn5-reset-off`
-  256/256, `turn5-action-off` 32/32, `turn6-reopen-off` 22/46, `turn6-menu`
-  34/44, `turn5-resolve-off-{a,b,c}` 25/196, 88/196, 149/196,
-  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each — all
-  byte-identical to the brief's own cited baselines.
-- **Next:** ISSUES #97 remainders, all still open, all now attributed to a
-  specific code path (not this gate): `confirm-off-b`'s 689px residual
-  (`drawTurn5RockSlideWindow` attack/text phase — item 1's own boundary,
-  possibly a text-timing recalibration, not an HP overlay); `resolve-off-d`'s
-  258px residual (settled-Sitrus-chrome ONIX overlay, needs its own
-  instrument); `resolve-off-c`'s trailing 47-frame secondary mechanism
-  (§3e/§7, untraced); `turn6KickoffBounceTick`/the 7318+ dispatch (side-lane
-  continuation, unchanged). #71 Rung 9 unchanged (blocked on the animation
-  lane's rung-4 back dispatcher).
-- **Notes:** no PAPERCUT. §19's per-caller audit (required before any edit)
-  took the bulk of the session but paid off — it predicted every trace's
-  outcome (including the two "stays at 0 but why" residuals) before a
-  single oracle rerun, and every prediction held exactly.
