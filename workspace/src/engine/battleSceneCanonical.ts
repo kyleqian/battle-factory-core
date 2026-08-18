@@ -1030,6 +1030,27 @@ export const TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
 };
 
 
+/**
+ * `docs/turn5-resolve-ab-pools-diagnosis.md` §4 (2026-08-18, ISSUES #97
+ * remainder): `drawTurn5RockSlideAttack` was the one sibling in this family
+ * still calling the shared hit-reaction helpers with no scoped profile (the
+ * generic default's `hitFlashAnchorAge=562` places its blink/wobble window
+ * entirely past this trace's own capture range). All 8 measured blink
+ * transitions (real oracle, `pressTick=TURN5_ROCKSLIDE_PRESS_TICK=5829`)
+ * solve exactly against `age=418` (anchor RAM tick 6247). The real GROVYLE
+ * sprite's own top row is pixel-flat for the entire window whenever visible
+ * (no shake) - `targetShakeStartAge: 0, targetShakeEndAge: -1` disables
+ * `rockSlideMonShakeY2` unconditionally (`t < start || t > end` is always
+ * true for `t >= 0` against this range).
+ */
+export const TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
+  ...ROCK_SLIDE_ANIMATION_PROFILE,
+  hitFlashAnchorAge: 418, // RAM/pixel tick 6247 (blink+wobble anchor) - pressTick(5829)
+  targetShakeStartAge: 0,
+  targetShakeEndAge: -1, // real GROVYLE never shakes during this hit - disables rockSlideMonShakeY2
+};
+
+
 export const TURN5_ENDEAVOR_HP = resolveTurn5EndeavorHpEndpoints();
 
 
@@ -1120,7 +1141,6 @@ export function turn5FaintedTextStartTick(pressTick: number): number {
 }
 
 
-
 /**
  * NOT `cursorState`'s own perpetual 4-phase BOUNCE - dense oracle re-check
  * this session (`turn5-faint.json`'s own compare run) shows this cursor
@@ -1134,10 +1154,35 @@ export function turn5FaintedTextStartTick(pressTick: number): number {
  * wait) is NOT known - this slice's own window doesn't run long enough past
  * the press to observe it, so this is deliberately a plain climb-then-hold,
  * not generalized into a perpetual cycle the pixels don't support yet.
+ *
+ * `docs/turn5-resolve-ab-pools-diagnosis.md` §6 (2026-08-18, ISSUES #97
+ * remainder) proposed replacing this with a plain `cursorState(t, cursorStart)`
+ * reuse, predicting `resolve-off-b` 88/196 -> 196/196. Landing that swap DID
+ * close the doc's own targeted 6426-6560 span exactly as predicted (with a
+ * `t-1` display-basis correction the doc's own §6c flagged as likely
+ * needed), but ALSO regressed the previously-exact `turn5-resolve-off-c`
+ * hard guard 195/196 -> 140/196 - that trace's own capture window
+ * (6614-6958) shares this exact code path and, empirically, is NOT disjoint
+ * from it as the doc's own §7 PASS/FAIL table assumed. Fresh pixel
+ * inspection past the KO-dismiss `A` press (trace tick 6561-6562, the same
+ * tick as this doc comment's own "6561" climb-then-hold anchor) shows the
+ * real cursor does NOT simply freeze at a fixed offset there (ruled out:
+ * the mismatch pattern still varies by phase, not a constant offset) - it
+ * looks like a genuine re-anchor/second-cycle event tied to the real
+ * dismiss-input tick, the same class of mechanism turn 13's own analogous
+ * cursor already solves via `opponentFaintPresentationOwner.dismiss`
+ * (`drawTurn13SwitchinWindow`, `frozenCursorTick`/`dismiss.cursor.
+ * frozenAtElapsed`) - NOT reproducible from a fixed pixel/RAM constant the
+ * way this function's own table is, since the real freeze/re-anchor point
+ * depends on when the (real, per-session) dismiss input actually lands.
+ * Reverted to this bespoke function pending that dismiss-aware plumbing
+ * being threaded into `drawTurn5RockSlideWindow` (mirroring turn 13's own
+ * pattern) - next instrument for a future session, not guessed here.
  */
 export function turn5FaintedCursorYOffset(t: number, start: number): number {
   return Math.min(2, Math.floor((t - start) / 9));
 }
+
 
 
 

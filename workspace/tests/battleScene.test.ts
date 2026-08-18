@@ -65,6 +65,7 @@ import {
   TURN5_ICONBAR_DESTROY_TICK,
   TURN5_ICONBAR_FADE_START_TICK,
   TURN5_OFF_ROCKSLIDE_TEXT_DELAY,
+  TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE,
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
   TURN5_OPPONENT_ICON_STATES,
   TURN5_ROCKSLIDE_PRESS_TICK,
@@ -167,6 +168,9 @@ import {
   rockSlideOpponentHp,
   rockSlideTextStartTick,
   rockSlideTextVisibleChars,
+  rockSlideMonBlinkInvisible,
+  rockSlideHealthboxWobbleY2,
+  rockSlideMonShakeY2,
   TURN6_SUPER_EFFECTIVE_LINE,
 } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
@@ -2302,6 +2306,32 @@ describe("ISSUES #97 remainder residual (A) (docs/turn5-confirmb-resolved-residu
   });
   it("stays 0 through the dispatch gate's own opening tick (6184) - the still-held old text is a separate, accepted one-tick transition artifact", () => {
     expect(rockSlideTextVisibleChars(6184 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(0);
+  });
+});
+
+describe("ISSUES #97 remainder Class A (docs/turn5-resolve-ab-pools-diagnosis.md §4, 2026-08-18): TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE - drawTurn5RockSlideAttack's own scoped hit-reaction profile, previously falling back to the shared default (hitFlashAnchorAge 562) which placed the blink/wobble window entirely past this trace's own capture range", () => {
+  const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
+  it("blinks 4-on/4-off exactly 4 times starting at the RAM/pixel-measured anchor (age=418, pressTick+418=6247), matching all 8 oracle-measured transitions", () => {
+    expect(rockSlideMonBlinkInvisible(6248, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(false); // d=0, setup tick
+    expect(rockSlideMonBlinkInvisible(6249, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(true); // d=1, first invisible
+    expect(rockSlideMonBlinkInvisible(6252, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(true);
+    expect(rockSlideMonBlinkInvisible(6253, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(false); // d=5, visible
+    expect(rockSlideMonBlinkInvisible(6257, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(true); // d=9, invisible
+    expect(rockSlideMonBlinkInvisible(6261, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(false); // d=13, visible
+    expect(rockSlideMonBlinkInvisible(6265, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(true); // d=17, invisible
+    expect(rockSlideMonBlinkInvisible(6269, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(false); // d=21, visible
+    expect(rockSlideMonBlinkInvisible(6273, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(true); // d=25, invisible
+    expect(rockSlideMonBlinkInvisible(6277, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(false); // d=29, visible and stays (d=33 at 6281 exceeds the 32-tick window)
+    expect(rockSlideMonBlinkInvisible(6281, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(false);
+  });
+  it("never shakes - real GROVYLE's own top row is pixel-flat the entire window (targetShakeStartAge/EndAge disable rockSlideMonShakeY2 unconditionally for t>=0)", () => {
+    expect(rockSlideMonShakeY2(pressTick, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(0);
+    expect(rockSlideMonShakeY2(6272, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(0); // the default profile's own shake-start age
+    expect(rockSlideMonShakeY2(6365, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(0); // the default profile's own shake-end age
+  });
+  it("shares the same hitFlashAnchorAge between the blink and healthbox-wobble helpers (both read profile.hitFlashAnchorAge)", () => {
+    expect(rockSlideHealthboxWobbleY2(6247, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(0); // d=-1, before the wobble opens
+    expect(rockSlideHealthboxWobbleY2(6248, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)).toBe(1); // d=0, first +1 wobble tick
   });
 });
 
