@@ -17,19 +17,37 @@ backlog.
 
 # Open
 
-## #96 — battle1-swap family: `enemy-picker` 1-tick header-edge sliver (129/130)
+## #96 — battle1-swap family: `enemy-picker` 1-tick ball-roll sliver (129/130) — CLASSIFIED, fix shape named
 
 **State (2026-08-17):** part (a) (the two player-quit traces) is FIXED —
 see `PROGRESS.md`. This is the sole remaining trace-family deviation.
 
-**`enemy-picker` (129/130, frame 29838 ONLY, 5px, bbox
-239,62-239,66):** a 1-column, 1-tick sliver at the screen's last column —
-oracle draws a dark border column of the ONIX name-box header one row
-further at the screen edge for exactly one tick; neighbors 29836-29840 are
-otherwise pixel-perfect. Plain enemy-list browsing path (`factorySwapRender.ts`
-header-box draw), shares nothing with the fixed (a) mechanism. Fix shape not
-yet identified — **next instrument:** RAM-probe the name-box border
-sprite/BG draw at that tick to classify 1-tick-early/late reveal edge.
+**`enemy-picker` (129/130, frame 29838 ONLY, 5px, bbox 239,62-239,66):**
+the earlier "ONIX name-box header drawn one row further" reading was
+DISPROVEN by a RAM/OAM probe (2026-08-17 side worker; full evidence in
+`docs/factory-swap-enemy-picker-probe.md`'s dated section + committed
+receipt `tools/probe/receipts/battle1-swap-enemy-picker-edge-oam.json`).
+The mismatch is a cycling rental-ball sprite (`Swap_Task_SlideCycleBalls`)
+clipped to its last 6 visible columns at the right screen edge. Ball OAM
+position is bit-exact app-vs-oracle at all 21 sampled ticks; every
+window/scroll register is constant. What differs at 29838 is the ball's
+OAM tile (120→136 for one tick): `SpriteCB_Pokeball`'s `Random()%5==0`
+"Moving" roll frame. The app's `selectedPalette` gate
+(`factorySwapPresentation.ts:845-860`) unconditionally disables the
+ball-roll RNG animation during `enemySwitch`/`playerSwitch` on a
+comment-stated assumption that is only true after each ball's individual
+wrap, not throughout the transition.
+
+**Fix shape (probe-named, not yet implemented):** per-ball eligibility —
+during `enemySwitch`/`playerSwitch`, each ball keeps consuming
+`advanceBallAnim` rolls until its own `cycledToEnemy` flag flips true
+(`factorySwapPresentation.ts:1299-1344`, `:1559-1567`), instead of the
+blanket `controller.phase` exclusion; `factorySwapRender.ts:414-425` then
+substitutes the advancing tile for the frozen `view.ballTiles[i]` while
+`cycledToEnemy` is false. This is an **RNG-consumption-order** change
+(draw order doc at `factorySwapPresentation.ts:795-796`: slot 0,1,2 after
+the caller's VBlank draw) — sweep the full 19-trace battle1-swap family
+for no count drops.
 
 ## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (real mechanism, bisect needed); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 
