@@ -37682,7 +37682,7 @@ export function renderSceneOnMovePresentation(
       ),
     );
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     drawSpriteSheet(
       fb,
@@ -37692,7 +37692,7 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
     );
     const attackerIdle = view.attacker.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.attacker.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : null;
     drawSpriteSheet(
       fb,
@@ -37816,7 +37816,7 @@ export function renderSceneOnMovePresentation(
     const attackerSprite = playerToOpponent ? metangBackSprite : metangFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const drawBackground = () => {
       const bg = view.background === "cosmic"
@@ -38015,7 +38015,7 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     drawSpriteSheet(
       fb,
@@ -38328,7 +38328,7 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     if (playerToOpponent) {
-      const idle = speciesFrontIdleRestOffset("ONIX");
+      const idle = speciesFrontIdleRestOffsetOrZero(view.target.species);
       drawSpriteSheet(
         fb,
         onixSprite.tileset,
@@ -38521,7 +38521,7 @@ export function renderSceneOnMovePresentation(
       refreshDisplayedBlendCoeffAtAge(state.age, "attacker"),
     );
     if (playerToOpponent) {
-      const idle = speciesFrontIdleRestOffset("ONIX");
+      const idle = speciesFrontIdleRestOffsetOrZero(view.target.species);
       drawSpriteSheet(
         fb,
         onixSprite.tileset,
@@ -38692,7 +38692,7 @@ export function renderSceneOnMovePresentation(
     // permanent send-out front-sprite-animation residual for the whole
     // window - same MOVE_GROWTH/DRAGON_RAGE/SHADOW_PUNCH finding.
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     drawSpriteSheet(
       fb,
@@ -38883,7 +38883,7 @@ export function renderSceneOnMovePresentation(
     // own AnimTask_ShakeMon/AnimTask_ScaleMonAndRestore pair takes
     // ownership of it at CONFUSION_WINDOW2_START_AGE (confusion.ts).
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     // +1 past the raw creation age: the live x2 read is now display-lagged
     // by 2 ticks (see sceneOnConfusionView's own module doc), so the
@@ -39059,7 +39059,7 @@ export function renderSceneOnMovePresentation(
     // window 2's own AnimTask_ShakeMon/AnimTask_ScaleMonAndRestore pair
     // takes ownership of it at PSYCHIC_WINDOW2_START_AGE (psychic.ts).
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     // +1 past the raw creation age, same reasoning as CONFUSION's own
     // handoff (sceneOnConfusionView's module doc): the live x2 read is
@@ -39493,7 +39493,7 @@ export function renderSceneOnMovePresentation(
     const red = { r: 255, g: 0, b: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const targetIdle = playerToOpponent && state.age < 120
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const drawTarget = () => drawSpriteSheet(
       fb,
@@ -42920,7 +42920,7 @@ export function renderSceneOnMovePresentation(
         + dragonClawDisplayedAttackerShakeY(state.age),
     );
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const drawOnix = () => drawSpriteSheet(
       fb,
@@ -43067,7 +43067,7 @@ export function renderSceneOnMovePresentation(
     // The target starts at its normal front-idle x2. The task claims x2 at
     // source age 4; its x-coordinate transfer reaches scanout at age 5.
     const targetIdle = playerToOpponent && state.age < 5
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const drawTarget = () => drawSpriteSheet(
       fb,
@@ -43192,7 +43192,7 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     const drawAttacker = () => drawSpriteSheet(
       fb,
@@ -43330,7 +43330,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
@@ -43473,7 +43473,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const black = { r: 0, g: 0, b: 0 };
     const darken = displayed.blendDarken;
