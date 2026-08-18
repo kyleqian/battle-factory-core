@@ -4,6 +4,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1323 — [main worker, 2026-08-18] **ISSUES #97-B rung 2 landed: window B's composed correction (+67 raw sine index + local display-basis t-1 shift) — turn6-reopen-off 11/46 → exactly 20/46, zero regressions**
+
+- **State:** `src/engine/battleMenu.ts`, `src/engine/battleScene.ts`,
+  `tests/fightSubmenu.test.ts` edited (new commits pending: fix, then
+  docs). `npm run typecheck`/`npm run build` green. `npm test` **1,066
+  files / 10,038 passed (+1, the new pin) / 223 skipped** — full suite
+  confirmed green, no regressions.
+- **Did:** implemented `docs/turn5-bounce-recalibration-probe.md` §8f
+  exactly. `menuIdleBounce` gained a defaulted `indexOffset = 0` param
+  (added to both raw sine indices before the mod/table lookup) — every
+  pre-existing caller unaffected. `drawTurn6FieldBase` (+ its internal
+  `drawTurn5RockSlideAttack` onix-Y2 call) thread a new
+  `bounceIndexOffset = 0` param through to that call. Exactly TWO call
+  sites pass `67`, both provably scoped local (§8e's own warning against
+  perturbing the unexplored `turn6KickoffBounceTick`/7318+ dispatch):
+  `drawTurn5RockSlideWindow`'s call (the ONLY caller that ever hits
+  `drawTurn6FieldBase`'s non-number `bounceTickOrLatest` branch, whose
+  fallback moved from `t` to `t - 1` — the §7a display-basis correction),
+  and `drawTurn6FightSubmenuWindow`'s DMA-wait branch (`t < revealTick`,
+  ~7313-7317 only — `turn6ReopenBounceTick(t - 1, ...)` instead of
+  `turn6ReopenBounceTick(t, ...)`). Per the step's hard order: ran §8h's
+  RAM-receipt PASS/FAIL check first (passed, no oracle call), then derived
+  the predicted per-tick output via `npx tsx` against the live formulas
+  BEFORE editing — reproduced §8e's exact predicted match set
+  (displayed frames 7305-7317: matches at {7305, 7307-7316}, mismatches at
+  {7306, 7317}) with zero deviation.
+- **Result:** `turn6-reopen-off` 11/46 → **exactly 20/46** (the best-case
+  number §8e predicted, not its 18/46 fallback), in-span mismatch set
+  exactly {7306, 7317} (both §8d's already-known sine-table-peak rounding
+  artifact), all 9 outside-span matches
+  (`{7326,7327,7335,7336,7344,7345,7348,7349,7350}`) unchanged. Zero
+  regressions: `turn5-reset-off` 256/256, `turn5-action-off` 1/32,
+  `turn5-confirm-off-a` 8/132, `turn5-confirm-off-b` 0/132,
+  `turn5-resolve-off-{a,b,c,d}` 7/196, 71/196, 149/196, 0/196 — all
+  byte-for-byte unchanged (their own windows sit entirely before
+  `turn5SitrusResettledBounceTick`'s bounce-onset tick ~7223, so this fix
+  is a structural no-op there, not just coincidentally unaffected).
+  Tier-1 pin added to `tests/fightSubmenu.test.ts`, red-verified (fails
+  with both `src/` files stashed).
+- **Next:** commit fix + docs (ISSUES.md #97-B already updated with the
+  rung-2 table) as two commits per the step brief. Remaining #97-B open
+  items unchanged in kind: (i) window A's own healthbox-lag correction,
+  (ii) §8d's table-peak artifact, (iii) `turn6KickoffBounceTick`/7318+,
+  (iv) the family's class-(iii) text/banner mechanism (§8g, ~85% of
+  `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining mismatches).
+- **Notes:** no PAPERCUT. The positional-param threading needed to keep
+  the offset "strictly local" (per the step brief's own warning) required
+  passing several `undefined` placeholders through `drawTurn6FieldBase`'s
+  already-long parameter list at both new call sites — ugly but matches
+  this file's own existing idiom for the same reason (see e.g. the
+  turn11/turn13 `drawTurn6FieldBase` callers already doing this).
+
+---
 ## 1322 — [main worker, 2026-08-17] **ISSUES #71 §1e retirement Rung 0 + Rung 1 landed: shared helper + first 14-move batch, zero FINDINGs**
 
 - **State:** `src/animation/speciesIdleAnim.ts`, `src/engine/battleScene.ts`,
@@ -102,45 +155,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `checkout --` on a file with a real pending fix nukes everything, not
   just the last edit.
 
----
-## 1320 — [main worker, 2026-08-17] **ISSUES #71 remainder: §1e patch-site retirement + hand-fit retirement design doc committed (docs-only, no behavior change)**
-
-- **State:** `docs/sendout-1e-retirement-design.md` added (new commit
-  pending). `npm test` **1,066 files / 10,033 passed / 223 skipped**
-  (unchanged from 1319's baseline), `npm run build` green. No `src/`/
-  `tests/` edit this step.
-- **Did:** live-re-derived the §1e `speciesFrontIdleRestOffset` census
-  against `docs/send-out-live-wiring-consumer-map.md` (2026-08-03 scout):
-  site count grew **58 → 125 total** (§1e-class specifically 58 → 121,
-  spanning 108 move branches, up from ~103) as `renderSceneOnMovePresentation`
-  nearly doubled (~15,700 → 27,540 lines) from new move ports since the old
-  scout, each copy-pasting the same ONIX-literal pair-lock pattern. Found
-  two already-generic template call sites (`sceneOnPresentation.ts`
-  DRAGON_RAGE/SHADOW_PUNCH) proving the target shape already exists in
-  production. Confirmed **Slice C (hand-fit throw-guards for MAGBY-back/
-  ONIX-back/KABUTO-front) is done and still live**, unchanged since
-  2026-08-03 entry 891 — the only genuinely open main-lane-actionable work
-  is the §1e patch-site consolidation; full hand-fit retirement is blocked
-  on the animation lane's rung-4 back dispatcher (not started, not main's
-  program). Designed a minimal mechanism (one fallback-idiom helper,
-  `speciesFrontIdleRestOffsetOrZero`, no new dispatcher) and a 9-rung
-  ladder (Rung 0 = helper + test; Rungs 1-8 = the 108 moves batched ~14
-  each; Rung 9 = named-but-deferred hand-fit swap-over, blocked on the
-  cross-lane dependency). Verified the boundary ratchet
-  (`tests/animation/animationBoundaryRatchet.test.ts`) needs **zero
-  widening** for every rung — `speciesFrontIdleRestOffset` is already
-  imported into the one allowlisted consumer (`battleScene.ts`). Found the
-  108 move windows are ON-profile-legacy with **no committed
-  `tools/compare/traces/` coverage at all**; real verification is the
-  per-move Tier-1 fixture-hash tests instead, one confirmed gap (HARDEN,
-  zero test coverage) flagged for a pin before that rung touches it.
-- **Docs:** new design doc only; `ISSUES.md` #71 left as-is (its own
-  remainder text already matches this doc's scope — no edit needed since
-  nothing closed this step).
-- **Next:** a future worker can pick up Rung 0 directly from
-  `docs/sendout-1e-retirement-design.md` §5. #97 turn5/6 bounce-tick drift
-  remains open on its own chain; #71/#73-adjacent filler otherwise per
-  standing priorities.
-- **Notes:** no PAPERCUT. Design-only step, no oracle query needed (per
-  the brief) — every citation is a live `grep -n`/`npx tsx` re-derivation
-  against this session's own HEAD, not copied from the old scout.

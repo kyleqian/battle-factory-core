@@ -1,3 +1,46 @@
+## 1320 — [main worker, 2026-08-17] **ISSUES #71 remainder: §1e patch-site retirement + hand-fit retirement design doc committed (docs-only, no behavior change)**
+
+- **State:** `docs/sendout-1e-retirement-design.md` added (new commit
+  pending). `npm test` **1,066 files / 10,033 passed / 223 skipped**
+  (unchanged from 1319's baseline), `npm run build` green. No `src/`/
+  `tests/` edit this step.
+- **Did:** live-re-derived the §1e `speciesFrontIdleRestOffset` census
+  against `docs/send-out-live-wiring-consumer-map.md` (2026-08-03 scout):
+  site count grew **58 → 125 total** (§1e-class specifically 58 → 121,
+  spanning 108 move branches, up from ~103) as `renderSceneOnMovePresentation`
+  nearly doubled (~15,700 → 27,540 lines) from new move ports since the old
+  scout, each copy-pasting the same ONIX-literal pair-lock pattern. Found
+  two already-generic template call sites (`sceneOnPresentation.ts`
+  DRAGON_RAGE/SHADOW_PUNCH) proving the target shape already exists in
+  production. Confirmed **Slice C (hand-fit throw-guards for MAGBY-back/
+  ONIX-back/KABUTO-front) is done and still live**, unchanged since
+  2026-08-03 entry 891 — the only genuinely open main-lane-actionable work
+  is the §1e patch-site consolidation; full hand-fit retirement is blocked
+  on the animation lane's rung-4 back dispatcher (not started, not main's
+  program). Designed a minimal mechanism (one fallback-idiom helper,
+  `speciesFrontIdleRestOffsetOrZero`, no new dispatcher) and a 9-rung
+  ladder (Rung 0 = helper + test; Rungs 1-8 = the 108 moves batched ~14
+  each; Rung 9 = named-but-deferred hand-fit swap-over, blocked on the
+  cross-lane dependency). Verified the boundary ratchet
+  (`tests/animation/animationBoundaryRatchet.test.ts`) needs **zero
+  widening** for every rung — `speciesFrontIdleRestOffset` is already
+  imported into the one allowlisted consumer (`battleScene.ts`). Found the
+  108 move windows are ON-profile-legacy with **no committed
+  `tools/compare/traces/` coverage at all**; real verification is the
+  per-move Tier-1 fixture-hash tests instead, one confirmed gap (HARDEN,
+  zero test coverage) flagged for a pin before that rung touches it.
+- **Docs:** new design doc only; `ISSUES.md` #71 left as-is (its own
+  remainder text already matches this doc's scope — no edit needed since
+  nothing closed this step).
+- **Next:** a future worker can pick up Rung 0 directly from
+  `docs/sendout-1e-retirement-design.md` §5. #97 turn5/6 bounce-tick drift
+  remains open on its own chain; #71/#73-adjacent filler otherwise per
+  standing priorities.
+- **Notes:** no PAPERCUT. Design-only step, no oracle query needed (per
+  the brief) — every citation is a live `grep -n`/`npx tsx` re-derivation
+  against this session's own HEAD, not copied from the old scout.
+
+---
 ## 1319 — [main worker, 2026-08-17] **ISSUES #96 remainder fixed: enemy-picker ball-roll sliver — battle1-swap family now 19/19 EXACT, ISSUES #96 fully closed**
 
 - **State:** `src/engine/factorySwapPresentation.ts` +

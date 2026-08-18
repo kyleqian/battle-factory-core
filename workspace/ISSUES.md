@@ -267,6 +267,70 @@ rung discovered.
   trace); (iv) `turn6KickoffBounceTick`'s own analogous defect, named but
   explicitly deferred by §6e/§6f, not touched this rung.
 
+**2026-08-17 rung 2 (bounded MAIN worker, per `docs/turn5-bounce-recalibration-probe.md`
+§7/§8 exactly): window B's composed correction — LANDED to the exact
+predicted number, 20/46.**
+
+- **Fix:** `menuIdleBounce` (`battleMenu.ts:825-833`) gained a new defaulted
+  `indexOffset = 0` param, added to both raw (pre-mod-256, pre-table-lookup)
+  sine indices - every pre-existing caller unaffected. `drawTurn6FieldBase`
+  and its two internal helpers (`drawTurn5RockSlideAttack`'s own onix-Y2
+  call, and the function itself) thread a new `bounceIndexOffset = 0`
+  param down to that call. Only TWO call sites pass `67`, both scoped
+  strictly local per §8e/§8f's own warning against perturbing the
+  unexplored `turn6KickoffBounceTick`/7318+ dispatch: (1)
+  `drawTurn5RockSlideWindow`'s call (`battleScene.ts` ~14822) - this is
+  ALSO the only caller that ever hits `drawTurn6FieldBase`'s non-number
+  `bounceTickOrLatest` branch, so changing that branch's fallback from `t`
+  to `t - 1` (the §7a display-basis correction) is provably scoped to this
+  one caller; (2) `drawTurn6FightSubmenuWindow`'s DMA-wait branch (`t <
+  revealTick`, ~7313-7317 only) - `turn6ReopenBounceTick(t - 1, ...)`
+  instead of `turn6ReopenBounceTick(t, ...)`, plus `67` threaded through a
+  new `bounceIndexOffset` param on `drawTurn6ActionMenuIdleWindow`. The
+  post-reveal `turn6KickoffBounceTick` branch and every other
+  `drawTurn6FieldBase` caller (turns 7-13's own kickoff/regime paths) are
+  byte-for-byte untouched (defaulted param, verified by the full suite
+  staying green).
+- **Paper derivation before editing (per this step's own hard order):**
+  `npx tsx` against the live formulas + planned change reproduced §8e's
+  exact predicted match set for displayed frames 7305-7317 - matches at
+  {7305, 7307-7316}, mismatches at {7306, 7317} - with zero deviation,
+  before any `src/` edit.
+- **Result: `turn6-reopen-off` 11/46 → exactly 20/46**, in-span mismatch
+  set exactly {7306, 7317} (both §8d's known sine-table-peak rounding
+  artifact, explicitly out of scope for this fix), and all 9 outside-span
+  matches (`{7326,7327,7335,7336,7344,7345,7348,7349,7350}`) unchanged -
+  the exact number §8e predicted for the "all three corrections composed"
+  case, not the 18/46 fallback its own contingency warned about.
+- **No regressions anywhere:** `turn5-reset-off` 256/256 (control,
+  untouched - its capture window ends before either affected span);
+  `turn5-action-off` 1/32 unchanged (window A untouched by design, out of
+  scope); `turn5-confirm-off-a` 8/132, `turn5-confirm-off-b` 0/132,
+  `turn5-resolve-off-{a,b,c,d}` 7/196, 71/196, 149/196, 0/196 - all
+  byte-for-byte unchanged from rung 1's own baseline (their own windows sit
+  entirely before `turn5SitrusResettledBounceTick`'s own bounce-onset tick,
+  ~7223, so this fix is a structural no-op there, not merely
+  coincidentally unaffected - §8g's "9 small-bbox frames plausibly
+  improve" speculation did NOT materialize this rung, since none of those
+  9 frames are actually inside the affected span either).
+- **Tier-1 pin:** `tests/fightSubmenu.test.ts`, new test under the turn-6
+  reopen describe block - reproduces the composed model's (onixY2,
+  healthboxY2) sequence across 7305-7317 against real-hardware RAM ground
+  truth (shifted -1 tick per the display-basis finding), asserts the OLD
+  (pre-rung-2) formula gets every one of the 11 now-matching ticks wrong.
+  Red-verified: fails with `src/engine/battleMenu.ts` +
+  `src/engine/battleScene.ts` stashed.
+- **Remaining open items (unchanged in kind from rung 1, renumbered):**
+  (i) window A's own healthbox-lag correction (untouched, out of scope this
+  rung); (ii) §8d's sine-table-peak rounding artifact (a small, ~1-in-9
+  periodic residual, not this correction's job - affects both windows);
+  (iii) `turn6KickoffBounceTick`/the 7318+ dispatch - still unexplored,
+  deliberately not touched (§8e's own warning); (iv) the family's
+  class-(iii) text/banner mechanism (§8g) - the overwhelming majority
+  (~85%) of `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining
+  mismatches, large multi-region bboxes unrelated to bounce/healthbox
+  timing, not investigated by this doc's line of work at all.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
