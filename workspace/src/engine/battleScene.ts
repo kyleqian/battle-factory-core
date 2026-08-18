@@ -32956,7 +32956,7 @@ export function renderSceneOnMovePresentation(
         };
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
-      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const black = { r: 0, g: 0, b: 0 };
     const tormentRed: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (31,0,0 5-bit)
@@ -33117,10 +33117,10 @@ export function renderSceneOnMovePresentation(
     const black = { r: 0, g: 0, b: 0 };
     const white = { r: 255, g: 255, b: 255 };
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const yanmaIdle = opponentToPlayer
-      ? speciesFrontIdleRestOffset("YANMA") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.attacker.species)
       : { x2: 0, y2: 0 };
     const yanmaPalette = view.attackerPaletteY > 0
       ? blendPaletteToward(yanma.palette, white, view.attackerPaletteY)
@@ -33243,7 +33243,7 @@ export function renderSceneOnMovePresentation(
     const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const targetX2 = state.age <= 12
       ? targetIdle.x2
@@ -33381,7 +33381,7 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // Script-created task writes pass through RunTasks, BuildOamBuffer, then
     // the following VBlank: battler x2 therefore trails reducer RAM by two
@@ -33536,7 +33536,7 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const targetOffset = state.age <= 31
       ? targetIdle
@@ -33681,12 +33681,12 @@ export function renderSceneOnMovePresentation(
     const displayedTargetOffset = opponentToPlayer && state.age === 41
       ? { x2: 0, y2: 0 }
       : playerToOpponent && state.age <= 40
-        ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+        ? speciesFrontIdleRestOffsetOrZero(view.target.species)
         : state.age <= 0
           ? { x2: 0, y2: 0 }
           : displayed.targetOffset;
     const targetIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX")
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     // `monbg ANIM_DEF_PARTNER` moves the target battler into BG2. It is
     // therefore the real target-2 layer for the semi-transparent water OBJ,
@@ -33868,7 +33868,7 @@ export function renderSceneOnMovePresentation(
       }
     };
     if (playerToOpponent) {
-      const idle = speciesFrontIdleRestOffset("ONIX");
+      const idle = speciesFrontIdleRestOffsetOrZero(view.target.species);
       drawSpriteSheet(
         fb,
         onixSprite.tileset,
@@ -33993,7 +33993,7 @@ export function renderSceneOnMovePresentation(
     );
     const drawTarget = () => {
       const targetIdle = playerToOpponent
-        ? speciesFrontIdleRestOffset("ONIX")
+        ? speciesFrontIdleRestOffsetOrZero(view.target.species)
         : null;
       drawSpriteSheet(
         fb,
@@ -34115,7 +34115,7 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     drawSpriteSheet(
       fb,
@@ -34219,7 +34219,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     const bgPalette = displayed.palette.active
       ? blendPaletteBanksToward(
@@ -34336,7 +34336,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     const white = { r: 255, g: 255, b: 255 };
     const black = { r: 0, g: 0, b: 0 };
@@ -34440,7 +34440,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
-      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // The facade color blend tints the ATTACKER's OBJ palette bank (bank 0
     // player / bank 1 opponent) toward gFacadeBlendColors[i] at coefficient 8.
@@ -34584,7 +34584,7 @@ export function renderSceneOnMovePresentation(
       : { ...attackerSource, tileset: { columns: 8, rows: 8, tiles: attackerSource.tileset.tiles.slice(0, 64) } };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
-      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const drawAttacker = (): void => {
@@ -34677,7 +34677,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = view.target.geometry.side === "opponent"
-      ? (speciesFrontIdleRestOffset(view.target.species) ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const black = { r: 0, g: 0, b: 0 };
     drawTileBg(
