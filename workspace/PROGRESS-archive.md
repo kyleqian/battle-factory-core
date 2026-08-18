@@ -1,3 +1,88 @@
+## 1338 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-a`'s Class A rock-slide hit-flash profile LANDED — 44/196→56/196; Class C reverted (hard-guard regression); Class B unresolved (new residual found)**
+
+- **State:** one green commit (`8372b6ab` fix+Tier-1 pins) plus this docs
+  commit. `npm test` **1,067 files / 10,068 passed (+3, one new pin
+  block) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read `docs/turn5-resolve-ab-pools-diagnosis.md` (committed at
+  `89d3f065`) in full and worked its three named classes in order.
+  **Class A landed**: `drawTurn5RockSlideAttack` was the one sibling
+  turn (1/3/4/9/10/11 already have their own scoped profile) still
+  calling the shared hit-reaction helpers with no override — added
+  `TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE` (`hitFlashAnchorAge: 418`,
+  matching all 8 RAM/pixel-measured blink transitions exactly per §4a;
+  shake disabled, real GROVYLE's top row is pixel-flat the whole
+  window) and threaded it through all 3 call sites (blink/shake/wobble).
+  Spot-checked `turn13-switchin` FIRST per the doc's own mandatory §4c
+  guard (unaffected, still 242/242) before touching anything else.
+  **Class C attempted then reverted**: swapping `turn5FaintedCursorYOffset`
+  for `cursorState(t-1, cursorStart)` per §6b closed `resolve-off-b`'s own
+  targeted 6426-6560 span exactly as predicted, but regressed the HARD
+  guard `turn5-resolve-off-c` 195/196 → 140/196 — that trace's own
+  capture window (6614-6958) shares the same cursor-draw code path and is
+  NOT disjoint from Class C's fix as the doc's own §7 PASS/FAIL table
+  assumed. Root-caused before reverting (not blind): the trace's own
+  button list shows a KO-dismiss `A` press at tick 6561-6562, and past
+  that point the real cursor's phase visibly re-anchors/freezes — the
+  same class of mechanism turn 13 already solves via
+  `opponentFaintPresentationOwner.dismiss`/`frozenCursorTick`, which is
+  NOT reproducible from a fixed pixel/RAM constant the way this doc's own
+  §6b fix shape assumed (the real freeze point depends on when a
+  per-session dismiss input actually lands). Reverted the call site and
+  restored `turn5FaintedCursorYOffset` byte-for-byte, with the finding
+  recorded in its own doc comment (next instrument: thread
+  `opponentFaintPresentationOwner`-style dismiss data into
+  `drawTurn5RockSlideWindow`, mirroring turn 13's own pattern).
+  **Class B not independently verified**: Class A's fix did NOT fully
+  close its own predicted 6248-6365 window — direct pixel/RAM
+  investigation (`tools/probe/dump-registers.py` against
+  `gBattle_BG3_Y`) found the dominant residual there (huge ~30%-of-frame
+  diffs at render ticks 6259/6260/6263/6264/6267/6268) is a SEPARATE,
+  previously-unknown static-background rendering artifact, NOT Class
+  A's own mechanism: `rockSlideBg3Y`'s formula (shared default
+  `rockAnchorAge`, untouched by this fix) is RAM-EXACT at all 26 sampled
+  ticks 6245-6270 (bit-for-bit match against a fresh live probe), so the
+  registered background-shake value itself is provably correct: the bug
+  is in how that shift renders (best-fit cross-correlation on a
+  background column suggests a ~1-row misalignment, but a shift alone
+  doesn't fully explain the color deltas either — likely a static-BG
+  asset/extraction gap in the `-7`-shifted row range, not a timing
+  formula). Named but not fixed — out of the "profile"-shaped fix this
+  step was scoped to, and doc's own §5 (the 17-frame sink tail) was
+  never reached in isolation because of it.
+- **Result:** `turn5-resolve-off-a` 44/196 → **56/196** (Class A alone;
+  short of the doc's own ≥156/196 floor — attributed above, not a
+  contradiction of §4a's own blink-anchor finding, which is independently
+  RAM-confirmed correct). `turn5-resolve-off-b` **88/196 unchanged**
+  (Class A's own window ends at 6365, before this trace's window starts,
+  exactly as the doc's own §7 table predicted; Class C reverted so no
+  change here either). Zero decreases across the full guard family:
+  `turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
+  46/46, `turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-{a,b}`
+  60/132 and 37/132, `turn5-resolve-off-c` 195/196, `turn5-resolve-off-d`
+  142/196, `turn13-switchin` 242/242 (the critical shared-function guard,
+  spot-checked first per the doc's own instruction),
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** the newly-found static-background artifact at render ticks
+  [6259,6268] (RAM-confirmed NOT a `rockSlideBg3Y`/`rockAnchorAge` issue)
+  needs its own instrument — likely a `staticBgPixel` asset check in the
+  `-7`-shifted row range, or a denser per-pixel oracle sweep across the
+  shake window to characterize the exact misalignment before touching
+  `drawStaticBgShiftedY`. The dismiss-aware cursor freeze (Class C) needs
+  `opponentFaintPresentationOwner`-style plumbing threaded into
+  `drawTurn5RockSlideWindow` before it can land without regressing
+  `resolve-off-c`. Class B (§5's 17-frame sink tail) still unverified in
+  isolation, blocked on the same background artifact dominating that
+  span's own diff. #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The family's own "confirmed by direct
+  experiment, not curve-fit" discipline caught a real regression before
+  commit: the diagnosis doc's own §7 PASS/FAIL table assumed
+  `resolve-off-c` was a disjoint window unaffected by Class C — a fresh
+  guard-family rerun (not just the two named traces) showed that
+  assumption was wrong (195/196 → 140/196), and reverting immediately
+  rather than chasing a deep dismiss-plumbing fix under a hard time cap
+  was the right call. Read the guard-family list literally and rerun ALL
+  of it, not just the traces a doc's own predictions section names.
+
 ---
 ## 1337 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s fourth mechanism and `resolve-off-d`'s spurious ONIX rotation LANDED — 173/196→195/196 and 66/196→142/196**
 

@@ -714,12 +714,47 @@ residuals.md` §8 (dated addendum recording the landing).
 submenu bounce, 5959-5961/5968, never independently RAM-verified — next
 instrument in the diagnosis doc's own §3.2) and class 4 (the 1-frame
 accepted `rockSlideTextStartTick` transition edge) in `confirm-off-b`.
-`resolve-off-a`/`-b`'s remaining pools (cursor/dismiss mechanism +
-static-bg artifact, sub-entry J) and `resolve-off-c`'s 6763 residual are
-untouched by this entry. `resolve-off-d`'s newly-exposed 6970-6988 ring/star
-residual and its already-flagged 6989-7005 menu-chrome spike (§6.3/§8.3)
-both still need their own RAM-probe instruments, not attempted this
-session (time).
+`resolve-off-a`/`-b`'s remaining pools (cursor/dismiss mechanism, sub-entry
+J CLOSED; static-bg artifact still open) and `resolve-off-c`'s 6763
+residual are untouched by this entry.
+
+### L. `resolve-off-d`'s remaining 6970-7005 span — all three named mechanisms LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-confirmb-resolved-residuals.md` §9/§10) — 159/196 → 194/196
+
+The 6970-6988 "ring/star" hypothesis flagged above was FALSIFIED (a full
+RAM sprite-table scan found zero granting-star/ring sprites anywhere in
+this trace — real defect was the app drawing two star sprites real
+hardware never creates) and fixed via `suppressSitrusStars`, mirroring
+`suppressSitrusRotate`. The 6989-7005 menu-chrome spike decomposed into
+two independently-timed, previously-conflated mechanisms: the heal text
+clears 2 ticks EARLY in real hardware (`TURN5_OFF_SITRUS_TEXT_CLEAR_TICK`
+6991→6989) and the settled menu chrome reveals 4 ticks LATE
+(`TURN5_OFF_SITRUS_MENU_REDRAW_TICK` 6991→6995, RAM-pinned to a
+`gBattle_BG0_Y` scroll-snap gated behind an async DMA3 copy,
+`battle_controller_player.c:2565-2589`). The open question of whether the
+message-box and button-grid needed independent gates resolved to **no** —
+direct oracle screenshots at 6989/6991/6994 all show a plain field with
+no box and no chrome at all, so the two windows (confirmed same `bg=0`
+layer, same `gBattle_BG0_Y` register, per `battle_bg.c:174-192`) reveal
+together as one unit; only the single existing gate needed retiming.
+
+**Numbers:** `turn5-resolve-off-d` **159/196 → 194/196**, exactly matching
+the diagnosis doc's own §9.5 prediction. Zero decreases across the full
+guard family (fresh this session): `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-confirm-off-a` 128/132, `turn5-confirm-off-b`
+131/132, `turn5-resolve-off-a` 58/196, `turn5-resolve-off-b` 196/196,
+`turn5-resolve-off-c` 195/196, `turn13-switchin` 242/242,
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each. Six new Tier-1
+pin blocks in `tests/battleScene.test.ts`; `drawTurn5RockSlideWindow` is
+now exported (was file-private) to pin the two retimed gates directly.
+
+**Remaining, still open in `resolve-off-d`:** tick 6850 (pre-existing,
+unrelated — the static-bg residual's own sibling, side-lane territory)
+and tick 6996 (cursor-adjacent, genuinely undiagnosed — flagged, not
+guessed at, per this entry's own explicit "do not touch anything
+cursor-related" constraint). Full receipts:
+`docs/turn5-confirmb-resolved-residuals.md` §9 (the diagnosis) and §10
+(the dated landing addendum).
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 

@@ -1259,3 +1259,88 @@ cursor-adjacent. `turn5-resolve-off-a`/`-b`/`-c`'s own residuals (ISSUES
 #97 sub-entries I/J) are untouched by this entry. No `src/` file was
 edited this session — `git diff -- src/` is empty; the two new probes
 under `tools/probe/` and this section are the whole deliverable.
+
+## 10. Landed (2026-08-18, bounded MAIN worker, ISSUES #97 remainder): all three of §9's named fix shapes land together; §9.4's own open question resolved empirically (no split gate needed)
+
+All three fix shapes named in §9.2/§9.3/§9.4 landed in one commit (they
+share the same call chain and the same two-tick dispatch window, so
+landing them separately would have meant re-deriving the same evidence
+twice):
+
+- **§9.2 `suppressSitrusStars`**: landed byte-for-byte as named, mirroring
+  `suppressSitrusRotate` — new trailing param on `drawTurn5RockSlideAttack`
+  (default `false`, every pre-existing caller unaffected), threaded through
+  `drawTurn6FieldBase`, gating `drawGrantingStars(fb, t)` with
+  `if (!suppressSitrusStars)`. `resolve-off-d`'s own call site
+  (`drawTurn5RockSlideWindow` → `drawTurn6FieldBase`) now passes `true`,
+  same as it already does for `suppressSitrusRotate`.
+- **§9.3 `TURN5_OFF_SITRUS_TEXT_CLEAR_TICK`**: moved 6991 → 6989, exactly
+  as named.
+- **§9.4 `TURN5_OFF_SITRUS_MENU_REDRAW_TICK`**: moved 6991 → 6995, exactly
+  as named.
+
+**§9.4's own open question — resolved empirically, no split gate needed.**
+The brief for this step named this the one thing to determine from
+pixels, not assume. Before touching `src/`, a fresh
+`npm run compare -- turn5-resolve-off-d --summary` reproduced §9's own
+159/196 baseline exactly, then direct oracle screenshots at 6989, 6991,
+and 6994 (`out/run-2026-08-18-22-01-08Z-89153/oracle-06989.png`,
+`oracle-06991.png`, `oracle-06994.png`) were inspected side by side:
+
+- `oracle-06989.png`, `oracle-06991.png`, and `oracle-06994.png` are the
+  same image — a **plain field with no message box and no menu chrome at
+  all** (no red border, no "What will ONIX do?" prompt, no FIGHT/BAG/
+  POKéMON/RUN grid).
+- `oracle-06995.png` shows the **full settled menu chrome** (prompt line
+  AND button grid together) for the first time.
+
+This directly falsifies the premise behind §6.3's own "left portion
+always matches, only the right/lower button-grid lags" split (the
+apparent match there was measured against ON-FIELD SPRITE pixels — the
+bbox `9,71-238,158` at y<115 is dominated by Onix's own on-field sprite
+region, unrelated to the menu-chrome mechanism at all — not evidence of
+an early-arriving prompt). Source cross-check confirms this reading:
+`B_WIN_ACTION_PROMPT` and `B_WIN_ACTION_MENU`
+(`reference/pokeemerald/src/battle_bg.c:174-192`) are both `bg=0`,
+`tilemapTop=35` — the SAME background layer and the SAME scrolled row,
+gated by the SAME single `gBattle_BG0_Y` register `HandleChooseAction
+AfterDma3` snaps once (`battle_controller_player.c:2565-2573`). There is
+no independent second gate for the two windows to split on. **The fix is
+simply moving the one existing shared `TURN5_OFF_SITRUS_MENU_REDRAW_TICK`
+gate from 6991 to 6995** — landed exactly that way, no new state, no
+split blit.
+
+A live-rendered check (`drawTurn5RockSlideWindow` at 6988/6989/6994/6995,
+now exported for direct Tier-1 testing) confirms the app's own blank-hold
+behavior between the two retimed gates matches this shape: nothing is
+drawn in the message/chrome region during `[6989,6995)` (the earlier-drawn
+field base + tile bg show through), reproducing the oracle's own plain-
+field appearance with no extra code.
+
+**Numbers:** `turn5-resolve-off-d` **159/196 → 194/196** (+35), exactly
+matching §9.5's own predicted count. Both of §9.1's structurally-explained
+sub-spans (6970-6988 star-only, 6989-6994 the union of star+text+menu)
+close in full; tick 6850 (pre-existing, out of scope — the static-bg
+residual's own sibling, untouched) and tick 6996 (cursor-adjacent,
+undiagnosed per §9.1's own explicit flag, deliberately not chased per this
+step's own "do not touch anything cursor-related" constraint) remain, both
+exactly as §9.5 predicted. Zero decreases across the full guard family,
+fresh this session: `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
+`turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+`turn5-confirm-off-a` 128/132, `turn5-confirm-off-b` 131/132,
+`turn5-resolve-off-a` 58/196, `turn5-resolve-off-b` 196/196,
+`turn5-resolve-off-c` 195/196, `turn13-switchin` 242/242,
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each. Six new
+Tier-1 pin blocks in `tests/battleScene.test.ts` (two for
+`suppressSitrusStars`, four for the retimed gates, including direct pins
+on both constants' new literal values). `drawTurn5RockSlideWindow` is now
+exported (was file-private) — the same shape `drawTurn5RockSlideAttack`
+already used for its own `suppressSitrusRotate` tests. `npm test`
+(1,067 files / 10,086 passed, +7) and `npm run build`/`npm run typecheck`
+green.
+
+**Remaining, still open:** tick 6850 and tick 6996 (both above, unchanged,
+deliberately not chased). `resolve-off-a`'s own 6398 residual and the
+6248-6365 static-background span (ISSUES #97 sub-entries I/J,
+side-lane territory), and `resolve-off-c`'s 6763 residual, are all
+untouched by this entry.
