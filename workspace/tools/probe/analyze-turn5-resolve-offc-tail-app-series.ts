@@ -38,18 +38,14 @@ import {
   TURN5_STRETCH_TICK,
   turn5PidgeottoHealthboxSlideDx,
   turn5MaterializeCoeff,
+  turn5BgFadeY as appTurn5BgFadeY,
 } from "../../src/engine/battleScene.ts";
-import { TURN5_BG_FADE_START_TICK } from "../../src/engine/battleSceneCanonical.ts";
 
-// `TURN5_BG_FADE_Y` itself is NOT exported (battleScene.ts:10601-10603) - this
-// is a verbatim, read-only copy for comparison purposes only (no src/ edit,
-// no new formula). `turn5BgFadeY(t) = TURN5_BG_FADE_Y[t - TURN5_BG_FADE_START_TICK] ?? 0`.
-const TURN5_BG_FADE_Y: readonly number[] = [
-  2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16, 14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2,
-];
-function appTurn5BgFadeY(t: number): number {
-  return TURN5_BG_FADE_Y[t - TURN5_BG_FADE_START_TICK] ?? 0;
-}
+// `turn5BgFadeY` is exported live from `battleScene.ts` as of the
+// 2026-08-18 ISSUES #97 remainder fix (docs/turn5-resolve-offc-tail-
+// diagnosis.md §4d) - this probe now reads the CURRENT app formula
+// directly instead of a frozen local copy, so a rerun always reflects
+// today's `src/` state, not the pre-fix snapshot this file used to pin.
 
 const TRACE_PATH = new URL("../compare/traces/turn5-resolve-off-a.json", import.meta.url);
 const trace = JSON.parse(readFileSync(TRACE_PATH, "utf8")) as Trace;
