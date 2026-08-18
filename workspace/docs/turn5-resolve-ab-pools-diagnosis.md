@@ -840,3 +840,219 @@ step's scope, side-lane territory, next instrument named in §11.2 above.
 `resolve-off-a`'s own 6398 residual (ISSUES #97-C, pre-existing,
 unrelated). `resolve-off-c`'s 6763 residual and `resolve-off-d`'s
 6970-6988/6989-7005 residuals (ISSUES #97 sub-entries I/K) — untouched.
+
+## 13. Side-lane instrument session (2026-08-18, second): §11.2's own
+"working hypothesis" FALSIFIED - the whole-screen-scroll mechanism is
+proven correct elsewhere; the real turn-5 residual is an occlusion/
+compositing difference, not a `rockSlideBg3Y`/`drawStaticBgShiftedY` bug
+
+ANALYSIS ONLY, side lane, Battle Scene OFF oracle - `git diff -- src/` is
+empty throughout this session. One new committed probe,
+`tools/probe/dump-turn5-resolve-offa-bglayer-census.py` (DISPCNT, all four
+BGxCNT decoded, all four `gBattle_BGn_X/Y` shadow globals, the real hardware
+BGnHOFS/VOFS registers, windowing (`WIN0/1H/V`, `WININ/WINOUT`) and blend
+(`BLDCNT/BLDALPHA/BLDY`) registers, per tick). Baseline reconfirmed fresh at
+session start: `turn5-resolve-off-a` 58/196 (106 of its 138 mismatches inside
+the assigned 6248-6365 span; the remaining 32 are the already-attributed
+sink-tail/`GROVYLE_HEALTHBOX_VANISH_TICK` residuals, §5/§9, out of this
+span).
+
+### 13.1 §11.2's own instrument #1, run: the vertical-scroll path is NOT
+"untested elsewhere" - it is exercised twice, and passes bit-exact both times
+
+§11.2's own working hypothesis was: "turn 5 would be the first and only
+currently-exercised window where `drawStaticBgShiftedY`'s own nonzero-`shiftY`
+code path is pixel-tested at all... [it] could have been silently wrong since
+it was written and simply never triggered anywhere else." This is **false**,
+confirmed by direct oracle reruns, not just static analysis of capture
+windows (the doc's own §11.2 named a cheaper, capture-window-only check;
+this session ran the actual traces instead, which is strictly stronger
+evidence):
+
+`drawTurn6RockSlideAttack` (`battleScene.ts:11876`) and
+`drawTurn7RockSlideAttack` (`battleScene.ts:12153`) both call
+`rockSlideBg3Y(t, pressTick)` / `drawStaticBgShiftedY(fb, shiftY, ...)`
+**unmodified, unscoped, with no profile override** - the identical function
+pair `drawTurn5RockSlideAttack` uses. Fresh reruns:
+
+```
+npm run compare -- turn6-rockslide-a --summary   -> 255/255 (ticks 7765-8019)
+npm run compare -- turn6-rockslide-b --summary   -> 105/105 (ticks 8020-8124)
+npm run compare -- turn7-rockslide-a --summary   -> 256/256 (ticks 8593-8848)
+npm run compare -- turn7-rockslide-b --summary   -> 256/256 (ticks 8849-9104)
+npm run compare -- turn7-rockslide-c --summary   -> 256/256 (ticks 9105-9360)
+npm run compare -- turn7-rockslide-d --summary   -> 19/19   (ticks 9361-9379)
+npm run compare -- battle2-turn1-rockslide --summary -> 190/191 (one unrelated residual at tick 6970, far outside any shake window)
+```
+
+`ROCK_SLIDE_SHAKE_SEQUENCE`'s own active window (`d = (t-1) - (pressTick+428)
+in [0,10]`, `rockAnchorAge=428` is the shared, never-overridden default for
+every turn including turn 5's own `TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE` -
+only `hitFlashAnchorAge`/`targetShakeStartAge`/`targetShakeEndAge` are ever
+scoped) lands at `t in [7801,7811]` for turn 6 (`pressTick=7372`) and
+`t in [8835,8845]` for turn 7 (`pressTick=8406`) - both **entirely inside**
+the passing traces' own capture ranges above. Per-tick manifest check at the
+exact nonzero-`shiftY` ticks (`d=1,2,5,6,9,10`, matching turn 5's own flagged
+6259/6260/6263/6264/6267/6268 pattern exactly):
+
+```
+turn6: ticks 7799-7812 all diffPixels=0 (includes 7802,7803,7806,7807,7810,7811, the shiftY=-7 ticks)
+turn7: ticks 8833-8846 all diffPixels=0 (includes 8836,8837,8840,8841,8844,8845, the shiftY=-7 ticks)
+```
+
+**This is decisive, not merely suggestive**: the exact same code, exact same
+shared static-bg asset (`staticBgPixel`/`battleBg.static`, a pure function of
+`(mapX, mapY, paletteOverride)` with no per-turn parameter - confirmed by
+reading `battleScene.ts:3054-3067`), exact same nonzero `shiftY` values,
+render bit-exact for two other turns. `rockSlideBg3Y`, `drawStaticBgShiftedY`,
+and the static asset's own wraparound math (`BG3_VERTICAL_PERIOD=256`,
+`battleScene.ts:15193-15211`) are **proven correct**, not "possibly silently
+wrong." The turn-5 residual is a **turn-5-specific** problem, not a shared-
+mechanism problem.
+
+### 13.2 §11.2's own instrument #2, run and extended: hardware registers are
+IDENTICAL between the working (turn 6) and broken (turn 5) cases - except one
+
+RAM/hardware probe (`dump-turn5-resolve-offa-bglayer-census.py`) at the
+flagged ticks, turn 5 (6255-6270) vs. turn 6 (7798-7812):
+
+- **`gBattle_BG3_Y` shadow AND the real hardware `REG_BG3VOFS`** (0x0400001E)
+  both read `-7` (as a 9-bit signed register, `505` unsigned) at turn 5's own
+  flagged ticks, confirming the value genuinely reaches the hardware register
+  - ruling out a "shadow-to-hardware copy skipped" hypothesis outright.
+  `VBlankCB_Battle` (`reference/pokeemerald/src/battle_main.c:2085-2098`)
+  copies all four `gBattle_BGn_X/Y` shadows to hardware unconditionally every
+  vblank; nothing gates this per-turn.
+- **DISPCNT** (`0x3f40`, mode 0, all 4 BGs enabled) - byte-identical between
+  turn 5 and turn 6 at every sampled tick.
+- **Windowing** (`WIN0H/V`, `WIN1H/V`, `WININ=WINOUT=0x3f3f`) and **blend**
+  (`BLDCNT=BLDALPHA=BLDY=0`) - all zero/inactive, byte-identical, in both
+  cases. Rules out a window mask or a hardware alpha-blend as the
+  differentiator.
+- **Palette RAM** (`0x05000000`, 512 bytes, BG palette): a fresh dump across
+  the entire turn-5 flagged window (6248-6270) shows **zero byte changes**
+  tick-to-tick throughout. Rules out a software palette fade
+  (`BeginNormalPaletteFade`-style, which writes PLTT directly and would not
+  show up in `BLDCNT`/`BLDALPHA`) as the mechanism.
+- **BG0CNT/BG1CNT/BG3CNT**: identical priority/char-base/screen-base between
+  turn 5 and turn 6 (`BG0`: priority 0, screenBase 24; `BG1`: priority 2,
+  screenBase 28; `BG3`: priority 3, screenBase 26, charBase 2).
+- **BG2CNT is the one register that differs**: turn 5's own window shows
+  `BG2` **priority 0** (tied with `BG0`, both in front of `BG3`) throughout
+  6180-6260 (no transition observed inside that range - already 0 at the
+  earliest sampled tick); turn 6's own window shows `BG2` **priority 2**
+  (tied with `BG1`, still in front of `BG3` either way) at the analogous
+  tick. Same `screenBase=30`/`charBase=0` in both cases - only the priority
+  field differs. This changes `BG2`'s own z-order relative to `BG1` (in
+  front of `BG1` for turn 5, behind `BG1` for turn 6) but does **not**, by
+  itself, change whether `BG2` occludes `BG3` (priority 0 or 2 both beat
+  `BG3`'s 3) - flagged as the one concrete, RAM-confirmed hardware
+  difference found this session, not yet proven to be causal.
+
+### 13.3 The real, decisive new evidence: turn 5's own real background is
+**provably 100% static** at some rows for the ENTIRE shake window, not just
+"mostly unchanged"
+
+Direct pixel sampling of the real oracle's own row 0 and row 10 (both purely
+background rows - above `GROVYLE_CORNER.y=12`, and `drawTurn5IconBar` is a
+no-op the entire window, active range `[6587,6742)` per its own constants,
+nowhere near 6248-6365) across **every tick 6256-6265** (the full
+active-shake sub-window, `d=0..9`):
+
+```
+row 0:  (255,255,255) at EVERY tick 6256-6265, no exceptions
+row 10: (231,239,239) at EVERY tick 6256-6265, no exceptions
+```
+
+Despite `gBattle_BG3_Y`/`REG_BG3VOFS` genuinely cycling `0,-7,-7,0,0,-7,-7,...`
+underneath (§13.2), the real displayed pixels at these rows **never change**,
+across the *entire* window - not "mostly" static (the prior session's own
+81.5%-at-delta-0 framing), but **exactly** static at these specific rows,
+every single sampled tick. Cross-check against turn 6's own analogous rows at
+its own shiftY=-7 tick (7802) shows those rows **do** visibly change from
+their own shiftY=0 baseline (7801): row 0 goes `(255,255,255)` ->
+`(222,231,231)`, matching **exactly** what the app itself already computes
+for `shiftY=-7` at that pixel (confirmed identical to the app's own
+mis-attributed prediction for turn 5's row 0, `app-06259.png`) - i.e. the
+app's `staticBgPixel`/`drawStaticBgShiftedY` computation is not just
+"probably right," it is bit-for-bit the value real hardware shows **when
+the shift is actually visible** (turn 6). Turn 5's own real screen simply
+never shows it, at these rows, for this whole window.
+
+Because `staticBgPixel` takes no per-turn parameter (§13.1), and the
+hardware register genuinely differs (§13.2's `BG3VOFS` read), the only
+remaining explanation is **compositing**: something opaque, in front of
+`BG3`, is covering these rows in turn 5's own real screen and is either
+absent or transparent there in turn 6's. `BG2`'s differing priority
+(§13.2) is the one confirmed register-level candidate, but this session did
+not trace it to specific VRAM tile content before the time budget ran out.
+
+### 13.4 What this means for the fix, and what's still unproven
+
+**The originally-suspected mechanism is wrong.** This is not a
+`rockSlideBg3Y` timing bug, not a `staticBgPixel` extraction/wraparound gap,
+not a missing row-shift correction, not a window/blend/palette effect. The
+shared ROCK_SLIDE background-shake code is correct and turn 5 must not have
+its own scoped variant of it (unlike Class A's `hitFlashAnchorAge`, this is
+not a per-turn constant-tuning problem).
+
+**Most turn 5-relevant precedent already exists in this exact file**: turns
+3/4/9/10/11 (`battleScene.ts:9873,10135,13081,13439,13694`) do **not** call
+`rockSlideBg3Y` at all for their own `drawStaticBgShiftedY` calls - they pass
+a hardcoded `0`, each with its own doc comment recording an independent
+RAM-confirmed finding that the real background is flat for their own window.
+Given §13.3's own finding (turn 5's real background is **exactly** static at
+the sampled rows for the *entire* shake window, not just "close to" static),
+**turn 5 may belong in that same bucket, not the turn-1/6/7 bucket** - i.e.
+the fix may be as simple as `drawTurn5RockSlideAttack`'s own
+`drawStaticBgShiftedY(fb, shiftY, ...)` call (`battleScene.ts:10891`)
+becoming `drawStaticBgShiftedY(fb, 0, ...)` (dropping the `rockSlideBg3Y`
+call entirely for this one turn), mirroring turns 3/4/9/10/11's own already-
+landed pattern.
+
+**This is NOT proven and must not be landed on this session's evidence
+alone**: §11.2's own row-15-44 sampling (the prior session, a band this
+session did not re-derive) showed a genuine, nonzero (if smaller-than-
+currently-modeled) difference between the real oracle's shiftY=0 and
+shiftY=-7 ticks there (~4.6-6.6% of the full frame, not 0%) - a flat
+`shiftY=0` fix would leave that band's own real, small residual unaddressed,
+and would need its own separate instrument (most likely: `BG2`'s or `BG0`'s
+own tile content in that row band specifically, to see whether ANY of the
+real change there is `BG3`-sourced at all, or whether it too has a
+non-`BG3` explanation).
+
+**Next instrument** (not run this session, named per the family's own
+"honest partial" discipline): VRAM tile/tilemap dump for `BG2` (screenBase
+30, charBase 0) and `BG0` (screenBase 24, charBase 0) at one of the flagged
+turn-5 ticks (e.g. 6259) vs. the analogous turn-6 tick (7802), to identify
+what content those layers actually carry at these rows and whether it
+changes between the two turns (this session confirmed the *registers*
+`BG0CNT`/`BG3CNT` don't differ, but never read the underlying tile
+indices/screen-entry data itself for `BG0`/`BG2`). If `BG2`'s own tile data
+turns out to be identical between turn 5 and turn 6 too, the flat-static
+finding in §13.3 would need re-explaining from OAM/sprite occlusion instead
+(re-run `dump-turn5-resolve-offa-sprite-census.py` at these exact ticks,
+checking every sprite's own screen bbox against rows 0-14, not just the
+mons already accounted for).
+
+### 13.5 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 58/196, unchanged (ANALYSIS ONLY - no src/ edit this session)
+npm run compare -- turn6-rockslide-a --summary     # 255/255 - regression guard for §13.1's own claim (turn 6's ROCK_SLIDE bg-shift window)
+npm run compare -- turn6-rockslide-b --summary     # 105/105
+npm run compare -- turn7-rockslide-a --summary     # 256/256
+npm run compare -- turn7-rockslide-b --summary     # 256/256
+npm run compare -- turn7-rockslide-c --summary     # 256/256
+npm run compare -- turn7-rockslide-d --summary     # 19/19
+npm run compare -- battle2-turn1-rockslide --summary # 190/191 (pre-existing, unrelated tick-6970 residual)
+```
+
+**Not fixed.** `git diff -- src/` remains empty. This is a named,
+evidence-backed partial: §11.2's own standing hypothesis is falsified with
+strong, reproducible evidence (§13.1-§13.2), a sharper, RAM-confirmed
+candidate mechanism is identified (§13.3's occlusion finding plus §13.2's
+`BG2CNT` priority difference), and a concrete, minimal candidate fix shape is
+named (§13.4) but explicitly flagged as unverified and NOT to be landed
+without the VRAM-tile next instrument closing the row-15-44 gap first.
