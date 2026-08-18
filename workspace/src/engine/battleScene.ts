@@ -24275,7 +24275,7 @@ export function renderSceneOnMovePresentation(
       ),
     );
     const targetIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
@@ -24735,7 +24735,7 @@ export function renderSceneOnMovePresentation(
       ? { ...targetSource, tileset: subTileset(targetSource.tileset, 0, 8) }
       : targetSource;
     const targetIdleX2 = playerToOpponent && view.age < 128
-      ? speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species).x2
       : 0;
     const targetPalette = blendPaletteToward(
       target.palette, { r: 0, g: 0, b: 0 }, view.targetBlackCoeff,
@@ -24829,7 +24829,7 @@ export function renderSceneOnMovePresentation(
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
 
@@ -24936,7 +24936,7 @@ export function renderSceneOnMovePresentation(
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // Task_FadeToBg's BLDCNT selects the field BG/backdrop, not OBJ. The
     // two battlers therefore retain their palette while the field darkens.
@@ -25028,7 +25028,7 @@ export function renderSceneOnMovePresentation(
       onix.palette, black, paletteDisplayed.battlerBlackCoeff,
     );
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     // Elevated enemy shadows observe the active-script flag one display
@@ -25116,7 +25116,7 @@ export function renderSceneOnMovePresentation(
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const targetPalette = view.displayedTargetScale?.grayscale
       ? grayscalePalette(onix.palette)
@@ -25244,7 +25244,7 @@ export function renderSceneOnMovePresentation(
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const opponent = playerToOpponent ? onix : houndour;
@@ -25352,7 +25352,7 @@ export function renderSceneOnMovePresentation(
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const opponent = playerToOpponent ? onix : attacker;
@@ -25468,7 +25468,7 @@ export function renderSceneOnMovePresentation(
         }
       : onixSource;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
@@ -26063,7 +26063,7 @@ export function renderSceneOnMovePresentation(
     // finding as the other ONIX-target moves); the player-back target does
     // not.
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
@@ -26162,7 +26162,7 @@ export function renderSceneOnMovePresentation(
     // same DRAGON_RAGE/SHADOW_PUNCH "ONIX starts at x2=+1" finding) instead of
     // settling to (0,0).
     const targetIdle = view.target.geometry.side === "opponent"
-      ? speciesFrontIdleRestOffset(view.target.species)
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : null;
     drawSpriteSheet(
       fb,
@@ -26260,7 +26260,7 @@ export function renderSceneOnMovePresentation(
     const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
@@ -26383,7 +26383,7 @@ export function renderSceneOnMovePresentation(
     const onixSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const poisonTint = { r: 198, g: 49, b: 189 };
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const targetX2 = state.age <= 111
       ? targetIdle.x2
@@ -26530,7 +26530,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // The target rests at its front-idle x2 (1px for ONIX) until the ShakeMon
     // displacement displays (player-back frame 334 / age 118); afterwards the
