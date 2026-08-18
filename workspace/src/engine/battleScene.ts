@@ -8189,7 +8189,19 @@ function drawActionMenuIdleContentFromLatest(
   const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick, bounceIndexOffset);
   drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
   drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
-  if (turn2FightCommandPresentationFromLatest(latest) !== null || turn3FightCommandPresentationFromLatest(latest) !== null) {
+  // ISSUES #97 / docs/turn5-family-class3-diagnosis.md §10a+§19: the turn4
+  // narrowing closes turn 5's own ENDEAVOR-hold gap (`drawTurn5EndeavorText`'s
+  // no-squish fallback, `latest` = turn 4's completed receipt, matched
+  // neither prior shape so the overlay never painted). Every other caller
+  // either already satisfies the turn2/turn3 arms or already redraws this
+  // same value manually right after this call (`drawActionMenuIdleWindow`'s
+  // eviction-class overlay, `drawTurn{3,4}RockSlideTurnEndSettledMenu`) - the
+  // turn4 arm is a no-op there, not a behavior change (per §19's audit).
+  if (
+    turn2FightCommandPresentationFromLatest(latest) !== null
+    || turn3FightCommandPresentationFromLatest(latest) !== null
+    || turn4FightCommandPresentationFromLatest(latest) !== null
+  ) {
     drawPlayerHealthboxHpOverlay(fb, resolvedPlayerHp, healthboxY2);
   }
 }

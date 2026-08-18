@@ -22,6 +22,7 @@ import {
   resolveTurn4CompletedResolutionNextCommandHandoff,
   resolveTurn4FightCommandPresentation,
   resolveTurn4LatestCompletedCommandHandoff,
+  turn4FightCommandPresentationFromLatest,
 } from "../src/engine/turn4ResolutionAdapter.ts";
 import type { LatestCompletedCommandHandoff } from "../src/engine/nextCommandHandoff.ts";
 import {
@@ -417,7 +418,7 @@ describe("slice-2 prerequisite: resolveTurn1..4FightCommandPresentation pinned a
  * .ts` today -- these cases are green against the legacy body alone, no
  * production edit required to pass.
  */
-describe("slice 3: drawActionMenuIdleContent's HP-overlay guard fires for turn-2/3, not turn-1/4", () => {
+describe("slice 3: drawActionMenuIdleContent's HP-overlay guard fires for turn-2/3/4 (current shim), not turn-1", () => {
   const turn2Handoff = resolveTurn2CompletedResolutionNextCommandHandoff(TURN2_PRESENTATION_EPOCH_ELAPSED);
   const turn3Handoff = resolveTurn3CompletedResolutionNextCommandHandoff(TURN3_PRESENTATION_EPOCH_ELAPSED);
   const turn4Handoff = resolveTurn4CompletedResolutionNextCommandHandoff(TURN4_PRESENTATION_EPOCH_ELAPSED);
@@ -438,14 +439,21 @@ describe("slice 3: drawActionMenuIdleContent's HP-overlay guard fires for turn-2
       || isTurn2NextCommandHandoffReady(turn2NextCommandHandoff);
   }
 
-  // The exact expression the new shim (`drawActionMenuIdleContentFromLatest`)
-  // runs: `latest` carries turn-2 or turn-3 content, read via the same
-  // already-exported `turnNFightCommandPresentationFromLatest` narrowing
-  // functions `drawFightSubmenuWindow`'s own generic locals already use
-  // (battleScene.ts, e.g. its `genericTurn2Content`/`genericTurn3Content`).
+  // The exact expression the shim (`drawActionMenuIdleContentFromLatest`)
+  // runs today: `latest` carries turn-2, turn-3, or (ISSUES #97 item 5,
+  // docs/turn5-family-class3-diagnosis.md §10a+§19) turn-4 content, read via
+  // the same already-exported `turnNFightCommandPresentationFromLatest`
+  // narrowing functions `drawFightSubmenuWindow`'s own generic locals already
+  // use (battleScene.ts, e.g. its `genericTurn2Content`/`genericTurn3Content`/
+  // `genericTurn4Content`). The turn-4 arm closes turn 5's own ENDEAVOR-hold
+  // gap (`drawTurn5EndeavorText`'s no-squish fallback: by turn 5's window
+  // `latest` is turn 4's own completed receipt, which matched neither prior
+  // arm, so the live `playerHpOverride` it passes never reached the
+  // framebuffer and stale pixels from a prior draw stayed on screen).
   function genericHpOverlayGuardFires(latest: LatestCompletedCommandHandoff | null): boolean {
     return turn2FightCommandPresentationFromLatest(latest) !== null
-      || turn3FightCommandPresentationFromLatest(latest) !== null;
+      || turn3FightCommandPresentationFromLatest(latest) !== null
+      || turn4FightCommandPresentationFromLatest(latest) !== null;
   }
 
   it("turn 1: does NOT fire -- drawTurnKickoffText's own (fb, tick, null) call shape carries no turn2/3 slot", () => {
@@ -465,12 +473,31 @@ describe("slice 3: drawActionMenuIdleContent's HP-overlay guard fires for turn-2
     expect(genericHpOverlayGuardFires(latest3)).toBe(true);
   });
 
-  it("turn 4: does NOT fire -- drawTurn4RockSlideTurnEndSettledMenu's real turn4 handoff lands in the guard's dead 7th slot", () => {
+  it("turn 4 (legacy positional ABI): does NOT fire -- the retired body's own turn4NextCommandHandoff was real but not one of its two read slots", () => {
     // turn4NextCommandHandoff is real (non-null) but is not one of the
-    // guard's own two read slots (turn2/turn3) -- the guard's own two
-    // arguments are both null for this call site's shape.
+    // legacy guard's own two read slots (turn2/turn3) -- its own two
+    // arguments are both null for this call site's shape. This pins the
+    // RETIRED `drawActionMenuIdleContent` body's own historical behavior,
+    // not the current production shim below.
     expect(turn4Handoff.hp.player).toBe(88);
     expect(legacyHpOverlayGuardFires(null, null)).toBe(false);
-    expect(genericHpOverlayGuardFires(latest4)).toBe(false);
+  });
+
+  // ISSUES #97 item 5 (docs/turn5-family-class3-diagnosis.md §10a+§19): the
+  // generic shim's own turn-4 arm now fires for a turn-4-shaped `latest` --
+  // this is exactly the shape `drawTurn5EndeavorText` passes throughout
+  // turn 5's own ENDEAVOR-hold window (turn 5 hasn't completed its own
+  // command yet, so `latest` is still turn 4's completed receipt). Before
+  // the fix this returned `false` (see the legacy-ABI pin above, which the
+  // shim's turn-2/3-only gate matched byte-for-byte); painting turn 4's own
+  // settled-menu callers (`drawTurn4RockSlideTurnEndSettledMenu`,
+  // `drawActionMenuIdleWindow`'s reopen paths) is a no-op here since they
+  // already redraw this exact value manually right after this call (§19's
+  // per-caller audit) -- this arm only newly paints where nothing painted
+  // before.
+  it("turn 4 (generic latest ABI, current production shim): DOES fire -- closes turn 5's own ENDEAVOR-hold HP-overlay gap", () => {
+    expect(turn4Handoff.hp.player).toBe(88);
+    expect(turn4FightCommandPresentationFromLatest(latest4)).not.toBeNull();
+    expect(genericHpOverlayGuardFires(latest4)).toBe(true);
   });
 });
