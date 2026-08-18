@@ -250,7 +250,7 @@ family)**:
 | `confirm-off-b` | 0/132 | 0/132 | unchanged count, but mismatch magnitude shrank (986px/2.57% -> 689px/1.79%) — item 1 shrank the affected span from 132 to ~38 ticks; the remaining frozen-HP residual needs item 5 |
 | `resolve-off-a` | 7/196 | **25/196** | improved — items 1+2 together |
 | `resolve-off-b` | 71/196 | **88/196** | improved — items 1+2 together, existing convergence tail undisturbed |
-| `resolve-off-c` | 149/196 | 149/196 | unchanged (allowed) — trailing 47-frame secondary mechanism (§3e/§7, send-out status-box + background-dither lag) is out of scope, untouched by items 1-3 |
+| `resolve-off-c` | 149/196 | 149/196 | unchanged (allowed) — trailing 47-frame secondary mechanism (§3e/§7, send-out status-box + background-dither lag) is out of scope, untouched by items 1-3; both sub-mechanisms later fixed, see sub-entry F |
 | `resolve-off-d` | 0/196 | 0/196 | unchanged count, but mismatch magnitude collapsed (6942px/18.08% -> 258px/0.67%) — item 3 closed nearly the entire window; a small, new, unattributed residual remains (bbox 44,71-195,104, likely the ONIX sprite/HP-overlay during the settled Sitrus chrome — not traced this session, banked) |
 | `turn5-action-off` | 26/32 | 26/32 | unchanged — landed window provably unmoved |
 | `turn6-reopen-off` | 20/46 | 20/46 | unchanged — landed window provably unmoved |
@@ -264,8 +264,10 @@ family)**:
   session touched); the §8d/§9e sine-index offset (below) is now CLOSED and
   ruled out as a cause (`resolve-off-d`'s own count was unchanged, 0/196
   before and after that fix) — needs its own instrument.
-- `resolve-off-c`'s trailing 47-frame secondary mechanism (§3e/§7,
-  unchanged from before) — still untraced.
+- `resolve-off-c`'s trailing 47-frame secondary mechanism — traced and
+  both named sub-mechanisms fixed, see the dated sub-entry F below (a
+  third, previously-flagged-but-unconfirmed mechanism now blocks the
+  remaining frames).
 
 **Item 5 landed (2026-08-18, later bounded MAIN worker session)** — see
 `docs/turn5-family-class3-diagnosis.md` §19 for the full per-caller audit
@@ -333,6 +335,73 @@ table: `docs/turn6-reopen-endstate-spec.md`'s 2026-08-18 addendum.
 untouched frozen tail `[7348,7350]` has no dynamic RAM ground truth to
 calibrate against and already matched before this fix (confirmed still
 correct, left alone by design, not a residual).
+
+### F. `resolve-off-c`'s trailing 47-frame secondary mechanism — both named mechanisms FIXED (2026-08-18, bounded MAIN worker, per `docs/turn5-resolve-offc-tail-diagnosis.md`); count held at 149/196 by a THIRD, newly-confirmed, out-of-scope mechanism
+
+Landed both fix shapes the diagnosis doc specified: (i)
+`turn5PidgeottoHealthboxSlideDx` re-anchored from the sprite's own
+unrelated materialize-settle tick (6829) to the healthbox's own RAM-pinned
+onset (6763, `TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK`); (ii) the
+switch-in BG-white-flash peak hold extended by one render tick (a new,
+separate `TURN5_PIDGEOTTO_BG_FADE_Y` table, not an edit to the shared
+`TURN5_BG_FADE_Y` — see below). Both verified bit/pixel-exact against the
+doc's own §3a/§4c tables and the doc's own §7 rerunnable PASS/FAIL block
+(RAM probe re-run byte-identical, app-series probe now matches both tables
+exactly).
+
+**`resolve-off-c` itself held at 149/196 (same 47 frames, 6763-6809)** —
+NOT the doc's own §6 prediction of 196/196. Per-frame attribution: every
+one of the 47 frames' diff magnitude collapsed from up to 17452px/45.45%
+to a flat ~1100-1600px/~3% — both fixed mechanisms are confirmed gone from
+the diff — but a THIRD mechanism the diagnosis's own §3c flagged as a
+"possible adjacent residual" and marked explicitly out of scope
+(`drawTurn5PidgeottoMaterialize`'s settled-transition path, gated on
+`TURN5_PIDGEOTTO_SETTLE_TICK`=6828) turned out to be real and dominant:
+direct pixel sampling (`tools/compare/out` diff PNGs, this session) shows
+a genuine shape/pose mismatch in PIDGEOTTO's own sprite region at every
+sampled frame across the full window, not a color/tint difference — the
+app still renders the affine-emerge/stretch "materializing" sprite variant
+throughout 6763-6809 (materialize doesn't hand off to the plain settled
+draw until 6828), while the doc's own §3c notes the real hardware's sprite
+reaches its idle callback by RAM tick 6760 — i.e. already settled for this
+entire window. This is the exact item the brief marked OUT OF SCOPE
+(`TURN5_PIDGEOTTO_SETTLE_TICK`/`drawTurn5PidgeottoMaterialize`'s
+settled-transition path) — recorded here, not fixed.
+
+A real regression was caught and avoided along the way: extending the
+shared `TURN5_BG_FADE_Y` table (the doc's literal suggested edit)
+regressed `turn13-switchin` 242/242 -> 234/242, because
+`turn13MurkrowBgFadeY` (turn 13's own Murkrow switch-in) and
+`turn15ReleaseFieldPalette` (a forced-switch MAGBY release) both reuse
+that exact table verbatim at their own anchors, and oracle data confirms
+Murkrow's own window genuinely needs the original 8-entry peak hold while
+Pidgeotto's turn-5 window needs 9. Fixed by giving turn 5's own consumer
+(`turn5BgFadeY`) a separate, dedicated table instead — `turn13-switchin`
+restored to 242/242, zero risk to `turn15ReleaseFieldPalette` (untouched
+by construction).
+
+**Numbers:** `turn5-resolve-off-c` 149/196 -> **149/196** (unchanged count,
+diff magnitude collapsed as described); zero decreases across the full
+guard family (`turn5-reset-off` 256/256, `turn5-action-off` 32/32,
+`turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+`turn5-confirm-off-{a,b}` 60/132 and 0/132, `turn5-resolve-off-{a,b}`
+25/196 and 88/196, `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256
+each, `turn13-switchin` 242/242 after the table-sharing fix) — one
+expected, explained increase: `turn5-resolve-off-d` 0/196 -> **24/196**
+(the healthbox fix's own settle behavior also reaches this trace's early
+frames, 6810-6828; its own out-of-scope 258px/0.67% residual, past tick
+7004, is byte-identical before and after). Two Tier-1 pins added
+(`tests/battleScene.test.ts`). Full details, receipts, and the dated
+addendum: `docs/turn5-resolve-offc-tail-diagnosis.md`.
+
+**Remaining, still open:** the third mechanism above
+(`drawTurn5PidgeottoMaterialize`'s settled-transition path never handing
+off before `TURN5_PIDGEOTTO_SETTLE_TICK`=6828, while the real sprite
+settles by RAM tick 6760) — needs its own instrument and is explicitly
+out of scope for this fix (touches the sprite's own animation, not the
+healthbox/bg-fade mechanisms this entry closes). `resolve-off-d`'s 258px
+residual and `confirm-off-b`'s 689px residual remain open, untouched, per
+their own standing entries above.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 

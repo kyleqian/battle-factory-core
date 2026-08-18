@@ -1,4 +1,69 @@
 ---
+## 1331 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement COMPLETE: Rungs 7-8 land the final 25 sites, closes 119/119 in-scope `battleScene.ts` call sites, zero FINDINGs across all 9 rungs**
+
+- **State:** two green commits (`a57d281b` Rung 7, `f70b6e67` Rung 8) plus
+  this docs commit. `npm test` **1,067 files / 10,043 passed / 223
+  skipped** (unchanged — neither rung needed a new pin, unlike Rung 5's
+  HARDEN) after each commit; `npm run build`/`npm run typecheck` green
+  throughout.
+- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs 7-8
+  exactly, re-grepping every site's current line number first (both
+  rungs' lines had drifted from the doc's own stale cites, as its own
+  warning predicted) and confirming every per-move Tier-1 test filename
+  with `find` before scoping. **Rung 7** (15 sites, WISH…TAKE_DOWN,
+  `:37684-43476` this session): WISH (2 sites), RECOVER, FUTURE_SIGHT,
+  CONFUSION, PSYCHIC, METAL_CLAW already carried a dynamic
+  `view.target.species`/`view.attacker.species` argument — fallback-idiom
+  swap only. METEOR_MASH, MILK_DRINK, REFRESH, FLAME_WHEEL, DRAGON_CLAW,
+  FIRE_SPIN, CRUSH_CLAW, TAKE_DOWN had a hardcoded ONIX literal, each
+  converted to `view.target.species` after independently confirming that
+  move's own `playerToOpponent`/`opponentToPlayer` throw-guard proves it.
+  METEOR_MASH's doc-flagged caveat confirmed exactly as written: covered
+  by `meteorMashSource/Evidence/Reducer.test.ts`, not a plain
+  `meteorMash.test.ts`. **Rung 8** (10 sites, CRUNCH…DOUBLE_EDGE,
+  `:43605-44867`): all 10 moves (CRUNCH, LICK, SLASH, COUNTER,
+  COMET_PUNCH, DOUBLE_SLAP, TRIPLE_KICK, DOUBLE_KICK, THRASH,
+  DOUBLE_EDGE) shared byte-identical
+  `speciesFrontIdleRestOffset("ONIX") ?? {x2:0,y2:0}` call-site text; each
+  move's own guard was still confirmed individually (not assumed from the
+  shared shape) before substituting `view.target.species`. Every site's
+  fallback idiom collapsed to Rung 0's `speciesFrontIdleRestOffsetOrZero`
+  in the same edit; throw-guard/pair-lock blocks untouched everywhere, as
+  in every prior rung. **Zero FINDINGs across both rungs** — no
+  substituted expression ever disagreed with what its guard proved.
+- **Result — §1e CLOSED:** the doc's own final census grep, re-run after
+  Rung 8: `grep -c speciesFrontIdleRestOffset( battleScene.ts` → **4**
+  (exactly the doc's §1.2 permanently-out-of-scope settle-hook literals:
+  GROVYLE `:5372`, KABUTO `:6486`, PIDGEOTTO `:11187`, MURKROW `:11324` —
+  unchanged, never in scope); `grep -c speciesFrontIdleRestOffsetOrZero(`
+  → **119**, matching the doc's §1.2 "Inside renderSceneOnMovePresentation
+  | 119 | The §1e debt" row exactly — **119/119 in-scope sites retired**,
+  raw+OrZero summing to the same constant 123 held since Rung 0.
+  `sceneOnPresentation.ts`'s 2 already-generic sites (`:4960`, `:9416`,
+  DRAGON_RAGE/SHADOW_PUNCH) are untouched and correctly so — per §3 they
+  were never part of any rung, already using the ideal shape this whole
+  ladder exists to spread. Every named per-move Tier-1 test file green
+  each rung (24 files/116 tests Rung 7, 24 files/94 tests Rung 8, several
+  files shared with earlier rungs' confirmation passes but independently
+  re-run here); `npm run compare:differential -- battle-command-
+  generated-off.json --base <rung's parent sha> --summary` 128/128
+  byte-identical both rungs (insurance smoke check — none of these
+  windows are reachable from that trace).
+- **Next:** §1e retirement is done; no more rungs of this shape remain.
+  ISSUES #71 itself stays open — its one remaining item is **Rung 9**
+  (hand-fit consumer swap-over: `magbySendOut.ts`, the `battleMenu.ts`
+  ONIX-back hand-fits, `kabutoSendOut.ts`'s `kabutoHSlideWobble`), which
+  is **blocked on the animation lane's rung-4 back-family dispatcher** (68
+  functions, not started) per the doc's §5 Rung 9 section — not this
+  lane's to start, do not attempt until that dispatcher exists and
+  exports a callable per-species+nature back-offset function. Do not edit
+  `ISSUES.md`; #71 stays open for that reason alone.
+- **Notes:** no PAPERCUT. Landed well inside the 40-min cap — both rungs'
+  site-context (guard shapes, test filenames) were either already
+  established by the prior session's identical recipe or quick to
+  re-confirm, so no time was lost re-deriving the pattern.
+
+---
 ## 1330 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 5-6 landed (30 more sites, 94/119 in-scope), corrects prior ledger's site-count arithmetic: HARDEN's zero-coverage gap pinned first, zero FINDINGs, zero regressions**
 
 - **State:** three green commits (`606ca03d` HARDEN pin test, `efa62046`

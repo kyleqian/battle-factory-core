@@ -4,6 +4,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1334 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s two named tail mechanisms FIXED per `docs/turn5-resolve-offc-tail-diagnosis.md` — count holds at 149/196, blocked by a third, newly-confirmed, out-of-scope mechanism**
+
+- **State:** three green commits (`6b9f1a12` fix+Tier-1 pins,
+  `18d8d23c` probe re-point) plus this docs commit. `npm test` **1,067
+  files / 10,049 passed (+5, two new pin blocks) / 223 skipped**; `npm
+  run build`/`npm run typecheck` green throughout.
+- **Did:** landed both fixes the fresh diagnosis doc specified: (i)
+  `turn5PidgeottoHealthboxSlideDx` re-anchored from the sprite's own
+  unrelated materialize-settle tick (6829) to the healthbox's own
+  RAM-pinned onset (`TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK = 6763`,
+  `initialHold = true`); (ii) the switch-in BG-white-flash peak hold
+  extended by one render tick. (ii) landed as a **new, separate**
+  `TURN5_PIDGEOTTO_BG_FADE_Y` table rather than the doc's literal
+  suggested edit-in-place — extending the shared `TURN5_BG_FADE_Y`
+  regressed `turn13-switchin` 242/242→234/242 (caught live, not assumed):
+  `turn13MurkrowBgFadeY` and `turn15ReleaseFieldPalette` both reuse that
+  table verbatim at their own anchors, and oracle data confirms Murkrow's
+  own window genuinely needs the original 8-entry hold while Pidgeotto's
+  needs 9. Exported `turn5BgFadeY` (was module-private) and re-pointed
+  `tools/probe/analyze-turn5-resolve-offc-tail-app-series.ts` at the live
+  function instead of its own frozen pre-fix copy. Ran the doc's §7
+  PASS/FAIL block in full, including the RAM-probe sanity rerun (byte-
+  identical to the doc's own §3a/§4b tables — no drift) and both
+  app-series probe re-runs (both now match their target tables exactly).
+- **Result:** `turn5-resolve-off-c` **149/196 → 149/196, unchanged** —
+  NOT the doc's own §6 prediction of 196/196. Per-frame attribution: all
+  47 mismatched frames' diff magnitude collapsed from up to 17452px/
+  45.45% to a flat ~1100-1600px/~3%, confirming both landed fixes are
+  clean, but a **third mechanism** — `drawTurn5PidgeottoMaterialize`'s
+  settled-transition path never handing off before
+  `TURN5_PIDGEOTTO_SETTLE_TICK` (6828), while the doc's own §3c aside
+  already noted the real sprite settles by RAM tick 6760 — dominates
+  every frame in the window. Confirmed structural (shape, not tint) by
+  direct RGB sampling of the diff PNGs. This is exactly the item the
+  brief marked **out of scope** (`TURN5_PIDGEOTTO_SETTLE_TICK`/
+  `drawTurn5PidgeottoMaterialize`) — recorded in `ISSUES.md` #97 sub-entry
+  F and the diagnosis doc's own §10 addendum, not fixed. Zero decreases
+  anywhere in the full guard family (`turn5-reset-off` 256/256,
+  `turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+  fixture 47/47, `turn5-confirm-off-{a,b}` 60/132 and 0/132
+  (689px/1.79% unchanged), `turn5-resolve-off-{a,b}` 25/196 and 88/196,
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each,
+  `turn13-switchin` 242/242 after the table-sharing fix); one expected,
+  fully-explained increase: `turn5-resolve-off-d` 0/196 → **24/196** (the
+  healthbox fix also reaches this trace's own early frames 6810-6828; its
+  own out-of-scope 258px/0.67% residual past tick 7004 is byte-identical
+  before and after).
+- **Next:** the third mechanism above needs its own instrument (out of
+  this step's scope by the brief). `resolve-off-d`'s 258px residual and
+  `confirm-off-b`'s 689px residual remain open, untouched (a side-lane
+  instrument was diagnosing them in parallel this session, per the
+  brief). Class-(iii) text/banner mechanism and #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The turn13/turn15 shared-table regression was
+  only caught because the brief's "zero decreases anywhere" standard
+  prompted a guard-trace sweep beyond the explicitly named list —
+  `turn13-switchin` wasn't in the brief's own guard list but shares the
+  exact constant the fix touches; worth checking downstream reuse of any
+  shared table/constant before treating a doc's literal edit-in-place
+  suggestion as safe.
+
+---
 ## 1333 — [main worker, 2026-08-18] **ISSUES #97 CLOSED: turn6 [7318,7347] bounce correction lands under a supervisor overturn of `turn6-reopen-endstate-spec.md`'s §2/§3 rejection — `turn6-reopen-off` 22/46→46/46, `turn6-menu-off` 23/47→47/47, both FULL**
 
 - **State:** one green commit (`cb7cbee3` fix+Tier-1 pin) plus this docs
@@ -112,68 +173,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   took the bulk of the session but paid off — it predicted every trace's
   outcome (including the two "stays at 0 but why" residuals) before a
   single oracle rerun, and every prediction held exactly.
-
----
-## 1331 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement COMPLETE: Rungs 7-8 land the final 25 sites, closes 119/119 in-scope `battleScene.ts` call sites, zero FINDINGs across all 9 rungs**
-
-- **State:** two green commits (`a57d281b` Rung 7, `f70b6e67` Rung 8) plus
-  this docs commit. `npm test` **1,067 files / 10,043 passed / 223
-  skipped** (unchanged — neither rung needed a new pin, unlike Rung 5's
-  HARDEN) after each commit; `npm run build`/`npm run typecheck` green
-  throughout.
-- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs 7-8
-  exactly, re-grepping every site's current line number first (both
-  rungs' lines had drifted from the doc's own stale cites, as its own
-  warning predicted) and confirming every per-move Tier-1 test filename
-  with `find` before scoping. **Rung 7** (15 sites, WISH…TAKE_DOWN,
-  `:37684-43476` this session): WISH (2 sites), RECOVER, FUTURE_SIGHT,
-  CONFUSION, PSYCHIC, METAL_CLAW already carried a dynamic
-  `view.target.species`/`view.attacker.species` argument — fallback-idiom
-  swap only. METEOR_MASH, MILK_DRINK, REFRESH, FLAME_WHEEL, DRAGON_CLAW,
-  FIRE_SPIN, CRUSH_CLAW, TAKE_DOWN had a hardcoded ONIX literal, each
-  converted to `view.target.species` after independently confirming that
-  move's own `playerToOpponent`/`opponentToPlayer` throw-guard proves it.
-  METEOR_MASH's doc-flagged caveat confirmed exactly as written: covered
-  by `meteorMashSource/Evidence/Reducer.test.ts`, not a plain
-  `meteorMash.test.ts`. **Rung 8** (10 sites, CRUNCH…DOUBLE_EDGE,
-  `:43605-44867`): all 10 moves (CRUNCH, LICK, SLASH, COUNTER,
-  COMET_PUNCH, DOUBLE_SLAP, TRIPLE_KICK, DOUBLE_KICK, THRASH,
-  DOUBLE_EDGE) shared byte-identical
-  `speciesFrontIdleRestOffset("ONIX") ?? {x2:0,y2:0}` call-site text; each
-  move's own guard was still confirmed individually (not assumed from the
-  shared shape) before substituting `view.target.species`. Every site's
-  fallback idiom collapsed to Rung 0's `speciesFrontIdleRestOffsetOrZero`
-  in the same edit; throw-guard/pair-lock blocks untouched everywhere, as
-  in every prior rung. **Zero FINDINGs across both rungs** — no
-  substituted expression ever disagreed with what its guard proved.
-- **Result — §1e CLOSED:** the doc's own final census grep, re-run after
-  Rung 8: `grep -c speciesFrontIdleRestOffset( battleScene.ts` → **4**
-  (exactly the doc's §1.2 permanently-out-of-scope settle-hook literals:
-  GROVYLE `:5372`, KABUTO `:6486`, PIDGEOTTO `:11187`, MURKROW `:11324` —
-  unchanged, never in scope); `grep -c speciesFrontIdleRestOffsetOrZero(`
-  → **119**, matching the doc's §1.2 "Inside renderSceneOnMovePresentation
-  | 119 | The §1e debt" row exactly — **119/119 in-scope sites retired**,
-  raw+OrZero summing to the same constant 123 held since Rung 0.
-  `sceneOnPresentation.ts`'s 2 already-generic sites (`:4960`, `:9416`,
-  DRAGON_RAGE/SHADOW_PUNCH) are untouched and correctly so — per §3 they
-  were never part of any rung, already using the ideal shape this whole
-  ladder exists to spread. Every named per-move Tier-1 test file green
-  each rung (24 files/116 tests Rung 7, 24 files/94 tests Rung 8, several
-  files shared with earlier rungs' confirmation passes but independently
-  re-run here); `npm run compare:differential -- battle-command-
-  generated-off.json --base <rung's parent sha> --summary` 128/128
-  byte-identical both rungs (insurance smoke check — none of these
-  windows are reachable from that trace).
-- **Next:** §1e retirement is done; no more rungs of this shape remain.
-  ISSUES #71 itself stays open — its one remaining item is **Rung 9**
-  (hand-fit consumer swap-over: `magbySendOut.ts`, the `battleMenu.ts`
-  ONIX-back hand-fits, `kabutoSendOut.ts`'s `kabutoHSlideWobble`), which
-  is **blocked on the animation lane's rung-4 back-family dispatcher** (68
-  functions, not started) per the doc's §5 Rung 9 section — not this
-  lane's to start, do not attempt until that dispatcher exists and
-  exports a callable per-species+nature back-offset function. Do not edit
-  `ISSUES.md`; #71 stays open for that reason alone.
-- **Notes:** no PAPERCUT. Landed well inside the 40-min cap — both rungs'
-  site-context (guard shapes, test filenames) were either already
-  established by the prior session's identical recipe or quick to
-  re-confirm, so no time was lost re-deriving the pattern.

@@ -384,3 +384,84 @@ Both mechanisms named in the brief are pinned:
 Both fixes are additive, narrow, and independently testable per §7's own
 PASS/FAIL block. No `src/` edit was made this session (`git diff -- src/`
 empty throughout).
+
+## 10. Landed (2026-08-18, bounded MAIN worker, ISSUES #97 remainder)
+
+Both fixes landed exactly as specified in §3c/§4d, with one shape change
+to §4d's fix (below) discovered while guarding against regressions.
+
+**§3c landed verbatim**: new constant
+`TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK = 6763`,
+`turn5PidgeottoHealthboxSlideDx` re-anchored with `initialHold = true`.
+Re-ran the app-series probe (§7 step 2): `healthboxSlideDx` is non-null
+starting exactly at tick 6763 and reaches 0 exactly at tick 6786, matching
+§3a's own table bit-for-bit.
+
+**§4d landed with a shape change**: the doc's literal suggestion (edit
+`TURN5_BG_FADE_Y` in place, 36 -> 37 entries) was tried first and
+regressed `turn13-switchin` 242/242 -> 234/242. That table is shared
+verbatim by two other consumers this doc's own method never checked:
+`turn13MurkrowBgFadeY` (turn 13's own Murkrow switch-in, own anchor) and
+`turn15ReleaseFieldPalette` (a forced-switch MAGBY release, via
+`cleanSwitchinBgFadeY`). Oracle data confirms Murkrow's own window
+genuinely needs the original 8-entry peak hold while Pidgeotto's turn-5
+window needs 9 — not the same curve after all, despite both being
+`BeginNormalPaletteFade`-driven. Landed instead as a new, separate
+`TURN5_PIDGEOTTO_BG_FADE_Y` table (37 entries, the same insert §4d
+specified) consumed only by `turn5BgFadeY`; `TURN5_BG_FADE_Y` itself is
+untouched, restoring `turn13-switchin` to 242/242. `turn5BgFadeY` was
+exported (previously module-private) so both the Tier-1 pin and the
+app-series probe (`tools/probe/analyze-turn5-resolve-offc-tail-app-series.ts`,
+re-pointed at the live export instead of its own frozen pre-fix copy) can
+exercise the real function. Re-ran the app-series probe (§7 step 3): the
+falling-edge mismatches at 6768/6772/6776/6780 are gone (peak hold now
+extends through 6768, first fall step lands at 6769).
+
+**§7 step 1** (RAM-probe sanity rerun): re-ran
+`dump-turn5-resolve-offc-tail-probe.py` over the same window. Byte-
+identical to this doc's own §3a/§4b tables at every spot-checked tick
+(healthbox onset/hold/settle at 6762/6763/6785; palette fade launch/peak/
+second-launch/settle at 6744/6758-6759/6766/6781) — no ROM/bootstrap
+drift.
+
+**§7 step 4/5** (`npm run compare -- turn5-resolve-off-c --summary` plus
+the regression guard): **149/196, unchanged from before either fix** —
+NOT this doc's own §6 prediction of 196/196. Every one of the same 47
+frames (6763-6809) still mismatches, but with per-pixel diff magnitude
+collapsed from up to 17452px/45.45% to a flat ~1100-1600px/~3% throughout
+— both §3c and §4d's own contributions are confirmed gone from the diff
+(direct pixel sampling shows the healthbox region and the isolated
+6768/6772/6776/6780 spike are both clean now). The remaining, dominant
+contributor is a **third mechanism this doc's own §3c flagged but did not
+verify**: `drawTurn5PidgeottoMaterialize`'s settled-transition path never
+hands off to `drawTurn5PidgeottoSettled` before `TURN5_PIDGEOTTO_SETTLE_
+TICK` (6828), while §3c's own aside already noted the real sprite's own
+idle callback fires by RAM tick 6760 — i.e. the real hardware has already
+settled for this entire 6763-6809 window, while the app is still drawing
+the affine-emerge (t<6786) or affine-stretch-table (t>=6786, clamped at
+its last entry) "materializing" variant throughout. Confirmed structurally
+(not a tint/color issue) by direct RGB sampling of the diff PNGs at
+PIDGEOTTO's own sprite region (e.g. frame 6809, screen coordinate
+(173,28): app reads sprite-silhouette brown where the oracle reads
+background white; (185,31)/(173,34): different silhouette colors
+entirely) — a shape mismatch, not a lingering blend coefficient. This is
+exactly the item the brief marked OUT OF SCOPE (`TURN5_PIDGEOTTO_SETTLE_
+TICK` and `drawTurn5PidgeottoMaterialize`'s settled-transition path) and
+is recorded here, not fixed.
+
+Full guard family, zero decreases: `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-confirm-off-a` 60/132, `turn5-confirm-off-b` 0/132
+(689px/1.79% residual unchanged), `turn5-resolve-off-a` 25/196,
+`turn5-resolve-off-b` 88/196, `turn4-doubleteam-off`/`turn4-rockslide-off`
+256/256 each, `turn13-switchin` 242/242 (after the table-sharing fix
+above). One expected, fully-explained increase: `turn5-resolve-off-d`
+0/196 -> **24/196** (the healthbox fix's own settle behavior also reaches
+this trace's own early frames, 6810-6828, which were previously
+mismatching for the exact same reason as `resolve-off-c`; its own
+out-of-scope 258px/0.67% residual past tick 7004 is byte-identical before
+and after).
+
+`npm test` 1067 files / 10049 passed / 223 skipped; `npm run build` green.
+Two Tier-1 pins added in `tests/battleScene.test.ts` for both re-anchored
+formulas. Full writeup and per-trace numbers: `ISSUES.md` #97 sub-entry F.
