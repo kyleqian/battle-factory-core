@@ -452,3 +452,312 @@ in the SAME session as any retry, not just `resolve-off-a`/`-b`.
 necessary but not sufficient — always rerun the FULL guard family (not
 just the traces a diagnosis doc's predictions section names) before
 trusting a "disjoint window" claim.
+
+## 11. Side-lane instrument session (2026-08-18): the real cursor-freeze
+timeline (Class C's own next instrument) + the Class B static-background
+residual's real mechanism
+
+ANALYSIS ONLY, side lane, Battle Scene OFF oracle — `git diff -- src/` is
+empty throughout. Two new committed probes:
+`tools/probe/dump-turn5-resolve-cursor-driver.py` (RAM-exact wait-cursor
+timeline) and `tools/probe/dump-turn5-resolve-offa-sprite-census.py` (full
+OAM census, rules rock-prop sprites in/out). Everything below is fresh RAM/
+pixel evidence gathered this session; no landed anchor is re-litigated.
+
+### 11.1 Mechanism (A): the real fainted-message cursor freezes at a genuine
+per-session `JOY_NEW(A_BUTTON|B_BUTTON)` accept edge — pinned across BOTH
+`resolve-off-b` and `resolve-off-c`
+
+**RAM ground truth.** `struct TextPrinterSubStruct` (`reference/pokeemerald/
+include/text.h:53-61`) packs `downArrowDelay:5` and `downArrowYPosIdx:2` into
+one byte, `sTextPrinters[0]` (`0x020201B0`) `+0x15` (LSB-first bitfield
+packing: `downArrowDelay` bits 0-4, `downArrowYPosIdx` bits 5-6). Driving
+`turn5-resolve-off-a.json`'s own 76-segment button script (sha256-identical
+across all four `resolve-off-{a,b,c,d}` traces, already established) through
+`dump-turn5-resolve-cursor-driver.py` over ticks 6420-6970 gives the real,
+unambiguous timeline:
+
+| ram tick | downArrowYPosIdx | downArrowDelay | active | newKeys A | note |
+|---|---|---|---|---|---|
+| 6425,6434,...,6551 | cycles 0,1,2,3 (period 9) | resets to 8 each transition | 1 | 0 | free-running 4-phase/9-tick bounce, matches `CURSOR_Y_OFFSETS` exactly |
+| 6560 | 3 | 8 | 1 | 0 | **last live transition** — this tick's own blit (pre-increment idx) is the last one that ever paints |
+| 6561 | 3 | 7 | **0** | **1** | `TextPrinterWaitWithDownArrow` (`text.c:849-863`) sees the real accepted A edge and returns TRUE; the printer is deactivated the SAME tick |
+| 6562–6685 | 3 | 7 | 0 | 0 | frozen bit-for-bit, no further writes to this struct at all, for the entire remainder of the "Foe GROVYLE\nfainted!" window |
+| 6686 | 0 | 0 | 1 | 0 | a wholly DIFFERENT printer instance (DESTIN's own sent-out text) — unrelated re-init, not a continuation |
+
+`TextPrinterDrawDownArrow` (`text.c:787-833`) blits using `downArrowYPosIdx`
+**before** incrementing it, so the value shown on screen at RAM-sample tick
+T is `CURSOR_Y_OFFSETS[(idx(T) - 1) mod 4]`, not `CURSOR_Y_OFFSETS[idx(T)]`
+directly. At the freeze (idx frozen at 3 forever), the real shown offset is
+therefore `CURSOR_Y_OFFSETS[(3-1)%4] = CURSOR_Y_OFFSETS[2] = 2` — **not** 1
+as a naive same-index read would suggest. This is independently
+cross-validated two ways: (1) it is self-consistent against every free-
+running transition tick in the table (the shown-offset sequence it predicts,
+1,0,1,2,1,0,1,2,…, exactly matches the periodic pattern §6a's own census
+already found), and (2) the currently-landed `turn5FaintedCursorYOffset`
+(`Math.min(2, floor((t-start)/9))`, saturates at 2 forever) is — by this same
+math — **accidentally correct for the frozen tail**, which is exactly why
+`resolve-off-c`'s own baseline (195/196, zero mismatches in the cursor bbox)
+already passes today: both the buggy formula and the real hardware converge
+on the same constant 2 once the climb saturates. The formula is simply wrong
+for the *actively cycling* portion before the freeze (`resolve-off-b`'s own
+100%-mismatched 6426-6560 span), which is the whole reason Class C existed.
+
+**Why bare Class C (no freeze) regressed `resolve-off-c`, and likely also
+part of `resolve-off-b`'s own tail.** `resolve-off-b`'s own capture window is
+6418-6613 (196 frames), but its reported 108 mismatches are ALL inside
+6426-6560 — meaning the remaining 88 frames (6418-6425 pre-cursor, plus
+6561-6613 post-freeze) already match today, precisely because the frozen
+region's real value (2) coincides with the old formula's own saturated
+value there. `cursorState(t-1, cursorStart)` has no freeze concept: it keeps
+extrapolating the SAME 9-tick-bucket cycle forever. Because the bucket
+containing the last live transition (6560) naturally spans about 9 ticks,
+the *first* several post-freeze ticks (~6561-6568) still coincidentally read
+2 under bare `cursorState`, but the very next bucket (~6569 on) rolls the
+formula onward to 1, 0, 1, 2, 1, 0, 1, 2, … — diverging from the real,
+now-frozen constant 2 for the rest of `resolve-off-b`'s own 6569-6613 tail
+too. **This was not independently re-verified against a live rerun this
+session** (Class C is reverted; re-landing it and re-diffing is out of scope
+for an analysis-only session) — flagged here as a *predicted*, mechanism-
+grounded consequence, not a re-measured fact, but it sharpens the ISSUES
+entry's own "must satisfy both windows simultaneously" lesson: the reverted
+fix's own blast radius likely was not fully "just `resolve-off-c`" either.
+
+**Turn 13's own mechanism, and why it can't be reused verbatim.**
+`opponentFaintPresentationOwner.ts`'s `OpponentFaintDismissEdge`/
+`storeOpponentFaintDismiss` is exactly the right SHAPE (a real, input-driven
+`acceptedElapsed` captured once, freezing `dismiss.cursor.frozenAtElapsed`
+for `drawFaintedOpponentWindow`/`drawTurn13SwitchinWindow` to clamp against,
+`battleScene.ts:14880-14923,11627-11689`) — but it is NOT a generic,
+reusable owner: `createOpponentFaintPresentationOwner` bakes in
+`resolveTurn13ResolutionAdapter()`/`resolveTurn13SwitchInAdapter()`
+(`Turn13ResolutionAdapter`/`Turn13SwitchInAdapter`), and `battleScene`
+carries exactly **one** `opponentFaintPresentationOwner` slot
+(`battleScene.ts:2916`), created once (`core.ts:1425-1433`, gated on
+`opponentFaintDismissEligible`, itself hardcoded to
+`TURN13_DRAGONBREATH_PRESS_TICK`) and then a **one-shot latch** —
+`storeOpponentFaintDismiss` refuses to overwrite an existing `dismiss`.
+Turn 5's own fainted-cursor fires at real tick ~6561, turn 13's at ~16000+,
+in the SAME continuous battle-scene state; if turn 5's dismiss consumed the
+shared slot, `battleScene.opponentFaintPresentationOwner !== null` would
+already be true by the time turn 13's own eligibility window arrives, and
+`createOpponentFaintPresentationOwner()` would never fire for turn 13 at
+all — silently breaking its own currently-passing 242/242. **Do not thread
+turn 5's dismiss through the existing `opponentFaintPresentationOwner`
+slot or type.**
+
+**What turn 5 actually needs already half-exists.** `turn5RockSlideKoDismiss
+Eligible` (`battleSceneCanonical.ts:2537-2539`) is the exact turn-5 analog of
+`opponentFaintDismissEligible` — defined, exported, even re-exported through
+`battleScene.ts`'s own barrel (`battleScene.ts:1355-1356`) — but has **zero
+call sites** anywhere in `src/` (`grep -rn "turn5RockSlideKoDismissEligible("
+src/` matches only its own definition). It was clearly staged for exactly
+this fix and never wired up. The lightest-diff idiom to wire it to is
+`sendOutPressElapsed`'s own flat-scalar pattern (`battleScene.ts:2875-2901`,
+"created directly, same tick already reflects it," no owner object needed
+since turn 5's own switch-in continuation is already handled by
+`drawTurn5RockSlideWindow`'s own fixed dispatch, not a generic
+"automatic-opponent-switch-in" continuation the way turn 13's owner drives).
+
+**Fix shape** (three small, additive edits, all new/optional so every
+existing call site is unaffected):
+
+```ts
+// battleScene.ts, BattleSceneState — next to sendOutPressElapsed (2901)
+/** The real accepted A edge that dismisses turn 5's own GROVYLE fainted-text
+ * cursor (mirrors sendOutPressElapsed's own "captured directly" idiom —
+ * turn 5 needs nothing from the heavier OpponentFaintPresentationOwner
+ * shape, see docs/turn5-resolve-ab-pools-diagnosis.md §11.1). */
+turn5FaintDismissElapsed: number | null;
+```
+
+```ts
+// core.ts, next to the existing sendOutPressElapsed / opponentFaintPresentationOwner block (~1413-1440)
+if (
+  battleScene.turn5FaintDismissElapsed === null &&
+  newKeys.has("A") &&
+  turn5RockSlideKoDismissEligible(SCENE_TICK0 + battleScene.elapsed + 1)
+) {
+  battleScene = { ...battleScene, turn5FaintDismissElapsed: battleScene.elapsed + 1 };
+}
+```
+
+```ts
+// battleScene.ts:15048-15049 (drawTurn5RockSlideWindow) — replace the
+// turn5FaintedCursorYOffset call with a freeze-aware cursorState call
+const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
+if (t >= cursorStart) {
+  const naturalTick = t - 1; // same t-1 basis §6b/Class C already proved exact for the free-running span
+  const cursorTick = turn5FaintDismissElapsed === null
+    ? naturalTick
+    // RAM-confirmed freeze (§11.1): clamp at the LAST LIVE tick's own
+    // natural input, not the accept-edge tick itself — PIN this exact
+    // constant against resolve-off-b's FULL window (not just its old
+    // 6426-6560 span) before trusting it against resolve-off-c, per
+    // ISSUES #97-J's own standing lesson.
+    : Math.min(naturalTick, SCENE_TICK0 + turn5FaintDismissElapsed - 2);
+  drawCursor(fb, cursorState(cursorTick, cursorStart).yOffset, TURN5_FAINTED_CURSOR_X);
+}
+```
+
+`turn5FaintDismissElapsed` must be threaded as a new parameter alongside the
+already-threaded `opponentFaintPresentationOwner` down the existing call
+chain `drawFightSubmenuWindow` (`battleScene.ts:8462-8470`, already reads
+`state.opponentFaintPresentationOwner` at its own top-level call site,
+`battleScene.ts:17664-17672`) → the `turn5Active` branch's own
+`drawTurn5EndeavorText` call (`battleScene.ts:8569-8581`, currently passes
+NO owner/dismiss data at all) → `drawTurn5EndeavorText` → `drawTurn5RockSlideWindow`
+(`battleScene.ts:10440-10450,15019-15024`).
+
+**The `-2` constant is a hand-derivation, not oracle-pinned — the fix
+worker must confirm it via a live rerun before trusting it.** Derivation:
+the real freeze is first visible starting render tick 6561 (RAM `active`
+1→0); the last tick whose *natural* (`t-1`) `cursorState` input is
+independently known-correct is 6560 (its own `t-1`=6559, and
+`cursorState(6559,cursorStart)` must equal the real shown offset 2 there,
+since that tick is inside Class C's own already-proven-exact 6426-6560
+span). Clamping every later tick's input at that same value (6559 =
+6561-2) reproduces the frozen constant for all `t >= 6561`. This chain is
+internally consistent but was never run through an actual `npm run
+compare` (analysis-only constraint) — a one-tick error here is exactly the
+class of bug this whole family's docs repeatedly warn about, so pin it
+live, not by re-reading this derivation.
+
+**Predicted counts (structural, not re-measured this session):**
+
+| trace | current | after this fix, predicted |
+|---|---|---|
+| `turn5-resolve-off-a` | 56/196 | ≥59/196 (the 3 confirmed direct-hit ticks from §6d, `[6398,6416]`) — unaffected by the freeze itself (the accept edge at 6561 is outside `-a`'s own 6222-6417 window) |
+| `turn5-resolve-off-b` | 88/196 | 196/196 — the ENTIRE window is class C (free-running span fixed by the proven `t-1` `cursorState` swap, frozen tail preserved by the new clamp, closing the gap this doc's own §11.1 predicts bare Class C would have left) |
+| `turn5-resolve-off-c` | 195/196 | 195/196 unchanged (still just the unrelated 6763 residual) — the frozen clamp reproduces today's own accidentally-correct constant-2 tail exactly, so this window should see ZERO change, not just "no regression" |
+
+**Rerunnable PASS/FAIL** (after landing):
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-b --summary   # PASS: 196/196 exact (the load-bearing check — this is the window the fix targets)
+npm run compare -- turn5-resolve-off-c --summary   # PASS: unchanged 195/196, ONLY the pre-existing 6763 residual — any OTHER mismatch means the freeze clamp is wrong
+npm run compare -- turn5-resolve-off-a --summary   # PASS: strictly >= 56/196, ticks 6398/6407/6416 close
+npm run compare -- turn5-resolve-off-d --summary   # PASS: unchanged 142/196 (disjoint window)
+npm run compare -- turn5-action-off --summary      # PASS: unchanged 32/32 (hard guard)
+npm run compare -- turn5-reset-off --summary       # PASS: unchanged 256/256 (hard guard, control)
+npm run compare -- turn13-switchin --summary        # PASS: unchanged 242/242 — the load-bearing guard for the "new, disjoint state slot" claim; a regression here means turn5FaintDismissElapsed leaked into turn 13's own owner somehow
+```
+FAIL on any decrease anywhere, or if `resolve-off-b` doesn't hit exactly
+196/196, or if `resolve-off-c` picks up ANY new mismatch beyond 6763.
+
+**Regression guards for the fix worker:**
+- `turn5FaintDismissElapsed` must be a **new, disjoint** state field — never
+  reuse `opponentFaintPresentationOwner`'s own slot or type (§11.1's own
+  "why bare reuse breaks turn 13" analysis).
+- Gate creation on `turn5RockSlideKoDismissEligible`, not a hand-rolled tick
+  comparison — it already exists and is already exported for this purpose.
+- The `-2` clamp constant is unverified — treat it as a starting point, pin
+  it against `resolve-off-b`'s FULL 196-frame window (not just the old
+  6426-6560 span) in the SAME session as `resolve-off-c`, per the standing
+  lesson two sections up.
+- Do not touch `turn5FaintedCursorYOffset` itself beyond removing its call
+  site — its own doc comment already records this session's finding.
+
+### 11.2 Mechanism (B): the `resolve-off-a` 6248-6365 static-background
+residual — not fadeY, not a row shift, not missing rock sprites; the real
+background barely moves despite `gBattle_BG3_Y`'s RAM-confirmed `-7`
+
+**fadeY ruled out cleanly.** `drawTurn5RockSlideAttack`'s own call site
+(`battleScene.ts:10920-10921`) passes `bgFadeYOverride=undefined`, falling
+through to `turn5BgFadeY(t)` (`battleScene.ts:10640-10642`), which indexes
+`TURN5_PIDGEOTTO_BG_FADE_Y` from `TURN5_BG_FADE_START_TICK = 6746`
+(`battleSceneCanonical.ts:184`) — **500+ ticks past** the 6248-6365 residual
+window, so `fadeY = 0` (no white-blend) for the entire window. The
+"dithered near-white shades" framing in the prior session's own finding is
+real (confirmed below), but it is not `blendComponentToWhite` at all.
+
+**No integer row shift resolves it (reconfirmed, sharper method).** Fresh
+`npm run compare -- turn5-resolve-off-a --capture-range 6255:6270 --summary`
+reconfirms the flagged ticks (6259/6260/6263/6264/6267/6268, all
+`bbox=0,0-239,111`, 28-31% of the frame, `ssimMin` slightly negative —
+genuine structural mismatch, not just dither noise). A full row-by-row
+best-fit-shift scan (all 240 columns × rows 0-111, `app` vs `oracle` PNGs
+from that run) against every integer delta in `[-4,4]` tops out at **67% at
+delta=-1** — no shift, integer or otherwise, gets close to exact, matching
+and sharpening the prior session's own "no integer shift fully explained
+it" finding.
+
+**Missing rock-slide props ruled out.** `drawTurn5RockSlideAttack`
+(`battleScene.ts:10918-10985`, read in full this session) never calls any
+rock-sprite draw function at all — `ROCK_SLIDE_ROCK_TABLE`/
+`gFallingRockSpriteTemplate` exist in `battleMenu.ts` but have no renderer
+call site anywhere in `battleScene.ts`. A fresh full-OAM census
+(`dump-turn5-resolve-offa-sprite-census.py`, all 64 `gSprites[]` slots, 12
+ticks spanning 6248-6268) confirms this matches REAL oracle behavior, not
+just app scope: only 9-10 sprites are ever active, every one mapping to an
+already-known, positionally-stable battler/icon-bar/UI sprite (Grovyle's own
+front sprite toggling its already-understood blink at slot 8, x=176/y=44;
+icon-bar sprites at fixed x=44-248, y=30-88 with only ±1 `y2` bounce
+jitter) — **no rock-shaped or rock-moving sprite is ever present**. This
+independently reconfirms, for turn 5 specifically, the same finding turn
+1's own dossier already recorded for the `HITMARKER_NO_ANIMATIONS`
+substitution (`battleScene.ts:15105-15120`): ROCK_SLIDE's own rock-prop
+animation is suppressed under Battle Scene OFF. Ruling this out narrows the
+residual to the static-BG tilemap/scroll mechanism alone.
+
+**New finding: the real background barely moves at all.** A clean
+oracle-vs-oracle comparison, controlling for Grovyle's own blink state
+(both 6258 and 6259 sampled `downArrowYPosIdx`-analog — actually here,
+sprite slot 8's own `invisible` flag — **identically True**, confirmed by
+the same sprite census, so this is NOT a blink confound):
+
+```
+oracle-06258.png (shiftY=0, per rockSlideBg3Y's own table)
+  vs
+oracle-06259.png (shiftY=-7, one of the 6 flagged huge-diff ticks)
+```
+
+Best-fit row-shift scan restricted to rows 10-50 (the genuinely-differing
+band once Grovyle's blink is controlled for) across deltas `[-10,10]`:
+**delta=0 wins outright at 81.5% exact match** — every other tested delta,
+including -7 (the "obvious" candidate matching `rockSlideBg3Y`'s own RAM
+value) and -8 (one row off), scores far worse (19-57%). In other words: the
+real oracle's own visible background is **almost unchanged** between a
+shiftY=0 tick and a shiftY=-7 tick, despite `gBattle_BG3_Y` genuinely
+differing by RAM (already independently confirmed bit-exact by the prior
+session's own probe). This directly contradicts `drawStaticBgShiftedY`'s own
+modeling, which applies a full uniform whole-screen vertical scroll by the
+raw register value. The residual 18.5% at delta=0 is consistent with the
+already-known, already-modeled icon-bar `y2` bounce jitter (±1px, visible in
+the same sprite census) bleeding into a couple of rows — not a second
+undiscovered mechanism.
+
+**Working hypothesis, not yet confirmed:** `rockSlideBg3Y`'s shared helper
+pair (`rockSlideBg3Y`/`drawStaticBgShiftedY`) is reused by every sibling
+ROCK_SLIDE turn's own attack window (§4a's own citation, turns 1/3/4/9/10/
+11), but turn 1's own dossier (`battleScene.ts:15105-15120`) explicitly
+records `gBattle_BG3_Y` **flat at 0 for its entire window** under
+`HITMARKER_NO_ANIMATIONS`. If every sibling shares that same suppression
+(not independently checked this session — see next instrument), turn 5
+would be the **first and only currently-exercised window** where
+`drawStaticBgShiftedY`'s own nonzero-`shiftY` code path is pixel-tested at
+all — i.e. "shared, sibling-proven" (§4a's own framing) may be true only for
+the blink/wobble helpers, not for this vertical-scroll path, which could
+have been silently wrong since it was written and simply never triggered
+anywhere else.
+
+**Next instrument (not run this session, named per the brief's own "honest
+partial beats a rushed pin"):**
+1. Cheap, no-probe check: for each sibling turn's own `pressTick` and its
+   own capture window, compute whether any captured tick lands inside
+   `ROCK_SLIDE_SHAKE_SEQUENCE`'s own active `d` range (`battleMenu.ts:1706`)
+   — if none do, "shared/sibling-proven" is confirmed to exclude this path
+   entirely, strengthening the hypothesis above from "working" to "load-
+   bearing."
+2. RAM probe: read `DISPCNT`'s own BG-enable bits and each `BGxCNT`'s own
+   priority/char-base/screen-base at one of the 6 flagged ticks, to confirm
+   which background layer is actually the one carrying the visible sky/
+   ground art in this specific composited scene — if it is not BG3 (or BG3
+   is layered under something else at this moment), shifting `BG3VOFS`
+   would have exactly the "barely visible" effect this session measured,
+   and the real fix is elsewhere (a different layer's own offset, or no
+   shift application here at all).
+
+**Not fixed.** This is a named, evidence-backed partial per the brief's own
+priority ordering — (A) was the larger, higher-priority pool and consumed
+the bulk of this session's budget.
