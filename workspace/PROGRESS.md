@@ -7,11 +7,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1342 — [supervisor wind-down, 2026-08-18 session 2] **#97 near-CLOSED in one instrument→fix assembly line (10 fix + 8 instrument worker rounds): `resolve-off-b` 196/196 + both turn6 windows CLOSED, every trace verified after every round, zero guard decreases all session; one supervisor overturn (ON/OFF oracle-profile proof) unlocked turn6**
 
-- **Final gates (independent, after the last engine fold `758107d9`;
-  the two later folds `ca8e70d0`/`8127921e` are docs+probe-only):**
-  full npm test **1,067 files / 10,086 passed / 223 skipped**; `npm run
-  build` green; soak vanilla 0:20 **20/20 OK**; soak full 0:60
-  **60/60 OK**. animation-main and rust-main EMPTY at orient AND
+- **Final gates (run TWICE — at `758107d9` after the last pre-wind-down
+  engine fold, and RERUN at the final tree `cc51b13e` after the bonus
+  round's engine fix below):** full npm test **1,067 files / 10,088
+  passed / 223 skipped** (final rerun; 10,086 at the first pass, +2 =
+  the bonus round's pin); `npm run build` green both times; soak
+  vanilla 0:20 **20/20 OK** both times; soak full 0:60 **60/60 OK**
+  both times. animation-main and rust-main EMPTY at orient AND
   wind-down. DEFERRED.md EMPTY. Only permanent worktrees remain; no
   unmerged branches; freshness-check FAIL at orient was false-positive
   #5 (PAPERCUTS bumped; zero `oracle/` commits since either service
