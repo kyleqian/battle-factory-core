@@ -17,42 +17,19 @@ backlog.
 
 # Open
 
-## #96 — battle1-swap family: 3-trace remainder DIAGNOSED (two mechanisms, fix shapes named) — swap-screen ball-anim lag args hardcoded off + a 1-tick header-edge sliver
+## #96 — battle1-swap family: `enemy-picker` 1-tick header-edge sliver (129/130)
 
-**State (2026-08-17, post-appRoute-restoration `cbc56d1b` + read-only
-diagnosis):** 14 of 17 traces restored exactly. The 3-trace remainder is TWO
-mechanisms, both diagnosed pixel-first (probe report retained in the
-2026-08-17 supervisor transcript; counts reproduced fresh twice):
+**State (2026-08-17):** part (a) (the two player-quit traces) is FIXED —
+see `PROGRESS.md`. This is the sole remaining trace-family deviation.
 
-**(a) `player-quit-b-return` + `player-quit-no-return` (both 61/67, frames
-29774/78/82/86/90/94, bbox 61,54-81,73, byte-identical in both traces) —
-ONE shared root cause:** the swap screen's `advanceBallAnim` call site
-(`src/engine/factorySwapPresentation.ts:868`) hardcodes BOTH display-lag
-arguments off — `advanceBallAnim(next[i], rngValue, false, false, true)` —
-while the draft screen's two call sites (`core.ts:2157`, `core.ts:2245`)
-correctly thread `i === 0` for `isSlot0` and a computed
-`isRevealStallActive(...)` for `revealStallActive`. The mismatch is ball
-slot 0's lift-stage shading during the "Quit swapping?" popup hold — the
-popup is exactly the window-hold event `revealStallActive` exists to
-compensate for on the draft screen; the swap screen has no analog predicate.
-NOT the menuIdleBounce family (#97-B) — same shape, structurally distinct
-site. **Fix shape:** thread `i === 0` for `isSlot0` and implement a
-swap-screen stall predicate (analog of `confirmReveal.ts`'s
-`isRevealStallActive`, gated on the quit-prompt/popup hold) around
-factorySwapPresentation.ts:862-879. **Non-cascading check:**
-`tests/ballAnim.test.ts` draft-screen checkpoints stay green; rerun both
-quit traces AND the picker-revisiting traces (`enemy-accept-*`,
-`player-summary-return`) for no new regressions.
-
-**(b) `enemy-picker` (129/130, frame 29838 ONLY, 5px, bbox
-239,62-239,66) — separate minor mechanism:** a 1-column, 1-tick sliver at
-the screen's last column — oracle draws a dark border column of the
-ONIX name-box header one row further at the screen edge for exactly one
-tick; neighbors 29836-29840 are otherwise pixel-perfect. Plain enemy-list
-browsing path (`factorySwapRender.ts` header-box draw), shares nothing with
-(a). Fix shape not yet identified — **next instrument:** RAM-probe the
-name-box border sprite/BG draw at that tick to classify 1-tick-early/late
-reveal edge.
+**`enemy-picker` (129/130, frame 29838 ONLY, 5px, bbox
+239,62-239,66):** a 1-column, 1-tick sliver at the screen's last column —
+oracle draws a dark border column of the ONIX name-box header one row
+further at the screen edge for exactly one tick; neighbors 29836-29840 are
+otherwise pixel-perfect. Plain enemy-list browsing path (`factorySwapRender.ts`
+header-box draw), shares nothing with the fixed (a) mechanism. Fix shape not
+yet identified — **next instrument:** RAM-probe the name-box border
+sprite/BG draw at that tick to classify 1-tick-early/late reveal edge.
 
 ## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (real mechanism, bisect needed); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 

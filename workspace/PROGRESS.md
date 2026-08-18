@@ -4,6 +4,47 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1318 — [main worker, 2026-08-17] **ISSUES #96(a) fixed: swap-screen quit-return ball-slot-0 display stall — both player-quit traces 61/67 → 67/67, zero regressions across the 19-trace battle1-swap family**
+
+- **State:** `src/engine/factorySwapPresentation.ts` +
+  `tests/factorySwapPresentation.test.ts` edited (`bcab2e9e`). `npm test`
+  **1,066 files / 10,031 passed (+1) / 223 skipped**, `npm run build`
+  green, `tests/ballAnim.test.ts` (draft-screen checkpoints) green.
+- **Did:** the diagnosed fix shape from 1317 (thread `i === 0` + a
+  `confirmReveal.ts`-style `isRevealStallActive` analog) turned out
+  **wrong on contact** — frame-by-frame oracle instrumentation (temp
+  `console.error` at the `core.ts` call site, reverted) showed the 6
+  mismatch frames (29774-94) sit inside `quitReturn` (the popup's close),
+  not the `quitPrompt` shown-hold, and both draft's `i===0`/`!hasRested`
+  formula and a popup-shown predicate regressed frames that were already
+  exact when tried in isolation. The real boundary: ball slot 0's own
+  `hasRested` latch flipping true while `phase === "quitReturn"` — every
+  cmdIndex-transition frame from that latch onward needs slot 0 one tick
+  further behind. Landed a narrowly-scoped
+  `isFactorySwapQuitReturnSlot0StallActive(ballIndex, phase, hasRested)`
+  predicate at the `factorySwapPresentation.ts:862` call site only
+  (`isSlot0` stays `false`; only the `revealStallActive` arg is now
+  per-ball and predicate-driven) — draft-screen call sites and
+  `confirmReveal.ts` untouched, per scope.
+- **Result:** `battle1-swap-player-quit-b-return.json` and
+  `-no-return.json` both 61/67 → **67/67**. Full 19-trace
+  `battle1-swap-*.json` family re-verified: every other trace unchanged
+  from its 2026-08-17-supervisor baseline (`enemy-picker` still 129/130,
+  correctly untouched — that's #96(b), separately scoped, out of this
+  step). New Tier-1 test pins the predicate's exact semantics (quitReturn
+  + slot 0 + post-latch → active; quitPrompt-shown, other slots, and
+  ordinary picker ticks → inactive).
+- **Docs:** `ISSUES.md` #96 trimmed to its still-open remainder — retitled
+  to the `enemy-picker` 1-tick header-edge sliver only, part (a) deleted.
+- **Next:** #96(b) enemy-picker sliver (RAM-probe the ONIX name-box border
+  draw at frame 29838, per the trimmed #96 entry); #97-B turn5/6 bounce
+  drift re-derivation; #71/#73-adjacent filler per standing priorities.
+- **Notes:** the session's own worked example of why the contingency
+  clause exists — a diagnosed "fix shape" from a read-only probe can still
+  be wrong in the details; ground-truthing against fresh instrumentation
+  before trusting it caught it before any regression landed.
+
+---
 ## 1317 — [supervisor wind-down, 2026-08-17] **13 worker steps + 4 probes/audits, two lanes: EVERY open walk-up window closed to its full bar (6 windows to exact), #98 found→designed→CLOSED same-session, fixture-estate audit filed+fixed #96/#97 — all final gates green**
 
 - **Final gates (tree `829b299b`, run independently AFTER the last merge):**
@@ -104,50 +145,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** S4 (soak, supervisor-owned) should be a confirmation pass, not
   new work — this session's own full-suite/build/guard-matrix reruns
   already cover its acceptance surface. #96/#97 remain open, untouched.
-- **Notes:** No PAPERCUT.
-
----
-## 1315 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S1 landed: `B_TRANSITION_FRONTIER_CIRCLES_CROSS` renderer (id 35), unwired by design — guards unmoved, red-verified Tier-1 coverage**
-
-- **State:** `src/engine/battleTransition.ts` +109/-12,
-  `tests/battleTransition.test.ts` +67, `tests/battleTransitionFrontier.test.ts`
-  +16. `npm test` **1065 files / 10019 passed** (+8, unmoved shape)
-  **/ 223 skipped**, `npm run build` + `npm run typecheck` green,
-  `executableFrontierRatchet` barrier counts unmoved.
-- **Did:** Per the design doc's S1 (§4, ~30-45 min slot): generalized
-  `CIRCLE_SPECS`/`circleCenter` into per-family spec tables
-  (`MEET_CIRCLE_SPECS`/`CROSS_CIRCLE_SPECS`, CROSS's own 3 rows from
-  `transitionMeta.table[5].params.sprites`, `battle_transition_frontier.c:
-  459-467`), registered `transitionId === 35 → "circlesCross"` in
-  `frontierTransitionRenderKind`, wired the new kind into
-  `applyBattleTransitionOverlay`'s existing fixed-order draw path. One
-  correction to the design doc's own "no new timing mechanism" framing:
-  CROSS's left/right circles need `CreateSlidingLogoCircleSprite`'s
-  `delayX`/`delayY` per-axis throttle (`SpriteCB_LogoCircleSlide`,
-  MEET's own 3 circles are all `delay=(0,0)` so the original formula never
-  needed it) — ported literally (`slideMoves`, cross-checked call-by-call
-  against a Python port of the actual C algorithm, zero divergence) rather
-  than hand-fit. `centerLogoEva`/`exitFadeY` gained a `"circlesCross"`
-  branch (`CROSS_BLEND_START_TE`/`CROSS_EXIT_FADE_START_TE`, derived by
-  reapplying MEET's own already-established "+1"/"+50" deltas — both from
-  family-independent shared code — against CROSS's 38-tick slide instead
-  of MEET's 48).
-- **Result:** 8 new Tier-1 tests, **red-verified** (reverted the delay
-  throttle, reran, exactly the 2 delay-dependent tests failed, confirming
-  they're load-bearing before restoring). Acceptance run, all fresh/
-  synchronous: `npm run compare -- factory-brain-silver-walkup-speech-
-  flicker-off.json --summary` → **79/100, correctly unmoved** (S1 is
-  UNWIRED by design — S3 threads the presentation through; confirmed by
-  reading `core.ts:2528-2540` that `b.transitionPresentation` stays
-  `undefined` for brain rooms today regardless of this slice). Guard
-  matrix all unmoved: gold-close 113/126, silver-flicker 79/100,
-  gold-pages 177/177, callscene-02 199/199, entrance-03 256/256.
-  `npm run test:smoke` green (375/375). Full detail + evidence in
-  `docs/brain-transition-wiring-design.md`'s new §6.
-- **Next:** S2 (`CIRCLES_MEET_IN_SEQ` renderer, independent of S1) or S3
-  (wire both — design doc §4's steps 1-2; S3's own partial-credit guard
-  means it's safe to land now against just silver's window, with id 38
-  falling through to the existing fallback until S2 also lands).
 - **Notes:** No PAPERCUT.
 
 ---
