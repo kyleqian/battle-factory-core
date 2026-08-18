@@ -987,3 +987,275 @@ Full ledger: ISSUES #97 sub-entry K.
 `drawGrantingStars` now that the dominant digit signal is gone) and the
 6989-7005 menu-chrome spike (the named window-system RAM probe, e.g.
 `gBattle_BG0_X`/window `WindowId`/tilemap-write completion).
+
+## 9. Follow-up (2026-08-18, bounded SIDE worker, ISSUES #97 remainder): both named instruments run — the "ring/star" hypothesis is FALSIFIED (spurious sprites, zero RAM basis), the menu-chrome spike is PINNED to a source-cited mechanism, and a third, previously-uncounted mechanism (text-clear timing) fell out of decomposing the span
+
+Scope per this step's brief: run the two named-but-never-attempted RAM
+instruments for `turn5-resolve-off-d`'s remaining 6970-7005 residual — (A)
+the star/ring sparkle hypothesis (§8.2's "widening toward x=200... separate,
+unisolated sparkle contribution" flag) and (B) the §6.3/§8.3 menu-chrome
+transition-spike window-system probe. Fresh baseline confirmed in THIS
+worktree before touching anything: `npm run compare -- turn5-resolve-off-d
+--summary` -> **159/196**, matching ISSUES #97 sub-entry K's own cited
+number exactly. `git status` / `git diff -- src/` empty throughout — the two
+new probes under `tools/probe/` (`dump-turn5-resolve-offd-star-ram.py`,
+`dump-turn5-resolve-offd-menu-redraw-ram.py`) and this section are the whole
+deliverable.
+
+### 9.1 The 36-tick remaining span decomposes into (at least) three stacked, independently-timed mechanisms, not one
+
+`npm run compare -- turn5-resolve-off-d --capture-range 6985:7005 --summary`
+(this session, fresh) shows the post-HP-climb-fix residual is NOT the single
+"ring/star" span the brief's own framing implied:
+
+| sub-span | ticks | diff shape | mechanism (this session's finding) |
+|---|---|---|---|
+| 6970-6988 | 19 | ~175-178px, bbox settles to `44,71-97,105` (Onix's own on-field sprite region) | (A) spurious granting-star sprites — see §9.2 |
+| 6989-6990 | 2 | ~1300-1316px, bbox `16,71-120,149` (the ENTIRE message textbox) | NEW, previously-uncounted — see §9.3 |
+| 6991-6994 | 4 | ~6172-6197px, bbox `9,70-238,158` (nearly full screen) | (B) menu-chrome reveal, 4 ticks early — see §9.4 |
+| 6995 | 1 | 214px, bbox `43,71-98,106` | back to the (A) star-only shape — transition settled |
+| 6996 | 1 | 1793px, bbox `43,71-229,110` (adds the button-grid border/cursor outline) | NOT diagnosed — bbox includes the cursor highlight box; per this step's own explicit "do not touch anything cursor-related" constraint, flagged and left alone, not attributed |
+| 6997-7005 | 9 | ~207-221px, bbox `42-44,70-99,71-106` | back to (A)'s star-only shape, unchanged |
+
+(6850, one tick, pre-existing and unrelated, untouched — not re-examined
+this session.) The **19+2+4+1+1+9 = 36** ticks above plus tick 6850 account
+for all **37** of the current 159/196 baseline's mismatches.
+
+### 9.2 (A) 6970-onward "ring/star sparkle" hypothesis: FALSIFIED — `gGrantingStarsSpriteTemplate` sprites never exist in this trace's RAM at all
+
+**Instrument**: `tools/probe/dump-turn5-resolve-offd-star-ram.py`, run via
+`python3 tools/run-mgba-probe.py <out.json> -- tools/probe/dump-turn5-
+resolve-offd-star-ram.py <out.json>` (default window `[6945,7003]`, chosen
+to bracket both stars' own expected active windows — see below). Scans all
+64 `gSprites` slots every tick for a template pointer equal to
+`gGrantingStarsSpriteTemplate` (`bin/oracle symbols
+gGrantingStarsSpriteTemplate` -> `0x08592b7c`) or
+`gThinRingExpandingSpriteTemplate` (`0x0859381c`, the ring, reusing the
+already-confirmed-correct pointer from `dump-sitrus-ring-sprite.py`, ISSUES
+#26).
+
+**Result: zero matches, at every one of the 59 sampled ticks, for either
+template.** A cross-check dump of every in-use sprite slot at tick 6980
+(`/tmp/dump_all_slots.py`, same struct layout, not committed — a one-off
+sanity check, not a named instrument) found only **8** sprites ever in use
+at that tick, none matching either pointer: two battler mon sprites, two
+runtime-generated (EWRAM-pointer, `0x0202499c`) healthbox-family sprites,
+and four more with ROM pointers in the `0x0832c1xx` range (icon/name-plate
+family, not the sparkle effect). **The granting-star sprites this family's
+own §6.2 doc comment cites (`spawning at RAM 6968/6978`) do not exist
+anywhere in this trace's own replay** — that citation (from an earlier,
+unrelated S7 slice, per its own doc comment "RAM-probed fresh this
+session") was evidently measured against a DIFFERENT trace (almost
+certainly a Battle-Scene-ON replay of the same Sitrus proc, where
+`GrantingStarsEffect`'s battle-anim-script actually runs) and was never
+independently re-verified for `turn5-resolve-off-d` specifically until now.
+
+**Why this matches the pixel evidence exactly**: `onixSitrusRotateMatrix`'s
+own epoch (`ONIX_SITRUS_IDENTITY_RENDER_TICK = ONIX_SITRUS_PROC_TRIGGER_RAM_
+TICK(6872) + ONIX_SITRUS_ROTATE_RENDER_LAG(2) = 6874`) feeds
+`drawGrantingStars` too (`battleScene.ts:10703-10709`, unconditional call,
+no suppress flag — unlike the already-fixed rotation). `heldItemHeal.ts`'s
+own `sitrusStarPlacementAtAge` places star 0 first-visible at
+`age=SITRUS_ITEM_STAR_FIRST_VISIBLE_AGE(96)` -> render tick `6874+96=6970`
+— **exactly the render tick this residual span begins at** — and stays
+visible for `STAR_VISIBLE_TICKS(61)` ticks, i.e. through render `~7030`,
+well past this trace's own 7005 capture-window end. Star 1 first-visible at
+age 106 -> render tick 6980, visible through ~7041. Hand-computing both
+stars' own `(cx,cy)` corner boxes at, e.g., t=6985 (age=111): star 0
+`local=15` -> `frameIndex=2`, corner `(41,74)`, 32x32 span `x:41-73,y:74-106`;
+star 1 `local=5` -> `frameIndex=0`, corner `(68,67)`, 32x32 span
+`x:68-100,y:67-99`. The union, `x:41-100,y:67-106`, matches the observed
+diff bbox (`44,71-97,105` at that tick, and the same shape at every other
+sampled tick in 6970-6988 and 6997-7005) almost exactly. **The app is
+painting two star sprites that the real hardware never creates in this
+trace at all** — the same "spurious presentation, zero RAM basis" class of
+bug already found and fixed for the rotation (§6.2/§7), now confirmed for
+the OTHER consumer of the same shared epoch it explicitly flagged as
+"neither independently verified this session."
+
+This also explains why the residual doesn't stop at 6988 as the stale
+"6970-6988" framing implied: `STAR_VISIBLE_TICKS=61` keeps both spurious
+stars rendering all the way through 7005 (this trace's own capture-window
+end) and beyond — visible directly in the table above (§9.1: the ~175-221px
+star-shaped residual reappears at 6995 and persists through 6997-7005,
+unrelated to the (B) menu-chrome mechanism which fully settles by 6995).
+
+**Ring (`turn5SitrusRingMatrix`) remains genuinely unverified, not
+falsified**: its own active window (`SITRUS_ITEM_RING_FIRST_AGE=167` ->
+render tick `6874+167=7041`) is entirely OUTSIDE both this trace's own
+196-frame capture range (ends 7005) and this probe's own scanned window
+(ends 7003) — there is no pixel or RAM data in this trace that could
+confirm OR falsify the ring for `resolve-off-d` specifically. Left exactly
+as open as before, just for a different reason (out of range, not
+unmeasured).
+
+**Named fix shape (RAM/pixel-confirmed, not fix-ready without one more
+grep pass)**: a `suppressSitrusStars` flag mirroring `suppressSitrusRotate`
+byte-for-byte (`battleScene.ts:10852` onward) — default `false`, threaded
+through `drawTurn5RockSlideAttack`'s single `drawGrantingStars(fb, t)` call
+site (`battleScene.ts:10906`), set `true` at `resolve-off-d`'s own call
+path the same way `drawTurn5RockSlideWindow` already threads
+`suppressSitrusRotate` down through `drawTurn6FieldBase`/
+`drawTurn5RockSlideAttack`. A fix worker must re-run the same `turn13-
+switchin` 242/242 shared-guard check §7's own landing already established
+as mandatory for any edit to this call chain (both functions are reused
+across turns 6-13) before landing.
+
+### 9.3 NEW, previously-uncounted mechanism: the heal-text textbox clears 2 ticks EARLY in real hardware relative to the app (opposite direction from the menu-chrome finding)
+
+Falls out of §9.1's table, not separately probed via RAM (pixel evidence
+alone is unambiguous): `npm run compare -- turn5-resolve-off-d
+--capture-range 6986:6989` (this session) —
+
+- **6986-6988**: app and oracle both still show the "ONIX's SITRUS BERRY /
+  restored health!" textbox — diff is the (A) star-only ~175px shape, no
+  textbox mismatch.
+- **6989**: oracle-06989.png shows the textbox **already gone** (plain
+  field background, no red box, no text); app-06989.png still shows the
+  full textbox. Diff bbox `16,71-120,149` covers almost the entire textbox
+  region.
+
+The app's own `TURN5_OFF_SITRUS_TEXT_CLEAR_TICK = 6991`
+(`battleSceneCanonical.ts:207`) is **2 ticks too LATE** — real hardware has
+already cleared the message by render tick 6989. This is the opposite
+direction from §9.4's menu-chrome finding (app early there, app late here)
+— two genuinely independent constants that happen to currently share the
+same numeric value (6991), not one mechanism. **Not RAM-probed this
+session** (pixel evidence alone brackets it to render tick 6989 cleanly,
+matching frame-by-frame with no ambiguity — 6988 matches, 6989 does not).
+**Named fix shape, not landed**: move `TURN5_OFF_SITRUS_TEXT_CLEAR_TICK`
+from 6991 to 6989 — before landing, grep every other caller of this
+constant (shared constants in this family are frequently reused across
+turns 6-13 per §6.2/§7/§9.2's own precedent) to confirm this specific
+window's own call site can move independently without regressing a sibling
+trace.
+
+### 9.4 (B) 6991-6994 menu-chrome spike: PINNED — real hardware's button-grid reveal is a `gBattle_BG0_Y` scroll snap gated behind an async DMA3 tilemap copy, confirmed exactly 4 ticks later than the app's current blit tick
+
+**Source reading** (`reference/pokeemerald/src/battle_controller_
+player.c:2565-2589`) names the real mechanism directly, superseding the
+§6.3 "candidates not verified" hedge: `PlayerHandleChooseAction` queues the
+button-grid text into `B_WIN_ACTION_MENU` and switches
+`gBattlerControllerFuncs[gActiveBattler]` to `HandleChooseActionAfterDma3`,
+which polls `IsDma3ManagerBusyWithBgCopy()` every tick and, only once the
+async DMA3 tilemap copy finishes, sets `gBattle_BG0_Y = DISPLAY_HEIGHT`
+(160) — a **Y-scroll snap that reveals the button-grid region**, not a
+redraw of its pixels. (`gBattle_BG0_Y` is reset to 0 by the five other
+`PlayerHandle*` call sites in the same file whenever a fresh message window
+opens.) This also explains §6.3's own "left portion always matches, only
+the right/lower button-grid lags" split: the message-text region isn't
+gated by this BG0 scroll at all, only the button-grid sub-window is.
+
+**Instrument**: `tools/probe/dump-turn5-resolve-offd-menu-redraw-ram.py`,
+same run pattern, reads `gBattle_BG0_X`/`gBattle_BG0_Y` (`bin/oracle
+symbols` -> `0x2022e14`/`0x2022e16`) every tick across `[6980,7010]`.
+**Result**: `bg0Y` is `0` at every tick 6980-6993, then `160` at every tick
+6994-7010 — a single, clean, one-time transition at **RAM tick 6994**, zero
+noise. `bg0X` stays `0` throughout (unrelated to this defect).
+
+**Cross-checked against fresh pixel evidence** (`npm run compare --
+turn5-resolve-off-d --capture-range 6990:6996`, this session): frames
+6991-6994 all still show the OLD full-screen-ish mismatch (bbox growing
+toward `9,70-238,158`, both message-region and button-grid-region content
+disagreeing); frame **6995** collapses back down to the (A) star-only shape
+(`bbox=43,71-98,106`, no button-grid-region diff at all) — i.e. the real
+reveal is visible starting render tick 6995, exactly one render tick after
+RAM tick 6994, matching this family's own standard "+1 render lag"
+convention used everywhere else (§8.7, `SWITCHIN_SENTOUT_TEXT_START_TICK`,
+etc.) with zero fitting.
+
+**The app's `TURN5_OFF_SITRUS_MENU_REDRAW_TICK = 6991`
+(`battleSceneCanonical.ts:213`) is exactly 4 ticks early** (`6995 - 6991 =
+4`), matching §6.3's own pixel-derived "4 ticks early" characterization
+number-for-number — this session's RAM probe independently reproduces that
+magnitude from a completely different measurement (a register read, not a
+pixel diff), which is strong confirmation neither measurement was an
+artifact of the other's own method.
+
+**Named fix shape (RAM+pixel-confirmed, source-cited mechanism — the
+strongest evidentiary bar this family uses)**: move
+`TURN5_OFF_SITRUS_MENU_REDRAW_TICK` from 6991 to 6995. Per the doc's own
+disclosed uncertainty in §6.3 (real hardware's redraw might be "two
+separate window system calls" for message vs. button-grid, and the app's
+`drawTurn5SitrusSettledMenuChrome` currently blits both regions as one
+uniform bitmap) — moving the shared constant to 6995 is safe for the
+button-grid region (this probe's own direct evidence) but a fix worker
+should re-verify the message-region content is unaffected (§6.3's own
+"left portion" was already correct at the OLD 6991 tick per that section's
+own citation, so moving the single shared gate to 6995 risks re-breaking
+that region for 4 ticks unless the two regions are split into independent
+blits/gates — not attempted this session, flagged as the one open question
+blocking a blind constant bump).
+
+### 9.5 Predicted counts (not landed, no `src/` edit this session)
+
+If all three named fix shapes land (§9.2 `suppressSitrusStars`, §9.3
+`TEXT_CLEAR_TICK` 6991->6989, §9.4 `MENU_REDRAW_TICK` 6991->6995, the last
+contingent on resolving its own open question above):
+
+- 6970-6988 (19 ticks): closes fully — §9.2's own bbox/magnitude match
+  leaves no other signal in this sub-span.
+- 6989-6990 (2 ticks): closes once §9.2 AND §9.3 both land (both
+  mechanisms are active simultaneously here — §9.1's own bbox `16,71-
+  120,149` is the union of the star region and the still-showing textbox).
+- 6991-6994 (4 ticks): closes once §9.2 AND §9.4 both land.
+- 6995 (1 tick): already closes with §9.2 alone (§9.4 doesn't touch it —
+  6995 is already past the real reveal either way).
+- 6996 (1 tick): **not predicted to close** — this session did not
+  diagnose it (§9.1's own explicit cursor-adjacent flag) and it is not
+  addressed by any of the three fix shapes above.
+- 6997-7005 (9 ticks): closes fully with §9.2 alone.
+
+**`turn5-resolve-off-d`: 159/196 -> predicted 194/196** (35 of the
+remaining 36 ticks in the contiguous span close; tick 6850 stays open as
+before, untouched; tick 6996 stays open, undiagnosed) — contingent on §9.4's
+own open split-region question being resolved one way or the other first.
+
+### 9.6 Regression guards (for a future fix worker, not run this session beyond the read-only checks already cited)
+
+- `drawGrantingStars`'s only call site is `drawTurn5RockSlideAttack`
+  (`battleScene.ts:10906`), itself reused across turns 6-13 exactly like
+  `onixSitrusRotateMatrix` — §9.2's own fix shape reuses §7's own mandatory
+  `turn13-switchin` 242/242 guard requirement verbatim.
+- `TURN5_OFF_SITRUS_TEXT_CLEAR_TICK`/`TURN5_OFF_SITRUS_MENU_REDRAW_TICK`
+  are both exported from `battleSceneCanonical.ts` (`battleScene.ts`'s own
+  giant re-export barrel at the top of the file) — a fix worker must grep
+  every consumer, not just `drawTurn5RockSlideWindow`, before moving either
+  constant, per this family's own standing convention (§6.2/§6.3's own
+  caveats already flagged this for the ROTATE/RING epoch; the same
+  diligence applies here).
+- Neither `ONIX_SITRUS_PROC_TRIGGER_RAM_TICK`(6872) nor
+  `ONIX_SITRUS_IDENTITY_RENDER_TICK`(6874) is touched or contradicted by
+  §9.2 — only whether the STAR branch should fire at all in this trace,
+  the same shape §6.2's own verdict already established for the ROTATE
+  branch.
+
+### 9.7 Verdict
+
+**No landed anchor was contradicted.** Both named next instruments from
+§8.3/§8.6 were run for the first time this session, with three outcomes,
+none matching the original framing exactly:
+
+1. The "ring/star" hypothesis (A) is **falsified, not pinned** — direct
+   RAM sprite-table scanning across the full relevant window found zero
+   granting-star or ring sprites at any tick; the real defect is the APP
+   drawing sprites the real hardware never creates, the same "spurious
+   presentation" class of bug already fixed once in this family (§6.2).
+   Fix shape named, one open item (a mandatory shared-guard re-check)
+   before landing.
+2. The menu-chrome spike (B) is **pinned to a source-cited mechanism**
+   with two independent, mutually-corroborating measurements (a live
+   register read and a pixel diff) agreeing on the same "+4 ticks early"
+   magnitude. Fix shape named, one open question (whether the message- and
+   button-grid regions need independent gates) before landing.
+3. A third mechanism (text-clear timing) was previously uncounted —
+   masked by the HP-digit bug until this family's own §8.7 fix landed,
+   then further masked by conflating the whole 6989-7005 span under the
+   single "menu-chrome" label. Pixel-bracketed cleanly, fix shape named.
+
+One tick (6996) remains genuinely undiagnosed and is flagged, not guessed
+at, per this step's own explicit instruction not to touch anything
+cursor-adjacent. `turn5-resolve-off-a`/`-b`/`-c`'s own residuals (ISSUES
+#97 sub-entries I/J) are untouched by this entry. No `src/` file was
+edited this session — `git diff -- src/` is empty; the two new probes
+under `tools/probe/` and this section are the whole deliverable.
