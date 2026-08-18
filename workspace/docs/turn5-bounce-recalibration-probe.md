@@ -808,4 +808,355 @@ component) and a named next instrument (§7c) rather than an open-ended
 "trace `menuIdleBounce`'s internals" - but was not landed this session.
 Expect turn6-reopen-off to reach **16/46** once BOTH the goal-2 freeze AND
 a healthbox-specific correction land; 11/46 unchanged today (reconfirmed
-live, §7b).
+live, §7b). **Continuation 3 (§8) supersedes this 16/46 figure** - the
+correction is a raw-sine-index constant (+67), not a healthbox-only one
+(it applies identically to onix), and the corrected prediction is ~20/46
+with important composition caveats - see §8f.
+
+## 8. Continuation 3 (2026-08-17, bounded SIDE worker): the §7c instrument run, a dead-end cross-reference, and the raw-index anchor correction landed to an exact number
+
+Executes this step's goal 1 (required: run the §7c `n`-tap instrument and
+land the healthbox correction to a number) - **DONE, but with a corrected
+premise**: the instrument as specified in §7c ("cross-reference this
+window's `n` against the turn-5 settled-menu-redraw window's own `n` at
+the same call site") turns out to be **comparing one call site against
+itself** - see §8a. The real, load-bearing measurement this session is a
+**direct RAM-receipt cross-check** (§8b) that lands the correction to an
+exact closed-form number: **`+67`, added to the raw (pre-mod-256,
+pre-table-lookup) sine index shared by BOTH onix and healthbox** - not a
+healthbox-only correction as §7c hypothesized. Goal 2 (family
+classification) is started but not completed to per-frame granularity -
+§8g. No `src/` file is committed edited (`git diff -- src/` is empty at
+commit time); the tap used to gather §8a/§8c's live numbers was reverted
+before this commit, exactly as in every prior continuation.
+
+### 8a. The `n`-tap: only ONE call site exists for this window, not two
+
+§7c's own text framed the next instrument as: tap `menuIdleBounce`'s `n`
+at window B's own call site AND at "whatever call site turn 5's own
+settled-menu redraw (`TURN5_SITRUS_MENU_REDRAW_TICK=7222`) uses
+`turn5SitrusResettledBounceTick` for," then compare. Reading
+`drawTurn5RockSlideWindow` (`battleScene.ts:14781-14820`) end to end
+answers this directly: **the settled-menu-redraw window IS window B's own
+call site.** `drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff)` is
+called **unconditionally** at the top of `drawTurn5RockSlideWindow`
+(line 14788), before ANY branch on `t` - the same call fires for every
+tick from turn 5's own confirm press through 7312 (and, per §6a, its
+turn-6-DMA-wait sibling `drawTurn6ActionMenuIdleWindow` continues feeding
+the exact same `menuIdleBounce(turn5SitrusResettledBounceTick(...))`
+formula through 7317). `TURN5_SITRUS_MENU_REDRAW_TICK` (7222) only gates
+which **message text** is drawn afterward (`t < TURN5_SITRUS_MENU_REDRAW_
+TICK) return;` at line 14818) - the field-base bounce draw above it is
+unconditional. So "tap the settled-menu-redraw window's own `n`" and "tap
+window B's own `n`" are **the same tap on the same line**
+(`battleScene.ts:14765`), confirmed live: a temporary `console.error` at
+that line, gated `t>=7300 && t<=7318`, run once via `NTAP=1 npm run
+compare -- turn6-reopen-off --summary` and once via `NTAP=1 npm run
+compare -- turn5-sitrus-d --summary` (a legacy trace whose own captured
+window, 7180-7312, spans the settled-menu-redraw era), printed **byte-
+identical `n`/`onixY2`/`hbY2` values at every shared tick** (7305-7312).
+**Verdict on §7c's own framing: there is no second call site to
+cross-reference against** - the "-5474" anchor cannot be "miscalibrated
+for window B specifically vs. some other window" because window B's own
+early span (up to 7306, already a live exact-match anchor per §7b) and
+the disputed 7307-7316 band are rendered by the literal same line of code.
+
+### 8b. A dead-end noticed and corrected before it produced a wrong conclusion: `turn5-sitrus-d.json` runs on the WRONG oracle
+
+The `n`-tap cross-reference above was first attempted using
+`turn5-sitrus-d.json` as the "known pixel-correct" comparison trace (it
+captures 7180-7312, squarely covering the disputed span, and scored
+**133/133 matched** on a live rerun). Before trusting that as ground
+truth, oracle PNGs from both runs were diff'ed directly
+(`shasum -a 256` + a numpy pixel diff): the APP's own rendered PNG at
+frame 7307 is byte-identical between the two runs (confirms §8a - same
+formula, same `t`, same output), but the **ORACLE's own PNG differs** -
+1579px, exactly the healthbox bbox. Root cause: `turn5-sitrus-d.json`
+(and its `-a/-b/-c` siblings) predate this lane's `oracleProfile` field
+convention and **do not set `"oracleProfile": "battle-scene-off"`** -
+`tools/compare/run.ts:74` defaults missing `oracleProfile` to
+`"battle-scene-on"` (documented in `AGENTS.md`: "Historical traces
+without that field remain ON-profile traces"). So `turn5-sitrus-d.json`'s
+133/133 was scored against the **Battle Scene ON** oracle
+(`127.0.0.1:8012`), a different profile with different move/animation
+timing - **not a valid ground-truth cross-reference for this OFF-profile
+lane's own window B.** This is flagged explicitly as a trap for future
+sessions: **always check a trace's own `oracleProfile` field (or its
+absence) before treating its PASS/FAIL as ground truth for a specific
+lane's oracle** - a trace name alone ("turn5-sitrus-*") gives no signal.
+Discarding this cross-reference entirely (per §8a, it was never a second
+call site anyway, so nothing of value is lost), the actual instrument that
+lands the correction is the ALREADY-COMMITTED, correctly-OFF-profile RAM
+receipt from §1 (`src/data/gen/turn5-6-reopen-bounce-probe.json`),
+re-read directly rather than re-probed (no new oracle call needed).
+
+### 8c. The correction, landed to an exact number: `+67` on the shared raw sine index
+
+For every tick `t` in the receipt's window-B range (7300-7346, RAM ticks,
+`src/data/gen/turn5-6-reopen-bounce-probe.json`), compute the model's raw
+(pre-mod-256) sine index the same way `menuIdleBounce`/`onixSinIndex`/
+`healthboxSinIndex` do (`battleMenu.ts:812-819,825-833`): `n = t - 7223`
+(i.e. `turn5SitrusResettledBounceTick(t) - 1 - MENU_BOUNCE_RAM_SETUP_TICK`,
+folding the doc's own `-5474` anchor and `menuIdleBounce`'s internal
+`ramTick-1`/`-1748` steps into one closed form), `onixRaw = 192 + 7n`,
+`hbRaw = 128 + 7n`. Comparing `(RAM_raw - model_raw) mod 256` against the
+receipt's own `onixSinIndex`/`healthboxSinIndex` fields at every one of
+14 consecutive ticks 7300-7313:
+
+```
+tick: 7300 7301 7302 7303 7304 7305 7306 7307 7308 7309 7310 7311 7312 7313
+diff:   67   67   67   67   67   67   67   67   67   67   67   67   67   67
+```
+
+**Exactly 67, for BOTH onix and healthbox, at every one of the 14 ticks,
+zero exceptions.** This directly falsifies §7c's "candidate (c)"
+(a healthbox-*specific* anchor miscalibration) - the correction is
+IDENTICAL for both fields, so it belongs upstream of where the seeds
+(128 vs 192) diverge, i.e. it is an offset on the shared `n`-derived raw
+index itself (equivalently: a `+67` fold-in wherever `7*n` is computed,
+NOT a change to either seed constant). At 7314-7315 the diff shrinks to
+60 then 53 - **exactly** accounted for by the ALREADY-KNOWN, separately-
+scoped 3-tick reopen-press hold (goal 2 from continuation 1/2: RAM holds
+constant for 2 transitions, 7313->7314 and 7314->7315, while an unfrozen
+model keeps advancing by 7/tick, so the gap shrinks by 7 per unmatched
+transition: 67, 67-7=60, 60-7=53) - and from 7315 through the end of the
+driver's active window (7346, the last tick before "kickoff text takes
+over" per §1) **the diff stays locked at exactly 53, for all 32
+consecutive ticks, zero exceptions**, confirming the hold is fully
+absorbed as a permanent 2-tick lag once both corrections are combined (see
+formula below) - not a fresh, unexplained drift.
+
+**Combined closed-form validated against the RAM receipt, all 47 ticks
+7300-7346 (not just the disputed band - per this step's own instruction):**
+```
+tEff(t) = t                              for t < 7313
+        = 7313                            for 7313 <= t <= 7315   (goal-2 freeze)
+        = t - 2                           for t > 7315             (permanent lag)
+n = tEff(t) - 7223
+onixRaw = 192 + 7n + 67   (mod 256, then table lookup, then +1 for Y2)
+hbRaw   = 128 + 7n + 67   (mod 256, then table lookup, then +1 for Y2)
+```
+Checked against the receipt's own `onixSinIndex`/`healthboxSinIndex` raw
+fields (not just the derived Y2): **47/47 ticks match exactly, zero
+exceptions** - the `+67` correction, combined with the already-scoped
+freeze, reproduces real hardware's raw sine-index driver state perfectly
+for the entire probed window. This is a materially stronger and
+differently-shaped result than §7c's own hypothesis (an "~8-tick residual
+beyond the seed-offset component" was the *magnitude* estimate there,
+but this session's 67-unit constant is not expressible as a whole-tick
+`t`-shift at all - `67 / 7 = 9.57`, not an integer, so no "evaluate N
+ticks earlier/later" formula could ever have reproduced it; only a
+constant folded in *after* the `7*n` multiplication, before the table
+lookup, works. This also confirms *why* every earlier small-integer-`t`-
+offset candidate in §2b/§7c was cleanly falsified - none of them were the
+right *kind* of correction, not just the wrong magnitude).
+
+### 8d. A second, separate, narrower residual: a sine-table-peak rounding artifact (not this correction's job)
+
+Checking the same 47 ticks at the **derived Y2** level (not raw index)
+surfaces 6 exceptions: ticks (raw, pre-display-shift) 7305, 7316, 7317,
+7326, 7335, 7344 - each exactly 9 ticks apart, i.e. wherever a field's
+`+67`-corrected raw index lands exactly on a table quarter-boundary (0,
+64, 128, 192 mod 256 - the sine table's zero-crossings/peaks). At these
+specific indices the model's `floor(table[i]/256)+1` computation disagrees
+with the RAM-recorded Y2 by exactly 1 (e.g. raw index 64: `table[64]=256`
+literal per `trig.c`, `floor(256/256)=1`, model Y2=2; RAM's own recorded
+`healthboxMainY2` at that exact tick is 1). **The raw sine index itself is
+still exactly correct at all 6 of these ticks** (confirmed against the
+receipt directly - only the table-to-Y2 rounding step disagrees) - this is
+the SAME class of artifact `battleMenu.ts:770-785`'s own doc comment
+already names for a different window/table version ("a spurious
+`table[62]=256` flips y2 from 1 to a phantom 2... that the oracle never
+actually shows"), now observed recurring at a peak of the CURRENT literal
+table too. **This is out of scope for the `+67` correction and is not
+fixed by it** - named here as a second, narrower, already-somewhat-
+precedented defect for a future session (likely: real hardware's
+`Sin(index, amplitude)` clamps or truncates differently right at the
+table's exact peak/trough than a naive `floor(table[i]/256)+amplitude`
+does). It affects a small, periodic (~1-in-9) subset of ticks, not the
+bulk of the window.
+
+### 8e. Composed prediction for `turn6-reopen-off` - corrects continuation 2's "16/46" claim
+
+§7e/§7f's "16/46" figure predates this session's finding that the
+correction is a raw-index constant, not a healthbox-only tick offset, and
+(more importantly) did not account for the interaction between this
+correction and the already-established `displayed(T) = RAM(T-1)` basis
+(§7a) at the two anchor frames. Composing all three pieces precisely,
+scoped to the span this session actually traced (displayed frames
+7305-7317, rendered via `drawTurn5RockSlideWindow`/`drawTurn6FightSubmenu
+Window`'s DMA-wait branch - both confirmed in §6a/§8a to share the exact
+formula this correction targets; frames 7318+ dispatch through a
+*different*, unexplored call site, `turn6KickoffBounceTick`, per §6e -
+out of scope):
+
+- **`+67` alone (no freeze, no display-basis fix) or freeze alone: neither
+  is sufficient** - already established (§6c/§7e for the freeze; §8c's
+  own diff table for `+67` alone would still be off by a full tick's
+  render-lag at every point).
+- **Freeze + `+67`, WITHOUT the display-basis fix** (i.e. if a fix step
+  lands only the `menuIdleBounce`/`turn5SitrusResettledBounceTick`-side
+  correction and the goal-2 freeze, but the separate `displayed(T)=RAM
+  (T-1)` rendering-lag correction from continuation 2 §7a is not also
+  applied at this call site): predicted matches in [7305,7317] = **9**
+  frames (7307-7315) - UP from the current 2 (7306, 7317), but those 2
+  anchors themselves flip to mismatching (the current formula's "accidental"
+  1-tick-early alignment, per §7c/§7f, is exactly what makes them pass
+  today; a raw-index-correct-but-not-display-lag-corrected formula no
+  longer benefits from that accident). Net for this span: 11-2+9=**18/46**
+  overall (assuming the 9 currently-matching frames outside this span,
+  listed below, are unaffected).
+- **Freeze + `+67` + the display-basis fix, all three composed** (the
+  intended end state): predicted matches in [7305,7317] = **11 of 13**
+  frames (7305, 7307-7316) - the 2 exceptions are displayed frames 7306
+  and 7317 themselves, whose basis tick (7305 and 7316 respectively) are
+  two of §8d's own 6 residual ticks. Net for this span: 11 (was 2). Total
+  = 11 (currently matching, all OUTSIDE this span - see below) + 11 (this
+  span, up from 2) = **20/46**, with 7306 and 7317 as the two
+  newly-introduced (but narrowly-scoped, §8d-explained) failures.
+
+**The 9 currently-matching frames outside [7305,7317]**, confirmed via a
+fresh live rerun this session (`npm run compare -- turn6-reopen-off
+--summary`, full 46-frame list cross-checked against `captureFrames`):
+`{7326, 7327, 7335, 7336, 7344, 7345, 7348, 7349, 7350}`. Frames 7326,
+7335, 7344 are - strikingly - the SAME "every 9 ticks" residual cadence as
+§8d's own list, strongly suggesting the *same* table-peak artifact (or its
+mirror) is already coincidentally in play past 7318 too, through the
+UNEXPLORED `turn6KickoffBounceTick` call site - **not traced this
+session**, so whether the display-basis fix (if implemented as a broader,
+non-call-site-local change) would perturb these 9 frames is a real,
+flagged unknown for the fix step, not asserted either way here.
+
+**Best-supported single number: ~20/46**, contingent on (a) the
+display-basis fix landing at this call site specifically (owned
+elsewhere, per this step's brief, by a parallel main-lane freeze
+worker - confirm its scope before relying on this figure) and (b) frames
+7318+ being genuinely unaffected by whatever that fix touches. If the
+display-basis fix does NOT land alongside `+67`+freeze, expect **18/46**
+instead, with frames 7306/7317 as REGRESSIONS from their current passing
+state - **a fix step landing `+67` without ALSO confirming the
+display-basis correction is active at this call site would look like a
+partial regression on a live rerun**, worth flagging loudly rather than
+silently accepting a lower number than hoped.
+
+### 8f. Fix shape and exact location
+
+The correction belongs in `battleMenu.ts`'s `onixSinIndex`/
+`healthboxSinIndex` (lines 813-819) OR in `menuIdleBounce` itself
+(line 825-833) - **not** in `turn5SitrusResettledBounceTick`
+(`battleSceneCanonical.ts:1019-1020`, unchanged/correct) and **not** via
+any change to the `t`/`bounceTick` argument threaded through
+`drawTurn6FieldBase` (§8c: a `t`-domain shift cannot express a
+non-multiple-of-7 correction). Because `menuIdleBounce` is shared by
+~20 other call sites across `battleScene.ts` (turns 3, 7, 8, 9, 10, the
+kickoff-bounce family, etc.), most already oracle-pinned, **the `+67`
+must NOT be a global change to `onixSinIndex`/`healthboxSinIndex`'s
+seed constants** - it needs a new, defaulted parameter (idiom already
+established throughout this file: "generalize a hardcoded value into a
+defaulted param, every pre-existing call site unaffected"), e.g.
+`menuIdleBounce(t, indexOffset = 0)` adding `indexOffset` to both raw
+indices before the mod/table-lookup step, with `drawTurn6FieldBase`'s own
+call (`battleScene.ts:14765`) passing `67` explicitly - the ONLY call
+site this session traced needing it. Whether ticks 7318+
+(`turn6KickoffBounceTick`'s own call path) need the SAME or a different
+offset is unresolved (out of scope, §8e). The goal-2 freeze itself
+(3-tick hold at `turn6ReopenPressTick`) is unchanged from continuation
+2's own fix shape (§6f) and composes with `+67` exactly as modeled in
+§8c - implement the freeze first (it is the smaller, self-contained
+change), then re-verify against §8c's 47-tick table before adding the
+offset, since the offset's own correctness was validated ASSUMING the
+freeze is present.
+
+### 8g. Goal 2 (family classification): started, not completed to per-frame granularity
+
+Fresh `npm run compare --summary` reruns of all six named traces
+(all confirmed `"oracleProfile": "battle-scene-off"` - no §8b-style trap):
+
+| trace | captureFrames | matched | bbox signature |
+|---|---|---|---|
+| `turn5-confirm-off-a` | 5958-6089 (132) | 8/132 | MIXED: 4 frames onix-only (`44,49-99,111`, 6066-6069 - class (i) shape), 5 frames healthbox-only (`127,7x-229,11x`, 6078/6083-6086 - class (ii) shape), remainder large multi-region bboxes (up to `44,49-229,111`, 8%+ diff) - class (iii) |
+| `turn5-confirm-off-b` | 6090-6221 (132) | 0/132 | Almost entirely ONE large, near-constant bbox (`16,91-221,149`, ~2.5% diff, unchanged across ~18 consecutive frames) - class (iii), not this doc's mechanism at all (region includes text/banner rows, not just sprite/healthbox) |
+| `turn5-resolve-off-a` | 6222-6417 (196) | 7/196 | Large bboxes only (`13,15-206,149` etc, 8-13% diff) - class (iii) |
+| `turn5-resolve-off-b` | 6418-6613 (196) | 71/196 | Large-ish bboxes (`16,91-78,149`-shaped, shrinking smoothly over ~15 frames - looks like a text-reveal timing lag, not bounce) - class (iii) |
+| `turn5-resolve-off-c` | 6614-6809 (196) | 149/196 | Large bboxes (`13,16-199,73`, ~10% diff, upper-screen - icon bar/banner region) - class (iii) |
+| `turn5-resolve-off-d` | 6810-7005 (196) | 0/196 | Large bboxes (`16,71-195,149` then `9,71-238,158`, up to 22% diff) - class (iii) |
+
+**Classification verdict:** only `turn5-confirm-off-a` (and marginally
+`-b`, if its own frames just past 6090 continue `-a`'s tail pattern - not
+confirmed) shows the small onix-only/healthbox-only bbox signature this
+whole document's mechanism produces; even there it is a **minority** of
+that trace's own 124 mismatching frames (9 of 124). **The overwhelming
+majority of mismatches across all six traces are class (iii) other/
+unknown** - large, multi-region bboxes (spanning text lines, banners, or
+icon-bar rows well outside the `44,49-99,11x`/`127,7x-229,11x` regions
+this doc's mechanism touches) that this session did not trace and cannot
+attribute. **Predicted counts after (freeze+`+67`+display-basis) land:**
+only derivable for the 9 small-bbox frames in `turn5-confirm-off-a`
+(plausibly move to match, by the same mechanism as §8e, not individually
+re-verified this session due to time) - the remaining ~85% of mismatches
+across the family are blocked on a completely separate investigation
+(large-region text/banner rendering, not bounce/healthbox timing) that
+this step's budget did not reach. This is explicitly the SAME conclusion
+§3c/§7 already flagged ("does NOT obviously predict turn5-confirm-off-*/
+turn5-resolve-off-* moving to full") - confirmed, not merely repeated,
+by this session's fresh per-trace bbox evidence.
+
+### 8h. §5/§6e/§7e PASS/FAIL update
+
+Rerunnable check for the `+67` correction (no oracle call needed - reads
+the already-committed receipt):
+```sh
+python3 -c "
+import json, math
+d = json.load(open('src/data/gen/turn5-6-reopen-bounce-probe.json'))
+rows = {r['tick']: r for r in d['ticks']}
+GBA=[0,6,12,18,25,31,37,43,49,56,62,68,74,80,86,92,97,103,109,115,120,126,131,136,142,147,152,157,162,167,171,176,181,185,189,193,197,201,205,209,212,216,219,222,225,228,231,234,236,238,241,243,244,246,248,249,251,252,253,254,254,255,255,255,256,255,255,255,254,254,253,252,251,249,248,246,244,243,241,238,236,234,231,228,225,222,219,216,212,209,205,201,197,193,189,185,181,176,171,167,162,157,152,147,142,136,131,126,120,115,109,103,97,92,86,80,74,68,62,56,49,43,37,31,25,18,12,6,0,-6,-12,-18,-25,-31,-37,-43,-49,-56,-62,-68,-74,-80,-86,-92,-97,-103,-109,-115,-120,-126,-131,-136,-142,-147,-152,-157,-162,-167,-171,-176,-181,-185,-189,-193,-197,-201,-205,-209,-212,-216,-219,-222,-225,-228,-231,-234,-236,-238,-241,-243,-244,-246,-248,-249,-251,-252,-253,-254,-254,-255,-255,-255,-256,-255,-255,-255,-254,-254,-253,-252,-251,-249,-248,-246,-244,-243,-241,-238,-236,-234,-231,-228,-225,-222,-219,-216,-212,-209,-205,-201,-197,-193,-189,-185,-181,-176,-171,-167,-162,-157,-152,-147,-142,-136,-131,-126,-120,-115,-109,-103,-97,-92,-86,-80,-74,-68,-62,-56,-49,-43,-37,-31,-25,-18,-12,-6]
+def bounceTickEff(t):
+    if t<7313: return t
+    if t<=7315: return 7313
+    return t-2
+ok=0
+for t in range(7300,7347):
+    n=bounceTickEff(t)-7223
+    r=rows[t]
+    assert (192+7*n+67-r['onixSinIndex'])%256==0
+    assert (128+7*n+67-r['healthboxSinIndex'])%256==0
+    ok+=1
+print(f'raw-index PASS: +67 (freeze-composed) exact-matches RAM for all {ok}/47 ticks 7300-7346')
+"
+```
+**§5's window-A count (5/32) is unaffected** - window A uses the
+"legacy"/"submenu" formulas, not `turn5SitrusResettledBounceTick`, per
+§2a/§7d; this session's correction does not touch that code path.
+**§6e/§7e's window-B count is corrected to ~20/46** (from freeze alone
+~18/46 if the display-basis fix isn't co-landed at this call site) per
+§8e, superseding "16/46" - the mechanism itself is a raw-sine-index
+constant shared by both fields, not a healthbox-only tick lag, and the
+two current exact-match anchor frames (7306, 7317) are expected to become
+new (but explained, §8d) failures rather than staying matched, unless the
+display-basis fix is ALSO active at this exact call site.
+
+### 8i. Verdict for this continuation
+
+**Goal 1: DONE**, to an exact number. The `+67` raw-sine-index correction
+(shared by onix and healthbox, applied after `seed + 7n`, before the
+table lookup) is proven, not estimated - 47/47 raw-index ticks in the
+committed RAM receipt match exactly once composed with the already-scoped
+freeze. §7c's own "healthbox-specific anchor" framing is falsified (the
+correction is field-agnostic); its "second call site" framing is also
+corrected (there is only one). A second, separate, narrower defect (a
+sine-table-peak rounding artifact, §8d) is newly surfaced and explicitly
+left unfixed. The predicted count is corrected from continuation 2's
+"16/46" to **~20/46** (or 18/46 without a co-landed display-basis fix),
+with the exact number contingent on a fix owned outside this session's
+scope (the display-basis correction, §7a) - named precisely enough
+(§8f) for a fix step to implement and re-verify against §8h's check.
+
+**Goal 2: PARTIALLY DONE.** All six family traces reconfirmed on the
+correct oracle profile; bbox-shape classification done at the trace
+level; only `turn5-confirm-off-a` shows this mechanism's own signature,
+and only in a minority (9/124) of its own mismatching frames. The
+remaining ~85% of the family's mismatches are class (iii)
+(other/unknown, large multi-region bboxes suggesting text/banner
+rendering, not bounce timing) - not investigated this session, named
+explicitly as the blocker for predicting the family's other counts.
