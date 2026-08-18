@@ -1,3 +1,48 @@
+## 1316 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S3 landed: brain-room transition wiring — both target windows CLOSED (silver 100/100, gold 126/126); ISSUES #98 deleted**
+
+- **State:** `src/engine/battleTransition.ts`, `battleScenario.ts`,
+  `factoryRoundBattleOrchestrator.ts`, `battleRoom.ts`,
+  `tools/compare/factoryRoundIntroGeneralizationStage.ts` edited; 3 test
+  files gained/adjusted assertions. `npm test` **1066 files / 10030 passed
+  / 223 skipped** (+9), `npm run build` + `npm run typecheck` green,
+  `executableFrontierRatchet` barrier counts unmoved.
+- **Did:** Wired `generateOpponentFor`'s frontier-brain branch to call
+  `selectFrontierTransition(generation.rngValue)` once and carry the result
+  on `FactoryScheduledOpponentGeneration`/`BattleOpponent.frontierBrain`'s
+  new `transitionPresentation` field; `battleRoomStateForOpponent`/
+  `createBrainWalkupBattleRoomState` now set it on the constructed room at
+  construction time (`opponentSetupExtraRngSteps` untouched — still 0 for
+  every brain phase). Found and fixed 3 issues the wiring alone didn't
+  cover: (1) the compare-tooling stage builders' own pinned dev seeds don't
+  reproduce the oracle fixtures' real seed (no app-side seed-mapping
+  exists), so the live draw picked the wrong family for both fixtures —
+  fixed with a new `frontierTransitionPresentationForTableIndex` hand-
+  derived override at the shared ready-state helpers, same idiom as
+  `speechAcceptedFast`; (2) `CIRCLES_CROSS`'s renderer (landed unwired in
+  S1, never real-pixel-tested until now) drew its edge circles from `te` 0,
+  tens of ticks before the real game creates them — MEET was invisibly safe
+  by off-screen geometry, CROSS's near-edge spawn position wasn't — fixed
+  with a `te > CIRCLE_ANCHOR_TE` draw gate (dense-evidence-derived, strict
+  `>`); (3) the fixed top/left/right paint order breaks once CROSS's top
+  circle crosses below left/right in Y partway through its slide — fixed
+  with a dynamic Y-ascending `slidingCirclePainterOrder`, shared by
+  MEET/CROSS/MEET_IN_SEQ, both fixes empirically provably inert for MEET.
+- **Result:** `factory-brain-silver-walkup-speech-flicker-off.json`
+  79/100 → **100/100**; `factory-brain-gold-walkup-speech-close-off.json`
+  113/126 → **126/126**. Full guard matrix unmoved (gold-pages 177/177,
+  silver box-2 100/100, gold-open 256/256, entrance-02/03 256/256,
+  callscene-01/02 131/131+199/199, gold close-edge 54/54, silver cry-edge
+  75/75, silver close-pause 28/28, both named canaries
+  battle7-noland-{,gold-}reveal-off 690/701). `ISSUES.md #98` deleted (both
+  windows fully closed, no open remainder). Full detail in
+  `docs/brain-transition-wiring-design.md` §8.
+- **Next:** S4 (soak, supervisor-owned) should be a confirmation pass, not
+  new work — this session's own full-suite/build/guard-matrix reruns
+  already cover its acceptance surface. #96/#97 remain open, untouched.
+- **Notes:** No PAPERCUT.
+
+---
+
 ## 1315 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S1 landed: `B_TRANSITION_FRONTIER_CIRCLES_CROSS` renderer (id 35), unwired by design — guards unmoved, red-verified Tier-1 coverage**
 
 - **State:** `src/engine/battleTransition.ts` +109/-12,

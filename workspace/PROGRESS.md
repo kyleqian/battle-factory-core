@@ -4,6 +4,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1319 — [main worker, 2026-08-17] **ISSUES #96 remainder fixed: enemy-picker ball-roll sliver — battle1-swap family now 19/19 EXACT, ISSUES #96 fully closed**
+
+- **State:** `src/engine/factorySwapPresentation.ts` +
+  `tests/factorySwapPresentation.test.ts` edited (`68235a08`). `npm test`
+  **1,066 files / 10,033 passed (+2) / 223 skipped**, `npm run build`
+  green, `tests/factorySwapPresentation.test.ts` + `tests/ballAnim.test.ts`
+  green in isolation too.
+- **Did:** implemented the probe-named fix from `docs/factory-swap-enemy-
+  picker-probe.md`'s 2026-08-17 section (citations verified against live
+  code first — line numbers had drifted slightly but the mechanism held
+  exactly as described). Replaced `advanceFactorySwapPresentation`'s single
+  `selectedPalette` boolean (which blanket-excluded ALL ball-roll RNG
+  consumption for the entire `enemySwitch`/`playerSwitch` transition) with
+  a per-ball `perBallRollEligible` array keyed off each ball's own
+  `cycledToEnemy` flag (`factorySwapEnemyBallCycleVisuals`/
+  `factorySwapPlayerSwitchBallCycleVisuals`, evaluated at the tick's own
+  `phaseElapsed`) — enemySwitch balls roll while NOT YET cycled to the gray
+  enemy side, playerSwitch balls roll once they HAVE cycled back to the
+  selected player side, matching `factorySwapRender.ts`'s own per-phase
+  `gray` sense exactly. Draw order (slot 0, 1, 2, after the caller's own
+  VBlank draw) preserved by keeping the existing single sequential loop,
+  now gated per-index instead of applying uniformly to all three. No
+  `factorySwapRender.ts` edit was needed: `enemySwitch`'s render branch
+  already reads `view.ballTiles[i]` (`factorySwapBallTiles(state)` →
+  `state.ballAnims`), which now advances correctly on its own; playerSwitch
+  keeps its already-exact, RNG-independent `factorySwapPlayerSwitchBallTiles`
+  formula untouched (its own rendering never reads `ballAnims`).
+- **Result:** `battle1-swap-enemy-picker.json` 129/130 → **130/130** (frame
+  29838 now exact). Full 19-trace `battle1-swap-*.json` family re-swept
+  end-to-end: **19/19 at their full bar**, zero drops anywhere (both
+  player-quit traces hold #96(a)'s 67/67). Two new Tier-1 tests pin the
+  per-ball eligibility semantics directly: one drives a real enemySwitch
+  transition and proves each ball keeps rolling (its internal
+  `advanceBallAnim` state changes tick-to-tick) right up to its own wrap
+  tick, then freezes dead the instant `cycledToEnemy` flips, independently
+  per ball; the other primes all three balls to a guaranteed same-tick roll
+  and proves the RNG draw order is exactly 0, 1, 2 (each ball's `pendingRest`
+  matches the corresponding link in a hand-chained `advanceRngValue` call).
+- **Docs:** `ISSUES.md #96` deleted in full (both parts (a) and (b) closed,
+  no remainder — git keeps the history). `PROGRESS.md` entry 1316 archived
+  to `PROGRESS-archive.md` to keep this ledger at 3 entries.
+- **Next:** #97 turn5/turn6 bounce-tick drift (a side probe was running on
+  it in parallel this session — check its findings before re-bisecting);
+  #71/#73-adjacent filler per standing priorities. No open battle1-swap
+  deviations remain.
+- **Notes:** the render-layer half of the probe's fix shape
+  (`factorySwapRender.ts:414-425`) turned out to be unnecessary once the
+  presentation-layer state producer was fixed — `view.ballTiles` already
+  routed through `ballAnims` for the affected phase, so the probe's
+  described *outcome* was right even though no render-layer edit was
+  required to get there. No PAPERCUT.
+
+---
 ## 1318 — [main worker, 2026-08-17] **ISSUES #96(a) fixed: swap-screen quit-return ball-slot-0 display stall — both player-quit traces 61/67 → 67/67, zero regressions across the 19-trace battle1-swap family**
 
 - **State:** `src/engine/factorySwapPresentation.ts` +
@@ -101,50 +154,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   bounce drift (re-derive against the CURRENT oracle per the banked
   forward path — regression framing is dead). (c) #71/#73-adjacent
   filler per standing priorities. No deferred questions; no blockers.
-
----
-
-## 1316 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S3 landed: brain-room transition wiring — both target windows CLOSED (silver 100/100, gold 126/126); ISSUES #98 deleted**
-
-- **State:** `src/engine/battleTransition.ts`, `battleScenario.ts`,
-  `factoryRoundBattleOrchestrator.ts`, `battleRoom.ts`,
-  `tools/compare/factoryRoundIntroGeneralizationStage.ts` edited; 3 test
-  files gained/adjusted assertions. `npm test` **1066 files / 10030 passed
-  / 223 skipped** (+9), `npm run build` + `npm run typecheck` green,
-  `executableFrontierRatchet` barrier counts unmoved.
-- **Did:** Wired `generateOpponentFor`'s frontier-brain branch to call
-  `selectFrontierTransition(generation.rngValue)` once and carry the result
-  on `FactoryScheduledOpponentGeneration`/`BattleOpponent.frontierBrain`'s
-  new `transitionPresentation` field; `battleRoomStateForOpponent`/
-  `createBrainWalkupBattleRoomState` now set it on the constructed room at
-  construction time (`opponentSetupExtraRngSteps` untouched — still 0 for
-  every brain phase). Found and fixed 3 issues the wiring alone didn't
-  cover: (1) the compare-tooling stage builders' own pinned dev seeds don't
-  reproduce the oracle fixtures' real seed (no app-side seed-mapping
-  exists), so the live draw picked the wrong family for both fixtures —
-  fixed with a new `frontierTransitionPresentationForTableIndex` hand-
-  derived override at the shared ready-state helpers, same idiom as
-  `speechAcceptedFast`; (2) `CIRCLES_CROSS`'s renderer (landed unwired in
-  S1, never real-pixel-tested until now) drew its edge circles from `te` 0,
-  tens of ticks before the real game creates them — MEET was invisibly safe
-  by off-screen geometry, CROSS's near-edge spawn position wasn't — fixed
-  with a `te > CIRCLE_ANCHOR_TE` draw gate (dense-evidence-derived, strict
-  `>`); (3) the fixed top/left/right paint order breaks once CROSS's top
-  circle crosses below left/right in Y partway through its slide — fixed
-  with a dynamic Y-ascending `slidingCirclePainterOrder`, shared by
-  MEET/CROSS/MEET_IN_SEQ, both fixes empirically provably inert for MEET.
-- **Result:** `factory-brain-silver-walkup-speech-flicker-off.json`
-  79/100 → **100/100**; `factory-brain-gold-walkup-speech-close-off.json`
-  113/126 → **126/126**. Full guard matrix unmoved (gold-pages 177/177,
-  silver box-2 100/100, gold-open 256/256, entrance-02/03 256/256,
-  callscene-01/02 131/131+199/199, gold close-edge 54/54, silver cry-edge
-  75/75, silver close-pause 28/28, both named canaries
-  battle7-noland-{,gold-}reveal-off 690/701). `ISSUES.md #98` deleted (both
-  windows fully closed, no open remainder). Full detail in
-  `docs/brain-transition-wiring-design.md` §8.
-- **Next:** S4 (soak, supervisor-owned) should be a confirmation pass, not
-  new work — this session's own full-suite/build/guard-matrix reruns
-  already cover its acceptance surface. #96/#97 remain open, untouched.
-- **Notes:** No PAPERCUT.
 
 ---
