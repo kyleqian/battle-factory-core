@@ -10897,8 +10897,7 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  */
 export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false, suppressSitrusStars: boolean = false): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
-  const shiftY = rockSlideBg3Y(t, pressTick);
-  drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
+  drawStaticBgShiftedY(fb, 0, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
   const sink = faintSinkRowsAndY2(t);
   if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
     if (!rockSlideMonBlinkInvisible(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {

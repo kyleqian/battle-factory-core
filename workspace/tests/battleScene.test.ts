@@ -184,6 +184,7 @@ import {
   rockSlideMonBlinkInvisible,
   rockSlideHealthboxWobbleY2,
   rockSlideMonShakeY2,
+  rockSlideBg3Y,
   TURN6_SUPER_EFFECTIVE_LINE,
 } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
@@ -2094,6 +2095,29 @@ describe("docs/turn5-confirmb-resolved-residuals.md §9.2 (2026-08-18, ISSUES #9
     drawTurn5RockSlideAttack(withStars, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true, false);
     drawTurn5RockSlideAttack(withoutStars, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true, true);
     expect(withStars).not.toEqual(withoutStars);
+  });
+});
+
+describe("docs/turn5-resolve-ab-pools-diagnosis.md §15.3 (2026-08-18, ISSUES #97): drawTurn5RockSlideAttack no longer shakes BG3 - real hardware's own REG_BG3VOFS never leaves 0 under Battle Scene Off anywhere in turn 5's window (§15.1's corrected-bootstrap RAM proof, full 6100-6376 scan), so rockSlideBg3Y's nonzero returns during the active-shake sub-window are no longer applied to the drawn background", () => {
+  // 6258 (rockSlideBg3Y=0) and 6259/6260 (rockSlideBg3Y=-7, the old shake's
+  // own first two nonzero ticks) - the exact pair `npm run compare --
+  // turn5-resolve-off-a` newly matches after this fix (58/196 -> 60/196,
+  // zero other frames changed).
+  const ticks = [6258, 6259, 6260];
+
+  it("sanity: rockSlideBg3Y itself still returns the old nonzero shake values at 2 of these 3 ticks - the mechanism function is untouched, only its caller changed", () => {
+    expect(ticks.map((t) => rockSlideBg3Y(t, TURN5_ROCKSLIDE_PRESS_TICK))).toEqual([0, -7, -7]);
+  });
+
+  it("row 0 (pure BG3 content at these ticks - no falling-rock sprite reaches row 0 yet) is byte-identical across all 3 ticks, matching real hardware's own static reading instead of shifting by the old -7 (pre-fix, row 0 differed at all 240 columns between 6258 and 6259/6260)", () => {
+    const rows = ticks.map((t) => {
+      const fb = new Uint8Array(240 * 160 * 4);
+      drawTurn5RockSlideAttack(fb, t, t);
+      return fb.slice(0, 240 * 4);
+    });
+    for (const row of rows.slice(1)) {
+      expect(row).toEqual(rows[0]);
+    }
   });
 });
 
