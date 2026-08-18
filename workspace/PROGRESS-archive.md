@@ -1,4 +1,63 @@
 ---
+## 1337 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s fourth mechanism and `resolve-off-d`'s spurious ONIX rotation LANDED — 173/196→195/196 and 66/196→142/196**
+
+- **State:** one green commit (`8949e4c5` fix+Tier-1 pins) plus this docs
+  commit. `npm test` **1,067 files / 10,065 passed (+7, three new pin
+  blocks) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read `docs/turn5-resolve-offc-tail-diagnosis.md` §13 (13a-13j)
+  and `docs/turn5-confirmb-resolved-residuals.md` §6 in full. Per the
+  brief's own reconciliation caveat, re-baselined first: `turn5-resolve-
+  off-c` was already **173/196** on today's tree (not §13's own 149/196
+  worktree baseline) — §11/§12's stretch/frame-toggle fix had landed on
+  `master` ahead of §13's own parallel worktree, already fully covering
+  §13f's defect 2 (the frame0/frame2 toggle; `turn5PidgeottoFrame` was
+  already deleted, wider than §13's own proposed patch). Landed the other
+  two: **defect 1** — `turn5MaterializeCoeff(t)` → `turn5MaterializeCoeff(t
+  - 1)` at `drawTurn5PidgeottoMaterialize`'s call site, the same lag
+  `drawGeneratedOpponentRelease` already corrects for. **Defect 3** —
+  §13f's own literal `extraDelay`/burst-wide-shift proposal was tried
+  first and directly disproven by experiment (regressed 17 previously-
+  exact frames, `6746-6762`); root cause is a **one-time freeze**, not a
+  uniform shift — landed via `drawCleanSwitchinParticles`'s existing
+  `stallLogicalTick` param, threaded through a new
+  `TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK` constant that lands on the
+  same render tick (6763) as `TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK`,
+  an independently RAM-pinned anchor for an unrelated component — read as
+  corroboration, not curve-fitting (confirmed: one tick either side is
+  strictly worse). Separately, landed FIX (2): `onixSitrusRotateMatrix`'s
+  periodic curve has zero RAM basis in `turn5-resolve-off-d`'s window (flat
+  static at all 108 sampled ticks/7 coordinates, §6.2) — suppressed via a
+  new `suppressSitrusRotate` flag threaded from `drawTurn5RockSlideWindow`
+  down through `drawTurn6FieldBase`/`drawTurn5RockSlideAttack` (both shared
+  across turns 6-13), defaulting `false` everywhere else.
+- **Result:** `turn5-resolve-off-c` 173/196 → **195/196** (near-full close
+  of 6763-6785; one frame, 6763 itself, keeps a 6px/0.02% anti-aliasing-
+  class residual). `turn5-resolve-off-d` 66/196 → **142/196** (closes
+  6810-6952 entirely, including the resolve-off-c carryover at 6810-6825;
+  6953-6969's own unverified ring/star residual and 6970+'s §6.3/out-of-
+  scope spans left open, exactly as §6.2 flagged). Zero decreases across
+  the full guard family: `turn5-reset-off` 256/256, `turn5-action-off`
+  32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+  `turn5-confirm-off-a` 60/132, `turn5-confirm-off-b` 37/132,
+  `turn5-resolve-off-a` 44/196, `turn5-resolve-off-b` 88/196,
+  `turn13-switchin` 242/242 (the critical shared-function guard, verified
+  empirically), `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** `turn5-resolve-off-c`'s own 6763 residual (6px) and
+  `turn5-resolve-off-d`'s 6953-6969 ring/star span (`turn5SitrusRingMatrix`/
+  `drawGrantingStars`, never independently RAM-checked) are both small,
+  named, unchased residuals. §2.5/§6.3 (the 6991-6994 transition spike,
+  re-characterized as the app transitioning early) stays explicitly out of
+  scope, next instrument named but not fix-ready. #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The brief's reconciliation caveat was load-
+  bearing: landing §13f's fixes against its own stated 149/196 baseline
+  (rather than re-deriving against today's actual 173/196 tree) would have
+  meant re-implementing already-landed defect 2. Separately, blindly
+  landing §13f's literal Fix 3 shape without the mandatory re-measurement
+  step would have shipped a 17-frame regression masked by a higher net
+  count — the family's "confirmed by direct experiment, not curve-fit"
+  discipline caught it before commit.
+
+---
 ## 1336 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s third mechanism (materialize→settled sprite transition) LANDED per `docs/turn5-resolve-offc-tail-diagnosis.md` §11 — 149/196→173/196, exactly the prediction**
 
 - **State:** one green commit (fix+Tier-1 pin) plus this docs commit.

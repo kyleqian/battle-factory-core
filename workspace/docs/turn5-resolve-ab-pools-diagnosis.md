@@ -761,3 +761,82 @@ partial beats a rushed pin"):**
 **Not fixed.** This is a named, evidence-backed partial per the brief's own
 priority ordering — (A) was the larger, higher-priority pool and consumed
 the bulk of this session's budget.
+
+## 12. Landed addendum (2026-08-18, bounded MAIN worker, fix session): §11.1's mechanism (A) landed, the `-2` constant corrected to `-1`
+
+Landed exactly the fix shape §11.1 specified: a new, disjoint
+`turn5FaintDismissElapsed: number | null` field on `BattleSceneState`
+(next to `sendOutPressElapsed`), set once in `core.ts` on the real
+`newKeys.has("A")` edge gated by `turn5RockSlideKoDismissEligible`
+(mirroring `sendOutPressElapsed`'s own "captured directly" idiom, and
+explicitly NOT threaded through `opponentFaintPresentationOwner` per
+§11.1's own "why bare reuse breaks turn 13" analysis), threaded as a new
+trailing parameter down the existing call chain
+`drawFightSubmenuWindow` → `drawTurn5EndeavorText` →
+`drawTurn5RockSlideWindow` (made optional/defaulted `null` at every hop,
+rather than the doc's own literal non-optional field, so the many
+pre-existing raw-`BattleSceneState`-literal test fixtures that predate
+this field keep compiling without a mass edit — `advanceBattleScene`
+still normalizes it to `null` every tick either way). The cursor-draw
+call site was extracted into a small, independently-testable pure
+function, `turn5FaintDismissCursorTick(t, dismissTick)`, rather than
+inlined at the call site — matching this codebase's own established
+pattern for this class of small pure helper (`turn5RockSlideKoDismiss
+Eligible`, `faintSinkRowsAndY2`, etc.), and giving the freeze-clamp
+arithmetic a direct Tier-1 pin independent of the render pipeline.
+
+**MANDATORY live-pinning caught a real bug.** §11.1 explicitly flagged
+its own hand-derived `-2` freeze-tick offset as unverified. Live-pinning
+it first (a temporary debug print of the real landing tick of
+`turn5FaintDismissElapsed`, confirmed exactly RAM tick 6561 as §11.1
+predicted, plus a fresh `npm run compare -- turn5-resolve-off-b
+--summary`) found the `-2` constant produced a CONSTANT 24px mismatch
+across the entire frozen tail 6561-6613 — the doc's own derivation had
+an off-by-one: the last NATURAL (`t-1`) input independently confirmed
+correct by the free-running span's own unbroken match is render tick
+6560 itself (not 6559, `turn5FaintDismissElapsed`'s landing tick minus
+1, not minus 2) — `cursorState(6559, cursorStart)` evaluates to offset 1
+where the real frozen value is 2; `cursorState(6560, cursorStart)`
+evaluates to the correct 2. Corrected
+`TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET` to **1**; re-ran the full
+rerunnable PASS/FAIL block after the correction, not just the target
+trace.
+
+**Numbers, exactly as predicted once the constant was corrected:**
+`turn5-resolve-off-b` 88/196 → **196/196** (exact — §11.1's own
+prediction held once the constant was fixed). `turn5-resolve-off-c`
+unchanged **195/196** (only the pre-existing 6763 residual — the hard
+guard that sank the original bare Class C attempt is untouched).
+`turn5-resolve-off-a` 56/196 → **58/196** — 1 short of §11.1's own ≥59
+prediction: 2 of the 3 named direct-hit ticks (6407, 6416) close exactly
+as predicted, but 6398 remains mismatched. This is NOT a new defect —
+6398 is the pre-existing, already-accepted 1-tick `GROVYLE_HEALTHBOX_
+VANISH_TICK` granularity residual §6d's own prediction table separately
+flagged as unrelated (ISSUES #97-C). Full guard family re-verified with
+zero decreases: `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
+`turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+`turn5-confirm-off-a` 128/132, `turn5-confirm-off-b` 131/132,
+`turn5-resolve-off-d` 159/196, `turn13-switchin` 242/242 (the
+load-bearing guard for the new, disjoint state slot claim — unaffected,
+confirming turn 5's dismiss did not leak into turn 13's owner),
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+
+**Test fallout, fixed in the same commit.** Landing this surfaced two
+pre-existing tests (`describe("rank-3 turn-5 KO dismiss mirror
+retirement"...)`, `tests/battleScene.test.ts`) that had pinned the
+OLD, since-superseded finding that a KO-dismiss A-press at trace ticks
+6561/6591 was "presentation-inert" — true of the prior, never-consumed
+mirror this doc's own §11.1 replaces, but now literally false (the real
+mechanism this fix lands DOES change state at exactly those ticks).
+Updated both to assert the new, correct behavior (the press registers
+`turn5FaintDismissElapsed` and changes nothing else) rather than
+deleting them — they remain a live regression pin against the dismiss
+edge's own isolated blast radius. `turn5FaintedCursorYOffset` itself was
+left defined but unreferenced, per §11.1's own explicit guard.
+
+**Still open, unchanged by this landing:** mechanism (B) (§11.2, the
+`resolve-off-a` 6248-6365 static-background residual) — out of this
+step's scope, side-lane territory, next instrument named in §11.2 above.
+`resolve-off-a`'s own 6398 residual (ISSUES #97-C, pre-existing,
+unrelated). `resolve-off-c`'s 6763 residual and `resolve-off-d`'s
+6970-6988/6989-7005 residuals (ISSUES #97 sub-entries I/K) — untouched.

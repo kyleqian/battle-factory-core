@@ -574,7 +574,7 @@ unchased residuals. §2.5/§6.3 (the 6991-6994 transition spike,
 re-characterized as the app transitioning early) stays out of scope, next
 instrument named but not fix-ready.
 
-### J. `resolve-off-a`'s Class A rock-slide hit-flash profile — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-resolve-ab-pools-diagnosis.md` §4); Class C attempted and reverted (hard-guard regression); Class B unresolved (new residual found, not fixed)
+### J. `resolve-off-a`'s Class A rock-slide hit-flash profile — LANDED; Class C (fainted-cursor dismiss+freeze) LANDED 2026-08-18 per `docs/turn5-resolve-ab-pools-diagnosis.md` §11.1, CLOSING `resolve-off-b` 196/196; Class B (static-bg residual) still unresolved
 
 Landed §4's fix: `drawTurn5RockSlideAttack` was the one sibling turn
 still calling the shared hit-reaction helpers (`rockSlideMonBlinkInvisible`/
@@ -585,26 +585,32 @@ transitions; shake disabled) and threaded it through all 3 call sites.
 `turn13-switchin` spot-checked first per §4c's own mandatory guard,
 unaffected (242/242).
 
-**§6's Class C (fainted-message cursor) was implemented then reverted.**
-Swapping `turn5FaintedCursorYOffset` for `cursorState(t-1, cursorStart)`
-closed `resolve-off-b`'s own targeted 6426-6560 span exactly as §6d
-predicted, but regressed the hard guard `turn5-resolve-off-c` 195/196 ->
-140/196 — that trace's own capture window (6614-6958) shares the same
-cursor-draw code path and is NOT disjoint from Class C's fix as the
-doc's own §7 PASS/FAIL table assumed. Root cause (confirmed before
-reverting, not guessed): the trace's own button list shows a KO-dismiss
-`A` press at tick 6561-6562, and the real cursor's phase visibly
-re-anchors/freezes past that point — the same class of mechanism turn
-13 already solves via `opponentFaintPresentationOwner.dismiss`/
-`frozenCursorTick`, not reproducible from a fixed pixel/RAM constant
-since the real freeze point depends on when a per-session dismiss input
-lands. Reverted byte-for-byte; the finding is recorded in
-`turn5FaintedCursorYOffset`'s own doc comment. **Next instrument:**
-thread `opponentFaintPresentationOwner`-style dismiss data into
-`drawTurn5RockSlideWindow`, mirroring turn 13's own pattern, before
-retrying the `cursorState` swap.
+**§6's Class C (fainted-message cursor) was first implemented then
+reverted (2026-08-18 rung 1)** — swapping `turn5FaintedCursorYOffset` for
+bare `cursorState(t-1, cursorStart)` closed `resolve-off-b`'s own
+6426-6560 span but regressed the hard guard `turn5-resolve-off-c`
+195/196 -> 140/196 (that trace's own capture window shares the same
+cursor-draw path past a KO-dismiss `A` press at tick 6561-6562, NOT a
+disjoint window as first assumed). **LANDED for real (2026-08-18 rung
+2)** per a side-lane instrument (`docs/turn5-resolve-ab-pools-diagnosis.md`
+§11.1, RAM-pinned via a new `dump-turn5-resolve-cursor-driver.py` probe)
+that found the real mechanism: a genuine per-session `JOY_NEW(A_BUTTON)`
+accept edge (text printer `active` 1->0 at RAM tick 6561) that freezes
+the cursor's phase, NOT reproducible from a fixed pixel/RAM constant and
+explicitly NOT reusing turn 13's `opponentFaintPresentationOwner` (a
+one-shot latch that would starve turn 13's own eligibility check). Landed
+a new, disjoint `turn5FaintDismissElapsed` field wired through the
+already-staged `turn5RockSlideKoDismissEligible`, and a
+`turn5FaintDismissCursorTick` helper that clamps `cursorState`'s own
+`t-1` input once dismissed. The diagnosis doc's own hand-derived freeze
+offset (`-2`) was explicitly flagged unverified — live-pinned via a fresh
+`npm run compare` to `-1` instead (`TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET`,
+own doc comment records the correction). **`resolve-off-b` now closes
+exactly 196/196**; `resolve-off-c` re-verified unchanged 195/196 (only
+the pre-existing 6763 residual) — the hard guard that sank rung 1 no
+longer regresses.
 
-**§5's Class B (17-frame sink tail) was not independently verified** —
+**§5's Class B (17-frame sink tail) still not independently verified** —
 blocked by a newly-found, previously-unknown mechanism: Class A's own
 fix did not fully close its own predicted 6248-6365 window. Direct RAM
 probing (`tools/probe/dump-registers.py` against `gBattle_BG3_Y`)
@@ -614,32 +620,42 @@ residual (huge ~30%-of-frame diffs at render ticks
 6259/6260/6263/6264/6267/6268) is a separate static-background rendering
 artifact, not a Class A/timing bug. A best-fit cross-correlation on a
 background column suggests a ~1-row misalignment, but a plain shift
-doesn't fully explain the observed color deltas either, pointing at a
-static-BG asset/extraction gap in the `-7`-shifted row range rather than
-a formula error. **Next instrument:** a `staticBgPixel` asset check in
-the `-7`-shifted row range, or a denser per-pixel oracle sweep across the
-shake window, before touching `drawStaticBgShiftedY`.
+doesn't fully explain the observed color deltas either. A follow-up
+side-lane instrument (§11.2) further ruled out fadeY, any integer row
+shift, and missing rock-slide sprites (confirmed suppressed under Battle
+Scene OFF, matching turn 1's own precedent) — a clean oracle-vs-oracle
+comparison found the real background barely moves at all despite
+`gBattle_BG3_Y`'s RAM-confirmed `-7`, pointing at either a different BG
+layer carrying the visible art or a static-BG asset/extraction gap, not
+a shift-application bug in `drawStaticBgShiftedY` itself. **Next
+instrument (§11.2's own, not yet run):** an OAM/`DISPCNT`/`BGxCNT` RAM
+probe at one of the 6 flagged ticks to identify which layer actually
+carries the visible sky/ground art.
 
-**Numbers:** `turn5-resolve-off-a` 44/196 -> **56/196** (Class A alone;
-short of §4d's own >=156/196 floor, attributed above — not a
-contradiction of §4a's own RAM-confirmed blink-anchor finding).
-`turn5-resolve-off-b` **88/196 unchanged** (Class A's window ends at
-6365, before this trace's window starts, exactly as §7's table
-predicted; Class C reverted so no change here either). Zero decreases
-across the full guard family: `turn5-reset-off` 256/256,
+**Numbers (as landed, this rung):** `turn5-resolve-off-a` 56/196 ->
+**58/196** (2 of the fix's own predicted 3 direct hits close; the third,
+tick 6398, is the already-accepted, unrelated 1-tick residual from
+ISSUES #97-C, not a new regression). `turn5-resolve-off-b` **88/196 ->
+196/196 (CLOSED)**. `turn5-resolve-off-c` unchanged **195/196**. Zero
+decreases across the full guard family: `turn5-reset-off` 256/256,
 `turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
-fixture 47/47, `turn5-confirm-off-{a,b}` 60/132 and 37/132,
-`turn5-resolve-off-c` 195/196, `turn5-resolve-off-d` 142/196,
-`turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
-256/256 each. One new Tier-1 pin block (`tests/battleScene.test.ts`).
+fixture 47/47, `turn5-confirm-off-{a,b}` 128/132 and 131/132,
+`turn5-resolve-off-d` 159/196, `turn13-switchin` 242/242 (the
+load-bearing guard for the new, disjoint state slot),
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each. New Tier-1
+pins for `turn5FaintDismissCursorTick` and the live-pinned freeze offset;
+the two now-obsolete "presentation-inert" KO-dismiss pins in
+`tests/battleScene.test.ts` were updated to assert the real dismiss
+instead (the mirror they documented as inert is genuinely consumed by
+rendering now).
 
 **Remaining, still open:** the static-background artifact at render
-ticks [6259,6268] (own next instrument above); the dismiss-aware cursor
-freeze for Class C (own next instrument above); Class B's own 17-frame
-tail, still unverified in isolation, blocked on the same background
-artifact dominating that span. `resolve-off-c`'s 6763 residual and
-`resolve-off-d`'s 6953-6969 ring/star span (sub-entry I) remain
-unchanged, untouched by this entry.
+ticks [6259,6268] (§11.2's own next instrument above); Class B's own
+17-frame tail, still unverified in isolation, blocked on the same
+background artifact dominating that span; `resolve-off-a`'s own 6398
+1-tick residual (ISSUES #97-C, unrelated, pre-existing).
+`resolve-off-c`'s 6763 residual and `resolve-off-d`'s 6970-6988/6989-7005
+residuals (sub-entries I/K) remain unchanged, untouched by this entry.
 
 ### K. `turn5-confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED (both near-full close, per `docs/turn5-confirm-pools-diagnosis.md` §1/§2); `resolve-off-d`'s Onix Sitrus HP display-climb formula also LANDED (per `docs/turn5-confirmb-resolved-residuals.md` §8) — 2026-08-18, bounded MAIN worker
 
