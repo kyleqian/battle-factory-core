@@ -1056,3 +1056,182 @@ candidate mechanism is identified (§13.3's occlusion finding plus §13.2's
 `BG2CNT` priority difference), and a concrete, minimal candidate fix shape is
 named (§13.4) but explicitly flagged as unverified and NOT to be landed
 without the VRAM-tile next instrument closing the row-15-44 gap first.
+
+## 14. Side-lane instrument session (2026-08-18, third): §13.4's own named
+VRAM-tile next instrument, run - BG0/BG2 definitively ruled out as the
+occluder (fully transparent, byte-identical both turns); BG1 carries real
+but narrow, non-explanatory content; rows 0/10's exact-static mystery is
+UNRESOLVED, not closed by any BG-layer occlusion
+
+ANALYSIS ONLY, side lane, Battle Scene OFF oracle - `git diff -- src/` is
+empty throughout this session. New committed probe,
+`tools/probe/dump-turn5-resolve-offa-bg02-vram-census.py` (BG0/BG1/BG2
+tilemap + 4bpp tile pixel content, full HOFS/VOFS scroll-wraparound
+accounting across up to 4 screenblocks per layer, plus the 512-byte BG
+palette and HBlank-IRQ enable state, per requested tick). Baseline
+reconfirmed fresh at session start and again after: `turn5-resolve-off-a`
+58/196 (unchanged), `turn6-rockslide-a` 255/255, `turn5-resolve-off-b`
+196/196, `turn5-resolve-off-c` 195/196, `turn5-resolve-off-d` 194/196,
+`turn5-reset-off` 256/256, `turn5-action-off` 32/32 - all bit-for-bit the
+same as the 758107d9 baselines this step's brief named.
+
+### 14.1 BG0 and BG2 are provably, byte-identically TRANSPARENT across the
+entire flagged region, in both turns - the BG2CNT priority-field difference
+is NOT causal
+
+§13.4's own named next instrument: dump BG0 (screenBase 24) and BG2
+(screenBase 30) tile/tilemap content at a flagged turn-5 tick vs. the turn-6
+analog, to see what those layers actually carry. Run at turn 5's own
+baseline/shifted-tick pair (6258/6259, plus 6263/6264 for stability) and
+turn 6's own analog pair (7801/7802, plus 7806/7807):
+
+- Both layers' HOFS/VOFS are 0 in both turns (matches §13.2's own already-
+  recorded hardware read).
+- Sampling the FULL visible screen region for both layers (240x64px, i.e.
+  tile rows 0-7 / cols 0-29 - covers rows 0/10, §13.3's own proven-static
+  rows, and the entire unresolved row-15-44 residual band with margin)
+  shows **every single entry, in both layers, in both turns, at every
+  sampled tick, is tile index 0 with all-zero (fully transparent) 4bpp
+  pixel data** - not "mostly empty," literally zero opaque pixels anywhere
+  in the sampled region. `bg0`/`bg2` bbox-of-opaque-content is empty
+  (`(999,-1,999,-1)`) for both turns.
+- This is **decisive, not suggestive**: BG0 and BG2 contribute **nothing
+  visible** at these rows in either turn, so BG2CNT's priority field (0 for
+  turn 5, 2 for turn 6 - §13.2's own "one confirmed register-level
+  candidate, not yet proven causal") **cannot be the occluder** - a
+  transparent layer occludes nothing regardless of its z-order. §13.2's own
+  flagged candidate is now **proven non-causal**, not merely undemonstrated.
+
+### 14.2 BG1 carries real, RAM-confirmed content and its own genuine ~7px
+VOFS difference between turns - but it is too narrow and starts too low to
+explain rows 0/10, or the full-width residual
+
+BG1 (priority 2 in both turns, CNT otherwise identical per §13.2) was not
+part of §13.4's own named instrument but was added this session once
+BG0/BG2 turned out empty, since it is the only remaining opaque-content BG
+candidate. Findings, same tick pairs:
+
+- **BG1's own VOFS genuinely differs between the two turns**: raw hardware
+  register reads 500 (turn 5) vs. 493 (turn 6) at every sampled tick in each
+  window (HOFS identical, 368, in both) - a real, previously-unremarked
+  hardware difference. (§13.2's own prior probe recorded this value in its
+  raw JSON output but its written summary only called out CNT-register
+  equality, not VOFS/HOFS - this session is the first to act on it.)
+- BG1's opaque content is a single narrow object: bbox rows 16-63 / cols
+  18-25 (turn 5), rows 25-63 / cols 19-24 (turn 6) - i.e. roughly 48-64px
+  wide, starting at x=144px, and **never present above row 16 in either
+  turn**.
+- Comparing turn 5's content at screen row Y against turn 6's content at
+  screen row Y+7 (matching the two turns' own 7px VOFS delta) matches on
+  tile index/flip at 982/1230 = 80% of cells in the overlapping band (rows
+  16-56) - consistent with this being the **same object**, merely
+  repositioned by the same real VOFS delta, not a different object.
+- BG1 uses palette bank 8 exclusively (plus bank 0's transparent index), and
+  bank 8's own 16 colors differ completely between turn 5 and turn 6 (all 16
+  entries, not a subset) - the object's color, not just its position,
+  differs between turns.
+- **This does not explain §13.3's own rows-0/10 exact-static finding**:
+  nothing from BG0, BG1, or BG2 is present at rows 0 or 10 in EITHER turn
+  (BG1's own content starts at row 16 at the earliest). Those two rows are
+  100% BG3-sourced in both turns, with no occluding layer above them at all.
+
+### 14.3 One cheap remaining lead checked and ruled out: HBlank IRQ is
+disabled throughout both windows
+
+A once-per-tick RAM snapshot (this probe's own method, and §13.2's own
+prior probe) cannot see a mid-frame scanline-split scroll rewrite (a
+standard GBA technique: an HBlank IRQ handler that changes BGnVOFS partway
+down the frame, so only some scanlines show a shift even though the
+end-of-frame/shadow value reads uniformly). This session added a direct
+check: `REG_IE` bit 1 (HBlank IRQ enable) and `REG_DISPSTAT` bit 4 (HBlank
+IRQ enable) are both **False** at every sampled tick in both turns. This
+doesn't prove no mid-frame effect exists (a handler could enable/disable the
+IRQ faster than our once-per-tick sampling cadence), but there is no
+positive evidence for one, and it rules out the simplest, standing-enabled
+form of that hypothesis.
+
+### 14.4 What this means for the fix: the row-0/10 gap is NOT closed; the
+candidate fix remains unverified, now for a sharper reason
+
+**§13.4's own instrument is complete, and it does not close the gap it was
+named to close.** The prior session's own framing was: "if BG2's own tile
+data turns out to be identical between turn 5 and turn 6 too, the
+flat-static finding in §13.3 would need re-explaining from OAM/sprite
+occlusion instead." That antecedent is now true (BG2 - and BG0 - are
+identical, empty, in both turns), so its own consequent applies: **the
+explanation is not a BG-layer occlusion difference at all.** Every
+hardware-visible BG-layer signal (registers, tilemap, tile pixels, palette)
+that could occlude BG3 at rows 0/10 has now been read directly and is
+either absent (BG0/BG2) or geometrically excluded (BG1, which never reaches
+row 16). The mystery §13.3 raised - the real screen not moving at rows 0/10
+despite BG3VOFS genuinely, RAM-confirmedly cycling -7, using rendering code
+proven bit-exact elsewhere - is **unresolved by this session**, not merely
+"not yet proven."
+
+**The candidate fix named in §13.4 (turn 5's
+`drawStaticBgShiftedY(fb, shiftY, ...)` becoming
+`drawStaticBgShiftedY(fb, 0, ...)`) must still NOT be recommended as
+landable on this session's evidence.** It remains empirically consistent
+with the two proven-static rows (0 and 10 both show what a flat shiftY=0
+would produce - true in both turns, an outcome-level match) and would leave
+the row-15-44 residual (§13.4's own ~4.6-6.6%, not fully re-derived this
+session) only PARTIALLY addressed at best: BG1's own narrow blob (cols
+18-25 only, ~1/4 of the screen width) cannot account for a full-width
+residual, so most of that band's real cause is still unidentified even
+after this session.
+
+**Next instrument, named precisely per the family's own "honest partial"
+discipline, and the one the doc has pointed at since §13.4 without yet
+running it:** the OAM/sprite census `dump-turn5-resolve-offa-sprite-
+census.py` already exists (§11.2's own citation) but its prior run only
+checked already-known battler/icon-bar sprites' positions, not every
+sprite's bbox against rows 0-63 specifically for occlusion purposes. Re-run
+it at the same tick pairs used here (6258/6259/6263/6264 vs.
+7801/7802/7806/7807), this time computing each of the 64 `gSprites[]`
+slots' own screen bbox (including any not-yet-attributed slot) and
+intersecting against rows 0-63 for both turns - if a sprite occupies rows
+0/10 in one turn and not the other (or with different opacity/priority),
+that is the closing piece of evidence. If OAM also turns out empty/
+identical at those exact rows in both turns, the remaining candidate is the
+mid-frame HBlank-toggle hypothesis (§14.3) - which would need an
+instruction-level or multiple-reads-per-frame probe that this probe family
+has not yet built (not confirmed unavailable in the harness - just not
+attempted by any probe so far, this one included).
+
+### 14.5 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 58/196, unchanged (ANALYSIS ONLY - no src/ edit this session)
+npm run compare -- turn6-rockslide-a --summary     # 255/255
+npm run compare -- turn5-resolve-off-b --summary   # 196/196
+npm run compare -- turn5-resolve-off-c --summary   # 195/196 (pre-existing 6763 residual)
+npm run compare -- turn5-resolve-off-d --summary   # 194/196
+npm run compare -- turn5-reset-off --summary       # 256/256
+npm run compare -- turn5-action-off --summary      # 32/32
+```
+
+Probe rerun (writes fresh JSON per turn; an mGBA teardown SIGSEGV after
+valid JSON is written is expected and benign per `tools/run-mgba-probe.py`'s
+own docstring):
+
+```sh
+python3 tools/run-mgba-probe.py /tmp/vram-turn5.json -- \
+  tools/probe/dump-turn5-resolve-offa-bg02-vram-census.py \
+  tools/compare/traces/turn5-resolve-off-a.json /tmp/vram-turn5.json 6258 6259 6263 6264
+python3 tools/run-mgba-probe.py /tmp/vram-turn6.json -- \
+  tools/probe/dump-turn5-resolve-offa-bg02-vram-census.py \
+  tools/compare/traces/turn6-rockslide-a.json /tmp/vram-turn6.json 7801 7802 7806 7807
+```
+
+**Not fixed.** `git diff -- src/` remains empty. §13.4's own next instrument
+is run in full and its own conditional "re-explain from OAM/sprite occlusion
+instead" branch is now the live path: BG0/BG2 are proven non-occluders
+(transparent, identical), BG1 is real but geometrically excluded from rows
+0/10, and the row-0/10 exact-static mystery central to this whole residual
+remains open. The next session's fix worker should NOT land the §13.4
+candidate fix from this doc alone without first running the OAM/sprite
+census named in §14.4 above - if that also comes back empty at rows 0/10,
+the doc should say so explicitly and escalate to the HBlank/scanline-split
+hypothesis, which needs a new instrument this probe family cannot yet
+provide.
