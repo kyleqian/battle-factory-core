@@ -10607,7 +10607,11 @@ function drawSpriteSheetTopClipped(fb: Uint8Array, tileset: Tileset, palette: Rg
  * ticks 6746-6759 (6746 = `MATERIALIZE_START_OFFSET`'s own first-tint
  * tick exactly, both driven by the same `LaunchBallFadeMonTask` handoff),
  * holds white 6760-6767, ramps back down 6768-6781, settled (0, plain
- * `drawStaticBgShiftedY`) from 6782 on.
+ * `drawStaticBgShiftedY`) from 6782 on. Shared verbatim by
+ * `turn13MurkrowBgFadeY` (own window, own anchor) and `turn15
+ * ReleaseFieldPalette` (forced-switch MAGBY release) via
+ * `cleanSwitchinBgFadeY` - both oracle-confirmed exact against this
+ * 36-entry shape, unchanged below.
  */
 
 const TURN5_BG_FADE_Y: readonly number[] = [
@@ -10616,8 +10620,25 @@ const TURN5_BG_FADE_Y: readonly number[] = [
 function cleanSwitchinBgFadeY(logicalTick: number): number {
   return TURN5_BG_FADE_Y[logicalTick] ?? 0;
 }
-function turn5BgFadeY(t: number): number {
-  return cleanSwitchinBgFadeY(t - TURN5_BG_FADE_START_TICK);
+
+/**
+ * `docs/turn5-resolve-offc-tail-diagnosis.md` §4d (2026-08-18, ISSUES #97
+ * remainder): turn 5's OWN Pidgeotto switch-in needs a different peak-hold
+ * length than the shared `TURN5_BG_FADE_Y` above - direct pixel comparison
+ * against the oracle (§4c) found this window's falling edge stepping down
+ * one render tick too early at every boundary (6768/6772/6776/6780); one
+ * more held-16 entry (8->9) shifts the whole falling edge one tick later,
+ * matching that doc's own pixel-derived ground truth. Deliberately a
+ * SEPARATE table, not an edit to `TURN5_BG_FADE_Y` itself - extending the
+ * shared table regressed `turn13-switchin` 242/242 -> 234/242 (oracle-
+ * confirmed this session), so Murkrow's own turn-13 window really does
+ * need the original 8-entry hold while Pidgeotto's turn-5 window needs 9.
+ */
+const TURN5_PIDGEOTTO_BG_FADE_Y: readonly number[] = [
+  2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16, 16, 14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2,
+];
+export function turn5BgFadeY(t: number): number {
+  return TURN5_PIDGEOTTO_BG_FADE_Y[t - TURN5_BG_FADE_START_TICK] ?? 0;
 }
 
 /**
@@ -11144,20 +11165,21 @@ function pidgeottoHealthboxContentForHp(hp: number): ReturnType<typeof composeOp
 }
 
 /**
- * S7 slice M (docs/faint-switch-notes.md §8e, re-timed this session): Pidgeotto's
- * own healthbox slide-in - bit-for-bit the same 23-step `healthboxSlideDx`
- * shape as S6's own send-out, re-anchored at `TURN5_PIDGEOTTO_SETTLE_TICK + 1`
- * (6829). §8e's own RAM probe cites RAM tick 6828 for the slide task's own
- * `callback` flip - this render anchor needs the ordinary +1 RAM-to-render
- * lag every other mechanism in this dossier carries (first pixel-confirmed
- * this session directly: a naive render anchor of 6828 reproduces the
- * oracle's own slide sequence exactly one tick EARLY throughout, `tools/
- * compare/out` diff isolated the whole mismatch to this single off-by-one -
- * onset of visible content 6830 (app) vs 6831 (oracle), settle 6851 (app) vs
- * 6852 (oracle), a constant 1-tick gap at every sample). Settles at 6851.
+ * S7 slice M (docs/faint-switch-notes.md §8e) + `docs/turn5-resolve-offc-
+ * tail-diagnosis.md` §3 (2026-08-18, ISSUES #97 remainder): Pidgeotto's own
+ * healthbox slide-in - bit-for-bit the same 23-step `healthboxSlideDx`
+ * shape as S6's own send-out. Previously anchored at
+ * `TURN5_PIDGEOTTO_SETTLE_TICK + 1` (6829) - that constant is the SPRITE's
+ * own separate materialize-finish tick, not the healthbox's own onset;
+ * the diagnosis's RAM probe (`dump-turn5-resolve-offc-tail-probe.py`,
+ * `gHealthboxSpriteIds[1]`) pins the healthbox's own real slide-in start
+ * at RAM tick 6762 (render 6763, the usual +1 RAM-to-render lag), holds
+ * one extra tick, then ramps +5/tick to settle at render 6786 - hand-
+ * verified bit-exact against that table (§3c).
  */
+const TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK = 6763;
 export function turn5PidgeottoHealthboxSlideDx(t: number): number | null {
-  return healthboxSlideDx(t, TURN5_PIDGEOTTO_SETTLE_TICK + 1);
+  return healthboxSlideDx(t, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, HEALTHBOX_SLIDE_START_DX, true);
 }
 
 function drawTurn5PidgeottoMaterialize(fb: Uint8Array, t: number): void {

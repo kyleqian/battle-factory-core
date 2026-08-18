@@ -61,11 +61,11 @@ import {
   TURN5_ICONBAR_FADE_START_TICK,
   TURN5_OPPONENT_ICON_STATES,
   turn3SubmenuBounceTickFromPresentationEpochAge,
+  turn5BgFadeY,
   turn5IconBarEva,
   turn5MaterializeCoeff,
   turn5PidgeottoHealthboxSlideDx,
   turn5RockSlideKoDismissEligible,
-  TURN5_PIDGEOTTO_SETTLE_TICK,
   TURN7_REGIME2_TO_REGIME1_SHIFT,
   TURN8_REGIME3_TO_REGIME1_SHIFT,
   turn6KickoffBounceTick,
@@ -1821,20 +1821,43 @@ describe("S7 slice L-4: turn5MaterializeCoeff (docs/faint-switch-notes.md §10 c
   });
 });
 
-describe("S7 slice M: turn5PidgeottoHealthboxSlideDx (docs/faint-switch-notes.md §8e/§11 - same 23-step linear slide as S6's own send-out healthbox, re-anchored TURN5_PIDGEOTTO_SETTLE_TICK+1 - the +1 is a pixel-verified correction this session, a naive TURN5_PIDGEOTTO_SETTLE_TICK anchor reproduced the oracle's own sequence exactly one tick early throughout)", () => {
-  it("is null (not yet created) before the mon's own materialize settles", () => {
-    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK - 1)).toBeNull();
-    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK)).toBeNull();
+describe("S7 slice M: turn5PidgeottoHealthboxSlideDx (docs/turn5-resolve-offc-tail-diagnosis.md §3c, 2026-08-18, ISSUES #97 remainder - re-anchored to the healthbox's OWN RAM-pinned onset (render 6763), not the unrelated sprite materialize-settle tick it was previously wired to)", () => {
+  it("is null (not yet created) before render 6763", () => {
+    expect(turn5PidgeottoHealthboxSlideDx(6761)).toBeNull();
+    expect(turn5PidgeottoHealthboxSlideDx(6762)).toBeNull();
   });
-  it("starts at -110 the tick it's created and climbs +5/tick", () => {
-    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK + 1)).toBe(-110);
-    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK + 2)).toBe(-105);
-    expect(turn5PidgeottoHealthboxSlideDx(TURN5_PIDGEOTTO_SETTLE_TICK + 22)).toBe(-5);
+  it("onsets at -110, holds one extra tick, then climbs +5/tick", () => {
+    expect(turn5PidgeottoHealthboxSlideDx(6763)).toBe(-110);
+    expect(turn5PidgeottoHealthboxSlideDx(6764)).toBe(-110);
+    expect(turn5PidgeottoHealthboxSlideDx(6765)).toBe(-105);
+    expect(turn5PidgeottoHealthboxSlideDx(6785)).toBe(-5);
   });
-  it("settles to 0 at render 6851 (22 steps after the +1-lagged creation tick 6829) and stays settled indefinitely", () => {
-    expect(turn5PidgeottoHealthboxSlideDx(6851)).toBe(0);
-    expect(turn5PidgeottoHealthboxSlideDx(6852)).toBe(0);
+  it("settles to 0 at render 6786 (§3a's own RAM-pinned settle tick) and stays settled indefinitely", () => {
+    expect(turn5PidgeottoHealthboxSlideDx(6786)).toBe(0);
+    expect(turn5PidgeottoHealthboxSlideDx(6787)).toBe(0);
     expect(turn5PidgeottoHealthboxSlideDx(7000)).toBe(0);
+  });
+});
+
+describe("S7 slice L-3: turn5BgFadeY (docs/turn5-resolve-offc-tail-diagnosis.md §4d, 2026-08-18, ISSUES #97 remainder - peak hold extended 8->9 entries so the falling edge starts one render tick later, pixel-verified against the oracle)", () => {
+  it("ramps 0->16 over the rise (unchanged by this fix)", () => {
+    expect(turn5BgFadeY(6745)).toBe(0);
+    expect(turn5BgFadeY(6746)).toBe(2);
+    expect(turn5BgFadeY(6759)).toBe(14);
+  });
+  it("holds at peak 16 through render 6768 (the extended hold - previously fell to 14 here)", () => {
+    expect(turn5BgFadeY(6760)).toBe(16);
+    expect(turn5BgFadeY(6767)).toBe(16);
+    expect(turn5BgFadeY(6768)).toBe(16);
+  });
+  it("falls starting render 6769, one tick later than before the fix", () => {
+    expect(turn5BgFadeY(6769)).toBe(14);
+    expect(turn5BgFadeY(6770)).toBe(14);
+    expect(turn5BgFadeY(6782)).toBe(2);
+  });
+  it("settles to 0 from render 6783 on", () => {
+    expect(turn5BgFadeY(6783)).toBe(0);
+    expect(turn5BgFadeY(7000)).toBe(0);
   });
 });
 
