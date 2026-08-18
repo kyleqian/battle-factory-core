@@ -258,51 +258,14 @@ export const SWITCHIN_SENTOUT_LINE1 = "BUG CATCHER DESTIN sent";
 
 export const SWITCHIN_SENTOUT_TEXT_START_TICK = 6687;
 
+/**
+ * `docs/turn5-resolve-offc-tail-diagnosis.md` §11d (2026-08-18, ISSUES #97
+ * remainder): still consumed by `tools/probe/analyze-turn5-resolve-offc-
+ * tail-app-series.ts`'s own receipt, but no longer by `drawTurn5PidgeottoMaterialize`
+ * -- the RAM-flat affine matrix this tick used to gate a settle-wobble
+ * table (`TURN5_STRETCH_TABLE`, since deleted, no RAM basis) never engaged.
+ */
 export const TURN5_STRETCH_TICK = 6786;
-
-export const TURN5_STRETCH_TABLE: readonly { xScale: number; yScale: number; y2: number }[] = [
-  { xScale: 256, yScale: 256, y2: 0 },
-  { xScale: 257, yScale: 254, y2: 0 },
-  { xScale: 258, yScale: 251, y2: 0 },
-  { xScale: 259, yScale: 248, y2: -1 },
-  { xScale: 260, yScale: 245, y2: -1 },
-  { xScale: 262, yScale: 241, y2: -1 },
-  { xScale: 263, yScale: 239, y2: -2 },
-  { xScale: 264, yScale: 236, y2: -2 },
-  { xScale: 265, yScale: 234, y2: -2 },
-  { xScale: 266, yScale: 231, y2: -3 },
-  { xScale: 267, yScale: 221, y2: -4 },
-  { xScale: 268, yScale: 222, y2: -4 },
-  { xScale: 268, yScale: 229, y2: -3 },
-  { xScale: 269, yScale: 231, y2: -3 },
-  { xScale: 270, yScale: 222, y2: -4 },
-  { xScale: 270, yScale: 213, y2: -5 },
-  { xScale: 271, yScale: 215, y2: -5 },
-  { xScale: 271, yScale: 223, y2: -4 },
-  { xScale: 271, yScale: 225, y2: -3 },
-  { xScale: 271, yScale: 218, y2: -4 },
-  { xScale: 272, yScale: 209, y2: -5 },
-  { xScale: 271, yScale: 212, y2: -5 },
-  { xScale: 271, yScale: 222, y2: -4 },
-  { xScale: 271, yScale: 226, y2: -3 },
-  { xScale: 271, yScale: 219, y2: -4 },
-  { xScale: 270, yScale: 213, y2: -5 },
-  { xScale: 270, yScale: 216, y2: -5 },
-  { xScale: 269, yScale: 227, y2: -3 },
-  { xScale: 269, yScale: 232, y2: -3 },
-  { xScale: 268, yScale: 227, y2: -3 },
-  { xScale: 267, yScale: 228, y2: -3 },
-  { xScale: 266, yScale: 230, y2: -3 },
-  { xScale: 265, yScale: 233, y2: -2 },
-  { xScale: 264, yScale: 235, y2: -2 },
-  { xScale: 263, yScale: 238, y2: -2 },
-  { xScale: 262, yScale: 241, y2: -1 },
-  { xScale: 261, yScale: 244, y2: -1 },
-  { xScale: 259, yScale: 247, y2: -1 },
-  { xScale: 258, yScale: 250, y2: 0 },
-  { xScale: 257, yScale: 253, y2: 0 },
-  { xScale: 256, yScale: 256, y2: 0 },
-];
 
 export const TURN13_BALL_HANDOFF_AFTER_DISMISS = 164;
 
@@ -1296,36 +1259,63 @@ export function turn5IconBarEva(t: number, fadeStartTick: number = TURN5_ICONBAR
  *    sprite's own scale stays neutral throughout (the stretch driver's
  *    `data4`/`data5` don't engage until RAM 6785, several ticks after the
  *    ramp reaches coefficient 0).
- * 2. **Wobble table** (render 6786-6826, `TURN5_STRETCH_TICK`-anchored):
- *    once the stretch driver's own callback engages (RAM 6784), `data4`/
- *    `data5`/`y2` (`xScale`/`yScale`/`y2`) oscillate in a small,
- *    non-monotonic band around neutral (256, max deviation ~272/209, i.e.
- *    an ~6% wobble, not a real stretch) before returning to exactly
- *    `(256,256,0)` at the last entry - RAM ground truth, not curve-fit,
- *    same precedent as `GROVYLE_STRETCH_TABLE`. Palette coefficient is 0
- *    (true colors) for this entire phase (confirmed via the same palette
- *    probe). Settles to the plain, untransformed sprite at
- *    `TURN5_PIDGEOTTO_SETTLE_TICK` (RAM 6827's own idle callback, visible
- *    render 6828) - species-dossier slice 7: now
- *    `TURN5_SWITCHIN.materializeSettleTick`, `turn5ResolutionAdapter.ts`'s
- *    own adapter-owned fact, not an independently hand-derived literal here.
+ * 2. **~~Wobble table~~ - CORRECTED 2026-08-18, ISSUES #97 remainder**
+ *    (`docs/turn5-resolve-offc-tail-diagnosis.md` §11, superseding this
+ *    item's original claim below): the "RAM ground truth" cited here was
+ *    wrong. A direct RAM reprobe of `gBattlerSpriteIds[1]`'s own affine
+ *    matrix (`dump-turn5-pidgeotto-materialize-settle-probe.py`) found
+ *    `a=d=256,y2=0` FLAT from RAM 6756 clear through RAM 6835+ - thirty
+ *    render ticks before this item's own `render 6786` start and eighty-
+ *    plus past its own `6826` end. There is no stretch driver, no wobble,
+ *    no `doubled` affine mode engaged anywhere in this window; the sprite's
+ *    own idle callback (`SpriteCB_OpponentMonFromBall` ->
+ *    `SpriteCallbackDummy`) flips at RAM 6760 (render 6761), not RAM 6827.
+ *    `TURN5_STRETCH_TABLE` (the literal table this item used to describe)
+ *    has been deleted; phase 1's own tinted-blend formula now runs
+ *    unconditionally through the whole materialize window instead and
+ *    already saturates to this exact flat end-state for large `t` - see
+ *    `drawTurn5PidgeottoMaterialize`'s own doc comment in battleScene.ts.
+ *    Original (wrong) text, kept for the forensic record: once the stretch
+ *    driver's own callback engages (RAM 6784), `data4`/`data5`/`y2`
+ *    (`xScale`/`yScale`/`y2`) oscillate in a small, non-monotonic band
+ *    around neutral (256, max deviation ~272/209, i.e. an ~6% wobble, not a
+ *    real stretch) before returning to exactly `(256,256,0)` at the last
+ *    entry - RAM ground truth, not curve-fit, same precedent as
+ *    `GROVYLE_STRETCH_TABLE`. Palette coefficient is 0 (true colors) for
+ *    this entire phase (confirmed via the same palette probe). Settles to
+ *    the plain, untransformed sprite at `TURN5_PIDGEOTTO_SETTLE_TICK` (RAM
+ *    6827's own idle callback, visible render 6828) - species-dossier slice
+ *    7: now `TURN5_SWITCHIN.materializeSettleTick`,
+ *    `turn5ResolutionAdapter.ts`'s own adapter-owned fact, not an
+ *    independently hand-derived literal here.
  *
- * Front-sprite frame selection (`turn5PidgeottoFrame`) uses the RAM-
- * confirmed `animCmdIndex` transition ticks directly (render = RAM+1: 6761,
- * 6766, 6776, 6786, 6821) with an even/odd-index parity heuristic (no
- * species-specific frame-duration table was extracted for Pidgeotto this
- * session, unlike Grovyle's own `battleAnimTables.grovyleFrontAnim`) -
- * verified empirically against the oracle's own pixels in this window (see
- * `turn5-switchin.json`'s own 0-diff verification), not assumed.
+ * Front-sprite frame selection (`turn5PidgeottoFrame`, this dossier's own
+ * former claim below) - REMOVED 2026-08-18 (ISSUES #97 remainder, landing
+ * `docs/turn5-resolve-offc-tail-diagnosis.md` §11d/§11f). The claimed
+ * RAM-confirmed `animCmdIndex` transitions at renders 6766/6776/6786/6821
+ * are contradicted by this session's own denser RAM reprobe (§11a,
+ * `dump-turn5-pidgeotto-materialize-settle-probe.py`): the real sprite is
+ * dead static - zero change of ANY kind, affine matrix and callback alike -
+ * from RAM 6756 clear through the probe's own end (6835+), spanning every
+ * one of those claimed transition ticks. Confirmed independently this
+ * session by direct RGB sampling of the oracle's own captured PNGs
+ * (`turn5-resolve-off-c`, renders 6784-6809, coordinates `(175,30)`/
+ * `(190,50)`): the real captures hold pixel-identical at every sampled
+ * tick, while this function's own frame-2 branch flip produced a
+ * different, wrong color starting exactly at render 6786 - forcing frame 0
+ * unconditionally closes that entire span to 0px (`npm run compare --
+ * turn5-resolve-off-c`, landing exactly at §11f's own predicted 173/196).
+ * `drawTurn5PidgeottoMaterialize` now uses `pidgeottoFrontSprite.tileset`
+ * (frame 0) unconditionally; `pidgeottoFrontSprite.frame2` was never a real
+ * frame this call site should have reached. Original (wrong) claim, kept
+ * for the forensic record: uses the RAM-confirmed `animCmdIndex` transition
+ * ticks directly (render = RAM+1: 6761, 6766, 6776, 6786, 6821) with an
+ * even/odd-index parity heuristic (no species-specific frame-duration
+ * table was extracted for Pidgeotto this session, unlike Grovyle's own
+ * `battleAnimTables.grovyleFrontAnim`) - verified empirically against the
+ * oracle's own pixels in this window (see `turn5-switchin.json`'s own
+ * 0-diff verification), not assumed.
  */
-export function turn5PidgeottoFrame(t: number): 0 | 1 {
-  if (t < 6761) return 0;
-  if (t < 6766) return 0;
-  if (t < 6776) return 1;
-  if (t < 6786) return 0;
-  if (t < 6821) return 1;
-  return 0;
-}
 
 
 

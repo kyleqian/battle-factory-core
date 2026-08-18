@@ -15,6 +15,7 @@ import {
   drawKabutoHSlideWobble,
   drawPlayerMaterializeSettle,
   drawSpriteSheetAffineRotate,
+  drawSpriteSheetAffineTintedBlend,
   drawTurn15ForcedSwitchRelease,
   endeavorShakeSteps,
   evaEvb,
@@ -1907,6 +1908,44 @@ describe("S7 slice M-3 (docs/faint-switch-notes.md §12/§13): drawSpriteSheetAf
     const fb = render(0, 256, -256, 0);
     expect(pixelAtOffset(fb, 2, 2)).toEqual([200, 50, 80]); // tex(6,2)
     expect(pixelAtOffset(fb, -1, -3)).toEqual([10, 220, 30]); // tex(1,5)
+  });
+});
+
+describe("docs/turn5-resolve-offc-tail-diagnosis.md §11d/§11f (2026-08-18, ISSUES #97 remainder): drawTurn5PidgeottoMaterialize's own formula converges to a plain, untransformed draw for large t, matching §11a's RAM-confirmed static end-state - pinning drawSpriteSheetAffineTintedBlend's degenerate case directly (accumulator=256, tintCoeff=0, y2=0: exactly the values turn5MaterializeCoeff/affineEmergeAccumulator/MATERIALIZE_Y2_TABLE all fall back to once t clears their own tables), since the STRETCH_TICK branch that used to divert away from this formula past render 6786 has been deleted", () => {
+  // 1 tile (8x8), two marked texels: (col=6,row=2) -> palette index 1, (col=1,row=5) -> palette index 2.
+  const tile = new Array(64).fill(0);
+  tile[2 * 8 + 6] = 1;
+  tile[5 * 8 + 1] = 2;
+  const tileset = { columns: 1, rows: 1, tiles: [tile] };
+  const palette = [
+    { r: 0, g: 0, b: 0 },
+    { r: 200, g: 50, b: 80 },
+    { r: 10, g: 220, b: 30 },
+  ];
+  const CORNER_X = 100;
+  const CORNER_Y = 60;
+  const TINT_COLOR = { r: 255, g: 173, b: 0 };
+
+  function render(accumulator: number, tintCoeff: number, y2: number): Uint8Array {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawSpriteSheetAffineTintedBlend(fb, tileset, palette, CORNER_X, CORNER_Y, accumulator, TINT_COLOR, tintCoeff, y2);
+    return fb;
+  }
+  function pixelAt(fb: Uint8Array, dx: number, dy: number): [number, number, number] {
+    const o = ((CORNER_Y + dy) * 240 + (CORNER_X + dx)) * 4;
+    return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+  }
+
+  it("at the static end-state (accumulator=256, coeff=0, y2=0) reproduces the plain untransformed tileset exactly, byte-for-byte the same anchor a plain drawSpriteSheet call would produce - the exact claim §11d's fix relies on to need no new table", () => {
+    const fb = render(256, 0, 0);
+    expect(pixelAt(fb, 6, 2)).toEqual([200, 50, 80]); // tex(6,2), untinted
+    expect(pixelAt(fb, 1, 5)).toEqual([10, 220, 30]); // tex(1,5), untinted
+  });
+
+  it("away from the static end-state (mid-ramp accumulator/coeff/y2), the same texels visibly shift and tint - proves the pin above exercises a real degenerate case, not a tautology", () => {
+    const fb = render(160, 8, -3);
+    expect(pixelAt(fb, 6, 2 - 3)).not.toEqual([200, 50, 80]);
+    expect(pixelAt(fb, 1, 5 - 3)).not.toEqual([10, 220, 30]);
   });
 });
 

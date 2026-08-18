@@ -306,9 +306,19 @@ export type Turn5SwitchInAdapter = Readonly<{
   sentOutLine2: string;
   /**
    * species-dossier slice 7: Pidgeotto's own switch-in materialize settle --
-   * RAM tick 6827's idle callback flip, visible render 6828
-   * (`battleScene.ts`'s own former `TURN5_PIDGEOTTO_SETTLE_TICK`; see
-   * `drawTurn5PidgeottoMaterialize`'s doc there). Hosted here, matching
+   * NOT the real idle-callback flip. `docs/turn5-resolve-offc-tail-
+   * diagnosis.md` §11a/§11b (2026-08-18, ISSUES #97 remainder) RAM-probed
+   * `gBattlerSpriteIds[1]` directly and found the real flip at RAM tick
+   * 6760 (visible render 6761), sixty-seven ticks earlier than this
+   * constant's own value (6828) implies -- this doc comment previously
+   * claimed "RAM tick 6827's idle callback flip", which that probe
+   * contradicts outright (zero RAM event at 6827/6828; the sprite is
+   * already 75+ ticks idle by then). Left unmoved anyway: §11d proved
+   * `drawTurn5PidgeottoMaterialize`'s own formula already converges to the
+   * exact RAM-confirmed static end-state well before this tick, so
+   * wherever the hand-off to the plain settled draw fires is a pixel-level
+   * no-op. (`battleScene.ts`'s own former `TURN5_PIDGEOTTO_SETTLE_TICK`;
+   * see `drawTurn5PidgeottoMaterialize`'s doc there). Hosted here, matching
    * `procTriggerRamTick`'s own rationale -- Pidgeotto's replacement
    * switch-in resolution owns this fact, not a render-side guess.
    */
