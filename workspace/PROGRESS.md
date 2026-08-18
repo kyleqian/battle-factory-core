@@ -4,6 +4,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1320 — [main worker, 2026-08-17] **ISSUES #71 remainder: §1e patch-site retirement + hand-fit retirement design doc committed (docs-only, no behavior change)**
+
+- **State:** `docs/sendout-1e-retirement-design.md` added (new commit
+  pending). `npm test` **1,066 files / 10,033 passed / 223 skipped**
+  (unchanged from 1319's baseline), `npm run build` green. No `src/`/
+  `tests/` edit this step.
+- **Did:** live-re-derived the §1e `speciesFrontIdleRestOffset` census
+  against `docs/send-out-live-wiring-consumer-map.md` (2026-08-03 scout):
+  site count grew **58 → 125 total** (§1e-class specifically 58 → 121,
+  spanning 108 move branches, up from ~103) as `renderSceneOnMovePresentation`
+  nearly doubled (~15,700 → 27,540 lines) from new move ports since the old
+  scout, each copy-pasting the same ONIX-literal pair-lock pattern. Found
+  two already-generic template call sites (`sceneOnPresentation.ts`
+  DRAGON_RAGE/SHADOW_PUNCH) proving the target shape already exists in
+  production. Confirmed **Slice C (hand-fit throw-guards for MAGBY-back/
+  ONIX-back/KABUTO-front) is done and still live**, unchanged since
+  2026-08-03 entry 891 — the only genuinely open main-lane-actionable work
+  is the §1e patch-site consolidation; full hand-fit retirement is blocked
+  on the animation lane's rung-4 back dispatcher (not started, not main's
+  program). Designed a minimal mechanism (one fallback-idiom helper,
+  `speciesFrontIdleRestOffsetOrZero`, no new dispatcher) and a 9-rung
+  ladder (Rung 0 = helper + test; Rungs 1-8 = the 108 moves batched ~14
+  each; Rung 9 = named-but-deferred hand-fit swap-over, blocked on the
+  cross-lane dependency). Verified the boundary ratchet
+  (`tests/animation/animationBoundaryRatchet.test.ts`) needs **zero
+  widening** for every rung — `speciesFrontIdleRestOffset` is already
+  imported into the one allowlisted consumer (`battleScene.ts`). Found the
+  108 move windows are ON-profile-legacy with **no committed
+  `tools/compare/traces/` coverage at all**; real verification is the
+  per-move Tier-1 fixture-hash tests instead, one confirmed gap (HARDEN,
+  zero test coverage) flagged for a pin before that rung touches it.
+- **Docs:** new design doc only; `ISSUES.md` #71 left as-is (its own
+  remainder text already matches this doc's scope — no edit needed since
+  nothing closed this step).
+- **Next:** a future worker can pick up Rung 0 directly from
+  `docs/sendout-1e-retirement-design.md` §5. #97 turn5/6 bounce-tick drift
+  remains open on its own chain; #71/#73-adjacent filler otherwise per
+  standing priorities.
+- **Notes:** no PAPERCUT. Design-only step, no oracle query needed (per
+  the brief) — every citation is a live `grep -n`/`npx tsx` re-derivation
+  against this session's own HEAD, not copied from the old scout.
+
+---
 ## 1319 — [main worker, 2026-08-17] **ISSUES #96 remainder fixed: enemy-picker ball-roll sliver — battle1-swap family now 19/19 EXACT, ISSUES #96 fully closed**
 
 - **State:** `src/engine/factorySwapPresentation.ts` +
@@ -96,63 +139,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   clause exists — a diagnosed "fix shape" from a read-only probe can still
   be wrong in the details; ground-truthing against fresh instrumentation
   before trusting it caught it before any regression landed.
-
----
-## 1317 — [supervisor wind-down, 2026-08-17] **13 worker steps + 4 probes/audits, two lanes: EVERY open walk-up window closed to its full bar (6 windows to exact), #98 found→designed→CLOSED same-session, fixture-estate audit filed+fixed #96/#97 — all final gates green**
-
-- **Final gates (tree `829b299b`, run independently AFTER the last merge):**
-  full npm **1,066 files / 10,030 passed / 223 skipped**; `npm run build`
-  green; soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**
-  (30+30). Fold status: animation-main and rust-main both EMPTY at orient
-  AND at wind-down (no sibling sessions today). DEFERRED.md EMPTY. Only
-  permanent worktrees remain; no orphan branches.
-- **Window scoreboard (session start → end, all supervisor-verified
-  live):** gold-pages 85/177 → **177/177**; callscene-02 171/199 →
-  **199/199**; gold-open 254/256 → **256/256**; entrance-03 254/256 →
-  **256/256**; gold-close 80/126 → **126/126**; NEW silver box-2 fixture
-  → **100/100**; NEW gold close-edge → **54/54**; NEW silver cry-edge →
-  **75/75**; NEW silver-flicker → **100/100**. Reveal canaries hold at
-  the accepted #87 bar (690/701 ×2). The brain walk-up program is now
-  pixel-exact at every fixtured window.
-- **Mechanisms landed (all tier-general, no fitted constants):**
-  later-`\p`/`\l` accept model (window's 2nd+ transition skips the
-  cleared tick — closed gold 593/727 AND silver box-2 in one rule);
-  real-close edge fix (mid-window box→box accept lands directly on the
-  cleared-box tick, spurious 4-tick MSGBOX_HIDDEN wait removed — the
-  read-only audit found the coverage hole, two dense edge fixtures
-  proved the defect on both tiers); brainSettled render-clock −1
-  (boundary family mech B) + nolandStep `<=` fence-post (mech A);
-  per-tier transition te origins (gold waveform-derived re-base, silver
-  = plain elapsed); **#98 end-to-end**: brain rooms never fired the
-  transition RNG draw (phase-name mismatch) — S0 mGBA cross-check
-  (gold→id 38 CIRCLES_MEET_IN_SEQ, silver→id 35 CIRCLES_CROSS, RAM-
-  proven MATCH with the pixel IDs), S1+S2 renderers ported literally,
-  S3 wiring via orchestrator-precomputed presentation (ordinary-path
-  cursor untouched) — both windows closed, 2 latent S1 renderer bugs
-  found at first pixel contact and fixed.
-- **Fixture-estate work:** exhaustive 201-trace sweep
-  (`docs/fixture-sweep-2026-08-17.md`) + b229076a baseline check proved
-  ALL 26 deviations pre-existing (today: zero regressions). #96 filed →
-  appRoute fix landed same-session (14/17 restored exactly; 3-trace
-  remainder trimmed into #96). #97 filed → diagnosed: loss-terminal bar
-  OBSOLETE (deliberate 2026-08-14 chaining), turn5/6 = real 1px
-  menuIdleBounce drift, bisect executed and DISPROVED its good ref
-  (range unbisectable; forward paths banked in #97-B). Soak coverage
-  extended: vanilla 0:60, full 0:180, winning 0:180 all clean + 2×
-  budget probe (no HANG masking).
-- **Ops notes:** freshness-check false positive #4 at orient (8014 FAIL
-  but all commits since service start are workspace-only — kept, no
-  restart). One launcher killed by `| head -2` SIGPIPE (the documented
-  masking trap — relaunched clean). S1∥S2 same-file parallel merge
-  resolved both-sides-additive, union suite before merge commit.
-- **Open (ordered for next session):** (a) #96 remainder now fully
-  DIAGNOSED by a late read-only probe (bonus round): quit-pair = the
-  swap screen's `advanceBallAnim` lag args hardcoded false at
-  factorySwapPresentation.ts:868 (fix shape + non-cascading checks in
-  the entry — a ready-made ~30-min fix brief); enemy-picker = separate
-  1-tick header-edge sliver, next instrument named. (b) #97-B turn5/6
-  bounce drift (re-derive against the CURRENT oracle per the banked
-  forward path — regression framing is dead). (c) #71/#73-adjacent
-  filler per standing priorities. No deferred questions; no blockers.
-
----

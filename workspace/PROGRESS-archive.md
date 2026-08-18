@@ -1,3 +1,62 @@
+## 1317 — [supervisor wind-down, 2026-08-17] **13 worker steps + 4 probes/audits, two lanes: EVERY open walk-up window closed to its full bar (6 windows to exact), #98 found→designed→CLOSED same-session, fixture-estate audit filed+fixed #96/#97 — all final gates green**
+
+- **Final gates (tree `829b299b`, run independently AFTER the last merge):**
+  full npm **1,066 files / 10,030 passed / 223 skipped**; `npm run build`
+  green; soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**
+  (30+30). Fold status: animation-main and rust-main both EMPTY at orient
+  AND at wind-down (no sibling sessions today). DEFERRED.md EMPTY. Only
+  permanent worktrees remain; no orphan branches.
+- **Window scoreboard (session start → end, all supervisor-verified
+  live):** gold-pages 85/177 → **177/177**; callscene-02 171/199 →
+  **199/199**; gold-open 254/256 → **256/256**; entrance-03 254/256 →
+  **256/256**; gold-close 80/126 → **126/126**; NEW silver box-2 fixture
+  → **100/100**; NEW gold close-edge → **54/54**; NEW silver cry-edge →
+  **75/75**; NEW silver-flicker → **100/100**. Reveal canaries hold at
+  the accepted #87 bar (690/701 ×2). The brain walk-up program is now
+  pixel-exact at every fixtured window.
+- **Mechanisms landed (all tier-general, no fitted constants):**
+  later-`\p`/`\l` accept model (window's 2nd+ transition skips the
+  cleared tick — closed gold 593/727 AND silver box-2 in one rule);
+  real-close edge fix (mid-window box→box accept lands directly on the
+  cleared-box tick, spurious 4-tick MSGBOX_HIDDEN wait removed — the
+  read-only audit found the coverage hole, two dense edge fixtures
+  proved the defect on both tiers); brainSettled render-clock −1
+  (boundary family mech B) + nolandStep `<=` fence-post (mech A);
+  per-tier transition te origins (gold waveform-derived re-base, silver
+  = plain elapsed); **#98 end-to-end**: brain rooms never fired the
+  transition RNG draw (phase-name mismatch) — S0 mGBA cross-check
+  (gold→id 38 CIRCLES_MEET_IN_SEQ, silver→id 35 CIRCLES_CROSS, RAM-
+  proven MATCH with the pixel IDs), S1+S2 renderers ported literally,
+  S3 wiring via orchestrator-precomputed presentation (ordinary-path
+  cursor untouched) — both windows closed, 2 latent S1 renderer bugs
+  found at first pixel contact and fixed.
+- **Fixture-estate work:** exhaustive 201-trace sweep
+  (`docs/fixture-sweep-2026-08-17.md`) + b229076a baseline check proved
+  ALL 26 deviations pre-existing (today: zero regressions). #96 filed →
+  appRoute fix landed same-session (14/17 restored exactly; 3-trace
+  remainder trimmed into #96). #97 filed → diagnosed: loss-terminal bar
+  OBSOLETE (deliberate 2026-08-14 chaining), turn5/6 = real 1px
+  menuIdleBounce drift, bisect executed and DISPROVED its good ref
+  (range unbisectable; forward paths banked in #97-B). Soak coverage
+  extended: vanilla 0:60, full 0:180, winning 0:180 all clean + 2×
+  budget probe (no HANG masking).
+- **Ops notes:** freshness-check false positive #4 at orient (8014 FAIL
+  but all commits since service start are workspace-only — kept, no
+  restart). One launcher killed by `| head -2` SIGPIPE (the documented
+  masking trap — relaunched clean). S1∥S2 same-file parallel merge
+  resolved both-sides-additive, union suite before merge commit.
+- **Open (ordered for next session):** (a) #96 remainder now fully
+  DIAGNOSED by a late read-only probe (bonus round): quit-pair = the
+  swap screen's `advanceBallAnim` lag args hardcoded false at
+  factorySwapPresentation.ts:868 (fix shape + non-cascading checks in
+  the entry — a ready-made ~30-min fix brief); enemy-picker = separate
+  1-tick header-edge sliver, next instrument named. (b) #97-B turn5/6
+  bounce drift (re-derive against the CURRENT oracle per the banked
+  forward path — regression framing is dead). (c) #71/#73-adjacent
+  filler per standing priorities. No deferred questions; no blockers.
+
+---
+
 ## 1316 — [main worker, 2026-08-17] **`docs/brain-transition-wiring-design.md` slice S3 landed: brain-room transition wiring — both target windows CLOSED (silver 100/100, gold 126/126); ISSUES #98 deleted**
 
 - **State:** `src/engine/battleTransition.ts`, `battleScenario.ts`,
