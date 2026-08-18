@@ -1,3 +1,60 @@
+## 1322 — [main worker, 2026-08-17] **ISSUES #71 §1e retirement Rung 0 + Rung 1 landed: shared helper + first 14-move batch, zero FINDINGs**
+
+- **State:** `src/animation/speciesIdleAnim.ts`, `src/engine/battleScene.ts`,
+  `tests/animation/speciesIdleAnim.test.ts` edited across two commits
+  (`7a08eede` Rung 0, `a6f80a1b` Rung 1). `npm test` **1,066 files /
+  10,037 passed (+4 vs 1320's 10,033, all from Rung 0's new unit tests) /
+  223 skipped**, `npm run build` and `npm run typecheck` green after each
+  commit. `compare:differential -- battle-command-generated-off.json
+  --base 7a08eede --summary` (Rung 1 vs its parent): **128/128
+  byte-identical**, confirming the OFF-profile route is untouched.
+- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 exactly.
+  **Rung 0:** added `speciesFrontIdleRestOffsetOrZero` next to
+  `speciesFrontIdleRestOffset` in `speciesIdleAnim.ts`, pinned with 3 new
+  unit tests (ONIX/RATTATA nonzero, PIDGEOT zero). **Deviation from the
+  doc's literal scope:** did NOT widen `battleScene.ts:1252`'s import in
+  this commit — the doc's own "no call site changed yet" framing for
+  Rung 0 means the new name is an unused import under this project's
+  `noUnusedLocals` tsconfig, which fails `npm run build`; moved the
+  import widening into Rung 1's commit instead (its first real call
+  site), keeping every commit green per AGENTS.md's own bar. No ratchet
+  impact (§4: the ratchet only tracks import specifiers). **Rung 1:**
+  re-grepped all 14 call sites fresh (line numbers had drifted a few
+  lines from the doc's citations, mechanism identical) and, per site,
+  confirmed the enclosing `playerToOpponent`/`opponentToPlayer`
+  throw-guard proves the substituted expression (`view.target.species`
+  at 13 sites, `opponentBattler.species` at SANDSTORM where that local
+  is already bound) equals the "ONIX" literal being replaced, then
+  swapped the fallback idiom to the Rung-0 helper. Throw-guard blocks
+  untouched everywhere. **Zero FINDINGs** — every one of the 14 sites
+  matched the doc's predicted shape exactly (all ONIX-literal pair-locks,
+  no site disagreed).
+- **Verification:** grep sanity —
+  `speciesFrontIdleRestOffset(` count 123→109,
+  `speciesFrontIdleRestOffsetOrZero(` 0→14, total unchanged (no site
+  silently dropped). Named per-move Tier-1 files for the 14 moves (30
+  files found via `find`/`grep` first, per the doc's filename-drift
+  warning — all standard-pattern, no mapping surprises this rung): 96/96
+  tests green.
+- **Next:** Rung 2 (14 more moves: BRICK_BREAK, NIGHT_SHADE, MEMENTO,
+  SPITE, HAZE, DISABLE, PROTECT, MAGIC_COAT, LIGHT_SCREEN, WRAP, GROWTH,
+  TOXIC, POISON_TAIL, IRON_TAIL, per the doc's table) is next in the
+  ladder — same procedure, re-grep line numbers fresh first. Did not
+  attempt it this session: by the time Rung 1 was committed and
+  insurance-checked, elapsed time was past the step's ~25 min stretch
+  threshold for starting another batch that must also finish and commit
+  within the 45 min cap. Rungs 3-8 remain queued behind it; Rung 9
+  (hand-fit swap-over) stays blocked on the animation lane's rung-4 back
+  dispatcher, unchanged.
+- **Notes:** no PAPERCUT. One process note for future rungs: `npm test`
+  alone (~130s) exceeds the harness's 120s default foreground timeout
+  and gets auto-backgrounded — poll its own output file in a blocking
+  loop (not `ScheduleWakeup`/`Monitor`) rather than waiting on a
+  notification, per this step's own synchronous-verification
+  requirement; a `timeout` bump on the same call also works.
+
+---
+
 ## 1321 — [main worker, 2026-08-17] **ISSUES #97-B rung 1: turn-6 reopen-press 3-tick freeze landed; turn-5's own sibling tried both named variants, neither flips its dense window, reverted to green**
 
 - **State:** `src/engine/battleScene.ts` + `tests/fightSubmenu.test.ts`

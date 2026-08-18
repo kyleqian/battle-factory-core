@@ -4,6 +4,76 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1325 — [main worker, 2026-08-18] **ISSUES #97-B closed: PP-digit confound root-caused and fixed, rung 3 reapplied — turn5-action-off 1/32 → 26/32, zero regressions**
+
+- **State:** three green commits this session (`1a70ec69` PP fix,
+  `5c21df81` rung-3 reapply, plus this docs commit). `npm test` **1,066
+  files / 10,040 passed (+2 vs 1323's 10,038, both new Tier-1 pins) / 223
+  skipped**, `npm run build`/`npm run typecheck` green after each commit.
+- **Did — Goal A (PP confound):** established ground truth with two
+  independent instruments per the step brief, plus a third for extra
+  confidence: (a) source-derived ROCK_SLIDE decrement count
+  (`battleMenu.ts`: turns 1, 3, 4 decrement slot 0 → `maxPP 10 - 3 = 7`);
+  (b) backward RAM math from `docs/turn5-6-off-ground-truth.md`'s
+  post-turn-5/6 PP handoffs; (c) a fresh live `gBattleMons` RAM probe
+  (`tools/run-mgba-probe.py`) across ticks 5920-5960 of `turn5-menu.json`,
+  reading `[7,20,19,10]` throughout. All three agree: PP is 7, not the
+  app's displayed 8, throughout turn 5's own reopened FIGHT submenu.
+  Root cause: `resolveTurn4LatestCompletedCommandHandoff`
+  (`turn4ResolutionAdapter.ts`) pinned `playerPp`/`persistedMoveSlot`
+  from the *prior* (turn-3) handoff per `docs/turn4-fold-pp-freshness-
+  design.md`'s 2026-08-02 direction — that doc's own §6 risk 4 flagged
+  this as an unresolved assumption pending exactly this probe. Fixed by
+  using turn 4's own fresh receipt directly (matching turn3's/turn5's own
+  sibling adapters' shape); re-pinned the 2026-08-02 tests that encoded
+  the superseded value, citing this session's ground truth. Full 9-trace
+  family + 2 turn-4-adjacent spot checks: zero regressions, one
+  improvement (`turn5-confirm-off-a` 8/132 → 14/132).
+- **Did — Goal B (rung 3 reapply):** with the confound gone, reapplied
+  the banked composed correction (`docs/turn5-bounce-recalibration-
+  probe.md` §4 item 1/§9: 3-tick freeze + `+116` raw sine-index offset +
+  `t-1` display basis), mirroring rung 2's `menuIdleBounce`/
+  `drawMenuIdleBounceOverlay` `indexOffset` idiom and rung 1's
+  `turn6ReopenBounceTick` freeze-helper shape (new sibling export,
+  `turn5ReopenBounceTick`). Live-verified against the oracle before any
+  test edit: `turn5-action-off` mismatch set exactly
+  `{5928,5929,5930,5931,5940,5949}`, **26/32** — the exact best-case
+  number §9d's own paper derivation predicted, zero deviation. Re-pinned
+  `battleScene.test.ts`'s "Onix bounce sprite preserves the existing
+  continuation phase" fixture to the new, oracle-matching plateau
+  boundary (rung 3's own flagged re-pin, banked verbatim). Added two new
+  red-verified Tier-1 pins in `fightSubmenu.test.ts` (the freeze helper's
+  own shape; the full composed model against
+  `src/data/gen/turn5-6-reopen-bounce-probe.json`'s RAM ground truth).
+- **Final family numbers (all traces, zero regressions from Goal A's own
+  post-fix baseline):** `turn5-action-off` 1/32 → **26/32**,
+  `turn6-reopen-off` 20/46 (unchanged, no decrease), `turn5-reset-off`
+  256/256, `turn5-confirm-off-a` 14/132 (PP-fix improvement, held),
+  `turn5-confirm-off-b` 0/132, `turn5-resolve-off-{a,b,c,d}` 7/196,
+  71/196, 149/196, 0/196, `turn4-doubleteam-off`/`turn4-rockslide-off`
+  256/256 each.
+- **Next:** ISSUES #97-B's remaining, separately-scoped open items (see
+  `ISSUES.md` #97 §B for the full writeup): (i) the §8d/§9e sine-table-peak
+  rounding artifact (both windows' own small residual, root cause narrowed
+  to the derivation rule, real hardware `Sin()` not yet read); (ii)
+  `turn6KickoffBounceTick`/the 7318+ dispatch (a SIDE-worker continuation
+  was in flight in parallel this session — check its state before
+  touching); (iii) the class-(iii) text/banner mechanism dominating
+  `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining mismatches —
+  checked against the PP-digit fix by inspection, did NOT meaningfully
+  move (a separate, still-uninvestigated mechanism, not this session's
+  scope).
+- **Notes:** no PAPERCUT. The three-independent-instrument ground-truth
+  requirement (source count + backward RAM math + a fresh live RAM probe)
+  was worth the extra probe beyond the step's own "two instruments"
+  minimum — `docs/turn5-off-reader-set.md` already had a cached
+  `[7,20,19,10]` value for this exact window from an earlier session, and
+  a fresh live check confirmed it still holds today rather than trusting
+  a possibly-stale cached figure (ISSUES #97's own ledger already
+  documents one prior instance of the oracle's answer shifting between
+  sessions for this same window).
+
+---
 ## 1324 — [main worker, 2026-08-18] **ISSUES #97-B rung 3: window A's composed correction (3-tick freeze + indexOffset 116 + local display basis) implemented, PROVEN mechanism-exact, then REVERTED — a third, previously-unknown, pre-existing PP-digit defect blocks the numeric acceptance bar**
 
 - **State:** tree is byte-for-byte HEAD (`git checkout -- src/engine/battleScene.ts
@@ -118,58 +188,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   turn11/turn13 `drawTurn6FieldBase` callers already doing this).
 
 ---
-## 1322 — [main worker, 2026-08-17] **ISSUES #71 §1e retirement Rung 0 + Rung 1 landed: shared helper + first 14-move batch, zero FINDINGs**
-
-- **State:** `src/animation/speciesIdleAnim.ts`, `src/engine/battleScene.ts`,
-  `tests/animation/speciesIdleAnim.test.ts` edited across two commits
-  (`7a08eede` Rung 0, `a6f80a1b` Rung 1). `npm test` **1,066 files /
-  10,037 passed (+4 vs 1320's 10,033, all from Rung 0's new unit tests) /
-  223 skipped**, `npm run build` and `npm run typecheck` green after each
-  commit. `compare:differential -- battle-command-generated-off.json
-  --base 7a08eede --summary` (Rung 1 vs its parent): **128/128
-  byte-identical**, confirming the OFF-profile route is untouched.
-- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 exactly.
-  **Rung 0:** added `speciesFrontIdleRestOffsetOrZero` next to
-  `speciesFrontIdleRestOffset` in `speciesIdleAnim.ts`, pinned with 3 new
-  unit tests (ONIX/RATTATA nonzero, PIDGEOT zero). **Deviation from the
-  doc's literal scope:** did NOT widen `battleScene.ts:1252`'s import in
-  this commit — the doc's own "no call site changed yet" framing for
-  Rung 0 means the new name is an unused import under this project's
-  `noUnusedLocals` tsconfig, which fails `npm run build`; moved the
-  import widening into Rung 1's commit instead (its first real call
-  site), keeping every commit green per AGENTS.md's own bar. No ratchet
-  impact (§4: the ratchet only tracks import specifiers). **Rung 1:**
-  re-grepped all 14 call sites fresh (line numbers had drifted a few
-  lines from the doc's citations, mechanism identical) and, per site,
-  confirmed the enclosing `playerToOpponent`/`opponentToPlayer`
-  throw-guard proves the substituted expression (`view.target.species`
-  at 13 sites, `opponentBattler.species` at SANDSTORM where that local
-  is already bound) equals the "ONIX" literal being replaced, then
-  swapped the fallback idiom to the Rung-0 helper. Throw-guard blocks
-  untouched everywhere. **Zero FINDINGs** — every one of the 14 sites
-  matched the doc's predicted shape exactly (all ONIX-literal pair-locks,
-  no site disagreed).
-- **Verification:** grep sanity —
-  `speciesFrontIdleRestOffset(` count 123→109,
-  `speciesFrontIdleRestOffsetOrZero(` 0→14, total unchanged (no site
-  silently dropped). Named per-move Tier-1 files for the 14 moves (30
-  files found via `find`/`grep` first, per the doc's filename-drift
-  warning — all standard-pattern, no mapping surprises this rung): 96/96
-  tests green.
-- **Next:** Rung 2 (14 more moves: BRICK_BREAK, NIGHT_SHADE, MEMENTO,
-  SPITE, HAZE, DISABLE, PROTECT, MAGIC_COAT, LIGHT_SCREEN, WRAP, GROWTH,
-  TOXIC, POISON_TAIL, IRON_TAIL, per the doc's table) is next in the
-  ladder — same procedure, re-grep line numbers fresh first. Did not
-  attempt it this session: by the time Rung 1 was committed and
-  insurance-checked, elapsed time was past the step's ~25 min stretch
-  threshold for starting another batch that must also finish and commit
-  within the 45 min cap. Rungs 3-8 remain queued behind it; Rung 9
-  (hand-fit swap-over) stays blocked on the animation lane's rung-4 back
-  dispatcher, unchanged.
-- **Notes:** no PAPERCUT. One process note for future rungs: `npm test`
-  alone (~130s) exceeds the harness's 120s default foreground timeout
-  and gets auto-backgrounded — poll its own output file in a blocking
-  loop (not `ScheduleWakeup`/`Monitor`) rather than waiting on a
-  notification, per this step's own synchronous-verification
-  requirement; a `timeout` bump on the same call also works.
-
