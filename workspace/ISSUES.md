@@ -168,6 +168,90 @@ mechanism and the PP-freshness direction are both now correct):**
   (`turn5-confirm-off-b`/`turn5-resolve-off-{a,b,c,d}` all unchanged) —
   a separate, still-uninvestigated mechanism.
 
+### C. Class-(iii) family anchor fix (2026-08-18, bounded MAIN worker) — §17 items 1-3 landed, items 4/5 handled per their own instructions
+
+Root-caused by the prior SIDE session's `docs/turn5-family-class3-
+diagnosis.md` (§9-16: a live dispatch tap proved reachability was never
+broken, then three independent anchor-error clusters were found and a
+GROVYLE-side RAM timeline pinned exact real ticks). This session ran §17's
+two prerequisite RAM sweeps (extended `dump-turn5-resolve-grovyle-side-
+driver.py`) and applied §17's ordered edit list, items 1-3:
+
+- **Sweep A (GROVYLE drain shape, 6180-6295)**: real GROVYLE hp is a
+  single-tick **STEP** (1 flat from 6184 through 6284, then 0 exactly at
+  6285) — not a live multi-tick drain curve. Resolves §17 item 2's own
+  open question.
+- **Sweep B (Sitrus tick, dense 6800-7000)**: real Sitrus-heal message
+  starts at **tick 6850** (not merely "by 6977" as previously bounded);
+  printer settles (fully typed) at 6885; ONIX hp jumps 1->31 at 6984; the
+  message hard-cuts directly to `"What will ONIX do?"` at **tick 6991**,
+  no intermediate blank state visible in `gDisplayedStringBattle`.
+- **Item 1**: `rockSlideTextStartTick` resolved to 6184 for this family
+  via a scoped override (`TURN5_OFF_ROCKSLIDE_TEXT_DELAY=355`) — the
+  shared helper's default and every other turn's own call
+  (3/4/6/7/9/10/11/12) are untouched (checked by grep first, per the
+  brief).
+- **Item 2**: the GROVYLE-faints cluster — `rockSlideOpponentHp`'s
+  `startDelay` scoped to `TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY=455`
+  (opponentHp steps to 0 at the RAM-exact 6285); `GROVYLE_FAINT_SINK_
+  START_TICK` 6502->6360 (turn-5-exclusive constant, edited directly —
+  `GROVYLE_HEALTHBOX_VANISH_TICK` auto-follows via its existing formula to
+  6379, within 1 tick of the RAM-exact fainted-text-start 6378, a
+  convergent but not independently-probed anchor for the sink's own visual
+  start — flagged in the constant's own doc comment);
+  `TURN5_FAINTED_TEXT_DELAY` 694->549 (turn5FaintedTextStartTick -> 6378,
+  RAM-exact).
+- **Item 3**: the Sitrus cluster — landed via a SCOPED override
+  (`TURN5_OFF_SITRUS_{HEAL_TEXT_START,TEXT_CLEAR,MENU_REDRAW}_TICK` =
+  6850/6991/6991, new constants used only by `drawTurn5RockSlideWindow`'s
+  own dispatch gate) rather than editing the exported `TURN5_SITRUS_*`
+  triple directly — that triple is a load-bearing upstream anchor for
+  `TURN{9,10,11,12,13}_REGIME{4,5,6,7,8}_TO_REGIME1_SHIFT`/`TURN14_MENU_
+  REDRAW_RESET_SHIFT` (`battleScene.ts`), entirely out of this fix's scope;
+  editing it in place would have cascaded into turns 9-14 unverified.
+- **Item 4** (`SWITCHIN_SENTOUT_TEXT_START_TICK`): confirmed accurate per
+  the diagnosis doc's own §15 (real 6686 vs app 6687, +1) — left untouched
+  as instructed.
+- **Item 5** (§10a's HP-overlay gate, `drawActionMenuIdleContentFromLatest`):
+  **not attempted this session** (time) — the gate is reused by 12 call
+  sites across many turns; widening it safely needs a full per-caller audit
+  this session's remaining budget didn't have room for. Banked as the
+  clear next step; the diagnosis doc's own §10a already names the fix
+  shape (extend the gate to also cover turn 4/5's own presentation shape,
+  or loosen it for this call site specifically).
+
+**Per-trace result (zero decreases anywhere in the 9-trace verification
+family)**:
+
+| trace | before | after | verdict |
+|---|---|---|---|
+| `confirm-off-a` | 14/132 | 14/132 | unchanged — window (5958-6089) sits entirely before 6184, none of items 1-3 reach it; needs item 5 |
+| `confirm-off-b` | 0/132 | 0/132 | unchanged count, but mismatch magnitude shrank (986px/2.57% -> 689px/1.79%) — item 1 shrank the affected span from 132 to ~38 ticks; the remaining frozen-HP residual needs item 5 |
+| `resolve-off-a` | 7/196 | **25/196** | improved — items 1+2 together |
+| `resolve-off-b` | 71/196 | **88/196** | improved — items 1+2 together, existing convergence tail undisturbed |
+| `resolve-off-c` | 149/196 | 149/196 | unchanged (allowed) — trailing 47-frame secondary mechanism (§3e/§7, send-out status-box + background-dither lag) is out of scope, untouched by items 1-3 |
+| `resolve-off-d` | 0/196 | 0/196 | unchanged count, but mismatch magnitude collapsed (6942px/18.08% -> 258px/0.67%) — item 3 closed nearly the entire window; a small, new, unattributed residual remains (bbox 44,71-195,104, likely the ONIX sprite/HP-overlay during the settled Sitrus chrome — not traced this session, banked) |
+| `turn5-action-off` | 26/32 | 26/32 | unchanged — landed window provably unmoved |
+| `turn6-reopen-off` | 20/46 | 20/46 | unchanged — landed window provably unmoved |
+| `turn5-reset-off` | 256/256 | 256/256 | unchanged — control |
+
+**Remaining, still open**:
+- **Item 5** (HP-overlay gate) — needed to close `confirm-off-a`/`-b`'s
+  own remaining frozen-HP frames and possibly `resolve-off-d`'s small
+  residual too; not attempted (time/risk — a 12-caller shared function).
+- **`resolve-off-d`'s new 0.67% residual** (bbox 44,71-195,104, past the
+  6991 menu-redraw tick) — not traced to a specific function this session,
+  possibly related to the settled-Sitrus-phase ONIX sprite/HP-overlay draw
+  (`turn5SitrusOnixHp`, a separate anchor from the dispatch-gate ticks this
+  session touched) or the already-known §8d rounding artifact; needs its
+  own instrument.
+- `resolve-off-c`'s trailing 47-frame secondary mechanism (§3e/§7,
+  unchanged from before) — still untraced.
+- §8d/§9e sine-table-peak rounding artifact — unchanged, out of scope
+  (a side worker's own parallel spec).
+- `turn6KickoffBounceTick`/the 7318+ dispatch — unchanged, side-worker
+  continuation, not checked this session.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
