@@ -67,11 +67,6 @@ export const ROCK_SLIDE_MOVE_POWER = 75;
 
 export const DRAGON_BREATH_MOVE_POWER = 60;
 
-export const ENDEAVOR_HITSPLAT_ROUNDS: readonly { center: { x: number; y: number }; ramOffset: number }[] = [
-  { center: { x: 60, y: 76 }, ramOffset: 62 }, // round 0: RAM 3007-3016 visible (script offset (12,-12), X-flipped for the target side)
-  { center: { x: 84, y: 100 }, ramOffset: 88 }, // round 1: RAM 3033-3042 visible (script offset (-12,12), X-flipped for the target side)
-];
-
 export const DRAGONBREATH_KICKOFF_LINE2 = "DRAGONBREATH!";
 
 export const DRAGONBREATH_TEXT_START_DELAY = 192;
@@ -1052,6 +1047,27 @@ export const TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE = {
 
 
 export const TURN5_ENDEAVOR_HP = resolveTurn5EndeavorHpEndpoints();
+
+
+/**
+ * `docs/turn5-confirm-pools-diagnosis.md` §1/§2 (2026-08-18, ISSUES #97
+ * remainder): turn 5's own `drawTurn5EndeavorText` was the last remaining
+ * caller of `drawEndeavorSquish` (turn 2/turn 3 already dropped it per
+ * ISSUES #39) and its own `endeavorHp` call passed no `startDelay`
+ * override, silently defaulting to the shared `ENDEAVOR_HP_DRAIN_START_
+ * DELAY`(153). Both values below are bit-for-bit the same turn2/turn3-
+ * precedent constants (`TURN2/3_OFF_ENDEAVOR_HP_DRAIN_START_DELAY`=116,
+ * `TURN2/3_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START`=81), re-derived independently
+ * this session from 4 oracle-read HP digits (§2.2) and a 33-tick flicker
+ * sweep (§1.3) - not shared with turn 2/3's own constants, per this
+ * family's own "mint a scoped constant, don't touch the shared default"
+ * convention.
+ */
+export const TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY = 116;
+
+export const TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START = 81;
+
+export const TURN5_OFF_ENDEAVOR_FLICKER_START = TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START + 1;
 
 
 export const GROVYLE_FAINT_SINK = resolveTurn5FaintSinkGeometry();

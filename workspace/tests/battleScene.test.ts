@@ -19,6 +19,8 @@ import {
   drawSpriteSheetAffineTintedBlend,
   drawTurn5RockSlideAttack,
   drawTurn15ForcedSwitchRelease,
+  endeavorHealthboxBounceY2,
+  endeavorOnixInvisible,
   endeavorShakeSteps,
   evaEvb,
   GROVYLE_FAINT_SINK_START_TICK,
@@ -64,6 +66,9 @@ import {
   TURN5_ICONBAR_CREATE_TICK,
   TURN5_ICONBAR_DESTROY_TICK,
   TURN5_ICONBAR_FADE_START_TICK,
+  TURN5_OFF_ENDEAVOR_FLICKER_START,
+  TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START,
+  TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY,
   TURN5_OFF_ROCKSLIDE_TEXT_DELAY,
   TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE,
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
@@ -157,6 +162,7 @@ describe("turn13MurkrowFrame boundary transfer timing", () => {
 import {
   CLOSED_FIGHT_SUBMENU_STATE,
   confirmFightMove,
+  endeavorHp,
   FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
   menuIdleBounce,
@@ -2290,6 +2296,50 @@ describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residu
   });
   it("stays clamped at 35 past the reveal", () => {
     expect(turn5SitrusOffHealTextVisibleChars(6900)).toBe(35);
+  });
+});
+
+describe("ISSUES #97 remainder (docs/turn5-confirm-pools-diagnosis.md §1/§2, 2026-08-18): drawTurn5EndeavorText's own scoped ENDEAVOR-tail overrides - endeavorHp's TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY(116), endeavorOnixInvisible's TURN5_OFF_ENDEAVOR_FLICKER_START(82), and endeavorHealthboxBounceY2's TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START(81) - all three bit-for-bit the same turn2/turn3-precedent values, replacing the previous silent fallback to the shared defaults (153/119/118) and the now-deleted drawEndeavorSquish's own zero-RAM-basis squish/blend/droplets/hitsplat package (ISSUES #39, dropped for turn 2/turn 3 already; turn 5 was the last caller). Verified against tools/probe/analyze-turn5-confirm-endeavor-drain-flicker.ts (PASS).", () => {
+  const pressTick = 5959; // TURN5_CONFIRM_PRESS_TICK
+
+  it("endeavorHp: full HP (88) through the sentinel tick (pressTick+116=6075), then exactly 1 HP/tick down to 1, settled forever after - matches all 4 oracle-read HP digits (6053->88, 6120->43, 6150->13, 6183->1)", () => {
+    expect(endeavorHp(6053, pressTick, 88, 1, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY)).toBe(88);
+    expect(endeavorHp(6075, pressTick, 88, 1, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY)).toBe(88); // sentinel tick itself, no visible drop yet
+    expect(endeavorHp(6076, pressTick, 88, 1, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY)).toBe(87); // first drained tick
+    expect(endeavorHp(6120, pressTick, 88, 1, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY)).toBe(43);
+    expect(endeavorHp(6150, pressTick, 88, 1, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY)).toBe(13);
+    expect(endeavorHp(6162, pressTick, 88, 1, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY)).toBe(1); // d=87, exactly startHp-endHp
+    expect(endeavorHp(6183, pressTick, 88, 1, TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY)).toBe(1); // settled
+  });
+
+  it("endeavorOnixInvisible: flickers 4-on/4-off exactly 4 times starting at the re-anchored tick (start=82, first invisible render tick 6042, matching the oracle-measured period-8 cycle in §1.1)", () => {
+    expect(endeavorOnixInvisible(6041, pressTick, TURN5_OFF_ENDEAVOR_FLICKER_START)).toBe(false); // one tick before the window opens
+    for (const t of [6042, 6043, 6044, 6045]) {
+      expect(endeavorOnixInvisible(t, pressTick, TURN5_OFF_ENDEAVOR_FLICKER_START)).toBe(true);
+    }
+    for (const t of [6046, 6047, 6048, 6049]) {
+      expect(endeavorOnixInvisible(t, pressTick, TURN5_OFF_ENDEAVOR_FLICKER_START)).toBe(false);
+    }
+    expect(endeavorOnixInvisible(6069, pressTick, TURN5_OFF_ENDEAVOR_FLICKER_START)).toBe(true); // last real invisible tick per §1.1
+  });
+
+  it("endeavorOnixInvisible settles visible for good after the fourth cycle (render tick 6074 on) - no fifth cycle", () => {
+    expect(endeavorOnixInvisible(6074, pressTick, TURN5_OFF_ENDEAVOR_FLICKER_START)).toBe(false);
+    expect(endeavorOnixInvisible(9999, pressTick, TURN5_OFF_ENDEAVOR_FLICKER_START)).toBe(false);
+  });
+
+  it("endeavorHealthboxBounceY2: sharp +1/-1 alternation for 20 ticks starting one tick before the flicker (start=81), then a hard stop", () => {
+    expect(endeavorHealthboxBounceY2(6040, pressTick, TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START)).toBe(0); // one tick before the window opens
+    expect(endeavorHealthboxBounceY2(6041, pressTick, TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START)).toBe(1); // first flip
+    expect(endeavorHealthboxBounceY2(6042, pressTick, TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START)).toBe(-1);
+    expect(endeavorHealthboxBounceY2(6060, pressTick, TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START)).toBe(-1); // last active tick (n=19)
+    expect(endeavorHealthboxBounceY2(6061, pressTick, TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START)).toBe(0); // hard stop, not damped
+  });
+
+  it("TURN5_OFF_ENDEAVOR_FLICKER_START is exactly TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START+1, the same +1 pairing turn2/turn3's own scoped constants already use", () => {
+    expect(TURN5_OFF_ENDEAVOR_FLICKER_START).toBe(TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START + 1);
+    expect(TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY).toBe(116);
+    expect(TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START).toBe(81);
   });
 });
 
