@@ -513,3 +513,299 @@ B's reopen-hold half, but should expect turn6-reopen-off to still show a
 healthbox-only mismatch band after that lands, and should budget a further
 tracing pass into `turn5SitrusResettledBounceTick`/`menuIdleBounce` before
 attempting the second half.
+
+## 7. Continuation 2 (2026-08-17, bounded SIDE worker): display basis CONFIRMED, corrected re-tabulation, mechanism narrowed
+
+Executes this step's goals 1 (required, DONE) and 2 (required, PARTIALLY
+DONE - narrowed with concrete ruled-out candidates, exact file:line not
+landed). Goal 3 (stretch) not attempted - budget went entirely to 1/2 per
+the step's own priority order. No `src/` file was edited this session
+(`git diff -- src/` is empty at commit time); all evidence below comes from
+a new read-only probe script plus live `npm run compare` reruns.
+
+### 7a. Goal 1: the display-basis hypothesis is CONFIRMED, directly, by pixel evidence
+
+**Protocol-identity check first.** `oracle/server.py`'s `run_trace` (the
+function every `npm run compare` call ultimately drives) calls
+`ORACLE.advance(buttons)` once per frame and, only if `ORACLE.frame in
+wanted`, captures `screen_rgb()`/`screen_png()` **in that same iteration,
+immediately after the `advance()` call that produced that frame number**
+(`oracle/server.py:119-123`). This is byte-for-byte the same protocol both
+`dump-turn5-6-reopen-bounce-driver.py` (§1) and this session's new probe use
+for their own RAM reads (`oracle.advance()` then `record()` in the same
+loop iteration). **This rules out a probe-methodology artifact as the
+source of any N-vs-N-1 disagreement** - both the official compare captures
+and every RAM probe in this doc read from the exact same simulation instant
+for a given tick number, so any disagreement between "RAM value at tick N"
+and "pixels actually shown at tick N" is a genuine property of the emulated
+hardware/task-ordering, not a probe bug.
+
+**Direct pixel probe.** New script `tools/probe/dump-turn6-reopen-display-basis-probe.py`
+(receipt `/tmp/turn6-display-basis.json`, not committed - trivially
+rerunnable, see command below) extends the RAM read with a sha256 of the
+raw-RGB crop over each of the compare tool's own reported bbox regions
+(onix `44,49-99,110`, healthbox `127,74-229,110`) at the SAME tick, for
+`t` in `[7302,7320]`. Comparing consecutive-tick RAM-value transitions
+against consecutive-tick crop-hash transitions in that same run:
+
+| field | RAM value changes at tick | crop pixels visibly change at tick | lag |
+|---|---|---|---|
+| healthbox | 7306 (0->1) | 7307 | **+1** |
+| healthbox | 7317 (1->2) | 7318 | **+1** |
+| healthbox | 7318 (2->1) | 7319 | **+1** |
+| onix | 7318 (1->0) | 7319 | **+1** |
+
+**All four observed transitions in this window lag the RAM write by
+exactly one tick, with zero exceptions.** This directly confirms §6d's
+hypothesis, not merely by re-checking consistency of already-known numbers
+(as §6d itself did) but by independently measuring the pixels: **the
+oracle's displayed frame N shows the sprite-Y2 RAM state as of tick N-1,
+not tick N's own value** - `displayed(T) = RAM(T-1)`. Mechanistically this
+is the standard GBA "OAM writes made during frame N's own trailing VBlank
+task-processing are scanned out starting frame N+1, not frame N" ordering
+(frame N's own visible scanlines, drawn during the SAME `run_frame()` call
+that also runs frame N's vblank tasks, are already committed before that
+vblank's `DoBounceEffect` write lands in the OAM shadow buffer). This is
+the SAME real-hardware phenomenon `menuIdleBounce`'s own doc comment
+(`battleMenu.ts:824`, "screenTick T shows RAM tick T-1's sprite state")
+already documents and bakes in via its internal `ramTick = t - 1` - but
+that internal shift models a DIFFERENT thing (menuIdleBounce's own
+age-relative RAM-setup-tick alignment) and is orthogonal to, not a
+duplicate of, this oracle-capture-vs-RAM lag: both corrections are real and
+both are needed simultaneously for the numbers below to close (confirmed
+by the exact-match anchors in 7b, which already include `menuIdleBounce`'s
+own internal shift and STILL require the external `T-1` correction to
+match oracle).
+
+**Corrected basis, stated explicitly for the rest of this document:**
+every table above (§1, §2a, §2b, §6b) that compared "app value computed for
+trace tick T" against "oracle RAM value recorded at tick T" used the WRONG
+basis. The correct comparison is app(T) vs **RAM(T-1)** - i.e. shift the
+oracle column of every existing table in this doc back by one tick before
+reading it as "what should the app produce at tick T."
+
+Rerun command (fresh, ~15s, no bootstrap/state changes):
+```sh
+python3 tools/run-mgba-probe.py /tmp/check-basis.json -- \
+  tools/probe/dump-turn6-reopen-display-basis-probe.py /tmp/check-basis.json
+python3 -c "
+import json
+d = json.load(open('/tmp/check-basis.json'))
+t = d['transitions']
+assert {'kind':'ram','tick':7306,'from':0,'to':1} in t['healthbox']
+assert {'kind':'pixels','tick':7307} in t['healthbox']
+assert {'kind':'ram','tick':7318,'from':1,'to':0} in t['onix']
+assert {'kind':'pixels','tick':7319} in t['onix']
+print('display-basis PASS: pixel transitions lag RAM transitions by exactly 1 tick')
+"
+```
+
+### 7b. Window B re-tabulated on the corrected basis - PERFECTLY reproduces the live compare output, zero new code
+
+Re-deriving app(T) from the ALREADY-established §6a dispatch formulas
+(unchanged this session - `menuIdleBounce(turn5SitrusResettledBounceTick(t))`
+for 7305-7312, same with `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` for
+7313-7317, computed live this session via
+`node --experimental-strip-types` importing the real exported symbols -
+not hand-copied arithmetic) against `displayed(T) = RAM(T-1)`:
+
+| tick | app (onixY2,hbY2) | displayed = RAM(T-1) | predicted verdict | **live `npm run compare` verdict (reconfirmed this session)** |
+|---|---|---|---|---|
+| 7305 | (0,0) | RAM(7304)=(1,0) | onix-only mismatch | onix-only mismatch, bbox `44,49-99,110` ✓ |
+| 7306 | (1,0) | RAM(7305)=(1,0) | **FULL MATCH** | **absent from mismatch list** ✓ |
+| 7307-7316 | (1,0) | RAM(7306..7315)=(1,1) | healthbox-only mismatch | healthbox-only mismatch, bbox `127,74-229,110`, all 10 ticks ✓ |
+| 7317 | (1,1) | RAM(7316)=(1,1) | **FULL MATCH** | **absent from mismatch list** ✓ |
+| 7318 | (1,1) | RAM(7317)=(1,2) | healthbox-only mismatch (off by 1, bbox grows 1 row) | mismatch resumes, bbox `127,75-229,111` ✓ |
+
+**Every one of these 12 predictions matches the live, freshly-rerun
+`npm run compare -- turn6-reopen-off --summary` output exactly** (rerun
+this session: still 11/46, same frame list as §0/§6). This is a complete,
+tick-for-tick reproduction of the real match/mismatch pattern using
+**zero additional formula changes** beyond correcting the comparison basis
+- i.e. §6a's dispatch-formula recovery was already complete and correct;
+the entire remaining puzzle is in the MAGNITUDE of the healthbox-specific
+error, not in the call path.
+
+**Corrected lag magnitude:** oracle's real (displayed-basis) healthbox
+0->1 transition is at tick **7307** (not 7306 as the uncorrected §6c
+computed). App's own healthbox 0->1 transition is at tick 7317 (unchanged -
+directly recomputed this session, matches §6c's citation). **Corrected lag:
+exactly 10 ticks** (7317 - 7307), not the previously-stated ~11.
+
+### 7c. Goal 2: candidate (a) is now DEFINITIVELY ruled out with anchor evidence; exact mechanism still not pinned to file:line
+
+**Ruling out a uniform additive time/phase shift, precisely:** the SAME
+already-published, zero-modification dispatch formula exactly matches
+oracle at BOTH anchor ticks 7306 and 7317 (§7b). Any proposed uniform
+correction to the shared `bounceTick` input (adding/subtracting a constant
+`C`) would shift EVERY field's transition tick by the same `C` - which
+would necessarily break at least one of these two already-exact anchor
+matches (a `C != 0` cannot leave two already-correct points correct while
+also fixing the 10 intervening healthbox ticks, since `menuIdleBounce`'s
+onix/healthbox outputs are both monotonic step functions of the SAME
+shared input over this span). This is a stronger, more direct version of
+§3a/§6c's prior "not a pure phase shift" conclusion - previously argued
+from three ruled-out candidate formulas (§2b) and a plateau-overlap
+argument (§6c); now proven directly from two independently-reconfirmed
+exact-match data points that bracket the entire defective span.
+
+**What this rules IN:** the defect is in the *shape/rate* of the
+healthbox-specific transition between the two anchors, not a shared-input
+timing offset. Candidate (a) (a wrong per-field phase/epoch constant
+applying uniformly) is refuted by the same anchor argument - a wrong
+epoch constant is just another additive shift on the shared input. The
+remaining candidates from the step brief:
+- **(b) render-site per-field lag convention:** NOT reached this session -
+  `drawTurn6FieldBase`'s exact per-field OAM/compositor write order
+  (`battleScene.ts:14743` and its callers) was not re-instrumented; this is
+  named as the sharpest next instrument (a temporary tap distinguishing
+  whether onix's and healthbox's `y2` fields are written/read through
+  genuinely different code paths at the render site, vs. both purely
+  reading `menuIdleBounce`'s return value uniformly - if genuinely uniform,
+  (b) is refuted too and only (c)/(d) remain).
+- **(c) stale-epoch input specific to `turn5SitrusResettledBounceTick`:**
+  PARTIALLY supported. Computed this session: under the shared seed offset
+  alone (onix seed 192, healthbox seed 128, a difference of 64 steps at
+  +7/tick - the SAME real-hardware constants §1 RAM-confirmed), healthbox's
+  transition should trail onix's by `64/7 ≈ 9.14` ticks if BOTH fields
+  were driven by the SAME continuous input with no dispatcher switch. Onix
+  crosses to Y2=1 at t=7306 under the live formula; the natural phase-only
+  prediction for healthbox's crossing would then be ~t=7315
+  (`7306+9`) - and indeed, computing the UNSHIFTED `t`-only formula
+  continuously past 7312 (ignoring the real 7313 dispatcher switch) gives
+  healthbox crossing to 1 exactly at t=7315, matching this phase-offset
+  prediction closely. But oracle's REAL transition is at t=7307 - **8
+  ticks earlier than even this natural continuous-phase model predicts**,
+  not just earlier than the app's actual (dispatcher-switched) t=7317.
+  This residual (~8 ticks, beyond what the shared 64-step seed offset
+  alone explains) is NOT accounted for by the seed-offset mechanism and
+  points at `turn5SitrusResettledBounceTick`'s own anchor (grid-searched
+  as a single global `-5474` shift, per its doc comment, against "the
+  17-sample healthbox y2 sequence" from what is almost certainly a
+  DIFFERENT call site/window than this one) being miscalibrated
+  specifically for the healthbox field's use in the 7305-7312
+  `drawTurn5RockSlideWindow` span - not proven to file:line this session,
+  but now bounded to an ~8-tick residual after subtracting the
+  well-evidenced 64-step/9-tick seed-offset component.
+- **(d) something else:** not identified beyond (b)/(c) above.
+
+**Sharpest next instrument for the fix step:** a temporary tap on
+`menuIdleBounce`'s own `n` value (the shared input after the `ramTick - 1748`
+step) at each of 7305-7318, cross-referenced against the SAME tap at
+whatever call site turn 5's own settled-menu redraw (`TURN5_SITRUS_MENU_
+REDRAW_TICK=7222`) uses `turn5SitrusResettledBounceTick` for - if that
+OTHER window's `n` sequence at the SAME absolute healthbox RAM values lands
+on a different `n` than this window's, the `-5474` anchor is confirmed
+miscalibrated for this specific call site and the fix is a second,
+window-B-local additive correction to the healthbox `n` (or to
+`turn5SitrusResettledBounceTick`'s single input before the seed-specific
+sine lookup) - not attempted this session (time budget).
+
+### 7d. Window A re-tabulated on the corrected basis - corrects a prior claim
+
+Re-applying `displayed(T) = RAM(T-1)` to window A (ticks 5927-5931, RAM
+values pulled fresh from `src/data/gen/turn5-6-reopen-bounce-probe.json`
+this session) against §2a's unchanged app table:
+
+| tick | app (onixY2,hbY2) | displayed = RAM(T-1) | onix | healthbox |
+|---|---|---|---|---|
+| 5927 | (1,0) | RAM(5926)=(1,1) | MATCH | mismatch (off by 1) |
+| 5928 | (1,0) | RAM(5927)=(1,1) | MATCH | mismatch (off by 1) |
+| 5929 | (1,0) | RAM(5928)=(1,1) | MATCH | mismatch (off by 1) |
+| 5930 | (1,0) | RAM(5929)=(1,1) | MATCH | mismatch (off by 1, corrected from §2a's uncorrected "off by 2") |
+| 5931 | (1,0) | RAM(5930)=(1,2) | **MATCH** (corrected from §2a's "NO") | mismatch (off by 2) |
+
+**Live-reconfirmed this session** (`npm run compare -- turn5-action-off --summary`):
+frame 5931's mismatch bbox is `127,74-229,111` - **still confined to the
+healthbox x-range (127-229), NOT extending to onix's own x-range
+(44-99)**. Onix's own bbox only appears starting frame **5932**
+(`bbox=44,49-229,133`, a different, larger, out-of-domain mismatch past
+this window's own `revealTick=5932` boundary - already flagged in §2a as
+outside the pinned domain). **This corrects §2a/§3a's claim that "onix ALSO
+starts mismatching... at 5931."** That claim used the uncorrected basis
+(RAM(5931) directly); on the corrected basis, onix matches at every tick
+5927-5931, and the bbox's 1-row growth at 5931 is fully and only explained
+by healthbox's own error widening from off-by-1 to off-by-2 (matching
+`RAM(5930)=(1,2)` vs the flat `RAM(5926..5929)=(1,1)`) - not a second,
+independent onix defect.
+
+**Practical implication for the fix step:** window A's defect is now shown
+to be a SINGLE-FIELD (healthbox-only), uniform-shape error across all five
+ticks 5927-5931 - off by exactly 1 for 5927-5930, off by exactly 2 at 5931
+(tracking `RAM(T-1)`'s own healthbox value exactly). §4 item 1's proposed
+fix (freeze the legacy bounceTick for `[press, press+2]`, matching the
+RAM-proven 3-tick sinIndex hold) was designed against the OLD, uncorrected
+table and should be re-validated against this corrected one before
+implementation - in particular it must reproduce healthbox=1 for
+5927-5930 AND healthbox=2 at 5931 (not just "get 5930 right" as §4's own
+hedge worded it), and since onix is now proven to already match throughout
+with zero fix needed, the fix step should NOT touch onix's formula for
+this span at all.
+
+### 7e. §5/§6e PASS/FAIL corrections
+
+**§5's window-A expected count, corrected:** if the healthbox-only fix
+described in §7d lands correctly (reproducing `hbY2=1` for 5927-5930 and
+`hbY2=2` at 5931, onix untouched), `turn5-action-off` should move from
+1/32 to **5/32** matched (5927, 5928, 5929, 5930, AND 5931 - not "4/32,
+5931 uncertain" as §5 previously stated; 5931 was only uncertain under the
+uncorrected basis's mistaken onix-mismatch belief, corrected in §7d).
+Frame 5932 remains unresolved (outside this window's pinned domain, past
+`revealTick`) and is not claimed by this correction.
+
+**§6e's window-B expected count: UNCHANGED in headline number** (still
+11/46 -> at least 16/46 if both corrections land), but the MECHANISM
+description is corrected: the "healthbox lag" is now precisely 10 ticks
+(7307->7317), not ~11, and is now known to require a healthbox-specific
+correction of magnitude ~8 ticks beyond what the shared 64-step onix/
+healthbox seed-offset already explains (§7c) - not a from-scratch
+unexplained 10-11 tick gap. The goal-2 freeze fix's own effect is
+UNCHANGED by this correction (§6c's finding that the freeze doesn't touch
+this healthbox sub-range at all still holds exactly, re-verified with the
+corrected-basis table in §7b: the freeze only matters at a plateau
+boundary, and none sits inside `[7313,7315]` for either basis).
+
+### 7f. Verdict for this continuation
+
+**Goal 1 (confirm/refute §6d's display-basis hypothesis): CONFIRMED**,
+directly, via a new pixel-level probe (`tools/probe/dump-turn6-reopen-display-basis-probe.py`)
+- not by re-checking existing numbers for consistency (as §6d itself had
+to settle for), but by independently measuring RAM-transition ticks against
+crop-pixel-transition ticks in the same run: 4/4 observed transitions lag
+by exactly 1 tick, zero exceptions. Corrected basis stated explicitly:
+`displayed(T) = RAM(T-1)`. Applying it (§7b) reproduces the ENTIRE live
+`npm run compare -- turn6-reopen-off` match/mismatch pattern for
+7305-7318 exactly, with no formula changes - and (§7d) corrects a prior
+claim about window A (onix does NOT mismatch at 5931; only healthbox does,
+confirmed against a live rerun's bbox).
+
+**Goal 2 (locate the ~11-tick, now ~10-tick, healthbox lag mechanism):
+NARROWED, not landed to file:line.** Candidate (a) (uniform phase/offset)
+is now DEFINITIVELY ruled out (not just "not established" as §3a left it)
+by the two exact-match anchors bracketing the whole defective span - a
+uniform shift cannot both preserve two exact matches and fix 10
+intervening mismatches. ~9 of the ~10 remaining ticks are explained by the
+real, RAM-confirmed 64-step onix/healthbox seed-offset (an intentional,
+correct asymmetry, not a bug); an ~8-tick residual beyond that is
+attributed (not yet proven to file:line) to `turn5SitrusResettledBounceTick`'s
+single shared `-5474` anchor being calibrated against a different call
+site/window than this one. §7c names the exact next instrument (a tap on
+`menuIdleBounce`'s internal `n` compared across call sites) to close this
+gap - not run this session (time budget spent on goal 1's required direct
+confirmation and the corrected re-tabulation of both windows).
+
+**Goal 3 (stretch): NOT attempted**, as instructed by the step's own
+priority order.
+
+**Can the fix step now close turn6-reopen-off fully?** NO. Window A can
+now close to 5/32 (corrected from 4/32, §7e) once §4 item 1's fix is
+re-validated against §7d's corrected table. Window B's reopen-hold half
+(goal 2 from the prior continuation) remains a real, needed fix (unaffected
+by this session's corrections) but, applied alone, still does not close
+the 10-tick healthbox band (§6c/§7e, unchanged). That band's fix now has a
+narrower, quantified target (~8 residual ticks after the seed-offset
+component) and a named next instrument (§7c) rather than an open-ended
+"trace `menuIdleBounce`'s internals" - but was not landed this session.
+Expect turn6-reopen-off to reach **16/46** once BOTH the goal-2 freeze AND
+a healthbox-specific correction land; 11/46 unchanged today (reconfirmed
+live, §7b).
