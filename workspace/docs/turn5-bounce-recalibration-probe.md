@@ -813,6 +813,246 @@ correction is a raw-sine-index constant (+67), not a healthbox-only one
 (it applies identically to onix), and the corrected prediction is ~20/46
 with important composition caveats - see §8f.
 
+## 10. Continuation 5 (2026-08-18, bounded SIDE worker): `turn6KickoffBounceTick`'s call path traced, no new constant - a missing shift and a second, previously-unpatched call site instead
+
+Executes this step's goal 1 (required: trace `turn6KickoffBounceTick`'s
+call path, measure the raw-index delta for displayed frames 7318+, verdict
+on its own constant) - **DONE**, with a corrected premise: this span does
+**NOT** have its own field-agnostic `+K3`. Goal 2 (required: explain the
+9 currently-matching frames and their fate under upcoming fixes) - **DONE**,
+live-verified, and it **directly refutes** this step's own brief hypothesis
+for sub-goal (a) ("the +67 fix... should be nothing... different call
+site"). Goal 3 (stretch) not attempted - budget went entirely to 1/2, both
+required, and a live-verification detour that paid for itself (§10c). All
+taps (two temporary `console.error`s plus a temporary `indexOffsetTAP97B5`
+parameter added to `menuIdleBounce` and threaded through two call sites)
+were reverted before this commit - `git diff -- src/` is empty.
+
+### 10a. Call path, confirmed live (source read + a live tap, `NTAP97B5`-gated)
+
+`drawTurn6FightSubmenuWindow` (`battleScene.ts:11804`), once past
+`revealTick` and not yet in the FEATHER_DANCE kickoff text:
+```
+const bounceTick = sm.confirmElapsed !== null
+  ? turn6KickoffBounceTick(t, TICK0 + sm.confirmElapsed)
+  : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;                    // battleScene.ts:11827
+drawTurn6FieldBase(fb, t, bounceTick);                       // battleScene.ts:11828
+```
+`turn6KickoffBounceTick` itself (`battleSceneCanonical.ts:1313-1316`):
+```
+if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;   // FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY = 3
+return pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET;               // TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET = 4
+```
+A live tap at `battleScene.ts:11827` (`NTAP97B5=1 npm run compare --
+turn6-reopen-off --summary`) resolves the open question directly: for
+`turn6-reopen-off.json`'s own script, `sm.confirmElapsed` stays `null`
+through `t=7344` - turn 6's real ROCK_SLIDE confirm press is **not** yet
+registered - so `turn6KickoffBounceTick` is **not actually reached** until
+`t=7345`, where `confirmElapsed` flips to `6305` (`pressTick = TICK0 +
+6305 = 7345`). Concretely, the live `bounceTick` sequence is:
+- `t` in `[7318, 7344]`: `bounceTick = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+  (`= t - 2`) - the **`else` branch**, not `turn6KickoffBounceTick` at all.
+  This is the literal same formula already governing 7313-7317 (§6a) - the
+  DMA-wait branch never actually ends at `revealTick=7318` in terms of
+  *which formula* is live, only in which `if` branch of the caller executes
+  it.
+- `t` in `[7345, 7347]`: `turn6KickoffBounceTick`'s **raw branch** now
+  finally executes (`t < pressTick+3=7348`), returning **unshifted `t`**
+  (live-tapped: `bounceTick=7345,7346,7347`).
+- `t` in `[7348, 7350]`: the **frozen branch**, `bounceTick = pressTick - 4
+  = 7341` (live-tapped, constant).
+
+`drawTurn6FieldBase` (`battleScene.ts:14743`) then feeds this SAME
+`bounceTick` to **two separate `menuIdleBounce` calls**, not one - this
+corrects §8a's "only ONE call site" framing, which was true for the
+*healthbox* field's dispatch chain but never checked the *onix* field's own
+chain:
+- healthbox: `drawTurn6FieldBase`'s own `const bounce =
+  menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick))`
+  (`battleScene.ts:14768`, the call §8f already named).
+- **onix (not previously traced by this doc): `drawTurn5RockSlideAttack`'s
+  own, independent call**, `const onixY2 =
+  menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick)).onixY2 +
+  onixY2Extra` (`battleScene.ts:10829`), reached via
+  `drawTurn6FieldBase`'s unconditional `drawTurn5RockSlideAttack(fb, t,
+  bounceTick, ...)` call. This function's own doc comment
+  (`battleScene.ts:10820-10828`) already documents a **prior, separate**
+  fix in this exact spot ("`drawTurn6FieldBase` already freezes region
+  B/the healthbox but never threaded the same freeze into this function" -
+  closing a 7348-7404 residual) - i.e. this call site has its own
+  fix history, independent of `drawTurn6FieldBase`'s, and needs its own
+  `indexOffset` too (§10c).
+
+### 10b. Per-tick raw-index delta vs receipt - no new constant, a missing `-2` shift instead
+
+Receipt coverage confirmed sufficient - `src/data/gen/turn5-6-reopen-bounce-probe.json`
+already covers ticks 7300-7351 (52 rows) in full; no probe extension
+needed. Computing `(RAM_raw - model_raw) mod 256` with `model_raw = seed +
+7*(bounceTick - 7223)` (no offset) against the receipt's own
+`onixSinIndex`/`healthboxSinIndex`, using the LIVE `bounceTick` values from
+§10a:
+
+| span | live `bounceTick` | delta needed | verdict |
+|---|---|---|---|
+| `[7318, 7344]` | `t - 2` | **+67** (constant, both fields, 27/27 ticks) | the SAME already-established §8 constant - this sub-span isn't `turn6KickoffBounceTick`'s domain at all |
+| `[7345, 7346]` | `t` (raw, unshifted) | **+53** (constant, both fields) | **NOT** a new constant: `53 = 67 - 14 = 67 - 2*7` - exactly the raw-index footprint of the missing `- FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` (`2`) that the sibling `else` branch one line above already applies. Substituting `bounceTick = t - 2` here instead of raw `t` makes **+67 match exactly** (checked directly against the receipt: onix/healthbox raw index both exact at 7345, 7346) |
+| `7347` | `t` (raw) | not computable | real hardware's driver is **already torn down** in RAM at this tick (`onixSinIndex=0`, `delta=0` literal, receipt-confirmed) - 7346 is the last tick with live dynamic sine data, matching §8c's own stated boundary exactly |
+| `[7348, 7350]` | `7341` (frozen) | not computable | same reason - no dynamic RAM ground truth exists in this window to calibrate a frozen-branch constant against; the frozen anchor's correctness can only be judged via displayed-Y2 comparison (§10d), not a raw-index delta |
+
+**Verdict for goal 1: there is no own, distinct, field-agnostic `+K3` for
+this span.** It decomposes into three regimes, only one of which is new
+territory:
+1. `[7318,7344]` reuses the existing `+67` exactly, unconditionally -
+   `turn6KickoffBounceTick` is not yet even called here.
+2. `[7345,7347]` (its raw/un-frozen branch, finally exercised) needs the
+   *same* `+67`, but only once a **second, tiny, source-level bug** is
+   fixed: `turn6KickoffBounceTick`'s `t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`
+   branch returns bare `t` where its sibling (`drawTurn6FightSubmenuWindow`'s
+   own `else` branch, one line above the call) returns `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`.
+   This is the same *class* of defect §6f named for the reopen-press freeze
+   ("a missing branch," not a wrong formula) - here it's a missing
+   `-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` term, not a missing freeze.
+3. `[7348,7350]` (the frozen branch) has no dynamic ground truth in this
+   receipt to validate any constant against at all - flagged, not resolved.
+
+**Composition rules, answered directly:** no freeze applies in this span
+(the goal-2 reopen-press freeze is scoped to `[7313,7315]` only, confirmed
+by construction - unaffected here). The display basis
+(`displayed(T)=RAM(T-1)`) is unchanged/still applicable (not independently
+re-verified at these specific ticks this session, but no mechanism exists
+that would suspend it here - same oracle capture protocol throughout).
+
+### 10c. Live pixel verification: §8f's fix shape under-specified by one call site - now corrected and confirmed
+
+Rather than trust the closed-form math alone, this session temporarily
+added a defaulted `indexOffsetTAP97B5` parameter to `menuIdleBounce`
+(`battleMenu.ts:825`) and threaded `process.env.NTAP97B5 ? 67 : 0` through
+**both** call sites, then re-ran `NTAP97B5=1 npm run compare --
+turn6-reopen-off --summary` after each edit (reverted before this commit):
+
+| patched call site(s) | live score | notes |
+|---|---|---|
+| none (baseline) | 11/46 | matches §0/§8's own reconfirmed baseline |
+| healthbox only (`battleScene.ts:14768`, §8f's own named site) | 24/46 | **not** what §8f's fix shape alone would produce - onix stays broken |
+| **healthbox + onix** (`battleScene.ts:14768` AND `:10829`) | **32/46** | matches this session's own closed-form model (§10d) exactly, tick-for-tick, once both sites carry the offset |
+
+**This corrects §8f's fix shape**: `indexOffset=67` must land at **two**
+call sites, not one - `drawTurn6FieldBase`'s own healthbox computation
+(`:14768`) AND `drawTurn5RockSlideAttack`'s independent onix computation
+(`:10829`), both reachable through the SAME `drawTurn6FieldBase(fb, t,
+bounceTick)` dispatch. A fix step that only patches the site §8f named
+would land onix visibly broken across the whole `turn6-reopen-off` family
+- this was not previously live-tested (§8h's own PASS/FAIL check is a pure
+raw-index arithmetic check against the receipt, never a live pixel compare,
+so it could not have caught a missing call site). **Whether this same
+gap exists for window A's own `+116` fix (§9) was not checked this
+session** - flagged as a needed pre-flight check before that fix lands
+too, since `turn5LegacyResettledBounceTickFromLatest`/`turn5SubmenuBounceTickFromLatest`
+may have the same two-call-site (onix vs healthbox) split.
+
+### 10d. Goal 2: the 9-frame regression map, live-confirmed
+
+The currently-matching frames outside `[7305,7317]` are, live-reconfirmed
+this session: `{7326, 7327, 7335, 7336, 7344, 7345, 7348, 7349, 7350}` (9
+frames) - identical to §8e's list. Why each matches TODAY (unfixed code,
+closed-form model cross-checked tick-for-tick against the live compare
+tool's exact pass/fail pattern for all of `[7305,7350]`, not just these 9):
+
+| frame(s) | raw index (unfixed) distance from nearest table 1/4-boundary | mechanism |
+|---|---|---|
+| 7326, 7335, 7344 | 3, 2, 1 (onix); same for hb | the SAME §8d/§9e "every 9 ticks" table-peak-adjacent class already flagged - genuinely plausible rounding-tolerance coincidences |
+| 7327, 7336 | 10, 9 | one tick past the peak cluster above - still inside the same wide plateau bucket, a weaker/wider version of the same tolerance, not as tightly peak-bound |
+| 7345 | 22 | **not** table-peak-related at all - this is the regime-boundary tick where `turn6KickoffBounceTick` first executes; its match is a coincidence of raw-index *magnitude* landing in the right bucket, unconnected to §8d's mechanism |
+| 7348, 7349, 7350 | 6 (frozen branch) | a **third, distinct** coincidence: real hardware's driver is fully torn down (flat literal 0) here, while the model still computes a stale frozen-`bounceTick` sine value that happens to floor to the same `(0,0)` bucket by table geometry - unrelated to both other mechanisms |
+
+**(a) Fate under the `+67` fix already landing (main lane): NOT a no-op -
+live-confirmed regression, all 9.** This directly refutes the step brief's
+own framing ("should be nothing - different call site; confirm"). §10a
+shows it is the identical dispatch chain (through `drawTurn6FieldBase`),
+and §10c's live run proves it: with `+67` correctly landed at **both**
+call sites, all 9 frames (plus 7318, a 10th, previously-matching-adjacent
+frame not in the original 9-list but immediately outside it) flip from
+match to mismatch, while a disjoint set of 23 frames in `[7319,7350]`
+become newly matching. Net for the family: strongly positive (11→32
+overall, live-confirmed §10c), but every one of these specific 9 is a
+regression, not preserved - **a fix step landing `+67` should expect and
+report this specific list flipping, not treat it as a bug in the fix.**
+**If only the healthbox call site is patched (missing §10c's onix-site
+correction), the picture is worse and messier** (24/46, a different,
+overlapping-but-not-identical mismatch pattern) - underscoring why both
+sites must land together, not sequentially with a gap.
+
+**(b) Fate under a future fix to `turn6KickoffBounceTick`'s missing `-2`
+shift (§10b's "own constant" answer):** no additional effect on these 9
+specifically, live-modeled - the shift only touches `bounceTick` for
+`t` in `[7345,7347]`, and (checked via the closed-form model) does not
+by itself restore any of the 9 to matching once `+67` has already broken
+their current coincidence; it only affects *how close to correct* the
+already-broken frames 7345-7347 land, not whether they flip back to a
+match. Restoring correctness at those specific ticks needs `+67` AND the
+shift fix AND (per §8e's own established pattern for the anchor frames)
+likely the display-basis correction too - not independently confirmed for
+this exact sub-list this session (flagged as open, consistent with §8e's
+own caveat for the analogous 7305-7317 span).
+
+**(c) Fate under a future §8d rounding-artifact fix:** relevant only to
+the `{7326, 7327, 7335, 7336, 7344}` subset (the table-peak-adjacent
+group) - and even there, moot in isolation: `+67` alone (§10c, already
+confirmed live) already destroys their current match *before* any rounding
+fix would apply, since the rounding fix only changes behavior exactly at a
+table peak, and `+67`'s job is to relocate WHICH raw index each tick lands
+on in the first place. The rounding fix's relevance to this group is
+real but conditional - it becomes relevant again only after `+67` +
+the shift fix + (likely) the display-basis fix are ALL composed and
+re-measured fresh; asserting today whether it would restore these frames
+to matching is not evidenced (correctly flagged as unresolved, not
+guessed).
+
+### 10e. Verdict for this continuation
+
+**Goal 1: DONE.** `turn6KickoffBounceTick`'s call path is traced to
+file:line (§10a) and its own raw-index delta is measured per-tick against
+the committed receipt (§10b, no probe extension needed - coverage was
+already sufficient). **There is no distinct `+K3` for this span** - most
+of it (`[7318,7344]`) is still governed by the already-known `+67`/`else`-branch
+formula and doesn't exercise `turn6KickoffBounceTick` at all; the small
+slice that does (`[7345,7347]`) needs the same `+67` plus a separate,
+tiny, already-precedented "missing shift" fix, not a new constant; the
+frozen tail (`[7348,7350]`) has no dynamic RAM ground truth in this window
+to calibrate anything against. A live pixel-diff detour (§10c) additionally
+found and corrected a real gap in §8f's own fix shape (two call sites, not
+one) - proven, not modeled, via a temporary before/after live compare.
+
+**Goal 2: DONE, live-verified.** The 9 currently-matching frames are
+explained (three distinct coincidence mechanisms, §10d) and their fate
+under the `+67` fix is **directly measured, not predicted**: it is a
+guaranteed regression for all 9 (plus 7318), contradicting this step's own
+brief hypothesis - flagged loudly per this doc's established convention
+(§8e already flagged the *general* risk of `+67` looking like a regression
+without the display-basis fix; this session confirms it concretely for
+this exact frame list and this exact call-site gap).
+
+**Goal 3: NOT attempted**, per the step's own priority order - required
+goals 1/2 consumed the full budget, plus the live-verification detour that
+uncovered §10c's real fix-shape gap.
+
+**What should the next fix rung(s) land, in what order?** (1) The
+two-call-site `+67`/`indexOffset` fix (§10c: `battleScene.ts:14768` AND
+`:10829`, landed together - not one without the other). (2) The
+`turn6KickoffBounceTick` missing-shift fix (§10b: its raw branch should
+return `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`, matching its sibling). (3)
+Separately and orthogonally, the display-basis fix (owned elsewhere,
+§7a/§8e) - needed before the 9-frame regression in (a) can be *recovered*
+correctly rather than just relocated. (4) The §8d/§9e table-peak rounding
+fix, last, and only re-measured once (1)-(3) are all composed - not before
+(§10d's own finding: measuring it in isolation against today's baseline
+would misattribute credit, since most of the "every 9 ticks" coincidences
+it might seem to explain are destroyed by step (1) regardless of whether
+(4) ever lands). **Before landing window A's own `+116` fix (§9), check for
+the SAME two-call-site gap this session found for window B (§10c)** - not
+checked this session, a real risk given the structural similarity
+(`drawTurn5RockSlideAttack`'s onix call is shared code, not window-B-specific).
+
 ## 8. Continuation 3 (2026-08-17, bounded SIDE worker): the §7c instrument run, a dead-end cross-reference, and the raw-index anchor correction landed to an exact number
 
 Executes this step's goal 1 (required: run the §7c `n`-tap instrument and
