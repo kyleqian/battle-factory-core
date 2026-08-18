@@ -1,0 +1,235 @@
+{
+"sourceTrace": "tools/compare/traces/turn5-action-off.json",
+"oracleProfile": "battle-scene-off",
+"onixBbox": [
+44,
+49,
+99,
+110
+],
+"healthboxBbox": [
+127,
+74,
+229,
+110
+],
+"tickRange": [
+5918,
+5940
+],
+"ticks": [
+{
+"tick": 5918,
+"onixY2": 1,
+"healthboxMainY2": 0,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "5ca2f8f41722bfe83ee8ede492e82323a0378a84c6a30be9358d0f21a48a436e"
+},
+{
+"tick": 5919,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "5ca2f8f41722bfe83ee8ede492e82323a0378a84c6a30be9358d0f21a48a436e"
+},
+{
+"tick": 5920,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5921,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5922,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5923,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5924,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5925,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5926,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5927,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5928,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5929,
+"onixY2": 1,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5930,
+"onixY2": 1,
+"healthboxMainY2": 2,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5931,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "1939b1517cfb1c5b832c7b27be1fb28e08bcc2219ef92f720e38c56c661fe2ce",
+"healthboxCropSha256": "237f30280448b9b2ff29344c7cb762b4d340bbd8089062696d4a45a812c28b5b"
+},
+{
+"tick": 5932,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5933,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5934,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5935,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5936,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5937,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5938,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5939,
+"onixY2": 0,
+"healthboxMainY2": 1,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+},
+{
+"tick": 5940,
+"onixY2": 0,
+"healthboxMainY2": 0,
+"onixCropSha256": "a03a602bb419740a2bf0fa0542b461c0b3def0a0792f210dec711e8cb1f38930",
+"healthboxCropSha256": "637b964ef31fae4b43d38247a64cd4b16e0d1d0477bd83ccffe7013fdb6bcd18"
+}
+],
+"transitions": {
+"onix": [
+{
+"kind": "ram",
+"tick": 5931,
+"from": 1,
+"to": 0
+},
+{
+"kind": "pixels",
+"tick": 5932
+}
+],
+"healthbox": [
+{
+"kind": "ram",
+"tick": 5919,
+"from": 0,
+"to": 1
+},
+{
+"kind": "pixels",
+"tick": 5920
+},
+{
+"kind": "ram",
+"tick": 5930,
+"from": 1,
+"to": 2
+},
+{
+"kind": "ram",
+"tick": 5931,
+"from": 2,
+"to": 1
+},
+{
+"kind": "pixels",
+"tick": 5931
+},
+{
+"kind": "pixels",
+"tick": 5932
+},
+{
+"kind": "ram",
+"tick": 5940,
+"from": 1,
+"to": 0
+}
+]
+}
+}
