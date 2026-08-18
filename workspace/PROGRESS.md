@@ -132,11 +132,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   window.
 
 ---
-## 1329 — [supervisor wind-down, 2026-08-18] **16 worker steps, two lanes: #96 CLOSED (swap family 19/19 exact), #97 mechanism RESOLVED via an 8-probe instrument chain (turn5-action-off CLOSED 32/32; five root causes landed), #71 §1e rungs 0-4 (94/121 sites) — all final gates green**
+## 1329 — [supervisor wind-down, 2026-08-18, amended after two bonus rounds] **18 worker steps, two lanes: #96 CLOSED (swap family 19/19 exact), #97 mechanism RESOLVED via an 8-probe instrument chain (turn5-action-off CLOSED 32/32; five root causes landed), #71 §1e ladder COMPLETE (119/119 in-scope sites) — all final gates green**
 
-- **Final gates (tree `37b2818d`, run independently AFTER the last merge):**
-  full npm **1,066 files / 10,040 passed / 223 skipped**; `npm run build`
-  green; soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
+- **Final gates (run independently AFTER the last merge, twice — at
+  `37b2818d` and again at the final tree `d7bc0fae`):** full npm
+  **1,067 files / 10,043 passed / 223 skipped**; `npm run build` green;
+  soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
   Fold status: animation-main and rust-main both EMPTY at orient AND at
   wind-down. DEFERRED.md EMPTY. Only permanent worktrees remain; no
   unmerged branches; no stray probe processes.
@@ -164,10 +165,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `turn6-reopen-endstate-spec.md` (naive 7318+ extension REJECTED by a
   sibling-trace guard: fitted offsets are context-bound),
   `bounce-peak-rounding-fix-spec.md`.
-- **#71 §1e ladder:** design scout re-derived the census (58→121 sites,
+- **#71 §1e ladder COMPLETE (two post-wind-down bonus rounds):** design
+  scout re-derived the census (58→121 raw sites,
   `docs/sendout-1e-retirement-design.md`, 9-rung plan, ZERO
-  boundary-ratchet widening); rungs 0-4 landed (94/121 sites retired,
-  zero FINDINGs, differential 128/128 per rung, suite +7 tests).
+  boundary-ratchet widening); rungs 0-8 ALL landed — **119/119 in-scope
+  sites retired** (final grep census: 119 `OrZero` calls + exactly the 4
+  permanently-out-of-scope settle-hook literals), zero FINDINGs across
+  all 8 batches, differential 128/128 per rung, HARDEN got its first
+  Tier-1 pin before its site was touched, and a real site-count
+  arithmetic error in earlier ledger entries was caught and corrected by
+  the rung 5-6 worker (94/121 → 94/119 ground truth). Only Rung 9
+  (hand-fit swap-over) remains, blocked on the animation lane's rung-4
+  back dispatcher.
 - **Ops notes:** freshness-check false positive #5 at orient (kept
   services; `3e29880b` proves schema currency) — PAPERCUTS bumped. NEW
   papercut: side-worktree ROOT has no package.json, `npm run` silently
@@ -180,7 +189,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   resolve-off-c trailing 47 frames (status-box+dither instrument named),
   resolve-off-d residual, turn6 7318+ kickoff phase-context (needs a
   phase-history model — do NOT re-extend fitted constants).
-  (b) #71 rungs 5-8 (~50 sites; HARDEN needs a pin first per the doc),
-  rung 9 blocked on the animation lane's rung-4 dispatcher.
+  (b) #71 Rung 9 only (hand-fit swap-over), blocked on the animation
+  lane's rung-4 back dispatcher — §1e itself is DONE.
   (c) #73/#55-adjacent items unchanged. No deferred questions; no
   blockers.
