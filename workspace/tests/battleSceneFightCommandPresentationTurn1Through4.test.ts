@@ -425,7 +425,7 @@ describe("slice 3: drawActionMenuIdleContent's HP-overlay guard fires for turn-2
   const latest1 = resolveTurn1LatestCompletedCommandHandoff(TURN1_PRESENTATION_EPOCH_ELAPSED);
   const latest2 = resolveTurn2LatestCompletedCommandHandoff(TURN2_PRESENTATION_EPOCH_ELAPSED);
   const latest3 = resolveTurn3LatestCompletedCommandHandoff(TURN3_PRESENTATION_EPOCH_ELAPSED);
-  const latest4 = resolveTurn4LatestCompletedCommandHandoff(TURN4_PRESENTATION_EPOCH_ELAPSED, latest3);
+  const latest4 = resolveTurn4LatestCompletedCommandHandoff(TURN4_PRESENTATION_EPOCH_ELAPSED);
 
   // Extracted verbatim from `drawActionMenuIdleContent`'s own guard line --
   // the same two predicates over the same two positional slots, not a

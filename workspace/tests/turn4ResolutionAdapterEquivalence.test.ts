@@ -64,12 +64,12 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
 
   it("carries slot 0, field facts, ENDEAVOR/ROCK_SLIDE routing, and the immutable epoch through generic content", () => {
     const legacy = resolveTurn4CompletedResolutionNextCommandHandoff(4312);
-    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312);
     const content = latest.content;
     if (content === undefined) throw new Error("turn-4 generic receipt has no content");
 
     expect(isLatestCompletedCommandHandoffReady(latest)).toBe(true);
-    expect(latest.playerPp).toEqual(TURN3_PRIOR_LATEST.playerPp);
+    expect(latest.playerPp).toEqual(legacy.playerPp);
     expect(latest.persistedMoveSlot).toBe(0);
     expect(content.field.player.hp.current).toBe(88);
     expect(content.field.opponent.hp.current).toBe(1);
@@ -79,17 +79,14 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
       { user: "player", target: "opponent", move: "ROCK_SLIDE", hpChange: { from: 1, to: 0 } },
     ]);
     expect(latestCompletedCommandPresentationEpochElapsedSinceReset(latest, 4319)).toBe(7);
-    expect(turn4CompletedResolutionNextCommandHandoffFromLatest(latest)).toEqual({
-      ...legacy,
-      playerPp: TURN3_PRIOR_LATEST.playerPp,
-    });
+    expect(turn4CompletedResolutionNextCommandHandoffFromLatest(latest)).toEqual(legacy);
     expect(Object.isFrozen(content.presentationEpoch)).toBe(true);
     expect(Object.isFrozen(content.presentationEpoch!.mon)).toBe(true);
     expect(Object.isFrozen(content.upcoming?.moves)).toBe(true);
   });
 
   it("derives every turn-5 bounce and kickoff clock from turn-4 content's semantic epoch", () => {
-    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312);
     const content = latest.content;
     if (content === undefined) throw new Error("turn-4 generic receipt has no content");
 
@@ -114,7 +111,7 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
     expect(isTurn4NextCommandLifecycleActive(handoff, 4896)).toBe(true);
     expect(handoff.presentationEpoch.elapsed).toBe(4312);
 
-    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312);
     expect(isLatestCompletedCommandLifecycleActive(latest, 3853)).toBe(false);
     expect(isLatestCompletedCommandLifecycleActive(latest, 4887)).toBe(true);
     expect(isLatestCompletedCommandLifecycleActive(latest, 4896)).toBe(true);
@@ -132,16 +129,17 @@ describe("turn4ResolutionAdapter: #39 completed-turn-4/next-command handoff proo
     expect(Object.isFrozen(handoff.nextCommand)).toBe(true);
   });
 
-  it("pins playerPp/persistedMoveSlot from the prior latest handoff while content stays turn-4 fresh (turn4-fold-pp-freshness-design.md §3.3)", () => {
-    const latest = resolveTurn4LatestCompletedCommandHandoff(4312, TURN3_PRIOR_LATEST);
+  it("carries playerPp/persistedMoveSlot from turn 4's OWN fresh receipt, not the prior (turn-3) latest handoff (ISSUES #97-B: a live gBattleMons RAM probe across ticks 5920-5960, plus the source-derived ROCK_SLIDE decrement count for turns 1/3/4, both show PP 7 - not turn 3's 8 - throughout turn 5's own reopened FIGHT submenu; the 2026-08-02 design's opposite direction, turn4-fold-pp-freshness-design.md §3.3, is superseded)", () => {
+    const latest = resolveTurn4LatestCompletedCommandHandoff(4312);
     const content = latest.content;
     if (content === undefined) throw new Error("turn-4 generic receipt has no content");
 
-    expect(latest.playerPp).toEqual(TURN3_PRIOR_LATEST.playerPp);
-    expect(latest.persistedMoveSlot).toBe(TURN3_PRIOR_LATEST.persistedMoveSlot);
-    expect(latest.playerPp).not.toEqual(
+    expect(latest.playerPp).toEqual(
       resolveTurn4CompletedResolutionNextCommandHandoff(4312).playerPp,
     );
+    expect(latest.playerPp).toEqual([7, 20, 19, 10]);
+    expect(latest.persistedMoveSlot).toBe(0);
+    expect(latest.playerPp).not.toEqual(TURN3_PRIOR_LATEST.playerPp);
     expect(content.field.player.hp.current).toBe(88);
   });
 });

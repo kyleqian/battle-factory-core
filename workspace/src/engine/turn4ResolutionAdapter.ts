@@ -188,22 +188,30 @@ export function resolveTurn4FightCommandPresentation(
 /**
  * Publishes turn 4 through the generic completed-command owner.
  *
- * `playerPp`/`persistedMoveSlot` are pinned from `priorLatest` (turn 3's
- * values) rather than turn 4's own fresh receipt: chrome must stay on turn
- * 3's PP until the turn 5->6 promotion explicitly replaces the whole
- * handoff (`createCanonicalCompletedCommandChain`). `content` still carries
- * turn 4's own fresh HP/bounce/kickoff - only the top-level PP/slot pin.
+ * `playerPp`/`persistedMoveSlot` are turn 4's own fresh receipt values -
+ * matching turn 3's and turn 5's own `resolveTurnNLatestCompletedCommandHandoff`
+ * pattern. Prior to ISSUES #97-B (2026-08-18), this pinned `priorLatest`
+ * (turn 3's stale PP) instead, per `docs/turn4-fold-pp-freshness-design.md`
+ * §2's "match the parent byte-for-byte" direction - that doc's own §6 risk 4
+ * flagged the direction as unresolved pending a real oracle probe of turn 5's
+ * reopened FIGHT submenu. That probe is now in: three independent instruments
+ * (the source-derived ROCK_SLIDE decrement count for turns 1/3/4, backward
+ * RAM math from `docs/turn5-6-off-ground-truth.md`'s post-turn-5/6 PP
+ * handoffs, and a fresh live `gBattleMons` RAM probe across ticks 5920-5960)
+ * all agree the oracle shows PP 7 (turn 4's own fresh value), not 8 (turn
+ * 3's stale one), throughout turn 5's own reopened FIGHT submenu - so the
+ * immediate-freshness direction (turn 2->3's own precedent) was correct all
+ * along and this pin was the bug, not the fix.
  */
 export function resolveTurn4LatestCompletedCommandHandoff(
   presentationEpochElapsed: number,
-  priorLatest: LatestCompletedCommandHandoff,
 ): LatestCompletedCommandHandoff {
   const handoff = resolveTurn4CompletedResolutionNextCommandHandoff(
     presentationEpochElapsed,
   );
   return createLatestCompletedCommandHandoff({
-    playerPp: priorLatest.playerPp,
-    persistedMoveSlot: priorLatest.persistedMoveSlot,
+    playerPp: handoff.playerPp,
+    persistedMoveSlot: handoff.persistedMoveSlot,
     nextCommand: handoff.nextCommand,
     content: resolveTurn4FightCommandPresentation(handoff),
   });
