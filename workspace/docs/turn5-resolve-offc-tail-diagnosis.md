@@ -465,3 +465,285 @@ and after).
 `npm test` 1067 files / 10049 passed / 223 skipped; `npm run build` green.
 Two Tier-1 pins added in `tests/battleScene.test.ts` for both re-anchored
 formulas. Full writeup and per-trace numbers: `ISSUES.md` #97 sub-entry F.
+
+## 11. Mechanism (iii) instrument (2026-08-18, bounded SIDE worker, ISSUES #97
+remainder): the PIDGEOTTO materialize->settled transition anchor
+
+Scope per this step's brief: pin the real materialize->settled visual
+timeline for PIDGEOTTO's own SPRITE (not the healthbox, already fully
+covered by §3/§10's landed fix) across render ticks ~6740-6830, and name
+the exact fix shape for `drawTurn5PidgeottoMaterialize`/
+`TURN5_PIDGEOTTO_SETTLE_TICK`/`TURN5_STRETCH_TABLE` - the item §3c's own
+aside flagged out of scope at the time ("the real sprite's own emerge
+animation reaches its idle callback far EARLIER than 6828 in RAM terms
+too, 6760 - but... an UNRELATED, NOT re-verified-this-session code path"),
+and §10's landed-fix session confirmed is now the dominant remaining
+contributor to all 47 mismatched frames after both `turn5-resolve-off-c`
+fixes above already landed (149/196 unchanged, ~3% flat residual). This
+session's method: same direct-`EmeraldOracle`/`factory-battle-scene-off.json`
+replay driver as §1, new probe `tools/probe/dump-turn5-pidgeotto-
+materialize-settle-probe.py` (window [6735,6835]), plus a fresh
+`npm run compare -- turn5-resolve-off-c --summary` run and direct RGB
+sampling of its saved PNGs.
+
+### 11a. Real RAM ground truth (`gBattlerSpriteIds[1]`, PIDGEOTTO's own mon sprite)
+
+| RAM tick | render | event |
+|---|---|---|
+| <=6743 | <=6744 | sprite invisible, idle (leftover state, doesn't matter - hidden) |
+| **6744** | **6745** | callback -> `SpriteCB_OpponentMonFromBall` (0x08039B58, the same address `dump-midbattle-switch-oam.py` already pinned for this ROM), affine matrix `a=d=1638` (tiny apparent silhouette inside a NORMAL, non-doubled affine box - `affineMode=1` the entire session, never `3`/double) |
+| 6745 | **6746** | `invisible` clears - first visible tick, EXACTLY `TURN5_BALL_HANDOFF_TICK(6727) + MATERIALIZE_START_OFFSET(19) = 6746`, the app's own `materializeStart` - matches |
+| 6745-6755 | 6746-6756 | `a=d` ramps 1129 -> 275 (monotonic shrink-in), `y2` descends 14 -> 3 |
+| **6756** | **6757** | `a=d=256` (full/normal scale) reached, `y2=2` (one tick behind) |
+| **6757** | **6758** | `y2=0` - BOTH scale and y-offset now at their final rest values; the affine-anim task's own internal step cursor also reports done here (`sAffineAnimStates[matrixNum].animCmdIndex` flips 1->0) |
+| 6758-6759 | 6759-6760 | held: `a=d=256`, `y2=0`, callback still `SpriteCB_OpponentMonFromBall` (administrative delay before the formal hand-off) |
+| **6760** | **6761** | callback -> `SpriteCallbackDummy` (0x08007428, the idle sentinel `dump-onix-front-idle-anim.py` also uses) - **the real, formal materialize-finished event** |
+| 6761-6835 (probe end) | 6762-6836 | **100% unchanged**: `a=d=256`, `y2=0`, `x2=0`, `callback=SpriteCallbackDummy`, every single sampled tick, 75 consecutive ticks with zero further change of any kind - no wobble, no bounce, no idle animation, dead static |
+
+Healthbox cross-check (same probe, `gHealthboxSpriteIds[1]`): slide-in
+callback `SpriteCB_HealthBoxSlideIn` from RAM 6762, idle `SpriteCallbackDummy`
+from RAM 6785 - byte-identical to §3a's own already-landed table. **Nothing
+new or uncovered** in the healthbox for this span; the 6763 slide re-anchor
+already covers 100% of the healthbox's own real behavior here.
+
+### 11b. Direct contradiction of the SETTLE_TICK doc comment - flagged, not fixed
+
+`turn5ResolutionAdapter.ts:308-313` (`Turn5SwitchInAdapter.materializeSettleTick`'s
+own doc comment, feeding `PIDGEOTTO_MATERIALIZE_SETTLE_TICK = 6828` at
+`turn5ResolutionAdapter.ts:196`, in turn `TURN5_PIDGEOTTO_SETTLE_TICK` at
+`battleScene.ts:11114`) claims:
+
+> Pidgeotto's own switch-in materialize settle -- RAM tick 6827's idle
+> callback flip, visible render 6828
+
+**This session's own direct RAM probe (§11a) contradicts this claim
+outright**: the real idle-callback flip is RAM tick **6760**, not 6827 -
+sixty-seven ticks earlier. Every one of the 75 sampled ticks from RAM 6761
+through 6835 (spanning RAM 6827/6828 explicitly) shows the sprite ALREADY
+idle, unchanged, with zero event of any kind at 6827/6828. Per this step's
+brief ("record any contradiction, change nothing" - scoped there to the two
+landed fixes, but the same discipline applies here since this is analysis-
+only): this doc comment's specific factual claim is wrong and should be
+corrected by whichever session next touches `turn5ResolutionAdapter.ts`,
+but no `src/` edit was made this session.
+
+### 11c. Pixel cross-check: the failure boundary is exactly `TURN5_STRETCH_TICK` (6786), not a wobble-curve-value issue
+
+Fresh `npm run compare -- turn5-resolve-off-c --summary` this session
+(149/196, unchanged - `tools/compare/out/run-2026-08-18-18-55-13Z-53562`):
+diff magnitude across the window is NOT flat, as this doc's own §10 landed
+addendum characterized it - it has a sharp, structural shape:
+
+| render range | diff | note |
+|---|---|---|
+| 6763-6765 | 185-213px (~0.5%) | small, see §11e |
+| 6766-6775 | 596-1571px (1.5-4.1%) | growing, see §11e |
+| 6776-6783 | 1109-1198px (2.9-3.1%) | still elevated, see §11e |
+| **6784** | **30px (0.08%)** | near-perfect |
+| **6785** | **14px (0.04%)** | near-perfect |
+| **6786** | **1185px (3.09%)** | **jumps back up, exactly at `TURN5_STRETCH_TICK`** |
+| 6787-6809 | 1112-1402px (2.9-3.65%) | stays elevated through the capture window's own end |
+
+Direct RGB sampling of the saved `app-XXXXX.png`/`oracle-XXXXX.png` pairs
+(same run) at coordinates inside PIDGEOTTO's own sprite silhouette
+(outside the tiny 6784/6785 particle-tail residual's own footprint,
+x=127-145/y=23-61 - see §11e):
+
+- **t=6784, 6785**: app and oracle agree EXACTLY at every sampled sprite
+  pixel, e.g. `(160,45)`: both `(123,90,74)`; `(175,30)`: both `(90,57,41)`;
+  `(190,50)`: both `(33,33,33)`.
+- **t=6786 onward (every tick sampled through 6809)**: the ORACLE stays
+  LITERALLY CONSTANT at those same coordinates - `(175,30)` reads
+  `(90,57,41)` and `(190,50)` reads `(33,33,33)` at EVERY tick 6786, 6790,
+  6800, 6809 alike, confirming §11a's RAM finding pixel-for-pixel (the real
+  sprite is static). The APP's own colors at those SAME coordinates instead
+  change tick to tick - `(175,30)`: `(214,49,24)` at 6786, still `(214,49,24)`
+  at 6790, `(239,99,66)` at 6800, `(239,99,66)` at 6809; `(190,50)`:
+  `(90,57,41)` at 6786, `(33,33,33)` at 6790 - direct visual proof the app
+  is deforming a sprite the real game renders motionless.
+
+The failure boundary is EXACTLY `TURN5_STRETCH_TICK = 6786`
+(`battleSceneCanonical.ts:244`) - not a gradual drift, not a
+curve-shape-only issue. This pins the mechanism precisely: whatever
+`drawTurn5PidgeottoMaterialize` renders for `t < TURN5_STRETCH_TICK` is
+(modulo §11e's separate, smaller residual) ALREADY CORRECT by the time it
+reaches steady state; the bug is entirely in what happens from
+`TURN5_STRETCH_TICK` onward.
+
+### 11d. Named mechanism and fix shape
+
+**`TURN5_STRETCH_TABLE`** (`battleSceneCanonical.ts:246-288`, 41 entries,
+consumed at `battleScene.ts:11198-11199` inside `drawTurn5PidgeottoMaterialize`)
+encodes a "settle wobble/bounce" - `xScale`/`yScale` swinging as far as
+209-272 (up to ~18% asymmetric x/y distortion) before returning to
+`{256,256,0}` at its own last entry (render 6826) - **with zero RAM basis
+in this trace**: §11a's own per-tick table shows the real affine matrix is
+flat at `a=d=256,y2=0` for the ENTIRE span from RAM 6756 (render 6757)
+onward, thirty render ticks BEFORE `TURN5_STRETCH_TICK` even begins, and
+stays flat another eighty-plus ticks past where the table ends. There is no
+wobble to reproduce here, in this profile, for this switch-in. (Whether the
+table was derived from a different trace/profile/species entirely, or is a
+hand-authored placeholder, is undetermined and out of this session's remit
+- it is simply wrong for this call site.)
+
+A second, independent tell confirms it's a code-path/dispatch bug, not
+just wrong curve values: even `TURN5_STRETCH_TABLE`'s own FIRST entry
+(index 0, render 6786) is `{256,256,0}` - textually identical to "no
+distortion" - yet render 6786 already shows the full ~1185px jump (§11c).
+That's because the stretch branch calls a DIFFERENT drawing primitive
+(`drawSpriteSheetAffineStretch`, `battleScene.ts:6014-6063`) than the
+branch before it (`drawSpriteSheetAffineTintedBlend`, used for
+`t < TURN5_STRETCH_TICK`), **with `doubled=true`**
+(`battleScene.ts:11199`, the 11th positional arg) - GBA double-size affine
+OAM semantics. §11a's own RAM table shows `affineMode` is `1` (normal,
+non-doubled) at every single sampled tick, never `3` (double) - the real
+hardware never uses double-size mode for this sprite. The bug is the
+FUNCTION SWITCH itself at `TURN5_STRETCH_TICK`, independent of whether the
+table's own values happen to be near-identity at any given tick.
+
+**Fix** (`drawTurn5PidgeottoMaterialize`, `battleScene.ts:11185-11200`):
+delete the `if (t < TURN5_STRETCH_TICK) { ... return; }` split and its
+`TURN5_STRETCH_TABLE`-driven `else` branch entirely; let the tinted-blend
+formula (currently the `if` body) run unconditionally for the whole
+materialize window (`materializeStart` through the eventual settle
+hand-off). This is safe and suffices on its own, with no new table needed,
+because every one of that formula's own inputs already saturates/degenerates
+to the exact RAM-confirmed steady state for large `t`:
+- `turn5MaterializeCoeff(t)` (`battleScene.ts:11108-11111`): `??` falls
+  back to `0` once `t` runs past `TURN5_MATERIALIZE_RAMP_COEFF`'s own last
+  entry - no more tint.
+- `affineEmergeAccumulator(local + 1)` (`battleScene.ts:5422-5436`):
+  `Math.min(neutralScale, acc)` already clamps to `neutralScale` (full
+  scale, `256`) for any `logicalOffset` past the extracted table's own
+  total duration - no more shrink.
+- `MATERIALIZE_Y2_TABLE[local] ?? 0` (`battleScene.ts:5492`, consumed at
+  `:11193`): `??` falls back to `0` once `local` exceeds the table's own
+  12 entries - no more y-offset.
+
+`TURN5_PIDGEOTTO_SETTLE_TICK` itself (`battleScene.ts:11114`) does not need
+to move: once the fix above lands, the tinted-blend formula's own
+degenerate/steady state is ALREADY pixel-identical to what
+`drawTurn5PidgeottoSettled` draws (verified: PIDGEOTTO has no
+`speciesFrontIdleRestOffset` entry in `src/animation/speciesIdleAnim.ts`,
+so `drawTurn5PidgeottoSettled`'s own `idle` var is `{x2:0,y2:0}` -
+literally the same degenerate anchor the materialize formula converges to)
+- so the hand-off from one to the other becomes a no-op at the pixel level,
+wherever it happens to fire. Only §11b's doc-comment inaccuracy is a loose
+end, not a functional one.
+
+### 11e. Separate, smaller residual flagged but NOT diagnosed this session (out of assigned scope)
+
+Renders 6763-6783 (§11c's table) carry a DIFFERENT, smaller-magnitude
+residual this session did not chase to a fix shape (the brief's own scope
+was specifically the settle/stretch transition). Two components, both
+outside PIDGEOTTO's own sprite silhouette or of much smaller per-pixel
+magnitude:
+
+- A tiny (14-30px) residual confined to `x=127-145,y=23-61` at renders
+  6784/6785 specifically (colors involving `(255,173,0)`, consistent with
+  `drawTurn5SwitchinParticles`' own particle sprites, not the mon sprite) -
+  most likely a stray 1px particle-position mistiming near the tail end of
+  the switch-in's particle burst. This coordinate range shows ZERO diff at
+  every sampled tick from 6786 onward in this session's own trace, so it
+  does not affect §11d's predicted counts below.
+- A larger (600-1571px) residual at renders 6766-6783, confined to the
+  sprite's own silhouette. Direct RGB sampling at renders 6768/6772/6776/
+  6780 (inside the silhouette, away from the particle footprint above)
+  shows small PER-CHANNEL deltas (e.g. 6776: `(255,206,156)` vs
+  `(255,206,165)`, an 9-unit blue delta; 6780: `(231,181,99)` vs
+  `(231,181,115)`, a 16-unit blue delta) - the SAME "one-tick-early
+  falling edge" shape §4c/§4d already diagnosed and fixed for
+  `TURN5_BG_FADE_Y`, but here on the SPRITE's own tint ramp
+  (`TURN5_MATERIALIZE_RAMP_COEFF`, `battleScene.ts:11107`) instead of the
+  background. Plausible FOURTH mechanism, evidenced but not fixed here -
+  flagged for a future instrument, same shape as §4e's own open caveat.
+
+### 11f. Predicted counts (estimates, not rerun-verified - no `src/` edit was made this session)
+
+- **Renders 6786-6809 (24 of the 47 mismatched frames)**: predicted to
+  become EXACT (0px) matches once §11d's fix lands - directly supported by
+  this session's own per-pixel sampling showing the SAME formula already
+  produces byte-identical sprite pixels at 6784/6785, and the one
+  known-different contributor at those two ticks (the particle-tail
+  residual) is independently confirmed absent at every tick 6786+.
+- **Renders 6763-6783 (the remaining 23 of the 47)**: predicted UNCHANGED
+  by §11d's fix alone - §11e's own separate residual is untouched by this
+  fix shape.
+- **`turn5-resolve-off-c` (196 total, 149/196 today)**: predicted
+  **173/196** after §11d's fix alone (149 + 24). Reaching 196/196
+  additionally needs §11e's flagged fourth mechanism resolved.
+- **`turn5-resolve-off-b`** (196 total, 88/196 today, window 6418-6613,
+  entirely before this section's 6744+ anchors) and **`turn5-reset-off`**
+  (256/256, unrelated control scenario): both **predicted unchanged**.
+- **`turn5-resolve-off-d`** (196 total, 24/196 today, per §10's own landed
+  addendum its own early frames 6810-6828 already benefit from the landed
+  healthbox fix): this section's own fix touches PIDGEOTTO's sprite
+  rendering in the SAME `t < TURN5_PIDGEOTTO_SETTLE_TICK(6828)` window
+  `drawTurn5SwitchinSprite` (`battleScene.ts:11274-11280`) reuses for every
+  later turn's own redraw of the settled scene, so `turn5-resolve-off-d`'s
+  own capture window should be checked as part of the regression guard
+  below - not confidently predicted unchanged given this fix's broader
+  reach through the shared draw path, unlike §10's landed healthbox fix
+  which was healthbox-local.
+
+### 11g. Rerunnable PASS/FAIL for the fix worker
+
+1. **Rerun the RAM probe** (should be byte-identical to §11a's own table):
+   ```
+   python3 tools/run-mgba-probe.py artifacts/turn5-pidgeotto-materialize-settle-probe.json -- \
+     tools/probe/dump-turn5-pidgeotto-materialize-settle-probe.py artifacts/turn5-pidgeotto-materialize-settle-probe.json
+   ```
+   PASS if the mon sprite's callback is `SpriteCB_OpponentMonFromBall` for
+   RAM ticks 6744-6759, flips to `SpriteCallbackDummy` at exactly RAM 6760,
+   and the affine matrix is `a=d=256,y2=0` for every tick from RAM 6756
+   through the probe's own end (6835) with zero further change.
+2. **Apply §11d's fix** (`drawTurn5PidgeottoMaterialize`,
+   `battleScene.ts:11185-11200`: drop the `TURN5_STRETCH_TICK` split, run
+   the tinted-blend branch unconditionally). Direct pixel-sample renders
+   6786-6809 at PIDGEOTTO's own silhouette coordinates (e.g. `(175,30)`,
+   `(190,50)`) against the oracle's own saved PNGs from a fresh
+   `npm run compare -- turn5-resolve-off-c` run - PASS if every one of
+   those ticks now reads the SAME static color the oracle already holds
+   constant at (this doc's own §11c table has the exact values).
+3. **`npm run compare -- turn5-resolve-off-c --summary`**: PASS if
+   **173/196 or higher**, with any remaining mismatches confined to
+   6763-6783 (§11e's flagged, still-open residual) - NOT 6786-6809.
+4. **Regression guard** - rerun all four and confirm no decreases:
+   ```
+   npm run compare -- turn5-resolve-off-c --summary   # expect >= 173/196, was 149/196
+   npm run compare -- turn5-resolve-off-b --summary   # expect unchanged 88/196
+   npm run compare -- turn5-resolve-off-d --summary   # expect >= 24/196 (see §11f - reused draw path)
+   npm run compare -- turn5-reset-off --summary       # expect unchanged 256/256
+   ```
+
+### 11h. Probe script (committed, rerunnable)
+
+- `tools/probe/dump-turn5-pidgeotto-materialize-settle-probe.py` - RAM
+  ground truth for PIDGEOTTO's own mon sprite (OAM, callback resolved
+  against named addresses, affine matrix + affine-anim state when
+  `affineMode != 0`, `data[]`) plus the healthbox cross-check, window
+  [6735,6835] (override via two extra argv ticks). Run via
+  `python3 tools/run-mgba-probe.py <out.json> -- tools/probe/dump-turn5-pidgeotto-materialize-settle-probe.py <out.json> [start end]`.
+
+Writes gitignored JSON under `artifacts/` - this doc's own tables are the
+receipt. No `src/` edit was made this session (`git diff -- src/` empty
+throughout).
+
+### 11i. Verdict
+
+The THIRD `turn5-resolve-off-c` mechanism (PIDGEOTTO's own SPRITE
+materialize->settled hand-off) is FULLY pinned: the real sprite finishes
+its grow-in and formally goes idle by RAM tick 6760 (render 6761) and is
+then 100% static for at least 75 more ticks (through render 6836,
+spanning the app's own 6828 boundary with zero RAM event there -
+contradicting `turn5ResolutionAdapter.ts:308-313`'s own doc comment,
+§11b). `TURN5_STRETCH_TABLE`'s wobble (`battleSceneCanonical.ts:246-288`)
+has no RAM basis in this trace and is compounded by a `doubled=true`
+double-size-affine call (`battleScene.ts:11199`) the real hardware never
+uses here either. Fix: drop `drawTurn5PidgeottoMaterialize`'s
+`TURN5_STRETCH_TICK` branch split entirely (§11d) - predicted to land
+`turn5-resolve-off-c` at 173/196 (up from 149/196), closing renders
+6786-6809 exactly. A separate, smaller residual at renders 6763-6783
+(§11e) is evidenced but not fixed here, flagged as a probable fourth
+mechanism (`TURN5_MATERIALIZE_RAMP_COEFF`'s own falling edge) for a future
+instrument.
