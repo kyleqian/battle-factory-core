@@ -136,7 +136,50 @@ export const TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG = 234;
 
 export const TURN5_ROCKSLIDE_PRESS_TICK = 5829;
 
-export const GROVYLE_FAINT_SINK_START_TICK = 6502;
+/**
+ * ISSUES #97-B (docs/turn5-family-class3-diagnosis.md §14/§15/§17 item 1):
+ * a scoped OFF-profile override of `rockSlideTextStartTick`'s shared
+ * `delay` param, turn-5-only - the shared helper's default
+ * (`ROCK_SLIDE_TEXT_DELAY`=393) and every OTHER turn's own call
+ * (3/4/6/7/9/10/11/12, each already scoped the same way or unaffected)
+ * are untouched. RAM-confirmed exact this session
+ * (`dump-turn5-resolve-grovyle-side-driver.py`, ticks 6180-6295): the real
+ * oracle's "ONIX used\nROCK SLIDE!" message starts at tick 6184, not the
+ * unscoped default's 6222 (`TURN5_ROCKSLIDE_PRESS_TICK`+393) - a -38 tick
+ * correction, so `pressTick`+355 = 6184.
+ */
+export const TURN5_OFF_ROCKSLIDE_TEXT_DELAY = 355;
+
+/**
+ * ISSUES #97-B (docs/turn5-family-class3-diagnosis.md §16/§17 item 2): a
+ * scoped OFF-profile override of `rockSlideOpponentHp`'s shared
+ * `startDelay` param, turn-5-only (mirrors turns 9/10/11's own existing
+ * per-turn overrides of this same shared default,
+ * `TURN9_ROCKSLIDE_HP_DRAIN_START_DELAY`/`TURN10_OFF_ROCKSLIDE_HP_DRAIN_
+ * START_DELAY`/`TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY`). GROVYLE's own
+ * hp is a single-unit STEP (startHp=1 -> endHp=0, not a live multi-tick
+ * drain - RAM-confirmed this session: the real oracle holds hp=1 flat from
+ * 6184 through 6284, then hp=0 at 6285 exactly, no intermediate values).
+ * `pressTick`+455+1 = 6285 reproduces that exact step tick (the unscoped
+ * default, 597, steps at 6427 instead - 142 ticks late).
+ */
+export const TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY = 455;
+
+/**
+ * ISSUES #97-B (docs/turn5-family-class3-diagnosis.md §16/§17 item 2):
+ * RAM-confirmed exact this session (same probe/window as above) that the
+ * real oracle's fainted-flash/healthbox-sink event family clusters around
+ * the real fainted-text-start tick (6378), not the prior 6502 anchor (145
+ * ticks late, §15). Re-anchored by preserving this cluster's own existing
+ * internal delta (the prior code's opponentHp-zero-to-sink-start gap, +75
+ * ticks) against the NEW RAM-confirmed opponentHp-zero tick (6285) rather
+ * than an independent probe of the sink animation's own OAM state (not run
+ * this session, time) - 6285+75=6360. This lands `GROVYLE_HEALTHBOX_VANISH_
+ * TICK` (computed below, unchanged formula) at 6360+19=6379, within 1 tick
+ * of the RAM-confirmed real fainted-text-start (6378) - convergent, not
+ * independently verified for the sink's own visual start.
+ */
+export const GROVYLE_FAINT_SINK_START_TICK = 6360;
 
 export const TURN5_BG_FADE_START_TICK = 6746;
 
@@ -146,7 +189,37 @@ export const TURN5_SITRUS_TEXT_CLEAR_TICK = 7216;
 
 export const TURN5_SITRUS_MENU_REDRAW_TICK = 7222;
 
-export const TURN5_FAINTED_TEXT_DELAY = 694;
+/**
+ * ISSUES #97-B (docs/turn5-family-class3-diagnosis.md §17 item 3): the
+ * three ticks above are all confirmed WRONG for this trace family
+ * (RAM-confirmed this session, `dump-turn5-resolve-grovyle-side-driver.py`
+ * dense sweeps 6800-7000: real Sitrus-heal message start is tick 6850, not
+ * 7078 - 228 ticks late; real "What will ONIX do?" menu redraw is tick
+ * 6991, not 7222 - 231 ticks late; no intermediate blank-text state was
+ * observed in `gDisplayedStringBattle` between the two, so the real
+ * transition is a direct hard-cut, same shape `turn5FaintedTextStartTick`'s
+ * own doc already established for the fainted text one phase earlier).
+ * Left UNCHANGED here (not "fixed in place") because `TURN5_SITRUS_MENU_
+ * REDRAW_TICK` is a load-bearing upstream anchor for MANY later turns' own
+ * `TURN{9,10,11,12,13}_REGIME{4,5,6,7,8}_TO_REGIME1_SHIFT`/`TURN14_MENU_
+ * REDRAW_RESET_SHIFT` relative-tick math (`battleScene.ts`) - editing it
+ * here would cascade into turns 9-14, entirely out of this fix's scope and
+ * verification budget. Corrected via a SCOPED override
+ * (`TURN5_OFF_SITRUS_*` below, turn-5-dispatch-gate-only) instead, per the
+ * same "scoped override if shared" rule §17 item 1 already used.
+ */
+export const TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK = 6850;
+export const TURN5_OFF_SITRUS_TEXT_CLEAR_TICK = 6991;
+export const TURN5_OFF_SITRUS_MENU_REDRAW_TICK = 6991;
+
+/**
+ * ISSUES #97-B (docs/turn5-family-class3-diagnosis.md §14/§15/§17 item 2):
+ * RAM-confirmed exact this session - the real oracle's "Foe GROVYLE
+ * fainted!" message starts at tick 6378, not the old 6523
+ * (`TURN5_ROCKSLIDE_PRESS_TICK`+694) - 145 ticks late. `pressTick`+549 =
+ * 6378.
+ */
+export const TURN5_FAINTED_TEXT_DELAY = 549;
 
 export const TURN5_ICONBAR_CREATE_TICK = 6587;
 

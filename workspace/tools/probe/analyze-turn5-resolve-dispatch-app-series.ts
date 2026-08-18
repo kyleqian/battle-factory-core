@@ -21,12 +21,13 @@ import { endeavorHp, rockSlideTextStartTick } from "../../src/engine/battleMenu.
 import {
   TICK0,
   TURN5_ROCKSLIDE_PRESS_TICK,
+  TURN5_OFF_ROCKSLIDE_TEXT_DELAY,
   TURN5_ENDEAVOR_HP,
   TURN5_FAINTED_TEXT_DELAY,
   SWITCHIN_SENTOUT_TEXT_START_TICK,
-  TURN5_SITRUS_HEAL_TEXT_START_TICK,
-  TURN5_SITRUS_TEXT_CLEAR_TICK,
-  TURN5_SITRUS_MENU_REDRAW_TICK,
+  TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK,
+  TURN5_OFF_SITRUS_TEXT_CLEAR_TICK,
+  TURN5_OFF_SITRUS_MENU_REDRAW_TICK,
   TURN5_ICONBAR_CREATE_TICK,
   TURN5_ICONBAR_FADE_START_TICK,
   TURN5_ICONBAR_DESTROY_TICK,
@@ -42,7 +43,7 @@ function inRange(t: number): boolean {
   return t >= RANGE[0] && t <= RANGE[1];
 }
 
-const ROCKSLIDE_TEXT_START = rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK);
+const ROCKSLIDE_TEXT_START = rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK, TURN5_OFF_ROCKSLIDE_TEXT_DELAY);
 const FAINTED_START = turn5FaintedTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK);
 
 let state: EngineState = createInitialState({ appRoute: trace.appRoute });
@@ -71,7 +72,7 @@ function recordIfInRange(): void {
       branch = "drawTurn5RockSlideWindow";
       if (frame < FAINTED_START) {
         sub = "attackText (ONIX used ROCK SLIDE!)";
-      } else if (frame < TURN5_SITRUS_HEAL_TEXT_START_TICK) {
+      } else if (frame < TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK) {
         sub = frame >= SWITCHIN_SENTOUT_TEXT_START_TICK ? "sentOutText (BUG CATCHER DESTIN sent out PIDGEOTTO!)" : "faintedText (Foe GROVYLE fainted!)";
       } else {
         sub = "sitrusPhase (heal text / menu redraw)";
@@ -113,9 +114,9 @@ writeFileSync(outPath, JSON.stringify({
     ROCKSLIDE_TEXT_START,
     FAINTED_START,
     SWITCHIN_SENTOUT_TEXT_START_TICK,
-    TURN5_SITRUS_HEAL_TEXT_START_TICK,
-    TURN5_SITRUS_TEXT_CLEAR_TICK,
-    TURN5_SITRUS_MENU_REDRAW_TICK,
+    TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK,
+    TURN5_OFF_SITRUS_TEXT_CLEAR_TICK,
+    TURN5_OFF_SITRUS_MENU_REDRAW_TICK,
     TURN5_ICONBAR_CREATE_TICK,
     TURN5_ICONBAR_FADE_START_TICK,
     TURN5_ICONBAR_DESTROY_TICK,

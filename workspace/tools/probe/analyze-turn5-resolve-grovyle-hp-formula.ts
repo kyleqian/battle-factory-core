@@ -16,6 +16,7 @@ import {
   TURN5_ROCKSLIDE_PRESS_TICK,
   TURN4_ROCKSLIDE_HP,
   TURN5_ROCKSLIDE_OPPONENT_TO_HP,
+  TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY,
   GROVYLE_FAINT_SINK_START_TICK,
   GROVYLE_HEALTHBOX_VANISH_TICK,
   GROVYLE_FAINT_SINK_STEPS,
@@ -36,6 +37,6 @@ console.log(JSON.stringify({
   GROVYLE_FAINT_SINK_STEPS,
 }));
 
-for (const t of [6184, 6222, 6250, 6285, 6300, 6350, 6378, 6400, 6417, 6502, 6521, 6523]) {
-  console.log(t, "opponentHp=", rockSlideOpponentHp(t, pressTick, startHp, endHp), "sink=", JSON.stringify(faintSinkRowsAndY2(t)));
+for (const t of [6184, 6222, 6250, 6284, 6285, 6300, 6350, 6360, 6378, 6379, 6400, 6417, 6502, 6521, 6523]) {
+  console.log(t, "opponentHp=", rockSlideOpponentHp(t, pressTick, startHp, endHp, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY), "sink=", JSON.stringify(faintSinkRowsAndY2(t)));
 }

@@ -1677,37 +1677,39 @@ describe("completed turn-4 receipt: turn 5 reopen consumes the retained continua
 
 // S7 slice K (docs/battle-turn-notes.md §24): the faint-sink closed form
 // (docs/faint-switch-notes.md §7a, `SpriteCB_FaintOpponentMon`/
-// `SpriteCB_AnimFaintOpponent`, battle_main.c:2744-2811) - RAM-pinned exact
-// for Grovyle (yOffset=4, n=8) at handoff tick S=6502; this pins the CLOSED
-// FORM itself against every one of the 8 RAM-confirmed step ticks (not just
-// endpoints), independent of `tools/compare/traces/turn5-faint.json`'s own
-// pixel parity (110/110, 0 diff) which only proves the RENDER, not the
-// formula's own shape.
+// `SpriteCB_AnimFaintOpponent`, battle_main.c:2744-2811) - shape RAM-pinned
+// exact for Grovyle (yOffset=4, n=8); the handoff tick S itself was
+// RE-ANCHORED from 6502 to 6360 (ISSUES #97-B,
+// docs/turn5-family-class3-diagnosis.md §16/§17 item 2, this session) -
+// this pins the CLOSED FORM's own shape against every one of the 8
+// step ticks relative to the constant (not just endpoints), independent of
+// `tools/compare/traces/turn5-faint.json`'s own pixel parity which only
+// proves the RENDER, not the formula's own shape.
 describe("S7 slice K: faintSinkRowsAndY2 (docs/faint-switch-notes.md §7a's closed form)", () => {
-  it("before the handoff tick S(6502), fully visible (keptRows=STEPS, y2=0)", () => {
+  it("before the handoff tick S(6360), fully visible (keptRows=STEPS, y2=0)", () => {
     expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
     expect(faintSinkRowsAndY2(6000)).toEqual({ keptRows: 8, y2: 0 });
   });
 
-  it("the 8 RAM-confirmed erase steps (S+1,S+3,...,S+15 = 6503,6505,...,6517) land at render ticks S+2,S+4,...,S+16 (the same +1 render lag every other ROCK_SLIDE mechanism in this file uses) - keptRows counts down 7->0, y2 climbs 8->64", () => {
+  it("the 8 erase steps (S+1,S+3,...,S+15 = 6361,6363,...,6375) land at render ticks S+2,S+4,...,S+16 (the same +1 render lag every other ROCK_SLIDE mechanism in this file uses) - keptRows counts down 7->0, y2 climbs 8->64", () => {
     const expected = [
-      [6504, 7, 8],
-      [6505, 7, 8], // RAM unchanged between odd ticks - same render as 6504
-      [6506, 6, 16],
-      [6508, 5, 24],
-      [6510, 4, 32],
-      [6512, 3, 40],
-      [6514, 2, 48],
-      [6516, 1, 56],
-      [6518, 0, 64],
+      [6362, 7, 8],
+      [6363, 7, 8], // RAM unchanged between odd ticks - same render as 6362
+      [6364, 6, 16],
+      [6366, 5, 24],
+      [6368, 4, 32],
+      [6370, 3, 40],
+      [6372, 2, 48],
+      [6374, 1, 56],
+      [6376, 0, 64],
     ] as const;
     for (const [t, keptRows, y2] of expected) {
       expect(faintSinkRowsAndY2(t), `tick ${t}`).toEqual({ keptRows, y2 });
     }
   });
 
-  it("destroyed at S+2n+1=6519 (RAM-confirmed) - stays fully erased (keptRows=0) forever after, y2 clamped at its final 64", () => {
-    expect(faintSinkRowsAndY2(6519)).toEqual({ keptRows: 0, y2: 64 });
+  it("destroyed at S+2n+1=6377 - stays fully erased (keptRows=0) forever after, y2 clamped at its final 64", () => {
+    expect(faintSinkRowsAndY2(6377)).toEqual({ keptRows: 0, y2: 64 });
     expect(faintSinkRowsAndY2(6560)).toEqual({ keptRows: 0, y2: 64 });
     expect(faintSinkRowsAndY2(9999)).toEqual({ keptRows: 0, y2: 64 });
   });
@@ -1738,9 +1740,9 @@ describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
     };
   }
 
-  it("turn5RockSlideKoDismissEligible: false before the fainted text's own cursor tick (6543), true from exactly that tick on", () => {
-    expect(turn5RockSlideKoDismissEligible(6542)).toBe(false);
-    expect(turn5RockSlideKoDismissEligible(6543)).toBe(true);
+  it("turn5RockSlideKoDismissEligible: false before the fainted text's own cursor tick (6398, re-anchored from 6543 - ISSUES #97-B, docs/turn5-family-class3-diagnosis.md §17 item 2), true from exactly that tick on", () => {
+    expect(turn5RockSlideKoDismissEligible(6397)).toBe(false);
+    expect(turn5RockSlideKoDismissEligible(6398)).toBe(true);
     expect(turn5RockSlideKoDismissEligible(7000)).toBe(true);
   });
 
