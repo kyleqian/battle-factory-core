@@ -305,3 +305,211 @@ npm run compare -- turn5-action-off --summary
 npm run compare -- turn5-reset-off --summary
 #    expect: "256/256 frames matched"
 ```
+
+## 6. Continuation (2026-08-17, bounded SIDE worker): window B call path recovered
+
+Executes this step's assigned goals 1 and 2 (window-B tracing pass). Method:
+temporary `console.error` taps at the entry of every candidate dispatcher
+(`drawLatestCompletedCommandWindow`, `drawActionMenuIdleWindow`,
+`drawTurn5RockSlideWindow`, `drawTurn6FightSubmenuWindow`, the region-A onix
+branch inside `drawTurn5RockSlideAttack`, and `drawTurn6FieldBase` itself),
+gated on `t` in `[7299, 7318]`, run once via
+`npm run compare -- turn6-reopen-off --summary` (drives `tools/compare/appTrace.ts`
+in-process through `node --experimental-strip-types`). **All taps were
+reverted before this commit** - `git diff src/` is empty; the tap transcript
+below is this session's own captured stderr, not re-derivable without
+re-adding the same lines.
+
+### 6a. Recovered call path, ticks 7305-7318
+
+Two *different* dispatchers render this window, splitting exactly at 7313
+(turn 6's own reopen-press registration tick, confirmed live:
+`sm.openElapsed` reads `6273` starting at `t=7313`, and
+`TICK0 (1040) + 6273 = 7313`, matching §1's RAM hold start exactly):
+
+**7305-7312 (still turn-5-descended, confirming §2b's inference):**
+`drawFightSubmenuWindow`'s `turn5Active` branch -> `drawTurn5EndeavorText`
+(`t >= rockSlideTextStartTick`) -> `drawTurn5RockSlideWindow`
+(`battleScene.ts:14781`) -> `drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff)`
+(the **object**, not a number) -> `battleScene.ts:14744`'s
+`bounceTick = typeof bounceTickOrLatest === "number" ? ... : t` resolves to
+the **raw, unshifted live `t`** - i.e. the live formula for this whole span
+is exactly `menuIdleBounce(turn5SitrusResettledBounceTick(t))`, doc §2b's
+own "candidate 1" (live `t`, no shift). This is now empirically confirmed as
+the *actual* dispatch, not just a plausible guess - the trace log shows
+`drawTurn5RockSlideWindow t=7305..7312` firing every tick with
+`latestHandoffPresent=true`, landing in `drawTurn6FieldBase` with
+`bounceTickOrLatestIsNumber=false, bounceTick=t` each time.
+
+**7313-7317 (turn-6's own DMA-wait hold, a *third* code path not named in
+§2b):** once `isLatestCompletedCommandHandoffReady(...) && ...Epoch === null`
+flips true at `t=7313`, `drawFightSubmenuWindow` switches to
+`drawLatestCompletedCommandWindow` -> `drawTurn6FightSubmenuWindow`
+(`battleScene.ts:11804`). Turn 6's own `sm.openElapsed=6273` is now set but
+`sm.confirmElapsed` is still `null`, so this hits the `t < revealTick` DMA-wait
+branch (`revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY(5)
+= 7313 + 5 = 7318`, confirmed live - the branch is active for exactly
+`t=7313..7317`, matching `drawTurn6FightSubmenuWindow`'s own reveal tick
+comment pattern already established for window A):
+`drawTurn6ActionMenuIdleWindow(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT(2))`
+(`battleScene.ts:11592`, called from `battleScene.ts:11818` inside
+`drawTurn6FightSubmenuWindow`) -> `drawTurn6FieldBase(fb, t, bounceTick=t-2)`.
+**Critically: `bounceTick` here increments by exactly +1 every tick with NO
+freeze at all** - the trace shows `bounceTick=7311,7312,7313,7314,7315` for
+`t=7313,7314,7315,7316,7317` respectively, a plain, uninterrupted `t-2`. This
+is goal 2's answer: **the turn-6 sibling of the reopen-press special case
+does not exist in source at all yet** - it's not a wrong formula, it's a
+missing branch.
+
+### 6b. Per-tick app-vs-oracle table (live-traced this session)
+
+| tick | live app dispatcher | app bounceTick fed to `menuIdleBounce` | app (onixY2, hbY2) | oracle (onixY2, hbY2) | compare verdict |
+|---|---|---|---|---|---|
+| 7305 | `drawTurn5RockSlideWindow` | `t` (=7305) | (0, 0) | (1, 0) | sprite-only MISMATCH |
+| 7306 | `drawTurn5RockSlideWindow` | `t` (=7306) | (1, 0) | (1, 1) | **fully MATCHES (unexplained, see 6c)** |
+| 7307-7312 | `drawTurn5RockSlideWindow` | `t` | (1, 0) | (1, 1) | healthbox-only MISMATCH |
+| 7313-7317 | `drawTurn6FightSubmenuWindow`'s DMA-wait -> `drawTurn6ActionMenuIdleWindow` | `t-2` (7311..7315, unfrozen) | (1, 0) through 7316; (1,1) at 7317 | (1, 1) throughout | healthbox-only MISMATCH through 7316, MATCH at 7317 |
+| 7318 | same, `revealTick` now reached, `drawTurn6FightSubmenuWindow`'s own `bounceTick=7316` (still `t-2`, un-frozen) -> `drawTurn6FieldBase` directly | `t-2` (=7316) | (1, 1) | (0-ish, per raw JSON `onixY2=0` at 7318) | MISMATCH resumes (different bbox: `127,75-229,111`) |
+
+(Oracle column cross-checked directly against the raw receipt
+`src/data/gen/turn5-6-reopen-bounce-probe.json` this session, not just the
+doc's own summarized table - confirms hbY2 is exactly `0` at 7305, exactly
+`1` for every tick 7306-7316 inclusive, `2` at 7317, and onixY2 flips to `0`
+at 7318.)
+
+**Formula, precisely, per span:**
+- 7305-7312: `{onixY2, healthboxY2} = menuIdleBounce(turn5SitrusResettledBounceTick(t))` - raw `t`, no shift, no special case. This is a real, in-source, already-active formula (not hypothetical) - it is simply *wrong* relative to oracle by a span-dependent amount (see 6c).
+- 7313-7317: `{onixY2, healthboxY2} = menuIdleBounce(turn5SitrusResettledBounceTick(t - 2))` - same function, `t` shifted by the pre-existing `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` constant, again with **no** reopen-press freeze applied (goal 2's missing branch).
+
+### 6c. New finding: the reopen-hold fix alone will NOT close window B's healthbox band
+
+This corrects an implicit assumption in §4 item 2 ("apply this doc's same
+'extend the hold' fix at turn 6's own analogous reopen-press" as the
+complete window-B fix). Measured this session:
+
+- The healthbox-only mismatch band spans **7307-7316** continuously,
+  straddling *both* dispatchers (turn-5-descended 7307-7312 AND turn-6
+  DMA-wait 7313-7316) with **the same wrong value** (`healthboxY2=0`)
+  throughout - the 7313 dispatcher handoff is invisible in the app's own
+  output at this field.
+- Applying goal 2's fix (freeze `bounceTick` for `t` in `[7313, 7315]` at
+  its `t=7313` value, `7311`) changes **nothing** about `healthboxY2` in
+  that sub-range, because the *unfrozen* value there (`7311, 7312, 7313`)
+  and the *frozen* value (`7311, 7311, 7311`) both fall in the exact same
+  `menuIdleBounce` healthbox plateau (both far below the `1841`-ish input
+  needed for `healthboxY2=1` - see next point) - the freeze only matters
+  where a plateau boundary sits inside the 3-tick hold window, which is not
+  the case here.
+- The real defect is a **~11-tick input lag** local to the healthbox field
+  only: app's `healthboxY2` output transitions `0 -> 1` at `t=7317`
+  (`turn5SitrusResettledBounceTick(7317)=1841` is the first input value
+  that yields `1`), but oracle's transition happens at `t=7306` - 11 ticks
+  earlier. The onix field's own transition (well, its single 1-tick notch
+  down to `0` exactly at `t=7305`, back to `1` at `t=7306`) is comparatively
+  well-aligned with oracle (which never dips - oracle onix is `1` for the
+  entire window). A uniform whole-window offset applied to `t` cannot fix
+  both fields at once: shifting by +11 to fix healthbox's 7306 transition
+  would ALSO shift onix's `t=7305` notch to `t=7316`, breaking a tick that
+  currently already matches. This reconfirms §3a/§3b's "not a pure
+  phase/offset shift" verdict for window B - now with a concrete measured
+  magnitude (11 ticks) instead of just three ruled-out candidates.
+- **Practical implication for the fix step:** window B needs **two
+  independent corrections**, not one - (1) goal 2's reopen-press freeze
+  (fixes the onix-only single-tick notch pattern IF it recurs identically
+  to window A's shape elsewhere in the family, not exercised by this
+  specific trace's own bbox since the notch here is a **different**
+  mechanism, see 6d) and (2) a still-unrecovered healthbox-specific lag
+  correction local to `drawTurn6FieldBase`'s `healthboxY2` derivation (or
+  to `turn5SitrusResettledBounceTick` itself) that a single `t`-shift does
+  not explain. This second correction is NOT located this session - it
+  needs its own tracing pass into `turn5SitrusResettledBounceTick` and
+  `menuIdleBounce`'s own two-field (onix vs healthbox) internals to find
+  why the healthbox half specifically lags by ~11 ticks relative to the
+  onix half's much smaller (1-tick) discrepancy, when both are fed the
+  *same* `bounceTick` input from the *same* call site.
+
+### 6d. Open puzzle, explicitly flagged (not resolved this session)
+
+Frame 7306 is reported as a **full pixel match** by the live compare run
+(absent from the mismatch list; re-confirmed fresh this session, not just
+cited from the prior run). But the traced app formula gives
+`healthboxY2=0` at `t=7306` while oracle's raw JSON gives `1` - the same
+disagreement that DOES show up as a mismatch at every neighboring tick
+(7305 sprite-only, 7307-7312 healthbox-only). Since `healthboxY2` is
+identically `0` at both 7306 and 7307 in the app trace, and identically `1`
+at both in the oracle JSON, the raw-value disagreement is indistinguishable
+between the two ticks - yet only one of them mismatches on screen. One
+candidate explanation was tested against the full observed match/mismatch
+sequence (7305 mismatch, 7306 match, 7307-7316 mismatch, 7317 match, 7318
+mismatch) and fits all six transitions: real hardware's sprite-Y2 RAM value
+for tick N is read by the probe *after* that tick's `DoBounceEffect` task
+runs, but the *displayed* frame N was already composited from the *previous*
+tick's Y2 (a standard "logic updates land one vblank after they're
+computed" ordering) - i.e. oracle's true *displayed* value for frame N
+equals the RAM probe's own tick-`(N-1)` reading, not tick-N's. Checked
+against all six pixel transitions in the mismatch list, this hypothesis is
+consistent throughout - but it was not independently confirmed (e.g. by
+probing the RAM value on the tick immediately preceding a captured
+screenshot, which this session's probe script does not do), so it is named
+here as a **lead for the fix step**, not a proven mechanism. It does not
+change 6c's magnitude conclusion (an ~11-tick app-side lag remains either
+way, since shifting the *oracle* comparison basis by 1 tick cannot explain
+an 11-tick app-side gap).
+
+### 6e. §5 PASS/FAIL check extension (window B acceptance criteria)
+
+```sh
+# After BOTH corrections in 6c land (goal-2 freeze + the still-unrecovered
+# healthbox lag fix), turn6-reopen-off should move from 11/46 to at least
+# 16/46 matched (7305, 7307-7316 newly matching - 11 frames - on top of the
+# already-matching 11; 7318+ needs the SAME healthbox lag fix applied to
+# `drawTurn6FightSubmenuWindow`'s own confirmed-bounceTick branch,
+# `turn6KickoffBounceTick`, not exercised by this session's trace and NOT
+# claimed fixed here):
+npm run compare -- turn6-reopen-off --summary
+#    expect: frames 7305, 7307, 7308, 7309, 7310, 7311, 7312, 7313, 7314,
+#    7315, 7316 to no longer appear in the mismatch list.
+
+# Goal-2's freeze alone (without the healthbox lag fix) is NOT expected to
+# change this count at all per 6c - if a fix step lands ONLY the freeze and
+# reruns this check expecting a count increase, that is a sign the freeze's
+# effect was not verified against 6c's plateau-overlap finding first.
+```
+
+### 6f. Verdict for this continuation
+
+**Goal 1 (recover window B's live formula): DONE**, decisively, for
+7305-7318 - two dispatchers, four call frames, exact file:line, exact
+constants (`TICK0=1040`, `FIGHT_SUBMENU_OPEN_DELAY=5`,
+`FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT=2`), and a per-tick table cross-checked
+against the raw RAM receipt (§6b). The doc's own §2b "candidate 1" is
+confirmed as the *actual* live formula for 7305-7312 (not merely a
+plausible guess that happened to be ruled out by a stale full-match
+requirement at 7306 - see §6d for why that requirement's premise needs a
+second look).
+
+**Goal 2 (locate turn-6's reopen-press special-case sibling): DONE.**
+`battleScene.ts:11804`'s `drawTurn6FightSubmenuWindow`, its `t < revealTick`
+branch (around line 11816-11819) calling `drawTurn6ActionMenuIdleWindow(fb,
+t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT)` - this branch has **no**
+`t === turn6ReopenPressTick` special case at all (`turn6ReopenPressTick =
+TICK0 + sm.openElapsed`, live-confirmed `= 7313`). The fix shape mirrors
+window A's (§4 item 1): freeze the fed `bounceTick` at its `t=turn6ReopenPressTick`
+value for `t` in `[turn6ReopenPressTick, turn6ReopenPressTick+2]` (i.e.
+`[7313,7315]`), matching §1's RAM-proven 3-tick sinIndex hold at those exact
+ticks.
+
+**Goal 3 (stretch): NOT attempted** - budget was spent on goals 1/2 per the
+step's own priority order; not started, not claimed.
+
+**Can ONE combined fix step now close both headline traces?** NO - not
+in one shot. Window A (turn5-action-off) is fully specified and ready
+(§4 item 1, unchanged by this session). Window B (turn6-reopen-off) now has
+its reopen-hold sibling **located** (goal 2) but that fix, applied alone,
+provably does NOT close the 7307-7316 healthbox band (§6c) - a second,
+separate, still-unrecovered healthbox-lag correction is needed for window B
+specifically. A combined fix step can land window A complete plus window
+B's reopen-hold half, but should expect turn6-reopen-off to still show a
+healthbox-only mismatch band after that lands, and should budget a further
+tracing pass into `turn5SitrusResettledBounceTick`/`menuIdleBounce` before
+attempting the second half.
