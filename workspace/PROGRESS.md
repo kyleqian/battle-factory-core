@@ -4,6 +4,65 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1337 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s fourth mechanism and `resolve-off-d`'s spurious ONIX rotation LANDED — 173/196→195/196 and 66/196→142/196**
+
+- **State:** one green commit (`8949e4c5` fix+Tier-1 pins) plus this docs
+  commit. `npm test` **1,067 files / 10,065 passed (+7, three new pin
+  blocks) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read `docs/turn5-resolve-offc-tail-diagnosis.md` §13 (13a-13j)
+  and `docs/turn5-confirmb-resolved-residuals.md` §6 in full. Per the
+  brief's own reconciliation caveat, re-baselined first: `turn5-resolve-
+  off-c` was already **173/196** on today's tree (not §13's own 149/196
+  worktree baseline) — §11/§12's stretch/frame-toggle fix had landed on
+  `master` ahead of §13's own parallel worktree, already fully covering
+  §13f's defect 2 (the frame0/frame2 toggle; `turn5PidgeottoFrame` was
+  already deleted, wider than §13's own proposed patch). Landed the other
+  two: **defect 1** — `turn5MaterializeCoeff(t)` → `turn5MaterializeCoeff(t
+  - 1)` at `drawTurn5PidgeottoMaterialize`'s call site, the same lag
+  `drawGeneratedOpponentRelease` already corrects for. **Defect 3** —
+  §13f's own literal `extraDelay`/burst-wide-shift proposal was tried
+  first and directly disproven by experiment (regressed 17 previously-
+  exact frames, `6746-6762`); root cause is a **one-time freeze**, not a
+  uniform shift — landed via `drawCleanSwitchinParticles`'s existing
+  `stallLogicalTick` param, threaded through a new
+  `TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK` constant that lands on the
+  same render tick (6763) as `TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK`,
+  an independently RAM-pinned anchor for an unrelated component — read as
+  corroboration, not curve-fitting (confirmed: one tick either side is
+  strictly worse). Separately, landed FIX (2): `onixSitrusRotateMatrix`'s
+  periodic curve has zero RAM basis in `turn5-resolve-off-d`'s window (flat
+  static at all 108 sampled ticks/7 coordinates, §6.2) — suppressed via a
+  new `suppressSitrusRotate` flag threaded from `drawTurn5RockSlideWindow`
+  down through `drawTurn6FieldBase`/`drawTurn5RockSlideAttack` (both shared
+  across turns 6-13), defaulting `false` everywhere else.
+- **Result:** `turn5-resolve-off-c` 173/196 → **195/196** (near-full close
+  of 6763-6785; one frame, 6763 itself, keeps a 6px/0.02% anti-aliasing-
+  class residual). `turn5-resolve-off-d` 66/196 → **142/196** (closes
+  6810-6952 entirely, including the resolve-off-c carryover at 6810-6825;
+  6953-6969's own unverified ring/star residual and 6970+'s §6.3/out-of-
+  scope spans left open, exactly as §6.2 flagged). Zero decreases across
+  the full guard family: `turn5-reset-off` 256/256, `turn5-action-off`
+  32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+  `turn5-confirm-off-a` 60/132, `turn5-confirm-off-b` 37/132,
+  `turn5-resolve-off-a` 44/196, `turn5-resolve-off-b` 88/196,
+  `turn13-switchin` 242/242 (the critical shared-function guard, verified
+  empirically), `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** `turn5-resolve-off-c`'s own 6763 residual (6px) and
+  `turn5-resolve-off-d`'s 6953-6969 ring/star span (`turn5SitrusRingMatrix`/
+  `drawGrantingStars`, never independently RAM-checked) are both small,
+  named, unchased residuals. §2.5/§6.3 (the 6991-6994 transition spike,
+  re-characterized as the app transitioning early) stays explicitly out of
+  scope, next instrument named but not fix-ready. #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The brief's reconciliation caveat was load-
+  bearing: landing §13f's fixes against its own stated 149/196 baseline
+  (rather than re-deriving against today's actual 173/196 tree) would have
+  meant re-implementing already-landed defect 2. Separately, blindly
+  landing §13f's literal Fix 3 shape without the mandatory re-measurement
+  step would have shipped a 17-frame regression masked by a higher net
+  count — the family's "confirmed by direct experiment, not curve-fit"
+  discipline caught it before commit.
+
+---
 ## 1336 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s third mechanism (materialize→settled sprite transition) LANDED per `docs/turn5-resolve-offc-tail-diagnosis.md` §11 — 149/196→173/196, exactly the prediction**
 
 - **State:** one green commit (fix+Tier-1 pin) plus this docs commit.
@@ -117,65 +176,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the given fact, and the result (a clean hard step, zero ramp ticks in a
   21-tick dense sweep) meant the doc's literal proposed fix shape could
   land unmodified.
-
----
-## 1334 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s two named tail mechanisms FIXED per `docs/turn5-resolve-offc-tail-diagnosis.md` — count holds at 149/196, blocked by a third, newly-confirmed, out-of-scope mechanism**
-
-- **State:** three green commits (`6b9f1a12` fix+Tier-1 pins,
-  `18d8d23c` probe re-point) plus this docs commit. `npm test` **1,067
-  files / 10,049 passed (+5, two new pin blocks) / 223 skipped**; `npm
-  run build`/`npm run typecheck` green throughout.
-- **Did:** landed both fixes the fresh diagnosis doc specified: (i)
-  `turn5PidgeottoHealthboxSlideDx` re-anchored from the sprite's own
-  unrelated materialize-settle tick (6829) to the healthbox's own
-  RAM-pinned onset (`TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK = 6763`,
-  `initialHold = true`); (ii) the switch-in BG-white-flash peak hold
-  extended by one render tick. (ii) landed as a **new, separate**
-  `TURN5_PIDGEOTTO_BG_FADE_Y` table rather than the doc's literal
-  suggested edit-in-place — extending the shared `TURN5_BG_FADE_Y`
-  regressed `turn13-switchin` 242/242→234/242 (caught live, not assumed):
-  `turn13MurkrowBgFadeY` and `turn15ReleaseFieldPalette` both reuse that
-  table verbatim at their own anchors, and oracle data confirms Murkrow's
-  own window genuinely needs the original 8-entry hold while Pidgeotto's
-  needs 9. Exported `turn5BgFadeY` (was module-private) and re-pointed
-  `tools/probe/analyze-turn5-resolve-offc-tail-app-series.ts` at the live
-  function instead of its own frozen pre-fix copy. Ran the doc's §7
-  PASS/FAIL block in full, including the RAM-probe sanity rerun (byte-
-  identical to the doc's own §3a/§4b tables — no drift) and both
-  app-series probe re-runs (both now match their target tables exactly).
-- **Result:** `turn5-resolve-off-c` **149/196 → 149/196, unchanged** —
-  NOT the doc's own §6 prediction of 196/196. Per-frame attribution: all
-  47 mismatched frames' diff magnitude collapsed from up to 17452px/
-  45.45% to a flat ~1100-1600px/~3%, confirming both landed fixes are
-  clean, but a **third mechanism** — `drawTurn5PidgeottoMaterialize`'s
-  settled-transition path never handing off before
-  `TURN5_PIDGEOTTO_SETTLE_TICK` (6828), while the doc's own §3c aside
-  already noted the real sprite settles by RAM tick 6760 — dominates
-  every frame in the window. Confirmed structural (shape, not tint) by
-  direct RGB sampling of the diff PNGs. This is exactly the item the
-  brief marked **out of scope** (`TURN5_PIDGEOTTO_SETTLE_TICK`/
-  `drawTurn5PidgeottoMaterialize`) — recorded in `ISSUES.md` #97 sub-entry
-  F and the diagnosis doc's own §10 addendum, not fixed. Zero decreases
-  anywhere in the full guard family (`turn5-reset-off` 256/256,
-  `turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
-  fixture 47/47, `turn5-confirm-off-{a,b}` 60/132 and 0/132
-  (689px/1.79% unchanged), `turn5-resolve-off-{a,b}` 25/196 and 88/196,
-  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each,
-  `turn13-switchin` 242/242 after the table-sharing fix); one expected,
-  fully-explained increase: `turn5-resolve-off-d` 0/196 → **24/196** (the
-  healthbox fix also reaches this trace's own early frames 6810-6828; its
-  own out-of-scope 258px/0.67% residual past tick 7004 is byte-identical
-  before and after).
-- **Next:** the third mechanism above needs its own instrument (out of
-  this step's scope by the brief). `resolve-off-d`'s 258px residual and
-  `confirm-off-b`'s 689px residual remain open, untouched (a side-lane
-  instrument was diagnosing them in parallel this session, per the
-  brief). Class-(iii) text/banner mechanism and #71 Rung 9 unchanged.
-- **Notes:** no PAPERCUT. The turn13/turn15 shared-table regression was
-  only caught because the brief's "zero decreases anywhere" standard
-  prompted a guard-trace sweep beyond the explicitly named list —
-  `turn13-switchin` wasn't in the brief's own guard list but shares the
-  exact constant the fix touches; worth checking downstream reuse of any
-  shared table/constant before treating a doc's literal edit-in-place
-  suggestion as safe.
-

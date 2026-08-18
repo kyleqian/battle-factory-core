@@ -1277,3 +1277,86 @@ session (`git diff -- src/` empty throughout); no landed anchor was
 contradicted (this section pins a previously-unrecognized defect in
 already-existing, never-previously-pixel-verified code, not a
 re-litigation of any prior fix).
+
+## 14. Landed (2026-08-18, bounded MAIN worker, ISSUES #97 remainder)
+
+Re-baselined in THIS worktree before touching anything: `npm run compare
+-- turn5-resolve-off-c --summary` -> **173/196**, not 149/196 - §11/§12's
+stretch/frame-toggle fix (mechanism (iii)) had already landed on `master`
+by the time this session started, ahead of §13's own worktree. Re-deriving
+§13f's three fix shapes against that fact: **defect 2 (the frame0/frame2
+toggle) was already fully covered** - grepping the current tree showed
+`turn5PidgeottoFrame` deleted entirely and `drawTurn5PidgeottoMaterialize`
+drawing `pidgeottoFrontSprite.tileset` unconditionally (§12's own commit),
+which is strictly wider than §13f Fix 2's own proposed `6766-6775`-only
+patch (it covers the whole `6763-6821` span). Only defects 1 and 3 were
+still open.
+
+**Fix 1 landed exactly as §13f specified**: `turn5MaterializeCoeff(t)` ->
+`turn5MaterializeCoeff(t - 1)` at `drawTurn5PidgeottoMaterialize`'s call
+site (`battleScene.ts`). Landed alone, this reduced the magnitude of
+every mismatched frame in `6763-6785` substantially (e.g. 6768's 1153px
+-> 143px) but did **not** flip any frame to exact match by itself - the
+residual at every one of these frames was particle-burst content
+(`drawTurn5SwitchinParticles`, outside PIDGEOTTO's own sprite footprint),
+not the tint/frame formula.
+
+**Fix 3 required a shape correction, found by direct experiment, not
+assumed from §13f's own text.** §13f's literal proposal (a uniform
+`extraDelay`/`-2` shift applied to the WHOLE particle burst from its own
+spawn) was implemented first and empirically REGRESSED renders
+`6746-6762` - 17 frames that already matched exactly before any of this
+session's edits - while fixing `6764-6785`. Net count still rose
+(149->178 in that intermediate test... consulted against THIS session's
+own 173/196 baseline), but a fix that breaks 17 known-good frames to gain
+22 different ones is not a clean landing, and directly contradicts this
+family's own "confirmed by direct experiment, not curve-fit" discipline.
+Root cause: the real defect is not a burst-wide shift, it's a **one-time
+freeze** partway through the burst - `drawCleanSwitchinParticles` already
+has exactly this primitive (`stallLogicalTick`, added by a prior,
+unrelated S6 fix and never used by turn 5's own call before now). Tested
+directly against the render tick where `TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_
+START_TICK` (6763, §3c's own independently RAM-pinned anchor for an
+UNRELATED component) falls in the particle burst's own logical-tick
+frame (`17`) - this single value closes `6764-6785` completely with ZERO
+regression at `6746-6762`. One tick either side of `17` is strictly worse
+(tested `16`: 194/196, one fewer than `17`'s `195/196`, `6762` regresses
+without `6763` gaining anything extra). The exact-match landing on the
+same tick as an already-established, independently-derived anchor is
+read as corroboration of a real shared controller-callback event, not a
+coincidence of curve-fitting a threshold to the test.
+
+**Both fixes scoped per §13f's own discipline**: new trailing parameters
+on `drawTurn5SwitchinParticles`/`drawCleanSwitchinParticles`
+(`stallLogicalTick`, already existed on the latter; threaded through the
+former), defaulting to `null`/unused so Murkrow's own turn-13 reuse
+(`battleScene.ts:11430`, unaffected) and every other pre-existing caller
+is untouched by construction. `turn5MaterializeCoeff`,
+`TURN5_MATERIALIZE_RAMP_COEFF`, and `TURN5_MATERIALIZE_RAMP_RENDER_START`
+stay byte-identical, so `turn13MurkrowMaterializeCoeff` is unaffected too.
+
+**Numbers**: `turn5-resolve-off-c` 173/196 -> **195/196** - near-full
+close of `6763-6785` (§13g's own prediction), one frame short: render
+`6763` itself keeps a tiny `6px/0.02%` residual (`bbox=0,41-2,43`, a
+2x2-pixel area) - the same class of isolated anti-aliasing/rounding-
+adjacent single-channel miss already accepted elsewhere in this family
+(§4e/§13d's own open caveats), not independently chased this session.
+Fix 3's own particle-timing evidence (§13e) was explicitly flagged as
+"least certain of the three" and "not exhaustively quantified" - the
+stall-shape correction found here is new evidence beyond what §13e/§13f
+directly predicted, not a contradiction of it.
+
+Full guard family, zero decreases: `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-confirm-off-a` 60/132, `turn5-confirm-off-b`
+37/132, `turn5-resolve-off-a` 44/196, `turn5-resolve-off-b` 88/196,
+`turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
+256/256 each. `turn5-resolve-off-d` (shares this draw path) also rose,
+66/196 -> 142/196 - see `docs/turn5-confirmb-resolved-residuals.md`'s own
+dated addendum for that trace's own separate ONIX-rotation fix landed the
+same session.
+
+`npm test` 1067 files / 10065 passed (+7 over the pre-session baseline,
+three new pin blocks) / 223 skipped; `npm run build`/`npm run typecheck`
+green. Full writeup: `PROGRESS.md` entry citing this section, `ISSUES.md`
+#97.

@@ -723,3 +723,64 @@ gates). Both are new evidence about previously-unswept downstream
 consumers of already-landed anchors, the same shape §2's own original
 verdict (§2, "No landed anchor was contradicted") already established for
 this family.
+
+## 7. Landed (2026-08-18, bounded MAIN worker, ISSUES #97 remainder)
+
+§6.2's fix shape landed as specified: `onixSitrusRotateMatrix`'s own
+periodic curve suppressed for this window via a new `suppressSitrusRotate`
+flag (default `false`), threaded from `drawTurn5RockSlideWindow`'s own
+call site down through `drawTurn6FieldBase`/`drawTurn5RockSlideAttack`
+(`battleScene.ts`) - both functions are heavily reused across turns 6-13,
+so the flag is a new trailing parameter on each, every pre-existing
+caller (grep-confirmed) unaffected. `onixSitrusRotateMatrix`,
+`ONIX_SITRUS_IDENTITY_RENDER_TICK`, and `ONIX_SITRUS_ROTATE_RENDER_LAG`
+are all untouched, so `turn5SitrusRingMatrix`/`drawGrantingStars` (the
+other two consumers of the same epoch, §6.2's own "not verified this
+session" flag) and the build-time consistency guard between the rotate
+and ring render-lag constants are unaffected by construction.
+
+**Numbers**: `turn5-resolve-off-d` 66/196 -> **142/196**. Per-frame
+attribution against §6.1's own table: renders `6810-6825` (the
+`resolve-off-c` mechanism-(iv) carryover, closed as a side effect of that
+same session's other fix, see `docs/turn5-resolve-offc-tail-diagnosis.md`
+§14) and `6826-6952` (the bulk of §6.2's own flagged span) are now exact
+match. Two spans remain open, both already named as unverified/out of
+scope before this fix landed:
+
+- **`6953-6969`** (`19-54px`, bbox narrowing toward `x∈[175,200]`,
+  `y∈[91,103]`) - §6.2's own flagged, unverified "ring/star" residual:
+  `turn5SitrusRingMatrix`/`drawGrantingStars` (the granting-star sparkle,
+  spawning at RAM `6968`/`6978` per their own doc) were never independently
+  checked against real RAM this session or last - not suppressed, and the
+  brief for this session scoped the fix to the ROTATION only. Left open,
+  matching §6.2's own prediction almost exactly (it named this exact
+  render span as the likely site of a separate, not-yet-isolated defect).
+- **`6970-6994`, `6995-7005`** - §6.1's own already-named tail-of-the-same-
+  mechanism and §6.3's own re-characterized, not-pinned transition-spike
+  spans - untouched, per this session's own explicit out-of-scope
+  instruction (§6.3/§2.5 is "next instrument named, not fix-ready").
+
+Full guard family, zero decreases: `turn5-resolve-off-a` 44/196,
+`turn5-resolve-off-b` 88/196, `turn5-resolve-off-c` 195/196 (this
+session's OTHER fix, landed the same session - see that doc's own §14),
+`turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
+46/46, `turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-a` 60/132,
+`turn5-confirm-off-b` 37/132, `turn13-switchin` 242/242 (the critical
+guard: `drawTurn6FieldBase`/`drawTurn5RockSlideAttack` are shared with
+Murkrow's own turn-13 continuation, and the new flag defaults `false`
+there by construction - verified empirically, not just by grep),
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+
+New Tier-1 pin (`tests/battleScene.test.ts`): exported
+`drawTurn5RockSlideAttack` directly for testing; pins (1) that
+`onixSitrusRotateMatrix` is genuinely non-null at the sampled tick
+(`6900`, inside the doc's own §6.2 citation), so the gate below exercises
+a real branch choice; (2) `suppressSitrusRotate=true` visibly changes the
+rendered output relative to the default; (3) with the flag on, two ticks
+34 renders apart (the same pair §6.2's own RAM sampling used) render
+byte-identical, matching the "flat static" claim directly.
+
+`npm test` 1067 files / 10065 passed (+7, shared commit with
+`turn5-resolve-off-c`'s own mechanism-(iv) fix above); `npm run
+build`/`npm run typecheck` green. Full writeup: `PROGRESS.md` entry
+citing this section, `ISSUES.md` #97.

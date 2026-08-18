@@ -397,13 +397,12 @@ frames, 6810-6828; its own out-of-scope 258px/0.67% residual, past tick
 addendum: `docs/turn5-resolve-offc-tail-diagnosis.md`.
 
 **Remaining, still open:** the third mechanism above
-(`drawTurn5PidgeottoMaterialize`'s settled-transition path) is **now
-landed, see the dated sub-entry H below** — closed `turn5-resolve-off-c`
-149/196 -> 173/196. A fourth, separate mechanism at renders 6763-6783
-(`TURN5_MATERIALIZE_RAMP_COEFF`'s own falling edge, sub-entry H's own
-§11e cite) stays open, needs its own instrument. `resolve-off-d`'s 258px
-residual and `confirm-off-b`'s 689px residual are **landed, see the dated
-sub-entry G below**.
+(`drawTurn5PidgeottoMaterialize`'s settled-transition path) and the fourth
+(renders 6763-6783) are **both now landed, see the dated sub-entries H/I
+below** — closed `turn5-resolve-off-c` 149/196 -> 173/196 -> 195/196 (one
+frame, 6763, keeps a 6px anti-aliasing-class residual, not chased).
+`resolve-off-d`'s 258px residual and `confirm-off-b`'s 689px residual are
+**landed, see the dated sub-entry G below**.
 
 ### G. `confirm-off-b`'s rockslide-text-delay fix and `resolve-off-d`'s two Sitrus epoch fixes — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-confirmb-resolved-residuals.md`)
 
@@ -447,17 +446,16 @@ functions and the rockslide-text-delay call-site formula.
 **Remaining, still open:** `confirm-off-b`'s own separate, already-flagged
 small pre-6184 ENDEAVOR-hold residual (§1.1's table, out of this fix's
 scope, needs its own instrument — item 5's residual, not this one).
-`resolve-off-d`'s own §2.4 (sprite/particle overlay mismatch, ONIX's own
-tint/rotation and granting-star placement, also keyed off the same stale
-epoch but not independently isolated) and §2.5 (the 6991-6994 transition
-spike, 4 frames) remain unexplained and untouched, per the diagnosis doc's
-own explicit scope boundary — a future session should dense-capture
-6870-6990 and isolate `onixSitrusRotateMatrix`'s own render window against
-the oracle's real tint timing before claiming a full predicted count for
-that span. The resolve-off-c settled-transition mechanism
-(`TURN5_PIDGEOTTO_SETTLE_TICK`/`drawTurn5PidgeottoMaterialize`, sub-entry
-F above) is untouched by this entry, per its own explicit out-of-scope
-note.
+`resolve-off-d`'s own §2.4 rotation component is **now landed, see the
+dated sub-entry I below** (`onixSitrusRotateMatrix` suppressed for this
+window — zero RAM basis, same class as PIDGEOTTO's stretch table); its
+own ring/star sibling consumers (`turn5SitrusRingMatrix`/
+`drawGrantingStars`) remain unverified, a small residual at renders
+6953-6969. §2.5 (the 6991-6994 transition spike, re-characterized as the
+app transitioning early, not late) remains unexplained and untouched, per
+the diagnosis doc's own explicit scope boundary. The resolve-off-c
+settled-transition mechanism (sub-entry F/H above) is untouched by this
+entry, per its own explicit out-of-scope note.
 
 ### H. `resolve-off-c`'s third mechanism (materialize->settled sprite transition) — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-resolve-offc-tail-diagnosis.md` §11)
 
@@ -523,13 +521,58 @@ pinning its degenerate/static-end-state case against a hand-built
 fixture, the exact claim §11d's fix relies on). Full receipts and the
 dated addendum: `docs/turn5-resolve-offc-tail-diagnosis.md` §12.
 
-**Remaining, still open:** a fourth mechanism at renders 6763-6783
-(§11e's own flagged residual, `TURN5_MATERIALIZE_RAMP_COEFF`'s falling
-edge — direct experiment this session confirmed the frame-selector fix
-above only partially explains this span, 6766/6767 improved but
-6768-6783 stayed at essentially the same magnitude) — needs its own RAM
-instrument, out of this fix's scope. `resolve-off-d`'s own §2.4/§2.5
-(sub-entry G) remain untouched, unrelated to this entry.
+**Remaining, still open:** a fourth mechanism at renders 6763-6783 was
+identified (§11e's own flagged residual) — **now landed, see the dated
+sub-entry I below**. `resolve-off-d`'s own §2.4/§2.5 (sub-entry G) were
+untouched by this entry; §2.4's rotation component is also now landed
+(sub-entry I).
+
+### I. `resolve-off-c`'s fourth mechanism and `resolve-off-d`'s spurious ONIX rotation — LANDED (2026-08-18, bounded MAIN worker, per `docs/turn5-resolve-offc-tail-diagnosis.md` §13/§14 and `docs/turn5-confirmb-resolved-residuals.md` §6/§7)
+
+Re-derived §13f's three fix shapes against today's tree (defect 2, the
+frame0/frame2 toggle, was already covered by sub-entry H's own landing,
+ahead of §13's own parallel worktree). Landed the other two, both scoped
+to turn5's own call sites (new trailing/defaulted params, every other
+caller including Murkrow's turn-13 reuse unaffected): (1)
+`turn5MaterializeCoeff(t)` -> `turn5MaterializeCoeff(t - 1)` at
+`drawTurn5PidgeottoMaterialize`'s call site — the same lag
+`drawGeneratedOpponentRelease` already corrects for. (3)
+`drawTurn5SwitchinParticles`' particle burst needed one extra tick of age
+— but §13f's own literal burst-wide-shift proposal was disproven by
+direct experiment (regressed 17 previously-exact frames, 6746-6762); the
+real mechanism is a one-time freeze, landed via `drawCleanSwitchinParticles`'s
+existing `stallLogicalTick` param anchored to `TURN5_PIDGEOTTO_HEALTHBOX_
+SLIDE_START_TICK` (6763), an independently RAM-pinned anchor for an
+unrelated component at the same tick. Separately, landed `docs/turn5-
+confirmb-resolved-residuals.md` §6.2's fix: `onixSitrusRotateMatrix`'s
+periodic curve has zero RAM basis in `turn5-resolve-off-d`'s window (flat
+static at all 108 sampled ticks/7 coordinates) — suppressed via a new
+`suppressSitrusRotate` flag threaded from `drawTurn5RockSlideWindow` down
+through `drawTurn6FieldBase`/`drawTurn5RockSlideAttack` (both shared
+across turns 6-13, defaulting `false` everywhere else).
+
+**Numbers:** `turn5-resolve-off-c` 173/196 -> **195/196** (near-full close
+of 6763-6785; 6763 itself keeps a 6px/0.02% anti-aliasing-class residual,
+not chased). `turn5-resolve-off-d` 66/196 -> **142/196** (closes
+6810-6952 entirely, including the resolve-off-c carryover; 6953-6969's
+own unverified ring/star residual — `turn5SitrusRingMatrix`/
+`drawGrantingStars`, never independently RAM-checked — and 6970+'s
+§2.5/§6.3 spans left open). Zero decreases across the full guard family:
+`turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
+46/46, `turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-a` 60/132,
+`turn5-confirm-off-b` 37/132, `turn5-resolve-off-a` 44/196,
+`turn5-resolve-off-b` 88/196, `turn13-switchin` 242/242 (the critical
+shared-function guard, verified empirically), `turn4-doubleteam-off`/
+`turn4-rockslide-off` 256/256 each. Three new Tier-1 pin blocks
+(`tests/battleScene.test.ts`). Full receipts and dated addenda:
+`docs/turn5-resolve-offc-tail-diagnosis.md` §14, `docs/turn5-confirmb-
+resolved-residuals.md` §7.
+
+**Remaining, still open:** `resolve-off-c`'s 6763 residual (6px) and
+`resolve-off-d`'s 6953-6969 ring/star span are both small, named,
+unchased residuals. §2.5/§6.3 (the 6991-6994 transition spike,
+re-characterized as the app transitioning early) stays out of scope, next
+instrument named but not fix-ready.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 

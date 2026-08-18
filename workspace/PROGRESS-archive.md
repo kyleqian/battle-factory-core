@@ -1,4 +1,65 @@
 ---
+## 1334 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s two named tail mechanisms FIXED per `docs/turn5-resolve-offc-tail-diagnosis.md` — count holds at 149/196, blocked by a third, newly-confirmed, out-of-scope mechanism**
+
+- **State:** three green commits (`6b9f1a12` fix+Tier-1 pins,
+  `18d8d23c` probe re-point) plus this docs commit. `npm test` **1,067
+  files / 10,049 passed (+5, two new pin blocks) / 223 skipped**; `npm
+  run build`/`npm run typecheck` green throughout.
+- **Did:** landed both fixes the fresh diagnosis doc specified: (i)
+  `turn5PidgeottoHealthboxSlideDx` re-anchored from the sprite's own
+  unrelated materialize-settle tick (6829) to the healthbox's own
+  RAM-pinned onset (`TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK = 6763`,
+  `initialHold = true`); (ii) the switch-in BG-white-flash peak hold
+  extended by one render tick. (ii) landed as a **new, separate**
+  `TURN5_PIDGEOTTO_BG_FADE_Y` table rather than the doc's literal
+  suggested edit-in-place — extending the shared `TURN5_BG_FADE_Y`
+  regressed `turn13-switchin` 242/242→234/242 (caught live, not assumed):
+  `turn13MurkrowBgFadeY` and `turn15ReleaseFieldPalette` both reuse that
+  table verbatim at their own anchors, and oracle data confirms Murkrow's
+  own window genuinely needs the original 8-entry hold while Pidgeotto's
+  needs 9. Exported `turn5BgFadeY` (was module-private) and re-pointed
+  `tools/probe/analyze-turn5-resolve-offc-tail-app-series.ts` at the live
+  function instead of its own frozen pre-fix copy. Ran the doc's §7
+  PASS/FAIL block in full, including the RAM-probe sanity rerun (byte-
+  identical to the doc's own §3a/§4b tables — no drift) and both
+  app-series probe re-runs (both now match their target tables exactly).
+- **Result:** `turn5-resolve-off-c` **149/196 → 149/196, unchanged** —
+  NOT the doc's own §6 prediction of 196/196. Per-frame attribution: all
+  47 mismatched frames' diff magnitude collapsed from up to 17452px/
+  45.45% to a flat ~1100-1600px/~3%, confirming both landed fixes are
+  clean, but a **third mechanism** — `drawTurn5PidgeottoMaterialize`'s
+  settled-transition path never handing off before
+  `TURN5_PIDGEOTTO_SETTLE_TICK` (6828), while the doc's own §3c aside
+  already noted the real sprite settles by RAM tick 6760 — dominates
+  every frame in the window. Confirmed structural (shape, not tint) by
+  direct RGB sampling of the diff PNGs. This is exactly the item the
+  brief marked **out of scope** (`TURN5_PIDGEOTTO_SETTLE_TICK`/
+  `drawTurn5PidgeottoMaterialize`) — recorded in `ISSUES.md` #97 sub-entry
+  F and the diagnosis doc's own §10 addendum, not fixed. Zero decreases
+  anywhere in the full guard family (`turn5-reset-off` 256/256,
+  `turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+  fixture 47/47, `turn5-confirm-off-{a,b}` 60/132 and 0/132
+  (689px/1.79% unchanged), `turn5-resolve-off-{a,b}` 25/196 and 88/196,
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each,
+  `turn13-switchin` 242/242 after the table-sharing fix); one expected,
+  fully-explained increase: `turn5-resolve-off-d` 0/196 → **24/196** (the
+  healthbox fix also reaches this trace's own early frames 6810-6828; its
+  own out-of-scope 258px/0.67% residual past tick 7004 is byte-identical
+  before and after).
+- **Next:** the third mechanism above needs its own instrument (out of
+  this step's scope by the brief). `resolve-off-d`'s 258px residual and
+  `confirm-off-b`'s 689px residual remain open, untouched (a side-lane
+  instrument was diagnosing them in parallel this session, per the
+  brief). Class-(iii) text/banner mechanism and #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The turn13/turn15 shared-table regression was
+  only caught because the brief's "zero decreases anywhere" standard
+  prompted a guard-trace sweep beyond the explicitly named list —
+  `turn13-switchin` wasn't in the brief's own guard list but shares the
+  exact constant the fix touches; worth checking downstream reuse of any
+  shared table/constant before treating a doc's literal edit-in-place
+  suggestion as safe.
+
+---
 ## 1333 — [main worker, 2026-08-18] **ISSUES #97 CLOSED: turn6 [7318,7347] bounce correction lands under a supervisor overturn of `turn6-reopen-endstate-spec.md`'s §2/§3 rejection — `turn6-reopen-off` 22/46→46/46, `turn6-menu-off` 23/47→47/47, both FULL**
 
 - **State:** one green commit (`cb7cbee3` fix+Tier-1 pin) plus this docs
