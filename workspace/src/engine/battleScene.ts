@@ -10884,8 +10884,18 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
  * `ONIX_SITRUS_IDENTITY_RENDER_TICK` directly - both are shared with
  * `turn5SitrusRingMatrix`/`drawGrantingStars`, neither independently
  * verified this session.
+ *
+ * docs/turn5-confirmb-resolved-residuals.md §9.2 (2026-08-18, ISSUES #97
+ * remainder): `suppressSitrusStars` (default `false`, every pre-existing
+ * caller unaffected), same shape as `suppressSitrusRotate` above - a full
+ * 64-slot `gSprites` RAM scan across 59 sampled ticks (6945-7003) found zero
+ * matches for either `gGrantingStarsSpriteTemplate` or
+ * `gThinRingExpandingSpriteTemplate`; `drawGrantingStars`'s own two star
+ * sprites have zero RAM basis in this trace, the same "spurious
+ * presentation" class as the rotation fix above, now confirmed for the
+ * OTHER consumer of the same shared epoch.
  */
-export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false): void {
+export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false, suppressSitrusStars: boolean = false): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
@@ -10939,7 +10949,7 @@ export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
       }
     }
   }
-  drawGrantingStars(fb, t);
+  if (!suppressSitrusStars) drawGrantingStars(fb, t);
   const sitrusRing = turn5SitrusRingMatrix(t);
   if (sitrusRing) {
     // Z-order (ISSUES #26's own caveat): rows >= PLAYER_BALL_OPEN_VISIBLE_
@@ -14941,7 +14951,7 @@ function drawFaintedOpponentWindow(
  * same "generalize a hardcoded value into a defaulted param" idiom every
  * other reused mechanism in this file already uses.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: number | LatestCompletedCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false): void {
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: number | LatestCompletedCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false, suppressSitrusStars: boolean = false): void {
   // ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §7a): the
   // non-number branch is reached ONLY by drawTurn5RockSlideWindow's own call
   // (the `latestCompletedCommandHandoff` object/null form) - every numeric
@@ -14953,7 +14963,7 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: numbe
   const latestCompletedCommandHandoff = typeof bounceTickOrLatest === "number"
     ? null
     : bounceTickOrLatest;
-  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, latestCompletedCommandHandoff, bounceIndexOffset, suppressSitrusRotate);
+  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, latestCompletedCommandHandoff, bounceIndexOffset, suppressSitrusRotate, suppressSitrusStars);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t, pidgeottoX2, pidgeottoSink);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
@@ -14986,7 +14996,7 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: numbe
  * literals (`ROCK_SLIDE_LINE1`/`LINE2` themselves stay defined and in use by
  * every OTHER turn's own ROCK_SLIDE window elsewhere in this file).
  */
-function drawTurn5RockSlideWindow(
+export function drawTurn5RockSlideWindow(
   fb: Uint8Array,
   t: number,
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
@@ -14998,7 +15008,7 @@ function drawTurn5RockSlideWindow(
   // shared raw sine index (the true offset - the original `+67` fit was off
   // by one sDelta step, 7) - RAM-proven across 47 consecutive ticks
   // (7300-7346), the ONLY call site this correction targets.
-  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, turn5OffSitrusOnixHp(t), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 60, true);
+  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, turn5OffSitrusOnixHp(t), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 60, true, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {

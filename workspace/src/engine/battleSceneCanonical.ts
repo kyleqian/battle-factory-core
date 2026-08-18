@@ -204,8 +204,8 @@ export const TURN5_SITRUS_MENU_REDRAW_TICK = 7222;
  * same "scoped override if shared" rule §17 item 1 already used.
  */
 export const TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK = 6850;
-export const TURN5_OFF_SITRUS_TEXT_CLEAR_TICK = 6991;
-export const TURN5_OFF_SITRUS_MENU_REDRAW_TICK = 6991;
+export const TURN5_OFF_SITRUS_TEXT_CLEAR_TICK = 6989;
+export const TURN5_OFF_SITRUS_MENU_REDRAW_TICK = 6995;
 
 /**
  * ISSUES #97 remainder residual (B) (`docs/turn5-confirmb-resolved-

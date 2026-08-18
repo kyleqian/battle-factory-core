@@ -18,6 +18,7 @@ import {
   drawSpriteSheetAffineRotate,
   drawSpriteSheetAffineTintedBlend,
   drawTurn5RockSlideAttack,
+  drawTurn5RockSlideWindow,
   drawTurn15ForcedSwitchRelease,
   endeavorHealthboxBounceY2,
   endeavorOnixInvisible,
@@ -73,6 +74,8 @@ import {
   TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE,
   TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK,
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
+  TURN5_OFF_SITRUS_TEXT_CLEAR_TICK,
+  TURN5_OFF_SITRUS_MENU_REDRAW_TICK,
   TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET,
   TURN5_FAINTED_CURSOR_START_DELAY,
   TURN5_OPPONENT_ICON_STATES,
@@ -2071,6 +2074,61 @@ describe("docs/turn5-confirmb-resolved-residuals.md §6.2 (2026-08-18, ISSUES #9
     // this point in the window, so the two full frames should match exactly
     // once the rotation curve itself is suppressed.
     expect(first).toEqual(second);
+  });
+});
+
+describe("docs/turn5-confirmb-resolved-residuals.md §9.2 (2026-08-18, ISSUES #97 remainder): drawTurn5RockSlideAttack's new suppressSitrusStars gate skips drawGrantingStars entirely - a full 64-slot gSprites RAM scan across 59 sampled ticks (6945-7003) found zero matches for either granting-star template or the ring template, so the app's two star sprites have zero RAM basis in this trace", () => {
+  const T = 6980; // inside both spurious stars' own active window (star 0 from 6970, star 1 from 6980), per §9.2's own hand-computed corner boxes
+
+  it("suppressSitrusStars=true renders a different image than the default (false) at the same tick - the gate has a real, visible effect", () => {
+    const unsuppressed = new Uint8Array(240 * 160 * 4);
+    const suppressed = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideAttack(unsuppressed, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true, false);
+    drawTurn5RockSlideAttack(suppressed, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true, true);
+    expect(suppressed).not.toEqual(unsuppressed);
+  });
+
+  it("suppressSitrusRotate=true, suppressSitrusStars=false (the pre-this-fix shape) still paints the two stars - isolates the new flag as the sole cause of the difference above", () => {
+    const withStars = new Uint8Array(240 * 160 * 4);
+    const withoutStars = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideAttack(withStars, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true, false);
+    drawTurn5RockSlideAttack(withoutStars, T, T, undefined, 0, false, 0, false, undefined, 0, null, 0, true, true);
+    expect(withStars).not.toEqual(withoutStars);
+  });
+});
+
+describe("docs/turn5-confirmb-resolved-residuals.md §9.3/§9.4 (2026-08-18, ISSUES #97 remainder): drawTurn5RockSlideWindow's Sitrus text-clear/menu-redraw dispatch gates - real hardware clears the heal message 2 ticks EARLIER than previously landed (6989, not 6991) and reveals the settled menu chrome 4 ticks LATER (6995, not 6991); a direct pixel comparison at both open oracle screenshots (6989, 6994) showed a PLAIN FIELD with no message box and no chrome at all, so the two ticks genuinely diverged rather than needing independent message-box/button-grid gates (§9.4's own open question)", () => {
+
+  it("TURN5_OFF_SITRUS_TEXT_CLEAR_TICK is 6989 (2 ticks earlier than the app's old, since-superseded 6991)", () => {
+    expect(TURN5_OFF_SITRUS_TEXT_CLEAR_TICK).toBe(6989);
+  });
+
+  it("TURN5_OFF_SITRUS_MENU_REDRAW_TICK is 6995 (4 ticks later than the app's old, since-superseded 6991), a gBattle_BG0_Y RAM-confirmed +1 render lag past the real RAM transition tick 6994", () => {
+    expect(TURN5_OFF_SITRUS_MENU_REDRAW_TICK).toBe(6995);
+  });
+
+  it("clears the heal message at the new, earlier tick - 6988 still shows it, 6989 no longer does", () => {
+    const before = new Uint8Array(240 * 160 * 4);
+    const after = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideWindow(before, 6988, null);
+    drawTurn5RockSlideWindow(after, 6989, null);
+    expect(after).not.toEqual(before);
+  });
+
+  it("stays on the same blank-hold frame for the whole gap between the two gates (6989 through 6994) - neither gate has fired yet", () => {
+    const at6989 = new Uint8Array(240 * 160 * 4);
+    const at6994 = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideWindow(at6989, 6989, null);
+    drawTurn5RockSlideWindow(at6994, 6994, null);
+    expect(at6994).toEqual(at6989);
+  });
+
+  it("reveals the settled menu chrome only once the new, later tick is reached - 6994 doesn't show it, 6995 does", () => {
+    const before = new Uint8Array(240 * 160 * 4);
+    const after = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideWindow(before, 6994, null);
+    drawTurn5RockSlideWindow(after, 6995, null);
+    expect(after).not.toEqual(before);
   });
 });
 
