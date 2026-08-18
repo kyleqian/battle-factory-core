@@ -10788,7 +10788,7 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
   return sitrusRingMatrixAtAge(t - ONIX_SITRUS_IDENTITY_RENDER_TICK);
 }
 
-function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null): void {
+function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null, bounceIndexOffset: number = 0): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   const shiftY = rockSlideBg3Y(t, pressTick);
   drawStaticBgShiftedY(fb, shiftY, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
@@ -10829,7 +10829,7 @@ function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number 
     // freeze into this function) - RAM/pixel-confirmed this session
     // (`turn6-fd-check.json` scratch compare): freezing this too closes the
     // entire 769px residual across 7348-7404 in one fix.
-    const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick)).onixY2 + onixY2Extra;
+    const onixY2 = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick), bounceIndexOffset).onixY2 + onixY2Extra;
     const tintCoeff = onixSitrusTintCoeff(t);
     const onixSpriteHeight = onixBackSprite.tileset.rows * 8;
     if (!onixInvisible && onixSinkSkipRows < onixSpriteHeight) {
@@ -11592,8 +11592,8 @@ export const TURN5_SITRUS_MENU_REOPEN_GATE_DELAY = 1348;
  * own field base plus the unchanged settled-menu chrome text (§5's own
  * "reverts to submenu-open pixels" plateau starts from this same picture).
  */
-function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number, bounceTick: number = t): void {
-  drawTurn6FieldBase(fb, t, bounceTick);
+function drawTurn6ActionMenuIdleWindow(fb: Uint8Array, t: number, bounceTick: number = t, bounceIndexOffset: number = 0): void {
+  drawTurn6FieldBase(fb, t, bounceTick, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, bounceIndexOffset);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
 }
@@ -11840,7 +11840,13 @@ function drawTurn6FightSubmenuWindow(
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (t < revealTick) {
-    drawTurn6ActionMenuIdleWindow(fb, t, turn6ReopenBounceTick(t, TICK0 + sm.openElapsed));
+    // ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §7a/§8c/
+    // §8f): this DMA-wait branch shares window B's own `+67` raw-sine-index
+    // anchor and display-basis correction (`t - 1`) with drawTurn5RockSlide
+    // Window's call above - strictly local to this branch (`t < revealTick`,
+    // i.e. `turn6ReopenPressTick` through `turn6ReopenPressTick + 4`); the
+    // post-reveal `turn6KickoffBounceTick` branch below is untouched.
+    drawTurn6ActionMenuIdleWindow(fb, t, turn6ReopenBounceTick(t - 1, TICK0 + sm.openElapsed), 67);
     return;
   }
   if (sm.confirmElapsed !== null) {
@@ -14767,12 +14773,19 @@ function drawFaintedOpponentWindow(
  * same "generalize a hardcoded value into a defaulted param" idiom every
  * other reused mechanism in this file already uses.
  */
-function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: number | LatestCompletedCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true): void {
-  const bounceTick = typeof bounceTickOrLatest === "number" ? bounceTickOrLatest : t;
+function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: number | LatestCompletedCommandHandoff | null = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true, bounceIndexOffset: number = 0): void {
+  // ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §7a): the
+  // non-number branch is reached ONLY by drawTurn5RockSlideWindow's own call
+  // (the `latestCompletedCommandHandoff` object/null form) - every numeric
+  // caller is unaffected. `t - 1` is the display-basis correction: the
+  // oracle's displayed frame T shows the model's RAM state as of T-1
+  // (RAM-confirmed with zero exceptions, §7a), on top of `menuIdleBounce`'s
+  // own orthogonal internal `ramTick = t - 1` age-relative shift.
+  const bounceTick = typeof bounceTickOrLatest === "number" ? bounceTickOrLatest : t - 1;
   const latestCompletedCommandHandoff = typeof bounceTickOrLatest === "number"
     ? null
     : bounceTickOrLatest;
-  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, latestCompletedCommandHandoff);
+  drawTurn5RockSlideAttack(fb, t, bounceTick, beforeMonSprite, onixX2, onixInvisible, onixY2Extra, darken, undefined, 0, latestCompletedCommandHandoff, bounceIndexOffset);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t, pidgeottoX2, pidgeottoSink);
   // S7 slice M (docs/faint-switch-notes.md §8e/§11): Pidgeotto's own
@@ -14789,7 +14802,7 @@ function drawTurn6FieldBase(fb: Uint8Array, t: number, bounceTickOrLatest: numbe
   // Effect` stops being polled the instant the A-press hands off - the same
   // freeze rule `turnKickoffBounceTick` et al. already establish for turns
   // 1-5's own confirm-wait window).
-  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick), bounceIndexOffset);
   const healthboxY2 = healthboxY2Override ?? bounce.healthboxY2;
   drawMenuHealthboxPlayer(fb, 0, healthboxY2);
   drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2);
@@ -14812,7 +14825,10 @@ function drawTurn5RockSlideWindow(
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
-  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff);
+  // ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §8c/§8f):
+  // +67 on the shared raw sine index - RAM-proven across 47 consecutive
+  // ticks (7300-7346), the ONLY call site this correction targets.
+  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 67);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {

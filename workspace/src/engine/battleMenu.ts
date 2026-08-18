@@ -821,14 +821,14 @@ function healthboxSinIndex(ramTicksSinceSetup: number): number {
 /** RAM tick `DoBounceEffect`'s one-time setup runs (`HandleInputChooseAction`'s first tick) - one tick *after* `MENU_DRAW_TICK`'s screen-visible reveal, since the bounce is a later controller-func state (docs/battle-menu-idle-notes.md §1's "phase origin" derivation). Screen tick `MENU_DRAW_TICK + 1` (1749) is the first screen tick that can show a nonzero bounce (the window's established +1 render lag - see `menuIdleBounce`). */
 const MENU_BOUNCE_RAM_SETUP_TICK = MENU_DRAW_TICK;
 
-/** Region A (`gSprites[gBattlerSpriteIds[player]]`, the ONIX battler sprite itself) / region B (`gSprites[gHealthboxSpriteIds[player]]`, the healthbox main sprite) `y2` bounce offsets (0-2px, vertical only) at absolute trace/screen tick `t`. Pure closed-form generator (docs/battle-menu-idle-notes.md §1) - `screenTick T` shows RAM tick `T-1`'s sprite state (this window's own established render-lag convention, re-derived and RAM-confirmed independently of `battle-menu-notes.md`'s ball-arc convention). Both are 0 before the bounce starts (RAM tick < `MENU_BOUNCE_RAM_SETUP_TICK`, i.e. screen tick <= `MENU_DRAW_TICK`). */
-export function menuIdleBounce(t: number): { onixY2: number; healthboxY2: number } {
+/** Region A (`gSprites[gBattlerSpriteIds[player]]`, the ONIX battler sprite itself) / region B (`gSprites[gHealthboxSpriteIds[player]]`, the healthbox main sprite) `y2` bounce offsets (0-2px, vertical only) at absolute trace/screen tick `t`. Pure closed-form generator (docs/battle-menu-idle-notes.md §1) - `screenTick T` shows RAM tick `T-1`'s sprite state (this window's own established render-lag convention, re-derived and RAM-confirmed independently of `battle-menu-notes.md`'s ball-arc convention). Both are 0 before the bounce starts (RAM tick < `MENU_BOUNCE_RAM_SETUP_TICK`, i.e. screen tick <= `MENU_DRAW_TICK`). `indexOffset` (default 0, every pre-existing caller unaffected) adds to BOTH raw (pre-mod-256, pre-table-lookup) sine indices - ISSUES #97-B rung 2 (`docs/turn5-bounce-recalibration-probe.md` §8c/§8f): a call site whose own anchor is a fixed `+67` off real hardware's raw `DoBounceEffect` sinIndex, RAM-proven across 47 consecutive ticks. */
+export function menuIdleBounce(t: number, indexOffset: number = 0): { onixY2: number; healthboxY2: number } {
   const ramTick = t - 1;
   if (ramTick < MENU_BOUNCE_RAM_SETUP_TICK) return { onixY2: 0, healthboxY2: 0 };
   const n = ramTick - MENU_BOUNCE_RAM_SETUP_TICK;
   return {
-    onixY2: bounceSin(onixSinIndex(n)) + 1,
-    healthboxY2: bounceSin(healthboxSinIndex(n)) + 1,
+    onixY2: bounceSin(onixSinIndex(n) + indexOffset) + 1,
+    healthboxY2: bounceSin(healthboxSinIndex(n) + indexOffset) + 1,
   };
 }
 

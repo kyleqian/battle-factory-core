@@ -1312,6 +1312,59 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(turn6ReopenBounceTick(pressTick + 4, pressTick)).toBe(pressTick + 4 - 2);
   });
 
+  it("ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §7a/§8c/§8f): window B's composed correction - a shared +67 raw-sine-index offset plus a local display-basis t-1 shift, composed with rung 1's freeze - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 7305-7317, matching real hardware exactly where the OLD (pre-rung-2) formula does not", () => {
+    const pressTick = 7313; // same live-confirmed openElapsed press tick as the rung-1 test above
+    // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 7305-7317
+    // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
+    // §7a display-basis finding: displayed(T) = RAM(T-1)).
+    const displayed: Record<number, { onixY2: number; healthboxY2: number }> = {
+      7305: { onixY2: 1, healthboxY2: 0 },
+      7306: { onixY2: 1, healthboxY2: 0 },
+      7307: { onixY2: 1, healthboxY2: 1 },
+      7308: { onixY2: 1, healthboxY2: 1 },
+      7309: { onixY2: 1, healthboxY2: 1 },
+      7310: { onixY2: 1, healthboxY2: 1 },
+      7311: { onixY2: 1, healthboxY2: 1 },
+      7312: { onixY2: 1, healthboxY2: 1 },
+      7313: { onixY2: 1, healthboxY2: 1 },
+      7314: { onixY2: 1, healthboxY2: 1 },
+      7315: { onixY2: 1, healthboxY2: 1 },
+      7316: { onixY2: 1, healthboxY2: 1 },
+      7317: { onixY2: 1, healthboxY2: 1 },
+    };
+    // New (rung 2) composed model, reproducing exactly what drawTurn6FieldBase's
+    // two call sites now feed menuIdleBounce: bounceTick evaluated at t-1
+    // (the local display-basis correction), with the freeze mapping applied
+    // for t >= pressTick, and indexOffset=67 (the shared raw-sine-index anchor).
+    const newModel = (t: number) => {
+      const bounceTick = t < pressTick ? t - 1 : turn6ReopenBounceTick(t - 1, pressTick);
+      return menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick), 67);
+    };
+    // §8e's exact predicted match set: matches at {7305, 7307..7316}, mismatches
+    // at {7306, 7317} (both are §8d's known sine-table-peak rounding artifact,
+    // explicitly out of scope for this fix).
+    const expectedMismatches = new Set([7306, 7317]);
+    for (let t = 7305; t <= 7317; t += 1) {
+      const model = newModel(t);
+      if (expectedMismatches.has(t)) {
+        expect(model).not.toEqual(displayed[t]);
+      } else {
+        expect(model).toEqual(displayed[t]);
+      }
+    }
+    // Regression-proof: the OLD (pre-rung-2) formula - no offset, no t-1 basis
+    // shift, freeze mapping evaluated at raw t - gets EVERY one of the 11
+    // now-matching ticks wrong (proves this pin actually exercises rung 2's
+    // new behavior, not something the prior formula already satisfied).
+    const oldModel = (t: number) => {
+      const bounceTick = t < pressTick ? t : turn6ReopenBounceTick(t, pressTick);
+      return menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
+    };
+    for (let t = 7305; t <= 7317; t += 1) {
+      if (!expectedMismatches.has(t)) expect(oldModel(t)).not.toEqual(displayed[t]);
+    }
+  });
+
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn6-menu.json (33/33, 0 diff, 11 named single-tick bounce-extremum residuals excluded, docs/battle-turn-notes.md's new §27)", () => {
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn6-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
