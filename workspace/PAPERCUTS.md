@@ -17,7 +17,10 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 3 (2026-08-16: FAILed because services started 09:45:59 on the
+- **Hits:** 4 (2026-08-18 orient: both ports FAILed again; only non-workspace
+  commit since the 8014 start was `3e29880b`, whose own message says it was
+  verified against these restarted services — kept, no restart, ~4 min.)
+  (2026-08-16: FAILed because services started 09:45:59 on the
   new working tree, 6 min before the commit was recorded at 09:51:59 — the
   services were NEWER than their own code's commit date; hit again at the
   2026-08-16 afternoon orient against the same 09:45:59 processes,
@@ -1115,3 +1118,21 @@ current app stage should be rejected before replay.
   bound their own verification runs.
 - **Real fix:** none cheap — this is one machine running three programs;
   scheduling full-suite runs to avoid overlap is the lever that exists.
+
+## Side-worktree root has no `package.json` — `npm run` silently escapes to the main checkout
+
+- **What:** worker worktrees check out the whole repo (`workspace/` is a
+  subdirectory), so the worktree ROOT has no `package.json`. Running
+  `npm run compare` (or any npm script) from the worktree root makes npm
+  walk up the directory tree until it finds a `package.json` — which is the
+  MAIN checkout's — so the command runs against the main tree's unpatched
+  source while appearing to run in the worktree. A local patch then looks
+  like a no-op.
+- **Hits:** 1 (2026-08-18, #97-B continuation-6 side worker: a live-verify
+  patch "did nothing" until the worker spotted the escape; ~15 min lost).
+- **Workaround:** always `cd <worktree>/workspace` (the directory holding
+  `package.json`) before any npm script; treat a patch-is-a-no-op result as
+  this trap until the cwd is confirmed.
+- **Real fix:** run-subagent.sh could `cd` workers into `<worktree>/workspace`
+  (it already does for the brief's cwd — the trap is manual `cd`s during the
+  session), or a stub root `package.json` that fails loudly.
