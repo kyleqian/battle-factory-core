@@ -4,6 +4,71 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1331 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement COMPLETE: Rungs 7-8 land the final 25 sites, closes 119/119 in-scope `battleScene.ts` call sites, zero FINDINGs across all 9 rungs**
+
+- **State:** two green commits (`a57d281b` Rung 7, `f70b6e67` Rung 8) plus
+  this docs commit. `npm test` **1,067 files / 10,043 passed / 223
+  skipped** (unchanged — neither rung needed a new pin, unlike Rung 5's
+  HARDEN) after each commit; `npm run build`/`npm run typecheck` green
+  throughout.
+- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs 7-8
+  exactly, re-grepping every site's current line number first (both
+  rungs' lines had drifted from the doc's own stale cites, as its own
+  warning predicted) and confirming every per-move Tier-1 test filename
+  with `find` before scoping. **Rung 7** (15 sites, WISH…TAKE_DOWN,
+  `:37684-43476` this session): WISH (2 sites), RECOVER, FUTURE_SIGHT,
+  CONFUSION, PSYCHIC, METAL_CLAW already carried a dynamic
+  `view.target.species`/`view.attacker.species` argument — fallback-idiom
+  swap only. METEOR_MASH, MILK_DRINK, REFRESH, FLAME_WHEEL, DRAGON_CLAW,
+  FIRE_SPIN, CRUSH_CLAW, TAKE_DOWN had a hardcoded ONIX literal, each
+  converted to `view.target.species` after independently confirming that
+  move's own `playerToOpponent`/`opponentToPlayer` throw-guard proves it.
+  METEOR_MASH's doc-flagged caveat confirmed exactly as written: covered
+  by `meteorMashSource/Evidence/Reducer.test.ts`, not a plain
+  `meteorMash.test.ts`. **Rung 8** (10 sites, CRUNCH…DOUBLE_EDGE,
+  `:43605-44867`): all 10 moves (CRUNCH, LICK, SLASH, COUNTER,
+  COMET_PUNCH, DOUBLE_SLAP, TRIPLE_KICK, DOUBLE_KICK, THRASH,
+  DOUBLE_EDGE) shared byte-identical
+  `speciesFrontIdleRestOffset("ONIX") ?? {x2:0,y2:0}` call-site text; each
+  move's own guard was still confirmed individually (not assumed from the
+  shared shape) before substituting `view.target.species`. Every site's
+  fallback idiom collapsed to Rung 0's `speciesFrontIdleRestOffsetOrZero`
+  in the same edit; throw-guard/pair-lock blocks untouched everywhere, as
+  in every prior rung. **Zero FINDINGs across both rungs** — no
+  substituted expression ever disagreed with what its guard proved.
+- **Result — §1e CLOSED:** the doc's own final census grep, re-run after
+  Rung 8: `grep -c speciesFrontIdleRestOffset( battleScene.ts` → **4**
+  (exactly the doc's §1.2 permanently-out-of-scope settle-hook literals:
+  GROVYLE `:5372`, KABUTO `:6486`, PIDGEOTTO `:11187`, MURKROW `:11324` —
+  unchanged, never in scope); `grep -c speciesFrontIdleRestOffsetOrZero(`
+  → **119**, matching the doc's §1.2 "Inside renderSceneOnMovePresentation
+  | 119 | The §1e debt" row exactly — **119/119 in-scope sites retired**,
+  raw+OrZero summing to the same constant 123 held since Rung 0.
+  `sceneOnPresentation.ts`'s 2 already-generic sites (`:4960`, `:9416`,
+  DRAGON_RAGE/SHADOW_PUNCH) are untouched and correctly so — per §3 they
+  were never part of any rung, already using the ideal shape this whole
+  ladder exists to spread. Every named per-move Tier-1 test file green
+  each rung (24 files/116 tests Rung 7, 24 files/94 tests Rung 8, several
+  files shared with earlier rungs' confirmation passes but independently
+  re-run here); `npm run compare:differential -- battle-command-
+  generated-off.json --base <rung's parent sha> --summary` 128/128
+  byte-identical both rungs (insurance smoke check — none of these
+  windows are reachable from that trace).
+- **Next:** §1e retirement is done; no more rungs of this shape remain.
+  ISSUES #71 itself stays open — its one remaining item is **Rung 9**
+  (hand-fit consumer swap-over: `magbySendOut.ts`, the `battleMenu.ts`
+  ONIX-back hand-fits, `kabutoSendOut.ts`'s `kabutoHSlideWobble`), which
+  is **blocked on the animation lane's rung-4 back-family dispatcher** (68
+  functions, not started) per the doc's §5 Rung 9 section — not this
+  lane's to start, do not attempt until that dispatcher exists and
+  exports a callable per-species+nature back-offset function. Do not edit
+  `ISSUES.md`; #71 stays open for that reason alone.
+- **Notes:** no PAPERCUT. Landed well inside the 40-min cap — both rungs'
+  site-context (guard shapes, test filenames) were either already
+  established by the prior session's identical recipe or quick to
+  re-confirm, so no time was lost re-deriving the pattern.
+
+---
 ## 1330 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 5-6 landed (30 more sites, 94/119 in-scope), corrects prior ledger's site-count arithmetic: HARDEN's zero-coverage gap pinned first, zero FINDINGs, zero regressions**
 
 - **State:** three green commits (`606ca03d` HARDEN pin test, `efa62046`
@@ -61,18 +126,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `npm run compare:differential -- battle-command-generated-off.json
   --base <parent> --summary` 128/128 byte-identical both rungs (insurance
   smoke check — none of these windows are reachable from that trace).
-- **Next:** Rung 7 (WISH…TAKE_DOWN, 15 sites, doc-cited `~37643` onward —
-  re-grep line numbers first, they will have shifted) and Rung 8 (CRUNCH…
-  DOUBLE_EDGE, 10 sites) remain — 25 sites, matching the corrected count
-  above. Rung 7's own doc caveat: METEOR_MASH is covered by 3
-  differently-named files (`meteorMashEvidence/Reducer/Source.test.ts`),
-  not `meteorMash.test.ts` — confirm with find/grep, don't assume. After
-  Rung 8 lands: raw count should read **4** (only the permanently-out-of-
-  scope settle-hook literals) and OrZero should read **119**; run the
-  doc's own final census grep and record that exact pair here, not a
-  restated "121". Rung 9 (hand-fit swap-over) stays blocked on the
-  animation lane's rung-4 back dispatcher, per ISSUES #71 — not started,
-  not this lane's to start.
 - **Notes:** no PAPERCUT. Time-boxed to a 50-min worker cap; stopped
   after two clean rungs rather than rushing Rung 7's extra-confirmation
   requirement (3-file METEOR_MASH mapping) into a shorter remaining
@@ -131,55 +184,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rung 9 blocked on the animation lane's rung-4 dispatcher.
   (c) #73/#55-adjacent items unchanged. No deferred questions; no
   blockers.
-
-## 1328 — [main worker, 2026-08-18] **ISSUES #97-B §8d/§9e sine-index offset fix landed: turn5-action-off CLOSED 32/32, turn6-reopen-off 20→22/46, zero decreases**
-
-- **State:** one green commit (src + 2 test files) plus this docs commit.
-  `npm test` **1,066 files / 10,040 passed / 223 skipped**, `npm run build`
-  green.
-- **Did:** followed `docs/bounce-peak-rounding-fix-spec.md` §7 exactly — a
-  SIDE-worker analysis that read `trig.c`'s real `Sin()`/`DoBounceEffect`
-  and found the landed `+67`/`+116` raw-sine-index offsets each carried a
-  +7 excess inherited from fitting against the receipt's own
-  post-increment `sSinIndex` RAM column (real hardware has no special
-  peak-rounding rule; the app's per-index `bounceSin` math was already
-  exactly correct). Ran the spec's receipt cross-check first (176 ok / 0
-  bad, PASS), recorded the full 11-trace baseline, then applied the
-  4-literal edit at the exact spec-cited lines (all 4 unchanged since the
-  spec was written): `battleScene.ts` `bounceIndexOffset`/
-  `idleWaitBounceIndexOffset` 116→109 (:8320/:8689), the two window-B `67`
-  literals →60 (`drawTurn6ActionMenuIdleWindow`'s DMA-wait-branch call
-  :11887, `drawTurn6FieldBase`'s window-B call :14869). No change to
-  `bounceSin`/`menuIdleBounce` internals — confirmed live per the spec's
-  own warning: a global `-7` shift inside the shared lookup breaks 25
-  tests across 5 files (not attempted here, spec-rejected).
-- **Result (exact predicted numbers, zero decreases across the 11-trace
-  family):** `turn5-action-off` 26/32→**32/32** (window fully CLOSED — the
-  former residual `{5928,5929,5930,5931,5940,5949}` was the same offset
-  excess, not the periodic §8d/§9e "rounding artifact" it was previously
-  attributed to), `turn6-reopen-off` 20/46→**22/46** (`{7306,7317}` now
-  match; remainder is entirely `[7318,7347]`, the still-open
-  `turn6KickoffBounceTick` dispatch, untouched by construction),
-  `turn5-confirm-off-a` 14/132→**15/132** (bonus — `idleWaitBounceIndexOffset`
-  is gated on plain `turn5Active`, reaches this trace's span too);
-  `turn5-reset-off` 256/256 and the rest of the family (`confirm-off-b`,
-  `resolve-off-{a,b,c,d}`, `turn4-doubleteam-off`, `turn4-rockslide-off`)
-  byte-identical, zero decreases. Re-pinned one Tier-1 pixel test
-  (`battleScene.test.ts`, tick 5931 at (58,49): `[189,181,181]` →
-  `[247,247,255]`, oracle-verified) plus the two rung-2/3 composed-model
-  tests in `fightSubmenu.test.ts` that hardcoded the old `67`/`116`
-  literals and asserted a named residual set — both now assert zero
-  exceptions (verified computationally against the real formula before
-  editing: with the corrected offset, all displayed ticks in both
-  windows' own probed spans match with no exceptions).
-- **Next:** `ISSUES.md` #97 §D lists what's still open — (i)
-  `turn6KickoffBounceTick`/the 7318+ dispatch (SIDE-worker continuation,
-  check its current state first), (ii) the class-(iii) text/banner
-  mechanism dominating `confirm-off-*`/`resolve-off-*`'s remaining
-  mismatches, (iii) §17 item 5 (the 12-caller HP-overlay gate) from entry
-  1327, (iv) `resolve-off-d`'s own small residual (now ruled out as
-  §8d/§9e-caused).
-- **Notes:** no PAPERCUT. The spec's cited line numbers (8320/8689/
-  11887/14869) turned out unchanged despite the brief's drift warning —
-  worth noting the brief over-hedged, not a problem.
-

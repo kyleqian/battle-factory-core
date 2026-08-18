@@ -1,3 +1,54 @@
+## 1328 — [main worker, 2026-08-18] **ISSUES #97-B §8d/§9e sine-index offset fix landed: turn5-action-off CLOSED 32/32, turn6-reopen-off 20→22/46, zero decreases**
+
+- **State:** one green commit (src + 2 test files) plus this docs commit.
+  `npm test` **1,066 files / 10,040 passed / 223 skipped**, `npm run build`
+  green.
+- **Did:** followed `docs/bounce-peak-rounding-fix-spec.md` §7 exactly — a
+  SIDE-worker analysis that read `trig.c`'s real `Sin()`/`DoBounceEffect`
+  and found the landed `+67`/`+116` raw-sine-index offsets each carried a
+  +7 excess inherited from fitting against the receipt's own
+  post-increment `sSinIndex` RAM column (real hardware has no special
+  peak-rounding rule; the app's per-index `bounceSin` math was already
+  exactly correct). Ran the spec's receipt cross-check first (176 ok / 0
+  bad, PASS), recorded the full 11-trace baseline, then applied the
+  4-literal edit at the exact spec-cited lines (all 4 unchanged since the
+  spec was written): `battleScene.ts` `bounceIndexOffset`/
+  `idleWaitBounceIndexOffset` 116→109 (:8320/:8689), the two window-B `67`
+  literals →60 (`drawTurn6ActionMenuIdleWindow`'s DMA-wait-branch call
+  :11887, `drawTurn6FieldBase`'s window-B call :14869). No change to
+  `bounceSin`/`menuIdleBounce` internals — confirmed live per the spec's
+  own warning: a global `-7` shift inside the shared lookup breaks 25
+  tests across 5 files (not attempted here, spec-rejected).
+- **Result (exact predicted numbers, zero decreases across the 11-trace
+  family):** `turn5-action-off` 26/32→**32/32** (window fully CLOSED — the
+  former residual `{5928,5929,5930,5931,5940,5949}` was the same offset
+  excess, not the periodic §8d/§9e "rounding artifact" it was previously
+  attributed to), `turn6-reopen-off` 20/46→**22/46** (`{7306,7317}` now
+  match; remainder is entirely `[7318,7347]`, the still-open
+  `turn6KickoffBounceTick` dispatch, untouched by construction),
+  `turn5-confirm-off-a` 14/132→**15/132** (bonus — `idleWaitBounceIndexOffset`
+  is gated on plain `turn5Active`, reaches this trace's span too);
+  `turn5-reset-off` 256/256 and the rest of the family (`confirm-off-b`,
+  `resolve-off-{a,b,c,d}`, `turn4-doubleteam-off`, `turn4-rockslide-off`)
+  byte-identical, zero decreases. Re-pinned one Tier-1 pixel test
+  (`battleScene.test.ts`, tick 5931 at (58,49): `[189,181,181]` →
+  `[247,247,255]`, oracle-verified) plus the two rung-2/3 composed-model
+  tests in `fightSubmenu.test.ts` that hardcoded the old `67`/`116`
+  literals and asserted a named residual set — both now assert zero
+  exceptions (verified computationally against the real formula before
+  editing: with the corrected offset, all displayed ticks in both
+  windows' own probed spans match with no exceptions).
+- **Next:** `ISSUES.md` #97 §D lists what's still open — (i)
+  `turn6KickoffBounceTick`/the 7318+ dispatch (SIDE-worker continuation,
+  check its current state first), (ii) the class-(iii) text/banner
+  mechanism dominating `confirm-off-*`/`resolve-off-*`'s remaining
+  mismatches, (iii) §17 item 5 (the 12-caller HP-overlay gate) from entry
+  1327, (iv) `resolve-off-d`'s own small residual (now ruled out as
+  §8d/§9e-caused).
+- **Notes:** no PAPERCUT. The spec's cited line numbers (8320/8689/
+  11887/14869) turned out unchanged despite the brief's drift warning —
+  worth noting the brief over-hedged, not a problem.
+
 ## 1327 — [main worker, 2026-08-18] **ISSUES #97-B turn5-resolve anchor cluster: §17 items 1-3 landed (2 RAM sweeps + 3 scoped anchor fixes) — resolve-off-a 7→25/196, resolve-off-b 71→88/196, zero decreases**
 
 - **State:** one green commit (`4c49776d`, src+test+probe-script fix) plus
