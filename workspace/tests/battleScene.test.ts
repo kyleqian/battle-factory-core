@@ -73,11 +73,14 @@ import {
   TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE,
   TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK,
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
+  TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET,
+  TURN5_FAINTED_CURSOR_START_DELAY,
   TURN5_OPPONENT_ICON_STATES,
   TURN5_ROCKSLIDE_PRESS_TICK,
   TURN5_SWITCHIN_PARTICLE_STALL_LOGICAL_TICK,
   turn3SubmenuBounceTickFromPresentationEpochAge,
   turn5BgFadeY,
+  turn5FaintDismissCursorTick,
   turn5IconBarEva,
   turn5MaterializeCoeff,
   turn5PidgeottoHealthboxSlideDx,
@@ -677,7 +680,7 @@ describe("battleScene: send-out A-press #3 registration + text cadence (docs/bat
   it("state advance preserves sendOutPressElapsed once set, and elapsed keeps incrementing regardless", () => {
     let state: BattleSceneState = { ...INITIAL_BATTLE_SCENE_STATE, sendOutPressElapsed: 380 };
     state = advanceBattleScene(state);
-    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
+    expect(state).toEqual({ elapsed: 1, sendOutPressElapsed: 380, turn5FaintDismissElapsed: null, fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: null, opponentFaintPresentationOwner: null, resolutionOwner: null, battleOutcome: 0, terminalResolution: null });
   });
 });
 
@@ -1734,11 +1737,17 @@ describe("S7 slice K: faintSinkRowsAndY2 (docs/faint-switch-notes.md §7a's clos
   });
 });
 
-// ISSUES #39 rank-3 mirror retirement: the old dismiss timestamp was never
-// consumed by rendering or continuation. The immutable staged KO -> switch-in
-// -> Sitrus -> next-command lifecycle owns the facts; this compatibility
-// window remains a pure presentation clock.
-describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
+// ISSUES #39 rank-3 mirror retirement: the OLD dismiss timestamp
+// (`opponentFaintPresentationOwner`-shaped) was never consumed by rendering
+// or continuation - the immutable staged KO -> switch-in -> Sitrus ->
+// next-command lifecycle owns the facts, so that mirror stayed a pure
+// presentation clock. ISSUES #97 remainder (docs/turn5-resolve-ab-pools-
+// diagnosis.md §11.1, landed 2026-08-18) supersedes that finding with a
+// NEW, disjoint `turn5FaintDismissElapsed` field that IS genuinely consumed
+// by rendering (`drawTurn5RockSlideWindow`'s freeze-aware cursor) - the
+// eligibility gate below is unchanged, but the two "presentation-inert"
+// cases are now real, positive dismiss-edge pins instead.
+describe("rank-3 turn-5 KO dismiss mirror retirement, superseded by the real per-session accept edge (§11.1)", () => {
   function stateAtTurn5Confirm(): { battleScene: BattleSceneState } {
     return {
       battleScene: {
@@ -1765,13 +1774,14 @@ describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
     expect(turn5RockSlideKoDismissEligible(7000)).toBe(true);
   });
 
-  it.each([6561, 6591])("the historical dismiss A edge at trace tick %i is presentation-inert and produces exactly the same battle state as idle", (pressTick) => {
+  it.each([6561, 6591])("the real per-session A edge at trace tick %i (docs/turn5-resolve-ab-pools-diagnosis.md §11.1) now registers turn5FaintDismissElapsed, changing ONLY that one field vs idle", (pressTick) => {
     let state: EngineState = { ...createInitialState(), battleScene: stateAtTurn5Confirm().battleScene };
     for (let i = 0; i < pressTick - 1 - 5959; i += 1) state = tick(state, new Set());
     expect(state.battleScene!.elapsed).toBe(pressTick - 1 - TICK0);
     const idle = tick(state, new Set());
     const pressed = tick(state, new Set(["A"]));
-    expect(pressed.battleScene).toEqual(idle.battleScene);
+    expect(pressed.battleScene!.turn5FaintDismissElapsed).toBe(pressTick - TICK0);
+    expect({ ...pressed.battleScene, turn5FaintDismissElapsed: null }).toEqual(idle.battleScene);
   });
 
   it("an early A edge is likewise presentation-inert", () => {
@@ -1779,6 +1789,38 @@ describe("rank-3 turn-5 KO dismiss mirror retirement", () => {
     expect(tick(state, new Set(["A"])).battleScene).toEqual(
       tick(state, new Set()).battleScene,
     );
+  });
+});
+
+// docs/turn5-resolve-ab-pools-diagnosis.md §11.1, live-pinned this session:
+// the fainted-message wait-cursor's freeze-aware display-basis input.
+// TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET's own doc comment records the
+// pinning session's own npm-run-compare evidence (§11.1's hand-derived -2
+// was off by one, corrected to -1 against a fresh 196/196 resolve-off-b run
+// plus an unchanged 195/196 resolve-off-c run).
+describe("turn5FaintDismissCursorTick (docs/turn5-resolve-ab-pools-diagnosis.md §11.1)", () => {
+  it("before any dismiss (dismissTick=null), passes t-1 straight through - the free-running span", () => {
+    expect(turn5FaintDismissCursorTick(6560, null)).toBe(6559);
+    expect(turn5FaintDismissCursorTick(6561, null)).toBe(6560);
+    expect(turn5FaintDismissCursorTick(6570, null)).toBe(6569);
+  });
+
+  it("TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET is 1 (live-pinned, not the diagnosis doc's own unverified -2)", () => {
+    expect(TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET).toBe(1);
+  });
+
+  it("once dismissed, clamps at dismissTick - 1 forever after, reproducing the frozen tail's own last-live-phase offset (2) via cursorState", () => {
+    const dismissTick = 6561; // the real RAM accept-edge tick (§11.1's own table)
+    const cursorStart = TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
+    expect(turn5FaintDismissCursorTick(6561, dismissTick)).toBe(6560);
+    expect(turn5FaintDismissCursorTick(6570, dismissTick)).toBe(6560);
+    expect(turn5FaintDismissCursorTick(6613, dismissTick)).toBe(6560);
+    expect(cursorState(turn5FaintDismissCursorTick(6561, dismissTick), cursorStart).yOffset).toBe(2);
+    expect(cursorState(turn5FaintDismissCursorTick(6613, dismissTick), cursorStart).yOffset).toBe(2);
+  });
+
+  it("a dismiss at exactly the current tick still clamps below t-1 (edge case: dismissTick === t)", () => {
+    expect(turn5FaintDismissCursorTick(6561, 6561)).toBe(6560);
   });
 });
 

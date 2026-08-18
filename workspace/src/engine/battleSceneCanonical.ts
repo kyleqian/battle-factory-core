@@ -814,6 +814,7 @@ export const playerHealthboxHpOverlayByHp = new Map<number, ReturnType<typeof co
 export const INITIAL_BATTLE_SCENE_STATE: BattleSceneState = {
   elapsed: 0,
   sendOutPressElapsed: null,
+  turn5FaintDismissElapsed: null,
   fightSubmenu: CLOSED_FIGHT_SUBMENU_STATE,
   latestCompletedCommandHandoff: null,
   opponentFaintPresentationOwner: null,
@@ -2578,6 +2579,24 @@ export const TURN5_FAINTED_CURSOR_START_DELAY = TURN5_FAINTED_TEXT_DELAY + TURN5
 export function turn5RockSlideKoDismissEligible(t: number): boolean {
   return t >= TURN5_ROCKSLIDE_PRESS_TICK + TURN5_FAINTED_CURSOR_START_DELAY;
 }
+
+/**
+ * Live-pinned this session (docs/turn5-resolve-ab-pools-diagnosis.md §11.1's
+ * own hand-derived `-2` was off by one - a fresh `npm run compare -- turn5-
+ * resolve-off-b` isolated a CONSTANT 24px mismatch across the entire frozen
+ * tail 6561-6613, matching §6a's own "1 phase step off" magnitude exactly).
+ * `turn5FaintDismissElapsed` lands at render tick 6561 (confirmed via a
+ * temporary debug print, matching the RAM accept-edge tick exactly); the
+ * real cursor freezes at `cursorState`'s own already-correct value for
+ * NATURAL tick 6560 (the highest `t-1` input the free-running formula
+ * produces before the freeze - render tick 6560 itself, one tick before the
+ * accept edge, is already independently confirmed exact via the unbroken
+ * match run 6418-6560). Clamping at `landingTick - 1` (not `- 2`) reproduces
+ * that value for every later tick - re-verified 196/196 exact against
+ * resolve-off-b's FULL window and unchanged 195/196 against resolve-off-c
+ * (see PROGRESS.md for the landing session's own numbers).
+ */
+export const TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET = 1;
 
 export function faintSinkRowsAndY2(t: number, startTick: number = GROVYLE_FAINT_SINK_START_TICK, steps: number = GROVYLE_FAINT_SINK_STEPS): { keptRows: number; y2: number } {
   const d = t - 1 - startTick;

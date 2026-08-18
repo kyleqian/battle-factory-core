@@ -157,6 +157,7 @@ import {
   TURN16_FIRE_PUNCH_MENU_REDRAW_DELAY,
   opponentFaintDismissEligible,
   turn15KoDismissEligible,
+  turn5RockSlideKoDismissEligible,
   turn17KoDismissEligible,
   turn17LossDismissEligible,
   turn17OutcomeDismissEligible,
@@ -1437,6 +1438,19 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       if (storedOwner !== opponentFaintOwner) {
         battleScene = { ...battleScene, opponentFaintPresentationOwner: storedOwner };
       }
+    }
+    // Turn 5's own fainted-message wait-cursor accepts a genuine per-session
+    // A edge, then freezes (docs/turn5-resolve-ab-pools-diagnosis.md §11.1)
+    // - mirrors sendOutPressElapsed's own "captured directly" idiom.
+    // Deliberately NOT threaded through opponentFaintPresentationOwner: that
+    // owner is a one-shot latch scoped to turn 13's own resolution/switch-in
+    // adapters (§11.1's own "why bare reuse breaks turn 13" analysis).
+    if (
+      battleScene.turn5FaintDismissElapsed === null
+      && newKeys.has("A")
+      && turn5RockSlideKoDismissEligible(SCENE_TICK0 + nextSceneElapsed)
+    ) {
+      battleScene = { ...battleScene, turn5FaintDismissElapsed: nextSceneElapsed };
     }
     const resolutionOwner = battleScene.resolutionOwner ?? null;
     const forcedPartySelect = resolutionOwner?.forcedPartySelect ?? null;

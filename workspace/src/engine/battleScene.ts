@@ -1352,8 +1352,8 @@ import { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKO
 export { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick };
 import { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars } from "./battleSceneCanonical.ts";
 export { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars };
-import { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
-export { TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
+import { TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET, TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible } from "./battleSceneCanonical.ts";
+export { TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET, TURN5_FAINTED_CURSOR_START_DELAY, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, TURN5_FAINTED_TEXT_TOTAL, faintSinkRowsAndY2, playerSummaryEvaOffset, turn5RockSlideKoDismissEligible };
 import { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL } from "./battleSceneCanonical.ts";
 export { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKSLIDE_KICKOFF_LINE1, TURN1_ROCKSLIDE_KICKOFF_LINE2, TURN2_ENDEAVOR_ATTACK_LINE1, TURN2_ENDEAVOR_ATTACK_LINE2, TURN4_DOUBLETEAM_KICKOFF_LINE1, TURN4_DOUBLETEAM_KICKOFF_LINE2, TURN5_ENDEAVOR_ATTACK_LINE1, TURN5_ENDEAVOR_ATTACK_LINE2, TURN8_BIND_LINE1, TURN8_BIND_LINE2, TURN8_BIND_TEXT_TOTAL, TURN8_MISS_LINE1, TURN8_MISS_LINE2, TURN8_MISS_TEXT_TOTAL, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, TURN13_ACCFELL_TEXT_TOTAL, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, TURN13_SANDATTACK_TEXT_TOTAL };
 import { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars } from "./battleSceneCanonical.ts";
@@ -2899,6 +2899,21 @@ export interface BattleSceneState {
    * tick regardless (it's a pure `t - TICK0` counter, not phase-relative).
    */
   sendOutPressElapsed: number | null;
+  /**
+   * `elapsed` value of the real, per-session A/B accept edge that dismisses
+   * turn 5's own "Foe GROVYLE fainted!" wait-cursor
+   * (docs/turn5-resolve-ab-pools-diagnosis.md §11.1), `null` before. Mirrors
+   * `sendOutPressElapsed`'s own "captured directly, same tick already
+   * reflects it" idiom — deliberately a separate, disjoint field, NOT
+   * threaded through `opponentFaintPresentationOwner` (that owner is a
+   * one-shot latch scoped to turn 13's own resolution/switch-in adapters;
+   * reusing its slot for turn 5 would starve turn 13's own eligibility
+   * check, see §11.1's own "why bare reuse breaks turn 13" analysis).
+   * Optional (like `resolutionOwner`/`terminalResolution`) so the many
+   * pre-existing raw-literal test fixtures that predate this field keep
+   * compiling; treated as `null` (never dismissed) wherever absent.
+   */
+  turn5FaintDismissElapsed?: number | null;
   /** The FIGHT (move-select) submenu (docs/battle-turn-notes.md §11) - `CLOSED_FIGHT_SUBMENU_STATE` until the settled action menu's own A-press opens it. core.ts owns applying input (open/nav/close) directly, mirroring `sendOutPressElapsed`'s own "created directly, same tick already reflects it" idiom; core.ts must call `advanceFightSubmenuDisplay` on this BEFORE applying each tick's own input (not after - the 1-tick display lag depends on that ordering, see that function's own doc). */
   fightSubmenu: FightSubmenuState;
   /**
@@ -2940,6 +2955,7 @@ export function advanceBattleScene(state: BattleSceneState): BattleSceneState {
     elapsed,
     ...(state.encounter === undefined ? {} : { encounter: state.encounter }),
     sendOutPressElapsed: state.sendOutPressElapsed,
+    turn5FaintDismissElapsed: state.turn5FaintDismissElapsed ?? null,
     fightSubmenu: state.fightSubmenu,
     latestCompletedCommandHandoff: state.latestCompletedCommandHandoff,
     opponentFaintPresentationOwner: state.opponentFaintPresentationOwner,
@@ -3209,6 +3225,23 @@ export function cursorState(t: number, startTick: number = CURSOR_START_TICK): {
   if (t < startTick) return { visible: false, yOffset: 0 };
   const phase = Math.floor((t - startTick) / 9) % CURSOR_Y_OFFSETS.length;
   return { visible: true, yOffset: CURSOR_Y_OFFSETS[phase]! };
+}
+
+/**
+ * `cursorState`'s own `t-1` display-basis input for turn 5's fainted-message
+ * wait-cursor, freeze-aware (docs/turn5-resolve-ab-pools-diagnosis.md §11.1,
+ * `TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET`'s own doc comment for the live-
+ * pinned offset derivation). `dismissTick` is the absolute trace tick the
+ * real per-session A edge landed at (`TICK0 + turn5FaintDismissElapsed`),
+ * `null` before that edge is ever seen - the free-running natural tick then
+ * passes straight through, matching every tick up to and including the last
+ * live phase transition.
+ */
+export function turn5FaintDismissCursorTick(t: number, dismissTick: number | null): number {
+  const naturalTick = t - 1;
+  return dismissTick === null
+    ? naturalTick
+    : Math.min(naturalTick, dismissTick - TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET);
 }
 
 // --- §4: party-status-summary ball-icon + diagonal-bar widget entrance -----
@@ -8467,6 +8500,7 @@ function drawFightSubmenuWindow(
   opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null = null,
   resolutionOwner: BattleSceneResolutionOwner | null = null,
   trainerPresentation?: FactoryTrainerPresentation,
+  turn5FaintDismissElapsed: number | null = null,
 ): void {
   const genericTurn2Content = turn2FightCommandPresentationFromLatest(
     latestCompletedCommandHandoff,
@@ -8577,6 +8611,7 @@ function drawFightSubmenuWindow(
           pressTick,
           latestCompletedCommandHandoff,
           trainerPresentation,
+          turn5FaintDismissElapsed,
         );
         return;
       }
@@ -10366,9 +10401,10 @@ function drawTurn5EndeavorText(
   pressTick: number,
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
   trainerPresentation?: FactoryTrainerPresentation,
+  turn5FaintDismissElapsed: number | null = null,
 ): void {
   if (t >= rockSlideTextStartTick(TURN5_ROCKSLIDE_PRESS_TICK, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)) {
-    drawTurn5RockSlideWindow(fb, t, latestCompletedCommandHandoff, trainerPresentation);
+    drawTurn5RockSlideWindow(fb, t, latestCompletedCommandHandoff, trainerPresentation, turn5FaintDismissElapsed);
     return;
   }
   const bounceTick = turn5KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff);
@@ -14955,6 +14991,7 @@ function drawTurn5RockSlideWindow(
   t: number,
   latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
   trainerPresentation?: FactoryTrainerPresentation,
+  turn5FaintDismissElapsed: number | null = null,
 ): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): +60 on the
@@ -14980,7 +15017,13 @@ function drawTurn5RockSlideWindow(
     }
     drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t, pressTick));
     const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
-    if (t >= cursorStart) drawCursor(fb, turn5FaintedCursorYOffset(t, cursorStart), TURN5_FAINTED_CURSOR_X);
+    if (t >= cursorStart) {
+      // §11.1: the real cursor accepts a per-session A edge then freezes
+      // (turn5FaintedCursorYOffset's fixed-table formula is retired here but
+      // left defined, see its own doc comment).
+      const dismissTick = turn5FaintDismissElapsed === null ? null : TICK0 + turn5FaintDismissElapsed;
+      drawCursor(fb, cursorState(turn5FaintDismissCursorTick(t, dismissTick), cursorStart).yOffset, TURN5_FAINTED_CURSOR_X);
+    }
     return;
   }
   // S7 slice M-5: the Sitrus heal message, then a blank hold, then the
@@ -17603,6 +17646,7 @@ export function renderBattleScene(fb: Uint8Array, state: BattleSceneState): void
       state.opponentFaintPresentationOwner,
       state.resolutionOwner ?? null,
       state.trainerPresentation,
+      state.turn5FaintDismissElapsed ?? null,
     );
     return;
   }
