@@ -1,3 +1,67 @@
+---
+## 1329 — [supervisor wind-down, 2026-08-18, amended after two bonus rounds] **18 worker steps, two lanes: #96 CLOSED (swap family 19/19 exact), #97 mechanism RESOLVED via an 8-probe instrument chain (turn5-action-off CLOSED 32/32; five root causes landed), #71 §1e ladder COMPLETE (119/119 in-scope sites) — all final gates green**
+
+- **Final gates (run independently AFTER the last merge, twice — at
+  `37b2818d` and again at the final tree `d7bc0fae`):** full npm
+  **1,067 files / 10,043 passed / 223 skipped**; `npm run build` green;
+  soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
+  Fold status: animation-main and rust-main both EMPTY at orient AND at
+  wind-down. DEFERRED.md EMPTY. Only permanent worktrees remain; no
+  unmerged branches; no stray probe processes.
+- **#96 CLOSED and deleted:** (a) quit-pair 61/67→67/67 ×2 — the banked
+  fix shape was wrong in detail; the real trigger was ball slot 0's
+  `hasRested` latch during quitReturn (narrow predicate + Tier-1 pin).
+  (b) enemy-picker 129/130→130/130 — OAM probe DISPROVED the banked
+  "header box" reading; it was the suppressed `Random()%5` ball-roll
+  frame; per-ball `cycledToEnemy` eligibility landed. Family 19/19 exact.
+- **#97 (turn5/6 bounce family) — mechanism RESOLVED, windows landed:**
+  `turn5-action-off` 1/32 → **32/32 CLOSED**; `turn6-reopen-off` 11/46 →
+  **22/46** (remainder attributed: kickoff phase-context + class-(iii));
+  `turn5-resolve-off-a` 7→25/196, `-b` 71→88/196, `confirm-off-a`
+  8→15/132; control 256/256 held throughout; zero decreases all session.
+  Root causes, each RAM/source-proven then landed at EXACT predicted
+  counts: 3-tick reopen-press sinIndex hold; per-call-site raw
+  sine-index offsets (+60/+109 — the first fit (+67/+116) inherited a +7
+  probe-basis excess: the RAM probe reads sSinIndex post-increment;
+  "table-peak rounding quirk" dissolved, hardware math is bit-identical);
+  displayed(T)=RAM(T-1) basis DIRECTLY confirmed; turn-4 handoff pinned
+  turn-3's stale PP (fixed; the 2026-08-02 doc's own risk flag);
+  three independent anchor clusters (-38/-145/-228) re-derived from
+  fresh RAM sweeps. Evidence docs: `turn5-bounce-recalibration-probe.md`
+  (§1-§9), `turn5-family-class3-diagnosis.md` (§1-§17),
+  `turn6-reopen-endstate-spec.md` (naive 7318+ extension REJECTED by a
+  sibling-trace guard: fitted offsets are context-bound),
+  `bounce-peak-rounding-fix-spec.md`.
+- **#71 §1e ladder COMPLETE (two post-wind-down bonus rounds):** design
+  scout re-derived the census (58→121 raw sites,
+  `docs/sendout-1e-retirement-design.md`, 9-rung plan, ZERO
+  boundary-ratchet widening); rungs 0-8 ALL landed — **119/119 in-scope
+  sites retired** (final grep census: 119 `OrZero` calls + exactly the 4
+  permanently-out-of-scope settle-hook literals), zero FINDINGs across
+  all 8 batches, differential 128/128 per rung, HARDEN got its first
+  Tier-1 pin before its site was touched, and a real site-count
+  arithmetic error in earlier ledger entries was caught and corrected by
+  the rung 5-6 worker (94/121 → 94/119 ground truth). Only Rung 9
+  (hand-fit swap-over) remains, blocked on the animation lane's rung-4
+  back dispatcher.
+- **Ops notes:** freshness-check false positive #5 at orient (kept
+  services; `3e29880b` proves schema currency) — PAPERCUTS bumped. NEW
+  papercut: side-worktree ROOT has no package.json, `npm run` silently
+  escapes to the main checkout (~15 min lost once). Six-deep stacked
+  side-worktree instrument chain worked cleanly; merged as two chain
+  folds; all cleaned innermost-first.
+- **Open (ordered for next session):** (a) #97 remainders, all
+  diagnosed+banked: §17 item 5 HP-overlay gate (12-caller-shared,
+  deliberately not rushed; fixes confirm-off-a/b frozen HP),
+  resolve-off-c trailing 47 frames (status-box+dither instrument named),
+  resolve-off-d residual, turn6 7318+ kickoff phase-context (needs a
+  phase-history model — do NOT re-extend fitted constants).
+  (b) #71 Rung 9 only (hand-fit swap-over), blocked on the animation
+  lane's rung-4 back dispatcher — §1e itself is DONE.
+  (c) #73/#55-adjacent items unchanged. No deferred questions; no
+  blockers.
+
+---
 ## 1328 — [main worker, 2026-08-18] **ISSUES #97-B §8d/§9e sine-index offset fix landed: turn5-action-off CLOSED 32/32, turn6-reopen-off 20→22/46, zero decreases**
 
 - **State:** one green commit (src + 2 test files) plus this docs commit.

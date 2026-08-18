@@ -241,7 +241,8 @@ driver.py`) and applied §17's ordered edit list, items 1-3:
   this session's remaining budget didn't have room for. Banked as the
   clear next step; the diagnosis doc's own §10a already names the fix
   shape (extend the gate to also cover turn 4/5's own presentation shape,
-  or loosen it for this call site specifically).
+  or loosen it for this call site specifically). **Landed in a later
+  session (2026-08-18) — see the dated addendum below.**
 
 **Per-trace result (zero decreases anywhere in the 9-trace verification
 family)**:
@@ -258,11 +259,8 @@ family)**:
 | `turn6-reopen-off` | 20/46 | 20/46 | unchanged — landed window provably unmoved |
 | `turn5-reset-off` | 256/256 | 256/256 | unchanged — control |
 
-**Remaining, still open**:
-- **Item 5** (HP-overlay gate) — needed to close `confirm-off-a`/`-b`'s
-  own remaining frozen-HP frames and possibly `resolve-off-d`'s small
-  residual too; not attempted (time/risk — a 12-caller shared function).
-- **`resolve-off-d`'s new 0.67% residual** (bbox 44,71-195,104, past the
+**Remaining, still open (as of this dated sub-entry)**:
+- **`resolve-off-d`'s 0.67% residual** (bbox 44,71-195,104, past the
   6991 menu-redraw tick) — not traced to a specific function this session,
   possibly related to the settled-Sitrus-phase ONIX sprite/HP-overlay draw
   (`turn5SitrusOnixHp`, a separate anchor from the dispatch-gate ticks this
@@ -273,6 +271,24 @@ family)**:
   unchanged from before) — still untraced.
 - `turn6KickoffBounceTick`/the 7318+ dispatch — unchanged, side-worker
   continuation, not checked this session.
+
+**Item 5 landed (2026-08-18, later bounded MAIN worker session)** — see
+`docs/turn5-family-class3-diagnosis.md` §19 for the full per-caller audit
+of all 12 call sites, the fix-shape decision, and the measured result.
+Summary: added a third OR arm,
+`turn4FightCommandPresentationFromLatest(latest) !== null`, to
+`drawActionMenuIdleContentFromLatest`'s HP-overlay gate — confirmed a no-op
+everywhere except `drawTurn5EndeavorText`'s own ENDEAVOR-hold fallback (the
+bug's own call site), where it now lets the live `onixHp` §10a already
+proved was computed correctly finally paint. `turn5-confirm-off-a` 15/132
+-> **60/132**; `turn5-confirm-off-b` and `turn5-resolve-off-d` held their
+prior 0-match counts with their own cited residuals unchanged and
+attributed to different, ungated code paths (`drawTurn5RockSlideWindow`'s
+attack/text phase and its own settled-Sitrus-chrome tail respectively) —
+neither reachable through the gate this fix touched. Zero decreases across
+the full guard family. `confirm-off-b`'s 689px residual and
+`resolve-off-d`'s 258px residual both remain open (see above), now
+attributed to specific out-of-scope code paths rather than to this gate.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
