@@ -1474,3 +1474,91 @@ census named in §14.4 above - if that also comes back empty at rows 0/10,
 the doc should say so explicitly and escalate to the HBlank/scanline-split
 hypothesis, which needs a new instrument this probe family cannot yet
 provide.
+
+## 16. Landed addendum (2026-08-18, post-wind-down bonus round, bounded MAIN worker, commit `e07e1813`): §15.3's fix landed, closing exactly the shake sub-window it predicted
+
+**Fix landed as specified, unconditional (no runtime branch).**
+`drawTurn5RockSlideAttack` (`src/engine/battleScene.ts:10898-10900`) no
+longer computes `shiftY` via `rockSlideBg3Y` - it now calls
+`drawStaticBgShiftedY(fb, 0, ...)` directly, the same flat pattern turns
+3/4/9/10/11/13 already use. `rockSlideBg3Y` itself is untouched (still
+used by turns 1/6/7's own genuinely-shaking ON-trace callers,
+`battleScene.ts:8032/11888/12165`); `pressTick` stayed in scope (still
+consumed by the `rockSlideMonBlinkInvisible`/`rockSlideMonShakeY2` calls
+a few lines below).
+
+**Result, `npm run compare -- turn5-resolve-off-a --summary`: 58/196 →
+60/196.** A before/after diff of the full mismatched-frame list (not
+just the matched count) confirms the change is exactly what §15.4
+predicted for the shake sub-window's own first two nonzero ticks and
+nothing else: frames **6259 and 6260** move from mismatch to match (old
+`rockSlideBg3Y(6259, pressTick)` = `rockSlideBg3Y(6260, pressTick)` =
+-7, both now render with the flat background); every other mismatched
+frame in the file, including the rest of the old shake window
+(6263/6264/6267/6268, also `-7` under the old formula) and the huge
+6262-6376 band below, is byte-for-byte unchanged from the pre-fix run.
+
+**Why the rest of the old shake window (6263+) didn't also close:**
+diagnostic instrumentation this session (row-0-only pixel diff, not a
+committed probe) found that at ticks 6263/6264 our own app already
+draws a falling ROCK_SLIDE rock sprite through screen row 0 - a
+genuinely different, pre-existing mismatch source unrelated to the BG3
+shift, first appearing at 6263 (13px) and 6264 (10px). This wasn't
+checked against real hardware's own OAM this session (§15.2's OAM
+census only sampled 6258/6259/6263/6264 and reported zero row-0/10
+overlaps at ALL four ticks in the REAL game - meaning this rock-sprite
+pixel content in our app's own row 0 at 6263/6264 is itself likely a
+separate, pre-existing app-vs-hardware discrepancy, not yet
+instrumented). Do not assume it shares a cause with this fix.
+
+**What's left in `resolve-off-a` (134/196, span 6262-6376) - a single
+new instrument should cover most of it:** row-0 diagnostics (not a
+committed probe, `git diff -- tools/` empty) show the mismatch region
+starts small (~8-100px at 6262-6265, consistent with the rock-sprite
+lead above), then grows continuously through a much larger band peaking
+~3.7% (1454px) around 6304-6354 with a slowly-drifting bbox
+(`x` column drifting from ~230 down to ~118 over hundreds of ticks) -
+shaped like a real sprite/field-position drift, not a static-background
+artifact (nothing here resembles the old BG3-shift signature: no sharp
+step, no full-row change). 6360-6376 is the already-diagnosed Class-B
+sink-transition tail (§5), separately tracked and NOT re-covered here.
+The next session should instrument the 6262-6354 band fresh (OAM/sprite
+RAM census at a handful of named ticks across that range, same method
+as §15's own probe generalized to a wider tick set) rather than assume
+it's a residue of the BG3 mechanism just closed.
+
+**Zero decreases, full guard family (fresh this session):**
+`turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
+46/46, `turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-a`
+128/132, `-b` 131/132, `turn5-resolve-off-b` 196/196, `-c` 195/196, `-d`
+194/196, `turn6-rockslide-a` 255/255, `turn6-rockslide-b` 105/105,
+`turn7-rockslide-a` 256/256, `turn13-switchin` 242/242,
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256.
+
+**Tier-1 pin** (`tests/battleScene.test.ts`, describe block citing this
+§15.3): row 0 (pure BG3 content at ticks 6258/6259/6260 - no rock sprite
+reaches row 0 yet at these three) is byte-identical across all three
+post-fix; pre-fix, row 0 differed at all 240 columns between 6258 and
+6259/6260. `npm test`: 10,088 passed (+2). `npm run build`: green.
+
+### 16.1 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 60/196 (was 58/196)
+npm run compare -- turn6-rockslide-a --summary     # 255/255
+npm run compare -- turn6-rockslide-b --summary     # 105/105
+npm run compare -- turn7-rockslide-a --summary     # 256/256
+npm run compare -- turn5-resolve-off-b --summary   # 196/196
+npm run compare -- turn5-resolve-off-c --summary   # 195/196 (pre-existing 6763 residual)
+npm run compare -- turn5-resolve-off-d --summary   # 194/196
+npm run compare -- turn5-reset-off --summary       # 256/256
+npm run compare -- turn5-action-off --summary      # 32/32
+npm run compare -- turn6-reopen-off --summary       # 46/46
+npm run compare -- tools/compare/fixtures/turn6-menu-off.json --summary  # 47/47
+npm run compare -- turn5-confirm-off-a --summary   # 128/132
+npm run compare -- turn5-confirm-off-b --summary   # 131/132
+npm run compare -- turn13-switchin --summary       # 242/242
+npm run compare -- turn4-doubleteam-off --summary  # 256/256
+npm run compare -- turn4-rockslide-off --summary   # 256/256
+```

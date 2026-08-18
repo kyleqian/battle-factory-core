@@ -574,7 +574,7 @@ unchased residuals. §2.5/§6.3 (the 6991-6994 transition spike,
 re-characterized as the app transitioning early) stays out of scope, next
 instrument named but not fix-ready.
 
-### J. `resolve-off-a`'s Class A rock-slide hit-flash profile — LANDED; Class C (fainted-cursor dismiss+freeze) LANDED 2026-08-18 per `docs/turn5-resolve-ab-pools-diagnosis.md` §11.1, CLOSING `resolve-off-b` 196/196; Class B (static-bg residual) still unresolved
+### J. `resolve-off-a`'s Class A rock-slide hit-flash profile — LANDED; Class C (fainted-cursor dismiss+freeze) LANDED 2026-08-18 per `docs/turn5-resolve-ab-pools-diagnosis.md` §11.1, CLOSING `resolve-off-b` 196/196; Class B (BG3-shake mismatch) LANDED 2026-08-18 per §15.3 — the "static-bg residual" was a mis-bootstrapped register read (§15.1), not an occlusion mystery; a separate, unrelated 6262-6376 residual remains (see below)
 
 Landed §4's fix: `drawTurn5RockSlideAttack` was the one sibling turn
 still calling the shared hit-reaction helpers (`rockSlideMonBlinkInvisible`/
@@ -649,13 +649,30 @@ the two now-obsolete "presentation-inert" KO-dismiss pins in
 instead (the mirror they documented as inert is genuinely consumed by
 rendering now).
 
-**Remaining, still open:** the static-background artifact at render
-ticks [6259,6268] (§11.2's own next instrument above); Class B's own
-17-frame tail, still unverified in isolation, blocked on the same
-background artifact dominating that span; `resolve-off-a`'s own 6398
-1-tick residual (ISSUES #97-C, unrelated, pre-existing).
-`resolve-off-c`'s 6763 residual and `resolve-off-d`'s 6970-6988/6989-7005
-residuals (sub-entries I/K) remain unchanged, untouched by this entry.
+**Class B landed 2026-08-18 (post-wind-down bonus round, commit
+`e07e1813`), per `docs/turn5-resolve-ab-pools-diagnosis.md` §15.3.** A
+side-lane instrument corrected an inherited bootstrap bug in every
+§13/§14 BG-register probe (they replayed turn 5 from the wrong,
+scene-ON save state): re-read with the correct scene-OFF bootstrap,
+`REG_BG3VOFS` never leaves 0 anywhere in the 6100-6376 window — real
+hardware never applies the ROCK_SLIDE BG3 shake here at all, so there
+was never an occluding layer to find. `drawTurn5RockSlideAttack` was
+the one sibling turn still calling `rockSlideBg3Y` unconditionally;
+converted to the flat `drawStaticBgShiftedY(fb, 0, ...)` pattern turns
+3/4/9/10/11/13 already use. `turn5-resolve-off-a` 58/196 → **60/196**
+(exactly frames 6259/6260, the shake window's own first two nonzero
+ticks; zero other frames changed).
+
+**Remaining, still open in `resolve-off-a`:** a separate, unrelated
+134/196 residual spanning 6262-6376, NOT investigated by this fix and
+NOT assumed to share its cause: a falling-rock-sprite mismatch
+starting at tick 6263 (small, ~10-13px) that grows into a much larger
+band peaking ~3.7% around 6304-6354 (uninstrumented — candidate causes
+not yet ruled out), plus the already-documented Class-B sink-transition
+tail at 6360-6376. `resolve-off-a`'s own 6398 1-tick residual (ISSUES
+#97-C, unrelated, pre-existing) is untouched. `resolve-off-c`'s 6763
+residual and `resolve-off-d`'s 6970-6988/6989-7005 residuals
+(sub-entries I/K) remain unchanged, untouched by this entry.
 
 ### K. `turn5-confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED (both near-full close, per `docs/turn5-confirm-pools-diagnosis.md` §1/§2); `resolve-off-d`'s Onix Sitrus HP display-climb formula also LANDED (per `docs/turn5-confirmb-resolved-residuals.md` §8) — 2026-08-18, bounded MAIN worker
 

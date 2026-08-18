@@ -47,18 +47,46 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   through a shared path → reverted, re-instrumented, relanded; +1-off
   hand-derived freeze offset; census Class-B misattribution; ring/star
   hypothesis falsified by full OAM scan).
-- **Open (ordered for next session):** (a) `resolve-off-a`'s
-  static-background artifact (span 6248-6365, ~136 frames — the only
-  big pool left): shared scroll code PROVEN correct at turns 6/7;
-  BG2CNT-priority lead DISPROVED by the VRAM census (BG0/BG2
-  transparent, BG1 geometrically excluded, HBlank off); next named
-  instrument = OAM/sprite census over the static rows
-  (`docs/turn5-resolve-ab-pools-diagnosis.md`, final section). Do NOT
-  land the flat-shiftY candidate without it. (b) Named single-frame
-  residuals: `-c` 6763 (6px AA-class), `-d` 6850 + 6996 (cursor-
-  adjacent), confirm-off 4-frame bounce + 1-frame edge. (c) #71 Rung 9
-  still blocked on the animation lane's rung-4 back dispatcher.
-  (d) #73/#55 unchanged. No deferred questions; no blockers.
+- **Open (ordered for next session):** (a) `resolve-off-a`'s remaining
+  static-background/rock-sprite residual (span 6262-6376, ~134 frames —
+  see the post-wind-down bonus round below for what's now closed vs.
+  what's left). (b) Named single-frame residuals: `-c` 6763 (6px
+  AA-class), `-d` 6850 + 6996 (cursor-adjacent), confirm-off 4-frame
+  bounce + 1-frame edge. (c) #71 Rung 9 still blocked on the animation
+  lane's rung-4 back dispatcher. (d) #73/#55 unchanged. No deferred
+  questions; no blockers.
+- **Post-wind-down bonus round [main worker, 2026-08-18 session 3,
+  commit `e07e1813`]:** landed §15.3's fix
+  (`docs/turn5-resolve-ab-pools-diagnosis.md`, corrected-bootstrap RAM
+  proof that `REG_BG3VOFS` never leaves 0 anywhere in turn 5's
+  6100-6376 window under Battle Scene Off) — `drawTurn5RockSlideAttack`
+  no longer calls `rockSlideBg3Y`, hardcoded to the sibling turns'
+  flat `drawStaticBgShiftedY(fb, 0, ...)` pattern instead.
+  `turn5-resolve-off-a` **58/196 → 60/196** (exactly frames 6259/6260
+  newly match — the shake sub-window's own first two nonzero ticks —
+  verified via a before/after diff of the full mismatched-frame list,
+  zero other frames changed). Every guard trace unchanged:
+  `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
+  `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+  `turn5-confirm-off-a` 128/132, `-b` 131/132, `turn5-resolve-off-b`
+  196/196, `-c` 195/196, `-d` 194/196, `turn6-rockslide-a` 255/255,
+  `turn6-rockslide-b` 105/105, `turn7-rockslide-a` 256/256,
+  `turn13-switchin` 242/242, `turn4-doubleteam-off`/
+  `turn4-rockslide-off` 256/256. New Tier-1 pin
+  (`tests/battleScene.test.ts`, §15.3): row 0 byte-identical across
+  ticks 6258/6259/6260 post-fix (pre-fix it differed at all 240
+  columns between 6258 and 6259/6260). `npm test` **10,088 passed**
+  (+2); `npm run build` green. What's left in `resolve-off-a`
+  (134/196, span 6262-6376) is NOT this fix's target and was NOT
+  touched: a separate falling-rock-sprite residual starting at 6263
+  (our app's own rock timing puts a rock at row 0 there; not
+  cross-checked against real OAM this session) that grows into a much
+  larger, already-known mismatch band through 6376 (peaking ~3.7% at
+  6304-6354, a probable menu-idle-bounce or field-position drift
+  unrelated to BG3, plus the already-documented Class-B
+  sink-transition tail at 6360-6376). Next session should instrument
+  that band fresh rather than assume it shares a cause with the BG3
+  fix just landed.
 
 ---
 ## 1341 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-d`'s three §9-named fix shapes (star suppression + text-clear/menu-redraw retiming) LANDED — 159/196→194/196, exactly matching §9.5's own prediction**
