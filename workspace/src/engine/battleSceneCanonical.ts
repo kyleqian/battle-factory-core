@@ -225,6 +225,31 @@ export const TURN5_OFF_SITRUS_MENU_REDRAW_TICK = 6991;
 export const TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK = 6984;
 
 /**
+ * `docs/turn5-confirmb-resolved-residuals.md` §8 (2026-08-18, ISSUES #97
+ * remainder): the DISPLAYED bar is not a mirror of the RAM hard step above -
+ * fresh oracle-vs-oracle pixel-diffing this session
+ * (`npm run compare -- turn5-resolve-off-d --capture-range`, a per-tick
+ * diff of the HP-digit crop `[172,92]-[216,101]`) shows the digit is
+ * UNCHANGED through render tick 6952, then changes on EVERY single tick
+ * 6953-6982 inclusive (30 consecutive nonzero diffs, no skips, no repeats),
+ * then flat again 6982-6984+ (bbox moves off the digit region entirely by
+ * 6989, confirming the climb is done well before this file's own JUMP_TICK
+ * RAM anchor). Combined with 3 independently oracle-read HP digits (6953->2,
+ * 6960->9, 6980->29, all exactly `t-6951`), this pins the SAME live-climb
+ * shape `endeavorHp`/GROVYLE's own drain already use (1 HP/tick, sentinel
+ * tick shows the pre-climb value, first visible change one tick later) -
+ * `1 + (t - 6952)`, clamped to `[TURN5_SITRUS_HEAL_HP_START,
+ * TURN5_SITRUS_HEAL_HP_END]`, reaches the cap at exactly t=6982 (`1+30=31`).
+ * A NEW scoped anchor, not derived from `TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK`
+ * or `ONIX_SITRUS_PROC_TRIGGER_RAM_TICK`(6872)/`TURN5_OFF_SITRUS_HEAL_TEXT_
+ * START_TICK`(6850) by any clean relative offset found this session (80/102
+ * ticks respectively, neither a round or previously-seen delta) - minted
+ * directly from the pixel-confirmed absolute tick, same as the jump tick
+ * above.
+ */
+export const TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK = 6952;
+
+/**
  * ISSUES #97-B (docs/turn5-family-class3-diagnosis.md §14/§15/§17 item 2):
  * RAM-confirmed exact this session - the real oracle's "Foe GROVYLE
  * fainted!" message starts at tick 6378, not the old 6523

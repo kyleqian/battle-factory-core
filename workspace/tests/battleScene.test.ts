@@ -71,6 +71,7 @@ import {
   TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY,
   TURN5_OFF_ROCKSLIDE_TEXT_DELAY,
   TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE,
+  TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK,
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
   TURN5_OPPONENT_ICON_STATES,
   TURN5_ROCKSLIDE_PRESS_TICK,
@@ -2274,11 +2275,21 @@ describe("S7 slice M-5: turn5SitrusOnixHp - the heal's own 1->31 HP-bar climb, P
   });
 });
 
-describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residuals.md §2.2, 2026-08-18): turn5OffSitrusOnixHp - the OFF-profile-only sibling of turn5SitrusOnixHp, a hard single-tick STEP at the RAM-confirmed jump tick (not sitrusDisplayedHpAtAge's live ON-profile climb, RAM-reconfirmed fresh this session against turn5-resolve-off-d.json, ticks 6975-6995: gBattleMons[0].hp holds flat at 1 through 6983, reads 31 from 6984 on)", () => {
-  it("holds at the pre-heal hp (1) through the tick before the jump", () => {
-    expect(turn5OffSitrusOnixHp(TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK - 1)).toBe(1);
+describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residuals.md §8, 2026-08-18): turn5OffSitrusOnixHp - the OFF-profile-only sibling of turn5SitrusOnixHp. The underlying RAM stat is a hard single-tick STEP (TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK=6984, gBattleMons[0].hp holds flat at 1 through 6983, reads 31 from 6984 on) but the DISPLAYED bar is a live 1-HP/tick climb - fresh oracle-vs-oracle pixel diffing this session found 30 consecutive per-tick changes 6953-6982 (zero skips), matching all 3 independently oracle-read HP digits (6953->2, 6960->9, 6980->29) exactly", () => {
+  it("holds at the pre-heal hp (1) through the sentinel tick (climb-start anchor 6952, no visible change yet)", () => {
+    expect(turn5OffSitrusOnixHp(TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK - 1)).toBe(1);
+    expect(turn5OffSitrusOnixHp(TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK)).toBe(1);
   });
-  it("steps straight to the post-heal hp (31) at the jump tick, no intermediate ramp", () => {
+  it("climbs exactly 1 hp/tick from render tick 6953 (hp=2) - matches all 3 oracle-read anchors exactly", () => {
+    expect(turn5OffSitrusOnixHp(6953)).toBe(2);
+    expect(turn5OffSitrusOnixHp(6960)).toBe(9);
+    expect(turn5OffSitrusOnixHp(6980)).toBe(29);
+  });
+  it("reaches the cap (31) at exactly t=6982 (1+30, pixel-confirmed - the last of 30 consecutive per-tick oracle diffs), well before the RAM jump tick (6984)", () => {
+    expect(turn5OffSitrusOnixHp(6981)).toBe(30);
+    expect(turn5OffSitrusOnixHp(6982)).toBe(31);
+  });
+  it("stays clamped at 31 past the climb, through and past the RAM jump tick", () => {
     expect(turn5OffSitrusOnixHp(TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK)).toBe(31);
     expect(turn5OffSitrusOnixHp(6988)).toBe(31);
     expect(turn5OffSitrusOnixHp(7005)).toBe(31);
