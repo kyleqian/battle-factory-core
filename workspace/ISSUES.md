@@ -331,6 +331,106 @@ predicted number, 20/46.**
   mismatches, large multi-region bboxes unrelated to bounce/healthbox
   timing, not investigated by this doc's line of work at all.
 
+**2026-08-18 rung 3 (bounded MAIN worker, per `docs/turn5-bounce-
+recalibration-probe.md` §4 item 1/§9 exactly): window A's composed
+correction implemented, PROVEN mechanism-exact against §9d's own predicted
+model, then REVERTED per this step's own contingency - a third, previously
+undetected, pre-existing, out-of-scope defect (a PP-counter digit mismatch)
+caps the achievable oracle pixel count far below the 25-26/32 acceptance
+bar despite the fix itself being correct and zero-regression.**
+
+- **§9f's PASS/FAIL check (RAM-receipt-only, no oracle call) ran first and
+  PASSED**: `+116` (freeze-composed) exact-matches RAM ground truth for all
+  31/31 ticks 5927-5957, reconfirming §9's own finding before any edit.
+- **Implementation** (`battleScene.ts`): extended `drawActionMenuIdleWindow`'s
+  single-tick `t === turn5ReopenPressTick` special case to the RAM-proven
+  3-tick freeze (`t - 1` in `[turn5ReopenPressTick, turn5ReopenPressTick+2]`,
+  evaluated ONCE at the press tick per §4 item 1); added the same `+116`
+  `indexOffset`/`t - 1` display-basis composition `drawFightSubmenuWindow`'s
+  own `idleWaitBounceTick` line uses (§9a: literal same formula, zero
+  discontinuity at `revealTick`) - both gated strictly by the SAME
+  `turn5Active` boolean that already scopes this exact formula chain (traced
+  live in §9a: nothing dispatches through either line before tick 5927,
+  confirming this gate never leaks into turns 2-4's own content). Threaded
+  a defaulted `bounceIndexOffset = 0` through `drawActionMenuIdleContentFromLatest`
+  and `drawMenuIdleBounceOverlay` (mirrors rung 2's `menuIdleBounce` idiom) -
+  every other one of their ~18 combined pre-existing callers unaffected
+  (defaulted param). `npm run typecheck` clean.
+- **Paper derivation before any oracle call (this step's own hard order,
+  step 2)**: a from-scratch Python model (real `GBA_SINE_TABLE_256`, the
+  committed `turn5-6-reopen-bounce-probe.json` RAM receipt's own per-tick
+  `onixY2`/`healthboxMainY2` ground truth, `displayed(T) = RAM(T-1)`)
+  reproduced §9d's exact predicted mismatch set for displayed frames
+  5926-5958 - `{5928, 5929, 5930, 5931, 5940, 5949}` - with frame 5927
+  resolving to a MATCH (the doc's own non-source-confirmed best-case
+  extrapolation, `bounceTick(5926)=2086`), zero deviation, before touching
+  `src/`.
+- **Oracle result matched the mechanism prediction EXACTLY, isolated by
+  bbox**: `turn5-action-off` mismatches at exactly `{5928, 5929, 5930,
+  5931, 5940, 5949}` showed the SAME large, multi-region diffs (1591-2360px,
+  `bbox` spanning the onix/healthbox region) §9d's own §8d-class table-peak
+  explanation predicts - a perfect, zero-deviation match to the paper
+  derivation on the bounce/healthbox dimension. But EVERY one of the other
+  24 ticks in `[5932,5957]` (predicted to newly MATCH) instead showed a
+  small, isolated, constant **35px diff at `bbox=208,124-213,133`** - a PP
+  move-count digit glyph (crop-confirmed: app renders "8" where the oracle
+  renders "7", e.g. "8/10" vs "7/10" for ROCK_SLIDE's remaining PP),
+  nowhere near either bounce field and never mentioned anywhere in this
+  doc's 9 sections of RAM-ground-truth analysis (the RAM receipt this whole
+  line of work is built on has no PP field at all - undetectable from it by
+  construction). **Confirmed pre-existing, not a regression**: reverting to
+  HEAD (`git stash`) and re-running the same trace shows baseline's own
+  (larger, `1/32`) mismatch bboxes at those exact ticks already span
+  `(44,49)-(229,133)`/`(44,49)-(213,133)` - already spatially containing
+  `(208,124)-(213,133)` - so the PP defect was already there, merely masked
+  inside the bigger pre-fix diff region; this rung's own fix, by correctly
+  shrinking the bounce/healthbox mismatch down to its true 6-tick §8d-class
+  residual, is what exposed it as its own isolated bbox for the first time.
+  Real achieved count: **2/32** (`{5926, 5927}` only) - far short of the
+  25-26/32 bar, entirely because of this one confound (verified: zero other
+  pixels differ on any of the 24 "should-match" frames).
+- **Zero regressions anywhere** (checked before reverting): `turn6-reopen-off`
+  exactly 20/46 (unchanged), `turn5-reset-off` 256/256 (control),
+  `turn5-confirm-off-a` 8/132, `turn5-confirm-off-b` 0/132,
+  `turn5-resolve-off-{a,b,c,d}` 7/196, 71/196, 149/196, 0/196 - every family
+  trace byte-for-byte identical to rung 2's own baseline.
+- **Per this step's own explicit contingency** ("any deviation from the
+  predicted set at step 5 -> revert to green, bank the per-tick divergence
+  table, stop honestly") - the real per-tick mismatch SET (30 ticks: the 6
+  predicted plus 24 PP-confounded) deviates from the required "{5928, 5929,
+  5930, 5931, 5940, 5949} plus optionally 5927" bar, so the fix was
+  **reverted** (`git checkout -- src/engine/battleScene.ts
+  tests/battleScene.test.ts`) rather than landed non-conforming. Re-ran
+  `turn5-action-off --summary` post-revert to confirm the tree is back to
+  the exact `1/32` baseline. **Also found and reverted in the same pass**: a
+  legitimate re-pin was needed in `tests/battleScene.test.ts`'s "Onix bounce
+  sprite preserves the existing continuation phase through 5926-5928"
+  describe block (the fix moves that synthetic pixel's own plateau boundary
+  from between 5926/5927 to 5930/5931, matching the oracle's own onix
+  mismatch boundary in §2a's table) - banked here, not committed, since it
+  only makes sense composed with the reverted fix.
+- **Remaining open items, renumbered, (i) now precisely bounded rather than
+  open-ended**: (i) window A's own composed correction (freeze + `+116` +
+  display basis, this rung's own diff, fully specified and proven
+  mechanism-exact above) is ready to reapply verbatim once (v) below is
+  independently resolved - do not re-derive it, re-paper-derive first
+  against a fresh `turn5-6-reopen-bounce-probe.json` receipt only if the
+  oracle has restarted since 2026-08-17; (ii) §8d's sine-table-peak
+  rounding artifact (unchanged, still not this correction's job); (iii)
+  `turn6KickoffBounceTick`/7318+ (unchanged, unexplored); (iv) the family's
+  class-(iii) text/banner mechanism (§8g, `turn5-confirm-off-*`/
+  `turn5-resolve-off-*`'s own remaining mismatches - **this rung's PP-digit
+  finding is very likely the SAME mechanism**, worth checking first before
+  a fresh investigation); (v) **NEW, blocking**: the PP move-count digit
+  mismatch itself (`bbox~208,124-213,133`, "8" vs "7", ROCK_SLIDE's PP on
+  ONIX's turn-5 reopened FIGHT submenu) - untraced (no source read, no RAM
+  probe - this rung's entire budget went to confirming it's real,
+  pre-existing, and isolated, not to root-causing it), but now the
+  precondition for `turn5-action-off` ever reaching its own 25-26/32 bar;
+  whoever picks this up should start from `sm.activeMonMoveset`/PP-tracking
+  around `drawFightSubmenuChromeFromLatest`, not from anything in this
+  doc's own bounce/healthbox derivation chain.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for

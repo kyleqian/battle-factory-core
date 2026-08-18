@@ -1,3 +1,45 @@
+## 1321 — [main worker, 2026-08-17] **ISSUES #97-B rung 1: turn-6 reopen-press 3-tick freeze landed; turn-5's own sibling tried both named variants, neither flips its dense window, reverted to green**
+
+- **State:** `src/engine/battleScene.ts` + `tests/fightSubmenu.test.ts`
+  edited (new commit pending). `npm test` **1,066 files / 10,034 passed
+  (+1) / 223 skipped**, `npm run build` green. Full 9-trace family sweep
+  (`turn5-action-off`, `turn6-reopen-off`, `turn5-reset-off`,
+  `turn5-confirm-off-{a,b}`, `turn5-resolve-off-{a,b,c,d}`) re-run
+  before/after: **zero regressions, zero count changes anywhere** (see
+  `ISSUES.md` #97-B for the full per-trace table).
+- **Did:** followed `docs/turn5-bounce-recalibration-probe.md`'s named fix
+  shapes (§4 item 1, §6f). Turn 6's own reopen-press special case
+  (`drawTurn6FightSubmenuWindow`'s `t < revealTick` branch, previously NO
+  hold at all) now freezes its fed bounceTick for 3 ticks via a new
+  exported helper `turn6ReopenBounceTick`, red-verified then landed
+  green — matches §1's RAM-proven 3-tick `sinIndex` hold, and (per §6c's
+  own prediction) is a provable no-op on `turn6-reopen-off.json`
+  specifically (11/46 unchanged), landed anyway for RAM correctness and
+  because it may close other family traces. Turn 5's own reopen-press
+  special case (`drawActionMenuIdleWindow:8307-8310`) was tried both ways
+  the doc named — frozen-at-press-tick and advancing-unshifted — and BOTH
+  produced byte-identical pixels to the unfixed baseline across ticks
+  5927-5931 (confirmed via `git stash` A/B). Root-caused why: direct
+  `menuIdleBounce` enumeration shows no bounceTick reachable by either
+  variant (~2069-2097) ever yields `healthboxY2=1` — the real defect
+  needs roughly **+8 more ticks** than either variant can feed it, i.e.
+  it's a field-specific lag (same *class* as the already-known §6c/§6d
+  ~11-tick healthbox lag for window B), not a hold-duration bug at all.
+  Per the step's own contingency, reverted the window-A edit to green
+  rather than land a non-conforming change, and banked this finding.
+- **Next:** window A needs its own lag-magnitude tracing pass (mirror of
+  §6c/§6d's method) before any further fix attempt — do not re-try a
+  "wider hold" variant without new evidence, that door is now closed.
+  The SIDE-lane's parallel §6c/§6d healthbox-lag tracing (window B) is
+  the more promising unblock; once landed, re-check whether the same
+  mechanism also explains window A's own gap.
+- **Notes:** no PAPERCUT. `git checkout -- battleScene.ts` mid-session (to
+  strip a temporary red-test negative-control edit) accidentally reverted
+  the whole uncommitted window-B fix too, not just the temp probe — cost
+  ~2 min to redo from the diff already reviewed; worth remembering
+  `checkout --` on a file with a real pending fix nukes everything, not
+  just the last edit.
+
 ## 1320 — [main worker, 2026-08-17] **ISSUES #71 remainder: §1e patch-site retirement + hand-fit retirement design doc committed (docs-only, no behavior change)**
 
 - **State:** `docs/sendout-1e-retirement-design.md` added (new commit
