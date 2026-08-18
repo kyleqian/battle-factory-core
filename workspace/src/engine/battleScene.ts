@@ -43602,7 +43602,7 @@ export function renderSceneOnMovePresentation(
     const houndour = playerToOpponent ? houndourBackSprite : houndourFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // `fadetobg BG_DARK` / `restorebg` swap the field AND both battler OBJ
     // palettes to the dark bank from display 103 (RAM 28) through the
@@ -43773,7 +43773,7 @@ export function renderSceneOnMovePresentation(
         };
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // The shake's display age is the engine age itself: the shared ShakeMon2
     // sequence's tick 0 (the +1 creation write) lands on display age 22, so
@@ -43880,7 +43880,7 @@ export function renderSceneOnMovePresentation(
     const attackerSprite = playerToOpponent ? charmeleonBackSprite : charmeleonFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // The target rests at its front-idle x2 (1 for the opponent-front ONIX)
     // through display age 10; the shared ShakeMon2 sequence takes over from
@@ -44159,7 +44159,7 @@ export function renderSceneOnMovePresentation(
     const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // The attacker's own sprite x2/y2. The slide dummies (RAM ages 25-61,
     // sprite-driven) take the `age - 1` displayed state; the elliptical
@@ -44299,7 +44299,7 @@ export function renderSceneOnMovePresentation(
     const ledian = playerToOpponent ? ledianBackSprite : ledianFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // Comet Punch's own complete bilateral maps pin the ordinary fist and
     // ShakeMon at RAM+1. The freshly allocated affine hitsplat's matrix is
@@ -44420,7 +44420,7 @@ export function renderSceneOnMovePresentation(
     const poliwhirl = playerToOpponent ? poliwhirlBackSprite : poliwhirlFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // Double Slap's own complete natural sequence pins basic hitsplat OAM,
     // its affine matrix, and ShakeMon at RAM+1. Later controller invocations
@@ -44516,7 +44516,7 @@ export function renderSceneOnMovePresentation(
     const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // Triple Kick's own bilateral maps select RAM+1 for both the plain
     // wide-foot/hitsplat OAM and AnimTask_ShakeMon. Each real controller
@@ -44626,7 +44626,7 @@ export function renderSceneOnMovePresentation(
     const nidorina = playerToOpponent ? nidorinaBackSprite : nidorinaFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // Double Kick's own dense maps confirm the two already-source-proven
     // component latches from COUNTER: both plain fist/child OAM and
@@ -44738,7 +44738,7 @@ export function renderSceneOnMovePresentation(
     const tauros = playerToOpponent ? taurosBackSprite : taurosFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const targetX2 = targetIdle.x2 + displayedTargetOffset.x2;
     const black = { r: 0, g: 0, b: 0 };
@@ -44864,7 +44864,7 @@ export function renderSceneOnMovePresentation(
     const hitmontop = playerToOpponent ? hitmontopBackSprite : hitmontopFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const white = { r: 255, g: 255, b: 255 };
     // The BG-white `simple_palette_blend` (delay=0) writes the F_PAL_BG
