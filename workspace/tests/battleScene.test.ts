@@ -1658,20 +1658,18 @@ describe("ISSUES #39 rank-6 slice 4: turn 4's own OFF-timed DOUBLE_TEAM/ROCK_SLI
 // legacy turn-5 presentation consumes that immutable epoch through its
 // retained continuation lag; the reopen itself never republishes it.
 describe("completed turn-4 receipt: turn 5 reopen consumes the retained continuation epoch", () => {
-  // ISSUES #97-B rung 3 (docs/turn5-bounce-recalibration-probe.md §4 item 1/
-  // §9): the composed fix (3-tick freeze + `+116` raw-sine-index constant +
-  // `t-1` display basis) moves this synthetic pixel's own plateau boundary
-  // from between 5926/5927 to between 5930/5931 - re-pinned to the new,
-  // oracle-matching value (matches the live oracle's own onix mismatch
-  // boundary, live-verified via `npm run compare -- turn5-action-off`: the
-  // fix's own mismatch set is exactly {5928,5929,5930,5931,5940,5949}).
-  it("Onix bounce sprite preserves the existing continuation phase through 5926-5930, stepping at 5931, at (58,49)", () => {
+  // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): the `+116`
+  // raw-sine-index offset was itself off by one `sDelta` step (a
+  // post-increment RAM probe artifact, not a hardware rounding rule) and is
+  // now `+109`. Tick 5931 at (58,49) is inside `turn5-action-off`'s
+  // newly-100%-matching span (32/32) - re-pinned to the oracle-correct value.
+  it("Onix bounce sprite preserves the existing continuation phase through 5926-5931, at (58,49)", () => {
     expect(pixelAtTurn5Reopen(5926, 58, 49)).toEqual([247, 247, 255]);
     expect(pixelAtTurn5Reopen(5927, 58, 49)).toEqual([247, 247, 255]);
     expect(pixelAtTurn5Reopen(5928, 58, 49)).toEqual([247, 247, 255]);
     expect(pixelAtTurn5Reopen(5929, 58, 49)).toEqual([247, 247, 255]);
     expect(pixelAtTurn5Reopen(5930, 58, 49)).toEqual([247, 247, 255]);
-    expect(pixelAtTurn5Reopen(5931, 58, 49)).toEqual([189, 181, 181]);
+    expect(pixelAtTurn5Reopen(5931, 58, 49)).toEqual([247, 247, 255]);
   });
 });
 

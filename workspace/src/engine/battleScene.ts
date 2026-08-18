@@ -8308,16 +8308,17 @@ function drawActionMenuIdleWindow(
     latestCompletedCommandHandoff,
     turn1CommandOpenElapsed,
   );
-  // ISSUES #97-B rung 3 (docs/turn5-bounce-recalibration-probe.md §4 item 1/
-  // §9): the reopen-press special case now covers the RAM-proven 3-tick
-  // freeze (turn5ReopenBounceTick), composed with window A's own `+116`
-  // raw-sine-index constant (§9b) and the `displayed(T)=RAM(T-1)` display
-  // basis (§9c, `t - 1` fed to the tick formula, independent of
-  // menuIdleBounce's own orthogonal internal ramTick=t-1 shift) - strictly
-  // scoped to when a reopen-press tick is actually live (`turn5ReopenPressTick
-  // !== undefined`); the untraced pre-press span (~5920-5926, §9a) keeps the
-  // original unshifted, unoffset submenu formula.
-  const bounceIndexOffset = turn5Active && turn5ReopenPressTick !== undefined ? 116 : 0;
+  // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): the reopen-press
+  // special case covers the RAM-proven 3-tick freeze (turn5ReopenBounceTick),
+  // composed with window A's own `+109` raw-sine-index constant (the true
+  // offset - the original `+116` fit was itself off by one sDelta step, 7, a
+  // post-increment RAM probe artifact, not a real hardware quirk) and the
+  // `displayed(T)=RAM(T-1)` display basis (`t - 1` fed to the tick formula,
+  // independent of menuIdleBounce's own orthogonal internal ramTick=t-1
+  // shift) - strictly scoped to when a reopen-press tick is actually live
+  // (`turn5ReopenPressTick !== undefined`); the untraced pre-press span
+  // (~5920-5926) keeps the original unshifted, unoffset submenu formula.
+  const bounceIndexOffset = turn5Active && turn5ReopenPressTick !== undefined ? 109 : 0;
   const bounceTick = turn5Active
     ? turn5ReopenPressTick !== undefined
       ? turn5ReopenBounceTick(t - 1, turn5ReopenPressTick, latestCompletedCommandHandoff)
@@ -8679,14 +8680,14 @@ function drawFightSubmenuWindow(
   // own doc), checked ahead of the plain-`t` fallback since it's otherwise
   // indistinguishable from turn 1's first open until receipt lifecycle state
   // is considered.
-  // ISSUES #97-B rung 3 (docs/turn5-bounce-recalibration-probe.md §9a/§9b/
-  // §9c): this is the SAME `turn5SubmenuBounceTickFromLatest` formula
-  // `drawActionMenuIdleWindow`'s own DMA-wait branch uses, called from this
-  // second, different line, with zero discontinuity at revealTick - so it
-  // shares window A's own `+116` raw-sine-index constant and `t - 1` display
-  // basis (no freeze needed here: this branch is only reached post-reveal,
-  // past the 3-tick freeze window entirely).
-  const idleWaitBounceIndexOffset = turn5Active ? 116 : 0;
+  // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): this is the SAME
+  // `turn5SubmenuBounceTickFromLatest` formula `drawActionMenuIdleWindow`'s
+  // own DMA-wait branch uses, called from this second, different line, with
+  // zero discontinuity at revealTick - so it shares window A's own `+109`
+  // raw-sine-index constant and `t - 1` display basis (no freeze needed
+  // here: this branch is only reached post-reveal, past the 3-tick freeze
+  // window entirely).
+  const idleWaitBounceIndexOffset = turn5Active ? 109 : 0;
   const idleWaitBounceTick = turn5Active
     ? turn5SubmenuBounceTickFromLatest(t - 1, latestCompletedCommandHandoff)
     : turn4Active
@@ -11878,13 +11879,14 @@ function drawTurn6FightSubmenuWindow(
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (t < revealTick) {
-    // ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §7a/§8c/
-    // §8f): this DMA-wait branch shares window B's own `+67` raw-sine-index
-    // anchor and display-basis correction (`t - 1`) with drawTurn5RockSlide
-    // Window's call above - strictly local to this branch (`t < revealTick`,
-    // i.e. `turn6ReopenPressTick` through `turn6ReopenPressTick + 4`); the
+    // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): this DMA-wait
+    // branch shares window B's own `+60` raw-sine-index anchor (the true
+    // offset - the original `+67` fit was off by one sDelta step, 7) and
+    // display-basis correction (`t - 1`) with drawTurn5RockSlideWindow's call
+    // above - strictly local to this branch (`t < revealTick`, i.e.
+    // `turn6ReopenPressTick` through `turn6ReopenPressTick + 4`); the
     // post-reveal `turn6KickoffBounceTick` branch below is untouched.
-    drawTurn6ActionMenuIdleWindow(fb, t, turn6ReopenBounceTick(t - 1, TICK0 + sm.openElapsed), 67);
+    drawTurn6ActionMenuIdleWindow(fb, t, turn6ReopenBounceTick(t - 1, TICK0 + sm.openElapsed), 60);
     return;
   }
   if (sm.confirmElapsed !== null) {
@@ -14863,10 +14865,11 @@ function drawTurn5RockSlideWindow(
   trainerPresentation?: FactoryTrainerPresentation,
 ): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
-  // ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §8c/§8f):
-  // +67 on the shared raw sine index - RAM-proven across 47 consecutive
-  // ticks (7300-7346), the ONLY call site this correction targets.
-  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 67);
+  // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): +60 on the
+  // shared raw sine index (the true offset - the original `+67` fit was off
+  // by one sDelta step, 7) - RAM-proven across 47 consecutive ticks
+  // (7300-7346), the ONLY call site this correction targets.
+  drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 60);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
   if (t < faintedStart) {

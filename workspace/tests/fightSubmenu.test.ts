@@ -1163,7 +1163,7 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     expect(turn5ReopenBounceTick(pressTick + 4, pressTick, frozen)).not.toBe(legacyAtPress);
   });
 
-  it("ISSUES #97-B rung 3 (docs/turn5-bounce-recalibration-probe.md §4 item 1/§9): window A's composed correction - the 3-tick freeze plus a shared +116 raw-sine-index offset plus a t-1 display-basis shift - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 5927-5957, matching real hardware exactly everywhere except the named, out-of-scope §8d/§9e sine-table-peak residual", () => {
+  it("ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): window A's composed correction - the 3-tick freeze plus a shared +109 raw-sine-index offset plus a t-1 display-basis shift - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 5927-5957, with ZERO exceptions (the former §8d/§9e residual was itself the same one-`sDelta`-step offset excess, not a separate hardware rounding rule)", () => {
     const pressTick = 5927; // same live-confirmed openElapsed press tick as the freeze test above
     // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 5927-5957
     // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
@@ -1201,28 +1201,25 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
       5956: { onixY2: 1, healthboxY2: 0 },
       5957: { onixY2: 1, healthboxY2: 0 },
     };
-    // New (rung 3) composed model, reproducing exactly what drawActionMenuIdleWindow's/
+    // Composed model, reproducing exactly what drawActionMenuIdleWindow's/
     // drawFightSubmenuWindow's own window-A call sites now feed menuIdleBounce:
     // bounceTick evaluated via turn5ReopenBounceTick at t-1 (the local
-    // display-basis correction), and indexOffset=116 (window A's own shared
-    // raw-sine-index anchor, distinct from window B's 67).
-    const newModel = (t: number) => menuIdleBounce(turn5ReopenBounceTick(t - 1, pressTick, TURN4_LATEST_HANDOFF), 116);
-    // §9d's exact predicted mismatch set (live-confirmed against the oracle,
-    // ISSUES #97-B rung 3): the frozen-value table-peak cluster {5928-5931}
-    // plus the periodic §8d-class residual {5940, 5949} - both explicitly out
-    // of scope for this fix (§9e).
-    const expectedMismatches = new Set([5928, 5929, 5930, 5931, 5940, 5949]);
+    // display-basis correction), and indexOffset=109 (window A's own shared
+    // raw-sine-index anchor, distinct from window B's 60) - the corrected
+    // offset per docs/bounce-peak-rounding-fix-spec.md (the prior +116 was
+    // itself off by one sDelta step, 7, a post-increment RAM probe artifact).
+    const newModel = (t: number) => menuIdleBounce(turn5ReopenBounceTick(t - 1, pressTick, TURN4_LATEST_HANDOFF), 109);
+    // Live-confirmed against the oracle (turn5-action-off 32/32): zero
+    // exceptions anywhere in this span, including the former §8d/§9e
+    // sine-table-peak residual {5928-5931, 5940, 5949} - that residual was
+    // the same offset excess, not a separate hardware rounding rule.
     for (let t = 5927; t <= 5957; t += 1) {
       const model = newModel(t);
-      if (expectedMismatches.has(t)) {
-        expect(model, `tick ${t}`).not.toEqual(displayed[t]);
-      } else {
-        expect(model, `tick ${t}`).toEqual(displayed[t]);
-      }
+      expect(model, `tick ${t}`).toEqual(displayed[t]);
     }
     // Regression-proof: the offset/basis correction alone (no freeze) already
     // diverges from ground truth at most matching ticks - e.g. without
-    // indexOffset=116, tick 5932 (the first post-freeze tick) would read:
+    // indexOffset=109, tick 5932 (the first post-freeze tick) would read:
     expect(menuIdleBounce(turn5ReopenBounceTick(5931, pressTick, TURN4_LATEST_HANDOFF))).not.toEqual(displayed[5932]);
   });
 
@@ -1391,7 +1388,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(turn6ReopenBounceTick(pressTick + 4, pressTick)).toBe(pressTick + 4 - 2);
   });
 
-  it("ISSUES #97-B rung 2 (docs/turn5-bounce-recalibration-probe.md §7a/§8c/§8f): window B's composed correction - a shared +67 raw-sine-index offset plus a local display-basis t-1 shift, composed with rung 1's freeze - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 7305-7317, matching real hardware exactly where the OLD (pre-rung-2) formula does not", () => {
+  it("ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): window B's composed correction - a shared +60 raw-sine-index offset plus a local display-basis t-1 shift, composed with rung 1's freeze - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 7305-7317, with ZERO exceptions (the former §8d/§9e residual at {7306,7317} was the same one-sDelta-step offset excess, not a separate hardware rounding rule)", () => {
     const pressTick = 7313; // same live-confirmed openElapsed press tick as the rung-1 test above
     // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 7305-7317
     // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
@@ -1411,36 +1408,38 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
       7316: { onixY2: 1, healthboxY2: 1 },
       7317: { onixY2: 1, healthboxY2: 1 },
     };
-    // New (rung 2) composed model, reproducing exactly what drawTurn6FieldBase's
+    // Composed model, reproducing exactly what drawTurn6FieldBase's
     // two call sites now feed menuIdleBounce: bounceTick evaluated at t-1
     // (the local display-basis correction), with the freeze mapping applied
-    // for t >= pressTick, and indexOffset=67 (the shared raw-sine-index anchor).
+    // for t >= pressTick, and indexOffset=60 (the shared raw-sine-index
+    // anchor, corrected per docs/bounce-peak-rounding-fix-spec.md - the
+    // prior +67 was itself off by one sDelta step, 7).
     const newModel = (t: number) => {
       const bounceTick = t < pressTick ? t - 1 : turn6ReopenBounceTick(t - 1, pressTick);
-      return menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick), 67);
+      return menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick), 60);
     };
-    // §8e's exact predicted match set: matches at {7305, 7307..7316}, mismatches
-    // at {7306, 7317} (both are §8d's known sine-table-peak rounding artifact,
-    // explicitly out of scope for this fix).
-    const expectedMismatches = new Set([7306, 7317]);
+    // Live-confirmed against the oracle (turn6-reopen-off improves 20/46 ->
+    // 22/46 for this exact pair): zero exceptions in this span, including
+    // the former §8d/§9e residual {7306, 7317} - the same offset excess,
+    // not a separate hardware rounding rule.
     for (let t = 7305; t <= 7317; t += 1) {
       const model = newModel(t);
-      if (expectedMismatches.has(t)) {
-        expect(model).not.toEqual(displayed[t]);
-      } else {
-        expect(model).toEqual(displayed[t]);
-      }
+      expect(model, `tick ${t}`).toEqual(displayed[t]);
     }
     // Regression-proof: the OLD (pre-rung-2) formula - no offset, no t-1 basis
-    // shift, freeze mapping evaluated at raw t - gets EVERY one of the 11
-    // now-matching ticks wrong (proves this pin actually exercises rung 2's
-    // new behavior, not something the prior formula already satisfied).
+    // shift, freeze mapping evaluated at raw t - gets every one of the
+    // now-matching ticks wrong, except {7306, 7317} where it coincidentally
+    // agrees with ground truth despite the wrong formula (proves this pin
+    // actually exercises the corrected behavior, not something the prior
+    // formula already satisfied by accident).
     const oldModel = (t: number) => {
       const bounceTick = t < pressTick ? t : turn6ReopenBounceTick(t, pressTick);
       return menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
     };
+    const oldModelCoincidentalMatches = new Set([7306, 7317]);
     for (let t = 7305; t <= 7317; t += 1) {
-      if (!expectedMismatches.has(t)) expect(oldModel(t)).not.toEqual(displayed[t]);
+      if (oldModelCoincidentalMatches.has(t)) continue;
+      expect(oldModel(t), `tick ${t}`).not.toEqual(displayed[t]);
     }
   });
 

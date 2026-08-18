@@ -1,3 +1,74 @@
+## 1325 — [main worker, 2026-08-18] **ISSUES #97-B closed: PP-digit confound root-caused and fixed, rung 3 reapplied — turn5-action-off 1/32 → 26/32, zero regressions**
+
+- **State:** three green commits this session (`1a70ec69` PP fix,
+  `5c21df81` rung-3 reapply, plus this docs commit). `npm test` **1,066
+  files / 10,040 passed (+2 vs 1323's 10,038, both new Tier-1 pins) / 223
+  skipped**, `npm run build`/`npm run typecheck` green after each commit.
+- **Did — Goal A (PP confound):** established ground truth with two
+  independent instruments per the step brief, plus a third for extra
+  confidence: (a) source-derived ROCK_SLIDE decrement count
+  (`battleMenu.ts`: turns 1, 3, 4 decrement slot 0 → `maxPP 10 - 3 = 7`);
+  (b) backward RAM math from `docs/turn5-6-off-ground-truth.md`'s
+  post-turn-5/6 PP handoffs; (c) a fresh live `gBattleMons` RAM probe
+  (`tools/run-mgba-probe.py`) across ticks 5920-5960 of `turn5-menu.json`,
+  reading `[7,20,19,10]` throughout. All three agree: PP is 7, not the
+  app's displayed 8, throughout turn 5's own reopened FIGHT submenu.
+  Root cause: `resolveTurn4LatestCompletedCommandHandoff`
+  (`turn4ResolutionAdapter.ts`) pinned `playerPp`/`persistedMoveSlot`
+  from the *prior* (turn-3) handoff per `docs/turn4-fold-pp-freshness-
+  design.md`'s 2026-08-02 direction — that doc's own §6 risk 4 flagged
+  this as an unresolved assumption pending exactly this probe. Fixed by
+  using turn 4's own fresh receipt directly (matching turn3's/turn5's own
+  sibling adapters' shape); re-pinned the 2026-08-02 tests that encoded
+  the superseded value, citing this session's ground truth. Full 9-trace
+  family + 2 turn-4-adjacent spot checks: zero regressions, one
+  improvement (`turn5-confirm-off-a` 8/132 → 14/132).
+- **Did — Goal B (rung 3 reapply):** with the confound gone, reapplied
+  the banked composed correction (`docs/turn5-bounce-recalibration-
+  probe.md` §4 item 1/§9: 3-tick freeze + `+116` raw sine-index offset +
+  `t-1` display basis), mirroring rung 2's `menuIdleBounce`/
+  `drawMenuIdleBounceOverlay` `indexOffset` idiom and rung 1's
+  `turn6ReopenBounceTick` freeze-helper shape (new sibling export,
+  `turn5ReopenBounceTick`). Live-verified against the oracle before any
+  test edit: `turn5-action-off` mismatch set exactly
+  `{5928,5929,5930,5931,5940,5949}`, **26/32** — the exact best-case
+  number §9d's own paper derivation predicted, zero deviation. Re-pinned
+  `battleScene.test.ts`'s "Onix bounce sprite preserves the existing
+  continuation phase" fixture to the new, oracle-matching plateau
+  boundary (rung 3's own flagged re-pin, banked verbatim). Added two new
+  red-verified Tier-1 pins in `fightSubmenu.test.ts` (the freeze helper's
+  own shape; the full composed model against
+  `src/data/gen/turn5-6-reopen-bounce-probe.json`'s RAM ground truth).
+- **Final family numbers (all traces, zero regressions from Goal A's own
+  post-fix baseline):** `turn5-action-off` 1/32 → **26/32**,
+  `turn6-reopen-off` 20/46 (unchanged, no decrease), `turn5-reset-off`
+  256/256, `turn5-confirm-off-a` 14/132 (PP-fix improvement, held),
+  `turn5-confirm-off-b` 0/132, `turn5-resolve-off-{a,b,c,d}` 7/196,
+  71/196, 149/196, 0/196, `turn4-doubleteam-off`/`turn4-rockslide-off`
+  256/256 each.
+- **Next:** ISSUES #97-B's remaining, separately-scoped open items (see
+  `ISSUES.md` #97 §B for the full writeup): (i) the §8d/§9e sine-table-peak
+  rounding artifact (both windows' own small residual, root cause narrowed
+  to the derivation rule, real hardware `Sin()` not yet read); (ii)
+  `turn6KickoffBounceTick`/the 7318+ dispatch (a SIDE-worker continuation
+  was in flight in parallel this session — check its state before
+  touching); (iii) the class-(iii) text/banner mechanism dominating
+  `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining mismatches —
+  checked against the PP-digit fix by inspection, did NOT meaningfully
+  move (a separate, still-uninvestigated mechanism, not this session's
+  scope).
+- **Notes:** no PAPERCUT. The three-independent-instrument ground-truth
+  requirement (source count + backward RAM math + a fresh live RAM probe)
+  was worth the extra probe beyond the step's own "two instruments"
+  minimum — `docs/turn5-off-reader-set.md` already had a cached
+  `[7,20,19,10]` value for this exact window from an earlier session, and
+  a fresh live check confirmed it still holds today rather than trusting
+  a possibly-stale cached figure (ISSUES #97's own ledger already
+  documents one prior instance of the oracle's answer shifting between
+  sessions for this same window).
+
+---
+
 ## 1324 — [main worker, 2026-08-18] **ISSUES #97-B rung 3: window A's composed correction (3-tick freeze + indexOffset 116 + local display basis) implemented, PROVEN mechanism-exact, then REVERTED — a third, previously-unknown, pre-existing PP-digit defect blocks the numeric acceptance bar**
 
 - **State:** tree is byte-for-byte HEAD (`git checkout -- src/engine/battleScene.ts

@@ -4,6 +4,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1328 — [main worker, 2026-08-18] **ISSUES #97-B §8d/§9e sine-index offset fix landed: turn5-action-off CLOSED 32/32, turn6-reopen-off 20→22/46, zero decreases**
+
+- **State:** one green commit (src + 2 test files) plus this docs commit.
+  `npm test` **1,066 files / 10,040 passed / 223 skipped**, `npm run build`
+  green.
+- **Did:** followed `docs/bounce-peak-rounding-fix-spec.md` §7 exactly — a
+  SIDE-worker analysis that read `trig.c`'s real `Sin()`/`DoBounceEffect`
+  and found the landed `+67`/`+116` raw-sine-index offsets each carried a
+  +7 excess inherited from fitting against the receipt's own
+  post-increment `sSinIndex` RAM column (real hardware has no special
+  peak-rounding rule; the app's per-index `bounceSin` math was already
+  exactly correct). Ran the spec's receipt cross-check first (176 ok / 0
+  bad, PASS), recorded the full 11-trace baseline, then applied the
+  4-literal edit at the exact spec-cited lines (all 4 unchanged since the
+  spec was written): `battleScene.ts` `bounceIndexOffset`/
+  `idleWaitBounceIndexOffset` 116→109 (:8320/:8689), the two window-B `67`
+  literals →60 (`drawTurn6ActionMenuIdleWindow`'s DMA-wait-branch call
+  :11887, `drawTurn6FieldBase`'s window-B call :14869). No change to
+  `bounceSin`/`menuIdleBounce` internals — confirmed live per the spec's
+  own warning: a global `-7` shift inside the shared lookup breaks 25
+  tests across 5 files (not attempted here, spec-rejected).
+- **Result (exact predicted numbers, zero decreases across the 11-trace
+  family):** `turn5-action-off` 26/32→**32/32** (window fully CLOSED — the
+  former residual `{5928,5929,5930,5931,5940,5949}` was the same offset
+  excess, not the periodic §8d/§9e "rounding artifact" it was previously
+  attributed to), `turn6-reopen-off` 20/46→**22/46** (`{7306,7317}` now
+  match; remainder is entirely `[7318,7347]`, the still-open
+  `turn6KickoffBounceTick` dispatch, untouched by construction),
+  `turn5-confirm-off-a` 14/132→**15/132** (bonus — `idleWaitBounceIndexOffset`
+  is gated on plain `turn5Active`, reaches this trace's span too);
+  `turn5-reset-off` 256/256 and the rest of the family (`confirm-off-b`,
+  `resolve-off-{a,b,c,d}`, `turn4-doubleteam-off`, `turn4-rockslide-off`)
+  byte-identical, zero decreases. Re-pinned one Tier-1 pixel test
+  (`battleScene.test.ts`, tick 5931 at (58,49): `[189,181,181]` →
+  `[247,247,255]`, oracle-verified) plus the two rung-2/3 composed-model
+  tests in `fightSubmenu.test.ts` that hardcoded the old `67`/`116`
+  literals and asserted a named residual set — both now assert zero
+  exceptions (verified computationally against the real formula before
+  editing: with the corrected offset, all displayed ticks in both
+  windows' own probed spans match with no exceptions).
+- **Next:** `ISSUES.md` #97 §D lists what's still open — (i)
+  `turn6KickoffBounceTick`/the 7318+ dispatch (SIDE-worker continuation,
+  check its current state first), (ii) the class-(iii) text/banner
+  mechanism dominating `confirm-off-*`/`resolve-off-*`'s remaining
+  mismatches, (iii) §17 item 5 (the 12-caller HP-overlay gate) from entry
+  1327, (iv) `resolve-off-d`'s own small residual (now ruled out as
+  §8d/§9e-caused).
+- **Notes:** no PAPERCUT. The spec's cited line numbers (8320/8689/
+  11887/14869) turned out unchanged despite the brief's drift warning —
+  worth noting the brief over-hedged, not a problem.
+
+---
 ## 1327 — [main worker, 2026-08-18] **ISSUES #97-B turn5-resolve anchor cluster: §17 items 1-3 landed (2 RAM sweeps + 3 scoped anchor fixes) — resolve-off-a 7→25/196, resolve-off-b 71→88/196, zero decreases**
 
 - **State:** one green commit (`4c49776d`, src+test+probe-script fix) plus
@@ -118,75 +170,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the point.
 
 ---
-## 1325 — [main worker, 2026-08-18] **ISSUES #97-B closed: PP-digit confound root-caused and fixed, rung 3 reapplied — turn5-action-off 1/32 → 26/32, zero regressions**
-
-- **State:** three green commits this session (`1a70ec69` PP fix,
-  `5c21df81` rung-3 reapply, plus this docs commit). `npm test` **1,066
-  files / 10,040 passed (+2 vs 1323's 10,038, both new Tier-1 pins) / 223
-  skipped**, `npm run build`/`npm run typecheck` green after each commit.
-- **Did — Goal A (PP confound):** established ground truth with two
-  independent instruments per the step brief, plus a third for extra
-  confidence: (a) source-derived ROCK_SLIDE decrement count
-  (`battleMenu.ts`: turns 1, 3, 4 decrement slot 0 → `maxPP 10 - 3 = 7`);
-  (b) backward RAM math from `docs/turn5-6-off-ground-truth.md`'s
-  post-turn-5/6 PP handoffs; (c) a fresh live `gBattleMons` RAM probe
-  (`tools/run-mgba-probe.py`) across ticks 5920-5960 of `turn5-menu.json`,
-  reading `[7,20,19,10]` throughout. All three agree: PP is 7, not the
-  app's displayed 8, throughout turn 5's own reopened FIGHT submenu.
-  Root cause: `resolveTurn4LatestCompletedCommandHandoff`
-  (`turn4ResolutionAdapter.ts`) pinned `playerPp`/`persistedMoveSlot`
-  from the *prior* (turn-3) handoff per `docs/turn4-fold-pp-freshness-
-  design.md`'s 2026-08-02 direction — that doc's own §6 risk 4 flagged
-  this as an unresolved assumption pending exactly this probe. Fixed by
-  using turn 4's own fresh receipt directly (matching turn3's/turn5's own
-  sibling adapters' shape); re-pinned the 2026-08-02 tests that encoded
-  the superseded value, citing this session's ground truth. Full 9-trace
-  family + 2 turn-4-adjacent spot checks: zero regressions, one
-  improvement (`turn5-confirm-off-a` 8/132 → 14/132).
-- **Did — Goal B (rung 3 reapply):** with the confound gone, reapplied
-  the banked composed correction (`docs/turn5-bounce-recalibration-
-  probe.md` §4 item 1/§9: 3-tick freeze + `+116` raw sine-index offset +
-  `t-1` display basis), mirroring rung 2's `menuIdleBounce`/
-  `drawMenuIdleBounceOverlay` `indexOffset` idiom and rung 1's
-  `turn6ReopenBounceTick` freeze-helper shape (new sibling export,
-  `turn5ReopenBounceTick`). Live-verified against the oracle before any
-  test edit: `turn5-action-off` mismatch set exactly
-  `{5928,5929,5930,5931,5940,5949}`, **26/32** — the exact best-case
-  number §9d's own paper derivation predicted, zero deviation. Re-pinned
-  `battleScene.test.ts`'s "Onix bounce sprite preserves the existing
-  continuation phase" fixture to the new, oracle-matching plateau
-  boundary (rung 3's own flagged re-pin, banked verbatim). Added two new
-  red-verified Tier-1 pins in `fightSubmenu.test.ts` (the freeze helper's
-  own shape; the full composed model against
-  `src/data/gen/turn5-6-reopen-bounce-probe.json`'s RAM ground truth).
-- **Final family numbers (all traces, zero regressions from Goal A's own
-  post-fix baseline):** `turn5-action-off` 1/32 → **26/32**,
-  `turn6-reopen-off` 20/46 (unchanged, no decrease), `turn5-reset-off`
-  256/256, `turn5-confirm-off-a` 14/132 (PP-fix improvement, held),
-  `turn5-confirm-off-b` 0/132, `turn5-resolve-off-{a,b,c,d}` 7/196,
-  71/196, 149/196, 0/196, `turn4-doubleteam-off`/`turn4-rockslide-off`
-  256/256 each.
-- **Next:** ISSUES #97-B's remaining, separately-scoped open items (see
-  `ISSUES.md` #97 §B for the full writeup): (i) the §8d/§9e sine-table-peak
-  rounding artifact (both windows' own small residual, root cause narrowed
-  to the derivation rule, real hardware `Sin()` not yet read); (ii)
-  `turn6KickoffBounceTick`/the 7318+ dispatch (a SIDE-worker continuation
-  was in flight in parallel this session — check its state before
-  touching); (iii) the class-(iii) text/banner mechanism dominating
-  `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining mismatches —
-  checked against the PP-digit fix by inspection, did NOT meaningfully
-  move (a separate, still-uninvestigated mechanism, not this session's
-  scope).
-- **Notes:** no PAPERCUT. The three-independent-instrument ground-truth
-  requirement (source count + backward RAM math + a fresh live RAM probe)
-  was worth the extra probe beyond the step's own "two instruments"
-  minimum — `docs/turn5-off-reader-set.md` already had a cached
-  `[7,20,19,10]` value for this exact window from an earlier session, and
-  a fresh live check confirmed it still holds today rather than trusting
-  a possibly-stale cached figure (ISSUES #97's own ledger already
-  documents one prior instance of the oracle's answer shifting between
-  sessions for this same window).
-
 ---
 
 ---

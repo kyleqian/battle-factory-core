@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, both windows landed, remainder below is separate open debt); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
+## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, `turn5-action-off` CLOSED 32/32, `turn6-reopen-off` 22/46 with a separate open kickoff-dispatch remainder below); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 
 **2026-08-17 rung 1 (bounded MAIN worker, pixel-first per the standing
 method):** split into two independently-diagnosed findings.
@@ -128,7 +128,8 @@ RAM-proven 3-tick `sinIndex` freeze. Full derivation:
    `docs/turn5-bounce-recalibration-probe.md` §9d predicted, zero
    deviation. Zero regressions anywhere in the family.
 
-**Final numbers, this line of work closed:** `turn5-action-off` 26/32 (was
+**Final numbers (superseded by the §8d/§9e sine-index offset fix below —
+see that entry for the current numbers):** `turn5-action-off` 26/32 (was
 1/32), `turn6-reopen-off` 20/46 (was 11/46), `turn5-reset-off` 256/256
 (control, unchanged), `turn5-confirm-off-a` 14/132 (was 8/132, PP-fix
 improvement), `turn5-confirm-off-b` 0/132, `turn5-resolve-off-{a,b,c,d}`
@@ -137,22 +138,44 @@ either fix's affected span), `turn4-doubleteam-off`/`turn4-rockslide-off`
 256/256 each (unchanged — turn 4's own window never renders FIGHT chrome,
 confirmed structural no-op).
 
-**Remaining, still open (not this doc's remit — the bounce/healthbox
-mechanism and the PP-freshness direction are both now correct):**
-- **§8d/§9e sine-table-peak rounding artifact** (`docs/turn5-bounce-
-  recalibration-probe.md` §8d/§9e): a real hardware sine-table/rounding
-  disagreement at the table's literal peak (`index=64`, hardware gives `1`
-  where naive `floor(table[64]/256)+1` gives `2`), hitting both windows'
-  own residual mismatch ticks (`{5928,5929,5930,5931,5940,5949}` for
-  window A, `{7306,7317}` for window B) at a roughly 1-in-9 periodic
-  cadence. Root cause narrowed to the derivation rule, not the table
-  itself, but the real hardware `Sin()` rule isn't pinned down (would need
-  reading `trig.c`'s own `Sin()`/`Cos()` implementation). Whoever picks
-  this up: land it as a pure function of the resolved post-`indexOffset`
-  raw index with NO call-site gating, then re-check
-  `{7326,7335,7344}` (currently-matching frames outside window B's own
-  span, dispatching through the still-unexplored `turn6KickoffBounceTick`
-  below) as a regression gate.
+### D. §8d/§9e sine-index offset fix (2026-08-18, bounded MAIN worker) — CLOSED, window A fully closed
+
+`docs/bounce-peak-rounding-fix-spec.md` (a SIDE-worker analysis) read
+`trig.c`'s actual `Sin()`/`DoBounceEffect`/`SpriteCB_BounceEffect` and
+found there is **no special hardware peak-rounding rule at all** — the
+app's per-index `bounceSin` math was already exactly correct. The real bug:
+the prior rungs' `+67`/`+116` raw-sine-index offset constants were fit
+directly against the receipt's own `onixSinIndex`/`healthboxSinIndex` RAM
+column, but that column is the **post-increment** value (`SpriteCB_
+BounceEffect` reads `sSinIndex`, computes `y2`, *then* increments by
+`sDelta`=7) — one `sDelta` step (7) ahead of the index that actually
+produced that row's `y2`. The true offsets are `60` (`67-7`) and `109`
+(`116-7`). Fixed by a 4-literal, call-site-local edit (`battleScene.ts`
+`bounceIndexOffset`/`idleWaitBounceIndexOffset` 116→109, the two `67`
+literals at `drawTurn6ActionMenuIdleWindow`'s DMA-wait branch call and
+`drawTurn6FieldBase`'s window-B call →60) — no change to `bounceSin`/
+`menuIdleBounce` internals (a global `-7` shift inside the shared lookup
+was tried and reverted: it broke 25 tests across 5 files, including a
+real-oracle-pinned turn-1 menu-open window that needs the OLD per-index
+math unchanged).
+
+**Final numbers, both windows now closed:** `turn5-action-off` **32/32**
+(was 26/32, window fully closed — the former residual
+`{5928,5929,5930,5931,5940,5949}` was the same offset excess, not a
+periodic rounding artifact), `turn6-reopen-off` **22/46** (was 20/46,
+`{7306,7317}` now match; all remaining mismatches sit in `[7318,7347]`, the
+still-open `turn6KickoffBounceTick` dispatch below, untouched by
+construction), `turn5-confirm-off-a` **15/132** (was 14/132, bonus —
+`idleWaitBounceIndexOffset` is gated on plain `turn5Active`, reaches into
+this trace's own span too), `turn5-reset-off` 256/256 and the rest of the
+9-trace family byte-identical (zero regressions). Re-pinned one Tier-1
+pixel test (`battleScene.test.ts`, tick 5931) and two rung-2/3 composed-
+model tests (`fightSubmenu.test.ts`, `+67`/`+116` → `+60`/`+109`, both now
+assert zero exceptions instead of a named residual set) — all cite this
+fix. Full `npm test` 1066/1066 files, 10040 passed, 223 skipped; `npm run
+build` green.
+
+**Remaining, still open:**
 - **`turn6KickoffBounceTick`/the 7318+ dispatch** (`docs/turn5-bounce-
   recalibration-probe.md` §10, a SIDE-worker continuation in flight in
   parallel with this rung — do not touch without checking its current
@@ -243,12 +266,11 @@ family)**:
   6991 menu-redraw tick) — not traced to a specific function this session,
   possibly related to the settled-Sitrus-phase ONIX sprite/HP-overlay draw
   (`turn5SitrusOnixHp`, a separate anchor from the dispatch-gate ticks this
-  session touched) or the already-known §8d rounding artifact; needs its
-  own instrument.
+  session touched); the §8d/§9e sine-index offset (below) is now CLOSED and
+  ruled out as a cause (`resolve-off-d`'s own count was unchanged, 0/196
+  before and after that fix) — needs its own instrument.
 - `resolve-off-c`'s trailing 47-frame secondary mechanism (§3e/§7,
   unchanged from before) — still untraced.
-- §8d/§9e sine-table-peak rounding artifact — unchanged, out of scope
-  (a side worker's own parallel spec).
 - `turn6KickoffBounceTick`/the 7318+ dispatch — unchanged, side-worker
   continuation, not checked this session.
 
