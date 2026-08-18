@@ -1,3 +1,68 @@
+## 1326 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 2-4 landed: 50 more sites converted (94 of 121 total), zero FINDINGs, zero regressions**
+
+- **State:** three green commits, one per rung, each independently
+  verified (`d02ed8d9` Rung 2, `c9ce2d14` Rung 3, `0bd6b34e` Rung 4 —
+  the stretch goal). `src/engine/battleScene.ts` only edited each time.
+  `npm test` **1,066 files / 10,040 passed / 223 skipped** after every
+  commit — byte-for-byte identical to session start, matching entry
+  1325's own baseline exactly (pure refactor, zero test-count drift).
+  `npm run build`/`npm run typecheck` green after each commit.
+- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs
+  2-4 exactly, re-grepping every move's current line number first (doc's
+  own drift warning) and confirming every per-move Tier-1 test filename
+  with `find` before scoping (doc's rollingKick/healBell caveats both
+  reconfirmed). **Rung 2** (14 sites, BRICK_BREAK…IRON_TAIL): GROWTH
+  was already one of the pre-existing "dynamic in syntax" sites — only
+  its raw call swapped for the OrZero helper inside its existing
+  `side==="opponent" ? ... : null` ternary, value-identical by
+  inspection. **Rung 3** (16 sites, STEEL_WING…SLEEP_TALK): two
+  double-site branches (KARATE_CHOP's ONIX+PRIMEAPE, both proven by
+  their own half of the throw-guard). **Rung 4, stretch** (20 sites,
+  HEAL_BELL…BULK_UP): five double-site branches (PERISH_SONG/MURKROW,
+  COTTON_SPORE/MAREEP, SLEEP_POWDER/HOPPIP — shared branch with
+  STUN_SPORE, SWAGGER/RATTATA, BULK_UP/PRIMEAPE); SWAGGER's RATTATA
+  fallback was `?? {x2:1,y2:0}` (not the zero idiom, since RATTATA is
+  the only other species besides ONIX with a real nonzero table entry)
+  — confirmed by inspection that the real table lookup already returns
+  that value directly, so the fallback was already dead code and the
+  substitution is value-identical, per the doc's own explicit
+  diff-review caveat for this site. Every other site matched the
+  standard `view.target.species`/`view.attacker.species` substitution
+  the doc's §3 describes. Every rung's own site-count sanity check
+  (`grep -c speciesFrontIdleRestOffset(` vs
+  `speciesFrontIdleRestOffsetOrZero(`) summed to 123 unchanged — 0 (Rung
+  0) + 14 (Rung 1) + 14 (Rung 2) + 16 (Rung 3) + 20 (Rung 4) = 64 helper
+  sites, 59 raw remaining. Zero FINDINGs across all three rungs — every
+  substituted expression matched what its enclosing throw-guard already
+  proved, confirmed per-site by inspection, not assumed from the
+  pattern.
+- **Verification per rung (all three, independently):** named per-move
+  Tier-1 test files green (23/84 tests Rung 2, 26/97 Rung 3, 34/92+1skip
+  Rung 4), full `npm test` green and byte-identical to baseline each
+  time, `npm run build` + `npm run typecheck` green each time, and
+  `compare:differential -- battle-command-generated-off.json --base
+  <rung's parent sha>` **128/128 byte-identical** each time (expected —
+  none of these 108 ON-profile-legacy branches are reachable from that
+  trace's OFF-profile route, per the doc's own §5 framing; this is
+  insurance against the shared-import/helper change, not primary proof).
+- **Next:** Rungs 5-8 remain (TORMENT…DOUBLE_EDGE, ~50 more sites) —
+  same recipe, same per-rung verification bar. Rung 5's own doc row
+  flags HARDEN as having zero Tier-1 coverage; that gap needs a minimal
+  pin (mirroring `calmMind.test.ts`) *before* that site is touched, per
+  the doc's explicit instruction — not a mechanical grep-and-substitute
+  like every other site so far. Rung 9 (hand-fit swap-over) stays
+  blocked on the animation lane's not-yet-started rung-4 back dispatcher.
+- **Notes:** no PAPERCUT. Splitting each rung into its own commit meant
+  re-running the full `npm test`/build/typecheck three times instead of
+  once for the combined 50-site diff — the AGENTS.md-mandated
+  per-rung-commit discipline costs real wall-clock time (~5 min/rung)
+  but keeps every commit independently bisectable and green, which is
+  the point.
+
+---
+---
+
+---
 ## 1325 — [main worker, 2026-08-18] **ISSUES #97-B closed: PP-digit confound root-caused and fixed, rung 3 reapplied — turn5-action-off 1/32 → 26/32, zero regressions**
 
 - **State:** three green commits this session (`1a70ec69` PP fix,

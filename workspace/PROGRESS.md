@@ -4,6 +4,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1329 — [supervisor wind-down, 2026-08-18] **16 worker steps, two lanes: #96 CLOSED (swap family 19/19 exact), #97 mechanism RESOLVED via an 8-probe instrument chain (turn5-action-off CLOSED 32/32; five root causes landed), #71 §1e rungs 0-4 (94/121 sites) — all final gates green**
+
+- **Final gates (tree `37b2818d`, run independently AFTER the last merge):**
+  full npm **1,066 files / 10,040 passed / 223 skipped**; `npm run build`
+  green; soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
+  Fold status: animation-main and rust-main both EMPTY at orient AND at
+  wind-down. DEFERRED.md EMPTY. Only permanent worktrees remain; no
+  unmerged branches; no stray probe processes.
+- **#96 CLOSED and deleted:** (a) quit-pair 61/67→67/67 ×2 — the banked
+  fix shape was wrong in detail; the real trigger was ball slot 0's
+  `hasRested` latch during quitReturn (narrow predicate + Tier-1 pin).
+  (b) enemy-picker 129/130→130/130 — OAM probe DISPROVED the banked
+  "header box" reading; it was the suppressed `Random()%5` ball-roll
+  frame; per-ball `cycledToEnemy` eligibility landed. Family 19/19 exact.
+- **#97 (turn5/6 bounce family) — mechanism RESOLVED, windows landed:**
+  `turn5-action-off` 1/32 → **32/32 CLOSED**; `turn6-reopen-off` 11/46 →
+  **22/46** (remainder attributed: kickoff phase-context + class-(iii));
+  `turn5-resolve-off-a` 7→25/196, `-b` 71→88/196, `confirm-off-a`
+  8→15/132; control 256/256 held throughout; zero decreases all session.
+  Root causes, each RAM/source-proven then landed at EXACT predicted
+  counts: 3-tick reopen-press sinIndex hold; per-call-site raw
+  sine-index offsets (+60/+109 — the first fit (+67/+116) inherited a +7
+  probe-basis excess: the RAM probe reads sSinIndex post-increment;
+  "table-peak rounding quirk" dissolved, hardware math is bit-identical);
+  displayed(T)=RAM(T-1) basis DIRECTLY confirmed; turn-4 handoff pinned
+  turn-3's stale PP (fixed; the 2026-08-02 doc's own risk flag);
+  three independent anchor clusters (-38/-145/-228) re-derived from
+  fresh RAM sweeps. Evidence docs: `turn5-bounce-recalibration-probe.md`
+  (§1-§9), `turn5-family-class3-diagnosis.md` (§1-§17),
+  `turn6-reopen-endstate-spec.md` (naive 7318+ extension REJECTED by a
+  sibling-trace guard: fitted offsets are context-bound),
+  `bounce-peak-rounding-fix-spec.md`.
+- **#71 §1e ladder:** design scout re-derived the census (58→121 sites,
+  `docs/sendout-1e-retirement-design.md`, 9-rung plan, ZERO
+  boundary-ratchet widening); rungs 0-4 landed (94/121 sites retired,
+  zero FINDINGs, differential 128/128 per rung, suite +7 tests).
+- **Ops notes:** freshness-check false positive #5 at orient (kept
+  services; `3e29880b` proves schema currency) — PAPERCUTS bumped. NEW
+  papercut: side-worktree ROOT has no package.json, `npm run` silently
+  escapes to the main checkout (~15 min lost once). Six-deep stacked
+  side-worktree instrument chain worked cleanly; merged as two chain
+  folds; all cleaned innermost-first.
+- **Open (ordered for next session):** (a) #97 remainders, all
+  diagnosed+banked: §17 item 5 HP-overlay gate (12-caller-shared,
+  deliberately not rushed; fixes confirm-off-a/b frozen HP),
+  resolve-off-c trailing 47 frames (status-box+dither instrument named),
+  resolve-off-d residual, turn6 7318+ kickoff phase-context (needs a
+  phase-history model — do NOT re-extend fitted constants).
+  (b) #71 rungs 5-8 (~50 sites; HARDEN needs a pin first per the doc),
+  rung 9 blocked on the animation lane's rung-4 dispatcher.
+  (c) #73/#55-adjacent items unchanged. No deferred questions; no
+  blockers.
+
 ## 1328 — [main worker, 2026-08-18] **ISSUES #97-B §8d/§9e sine-index offset fix landed: turn5-action-off CLOSED 32/32, turn6-reopen-off 20→22/46, zero decreases**
 
 - **State:** one green commit (src + 2 test files) plus this docs commit.
@@ -106,70 +159,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   anchor this session didn't touch) or the known §8d rounding artifact.
   Full per-trace before/after table and remainders in `ISSUES.md` #97 §C.
 - **Notes:** no PAPERCUT.
-
----
-## 1326 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 2-4 landed: 50 more sites converted (94 of 121 total), zero FINDINGs, zero regressions**
-
-- **State:** three green commits, one per rung, each independently
-  verified (`d02ed8d9` Rung 2, `c9ce2d14` Rung 3, `0bd6b34e` Rung 4 —
-  the stretch goal). `src/engine/battleScene.ts` only edited each time.
-  `npm test` **1,066 files / 10,040 passed / 223 skipped** after every
-  commit — byte-for-byte identical to session start, matching entry
-  1325's own baseline exactly (pure refactor, zero test-count drift).
-  `npm run build`/`npm run typecheck` green after each commit.
-- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs
-  2-4 exactly, re-grepping every move's current line number first (doc's
-  own drift warning) and confirming every per-move Tier-1 test filename
-  with `find` before scoping (doc's rollingKick/healBell caveats both
-  reconfirmed). **Rung 2** (14 sites, BRICK_BREAK…IRON_TAIL): GROWTH
-  was already one of the pre-existing "dynamic in syntax" sites — only
-  its raw call swapped for the OrZero helper inside its existing
-  `side==="opponent" ? ... : null` ternary, value-identical by
-  inspection. **Rung 3** (16 sites, STEEL_WING…SLEEP_TALK): two
-  double-site branches (KARATE_CHOP's ONIX+PRIMEAPE, both proven by
-  their own half of the throw-guard). **Rung 4, stretch** (20 sites,
-  HEAL_BELL…BULK_UP): five double-site branches (PERISH_SONG/MURKROW,
-  COTTON_SPORE/MAREEP, SLEEP_POWDER/HOPPIP — shared branch with
-  STUN_SPORE, SWAGGER/RATTATA, BULK_UP/PRIMEAPE); SWAGGER's RATTATA
-  fallback was `?? {x2:1,y2:0}` (not the zero idiom, since RATTATA is
-  the only other species besides ONIX with a real nonzero table entry)
-  — confirmed by inspection that the real table lookup already returns
-  that value directly, so the fallback was already dead code and the
-  substitution is value-identical, per the doc's own explicit
-  diff-review caveat for this site. Every other site matched the
-  standard `view.target.species`/`view.attacker.species` substitution
-  the doc's §3 describes. Every rung's own site-count sanity check
-  (`grep -c speciesFrontIdleRestOffset(` vs
-  `speciesFrontIdleRestOffsetOrZero(`) summed to 123 unchanged — 0 (Rung
-  0) + 14 (Rung 1) + 14 (Rung 2) + 16 (Rung 3) + 20 (Rung 4) = 64 helper
-  sites, 59 raw remaining. Zero FINDINGs across all three rungs — every
-  substituted expression matched what its enclosing throw-guard already
-  proved, confirmed per-site by inspection, not assumed from the
-  pattern.
-- **Verification per rung (all three, independently):** named per-move
-  Tier-1 test files green (23/84 tests Rung 2, 26/97 Rung 3, 34/92+1skip
-  Rung 4), full `npm test` green and byte-identical to baseline each
-  time, `npm run build` + `npm run typecheck` green each time, and
-  `compare:differential -- battle-command-generated-off.json --base
-  <rung's parent sha>` **128/128 byte-identical** each time (expected —
-  none of these 108 ON-profile-legacy branches are reachable from that
-  trace's OFF-profile route, per the doc's own §5 framing; this is
-  insurance against the shared-import/helper change, not primary proof).
-- **Next:** Rungs 5-8 remain (TORMENT…DOUBLE_EDGE, ~50 more sites) —
-  same recipe, same per-rung verification bar. Rung 5's own doc row
-  flags HARDEN as having zero Tier-1 coverage; that gap needs a minimal
-  pin (mirroring `calmMind.test.ts`) *before* that site is touched, per
-  the doc's explicit instruction — not a mechanical grep-and-substitute
-  like every other site so far. Rung 9 (hand-fit swap-over) stays
-  blocked on the animation lane's not-yet-started rung-4 back dispatcher.
-- **Notes:** no PAPERCUT. Splitting each rung into its own commit meant
-  re-running the full `npm test`/build/typecheck three times instead of
-  once for the combined 50-site diff — the AGENTS.md-mandated
-  per-rung-commit discipline costs real wall-clock time (~5 min/rung)
-  but keeps every commit independently bisectable and green, which is
-  the point.
-
----
----
 
 ---
