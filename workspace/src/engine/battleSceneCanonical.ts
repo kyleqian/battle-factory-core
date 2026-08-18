@@ -213,6 +213,23 @@ export const TURN5_OFF_SITRUS_TEXT_CLEAR_TICK = 6991;
 export const TURN5_OFF_SITRUS_MENU_REDRAW_TICK = 6991;
 
 /**
+ * ISSUES #97 remainder residual (B) (`docs/turn5-confirmb-resolved-
+ * residuals.md` §2.2): `turn5SitrusOnixHp`/`turn5SitrusHealTextVisibleChars`
+ * still key off the separate, older `ONIX_SITRUS_IDENTITY_RENDER_TICK`
+ * epoch (6874) that item 3's dispatch-gate overrides above never swept -
+ * their downstream age-offset consumers (`heldItemHeal.ts`'s
+ * `SITRUS_ITEM_*_FIRST_AGE`) reconstruct the same superseded 7078-era
+ * anchor. This turn5-off-scoped jump tick is the real hard step
+ * RAM-confirmed fresh this session (`tools/probe/dump-turn5-resolve-offd-
+ * onixhp-ram.py`, dense sweep 6975-6995 against `turn5-resolve-off-d.json`):
+ * ONIX's own `gBattleMons[0].hp` holds flat at 1 through 6983, then reads 31
+ * from 6984 on - a genuine single-tick step, not a live ramp (matching the
+ * established Scene-OFF precedent, GROVYLE's own drain above) - confirming
+ * the diagnosis doc's own given ground truth exactly, no contradiction.
+ */
+export const TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK = 6984;
+
+/**
  * ISSUES #97-B (docs/turn5-family-class3-diagnosis.md §14/§15/§17 item 2):
  * RAM-confirmed exact this session - the real oracle's "Foe GROVYLE
  * fainted!" message starts at tick 6378, not the old 6523

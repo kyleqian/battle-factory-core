@@ -26,7 +26,9 @@ import {
   onixSitrusTintCoeff,
   turn5GrantingStarPlacement,
   turn5SitrusHealTextVisibleChars,
+  turn5SitrusOffHealTextVisibleChars,
   turn5SitrusOnixHp,
+  turn5OffSitrusOnixHp,
   turn5SitrusResettledBounceTick,
   turn5SitrusRingMatrix,
   LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION,
@@ -59,7 +61,10 @@ import {
   TURN5_ICONBAR_CREATE_TICK,
   TURN5_ICONBAR_DESTROY_TICK,
   TURN5_ICONBAR_FADE_START_TICK,
+  TURN5_OFF_ROCKSLIDE_TEXT_DELAY,
+  TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
   TURN5_OPPONENT_ICON_STATES,
+  TURN5_ROCKSLIDE_PRESS_TICK,
   turn3SubmenuBounceTickFromPresentationEpochAge,
   turn5BgFadeY,
   turn5IconBarEva,
@@ -157,6 +162,7 @@ import {
   TURN7_ROCKSLIDE_PRESS_TICK,
   rockSlideOpponentHp,
   rockSlideTextStartTick,
+  rockSlideTextVisibleChars,
   TURN6_SUPER_EFFECTIVE_LINE,
 } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
@@ -2144,6 +2150,47 @@ describe("S7 slice M-5: turn5SitrusOnixHp - the heal's own 1->31 HP-bar climb, P
   it("stays clamped at 31 (settled) indefinitely past the climb - §11's own 'still climbing past 7306' hedge was a bounce-cycle illusion, not a real climb", () => {
     expect(turn5SitrusOnixHp(7306)).toBe(31);
     expect(turn5SitrusOnixHp(9999)).toBe(31);
+  });
+});
+
+describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residuals.md §2.2, 2026-08-18): turn5OffSitrusOnixHp - the OFF-profile-only sibling of turn5SitrusOnixHp, a hard single-tick STEP at the RAM-confirmed jump tick (not sitrusDisplayedHpAtAge's live ON-profile climb, RAM-reconfirmed fresh this session against turn5-resolve-off-d.json, ticks 6975-6995: gBattleMons[0].hp holds flat at 1 through 6983, reads 31 from 6984 on)", () => {
+  it("holds at the pre-heal hp (1) through the tick before the jump", () => {
+    expect(turn5OffSitrusOnixHp(TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK - 1)).toBe(1);
+  });
+  it("steps straight to the post-heal hp (31) at the jump tick, no intermediate ramp", () => {
+    expect(turn5OffSitrusOnixHp(TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK)).toBe(31);
+    expect(turn5OffSitrusOnixHp(6988)).toBe(31);
+    expect(turn5OffSitrusOnixHp(7005)).toBe(31);
+  });
+});
+
+describe("ISSUES #97 remainder residual (B) (docs/turn5-confirmb-resolved-residuals.md §2.3, 2026-08-18): turn5SitrusOffHealTextVisibleChars - the OFF-profile-only sibling of turn5SitrusHealTextVisibleChars, anchored at TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK (6850) instead of the stale ONIX_SITRUS_IDENTITY_RENDER_TICK epoch, same t-1/one-char-per-tick shape as residual (A)'s rockSlideTextVisibleChars fix - predicts full reveal (35 chars) at exactly t=6885, matching the given ground truth ('settles 6885') with zero fitting", () => {
+  it("is 0 at and before the anchor tick (6850)", () => {
+    expect(turn5SitrusOffHealTextVisibleChars(6850)).toBe(0);
+  });
+  it("prints 1 char/tick from 6851, reaching the full 35-char total exactly at 6885", () => {
+    expect(turn5SitrusOffHealTextVisibleChars(6851)).toBe(1);
+    expect(turn5SitrusOffHealTextVisibleChars(6884)).toBe(34);
+    expect(turn5SitrusOffHealTextVisibleChars(6885)).toBe(35);
+  });
+  it("stays clamped at 35 past the reveal", () => {
+    expect(turn5SitrusOffHealTextVisibleChars(6900)).toBe(35);
+  });
+});
+
+describe("ISSUES #97 remainder residual (A) (docs/turn5-confirmb-resolved-residuals.md §1.4, 2026-08-18): drawTurn5RockSlideWindow's attack/text branch now threads TURN5_OFF_ROCKSLIDE_TEXT_DELAY (355) into rockSlideTextVisibleChars instead of silently falling back to the shared 393 default, plus the codebase's own t-1 display-basis correction - probe-matched against 6 independent oracle-read char counts spanning the whole reveal (tools/probe/analyze-turn5-confirmb-rockslide-text-delay.ts)", () => {
+  const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
+  it("reproduces the exact call site's formula at every oracle-read anchor", () => {
+    expect(rockSlideTextVisibleChars(6185 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(1);
+    expect(rockSlideTextVisibleChars(6190 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(6);
+    expect(rockSlideTextVisibleChars(6195 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(11);
+    expect(rockSlideTextVisibleChars(6200 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(16);
+    expect(rockSlideTextVisibleChars(6203 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(19);
+    expect(rockSlideTextVisibleChars(6204 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(20);
+    expect(rockSlideTextVisibleChars(6221 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(20);
+  });
+  it("stays 0 through the dispatch gate's own opening tick (6184) - the still-held old text is a separate, accepted one-tick transition artifact", () => {
+    expect(rockSlideTextVisibleChars(6184 - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY)).toBe(0);
   });
 });
 
