@@ -60,7 +60,11 @@ import {
 } from "../src/engine/factorySwapPresentation.ts";
 import type { FactoryRentalParty } from "../src/engine/battleScenario.ts";
 import { factorySwapRoundDecision } from "../src/engine/factorySwap.ts";
-import { initialMovingBallAnimState } from "../src/engine/ballAnim.ts";
+import {
+  initialMovingBallAnimState,
+  type BallAnimState,
+} from "../src/engine/ballAnim.ts";
+import { advanceRngValue } from "../src/engine/rng.ts";
 import { INITIAL_POSTWIN_STATE } from "../src/engine/postwin.ts";
 import {
   advanceRoundController,
@@ -1652,5 +1656,108 @@ describe("live Factory swap presentation adapter", () => {
     // Ordinary picker ticks, well outside the quit flow: inactive.
     expect(isFactorySwapQuitReturnSlot0StallActive(0, "playerPicker", true)).toBe(false);
     expect(isFactorySwapQuitReturnSlot0StallActive(0, "enemyPicker", true)).toBe(false);
+  });
+
+  it("ISSUES #96(b): enemySwitch balls keep rolling until their own cycledToEnemy wrap, not the blanket phase exclusion", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 58);
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    state = advance(state, 2);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state.controller.phase).toBe("enemySwitch");
+    expect(state.phaseElapsed).toBe(0);
+
+    let rngValue = 0;
+    const animsByTick: FactorySwapPresentationState["ballAnims"][] = [];
+    const cycledByTick: boolean[][] = [];
+    for (let tick = 1; tick <= 40; tick += 1) {
+      const advanced = advanceFactorySwapPresentation(state, rngValue);
+      state = advanced.presentation;
+      rngValue = advanced.rngValue;
+      animsByTick.push(state.ballAnims);
+      cycledByTick.push(
+        factorySwapEnemyBallCycleVisuals(state.phaseElapsed).map(
+          (ball) => ball.cycledToEnemy,
+        ),
+      );
+    }
+
+    // Balls wrap right-to-left (index 2 first, per
+    // factorySwapEnemyBallCycleVisuals), each at its own tick - verify all
+    // three independently, no hardcoded phaseElapsed thresholds. A ball that
+    // never wraps in this window (index 0) must still be rolling throughout;
+    // one that does wrap (indices 1/2) must roll right up to its own wrap
+    // tick and then freeze dead - exactly the per-ball eligibility this fix
+    // replaces the old blanket phase exclusion with.
+    const lastTick = animsByTick.length - 1;
+    let sawAWrap = false;
+    for (const ballIndex of [0, 1, 2] as const) {
+      const wrapTick = cycledByTick.findIndex((row) => row[ballIndex]);
+      if (wrapTick === -1) {
+        expect(animsByTick[lastTick]![ballIndex])
+          .not.toEqual(animsByTick[0]![ballIndex]);
+        continue;
+      }
+      sawAWrap = true;
+      expect(wrapTick).toBeGreaterThan(0);
+      expect(animsByTick[wrapTick - 1]![ballIndex])
+        .not.toEqual(animsByTick[0]![ballIndex]);
+      const frozen = animsByTick[wrapTick]![ballIndex];
+      for (let i = wrapTick + 1; i <= lastTick; i += 1) {
+        expect(animsByTick[i]![ballIndex]).toEqual(frozen);
+      }
+    }
+    expect(sawAWrap).toBe(true);
+  });
+
+  it("ISSUES #96(b): mid-transition ball rolls consume Random() in sprite/OAM index order (0, 1, 2)", () => {
+    let state = createCanonicalFactorySwapPresentation();
+    state = advance(state, FACTORY_SWAP_ENTRY_READY_DELAY);
+    state = handleFactorySwapPresentationInput(state, "A");
+    state = advance(state, 58);
+    state = handleFactorySwapPresentationInput(state, "DOWN");
+    state = advance(state, 2);
+    state = handleFactorySwapPresentationInput(state, "A");
+    expect(state.controller.phase).toBe("enemySwitch");
+    expect(state.phaseElapsed).toBe(0);
+    expect(
+      factorySwapEnemyBallCycleVisuals(1).every((ball) => !ball.cycledToEnemy),
+    ).toBe(true);
+
+    // Force all three balls to a guaranteed roll this tick (resting, timer
+    // 1) so all three are simultaneously eligible - the only way to observe
+    // consumption ORDER rather than just which balls draw at all.
+    const rollReady: BallAnimState = {
+      phase: "resting",
+      timer: 1,
+      cmdIndex: 0,
+      pendingRest: 0,
+      displayTile: 0,
+      tileHistory: [],
+      hasRested: true,
+    };
+    const primed: FactorySwapPresentationState = {
+      ...state,
+      ballAnims: [rollReady, rollReady, rollReady],
+    };
+
+    const inputRng = 0x12345678;
+    const result = advanceFactorySwapPresentation(primed, inputRng);
+
+    const rng0 = advanceRngValue(inputRng);
+    const rng1 = advanceRngValue(rng0);
+    const rng2 = advanceRngValue(rng1);
+    const pendingRestFor = (rng: number) =>
+      ((rng >>> 16) & 0xffff) % 5 === 0 ? 32 : 0;
+
+    expect(result.presentation.ballAnims[0]!.pendingRest)
+      .toBe(pendingRestFor(rng0));
+    expect(result.presentation.ballAnims[1]!.pendingRest)
+      .toBe(pendingRestFor(rng1));
+    expect(result.presentation.ballAnims[2]!.pendingRest)
+      .toBe(pendingRestFor(rng2));
+    expect(result.rngValue >>> 0).toBe(rng2 >>> 0);
   });
 });

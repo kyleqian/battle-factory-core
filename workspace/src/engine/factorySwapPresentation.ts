@@ -886,12 +886,46 @@ export function advanceFactorySwapPresentation(
     )
   );
 
-  if (
-    selectedPalette &&
-    (initialEpochActive || summaryReturnEpochActive || returnedSummaryEpochActive)
-  ) {
+  // ISSUES #96(b): mid-cycle (enemySwitch/playerSwitch) balls still on the
+  // selected palette keep rolling until their OWN Swap_Task_SlideCycleBalls
+  // wrap - eligibility is per-ball, not the blanket phase exclusion above
+  // (RAM/OAM evidence: docs/factory-swap-enemy-picker-probe.md's 2026-08-17
+  // section, battle1-swap-enemy-picker frame 29838). enemySwitch balls roll
+  // while NOT YET cycled to the enemy (gray) side; playerSwitch balls roll
+  // once they HAVE cycled back onto the player (selected) side - matching
+  // factorySwapRender.ts's own per-phase `gray` sense.
+  const enemySwitchCycle =
+    clocked.controller.phase === "enemySwitch"
+      ? factorySwapEnemyBallCycleVisuals(clocked.phaseElapsed)
+      : null;
+  const playerSwitchCycle =
+    clocked.controller.phase === "playerSwitch"
+      ? factorySwapPlayerSwitchBallCycleVisuals(clocked.phaseElapsed)
+      : null;
+  const perBallRollEligible: readonly [boolean, boolean, boolean] =
+    enemySwitchCycle
+      ? [
+          !enemySwitchCycle[0].cycledToEnemy,
+          !enemySwitchCycle[1].cycledToEnemy,
+          !enemySwitchCycle[2].cycledToEnemy,
+        ]
+      : playerSwitchCycle
+        ? [
+            playerSwitchCycle[0].cycledToEnemy,
+            playerSwitchCycle[1].cycledToEnemy,
+            playerSwitchCycle[2].cycledToEnemy,
+          ]
+        : selectedPalette &&
+            (initialEpochActive ||
+              summaryReturnEpochActive ||
+              returnedSummaryEpochActive)
+          ? [true, true, true]
+          : [false, false, false];
+
+  if (perBallRollEligible.some(Boolean)) {
     const next = [...ballAnims] as [BallAnimState, BallAnimState, BallAnimState];
     for (let i = 0; i < next.length; i += 1) {
+      if (!perBallRollEligible[i]) continue;
       const result = advanceBallAnim(
         next[i]!,
         rngValue,
