@@ -37,6 +37,7 @@ import {
   turn6FeatherDanceTextStartTick,
   turn6FeatherDanceTextVisibleChars,
   turn6KickoffBounceTick,
+  turn6ReopenBounceTick,
   turn5SitrusResettledBounceTick,
 } from "../src/engine/battleScene.ts";
 import { menuIdleBounce } from "../src/engine/battleMenu.ts";
@@ -1292,6 +1293,23 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     expect(state.battleScene!.fightSubmenu.openElapsed).toBe(9381 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.confirmElapsed).toBe(9425 - SCENE_TICK0);
     expect(state.battleScene!.fightSubmenu.cursor).toBe(1);
+  });
+
+  it("turn6ReopenBounceTick: the reopen-press's own sinIndex hold now spans 3 ticks (turn6ReopenPressTick..+2), matching turn 5's RAM-proven driver behavior (ISSUES #97-B rung 1, docs/turn5-bounce-recalibration-probe.md §1/§6f) - the live openElapsed=7313 press tick pinned above", () => {
+    const pressTick = 7313; // live-confirmed above: state.battleScene!.fightSubmenu.openElapsed === 7313 - SCENE_TICK0
+    // Frozen for exactly 3 ticks, all landing on the SAME value (the formula
+    // evaluated once, at the press tick itself) - not re-evaluated per-tick.
+    expect(turn6ReopenBounceTick(pressTick, pressTick)).toBe(pressTick - 2); // FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT=2
+    expect(turn6ReopenBounceTick(pressTick + 1, pressTick)).toBe(pressTick - 2);
+    expect(turn6ReopenBounceTick(pressTick + 2, pressTick)).toBe(pressTick - 2);
+    // Old (pre-fix) behavior was `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`, advancing
+    // every tick with no hold at all - this would give pressTick+1-2 and
+    // pressTick+2-2 respectively, NOT the frozen pressTick-2 asserted above.
+    expect(turn6ReopenBounceTick(pressTick + 1, pressTick)).not.toBe(pressTick + 1 - 2);
+    expect(turn6ReopenBounceTick(pressTick + 2, pressTick)).not.toBe(pressTick + 2 - 2);
+    // The shift correction resumes normal per-tick advancement from +3 onward.
+    expect(turn6ReopenBounceTick(pressTick + 3, pressTick)).toBe(pressTick + 3 - 2);
+    expect(turn6ReopenBounceTick(pressTick + 4, pressTick)).toBe(pressTick + 4 - 2);
   });
 
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn6-menu.json (33/33, 0 diff, 11 named single-tick bounce-extremum residuals excluded, docs/battle-turn-notes.md's new §27)", () => {

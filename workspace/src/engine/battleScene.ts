@@ -11801,6 +11801,30 @@ function drawTurn6RockSlideWindow(fb: Uint8Array, t: number, realPressTick: numb
   }
 }
 
+/**
+ * ISSUES #97-B rung 1 (`docs/turn5-bounce-recalibration-probe.md` §1/§6f):
+ * turn 6's own reopen-press is the same RAM-proven "`DoBounceEffect`'s own
+ * `sinIndex` FROZEN for exactly 3 ticks" hardware mechanic already known for
+ * turn 5's `turn5ReopenPressTick` - this is its turn-6 sibling, previously
+ * missing entirely (`drawTurn6FightSubmenuWindow`'s open-DMA-wait branch fed
+ * `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` uninterrupted, advancing every tick
+ * with no hold at all). Freeze that same formula's own value AT the press
+ * tick for `t` in `[turn6ReopenPressTick, turn6ReopenPressTick + 2]`
+ * inclusive, then resume the normal per-tick formula from `+3` onward.
+ * Confirmed a provable no-op on `turn6-reopen-off.json` specifically (§6c:
+ * that trace's own healthbox mismatch band is a *different*, still-open
+ * ~11-tick lag local to `turn5SitrusResettledBounceTick`'s span, not this
+ * hold - the freeze only matters where a plateau boundary sits inside the
+ * 3-tick window, which isn't the case on that trace) - landed anyway because
+ * it now matches RAM ground truth and may close other family traces whose
+ * capture windows cross this exact reopen-press instant differently.
+ */
+export function turn6ReopenBounceTick(t: number, turn6ReopenPressTick: number): number {
+  return t >= turn6ReopenPressTick && t <= turn6ReopenPressTick + 2
+    ? turn6ReopenPressTick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT
+    : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
 function drawTurn6FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
@@ -11813,7 +11837,7 @@ function drawTurn6FightSubmenuWindow(
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (t < revealTick) {
-    drawTurn6ActionMenuIdleWindow(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+    drawTurn6ActionMenuIdleWindow(fb, t, turn6ReopenBounceTick(t, TICK0 + sm.openElapsed));
     return;
   }
   if (sm.confirmElapsed !== null) {
