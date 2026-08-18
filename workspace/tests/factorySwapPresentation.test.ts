@@ -54,6 +54,7 @@ import {
   factorySwapPlayerSwitchMechanism,
   factorySwapSummaryReturnBallTile,
   handleFactorySwapPresentationInput,
+  isFactorySwapQuitReturnSlot0StallActive,
   submitFactorySwapRoundDecision,
   type FactorySwapPresentationState,
 } from "../src/engine/factorySwapPresentation.ts";
@@ -1636,5 +1637,20 @@ describe("live Factory swap presentation adapter", () => {
     expect(factorySwapPlayerSwitchBallTiles(77)).toEqual([0, 16, 32]);
     expect(factorySwapPlayerSwitchBallTiles(95)).toEqual([16, 0, 0]);
     expect(factorySwapPlayerSwitchBallTiles(103)).toEqual([32, 0, 0]);
+  });
+
+  it("ISSUES #96(a): gates slot 0's quit-return display stall on phase, slot, and the ball's own hasRested latch", () => {
+    // The "Quit swapping?" popup's close (quitReturn), slot 0, post-latch: active.
+    expect(isFactorySwapQuitReturnSlot0StallActive(0, "quitReturn", true)).toBe(true);
+    // Same phase and slot, but before slot 0's own first rest completes: inactive.
+    expect(isFactorySwapQuitReturnSlot0StallActive(0, "quitReturn", false)).toBe(false);
+    // Slots 1/2 never stall, even post-latch during quitReturn.
+    expect(isFactorySwapQuitReturnSlot0StallActive(1, "quitReturn", true)).toBe(false);
+    expect(isFactorySwapQuitReturnSlot0StallActive(2, "quitReturn", true)).toBe(false);
+    // The popup itself being shown (quitPrompt) is not the gate - only its close is.
+    expect(isFactorySwapQuitReturnSlot0StallActive(0, "quitPrompt", true)).toBe(false);
+    // Ordinary picker ticks, well outside the quit flow: inactive.
+    expect(isFactorySwapQuitReturnSlot0StallActive(0, "playerPicker", true)).toBe(false);
+    expect(isFactorySwapQuitReturnSlot0StallActive(0, "enemyPicker", true)).toBe(false);
   });
 });

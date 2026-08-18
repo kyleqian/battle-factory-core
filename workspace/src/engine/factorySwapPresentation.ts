@@ -790,6 +790,33 @@ export interface FactorySwapPresentationAdvance {
 }
 
 /**
+ * ISSUES #96(a): ball slot 0's own display-lag quirk during the "Quit
+ * swapping?" popup's close (`controller.phase === "quitReturn"`).
+ * Frame-by-frame oracle instrumentation (not a port of confirmReveal.ts's
+ * `isRevealStallActive`, which does not fit this site - see the ISSUES
+ * entry) shows the boundary is ball 0's own `hasRested` latch
+ * (`ballAnim.ts`): every cmdIndex-transition frame from the tick that latch
+ * flips true onward needs slot 0's displayed tile one further tick behind
+ * (`advanceBallAnim`'s `lag`), while the pre-latch span and slots 1/2 do
+ * not - draft's own `i === 0` / `!hasRested` "first cycle" formula
+ * (ballAnim.ts:215) does not reproduce this; both draft's isSlot0 threading
+ * and the popup-shown ("quitPrompt" + inputReady) analog of
+ * isRevealStallActive were tried first and regressed frames that were
+ * already exact (see PROGRESS.md). Passed as advanceBallAnim's
+ * `revealStallActive` argument with `isSlot0` left false throughout -
+ * `lag`'s formula reads identically either way, so scoping to slot 0 here
+ * in the caller (rather than reusing draft's own isSlot0 gate) is the
+ * change that actually matches the oracle.
+ */
+export function isFactorySwapQuitReturnSlot0StallActive(
+  ballIndex: number,
+  controllerPhase: FactorySwapPhase,
+  ballHasRested: boolean,
+): boolean {
+  return ballIndex === 0 && controllerPhase === "quitReturn" && ballHasRested;
+}
+
+/**
  * Advances the generic swap-screen tasks and its three SpriteCB_Pokeball
  * callbacks. The caller owns the ambient VBlank Random() call and passes its
  * resulting cursor here; eligible selected-palette balls then consume their
@@ -869,7 +896,11 @@ export function advanceFactorySwapPresentation(
         next[i]!,
         rngValue,
         false,
-        false,
+        isFactorySwapQuitReturnSlot0StallActive(
+          i,
+          clocked.controller.phase,
+          next[i]!.hasRested,
+        ),
         true,
       );
       next[i] = result.state;
