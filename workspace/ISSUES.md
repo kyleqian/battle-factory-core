@@ -641,6 +641,70 @@ artifact dominating that span. `resolve-off-c`'s 6763 residual and
 `resolve-off-d`'s 6953-6969 ring/star span (sub-entry I) remain
 unchanged, untouched by this entry.
 
+### K. `turn5-confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED (both near-full close, per `docs/turn5-confirm-pools-diagnosis.md` §1/§2); `resolve-off-d`'s Onix Sitrus HP display-climb formula also LANDED (per `docs/turn5-confirmb-resolved-residuals.md` §8) — 2026-08-18, bounded MAIN worker
+
+**Confirm-off classes 1+2 landed.** `drawTurn5EndeavorText` was the last
+remaining caller of `drawEndeavorSquish` (turn 2/turn 3 already dropped it,
+ISSUES #39, zero RAM basis — pixel-confirmed fresh for turn 5's own window
+too: Grovyle's sprite region byte-identical across 101 sampled oracle
+ticks). Rewrote it to mirror `drawTurn3EndeavorText`'s own structure:
+`drawActionMenuIdleContentFromLatest` for idle content, Onix's real flicker
+via `endeavorOnixInvisible` (new `TURN5_OFF_ENDEAVOR_FLICKER_START=82`,
+bit-for-bit the turn2/3 precedent) and healthbox wobble via
+`endeavorHealthboxBounceY2` (new `TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_
+START=81`, same precedent), plus a new `TURN5_OFF_ENDEAVOR_HP_DRAIN_START_
+DELAY=116` threaded into `endeavorHp`'s call site (was silently falling
+back to the shared, too-slow 153 default). All three values independently
+re-derived this session from oracle evidence, zero new numbers invented.
+Deleted `drawEndeavorSquish`/`drawEndeavorHitsplats`/
+`ENDEAVOR_HITSPLAT_ROUNDS` (grep-confirmed genuinely unreferenced after the
+rewrite — the squish table/blend color/shake/droplet helpers stay, still
+used by the separate Scene-ON ENDEAVOR staged path).
+
+**`resolve-off-d`'s display-climb also landed.** §8's "ring/star" framing
+for the 6953-~6988 residual was superseded by a live-climb HP-overlay
+finding: `turn5OffSitrusOnixHp` was a hard step at the RAM-confirmed jump
+tick (6984), correct for the underlying stat but not the DISPLAYED bar.
+Verified independently this session via oracle-vs-oracle pixel diffing of
+the HP-digit crop (not just trusting the doc's own 3-anchor curve fit): the
+digit is unchanged through render 6952, then changes on every single tick
+6953-6982 (30 consecutive nonzero diffs, zero skips), then flat from 6982
+on — an exact 1-HP/tick climb, matching all 3 oracle-read anchors exactly
+(6953→2, 6960→9, 6980→29) and capping at exactly t=6982, two ticks before
+the RAM jump tick. Landed as a new `TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_
+TICK=6952` anchor (pixel-confirmed absolute tick, not cleanly derivable
+from any existing epoch by a relative offset).
+
+**Numbers:** `turn5-confirm-off-a` 60/132 → **128/132** (predicted ~128,
+exact). `turn5-confirm-off-b` 37/132 → **131/132** (predicted ~131, exact).
+`turn5-resolve-off-d` 142/196 → **159/196** (+17, strict improvement — span
+closed: 6953-6969, 17 ticks, now exact; 6970-6988 still mismatches but with
+a much smaller residual than before, ~77-177px vs ~130-230px, a separate
+ring/star sparkle-timing defect §8.2 flagged but did not isolate, now
+exposed under the fixed digit — not touched by this fix; 6989-7005 is the
+already-flagged, out-of-scope §6.3/§8.3 menu-chrome spike, RAM probe still
+not run). Zero decreases across the full guard family, rerun after EACH
+landed mechanism per sub-entry J's own lesson: `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-resolve-off-a` 56/196, `turn5-resolve-off-b` 88/196,
+`turn5-resolve-off-c` 195/196, `turn13-switchin` 242/242,
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each. Two new Tier-1
+pin blocks (`tests/battleScene.test.ts`), one updated block (the now-live-
+climb `turn5OffSitrusOnixHp`). Full receipts:
+`docs/turn5-confirm-pools-diagnosis.md`, `docs/turn5-confirmb-resolved-
+residuals.md` §8 (dated addendum recording the landing).
+
+**Remaining, still open:** class 3 (turn 5's own 4-frame confirm-wait
+submenu bounce, 5959-5961/5968, never independently RAM-verified — next
+instrument in the diagnosis doc's own §3.2) and class 4 (the 1-frame
+accepted `rockSlideTextStartTick` transition edge) in `confirm-off-b`.
+`resolve-off-a`/`-b`'s remaining pools (cursor/dismiss mechanism +
+static-bg artifact, sub-entry J) and `resolve-off-c`'s 6763 residual are
+untouched by this entry. `resolve-off-d`'s newly-exposed 6970-6988 ring/star
+residual and its already-flagged 6989-7005 menu-chrome spike (§6.3/§8.3)
+both still need their own RAM-probe instruments, not attempted this
+session (time).
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for

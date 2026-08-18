@@ -4,6 +4,71 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1339 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED, plus `resolve-off-d`'s Onix Sitrus HP display-climb LANDED — 60/132→128/132, 37/132→131/132, 142/196→159/196**
+
+- **State:** two green commits (`02b82685` primary + `37a901db`
+  secondary, each fix+Tier-1 pins) plus this docs commit. `npm test`
+  **1,067 files / 10,075 passed (+7 total, 2 new describe blocks + 1
+  rewritten) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** read `docs/turn5-confirm-pools-diagnosis.md` (committed
+  `6366f91a`) and `docs/turn5-confirmb-resolved-residuals.md` §8 in full.
+  **Primary, both classes landed byte-for-byte per the doc's own diffs:**
+  `drawTurn5EndeavorText` was the last remaining caller of
+  `drawEndeavorSquish` (turn 2/3 already dropped it, ISSUES #39, zero RAM
+  basis — pixel-reconfirmed for turn 5 too) — rewritten to mirror
+  `drawTurn3EndeavorText`'s own structure, threading three new turn5-off
+  scoped constants (`TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY`=116,
+  `_HEALTHBOX_BOUNCE_START`=81, `_FLICKER_START`=82 — all bit-for-bit the
+  turn2/3 precedent). Deleted `drawEndeavorSquish`/`drawEndeavorHitsplats`/
+  `ENDEAVOR_HITSPLAT_ROUNDS` (grep-confirmed genuinely dead post-rewrite —
+  the squish table/blend/shake/droplet helpers survive, still used by the
+  separate Scene-ON ENDEAVOR staged path, so not ALL of the doc's own
+  speculative cleanup list died). **Secondary landed too (budget
+  remained):** §8's own "ring/star" framing for `resolve-off-d`'s
+  6953-~6988 residual was superseded by a live-climb HP-overlay finding.
+  Per the brief's own MANDATORY verification instruction, did NOT just
+  trust the doc's 3-anchor curve fit — ran a fresh oracle-vs-oracle
+  per-tick pixel diff of the HP-digit crop, confirming the digit changes
+  on EVERY tick 6953-6982 (30 consecutive nonzero diffs, zero skips) then
+  holds flat, exactly matching `hp(t)=t-6951` and capping at t=6982 (not
+  the hedged ~6982-6984). Landed `turn5OffSitrusOnixHp`'s new live-climb
+  body plus a new `TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK`=6952
+  constant (pixel-confirmed absolute tick; no clean relative-offset
+  derivation from any existing epoch was found). Per the brief's "hard
+  lesson" (sub-entry J), reran the ENTIRE guard family after EACH landed
+  mechanism, not just the target traces.
+- **Result:** `turn5-confirm-off-a` 60/132 → **128/132** (predicted ~128,
+  exact). `turn5-confirm-off-b` 37/132 → **131/132** (predicted ~131,
+  exact). `turn5-resolve-off-d` 142/196 → **159/196** (+17, strict
+  improvement; 6953-6969 now exact, 6970-6988 keeps a much smaller
+  residual — a real, previously-masked ring/star sparkle defect, now
+  exposed and still open — and 6989-7005's already-flagged menu-chrome
+  spike is untouched). Zero decreases anywhere, verified after both
+  landings: `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
+  `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+  `turn5-resolve-off-a` 56/196, `-b` 88/196, `-c` 195/196,
+  `turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
+  256/256 each.
+- **Next:** confirm-off's class 3 (4-frame confirm-wait submenu bounce,
+  next instrument in the doc's own §3.2) and class 4 (1-frame accepted
+  edge) remain open. `resolve-off-d`'s newly-exposed 6970-6988 ring/star
+  residual and its already-flagged 6989-7005 menu-chrome spike both need
+  their own RAM-probe instruments (named in `docs/turn5-confirmb-
+  resolved-residuals.md` §8.3, unchanged). `resolve-off-a`/`-b`'s
+  remaining pools (sub-entry J, side-lane territory) untouched. #71 Rung
+  9 unchanged.
+- **Notes:** no PAPERCUT. The secondary's own MANDATORY "verify, don't
+  assume" instruction paid off exactly as intended — an independent
+  per-tick pixel diff (not just re-checking the doc's 3 anchor points)
+  pinned the cap tick one tick earlier than the doc's own hedge (6982 vs
+  "~6982-6984") and, just as importantly, revealed that the doc's own
+  predicted 160-178/196 range wouldn't fully land: the actual result
+  (159/196) is a strict improvement but undershoots the low end by one,
+  because a real second mechanism (ring/star) was hiding under the digit
+  bug the whole time — exactly the kind of thing a rushed "looks close
+  enough" landing would have missed.
+
+---
 ## 1338 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-a`'s Class A rock-slide hit-flash profile LANDED — 44/196→56/196; Class C reverted (hard-guard regression); Class B unresolved (new residual found)**
 
 - **State:** one green commit (`8372b6ab` fix+Tier-1 pins) plus this docs
@@ -147,61 +212,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   step would have shipped a 17-frame regression masked by a higher net
   count — the family's "confirmed by direct experiment, not curve-fit"
   discipline caught it before commit.
-
----
-## 1336 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s third mechanism (materialize→settled sprite transition) LANDED per `docs/turn5-resolve-offc-tail-diagnosis.md` §11 — 149/196→173/196, exactly the prediction**
-
-- **State:** one green commit (fix+Tier-1 pin) plus this docs commit.
-  `npm test` **1,067 files / 10,058 passed (+2, one new Tier-1 describe
-  block) / 223 skipped**; `npm run build`/`npm run typecheck` green.
-- **Did:** read §11 fully (committed today at `b3497e0f`) and landed its
-  named fix: dropped `drawTurn5PidgeottoMaterialize`'s `TURN5_STRETCH_
-  TICK` branch split (`battleScene.ts`) — the tinted-blend formula now
-  runs unconditionally for the whole materialize window instead of
-  switching to a double-size-affine stretch table (`TURN5_STRETCH_TABLE`)
-  past render 6786, matching §11a's own fresh RAM probe (real sprite
-  "dead static" from RAM 6756 on, no wobble, no double-affine mode ever).
-  Landing that alone held the count flat at 149/196, contradicting §11f's
-  own 173/196 prediction — per the brief's own "attribute before
-  accepting" instruction, direct RGB sampling of the fresh compare run's
-  PNGs found a SECOND bug in the same function: `turn5PidgeottoFrame(t)`
-  (the front-sprite tileset selector) flipped to a second graphic frame at
-  render 6786, contradicted by the same §11a RAM table (dead static
-  spans every one of its claimed transition ticks). Confirmed by direct
-  experiment (forcing the selector to frame 0 and rerunning the compare)
-  before landing: exactly 173/196. Deleted `turn5PidgeottoFrame` entirely
-  (its `frame2` branch was the only remaining consumer of
-  `pidgeottoFrontSprite.frame2`) and `TURN5_STRETCH_TABLE` (genuinely
-  unreferenced after the branch removal); kept `TURN5_STRETCH_TICK`
-  (still read by `tools/probe/analyze-turn5-resolve-offc-tail-app-series.ts`)
-  and `drawTurn5PidgeottoSettled` (still called past `TURN5_PIDGEOTTO_
-  SETTLE_TICK`). Corrected the contradicted doc comments in both
-  `turn5ResolutionAdapter.ts` (`materializeSettleTick`, claimed "RAM tick
-  6827's idle callback flip" — real flip is RAM 6760) and
-  `battleSceneCanonical.ts` (the "Wobble table"/frame-selection comments),
-  original text kept for the forensic record. New Tier-1 pin: exported
-  `drawSpriteSheetAffineTintedBlend` and added a hand-built-fixture test
-  pinning its degenerate case (accumulator=256, coeff=0, y2=0 reproduces a
-  plain untransformed draw exactly) — the exact claim the fix relies on.
-- **Result:** `turn5-resolve-off-c` 149/196 → **173/196** (exactly §11f's
-  prediction; all 24 of renders 6786-6809 now 0px). Zero decreases:
-  `turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
-  46/46, `turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-a`
-  60/132, `turn5-confirm-off-b` 37/132, `turn5-resolve-off-b` 88/196,
-  `turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
-  256/256 each. Bonus, unprescribed increase: `turn5-resolve-off-d`
-  50/196 → **66/196** (shares the same draw path, per §11f's own flagged
-  reach; its own out-of-scope residual past tick 7004 unaffected).
-- **Next:** the remaining 23 of `resolve-off-c`'s 47 mismatched frames
-  (renders 6763-6783) are §11e's flagged FOURTH mechanism
-  (`TURN5_MATERIALIZE_RAMP_COEFF`'s own falling edge) — needs its own RAM
-  instrument, out of this step's scope. `resolve-off-d`'s §2.4/§2.5 (sub-
-  entry G) stay open, side-lane territory. #71 Rung 9 unchanged.
-- **Notes:** no PAPERCUT. The brief's own "attribute before accepting"
-  instruction was load-bearing this session — landing only the named fix
-  would have looked like a wash (149/196 unchanged) and could have been
-  mistaken for a failed prediction; one more RAM-consistent discovery
-  (the frame-selector bug, directly implied by §11a's own already-landed
-  "dead static" table, just not yet connected to that specific function)
-  was what actually made the predicted count real.
-

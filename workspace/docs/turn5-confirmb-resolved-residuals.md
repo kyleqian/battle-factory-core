@@ -950,3 +950,40 @@ signal in 6953-6988). Honest partial, per this step's own "honest partials
 beat rushed pins" priority instruction: one mechanism newly characterized
 with a strong, three-point pixel fit and a named (if not fully nailed) fix
 shape; one mechanism named but genuinely untouched.
+
+### 8.7 Landed (2026-08-18, bounded MAIN worker, ISSUES #97 remainder)
+
+§8.2's live-climb formula landed, with the exact anchor this section's own
+caveat flagged as unresolved now nailed down: fresh oracle-vs-oracle
+pixel-diffing of the HP-digit crop (`npm run compare --capture-range`,
+per-tick diffs, NOT just the 3-point curve fit above) found the digit
+unchanged through render 6952, then a nonzero diff on **every** tick
+6953-6982 (30 consecutive changes, zero skips or repeats), then flat again
+from 6982 on — confirming `hp(t) = clamp(1 + (t - 6952), 1, 31)` exactly,
+with the cap reached at t=6982 (not the hedged "~6982-6984" range). Landed
+as `turn5OffSitrusOnixHp`'s new body plus a new `TURN5_OFF_SITRUS_ONIX_HP_
+CLIMB_START_TICK=6952` constant — deliberately NOT derived from
+`ONIX_SITRUS_PROC_TRIGGER_RAM_TICK`(6872) or `TURN5_OFF_SITRUS_HEAL_TEXT_
+START_TICK`(6850) by a relative offset (neither gives a round or
+previously-seen delta), so minted directly from the pixel-confirmed
+absolute tick per this family's own convention.
+
+**Numbers:** `turn5-resolve-off-d` 142/196 → **159/196** (+17, strict
+improvement). 6953-6969 (17 ticks) now closes exactly. 6970-6988 (19
+ticks) still mismatches, but with a much smaller residual (77-177px vs the
+pre-fix 130-230px) — §8.2's own "widening toward x=200... separate,
+unisolated sparkle contribution" hedge was right: a real ring/star
+sparkle-timing defect was layered on top of the digit bug and is now
+exposed on its own, still unfixed. 6989-7005 (§8.3's own menu-chrome
+spike) is entirely untouched, as flagged — its own RAM-probe instrument
+still has not been run. Zero decreases across the full guard family
+(rerun in full per ISSUES #97 sub-entry J's own lesson, not just this
+trace). One updated Tier-1 pin block (`tests/battleScene.test.ts`, the
+`turn5OffSitrusOnixHp` describe block rewritten for the new climb shape).
+Full ledger: ISSUES #97 sub-entry K.
+
+**Still open, next instruments unchanged from §8.2/§8.3 above:** the
+6970-6988 ring/star residual (isolate `turn5SitrusRingMatrix`/
+`drawGrantingStars` now that the dominant digit signal is gone) and the
+6989-7005 menu-chrome spike (the named window-system RAM probe, e.g.
+`gBattle_BG0_X`/window `WindowId`/tilemap-write completion).

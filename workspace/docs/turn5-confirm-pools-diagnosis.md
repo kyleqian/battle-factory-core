@@ -399,3 +399,24 @@ contradict the DISPLAYED HP being a live, animated drain (§2); the real
 game updates the stat instantly but visually animates the health bar
 toward it over subsequent frames, exactly the behavior `endeavorHp`'s own
 linear formula (already used correctly by turn 2/3) already models.
+
+## 7. Landed (2026-08-18, bounded MAIN worker, ISSUES #97 remainder)
+
+Classes 1+2 landed byte-for-byte as this doc's own §1.4/§2.4 diffs
+specify: `TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY`(116)/`_HEALTHBOX_
+BOUNCE_START`(81)/`_FLICKER_START`(82) added to `battleSceneCanonical.ts`,
+`drawTurn5EndeavorText` rewritten per §1.4's diff. Verification script
+(`analyze-turn5-confirm-endeavor-drain-flicker.ts`) reconfirmed PASS before
+and after landing. `drawEndeavorSquish`/`drawEndeavorHitsplats`/
+`ENDEAVOR_HITSPLAT_ROUNDS` deleted (grep-confirmed genuinely unreferenced
+post-rewrite — the squish table/blend color/shake/droplet helpers survive,
+still used by the separate Scene-ON ENDEAVOR staged path, so NOT all of
+§1.4's follow-up cleanup list died as speculated). `turn5-confirm-off-a`
+60/132 → **128/132** (predicted ~128, exact). `turn5-confirm-off-b` 37/132
+→ **131/132** (predicted ~131, exact). Zero decreases across the full
+guard family (§5's list rerun in full). Two new Tier-1 pin blocks
+(`tests/battleScene.test.ts`, describe block importing `endeavorHp`/
+`endeavorHealthboxBounceY2`/`endeavorOnixInvisible` directly — the latter
+two newly exported from `battleScene.ts` for this purpose). Class 3 (4
+frames) and class 4 (1 frame) remain open exactly as predicted — see
+ISSUES #97 sub-entry K for the full ledger.
