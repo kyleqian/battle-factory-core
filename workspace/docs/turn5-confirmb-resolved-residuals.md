@@ -532,3 +532,194 @@ anchors §1.3/§2.2/§2.3 used. §2.4 (sprite/particle overlay) and §2.5
 (the 6991-6994 transition spike) remain exactly as flagged above — not
 attempted this session, per the brief's own scope boundary — recorded in
 `ISSUES.md` #97 sub-entry G.
+
+## 6. Follow-up (2026-08-18, bounded SIDE worker, ISSUES #97 remainder):
+§2.4/§2.5 re-measured fresh, one pinned, one re-characterized
+
+Scope per this step's brief: re-measure `turn5-resolve-off-d`'s remaining
+window fresh (§5's landed fixes moved the baseline from 0/196 to 50/196)
+and characterize what actually remains, not what §2's pre-fix tables show.
+Fresh baseline confirmed in THIS worktree: `npm run compare --
+turn5-resolve-off-d --summary` -> **50/196**, matching the brief's own
+cited number exactly. Method: read the diff PNGs first (a fresh
+`npm run compare -- turn5-resolve-off-d --summary`, no capture-range
+override — the trace's own 196 frames already densely cover 6810-7005),
+then direct RGB sampling at specific coordinates, same discipline as §1/§2
+above and `docs/turn5-resolve-offc-tail-diagnosis.md` §12's own sibling
+instrument (this session's other deliverable). No RAM probe run — pixel
+evidence alone was sufficient to either pin or clearly characterize both
+items. Analysis only — `git diff -- src/` empty throughout.
+
+### 6.1 Residual shape, re-measured
+
+| span | bbox | magnitude | status |
+|---|---|---|---|
+| 6810-6825 | `153,15-199,73` | 1146-1402px, 3-3.65% | §2.1's own already-flagged carryover from `resolve-off-c`'s trailing mechanism — **not this residual, not re-examined** |
+| 6826-6849, 6851-6874 | (absent from the mismatch list = exact match) | 0px | already fixed — both landed §2.2/§2.3 fixes hold here |
+| 6850 | `16,124-144,149` | 1245px, 3.24% | a single-frame transition edge (old text still held one tick past the new anchor) — same shape as §1.5's own already-accepted 6184 artifact, not re-chased |
+| **6875-6969** | `39,49-100,111` growing to `39,49-200,111` | **600-1591px, 1.56-4.14%** | **§6.2 below — PINNED** |
+| 6970-6988 | `44,71-200,103` shrinking to `44,71-97,105` | 130-232px, 0.29-0.6% | transitional tail of the same mechanism as 6875-6969, shrinking toward the now-fixed HP-jump tick (6984) — same root cause as §6.2, not separately chased |
+| **6989-6994** | `9,71-238,158` (widens sharply at 6991) | **1302-6197px, 3.39-16.14%** | **§6.3 below — re-characterized (direction was assumed backwards), NOT PINNED** |
+| 6995-7005 | `42,70-99,106` to `43,71-229,110` | 207-1793px, 0.54-4.67% | tail of the same menu-chrome mechanism as §6.3 — not separately chased |
+
+### 6.2 §2.4 (sprite/particle overlay) — PINNED: Onix's own rotation animation is spurious, zero RAM basis, exactly the same class of bug as `turn5-resolve-off-c`'s mechanism (iii)
+
+Direct RGB sampling of `onixSitrusRotateMatrix`'s own render region
+(`ONIX_MATERIALIZE_CORNER`-relative, `battleScene.ts:10709-10711`,
+consumed by `drawTurn5RockSlideAttack:10917-10931`) at 7 grayscale-toned
+coordinates inside Onix's own sprite silhouette (`(74,70)`, `(82,70)`,
+`(90,70)`, `(98,70)`, `(66,80)`, `(90,80)`, `(98,80)`), sampled at every
+tick from 6826 through 6934:
+
+**The ORACLE's own Onix sprite is byte-identical at all 7 coordinates for
+every one of these 108 ticks** — `(74,70)` reads `(222,214,214)` at 6826,
+6850, 6860, 6875, 6889, 6905, 6923, AND 6934 alike; same for all 6 other
+coordinates. The real hardware never rotates, tints, or otherwise animates
+Onix's sprite anywhere in this span — it is flat static, exactly the same
+finding `docs/turn5-resolve-offc-tail-diagnosis.md` §11 already made for
+PIDGEOTTO's own stretch table ("the real sprite is static... no wobble to
+reproduce here, in this profile, for this switch-in").
+
+The APP, meanwhile, actively renders `onixSitrusRotateMatrix(t)`'s own
+periodic curve throughout this span (`ONIX_SITRUS_IDENTITY_RENDER_TICK =
+TURN5_SITRUS.procTriggerRamTick(6872) + 2 = 6874`, `battleScene.ts:10705-
+10706`) — the diff magnitude oscillates in a clean ~30-tick rise-fall cycle
+(600px at 6875 -> 1568px peak at 6889-6891 -> 600px at 6904-6905 -> repeats
+6909-6934...) that exactly matches a real, well-documented rotation curve
+being actively evaluated (this is not noise; `app-06889.png` and
+`app-06923.png`, 34 ticks apart, read byte-identical at every one of the 7
+sample coordinates — the app's own animation is genuinely periodic, just
+with zero basis in this trace's real hardware behavior).
+
+**This is the SAME root cause class §11 already diagnosed for the OTHER
+switch-in's stretch table**, and per that same doc's own reasoning, the
+most likely explanation is `battle-scene-off`'s own documented behavior
+(`bin/oracle info`'s bootstrap description, `AGENTS.md`: "Move/effect and
+species front-sprite entrance animations are skipped by the real game" —
+plausibly extending to this item-heal rotation flourish too, though that
+specific extension isn't independently confirmed this session).
+
+**Named mechanism and fix shape**: `onixSitrusRotateMatrix(t)`
+(`battleScene.ts:10709-10711`) should return `null` for this trace's own
+6810-7005 window (falling through to `drawTurn5RockSlideAttack`'s own
+`else` branch, `:10932-10956`, which already draws Onix's plain static
+sprite with the tint/settle handling the rest of this window needs) rather
+than evaluating `sitrusRotationAtAge(t - 6874)`'s active curve. **Do NOT
+edit `sitrusRotationAtAge`, `ONIX_SITRUS_IDENTITY_RENDER_TICK`, or
+`ONIX_SITRUS_ROTATE_RENDER_LAG` directly** — per §2.2's own established
+reasoning (this same epoch and its `+1`/`+2` render-lag guard are shared
+with `turn5SitrusRingMatrix`/`drawGrantingStars`/`turn5GrantingStarPlacement`,
+none of which this session verified) and per the build-time consistency
+check at `battleScene.ts:10697-10704` that would need re-auditing if
+either constant moved. The minimal, scoped fix is a NEW turn5-off-only gate
+at `onixSitrusRotateMatrix`'s own single call site
+(`battleScene.ts:10917`), e.g. an explicit `false`/window-scoped override
+threaded from `drawTurn5RockSlideWindow`'s own caller (mirroring §2.2/§2.3's
+"new call-site parameter, don't touch the shared function" discipline) —
+**not fully worked out this session** (which caller-level plumbing is
+cleanest wasn't traced end-to-end), but the WHAT (suppress the rotation
+branch for this window) is pixel-pinned with high confidence.
+
+**Not verified this session**: whether `turn5SitrusRingMatrix`/
+`drawGrantingStars` (the OTHER two consumers of the same
+`ONIX_SITRUS_IDENTITY_RENDER_TICK` epoch, per §2.4's own original
+candidate list) have the SAME "spurious in this trace" defect, or are
+genuinely correct here — the bbox widening to `x=200` at renders 6953-6969
+(§6.1's own table) is a plausible sign the star/sparkle effect (spawning
+at RAM 6968 per its own doc) contributes separately, but this session
+didn't isolate it with its own coordinate sampling. Flagged as the next
+instrument if landing the rotation fix alone doesn't close this span.
+
+### 6.3 §2.5 (6991-6994 transition spike) — re-characterized: the app is EARLY, not the oracle; direction was assumed backwards
+
+Direct RGB sampling across the full mismatch bbox (`9,71-238,158`) at
+6988/6991/6995 (`out/run-2026-08-18-19-29-04Z-89202`, this session's own
+fresh run) shows a clean, consistent split:
+
+- **Left/upper portion (x<=100, and the whole screen for y<115)**: app and
+  oracle agree at EVERY sampled tick 6988/6991/6995 alike — this region
+  transitions to the new post-heal menu content (or was already there)
+  with no mismatch at all.
+- **Right/lower portion (x>=130, y>=115 — the action-menu button-grid
+  area)**: at **t=6988, BOTH sides still show the OLD (pre-menu, rock-slide-
+  window) content** (e.g. `(130,115)`: both `(214,74,57)`). At **t=6991
+  (`TURN5_OFF_SITRUS_MENU_REDRAW_TICK`, `battleSceneCanonical.ts:213`),
+  the APP has ALREADY switched to the new menu-chrome color at every one of
+  these coordinates (e.g. `(130,115)`: app reads `(115,107,132)`), but
+  the ORACLE is STILL showing the old content** (`(130,115)`: oracle still
+  reads `(214,74,57)`, unchanged from 6988). By **t=6995, both sides agree
+  on the new content** (`(130,115)`: both `(115,107,132)`).
+
+**This is the opposite of the brief's own framing** ("the MENU_REDRAW
+hard-cut itself landing on a different real tick... or a multi-tick
+transition render lag" left the direction unstated) — the pixel evidence
+is unambiguous: **the APP's `TURN5_OFF_SITRUS_MENU_REDRAW_TICK=6991` gate
+is not wrong for the LEFT/upper portion of the screen (that already
+matches at 6991), but the RIGHT/lower action-menu button grid transitions
+in the APP a full 4 ticks BEFORE the real hardware does.** `drawTurn5SitrusSettledMenuChrome`
+(`battleScene.ts:11649-11658`) draws its own `menuIdleBase` bitmap as a
+SINGLE uniform blit once `t >= TURN5_OFF_SITRUS_MENU_REDRAW_TICK` —
+consistent with the LEFT portion's own correct behavior, but this session
+did not identify why the RIGHT portion specifically lags in the real
+hardware (candidates not verified: a second, later real RAM event for
+just the button-grid sub-window redraw that the single-bitmap blit
+conflates; or `menuIdleBase`'s own asset simply painting the whole region
+including both, while the REAL redraw is genuinely two separate window
+system calls on real hardware that don't land on the same VBlank).
+
+**NOT PINNED — flagged with its own next instrument**: a RAM probe of the
+window-system state (`gBattle_BG0_X`/the action-menu window's own
+`WindowId`/tilemap-write completion, the same class of instrument
+`dump-turn5-resolve-offc-tail-probe.py` already uses for `gPaletteFade`)
+across RAM ticks corresponding to render 6988-6996 would directly show
+whether the real hardware's button-grid redraw is a genuinely separate,
+later event or an artifact of this specific pixel sample's own coordinate
+choice. Until then: the fix shape is NOT claimed here (unlike §6.2, where
+the RAM-basis question is already settled by the "static at every one of
+108 sampled ticks" finding) — landing a blind "+4" delay without RAM
+confirmation risks the same kind of curve-fit-without-basis mistake this
+family has explicitly avoided elsewhere (§4e/§11e's own open caveats).
+
+### 6.4 Baselines (measured fresh this session)
+
+| trace | before this session (per the brief) | this session |
+|---|---|---|
+| `turn5-resolve-off-d` | 50/196 | unchanged (analysis only) |
+| `turn5-resolve-off-a` | 44/196 | unchanged, not touched |
+| `turn5-resolve-off-b` | 88/196 | unchanged, not touched |
+| `turn5-resolve-off-c` | 149/196 | unchanged, not touched (this worktree's own baseline before the parallel main-lane §11 fix lands — see `docs/turn5-resolve-offc-tail-diagnosis.md` §12) |
+| `turn5-reset-off` | 256/256 | unchanged, control |
+
+### 6.5 Verdict
+
+§2.4 is now **fully pinned**: Onix's own rotation animation
+(`onixSitrusRotateMatrix`) has zero RAM basis anywhere in this trace's
+6810-6934+ window — the real sprite is flat static at every one of 108
+sampled ticks across 7 coordinates — the same "spurious animation with no
+real-hardware basis" root cause `turn5-resolve-offc-tail-diagnosis.md` §11
+already found and fixed-shaped for the OTHER switch-in's stretch table.
+The exact caller-level plumbing for the fix (which function should thread
+a "suppress rotation" flag into `onixSitrusRotateMatrix`'s single call
+site) is not fully worked out, and whether the ring/star consumers of the
+same epoch share the defect is unverified — both flagged as the next
+steps, not blocking on the core finding.
+
+§2.5 is **re-characterized, not newly pinned**: the original framing (an
+undiagnosed "transition spike") undersold what pixel evidence now shows
+cleanly — a real, reproducible 4-tick lag between the app's own uniform
+menu-chrome blit and the real hardware's own (apparently two-part) menu
+redraw, with the APP transitioning EARLY rather than late. This reverses
+an unstated assumption in the original brief's own framing and is exactly
+the kind of "direct RAM/pixel contradiction, change nothing, flag loudly"
+case the brief asked for — recorded here, `src/` untouched. A RAM probe of
+the window-system state is the named next instrument.
+
+No landed anchor was contradicted by either finding: §6.2 doesn't touch
+`ONIX_SITRUS_IDENTITY_RENDER_TICK`'s own value (only whether the ROTATION
+branch should fire at all in this trace), and §6.3 doesn't touch
+`TURN5_OFF_SITRUS_MENU_REDRAW_TICK`'s own value (only notes that ONE
+sub-region governed by it behaves differently from the rest of what it
+gates). Both are new evidence about previously-unswept downstream
+consumers of already-landed anchors, the same shape §2's own original
+verdict (§2, "No landed anchor was contradicted") already established for
+this family.
