@@ -825,3 +825,455 @@ residual past tick 7004 is unaffected).
 pinning `drawSpriteSheetAffineTintedBlend`'s degenerate/static-end-state
 case, now exported for the test) / 223 skipped; `npm run build` green.
 Full writeup and per-trace numbers: `ISSUES.md` #97 sub-entry H.
+## 13. Mechanism (iv) instrument (2026-08-18, bounded SIDE worker, ISSUES #97
+remainder): the materialize-phase tint/frame anchor, renders 6763-6783
+
+Scope per this step's brief: §11e's own flagged "probable fourth mechanism"
+(the SAME "one-tick-early falling edge" shape §4c/§4d already diagnosed and
+fixed for `TURN5_BG_FADE_Y`, here suspected on `TURN5_MATERIALIZE_RAMP_
+COEFF` instead) across render ticks 6763-6783 - explicitly disjoint from
+the parallel main-lane worker's own concurrent §11-addendum/6786+ work (not
+touched, not re-measured here). Fresh baseline confirmed in THIS worktree
+before starting: `npm run compare -- turn5-resolve-off-c --summary` ->
+**149/196**, byte-identical per-frame diff numbers to §11c's own table
+(same `run-2026-08-18-19-12-48Z-82442` shape) - no drift from concurrent
+lanes as of this session.
+
+This session's method departs from a RAM probe (the brief's own suggested
+starting point) because the diff PNGs, read first per the brief's own
+instruction, made a pixel-exact EXACT-INTEGER-INVERSION approach directly
+tractable and strictly more precise than a RAM sample would be for this
+specific question (a byte-level palette-blend formula, not a physical OAM
+register) - see §13a. Two new probe scripts implement it, both under
+`tools/probe/`, both committed:
+
+- `analyze-turn5-resolve-offc-materialize-tint-probe.ts` - exact per-channel
+  coefficient inversion of `blendComponentToward` (`battleScene.ts:5789-
+  5794`) at 3 known sprite-silhouette coordinates (`(175,30)`, `(190,50)`,
+  `(160,45)`, reused verbatim from §11c), using a base color read from
+  `oracle-06785.png`/`app-06785.png` (§11c's own "pixel-exact at 6785"
+  finding as the coeff=0 ground truth).
+- `analyze-turn5-resolve-offc-materialize-shift-probe.ts` - whole-frame
+  `oracle[t]` vs `app[t]` vs `app[t-1]` diff-pixel-count comparison (a
+  blunter instrument, superseded by the per-pixel/per-coordinate methods
+  below once the whole-frame version proved confounded by independently-
+  moving particles - kept as the record of that negative result, §13c).
+
+Both consume a `tools/compare/out/run-*` directory from a fresh
+`npm run compare -- turn5-resolve-off-c --capture-range 6755:6790 --summary`
+(this session's own run: `tools/compare/out/run-2026-08-18-19-13-00Z-82442`
+parent / `run-2026-08-18-19-13-00Z-82486` the capture-range rerun - both
+cited below by tick, PNGs are the receipt). Additional inline Node one-liners
+(reproduced in full in §13b-§13e below so they're rerunnable without a
+separate committed script) extend the same method to whole-mismatched-
+pixel-set scans and an analytic (asset-JSON-derived, no baseline-tick
+dependency) reconstruction - the strongest single piece of evidence in this
+section (§13d).
+
+### 13a. Method: exact integer inversion, not curve-fitting
+
+`blendComponentToward` (`battleScene.ts:5789-5794`) is:
+```
+c5 = component8 >> 3; t5 = target8 >> 3
+b5 = c5 + ((t5 - c5) * coeff) >> 4        (coeff integer, 0..16)
+component8_out = (b5 << 3) | (b5 >> 2)
+```
+This is invertible: `component8 >> 3` recovers `b5` exactly (the 5->8
+expansion is bijective over the 32 values the formula can produce), so for
+a KNOWN base color and KNOWN target color, trying every integer `coeff` in
+0..16 finds the (generically unique) value that reproduces an observed
+rendered byte EXACTLY - no least-squares fit, no rounding ambiguity.
+Ground truths used, both already-established facts, neither re-derived:
+
+- **Target**: `ballOpenFadeColor.rgb8 = (255,181,247)`
+  (`src/data/gen/battle-anim-tables.json`, the same constant
+  `MATERIALIZE_TINT_COLOR` resolves to, `battleScene.ts:5419`).
+- **Base (frame 0)**: `oracle-06785.png`/`app-06785.png` at the 3
+  coordinates - §11c's own table already established these are
+  pixel-exact matches at t=6785 (`(175,30)`: both `(90,57,41)`; `(190,50)`:
+  both `(33,33,33)`; `(160,45)`: both `(123,90,74)`), i.e. already-verified
+  coeff=0 ground truth. Independently cross-checked in §13d by sampling
+  `pidgeottoFrontSprite`'s own extracted tileset/palette JSON directly
+  (`src/assets/gen/battle-opponent-front-sprites.json`), replicating
+  `drawSpriteSheetAffineTintedBlend`'s own sampling math at
+  `accumulator=256` (RAM-confirmed flat from RAM 6756/render 6757 per
+  §11a) - which reduces to a literal 1:1 tile-to-screen copy
+  (`matrixParam = trunc(0x10000/256) = 256`, so `sx = ((rx*256)>>8)+halfW
+  = rx+halfW = dx` exactly, no rounding) - and getting the IDENTICAL three
+  colors with zero PNG dependency, confirming the PNG-based baseline and
+  the asset-JSON-based baseline agree exactly.
+
+### 13b. First pass: coefficient inversion finds a clean signature, but only in the frame-0 sub-spans
+
+`node --experimental-strip-types tools/probe/analyze-turn5-resolve-offc-materialize-tint-probe.ts tools/compare/out/run-2026-08-18-19-13-00Z-82486`
+(full table in `artifacts/turn5-resolve-offc-materialize-tint-probe.json`,
+gitignored, this doc's own tables are the receipt) shows, for renders
+**6776-6783** (all 3 coordinates, every tick):
+
+| render | oracle-implied coeff | app-reported coeff (`turn5MaterializeCoeff(t)`) |
+|---|---|---|
+| 6776 | 8 | 7 |
+| 6777 | 7 | 6 |
+| 6778 | 6 | 5 |
+| 6779 | 5 | 4 |
+| 6780 | 4 | 3 |
+| 6781 | 3 | 2 |
+| 6782 | 2 | 1 |
+| 6783 | 1 | 0 |
+
+`oracle_coeff(t) == app_coeff(t-1)` EXACTLY, all 3 coordinates, every one
+of these 8 ticks - the real hardware holds each coefficient step ONE TICK
+LONGER than the app's own table implies, i.e. the app steps down one tick
+too early. Renders 6763-6767 (the flat-peak hold, coeff=16) mostly already
+match (a couple of single-tick discrepancies noted, see §13e). Renders
+**6768-6775** show a much noisier, inconsistent picture at first pass (this
+is what the brief's §11e flagged as needing a "future instrument" - §13c/
+§13d below resolve why).
+
+### 13c. Why 6768-6775 look noisy: `turn5PidgeottoFrame`'s own 2-frame toggle is a confound, not the mechanism
+
+`turn5PidgeottoFrame(t)` (`battleSceneCanonical.ts:1321-1328`) flips
+PIDGEOTTO's front-sprite tileset between two hand-authored frames at
+render ticks 6761/6766/6776/6786/6821 - `frame0` for 6763-6765 AND
+6776-6785 (bracketing my span), `frame2` for **6766-6775**. §13a's
+baseline (t=6785) is a `frame0` tick, so my coordinate inversion silently
+assumed `frame0`'s palette content for the WHOLE window - correct for
+6763-6765/6776-6783, systematically wrong for 6766-6775, where the app's
+own `frame2` tileset genuinely differs at these coordinates (`(175,30)`:
+frame0=`(90,57,41)` vs frame2=`(214,49,24)` - a completely different
+color, not a rounding-adjacent one; asset-JSON-sampled directly, §13a).
+This single confound fully explains the "NONE"/inconsistent inversion
+results in the first-pass table for 6768-6775 - it isn't evidence against
+a clean underlying mechanism, it's evidence the baseline needed to be
+frame-aware. Confirmed directly: `analyze-turn5-resolve-offc-materialize-
+shift-probe.ts`'s own whole-frame `oracle[t]` vs `app[t-1]` diff-pixel
+count (blunter, no coordinate/frame reasoning at all) shows a sharp
+discontinuity that lines up EXACTLY with the frame-toggle boundaries, not
+the coefficient-ramp boundaries:
+
+| render span | whole-frame diff, unshifted | whole-frame diff, `app[t-1]` shift |
+|---|---|---|
+| 6763-6766 (frame0, ramp not yet started/just starting) | 185-596px | **0-151px** (mostly resolves) |
+| 6767-6776 (frame2 interior) | 596-1571px | 520-16733px (WORSE - wrong frame AND wrong coeff both compounding) |
+| 6777-6783 (frame0 again) | 1109-1198px | **520-2956px, mixed** (whole-frame test itself is confounded by particles here too - see the caveat below; the per-coordinate/per-pixel tests in §13b/§13d are the reliable read for this span) |
+
+(The whole-frame shift test is a blunt instrument - shifting the ENTIRE
+frame by one tick also misaligns the ALREADY-CORRECT, already-landed
+`TURN5_PIDGEOTTO_BG_FADE_Y` background blend, which is actively changing
+tick-to-tick in exactly this window and should NOT be shifted - so this
+table's own "worse under shift" readings for spans where the background
+dominates are an artifact of testing too bluntly, not evidence against the
+per-pixel finding. Kept here only as the record of why a coordinate-level/
+sprite-footprint-restricted method was needed instead - see §13d.)
+
+### 13d. Combined hypothesis, tested exhaustively over every mismatched pixel: `frame0` (never `frame2`) + coefficient queried at `t-1`
+
+Using the asset-JSON-derived, baseline-tick-independent sampling from
+§13a (so this test has ZERO dependency on any single PNG tick, sidestepping
+§13c's confound entirely), an inline Node script scanned **every currently-
+mismatched pixel inside PIDGEOTTO's own 64x64 sprite footprint**
+(`dx,dy` in `[0,64)x[0,64)` relative to `PIDGEOTTO_CORNER=(144,19)`,
+`battleSceneCanonical.ts:21`) at 4 representative ticks spanning the
+`frame2`-claimed span, predicting each pixel's color as
+`blend(frame0Palette[dx,dy], TINT, turn5MaterializeCoeff(t-1))` (i.e.
+FORCING frame0 regardless of what `turn5PidgeottoFrame(t)` currently
+claims, AND querying the existing, UNCHANGED coefficient table one tick
+in the past) and comparing against the oracle's own actual rendered byte:
+
+| render | sprite-footprint mismatch (today) | resolved by combined hypothesis | % |
+|---|---|---|---|
+| 6769 | 1069px | 1045px | 97.8% |
+| 6771 | 1065px | 1045px | 98.1% |
+| 6773 | 1084px | 1064px | 98.2% |
+| 6775 | 1087px | 1070px | 98.4% |
+| **total** | **4305px** | **4224px** | **98.1%** |
+
+Two independently-derived, zero-fitting-parameter hypotheses (never-frame2
++ coefficient-minus-one) together predict 98%+ of every currently-
+mismatched sprite pixel in the hardest part of the window, exactly. This
+is not curve-fitting: the target color, the frame-0 base colors, and the
+coefficient table are all pre-existing, independently-sourced constants:
+only WHICH tick/frame they're evaluated at changed. The residual ~2% is
+consistent with isolated anti-aliasing/rounding-adjacent single-channel
+misses of the kind already seen and accepted elsewhere in this family
+(§4c/§4e's own open caveat for `TURN5_BG_FADE_Y`).
+
+Sanity-checked at 2 of the 3 original coordinates by hand (exact
+arithmetic, not the script): at `(175,30)`, `t=6769`,
+`blend(frame0=(90,57,41), TINT=(255,181,247), coeff=RAMP[6768-6768]=15)`
+computes to `(239,173,231)` - the oracle's own actual pixel at that tick
+is `(239,173,231)`, an exact match. At `(190,50)`, `t=6773`,
+`blend(frame0=(33,33,33), TINT, coeff=RAMP[6772-6768]=11)` computes to
+`(181,132,173)` - oracle's own actual pixel is `(181,132,173)`, exact
+again. (`(160,45)` can't discriminate frame0 vs frame2 - both frames are
+identical `(123,90,74)` at that specific coordinate, which is why it alone
+"worked" in the naive first pass at §13b even for 6768-6775.)
+
+### 13e. Particle timing: the same "-1" defect, smaller magnitude, not fully swept
+
+Pixels OUTSIDE the sprite footprint (i.e. `drawTurn5SwitchinParticles`'s
+own particle burst, the only other thing `drawTurn5PidgeottoMaterialize`'s
+call site draws in this region) contribute a much smaller, partially-
+explained residual:
+
+| render | outside-footprint mismatch | resolved by simple `app[t-1]` shift |
+|---|---|---|
+| 6769 | 23px | 10px (43%) |
+| 6771 | 44px | 28px (64%) |
+| 6773 | 62px | 49px (79%) |
+| 6775 | 55px | 39px (71%) |
+
+Direct spot-checks at the 3 original coordinates (§13b's own raw data,
+before the frame confound was understood) show clean EXACT single-pixel
+particle matches under the shift at ticks 6763/6765/6766 (e.g. oracle's
+own particle-orange `(255,173,0)` pixel at `(160,45)` appears at `t=6770`
+in the oracle and at `t=6769` in the app - an exact one-tick-early
+match). The partial (43-79%) resolution rate above (vs. the sprite
+region's clean 98%) is expected, not contradictory: a coordinate-fixed,
+single-tick-shift test is the WRONG instrument for a MOVING point (a
+particle occupies different (x,y) at different ages), so it undercounts;
+the exact single-particle spot matches are the more reliable signal for
+this sub-component. Flagged as evidenced-but-not-exhaustively-quantified,
+same discipline as §11e's own original flag for this whole section.
+
+### 13f. Root cause and fix shapes
+
+**Fix 1 (coefficient anchor) - a single call-site `-1`, with a directly
+on-point precedent already living in the same file.** `drawTurn5PidgeottoMaterialize`'s
+own call (`battleScene.ts:11235-11236`):
+```ts
+const coeff = turn5MaterializeCoeff(t);
+```
+should be
+```ts
+const coeff = turn5MaterializeCoeff(t - 1);
+```
+**This exact `-1` adjustment is not a new idea** - `drawGeneratedOpponentRelease`
+(`battleScene.ts:4796-4809`, a separate, generic switch-in-release renderer)
+ALREADY calls `turn5MaterializeCoeff` as
+`turn5MaterializeCoeff(TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET + local - 1)`
+- substituting `local = elapsed - MATERIALIZE_START_OFFSET`, `elapsed = t -
+handoffTick`, this simplifies to `turn5MaterializeCoeff(t - 1)` exactly
+whenever `handoffTick == TURN5_BALL_HANDOFF_TICK` (the same-species case).
+Its own doc comment (`:4805-4806`) says why: "Intro release reaches
+`Task_FadeMon_ToNormal`'s poll one controller callback after the ordinary
+switch-in chain reused below" - i.e. this OTHER call site already
+discovered, and corrected for, the same one-controller-callback lag
+`turn5MaterializeCoeff`'s OWN native tick semantics doesn't natively
+include. `drawTurn5PidgeottoMaterialize`'s own direct, unmodified
+`turn5MaterializeCoeff(t)` call is the outlier, not the reference - an
+omission relative to this file's own established pattern, not a
+deliberately different design.
+
+**This does NOT touch `turn5MaterializeCoeff` itself, `TURN5_MATERIALIZE_
+RAMP_COEFF`, or `TURN5_MATERIALIZE_RAMP_RENDER_START`** - all three stay
+byte-identical, so `turn13MurkrowMaterializeCoeff`
+(`battleScene.ts:11347-11354`, which reads `TURN5_MATERIALIZE_RAMP_COEFF`
+directly and computes its OWN independent anchor,
+`TURN13_MURKROW_RAMP_RENDER_AFTER_DISMISS`) is untouched by construction -
+the same "new call-site input, don't edit the shared table" discipline
+§10's landed `TURN5_PIDGEOTTO_BG_FADE_Y` fix and §2.2/§2.3's landed
+`turn5OffSitrusOnixHp`/`turn5SitrusOffHealTextVisibleChars` fixes both
+already established for this exact family of sharing landmine. Whether
+Murkrow's OWN materialize-coefficient timing has the same defect is not
+evaluated here - out of this session's scope (turn 13 render ticks, a
+different trace/window entirely).
+
+**Fix 2 (frame selection) - `turn5PidgeottoFrame`'s own `6766-6775` branch is wrong.**
+`turn5PidgeottoFrame` (`battleSceneCanonical.ts:1321-1328`):
+```ts
+export function turn5PidgeottoFrame(t: number): 0 | 1 {
+  if (t < 6761) return 0;
+  if (t < 6766) return 0;
+  if (t < 6776) return 1;   // <- WRONG for this session's own evidence
+  if (t < 6786) return 0;
+  if (t < 6821) return 1;
+  return 0;
+}
+```
+§13d's own exhaustive, zero-fitting-parameter reconstruction shows the
+real hardware renders `frame0` content throughout 6766-6775 (verified
+exactly at 2 independent coordinates x 2 ticks, plus 98%+ of every
+sprite-footprint pixel at 4 ticks) - the `if (t < 6776) return 1` branch
+(effectively covering 6766-6775, since the prior branch already claims
+6761-6765) should return `0` instead, i.e. merge into the surrounding
+0-branches:
+```ts
+export function turn5PidgeottoFrame(t: number): 0 | 1 {
+  if (t < 6786) return 0;
+  if (t < 6821) return 1;
+  return 0;
+}
+```
+**Deliberately NOT touching the `6786`/`6821` boundaries** - those govern
+the OUT-OF-SCOPE post-6786 span the brief explicitly walled off (a
+parallel main-lane worker's own concurrent territory, §11's stretch-branch
+fix) - this session has no fresh evidence about whether `frame2` is
+correctly used there or not, and didn't look (per the brief's own
+constraint, not re-measured). `turn5PidgeottoFrame`'s only call site
+(grep-confirmed) is `battleScene.ts:11229`, inside
+`drawTurn5PidgeottoMaterialize` itself - not shared with Murkrow
+(`turn13MurkrowFrame` is a separate, independent function) - safe to edit
+in isolation.
+
+**Fix 3 (particle timing) - flagged, evidenced, not exhaustively pinned.**
+`drawTurn5SwitchinParticles` (`battleScene.ts:11310-11312`) computes
+`logicalT = t - handoffTick - BALL_OPEN_START_OFFSET - 1` before calling
+the shared `drawCleanSwitchinParticles`. §13e's spot checks suggest this
+needs ONE MORE tick of delay (`- 2` instead of `- 1`) for turn 5's own
+particle burst specifically. **This function is reused verbatim by
+Murkrow's own switch-in** (`battleScene.ts:11407`,
+`drawTurn5SwitchinParticles(fb, continuationElapsed, TURN13_BALL_HANDOFF_AFTER_DISMISS)`)
+- editing the internal `-1` in place would silently retime Murkrow's own
+particles too, unverified. Same discipline as Fix 1: add a new optional
+parameter (e.g. `extraDelay: number = 0`, added into the `logicalT`
+expression) defaulting to today's behavior, and pass `1` only from
+`drawTurn5PidgeottoMaterialize`'s/`drawTurn5SwitchinSprite`'s own turn-5
+call site (`battleScene.ts:11319`), leaving Murkrow's call untouched. Not
+exhaustively quantified this session (§13e's own 43-79% single-pixel-shift
+resolution rate is a lower bound, not a full accounting - a moving
+particle needs a trajectory-aware instrument, not a fixed-coordinate one) -
+flagged as the smallest, least-certain of the three fixes, safe to land
+after Fixes 1/2 and re-measure rather than block on.
+
+### 13g. Predicted counts (estimates, not rerun-verified - no `src/` edit was made this session)
+
+- **Renders 6763-6767, 6777-6783 (12 of the 21 pre-6784 mismatched
+  frames)**: Fix 1 alone is predicted to resolve the large majority -
+  §13b's own table shows a clean, exact `oracle(t)=app(t-1)` signature at
+  all 3 sampled coordinates for every one of 6776-6783, and the whole-
+  frame shift test showed 100% resolution for 6763-6766 (`0-151px`
+  residual from 185-596px unshifted, per §13c's own table).
+- **Renders 6768-6776 (9 frames, the `frame2`-claimed span)**: needs BOTH
+  Fix 1 AND Fix 2 together - §13d's own 98.1% sprite-footprint resolution
+  rate at 4 representative ticks (6769/6771/6773/6775) is strong evidence
+  these frames would land at or very near exact match once both fixes are
+  applied, modulo Fix 3's own smaller, not-fully-quantified particle
+  contribution (§13e: 23-62px per tick outside the sprite footprint,
+  mostly but not 100% explained by the same class of fix).
+- **`turn5-resolve-off-c` (196 total, 149/196 today in THIS worktree)**:
+  no `src/` edit was made this session, so no live rerun exists - directly
+  extrapolating §13d/§13b's own per-tick resolution rates suggests Fixes
+  1+2 together would close the LARGE majority of the 21 frames 6763-6783,
+  with Fix 3 needed for full exact-match on frames where the particle
+  burst's own moving footprint dominates the remaining few residual
+  pixels. Renders 6786-6809 (the OTHER 26 of the 47 originally-mismatched
+  frames) are the separate, disjoint, concurrently-in-flight §11 stretch-
+  branch fix - **not predicted or claimed here**, per the brief's own
+  explicit walling-off.
+- **`turn5-resolve-off-b`** (window 6418-6613, entirely before this
+  section's 6763+ anchors) and **`turn5-reset-off`** (256/256, unrelated
+  control): both **predicted unchanged**, same reasoning as §11f's own
+  equivalent guard.
+- **`turn5-resolve-off-d`**: this section's Fix 1/Fix 2 touch
+  `drawTurn5PidgeottoMaterialize`, which `drawTurn5SwitchinSprite`
+  (`battleScene.ts:11274-11280` per §11f's own citation) reuses for later
+  turns' redraw of the settled scene - same "not confidently predicted
+  unchanged, check as part of the regression guard" caveat §11f already
+  flagged for its own fix, for the same structural reason.
+
+### 13h. Rerunnable PASS/FAIL for the fix worker
+
+1. **Rerun both new probes** (should reproduce this doc's own §13b/§13d
+   numbers against a fresh compare-tool run):
+   ```
+   npm run compare -- turn5-resolve-off-c --capture-range 6755:6790 --summary
+   node --experimental-strip-types tools/probe/analyze-turn5-resolve-offc-materialize-tint-probe.ts <fresh-run-dir>
+   node --experimental-strip-types tools/probe/analyze-turn5-resolve-offc-materialize-shift-probe.ts <fresh-run-dir> 6763 6790
+   ```
+   PASS if the coefficient-inversion table reproduces §13b's own
+   `oracle_coeff(t)==app_coeff(t-1)` signature for 6776-6783 at all 3
+   coordinates.
+2. **Apply Fix 1** (`battleScene.ts:11235-11236`, `turn5MaterializeCoeff(t)`
+   -> `turn5MaterializeCoeff(t - 1)`). Re-run the tint probe - PASS if the
+   6776-6783 mismatch in that table disappears (oracle and app-reported
+   coeff now agree at every tick).
+3. **Apply Fix 2** (`battleSceneCanonical.ts:1321-1328`, collapse the
+   `6766-6775` branch into the surrounding `return 0`). Direct pixel-
+   sample renders 6769/6773 at `(175,30)`/`(190,50)` against a fresh
+   `npm run compare` run's saved PNGs - PASS if they now read
+   `(239,173,231)`/`(198,140,181)` at 6769/6773 respectively for
+   `(175,30)` (§13d's own hand-verified values) instead of the
+   frame2-tainted colors.
+4. **Apply Fix 3** (new `extraDelay` param on `drawTurn5SwitchinParticles`,
+   turn5's own call site passing `1`). Spot-check the same particle-pixel
+   signature §13e cited (oracle's `(255,173,0)` at `(160,45)`,`t=6770`
+   should now match app's own `t=6770` directly, not just `app[t-1]`).
+5. **`npm run compare -- turn5-resolve-off-c --summary`**: PASS if
+   strictly higher than 149/196 (this worktree's own fresh baseline),
+   with any remaining mismatches in 6763-6783 confined to isolated
+   single-digit-pixel rounding residuals (§13b's own "a couple of
+   single-tick discrepancies" note) rather than the current 185-1571px
+   range. Frames 6786-6809 are NOT this fix's responsibility (§11's own
+   parallel territory).
+6. **Regression guard** - rerun the full family and confirm no decreases:
+   ```
+   npm run compare -- turn5-resolve-off-c --summary   # expect > 149/196 (THIS worktree's baseline)
+   npm run compare -- turn5-resolve-off-b --summary   # expect unchanged 88/196
+   npm run compare -- turn5-resolve-off-d --summary   # expect >= 50/196 (see §13g's own reused-draw-path caveat)
+   npm run compare -- turn5-reset-off --summary        # expect unchanged 256/256
+   npm run compare -- turn13-switchin --summary        # expect unchanged 242/242 (Murkrow reuses TURN5_MATERIALIZE_RAMP_COEFF/drawTurn5SwitchinParticles - Fixes 1/3 are both scoped away from it by construction, this guard proves it empirically too)
+   ```
+
+### 13i. Probe scripts (committed, rerunnable)
+
+- `tools/probe/analyze-turn5-resolve-offc-materialize-tint-probe.ts` -
+  exact per-channel coefficient inversion at 3 sprite-silhouette
+  coordinates, PNG-baseline method (§13a/§13b). Run via
+  `node --experimental-strip-types tools/probe/analyze-turn5-resolve-offc-materialize-tint-probe.ts <run-out-dir>`.
+- `tools/probe/analyze-turn5-resolve-offc-materialize-shift-probe.ts` -
+  whole-frame `oracle[t]` vs `app[t]`/`app[t-1]` diff-pixel-count
+  comparison (§13c, the blunter instrument that motivated the
+  frame-aware/asset-JSON method). Run via
+  `node --experimental-strip-types tools/probe/analyze-turn5-resolve-offc-materialize-shift-probe.ts <run-out-dir> <startTick> <endTick>`.
+
+§13d/§13e's own exhaustive-pixel-scan and particle-footprint checks were
+run as inline Node one-liners (their full source is reproduced in this
+section's own prose above, byte-for-byte rerunnable) rather than committed
+as separate scripts, since they're thin, single-purpose compositions of
+the same asset-JSON-sampling primitive `analyze-turn5-resolve-offc-
+materialize-tint-probe.ts` already establishes - no new committed script
+needed beyond the two listed above. No `src/` edit was made this session
+(`git diff -- src/` empty throughout).
+
+### 13j. Verdict
+
+The FOURTH `turn5-resolve-off-c` mechanism (§11e's own flagged residual,
+renders 6763-6783) is pinned to THREE independent, additive defects, all
+inside `drawTurn5PidgeottoMaterialize`'s own tint/frame/particle
+machinery:
+
+1. **`turn5MaterializeCoeff`'s own call site is one tick too early**
+   (`battleScene.ts:11235-11236`) - fix is a single-argument `t -> t-1`
+   change, with a directly-on-point, ALREADY-EXISTING precedent for the
+   exact same adjustment living in the same file
+   (`drawGeneratedOpponentRelease`, §13f). Verified via exact integer
+   inversion of the blend formula, zero curve-fitting, clean 8/8-tick
+   match at 3 independent coordinates for the un-confounded half of the
+   window (§13b).
+2. **`turn5PidgeottoFrame`'s own `6766-6775` branch claims the wrong
+   sprite frame** - the real hardware shows `frame0` throughout, not the
+   `frame2` the current code claims. Verified via an asset-JSON-derived,
+   PNG-baseline-independent reconstruction matching oracle's own rendered
+   bytes EXACTLY at 2 coordinates x 2 ticks, and 98.1% of every currently-
+   mismatched sprite-footprint pixel across 4 ticks (§13d) - the single
+   strongest piece of evidence in this section, since it has zero free
+   parameters and zero dependency on any specific baseline tick.
+3. **`drawTurn5SwitchinParticles`'s own timing has the same class of
+   one-tick-early defect**, smaller magnitude, evidenced but not
+   exhaustively quantified (§13e) - flagged as the least-certain of the
+   three, safe to land after 1/2 and re-measure.
+
+All three fixes are scoped to avoid the two known sharing landmines this
+family has already hit twice (`TURN5_BG_FADE_Y`/turn13, `TURN5_SITRUS_*`/
+turns 9-14): Fix 1 and Fix 3 both add a NEW call-site argument rather than
+editing the shared table/function `turn13MurkrowMaterializeCoeff`/
+Murkrow's own particle call also depend on; Fix 2 edits a function with a
+single, turn5-only call site. Renders 6786-6809 (the OTHER half of the
+original 47-frame residual) are explicitly out of this section's scope,
+per the brief's own disjoint-span instruction - not touched, not
+re-measured, no claim made about them here. No `src/` edit was made this
+session (`git diff -- src/` empty throughout); no landed anchor was
+contradicted (this section pins a previously-unrecognized defect in
+already-existing, never-previously-pixel-verified code, not a
+re-litigation of any prior fix).
