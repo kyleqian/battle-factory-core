@@ -1,0 +1,1101 @@
+{
+  "profile": "battle-scene-off",
+  "trace": "/var/folders/wk/mq92yc6s53jfllv0m6rwvydc0000gn/T/tmp.MiqDtoPLe7/resolved.json",
+  "range": [
+    29825,
+    29845
+  ],
+  "rows": [
+    {
+      "tick": 29825,
+      "relevantOam": [],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29826,
+      "relevantOam": [],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29827,
+      "relevantOam": [],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29828,
+      "relevantOam": [
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": 182,
+          "xRaw": 182,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29829,
+      "relevantOam": [
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": 192,
+          "xRaw": 192,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29830,
+      "relevantOam": [
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": 202,
+          "xRaw": 202,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29831,
+      "relevantOam": [
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": 212,
+          "xRaw": 212,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29832,
+      "relevantOam": [
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": 222,
+          "xRaw": 222,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29833,
+      "relevantOam": [
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": 184,
+          "xRaw": 184,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": 232,
+          "xRaw": 232,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29834,
+      "relevantOam": [
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": 194,
+          "xRaw": 194,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": -32,
+          "xRaw": 480,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29835,
+      "relevantOam": [
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": 204,
+          "xRaw": 204,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": -22,
+          "xRaw": 490,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29836,
+      "relevantOam": [
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": 214,
+          "xRaw": 214,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": -12,
+          "xRaw": 500,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29837,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": 176,
+          "xRaw": 176,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": 224,
+          "xRaw": 224,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 5,
+          "hidden": false,
+          "y": 48,
+          "x": -2,
+          "xRaw": 510,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29838,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": 186,
+          "xRaw": 186,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": 234,
+          "xRaw": 234,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 136,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29839,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": 196,
+          "xRaw": 196,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 136,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": -32,
+          "xRaw": 480,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29840,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": 206,
+          "xRaw": 206,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 136,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": -22,
+          "xRaw": 490,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29841,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": 216,
+          "xRaw": 216,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 136,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": -12,
+          "xRaw": 500,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29842,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": 226,
+          "xRaw": 226,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 136,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        },
+        {
+          "oam": 4,
+          "hidden": false,
+          "y": 48,
+          "x": -2,
+          "xRaw": 510,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29843,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": 236,
+          "xRaw": 236,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 136,
+          "priority": 3,
+          "palette": 1,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29844,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": -32,
+          "xRaw": 480,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    },
+    {
+      "tick": 29845,
+      "relevantOam": [
+        {
+          "oam": 3,
+          "hidden": false,
+          "y": 48,
+          "x": -22,
+          "xRaw": 490,
+          "shape": 0,
+          "size": 2,
+          "width": 32,
+          "height": 32,
+          "tile": 120,
+          "priority": 3,
+          "palette": 0,
+          "hflip": 0,
+          "vflip": 0
+        }
+      ],
+      "bgHofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgVofs": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "bgcnt": {
+        "0": 6145,
+        "1": 6407,
+        "2": 6664,
+        "3": 6922
+      },
+      "dispcnt": 5952,
+      "win0h": 22680,
+      "win1h": 0,
+      "win0v": 16449,
+      "win1v": 0,
+      "winin": 63,
+      "winout": 55
+    }
+  ]
+}
