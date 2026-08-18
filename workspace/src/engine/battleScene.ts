@@ -1249,7 +1249,10 @@ import {
   SHADOW_PUNCH_TRACE_ALPHA,
   SHADOW_PUNCH_TRACE_BLEND_COEFF,
 } from "../animation/shadowPunch.ts";
-import { speciesFrontIdleRestOffset } from "../animation/speciesIdleAnim.ts";
+import {
+  speciesFrontIdleRestOffset,
+  speciesFrontIdleRestOffsetOrZero,
+} from "../animation/speciesIdleAnim.ts";
 import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
 import {
   rockTombSettledRocksForPainter,
@@ -17649,7 +17652,7 @@ export function renderSceneOnMovePresentation(
       onix.palette,
       playerToOpponent
         ? view.target.geometry.spriteCorner.x
-          + (speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0)
+          + speciesFrontIdleRestOffsetOrZero(view.target.species).x2
         : ONIX_MATERIALIZE_CORNER.x,
       playerToOpponent
         ? view.target.geometry.spriteCorner.y
@@ -18445,7 +18448,7 @@ export function renderSceneOnMovePresentation(
     const targetDisplayX2 = displayedTarget.targetTaskActive
       ? displayedTarget.targetX2
       : displayedTarget.age < 12 && playerToOpponent
-        ? speciesFrontIdleRestOffset("ONIX")?.x2 ?? 0
+        ? speciesFrontIdleRestOffsetOrZero(view.target.species).x2
         : 0;
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
@@ -18593,7 +18596,7 @@ export function renderSceneOnMovePresentation(
     const opponentBattler = playerToOpponent ? view.target : view.attacker;
     const playerBattler = playerToOpponent ? view.attacker : view.target;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(opponentBattler.species)
       : { x2: 0, y2: 0 };
 
     drawTileBg(
@@ -18798,7 +18801,7 @@ export function renderSceneOnMovePresentation(
       view.attacker.geometry.spriteCorner.y,
     );
     const targetIdle = muddy && playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawSpriteSheet(
       fb,
@@ -19550,7 +19553,7 @@ export function renderSceneOnMovePresentation(
     );
 
     const targetIdle = playerToOpponent && strengthState.age <= 48
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // ShakeAndSink writes x2/y2 from a task callback after BuildOamBuffer,
     // adding one more transfer than the return-slide sprite callback.
@@ -19697,7 +19700,7 @@ export function renderSceneOnMovePresentation(
     );
 
     const targetIdle = playerToOpponent && slamState.age <= 18
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
@@ -19839,7 +19842,7 @@ export function renderSceneOnMovePresentation(
         };
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const initialOnixOffset = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const displayedTargetOffset = whirlwindDisplayedTargetOffsetAtAge(
       whirlwindState.age,
@@ -19994,7 +19997,7 @@ export function renderSceneOnMovePresentation(
       ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
       : onixSource;
     const onixIdle = playerToOpponent
-      ? speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 }
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
 
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
@@ -20244,7 +20247,7 @@ export function renderSceneOnMovePresentation(
     );
 
     const targetIdle = playerToOpponent && bodyState.age < 48
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     const drawAttacker = () => drawSpriteSheet(
       fb,
@@ -20627,7 +20630,7 @@ export function renderSceneOnMovePresentation(
     const fearow = playerToOpponent ? fearowBackSprite : fearowFrontSprite;
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent && displayed.age < 28
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // ShakeMon2 writes the target in source ages 27..62; battler OAM is
     // built one age later and the framebuffer consumes that OAM one age
@@ -20933,7 +20936,7 @@ export function renderSceneOnMovePresentation(
       : { ...aipomFrontSprite, tileset: subTileset(aipomFrontSprite.tileset, 0, 8) };
     const targetSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     // Keep the species' settled front idle offset in the compositor. The
     // task helper independently resolves creation, body, terminal zero, and
@@ -21313,7 +21316,7 @@ export function renderSceneOnMovePresentation(
           tiles: ponytaFrontSprite.tileset.tiles.slice(0, 64) } };
     const onix = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const onixIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     // The target is drawn first so the attacker's ellipse slides over it.
@@ -21402,7 +21405,7 @@ export function renderSceneOnMovePresentation(
       : ledybaFrontSprite;
     const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const onixIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
@@ -21655,7 +21658,7 @@ export function renderSceneOnMovePresentation(
     const attacker = playerToOpponent ? ledianBackSprite : ledianFrontSprite;
     const target = playerToOpponent ? onixFrontSprite : onixBackSprite;
     const targetIdle = playerToOpponent
-      ? (speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 })
+      ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     drawSpriteSheet(
