@@ -525,3 +525,193 @@ paragraph).
    GROVYLE-healthbox/faint-sink-timing instrument (parallel to §10a/§10b
    but for the opponent side) is the next bounded step, not attempted here
    (time).
+
+## 14. GROVYLE-side RAM ground truth, ticks 6100-6810 (this session, ISSUES #97-B continuation)
+
+New script `tools/probe/dump-turn5-resolve-grovyle-side-driver.py` (same
+direct-`EmeraldOracle`/`factory-battle-scene-off.json`/`turn5-resolve-off-a.json`
+pattern `dump-turn5-6-reopen-bounce-driver.py` already established) reads,
+every tick, both battlers' `gBattleMons[]` hp/species (struct offsets from
+`dump-battler-full.py`), `gDisplayedStringBattle` (decoded via
+`probe-gate6-r2-off.py`'s own char table), `gBattlerSpriteIds`/
+`gHealthboxSpriteIds`, and the `B_WIN_MSG` `sTextPrinters[0]` struct (fixed
+EWRAM link address `0x020201B0`, pinned by
+`dump-win-terminal-swap-textprinter.py` on this SAME ROM build — a
+compile-time constant, not scenario-dependent). Two runs: the full union
+window (6185-6810, `artifacts/turn5-resolve-grovyle-side-driver.json`) and a
+dense early re-check (6100-6190, `artifacts/turn5-resolve-grovyle-side-driver-early.json`,
+both gitignored — this table is the receipt). Run:
+`python3 tools/run-mgba-probe.py <out.json> -- tools/probe/dump-turn5-resolve-grovyle-side-driver.py <out.json> [startTick endTick]`.
+
+**Real oracle transitions** (collapsed from all message/species/HP/printer
+state changes across both runs):
+
+| real tick | event |
+|---|---|
+| ≤6100 | `"Foe GROVYLE used\nENDEAVOR!"`, ONIX hp draining 88→1 |
+| 6164 | ONIX hp reaches 1 (Endeavor crash complete) |
+| **6184** | message flips to `"ONIX used\nROCK SLIDE!"`, printer `active=1` (starts typing) |
+| 6204 | printer `active→0` (attack text fully typed/settled) |
+| **6285** | GROVYLE (`battler1`) hp reaches **0** |
+| **6378** | message flips to `"Foe GROVYLE\nfainted!"`, printer `active=1` |
+| 6397 | printer `state 0→2` |
+| 6561 | printer `state 2→0` |
+| 6562 | printer `active→0` (fainted text settled) |
+| 6684 | `battler1` species flips 278(GROVYLE)→17(PIDGEOTTO), hp jumps to 156 (RAM send-out swap, precedes the message) |
+| **6686** | message flips to `"BUG CATCHER DESTIN sent\nout PIDGEOTTO!"`, printer `active=1` |
+| 6723 | printer `active→0` (sent-out text settled) |
+| 6762 | `gDisplayedStringBattle` switches to raw `PIDGEOTTO`-name status-box text (name-plate draw, not a dialogue message) |
+
+## 15. App vs. real: three distinct anchor errors, not one growing drift
+
+Comparing §9's app boundaries against §14's real transitions, restricted to
+the three boundaries both instruments cover in this window:
+
+| phase boundary | app constant (§9) | real oracle tick (§14) | delta (app − real) |
+|---|---|---|---|
+| attack-text start | `rockSlideTextStartTick(5829)=6222` | **6184** | **+38 (late)** |
+| fainted-text start | `turn5FaintedTextStartTick(5829)=6523` | **6378** | **+145 (late)** |
+| sent-out-text start | `SWITCHIN_SENTOUT_TEXT_START_TICK=6687` | **6686** | **+1 (essentially exact)** |
+
+**This directly answers the brief's growing-vs-independent question: the
+deltas do NOT grow monotonically through the window (38 → 145 → 1) — they
+spike and then reset to near-zero.** A single shared upstream cadence bug
+(e.g. the app running one continuous typing/animation clock slightly slower
+than real hardware) would predict a delta that keeps growing or stays
+roughly constant across consecutive boundaries; instead the third boundary
+is calibrated almost perfectly while the second is off by nearly 4×the
+first. This is **independent per-boundary anchor error**, not one cadence
+rule — consistent with, and now sharpened beyond, §10b's own finding for
+the (separate, later) Sitrus-heal anchor.
+
+## 16. Root cause 3 — GROVYLE's own HP overlay is a step function frozen at the wrong value, not a live drain (`resolve-off-a`/`-b`, the dominant unexplained mechanism)
+
+§11 flagged `resolve-off-a`'s 189/196 mismatch as untraced, guessing at "a
+GROVYLE-healthbox/faint-sink-timing code path." That code path exists and
+is live (`drawTurn5RockSlideAttack`, `battleScene.ts:10870-10876`, called
+unconditionally every tick via `drawTurn6FieldBase` →
+`drawTurn5RockSlideWindow`'s own top-of-function call, `battleScene.ts:14831`
+— contrary to a plausible-but-wrong hypothesis this session initially formed
+and then disproved by reading `drawTurn6FieldBase`'s own body in full):
+
+```
+const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick);
+const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP);
+if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {
+  const opponentContent = opponentHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  ...
+}
+```
+
+New script `tools/probe/analyze-turn5-resolve-grovyle-hp-formula.ts`
+re-evaluates `rockSlideOpponentHp`/`faintSinkRowsAndY2` with their real
+exported inputs. Result: `TURN4_ROCKSLIDE_HP.to = 1` (GROVYLE's HP carried
+over from turn 4) is used as `rockSlideOpponentHp`'s `startHp`, and the
+formula returns exactly **`1` for every tick from 6184 through 6501** —
+**it never drains at all** — then hard-steps to `0` at `t=6502`
+(`GROVYLE_FAINT_SINK_START_TICK`), with the healthbox itself drawn until
+`GROVYLE_HEALTHBOX_VANISH_TICK=6521`, after which it stops being drawn
+entirely:
+
+| tick | app `opponentHp` | app sink `keptRows` |
+|---|---|---|
+| 6184-6417 (covers all of `resolve-off-a`'s window) | **1 (frozen)** | 8 (full sprite, no sink) |
+| 6502 | 0 (step) | 8 |
+| 6521-6523 | 0 | 0 (sprite fully sunk, healthbox stops drawing) |
+
+Against §14's real ground truth (GROVYLE hp reaches **0 at tick 6285**,
+**217 ticks before** the app's own step at 6502; the fainted-flash/healthbox
+removal begins around the real **6378** fainted-text transition, **143-236
+ticks before** `GROVYLE_HEALTHBOX_VANISH_TICK=6521`/`GROVYLE_FAINT_SINK_START_TICK=6502`):
+this is a **third, independent anchor error**, clustered with (but distinct
+from) the fainted-text-start error (§15's row 2, +145). `GROVYLE_FAINT_SINK_START_TICK`
+(6502), `GROVYLE_HEALTHBOX_VANISH_TICK` (6521), and `turn5FaintedTextStartTick`
+(6523) sit within 21 ticks of each other — internally self-consistent as a
+single "GROVYLE-faints" event family — but that whole family is anchored
+**~140-240 ticks later** than the real oracle's own GROVYLE-faints event.
+This fully explains `resolve-off-a`'s 189/196 (GROVYLE's healthbox shows a
+static full/near-full HP bar the entire window while the real oracle's bar
+is already empty from tick 6285 on) and a large share of `resolve-off-b`'s
+mismatched span before the app's own catch-up at ≈6523/6542 (§3d).
+
+## 17. Consolidated fix spec (per the brief's item 3 — evidence supports it for the boundaries traced this session and last)
+
+**Ordered edit list** (not applied — analysis only, `git diff -- src/` empty
+throughout this session):
+
+1. **`rockSlideTextStartTick`'s anchor** (currently
+   `TURN5_ROCKSLIDE_PRESS_TICK`-derived, resolves to 6222) needs to resolve
+   to **6184** for this trace family (−38 ticks). Re-derive from
+   `TURN5_ROCKSLIDE_PRESS_TICK`'s own relationship to real tick 6184, not a
+   flat re-literal (other traces/turns may share this function; check for
+   regressions per §13 item 3's own caveat before changing the shared
+   helper vs. adding a trace-family-specific override).
+2. **The GROVYLE-faints cluster** — `TURN4_ROCKSLIDE_HP.to` (currently `1`,
+   used as `rockSlideOpponentHp`'s frozen `startHp`), `GROVYLE_FAINT_SINK_START_TICK`
+   (6502), `GROVYLE_HEALTHBOX_VANISH_TICK` (6521, itself
+   `GROVYLE_FAINT_SINK_START_TICK + GROVYLE_FAINT_SINK.healthboxVanishFrame`),
+   and `turn5FaintedTextStartTick(pressTick)` (6523) all need shifting
+   toward the real **6285 (hp-zero)** / **6378 (fainted-text/flash-start)**
+   cluster — a ~140-240-tick correction depending which sub-anchor. Whether
+   `rockSlideOpponentHp` should gain a genuine live drain curve (matching
+   ENDEAVOR's own `endeavorHp` live-formula shape) between 6184 and the
+   real hp-zero tick 6285, or stays a step function moved earlier, is
+   **not resolved this session** — needs the real drain SHAPE, not just its
+   endpoint (a `rockSlideOpponentHp`-focused RAM sweep at ~6184-6290, not
+   run this session, time).
+3. **§10b's Sitrus-heal cluster** (unchanged from the prior session):
+   `TURN5_SITRUS_HEAL_TEXT_START_TICK=7078` needs the dense
+   `6900-6996` sweep §13 item 2 already specifies.
+4. **`SWITCHIN_SENTOUT_TEXT_START_TICK=6687`**: confirmed accurate (real
+   6686, §15) — **do NOT touch**, it is correct as-is.
+5. **§10a's HP-overlay gate** (`confirm-off-a`/`-b`, unchanged from the
+   prior session): extend as previously specified.
+
+**Per-trace predicted counts after the above (evidence-based, not
+guaranteed without live rerun)**: `confirm-off-a`/`-b` per §10a/§13 item 1
+(unchanged); `resolve-off-a` (196 total) — item 1+2 together are predicted
+to explain the large majority of the 189 currently-mismatched frames (exact
+count depends on the still-unresolved drain-shape question in item 2);
+`resolve-off-b` (196) similarly, with its own already-matching 71/196 tail
+unaffected (item 2's fix should only widen the matching region earlier, not
+disturb the existing convergence); `resolve-off-c` (196) — items 1-5 do
+**not** touch its already-diagnosed secondary mechanism (§3e/§7's status-box
++ background-dither lag on the trailing 47 frames), which stays
+unexplained; `resolve-off-d` (196) per §10b/§13 item 2 (unchanged).
+
+**Do NOT touch**: the already-landed bounce corrections
+(`docs/turn5-bounce-recalibration-probe.md`'s own window fixes); any
+boundary this session or the last confirmed accurate
+(`SWITCHIN_SENTOUT_TEXT_START_TICK`, `turn5Active`'s own dispatch
+reachability — never broken, §9/§12); §8d rounding; the PP-digit fix (out
+of scope, orthogonal per §5).
+
+**Rerunnable PASS/FAIL**: after any edit above, rerun
+`tools/probe/analyze-turn5-resolve-dispatch-app-series.ts` and
+`tools/probe/analyze-turn5-resolve-grovyle-hp-formula.ts` to confirm the
+corrected constants compute as intended, THEN `npm run compare --
+turn5-resolve-off-a --summary` / `-b` / `-c` (PASS = counts strictly
+improve toward 196/196, with `-c`'s trailing 47 expected to remain
+unresolved per the note above) — no live rerun of any fix performed this
+session (analysis only, per the brief).
+
+## 18. Verdict (this session)
+
+Both required goals are resolved to concrete numbers. **Goal 2 (6193-vs-6222
+tension)**: neither figure was right — the real oracle transition to
+`"ONIX used\nROCK SLIDE!"` is **tick 6184**, RAM-confirmed exactly (§14);
+the prior session's `6193` pixel-read was itself a ~9-tick-late upper bound,
+and the app's `rockSlideTextStartTick=6222` is late by 38 ticks. **Goal 1
+(growing vs. independent)**: **independent, clustered per-anchor errors,
+not one cumulative cadence rule** — three boundaries measured this session
+show deltas of +38, +145, and +1 ticks respectively (§15), and a THIRD,
+previously-unattributed root cause was found and fully diagnosed (§16):
+GROVYLE's own HP overlay is a step function frozen at `1` for the entire
+`resolve-off-a` window, snapping to `0` only at `t=6502` — 217 ticks after
+the real oracle's own hp-zero tick 6285. This single mechanism, clustered
+with the already-known fainted-text-start error, is sufficient to explain
+`resolve-off-a`'s previously-unattributed 189/196 and a large share of
+`resolve-off-b`'s. `resolve-off-c`'s trailing 47-frame secondary mechanism
+(§3e/§7) remains untraced — out of this session's time budget. §17 gives
+the ordered fix list; no `src/` edit was made (`git diff -- src/` empty).
