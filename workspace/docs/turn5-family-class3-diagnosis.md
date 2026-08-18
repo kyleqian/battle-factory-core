@@ -715,3 +715,104 @@ with the already-known fainted-text-start error, is sufficient to explain
 `resolve-off-b`'s. `resolve-off-c`'s trailing 47-frame secondary mechanism
 (§3e/§7) remains untraced — out of this session's time budget. §17 gives
 the ordered fix list; no `src/` edit was made (`git diff -- src/` empty).
+
+## 19. §17 item 5 landed (2026-08-18, bounded MAIN worker) — per-caller audit, fix, and measured result
+
+**Per-caller audit of `drawActionMenuIdleContentFromLatest`** (12 real call
+sites at the commit this session started from, `battleScene.ts` lines
+8240/8338/8533/8830/9559/9678/9776/9954/10102/10200/10444/15053 — the
+brief's own 13th cite, 8656, is a doc-comment reference, not a call).
+Column "override?" is the 4th positional arg (`playerHpOverride`); "gate
+today" is whether `turn2FightCommandPresentationFromLatest(latest) !== null
+|| turn3FightCommandPresentationFromLatest(latest) !== null` is satisfied
+in that caller's own reachable window, established by tracing what `latest`
+narrows to at each call site (not guessed):
+
+| line | caller / window | override? | gate today | effect of adding a turn4 arm |
+|---|---|---|---|---|
+| 8240 | `drawActionMenuIdleWindow`, `reopenedFromClose` branch (turns 2-5's own FIGHT-submenu reopen-after-close) | no | true when `latest` is turn2/3-shaped; false once turn4 evicts it | **no-op** — the same function already redraws this exact value manually right after (`reopenOverlayPlayerHp`, line ~8252), same `resolvedPlayerHp` value, same `healthboxY2` (both use `t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`, offset 0) — double-paints an identical pixel |
+| 8338 | `drawActionMenuIdleWindow`, main branch (turns 2-5's own reopened-idle content) | no (explicit `undefined`) | same split as above | **no-op**, same reasoning — the "Slice 9" manual overlay (`overlayPlayerHp`, line ~8343) already covers the turn4-evicts-turn2/3 case with the identical value/Y2/`bounceIndexOffset` |
+| 8533 | `drawFightSubmenuWindow`, close-reveal branch (`sm.closeElapsed`) | no | false whenever `latest` is turn4-shaped (no turn2/3 match) | **only call site where this is a genuine new paint, not a duplicate** — no manual follow-up exists here (immediate `return`). Newly paints `latest.content.field.player.hp.current` — the mathematically correct value for that receipt — wherever it was previously skipped. Empirically: `turn5-action-off` 32/32 and `turn6-reopen-off` 22/46 are both byte-identical before/after (measured below), so either this branch isn't reached with a turn4-shaped `latest` inside those traces' own capture windows, or it was already pixel-silent (the frozen base harvest already agreed with the now-painted value) |
+| 8830 | `drawTurnKickoffText` | no | `latest` is literal `null` → all three arms false regardless | none |
+| 9559 | `drawDragonBreathTurnEndSettledMenu` (turn 2's own settled menu) | no | true — `latest` is turn2-shaped by construction (called only after turn2Content resolves) | none — turn2 arm already covers it |
+| 9678 | `drawTurn2KickoffText`, pre-DRAGON_BREATH branch | no | `latest` is turn2-shaped or earlier (pre-turn-2-completion); turn2 arm already the deciding one where it fires | none |
+| 9776 | `drawTurn3EndeavorText` (turn 3's own ENDEAVOR-hold — the exact turn-earlier analogue of turn 5's bug) | **yes** (`onixHp`) | **true** — reached only pre-turn-3-reset, when `latest` is still turn2-shaped (guarded by an explicit `turn2Content === null` throw above) | none — already painting live `onixHp` today via the turn2 arm; this is the working precedent the turn5 fix generalizes one turn further |
+| 9954 | `drawTurn3RockSlideTurnEndSettledMenu` (turn 3's own settled menu) | **yes** (`playerHp`) | true — `latest` is turn3-shaped (guarded by `turn3Content === null` throw) | none — turn3 arm already fires; the caller's own explicit follow-up redraw (line 9956, identical value/Y2) was already redundant before this fix too |
+| 10102 | `drawTurn4KickoffText`, pre-reset branch | **yes** (`turn3Content.field.player.hp.current`) | true — reached only pre-turn-4-reset, `latest` still turn3-shaped (guarded by `turn3Content === null` throw) | none |
+| 10200 | `drawTurn4RockSlideTurnEndSettledMenu` (turn 4's own settled menu) | **yes** (`playerHp`) | **false today** — `latest` is turn4-shaped (guarded by `turn4Content === null` throw), matches neither turn2 nor turn3 | **was already pixel-correct despite the false gate** — the caller's own explicit follow-up (line 10202, `drawPlayerHealthboxHpOverlay(fb, playerHp, menuIdleBounce(bounceTick).healthboxY2)`) unconditionally paints the identical value at the identical Y2 right after returning. Adding the turn4 arm makes the internal draw ALSO fire, painting the same value a second time — a no-op, not a regression. This is the caller the brief flagged to check "whether painting their override is pixel-correct there" — confirmed yes, byte-for-byte, because the caller already draws that same override unconditionally today |
+| 10444 | `drawTurn5EndeavorText`, no-squish else-branch — **the bug itself** | **yes** (`onixHp`, live-draining) | **false throughout** — `latest` is turn4-shaped (turn 5 hasn't completed its own command yet) the entire ENDEAVOR-hold span, matches neither arm | **this is the fix** — the turn4 arm now fires, `drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2)` runs, and the live-draining `onixHp` §10a already proved was computed correctly finally reaches the framebuffer |
+| 15053 | `drawTurnEndSettledMenu` (turn 1's own settled menu) | no | `latest` is literal `null` → all three arms false | none — turn 1's own player HP never changes this turn by design (doc comment on this function) |
+
+**Fix shape chosen: (a), not (b).** §10a offered two candidates: (a) add a
+turn4-shape narrowing to the OR-gate, mirroring the existing turn2/turn3
+arms one turn further; (b) loosen the gate to paint whenever an explicit
+`playerHpOverride` is supplied. The audit above shows (b) would have been
+**observably wider than necessary and harder to reason about**: three
+callers (9776, 9954, 10102) pass an override *and* already satisfy the
+existing turn2/turn3 arms — fine either way — but 8240/8338 pass **no**
+override at all and rely on the internal `latest?.content?.field.player.hp
+.current` fallback, so shape (b) would leave their turn4-evicts-turn2/3
+case exactly as broken as today (still gated out, since there's no
+override to trigger a loosened override-gate) while doing nothing shape (a)
+doesn't already do more precisely. Shape (a) is also the direct
+generalization of an already-working, already-proven pattern: turn 3's own
+`drawTurn3EndeavorText` (line 9776) paints its live `onixHp` correctly
+*today* specifically because `latest` is turn2-shaped during turn 3's own
+ENDEAVOR-hold and the turn2 arm already covers it — turn 5's window is
+structurally identical, just one `latest`-epoch further along (turn4-shaped
+instead of turn2-shaped), so adding the turn4 arm is the same rule applied
+one more turn, not a new mechanism. Rejected alternative (b) was not
+attempted in code.
+
+**Callers 9954/10200 pre-check (per the brief's explicit ask):** both
+already draw their own `playerHpOverride` unconditionally via a manual
+`drawPlayerHealthboxHpOverlay` call immediately after the
+`drawActionMenuIdleContentFromLatest` call (lines 9956/10202), at the same
+HP value and the same bounce-derived `healthboxY2`. Painting that override
+inside the gate too is therefore pixel-correct (idempotent) for both,
+confirmed by the unchanged 256/256 exact match on `turn4-doubleteam-off`/
+`turn4-rockslide-off` and unchanged 32/32 on `turn5-action-off` below.
+
+**Fix applied**: `battleScene.ts`, `drawActionMenuIdleContentFromLatest`'s
+gate — added `|| turn4FightCommandPresentationFromLatest(latest) !== null`
+as a third OR arm. Tier-1 pin: `tests/battleSceneFightCommandPresentation
+Turn1Through4.test.ts`'s "slice 3" describe block, which previously pinned
+"turn 4: does NOT fire" for the generic-ABI shim (the exact expression this
+fix edits) — that assertion is now split into two: the retired
+positional-ABI body's own historical `false` stays pinned unchanged (it's
+dead code, not what runs today), and a new case pins the current shim
+returning `true` for a turn4-shaped `latest`, citing this section.
+
+**Measured result** (oracle re-run this session, `npm run compare --
+<trace> --summary`):
+
+| trace | before (brief's cite) | after | verdict |
+|---|---|---|---|
+| `turn5-confirm-off-a` | 15/132 | **60/132** | improved — the ENDEAVOR-hold frames now paint live `onixHp` instead of stale pixels |
+| `turn5-confirm-off-b` | 0/132, residual 689px/1.79% bbox=16,124-75,149 | 0/132, residual unchanged: 689px/1.79% bbox=16,124-75,149 (ticks 6204-6221) | unchanged, attributed: this window's own `rockSlideTextStartTick` resolves to 6184 (`TURN5_ROCKSLIDE_PRESS_TICK=5829` + `TURN5_OFF_ROCKSLIDE_TEXT_DELAY=355`, item 1), so every tick ≥6184 — including the entire 6204-6221 residual span — dispatches through `drawTurn5RockSlideWindow`'s attack/text phase (`drawTurn6FieldBase`'s own unconditional HP paint), a code path `drawActionMenuIdleContentFromLatest` is never called from at all. This is the "second residual mechanism" the acceptance criteria anticipated — confirmed a different function, out of this item's reach by construction. Frames 6090-6183 (still inside the ENDEAVOR-hold, before 6184) individually shrank versus their own pre-fix magnitude at the same ticks (spot-checked: several dropped to 30-100px), just not enough to cross into exact-match for any single frame in this particular trace |
+| `turn5-resolve-off-d` | 0/196, residual 258px/0.67% bbox=44,71-195,104 | 0/196, residual unchanged: 258px/0.67% bbox=44,71-195,104 | unchanged (no decrease) — this residual sits in the settled post-menu-redraw span (past tick 6991), which ISSUES.md #97-C already flagged as "likely the ONIX sprite/HP-overlay during the settled Sitrus chrome... needs its own instrument" — not `drawActionMenuIdleContentFromLatest`'s own gate (confirmed by this session's dispatch trace: ticks in this span are inside `drawTurn5RockSlideWindow`'s own settled-menu tail, past the `TURN5_OFF_SITRUS_TEXT_CLEAR_TICK` branch, not the ENDEAVOR-hold fallback this fix touches) |
+| `turn5-reset-off` | 256/256 | 256/256 | unchanged (control) |
+| `turn5-action-off` | 32/32 | 32/32 | unchanged, exact (must-stay-exact criterion met) |
+| `turn6-reopen-off` | 22/46 | 22/46 | unchanged |
+| `turn6-menu` | 34/44 | 34/44 | unchanged |
+| `turn5-resolve-off-a` | 25/196 | 25/196 | unchanged |
+| `turn5-resolve-off-b` | 88/196 | 88/196 | unchanged |
+| `turn5-resolve-off-c` | 149/196 | 149/196 | unchanged |
+| `turn4-doubleteam-off` | 256/256 | 256/256 | unchanged, exact |
+| `turn4-rockslide-off` | 256/256 | 256/256 | unchanged, exact |
+
+Zero decreases anywhere in the guard family. `turn5-confirm-off-a` strictly
+improved (15→60/132); `turn5-confirm-off-b` and `turn5-resolve-off-d` held
+their match count at 0 with their cited residual magnitude unchanged and
+attributed to code paths this fix cannot reach (different functions
+entirely, not a gate this section's edit touches) — both satisfy the
+acceptance criteria's OR clause. `npm test` and `npm run build` green (see
+`PROGRESS.md` for the exact counts this session).
+
+**Remaining, still open** (unchanged by this fix, not attempted):
+`turn5-confirm-off-b`'s own 689px residual (a `drawTurn5RockSlideWindow`
+attack/text-phase mechanism, not this gate); `turn5-resolve-off-d`'s own
+258px residual (a settled-Sitrus-chrome ONIX overlay, not this gate);
+`resolve-off-c`'s trailing 47-frame secondary mechanism (§3e/§7, untouched
+by construction); `turn6KickoffBounceTick`/the 7318+ dispatch (a parallel
+side-lane continuation, untouched).
