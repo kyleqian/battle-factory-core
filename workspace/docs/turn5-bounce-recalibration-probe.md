@@ -1160,3 +1160,334 @@ remaining ~85% of the family's mismatches are class (iii)
 (other/unknown, large multi-region bboxes suggesting text/banner
 rendering, not bounce timing) - not investigated this session, named
 explicitly as the blocker for predicting the family's other counts.
+
+## 9. Continuation 4 (2026-08-17, bounded SIDE worker): window A's own raw-index constant (+116), display basis extended, §8d generalized
+
+Executes this step's goal 1 (required: apply §8's raw-index method to
+window A) - **DONE, landed to an exact number, `+116`** - and goal 2
+(required: characterize §8d) - **DONE to the extent evidence supports**.
+Goal 3 (stretch, `turn6KickoffBounceTick`) NOT attempted, per the step's
+own priority order and the time budget. Method: two temporary
+`console.error` taps (`NTAP97B4`-gated, one at `drawActionMenuIdleWindow`'s
+`bounceTick` line, one at `drawFightSubmenuWindow`'s `idleWaitBounceTick`
+line) run once via `NTAP97B4=1 npm run compare -- turn5-action-off
+--summary`, plus one new read-only RAM/pixel probe (`tools/probe/dump-
+turn5-action-display-basis-probe.py`, adapted from §7a's own script with
+`TICK_RANGE` moved to window A's own onset, `TRACE_PATH` already pointed
+at `turn5-action-off.json` upstream - unchanged). **Both taps reverted
+before this commit** - `git diff -- src/` is empty. New committed receipt:
+`src/data/gen/turn5-action-display-basis-probe.json`.
+
+### 9a. Window A's own call-site map, confirmed live (extends §2a past its own pinned [5927,5931] edge)
+
+The live tap resolved the open question from this step's brief ("the span
+past 5931 dispatches through what call site?") for free, in the same run:
+
+- `t == turn5ReopenPressTick` (5927 only): `drawActionMenuIdleWindow`'s
+  legacy branch, `turn5LegacyResettledBounceTickFromLatest(t, latest)` -
+  unchanged from §2a.
+- `t` in `[5928, 5931]` (pre-reveal DMA-wait): same function's submenu
+  branch, `turn5SubmenuBounceTickFromLatest(t, latest)` - unchanged from
+  §2a.
+- `t` in `[5932, 5957]` (post-reveal, pre-confirm - `sm.confirmElapsed`
+  stays `null` this entire span, confirmed live: the confirm-wait branch
+  never fires): **`drawFightSubmenuWindow`'s own `idleWaitBounceTick`**
+  (`battleScene.ts:8668-8683`), turn5Active branch:
+  `turn5SubmenuBounceTickFromLatest(t, latest)` again - **the literal same
+  formula**, called from a second, different line, with **zero
+  discontinuity** at the `revealTick=5932` boundary (live-tapped sequence
+  is a single unbroken `+1`/tick run, 2088 at 5928 through 2117 at 5957).
+  This means §2a's "fully pinned [5927,5931]" domain was too conservative -
+  the SAME formula (and, by extension, this session's correction) governs
+  the entire `turn5-action-off` captureFrames span from 5928 through 5957.
+- `t = 5920-5926` (before the reopen press): **not traced this session**
+  (a third, untapped call site - the tap fired nothing before 5927, so
+  whatever draws these six pre-press ticks is neither of the two dispatch
+  points above). Out of scope for the fix (frame 5926, the one captured
+  tick in this sub-span, already matches live today per §9c - untouched by
+  either correction below) - named, not chased, per this step's own time
+  budget.
+
+### 9b. The raw-index constant, landed to an exact number: `+116`
+
+Same method as §8c, applied to window A's own formula chain. For every
+tick `t` in `[5927, 5957]`, using the live-tapped `bounceTick` (§9a) fed
+through `menuIdleBounce`'s own internal `n = bounceTick - 1749` (folding
+its `ramTick = bounceTick - 1` and `n = ramTick - MENU_BOUNCE_RAM_SETUP_TICK
+(1748)` steps into one closed form, exactly as §8c did for window B's
+`turn5SitrusResettledBounceTick`), comparing `(RAM_raw - model_raw) mod
+256` against the committed receipt's own `onixSinIndex`/`healthboxSinIndex`
+fields:
+
+```
+tick:  5927 5928 5929 5930 5931 5932 ... 5957  (using the OBSERVED,
+diff:   116  123  116  116  116  116 ...  116   un-frozen bounceTick)
+```
+
+**Exactly 116, for BOTH onix and healthbox, at every tick except 5928**
+(where the diff bumps to 123 = 116+7). The single exception is fully
+explained, not a residual: it is the ALREADY-KNOWN §1/§4 defect - the
+live `bounceTick` sequence dips to 2088 at 5928 before continuing (the
+"legacy tick uses the unshifted formula, then resumes shifted" artifact),
+one tick lower than the smooth continuation, which shifts the raw index by
+exactly one delta-step (7). Applying the ALREADY-SCOPED §4 item 1 freeze
+(hold `bounceTick` at its `t=5927` legacy value, 2089, for `t` in
+`[5927,5929]`) removes this single exception - re-run with the frozen
+sequence, **the diff is exactly 116 at all 31 ticks 5927-5957, zero
+exceptions**. Composed closed form (mirrors §8c's box for window B):
+
+```
+tEffApp(t) = bounceTick(t)                          # per 9a's live-tapped map
+bounceTickEff(t) = 2089                              for t in [5927,5929]  (freeze)
+                  = bounceTick(t)                     otherwise (unchanged)
+n = bounceTickEff(t) - 1749
+onixRaw = 192 + 7n + 116   (mod 256, then table lookup, then +1 for Y2)
+hbRaw   = 128 + 7n + 116   (mod 256, then table lookup, then +1 for Y2)
+```
+
+**This answers the brief's core question directly: window A has its OWN
+exact field-agnostic raw-index constant, `+116`, distinct from window B's
+`+67`.** Like `+67`, `116` is **not a multiple of 7** (`116/7 ≈ 16.57`) -
+no integer number of "evaluate N ticks earlier/later" against `t` could
+ever reproduce it; only a constant folded in after the `7*n` step, before
+the table lookup, works. **This directly explains the MAIN-lane rung-1
+refutation cited in this step's brief**: enumerating every reachable
+`bounceTick` in `~2069-2097` for a `healthboxY2=1` fix could never
+succeed, because the correct fix is not a `bounceTick`-domain value at
+all - it's an index-domain additive constant that no `bounceTick` input
+can express through the existing formula. The two "refuted" freeze
+variants were missing exactly this term.
+
+### 9c. Display basis, verified (not assumed) at window A's own ticks
+
+New probe (`tools/probe/dump-turn5-action-display-basis-probe.py`,
+`TICK_RANGE=[5918,5940]`, same protocol-identity guarantees §7a already
+established for `oracle/server.py`'s capture loop) records RAM Y2 plus a
+crop-hash of the same two compare-tool bboxes (onix `44,49-99,110`,
+healthbox `127,74-229,110`, confirmed applicable to window A too by this
+session's own live rerun, §9d) for every tick 5918-5940. Comparing
+consecutive-tick RAM transitions against consecutive-tick crop-hash
+transitions in that same run (receipt: `src/data/gen/turn5-action-
+display-basis-probe.json`):
+
+| field | RAM value changes at tick | crop pixels visibly change at tick | lag |
+|---|---|---|---|
+| healthbox | 5919 (0->1) | 5920 | **+1** |
+| healthbox | 5930 (1->2) | 5931 | **+1** |
+| healthbox | 5931 (2->1) | 5932 | **+1** |
+| onix | 5931 (1->0) | 5932 | **+1** |
+
+**All four observed transitions lag the RAM write by exactly one tick,
+zero exceptions** - the same `displayed(T) = RAM(T-1)` basis §7a proved
+for window B is independently confirmed at window A's own ticks, not
+assumed by analogy. This is expected (the lag is a property of the
+oracle's own capture protocol / real GBA OAM-scanout ordering, uniform
+across every window it captures), but per this step's own instruction it
+is verified here from window-A-specific evidence, not inferred.
+
+### 9d. Composed prediction for `turn5-action-off`
+
+Two scenarios, mirroring §8e's own split (the display-basis correction is
+owned by a parallel effort - confirm it is active at this call site before
+trusting the higher figure):
+
+**Freeze + `+116`, WITHOUT the display-basis fix co-landed at this call
+site** (app(T) compared directly against oracle's true RAM(T-1)-basis
+display): predicted matches for `t` in `[5927,5957]` = **24/31** (7
+tick-level failures: 5927, 5928, 5929 - the SAME single frozen `bounceTick`
+value, 2089, whose raw healthbox index lands exactly on table index 64 - a
+§8d-class artifact tripled by the freeze itself, not a new defect; plus
+5930, 5939, 5948, 5957, each 9 ticks apart, the same periodic table-peak
+cadence §8d already named for window B). Plus frame 5926 (already
+matching today, outside either correction's domain, untouched). **Total:
+25/32.**
+
+**Freeze + `+116` + the display-basis fix, all three composed** (the
+intended end state, assuming the display-basis correction is wired at
+this call site too): predicted matches for `t` in `[5928,5957]` = **24/30**
+(6 failures: 5928-5931 - the same frozen-value table-peak cluster, now
+straddling the display shift - plus 5940, 5949, each landing one tick
+after 9-apart peaks 5939/5948 per the T-1 basis). Frame 5927 is
+**not conclusively resolved this session** - its target is `RAM(5926)`,
+which needs the app's own `bounceTick` at `t=5926`, a call site §9a left
+untraced; a numeric extrapolation (continuing the plain submenu formula
+one tick further back, `bounceTick(5926)=2086`) predicts a match
+(`model=(1,1)` vs `RAM(5926)=(1,1)`) but is **not source-confirmed**,
+named as an open edge rather than claimed. If it holds, plus frame 5926
+(already matching): **total 26/32**; if it doesn't, **25/32**.
+
+**Both scenarios land in the same narrow 25-26/32 band** (up from the
+current 1/32) - the display-basis fix's presence/absence barely moves
+window A's count, unlike window B where it mattered more (§8e's 18 vs 20
+of 46), because most of window A's span sits on wide sine plateaus where a
+1-tick basis shift doesn't cross a Y2 boundary. **§5's prior "5/32"
+estimate (from continuation 2, before the raw-index method existed) is
+superseded** - it under-counted because it didn't yet know about the
+`+116` constant or the table-peak residual; it's also now known to be
+achievable only up to ~25-26/32, not the full 32/32, because of the
+permanent §8d-class residual named above.
+
+### 9e. §8d generalized: it is a real hardware sine-table/rounding disagreement, not a table-transcription error, and it is not healthbox-only
+
+**Is the app's `GBA_SINE_TABLE_256` itself wrong, or is the derivation's
+rounding rule wrong?** The table is not wrong: `GBA_SINE_TABLE_256[64] =
+256` (literal, `battleMenu.ts:787-804`) is an EXACT copy of
+`reference/pokeemerald/src/trig.c`'s own `gSineTable[64]` entry (both
+sessions that built this table cross-checked it against the vendored
+source, per the table's own doc comment, `battleMenu.ts:770-785` - not
+re-verified against `trig.c` fresh this session, but no new evidence
+contradicts it). The disagreement is in the **derivation rule**:
+`bounceSin` computes `y2 = floor(table[index]/256) + 1`, a plain
+arithmetic floor-then-add. At `index=64` this gives `floor(256/256)+1 =
+2`. Real hardware (per every RAM receipt row checked, both windows)
+produces `1` at this exact index, every time. Since `256/256` is exactly
+`1` with **zero fractional remainder** - not a rounding-direction
+ambiguity (which would flip between two adjacent integers depending on
+tie-breaking) - the real GBA `Sin(index, amplitude)` function
+(`trig.c:515-518`) most likely computes something subtly different at the
+table's own literal peak (index 64, value 256) than
+`gSineTable[index] >> 8` naively suggests - e.g. a signed/unsigned
+interpretation of the `Q8.8` peak value that clamps `256` to `255` before
+the shift, or an amplitude multiply-then-shift ordering that isn't
+associative with a literal `256` input. **Not resolved to the exact
+hardware rule this session** (would need reading `trig.c`'s actual
+`Sin()`/`Cos()` C implementation, not just its table - not done, time
+budget) - named as the next instrument for whoever picks up the actual
+fix.
+
+**Is it healthbox-only?** NO - confirmed field-agnostic at BOTH windows
+now. Window A's own peak cluster hits healthbox at index 64 (5927-5929)
+and BOTH onix+healthbox together at 5930 (a different, simultaneous
+crossing - onix's raw index 135 and healthbox's raw index 71 are 64 apart,
+the fixed onix/healthbox seed gap, and both happen to cross a rounding
+edge in the same tick here), then onix alone at 5948 and healthbox alone
+at 5939/5957 - i.e. it hits whichever field's raw index happens to be near
+a table quarter-boundary at a given tick, consistent with §8d's own
+"~1-in-9" cadence and NOT a healthbox-specific mechanism at either window.
+
+**Fix shape and blast radius, extended:** confirms §8f's proposed shape
+(a defaulted `menuIdleBounce(t, indexOffset = 0)` parameter) generalizes
+cleanly to window A - window A's call sites (`drawActionMenuIdleWindow`'s
+`bounceTick` line, `battleScene.ts:8323`; `drawFightSubmenuWindow`'s
+`idleWaitBounceTick` line, `battleScene.ts:8684`; and, if the domain
+extends there too but NOT traced this session, its `confirmWaitBounceTick`
+line, `battleScene.ts:8639`) would pass `indexOffset=116` explicitly - a
+**different** literal from window B's `67`, since it is a different
+formula chain (`turn5LegacyResettledBounceTickFromLatest`/
+`turn5SubmenuBounceTickFromLatest`, not `turn5SitrusResettledBounceTick`).
+This keeps the change call-site-local: `menuIdleBounce`'s other ~18
+already-pinned callers keep the default `indexOffset=0` and are
+byte-identical. The table-peak rounding fix itself (whatever it turns out
+to be - §9e's own open item) is a SEPARATE, smaller change inside
+`bounceSin`/`menuIdleBounce` proper - since it depends only on the
+resolved raw index value (already `mod 256`, after any `indexOffset` is
+folded in), it is automatically shared correctly by every caller once
+fixed there once; it does not need to be call-site-local itself.
+
+**Exact frames this class of artifact explains or must not regress,
+consolidated across both windows:**
+- Window B (§8d, already-known): raw ticks 7305, 7316, 7317, 7326, 7335,
+  7344, plus anchors 7306/7317 (the two frames that currently accidentally
+  MATCH today only because of the OLD, un-K-corrected formula - §8e already
+  flags these as expected to flip to new, but explained, failures once
+  `+67` lands).
+- **Outside-span, currently-matching frames that a broad (non-call-site-
+  local) rounding fix must not regress:** `{7326, 7335, 7344}` - these are
+  currently in the "9 currently-matching frames outside [7305,7317]" list
+  (§8e) and dispatch through the STILL-UNEXPLORED `turn6KickoffBounceTick`
+  call site (goal 3, not attempted this or any prior session). **How to
+  avoid regressing them:** land the table/rounding fix (whatever its exact
+  form) as a pure function of the resolved post-`indexOffset` raw index,
+  with NO call-site gating of its own - if `turn6KickoffBounceTick`'s own
+  raw index formula is EXACTLY correct already (unverified - it is
+  unexplored, not confirmed correct) and these three frames' current match
+  is coincidental rather than exact, a rounding-only fix could still
+  change them; the safe order is: land `indexOffset` (call-site-local,
+  zero-risk to unrelated callers) FIRST, re-run `npm run compare --
+  turn6-reopen-off --summary` to confirm `{7326,7335,7344}` are still
+  exact matches (they are untouched by any `indexOffset` change since that
+  call site isn't listed as touched), THEN attempt the rounding fix and
+  immediately re-check the same three frames as a regression gate.
+- Window A (new this session): raw ticks 5927, 5928, 5929 (one shared
+  cluster - the frozen `bounceTick=2089`'s healthbox index sits exactly on
+  table index 64), 5930 (both fields, a coincident onix+healthbox
+  crossing), 5939, 5948, 5957 (single-field, 9-tick cadence, same class).
+  No currently-matching frames in `turn5-action-off`'s own family are at
+  risk from this class today (the trace is 1/32 now - matching frame 5926
+  is outside this mechanism's domain entirely, per §9a).
+
+### 9f. §5/§8h PASS/FAIL update
+
+Rerunnable check for the `+116` correction (no oracle call needed - reads
+the already-committed receipt):
+```sh
+python3 -c "
+import json
+d = json.load(open('src/data/gen/turn5-6-reopen-bounce-probe.json'))
+rows = {r['tick']: r for r in d['ticks']}
+def bt(t):
+    if t == 5927: return 2089
+    if t in (5928, 5929): return 2089          # goal-2-style freeze, already scoped in §4
+    return t - 3840                             # plain submenu continuation, t>=5930
+ok = 0
+for t in range(5927, 5958):
+    n = bt(t) - 1749
+    r = rows[t]
+    assert (192 + 7*n + 116 - r['onixSinIndex']) % 256 == 0
+    assert (128 + 7*n + 116 - r['healthboxSinIndex']) % 256 == 0
+    ok += 1
+print(f'window-A raw-index PASS: +116 (freeze-composed) exact-matches RAM for all {ok}/31 ticks 5927-5957')
+"
+```
+**§5's window-A count is corrected again**, superseding continuation 2's
+"5/32" (§7e): expect **25/32** once freeze+`+116` land WITHOUT a co-landed
+display-basis fix at this call site, or **~25-26/32** with it (§9d) - not
+32/32, because of the permanent, separately-scoped §8d/§9e table-peak
+residual (7 raw-basis / 6 display-basis ticks, bounded and named above,
+not part of this correction's job).
+**§8h's window-B count (~20/46) is unaffected** - window A uses a
+completely different formula chain and a different constant (`116` vs
+`67`); nothing in this continuation touches window B's own numbers.
+
+### 9g. Verdict for this continuation
+
+**Goal 1: DONE**, to an exact number. Window A's own field-agnostic
+raw-sine-index constant is **`+116`** (distinct from window B's `+67`),
+proven (not estimated) against the committed RAM receipt with zero
+exceptions once composed with the already-scoped 3-tick freeze. The
+display basis `displayed(T) = RAM(T-1)` is independently CONFIRMED at
+window A's own ticks (new probe, 4/4 transitions lag by exactly one tick,
+zero exceptions) - not assumed by analogy to §7a's window-B result. The
+composed prediction is **25-26/32** for `turn5-action-off` (up from 1/32),
+contingent on the same external display-basis fix scope caveat §8e
+already flagged for window B. This result directly explains the MAIN-lane
+rung-1 fix step's refutation cited in this step's brief: `116` (like
+`67`) is not a multiple of 7, so no `bounceTick` value in any enumerated
+range could ever have produced the right answer - the missing term is a
+raw-index-domain constant, not a tick-domain one.
+
+**Goal 2: DONE to the extent time allowed.** The §8d artifact is
+field-agnostic (not healthbox-specific) at both windows, traced to
+`bounceSin`'s `floor(table[index]/256)+1` rule disagreeing with real
+hardware specifically at the table's own literal peak/trough entries
+(`256`/`-256`) - the table's own values are not in question, only the
+derivation rule at those exact entries. Fix shape (a defaulted
+`menuIdleBounce(t, indexOffset=0)` parameter, window A passing `116` and
+window B passing `67` at their own call sites) is call-site-local and
+does not touch `menuIdleBounce`'s ~18 other already-pinned callers. The
+rounding/table fix itself is NOT call-site-local (it is a property of the
+resolved raw index alone) - the exact hardware rule was not identified
+this session (needs `trig.c`'s real `Sin()` source, not just its table),
+and the regression-avoidance order for `{7326,7335,7344}` (§9e) is named
+precisely enough for a fix step to follow.
+
+**Goal 3 (stretch, `turn6KickoffBounceTick`): NOT attempted**, per the
+step's own priority order - all budget went to goals 1/2, both required.
+
+**Can a fix step now close `turn5-action-off` fully?** NO, and this is
+now precisely quantified rather than open-ended: landing the freeze +
+`+116` (± the display-basis fix) closes it to **25-26/32**, not 32/32 -
+the remaining 6-7 frames are the permanently-out-of-scope §8d/§9e
+table-peak residual, which needs its own separate rounding-rule fix
+(named but not landed, §9e) to close further. This mirrors window B's own
+situation exactly (§8i: ~20/46, not 46/46, for the identical reason).
