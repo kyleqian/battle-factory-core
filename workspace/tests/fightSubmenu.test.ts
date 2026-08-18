@@ -38,6 +38,7 @@ import {
   turn6FeatherDanceTextVisibleChars,
   turn6KickoffBounceTick,
   turn6ReopenBounceTick,
+  turn5ReopenBounceTick,
   turn5SitrusResettledBounceTick,
 } from "../src/engine/battleScene.ts";
 import { menuIdleBounce } from "../src/engine/battleMenu.ts";
@@ -1146,6 +1147,83 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
     // Sanity: the completed-turn-3 receipt alone (pre-turn-4) still reads 8/10, matching
     // slice I's own pinned behavior - this test doesn't regress it.
     expect(currentPPForActiveMon(moveset, TURN3_LATEST_HANDOFF)[0]).toBe(8);
+  });
+
+  it("turn5ReopenBounceTick: the reopen-press's own sinIndex hold spans 3 ticks (turn5ReopenPressTick..+2), the same RAM-proven driver behavior turn 6's own sibling reuses (ISSUES #97-B rung 3, docs/turn5-bounce-recalibration-probe.md §4 item 1/§9) - the live openElapsed=5927 press tick pinned above", () => {
+    const pressTick = 5927; // live-confirmed above: state.battleScene!.fightSubmenu.openElapsed === 5927 - SCENE_TICK0
+    // Frozen for exactly 3 ticks, all landing on the SAME value (the legacy
+    // formula evaluated once, at the press tick itself) - not re-evaluated
+    // per-tick.
+    const frozen = TURN4_LATEST_HANDOFF;
+    const legacyAtPress = turn5ReopenBounceTick(pressTick, pressTick, frozen);
+    expect(turn5ReopenBounceTick(pressTick + 1, pressTick, frozen)).toBe(legacyAtPress);
+    expect(turn5ReopenBounceTick(pressTick + 2, pressTick, frozen)).toBe(legacyAtPress);
+    // The submenu (shifted) formula resumes normal per-tick advancement from +3 onward.
+    expect(turn5ReopenBounceTick(pressTick + 3, pressTick, frozen)).not.toBe(legacyAtPress);
+    expect(turn5ReopenBounceTick(pressTick + 4, pressTick, frozen)).not.toBe(legacyAtPress);
+  });
+
+  it("ISSUES #97-B rung 3 (docs/turn5-bounce-recalibration-probe.md §4 item 1/§9): window A's composed correction - the 3-tick freeze plus a shared +116 raw-sine-index offset plus a t-1 display-basis shift - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 5927-5957, matching real hardware exactly everywhere except the named, out-of-scope §8d/§9e sine-table-peak residual", () => {
+    const pressTick = 5927; // same live-confirmed openElapsed press tick as the freeze test above
+    // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 5927-5957
+    // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
+    // §9c display-basis finding: displayed(T) = RAM(T-1)).
+    const displayed: Record<number, { onixY2: number; healthboxY2: number }> = {
+      5927: { onixY2: 1, healthboxY2: 1 },
+      5928: { onixY2: 1, healthboxY2: 1 },
+      5929: { onixY2: 1, healthboxY2: 1 },
+      5930: { onixY2: 1, healthboxY2: 1 },
+      5931: { onixY2: 1, healthboxY2: 2 },
+      5932: { onixY2: 0, healthboxY2: 1 },
+      5933: { onixY2: 0, healthboxY2: 1 },
+      5934: { onixY2: 0, healthboxY2: 1 },
+      5935: { onixY2: 0, healthboxY2: 1 },
+      5936: { onixY2: 0, healthboxY2: 1 },
+      5937: { onixY2: 0, healthboxY2: 1 },
+      5938: { onixY2: 0, healthboxY2: 1 },
+      5939: { onixY2: 0, healthboxY2: 1 },
+      5940: { onixY2: 0, healthboxY2: 1 },
+      5941: { onixY2: 0, healthboxY2: 0 },
+      5942: { onixY2: 0, healthboxY2: 0 },
+      5943: { onixY2: 0, healthboxY2: 0 },
+      5944: { onixY2: 0, healthboxY2: 0 },
+      5945: { onixY2: 0, healthboxY2: 0 },
+      5946: { onixY2: 0, healthboxY2: 0 },
+      5947: { onixY2: 0, healthboxY2: 0 },
+      5948: { onixY2: 0, healthboxY2: 0 },
+      5949: { onixY2: 0, healthboxY2: 0 },
+      5950: { onixY2: 1, healthboxY2: 0 },
+      5951: { onixY2: 1, healthboxY2: 0 },
+      5952: { onixY2: 1, healthboxY2: 0 },
+      5953: { onixY2: 1, healthboxY2: 0 },
+      5954: { onixY2: 1, healthboxY2: 0 },
+      5955: { onixY2: 1, healthboxY2: 0 },
+      5956: { onixY2: 1, healthboxY2: 0 },
+      5957: { onixY2: 1, healthboxY2: 0 },
+    };
+    // New (rung 3) composed model, reproducing exactly what drawActionMenuIdleWindow's/
+    // drawFightSubmenuWindow's own window-A call sites now feed menuIdleBounce:
+    // bounceTick evaluated via turn5ReopenBounceTick at t-1 (the local
+    // display-basis correction), and indexOffset=116 (window A's own shared
+    // raw-sine-index anchor, distinct from window B's 67).
+    const newModel = (t: number) => menuIdleBounce(turn5ReopenBounceTick(t - 1, pressTick, TURN4_LATEST_HANDOFF), 116);
+    // §9d's exact predicted mismatch set (live-confirmed against the oracle,
+    // ISSUES #97-B rung 3): the frozen-value table-peak cluster {5928-5931}
+    // plus the periodic §8d-class residual {5940, 5949} - both explicitly out
+    // of scope for this fix (§9e).
+    const expectedMismatches = new Set([5928, 5929, 5930, 5931, 5940, 5949]);
+    for (let t = 5927; t <= 5957; t += 1) {
+      const model = newModel(t);
+      if (expectedMismatches.has(t)) {
+        expect(model, `tick ${t}`).not.toEqual(displayed[t]);
+      } else {
+        expect(model, `tick ${t}`).toEqual(displayed[t]);
+      }
+    }
+    // Regression-proof: the offset/basis correction alone (no freeze) already
+    // diverges from ground truth at most matching ticks - e.g. without
+    // indexOffset=116, tick 5932 (the first post-freeze tick) would read:
+    expect(menuIdleBounce(turn5ReopenBounceTick(5931, pressTick, TURN4_LATEST_HANDOFF))).not.toEqual(displayed[5932]);
   });
 
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn5-menu.json (42/42, 0 diff; tick 5927's own former residual RESOLVED, see docs/battle-turn-notes.md §23)", () => {

@@ -8180,12 +8180,13 @@ function drawActionMenuIdleContentFromLatest(
   bounceTick: number,
   latest: LatestCompletedCommandHandoff | null,
   playerHpOverride?: number,
+  bounceIndexOffset: number = 0,
 ): void {
   drawMenuIdleBaseWithOpponentHpFromLatest(fb, latest);
   const resolvedPlayerHp = playerHpOverride
     ?? latest?.content?.field.player.hp.current
     ?? anchorPlayerAfterTurnHp;
-  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick, bounceIndexOffset);
   drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
   drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
   if (turn2FightCommandPresentationFromLatest(latest) !== null || turn3FightCommandPresentationFromLatest(latest) !== null) {
@@ -8307,9 +8308,19 @@ function drawActionMenuIdleWindow(
     latestCompletedCommandHandoff,
     turn1CommandOpenElapsed,
   );
+  // ISSUES #97-B rung 3 (docs/turn5-bounce-recalibration-probe.md §4 item 1/
+  // §9): the reopen-press special case now covers the RAM-proven 3-tick
+  // freeze (turn5ReopenBounceTick), composed with window A's own `+116`
+  // raw-sine-index constant (§9b) and the `displayed(T)=RAM(T-1)` display
+  // basis (§9c, `t - 1` fed to the tick formula, independent of
+  // menuIdleBounce's own orthogonal internal ramTick=t-1 shift) - strictly
+  // scoped to when a reopen-press tick is actually live (`turn5ReopenPressTick
+  // !== undefined`); the untraced pre-press span (~5920-5926, §9a) keeps the
+  // original unshifted, unoffset submenu formula.
+  const bounceIndexOffset = turn5Active && turn5ReopenPressTick !== undefined ? 116 : 0;
   const bounceTick = turn5Active
-    ? t === turn5ReopenPressTick
-      ? turn5LegacyResettledBounceTickFromLatest(t, latestCompletedCommandHandoff)
+    ? turn5ReopenPressTick !== undefined
+      ? turn5ReopenBounceTick(t - 1, turn5ReopenPressTick, latestCompletedCommandHandoff)
       : turn5SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
     : turn4Active
       ? turn4SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
@@ -8323,7 +8334,7 @@ function drawActionMenuIdleWindow(
               ),
             )
           : t;
-  drawActionMenuIdleContentFromLatest(fb, bounceTick, latestCompletedCommandHandoff);
+  drawActionMenuIdleContentFromLatest(fb, bounceTick, latestCompletedCommandHandoff, undefined, bounceIndexOffset);
   // Slice 9: same eviction-class gap as the `reopenedFromClose` branch above
   // - once turn 4's own reset has evicted turn 3's shape, Onix's own HP
   // (still 88, per turn 3's own established anchor) must come from the
@@ -8334,7 +8345,7 @@ function drawActionMenuIdleWindow(
     ? genericTurn4Content.field.player.hp.current
     : null;
   if (overlayPlayerHp !== null) {
-    drawPlayerHealthboxHpOverlay(fb, overlayPlayerHp, menuIdleBounce(bounceTick).healthboxY2);
+    drawPlayerHealthboxHpOverlay(fb, overlayPlayerHp, menuIdleBounce(bounceTick, bounceIndexOffset).healthboxY2);
   }
 }
 
@@ -8668,8 +8679,16 @@ function drawFightSubmenuWindow(
   // own doc), checked ahead of the plain-`t` fallback since it's otherwise
   // indistinguishable from turn 1's first open until receipt lifecycle state
   // is considered.
+  // ISSUES #97-B rung 3 (docs/turn5-bounce-recalibration-probe.md §9a/§9b/
+  // §9c): this is the SAME `turn5SubmenuBounceTickFromLatest` formula
+  // `drawActionMenuIdleWindow`'s own DMA-wait branch uses, called from this
+  // second, different line, with zero discontinuity at revealTick - so it
+  // shares window A's own `+116` raw-sine-index constant and `t - 1` display
+  // basis (no freeze needed here: this branch is only reached post-reveal,
+  // past the 3-tick freeze window entirely).
+  const idleWaitBounceIndexOffset = turn5Active ? 116 : 0;
   const idleWaitBounceTick = turn5Active
-    ? turn5SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+    ? turn5SubmenuBounceTickFromLatest(t - 1, latestCompletedCommandHandoff)
     : turn4Active
       ? turn4SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
       : genericTurn2Content !== null && turn3Active
@@ -8684,7 +8703,7 @@ function drawFightSubmenuWindow(
           : sm.reopenedFromClose
             ? t - FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT
             : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  drawMenuIdleBounceOverlay(fb, idleWaitBounceTick);
+  drawMenuIdleBounceOverlay(fb, idleWaitBounceTick, idleWaitBounceIndexOffset);
   // S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopened submenu
   // (cursor persisted at 2, then UP-nav'd to 0) dwells here while waiting for
   // the confirm press - Onix's own HP overlay (101, stale in the flat
@@ -8699,7 +8718,7 @@ function drawFightSubmenuWindow(
     ?? genericTurn2Content?.field.player.hp.current
     ?? null;
   if (idleWaitOverlayPlayerHp !== null) {
-    drawPlayerHealthboxHpOverlay(fb, idleWaitOverlayPlayerHp, menuIdleBounce(idleWaitBounceTick).healthboxY2);
+    drawPlayerHealthboxHpOverlay(fb, idleWaitOverlayPlayerHp, menuIdleBounce(idleWaitBounceTick, idleWaitBounceIndexOffset).healthboxY2);
   }
 }
 
@@ -8786,8 +8805,8 @@ function drawFightSubmenuChromeFromLiveState(
 }
 
 /** The onix/healthbox bounce overlay alone (`drawActionMenuIdleContent`'s own second half, factored out so `drawFightSubmenuWindow`'s frozen-bounce branch can reuse it without redrawing `menuIdleBase`). */
-function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number): void {
-  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick);
+function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number, bounceIndexOffset: number = 0): void {
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick, bounceIndexOffset);
   drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
   drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
 }
@@ -10289,6 +10308,25 @@ function turn5SubmenuBounceTickFromLatest(
   latest: LatestCompletedCommandHandoff | null,
 ): number {
   return turn5LegacyResettledBounceTickFromLatest(t, latest) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+/**
+ * ISSUES #97-B rung 3 (`docs/turn5-bounce-recalibration-probe.md` §4 item 1/
+ * §9): turn 5's own reopen-press is the RAM-proven "`DoBounceEffect`'s own
+ * `sinIndex` FROZEN for exactly 3 ticks" hardware mechanic (the same one
+ * rung 1 named `turn6ReopenBounceTick` for turn 6's own sibling press).
+ * Freeze the LEGACY formula's own value, evaluated ONCE at the press tick,
+ * for `t` in `[turn5ReopenPressTick, turn5ReopenPressTick + 2]` inclusive;
+ * resume the normal per-tick submenu formula from `+3` onward.
+ */
+export function turn5ReopenBounceTick(
+  t: number,
+  turn5ReopenPressTick: number,
+  latest: LatestCompletedCommandHandoff | null,
+): number {
+  return t >= turn5ReopenPressTick && t <= turn5ReopenPressTick + 2
+    ? turn5LegacyResettledBounceTickFromLatest(turn5ReopenPressTick, latest)
+    : turn5SubmenuBounceTickFromLatest(t, latest);
 }
 
 /**
