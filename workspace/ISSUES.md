@@ -193,6 +193,80 @@ Do not re-run this exact bisect recipe against `c5563c72..HEAD` without new
 evidence that `c5563c72` is actually good; that specific question is now
 closed.
 
+**2026-08-17 rung 1 (bounded MAIN worker, per `docs/turn5-bounce-recalibration-probe.md`):**
+implemented the doc's §4 item 1 / §6f named fix shapes. Window B (turn 6's
+own reopen-press sibling) landed; window A (turn 5's own) did NOT — its
+dense window provably cannot flip under either variant, a new fact this
+rung discovered.
+
+- **Window B — LANDED.** `drawTurn6FightSubmenuWindow`'s `t < revealTick`
+  branch (`battleScene.ts:11816-11819` pre-fix) had **no** reopen-press
+  special case at all — `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` advanced every
+  tick, uninterrupted. Factored the fix into a new named/exported helper,
+  `turn6ReopenBounceTick(t, turn6ReopenPressTick)`: freezes the fed
+  bounceTick at its `t = turn6ReopenPressTick` value for `t` in
+  `[turn6ReopenPressTick, turn6ReopenPressTick + 2]` inclusive, resuming the
+  normal per-tick formula from `+3` onward — matching §1's RAM-proven
+  3-tick `sinIndex` hold. Tier-1 pin added/red-verified in
+  `tests/fightSubmenu.test.ts` (`turn6ReopenBounceTick` describe block).
+  Per §6c/§6e's own prediction, this is a **provable no-op on
+  `turn6-reopen-off.json` specifically** (that trace's healthbox mismatch
+  band is a *different*, still-open ~11-tick lag local to
+  `turn5SitrusResettledBounceTick`'s own span — the freeze only matters
+  where a plateau boundary sits inside the 3-tick hold window, which isn't
+  the case on this trace) — landed anyway because it now matches RAM ground
+  truth and may close other family traces whose capture windows cross this
+  exact reopen-press instant at a different phase.
+- **Window A — NOT landed, reverted to green.** Implemented and pixel-tested
+  BOTH §4 item 1 variants at `drawActionMenuIdleWindow`'s
+  `t === turn5ReopenPressTick` special case (`battleScene.ts:8307-8310`):
+  (1) frozen — bounceTick held constant at
+  `turn5LegacyResettledBounceTickFromLatest(turn5ReopenPressTick, latest)`
+  for `t` in `[press, press+2]`; (2) advancing-unshifted — the same legacy
+  formula re-evaluated per-tick over that span. **Both produced byte-identical
+  output to the unfixed baseline at every one of ticks 5927-5931** (same
+  bbox `127,74-229,110`, same 1591px diff, confirmed via `git stash`
+  A/B against the pre-edit tree). Root cause, newly established this rung
+  via direct `menuIdleBounce` scanning (not present in the probe doc): for
+  the healthbox field specifically, **no bounceTick value within the entire
+  reachable neighborhood of either variant (~2069-2097) produces
+  `healthboxY2 = 1`** — `menuIdleBounce`'s healthbox output stays pinned at
+  `0` for bounceTick 2069-2096 inclusive (confirmed by direct enumeration)
+  and only becomes `1` starting at bounceTick 2097, roughly **+8 ticks**
+  past what either "3-tick hold" variant can ever feed it. This means
+  window A's defect is **not a hold-duration bug at all** for the healthbox
+  field — it's the same *kind* of field-specific lag already documented for
+  window B in §6c/§6d (there measured at ~11 ticks), just previously
+  unattributed for window A because the "1-vs-3-tick hold" theory was never
+  checked against whether ANY nearby bounceTick could even in principle
+  produce the oracle's pixel. Per this step's contingency, the edit was
+  reverted to green rather than landed non-conforming (neither variant
+  meets the required "≥5/32, frames 5927-5930 newly matching" bar — count
+  stayed exactly 1/32 for both).
+- **Per-trace counts, before/after (all traces, full family sweep):**
+  `turn5-action-off` 1/32 → **1/32 (unchanged — window A not fixed)**;
+  `turn6-reopen-off` 11/46 → **11/46 (unchanged, exactly as predicted by
+  §6c)**; `turn5-reset-off` 256/256 → **256/256 (control held)**;
+  `turn5-confirm-off-a` 8/132 → **8/132**; `turn5-confirm-off-b` 0/132 →
+  **0/132**; `turn5-resolve-off-a` 7/196 → **7/196**; `turn5-resolve-off-b`
+  71/196 → **71/196**; `turn5-resolve-off-c` 149/196 → **149/196**;
+  `turn5-resolve-off-d` 0/196 → **0/196**. Zero regressions anywhere; zero
+  improvements anywhere except the mechanism-correctness of window B's now
+  RAM-matching source (not visible in this trace's own pixel count per
+  §6c).
+- **Remaining open items:** (i) window A's own healthbox-lag correction —
+  a new, still-unidentified defect of the same *class* as (ii) below, not
+  yet quantified beyond "needs ≥+8 ticks near bounceTick~2089"; (ii) the
+  §6c/§6d healthbox ~11-tick lag local to `turn5SitrusResettledBounceTick`
+  for window B (a SIDE-worker tracing pass was in flight in parallel this
+  session, not this rung's scope); (iii) the family's remaining
+  unclassified `turn5-confirm-off-*`/`turn5-resolve-off-*` deviations,
+  whose own windows were not individually traced this rung (their counts
+  did not move, consistent with none of them crossing the fixed turn-6
+  reopen instant at a plateau-sensitive phase, but this was not proven per-
+  trace); (iv) `turn6KickoffBounceTick`'s own analogous defect, named but
+  explicitly deferred by §6e/§6f, not touched this rung.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for

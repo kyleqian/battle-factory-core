@@ -4,6 +4,49 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1321 — [main worker, 2026-08-17] **ISSUES #97-B rung 1: turn-6 reopen-press 3-tick freeze landed; turn-5's own sibling tried both named variants, neither flips its dense window, reverted to green**
+
+- **State:** `src/engine/battleScene.ts` + `tests/fightSubmenu.test.ts`
+  edited (new commit pending). `npm test` **1,066 files / 10,034 passed
+  (+1) / 223 skipped**, `npm run build` green. Full 9-trace family sweep
+  (`turn5-action-off`, `turn6-reopen-off`, `turn5-reset-off`,
+  `turn5-confirm-off-{a,b}`, `turn5-resolve-off-{a,b,c,d}`) re-run
+  before/after: **zero regressions, zero count changes anywhere** (see
+  `ISSUES.md` #97-B for the full per-trace table).
+- **Did:** followed `docs/turn5-bounce-recalibration-probe.md`'s named fix
+  shapes (§4 item 1, §6f). Turn 6's own reopen-press special case
+  (`drawTurn6FightSubmenuWindow`'s `t < revealTick` branch, previously NO
+  hold at all) now freezes its fed bounceTick for 3 ticks via a new
+  exported helper `turn6ReopenBounceTick`, red-verified then landed
+  green — matches §1's RAM-proven 3-tick `sinIndex` hold, and (per §6c's
+  own prediction) is a provable no-op on `turn6-reopen-off.json`
+  specifically (11/46 unchanged), landed anyway for RAM correctness and
+  because it may close other family traces. Turn 5's own reopen-press
+  special case (`drawActionMenuIdleWindow:8307-8310`) was tried both ways
+  the doc named — frozen-at-press-tick and advancing-unshifted — and BOTH
+  produced byte-identical pixels to the unfixed baseline across ticks
+  5927-5931 (confirmed via `git stash` A/B). Root-caused why: direct
+  `menuIdleBounce` enumeration shows no bounceTick reachable by either
+  variant (~2069-2097) ever yields `healthboxY2=1` — the real defect
+  needs roughly **+8 more ticks** than either variant can feed it, i.e.
+  it's a field-specific lag (same *class* as the already-known §6c/§6d
+  ~11-tick healthbox lag for window B), not a hold-duration bug at all.
+  Per the step's own contingency, reverted the window-A edit to green
+  rather than land a non-conforming change, and banked this finding.
+- **Next:** window A needs its own lag-magnitude tracing pass (mirror of
+  §6c/§6d's method) before any further fix attempt — do not re-try a
+  "wider hold" variant without new evidence, that door is now closed.
+  The SIDE-lane's parallel §6c/§6d healthbox-lag tracing (window B) is
+  the more promising unblock; once landed, re-check whether the same
+  mechanism also explains window A's own gap.
+- **Notes:** no PAPERCUT. `git checkout -- battleScene.ts` mid-session (to
+  strip a temporary red-test negative-control edit) accidentally reverted
+  the whole uncommitted window-B fix too, not just the temp probe — cost
+  ~2 min to redo from the diff already reviewed; worth remembering
+  `checkout --` on a file with a real pending fix nukes everything, not
+  just the last edit.
+
+---
 ## 1320 — [main worker, 2026-08-17] **ISSUES #71 remainder: §1e patch-site retirement + hand-fit retirement design doc committed (docs-only, no behavior change)**
 
 - **State:** `docs/sendout-1e-retirement-design.md` added (new commit
@@ -98,44 +141,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   routed through `ballAnims` for the affected phase, so the probe's
   described *outcome* was right even though no render-layer edit was
   required to get there. No PAPERCUT.
-
----
-## 1318 — [main worker, 2026-08-17] **ISSUES #96(a) fixed: swap-screen quit-return ball-slot-0 display stall — both player-quit traces 61/67 → 67/67, zero regressions across the 19-trace battle1-swap family**
-
-- **State:** `src/engine/factorySwapPresentation.ts` +
-  `tests/factorySwapPresentation.test.ts` edited (`bcab2e9e`). `npm test`
-  **1,066 files / 10,031 passed (+1) / 223 skipped**, `npm run build`
-  green, `tests/ballAnim.test.ts` (draft-screen checkpoints) green.
-- **Did:** the diagnosed fix shape from 1317 (thread `i === 0` + a
-  `confirmReveal.ts`-style `isRevealStallActive` analog) turned out
-  **wrong on contact** — frame-by-frame oracle instrumentation (temp
-  `console.error` at the `core.ts` call site, reverted) showed the 6
-  mismatch frames (29774-94) sit inside `quitReturn` (the popup's close),
-  not the `quitPrompt` shown-hold, and both draft's `i===0`/`!hasRested`
-  formula and a popup-shown predicate regressed frames that were already
-  exact when tried in isolation. The real boundary: ball slot 0's own
-  `hasRested` latch flipping true while `phase === "quitReturn"` — every
-  cmdIndex-transition frame from that latch onward needs slot 0 one tick
-  further behind. Landed a narrowly-scoped
-  `isFactorySwapQuitReturnSlot0StallActive(ballIndex, phase, hasRested)`
-  predicate at the `factorySwapPresentation.ts:862` call site only
-  (`isSlot0` stays `false`; only the `revealStallActive` arg is now
-  per-ball and predicate-driven) — draft-screen call sites and
-  `confirmReveal.ts` untouched, per scope.
-- **Result:** `battle1-swap-player-quit-b-return.json` and
-  `-no-return.json` both 61/67 → **67/67**. Full 19-trace
-  `battle1-swap-*.json` family re-verified: every other trace unchanged
-  from its 2026-08-17-supervisor baseline (`enemy-picker` still 129/130,
-  correctly untouched — that's #96(b), separately scoped, out of this
-  step). New Tier-1 test pins the predicate's exact semantics (quitReturn
-  + slot 0 + post-latch → active; quitPrompt-shown, other slots, and
-  ordinary picker ticks → inactive).
-- **Docs:** `ISSUES.md` #96 trimmed to its still-open remainder — retitled
-  to the `enemy-picker` 1-tick header-edge sliver only, part (a) deleted.
-- **Next:** #96(b) enemy-picker sliver (RAM-probe the ONIX name-box border
-  draw at frame 29838, per the trimmed #96 entry); #97-B turn5/6 bounce
-  drift re-derivation; #71/#73-adjacent filler per standing priorities.
-- **Notes:** the session's own worked example of why the contingency
-  clause exists — a diagnosed "fix shape" from a read-only probe can still
-  be wrong in the details; ground-truthing against fresh instrumentation
-  before trusting it caught it before any regression landed.

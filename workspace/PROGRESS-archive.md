@@ -1,3 +1,44 @@
+## 1318 — [main worker, 2026-08-17] **ISSUES #96(a) fixed: swap-screen quit-return ball-slot-0 display stall — both player-quit traces 61/67 → 67/67, zero regressions across the 19-trace battle1-swap family**
+
+- **State:** `src/engine/factorySwapPresentation.ts` +
+  `tests/factorySwapPresentation.test.ts` edited (`bcab2e9e`). `npm test`
+  **1,066 files / 10,031 passed (+1) / 223 skipped**, `npm run build`
+  green, `tests/ballAnim.test.ts` (draft-screen checkpoints) green.
+- **Did:** the diagnosed fix shape from 1317 (thread `i === 0` + a
+  `confirmReveal.ts`-style `isRevealStallActive` analog) turned out
+  **wrong on contact** — frame-by-frame oracle instrumentation (temp
+  `console.error` at the `core.ts` call site, reverted) showed the 6
+  mismatch frames (29774-94) sit inside `quitReturn` (the popup's close),
+  not the `quitPrompt` shown-hold, and both draft's `i===0`/`!hasRested`
+  formula and a popup-shown predicate regressed frames that were already
+  exact when tried in isolation. The real boundary: ball slot 0's own
+  `hasRested` latch flipping true while `phase === "quitReturn"` — every
+  cmdIndex-transition frame from that latch onward needs slot 0 one tick
+  further behind. Landed a narrowly-scoped
+  `isFactorySwapQuitReturnSlot0StallActive(ballIndex, phase, hasRested)`
+  predicate at the `factorySwapPresentation.ts:862` call site only
+  (`isSlot0` stays `false`; only the `revealStallActive` arg is now
+  per-ball and predicate-driven) — draft-screen call sites and
+  `confirmReveal.ts` untouched, per scope.
+- **Result:** `battle1-swap-player-quit-b-return.json` and
+  `-no-return.json` both 61/67 → **67/67**. Full 19-trace
+  `battle1-swap-*.json` family re-verified: every other trace unchanged
+  from its 2026-08-17-supervisor baseline (`enemy-picker` still 129/130,
+  correctly untouched — that's #96(b), separately scoped, out of this
+  step). New Tier-1 test pins the predicate's exact semantics (quitReturn
+  + slot 0 + post-latch → active; quitPrompt-shown, other slots, and
+  ordinary picker ticks → inactive).
+- **Docs:** `ISSUES.md` #96 trimmed to its still-open remainder — retitled
+  to the `enemy-picker` 1-tick header-edge sliver only, part (a) deleted.
+- **Next:** #96(b) enemy-picker sliver (RAM-probe the ONIX name-box border
+  draw at frame 29838, per the trimmed #96 entry); #97-B turn5/6 bounce
+  drift re-derivation; #71/#73-adjacent filler per standing priorities.
+- **Notes:** the session's own worked example of why the contingency
+  clause exists — a diagnosed "fix shape" from a read-only probe can still
+  be wrong in the details; ground-truthing against fresh instrumentation
+  before trusting it caught it before any regression landed.
+
+---
 ## 1317 — [supervisor wind-down, 2026-08-17] **13 worker steps + 4 probes/audits, two lanes: EVERY open walk-up window closed to its full bar (6 windows to exact), #98 found→designed→CLOSED same-session, fixture-estate audit filed+fixed #96/#97 — all final gates green**
 
 - **Final gates (tree `829b299b`, run independently AFTER the last merge):**
