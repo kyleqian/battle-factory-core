@@ -1383,8 +1383,18 @@ export function turn13MurkrowFrame(continuationElapsed: number): 0 | 1 {
  */
 
 
+/**
+ * ISSUES #97 (docs/turn5-bounce-recalibration-probe.md §10b): the raw
+ * (not-yet-frozen) branch was missing the same `- FIGHT_SUBMENU_OPEN_
+ * BOUNCE_SHIFT` term `drawTurn6FightSubmenuWindow`'s own sibling `else`
+ * branch (the pre-confirm idle regime, one line above this function's
+ * only call site) already applies - both regimes drive the SAME live
+ * `DoBounceEffect` cycle, RAM-confirmed continuous across the press
+ * (receipt: `src/data/gen/turn5-6-reopen-bounce-probe.json`, raw sine
+ * index step of 7/tick with zero discontinuity at the press tick).
+ */
 export function turn6KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t;
+  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   return pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET;
 }
 

@@ -11897,7 +11897,9 @@ function drawTurn6FightSubmenuWindow(
     // display-basis correction (`t - 1`) with drawTurn5RockSlideWindow's call
     // above - strictly local to this branch (`t < revealTick`, i.e.
     // `turn6ReopenPressTick` through `turn6ReopenPressTick + 4`); the
-    // post-reveal `turn6KickoffBounceTick` branch below is untouched.
+    // post-reveal span below now carries the SAME anchor+basis too (ISSUES
+    // #97, docs/turn5-bounce-recalibration-probe.md §10b/§10e), except for
+    // `turn6KickoffBounceTick`'s own frozen regime, which stays untouched.
     drawTurn6ActionMenuIdleWindow(fb, t, turn6ReopenBounceTick(t - 1, TICK0 + sm.openElapsed), 60);
     return;
   }
@@ -11909,8 +11911,33 @@ function drawTurn6FightSubmenuWindow(
       return;
     }
   }
-  const bounceTick = sm.confirmElapsed !== null ? turn6KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  drawTurn6FieldBase(fb, t, bounceTick);
+  // ISSUES #97 (docs/turn5-bounce-recalibration-probe.md §10b/§10e,
+  // docs/turn6-reopen-endstate-spec.md's dated addendum - a supervisor
+  // overturn of that spec's own §2/§3 rejection): this branch shares the
+  // SAME `+60` raw-sine-index anchor + `t - 1` display basis as the
+  // DMA-wait branch above, for BOTH the idle-else regime
+  // (`sm.confirmElapsed === null`) and `turn6KickoffBounceTick`'s own raw
+  // (not-yet-frozen) regime - real hardware's driver is still live and on
+  // the SAME cycle in both. The frozen regime (`t >=
+  // pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`) is intentionally
+  // UNTOUCHED: its RAM driver is already torn down by then (no dynamic
+  // ground truth to calibrate against), and its existing frozen anchor
+  // already matches every captured tick as-is.
+  let bounceTick: number;
+  let bounceIndexOffset = 0;
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) {
+      bounceTick = turn6KickoffBounceTick(t - 1, pressTick);
+      bounceIndexOffset = 60;
+    } else {
+      bounceTick = turn6KickoffBounceTick(t, pressTick);
+    }
+  } else {
+    bounceTick = t - 1 - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+    bounceIndexOffset = 60;
+  }
+  drawTurn6FieldBase(fb, t, bounceTick, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, bounceIndexOffset);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   // `fightSubmenuWindow`'s own box (231px) is narrower than the screen - the
   // remaining x=232-239 strip is the outer window frame's own right-edge
@@ -12359,7 +12386,10 @@ export const LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION = createFightCommandPresent
     fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
     kickoff: {
       freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
-      preFreezeTickOffset: 0,
+      // ISSUES #97 (docs/turn5-bounce-recalibration-probe.md §10b): kept in
+      // lockstep with `turn6KickoffBounceTick`'s own raw-branch fix, same
+      // as `resolveTurn5FightCommandPresentation`'s own bounce.kickoff.
+      preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
       frozenPressTickOffset: -TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET,
     },
   },

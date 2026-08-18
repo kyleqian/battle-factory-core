@@ -488,7 +488,11 @@ export function resolveTurn5FightCommandPresentation(): FightCommandPresentation
       fightSubmenuTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
       kickoff: {
         freezeAfterConfirmTicks: FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
-        preFreezeTickOffset: 0,
+        // ISSUES #97 (docs/turn5-bounce-recalibration-probe.md §10b): kept
+        // in lockstep with `turn6KickoffBounceTick`'s own raw-branch fix -
+        // this bridge is a parity pin on that function's real behavior
+        // (see this file's own module doc), not yet render-consumed.
+        preFreezeTickOffset: -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
         frozenPressTickOffset: -4,
       },
     },

@@ -1443,6 +1443,87 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
     }
   });
 
+  it("ISSUES #97 (docs/turn5-bounce-recalibration-probe.md §10b/§10e, docs/turn6-reopen-endstate-spec.md's dated addendum - supervisor overturn of that spec's own §2/§3 rejection): the post-reveal span's composed correction - the idle-else regime AND turn6KickoffBounceTick's own raw regime now share window B's +60 offset + t-1 display basis (the raw regime via its own missing -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT term, §10b), while the frozen regime stays untouched - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 7318-7350, with ZERO exceptions", () => {
+    const pressTick = 7345; // same live-confirmed confirmElapsed press tick as this describe block's own PRESS_TICK
+    // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 7318-7350
+    // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
+    // §7a display-basis finding: displayed(T) = RAM(T-1)).
+    const displayed: Record<number, { onixY2: number; healthboxY2: number }> = {
+      7318: { onixY2: 1, healthboxY2: 2 },
+      7319: { onixY2: 0, healthboxY2: 1 },
+      7320: { onixY2: 0, healthboxY2: 1 },
+      7321: { onixY2: 0, healthboxY2: 1 },
+      7322: { onixY2: 0, healthboxY2: 1 },
+      7323: { onixY2: 0, healthboxY2: 1 },
+      7324: { onixY2: 0, healthboxY2: 1 },
+      7325: { onixY2: 0, healthboxY2: 1 },
+      7326: { onixY2: 0, healthboxY2: 1 },
+      7327: { onixY2: 0, healthboxY2: 1 },
+      7328: { onixY2: 0, healthboxY2: 0 },
+      7329: { onixY2: 0, healthboxY2: 0 },
+      7330: { onixY2: 0, healthboxY2: 0 },
+      7331: { onixY2: 0, healthboxY2: 0 },
+      7332: { onixY2: 0, healthboxY2: 0 },
+      7333: { onixY2: 0, healthboxY2: 0 },
+      7334: { onixY2: 0, healthboxY2: 0 },
+      7335: { onixY2: 0, healthboxY2: 0 },
+      7336: { onixY2: 0, healthboxY2: 0 },
+      7337: { onixY2: 1, healthboxY2: 0 },
+      7338: { onixY2: 1, healthboxY2: 0 },
+      7339: { onixY2: 1, healthboxY2: 0 },
+      7340: { onixY2: 1, healthboxY2: 0 },
+      7341: { onixY2: 1, healthboxY2: 0 },
+      7342: { onixY2: 1, healthboxY2: 0 },
+      7343: { onixY2: 1, healthboxY2: 0 },
+      7344: { onixY2: 1, healthboxY2: 0 },
+      7345: { onixY2: 1, healthboxY2: 0 },
+      7346: { onixY2: 1, healthboxY2: 1 },
+      7347: { onixY2: 1, healthboxY2: 1 },
+      7348: { onixY2: 0, healthboxY2: 0 },
+      7349: { onixY2: 0, healthboxY2: 0 },
+      7350: { onixY2: 0, healthboxY2: 0 },
+    };
+    // Composed model, reproducing exactly what drawTurn6FightSubmenuWindow's
+    // post-reveal dispatch now feeds drawTurn6FieldBase/menuIdleBounce: the
+    // idle-else regime (t < pressTick, confirmElapsed still null) and
+    // turn6KickoffBounceTick's own raw regime (not yet frozen) both apply
+    // the t-1 display basis and indexOffset=60; the frozen regime (from
+    // pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY=3 onward) calls the
+    // REAL (now-fixed) turn6KickoffBounceTick with the untouched raw t and
+    // no offset - it stays exactly as current master already has it.
+    const newModel = (t: number) => {
+      const inRaw = t < pressTick + 3; // FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY=3
+      const bounceTick = t < pressTick
+        ? t - 1 - 2 // FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT=2
+        : turn6KickoffBounceTick(inRaw ? t - 1 : t, pressTick);
+      const offset = t < pressTick || inRaw ? 60 : 0;
+      return menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick), offset);
+    };
+    for (let t = 7318; t <= 7350; t += 1) {
+      const model = newModel(t);
+      expect(model, `tick ${t}`).toEqual(displayed[t]);
+    }
+    // Regression-proof: the OLD (pre-#97-remainder) formula - idle-else with
+    // no offset/basis shift, turn6KickoffBounceTick's raw branch returning
+    // bare t (the missing-shift bug this step fixes) - only coincidentally
+    // agrees with ground truth at the same 9 ticks docs/turn5-bounce-
+    // recalibration-probe.md §10d already named (a table-peak-adjacent
+    // rounding-tolerance class, a regime-boundary-magnitude coincidence, and
+    // a torn-down-driver coincidence - three distinct, unrelated mechanisms,
+    // none of them this fix).
+    const oldModel = (t: number) => {
+      const bounceTick = t < pressTick
+        ? t - 2 // FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT=2, no basis shift
+        : (t < pressTick + 3 ? t : pressTick - TURN6_BOUNCE_FREEZE_ANCHOR_OFFSET); // raw branch returns bare t (the bug)
+      return menuIdleBounce(turn5SitrusResettledBounceTick(bounceTick));
+    };
+    const oldModelCoincidentalMatches97 = new Set([7326, 7327, 7335, 7336, 7344, 7345, 7348, 7349, 7350]);
+    for (let t = 7318; t <= 7350; t += 1) {
+      if (oldModelCoincidentalMatches97.has(t)) continue;
+      expect(oldModel(t), `tick ${t}`).not.toEqual(displayed[t]);
+    }
+  });
+
   it("engine state stays well-formed and deterministic through the reopen/confirm-registration window - pixel parity lives in tools/compare/traces/turn6-menu.json (33/33, 0 diff, 11 named single-tick bounce-extremum residuals excluded, docs/battle-turn-notes.md's new §27)", () => {
     const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/turn6-menu.json", import.meta.url), "utf8")) as {
       segments: { frames: number; buttons?: GbaButton[] }[];
