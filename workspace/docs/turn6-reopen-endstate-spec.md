@@ -211,3 +211,121 @@ reproduces this session's rejected result and should not land.
 so neither suite's outcome is expected to differ from master's own
 baseline. (Confirmed at commit time; see the worker's final message for
 the actual run.)
+
+## 6. Addendum (2026-08-18, bounded MAIN worker): supervisor overturn of §2/§3's rejection — the `[7318,7347]` correction LANDS
+
+A supervisor decision (2026-08-18, evidence gathered at commit `e22e278b`)
+overturned this doc's §2/§3 verdict. The rejection's own premise — an
+untracked "phase-history" input (prior menu open/close cycles) explaining
+why `turn6-menu.json` and `turn6-reopen-off.json` diverge despite
+identical modeled elapsed-tick bookkeeping (§2's own finding) — is
+refuted by four points:
+
+1. **Button histories are byte-identical.** The two traces' `segments`
+   arrays split their idle waits differently but sum to the identical
+   per-frame button sequence through tick 7350 (cumulative-frame
+   expansion, cross-checked both ways).
+2. **They are not the same oracle contract.** `turn6-menu.json` has no
+   `oracleProfile` field — under this codebase's convention (`AGENTS.md`
+   "New compare traces set `oracleProfile`... Historical traces without
+   that field remain ON-profile"), it is a **legacy Battle Scene ON**
+   trace, replayed against oracle profile `8012`. `turn6-reopen-off.json`
+   declares `"oracleProfile": "battle-scene-off"`, replayed against `8014`.
+   Both traces share the same `appRoute` (`canonical-recorded`), so this
+   is the ONLY contract difference between them.
+3. **The oracle PNGs themselves disagree; the app PNGs do not.**
+   Byte-comparing the two compare runs' own oracle captures at their 44
+   overlapping ticks (7307-7350): the ORACLE PNGs differ at **34/44**
+   ticks; the APP PNGs (profile-blind, identical renderer for both) are
+   identical at **44/44**. A single profile-blind app render can never
+   match both oracles when the oracles themselves disagree at 34/44 of
+   the shared ticks — the "different phase" §2 attributed to an untracked
+   input is Battle Scene ON's own different animation timing shifting the
+   real hardware bounce driver to a different sine phase, not a
+   button-history difference this model fails to track.
+4. **The main lane's own mission and precedent both point OFF.** The main
+   lane's lane contract (`AGENTS.md`) scores against the Battle Scene OFF
+   oracle; `turn6-menu.json` is not this lane's ground truth. OFF re-fits
+   moving legacy ON counts without blocker treatment is already this
+   line of work's own established precedent, not a new risk: `turn5-menu.json`
+   (ON) went 42/42 -> 9/42 and this session's own live rerun confirms
+   `turn6-featherdance`/`turn6-feathers` (ON) move 82/90 -> 64/90 and
+   227/235 -> 209/235 alongside this fix, all attributed to the exact
+   span touched. The receipt this whole fix derives from
+   (`src/data/gen/turn5-6-reopen-bounce-probe.json`) is itself an
+   OFF-profile capture — receipt, model, and the OFF traces this lane
+   scores against all share one consistent ground truth; `turn6-menu.json`
+   does not participate in that ground truth at all.
+
+**Consequence:** §2's own Experiment A result (`turn6-reopen-off` 20/46 ->
+40/46, live) undersold the correct outcome — it used the spec's own
+`+67`/`t-1` combination, fit directly against the receipt's raw
+`onixSinIndex`/`healthboxSinIndex` columns without correcting for their
+**post-increment** capture (the driver reads `sSinIndex`, computes `y2`,
+*then* adds `sDelta`=7 — one step too high). Composed on the corrected
+basis (the same `+60`, not `+67`, window B's own landed fix already
+uses) plus `turn6KickoffBounceTick`'s own missing-shift fix (§10b), the
+span closes **completely**, not partially — see below. The `turn6-menu`
+regression §2/§3 feared is real, expected, and — per points 1-4 above —
+the unavoidable cost of scoring the correct (OFF) oracle rather than a
+bug this fix introduces.
+
+### Landed edit list
+
+- `src/engine/battleSceneCanonical.ts`: `turn6KickoffBounceTick`'s raw
+  (not-yet-frozen) branch now returns `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+  instead of bare `t` (§10b: its sibling `else` branch, one line above its
+  only call site, already applied this shift).
+- `src/engine/battleScene.ts`: `drawTurn6FightSubmenuWindow`'s post-reveal
+  dispatch now computes `bounceTick`/`bounceIndexOffset` per regime — the
+  idle-else regime (`sm.confirmElapsed === null`) and
+  `turn6KickoffBounceTick`'s own raw regime both get the `t - 1` display
+  basis (fed as the shifted tick argument) and `bounceIndexOffset = 60`;
+  the frozen regime calls the (now-fixed) `turn6KickoffBounceTick` with
+  the untouched real `t` and offset `0`, unchanged from before this
+  session. `drawTurn6FieldBase`'s single `bounceIndexOffset` parameter
+  already threads to BOTH the onix (`drawTurn5RockSlideAttack`) and
+  healthbox computations internally (confirmed by re-reading — §10c's
+  "two call site" risk was already resolved by that existing plumbing, no
+  second call site needed for this span).
+- `src/engine/turn5ResolutionAdapter.ts` /
+  `src/engine/battleScene.ts` (`LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION`):
+  both "content-owned presentation bridge" copies of
+  `bounce.kickoff.preFreezeTickOffset` updated `0` -> `-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`
+  in lockstep with the real function's fix (a parity pin against
+  `turn6KickoffBounceTick`, not yet render-consumed — required to keep
+  `tests/battleScene.test.ts`'s own bridge-vs-legacy equality check green,
+  not a rendering change).
+- `tests/fightSubmenu.test.ts`: new Tier-1 pin, the composed model across
+  the full `[7318,7350]` span against the receipt (33/33 exact), plus a
+  regression-proof that the OLD (pre-fix) formula only coincidentally
+  matched the same 9-tick set §10d already named.
+
+The composition was proven per-tick against
+`src/data/gen/turn5-6-reopen-bounce-probe.json` (33/33 exact, zero
+exceptions across the FULL `[7318,7350]` span including the untouched
+frozen tail) via `npx tsx` before any live oracle compare, per this step's
+own required modeling-first discipline.
+
+### Before/after table (this session's own live reruns)
+
+| trace | oracle profile | before | after | verdict |
+|---|---|---|---|---|
+| `turn6-reopen-off.json` | OFF (8014) | 22/46 | **46/46** | CLOSED — full match |
+| `turn6-menu-off.json` | OFF (8014) | 23/47 | **47/47** | CLOSED — full match |
+| `turn6-menu.json` | ON (8012, legacy) | 34/44 | 10/44 | expected, accepted — all movement in `[7307,7347]` |
+| `turn6-featherdance.json` | ON (8012, legacy) | 82/90 | 64/90 | expected, accepted — same span |
+| `turn6-feathers.json` | ON (8012, legacy) | 227/235 | 209/235 | expected, accepted — same span |
+| `turn5-sitrus-d.json` | ON | 15/133 | 15/133 | unchanged (hard guard — captures end at 7312, before this span) |
+| `turn5-action-off.json` | OFF | 32/32 | 32/32 | unchanged (hard guard) |
+| `turn5-reset-off.json` | OFF | 256/256 | 256/256 | unchanged (hard guard) |
+| `turn5-confirm-off-a.json` | OFF | 60/132 | 60/132 | unchanged (hard guard) |
+| `turn5-confirm-off-b.json` | OFF | 0/132 (689px/1.79%) | 0/132 (689px/1.79%) | unchanged (hard guard, magnitude identical) |
+| `turn5-resolve-off-a.json` | OFF | 25/196 | 25/196 | unchanged (hard guard) |
+| `turn5-resolve-off-b.json` | OFF | 88/196 | 88/196 | unchanged (hard guard) |
+| `turn5-resolve-off-c.json` | OFF | 149/196 | 149/196 | unchanged (hard guard) |
+| `turn5-resolve-off-d.json` | OFF | 0/196 (258px/0.67%) | 0/196 (258px/0.67%) | unchanged (hard guard, magnitude identical) |
+| `win-terminal-window-off.json` | OFF, generated-orchestrator route | 3590/3590 | 3590/3590 | unchanged (spot-check, disjoint app route) |
+
+`npm test`: 1,067 files / 10,045 passed (+1, the new composed-model pin) /
+223 skipped. `npm run build` green.

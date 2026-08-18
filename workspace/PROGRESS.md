@@ -4,6 +4,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 `PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
+## 1333 — [main worker, 2026-08-18] **ISSUES #97 CLOSED: turn6 [7318,7347] bounce correction lands under a supervisor overturn of `turn6-reopen-endstate-spec.md`'s §2/§3 rejection — `turn6-reopen-off` 22/46→46/46, `turn6-menu-off` 23/47→47/47, both FULL**
+
+- **State:** one green commit (`cb7cbee3` fix+Tier-1 pin) plus this docs
+  commit. `npm test` **1,067 files / 10,045 passed (+1, the new
+  [7318,7350] composed-model pin) / 223 skipped**; `npm run build` green.
+- **Did:** per a supervisor decision overturning `docs/turn6-reopen-
+  endstate-spec.md`'s own §2/§3 rejection (that doc's `turn6-menu.json`
+  regression premise was refuted: that trace has no `oracleProfile` field
+  — it's a legacy Battle Scene ON trace, not this lane's OFF ground truth;
+  byte-comparing the two compare runs' own oracle captures showed the
+  ORACLE PNGs differ at 34/44 overlapping ticks while the profile-blind
+  APP PNGs are identical at 44/44 — full evidence in that doc's own
+  2026-08-18 addendum). Landed the composed `[7318,7347]` correction:
+  `turn6KickoffBounceTick`'s raw branch gets its missing
+  `-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` term (§10b); `drawTurn6FightSubmenu
+  Window`'s post-reveal dispatch applies the shared `+60` raw-sine-index
+  offset + `t-1` display basis to both the idle-else regime and this raw
+  regime; the frozen tail `[7348,7350]` stays untouched (no dynamic RAM
+  ground truth there, already correct). Composition re-derived from
+  scratch against the receipt on the corrected (post-increment, `t-1`
+  basis) footing per this step's own arithmetic caution — NOT the spec's
+  own rejected `+67`/`t-1` combination — and proven exact (33/33 ticks)
+  against `src/data/gen/turn5-6-reopen-bounce-probe.json` before any live
+  compare. Two "content-owned presentation bridge" parity pins
+  (`turn5ResolutionAdapter.ts`, `LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION`
+  in `battleScene.ts`) updated in lockstep to keep reproducing the real,
+  now-fixed function.
+- **Result:** `turn6-reopen-off.json` 22/46 → **46/46** (full match, beats
+  the ≥40/46 target); `turn6-menu-off.json` 23/47 → **47/47** (full
+  match). Expected, accepted ON-profile movement (legacy traces, out of
+  this lane's oracle contract): `turn6-menu.json` 34/44→10/44,
+  `turn6-featherdance.json` 82/90→64/90, `turn6-feathers.json`
+  227/235→209/235 — all inside `[7307,7347]`, the exact touched span.
+  Zero regressions across every hard guard: `turn5-sitrus-d` 15/133,
+  `turn5-action-off` 32/32, `turn5-reset-off` 256/256,
+  `turn5-confirm-off-{a,b}` 60/132 and 0/132 (689px/1.79% unchanged),
+  `turn5-resolve-off-{a,b,c,d}` 25/196, 88/196, 149/196, 0/196
+  (258px/0.67% unchanged), `win-terminal-window-off` 3590/3590. ISSUES
+  #97's `turn6KickoffBounceTick`/7318+ dispatch remainder is fully closed
+  (new §E dated sub-entry); full before/after table in
+  `docs/turn6-reopen-endstate-spec.md`'s addendum.
+- **Next:** ISSUES #97 stays open only for its unrelated remainders:
+  `confirm-off-b`'s 689px residual (`drawTurn5RockSlideWindow` attack/text
+  phase), `resolve-off-d`'s 258px residual (settled-Sitrus-chrome ONIX
+  overlay), `resolve-off-c`'s trailing 47-frame secondary mechanism
+  (§3e/§7, untraced), and the Class-(iii) text/banner mechanism (§8g) —
+  none touched by this session. #71 Rung 9 unchanged (blocked on the
+  animation lane's rung-4 back dispatcher).
+- **Notes:** no PAPERCUT. The arithmetic-caution flag in this step's own
+  brief (receipt columns are post-increment) was worth the up-front
+  `npx tsx` modeling pass — it caught that the spec's own `+67` fit needed
+  the same `-7` correction window B's landed fix already applies, so the
+  composed formula matched the receipt exactly (33/33) on the first live
+  compare, no iteration needed.
+
+
+---
 ## 1332 — [main worker, 2026-08-18] **ISSUES #97 §17 item 5 landed: HP-overlay gate's turn4 arm closes turn5-confirm-off-a's frozen-HP frames (15→60/132), zero decreases across the guard family**
 
 - **State:** two green commits (`e7657a86` fix+Tier-1 pin, `0ac71a47`
@@ -120,66 +177,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   site-context (guard shapes, test filenames) were either already
   established by the prior session's identical recipe or quick to
   re-confirm, so no time was lost re-deriving the pattern.
-
----
-## 1330 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 5-6 landed (30 more sites, 94/119 in-scope), corrects prior ledger's site-count arithmetic: HARDEN's zero-coverage gap pinned first, zero FINDINGs, zero regressions**
-
-- **State:** three green commits (`606ca03d` HARDEN pin test, `efa62046`
-  Rung 5, `e7f31260` Rung 6). `src/engine/battleScene.ts` only edited in
-  the two rung commits; `tests/animation/harden.test.ts` new. `npm test`
-  **1,067 files / 10,043 passed (+1 file/+3 tests, exactly the HARDEN
-  pin) / 223 skipped** after every commit; `npm run build`/
-  `npm run typecheck` green throughout.
-- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs 5-6
-  exactly, re-grepping every move's current line number first (doc's own
-  drift warning — lines had shifted from the doc's `8863ecbc` cites) and
-  confirming every per-move Tier-1 test filename with `find` before
-  scoping. **Rung 5 caveat honored**: HARDEN (`renderSceneOnMovePresentation`
-  `:34080-34185`) had zero Tier-1 coverage — no `harden*.test.ts`, no test
-  referencing `"HARDEN"`/`sceneOnHardenView`/`SceneOnHardenConfig`. Landed
-  a minimal pin FIRST, in its own preceding commit, mirroring
-  `ironDefense.test.ts`'s "crosses the typed seam" shape (HARDEN has no
-  dedicated `<move>AtAge` file of its own — `sceneOnHardenView` wires
-  `metallicShineAtAge` directly): attacker/target identity, metallic-state
-  values cross-checked against the already-pinned `metallicShineAtAge` at
-  4 ages, and the move-mismatch throw guard — confirmed green
-  independently before touching HARDEN's own call site. **Rung 5** (16
-  sites, TORMENT…MINIMIZE): 13 ONIX/YANMA-literal sites converted to
-  `view.target.species`/`view.attacker.species`; 6 sites (HARDEN,
-  IRON_DEFENSE, FLASH, FACADE, ACID_ARMOR, MINIMIZE — already the
-  "dynamic in syntax" §1.3 category) needed only the fallback-idiom swap.
-  **Rung 6** (14 sites, CALM_MIND…ANCIENT_POWER, `calmMind.test.ts`
-  reconfirmed to exist per the brief): 8 ONIX-literal sites converted; 6
-  sites (CALM_MIND, SHADOW_BALL, SYNTHESIS, MOONLIGHT, COSMIC_POWER,
-  ANCIENT_POWER's own `opponentBattler.species`) already dynamic, fallback
-  swap only. Every literal→dynamic substitution used the exact expression
-  each site's enclosing throw-guard already proved equal to the literal;
-  throw-guard/pair-lock blocks themselves untouched everywhere. No
-  FINDINGs — no substituted expression ever disagreed with what the guard
-  proved.
-- **Result — corrects a site-count error in entries 1326/1329:** those
-  entries logged rungs 0-4 as landing "94/121" sites; this session's
-  fresh `grep -c` at the pre-session sha (`77ce70ea`) shows that was
-  wrong. Ground truth (self-consistent at every commit, verified against
-  the actual file, not against any prior doc/ledger claim):
-  `speciesFrontIdleRestOffset(` raw-count + `speciesFrontIdleRestOffsetOrZero(`
-  OrZero-count sum to a constant **123** throughout (119 in-scope + 4
-  permanently-out-of-scope settle-hook literals, per the design doc's own
-  §1.2 split). Pre-session: **59 raw / 64 OrZero** — i.e. rungs 0-4 had
-  actually converted **64**, exactly matching the doc's own §5 table sum
-  (14+14+16+20=64), not 94. After Rung 5 (+16): 43/80. After Rung 6
-  (+14): 29/94. So this session converted 30 sites, bringing the running
-  total to **94 of 119 in-scope sites** (matching the table sum through
-  Rung 6: 64+16+14=94) — coincidentally the same number "94" the prior
-  ledger misattributed to rungs 0-4 alone; the two are not the same claim
-  and shouldn't be conflated. 25 in-scope sites remain (15+10 per the
-  table's Rung 7/8 rows), plus the 4 permanently-out-of-scope literals.
-  Every named per-move Tier-1 test file green each rung (24 files/102
-  tests Rung 5 incl. the new HARDEN pin, 25 files/106 tests Rung 6);
-  `npm run compare:differential -- battle-command-generated-off.json
-  --base <parent> --summary` 128/128 byte-identical both rungs (insurance
-  smoke check — none of these windows are reachable from that trace).
-- **Notes:** no PAPERCUT. Time-boxed to a 50-min worker cap; stopped
-  after two clean rungs rather than rushing Rung 7's extra-confirmation
-  requirement (3-file METEOR_MASH mapping) into a shorter remaining
-  window.

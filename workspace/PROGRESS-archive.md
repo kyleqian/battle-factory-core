@@ -1,4 +1,66 @@
 ---
+## 1330 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 5-6 landed (30 more sites, 94/119 in-scope), corrects prior ledger's site-count arithmetic: HARDEN's zero-coverage gap pinned first, zero FINDINGs, zero regressions**
+
+- **State:** three green commits (`606ca03d` HARDEN pin test, `efa62046`
+  Rung 5, `e7f31260` Rung 6). `src/engine/battleScene.ts` only edited in
+  the two rung commits; `tests/animation/harden.test.ts` new. `npm test`
+  **1,067 files / 10,043 passed (+1 file/+3 tests, exactly the HARDEN
+  pin) / 223 skipped** after every commit; `npm run build`/
+  `npm run typecheck` green throughout.
+- **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs 5-6
+  exactly, re-grepping every move's current line number first (doc's own
+  drift warning — lines had shifted from the doc's `8863ecbc` cites) and
+  confirming every per-move Tier-1 test filename with `find` before
+  scoping. **Rung 5 caveat honored**: HARDEN (`renderSceneOnMovePresentation`
+  `:34080-34185`) had zero Tier-1 coverage — no `harden*.test.ts`, no test
+  referencing `"HARDEN"`/`sceneOnHardenView`/`SceneOnHardenConfig`. Landed
+  a minimal pin FIRST, in its own preceding commit, mirroring
+  `ironDefense.test.ts`'s "crosses the typed seam" shape (HARDEN has no
+  dedicated `<move>AtAge` file of its own — `sceneOnHardenView` wires
+  `metallicShineAtAge` directly): attacker/target identity, metallic-state
+  values cross-checked against the already-pinned `metallicShineAtAge` at
+  4 ages, and the move-mismatch throw guard — confirmed green
+  independently before touching HARDEN's own call site. **Rung 5** (16
+  sites, TORMENT…MINIMIZE): 13 ONIX/YANMA-literal sites converted to
+  `view.target.species`/`view.attacker.species`; 6 sites (HARDEN,
+  IRON_DEFENSE, FLASH, FACADE, ACID_ARMOR, MINIMIZE — already the
+  "dynamic in syntax" §1.3 category) needed only the fallback-idiom swap.
+  **Rung 6** (14 sites, CALM_MIND…ANCIENT_POWER, `calmMind.test.ts`
+  reconfirmed to exist per the brief): 8 ONIX-literal sites converted; 6
+  sites (CALM_MIND, SHADOW_BALL, SYNTHESIS, MOONLIGHT, COSMIC_POWER,
+  ANCIENT_POWER's own `opponentBattler.species`) already dynamic, fallback
+  swap only. Every literal→dynamic substitution used the exact expression
+  each site's enclosing throw-guard already proved equal to the literal;
+  throw-guard/pair-lock blocks themselves untouched everywhere. No
+  FINDINGs — no substituted expression ever disagreed with what the guard
+  proved.
+- **Result — corrects a site-count error in entries 1326/1329:** those
+  entries logged rungs 0-4 as landing "94/121" sites; this session's
+  fresh `grep -c` at the pre-session sha (`77ce70ea`) shows that was
+  wrong. Ground truth (self-consistent at every commit, verified against
+  the actual file, not against any prior doc/ledger claim):
+  `speciesFrontIdleRestOffset(` raw-count + `speciesFrontIdleRestOffsetOrZero(`
+  OrZero-count sum to a constant **123** throughout (119 in-scope + 4
+  permanently-out-of-scope settle-hook literals, per the design doc's own
+  §1.2 split). Pre-session: **59 raw / 64 OrZero** — i.e. rungs 0-4 had
+  actually converted **64**, exactly matching the doc's own §5 table sum
+  (14+14+16+20=64), not 94. After Rung 5 (+16): 43/80. After Rung 6
+  (+14): 29/94. So this session converted 30 sites, bringing the running
+  total to **94 of 119 in-scope sites** (matching the table sum through
+  Rung 6: 64+16+14=94) — coincidentally the same number "94" the prior
+  ledger misattributed to rungs 0-4 alone; the two are not the same claim
+  and shouldn't be conflated. 25 in-scope sites remain (15+10 per the
+  table's Rung 7/8 rows), plus the 4 permanently-out-of-scope literals.
+  Every named per-move Tier-1 test file green each rung (24 files/102
+  tests Rung 5 incl. the new HARDEN pin, 25 files/106 tests Rung 6);
+  `npm run compare:differential -- battle-command-generated-off.json
+  --base <parent> --summary` 128/128 byte-identical both rungs (insurance
+  smoke check — none of these windows are reachable from that trace).
+- **Notes:** no PAPERCUT. Time-boxed to a 50-min worker cap; stopped
+  after two clean rungs rather than rushing Rung 7's extra-confirmation
+  requirement (3-file METEOR_MASH mapping) into a shorter remaining
+  window.
+---
 ## 1329 — [supervisor wind-down, 2026-08-18, amended after two bonus rounds] **18 worker steps, two lanes: #96 CLOSED (swap family 19/19 exact), #97 mechanism RESOLVED via an 8-probe instrument chain (turn5-action-off CLOSED 32/32; five root causes landed), #71 §1e ladder COMPLETE (119/119 in-scope sites) — all final gates green**
 
 - **Final gates (run independently AFTER the last merge, twice — at

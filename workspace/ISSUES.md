@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, `turn5-action-off` CLOSED 32/32, `turn6-reopen-off` 22/46 with a separate open kickoff-dispatch remainder below); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
+## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, `turn5-action-off` CLOSED 32/32, `turn6-reopen-off` CLOSED 46/46, `turn6-menu-off.json` CLOSED 47/47); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 
 **2026-08-17 rung 1 (bounded MAIN worker, pixel-first per the standing
 method):** split into two independently-diagnosed findings.
@@ -175,12 +175,9 @@ assert zero exceptions instead of a named residual set) — all cite this
 fix. Full `npm test` 1066/1066 files, 10040 passed, 223 skipped; `npm run
 build` green.
 
-**Remaining, still open:**
-- **`turn6KickoffBounceTick`/the 7318+ dispatch** (`docs/turn5-bounce-
-  recalibration-probe.md` §10, a SIDE-worker continuation in flight in
-  parallel with this rung — do not touch without checking its current
-  state first): a missing shift plus a second, previously-unpatched call
-  site, still unlanded as of this entry.
+**Remaining, still open (as of this dated sub-entry — see the 2026-08-18
+addendum below for `turn6KickoffBounceTick`/the 7318+ dispatch, now
+CLOSED):**
 - **Class-(iii) text/banner mechanism** (`docs/turn5-bounce-
   recalibration-probe.md` §8g): the overwhelming majority of
   `turn5-confirm-off-*`/`turn5-resolve-off-*`'s own remaining mismatches
@@ -269,8 +266,6 @@ family)**:
   before and after that fix) — needs its own instrument.
 - `resolve-off-c`'s trailing 47-frame secondary mechanism (§3e/§7,
   unchanged from before) — still untraced.
-- `turn6KickoffBounceTick`/the 7318+ dispatch — unchanged, side-worker
-  continuation, not checked this session.
 
 **Item 5 landed (2026-08-18, later bounded MAIN worker session)** — see
 `docs/turn5-family-class3-diagnosis.md` §19 for the full per-caller audit
@@ -289,6 +284,55 @@ neither reachable through the gate this fix touched. Zero decreases across
 the full guard family. `confirm-off-b`'s 689px residual and
 `resolve-off-d`'s 258px residual both remain open (see above), now
 attributed to specific out-of-scope code paths rather than to this gate.
+
+### E. `turn6KickoffBounceTick`/the 7318+ dispatch — CLOSED (2026-08-18, bounded MAIN worker, under a supervisor overturn of `docs/turn6-reopen-endstate-spec.md`'s own §2/§3 rejection)
+
+The prior SIDE-worker spec (`docs/turn6-reopen-endstate-spec.md`) had
+rejected extending window B's `+60`/`t-1` correction into `[7318,7350]`
+because it regressed `turn6-menu.json` (a same-family trace) more than it
+gained on `turn6-reopen-off.json`. The supervisor overturned that
+rejection (evidence recorded in that doc's own 2026-08-18 dated addendum):
+`turn6-menu.json` has no `oracleProfile` field — it is a legacy Battle
+Scene ON trace (runs against oracle profile 8012), while this lane's own
+`turn6-reopen-off.json` is `battle-scene-off` (8014); byte-comparing the
+two compare runs' oracle captures at their 44 overlapping ticks showed the
+ORACLE PNGs differ at 34/44 while the APP PNGs (profile-blind) are
+identical at 44/44 — the "different phase" the spec attributed to an
+untracked phase-history input is Scene ON's own different animation
+timing, not button history, and the app cannot match both oracles at once.
+
+Landed: `turn6KickoffBounceTick`'s raw (not-yet-frozen) branch gets its
+missing `-FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` term (its sibling `else`
+branch already applies it, `docs/turn5-bounce-recalibration-probe.md`
+§10b); `drawTurn6FightSubmenuWindow`'s post-reveal dispatch applies the
+SAME `+60` raw-sine-index offset + `t-1` display basis to both the
+idle-else regime and this raw regime; the frozen regime (no dynamic RAM
+ground truth past 7347) stays untouched, confirmed still correct as-is.
+Composition re-derived from scratch against the receipt on the corrected
+(post-increment, `t-1`-basis) footing, not copied from the spec's own
+rejected `+67`/`t-1` combination — verified exact (33/33 ticks) against
+`src/data/gen/turn5-6-reopen-bounce-probe.json` before any live compare.
+
+**Result: both OFF-profile traces in this dispatch's own scope now CLOSE
+FULLY** — `turn6-reopen-off.json` 22/46 -> **46/46**, `turn6-menu-off.json`
+23/47 -> **47/47**. Expected, accepted ON-profile movement (legacy Battle
+Scene ON traces, out of this lane's oracle contract, NOT a regression):
+`turn6-menu.json` 34/44 -> 10/44, `turn6-featherdance.json` 82/90 -> 64/90,
+`turn6-feathers.json` 227/235 -> 209/235 — all movement lands inside
+`[7307,7347]`, the exact span this fix touches, on the same onix/healthbox
+bounce chrome. Zero regressions in the hard-guard family: `turn5-sitrus-d`
+15/133, `turn5-action-off` 32/32, `turn5-reset-off` 256/256,
+`turn5-confirm-off-{a,b}` 60/132 and 0/132 (689px/1.79% residual
+unchanged), `turn5-resolve-off-{a,b,c,d}` 25/196, 88/196, 149/196, 0/196
+(258px/0.67% residual unchanged), `win-terminal-window-off` 3590/3590. Full
+details, including the byte-compare evidence and the per-tick receipt
+table: `docs/turn6-reopen-endstate-spec.md`'s 2026-08-18 addendum.
+
+**Remaining, still open:** none in this dispatch's own scope — the
+`[7318,7350]` span is fully closed for both OFF-profile family traces. The
+untouched frozen tail `[7348,7350]` has no dynamic RAM ground truth to
+calibrate against and already matched before this fix (confirmed still
+correct, left alone by design, not a residual).
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
