@@ -7553,3 +7553,12 @@ export function speciesFrontIdleRestOffset(species: string): SpeciesIdleOffset |
   if (!PORTED_FRONT_FAMILIES.has(family)) return null;
   return terminalOffsetForFamily(family);
 }
+
+/**
+ * Same as `speciesFrontIdleRestOffset`, but collapses the `null` case (an
+ * unported front-anim family) to `{ x2: 0, y2: 0 }` — the fallback idiom
+ * repeated verbatim at most `renderSceneOnMovePresentation` call sites.
+ */
+export function speciesFrontIdleRestOffsetOrZero(species: string): SpeciesIdleOffset {
+  return speciesFrontIdleRestOffset(species) ?? { x2: 0, y2: 0 };
+}

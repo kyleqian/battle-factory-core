@@ -135,6 +135,7 @@ import {
   ROTATE_UP_TO_SIDES_FRONT_SPECIES,
   ROTATE_UP_TO_SIDES_OUTSIDE_FACTORY_FRONT_SPECIES,
   speciesFrontIdleRestOffset,
+  speciesFrontIdleRestOffsetOrZero,
   swingConcaveFrameAtTick,
   SWING_CONCAVE_FACTORY_FRONT_SPECIES,
   SWING_CONCAVE_FRONT_SPECIES,
@@ -810,6 +811,29 @@ describe("speciesIdleAnim", () => {
       for (const species of V_SHAKE_FRONT_SPECIES) {
         expect(speciesFrontIdleRestOffset(species)).toEqual({ x2: 0, y2: 0 });
       }
+    });
+  });
+
+  describe("speciesFrontIdleRestOffsetOrZero", () => {
+    it("equals speciesFrontIdleRestOffset(...) ?? {x2:0,y2:0} for ONIX (nonzero)", () => {
+      expect(speciesFrontIdleRestOffsetOrZero("ONIX")).toEqual(
+        speciesFrontIdleRestOffset("ONIX") ?? { x2: 0, y2: 0 },
+      );
+      expect(speciesFrontIdleRestOffsetOrZero("ONIX")).toEqual({ x2: 1, y2: 0 });
+    });
+
+    it("equals speciesFrontIdleRestOffset(...) ?? {x2:0,y2:0} for RATTATA (nonzero)", () => {
+      expect(speciesFrontIdleRestOffsetOrZero("RATTATA")).toEqual(
+        speciesFrontIdleRestOffset("RATTATA") ?? { x2: 0, y2: 0 },
+      );
+      expect(speciesFrontIdleRestOffsetOrZero("RATTATA")).toEqual({ x2: 1, y2: 0 });
+    });
+
+    it("equals speciesFrontIdleRestOffset(...) ?? {x2:0,y2:0} for a zero species (PIDGEOT)", () => {
+      expect(speciesFrontIdleRestOffsetOrZero("PIDGEOT")).toEqual(
+        speciesFrontIdleRestOffset("PIDGEOT") ?? { x2: 0, y2: 0 },
+      );
+      expect(speciesFrontIdleRestOffsetOrZero("PIDGEOT")).toEqual({ x2: 0, y2: 0 });
     });
   });
 
