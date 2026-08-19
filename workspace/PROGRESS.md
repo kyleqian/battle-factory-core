@@ -7,6 +7,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1354 — [main worker, 2026-08-19] **M-A step 1 DONE: real max-depth tracking (maxCarriedWinStreak/maxBattleDepth) added to the soak driver and surfaced in the CLI, old carriedWinStreak snapshot's lying doc comment corrected**
 
+- **Supervisor verification + parallel side fold (same session):** step 1
+  independently verified — test file rerun green, tracking hook read, live
+  vanilla 0:3 run, and a seed-0 `winning` diagnostics probe reconciling the
+  pasted `b2 / carry<=7 / depth<=7` line (round 1 complete at carry 0 →
+  carry-7 round lost its FIRST battle, the true depth-7 point → post-loss
+  re-chained carry-0 round lost at battle 2, which is where `b2` comes
+  from; `opponentGenerationCount 2` confirms). Depth convention for step 3
+  reports: during battle N of a carry-C round, `maxBattleDepth` = C+(N-1)
+  (0-based ladder position). **Side-lane fold `79a0c6ad`:** scanner
+  H3-let-write hazard (`e99c3511`) — both batch-8 hand-exclusions now
+  auto-blocked, `playerHealthboxHpOverlayForHp` stays eligible (pool = 1);
+  verified in-worktree (11/11 + live scanner run) and on the union
+  (26/26 touched tests + smoke 444/444). A stray main-tree copy of the
+  scanner edit (absolute-path papercut, hit #3) was byte-identical to the
+  committed version and discarded. Freshness FAIL at orient =
+  false-positive #7. PAPERCUTS bumped ×2, ISSUES #39 scanner-gap note
+  trimmed to CLOSED.
+
 - **State:** two green commits (`4570aa11` driver+test, `ecb2e5de` CLI).
   Full `npm test` **1,068 files / 10,124 passed / 223 skipped**; `npm run
   build`/`npm run typecheck` clean.

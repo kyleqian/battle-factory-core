@@ -17,7 +17,11 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 6 (2026-08-18 supervisor session 3 orient: both ports FAILed
+- **Hits:** 7 (2026-08-19 supervisor orient: both ports FAILed again — same
+  09:45:59-vs-09:51:59 shape for 8014, zero `oracle/` commits since the 8012
+  start; disproved in ~3 min via the commit-date check plus three sessions of
+  walk-up staging evidence on the running 8014, kept both, no restart.)
+  (2026-08-18 supervisor session 3 orient: both ports FAILed
   again — same 09:45:59-vs-09:51:59 services-newer-than-their-own-commit
   shape as 2026-08-16; disproved in ~3 min via the commit-date check, kept
   both services, no restart.)
@@ -56,7 +60,12 @@ history.
   concludes "Edit/Write silently fails" and routes around it with shell
   writes; meanwhile the main tree accumulates stray uncommitted duplicates
   of its early drafts.
-- **Hits:** 2 (2026-08-16 morning, S3 gold-doc worker — caught by
+- **Hits:** 3 (2026-08-19, scanner-H3 side worker — its first three Edit
+  calls landed in the main tree; the stray was byte-identical to the
+  branch's committed version (`git diff worker/<id> -- <file>` empty), so
+  `git checkout --` was safe; the worker lost ~5 min and again reported it
+  as "Edit silently doesn't persist".)
+  (2026-08-16 morning, S3 gold-doc worker — caught by
   `git status` before merge, PROGRESS 1288 notes; 2026-08-16 afternoon,
   B1c worker — two stray files in the main tree, diagnosed via diff
   against the branch's committed versions as superseded early drafts and
