@@ -813,6 +813,22 @@ function's** own "Foe GROVYLE fainted!" text-reveal timing
 with a named next probe, not chased this session. Full receipts:
 `docs/turn5-resolve-ab-pools-diagnosis.md` §17-§19.
 
+**2026-08-18 status (bounded MAIN worker, session 6): `resolve-off-a`'s
+fainted-text reveal band CLOSED, 175/196 -> 193/196.** §19.1's own named
+next probe (dense visible-char-count sweep, both text lines, solved
+against measured glyph-column boundaries) found `drawTurn5RockSlideWindow`
+runs 1 render tick ahead of real hardware at two sibling dispatch points
+(the text-reveal branch's own gate, and the glyph-reveal call itself) —
+both fixed with the same scoped `t - 1` display-basis correction already
+used elsewhere in this function. `6398` (the fainted-message wait-cursor)
+confirmed a separate, already-census'd Class C bug, untouched by this fix.
+Remaining 3/196: `6283`/`6284` (2px each) pixel-isolated to an exact
+single UI element inside GROVYLE's healthbox, RAM-correlated to the same
+2-tick-lag family, but the responsible draw path not yet found — banked
+with a named next probe rather than guessed at; `6398` (Class C cursor)
+untouched, out of this session's scope. Full receipts:
+`docs/turn5-resolve-ab-pools-diagnosis.md` §19.3-§19.4.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for

@@ -5,6 +5,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1345 — [main worker, 2026-08-18 session 6] **ISSUES #97: `drawTurn5RockSlideWindow`'s fainted-text dispatch gate + glyph reveal (§19.1's named next probe) LANDED — `resolve-off-a` 175/196 -> 193/196 (one commit, green)**
+
+- **State:** one green commit (`98fe3385` fix + 2 Tier-1 pins) plus this
+  docs commit. `npm test` **1,067 files / 10,096 passed (+3) / 223
+  skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** per §19.1's own named next probe, a dense oracle pixel sweep
+  (6373-6399, `--capture-range`) plus a scratch script computing each
+  character's own measured glyph-column boundary (via the real
+  `measureText`/font/charmap) solved the mismatch precisely: real
+  hardware's fainted-message glyph reveal AND its dispatch gate (the
+  switch away from the prior "ONIX used ROCK SLIDE!" text) both run 1
+  render tick ahead of real hardware in `drawTurn5RockSlideWindow` — a
+  uniform `t - 1` display-basis correction at this function's own two
+  dispatch points (`battleScene.ts:15032`/`15046`), same shape already
+  used elsewhere in this file. `turn5FaintedTextStartTick`/
+  `turn5FaintedTextVisibleChars` themselves are untouched.
+- **Result:** `turn5-resolve-off-a` **175/196 -> 193/196** (18 newly
+  matched frames, exceeding the step's 190+ target). `6398` (the
+  fainted-message wait-cursor) confirmed unchanged — a separate,
+  already-census'd Class C bug, not this session's mechanism. Full guard
+  family reran with **zero decreases**: `-b` 196/196, `-c` 195/196 (6763
+  unchanged), `-d` 194/196 (6850/6996 unchanged), `reset-off` 256/256,
+  `action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+  47/47, `confirm-off-a` 128/132 (5959-5961/5968 unchanged), `-b` 131/132
+  (6184 unchanged), `turn6-rockslide-a`/`-b` 255/255, 105/105,
+  `turn7-rockslide-a` 256/256, `turn13-switchin` 242/242,
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** `resolve-off-a`'s remaining 3/196 is `6283`/`6284` (2px
+  each) — pixel-isolated to an exact single UI element inside GROVYLE's
+  healthbox (an "HP"-icon-colored pixel pair swapping to the healthbox
+  frame color), RAM-correlated to the same 2-tick-lag family
+  (`battleBars[1]` struct restart at RAM 6282, pixel-visible 6283, 2
+  ticks ahead of the literal `gBattleMons[1].hp` zero-step at 6285) but
+  the responsible TS draw path not yet identified (both per-tick
+  formulas that feed this function's healthbox draw are ruled out —
+  ordinary opponent-hp drain and the hit-reaction wobble are both static
+  across this window). Banked with a named next probe
+  (`docs/turn5-resolve-ab-pools-diagnosis.md` §19.4) rather than guessed
+  at. `6398` (Class C cursor), `-c` 6763, and `-d` 6850/6996 remain other
+  lanes'/mechanisms' own tracked residuals.
+- **Notes:** no PAPERCUT. Fix red-verified against pre-fix code via
+  `git stash -- src/engine/battleScene.ts` before finalizing (2 of the 3
+  new pins fail as expected pre-fix; the third is a pure sanity pin on
+  the untouched shared function, correctly holds either way).
+
+---
+
 ## 1344 — [main worker, 2026-08-18 session 5] **ISSUES #97: `drawTurn5RockSlideAttack`'s three §17/§5-named mechanisms LANDED — `resolve-off-a` 60/196 -> 175/196 (three commits, all green)**
 
 - **State:** three green commits (`9ec92966` phantom rock-prop drop,
@@ -110,91 +157,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and #71/#73/#55 unchanged.
 - **Notes:** no PAPERCUT. ISSUES #97 given a short dated status line
   recording this round (entry not restructured).
-
----
-
-## 1342 — [supervisor wind-down, 2026-08-18 session 2] **#97 near-CLOSED in one instrument→fix assembly line (10 fix + 8 instrument worker rounds): `resolve-off-b` 196/196 + both turn6 windows CLOSED, every trace verified after every round, zero guard decreases all session; one supervisor overturn (ON/OFF oracle-profile proof) unlocked turn6**
-
-- **Final gates (run TWICE — at `758107d9` after the last pre-wind-down
-  engine fold, and RERUN at the final tree `cc51b13e` after the bonus
-  round's engine fix below):** full npm test **1,067 files / 10,088
-  passed / 223 skipped** (final rerun; 10,086 at the first pass, +2 =
-  the bonus round's pin); `npm run build` green both times; soak
-  vanilla 0:20 **20/20 OK** both times; soak full 0:60 **60/60 OK**
-  both times. animation-main and rust-main EMPTY at orient AND
-  wind-down. DEFERRED.md EMPTY. Only permanent worktrees remain; no
-  unmerged branches; freshness-check FAIL at orient was false-positive
-  #5 (PAPERCUTS bumped; zero `oracle/` commits since either service
-  start).
-- **Family scoreboard (session start → end, supervisor-verified after
-  every round):** `turn5-confirm-off-a` 15→**128**/132; `-b`
-  0→**131**/132; `turn5-resolve-off-a` 25→**58**/196; `-b`
-  88→**196/196 CLOSED**; `-c` 149→**195**/196; `-d` 0→**194**/196;
-  `turn6-reopen-off` 22→**46/46 CLOSED**; `turn6-menu-off` fixture
-  23→**47/47 CLOSED**; controls (`turn5-reset-off` 256/256,
-  `turn5-action-off` 32/32, turn4 pair 256/256, `turn13-switchin`
-  242/242) never moved.
-- **Supervisor decision (evidence-backed, recorded in
-  `docs/turn6-reopen-endstate-spec.md` §6 + commit `cb7cbee3`):**
-  overturned that spec's rejection of the turn6 [7318,1350] fix. Its
-  guard trace `turn6-menu.json` is a legacy Battle Scene ON trace with
-  byte-identical inputs to `turn6-reopen-off` (OFF); the two ORACLES'
-  PNGs differ at 34/44 overlapping ticks while the app's are identical
-  44/44 — one profile-blind render can never match both. Mission + lane
-  contract + precedent (`turn5-menu` 42/42→9/42 under earlier OFF
-  re-fits) say OFF wins; legacy-ON movement measured and recorded
-  (turn6-menu 34→10/44, featherdance 82→64/90, feathers 227→209/235).
-- **Root-cause classes landed:** three "spurious animation with zero
-  RAM basis" deletions (ENDEAVOR squish package, PIDGEOTTO
-  stretch/frame-flip, ONIX Sitrus rotation + granting stars); five
-  wrong-anchor retimings (healthbox slide 6763, text-clear 6989,
-  menu-redraw 6995, HP display-climb 6952, materialize coeff t-1); two
-  missing per-window parameter threads (rockslide text delay 355,
-  ENDEAVOR drain delay 116); one real state addition
-  (`turn5FaintDismissElapsed` dismiss+freeze, the turn6 kickoff shift).
-  The live-verification bar caught five would-be regressions before
-  they landed (shared BG-fade table → forked; cursor fix broke `-c`
-  through a shared path → reverted, re-instrumented, relanded; +1-off
-  hand-derived freeze offset; census Class-B misattribution; ring/star
-  hypothesis falsified by full OAM scan).
-- **Open (ordered for next session):** (a) `resolve-off-a`'s remaining
-  static-background/rock-sprite residual (span 6262-6376, ~134 frames —
-  see the post-wind-down bonus round below for what's now closed vs.
-  what's left). (b) Named single-frame residuals: `-c` 6763 (6px
-  AA-class), `-d` 6850 + 6996 (cursor-adjacent), confirm-off 4-frame
-  bounce + 1-frame edge. (c) #71 Rung 9 still blocked on the animation
-  lane's rung-4 back dispatcher. (d) #73/#55 unchanged. No deferred
-  questions; no blockers.
-- **Post-wind-down bonus round [main worker, 2026-08-18 session 3,
-  commit `e07e1813`]:** landed §15.3's fix
-  (`docs/turn5-resolve-ab-pools-diagnosis.md`, corrected-bootstrap RAM
-  proof that `REG_BG3VOFS` never leaves 0 anywhere in turn 5's
-  6100-6376 window under Battle Scene Off) — `drawTurn5RockSlideAttack`
-  no longer calls `rockSlideBg3Y`, hardcoded to the sibling turns'
-  flat `drawStaticBgShiftedY(fb, 0, ...)` pattern instead.
-  `turn5-resolve-off-a` **58/196 → 60/196** (exactly frames 6259/6260
-  newly match — the shake sub-window's own first two nonzero ticks —
-  verified via a before/after diff of the full mismatched-frame list,
-  zero other frames changed). Every guard trace unchanged:
-  `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
-  `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
-  `turn5-confirm-off-a` 128/132, `-b` 131/132, `turn5-resolve-off-b`
-  196/196, `-c` 195/196, `-d` 194/196, `turn6-rockslide-a` 255/255,
-  `turn6-rockslide-b` 105/105, `turn7-rockslide-a` 256/256,
-  `turn13-switchin` 242/242, `turn4-doubleteam-off`/
-  `turn4-rockslide-off` 256/256. New Tier-1 pin
-  (`tests/battleScene.test.ts`, §15.3): row 0 byte-identical across
-  ticks 6258/6259/6260 post-fix (pre-fix it differed at all 240
-  columns between 6258 and 6259/6260). `npm test` **10,088 passed**
-  (+2); `npm run build` green. What's left in `resolve-off-a`
-  (134/196, span 6262-6376) is NOT this fix's target and was NOT
-  touched: a separate falling-rock-sprite residual starting at 6263
-  (our app's own rock timing puts a rock at row 0 there; not
-  cross-checked against real OAM this session) that grows into a much
-  larger, already-known mismatch band through 6376 (peaking ~3.7% at
-  6304-6354, a probable menu-idle-bounce or field-position drift
-  unrelated to BG3, plus the already-documented Class-B
-  sink-transition tail at 6360-6376). Next session should instrument
-  that band fresh rather than assume it shares a cause with the BG3
-  fix just landed.
 

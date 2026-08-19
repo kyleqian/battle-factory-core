@@ -2067,7 +2067,9 @@ fix shape will be needed.
 `resolve-off-d` ticks 6850/6996 (another lane's own tracked residuals,
 explicitly checked unchanged by both fixes this session).
 
-### 19.2 Rerunnable guards (fresh, this session)
+### 19.2 Rerunnable guards (fresh, this session; resolve-off-a's own count
+updated again by §19.3 below - see that section for the fresh per-command
+rerun after THIS session's own fix)
 
 ```sh
 cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
@@ -2088,3 +2090,148 @@ npm run compare -- turn13-switchin --summary       # 242/242
 npm run compare -- turn4-doubleteam-off --summary  # 256/256
 npm run compare -- turn4-rockslide-off --summary   # 256/256
 ```
+
+## 19.3 Landed (2026-08-18, bounded MAIN worker, session 6): §19.1's own named next probe (dense visible-char-count sweep, both text lines, solved against measured glyph-column boundaries) closed the fainted-text reveal band exactly - `turn5-resolve-off-a` 175/196 -> 193/196
+
+**Method**: per §19.1's own instruction, a dense oracle pixel sweep
+(`npm run compare -- turn5-resolve-off-a --capture-range 6373:6399
+--summary`) plus a scratch vitest script computing each character's own
+cumulative glyph-column boundary (via the real `measureText`/font/charmap,
+not eyeballed) for both `TURN5_FAINTED_LINE1` ("Foe GROVYLE", 11 chars)
+and `TURN5_FAINTED_LINE2` ("fainted!", 8 chars). Matching each mismatched
+frame's own diff bbox against this boundary table pinpointed exactly which
+character index was under dispute at every tick - one clean linear solve
+(matches §19.1's own prediction: reveal rate correct, only the start
+offset wrong).
+
+**Finding 1 (glyph reveal)**: real hardware's first fainted-message
+character (`turn5FaintedTextVisibleChars`, `battleScene.ts:15046`, the
+lone call site) appears at render tick 6379, not 6378 as the unshifted
+formula produces (`turn5FaintedTextStartTick` itself, RAM-confirmed 6378,
+is untouched - correct anchor, just one render tick of display lag before
+the pixel shows, the exact "display-basis correction" shape already
+established elsewhere in this same file, e.g.
+`drawTurn6FightSubmenuWindow`'s own `turn6ReopenBounceTick(t - 1, ...)`).
+Every one of the 18 target frames' own char-boundary transitions solved
+cleanly against a uniform `t - 1` shift - not a rate difference.
+
+**Finding 2 (dispatch gate)**: fixing only the glyph reveal exposed a
+sibling 1-tick-early bug in the SAME function's own gate at
+`battleScene.ts:15032` (`if (t < faintedStart)`) - real hardware still
+shows the prior "ONIX used ROCK SLIDE!" text in full at render tick 6378
+(direct pixel crop confirmed, not blank/not the new message), and only
+swaps to the fainted-message branch on 6379. Same `t - 1` shape, applied
+to the gate condition (`t - 1 < faintedStart`) at this same call site.
+
+**Fix**: both scoped to `drawTurn5RockSlideWindow`'s own two dispatch
+points (`battleScene.ts:15017`); `turn5FaintedTextStartTick`/
+`turn5FaintedTextVisibleChars` themselves (and their behavior at any other
+caller) are untouched.
+
+**Result: `turn5-resolve-off-a` 175/196 -> 193/196** (18 newly matched
+frames - all of 6378-6397 close; the pre-existing 6283/6284 micro-residual
+is untouched). `6398` remains mismatched, unchanged in size/bbox (37px,
+`61,142-67,148`) before and after this fix - confirmed a SEPARATE,
+already-census'd mechanism (§3's own "Class C - CURSOR_FREEZE", the
+fainted-message wait-cursor's own bug, not this session's text-reveal
+target; it happened to fall inside the brief's own 6379-6398 frame range
+but is provably not the same mechanism - the fix left it exactly the same
+bbox/size).
+
+**Zero decreases, full guard family (fresh this session)**: all 16 §19.2
+commands rerun; every one matches its recorded baseline exactly except
+`resolve-off-a` itself (improved, see above) - `-b` 196/196, `-c` 195/196
+(6763 unchanged), `-d` 194/196 (6850/6996 unchanged), `reset-off` 256/256,
+`action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json` 47/47,
+`confirm-off-a` 128/132 (5959/5960/5961/5968 unchanged), `confirm-off-b`
+131/132 (6184 unchanged, confirms this fix doesn't leak into the parallel
+confirm-off side worker's own track), `turn6-rockslide-a`/`-b` 255/255,
+105/105, `turn7-rockslide-a` 256/256, `turn13-switchin` 242/242,
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+
+**Tier-1 pins** (`tests/battleScene.test.ts`, describe block citing this
+§19.3): (1) the dispatch gate - render(6378) byte-identical to render(6377)
+(still the old text), render(6379) different (switched); (2) sanity pin on
+the shared `turn5FaintedTextVisibleChars` function itself at the exact
+arguments the call site now passes; (3) the 2nd glyph's own measured
+column (x=22-27, y=124-133) is untouched background at 6379 and lit at
+6380. All three red-verified against pre-fix code via `git stash -- src/
+engine/battleScene.ts` (2 of the 3 fail as expected pre-fix - the pure
+sanity pin necessarily always holds, by construction). `npm test`:
+10,096 passed (+3). `npm run build`: green.
+
+## 19.4 Banked (2026-08-18, bounded MAIN worker, session 6, not fixed): `resolve-off-a`'s last 2 frames (6283/6284, 2px each) - pixel-isolated to an exact 2-pixel element, RAM-correlated, but the responsible TS draw path not yet identified; next probe named
+
+**Evidence, pixel-first**: a full-frame (240x160) pixel diff of
+consecutive oracle captures around this window (`oracle-06282.png` vs
+`oracle-06283.png`, scratch Python/PIL) shows real hardware changes
+**exactly 2 pixels in the entire frame** at this transition - `(52,33)`
+and `(52,34)`, from an orange/salmon color (`(173,66,74)`/`(255,90,57)`,
+matching the "HP" icon's own letter color inside GROVYLE's opponent
+healthbox) to a dark navy color (`(74,66,90)`/`(82,107,90)`, matching the
+healthbox's own frame/divider color) - and nothing else in the frame
+moves. The app's own render makes the **identical 2-pixel, identical
+color-pair transition**, just 2 render ticks late (`app-06284.png` vs
+`app-06285.png`, same full-frame diff, same 2 pixels, same colors) -
+this is a clean, isolated, single-element, uniform-2-tick-lag residual,
+the same family shape as this session's earlier sink/healthbox-vanish
+fixes (§19) and the earlier bounce-recalibration fixes elsewhere in this
+dossier.
+
+**Ruled out (the only two per-tick-varying inputs to this function's
+healthbox draw, `drawTurn5RockSlideAttack`, `battleScene.ts:10985-10997`)**:
+- `rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.to,
+  TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)`
+  (`battleMenu.ts:2285`) is a linear drain that only starts moving at
+  `pressTick + 455 = 6284` (i.e. `opponentHp` is constant across
+  6283-6284, only reaching its post-drain value at 6285) - matches
+  `opponentHealthboxContentForHp`'s own memoized compositor NOT changing
+  content between 6283/6284, ruling out the HP-fraction/digit/bar-color
+  path directly. (Confirmed independently: the oracle's own HP digit and
+  bar-fill pixels are UNCHANGED at 6283 too - the full-frame diff above
+  already proves this, only 2 pixels move - so the digit/bar genuinely
+  hasn't transitioned yet on real hardware either; a naive "shift the
+  whole drain formula -2" fix would be WRONG, not just imprecise, since it
+  would incorrectly move the digit/bar 2 ticks early alongside this
+  unrelated 2px element.)
+- `rockSlideHealthboxWobbleY2(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)`
+  (the shared hit-reaction wobble, `hitFlashAnchorAge=418` per §4a) has
+  already closed its active window (`d = t-1-6247`, active only
+  `d∈[0,19]`, i.e. ticks 6248-6267) well before 6283 - `healthboxY2` is 0
+  throughout this window, so `drawOpponentHealthboxWobble`'s own
+  `if (healthboxY2 !== 0)` gate never fires here either.
+
+**RAM correlate (not yet tied to a specific TS draw path)**: a fresh run
+of `tools/probe/dump-turn5-resolve-ab-healthbar-driver.py` over
+6278-6288 shows the real `battleBars[1]` struct (GROVYLE's own animated
+HP-bar internals, `include/battle.h`'s `BattleBarInfo`) hard-steps at RAM
+tick 6282 - `oldValue` 41->1, `receivedValue` 40->41, `currValue` hits the
+struct's own `-32768` "(re)start new bar animation" sentinel - one RAM
+tick before the pixel-visible change (6283, the same 1-tick render-lag
+shape used throughout this dossier), and 3 RAM ticks before
+`gBattleMons[1].hp` itself hard-steps to literal 0 (RAM tick 6285,
+already established, §2/Sweep A). This is a real, decisive RAM anchor for
+*something* - but our engine doesn't model `battleBars[]`'s own internal
+animation-restart struct at all (it derives `opponentHp` from the pure
+`rockSlideOpponentHp` closed form instead), so there is no obvious TS
+variable to re-anchor without inventing a new one - not attempted this
+session per the "fix only if decisive" instruction; this narrows the
+search but doesn't yet name the responsible draw call.
+
+**Not fixed this session** - the responsible source element (what,
+exactly, occupies screen pixels `(52,33)-(52,34)` inside the compositor
+`composeOpponentHealthbox`'s own output, `battleScene.ts:2594` area) is
+still unidentified. **Named next probe**: render
+`opponentHealthboxContentForHp(1)` vs a hypothetical
+`opponentHealthboxContentForHp(0)` in isolation (off-screen, no other
+draws) and diff just those two composited outputs at `(52,33)-(52,34)` -
+if they differ there, the compositor itself already encodes this exact
+2px hp=1-vs-hp=0 boundary artifact, and the real fix is a scoped
+alternate anchor for when GROVYLE's *effective* KO state should be
+considered reached for content-selection purposes (likely a new,
+independently-measured tick, not a reuse of
+`TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY` - the ruled-out section above
+already shows a uniform -2 shift of that shared constant would be wrong).
+If the two composited outputs are pixel-identical at that location, the
+2px element is layered on top by some OTHER, not-yet-found draw call and
+the search continues there instead.
