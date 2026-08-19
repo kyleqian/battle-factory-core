@@ -185,6 +185,8 @@ import {
   rockSlideHealthboxWobbleY2,
   rockSlideMonShakeY2,
   rockSlideBg3Y,
+  rockSlideRockState,
+  rockSlideDrawOrder,
   TURN6_SUPER_EFFECTIVE_LINE,
 } from "../src/engine/battleMenu.ts";
 import { rentalMoveset } from "../src/engine/battleSetup.ts";
@@ -2118,6 +2120,28 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §15.3 (2026-08-18, ISSUES #9
     for (const row of rows.slice(1)) {
       expect(row).toEqual(rows[0]);
     }
+  });
+});
+
+describe("docs/turn5-resolve-ab-pools-diagnosis.md §17.4 (2026-08-18, ISSUES #97): drawTurn5RockSlideAttack no longer draws the falling-rock props (rockSlideRockState/drawRockSprite) - real hardware's own OAM has zero rock-shaped (32x32) entries anywhere across turn 5's 6258-6354 window (§17.1's full census), so the app's own phantom rock population is dropped, same mechanism §15.3 already pinned for this function's camera shake", () => {
+  const T = 6304; // mid-band tick: §17.1 measured 12 simultaneously-active rocks here (the peak), bbox x=[125,226]
+
+  it("sanity: rockSlideRockState itself still reports active rocks at this tick for most slots - the mechanism function is untouched, only its caller stopped drawing them", () => {
+    const activeCount = rockSlideDrawOrder(T, TURN5_ROCKSLIDE_PRESS_TICK).filter((i) => rockSlideRockState(i, T, TURN5_ROCKSLIDE_PRESS_TICK) !== null).length;
+    expect(activeCount).toBe(12);
+  });
+
+  it("row 0 and row 10 (the exact rows §17.1's own OAM census checked for rock overlap) are now byte-identical between the pre-window tick 6258 and the peak-population tick 6304 - pre-fix these rows differed (rocks painted through them at 6304 but not 6258); post-fix both ticks render the same flat, rock-free content", () => {
+    const frameAt = (t: number) => {
+      const fb = new Uint8Array(240 * 160 * 4);
+      drawTurn5RockSlideAttack(fb, t, t);
+      return fb;
+    };
+    const rowSlice = (fb: Uint8Array, row: number) => fb.slice(row * 240 * 4, (row + 1) * 240 * 4);
+    const before = frameAt(6258);
+    const peak = frameAt(T);
+    expect(rowSlice(peak, 0)).toEqual(rowSlice(before, 0));
+    expect(rowSlice(peak, 10)).toEqual(rowSlice(before, 10));
   });
 });
 

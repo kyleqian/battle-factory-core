@@ -1859,3 +1859,78 @@ third ("the real rock never exists at all", §17.2), and one new, likely-
 benign hardware observation is recorded without being chased into a false
 lead (§17.3). The next session's fix worker should land §17.4's loop
 removal, rerun the compare guard, and record the actual resulting count.
+
+## 18. Landed addendum (2026-08-18, bounded MAIN worker, fix session): §17.4's fix landed exactly as specified - `turn5-resolve-off-a` 60/196 -> 158/196
+
+**Fix landed as specified, unconditional (no runtime branch).**
+`drawTurn5RockSlideAttack`'s falling-rock draw loop (`battleScene.ts:10984-
+10988`, `for (const i of rockSlideDrawOrder(t, pressTick)) { ... drawRockSprite(...) }`)
+is dropped entirely, matching `drawTurn9RockSlideAttack`'s own precedent
+(`battleScene.ts:13070-13094`) exactly - same doc-comment shape naming the
+`HITMARKER_NO_ANIMATIONS` mechanism, no scene-ON call site to preserve.
+`rockSlideDrawOrder`/`rockSlideRockState`/`drawRockSprite` themselves are
+untouched (still consumed by turns 1/6/7/9's own callers); `pressTick`
+stays in scope (still consumed by the blink/wobble calls above the removed
+loop).
+
+**Result: `npm run compare -- turn5-resolve-off-a --summary`: 60/196 ->
+158/196** (98 frames newly matched). Below §17.4's own directional
+"170-180" estimate but still the single largest jump this trace has seen.
+A before/after diff of the full mismatched-frame list (fresh this session,
+136 mismatched frames pre-fix vs. 38 post-fix) confirms the fix is purely
+additive - **zero newly-mismatched frames**, only closures. The 38 that
+remain: 6283/6284 (2px each, unrelated micro-residual, unchanged
+before/after) and a contiguous 6360-6398 band. This band is **wider than
+§16's/§5's own "Class B, 6360-6376" characterization** - the same
+before/after diff proves 6360-6398 was *already* present, byte-identical,
+in the pre-fix 136-frame mismatch list; it was simply invisible as a
+distinct band before because it sat inside the same active-rock window
+(rocks live through render 6382 per §17.4's own math) and got folded into
+the same "mismatched" bucket as the rock pixels. The next session (step 2)
+should treat the actual remaining span as **6360-6398**, not 6355-6376,
+when running §5's named sink-transition sweep.
+
+**`resolve-off-d`'s two residual ticks (6850, 6996) did NOT move** - both
+present, unchanged bbox/diff magnitude, confirming they don't share this
+rock-prop mechanism (the banked hypothesis in PROGRESS is falsified for
+this fix; §11.2's cursor-adjacent question for 6996 remains open per
+`docs/turn5-single-frame-residuals-diagnosis.md`, out of this lane's scope).
+
+**Zero decreases, full guard family (fresh this session):**
+`turn5-resolve-off-b` 196/196, `-c` 195/196 (6763 unchanged), `-d` 194/196
+(6850/6996 unchanged), `turn5-reset-off` 256/256, `turn5-action-off`
+32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
+`turn5-confirm-off-a` 128/132, `-b` 131/132, `turn6-rockslide-a` 255/255,
+`turn6-rockslide-b` 105/105, `turn7-rockslide-a` 256/256,
+`turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
+256/256 each.
+
+**Tier-1 pin** (`tests/battleScene.test.ts`, describe block citing this
+§17.4/§18): at the peak-population tick 6304 (12 simultaneously-active
+rocks per §17.1), row 0 and row 10 (the exact rows §17.1's own OAM census
+checked) now render byte-identical to the pre-window tick 6258; pre-fix
+these rows differed (48 and 15 bytes respectively). Red-verified against
+the pre-fix code via `git stash` before finalizing - the pin fails as
+expected pre-fix. `npm test`: 10,090 passed (+2). `npm run build`: green.
+
+### 18.1 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 158/196 (was 60/196)
+npm run compare -- turn5-resolve-off-b --summary   # 196/196
+npm run compare -- turn5-resolve-off-c --summary   # 195/196 (pre-existing 6763 residual)
+npm run compare -- turn5-resolve-off-d --summary   # 194/196 (6850/6996 unchanged)
+npm run compare -- turn5-reset-off --summary       # 256/256
+npm run compare -- turn5-action-off --summary      # 32/32
+npm run compare -- turn6-reopen-off --summary      # 46/46
+npm run compare -- tools/compare/fixtures/turn6-menu-off.json --summary  # 47/47
+npm run compare -- turn5-confirm-off-a --summary   # 128/132
+npm run compare -- turn5-confirm-off-b --summary   # 131/132
+npm run compare -- turn6-rockslide-a --summary     # 255/255
+npm run compare -- turn6-rockslide-b --summary     # 105/105
+npm run compare -- turn7-rockslide-a --summary     # 256/256
+npm run compare -- turn13-switchin --summary       # 242/242
+npm run compare -- turn4-doubleteam-off --summary  # 256/256
+npm run compare -- turn4-rockslide-off --summary   # 256/256
+```

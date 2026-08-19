@@ -10981,11 +10981,15 @@ export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
     if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
   }
   drawMenuIdleBounceOverlay(fb, turn5KickoffBounceTickFromLatest(t, TURN5_CONFIRM_PRESS_TICK, latestCompletedCommandHandoff));
-  for (const i of rockSlideDrawOrder(t, pressTick)) {
-    const rock = rockSlideRockState(i, t, pressTick);
-    if (!rock) continue;
-    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
-  }
+  // docs/turn5-resolve-ab-pools-diagnosis.md §17.4 (ISSUES #97): the
+  // falling-rock props (`rockSlideRockState`/`drawRockSprite`) never render
+  // under `HITMARKER_NO_ANIMATIONS`, same mechanism §15.3 already pinned for
+  // this function's own `rockSlideBg3Y` camera shake and
+  // `drawTurn9RockSlideAttack` already established as precedent
+  // (`battleScene.ts:13077-13083`) - a 12-tick OAM census across 6258-6354
+  // found zero rock-shaped (32x32) hardware OAM entries anywhere in this
+  // window, so dropped here unconditionally (no scene-ON call site to
+  // preserve).
 }
 
 /**
