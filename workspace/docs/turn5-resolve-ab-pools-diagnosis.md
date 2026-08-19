@@ -1562,3 +1562,300 @@ npm run compare -- turn13-switchin --summary       # 242/242
 npm run compare -- turn4-doubleteam-off --summary  # 256/256
 npm run compare -- turn4-rockslide-off --summary   # 256/256
 ```
+
+## 17. Side-lane instrument session (2026-08-18, fifth): §16's own named
+next instrument (the 6262-6354 band) - run fresh; the whole band is a single
+already-precedented bug, not a new mechanism: `drawTurn5RockSlideAttack`
+draws up to 12 simultaneous ROCK_SLIDE falling-rock props that real
+Battle-Scene-Off hardware's OAM never creates anywhere in this window
+
+ANALYSIS ONLY, side lane, Battle Scene OFF oracle - `git diff -- src/` is
+empty throughout this session. Two probes, one new, one reused unmodified
+(purely additive - only its own CLI tick-list argument differs from prior
+runs):
+
+- **New**, `tools/probe/dump-turn5-resolveoffa-app-rockladder.ts` - the
+  app-side half. Read-only: imports the exact pure functions
+  `drawTurn5RockSlideAttack` itself calls (`rockSlideDrawOrder`/
+  `rockSlideRockState`/`rockSlideBg3Y` from `src/engine/battleMenu.ts`,
+  `TURN5_ROCKSLIDE_PRESS_TICK` from `src/engine/battleScene.ts`'s own
+  re-export) and reports every active rock's own on-screen bbox at a named
+  tick ladder, using `drawRockSprite`'s own `centerX-16, centerY-16, 32x32`
+  convention (`battleScene.ts:15257-15259`). Run via `node
+  --experimental-strip-types` (this codebase's existing convention for
+  `.ts` probes, e.g. `verify-turn11.ts`) - no compiled build step, no `src/`
+  edit. **Import-order gotcha, worth recording for the next TS probe
+  author**: `battleMenu.ts`/`battleScene.ts`/`battleSceneCanonical.ts` form
+  a circular trio, and under `node --experimental-strip-types` (no
+  bundler's hoisting) the wrong resolution order hits a real TDZ crash
+  (`battleScene.ts`'s own `TEXT_TOTAL_CHARS = LINE1.length + ...`
+  evaluates before `LINE1`'s own initializer runs). Importing
+  `battleMenu.ts` first, then reaching `TURN5_ROCKSLIDE_PRESS_TICK` via
+  `battleScene.ts`'s own re-export (NOT `battleSceneCanonical.ts` directly,
+  which pulls `battleMenu.ts` back in through a different edge first) is
+  the same order `verify-turn11.ts` already uses successfully - this
+  session had to rediscover that by trial rather than finding it written
+  down anywhere, hence recording it here (see PAPERCUT below).
+- **Reused unmodified**, `tools/probe/dump-turn5-resolve-offa-oam-bg3rows-
+  census.py` (§15's own bootstrap-corrected probe) - it already accepts an
+  arbitrary tick list on the CLI and already records the FULL 128-slot OAM
+  census per tick (not just the row-0/10 subset its own `staticRowHitSlots`
+  summary highlights), so no new Python file was needed: this session just
+  ran it against a wider tick ladder. Per this doc's own "new filename,
+  don't rewrite in place" instruction, additive-only reuse of an unchanged
+  script doesn't need one.
+
+Ladder ticks used (the brief's own suggestion, unchanged): 6258, 6259,
+6262, 6263, 6264, 6270, 6280, 6290, 6304, 6320, 6340, 6354 (6258/6259 kept
+as a pre-window control pair, re-derived fresh rather than assumed from
+§15.2). Baseline reconfirmed fresh, unchanged: `turn5-resolve-off-a`
+60/196.
+
+### 17.1 Question (A) and (B) turn out to be the SAME question: the app's
+own rock-prop population, hardware vs. app, tick by tick
+
+Hardware side (full 128-slot OAM census, filtered post-hoc to every entry
+matching the falling-rock sprite's own real shape - 32x32, square,
+`gOamData_AffineOff_ObjNormal_32x32`, `battle_anim_rock.c:59` per §16's own
+citation - **and, to rule out a shape/size assumption error, independently
+re-checked against EVERY priority-2 entry regardless of size, and EVERY
+32x32 entry regardless of priority**):
+
+```
+tick    32x32-any-priority   priority2-any-size (non-rock-shaped ones shown for context)
+6258    0                    [(slot9, x=40,y=48,64x64,tile369)]                    <- Onix back sprite, ONIX_MATERIALIZE_CORNER, unchanged all ticks
+6259    0                    [(slot9, ...)]
+6262    0                    [(slot9, ...), (slot10, x=144,y=12,64x64,tile473, AFFINE matrixNum=2)]  <- Grovyle, see 17.3
+6263    0                    [(slot9, ...), (slot10, ...)]
+6264    0                    [(slot9, ...), (slot10, ...)]
+6270    0                    [(slot9, ...), (slot10, ...)]
+6280    0                    [(slot9, ...), (slot10, ...)]
+6290    0                    [(slot9, ...), (slot10, ...)]
+6304    0                    [(slot9, ...), (slot10, ...)]
+6320    0                    [(slot9, ...), (slot10, ...)]
+6340    0                    [(slot9, ...), (slot10, ...)]
+6354    0                    [(slot9, ...), (slot10, ...)]
+```
+
+**Zero rock-shaped (32x32, any priority) OAM entries at ANY of the 12
+sampled ticks spanning the entire 6258-6354 window.** Not "occluded", not
+"present but not overlapping row 0/10" (§15.2's own narrower question) -
+genuinely absent from all 128 hardware slots, every tick. `slot9`
+(Onix's own back sprite, `ONIX_MATERIALIZE_CORNER = {x:40,y:48}`,
+`battleScene.ts:5613`) and `slot10` (Grovyle's own front sprite,
+`GROVYLE_CORNER = {x:144,y:12}`, `battleSceneCanonical.ts:31`, appearing
+from 6262 on) are the only priority-2 sprites present, and neither is
+rock-sized.
+
+App side (`dump-turn5-resolveoffa-app-rockladder.ts`, same ticks):
+
+```
+tick    n active rocks   combined bboxX      row0 hit   row10 hit
+6258    1                [155, 187]          no         no
+6259    1                [155, 187]          yes        no
+6262    2                [155, 197]          yes        no
+6263    2                [155, 197]          yes        yes
+6264    2                [155, 197]          yes        yes
+6270    4                [137, 211]          yes        yes
+6280    6                [137, 220]          yes        yes
+6290    9                [136, 220]          yes        yes
+6304    12               [125, 226]          yes        yes
+6320    12               [120, 238]          yes        yes
+6340    11               [108, 237]          yes        yes
+6354    8                [120, 239]          no         no
+```
+
+The app's own simultaneously-active rock count climbs from 1 (6258, the
+spawn tick) to 12 (6304-6320, roughly the point where the earliest-spawned
+rocks haven't yet despawned and the latest ones have already spawned - all
+20 rocks spawn 4 ticks apart per `ROCK_SLIDE_SPAWN_STRIDE`, each lives 49
+render ticks per `rockSlideRockState`'s own doc) before falling off as
+early rocks despawn. The combined on-screen bbox of all active rocks
+widens from `[155,187]` (32px, one rock) to `[108,239]` (131px, up to 12
+rocks) over exactly this span - this **is** §16's own "slowly-drifting
+bbox x column drifting from ~230 down to ~118" observation, not a
+coincidental resemblance: pulling the actual `npm run compare -- turn5-
+resolve-off-a --summary` per-tick bboxes for the same ticks confirms it
+directly (fresh this session, `git diff -- tools/` unaffected - this is
+read-only comparison output, not a committed script):
+
+```
+frame 6262: DIFF 8px    (0.02%) bbox=170,0-174,1
+frame 6270: DIFF 336px  (0.88%) bbox=165,0-198,42
+frame 6280: DIFF 642px  (1.67%) bbox=145,0-202,59
+frame 6290: DIFF 976px  (2.54%) bbox=145,0-211,64
+frame 6304: DIFF 1309px (3.41%) bbox=135,0-217,59
+frame 6320: DIFF 1390px (3.62%) bbox=125,0-229,59
+frame 6325: DIFF 1454px (3.79%) bbox=128,0-230,60   <- the doc's own cited peak, reproduced exactly
+frame 6340: DIFF 1326px (3.45%) bbox=118,0-224,58
+frame 6354: DIFF 1026px (2.67%) bbox=125,25-230,61
+```
+
+The app-diff bbox's left edge (135 -> 125 -> 118 across 6304/6320/6340) and
+right edge (217 -> 229 -> 224) track the app's own rock-population bbox
+(`[125,226]` -> `[120,238]` -> `[108,237]`) within a few px at every
+sampled tick - well inside the slop expected from partial sprite occlusion
+by the healthbox/terrain foreground (`isOpponentHealthboxOpaqueAt`,
+`drawRockSprite`'s own occlusion check, `battleScene.ts:15274`) and from
+the diff tool's bbox being the union across BOTH the rock pixels and
+whatever real-hardware pixels they're overwriting. There is no separate
+"field-position drift" mechanism to find - it is the union bbox of an
+accumulating population of the app's own phantom rock sprites, full stop.
+
+### 17.2 Question (A) restated precisely: not "wrong trajectory", not "real
+rock sits elsewhere" - the real rock never exists
+
+§16's own two possibilities for question (A) - "wrong rock
+trajectory/timing" vs. "the real rock exists but sits elsewhere" - are both
+ruled out by the same evidence as §17.1: real hardware has NO rock-shaped
+OAM entry at 6258, 6259, 6262, 6263, or 6264 (nor anywhere later in the
+ladder). There is no real rock to be displaced relative to; the app draws
+one (in fact, up to 12 concurrently) that the real ROM's animation script
+never creates under Battle Scene Off at all.
+
+### 17.3 A genuinely new, distinct observation this session surfaced -
+`slot10`'s AFFINE mode - is very likely benign, not a live divergence (do
+not chase it as this band's cause)
+
+Real hardware's `slot10` (Grovyle) switches from absent/off-screen-parked
+(`x=304,y=160`, off both screen edges, at 6258/6259 - i.e. not yet drawn)
+to a genuinely AFFINE-mode OAM entry (`objMode=1`, `matrixNum=2`) fixed
+exactly at `GROVYLE_CORNER` from 6262 through 6354 (last ladder tick). This
+session did **not** read the affine matrix's own `PA/PB/PC/PD` parameters
+(`OAM_BASE + matrixNum*32 + {6,14,22,30}`), so whether this matrix is
+actively rotating/scaling Grovyle or sitting at the identity transform
+(`pa=256,pb=0,pc=0,pd=256`, i.e. visually a no-op) is **not established
+this session**. However, this doc's own already-landed §4 addendum
+(`battleSceneCanonical.ts:1055-1072`, `TURN5_OFF_ROCKSLIDE_ANIMATION_
+PROFILE`) already recorded, from a real-oracle-confirmed prior session:
+"The real GROVYLE sprite's own top row is pixel-flat for the entire window
+whenever visible (no shake)" - `targetShakeStartAge:0, targetShakeEndAge:
+-1` unconditionally disables `rockSlideMonShakeY2` for this exact profile
+on the strength of that finding. A pixel-flat real sprite is hard to
+reconcile with an actively-transforming affine matrix over a ~90-tick
+window, so the more likely explanation is that real Emerald's battle
+engine puts Pokémon front sprites in affine OAM mode as a matter of course
+(available for scale/rotate entry effects elsewhere) and simply leaves the
+matrix at identity here - a hardware representation detail our non-affine
+`drawSpriteSheet` call already reproduces pixel-for-pixel by a different
+route, not an open mismatch source. Recorded per this family's "flag
+loudly" convention rather than silently dropped, but **not** part of this
+session's mechanism attribution or fix shape - do not let a future session
+chase it as this band's cause without first checking whether landing
+§17.4's fix alone already closes the band.
+
+### 17.4 Mechanism attribution and fix shape - directionally strong, not
+applied or independently counted this session (ANALYSIS ONLY)
+
+**APP-HAS-EXTRA, all of it.** `drawTurn5RockSlideAttack`'s falling-rock
+draw loop:
+
+```ts
+  for (const i of rockSlideDrawOrder(t, pressTick)) {   // battleScene.ts:10984
+    const rock = rockSlideRockState(i, t, pressTick);   // battleScene.ts:10985
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);  // battleScene.ts:10987
+  }
+```
+
+draws real-hardware-absent rock props for the entire 6258-6382 active
+window (per `rockSlideRockState`'s own per-rock 49-render-tick lifetime,
+the last of 20 rocks spawning at render tick 6334 - this session's own
+ladder covers 6258-6354, comfortably inside that full span). This is the
+same "Battle Scene Off gates the WHOLE move-animation script, not just the
+shake" mechanism §15.3 already pinned for `REG_BG3VOFS` - and it is not a
+new hypothesis invented this session. **An already-landed sibling function
+in this exact file already handles it correctly**: `drawTurn9RockSlideAttack`
+(`battleScene.ts:13070-13094`) explicitly drops `rockSlideRockState`/
+`drawRockSprite` under Battle Scene Off, with its own doc comment naming
+the real mechanism directly: "ROCK_SLIDE's own class-c bodies - the
+`rockSlideBg3Y` camera shake ..., Pidgeotto's own target shake
+(`rockSlideMonShakeY2`), and the rock-prop drop sprites themselves
+(`rockSlideRockState`/`drawRockSprite`, `docs/rank5-effect-visibility-
+scout.md` §2/§3) - never render under `HITMARKER_NO_ANIMATIONS` and are
+dropped here" (`battleScene.ts:13077-13083`). `drawTurn5RockSlideAttack`
+is the one remaining ROCK_SLIDE-family caller in this file whose own rock
+loop is still unconditional - §15.3 already dropped its `rockSlideBg3Y`
+camera-shake call the same way; this loop is the sibling half of that same
+fix that session explicitly deferred ("the fix is the next step, not this
+one" applies equally here, per this step's own out-of-scope instruction).
+
+**Predicted fix shape** (matching §15.3's own precedent-matched,
+unconditional style - `drawTurn5RockSlideAttack` has no scene-ON call site
+to preserve, §15.3's own already-established fact, re-confirmed unchanged
+this session):
+
+```ts
+  // was: for (const i of rockSlideDrawOrder(t, pressTick)) {
+  //        const rock = rockSlideRockState(i, t, pressTick);
+  //        if (!rock) continue;
+  //        drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  //      }
+  // (drop the loop entirely, matching drawTurn9RockSlideAttack's own precedent)
+```
+
+**Predicted count - directional, not independently verified this session**:
+should close most or all of frames 6262-6354's own mismatches (the band
+this step was scoped to) - §17.1's own per-tick evidence shows the app's
+own rock-population bbox tracking the observed diff bbox closely at every
+sampled tick, and the diff magnitude (up to 1454px/3.79%) is consistent
+with up to 12 concurrent 32x32 sprites (up to 12,288px of raw sprite area,
+partially self-overlapping/occluded) rather than a single-digit-px
+residual. Do not assume this closes `turn5-resolve-off-a` to 196/196:
+6360-6376 (Class B, §5) remains separately tracked and out of this step's
+scope, and §17.3's own affine curiosity - while assessed as likely benign
+- is not proven inert. The next session (fix worker) should land the loop
+removal, rerun `npm run compare -- turn5-resolve-off-a --summary`, and
+record the actual resulting count rather than assume full closure.
+
+### 17.5 What remains unproven, and the exact named next probe
+
+- **Not proven**: whether §17.3's affine `matrixNum=2` entry is truly
+  inert (identity transform) or contributes any real pixels. Named next
+  probe: extend `dump-turn5-resolve-offa-oam-bg3rows-census.py` (or a new
+  sibling) to also read `PA/PB/PC/PD` at `OAM_BASE + matrixNum*32 +
+  {6,14,22,30}` for `matrixNum=2` across a denser ladder (every tick
+  6259-6265, then every ~10 ticks through 6354) - only needed if landing
+  §17.4's fix leaves a residual in this band.
+- **Not proven**: the exact post-fix count. This session is ANALYSIS ONLY;
+  §17.4's predicted count is directional only, per this family's own
+  standing convention (§15.4/§15.5's own precedent for the same caveat).
+- **Out of scope, unchanged**: the 6360-6376 Class-B sink-transition tail
+  (§5) and the single-frame residuals in `-c`/`-d`/confirm traces (other
+  workers' tracks per this step's brief).
+
+### 17.6 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 60/196, unchanged (ANALYSIS ONLY - no src/ edit this session)
+npm run compare -- turn5-resolve-off-b --summary   # 196/196
+npm run compare -- turn5-resolve-off-c --summary   # 195/196 (pre-existing residual, another worker's track)
+npm run compare -- turn5-resolve-off-d --summary   # 194/196 (pre-existing residual, another worker's track)
+npm run compare -- turn5-reset-off --summary       # 256/256
+npm run compare -- turn6-rockslide-a --summary     # 255/255
+```
+
+Probe rerun:
+
+```sh
+node --experimental-strip-types tools/probe/dump-turn5-resolveoffa-app-rockladder.ts \
+  6258 6259 6262 6263 6264 6270 6280 6290 6304 6320 6340 6354
+
+python3 tools/run-mgba-probe.py /tmp/oam-bg3-ladder-a.json -- \
+  tools/probe/dump-turn5-resolve-offa-oam-bg3rows-census.py \
+  tools/compare/traces/turn5-resolve-off-a.json /tmp/oam-bg3-ladder-a.json \
+  6258 6259 6262 6263 6264 6270 6280 6290 6304 6320 6340 6354
+```
+
+(mGBA teardown SIGSEGV after valid JSON is written is expected and benign
+per `tools/run-mgba-probe.py`'s own docstring.)
+
+**Not fixed.** `git diff -- src/` remains empty. This session's own
+instrument (§16's named next step) is run in full: the 6262-6354 band's
+own mechanism is pinned to a single, already-precedented cause (§17.4),
+question (A)'s two named hypotheses are both ruled out in favor of a
+third ("the real rock never exists at all", §17.2), and one new, likely-
+benign hardware observation is recorded without being chased into a false
+lead (§17.3). The next session's fix worker should land §17.4's loop
+removal, rerun the compare guard, and record the actual resulting count.
