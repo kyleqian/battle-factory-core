@@ -74,3 +74,52 @@ node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla -
 - **Deepest carry anywhere:** 14 — seeds 24, 27, 28.
 - **Deepest battle-depth anywhere:** 20 — seed 24 (carry 14, i.e. battle 7
   of the third round: `14 + (7-1) = 20`).
+
+## `full` policy, seeds 0:60 (contrast)
+
+```
+node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy full --seeds 0:20
+node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy full --seeds 20:40
+node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy full --seeds 40:60
+```
+
+- **Seeds run:** 60 (0..59), in three 20-seed chunks.
+- **OK/CRASH/HANG:** 60 OK, 0 CRASH, 0 HANG (every chunk summary: `OK 20
+  CRASH 0  HANG 0`) — known-green ground confirmed; STOP RULE not
+  triggered.
+- **carry >= 7  (challengeNum >= 1):** 0/60
+- **carry >= 14 (challengeNum >= 2):** 0/60
+- **carry >= 21 (challengeNum >= 3):** 0/60
+- **Deepest carry anywhere:** 0 — no seed in this range ever completed a
+  full 7-battle round under `full` policy's arbitrary-but-legal play.
+- **Deepest battle-depth anywhere:** 6 — seed 4. Its log line reads
+  `seed 4 OK b2 t27 ... roundLost carry<=0 depth<=6`: `b2` is the battle
+  index of the run's *final* state (the round it ultimately lost on), not
+  the max — the tracked `depth<=6` shows it reached battle 7 of an
+  *earlier* round attempt (`0 + (7-1) = 6`) before that round was lost and
+  the run re-chained down to a fresh carry-0 round, which is where it
+  ended. Runner-up: seeds 26 and 39 at depth 5.
+
+## M-A step-3 headline
+
+Does ordinary play reach challengeNum >= 2 (carry >= 14 — meaning the seed
+*entered* the challengeNum-2 (third) challenge; the CLI's own mapping is
+`carry >= 7 (challengeNum >= 1)`, `carry >= 14 (challengeNum >= 2)`,
+`carry >= 21 (challengeNum >= 3)`, i.e. `challengeNum = floor(carry / 7)`
+and crossing a threshold means the run has *entered*, not necessarily
+finished, that challenge)?
+
+| policy    | seeds | carry>=7 (challengeNum>=1) | carry>=14 (challengeNum>=2) | carry>=21 (challengeNum>=3) | deepest carry | deepest battle-depth |
+|-----------|-------|-----------------------------|-------------------------------|-------------------------------|----------------|-------------------------|
+| `winning` | 180   | 64/180 (35.6%)              | 10/180 (5.6%)                 | 0/180 (0%)                    | 14             | 16 (seed 61)            |
+| `vanilla` | 60    | 16/60 (26.7%)                | 3/60 (5.0%)                   | 0/60 (0%)                     | 14             | 20 (seed 24)            |
+| `full`    | 60    | 0/60 (0%)                    | 0/60 (0%)                     | 0/60 (0%)                     | 0              | 6 (seed 4)              |
+
+Across all 300 seeds run this session, across all three policies, **not a
+single seed ever reached carry >= 21 (challengeNum >= 3)**, and the
+deepest carry observed anywhere was 14 (challengeNum 2, i.e. entry into
+the third challenge), reached by `winning` and `vanilla` alike. `winning`
+and `vanilla` reach challengeNum >= 1 at broadly similar rates (35.6% vs
+26.7%) and challengeNum >= 2 at nearly identical rates (5.6% vs 5.0%).
+`full` policy — arbitrary-but-legal play with no bias toward winning
+moves — never completed a single 7-battle round in 60 seeds.
