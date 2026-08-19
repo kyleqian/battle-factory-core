@@ -2145,6 +2145,35 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §17.4 (2026-08-18, ISSUES #9
   });
 });
 
+describe("docs/turn5-resolve-ab-pools-diagnosis.md §19 (2026-08-18, ISSUES #97): drawTurn5RockSlideAttack's faintSinkRowsAndY2 call runs 2 render ticks ahead of the shared formula's own default t-1 anchor - a dense oracle pixel sweep (GROVYLE's own column x=165) found the real sink's first erased row already showing at GROVYLE_FAINT_SINK_START_TICK itself (6360), not 2 ticks later as the unshifted formula would produce", () => {
+  it("sanity: the shared faintSinkRowsAndY2 formula itself is untouched - called directly (no shift) it still reports unsunk (keptRows=steps) at t=GROVYLE_FAINT_SINK_START_TICK, only drawTurn5RockSlideAttack's own call site shifts its input", () => {
+    expect(faintSinkRowsAndY2(GROVYLE_FAINT_SINK_START_TICK)).toEqual({ keptRows: GROVYLE_FAINT_SINK_STEPS, y2: 0 });
+  });
+
+  it("row 21 (GROVYLE's own sprite top row, the real hardware's first sink-erase boundary per §4a) is already erased in drawTurn5RockSlideAttack's own render of tick 6360 - byte-identical to its own render of 6361 (same step under the +2 shift) and different from the pre-window render of 6358", () => {
+    const rowAt = (t: number) => {
+      const fb = new Uint8Array(240 * 160 * 4);
+      drawTurn5RockSlideAttack(fb, t, t);
+      return fb.slice(21 * 240 * 4, 22 * 240 * 4);
+    };
+    const before = rowAt(6358);
+    const onset = rowAt(6360);
+    const stillStep1 = rowAt(6361);
+    expect(onset).toEqual(stillStep1);
+    expect(onset).not.toEqual(before);
+  });
+
+  it("the opponent healthbox is gone from drawTurn5RockSlideAttack's own render by tick 6377, not 6379 - a direct oracle screenshot comparison (6376 vs 6377) showed the real healthbox already gone at 6377, 2 ticks ahead of the unshifted GROVYLE_HEALTHBOX_VANISH_TICK gate, the same lag family as the sink fix above", () => {
+    const healthboxRegion = (t: number) => {
+      const fb = new Uint8Array(240 * 160 * 4);
+      drawTurn5RockSlideAttack(fb, t, t);
+      return fb.slice(16 * 240 * 4, 32 * 240 * 4);
+    };
+    expect(healthboxRegion(6377)).not.toEqual(healthboxRegion(6376));
+    expect(healthboxRegion(6377)).toEqual(healthboxRegion(6378));
+  });
+});
+
 describe("docs/turn5-confirmb-resolved-residuals.md §9.3/§9.4 (2026-08-18, ISSUES #97 remainder): drawTurn5RockSlideWindow's Sitrus text-clear/menu-redraw dispatch gates - real hardware clears the heal message 2 ticks EARLIER than previously landed (6989, not 6991) and reveals the settled menu chrome 4 ticks LATER (6995, not 6991); a direct pixel comparison at both open oracle screenshots (6989, 6994) showed a PLAIN FIELD with no message box and no chrome at all, so the two ticks genuinely diverged rather than needing independent message-box/button-grid gates (§9.4's own open question)", () => {
 
   it("TURN5_OFF_SITRUS_TEXT_CLEAR_TICK is 6989 (2 ticks earlier than the app's old, since-superseded 6991)", () => {

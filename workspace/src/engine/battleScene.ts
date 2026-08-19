@@ -10898,7 +10898,16 @@ export function turn5SitrusRingMatrix(t: number): { pa: number; pb: number; pc: 
 export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixX2: number = 0, onixInvisible: boolean = false, onixY2Extra: number = 0, darken: boolean = false, bgFadeYOverride?: number, onixSinkSkipRows: number = 0, latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null, bounceIndexOffset: number = 0, suppressSitrusRotate: boolean = false, suppressSitrusStars: boolean = false): void {
   const pressTick = TURN5_ROCKSLIDE_PRESS_TICK;
   drawStaticBgShiftedY(fb, 0, bgFadeYOverride ?? turn5BgFadeY(t), darken ? turn10BgDarkPalette() : undefined);
-  const sink = faintSinkRowsAndY2(t);
+  // docs/turn5-resolve-ab-pools-diagnosis.md §19 (ISSUES #97): a dense oracle
+  // pixel sweep (GROVYLE's own column x=165, ticks 6358-6374) found the real
+  // sink is 2 render ticks AHEAD of faintSinkRowsAndY2's default `t-1`
+  // anchor - real hardware already shows the first erased row at 6360
+  // (GROVYLE_FAINT_SINK_START_TICK itself) where the unshifted formula
+  // doesn't erase until 6362. `t+2` reproduces every sampled real
+  // transition exactly. Scoped to this call site (not the shared function's
+  // default) - turn 13's own faintSinkRowsAndY2 call (battleScene.ts:14513)
+  // passes its own explicit startTick/steps and is untouched.
+  const sink = faintSinkRowsAndY2(t + 2);
   if (sink.keptRows >= GROVYLE_FAINT_SINK_STEPS) {
     if (!rockSlideMonBlinkInvisible(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
       drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y + rockSlideMonShakeY2(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE));
@@ -10975,7 +10984,13 @@ export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
   }
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE);
   const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
-  if (t < GROVYLE_HEALTHBOX_VANISH_TICK) {
+  // docs/turn5-resolve-ab-pools-diagnosis.md §19 (ISSUES #97): same 2-tick
+  // lag family as the sink shift above - a direct oracle screenshot
+  // comparison (6376 vs 6377) shows the real healthbox already gone by
+  // 6377, but GROVYLE_HEALTHBOX_VANISH_TICK (6379) doesn't gate it off
+  // until 6379. Scoped -2 at this call site only - the constant itself is
+  // exclusive to this one gate (no other reader).
+  if (t < GROVYLE_HEALTHBOX_VANISH_TICK - 2) {
     const opponentContent = opponentHealthboxContentForHp(opponentHp);
     drawSendOutHealthbox(fb, 0, opponentContent);
     if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);

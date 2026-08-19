@@ -1934,3 +1934,157 @@ npm run compare -- turn13-switchin --summary       # 242/242
 npm run compare -- turn4-doubleteam-off --summary  # 256/256
 npm run compare -- turn4-rockslide-off --summary   # 256/256
 ```
+
+## 19. Landed addendum (2026-08-18, bounded MAIN worker, fix session, step 2): Class B's own sink-transition lag fixed exactly as §5 predicted (2-tick anchor bug, same family as §18's sink fix), plus its sibling healthbox-vanish gate - `turn5-resolve-off-a` 158/196 -> 175/196; the remaining 6283/6284 + 6379-6398 band is a DIFFERENT function's text-reveal timing, banked below, not chased this session
+
+**Method**: §5's own named next instrument (top-row/pixel sweep restricted
+to the sink window, §4a's method) - reused the already-fetched oracle/app
+PNGs from the fresh `turn5-resolve-off-a` compare run (`tools/compare/out/
+run-2026-08-19-04-05-15Z-35588`, all 196 captured frames saved even under
+`--summary`) rather than a fresh oracle round-trip. A Python/PIL script
+(scratch, not committed - `git diff -- tools/` stayed empty this session)
+scanned GROVYLE's own reference column `x=165` (§4a's own column) across
+6358-6374 for both oracle and app, tracking the topmost non-background row
+independently per side.
+
+**Finding**: real hardware's sink is a clean **2 render ticks AHEAD** of
+`faintSinkRowsAndY2`'s own default `d = t - 1 - startTick` anchor when
+called unshifted from `drawTurn5RockSlideAttack`. Direct evidence (topmost
+visible-sprite row in column x=165, oracle vs. app, independently tracked):
+
+```
+t       oracle_top   app_top (pre-fix)
+6358    21           21
+6360    29           21   <- oracle already erased row 21->29 by 6360; app doesn't move until 6362
+6361    29           21
+6362    (>=32,~37)   29   <- app finally reaches oracle's own 6360 state, 2 ticks late
+6363    (>=32,~37)   29
+```
+
+`app_top(t+2) == oracle_top(t)` holds at every sampled point - a uniform
+2-tick lag, not a formula-shape bug. **Fix**: scoped `+2` shift at the call
+site only (`battleScene.ts`, `drawTurn5RockSlideAttack`): `faintSinkRowsAndY2(t)`
+-> `faintSinkRowsAndY2(t + 2)`. `faintSinkRowsAndY2` itself, its own
+default-parameter Tier-1 pins (`tests/battleScene.test.ts:1716-1742`), and
+turn 13's own separate call site (`battleScene.ts:14513`, explicit
+`TURN13_FAINT_SINK_START_TICK`/`TURN13_FAINT_SINK_STEPS` args) are all
+untouched - same "scope to the call site, don't touch the shared
+mechanism" convention §4b/§17.4 already established for this family.
+
+**Result: `turn5-resolve-off-a` 158/196 -> 174/196** (16 frames newly
+matched, exactly the 6360-6375 span predicted). Zero newly-mismatched
+frames (checked via before/after mismatch-list diff, same method as §18).
+
+**Sibling fix, same session**: closing the sink exposed a second, smaller
+lag in the immediately-adjacent healthbox-vanish gate. Direct oracle
+screenshot comparison (crops of `oracle-06376.png` vs. `oracle-06377.png`
+from the same fresh run) shows GROVYLE's opponent healthbox (HP bar/name/
+level) already gone by real tick 6377, while `GROVYLE_HEALTHBOX_VANISH_TICK`
+(6379, `battleSceneCanonical.ts:2408`) doesn't gate the draw off until
+6379 - the identical 2-tick lag shape, on a fully independent code path
+(`if (t < GROVYLE_HEALTHBOX_VANISH_TICK)`, `battleScene.ts:10987`, the
+constant's only reader anywhere in the codebase). Fixed the same way:
+`GROVYLE_HEALTHBOX_VANISH_TICK` -> `GROVYLE_HEALTHBOX_VANISH_TICK - 2` at
+this one call site (the constant itself, and its own upstream
+`GROVYLE_FAINT_SINK.healthboxVanishFrame` resolver, untouched - no other
+reader to protect, but scoping the same way keeps the two fixes
+symmetric and auditable independently).
+
+**Result: `turn5-resolve-off-a` 174/196 -> 175/196** (frame 6377 fully
+closed, 2526px -> 0; frame 6378 shrank 3202px -> 676px with its bbox
+collapsing from `13,16-112,149` to `16,124-75,149` - the top healthbox
+region is gone, only a bottom text-region remainder is left, see below).
+
+**Zero decreases, full guard family (fresh this session, both fixes
+combined):** `turn5-resolve-off-b` 196/196, `-c` 195/196 (6763
+unchanged), `-d` 194/196 (**6850 and 6996 both unchanged** - neither
+residual shares this lag family), `turn5-reset-off` 256/256,
+`turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+fixture 47/47, `turn5-confirm-off-a` 128/132 (5959/5960/5961/5968
+unchanged, matching PROGRESS 1343's own note exactly), `-b` 131/132
+(6184 unchanged), `turn6-rockslide-a` 255/255, `turn6-rockslide-b`
+105/105, `turn7-rockslide-a` 256/256, `turn13-switchin` 242/242
+(confirms the scoped `+2`/`-2` shifts do NOT leak into turn 13's own
+reuse of `drawTurn5RockSlideAttack`/`faintSinkRowsAndY2`),
+`turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+
+**Tier-1 pins** (`tests/battleScene.test.ts`, same describe block, citing
+this §19): (1) row 21 in `drawTurn5RockSlideAttack`'s own render is
+already erased at tick 6360 (byte-identical to 6361, different from the
+pre-window 6358); (2) the opponent-healthbox screen region (rows 16-31)
+in `drawTurn5RockSlideAttack`'s own render differs between 6376 and 6377
+(gone) and is identical between 6377 and 6378 (both gone). Both
+red-verified against pre-fix code via `git stash` before finalizing -
+both fail as expected pre-fix. `npm test`: 10,093 passed (+3). `npm run
+build`: green.
+
+### 19.1 What's left in `resolve-off-a` (21/196 mismatched) - banked, NOT
+chased further this session: a different function's own text-reveal
+timing, not this session's sink/healthbox mechanism
+
+Fresh mismatch list after both fixes: **6283/6284** (2px each, unchanged
+across this entire session - pre-existing, unrelated micro-residual,
+never investigated) and **6378 (676px, partial) + 6379-6398** (18 frames,
+20-46px each, `6381`/`6397`/`6399`/`6400` already matching). Direct pixel
+inspection (crops of the fresh oracle/app PNGs at 6389, per this
+session's own screenshot compare) identifies the content precisely:
+this is the **"Foe GROVYLE fainted!" message box being typed out**, and
+the two sides' character reveal is offset by roughly one character-tick -
+oracle shows `Foe GROVYLE` fully printed with line 2 (`fainted!`) not yet
+started, while the app already shows `Foe GROVYLE` plus a stray leading
+`f` of `fainted!` at the same tick. The per-frame diff bbox marches
+rightward by ~6px (one glyph width) per captured tick and stays within
+two fixed text-row bands (y=124-133 for line 1, y=140-149 for line 2) -
+the signature of a small, constant text-timing offset, not a structural
+mismatch.
+
+**This is explicitly a DIFFERENT code path from this session's two
+fixes.** `drawTurn5RockSlideAttack` doesn't draw this message at all -
+the fainted-message text (`turn5FaintedTextStartTick`/
+`turn5FaintedTextVisibleChars`, `battleSceneCanonical.ts:1181-1182,2658-
+2661`, `TURN5_FAINTED_TEXT_DELAY=549`) is drawn from a separate function
+(`battleScene.ts:15025` area, reached via `drawTurn5RockSlideWindow`, not
+`drawTurn5RockSlideAttack`). `TURN5_FAINTED_TEXT_DELAY` and the wait-
+cursor's own start tick both carry existing "pixel-confirmed this
+session" doc comments from an EARLIER session, so this is not
+necessarily the same anchor bug reappearing - it needs its own
+independent dense probe, not an assumed `+2`/`-2` copy-paste of this
+session's fix shape.
+
+**Named next probe** (for the session that picks this up): dense oracle
+pixel sweep of the message text's own two line-origins (`LINE1_ORIGIN`/
+`LINE2_ORIGIN`, whatever this file's own convention is) across
+6375-6399, measuring each side's own visible-character count per tick
+(not just first-diff-row) to solve for the real `turn5FaintedTextStartTick`
+delta directly - the same "solve 8 measured transitions against `d=t-1-
+(pressTick+age)`" method §4a already used successfully for the blink
+window. If the fix turns out to be a simple constant shift (matching this
+session's own two), the same "+N at the call site" scoping applies; if
+the reveal RATE itself differs (not just the start offset), a different
+fix shape will be needed.
+
+**Out of scope, confirmed unaffected**: `resolve-off-c` tick 6763 and
+`resolve-off-d` ticks 6850/6996 (another lane's own tracked residuals,
+explicitly checked unchanged by both fixes this session).
+
+### 19.2 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 175/196 (was 60/196 at session start, 158/196 after §18)
+npm run compare -- turn5-resolve-off-b --summary   # 196/196
+npm run compare -- turn5-resolve-off-c --summary   # 195/196 (pre-existing 6763 residual)
+npm run compare -- turn5-resolve-off-d --summary   # 194/196 (6850/6996 unchanged)
+npm run compare -- turn5-reset-off --summary       # 256/256
+npm run compare -- turn5-action-off --summary      # 32/32
+npm run compare -- turn6-reopen-off --summary      # 46/46
+npm run compare -- tools/compare/fixtures/turn6-menu-off.json --summary  # 47/47
+npm run compare -- turn5-confirm-off-a --summary   # 128/132
+npm run compare -- turn5-confirm-off-b --summary   # 131/132
+npm run compare -- turn6-rockslide-a --summary     # 255/255
+npm run compare -- turn6-rockslide-b --summary     # 105/105
+npm run compare -- turn7-rockslide-a --summary     # 256/256
+npm run compare -- turn13-switchin --summary       # 242/242
+npm run compare -- turn4-doubleteam-off --summary  # 256/256
+npm run compare -- turn4-rockslide-off --summary   # 256/256
+```
