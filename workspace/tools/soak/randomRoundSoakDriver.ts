@@ -136,6 +136,21 @@ export type SeedResult = {
   signature?: string;
   lastActions?: string[];
   hangSurface?: string;
+  /**
+   * Max over the run, sampled every tick, of the orchestrator's carried-in
+   * win streak (`config.factoryWinStreak`) — null only if no orchestrator
+   * ever existed. Unlike `RunDiagnostics.carriedWinStreak`, this survives a
+   * later loss/re-chain: it is a running maximum, not a snapshot.
+   */
+  maxCarriedWinStreak: number | null;
+  /**
+   * Max over the run, sampled every tick, of `config.factoryWinStreak +
+   * round.rules.battleIndex` — the deepest battle position ever reached,
+   * matching the internal depth formula
+   * (`factoryRoundBattleOrchestrator.ts:559`). Null only if no orchestrator
+   * ever existed.
+   */
+  maxBattleDepth: number | null;
   /** Opt-in test diagnostics; absent from ordinary CLI/full/vanilla runs. */
   diagnostics?: RunDiagnostics;
 };
@@ -151,14 +166,15 @@ export type RunDiagnostics = Readonly<{
   terminalRecordChoice: "yes" | "no" | "cancel" | null;
   renderCalls: number;
   /**
-   * The win streak carried INTO the current orchestrator's round
+   * The win streak carried INTO the CURRENT orchestrator's round
    * (`config.factoryWinStreak`, `factoryRoundChaining.ts`'s carry — +7 per
-   * completed round win, 0 after a loss). Combined with `battleIndex`, this
-   * is exactly the internal `config.factoryWinStreak + battleIndex` formula
-   * (`factoryRoundBattleOrchestrator.ts:559`) — the deepest chained-streak
-   * value this run reached before its outcome, used by the soak depth
-   * report (chained-round distribution-parity plan §4 step 3), not read by
-   * ordinary CLI/full/vanilla runs.
+   * completed round win, 0 after a loss), read at whatever moment
+   * diagnostics happen to be captured. This is a SNAPSHOT, not a maximum:
+   * a run that chains a win (carry 7) and then loses the next round can
+   * re-chain into a fresh round before diagnostics are taken, resetting
+   * this back to 0 even though the run once carried 7. For the run's true
+   * peak, use `SeedResult.maxCarriedWinStreak` / `maxBattleDepth` (tracked
+   * every tick in `runSeed`), not this field.
    */
   carriedWinStreak: number | null;
 }>;
@@ -882,12 +898,25 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   let renderCalls = 0;
   let terminalRecordMenuInputReadyReached = false;
   let terminalOutcome: RunDiagnostics["terminalOutcome"] = null;
+  let maxCarriedWinStreak: number | null = null;
+  let maxBattleDepth: number | null = null;
 
   const observe = (): void => {
     if (state.factoryTerminal !== null) {
       terminalOutcome = state.factoryTerminal.profile.outcome;
       terminalRecordMenuInputReadyReached ||=
         factoryTerminalRecordMenuInputReady(state.factoryTerminal);
+    }
+    const orchestrator = state.factoryRoundBattleOrchestrator;
+    if (orchestrator !== null) {
+      const carry = orchestrator.config.factoryWinStreak;
+      if (maxCarriedWinStreak === null || carry > maxCarriedWinStreak) {
+        maxCarriedWinStreak = carry;
+      }
+      const depth = carry + orchestrator.round.rules.battleIndex;
+      if (maxBattleDepth === null || depth > maxBattleDepth) {
+        maxBattleDepth = depth;
+      }
     }
   };
 
@@ -917,6 +946,8 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       frames: frame,
       battle: player.battle,
       turn: player.turn,
+      maxCarriedWinStreak,
+      maxBattleDepth,
       lastActions: log.tail(15).map(
         (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
       ),

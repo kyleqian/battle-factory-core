@@ -13,13 +13,24 @@
 import { describe, expect, it } from "vitest";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
+import type { GbaButton } from "../src/input.ts";
 import type { FactoryRentalRecord } from "../src/engine/battleScenario.ts";
+import type { BattleSubmittedDecision } from "../src/engine/battleDecisionBoundary.ts";
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
 import {
   beginFactoryRoundBattleStartIntro,
+  chooseFactoryRoundSwap,
+  completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
+  advanceFactoryRoundPresentation,
+  submitFactoryRoundPlayerDecision,
+  type FactoryRoundBattleOrchestratorState,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
-import { createInitialState, type EngineState } from "../src/engine/core.ts";
+import {
+  createInitialFactoryCarry,
+  type FactoryCarry,
+} from "../src/engine/factoryRoundChaining.ts";
+import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import { resolveMaxFrames, runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
 
 const PIN_SEEDS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
@@ -75,6 +86,124 @@ function createSevenWinLiveState(): EngineState {
     rngMode: "frontierBattle",
     rngValue: orchestrator.round.rules.rngValue,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Orchestrator-level round carrier (mirrors factoryRoundChaining.test.ts's
+// own driveGeneratedRoundToCompletion/driveTerminalToNextDraft/
+// stateAtDecidedRound helpers) -- reused below to reach a chained-then-lost
+// run: round 1 wins (the known-strong 664/678/527 trio) carrying the streak
+// to 7, then round 2 loses (arbitrary generated rentals, same recipe as that
+// file's "(c)" case), the cheapest deterministic way to exercise the exact
+// scenario where the old carriedWinStreak snapshot lies.
+// ---------------------------------------------------------------------------
+
+function acknowledgeAndAdvance(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  const commandId = state.round.presentation?.command.commandId;
+  if (commandId === undefined) throw new Error("expected a presentation command");
+  return advanceFactoryRoundPresentation(
+    completeFactoryRoundPresentation(state, { commandId }),
+  );
+}
+
+function choosePlayerDecision(
+  state: FactoryRoundBattleOrchestratorState,
+): BattleSubmittedDecision {
+  const boundary = state.battle?.boundary;
+  if (boundary?.kind !== "decision-required" || boundary.request.side !== "player") {
+    throw new Error("expected a player decision");
+  }
+  if (boundary.request.kind === "forced-switch") {
+    return { kind: "switch", partyIndex: boundary.request.legalPartyIndexes[0]! };
+  }
+  const active = state.battle!.rules.rulesContext.battlers[0]!;
+  const preferredSlot = active.partyIndex === 1 && active.isFirstTurn === 2 ? 3 : 0;
+  return boundary.request.legalDecisions.find(
+    (decision) => decision.kind === "use-move" && decision.moveSlot === preferredSlot,
+  ) ?? boundary.request.legalDecisions.find(
+    (decision) => decision.kind === "use-move",
+  )!;
+}
+
+function driveGeneratedRoundToCompletion(
+  carry: FactoryCarry,
+  seed: number,
+  // "strong" (the known-reliable 664/678/527 trio) drives a win; "weak"
+  // rents whatever the live generator pulls into slots 0/1/2 -- not tuned to
+  // win, used below to reach a scripted roundLost regardless of carry.
+  partyStrength: "strong" | "weak" = "strong",
+): FactoryRoundBattleOrchestratorState {
+  const playerRecords = [strongRouteRecord(664), strongRouteRecord(678), strongRouteRecord(527)] as const;
+  const savedRentalRecords = [
+    ...playerRecords,
+    strongRouteRecord(1),
+    strongRouteRecord(2),
+    strongRouteRecord(3),
+  ] as const;
+  let state = createFactoryRoundBattleOrchestrator({
+    id: `random-round-soak-depth-carrier-${seed}`,
+    rngValue: seed,
+    factoryWinStreak: carry.factoryWinStreak,
+    playerTrainerId: carry.playerTrainerId,
+    battleTowerLevel50WinStreak: 0,
+    factorySymbolsCount: carry.factorySymbolsCount,
+    facilityState: { rentsCount: carry.rentsCount },
+    rentals: partyStrength === "strong"
+      ? { type: "currentRecords", playerRentalRecords: playerRecords, savedRentalRecords }
+      : { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+  });
+  for (
+    let budget = 0;
+    budget < 1_000
+      && state.round.rules.phase !== "roundComplete"
+      && state.round.rules.phase !== "roundLost";
+    budget += 1
+  ) {
+    if (state.battle !== null) {
+      state = submitFactoryRoundPlayerDecision(state, choosePlayerDecision(state));
+      continue;
+    }
+    if (
+      state.round.rules.phase === "presentingBattleStart"
+      || state.round.rules.phase === "presentingBattleWin"
+      || state.round.rules.phase === "presentingSwapResult"
+    ) {
+      state = acknowledgeAndAdvance(state);
+      continue;
+    }
+    if (state.round.rules.phase === "awaitingSwapDecision") {
+      const commandId = state.round.presentation?.command.commandId;
+      if (commandId === undefined) throw new Error("expected swap-offer presentation command");
+      state = completeFactoryRoundPresentation(state, { commandId });
+      state = chooseFactoryRoundSwap(state, { type: "decline" });
+      continue;
+    }
+    throw new Error(`unexpected carrier phase ${state.round.rules.phase}`);
+  }
+  return state;
+}
+
+/** tick()s a decided round's terminal forward, holding A every other frame
+ * (the record menu's cursor stays at its default NO), until it chains into
+ * the next generated draft. */
+function driveTerminalToNextDraft(state: EngineState, maxTicks = 3_000): EngineState {
+  let s = state;
+  const A: ReadonlySet<GbaButton> = new Set(["A"]);
+  const NONE: ReadonlySet<GbaButton> = new Set();
+  for (let i = 0; i < maxTicks; i += 1) {
+    if (s.pendingGeneratedRound !== null) return s;
+    s = tick(s, i % 2 === 0 ? A : NONE);
+  }
+  throw new Error(`terminal did not chain into the next draft within ${maxTicks} ticks`);
+}
+
+function stateAtDecidedRound(
+  round: FactoryRoundBattleOrchestratorState,
+  carry: FactoryCarry,
+): EngineState {
+  return { ...createInitialState(), factoryCarry: carry, factoryRoundBattleOrchestrator: round };
 }
 
 describe("random round soak driver (green milestone pin)", () => {
@@ -340,5 +469,40 @@ describe("random round soak driver (green milestone pin)", () => {
     // An explicit maxFrames always overrides the policy default.
     expect(resolveMaxFrames("winning", 42)).toBe(42);
     expect(resolveMaxFrames("full", 42)).toBe(42);
+  });
+});
+
+describe("real max-depth tracking (Milestone M-A step 1)", () => {
+  it("maxCarriedWinStreak/maxBattleDepth survive a later loss where the old carriedWinStreak snapshot resets to 0", () => {
+    // Round 1 wins with the scripted-strong trio, carrying the streak to 7.
+    const carry0 = createInitialFactoryCarry(0x89ab_cdef);
+    const round1 = driveGeneratedRoundToCompletion(carry0, 17);
+    expect(round1.round.rules.phase).toBe("roundComplete");
+    const chained1 = driveTerminalToNextDraft(stateAtDecidedRound(round1, carry0));
+    const carry1 = chained1.factoryCarry;
+    expect(carry1.factoryWinStreak).toBe(7);
+
+    // Round 2 (carry-in 7) loses with an unscripted, arbitrary-strength
+    // party -- same recipe as factoryRoundChaining.test.ts's "(c)" case.
+    const round2Lost = driveGeneratedRoundToCompletion(carry1, 17, "weak");
+    expect(round2Lost.round.rules.phase).toBe("roundLost");
+    const initialState = stateAtDecidedRound(round2Lost, carry1);
+
+    // Let the soak driver run forward from that decided round2 loss: within
+    // a couple thousand frames the default policy declines the record menu
+    // and the run re-chains into a fresh round 3 (carry reset to 0 on the
+    // loss), so by the time diagnostics are captured, the OLD snapshot field
+    // has already forgotten the streak-7 depth this run actually reached.
+    const result = runSeed(999, {
+      maxFrames: 2_000,
+      renderEvery: 0,
+      policy: "vanilla",
+      stateFactory: () => initialState,
+      collectDiagnostics: true,
+    });
+
+    expect(result.diagnostics?.carriedWinStreak).toBe(0);
+    expect(result.maxCarriedWinStreak).toBeGreaterThanOrEqual(7);
+    expect(result.maxBattleDepth).toBeGreaterThanOrEqual(7);
   });
 });
