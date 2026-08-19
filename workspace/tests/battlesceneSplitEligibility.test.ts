@@ -86,13 +86,12 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
     }
   });
 
-  it("does not flag a function that only calls methods on / reads a stay-behind binding (must stay ELIGIBLE)", () => {
-    // playerHealthboxHpOverlayForHp only calls `.get()`/`.set()` on its
-    // cache -- legal ESM even against an imported binding. Batch 8 over-
-    // excluded this by pattern-matching; it must remain a real candidate.
-    const row = byName.get("playerHealthboxHpOverlayForHp");
-    expect(row?.eligible).toBe(true);
-    expect(row?.hazard).toBeNull();
+  it("playerHealthboxHpOverlayForHp is gone from the CANONICAL bucket (batch 9 moved it)", () => {
+    // It only called `.get()`/`.set()` on its cache -- legal ESM even
+    // against an imported binding, unlike the H3-let-write functions
+    // above. Batch 8 over-excluded it by pattern-matching; batch 9 moved
+    // it after confirming it was the whole remaining function-kind pool.
+    expect(byName.has("playerHealthboxHpOverlayForHp")).toBe(false);
   });
 
   it("never marks a let-kind or animation-importing symbol eligible", () => {
@@ -101,15 +100,14 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
     }
   });
 
-  it("finds a function-kind eligible pool for batch selection", () => {
+  it("the function-kind eligible pool is empty (batch 9 moved the last one)", () => {
     // Batch 8 (75b73fab) moved 47 of the 50 the scanner listed, down from
-    // batch 7's 100 -- this pins a floor, not an exact count, since the
-    // eligible pool shrinks as future batches move symbols out.
-    expect(result.eligibleFunctions.length).toBeGreaterThan(0);
-    for (const name of result.eligibleFunctions) {
-      expect(byName.get(name)?.kind).toBe("function");
-      expect(byName.get(name)?.hazard).toBeNull();
-    }
+    // batch 7's 100, leaving 1 (playerHealthboxHpOverlayForHp). Batch 9
+    // moved that one too, so the pool is now genuinely empty -- every
+    // remaining CANONICAL function-kind symbol is hazard-blocked. If a
+    // future scanner/topology change makes one eligible again, update
+    // this pin rather than loosening it back to a floor.
+    expect(result.eligibleFunctions.length).toBe(0);
   });
 
   it("already-moved batch-6 symbols are gone from the CANONICAL bucket, not re-flagged", () => {
