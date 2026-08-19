@@ -13769,10 +13769,22 @@ export const TURN11_REGIME6_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (
  * this turn's own ROCK_SLIDE hit lands; FEATHER_DANCE deals no damage so
  * there's no override needed for Onix's own side this turn).
  */
-function drawTurn11FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN10_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN11_REGIME6_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken);
+function drawTurn11FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN10_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, bounceIndexOffset: number = 0): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN11_REGIME6_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken, undefined, undefined, undefined, bounceIndexOffset);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
+
+/**
+ * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
+ * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
+ * against `turn11-featherdance-off.json`): the shared onix/healthbox raw
+ * sine index this early (not-yet-frozen) branch feeds `menuIdleBounce`
+ * carries a flat `+114` offset off this call site's own unmodified formula -
+ * RAM-receipt-exact, zero exceptions across 32 consecutive probed ticks
+ * (13310-13341, spanning this trace's own live-driver span up to its
+ * teardown at 13341).
+ */
+const TURN11_KICKOFF_BOUNCE_INDEX_OFFSET = 114;
 
 /** `turn10KickoffBounceTick`'s own turn-11 analogue, in regime-6 space (`drawTurn11FieldBase`'s own domain) - freezes at the regime-6 anchor tick itself (`TURN10_ROCKSLIDE_PRESS_TICK+TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction). */
 function turn11KickoffBounceTick(t: number, pressTick: number): number {
@@ -13995,7 +14007,15 @@ function drawTurn11FightSubmenuWindow(
     }
   }
   const bounceTick = sm.confirmElapsed !== null ? turn11KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  drawTurn11FieldBase(fb, t, bounceTick);
+  // ISSUES #39 rank-5 slice 1: `turn11KickoffBounceTick`'s own already-
+  // established freeze (past `pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`,
+  // its driver already torn down) is out of `TURN11_KICKOFF_BOUNCE_INDEX_
+  // OFFSET`'s own RAM-verified regime (live driver) - only apply the offset
+  // while that driver is still live.
+  const bounceIndexOffset = sm.confirmElapsed === null || t < TICK0 + sm.confirmElapsed + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
+    ? TURN11_KICKOFF_BOUNCE_INDEX_OFFSET
+    : 0;
+  drawTurn11FieldBase(fb, t, bounceTick, undefined, undefined, undefined, undefined, bounceIndexOffset);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
   drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
