@@ -5,6 +5,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1344 — [main worker, 2026-08-18 session 5] **ISSUES #97: `drawTurn5RockSlideAttack`'s three §17/§5-named mechanisms LANDED — `resolve-off-a` 60/196 -> 175/196 (three commits, all green)**
+
+- **State:** three green commits (`9ec92966` phantom rock-prop drop,
+  `1e8096fc` sink+healthbox-vanish 2-tick fix, plus this docs commit).
+  `npm test` **1,067 files / 10,093 passed (+5 new pin blocks) / 223
+  skipped**; `npm run build`/`npm run typecheck` green.
+- **Did (step 1, §17.4):** dropped `drawTurn5RockSlideAttack`'s
+  falling-rock draw loop entirely (unconditional, no scene-ON call site
+  to preserve) — real hardware's OAM has zero rock-shaped (32x32)
+  entries anywhere across turn 5's 6258-6354 window (§17.1's full
+  census); matches `drawTurn9RockSlideAttack`'s own already-landed
+  precedent exactly. `resolve-off-a` 60/196 -> 158/196 (98 frames, zero
+  regressions).
+  **Did (step 2, §19):** a dense oracle pixel sweep (GROVYLE's own
+  column x=165) found the sink formula (`faintSinkRowsAndY2`, called
+  unshifted from this function) runs a uniform 2 render ticks BEHIND
+  real hardware — scoped `+2` shift at the call site only (shared
+  function/its Tier-1 pins/turn 13's own separate call site untouched).
+  Closing the sink exposed a sibling 2-tick lag in the adjacent
+  healthbox-vanish gate (`GROVYLE_HEALTHBOX_VANISH_TICK`, its own single
+  reader) — fixed the same way, scoped `-2`. `resolve-off-a` 158/196 ->
+  175/196 (17 frames, zero regressions).
+- **Result:** `turn5-resolve-off-a` **60/196 -> 175/196** (below the
+  brief's own directional 170-180 estimate at the low end but landed in
+  range). Full guard family reran after EACH step with **zero
+  decreases**: `-b` 196/196, `-c` 195/196 (6763 unchanged, other lane's
+  track), `-d` 194/196 (**6850 and 6996 both unchanged** — neither
+  banked hypothesis panned out, this fix's mechanism isn't shared),
+  `turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
+  46/46, `turn6-menu-off.json` 47/47, `turn5-confirm-off-a` 128/132
+  (5959-5961/5968 unchanged), `-b` 131/132 (6184 unchanged),
+  `turn6-rockslide-a`/`-b` 255/255, 105/105, `turn7-rockslide-a`
+  256/256, `turn13-switchin` 242/242 (confirms neither scoped shift
+  leaks into turn 13's own reuse), `turn4-doubleteam-off`/
+  `turn4-rockslide-off` 256/256 each.
+- **Next:** `resolve-off-a`'s remaining 21/196 (6283/6284 + 6379-6398) is
+  a **different function's** own "Foe GROVYLE fainted!" text-reveal
+  timing (`drawTurn5RockSlideWindow`, not `drawTurn5RockSlideAttack`) —
+  banked as `docs/turn5-resolve-ab-pools-diagnosis.md` §19.1 with a named
+  next probe (dense visible-char-count sweep, §4a's own solve method),
+  not chased this session per the step brief's time-boxing. `-c` 6763
+  and `-d` 6850/6996 remain other lanes' own tracked residuals.
+- **Notes:** no PAPERCUT. Both fixes red-verified against pre-fix code
+  via `git stash` before finalizing, per the family's own convention.
+
+---
+
 ## 1343 — [main worker, 2026-08-18 session 4] **ISSUES #97's four named single-frame residual groups (PROGRESS 1342 open item (b)) all BANKED with decisive new evidence, none fixed — one precedent-matched bounce fix tried and empirically falsified, cleanly reverted**
 
 - **State:** zero `src/` changes landed (`git diff -- src/` clean); one
@@ -150,70 +197,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   sink-transition tail at 6360-6376). Next session should instrument
   that band fresh rather than assume it shares a cause with the BG3
   fix just landed.
-
----
-## 1341 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-d`'s three §9-named fix shapes (star suppression + text-clear/menu-redraw retiming) LANDED — 159/196→194/196, exactly matching §9.5's own prediction**
-
-- **State:** one green commit (`7448000c` fix+Tier-1 pins) plus this docs
-  commit. `npm test` **1,067 files / 10,086 passed (+7, six new pin
-  blocks + `pressTick` cleanup) / 223 skipped**; `npm run build`/
-  `npm run typecheck` green.
-- **Did:** read §9 fully (committed at `1ff264ee`, the side worker's own
-  two-instrument follow-up) and landed all three of its named fix shapes
-  together (they share one call chain and interact, so landing separately
-  would re-derive the same evidence twice): (1) `suppressSitrusStars`,
-  mirroring `suppressSitrusRotate` byte-for-byte — §9.2's own full
-  64-slot `gSprites` RAM scan found zero granting-star/ring template
-  matches anywhere in this trace, so `drawGrantingStars`'s two star
-  sprites are spurious, same class as the already-fixed rotation; gated
-  behind a new trailing param threaded `drawTurn5RockSlideAttack` →
-  `drawTurn6FieldBase` → `resolve-off-d`'s own call site. (2)
-  `TURN5_OFF_SITRUS_TEXT_CLEAR_TICK` 6991→6989 (§9.3, real hardware
-  clears 2 ticks early). (3) `TURN5_OFF_SITRUS_MENU_REDRAW_TICK`
-  6991→6995 (§9.4, RAM-pinned to a `gBattle_BG0_Y` scroll-snap gated
-  behind an async DMA3 copy). **Resolved §9.4's own open question
-  empirically, per this step's own explicit instruction:** before
-  touching `src/`, inspected fresh oracle screenshots at 6989/6991/6994
-  side by side — all three are the SAME plain-field image, no message
-  box, no chrome at all — falsifying §6.3's own "left portion already
-  matches at 6991" framing (that match was measured against unrelated
-  on-field sprite pixels, not real prompt-text timing). Source
-  cross-check confirms: `B_WIN_ACTION_PROMPT`/`B_WIN_ACTION_MENU`
-  (`battle_bg.c:174-192`) are both `bg=0`, same scrolled row, gated by
-  the SAME single `gBattle_BG0_Y` register — no independent second gate
-  exists to split on. Landed the simplest shape consistent with the
-  evidence: retime the one existing shared gate, no split blit. Both
-  `TURN5_OFF_SITRUS_*` constants are scoped to this single call site
-  (grep-confirmed, per their own doc comments), so moving them
-  independently needed no sibling-turn sweep. Exported
-  `drawTurn5RockSlideWindow` (was file-private) to pin the two retimed
-  gates directly, mirroring `drawTurn5RockSlideAttack`'s own existing
-  export for `suppressSitrusRotate`'s tests.
-- **Result:** `turn5-resolve-off-d` 159/196 → **194/196** (+35, exactly
-  matching §9.5's own predicted count). Tick 6850 (pre-existing,
-  unrelated) and tick 6996 (cursor-adjacent, genuinely undiagnosed per
-  §9.1's own explicit flag, deliberately not chased per this step's own
-  "do not touch anything cursor-related" constraint) remain, both exactly
-  as §9.5 predicted. Zero decreases across the full guard family, fresh
-  this session: `turn5-reset-off` 256/256, `turn5-action-off` 32/32,
-  `turn6-reopen-off` 46/46, `turn6-menu-off.json` fixture 47/47,
-  `turn5-confirm-off-a` 128/132, `turn5-confirm-off-b` 131/132,
-  `turn5-resolve-off-a` 58/196, `turn5-resolve-off-b` 196/196,
-  `turn5-resolve-off-c` 195/196, `turn13-switchin` 242/242,
-  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
-- **Next:** `resolve-off-d` is now down to its two flagged, deliberately
-  unchased residuals (6850, 6996) — no further named instrument pending
-  for it. `resolve-off-a`'s Class B (6248-6365 static-background span,
-  side-lane territory) and `resolve-off-a`'s own 6398 residual,
-  `resolve-off-c`'s 6763 residual, and `confirm-off-b`'s classes 3/4
-  (ISSUES #97 sub-entries J/K) remain the family's own open items. #71
-  Rung 9 unchanged.
-- **Notes:** no PAPERCUT. The step brief's own MANDATORY "resolve
-  empirically, don't guess" instruction on §9.4's split-gate question
-  paid off directly: a plausible-sounding alternative (independently
-  gating the message-box and button-grid regions, since §6.3's own
-  wording explicitly invited that reading) would have added real
-  complexity for no benefit — a direct pixel check ruled it out in
-  minutes and the single-retimed-gate fix landed exactly at the
-  predicted count on the first try.
 

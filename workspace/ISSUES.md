@@ -793,6 +793,26 @@ Zero `src/` changes landed this session (`git diff -- src/` clean); full
 guard family reran with zero decreases. Every next probe named in
 `docs/turn5-single-frame-residuals-diagnosis.md` (new).
 
+**2026-08-18 status (bounded MAIN worker, session 5): `resolve-off-a`'s
+own 6262-6398 band mostly closed, 60/196 -> 175/196.** Three landed
+mechanisms, all in `drawTurn5RockSlideAttack`: (1) dropped the
+falling-rock draw loop entirely — real hardware's OAM has zero
+rock-shaped OAM entries anywhere in this window (§17 census), matching
+`drawTurn9RockSlideAttack`'s own already-landed precedent; +98 frames.
+(2) the sink formula (`faintSinkRowsAndY2`) runs a scoped `+2` tick
+ahead of its own default anchor at this one call site — real hardware's
+sink is a clean 2 ticks ahead of the unshifted formula (dense pixel
+sweep, column x=165); +16 frames. (3) the sibling healthbox-vanish gate
+(`GROVYLE_HEALTHBOX_VANISH_TICK`) needed the identical `-2` scoped shift
+(direct oracle screenshot diff, 6376 vs 6377); +1 frame. `resolve-off-d`
+ticks 6850/6996 and `confirm-off-a` ticks 5959-5961/5968 explicitly
+checked unchanged by all three fixes — none share this mechanism.
+Remaining 21/196 (`6283`/`6284` + `6379-6398`) is a **different
+function's** own "Foe GROVYLE fainted!" text-reveal timing
+(`drawTurn5RockSlideWindow`, not `drawTurn5RockSlideAttack`) — banked
+with a named next probe, not chased this session. Full receipts:
+`docs/turn5-resolve-ab-pools-diagnosis.md` §17-§19.
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
