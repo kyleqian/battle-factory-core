@@ -2531,6 +2531,22 @@ a runtime value import from `battleScene.ts` back into the canonical file. Slice
 already proved empirically that such an import forms an ESM cycle whose module-eval
 read throws TDZ.
 
+**Decision (a) AUTHORIZED (2026-08-19, supervisor decision):** canonical→
+`battleScene.ts` value imports via re-export are allowed, exactly as
+`docs/battlescene-canonical-split-design.md` §7 hazard 1 recommends, under
+its own safety rule enforced per symbol: the moved symbol may read the
+imported binding **only inside function bodies** (never at module eval —
+slice 1 proved eval-time reads TDZ-crash), each batch is proven by the
+standing differential recipe plus full `npm test`/`npm run build`, and any
+symbol that would need an eval-time read stays put. Decision (b) (widening
+`tests/animation/animationBoundaryRatchet.test.ts`) remains NOT taken —
+cross-program, still deferred; the 8-symbol ONIX-Sitrus cluster and the two
+`let` caches stay in `battleScene.ts`. Rationale: reversible pure-structure
+change, the design doc's own recommended option, and the only path left for
+this filler-priority program (2026-08-19 batch confirmed the wall live).
+
+The original framing of that choice, kept for context:
+
 Going further needs one of two **deliberate structural decisions**, neither of which
 a slice worker may take: (a) allow canonical→`battleScene.ts` value imports via
 re-export (`docs/battlescene-canonical-split-design.md` §7 hazard 1's recommended
