@@ -7,6 +7,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1352 — [main worker, 2026-08-19] **ladder Slice 2 batch 8: canonical split 123→76 under decision (a), scanner gap found (functions writing to a let-cache elsewhere)**
 
+- **Supervisor final-gates RERUN at this final tree (`82122cc3` + this
+  amend), independent of the worker's own run:** full npm test **1,068
+  files / 10,123 passed / 223 skipped**; `npm run build` green; soak
+  vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**. Entry 1351's
+  gate block cited the pre-bonus tree; this line supersedes it for the
+  session's final state. Slice 2's decision-(a) pool is now ~3 eligible
+  function-kind symbols + the named one-line pickup
+  (`playerHealthboxHpOverlayForHp`); the 4 canonical entry points remain
+  the reserved final slice.
+
 - **State:** two green commits (`75b73fab` move+reconnect, `b1fef20c` test-pin fix). Full
   `npm test` **1,068 files / 10,123 passed / 223 skipped**; `npm run build` green;
   `npm run typecheck` clean; `tests/animation/animationBoundaryRatchet.test.ts` untouched, 3/3.
