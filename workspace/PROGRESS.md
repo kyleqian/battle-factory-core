@@ -5,6 +5,47 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1352 — [main worker, 2026-08-19] **ladder Slice 2 batch 8: canonical split 123→76 under decision (a), scanner gap found (functions writing to a let-cache elsewhere)**
+
+- **State:** two green commits (`75b73fab` move+reconnect, `b1fef20c` test-pin fix). Full
+  `npm test` **1,068 files / 10,123 passed / 223 skipped**; `npm run build` green;
+  `npm run typecheck` clean; `tests/animation/animationBoundaryRatchet.test.ts` untouched, 3/3.
+- **Did:** eligibility scanner listed 50 function-kind ELIGIBLE symbols; excluded 2
+  (`turn10OnixDarkPalette`, `getMenuHealthboxPlayerContentMask`) after finding each writes
+  (via `??=`/assignment) to one of the two named let-cache blockers while the let itself stays
+  behind — the scanner's let-cache hazard class only flags moving the let, not a function
+  elsewhere assigning to it; confirmed live by attempting the move and reading both function
+  bodies, not inferred. **Flagging for the next scanner touch**, not fixed here (out of scope:
+  "scanner rewrites"). Moved the remaining 48 (Set-dedup landed 47, one accidental arg-list
+  duplicate); reconnected battleScene.ts/battleSceneCanonical.ts by the batch 6/7 pattern
+  (export-add + import-back, third-module direct imports, dead-specifier pruning, one
+  battleScene.ts→canonical.ts import-back for functions two still-blocked H2 functions call).
+  Reused batch 7's existing `battlescene-split-move.ts` tool as-is.
+- **Result:** eligibility scanner CANONICAL 123→**76** (matches batch size), partition
+  bucket-acyclicity CLEAN; differential (`turn5-resolve-off-a turn5-confirm-off-a
+  turn9-quickattack-off turn11-featherdance-off turn12-aerialace-off turn13-switchin --base
+  bfd60da8 --summary`): **1241/1241 byte-identical**; `battleScene.ts` loads standalone, no
+  TDZ crash. `tests/battlesceneSplitEligibility.test.ts`'s pinned ">20 eligible" floor went
+  stale (live pool dropped to 3) — lowered to ">0", not a scanner regression (full suite
+  verified green both before and after).
+- **Next:** Slice 2 batch 9 — scanner shows **3** function-kind eligible symbols remain
+  (`getMenuHealthboxPlayerContentMask`, `playerHealthboxHpOverlayForHp`,
+  `turn10OnixDarkPalette`), but only the first and third are the real let-cache-write hazard
+  above; **`playerHealthboxHpOverlayForHp` was over-cautiously excluded this round** (pattern-
+  matched alongside the other two without individually re-checking) even though its own cache
+  (`playerHealthboxHpOverlayByHp`) is a `Map` used via `.get()`/`.set()`, not a `let`
+  reassignment — importing a `Map` binding and calling methods on it is legal ESM, unlike
+  assigning to an imported `let`. Confirmed live (not just reasoned) by grepping its body: no
+  `=` assignment to the imported binding. Next batch worker: move
+  `playerHealthboxHpOverlayForHp` alone first (near-zero risk, already scoped), then the
+  ~28-symbol non-`function`/topological remainder batch 6/7 deferred, or decision (b).
+- **Notes:** no PAPERCUT beyond the scanner gap above (cost ~5 min: one wasted move+revert
+  cycle, caught before commit) and the `playerHealthboxHpOverlayForHp` over-exclusion above
+  (cost ~1 min to catch via a fresh scanner run post-commit; left for next batch rather than a
+  third move+verify cycle inside this session's cap).
+
+---
+
 ## 1351 — [supervisor wind-down, 2026-08-19] **#97 SETTLED (resolve-off-a 60→196/196 + confirm-off-a 128→132/132 CLOSED, park/accept endgame for the last 4 frames) + seam ladder authored + Slice 1 CLOSED (turns 9/11/12 full bars) + canonical split 226→123 under newly authorized decision (a) — 10 worker rounds + 2 cap-kill salvages, all supervisor-verified**
 
 - **Final gates (at `e6b4ab1c` + this docs commit):** full npm test

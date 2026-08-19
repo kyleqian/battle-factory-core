@@ -2494,6 +2494,15 @@ via a failed `tsc -b` run. The two `let` caches remain blocked as described
 above. Neither obstacle is new in kind, just newly confirmed against the
 current tree.
 
+**2026-08-19 update (main worker session 12, `75b73fab`):** batch 8, 47
+more symbols (CANONICAL 123 → 76). Found a real gap in the eligibility
+scanner's let-cache hazard class: it only flags moving the `let` itself,
+not a function elsewhere that assigns into a still-resident let-cache
+(`turn10OnixDarkPalette`, `getMenuHealthboxPlayerContentMask` — both
+scanner-ELIGIBLE, both excluded by hand after reading their bodies, not a
+scanner fix, out of scope). Full detail: `PROGRESS.md` #1352,
+`docs/presentation-seam-retirement-ladder.md` Slice 2.
+
 **2026-08-19 update (main worker session 11, `74f3c1c2`):** first batch
 under decision (a) — 41 `function`-kind canonical symbols moved (CANONICAL
 214 → 173, differential 1241/1241 byte-identical, full `npm test`

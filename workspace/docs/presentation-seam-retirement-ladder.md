@@ -291,6 +291,30 @@ cluster (the file's one remaining top-level module-eval `if` guard reads
 it eagerly — moving it would make battleScene.ts itself eagerly read an
 imported binding, the reverse-direction version of slice 1's TDZ hazard)
 and 6 more turned out to import `src/animation/*` identifiers
+
+**Progress (2026-08-19, main worker session 12, `75b73fab`):** batch 8
+landed 47 more symbols (CANONICAL 123 → 76, bucket-acyclicity CLEAN,
+differential 1241/1241 byte-identical, full `npm test` 10,123/10,123).
+Found a real gap in the eligibility scanner's let-cache hazard class: it
+only flags moving the `let` cache itself, not a *function* elsewhere that
+writes to a still-resident let-cache via compound assignment
+(`turn10OnixDarkPalette`'s `turn10OnixDarkPaletteCache ??= ...` and
+`getMenuHealthboxPlayerContentMask`'s `menuHealthboxPlayerContentMask =
+mask`) — both were listed ELIGIBLE by the scanner but would fail to
+typecheck (`cannot assign to imported binding`) if moved while their let
+stays behind; excluded by hand after reading both bodies, not fixed in
+the scanner (out of scope this round). Over-corrected in the same pass:
+`playerHealthboxHpOverlayForHp` was also excluded alongside those two
+without individually re-checking, even though its own cache
+(`playerHealthboxHpOverlayByHp`) is a `Map` read/written via
+`.get()`/`.set()`, not a `let` reassignment — legal to import. Left for
+the next batch (see `PROGRESS.md` #1352). Scanner pool: 3 function-kind
+ELIGIBLE remain (`getMenuHealthboxPlayerContentMask`,
+`playerHealthboxHpOverlayForHp`, `turn10OnixDarkPalette`) — down from
+batch 7's 100, since decision (a)'s function-kind pool is now nearly
+exhausted; the next batch worker should expect the remaining ~28
+CANONICAL-only symbols to need the non-`function`/topological-dependency
+work batches 6/7 deferred, not another same-shape function-kind sweep.
 (speciesIdleAnim.ts, firePunch.ts, featherDance.ts) — a **second,
 previously-undocumented instance of design doc §7 hazard 1**, found only
 by cross-checking every candidate's body against battleScene.ts's own
