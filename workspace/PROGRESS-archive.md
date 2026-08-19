@@ -1,3 +1,40 @@
+## 1347 — [main worker, 2026-08-19 session 8] **ISSUES #97: `turn5-resolve-off-a` CLOSED 193/196 -> 196/196 — §20.1/§20.2's two decisively-pinned one-liners (two commits, all green)**
+
+- **State:** two green commits (`58eafbd8` Fix 1, `adf15be1` Fix 2) plus
+  this docs commit. `npm test` **1,067 files / 10,103 passed (+2 new pin
+  blocks) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+- **Did (Fix 1, §20.1):** `rockSlideOpponentHp(t + 2, ...)` at
+  `drawTurn5RockSlideAttack`'s own call site (`battleScene.ts:11008`) —
+  the opponent-healthbox never-show-empty-bar sliver's hp=1->hp=0
+  boundary landed 2 render ticks late (app 6285 vs real hardware's
+  RAM-6282/pixel-6283). `resolve-off-a` 193/196 -> 195/196 (6283/6284
+  close exactly, 6398 unaffected).
+  **Did (Fix 2, §20.2):** `if (t - 1 >= cursorStart)` at
+  `drawTurn5RockSlideWindow`'s fainted-message cursor first-appearance
+  gate (`battleScene.ts:15089`) — the one dispatch point in that
+  function missing the same `t - 1` display-basis correction every
+  sibling gate already has, so a spurious cursor drew one tick early.
+  `resolve-off-a` 195/196 -> **196/196 CLOSED**.
+- **Result:** Full 16-trace guard family reran after EACH fix with
+  **zero decreases**: `resolve-off-{a,b,c,d}` 196/196, 196/196, 195/196,
+  194/196; `confirm-off-{a,b}` 132/132, 131/132; `reset-off` 256/256;
+  `action-off` 32/32; `turn6-reopen-off` 46/46; `turn6-menu-off.json`
+  47/47; `turn6-rockslide-{a,b}` 255/255, 105/105; `turn7-rockslide-a`
+  256/256; `turn13-switchin` 242/242 (confirms `drawTurn5RockSlideAttack`'s
+  other caller, turn 13's Murkrow reuse, unaffected); `turn4-doubleteam-off`/
+  `turn4-rockslide-off` 256/256 each.
+- **Next:** `turn5-resolve-off-a`/`-b` are both now fully closed
+  (196/196 each). Remaining #97 residuals are owned elsewhere:
+  `resolve-off-c`'s own 6763, `resolve-off-d`'s own 6850/6996 — both
+  side-lane-owned (`docs/turn5-single-frame-residuals-diagnosis.md`,
+  currently being probed in parallel).
+- **Notes:** no PAPERCUT. Both fixes red-verified against pre-fix code
+  via `git stash -- src/engine/battleScene.ts` before finalizing (both
+  new pin blocks fail at exactly the predicted pre-fix values). Landing
+  addendum banked as §21 in `docs/turn5-resolve-ab-pools-diagnosis.md`.
+
+---
+
 ## 1346 — [main worker, 2026-08-19 session 7] **ISSUES #97: `turn5-confirm-off-a` CLOSED 128/132 -> 132/132 — §9.5's one-liner + §9.6's derived live-bounce correction (two commits, all green)**
 
 - **State:** two green commits (`54c87516` step 1, `0c5a1e6f` step 2)

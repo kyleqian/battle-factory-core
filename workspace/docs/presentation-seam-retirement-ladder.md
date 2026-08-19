@@ -276,6 +276,38 @@ resolution. The two `let` caches (`turn10OnixDarkPaletteCache`,
 #39's named obstacle — their consumers reassign them, impossible across an
 ES import binding).
 
+**Progress (2026-08-19, main worker session 11, `74f3c1c2`):** batch 6
+landed 41 more symbols under ISSUES #39's newly-authorized decision (a)
+(CANONICAL 214 → 173, bucket-acyclicity stays CLEAN, differential
+1241/1241 byte-identical, full `npm test` 10,114/10,114). All 41 are
+`function` declarations — decision (a) makes them categorically safe
+regardless of SHARED/LIVE dependency count, since every reference inside a
+function body is a deferred, call-time read. Found the eligible pool this
+way: of 214 remaining canonical-only symbols, 159 are `function`
+declarations; of those, 48 have zero unmoved-canonical-internal dependency
+(no topological batching needed); of those 48, one (`ONIX_SITRUS_ROTATE_
+RENDER_LAG`) is a support constant for the still-blocked ONIX-Sitrus
+cluster (the file's one remaining top-level module-eval `if` guard reads
+it eagerly — moving it would make battleScene.ts itself eagerly read an
+imported binding, the reverse-direction version of slice 1's TDZ hazard)
+and 6 more turned out to import `src/animation/*` identifiers
+(speciesIdleAnim.ts, firePunch.ts, featherDance.ts) — a **second,
+previously-undocumented instance of design doc §7 hazard 1**, found only
+by cross-checking every candidate's body against battleScene.ts's own
+~270-line import header (the existing partition script's adjacency scan
+only tracks references among battleScene.ts's own top-level symbols, so
+it's blind to both this and the module-eval-guard hazard above). Landing
+the batch also required a mechanical follow-through decision (a) implies
+but doesn't spell out: 42 battleScene.ts-local SHARED/LIVE symbols needed
+`export` added (pure visibility change) so the moved functions could
+import them back, and 6 of battleScene.ts's own now-dead third-module
+imports were removed. See `PROGRESS.md` #1350 for the full symbol/import
+accounting. Still open: the ~111 non-`function` canonical-only symbols
+(const-initializer eval-time-vs-deferred classification needs the same
+import-boundary cross-check before trusting it) and `function` candidates
+with unmoved-canonical-internal dependencies (topological batching, not
+attempted this round).
+
 **Goal.** `docs/battlescene-canonical-split-design.md` (685 lines,
 committed) already specifies this as a pure, cycle-free text move (§1's own
 "CLEAN — 0 leaked edges" acyclicity proof, re-verified live this session,

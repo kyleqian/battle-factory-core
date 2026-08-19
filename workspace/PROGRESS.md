@@ -5,6 +5,80 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1350 — [main worker, 2026-08-19 session 11] **ladder Slice 2: canonical split batch 6 landed under decision (a), 41 symbols (`battleScene.ts` CANONICAL 214 -> 173)**
+
+- **State:** one green commit (`74f3c1c2`). `npm test` **1,067 files /
+  10,114 passed / 223 skipped** (unchanged from baseline); `npm run
+  build`/`npm run typecheck` green; `tests/animation/
+  animationBoundaryRatchet.test.ts` untouched, reran green 3/3.
+- **Did:** first batch under ISSUES #39's newly-authorized decision (a)
+  (canonical→battleScene.ts value re-exports, function-body reads only).
+  Wrote a scratch eligibility scanner (uncommitted) reusing the partition
+  script's decl parser: found 159 of 214 remaining canonical-only symbols
+  are `function` declarations (categorically safe under decision (a) —
+  every SHARED/LIVE reference inside a function body is a deferred,
+  call-time read, never module-eval); narrowed to the 48 with **zero**
+  unmoved-canonical-internal dependency (no topological ordering needed).
+  Excluded `ONIX_SITRUS_ROTATE_RENDER_LAG`: looks like a "zero-ref leaf"
+  in isolation, but the file's one remaining top-level module-eval `if`
+  guard (line ~10685, invisible to any decl-only parser) reads it eagerly
+  to feed the still-blocked ONIX-Sitrus cluster — moving it would make
+  *battleScene.ts itself* eagerly read an imported binding, the same TDZ
+  hazard slice 1 proved unsafe, just reversed. Cross-checked the
+  remaining 47 against battleScene.ts's own ~270 top-of-file imports (a
+  check no prior session ran) and found a second, previously-undocumented
+  hazard class: 6 functions (`drawFirePunchBurnFlames`, `drawFirePunchEmbers`,
+  `drawGrovyleSettled`, `drawTurn13MurkrowSettled`, `drawTurn5PidgeottoSettled`,
+  `drawTurn6FeatherSprites`) reference identifiers battleScene.ts imports
+  from `src/animation/*` (speciesIdleAnim.ts, firePunch.ts, featherDance.ts)
+  — the same animation-import boundary as the ONIX-Sitrus cluster (design
+  doc §7 hazard 1), confirmed live via `npm run typecheck` before exclusion
+  (not just inferred). Moved the remaining 41 as a pure text cut, then
+  fixed the resulting typecheck errors mechanically: 42 battleScene.ts
+  SHARED/LIVE symbols needed `export` added (pure visibility change, same
+  binding/value) so the moved code could import them back; 6 of
+  battleScene.ts's own third-module imports (battleMenu.ts,
+  kabutoSendOut.ts, battleCommandPresentation.ts, battle2CommandAdapter.ts,
+  battleSceneCanonical.ts) became dead after their sole battleScene.ts
+  consumer moved out and were removed; 2 near-duplicate new import lines
+  into battleSceneCanonical.ts were merged with lines an earlier session
+  had already added from the same two modules.
+- **Result:** partition script: CANONICAL 214 -> 173 symbols (41 moved),
+  4645 -> 4199 declaration lines, bucket-acyclicity stays CLEAN. Full
+  `npm test` **10,114/10,114 passed** (byte-for-byte same count as
+  baseline), `npm run build` green. Differential
+  (`compare:differential -- turn5-resolve-off-a turn5-confirm-off-a
+  turn9-quickattack-off turn11-featherdance-off turn12-aerialace-off
+  turn13-switchin --base 8033103c --summary`): **1241/1241 captures
+  byte-identical**.
+- **Next:** ladder Slice 2 continues at 173 remaining canonical-only
+  symbols. Skipped this round, still open for a future batch: (1) the
+  ~111 non-`function` (const/let/interface/type) canonical-only symbols —
+  this session's eligibility scan only characterized `function`-kind
+  decls as categorically safe; const-initializer eval-time-vs-deferred
+  classification (attempted, see `SAFE-const-fn`/`UNSAFE-const-eager` in
+  the scratch scanner) needs the same import-boundary cross-check applied
+  before trusting it; (2) `function`-kind candidates with nonzero
+  internal (still-unmoved-canonical) dependencies — topological batching,
+  not attempted this round; (3) the 6 animation-import-hazard functions
+  and `ONIX_SITRUS_ROTATE_RENDER_LAG` (blocked on decision (b), deferred);
+  (4) the two `let` caches (blocked, ISSUES #39's named obstacle).
+- **Notes:** no PAPERCUT, but flagging a real time sink for the next
+  batch worker: the battleScene.ts-internal adjacency scan (this session's
+  and the prior session's) is blind to (a) top-level module-eval
+  executable statements outside decl boundaries, and (b) references to
+  identifiers battleScene.ts imports from OTHER files (both animation and
+  plain engine modules) — only caught here by grepping for stray
+  `^if (`-style top-level statements and by cross-referencing every
+  candidate's body against battleScene.ts's own ~270-line import header.
+  Skipping either check would have produced a real TDZ crash (guard case)
+  or a silent animation-boundary-ratchet violation (import case) despite
+  a clean `battlescene-split-partition.ts` run and a clean pre-fix
+  compile of the untouched file — worth scripting properly rather than
+  re-deriving by hand every batch.
+
+---
+
 ## 1349 — [main worker, 2026-08-19 session 10] **ladder Slice 2: canonical split batch 5 landed, 12 symbols (`battleScene.ts` CANONICAL 226 -> 214)**
 
 - **State:** one green commit (`f15cb254`). `npm test` **1,067 files / 10,114
@@ -91,41 +165,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   upstream fix) remains open and unpursued — named for whoever retimes
   turns 6-8, not blocking anything today.
 - **Notes:** no PAPERCUT.
-
----
-
-## 1347 — [main worker, 2026-08-19 session 8] **ISSUES #97: `turn5-resolve-off-a` CLOSED 193/196 -> 196/196 — §20.1/§20.2's two decisively-pinned one-liners (two commits, all green)**
-
-- **State:** two green commits (`58eafbd8` Fix 1, `adf15be1` Fix 2) plus
-  this docs commit. `npm test` **1,067 files / 10,103 passed (+2 new pin
-  blocks) / 223 skipped**; `npm run build`/`npm run typecheck` green.
-- **Did (Fix 1, §20.1):** `rockSlideOpponentHp(t + 2, ...)` at
-  `drawTurn5RockSlideAttack`'s own call site (`battleScene.ts:11008`) —
-  the opponent-healthbox never-show-empty-bar sliver's hp=1->hp=0
-  boundary landed 2 render ticks late (app 6285 vs real hardware's
-  RAM-6282/pixel-6283). `resolve-off-a` 193/196 -> 195/196 (6283/6284
-  close exactly, 6398 unaffected).
-  **Did (Fix 2, §20.2):** `if (t - 1 >= cursorStart)` at
-  `drawTurn5RockSlideWindow`'s fainted-message cursor first-appearance
-  gate (`battleScene.ts:15089`) — the one dispatch point in that
-  function missing the same `t - 1` display-basis correction every
-  sibling gate already has, so a spurious cursor drew one tick early.
-  `resolve-off-a` 195/196 -> **196/196 CLOSED**.
-- **Result:** Full 16-trace guard family reran after EACH fix with
-  **zero decreases**: `resolve-off-{a,b,c,d}` 196/196, 196/196, 195/196,
-  194/196; `confirm-off-{a,b}` 132/132, 131/132; `reset-off` 256/256;
-  `action-off` 32/32; `turn6-reopen-off` 46/46; `turn6-menu-off.json`
-  47/47; `turn6-rockslide-{a,b}` 255/255, 105/105; `turn7-rockslide-a`
-  256/256; `turn13-switchin` 242/242 (confirms `drawTurn5RockSlideAttack`'s
-  other caller, turn 13's Murkrow reuse, unaffected); `turn4-doubleteam-off`/
-  `turn4-rockslide-off` 256/256 each.
-- **Next:** `turn5-resolve-off-a`/`-b` are both now fully closed
-  (196/196 each). Remaining #97 residuals are owned elsewhere:
-  `resolve-off-c`'s own 6763, `resolve-off-d`'s own 6850/6996 — both
-  side-lane-owned (`docs/turn5-single-frame-residuals-diagnosis.md`,
-  currently being probed in parallel).
-- **Notes:** no PAPERCUT. Both fixes red-verified against pre-fix code
-  via `git stash -- src/engine/battleScene.ts` before finalizing (both
-  new pin blocks fail at exactly the predicted pre-fix values). Landing
-  addendum banked as §21 in `docs/turn5-resolve-ab-pools-diagnosis.md`.
-

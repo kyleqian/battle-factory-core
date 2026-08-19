@@ -2572,6 +2572,25 @@ via a failed `tsc -b` run. The two `let` caches remain blocked as described
 above. Neither obstacle is new in kind, just newly confirmed against the
 current tree.
 
+**2026-08-19 update (main worker session 11, `74f3c1c2`):** first batch
+under decision (a) — 41 `function`-kind canonical symbols moved (CANONICAL
+214 → 173, differential 1241/1241 byte-identical, full `npm test`
+10,114/10,114). Found a **second instance of hazard 1** beyond the
+ONIX-Sitrus cluster: 6 more functions (`drawFirePunchBurnFlames`,
+`drawFirePunchEmbers`, `drawGrovyleSettled`, `drawTurn13MurkrowSettled`,
+`drawTurn5PidgeottoSettled`, `drawTurn6FeatherSprites`) reference
+identifiers battleScene.ts imports from `src/animation/*`
+(speciesIdleAnim.ts, firePunch.ts, featherDance.ts) — same blocked
+class, same root cause (decision (b) not taken), confirmed live via
+`npm run typecheck` before exclusion. Also confirmed `ONIX_SITRUS_ROTATE_
+RENDER_LAG` (a support constant for the ONIX-Sitrus cluster) is read
+eagerly by the file's one remaining top-level module-eval `if` guard, so
+it stays with the cluster it feeds. See `docs/presentation-seam-
+retirement-ladder.md` Slice 2 and `PROGRESS.md` #1350 for the full
+eligibility-scan method and remaining-work breakdown (~111 non-`function`
+canonical symbols and topological-dependency `function`s untried this
+round).
+
 **Also worth knowing:** the selection scan's `FORBIDDEN` set was **dead code** until
 2026-08-08 (`70caf397`) — pass 1 marked forbidden roots clean, so pass 2 treated
 them as satisfied deps and falsely certified every ONIX-cluster consumer as
