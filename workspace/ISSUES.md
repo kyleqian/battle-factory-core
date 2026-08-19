@@ -17,84 +17,6 @@ backlog.
 
 # Open
 
-## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
-
-**SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
-the only window that currently needs it.** Kept for the *why* behind
-`MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET` (`battleScene.ts`) and as
-the standing rule for any FUTURE compare window whose capture range grows
-to cross the ready transition — do not reopen or re-run the evidence
-program below without a new crossing window; see the trimmed dossiers
-(`docs/trainer-pic-off-window-scout.md`, `docs/ready-lag-discriminator-scout.md`,
-`docs/ready-lag-confound-fixture.md`, `docs/overrides-ready-lag-probe.md`)
-for the full rounds-13-17 archaeology if the mechanism itself is ever in
-question again.
-
-**Mechanism:** the app's predicted first-action-menu-ready frame
-(`generatedBattleStartCommandReady` family, `src/engine/battleScene.ts`)
-fires 4-7 ticks EARLY relative to the oracle's real menu-open, universally
-(every fixture tested, not just a `dispatchDelay<101` regime — that and
-every other single-factor discriminator tried was falsified). Source
-location: `TryDoEventsBeforeFirstTurn`'s switch-in ability/item/weather
-loop plus `HandleTurnActionSelectionState`'s `ChooseAction` dispatch/AI-ack
-round trip (`reference/pokeemerald/src/battle_main.c`) run between send-out
-completion and menu interactivity — a real ROM span the formula has no
-term for. The residual is the sum of two legs (tick-split instruments:
-`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`): a
-switch-in-loop leg ∈ {3,4} and an AI-ack leg ∈ {2,3} — the AI-ack leg is
-`AI_TrySwitchOrUseItem` (`battle_ai_switch_items.c:528-603`), a single
-non-yielding call whose 2-vs-3-tick spread is raw ARM7TDMI cycle-cost
-spill against the frame boundary; the switch-in-loop leg's 3-vs-4 split
-survived falsification of every named candidate (Quick Claw, weather
-carryover, `SwapTurnOrder`, all 12 active-lead switch-in abilities/items).
-**Neither leg is predictable from source-visible properties** — modeling
-either needs instruction-cycle counting this harness has no tool for.
-
-**Standing rule for a future crossing window:** when a NEW committed
-compare window's capture range grows to cross the ready transition (this
-is about the *window*, not the underlying mechanism — most committed
-windows end before it and are unaffected), calibrate that window alone,
-per the user's 2026-08-14 option (c) decision (recorded in
-`ROADMAP.md`'s 2026-08-14-eve decision block):
-1. Measure the fixture's actual ready lag with
-   `tools/probe/probe-ready-lag-chooseaction-handshake.ts` (formula-relative
-   residual) and `tools/probe/probe-readylag-span-tickbytick-plus7.ts`
-   (raw leg split) — add the fixture as a new scenario/trace entry in each,
-   don't fork the probe.
-2. Key the calibration off an EXISTING sanctioned route-level fact (e.g.
-   `frontierBrain.status`), the same way `isCanonicalAnchorIntro` already
-   selects `GENERATED_PLAYER_READY_LAG` — never a battle-number/turn-number
-   /absolute-tick/trace-name branch.
-3. Resolve the exact integer against that window's own dense compare
-   (`npm run compare`) — the two RAM probes bound the right neighborhood,
-   but their oracle-tick domain and the reducer's own button-press-relative
-   `elapsed` clock carry a few ticks of unmodeled skew neither resolves
-   alone; this is the same "value the committed pin needs" convention
-   `GENERATED_PLAYER_READY_LAG` itself already uses.
-4. Label the constant MEASURED, NOT DERIVED in code (name the probes and
-   measured legs), and prove every OTHER committed window is untouched:
-   its own dense compare stays at its recorded number, and
-   `npm run compare:differential` is byte-identical on windows ending
-   before their own ready transition.
-
-**Precedent (silver Frontier-Brain reveal, 2026-08-15):** the only window
-that currently crosses the transition. RAM-handshake formula-relative
-residual +6; leg-split raw span 4 (switch-in-loop) + 3 (AI-ack) = 7,
-matching the PUPITAR/DELCATTY +7 fixture's own split. Dense-compare
-calibration against `factory-round-battle7-noland-reveal-off` settled on
-`MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET = 9`, keyed off a new
-`isSilverBrainReveal` fact (`frontierBrain.status === "silver"`,
-threaded through `FactoryBattleStartIntroState` in
-`beginFactoryRoundBattleStartIntro`). Compare: silver reveal 648/701 →
-**690/701**; gold Noland dense stays 700/701 (`frontierBrain.status`
-differs, offset never applies); differential PASS (1656/1656 identical)
-on Yoshi/Lukas/Magneton, which all end before their ready transition.
-The remaining 11/701 silver frames (420, 503 — present identically with
-NO offset applied, i.e. pre-existing and unrelated to readiness; 647-655
-— a render seam right at the not-ready/ready boundary, offset-invariant
-in width across every offset tried) are a separate, out-of-scope gap this
-constant cannot close at any value — an honest cap, not a #87 residual.
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **User decision (2026-08-10): the playable path stays FAITHFUL — no
@@ -3161,6 +3083,85 @@ slice above remains the next #39 owner whenever a filler slot opens; nothing
 here is canceled.
 
 # Settled records (not open work — see the note at the top of this file)
+
+## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
+
+**SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
+the only window that currently needs it.** Kept for the *why* behind
+`MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET` (`battleScene.ts`) and as
+the standing rule for any FUTURE compare window whose capture range grows
+to cross the ready transition — do not reopen or re-run the evidence
+program below without a new crossing window; see the trimmed dossiers
+(`docs/trainer-pic-off-window-scout.md`, `docs/ready-lag-discriminator-scout.md`,
+`docs/ready-lag-confound-fixture.md`, `docs/overrides-ready-lag-probe.md`)
+for the full rounds-13-17 archaeology if the mechanism itself is ever in
+question again.
+
+**Mechanism:** the app's predicted first-action-menu-ready frame
+(`generatedBattleStartCommandReady` family, `src/engine/battleScene.ts`)
+fires 4-7 ticks EARLY relative to the oracle's real menu-open, universally
+(every fixture tested, not just a `dispatchDelay<101` regime — that and
+every other single-factor discriminator tried was falsified). Source
+location: `TryDoEventsBeforeFirstTurn`'s switch-in ability/item/weather
+loop plus `HandleTurnActionSelectionState`'s `ChooseAction` dispatch/AI-ack
+round trip (`reference/pokeemerald/src/battle_main.c`) run between send-out
+completion and menu interactivity — a real ROM span the formula has no
+term for. The residual is the sum of two legs (tick-split instruments:
+`tools/probe/probe-readylag-span-tickbytick.ts`, `...-plus7.ts`): a
+switch-in-loop leg ∈ {3,4} and an AI-ack leg ∈ {2,3} — the AI-ack leg is
+`AI_TrySwitchOrUseItem` (`battle_ai_switch_items.c:528-603`), a single
+non-yielding call whose 2-vs-3-tick spread is raw ARM7TDMI cycle-cost
+spill against the frame boundary; the switch-in-loop leg's 3-vs-4 split
+survived falsification of every named candidate (Quick Claw, weather
+carryover, `SwapTurnOrder`, all 12 active-lead switch-in abilities/items).
+**Neither leg is predictable from source-visible properties** — modeling
+either needs instruction-cycle counting this harness has no tool for.
+
+**Standing rule for a future crossing window:** when a NEW committed
+compare window's capture range grows to cross the ready transition (this
+is about the *window*, not the underlying mechanism — most committed
+windows end before it and are unaffected), calibrate that window alone,
+per the user's 2026-08-14 option (c) decision (recorded in
+`ROADMAP.md`'s 2026-08-14-eve decision block):
+1. Measure the fixture's actual ready lag with
+   `tools/probe/probe-ready-lag-chooseaction-handshake.ts` (formula-relative
+   residual) and `tools/probe/probe-readylag-span-tickbytick-plus7.ts`
+   (raw leg split) — add the fixture as a new scenario/trace entry in each,
+   don't fork the probe.
+2. Key the calibration off an EXISTING sanctioned route-level fact (e.g.
+   `frontierBrain.status`), the same way `isCanonicalAnchorIntro` already
+   selects `GENERATED_PLAYER_READY_LAG` — never a battle-number/turn-number
+   /absolute-tick/trace-name branch.
+3. Resolve the exact integer against that window's own dense compare
+   (`npm run compare`) — the two RAM probes bound the right neighborhood,
+   but their oracle-tick domain and the reducer's own button-press-relative
+   `elapsed` clock carry a few ticks of unmodeled skew neither resolves
+   alone; this is the same "value the committed pin needs" convention
+   `GENERATED_PLAYER_READY_LAG` itself already uses.
+4. Label the constant MEASURED, NOT DERIVED in code (name the probes and
+   measured legs), and prove every OTHER committed window is untouched:
+   its own dense compare stays at its recorded number, and
+   `npm run compare:differential` is byte-identical on windows ending
+   before their own ready transition.
+
+**Precedent (silver Frontier-Brain reveal, 2026-08-15):** the only window
+that currently crosses the transition. RAM-handshake formula-relative
+residual +6; leg-split raw span 4 (switch-in-loop) + 3 (AI-ack) = 7,
+matching the PUPITAR/DELCATTY +7 fixture's own split. Dense-compare
+calibration against `factory-round-battle7-noland-reveal-off` settled on
+`MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET = 9`, keyed off a new
+`isSilverBrainReveal` fact (`frontierBrain.status === "silver"`,
+threaded through `FactoryBattleStartIntroState` in
+`beginFactoryRoundBattleStartIntro`). Compare: silver reveal 648/701 →
+**690/701**; gold Noland dense stays 700/701 (`frontierBrain.status`
+differs, offset never applies); differential PASS (1656/1656 identical)
+on Yoshi/Lukas/Magneton, which all end before their ready transition.
+The remaining 11/701 silver frames (420, 503 — present identically with
+NO offset applied, i.e. pre-existing and unrelated to readiness; 647-655
+— a render seam right at the not-ready/ready boundary, offset-invariant
+in width across every offset tried) are a separate, out-of-scope gap this
+constant cannot close at any value — an honest cap, not a #87 residual.
+
 
 ## #97 — [SETTLED 2026-08-19, supervisor decision] turn5/turn6 presentation-parity family: every window CLOSED or at its evidence-backed accepted ceiling
 

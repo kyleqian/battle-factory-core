@@ -5,6 +5,59 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1351 — [supervisor wind-down, 2026-08-19] **#97 SETTLED (resolve-off-a 60→196/196 + confirm-off-a 128→132/132 CLOSED, park/accept endgame for the last 4 frames) + seam ladder authored + Slice 1 CLOSED (turns 9/11/12 full bars) + canonical split 226→123 under newly authorized decision (a) — 10 worker rounds + 2 cap-kill salvages, all supervisor-verified**
+
+- **Final gates (at `e6b4ab1c` + this docs commit):** full npm test
+  **1,068 files / 10,123 passed / 223 skipped**; `npm run build` green;
+  soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
+  animation-main and rust-main EMPTY at orient AND wind-down. DEFERRED.md
+  EMPTY. Only permanent worktrees remain; no worker branches. Freshness
+  FAIL at orient = false-positive #6 (PAPERCUTS bumped).
+- **#97 SETTLED (entry moved to ISSUES Settled records):**
+  `resolve-off-a` 60→**196/196** via five stacked landed mechanisms
+  (phantom rock-prop loop §17.4, 2-tick sink+healthbox-vanish §19,
+  1-tick-early fainted text §19.3, HP-sliver +2 + cursor-onset t-1 §20);
+  `confirm-off-a` 128→**132/132** (turn5 missing from the shared
+  kickoff-text -1 ternary §9.5 + RAM-receipt-exact -21 live-bounce
+  correction §9.6). Endgame supervisor decisions (per #61/#38 precedent):
+  `-c` 6763 **PARKED** (3 probe sessions exhausted every candidate),
+  `-d` 6996 **ACCEPT** (new post-redraw single-scanline capture-tear
+  class), 6850/6184 the accepted PNG(T)=RAM(T-1) class. Every fix
+  Tier-1-pinned red-verified; 16-trace guard family zero decreases all
+  session.
+- **Presentation-seam ladder** (`docs/presentation-seam-retirement-ladder.md`,
+  scout round — it corrected the stale "two conversions" framing: the
+  turn-keyed retirement was already ~rank-9 complete). **Slice 1 CLOSED
+  same-session:** turn9-quickattack-off 177→**233/233**,
+  turn11-featherdance-off 189→**191/191**, turn12-aerialace-off
+  246→**247/247** (idle-bounce offsets +191/+205+freeze/+114/+237,
+  RAM-receipt-exact; 4 red-verified pin blocks; differential 1312/1312
+  byte-identical).
+- **Slice 2 (canonical split) 226→123 symbols** (batches 5: 12, 6: 41,
+  7: 50) under **decision (a) AUTHORIZED this session** (supervisor,
+  recorded in ISSUES #39: canonical→battleScene value re-exports allowed,
+  function-body reads ONLY; decision (b) stays deferred — ONIX-Sitrus
+  cluster + 2 let caches stay put). New tooling:
+  `tools/report/battlescene-split-eligibility.ts` (H1-eval-read/
+  H2-animation-import hazard detection, Tier-1 self-check 9/9). Batch 7's
+  full gates were run by the supervisor after the round-10 cap-kill:
+  differential **1241/1241 byte-identical** vs `2e984787`, full suite
+  green; salvage commit `e6b4ab1c` (scanner folds the partition's
+  residual-unreachable block into CANONICAL — required after any batch
+  whose move orphans a symbol's internal referrer).
+- **Two cap-kills, both salvaged:** r7 (turn12 fix verified+committed
+  `eb0be62b`, 35-min finisher worker added pins/docs) and r10 (scanner
+  fix `e6b4ab1c`); this entry carries round 10's unwritten docs record.
+- **Open (ordered for next session):** (a) Slice 2 batches 8+ — ~100
+  eligible function-kind symbols of the 123 remain (scanner-selected; the
+  4 canonical entry points are the reserved FINAL slice); (b) ladder
+  Slice 3 (status-change/outcome emission — declared, unemitted, nothing
+  blocked on it); (c) #71 rung 9 still blocked on animation lane's rung-4
+  back dispatcher; (d) #73/#55 unchanged (parked). No deferred questions;
+  no blockers.
+
+---
+
 ## 1350 — [main worker, 2026-08-19 session 11] **ladder Slice 2: canonical split batch 6 landed under decision (a), 41 symbols (`battleScene.ts` CANONICAL 214 -> 173)**
 
 - **State:** one green commit (`74f3c1c2`). `npm test` **1,067 files /
@@ -126,42 +179,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1348 — [main worker, 2026-08-19 session 9] **ladder Slice 1 CLOSED: turns 9/11/12 idle-bounce residuals all full bars (finisher for 3 salvaged fixes, one docs+pins commit)**
-
-- **State:** one green commit (`7a914770`, Tier-1 pins) plus this docs
-  commit. `npm test` **1,067 files / 10,114 passed (+30 new pin
-  assertions) / 223 skipped**; `npm run build`/`npm run typecheck` green.
-  The three fixes themselves (`62a36f66`/`511c8c7f`/`eb0be62b`) were landed
-  and supervisor-verified by a prior, cap-killed worker; this session was
-  the finisher only (pins + docs + differential), no fix logic touched.
-- **Did:** added 4 "ISSUES #39 rank-5 slice 1 (`<sha>`)" describe blocks to
-  `tests/battleScene.test.ts`, pinning each fix's raw-sine-index offset
-  directly against the fixed `menuIdleBounce` closed form at named ticks
-  (turn9: +191 flat + +205-with-2-tick-freeze; turn11: +114; turn12:
-  +237), each paired with a pre-fix (offset 0) mismatch proof. Exported 5
-  previously-file-local symbols in `battleScene.ts` to make this possible
-  (no logic change — `git diff` is 5 lines, each just adding `export`).
-  Red-verified by zeroing the three named offset constants in source: 6 of
-  the new pins failed as expected; restored (byte-identical to pre-edit)
-  and reconfirmed green before committing.
-- **Result:** `turn9-quickattack-off` **233/233**, `turn11-featherdance-off`
-  **191/191**, `turn12-aerialace-off` **247/247** — all three CLOSED (full
-  bars). Differential guard (`compare:differential -- turn10-aerialace-off
-  turn10-rockslide-off turn10-menu-off turn9-rockslide-off
-  turn11-rockslide-off turn12-rockslide-miss-off --base c4441e8e --summary`)
-  **1312/1312 captures byte-identical**. Spot-guards `turn5-resolve-off-a`
-  196/196, `turn5-confirm-off-a` 132/132 (both #97-family, unaffected).
-  Docs: dated landed-addendum in `docs/idle-bounce-phase-attribution.md`;
-  row 5 of `docs/battle-scene-retirement-inventory.md` updated to full
-  bars; `docs/presentation-seam-retirement-ladder.md` Slice 1 marked
-  LANDED with final counts.
-- **Next:** ladder Slice 1 is fully closed. Ladder Slice 2 (the
-  `battleScene.ts` -> `battleSceneCanonical.ts` split, ~35-45% executed,
-  `docs/presentation-seam-retirement-ladder.md` §3) is the next open item
-  on this doc's own ladder — not started this session, out of this step's
-  scope. The idle-bounce doc's own §5 prediction
-  (`TURN8_MENU_REDRAW_DELAY≈434`, the turns 6-8 upstream OFF re-timing
-  that would let these three per-turn offsets be replaced by one shared
-  upstream fix) remains open and unpursued — named for whoever retimes
-  turns 6-8, not blocking anything today.
-- **Notes:** no PAPERCUT.
