@@ -66,6 +66,14 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
     expect(taggedCount).toBe(clusterNames.length);
   });
 
+  it("excludes the canonical entry points as final-slice, not a batch move", () => {
+    for (const name of ["renderBattleScene", "advanceBattleScene"]) {
+      const row = byName.get(name);
+      expect(row?.eligible, `${name} should be blocked`).toBe(false);
+      expect(row?.hazard, `${name} hazard`).toBe("final-slice-entry-point");
+    }
+  });
+
   it("never marks a let-kind or animation-importing symbol eligible", () => {
     for (const row of result.rows) {
       if (row.kind === "let") expect(row.eligible).toBe(false);

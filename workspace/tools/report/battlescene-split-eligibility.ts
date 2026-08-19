@@ -387,6 +387,19 @@ export interface EligibilityResult {
 
 const CLUSTER_NAME_RE = /sitrus|grantingstar/i;
 
+// The four canonical entry points (design doc §6 "Final slice"). They are
+// mechanically CANONICAL-only and would otherwise read as eligible
+// function-kind leaves, but moving them is the explicitly out-of-scope
+// final slice (core.ts + ~46 importers' path updates), not a decision-(a)
+// batch move -- excluded here so a batch worker never mistakes them for a
+// normal candidate.
+const FINAL_SLICE_ENTRY_POINTS = new Set([
+  "renderBattleScene",
+  "advanceBattleScene",
+  "INITIAL_BATTLE_SCENE_STATE",
+  "BattleSceneState",
+]);
+
 export function computeEligibility(): EligibilityResult {
   const source = readFileSync(DEFAULT_BATTLE_SCENE_PATH, "utf8");
   const { decls, importSpans, guardSpans, residualLines } = walkTopLevel(source);
@@ -454,7 +467,11 @@ export function computeEligibility(): EligibilityResult {
     let hazard: string | null;
     let offending: string[];
 
-    if (decl.kind === "let") {
+    if (FINAL_SLICE_ENTRY_POINTS.has(name)) {
+      eligible = false;
+      hazard = "final-slice-entry-point";
+      offending = ["one of the four canonical entry points; moving is the reserved final slice, not a batch move"];
+    } else if (decl.kind === "let") {
       eligible = false;
       hazard = "let-cache";
       offending = ["reassigned by a consumer; an ES import binding cannot be assigned to"];
