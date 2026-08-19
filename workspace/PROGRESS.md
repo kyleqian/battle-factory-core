@@ -7,14 +7,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 1355 — [supervisor wind-down, 2026-08-19] **Milestone M-A COMPLETE same-day (steps 1-3): play regularly passes challenge 1 (27-36%), ~5% enter challenge 3, NOTHING reaches carry 21 in 300 seeds — follow-on scope decision filed as DEFERRED D2; scanner H3 folded; walk-up ROADMAP line found stale TWICE and corrected to program-COMPLETE**
 
-- **Final gates (at this tree, supervisor-run):** full `npm test`
-  **1,068 files / 10,126 passed / 223 skipped**; `npm run build` green
-  (exit 0); soak gates satisfied by this
-  session's own sweep runs at the final code tree (all code folds landed
-  BEFORE the sweeps; every commit after them is docs-only): vanilla
-  0:20 **20/20 OK** (within vanilla 0:60 60/60, `a395d436`), full 0:60
-  **60/60 OK** (`1e654c62`). DEFERRED.md now carries **D2 (OPEN)** — the
-  post-M-A scope decision, reserved to the user by the M-A block itself.
+- **Final gates (SUPERSEDED line below — rerun after #39 batch 9 landed
+  late-session; both runs supervisor-independent):** at the FINAL tree
+  (`0a9caeda` + this docs commit): full `npm test` **1,068 files /
+  10,126 passed / 223 skipped**; `npm run build` green; soak vanilla
+  0:20 **20/20 OK**; soak full 0:60 **60/60 OK** — and the full-0:60
+  depth block byte-matches the sweep doc's same-range numbers
+  (determinism cross-check). Batch 9 itself verified: scanner CANONICAL
+  76→75 + function-kind pool 0 (rerun live), test pins inspected
+  (absence + exact-0 pins, not vacuous), differential independently
+  rerun on 2 of 6 traces **438/438 byte-identical** (worker's own full
+  run: 1241/1241). NOTE: my brief stated the move direction backwards;
+  the worker correctly followed the established battleScene→canonical
+  direction (matches batches 5-8 and the acceptance numbers) — right
+  call. Earlier same-day gates at the pre-batch-9 tree (10,126 passed,
+  build green, sweep-satisfied soaks) stand in history. DEFERRED.md
+  carries **D2 (OPEN)** — the post-M-A scope decision, reserved to the
+  user by the M-A block itself.
 - **Did (4 worker rounds + 1 read-only scout, 2 lanes):** (1) M-A step 1
   (entry 1354 below, supervisor-verified incl. a seed-0 diagnostics
   trajectory audit). (2) Side: scanner **H3-let-write** hazard
