@@ -15029,7 +15029,13 @@ export function drawTurn5RockSlideWindow(
   drawTurn6FieldBase(fb, t, latestCompletedCommandHandoff, undefined, turn5OffSitrusOnixHp(t), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 60, true, true);
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   const faintedStart = turn5FaintedTextStartTick(pressTick);
-  if (t < faintedStart) {
+  // ISSUES #97 (docs/turn5-resolve-ab-pools-diagnosis.md §19.3): this
+  // dispatch gate shares the same 1-render-tick lag as the fainted-text
+  // reveal below - a fresh oracle screenshot at `faintedStart` itself
+  // (6378) still shows the prior "ONIX used ROCK SLIDE!" text in full, not
+  // a blank/fainted frame; the switch only happens on the following tick.
+  // Scoped `t - 1` here, same shape as the reveal fix below.
+  if (t - 1 < faintedStart) {
     drawMessageTextLines(fb, TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_DELAY));
     return;
   }
@@ -15043,7 +15049,15 @@ export function drawTurn5RockSlideWindow(
       );
       return;
     }
-    drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t, pressTick));
+    // ISSUES #97 (docs/turn5-resolve-ab-pools-diagnosis.md §19.3): dense
+    // oracle pixel sweep (6373-6399, per-tick visible-char-count solve on
+    // both text lines) found this draw's own glyph reveal runs 1 render
+    // tick ahead of real hardware - `t - 1` is the same display-basis
+    // correction already used elsewhere in this file (e.g.
+    // `drawTurn6FightSubmenuWindow`'s own `turn6ReopenBounceTick(t - 1, ...)`
+    // above), scoped to this single call site (turn5FaintedTextVisibleChars's
+    // own RAM-confirmed `turn5FaintedTextStartTick` anchor is untouched).
+    drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t - 1, pressTick));
     const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
     if (t >= cursorStart) {
       // §11.1: the real cursor accepts a per-session A edge then freezes

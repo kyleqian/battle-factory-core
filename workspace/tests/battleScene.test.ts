@@ -84,6 +84,7 @@ import {
   turn3SubmenuBounceTickFromPresentationEpochAge,
   turn5BgFadeY,
   turn5FaintDismissCursorTick,
+  turn5FaintedTextVisibleChars,
   turn5IconBarEva,
   turn5MaterializeCoeff,
   turn5PidgeottoHealthboxSlideDx,
@@ -2171,6 +2172,38 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §19 (2026-08-18, ISSUES #97)
     };
     expect(healthboxRegion(6377)).not.toEqual(healthboxRegion(6376));
     expect(healthboxRegion(6377)).toEqual(healthboxRegion(6378));
+  });
+});
+
+describe("docs/turn5-resolve-ab-pools-diagnosis.md §19.3 (2026-08-18, ISSUES #97): drawTurn5RockSlideWindow's own fainted-message dispatch gate and glyph reveal both ran 1 render tick ahead of real hardware - a dense oracle pixel sweep (6373-6399, per-tick visible-char-count solved against each character's own measured glyph column on both text lines) found the real 'ONIX used ROCK SLIDE!' text still fully shown at render tick 6378 (not yet swapped for the fainted message) and the fainted message's own first glyph not appearing until 6379 (not 6378) - a uniform `t - 1` display-basis correction, scoped to this function's own two dispatch points (the shared turn5FaintedTextStartTick/turn5FaintedTextVisibleChars functions and their other reader are untouched)", () => {
+  it("the dispatch gate: still renders the prior ROCK_SLIDE_ATTACK text, byte-identical, through render tick 6378 (real hardware doesn't swap to the fainted message until one tick later)", () => {
+    const at = (t: number) => {
+      const fb = new Uint8Array(240 * 160 * 4);
+      drawTurn5RockSlideWindow(fb, t, null);
+      return fb;
+    };
+    expect(at(6378)).toEqual(at(6377));
+    expect(at(6379)).not.toEqual(at(6378));
+  });
+
+  it("sanity: the shared turn5FaintedTextVisibleChars function itself is untouched - called directly at the exact argument the call site now passes (outer tick - 1), it returns 1 char for outer tick 6379 and 2 for outer tick 6380, the real hardware's own one-character-per-tick reveal rate confirmed by the sweep", () => {
+    expect(turn5FaintedTextVisibleChars(6379 - 1, TURN5_ROCKSLIDE_PRESS_TICK)).toBe(1);
+    expect(turn5FaintedTextVisibleChars(6380 - 1, TURN5_ROCKSLIDE_PRESS_TICK)).toBe(2);
+  });
+
+  it("the call site actually wires that shift through to the real render: the 2nd glyph's own column (x=22-27, y=124-133 - the measured character-boundary sweep's own char-index-2 box) is still untouched background at render tick 6379 and only lights up at 6380 - pre-fix this column was already lit at 6379 (the over-eager 2-chars-by-6379 bug)", () => {
+    const width = 240;
+    const bpp = 4;
+    const charTwoColumn = (t: number) => {
+      const fb = new Uint8Array(width * 160 * bpp);
+      drawTurn5RockSlideWindow(fb, t, null);
+      const rows: number[] = [];
+      for (let y = 124; y < 134; y++) {
+        rows.push(...fb.slice((y * width + 22) * bpp, (y * width + 28) * bpp));
+      }
+      return rows;
+    };
+    expect(charTwoColumn(6380)).not.toEqual(charTwoColumn(6379));
   });
 });
 
