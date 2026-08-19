@@ -17,7 +17,11 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 5 (2026-08-18 supervisor session 2 orient: both ports FAILed
+- **Hits:** 6 (2026-08-18 supervisor session 3 orient: both ports FAILed
+  again — same 09:45:59-vs-09:51:59 services-newer-than-their-own-commit
+  shape as 2026-08-16; disproved in ~3 min via the commit-date check, kept
+  both services, no restart.)
+  (2026-08-18 supervisor session 2 orient: both ports FAILed
   again; every commit since both service starts touched only `workspace/`
   paths, zero `oracle/` commits — disproved in ~3 min via
   `git log --name-only --since`, kept both services, no restart.)
@@ -1140,3 +1144,22 @@ current app stage should be rejected before replay.
 - **Real fix:** run-subagent.sh could `cd` workers into `<worktree>/workspace`
   (it already does for the brief's cwd — the trap is manual `cd`s during the
   session), or a stub root `package.json` that fails loudly.
+
+## `node --experimental-strip-types` TS probes crash with a TDZ error unless the circular engine trio is imported in the right order
+
+- **What:** `battleMenu.ts` / `battleScene.ts` / `battleSceneCanonical.ts`
+  form a circular import trio. A standalone TS probe (`node
+  --experimental-strip-types tools/probe/x.ts`) that imports them in the
+  wrong order hits a real module-eval TDZ crash (e.g. `battleScene.ts`'s
+  `TEXT_TOTAL_CHARS = LINE1.length + …` evaluating before `LINE1`'s
+  initializer). No bundler hoisting saves you outside vitest/vite.
+- **Hits:** 1 (2026-08-18 side instrument worker, ~10 min lost rediscovering
+  the order by trial).
+- **Workaround (recorded in `docs/turn5-resolve-ab-pools-diagnosis.md` §17):**
+  import `battleMenu.ts` FIRST, then reach `battleScene.ts` exports via its
+  own re-exports (never `battleSceneCanonical.ts` directly) — the same order
+  `tools/probe/verify-turn11.ts` already uses. Alternatively reconstruct
+  against leaf modules only (the round-4 healthbox probe pattern,
+  `tools/probe/probe-opponent-healthbox-hp1-vs-hp0.ts` — zero TDZ risk).
+- **Real fix:** break the cycle (ISSUES #39's program) or a shared probe
+  bootstrap helper under `tools/probe/` that encodes the safe order once.
