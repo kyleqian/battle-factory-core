@@ -1,3 +1,72 @@
+## 1340 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-b`'s fainted-cursor dismiss+freeze LANDED per `docs/turn5-resolve-ab-pools-diagnosis.md` §11.1 — 88/196→196/196 (CLOSED); `-a` 56/196→58/196; `-c` unchanged 195/196**
+
+- **State:** one green commit (`f4b43eec` fix+Tier-1 pins) plus this docs
+  commit. `npm test` **1,067 files / 10,079 passed (+4, updated 2 stale
+  pins + 2 new describe blocks) / 223 skipped**; `npm run build`/
+  `npm run typecheck` green.
+- **Did:** read §11 fully (committed today, ab-pools diagnosis doc) and
+  landed its named fix shape exactly: a new, disjoint
+  `turn5FaintDismissElapsed: number | null` field on `BattleSceneState`
+  (optional, not the doc's literal non-optional shape, so the many
+  pre-existing raw-state-literal test fixtures kept compiling without a
+  mass edit), set once in `core.ts` on the real `newKeys.has("A")` edge
+  gated by the already-staged `turn5RockSlideKoDismissEligible`, threaded
+  as a trailing param down `drawFightSubmenuWindow` →
+  `drawTurn5EndeavorText` → `drawTurn5RockSlideWindow`. Extracted the
+  freeze-clamp arithmetic into a new pure `turn5FaintDismissCursorTick`
+  helper (matching this codebase's existing small-pure-helper pattern,
+  e.g. `faintSinkRowsAndY2`) rather than inlining it, for direct
+  testability. **MANDATORY live-pinning caught a real off-by-one:** §11.1
+  flagged its own hand-derived `-2` freeze-tick offset as unverified; a
+  temporary debug print confirmed `turn5FaintDismissElapsed` lands at
+  exactly RAM tick 6561 as predicted, but a fresh `npm run compare --
+  turn5-resolve-off-b` with `-2` showed a CONSTANT 24px mismatch across
+  the entire frozen tail (6561-6613) — the doc's own derivation was one
+  tick short (`cursorState(6559,...)` = offset 1, not the real frozen
+  value 2; `cursorState(6560,...)` = 2). Corrected
+  `TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET` to **1**, re-verified. Two
+  pre-existing tests (`"rank-3 turn-5 KO dismiss mirror retirement"`)
+  had pinned the OLD, since-superseded finding that a KO-dismiss A-press
+  at ticks 6561/6591 was "presentation-inert" — now literally false (the
+  real mechanism this fix lands DOES change state there) — updated both
+  to assert the new correct behavior instead of deleting them.
+  `turn5FaintedCursorYOffset` itself left defined but unreferenced, per
+  §11.1's own explicit guard.
+- **Result:** `turn5-resolve-off-b` 88/196 → **196/196 (CLOSED, exact,
+  as §11.1 predicted)**. `turn5-resolve-off-c` unchanged **195/196**
+  (only the pre-existing 6763 residual — the hard guard that sank the
+  original bare Class C attempt, reverified unaffected). `turn5-resolve-
+  off-a` 56/196 → **58/196** (2 of the doc's own 3 predicted direct hits
+  close — 6407, 6416; the third, 6398, is the pre-existing, already-
+  accepted 1-tick `GROVYLE_HEALTHBOX_VANISH_TICK` residual, ISSUES #97-C,
+  unrelated to this fix — 1 short of §11.1's own ≥59 prediction,
+  attributed not chased). Zero decreases across the full guard family:
+  `turn5-reset-off` 256/256, `turn5-action-off` 32/32, `turn6-reopen-off`
+  46/46, `turn6-menu-off.json` fixture 47/47, `turn5-confirm-off-a`
+  128/132, `turn5-confirm-off-b` 131/132, `turn5-resolve-off-d` 159/196,
+  `turn13-switchin` 242/242 (the load-bearing guard for the new,
+  disjoint state slot claim — unaffected, confirming turn 5's dismiss
+  did not leak into turn 13's owner), `turn4-doubleteam-off`/
+  `turn4-rockslide-off` 256/256 each.
+- **Next:** ISSUES #97-J's Class B (the `resolve-off-a` 6248-6365
+  static-background residual, §11.2, side-lane territory) is the next
+  named instrument — a `DISPCNT`/`BGxCNT` RAM probe to identify which
+  layer actually carries the visible sky/ground art. `resolve-off-a`'s
+  own 6398 residual (pre-existing, ISSUES #97-C) and `resolve-off-c`'s
+  6763 residual stay small, named, unchased. `resolve-off-d`'s
+  6970-6988 ring/star and 6989-7005 menu-chrome spike (sub-entry K)
+  remain untouched. #71 Rung 9 unchanged.
+- **Notes:** no PAPERCUT. The step brief's MANDATORY "pin the unverified
+  constant with a probe or targeted pixel read FIRST, then land"
+  instruction caught a real bug before commit — landing §11.1's own `-2`
+  literally as hand-derived would have shipped `resolve-off-b` at a
+  worse count than the pre-fix baseline in the frozen span specifically
+  (constant wrong-by-one-step mismatch across all 53 post-dismiss
+  frames), silently regressing the exact window the fix targeted while
+  still reporting a net "improvement" over 88/196. Re-running the FULL
+  guard family (not just `-a`/`-b`) after the correction, per ISSUES
+  #97-J's own standing lesson, confirmed `-c` genuinely holds this time.
+
 ## 1339 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED, plus `resolve-off-d`'s Onix Sitrus HP display-climb LANDED — 60/132→128/132, 37/132→131/132, 142/196→159/196**
 
 - **State:** two green commits (`02b82685` primary + `37a901db`

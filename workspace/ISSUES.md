@@ -773,6 +773,26 @@ cursor-related" constraint). Full receipts:
 `docs/turn5-confirmb-resolved-residuals.md` §9 (the diagnosis) and §10
 (the dated landing addendum).
 
+**2026-08-18 status (bounded MAIN worker, four named single-frame
+residual groups):** all four BANKED, none fixed — `turn5-resolve-off-c`
+tick 6763 (new OAM evidence: the real healthbox sprite is a 64px-wide
+hardware OBJ based at a different screen X than our software's 128px
+composited canvas, fully off-screen at this tick — supersedes the old
+"AA-class rounding" framing), `turn5-resolve-off-d` tick 6850 (confirmed
+the same accepted "PNG(T) shows RAM(T-1)" dispatch-boundary class as
+6184), `turn5-resolve-off-d` tick 6996 (current post-fix bbox no longer
+overlaps the cursor/button-grid area — the "cursor-adjacent" label was
+stale; likely shares a root cause with `resolve-off-a`'s own out-of-scope
+static-background residual, not touched per this entry's own scope
+wall), `turn5-confirm-off-a` ticks 5959-5961/5968 (a precedent-matched
+`+109`/`t-1` bounce-offset fix was tried and empirically REGRESSED the
+trace — reverted; the residual is a compound of at least two disjoint
+screen regions, not the bounce formula). `turn5-confirm-off-b` tick 6184
+independently reconfirmed as the same already-accepted boundary class.
+Zero `src/` changes landed this session (`git diff -- src/` clean); full
+guard family reran with zero decreases. Every next probe named in
+`docs/turn5-single-frame-residuals-diagnosis.md` (new).
+
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
 **SETTLED RECORD for the mechanism; option (c) EXECUTED (2026-08-15) for
