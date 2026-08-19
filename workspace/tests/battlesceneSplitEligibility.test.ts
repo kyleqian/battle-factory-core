@@ -74,6 +74,27 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
     }
   });
 
+  it("flags a function that assigns to a stay-behind let as H3-let-write (batch 8's wasted move+revert)", () => {
+    // turn10OnixDarkPalette writes its cache via `??=` (compound assignment);
+    // getMenuHealthboxPlayerContentMask writes its cache via plain `=`. Both
+    // reassign a module-level `let` that stays behind -- moving either turns
+    // the assignment into a write to an imported binding (illegal ESM).
+    for (const name of ["turn10OnixDarkPalette", "getMenuHealthboxPlayerContentMask"]) {
+      const row = byName.get(name);
+      expect(row?.eligible, `${name} should be blocked`).toBe(false);
+      expect(row?.hazard, `${name} hazard`).toBe("H3-let-write");
+    }
+  });
+
+  it("does not flag a function that only calls methods on / reads a stay-behind binding (must stay ELIGIBLE)", () => {
+    // playerHealthboxHpOverlayForHp only calls `.get()`/`.set()` on its
+    // cache -- legal ESM even against an imported binding. Batch 8 over-
+    // excluded this by pattern-matching; it must remain a real candidate.
+    const row = byName.get("playerHealthboxHpOverlayForHp");
+    expect(row?.eligible).toBe(true);
+    expect(row?.hazard).toBeNull();
+  });
+
   it("never marks a let-kind or animation-importing symbol eligible", () => {
     for (const row of result.rows) {
       if (row.kind === "let") expect(row.eligible).toBe(false);

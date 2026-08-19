@@ -28,6 +28,18 @@
  *                           design.md` §7 hazard 1). This is a static
  *                           import-boundary rule, independent of read timing.
  *
+ *   H3 (let-write)       -- a function-kind candidate's body ASSIGNS to a
+ *                           module-level `let` that stays behind (every
+ *                           top-level `let` does -- see let-cache below).
+ *                           Moving the function turns that assignment into
+ *                           a write to an imported binding -- illegal ESM,
+ *                           TDZ/runtime failure. Reads and method calls
+ *                           (`.get()`/`.set()`) on the binding are not
+ *                           writes and do not trigger this (PROGRESS #1352
+ *                           batch 8: `turn10OnixDarkPalette` and
+ *                           `getMenuHealthboxPlayerContentMask` cost a
+ *                           wasted move+revert before this hazard existed).
+ *
  * Plus two named, non-negotiable exclusions:
  *   let-cache           -- `let`-kind candidates. Their consumers reassign
  *                           them; an ES import binding cannot be assigned
@@ -349,6 +361,28 @@ function animationImportSurface(source: string, importSpans: Span[]): Map<string
 }
 
 // ---------------------------------------------------------------------------
+// Let-write surface (H3): does a function body ASSIGN to a given module-
+// level `let` binding (=, compound assignment, ++/--), as opposed to only
+// reading it or calling a method on it? A bare identifier immediately
+// followed by an assignment operator, or immediately preceded/followed by
+// ++/--, counts; an identifier followed by `.` or `(`/`[` (member access,
+// method call, index) does not -- calling a method on an imported binding
+// is legal ESM, rebinding it is not.
+// ---------------------------------------------------------------------------
+const ASSIGN_OP_ALTERNATION =
+  "\\*\\*=|\\+=|-=|\\*=|/=|%=|&&=|\\|\\|=|\\?\\?=|&=|\\|=|\\^=|<<=|>>>=|>>=|=(?![=>])";
+
+function assignsToBinding(body: string, name: string): boolean {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const notMemberAccess = "(?!\\s*[.([])";
+  const re = new RegExp(
+    `\\b${escaped}\\b${notMemberAccess}\\s*(?:\\+\\+|--|${ASSIGN_OP_ALTERNATION})` +
+      `|(?:\\+\\+|--)\\s*\\b${escaped}\\b${notMemberAccess}`,
+  );
+  return re.test(body);
+}
+
+// ---------------------------------------------------------------------------
 // CANONICAL bucket (authoritative source: battlescene-split-partition.ts).
 // ---------------------------------------------------------------------------
 function canonicalBucket(): Set<string> {
@@ -450,6 +484,18 @@ export function computeEligibility(): EligibilityResult {
     if (hits.length > 0) animationRefsOf.set(decl.name, hits.sort());
   }
 
+  // H3: function bodies that assign to a stay-behind top-level `let`. Every
+  // top-level `let` stays behind permanently (let-cache blocks all of them
+  // unconditionally below), so the full decl-level `let` set is the target.
+  const letNames = decls.filter((d) => d.kind === "let").map((d) => d.name);
+  const letWriteRefsOf = new Map<string, string[]>();
+  for (const decl of decls) {
+    if (decl.kind !== "function") continue;
+    const body = source.slice(decl.startIdx, decl.endIdx);
+    const hits = letNames.filter((letName) => assignsToBinding(body, letName));
+    if (hits.length > 0) letWriteRefsOf.set(decl.name, hits.sort());
+  }
+
   // Reverse-direction H1: battleScene.ts's own remaining top-level module-
   // eval guards reading a CANONICAL-only candidate eagerly.
   const guardReferenced = new Map<string, number>(); // name -> guard line
@@ -473,6 +519,7 @@ export function computeEligibility(): EligibilityResult {
     }
     const animRefs = animationRefsOf.get(name) ?? [];
     const guardLine = guardReferenced.get(name);
+    const letWriteRefs = letWriteRefsOf.get(name) ?? [];
 
     let eligible: boolean;
     let hazard: string | null;
@@ -494,6 +541,10 @@ export function computeEligibility(): EligibilityResult {
       eligible = false;
       hazard = "H1-eval-read";
       offending = [`read by battleScene.ts's own top-level module-eval guard at line ${guardLine}`];
+    } else if (decl.kind === "function" && letWriteRefs.length > 0) {
+      eligible = false;
+      hazard = "H3-let-write";
+      offending = letWriteRefs.map((n) => `assigns to stay-behind let ${n}`);
     } else if (decl.kind === "function") {
       eligible = true;
       hazard = null;
