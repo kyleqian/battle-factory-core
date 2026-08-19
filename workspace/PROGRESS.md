@@ -5,6 +5,52 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1346 — [main worker, 2026-08-19 session 7] **ISSUES #97: `turn5-confirm-off-a` CLOSED 128/132 -> 132/132 — §9.5's one-liner + §9.6's derived live-bounce correction (two commits, all green)**
+
+- **State:** two green commits (`54c87516` step 1, `0c5a1e6f` step 2)
+  plus this docs commit. `npm test` **1,067 files / 10,099 passed (+4
+  new pin blocks) / 223 skipped**; `npm run build`/`npm run typecheck`
+  green.
+- **Did (step 1, §9.5):** widened `drawFightSubmenuWindow`'s `textStart`
+  ternary (`battleScene.ts:8592`) to also route `turn5Active` through
+  `turn2KickoffTextStartTick`'s already-landed `-1` correction — turn 5
+  had simply never been added to that side of the ternary. `confirm-off-a`
+  128/132 -> 129/132 (tick 5968 closes exactly, as predicted).
+  **Did (step 2, §9.6's own named probe):** extended
+  `dump-turn5-confirma-bounce-driver.py` with a full 1-5970 RAM scan for
+  driver-id changes. Decisive finding: exactly ONE creation event in the
+  whole window — turn 1's own `MENU_BOUNCE_RAM_SETUP_TICK` (1748); the
+  confirm-wait bounce driver is the SAME instance the entire game, not a
+  turn-5-specific reseed as §9.6 hypothesized. With no fresh anchor
+  available, derived the correction directly from matching the live
+  branch against the real driver's own already-probed raw `sSinIndex`
+  values (§9.2): exact match gives `bounceTick=2098` for screen tick
+  5959 vs. the current formula's `2119` — a constant **-21**, scoped to
+  the live pre-freeze sub-window only. `confirm-off-a` 129/132 ->
+  **132/132 CLOSED**.
+- **Result:** Full guard family reran after EACH step with **zero
+  decreases**: `-b` 131/132, `resolve-off-a` 193/196 (out-of-scope guard
+  bar, side lane's own 6283/6284/6398 untouched), `-b` 196/196, `-c`
+  195/196, `-d` 194/196, `reset-off` 256/256, `action-off` 32/32,
+  `turn6-reopen-off` 46/46, `turn6-menu-off.json` 47/47,
+  `turn6-rockslide-a`/`-b` 255/255+105/105, `turn7-rockslide-a` 256/256,
+  `turn13-switchin` 242/242 (confirms the shared function's two OTHER
+  call sites are unaffected — they never reach the live sub-window),
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** `turn5-confirm-off-a`/`-b` are both now at their guard-family
+  ceiling for this lane (`-b`'s own 6184 is the already-accepted boundary
+  class, §4). Remaining #97 residuals are all owned elsewhere:
+  `resolve-off-a`'s 6283/6284/6398 (side lane,
+  `docs/turn5-resolve-ab-pools-diagnosis.md`), `resolve-off-c` 6763,
+  `resolve-off-d` 6850/6996 (banked, this doc §1-§3).
+- **Notes:** no PAPERCUT. Both fixes red-verified against pre-fix code
+  via `git stash -- src/engine/battleScene.ts` before finalizing (all 3
+  new pin assertions fail at exactly the predicted pre-fix values).
+  Full derivation banked as §10 in
+  `docs/turn5-single-frame-residuals-diagnosis.md`.
+
+---
+
 ## 1345 — [main worker, 2026-08-18 session 6] **ISSUES #97: `drawTurn5RockSlideWindow`'s fainted-text dispatch gate + glyph reveal (§19.1's named next probe) LANDED — `resolve-off-a` 175/196 -> 193/196 (one commit, green)**
 
 - **State:** one green commit (`98fe3385` fix + 2 Tier-1 pins) plus this
@@ -96,65 +142,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   and `-d` 6850/6996 remain other lanes' own tracked residuals.
 - **Notes:** no PAPERCUT. Both fixes red-verified against pre-fix code
   via `git stash` before finalizing, per the family's own convention.
-
----
-
-## 1343 — [main worker, 2026-08-18 session 4] **ISSUES #97's four named single-frame residual groups (PROGRESS 1342 open item (b)) all BANKED with decisive new evidence, none fixed — one precedent-matched bounce fix tried and empirically falsified, cleanly reverted**
-
-- **State:** zero `src/` changes landed (`git diff -- src/` clean); one
-  docs+probes commit. `npm test` **1,067 files / 10,088 passed (unchanged)
-  / 223 skipped**; `npm run build` green. Full guard family reran with
-  **zero decreases** everywhere, matching every baseline exactly:
-  `turn5-resolve-off-a` 60/196 (the out-of-scope guard bar, untouched),
-  `-b` 196/196, `-c` 195/196, `-d` 194/196, `turn5-reset-off` 256/256,
-  `turn5-action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
-  fixture 47/47, `turn5-confirm-off-a` 128/132, `-b` 131/132,
-  `turn6-rockslide-a` 255/255, `-b` 105/105, `turn7-rockslide-a` 256/256,
-  `turn13-switchin` 242/242, `turn4-doubleteam-off`/`turn4-rockslide-off`
-  256/256 each.
-- **Did:** pixel-first diagnosis of all four residual groups PROGRESS
-  1342 open item (b) named, per the standing #97 method, plus RAM probes
-  where pixels alone were ambiguous. New doc (owned):
-  `docs/turn5-single-frame-residuals-diagnosis.md`. **(1) `resolve-off-c`
-  tick 6763**: new OAM evidence (fresh RAM probe) supersedes the prior
-  session's "AA-class rounding" framing — the real healthbox sprite is a
-  64px-wide hardware OBJ (`shape=1,size=3`) based at real screen `x=44`,
-  while our software composites a 128px single canvas anchored at
-  `origin.x=12`; at the slide's onset tick the real sprite is fully
-  off-screen (max `x=-3`) while our wider canvas's own far column happens
-  to peek onto screen at `x=0-2` — a geometry mismatch, not a rounding
-  fringe. Next probe named (find the real HP-bar sub-sprite's own base X).
-  **(2) `resolve-off-d` tick 6850**: pixel-confirmed the same
-  already-accepted "PNG(T) shows RAM(T-1)" dispatch-boundary class as
-  tick 6184 — architecturally inherent to the hard cutover, not
-  independently chased. **(3) `resolve-off-d` tick 6996**: the inherited
-  "cursor-adjacent, do not touch" label was stale — current post-fix bbox
-  (`127,74-229,110`) no longer overlaps the button-grid/cursor region at
-  all; likely shares a root cause with `resolve-off-a`'s own **out-of-
-  scope** static-background residual (same draw path), so per this step's
-  own explicit stop-and-bank instruction, banked without attempting a fix
-  to protect the `resolve-off-a` 60/196 guard bar. **(4) `confirm-off-a`
-  ticks 5959-5961/5968**: tried the precedent-matched fix (the sibling
-  idle-wait bounce branch's own oracle-RAM-proven `+109`/`t-1`
-  correction, applied to the structurally-identical confirm-wait branch)
-  — **regressed** `turn5-confirm-off-a` 128/132 → 125/132 (six
-  previously-matching frames broke). Reverted immediately, verified clean.
-  The failure itself is decisive evidence: the frozen-phase value (used
-  for 5962-5967, already matching) and the live-phase value at 5959 are
-  provably identical (same `sourceTick`), ruling out a bounceTick-value
-  bug entirely — the residual is a compound of at least two disjoint
-  screen regions (Onix-sprite x=44-99, a separate unexplained x=127-229
-  region) plus a likely-separate boundary artifact at 5968. **(5)
-  `confirm-off-b` tick 6184**: independently reconfirmed as the same
-  already-accepted boundary class via fresh pixel sampling, not
-  re-chased. Two new committed probes:
-  `tools/probe/analyze-residual-family-sample.ts` (generic reusable bbox
-  pixel-diff dumper) and `tools/probe/dump-turn5-confirma-bounce-driver.py`
-  (bounce driver RAM fields, windowed to confirm-off-a's own 5955-5970).
-- **Next:** four concrete next probes, one per residual, named in
-  `docs/turn5-single-frame-residuals-diagnosis.md` §1.3/§2.2/§3.3/§5.5.
-  `resolve-off-a`'s own 6262-6376 band (side-lane territory this round)
-  and #71/#73/#55 unchanged.
-- **Notes:** no PAPERCUT. ISSUES #97 given a short dated status line
-  recording this round (entry not restructured).
-

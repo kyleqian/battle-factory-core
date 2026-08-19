@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, `turn5-action-off` CLOSED 32/32, `turn6-reopen-off` CLOSED 46/46, `turn6-menu-off.json` CLOSED 47/47); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
+## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, `turn5-action-off` CLOSED 32/32, `turn6-reopen-off` CLOSED 46/46, `turn6-menu-off.json` CLOSED 47/47, `turn5-confirm-off-a` CLOSED 132/132); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
 
 **2026-08-17 rung 1 (bounded MAIN worker, pixel-first per the standing
 method):** split into two independently-diagnosed findings.
@@ -828,6 +828,29 @@ single UI element inside GROVYLE's healthbox, RAM-correlated to the same
 with a named next probe rather than guessed at; `6398` (Class C cursor)
 untouched, out of this session's scope. Full receipts:
 `docs/turn5-resolve-ab-pools-diagnosis.md` §19.3-§19.4.
+
+**2026-08-19 status (bounded MAIN worker, session 7): `turn5-confirm-off-a`
+CLOSED, 128/132 -> 132/132.** Two mechanisms, both in
+`battleScene.ts`. (1) Tick 5968: `drawFightSubmenuWindow`'s `textStart`
+ternary (`battleScene.ts:8592`) had never routed `turn5Active` through
+`turn2KickoffTextStartTick`'s own `-1` correction — a precedented
+one-line widening (`|| turn5Active`) closed it exactly as predicted. (2)
+Ticks 5959-5961 (the compound Onix-sprite/healthbox residual): a fresh
+full-window RAM scan (`dump-turn5-confirma-bounce-driver.py`, extended
+with `idChangeEvents`) found the confirm-wait bounce driver is NOT
+turn-5-specific — it's the SAME sprite instance continuously alive since
+turn 1's own `MENU_BOUNCE_RAM_SETUP_TICK` (1748), the only creation event
+in the entire 1-5970 tick range. With no fresh reseed anchor to build a
+new formula from, the fix instead matches `turn5KickoffBounceTickFromLatest`'s
+live pre-freeze branch directly against the real driver's own
+already-probed raw `sSinIndex` values — a constant **-21** correction,
+exact (not merely landing in the right `y2` plateau), scoped to the live
+sub-window only; the frozen branch and this shared function's two other
+call sites (rock slide kickoff text, turn-13 switch-in echo, neither ever
+reaches the live sub-window) are untouched. Full guard family zero
+decreases (`turn13-switchin` 242/242 and `turn6-rockslide-a`/`-b`
+confirm the other call sites are unaffected). Full receipts:
+`docs/turn5-single-frame-residuals-diagnosis.md` §10.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 
