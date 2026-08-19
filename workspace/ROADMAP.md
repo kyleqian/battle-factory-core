@@ -1130,6 +1130,78 @@ scientist turn) is **DONE** (2026-08-15, PROGRESS 1277); its own oracle
 dense-compare leg is queued, not yet run (see that entry's residual).
 Next: B2 (silver/gold speech).
 
+**User decision (2026-08-19, planning session — the next milestone):
+measure play depth first; the chained-round distribution-parity program
+is COMPLETE, and the #39/ladder housekeeping is DEMOTED.**
+
+**Correction to the standing queue.** "Chained-round distribution-parity
+breadth" (the last item of the 2026-08-14 eve order above) was carried as
+an unstarted queue entry through the 2026-08-19 supervisor sessions and
+reported to the user as untouched. It is **not** unstarted — all three
+dispatchable steps of `docs/chained-round-distribution-parity-plan.md` §4
+landed on 2026-08-16/17 and no one updated this line:
+
+- **Step 1 DONE** (`96e1dd4b`): `tests/factoryRoundChaining.test.ts`'s
+  "(b)" case drives four consecutive completed rounds through the real
+  `tick()` path, asserting streak 7/14/21/28 and `generation.challengeNum`
+  at every hop, and reaching a genuine `TRAINER_FRONTIER_BRAIN` silver
+  encounter at hop 3 *by carry* — plan claims C1/C2/C3/C4.
+- **Step 2 DONE**: `factoryRentalGeneration.ts:229-239` carries the
+  challengeNum-8 retail-OOB rationale, citing `config.h:48` +
+  `Makefile:6` (claim C6).
+- **Step 3 DONE** (`6366ee33`; swept, `6d92ddf1`): the opt-in `winning`
+  `SoakPolicy` exists and has been swept wide. Standing coverage
+  `vanilla` 0:60, `full` 0:180, `winning` 0:180 — **all green, zero
+  crashes** (`docs/soak-winning-sweep-2026-08-16{,-part2}.md`,
+  `docs/soak-resweep-2026-08-16-part{3,4}.md`,
+  `docs/soak-sweep-2026-08-17-part{5,6}.md`).
+- **Step 4** was already marked SATISFIED by harness commit `3e29880b`.
+
+**The gap those steps left — and why it is the milestone.** Every sweep
+above reports *whether a seed crashed*. **None reports how deep it
+played.** `randomRoundSoakDriver.ts:163` declares `carriedWinStreak`
+("the deepest chained-streak value this run reached ... used by the soak
+depth report") and `:907` populates it on every result — and **nothing in
+the tree ever reads it**: not `tools/soak/randomRoundSoak.ts`, not a
+test, not a sweep doc (one incidental mention of one seed's `0`;
+`rg carriedWinStreak` re-run live 2026-08-19). So the honest status of
+the "play round after round indefinitely" bar is **unknown**. It is fully
+consistent with all 420 clean seeds that every one of them lost in round
+1 — which would leave challengeNum ≥ 2 (the escalated rental tier/IV
+rows, `CHECK_BAD_MOVE` AI at challenge 2-3 and the full triad at 4+, and
+the battle-21 silver Brain) exercised only by step 1's scripted-win test
+and never by play.
+
+**Milestone M-A — "how deep does play actually get?"** User pick
+(2026-08-19): **measure first, then scope** — deliberately one cheap step
+before committing worker weeks.
+
+1. Surface the number the driver already records: print `carriedWinStreak`
+   per seed and as a distribution in the sweep summary. Report-layer
+   change only — no engine, no policy, no new standing gate.
+2. Re-run over ranges already swept (`winning` 0:180 at minimum, plus
+   `vanilla`/`full` for contrast). This is a re-measure of known-green
+   ground, so it needs no new crash-triage budget.
+3. Report the distribution: how many seeds ever reach streak 7 / 14 / 21
+   (challengeNum 1 / 2 / 3), and the deepest reached anywhere.
+
+Falsifiable either way, recorded now so the result cannot be
+rationalized after the fact: if play routinely reaches challengeNum ≥ 2,
+the late-game worry is answered and M-A closes as a documented number. If
+depth is shallow (the plan's own §0 / §3-gap-3 prediction), the follow-on
+milestone is making deep play *reachable* — and **that** scope decision
+returns to the user with the measurement in hand, not before.
+
+**Demoted — explicitly NOT the next objective:** (a) ISSUES #39's
+`battleScene.ts` canonical split (76 movable symbols left of 226; it is
+refactoring, and since each landed batch is independently verified and
+differential-clean, parking it mid-way costs nothing); (b) the
+presentation-seam ladder's Slice 3 (`status-change`/`outcome` declared
+but unemitted — the ladder doc itself records that nothing is blocked on
+it, so it is a note, not work). Both remain available as filler for spare
+capacity; neither is a milestone, and neither should be reported as the
+next objective again.
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.

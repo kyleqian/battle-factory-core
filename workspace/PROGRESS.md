@@ -5,6 +5,63 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1353 — [planning session, 2026-08-19] **Next-milestone reset: the chained-round distribution-parity program is COMPLETE (all 3 steps landed 08-16/17; the queue line was stale), #39 split + ladder Slice 3 DEMOTED, new milestone M-A = measure how deep play actually gets**
+
+- **State:** planning/audit session at the TOP layer. No `src/`, `tools/`, or
+  test change. Three docs edited: `ROADMAP.md` (new 2026-08-19 user-decision
+  block), `docs/chained-round-distribution-parity-plan.md` (STATUS header),
+  `PROGRESS.md` (this entry, plus archiving 1349/1350). Docs-only — no suites
+  required per the standing judicious-cadence rule.
+- **Did:** the user asked, in plain terms, how the last run went and what was
+  next; then asked to reorganize so the substantive program — not the
+  housekeeping — became the next milestone. Auditing what that program
+  actually *is* inverted the premise twice:
+  1. **The queue line was stale.** ROADMAP's "chained-round
+     distribution-parity breadth" had been carried as unstarted since
+     2026-08-14 and was reported to the user that way. All three dispatchable
+     steps of `docs/chained-round-distribution-parity-plan.md` §4 had in fact
+     landed on 2026-08-16/17 — step 1 `96e1dd4b` (4-hop chaining test,
+     silver Brain reached at hop 3 by real carry), step 2
+     `factoryRentalGeneration.ts:229-239` (challengeNum-8 retail-OOB
+     rationale), step 3 `6366ee33` + sweeps `6d92ddf1` (`winning` policy;
+     standing coverage `vanilla` 0:60 / `full` 0:180 / `winning` 0:180, all
+     green) — with step 4 already marked SATISFIED inline. Corrected to the
+     user in-session.
+  2. **The program's own completion hid a bigger gap.** Every one of those
+     sweeps proves *crash-freedom*; none measures *depth*.
+     `randomRoundSoakDriver.ts:163` declares `carriedWinStreak` with a doc
+     comment naming it "the deepest chained-streak value this run reached ...
+     used by the soak depth report", `:907` populates it on every result, and
+     `rg carriedWinStreak` (run live) shows **nothing in the tree reads it** —
+     no CLI output, no test, no sweep doc. So whether play ever gets past
+     challengeNum 1 is unmeasured: it is fully consistent with all 420 clean
+     seeds that every one lost in round 1, leaving the escalated rental
+     tiers/IVs, the challenge-2+/4+ AI tiers, and the battle-21 silver Brain
+     touched only by step 1's scripted test.
+- **Result:** ROADMAP carries a new user-decision block recording the
+  correction and **milestone M-A ("how deep does play actually get?")**, user
+  pick *measure first, then scope*: (1) print `carriedWinStreak` per seed and
+  as a distribution in the sweep summary — report layer only; (2) re-run over
+  already-swept, known-green ranges; (3) report how many seeds reach streak
+  7/14/21 and the deepest anywhere. The follow-on scope decision explicitly
+  returns to the user *with the measurement in hand*. ISSUES #39's canonical
+  split (76 of 226 symbols left) and ladder Slice 3 are demoted in writing to
+  filler — not the next objective, and not to be reported as such again.
+- **Next:** dispatch M-A step 1 to a workspace worker (report-layer change to
+  `tools/soak/randomRoundSoak.ts` + the driver's summary; no engine, no
+  policy, no new standing gate), then steps 2-3 as one evidence step.
+- **Notes:** PAPERCUT-adjacent process finding, recorded rather than fixed:
+  the stale queue line survived ~5 supervisor sessions because a ROADMAP
+  "next runs" order is written once and never re-validated against the tree,
+  while the work that satisfies it lands under a different heading (soak
+  sweeps). Both prior stale-doc catches this month (the seam ladder's §0
+  correction; this one) were found the same way — re-running the doc's own
+  claims live. Cheap rule: any session that reports a queue item's status to
+  the user verifies it against the tree first, at least by `git log -S` on the
+  item's named artifact.
+
+---
+
 ## 1352 — [main worker, 2026-08-19] **ladder Slice 2 batch 8: canonical split 123→76 under decision (a), scanner gap found (functions writing to a let-cache elsewhere)**
 
 - **Supervisor final-gates RERUN at this final tree (`82122cc3` + this
@@ -106,127 +163,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   blocked on it); (c) #71 rung 9 still blocked on animation lane's rung-4
   back dispatcher; (d) #73/#55 unchanged (parked). No deferred questions;
   no blockers.
-
----
-
-## 1350 — [main worker, 2026-08-19 session 11] **ladder Slice 2: canonical split batch 6 landed under decision (a), 41 symbols (`battleScene.ts` CANONICAL 214 -> 173)**
-
-- **State:** one green commit (`74f3c1c2`). `npm test` **1,067 files /
-  10,114 passed / 223 skipped** (unchanged from baseline); `npm run
-  build`/`npm run typecheck` green; `tests/animation/
-  animationBoundaryRatchet.test.ts` untouched, reran green 3/3.
-- **Did:** first batch under ISSUES #39's newly-authorized decision (a)
-  (canonical→battleScene.ts value re-exports, function-body reads only).
-  Wrote a scratch eligibility scanner (uncommitted) reusing the partition
-  script's decl parser: found 159 of 214 remaining canonical-only symbols
-  are `function` declarations (categorically safe under decision (a) —
-  every SHARED/LIVE reference inside a function body is a deferred,
-  call-time read, never module-eval); narrowed to the 48 with **zero**
-  unmoved-canonical-internal dependency (no topological ordering needed).
-  Excluded `ONIX_SITRUS_ROTATE_RENDER_LAG`: looks like a "zero-ref leaf"
-  in isolation, but the file's one remaining top-level module-eval `if`
-  guard (line ~10685, invisible to any decl-only parser) reads it eagerly
-  to feed the still-blocked ONIX-Sitrus cluster — moving it would make
-  *battleScene.ts itself* eagerly read an imported binding, the same TDZ
-  hazard slice 1 proved unsafe, just reversed. Cross-checked the
-  remaining 47 against battleScene.ts's own ~270 top-of-file imports (a
-  check no prior session ran) and found a second, previously-undocumented
-  hazard class: 6 functions (`drawFirePunchBurnFlames`, `drawFirePunchEmbers`,
-  `drawGrovyleSettled`, `drawTurn13MurkrowSettled`, `drawTurn5PidgeottoSettled`,
-  `drawTurn6FeatherSprites`) reference identifiers battleScene.ts imports
-  from `src/animation/*` (speciesIdleAnim.ts, firePunch.ts, featherDance.ts)
-  — the same animation-import boundary as the ONIX-Sitrus cluster (design
-  doc §7 hazard 1), confirmed live via `npm run typecheck` before exclusion
-  (not just inferred). Moved the remaining 41 as a pure text cut, then
-  fixed the resulting typecheck errors mechanically: 42 battleScene.ts
-  SHARED/LIVE symbols needed `export` added (pure visibility change, same
-  binding/value) so the moved code could import them back; 6 of
-  battleScene.ts's own third-module imports (battleMenu.ts,
-  kabutoSendOut.ts, battleCommandPresentation.ts, battle2CommandAdapter.ts,
-  battleSceneCanonical.ts) became dead after their sole battleScene.ts
-  consumer moved out and were removed; 2 near-duplicate new import lines
-  into battleSceneCanonical.ts were merged with lines an earlier session
-  had already added from the same two modules.
-- **Result:** partition script: CANONICAL 214 -> 173 symbols (41 moved),
-  4645 -> 4199 declaration lines, bucket-acyclicity stays CLEAN. Full
-  `npm test` **10,114/10,114 passed** (byte-for-byte same count as
-  baseline), `npm run build` green. Differential
-  (`compare:differential -- turn5-resolve-off-a turn5-confirm-off-a
-  turn9-quickattack-off turn11-featherdance-off turn12-aerialace-off
-  turn13-switchin --base 8033103c --summary`): **1241/1241 captures
-  byte-identical**.
-- **Next:** ladder Slice 2 continues at 173 remaining canonical-only
-  symbols. Skipped this round, still open for a future batch: (1) the
-  ~111 non-`function` (const/let/interface/type) canonical-only symbols —
-  this session's eligibility scan only characterized `function`-kind
-  decls as categorically safe; const-initializer eval-time-vs-deferred
-  classification (attempted, see `SAFE-const-fn`/`UNSAFE-const-eager` in
-  the scratch scanner) needs the same import-boundary cross-check applied
-  before trusting it; (2) `function`-kind candidates with nonzero
-  internal (still-unmoved-canonical) dependencies — topological batching,
-  not attempted this round; (3) the 6 animation-import-hazard functions
-  and `ONIX_SITRUS_ROTATE_RENDER_LAG` (blocked on decision (b), deferred);
-  (4) the two `let` caches (blocked, ISSUES #39's named obstacle).
-- **Notes:** no PAPERCUT, but flagging a real time sink for the next
-  batch worker: the battleScene.ts-internal adjacency scan (this session's
-  and the prior session's) is blind to (a) top-level module-eval
-  executable statements outside decl boundaries, and (b) references to
-  identifiers battleScene.ts imports from OTHER files (both animation and
-  plain engine modules) — only caught here by grepping for stray
-  `^if (`-style top-level statements and by cross-referencing every
-  candidate's body against battleScene.ts's own ~270-line import header.
-  Skipping either check would have produced a real TDZ crash (guard case)
-  or a silent animation-boundary-ratchet violation (import case) despite
-  a clean `battlescene-split-partition.ts` run and a clean pre-fix
-  compile of the untouched file — worth scripting properly rather than
-  re-deriving by hand every batch.
-
----
-
-## 1349 — [main worker, 2026-08-19 session 10] **ladder Slice 2: canonical split batch 5 landed, 12 symbols (`battleScene.ts` CANONICAL 226 -> 214)**
-
-- **State:** one green commit (`f15cb254`). `npm test` **1,067 files / 10,114
-  passed / 223 skipped** (unchanged from baseline); `npm run build`/
-  `npm run typecheck` green; `tests/animation/animationBoundaryRatchet.test.ts`
-  untouched (`git status` confirms, reran green: 3/3).
-- **Did:** re-ran `tools/report/battlescene-split-partition.ts` live (226
-  CANONICAL-only symbols remained, up from #39's 2026-08-08 snapshot of 199 —
-  the turn9/11/12 idle-bounce fixes landed this session added a few). Built a
-  scratch dependency-closure scan (not committed) on top of the partition
-  script's own adjacency, since its CLEAN acyclicity label only proves the
-  *other* direction (per #39's caution): transitively, only 22 of 226 had zero
-  battleScene-local SHARED/LIVE dependency. Excluded the two `let` caches
-  (`turn10OnixDarkPaletteCache`, `menuHealthboxPlayerContentMask` — ISSUES #39's
-  named obstacle: their consumers reassign them, which an ES import binding
-  can't do) and, after a first attempt hit a real `tsc` failure, the 8-symbol
-  ONIX-Sitrus rotate/tint/ring/granting-star cluster (calls `sitrus*AtAge`
-  helpers from `../animation/heldItemHeal.ts` — design doc §7 hazard 1,
-  confirmed live: moving them trips `animationBoundaryRatchet.test.ts`'s
-  engine/animation import boundary). Also found and correctly handled a SECOND
-  module-eval top-level `if` guard (line ~10683, invisible to the partition
-  script's decl-only parser) that had to travel with its constant, matching
-  §6's "module-eval guards travel with their constants" rule.
-- **Result:** moved the remaining 12 clean symbols (turn5FaintDismissCursorTick,
-  TURN5_PIDGEOTTO_BG_FADE_Y/turn5BgFadeY, turn5SitrusOffHealTextVisibleChars,
-  turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK,
-  turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_{FREEZE_TICK,INDEX_OFFSET}/
-  turn9FightSubmenuBrowseBounceTick, TURN11/12_KICKOFF_BOUNCE_INDEX_OFFSET).
-  Partition script: CANONICAL 226 -> 214 symbols, 4682 -> ~4645 declaration
-  lines, bucket-acyclicity stays CLEAN. Differential (`compare:differential --
-  turn5-resolve-off-a turn5-confirm-off-a turn9-quickattack-off
-  turn11-featherdance-off turn12-aerialace-off turn13-switchin --base
-  8bee19a0 --summary`): **1241/1241 captures byte-identical**.
-- **Next:** ladder Slice 2 continues — re-run the eligibility scan against
-  the next batch of the remaining 214 canonical symbols (same transitive
-  SHARED/LIVE + animation-import + module-eval-guard checks this session
-  established). The ONIX-Sitrus cluster and the two `let` caches remain
-  blocked pending structural decisions (a)/(b) in ISSUES #39, not this
-  worker's to make.
-- **Notes:** no PAPERCUT. The partition script's own "zero-ref leaves"/
-  "topological batch" framing in the design doc's §6 is aspirational — it has
-  no such computed output; a fix worker must derive eligibility by hand
-  (or script it fresh) each session, which is where most of this step's time
-  went.
 
 ---
 

@@ -1,5 +1,24 @@
 # Chained-round distribution-parity program (scout)
 
+> **STATUS 2026-08-19 (planning session): §4 steps 1-4 are ALL LANDED.
+> This program is COMPLETE as scoped.** Verified live, not inferred:
+> step 1 = `96e1dd4b` (`tests/factoryRoundChaining.test.ts` case "(b)",
+> four hops, silver Brain at hop 3); step 2 =
+> `factoryRentalGeneration.ts:229-239`; step 3 = `6366ee33` + sweeps
+> `6d92ddf1` (`vanilla` 0:60, `full` 0:180, `winning` 0:180, all green);
+> step 4 = satisfied by harness `3e29880b`, already noted inline below.
+> Do not re-dispatch §4 as open work — a 2026-08-19 session reported this
+> program to the user as "queued since 08-15, never picked up" purely from
+> a stale ROADMAP queue line, without checking the tree.
+>
+> **What this program did NOT settle**, and what supersedes it: every
+> sweep proves *crash-freedom*, none measures *depth*.
+> `randomRoundSoakDriver.ts:163` records `carriedWinStreak` on every
+> result and nothing in the tree reads it, so §0's "natural chained depth
+> is shallow" prediction and §3 gap 3 are still **unmeasured on the
+> winning policy**. That measurement is now ROADMAP milestone **M-A**
+> (user decision 2026-08-19, "measure first, then scope").
+
 Read-only scout for the ROADMAP's "Follow-on objective — continuous play"
 bar: "boot the app and play round after round indefinitely, matching what a
 real Emerald player would see at distribution parity." Round chaining itself
