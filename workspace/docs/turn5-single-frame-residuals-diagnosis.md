@@ -1124,3 +1124,193 @@ Full `npm test` (10,099 passed, +4 new pin blocks) and `npm run build`
 green. `docs/turn5-resolve-ab-pools-diagnosis.md`'s own 6283/6284/6398
 residuals (out of scope this session, owned by a parallel side-lane
 worker) untouched.
+
+## 11. 2026-08-18 (side lane, third) — `turn5-resolve-off-c` tick 6763: PARK, confirmed; `turn5-resolve-off-d` tick 6996: ACCEPT, new decisive mechanism (oracle's own transient 1-scanline capture glitch, not an app defect)
+
+Bounded SIDE-lane INSTRUMENT worker, Battle Scene OFF oracle. Scope: run
+§8's own named next probe for `resolve-off-c` 6763 (hardware-OAM-vs-
+software-`gSprites[]` timing cross-check), and do a fresh from-scratch
+pixel characterization of `resolve-off-d` 6996 (the old "cursor-adjacent"
+and "shares resolve-off-a's mechanism" framings are both stale/disproven
+per this step's own brief). `git diff -- src/` is empty this session —
+INSTRUMENT only, no `src/` edit attempted.
+
+### 11.1 Baselines (fresh, unchanged)
+
+```
+npm run compare -- turn5-resolve-off-c --summary   -> 195/196 (tick 6763)
+npm run compare -- turn5-resolve-off-d --summary   -> 194/196 (ticks 6850, 6996)
+```
+
+### 11.2 Part 1 — `turn5-resolve-off-c` tick 6763: PARK
+
+New probe `tools/probe/dump-turn5-resolve-offc-hwoam-schedule-probe.py`
+(committed this session) runs §8.7's own exact named next step: at EACH of
+ticks 6760-6765 in one probe run, read BOTH the software `gSprites[]`
+struct for PIDGEOTTO's three healthbox sprites (left/right/bar) AND a full
+128-slot raw hardware OAM scan (0x07000000), so the two views can be
+compared tick-for-tick with zero cross-run bootstrap drift. Result:
+
+| software tick | sw.invisible | sw.x2 | tile# found in hw OAM? |
+|---|---|---|---|
+| 6760 | True | 0 | no |
+| 6761 | True | 0 | no |
+| 6762 | **False** (onset) | -110 | no |
+| 6763 | False (held) | -110 | no |
+| 6764 | False | -105 | **yes** (all 3 sprites, exact tile#/x/y match) |
+| 6765 | False | -100 | yes |
+
+The three healthbox sprites' own tile numbers (156/188/292) are absent
+from the raw hardware OAM buffer at BOTH software ticks 6762 and 6763 —
+the software struct already shows correct `invisible=False`/`x2=-110` at
+6762, yet the hardware copy doesn't pick the sprites up until software-tick
+6764, by which point `x2` has already advanced to -105 (i.e. **the
+hardware OAM buffer, read this way, never shows `x2=-110` for these
+sprites at all** — it jumps straight from "absent" to "present at -105").
+
+This picture cannot be reconciled with this doc's own independently
+pixel-verified fact (§1.2/§1.3/§8, extensively re-confirmed) that render
+tick 6764 exactly matches content computed from software-tick-6763's state
+(`x2=-110`, still held) — the already-oracle-exact 6764-6785 span is real
+and unshaken. If hardware OAM genuinely never contained `x2=-110` for this
+sprite, render 6764 could not show it. The only consistent explanation is
+that this probe's own hardware-OAM read, taken immediately after each
+`oracle.advance()` call returns, samples at a POINT WITHIN THE FRAME that
+does not line up with whatever point `BuildOamBuffer`'s real VBlank-DMA
+copy runs at — i.e. a **probe-methodology ceiling**, not a new game
+mechanism: `oracle.advance()`'s single-call granularity cannot distinguish
+"hardware OAM was rebuilt already this frame" from "hardware OAM reflects
+last frame's build," so a hw-OAM census at this granularity cannot itself
+resolve why 6763 shows white. This is exactly the option (c) ("a
+probe-harness timing artifact independent of the game itself") §8.7 named
+as one of three untested possibilities — now the only one left standing,
+since (a)/(b) would have to produce a hw-OAM timeline consistent with the
+already-proven 6764 pixel match, and neither does.
+
+**Verdict: PARK.** Three probe sessions (original diagnosis, §8, this one)
+have each closed off a candidate mechanism with decisive evidence
+(per-sprite clip is a mathematical no-op, §8.4; harvested content is
+byte-exact, §8.5; and now, the hardware-OAM census that could have
+explained the gap is itself unable to resolve it at this probe's
+granularity) without ever finding an actionable fix shape. Per this step's
+own explicit guidance, park is the correct call rather than manufacturing
+a speculative fix on a 6px/0.02% single frame. Any further progress needs
+frame-precise (sub-tick, pre/post-VBlank) emulator stepping control this
+harness's `oracle.advance()`/probe API does not expose — out of scope for
+another whole-OAM-census-style probe at this granularity.
+
+```
+npm run compare -- turn5-resolve-off-c --summary   # expect 195/196, tick 6763 - unchanged
+python3 tools/run-mgba-probe.py /tmp/out.json -- \
+  tools/probe/dump-turn5-resolve-offc-hwoam-schedule-probe.py \
+  tools/compare/traces/turn5-resolve-off-c.json /tmp/out.json \
+  6760 6761 6762 6763 6764 6765
+```
+
+### 11.3 Part 2 — `turn5-resolve-off-d` tick 6996: ACCEPT, mechanism identified
+
+Fresh crop-diff (`analyze-residual-family-sample.ts` plus a direct
+Pillow-based per-pixel sweep, `npm run compare -- turn5-resolve-off-d
+/tmp/offd-run --capture-range 6993:6999`) confirms the current bbox
+`127,74-229,110` exactly (1579px/4.11%) and visually identifies the
+differing element as ONIX's own (the player's) settled healthbox — name
+plate, HP bar, level text — NOT Pidgeotto's sprite/shadow (a sliver of
+which only grazes the bbox's very top edge). This supersedes §3's own
+still-open "which element" question.
+
+**Row-by-row diff sampling found a clean, uniform 1-scanline vertical
+displacement**: shifting the ORACLE image down by 1px before comparing
+(`app(x,y)` vs `oracle(x,y+1)`) drops the bbox's mismatch count from
+1579/3811 to 166/3811 — checked independently for the upper sub-region
+(Pidgeotto-shadow sliver, y=74-87: 544->87) and the lower sub-region (Onix
+healthbox body, y=88-110: 1035->79), both showing the same ~85-95%
+reduction, i.e. one coherent shifted element, not two coincidentally
+aligned defects.
+
+**Decisive follow-up (settles content vs. position cleanly): this is a
+TEMPORAL, not spatial, effect.** Directly comparing whole frames in the
+bbox across the three captured ticks:
+
+```
+app-06996  vs oracle-06995:  0/3811 mismatches (EXACT)
+app-06996  vs oracle-06996:  1579/3811 mismatches (the reported residual)
+app-06996  vs oracle-06997:  0/3811 mismatches (EXACT)
+app-06995  vs app-06996:     0/3811 (app is byte-identical across all 3 ticks)
+app-06996  vs app-06997:     0/3811
+```
+
+The app renders the **exact same, unchanging** healthbox at 6995, 6996,
+and 6997 (correct: nothing in game state changes there — HP isn't
+draining, no bounce is active, per §11.4 below). The oracle **also**
+shows byte-identical content at 6995 and 6997 (confirming the box really
+is static on real hardware too) — but at 6996, and ONLY 6996, the oracle's
+own captured frame shows that exact same content shifted down by 1
+scanline, then reverts on the very next tick. Our software isn't missing
+a real, reproducible piece of game state; the real hardware/oracle capture
+itself has a genuine one-frame anomaly that our software (correctly
+computing a static scene) does not and should not reproduce.
+
+### 11.4 Draw-formula check (read-only): confirms nothing in our own model varies at 6996
+
+`turn5-resolve-off-d` is driven by `drawTurn5RockSlideWindow`
+(`battleScene.ts:15039`), which unconditionally calls `drawTurn6FieldBase`
+(`battleScene.ts:15051`, `bounceIndexOffset=60` per the ISSUES #97-B
+correction) every tick before dispatching to the message/chrome text
+switch. Tracing the player healthbox's own `y` offset
+(`battleScene.ts:15002-15006,15023-15026`): `bounceTick = t - 1` (since
+`latestCompletedCommandHandoff` isn't a raw number here) ->
+`turn5SitrusResettledBounceTick(bounceTick)` (`battleSceneCanonical.ts:
+1135`, `= bounceTick - TURN5_SITRUS_MENU_REDRAW_TICK(7222) +
+MENU_IDLE_BLANK_END_TICK+1(1748)`) -> `menuIdleBounce(...)`
+(`battleMenu.ts:825`). For render tick 6996 this resolves to
+`resettled=1521`, `ramTick=1520`, which is `< MENU_BOUNCE_RAM_SETUP_TICK`
+(1748) — so `menuIdleBounce` returns `{onixY2:0, healthboxY2:0}`
+**identically at 6995, 6996, and 6997** (the resettled bounce cycle for
+this window doesn't start until render tick ~7224, well outside this
+capture). `onixHp = turn5OffSitrusOnixHp(t)` also reads the same HP value
+across this narrow span (no drain/climb active here — `TURN5_OFF_SITRUS_
+ONIX_HP_CLIMB_START_TICK=6952`/`_JUMP_TICK` both already resolved well
+before 6995, per §2). `drawTurn5SitrusSettledMenuChrome`
+(`battleScene.ts:11722`, first fires at `t>=TURN5_OFF_SITRUS_MENU_REDRAW_
+TICK=6995`) only repaints `y>=112` (the bottom FIGHT/BAG/etc chrome),
+never touching this bbox's `y=74-110` span. Every formula this session
+traced is provably flat across 6995-6997 — matching the app's own observed
+byte-for-byte stability and confirming there is no missed per-tick input
+this session overlooked; the discrepancy is 100% on the oracle capture's
+own side at exactly one tick.
+
+### 11.5 Why ACCEPT (not a fix, not a blind park)
+
+The render tick immediately following this window's own hard chrome
+redraw (`TURN5_OFF_SITRUS_MENU_REDRAW_TICK=6995`, itself documented
+elsewhere in this file as an "atomic off-screen draw + BG0-scroll reveal"
+event, `battleMenu.ts:767`'s doc on the analogous `MENU_DRAW_TICK`)
+showing a one-scanline-only capture tear that reverts by the very next
+tick is consistent with a genuine real-hardware/capture-timing artifact
+tied to that redraw, not a persistent game-state difference — the same
+"real hardware momentarily shows something our deterministic, pure-`t`
+model has no principled way to predict" character this family already
+accepts elsewhere (§2.2/§4), just manifesting as a spatial 1px tear rather
+than a content swap, so it doesn't fit those sections' own "PNG(T) shows
+RAM(T-1)" boundary class verbatim — it is its own, new, evidence-backed
+accepted class ("post-redraw single-scanline capture tear"), not merely
+asserted: polarity proven the same way §9.5 proved its own (app is
+provably static and correct at all three ticks; oracle is provably
+identical at the two neighbors and uniquely, transiently offset at the
+one residual tick). No fix is recommended: reproducing this would require
+inventing an unmotivated one-tick spatial jitter with no game-state driver
+behind it, exactly the "manufactured speculative fix" this family's own
+discipline warns against.
+
+### 11.6 Guard family (fresh, this session — zero decreases anywhere)
+
+```
+npm run compare -- turn5-resolve-off-c --summary   -> 195/196 (unchanged)
+npm run compare -- turn5-resolve-off-d --summary   -> 194/196 (unchanged)
+npm run test:smoke                                  -> green
+```
+
+`git diff -- src/` is empty at the end of this session — INSTRUMENT step,
+both residuals characterized to a decisive conclusion (PARK / ACCEPT)
+without a code change.
+
