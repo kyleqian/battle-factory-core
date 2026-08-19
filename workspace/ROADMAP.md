@@ -1126,9 +1126,16 @@ windows unaffected; ISSUES #87 trimmed to a settled mechanism record.
 
 **FAITHFUL walk-up program progress:** step B1 (BattleRoom entrance —
 Noland visible-from-start, "Get a move on!", simultaneous walk-in,
-scientist turn) is **DONE** (2026-08-15, PROGRESS 1277); its own oracle
-dense-compare leg is queued, not yet run (see that entry's residual).
-Next: B2 (silver/gold speech).
+scientist turn) is **DONE** (2026-08-15, PROGRESS 1277). Its oracle
+dense-compare leg is NOT "queued, not yet run" (stale line corrected
+2026-08-19 against the tree): a later session (PROGRESS-archive, "B1's
+oracle-dense-compare debt" entry) built the re-runnable harness
+(`generatedRoundBattle7NolandRoomEntranceStage` + entrance traces 02/03),
+closed fixture 02 at 256/256 exact, and measured 2 of the 3 flagged
+constants. Open remainder: fixture 03's `brainMoving` walk/pan cadence
+(~103 ticks, up to ~26% pixel mismatch) needs its own RAM/pixel
+derivation — the named prerequisite for B2 (silver/gold speech), which
+stays next after it.
 
 **User decision (2026-08-19, planning session — the next milestone):
 measure play depth first; the chained-round distribution-parity program
