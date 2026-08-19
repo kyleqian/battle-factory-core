@@ -43,9 +43,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   round. ROADMAP M-A block updated with the result; the block's two
   pre-recorded outcomes bracket it, so the scope call goes to D2.
 - **Next:** user resolves D2 (mechanically blocks the next supervisor
-  session). Available filler regardless: #39 batch 9 (move
-  `playerHealthboxHpOverlayForHp`, the last scanner-eligible
-  function-kind symbol), then the non-function remainder.
+  session). #39 batch 9 landed same-day (`2f8edef2` move+reconnect,
+  `dc89b145` test-pin fix): moved `playerHealthboxHpOverlayForHp`,
+  scanner CANONICAL 76→75, function-kind eligible pool 1→0 (none left).
+  Available filler regardless: the non-function/topological CANONICAL
+  remainder (5 eligible non-function symbols + the ~70 hazard-blocked
+  ones per the scanner's own summary), or decision (b).
 - **Notes:** process lesson recorded on top of 1353's rule — verifying a
   queue item against the tree must grep for the artifact's NEWEST
   archive mention, not stop at the first hit near the cited entry (my
