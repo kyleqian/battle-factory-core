@@ -17,7 +17,7 @@ backlog.
 
 # Open
 
-## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, `turn5-action-off` CLOSED 32/32, `turn6-reopen-off` CLOSED 46/46, `turn6-menu-off.json` CLOSED 47/47, `turn5-confirm-off-a` CLOSED 132/132); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug)
+## #97 — turn5/turn6 FIGHT-submenu-reopen bounce-tick drift (mechanism RESOLVED, `turn5-action-off` CLOSED 32/32, `turn6-reopen-off` CLOSED 46/46, `turn6-menu-off.json` CLOSED 47/47, `turn5-confirm-off-a` CLOSED 132/132, `turn5-resolve-off-a` CLOSED 196/196, `turn5-resolve-off-b` CLOSED 196/196); loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended-behavior change, not a bug); `resolve-off-c`/`-d` remain open (side lane)
 
 **2026-08-17 rung 1 (bounded MAIN worker, pixel-first per the standing
 method):** split into two independently-diagnosed findings.
@@ -851,6 +851,29 @@ reaches the live sub-window) are untouched. Full guard family zero
 decreases (`turn13-switchin` 242/242 and `turn6-rockslide-a`/`-b`
 confirm the other call sites are unaffected). Full receipts:
 `docs/turn5-single-frame-residuals-diagnosis.md` §10.
+
+**2026-08-19 status (bounded MAIN worker, session 8): `turn5-resolve-off-a`
+CLOSED, 193/196 -> 196/196.** Two one-line fixes, both in `battleScene.ts`,
+per the side lane's own decisively-pinned §20. (1) Ticks 6283/6284 (2px
+each): the opponent-healthbox never-show-empty-bar sliver's hp=1->hp=0
+boundary landed 2 render ticks late — `rockSlideOpponentHp(t + 2, ...)`
+at `drawTurn5RockSlideAttack`'s own call site only. (2) Tick 6398 (37px):
+the fainted-message wait-cursor's first-appearance gate
+(`if (t >= cursorStart)`) was the one dispatch point in
+`drawTurn5RockSlideWindow` missing the same `t - 1` display-basis
+correction every sibling gate in that function already has — fixed to
+`if (t - 1 >= cursorStart)`. Both landed as separate green commits, each
+red-verified via stash before finalizing. Full 16-trace guard family
+reran with zero decreases: `resolve-off-{a,b,c,d}` 196/196, 196/196,
+195/196, 194/196; `confirm-off-{a,b}` 132/132, 131/132; `reset-off`
+256/256; `action-off` 32/32; `turn6-reopen-off` 46/46; `turn6-menu-off`
+47/47; `turn6-rockslide-{a,b}` 255/255, 105/105; `turn7-rockslide-a`
+256/256; `turn13-switchin` 242/242; `turn4-doubleteam-off`/
+`turn4-rockslide-off` 256/256 each. `resolve-off-a` and `resolve-off-b`
+are now both fully closed. Remaining #97 residuals: `resolve-off-c`'s own
+6763, `resolve-off-d`'s own 6850/6996 — both out of scope this session,
+owned by the parallel side-lane worker. Full receipts:
+`docs/turn5-resolve-ab-pools-diagnosis.md` §20-§21.
 
 ## #87 — Battle-start ready-frame formula's pre-first-turn span (universal +4..+7 tick late-fire) — mechanism record + standing rule
 

@@ -2459,3 +2459,77 @@ npm run test:smoke                                 # 426/426, 8 files (fresh thi
 ```
 FAIL if `resolve-off-a` decreases below 193/196, or if `-b`/`-c` pick up
 ANY new mismatch beyond their own recorded baselines.
+
+## 21. Landed addendum (2026-08-19, bounded MAIN worker, fix session): both §20 fixes landed VERBATIM, `turn5-resolve-off-a` CLOSED 193/196 -> 196/196
+
+Both fix shapes from §20.1/§20.2 were applied exactly as specified, no
+deviation from either derivation. Two green commits, one per fix, each
+red-verified via `git stash -- src/engine/battleScene.ts` before
+finalizing (both new Tier-1 pin blocks fail at exactly their predicted
+pre-fix values with the stash applied, pass once popped).
+
+**Fix 1 (§20.1, commit `58eafbd8`):** `rockSlideOpponentHp(t + 2, ...)` at
+`drawTurn5RockSlideAttack`'s own call site (`battleScene.ts:11008` at the
+time of landing - shifted from §20's own citation of `10986` by intervening
+unrelated edits earlier in the file; confirmed via
+`grep -n "rockSlideOpponentHp(t"` this session, not assumed from the
+doc's line number). `turn5-resolve-off-a` 193/196 -> **195/196 exactly**
+(+2, only 6283/6284 moved, 6398 unaffected) - matches §20.1's own
+prediction with zero deviation. New Tier-1 pin,
+`tests/battleScene.test.ts` (§20.1 describe block): a sanity check that
+the shared `rockSlideOpponentHp` function itself is untouched (hp=1 at
+t=6284, hp=0 at t=6285, unshifted), plus a direct render-pixel pin at
+full-frame `(52,33)` confirming `drawTurn5RockSlideAttack`'s own output
+transitions between render tick 6282 and 6283 (matching real hardware's
+RAM-6282/pixel-6283 boundary) and holds through 6284.
+
+**Fix 2 (§20.2, commit `adf15be1`):** `if (t - 1 >= cursorStart)` at
+`drawTurn5RockSlideWindow`'s cursor first-appearance gate
+(`battleScene.ts:15089` at landing time, immediately below the
+`cursorStart` assignment - `turn5FaintDismissCursorTick`, `cursorState`,
+`TURN5_FAINTED_CURSOR_START_DELAY`, and `turn5RockSlideKoDismissEligible`
+all untouched, exactly as §20.2 specified). `turn5-resolve-off-a` 195/196
+-> **196/196 exactly** (+1, 6398 closes, 37px -> 0) - matches §20.2's own
+prediction with zero deviation. New Tier-1 pin (§20.2 describe block):
+renders `drawTurn5RockSlideWindow` directly and diffs the cursor's own
+fixed bbox (`61,140-67,148`) at the three boundary ticks - confirms no
+cursor glyph is drawn at 6398 (byte-identical to a pre-message tick,
+6390) and that the first real blit appears only at 6399.
+
+**Combined result, exactly as §20.3 predicted:** `turn5-resolve-off-a`
+**193/196 -> 196/196, CLOSED**. Landing either fix alone (checked as an
+intermediate step, not a hypothetical) produces the exact partial counts
+§20.3 named: +2 only gives 195/196, +1 only (on top of that) gives
+196/196 - no cross-interaction between the two fixes, as the disjoint-bbox
+argument in both subsections predicted.
+
+**Full 16-trace guard family reran after EACH fix landed (not just at the
+end), zero decreases anywhere, every count at its predicted ceiling:**
+`resolve-off-a` 196/196, `-b` 196/196, `-c` 195/196 (6763 unchanged,
+untouched - out of scope, owned by the parallel side worker), `-d`
+194/196 (6850/6996 unchanged, same ownership), `confirm-off-a` 132/132,
+`-b` 131/132 (6184 unchanged, already-accepted), `reset-off` 256/256,
+`action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+47/47, `turn6-rockslide-a` 255/255, `-b` 105/105, `turn7-rockslide-a`
+256/256, `turn13-switchin` 242/242 (confirms `drawTurn5RockSlideAttack`'s
+other caller, turn 13's Murkrow reuse, is unaffected by the `+2` shift -
+its own absolute `t` never lands in GROVYLE's fixed `[6180,6380]`
+window), `turn4-doubleteam-off` 256/256, `turn4-rockslide-off` 256/256.
+
+`npm test`: **1,067 files / 10,103 passed (+2 new pin blocks) / 223
+skipped**. `npm run build`/`npm run typecheck` green throughout.
+
+**PAPERCUT: none.** Both fix shapes and their predicted counts were
+correct as specified in §20 with zero rework needed - the only session
+friction was the doc's own call-site line numbers (`10986`/`15062`)
+having drifted slightly from intervening commits between the analysis
+and fix sessions; re-`grep`ping the exact call site before editing (as
+this family's own standing convention already recommends) cost about a
+minute, not worth a papercut.
+
+**#97 status after this session:** `turn5-resolve-off-a` and
+`turn5-resolve-off-b` are both now at their guard-family ceiling
+(196/196 each). Remaining #97 residuals are `resolve-off-c`'s own 6763
+and `resolve-off-d`'s own 6850/6996 - both out of scope for this session
+per the brief, owned by the parallel side-lane worker and tracked in
+`docs/turn5-single-frame-residuals-diagnosis.md`.
