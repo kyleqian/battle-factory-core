@@ -8589,7 +8589,7 @@ function drawFightSubmenuWindow(
     // completed-turn-2 command lifecycle. Turn 4 needs DOUBLE_TEAM-family
     // timing despite retaining that older receipt, so it stays excluded.
     const inTurn4DoubleTeamWindow = turn4Active && !turn5Active;
-    const textStart = (sm.cursor === 2 || turn3Active) && !inTurn4DoubleTeamWindow ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
+    const textStart = (sm.cursor === 2 || turn3Active || turn5Active) && !inTurn4DoubleTeamWindow ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
     if (t >= textStart) {
       // S7 slice E1: turn 2's confirm (cursor 2, DRAGON_BREATH) kicks off
       // Grovyle's ENDEAVOR instead of turn 1's DOUBLE_TEAM - this slice only

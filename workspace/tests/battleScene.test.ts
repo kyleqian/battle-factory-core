@@ -412,6 +412,25 @@ function pixelAtTurn5Reopen(t: number, x: number, y: number): [number, number, n
   return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
 }
 
+/** turn 5's own real confirm press tick (docs/turn5-single-frame-residuals-diagnosis.md §9.5's own `TURN5_CONFIRM_PRESS_TICK`), same reopen but with the confirm now registered. */
+const TURN5_CONFIRM_PRESS_TICK = 5959;
+const TURN5_CONFIRM_FIGHT_SUBMENU_STATE = {
+  openElapsed: TURN5_REOPEN_TICK - TICK0,
+  cursor: 0 as const,
+  displayCursor: 0 as const,
+  closeElapsed: null,
+  confirmElapsed: TURN5_CONFIRM_PRESS_TICK - TICK0,
+  activeMonMoveset: rentalMoveset("ONIX"),
+  reopenedFromClose: false,
+};
+/** Same shape as `pixelAtTurn5Reopen`, but the confirm is registered (`drawTurn5EndeavorText`'s own dispatch gate renders under). */
+function pixelAtTurn5Confirm(t: number, x: number, y: number): [number, number, number] {
+  const fb = new Uint8Array(240 * 160 * 4);
+  renderBattleScene(fb, { elapsed: t - TICK0, sendOutPressElapsed: 380, fightSubmenu: TURN5_CONFIRM_FIGHT_SUBMENU_STATE, latestCompletedCommandHandoff: TURN4_LATEST_HANDOFF, opponentFaintPresentationOwner: null, });
+  const o = (y * 240 + x) * 4;
+  return [fb[o]!, fb[o + 1]!, fb[o + 2]!];
+}
+
 /** Same as `pixelAtTurn2`, but turns 1-3 all resolved and the FIGHT submenu confirmed on turn 4's own ROCK_SLIDE (slot 0) - the state `drawTurn4KickoffText`/`drawTurn4RockSlideWindow` render under (S7 slice I resolution, docs/battle-turn-notes.md §22). */
 function pixelAtTurn4(t: number, x: number, y: number): [number, number, number] {
   const fb = new Uint8Array(240 * 160 * 4);
@@ -1682,6 +1701,24 @@ describe("ISSUES #39 rank-6 slice 4: turn 4's own OFF-timed DOUBLE_TEAM/ROCK_SLI
     expect(pixelAtTurn4(4933, 16, 118)).toEqual([255, 255, 255]);
     expect(pixelAtTurn4(4934, 16, 118)).toEqual([255, 255, 255]);
     expect(pixelAtTurn4(4935, 16, 118)).toEqual([107, 165, 165]);
+  });
+});
+
+// ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9.5, 2026-08-18):
+// `drawFightSubmenuWindow`'s own `textStart` ternary (`battleScene.ts:8592`)
+// never added turn 5 to the `turn2KickoffTextStartTick` ("-1") side, so
+// turn 5's own ENDEAVOR-kickoff dispatch fired one tick later than real
+// hardware - the SAME "PNG(T) shows RAM(T-1)" hard-cut-boundary class §2/§4
+// already established, just missing the precedented correction turn 2 already
+// has. Oracle-verified via turn5-confirm-off-a.json (129/132, tick 5968 now
+// matches; 5959-5961 are the separate, still-banked live-bounce residual §9
+// itself pins as a disjoint mechanism).
+describe("ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9.5): turn 5's own kickoff-text gate now shares turn 2/turn 3's -1 correction", () => {
+  it("kickoff-text gate: render 5967 (pressTick+8) still shows the settled menu's message box vs render 5968 (pressTick+9=turn2KickoffTextStartTick(pressTick), message box hard-cuts to blank/teal one tick earlier than the generic turnKickoffTextStartTick(pressTick)=5969 formula would) at the message-box background pixel (16,118)", () => {
+    expect(pixelAtTurn5Confirm(5966, 16, 118)).toEqual([255, 255, 255]);
+    expect(pixelAtTurn5Confirm(5967, 16, 118)).toEqual([255, 255, 255]);
+    expect(pixelAtTurn5Confirm(5968, 16, 118)).toEqual([107, 165, 165]);
+    expect(pixelAtTurn5Confirm(5969, 16, 118)).toEqual([107, 165, 165]);
   });
 });
 
