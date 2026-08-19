@@ -2541,6 +2541,21 @@ remain: the `MenuIdleFrameAsset`/`SendOutHealthboxContentAsset` type-only export
 widening, `drawTurn16PostSwitchField`'s `src/animation` import, the ONIX-Sitrus
 cluster plus its module-eval guard, and the two `let` caches.
 
+**2026-08-19 update (main worker session 10, `f15cb254`):** the graph had
+genuinely opened up somewhat — batch 5 found 12 more movable symbols
+(CANONICAL 226 → 214, up from batch 5's 2026-08-08 zero, differential
+1241/1241 byte-identical) — but confirmed the ONIX-Sitrus cluster
+specifically is still blocked, for a reason not previously spelled out:
+`onixSitrusRotateMatrix`/`turn5GrantingStarPlacement`/`turn5SitrusHealText
+VisibleChars`/`turn5SitrusOnixHp`/`onixSitrusTintCoeff`/`turn5SitrusRing
+Matrix` (plus their two support constants) call `sitrus*AtAge` helpers from
+`../animation/heldItemHeal.ts` — moving them trips
+`animationBoundaryRatchet.test.ts`'s engine/animation import boundary
+(`docs/battlescene-canonical-split-design.md` §7 hazard 1), confirmed live
+via a failed `tsc -b` run. The two `let` caches remain blocked as described
+above. Neither obstacle is new in kind, just newly confirmed against the
+current tree.
+
 **Also worth knowing:** the selection scan's `FORBIDDEN` set was **dead code** until
 2026-08-08 (`70caf397`) — pass 1 marked forbidden roots clean, so pass 2 treated
 them as satisfied deps and falsely certified every ONIX-cluster consumer as

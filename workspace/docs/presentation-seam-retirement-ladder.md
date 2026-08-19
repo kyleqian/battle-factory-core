@@ -259,6 +259,23 @@ any window outside turns 9-12.
 
 ### Slice 2 (second — mechanical, no semantic risk): continue the `battleScene.ts` → `battleSceneCanonical.ts` split
 
+**Progress (2026-08-19, main worker session 10, `f15cb254`):** batch 5 landed
+12 more symbols (CANONICAL 226 → 214, bucket-acyclicity stays CLEAN,
+differential 1241/1241 byte-identical). The remaining 214 are NOT all
+equally blocked: this session found the partition script's CLEAN acyclicity
+label proves only one direction (per ISSUES #39's caution), so eligibility
+needs a transitive dependency-closure check per candidate, which the
+partition script itself does not compute — a future batch worker must
+re-derive it (or script it fresh) each time. This session also found a
+SECOND animation-import hazard beyond design doc §7 hazard 1's named
+example: the ONIX-Sitrus rotate/tint/ring/granting-star cluster (8 symbols)
+calls `sitrus*AtAge` helpers from `../animation/heldItemHeal.ts`, confirmed
+live via a failed `tsc` run, not just inferred — excluded pending hazard 1's
+resolution. The two `let` caches (`turn10OnixDarkPaletteCache`,
+`menuHealthboxPlayerContentMask`) are also confirmed still-blocked (ISSUES
+#39's named obstacle — their consumers reassign them, impossible across an
+ES import binding).
+
 **Goal.** `docs/battlescene-canonical-split-design.md` (685 lines,
 committed) already specifies this as a pure, cycle-free text move (§1's own
 "CLEAN — 0 leaked edges" acyclicity proof, re-verified live this session,
