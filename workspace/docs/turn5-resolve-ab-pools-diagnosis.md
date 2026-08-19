@@ -2235,3 +2235,227 @@ already shows a uniform -2 shift of that shared constant would be wrong).
 If the two composited outputs are pixel-identical at that location, the
 2px element is layered on top by some OTHER, not-yet-found draw call and
 the search continues there instead.
+
+## 20. Side-lane instrument session (2026-08-19): §19.4's own named probe run - both `resolve-off-a` residuals (6283/6284's 2px healthbox sliver, 6398's cursor-onset frame) resolved to decisive, fully-verified fix shapes; predicted `193/196 -> 196/196`
+
+ANALYSIS ONLY, side lane, Battle Scene OFF oracle - `git diff -- src/` is
+empty throughout this session. One new committed probe,
+`tools/probe/probe-opponent-healthbox-hp1-vs-hp0.ts` (TS, read-only,
+`node --experimental-strip-types`).
+
+### 20.1 Part 1 (6283/6284): §19.4's probe run - the compositor already
+encodes the exact boundary; the bug is a 2-tick-late timing anchor at
+the ONE call site that feeds it, not a compositor gap
+
+**Probe, run exactly as named.** `opponentHealthboxContentForHp` is a
+module-private function in `battleScene.ts` (not exported), so rather than
+export it (an `src/` edit, out of scope for this step), the probe
+reconstructs its exact call shape directly against `composeOpponentHealthbox`
+(`healthboxAssembly.ts` - confirmed a leaf module, no import from
+`battleScene.ts`/`battleSceneCanonical.ts`/`battleMenu.ts`, so none of §17's
+circular-trio TDZ gotcha applies here) using the same GROVYLE-anchor params
+`battleScene.ts:2253-2266` derive, sourced from their own upstream leaf
+modules (`resolveBattle1PresentationHpValues()`, `battle-healthbox.json`,
+`species-names.json`). Output (full run in the probe's own stdout):
+
+```
+anchorOpponentBattler: { species: 278, level: 50, hp: 143, maxHP: 143 } name: GROVYLE
+content size: 128x32, FRAME_ORIGIN=(12,14)
+full(52,33) -> local(40,19): hp=1 -> {"r":173,"g":66,"b":74}, hp=0 -> {"r":74,"g":66,"b":90}
+full(52,34) -> local(40,20): hp=1 -> {"r":255,"g":90,"b":57}, hp=0 -> {"r":82,"g":107,"b":90}
+
+Total differing pixels (hp=1 vs hp=0), full compositor: 2
+  local(40,19) full(52,33): hp=1 -> {"r":173,"g":66,"b":74}, hp=0 -> {"r":74,"g":66,"b":90}
+  local(40,20) full(52,34): hp=1 -> {"r":255,"g":90,"b":57}, hp=0 -> {"r":82,"g":107,"b":90}
+```
+
+**Verdict: they differ, and ONLY there** - an exhaustive 128x32 diff of the
+two composited outputs finds exactly 2 differing pixels, at exactly
+`(52,33)`/`(52,34)` (full-frame), with colors matching §19.4's own real
+oracle diff byte-for-byte (`(173,66,74)`/`(255,90,57)` at hp=1 ->
+`(74,66,90)`/`(82,107,90)` at hp=0). No HP-bar-fill or name/level pixel
+differs anywhere else - the "paper-check the fix does NOT move the HP
+digit/bar pixels" requirement is satisfied by direct measurement, not
+inference (and there IS no opponent HP digit at all - `composeOpponentHealthbox`
+never draws one, confirmed reading its own body, `healthboxAssembly.ts:558-609`
+- unlike the player side).
+
+**Mechanism, traced to source.** Local `(40,19)`/`(40,20)` sits inside the
+HP bar's leftmost fill tile (`HP_BAR_SUBSPRITE_CORNERS[0]` = `(24,16)`,
+tiles `[H, P, fill0, fill1]` at local x=24/32/40/48 -
+`healthboxAssembly.ts:221-224,290-309`), rows 3-4 of that tile. This is
+exactly `calcBarFilledPixels`'s own "never show a fully-empty bar when the
+destination is nonzero" sliver rule (`healthboxAssembly.ts:258-261`):
+`hp=1` (`hpFraction=1/143`) gives `rawPixels=floor(0.335)=0`, but since
+`hpTargetFraction>0` the rule forces `columns[0]=1` (a 1px red sliver);
+`hp=0` gives `hpFraction=0=hpTargetFraction`, the rule does NOT fire,
+`columns[0]=0` (transparent, frame color shows through - the navy divider
+color). The compositor's own hp=1-vs-hp=0 boundary is exactly real
+hardware's `battleBars[1]` restart-sentinel boundary §19.4 already
+RAM-anchored at RAM tick 6282 (pixel-visible 6283).
+
+At this ONE call site (`battleScene.ts:10986`,
+`drawTurn5RockSlideAttack`), `rockSlideOpponentHp(t, pressTick,
+TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP,
+TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)` resolves (confirmed via a
+throwaway eval, `TURN4_ROCKSLIDE_HP.to=1`, `TURN5_ROCKSLIDE_OPPONENT_TO_HP=0`,
+`TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY=455`, `pressTick=5829` so the
+drain's own zero-crossing is at `t=6284`+`1`=`6285`) to the CONSTANT value
+`1` for every `t<=6284`, then hard-steps to `0` at `t=6285` and stays
+there - a genuine 1-HP-point drain (`startHp=1`, no intermediate value ever
+reached), 2 render ticks later than real hardware's own equivalent
+transition. Since `opponentHp` only ever takes the two values probed above
+at this call site, and the probe already proved those two values differ at
+EXACTLY the 2 residual pixels and nowhere else, shifting only the render
+tick fed into `rockSlideOpponentHp` at this one call site is fully scoped
+and provably can't touch anything else this function draws.
+
+**Fix shape** (one-line, scoped to the call site, matching this session's
+own §19 `faintSinkRowsAndY2(t + 2)`/`GROVYLE_HEALTHBOX_VANISH_TICK - 2`
+idiom exactly - NOT a change to the shared `rockSlideOpponentHp` function,
+`TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY`, or `TURN4_ROCKSLIDE_HP`/
+`TURN5_ROCKSLIDE_OPPONENT_TO_HP`, all of which stay exactly as-is for every
+other reader):
+
+```ts
+// battleScene.ts:10986
+const opponentHp = rockSlideOpponentHp(t + 2, pressTick, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+```
+
+**Predicted count: `resolve-off-a` +2 exactly** (6283 and 6284 both close,
+2px each per the current baseline census - no other frame in this
+function's own active window, `[6222, 6376]` post-§19's `-2` vanish gate,
+is affected, since `opponentHp` is flat on both plateaus and the shift is a
+no-op everywhere except the single tick pair it targets). Confirmed
+disjoint from every guard trace: `resolve-off-a` is the only trace whose
+capture window (6222-6417) contains ticks 6283/6284 at all (`-b`
+6418-6613, `-c` 6614-6809, `-d` 6810-7005 - none overlap, checked this
+session against each trace file's own `captureFrames`).
+
+### 20.2 Part 2 (6398): attribution conflict resolved - it is Class C's own
+bbox but NOT §11.1's phase-cycle bug or the old `GROVYLE_HEALTHBOX_VANISH_TICK`
+guess (both independently disproven this session); it's a THIRD, narrow
+sibling bug - the cursor's own first-appearance gate is missing the same
+`t-1` display-basis correction every OTHER gate in this function already has
+
+**Pixel-first, per the brief.** A dense capture (`--capture-range
+6395:6401`) plus an 8x-upscaled crop of the cursor's own bbox neighborhood
+(`55,138`-`75,152`) across oracle/app at 6396-6400 shows unambiguously:
+oracle has NO heart-cursor glyph at 6396/6397/**6398** (just the "fainted!"
+text's own "!" and a small unrelated glyph shadow below it) and the FULL
+heart cursor first appears at **6399**; the app already shows the full
+heart cursor at **6398**, one tick early. 6397 and 6399+ are pixel-identical
+between oracle and app (matches the current 193/196 census - 6397/6399/6400
+are not in the mismatch list). This is a **cursor first-appearance timing
+bug**, not a phase-cycle or freeze bug, and not any healthbox content at
+all - directly disproving the older addendum's
+`GROVYLE_HEALTHBOX_VANISH_TICK` 1-tick-granularity guess (§9/§12/ISSUES
+#97-C): that gate draws HP bar/name/level content, none of which appears
+anywhere in this crop. The mismatched bbox (`61,142-67,148`) DOES match
+Class C's fixed cursor box (`61,140-67,147/148`) - the Class-C table's own
+attribution of 6398 as a "CURSOR_FREEZE" hit was directionally right about
+WHICH graphic (the cursor) but the mechanism §11.1 fixed (mid-cycle phase
+value, freeze-on-dismiss) is a different bug from this one (first-appearance
+timing) that happens to share the same bbox family.
+
+**RAM ground truth, independently confirms the pixel read.** Reran the
+existing `tools/probe/dump-turn5-resolve-cursor-driver.py` (unmodified,
+just a different tick-range CLI argument, per this family's "additive
+reuse" convention) over `[6390, 6402]`:
+
+```
+tick  state  downArrowDelay  downArrowYPosIdx
+6396    0        0                0
+6397    2        0                0   <- TextPrinterWaitWithDownArrow mode entered
+6398    2        8                1   <- FIRST arrow blit happens here (idx read pre-increment: 0), idx bumped to 1 after
+6399    2        7                1
+```
+
+Per §11.1's own already-established convention (`TextPrinterDrawDownArrow`
+blits using `downArrowYPosIdx` BEFORE incrementing it), the first real
+arrow draw is the RAM-tick-6398 write (blitted value 0, matching
+`CURSOR_Y_OFFSETS[0]`). Per this entire dossier's own uniform "RAM write at
+tick N becomes visible in the captured frame at render tick N+1" convention
+(independently reconfirmed by §19.4's own `battleBars[1]` RAM-6282 ->
+pixel-6283 pair a few sections up), that write's own pixel becomes visible
+at **render tick 6399** - exactly matching the fresh pixel crop above, and
+ruling out any ambiguity about which side (RAM sample vs. capture frame
+numbering) the "real" boundary sits on.
+
+**Source-level mechanism.** `TURN5_FAINTED_CURSOR_START_DELAY = TURN5_FAINTED_TEXT_DELAY(549) + TURN5_FAINTED_TEXT_TOTAL(19) + 1 = 569`
+(`battleSceneCanonical.ts:2577`), so `cursorStart = pressTick(5829) + 569 =
+6398` exactly (`battleScene.ts:15061`). The draw gate,
+`battleScene.ts:15062`, is `if (t >= cursorStart)` - raw `t`, NOT `t - 1`.
+But the phase computation immediately inside it already uses the family's
+`t - 1` display-basis convention
+(`turn5FaintDismissCursorTick`'s own `naturalTick = t - 1`,
+`battleScene.ts:3241`). At `t=6398`: outer gate `6398 >= 6398` is true (so
+`drawCursor` IS called), but the phase input is `turn5FaintDismissCursorTick(6398,
+null) = 6397`, and `cursorState(6397, 6398)` returns `{visible:false,
+yOffset:0}` since `6397 < 6398` - the call site (`battleScene.ts:15067`)
+only reads `.yOffset` (never checks `.visible`), so it draws a cursor
+anyway, at `yOffset=0`, one tick before real hardware's own first blit.
+This is the exact same shape as §19.3's own "Finding 2 (dispatch gate)" in
+this SAME function (a sibling gate one call up, `if (t - 1 < faintedStart)`,
+already fixed with a `t - 1` basis) - this cursor gate is the one dispatch
+point in `drawTurn5RockSlideWindow` that never got the same correction.
+
+**Why the OTHER two candidate attributions are wrong, confirmed not just
+argued:** (1) `GROVYLE_HEALTHBOX_VANISH_TICK`'s own gate
+(`battleScene.ts:10993`, `if (t < GROVYLE_HEALTHBOX_VANISH_TICK - 2)`)
+stopped drawing the healthbox entirely by `t=6377` (§19's own landed fix,
+21 ticks before 6398) - it cannot be the cause of a mismatch at 6398 by
+construction, and this session's own crop confirms no healthbox pixel
+appears in the 6398 bbox at all. (2) `turn5RockSlideKoDismissEligible(t) =
+t >= pressTick + TURN5_FAINTED_CURSOR_START_DELAY` (i.e. `t >= 6398`,
+`battleSceneCanonical.ts:2579-2581`, pinned exactly at 6398 by an existing
+test, `tests/battleScene.test.ts:1778-1780`) is a DIFFERENT real boundary -
+RAM `state` reaches 2 (wait-with-cursor entered, dismiss-eligible) at RAM
+tick 6397, visible/effective at render tick 6398 by the same 1-tick
+convention - and is therefore CORRECTLY anchored already; it must NOT be
+touched, and this session's fix doesn't touch it.
+
+**Fix shape** (one-line, scoped to this one gate; `cursorStart`,
+`turn5FaintDismissCursorTick`, `cursorState`, `TURN5_FAINTED_CURSOR_START_DELAY`,
+and `turn5RockSlideKoDismissEligible` all untouched - the existing pinned
+test above stays valid unmodified):
+
+```ts
+// battleScene.ts:15062
+if (t - 1 >= cursorStart) {
+```
+
+**Predicted count: `resolve-off-a` +1 exactly** (6398 closes, 37px -> 0).
+No other trace reaches this tick (same disjoint-window check as Part 1 -
+`-b`/`-c`/`-d` all start at 6418 or later); no other call site reads
+`cursorStart`'s outer gate (`turn5RockSlideKoDismissEligible` is a
+textually separate function/constant pairing, confirmed above).
+
+### 20.3 Combined predicted count
+
+`turn5-resolve-off-a`: **193/196 -> 196/196** (both fixes land: +2 from
+§20.1, +1 from §20.2, zero overlap, zero risk to any guard trace per the
+disjoint-window checks in both subsections). Landing either fix alone
+predicts the partial count (+2 only, 195/196; or +1 only, 194/196).
+
+**Not landed this session** (`git diff -- src/` stays empty throughout,
+confirmed below) - both fix shapes are ready for a bounded MAIN-worker fix
+session to apply verbatim and live-pin, per this family's own "mandatory
+live-pinning" discipline (§12's own `-2`-vs-`-1` catch is the standing
+lesson: verify the exact predicted count against a live `npm run compare`
+before trusting either derivation here, even though both are backed by
+exhaustive pixel diffs and, for Part 2, independent RAM confirmation).
+
+### 20.4 Rerunnable guards (fresh, this session)
+
+```sh
+cd workspace   # WORKTREE GOTCHA - verify with `npm prefix` first
+npm run compare -- turn5-resolve-off-a --summary   # 193/196 today (6283/6284/6398); predicted 196/196 after both §20.1+§20.2 fixes land
+npm run compare -- turn5-resolve-off-b --summary   # 196/196 (unaffected - window starts 6418)
+npm run compare -- turn5-resolve-off-c --summary   # 195/196, 6763 unchanged (unaffected - window starts 6614)
+node --experimental-strip-types tools/probe/probe-opponent-healthbox-hp1-vs-hp0.ts   # reproduces §20.1's own exact 2-pixel/2-color-pair diff
+python3 tools/run-mgba-probe.py /tmp/out.json -- tools/probe/dump-turn5-resolve-cursor-driver.py /tmp/out.json 6390 6402   # reproduces §20.2's own RAM table (state=2 at 6397, first blit idx=0 at 6398)
+npm run test:smoke                                 # 426/426, 8 files (fresh this session)
+```
+FAIL if `resolve-off-a` decreases below 193/196, or if `-b`/`-c` pick up
+ANY new mismatch beyond their own recorded baselines.
