@@ -80,10 +80,11 @@ describe("battleScene.ts split eligibility (decision (a))", () => {
     }
   });
 
-  it("finds a substantial function-kind eligible pool for batch selection", () => {
-    // Batch 6 (74f3c1c2) moved 41; this pins a floor, not an exact count,
-    // since the eligible pool shrinks as future batches move symbols out.
-    expect(result.eligibleFunctions.length).toBeGreaterThan(20);
+  it("finds a function-kind eligible pool for batch selection", () => {
+    // Batch 8 (75b73fab) moved 47 of the 50 the scanner listed, down from
+    // batch 7's 100 -- this pins a floor, not an exact count, since the
+    // eligible pool shrinks as future batches move symbols out.
+    expect(result.eligibleFunctions.length).toBeGreaterThan(0);
     for (const name of result.eligibleFunctions) {
       expect(byName.get(name)?.kind).toBe("function");
       expect(byName.get(name)?.hazard).toBeNull();
