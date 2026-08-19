@@ -1722,6 +1722,37 @@ describe("ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9.5): tur
   });
 });
 
+// ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9/§9.2/§9.6,
+// 2026-08-18): `turn5KickoffBounceTickFromLatest`'s own live pre-freeze
+// sub-window (`t` in `[pressTick, pressTick+FIGHT_CONFIRM_BOUNCE_FREEZE_
+// DELAY)`) reused the frozen branch's own affine `epochAge` mapping, which
+// RAM-proof (`dump-turn5-confirma-bounce-driver.py`'s own `idChangeEvents`)
+// shows is correct for the frozen tail (same driver instance, alive
+// continuously since turn 1's own `MENU_BOUNCE_RAM_SETUP_TICK`) but 21
+// ticks off for these three still-live ticks specifically - a real,
+// RAM-verified gap (the probe's own raw `onixSinIndex`/`healthboxSinIndex`
+// reads at RAM ticks 5958-5960 exactly reproduce `menuIdleBounce(bounceTick
+// - 21)`, not just its own `y2` output). Onix sprite pixel (58,49) and
+// healthbox pixel (139,74) both flip from the live bounce-overlay content
+// to the frozen/no-overlay content exactly at render 5962 (the first
+// frozen tick) both before and after the fix - only the LIVE ticks'
+// content itself changes.
+describe("ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9/§9.6): turn 5's own confirm-wait live bounce (ticks 5959-5961) now matches the real DoBounceEffect driver's still-live RAM state", () => {
+  it("Onix sprite pixel (58,49): live bounce overlay content through 5959-5961, unchanged frozen/no-overlay content from 5962 on", () => {
+    expect(pixelAtTurn5Confirm(5959, 58, 49)).toEqual([247, 247, 255]);
+    expect(pixelAtTurn5Confirm(5960, 58, 49)).toEqual([247, 247, 255]);
+    expect(pixelAtTurn5Confirm(5961, 58, 49)).toEqual([247, 247, 255]);
+    expect(pixelAtTurn5Confirm(5962, 58, 49)).toEqual([189, 181, 181]);
+  });
+
+  it("Onix healthbox pixel (139,74): same live-vs-frozen shape as the sprite pixel above (one shared root cause, §9.1)", () => {
+    expect(pixelAtTurn5Confirm(5959, 139, 74)).toEqual([214, 214, 198]);
+    expect(pixelAtTurn5Confirm(5960, 139, 74)).toEqual([214, 214, 198]);
+    expect(pixelAtTurn5Confirm(5961, 139, 74)).toEqual([214, 214, 198]);
+    expect(pixelAtTurn5Confirm(5962, 139, 74)).toEqual([123, 148, 132]);
+  });
+});
+
 // The completed-turn-4 receipt owns the source reset at 5352. The still
 // legacy turn-5 presentation consumes that immutable epoch through its
 // retained continuation lag; the reopen itself never republishes it.

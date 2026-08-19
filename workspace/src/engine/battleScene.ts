@@ -10327,7 +10327,8 @@ function turn5KickoffBounceTickFromLatest(
     return historicalResettledTick(TURN5_CONFIRM_PRESS_TICK)
       - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   }
-  const sourceTick = t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY ? t : pressTick;
+  const live = t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
+  const sourceTick = live ? t : pressTick;
   const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
     latestCompletedCommandHandoff,
     sourceTick - TICK0,
@@ -10335,8 +10336,29 @@ function turn5KickoffBounceTickFromLatest(
   if (epochAge === null) {
     throw new Error("turn-5 kickoff bounce requires semantic turn-4 presentation epoch content");
   }
-  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge
+  const bounceTick = MENU_IDLE_BLANK_END_TICK + 1 + epochAge
     - TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  // ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9.2/§9's own
+  // named next probe): the real `DoBounceEffect` driver for turn 5's own
+  // confirm-wait bounce is NOT a fresh re-seed - RAM-proven (`tools/probe/
+  // dump-turn5-confirma-bounce-driver.py`'s own `idChangeEvents`) to be the
+  // SAME sprite instance continuously alive since turn 1's own
+  // `MENU_BOUNCE_RAM_SETUP_TICK` (1748), its own `sSinIndex` only advancing
+  // during "menu idle" sub-windows scattered across turns 1-5 (real
+  // hardware masks it `& 0xFF` every frame, `battle_main.c:2978`, so its
+  // raw value alone can't reconstruct elapsed real ticks without knowing
+  // that whole schedule). This affine `epochAge`-based reconstruction gets
+  // the FROZEN branch's own value right (confirmed correct for ticks
+  // 5962+, unchanged below) but is 21 ticks off for the LIVE pre-freeze
+  // sub-window specifically - a real, RAM-verified gap (the probe's own
+  // raw `onixSinIndex`/`healthboxSinIndex` reads at RAM ticks 5958-5960
+  // exactly match `menuIdleBounce(bounceTick - 21)`, not just its own
+  // `(onixY2,healthboxY2)` output). Scoped to the live branch only - this
+  // function's only other two call sites (`battleScene.ts:10410`'s rock
+  // slide kickoff text, `battleScene.ts:10998`'s turn-13 switch-in echo)
+  // always run with `t` far past `pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_
+  // DELAY`, so they always take the (unchanged) frozen branch.
+  return live ? bounceTick - 21 : bounceTick;
 }
 
 /**

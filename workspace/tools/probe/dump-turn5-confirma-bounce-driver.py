@@ -17,6 +17,22 @@ window widened to cover the confirm-wait tail this trace's own capture
 range actually reaches (5958-6089) that `turn5-action-off.json`'s own
 window (ending 5960) does not.
 
+ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9.6's own
+named next probe, 2026-08-18): ALSO scans every tick from 1 through
+`WINDOW_A[1]` for the exact RAM tick this specific bounce-driver instance
+was seeded (`DoBounceEffect`'s own literal `sSinIndex=192`(ONIX)/`128`
+(HEALTHBOX) write, `battle_main.c:2923,2930`) - distinct from
+`MENU_BOUNCE_RAM_SETUP_TICK`'s own turn-1 anchor, since real hardware's
+`sSinIndex` is masked `& 0xFF` every frame (`battle_main.c:2978`) so its
+own value alone cycles with period 256 and cannot pin the seed tick
+without a full historical scan. This scan is free (the emulator already
+advances every frame regardless of `in_windows`'s own recording filter;
+widening what gets RECORDED costs nothing extra). Reported as
+`reseedEvents` in the output JSON: every tick where the live driver's own
+`(onixSinIndex, healthboxSinIndex)` reads exactly `(192, 128)`
+simultaneously - the unambiguous literal seed signature, not a
+mod-256-ambiguous inference.
+
 Run through the teardown-safe wrapper:
     python3 tools/run-mgba-probe.py <fresh-output.json> -- \\
       tools/probe/dump-turn5-6-reopen-bounce-driver.py <fresh-output.json>
@@ -136,7 +152,12 @@ def main() -> None:
         row["healthboxWhich"] = healthbox_driver["which"]
         return row
 
+    SCAN_END = WINDOW_A[1]
+
     ticks_out = []
+    reseed_events = []
+    id_change_events = []
+    prev_ids = None
     tick = 0
     if in_windows(tick):
         ticks_out.append(record(tick))
@@ -148,6 +169,33 @@ def main() -> None:
             tick += 1
             if in_windows(tick):
                 ticks_out.append(record(tick))
+            if tick <= SCAN_END:
+                onix_slot = u8(g_battler_sprite_ids + 0)
+                healthbox_slot = u8(g_healthbox_sprite_ids + 0)
+                battle_sprites_data = u32(g_battle_sprites_data_ptr)
+                healthboxes_data0 = u32(battle_sprites_data + 4)
+                onix_driver_id = u8(healthboxes_data0 + 3)
+                healthbox_driver_id = u8(healthboxes_data0 + 2)
+                onix_sin = u16(g_sprites + onix_driver_id * SPRITE_SIZE + 46)
+                healthbox_sin = u16(g_sprites + healthbox_driver_id * SPRITE_SIZE + 46)
+                cur_ids = (onix_driver_id, healthbox_driver_id)
+                if prev_ids is not None and cur_ids != prev_ids:
+                    id_change_events.append({
+                        "tick": tick,
+                        "prevIds": prev_ids,
+                        "newIds": cur_ids,
+                        "onixSinIndex": onix_sin,
+                        "healthboxSinIndex": healthbox_sin,
+                    })
+                prev_ids = cur_ids
+                if onix_sin == 192 and healthbox_sin == 128:
+                    reseed_events.append({
+                        "tick": tick,
+                        "onixDriverId": onix_driver_id,
+                        "healthboxDriverId": healthbox_driver_id,
+                        "onixSlot": onix_slot,
+                        "healthboxSlot": healthbox_slot,
+                    })
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(json.dumps({
@@ -155,6 +203,9 @@ def main() -> None:
         "oracleProfile": "battle-scene-off",
         "windowA": WINDOW_A,
         "windowB": WINDOW_B,
+        "scanEnd": SCAN_END,
+        "reseedEvents": reseed_events,
+        "idChangeEvents": id_change_events,
         "ticks": ticks_out,
     }, indent=0))
 

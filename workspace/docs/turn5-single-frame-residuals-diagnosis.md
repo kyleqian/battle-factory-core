@@ -1008,3 +1008,119 @@ census.py` (new). `git diff -- src/` is empty at the end of this session -
 INSTRUMENT step, no fix attempted (mechanism pinned to file:line for both
 (i)+(ii) and (iii); (iii) additionally has a fully precedented one-line
 candidate fix, named but not landed).
+
+## 10. 2026-08-19 (main lane) — both §9 mechanisms LANDED: `turn5-confirm-off-a` CLOSED 128/132 -> 132/132
+
+Bounded MAIN-lane worker, Battle Scene OFF oracle. Scope: land §9.5's
+precedented one-liner (tick 5968) and §9.6's own named next probe (ticks
+5959-5961), in that order, full guard family after each.
+
+### 10.1 Step 1 (§9.5): the one-line ternary widening, landed exactly as named
+
+Applied `battleScene.ts:8592`'s own predicted fix verbatim: widened
+`(sm.cursor === 2 || turn3Active)` to `(sm.cursor === 2 || turn3Active ||
+turn5Active)`. `turn5-confirm-off-a` **128/132 -> 129/132** (tick 5968
+closes exactly, zero new mismatches). New Tier-1 pin
+(`pixelAtTurn5Confirm`, `tests/battleScene.test.ts`) red-verified against
+pre-fix code via `git stash -- src/engine/battleScene.ts`. Full guard
+family reran with zero decreases (see 10.4). Committed
+(`54c87516`) before starting step 2.
+
+### 10.2 Step 2 (§9.6's own named probe): the real re-seed tick is turn 1's own `MENU_BOUNCE_RAM_SETUP_TICK` - there is no turn-5-specific reseed
+
+Extended `dump-turn5-confirma-bounce-driver.py` with two new scans across
+every tick 1-5970 (free: the emulator already advances every frame
+regardless of what gets recorded) - `reseedEvents` (ticks where the live
+driver's own `sSinIndex` reads exactly `(192, 128)`, the literal
+`DoBounceEffect` seed write, `battle_main.c:2923,2930`) and
+`idChangeEvents` (ticks where the live onix/healthbox driver's own sprite
+slot IDs change at all, a strictly more general/robust signal than
+`sSinIndex`'s own value alone, which real hardware masks `& 0xFF` every
+frame, `battle_main.c:2978`, so it cycles with period 256 and can't alone
+distinguish "freshly reseeded" from "the same instance, further along").
+
+**Decisive result: exactly ONE `idChangeEvents` entry in the whole
+1-5970 range** - `{tick: 1748, prevIds: [0,0], newIds: [4,3]}` - i.e. the
+ONLY sprite-instance creation in this entire window is turn 1's own
+original `MENU_BOUNCE_RAM_SETUP_TICK` (1748, `battleMenu.ts:822`). The
+SAME driver instance (ids 4/3) is still alive, unchanged, through RAM tick
+5960 (destroyed at 5961, per §9.2). **§9.6's own premise - "distinct from
+`MENU_BOUNCE_RAM_SETUP_TICK`'s own turn-1 anchor" - does not hold: there
+is no turn-5-specific reseed to find.** The `reseedEvents` scan
+independently confirms this (8 periodic `(192,128)` recurrences at
+2603, 2859, 3492, 3748, 4467, 4723, 5607, 5863 - all under the SAME ids
+4/3, spaced by the driver's own 256-tick wrap period whenever it's
+actively ticking, with irregular longer gaps in between from real
+hardware's own idle-only ticking schedule pausing the driver across
+non-idle phases spanning turns 2-5).
+
+### 10.3 Deriving the LIVE-only correction directly from the real driver's own raw `sSinIndex`, not from a reconstructed reseed tick
+
+Since there is no fresh reseed tick to re-anchor an affine formula on, the
+correction instead came directly from matching the LIVE branch's own
+output against the real driver's own already-probed raw values (§9.2's
+own table: RAM ticks 5958/5959/5960 read `onixSinIndex=75/82/89`,
+`healthboxSinIndex=11/18/25`). Fresh instrumentation this session (a
+standalone script reproducing `turn5KickoffBounceTickFromLatest`'s own
+exact formula, no source edits) confirmed the live branch's current
+output is unchanged from §9.2's own recorded values
+(`bounceTick(5959,5960,5961) = 2119,2120,2121`, `menuIdleBounce` at each
+= `{onixY2:0, healthboxY2:0}`, wrong - the required state is `(1,1)`).
+Solving `(192 + 7n) mod 256 = 75` (onix) directly gives `n ≡ 93 (mod
+256)`; feeding that through `menuIdleBounce`'s own `ramTick=bounceTick-1,
+n=ramTick-1748` relation and checking against §9.2's own found
+`(onixY2,healthboxY2)=(1,1)` windows (2097-2105/2134-2142) gives
+`bounceTick=2098` for screen tick 5959 - inside the first window, and
+**exactly** reproducing the real hardware's own raw `sSinIndex` values (not
+merely landing in the `y2=1` plateau): `menuIdleBounce(2098)` through
+`menuIdleBounce(2100)` (ticks 5959-5961) reproduce `{onixY2:1,
+healthboxY2:1}` exactly, verified directly against the current formula's
+own output (`2119,2120,2121`) - a **constant -21** difference, matching
+§9's own "14-22 ticks away" estimate at its far edge, but derived from an
+exact raw-index match this time, not a blind grid-search guess.
+
+**Landed**: `battleScene.ts`'s `turn5KickoffBounceTickFromLatest` now
+subtracts 21 from the live branch's own `bounceTick` output only (`t <
+pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`); the frozen branch and the
+`latestCompletedCommandHandoff === null` branch are byte-identical to
+before. Confirmed safe against the two OTHER call sites of this shared
+function (`battleScene.ts:10410`'s rock slide kickoff text,
+`battleScene.ts:10998`'s turn-13 switch-in echo): both always pass `t`
+values far past `pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` for their
+own respective windows (turn 5's rock slide window starts at
+`TURN5_ROCKSLIDE_PRESS_TICK=5829`+ various delays, always >5961; turn 13's
+switch-in echo runs even later), so the live branch never fires there -
+confirmed empirically by the unchanged `turn13-switchin` (242/242) and
+`turn6-rockslide-a`/`-b` guard results below, not just by inspection.
+
+`turn5-confirm-off-a` **129/132 -> 132/132 - CLOSED**. Two new Tier-1
+pins (`tests/battleScene.test.ts`, Onix sprite pixel (58,49) and Onix
+healthbox pixel (139,74), both live-vs-frozen at tick 5962) red-verified
+against pre-fix code via `git stash -- src/engine/battleScene.ts` (both
+fail at exactly the predicted pre-fix values).
+
+### 10.4 Full guard family (fresh, this session, after BOTH steps - zero decreases anywhere)
+
+```
+turn5-confirm-off-a       132/132   (CLOSED - was 128/132)
+turn5-confirm-off-b       131/132   (unchanged - banked, §4)
+turn5-resolve-off-a       193/196   (unchanged - out-of-scope guard bar, side lane owns 6283/6284/6398)
+turn5-resolve-off-b       196/196
+turn5-resolve-off-c       195/196   (unchanged - banked, §1)
+turn5-resolve-off-d       194/196   (unchanged - banked, §2/§3)
+turn5-reset-off           256/256
+turn5-action-off            32/32
+turn6-reopen-off             46/46
+turn6-menu-off.json fixture  47/47
+turn6-rockslide-a           255/255
+turn6-rockslide-b           105/105
+turn7-rockslide-a           256/256
+turn13-switchin              242/242
+turn4-doubleteam-off         256/256
+turn4-rockslide-off          256/256
+```
+
+Full `npm test` (10,099 passed, +4 new pin blocks) and `npm run build`
+green. `docs/turn5-resolve-ab-pools-diagnosis.md`'s own 6283/6284/6398
+residuals (out of scope this session, owned by a parallel side-lane
+worker) untouched.
