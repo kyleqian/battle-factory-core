@@ -5,6 +5,62 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1354 — [main worker, 2026-08-19] **M-A step 1 DONE: real max-depth tracking (maxCarriedWinStreak/maxBattleDepth) added to the soak driver and surfaced in the CLI, old carriedWinStreak snapshot's lying doc comment corrected**
+
+- **State:** two green commits (`4570aa11` driver+test, `ecb2e5de` CLI).
+  Full `npm test` **1,068 files / 10,124 passed / 223 skipped**; `npm run
+  build`/`npm run typecheck` clean.
+- **Did:** added `SeedResult.maxCarriedWinStreak` (max over the run of
+  `orchestrator.config.factoryWinStreak`) and `maxBattleDepth` (max of
+  `factoryWinStreak + battleIndex`, the internal depth formula at
+  `factoryRoundBattleOrchestrator.ts:559`) to
+  `tools/soak/randomRoundSoakDriver.ts`, tracked every tick in `observe()`
+  (including the initial pre-loop call) and always populated — not gated
+  behind `collectDiagnostics`. Left `RunDiagnostics.carriedWinStreak`'s
+  value semantics untouched but fixed its false doc comment (it claimed
+  to already be "the deepest ... value this run reached"; it is a
+  snapshot that a later re-chain can reset to 0) and pointed it at the
+  new max fields. `tools/soak/randomRoundSoak.ts`: appended the two new
+  fields to each seed's existing OK/CRASH/HANG line, and added a "depth
+  distribution" block to the summary (seeds reaching carry >= 7/14/21,
+  labeled with the live-derived `challengeNum = floor(factoryWinStreak /
+  7)` mapping from `factoryRentalGeneration.ts`/`factoryTrainerSchedule.ts`
+  — not guessed — plus the deepest carry/battle-depth anywhere).
+- **Result:** new Tier-1 test in `tests/randomRoundSoak.test.ts`
+  (`describe("real max-depth tracking (Milestone M-A step 1)")`) pins the
+  exact lying-field scenario: round 1 wins (carry → 7, scripted-strong
+  664/678/527 trio), round 2 loses (arbitrary "weak" rentals, same recipe
+  as `factoryRoundChaining.test.ts`'s "(c)" case), the run re-chains into
+  round 3 within ~2,000 frames — `diagnostics().carriedWinStreak` reads
+  **0** while `maxCarriedWinStreak`/`maxBattleDepth` correctly read **7**.
+  RED-VERIFIED: `git stash`ed just the driver change (keeping the new
+  test), reran — `maxCarriedWinStreak` was `undefined` and the assertion
+  threw `TypeError: actual value must be number or bigint, received
+  "undefined"`; restored via `git stash pop` before committing. Live spot
+  checks pasted below.
+- **Next:** M-A steps 2-3 (re-sweep `winning` 0:180 + `vanilla`/`full` for
+  contrast using the now-real depth fields, report the distribution) —
+  dispatch as the next worker step.
+- **Notes:** no PAPERCUT. Spot-check output —
+  `npm run soak -- --policy winning --seeds 0:3`:
+  ```
+  seed    0  OK     b2 t30  152641f  22.7s  roundLost  carry<=7 depth<=7
+  seed    1  OK     b7 t26  151729f  22.2s  roundComplete  carry<=0 depth<=6
+  seed    2  OK     b5 t14  161852f  24.3s  roundLost  carry<=0 depth<=4
+
+  === soak summary: 3 seeds (policy winning) in 69.2s ===
+  OK 3  CRASH 0  HANG 0
+
+  === depth distribution ===
+  carry >= 7  (challengeNum >= 1): 1/3
+  carry >= 14 (challengeNum >= 2): 0/3
+  carry >= 21 (challengeNum >= 3): 0/3
+  deepest carry anywhere: 7
+  deepest battle-depth anywhere: 7
+  ```
+
+---
+
 ## 1353 — [planning session, 2026-08-19] **Next-milestone reset: the chained-round distribution-parity program is COMPLETE (all 3 steps landed 08-16/17; the queue line was stale), #39 split + ladder Slice 3 DEMOTED, new milestone M-A = measure how deep play actually gets**
 
 - **State:** planning/audit session at the TOP layer. No `src/`, `tools/`, or
@@ -110,59 +166,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   cycle, caught before commit) and the `playerHealthboxHpOverlayForHp` over-exclusion above
   (cost ~1 min to catch via a fresh scanner run post-commit; left for next batch rather than a
   third move+verify cycle inside this session's cap).
-
----
-
-## 1351 — [supervisor wind-down, 2026-08-19] **#97 SETTLED (resolve-off-a 60→196/196 + confirm-off-a 128→132/132 CLOSED, park/accept endgame for the last 4 frames) + seam ladder authored + Slice 1 CLOSED (turns 9/11/12 full bars) + canonical split 226→123 under newly authorized decision (a) — 10 worker rounds + 2 cap-kill salvages, all supervisor-verified**
-
-- **Final gates (at `e6b4ab1c` + this docs commit):** full npm test
-  **1,068 files / 10,123 passed / 223 skipped**; `npm run build` green;
-  soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
-  animation-main and rust-main EMPTY at orient AND wind-down. DEFERRED.md
-  EMPTY. Only permanent worktrees remain; no worker branches. Freshness
-  FAIL at orient = false-positive #6 (PAPERCUTS bumped).
-- **#97 SETTLED (entry moved to ISSUES Settled records):**
-  `resolve-off-a` 60→**196/196** via five stacked landed mechanisms
-  (phantom rock-prop loop §17.4, 2-tick sink+healthbox-vanish §19,
-  1-tick-early fainted text §19.3, HP-sliver +2 + cursor-onset t-1 §20);
-  `confirm-off-a` 128→**132/132** (turn5 missing from the shared
-  kickoff-text -1 ternary §9.5 + RAM-receipt-exact -21 live-bounce
-  correction §9.6). Endgame supervisor decisions (per #61/#38 precedent):
-  `-c` 6763 **PARKED** (3 probe sessions exhausted every candidate),
-  `-d` 6996 **ACCEPT** (new post-redraw single-scanline capture-tear
-  class), 6850/6184 the accepted PNG(T)=RAM(T-1) class. Every fix
-  Tier-1-pinned red-verified; 16-trace guard family zero decreases all
-  session.
-- **Presentation-seam ladder** (`docs/presentation-seam-retirement-ladder.md`,
-  scout round — it corrected the stale "two conversions" framing: the
-  turn-keyed retirement was already ~rank-9 complete). **Slice 1 CLOSED
-  same-session:** turn9-quickattack-off 177→**233/233**,
-  turn11-featherdance-off 189→**191/191**, turn12-aerialace-off
-  246→**247/247** (idle-bounce offsets +191/+205+freeze/+114/+237,
-  RAM-receipt-exact; 4 red-verified pin blocks; differential 1312/1312
-  byte-identical).
-- **Slice 2 (canonical split) 226→123 symbols** (batches 5: 12, 6: 41,
-  7: 50) under **decision (a) AUTHORIZED this session** (supervisor,
-  recorded in ISSUES #39: canonical→battleScene value re-exports allowed,
-  function-body reads ONLY; decision (b) stays deferred — ONIX-Sitrus
-  cluster + 2 let caches stay put). New tooling:
-  `tools/report/battlescene-split-eligibility.ts` (H1-eval-read/
-  H2-animation-import hazard detection, Tier-1 self-check 9/9). Batch 7's
-  full gates were run by the supervisor after the round-10 cap-kill:
-  differential **1241/1241 byte-identical** vs `2e984787`, full suite
-  green; salvage commit `e6b4ab1c` (scanner folds the partition's
-  residual-unreachable block into CANONICAL — required after any batch
-  whose move orphans a symbol's internal referrer).
-- **Two cap-kills, both salvaged:** r7 (turn12 fix verified+committed
-  `eb0be62b`, 35-min finisher worker added pins/docs) and r10 (scanner
-  fix `e6b4ab1c`); this entry carries round 10's unwritten docs record.
-- **Open (ordered for next session):** (a) Slice 2 batches 8+ — ~100
-  eligible function-kind symbols of the 123 remain (scanner-selected; the
-  4 canonical entry points are the reserved FINAL slice); (b) ladder
-  Slice 3 (status-change/outcome emission — declared, unemitted, nothing
-  blocked on it); (c) #71 rung 9 still blocked on animation lane's rung-4
-  back dispatcher; (d) #73/#55 unchanged (parked). No deferred questions;
-  no blockers.
-
----
 
