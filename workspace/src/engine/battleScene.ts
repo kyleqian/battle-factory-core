@@ -15086,7 +15086,14 @@ export function drawTurn5RockSlideWindow(
     // own RAM-confirmed `turn5FaintedTextStartTick` anchor is untouched).
     drawMessageTextLines(fb, TURN5_FAINTED_LINE1, TURN5_FAINTED_LINE2, turn5FaintedTextVisibleChars(t - 1, pressTick));
     const cursorStart = pressTick + TURN5_FAINTED_CURSOR_START_DELAY;
-    if (t >= cursorStart) {
+    // docs/turn5-resolve-ab-pools-diagnosis.md §20.2 (ISSUES #97): this
+    // gate's own first-appearance check was missing the same `t - 1`
+    // display-basis correction the phase computation right below it
+    // already uses (turn5FaintDismissCursorTick's own naturalTick = t - 1)
+    // - real hardware's first cursor blit isn't visible until render tick
+    // cursorStart + 1, RAM-confirmed (state=2 at RAM 6397, first arrow
+    // blit RAM 6398 -> visible render 6399).
+    if (t - 1 >= cursorStart) {
       // §11.1: the real cursor accepts a per-session A edge then freezes
       // (turn5FaintedCursorYOffset's fixed-table formula is retired here but
       // left defined, see its own doc comment).

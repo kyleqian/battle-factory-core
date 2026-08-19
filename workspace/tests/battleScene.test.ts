@@ -2295,6 +2295,26 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §20.1 (2026-08-19, ISSUES #9
   });
 });
 
+describe("docs/turn5-resolve-ab-pools-diagnosis.md §20.2 (2026-08-19, ISSUES #97): drawTurn5RockSlideWindow's own fainted-message cursor first-appearance gate was missing the same t - 1 display-basis correction the phase computation right below it already uses (turn5FaintDismissCursorTick's own naturalTick = t - 1) - real hardware's first cursor blit isn't visible until render tick cursorStart + 1 (6399), not cursorStart itself (6398), RAM-confirmed (downArrowYPosIdx state=2 at RAM tick 6397, first arrow blit RAM tick 6398 -> visible render tick 6399)", () => {
+  const cursorBox = (t: number) => {
+    const fb = new Uint8Array(240 * 160 * 4);
+    drawTurn5RockSlideWindow(fb, t, null);
+    const rows: number[] = [];
+    for (let y = 140; y < 148; y++) {
+      rows.push(...fb.slice((y * 240 + 61) * 4, (y * 240 + 67) * 4));
+    }
+    return rows;
+  };
+
+  it("no cursor glyph is drawn yet at render tick 6398 (cursorStart itself) - byte-identical to a tick well before the cursor's own start delay elapses (6390), where no version of the gate has ever drawn a cursor", () => {
+    expect(cursorBox(6398)).toEqual(cursorBox(6390));
+  });
+
+  it("the cursor's first real blit appears at render tick 6399, not 6398", () => {
+    expect(cursorBox(6399)).not.toEqual(cursorBox(6398));
+  });
+});
+
 describe("docs/turn5-confirmb-resolved-residuals.md §9.3/§9.4 (2026-08-18, ISSUES #97 remainder): drawTurn5RockSlideWindow's Sitrus text-clear/menu-redraw dispatch gates - real hardware clears the heal message 2 ticks EARLIER than previously landed (6989, not 6991) and reveals the settled menu chrome 4 ticks LATER (6995, not 6991); a direct pixel comparison at both open oracle screenshots (6989, 6994) showed a PLAIN FIELD with no message box and no chrome at all, so the two ticks genuinely diverged rather than needing independent message-box/button-grid gates (§9.4's own open question)", () => {
 
   it("TURN5_OFF_SITRUS_TEXT_CLEAR_TICK is 6989 (2 ticks earlier than the app's old, since-superseded 6991)", () => {
