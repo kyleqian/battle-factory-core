@@ -84,16 +84,17 @@ function main(): void {
     const elapsed = ((Date.now() - seedStart) / 1000).toFixed(1);
     const head = `seed ${String(seed).padStart(4)}  ${result.outcome.padEnd(5)}`
       + `  b${result.battle} t${result.turn}  ${String(result.frames).padStart(6)}f  ${elapsed}s`;
+    const depthSuffix = `  carry<=${result.maxCarriedWinStreak ?? "-"} depth<=${result.maxBattleDepth ?? "-"}`;
     if (result.outcome === "OK") {
-      console.log(`${head}  ${result.endState}`);
+      console.log(`${head}  ${result.endState}${depthSuffix}`);
     } else if (result.outcome === "CRASH") {
-      console.log(`${head}  [${result.errorOrigin}/${result.errorPhase}] ${result.errorName}: ${result.errorMessage}`);
+      console.log(`${head}  [${result.errorOrigin}/${result.errorPhase}] ${result.errorName}: ${result.errorMessage}${depthSuffix}`);
       if (verbose) {
         for (const frame of result.stackTop ?? []) console.log(`    ${frame}`);
         for (const action of result.lastActions ?? []) console.log(`    ${action}`);
       }
     } else {
-      console.log(`${head}  stuck at ${result.hangSurface}`);
+      console.log(`${head}  stuck at ${result.hangSurface}${depthSuffix}`);
       if (verbose) {
         for (const action of result.lastActions ?? []) console.log(`    ${action}`);
       }
@@ -122,6 +123,29 @@ function main(): void {
   console.log("");
   console.log(`=== soak summary: ${results.length} seeds (policy ${policy}) in ${totalSeconds}s ===`);
   console.log(`OK ${counts.OK}  CRASH ${counts.CRASH}  HANG ${counts.HANG}`);
+
+  // Depth distribution: how many seeds ever carried a win streak reaching
+  // each challengeNum threshold (challengeNum = floor(factoryWinStreak / 7),
+  // factoryRentalGeneration.ts/factoryTrainerSchedule.ts), plus the deepest
+  // carry and battle-depth reached anywhere in the sweep.
+  const reachedCarry = (min: number) =>
+    results.filter((r) => (r.maxCarriedWinStreak ?? -1) >= min).length;
+  const deepestCarry = results.reduce(
+    (max, r) => (r.maxCarriedWinStreak !== null ? Math.max(max, r.maxCarriedWinStreak) : max),
+    -1,
+  );
+  const deepestBattleDepth = results.reduce(
+    (max, r) => (r.maxBattleDepth !== null ? Math.max(max, r.maxBattleDepth) : max),
+    -1,
+  );
+  console.log("");
+  console.log("=== depth distribution ===");
+  console.log(`carry >= 7  (challengeNum >= 1): ${reachedCarry(7)}/${results.length}`);
+  console.log(`carry >= 14 (challengeNum >= 2): ${reachedCarry(14)}/${results.length}`);
+  console.log(`carry >= 21 (challengeNum >= 3): ${reachedCarry(21)}/${results.length}`);
+  console.log(`deepest carry anywhere: ${deepestCarry >= 0 ? deepestCarry : "n/a"}`);
+  console.log(`deepest battle-depth anywhere: ${deepestBattleDepth >= 0 ? deepestBattleDepth : "n/a"}`);
+
   const ranked = [...bySignature.entries()].sort((a, b) => b[1].length - a[1].length);
   for (const [signature, list] of ranked) {
     const seedsList = list.slice(0, 8).map((r) => r.seed).join(", ");
