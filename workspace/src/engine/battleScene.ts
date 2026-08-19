@@ -12415,7 +12415,19 @@ export function turn8ResettledBounceTick(t: number, pressTick: number): number {
 function drawTurn8BindWindow(fb: Uint8Array, t: number, pressTick: number): void {
   const redrawTick = pressTick + TURN8_MENU_REDRAW_DELAY;
   if (t >= redrawTick) {
-    drawTurn8TurnEndSettledMenu(fb, t, pressTick);
+    // ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
+    // diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
+    // against `turn9-quickattack-off.json`): the assigned residual window's
+    // own first 9 ticks (10818-10826) are STILL rendered through turn 8's own
+    // settled-menu redraw (this trace's own turn-9 `FightSubmenuState.openElapsed`
+    // doesn't register until tick 10827 - `drawTurn9FightSubmenuWindow`'s own
+    // window only starts there) - shares the real oscillator with the two
+    // branches that pick up afterward, needing its own flat, independently
+    // RAM-fit offset (`turn8ResettledBounceTick`'s own `bounceRawTick=t`
+    // default is a different closed form than theirs). Zero exceptions
+    // across 9 probed Y2 ticks.
+    const bounceIndexOffset = t >= 10818 && t <= 10826 ? 191 : 0;
+    drawTurn8TurnEndSettledMenu(fb, t, pressTick, t, bounceIndexOffset);
     return;
   }
   const frozenRegime3Tick = TURN7_ROCKSLIDE_PRESS_TICK + TURN7_ROCKSLIDE_MENU_REDRAW_DELAY;
@@ -12443,9 +12455,9 @@ function drawTurn8BindWindow(fb: Uint8Array, t: number, pressTick: number): void
  * SHIFT` instead of plain `t`, exactly the fix already applied to turn 6/8's
  * own analogous idle-window calls.
  */
-function drawTurn8TurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number, bounceRawTick: number = t): void {
+function drawTurn8TurnEndSettledMenu(fb: Uint8Array, t: number, pressTick: number, bounceRawTick: number = t, bounceIndexOffset: number = 0): void {
   const bounceTick = turn8ResettledBounceTick(bounceRawTick, pressTick);
-  const bounce = menuIdleBounce(bounceTick);
+  const bounce = menuIdleBounce(bounceTick, bounceIndexOffset);
   drawStaticBgShiftedY(fb, 0, 0);
   drawTurn5IconBar(fb, t);
   drawTurn5SwitchinSprite(fb, t);
@@ -12477,8 +12489,8 @@ export const TURN9_REGIME4_TO_REGIME1_SHIFT = TURN5_SITRUS_MENU_REDRAW_TICK - (T
  * "drawTurn6FieldBase itself never repaints past the slide-in settle" fix
  * `drawTurn7FieldBase`/`drawTurn8FieldBase` already establish.
  */
-function drawTurn9FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number): void {
-  drawTurn6FieldBase(fb, t, bounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, onixX2, onixInvisible, healthboxY2Override);
+function drawTurn9FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = turn5SitrusOnixHp(t), onixX2: number = 0, onixInvisible: boolean = false, healthboxY2Override?: number, bounceIndexOffset: number = 0): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN9_REGIME4_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, onixX2, onixInvisible, healthboxY2Override, undefined, undefined, undefined, undefined, undefined, bounceIndexOffset);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
@@ -13205,6 +13217,41 @@ function drawTurn9RockSlideWindow(fb: Uint8Array, t: number): void {
  * NOT modeled this session - deferred, see battle-turn-notes.md §35 - this
  * dispatcher stops at the kickoff text's own settled plateau (10930).
  */
+/**
+ * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
+ * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
+ * against `turn9-quickattack-off.json`): turn 9's own FIGHT-submenu window
+ * shares ONE real, continuous `DoBounceEffect` oscillator across both the
+ * pre-reveal DMA-wait branch below (`turn8ResettledBounceTick`'s own chain)
+ * and `drawTurn9FieldBase`'s regime-4 chain further down - the two reduce to
+ * the IDENTICAL closed form (`TURN9_REGIME4_TO_REGIME1_SHIFT`'s own
+ * construction makes them cancel to the same raw sine index), so they share
+ * one correction: a flat `+205` raw-sine-index offset, with RAM holding for
+ * 2 ticks (screen ticks 10830-10831 - a stray cursor-reject `A` press
+ * mid-browse, this trace's own segment 82) before resuming permanently 2
+ * ticks behind - the same freeze-then-permanent-lag shape ISSUES #97-B's
+ * turn6-reopen fix already established (docs/turn5-bounce-recalibration-probe.md
+ * §8c). Checked against the RAM receipt at both the raw-sine-index level (47
+ * ticks) and the derived Y2 level (56 ticks, the full assigned residual
+ * window) - zero exceptions either way.
+ */
+const TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK = 10829;
+const TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET = 205;
+
+function turn9FightSubmenuBrowseBounceTick(t: number, raw: number): number {
+  if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK) return raw;
+  if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK + 2) return TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  return raw - 2;
+}
+
+// `turn9KickoffBounceTick`'s own already-established freeze (past `pressTick +
+// FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`, its driver already torn down) is out
+// of this correction's own RAM-verified regime (live driver, ticks
+// 10818-10873) - `turn9FightSubmenuBrowseBounceTick` must never touch it.
+function turn9FightSubmenuLiveBounceRegime(t: number, sm: FightSubmenuState): boolean {
+  return sm.confirmElapsed === null || t < TICK0 + sm.confirmElapsed + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
+}
+
 function drawTurn9FightSubmenuWindow(
   fb: Uint8Array,
   t: number,
@@ -13217,7 +13264,9 @@ function drawTurn9FightSubmenuWindow(
   }
   const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
   if (t < revealTick) {
-    drawTurn8TurnEndSettledMenu(fb, t, TURN8_BIND_PRESS_TICK, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+    const rawBounceTick = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+    const bounceTick = turn9FightSubmenuBrowseBounceTick(t, rawBounceTick);
+    drawTurn8TurnEndSettledMenu(fb, t, TURN8_BIND_PRESS_TICK, bounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET);
     return;
   }
   if (sm.confirmElapsed !== null) {
@@ -13238,8 +13287,13 @@ function drawTurn9FightSubmenuWindow(
       return;
     }
   }
-  const bounceTick = sm.confirmElapsed !== null ? turn9KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  drawTurn9FieldBase(fb, t, bounceTick);
+  const rawBounceTick = sm.confirmElapsed !== null ? turn9KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  if (turn9FightSubmenuLiveBounceRegime(t, sm)) {
+    const bounceTick = turn9FightSubmenuBrowseBounceTick(t, rawBounceTick);
+    drawTurn9FieldBase(fb, t, bounceTick, undefined, undefined, undefined, undefined, undefined, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET);
+  } else {
+    drawTurn9FieldBase(fb, t, rawBounceTick);
+  }
   drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
   drawTurn5SitrusSettledMenuChrome(fb);
   drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
