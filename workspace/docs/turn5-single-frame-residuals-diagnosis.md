@@ -660,3 +660,351 @@ Both probes committed this session under `tools/probe/`. `git diff --
 src/` is empty at the end of this session — INSTRUMENT step, no fix
 attempted (§8.4 proves the originally-anticipated fix shape would not
 have worked anyway).
+
+## 9. 2026-08-18 (side lane, second) — `turn5-confirm-off-a`'s 4-frame
+residual, mechanism pinned: (i)+(ii) are ONE shared root cause (not two),
+(iii) is a fixable off-by-one, NOT the accepted boundary class
+
+Bounded SIDE-lane INSTRUMENT worker, Battle Scene OFF oracle. Scope: §5's
+own named next probe (a full OAM census at ticks 5958-5962, plus mechanism
+attribution for the 5959-5961 two-region split and a verdict on 5968's
+boundary-class hypothesis). `git diff -- src/` is empty at the end of this
+session — a temporary debug `console.error` was added to
+`turn5KickoffBounceTickFromLatest` mid-session to read its own live
+`sourceTick`/`epochAge`/`bounceTick` values directly (the cleanest ground
+truth for a pure function three call layers deep), then reverted via
+`git checkout -- src/engine/battleScene.ts` before this commit — confirmed
+clean (`git diff --stat -- src/` empty) before every commit below.
+
+### 9.0 Baseline (fresh, unchanged)
+
+```
+npm run compare -- turn5-confirm-off-a --summary
+frame 5959: DIFF 2360px (6.15%) bbox=44,49-229,110
+frame 5960: DIFF 2360px (6.15%) bbox=44,49-229,110
+frame 5961: DIFF 2360px (6.15%) bbox=44,49-229,110
+frame 5968: DIFF 10930px (28.46%) bbox=1,113-238,158
+128/132 frames matched
+```
+
+### 9.1 Source read: regions (i) and (ii) are ONE draw call's two assets, not two mechanisms
+
+`menu-idle-onix-bounce.json`'s own header: `{x:44, y:49, width:56,
+height:63}` → screen columns 44-99 (region i, exactly). `menu-idle-
+healthbox-bounce.json`'s own header: `{x:127, y:74, width:103, height:38}`
+→ screen columns 127-229 (region ii, exactly, 28px gap from region i
+because the asset bboxes themselves have that gap). Both are `Menu
+IdleBounceTwoStateAsset`s (a baked `y1`-patch and a baked `y2`-patch,
+`drawTwoStateBounceRect`, `battleScene.ts:8135-8141`: draws nothing at
+`y2===0`, the `y1` patch at `y2===1`, the `y2` patch at `y2>=2`), and BOTH
+are drawn by a SINGLE call, `drawMenuIdleBounceOverlay(fb,
+confirmWaitBounceTick)` (`battleScene.ts:8701`, inside `drawFightSubmenu
+Window`'s confirm-wait branch, `confirmWaitBounceTick` assigned at
+`battleScene.ts:8681-8682` from `turn5KickoffBounceTickFromLatest(t,
+pressTick, latestCompletedCommandHandoff)`):
+
+```ts
+function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number, bounceIndexOffset: number = 0): void {
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick, bounceIndexOffset);
+  drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
+  drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
+}
+```
+
+`menuIdleBounce` (`battleMenu.ts:825-833`) derives both `onixY2` and
+`healthboxY2` from the SAME `bounceTick` input (`onixSinIndex`/`healthbox
+SinIndex`, `battleMenu.ts:812-819`, differ only by their sine seed - 192 vs
+128 - stepping `+7` per tick identically). So regions (i) and (ii) cannot
+be independent defects: any bug in the single `confirmWaitBounceTick`
+value poisons BOTH regions simultaneously, at every affected tick. §5.4's
+"two disjoint regions" framing was a symptom-level read (correct that the
+PIXELS are disjoint - the two assets' bboxes really don't overlap) that
+this session's source read shows is ONE mechanism underneath, not two.
+`commandMenuBounceY2`'s own doc (`battleMenu.ts:849-851`) independently
+confirms which real hardware sprites these represent: *"Only the player
+battler sprite and player healthbox bounce - `DoBounceEffect(gActive
+Battler, ...)` targets the player side in singles."* Player-side active
+mon this trace = ONIX. So region (i) = Onix's own battler (back) sprite,
+region (ii) = Onix's own healthbox - not background, not the opponent
+(GROVYLE) side, matching §5's own hedge exactly.
+
+### 9.2 Hardware ground truth: the real `DoBounceEffect` driver is still live through RAM tick 5960, destroyed at RAM tick 5961 - the app already shows the destroyed state 2-3 ticks too early
+
+`dump-turn5-confirma-bounce-driver.py` (pre-existing, re-run fresh this
+session against `turn5-confirm-off-a.json`, RAM ticks 5955-5970):
+
+| RAM tick | onixSinIndex | onixY2 | healthboxSinIndex | healthboxMainY2 | driver fields (sinIndex/delta/amplitude/bouncerTarget) |
+|---|---|---|---|---|---|
+| 5958 | 75 | 1 | 11 | 1 | live |
+| 5959 | 82 | 1 | 18 | 1 | live |
+| 5960 | 89 | 1 | 25 | 1 | live |
+| 5961 | 0 | **0** | 0 | **0** | **all zeroed - driver destroyed** |
+| 5962-5970 | 0 | 0 | 0 | 0 | stays zeroed (frozen tail) |
+
+Under this family's own established "screen tick T shows RAM tick T-1"
+display-basis convention (re-stated at `battleScene.ts:14829-14835`), real
+hardware's own rendered `(onixY2, healthboxY2)` by screen tick are:
+5959→RAM5958→(1,1); 5960→RAM5959→(1,1); 5961→RAM5960→(1,1); 5962→RAM5961→
+(0,0), staying (0,0) through the rest of the window. Direct pixel
+classification of the app's and oracle's own captures against the two
+baked assets' `y1`/`y2` patches (a `bg` reference sampled from app-05963,
+a known-matching frozen tick) confirms this exactly:
+
+| tick | region | oracle state (px classified) | app state (px classified) |
+|---|---|---|---|
+| 5958 | onix | y1 (769/3528px) | y1 (769/3528px) — **match** |
+| 5958 | healthbox | bg (0 overlay) | bg (0 overlay) — **match** |
+| 5959 | onix | y1 (769/3528px) | **bg (0/3528px)** |
+| 5959 | healthbox | y1 (1536/3914px, +5 y2 +50 other) | **bg (0/3914px)** |
+| 5960 | onix | y1 (769px) | **bg (0px)** |
+| 5960 | healthbox | y1 (1536px) | **bg (0px)** |
+| 5961 | onix | y1 (769px) | **bg (0px)** |
+| 5961 | healthbox | y1 (1536px) | **bg (0px)** |
+| 5962 | onix | bg | bg — **match** |
+| 5962 | healthbox | bg | bg — **match** |
+
+This directly explains §5.1's own "one row above" pixel signature as a
+misread: it isn't a vertical-shift bug at all - it's a **binary
+overlay-present-vs-absent** mismatch (oracle draws the `y1` patch, app
+draws nothing/background) that merely *looks* like a 1-row shift because
+`y1`'s own baked content differs from the plain background by exactly the
+bounce's own 1px amplitude in a narrow band. §5.3's own "pure function of
+sourceTick, so ticks 5959 and 5962+ must return the SAME value" reasoning
+is confirmed correct (it does), but the conclusion drawn from it (that the
+bounce formula can't be the culprit because 5962+ already match) doesn't
+follow: 5962+'s own (0,0) IS what real hardware shows there too (driver
+already destroyed by RAM 5961) - the SAME shared `bounceTick` value is
+simply being reused at LIVE screen ticks 5959-5961 where it does NOT
+apply, because real hardware's driver hasn't been destroyed yet at RAM
+ticks 5958-5960.
+
+Direct instrumentation (temporary `console.error` in `turn5KickoffBounce
+TickFromLatest`, `battleScene.ts:10330-10339`, reverted before commit)
+confirms the exact live values:
+
+```
+t=5959 pressTick=5959 sourceTick=5959 epochAge=607 bounceTick=2119
+t=5960 pressTick=5959 sourceTick=5960 epochAge=608 bounceTick=2120
+t=5961 pressTick=5959 sourceTick=5961 epochAge=609 bounceTick=2121
+t=5962..5970 sourceTick=5959 (frozen) epochAge=607 bounceTick=2119   (same value as t=5959's own live call)
+```
+
+`menuIdleBounce(2119|2120|2121)` all evaluate to `{onixY2:0, healthbox
+Y2:0}` - confirming the pixel classification table above arithmetically,
+not just visually. A brute-force sweep of `menuIdleBounce` over
+`bounceTick ∈ [1740, 2300]` for the exact target `(onixY2, healthbox
+Y2)=(1,1)` (the state oracle needs at all three live ticks) finds windows
+at **2097-2105** and **2134-2142** (9 ticks wide each, ~37-tick period) -
+the app's actual 2119-2121 sits in the trough BETWEEN them, 14-22 ticks
+from either. This is not a small/off-by-one correction like §5.2's own
+falsified `+109`/`t-1` experiment (which nudged the SAME shared formula's
+constants directly and broke 6 previously-matching frames) - it would
+require a materially different sourceTick→bounceTick mapping for the LIVE
+sub-window specifically, while leaving the FROZEN branch (sourceTick=
+pressTick, unchanged) exactly as-is, since that branch's own (0,0) output
+is independently confirmed correct for ticks 5962+.
+
+### 9.3 Full-OAM census (new probe, `dump-turn5-confirma-oam-census.py`) - hardware-confirms region (ii) is Onix's own healthbox (3 real sprites), not background, cross-checking §9.1's source-only read
+
+Raw hardware OAM (0x07000000, all 128 slots) at ticks 5958-5962 (this
+probe drops the caution `gBattlerSpriteIds`/`gHealthboxSpriteIds` naively:
+those are `gSprites[]` SOFTWARE indices, not hardware OAM slot numbers -
+`BuildOamBuffer` re-sorts/re-slots per frame, so a same-numbered hardware
+OAM slot is coincidental, not identity - real sprites are identified below
+by tile number, size, and the 1px bounce-lockstep instead):
+
+| tick | slot | x | y | size | tileNum | pal | identity |
+|---|---|---|---|---|---|---|---|
+| 5958 | 9 | 40 | 49 | 64×64 | 369 | 0 | **Onix battler (region i)** |
+| 5959-5961 | 9 | 40 | 49 | 64×64 | 369 | 0 | (unchanged; y bounces to 48 at 5962, one-frame-lagged vs. the driver read - a known OAM-vs-`gSprites` read-order artifact, §8.7's own already-flagged class, not re-chased) |
+| 5958,5962 | 5 | 126 | 72 | 64×64 | 28 | 5 | **Onix healthbox, left half (region ii)** |
+| 5959-5961 | 5 | 126 | **73** | 64×64 | 28 | 5 | (y2-bounces +1px in lockstep with slot 6 and 0/1 below) |
+| 5958,5962 | 6 | 190 | 72 | 64×64 | 92 | 5 | **Onix healthbox, right half (region ii)** — adjacent to slot 5, 126-239 combined |
+| 5959-5961 | 6 | 190 | **73** | 64×64 | 92 | 5 | (same lockstep bounce as slot 5) |
+| 5958,5962 | 0 | 158 | 88 | 32×8 | 284 | 6 | **Onix healthbar sub-sprite** (analogous to §8.2's 3rd-sprite finding, player side) |
+| 5959-5961 | 0 | 158 | **89** | 32×8 | 284 | 6 | (same lockstep bounce) |
+| 5958,5962 | 1 | 190 | 88 | 32×8 | 288 | 6 | Onix healthbar sub-sprite, other half |
+| 5959-5961 | 1 | 190 | **89** | 32×8 | 288 | 6 | (same lockstep bounce) |
+
+(Slots 2/3/7/8, tileNum 292/296/156/188, `y=14-30`, are GROVYLE's own
+top-of-screen healthbox halves + healthbar - present every tick, outside
+both mismatch regions' `y=49-110` band, listed by the probe's own X-only
+overlap check but excluded here after a manual Y-range filter the probe
+itself doesn't apply.)
+
+This directly answers the brief's own question ("healthbox? HP overlay?
+window tiles?") at the hardware level: **region (ii) is Onix's own
+healthbox - a real, on-screen, 3-sprite compound (left half + right half +
+HP-bar sub-sprite, exactly the same `battle_interface.c`-documented
+3-sprite healthbox structure §8.2 already established for PIDGEOTTO's
+opponent-side healthbox) - not background, not a window tile, not an HP
+overlay.** No BG-register read was needed (contra the brief's own
+contingency) since this rules out background content directly. `git diff
+--stat -- src/` confirmed empty after this probe.
+
+### 9.4 Mechanism attribution and fix shape for (i)+(ii) - pinned to file:line, NOT applied this session (INSTRUMENT ONLY)
+
+**One shared root cause, two symptom regions.** `confirmWaitBounceTick`
+(`turn5KickoffBounceTickFromLatest`, `battleScene.ts:10315-10340`, called
+at `battleScene.ts:8681-8682`) is a pure function of `(t, pressTick,
+latestCompletedCommandHandoff)` reused for BOTH the live pre-freeze window
+(`t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`, sourceTick=`t`) and
+the frozen tail (sourceTick=`pressTick`, constant). Its own affine
+sourceTick→bounceTick mapping (`battleScene.ts:10330-10339`) happens to
+place `sourceTick=pressTick` exactly at the real driver's own POST-
+DESTRUCTION phase (correct for the frozen tail, which needs exactly that
+value) - but the SAME mapping, evaluated live at `sourceTick=t` for
+`t=pressTick..pressTick+2`, ALSO lands in that same post-destruction
+region instead of tracking the driver's still-live RAM state through RAM
+tick 5960. Both `drawTwoStateBounceRect` calls inside `drawMenuIdleBounce
+Overlay` (`battleScene.ts:8701`) - one per region - consume this single
+wrong value, so both regions go wrong on the same three ticks.
+
+**Fix shape** (named, NOT applied - would need the live sub-window's own
+sourceTick→bounceTick mapping corrected without disturbing the frozen
+branch's own already-correct `sourceTick=pressTick` value, which several
+OTHER call sites of this same shared function also depend on - rock slide
+kickoff text at `battleScene.ts:10410`, the turn-13 switch-in echo at
+`battleScene.ts:10998`, and any other reuse of `turn5KickoffBounceTick
+FromLatest`. §5.2's own falsified experiment already shows a blind
+constant tweak to this function regresses other, currently-matching
+ticks; §9.2's own 14-22-tick-wide required correction rules out a small
+nudge). The next probe below is scoped specifically to avoid repeating
+that mistake.
+
+**Predicted count effect**: closing this correctly would flip ticks 5959,
+5960, 5961 from mismatch to match (128/132 → 131/132 combined with §9.5's
+own 5968 finding, if both land) - not independently verified this
+session (no fix attempted).
+
+### 9.5 Tick 5968: REFUTES the "accepted boundary class, no fix needed" hypothesis - it's the SAME mechanism class but with a MISSING, already-precedented -1 correction
+
+`turnKickoffTextStartTick(pressTick) = pressTick + FIGHT_CONFIRM_TEXT_DELAY`
+(`battleMenu.ts:1172-1174`, `FIGHT_CONFIRM_TEXT_DELAY=10`) gives `5959+10
+=5969` for this trace. `drawFightSubmenuWindow`'s own dispatch
+(`battleScene.ts:8591-8593`):
+
+```ts
+const inTurn4DoubleTeamWindow = turn4Active && !turn5Active;
+const textStart = (sm.cursor === 2 || turn3Active) && !inTurn4DoubleTeamWindow
+  ? turn2KickoffTextStartTick(pressTick)
+  : turnKickoffTextStartTick(pressTick);
+if (t >= textStart) { /* ... turn5Active → drawTurn5EndeavorText ... */ }
+```
+
+Turn 5's own branch (`turn5Active`, `sm.cursor !== 2`, `turn3Active` false)
+falls to the generic, uncorrected `turnKickoffTextStartTick(pressTick)=
+5969` - turn 5 was never added to the `-1`-corrected side of this ternary.
+
+Direct pixel evidence (fresh capture, `app-0596{8,9}.png`/`oracle-05968
+.png`, `/tmp/confirma-run2`):
+
+```
+app(5968) vs app(5969):     10929px differ, bbox (1,113)-(239,159)   — app's OWN content flips branches between these two ticks
+oracle(5968) vs app(5968):  10930px differ, bbox (1,113)-(239,159)   — the reported mismatch (app still shows the OLD confirm-wait branch)
+oracle(5968) vs app(5969):     32px differ, bbox (22,127)-(28,134)   — oracle(5968) is ALREADY almost byte-identical to app's OWN NEW-branch content
+```
+
+The 32px residual is the SAME glyph-vs-blank signature §2/§4 already
+established for this family's "PNG(T) shows RAM(T-1)" class (`oracle=
+(107,165,165)` solid box fill at every one of the 32 pixels; `app(5969)=
+(255,255,255)`/`(107,90,115)` glyph pixels already drawn there) - i.e.
+oracle at 5968 is a hair BEHIND app's own tick-5969 content (one
+character's own reveal sub-timing, not a whole-branch difference).
+
+**This is the opposite polarity from §2/§4's own established class**,
+which needs restating carefully: in §2/§4, the APP switches to the NEW
+branch content exactly at its own anchor tick while the ORACLE still
+shows OLD content for one more tick (oracle lags). Here, the ORACLE
+already shows (99.7% of, 10898/10930px) the NEW branch's content a full
+tick before the APP's own anchor fires (app lags, oracle leads) - real
+hardware's own dispatch is not "architecturally, inherently" one tick
+after the app's anchor; it's genuinely one tick BEFORE it. **This directly
+refutes §5's own hedge that 5968 is "likely (not confirmed) the same
+accepted boundary-artifact class as §2/§4" in the sense of "nothing to
+fix here"** - it IS the same general mechanism class (a hard dispatch-gate
+cutover producing a single-tick artifact under this family's display-basis
+convention), but turn 5's own anchor is simply missing a correction this
+codebase has ALREADY landed, oracle-confirmed, for the identical situation
+on turn 2 (`turn2KickoffTextStartTick`, `battleMenu.ts:2659-2673`, own doc:
+*"Turn 2's own kickoff message hard-cuts in 1 tick EARLIER than
+`turnKickoffTextStartTick`'s general formula predicts... A pixel-fit
+correction... plausible unverified guess: the reopened-submenu's own extra
+DMA-wait state costs this transition 1 tick"*). Turn 5's own confirm-wait
+window is not a reopened submenu, so the SAME root cause is not
+guaranteed, but the SHAPE of the fix (append `|| turn5Active` to
+`battleScene.ts:8592`'s own ternary condition, so turn 5 also gets
+`turn2KickoffTextStartTick(pressTick)` instead of the raw generic formula)
+is exactly precedented and was NOT applied - most likely a simple gap (the
+ternary was written when turn 2/3 were the only known cases) rather than a
+turn-5-specific reason to exclude it.
+
+**Fix shape** (named, NOT applied):
+
+```ts
+// battleScene.ts:8592, was:
+const textStart = (sm.cursor === 2 || turn3Active) && !inTurn4DoubleTeamWindow
+  ? turn2KickoffTextStartTick(pressTick)
+  : turnKickoffTextStartTick(pressTick);
+// candidate:
+const textStart = (sm.cursor === 2 || turn3Active || turn5Active) && !inTurn4DoubleTeamWindow
+  ? turn2KickoffTextStartTick(pressTick)
+  : turnKickoffTextStartTick(pressTick);
+```
+
+(`inTurn4DoubleTeamWindow = turn4Active && !turn5Active` is `false`
+whenever `turn5Active` is `true`, so this is a pure widening - no
+existing turn2/turn3/turn4 behavior changes.)
+
+**Predicted count effect**: should resolve ~99.7% of tick 5968's own
+28.46% diff (10898/10930px, per the direct measurement above) - very
+likely flips 5968 from mismatch to match, though the residual 32px
+sub-character-timing difference is not itself explained by this shift
+alone and could reappear as a much smaller separate diff if the two don't
+fully cancel. Not independently verified this session (no fix attempted -
+this function is reused by every other `drawFightSubmenuWindow` caller;
+committing to "safe" without running the full guard family is exactly the
+mistake §5.2 already burned a session on for a different call site).
+
+### 9.6 What remains unproven + exact named next probes
+
+- **(i)+(ii) fix formula**: not derived. Next probe: extend `dump-turn5-
+  confirma-bounce-driver.py`'s own pattern to ALSO dump `sSinIndex` at the
+  exact RAM tick `DoBounceEffect`'s setup call fires for turn 5's own
+  confirm-wait bounce (distinct from `MENU_BOUNCE_RAM_SETUP_TICK`'s turn-1
+  anchor that `menuIdleBounce`'s own formula is built around) - i.e. find
+  the real re-seed tick this specific bounce driver instance started from,
+  which `epochAge`'s own affine chain is trying (and, per §9.2, failing)
+  to reconstruct indirectly. Once that real re-seed tick is known, a
+  LIVE-only correction (scoped to `t < pressTick + FIGHT_CONFIRM_BOUNCE_
+  FREEZE_DELAY` only, leaving the frozen branch's `sourceTick=pressTick`
+  path untouched) can be derived and grid-checked against the 2097-2105 /
+  2134-2142 target windows from §9.2 before landing.
+- **(iii) fix**: named in §9.5, not applied or guard-family-verified. Next
+  step for a FIX-authorized session: apply the one-line ternary widening,
+  then run the FULL guard family below (not just this trace) before
+  trusting it, exactly as this family's own discipline requires.
+- **Whether (i)+(ii)'s fix and (iii)'s fix compose without interaction**:
+  not tested (both are analysis-only this session, no code changed).
+
+### 9.7 Rerunnable guards (fresh, this session)
+
+```sh
+npm prefix   # WORKTREE GOTCHA - verify cwd first
+npm run compare -- turn5-confirm-off-a --summary   # 128/132 (mismatches 5959,5960,5961,5968), unchanged
+npm run compare -- turn5-confirm-off-b --summary   # 131/132, unchanged
+npm run compare -- turn5-reset-off --summary       # 256/256, unchanged
+npm run test:smoke
+
+python3 tools/run-mgba-probe.py /tmp/out.json -- \
+  tools/probe/dump-turn5-confirma-bounce-driver.py /tmp/out.json
+
+python3 tools/run-mgba-probe.py /tmp/out2.json -- \
+  tools/probe/dump-turn5-confirma-oam-census.py /tmp/out2.json
+```
+
+One probe committed this session: `tools/probe/dump-turn5-confirma-oam-
+census.py` (new). `git diff -- src/` is empty at the end of this session -
+INSTRUMENT step, no fix attempted (mechanism pinned to file:line for both
+(i)+(ii) and (iii); (iii) additionally has a fully precedented one-line
+candidate fix, named but not landed).
