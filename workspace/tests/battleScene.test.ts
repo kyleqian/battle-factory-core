@@ -70,8 +70,11 @@ import {
   TURN5_OFF_ENDEAVOR_FLICKER_START,
   TURN5_OFF_ENDEAVOR_HEALTHBOX_BOUNCE_START,
   TURN5_OFF_ENDEAVOR_HP_DRAIN_START_DELAY,
+  TURN4_ROCKSLIDE_HP,
   TURN5_OFF_ROCKSLIDE_TEXT_DELAY,
   TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE,
+  TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY,
+  TURN5_ROCKSLIDE_OPPONENT_TO_HP,
   TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK,
   TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK,
   TURN5_OFF_SITRUS_TEXT_CLEAR_TICK,
@@ -2272,6 +2275,23 @@ describe("docs/turn5-resolve-ab-pools-diagnosis.md §19.3 (2026-08-18, ISSUES #9
       return rows;
     };
     expect(charTwoColumn(6380)).not.toEqual(charTwoColumn(6379));
+  });
+});
+
+describe("docs/turn5-resolve-ab-pools-diagnosis.md §20.1 (2026-08-19, ISSUES #97): drawTurn5RockSlideAttack's own rockSlideOpponentHp call runs 2 render ticks late - a leaf-compositor probe (probe-opponent-healthbox-hp1-vs-hp0.ts) found the never-show-empty-bar sliver's hp=1->hp=0 boundary differs from real hardware (RAM tick 6282, pixel-visible 6283) by exactly the 2 residual pixels at full-frame (52,33)/(52,34) and nowhere else, so the call site's own render tick is shifted `t + 2`, scoped to this one call site only", () => {
+  it("sanity: the shared rockSlideOpponentHp function itself is untouched - called directly (no shift) it still reports hp=1 through t=6284, stepping to 0 only at t=6285", () => {
+    expect(rockSlideOpponentHp(6284, TURN5_ROCKSLIDE_PRESS_TICK, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)).toBe(1);
+    expect(rockSlideOpponentHp(6285, TURN5_ROCKSLIDE_PRESS_TICK, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY)).toBe(0);
+  });
+
+  it("the call site actually wires the +2 shift through to the real render: the HP-bar sliver pixel at full-frame (52,33) changes color between render tick 6282 and 6283 - matching real hardware's own RAM-6282/pixel-6283 boundary - and stays at its new color through 6284, not the unshifted 6285", () => {
+    const pixelAt = (t: number) => {
+      const fb = new Uint8Array(240 * 160 * 4);
+      drawTurn5RockSlideAttack(fb, t, t);
+      return fb.slice((33 * 240 + 52) * 4, (33 * 240 + 53) * 4);
+    };
+    expect(pixelAt(6283)).not.toEqual(pixelAt(6282));
+    expect(pixelAt(6284)).toEqual(pixelAt(6283));
   });
 });
 

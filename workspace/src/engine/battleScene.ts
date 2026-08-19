@@ -11005,7 +11005,12 @@ export function drawTurn5RockSlideAttack(fb: Uint8Array, t: number, bounceTick: 
     );
   }
   const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE);
-  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  // docs/turn5-resolve-ab-pools-diagnosis.md §20.1 (ISSUES #97): the
+  // never-show-empty-bar sliver's own hp=1->hp=0 boundary lands 2 render
+  // ticks late here - scoped `t + 2` at this one call site only (opponentHp
+  // only ever takes {1,0} here; the compositor diff at that boundary is
+  // exactly the 2 residual pixels, nothing else this function draws).
+  const opponentHp = rockSlideOpponentHp(t + 2, pressTick, TURN4_ROCKSLIDE_HP.to, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
   // docs/turn5-resolve-ab-pools-diagnosis.md §19 (ISSUES #97): same 2-tick
   // lag family as the sink shift above - a direct oracle screenshot
   // comparison (6376 vs 6377) shows the real healthbox already gone by
