@@ -701,6 +701,23 @@ export const TURN17_LOSS_LINE2 = "SOME WATER";
 export const TURN17_LOSS_INPUT_READY_DELAY = 79;
 
 import { stageBattle2Turn1Kernel } from "./battle2CommandAdapter.ts";
+import { BALL_CLOSED_TILESET, KABUTO_SENDOUT_BATTLER, LINE2_ORIGIN, MATERIALIZE_TINT_COLOR, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS, ONIX_SITRUS_IDENTITY_RENDER_TICK, OPPONENT_CORNER, PARTY_ENTRY_FADE_IN, PARTY_ENTRY_FADE_OUT, PARTY_SENDOUT_FADE_OUT, PLAYER_CORNER, TURN10_REGIME5_TO_REGIME1_SHIFT, TURN11_REGIME6_TO_REGIME1_SHIFT, TURN12_REGIME7_TO_REGIME1_SHIFT, TURN13_DRAGONBREATH_FAINT_LINE1, TURN13_DRAGONBREATH_FAINT_LINE2, TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL, TURN13_DRAGONBREATH_HP, TURN13_DRAGONBREATH_KICKOFF_LINE1, TURN13_DRAGONBREATH_KICKOFF_LINE2, TURN13_DRAGONBREATH_PRESS_TICK, TURN13_FAINTED_CURSOR_START_DELAY, TURN13_FAINTED_CURSOR_X, TURN13_FAINT_SINK_STEPS, TURN13_HEALTHBOX_VANISH_TICK, TURN13_HIT_FLASH_PRESS_TICK, TURN13_MURKROW_MATERIALIZE_AFTER_DISMISS, TURN13_REGIME8_TO_REGIME1_SHIFT, TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS, TURN13_SWITCHIN_RESET_AFTER_DISMISS_SHIFT, TURN13_SWITCHIN_SENTOUT_LINE2, TURN14_MENU_REDRAW_RESET_SHIFT, TURN14_MENU_REDRAW_TICK, TURN15_FAINTED_CURSOR_START_TICK, TURN15_FAINTED_CURSOR_X, TURN15_FAINTED_LINE1, TURN15_FAINTED_LINE2, TURN15_FAINTED_TEXT_START_TICK, TURN15_FAINTED_TEXT_TOTAL, actionMenuAge, anchorOpponentAfterTurn2Hp, anchorOpponentAfterTurnHp, anchorPlayerAfterTurnHp, anchorPlayerBattler, battleBg, battleWindow, brendan, brendanSettledTileset, brendanThrowTilesets, charmap, cursorState, drawBallIcons, drawBallOpenParticles, drawBattle2ActionMenuWindow, drawComposedPlayerHealthbox, drawCursor, drawFightSubmenuChromeFromLatest, drawFightSubmenuChromeFromLiveState, drawGrantingStarsAtAge, drawGrovyleSettled, drawKabutoHSlideWobble, drawOpponentHealthboxWobble, drawOpponentSummaryExit, drawPlayerBallOpen, drawPlayerBallOpenParticles, drawPlayerMaterializeSettle, drawRockSprite, drawSendOutBall, drawSpriteSheetAffineTintedBlend, drawStaticBgShiftedY, drawTileBg, drawTileBgFaded, drawTurn13MurkrowSettled, drawTurn13SandAttackAccBanner, drawTurn15ForcedSwitchBall, drawTurn15ForcedSwitchRelease, drawTurn15MagbyHealthbox, drawTurn15PartyListObjMask, drawTurn15PartySelectList, drawTurn16FightSubmenuWindow, drawTurn2KickoffText, drawTurn3EndeavorText, drawTurn4KickoffText, drawTurn5EndeavorText, drawTurn5RockSlideAttack, drawTurn5SitrusSettledMenuChrome, drawTurn5SwitchinSprite, drawTurn6FieldBase, drawTurn6FightSubmenuWindow, drawTurn7FightSubmenuWindow, drawTurn8FightSubmenuWindow, drawTurn9FightSubmenuWindow, drawTurn9TurnEndSettledMenu, drawTurnEndSettledMenu, drawTurnKickoffText, fadeTurn15PartyFramebuffer, font, getMenuHealthboxPlayerContentMask, healthboxBackgroundColorAt, introTrainer, kabutoHealthboxContent, kabutoHealthboxContentForHp, menuHealthboxPlayer, menuIdleBlank, murkrowFrontSprite, murkrowHealthboxContent, onixPlayerHealthboxContent, opponentHealthboxContent, pidgeottoFrontSprite, pidgeottoHealthboxContentForHp, playerHealthboxHpOverlayForHp, playerSendOutClock, playerTrainerSendOutClock, sendOutBgFadeY, setPixel, summaryBall, trainerExitX, turn13FaintedTextVisibleChars, turn13MurkrowBgFadeY, turn13MurkrowMaterializeCoeff, turn13SandAttackAccEva, turn13SwitchinSentOutTextVisibleChars, turn14BareSceneStartTick, turn15KickoffBounceTick, turn15ReleaseFieldPalette, turn5ReopenBounceTick, turn5SubmenuBounceTickFromLatest } from "./battleScene.ts";
+import turn15FieldPpuAsset from "../assets/gen/turn15-field-ppu-20302.json" with { type: "json" };
+import { drawBattleCommandActionChrome, renderBattleCommandPresentation } from "./battleCommandPresentationRender.ts";
+import { FIGHT_CONFIRM_TEXT_DELAY, FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT, FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, GO_TEXT, GO_TEXT_START_TICK, PLAYER_THROW_BALL_START_TICK, ROCK_SLIDE_LINE2, STAT_ROSE_LINE1, STAT_ROSE_LINE2, brendanThrowDx, brendanThrowFrame, goTextVisibleChars, menuIdleBounce, playerHealthboxSlideDx, playerMaterializeBgFadeY, playerThrowBallSpin, playerThrowBallTopLeft, rockSlideBg3Y, rockSlideDrawOrder, rockSlideHealthboxWobbleY2, rockSlideMonBlinkInvisible, rockSlideMonShakeY2, rockSlideOpponentHp, rockSlideRockState, rockSlideTextStartTick, rockSlideTextVisibleChars, statRoseTextStartTick, statRoseTextVisibleChars, turn2KickoffBounceTick, turn2KickoffTextStartTick, turn2SubmenuBounceTickFromPresentationEpochAge, turnKickoffBounceTick, turnKickoffTextStartTick, turnKickoffTextVisibleChars } from "./battleMenu.ts";
+import type { BattleSceneResolutionOwner } from "./battleSceneResolutionOwner.ts";
+import { fightCommandSettledBounceEpochTick, fightCommandSubmenuBounceEpochTick, retainedFightCommandResolutionOwner } from "./fightCommandPresentation.ts";
+import { drawText } from "./font.ts";
+import { drawMode0Ppu } from "./gbaPpu.ts";
+import { isLatestCompletedCommandHandoffReady, isLatestCompletedCommandLifecycleActive, latestCompletedCommandPresentationEpoch } from "./nextCommandHandoff.ts";
+import { opponentFaintContinuationElapsed } from "./opponentFaintPresentationOwner.ts";
+import type { OpponentFaintPresentationOwner } from "./opponentFaintPresentationOwner.ts";
+import { bgFadeY, objFadeY } from "./paletteFade.ts";
+import { PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_GO_TEXT, partySelectEntryPhase, partySendOutBattleFadeBldy, partySendOutGoTextVisibleChars, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick } from "./partySelect.ts";
+import { TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM } from "./turn1ChooseActionReset.ts";
+import { isTurn2LatestCompletedCommandLifecycleActive, turn2FightCommandPresentationFromLatest } from "./turn2ResolutionAdapter.ts";
+import { isTurn3LatestCompletedCommandLifecycleActive, turn3FightCommandPresentationFromLatest } from "./turn3ResolutionAdapter.ts";
+import { isTurn4LatestCompletedCommandLifecycleActive, turn4FightCommandPresentationFromLatest } from "./turn4ResolutionAdapter.ts";
 import { CLOSED_FIGHT_SUBMENU_STATE, FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY, FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT, HIT_FLASH_RAM_ANCHOR_DELAY, MENU_IDLE_BLANK_END_TICK, ROCK_SLIDE_ANIMATION_PROFILE, ROCK_SLIDE_LINE1, TURN6_ROCKSLIDE_MENU_REDRAW_DELAY, TURN6_ROCKSLIDE_PRESS_TICK, TURN7_ROCKSLIDE_MENU_REDRAW_DELAY, TURN7_ROCKSLIDE_PRESS_TICK } from "./battleMenu.ts";
 import { fightCommandKickoffBounceEpochTick, type FightCommandPresentation } from "./fightCommandPresentation.ts";
 import { composePlayerHealthboxHpOverlay } from "./healthboxAssembly.ts";
@@ -3580,4 +3597,1852 @@ export function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
     12,
     8,
   );
+}
+
+// --- slice 4 batch: verbatim move ---
+
+export function drawTurn15PartySelectWindow(fb: Uint8Array, state: BattleSceneState, party: import("./partySelect.ts").PartySelectState): boolean {
+  if (party.sendOutElapsed !== null) {
+    const phase = partySendOutPhase(party.sendOutElapsed);
+    if (phase === "submenuHold") {
+      drawTurn15PartySelectList(fb, party);
+      return true;
+    }
+    if (phase === "fadingOut") {
+      drawTurn15PartySelectList(fb, party);
+      const mask = new Uint8Array(fb.length);
+      drawTurn15PartyListObjMask(mask, party);
+      fadeTurn15PartyFramebuffer(fb, bgFadeY(party.sendOutElapsed - PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT), mask, objFadeY(party.sendOutElapsed - PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_FADE_OUT));
+      return true;
+    }
+    if (phase === "black") return true;
+    if (phase === "actionMenu" && state.fightSubmenu.openElapsed !== null) {
+      drawTurn16FightSubmenuWindow(
+        fb,
+        TICK0 + state.elapsed,
+        state.fightSubmenu,
+        party.sendOutElapsed,
+        state.resolutionOwner?.followingPresentation ?? null,
+        state.terminalResolution ?? null,
+        state.trainerPresentation,
+      );
+      return true;
+    }
+    // The extracted mode-0 state supplies field/message-box ownership and
+    // unfaded palette RAM.  Fade, text, and release clocks all remain
+    // confirmation-relative.
+    const releaseTick = partySendOutReleaseLogicalTick(party.sendOutElapsed);
+    const bounce = phase === "actionMenu"
+      ? menuIdleBounce(partySendOutMenuBounceTick(party.sendOutElapsed))
+      : { onixY2: 0, healthboxY2: 0 };
+    drawMode0Ppu(fb, {
+      ...turn15FieldPpuAsset,
+      bldy: partySendOutBattleFadeBldy(party.sendOutElapsed),
+      paletteBgr555: releaseTick === null ? turn15FieldPpuAsset.paletteBgr555 : turn15ReleaseFieldPalette(releaseTick),
+    });
+    drawTurn15ForcedSwitchBall(fb, party.sendOutElapsed);
+    if (releaseTick !== null) drawTurn15ForcedSwitchRelease(fb, releaseTick, "MAGBY", bounce.onixY2);
+    const healthboxDx = partySendOutHealthboxDx(party.sendOutElapsed);
+    if (healthboxDx !== null) drawTurn15MagbyHealthbox(fb, healthboxDx, bounce.healthboxY2);
+    if (phase === "actionMenu") {
+      drawTurn15MagbySettledMenuChrome(fb);
+    } else if (phase !== "blankMessage") {
+      drawMessageTextLines(fb, PARTY_SENDOUT_GO_TEXT, "", partySendOutGoTextVisibleChars(party.sendOutElapsed));
+    }
+    return true;
+  }
+  const phase = partySelectEntryPhase(party.elapsed);
+  // The faint-message controller is torn down on the dismiss edge: its
+  // cursor/bounce presentation freezes at that exact rendered battle frame
+  // for the hold and for every source frame fed into the fade.  Deriving the
+  // entry tick from current scene elapsed keeps delayed A presses honest.
+  const entryTick = TICK0 + state.elapsed - party.elapsed;
+  const pressTick = state.fightSubmenu.confirmElapsed === null ? TURN15_FLY_STRIKE_TEXT_START_TICK : TICK0 + state.fightSubmenu.confirmElapsed;
+  if (phase === "battleHold") {
+    drawTurn15FlyStrikeWindow(fb, entryTick, pressTick);
+    return true;
+  }
+  if (phase === "fadingOut") {
+    drawTurn15FlyStrikeWindow(fb, entryTick, pressTick);
+    const local = party.elapsed - PARTY_ENTRY_FADE_OUT_START;
+    const mask = new Uint8Array(fb.length);
+    drawTurn13MurkrowSettled(mask);
+    drawSendOutHealthbox(mask, 0, murkrowHealthboxContent);
+    fadeTurn15PartyFramebuffer(fb, bgFadeY(local, PARTY_ENTRY_FADE_OUT), mask, objFadeY(local, PARTY_ENTRY_FADE_OUT));
+    return true;
+  }
+  if (phase === "black") return true;
+  drawTurn15PartySelectList(fb, party);
+  if (phase === "fadingIn") {
+    const local = party.elapsed - PARTY_ENTRY_FADE_IN_START;
+    const mask = new Uint8Array(fb.length);
+    drawTurn15PartyListObjMask(mask, party);
+    fadeTurn15PartyFramebuffer(fb, bgFadeY(local, PARTY_ENTRY_FADE_IN), mask, objFadeY(local, PARTY_ENTRY_FADE_IN));
+  }
+  return true;
+}
+
+export function drawTurn15FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  resolution: import("./battleResolutionPresentation.ts").BattleResolutionPresentationState,
+  latest: LatestCompletedCommandHandoff | null = null,
+): void {
+  const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (sm.openElapsed === null || t < revealTick) {
+    const shiftedBounceTick = t + TURN14_MENU_REDRAW_RESET_SHIFT;
+    drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    if (t >= TURN15_FLY_STRIKE_TEXT_START_TICK) {
+      drawTurn15FlyStrikeWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const shiftedBounceTick = sm.confirmElapsed !== null ? turn15KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN14_MENU_REDRAW_RESET_SHIFT;
+  drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChromeFromLatest(
+    fb,
+    sm.displayCursor,
+    sm.activeMonMoveset,
+    latest,
+    resolution,
+  );
+}
+
+export function drawTurn15FlyStrikeWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const frozenBounceTick = turn15KickoffBounceTick(t, pressTick);
+  const onixHp = turn15StrikeTargetHp(t, TURN12_ONIX_AFTER_AERIALACE_HP);
+  const onixSinkSkipRows = turn15FaintSinkSkipRows(t, TURN15_ONIX_SINK_START_TICK, TURN15_ONIX_SINK_RATE);
+  const onixHealthboxVisible = t < TURN15_ONIX_HEALTHBOX_VANISH_TICK;
+  drawTurn13SwitchinFieldBase(
+    fb,
+    t,
+    frozenBounceTick,
+    turn15StrikeAttackerInvisible(t, TURN15_STRIKE_ATTACKER_REVEAL_TICK),
+    turn15StrikeTargetInvisible(t, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_START_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_END_TICK, TURN15_STRIKE_TARGET_INVISIBLE_PULSE_PERIOD),
+    turn15StrikeTargetHealthboxWobbleY2(t, TURN15_HEALTHBOX_WOBBLE_RAM_START, TURN15_HEALTHBOX_WOBBLE_TICKS),
+    turn15StrikeTargetShakeX2(t, TURN15_ONIX_SHAKE_X2, TURN15_ONIX_SHAKE_RAM_TICKS),
+    onixHp,
+    onixSinkSkipRows,
+    onixHealthboxVisible,
+  );
+  drawTurn15ImpactHitsplat(fb, t);
+  drawTurn15FlyBallDescent(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t >= TURN15_FAINTED_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN15_FAINTED_LINE1, TURN15_FAINTED_LINE2, turn15SimpleVisibleChars(t, TURN15_FAINTED_TEXT_START_TICK, TURN15_FAINTED_TEXT_TOTAL));
+    const cursor = cursorState(t, TURN15_FAINTED_CURSOR_START_TICK);
+    if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN15_FAINTED_CURSOR_X);
+    return;
+  }
+  if (t >= TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn15SimpleVisibleChars(t, TURN15_NOTVERYEFFECTIVE_TEXT_START_TICK, TURN9_NOTVERYEFFECTIVE_LINE.length));
+    return;
+  }
+  drawMessageTextLines(fb, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, turn15SimpleVisibleChars(t, TURN15_FLY_STRIKE_TEXT_START_TICK, TURN15_FLY_STRIKE_TEXT_TOTAL));
+}
+
+export function drawTurn14FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  latest: LatestCompletedCommandHandoff | null = null,
+): void {
+  const revealTick = sm.openElapsed === null ? -Infinity : TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (sm.openElapsed === null || t < revealTick) {
+    const shiftedBounceTick = sm.openElapsed === null ? t + TURN13_SETTLED_BOUNCE_PHASE_SHIFT : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SETTLED_BOUNCE_PHASE_SHIFT;
+    drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    if (t >= turn14BareSceneStartTick(pressTick)) {
+      drawTurn14FlyMissWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const shiftedBounceTick = sm.confirmElapsed !== null ? turn14KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT + TURN13_SETTLED_BOUNCE_PHASE_SHIFT;
+  drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  // The handoff owns turn 13's already-completed PP and persisted slot before
+  // the retained charge receipt advances to its locked strike segment.
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
+}
+
+export function drawTurn14FlyMissWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= TURN14_MENU_REDRAW_TICK) {
+    const shiftedBounceTick = t + TURN14_MENU_REDRAW_RESET_SHIFT;
+    drawTurn13SwitchinFieldBase(fb, t, shiftedBounceTick, true);
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (t >= TURN14_MENU_TEXT_CLEAR_TICK) {
+    // TEXT_CLEAR_TICK <= t < MENU_REDRAW_TICK: blank hold, mirrors
+    // drawTurn13SwitchinWindow's own gap - drawTileBg below already paints
+    // the message box's own flat teal fill.
+    drawTurn13SwitchinFieldBase(fb, t, turn14KickoffBounceTick(t, pressTick), turn14MurkrowInvisible(t));
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    return;
+  }
+  const frozenBounceTick = turn14KickoffBounceTick(t, pressTick);
+  const murkrowInvisible = turn14MurkrowInvisible(t);
+  drawTurn13SwitchinFieldBase(fb, t, frozenBounceTick, murkrowInvisible);
+  drawTurn14FlyBall(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t >= TURN14_MISSED_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN8_MISS_LINE1, TURN8_MISS_LINE2, turn14SimpleVisibleChars(t, TURN14_MISSED_TEXT_START_TICK, TURN8_MISS_TEXT_TOTAL));
+    return;
+  }
+  if (t >= TURN14_DRAGONBREATH_TEXT_START_TICK) {
+    drawMessageTextLines(fb, ROCK_SLIDE_LINE1, DRAGONBREATH_KICKOFF_LINE2, turn14SimpleVisibleChars(t, TURN14_DRAGONBREATH_TEXT_START_TICK, TURN14_DRAGONBREATH_TEXT_TOTAL));
+    return;
+  }
+  if (t >= TURN14_FLYUP_TEXT_START_TICK) {
+    drawMessageTextLines(fb, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, turn14SimpleVisibleChars(t, TURN14_FLYUP_TEXT_START_TICK, TURN14_FLYUP_TEXT_TOTAL));
+    return;
+  }
+  // Bare scene, no message box content at all (the empty-string kickoff
+  // quirk, §5a) - field base + ball (if alive) + tile bg above already
+  // cover the whole frame.
+}
+
+export function drawSendOutHandoff(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  encounter: BattleSceneState["encounter"] = "destin",
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  const isJenson = encounter === "jenson";
+  // PlayerHandleIntroTrainerBallThrow is scheduled from the opponent
+  // send-out handoff, not from the battle scene's absolute clock.  Battle 1
+  // established handoff=1462; rebasing onto that proven clock keeps every
+  // Brendan/ball/ONIX helper unchanged while allowing later encounters to
+  // start their send-out at a different scene elapsed.
+  const playerT = playerSendOutClock(t, handoffTick);
+  // In the subsequent-battle intro, the already-created player trainer and
+  // party summary retain their controller delay while the generic ball
+  // task proceeds on the ordinary handoff-relative clock.  The first live
+  // trainer/summary callback is 45 ticks later, pinned by the dense trace's
+  // last unchanged settled pose (32726) and first changed pose (32727).
+  const playerTrainerT = playerTrainerSendOutClock(t, handoffTick, encounter);
+  // battleMenu.ts's own module doc (§3 item 5 root-cause, PROGRESS.md #98's
+  // named blocker): the player's own ONIX release re-triggers the identical
+  // BG-to-white materialize dither `sendOutBgFadeY` models for the
+  // opponent's own send-out - the two windows never overlap, so only one of
+  // the two is ever nonzero at a given tick.
+  //
+  // Battle 2 retains the already-created trainer controller's 45-tick
+  // callback delay for the whole visual throw chain (trainer, ball,
+  // materialize, particles, and healthbox).  Only the independently queued
+  // "Go! ONIX!" printer uses `playerT`.  This is observable before any
+  // overlap: canonical 32727..32759 maps byte-for-byte to Battle 1's visual
+  // ticks 1574..1606, with no ball yet present.
+  const bgFadeY = sendOutBgFadeY(t, handoffTick) || playerMaterializeBgFadeY(playerTrainerT);
+  drawTileBgFaded(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette, bgFadeY);
+  // battleMenu.ts: Brendan's throw pose-swap + exit translation start at
+  // BRENDAN_THROW_START_TICK - before that he's still the settled slide-in
+  // pose (frame 3, unshifted). `brendanThrowFrame` uses `null` for BOTH ends
+  // of its own table (before the throw starts, AND once its `FRAME(3,50)`
+  // tail is exhausted, et>=116 - a "table truncated both ends" case, per
+  // this run's own named convention) - the two must NOT be conflated here:
+  // once the throw has started, `null` means "long done and off-screen"
+  // (`brendanThrowDx` itself freezes fully off-screen at n=50), not "back to
+  // the settled on-screen pose". Found via ISSUES #17's own settle-window
+  // work: this bug was invisible before (masked by the much larger
+  // ONIX-missing gap it happened to overlap) and surfaced only once ONIX's
+  // own real transparency let Brendan's incorrectly-redrawn settled sprite
+  // show through at render tick 1690+ (`BRENDAN_THROW_START_TICK`+116).
+  const throwFrame = brendanThrowFrame(playerTrainerT);
+  if (playerTrainerT < BRENDAN_THROW_START_TICK) {
+    drawSpriteSheet(fb, brendanSettledTileset, brendan.palette, PLAYER_CORNER.x, PLAYER_CORNER.y);
+  } else if (throwFrame !== null) {
+    const dx = brendanThrowDx(playerTrainerT) ?? 0;
+    drawSpriteSheet(fb, brendanThrowTilesets[throwFrame]!, brendan.palette, PLAYER_CORNER.x + dx, PLAYER_CORNER.y);
+  }
+  const trainerX = trainerExitX(t, handoffTick);
+  if (trainerX !== null) {
+    const trainer = introTrainer(encounter, trainerPresentation);
+    drawSpriteSheet(fb, trainer.tileset, trainer.palette, trainerX, OPPONENT_CORNER.y);
+  }
+  if (isJenson) {
+    drawKabutoMaterialize(fb, t, handoffTick);
+    drawKabutoHSlideWobble(fb, t, handoffTick, encounter);
+  } else {
+    drawGrovyleMaterialize(fb, t, handoffTick);
+    drawGrovyleStretchEarly(fb, t, handoffTick);
+    if (t < GROVYLE_MATERIALIZE_TICK) drawGrovyleStretch(fb, t, handoffTick);
+  }
+  drawSendOutBall(fb, t, handoffTick);
+  const playerBallTopLeft = playerThrowBallTopLeft(playerTrainerT);
+  if (playerBallTopLeft !== null) {
+    drawSpriteSheet(fb, BALL_CLOSED_TILESET, summaryBall.palette, playerBallTopLeft.x, playerBallTopLeft.y);
+  }
+  const playerBallSpin = playerThrowBallSpin(playerTrainerT);
+  if (playerBallSpin !== null) {
+    drawSpriteSheetAffineRotate(
+      fb,
+      BALL_CLOSED_TILESET,
+      summaryBall.palette,
+      playerBallSpin.centerX,
+      playerBallSpin.centerY,
+      playerBallSpin.pa,
+      playerBallSpin.pb,
+      playerBallSpin.pc,
+      playerBallSpin.pd,
+    );
+  }
+  drawBallOpenParticles(fb, t, handoffTick, encounter);
+  drawPlayerMaterialize(fb, playerTrainerT);
+  drawPlayerMaterializeSettle(fb, playerTrainerT, encounter);
+  drawPlayerBallOpen(fb, playerTrainerT);
+  drawPlayerBallOpenParticles(fb, playerTrainerT);
+  if (!isJenson && t >= GROVYLE_MATERIALIZE_TICK) drawGrovyleSettled(fb);
+  // §7.19: `drawOpponentSummaryExit` only draws from elapsed=t-handoffTick-1
+  // >= 0 (render handoffTick+1 on) - at handoffTick itself (elapsed=-1) the
+  // real game still shows the opponent's settled (un-faded, un-slid) bar+
+  // icons for exactly one tick before the exit fade/slide takes over, so
+  // fall back to the same settled render the pre-handoff branch uses.
+  drawBallIcons(fb, playerTrainerT, {
+    opponent: t === handoffTick,
+    player: true,
+    playerEvaOffset: playerSummaryEvaOffset(playerTrainerT, encounter),
+  });
+  drawOpponentSummaryExit(fb, t, handoffTick, encounter);
+  const healthboxDx = isJenson
+    ? healthboxSlideDx(t, handoffTick + 32, -110, true)
+    : healthboxSlideDx(t, handoffTick + 33);
+  if (healthboxDx !== null) drawSendOutHealthbox(fb, healthboxDx, isJenson ? kabutoHealthboxContent : opponentHealthboxContent);
+  const playerHealthboxDx = playerHealthboxSlideDx(playerTrainerT);
+  if (playerHealthboxDx !== null) drawMenuHealthboxPlayer(fb, playerHealthboxDx);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  // battleMenu.ts §1/§2: the box clears (no blank-box frame - a bare
+  // `drawTileBg` above already redraws it empty) and "Go! ONIX!" starts
+  // printing the same tick the opponent's held "sent\nout GROVYLE!" text
+  // would otherwise still be drawn.
+  if (isJenson && playerT >= PLAYER_THROW_BALL_START_TICK + 1) {
+    drawMessageTextLines(
+      fb,
+      GO_TEXT,
+      "",
+      Math.min(GO_TEXT.length, playerT - (PLAYER_THROW_BALL_START_TICK + 1) + 1),
+    );
+  } else if (!isJenson && playerT >= GO_TEXT_START_TICK) {
+    drawMessageTextLines(fb, GO_TEXT, "", goTextVisibleChars(playerT));
+  } else {
+    const params = battleSendOutEncounterParams(encounter);
+    drawMessageTextLines(fb, params.line1, params.line2, params.textTotal);
+  }
+}
+
+export function drawRockSlideAttack(fb: Uint8Array, t: number, pressTick: number): void {
+  // ISSUES #39 rank-6 slice 1: the camera shake (`rockSlideBg3Y`), Grovyle's
+  // own target shake (`rockSlideMonShakeY2`), and the falling-rock props
+  // (`rockSlideDrawOrder`/`rockSlideRockState`) are ROCK_SLIDE's own
+  // `attackanimation` body - class (c), never renders under
+  // `HITMARKER_NO_ANIMATIONS` (RAM-confirmed flat 0 the whole window, this
+  // window's own doc comment above) - dropped entirely rather than called
+  // with a never-active override.
+  drawStaticBgShiftedY(fb, 0);
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
+  }
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN1_ROCKSLIDE_HP.from, TURN1_ROCKSLIDE_HP.to, TURN1_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(opponentHp));
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2);
+  drawMenuHealthboxPlayer(fb, 0);
+  drawMenuIdleBounceOverlay(fb, turnKickoffBounceTick(t, pressTick));
+}
+
+export function drawRockSlideWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  const redrawTick = pressTick + TURN1_CHOOSE_ACTION_RESET_AFTER_CONFIRM;
+  if (t >= redrawTick) {
+    drawTurnEndSettledMenu(fb, t, pressTick);
+    return;
+  }
+  const statRoseStart = statRoseTextStartTick(pressTick, TURN1_OFF_STAT_ROSE_TEXT_DELAY);
+  const rockSlideStart = rockSlideTextStartTick(pressTick, TURN1_OFF_ROCKSLIDE_TEXT_DELAY);
+  const textClearTick = pressTick + TURN1_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawRockSlideAttack(fb, t, pressTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    let line1: string;
+    let line2: string;
+    let chars: number;
+    if (t < statRoseStart) {
+      line1 = TURN1_ROCKSLIDE_KICKOFF_LINE1;
+      line2 = TURN1_ROCKSLIDE_KICKOFF_LINE2;
+      chars = turnKickoffTextVisibleChars(t, pressTick);
+    } else if (t < rockSlideStart) {
+      line1 = STAT_ROSE_LINE1;
+      line2 = STAT_ROSE_LINE2;
+      chars = statRoseTextVisibleChars(t, pressTick, TURN1_OFF_STAT_ROSE_TEXT_DELAY);
+    } else {
+      line1 = TURN1_ROCKSLIDE_ATTACK_LINE1;
+      line2 = TURN1_ROCKSLIDE_ATTACK_LINE2;
+      chars = rockSlideTextVisibleChars(t, pressTick, TURN1_OFF_ROCKSLIDE_TEXT_DELAY);
+    }
+    drawMessageTextLines(fb, line1, line2, chars);
+  }
+}
+
+export function drawFaintedOpponentWindow(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  sandAttackPressTick: number,
+  opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null = null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
+  const dismiss = opponentFaintPresentationOwner?.dismiss ?? null;
+  const continuationElapsed = opponentFaintContinuationElapsed(
+    opponentFaintPresentationOwner,
+    t - TICK0,
+  );
+  if (
+    dismiss !== null
+    && continuationElapsed !== null
+    && continuationElapsed >= TURN13_ICONBAR_CREATE_AFTER_DISMISS
+  ) {
+    drawTurn13SwitchinWindow(
+      fb,
+      t,
+      frozenBounceTick,
+      pressTick + TURN13_FAINTED_CURSOR_START_DELAY,
+      opponentFaintPresentationOwner!,
+      trainerPresentation,
+    );
+    return;
+  }
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, TURN13_DRAGONBREATH_HP.to, { keptRows: 0, y2: TURN13_FAINT_SINK_STEPS * 8 }, false);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(
+    fb,
+    TURN13_DRAGONBREATH_FAINT_LINE1,
+    TURN13_DRAGONBREATH_FAINT_LINE2,
+    turn13FaintedTextVisibleChars(t, pressTick),
+  );
+  const cursorStart = pressTick + TURN13_FAINTED_CURSOR_START_DELAY;
+  const cursorTick = dismiss === null
+    ? t
+    : Math.min(t, TICK0 + dismiss.cursor.frozenAtElapsed);
+  const cursor = cursorState(cursorTick, cursorStart);
+  if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
+}
+
+export function drawDragonBreathKoWindow(
+  fb: Uint8Array,
+  t: number,
+  sandAttackPressTick: number,
+  opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  const dbPressTick = TURN13_DRAGONBREATH_PRESS_TICK;
+  if (t >= turn13FaintedTextStartTick(dbPressTick)) {
+    drawFaintedOpponentWindow(
+      fb,
+      t,
+      dbPressTick,
+      sandAttackPressTick,
+      opponentFaintPresentationOwner,
+      trainerPresentation,
+    );
+    return;
+  }
+  const frozenBounceTick = turn13KickoffBounceTick(t, sandAttackPressTick);
+  const hp = dragonBreathHp(
+    t,
+    dbPressTick,
+    TURN13_DRAGONBREATH_HP.from,
+    TURN13_DRAGONBREATH_HP.to,
+  );
+  const sink =
+    t >= TURN13_FAINT_SINK_START_TICK
+      ? faintSinkRowsAndY2(t, TURN13_FAINT_SINK_START_TICK, TURN13_FAINT_SINK_STEPS)
+      : rockSlideMonBlinkInvisible(t, TURN13_HIT_FLASH_PRESS_TICK)
+        ? { keptRows: 0, y2: 0 }
+        : null;
+  const healthboxVisible = t < TURN13_HEALTHBOX_VANISH_TICK;
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, 0, hp, sink, healthboxVisible);
+  if (healthboxVisible) {
+    const healthboxY2 = rockSlideHealthboxWobbleY2(t, TURN13_HIT_FLASH_PRESS_TICK);
+    if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, pidgeottoHealthboxContentForHp(hp));
+  }
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawMessageTextLines(
+    fb,
+    TURN13_DRAGONBREATH_KICKOFF_LINE1,
+    TURN13_DRAGONBREATH_KICKOFF_LINE2,
+    dragonBreathTextVisibleChars(t, dbPressTick),
+  );
+}
+
+export function drawTurn13SandAttackWindow(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  if (t >= dragonBreathTextStartTick(TURN13_DRAGONBREATH_PRESS_TICK)) {
+    drawDragonBreathKoWindow(
+      fb,
+      t,
+      pressTick,
+      opponentFaintPresentationOwner,
+      trainerPresentation,
+    );
+    return;
+  }
+  const frozenBounceTick = turn13KickoffBounceTick(t, pressTick);
+  drawTurn13FieldBase(fb, t, frozenBounceTick, undefined, undefined, 0, false, turn13SandAttackPidgeottoX2(t, pressTick));
+  drawTurn13SandAttackDirt(fb, t, pressTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const accEva = turn13SandAttackAccEva(t, pressTick);
+  if (accEva !== null) drawTurn13SandAttackAccBanner(fb, t, pressTick, accEva);
+  const accFellStart = turn13AccFellTextStartTick(pressTick);
+  if (t >= accFellStart) {
+    drawMessageTextLines(fb, TURN13_ACCFELL_EVENT_LINE1, TURN13_ACCFELL_EVENT_LINE2, turn13AccFellTextVisibleChars(t, pressTick));
+    return;
+  }
+  drawMessageTextLines(fb, TURN13_SANDATTACK_EVENT_LINE1, TURN13_SANDATTACK_EVENT_LINE2, turn13SandAttackTextVisibleChars(t, pressTick));
+}
+
+export function drawTurn13FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null,
+  trainerPresentation?: FactoryTrainerPresentation,
+  latest: LatestCompletedCommandHandoff | null = null,
+): void {
+  if (sm.openElapsed === null) {
+    drawTurn12TurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    // Oracle-pixel-confirmed this session (turn13-menu.json bisection): this
+    // specific DMA-wait window needs an UNSHIFTED raw `t` here, not the
+    // usual `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` every other turn's analogous
+    // branch uses - the underlying `menuIdleBounce` table's own plateau
+    // boundary for THIS regime (anchored off `TURN12_ROCKSLIDE_PRESS_TICK+
+    // TURN12_ROCKSLIDE_MENU_REDRAW_DELAY`) lands 2 ticks earlier than the
+    // shifted formula predicts - not assumed transferable from turn 12's own
+    // instance, which uses a different regime anchor and DOES need the -2
+    // shift; a real per-turn residue difference, not a bug in the shared
+    // constant.
+    drawTurn12TurnEndSettledMenu(fb, t);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn13SandAttackTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn13SandAttackWindow(
+        fb,
+        t,
+        pressTick,
+        opponentFaintPresentationOwner,
+        trainerPresentation,
+      );
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn13KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawTurn13FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
+}
+
+export function drawTurn13FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, pidgeottoX2: number = 0, pidgeottoHp: number = TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP, pidgeottoSink: { keptRows: number; y2: number } | null = null, pidgeottoHealthboxVisible: boolean = true): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken, pidgeottoX2, pidgeottoSink, pidgeottoHealthboxVisible);
+  if (pidgeottoHealthboxVisible) drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(pidgeottoHp));
+}
+
+export function drawTurn12FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  latest: LatestCompletedCommandHandoff | null = null,
+): void {
+  if (sm.openElapsed === null) {
+    drawTurn11RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn11RockSlideTurnEndSettledMenu(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn10AerialAceTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn12AerialAceWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn12KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  // ISSUES #39 rank-5 slice 1: `turn12KickoffBounceTick`'s own already-
+  // established freeze (past `pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`,
+  // its driver already torn down) is out of `TURN12_KICKOFF_BOUNCE_INDEX_
+  // OFFSET`'s own RAM-verified regime (live driver) - only apply the offset
+  // while that driver is still live.
+  const bounceIndexOffset = sm.confirmElapsed === null || t < TICK0 + sm.confirmElapsed + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
+    ? TURN12_KICKOFF_BOUNCE_INDEX_OFFSET
+    : 0;
+  drawTurn12FieldBase(fb, t, bounceTick, undefined, undefined, undefined, undefined, undefined, undefined, bounceIndexOffset);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
+}
+
+export function drawTurn12RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN12_OFF_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn12TurnEndSettledMenu(fb, t, t, pressTick);
+    return;
+  }
+  const frozenBounceTick = turn12KickoffBounceTick(t, pressTick);
+  drawTurn12FieldBase(fb, t, frozenBounceTick, undefined, TURN12_ONIX_AFTER_AERIALACE_HP, 0, false);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const textClearTick = pressTick + TURN12_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  if (t < textClearTick) {
+    const missStart = turn12MissTextStartTick(pressTick);
+    if (t >= missStart) {
+      drawMessageTextLines(fb, TURN8_MISS_LINE1, TURN8_MISS_LINE2, turn12MissTextVisibleChars(t, pressTick));
+    } else {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    }
+  }
+}
+
+export function drawTurn12TurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t, pressTick: number = TURN12_ROCKSLIDE_PRESS_TICK): void {
+  const bounceTick = turn12RockSlideResettledBounceTick(bounceRawTick, pressTick);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN12_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+export function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN12_OFF_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn12RockSlideWindow(fb, t);
+    return;
+  }
+  const bounceTick = turn12KickoffBounceTick(t, pressTick);
+  const onixHp = turn10AerialAceHp(t, pressTick, TURN12_AERIALACE_HP.from, TURN12_AERIALACE_HP.to, TURN12_OFF_AERIALACE_HP_DRAIN_START_DELAY);
+  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN12_OFF_ONIX_FLICKER_START);
+  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN12_OFF_ONIX_HEALTHBOX_WOBBLE_START);
+  drawTurn12FieldBase(fb, t, bounceTick, undefined, onixHp, 0, false, onixInvisible, healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick, TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY);
+  if (t >= notVeryEffectiveStart) {
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn10NotVeryEffectiveTextVisibleChars(t, pressTick, TURN12_OFF_NOTVERYEFFECTIVE_TEXT_DELAY));
+  } else {
+    drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
+  }
+}
+
+export function drawTurn12FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN10_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, onixInvisible: boolean = false, healthboxY2Override?: number, bounceIndexOffset: number = 0): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN12_REGIME7_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, onixInvisible, healthboxY2Override, onixY2Extra, darken, undefined, undefined, undefined, bounceIndexOffset);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+export function drawTurn11FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  latest: LatestCompletedCommandHandoff | null = null,
+): void {
+  if (sm.openElapsed === null) {
+    drawTurn10RockSlideTurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn10RockSlideTurnEndSettledMenu(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn6FeatherDanceTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn11FeatherDanceWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn11KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  // ISSUES #39 rank-5 slice 1: `turn11KickoffBounceTick`'s own already-
+  // established freeze (past `pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`,
+  // its driver already torn down) is out of `TURN11_KICKOFF_BOUNCE_INDEX_
+  // OFFSET`'s own RAM-verified regime (live driver) - only apply the offset
+  // while that driver is still live.
+  const bounceIndexOffset = sm.confirmElapsed === null || t < TICK0 + sm.confirmElapsed + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
+    ? TURN11_KICKOFF_BOUNCE_INDEX_OFFSET
+    : 0;
+  drawTurn11FieldBase(fb, t, bounceTick, undefined, undefined, undefined, undefined, bounceIndexOffset);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
+}
+
+export function drawTurn11FeatherDanceWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN11_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn11RockSlideWindow(fb, t);
+    return;
+  }
+  const bounceTick = turn11KickoffBounceTick(t, pressTick);
+  drawTurn11FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const atkFloorStart = turn11AtkFloorTextStartTick(pressTick);
+  if (t >= atkFloorStart) {
+    drawMessageTextLines(fb, TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, turn11AtkFloorTextVisibleChars(t, pressTick));
+  } else {
+    drawMessageTextLines(fb, TURN6_FEATHERDANCE_LINE1, TURN6_FEATHERDANCE_LINE2, turn6FeatherDanceTextVisibleChars(t, pressTick));
+  }
+}
+
+export function drawTurn11RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN11_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn11RockSlideTurnEndSettledMenu(fb, t, t, pressTick, TURN11_OFF_ROCKSLIDE_MENU_REDRAW_DELAY);
+    return;
+  }
+  const textClearTick = pressTick + TURN11_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawTurn11RockSlideAttack(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    const superEffectiveStart = turn11SuperEffectiveTextStartTick(pressTick, TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY);
+    if (t >= superEffectiveStart) {
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn11SuperEffectiveTextVisibleChars(t, pressTick, TURN11_OFF_SUPER_EFFECTIVE_TEXT_DELAY));
+    } else {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    }
+  }
+}
+
+export function drawTurn11RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t, pressTick: number = TURN11_ROCKSLIDE_PRESS_TICK, menuRedrawDelay: number = TURN11_ROCKSLIDE_MENU_REDRAW_DELAY): void {
+  const bounceTick = turn11RockSlideResettledBounceTick(bounceRawTick, pressTick, menuRedrawDelay);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+export function drawTurn11RockSlideAttack(fb: Uint8Array, t: number): void {
+  const pressTick = TURN11_ROCKSLIDE_PRESS_TICK;
+  drawStaticBgShiftedY(fb, 0, turn5BgFadeY(t));
+  drawTurn5IconBar(fb, t);
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y);
+  }
+  const frozenBounceTick = turn10KickoffBounceTick(t, pressTick);
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN11_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, 0);
+}
+
+export function drawTurn11FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN10_ONIX_AFTER_AERIALACE_HP, onixY2Extra: number = 0, darken: boolean = false, bounceIndexOffset: number = 0): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN11_REGIME6_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, false, undefined, onixY2Extra, darken, undefined, undefined, undefined, bounceIndexOffset);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+export function drawTurn10FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  latest: LatestCompletedCommandHandoff | null = null,
+): void {
+  if (sm.openElapsed === null) {
+    drawTurn9TurnEndSettledMenu(fb, t);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    drawTurn9TurnEndSettledMenu(fb, t, t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT);
+    return;
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    const textStart = turn10AerialAceTextStartTick(pressTick);
+    if (t >= textStart) {
+      drawTurn10AerialAceWindow(fb, t, pressTick);
+      return;
+    }
+  }
+  const bounceTick = sm.confirmElapsed !== null ? turn10KickoffBounceTick(t, TICK0 + sm.confirmElapsed) : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawTurn10FieldBase(fb, t, bounceTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latest);
+}
+
+export function drawTurn10AerialAceWindow(fb: Uint8Array, t: number, pressTick: number): void {
+  if (t >= rockSlideTextStartTick(TURN10_OFF_ROCKSLIDE_PRESS_TICK)) {
+    drawTurn10RockSlideWindow(fb, t);
+    return;
+  }
+  const bounceTick = turn10KickoffBounceTick(t, pressTick);
+  const onixHp = turn10AerialAceHp(t, pressTick, TURN10_AERIALACE_HP.from, TURN10_AERIALACE_HP.to, TURN10_OFF_AERIALACE_HP_DRAIN_START_DELAY);
+  const onixInvisible = turn9Ep2OnixInvisible(t, pressTick, TURN10_OFF_ONIX_FLICKER_START);
+  const healthboxY2 = turn9Ep2HealthboxWobbleY2(t, pressTick, TURN10_OFF_ONIX_HEALTHBOX_WOBBLE_START);
+  drawTurn10FieldBase(fb, t, bounceTick, undefined, onixHp, 0, false, onixInvisible, healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const notVeryEffectiveStart = turn10NotVeryEffectiveTextStartTick(pressTick, TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY);
+  if (t >= notVeryEffectiveStart) {
+    drawMessageTextLines(fb, TURN9_NOTVERYEFFECTIVE_LINE, "", turn10NotVeryEffectiveTextVisibleChars(t, pressTick, TURN10_OFF_NOTVERYEFFECTIVE_TEXT_DELAY));
+  } else {
+    drawMessageTextLines(fb, TURN10_AERIALACE_LINE1, TURN10_AERIALACE_LINE2, turn10AerialAceTextVisibleChars(t, pressTick));
+  }
+}
+
+export function drawTurn10RockSlideWindow(fb: Uint8Array, t: number): void {
+  const pressTick = TURN10_OFF_ROCKSLIDE_PRESS_TICK;
+  const redrawTick = pressTick + TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY;
+  if (t >= redrawTick) {
+    drawTurn10RockSlideTurnEndSettledMenu(fb, t, t, pressTick, TURN10_OFF_ROCKSLIDE_MENU_REDRAW_DELAY);
+    return;
+  }
+  const textClearTick = pressTick + TURN10_OFF_ROCKSLIDE_TEXT_CLEAR_DELAY;
+  drawTurn10RockSlideAttack(fb, t);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (t < textClearTick) {
+    const superEffectiveStart = turn10SuperEffectiveTextStartTick(pressTick, TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY);
+    if (t >= superEffectiveStart) {
+      drawMessageTextLines(fb, TURN6_SUPER_EFFECTIVE_LINE, "", turn10SuperEffectiveTextVisibleChars(t, pressTick, TURN10_OFF_SUPER_EFFECTIVE_TEXT_DELAY));
+    } else {
+      drawMessageTextLines(fb, ROCK_SLIDE_LINE1, ROCK_SLIDE_LINE2, rockSlideTextVisibleChars(t, pressTick));
+    }
+  }
+}
+
+export function drawTurn10RockSlideTurnEndSettledMenu(fb: Uint8Array, t: number, bounceRawTick: number = t, pressTick: number = TURN10_ROCKSLIDE_PRESS_TICK, menuRedrawDelay: number = TURN10_ROCKSLIDE_MENU_REDRAW_DELAY): void {
+  const bounceTick = turn10RockSlideResettledBounceTick(bounceRawTick, pressTick, menuRedrawDelay);
+  const bounce = menuIdleBounce(bounceTick);
+  drawStaticBgShiftedY(fb, 0, 0);
+  drawTurn5IconBar(fb, t);
+  drawTurn5SwitchinSprite(fb, t);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  drawMenuHealthboxPlayer(fb, 0, bounce.healthboxY2);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, bounce.healthboxY2);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  drawTurn5SitrusSettledMenuChrome(fb);
+}
+
+export function drawTurn10RockSlideAttack(fb: Uint8Array, t: number): void {
+  const pressTick = TURN10_OFF_ROCKSLIDE_PRESS_TICK;
+  drawStaticBgShiftedY(fb, 0, turn5BgFadeY(t));
+  drawTurn5IconBar(fb, t);
+  if (!rockSlideMonBlinkInvisible(t, pressTick, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE)) {
+    drawSpriteSheet(fb, pidgeottoFrontSprite.tileset, pidgeottoFrontSprite.palette, PIDGEOTTO_CORNER.x, PIDGEOTTO_CORNER.y);
+  }
+  const frozenBounceTick = turn10KickoffBounceTick(t, pressTick);
+  const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(frozenBounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT));
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y + bounce.onixY2);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, pressTick, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE);
+  const opponentHp = rockSlideOpponentHp(t, pressTick, TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN10_OFF_ROCKSLIDE_HP_DRAIN_START_DELAY);
+  const opponentContent = pidgeottoHealthboxContentForHp(opponentHp);
+  drawSendOutHealthbox(fb, 0, opponentContent);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, opponentContent);
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  drawPlayerHealthboxHpOverlay(fb, TURN10_ONIX_AFTER_AERIALACE_HP, 0);
+}
+
+export function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, beforeMonSprite?: () => void, onixHp: number = TURN9_ONIX_AFTER_QUICKATTACK_HP, onixY2Extra: number = 0, darken: boolean = false, onixInvisible: boolean = false, healthboxY2Override?: number): void {
+  drawTurn6FieldBase(fb, t, bounceTick + TURN10_REGIME5_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, onixInvisible, healthboxY2Override, onixY2Extra, darken);
+  drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
+}
+
+export function drawTurn15MagbySettledMenuChrome(fb: Uint8Array): void {
+  drawTurn5SitrusSettledMenuChrome(fb);
+  const TEXT_ROW_X = 8;
+  const TEXT_ROW_Y = 136;
+  const TEXT_ROW_WIDTH = 14 * 8;
+  const TEXT_ROW_HEIGHT = 2 * 8;
+  for (let py = 0; py < TEXT_ROW_HEIGHT; py += 1) {
+    for (let px = 0; px < TEXT_ROW_WIDTH; px += 1) {
+      const x = TEXT_ROW_X + px;
+      const y = TEXT_ROW_Y + py;
+      const i = (y * menuIdleBlank.width + x) * 3;
+      setPixel(fb, x, y, {
+        r: menuIdleBlank.pixels[i]!,
+        g: menuIdleBlank.pixels[i + 1]!,
+        b: menuIdleBlank.pixels[i + 2]!,
+      });
+    }
+  }
+  drawText(fb, font, charmap, "MAGBY do?", TEXT_ROW_X + 1, LINE2_ORIGIN.y, MESSAGE_PALETTE, MESSAGE_TEXT_COLORS);
+}
+
+export function drawTurn13SwitchinWindow(
+  fb: Uint8Array,
+  t: number,
+  frozenBounceTick: number,
+  cursorStart: number,
+  opponentFaintPresentationOwner: OpponentFaintPresentationOwner,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  const dismiss = opponentFaintPresentationOwner.dismiss;
+  if (dismiss === null) return;
+  const continuationElapsed = opponentFaintContinuationElapsed(
+    opponentFaintPresentationOwner,
+    t - TICK0,
+  );
+  if (continuationElapsed === null) return;
+  const settled = continuationElapsed >= TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS;
+  const shiftedBounceTick = settled
+    ? continuationElapsed + TURN13_SWITCHIN_RESET_AFTER_DISMISS_SHIFT
+    : frozenBounceTick + TURN13_REGIME8_TO_REGIME1_SHIFT;
+  drawTurn13SwitchinPresentationFieldBase(
+    fb,
+    t,
+    continuationElapsed,
+    shiftedBounceTick,
+  );
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  if (settled) {
+    drawTurn5SitrusSettledMenuChrome(fb);
+    return;
+  }
+  if (continuationElapsed < TURN13_SWITCHIN_SENTOUT_TEXT_AFTER_DISMISS) {
+    // The button-gated fainted message's own wait-cursor stays frozen in
+    // place (same locked phase the press itself established) all the way
+    // through the icon-bar retrigger and species-flip, right up until the
+    // sent-out text hard-cuts over it - oracle-pixel-confirmed this session
+    // (a first attempt dropped the cursor entirely here, regressing a
+    // constant 37px diff, exactly one glyph's worth, isolated to the
+    // cursor's own bbox at every sampled tick 16847-16946).
+    drawMessageTextLines(
+      fb,
+      TURN13_DRAGONBREATH_FAINT_LINE1,
+      TURN13_DRAGONBREATH_FAINT_LINE2,
+      TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL,
+    );
+    const frozenCursorTick = TICK0 + dismiss.cursor.frozenAtElapsed;
+    const cursor = cursorState(frozenCursorTick, cursorStart);
+    if (cursor.visible) drawCursor(fb, cursor.yOffset, TURN13_FAINTED_CURSOR_X);
+    return;
+  }
+  if (continuationElapsed < TURN13_SWITCHIN_TEXT_CLEAR_AFTER_DISMISS) {
+    drawMessageTextLines(
+      fb,
+      switchinSentOutLine1(trainerPresentation),
+      TURN13_SWITCHIN_SENTOUT_LINE2,
+      turn13SwitchinSentOutTextVisibleChars(continuationElapsed, trainerPresentation),
+    );
+    return;
+  }
+  // text-clear <= continuation < menu-redraw: blank hold, mirrors
+  // drawTurn5RockSlideWindow's own TEXT_CLEAR->MENU_REDRAW gap - the
+  // unconditional drawTileBg call above already painted the message box's
+  // own flat teal fill, nothing else to draw here.
+}
+
+export function drawTurn13SwitchinFieldBase(fb: Uint8Array, t: number, shiftedBounceTick: number, murkrowInvisible: boolean = false, onixInvisible: boolean = false, healthboxY2Extra: number = 0, onixX2: number = 0, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixSinkSkipRows: number = 0, onixHealthboxVisible: boolean = true): void {
+  drawTurn13SwitchinPresentationFieldBase(
+    fb,
+    t,
+    TURN13_SWITCHIN_MENU_REDRAW_AFTER_DISMISS,
+    shiftedBounceTick,
+    murkrowInvisible,
+    onixInvisible,
+    healthboxY2Extra,
+    onixX2,
+    onixHp,
+    onixSinkSkipRows,
+    onixHealthboxVisible,
+  );
+}
+
+export function drawTurn13SwitchinPresentationFieldBase(fb: Uint8Array, t: number, continuationElapsed: number, shiftedBounceTick: number, murkrowInvisible: boolean = false, onixInvisible: boolean = false, healthboxY2Extra: number = 0, onixX2: number = 0, onixHp: number = TURN12_ONIX_AFTER_AERIALACE_HP, onixSinkSkipRows: number = 0, onixHealthboxVisible: boolean = true): void {
+  drawTurn5RockSlideAttack(fb, t, shiftedBounceTick, undefined, onixX2, onixInvisible, 0, false, turn13MurkrowBgFadeY(continuationElapsed), onixSinkSkipRows);
+  drawTurn5IconBar(fb, continuationElapsed, TURN13_ICONBAR_CREATE_AFTER_DISMISS, TURN13_ICONBAR_FADE_START_AFTER_DISMISS, TURN13_ICONBAR_DESTROY_AFTER_DISMISS, TURN13_OPPONENT_ICON_STATES);
+  if (!murkrowInvisible) drawTurn13MurkrowSwitchinSprite(fb, continuationElapsed);
+  const murkrowHealthboxDx = healthboxSlideDx(continuationElapsed, TURN13_MURKROW_SETTLE_AFTER_DISMISS + 1);
+  if (murkrowHealthboxDx !== null) drawSendOutHealthbox(fb, murkrowHealthboxDx, murkrowHealthboxContent);
+  if (onixHealthboxVisible) {
+    const bounce = menuIdleBounce(turn5SitrusResettledBounceTick(shiftedBounceTick));
+    const healthboxY2 = bounce.healthboxY2 + healthboxY2Extra;
+    drawMenuHealthboxPlayer(fb, 0, healthboxY2);
+    drawPlayerHealthboxHpOverlay(fb, onixHp, healthboxY2);
+  }
+}
+
+export function drawTurn13MurkrowSwitchinSprite(fb: Uint8Array, continuationElapsed: number): void {
+  if (continuationElapsed < TURN13_BALL_HANDOFF_AFTER_DISMISS) return;
+  drawTurn13MurkrowMaterialize(fb, continuationElapsed);
+  drawSendOutBall(fb, continuationElapsed, TURN13_BALL_HANDOFF_AFTER_DISMISS);
+  drawTurn5SwitchinParticles(fb, continuationElapsed, TURN13_BALL_HANDOFF_AFTER_DISMISS);
+  if (continuationElapsed >= TURN13_MURKROW_SETTLE_AFTER_DISMISS) drawTurn13MurkrowSettled(fb);
+}
+
+export function drawTurn13MurkrowMaterialize(fb: Uint8Array, continuationElapsed: number): void {
+  if (
+    continuationElapsed < TURN13_MURKROW_MATERIALIZE_AFTER_DISMISS
+    || continuationElapsed >= TURN13_MURKROW_SETTLE_AFTER_DISMISS
+  ) return;
+  const frame = turn13MurkrowFrame(continuationElapsed);
+  const tileset = frame === 0 ? murkrowFrontSprite.tileset : murkrowFrontSprite.frame2;
+  if (continuationElapsed < TURN13_MURKROW_STRETCH_AFTER_DISMISS) {
+    const local = continuationElapsed - TURN13_MURKROW_MATERIALIZE_AFTER_DISMISS;
+    const accumulator = affineEmergeAccumulator(local + 1);
+    const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
+    const coeff = turn13MurkrowMaterializeCoeff(continuationElapsed);
+    drawSpriteSheetAffineTintedBlend(fb, tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, accumulator, MATERIALIZE_TINT_COLOR, coeff, y2);
+    return;
+  }
+  const entry = TURN13_MURKROW_WOBBLE_TABLE[Math.min(continuationElapsed - TURN13_MURKROW_STRETCH_AFTER_DISMISS, TURN13_MURKROW_WOBBLE_TABLE.length - 1)]!;
+  const wobbleCoeff = turn13MurkrowMaterializeCoeff(continuationElapsed);
+  drawSpriteSheetAffineStretch(fb, tileset, murkrowFrontSprite.palette, MURKROW_CORNER.x, MURKROW_CORNER.y, entry.xScale, entry.yScale, entry.y2, MATERIALIZE_TINT_COLOR, wobbleCoeff, true);
+}
+
+export function drawGrantingStars(fb: Uint8Array, t: number): void {
+  drawGrantingStarsAtAge(
+    fb,
+    t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
+    TURN5_SITRUS_RING_CENTER,
+  );
+}
+
+export function drawDragonBreathTurnEndSettledMenu(
+  fb: Uint8Array,
+  t: number,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
+  turn2Content: FightCommandPresentation,
+): void {
+  const bounceTick = fightCommandSettledBounceEpochTick(turn2Content, t - TICK0);
+  drawActionMenuIdleContentFromLatest(
+    fb,
+    bounceTick,
+    latestCompletedCommandHandoff,
+  );
+}
+
+export function drawDragonBreathScene(
+  fb: Uint8Array,
+  t: number,
+  pressTick: number,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
+): void {
+  drawStaticBgShiftedY(fb, 0);
+  const grovyleHp = dragonBreathHp(t, pressTick, anchorOpponentAfterTurnHp, anchorOpponentAfterTurn2Hp, TURN2_OFF_DRAGONBREATH_HP_DRAIN_START_DELAY);
+  const grovyleContent = opponentHealthboxContentForHp(grovyleHp);
+  const hitFlashPressTick = pressTick + (TURN2_OFF_DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY - HIT_FLASH_RAM_ANCHOR_DELAY);
+
+  if (!rockSlideMonBlinkInvisible(t, hitFlashPressTick)) {
+    drawSpriteSheet(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER.x, GROVYLE_CORNER.y);
+  }
+
+  drawSpriteSheet(fb, onixBackSprite.tileset, onixBackSprite.palette, ONIX_MATERIALIZE_CORNER.x, ONIX_MATERIALIZE_CORNER.y);
+  drawSendOutHealthbox(fb, 0, grovyleContent);
+  drawMenuHealthboxPlayer(fb, 0, 0);
+  const genericEpochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
+    latestCompletedCommandHandoff,
+    t - TICK0,
+  );
+  const bounceTick = genericEpochAge !== null
+    ? turn2KickoffBounceTick(t - TICK0, pressTick - TICK0, genericEpochAge)
+    : turnKickoffBounceTick(t, pressTick);
+  drawMenuIdleBounceOverlay(fb, bounceTick);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, hitFlashPressTick);
+  if (healthboxY2 !== 0) drawOpponentHealthboxWobble(fb, healthboxY2, grovyleContent);
+}
+
+export function drawMenuIdleBounceOverlay(fb: Uint8Array, bounceTick: number, bounceIndexOffset: number = 0): void {
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick, bounceIndexOffset);
+  drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
+  drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
+}
+
+export function drawFightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
+  opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null = null,
+  resolutionOwner: BattleSceneResolutionOwner | null = null,
+  trainerPresentation?: FactoryTrainerPresentation,
+  turn5FaintDismissElapsed: number | null = null,
+): void {
+  const genericTurn2Content = turn2FightCommandPresentationFromLatest(
+    latestCompletedCommandHandoff,
+  );
+  const genericTurn3Content = turn3FightCommandPresentationFromLatest(
+    latestCompletedCommandHandoff,
+  );
+  const genericTurn4Content = turn4FightCommandPresentationFromLatest(
+    latestCompletedCommandHandoff,
+  );
+  const turn2Active = isLatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    sm.openElapsed,
+  );
+  const turn3Active = isTurn2LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    sm.openElapsed,
+  );
+  const turn4Active = isTurn3LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    sm.openElapsed,
+  );
+  // Turn 3's own source-owned reset publishes directly into the shared
+  // generic slot, which is exactly what `turn3Active` above narrows FROM
+  // (turn 2's content) - so that publish evicts the very shape `turn3Active`
+  // depends on for the remainder of turn 3's own window (kickoff text is
+  // long past `genericTurn2Content`'s own need by the time this reset
+  // fires, but the render dispatch below still needs a "we're still inside
+  // turn 3's window" flag through its settled menu). `!turn4Active` keeps
+  // this OFF once turn 4's own FIGHT reopen supersedes it.
+  const turn3SettledWindowActive = !turn4Active && genericTurn3Content !== null;
+  const turn5Active = isTurn4LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    sm.openElapsed,
+  );
+  // Turn 4's own source-owned reset publishes directly into the shared
+  // generic slot, evicting the turn-3 shape `turn4Active` above narrows
+  // FROM - so that publish happens WHILE we're still deep inside turn 4's
+  // own settled-menu display (`drawTurn4RockSlideWindow`'s own redrawTick
+  // branch), exactly the eviction-class trap slice 8 already hit one turn
+  // earlier (`turn3SettledWindowActive`'s own doc). `!turn5Active` keeps
+  // this OFF once turn 5's own FIGHT reopen supersedes it.
+  const turn4SettledWindowActive = !turn5Active && genericTurn4Content !== null;
+  if (
+    isLatestCompletedCommandHandoffReady(latestCompletedCommandHandoff)
+    && latestCompletedCommandPresentationEpoch(latestCompletedCommandHandoff) === null
+  ) {
+    drawLatestCompletedCommandWindow(
+      fb,
+      t,
+      sm,
+      latestCompletedCommandHandoff,
+      opponentFaintPresentationOwner,
+      resolutionOwner,
+      trainerPresentation,
+    );
+    return;
+  }
+  if (sm.openElapsed === null) {
+    drawActionMenuIdleWindow(fb, t, false, undefined, null, latestCompletedCommandHandoff);
+    return;
+  }
+  const revealTick = TICK0 + sm.openElapsed + FIGHT_SUBMENU_OPEN_DELAY;
+  if (t < revealTick) {
+    // Open DMA-wait: the submenu's content is drawn off-screen, not yet
+    // revealed - the screen still shows the action menu, unmodified (§11
+    // finding 1's "5-tick hold" turns out to need no special-casing at all:
+    // it's just this same bounce cycle naturally dwelling on one phase for
+    // that span, pixel-confirmed exact with a plain, unshifted `t`).
+    drawActionMenuIdleWindow(fb, t, sm.reopenedFromClose, TICK0 + sm.openElapsed, sm.openElapsed, latestCompletedCommandHandoff);
+    return;
+  }
+  if (sm.closeElapsed !== null) {
+    const closeRevealTick = TICK0 + sm.closeElapsed + FIGHT_SUBMENU_CLOSE_DELAY;
+    if (t >= closeRevealTick) {
+      drawActionMenuIdleContentFromLatest(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, latestCompletedCommandHandoff);
+      return;
+    }
+  }
+  if (sm.confirmElapsed !== null) {
+    const pressTick = TICK0 + sm.confirmElapsed;
+    // S7 slice G: turn 3's own confirm (cursor 0, ROCK_SLIDE selected by the
+    // player) still kicks off Grovyle's ENDEAVOR first (speed 90 beats
+    // Onix's 76, same turn-order rule every prior turn established) -
+    // distinguished from turn 1's own cursor-0 confirm by the active
+    // completed-turn-2 command lifecycle. Turn 4 needs DOUBLE_TEAM-family
+    // timing despite retaining that older receipt, so it stays excluded.
+    const inTurn4DoubleTeamWindow = turn4Active && !turn5Active;
+    const textStart = (sm.cursor === 2 || turn3Active || turn5Active) && !inTurn4DoubleTeamWindow ? turn2KickoffTextStartTick(pressTick) : turnKickoffTextStartTick(pressTick);
+    if (t >= textStart) {
+      // S7 slice E1: turn 2's confirm (cursor 2, DRAGON_BREATH) kicks off
+      // Grovyle's ENDEAVOR instead of turn 1's DOUBLE_TEAM - this slice only
+      // models the kickoff text itself (the animation/HP-drain window is out
+      // of scope this session, docs/battle-menu-notes.md §13), so there's no
+      // turn-2 equivalent of `drawRockSlideWindow`'s later phases yet.
+      if (sm.cursor === 2) {
+        drawTurn2KickoffText(fb, t, pressTick, latestCompletedCommandHandoff);
+        return;
+      }
+      if (turn5Active) {
+        // S7 slice J (docs/battle-turn-notes.md §13/§23): turn 5's own
+        // confirm (cursor 0, ROCK_SLIDE again) kicks off Grovyle's ENDEAVOR
+        // once more - distinguished from turn 3's own ENDEAVOR confirm by
+        // the completed-turn-4 receipt's later command lifecycle.
+        drawTurn5EndeavorText(
+          fb,
+          t,
+          pressTick,
+          latestCompletedCommandHandoff,
+          trainerPresentation,
+          turn5FaintDismissElapsed,
+        );
+        return;
+      }
+      if (turn4Active || turn4SettledWindowActive) {
+        // S7 slice I (docs/battle-turn-notes.md §13/§22): turn 4's own
+        // confirm (cursor 0, ROCK_SLIDE again) kicks off Grovyle's
+        // DOUBLE_TEAM first - same move as turn 1's own, distinguished by
+        // the completed-turn-3 receipt's later command lifecycle. Slice 9:
+        // `turn4SettledWindowActive` keeps this branch selected through
+        // turn 4's own settled menu even after its reset has evicted
+        // `turn4Active`'s own turn-3 view from the shared slot.
+        drawTurn4KickoffText(
+          fb,
+          t,
+          pressTick,
+          latestCompletedCommandHandoff,
+        );
+        return;
+      }
+      if (turn3Active || turn3SettledWindowActive) {
+        // S7 slice G (docs/battle-turn-notes.md §20): turn 3's own ENDEAVOR
+        // half - stops holding the kickoff text once printed, deliberately
+        // NOT dispatching onward into ROCK_SLIDE's own kickoff (out of
+        // scope; the caller/trace never captures past the oracle-confirmed
+        // safe boundary this function's own doc names). Slice 8:
+        // `turn3SettledWindowActive` keeps this branch selected through
+        // turn 3's own settled menu even after its reset has evicted
+        // `turn3Active`'s own turn-2 view from the shared slot.
+        drawTurn3EndeavorText(fb, t, pressTick, latestCompletedCommandHandoff, genericTurn2Content);
+        return;
+      }
+      // ISSUES #39 rank-6 slice 1: turn 1 is now Scene-OFF-owned - DOUBLE_TEAM's
+      // own clone-blend (formerly `drawDoubleTeamClones`, deleted entirely in
+      // rank-6 slice 4 once turn 4 also flipped) is class (c), never renders
+      // under `HITMARKER_NO_ANIMATIONS` (RAM-confirmed absent the whole
+      // window, `TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE`'s own doc comment
+      // above), so this branch never calls it; the generic stat-change
+      // banner is exempt from that substitution and re-times via the
+      // `TURN1_OFF_STATS_BANNER_*` constants instead of the shared ON-fit
+      // ones.
+      if (t - pressTick > TURN1_OFF_STATS_BANNER_END_DELAY) {
+        drawRockSlideWindow(fb, t, pressTick);
+        return;
+      }
+      drawTurnKickoffText(fb, t, pressTick);
+      drawStatsBanner(fb, t, pressTick, TURN1_OFF_STATS_BANNER_START_DELAY, TURN1_OFF_STATS_BANNER_END_DELAY, TURN1_OFF_STATS_BANNER_BG1_Y_ANCHOR_DELAY);
+      return;
+    }
+    // Engine-side turn-order/attacker resolution is in flight but not yet
+    // visible - the submenu keeps showing its ordinary slot content, but the
+    // onix/healthbox bounce overlay is already frozen (battleMenu.ts's new
+    // Slice 7 doc comment: `DoBounceEffect` stops being polled the instant
+    // the A-press hands off, not merely once the text becomes visible).
+    drawMenuIdleBaseWithOpponentHpFromLatest(fb, latestCompletedCommandHandoff);
+    drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latestCompletedCommandHandoff);
+    // S7 slice G: turn 3's own confirm-wait window now uses the same
+    // freeze-then-hold shape turns 1/2 already established
+    // (`turn3KickoffBounceTick`) instead of the plain live formula slice F's
+    // own trace got away with (its own window never reached past
+    // `FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY` ticks past the press) - oracle-
+    // pixel-confirmed unchanged for every tick slice F already covers (the
+    // live/frozen values coincide there, see `TURN3_KICKOFF_FROZEN_BOUNCE_TICK`'s
+    // own doc). S7 slice I: turn 4's own confirm-wait window is the same
+    // shape one epoch further (`turn4KickoffBounceTickFromLatest`). S7
+    // slice J: turn 5's own confirm-wait window is the same shape yet
+    // another epoch further (`turn5KickoffBounceTickFromLatest`).
+    const confirmWaitBounceTick = turn5Active
+      ? turn5KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff)
+      : turn4Active
+        ? turn4KickoffBounceTickFromLatest(t, pressTick, latestCompletedCommandHandoff)
+        : genericTurn2Content !== null && turn3Active
+          ? turn3KickoffBounceTick(
+              t - TICK0,
+              sm.confirmElapsed,
+              genericTurn2Content,
+            )
+          : turn2Active
+            ? turn2KickoffBounceTick(
+                t - TICK0,
+                sm.confirmElapsed,
+                currentEpochPresentationAgeFromLatest(
+                  latestCompletedCommandHandoff,
+                  t - TICK0,
+                ),
+              )
+            : turnKickoffBounceTick(t, pressTick);
+    drawMenuIdleBounceOverlay(fb, confirmWaitBounceTick);
+    // S7 slice F: same overlay-after-bounce ordering as
+    // `drawActionMenuIdleContentFromLatest`'s own (turn 3's reopen isn't
+    // reachable through this specific branch yet - it needs a fresh confirm
+    // of its own first - but kept consistent so a future turn-3-confirm
+    // slice doesn't rediscover the ordering bug).
+    const confirmWaitOverlayPlayerHp = genericTurn4Content?.field.player.hp.current
+      ?? genericTurn3Content?.field.player.hp.current
+      ?? genericTurn2Content?.field.player.hp.current
+      ?? null;
+    if (confirmWaitOverlayPlayerHp !== null) {
+      drawPlayerHealthboxHpOverlay(fb, confirmWaitOverlayPlayerHp, menuIdleBounce(confirmWaitBounceTick).healthboxY2);
+    }
+    return;
+  }
+  drawMenuIdleBaseWithOpponentHpFromLatest(fb, latestCompletedCommandHandoff);
+  drawFightSubmenuChromeFromLatest(fb, sm.displayCursor, sm.activeMonMoveset, latestCompletedCommandHandoff);
+  // S7 slice E1: turn 2's own reopened submenu inherits the resettled menu's
+  // bounce phase, not the plain absolute-`t` mapping turn 1's first open
+  // happened to coincide with (the turn-2 epoch mapping's own doc). S7 slice
+  // I: turn 4's own reopened submenu is the same shape one epoch further.
+  // S7 slice J: turn 5's own reopened submenu is the same shape yet another
+  // epoch further.
+  // ISSUES #25: a same-turn B-close/reopen (`sm.reopenedFromClose`) is
+  // neither the very first open nor a turn-boundary reset - it inherits the
+  // cumulative DMA-wait drift instead (`FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT`'s
+  // own doc), checked ahead of the plain-`t` fallback since it's otherwise
+  // indistinguishable from turn 1's first open until receipt lifecycle state
+  // is considered.
+  // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): this is the SAME
+  // `turn5SubmenuBounceTickFromLatest` formula `drawActionMenuIdleWindow`'s
+  // own DMA-wait branch uses, called from this second, different line, with
+  // zero discontinuity at revealTick - so it shares window A's own `+109`
+  // raw-sine-index constant and `t - 1` display basis (no freeze needed
+  // here: this branch is only reached post-reveal, past the 3-tick freeze
+  // window entirely).
+  const idleWaitBounceIndexOffset = turn5Active ? 109 : 0;
+  const idleWaitBounceTick = turn5Active
+    ? turn5SubmenuBounceTickFromLatest(t - 1, latestCompletedCommandHandoff)
+    : turn4Active
+      ? turn4SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+      : genericTurn2Content !== null && turn3Active
+        ? fightCommandSubmenuBounceEpochTick(genericTurn2Content, t - TICK0)
+        : turn2Active
+          ? turn2SubmenuBounceTickFromPresentationEpochAge(
+              currentEpochPresentationAgeFromLatest(
+                latestCompletedCommandHandoff,
+                t - TICK0,
+              ),
+            )
+          : sm.reopenedFromClose
+            ? t - FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT
+            : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  drawMenuIdleBounceOverlay(fb, idleWaitBounceTick, idleWaitBounceIndexOffset);
+  // S7 slice F (docs/battle-turn-notes.md §13): turn 3's own reopened submenu
+  // (cursor persisted at 2, then UP-nav'd to 0) dwells here while waiting for
+  // the confirm press - Onix's own HP overlay (101, stale in the flat
+  // harvest) needs the same after-bounce ordering as every other branch above.
+  // S7 slice I: turn 4's own reopened submenu (cursor persisted at 0, NO nav
+  // needed) needs Onix's own post-turn-3 hp (88) instead once turn 3 has
+  // ALSO resolved. S7 slice J: turn 5's own reopened submenu needs the SAME
+  // 88 (Onix untouched by turn 4's own DOUBLE_TEAM) - no further anchor swap
+  // needed; the completed-turn-3 receipt selects it directly.
+  const idleWaitOverlayPlayerHp = genericTurn4Content?.field.player.hp.current
+    ?? genericTurn3Content?.field.player.hp.current
+    ?? genericTurn2Content?.field.player.hp.current
+    ?? null;
+  if (idleWaitOverlayPlayerHp !== null) {
+    drawPlayerHealthboxHpOverlay(fb, idleWaitOverlayPlayerHp, menuIdleBounce(idleWaitBounceTick, idleWaitBounceIndexOffset).healthboxY2);
+  }
+}
+
+export function drawLatestCompletedCommandWindow(
+  fb: Uint8Array,
+  t: number,
+  sm: FightSubmenuState,
+  latest: LatestCompletedCommandHandoff,
+  opponentFaintPresentationOwner: OpponentFaintPresentationOwner | null,
+  resolutionOwner: BattleSceneResolutionOwner | null,
+  trainerPresentation?: FactoryTrainerPresentation,
+): void {
+  const content = latest.content;
+  if (content === undefined) {
+    throw new Error("latest completed command handoff has no semantic presentation content");
+  }
+  const retained = retainedFightCommandResolutionOwner(content);
+  if (retained !== null) {
+    if (resolutionOwner === null) {
+      throw new Error("resolved turn-13 handoff has no retained action presentation owner");
+    }
+    const activeSegment = resolutionOwner.resolution.segments[
+      resolutionOwner.resolution.segmentIndex
+    ];
+    const retainedSegment = retained.segments[0];
+    if (retainedSegment !== undefined && activeSegment === retainedSegment) {
+      drawTurn14FightSubmenuWindow(fb, t, sm, latest);
+      return;
+    }
+    if (
+      retainedSegment === undefined
+      || !resolutionOwner.resolution.segments.includes(retainedSegment)
+      || activeSegment === undefined
+    ) {
+      throw new Error("retained FLY command owner lost its charge/strike segment chain");
+    }
+    drawTurn15FightSubmenuWindow(fb, t, sm, resolutionOwner.resolution, latest);
+    return;
+  }
+
+  const moves = content.upcoming?.moves;
+  const opponentMove = moves?.find((move) => move.user === "opponent");
+  const playerMove = moves?.find((move) => move.user === "player");
+  if (opponentMove === undefined || playerMove === undefined) {
+    throw new Error("latest completed command handoff has no complete semantic move stream");
+  }
+  if (opponentMove.move === "SAND_ATTACK" && playerMove.move === "DRAGON_BREATH") {
+    drawTurn13FightSubmenuWindow(fb, t, sm, opponentFaintPresentationOwner, trainerPresentation, latest);
+    return;
+  }
+  if (opponentMove.move === "AERIAL_ACE" && playerMove.move === "ROCK_SLIDE") {
+    if (playerMove.miss !== undefined) {
+      drawTurn12FightSubmenuWindow(fb, t, sm, latest);
+    } else {
+      drawTurn10FightSubmenuWindow(fb, t, sm, latest);
+    }
+    return;
+  }
+  if (opponentMove.move === "QUICK_ATTACK" && playerMove.move === "ROCK_SLIDE") {
+    drawTurn9FightSubmenuWindow(fb, t, sm, latest);
+    return;
+  }
+  if (opponentMove.move === "FEATHER_DANCE") {
+    const statChange = opponentMove.statChange;
+    if (playerMove.move === "BIND" && playerMove.miss !== undefined) {
+      drawTurn8FightSubmenuWindow(fb, t, sm, latest);
+      return;
+    }
+    if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 6 && statChange.to === 4) {
+      drawTurn6FightSubmenuWindow(fb, t, sm, latest);
+      return;
+    }
+    if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 4 && statChange.to === 2) {
+      drawTurn7FightSubmenuWindow(fb, t, sm, latest);
+      return;
+    }
+    if (playerMove.move === "ROCK_SLIDE" && statChange?.from === 0 && statChange.to === 0) {
+      drawTurn11FightSubmenuWindow(fb, t, sm, latest);
+      return;
+    }
+  }
+  throw new Error("latest completed command handoff has unsupported semantic move content");
+}
+
+export function drawActionMenuIdleWindow(
+  fb: Uint8Array,
+  t: number,
+  reopenedFromClose: boolean = false,
+  turn5ReopenPressTick: number | undefined = undefined,
+  turn1CommandOpenElapsed: number | null = null,
+  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null = null,
+): void {
+  const genericTurn2Content = turn2FightCommandPresentationFromLatest(
+    latestCompletedCommandHandoff,
+  );
+  const genericTurn3Content = turn3FightCommandPresentationFromLatest(
+    latestCompletedCommandHandoff,
+  );
+  const genericTurn4Content = turn4FightCommandPresentationFromLatest(
+    latestCompletedCommandHandoff,
+  );
+  if (t <= MENU_IDLE_BLANK_END_TICK) {
+    drawRect(fb, menuIdleBlank);
+    return;
+  }
+  if (reopenedFromClose) {
+    // ISSUES #25: this reopen's own DMA-wait hold is NOT a bounce-sprite
+    // reset (see `FightSubmenuState.reopenedFromClose`'s own doc) - it keeps
+    // showing whatever shift was already active right before this reopen's
+    // own press (`FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT`, the same one the
+    // resumed action menu was using), same "wait holds freeze the prior
+    // shift, only the reveal steps to the next one" pattern the original
+    // open/close events already established (see
+    // `FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT`'s own doc).
+    drawActionMenuIdleContentFromLatest(fb, t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT, latestCompletedCommandHandoff);
+    // Slice 9: once turn 4's own source-owned reset has evicted turn 3's
+    // shape from the shared slot (`genericTurn3Content === null`), the
+    // internal fallback above can no longer reach Onix's own HP - draw it
+    // explicitly from the completed-turn-4 receipt instead (same 88 turn 3
+    // already established; `turn4SettledWindowActive`'s own eviction-class
+    // doc in `drawFightSubmenuWindow`).
+    const reopenOverlayPlayerHp = genericTurn4Content !== null
+        && genericTurn3Content === null
+        && genericTurn2Content === null
+      ? genericTurn4Content.field.player.hp.current
+      : null;
+    if (reopenOverlayPlayerHp !== null) {
+      drawPlayerHealthboxHpOverlay(
+        fb,
+        reopenOverlayPlayerHp,
+        menuIdleBounce(t - FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT).healthboxY2,
+      );
+    }
+    return;
+  }
+  // S7 slice F: turn 3's own reopen needs the same receipt-epoch remap
+  // its later "revealed, idle" phase uses even
+  // during this brief DMA-wait hold - pixel-confirmed via `turn3-menu.json`'s
+  // own dense probe of ticks 3847/3848 (plain `t` mismatched there, the
+  // remap doesn't).
+  //
+  // ISSUES #24 (docs/battle-menu-notes.md §8d): turn 2's own reopen needs
+  // the SAME treatment, via the turn-2 submenu epoch mapping - the prior "oracle-
+  // confirmed fine with plain `t`" claim here was a false negative, not a
+  // different mechanism: turn 1's *very first* open is the one case where
+  // plain `t` is correct (that epoch's bounce sprite really is anchored at
+  // `MENU_IDLE_BLANK_END_TICK+1` with no prior reset), but turn 2's reopen
+  // - like turn 3's - inherits a RESET bounce task (`EndBounceEffect`/
+  // `DoBounceEffect` re-fire between turns, `rockSlideResettledBounceTick`'s
+  // own doc), so it needs the resettled remap here too. The bug was
+  // invisible until now because this 5-tick open-DMA-wait hold only ever
+  // lands on the sine table's rare peak (`table[64]`, ISSUES #22/#19's own
+  // "1-in-256" state) at RAM-confirmed tick 2901 specifically - every OTHER
+  // tick in this hold happens to share the same state under both formulas
+  // (verified against `turn2-endeavor-drain.json`/`turn2-dragonbreath.json`,
+  // ticks 2902-2905 identical either way).
+  // S7 slice I: turn 4's own reopen needs the same treatment one epoch
+  // further (`turn4SubmenuBounceTickFromLatest`, reset at turn 3's own
+  // ROCK_SLIDE redraw) - same "reopening FIGHT doesn't reset the bounce
+  // task" rule.
+  // S7 slice J: turn 5's own reopen is the same shape yet another epoch
+  // further (`turn5SubmenuBounceTickFromLatest`, reset at turn 4's own
+  // ROCK_SLIDE redraw).
+  // PROGRESS #183/cleanup (docs/turn3-residual-probe-notes.md "The extremum
+  // class, probed", tick 5927): hardware doesn't apply
+  // turn5SubmenuBounceTickFromLatest's own -2-tick phase correction until
+  // the tick AFTER the reopen press registers - `t === turn5ReopenPressTick`
+  // is the press's own registering tick itself, so it alone still uses the
+  // unshifted formula.
+  const turn2Active = isLatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    turn1CommandOpenElapsed,
+  );
+  const turn3Active = isTurn2LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    turn1CommandOpenElapsed,
+  );
+  const turn4Active = isTurn3LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    turn1CommandOpenElapsed,
+  );
+  const turn5Active = isTurn4LatestCompletedCommandLifecycleActive(
+    latestCompletedCommandHandoff,
+    turn1CommandOpenElapsed,
+  );
+  // ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): the reopen-press
+  // special case covers the RAM-proven 3-tick freeze (turn5ReopenBounceTick),
+  // composed with window A's own `+109` raw-sine-index constant (the true
+  // offset - the original `+116` fit was itself off by one sDelta step, 7, a
+  // post-increment RAM probe artifact, not a real hardware quirk) and the
+  // `displayed(T)=RAM(T-1)` display basis (`t - 1` fed to the tick formula,
+  // independent of menuIdleBounce's own orthogonal internal ramTick=t-1
+  // shift) - strictly scoped to when a reopen-press tick is actually live
+  // (`turn5ReopenPressTick !== undefined`); the untraced pre-press span
+  // (~5920-5926) keeps the original unshifted, unoffset submenu formula.
+  const bounceIndexOffset = turn5Active && turn5ReopenPressTick !== undefined ? 109 : 0;
+  const bounceTick = turn5Active
+    ? turn5ReopenPressTick !== undefined
+      ? turn5ReopenBounceTick(t - 1, turn5ReopenPressTick, latestCompletedCommandHandoff)
+      : turn5SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+    : turn4Active
+      ? turn4SubmenuBounceTickFromLatest(t, latestCompletedCommandHandoff)
+      : genericTurn2Content !== null && turn3Active
+        ? fightCommandSubmenuBounceEpochTick(genericTurn2Content, t - TICK0)
+        : turn2Active
+          ? turn2SubmenuBounceTickFromPresentationEpochAge(
+              currentEpochPresentationAgeFromLatest(
+                latestCompletedCommandHandoff,
+                t - TICK0,
+              ),
+            )
+          : t;
+  drawActionMenuIdleContentFromLatest(fb, bounceTick, latestCompletedCommandHandoff, undefined, bounceIndexOffset);
+  // Slice 9: same eviction-class gap as the `reopenedFromClose` branch above
+  // - once turn 4's own reset has evicted turn 3's shape, Onix's own HP
+  // (still 88, per turn 3's own established anchor) must come from the
+  // completed-turn-4 receipt instead.
+  const overlayPlayerHp = genericTurn4Content !== null
+      && genericTurn3Content === null
+      && genericTurn2Content === null
+    ? genericTurn4Content.field.player.hp.current
+    : null;
+  if (overlayPlayerHp !== null) {
+    drawPlayerHealthboxHpOverlay(fb, overlayPlayerHp, menuIdleBounce(bounceTick, bounceIndexOffset).healthboxY2);
+  }
+}
+
+export function drawActionMenuIdleContentFromLatest(
+  fb: Uint8Array,
+  bounceTick: number,
+  latest: LatestCompletedCommandHandoff | null,
+  playerHpOverride?: number,
+  bounceIndexOffset: number = 0,
+): void {
+  drawMenuIdleBaseWithOpponentHpFromLatest(fb, latest);
+  const resolvedPlayerHp = playerHpOverride
+    ?? latest?.content?.field.player.hp.current
+    ?? anchorPlayerAfterTurnHp;
+  const { onixY2, healthboxY2 } = menuIdleBounce(bounceTick, bounceIndexOffset);
+  drawTwoStateBounceRect(fb, menuIdleOnixBounce, onixY2);
+  drawTwoStateBounceRect(fb, menuIdleHealthboxBounce, healthboxY2);
+  // ISSUES #97 / docs/turn5-family-class3-diagnosis.md §10a+§19: the turn4
+  // narrowing closes turn 5's own ENDEAVOR-hold gap (`drawTurn5EndeavorText`'s
+  // no-squish fallback, `latest` = turn 4's completed receipt, matched
+  // neither prior shape so the overlay never painted). Every other caller
+  // either already satisfies the turn2/turn3 arms or already redraws this
+  // same value manually right after this call (`drawActionMenuIdleWindow`'s
+  // eviction-class overlay, `drawTurn{3,4}RockSlideTurnEndSettledMenu`) - the
+  // turn4 arm is a no-op there, not a behavior change (per §19's audit).
+  if (
+    turn2FightCommandPresentationFromLatest(latest) !== null
+    || turn3FightCommandPresentationFromLatest(latest) !== null
+    || turn4FightCommandPresentationFromLatest(latest) !== null
+  ) {
+    drawPlayerHealthboxHpOverlay(fb, resolvedPlayerHp, healthboxY2);
+  }
+}
+
+export function drawBattle2RockSlideTurn1Window(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  confirmTick: number,
+  sm: FightSubmenuState,
+): void {
+  const textStart = confirmTick + FIGHT_CONFIRM_TEXT_DELAY + 3;
+  if (t < textStart) {
+    const frozen =
+      t >= confirmTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
+        ? { onixY2: 0, healthboxY2: 0 }
+        : undefined;
+    drawBattle2ActionMenuWindow(
+      fb,
+      t,
+      handoffTick,
+      FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
+      frozen,
+    );
+    drawFightSubmenuChromeFromLatest(
+      fb,
+      sm.displayCursor,
+      sm.activeMonMoveset,
+      null,
+    );
+    return;
+  }
+
+  drawBattle2RockSlideAttack(fb, t, handoffTick, confirmTick);
+  drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+  const chars = Math.min(
+    ROCK_SLIDE_LINE1.length + ROCK_SLIDE_LINE2.length,
+    t - textStart + 1,
+  );
+  drawMessageTextLines(
+    fb,
+    ROCK_SLIDE_LINE1,
+    ROCK_SLIDE_LINE2,
+    chars,
+  );
+}
+
+export function drawBattle2RockSlideAttack(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  confirmTick: number,
+): void {
+  const mechanismPress = battle2RockSlideMechanismPressTick(confirmTick);
+  const shiftY = rockSlideBg3Y(t, mechanismPress);
+  const bounce =
+    t < confirmTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY
+      ? menuIdleBounce(battle2Turn1BounceTick(t, handoffTick))
+      : { onixY2: 0, healthboxY2: 0 };
+  const kabutoDisplayHp = rockSlideOpponentHp(
+    t,
+    mechanismPress,
+    BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.from,
+    BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP.to,
+  );
+  const kabutoContent = kabutoHealthboxContentForHp(kabutoDisplayHp, KABUTO_SENDOUT_BATTLER.name, KABUTO_SENDOUT_BATTLER.level, KABUTO_SENDOUT_BATTLER.maxHP, KABUTO_SENDOUT_BATTLER.gender);
+
+  drawStaticBgShiftedY(fb, shiftY);
+  if (!rockSlideMonBlinkInvisible(t, mechanismPress)) {
+    drawSpriteSheet(
+      fb,
+      kabutoFrontSprite.tileset,
+      kabutoFrontSprite.palette,
+      KABUTO_CORNER.x,
+      KABUTO_CORNER.y + rockSlideMonShakeY2(t, mechanismPress),
+    );
+  }
+  drawSpriteSheet(
+    fb,
+    onixBackSprite.tileset,
+    onixBackSprite.palette,
+    ONIX_MATERIALIZE_CORNER.x,
+    ONIX_MATERIALIZE_CORNER.y + bounce.onixY2,
+  );
+  drawSendOutHealthbox(fb, 0, kabutoContent);
+  const healthboxY2 = rockSlideHealthboxWobbleY2(t, mechanismPress);
+  if (healthboxY2 !== 0) {
+    drawOpponentHealthboxWobble(fb, healthboxY2, kabutoContent);
+  }
+  drawComposedPlayerHealthbox(
+    fb,
+    onixPlayerHealthboxContent,
+    0,
+    bounce.healthboxY2,
+  );
+  for (const i of rockSlideDrawOrder(t, mechanismPress)) {
+    const rock = rockSlideRockState(i, t, mechanismPress);
+    if (!rock) continue;
+    drawRockSprite(fb, rock.animNum, rock.centerX, rock.centerY);
+  }
+}
+
+export function drawBattle2FightSubmenuWindow(
+  fb: Uint8Array,
+  t: number,
+  handoffTick: number,
+  sm: FightSubmenuState,
+): void {
+  if (sm.confirmElapsed !== null) {
+    drawBattle2RockSlideTurn1Window(
+      fb,
+      t,
+      handoffTick,
+      TICK0 + sm.confirmElapsed,
+      sm,
+    );
+    return;
+  }
+
+  const presentation = battle2CommandPresentationForRender(
+    actionMenuAge(t, handoffTick),
+    t - TICK0,
+    sm,
+  );
+  const actionBounceShift =
+    presentation.lifecycle.phase === "action-menu" && sm.closeElapsed !== null
+      ? FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT
+      : presentation.lifecycle.phase === "fight-opening" && sm.reopenedFromClose
+        ? FIGHT_SUBMENU_RESUMED_BOUNCE_SHIFT
+        : 0;
+  const fightBounceShift = sm.reopenedFromClose
+    ? FIGHT_SUBMENU_REOPEN_BOUNCE_SHIFT
+    : FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+
+  renderBattleCommandPresentation(fb, presentation, {
+    drawActionMenu(framebuffer, view, revealed) {
+      drawBattle2ActionMenuWindow(
+        framebuffer,
+        t,
+        handoffTick,
+        actionBounceShift,
+        undefined,
+        revealed,
+        view.healthboxes,
+        view.fieldArt,
+      );
+      if (revealed) drawBattleCommandActionChrome(framebuffer, view.actionMenu);
+    },
+    drawFightMenu(framebuffer, view) {
+      drawBattle2ActionMenuWindow(
+        framebuffer,
+        t,
+        handoffTick,
+        fightBounceShift,
+        undefined,
+        true,
+        view.healthboxes,
+        view.fieldArt,
+      );
+      drawFightSubmenuChromeFromLiveState(
+        framebuffer,
+        view.fightMenu.displayCursor,
+        view.fightMenu.moveset,
+      );
+    },
+    // The retired Battle 2 march never enters a rejection phase; this branch
+    // stays a defensive draw of the settled menu.
+    drawRejectionMessage(framebuffer, view) {
+      drawBattle2ActionMenuWindow(
+        framebuffer,
+        t,
+        handoffTick,
+        fightBounceShift,
+        undefined,
+        true,
+        view.healthboxes,
+        view.fieldArt,
+      );
+    },
+  });
+}
+
+export function drawMenuHealthboxPlayerWobble(fb: Uint8Array, dy: number): void {
+  const { x, y, width, height, pixels } = menuHealthboxPlayer;
+  const mask = getMenuHealthboxPlayerContentMask();
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (!mask[py * width + px]) continue;
+      const bg = healthboxBackgroundColorAt(x + px, y + py);
+      if (bg) setPixel(fb, x + px, y + py, bg);
+    }
+  }
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (!mask[py * width + px]) continue;
+      const i = (py * width + px) * 3;
+      setPixel(fb, x + px, y + dy + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+    }
+  }
+}
+
+export function drawMenuHealthboxPlayer(fb: Uint8Array, dx: number, dy: number = 0): void {
+  const { x, y, width, height, pixels } = menuHealthboxPlayer;
+  const mask = getMenuHealthboxPlayerContentMask();
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      if (!mask[py * width + px]) continue;
+      const i = (py * width + px) * 3;
+      setPixel(fb, x + dx + px, y + dy + py, { r: pixels[i]!, g: pixels[i + 1]!, b: pixels[i + 2]! });
+    }
+  }
+}
+
+export function drawPlayerHealthboxHpOverlay(fb: Uint8Array, hp: number, yOffset = 0): void {
+  if (hp === anchorPlayerBattler.hp) return;
+  const { width, height, pixels } = playerHealthboxHpOverlayForHp(hp);
+  for (let py = 0; py < height; py += 1) {
+    for (let px = 0; px < width; px += 1) {
+      const color = pixels[py * width + px];
+      if (!color) continue;
+      setPixel(fb, menuHealthboxPlayer.x + px, menuHealthboxPlayer.y + py + yOffset, color);
+    }
+  }
 }
