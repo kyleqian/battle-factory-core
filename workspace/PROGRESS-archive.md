@@ -1,3 +1,50 @@
+## 1345 — [main worker, 2026-08-18 session 6] **ISSUES #97: `drawTurn5RockSlideWindow`'s fainted-text dispatch gate + glyph reveal (§19.1's named next probe) LANDED — `resolve-off-a` 175/196 -> 193/196 (one commit, green)**
+
+- **State:** one green commit (`98fe3385` fix + 2 Tier-1 pins) plus this
+  docs commit. `npm test` **1,067 files / 10,096 passed (+3) / 223
+  skipped**; `npm run build`/`npm run typecheck` green.
+- **Did:** per §19.1's own named next probe, a dense oracle pixel sweep
+  (6373-6399, `--capture-range`) plus a scratch script computing each
+  character's own measured glyph-column boundary (via the real
+  `measureText`/font/charmap) solved the mismatch precisely: real
+  hardware's fainted-message glyph reveal AND its dispatch gate (the
+  switch away from the prior "ONIX used ROCK SLIDE!" text) both run 1
+  render tick ahead of real hardware in `drawTurn5RockSlideWindow` — a
+  uniform `t - 1` display-basis correction at this function's own two
+  dispatch points (`battleScene.ts:15032`/`15046`), same shape already
+  used elsewhere in this file. `turn5FaintedTextStartTick`/
+  `turn5FaintedTextVisibleChars` themselves are untouched.
+- **Result:** `turn5-resolve-off-a` **175/196 -> 193/196** (18 newly
+  matched frames, exceeding the step's 190+ target). `6398` (the
+  fainted-message wait-cursor) confirmed unchanged — a separate,
+  already-census'd Class C bug, not this session's mechanism. Full guard
+  family reran with **zero decreases**: `-b` 196/196, `-c` 195/196 (6763
+  unchanged), `-d` 194/196 (6850/6996 unchanged), `reset-off` 256/256,
+  `action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
+  47/47, `confirm-off-a` 128/132 (5959-5961/5968 unchanged), `-b` 131/132
+  (6184 unchanged), `turn6-rockslide-a`/`-b` 255/255, 105/105,
+  `turn7-rockslide-a` 256/256, `turn13-switchin` 242/242,
+  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
+- **Next:** `resolve-off-a`'s remaining 3/196 is `6283`/`6284` (2px
+  each) — pixel-isolated to an exact single UI element inside GROVYLE's
+  healthbox (an "HP"-icon-colored pixel pair swapping to the healthbox
+  frame color), RAM-correlated to the same 2-tick-lag family
+  (`battleBars[1]` struct restart at RAM 6282, pixel-visible 6283, 2
+  ticks ahead of the literal `gBattleMons[1].hp` zero-step at 6285) but
+  the responsible TS draw path not yet identified (both per-tick
+  formulas that feed this function's healthbox draw are ruled out —
+  ordinary opponent-hp drain and the hit-reaction wobble are both static
+  across this window). Banked with a named next probe
+  (`docs/turn5-resolve-ab-pools-diagnosis.md` §19.4) rather than guessed
+  at. `6398` (Class C cursor), `-c` 6763, and `-d` 6850/6996 remain other
+  lanes'/mechanisms' own tracked residuals.
+- **Notes:** no PAPERCUT. Fix red-verified against pre-fix code via
+  `git stash -- src/engine/battleScene.ts` before finalizing (2 of the 3
+  new pins fail as expected pre-fix; the third is a pure sanity pin on
+  the untouched shared function, correctly holds either way).
+
+---
+
 ## 1344 — [main worker, 2026-08-18 session 5] **ISSUES #97: `drawTurn5RockSlideAttack`'s three §17/§5-named mechanisms LANDED — `resolve-off-a` 60/196 -> 175/196 (three commits, all green)**
 
 - **State:** three green commits (`9ec92966` phantom rock-prop drop,

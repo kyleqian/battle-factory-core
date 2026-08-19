@@ -5,6 +5,48 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1348 — [main worker, 2026-08-19 session 9] **ladder Slice 1 CLOSED: turns 9/11/12 idle-bounce residuals all full bars (finisher for 3 salvaged fixes, one docs+pins commit)**
+
+- **State:** one green commit (`7a914770`, Tier-1 pins) plus this docs
+  commit. `npm test` **1,067 files / 10,114 passed (+30 new pin
+  assertions) / 223 skipped**; `npm run build`/`npm run typecheck` green.
+  The three fixes themselves (`62a36f66`/`511c8c7f`/`eb0be62b`) were landed
+  and supervisor-verified by a prior, cap-killed worker; this session was
+  the finisher only (pins + docs + differential), no fix logic touched.
+- **Did:** added 4 "ISSUES #39 rank-5 slice 1 (`<sha>`)" describe blocks to
+  `tests/battleScene.test.ts`, pinning each fix's raw-sine-index offset
+  directly against the fixed `menuIdleBounce` closed form at named ticks
+  (turn9: +191 flat + +205-with-2-tick-freeze; turn11: +114; turn12:
+  +237), each paired with a pre-fix (offset 0) mismatch proof. Exported 5
+  previously-file-local symbols in `battleScene.ts` to make this possible
+  (no logic change — `git diff` is 5 lines, each just adding `export`).
+  Red-verified by zeroing the three named offset constants in source: 6 of
+  the new pins failed as expected; restored (byte-identical to pre-edit)
+  and reconfirmed green before committing.
+- **Result:** `turn9-quickattack-off` **233/233**, `turn11-featherdance-off`
+  **191/191**, `turn12-aerialace-off` **247/247** — all three CLOSED (full
+  bars). Differential guard (`compare:differential -- turn10-aerialace-off
+  turn10-rockslide-off turn10-menu-off turn9-rockslide-off
+  turn11-rockslide-off turn12-rockslide-miss-off --base c4441e8e --summary`)
+  **1312/1312 captures byte-identical**. Spot-guards `turn5-resolve-off-a`
+  196/196, `turn5-confirm-off-a` 132/132 (both #97-family, unaffected).
+  Docs: dated landed-addendum in `docs/idle-bounce-phase-attribution.md`;
+  row 5 of `docs/battle-scene-retirement-inventory.md` updated to full
+  bars; `docs/presentation-seam-retirement-ladder.md` Slice 1 marked
+  LANDED with final counts.
+- **Next:** ladder Slice 1 is fully closed. Ladder Slice 2 (the
+  `battleScene.ts` -> `battleSceneCanonical.ts` split, ~35-45% executed,
+  `docs/presentation-seam-retirement-ladder.md` §3) is the next open item
+  on this doc's own ladder — not started this session, out of this step's
+  scope. The idle-bounce doc's own §5 prediction
+  (`TURN8_MENU_REDRAW_DELAY≈434`, the turns 6-8 upstream OFF re-timing
+  that would let these three per-turn offsets be replaced by one shared
+  upstream fix) remains open and unpursued — named for whoever retimes
+  turns 6-8, not blocking anything today.
+- **Notes:** no PAPERCUT.
+
+---
+
 ## 1347 — [main worker, 2026-08-19 session 8] **ISSUES #97: `turn5-resolve-off-a` CLOSED 193/196 -> 196/196 — §20.1/§20.2's two decisively-pinned one-liners (two commits, all green)**
 
 - **State:** two green commits (`58eafbd8` Fix 1, `adf15be1` Fix 2) plus
@@ -85,50 +127,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   new pin assertions fail at exactly the predicted pre-fix values).
   Full derivation banked as §10 in
   `docs/turn5-single-frame-residuals-diagnosis.md`.
-
----
-
-## 1345 — [main worker, 2026-08-18 session 6] **ISSUES #97: `drawTurn5RockSlideWindow`'s fainted-text dispatch gate + glyph reveal (§19.1's named next probe) LANDED — `resolve-off-a` 175/196 -> 193/196 (one commit, green)**
-
-- **State:** one green commit (`98fe3385` fix + 2 Tier-1 pins) plus this
-  docs commit. `npm test` **1,067 files / 10,096 passed (+3) / 223
-  skipped**; `npm run build`/`npm run typecheck` green.
-- **Did:** per §19.1's own named next probe, a dense oracle pixel sweep
-  (6373-6399, `--capture-range`) plus a scratch script computing each
-  character's own measured glyph-column boundary (via the real
-  `measureText`/font/charmap) solved the mismatch precisely: real
-  hardware's fainted-message glyph reveal AND its dispatch gate (the
-  switch away from the prior "ONIX used ROCK SLIDE!" text) both run 1
-  render tick ahead of real hardware in `drawTurn5RockSlideWindow` — a
-  uniform `t - 1` display-basis correction at this function's own two
-  dispatch points (`battleScene.ts:15032`/`15046`), same shape already
-  used elsewhere in this file. `turn5FaintedTextStartTick`/
-  `turn5FaintedTextVisibleChars` themselves are untouched.
-- **Result:** `turn5-resolve-off-a` **175/196 -> 193/196** (18 newly
-  matched frames, exceeding the step's 190+ target). `6398` (the
-  fainted-message wait-cursor) confirmed unchanged — a separate,
-  already-census'd Class C bug, not this session's mechanism. Full guard
-  family reran with **zero decreases**: `-b` 196/196, `-c` 195/196 (6763
-  unchanged), `-d` 194/196 (6850/6996 unchanged), `reset-off` 256/256,
-  `action-off` 32/32, `turn6-reopen-off` 46/46, `turn6-menu-off.json`
-  47/47, `confirm-off-a` 128/132 (5959-5961/5968 unchanged), `-b` 131/132
-  (6184 unchanged), `turn6-rockslide-a`/`-b` 255/255, 105/105,
-  `turn7-rockslide-a` 256/256, `turn13-switchin` 242/242,
-  `turn4-doubleteam-off`/`turn4-rockslide-off` 256/256 each.
-- **Next:** `resolve-off-a`'s remaining 3/196 is `6283`/`6284` (2px
-  each) — pixel-isolated to an exact single UI element inside GROVYLE's
-  healthbox (an "HP"-icon-colored pixel pair swapping to the healthbox
-  frame color), RAM-correlated to the same 2-tick-lag family
-  (`battleBars[1]` struct restart at RAM 6282, pixel-visible 6283, 2
-  ticks ahead of the literal `gBattleMons[1].hp` zero-step at 6285) but
-  the responsible TS draw path not yet identified (both per-tick
-  formulas that feed this function's healthbox draw are ruled out —
-  ordinary opponent-hp drain and the hit-reaction wobble are both static
-  across this window). Banked with a named next probe
-  (`docs/turn5-resolve-ab-pools-diagnosis.md` §19.4) rather than guessed
-  at. `6398` (Class C cursor), `-c` 6763, and `-d` 6850/6996 remain other
-  lanes'/mechanisms' own tracked residuals.
-- **Notes:** no PAPERCUT. Fix red-verified against pre-fix code via
-  `git stash -- src/engine/battleScene.ts` before finalizing (2 of the 3
-  new pins fail as expected pre-fix; the third is a pure sanity pin on
-  the untouched shared function, correctly holds either way).

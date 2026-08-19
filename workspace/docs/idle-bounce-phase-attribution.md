@@ -247,3 +247,62 @@ against turn 10/11/12 content. No `src/` file was touched or is proposed to
 be touched this step (evidence-only, per the hard constraint) — the
 predicted `TURN8_MENU_REDRAW_DELAY≈434` is named for the supervisor per the
 brief's item 4, not implemented.
+
+## Landed addendum (2026-08-19, main lane, ladder Slice 1)
+
+The three residuals this doc diagnosed are now all closed. Per §5's
+verdict-(b) framing, each turn's own window bottomed out at a **different**
+per-turn constant (not one shared upstream fix) — three call-site-scoped
+flat raw-sine-index offsets on `menuIdleBounce`, each independently
+RAM-probed via `tools/probe/dump-turn9-idle-bounce-off.py` against that
+turn's own OFF trace:
+
+- **turn9-quickattack-off 177/233 -> 233/233** (`62a36f66`). Two
+  corrections sharing one real oscillator: `drawTurn8BindWindow`'s own
+  redraw branch (ticks 10818-10826, turn 9's own
+  `FightSubmenuState.openElapsed` not yet registered so turn 8's own
+  settled menu keeps rendering) gets a flat **+191** raw-index offset;
+  `drawTurn9FightSubmenuWindow`'s pre-reveal DMA-wait branch and its
+  post-reveal regime-4 branch both reduce to the identical closed form
+  (`TURN9_REGIME4_TO_REGIME1_SHIFT`'s own construction cancels them to the
+  same raw sine index) and share one **+205** offset plus a 2-tick freeze
+  (`TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK=10829`) for the mid-window stray
+  cursor-reject press — the same freeze-then-permanent-lag shape ISSUES
+  #97-B's turn6-reopen fix already established.
+- **turn11-featherdance-off 189/191 -> 191/191** (`511c8c7f`). The
+  FEATHER_DANCE kickoff window's early (not-yet-frozen)
+  `turn11KickoffBounceTick` branch carries a flat **+114** raw-index offset
+  off the existing formula — RAM-receipt-exact, zero exceptions across 32
+  consecutive ticks (13310-13341). No freeze needed: the residual window
+  sits well after the last driver hold, right before
+  `turn11KickoffBounceTick`'s own existing freeze takes over.
+- **turn12-aerialace-off 246/247 -> 247/247** (`eb0be62b`, salvaged from
+  the cap-killed round-7 worker's verified working state). A scoped
+  **+237** raw sine-index offset (`TURN12_KICKOFF_BOUNCE_INDEX_OFFSET`),
+  RAM-receipt-exact across 31 probed ticks (14344-14374), applied only
+  while the live bounce driver exists; the frozen branch stays untouched.
+
+**RAM receipts** (all three, per their own commit messages): each offset
+was matched against the real hardware's raw `sSinIndex` with **zero
+exceptions** across its full probed tick range — no committed RAM fixture
+JSON (the probe script's own output is reproducible via the command in §
+Reproduce above, not committed), so the receipt is the commit message's own
+citation plus this session's Tier-1 pins (`tests/battleScene.test.ts`,
+"ISSUES #39 rank-5 slice 1 (<sha>)" describe blocks) pinning the fixed
+closed form directly against `menuIdleBounce`, each paired with a pre-fix
+(offset 0) mismatch proof, red-verified by zeroing the three named offset
+constants in source and confirming the new pins fail before restoring.
+
+**Family verdict confirmed, not just predicted:** §5's rejection of
+attribution (a) ("one upstream anchor constant fixes the whole class") is
+now empirically closed, not just argued — turns 9/11/12 landed at three
+different offsets (191/205, 114, 237), not one shared value, exactly as
+predicted. The remaining §5 prediction (`TURN8_MENU_REDRAW_DELAY≈434`, the
+turns 6-8 upstream re-timing that would make these three offsets
+unnecessary) was **not** pursued this session — out of scope for the
+ladder's Slice 1 finisher — and remains open for whichever future step
+retimes turns 6-8 for OFF.
+
+Full guard-family and differential verification: see
+`docs/presentation-seam-retirement-ladder.md` Slice 1's LANDED entry and
+`PROGRESS.md`'s top entry for this date.

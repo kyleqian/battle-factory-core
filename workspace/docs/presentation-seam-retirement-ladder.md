@@ -169,6 +169,26 @@ Two genuinely open slices found; both are already scoped by an existing
 committed scout doc (not re-derived here), both live-verified this session,
 neither is a re-proposal of anything in §0/§2.
 
+### Slice 1 — LANDED 2026-08-19: re-time the turns 9-12 Scene-OFF residuals
+
+**Final state (main lane, three commits + finisher):** `62a36f66`
+(turn9-quickattack-off 177/233 -> 233/233), `511c8c7f`
+(turn11-featherdance-off 189/191 -> 191/191), `eb0be62b`
+(turn12-aerialace-off 246/247 -> 247/247, salvaged from a cap-killed
+worker). All three now carry red-verified Tier-1 pins
+(`tests/battleScene.test.ts`, "ISSUES #39 rank-5 slice 1 (<sha>)" blocks)
+directly against the fixed `menuIdleBounce` closed form, each paired with a
+pre-fix (offset 0) mismatch proof. Differential guard
+(`compare:differential -- turn10-aerialace-off turn10-rockslide-off
+turn10-menu-off turn9-rockslide-off turn11-rockslide-off
+turn12-rockslide-miss-off --base c4441e8e --summary`) is byte-identical
+(1312 captures). Spot-guards `turn5-resolve-off-a` 196/196 and
+`turn5-confirm-off-a` 132/132 unaffected. `npm test`/`npm run
+build`/`npm run typecheck` green. Landed addendum:
+`docs/idle-bounce-phase-attribution.md`'s own "Landed addendum
+(2026-08-19...)" section; row 5 of `docs/battle-scene-retirement-inventory.md`
+updated to full bars. Original slice brief below, kept for the record.
+
 ### Slice 1 (first — sharpest, zero re-derivation needed): re-time the turns 9-12 Scene-OFF residuals
 
 **Goal.** Three named pixel residuals in the already-content-retired rank-5
