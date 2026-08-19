@@ -5,6 +5,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1355 — [supervisor wind-down, 2026-08-19] **Milestone M-A COMPLETE same-day (steps 1-3): play regularly passes challenge 1 (27-36%), ~5% enter challenge 3, NOTHING reaches carry 21 in 300 seeds — follow-on scope decision filed as DEFERRED D2; scanner H3 folded; walk-up ROADMAP line found stale TWICE and corrected to program-COMPLETE**
+
+- **Final gates (at this tree, supervisor-run):** full `npm test`
+  **1,068 files / 10,126 passed / 223 skipped**; `npm run build` green
+  (exit 0); soak gates satisfied by this
+  session's own sweep runs at the final code tree (all code folds landed
+  BEFORE the sweeps; every commit after them is docs-only): vanilla
+  0:20 **20/20 OK** (within vanilla 0:60 60/60, `a395d436`), full 0:60
+  **60/60 OK** (`1e654c62`). DEFERRED.md now carries **D2 (OPEN)** — the
+  post-M-A scope decision, reserved to the user by the M-A block itself.
+- **Did (4 worker rounds + 1 read-only scout, 2 lanes):** (1) M-A step 1
+  (entry 1354 below, supervisor-verified incl. a seed-0 diagnostics
+  trajectory audit). (2) Side: scanner **H3-let-write** hazard
+  (`e99c3511`, fold `79a0c6ad`) — batch-8's two hand-exclusions now
+  auto-blocked, `playerHealthboxHpOverlayForHp` correctly still eligible
+  (pool = 1 function-kind); union checks 26/26 + smoke 444/444; a stray
+  main-tree copy of the edit (absolute-path papercut, hit #3) was
+  byte-identical and discarded. (3) M-A steps 2-3 (`78f11bee`,
+  `a395d436`, `1e654c62`): winning 0:180 + vanilla 0:60 + full 0:60,
+  **all 300 seeds OK**, distributions + per-seed lines committed
+  (`docs/soak-depth-measure-2026-08-19.{md,log}`); supervisor recounted
+  winning carry≥7 from raw lines (64/180 exact match). Worker cap-killed
+  at 90min mid-OPTIONAL-extension (full toward 0:180) — nothing lost,
+  tree was clean and all goals committed. (4) Side scout on the
+  "fixture 03 brainMoving cadence" residual returned **premise
+  inverted**: the cadence was already derived and closed 256/256 by
+  entries 1280/1296/1307/1308 (walk-up program fully COMPLETE per 1317);
+  scout live-reverified 02+03 both 256/256, differential 563/563, full
+  suite green, and correctly committed nothing. ROADMAP walk-up line
+  corrected twice (`b1fd9734` — itself still stale-based — then
+  `477e7570` program-COMPLETE).
+- **The M-A number** (full table in the doc): winning 64/180 (35.6%)
+  carry≥7, 10/180 (5.6%) carry≥14, 0/180 carry≥21; vanilla 16/60 /
+  3/60 / 0/60, deepest anywhere = vanilla seed 24 at battle-depth 20
+  (= standing in ladder battle 21); full policy 0/60 ever complete a
+  round. ROADMAP M-A block updated with the result; the block's two
+  pre-recorded outcomes bracket it, so the scope call goes to D2.
+- **Next:** user resolves D2 (mechanically blocks the next supervisor
+  session). Available filler regardless: #39 batch 9 (move
+  `playerHealthboxHpOverlayForHp`, the last scanner-eligible
+  function-kind symbol), then the non-function remainder.
+- **Notes:** process lesson recorded on top of 1353's rule — verifying a
+  queue item against the tree must grep for the artifact's NEWEST
+  archive mention, not stop at the first hit near the cited entry (my
+  scout brief and first ROADMAP "correction" both did the latter;
+  the scout's live verification caught it). PAPERCUTS bumped:
+  freshness false-positive (hit 7), side absolute-path edits (hit 3).
+  Both lane branches (animation-main, rust-main) were EMPTY at orient
+  and stayed empty. Commits local only — pushing is Kyle's step.
+
+---
+
 ## 1354 — [main worker, 2026-08-19] **M-A step 1 DONE: real max-depth tracking (maxCarriedWinStreak/maxBattleDepth) added to the soak driver and surfaced in the CLI, old carriedWinStreak snapshot's lying doc comment corrected**
 
 - **Supervisor verification + parallel side fold (same session):** step 1
@@ -135,53 +187,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   item's named artifact.
 
 ---
-
-## 1352 — [main worker, 2026-08-19] **ladder Slice 2 batch 8: canonical split 123→76 under decision (a), scanner gap found (functions writing to a let-cache elsewhere)**
-
-- **Supervisor final-gates RERUN at this final tree (`82122cc3` + this
-  amend), independent of the worker's own run:** full npm test **1,068
-  files / 10,123 passed / 223 skipped**; `npm run build` green; soak
-  vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**. Entry 1351's
-  gate block cited the pre-bonus tree; this line supersedes it for the
-  session's final state. Slice 2's decision-(a) pool is now ~3 eligible
-  function-kind symbols + the named one-line pickup
-  (`playerHealthboxHpOverlayForHp`); the 4 canonical entry points remain
-  the reserved final slice.
-
-- **State:** two green commits (`75b73fab` move+reconnect, `b1fef20c` test-pin fix). Full
-  `npm test` **1,068 files / 10,123 passed / 223 skipped**; `npm run build` green;
-  `npm run typecheck` clean; `tests/animation/animationBoundaryRatchet.test.ts` untouched, 3/3.
-- **Did:** eligibility scanner listed 50 function-kind ELIGIBLE symbols; excluded 2
-  (`turn10OnixDarkPalette`, `getMenuHealthboxPlayerContentMask`) after finding each writes
-  (via `??=`/assignment) to one of the two named let-cache blockers while the let itself stays
-  behind — the scanner's let-cache hazard class only flags moving the let, not a function
-  elsewhere assigning to it; confirmed live by attempting the move and reading both function
-  bodies, not inferred. **Flagging for the next scanner touch**, not fixed here (out of scope:
-  "scanner rewrites"). Moved the remaining 48 (Set-dedup landed 47, one accidental arg-list
-  duplicate); reconnected battleScene.ts/battleSceneCanonical.ts by the batch 6/7 pattern
-  (export-add + import-back, third-module direct imports, dead-specifier pruning, one
-  battleScene.ts→canonical.ts import-back for functions two still-blocked H2 functions call).
-  Reused batch 7's existing `battlescene-split-move.ts` tool as-is.
-- **Result:** eligibility scanner CANONICAL 123→**76** (matches batch size), partition
-  bucket-acyclicity CLEAN; differential (`turn5-resolve-off-a turn5-confirm-off-a
-  turn9-quickattack-off turn11-featherdance-off turn12-aerialace-off turn13-switchin --base
-  bfd60da8 --summary`): **1241/1241 byte-identical**; `battleScene.ts` loads standalone, no
-  TDZ crash. `tests/battlesceneSplitEligibility.test.ts`'s pinned ">20 eligible" floor went
-  stale (live pool dropped to 3) — lowered to ">0", not a scanner regression (full suite
-  verified green both before and after).
-- **Next:** Slice 2 batch 9 — scanner shows **3** function-kind eligible symbols remain
-  (`getMenuHealthboxPlayerContentMask`, `playerHealthboxHpOverlayForHp`,
-  `turn10OnixDarkPalette`), but only the first and third are the real let-cache-write hazard
-  above; **`playerHealthboxHpOverlayForHp` was over-cautiously excluded this round** (pattern-
-  matched alongside the other two without individually re-checking) even though its own cache
-  (`playerHealthboxHpOverlayByHp`) is a `Map` used via `.get()`/`.set()`, not a `let`
-  reassignment — importing a `Map` binding and calling methods on it is legal ESM, unlike
-  assigning to an imported `let`. Confirmed live (not just reasoned) by grepping its body: no
-  `=` assignment to the imported binding. Next batch worker: move
-  `playerHealthboxHpOverlayForHp` alone first (near-zero risk, already scoped), then the
-  ~28-symbol non-`function`/topological remainder batch 6/7 deferred, or decision (b).
-- **Notes:** no PAPERCUT beyond the scanner gap above (cost ~5 min: one wasted move+revert
-  cycle, caught before commit) and the `playerHealthboxHpOverlayForHp` over-exclusion above
-  (cost ~1 min to catch via a fresh scanner run post-commit; left for next batch rather than a
-  third move+verify cycle inside this session's cap).
-

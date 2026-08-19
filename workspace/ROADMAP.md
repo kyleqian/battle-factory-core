@@ -1181,6 +1181,23 @@ and never by play.
 (2026-08-19): **measure first, then scope** — deliberately one cheap step
 before committing worker weeks.
 
+**M-A MEASUREMENT COMPLETE (2026-08-19, same-day): all 3 steps landed
+and verified** — step 1 `4570aa11`+`ecb2e5de` (real running-max fields
++ CLI distribution, red-verified test; PROGRESS 1354), steps 2-3
+`78f11bee`/`a395d436`/`1e654c62` (`docs/soak-depth-measure-2026-08-19
+.md` + committed 300-line per-seed log). **The number: play gets past
+challenge 1 regularly but never deep.** `winning` 0:180 — 64/180
+(35.6%) reach carry ≥ 7, 10/180 (5.6%) reach carry ≥ 14, 0/180 reach
+carry ≥ 21; `vanilla` 0:60 — 16/60 / 3/60 / 0/60 (deepest anywhere:
+seed 24 at battle-depth 20 = ladder battle 21); `full` 0:60 — never
+completes a round (0/60 at carry ≥ 7). All 300 seeds OK, zero
+CRASH/HANG. So challenge 3 is entered by ~5% of chaining-policy seeds,
+and challenge 4+ (carry ≥ 21), the full AI triad tier, and everything
+past ladder battle 21 remain unreached by play — exercised only by the
+scripted chaining test. Per this block's own falsifiability clause the
+result is between the two recorded outcomes; the follow-on scope
+decision returns to the user with these numbers (DEFERRED.md D2).
+
 1. Build real max-depth tracking, and **do not trust the field that
    already exists**. Audited live 2026-08-19, two defects, both must be
    handled or the measurement lies:
