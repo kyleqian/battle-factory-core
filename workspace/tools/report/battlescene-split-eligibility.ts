@@ -358,11 +358,22 @@ function canonicalBucket(): Set<string> {
     maxBuffer: 64 * 1024 * 1024,
   });
   const lines = stdout.split("\n");
-  let inCanonical = false;
+  // Two separate list blocks both belong to the CANONICAL bucket: the
+  // strict "CANONICAL (N symbols):" list, and "residual unreachable
+  // symbols (N):" -- symbols reachable from NO entry surface at all. The
+  // partition script's own summary explicitly folds residual into
+  // CANONICAL's total ("of which R are reachable from NO entry surface --
+  // folded in here"); a symbol lands there when its only remaining
+  // battleScene.ts-internal referrer already moved out under decision (a)
+  // (the internal-adjacency reachability check can't see the cross-file
+  // read that still keeps it alive), not because it stopped being
+  // canonical-only.
+  let section: "canonical" | "residual" | null = null;
   for (const line of lines) {
-    if (line.startsWith("CANONICAL (")) { inCanonical = true; continue; }
-    if (inCanonical && line.trim() === "") break;
-    if (inCanonical && /^[A-Za-z_$][\w$]*$/.test(line.trim())) out.add(line.trim());
+    if (line.startsWith("CANONICAL (")) { section = "canonical"; continue; }
+    if (line.startsWith("residual unreachable symbols (")) { section = "residual"; continue; }
+    if (section !== null && line.trim() === "") { section = null; continue; }
+    if (section !== null && /^[A-Za-z_$][\w$]*$/.test(line.trim())) out.add(line.trim());
   }
   return out;
 }
