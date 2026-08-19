@@ -1176,9 +1176,27 @@ and never by play.
 (2026-08-19): **measure first, then scope** — deliberately one cheap step
 before committing worker weeks.
 
-1. Surface the number the driver already records: print `carriedWinStreak`
-   per seed and as a distribution in the sweep summary. Report-layer
-   change only — no engine, no policy, no new standing gate.
+1. Build real max-depth tracking, and **do not trust the field that
+   already exists**. Audited live 2026-08-19, two defects, both must be
+   handled or the measurement lies:
+   - **`carriedWinStreak` is a snapshot, not a maximum.**
+     `randomRoundSoakDriver.ts:907` reads
+     `orchestrator?.config.factoryWinStreak` — the streak carried into
+     whatever round is current *when diagnostics are taken*. A loss
+     resets the carry to 0 (`advanceFactoryCarry`), and the sweeps show
+     the large majority of seeds end on `roundLost`, so this field reads
+     **0 for almost every run no matter how deep it got earlier**. Its
+     own doc comment ("the deepest chained-streak value this run
+     reached") is **wrong** — believe the code, not the comment. What is
+     needed is a running max of the carry observed across the run's chain
+     events, which does not exist today.
+   - **Diagnostics are not CLI-reachable.** `diagnostics` appears only in
+     the driver (`RunOptions`, `:794`); `tools/soak/randomRoundSoak.ts`
+     has zero mentions, so the CLI cannot enable them even for the
+     flawed snapshot. Needs an opt-in flag.
+   Then print max depth per seed and as a distribution in the sweep
+   summary. Still no engine change, no policy change, no new standing
+   gate — but this is a driver step with a test, not a one-line print.
 2. Re-run over ranges already swept (`winning` 0:180 at minimum, plus
    `vanilla`/`full` for contrast). This is a re-measure of known-green
    ground, so it needs no new crash-triage budget.

@@ -12,12 +12,25 @@
 > a stale ROADMAP queue line, without checking the tree.
 >
 > **What this program did NOT settle**, and what supersedes it: every
-> sweep proves *crash-freedom*, none measures *depth*.
-> `randomRoundSoakDriver.ts:163` records `carriedWinStreak` on every
-> result and nothing in the tree reads it, so §0's "natural chained depth
-> is shallow" prediction and §3 gap 3 are still **unmeasured on the
-> winning policy**. That measurement is now ROADMAP milestone **M-A**
-> (user decision 2026-08-19, "measure first, then scope").
+> sweep proves *crash-freedom*, none measures *depth*. So §0's "natural
+> chained depth is shallow" prediction and §3 gap 3 are still
+> **unmeasured on the winning policy**. That measurement is now ROADMAP
+> milestone **M-A** (user decision 2026-08-19, "measure first, then
+> scope").
+>
+> **Warning for whoever builds M-A — the depth instrument this program
+> left behind is broken twice over** (audited live 2026-08-19):
+> `randomRoundSoakDriver.ts:907` sets `carriedWinStreak` from
+> `orchestrator?.config.factoryWinStreak`, i.e. the carry of the round
+> that happens to be current when diagnostics are taken — **not** a
+> maximum. A loss resets the carry to 0 and most seeds end on
+> `roundLost`, so the field reads 0 for nearly every run however deep it
+> got; its doc comment ("the deepest chained-streak value this run
+> reached", `:158-161`) does not describe what the code does. Second,
+> `diagnostics` is driver-only (`RunOptions:794`) — `randomRoundSoak.ts`
+> never references it, so no CLI run populates the field at all. Build a
+> running max over chain events plus a CLI opt-in; do not implement §4
+> step 3's "depth report" by printing the existing field.
 
 Read-only scout for the ROADMAP's "Follow-on objective — continuous play"
 bar: "boot the app and play round after round indefinitely, matching what a
