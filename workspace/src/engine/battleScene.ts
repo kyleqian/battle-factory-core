@@ -456,8 +456,6 @@ import {
   turnKickoffBounceTick,
   TURN_KICKOFF_LINE1,
   TURN_KICKOFF_LINE2,
-  statsBannerEva,
-  statsBannerBg1Y,
   STAT_ROSE_LINE1,
   STAT_ROSE_LINE2,
   statRoseTextStartTick,
@@ -484,7 +482,6 @@ import {
   currentPPForActiveMon,
   FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY,
   turn6StatFallEva,
-  turn6StatFallBg1Y,
   TURN6_STATFALL_BG1_X,
   turn6AtkFellTextStartTick,
   turn6AtkFellTextVisibleChars,
@@ -706,7 +703,7 @@ import { fadeColor } from "./fadeRender.ts";
 import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
-import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET, KABUTO_FRONT_ANIM_START_OFFSET } from "./kabutoSendOut.ts";
+import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET } from "./kabutoSendOut.ts";
 
 export const ACTION_MENU_BLANK_END_OFFSET = 330;
 export const ACTION_MENU_REVEAL_OFFSET = 331;
@@ -783,7 +780,6 @@ export function battle2Turn1RngCalls(frame: number, confirmTick: number): number
   return 0;
 }
 import type {
-  BattleCommandPresentationPhase,
   BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
 import {
@@ -817,9 +813,6 @@ import {
   drawStandardWindowFrame,
   drawStandardWindowText,
 } from "./prebattleRoomRender.ts";
-import {
-  createBattle2CommandAdapterCommand,
-} from "./battle2CommandAdapter.ts";
 import { drawMode0Objects, drawMode0Ppu, mgbaDarkenColor, type Mode0Oam, type Mode0State } from "./gbaPpu.ts";
 import { compositeSemiTransparentObjPixel } from "./sprites.ts";
 import { fakeTearsControllerDisplayAtAge } from "./fakeTearsControllerPresentation.ts";
@@ -1347,7 +1340,6 @@ export { ACTION_MENU_BLANK_START_OFFSET, BALL_OAM_PRIORITY, BATTLE2_ROCK_SLIDE_R
 
 export { TURN5_SITRUS_RING_RENDER_LAG };
 export type { MenuIdleBounceTwoStateAsset } from "./battleSceneCanonical.ts";
-import type { MenuIdleBounceTwoStateAsset } from "./battleSceneCanonical.ts";
 import { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick } from "./battleSceneCanonical.ts";
 export { BATTLE2_TURN1_KERNEL, DRAGONBREATH_HIT_FLASH_OFFSET, DRAGONBREATH_KICKOFF_TEXT_TOTAL, GROVYLE_FAINT_SINK, INITIAL_BATTLE_SCENE_STATE, TURN10_AERIALACE_TEXT_TOTAL, TURN10_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN10_ONIX_AFTER_AERIALACE_HP, TURN11_ATKFLOOR_TEXT_TOTAL, TURN11_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN12_ONIX_AFTER_AERIALACE_HP, TURN13_SANDATTACK_DIRT_DRAW_ORDER, TURN14_DRAGONBREATH_TEXT_TOTAL, TURN14_FLYUP_LINE1, TURN14_FLYUP_LINE2, TURN15_FLY_STRIKE_LINE1, TURN15_FLY_STRIKE_LINE2, TURN15_ONIX_SHAKE_RAM_TICKS, TURN16_FAINT_ATTACK_TEXT_TOTAL, TURN16_FIRE_PUNCH_TEXT_TOTAL, TURN17_LOSS_TEXT_TOTAL, TURN1_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN1_ROCKSLIDE_HP, TURN2_ENDEAVOR_HP, TURN2_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ENDEAVOR_FLICKER_START, TURN3_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN3_ROCKSLIDE_HP, TURN4_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN4_ROCKSLIDE_HP, TURN5_ENDEAVOR_HP, TURN5_OFF_ROCKSLIDE_ANIMATION_PROFILE, TURN5_ROCKSLIDE_OPPONENT_TO_HP, TURN5_SITRUS, TURN6_FEATHERDANCE_TEXT_TOTAL, TURN6_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP, TURN7_REGIME2_TO_REGIME1_SHIFT, TURN8_REGIME3_TO_REGIME1_SHIFT, TURN9_ONIX_AFTER_QUICKATTACK_HP, TURN9_QUICKATTACK_TEXT_TOTAL, TURN9_ROCKSLIDE_ANIMATION_PROFILE, battle2RockSlideMechanismPressTick, currentEpochPresentationAgeFromLatest, dragonBreathHp, dragonBreathTextStartTick, frontSpriteAnimFrame, grovyleStretchTintCoeff, playerHealthboxHpOverlayByHp, turn10AerialAceHp, turn10AerialAceTextStartTick, turn10NotVeryEffectiveTextStartTick, turn10SuperEffectiveTextStartTick, turn11AtkFloorTextStartTick, turn11SuperEffectiveTextStartTick, turn12MissTextStartTick, turn13AccFellTextStartTick, turn13MurkrowFrame, turn13SandAttackPidgeottoX2, turn13SandAttackTextStartTick, turn14KickoffBounceTick, turn14MurkrowInvisible, turn14SimpleVisibleChars, turn15FaintSinkSkipRows, turn15SimpleVisibleChars, turn15StrikeAttackerInvisible, turn15StrikeTargetHealthboxWobbleY2, turn15StrikeTargetHp, turn15StrikeTargetInvisible, turn15StrikeTargetShakeX2, turn16PartyElapsedAtTick, turn3KickoffBounceTick, turn3SubmenuBounceTickFromPresentationEpochAge, turn5FaintedCursorYOffset, turn5FaintedTextStartTick, turn5IconBarEva, turn5SitrusResettledBounceTick, turn6FeatherDanceTextStartTick, turn6KickoffBounceTick, turn7KickoffBounceTick, turn8BindTextStartTick, turn8KickoffBounceTick, turn8MissTextStartTick, turn9Ep2HealthboxWobbleY2, turn9Ep2OnixInvisible, turn9Hp, turn9NotVeryEffectiveTextStartTick, turn9QuickAttackTextStartTick, turn9SuperEffectiveTextStartTick };
 import { BATTLE2_TURN1_KABUTO_ROCK_SLIDE_HP, GROVYLE_FAINT_SINK_STEPS, GROVYLE_HEALTHBOX_VANISH_TICK, TURN14_FLYUP_TEXT_TOTAL, TURN15_FLY_STRIKE_TEXT_TOTAL, TURN5_SITRUS_HEAL_HP_END, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2, TURN5_SITRUS_RING_CENTER, dragonBreathTextVisibleChars, menuIdleHealthboxBounce, menuIdleOnixBounce, turn10AerialAceTextVisibleChars, turn10NotVeryEffectiveTextVisibleChars, turn10SuperEffectiveTextVisibleChars, turn11AtkFloorTextVisibleChars, turn11SuperEffectiveTextVisibleChars, turn6FeatherDanceTextVisibleChars, turn9NotVeryEffectiveTextVisibleChars, turn9QuickAttackTextVisibleChars, turn9SuperEffectiveTextVisibleChars } from "./battleSceneCanonical.ts";
@@ -1361,6 +1353,8 @@ export { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATK
 
 // --- slice 4 batch 5 (docs/battlescene-canonical-split-design.md §6, ISSUES #39 rank-5) ---
 import { turn5FaintDismissCursorTick, TURN5_PIDGEOTTO_BG_FADE_Y, turn5BgFadeY, turn5SitrusOffHealTextVisibleChars, turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET, turn9FightSubmenuBrowseBounceTick, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET } from "./battleSceneCanonical.ts";
+export { generatedBattleStartAcknowledgementVisibleStarted, sendOutTextVisibleChars, textVisibleChars, turn10RockSlideResettledBounceTick, turn11RockSlideResettledBounceTick, turn12RockSlideResettledBounceTick, turn13FaintedTextStartTick, turn5PidgeottoHealthboxSlideDx, turn8ResettledBounceTick, turn9ResettledBounceTick } from "./battleSceneCanonical.ts";
+import { assertFeatherDanceAttackStatPalette, battle2CommandPresentationForRender, battle2Turn1BounceTick, drawGrovyleMaterialize, drawGrovyleStretch, drawGrovyleStretchEarly, drawKabutoMaterialize, drawMenuIdleBaseWithOpponentHpFromLatest, drawMessageText, drawPlayerMaterialize, drawStatsBanner, drawTurn13SandAttackDirt, drawTurn14FlyBall, drawTurn15FlyBallDescent, drawTurn15ImpactHitsplat, drawTurn5IconBar, drawTurn5SwitchinParticles, drawTurn6StatFallBanner, drawTwoStateBounceRect, legacyPidgeottoField, sendOutTextVisibleChars, switchinSentOutLine1, textVisibleChars, turn10KickoffBounceTick, turn10RockSlideResettledBounceTick, turn11KickoffBounceTick, turn11RockSlideResettledBounceTick, turn12KickoffBounceTick, turn12RockSlideResettledBounceTick, turn13FaintedTextStartTick, turn13KickoffBounceTick, turn4KickoffBounceTickFromLatest, turn4SubmenuBounceTickFromLatest, turn5KickoffBounceTickFromLatest, turn5LegacyResettledBounceTickFromLatest, turn5PidgeottoHealthboxSlideDx, turn8ResettledBounceTick, turn9FightSubmenuLiveBounceRegime, turn9KickoffBounceTick, turn9ResettledBounceTick } from "./battleSceneCanonical.ts";
 export { turn5FaintDismissCursorTick, TURN5_PIDGEOTTO_BG_FADE_Y, turn5BgFadeY, turn5SitrusOffHealTextVisibleChars, turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET, turn9FightSubmenuBrowseBounceTick, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET };
 
 interface Tileset {
@@ -1536,7 +1530,7 @@ const battleEnemyShadow = battleEnemyShadowAsset as Readonly<{
   elevatedSpecies: readonly string[];
 }>;
 const elevatedEnemyShadowSpecies = new Set(battleEnemyShadow.elevatedSpecies);
-const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
+export const statAnimBanner = statAnimBannerAsset as StatAnimBannerAsset;
 const battleWindow = battleWindowAsset as BattleWindowAsset;
 const frontierTrainerPics = [
   ...(frontierTrainerPicsAsset as { entries: FrontierTrainerPicAsset[] }).entries,
@@ -1549,13 +1543,13 @@ const frontierTrainerPicBySymbol = new Map(
   frontierTrainerPics.map((asset) => [asset.symbol, asset]),
 );
 const brendan = brendanAsset as BrendanAsset;
-const ballDisplay = ballDisplayAsset as BallDisplayAsset;
+export const ballDisplay = ballDisplayAsset as BallDisplayAsset;
 const downArrow = downArrowAsset as DownArrowAsset;
 const ballStatusBar = (battleHealthboxAsset as { ballStatusBar: BallStatusBarAsset }).ballStatusBar;
-const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
+export const grovyleFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).GROVYLE!;
 const medichamFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).MEDICHAM!;
-const kabutoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).KABUTO!;
-const KABUTO_CORNER = { x: 144, y: 25 };
+export const kabutoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).KABUTO!;
+export const KABUTO_CORNER = { x: 144, y: 25 };
 /** S7 slice L-3 (docs/faint-switch-notes.md §5): opponent front-sprite corner = `(144, 8 + gMonFrontPicCoords[species].yOffset)` - Pidgeotto's `yOffset` is 11, byte-exact-verified against the oracle at `(144,19)` (0/1087 mismatched px). */
 const pidgeottoFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).PIDGEOTTO!;
 const fearowFrontSprite = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).FEAROW!;
@@ -2150,12 +2144,12 @@ const menuHealthboxPlayer = menuHealthboxPlayerAsset as SendOutHealthboxContentA
 const battleAnimRocks = battleAnimRocksAsset as BattleAnimRocksAsset;
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
-const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
+export const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 const battleAnimSlashSlice = battleAnimSlashSliceAsset as BattleAnimCuttingSliceAsset;
 const battleAnimLick = battleAnimLickAsset as BattleAnimCuttingSliceAsset;
 /** S7/S8 turn 13 Part A (docs/turn13-notes.md's own dirt-throw sub-section): `gSandAttackDirtSpriteTemplate`'s single static 8x8 tile - see `tools/extract/extract-sandattack-dirt.ts`. */
-const battleAnimMudSand = battleAnimMudSandAsset as {
+export const battleAnimMudSand = battleAnimMudSandAsset as {
   tileset: Tileset;
   mudSlapTileset: Tileset;
   palette: RgbColor[];
@@ -2164,7 +2158,7 @@ const fissureArt = fissureAsset as {
   background: { tileset: Tileset; tilemap: Tilemap; palette: RgbColor[] };
 };
 /** S7/S8 turn 14 (docs/turn14-notes.md's worktree-lane addendum): `gFlyBallUpSpriteTemplate`'s "round shadow" ball sprite (`ANIM_TAG_ROUND_SHADOW`, `round_shadow.png`, 64x64) - see `tools/extract/extract-fly-ball.ts`. */
-const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
+export const battleAnimFlyBall = battleAnimFlyBallAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimSmallEmber = battleAnimSmallEmberAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimFirePlume = battleAnimFirePlumeAsset as { tileset: Tileset; palette: RgbColor[] };
 const battleAnimHandsAndFeet = battleAnimHandsAndFeetAsset as { tileset: Tileset; palette: RgbColor[] };
@@ -2596,7 +2590,7 @@ function bounceSpoinkPlayerHealthbox(
  * different HP and has no reason to route through the cache.
  */
 const opponentHealthboxContentByHp = new Map<number, ReturnType<typeof composeOpponentHealthbox>>();
-function opponentHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
+export function opponentHealthboxContentForHp(hp: number): ReturnType<typeof composeOpponentHealthbox> {
   let cached = opponentHealthboxContentByHp.get(hp);
   if (!cached) {
     cached = hp === anchorOpponentBattler.hp
@@ -2836,9 +2830,9 @@ function drawPlayerHealthboxHpOverlay(fb: Uint8Array, hp: number, yOffset = 0): 
 }
 const summaryBall = summaryBallAsset as SummaryBallAsset;
 const battleAnimBallOpen = battleAnimBallOpenAsset as BattleAnimBallOpenAsset;
-const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
+export const battleAnimTables = battleAnimTablesAsset as BattleAnimTablesAsset;
 const battleAnimParticles = battleAnimParticlesAsset as BattleAnimParticlesAsset;
-const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
+export const onixBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).ONIX!;
 const octilleryBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).OCTILLERY!;
 const latiosBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).LATIOS!;
 const baltoyBackSprite = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).BALTOY!;
@@ -2875,7 +2869,7 @@ const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 
 const menuIdleBlank = menuIdleBlankAsset as MenuIdleFrameAsset;
-const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
+export const menuIdleBase = menuIdleBaseAsset as MenuIdleFrameAsset;
 const fightSubmenuWindow = fightSubmenuWindowAsset as FightSubmenuWindowAsset;
 
 /** This window's own trace-tick origin - `elapsed` 0 == trace tick 1040 (tools/compare/traces-groundtruth/battle1-scene-dense.json's own first captured frame). */
@@ -3139,7 +3133,7 @@ function blendChannel(tgt1: number, tgt2: number, eva: number, evb: number): num
 
 const LINE2 = "would like to battle!";
 
-function presentationForEncounter(
+export function presentationForEncounter(
   encounter: BattleSceneState["encounter"],
   trainerPresentation?: FactoryTrainerPresentation,
 ): FactoryTrainerPresentation {
@@ -3182,17 +3176,6 @@ export const TEXT_TOTAL_CHARS = LINE1.length + LINE2.length;
 /** First trace tick the first glyph ("B") is drawn (docs/battle-scene-notes.md §1/§3.2). */
 export const TEXT_START_TICK = 1234;
 
-/** Visible character count (0..TEXT_TOTAL_CHARS) across both lines combined at trace tick `t`. */
-export function textVisibleChars(
-  t: number,
-  encounter: BattleSceneState["encounter"] = "destin",
-  trainerPresentation?: FactoryTrainerPresentation,
-): number {
-  const params = battleIntroEncounterParams(encounter, trainerPresentation);
-  const total = params.line1.length + params.line2.length;
-  if (t < params.textStartTick) return 0;
-  return Math.min(total, t - params.textStartTick + 1);
-}
 
 // --- §3.3: wait-cursor bob / 36-tick idle cycle ------------------------
 
@@ -3277,7 +3260,7 @@ const OPP_CREATE_TICK = 1231;
 const PLAYER_BAR_VISIBLE_TICK = PLAYER_CREATE_TICK + 1;
 
 const PLAYER_BAR_X2 = [95, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 0];
-const OPP_BAR_X2 = [-95, -90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0];
+export const OPP_BAR_X2 = [-95, -90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0];
 /**
  * Re-probed this session (PROGRESS.md #64): the previous tables above only
  * captured each icon's SLIDING tail, not the per-icon flat delay prefix
@@ -3304,7 +3287,7 @@ const OPP_ICON_X2: readonly number[][] = [
   [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
 ];
 
-function tableX2(table: readonly number[], createTick: number, t: number): number {
+export function tableX2(table: readonly number[], createTick: number, t: number): number {
   if (t < createTick) return 0;
   const idx = t - createTick;
   return idx < table.length ? table[idx]! : 0;
@@ -3430,7 +3413,7 @@ export function battleSendOutEncounterParams(
 /** §7.4: 3-tick lag from text-complete to the post-text handoff (trainer-pic exit / ball spawn / party-summary despawn all start the same tick). */
 const SENDOUT_HANDOFF_LAG = 3;
 
-function sendOutTextStartTick(pressTick: number): number {
+export function sendOutTextStartTick(pressTick: number): number {
   return pressTick + SENDOUT_TEXT_LAG;
 }
 export function sendOutHandoffTick(
@@ -3466,20 +3449,6 @@ export function playerTrainerSendOutClock(t: number, handoffTick: number, encoun
 
 
 
-/** Visible character count (0..35) of the "sent\nout GROVYLE!" message at trace tick `t`, given the press tick. Same 1-tick/char mechanism as `textVisibleChars` (§3.2/§7.3). */
-export function sendOutTextVisibleChars(
-  t: number,
-  pressTick: number,
-  encounter: BattleSceneState["encounter"] = "destin",
-  trainerPresentation?: FactoryTrainerPresentation,
-): number {
-  const start = sendOutTextStartTick(pressTick);
-  if (t < start) return 0;
-  return Math.min(
-    battleSendOutEncounterParams(encounter, trainerPresentation).textTotal,
-    t - start + 1,
-  );
-}
 
 /**
  * §7.4.1: trainer-pic exit slide - `gSprites[gBattlerSpriteIds[1]].x2` (the
@@ -3574,7 +3543,7 @@ function trainerExitX(t: number, handoffTick: number): number | null {
  * before 1495 (full mismatch, not just further off-screen).
  */
 const HEALTHBOX_SLIDE_START_TICK = 1495;
-const HEALTHBOX_SLIDE_START_DX = -110;
+export const HEALTHBOX_SLIDE_START_DX = -110;
 const HEALTHBOX_SLIDE_STEP = 5;
 /** Opponent healthbox's content-image x offset (added to its extracted `x`) at trace tick `t`, or `null` before it's created (`startTick`, default `HEALTHBOX_SLIDE_START_TICK` for S6's own send-out). */
 export function healthboxSlideDx(
@@ -3641,7 +3610,7 @@ export function healthboxSlideDx(
  */
 const BALL_CORNER = { x: 168, y: 56 };
 const BALL_CLOSED_START_OFFSET = 2;
-const BALL_OPEN_START_OFFSET = 18;
+export const BALL_OPEN_START_OFFSET = 18;
 const BALL_OPEN_FINAL_START_OFFSET = 23;
 const BALL_INVISIBLE_START_OFFSET = 29;
 
@@ -3723,7 +3692,7 @@ function drawSpriteSheetTile(fb: Uint8Array, tileset: Tileset, palette: RgbColor
   }
 }
 
-function drawSpriteSheet(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number): void {
+export function drawSpriteSheet(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number): void {
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
       drawSpriteSheetTile(fb, tileset, palette, ty * tileset.columns + tx, ox + tx * 8, oy + ty * 8);
@@ -4173,17 +4142,8 @@ export function drawBattleMessageTextLines(
 
 // Canonical callers retain their established local name and behavior while
 // the typed resolution renderer consumes the exported source-relative helper.
-const drawMessageTextLines = drawBattleMessageTextLines;
+export const drawMessageTextLines = drawBattleMessageTextLines;
 
-function drawMessageText(
-  fb: Uint8Array,
-  chars: number,
-  encounter: BattleSceneState["encounter"] = "destin",
-  trainerPresentation?: FactoryTrainerPresentation,
-): void {
-  const params = battleIntroEncounterParams(encounter, trainerPresentation);
-  drawMessageTextLines(fb, params.line1, params.line2, chars);
-}
 
 function drawCursor(fb: Uint8Array, yOffset: number, x: number = CURSOR_DEST_X): void {
   const destY = CURSOR_DEST_Y_BASE - yOffset;
@@ -4198,7 +4158,7 @@ function drawCursor(fb: Uint8Array, yOffset: number, x: number = CURSOR_DEST_X):
   }
 }
 
-function ballStateTileIndex(state: string): number {
+export function ballStateTileIndex(state: string): number {
   return Math.max(0, ballDisplay.states.indexOf(state));
 }
 
@@ -4223,7 +4183,7 @@ function ballStateTileIndex(state: string): number {
  * brendanColor)` (this function's old behavior) gave the wrong `(61,59,88)`
  * this codebase was actually drawing.
  */
-function blendedSetPixel(fb: Uint8Array, x: number, y: number, c: RgbColor, eva: number | null): void {
+export function blendedSetPixel(fb: Uint8Array, x: number, y: number, c: RgbColor, eva: number | null): void {
   if (eva === null) {
     setPixel(fb, x, y, c);
     return;
@@ -4240,7 +4200,7 @@ function blendedSetPixel(fb: Uint8Array, x: number, y: number, c: RgbColor, eva:
 }
 
 /** gBattleInterface_BallStatusBarGfx (`ball_status_bar.png`), the diagonal bar the ball icons sit on - corners brute-force-matched against the oracle this session: opponent (-24,40) h-flipped, player (136,96) unflipped, both 212/212 exact. `eva` (non-null only for the player side, post-`PLAYER_SUMMARY_FADE_START_TICK`) alpha-blends against the framebuffer instead of drawing flat - see `blendedSetPixel`. */
-function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolean, eva: number | null = null): void {
+export function drawBallStatusBar(fb: Uint8Array, ox: number, oy: number, hFlip: boolean, eva: number | null = null): void {
   const { tileset, palette } = ballStatusBar;
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     for (let tx = 0; tx < tileset.columns; tx += 1) {
@@ -4434,7 +4394,7 @@ export function renderGeneratedBattleStartPreSendOut(
  * this engine's stored acknowledgement frame. The existing printer then
  * owns five callbacks before its first visible glyph.
  */
-function generatedBattleStartPressTick(
+export function generatedBattleStartPressTick(
   state: FactoryBattleStartIntroState,
 ): number | null {
   return state.acknowledgedElapsed === null
@@ -4445,23 +4405,6 @@ function generatedBattleStartPressTick(
     );
 }
 
-/**
- * First callback whose framebuffer is owned by the accepted intro A edge.
- * `PrepareStringBattle(STRINGID_INTROSENDOUT)` leaves the old message visible
- * for the printer's five setup callbacks, then clears it and exposes the
- * first new glyph. The edge itself may arrive after an arbitrarily long
- * `PAUSE_UNTIL_PRESS` hold, so this boundary is acknowledgement-relative.
- */
-export function generatedBattleStartAcknowledgementVisibleStarted(
-  state: FactoryBattleStartIntroState,
-): boolean {
-  const pressTick = generatedBattleStartPressTick(state);
-  if (pressTick === null) return false;
-  return generatedBattleIntroSourceClock(
-    state.elapsed,
-    state.sceneAssemblyDisplayLag,
-  ) >= sendOutTextStartTick(pressTick);
-}
 
 export function generatedBattleStartOpponentReleaseStarted(
   state: FactoryBattleStartIntroState,
@@ -5350,7 +5293,7 @@ type FrontMaterializeGeometry =
   | { readonly kind: "stretch"; readonly xScale: number; readonly yScale: number; readonly y2: number; readonly tintCoeff: number }
   | { readonly kind: "rotate"; readonly pa: number; readonly pb: number; readonly pc: number; readonly pd: number; readonly x2: number; readonly tintCoeff: number };
 
-function drawFrontBackMaterialize(
+export function drawFrontBackMaterialize(
   fb: Uint8Array,
   tileset: Tileset,
   palette: RgbColor[],
@@ -5434,12 +5377,12 @@ function drawGrovyleSettled(fb: Uint8Array): void {
  * cutoff rather than guessing the fade-out curve - ticks 1504-1543 stay a
  * known gap (mechanism 5's own window, unimplemented).
  */
-const MATERIALIZE_START_OFFSET = 19;
-const MATERIALIZE_END_OFFSET = 42;
+export const MATERIALIZE_START_OFFSET = 19;
+export const MATERIALIZE_END_OFFSET = 42;
 const MATERIALIZE_TINT_COLOR = battleAnimTables.ballOpenFadeColor.rgb8;
 
 /** `sAffineAnim_Battler_Emerge`'s accumulator at `logicalOffset` ticks after the anim starts (0 = the tick it starts) - a generic reducer over `affineEmerge.steps` (`AFFINEANIMCMD_FRAME` semantics, `docs/battle-anim-assets.md` §3b), not hardcoded constants, so it stays correct if the extracted table ever changes. */
-function affineEmergeAccumulator(logicalOffset: number): number {
+export function affineEmergeAccumulator(logicalOffset: number): number {
   let acc = battleAnimTables.affineEmerge.neutralScale;
   let consumed = 0;
   for (const step of battleAnimTables.affineEmerge.steps) {
@@ -5511,37 +5454,7 @@ function affineEmergeAccumulator(logicalOffset: number): number {
  */
 export const MATERIALIZE_Y2_TABLE: readonly number[] = [14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 3, 2];
 
-/**
- * §7.23 (re-applying §7.22's verified fix): mechanism 5's own affine matrix
- * write starts 7 ticks before its original coded window (et 35, not et 42 -
- * `GROVYLE_FRONT_ANIM_START_OFFSET`, the SAME tick its front-sprite frame
- * cadence already switches, §7.17) - RAM-probed directly
- * (`tools/probe/specs/sendout-grovyle-stretch.json`, already-committed spec,
- * read further into its existing run): mechanism 4's own window is
- * shortened to match (`et < GROVYLE_FRONT_ANIM_START_OFFSET`, was `et <
- * MATERIALIZE_END_OFFSET`) - mechanism 4 never drew non-neutral pixels in
- * the newly-excluded et 35-41 gap anyway (its own tables are already dry by
- * et 30), so this only changes WHICH function renders that tail, not its
- * pixels. See `GROVYLE_STRETCH_EARLY_TABLE`'s doc comment for the other half
- * of this fix.
- */
-function drawGrovyleMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
-  const et = t - handoffTick;
-  if (et < MATERIALIZE_START_OFFSET || et >= GROVYLE_FRONT_ANIM_START_OFFSET) return;
-  const local = et - MATERIALIZE_START_OFFSET;
-  const accumulator = affineEmergeAccumulator(local + 1);
-  const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  drawFrontBackMaterialize(fb, grovyleFrontSprite.tileset, grovyleFrontSprite.palette, GROVYLE_CORNER, { kind: "tint", accumulator, y2 });
-}
 
-function drawKabutoMaterialize(fb: Uint8Array, t: number, handoffTick: number): void {
-  const et = t - handoffTick;
-  if (et < MATERIALIZE_START_OFFSET || et >= KABUTO_FRONT_ANIM_START_OFFSET) return;
-  const local = et - MATERIALIZE_START_OFFSET;
-  const accumulator = affineEmergeAccumulator(local + 1);
-  const y2 = MATERIALIZE_Y2_TABLE[local] ?? 0;
-  drawFrontBackMaterialize(fb, kabutoFrontSprite.tileset, kabutoFrontSprite.palette, KABUTO_CORNER, { kind: "tint", accumulator, y2 });
-}
 
 /**
  * PLAYER-side materialize (docs/battle-menu-notes.md §3 item 5 /
@@ -5597,13 +5510,13 @@ function drawKabutoMaterialize(fb: Uint8Array, t: number, handoffTick: number): 
  * clean boundary rather than forcing it). Named, not guessed at - see
  * `docs/battle-menu-notes.md` §3 item 5 for the full accounting.
  */
-const ONIX_MATERIALIZE_CORNER = { x: 40, y: 48 };
-const PLAYER_MATERIALIZE_START_TICK = 1653;
-const PLAYER_MATERIALIZE_END_TICK = 1663;
-const PLAYER_MATERIALIZE_ACCUMULATOR_LEAD = 2;
+export const ONIX_MATERIALIZE_CORNER = { x: 40, y: 48 };
+export const PLAYER_MATERIALIZE_START_TICK = 1653;
+export const PLAYER_MATERIALIZE_END_TICK = 1663;
+export const PLAYER_MATERIALIZE_ACCUMULATOR_LEAD = 2;
 
 /** Species-independent player-side ReleaseMonFromBall affine collapse. */
-function drawPlayerSideAffineMaterialize(
+export function drawPlayerSideAffineMaterialize(
   fb: Uint8Array,
   tileset: Tileset,
   corner: { x: number; y: number },
@@ -5616,11 +5529,6 @@ function drawPlayerSideAffineMaterialize(
   drawSpriteSheetAffineTinted(fb, tileset, corner.x, corner.y, accumulator, MATERIALIZE_TINT_COLOR, y2, clipBottom);
 }
 
-function drawPlayerMaterialize(fb: Uint8Array, t: number): void {
-  if (t < PLAYER_MATERIALIZE_START_TICK || t > PLAYER_MATERIALIZE_END_TICK) return;
-  const local = t - PLAYER_MATERIALIZE_START_TICK;
-  drawPlayerSideAffineMaterialize(fb, onixBackSprite.tileset, ONIX_MATERIALIZE_CORNER, local, PLAYER_MATERIALIZE_ACCUMULATOR_LEAD);
-}
 
 /**
  * ISSUES #17: ONIX's own color-fade-to-true-color + settle wobble, picking
@@ -6031,7 +5939,7 @@ function drawMistBallFogBlended(
  * stretched X axis grow past the sprite's own native 64px canvas instead of
  * being hard-capped at it.
  */
-function drawSpriteSheetAffineStretch(
+export function drawSpriteSheetAffineStretch(
   fb: Uint8Array,
   tileset: Tileset,
   palette: RgbColor[],
@@ -6432,53 +6340,7 @@ function drawSpriteSheetAffineRotateBlendedOverFb(
   }
 }
 
-function drawGrovyleStretch(fb: Uint8Array, t: number, handoffTick: number): void {
-  const local = t - handoffTick - MATERIALIZE_END_OFFSET;
-  if (local < 0) return;
-  const entry = GROVYLE_STRETCH_TABLE[Math.min(local, GROVYLE_STRETCH_TABLE.length - 1)]!;
-  const coeff = grovyleStretchTintCoeff(local);
-  const frameOffset = t - handoffTick - GROVYLE_FRONT_ANIM_START_OFFSET;
-  const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
-  drawFrontBackMaterialize(
-    fb,
-    frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
-    grovyleFrontSprite.palette,
-    GROVYLE_CORNER,
-    { kind: "stretch", xScale: entry.xScale, yScale: entry.yScale, y2: entry.y2, tintCoeff: coeff },
-  );
-}
 
-/**
- * §7.22/§7.23: the et 35-41 portion of mechanism 5 (`GROVYLE_STRETCH_EARLY_TABLE`) -
- * a separate call site, not a widened `drawGrovyleStretch` window, because it
- * must be drawn in mechanism 4's OLD slot (before `drawSendOutBall`/
- * `drawBallOpenParticles`), not mechanism 5's own later slot. §7.22 found
- * this the hard way: naively widening `drawGrovyleStretch` in its EXISTING
- * (late) call site made render 1497 WORSE (Grovyle-region diff 3px -> 114px)
- * because the ball-open particle burst (mechanism 3) is still active for et
- * 35-41 and must occlude Grovyle, same as it already correctly does through
- * mechanism 4's call site. Mechanism 5's own original window (et>=42) never
- * needed this ordering because by then the particles have mostly cleared
- * this screen region. Tint coefficient is pinned at 16 (fully tinted, same
- * as mechanism 4's own flat cutoff value) rather than `grovyleStretchTintCoeff`
- * (which assumes `local>=0`, i.e. et>=42) - RAM-confirmed separately
- * (§7.16/§7.21) that `Task_FadeMon_ToNormal`'s poll-gate doesn't start
- * decaying it until et 42 either way.
- */
-function drawGrovyleStretchEarly(fb: Uint8Array, t: number, handoffTick: number): void {
-  const et = t - handoffTick;
-  if (et < GROVYLE_FRONT_ANIM_START_OFFSET || et >= MATERIALIZE_END_OFFSET) return;
-  const entry = GROVYLE_STRETCH_EARLY_TABLE[et - GROVYLE_FRONT_ANIM_START_OFFSET]!;
-  const frameOffset = et - GROVYLE_FRONT_ANIM_START_OFFSET;
-  const frame = frontSpriteAnimFrame(battleAnimTables.grovyleFrontAnim.steps, frameOffset);
-  drawFrontBackMaterialize(
-    fb,
-    frame === 0 ? grovyleFrontSprite.tileset : grovyleFrontSprite.frame2,
-    grovyleFrontSprite.palette,
-    GROVYLE_CORNER,
-    { kind: "stretch", xScale: entry.xScale, yScale: entry.yScale, y2: entry.y2, tintCoeff: 16 },
-  );
-}
 
 /**
  * KABUTO front hand-fit validity (ISSUES #71 Slice C,
@@ -6578,7 +6440,7 @@ export function drawKabutoHSlideWobble(fb: Uint8Array, t: number, handoffTick: n
  * `SortSprites`-derived Y-sort (§7.26/§7.27, `sortAliveParticlesByScreenY`),
  * not spawn-index order - see that function's own doc comment.
  */
-const PARTICLE_ORIGIN = { x: 172, y: 55 };
+export const PARTICLE_ORIGIN = { x: 172, y: 55 };
 const PARTICLE_SPAWN_COUNT = 16;
 const PARTICLE_MAX_AGE = 24;
 /**
@@ -7169,55 +7031,8 @@ function statAnimBg1PixelAt(tilemap: Tilemap, tileset: Tileset, palette: RgbColo
   return palette[idx] ?? null;
 }
 
-/**
- * The generic stat-change banner (`General_StatsChange`,
- * `StatsChangeAnimation_Step1-3`, `src/battle_anim_utility_funcs.c:415-628` -
- * docs/battle-menu-notes.md §10a/§10c/§10d). A real BG1 layer, NOT a flat-
- * white flash (a prior session's 2-sample algebraic solve coincidentally
- * landed on white at both points it checked): `StatsChangeAnimation_Step2`
- * loads `gStatAnim_Increase_Tilemap`/`_Gfx`/`gStatAnim_Evasion_Pal` onto BG1
- * (DOUBLE_TEAM's own `EFFECT_EVASION_UP` - the only stat/direction this
- * slice wires up, per the brief's own scope; `extract-stat-anim.ts` pulls
- * the full 8-palette/2-tilemap family for future battles), and
- * `StatsChangeAnimation_Step1` sets an OBJ-WINDOW mask via a FROZEN copy of
- * Grovyle's own OAM sprite (`CreateInvisibleSpriteCopy`, `battle_anim_mons.
- * c:2323` - `objMode = ST_OAM_OBJ_WINDOW`, taken once at banner start and
- * never moved again) - exactly Grovyle's own silhouette at his current
- * (static, RAM-confirmed unmoving throughout this window) position, which is
- * why this function iterates the same `GROVYLE_CORNER`-anchored tile mask
- * `drawDoubleTeamClones` above uses, not the whole screen. Bit-exact
- * compositing per real GBA alpha-blend semantics: BG1 is TGT1 (priority 0,
- * frontmost within the window), TGT2 is ALL (whatever's already drawn -
- * Grovyle's own real, un-hidden sprite, since `drawTurnKickoffText` already
- * drew it before this runs) - blend where BG1 is opaque, else leave the
- * existing pixel raw (`statAnimBg1PixelAt`'s own `null` case).
- * `statsBannerBg1Y` (`battleMenu.ts`) reproduces `gBattle_BG1_Y`'s own
- * continuous `+3`/tick scroll bit-exact, RAM-confirmed - `gBattle_BG1_X`
- * stays 0 for a stat INCREASE (only a stat DECREASE sets it to 64, out of
- * scope this slice), so only the vertical map coordinate shifts.
- */
-function drawStatsBanner(
-  fb: Uint8Array,
-  t: number,
-  pressTick: number,
-  startDelay: number,
-  endDelay: number,
-  bg1YAnchorDelay: number,
-): boolean {
-  const eva = statsBannerEva(t, pressTick, startDelay, endDelay);
-  if (eva === null) return false;
-  const bg1Y = statsBannerBg1Y(t, pressTick, bg1YAnchorDelay);
-  drawStatIncreaseBannerForBattler(
-    fb,
-    grovyleFrontSprite.tileset,
-    GROVYLE_CORNER,
-    eva,
-    bg1Y,
-  );
-  return true;
-}
 
-function drawStatIncreaseBannerForBattler(
+export function drawStatIncreaseBannerForBattler(
   fb: Uint8Array,
   tileset: Tileset,
   corner: Readonly<{ x: number; y: number }>,
@@ -7250,26 +7065,8 @@ function drawStatIncreaseBannerForBattler(
   }
 }
 
-/**
- * ISSUES #39 rank-4 slice 2 (`docs/rank4-prep-scout.md` §2.3): every real
- * canonical caller of the turn-6/7/8 stat-fall banner (`drawTurn6StatFallBanner`
- * below) is FEATHER_DANCE, which only ever drops ATK -- this asserts that
- * real per-turn fact (`resolveTurnN FeatherDanceWindowContent().statChange.stat`,
- * not a bare literal) rather than building a full seven-stat hyphenated-to-
- * camelCase translation table (`spAttack`/`spDefense` etc.) this window's own
- * real domain never exercises -- the "disproportionate new surface" §2.3
- * itself named. Replaces the former `drawStatDecreaseBannerForBattler`
- * wrapper's own hardcoded-`attack` default (same FAKE_TEARS-precedent
- * explicit-palette-at-the-call-site shape, `:23256`).
- */
-function assertFeatherDanceAttackStatPalette(stat: string): RgbColor[] {
-  if (stat !== "attack") {
-    throw new Error(`battleScene: FEATHER_DANCE stat-fall banner expected stat "attack", got "${stat}"`);
-  }
-  return statAnimBanner.palettes.attack;
-}
 
-function drawStatDecreaseBannerForBattlerPalette(
+export function drawStatDecreaseBannerForBattlerPalette(
   fb: Uint8Array,
   tileset: Tileset,
   corner: Readonly<{ x: number; y: number }>,
@@ -7611,7 +7408,7 @@ function healthboxBackgroundColorAt(x: number, y: number, paletteOverride?: RgbC
  * caller that ever passes a different (drained) one, via
  * `opponentHealthboxContentForHp`.
  */
-function drawSendOutHealthbox(
+export function drawSendOutHealthbox(
   fb: Uint8Array,
   dx: number,
   content: ReturnType<typeof composeOpponentHealthbox> = opponentHealthboxContent,
@@ -7862,60 +7659,6 @@ function drawBattle2ActionMenuWindow(
   }
 }
 
-/**
- * Battle-2 controller command phase, driven by the real kernel
- * (battle2CommandAdapter.ts) instead of a hand-built fixture. The handoff
- * age activates `action-enter`; every later phase clock is relative to the
- * corresponding legacy open/close event -- that lifecycle clock (phase/
- * phaseElapsed) and the live FIGHT cursor stay legacy-owned (A-confirm
- * timing remains on the established predecessor until a later slice owns
- * that semantic handoff); the request/field/legal-decision facts come from
- * the kernel.
- */
-function battle2CommandPresentationForRender(
-  age: number,
-  legacyElapsed: number,
-  sm: FightSubmenuState,
-): BattleCommandPresentationState {
-  let phase: BattleCommandPresentationPhase;
-  let phaseElapsed: number;
-
-  if (age <= ACTION_MENU_BLANK_END_OFFSET) {
-    phase = "action-enter";
-    phaseElapsed = age - ACTION_MENU_BLANK_START_OFFSET;
-  } else if (sm.openElapsed === null) {
-    phase = "action-menu";
-    phaseElapsed = age - (ACTION_MENU_BLANK_END_OFFSET + 1);
-  } else {
-    const openElapsed = legacyElapsed - sm.openElapsed;
-    if (openElapsed < FIGHT_SUBMENU_OPEN_DELAY) {
-      phase = "fight-opening";
-      phaseElapsed = openElapsed;
-    } else if (sm.closeElapsed === null) {
-      phase = "fight-menu";
-      phaseElapsed = openElapsed - FIGHT_SUBMENU_OPEN_DELAY;
-    } else {
-      const closeElapsed = legacyElapsed - sm.closeElapsed;
-      if (closeElapsed < FIGHT_SUBMENU_CLOSE_DELAY) {
-        phase = "fight-closing";
-        phaseElapsed = closeElapsed;
-      } else {
-        phase = "action-menu";
-        phaseElapsed = closeElapsed - FIGHT_SUBMENU_CLOSE_DELAY;
-      }
-    }
-  }
-
-  const command = createBattle2CommandAdapterCommand(BATTLE2_TURN1_KERNEL, sm.cursor);
-  return Object.freeze({
-    ...command,
-    lifecycle: Object.freeze({ phase, phaseElapsed }),
-    // The legacy equivalence caller supplies its already-proven bounce
-    // overlay separately; this typed adapter only dispatches window chrome.
-    idleBounceElapsed: 0,
-    fightDisplayCursor: sm.displayCursor,
-  });
-}
 
 /**
  * Battle 2's action/FIGHT window now dispatches through the typed command
@@ -8002,12 +7745,6 @@ function drawBattle2FightSubmenuWindow(
   });
 }
 
-function battle2Turn1BounceTick(
-  t: number,
-  handoffTick: number,
-): number {
-  return actionMenuBounceTick(t, handoffTick) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-}
 
 function drawBattle2RockSlideAttack(
   fb: Uint8Array,
@@ -8108,7 +7845,7 @@ function drawBattle2RockSlideTurn1Window(
 }
 
 /** Opaque flat-RGB rectangle blit, no transparency/masking (every pixel in the harvest is real content - see `tools/extract/extract-menu-idle-window.ts`'s own doc for why this window's harvests don't need `getHealthboxContentMask`'s bleed handling: none of these ticks are mid-fade, so there's no stale-background risk). */
-function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
+export function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
   const { x, y, width, height, pixels } = asset;
   for (let py = 0; py < height; py += 1) {
     for (let px = 0; px < width; px += 1) {
@@ -8118,14 +7855,6 @@ function drawRect(fb: Uint8Array, asset: MenuIdleFrameAsset): void {
   }
 }
 
-/** Draws a `MenuIdleBounceTwoStateAsset` region's `y1` patch at `y2===1`, its `y2` patch at `y2>=2`, nothing at `y2===0` - shared by both onix and healthbox regions (ISSUES #22, docs/battle-menu-notes.md §8c: both regions reach the same rare `y2=2` sine-peak state and need the same two-patch treatment, not just healthbox). */
-function drawTwoStateBounceRect(fb: Uint8Array, asset: MenuIdleBounceTwoStateAsset, y2: number): void {
-  if (y2 === 1) {
-    drawRect(fb, { x: asset.x, y: asset.y, width: asset.width, height: asset.height, pixels: asset.y1 });
-  } else if (y2 >= 2) {
-    drawRect(fb, { x: asset.x, y: asset.y, width: asset.width, height: asset.height, pixels: asset.y2 });
-  }
-}
 
 /**
  * The settled first-action-menu window (docs/battle-menu-idle-notes.md,
@@ -8164,23 +7893,6 @@ function drawTwoStateBounceRect(fb: Uint8Array, asset: MenuIdleBounceTwoStateAss
  * exactly the ordering constraint S7 slice E2b-2 already found for this
  * same overlay.
  */
-/**
- * Generic sibling of the retired `drawMenuIdleBaseWithOpponentHp` (typeref-
- * retirement slice 7b, `docs/battlescene-turnN-typeref-retirement-design.md`
- * §4.1 row 7). `latest` only ever carries ONE turn's content at a time, so
- * its own `.content.field.opponent.hp.current` already IS whichever of
- * turn 1-4's own opponent HP is current - the legacy turn4-then-3-then-2-
- * then-1 readiness cascade was reconstructing this exact single fact from
- * `latest` one call frame up (§2.3), never a second independent source.
- */
-function drawMenuIdleBaseWithOpponentHpFromLatest(
-  fb: Uint8Array,
-  latest: LatestCompletedCommandHandoff | null,
-): void {
-  drawRect(fb, menuIdleBase);
-  const hp = latest?.content?.field.opponent.hp.current ?? null;
-  if (hp !== null) drawSendOutHealthbox(fb, 0, opponentHealthboxContentForHp(hp));
-}
 
 /**
  * Generic-owner idle content for callers with no legacy-typed predecessor
@@ -9957,56 +9669,7 @@ function drawTurn3RockSlideWindow(
  */
 
 
-/**
- * Generic sibling of the retired `turn4SubmenuBounceTick` (typeref-
- * retirement slice 7b, `docs/battlescene-turnN-typeref-retirement-design.md`
- * §4.1). Turn 4's reopened submenu composes turn 3's receipt-owned
- * resettled epoch with `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`; reopening FIGHT
- * does not reset the underlying bounce task. The legacy formula's own
- * `turn3PresentationEpochElapsedSinceReset(turn3NextCommandHandoff, elapsed)`
- * read `turn3NextCommandHandoff.presentationEpoch.elapsed`, the exact same
- * fact `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
- * `latest.content.presentationEpoch.elapsed` (verified field-for-field, same
- * as `turn4KickoffBounceTickFromLatest`'s own doc one branch below).
- */
-function turn4SubmenuBounceTickFromLatest(
-  t: number,
-  latest: LatestCompletedCommandHandoff | null,
-): number {
-  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(latest, t - TICK0);
-  if (epochAge === null) {
-    throw new Error("turn-4 submenu bounce requires semantic turn-3 presentation epoch content");
-  }
-  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-}
 
-/**
- * Generic sibling of the retired `turn4KickoffBounceTick` (typeref-
- * retirement slice 6/7b, `docs/battlescene-turnN-typeref-retirement-design.md`
- * §4.1). Same freeze-then-hold formula and the same
- * `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` offset `turn4SubmenuBounceTickFromLatest`
- * composes - `latestCompletedCommandPresentationEpochElapsedSinceReset` reads
- * `latest.content.presentationEpoch.elapsed` directly (ISSUES #39 rank-6
- * slice 4's own grid-search picked `d=11`/`pressTick - 11` as the frozen
- * plateau's center; that same freeze/hold shape is preserved verbatim here,
- * only the epoch source changed).
- */
-function turn4KickoffBounceTickFromLatest(
-  t: number,
-  pressTick: number,
-  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
-): number {
-  const freezeTick = pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
-  const sourceTick = t < freezeTick ? t : pressTick - 11;
-  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
-    latestCompletedCommandHandoff,
-    sourceTick - TICK0,
-  );
-  if (epochAge === null) {
-    throw new Error("turn-4 kickoff bounce requires semantic turn-3 presentation epoch content");
-  }
-  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-}
 
 /**
  * ISSUES #39 rank-6 slice 4: turn 4's own DOUBLE_TEAM-half Scene-OFF
@@ -10233,25 +9896,6 @@ function drawTurn4RockSlideWindow(
  */
 
 
-/**
- * Generic sibling of the retired `turn5LegacyResettledBounceTick` (typeref-
- * retirement slice 7b, `docs/battlescene-turnN-typeref-retirement-design.md`
- * §4.1). The legacy formula's own `turn4RockSlideResettledBounceTick` read
- * `turn4NextCommandHandoff.presentationEpoch.elapsed`, the exact same fact
- * `latestCompletedCommandPresentationEpochElapsedSinceReset` reads off
- * `latest.content.presentationEpoch.elapsed` (verified field-for-field, same
- * as `turn4KickoffBounceTickFromLatest`'s own doc one turn earlier).
- */
-function turn5LegacyResettledBounceTickFromLatest(
-  t: number,
-  latest: LatestCompletedCommandHandoff | null,
-): number {
-  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(latest, t - TICK0);
-  if (epochAge === null) {
-    throw new Error("turn-5 resettled bounce requires semantic turn-4 presentation epoch content");
-  }
-  return MENU_IDLE_BLANK_END_TICK + 1 + epochAge - TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG;
-}
 
 /** Generic sibling of the retired `turn5SubmenuBounceTick` (typeref-retirement slice 7b) - same `FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` offset over `turn5LegacyResettledBounceTickFromLatest`'s own epoch. */
 function turn5SubmenuBounceTickFromLatest(
@@ -10280,73 +9924,6 @@ export function turn5ReopenBounceTick(
     : turn5SubmenuBounceTickFromLatest(t, latest);
 }
 
-/**
- * Generic sibling of `turn5KickoffBounceTick` for callers with no legacy-
- * typed turn-4 predecessor handoff of their own (typeref-retirement slice 7,
- * `docs/battlescene-turnN-typeref-retirement-design.md` §4.1, same shape
- * `turn4KickoffBounceTickFromLatest` established one turn earlier). The
- * `null` branch (turn 13's own switch-in echo,
- * `drawTurn13SwitchinPresentationFieldBase`, and every plain-bounceTick
- * caller of `drawTurn6FieldBase` that folds through `drawTurn5RockSlideAttack`
- * with no handoff of its own) is copied verbatim, unchanged - it is a fixed
- * formula over `t`/`pressTick`/constants only and never reads the handoff,
- * so there is nothing to generalize there. The non-null branch composes the
- * same `turn5SubmenuBounceTickFromLatest`/`turn5LegacyResettledBounceTickFromLatest`
- * chain off `latestCompletedCommandPresentationEpochElapsedSinceReset`
- * directly - the legacy `turn5KickoffBounceTick`/`turn5SubmenuBounceTick`/
- * `turn5LegacyResettledBounceTick`/`turn4RockSlideResettledBounceTick` chain
- * this sibling replaces has fully retired (typeref-retirement slice 7b) -
- * `drawFightSubmenuWindow`/`drawActionMenuIdleWindow` now call this sibling
- * directly with `latestCompletedCommandHandoff`.
- */
-function turn5KickoffBounceTickFromLatest(
-  t: number,
-  pressTick: number,
-  latestCompletedCommandHandoff: LatestCompletedCommandHandoff | null,
-): number {
-  if (latestCompletedCommandHandoff === null) {
-    const historicalResettledTick = (value: number) => value
-      - (TURN4_CONFIRM_PRESS_TICK + TURN4_ROCKSLIDE_MENU_REDRAW_DELAY)
-      + (MENU_IDLE_BLANK_END_TICK + 1);
-    if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) {
-      return historicalResettledTick(t) - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-    }
-    return historicalResettledTick(TURN5_CONFIRM_PRESS_TICK)
-      - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  }
-  const live = t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
-  const sourceTick = live ? t : pressTick;
-  const epochAge = latestCompletedCommandPresentationEpochElapsedSinceReset(
-    latestCompletedCommandHandoff,
-    sourceTick - TICK0,
-  );
-  if (epochAge === null) {
-    throw new Error("turn-5 kickoff bounce requires semantic turn-4 presentation epoch content");
-  }
-  const bounceTick = MENU_IDLE_BLANK_END_TICK + 1 + epochAge
-    - TURN5_LEGACY_PRESENTATION_CONTINUATION_LAG - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  // ISSUES #97 (docs/turn5-single-frame-residuals-diagnosis.md §9.2/§9's own
-  // named next probe): the real `DoBounceEffect` driver for turn 5's own
-  // confirm-wait bounce is NOT a fresh re-seed - RAM-proven (`tools/probe/
-  // dump-turn5-confirma-bounce-driver.py`'s own `idChangeEvents`) to be the
-  // SAME sprite instance continuously alive since turn 1's own
-  // `MENU_BOUNCE_RAM_SETUP_TICK` (1748), its own `sSinIndex` only advancing
-  // during "menu idle" sub-windows scattered across turns 1-5 (real
-  // hardware masks it `& 0xFF` every frame, `battle_main.c:2978`, so its
-  // raw value alone can't reconstruct elapsed real ticks without knowing
-  // that whole schedule). This affine `epochAge`-based reconstruction gets
-  // the FROZEN branch's own value right (confirmed correct for ticks
-  // 5962+, unchanged below) but is 21 ticks off for the LIVE pre-freeze
-  // sub-window specifically - a real, RAM-verified gap (the probe's own
-  // raw `onixSinIndex`/`healthboxSinIndex` reads at RAM ticks 5958-5960
-  // exactly match `menuIdleBounce(bounceTick - 21)`, not just its own
-  // `(onixY2,healthboxY2)` output). Scoped to the live branch only - this
-  // function's only other two call sites (`battleScene.ts:10410`'s rock
-  // slide kickoff text, `battleScene.ts:10998`'s turn-13 switch-in echo)
-  // always run with `t` far past `pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_
-  // DELAY`, so they always take the (unchanged) frozen branch.
-  return live ? bounceTick - 21 : bounceTick;
-}
 
 /**
  * Presentation-seam wiring, window 3 (`docs/presentation-seam-scout.md`
@@ -10987,51 +10564,6 @@ const TURN5_FAINTED_CURSOR_X = LINE2_ORIGIN.x + measureText(font, charmap, TURN5
  */
 
 
-/**
- * Draws the switch-in icon-bar re-trigger (bar + 6 icons, uniform `x2`
- * slide-in, then the shared alpha-blend fade-out) - a no-op outside
- * `[createTick, destroyTick)` (RAM ticks, `rt = t - 1` convention per
- * `ballIcons`' own doc). S7/S8 turn 13 rung 4 (docs/turn13-notes.md §7):
- * `createTick`/`fadeStartTick`/`destroyTick`/`states` (all defaulted to
- * turn 5's own constants, every pre-existing call site unaffected) let
- * MURKROW's own switch-in re-trigger this exact mechanism at a new anchor
- * with a new per-slot states array (Pidgeotto's own former slot also
- * flips to `"Statused"` now) - oracle-pixel-bisected new anchors: first
- * visible slide pixel at render 16848 (`createTick+1`, the SAME "+1"
- * relationship turn 5's own `TURN5_ICONBAR_CREATE_TICK`/6588 pin
- * establishes) puts `createTick=16847`; first visible fade-blend pixel at
- * render 16985 (`fadeStartTick+2`, matching turn 5's own exact relation)
- * puts `fadeStartTick=16983`; `destroyTick=fadeStartTick+17` reuses turn
- * 5's own exact 17-tick gap (pixel-unobservable past eva=0 either way).
- */
-function drawTurn5IconBar(
-  fb: Uint8Array,
-  t: number,
-  createTick: number = TURN5_ICONBAR_CREATE_TICK,
-  fadeStartTick: number = TURN5_ICONBAR_FADE_START_TICK,
-  destroyTick: number = TURN5_ICONBAR_DESTROY_TICK,
-  states: readonly string[] = TURN5_OPPONENT_ICON_STATES,
-): void {
-  const rt = t - 1;
-  if (rt < createTick || rt >= destroyTick) return;
-  const x2 = tableX2(OPP_BAR_X2, createTick, rt);
-  const eva = turn5IconBarEva(t, fadeStartTick);
-  drawBallStatusBar(fb, -24 + x2, 40, true, eva);
-  for (let i = 0; i < 6; i += 1) {
-    const tile = ballDisplay.tileset.tiles[ballStateTileIndex(states[i]!)];
-    if (!tile) continue;
-    const x = 26 + 10 * i + x2;
-    for (let py = 0; py < 8; py += 1) {
-      for (let px = 0; px < 8; px += 1) {
-        const idx = tile[py * 8 + px]!;
-        if (idx === 0) continue;
-        const c = ballDisplay.palette[idx];
-        if (!c) continue;
-        blendedSetPixel(fb, x + px, 32 + py, c, eva);
-      }
-    }
-  }
-}
 
 /**
  * MURKROW's icon-bar continuation, measured from the accepted opponent-faint
@@ -11054,19 +10586,13 @@ function drawTurn5IconBar(
  * "module-level constant derived once at import time" discipline rank 2's
  * own switch-in flip established.
  */
-const TURN5_SWITCHIN = resolveTurn5SwitchInAdapter();
+export const TURN5_SWITCHIN = resolveTurn5SwitchInAdapter();
 /** "BUG CATCHER DESTIN sent\nout PIDGEOTTO!" (docs §9, `sText_Trainer1SentOutPkmn` family, same line 1 as `SENDOUT_LINE1`) - starts printing at the oracle-pixel-confirmed absolute tick 6687, 1 char/tick. Line 2 is `TURN5_SWITCHIN.sentOutLine2`, sourced from the real forced-switch decision instead of a raw literal. */
 
 const SWITCHIN_SENTOUT_LINE2 = TURN5_SWITCHIN.sentOutLine2;
 export const SWITCHIN_SENTOUT_TEXT_TOTAL = SWITCHIN_SENTOUT_LINE1.length + SWITCHIN_SENTOUT_LINE2.length;
 
 
-function switchinSentOutLine1(
-  trainerPresentation?: FactoryTrainerPresentation,
-): string {
-  const trainer = presentationForEncounter("destin", trainerPresentation);
-  return `${trainer.className} ${trainer.name} sent`;
-}
 
 export function switchinSentOutTextVisibleChars(
   t: number,
@@ -11134,7 +10660,7 @@ const pidgeottoHealthboxContent = composeOpponentHealthbox(healthboxAssemblyAsse
 });
 
 /** S7 slice N-4 rung (b) (docs/turn6-notes.md §4, RAM-confirmed via `dump-battler-full.py`): Pidgeotto's own max HP - the ROCK_SLIDE HP-drain window's own `hpFraction` denominator, now literally derived from `TURN5_SWITCHIN` (156) rather than independently re-stated. */
-const PIDGEOTTO_MAX_HP = TURN5_SWITCHIN.replacementHp.max;
+export const PIDGEOTTO_MAX_HP = TURN5_SWITCHIN.replacementHp.max;
 
 /**
  * S7 slice N-4 rung (b): Pidgeotto's own opponent healthbox at an arbitrary
@@ -11163,9 +10689,6 @@ function pidgeottoHealthboxContentForHp(hp: number): ReturnType<typeof composeOp
   return cached;
 }
 
-export function turn5PidgeottoHealthboxSlideDx(t: number): number | null {
-  return healthboxSlideDx(t, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, HEALTHBOX_SLIDE_START_DX, true);
-}
 
 /**
  * `docs/turn5-resolve-offc-tail-diagnosis.md` §11 (2026-08-18, ISSUES #97
@@ -11274,9 +10797,6 @@ export function drawCleanSwitchinParticles(
   }
 }
 
-function drawTurn5SwitchinParticles(fb: Uint8Array, t: number, handoffTick: number = TURN5_BALL_HANDOFF_TICK, stallLogicalTick: number | null = null): void {
-  drawCleanSwitchinParticles(fb, t - handoffTick - BALL_OPEN_START_OFFSET - 1, PARTICLE_ORIGIN, undefined, stallLogicalTick);
-}
 
 /**
  * docs/turn5-resolve-offc-tail-diagnosis.md §13e/§13f Fix 3: turn5's own
@@ -11747,38 +11267,6 @@ function drawFeatherSpriteList(
 /** `sprite.oam.priority` (`GetBattlerSpriteBGPriority(battler)+1` while `unk2` is in [64,191], base otherwise, `src/animation/featherDance.ts`) - Onix's own on-field sprite sits at the SAME base priority; empirically bisected this session (z-order scratch compares against the oracle) that the +1 ("far side of the flap") group draws BEHIND Onix while the base-priority group draws IN FRONT, matching a real depth toggle as each feather swings past the target. */
 const FEATHER_BASE_PRIORITY_CUTOFF = 3;
 
-/**
- * S7 slice N-4 rung (a) (docs/turn6-notes.md §6, battle-turn-notes.md §29's
- * "OTHER thing found" resolved - see `turn6StatFallEva`'s own doc for the
- * full RAM story): the generic `StatsChangeAnimation` banner, parameterized
- * for FEATHER_DANCE's ATK-FALL on ONIX - same OBJ-window-masked BG1 alpha
- * blend `drawStatsBanner` already renders for turn 1's own evasion-RISE
- * DOUBLE_TEAM, just swapped to Onix's own sprite mask/corner, the
- * `decrease` tilemap + `attack` palette, and `TURN6_STATFALL_BG1_X`'s own
- * constant horizontal offset (only ever nonzero for a DECREASE, unlike
- * `drawStatsBanner`'s always-0 increase case). `drawStatsBanner` itself is
- * left untouched (turn 1's own trace stays byte-for-byte reliant on its
- * exact zero-arg shape) rather than threading new optional params through
- * it - the two are similar enough in spirit to share `statAnimBg1PixelAt`
- * but different enough in every actual parameter that a copy is clearer
- * than a 6-optional-parameter generalization for a single second caller.
- *
- * ISSUES #39 rank-4 slice 2: `palette` is now an explicit parameter (each of
- * turns 6/7/8's own call sites passes its own real
- * `TURNN_FEATHERDANCE_STAT_PALETTE`, `:2270`) instead of this function
- * reaching for `drawStatDecreaseBannerForBattler`'s former hardcoded-`attack`
- * default.
- */
-function drawTurn6StatFallBanner(fb: Uint8Array, t: number, pressTick: number, eva: number, palette: RgbColor[]): void {
-  drawStatDecreaseBannerForBattlerPalette(
-    fb,
-    onixBackSprite.tileset,
-    ONIX_MATERIALIZE_CORNER,
-    eva,
-    turn6StatFallBg1Y(t, pressTick),
-    palette,
-  );
-}
 
 function drawTurn6FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: number): void {
   // S7 slice N-4 rung (b) (docs/battle-turn-notes.md §31): once ROCK_SLIDE's
@@ -12280,10 +11768,6 @@ function drawTurn8FeatherDanceKickoffText(fb: Uint8Array, t: number, pressTick: 
 
 export const TURN8_MENU_REDRAW_DELAY = 572;
 
-/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn7RockSlideResettledBounceTick`, keyed off `TURN8_MENU_REDRAW_DELAY`. */
-export function turn8ResettledBounceTick(t: number, pressTick: number): number {
-  return t - (pressTick + TURN8_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
-}
 
 /**
  * S7 slice P: turn 8's own BIND/miss window dispatcher - no move animation
@@ -12375,11 +11859,6 @@ function drawTurn9FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, b
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN7_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
-/** `turn8KickoffBounceTick`'s own turn-9 analogue, in regime-4 space (`drawTurn9FieldBase`'s own domain) - freezes at the regime-4 anchor tick itself (`TURN8_BIND_PRESS_TICK+TURN8_MENU_REDRAW_DELAY`, local phase 0 by construction). */
-function turn9KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  return TURN8_BIND_PRESS_TICK + TURN8_MENU_REDRAW_DELAY;
-}
 
 /**
  * Shadow-only readouts of the existing turn-keyed Pidgeotto renderer inputs.
@@ -12389,28 +11868,6 @@ function turn9KickoffBounceTick(t: number, pressTick: number): number {
  * and never use PP to select a window.
  */
 
-function legacyPidgeottoField(playerHp: number, playerAttackStage: number, opponentHp: number) {
-  return {
-    player: {
-      species: "ONIX",
-      displayName: "ONIX",
-      level: 50,
-      gender: "male" as const,
-      status: "none" as const,
-      hp: { current: playerHp, max: LEGACY_PIDGEOTTO_ONIX_MAX_HP },
-      attackStage: playerAttackStage,
-    },
-    opponent: {
-      species: TURN5_SWITCHIN.replacementSpecies,
-      displayName: TURN5_SWITCHIN.replacementSpecies,
-      level: TURN5_SWITCHIN.replacementLevel,
-      gender: "male" as const,
-      status: "none" as const,
-      hp: { current: opponentHp, max: PIDGEOTTO_MAX_HP },
-      attackStage: 6,
-    },
-  };
-}
 
 export const LEGACY_TURN6_FIGHT_COMMAND_PRESENTATION = createFightCommandPresentation({
   field: legacyPidgeottoField(TURN5_SITRUS_HEAL_HP_END, 6, TURN5_SWITCHIN.replacementHp.current),
@@ -12660,7 +12117,7 @@ function blendedTileOverFb(fb: Uint8Array, tile: number[], palette: RgbColor[], 
 }
 
 /** Same tile-grid iteration as `drawSpriteSheetBlended`, but through `blendedTileOverFb` instead of `blendedTile`. */
-function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number, maxY: number = Infinity): void {
+export function drawSpriteSheetBlendedOverFb(fb: Uint8Array, tileset: Tileset, palette: RgbColor[], ox: number, oy: number, eva: number, evb: number, maxY: number = Infinity): void {
   for (let ty = 0; ty < tileset.rows; ty += 1) {
     const rowY = oy + ty * 8;
     if (rowY >= maxY) continue;
@@ -13099,13 +12556,6 @@ function drawTurn9RockSlideWindow(fb: Uint8Array, t: number): void {
  * dispatcher stops at the kickoff text's own settled plateau (10930).
  */
 
-// `turn9KickoffBounceTick`'s own already-established freeze (past `pressTick +
-// FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`, its driver already torn down) is out
-// of this correction's own RAM-verified regime (live driver, ticks
-// 10818-10873) - `turn9FightSubmenuBrowseBounceTick` must never touch it.
-function turn9FightSubmenuLiveBounceRegime(t: number, sm: FightSubmenuState): boolean {
-  return sm.confirmElapsed === null || t < TICK0 + sm.confirmElapsed + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY;
-}
 
 function drawTurn9FightSubmenuWindow(
   fb: Uint8Array,
@@ -13194,10 +12644,6 @@ function drawTurn9FightSubmenuWindow(
  */
 export const TURN9_MENU_REDRAW_DELAY = 465;
 
-/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn8ResettledBounceTick`, keyed off `TURN9_MENU_REDRAW_DELAY`. */
-export function turn9ResettledBounceTick(t: number, pressTick: number): number {
-  return t - (pressTick + TURN9_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
-}
 
 /**
  * Pidgeotto's own HP entering turn 10 (docs/turn10-notes.md §4: "61 -> 38
@@ -13252,11 +12698,6 @@ function drawTurn10FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN9_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
-/** `turn9KickoffBounceTick`'s own turn-10 analogue, in regime-5 space (`drawTurn10FieldBase`'s own domain) - freezes at the regime-5 anchor tick itself (`TURN9_QUICKATTACK_PRESS_TICK+TURN9_MENU_REDRAW_DELAY`, local phase 0 by construction). */
-function turn10KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  return TURN9_QUICKATTACK_PRESS_TICK + TURN9_MENU_REDRAW_DELAY;
-}
 
 /**
  * S7 slice R rung (a): `sText_NotVeryEffective` ("It's not very
@@ -13452,10 +12893,6 @@ export const TURN10_ROCKSLIDE_MENU_REDRAW_DELAY = 730;
 
 
 
-/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn6RockSlideResettledBounceTick`, keyed off this turn's own `TURN10_ROCKSLIDE_MENU_REDRAW_DELAY` (or, ISSUES #39 rank-5 slice 2, an explicit `menuRedrawDelay` override - default unchanged, every pre-existing caller unaffected). */
-export function turn10RockSlideResettledBounceTick(t: number, pressTick: number, menuRedrawDelay: number = TURN10_ROCKSLIDE_MENU_REDRAW_DELAY): number {
-  return t - (pressTick + menuRedrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
-}
 
 /**
  * S7 slice R rung (a): turn 10's own settled action menu once ROCK_SLIDE's
@@ -13629,11 +13066,6 @@ function drawTurn11FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
-/** `turn10KickoffBounceTick`'s own turn-11 analogue, in regime-6 space (`drawTurn11FieldBase`'s own domain) - freezes at the regime-6 anchor tick itself (`TURN10_ROCKSLIDE_PRESS_TICK+TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction). */
-function turn11KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  return TURN10_ROCKSLIDE_PRESS_TICK + TURN10_ROCKSLIDE_MENU_REDRAW_DELAY;
-}
  // render 13422 - FEATHER_PRESS_TICK(13339)
 
 
@@ -13717,10 +13149,6 @@ export const TURN11_ROCKSLIDE_MENU_REDRAW_DELAY = 729; // render 13866 - pressTi
 
 
 
-/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn10RockSlideResettledBounceTick`, keyed off this turn's own `TURN11_ROCKSLIDE_MENU_REDRAW_DELAY` (or, ISSUES #39 rank-5 slice 3, an explicit `menuRedrawDelay` override - default unchanged, every pre-existing caller unaffected). */
-export function turn11RockSlideResettledBounceTick(t: number, pressTick: number, menuRedrawDelay: number = TURN11_ROCKSLIDE_MENU_REDRAW_DELAY): number {
-  return t - (pressTick + menuRedrawDelay) + (MENU_IDLE_BLANK_END_TICK + 1);
-}
 
 /**
  * S7 slice R rung 1: turn 11's own settled action menu once ROCK_SLIDE's own
@@ -13885,11 +13313,6 @@ function drawTurn12FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
-/** `turn11KickoffBounceTick`'s own turn-12 analogue, in regime-7 space (`drawTurn12FieldBase`'s own domain) - freezes at the regime-7 anchor tick itself (`TURN11_ROCKSLIDE_PRESS_TICK+TURN11_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction) - the SAME universal frozen mid-resolution bounce phase every prior turn's own equivalent freeze already reduces to (docs/turn12-notes.md §5's own "confirm-press transient (settled-submenu sha recurs)" finding), reused here for BOTH the pre-kickoff idle-wait AND (via `drawTurn12RockSlideWindow`) the ROCK_SLIDE-miss's own frozen field. */
-function turn12KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  return TURN11_ROCKSLIDE_PRESS_TICK + TURN11_ROCKSLIDE_MENU_REDRAW_DELAY;
-}
 
 /**
  * ISSUES #39 rank-5 slice 3 (Scene-OFF): turn 12's own AERIAL_ACE anchors,
@@ -13952,10 +13375,6 @@ function drawTurn12AerialAceWindow(fb: Uint8Array, t: number, pressTick: number)
 
 export const TURN12_ROCKSLIDE_MENU_REDRAW_DELAY = 551;
 
-/** Same "resettled menu re-initializes its own bounce phase fresh at redraw" formula as `turn11RockSlideResettledBounceTick`, keyed off this turn's own `TURN12_ROCKSLIDE_MENU_REDRAW_DELAY`. */
-export function turn12RockSlideResettledBounceTick(t: number, pressTick: number): number {
-  return t - (pressTick + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY) + (MENU_IDLE_BLANK_END_TICK + 1);
-}
 
 /**
  * Turn 12's own settled action menu once ROCK_SLIDE's own miss fully
@@ -14087,23 +13506,6 @@ function drawTurn13FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
   if (pidgeottoHealthboxVisible) drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(pidgeottoHp));
 }
 
-/**
- * `turn12KickoffBounceTick`'s own turn-13 analogue, in regime-8 space
- * (`drawTurn13FieldBase`'s own domain) - freezes at the regime-8 anchor tick
- * itself (`TURN12_ROCKSLIDE_PRESS_TICK+TURN12_ROCKSLIDE_MENU_REDRAW_DELAY`,
- * local phase 0 by construction) - the SAME universal frozen mid-resolution
- * bounce phase every prior turn's own equivalent freeze already reduces to.
- * Used for the confirm-press transient (docs/turn13-notes.md §4's own
- * "submenu STILL fully shown" row, sha `7922d883bcb6` steady from 15421) -
- * unlike prior turns, this freeze ALSO covers the DOWN-nav's own destination
- * cursor draw (the submenu's box-bounce cycle is independent of the cursor,
- * §4's own "6 idle-bounce phases" correction), so nothing extra is needed for
- * that.
- */
-function turn13KickoffBounceTick(t: number, pressTick: number): number {
-  if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  return TURN12_ROCKSLIDE_PRESS_TICK + TURN12_ROCKSLIDE_MENU_REDRAW_DELAY;
-}
 
 /**
  * S7/S8 (docs/turn13-notes.md): turn 13's own FIGHT submenu - cursor rests
@@ -14311,22 +13713,6 @@ function drawTurn13SandAttackAccBanner(fb: Uint8Array, t: number, pressTick: num
 
  // n in [1,21], n>20 clamped (held frame)
 
-/** Draws every dirt sprite alive at render tick `t` - a no-op outside the whole window (RAM 15480-15520, render 15481-15521). */
-function drawTurn13SandAttackDirt(fb: Uint8Array, t: number, pressTick: number): void {
-  const ramTick = t - 1;
-  const waveAnchor = pressTick + TURN13_SANDATTACK_DIRT_WAVE_ANCHOR_OFFSET;
-  for (const i of TURN13_SANDATTACK_DIRT_DRAW_ORDER) {
-    const wave = Math.floor(i / 5);
-    const spawnRamTick = waveAnchor + wave * TURN13_SANDATTACK_DIRT_SPAWN_STRIDE;
-    const n = ramTick - spawnRamTick + 1;
-    if (n < 1 || n > TURN13_SANDATTACK_DIRT_LIFETIME) continue;
-    const nClamped = Math.min(n, 20);
-    const { xStep, yStep } = TURN13_SANDATTACK_DIRT_TABLE[i]!;
-    const x2 = -Math.floor((nClamped * xStep) / 256);
-    const y2 = Math.floor((nClamped * yStep) / 256);
-    drawSpriteSheet(fb, battleAnimMudSand.tileset, battleAnimMudSand.palette, TURN13_SANDATTACK_DIRT_ORIGIN.x - 4 + x2, TURN13_SANDATTACK_DIRT_ORIGIN.y - 4 + y2);
-  }
-}
 
 /**
  * S7/S8 rung 2+Part A's own SAND_ATTACK dispatcher: the frozen on-field base
@@ -14532,10 +13918,7 @@ const [
 const TURN13_DRAGONBREATH_FAINT_TEXT_TOTAL =
   TURN13_DRAGONBREATH_FAINT_LINE1.length
   + TURN13_DRAGONBREATH_FAINT_LINE2.length;
-const TURN13_FAINTED_TEXT_DELAY = 463; // dbPressTick+463 = 15979, oracle-bisected exact (chars=1 first appears at render tick 15979; 15978 still shows the old DRAGON_BREATH text)
-export function turn13FaintedTextStartTick(pressTick: number): number {
-  return pressTick + TURN13_FAINTED_TEXT_DELAY;
-}
+export const TURN13_FAINTED_TEXT_DELAY = 463; // dbPressTick+463 = 15979, oracle-bisected exact (chars=1 first appears at render tick 15979; 15978 still shows the old DRAGON_BREATH text)
 export function turn13FaintedTextVisibleChars(t: number, pressTick: number): number {
   const start = turn13FaintedTextStartTick(pressTick);
   if (t < start) return 0;
@@ -15584,27 +14967,6 @@ function drawSlideScene(
 
 
 
-/** Murkrow's own on-field position (`InitSpritePosToAnimAttacker`, the ball spawns at the exact same corner every tick it's alive, RAM-confirmed - reuses `MURKROW_CORNER` verbatim, same corner-vs-OAM-center convention every other affine draw in this file already uses). */
-function drawTurn14FlyBall(fb: Uint8Array, t: number): void {
-  const ramTick = t - 1;
-  const entry = TURN14_FLY_BALL_TABLE[ramTick - TURN14_FLY_BALL_RAM_START];
-  if (!entry) return;
-  drawSpriteSheetAffineStretch(
-    fb,
-    battleAnimFlyBall.tileset,
-    battleAnimFlyBall.palette,
-    MURKROW_CORNER.x,
-    MURKROW_CORNER.y,
-    entry.a,
-    entry.d,
-    entry.y2,
-    { r: 0, g: 0, b: 0 },
-    0,
-    true,
-    0,
-    OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM,
-  );
-}
 
 /** The real button confirm press for turn 14's own DRAGON_BREATH re-selection (`TICK0+sm.confirmElapsed`, 17755 in the canonical trace - segment start 17754, the same "+1 after last press frame" convention every other confirm anchor in this file uses). Named (unlike the inline literal `TURN14_BARE_SCENE_DELAY` below already used) so `TURN14_DRAGONBREATH_MENU_REDRAW_DELAY` (docs/turn15-notes.md) can reference it directly, mirroring `TURN13_DRAGONBREATH_PRESS_TICK`'s own pattern. */
 const TURN14_DRAGONBREATH_PRESS_TICK = 17755;
@@ -15809,24 +15171,6 @@ function turn15KickoffBounceTick(t: number, pressTick: number): number {
 
 
 
-function drawTurn15FlyBallDescent(fb: Uint8Array, t: number): void {
-  const ramTick = t - TURN15_STRIKE_RENDER_LAG;
-  const entry = TURN15_FLY_BALL_TABLE[ramTick - TURN15_FLY_BALL_RAM_START];
-  if (!entry) return;
-  drawSpriteSheetAffineRotate(
-    fb,
-    battleAnimFlyBall.tileset,
-    battleAnimFlyBall.palette,
-    entry.x,
-    entry.y,
-    TURN15_FLY_BALL_MATRIX.pa,
-    TURN15_FLY_BALL_MATRIX.pb,
-    TURN15_FLY_BALL_MATRIX.pc,
-    TURN15_FLY_BALL_MATRIX.pd,
-    undefined,
-    false,
-  );
-}
 
 /**
  * The impact sprite (slot 4) - see this section's own module doc above for
@@ -15851,19 +15195,6 @@ function drawTurn15FlyBallDescent(fb: Uint8Array, t: number): void {
 
 
 
-function drawTurn15ImpactHitsplat(fb: Uint8Array, t: number): void {
-  const ramTick = t - TURN15_STRIKE_RENDER_LAG;
-  if (ramTick < TURN15_HITSPLAT_RAM_START || ramTick > TURN15_HITSPLAT_RAM_END) return;
-  drawSpriteSheetBlendedOverFb(
-    fb,
-    battleAnimHitsplat.tileset,
-    battleAnimHitsplat.palette,
-    TURN15_HITSPLAT_CENTER.x - 16,
-    TURN15_HITSPLAT_CENTER.y - 16,
-    12,
-    8,
-  );
-}
 
 /**
  * Onix's own player healthbox (name/level/HP-bar box plus its HP-digit
