@@ -393,3 +393,270 @@ pinned, not curve-fit" bar for a landed fix within this session's scope
 and time budget. Every next probe above is concrete and rerunnable. No
 landed anchor was contradicted; §1 and §5 both correct *prior sessions'
 own speculative* framing (not landed fixes) with fresh, decisive evidence.
+
+## 8. 2026-08-18 (side lane) — `turn5-resolve-off-c` tick 6763, §1.3's named probe run: the "two-sprite differential clip" framing is REFUTED (mathematically a no-op); the real gap is elsewhere
+
+Bounded SIDE-lane INSTRUMENT worker, Battle Scene OFF oracle. Scope: run
+§1.3's own named next probe (RAM-scan all 64 `gSprites[]` slots to find
+PIDGEOTTO's HP-bar sub-sprite tracking `gHealthboxSpriteIds[1]` in
+lockstep) and report the fix shape. `git diff -- src/` is empty this
+session — INSTRUMENT only, no `src/` edit attempted.
+
+### 8.1 Baseline (fresh, unchanged)
+
+```
+npm run compare -- turn5-resolve-off-c --summary  -> 195/196 (tick 6763, bbox 0,41-2,43)
+```
+
+### 8.2 The probe: it's THREE real sprites, not two, and both non-`gHealthboxSpriteIds[1]` sprites lockstep perfectly
+
+Source ground truth (`reference/pokeemerald/src/battle_interface.c:851-868`,
+own comment): *"Because the healthbox is too large to fit into one sprite,
+it is divided into two sprites. healthboxLeft/Main is the left part...
+healthboxRight/Other is the right part... There's also a third sprite...
+healthbarSprite... visible on the healthbox."* `CreateBattlerHealthboxSprites`
+(`battle_interface.c:869-951`) creates and links all three together;
+`gSprites[left].oam.affineParam` holds the right sprite's own id,
+`gSprites[left].data[5]` (`hMain_HealthBarSpriteId`) holds the healthbar's
+own id. Both slave callbacks (`SpriteCB_HealthBar`/`SpriteCB_HealthBoxOther`,
+`battle_interface.c:979-1013`) set `sprite->x2 = gSprites[left].x2` every
+frame — lockstep BY CONSTRUCTION, not coincidence.
+
+New probe `tools/probe/dump-turn5-resolve-offc-healthbox-halfsprite-census.py`
+(modeled on the bootstrap-corrected `dump-turn5-resolve-offa-oam-bg3rows-
+census.py`), run against `tools/compare/traces/turn5-resolve-off-c.json`
+across ticks 6758-6790 (the whole slide span plus lead-in/settle margin),
+independently confirms this from raw RAM — a full 64-slot scan finds
+exactly slots 60/61 tracking `left.x2` in lockstep at every single moving
+tick (6762-6784), with no other slot ever spuriously matching:
+
+| tick | left.x2 | right(61).x2 | bar(60).x2 | left.invisible |
+|---|---|---|---|---|
+| 6761 | 0 | 0 | 0 | True (pre-onset) |
+| 6762 | -110 | -110 | -110 | False (onset) |
+| 6763 | -110 | -110 | -110 | False (residual tick, held) |
+| 6764 | -105 | -105 | -105 | False |
+| 6774 | -55 | -55 | -55 | False |
+| 6784 | -5 | -5 | -5 | False |
+| 6785 | 0 | 0 | 0 | False (settled) |
+
+(Full 33-tick table in the probe's own JSON output; every tick not shown
+steps `x2` by exactly +5, matching `HEALTHBOX_SLIDE_STEP`,
+`battleScene.ts:3591`.)
+
+Per-sprite static fields (identical at every tick, RAM-confirmed):
+
+| sprite | id | x (base) | y | shape/size | px dims | subpriority | `centerToCornerVecX/Y` |
+|---|---|---|---|---|---|---|---|
+| left (`gHealthboxSpriteIds[1]`) | 1 | 44 | 30 | 1/3 | 64x32 | 1 | -32/-16 |
+| right (`oam.affineParam`) | 61 | 108 (=44+64) | 30 | 1/3 | 64x32 | 1 | -32/-16 |
+| **healthbar (`data[5]`)** | **60** | **52 (=44+8)** | **30** | **1/1** | **32x8** | **0** | **-16/-4** |
+
+**Headline number: PIDGEOTTO's own HP-bar sub-sprite (slot 60) has measured
+base `x=52`** (`left.x + 8`, matching `SpriteCB_HealthBar`'s opponent-side
+`hBar_Data6=2` case exactly, `battle_interface.c:993-997`), `y=30`, shape
+1/size 1 (32×8px), subpriority 0, `centerToCornerVecX/Y = (-16,-4)`. (A
+bonus second finding beyond what was asked: slot 61, the right FRAME half,
+base `x=108`.)
+
+### 8.3 The centerToCornerVec correction (a latent gap in every prior session's model)
+
+Every prior session's screen-position math for these sprites (§1.2 above;
+`dump-turn5-resolve-offc-tail-probe.py`'s own prior reads) used
+`screenX = sprite.x + x2` directly. The REAL formula
+(`UpdateOamCoords`, `reference/pokeemerald/src/sprite.c:339-359`) is:
+
+```
+oam.x = sprite.x + x2 + centerToCornerVecX   (+ gSpriteCoordOffsetX iff coordOffsetEnabled — confirmed FALSE for all 3 sprites here)
+```
+
+This session's follow-up probe (`tools/probe/dump-turn5-resolve-offc-
+healthbox-halfsprite-vram.py`) read `centerToCornerVecX/Y` directly and
+found `(-32,-16)` for left/right, `(-16,-4)` for the healthbar — exactly
+half each sprite's own width/height, the standard GBA center→corner
+convention. Plugging in: **left's own real corner = 44 + x2 - 32 = 12 +
+x2** — which exactly equals `FRAME_ORIGIN.x` (`healthboxAssembly.ts:168`)
+plus `x2` (i.e. `dx`, since this session also reconfirmed `dx` at each
+app tick numerically equals real RAM `x2` one tick earlier, matching the
+family's own established "PNG(T) shows RAM(T-1)" display-basis convention
+— `battleScene.ts:14829-14835`). This is not a coincidence: it's why the
+already-oracle-exact 6764-6785 span works at all. **Right's own real
+corner = 108 + x2 - 32 = 76 + x2 — exactly 64px right of left's corner, at
+every shared `x2`** (since both share the identical `x2` every tick, per
+§8.2). The healthbar's own real corner = 52 + x2 - 16 = 36 + x2.
+
+### 8.4 The fix shape this step's brief anticipated (per-sprite clip) is a mathematical NO-OP — REFUTES the inherited "differential clip" framing
+
+The brief's framing (this step's own prompt, and §1.3 above): our
+`drawSendOutHealthbox` (`battleScene.ts:7627-7646`) draws one continuous
+128px-wide canvas (`FRAME_SIZE`, `healthboxAssembly.ts:169`) at
+`HEALTHBOX_FRAME_ORIGIN.x + dx + px`, while real hardware clips two
+independent 64px sprites to their own screen bounds — implying a
+per-sprite-clip reshape should fix extreme-`dx` ticks like 6763.
+
+§8.3's own corrected math refutes this directly. Real left span at any
+shared `x2`: `[12+x2, 75+x2]` (64px). Real right span: `[76+x2, 139+x2]`
+(64px). These are **immediately adjacent with zero gap and zero overlap**,
+at every `x2`, because both origins (12, 76) differ by exactly 64 and both
+move by the identical `x2` every tick. Their union is therefore always the
+single contiguous range `[12+x2, 139+x2]` — **exactly** the current
+canvas's own unsplit span (`FRAME_ORIGIN.x+dx .. FRAME_ORIGIN.x+dx+127`,
+128 = 64+64). A per-sprite clip (draw canvas px 0-63 only within
+`[12+dx,75+dx]`, canvas px 64-127 only within `[76+dx,139+dx]`) recombines
+to the byte-identical screen range as today's single unclipped blit, at
+**every** tick, not just the already-matching ones. It cannot change tick
+6763's rendered pixels at all — the two framings are mathematically
+equivalent, not just empirically close.
+
+**Paper-check (canvas px → screen, `FRAME_ORIGIN.x=12`), current vs.
+per-sprite-clip, at 4 ticks including 6763/6764:**
+
+| tick | dx | canvas span (current, px0-127) | left-clip span (px0-63) | right-clip span (px64-127) | union (clipped) | same as current? |
+|---|---|---|---|---|---|---|
+| 6763 | -110 | [-98, 29] | [-98, -35] | [-34, 29] | [-98, 29] | **yes** |
+| 6764 | -105 | [-93, 34] | [-93, -30] | [-29, 34] | [-93, 34] | **yes** |
+| 6774 | -55 | [-43, 84] | [-43, 20] | [21, 84] | [-43, 84] | **yes** |
+| 6785 | 0 | [12, 139] | [12, 75] | [76, 139] | [12, 139] | **yes** |
+
+Every tick, clipped and unclipped unions are identical (adjacent-zero-gap
+spans always recombine to the same union) — so the already-exact
+6764-6785 span is trivially preserved by construction (not something that
+needs re-verifying per candidate fix), **and so is 6763's own mismatch**:
+a per-sprite-clip reshape predicts **zero pixel change**, confirmed by
+direct arithmetic, not just untested. This step's own inherited "the halves
+clip differently than real hardware" framing (this step's prompt; §1.3
+above) is REFUTED — same "prior speculative framing corrected by fresh
+evidence" move §1.1 and §5 already made elsewhere in this doc.
+
+### 8.5 What actually happens at the mismatch pixel: content is ALSO byte-exact — the gap is neither clip nor content
+
+Given clipping is ruled out, the remaining candidate was a content/harvest
+error in the canvas itself. Direct check: `dump-turn5-resolve-offc-
+healthbox-halfsprite-vram.py` decodes the right sprite's own OBJ VRAM tile
+(4bpp, `tileNum=188`, confirmed `156+32` = exactly `CreateBattlerHealthbox
+Sprites`'s own opponent-side `tileNum += 32`, `battle_interface.c:893`) at
+its real local position for the mismatch. The residual bbox (screen
+`0,41`-`2,43` at tick 6763) maps, via §8.3's corrected formula
+(`localCol = screenX - 76 - x2`, `localRow = screenY - 14`), to right-local
+`(col 34-36, row 27-29)` — **not** `(col 2-4, row 11-13)`, the naive
+pre-centerToCornerVec mapping an earlier draft of this same probe used
+before catching the omission.
+
+Decoded real tile indices there (palette bank 5): `(34,27)=5, (35,27)=0,
+(36,27)=0` / `(34,28)=6, (35,28)=5, (36,28)=0` / `(34,29)=6, (35,29)=6,
+(36,29)=5`. Cross-checked against the app's own rendered pixels at the
+corresponding screen cells (`(0,41)=idx5, (1,41)=bg, (2,41)=bg` /
+`(0,42)=idx6,(1,42)=idx5,(2,42)=bg` / `(0,43)=idx6,(1,43)=idx6,(2,43)=idx5`,
+sampled via `npm run compare -- turn5-resolve-off-c /tmp/offc-run
+--capture-range 6760:6768`) — **byte-exact, cell-for-cell, including which
+cells are transparent**. Palette index 5 = `0x424f` = `(123,148,132)`,
+index 6 = `0x31aa` = `(82,107,99)` — the EXACT colors §1.1 reported as the
+app's own mismatch content. Our canvas is not inventing content; it is
+faithfully reproducing the real right sprite's own tile bitmap, correctly
+positioned.
+
+**This means neither the clip boundary (§8.4) nor the harvested content
+(§8.5) is wrong.** Both independently, decisively match real hardware's
+own OAM-level and VRAM-level data. Yet the oracle's own captured pixel at
+that exact screen location is flat white. The discrepancy is not visible
+anywhere in the software `gSprites[]` bookkeeping this session's probes
+read.
+
+### 8.6 Ruled out this session (so a future probe doesn't re-chase them)
+
+- **Invisible-flag timing**: left/right/bar's own `invisible` bit flips
+  `True->False` at the identical tick (6762) for all three — not a
+  differential-reveal timing bug.
+- **Palette fade**: `gPaletteFade` (`dump-turn5-resolve-offc-tail-
+  probe.py`, rerun this session for ticks 6758-6768) shows an active
+  fade-to-white (`y=16`, `blendColor=32767`) only through tick 6759,
+  `softwareFadeFinishing=1` (tearing down, non-applying) from 6760
+  onward — already inactive two ticks before the residual, not a
+  coincident flash.
+- **Sub-sprite occlusion**: the healthbar's own real span (`[36+x2,
+  67+x2]`, 32px) doesn't reach screen col 0-2 at tick 6763
+  (`36-110=-74` max) — can't be occluding the right sprite there.
+
+### 8.7 What remains unproven + the exact named next probe
+
+A raw **hardware** OAM census (0x07000000, all 128 slots — as opposed to
+the software `gSprites[]` bookkeeping table every probe above reads) at
+tick 6762, added to `dump-turn5-resolve-offc-healthbox-halfsprite-vram.py`
+this session, found **zero** of the three healthbox sprites' own tile
+numbers (156 left / 188 right / 292 bar) among the ~20 non-default
+(non-tileNum-0) entries actually present in the built hardware OAM buffer
+at that tick — despite the software struct clearly showing all three
+`inUse`, `invisible=False`, correctly positioned. This is a genuine,
+unresolved gap: either (a) a one-frame lag between when
+`UpdateOamCoords`/`BuildOamBuffer` (`sprite.c:339-359` and its caller)
+actually run relative to this probe's own `oracle.advance()` sampling
+point, (b) an OAM-slot-budget/sort-order effect specific to this crowded
+send-out frame, or (c) a probe-harness timing artifact independent of the
+game itself. Two tile numbers in the same numeric neighborhood as the
+healthbar's own subsprite chunks (284, 288 — `292-8`/`292-4`, plausible
+subsprite `tileOffset`s given `AddSubspritesToOamBuffer`'s per-subsprite
+tile arithmetic) turned up at OAM slots 0/1 with `x=158`/`x=190` — screen
+positions that do NOT match this session's own corner math at all, an
+unresolved loose end rather than a confirmed lead.
+
+**Next probe** (named, not further run this session — the geometry/content
+questions §1.3 actually asked for ARE closed; this is a new, deeper
+question §8.5 surfaced): a **hardware** OAM census (0x07000000, all 128
+slots, not `gSprites[]`) at BOTH tick 6761 (pre-onset) and 6762
+(onset) — same tick pair, both software-side and hardware-side reads in
+one probe run — to determine whether the software `gSprites[]` write and
+the hardware OAM copy are simply on different per-frame schedules (in
+which case reading hardware OAM one tick later/earlier than this session
+did would resolve the mismatch trivially), before concluding anything
+more exotic. If that closes it, re-run §8.4's paper-check with the
+corrected hardware-frame-relative tick and confirm whether that shifts
+WHICH software tick's geometry the oracle's PNG(6763) truly reflects.
+
+### 8.8 Predicted count effect
+
+**None recommended.** §8.4 proves a per-sprite-clip `drawSendOutHealthbox`
+reshape is a no-op for 6763 (and everywhere else, since it's a no-op
+identically at every tick) — it would not move `turn5-resolve-off-c`'s
+195/196 count and is not worth the risk/churn of touching a widely-reused
+draw call for zero predicted gain. No other fix shape is evidenced yet;
+§8.7's hardware-OAM probe must land first.
+
+### 8.9 Other family windows reusing this draw call
+
+`drawSendOutHealthbox`/`healthboxSlideDx` is shared by GROVYLE's own
+send-out slide (`HEALTHBOX_SLIDE_START_TICK=1495`, `battleScene.ts:3589`,
+same `-110` start `dx`, same 23-tick linear slide) — already independently
+**pixel-brute-force-confirmed with ZERO mismatch** across its own onset
+tick (`battleScene.ts:3578-3588`'s own doc comment: "every tick 1495-1523
+matches... zero pixel mismatch"). Since the draw-call mechanism is
+identical and Grovyle's own onset has no residual, whatever ultimately
+explains PIDGEOTTO's tick 6763 is content/scene-specific to this exact
+window (or the §8.7 hardware-OAM effect, which could plausibly be
+frame-load/sprite-count-specific to this busier scene), **not** a generic
+bug in the shared draw call — reinforcing §8.8's "don't touch the shared
+draw call" conclusion. The other `pidgeottoHealthboxContentForHp` call
+sites (`battleScene.ts:11916`, `12064`, `12193`, `12238`, `12406`,
+`12436`, `13268`, `13297`, `13529`, `13674`, `13786`, `13922`, `14009`,
+...) all pass `dx=0` (post-slide HP-drain windows) and are unaffected
+regardless.
+
+### 8.10 Rerunnable guards
+
+```
+npm run compare -- turn5-resolve-off-c --summary   # expect 195/196, tick 6763
+npm run test:smoke
+npm run compare -- turn5-resolve-off-a --summary   # expect 60/196, unchanged (out-of-scope guard)
+
+python3 tools/run-mgba-probe.py /tmp/out.json -- \
+  tools/probe/dump-turn5-resolve-offc-healthbox-halfsprite-census.py \
+  tools/compare/traces/turn5-resolve-off-c.json /tmp/out.json 6758,6759,...,6790
+
+python3 tools/run-mgba-probe.py /tmp/out2.json -- \
+  tools/probe/dump-turn5-resolve-offc-healthbox-halfsprite-vram.py \
+  tools/compare/traces/turn5-resolve-off-c.json /tmp/out2.json 6762
+```
+
+Both probes committed this session under `tools/probe/`. `git diff --
+src/` is empty at the end of this session — INSTRUMENT step, no fix
+attempted (§8.4 proves the originally-anticipated fix shape would not
+have worked anyway).
