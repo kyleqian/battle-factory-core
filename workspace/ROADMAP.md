@@ -1124,18 +1124,16 @@ distribution-parity breadth. **#87(c) calibration DONE** (2026-08-15,
 PROGRESS 1276): silver Brain-reveal 648/701 → 690/701, gold + pre-ready
 windows unaffected; ISSUES #87 trimmed to a settled mechanism record.
 
-**FAITHFUL walk-up program progress:** step B1 (BattleRoom entrance —
-Noland visible-from-start, "Get a move on!", simultaneous walk-in,
-scientist turn) is **DONE** (2026-08-15, PROGRESS 1277). Its oracle
-dense-compare leg is NOT "queued, not yet run" (stale line corrected
-2026-08-19 against the tree): a later session (PROGRESS-archive, "B1's
-oracle-dense-compare debt" entry) built the re-runnable harness
-(`generatedRoundBattle7NolandRoomEntranceStage` + entrance traces 02/03),
-closed fixture 02 at 256/256 exact, and measured 2 of the 3 flagged
-constants. Open remainder: fixture 03's `brainMoving` walk/pan cadence
-(~103 ticks, up to ~26% pixel mismatch) needs its own RAM/pixel
-derivation — the named prerequisite for B2 (silver/gold speech), which
-stays next after it.
+**FAITHFUL walk-up program: COMPLETE (2026-08-17, PROGRESS-archive
+1317; stale "B1 dense-compare leg queued" line corrected twice on
+2026-08-19 — the second time after a read-only scout live-verified the
+tree).** Every walk-up window closed to its full bar: entrance fixtures
+02 AND 03 both 256/256 exact (constants RAM-measured, entries
+1280/1296/1307/1308; re-verified live 2026-08-19 — 256/256 + 256/256,
+differential 563/563, full suite green), speech closed both tiers
+(1305/1309/1310), brain-room transition wiring closed (1315/1316,
+ISSUES #98 deleted). No open walk-up work remains; M-A is the
+milestone.
 
 **User decision (2026-08-19, planning session — the next milestone):
 measure play depth first; the chained-round distribution-parity program
