@@ -2690,3 +2690,180 @@ export function turn13AccFellTextVisibleChars(t: number, pressTick: number): num
   if (t < start) return 0;
   return Math.min(TURN13_ACCFELL_TEXT_TOTAL, t - start + 1);
 }
+
+// --- slice 4 batch 5 (docs/battlescene-canonical-split-design.md §6, ISSUES #39 rank-5) ---
+
+/**
+ * `cursorState`'s own `t-1` display-basis input for turn 5's fainted-message
+ * wait-cursor, freeze-aware (docs/turn5-resolve-ab-pools-diagnosis.md §11.1,
+ * `TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET`'s own doc comment for the live-
+ * pinned offset derivation). `dismissTick` is the absolute trace tick the
+ * real per-session A edge landed at (`TICK0 + turn5FaintDismissElapsed`),
+ * `null` before that edge is ever seen - the free-running natural tick then
+ * passes straight through, matching every tick up to and including the last
+ * live phase transition.
+ */
+export function turn5FaintDismissCursorTick(t: number, dismissTick: number | null): number {
+  const naturalTick = t - 1;
+  return dismissTick === null
+    ? naturalTick
+    : Math.min(naturalTick, dismissTick - TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET);
+}
+
+/**
+ * `docs/turn5-resolve-offc-tail-diagnosis.md` §4d (2026-08-18, ISSUES #97
+ * remainder): turn 5's OWN Pidgeotto switch-in needs a different peak-hold
+ * length than the shared `TURN5_BG_FADE_Y` above - direct pixel comparison
+ * against the oracle (§4c) found this window's falling edge stepping down
+ * one render tick too early at every boundary (6768/6772/6776/6780); one
+ * more held-16 entry (8->9) shifts the whole falling edge one tick later,
+ * matching that doc's own pixel-derived ground truth. Deliberately a
+ * SEPARATE table, not an edit to `TURN5_BG_FADE_Y` itself - extending the
+ * shared table regressed `turn13-switchin` 242/242 -> 234/242 (oracle-
+ * confirmed this session), so Murkrow's own turn-13 window really does
+ * need the original 8-entry hold while Pidgeotto's turn-5 window needs 9.
+ */
+export const TURN5_PIDGEOTTO_BG_FADE_Y: readonly number[] = [
+  2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16, 16, 14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2,
+];
+export function turn5BgFadeY(t: number): number {
+  return TURN5_PIDGEOTTO_BG_FADE_Y[t - TURN5_BG_FADE_START_TICK] ?? 0;
+}
+
+/**
+ * ISSUES #97 remainder residual (B) (`docs/turn5-confirmb-resolved-
+ * residuals.md` §2.3): a turn5-off-scoped sibling of
+ * `turn5SitrusHealTextVisibleChars` above, anchored at the already-correct
+ * `TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK` (6850) instead of the stale
+ * `ONIX_SITRUS_IDENTITY_RENDER_TICK`-derived epoch, using the same `t-1`/
+ * one-char-per-tick shape residual (A)'s own `rockSlideTextVisibleChars`
+ * fix established (`drawTurn6FieldBase`'s own doc comment on the codebase's
+ * standard display-basis convention). Predicts full reveal (35 chars) at
+ * exactly t=6885, matching the given ground truth ("settles 6885") with
+ * zero fitting - independent confirmation of both the anchor and the shape.
+ * A new function rather than an override param on the existing one: this
+ * call site (`drawTurn5RockSlideWindow`) is the only caller of the OLD
+ * function too, so either shape is safe, but a new function keeps the
+ * change minimal and obviously scoped (same reasoning as `turn5OffSitrusOnixHp`
+ * below).
+ */
+export function turn5SitrusOffHealTextVisibleChars(t: number): number {
+  const total = TURN5_SITRUS_HEAL_LINE1.length + TURN5_SITRUS_HEAL_LINE2.length;
+  return Math.min(total, Math.max(0, (t - 1) - TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK + 1));
+}
+
+/**
+ * ISSUES #97 remainder residual (B) (`docs/turn5-confirmb-resolved-
+ * residuals.md` §2.2/§8): a turn5-off-scoped sibling of `turn5SitrusOnixHp`
+ * above. `sitrusDisplayedHpAtAge`'s own live climb (real ON-profile rolling-
+ * bar animation) never starts within this trace's window under the stale
+ * epoch. The underlying RAM stat (`gBattleMons[0].hp`) IS a hard single-tick
+ * STEP (`TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK`'s own doc comment) - but §8's
+ * fresh oracle-vs-oracle pixel diffing found the DISPLAYED bar is not a
+ * mirror of that RAM step: it's a live 1-HP/tick climb, same shape
+ * `endeavorHp`/GROVYLE's own drain already use, anchored at
+ * `TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK`'s own doc comment (30
+ * consecutive per-tick oracle pixel changes, zero skips, cap reached exactly
+ * at t=6982 - independently confirmed, not curve-fit assumed). Deliberately
+ * a NEW function/constant rather than editing `ONIX_SITRUS_PROC_TRIGGER_RAM_
+ * TICK`/`ONIX_SITRUS_IDENTITY_RENDER_TICK` in place - that shared epoch also
+ * feeds the tint/rotation and granting-star placement machinery (still
+ * unverified end-to-end for this trace family, ISSUES.md #97's own open
+ * remainder) - moving it risks an unverified cascade.
+ */
+export function turn5OffSitrusOnixHp(t: number): number {
+  return Math.min(
+    TURN5_SITRUS_HEAL_HP_END,
+    Math.max(TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_HP_START + (t - TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK)),
+  );
+}
+
+/**
+ * S7 slice M (docs/faint-switch-notes.md §8e) + `docs/turn5-resolve-offc-
+ * tail-diagnosis.md` §3 (2026-08-18, ISSUES #97 remainder): Pidgeotto's own
+ * healthbox slide-in - bit-for-bit the same 23-step `healthboxSlideDx`
+ * shape as S6's own send-out. Previously anchored at
+ * `TURN5_PIDGEOTTO_SETTLE_TICK + 1` (6829) - that constant is the SPRITE's
+ * own separate materialize-finish tick, not the healthbox's own onset;
+ * the diagnosis's RAM probe (`dump-turn5-resolve-offc-tail-probe.py`,
+ * `gHealthboxSpriteIds[1]`) pins the healthbox's own real slide-in start
+ * at RAM tick 6762 (render 6763, the usual +1 RAM-to-render lag), holds
+ * one extra tick, then ramps +5/tick to settle at render 6786 - hand-
+ * verified bit-exact against that table (§3c).
+ */
+export const TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK = 6763;
+
+/**
+ * ISSUES #97-B rung 1 (`docs/turn5-bounce-recalibration-probe.md` §1/§6f):
+ * turn 6's own reopen-press is the same RAM-proven "`DoBounceEffect`'s own
+ * `sinIndex` FROZEN for exactly 3 ticks" hardware mechanic already known for
+ * turn 5's `turn5ReopenPressTick` - this is its turn-6 sibling, previously
+ * missing entirely (`drawTurn6FightSubmenuWindow`'s open-DMA-wait branch fed
+ * `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` uninterrupted, advancing every tick
+ * with no hold at all). Freeze that same formula's own value AT the press
+ * tick for `t` in `[turn6ReopenPressTick, turn6ReopenPressTick + 2]`
+ * inclusive, then resume the normal per-tick formula from `+3` onward.
+ * Confirmed a provable no-op on `turn6-reopen-off.json` specifically (§6c:
+ * that trace's own healthbox mismatch band is a *different*, still-open
+ * ~11-tick lag local to `turn5SitrusResettledBounceTick`'s span, not this
+ * hold - the freeze only matters where a plateau boundary sits inside the
+ * 3-tick window, which isn't the case on that trace) - landed anyway because
+ * it now matches RAM ground truth and may close other family traces whose
+ * capture windows cross this exact reopen-press instant differently.
+ */
+export function turn6ReopenBounceTick(t: number, turn6ReopenPressTick: number): number {
+  return t >= turn6ReopenPressTick && t <= turn6ReopenPressTick + 2
+    ? turn6ReopenPressTick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT
+    : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+}
+
+/**
+ * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
+ * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
+ * against `turn9-quickattack-off.json`): turn 9's own FIGHT-submenu window
+ * shares ONE real, continuous `DoBounceEffect` oscillator across both the
+ * pre-reveal DMA-wait branch below (`turn8ResettledBounceTick`'s own chain)
+ * and `drawTurn9FieldBase`'s regime-4 chain further down - the two reduce to
+ * the IDENTICAL closed form (`TURN9_REGIME4_TO_REGIME1_SHIFT`'s own
+ * construction makes them cancel to the same raw sine index), so they share
+ * one correction: a flat `+205` raw-sine-index offset, with RAM holding for
+ * 2 ticks (screen ticks 10830-10831 - a stray cursor-reject `A` press
+ * mid-browse, this trace's own segment 82) before resuming permanently 2
+ * ticks behind - the same freeze-then-permanent-lag shape ISSUES #97-B's
+ * turn6-reopen fix already established (docs/turn5-bounce-recalibration-probe.md
+ * §8c). Checked against the RAM receipt at both the raw-sine-index level (47
+ * ticks) and the derived Y2 level (56 ticks, the full assigned residual
+ * window) - zero exceptions either way.
+ */
+export const TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK = 10829;
+export const TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET = 205;
+
+export function turn9FightSubmenuBrowseBounceTick(t: number, raw: number): number {
+  if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK) return raw;
+  if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK + 2) return TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+  return raw - 2;
+}
+
+/**
+ * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
+ * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
+ * against `turn11-featherdance-off.json`): the shared onix/healthbox raw
+ * sine index this early (not-yet-frozen) branch feeds `menuIdleBounce`
+ * carries a flat `+114` offset off this call site's own unmodified formula -
+ * RAM-receipt-exact, zero exceptions across 32 consecutive probed ticks
+ * (13310-13341, spanning this trace's own live-driver span up to its
+ * teardown at 13341).
+ */
+export const TURN11_KICKOFF_BOUNCE_INDEX_OFFSET = 114;
+
+/**
+ * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
+ * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
+ * against `turn12-aerialace-off.json`): the shared onix/healthbox raw sine
+ * index this early (not-yet-frozen) branch feeds `menuIdleBounce` carries a
+ * flat `+237` offset off this call site's own unmodified formula -
+ * RAM-receipt-exact, zero exceptions across 31 consecutive probed ticks
+ * (14344-14374, spanning this trace's own captured window through its
+ * live-driver teardown at 14375).
+ */
+export const TURN12_KICKOFF_BOUNCE_INDEX_OFFSET = 237;

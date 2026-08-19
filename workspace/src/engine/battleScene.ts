@@ -1359,6 +1359,10 @@ export { TURN1_ROCKSLIDE_ATTACK_LINE1, TURN1_ROCKSLIDE_ATTACK_LINE2, TURN1_ROCKS
 import { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars } from "./battleSceneCanonical.ts";
 export { TURN11_ATKFLOOR_KICKOFF_LINE1, TURN11_ATKFLOOR_KICKOFF_LINE2, TURN6_ATKFELL_KICKOFF_LINE1, TURN6_ATKFELL_KICKOFF_LINE2, TURN6_FEATHERDANCE_KICKOFF_LINE1, TURN6_FEATHERDANCE_KICKOFF_LINE2, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, TURN7_ATKFELL_KICKOFF_LINE1, TURN7_ATKFELL_KICKOFF_LINE2, TURN7_FEATHERDANCE_KICKOFF_LINE1, TURN7_FEATHERDANCE_KICKOFF_LINE2, TURN7_ROCKSLIDE_ATTACK_LINE1, TURN7_ROCKSLIDE_ATTACK_LINE2, TURN8_ATKFELL_KICKOFF_LINE1, TURN8_ATKFELL_KICKOFF_LINE2, TURN8_FEATHERDANCE_KICKOFF_LINE1, TURN8_FEATHERDANCE_KICKOFF_LINE2, turn12MissTextVisibleChars, turn13AccFellTextVisibleChars, turn13SandAttackTextVisibleChars, turn5FaintedTextVisibleChars, turn8BindTextVisibleChars, turn8MissTextVisibleChars };
 
+// --- slice 4 batch 5 (docs/battlescene-canonical-split-design.md §6, ISSUES #39 rank-5) ---
+import { turn5FaintDismissCursorTick, TURN5_PIDGEOTTO_BG_FADE_Y, turn5BgFadeY, turn5SitrusOffHealTextVisibleChars, turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET, turn9FightSubmenuBrowseBounceTick, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET } from "./battleSceneCanonical.ts";
+export { turn5FaintDismissCursorTick, TURN5_PIDGEOTTO_BG_FADE_Y, turn5BgFadeY, turn5SitrusOffHealTextVisibleChars, turn5OffSitrusOnixHp, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, turn6ReopenBounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET, turn9FightSubmenuBrowseBounceTick, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET };
+
 interface Tileset {
   columns: number;
   rows: number;
@@ -3225,23 +3229,6 @@ export function cursorState(t: number, startTick: number = CURSOR_START_TICK): {
   if (t < startTick) return { visible: false, yOffset: 0 };
   const phase = Math.floor((t - startTick) / 9) % CURSOR_Y_OFFSETS.length;
   return { visible: true, yOffset: CURSOR_Y_OFFSETS[phase]! };
-}
-
-/**
- * `cursorState`'s own `t-1` display-basis input for turn 5's fainted-message
- * wait-cursor, freeze-aware (docs/turn5-resolve-ab-pools-diagnosis.md §11.1,
- * `TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET`'s own doc comment for the live-
- * pinned offset derivation). `dismissTick` is the absolute trace tick the
- * real per-session A edge landed at (`TICK0 + turn5FaintDismissElapsed`),
- * `null` before that edge is ever seen - the free-running natural tick then
- * passes straight through, matching every tick up to and including the last
- * live phase transition.
- */
-export function turn5FaintDismissCursorTick(t: number, dismissTick: number | null): number {
-  const naturalTick = t - 1;
-  return dismissTick === null
-    ? naturalTick
-    : Math.min(naturalTick, dismissTick - TURN5_FAINT_DISMISS_FREEZE_TICK_OFFSET);
 }
 
 // --- §4: party-status-summary ball-icon + diagonal-bar widget entrance -----
@@ -10607,24 +10594,39 @@ function cleanSwitchinBgFadeY(logicalTick: number): number {
 }
 
 /**
- * `docs/turn5-resolve-offc-tail-diagnosis.md` §4d (2026-08-18, ISSUES #97
- * remainder): turn 5's OWN Pidgeotto switch-in needs a different peak-hold
- * length than the shared `TURN5_BG_FADE_Y` above - direct pixel comparison
- * against the oracle (§4c) found this window's falling edge stepping down
- * one render tick too early at every boundary (6768/6772/6776/6780); one
- * more held-16 entry (8->9) shifts the whole falling edge one tick later,
- * matching that doc's own pixel-derived ground truth. Deliberately a
- * SEPARATE table, not an edit to `TURN5_BG_FADE_Y` itself - extending the
- * shared table regressed `turn13-switchin` 242/242 -> 234/242 (oracle-
- * confirmed this session), so Murkrow's own turn-13 window really does
- * need the original 8-entry hold while Pidgeotto's turn-5 window needs 9.
+ * S7 slice M-4 (docs/faint-switch-notes.md §14): `GrantingStarsEffect`
+ * (`data/battle_anim_scripts.s:10040-10045`) - two `gGrantingStarsSprite-
+ * Template` sprites (`ANIM_TAG_SPARKLE_2`, §8a's own byte-exact-verified
+ * gfx), RAM-probed fresh this session (`gSprites[3]`/`gSprites[4]`, a
+ * 64-slot x/y/x2/y2/animCmdIndex/flags scan - not curve-fit, not assumed
+ * from the source's own "8 ticks apart" comment, which this data actually
+ * CORRECTS to 10). Both stars share the identical closed form, just at
+ * their own `spawnTick`/screen anchor:
+ * - **Spawn ticks (RAM): 6968 and 6978** - 10 ticks apart (source cites
+ *   "8 ticks apart" as a script-level delay parameter; RAM ground truth
+ *   here is 10, the two aren't the same unit/count and RAM wins).
+ * - **Fixed screen anchor**: star 0 at RAM `(57,88)`, star 1 at RAM
+ *   `(84,83)` - matches the source's own `(-15,0)`/`(12,-5)` attacker-
+ *   relative offset pair against Onix's own on-field center.
+ * - **Anim frame**: `floor(localTick/7) % 8` (8 frames, 7 ticks each, tile
+ *   offsets 0,16,...,112 - `grantingStarsAnim`, exactly the source-cited
+ *   shape).
+ * - **`y2` drift**: `floor(localTick/8)`, RAM-read (0..7 over the star's
+ *   own ~62-tick life) - a real, slow upward creep this session found by
+ *   probing `y2` directly, NOT part of any prior citation.
+ * - **Corner convention**: `(ramX - 16, ramY + y2 - 16)` - the ordinary
+ *   half-sprite (32x32) centering, y2 layered in - bisected this session
+ *   against 6 independent (tick, star, frame) triples, all 0px diff.
+ * - **Lifetime**: destroyed at `localTick===62` (RAM); the render lag from
+ *   RAM to render is the ordinary **+1** tick (bisected against oracle
+ *   PNGs directly: +0 leaves ~70-75px residual at every sampled tick, +1
+ *   is exactly 0px at all 6, +2 reintroduces a 1px residual at one of the
+ *   6 - +1 is the unambiguous fit).
  */
-const TURN5_PIDGEOTTO_BG_FADE_Y: readonly number[] = [
-  2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16, 16, 14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2,
+export const TURN5_SITRUS_STAR_SPAWNS: readonly { spawnTick: number; x: number; y: number }[] = [
+  { spawnTick: 6968, x: 57, y: 88 },
+  { spawnTick: 6978, x: 84, y: 83 },
 ];
-export function turn5BgFadeY(t: number): number {
-  return TURN5_PIDGEOTTO_BG_FADE_Y[t - TURN5_BG_FADE_START_TICK] ?? 0;
-}
 
 /**
  * S7 slice M-3 (docs/faint-switch-notes.md §12/§13): Onix's own Sitrus
@@ -10696,41 +10698,6 @@ export function onixSitrusRotateMatrix(t: number): { pa: number; pb: number; pc:
 }
 
 /**
- * S7 slice M-4 (docs/faint-switch-notes.md §14): `GrantingStarsEffect`
- * (`data/battle_anim_scripts.s:10040-10045`) - two `gGrantingStarsSprite-
- * Template` sprites (`ANIM_TAG_SPARKLE_2`, §8a's own byte-exact-verified
- * gfx), RAM-probed fresh this session (`gSprites[3]`/`gSprites[4]`, a
- * 64-slot x/y/x2/y2/animCmdIndex/flags scan - not curve-fit, not assumed
- * from the source's own "8 ticks apart" comment, which this data actually
- * CORRECTS to 10). Both stars share the identical closed form, just at
- * their own `spawnTick`/screen anchor:
- * - **Spawn ticks (RAM): 6968 and 6978** - 10 ticks apart (source cites
- *   "8 ticks apart" as a script-level delay parameter; RAM ground truth
- *   here is 10, the two aren't the same unit/count and RAM wins).
- * - **Fixed screen anchor**: star 0 at RAM `(57,88)`, star 1 at RAM
- *   `(84,83)` - matches the source's own `(-15,0)`/`(12,-5)` attacker-
- *   relative offset pair against Onix's own on-field center.
- * - **Anim frame**: `floor(localTick/7) % 8` (8 frames, 7 ticks each, tile
- *   offsets 0,16,...,112 - `grantingStarsAnim`, exactly the source-cited
- *   shape).
- * - **`y2` drift**: `floor(localTick/8)`, RAM-read (0..7 over the star's
- *   own ~62-tick life) - a real, slow upward creep this session found by
- *   probing `y2` directly, NOT part of any prior citation.
- * - **Corner convention**: `(ramX - 16, ramY + y2 - 16)` - the ordinary
- *   half-sprite (32x32) centering, y2 layered in - bisected this session
- *   against 6 independent (tick, star, frame) triples, all 0px diff.
- * - **Lifetime**: destroyed at `localTick===62` (RAM); the render lag from
- *   RAM to render is the ordinary **+1** tick (bisected against oracle
- *   PNGs directly: +0 leaves ~70-75px residual at every sampled tick, +1
- *   is exactly 0px at all 6, +2 reintroduces a 1px residual at one of the
- *   6 - +1 is the unambiguous fit).
- */
-export const TURN5_SITRUS_STAR_SPAWNS: readonly { spawnTick: number; x: number; y: number }[] = [
-  { spawnTick: 6968, x: 57, y: 88 },
-  { spawnTick: 6978, x: 84, y: 83 },
-];
-
-/**
  * Pure placement math for one star (index into `TURN5_SITRUS_STAR_SPAWNS`)
  * at absolute render tick `t` - `null` before/after its own visible window.
  * `local===0` (the sprite's own creation tick) never actually renders - see
@@ -10796,54 +10763,6 @@ export function turn5SitrusOnixHp(t: number): number {
     t - ONIX_SITRUS_IDENTITY_RENDER_TICK,
     TURN5_SITRUS_HEAL_HP_START,
     TURN5_SITRUS_HEAL_HP_END,
-  );
-}
-
-/**
- * ISSUES #97 remainder residual (B) (`docs/turn5-confirmb-resolved-
- * residuals.md` §2.3): a turn5-off-scoped sibling of
- * `turn5SitrusHealTextVisibleChars` above, anchored at the already-correct
- * `TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK` (6850) instead of the stale
- * `ONIX_SITRUS_IDENTITY_RENDER_TICK`-derived epoch, using the same `t-1`/
- * one-char-per-tick shape residual (A)'s own `rockSlideTextVisibleChars`
- * fix established (`drawTurn6FieldBase`'s own doc comment on the codebase's
- * standard display-basis convention). Predicts full reveal (35 chars) at
- * exactly t=6885, matching the given ground truth ("settles 6885") with
- * zero fitting - independent confirmation of both the anchor and the shape.
- * A new function rather than an override param on the existing one: this
- * call site (`drawTurn5RockSlideWindow`) is the only caller of the OLD
- * function too, so either shape is safe, but a new function keeps the
- * change minimal and obviously scoped (same reasoning as `turn5OffSitrusOnixHp`
- * below).
- */
-export function turn5SitrusOffHealTextVisibleChars(t: number): number {
-  const total = TURN5_SITRUS_HEAL_LINE1.length + TURN5_SITRUS_HEAL_LINE2.length;
-  return Math.min(total, Math.max(0, (t - 1) - TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK + 1));
-}
-
-/**
- * ISSUES #97 remainder residual (B) (`docs/turn5-confirmb-resolved-
- * residuals.md` §2.2/§8): a turn5-off-scoped sibling of `turn5SitrusOnixHp`
- * above. `sitrusDisplayedHpAtAge`'s own live climb (real ON-profile rolling-
- * bar animation) never starts within this trace's window under the stale
- * epoch. The underlying RAM stat (`gBattleMons[0].hp`) IS a hard single-tick
- * STEP (`TURN5_OFF_SITRUS_ONIX_HP_JUMP_TICK`'s own doc comment) - but §8's
- * fresh oracle-vs-oracle pixel diffing found the DISPLAYED bar is not a
- * mirror of that RAM step: it's a live 1-HP/tick climb, same shape
- * `endeavorHp`/GROVYLE's own drain already use, anchored at
- * `TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK`'s own doc comment (30
- * consecutive per-tick oracle pixel changes, zero skips, cap reached exactly
- * at t=6982 - independently confirmed, not curve-fit assumed). Deliberately
- * a NEW function/constant rather than editing `ONIX_SITRUS_PROC_TRIGGER_RAM_
- * TICK`/`ONIX_SITRUS_IDENTITY_RENDER_TICK` in place - that shared epoch also
- * feeds the tint/rotation and granting-star placement machinery (still
- * unverified end-to-end for this trace family, ISSUES.md #97's own open
- * remainder) - moving it risks an unverified cascade.
- */
-export function turn5OffSitrusOnixHp(t: number): number {
-  return Math.min(
-    TURN5_SITRUS_HEAL_HP_END,
-    Math.max(TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_HP_START + (t - TURN5_OFF_SITRUS_ONIX_HP_CLIMB_START_TICK)),
   );
 }
 
@@ -11244,20 +11163,6 @@ function pidgeottoHealthboxContentForHp(hp: number): ReturnType<typeof composeOp
   return cached;
 }
 
-/**
- * S7 slice M (docs/faint-switch-notes.md §8e) + `docs/turn5-resolve-offc-
- * tail-diagnosis.md` §3 (2026-08-18, ISSUES #97 remainder): Pidgeotto's own
- * healthbox slide-in - bit-for-bit the same 23-step `healthboxSlideDx`
- * shape as S6's own send-out. Previously anchored at
- * `TURN5_PIDGEOTTO_SETTLE_TICK + 1` (6829) - that constant is the SPRITE's
- * own separate materialize-finish tick, not the healthbox's own onset;
- * the diagnosis's RAM probe (`dump-turn5-resolve-offc-tail-probe.py`,
- * `gHealthboxSpriteIds[1]`) pins the healthbox's own real slide-in start
- * at RAM tick 6762 (render 6763, the usual +1 RAM-to-render lag), holds
- * one extra tick, then ramps +5/tick to settle at render 6786 - hand-
- * verified bit-exact against that table (§3c).
- */
-const TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK = 6763;
 export function turn5PidgeottoHealthboxSlideDx(t: number): number | null {
   return healthboxSlideDx(t, TURN5_PIDGEOTTO_HEALTHBOX_SLIDE_START_TICK, HEALTHBOX_SLIDE_START_DX, true);
 }
@@ -11994,30 +11899,6 @@ function drawTurn6RockSlideWindow(fb: Uint8Array, t: number, realPressTick: numb
       drawMessageTextLines(fb, TURN6_ROCKSLIDE_ATTACK_LINE1, TURN6_ROCKSLIDE_ATTACK_LINE2, rockSlideTextVisibleChars(t, pressTick));
     }
   }
-}
-
-/**
- * ISSUES #97-B rung 1 (`docs/turn5-bounce-recalibration-probe.md` §1/§6f):
- * turn 6's own reopen-press is the same RAM-proven "`DoBounceEffect`'s own
- * `sinIndex` FROZEN for exactly 3 ticks" hardware mechanic already known for
- * turn 5's `turn5ReopenPressTick` - this is its turn-6 sibling, previously
- * missing entirely (`drawTurn6FightSubmenuWindow`'s open-DMA-wait branch fed
- * `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT` uninterrupted, advancing every tick
- * with no hold at all). Freeze that same formula's own value AT the press
- * tick for `t` in `[turn6ReopenPressTick, turn6ReopenPressTick + 2]`
- * inclusive, then resume the normal per-tick formula from `+3` onward.
- * Confirmed a provable no-op on `turn6-reopen-off.json` specifically (§6c:
- * that trace's own healthbox mismatch band is a *different*, still-open
- * ~11-tick lag local to `turn5SitrusResettledBounceTick`'s span, not this
- * hold - the freeze only matters where a plateau boundary sits inside the
- * 3-tick window, which isn't the case on that trace) - landed anyway because
- * it now matches RAM ground truth and may close other family traces whose
- * capture windows cross this exact reopen-press instant differently.
- */
-export function turn6ReopenBounceTick(t: number, turn6ReopenPressTick: number): number {
-  return t >= turn6ReopenPressTick && t <= turn6ReopenPressTick + 2
-    ? turn6ReopenPressTick - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT
-    : t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
 }
 
 function drawTurn6FightSubmenuWindow(
@@ -13217,32 +13098,6 @@ function drawTurn9RockSlideWindow(fb: Uint8Array, t: number): void {
  * NOT modeled this session - deferred, see battle-turn-notes.md §35 - this
  * dispatcher stops at the kickoff text's own settled plateau (10930).
  */
-/**
- * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
- * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
- * against `turn9-quickattack-off.json`): turn 9's own FIGHT-submenu window
- * shares ONE real, continuous `DoBounceEffect` oscillator across both the
- * pre-reveal DMA-wait branch below (`turn8ResettledBounceTick`'s own chain)
- * and `drawTurn9FieldBase`'s regime-4 chain further down - the two reduce to
- * the IDENTICAL closed form (`TURN9_REGIME4_TO_REGIME1_SHIFT`'s own
- * construction makes them cancel to the same raw sine index), so they share
- * one correction: a flat `+205` raw-sine-index offset, with RAM holding for
- * 2 ticks (screen ticks 10830-10831 - a stray cursor-reject `A` press
- * mid-browse, this trace's own segment 82) before resuming permanently 2
- * ticks behind - the same freeze-then-permanent-lag shape ISSUES #97-B's
- * turn6-reopen fix already established (docs/turn5-bounce-recalibration-probe.md
- * §8c). Checked against the RAM receipt at both the raw-sine-index level (47
- * ticks) and the derived Y2 level (56 ticks, the full assigned residual
- * window) - zero exceptions either way.
- */
-export const TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK = 10829;
-export const TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET = 205;
-
-export function turn9FightSubmenuBrowseBounceTick(t: number, raw: number): number {
-  if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK) return raw;
-  if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK + 2) return TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
-  return raw - 2;
-}
 
 // `turn9KickoffBounceTick`'s own already-established freeze (past `pressTick +
 // FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY`, its driver already torn down) is out
@@ -13774,18 +13629,6 @@ function drawTurn11FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN10_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
 
-/**
- * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
- * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
- * against `turn11-featherdance-off.json`): the shared onix/healthbox raw
- * sine index this early (not-yet-frozen) branch feeds `menuIdleBounce`
- * carries a flat `+114` offset off this call site's own unmodified formula -
- * RAM-receipt-exact, zero exceptions across 32 consecutive probed ticks
- * (13310-13341, spanning this trace's own live-driver span up to its
- * teardown at 13341).
- */
-export const TURN11_KICKOFF_BOUNCE_INDEX_OFFSET = 114;
-
 /** `turn10KickoffBounceTick`'s own turn-11 analogue, in regime-6 space (`drawTurn11FieldBase`'s own domain) - freezes at the regime-6 anchor tick itself (`TURN10_ROCKSLIDE_PRESS_TICK+TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction). */
 function turn11KickoffBounceTick(t: number, pressTick: number): number {
   if (t < pressTick + FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY) return t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
@@ -14041,18 +13884,6 @@ function drawTurn12FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
   drawTurn6FieldBase(fb, t, bounceTick + TURN12_REGIME7_TO_REGIME1_SHIFT, beforeMonSprite, onixHp, 0, onixInvisible, healthboxY2Override, onixY2Extra, darken, undefined, undefined, undefined, bounceIndexOffset);
   drawSendOutHealthbox(fb, 0, pidgeottoHealthboxContentForHp(TURN11_PIDGEOTTO_AFTER_ROCKSLIDE_HP));
 }
-
-/**
- * ISSUES #39 rank-5 slice 1 (docs/idle-bounce-phase-attribution.md's own
- * diagnosis, RAM-probed this session: tools/probe/dump-turn9-idle-bounce-off.py
- * against `turn12-aerialace-off.json`): the shared onix/healthbox raw sine
- * index this early (not-yet-frozen) branch feeds `menuIdleBounce` carries a
- * flat `+237` offset off this call site's own unmodified formula -
- * RAM-receipt-exact, zero exceptions across 31 consecutive probed ticks
- * (14344-14374, spanning this trace's own captured window through its
- * live-driver teardown at 14375).
- */
-export const TURN12_KICKOFF_BOUNCE_INDEX_OFFSET = 237;
 
 /** `turn11KickoffBounceTick`'s own turn-12 analogue, in regime-7 space (`drawTurn12FieldBase`'s own domain) - freezes at the regime-7 anchor tick itself (`TURN11_ROCKSLIDE_PRESS_TICK+TURN11_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction) - the SAME universal frozen mid-resolution bounce phase every prior turn's own equivalent freeze already reduces to (docs/turn12-notes.md §5's own "confirm-press transient (settled-submenu sha recurs)" finding), reused here for BOTH the pre-kickoff idle-wait AND (via `drawTurn12RockSlideWindow`) the ROCK_SLIDE-miss's own frozen field. */
 function turn12KickoffBounceTick(t: number, pressTick: number): number {
