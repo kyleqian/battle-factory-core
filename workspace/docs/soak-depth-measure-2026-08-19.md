@@ -55,3 +55,22 @@ node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy winning -
   21).
 - **Deepest battle-depth anywhere:** 16 — seed 61 (carry 14, i.e. battle 3
   of the third round: `14 + (3-1) = 16`).
+
+## `vanilla` policy, seeds 0:60 (contrast)
+
+```
+node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla --seeds 0:20
+node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla --seeds 20:40
+node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla --seeds 40:60
+```
+
+- **Seeds run:** 60 (0..59), in three 20-seed chunks.
+- **OK/CRASH/HANG:** 60 OK, 0 CRASH, 0 HANG (every chunk summary: `OK 20
+  CRASH 0 HANG 0`) — known-green ground confirmed; STOP RULE not
+  triggered.
+- **carry >= 7  (challengeNum >= 1):** 16/60
+- **carry >= 14 (challengeNum >= 2):** 3/60
+- **carry >= 21 (challengeNum >= 3):** 0/60
+- **Deepest carry anywhere:** 14 — seeds 24, 27, 28.
+- **Deepest battle-depth anywhere:** 20 — seed 24 (carry 14, i.e. battle 7
+  of the third round: `14 + (7-1) = 20`).
