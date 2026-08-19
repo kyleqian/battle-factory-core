@@ -659,7 +659,7 @@ import {
 import { bgFadeY, objFadeY, type FadeTiming } from "./paletteFade.ts";
 import { fadeColor } from "./fadeRender.ts";
 import { drawTileBg as drawExtractedTileBg } from "./bg.ts";
-import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, composePlayerHealthboxHpOverlay, type HealthboxAssets } from "./healthboxAssembly.ts";
+import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN, composePlayerHealthbox, PLAYER_HEALTHBOX_FRAME_ORIGIN, type HealthboxAssets } from "./healthboxAssembly.ts";
 import { magbySendOutAnimation } from "./magbySendOut.ts";
 import { kabutoHSlideWobble, KABUTO_FRONT_ANIM_END_OFFSET } from "./kabutoSendOut.ts";
 
@@ -2681,7 +2681,7 @@ const TURN8_FEATHERDANCE_STAT_PALETTE = assertFeatherDanceAttackStatPalette(reso
  * longer read anywhere in this file.
  */
 
-const playerHealthboxHpOverlayAssets = {
+export const playerHealthboxHpOverlayAssets = {
   hpbar: healthboxAssemblyAssets.hpbar,
   hpbarAnim: healthboxAssemblyAssets.hpbarAnim,
   textPalette: (battleHealthboxAsset as { singlesPlayer: { palette: RgbColor[] } }).singlesPlayer.palette,
@@ -2727,14 +2727,7 @@ export function magbyPlayerHealthboxContentForHp(
   }
   return cached;
 }
-export function playerHealthboxHpOverlayForHp(hp: number): ReturnType<typeof composePlayerHealthboxHpOverlay> {
-  let cached = playerHealthboxHpOverlayByHp.get(hp);
-  if (!cached) {
-    cached = composePlayerHealthboxHpOverlay(playerHealthboxHpOverlayAssets, hp, anchorPlayerBattler.maxHP);
-    playerHealthboxHpOverlayByHp.set(hp, cached);
-  }
-  return cached;
-}
+
 
 /**
  * S7 slice E1b: blits the player healthbox's own HP-bar+digit overlay
