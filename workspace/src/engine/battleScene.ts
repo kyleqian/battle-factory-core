@@ -13235,10 +13235,10 @@ function drawTurn9RockSlideWindow(fb: Uint8Array, t: number): void {
  * ticks) and the derived Y2 level (56 ticks, the full assigned residual
  * window) - zero exceptions either way.
  */
-const TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK = 10829;
-const TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET = 205;
+export const TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK = 10829;
+export const TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET = 205;
 
-function turn9FightSubmenuBrowseBounceTick(t: number, raw: number): number {
+export function turn9FightSubmenuBrowseBounceTick(t: number, raw: number): number {
   if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK) return raw;
   if (t <= TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK + 2) return TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
   return raw - 2;
@@ -13784,7 +13784,7 @@ function drawTurn11FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
  * (13310-13341, spanning this trace's own live-driver span up to its
  * teardown at 13341).
  */
-const TURN11_KICKOFF_BOUNCE_INDEX_OFFSET = 114;
+export const TURN11_KICKOFF_BOUNCE_INDEX_OFFSET = 114;
 
 /** `turn10KickoffBounceTick`'s own turn-11 analogue, in regime-6 space (`drawTurn11FieldBase`'s own domain) - freezes at the regime-6 anchor tick itself (`TURN10_ROCKSLIDE_PRESS_TICK+TURN10_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction). */
 function turn11KickoffBounceTick(t: number, pressTick: number): number {
@@ -14052,7 +14052,7 @@ function drawTurn12FieldBase(fb: Uint8Array, t: number, bounceTick: number = t, 
  * (14344-14374, spanning this trace's own captured window through its
  * live-driver teardown at 14375).
  */
-const TURN12_KICKOFF_BOUNCE_INDEX_OFFSET = 237;
+export const TURN12_KICKOFF_BOUNCE_INDEX_OFFSET = 237;
 
 /** `turn11KickoffBounceTick`'s own turn-12 analogue, in regime-7 space (`drawTurn12FieldBase`'s own domain) - freezes at the regime-7 anchor tick itself (`TURN11_ROCKSLIDE_PRESS_TICK+TURN11_ROCKSLIDE_MENU_REDRAW_DELAY`, local phase 0 by construction) - the SAME universal frozen mid-resolution bounce phase every prior turn's own equivalent freeze already reduces to (docs/turn12-notes.md §5's own "confirm-press transient (settled-submenu sha recurs)" finding), reused here for BOTH the pre-kickoff idle-wait AND (via `drawTurn12RockSlideWindow`) the ROCK_SLIDE-miss's own frozen field. */
 function turn12KickoffBounceTick(t: number, pressTick: number): number {

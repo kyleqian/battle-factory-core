@@ -100,6 +100,11 @@ import {
   turn8ResettledBounceTick,
   TURN8_BIND_PRESS_TICK,
   TURN8_MENU_REDRAW_DELAY,
+  turn9FightSubmenuBrowseBounceTick,
+  TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET,
+  TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK,
+  TURN11_KICKOFF_BOUNCE_INDEX_OFFSET,
+  TURN12_KICKOFF_BOUNCE_INDEX_OFFSET,
   turn9Ep2HealthboxWobbleY2,
   turn9Ep2OnixInvisible,
   turn9Hp,
@@ -2891,6 +2896,132 @@ describe("S7 slice R rung (a): turn10NotVeryEffectiveTextStartTick/turn10NotVery
     expect(turn10NotVeryEffectiveTextVisibleChars(12464, pressTick)).toBe(8);
     expect(turn10NotVeryEffectiveTextVisibleChars(12480, pressTick)).toBe(24);
     expect(turn10NotVeryEffectiveTextVisibleChars(12561, pressTick)).toBe(24);
+  });
+});
+
+// ISSUES #39 rank-5 slice 1 finisher (62a36f66): turn9-quickattack-off's
+// idle-bounce phase 177/233 -> 233/233. Two call-site-scoped corrections,
+// both flat raw-sine-index offsets on the shared menuIdleBounce oscillator
+// (RAM-probed via tools/probe/dump-turn9-idle-bounce-off.py against
+// turn9-quickattack-off.json, docs/idle-bounce-phase-attribution.md's own
+// diagnosis). Pinned directly against the fixed closed form (no committed
+// RAM fixture for this window - the probe's own JSON output is reproducible,
+// not committed) with a paired pre-fix (offset 0) mismatch proof at the
+// same ticks, same style as the ISSUES #28/#29 bounce-blip family above.
+describe("ISSUES #39 rank-5 slice 1 (62a36f66): drawTurn8BindWindow's own redraw branch, ticks 10818-10826 - turn 9's own FightSubmenuState.openElapsed not yet registered, so turn 8's own settled-menu bounce still renders, needing its own flat +191 raw-sine-index offset", () => {
+  const ticks: [number, { onixY2: number; healthboxY2: number }][] = [
+    [10818, { onixY2: 0, healthboxY2: 0 }],
+    [10822, { onixY2: 1, healthboxY2: 0 }],
+    [10826, { onixY2: 1, healthboxY2: 0 }],
+  ];
+
+  it("matches the fixed +191 offset at the 3 sampled ticks", () => {
+    for (const [t, expected] of ticks) {
+      const bounceTick = turn8ResettledBounceTick(t, TURN8_BIND_PRESS_TICK);
+      expect(menuIdleBounce(bounceTick, 191)).toEqual(expected);
+    }
+  });
+
+  it("WITHOUT the +191 offset (the pre-fix bug, plain turn8ResettledBounceTick with no indexOffset) mismatches at the same 3 ticks - proves the fix is load-bearing", () => {
+    for (const [t, expected] of ticks) {
+      const bounceTick = turn8ResettledBounceTick(t, TURN8_BIND_PRESS_TICK);
+      expect(menuIdleBounce(bounceTick)).not.toEqual(expected);
+    }
+  });
+});
+
+describe("ISSUES #39 rank-5 slice 1 (62a36f66): turn9FightSubmenuBrowseBounceTick - drawTurn9FightSubmenuWindow's pre-reveal DMA-wait branch and post-reveal regime-4 branch reduce to the SAME closed form (TURN9_REGIME4_TO_REGIME1_SHIFT cancels the two), a flat +205 raw-sine-index offset plus a shared 2-tick freeze (10830-10831) for the mid-window stray cursor-reject press, RAM-verified at ticks 10827-10873", () => {
+  const ticks: [number, { onixY2: number; healthboxY2: number }][] = [
+    [10827, { onixY2: 0, healthboxY2: 1 }], // unfrozen, raw passes through
+    [10830, { onixY2: 0, healthboxY2: 0 }], // frozen (t > FREEZE_TICK, <= FREEZE_TICK+2)
+    [10831, { onixY2: 0, healthboxY2: 0 }], // frozen, last held tick
+    [10832, { onixY2: 0, healthboxY2: 0 }], // resumed, raw-2
+    [10870, { onixY2: 0, healthboxY2: 0 }], // late window, still raw-2
+  ];
+
+  it("TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK is 10829 and TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET is 205", () => {
+    expect(TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK).toBe(10829);
+    expect(TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET).toBe(205);
+  });
+
+  it("matches the fixed +205 offset (with freeze) at the 5 sampled ticks spanning all three regimes", () => {
+    for (const [t, expected] of ticks) {
+      const raw = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      const bounceTick = turn9FightSubmenuBrowseBounceTick(t, raw);
+      expect(menuIdleBounce(bounceTick, TURN9_FIGHT_SUBMENU_BOUNCE_INDEX_OFFSET)).toEqual(expected);
+    }
+  });
+
+  it("WITHOUT the offset+freeze (the pre-fix bug, plain drawTurn9FieldBase(fb, t, rawBounceTick) with no offset) mismatches at the same 5 ticks", () => {
+    for (const [t, expected] of ticks) {
+      const raw = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      expect(menuIdleBounce(raw)).not.toEqual(expected);
+    }
+  });
+});
+
+// ISSUES #39 rank-5 slice 1 finisher (511c8c7f): turn11-featherdance-off's
+// idle-bounce phase 189/191 -> 191/191. Same family as the turn9 fix above:
+// the FEATHER_DANCE kickoff window's early (not-yet-frozen) branch (both the
+// pre-press browsing formula and turn11KickoffBounceTick's own pre-freeze
+// branch reduce to the identical `t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT`) carries
+// a flat +114 raw-sine-index offset, RAM-verified across 32 consecutive ticks
+// 13310-13341 (this trace's own live-driver span, no freeze needed here).
+describe("ISSUES #39 rank-5 slice 1 (511c8c7f): turn11's FEATHER_DANCE kickoff window - flat +114 raw-sine-index offset (TURN11_KICKOFF_BOUNCE_INDEX_OFFSET) applied while the live bounce driver exists (sm.confirmElapsed === null, or still short of FIGHT_CONFIRM_BOUNCE_FREEZE_DELAY past the press)", () => {
+  const ticks: [number, { onixY2: number; healthboxY2: number }][] = [
+    [13310, { onixY2: 1, healthboxY2: 1 }],
+    [13320, { onixY2: 0, healthboxY2: 1 }],
+    [13335, { onixY2: 0, healthboxY2: 0 }],
+  ];
+
+  it("TURN11_KICKOFF_BOUNCE_INDEX_OFFSET is 114", () => {
+    expect(TURN11_KICKOFF_BOUNCE_INDEX_OFFSET).toBe(114);
+  });
+
+  it("matches the fixed +114 offset at the 3 sampled ticks", () => {
+    for (const [t, expected] of ticks) {
+      const raw = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      expect(menuIdleBounce(raw, TURN11_KICKOFF_BOUNCE_INDEX_OFFSET)).toEqual(expected);
+    }
+  });
+
+  it("WITHOUT the offset (the pre-fix bug, bounceIndexOffset defaulting to 0) mismatches at the same 3 ticks", () => {
+    for (const [t, expected] of ticks) {
+      const raw = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      expect(menuIdleBounce(raw)).not.toEqual(expected);
+    }
+  });
+});
+
+// ISSUES #39 rank-5 slice 1 finisher (eb0be62b, salvaged from the cap-killed
+// round-7 worker): turn12-aerialace-off's idle-bounce phase 246/247 -> 247/247.
+// Same shape as turn11's own fix above, one turn downstream: a scoped +237
+// raw sine-index offset (TURN12_KICKOFF_BOUNCE_INDEX_OFFSET), RAM-receipt-
+// exact across 31 probed ticks 14344-14374, applied only while the live
+// bounce driver exists; the frozen branch stays untouched.
+describe("ISSUES #39 rank-5 slice 1 (eb0be62b): turn12's AERIAL_ACE kickoff window - flat +237 raw-sine-index offset (TURN12_KICKOFF_BOUNCE_INDEX_OFFSET) applied while the live bounce driver exists, same gating shape as turn11's own fix", () => {
+  const ticks: [number, { onixY2: number; healthboxY2: number }][] = [
+    [14350, { onixY2: 1, healthboxY2: 0 }],
+    [14360, { onixY2: 1, healthboxY2: 1 }],
+    [14370, { onixY2: 0, healthboxY2: 1 }],
+  ];
+
+  it("TURN12_KICKOFF_BOUNCE_INDEX_OFFSET is 237", () => {
+    expect(TURN12_KICKOFF_BOUNCE_INDEX_OFFSET).toBe(237);
+  });
+
+  it("matches the fixed +237 offset at the 3 sampled ticks", () => {
+    for (const [t, expected] of ticks) {
+      const raw = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      expect(menuIdleBounce(raw, TURN12_KICKOFF_BOUNCE_INDEX_OFFSET)).toEqual(expected);
+    }
+  });
+
+  it("WITHOUT the offset (the pre-fix bug, bounceIndexOffset defaulting to 0) mismatches at the same 3 ticks", () => {
+    for (const [t, expected] of ticks) {
+      const raw = t - FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT;
+      expect(menuIdleBounce(raw)).not.toEqual(expected);
+    }
   });
 });
 
