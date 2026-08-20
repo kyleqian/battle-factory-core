@@ -71,13 +71,15 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
   });
 
   it("keeps GLARE exact after the Lovely Kiss promotion", () => {
-    expect(coverage.entries).toHaveLength(199);
+    expect(coverage.entries).toHaveLength(200);
     expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(199);
-    expect(coverage.entries.filter((entry) => entry.status === "partial")).toEqual([]);
+    expect(coverage.entries.filter((entry) => entry.status === "partial")).toEqual([
+      expect.objectContaining({ move: "MOVE_OCTAZOOKA", status: "partial" }),
+    ]);
     expect(coverage.entries).toContainEqual(
       expect.objectContaining({ move: "MOVE_LOVELY_KISS", status: "exact" }),
     );
     expect(coverage.entries.filter((entry) => entry.move === "MOVE_GLARE")).toHaveLength(1);
-    expect(276 - coverage.entries.length).toBe(77);
+    expect(276 - coverage.entries.length).toBe(76);
   });
 });
