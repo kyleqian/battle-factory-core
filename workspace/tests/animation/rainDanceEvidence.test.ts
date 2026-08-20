@@ -7,7 +7,7 @@ import fixture from "../../tools/compare/fixtures/rain-dance-evidence.json" with
 
 const sha = (path: string): string => createHash("sha256").update(readFileSync(path)).digest("hex");
 
-describe("MOVE_RAIN_DANCE evidence-only checkpoint", () => {
+describe("MOVE_RAIN_DANCE exact bilateral evidence", () => {
   it("pins the authoritative source interval, components, carrier, and legal bilateral staging", () => {
     const audit = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", fixture.source.audit,
@@ -48,7 +48,7 @@ describe("MOVE_RAIN_DANCE evidence-only checkpoint", () => {
     }
   });
 
-  it("replays complete twice-fresh dense state/RGB evidence and retains only a partial claim", () => {
+  it("replays complete twice-fresh dense state/RGB evidence and retains exact acceptance", () => {
     const output = execFileSync(process.execPath, [
       "--experimental-strip-types", fixture.source.evidenceReplay,
     ], { encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
@@ -56,7 +56,7 @@ describe("MOVE_RAIN_DANCE evidence-only checkpoint", () => {
     expect(fixture).toMatchObject({
       schema: "rain-dance-bilateral-evidence/v1",
       move: "MOVE_RAIN_DANCE",
-      status: "partial",
+      status: "exact",
       coverageCredit: true,
       acceptance: {
         freshRunsPerOrientation: 2,
@@ -64,7 +64,9 @@ describe("MOVE_RAIN_DANCE evidence-only checkpoint", () => {
         rawRgbRows: 374,
         reducerRows: 374,
         typedSeamRows: 374,
-        productionFramebufferRows: 0,
+        productionFramebufferRows: 374,
+        framebufferCompared: true,
+        framebufferResidualPixels: 0,
         observedPointerParities: [0, 1],
         raindropCreatesPerOrientation: 80,
         raindropDestroysPerOrientation: 80,
@@ -77,11 +79,12 @@ describe("MOVE_RAIN_DANCE evidence-only checkpoint", () => {
       "task:AnimTask_BlendBattleAnimPal",
       "task:AnimTask_CreateRaindrops",
     ]);
-    expect(fixture.boundedRemainder).toMatchObject({
-      reducer: "implemented and exact for all retained component-state rows",
-      typedSeam: "implemented and exact for all retained component-state rows",
-      productionCompositor: "not implemented",
-      zeroResidualFramebuffer: "not measured; no production framebuffer claim",
+    expect(fixture.productionAcceptance).toMatchObject({
+      reducer: "374/374 retained component-state rows",
+      typedSeam: "374/374 retained component-state rows",
+      productionCompositor: "374/374 retained raw-RGB rows with zero residual pixels",
+      freshProductionCompositor: "twice fresh per orientation, 748/748 raw-RGB rows with zero residual pixels and per-orientation deterministic evidence",
+      manualQueue: "empty after exact promotion",
     });
     for (const side of ["player-back", "opponent-front"] as const) {
       const config = fixture.orientations[side];

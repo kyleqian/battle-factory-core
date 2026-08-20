@@ -1,7 +1,7 @@
 {
   "schema": "rain-dance-bilateral-evidence/v1",
   "move": "MOVE_RAIN_DANCE",
-  "status": "partial",
+  "status": "exact",
   "coverageCredit": true,
   "profile": "battle-scene-on",
   "source": {
@@ -10,7 +10,10 @@
     "probe": "tools/compare/rainDanceProbe.py",
     "probeSha256": "c869e3e776b37819b6b9d4692029ff243fb9651ae63b904842c798a069561a93",
     "evidenceReplay": "tools/compare/rainDanceEvidence.ts",
-    "reducerVerifier": "tools/compare/verifyRainDanceReducer.ts"
+    "reducerVerifier": "tools/compare/verifyRainDanceReducer.ts",
+    "framebufferVerifier": "tools/compare/rainDanceFramebuffer.ts",
+    "freshFramebufferVerifier": "tools/compare/rainDanceFreshFramebuffer.ts",
+    "assetExtractor": "tools/compare/extractRainDanceAssets.ts"
   },
   "components": [
     "asset:ANIM_TAG_RAIN_DROPS",
@@ -23,7 +26,9 @@
     "rawRgbRows": 374,
     "reducerRows": 374,
     "typedSeamRows": 374,
-    "productionFramebufferRows": 0,
+    "productionFramebufferRows": 374,
+    "framebufferCompared": true,
+    "framebufferResidualPixels": 0,
     "sourcePointerInterval": ["0x082d050a", "0x082d0555"],
     "observedPointerParities": [0, 1],
     "raindropCreatesPerOrientation": 80,
@@ -38,12 +43,12 @@
     "comparison": "byte-identical dense JSON and every raw RGB frame",
     "allMatched": true
   },
-  "boundedRemainder": {
-    "reducer": "implemented and exact for all retained component-state rows",
-    "typedSeam": "implemented and exact for all retained component-state rows",
-    "productionCompositor": "not implemented",
-    "zeroResidualFramebuffer": "not measured; no production framebuffer claim",
-    "manualQueue": "MOVE_RAIN_DANCE remains the sole partial queue item"
+  "productionAcceptance": {
+    "reducer": "374/374 retained component-state rows",
+    "typedSeam": "374/374 retained component-state rows",
+    "productionCompositor": "374/374 retained raw-RGB rows with zero residual pixels",
+    "freshProductionCompositor": "twice fresh per orientation, 748/748 raw-RGB rows with zero residual pixels and per-orientation deterministic evidence",
+    "manualQueue": "empty after exact promotion"
   },
   "controls": {
     "haze": "exact BlendBattleAnimPal regression control only",

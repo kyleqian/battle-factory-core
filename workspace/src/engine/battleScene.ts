@@ -604,6 +604,7 @@ import encoreAsset from "../animation/assets/encore.json" with { type: "json" };
 import dragonClawAsset from "../animation/assets/dragon-claw.json" with { type: "json" };
 import singAsset from "../animation/assets/sing.json" with { type: "json" };
 import batonPassAsset from "../animation/assets/baton-pass.json" with { type: "json" };
+import rainDropsAsset from "../animation/assets/rain-drops.json" with { type: "json" };
 import menuHealthboxPlayerAsset from "../assets/gen/menu-healthbox-player.json" with { type: "json" };
 import summaryBallAsset from "../assets/gen/summary-ball.json" with { type: "json" };
 import battleAnimBallOpenAsset from "../assets/gen/battle-anim-ball-open.json" with { type: "json" };
@@ -832,6 +833,7 @@ import {
   sceneOnEmberView,
   sceneOnFireBlastView,
   sceneOnRolloutView,
+  sceneOnRainDanceView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
   sceneOnFlameWheelView,
@@ -1065,6 +1067,7 @@ import {
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
   type SceneOnRolloutConfig,
+  type SceneOnRainDanceConfig,
   type SceneOnHealBellConfig,
   type SceneOnSoftBoiledConfig,
   type SceneOnNeedleArmPresentationState,
@@ -2039,6 +2042,9 @@ const hypnosisArt = hypnosisAsset as {
   goldRing: { tileset: Tileset; palette: RgbColor[] };
   politoedBack: { tileset: Tileset; palette: RgbColor[] };
   politoedFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const rainDanceArt = rainDropsAsset as {
+  rainDrops: { tileset: Tileset; palette: RgbColor[] };
 };
 const perishSongArt = perishSongAsset as {
   murkrowBack: { tileset: Tileset; palette: RgbColor[] };
@@ -27374,6 +27380,158 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "POLITOED used" : "Foe POLITOED used",
       "HYPNOSIS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "RAIN_DANCE") {
+    const rainState =
+      state as SceneOnMovePresentationState<SceneOnRainDanceConfig>;
+    const view = sceneOnRainDanceView(rainState);
+    // BuildOamBuffer and palette DMA precede callbacks/tasks. The reducer's
+    // hardware coefficient already denotes the preceding faded palette;
+    // displayed drops likewise come from the preceding software sprite row.
+    const displayed = rainState.age === 0
+      ? null
+      : sceneOnRainDanceView({ ...rainState, age: rainState.age - 1 });
+    const playerToOpponent =
+      view.attacker.species === "WOOPER"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "WOOPER"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged RAIN_DANCE pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    const wooperSource = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WOOPER!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WOOPER!;
+    const wooper = playerToOpponent ? wooperSource : {
+      ...wooperSource,
+      tileset: subTileset(wooperSource.tileset, 0, 8),
+    };
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent ? {
+      ...onixSource,
+      tileset: subTileset(onixSource.tileset, 0, 8),
+    } : onixSource;
+    const coefficient = view.palette.hardwareCoefficient;
+    // F_PAL_BG resolves to the three live battle BG allocations. The
+    // extracted compact asset stores only those live banks, so all entries
+    // in this local array participate in the source BlendPalette call.
+    const backgroundPalettes = blendPaletteBanksToward(
+      battleBg.palette,
+      { r: 0, g: 0, b: 0 },
+      coefficient,
+    );
+    const wooperPalette = blendPaletteToward(
+      wooper.palette,
+      { r: 0, g: 0, b: 0 },
+      coefficient,
+    );
+    const onixPalette = blendPaletteToward(
+      onix.palette,
+      { r: 0, g: 0, b: 0 },
+      coefficient,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalettes,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      wooper.tileset,
+      wooperPalette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      onixPalette,
+      view.target.geometry.spriteCorner.x + (playerToOpponent ? 1 : 0),
+      view.target.geometry.spriteCorner.y,
+    );
+    if (playerToOpponent) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+
+    // Sprite.c stably sorts equal-priority/subpriority objects by signed OAM
+    // y descending; lower hardware OAM indices win. Paint the inverse order.
+    // A CreateSprite performed after this row's OAM build has sourcePass 0:
+    // its placeholder attributes transfer on the following VBlank, but its
+    // requested frame has not reached OBJ VRAM yet. It is therefore blank
+    // for this outer row and first paints once sourcePass advances.
+    const drops = (displayed?.drops ?? [])
+      .filter((drop) => drop.sourcePass > 0)
+      .slice().sort((left, right) => {
+      const signedY = (drop: typeof left): number => {
+        const y = drop.attr[0] & 0xff;
+        return y >= 160 ? y - 256 : y;
+      };
+      return signedY(left) - signedY(right) || right.slot - left.slot;
+    });
+    for (const drop of drops) {
+      const rawX = drop.attr[1] & 0x1ff;
+      const rawY = drop.attr[0] & 0xff;
+      drawSpriteSheet(
+        fb,
+        subTileset(rainDanceArt.rainDrops.tileset, drop.animCmdIndex * 4, 4),
+        rainDanceArt.rainDrops.palette,
+        rawX >= 240 ? rawX - 512 : rawX,
+        rawY >= 160 ? rawY - 256 : rawY,
+      );
+    }
+
+    const profile = rainState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "WOOPER",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "WOOPER" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "WOOPER used" : "Foe WOOPER used",
+      "RAIN DANCE!",
       99,
     );
     return;

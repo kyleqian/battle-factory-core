@@ -3,14 +3,14 @@
  "entries": [
   {
    "move": "MOVE_RAIN_DANCE",
-   "status": "partial",
-   "remaining": "Implement the production compositor/draw case and twice-fresh zero-residual framebuffer acceptance for all 374 retained bilateral rows before exact promotion.",
+   "status": "exact",
    "covered": [
     "complete legal Level-50 Wooper versus Onix mechanicLab parties pass the full Move_RAIN_DANCE source-owned window twice fresh in both orientations: player-back frames 213-399 and opponent-front frames 211-397, 187 rows each and 374 total, through first inactive cleanup",
     "the authoritative source interval is the half-open byte range 0x082d050a..0x082d0555; dense source/task/sprite/software+hardware OAM/matrix/unfaded+faded+hardware palette/tag/BG/register/audio/party/both-RNG state and raw RGB are retained, with observed command pointers of both even and odd parity",
     "asset:ANIM_TAG_RAIN_DROPS, task:AnimTask_BlendBattleAnimPal, and task:AnimTask_CreateRaindrops are measured independently: 80 creations, 80 destructions, peak 14 drops, palette blend edges, audio start, allocator slots, callbacks, and cleanup are pinned in both orientations; Haze and Detect are regression controls only and Hail remains distinct unsupported source",
     "the pure source-relative reducer and typed Scene-ON seam reproduce all 374 retained component-state rows: source cursor, both task lifecycles, Random2-derived allocator/drop state, sprite callback/animation/OAM attributes, the one-row OAM transfer contract, all 32 software/hardware matrices, all 512 unfaded/faded/hardware palette colors, tags, audio, task counts, and inactive cleanup",
-    "the production compositor/draw case, zero-residual framebuffer acceptance, and exact promotion remain explicitly open; no gameplay/weather outcome, damage, gameplay RNG, AI, controller, turn, round, or facility state is owned"
+    "the ordinary production compositor uses source-extracted Rain Drops art/palette, the real 5-bit BlendPalette ramp over the live background and battler palette banks, source Random2 geometry, preceding software-OAM transfer, signed-y/OAM painter order, the post-CreateSprite blank outer row, battlers, healthboxes, text, and inactive cleanup; all 374 retained rows and twice-fresh bilateral reruns match raw RGB with zero residual pixels and framebufferCompared=true",
+    "no gameplay/weather outcome, damage, gameplay RNG, AI, controller, turn, round, or facility state is owned; Haze and Detect remain exact regression controls only, Hail remains independently unsupported, and no sibling credit is awarded"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-rain-dance-player-wooper-opponent-onix.json",
@@ -20,6 +20,9 @@
     "tools/compare/rainDanceProbe.py",
     "tools/compare/rainDanceEvidence.ts",
     "tools/compare/verifyRainDanceReducer.ts",
+    "tools/compare/rainDanceFramebuffer.ts",
+    "tools/compare/rainDanceFreshFramebuffer.ts",
+    "tools/compare/extractRainDanceAssets.ts",
     "tools/compare/evidence/rain-dance-player-dense-state.json.gz",
     "tools/compare/evidence/rain-dance-opponent-dense-state.json.gz",
     "tools/compare/evidence/rain-dance-player-raw-rgb.tar.gz",
@@ -27,9 +30,12 @@
     "tools/compare/evidence/rain-dance-changemap-player.txt",
     "tools/compare/evidence/rain-dance-changemap-opponent.txt",
     "src/animation/rainDance.ts",
+    "src/animation/assets/rain-drops.json",
     "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
     "tests/animation/rainDanceEvidence.test.ts",
-    "tests/animation/rainDance.test.ts"
+    "tests/animation/rainDance.test.ts",
+    "tests/animation/rainDanceFramebuffer.test.ts"
    ]
   },
   {
@@ -5397,7 +5403,7 @@
    ]
   }
  ],
- "queue": ["MOVE_RAIN_DANCE"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6336,8 +6342,8 @@
     "task:AnimTask_CreateRaindrops"
    ],
    "representatives": ["MOVE_RAIN_DANCE"],
-   "fulfilled": false,
-   "goal": "PARTIAL REDUCER/SEAM: MOVE_RAIN_DANCE is the representative for all three measured components, with complete twice-fresh bilateral source/task/sprite/OAM/matrix/palette/tag/BG/register/audio/party/RNG/raw-RGB evidence and explicit allocator/cleanup timing. Its pure source-relative reducer and typed Scene-ON seam reproduce all 374 retained component-state rows; the production compositor/draw case, zero-residual framebuffer remainder, and exact promotion are not implemented. Haze and Detect are BlendBattleAnimPal regression controls only, Hail is a distinct unsupported body, and no sibling or component credit is awarded."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_RAIN_DANCE independently reproduces 187/187 player-back and 187/187 opponent-front source/component/reducer/typed-seam/raw-RGB/production-framebuffer rows through inactive cleanup with zero residual pixels and framebufferCompared=true, then repeats the same 374/374 proof twice fresh. The ordinary compositor uses source-extracted Rain Drops art/palette, the real 5-bit palette ramp, Random2-derived sprites, preceding OAM/palette transfer, signed-y painter order, battlers, field chrome, and cleanup. Haze and Detect remain exact BlendBattleAnimPal controls only, Hail remains independently unsupported, and no sibling credit is awarded."
   },
   {
    "id": "task-animtask-rollout",

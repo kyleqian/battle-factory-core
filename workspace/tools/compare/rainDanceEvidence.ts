@@ -201,11 +201,15 @@ for (const orientation of orientations) {
   };
 }
 
-assert(fixture.acceptance.productionFramebufferRows === 0
+assert(fixture.status === "exact"
+  && fixture.acceptance.productionFramebufferRows === 374
+  && fixture.acceptance.framebufferCompared === true
+  && fixture.acceptance.framebufferResidualPixels === 0
   && fixture.acceptance.reducerRows === 374
   && fixture.acceptance.typedSeamRows === 374
-  && fixture.boundedRemainder.reducer.startsWith("implemented")
-  && fixture.boundedRemainder.typedSeam.startsWith("implemented")
-  && fixture.boundedRemainder.productionCompositor === "not implemented",
-"partial remainder was widened");
+  && fixture.productionAcceptance.reducer.startsWith("374/374")
+  && fixture.productionAcceptance.typedSeam.startsWith("374/374")
+  && fixture.productionAcceptance.productionCompositor.startsWith("374/374")
+  && fixture.productionAcceptance.freshProductionCompositor.startsWith("twice fresh"),
+"exact acceptance receipt drifted");
 console.log(JSON.stringify(result, null, 2));

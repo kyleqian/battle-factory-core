@@ -934,6 +934,7 @@ export interface SceneOnPresentationBattler {
     | "CHINCHOU"
     | "SWINUB"
     | "ONIX"
+    | "WOOPER"
     | "DROWZEE"
     | "KRABBY"
     | "PELIPPER"
