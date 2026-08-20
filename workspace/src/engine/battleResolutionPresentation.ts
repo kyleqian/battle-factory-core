@@ -2666,6 +2666,23 @@ function messageLines(
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
     });
   }
+  // ISSUES #105: BattleScript_EffectConversion/Conversion2/Camouflage all
+  // print this same STRINGID after tryconversiontypechange/
+  // settypetorandomresistance/settypetoenvironment (battle_scripts_1.s:664,
+  // 1282, 2805) -- none of the three reassign selectorRoles, so BS_ATTACKER
+  // stays the move's own still-current user, the same battler whose types[]
+  // just changed.
+  if (messageId === "STRINGID_PKMNCHANGEDTYPE") {
+    if (event.payload.substitutions.length < 1) {
+      throw new Error(`battle resolution ${messageId} message has no type substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "changed-type message");
+    const typeName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_BUFF1: () => typeName,
+    });
+  }
   // ISSUES #72 batch 7: the small-plumbing + known-staging cluster of the
   // remaining REACHABLE-15 list (docs/issue72-reachability-triage.md,
   // PROGRESS 904's own classification).

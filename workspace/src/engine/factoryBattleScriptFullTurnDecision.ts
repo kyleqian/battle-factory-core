@@ -1161,22 +1161,32 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                     ? (rules.selectorRoles.target === null
                                                       ? []
                                                       : [resolveMoveName(rules.battlers[rules.selectorRoles.target].disabledMove)])
-                                                    // ISSUES #72 batch 7: BattleScript_ColorChangeActivates's
-                                                    // {B_DEF_ABILITY}/{B_BUFF1} -- executeOnDamageAbilities's own
-                                                    // Color Change branch never reassigns selectorRoles (BS_TARGET
-                                                    // stays the move's own still-current target, the ability
-                                                    // holder), and battleTextBuff1Type already carries the new
-                                                    // TYPE_* symbol (battleScriptMoveEndOpcode.ts:497). {B_BUFF1}'s
-                                                    // real source reads gTypeNames (battle_message.c:2802), the
-                                                    // same abbreviation table fightSubmenuText.ts's TYPE_DISPLAY_NAMES
-                                                    // already transcribes for the FIGHT menu's type icon.
-                                                    : operand.expression === "STRINGID_PKMNCHANGEDTYPEWITH"
-                                                      ? (rules.selectorRoles.target === null || rules.battleTextBuff1Type === null
+                                                    // ISSUES #105: BattleScript_EffectConversion/Conversion2/Camouflage's
+                                                    // {B_BUFF1} -- all three type-change opcodes
+                                                    // (battleScriptTypeChangeOpcode.ts) never reassign selectorRoles,
+                                                    // BS_ATTACKER stays the move's own still-current user, the same
+                                                    // battler whose types[] just changed and whose battleTextBuff1Type
+                                                    // this write carries.
+                                                    : operand.expression === "STRINGID_PKMNCHANGEDTYPE"
+                                                      ? (rules.battleTextBuff1Type === null
                                                         ? []
-                                                        : [
-                                                            resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
-                                                            TYPE_DISPLAY_NAMES[rules.battleTextBuff1Type] ?? rules.battleTextBuff1Type,
-                                                          ])
+                                                        : [TYPE_DISPLAY_NAMES[rules.battleTextBuff1Type] ?? rules.battleTextBuff1Type])
+                                                      // ISSUES #72 batch 7: BattleScript_ColorChangeActivates's
+                                                      // {B_DEF_ABILITY}/{B_BUFF1} -- executeOnDamageAbilities's own
+                                                      // Color Change branch never reassigns selectorRoles (BS_TARGET
+                                                      // stays the move's own still-current target, the ability
+                                                      // holder), and battleTextBuff1Type already carries the new
+                                                      // TYPE_* symbol (battleScriptMoveEndOpcode.ts:497). {B_BUFF1}'s
+                                                      // real source reads gTypeNames (battle_message.c:2802), the
+                                                      // same abbreviation table fightSubmenuText.ts's TYPE_DISPLAY_NAMES
+                                                      // already transcribes for the FIGHT menu's type icon.
+                                                      : operand.expression === "STRINGID_PKMNCHANGEDTYPEWITH"
+                                                        ? (rules.selectorRoles.target === null || rules.battleTextBuff1Type === null
+                                                          ? []
+                                                          : [
+                                                              resolveFactoryAbilityDisplayName(rules.battlers[rules.selectorRoles.target].ability),
+                                                              TYPE_DISPLAY_NAMES[rules.battleTextBuff1Type] ?? rules.battleTextBuff1Type,
+                                                            ])
                                                       // ISSUES #72 batch 7: Cmd_tryspiteppreduce (Spite) already
                                                       // captures both {B_BUFF1}/{B_BUFF2} substitutions itself
                                                       // (battleScriptTryspiteppreduceOpcode.ts:81-82) -- only the
