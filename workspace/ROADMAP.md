@@ -1297,6 +1297,24 @@ verified chained 0→7→14→21, battle-depth 25 = ladder battle 26)**, ≥ 28
 (CheckViability 0xFFFF sentinel) filed — fixes are the current main-lane
 queue, then a re-sweep with every lever for the carry ≥ 28 stretch.
 
+**M-B STATUS UPDATE (2026-08-20 afternoon, supervisor):** the final 0:480
+sweep (`docs/soak-deep-sweep-2026-08-20-final.{md,log}`, PROGRESS 1365) is
+480/480 OK with carry ≥ 21 in 5/480 (1.04%) — bar reconfirmed at 2× range —
+but its "carry ≥ 28 not reached; wall at battle 7 of the carry-21 round"
+reading is WITHDRAWN: the three deepest seeds stopped in the round-end
+terminal with the record prompt answered YES, which the engine never
+continues (ISSUES #104, engine half), and the soak driver's cumulative
+post-round grace then reported them OK (#104, driver half). The depth
+instrument had therefore been capped at ~3 re-chains since M-A; whether the
+challenge-4 AI tier (carry ≥ 28) is reachable by play is UNMEASURED until
+both halves land and a sweep is re-run. Levers folded into `winning` today:
+type-effectiveness × STAB move choice (1359), swap-offer decline
+(`781c8827`), true-immunity walled-matchup switch with a ≥50%-HP bench gate
+(`3fa78a98`). Withheld on `wip/mb-step2b-draft-heuristic` (`e9a415a7`):
+draft-by-strength (measured worse at n=60; re-measure at n ≥ 180 on the
+fixed tree before deciding). Refuted and pinned: the #102-derived
+end-turn-skip lead (`tests/endTurnFaintResumeIssue104.test.ts`).
+
 Acceptance: a committed sweep log showing carry ≥ 21 reached by play,
 with the crash outcome at that depth stated honestly (including "we got
 there and it broke, here is the issue number"). Explicitly NOT in scope:
