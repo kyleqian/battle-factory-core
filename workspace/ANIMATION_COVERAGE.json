@@ -2,6 +2,34 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_OCTAZOOKA",
+   "status": "partial",
+   "covered": [
+    "complete legal challenge-1 set-256 FRONTIER_MON_OCTILLERY_1 parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 218-297 and opponent-front frames 217-296, 80 consecutive rows each and 160 total; each orientation repeats twice fresh with byte-identical dense state and raw RGB",
+    "the authoritative half-open source interval is 0x082d2b83..0x082d2be9 (102 bytes, 1c86b2d6fc47a5825cd0e3f63d74c413d524eb025e09676de1e4d1851863c0a9), with even and odd command pointers observed; the exact graph is ANIM_TAG_BLACK_BALL, ANIM_TAG_GRAY_SMOKE, gOctazookaBallSpriteTemplate, and gOctazookaSmokeSpriteTemplate",
+    "the legal carrier is species 224 Octillery holding Shell Bell 219, Hardy with SpAttack+Attack EVs; both complete parties use unique species and held items, and the opposing Careful Onix has max HP/SpDef EVs without transient HP/status/stage/weather/outcome injection",
+    "the retained rows pin source cursor/wait/args, exact one-ball/four-smoke creation and destruction topology, AnimTranslateLinear_WithFollowup/AnimSpriteOnMonPos/DestroyAnimSprite callbacks, software/hardware OAM and matrices, unfaded/faded/hardware palettes and tags, registers, audio, complete parties, immutable gameplay fields, gameplay versus animation RNG, raw RGB/change maps, and first inactive cleanup",
+    "both orientations pass 80/80 dense plus 80/80 RGB rows; preceding OAM/matrix/palette latches are 79/79 each, gameplay RNG has zero transitions, animation RNG advances on all 79 edges, and SE_M_MEGA_KICK2 id 141 plus SE_M_SELF_DESTRUCT id 177 latch at their source boundaries",
+    "Smokescreen and Mist remain independent controls only; no reducer, typed seam, compositor, framebuffer equality, production import, gameplay/status/damage ownership, latch credit, sibling credit, or exact promotion is claimed"
+   ],
+   "remaining": "MOVE_OCTAZOOKA still needs a source-relative reducer, typed Scene-ON seam, ordinary source-derived compositor/draw wiring, and twice-fresh complete 160/160 production framebuffer equality before it can promote. Shared BLACK_BALL/GRAY_SMOKE evidence transfers no move acceptance.",
+   "evidence": [
+    "tools/battle-lab/mechanic-octazooka-player-octillery-opponent-onix.json",
+    "tools/battle-lab/mechanic-octazooka-opponent-octillery-player-onix.json",
+    "tools/compare/fixtures/octazooka-evidence.json",
+    "tools/compare/octazookaSourceAudit.ts",
+    "tools/compare/octazookaProbe.py",
+    "tools/compare/octazookaEvidence.ts",
+    "tools/compare/evidence/octazooka-player-dense-state.json.gz",
+    "tools/compare/evidence/octazooka-opponent-dense-state.json.gz",
+    "tools/compare/evidence/octazooka-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/octazooka-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/octazooka-changemap-player.json",
+    "tools/compare/evidence/octazooka-changemap-opponent.json",
+    "tests/animation/octazookaEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_LOVELY_KISS",
    "status": "exact",
    "covered": [
@@ -4012,7 +4040,7 @@
     "source topology is BLACK_BALL translation, dynamic four-part SmokescreenImpact tile/palette lifetime, twelve BLACK_SMOKE lifecycles, wait-for-visual completion, and first inactive cleanup; there is no task lifecycle or target ShakeMon2\u2014the prior audit crossed into the much later Move_BUBBLE block, while the corrected immediate Move_CONVERSION boundary and both dense probes prove an empty task topology",
     "the pure source-relative reducer and typed Scene-ON seam port the 35-callback horizontal arc, dynamic impact allocation/free boundary, all twelve 75-callback blinking translations, both panned audio displays, waits, and first inactive cleanup",
     "the shared compositor uses reproducibly extracted legal Koffing, BLACK_BALL, shared-palette BLACK_SMOKE, and impact art, reuses exact Onix/chrome and enemy-shadow primitives, and follows the source hardware OAM transfer order without battle/controller ownership",
-    "MOVE_OCTAZOOKA remains unsupported: its shared BLACK_BALL is followed by a distinct 20-frame ball translation and four delayed GRAY_SMOKE gOctazookaSmokeSpriteTemplate lifecycles with different audio and no independently dense acceptance"
+    "MOVE_OCTAZOOKA is now an independent partial evidence control: its distinct 20-frame ball translation and four delayed GRAY_SMOKE lifecycles pass complete bilateral dense evidence, but it receives no Smokescreen reducer, compositor, framebuffer, or exact acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-smokescreen-player-koffing-opponent-onix.json",
@@ -5441,7 +5469,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_OCTAZOOKA"],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6405,6 +6433,17 @@
    "representatives": ["MOVE_LOVELY_KISS"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_LOVELY_KISS independently passes 153/153 player-back plus 153/153 opponent-front source/component/reducer/typed-seam/raw-RGB/production-framebuffer rows through first inactive cleanup with zero residual pixels. The ordinary compositor uses typed live battler species/sides/geometry, source-extracted Devil and Pink Heart art/palettes, preceding OAM transfer, source visibility and painter order, chrome, and cleanup without an evidence-pair gate. Fresh legal post-implementation probes reproduce both evidence and raw-RGB hashes byte-for-byte. Sweet Kiss, Attract, and sleep-family moves remain independent controls with no sibling credit."
+  },
+  {
+   "id": "octazooka-ball-smoke",
+   "components": [
+    "asset:ANIM_TAG_BLACK_BALL",
+    "asset:ANIM_TAG_GRAY_SMOKE",
+    "sprite:gOctazookaBallSpriteTemplate",
+    "sprite:gOctazookaSmokeSpriteTemplate"
+   ],
+   "representatives": ["MOVE_OCTAZOOKA"],
+   "goal": "EVIDENCE ONLY: MOVE_OCTAZOOKA independently passes 80/80 player-back plus 80/80 opponent-front source/state/raw-RGB/change-map rows through first inactive cleanup, twice fresh. Exact lifecycle is one BLACK_BALL translation and four delayed GRAY_SMOKE sprites with source audio, tags, hardware latches, immutable gameplay state, and separate animation RNG retained. The track remains unfulfilled pending reducer, typed seam, compositor, and complete production framebuffer equality; Smokescreen, Mist, and every sibling receive no credit."
   }
  ],
  "variantAudits": {

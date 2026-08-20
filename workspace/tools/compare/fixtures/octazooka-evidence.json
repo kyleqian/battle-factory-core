@@ -1,0 +1,91 @@
+{
+  "schema": "octazooka-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_OCTAZOOKA",
+  "moveId": 190,
+  "status": "partial",
+  "coverageCredit": false,
+  "coverageCounts": "Level 50: 199/276 exact, 1 partial, 76 unsupported",
+  "components": [
+    "asset:ANIM_TAG_BLACK_BALL",
+    "asset:ANIM_TAG_GRAY_SMOKE",
+    "sprite:gOctazookaBallSpriteTemplate",
+    "sprite:gOctazookaSmokeSpriteTemplate"
+  ],
+  "carrier": {"setId":256,"label":"FRONTIER_MON_OCTILLERY_1","species":224,"item":219,"nature":"NATURE_HARDY"},
+  "source": {
+    "audit": "tools/compare/octazookaSourceAudit.ts",
+    "probe": "tools/compare/octazookaProbe.py",
+    "sourceBounds": {"start":"0x082d2b83","endExclusive":"0x082d2be9","byteLength":102,"sha256":"1c86b2d6fc47a5825cd0e3f63d74c413d524eb025e09676de1e4d1851863c0a9"},
+    "pointerContract": "half-open-byte-interval-with-even-and-odd-command-pointers-observed",
+    "graph": ["asset:ANIM_TAG_BLACK_BALL","asset:ANIM_TAG_GRAY_SMOKE","sprite:gOctazookaBallSpriteTemplate","sprite:gOctazookaSmokeSpriteTemplate"],
+    "callbacks": ["AnimSpriteOnMonPos","AnimTranslateLinear_WithFollowup","DestroyAnimSprite"],
+    "audio": {"launch":{"soundEffect":"SE_M_MEGA_KICK2","id":141,"pan":"SOUND_PAN_ATTACKER"},"impact":{"soundEffect":"SE_M_SELF_DESTRUCT","id":177,"pan":"SOUND_PAN_TARGET"}}
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-octazooka-player-octillery-opponent-onix.json",
+      "scenarioSha256":"f4f9f6edc153003816cd834f5754670c8caa6fb6822413c934aa8c6a01b25402",
+      "sourceWindow":{"startFrame":218,"endFrame":297,"frameCount":80},
+      "probeJsonSha256":"24a4ec804468438bbc6658cb085124ae33434d8a8a70b3a1a8507e6616226df2",
+      "repeatProbeJsonSha256":"24a4ec804468438bbc6658cb085124ae33434d8a8a70b3a1a8507e6616226df2",
+      "denseState":"tools/compare/evidence/octazooka-player-dense-state.json.gz",
+      "denseStateSha256":"fd1ae5d65a9e854b5842026c41642f05d9059f1bfbd8381dab2d138cae99f7c6",
+      "rawRgbArchive":"tools/compare/evidence/octazooka-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256":"6ec50110d47460da63249f9654266343dbcb0ad621bc3717122039fe6d4912cd",
+      "rawRgbSequenceSha256":"5e0c83044e433bea1fde28029c0f713cf5efcea73018fa3217a7aa1b4efad12c",
+      "changeMap":"tools/compare/evidence/octazooka-changemap-player.json",
+      "changeMapSha256":"f4d0b96fb55078885b720e44677aa1f91d5e0d770bc02de1472230cef2d55c56"
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-octazooka-opponent-octillery-player-onix.json",
+      "scenarioSha256":"9791f89acc3efb292778843146e99b2147e2135e2d32e4ac017b54efa24e1484",
+      "sourceWindow":{"startFrame":217,"endFrame":296,"frameCount":80},
+      "probeJsonSha256":"672941094f59f87eaa48fd2758fb6ffaf2fd4284f0292f0b6802d598db3d740a",
+      "repeatProbeJsonSha256":"672941094f59f87eaa48fd2758fb6ffaf2fd4284f0292f0b6802d598db3d740a",
+      "denseState":"tools/compare/evidence/octazooka-opponent-dense-state.json.gz",
+      "denseStateSha256":"324aebc7abba18e87b7ee15be6b4c1f95b691d328da5208fdbf8cb91458f686a",
+      "rawRgbArchive":"tools/compare/evidence/octazooka-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256":"1cdb077c3fc167da05fa23c1d2b69d5e2289727d16bab4428975e2b509780915",
+      "rawRgbSequenceSha256":"81ea0024cdde218d9c1f94689c8db7c715c5c4f50ee7c95d3eabfdf129c0f9db",
+      "changeMap":"tools/compare/evidence/octazooka-changemap-opponent.json",
+      "changeMapSha256":"dc280a2f634199deaf8e7b6b329672a4030427705997a97486c042aa27970b04"
+    }
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": "80/80 + 80/80",
+    "rawRgbRows": "80/80 + 80/80",
+    "observedPointerParities": [0,1],
+    "ballCreatesPerOrientation": 1,
+    "smokeCreatesPerOrientation": 4,
+    "oamLatch": "79/79 preceding-software rows per orientation",
+    "matrixLatch": "79/79 preceding-software rows per orientation",
+    "paletteLatch": "79/79 preceding-faded rows per orientation",
+    "gameplayRngTransitions": 0,
+    "animationRngTransitions": 79,
+    "firstInactiveCleanupAge": 79
+  },
+  "controls": {
+    "mist": "source-neighbor control only; no shared acceptance",
+    "smokescreen": "shared smoke-family control only; no shared acceptance"
+  },
+  "productionAcceptance": {
+    "reducerRows": "0/160",
+    "typedSeamRows": "0/160",
+    "productionFramebufferRows": "0/160",
+    "manualQueue": "MOVE_OCTAZOOKA only, partial evidence checkpoint"
+  }
+}
