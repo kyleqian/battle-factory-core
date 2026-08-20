@@ -36,17 +36,78 @@ import {
   isMonPicInputReady,
 } from "../../src/engine/monPic.ts";
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
+import { applyTypeEffectiveness, type TypeEffectivenessEntry } from "../../src/engine/damageCalc.ts";
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
+import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------
-// Move power lookup (for the "winning" policy's fight-move bias only)
+// Move power/type lookup and type-effectiveness table (for the "winning"
+// policy's fight-move bias only)
 // ---------------------------------------------------------------------------
 
-const MOVE_POWER_BY_ID = new Map<number, number>(
-  (movesData as { moves: { id: number; power: number }[] }).moves.map(
-    (move) => [move.id, move.power],
+const MOVE_BY_ID = new Map<number, { power: number; type: string }>(
+  (movesData as { moves: { id: number; power: number; type: string }[] }).moves.map(
+    (move) => [move.id, { power: move.power, type: move.type }],
   ),
 );
+
+const TYPE_EFFECTIVENESS =
+  typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
+
+/** Materialized battler types default (matches battleScriptRulesContext.ts's own convention). */
+const DEFAULT_TYPES: readonly [string, string] = ["TYPE_NORMAL", "TYPE_NORMAL"];
+
+/**
+ * "winning" policy fight-move scorer: for each legal slot,
+ * `score = basePower x effectivenessMultiplier(moveType vs defenderTypes) x
+ * (STAB ? 1.5 : 1)`, using the engine's own `applyTypeEffectiveness` +
+ * type-effectiveness table. A 0x-immune or non-damaging (power 0) slot
+ * scores 0. Ties keep the lower slot (strict `>` never overwrites an equal
+ * score). If every legal slot scores 0, falls back to the highest-power
+ * legal slot (ties to the lower slot again), matching the policy's prior
+ * behaviour.
+ */
+export function pickWinningFightSlot(input: {
+  legalSlots: readonly boolean[];
+  moveIds: readonly number[];
+  attackerTypes: readonly [string, string];
+  defenderTypes: readonly [string, string];
+}): number {
+  const { legalSlots, moveIds, attackerTypes, defenderTypes } = input;
+  let fallbackSlot = 0;
+  let fallbackFound = false;
+  let fallbackPower = -1;
+  let bestSlot = -1;
+  let bestScore = 0;
+  for (let slot = 0; slot < 4; slot += 1) {
+    if (!legalSlots[slot]) continue;
+    if (!fallbackFound) {
+      fallbackSlot = slot;
+      fallbackFound = true;
+    }
+    const move = MOVE_BY_ID.get(moveIds[slot]!);
+    const power = move?.power ?? 0;
+    if (power > fallbackPower) {
+      fallbackPower = power;
+      fallbackSlot = slot;
+    }
+    if (!move || power <= 0) continue;
+    const { multiplierTenths } = applyTypeEffectiveness(
+      power,
+      move.type,
+      defenderTypes,
+      TYPE_EFFECTIVENESS,
+    );
+    if (multiplierTenths <= 0) continue;
+    const stab = attackerTypes[0] === move.type || attackerTypes[1] === move.type;
+    const score = power * (multiplierTenths / 10) * (stab ? 1.5 : 1);
+    if (score > bestScore) {
+      bestScore = score;
+      bestSlot = slot;
+    }
+  }
+  return bestSlot >= 0 ? bestSlot : fallbackSlot;
+}
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32)
@@ -250,11 +311,14 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * biases toward winning, so a soak's natural chained depth almost never
  * strings together consecutive round wins). Reuses "full"'s menu/target
  * exploration verbatim (same draft/summary/postwin/swap/terminal rolls) for
- * every decision EXCEPT two: the fight-menu commits the highest-power legal
- * damaging move instead of a uniform-random slot, and a voluntary POKéMON
- * party-select (forced switches are unaffected — they're not voluntary)
- * always declines rather than "full"'s random target/cancel roll. Biased,
- * not guaranteed-win — arbitrary-but-legal play in spirit, not an AI oracle.
+ * every decision EXCEPT two: the fight-menu commits the legal move that
+ * scores highest on power x type-effectiveness x STAB (see
+ * `pickWinningFightSlot`; falls back to highest-power legal move if every
+ * legal move scores 0) instead of a uniform-random slot, and a voluntary
+ * POKéMON party-select (forced switches are unaffected — they're not
+ * voluntary) always declines rather than "full"'s random target/cancel
+ * roll. Biased, not guaranteed-win — arbitrary-but-legal play in spirit
+ * (a real player weighing type matchups), not an AI oracle.
  */
 export type SoakPolicy = "full" | "vanilla" | "winning";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
@@ -536,19 +600,16 @@ class RandomPlayer {
           0,
           presentation.legalMoveBySlot.findIndex((slot) => slot !== null),
         );
-        // "winning" only: highest-power LEGAL move, ties toward the lower slot.
-        const bestDamagingSlot = (): number => {
-          let bestSlot = firstLegal;
-          let bestPower = -1;
-          for (let slot = 0; slot < 4; slot += 1) {
-            if (presentation.legalMoveBySlot[slot] === null) continue;
-            const power = MOVE_POWER_BY_ID.get(presentation.field.player.moveIds[slot]) ?? 0;
-            if (power > bestPower) {
-              bestPower = power;
-              bestSlot = slot;
-            }
-          }
-          return bestSlot;
+        // "winning" only: type-effectiveness-aware LEGAL move (see
+        // pickWinningFightSlot); falls back to highest-power/lowest-slot.
+        const bestEffectivenessSlot = (): number => {
+          const battlers = orch.battle?.rules.rulesContext.battlers;
+          return pickWinningFightSlot({
+            legalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
+            moveIds: presentation.field.player.moveIds,
+            attackerTypes: battlers?.[0]?.types ?? DEFAULT_TYPES,
+            defenderTypes: battlers?.[1]?.types ?? DEFAULT_TYPES,
+          });
         };
         const target = this.policy === "strong-route"
           && active?.partyIndex === 1
@@ -558,7 +619,7 @@ class RandomPlayer {
           : this.policy === "vanilla" || this.policy === "strong-route"
             ? firstLegal
             : this.policy === "winning"
-              ? bestDamagingSlot()
+              ? bestEffectivenessSlot()
               : this.rng.int(4);
         this.fightIntent = {
           key,

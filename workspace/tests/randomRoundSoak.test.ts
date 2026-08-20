@@ -31,7 +31,7 @@ import {
   type FactoryCarry,
 } from "../src/engine/factoryRoundChaining.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
-import { resolveMaxFrames, runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
+import { pickWinningFightSlot, resolveMaxFrames, runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
 
 const PIN_SEEDS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
@@ -565,5 +565,88 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
     }
     expect(swapOfferNotes).toContain("swap offer: YES");
     expect(swapOfferNotes).toContain("swap offer: NO");
+  });
+});
+
+describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
+  it("(a) picks the type-effectiveness winner over raw higher power (SURF resisted vs VINE_WHIP super-effective+STAB)", () => {
+    // SURF (Water, power 95) vs a Water defender: resisted 0.5x, no STAB
+    // (attacker is Grass) -> score 47.5. VINE_WHIP (Grass, power 35) vs the
+    // same Water defender: super-effective 2x and STAB (attacker is Grass)
+    // -> score 105. The lower-power, on-type move should win.
+    const slot = pickWinningFightSlot({
+      legalSlots: [true, true, false, false],
+      moveIds: [57, 22, 0, 0], // MOVE_SURF, MOVE_VINE_WHIP
+      attackerTypes: ["TYPE_GRASS", "TYPE_GRASS"],
+      defenderTypes: ["TYPE_WATER", "TYPE_WATER"],
+    });
+    expect(slot).toBe(1);
+  });
+
+  it("(b) falls back to highest-power/lowest-slot when every legal move scores 0 (immune or non-damaging)", () => {
+    // GROWL (Normal, power 0) is non-damaging -> score 0. TACKLE (Normal,
+    // power 35) and HYPER_BEAM (Normal, power 150) are both immune (0x)
+    // against a Ghost defender -> score 0. Every legal slot scores 0, so
+    // the fallback rule (highest power, ties to the lower slot) applies:
+    // HYPER_BEAM's 150 beats TACKLE's 35 and GROWL's 0.
+    const slot = pickWinningFightSlot({
+      legalSlots: [true, true, true, false],
+      moveIds: [45, 33, 63, 0], // MOVE_GROWL, MOVE_TACKLE, MOVE_HYPER_BEAM
+      attackerTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      defenderTypes: ["TYPE_GHOST", "TYPE_GHOST"],
+    });
+    expect(slot).toBe(2);
+  });
+
+  it("(c) leaves \"full\" byte-identical for two seeds (winning-only change)", () => {
+    const options = {
+      maxFrames: 600_000,
+      renderEvery: 0,
+      policy: "full" as const,
+      stopAtFirstRoundDecision: true,
+    };
+    // Recorded on the pre-change tree (this milestone's step 2 commit).
+    expect(runSeed(0, options)).toMatchObject({
+      frames: 11955,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 20,
+    });
+    expect(runSeed(1, options)).toMatchObject({
+      frames: 14345,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 29,
+    });
+  });
+
+  it("(c) leaves \"vanilla\" byte-identical for two seeds (winning-only change)", () => {
+    const options = {
+      maxFrames: 600_000,
+      renderEvery: 0,
+      policy: "vanilla" as const,
+      stopAtFirstRoundDecision: true,
+    };
+    // Recorded on the pre-change tree (this milestone's step 2 commit).
+    expect(runSeed(0, options)).toMatchObject({
+      frames: 8499,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 16,
+    });
+    expect(runSeed(1, options)).toMatchObject({
+      frames: 16970,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 16,
+    });
   });
 });
