@@ -1315,6 +1315,15 @@ draft-by-strength (measured worse at n=60; re-measure at n ≥ 180 on the
 fixed tree before deciding). Refuted and pinned: the #102-derived
 end-turn-skip lead (`tests/endTurnFaintResumeIssue104.test.ts`).
 
+**M-B RESULT on the #104-fixed tree (2026-08-20 15:05, supervisor's own
+run, `winning` 0:60 `--render-every 0`, master `e3176a05`):** carry ≥ 7
+**60/60**, ≥ 14 **56/60**, ≥ 21 **13/60**, **≥ 28 1/60 (seed 24, battle-depth
+28 = challenge 4, the full `CHECK_BAD_MOVE`+triad AI tier, reached by
+play)**; 58 OK (`budget`) / 2 CRASH (seeds 40 + 50, both ISSUES #105, the
+Conversion/Color-Change type-name string — being fixed) / 0 HANG. Compare
+the same morning: 35.6% / 5.6% / 0% / 0%. The milestone's bar AND its
+stretch target are met; step 4 continues as crash triage at the new depth.
+
 Acceptance: a committed sweep log showing carry ≥ 21 reached by play,
 with the crash outcome at that depth stated honestly (including "we got
 there and it broke, here is the issue number"). Explicitly NOT in scope:
