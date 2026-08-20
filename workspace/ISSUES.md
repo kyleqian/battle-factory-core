@@ -17,6 +17,29 @@ backlog.
 
 # Open
 
+## #107 — STRINGID_PKMNSUBSTITUTEFADED references `{B_DEF_NAME_WITH_PREFIX}` with no resolver (Substitute breaking: "{target}'s SUBSTITUTE faded!") — same class as #100/#101/#105
+
+**Found 2026-08-20** (side re-measure of the withheld draft heuristic on the
+#104-fixed tree, `wip/mb-step2b-draft-heuristic` @ `18222b3a`; `winning`
+seeds 27 and 29, battle 3 turn 7) — a pre-existing engine gap reached via a
+different RNG path, not a heuristic defect. Not yet reproduced on master
+itself (different trajectories); repro on that branch:
+`node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 27
+--policy winning --verbose --render-every 0`.
+
+**Mechanism:** `battleStringResolver: STRINGID_PKMNSUBSTITUTEFADED references
+placeholder {B_DEF_NAME_WITH_PREFIX} with no resolver supplied` — a
+`messageLines` case is missing in `src/engine/battleResolutionPresentation.ts`
+for the substitute-broken message (`sText_PkmnSubstituteFaded`,
+`src/battle_message.c`; emitted by `BattleScript_SubstituteFade` from
+`Cmd_datahpupdate`'s substitute-HP path, `battle_script_commands.c`). Fix
+shape = the #100/#101/#105 house pattern (defender name resolver from the
+action snapshot, Tier-1 pin in `tests/presentationStringIssue107.test.ts`,
+red-verified). Sibling check worth doing in the same step: every remaining
+`{B_DEF_NAME_WITH_PREFIX}`/`{B_ATK_NAME_WITH_PREFIX}` STRINGID reachable in
+Factory singles without a `messageLines` case (grep the string table against
+the resolver sites) — four of these gaps were found one at a time today.
+
 ## #106 — `winning`-policy soak seed 203 crashes: Beat Up's `STRINGID_PKMNATTACK` has no `B_BUFF1` resolver
 
 **Found 2026-08-20** (M-B step-3 re-run, `docs/soak-deep-sweep-2026-08-20-semantics2.md`,

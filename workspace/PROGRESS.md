@@ -5,6 +5,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1371 — [supervisor close, 2026-08-20 16:00] **Bonus round folded: final-tree `winning` 0:240 (1370) reaches carry ≥ 28 in 7/240 (2.9%), ≥ 21 20.0%, ≥ 14 90.8% — deepest seeds hit the 1M-frame budget mid-round-5 (instrument ceiling, not a wall); draft heuristic re-measured n=30 (neutral, stays withheld on `wip/mb-step2b-draft-heuristic` @ `18222b3a`); #106 + #107 filed; #102 re-reproduced live (seed 138)**
+
+- **State:** docs-only since 1369's gates; tree clean. Cherry-picked the side
+  §6 measurement doc (`18222b3a` → `7b53b7a2`) onto master; ISSUES **#107**
+  filed (STRINGID_PKMNSUBSTITUTEFADED `{B_DEF_NAME_WITH_PREFIX}` resolver;
+  seeds 27/29 on the wip branch). `animation-main` is **+5 unfolded** at
+  close (sibling session live until 18:00) — fold at next orient;
+  `rust-main` 0.
+- **Next (in order):** (1) string-resolver sibling sweep as ONE step — #106
+  (Beat Up `STRINGID_PKMNATTACK` `{B_BUFF1}` via Metronome) + #107 + every
+  remaining `{B_ATK_NAME_WITH_PREFIX}`/`{B_DEF_NAME_WITH_PREFIX}`/`{B_BUFF1}`
+  STRINGID reachable in Factory singles without a `messageLines` case (five
+  were found one at a time today); (2) #102 now has a live repro (seed 138)
+  — diagnose + fix; (3) raise or parametrise the `winning` frame budget
+  (`--max-rounds` exists) so the challenge-4+ tier is swept for crashes
+  rather than truncated at 1,000,000 frames; (4) draft heuristic: n ≥ 180
+  before any fold; (5) #104 remainder (YES-branch "battle was recorded"
+  message needs an OFF trace). DEFERRED.md: none open.
+- **Notes:** the session's final numbers for the user: morning 35.6% / 5.6%
+  / 0% / 0% (carry ≥ 7/14/21/28, 08-19 semantics) → close 100% / 90.8% /
+  20.0% / 2.9% (new semantics, 1M-frame budget, 0:240). 11 main + 8 side
+  worker rounds, 3 cap-kill salvages, 0 regressions folded. Supervisor
+  papercut of its own: an unquoted heredoc mangled this entry's first draft
+  (backticks ran as commands) — always `<<'EOF'` for ledger text.
+
+---
+
 ## 1370 — [main worker, 2026-08-20] **M-B step 3 re-run: honest `winning` 0:240 depth sweep on the new soak semantics — carry ≥ 28 reached at 7/240 (2.9%), 238 OK / 2 CRASH (both triaged) / 0 HANG**
 
 - **State:** docs-only. `docs/soak-deep-sweep-2026-08-20-semantics2.md` +
@@ -98,52 +125,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   cap); an instrument fix can legitimately flip every historical "OK" — say
   so in the ledger rather than soften the instrument. DEFERRED.md: no new
   entries; none open.
-
----
-
-## 1368 — [main worker, 2026-08-20] **#105 FIXED: STRINGID_PKMNCHANGEDTYPE `messageLines` case added (Conversion/Conversion 2/Camouflage); soak seed 40 now runs to an honest OK (`1df9dcb6`)**
-
-- **State:** `src/engine/battleResolutionPresentation.ts` +
-  `src/engine/factoryBattleScriptFullTurnDecision.ts` (fix),
-  `tests/presentationStringIssue105.test.ts` (new), `ISSUES.md` (#105
-  deleted, fully fixed). Commit `1df9dcb6`. `npm test` 1080 files/10177
-  passed (44/223 skipped, unchanged), `npm run build` and `npm run
-  typecheck` green.
-- **Did:** `BattleScript_EffectConversion`/`Conversion2`/`Camouflage`
-  (`data/battle_scripts_1.s:664,1282,2805`) all print
-  `STRINGID_PKMNCHANGEDTYPE` ("{B_ATK_NAME_WITH_PREFIX} transformed\ninto
-  the {B_BUFF1} type!") after their own already-ported type-change opcode
-  (`battleScriptTypeChangeOpcode.ts`, which already records the chosen type
-  into `rulesContext.battleTextBuff1Type`); none reassign selectorRoles, so
-  BS_ATTACKER stays the move's own still-current user. Wired the
-  substitution in `factoryBattleScriptFullTurnDecision.ts`'s `prepareMessage`
-  ternary (`TYPE_DISPLAY_NAMES[battleTextBuff1Type]`, the same
-  `gTypeNames`-derived table `STRINGID_PKMNCHANGEDTYPEWITH`/Color Change
-  already uses) and added the `messageLines` case. Pinned in
-  `presentationStringIssue105.test.ts` (real player CONVERSION,
-  red-verified via `git stash` — reproduced the exact soak crash string
-  pre-fix). **Seed 40 (original repro): OK budget, 1,000,000f, 24.9s,
-  carry<=21 depth<=21** — no crash. Neighbourhood `winning --seeds 38:44`:
-  **OK 6, CRASH 0, HANG 0**.
-- **Sibling check:** grepped all 4 real-source `PREPARE_TYPE_BUFFER(gBattleTextBuff1,
-  ...)` call sites — `Cmd_tryconversiontypechange`,
-  `Cmd_settypetorandomresistance` (2 sites), `Cmd_settypetoenvironment` all
-  feed `STRINGID_PKMNCHANGEDTYPE` (now fixed); Color Change's
-  `ABILITYEFFECT_ON_DAMAGE` branch (`battle_util.c:2761`) feeds
-  `STRINGID_PKMNCHANGEDTYPEWITH`, which already had a resolver. No
-  remaining gaps.
-- **Emitter seed 40 hit:** verified in a throwaway worktree at the pre-fix
-  parent commit — turn 24 crashes right after the player confirms FIRE
-  BLAST (move 126); the type-change move that actually triggers
-  `STRINGID_PKMNCHANGEDTYPE` belongs to the AI-controlled opposing trainer
-  battler for that same turn, which the driver's verbose log does not name
-  (it only echoes the player's own FIGHT confirmations). Not distinguished
-  between Conversion/Conversion2/Camouflage specifically, but immaterial —
-  all three funnel through the identical opcode + STRINGID + fix, confirmed
-  by the seed rerunning clean.
-- **Next:** #104 (engine half: stub continuation for terminal
-  YES/cancel) is the next highest-value open item per 1367. A full honest
-  0:60/0:20/0:60 gate re-sweep is still owed once that lands.
-- **Notes:** no PAPERCUT. Landed inside the 30-min cap.
 
 ---
