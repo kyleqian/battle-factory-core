@@ -1,3 +1,10 @@
+# MOVE_LOVELY_KISS reducer + typed Scene-ON seam — partial (2026-08-20 worker)
+
+- **State:** Coverage remains **198/276 Level-50 exact, 1 partial, 77 unsupported**. MOVE_LOVELY_KISS stays the sole queue item; `devil-pink-heart-lovely-kiss` remains non-exclusive and unfulfilled, with no sibling credit or latch change.
+- **Did:** Added `lovelyKissAtAge` and the narrow `SceneOnLovelyKissConfig`/`sceneOnLovelyKissView` seam. The source-relative reducer ports the full 153-row script cursor, one Devil plus four Pink Heart allocator/callback lifecycles, Q8.8 geometry, per-heart `Random2` phases, sprite OAM/neutral affine state, full palette/tag transfer state, target-panned audio, animation RNG, and cleanup without sleep/status, gameplay RNG, damage, turn, round, facility, species-pair, or broad-family ownership.
+- **Verified:** Direct reducer + typed seam equality is **153/153 player-back + 153/153 opponent-front = 306/306 retained component rows** through first inactive cleanup. Sweet Kiss, Attract, and Sleep Powder are explicit negative controls. The twice-fresh raw-RGB evidence remains retained but `framebufferCompared` stays false.
+- **Remainder/next:** Add only the ordinary source-derived compositor/draw wiring, then require complete twice-fresh **306/306 zero-residual framebuffer rows** before Lovely Kiss alone can promote. No exact promotion, framebuffer claim, sibling promotion, boundary widening, or gameplay ownership in this step.
+
 # MOVE_LOVELY_KISS bilateral dense evidence checkpoint — partial (2026-08-20 worker)
 
 - **State:** Coverage remains **198/276 Level-50 exact, 1 partial, 77 unsupported**. MOVE_LOVELY_KISS is the sole queue item; the new `devil-pink-heart-lovely-kiss` track is non-exclusive and unfulfilled. No sibling credit or latch change.

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import fixture from "../../tools/compare/fixtures/lovely-kiss-evidence.json" with { type: "json" };
 import { verifyLovelyKissEvidence } from "../../tools/compare/lovelyKissEvidence.ts";
 
-describe("MOVE_LOVELY_KISS evidence-only checkpoint", () => {
+describe("MOVE_LOVELY_KISS retained evidence checkpoint", () => {
   it("pins the source interval, graph, callbacks, assets, audio, and lowest carrier", () => {
     const audit = JSON.parse(execFileSync(process.execPath, [
       "--experimental-strip-types", fixture.source.audit,
@@ -61,9 +61,9 @@ describe("MOVE_LOVELY_KISS evidence-only checkpoint", () => {
     expect(fixture.status).toBe("partial");
     expect(fixture.coverageCredit).toBe(false);
     expect(fixture.evidenceScope).toMatchObject({
-      productionAnimationChanged: false,
-      reducerAdded: false,
-      typedSeamAdded: false,
+      productionAnimationChanged: true,
+      reducerAdded: true,
+      typedSeamAdded: true,
       compositorAdded: false,
       framebufferCompared: false,
       gameplayStateOwned: false,

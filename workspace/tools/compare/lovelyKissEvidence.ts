@@ -130,7 +130,7 @@ function verifyOrientation(side: Side, row: Json): Json {
 
 export function verifyLovelyKissEvidence(): Record<string, Json> {
   invariant(fixture.schema === "lovely-kiss-bilateral-evidence/v1" && fixture.oracleProfile === "battle-scene-on" && fixture.move === "MOVE_LOVELY_KISS" && fixture.status === "partial" && fixture.coverageCredit === false, "Lovely Kiss partial contract drift");
-  invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false && fixture.evidenceScope.framebufferCompared === false, "Lovely Kiss evidence-only scope drift");
+  invariant(fixture.evidenceScope.productionAnimationChanged === true && fixture.evidenceScope.reducerAdded === true && fixture.evidenceScope.typedSeamAdded === true && fixture.evidenceScope.compositorAdded === false && fixture.evidenceScope.framebufferCompared === false, "Lovely Kiss reducer-checkpoint scope drift");
   const results = {} as Record<string, Json>;
   for (const side of ["player-back", "opponent-front"] as const) results[side] = verifyOrientation(side, fixture.orientations[side]);
   return results;

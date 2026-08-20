@@ -23,9 +23,9 @@
     "audio": {"first":{"soundEffect":"SE_M_PSYBEAM2","id":200,"pan":"SOUND_PAN_TARGET"},"hearts":{"soundEffect":"SE_M_ATTRACT","id":226,"pan":"SOUND_PAN_TARGET"}}
   },
   "evidenceScope": {
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
     "compositorAdded": false,
     "framebufferCompared": false,
     "coveragePromotion": false,
@@ -74,7 +74,8 @@
     "oamLatch": "152/152 preceding-software rows per orientation",
     "matrixLatch": "152/152 preceding-software rows per orientation",
     "paletteLatch": "152/152 preceding-faded rows per orientation",
-    "typedSeamRows": "not implemented by evidence-only checkpoint",
+    "reducerRows": "153/153 + 153/153",
+    "typedSeamRows": "153/153 + 153/153",
     "productionFramebufferRows": "not compared by evidence-only checkpoint",
     "firstInactiveCleanupAge": 152
   },
@@ -83,5 +84,5 @@
     "attract": "exact source-neighbor control only; no shared acceptance",
     "sleepAnimations": "Sleep Powder/Yawn/Dream Eater controls only; no status ownership"
   },
-  "next": "Derive a Lovely Kiss source-relative reducer, narrow typed Scene-ON seam, and source-derived compositor; then require complete dense seam/framebuffer equality twice fresh before any promotion. Do not award sibling credit."
+  "next": "Add only the source-derived Lovely Kiss compositor/draw wiring, then require complete twice-fresh bilateral framebuffer equality before promotion. Do not award sibling credit."
 }

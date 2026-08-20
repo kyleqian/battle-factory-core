@@ -9,9 +9,10 @@
     "the authoritative half-open source interval is 0x082d4035..0x082d407c (71 bytes, 604194e8a58c2a8e0aa8162e91983863ca464a43df99d593e720f991bcda66d3), with both even and odd command-pointer parity observed; the exact graph is ANIM_TAG_DEVIL, ANIM_TAG_PINK_HEART, gDevilSpriteTemplate, and gPinkHeartSpriteTemplate",
     "source callbacks AnimDevil, AnimPinkHeart, and AnimPinkHeart_Step, source-identical Devil/Magenta Heart graphics and palettes, and target-panned SE_M_PSYBEAM2 (id 200) then SE_M_ATTRACT (id 226) are pinned; the lowest legal Level-50 carrier is set 377 FRONTIER_MON_JYNX_1 (species 124, Shell Bell 219, Modest, SpAttack+HP)",
     "the retained dense rows include source cursor/wait/args, task and sprite creation/destruction/callback/OAM/affine state, animation RNG, software and hardware OAM/matrices, faded/unfaded/hardware palettes and tags, BG/register/audio, complete parties, battlers/engine/immutable state, gameplay RNG, raw RGB, normalized change maps, hardware latches, and first-inactive cleanup; visual-task topology stays empty and lifecycle is 1 Devil plus 4 Pink Hearts per orientation",
-    "the evidence-only verifier passes 306/306 dense rows and 306/306 raw-RGB rows; each preceding software-to-hardware OAM, matrix, and palette latch is 152/152 per orientation, gameplay RNG has zero transitions, animation RNG has 152 transitions per orientation, and cleanup is retained; Sweet Kiss, Attract, and sleep-animation bodies remain source-neighbor controls only"
+    "the evidence verifier passes 306/306 dense rows and 306/306 raw-RGB rows; each preceding software-to-hardware OAM, matrix, and palette latch is 152/152 per orientation, gameplay RNG has zero transitions, animation RNG has 152 transitions per orientation, and cleanup is retained",
+    "the pure source-relative reducer and typed Scene-ON seam reproduce all 306 retained component rows: script cursor/waits/args, one 91-pass AnimDevil lifecycle, four 24-pass Q8.8 AnimPinkHeart flights, four Random2-resolved 31-pass AnimPinkHeart_Step lifecycles, sprite callback/data/OAM/affine state, all 512 palette colors and transfer timing, tag/audio/animation-RNG behavior, and first inactive cleanup; Sweet Kiss, Attract, and sleep presentations are explicit negative controls"
    ],
-   "remaining": "MOVE_LOVELY_KISS still has no source-relative reducer, typed Scene-ON seam, production compositor/draw wiring, or framebuffer equality. The four components and every move acceptance unit remain unfulfilled; do not infer sibling credit from Sweet Kiss, Attract, or sleep controls.",
+   "remaining": "MOVE_LOVELY_KISS still has no production compositor/draw wiring or framebuffer equality. The compositor is the sole queued follow-up; the four-component track and move acceptance remain unfulfilled, and no sibling credit follows from Sweet Kiss, Attract, or sleep controls.",
    "evidence": [
     "tools/battle-lab/mechanic-lovely-kiss-player-jynx-opponent-onix.json",
     "tools/battle-lab/mechanic-lovely-kiss-opponent-jynx-player-onix.json",
@@ -19,13 +20,17 @@
     "tools/compare/lovelyKissSourceAudit.ts",
     "tools/compare/lovelyKissProbe.py",
     "tools/compare/lovelyKissEvidence.ts",
+    "tools/compare/lovelyKissReducerAudit.ts",
     "tools/compare/evidence/lovely-kiss-player-dense-state.json.gz",
     "tools/compare/evidence/lovely-kiss-opponent-dense-state.json.gz",
     "tools/compare/evidence/lovely-kiss-player-raw-rgb.tar.gz",
     "tools/compare/evidence/lovely-kiss-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/lovely-kiss-changemap-player.json",
     "tools/compare/evidence/lovely-kiss-changemap-opponent.json",
-    "tests/animation/lovelyKissEvidence.test.ts"
+    "src/animation/lovelyKiss.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tests/animation/lovelyKissEvidence.test.ts",
+    "tests/animation/lovelyKiss.test.ts"
    ]
   },
   {
@@ -6392,7 +6397,7 @@
     "sprite:gPinkHeartSpriteTemplate"
    ],
    "representatives": ["MOVE_LOVELY_KISS"],
-   "goal": "PARTIAL: MOVE_LOVELY_KISS independently retains complete legal Scene-ON player-back and opponent-front source-owned dense/raw-RGB windows twice fresh through first inactive cleanup, with source interval, callbacks, assets, audio, OAM/matrix/palette/tag/register latches, complete parties, and gameplay/animation-RNG evidence. The source-relative reducer, typed seam, production compositor, framebuffer equality, and every move-specific acceptance unit remain open; no sibling credit is conveyed."
+   "goal": "PARTIAL: MOVE_LOVELY_KISS independently retains complete legal Scene-ON player-back and opponent-front source-owned dense/raw-RGB windows twice fresh through first inactive cleanup. Its pure source-relative reducer and typed seam replay all 306 component rows, including Devil/Pink Heart callback, OAM/affine, palette/tag/audio/animation-RNG, and cleanup state. The production compositor and framebuffer equality remain the sole follow-up; the track stays unfulfilled and no sibling credit is conveyed."
   }
  ],
  "variantAudits": {
