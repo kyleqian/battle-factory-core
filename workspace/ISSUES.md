@@ -17,56 +17,25 @@ backlog.
 
 # Open
 
-## #104 — Round-end terminal: the record prompt's YES (and B-cancel) answers dead-end forever, for a WON *or LOST* round — this is why virtually every soak seed now reports HANG
+## #104 — Terminal record prompt's YES branch omits the real "battle was recorded" message (stub-only remainder)
 
-**Found 2026-08-20** (supervisor probe after the 0:480 final sweep, PROGRESS
-1365/1366). Three deepest seeds (125, 328, 409) all stopped at `roundComplete
-carry<=21 depth<=27`; none re-chained into carry 28.
-
-**Driver half FIXED 2026-08-20** (PROGRESS 1367,
-`tools/soak/randomRoundSoakDriver.ts`): the post-round `terminalGrace` window
-now re-arms every time a round re-chains, instead of being spent cumulatively
-across every prior chained round, and its expiry with no lobby reached and no
-re-chain now reports `HANG` + `hangSurface: "factoryTerminal"` + the decided
-round's own `endState`, instead of a false `OK`. Pinned in
-`tests/randomRoundSoak.test.ts` ("ISSUES #104 (driver)").
-
-**Engine half — still open.** `src/engine/factoryTerminalPresentation.ts:~663-704`
-only gives `recordChoice === "no"` a continuation (`declineFarewellReleaseAge`
-→ `core.ts:~830-842` re-chains a fresh generated draft, since continuous-play
-chaining means a "no" NEVER reaches the walkable Lobby either — it always
-re-chains straight into a new draft, `core.ts:~837-843`). `"yes"` and
-`"cancel"` set the field and stop, forever. This machinery
-(`advanceFactoryTerminalRecordPrompt`) is NOT win-only: `createFactoryTerminalLossPresentation`
-carries the same `recordChoice`/`recordMenuCursor` fields as the won-round
-state, and a LOST round's terminal offers and can dead-end on the same
-YES/cancel choices (confirmed directly: seed 4 `winning`, carry 0/roundLost,
-dead-ends on `recordChoice:"cancel"`). Real game
-(`BattleFrontier_BattleFactoryPreBattleRoom_EventScript_AskRecordBattle`,
-`scripts.inc:~65-94`): `case 0` → the record/save branch, then the same
-`EndRecordBattle` farewell ("We look forward to your next visit.") as the
-decline; `MULTI_B_PRESSED` → `EndRecordBattle` directly. Standing user
-decision (2026-08-05): RECORD is stub-only, no real recording — so the
-sanctioned fix is a stub continuation: YES/cancel follow the decline chain
-(YES may print the recorded-message family if ground truth is banked; the
-terminal's YES-branch dialogue is NOT yet ground-truthed — only the decline
-branch is, `docs/post-terminal-beyond-boundary-ground-truth.md` §rows
-4990-5093). A real player who answers YES (or presses B) at ANY round's
-record prompt, win or lose, is soft-locked today.
-
-**Post-driver-fix honest measurement (PROGRESS 1367):** with the driver fix
-landed, small samples report **HANG @ factoryTerminal for essentially every
-seed, under every policy** — `winning` 15/15 (seeds 0:15), `vanilla` 10/10
-(seeds 0:10), `full` 10/10 (seeds 0:10). The terminal's random A/B/UP/DOWN
-navigation (shared machinery across all three soak policies, `onTerminal()`)
-lands on YES or B-cancel with near certainty given enough presses across
-enough rounds, so a long-running soak seed reaching this dead end is the
-*expected* outcome, not a rare edge case — this is the actual "wall" behind
-every prior "OK" sweep result for a non-milestone, non-`stopAtFirstRoundDecision`
-run; those "OK"s were always grace-expiry artifacts, never a genuine reach of
-the (architecturally unreachable, by the continuous-play chaining design
-above) walkable Lobby. Fixing this engine half is high-value: it unblocks
-honest OK-reaching soak sweeps at all policies, not just deep `winning` runs.
+**Both the driver and engine halves that used to make this issue soft-lock
+the whole run are FIXED** (`fd30ee13` engine: YES/B-cancel now continue like
+NO instead of dead-ending; `428ba1c4` + 2026-08-20 driver retune: continuous
+play now honestly reports `OK budget`/`OK max-rounds` while progressing and
+`HANG` only on a genuine stall, `tests/randomRoundSoak.test.ts` "ISSUES #104
+(driver)"). What remains is cosmetic only: `advanceFactoryTerminalRecordPrompt`
+(`src/engine/factoryTerminalPresentation.ts:~685-704`) deliberately arms the
+SAME `declineFarewellReleaseAge` continuation for all three answers (matching
+`case 1`/`MULTI_B_PRESSED` both `goto EndRecordBattle` in source), but the
+real `case 0` (YES) first shows `EventScript_RecordBattle` →
+`EventScript_SaveBattle`'s msgbox — "{PLAYER}'s battle was recorded on the
+FRONTIER PASS." (`scripts.inc:87-88`) — before falling into that same
+farewell, and this repo doesn't print it: only the shared farewell text is
+ground-truthed (`docs/post-terminal-beyond-boundary-ground-truth.md` §rows
+4990-5093), not the YES-branch message. Standing decision (2026-08-05):
+RECORD is stub-only, so the real fix is ground-truthing and adding that one
+message string, not a real save. No player-visible soft-lock remains.
 
 ## #102 — `winning`-policy soak seed 154 crashes: `Cmd_switchhandleorder` sees no decided `monToSwitchIntoId` for battler 1 after a mid-round faint
 

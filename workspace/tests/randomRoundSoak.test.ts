@@ -824,55 +824,61 @@ describe("Milestone M-B step 2 part C (tightened by part C2): winning switches o
   });
 });
 
-describe("ISSUES #104 (driver): per-round terminal grace re-arms; a stalled terminal reports HANG, not OK", () => {
-  it("(a) a seed whose terminal dead-ends (record YES/cancel) reports HANG at factoryTerminal instead of a false OK", () => {
-    // Seed 328 winning: PROGRESS 1366's supervisor probe found the OLD
-    // cumulative-grace driver silently reporting OK at frame 249,367
-    // (`roundComplete carry<=21`) while the terminal's real state was
-    // `recordChoice: "yes"`, dead forever (ISSUES #104's engine half, still
-    // unfixed in this tree by design -- driver-only step). With the grace
-    // re-armed per round instead of shared across every earlier successful
-    // re-chain, THIS seed's own dead end no longer needs to wait for a
-    // cumulative budget to run dry; it is caught directly once ITS round's
-    // own 9,000-frame window elapses -- much sooner (this seed settles by
-    // frame 189,924, well inside the 260,000 budget).
-    const result = runSeed(328, {
+describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK = frame budget reached while progressing, HANG = no progress for stallFrames", () => {
+  // The engine half (fd30ee13) made the terminal record prompt's YES and
+  // B-cancel answers continue exactly like NO, so a decided round now
+  // ALWAYS re-chains into a fresh draft almost immediately -- the old
+  // per-round grace timer's own expiry-HANG branch (PROGRESS ~1367's
+  // seeds 328/34 pins, now retargeted below) is dead: master's own
+  // consequence is that a continuous-play run never stops on its own
+  // (`lobbyFreeRoam` is unreachable under the generated-orchestrator
+  // route), so every seed used to run to `maxFrames` and get reported HANG
+  // even while actively, honestly playing the whole time. Generic stall
+  // detection (any of round identity, `battleIndex`, the player's turn
+  // counter, the input-owning surface, or the decided-round phase going
+  // `stallFrames` frames without moving) replaces it.
+  it("(a) stall detection fires on the first frame with zero progress, and does not false-positive at the default window", () => {
+    // stallFrames: 1 is the cheapest exact trip: frame 1 always "progresses"
+    // (the surface baseline starts empty), so frame 2 -- the first frame
+    // whose progress signals are unchanged from frame 1 -- is caught
+    // immediately, deterministically, regardless of seed/policy.
+    const stalled = runSeed(0, {
       policy: "winning",
-      maxFrames: 260_000,
+      stallFrames: 1,
+      maxFrames: 5_000,
       renderEvery: 0,
     });
-    expect(result.outcome).toBe("HANG");
-    expect(result.hangSurface).toBe("factoryTerminal");
-    expect(result.endState).toBe("roundComplete");
+    expect(stalled.outcome).toBe("HANG");
+    expect(stalled.hangSurface).toBeTruthy();
+    expect(stalled.frames).toBeLessThanOrEqual(3);
+
+    // Positive control: the same seed at the DEFAULT stall window
+    // (30_000) never gets close to stalling within a much smaller budget --
+    // ordinary draft/battle/postwin play moves at least one progress
+    // signal many times a second.
+    const control = runSeed(0, {
+      policy: "winning",
+      maxFrames: 10_000,
+      renderEvery: 0,
+    });
+    expect(control.outcome).not.toBe("HANG");
   });
 
-  it("(b) re-arming lets a seed chain through >= 2 full round wins before its OWN eventual terminal dead-end", () => {
-    // Seed 34 winning: reaches carry 14 -- TWO chained round wins, i.e. two
-    // separate successful decide -> decline -> re-chain cycles -- before
-    // ITS OWN terminal dead-ends. This proves re-arming doesn't shrink or
-    // cap chaining: under the old cumulative bug a single shared
-    // 9,000-frame budget was spent down by every earlier round's own
-    // decided-dwelling time, capping how deep a chain could run before
-    // being mistaken for "OK, done" regardless of whether THIS seed's
-    // eventual dead end had even been reached yet.
-    //
-    // This is deliberately NOT an "outcome: OK" pin. A swept range (seeds
-    // 0-69, `winning`) found no seed that reaches genuine OK completion
-    // under the honest driver: continuous-play chaining
-    // (core.ts:~837-843) means a successful decline re-chains straight
-    // into a fresh draft and never emits `lobbyFreeRoam` under the default
-    // generated-orchestrator route this driver uses, so a long enough run
-    // always eventually lands on the terminal's YES/cancel dead end (ISSUES
-    // #104's engine half) with near-certainty. The honest regression guard
-    // is therefore the DEPTH reached before that seed's own dead end, not a
-    // fabricated "OK" -- see PROGRESS ~1367 for the full finding.
+  it("(b) a winning seed genuinely chains through >= 2 full round wins (carry >= 14), reported OK once --max-rounds is reached", () => {
+    // Seed 34 winning: PROGRESS ~1367 found this seed reaches carry 14 --
+    // TWO chained round wins, i.e. two separate decide -> continue ->
+    // re-chain cycles -- well before its own eventual terminal dead-end
+    // (now fixed). `maxRounds: 3` is a cheap, deterministic bound: it stops
+    // right after the 3rd round decision instead of running to a multi-
+    // hundred-thousand-frame budget, and is comfortably past the 2 wins
+    // needed to prove carry >= 14 was genuinely reached, not just claimed.
     const result = runSeed(34, {
       policy: "winning",
-      maxFrames: 210_000,
+      maxRounds: 3,
       renderEvery: 0,
     });
-    expect(result.outcome).toBe("HANG");
-    expect(result.hangSurface).toBe("factoryTerminal");
+    expect(result.outcome).toBe("OK");
+    expect(result.endState).toBe("max-rounds");
     expect(result.maxCarriedWinStreak).toBeGreaterThanOrEqual(14);
   });
 });

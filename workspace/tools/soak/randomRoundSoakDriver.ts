@@ -315,11 +315,13 @@ export type SeedResult = {
   seed: number;
   outcome: SeedOutcome;
   /**
-   * OK sub-outcome: roundComplete | roundLost | milestone:first-action-menu.
-   * Also set on a HANG whose grace window expired after a round WAS decided
-   * (ISSUES #104 driver half) — the decided round's own outcome
-   * (roundComplete | roundLost), so the CLI/summary line reads like other
-   * post-decision HANGs instead of looking like a mid-round stall.
+   * OK sub-outcome: "budget" (frame budget reached while still making
+   * progress — ISSUES #104 retune), "max-rounds" (`--max-rounds` reached),
+   * roundComplete | roundLost | milestone:first-action-menu. Also set on a
+   * HANG that stalled with some round already decided — the decided
+   * round's own outcome (roundComplete | roundLost), so the CLI/summary
+   * line reads like a post-decision stall instead of looking like a
+   * mid-round one.
    */
   endState?: string;
   frames: number;
@@ -1152,6 +1154,20 @@ export type RunOptions = {
    * across arbitrarily many chained rounds does not.
    */
   stopAtFirstRoundDecision?: boolean;
+  /**
+   * Frames of zero observed progress (see `DEFAULT_STALL_FRAMES`) before a
+   * run reports HANG. Ignored under `stopAtFirstRoundDecision`, which keeps
+   * its own bounded post-decision grace window instead (ISSUES #104 driver
+   * retune, PROGRESS ~1368).
+   */
+  stallFrames?: number;
+  /**
+   * Finish OK ("max-rounds") once this many round decisions
+   * (roundComplete/roundLost) have been observed, regardless of frame
+   * budget — a cheap run-length control for gates and tests that only want
+   * a bounded number of chained rounds. Default unlimited.
+   */
+  maxRounds?: number;
   /** Test-only opt-in observer for every action-log note, independent of `verbose`. */
   onNote?: (entry: { frame: number; battle: number; turn: number; what: string }) => void;
 };
@@ -1198,6 +1214,21 @@ export function resolveMaxFrames(policy: SoakPolicy, explicit?: number): number 
   return explicit ?? DEFAULT_MAX_FRAMES_BY_POLICY[policy] ?? DEFAULT_RUN_OPTIONS.maxFrames;
 }
 
+/**
+ * Frames of zero observed progress before a run reports HANG (ISSUES #104
+ * driver retune). "Progress" is any change in round identity (a fresh
+ * generated round committing, `factoryRoundBattleOrchestrator.config.id` or
+ * `pendingGeneratedRound`), `round.rules.battleIndex`, the player's own turn
+ * counter, the surface the player currently reads input from
+ * (`RandomPlayer.surface`), or `endStateOf(state)`. A stall this long with
+ * every one of those signals frozen is a genuine dead lock: a whole live
+ * battle turn, a chained round's terminal walk, or a draft/postwin screen
+ * all move several of these signals many times a second under real play, so
+ * 30,000 frozen frames (~8.3 real-time minutes at 60fps) is generous
+ * headroom over any legitimate single dwell, not a tight trip wire.
+ */
+export const DEFAULT_STALL_FRAMES = 30_000;
+
 function endStateOf(state: EngineState): string | null {
   const phase = state.factoryRoundBattleOrchestrator?.round.rules.phase;
   if (phase === "roundComplete") return "roundComplete";
@@ -1209,24 +1240,48 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const policy = optionsIn.policy ?? DEFAULT_RUN_OPTIONS.policy;
   const maxFrames = resolveMaxFrames(policy, optionsIn.maxFrames);
   const options: RunOptions = { ...DEFAULT_RUN_OPTIONS, ...optionsIn, maxFrames };
+  const stallFrames = options.stallFrames ?? DEFAULT_STALL_FRAMES;
   const rng = new Rng(seed);
   const log = new ActionLog(options.verbose, options.onNote);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
   let state = options.stateFactory?.() ?? createInitialState();
   let frame = 0;
-  let terminalGrace = -1;
-  let graceWasActive = false;
   let firstEndState: string | null = null;
   let chainingCommitted = false;
   let firstDecisionSnapshot:
     | { frames: number; battle: number; turn: number; diagnostics: RunDiagnostics }
     | null = null;
+  // `stopAtFirstRoundDecision` keeps its own small post-decision grace
+  // window, independent of the general stall/budget semantics below, so the
+  // FIRST round's own terminal/lobby presentation gets a bounded chance to
+  // run before freezing that round's snapshot as the result. `firstEndState`
+  // is sticky (set once, never cleared) for this mode, so this window never
+  // needs to re-arm.
+  let roundDecisionGrace = -1;
   let lastSurface = "";
+  let surfaceChangedThisTick = false;
   let renderCalls = 0;
   let terminalRecordMenuInputReadyReached = false;
   let terminalOutcome: RunDiagnostics["terminalOutcome"] = null;
   let maxCarriedWinStreak: number | null = null;
   let maxBattleDepth: number | null = null;
+
+  // ISSUES #104 driver retune: generic stall detection (see
+  // DEFAULT_STALL_FRAMES) replaces the old single-purpose post-round-
+  // decision grace timer for ordinary runs. With the engine half of #104
+  // also fixed, a decided round now always re-chains almost immediately, so
+  // the old timer's own expiry-HANG branch was already dead in practice;
+  // the real failure mode it never caught was a run that stays busy
+  // chaining forever and simply outlives its frame budget, which the old
+  // code always reported as HANG regardless of whether it was actually
+  // stuck (PROGRESS ~1367's "every seed HANGs" finding).
+  let lastProgressFrame = 0;
+  let roundDecisions = 0;
+  let prevRoundId: string | null = null;
+  let prevPendingGenerated = false;
+  let prevBattleIndex: number | null = null;
+  let prevPlayerTurn = player.turn;
+  let prevEnd: string | null = null;
 
   const observe = (): void => {
     if (state.factoryTerminal !== null) {
@@ -1293,11 +1348,11 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       frame += 1;
       observe();
       const surface = player.surface(state);
-      const surfaceChanged = surface !== lastSurface;
+      surfaceChangedThisTick = surface !== lastSurface;
       lastSurface = surface;
       if (
         options.renderEvery > 0
-        && (surfaceChanged || frame % options.renderEvery === 0)
+        && (surfaceChangedThisTick || frame % options.renderEvery === 0)
       ) {
         phase = "render";
         render(state);
@@ -1322,9 +1377,14 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       return finish("OK", { endState: "milestone:first-action-menu" });
     }
 
+    const orch = state.factoryRoundBattleOrchestrator;
+    const roundId = orch?.config.id ?? null;
+    const pendingGenerated = state.pendingGeneratedRound !== null;
+    const battleIndex = orch?.round.rules.battleIndex ?? null;
     const end = endStateOf(state);
     if (end !== null && firstEndState === null) firstEndState = end;
-    if (state.pendingGeneratedRound !== null) chainingCommitted = true;
+    if (end !== null && prevEnd === null) roundDecisions += 1;
+    if (pendingGenerated) chainingCommitted = true;
     if (options.stopAtFirstRoundDecision === true && firstEndState !== null && !chainingCommitted) {
       // Keep refreshing the snapshot every tick the FIRST round's own
       // terminal dialogue still runs (factoryRoundBattleOrchestrator gets
@@ -1340,42 +1400,57 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
         diagnostics: diagnostics(),
       };
     }
-    const graceActive = options.stopAtFirstRoundDecision === true
-      ? firstEndState !== null
-      : (end !== null || state.lobbyFreeRoam !== null);
-    if (!graceActive && graceWasActive) {
-      // The decided round re-chained (a fresh generated round started)
-      // before its own grace window expired — ISSUES #104 driver half: the
-      // window must be per round, not cumulative across every re-chain, so
-      // re-arm it for the NEXT round's own decision rather than letting it
-      // keep counting down from where the last round left off.
-      terminalGrace = -1;
-    }
-    graceWasActive = graceActive;
-    if (graceActive) {
-      // Round decided. Keep ticking a grace window so the terminal/lobby
-      // presentations (their own crash surface) still run, then stop.
-      if (terminalGrace < 0) terminalGrace = 9_000;
-      terminalGrace -= 1;
-      if (state.lobbyFreeRoam !== null) {
-        return options.stopAtFirstRoundDecision === true
-          ? finish("OK", { endState: firstEndState!, ...firstDecisionSnapshot! })
-          : finish("OK", { endState: end ?? "roundLost" });
-      }
-      if (terminalGrace === 0) {
-        if (options.stopAtFirstRoundDecision === true) {
-          return finish("OK", { endState: firstEndState!, ...firstDecisionSnapshot! });
+
+    // Progress signals (see DEFAULT_STALL_FRAMES doc): any change resets
+    // the stall clock.
+    const progressed =
+      roundId !== prevRoundId
+      || pendingGenerated !== prevPendingGenerated
+      || battleIndex !== prevBattleIndex
+      || player.turn !== prevPlayerTurn
+      || surfaceChangedThisTick
+      || end !== prevEnd;
+    if (progressed) lastProgressFrame = frame;
+    prevRoundId = roundId;
+    prevPendingGenerated = pendingGenerated;
+    prevBattleIndex = battleIndex;
+    prevPlayerTurn = player.turn;
+    prevEnd = end;
+
+    if (options.stopAtFirstRoundDecision === true) {
+      // `firstEndState` is sticky, so once set this branch is taken every
+      // remaining tick regardless of later chaining — see the field doc.
+      if (firstEndState !== null) {
+        if (roundDecisionGrace < 0) roundDecisionGrace = 9_000;
+        roundDecisionGrace -= 1;
+        if (state.lobbyFreeRoam !== null || roundDecisionGrace === 0) {
+          return finish("OK", { endState: firstEndState, ...firstDecisionSnapshot! });
         }
-        // Genuine stall: the round decided, its grace window ran out, and
-        // it neither re-chained nor reached the lobby (ISSUES #104 engine
-        // half — the terminal record-YES/cancel dead end is the known
-        // cause). Report HANG honestly instead of OK.
-        return finish("HANG", {
-          hangSurface: player.surface(state),
-          endState: end ?? "roundLost",
-        });
       }
+      continue;
+    }
+
+    if (state.lobbyFreeRoam !== null) {
+      return finish("OK", { endState: end ?? "roundLost" });
+    }
+    if (options.maxRounds !== undefined && roundDecisions >= options.maxRounds) {
+      return finish("OK", { endState: "max-rounds" });
+    }
+    if (frame - lastProgressFrame >= stallFrames) {
+      // Genuine stall: no round identity, battle index, turn, input
+      // surface, or decided-round phase has moved in `stallFrames` frames.
+      return finish("HANG", { hangSurface: player.surface(state), endState: end ?? undefined });
     }
   }
-  return finish("HANG", { hangSurface: player.surface(state) });
+  // Budget exhausted. Every earlier iteration already checked for a stall
+  // (and would have returned HANG), so reaching here means the run was
+  // still making genuine progress right up to the frame budget — report OK,
+  // not HANG (ISSUES #104 retune: a run that keeps chaining rounds forever
+  // is not "stuck", it simply outlived its budget).
+  if (options.stopAtFirstRoundDecision === true || options.stopAtFirstActionMenu === true) {
+    // Neither milestone was ever reached within budget — a genuine failure
+    // to reach the surface this run mode exists to observe.
+    return finish("HANG", { hangSurface: player.surface(state) });
+  }
+  return finish("OK", { endState: "budget" });
 }
