@@ -17,6 +17,14 @@ backlog.
 
 # Open
 
+## #103 — `factory-ai-check-viability: unknown last-used move 65535` — engine crash when the AI's CheckViability port reads a `gLastMoves`-style sentinel (0xFFFF) as a real move
+
+**Found 2026-08-20** (M-B step 2 part B side measurement, `docs/soak-winning-loss-analysis-2026-08-20.md` §4): `winning` policy with swap-decline (side commit `db5b2b27`, folded as `781c8827`; supervisor re-reproduced on master HEAD: seed 36 CRASH at battle 7 turn 3, carry 14 / depth 20), **seed 36**, battle 7 turn 3, frame 190,950 — `[engine/tick]` throw from the `factory-ai-check-viability` port, origin `src/**`, not the driver.
+
+**Repro (master ≥ `781c8827`):** `node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 36 --policy winning --verbose --render-every 0`.
+
+**Lead:** 65535 = 0xFFFF = `MOVE_UNAVAILABLE` in pokeemerald (`include/constants/moves.h`; `gLastMoves[battler]` / `gLastResultingMoves` / `gLastPrintedMoves` are reset to it in `SwitchInClearSetData`/`ClearLastMoves`-style paths — e.g. after a switch, a faint, or when the last move was made unusable). `battle_ai_script_commands.c`'s `Cmd_get_last_used_move`/`if_last_used_move_*`/`Cmd_get_move_power_from_result`-family handlers operate on that raw value (the C never validates it; `gBattleMoves[0xFFFF]` would be OOB there too, but the AI scripts only *compare* it or index `gBattleMoves` through checks that never see 0xFFFF on the ROM's real paths). The TS port's lookup throws on an unknown id instead. Determine from the C which handler reads the value at this turn (battle 7 turn 3: the player's active just switched/fainted-in, so `gLastMoves[player]` is plausibly 0xFFFF) and what the ROM computes for it, then mirror that exactly — a sentinel-aware branch at the port's read site, pinned by a Tier-1 test (CheckViability fixture with last-used move 0xFFFF), NOT a blanket try/catch. Re-run the seed to confirm an honest terminal.
+
 ## #101 — `winning`-policy soak seed 90 crashes: STRINGID_PKMNTOOKAIM (Lock-On/Mind Reader) has no messageLines case at all
 
 **Found 2026-08-20** (M-B step-3 sweep, `docs/soak-deep-sweep-2026-08-20.md`,

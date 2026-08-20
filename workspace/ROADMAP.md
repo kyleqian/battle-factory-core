@@ -1281,6 +1281,22 @@ Ordered:
    everything else is filed in ISSUES.md. The soak driver still never
    fixes engine behavior.
 
+**M-B STATUS (2026-08-20, supervisor): bar REACHED same-day, step 4 in
+progress.** Step 1 DONE (PROGRESS 1357: verdict (a), `full` is honest bad
+play). Driver defect ISSUES #99 found+fixed on the way (1358: the swap
+offer was never answered by its own branch; every policy accepted swaps).
+Step 2 landed opt-in in `winning`: type-effectiveness × STAB move choice
+(1359) and swap-offer decline (fold `781c8827`); draft-by-strength measured
+worse on 60 seeds and is WITHHELD on branch `worker/side-20260820-113153`
+(`e9a415a7`) pending a larger sample; a walled-matchup switch heuristic is
+in flight. Step 3 sweep `docs/soak-deep-sweep-2026-08-20.{md,log}`:
+`winning` 0:240 → carry ≥ 7 105/240, ≥ 14 33/240, **≥ 21 1/240 (seed 99,
+verified chained 0→7→14→21, battle-depth 25 = ladder battle 26)**, ≥ 28
+0/240, 238 OK / 2 CRASH / 0 HANG. Step 4 triage: #100 fixed (1360); #101
+(Lock-On string), #102 (switchhandleorder after a mid-round faint), #103
+(CheckViability 0xFFFF sentinel) filed — fixes are the current main-lane
+queue, then a re-sweep with every lever for the carry ≥ 28 stretch.
+
 Acceptance: a committed sweep log showing carry ≥ 21 reached by play,
 with the crash outcome at that depth stated honestly (including "we got
 there and it broke, here is the issue number"). Explicitly NOT in scope:

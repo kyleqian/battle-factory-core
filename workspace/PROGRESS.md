@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1362 — [supervisor fold, 2026-08-20] **M-B bar REACHED (sweep 1361: carry ≥ 21 by play, seed 99); swap-decline lever folded (`781c8827`); draft heuristic WITHHELD; #103 filed; ROADMAP M-B status written**
+
+- **State:** master = sweep docs (1361) + side part-B rung 1 (`db5b2b27`,
+  `winning` declines every swap; union soak file 23/23, smoke 444/444).
+  Supervisor independently reran seed 99 at HEAD: `roundLost carry<=21
+  depth<=25` — the milestone's acceptance seed reproduces.
+- **Did:** verified the side part-B worker (26/26 pins in its worktree):
+  rung 1 = 36/10/0 of 60 vs 34/10/0 baseline → folded; rung 2 (draft by
+  BST+STAB-power+coverage, `e9a415a7`) = 25/9/0 → **withheld** (no evidence
+  for it at n=60; branch `worker/side-20260820-113153` kept for a larger-
+  sample re-measure, not orphaned by accident). Its swap-decline run exposed
+  `factory-ai-check-viability: unknown last-used move 65535` (seed 36,
+  carry 14 / depth 20) — re-reproduced at HEAD, filed **#103** (0xFFFF =
+  MOVE_UNAVAILABLE sentinel lead). ROADMAP M-B block now carries a status
+  paragraph (bar reached; step 4 queue #101/#102/#103; carry ≥ 28 stretch).
+- **Next:** main: fix #101 + #103 (both small, source-cited, pinned), then
+  #102 (diagnostic), then a final 0:240 re-sweep with every folded lever.
+  Side (in flight): walled-matchup switch heuristic on the rung-1 base.
+- **Notes:** host load ~18 on 16 cores with three supervisors live — side
+  briefs now cap parallel soaks at 2. Issue numbering: the sweep worker took
+  #101/#102 while the sentinel crash was drafted as #101 → renumbered #103.
+
+---
+
 ## 1361 — [main worker, 2026-08-20] **M-B step 3 DONE: `winning` 0:240 deep sweep — first-ever carry >= 21 seed on the post-#99/#100-fix + 2a tree (depth 25, seed 99), confirmed genuine chained play; two new engine crashes filed (#101, #102), no HANG/budget issue**
 
 - **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20.{md,log}`
