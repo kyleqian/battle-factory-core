@@ -44,7 +44,13 @@ export function rainDanceConfigFor(
     species,
     geometry: {
       side,
-      spriteCorner: { x: sprite.x - 32, y: sprite.y - 32 },
+      // The renderer consumes this source OAM geometry directly. `x2`/`y2`
+      // are part of the displayed battler position, so this captures the
+      // observed opponent-front ONIX +1 without a production species branch.
+      spriteCorner: {
+        x: sprite.x + sprite.x2 - 32,
+        y: sprite.y + sprite.y2 - 32,
+      },
       animationCenter: side === "player" ? { x: 72, y: 88 } : { x: 176, y: 42 },
       battlePositionCenter: side === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 },
     },

@@ -27395,35 +27395,39 @@ export function renderSceneOnMovePresentation(
     const displayed = rainState.age === 0
       ? null
       : sceneOnRainDanceView({ ...rainState, age: rainState.age - 1 });
-    const playerToOpponent =
-      view.attacker.species === "WOOPER"
-      && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "opponent";
-    const opponentToPlayer =
-      view.attacker.species === "WOOPER"
-      && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "player";
-    if (!playerToOpponent && !opponentToPlayer) {
-      throw new Error(
-        `unsupported staged RAIN_DANCE pair `
-        + `${view.attacker.species}->${view.target.species}`,
-      );
+    const attackerIsPlayer = view.attacker.geometry.side === "player";
+    if (attackerIsPlayer === (view.target.geometry.side === "player")) {
+      throw new Error("RAIN_DANCE presentation requires battlers on opposite sides");
     }
-
-    const wooperSource = playerToOpponent
-      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).WOOPER!
-      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).WOOPER!;
-    const wooper = playerToOpponent ? wooperSource : {
-      ...wooperSource,
-      tileset: subTileset(wooperSource.tileset, 0, 8),
+    // The typed presentation supplies both species and exact displayed
+    // corners. Battle sides select back/front art; every supported asset pair
+    // uses this ordinary compositor rather than an evidence-pair branch.
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+          battler.species
+        ];
+        if (!source) {
+          throw new Error(`RAIN_DANCE missing player-back art for ${battler.species}`);
+        }
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+        battler.species
+      ];
+      if (!source) {
+        throw new Error(`RAIN_DANCE missing opponent-front art for ${battler.species}`);
+      }
+      return {
+        tileset: subTileset(source.tileset, 0, 8),
+        palette: source.palette,
+      };
     };
-    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
-    const onix = playerToOpponent ? {
-      ...onixSource,
-      tileset: subTileset(onixSource.tileset, 0, 8),
-    } : onixSource;
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
     const coefficient = view.palette.hardwareCoefficient;
     // F_PAL_BG resolves to the three live battle BG allocations. The
     // extracted compact asset stores only those live banks, so all entries
@@ -27433,13 +27437,13 @@ export function renderSceneOnMovePresentation(
       { r: 0, g: 0, b: 0 },
       coefficient,
     );
-    const wooperPalette = blendPaletteToward(
-      wooper.palette,
+    const attackerPalette = blendPaletteToward(
+      attackerArt.palette,
       { r: 0, g: 0, b: 0 },
       coefficient,
     );
-    const onixPalette = blendPaletteToward(
-      onix.palette,
+    const targetPalette = blendPaletteToward(
+      targetArt.palette,
       { r: 0, g: 0, b: 0 },
       coefficient,
     );
@@ -27451,19 +27455,19 @@ export function renderSceneOnMovePresentation(
     );
     const drawAttacker = () => drawSpriteSheet(
       fb,
-      wooper.tileset,
-      wooperPalette,
+      attackerArt.tileset,
+      attackerPalette,
       view.attacker.geometry.spriteCorner.x,
       view.attacker.geometry.spriteCorner.y,
     );
     const drawTarget = () => drawSpriteSheet(
       fb,
-      onix.tileset,
-      onixPalette,
-      view.target.geometry.spriteCorner.x + (playerToOpponent ? 1 : 0),
+      targetArt.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x,
       view.target.geometry.spriteCorner.y,
     );
-    if (playerToOpponent) {
+    if (attackerIsPlayer) {
       drawTarget();
       drawAttacker();
     } else {
@@ -27499,11 +27503,13 @@ export function renderSceneOnMovePresentation(
     }
 
     const profile = rainState.config.fieldProfile;
+    const playerBattler = attackerIsPlayer ? view.attacker : view.target;
+    const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
     drawSendOutHealthbox(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: playerToOpponent ? "ONIX" : "WOOPER",
+        name: opponentBattler.species,
         level: 50,
         gender: profile.opponentGender ?? "male",
         hpFraction: profile.opponentHp / profile.opponentMaxHp,
@@ -27513,7 +27519,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerToOpponent ? "WOOPER" : "ONIX",
+        name: playerBattler.species,
         level: 50,
         gender: profile.playerGender ?? "male",
         hpFraction: profile.playerHp / profile.playerMaxHp,
@@ -27530,7 +27536,9 @@ export function renderSceneOnMovePresentation(
     );
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "WOOPER used" : "Foe WOOPER used",
+      attackerIsPlayer
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
       "RAIN DANCE!",
       99,
     );
