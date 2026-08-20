@@ -3678,8 +3678,13 @@ function runCvDefenseUp(input: Readonly<{
   // `!(gHitMarker & HITMARKER_OBEYS)` branch). On hardware,
   // `Cmd_get_move_power_from_result` then indexes `gBattleMoves[0xFFFF]`, an
   // out-of-bounds read of whatever ROM bytes happen to sit past the move
-  // table -- not a value pokeemerald's own source ever computes, so there is
-  // no byte-faithful result to port. Degrade exactly like this file's other
+  // table. Supervisor verification (2026-08-20, PROGRESS 1363): in the pinned
+  // pokeemerald.gba, gBattleMoves = 0x0831c898 with a 12-byte stride, so
+  // gBattleMoves[0xFFFF] is ROM 0x083dc88c whose bytes are
+  // `00 00 00 00 6b 72 e9 72 ...` -- the power byte (+1) IS 0, so the
+  // hardware takes `if_equal 0, AI_CV_DefenseUp5` and never reads the type
+  // byte. The power-0 model below is therefore byte-faithful to the shipped
+  // ROM, not merely a convention. Degrade exactly like this file's other
   // CV handlers already treat an unresolved `target.lastUsedMoveId` (e.g. the
   // MirrorCoat handler's `MOVES_BY_ID.get(...) ?? 0`-shaped power read):
   // treat it as power 0, which is also this script's own least-consequential
