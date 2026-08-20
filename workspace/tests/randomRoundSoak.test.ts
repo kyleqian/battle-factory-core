@@ -551,11 +551,14 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
     expect(notes.some((note) => note.startsWith("swap offer:"))).toBe(true);
   });
 
-  it("both YES and NO swap-offer decisions occur across a small fixed seed set", () => {
+  it("both YES and NO swap-offer decisions occur across a small fixed seed set (full policy)", () => {
+    // Moved from "winning" to "full" by M-B step 2 part B, rung 1: "winning"
+    // now always declines (see the describe block below), so "full" is the
+    // policy that still exercises both branches of this menu.
     const swapOfferNotes: string[] = [];
     for (let seed = 0; seed < 7; seed += 1) {
       runSeed(seed, {
-        policy: "winning",
+        policy: "full",
         maxFrames: 20_000,
         renderEvery: 0,
         onNote: (entry) => {
@@ -648,5 +651,23 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       battle: 1,
       turn: 16,
     });
+  });
+});
+
+describe("Milestone M-B step 2 part B, rung 1: winning declines every swap offer", () => {
+  it("never enters the swap screen and every swap-offer note reads NO", () => {
+    const notes: string[] = [];
+    // Seed 0 reaches the swap-offer menu under "winning" well within 20,000
+    // frames (the pre-fix ISSUES #99 pin above confirms this for seed 0).
+    runSeed(0, {
+      policy: "winning",
+      maxFrames: 20_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    const swapOfferNotes = notes.filter((note) => note.startsWith("swap offer:"));
+    expect(swapOfferNotes.length).toBeGreaterThan(0);
+    expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
+    expect(notes.some((note) => note.startsWith("swap screen:"))).toBe(false);
   });
 });
