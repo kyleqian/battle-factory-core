@@ -1,3 +1,48 @@
+## 1356 — [planning session, 2026-08-19] **DEFERRED D2 ANSWERED: user picks option (b) — make deep play REACHABLE. Milestone M-B authored; supervisor launcher unblocked**
+
+- **State:** planning-layer session, docs only. `ROADMAP.md` (M-B block),
+  `DEFERRED.md` (D2 removed → **zero** `^## D<n> ... OPEN:` headings, verified
+  against `run-supervisor.sh:264`'s exact regex — the launcher will start
+  again), `PROGRESS.md` (this entry). No `src/`/`tools/`/test change; no
+  suites required.
+- **Did:** presented M-A's measured numbers to the user in plain terms and put
+  D2's scope call to them directly. Offered three bounded options: accept and
+  close; make deep play reachable; or first investigate `full`'s 0/60
+  never-wins result. **User picked "make deep play reachable"** — the
+  supervisor's own leaning, and the bounded option, not the open-ended one.
+- **Result — milestone M-B, "the late game gets reached by playing, and
+  survives it."** Bar: a sweep observes carry ≥ 21 (a genuine third
+  consecutive round win, ladder battle 22+) under still-arbitrary-but-legal
+  play, and the depth that opens is swept for crashes. Four ordered steps:
+  (1) **why does `full` never win a round?** — folded in from the user's third
+  option because it is cheap and load-bearing: `full` is the DEFAULT policy
+  and the standing `full` 0:180 gate's policy, so that gate has never once
+  observed a won round; the lead is that plainer `vanilla` wins 27% while
+  `full` wins 0%, so `full`'s extra exploration is actively harmful — report
+  before changing anything; (2) raise the win rate until carry ≥ 21 is
+  observed, opt-in only, standing gates and `DEFAULT_RUN_OPTIONS` untouched,
+  and it stays arbitrary-but-legal play (never an AI oracle, never a
+  scenario-tied win script — that is `strong-route`'s job); (3) sweep the
+  newly-reachable depth, target carry ≥ 28 (challenge 4+, where the full
+  `CHECK_BAD_MOVE`+triad AI switches on); (4) triage by the standing
+  convention — fix crashes that block going deeper, file the rest.
+  Acceptance is a committed sweep log showing carry ≥ 21 reached by play,
+  with the crash outcome stated honestly including "we got there and it
+  broke." Out of scope, named: parity plan C5 (oracle evidence for a
+  genuinely-chained deep arrival, still gated on trace cost), cross-session
+  saving, the Open level rule set.
+- **Next:** dispatch M-B step 1 (read-only diagnosis of `full`'s win path) as
+  the next supervisor session's opening step; steps 2-4 follow from what it
+  finds. #39's split (batch 9 landed, function-kind pool now 0) and ladder
+  Slice 3 remain demoted filler.
+- **Notes:** no PAPERCUT. Process note that held up well: 1353 wrote M-A's
+  falsifiability clause *before* the measurement, and the result landed
+  between its two branches (35.6% past challenge 1 is not "shallow"; 5.6% at
+  challenge 2 is not "routinely ≥ 2") — which is exactly why the supervisor
+  correctly refused to self-authorize and filed D2 instead of picking a
+  branch. Pre-committing both outcomes did its job; keep doing it.
+
+---
 ## 1355 — [supervisor wind-down, 2026-08-19] **Milestone M-A COMPLETE same-day (steps 1-3): play regularly passes challenge 1 (27-36%), ~5% enter challenge 3, NOTHING reaches carry 21 in 300 seeds — follow-on scope decision filed as DEFERRED D2; scanner H3 folded; walk-up ROADMAP line found stale TWICE and corrected to program-COMPLETE**
 
 - **Final gates (SUPERSEDED line below — rerun after #39 batch 9 landed

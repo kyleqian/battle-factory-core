@@ -17,47 +17,6 @@ backlog.
 
 # Open
 
-## #100 — `winning`-policy soak seed 15 crashes: STRINGID_NATUREPOWERTURNEDINTO has no `{B_CURRENT_MOVE}` resolver
-
-**Found 2026-08-20** (post-ISSUES #99 fix re-measurement, `docs/soak-depth-remeasure-2026-08-20.md`,
-`winning` policy seeds 0:60 — new coverage from the fix's genuine 50/50 swap
-decisions producing different, deeper trajectories than the pre-fix
-~85%-accept bug).
-
-**Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts
---seed 15 --policy winning --verbose --render-every 0`. Crashes at battle 5
-turn 5, frame 120877, immediately after committing fight-menu slot 0 = move
-118 (METRONOME). Error (`[engine/tick]`, an `src/engine/**` throw, not a
-driver bug):
-```
-Error: battleStringResolver: STRINGID_NATUREPOWERTURNEDINTO references placeholder {B_CURRENT_MOVE} with no resolver supplied
-    at resolveBattleStringLines (src/engine/battleStringResolver.ts:170)
-    at messageLines (src/engine/battleResolutionPresentation.ts:2945)
-    at projectBattleResolutionCommands (src/engine/battleResolutionPresentation.ts:3118)
-```
-
-**Mechanism (engine gap, likely genuine, not investigated further under this
-step's `src/`-off-limits scope):** METRONOME (move 118) randomly calls
-another move; here it called NATURE POWER, whose `EFFECT_NATURE_POWER`
-mechanic itself is implemented (`battleScriptEnvironmentAttackOpcode.ts`'s
-`callenvironmentattack` handler resolves the terrain-dependent move
-correctly), but the STRINGID_NATUREPOWERTURNEDINTO message ("NATURE POWER
-turned into `{move}`!") has no case wiring a `B_CURRENT_MOVE` resolver in
-`battleResolutionPresentation.ts`'s `messageLines` — every other
-`{B_CURRENT_MOVE}` call site there does supply one (see the ~14 existing
-`B_CURRENT_MOVE: () => resolveMoveName(...)` sites), so this looks like one
-missed STRINGID case rather than a structural gap. The completeness guard
-staying FATAL here is correct per the ISSUES #72 user decision ("nah, just
-crash") — do not soften it.
-
-**Leads:** find NATURE POWER's own attack-string emission (likely near
-`Cmd_callenvironmentattack`'s battle-script handling or its own printstring
-opcode) and wire a `B_CURRENT_MOVE` resolver mirroring the existing sites in
-`battleResolutionPresentation.ts` (e.g. the Taunt/Choice-item ones around
-lines 840-870). Re-run `node --experimental-strip-types
-tools/soak/randomRoundSoak.ts --seed 15 --policy winning --verbose` to
-confirm green once fixed.
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **User decision (2026-08-10): the playable path stays FAITHFUL — no
