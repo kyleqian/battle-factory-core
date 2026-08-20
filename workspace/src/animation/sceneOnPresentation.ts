@@ -7558,10 +7558,9 @@ export function sceneOnPsybeamView(
     targetIdleX2,
   );
   return {
-    age: state.age,
+    ...component,
     attacker: state.config.attacker,
     target: state.config.target,
-    ...component,
     displayedRings: psybeamDisplayedRingsAtAge(
       state.age,
       side,
