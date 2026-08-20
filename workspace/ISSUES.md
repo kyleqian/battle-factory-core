@@ -17,6 +17,46 @@ backlog.
 
 # Open
 
+## #106 — `winning`-policy soak seed 203 crashes: Beat Up's `STRINGID_PKMNATTACK` has no `B_BUFF1` resolver
+
+**Found 2026-08-20** (M-B step-3 re-run, `docs/soak-deep-sweep-2026-08-20-semantics2.md`,
+`winning` policy seeds 0:240, new post-#104 OK/HANG semantics).
+
+**Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts
+--seed 203 --policy winning --verbose --render-every 0`. Crashes at battle 1
+turn 13, frame 490300 (`carry<=14 depth<=18`), right after the player
+commits fight-menu slot 0 = move 118 (METRONOME). Error (`[engine/tick]`, an
+`src/engine/**` throw, not a driver bug):
+```
+Error: battleStringResolver: STRINGID_PKMNATTACK references placeholder {B_BUFF1} with no resolver supplied
+    at resolveBattleStringLines (src/engine/battleStringResolver.ts:170)
+    at messageLines (src/engine/battleResolutionPresentation.ts:3015)
+    at projectBattleResolutionCommands (src/engine/battleResolutionPresentation.ts:3188)
+```
+Last actions before the crash:
+```
+f=490240 b1 t12 resolution advance
+f=490263 b1 t12 resolution advance
+f=490281 b1 t12 resolution advance
+f=490294 b1 t13 action menu intent: FIGHT
+f=490294 b1 t13 action: FIGHT
+f=490300 b1 t13 fight menu intent: slot 0 (move 118)
+f=490300 b1 t13 fight: confirm slot 0
+```
+
+**Lead (source-traced, not yet fix-verified):** `STRINGID_PKMNATTACK` =
+`"{B_BUFF1}'s attack!"` (`reference/pokeemerald/src/battle_message.c:218,670`),
+printed only by `BattleScript_EffectBeatUp`'s `BattleScript_BeatUpLoop`
+(`reference/pokeemerald/data/battle_scripts_1.s:1946-1951`, immediately after
+`trydobeatup`) — Beat Up prints one "`<party member>`'s attack!" per
+participating party member, so `B_BUFF1` needs to be set to that member's
+nickname on each loop iteration. Move 118 is METRONOME, which calls a random
+move — Metronome likely called Beat Up here. Not yet confirmed whether this
+port's Beat Up path is missing a `B_BUFF1` resolver generally, or only when
+reached via Metronome's indirection; needs a direct Beat Up repro (not
+through Metronome) to isolate. Not fixed this session (docs-only step,
+`src/` off-limits).
+
 ## #104 — Terminal record prompt's YES branch omits the real "battle was recorded" message (stub-only remainder)
 
 **Both the driver and engine halves that used to make this issue soft-lock
@@ -129,6 +169,26 @@ a single clean hop from it to *this* crash's exact "no decided
 monToSwitchIntoId" symptom within this session's time, since the skipped
 battler simply doesn't faint this pass rather than reaching
 `switchhandleorder` undecided.
+
+**2026-08-20 M-B step-3 re-run — repro found again, live, at seed 138.**
+`docs/soak-deep-sweep-2026-08-20-semantics2.md`'s honest `winning` 0:240
+sweep (new post-#104 OK/HANG semantics) turned up a fresh, currently-live
+repro with the identical stack and error string: `node
+--experimental-strip-types tools/soak/randomRoundSoak.ts --seed 138 --policy
+winning --verbose --render-every 0` crashes at battle 5 turn 3, frame 976153
+(`carry<=14 depth<=15`), right after the player commits fight-menu slot 0 =
+move 185 (FAINT ATTACK) — same move, same crash site, different seed/depth
+than the original (now-stale) seed-154 repro above:
+```
+Error: Cmd_switchhandleorder: battler 1 has no decided monToSwitchIntoId -- openpartyscreen must run first
+    at <anon> (src/engine/battleScriptSwitchinOpcode.ts:326)
+    at stepBattleScriptMachine (src/engine/battleScriptMachine.ts:879)
+    at runScriptToOwnEnd (src/engine/battleScriptFaintedActionsOrchestration.ts:285)
+```
+Not investigated further this session (docs-only step, `src/` off-limits) —
+per this entry's own "Next session" item (2) below, the next session should
+capture full `battlerOrder`/fainting context from this seed before
+generalizing a fix, rather than starting from source tracing alone.
 
 **Next session:** (1) write a Tier-1 test staging two battlers with pending
 per-battler end-turn ticks (e.g. both poisoned) where the earlier-ordered

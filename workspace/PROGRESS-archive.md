@@ -1,3 +1,56 @@
+## 1367 — [main worker, 2026-08-20] **#104 driver half FIXED: per-round grace re-arm + honest HANG reporting; unmasked finding — the terminal record-YES/cancel dead end is near-universal, not a deep-chain rarity (`428ba1c4`)**
+
+- **State:** `tools/soak/randomRoundSoakDriver.ts`/`randomRoundSoak.ts` +
+  `tests/randomRoundSoak.test.ts` changed (`428ba1c4`); no `src/`. `npm test`
+  10152/10152 (223 skipped), `npm run build`, `npm run typecheck` all green.
+- **Did:** `terminalGrace` now re-arms on every `graceActive` falling edge (a
+  genuine re-chain) instead of counting down a single cumulative 9,000-frame
+  budget shared across every chained round; expiry with no lobby reached and
+  no re-chain now returns `HANG` + `hangSurface: "factoryTerminal"` + the
+  decided round's own `endState`, instead of a false `OK`. New describe
+  "ISSUES #104 (driver)": (a) seed 328 `winning` @ 260k frames now honestly
+  reports HANG (was the silent-OK carry-21 "wall" of PROGRESS 1365/1366); (b)
+  seed 34 `winning` reaches carry 14 (2 full chained round wins) before its
+  own dead end, proving re-arming doesn't cap chaining depth. Retargeted the
+  pre-existing ISSUES #89 seed-27 pin to `stopAtFirstRoundDecision: true` —
+  it now also hits a #104 dead end at its old 80k budget, unrelated to its
+  own (Baton Pass) concern.
+- **Finding (big):** brief's own pin-(b) premise (seed 4/5 "finish OK" per
+  `docs/soak-depth-measure-2026-08-19.md`) was FALSE once measured honestly —
+  BOTH dead-end on `recordChoice` (`"cancel"`/`"yes"`) with carry 0. Widened
+  to small honest samples post-fix: **`winning` 15/15 HANG@factoryTerminal
+  (seeds 0:15), `vanilla` 10/10 (seeds 0:10), `full` 10/10 (seeds 0:10)** —
+  reduced ranges, not the brief's full 0:60/0:20/0:60, given the 40-min cap
+  (each seed now runs to ITS OWN genuine dead end or the frame budget, not a
+  quick artificial cutoff). The dead end is NOT winning-policy-specific or
+  win-only: `advanceFactoryTerminalRecordPrompt` is shared machinery for
+  lost rounds too (loss presentation carries the same `recordChoice` field),
+  and the terminal's random A/B/UP/DOWN walk (shared across all 3 policies)
+  lands on YES/cancel with near certainty given enough presses across enough
+  rounds. Also confirmed structurally: `lobbyFreeRoam` is architecturally
+  unreachable via decline under the driver's default `generated-orchestrator`
+  route (continuous-play chaining always re-chains a "no" straight into a
+  fresh draft, `core.ts:~837-843`) — so every historical non-milestone,
+  non-`stopAtFirstRoundDecision` "OK" sweep result, at ANY policy, was always
+  a grace-expiry artifact, never a genuine reach of the Lobby. ISSUES #104
+  trimmed to its (now clearly-scoped, high-value) engine-half remainder.
+- **Next:** engine half of #104 (stub continuation for YES/cancel, RECORD is
+  stub-only per the 2026-08-05 decision) is now the highest-value open item —
+  fixing it should turn most of the sample above into genuine OKs at the
+  Lobby (well, still capped by continuous-play chaining re-entering a draft
+  instead — the decline path is unaffected, only yes/cancel gain a
+  continuation). A full honest 0:60/0:20/0:60 gate re-sweep is still owed
+  once that lands; today's reduced samples are real numbers, not a stand-in.
+- **Notes:** no PAPERCUT. Time ran over the 40-min soft cap (~55 min) — the
+  brief's pin-(b) seeds turned out to require live investigation (a wrong
+  premise, not a typo) before an honest alternative could be written, and
+  the full `npm test` run alone took ~3.3 min; landed everything green
+  rather than cut the investigation short and risk a dishonest pin.
+
+---
+
+---
+
 ## 1366 — [supervisor fold, 2026-08-20] **Carry-21 "wall" is a driver-masked engine dead end (#104: terminal record-YES/cancel never continues; soak grace cumulative + expiry reported OK) — found by supervisor probe; switch lever C2 + #104-refutation test folded (`3fa78a98`)**
 
 - **State:** master = 1365 sweep docs + side C2 (`5b31b1ea`: `winning`
