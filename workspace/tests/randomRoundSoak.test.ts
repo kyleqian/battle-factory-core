@@ -31,7 +31,12 @@ import {
   type FactoryCarry,
 } from "../src/engine/factoryRoundChaining.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
-import { pickWinningFightSlot, resolveMaxFrames, runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
+import {
+  pickWinningFightSlot,
+  pickWinningSwitchRow,
+  resolveMaxFrames,
+  runSeed,
+} from "../tools/soak/randomRoundSoakDriver.ts";
 
 const PIN_SEEDS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
@@ -669,5 +674,94 @@ describe("Milestone M-B step 2 part B, rung 1: winning declines every swap offer
     expect(swapOfferNotes.length).toBeGreaterThan(0);
     expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
     expect(notes.some((note) => note.startsWith("swap screen:"))).toBe(false);
+  });
+});
+
+describe("Milestone M-B step 2 part C: winning switches out of a walled matchup", () => {
+  // MOVE_SURF (Water, power 95), MOVE_VINE_WHIP (Grass, power 35),
+  // MOVE_TACKLE (Normal, power 35) -- the same move ids the part 2a pins
+  // above already prove are 0.5x/2x/1x respectively against a Water
+  // defender, so this reuses proven multipliers instead of re-deriving them.
+  const WATER: readonly [string, string] = ["TYPE_WATER", "TYPE_WATER"];
+  const GRASS: readonly [string, string] = ["TYPE_GRASS", "TYPE_GRASS"];
+  const walledActive = { activeMoveIds: [57, 0, 0, 0], activeLegalSlots: [true, false, false, false] };
+  const qualifyingBench = [
+    { row: 1 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
+  ];
+
+  it("(a) walled active + bench with a 2x move -> returns that row", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: WATER,
+      bench: qualifyingBench,
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBe(1);
+  });
+
+  it("(b) active has a >= 1x move (not walled) -> null even with a qualifying bench", () => {
+    const row = pickWinningSwitchRow({
+      activeMoveIds: [33, 0, 0, 0], // MOVE_TACKLE, neutral 1x vs Water
+      activeLegalSlots: [true, false, false, false],
+      defenderTypes: WATER,
+      bench: qualifyingBench,
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("(c) only one healthy party member remains -> null", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: WATER,
+      bench: qualifyingBench,
+      healthyCount: 1,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("(d) already switched against this opponent this battle -> null (no ping-pong)", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: WATER,
+      bench: qualifyingBench,
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: true,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("picks the best-scoring qualifying row, ties to the lower row regardless of bench order", () => {
+    // Row 2 and row 1 both carry VINE_WHIP -> the same 35 x 2 x 1.5(STAB) =
+    // 105 score. Row 2 is listed FIRST in `bench` to prove the tie-break is
+    // an explicit lower-row rule, not an artifact of iteration order.
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: WATER,
+      bench: [
+        { row: 2 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
+        { row: 1 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
+      ],
+      healthyCount: 3,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBe(1);
+  });
+
+  it("skips fainted and active bench candidates even when they'd qualify", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: WATER,
+      bench: [
+        { row: 0 as const, fainted: false, active: true, moveIds: [22, 0, 0, 0], types: GRASS },
+        { row: 1 as const, fainted: true, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
+      ],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
   });
 });
