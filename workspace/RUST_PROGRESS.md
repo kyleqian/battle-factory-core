@@ -5,6 +5,44 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## R51 — [supervised session, 2026-08-20] **M50 Battle Script Focus Punch no-damage gate + final wind-down**
+
+- **State:** `rust-main` = current master `0dd3f36c` plus verified
+  `Cmd_jumpifnodamage` worker `09a1bcc1`. The complete pure
+  `battleScriptJumpifnodamageOpcode.ts` registration/state/control projection
+  is native and wasm32-compilable; no ABI or adapter surface was widened. The
+  session ends committed and green.
+- **Did:** ported exact singleton registration and complete Focus Punch shape,
+  attacker-first role resolution, ProtectStruct-only physical/special receipt
+  reads, nonzero-receipt advance without label lookup, and zero-receipt late
+  jump resolution. The command preserves every projected field and ignores the
+  same-named SpecialStatus copies. Canonical TypeScript execution supplies
+  **131 handler cases** and **16 registration cases**, including every four-
+  attacker × 25 signed-i32 receipt-edge combination, shadow-receipt controls,
+  ordered errors, malformed shapes, preservation, and repetitions. Corpus
+  sha256 `d0972bdc7764a77f4ab75ac3c3e52c91ca845e14a52315a0f2ab5e1defa1e046`.
+- **Next:** merge current master at the next Rust session, recheck active work,
+  and select another conflict-free pure Battle Script leaf. M7c opponent
+  generation still waits on canonical TypeScript live generation; main and
+  animation moving targets remain excluded.
+- **Notes:** Terra/max worker, one commit. Supervisor audited the decomp
+  dispatch/body, source fields, macro, singleton Focus Punch site, registration
+  and role/label ordering, no-write boundary, shadow fields, and repetitions;
+  regenerated twice byte-identically (canonical corpus **343,093 bytes**;
+  generated file **885,070 bytes**, sha256
+  `cdf36b8c2fb11bdec08c9ba4d7dabd2a8e2af4bb061bc2e5657380ff999d5a78`;
+  generator **48,437 bytes**, sha256
+  `70848ab99e69b13bad3715fbe62d2581cf2fa01874848548a90ed878185dc9f1`).
+  Focused **10/10**, cargo **1,001/1,001**, fmt, strict Clippy, and wasm32
+  release pass. Artifact is **492,691 bytes**, sha256
+  `61f39cfe556864e1b44483297ed20a5192b7aef4b21391dc9cf87ec99e981574`.
+  Final npm is green at **1,068 files / 10,126 passed / 223 skipped**; build is
+  green at **691 modules**. Final soaks are vanilla **20/20 OK** and full
+  policy **60/60 OK**, both with zero crashes and zero hangs. Scope stayed
+  inside `core-rs/**`; no unsupported barrier, Rust deferral, or papercut was
+  added. `animation-main` has one unfolded commit (`7f2ccb84`); its supervisor
+  still owns that fold.
+
 ## R50 — [supervised session, 2026-08-15] **M49 Battle Script weather-scaled recovery leaf + final wind-down**
 
 - **State:** `rust-main` = current master `ab862ad1`, including verified
@@ -87,43 +125,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   build is green at **677 modules**. Scope stayed inside `core-rs/**`; no
   unsupported barrier or Rust deferral was added. PAPERCUT: long-command
   completion detached from live subprocess reporting, ~4 min.
-
-## R48 — [supervised session, 2026-08-15] **M47 Battle Script Pain Split leaf + green checkpoint**
-
-- **State:** `rust-main` = current master `d23e6e3a` plus verified Pain Split
-  worker `4aa27ce8` and metadata-ratchet repair `d69b464d`. The complete pure
-  `battleScriptPainSplitOpcode.ts` registration/state/control projection is
-  native and wasm32-compilable; no ABI or adapter surface was widened. The
-  session reached a committed green checkpoint and then continued.
-- **Did:** ported exact singleton registration and instruction-shape checks,
-  instruction-before-attacker-before-target error order, target-Substitute
-  no-write failure with late label resolution, and the successful u16 HP
-  average. Success writes only `painSplitHp = targetHP - average`,
-  `battleMoveDamage = attackerHP - average`, and target
-  `specialStatus.shellBellDmg = 0xffff`. Canonical TypeScript execution
-  supplies **922 cases**: the complete **625** optional-selector matrix,
-  **196** endpoint/parity/sign arithmetic pairs, packed Substitute edges,
-  ordered errors, full signed scratch/status siblings, repetitions, and
-  **13** exact registration cases. Corpus sha256
-  `636cff5a1ac7934a7e9aea36eabe93d69092a54648665dfc5791d91f03dc8f3a`.
-- **Next:** at the next session, merge current master, recheck active work, and
-  select another conflict-free pure Battle Script leaf. M7c opponent
-  generation still waits on canonical TS live generation; main walk-up and
-  animation moving targets remain excluded.
-- **Notes:** Terra/max implementation worker plus one Sol/high audit-repair
-  commit. Supervisor found and closed the initially missing independent corpus
-  metadata ratchet, audited decomp/dispatch/macro/single script site, widths,
-  shape and role ordering, substitute write set, signed averaging, sibling
-  preservation, and repetitions; regenerated twice byte-identically
-  (canonical corpus **5,351,849 bytes**; generated file **12,583,953 bytes**,
-  sha256
-  `beaff9112bc43ec7f0821bc0c3eee40c4b72dea9391d1c9755ebbdc61771f1fb`;
-  generator **50,220 bytes**, sha256
-  `585a963bbb61adc0cce3c0879ecda9c64af15b176b7cfc1ae73cdb1480468aef`).
-  Final cargo is **973/973**, fmt and strict Clippy pass, and wasm32 release is
-  **497,717 bytes**, sha256
-  `e9f227f2162fddfc8592cff07629856837ce5661f4f6efe5e3dc90c400a20c37`.
-  Final npm is green at **1,029 files / 9,870 passed / 223 skipped**; build is
-  green at **677 modules**. Wind-down soaks are vanilla **20/20 OK** and full
-  policy **60/60 OK**, both with zero crashes and zero hangs. Scope stayed
-  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
