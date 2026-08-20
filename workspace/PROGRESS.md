@@ -5,6 +5,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1366 — [supervisor fold, 2026-08-20] **Carry-21 "wall" is a driver-masked engine dead end (#104: terminal record-YES/cancel never continues; soak grace cumulative + expiry reported OK) — found by supervisor probe; switch lever C2 + #104-refutation test folded (`3fa78a98`)**
+
+- **State:** master = 1365 sweep docs + side C2 (`5b31b1ea`: `winning`
+  switches only out of a true-immunity wall with a ≥50%-HP bench answer;
+  38/13/2 of 60 vs 36/10/0 decline-only, 30 switches) + side refutation
+  pin (`bc8acc23`, end-turn skip claim REFUTED, later battler keeps its
+  tick). Union: soak file + new test 33/33, smoke 444/444. PAPERCUTS bumped
+  (`fdf46ebb`: absolute-path commit on master + reset --hard by a side
+  worker; pinned-line census citations, incl. the supervisor's own hit).
+- **Finding:** all three deepest 0:480 seeds (125/328/409) stop at
+  `roundComplete carry<=21`. Probe (scratch print at grace expiry, reverted):
+  `factoryTerminal.recordChoice:"yes"`, no `declineFarewellReleaseAge`, no
+  re-chain; grace 9k→90k changes only the frame count. Driver's
+  `terminalGrace` is set once and never re-armed → cumulative across
+  re-chains (~1k each) → expiry reported OK. Filed **#104** (engine + driver
+  halves). So "carry ≥ 28 not reached" (1365) is NOT evidence about the AI
+  tier; the depth instrument was capped at ~3 re-chains since M-A.
+- **Next:** main: driver half of #104 (per-round grace, HANG on stall) +
+  pin; side: engine half (stub continuation for YES/cancel per the RECORD
+  stub-only decision) + pin; then one more 0:480 sweep on the union for the
+  carry ≥ 28 tier. Withheld: draft-by-strength (`e9a415a7`) pending n≥180.
+- **Notes:** lesson banked — a sweep's "deepest seed stops at X" claim needs
+  the END SURFACE of those seeds inspected before it is attributed to game
+  difficulty; three sweeps attributed an instrument cap to the AI.
+
+---
+
 ## 1365 — [main worker, 2026-08-20] **M-B FINAL RE-SWEEP DONE: `winning` 0:480, 0 CRASH/0 HANG across the doubled range — 3 seeds reach the full width of the carry-21 challenge (depth 27, new deepest), carry ≥ 28 not yet reached; #90/#154/#36 all confirmed clean**
 
 - **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20-final.{md,log}`
