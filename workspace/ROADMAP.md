@@ -1242,6 +1242,52 @@ it, so it is a note, not work). Both remain available as filler for spare
 capacity; neither is a milestone, and neither should be reported as the
 next objective again.
 
+**User decision (2026-08-19, resolving DEFERRED D2): option (b) — make
+deep play REACHABLE. Milestone M-B.** Presented with M-A's numbers, the
+user chose the bounded follow-on over accepting the measured depth. D2 is
+answered and removed from DEFERRED.md; the next supervisor run is
+unblocked.
+
+**Milestone M-B — "the late game gets reached by playing, and survives
+it."** Bar: a soak sweep observes carry ≥ 21 (ladder battle 22+, i.e. a
+genuine third consecutive round win) under a policy that is still
+arbitrary-but-legal play, and the depth it opens is swept for crashes.
+Ordered:
+
+1. **Find out why `full` never wins a round** (0/60 at carry ≥ 7, M-A's
+   most surprising number, and folded in here from the user's third
+   option). `full` is the DEFAULT policy and the one the standing
+   `full` 0:180 gate uses, so today that gate's entire coverage is
+   "round 1, lost, re-chained, round 1 again" — it has never once
+   observed a won round. Determine whether that is the policy being
+   genuinely bad, or a real defect in the win path it happens to expose.
+   Cheap, read-only first: `vanilla` (plainer!) wins 27% of the time, so
+   `full`'s extra exploration is doing something actively harmful —
+   that asymmetry is the lead. Report before changing anything.
+2. **Raise the win rate until carry ≥ 21 is observed.** Strengthen the
+   `winning` policy (or add a stronger opt-in sibling) — better move
+   choice, smarter switching, whatever it takes. Constraint carried from
+   step 3 of the parity program: it stays *arbitrary-but-legal player
+   behavior*, never an oracle for the AI, and never a guaranteed-win
+   script tied to one staged scenario (that is `strong-route`'s narrow
+   job). Standing `full`/`vanilla` gates and `DEFAULT_RUN_OPTIONS`
+   unchanged; this lands opt-in.
+3. **Sweep the newly-reachable depth for crashes**, and report the depth
+   distribution again (M-A's instrument already prints it). Target:
+   carry ≥ 21 observed in a sweep, ideally carry ≥ 28 (challenge 4+,
+   where the full `CHECK_BAD_MOVE`+triad AI tier switches on).
+4. **Triage what it finds** by the standing convention: crashes that
+   block reaching deeper get fixed (otherwise step 3 cannot finish);
+   everything else is filed in ISSUES.md. The soak driver still never
+   fixes engine behavior.
+
+Acceptance: a committed sweep log showing carry ≥ 21 reached by play,
+with the crash outcome at that depth stated honestly (including "we got
+there and it broke, here is the issue number"). Explicitly NOT in scope:
+oracle-backed evidence for what a player sees on a genuinely-chained deep
+arrival (that is the parity plan's C5, still gated on trace cost, not on
+this milestone); cross-session saving; the Open level rule set.
+
 **User scope decision (2026-07-23):** S8's finite controller gates prove the
 round/presentation architecture but do not complete the mission's arbitrary
 single-battle rules breadth. S9 remains the bounded deferred interface stage.
