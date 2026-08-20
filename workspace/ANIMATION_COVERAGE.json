@@ -3212,6 +3212,7 @@
     "twice-fresh local-mGBA probes retain the complete first active source row through first inactive cleanup byte-for-byte at player-back frames 213-372 and opponent-front frames 213-372: 160 rows per orientation, 320 source/task/sprite/software+hardware-OAM/matrix/faded+unfaded+hardware-palette/tag/BG/register/audio/party/engine/both-RNG/raw-RGB rows total",
     "banked normalized change maps and full-state receipts independently confirm eleven ring creations at ages 42/48/54/60/66/72/78/84/90/96/102; GoldRing lives ages 42-115, LoopSEAdjustPanning 42-88, SwayMon 54-116, target BlendColorCycle 54-112, and cleanup age 159",
     "whole hardware OAM, matrices, and palettes equal the preceding software buffers on 159/159 comparable rows per orientation, confirming the existing RAM+1 script-create/x2/plain-OAM and faded-palette transfer classes; the psychic BLDY program has 65 edges and restores to zero at age 157; player-front ONIX contributes the species idle x2=1 draw hold while opponent-back ONIX is x2=0; measured orientation timing shift is 0",
+    "the pure source-relative reducer and typed Scene-ON seam replay all 320 retained bilateral rows: source owner/wait/args, SetPsychicBackground/Task_FadeToBg/SoundTask/SwayMon/BlendColorCycle payloads, all 11 GoldRing groups and OAM/matrix callbacks, BLDY/BLDCNT, task counts, target Sway x2, resource tags, and age-159 cleanup; the audit explicitly compares no framebuffer pixels",
     "MOVE_HYPNOSIS remains an independent exact GoldRing/psychic-background control, MOVE_SHADOW_BALL remains an independent exact LoopSEAdjustPanning control, and MOVE_CONFUSION/MOVE_PSYCHIC remain independent exact psychic-background controls; no sibling or component inherits Psybeam acceptance"
    ],
    "evidence": [
@@ -3227,9 +3228,13 @@
     "tools/compare/evidence/psybeam-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/psybeam-changemap-player.txt",
     "tools/compare/evidence/psybeam-changemap-opponent.txt",
+    "src/animation/psybeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/psybeamReducerAudit.ts",
+    "tests/animation/psybeam.test.ts",
     "tests/animation/psybeamEvidenceCheckpoint.test.ts"
    ],
-   "remaining": "Add a pure source-relative reducer, typed Scene-ON seam, and production compositor/draw wiring, then require zero-residual shared-framebuffer equality for all 320 retained rows twice fresh before MOVE_PSYBEAM alone can become exact."
+   "remaining": "Production compositor/draw wiring remains. Then require zero-residual shared-framebuffer equality for all 320 retained rows twice fresh before MOVE_PSYBEAM alone can become exact; this reducer/seam step does not promote Psybeam or any sibling."
   },
   {
    "move": "MOVE_QUICK_ATTACK",
@@ -6286,7 +6291,7 @@
    "representatives": [
     "MOVE_PSYBEAM"
    ],
-   "goal": "MOVE_PSYBEAM has complete twice-fresh bilateral retained evidence at 160/160 rows per orientation through first inactive cleanup, but remains partial until a source-relative reducer, typed seam, production compositor, and 320/320 zero-residual framebuffer proof land. Hypnosis, Shadow Ball, Confusion, and Psychic are exact regression controls only and confer no acceptance."
+   "goal": "MOVE_PSYBEAM has complete twice-fresh bilateral retained evidence and now has a source-relative reducer plus typed Scene-ON seam replaying 160/160 rows per orientation. It remains partial until the production compositor and 320/320 zero-residual framebuffer proof land. Hypnosis, Shadow Ball, Confusion, and Psychic are exact regression controls only and confer no acceptance."
   },
   {
    "id": "task-animtask-rollout",

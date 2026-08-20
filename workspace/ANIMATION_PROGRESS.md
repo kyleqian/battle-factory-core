@@ -1,3 +1,10 @@
+# MOVE_PSYBEAM source-relative reducer + typed Scene-ON seam — partial (2026-08-20 worker)
+
+- **State:** Coverage remains **196/276 Level-50 exact, 1 partial, 79 unsupported**. MOVE_PSYBEAM remains the sole queued partial; its production compositor/draw wiring and exact promotion are intentionally still open. No sibling or component credit was added.
+- **Did:** Added src/animation/psybeam.ts with source-relative Move_PSYBEAM, PsybeamRings, AnimTask_SwayMon, psychic BG fade/rotation, source cursor/task payloads, bilateral Q8.8 ring geometry, resource/register cleanup, and explicit RAM+1 display helpers. Added the narrow typed sceneOnPsybeamView seam; battleScene.ts, core.ts, shared compositor, framebuffer, gameplay, damage, confusion, RNG, and facility state remain untouched.
+- **Verified:** tools/compare/psybeamReducerAudit.ts exhaustively replays **160/160 player-back + 160/160 opponent-front = 320/320 retained source/component rows** for source owner/wait/args, all task data, every GoldRing OAM/matrix/callback row, BG registers, task counts, target Sway x2, and GoldRing tags. framebufferCompared is explicitly false. Focused reducer/evidence/boundary tests and the four exact sibling controls pass.
+- **Next / Notes:** Add only the source-derived production compositor/draw case, then require twice-fresh **320/320 zero-residual shared-framebuffer rows** before promoting Psybeam. Hypnosis, Shadow Ball, Confusion, and Psychic remain independent regression controls. No new evidence contradicted a latch, so ANIMATION_LATCHES.md is unchanged.
+
 # MOVE_PSYBEAM complete bilateral dense evidence checkpoint — partial (2026-08-20 worker)
 
 - **State:** Coverage is **196/276 Level-50 exact, 1 partial, 79 unsupported**. MOVE_PSYBEAM alone is queued partial; no reducer, typed seam, compositor/draw wiring, exact promotion, or sibling/component credit was added.
