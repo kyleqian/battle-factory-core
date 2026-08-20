@@ -891,6 +891,12 @@ import {
   type HypnosisState,
 } from "./hypnosis.ts";
 import {
+  psybeamAtAge,
+  psybeamDisplayedRingsAtAge,
+  type PsybeamRing,
+  type PsybeamState,
+} from "./psybeam.ts";
+import {
   agilityAnimationAtAge,
   type AgilityState,
 } from "./agility.ts";
@@ -2522,6 +2528,15 @@ export interface SceneOnHypnosisConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+export interface SceneOnPsybeamConfig {
+  readonly move: "PSYBEAM";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  /** Species-owned idle x2 is a draw input; SwayMon owns only its offset. */
+  readonly targetIdleX2?: number;
+}
+
 export interface SceneOnPerishSongFieldProfile
   extends SceneOnDragonRageFieldProfile {
   /** Immutable battle-engine result; presentation never advances these. */
@@ -3171,6 +3186,7 @@ export type SceneOnMoveConfig =
   | SceneOnStunSporeConfig
   | SceneOnSleepPowderConfig
   | SceneOnHypnosisConfig
+  | SceneOnPsybeamConfig
   | SceneOnPerishSongConfig
   | SceneOnNeedleArmConfig
   | SceneOnSandstormConfig
@@ -3361,6 +3377,8 @@ export type SceneOnSleepPowderPresentationState =
   SceneOnMovePresentationState<SceneOnSleepPowderConfig>;
 export type SceneOnHypnosisPresentationState =
   SceneOnMovePresentationState<SceneOnHypnosisConfig>;
+export type SceneOnPsybeamPresentationState =
+  SceneOnMovePresentationState<SceneOnPsybeamConfig>;
 export type SceneOnBlockPresentationState =
   SceneOnMovePresentationState<SceneOnBlockConfig>;
 export type SceneOnRockTombPresentationState =
@@ -7468,6 +7486,15 @@ export interface SceneOnHypnosisView extends HypnosisState {
   readonly displayedBgPaletteAge: number;
 }
 
+export interface SceneOnPsybeamView extends PsybeamState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly displayedRings: readonly PsybeamRing[];
+  readonly displayedTargetSwayX2: number;
+  readonly displayedBgPaletteAge: number;
+}
+
 /** `age=0` is Move_HYPNOSIS's first active source-script frame. */
 export function sceneOnHypnosisView(
   state: SceneOnHypnosisPresentationState,
@@ -7502,6 +7529,49 @@ export function sceneOnHypnosisView(
     // palette-transfer queue; UnsetPsychicBackground's setup pause absorbs
     // two of those display ticks at the second fade boundary.
     displayedBgPaletteAge: state.age - (state.age < 129 ? 6 : 4),
+  };
+}
+
+/** `age=0` is Move_PSYBEAM's first active source-script frame. */
+export function sceneOnPsybeamView(
+  state: SceneOnPsybeamPresentationState,
+): SceneOnPsybeamView {
+  if (state.config.move !== "PSYBEAM") {
+    throw new Error(`expected PSYBEAM presentation, got ${state.config.move}`);
+  }
+  const side = state.config.attacker.geometry.side;
+  const attackerCenter = state.config.attacker.geometry.animationCenter;
+  const targetCenter = state.config.target.geometry.animationCenter;
+  const targetIdleX2 = state.config.targetIdleX2 ?? 0;
+  const component = psybeamAtAge(
+    state.age,
+    side,
+    attackerCenter,
+    targetCenter,
+    targetIdleX2,
+  );
+  const displayed = psybeamAtAge(
+    state.age - 1,
+    side,
+    attackerCenter,
+    targetCenter,
+    targetIdleX2,
+  );
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...component,
+    displayedRings: psybeamDisplayedRingsAtAge(
+      state.age,
+      side,
+      attackerCenter,
+      targetCenter,
+    ),
+    displayedTargetSwayX2: displayed.targetSwayX2,
+    // Faded BG palette writes are RAM+1 for this source task. The compositor
+    // remains responsible for transferring the resulting palette to pixels.
+    displayedBgPaletteAge: state.age - 1,
   };
 }
 
