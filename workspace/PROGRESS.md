@@ -5,6 +5,53 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1368 — [main worker, 2026-08-20] **#105 FIXED: STRINGID_PKMNCHANGEDTYPE `messageLines` case added (Conversion/Conversion 2/Camouflage); soak seed 40 now runs to an honest OK (`1df9dcb6`)**
+
+- **State:** `src/engine/battleResolutionPresentation.ts` +
+  `src/engine/factoryBattleScriptFullTurnDecision.ts` (fix),
+  `tests/presentationStringIssue105.test.ts` (new), `ISSUES.md` (#105
+  deleted, fully fixed). Commit `1df9dcb6`. `npm test` 1080 files/10177
+  passed (44/223 skipped, unchanged), `npm run build` and `npm run
+  typecheck` green.
+- **Did:** `BattleScript_EffectConversion`/`Conversion2`/`Camouflage`
+  (`data/battle_scripts_1.s:664,1282,2805`) all print
+  `STRINGID_PKMNCHANGEDTYPE` ("{B_ATK_NAME_WITH_PREFIX} transformed\ninto
+  the {B_BUFF1} type!") after their own already-ported type-change opcode
+  (`battleScriptTypeChangeOpcode.ts`, which already records the chosen type
+  into `rulesContext.battleTextBuff1Type`); none reassign selectorRoles, so
+  BS_ATTACKER stays the move's own still-current user. Wired the
+  substitution in `factoryBattleScriptFullTurnDecision.ts`'s `prepareMessage`
+  ternary (`TYPE_DISPLAY_NAMES[battleTextBuff1Type]`, the same
+  `gTypeNames`-derived table `STRINGID_PKMNCHANGEDTYPEWITH`/Color Change
+  already uses) and added the `messageLines` case. Pinned in
+  `presentationStringIssue105.test.ts` (real player CONVERSION,
+  red-verified via `git stash` — reproduced the exact soak crash string
+  pre-fix). **Seed 40 (original repro): OK budget, 1,000,000f, 24.9s,
+  carry<=21 depth<=21** — no crash. Neighbourhood `winning --seeds 38:44`:
+  **OK 6, CRASH 0, HANG 0**.
+- **Sibling check:** grepped all 4 real-source `PREPARE_TYPE_BUFFER(gBattleTextBuff1,
+  ...)` call sites — `Cmd_tryconversiontypechange`,
+  `Cmd_settypetorandomresistance` (2 sites), `Cmd_settypetoenvironment` all
+  feed `STRINGID_PKMNCHANGEDTYPE` (now fixed); Color Change's
+  `ABILITYEFFECT_ON_DAMAGE` branch (`battle_util.c:2761`) feeds
+  `STRINGID_PKMNCHANGEDTYPEWITH`, which already had a resolver. No
+  remaining gaps.
+- **Emitter seed 40 hit:** verified in a throwaway worktree at the pre-fix
+  parent commit — turn 24 crashes right after the player confirms FIRE
+  BLAST (move 126); the type-change move that actually triggers
+  `STRINGID_PKMNCHANGEDTYPE` belongs to the AI-controlled opposing trainer
+  battler for that same turn, which the driver's verbose log does not name
+  (it only echoes the player's own FIGHT confirmations). Not distinguished
+  between Conversion/Conversion2/Camouflage specifically, but immaterial —
+  all three funnel through the identical opcode + STRINGID + fix, confirmed
+  by the seed rerunning clean.
+- **Next:** #104 (engine half: stub continuation for terminal
+  YES/cancel) is the next highest-value open item per 1367. A full honest
+  0:60/0:20/0:60 gate re-sweep is still owed once that lands.
+- **Notes:** no PAPERCUT. Landed inside the 30-min cap.
+
+---
+
 ## 1367 — [main worker, 2026-08-20] **#104 driver half FIXED: per-round grace re-arm + honest HANG reporting; unmasked finding — the terminal record-YES/cancel dead end is near-universal, not a deep-chain rarity (`428ba1c4`)**
 
 - **State:** `tools/soak/randomRoundSoakDriver.ts`/`randomRoundSoak.ts` +
@@ -80,63 +127,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** lesson banked — a sweep's "deepest seed stops at X" claim needs
   the END SURFACE of those seeds inspected before it is attributed to game
   difficulty; three sweeps attributed an instrument cap to the AI.
-
----
-
-## 1365 — [main worker, 2026-08-20] **M-B FINAL RE-SWEEP DONE: `winning` 0:480, 0 CRASH/0 HANG across the doubled range — 3 seeds reach the full width of the carry-21 challenge (depth 27, new deepest), carry ≥ 28 not yet reached; #90/#154/#36 all confirmed clean**
-
-- **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20-final.{md,log}`
-  (new — the milestone's final acceptance artefact), `PROGRESS.md`/
-  `PROGRESS-archive.md` (this entry; 1360/1362 archived to keep the ledger
-  at ~3). No `src/`/`tests/`/`tools/soak/` change — the sweep found zero new
-  crash/hang signatures, so there was nothing to triage or fix.
-- **Did:** swept `winning` seeds 0:480 (24×20-seed chunks, `--render-every
-  0`, six batches of 4 parallel foreground processes) at master HEAD
-  `a97d3b19` — the completed M-B tree (step 2a, swap-decline `781c8827`,
-  #99/#100/#101/#103 fixes all folded). **480/480 OK, 0 CRASH, 0 HANG** (vs.
-  238/240 OK, 2 CRASH in the 0:240 sweep that found #101/#103 — both fixes
-  hold at double the range). carry≥7 205/480 (42.71%), carry≥14 54/480
-  (11.25%), **carry≥21 5/480 (1.04%) — seeds 125, 271, 328, 406, 409**
-  (vs. 1/240 (0.4%) previously — more than double the rate). carry≥28
-  0/480 — not reached.
-- **Deepest:** carry 21 (5 seeds, tied), battle-depth **27** (seeds 125,
-  328, 409 — beats the prior deepest of 25 by two battles: the **full
-  7-battle width** of the carry-21 challenge, not just partway). Verbose-
-  traced all three via each seed's `draft confirm: YES` markers (a more
-  reliable round-boundary marker than the prior doc's "open menu on slot 1"
-  shorthand, which doesn't fire for every seed). Seed 328 is unambiguous —
-  its own final `roundComplete` directly is the carry-21 round's result: it
-  **wins the entire challenge outright** (first seed ever observed to do
-  so). Seeds 125 and 409 hit the same 21/27 ceiling but *lose* battle 7 of
-  that round instead (inferred from the ceiling itself: a win there would
-  read `factoryWinStreak=28`/depth≥28 for the remainder of that seed's run,
-  which never appears in either). **Headline: carry ≥ 28 — the full
-  `CHECK_BAD_MOVE` + AI-triad tier — is not reached in this sweep; the
-  closest approach is exact and three-seeds-deep: battle 7, the last battle,
-  of the carry-21 challenge**, won once and lost twice.
-- **Named-seed check:** #101 (seed 90), #102 (seed 154), #103 (seed 36) all
-  in-range and clean — `roundLost carry<=0 depth<=3`, `roundLost carry<=0
-  depth<=5`, `roundComplete carry<=14 depth<=20` respectively. #102 still
-  does not reproduce (consistent with 1364's diagnosis-only finding); left
-  open in `ISSUES.md` as-is (out of this step's scope).
-- **Gates:** docs-only change, so `npm run test:smoke` run instead of full
-  `npm test` per the brief's own rule; 444/444 green (baseline check before
-  the sweep and unchanged after, since nothing under `src/`/`tests/`
-  changed). No `npm run build` needed.
-- **Next:** M-B's own queue is now empty from this worker's side — bar
-  reached and reconfirmed at 2x range, zero live crashes, #102 diagnosis-
-  only and out of scope. Supervisor closes M-B per ROADMAP.md convention
-  (this worker does not edit ROADMAP.md). If a future step wants to chase
-  carry≥28, the 328/125/409 chain above is the exact jumping-off point —
-  battle 7 of the carry-21 round is the wall to push past.
-- **Notes:** no PAPERCUT. Time discipline: 24-chunk sweep (6 parallel
-  batches) landed by ~minute 22; the round-chain forensics for the
-  deepest-2 write-up (goal 2) took longer than planned (~15 min) working
-  out that `maxCarriedWinStreak`/`maxBattleDepth` are independent
-  whole-run peaks, not paired to the same instant, and that "open menu on
-  slot 1" isn't a reliable round-boundary marker — landed the doc inside
-  the 45-min cap but with less slack than the brief's own 32-min
-  chunk-launch cutoff implied.
 
 ---
 

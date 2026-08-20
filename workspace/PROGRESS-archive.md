@@ -1,3 +1,60 @@
+## 1365 — [main worker, 2026-08-20] **M-B FINAL RE-SWEEP DONE: `winning` 0:480, 0 CRASH/0 HANG across the doubled range — 3 seeds reach the full width of the carry-21 challenge (depth 27, new deepest), carry ≥ 28 not yet reached; #90/#154/#36 all confirmed clean**
+
+- **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20-final.{md,log}`
+  (new — the milestone's final acceptance artefact), `PROGRESS.md`/
+  `PROGRESS-archive.md` (this entry; 1360/1362 archived to keep the ledger
+  at ~3). No `src/`/`tests/`/`tools/soak/` change — the sweep found zero new
+  crash/hang signatures, so there was nothing to triage or fix.
+- **Did:** swept `winning` seeds 0:480 (24×20-seed chunks, `--render-every
+  0`, six batches of 4 parallel foreground processes) at master HEAD
+  `a97d3b19` — the completed M-B tree (step 2a, swap-decline `781c8827`,
+  #99/#100/#101/#103 fixes all folded). **480/480 OK, 0 CRASH, 0 HANG** (vs.
+  238/240 OK, 2 CRASH in the 0:240 sweep that found #101/#103 — both fixes
+  hold at double the range). carry≥7 205/480 (42.71%), carry≥14 54/480
+  (11.25%), **carry≥21 5/480 (1.04%) — seeds 125, 271, 328, 406, 409**
+  (vs. 1/240 (0.4%) previously — more than double the rate). carry≥28
+  0/480 — not reached.
+- **Deepest:** carry 21 (5 seeds, tied), battle-depth **27** (seeds 125,
+  328, 409 — beats the prior deepest of 25 by two battles: the **full
+  7-battle width** of the carry-21 challenge, not just partway). Verbose-
+  traced all three via each seed's `draft confirm: YES` markers (a more
+  reliable round-boundary marker than the prior doc's "open menu on slot 1"
+  shorthand, which doesn't fire for every seed). Seed 328 is unambiguous —
+  its own final `roundComplete` directly is the carry-21 round's result: it
+  **wins the entire challenge outright** (first seed ever observed to do
+  so). Seeds 125 and 409 hit the same 21/27 ceiling but *lose* battle 7 of
+  that round instead (inferred from the ceiling itself: a win there would
+  read `factoryWinStreak=28`/depth≥28 for the remainder of that seed's run,
+  which never appears in either). **Headline: carry ≥ 28 — the full
+  `CHECK_BAD_MOVE` + AI-triad tier — is not reached in this sweep; the
+  closest approach is exact and three-seeds-deep: battle 7, the last battle,
+  of the carry-21 challenge**, won once and lost twice.
+- **Named-seed check:** #101 (seed 90), #102 (seed 154), #103 (seed 36) all
+  in-range and clean — `roundLost carry<=0 depth<=3`, `roundLost carry<=0
+  depth<=5`, `roundComplete carry<=14 depth<=20` respectively. #102 still
+  does not reproduce (consistent with 1364's diagnosis-only finding); left
+  open in `ISSUES.md` as-is (out of this step's scope).
+- **Gates:** docs-only change, so `npm run test:smoke` run instead of full
+  `npm test` per the brief's own rule; 444/444 green (baseline check before
+  the sweep and unchanged after, since nothing under `src/`/`tests/`
+  changed). No `npm run build` needed.
+- **Next:** M-B's own queue is now empty from this worker's side — bar
+  reached and reconfirmed at 2x range, zero live crashes, #102 diagnosis-
+  only and out of scope. Supervisor closes M-B per ROADMAP.md convention
+  (this worker does not edit ROADMAP.md). If a future step wants to chase
+  carry≥28, the 328/125/409 chain above is the exact jumping-off point —
+  battle 7 of the carry-21 round is the wall to push past.
+- **Notes:** no PAPERCUT. Time discipline: 24-chunk sweep (6 parallel
+  batches) landed by ~minute 22; the round-chain forensics for the
+  deepest-2 write-up (goal 2) took longer than planned (~15 min) working
+  out that `maxCarriedWinStreak`/`maxBattleDepth` are independent
+  whole-run peaks, not paired to the same instant, and that "open menu on
+  slot 1" isn't a reliable round-boundary marker — landed the doc inside
+  the 45-min cap but with less slack than the brief's own 32-min
+  chunk-launch cutoff implied.
+
+---
+
 ## 1363 — [main worker, 2026-08-20] **M-B step 4 triage DONE: ISSUES #101 and #103 both fixed + pinned; both soak repros now reach honest terminals; neighbourhood sweeps clean**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` (#101 fix),
