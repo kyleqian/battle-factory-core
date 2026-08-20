@@ -17,6 +17,43 @@ backlog.
 
 # Open
 
+## #99 — Soak driver: the post-win swap-offer YES/NO is never answered by its own branch — every policy (incl. `vanilla`) accepts the swap by accident, then random-mashes the swap screen
+
+**Found 2026-08-20** (M-B step-2 side scout, PAPERCUT line; supervisor
+re-verified: `--seed 0 --policy winning --verbose` logs **0** `swap offer:`
+notes across 13,672 lines but 748 `swap screen:` presses).
+
+**Mechanism (driver bug, not engine):** `tools/soak/randomRoundSoakDriver.ts`
+`onPostwin` checks the continuation branch
+(`postwin.question === null && postwin.continuationCursorPos !== null`)
+BEFORE the swap-offer branch (`dialoguePage === 4 && swapCursorPos !== null`).
+After GO ON is confirmed, `state.continuationCursorPos` stays non-null
+(`src/engine/postwin.ts:899-904` projects the stored cursor; nothing clears
+it when the menu closes), so on dialogue page 4 the driver is still in the
+"continuation" branch: it re-rolls `target` every call and, for `target 0`
+(always for non-exploring policies; 85% for `full`/`winning`), presses A —
+which confirms **YES** on the swap menu (default cursor 0). The other 15% of
+rolls press DOWN/UP, which moves the *swap* cursor, so `full`/`winning`
+decline only when a DOWN roll happens to precede the next A.
+
+**Consequences:** (1) `vanilla`'s doc comment ("swap offers declined") is
+false in practice — it accepts **every** swap, then `onFactorySwap`'s random
+legal-button mash (not `explores`-gated) performs random swaps or quits;
+(2) `full`/`winning` accept ~85%, not the documented 50/50 roll; (3) the
+`swap offer: YES/NO` soak-log label never appears, so no sweep doc ever
+recorded swap decisions; (4) M-A's depth numbers and the M-B step-1/step-2
+ablations on swap declining (`SOAK_ABLATE_C`, side scout ablation (i)) were
+no-ops for this reason — their "swap declining does nothing" results are
+void.
+
+**Fix shape:** gate the continuation branch on the menu being live (e.g.
+`continuationConfirmElapsed === null` / `dialoguePage < 4`) and evaluate the
+swap-offer branch first; pin with a Tier-1 test (a `vanilla` seed never
+enters `state.factorySwap`; a `winning`/`full` seed logs `swap offer:`
+decisions and the accept rate over N seeds is ~50%). Fixing it changes every
+post-battle-1 trajectory of every policy: rerun the standing gates and
+re-measure depth (`docs/soak-depth-measure-2026-08-19.md`) in the same step.
+
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **User decision (2026-08-10): the playable path stays FAITHFUL — no
