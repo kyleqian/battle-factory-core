@@ -9,7 +9,8 @@
     "auditSha256": "46c786013413ce9b284fa658cbc07316443883a505f572d7f28993693184762c",
     "probe": "tools/compare/rainDanceProbe.py",
     "probeSha256": "c869e3e776b37819b6b9d4692029ff243fb9651ae63b904842c798a069561a93",
-    "evidenceReplay": "tools/compare/rainDanceEvidence.ts"
+    "evidenceReplay": "tools/compare/rainDanceEvidence.ts",
+    "reducerVerifier": "tools/compare/verifyRainDanceReducer.ts"
   },
   "components": [
     "asset:ANIM_TAG_RAIN_DROPS",
@@ -20,6 +21,8 @@
     "freshRunsPerOrientation": 2,
     "sourceRows": 374,
     "rawRgbRows": 374,
+    "reducerRows": 374,
+    "typedSeamRows": 374,
     "productionFramebufferRows": 0,
     "sourcePointerInterval": ["0x082d050a", "0x082d0555"],
     "observedPointerParities": [0, 1],
@@ -36,8 +39,8 @@
     "allMatched": true
   },
   "boundedRemainder": {
-    "reducer": "not implemented",
-    "typedSeam": "not implemented",
+    "reducer": "implemented and exact for all retained component-state rows",
+    "typedSeam": "implemented and exact for all retained component-state rows",
     "productionCompositor": "not implemented",
     "zeroResidualFramebuffer": "not measured; no production framebuffer claim",
     "manualQueue": "MOVE_RAIN_DANCE remains the sole partial queue item"

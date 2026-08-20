@@ -421,6 +421,11 @@ import {
   type RolloutState,
 } from "./rollout.ts";
 import {
+  rainDanceAtAge,
+  type RainDanceProfile,
+  type RainDanceState,
+} from "./rainDance.ts";
+import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
 } from "./supersonic.ts";
@@ -1823,6 +1828,15 @@ export interface SceneOnRolloutConfig {
   readonly animationProfile: Readonly<RolloutGeometry>;
 }
 
+/** Rain Dance presentation only; weather and battle outcomes remain battle-owned. */
+export interface SceneOnRainDanceConfig {
+  readonly move: "RAIN_DANCE";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<RainDanceProfile>;
+}
+
 export interface SceneOnSupersonicConfig {
   readonly move: "SUPERSONIC";
   readonly attacker: SceneOnPresentationBattler;
@@ -3109,6 +3123,7 @@ export type SceneOnMoveConfig =
   | SceneOnHealBellConfig
   | SceneOnFireBlastConfig
   | SceneOnRolloutConfig
+  | SceneOnRainDanceConfig
   | SceneOnSupersonicConfig
   | SceneOnMetalSoundConfig
   | SceneOnLeerConfig
@@ -4605,6 +4620,11 @@ export interface SceneOnRolloutView extends RolloutState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnRainDanceView extends RainDanceState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMilkDrinkView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5870,6 +5890,20 @@ export function sceneOnRolloutView(
       state.config.counter,
       state.config.animationProfile,
     ),
+  };
+}
+
+/** `age=0` is the first retained Move_RAIN_DANCE source-script row. */
+export function sceneOnRainDanceView(
+  state: SceneOnMovePresentationState<SceneOnRainDanceConfig>,
+): SceneOnRainDanceView {
+  if (state.config.move !== "RAIN_DANCE") {
+    throw new Error(`expected RAIN_DANCE presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...rainDanceAtAge(state.age, state.config.animationProfile),
   };
 }
 

@@ -62,6 +62,8 @@ describe("MOVE_RAIN_DANCE evidence-only checkpoint", () => {
         freshRunsPerOrientation: 2,
         sourceRows: 374,
         rawRgbRows: 374,
+        reducerRows: 374,
+        typedSeamRows: 374,
         productionFramebufferRows: 0,
         observedPointerParities: [0, 1],
         raindropCreatesPerOrientation: 80,
@@ -76,8 +78,8 @@ describe("MOVE_RAIN_DANCE evidence-only checkpoint", () => {
       "task:AnimTask_CreateRaindrops",
     ]);
     expect(fixture.boundedRemainder).toMatchObject({
-      reducer: "not implemented",
-      typedSeam: "not implemented",
+      reducer: "implemented and exact for all retained component-state rows",
+      typedSeam: "implemented and exact for all retained component-state rows",
       productionCompositor: "not implemented",
       zeroResidualFramebuffer: "not measured; no production framebuffer claim",
     });

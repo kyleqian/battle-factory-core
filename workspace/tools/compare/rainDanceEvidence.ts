@@ -202,8 +202,10 @@ for (const orientation of orientations) {
 }
 
 assert(fixture.acceptance.productionFramebufferRows === 0
-  && fixture.boundedRemainder.reducer === "not implemented"
-  && fixture.boundedRemainder.typedSeam === "not implemented"
+  && fixture.acceptance.reducerRows === 374
+  && fixture.acceptance.typedSeamRows === 374
+  && fixture.boundedRemainder.reducer.startsWith("implemented")
+  && fixture.boundedRemainder.typedSeam.startsWith("implemented")
   && fixture.boundedRemainder.productionCompositor === "not implemented",
 "partial remainder was widened");
 console.log(JSON.stringify(result, null, 2));
