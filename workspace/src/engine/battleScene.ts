@@ -820,6 +820,11 @@ import { painSplitDisplayedMatrixTransform } from "../animation/painSplit.ts";
 import { fireBlastSpritesInPainterOrderAtAge } from "../animation/fireBlast.ts";
 import { rolloutParticlesInPainterOrderAtAge } from "../animation/rollout.ts";
 import {
+  PSYBEAM_SWAY_FIRST_AGE,
+  PSYBEAM_TARGET_BLEND_COLOR,
+  psybeamBgPaletteRowAtAge,
+} from "../animation/psybeam.ts";
+import {
   sceneOnDoubleTeamView,
   sceneOnBindView,
   sceneOnWrapView,
@@ -988,6 +993,7 @@ import {
   sceneOnStunSporeView,
   sceneOnSleepPowderView,
   sceneOnHypnosisView,
+  sceneOnPsybeamView,
   sceneOnPerishSongView,
   sceneOnNeedleArmView,
   sceneOnSandstormView,
@@ -1055,6 +1061,7 @@ import {
   type SceneOnStunSporePresentationState,
   type SceneOnSleepPowderPresentationState,
   type SceneOnHypnosisPresentationState,
+  type SceneOnPsybeamPresentationState,
   type SceneOnPerishSongPresentationState,
   type SceneOnFireBlastConfig,
   type SceneOnRolloutConfig,
@@ -27367,6 +27374,166 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "POLITOED used" : "Foe POLITOED used",
       "HYPNOSIS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "PSYBEAM") {
+    const psybeamState = state as SceneOnPsybeamPresentationState;
+    const view = sceneOnPsybeamView(psybeamState);
+    // SwayMon mutates the live battler after that row's software OAM build;
+    // the ordinary software-to-hardware transfer adds the second source row.
+    // The typed seam's displayed value is the software-OAM row, so replay it
+    // one presentation age earlier for framebuffer scanout.
+    const hardwareTarget = sceneOnPsybeamView({
+      ...psybeamState,
+      age: psybeamState.age - 1,
+    });
+    const playerToOpponent =
+      view.attacker.species === "SPINDA"
+      && view.attacker.geometry.side === "player"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "opponent";
+    const opponentToPlayer =
+      view.attacker.species === "SPINDA"
+      && view.attacker.geometry.side === "opponent"
+      && view.target.species === "ONIX"
+      && view.target.geometry.side === "player";
+    if (!playerToOpponent && !opponentToPlayer) {
+      throw new Error(
+        `unsupported staged PSYBEAM pair `
+        + `${view.attacker.species}->${view.target.species}`,
+      );
+    }
+
+    // Reuse the source-identity battler and GoldRing art already extracted.
+    // The legal set-143 mechanicLab staging record retains CRAWDAUNT's loaded
+    // picture/name chrome while the complete party override supplies SPINDA's
+    // semantic move carrier; the committed OAM/palette/RGB evidence pins that
+    // presentation identity in both orientations.
+    const spinda = playerToOpponent
+      ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>).CRAWDAUNT!
+      : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>).CRAWDAUNT!;
+    const onixSource = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const onix = playerToOpponent
+      ? { ...onixSource, tileset: subTileset(onixSource.tileset, 0, 8) }
+      : onixSource;
+    const gpuDarken = (palette: readonly RgbColor[]) =>
+      palette.map((color) => {
+        const packed = mgbaDarkenColor(
+          color.r | (color.g << 8) | (color.b << 16),
+          view.bgBldy,
+        );
+        return {
+          r: packed & 0xff,
+          g: (packed >>> 8) & 0xff,
+          b: (packed >>> 16) & 0xff,
+        };
+      });
+    if (view.bgIsPsychic) {
+      drawExtractedTileBg(fb, {
+        tileset: battleAnimPsychicBg.tileset,
+        tilemap: battleAnimPsychicBg.tilemap,
+        subpalettes: [gpuDarken(psybeamBgPaletteRowAtAge(
+          battleAnimPsychicBg.palette,
+          view.displayedBgPaletteAge,
+        ))],
+      });
+    } else {
+      drawExtractedTileBg(fb, {
+        tileset: battleBg.static.tileset,
+        tilemap: battleBg.static.tilemap,
+        subpalettes: battleBg.palette.map(gpuDarken),
+      });
+    }
+
+    const targetPalette = blendPaletteToward(
+      onix.palette,
+      PSYBEAM_TARGET_BLEND_COLOR,
+      view.displayedTargetBlendCoefficient,
+    );
+    // The species-owned front idle hold survives through SwayMon's first
+    // hardware display. After that point the task owns x2 through its final
+    // RAM+1 teardown and explicitly restores zero.
+    const targetX2 = view.age <= PSYBEAM_SWAY_FIRST_AGE + 1
+      ? view.targetIdleX2
+      : hardwareTarget.displayedTargetSwayX2;
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      spinda.tileset,
+      spinda.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      onix.tileset,
+      targetPalette,
+      view.target.geometry.spriteCorner.x + targetX2,
+      view.target.geometry.spriteCorner.y,
+    );
+    const rings = view.displayedRings.slice().sort((left, right) =>
+      (left.y + left.y2) - (right.y + right.y2)
+      || left.index - right.index
+    );
+    const drawRings = () => {
+      for (const ring of rings) {
+        drawSpriteSheet(
+          fb,
+          hypnosisArt.goldRing.tileset,
+          hypnosisArt.goldRing.palette,
+          ring.x + ring.x2 - 8,
+          ring.y + ring.y2 - 16,
+        );
+      }
+    };
+    // Source subpriorities are target 40 / rings 38 / attacker 30 for the
+    // player attack and attacker 40 / target 30 / rings 28 when mirrored.
+    if (playerToOpponent) {
+      drawTarget();
+      drawRings();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawRings();
+    }
+
+    const profile = psybeamState.config.fieldProfile;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: playerToOpponent ? "ONIX" : "CRAWDAUNT",
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerToOpponent ? "CRAWDAUNT" : "ONIX",
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(
+      fb,
+      battleWindow.tileset,
+      battleWindow.tilemap,
+      battleWindow.palette,
+    );
+    drawMessageTextLines(
+      fb,
+      playerToOpponent ? "CRAWDAUNT used" : "Foe CRAWDAUNT used",
+      "PSYBEAM!",
       99,
     );
     return;

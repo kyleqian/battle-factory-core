@@ -86,6 +86,8 @@ export interface PsybeamState {
   readonly swayMon: PsybeamSwayMon | null;
   readonly targetSwayX2: number;
   readonly targetIdleX2: number;
+  /** Source faded-palette coefficient for the target's two-leg cycle. */
+  readonly targetBlendCoefficient: number;
   readonly visualTaskCount: number;
   readonly soundTaskCount: 0 | 1;
   readonly sound: "SE_M_PSYBEAM" | null;
@@ -110,6 +112,11 @@ export const PSYBEAM_BLEND_LAST_AGE = 112;
 export const PSYBEAM_BG_LOAD_AGE = 23;
 export const PSYBEAM_BG_FIRST_ROTATION_AGE = 26;
 export const PSYBEAM_BG_RESTORE_AGE = 140;
+export const PSYBEAM_TARGET_BLEND_COLOR: Readonly<RgbColor> = Object.freeze({
+  r: 255,
+  g: 148,
+  b: 255,
+});
 
 const GOLD_RING_TAG = 10163;
 const BLDCNT_FADE = 232;
@@ -415,6 +422,19 @@ export function psybeamBgPaletteRowAtAge(
   );
 }
 
+/**
+ * Source `blend_color_cycle ANIM_TARGET, 4, 2, 0, 12, RGB(31,18,31)`.
+ * The task starts at age 54; its delay-4 palette worker first writes faded
+ * coefficient 2 at age 58, reaches 12 at 78, then restores to zero at 108.
+ */
+export function psybeamTargetBlendCoefficientAtAge(age: number): number {
+  if (age < 58) return 0;
+  if (age < 78) return Math.min(12, 2 + 2 * Math.floor((age - 58) / 4));
+  if (age < 88) return 12;
+  if (age < 108) return Math.max(0, 10 - 2 * Math.floor((age - 88) / 4));
+  return 0;
+}
+
 /** Pure source-relative `Move_PSYBEAM`; battle outcome and RNG stay external. */
 export function psybeamAtAge(
   age: number,
@@ -447,6 +467,7 @@ export function psybeamAtAge(
     swayMon,
     targetSwayX2: swayMon?.offsetX2 ?? 0,
     targetIdleX2,
+    targetBlendCoefficient: psybeamTargetBlendCoefficientAtAge(age),
     // The ROM's visual-task counter is the active visual worklist:
     // sprite-created GoldRings plus SwayMon and BlendColorCycle. The
     // background fade/rotation tasks live in gTasks but do not contribute

@@ -1,14 +1,16 @@
 {
   "schema": "psybeam-bilateral-evidence/v1",
-  "status": "partial",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "acceptance": {
     "sourceRows": 320,
     "rawRgbRows": 320,
     "freshRunsPerOrientation": 2,
     "ringGroups": 11,
     "ringSprites": 11,
-    "firstInactiveCleanupAge": 159
+    "firstInactiveCleanupAge": 159,
+    "productionFramebufferRows": 320,
+    "freshProductionRunsPerOrientation": 2
   },
   "source": {
     "audit": "tools/compare/goldRingSourceAudit.ts",
@@ -16,7 +18,11 @@
     "probe": "tools/compare/psybeamProbe.py",
     "probeSha256": "74a1f6df2bd1396e09f60e4659804f1d8a32797d5c00b21bf79099308dc366b3",
     "verifier": "tools/compare/psybeamEvidence.ts",
-    "verifierSha256": "fa84171af32074c95c86be60291b26e4c84850d3ae15caa76eab2c0e8d46cecf"
+    "verifierSha256": "fa84171af32074c95c86be60291b26e4c84850d3ae15caa76eab2c0e8d46cecf",
+    "framebufferVerifier": "tools/compare/psybeamFramebuffer.ts",
+    "framebufferVerifierSha256": "1f4fed75bc5228f37bffc6ad1ed328fc203e247c38082d29034845e60fad005f",
+    "freshFramebufferVerifier": "tools/compare/psybeamFreshFramebuffer.ts",
+    "freshFramebufferVerifierSha256": "10c30fdcc5eb2c575a3090ee14bfb0360ba5b03b4360b928afd836bbb31ab1fc"
   },
   "orientations": {
     "player-back": {
@@ -49,5 +55,5 @@
     }
   },
   "latchVerdict": "Psybeam independently confirms RAM+1 for script-created GoldRing OAM/x2, faded and hardware palette transfer including target BlendPalette ramps and psychic BG rotation, and the existing current-register BLDY program. Player-front Onix contributes its x2=1 species idle hold; opponent-back Onix contributes x2=0. Both source windows start and end together, so the measured orientation timing shift is 0.",
-  "boundedRemainder": "MOVE_PSYBEAM remains partial. A later round must add a pure source-relative reducer, typed Scene-ON seam, and production compositor/draw wiring, then prove all 320 retained framebuffer rows with zero residual pixels twice fresh. No sibling or component inherits promotion from this evidence checkpoint."
+  "exactAcceptance": "MOVE_PSYBEAM alone passes all 320 retained source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels and inactive cleanup, reproduced twice fresh. Hypnosis, Shadow Ball, Confusion, and Psychic remain independent exact controls and receive no Psybeam acceptance credit."
 }

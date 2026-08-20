@@ -14,16 +14,21 @@ describe("MOVE_PSYBEAM bilateral dense evidence checkpoint", () => {
   it("retains complete twice-fresh Scene-ON state and RGB through cleanup", () => {
     expect(fixture).toMatchObject({
       schema: "psybeam-bilateral-evidence/v1",
-      status: "partial",
-      coverageCredit: false,
+      status: "exact",
+      coverageCredit: true,
       acceptance: {
         sourceRows: 320, rawRgbRows: 320, freshRunsPerOrientation: 2,
         ringGroups: 11, ringSprites: 11, firstInactiveCleanupAge: 159,
+        productionFramebufferRows: 320, freshProductionRunsPerOrientation: 2,
       },
     });
     expect(sha(fixture.source.audit)).toBe(fixture.source.auditSha256);
     expect(sha(fixture.source.probe)).toBe(fixture.source.probeSha256);
     expect(sha(fixture.source.verifier)).toBe(fixture.source.verifierSha256);
+    expect(sha(fixture.source.framebufferVerifier))
+      .toBe(fixture.source.framebufferVerifierSha256);
+    expect(sha(fixture.source.freshFramebufferVerifier))
+      .toBe(fixture.source.freshFramebufferVerifierSha256);
     for (const orientation of ["player-back", "opponent-front"] as const) {
       const entry = fixture.orientations[orientation];
       expect(entry.probeJsonSha256).toBe(entry.repeatProbeJsonSha256);
@@ -63,12 +68,13 @@ describe("MOVE_PSYBEAM bilateral dense evidence checkpoint", () => {
     }
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8"));
     expect(coverage.entries.find((entry: any) => entry.move === "MOVE_PSYBEAM"))
-      .toMatchObject({ status: "partial" });
+      .toMatchObject({ status: "exact" });
     for (const move of ["MOVE_HYPNOSIS", "MOVE_SHADOW_BALL", "MOVE_CONFUSION", "MOVE_PSYCHIC"]) {
       expect(coverage.entries.find((entry: any) => entry.move === move))
         .toMatchObject({ status: "exact" });
     }
-    expect(fixture.boundedRemainder).toContain("320 retained framebuffer rows");
-    expect(fixture.boundedRemainder).toContain("No sibling");
+    expect(fixture.exactAcceptance).toContain("320 retained");
+    expect(fixture.exactAcceptance).toContain("zero residual pixels");
+    expect(fixture.exactAcceptance).toContain("no Psybeam acceptance credit");
   });
 });

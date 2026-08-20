@@ -1,3 +1,11 @@
+# MOVE_PSYBEAM bilateral exact production presentation (2026-08-20 worker)
+
+- **State:** Coverage advances **196→197/276 Level-50 exact**, **1→0 partial**, and remains **79 unsupported**. MOVE_PSYBEAM alone promotes, the manual queue is empty, and `gold-ring-psybeam` is fulfilled. Hypnosis, Shadow Ball, Confusion, and Psychic remain independent exact controls with no new credit.
+- **Did:** Added the source-derived ordinary Battle Scene ON compositor behind `sceneOnPsybeamView`: reused Psychic background, GoldRing art/palette, source-loaded Crawdaunt picture/name chrome for the legal Spinda carrier, Onix art, healthboxes, and existing OAM/affine/palette/register infrastructure by source identity. It renders target SwayMon, all eleven source-age rings, the two-leg target palette cycle, bilateral OAM order, BG rotation/darkening, healthboxes/text, and inactive cleanup without absolute battle ticks, replay tables, framebuffer lookup, gameplay, damage, confusion, RNG, turn, round, or facility ownership.
+- **Verified:** Retained production equality is **160/160 player-back + 160/160 opponent-front = 320/320 raw-RGB rows with zero residual pixels**. The same ordinary framebuffer path reproduced **twice fresh per orientation** through `tools/run-mgba-probe.py`, including first inactive cleanup. Focused Psybeam component/seam/framebuffer tests and exact sibling controls pass.
+- **Checks:** Animation audit/coverage reports **197 exact, 0 partial, 79 unsupported**; typecheck; full `npm test` (**1,071 files passed / 44 skipped; 10,134 passed / 223 skipped**); and production build (**692 modules**) pass. The worker handoff records the final `git diff --check` and clean-commit result.
+- **Notes:** The compositor preserves the established RAM+1 script-sprite/plain-OAM, palette, BG palette/BLDY display behavior, species idle x2 draw input, and zero orientation shift. No new evidence contradicts or refines a latch, so `ANIMATION_LATCHES.md` is unchanged; animation boundary lists are unchanged.
+
 # MOVE_PSYBEAM source-relative reducer + typed Scene-ON seam — partial (2026-08-20 worker)
 
 - **State:** Coverage remains **196/276 Level-50 exact, 1 partial, 79 unsupported**. MOVE_PSYBEAM remains the sole queued partial; its production compositor/draw wiring and exact promotion are intentionally still open. No sibling or component credit was added.

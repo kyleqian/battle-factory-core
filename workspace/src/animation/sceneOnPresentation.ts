@@ -7492,6 +7492,7 @@ export interface SceneOnPsybeamView extends PsybeamState {
   readonly target: SceneOnPresentationBattler;
   readonly displayedRings: readonly PsybeamRing[];
   readonly displayedTargetSwayX2: number;
+  readonly displayedTargetBlendCoefficient: number;
   readonly displayedBgPaletteAge: number;
 }
 
@@ -7568,6 +7569,7 @@ export function sceneOnPsybeamView(
       targetCenter,
     ),
     displayedTargetSwayX2: displayed.targetSwayX2,
+    displayedTargetBlendCoefficient: displayed.targetBlendCoefficient,
     // Faded BG palette writes are RAM+1 for this source task. The compositor
     // remains responsible for transferring the resulting palette to pixels.
     displayedBgPaletteAge: state.age - 1,

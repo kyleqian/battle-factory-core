@@ -6,6 +6,7 @@ import {
   psybeamBgPaletteRotationCountAtAge,
   psybeamRingsAtAge,
   psybeamSwayMonAtAge,
+  psybeamTargetBlendCoefficientAtAge,
 } from "../../src/animation/psybeam.ts";
 import {
   createSceneOnMovePresentation,
@@ -101,6 +102,11 @@ describe("MOVE_PSYBEAM source-relative reducer", () => {
     expect(psybeamBgPaletteRotationCountAtAge(26)).toBe(1);
     expect(psybeamBgPaletteRotationCountAtAge(138)).toBe(29);
     expect(psybeamBgPaletteRotationCountAtAge(140)).toBe(0);
+    expect([
+      57, 58, 62, 78, 87, 88, 104, 108,
+    ].map(psybeamTargetBlendCoefficientAtAge)).toEqual([
+      0, 2, 4, 12, 12, 10, 2, 0,
+    ]);
   });
 
   it("exposes the reducer through the typed Scene-ON seam", () => {
@@ -140,6 +146,7 @@ describe("MOVE_PSYBEAM source-relative reducer", () => {
       rings: [{ x: 88, y: 93, x2: 6, y2: -3 }],
       displayedRings: [],
       displayedTargetSwayX2: 0,
+      displayedTargetBlendCoefficient: 0,
       displayedBgPaletteAge: 41,
     });
   });
