@@ -310,15 +310,23 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * parity plan §4 step 3, addressing gap 3 — neither "full" nor "vanilla"
  * biases toward winning, so a soak's natural chained depth almost never
  * strings together consecutive round wins). Reuses "full"'s menu/target
- * exploration verbatim (same draft/summary/postwin/swap/terminal rolls) for
- * every decision EXCEPT two: the fight-menu commits the legal move that
- * scores highest on power x type-effectiveness x STAB (see
- * `pickWinningFightSlot`; falls back to highest-power legal move if every
- * legal move scores 0) instead of a uniform-random slot, and a voluntary
- * POKéMON party-select (forced switches are unaffected — they're not
- * voluntary) always declines rather than "full"'s random target/cancel
- * roll. Biased, not guaranteed-win — arbitrary-but-legal play in spirit
- * (a real player weighing type matchups), not an AI oracle.
+ * exploration verbatim (same summary/postwin-continuation/terminal rolls)
+ * for every decision EXCEPT four (Milestone M-B step 2, parts a/b):
+ * (1) the fight-menu commits the legal move that scores highest on power x
+ * type-effectiveness x STAB (see `pickWinningFightSlot`; falls back to
+ * highest-power legal move if every legal move scores 0) instead of a
+ * uniform-random slot; (2) a voluntary POKéMON party-select (forced
+ * switches are unaffected — they're not voluntary) always declines rather
+ * than "full"'s random target/cancel roll; (3) the postwin swap offer
+ * always answers NO instead of "full"'s 50/50 roll (the roll is still
+ * drawn from the shared RNG stream, matching "full"'s draw at that point,
+ * just ignored) — a rental already scouted and played with is worth
+ * keeping over an unscouted swap; (4) the draft screen rents the 3
+ * highest-scoring offered rentals (see `pickWinningDraftPicks`) in score
+ * order, in place of "full"'s random 3-of-6 shuffle. Biased, not
+ * guaranteed-win — arbitrary-but-legal play in spirit (a real player
+ * weighing type matchups and preferring stronger rentals over an
+ * unscouted swap), not an AI oracle.
  */
 export type SoakPolicy = "full" | "vanilla" | "winning";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
@@ -789,7 +797,13 @@ class RandomPlayer {
       && postwin.swapDeclineElapsed === null
       && postwin.swapCursorPos !== null
     ) {
-      const accept = this.explores && this.rng.chance(0.5);
+      // "winning" (M-B step 2 part B, rung 1): always decline -- a rental
+      // it already chose (now by the draft heuristic below) and has played
+      // with is worth keeping over an unscouted swap. The roll is still
+      // drawn (this.explores covers both "full" and "winning") so "full"'s
+      // own draw here is untouched; only the decision it feeds is overridden.
+      const rolledAccept = this.explores && this.rng.chance(0.5);
+      const accept = this.policy === "winning" ? false : rolledAccept;
       const targetPos = accept ? 0 : 1;
       if (postwin.swapCursorPos !== targetPos) {
         return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
