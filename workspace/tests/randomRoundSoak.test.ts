@@ -657,8 +657,17 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       battle: 1,
       turn: 16,
     });
+    // ISSUES #104 (engine half, fixed): the old 16970 pin was a grace-expiry
+    // artifact -- seed 1's random terminal presses landed on the record
+    // prompt's YES/cancel answer, which used to dead-end forever (no
+    // declineFarewellReleaseAge, no re-chain), so the driver's 9000-frame
+    // grace window ran out before the snapshot ever refreshed past the
+    // dead-end tick. Now that YES/cancel arm the same continuation as NO
+    // (factoryTerminalPresentation.ts's advanceFactoryTerminalRecordPrompt),
+    // the round genuinely re-chains right after the answer is given, so the
+    // frozen last-pre-chain snapshot lands much earlier, at the real frame.
     expect(runSeed(1, options)).toMatchObject({
-      frames: 16970,
+      frames: 8550,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

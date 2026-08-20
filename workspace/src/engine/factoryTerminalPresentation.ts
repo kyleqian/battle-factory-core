@@ -682,12 +682,25 @@ function advanceFactoryTerminalRecordPrompt<
       recordChoice = recordMenuCursor === 0 ? "yes" : "no";
     }
   }
-  // EndRecordBattle decline edge: NO (or, in the real game, B) on the record
-  // multichoice -> `msgbox Text_LookForwardToNextVisit` + a second dismiss
-  // before `releaseall`. Store the edge so every decline clock can be
-  // source-relative to it; the YES/cancel branches are intentionally left
-  // unconsumed (out of scope: the YES record-playback flow).
-  if (recordChoice === "no" && declineFarewellReleaseAge === null) {
+  // EndRecordBattle (ISSUES #104): the real AskRecordBattle multichoice
+  // (BattleFrontier_BattleFactoryLobby/scripts.inc:76-94) sends ALL THREE
+  // answers into the same farewell. `case 1` (NO) and `case MULTI_B_PRESSED`
+  // (cancel) both `goto EndRecordBattle` directly -- byte-identical targets,
+  // so cancel is not a stub here, it already matches NO exactly. `case 0`
+  // (YES) calls EventScript_RecordBattle -> EventScript_SaveBattle
+  // (`frontier_savebattle` + msgbox "{PLAYER}'s battle was recorded on the
+  // FRONTIER PASS.", scripts.inc:87-88 /
+  // BattleFrontier_BattleTowerBattleRoom/scripts.inc:472-474), which then
+  // falls into the same EndRecordBattle (`msgbox Text_LookForwardToNextVisit`
+  // + closemessage + releaseall). Standing decision 2026-08-05 (ISSUES.md
+  // ~1008, docs/factory-lobby-freeroam-ground-truth.md §4): RECORD is
+  // stub-only, no real recording ever -- so this arms the SAME
+  // declineFarewellReleaseAge edge for all three answers (identical to NO's
+  // existing pinned timing) and deliberately omits the YES-branch's "battle
+  // was recorded" message, which is not yet ground-truthed (only the shared
+  // farewell is, docs/post-terminal-beyond-boundary-ground-truth.md rows
+  // 4990-5093). Open remainder: #104.
+  if (recordChoice !== null && declineFarewellReleaseAge === null) {
     declineFarewellReleaseAge = age;
   }
   if (
