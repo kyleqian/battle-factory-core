@@ -1,0 +1,87 @@
+{
+  "schema": "lovely-kiss-bilateral-evidence/v1",
+  "oracleProfile": "battle-scene-on",
+  "move": "MOVE_LOVELY_KISS",
+  "moveId": 142,
+  "status": "partial",
+  "coverageCredit": false,
+  "coverageCounts": "Level 50: 198/276 exact, 1 partial, 77 unsupported",
+  "components": [
+    "asset:ANIM_TAG_DEVIL",
+    "asset:ANIM_TAG_PINK_HEART",
+    "sprite:gDevilSpriteTemplate",
+    "sprite:gPinkHeartSpriteTemplate"
+  ],
+  "carrier": {"setId":377,"label":"FRONTIER_MON_JYNX_1","species":124,"item":219},
+  "source": {
+    "audit": "tools/compare/lovelyKissSourceAudit.ts",
+    "probe": "tools/compare/lovelyKissProbe.py",
+    "sourceBounds": {"start":"0x082d4035","endExclusive":"0x082d407c","byteLength":71,"sha256":"604194e8a58c2a8e0aa8162e91983863ca464a43df99d593e720f991bcda66d3"},
+    "pointerContract": "half-open-byte-interval-with-even-and-odd-command-pointers-observed",
+    "graph": ["asset:ANIM_TAG_DEVIL","asset:ANIM_TAG_PINK_HEART","sprite:gDevilSpriteTemplate","sprite:gPinkHeartSpriteTemplate"],
+    "callbacks": ["AnimDevil","AnimPinkHeart","AnimPinkHeart_Step"],
+    "audio": {"first":{"soundEffect":"SE_M_PSYBEAM2","id":200,"pan":"SOUND_PAN_TARGET"},"hearts":{"soundEffect":"SE_M_ATTRACT","id":226,"pan":"SOUND_PAN_TARGET"}}
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": false,
+    "reducerAdded": false,
+    "typedSeamAdded": false,
+    "compositorAdded": false,
+    "framebufferCompared": false,
+    "coveragePromotion": false,
+    "boundaryOrBarrierChanged": false,
+    "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true,
+    "twiceFreshByteIdentical": true
+  },
+  "orientations": {
+    "player-back": {
+      "scenario":"tools/battle-lab/mechanic-lovely-kiss-player-jynx-opponent-onix.json",
+      "scenarioSha256":"2c05595261487d204127514074f1fd8aa80a5c224f63cee7ba5d8d0025559de2",
+      "sourceWindow":{"startFrame":73,"endFrame":225,"frameCount":153},
+      "probeJsonSha256":"d7039abfa9d653fa3a543df8ce3c51a78e10a1ba4ad4157a7e6239f3101ee081",
+      "repeatProbeJsonSha256":"d7039abfa9d653fa3a543df8ce3c51a78e10a1ba4ad4157a7e6239f3101ee081",
+      "denseState":"tools/compare/evidence/lovely-kiss-player-dense-state.json.gz",
+      "denseStateSha256":"1f0c762b348fd18312a4f9032435f749f5aa49be7c342724e5f09fed1ac82ad3",
+      "rawRgbArchive":"tools/compare/evidence/lovely-kiss-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256":"b9c42ab13f18f57415811a5976ab7a02d010150d2982162383f97c34a7bc1112",
+      "rawRgbSequenceSha256":"6236f7e91047c920fdf47e6bc759b9b3bf178bd2afab3d5d01318640cd6cb5fc",
+      "changeMap":"tools/compare/evidence/lovely-kiss-changemap-player.json",
+      "changeMapSha256":"6bf9bb4f6be83eaad97d1422623af596a3b70439519c31ea003e7b58a2aadec8"
+    },
+    "opponent-front": {
+      "scenario":"tools/battle-lab/mechanic-lovely-kiss-opponent-jynx-player-onix.json",
+      "scenarioSha256":"6e00f38f4231695336af2c45986756527cd4db99c0ea6fe700eea4d15afccfc9",
+      "sourceWindow":{"startFrame":77,"endFrame":229,"frameCount":153},
+      "probeJsonSha256":"3687165a7eeff31c72f008976d50f91d9da7b8a217df58fb1e91299a6a6ffa77",
+      "repeatProbeJsonSha256":"3687165a7eeff31c72f008976d50f91d9da7b8a217df58fb1e91299a6a6ffa77",
+      "denseState":"tools/compare/evidence/lovely-kiss-opponent-dense-state.json.gz",
+      "denseStateSha256":"baa365915c4a262b09a8c9929be39731405e792c9173599bc699f1ff8a57e24a",
+      "rawRgbArchive":"tools/compare/evidence/lovely-kiss-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256":"24ea3297b4d5a80577101429ecf203542b7b7cb12260849a56e6ce978c323c17",
+      "rawRgbSequenceSha256":"5b6f13eb31a1ba675f73ba05c15e9aa31bdee11350f9727ba250069421bc52f7",
+      "changeMap":"tools/compare/evidence/lovely-kiss-changemap-opponent.json",
+      "changeMapSha256":"c68529b7ab080df376d0e2bc90cba0c60c1f96606c90cc4d2c79205fe1b488c1"
+    }
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": "153/153 + 153/153",
+    "rawRgbRows": "153/153 + 153/153",
+    "observedPointerParities": [0,1],
+    "devilCreatesPerOrientation": 1,
+    "pinkHeartCreatesPerOrientation": 4,
+    "oamLatch": "152/152 preceding-software rows per orientation",
+    "matrixLatch": "152/152 preceding-software rows per orientation",
+    "paletteLatch": "152/152 preceding-faded rows per orientation",
+    "typedSeamRows": "not implemented by evidence-only checkpoint",
+    "productionFramebufferRows": "not compared by evidence-only checkpoint",
+    "firstInactiveCleanupAge": 152
+  },
+  "controls": {
+    "sweetKiss": "exact source-neighbor control only; no shared acceptance",
+    "attract": "exact source-neighbor control only; no shared acceptance",
+    "sleepAnimations": "Sleep Powder/Yawn/Dream Eater controls only; no status ownership"
+  },
+  "next": "Derive a Lovely Kiss source-relative reducer, narrow typed Scene-ON seam, and source-derived compositor; then require complete dense seam/framebuffer equality twice fresh before any promotion. Do not award sibling credit."
+}

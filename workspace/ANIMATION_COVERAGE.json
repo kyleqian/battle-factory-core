@@ -2,6 +2,33 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_LOVELY_KISS",
+   "status": "partial",
+   "covered": [
+    "complete legal Level-50 challenge-3 FRONTIER_MON_JYNX_1 parties stage Lovely Kiss against Onix in both ordinary Battle Scene ON orientations; player-back and opponent-front each retain 153 consecutive source-owned rows through first inactive cleanup, and each orientation is replayed twice fresh with byte-identical dense state and raw RGB",
+    "the authoritative half-open source interval is 0x082d4035..0x082d407c (71 bytes, 604194e8a58c2a8e0aa8162e91983863ca464a43df99d593e720f991bcda66d3), with both even and odd command-pointer parity observed; the exact graph is ANIM_TAG_DEVIL, ANIM_TAG_PINK_HEART, gDevilSpriteTemplate, and gPinkHeartSpriteTemplate",
+    "source callbacks AnimDevil, AnimPinkHeart, and AnimPinkHeart_Step, source-identical Devil/Magenta Heart graphics and palettes, and target-panned SE_M_PSYBEAM2 (id 200) then SE_M_ATTRACT (id 226) are pinned; the lowest legal Level-50 carrier is set 377 FRONTIER_MON_JYNX_1 (species 124, Shell Bell 219, Modest, SpAttack+HP)",
+    "the retained dense rows include source cursor/wait/args, task and sprite creation/destruction/callback/OAM/affine state, animation RNG, software and hardware OAM/matrices, faded/unfaded/hardware palettes and tags, BG/register/audio, complete parties, battlers/engine/immutable state, gameplay RNG, raw RGB, normalized change maps, hardware latches, and first-inactive cleanup; visual-task topology stays empty and lifecycle is 1 Devil plus 4 Pink Hearts per orientation",
+    "the evidence-only verifier passes 306/306 dense rows and 306/306 raw-RGB rows; each preceding software-to-hardware OAM, matrix, and palette latch is 152/152 per orientation, gameplay RNG has zero transitions, animation RNG has 152 transitions per orientation, and cleanup is retained; Sweet Kiss, Attract, and sleep-animation bodies remain source-neighbor controls only"
+   ],
+   "remaining": "MOVE_LOVELY_KISS still has no source-relative reducer, typed Scene-ON seam, production compositor/draw wiring, or framebuffer equality. The four components and every move acceptance unit remain unfulfilled; do not infer sibling credit from Sweet Kiss, Attract, or sleep controls.",
+   "evidence": [
+    "tools/battle-lab/mechanic-lovely-kiss-player-jynx-opponent-onix.json",
+    "tools/battle-lab/mechanic-lovely-kiss-opponent-jynx-player-onix.json",
+    "tools/compare/fixtures/lovely-kiss-evidence.json",
+    "tools/compare/lovelyKissSourceAudit.ts",
+    "tools/compare/lovelyKissProbe.py",
+    "tools/compare/lovelyKissEvidence.ts",
+    "tools/compare/evidence/lovely-kiss-player-dense-state.json.gz",
+    "tools/compare/evidence/lovely-kiss-opponent-dense-state.json.gz",
+    "tools/compare/evidence/lovely-kiss-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/lovely-kiss-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/lovely-kiss-changemap-player.json",
+    "tools/compare/evidence/lovely-kiss-changemap-opponent.json",
+    "tests/animation/lovelyKissEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_RAIN_DANCE",
    "status": "exact",
    "covered": [
@@ -5403,7 +5430,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_LOVELY_KISS"],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6355,6 +6382,17 @@
    ],
    "fulfilled": true,
    "goal": "FULFILLED: task:AnimTask_Rollout is a singleton Level-50 component represented only by MOVE_ROLLOUT. Complete legal Voltorb/Onix Scene-ON lifecycles naturally progress all five counter bodies twice fresh in both orientations through first inactive cleanup. The source-relative reducer, typed seam, and shared production framebuffer pass player-back 793/793 plus opponent-front 793/793, 1,586/1,586 total with zero residual pixels. The five opponent pointer-entry rows use the source-extracted elevated enemy-shadow OAM layer and its preceding-hardware-buffer lifetime. MOVE_ROLLOUT alone is exact; MOVE_ICE_BALL remains independently unsupported. MOVE_SAND_ATTACK and MOVE_ANCIENT_POWER remain independent exact controls, and Defense Curl gameplay state receives no presentation ownership or unsupported visual claim."
+  },
+  {
+   "id": "devil-pink-heart-lovely-kiss",
+   "components": [
+    "asset:ANIM_TAG_DEVIL",
+    "asset:ANIM_TAG_PINK_HEART",
+    "sprite:gDevilSpriteTemplate",
+    "sprite:gPinkHeartSpriteTemplate"
+   ],
+   "representatives": ["MOVE_LOVELY_KISS"],
+   "goal": "PARTIAL: MOVE_LOVELY_KISS independently retains complete legal Scene-ON player-back and opponent-front source-owned dense/raw-RGB windows twice fresh through first inactive cleanup, with source interval, callbacks, assets, audio, OAM/matrix/palette/tag/register latches, complete parties, and gameplay/animation-RNG evidence. The source-relative reducer, typed seam, production compositor, framebuffer equality, and every move-specific acceptance unit remain open; no sibling credit is conveyed."
   }
  ],
  "variantAudits": {

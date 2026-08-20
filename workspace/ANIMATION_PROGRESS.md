@@ -1,3 +1,11 @@
+# MOVE_LOVELY_KISS bilateral dense evidence checkpoint — partial (2026-08-20 worker)
+
+- **State:** Coverage remains **198/276 Level-50 exact, 1 partial, 77 unsupported**. MOVE_LOVELY_KISS is the sole queue item; the new `devil-pink-heart-lovely-kiss` track is non-exclusive and unfulfilled. No sibling credit or latch change.
+- **Did:** Added complete legal challenge-3 set-377 Jynx↔Onix Scene-ON parties, source audit, and an evidence-only probe. The pointer-bounded interval is **0x082d4035..0x082d407c (71 bytes)** with exactly four components: `ANIM_TAG_DEVIL`, `ANIM_TAG_PINK_HEART`, `gDevilSpriteTemplate`, and `gPinkHeartSpriteTemplate`; callbacks are `AnimDevil`, `AnimPinkHeart`, `AnimPinkHeart_Step`, with target-panned `SE_M_PSYBEAM2` then `SE_M_ATTRACT`.
+- **Verified:** Player-back **73..225 (153 rows)** and opponent-front **77..229 (153 rows)** each rerun twice fresh with byte-identical dense state and raw RGB. Retained state covers source/task/sprite/OAM/affine/palette/tag/BG/register/audio/party/engine/immutable/RNG/cleanup; lifecycle is 1 Devil + 4 Pink Hearts, visual tasks remain empty, gameplay RNG has 0 transitions, animation RNG has 152 transitions, and OAM/matrix/palette latches are 152/152 per orientation. Evidence/raw/map digests are pinned in the fixture and direct verifier.
+- **Remainder/next:** This is evidence-only: no reducer, typed seam, production compositor, framebuffer equality, or move-specific acceptance. Sweet Kiss, Attract, and sleep animations are source-neighbor controls only; do not infer Lovely Kiss or sibling promotion.
+- **Checks:** Source/evidence verifiers, focused evidence/boundary/import/unsupported-branch ratchets, typecheck, full `npm test` (**1,075 files passed / 44 skipped; 10,145 passed / 223 skipped**), production build (**694 modules**), and `git diff --check` pass. Successful probe scratch directories were cleaned; the worktree is ready for the evidence-only commit.
+
 # MOVE_RAIN_DANCE bilateral exact production presentation (2026-08-20 worker)
 
 - **State:** Coverage advances **197→198/276 Level-50 exact**, **1→0 partial**, and remains **78 unsupported**. MOVE_RAIN_DANCE alone promotes, the queue is empty, and `rain-drops-rain-dance` is fulfilled. Haze and Detect remain independent exact regression controls; Hail remains distinct unsupported, with no sibling credit.
