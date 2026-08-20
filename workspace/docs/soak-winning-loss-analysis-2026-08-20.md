@@ -204,3 +204,68 @@ would need a much larger sweep (several hundred seeds) to observe carry >=
 whatever (2)/swap-policy turns out to help) to lift the per-round win
 probability enough to make it a non-rare event rather than a needle in a
 few-hundred-seed haystack.
+
+## 4. Part C landed: voluntary switch out of a walled matchup (2026-08-20, worker/side-20260820-120834)
+
+Implements the §3 loss-census finding that 22.0% of `winning` losses ended
+with a resisted/immune move and no better legal move in the active's
+moveset ("walled"). At the action menu, when the active's best legal fight
+score (`pickWinningFightSlot`'s own scoring) is walled AND a benched,
+non-fainted party member has a damaging move that is super-effective
+(>= 2x) against the opponent's live types, `winning` now overrides the
+drawn action-menu roll to POKéMON and sends out the best-scoring qualifying
+bench row (ties to the lower row) instead of part B's always-decline.
+Guarded against ping-pong (one voluntary switch per opponent party slot per
+battle) and against emptying the bench (never switches with only one
+healthy party member left). Pure decision function `pickWinningSwitchRow`
+(`tools/soak/randomRoundSoakDriver.ts`), pinned with 6 synthetic cases in
+`tests/randomRoundSoak.test.ts`. `full`/`vanilla` byte-identical pins
+verified green unmodified; no `src/` change.
+
+**Like-for-like measurement, `--policy winning --seeds 0:60 --render-every 0`,
+same worktree, before implementing part C vs. after:**
+
+| | OK | CRASH | HANG | carry>=7 (36/60 baseline) | carry>=14 | carry>=21 | deepest carry | deepest depth |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Before (base, part B) | 57/60 | 3 | 0 | 36/60 (60.0%) | 10/60 (16.7%) | 0/60 (0%) | 14 | 20 |
+| After (part C) | 60/60 | 0 | 0 | 25/60 (41.7%) | 6/60 (10.0%) | 1/60 (1.7%) | 21 | 21 |
+
+The before run reproduced the supervisor-reported baseline exactly (57
+OK / 3 CRASH — seeds 10, 51 `STRINGID_NATUREPOWERTURNEDINTO`, seed 36
+`factory-ai-check-viability: unknown last-used move 65535` — carry>=7
+36/60, carry>=14 10/60, carry>=21 0/60, deepest carry 14, deepest depth 20).
+
+**The heuristic measures WORSE on this seed set for the primary carry>=7
+metric: 25/60 (41.7%) vs. the 36/60 (60.0%) baseline, a clear regression,
+not noise.** carry>=14 also dropped (6/60 vs. 10/60). The only metrics that
+improved are the tail: deepest carry (21 vs. 14) and carry>=21 (1/60 vs.
+0/60) — plausibly because escaping a walled matchup occasionally survives a
+battle that would otherwise be an immediate loss, letting a handful of runs
+push one round further than baseline ever reached, at the cost of a lower
+overall clear rate (a switch spends a turn not attacking, and the bench
+mon it switches to is not vetted against what the opponent sends out next).
+All three baseline crashes (seeds 10/36/51) disappeared in the after run —
+not a fix (still unreached commits, base tree unchanged: no #100 fix, no
+draft heuristic) but a side effect of the heuristic changing play well
+before those frames, so those seeds' RNG-consumption/battle-state paths no
+longer reach the crashing conditions. Seeds 10 and 51 (STRINGID_NATURE...)
+and seed 36 (unknown last-used move) both switched at least once (7, 4, and
+6 switches respectively per the count below) before their prior crash point.
+
+**Voluntary switches actually committed:** counted via the `winning switch:
+row N` log note (added this session) across the same 60-seed set at
+`--max-frames 1_000_000` (matching `DEFAULT_MAX_FRAMES_BY_POLICY.winning`):
+**153 switches across 52/60 seeds** (min 1, max 12 in a single seed's
+chained rounds) — the heuristic engages often, not a rare edge case.
+
+**Interpretation:** the heuristic is real player behavior (a benched
+teammate with a clean super-effective answer beats grinding a walled
+attacker) but is not a net win-rate improvement on this seed set — spending
+an action-menu turn on POKéMON instead of FIGHT has an opportunity cost
+(no chip damage that turn, and the bench mon's own matchup against
+whatever the opponent sends out or does next isn't evaluated) that this
+20% of decisions apparently outweighs the walled-mon damage it avoids, at
+least at 60 seeds. Landing this as `winning`'s default is the supervisor's
+call, not this worker's; per the brief, it is committed test-pinned as
+measured, without seed-tuning the heuristic's thresholds to chase a better
+number here.
