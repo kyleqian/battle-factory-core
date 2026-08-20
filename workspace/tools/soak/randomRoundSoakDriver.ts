@@ -713,12 +713,47 @@ class RandomPlayer {
       this.note(state, `postwin ${postwin.question.kind}: ${wantYes ? "YES" : "NO"}`);
       return this.press("A", 10);
     }
+    // Swap offer YES/NO menu (dialogue page 4) -- shared for both routes
+    // (brain's short path lands here directly from dialoguePage 1). Checked
+    // before the continuation branch below: `acceptPostwinContinuation`
+    // (src/engine/postwin.ts:1558-1573) never clears `continuationCursorPos`
+    // once GO ON is confirmed, only advances `dialoguePage` away from 0, so
+    // without an explicit page gate the continuation branch's condition
+    // would still read true here and answer this menu instead (ISSUES #99).
+    if (
+      postwin.dialoguePage === 4
+      && postwin.swapDeclineElapsed === null
+      && postwin.swapCursorPos !== null
+    ) {
+      const accept = this.explores && this.rng.chance(0.5);
+      const targetPos = accept ? 0 : 1;
+      if (postwin.swapCursorPos !== targetPos) {
+        return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
+      }
+      this.note(state, `swap offer: ${accept ? "YES" : "NO"}`);
+      return this.press("A", 10);
+    }
+    // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead one-liner
+    // (dialoguePage 1) has no scouting pages to cycle through -- it advances
+    // generically (the fallback `pressAdvance` below) then jumps straight to
+    // the swap prompt (dialoguePage 4, handled above).
+    if (postwin.frontierBrain && postwin.dialoguePage === 1) {
+      return this.pressAdvance(state, "postwin brain one-liner (AskSwapBeforeHead)");
+    }
     // Continuation menu (GO ON / RECORD / REST / RETIRE) -- shared machinery
     // for both the ordinary AskReadyForOpponent menu and brain's own
     // AskReadyForHead (walk-up build step A, Brief 1): the same GO ON/
     // RECORD/REST/RETIRE random exploration already exercises brain's menu
     // too whenever continuationCursorPos is live, no separate branch needed.
-    if (postwin.question === null && postwin.continuationCursorPos !== null) {
+    // Gated on `dialoguePage === 0` -- the engine's own live-menu condition
+    // (`acceptPostwinContinuation`'s guard) -- so this branch stops matching
+    // once GO ON is confirmed and later pages (incl. the swap offer above)
+    // take over; see the comment on that branch (ISSUES #99).
+    if (
+      postwin.question === null
+      && postwin.dialoguePage === 0
+      && postwin.continuationCursorPos !== null
+    ) {
       const roll = this.rng.float();
       const target = !this.explores
         ? 0
@@ -732,29 +767,6 @@ class RandomPlayer {
           + `${["GO ON", "RECORD", "REST", "RETIRE"][target]}`,
       );
       return this.press("A", 12);
-    }
-    // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead one-liner
-    // (dialoguePage 1) has no scouting pages to cycle through -- it advances
-    // generically (the fallback `pressAdvance` below) then jumps straight to
-    // the swap prompt (dialoguePage 4, handled next). Explicit branch only
-    // for a clearer soak-log label.
-    if (postwin.frontierBrain && postwin.dialoguePage === 1) {
-      return this.pressAdvance(state, "postwin brain one-liner (AskSwapBeforeHead)");
-    }
-    // Swap offer YES/NO menu (dialogue page 4) -- shared for both routes
-    // (brain's short path lands here directly from dialoguePage 1).
-    if (
-      postwin.dialoguePage === 4
-      && postwin.swapDeclineElapsed === null
-      && postwin.swapCursorPos !== null
-    ) {
-      const accept = this.explores && this.rng.chance(0.5);
-      const targetPos = accept ? 0 : 1;
-      if (postwin.swapCursorPos !== targetPos) {
-        return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
-      }
-      this.note(state, `swap offer: ${accept ? "YES" : "NO"}`);
-      return this.press("A", 10);
     }
     return this.pressAdvance(state, "postwin advance");
   }
