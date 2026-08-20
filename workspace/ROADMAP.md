@@ -1392,6 +1392,18 @@ compact assertion block; a dump that is expensive to regenerate MAY be
 committed as-is. Never spend a worker step regenerating or slimming an
 existing receipt for hygiene alone.
 
+**Semantics update (2026-08-20, ISSUES #104 retune, PROGRESS 1368):** under
+continuous play a soak run never ends by itself (every round re-chains), so
+the per-seed outcome is now: **OK** = the frame budget (`DEFAULT_MAX_FRAMES_BY_POLICY`)
+is reached while the run is still progressing (`endState: "budget"`), or
+`--max-rounds N` round decisions were observed, or the lobby was reached;
+**HANG** = no progress (round identity / battle index / turn / input surface /
+round phase) for `--stall-frames` (default 30,000) frames; **CRASH** unchanged.
+The standing gates therefore read "no stall and no crash within the budget".
+Every pre-#104 sweep's "OK" was a cumulative-grace artifact (the run stopped
+after ~3 re-chains) — compare depth numbers only within one semantics era.
+
+
 **Gate-6 evidence granularity + sequencing (user decision 2026-08-09):**
 the 561-item per-move hook-gap census (300 item + 261 ability) is NOT to be
 closed gap-by-gap. Re-group it into effect/hook families; each family gets
