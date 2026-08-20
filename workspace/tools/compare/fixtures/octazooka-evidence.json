@@ -23,9 +23,9 @@
     "audio": {"launch":{"soundEffect":"SE_M_MEGA_KICK2","id":141,"pan":"SOUND_PAN_ATTACKER"},"impact":{"soundEffect":"SE_M_SELF_DESTRUCT","id":177,"pan":"SOUND_PAN_TARGET"}}
   },
   "evidenceScope": {
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
     "compositorAdded": false,
     "framebufferCompared": false,
     "coveragePromotion": false,
@@ -83,8 +83,8 @@
     "smokescreen": "shared smoke-family control only; no shared acceptance"
   },
   "productionAcceptance": {
-    "reducerRows": "0/160",
-    "typedSeamRows": "0/160",
+    "reducerRows": "160/160",
+    "typedSeamRows": "160/160",
     "productionFramebufferRows": "0/160",
     "manualQueue": "MOVE_OCTAZOOKA only, partial evidence checkpoint"
   }

@@ -105,6 +105,11 @@ import {
   type SmokescreenEffect,
 } from "./smokescreen.ts";
 import {
+  octazookaAtAge,
+  type OctazookaProfile,
+  type OctazookaState,
+} from "./octazooka.ts";
+import {
   mudShotAtAge,
   type MudShotState,
 } from "./mudShot.ts";
@@ -2126,6 +2131,15 @@ export interface SceneOnSmokescreenConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Octazooka presentation only; blindness/status resolution remains battle-owned. */
+export interface SceneOnOctazookaConfig {
+  readonly move: "OCTAZOOKA";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<OctazookaProfile>;
+}
+
 export interface SceneOnMudShotConfig {
   readonly move: "MUD_SHOT";
   readonly attacker: SceneOnPresentationBattler;
@@ -3177,6 +3191,7 @@ export type SceneOnMoveConfig =
   | SceneOnPinMissileConfig
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
+  | SceneOnOctazookaConfig
   | SceneOnMudShotConfig
   | SceneOnHydroPumpConfig
   | SceneOnWhirlpoolConfig
@@ -3399,6 +3414,8 @@ export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
 export type SceneOnLovelyKissPresentationState =
   SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
+export type SceneOnOctazookaPresentationState =
+  SceneOnMovePresentationState<SceneOnOctazookaConfig>;
 export type SceneOnAttractPresentationState =
   SceneOnMovePresentationState<SceneOnAttractConfig>;
 export type SceneOnSporePresentationState =
@@ -3681,6 +3698,11 @@ export interface SceneOnSonicBoomView extends SonicBoomEffect {
 
 export interface SceneOnSmokescreenView extends SmokescreenEffect {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnOctazookaView extends OctazookaState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6682,6 +6704,27 @@ export function sceneOnSmokescreenView(
       state.config.attacker.geometry.side,
       state.config.attacker.geometry.animationCenter,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_OCTAZOOKA's first retained active source row. */
+export function sceneOnOctazookaView(
+  state: SceneOnOctazookaPresentationState,
+): SceneOnOctazookaView {
+  if (state.config.move !== "OCTAZOOKA") {
+    throw new Error(`expected OCTAZOOKA presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...octazookaAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.animationProfile,
     ),
   };
 }

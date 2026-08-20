@@ -10,9 +10,11 @@
     "the legal carrier is species 224 Octillery holding Shell Bell 219, Hardy with SpAttack+Attack EVs; both complete parties use unique species and held items, and the opposing Careful Onix has max HP/SpDef EVs without transient HP/status/stage/weather/outcome injection",
     "the retained rows pin source cursor/wait/args, exact one-ball/four-smoke creation and destruction topology, AnimTranslateLinear_WithFollowup/AnimSpriteOnMonPos/DestroyAnimSprite callbacks, software/hardware OAM and matrices, unfaded/faded/hardware palettes and tags, registers, audio, complete parties, immutable gameplay fields, gameplay versus animation RNG, raw RGB/change maps, and first inactive cleanup",
     "both orientations pass 80/80 dense plus 80/80 RGB rows; preceding OAM/matrix/palette latches are 79/79 each, gameplay RNG has zero transitions, animation RNG advances on all 79 edges, and SE_M_MEGA_KICK2 id 141 plus SE_M_SELF_DESTRUCT id 177 latch at their source boundaries",
-    "Smokescreen and Mist remain independent controls only; no reducer, typed seam, compositor, framebuffer equality, production import, gameplay/status/damage ownership, latch credit, sibling credit, or exact promotion is claimed"
+    "the pure source-relative reducer and narrow typed Scene-ON seam reproduce all 80/80 player-back plus 80/80 opponent-front retained component rows: script cursor/waits/args, animation RNG, one 20-callback BLACK_BALL TranslateAnimSpriteToTargetMonLocation -> AnimTranslateLinear_WithFollowup lifecycle, four delayed 15-display GRAY_SMOKE AnimSpriteOnMonPos lifecycles, source allocator order, sprite OAM/neutral affine state, tag/palette transfers, audio, preceding hardware latches, and first inactive cleanup",
+    "Mist and Smokescreen are explicit negative controls, while an ARON->GROVYLE reversed-side/altered-geometry control proves typed side and geometry activation without an Octillery/Onix pair gate; no sibling receives acceptance credit",
+    "no compositor/draw wiring, framebuffer equality, production recording import, gameplay/status/damage ownership, latch credit, sibling credit, or exact promotion is claimed"
    ],
-   "remaining": "MOVE_OCTAZOOKA still needs a source-relative reducer, typed Scene-ON seam, ordinary source-derived compositor/draw wiring, and twice-fresh complete 160/160 production framebuffer equality before it can promote. Shared BLACK_BALL/GRAY_SMOKE evidence transfers no move acceptance.",
+   "remaining": "The sole remaining follow-up is ordinary source-derived compositor/draw wiring plus twice-fresh complete 160/160 production framebuffer equality before MOVE_OCTAZOOKA can promote. Shared BLACK_BALL/GRAY_SMOKE evidence transfers no move acceptance.",
    "evidence": [
     "tools/battle-lab/mechanic-octazooka-player-octillery-opponent-onix.json",
     "tools/battle-lab/mechanic-octazooka-opponent-octillery-player-onix.json",
@@ -20,13 +22,17 @@
     "tools/compare/octazookaSourceAudit.ts",
     "tools/compare/octazookaProbe.py",
     "tools/compare/octazookaEvidence.ts",
+    "tools/compare/octazookaReducerAudit.ts",
     "tools/compare/evidence/octazooka-player-dense-state.json.gz",
     "tools/compare/evidence/octazooka-opponent-dense-state.json.gz",
     "tools/compare/evidence/octazooka-player-raw-rgb.tar.gz",
     "tools/compare/evidence/octazooka-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/octazooka-changemap-player.json",
     "tools/compare/evidence/octazooka-changemap-opponent.json",
-    "tests/animation/octazookaEvidence.test.ts"
+    "src/animation/octazooka.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tests/animation/octazookaEvidence.test.ts",
+    "tests/animation/octazooka.test.ts"
    ]
   },
   {
@@ -6443,7 +6449,7 @@
     "sprite:gOctazookaSmokeSpriteTemplate"
    ],
    "representatives": ["MOVE_OCTAZOOKA"],
-   "goal": "EVIDENCE ONLY: MOVE_OCTAZOOKA independently passes 80/80 player-back plus 80/80 opponent-front source/state/raw-RGB/change-map rows through first inactive cleanup, twice fresh. Exact lifecycle is one BLACK_BALL translation and four delayed GRAY_SMOKE sprites with source audio, tags, hardware latches, immutable gameplay state, and separate animation RNG retained. The track remains unfulfilled pending reducer, typed seam, compositor, and complete production framebuffer equality; Smokescreen, Mist, and every sibling receive no credit."
+   "goal": "REDUCER/SEAM PARTIAL: MOVE_OCTAZOOKA independently passes 80/80 player-back plus 80/80 opponent-front source/state/raw-RGB/change-map/reducer/typed-seam rows through first inactive cleanup, twice fresh. The source-relative reducer ports one BLACK_BALL translation and four delayed GRAY_SMOKE sprites, cursor/waits/args, source audio, tags/palette transfers, neutral affine/OAM state, allocator order, hardware latches, and animation RNG without gameplay ownership or an evidence-pair gate. Mist, Smokescreen, and every sibling receive no credit. The track remains unfulfilled pending only ordinary compositor/draw wiring and complete production framebuffer equality."
   }
  ],
  "variantAudits": {

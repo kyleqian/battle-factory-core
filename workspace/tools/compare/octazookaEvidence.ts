@@ -125,7 +125,8 @@ function verifyOrientation(side: Side, contract: Json): Json {
 
 export function verifyOctazookaEvidence(): Record<string, Json> {
   invariant(fixture.schema === "octazooka-bilateral-evidence/v1" && fixture.oracleProfile === "battle-scene-on" && fixture.move === "MOVE_OCTAZOOKA" && fixture.status === "partial" && fixture.coverageCredit === false, "Octazooka evidence contract drift");
-  invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false && fixture.evidenceScope.framebufferCompared === false && fixture.evidenceScope.coveragePromotion === false, "Octazooka evidence scope widened");
+  invariant(fixture.evidenceScope.productionAnimationChanged === true && fixture.evidenceScope.reducerAdded === true && fixture.evidenceScope.typedSeamAdded === true && fixture.evidenceScope.compositorAdded === false && fixture.evidenceScope.framebufferCompared === false && fixture.evidenceScope.coveragePromotion === false, "Octazooka evidence scope widened");
+  invariant(fixture.productionAcceptance.reducerRows === "160/160" && fixture.productionAcceptance.typedSeamRows === "160/160" && fixture.productionAcceptance.productionFramebufferRows === "0/160", "Octazooka partial acceptance drift");
   return Object.fromEntries((["player-back", "opponent-front"] as const).map((side) => [side, verifyOrientation(side, fixture.orientations[side])]));
 }
 
