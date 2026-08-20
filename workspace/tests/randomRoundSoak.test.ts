@@ -432,8 +432,17 @@ describe("random round soak driver (green milestone pin)", () => {
     // whole round plays out to a genuine finish. Pin the meaningful outcome
     // shape (progressed past the old crash point, no throw, real endState),
     // not the exact settling frame/turn — those drift with unrelated
-    // downstream RNG-consumption changes.
-    const result = runSeed(27, { maxFrames: 80_000, renderEvery: 0 });
+    // downstream RNG-consumption changes. `stopAtFirstRoundDecision` snapshots
+    // THIS round's own decided outcome regardless of what the terminal does
+    // afterward — this seed's terminal happens to dead-end on ISSUES #104
+    // (ISSUES #104 driver fix, PROGRESS ~1367), an unrelated open defect this
+    // pin has no stake in; without the flag the honest driver now reports
+    // that dead-end as HANG instead of this seed's own genuine roundLost.
+    const result = runSeed(27, {
+      maxFrames: 80_000,
+      renderEvery: 0,
+      stopAtFirstRoundDecision: true,
+    });
     expect(result.errorMessage ?? "").not.toMatch(/openpartyscreen|machine-barrier/i);
     expect(result.frames).toBeGreaterThan(30_798);
     expect(result).toMatchObject({ outcome: "OK", endState: "roundLost" });
@@ -803,5 +812,58 @@ describe("Milestone M-B step 2 part C (tightened by part C2): winning switches o
       alreadySwitchedAgainstThisOpponent: false,
     });
     expect(row).toBeNull();
+  });
+});
+
+describe("ISSUES #104 (driver): per-round terminal grace re-arms; a stalled terminal reports HANG, not OK", () => {
+  it("(a) a seed whose terminal dead-ends (record YES/cancel) reports HANG at factoryTerminal instead of a false OK", () => {
+    // Seed 328 winning: PROGRESS 1366's supervisor probe found the OLD
+    // cumulative-grace driver silently reporting OK at frame 249,367
+    // (`roundComplete carry<=21`) while the terminal's real state was
+    // `recordChoice: "yes"`, dead forever (ISSUES #104's engine half, still
+    // unfixed in this tree by design -- driver-only step). With the grace
+    // re-armed per round instead of shared across every earlier successful
+    // re-chain, THIS seed's own dead end no longer needs to wait for a
+    // cumulative budget to run dry; it is caught directly once ITS round's
+    // own 9,000-frame window elapses -- much sooner (this seed settles by
+    // frame 189,924, well inside the 260,000 budget).
+    const result = runSeed(328, {
+      policy: "winning",
+      maxFrames: 260_000,
+      renderEvery: 0,
+    });
+    expect(result.outcome).toBe("HANG");
+    expect(result.hangSurface).toBe("factoryTerminal");
+    expect(result.endState).toBe("roundComplete");
+  });
+
+  it("(b) re-arming lets a seed chain through >= 2 full round wins before its OWN eventual terminal dead-end", () => {
+    // Seed 34 winning: reaches carry 14 -- TWO chained round wins, i.e. two
+    // separate successful decide -> decline -> re-chain cycles -- before
+    // ITS OWN terminal dead-ends. This proves re-arming doesn't shrink or
+    // cap chaining: under the old cumulative bug a single shared
+    // 9,000-frame budget was spent down by every earlier round's own
+    // decided-dwelling time, capping how deep a chain could run before
+    // being mistaken for "OK, done" regardless of whether THIS seed's
+    // eventual dead end had even been reached yet.
+    //
+    // This is deliberately NOT an "outcome: OK" pin. A swept range (seeds
+    // 0-69, `winning`) found no seed that reaches genuine OK completion
+    // under the honest driver: continuous-play chaining
+    // (core.ts:~837-843) means a successful decline re-chains straight
+    // into a fresh draft and never emits `lobbyFreeRoam` under the default
+    // generated-orchestrator route this driver uses, so a long enough run
+    // always eventually lands on the terminal's YES/cancel dead end (ISSUES
+    // #104's engine half) with near-certainty. The honest regression guard
+    // is therefore the DEPTH reached before that seed's own dead end, not a
+    // fabricated "OK" -- see PROGRESS ~1367 for the full finding.
+    const result = runSeed(34, {
+      policy: "winning",
+      maxFrames: 210_000,
+      renderEvery: 0,
+    });
+    expect(result.outcome).toBe("HANG");
+    expect(result.hangSurface).toBe("factoryTerminal");
+    expect(result.maxCarriedWinStreak).toBeGreaterThanOrEqual(14);
   });
 });

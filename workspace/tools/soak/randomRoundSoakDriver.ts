@@ -314,7 +314,13 @@ export type SeedOutcome = "OK" | "CRASH" | "HANG";
 export type SeedResult = {
   seed: number;
   outcome: SeedOutcome;
-  /** OK sub-outcome: roundComplete | roundLost | milestone:first-action-menu */
+  /**
+   * OK sub-outcome: roundComplete | roundLost | milestone:first-action-menu.
+   * Also set on a HANG whose grace window expired after a round WAS decided
+   * (ISSUES #104 driver half) — the decided round's own outcome
+   * (roundComplete | roundLost), so the CLI/summary line reads like other
+   * post-decision HANGs instead of looking like a mid-round stall.
+   */
   endState?: string;
   frames: number;
   battle: number;
@@ -1209,6 +1215,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   let state = options.stateFactory?.() ?? createInitialState();
   let frame = 0;
   let terminalGrace = -1;
+  let graceWasActive = false;
   let firstEndState: string | null = null;
   let chainingCommitted = false;
   let firstDecisionSnapshot:
@@ -1336,15 +1343,37 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
     const graceActive = options.stopAtFirstRoundDecision === true
       ? firstEndState !== null
       : (end !== null || state.lobbyFreeRoam !== null);
+    if (!graceActive && graceWasActive) {
+      // The decided round re-chained (a fresh generated round started)
+      // before its own grace window expired — ISSUES #104 driver half: the
+      // window must be per round, not cumulative across every re-chain, so
+      // re-arm it for the NEXT round's own decision rather than letting it
+      // keep counting down from where the last round left off.
+      terminalGrace = -1;
+    }
+    graceWasActive = graceActive;
     if (graceActive) {
       // Round decided. Keep ticking a grace window so the terminal/lobby
       // presentations (their own crash surface) still run, then stop.
       if (terminalGrace < 0) terminalGrace = 9_000;
       terminalGrace -= 1;
-      if (terminalGrace === 0 || state.lobbyFreeRoam !== null) {
+      if (state.lobbyFreeRoam !== null) {
         return options.stopAtFirstRoundDecision === true
           ? finish("OK", { endState: firstEndState!, ...firstDecisionSnapshot! })
           : finish("OK", { endState: end ?? "roundLost" });
+      }
+      if (terminalGrace === 0) {
+        if (options.stopAtFirstRoundDecision === true) {
+          return finish("OK", { endState: firstEndState!, ...firstDecisionSnapshot! });
+        }
+        // Genuine stall: the round decided, its grace window ran out, and
+        // it neither re-chained nor reached the lobby (ISSUES #104 engine
+        // half — the terminal record-YES/cancel dead end is the known
+        // cause). Report HANG honestly instead of OK.
+        return finish("HANG", {
+          hangSurface: player.surface(state),
+          endState: end ?? "roundLost",
+        });
       }
     }
   }

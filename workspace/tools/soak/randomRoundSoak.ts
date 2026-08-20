@@ -94,7 +94,8 @@ function main(): void {
         for (const action of result.lastActions ?? []) console.log(`    ${action}`);
       }
     } else {
-      console.log(`${head}  stuck at ${result.hangSurface}${depthSuffix}`);
+      const decidedSuffix = result.endState ? ` (decided: ${result.endState})` : "";
+      console.log(`${head}  stuck at ${result.hangSurface}${decidedSuffix}${depthSuffix}`);
       if (verbose) {
         for (const action of result.lastActions ?? []) console.log(`    ${action}`);
       }
