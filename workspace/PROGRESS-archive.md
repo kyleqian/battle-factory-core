@@ -1,3 +1,27 @@
+## 1359 — [supervisor fold, 2026-08-20] **M-B step 2a folded: `winning` picks fight moves by power × type-effectiveness × STAB (side `ff5e84d6`, merge `82580f0f`) — first-ever carry ≥ 21 seed observed**
+
+- **State:** union of the #99 fix (1358) + side step 2a. Both-sides-additive
+  conflict in `tests/randomRoundSoak.test.ts` resolved by keeping both
+  describes; union checks: soak test file 22/22, smoke 444/444, build green.
+- **Did:** side worker (Sonnet, 26 min) landed `pickWinningFightSlot` (engine's
+  own `applyTypeEffectiveness` + `type-effectiveness.json`; immune/0-power
+  score 0; fallback = old highest-power rule) with 4 Tier-1 pins incl.
+  `full`/`vanilla` byte-identical seeds. Supervisor independently reran its
+  measurement in the worktree (pre-#99-fix tree, like-for-like): `winning`
+  0:60 **25/9/1** at carry ≥ 7/14/21, deepest battle-depth **24** — exact
+  match to the worker's table (before: 26/2/0, deepest 6). Scout doc
+  `docs/soak-winning-loss-analysis-2026-08-20.md` (fold `7f5a9b66`) holds
+  the loss census that motivated it (48.4% of losses ended on a
+  resisted/immune move).
+- **Next:** the union (#99 + #100 + 2a) has not been swept yet — M-B step 3
+  sweep next on main; side lane is landing two more `winning` levers
+  (decline swaps, draft by strength) for a second sweep after.
+- **Notes:** no PAPERCUT. Parallel-lane note: side round 2 launched mid-main-
+  round on `--base 0dd3f36c` and merged only after the main worker exited
+  (code branches never merge under a live main worker).
+
+---
+
 ## 1358 — [main worker, 2026-08-20] **ISSUES #99 FIXED: soak driver's swap offer now answered by its own branch; depth re-measured for all three policies — vanilla's apparent carry-14 depth was a swap-accept-bug artifact, `full` moved off its 0/60 floor, `winning` found one new engine crash (#100)**
 
 - **State:** `tools/soak/randomRoundSoakDriver.ts` (fix + additive

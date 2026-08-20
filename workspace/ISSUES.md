@@ -17,61 +17,6 @@ backlog.
 
 # Open
 
-## #103 — `factory-ai-check-viability: unknown last-used move 65535` — engine crash when the AI's CheckViability port reads a `gLastMoves`-style sentinel (0xFFFF) as a real move
-
-**Found 2026-08-20** (M-B step 2 part B side measurement, `docs/soak-winning-loss-analysis-2026-08-20.md` §4): `winning` policy with swap-decline (side commit `db5b2b27`, folded as `781c8827`; supervisor re-reproduced on master HEAD: seed 36 CRASH at battle 7 turn 3, carry 14 / depth 20), **seed 36**, battle 7 turn 3, frame 190,950 — `[engine/tick]` throw from the `factory-ai-check-viability` port, origin `src/**`, not the driver.
-
-**Repro (master ≥ `781c8827`):** `node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 36 --policy winning --verbose --render-every 0`.
-
-**Lead:** 65535 = 0xFFFF = `MOVE_UNAVAILABLE` in pokeemerald (`include/constants/moves.h`; `gLastMoves[battler]` / `gLastResultingMoves` / `gLastPrintedMoves` are reset to it in `SwitchInClearSetData`/`ClearLastMoves`-style paths — e.g. after a switch, a faint, or when the last move was made unusable). `battle_ai_script_commands.c`'s `Cmd_get_last_used_move`/`if_last_used_move_*`/`Cmd_get_move_power_from_result`-family handlers operate on that raw value (the C never validates it; `gBattleMoves[0xFFFF]` would be OOB there too, but the AI scripts only *compare* it or index `gBattleMoves` through checks that never see 0xFFFF on the ROM's real paths). The TS port's lookup throws on an unknown id instead. Determine from the C which handler reads the value at this turn (battle 7 turn 3: the player's active just switched/fainted-in, so `gLastMoves[player]` is plausibly 0xFFFF) and what the ROM computes for it, then mirror that exactly — a sentinel-aware branch at the port's read site, pinned by a Tier-1 test (CheckViability fixture with last-used move 0xFFFF), NOT a blanket try/catch. Re-run the seed to confirm an honest terminal.
-
-## #101 — `winning`-policy soak seed 90 crashes: STRINGID_PKMNTOOKAIM (Lock-On/Mind Reader) has no messageLines case at all
-
-**Found 2026-08-20** (M-B step-3 sweep, `docs/soak-deep-sweep-2026-08-20.md`,
-`winning` policy seeds 0:240 — new coverage from the deeper post-#99/#100/2a
-trajectories).
-
-**Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts
---seed 90 --policy winning --verbose --render-every 0`. Crashes at battle 1
-turn 23, frame 241646 (`carry<=7 depth<=7`), right after the player commits
-fight-menu slot 0 = move 61 (BUBBLEBEAM) — the STRINGID fires later in the
-same turn's resolution, most likely from the opponent's move (the soak
-action log only records the player-side decision, not the AI's). Error
-(`[engine/tick]`, an `src/engine/**` throw, not a driver bug):
-```
-Error: battleStringResolver: STRINGID_PKMNTOOKAIM references placeholder {B_DEF_NAME_WITH_PREFIX} with no resolver supplied
-    at resolveBattleStringLines (src/engine/battleStringResolver.ts:170)
-    at messageLines (src/engine/battleResolutionPresentation.ts:2983)
-    at projectBattleResolutionCommands (src/engine/battleResolutionPresentation.ts:3156)
-```
-Last actions before the crash:
-```
-f=241595 b1 t23 action menu intent: POKEMON
-f=241603 b1 t23 action: POKEMON
-f=241611 b1 t23 party intent: cancel
-f=241627 b1 t23 party: cancel
-f=241635 b1 t23 action menu intent: FIGHT
-f=241640 b1 t23 action: FIGHT
-f=241646 b1 t23 fight menu intent: slot 0 (move 61)
-f=241646 b1 t23 fight: confirm slot 0
-```
-
-**Mechanism (engine gap, wider than #100's, not investigated further under
-this step's `src/`-off-limits scope):** `STRINGID_PKMNTOOKAIM` is
-`BattleScript_EffectLockOn`'s only printstring
-(`reference/pokeemerald/data/battle_scripts_1.s:1295`, Lock-On/Mind Reader's
-`EFFECT_LOCK_ON`, `setalwayshitflag` + `printstring STRINGID_PKMNTOOKAIM`).
-Unlike #100 (a `B_CURRENT_MOVE` resolver missing from one existing
-`messageLines` case), this STRINGID has **zero** references anywhere in
-`src/engine/*.ts` — `EFFECT_LOCK_ON` only appears in
-`factoryAiCheckViability.ts` (the AI's viability scoring), never in a move
-execution/presentation path. Fix shape is unclear without more digging:
-either the whole `EFFECT_LOCK_ON` script path is unmodeled and needs a real
-`messageLines` case (mirroring the ~14 existing `B_ATK_NAME_WITH_PREFIX`/
-`B_DEF_NAME_WITH_PREFIX` sites) plus whatever kernel state Lock-On's
-always-hit flag requires, or there's a narrower gap this triage didn't have
-time to isolate — needs its own investigation session, not a same-step fix.
-
 ## #102 — `winning`-policy soak seed 154 crashes: `Cmd_switchhandleorder` sees no decided `monToSwitchIntoId` for battler 1 after a mid-round faint
 
 **Found 2026-08-20** (M-B step-3 sweep, `docs/soak-deep-sweep-2026-08-20.md`,

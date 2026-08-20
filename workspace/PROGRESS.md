@@ -5,6 +5,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1363 — [main worker, 2026-08-20] **M-B step 4 triage DONE: ISSUES #101 and #103 both fixed + pinned; both soak repros now reach honest terminals; neighbourhood sweeps clean**
+
+- **State:** `src/engine/battleResolutionPresentation.ts` (#101 fix),
+  `src/engine/factoryAiCheckViability.ts` (#103 fix),
+  `tests/presentationStringIssue101.test.ts` (new),
+  `tests/factoryAiCheckViability.test.ts` (2 new cases),
+  `tools/report/ability-item-parity-census.ts` (5-line-citation ratchet
+  moved +15 to track #103's inserted comments — doc output unchanged, diffed
+  byte-identical), `ISSUES.md` (#101, #103 deleted, fully fixed, no
+  remainder), this entry. Commits `ed66e000` (#101), `1403f462` (#103).
+- **Did — #101:** `STRINGID_PKMNTOOKAIM` (`BattleScript_EffectLockOn`,
+  `data/battle_scripts_1.s:1286-1297`) had no `messageLines` case.
+  Confirmed `Cmd_setalwayshitflag` is already ported
+  (`battleScriptSetalwayshitflagOpcode.ts`) and its always-hit flag is
+  consumed by the accuracy chain, so `EFFECT_LOCK_ON` is fully executable —
+  this was a pure missing-case gap (same shape as `STRINGID_PKMNIDENTIFIED`/
+  `BattleScript_EffectForesight`), not an unmodeled effect; the ISSUES
+  entry's "zero references" claim was about the string only. Added the case
+  (`B_ATK_NAME_WITH_PREFIX`/`B_DEF_NAME_WITH_PREFIX`, unchanged roles).
+  Red-verified via `git stash`. Soak seed 90 no longer reaches the original
+  crash frame at all (the intervening `781c8827`/`db5b2b27` swap-decline
+  fold diverged its RNG path before that point) — pinned directly with a
+  real LOCK ON turn instead; fix is unconditional regardless of seed 90's
+  new trajectory.
+- **Did — #103:** `runCvDefenseUp`/`runCvSpDefUp` (`AI_CV_DefenseUp`/
+  `AI_CV_SpDefUp`, `data/battle_ai_scripts.s:915-942/986-1013`) threw on the
+  target's last-used move id `0xFFFF` (`MOVE_UNAVAILABLE`). Traced the real
+  mechanism: `gLastMoves[gBattlerTarget]` becomes `MOVE_UNAVAILABLE` when the
+  target's move was *blocked* last turn (flinch/full paralysis/frozen/
+  still-asleep/recharge/Truant loafing — `battle_script_commands.c:4405-
+  4412`'s `!HITMARKER_OBEYS` branch), confirmed disobedience itself never
+  fires in the Factory (`IsMonDisobedient` short-circuits on
+  `BATTLE_TYPE_FRONTIER`) so the blocked-move paths are the only route. On
+  hardware `Cmd_get_move_power_from_result` then indexes
+  `gBattleMoves[0xFFFF]`, an out-of-bounds ROM read with no byte-faithful
+  value pokeemerald's own source computes — degraded it the same way this
+  file's other CV handlers already treat an unresolved
+  `target.lastUsedMoveId` (`AI_CV_MirrorCoat`'s `?? 0` power read): power 0,
+  the script's own least-consequential branch. Red-verified via `git
+  stash`. Soak seed 36 now runs to `roundComplete carry<=14 depth<=20`
+  (was a crash at battle 7 turn 3).
+- **Neighbourhood:** `--seeds 30:40` **10/10 OK**, 0 CRASH, 0 HANG (deepest
+  carry 14, depth 20); `--seeds 85:95` **10/10 OK**, 0 CRASH, 0 HANG
+  (deepest carry 7, depth 13).
+- **Gates:** full `npm test` **1,070 files (44 skipped) / 10,140 tests
+  passed (223 skipped)**; `npm run build` green (7.48s vite stage);
+  `npm run typecheck` clean at each edit; `npm run test:smoke` 444/444
+  (caught the census-ratchet line shift, fixed in the same commit).
+- **Next:** #102 (`Cmd_switchhandleorder` no decided `monToSwitchIntoId`,
+  seed 154) is the one remaining M-B step-4 queue item — separate step per
+  the brief's scope. After that, a final 0:240 `winning` re-sweep with
+  every folded lever (2a, swap-decline, #99/#100/#101/#103 fixes) to
+  re-measure the carry≥21/28 rate against 1361's baseline.
+- **Notes:** no PAPERCUT. Time discipline: #101 investigation+fix+pin
+  ~12 min, #103 investigation+fix+pin ~20 min (the ROM-mechanism trace —
+  disobedience vs. blocked-move paths — took longer than expected), census
+  ratchet fix ~3 min, neighbourhood+full-suite+build+docs ~15 min;
+  landed inside the 50-min cap.
+
+---
+
 ## 1362 — [supervisor fold, 2026-08-20] **M-B bar REACHED (sweep 1361: carry ≥ 21 by play, seed 99); swap-decline lever folded (`781c8827`); draft heuristic WITHHELD; #103 filed; ROADMAP M-B status written**
 
 - **State:** master = sweep docs (1361) + side part-B rung 1 (`db5b2b27`,
@@ -138,24 +199,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1359 — [supervisor fold, 2026-08-20] **M-B step 2a folded: `winning` picks fight moves by power × type-effectiveness × STAB (side `ff5e84d6`, merge `82580f0f`) — first-ever carry ≥ 21 seed observed**
-
-- **State:** union of the #99 fix (1358) + side step 2a. Both-sides-additive
-  conflict in `tests/randomRoundSoak.test.ts` resolved by keeping both
-  describes; union checks: soak test file 22/22, smoke 444/444, build green.
-- **Did:** side worker (Sonnet, 26 min) landed `pickWinningFightSlot` (engine's
-  own `applyTypeEffectiveness` + `type-effectiveness.json`; immune/0-power
-  score 0; fallback = old highest-power rule) with 4 Tier-1 pins incl.
-  `full`/`vanilla` byte-identical seeds. Supervisor independently reran its
-  measurement in the worktree (pre-#99-fix tree, like-for-like): `winning`
-  0:60 **25/9/1** at carry ≥ 7/14/21, deepest battle-depth **24** — exact
-  match to the worker's table (before: 26/2/0, deepest 6). Scout doc
-  `docs/soak-winning-loss-analysis-2026-08-20.md` (fold `7f5a9b66`) holds
-  the loss census that motivated it (48.4% of losses ended on a
-  resisted/immune move).
-- **Next:** the union (#99 + #100 + 2a) has not been swept yet — M-B step 3
-  sweep next on main; side lane is landing two more `winning` levers
-  (decline swaps, draft by strength) for a second sweep after.
-- **Notes:** no PAPERCUT. Parallel-lane note: side round 2 launched mid-main-
-  round on `--base 0dd3f36c` and merged only after the main worker exited
-  (code branches never merge under a live main worker).
+Older entries: see `PROGRESS-archive.md`.
