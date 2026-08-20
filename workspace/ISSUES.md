@@ -46,18 +46,77 @@ f=104070 b4 t10 fight menu intent: slot 0 (move 185)
 f=104070 b4 t10 fight: confirm slot 0
 ```
 
-**Mechanism (engine gap, not investigated further under this step's
-`src/`-off-limits scope):** `battleScriptSwitchinOpcode.ts:283-292`'s own
-comment documents that `Cmd_switchhandleorder` cases 1/2/3 rely on
-`monToSwitchIntoId` already being decided by a prior `openpartyscreen` run;
-here battler 1 (likely the opponent, post-faint forced switch given the
-FAINT ATTACK context) reached `switchhandleorder` with that slot still
-`BATTLE_SCRIPT_PARTY_SIZE` (undecided). Plausible root causes not yet
-narrowed: the AI's forced-switch `openpartyscreen` decision path skipping
-this specific battler/scenario, an ordering issue between a faint this turn
-and the switch-in script, or a legitimate multi-battler case the file's own
-"Case 0 (multi-battler collection loop) retains the named barrier" comment
-flags as unmodeled. Needs its own investigation session.
+**2026-08-20 M-B step-4 triage session — repro lost, one lead confirmed, no
+fix landed.** Seed 154 no longer reaches frame 104070 on HEAD (its RNG
+trajectory shifted after the #101/#103 fixes landed the same day); reran the
+brief's fallback `--seeds 150:160` (10/10 OK) and, since that also came up
+clean, the full original `--seeds 0:240` sweep too (240/240 OK, 0 CRASH,
+0 HANG) — the crash is not currently live-reproducible. Diagnosis below is
+from source tracing only, per the brief's explicit fallback.
+
+*Ruled out:* `BattleScript_HandleFaintedMon`'s own script
+(`reference/pokeemerald/data/battle_scripts_1.s:2830-2845`) is straight-line
+for Factory (trainer-type battles always take
+`jumpifbattletype BATTLE_TYPE_TRAINER, BattleScript_FaintedMonTryChoose`):
+`openpartyscreen BS_FAINTED, BattleScript_FaintedMonEnd` always immediately
+precedes `switchhandleorder BS_FAINTED, 2` with nothing between them, both
+resolve the identical `selectorRoles.fainted` battler
+(`battleScriptRulesContext.ts:2859-2860`, shared by both opcodes), and the
+opponent/AI branch of `Cmd_openpartyscreen`
+(`battleScriptOpenPartyScreenOpcode.ts:201-268`) unconditionally computes and
+writes `monToSwitchIntoId[battler]` — it never halts. A genuine same-action
+double-KO (e.g. Destiny Bond faints the attacker alongside the target) also
+checks out: `resumeBattleScriptFaintedActionsAfterPlayerChoice`'s
+`remainingFaintedBattlers` re-collection
+(`battleScriptFaintedActionsOrchestration.ts:629-638`) correctly hands the
+still-fainted opponent battler to a fresh `runFaintedBattlerHandlers` pass
+after the player's own replacement resumes, and this exact shape (both
+battlers faint together, player resumes first, opponent's own dance runs
+second) is already pinned green
+(`tests/battleScriptFaintedActionsOrchestration.test.ts:290-331`, "simultaneous
+Rough Skin double faint").
+
+*Strongest remaining lead (confirmed by source reading, not yet tied to this
+exact crash message):* `runDoBattlerEndTurnEffects`
+(`battleEndTurnOrchestration.ts:1497-1600+`) loops `battlerOrder`, applying
+each battler's own end-turn ticks (ingrain/abilities/items1/leech
+seed/status damage/nightmare/curse/wrap/uproar/thrash/disable/encore/...),
+but returns `{kind:"outcome-decided"}` — bailing the *entire* loop, not just
+the fainted battler's own remaining ticks — the instant any single tick
+faints a battler. Its caller, `runBattleEndTurnOrchestration`
+(`:2420-2427`), does not distinguish "bailed early" from "all battlers
+completed": it takes `battlerResult.state` either way and immediately calls
+`runBattleScriptFaintedActionsOrchestration` (`:2431`). If that needs a
+player choice, the reducer tags the pause `resumeAt:
+"finish-end-turn-after-faints"` (`factoryBattleScriptFullTurnDecision.ts:2283`,
+the *only* end-turn resume tag that exists — checked via
+`grep -n resumeAt src/engine/*.ts`), and resuming
+(`resumeBattleEndTurnAfterFaintedActions`, `battleEndTurnOrchestration.ts:2357-2363`)
+unconditionally re-enters at `runFutureAttacksAfterFaints` — it never
+re-enters `runDoBattlerEndTurnEffects` for battlers `battlerOrder` had not
+yet reached. Net effect: any battler ordered after the one whose own
+end-turn tick triggered a fainted-actions pause silently loses its own
+end-turn residual effects for that turn — a real divergence from
+`DoBattlerEndTurnEffects`'s C-side per-battler cursor (`battle_util.c`),
+which resumes the same or next battler in place and never jumps ahead to
+Future Sight/Perish Song. No test currently exercises this (`grep -rn
+"finish-end-turn-after-faints\|resumeBattleEndTurnAfterFaintedActions"
+tests/*.ts` is empty). This produces a *missed-damage* class of bug on its
+own (a later battler survives a turn it shouldn't have); I could not derive
+a single clean hop from it to *this* crash's exact "no decided
+monToSwitchIntoId" symptom within this session's time, since the skipped
+battler simply doesn't faint this pass rather than reaching
+`switchhandleorder` undecided.
+
+**Next session:** (1) write a Tier-1 test staging two battlers with pending
+per-battler end-turn ticks (e.g. both poisoned) where the earlier-ordered
+battler's tick faints it and needs a player-choice pause, to confirm/refute
+the missed-damage skip above and fix it if confirmed (likely needs a
+persisted per-battler-loop resume cursor — a new shared boundary shape, not
+a small patch, so budget accordingly). (2) Independently, if a live seed
+reproducing the original crash message turns up, capture full context
+(`battlerOrder`, which battler faints from what, in what order) to pin the
+exact mechanism before generalizing a fix.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

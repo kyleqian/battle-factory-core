@@ -1,3 +1,52 @@
+## 1361 — [main worker, 2026-08-20] **M-B step 3 DONE: `winning` 0:240 deep sweep — first-ever carry >= 21 seed on the post-#99/#100-fix + 2a tree (depth 25, seed 99), confirmed genuine chained play; two new engine crashes filed (#101, #102), no HANG/budget issue**
+
+- **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20.{md,log}`
+  (new), `ISSUES.md` (#101, #102 filed), `PROGRESS.md`/`PROGRESS-archive.md`
+  (this entry; 1358/1357 archived to keep the ledger at ~3). No `src/`,
+  `tools/`, or `tests/` change — both crashes found are genuine `src/engine`
+  gaps, filed per the standing convention rather than fixed same-step.
+- **Did:** swept `winning` seeds 0:240 (12×20-seed chunks, `--render-every 0`,
+  3 batches of 4 parallel foreground processes) over the union of ISSUES #99
+  (soak driver swap-offer fix), #100 (NATURE POWER string resolver), and
+  M-B step 2a (type-aware fight-move choice) — the first sweep of that union.
+- **Result:** **238/240 OK, 2 CRASH, 0 HANG.** carry>=7 105/240 (43.75%),
+  carry>=14 33/240 (13.75%), **carry>=21 1/240 (0.4%) — seed 99**, carry>=28
+  0/240. Deepest carry 21, deepest battle-depth **25** (seed 99, new
+  all-time deepest) — one battle past 1359's pre-#99-fix 2a-only measure
+  (24). `--verbose` on seed 99 confirms genuine chained play, not an
+  artefact: 3 clean 7-battle round wins (carry 0→7→14→21), then the carry-21
+  round reaches battle 5 before an honest loss re-chains to 0; challengeNum
+  at carry 21 is `floor(21/7)=3`, the `CHECK_BAD_MOVE`-only AI tier
+  (`factoryAiMaskSelection.ts`'s `challengeBelow4` branch) — full AI triad
+  (challengeNum>=4, carry>=28) not reached. Zero HANGs anywhere; highest
+  frame count was 649,579 of the 1,000,000 `winning` budget, so no budget
+  question this round. Since carry>=21 *was* observed in 0:240, the brief's
+  240:360 fallback extension did not apply and was not run.
+- **Triage:** two new, distinct, low-frequency (1/120 each) genuine
+  `[engine/tick]` crashes, neither small/engine-local enough to pin
+  same-step — filed as **ISSUES #101** (seed 90: `STRINGID_PKMNTOOKAIM`,
+  Lock-On/Mind Reader's only printstring, has **no** `messageLines` case at
+  all, and `EFFECT_LOCK_ON` has zero execution-path references anywhere in
+  `src/engine/*.ts` outside AI viability scoring — wider than #100's
+  single-missing-resolver pattern) and **ISSUES #102** (seed 154:
+  `Cmd_switchhandleorder` finds no decided `monToSwitchIntoId` for battler 1
+  after a mid-round forced switch — root cause not narrowed: AI switch-in
+  skip vs. ordering bug vs. the file's own documented unmodeled
+  multi-battler case). No STOP RULE trigger.
+- **Gates:** no `src/`/`tests/` change this session, so `npm run test:smoke`
+  once is the finish requirement per the brief — 444/444 green (run at
+  session start as the baseline check; nothing changed engine-side since).
+- **Next:** M-B step 4 (triage/fix #101 and #102, or continue widening
+  `winning`'s reach) — the side lane's two more `winning` levers (decline
+  swaps, draft by strength) are still in flight for a second sweep to
+  compare against this one's baseline numbers.
+- **Notes:** no PAPERCUT this session. Time discipline: all 12 chunks
+  (3 batches of 4 parallel foreground processes) landed by ~20 min; seed 99
+  verbose confirmation + both crash triages by ~35 min; docs + ISSUES +
+  PROGRESS by ~45 min, comfortably inside the 55-min cap.
+
+---
+
 ## 1359 — [supervisor fold, 2026-08-20] **M-B step 2a folded: `winning` picks fight moves by power × type-effectiveness × STAB (side `ff5e84d6`, merge `82580f0f`) — first-ever carry ≥ 21 seed observed**
 
 - **State:** union of the #99 fix (1358) + side step 2a. Both-sides-additive

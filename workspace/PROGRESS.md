@@ -5,6 +5,58 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1364 — [main worker, 2026-08-20] **M-B step 4 triage on #102: no fix, diagnosis-only landed — repro is gone on HEAD, one strong lead found and written up, one path ruled out**
+
+- **State:** docs-only session. `ISSUES.md` #102 rewritten (root-cause
+  paragraph replaced with today's findings; entry kept open, not deleted).
+  No `src/`/`tests/` change. This entry.
+- **Did:** seed 154 no longer reaches the original crash frame post-#101/#103
+  (RNG trajectory shifted); reran the brief's fallback `--seeds 150:160`
+  (10/10 OK), then the full original `--seeds 0:240` (240/240 OK, 0 CRASH,
+  0 HANG) — not currently live-reproducible. Traced
+  `BattleScript_HandleFaintedMon`'s script and the TS opcode ports and
+  **ruled out** the straightforward paths: `openpartyscreen`/`switchhandleorder`
+  are adjacent with nothing between them and share the same
+  `selectorRoles.fainted` resolution; the opponent/AI branch of
+  `Cmd_openpartyscreen` (`battleScriptOpenPartyScreenOpcode.ts:201-268`)
+  never halts; the same-action double-KO + player-resume shape (Destiny
+  Bond-class) is already pinned green
+  (`tests/battleScriptFaintedActionsOrchestration.test.ts:290-331`).
+  **Strongest remaining lead** (source-confirmed, not yet tied to this exact
+  crash): `runDoBattlerEndTurnEffects` (`battleEndTurnOrchestration.ts:1497+`)
+  bails its *entire* per-battler loop (not just the fainted battler's own
+  remaining ticks) on the first battler that faints from an end-turn tick;
+  the sole end-turn resume tag `"finish-end-turn-after-faints"`
+  (`factoryBattleScriptFullTurnDecision.ts:2283`) always resumes at
+  `runFutureAttacksAfterFaints`, never re-entering
+  `runDoBattlerEndTurnEffects` for battlers it hadn't reached yet — a real,
+  untested (`grep` for its resume tag/function across `tests/*.ts` is empty)
+  divergence that silently skips a later battler's own end-turn residual
+  effects for that turn. This explains a missed-damage class of bug on its
+  own; I could not derive a clean single hop from it to the *specific*
+  "no decided monToSwitchIntoId" crash message within this session's time.
+- **Neighbourhood:** `--seeds 150:160` **10/10 OK**, 0 CRASH, 0 HANG.
+- **Gates:** docs-only change, so `npm run test:smoke` run instead of full
+  `npm test` per the brief's own rule; 444/444 green. No `npm run build`
+  needed (no `src/`/`tests/` edits).
+- **Next:** (1) write a Tier-1 test staging two battlers with pending
+  end-turn ticks (both poisoned, earlier-ordered one faints and pauses) to
+  confirm/fix the `runDoBattlerEndTurnEffects` skip above — likely needs a
+  persisted per-battler-loop resume cursor (new shared boundary shape, not a
+  small patch). (2) If a live seed reproducing #102's exact message turns
+  up, capture full context (battler order, fault cause/order) before
+  generalizing a fix. (3) M-B step-4 queue is otherwise empty (#101/#103
+  done, #102 now diagnosis-only) — next up per 1363 is the final 0:240
+  `winning` re-sweep with every folded lever, unless the supervisor
+  redirects.
+- **Notes:** no PAPERCUT. Spent longer than the 15-min diagnose budget
+  (~40 min) because the brief's live-repro path was exhausted first (its own
+  fallback instruction), then the source trace went deep enough to rule out
+  the obvious mechanisms and find a real secondary bug before time ran out —
+  landed the docs-only deliverable rather than rush an unverified `src/` fix.
+
+---
+
 ## 1363 — [main worker, 2026-08-20] **M-B step 4 triage DONE: ISSUES #101 and #103 both fixed + pinned; both soak repros now reach honest terminals; neighbourhood sweeps clean**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` (#101 fix),
@@ -87,55 +139,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** host load ~18 on 16 cores with three supervisors live — side
   briefs now cap parallel soaks at 2. Issue numbering: the sweep worker took
   #101/#102 while the sentinel crash was drafted as #101 → renumbered #103.
-
----
-
-## 1361 — [main worker, 2026-08-20] **M-B step 3 DONE: `winning` 0:240 deep sweep — first-ever carry >= 21 seed on the post-#99/#100-fix + 2a tree (depth 25, seed 99), confirmed genuine chained play; two new engine crashes filed (#101, #102), no HANG/budget issue**
-
-- **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20.{md,log}`
-  (new), `ISSUES.md` (#101, #102 filed), `PROGRESS.md`/`PROGRESS-archive.md`
-  (this entry; 1358/1357 archived to keep the ledger at ~3). No `src/`,
-  `tools/`, or `tests/` change — both crashes found are genuine `src/engine`
-  gaps, filed per the standing convention rather than fixed same-step.
-- **Did:** swept `winning` seeds 0:240 (12×20-seed chunks, `--render-every 0`,
-  3 batches of 4 parallel foreground processes) over the union of ISSUES #99
-  (soak driver swap-offer fix), #100 (NATURE POWER string resolver), and
-  M-B step 2a (type-aware fight-move choice) — the first sweep of that union.
-- **Result:** **238/240 OK, 2 CRASH, 0 HANG.** carry>=7 105/240 (43.75%),
-  carry>=14 33/240 (13.75%), **carry>=21 1/240 (0.4%) — seed 99**, carry>=28
-  0/240. Deepest carry 21, deepest battle-depth **25** (seed 99, new
-  all-time deepest) — one battle past 1359's pre-#99-fix 2a-only measure
-  (24). `--verbose` on seed 99 confirms genuine chained play, not an
-  artefact: 3 clean 7-battle round wins (carry 0→7→14→21), then the carry-21
-  round reaches battle 5 before an honest loss re-chains to 0; challengeNum
-  at carry 21 is `floor(21/7)=3`, the `CHECK_BAD_MOVE`-only AI tier
-  (`factoryAiMaskSelection.ts`'s `challengeBelow4` branch) — full AI triad
-  (challengeNum>=4, carry>=28) not reached. Zero HANGs anywhere; highest
-  frame count was 649,579 of the 1,000,000 `winning` budget, so no budget
-  question this round. Since carry>=21 *was* observed in 0:240, the brief's
-  240:360 fallback extension did not apply and was not run.
-- **Triage:** two new, distinct, low-frequency (1/120 each) genuine
-  `[engine/tick]` crashes, neither small/engine-local enough to pin
-  same-step — filed as **ISSUES #101** (seed 90: `STRINGID_PKMNTOOKAIM`,
-  Lock-On/Mind Reader's only printstring, has **no** `messageLines` case at
-  all, and `EFFECT_LOCK_ON` has zero execution-path references anywhere in
-  `src/engine/*.ts` outside AI viability scoring — wider than #100's
-  single-missing-resolver pattern) and **ISSUES #102** (seed 154:
-  `Cmd_switchhandleorder` finds no decided `monToSwitchIntoId` for battler 1
-  after a mid-round forced switch — root cause not narrowed: AI switch-in
-  skip vs. ordering bug vs. the file's own documented unmodeled
-  multi-battler case). No STOP RULE trigger.
-- **Gates:** no `src/`/`tests/` change this session, so `npm run test:smoke`
-  once is the finish requirement per the brief — 444/444 green (run at
-  session start as the baseline check; nothing changed engine-side since).
-- **Next:** M-B step 4 (triage/fix #101 and #102, or continue widening
-  `winning`'s reach) — the side lane's two more `winning` levers (decline
-  swaps, draft by strength) are still in flight for a second sweep to
-  compare against this one's baseline numbers.
-- **Notes:** no PAPERCUT this session. Time discipline: all 12 chunks
-  (3 batches of 4 parallel foreground processes) landed by ~20 min; seed 99
-  verbose confirmation + both crash triages by ~35 min; docs + ISSUES +
-  PROGRESS by ~45 min, comfortably inside the 55-min cap.
 
 ---
 
