@@ -332,3 +332,76 @@ so this reads as "switch rarely, but correctly" rather than C's "switch
 often, often wrong." As with part C, this is committed test-pinned as
 measured, without seed-tuning the 50%/2x thresholds to chase a better
 number; landing it as `winning`'s default remains the supervisor's call.
+
+## 6. Draft heuristic (rung 2) re-measured on the #104-fixed tree (2026-08-20, side lane)
+
+Re-measures §3.5's withheld draft heuristic (`wip/mb-step2b-draft-heuristic`
+`e9a415a7`, cherry-picked onto this branch on top of master `f7ccbc5b` --
+i.e. on top of rung 1 swap-decline, part C2's 0x-immune+50%-HP-gate switch,
+and the ISSUES #104 OK/HANG semantics retune, all of which post-date the
+branch this heuristic was cut from). Conflicts in `tests/randomRoundSoak.test.ts`
+and this doc resolved by hand (kept both the switch-heuristic exports and
+the new draft-heuristic exports); one pre-existing pin (`ISSUES #104 (b)`,
+seed 34's carry>=14 check) needed its `maxRounds` bumped 3 -> 12 because the
+draft heuristic reshuffles seed 34's whole RNG-consuming trajectory the same
+way it already reshuffled the ISSUES #99 swap-offer pins. `npm run
+test:smoke` (444/444) and the full `randomRoundSoak.test.ts` file (37/37)
+both green before measuring below.
+
+**Time-capped result: n=30 (seeds 0:30), not the >=90 minimum the step
+asked for.** The cherry-pick, conflict resolution, and the seed-34 pin fix
+consumed most of the 50-minute budget before any measurement could start;
+30 same-seed pairs is what completed inside the remaining window. Treat
+this as a first read, not a confirming sample -- especially the carry>=21/28
+cells, which are single- or low-digit counts on a 30-seed base and swing
+heavily on one or two seeds either way.
+
+**Like-for-like, `--policy winning --seeds 0:30 --render-every 0`, same 30
+seeds both rows (driver swapped in-place via `git checkout <rev> --
+tools/soak/randomRoundSoakDriver.ts`, then restored; two concurrent
+15-seed shards per row):**
+
+| | OK | CRASH | HANG | carry>=7 | carry>=14 | carry>=21 | carry>=28 | deepest carry | deepest depth |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Baseline (master `f7ccbc5b`, no draft heuristic) | 30/30 | 0 | 0 | 30/30 (100%) | 27/30 (90.0%) | 3/30 (10.0%) | 1/30 (3.3%) | 28 | 28 |
+| + rung 2 draft heuristic (`e9a415a7` cherry-picked) | 28/30 | 2 | 0 | 30/30 (100%) | 30/30 (100%) | 4/30 (13.3%) | 0/30 (0%) | 21 | 23 |
+
+The 2 heuristic-row crashes (seeds 27 and 29, both battle 3 turn 7, frames
+~766,385-768,654) are the same signature: `battleStringResolver:
+STRINGID_PKMNSUBSTITUTEFADED references placeholder {B_DEF_NAME_WITH_PREFIX}
+with no resolver supplied`. This is a signature not seen in any prior row
+of this doc (§3.5's rung-1-alone crashes were `STRINGID_NATUREPOWERTURNEDINTO`
+and an "unknown last-used move" AI-viability throw) -- a third pre-existing
+`battleStringResolver` resolver gap, reached only because the heuristic's
+draft order puts a different RNG path in front of these two seeds. Per this
+lane's contract this is reported here, not filed to `ISSUES.md`.
+**PAPERCUT: `battleStringResolver` is missing a resolver for
+`STRINGID_PKMNSUBSTITUTEFADED`'s `{B_DEF_NAME_WITH_PREFIX}` placeholder
+(seeds 27/29, battle 3 turn 7, `--policy winning` with the draft heuristic
+applied) -- for the supervisor's crash catalog, not filed here.**
+
+**Plain verdict at n=30: neutral-to-slightly-better on carry depth, with a
+new open crash question.** carry>=14 goes from 90.0% to 100% (27/30 ->
+30/30) and carry>=21 ticks up (10.0% -> 13.3%, 3/30 -> 4/30). Per-seed
+`maxCarriedWinStreak` (same 30 seed numbers, both rows) shows this is not a
+uniform lift: every baseline seed that reached carry>=14 stayed at
+carry>=14 or above under the heuristic, but the exact carry value moves
+both ways per seed -- seeds 15, 16, and 24 drop (21/21/28 -> 14/14/21) while
+seeds 2, 6, 7 rise from 7 to 14 and seeds 5, 19, 21 rise from 14 to 21; the
+30/30 and 4/30 headline counts are net gains, not every-seed gains. The far
+tail inverts (carry>=28 1/30 -> 0/30, deepest carry 28 -> 21, both seed 24
+either way) -- a single seed, well within single-draw noise at n=30. The 2
+new crashes are the headline risk: not an
+engine regression (same "different RNG path through a pre-existing
+resolver gap" pattern as §3.5's rung-1 crashes, which is itself not a
+draft-heuristic defect), but a real reduction in OK rate (100% -> 93.3%) on
+this sample that a larger run could confirm or wash out. This reverses the
+direction of §3.5's n=60 pre-#104 finding (25/9/0 vs. 36/10/0, "clear
+regression") into "modest improvement at the carry>=14/21 thresholds, at
+the cost of 2 new crashes" on the fixed tree -- consistent with the
+brief's suspicion that the earlier result was single-draw noise, but not a
+confirmation of it; n=30 straddling both the earlier regression and this
+session's improvement is exactly the kind of result the brief's requested
+n>=90 sample was meant to resolve. **Folding this heuristic, and whether the
+new crash signature needs a larger sample or an immediate catalog entry,
+remains the supervisor's call** -- this lane only measures.
