@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import {
   psybeamAtAge,
@@ -79,7 +80,12 @@ describe("MOVE_PSYBEAM source-relative reducer", () => {
         expect(state.active).toBe(age < 159);
         expect(state.rings.every((ring) => ring.localAge >= 0 && ring.localAge <= 13))
           .toBe(true);
-        expect(state.visualTaskCount).toBe(state.tasks.length);
+        expect(state.visualTaskCount).toBe(
+          state.rings.length
+            + (state.swayMon ? 1 : 0)
+            + (state.tasks.some((task) =>
+              task.callback === "AnimTask_BlendColorCycleLoop") ? 1 : 0),
+        );
         expect(state.soundTaskCount).toBe(age >= 42 && age <= 88 ? 1 : 0);
       }
       expect(psybeamAtAge(159, side, attacker, target).source.active).toBe(false);
@@ -135,6 +141,22 @@ describe("MOVE_PSYBEAM source-relative reducer", () => {
       displayedRings: [],
       displayedTargetSwayX2: 0,
       displayedBgPaletteAge: 41,
+    });
+  });
+
+  it("replays every retained bilateral source row without framebuffer claims", () => {
+    const output = execFileSync(process.execPath, [
+      "--experimental-strip-types",
+      "tools/compare/psybeamReducerAudit.ts",
+    ], { encoding: "utf8" });
+    const audit = JSON.parse(output.trim().split("\n").at(-1)!);
+    expect(audit).toMatchObject({
+      schema: "psybeam-reducer-audit/v1",
+      framebufferCompared: false,
+      orientations: [
+        { orientation: "player-back", sourceRows: 160, reducerRows: 160, failures: [] },
+        { orientation: "opponent-front", sourceRows: 160, reducerRows: 160, failures: [] },
+      ],
     });
   });
 });

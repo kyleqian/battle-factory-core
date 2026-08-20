@@ -175,10 +175,10 @@ function soundTask(age: number, side: PsybeamSide): PsybeamTask | null {
       1: player ? -64 : 63,
       2: player ? 63 : -63,
       3: player ? 3 : -3,
-      4: 3 - Math.floor(localAge / 16),
+      4: 3 - Math.floor((localAge + 1) / 16),
       6: 15,
       11: pan,
-      12: localAge & 15,
+      12: (localAge + 1) & 15,
     }),
   };
 }
@@ -308,6 +308,7 @@ function ringAtAge(
   const callbacks = localAge + 1;
   const deltaX = linearMagnitudeQ8(xDistance, PSYBEAM_RING_DURATION);
   const deltaY = linearMagnitudeQ8(yDistance, PSYBEAM_RING_DURATION);
+  const effectiveCallbacks = Math.min(callbacks, PSYBEAM_RING_DURATION);
   const x2 = linearOffset(xDistance, PSYBEAM_RING_DURATION, callbacks);
   const y2 = linearOffset(yDistance, PSYBEAM_RING_DURATION, callbacks);
   return {
@@ -323,8 +324,8 @@ function ringAtAge(
       Math.max(0, PSYBEAM_RING_DURATION - callbacks),
       deltaX,
       deltaY,
-      deltaX * callbacks,
-      deltaY * callbacks,
+      deltaX * effectiveCallbacks,
+      deltaY * effectiveCallbacks,
       0,
       15357,
       2058,
@@ -346,7 +347,8 @@ export function psybeamRingsAtAge(
 ): readonly PsybeamRing[] {
   return Array.from({ length: PSYBEAM_RING_COUNT }, (_, index) =>
     ringAtAge(age, index, side, attackerCenter, targetCenter))
-    .filter((ring): ring is PsybeamRing => ring !== null);
+    .filter((ring): ring is PsybeamRing => ring !== null)
+    .sort((left, right) => left.slot - right.slot);
 }
 
 /** Hardware-OAM view: script-created sprites reach the preceding display age. */
@@ -428,6 +430,7 @@ export function psybeamAtAge(
     swayTask(age, side),
     blendTask(age),
   ].filter((task): task is PsybeamTask => task !== null);
+  tasks.sort((left, right) => left.slot - right.slot);
   const swayMon = psybeamSwayMonAtAge(age, side);
   const bgBldy = psybeamBgBldyAtAge(age);
   const active = age >= 0 && age < PSYBEAM_FIRST_INACTIVE_AGE;
@@ -444,7 +447,14 @@ export function psybeamAtAge(
     swayMon,
     targetSwayX2: swayMon?.offsetX2 ?? 0,
     targetIdleX2,
-    visualTaskCount: tasks.length,
+    // The ROM's visual-task counter is the active visual worklist:
+    // sprite-created GoldRings plus SwayMon and BlendColorCycle. The
+    // background fade/rotation tasks live in gTasks but do not contribute
+    // to this counter.
+    visualTaskCount:
+      psybeamRingsAtAge(age, side, attackerCenter, targetCenter).length
+      + (swayMon ? 1 : 0)
+      + (blendTask(age) ? 1 : 0),
     soundTaskCount: soundTask(age, side) ? 1 : 0,
     sound: age === 0 ? "SE_M_PSYBEAM" : null,
     soundPanSide: age === 0 ? side : null,
