@@ -826,20 +826,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     // walkable-lobby overworld (factoryLobbyFreeRoam.ts); until then the
     // terminal presentation still owns the screen.
     // Continuous-play chaining (queue item 2, ROADMAP "User decisions
-    // 2026-08-14" #2): the terminal record menu's accepted default-NO input
-    // (recordChoice newly "no" this tick) re-enters a fresh GENERATED draft
-    // screen directly, carrying win streak/symbols/BP/rents forward, instead
-    // of continuing into the decline-farewell -> free-roam Lobby chain below.
-    // Supervisor design decision: no new lobby-dialogue surfaces for this
-    // step; faithful attendant re-entry chrome layers on later. Scoped to the
-    // production generated-orchestrator route, whose roundOutcome carries the
-    // real BP/symbol award this carry needs.
+    // 2026-08-14" #2): the terminal record menu's accepted answer
+    // (recordChoice newly non-null this tick -- YES, NO, or B-cancel all
+    // reach the same EndRecordBattle continuation, ISSUES #104) re-enters a
+    // fresh GENERATED draft screen directly, carrying win streak/symbols/BP/
+    // rents forward, instead of continuing into the decline-farewell ->
+    // free-roam Lobby chain below. Supervisor design decision: no new
+    // lobby-dialogue surfaces for this step; faithful attendant re-entry
+    // chrome layers on later. Scoped to the production generated-orchestrator
+    // route, whose roundOutcome carries the real BP/symbol award this carry
+    // needs.
     if (
       state.appRoute === "generated-orchestrator" &&
       factoryRoundBattleOrchestrator !== null &&
       factoryRoundBattleOrchestrator.roundOutcome !== null &&
-      state.factoryTerminal?.recordChoice !== "no" &&
-      factoryTerminal.recordChoice === "no"
+      (state.factoryTerminal?.recordChoice ?? null) === null &&
+      factoryTerminal.recordChoice !== null
     ) {
       const nextCarry = advanceFactoryCarry(
         state.factoryCarry,

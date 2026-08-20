@@ -465,8 +465,9 @@ function drawRecordPrompt(
 }
 
 /**
- * The EndRecordBattle decline span (recordChoice === "no"): the YES/NO
- * multichoice vanishes `declineMenuClearDelay` ticks after the decline edge
+ * The EndRecordBattle farewell span (any recordChoice -- YES, NO, or
+ * B-cancel all reach it, ISSUES #104): the YES/NO multichoice vanishes
+ * `declineMenuClearDelay` ticks after the decline edge
  * while the scrolled record question stays drawn until `declineTextClearDelay`,
  * then FillWindowPixelBuffer wipes the box and the farewell prints 1 glyph/tick
  * from `declineTextFirstDelay`, holds (no wait-cursor), and stays fully drawn
