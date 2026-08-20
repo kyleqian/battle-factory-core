@@ -579,6 +579,7 @@ import restAsset from "../animation/assets/rest.json" with { type: "json" };
 import howlAsset from "../animation/assets/howl.json" with { type: "json" };
 import yawnAsset from "../animation/assets/yawn.json" with { type: "json" };
 import sweetKissAsset from "../animation/assets/sweet-kiss.json" with { type: "json" };
+import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
 import attractAsset from "../animation/assets/attract.json" with { type: "json" };
 import sporeAsset from "../animation/assets/spore.json" with { type: "json" };
 import stunSporeAsset from "../animation/assets/stunSpore.json" with { type: "json" };
@@ -989,6 +990,7 @@ import {
   sceneOnYawnView,
   sceneOnRoarView,
   sceneOnSweetKissView,
+  sceneOnLovelyKissView,
   sceneOnAttractView,
   sceneOnSporeView,
   sceneOnCottonSporeView,
@@ -1056,6 +1058,7 @@ import {
   type SceneOnYawnPresentationState,
   type SceneOnRoarPresentationState,
   type SceneOnSweetKissPresentationState,
+  type SceneOnLovelyKissPresentationState,
   type SceneOnAttractPresentationState,
   type SceneOnPresentPresentationState,
   type SceneOnSporePresentationState,
@@ -2019,6 +2022,10 @@ const sweetKissArt = sweetKissAsset as {
   luvdiscFront: { tileset: Tileset; palette: RgbColor[] };
   redHeart: { tileset: Tileset; palette: RgbColor[] };
   angel: { tileset: Tileset; palette: RgbColor[] };
+};
+const lovelyKissArt = lovelyKissAsset as {
+  devil: { tileset: Tileset; palette: RgbColor[] };
+  pinkHeart: { tileset: Tileset; palette: RgbColor[] };
 };
 const attractArt = attractAsset as {
   background: {
@@ -26799,6 +26806,138 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "LUVDISC used" : "Foe LUVDISC used",
       "SWEET KISS!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "LOVELY_KISS") {
+    const lovelyState = state as SceneOnLovelyKissPresentationState;
+    const view = sceneOnLovelyKissView(lovelyState);
+    // BuildOamBuffer precedes the animation callbacks. The live reducer is
+    // software sprite state; scanout consumes the preceding source row.
+    const displayed = sceneOnLovelyKissView({
+      ...lovelyState,
+      age: lovelyState.age - 1,
+    });
+    const attackerIsPlayer = view.attacker.geometry.side === "player";
+    if (attackerIsPlayer === (view.target.geometry.side === "player")) {
+      throw new Error("LOVELY_KISS presentation requires battlers on opposite sides");
+    }
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+          battler.species
+        ];
+        if (!source) {
+          throw new Error(`LOVELY_KISS missing player-back art for ${battler.species}`);
+        }
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+        battler.species
+      ];
+      if (!source) {
+        throw new Error(`LOVELY_KISS missing opponent-front art for ${battler.species}`);
+      }
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerArt.tileset,
+      attackerArt.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetArt.tileset,
+      targetArt.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    const oamCoordinate = (value: number, wrap: number): number => {
+      const masked = value & (wrap - 1);
+      return masked >= wrap / 2 ? masked - wrap : masked;
+    };
+    const effects = displayed.sprites
+      .filter((sprite) => !sprite.invisible)
+      .slice()
+      // Equal-priority OBJ entries are built in descending signed OAM Y,
+      // retaining allocation order for ties. Paint the exact inverse.
+      .sort((left, right) =>
+        oamCoordinate(left.attr[0], 256) - oamCoordinate(right.attr[0], 256)
+        || right.slot - left.slot
+      );
+    const drawEffects = () => {
+      for (const sprite of effects) {
+        const art = sprite.template === "gDevilSpriteTemplate"
+          ? {
+              tileset: subTileset(lovelyKissArt.devil.tileset, 0, 4),
+              palette: lovelyKissArt.devil.palette,
+            }
+          : lovelyKissArt.pinkHeart;
+        drawSpriteSheet(
+          fb,
+          art.tileset,
+          art.palette,
+          oamCoordinate(sprite.attr[1], 512),
+          oamCoordinate(sprite.attr[0], 256),
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Player OBJ subpriority is 30 and opponent is 40. Lovely Kiss places
+    // Devil/heart OBJ immediately in front of its target, on either side.
+    if (attackerIsPlayer) {
+      drawTarget();
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawEffects();
+    }
+
+    const profile = lovelyState.config.fieldProfile;
+    const playerBattler = attackerIsPlayer ? view.attacker : view.target;
+    const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentBattler.species,
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerBattler.species,
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      attackerIsPlayer
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "LOVELY KISS!",
       99,
     );
     return;

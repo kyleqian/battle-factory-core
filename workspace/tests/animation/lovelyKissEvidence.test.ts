@@ -36,7 +36,7 @@ describe("MOVE_LOVELY_KISS retained evidence checkpoint", () => {
     });
   });
 
-  it("verifies both complete legal dense Scene-ON receipts without promotion", () => {
+  it("verifies both complete legal dense Scene-ON receipts retained for exact promotion", () => {
     const result = verifyLovelyKissEvidence();
     expect(result).toEqual({
       "player-back": expect.objectContaining({
@@ -58,14 +58,14 @@ describe("MOVE_LOVELY_KISS retained evidence checkpoint", () => {
         framebufferCompared: false,
       }),
     });
-    expect(fixture.status).toBe("partial");
-    expect(fixture.coverageCredit).toBe(false);
+    expect(fixture.status).toBe("exact");
+    expect(fixture.coverageCredit).toBe(true);
     expect(fixture.evidenceScope).toMatchObject({
       productionAnimationChanged: true,
       reducerAdded: true,
       typedSeamAdded: true,
-      compositorAdded: false,
-      framebufferCompared: false,
+      compositorAdded: true,
+      framebufferCompared: true,
       gameplayStateOwned: false,
       twiceFreshByteIdentical: true,
     });

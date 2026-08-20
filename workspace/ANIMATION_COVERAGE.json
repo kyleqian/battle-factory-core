@@ -3,16 +3,17 @@
  "entries": [
   {
    "move": "MOVE_LOVELY_KISS",
-   "status": "partial",
+   "status": "exact",
    "covered": [
     "complete legal Level-50 challenge-3 FRONTIER_MON_JYNX_1 parties stage Lovely Kiss against Onix in both ordinary Battle Scene ON orientations; player-back and opponent-front each retain 153 consecutive source-owned rows through first inactive cleanup, and each orientation is replayed twice fresh with byte-identical dense state and raw RGB",
     "the authoritative half-open source interval is 0x082d4035..0x082d407c (71 bytes, 604194e8a58c2a8e0aa8162e91983863ca464a43df99d593e720f991bcda66d3), with both even and odd command-pointer parity observed; the exact graph is ANIM_TAG_DEVIL, ANIM_TAG_PINK_HEART, gDevilSpriteTemplate, and gPinkHeartSpriteTemplate",
     "source callbacks AnimDevil, AnimPinkHeart, and AnimPinkHeart_Step, source-identical Devil/Magenta Heart graphics and palettes, and target-panned SE_M_PSYBEAM2 (id 200) then SE_M_ATTRACT (id 226) are pinned; the lowest legal Level-50 carrier is set 377 FRONTIER_MON_JYNX_1 (species 124, Shell Bell 219, Modest, SpAttack+HP)",
     "the retained dense rows include source cursor/wait/args, task and sprite creation/destruction/callback/OAM/affine state, animation RNG, software and hardware OAM/matrices, faded/unfaded/hardware palettes and tags, BG/register/audio, complete parties, battlers/engine/immutable state, gameplay RNG, raw RGB, normalized change maps, hardware latches, and first-inactive cleanup; visual-task topology stays empty and lifecycle is 1 Devil plus 4 Pink Hearts per orientation",
     "the evidence verifier passes 306/306 dense rows and 306/306 raw-RGB rows; each preceding software-to-hardware OAM, matrix, and palette latch is 152/152 per orientation, gameplay RNG has zero transitions, animation RNG has 152 transitions per orientation, and cleanup is retained",
-    "the pure source-relative reducer and typed Scene-ON seam reproduce all 306 retained component rows: script cursor/waits/args, one 91-pass AnimDevil lifecycle, four 24-pass Q8.8 AnimPinkHeart flights, four Random2-resolved 31-pass AnimPinkHeart_Step lifecycles, sprite callback/data/OAM/affine state, all 512 palette colors and transfer timing, tag/audio/animation-RNG behavior, and first inactive cleanup; Sweet Kiss, Attract, and sleep presentations are explicit negative controls"
+    "the pure source-relative reducer and typed Scene-ON seam reproduce all 306 retained component rows: script cursor/waits/args, one 91-pass AnimDevil lifecycle, four 24-pass Q8.8 AnimPinkHeart flights, four Random2-resolved 31-pass AnimPinkHeart_Step lifecycles, sprite callback/data/OAM/affine state, all 512 palette colors and transfer timing, tag/audio/animation-RNG behavior, and first inactive cleanup; Sweet Kiss, Attract, and sleep presentations are explicit negative controls",
+    "the ordinary production compositor selects back/front battler art from typed live species and sides, consumes supplied battler geometry, source-extracted Devil and Pink Heart tiles/palettes, the preceding software-OAM latch, source visibility, signed-y/allocation painter order, battle chrome, and inactive cleanup without a Jynx/Onix pair gate; all 153 player-back plus 153 opponent-front shared framebuffers match raw RGB with zero residual pixels, and fresh legal post-implementation probes reproduce evidence/raw hashes byte-for-byte",
+    "no gameplay sleep/status, damage, gameplay RNG, AI, controller, turn, round, facility, absolute-tick, species-pair, framebuffer lookup, recorded RGB, or sibling presentation ownership is added; Sweet Kiss, Attract, and sleep-family controls remain independently accepted only"
    ],
-   "remaining": "MOVE_LOVELY_KISS still has no production compositor/draw wiring or framebuffer equality. The compositor is the sole queued follow-up; the four-component track and move acceptance remain unfulfilled, and no sibling credit follows from Sweet Kiss, Attract, or sleep controls.",
    "evidence": [
     "tools/battle-lab/mechanic-lovely-kiss-player-jynx-opponent-onix.json",
     "tools/battle-lab/mechanic-lovely-kiss-opponent-jynx-player-onix.json",
@@ -21,6 +22,8 @@
     "tools/compare/lovelyKissProbe.py",
     "tools/compare/lovelyKissEvidence.ts",
     "tools/compare/lovelyKissReducerAudit.ts",
+    "tools/compare/lovelyKissFramebuffer.ts",
+    "tools/compare/extractLovelyKissAssets.ts",
     "tools/compare/evidence/lovely-kiss-player-dense-state.json.gz",
     "tools/compare/evidence/lovely-kiss-opponent-dense-state.json.gz",
     "tools/compare/evidence/lovely-kiss-player-raw-rgb.tar.gz",
@@ -28,9 +31,12 @@
     "tools/compare/evidence/lovely-kiss-changemap-player.json",
     "tools/compare/evidence/lovely-kiss-changemap-opponent.json",
     "src/animation/lovelyKiss.ts",
+    "src/animation/assets/lovely-kiss.json",
     "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
     "tests/animation/lovelyKissEvidence.test.ts",
-    "tests/animation/lovelyKiss.test.ts"
+    "tests/animation/lovelyKiss.test.ts",
+    "tests/animation/lovelyKissFramebuffer.test.ts"
    ]
   },
   {
@@ -5435,7 +5441,7 @@
    ]
   }
  ],
- "queue": ["MOVE_LOVELY_KISS"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6397,7 +6403,8 @@
     "sprite:gPinkHeartSpriteTemplate"
    ],
    "representatives": ["MOVE_LOVELY_KISS"],
-   "goal": "PARTIAL: MOVE_LOVELY_KISS independently retains complete legal Scene-ON player-back and opponent-front source-owned dense/raw-RGB windows twice fresh through first inactive cleanup. Its pure source-relative reducer and typed seam replay all 306 component rows, including Devil/Pink Heart callback, OAM/affine, palette/tag/audio/animation-RNG, and cleanup state. The production compositor and framebuffer equality remain the sole follow-up; the track stays unfulfilled and no sibling credit is conveyed."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_LOVELY_KISS independently passes 153/153 player-back plus 153/153 opponent-front source/component/reducer/typed-seam/raw-RGB/production-framebuffer rows through first inactive cleanup with zero residual pixels. The ordinary compositor uses typed live battler species/sides/geometry, source-extracted Devil and Pink Heart art/palettes, preceding OAM transfer, source visibility and painter order, chrome, and cleanup without an evidence-pair gate. Fresh legal post-implementation probes reproduce both evidence and raw-RGB hashes byte-for-byte. Sweet Kiss, Attract, and sleep-family moves remain independent controls with no sibling credit."
   }
  ],
  "variantAudits": {

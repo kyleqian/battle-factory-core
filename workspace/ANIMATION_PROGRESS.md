@@ -1,3 +1,10 @@
+# MOVE_LOVELY_KISS bilateral exact production presentation (2026-08-20 worker)
+
+- **State:** Coverage advances **198→199/276 Level-50 exact**, **1→0 partial**, and remains **77 unsupported**. MOVE_LOVELY_KISS alone promotes, the queue is empty, and `devil-pink-heart-lovely-kiss` is fulfilled; Sweet Kiss, Attract, and sleep-family controls receive no credit or latch change.
+- **Did:** Added reproducible source extraction for DEVIL and PINK_HEART art/palettes and the ordinary shared Battle Scene ON draw case behind `sceneOnLovelyKissView`. It uses typed live species/sides/battler geometry, generic back/front art lookup, the preceding software-OAM latch, source visibility, signed-y/allocation painter order, field chrome, and inactive cleanup without a Jynx/Onix gate, replay/RGB/framebuffer lookup, absolute ticks, or gameplay/status/RNG/turn/round/facility ownership.
+- **Verified:** Complete shared-framebuffer equality is **153/153 player-back + 153/153 opponent-front = 306/306**, alongside **306/306 component/seam/raw-RGB rows**, with zero residual pixels through first inactive cleanup. Fresh legal post-implementation Scene-ON probes reproduce player probe/raw hashes `d7039abf…`/`6236f7e9…` and opponent `3687165a…`/`5b6f13eb…` byte-for-byte. An ARON→GROVYLE geometry control activates generically; Sweet Kiss, Attract, Sleep Powder, Sleep Talk, and Yawn remain independent controls.
+- **Checks:** Lovely Kiss source/evidence/reducer/framebuffer validators and focused controls pass. Final animation audits/ratchets/typecheck/full suite/build follow in this commit; `ANIMATION_LATCHES.md` and boundary lists remain unchanged.
+
 # MOVE_LOVELY_KISS reducer + typed Scene-ON seam — partial (2026-08-20 worker)
 
 - **State:** Coverage remains **198/276 Level-50 exact, 1 partial, 77 unsupported**. MOVE_LOVELY_KISS stays the sole queue item; `devil-pink-heart-lovely-kiss` remains non-exclusive and unfulfilled, with no sibling credit or latch change.
