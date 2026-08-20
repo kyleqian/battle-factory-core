@@ -1,0 +1,283 @@
+$ node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla --seeds 0:60 --render-every 0
+seed    0  OK     b1 t20  195704f  4.4s  roundLost  carry<=7 depth<=9
+seed    1  OK     b1 t16   16970f  0.3s  roundLost  carry<=0 depth<=0
+seed    2  OK     b1 t28   26752f  0.5s  roundLost  carry<=0 depth<=0
+seed    3  OK     b1 t16   16891f  0.3s  roundLost  carry<=0 depth<=0
+seed    4  OK     b4 t11  336618f  7.9s  roundLost  carry<=7 depth<=10
+seed    5  OK     b1 t16   16977f  0.3s  roundLost  carry<=0 depth<=0
+seed    6  OK     b1 t28   26766f  0.5s  roundLost  carry<=0 depth<=0
+seed    7  OK     b1 t16   16904f  0.3s  roundLost  carry<=0 depth<=0
+seed    8  OK     b1 t16   16872f  0.3s  roundLost  carry<=0 depth<=0
+seed    9  OK     b1 t28   26731f  0.5s  roundLost  carry<=0 depth<=0
+seed   10  OK     b1 t16  458626f  11.2s  roundLost  carry<=7 depth<=10
+seed   11  OK     b1 t28   26796f  0.5s  roundLost  carry<=0 depth<=0
+seed   12  OK     b1 t31  203557f  4.4s  roundLost  carry<=7 depth<=9
+seed   13  OK     b1 t28   26805f  0.5s  roundLost  carry<=0 depth<=0
+seed   14  OK     b1 t11  128564f  3.0s  roundLost  carry<=7 depth<=9
+seed   15  OK     b1 t28   26719f  0.5s  roundLost  carry<=0 depth<=0
+seed   16  OK     b3 t23  121190f  2.8s  roundLost  carry<=7 depth<=9
+seed   17  OK     b1 t28   26759f  0.5s  roundLost  carry<=0 depth<=0
+seed   18  OK     b1 t16  458386f  11.3s  roundLost  carry<=7 depth<=10
+seed   19  OK     b1 t28   26736f  0.5s  roundLost  carry<=0 depth<=0
+seed   20  OK     b7 t13   90156f  2.0s  roundComplete  carry<=0 depth<=6
+seed   21  OK     b1 t28   26780f  0.5s  roundLost  carry<=0 depth<=0
+seed   22  OK     b1 t16   16852f  0.3s  roundLost  carry<=0 depth<=0
+seed   23  OK     b1 t16   16953f  0.3s  roundLost  carry<=0 depth<=0
+seed   24  OK     b7 t13   90189f  2.0s  roundComplete  carry<=0 depth<=6
+seed   25  OK     b1 t16   16875f  0.3s  roundLost  carry<=0 depth<=0
+seed   26  OK     b7 t13   90243f  2.0s  roundComplete  carry<=0 depth<=6
+seed   27  OK     b7 t13   90261f  2.0s  roundComplete  carry<=0 depth<=6
+seed   28  OK     b3 t23  121334f  2.8s  roundLost  carry<=7 depth<=9
+seed   29  OK     b7 t13   90156f  2.0s  roundComplete  carry<=0 depth<=6
+seed   30  OK     b1 t28   26773f  0.5s  roundLost  carry<=0 depth<=0
+seed   31  OK     b3 t23  121363f  2.8s  roundLost  carry<=7 depth<=9
+seed   32  OK     b3 t29  449986f  10.8s  roundLost  carry<=7 depth<=10
+seed   33  OK     b7 t13   90266f  2.0s  roundComplete  carry<=0 depth<=6
+seed   34  OK     b3 t23  121400f  2.8s  roundLost  carry<=7 depth<=9
+seed   35  OK     b1 t16   16947f  0.3s  roundLost  carry<=0 depth<=0
+seed   36  OK     b4 t11  336703f  7.8s  roundLost  carry<=7 depth<=10
+seed   37  OK     b1 t16   16922f  0.3s  roundLost  carry<=0 depth<=0
+seed   38  OK     b1 t16   16871f  0.3s  roundLost  carry<=0 depth<=0
+seed   39  OK     b3 t23  121328f  2.8s  roundLost  carry<=7 depth<=9
+seed   40  OK     b1 t28   26809f  0.5s  roundLost  carry<=0 depth<=0
+seed   41  OK     b7 t13   90153f  2.0s  roundComplete  carry<=0 depth<=6
+seed   42  OK     b1 t28   26767f  0.5s  roundLost  carry<=0 depth<=0
+seed   43  OK     b1 t14  420832f  10.5s  roundLost  carry<=7 depth<=10
+seed   44  OK     b1 t16   16942f  0.3s  roundLost  carry<=0 depth<=0
+seed   45  OK     b7 t25  292829f  6.8s  roundComplete  carry<=7 depth<=9
+seed   46  OK     b1 t28   26730f  0.5s  roundLost  carry<=0 depth<=0
+seed   47  OK     b1 t16   16955f  0.3s  roundLost  carry<=0 depth<=0
+seed   48  OK     b1 t11  128397f  3.0s  roundLost  carry<=7 depth<=9
+seed   49  OK     b1 t16   16882f  0.3s  roundLost  carry<=0 depth<=0
+seed   50  OK     b7 t13   90103f  2.0s  roundComplete  carry<=0 depth<=6
+seed   51  OK     b1 t11  128591f  3.0s  roundLost  carry<=7 depth<=9
+seed   52  OK     b1 t28   26761f  0.5s  roundLost  carry<=0 depth<=0
+seed   53  OK     b1 t31  203503f  4.5s  roundLost  carry<=7 depth<=9
+seed   54  OK     b1 t16   16919f  0.3s  roundLost  carry<=0 depth<=0
+seed   55  OK     b1 t16   16935f  0.3s  roundLost  carry<=0 depth<=0
+seed   56  OK     b3 t23  121221f  2.8s  roundLost  carry<=7 depth<=9
+seed   57  OK     b1 t16   16963f  0.3s  roundLost  carry<=0 depth<=0
+seed   58  OK     b3 t23  121198f  2.8s  roundLost  carry<=7 depth<=9
+seed   59  OK     b3 t23  121453f  2.8s  roundLost  carry<=7 depth<=9
+
+=== soak summary: 60 seeds (policy vanilla) in 137.9s ===
+OK 60  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 21/60
+carry >= 14 (challengeNum >= 2): 0/60
+carry >= 21 (challengeNum >= 3): 0/60
+deepest carry anywhere: 7
+deepest battle-depth anywhere: 10
+
+$ node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy full --seeds 0:60 --render-every 0
+seed    0  OK     b1 t141   92328f  2.3s  roundLost  carry<=0 depth<=0
+seed    1  OK     b2 t15  257100f  6.5s  roundLost  carry<=0 depth<=4
+seed    2  OK     b1 t19   19744f  0.3s  roundLost  carry<=0 depth<=0
+seed    3  OK     b1 t30   25412f  0.5s  roundLost  carry<=0 depth<=0
+seed    4  OK     b1 t86   85157f  2.0s  roundLost  carry<=0 depth<=1
+seed    5  OK     b1 t20   22179f  0.3s  roundLost  carry<=0 depth<=0
+seed    6  OK     b1 t18   68163f  1.3s  roundLost  carry<=0 depth<=2
+seed    7  OK     b2 t26   35667f  0.7s  roundLost  carry<=0 depth<=1
+seed    8  OK     b2 t22  129964f  3.1s  roundLost  carry<=0 depth<=3
+seed    9  OK     b3 t26  209156f  5.0s  roundLost  carry<=0 depth<=4
+seed   10  OK     b1 t34   27324f  0.5s  roundLost  carry<=0 depth<=0
+seed   11  OK     b1 t27   26475f  0.4s  roundLost  carry<=0 depth<=0
+seed   12  OK     b1 t15   78385f  1.7s  roundLost  carry<=0 depth<=2
+seed   13  OK     b1 t25  217706f  4.9s  roundLost  carry<=0 depth<=2
+seed   14  OK     b1 t20   20078f  0.3s  roundLost  carry<=0 depth<=0
+seed   15  OK     b1 t112   71177f  1.6s  roundLost  carry<=0 depth<=0
+seed   16  OK     b1 t29   55822f  1.1s  roundLost  carry<=0 depth<=1
+seed   17  OK     b2 t16  236990f  5.8s  roundLost  carry<=0 depth<=1
+seed   18  OK     b1 t42  241374f  6.3s  roundLost  carry<=0 depth<=2
+seed   19  OK     b4 t26  155701f  3.7s  roundLost  carry<=0 depth<=3
+seed   20  OK     b2 t16   64380f  1.6s  roundLost  carry<=0 depth<=1
+seed   21  OK     b3 t20   54688f  1.2s  roundLost  carry<=0 depth<=2
+seed   22  OK     b1 t24  173416f  4.4s  roundLost  carry<=0 depth<=5
+seed   23  OK     b1 t106  181933f  4.9s  roundLost  carry<=0 depth<=2
+seed   24  OK     b1 t24   20622f  0.4s  roundLost  carry<=0 depth<=0
+seed   25  OK     b3 t23   60984f  1.4s  roundLost  carry<=0 depth<=2
+seed   26  OK     b2 t28  109576f  3.0s  roundLost  carry<=0 depth<=1
+seed   27  OK     b4 t28   73332f  1.8s  roundLost  carry<=0 depth<=3
+seed   28  OK     b1 t16  219271f  6.3s  roundLost  carry<=0 depth<=2
+seed   29  OK     b1 t27   24716f  0.5s  roundLost  carry<=0 depth<=0
+seed   30  OK     b1 t20  101337f  2.5s  roundLost  carry<=0 depth<=2
+seed   31  OK     b2 t19   36430f  0.7s  roundLost  carry<=0 depth<=1
+seed   32  OK     b1 t40   33274f  0.7s  roundLost  carry<=0 depth<=0
+seed   33  OK     b2 t26  110061f  2.6s  roundLost  carry<=0 depth<=4
+seed   34  OK     b1 t30   29322f  0.5s  roundLost  carry<=0 depth<=0
+seed   35  OK     b5 t17  116943f  3.2s  roundLost  carry<=0 depth<=4
+seed   36  OK     b2 t16   40998f  0.8s  roundLost  carry<=0 depth<=1
+seed   37  OK     b7 t13  258973f  6.5s  roundLost  carry<=0 depth<=6
+seed   38  OK     b4 t16  143736f  3.9s  roundLost  carry<=0 depth<=3
+seed   39  OK     b1 t26  170188f  4.2s  roundLost  carry<=7 depth<=7
+seed   40  OK     b2 t16  274763f  6.6s  roundLost  carry<=0 depth<=3
+seed   41  OK     b1 t38   33625f  0.7s  roundLost  carry<=0 depth<=0
+seed   42  OK     b1 t91  121072f  3.0s  roundLost  carry<=0 depth<=2
+seed   43  OK     b1 t12   41156f  0.8s  roundLost  carry<=0 depth<=1
+seed   44  OK     b1 t35   59894f  1.3s  roundLost  carry<=0 depth<=1
+seed   45  OK     b2 t23   42104f  0.9s  roundLost  carry<=0 depth<=1
+seed   46  OK     b1 t32  170647f  4.5s  roundLost  carry<=0 depth<=2
+seed   47  OK     b1 t71   85392f  2.2s  roundLost  carry<=0 depth<=1
+seed   48  OK     b1 t61   43083f  1.0s  roundLost  carry<=0 depth<=0
+seed   49  OK     b3 t22   58513f  1.3s  roundLost  carry<=0 depth<=2
+seed   50  OK     b2 t21   68856f  1.5s  roundLost  carry<=0 depth<=1
+seed   51  OK     b1 t24   71841f  1.8s  roundLost  carry<=0 depth<=1
+seed   52  OK     b1 t17   47543f  1.1s  roundLost  carry<=0 depth<=1
+seed   53  OK     b2 t24   40221f  0.9s  roundLost  carry<=0 depth<=1
+seed   54  OK     b1 t21   20201f  0.4s  roundLost  carry<=0 depth<=0
+seed   55  OK     b1 t60   83442f  2.1s  roundLost  carry<=0 depth<=2
+seed   56  OK     b1 t15   19405f  0.3s  roundLost  carry<=0 depth<=0
+seed   57  OK     b1 t77  143648f  3.6s  roundLost  carry<=0 depth<=1
+seed   58  OK     b3 t16   70612f  1.5s  roundLost  carry<=0 depth<=2
+seed   59  OK     b1 t30   24648f  0.5s  roundLost  carry<=0 depth<=0
+
+=== soak summary: 60 seeds (policy full) in 135.5s ===
+OK 60  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 1/60
+carry >= 14 (challengeNum >= 2): 0/60
+carry >= 21 (challengeNum >= 3): 0/60
+deepest carry anywhere: 7
+deepest battle-depth anywhere: 7
+
+$ node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy winning --seeds 0:60 --render-every 0
+seed    0  OK     b5 t14  135591f  3.4s  roundLost  carry<=0 depth<=5
+seed    1  OK     b7 t20  144392f  3.5s  roundLost  carry<=0 depth<=6
+seed    2  OK     b1 t15   42862f  0.9s  roundLost  carry<=0 depth<=2
+seed    3  OK     b6 t11  290177f  6.7s  roundLost  carry<=7 depth<=8
+seed    4  OK     b2 t16   41041f  0.8s  roundLost  carry<=0 depth<=1
+seed    5  OK     b7 t14  123015f  2.7s  roundComplete  carry<=0 depth<=6
+seed    6  OK     b1 t21   51259f  0.9s  roundLost  carry<=0 depth<=2
+seed    7  OK     b4 t27  461070f  10.1s  roundLost  carry<=14 depth<=14
+seed    8  OK     b2 t21   28936f  0.5s  roundLost  carry<=0 depth<=1
+seed    9  OK     b7 t26   88983f  2.0s  roundComplete  carry<=0 depth<=6
+seed   10  OK     b3 t14  421688f  9.5s  roundLost  carry<=7 depth<=8
+seed   11  OK     b3 t11   51277f  1.1s  roundLost  carry<=0 depth<=2
+seed   12  OK     b1 t19   18396f  0.3s  roundLost  carry<=0 depth<=0
+seed   13  OK     b1 t13   58440f  1.1s  roundLost  carry<=0 depth<=4
+seed   14  OK     b7 t15   77844f  1.6s  roundComplete  carry<=0 depth<=6
+seed   15  CRASH  b5 t5  120877f  2.6s  [engine/tick] Error: battleStringResolver: STRINGID_NATUREPOWERTURNEDINTO references placeholder {B_CURRENT_MOVE} with no resolver supplied  carry<=7 depth<=11
+seed   16  OK     b7 t30  192454f  4.8s  roundComplete  carry<=0 depth<=6
+seed   17  OK     b1 t21   19543f  0.3s  roundLost  carry<=0 depth<=0
+seed   18  OK     b1 t22   18929f  0.3s  roundLost  carry<=0 depth<=0
+seed   19  OK     b5 t19  103100f  2.1s  roundLost  carry<=0 depth<=4
+seed   20  OK     b1 t10  149729f  3.4s  roundLost  carry<=14 depth<=14
+seed   21  OK     b2 t10   84787f  1.8s  roundLost  carry<=7 depth<=8
+seed   22  OK     b2 t16  204281f  5.0s  roundLost  carry<=7 depth<=11
+seed   23  OK     b2 t18  107363f  2.5s  roundLost  carry<=7 depth<=8
+seed   24  OK     b3 t29  162966f  3.7s  roundLost  carry<=7 depth<=10
+seed   25  OK     b7 t15  197667f  4.1s  roundComplete  carry<=0 depth<=6
+seed   26  OK     b5 t14   62271f  1.0s  roundLost  carry<=0 depth<=4
+seed   27  OK     b3 t26  244332f  5.5s  roundLost  carry<=7 depth<=9
+seed   28  OK     b7 t20  108017f  2.2s  roundComplete  carry<=0 depth<=6
+seed   29  OK     b5 t11  109535f  2.4s  roundLost  carry<=0 depth<=4
+seed   30  OK     b1 t20  193133f  4.7s  roundLost  carry<=14 depth<=14
+seed   31  OK     b6 t17   71222f  1.5s  roundLost  carry<=0 depth<=5
+seed   32  OK     b4 t17  247125f  5.9s  roundLost  carry<=14 depth<=14
+seed   33  OK     b2 t18  100785f  2.4s  roundLost  carry<=0 depth<=4
+seed   34  OK     b4 t18  176469f  4.0s  roundLost  carry<=7 depth<=10
+seed   35  OK     b5 t10  273518f  6.2s  roundLost  carry<=7 depth<=11
+seed   36  OK     b1 t27   26056f  0.4s  roundLost  carry<=0 depth<=0
+seed   37  OK     b2 t20  136063f  3.1s  roundLost  carry<=0 depth<=4
+seed   38  OK     b7 t10   69742f  1.3s  roundComplete  carry<=0 depth<=6
+seed   39  OK     b1 t13  253519f  5.7s  roundLost  carry<=7 depth<=7
+seed   40  OK     b6 t12   67953f  1.5s  roundLost  carry<=0 depth<=5
+seed   41  OK     b7 t27  197732f  4.4s  roundLost  carry<=0 depth<=6
+seed   42  OK     b3 t11  112518f  2.3s  roundLost  carry<=7 depth<=9
+seed   43  OK     b6 t21  399891f  9.3s  roundLost  carry<=7 depth<=7
+seed   44  OK     b1 t18  101195f  2.5s  roundLost  carry<=7 depth<=7
+seed   45  OK     b4 t13   57188f  1.3s  roundLost  carry<=0 depth<=3
+seed   46  OK     b4 t16  172785f  4.2s  roundLost  carry<=0 depth<=4
+seed   47  OK     b2 t9   23638f  0.3s  roundLost  carry<=0 depth<=1
+seed   48  OK     b3 t42  119375f  2.8s  roundLost  carry<=0 depth<=3
+seed   49  OK     b7 t8   82050f  1.7s  roundComplete  carry<=0 depth<=6
+seed   50  OK     b3 t19   38770f  0.7s  roundLost  carry<=0 depth<=2
+seed   51  OK     b7 t13  141194f  3.1s  roundComplete  carry<=7 depth<=7
+seed   52  OK     b7 t15   97702f  2.2s  roundLost  carry<=0 depth<=6
+seed   53  OK     b1 t26   20808f  0.4s  roundLost  carry<=0 depth<=0
+seed   54  OK     b7 t26  214512f  4.9s  roundComplete  carry<=0 depth<=6
+seed   55  OK     b6 t17   62694f  1.1s  roundLost  carry<=0 depth<=5
+seed   56  OK     b7 t11   67626f  1.3s  roundComplete  carry<=0 depth<=6
+seed   57  OK     b7 t11   82320f  2.0s  roundComplete  carry<=0 depth<=6
+seed   58  OK     b2 t14   74402f  1.6s  roundLost  carry<=0 depth<=3
+seed   59  OK     b1 t40  122889f  2.9s  roundLost  carry<=7 depth<=7
+
+=== soak summary: 60 seeds (policy winning) in 172.3s ===
+OK 59  CRASH 1  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 20/60
+carry >= 14 (challengeNum >= 2): 4/60
+carry >= 21 (challengeNum >= 3): 0/60
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 14
+
+[1/60] Error: battleStringResolver: STRINGID_NATUREPOWERTURNEDINTO references placeholder {B_CURRENT_MOVE} with no resolver supplied @ resolveBattleStringLines (src/engine/battleStringResolver.ts)
+  seeds: 15
+  first at: seed 15, battle 5, turn 5, frame 120877
+
+$ node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy vanilla --seeds 0:20   (standing gate, default rendering)
+seed    0  OK     b1 t20  195704f  29.7s  roundLost  carry<=7 depth<=9
+seed    1  OK     b1 t16   16970f  2.3s  roundLost  carry<=0 depth<=0
+seed    2  OK     b1 t28   26752f  4.5s  roundLost  carry<=0 depth<=0
+seed    3  OK     b1 t16   16891f  2.7s  roundLost  carry<=0 depth<=0
+seed    4  OK     b4 t11  336618f  69.2s  roundLost  carry<=7 depth<=10
+seed    5  OK     b1 t16   16977f  3.2s  roundLost  carry<=0 depth<=0
+seed    6  OK     b1 t28   26766f  4.1s  roundLost  carry<=0 depth<=0
+seed    7  OK     b1 t16   16904f  2.5s  roundLost  carry<=0 depth<=0
+seed    8  OK     b1 t16   16872f  2.4s  roundLost  carry<=0 depth<=0
+seed    9  OK     b1 t28   26731f  4.3s  roundLost  carry<=0 depth<=0
+seed   10  OK     b1 t16  458626f  72.3s  roundLost  carry<=7 depth<=10
+seed   11  OK     b1 t28   26796f  3.7s  roundLost  carry<=0 depth<=0
+seed   12  OK     b1 t31  203557f  30.2s  roundLost  carry<=7 depth<=9
+seed   13  OK     b1 t28   26805f  3.7s  roundLost  carry<=0 depth<=0
+seed   14  OK     b1 t11  128564f  19.2s  roundLost  carry<=7 depth<=9
+seed   15  OK     b1 t28   26719f  3.7s  roundLost  carry<=0 depth<=0
+seed   16  OK     b3 t23  121190f  18.1s  roundLost  carry<=7 depth<=9
+seed   17  OK     b1 t28   26759f  3.7s  roundLost  carry<=0 depth<=0
+seed   18  OK     b1 t16  458386f  69.7s  roundLost  carry<=7 depth<=10
+seed   19  OK     b1 t28   26736f  3.6s  roundLost  carry<=0 depth<=0
+
+=== soak summary: 20 seeds (policy vanilla) in 352.8s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 7/20
+carry >= 14 (challengeNum >= 2): 0/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 7
+deepest battle-depth anywhere: 10
+
+$ node --experimental-strip-types tools/soak/randomRoundSoak.ts --seeds 0:20   (full policy, standing gate, default rendering)
+seed    0  OK     b1 t141   92328f  14.1s  roundLost  carry<=0 depth<=0
+seed    1  OK     b2 t15  257100f  41.9s  roundLost  carry<=0 depth<=4
+seed    2  OK     b1 t19   19744f  2.7s  roundLost  carry<=0 depth<=0
+seed    3  OK     b1 t30   25412f  4.0s  roundLost  carry<=0 depth<=0
+seed    4  OK     b1 t86   85157f  19.3s  roundLost  carry<=0 depth<=1
+seed    5  OK     b1 t20   22179f  4.6s  roundLost  carry<=0 depth<=0
+seed    6  OK     b1 t18   68163f  15.6s  roundLost  carry<=0 depth<=2
+seed    7  OK     b2 t26   35667f  7.1s  roundLost  carry<=0 depth<=1
+seed    8  OK     b2 t22  129964f  23.2s  roundLost  carry<=0 depth<=3
+seed    9  OK     b3 t26  209156f  32.9s  roundLost  carry<=0 depth<=4
+seed   10  OK     b1 t34   27324f  3.7s  roundLost  carry<=0 depth<=0
+seed   11  OK     b1 t27   26475f  3.6s  roundLost  carry<=0 depth<=0
+seed   12  OK     b1 t15   78385f  11.4s  roundLost  carry<=0 depth<=2
+seed   13  OK     b1 t25  217706f  32.4s  roundLost  carry<=0 depth<=2
+seed   14  OK     b1 t20   20078f  2.6s  roundLost  carry<=0 depth<=0
+seed   15  OK     b1 t112   71177f  10.7s  roundLost  carry<=0 depth<=0
+seed   16  OK     b1 t29   55822f  7.9s  roundLost  carry<=0 depth<=1
+seed   17  OK     b2 t16  236990f  36.0s  roundLost  carry<=0 depth<=1
+seed   18  OK     b1 t42  241374f  36.8s  roundLost  carry<=0 depth<=2
+seed   19  OK     b4 t26  155701f  23.4s  roundLost  carry<=0 depth<=3
+
+=== soak summary: 20 seeds (policy full) in 333.8s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 0/20
+carry >= 14 (challengeNum >= 2): 0/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 0
+deepest battle-depth anywhere: 4

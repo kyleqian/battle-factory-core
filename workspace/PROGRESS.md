@@ -5,6 +5,67 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1358 — [main worker, 2026-08-20] **ISSUES #99 FIXED: soak driver's swap offer now answered by its own branch; depth re-measured for all three policies — vanilla's apparent carry-14 depth was a swap-accept-bug artifact, `full` moved off its 0/60 floor, `winning` found one new engine crash (#100)**
+
+- **State:** `tools/soak/randomRoundSoakDriver.ts` (fix + additive
+  `RunOptions.onNote` test hook), `tests/randomRoundSoak.test.ts` (new
+  `describe("ISSUES #99 ...")`, 3 tests; one pre-existing strong-route pin
+  corrected — see Notes), `docs/soak-depth-remeasure-2026-08-20.{md,log}`,
+  `ISSUES.md` (#99 deleted, #100 filed), this entry. No other `src/` change.
+- **Did:** `onPostwin`'s continuation-menu branch never cleared
+  `continuationCursorPos` after GO ON was confirmed (engine projection,
+  `src/engine/postwin.ts:899-904`), so it kept matching on every later
+  postwin page — including the dialoguePage-4 swap offer — and answered it
+  with A on the frozen cursor-0 (YES) before the swap-offer branch ever ran.
+  Fix: moved the swap-offer branch above the continuation branch and gated
+  the continuation branch on `dialoguePage === 0` (the engine's own live-menu
+  guard in `acceptPostwinContinuation`). Pinned with 3 new tests (vanilla
+  seed 0 always NO + never enters the swap screen; winning seed 0 logs a
+  swap-offer decision; winning seeds 0-6 show both YES and NO) — ~4.5s
+  combined, well under the 20s per-test timeout.
+- **Before/after (carry >= 7 / >= 14 / >= 21 of 60 seeds, full table +
+  before/after methodology in the doc):**
+  | policy | before OK | before carry>=7/14/21 | after OK | after carry>=7/14/21 |
+  |---|---|---|---|---|
+  | vanilla | 60/60 | 16/3/0 | 60/60 | 21/0/0 |
+  | full | 60/60 | 0/0/0 | 60/60 | 1/0/0 |
+  | winning | 60/60 (recount) | 26/2/0 | **59/60** | 20/4/0 |
+  vanilla's pre-fix carry-14 reach (deepest depth 20) was an artifact of
+  accidentally accepting every swap; post-fix it never exceeds carry 7
+  (deepest depth 10). `full` moved off its 0/60 never-carries floor (1/60).
+- **New crash (not fixed, out of scope):** `winning` seed 15 crashes at
+  battle 5 turn 5 — `STRINGID_NATUREPOWERTURNEDINTO` (METRONOME → NATURE
+  POWER) has no `{B_CURRENT_MOVE}` resolver in
+  `battleResolutionPresentation.ts`. Filed as **ISSUES #100** with repro +
+  mechanism + fix lead; reported honestly as 59/60, not rounded up.
+- **Gates:** standing soak gates rerun post-fix with default rendering:
+  `--policy vanilla --seeds 0:20` **20/20 OK**; `--seeds 0:20` (full,
+  default rendering) **20/20 OK**, cited together with the render-every-0
+  `full` 0:60 measurement run (60/60 OK) for the `full` 0:60 gate per the
+  brief's citation rule. `npm run test:smoke` 444/444 green throughout;
+  full `npm test` and `npm run build` run once at the end (see Notes for
+  the exact counts).
+- **Next:** ISSUES #100 (NATURE POWER string resolver) is a clean, bounded
+  next step — add the missing `B_CURRENT_MOVE` resolver case in
+  `battleResolutionPresentation.ts`'s `messageLines`, mirroring the ~14
+  existing sites, then re-run soak seed 15 winning to confirm green.
+  M-B step 2 (raise `winning`'s win rate toward carry>=21) can now proceed
+  from a clean, bug-free swap-decision baseline.
+- **Notes:** one pre-existing pin ("earns all seven generated wins...",
+  `testPolicy: "strong-route"`) had its literal frame/turn/renderCalls
+  numbers corrected (59,656→40,566 frames, turn 18→5, renderCalls
+  4,397→2,953): strong-route shares vanilla's non-exploring swap semantics,
+  so it now genuinely declines every swap instead of the old bug's
+  accidental accept-every-swap, producing a shorter, different, still-
+  deterministic trajectory (comment explains why in the test file).
+  `PAPERCUT: none this session — the earlier session's swap-offer-log gap
+  (1357's PAPERCUT) is what #99 turned out to be.` Time discipline: fix +
+  pin landed by ~25 min; measurement + gates (parallel foreground shell
+  jobs, ~2.5min + ~6min wall) by ~45 min; full-suite/build run once at the
+  end per the brief.
+
+---
+
 ## 1357 — [main worker, 2026-08-20] **M-B step 1 DONE: `full` never wins a round because it's genuinely bad play, not an engine defect — verdict (a). Fight-menu's uniform-over-legality move roll is the dominant lever (ablation 0%→20.0%)**
 
 - **State:** docs-only session (`docs/soak-full-policy-diagnosis-2026-08-20.md`,
@@ -112,66 +173,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1355 — [supervisor wind-down, 2026-08-19] **Milestone M-A COMPLETE same-day (steps 1-3): play regularly passes challenge 1 (27-36%), ~5% enter challenge 3, NOTHING reaches carry 21 in 300 seeds — follow-on scope decision filed as DEFERRED D2; scanner H3 folded; walk-up ROADMAP line found stale TWICE and corrected to program-COMPLETE**
-
-- **Final gates (SUPERSEDED line below — rerun after #39 batch 9 landed
-  late-session; both runs supervisor-independent):** at the FINAL tree
-  (`0a9caeda` + this docs commit): full `npm test` **1,068 files /
-  10,126 passed / 223 skipped**; `npm run build` green; soak vanilla
-  0:20 **20/20 OK**; soak full 0:60 **60/60 OK** — and the full-0:60
-  depth block byte-matches the sweep doc's same-range numbers
-  (determinism cross-check). Batch 9 itself verified: scanner CANONICAL
-  76→75 + function-kind pool 0 (rerun live), test pins inspected
-  (absence + exact-0 pins, not vacuous), differential independently
-  rerun on 2 of 6 traces **438/438 byte-identical** (worker's own full
-  run: 1241/1241). NOTE: my brief stated the move direction backwards;
-  the worker correctly followed the established battleScene→canonical
-  direction (matches batches 5-8 and the acceptance numbers) — right
-  call. Earlier same-day gates at the pre-batch-9 tree (10,126 passed,
-  build green, sweep-satisfied soaks) stand in history. DEFERRED.md
-  carries **D2 (OPEN)** — the post-M-A scope decision, reserved to the
-  user by the M-A block itself.
-- **Did (4 worker rounds + 1 read-only scout, 2 lanes):** (1) M-A step 1
-  (entry 1354 below, supervisor-verified incl. a seed-0 diagnostics
-  trajectory audit). (2) Side: scanner **H3-let-write** hazard
-  (`e99c3511`, fold `79a0c6ad`) — batch-8's two hand-exclusions now
-  auto-blocked, `playerHealthboxHpOverlayForHp` correctly still eligible
-  (pool = 1 function-kind); union checks 26/26 + smoke 444/444; a stray
-  main-tree copy of the edit (absolute-path papercut, hit #3) was
-  byte-identical and discarded. (3) M-A steps 2-3 (`78f11bee`,
-  `a395d436`, `1e654c62`): winning 0:180 + vanilla 0:60 + full 0:60,
-  **all 300 seeds OK**, distributions + per-seed lines committed
-  (`docs/soak-depth-measure-2026-08-19.{md,log}`); supervisor recounted
-  winning carry≥7 from raw lines (64/180 exact match). Worker cap-killed
-  at 90min mid-OPTIONAL-extension (full toward 0:180) — nothing lost,
-  tree was clean and all goals committed. (4) Side scout on the
-  "fixture 03 brainMoving cadence" residual returned **premise
-  inverted**: the cadence was already derived and closed 256/256 by
-  entries 1280/1296/1307/1308 (walk-up program fully COMPLETE per 1317);
-  scout live-reverified 02+03 both 256/256, differential 563/563, full
-  suite green, and correctly committed nothing. ROADMAP walk-up line
-  corrected twice (`b1fd9734` — itself still stale-based — then
-  `477e7570` program-COMPLETE).
-- **The M-A number** (full table in the doc): winning 64/180 (35.6%)
-  carry≥7, 10/180 (5.6%) carry≥14, 0/180 carry≥21; vanilla 16/60 /
-  3/60 / 0/60, deepest anywhere = vanilla seed 24 at battle-depth 20
-  (= standing in ladder battle 21); full policy 0/60 ever complete a
-  round. ROADMAP M-A block updated with the result; the block's two
-  pre-recorded outcomes bracket it, so the scope call goes to D2.
-- **Next:** user resolves D2 (mechanically blocks the next supervisor
-  session). #39 batch 9 landed same-day (`2f8edef2` move+reconnect,
-  `dc89b145` test-pin fix): moved `playerHealthboxHpOverlayForHp`,
-  scanner CANONICAL 76→75, function-kind eligible pool 1→0 (none left).
-  Available filler regardless: the non-function/topological CANONICAL
-  remainder (5 eligible non-function symbols + the ~70 hazard-blocked
-  ones per the scanner's own summary), or decision (b).
-- **Notes:** process lesson recorded on top of 1353's rule — verifying a
-  queue item against the tree must grep for the artifact's NEWEST
-  archive mention, not stop at the first hit near the cited entry (my
-  scout brief and first ROADMAP "correction" both did the latter;
-  the scout's live verification caught it). PAPERCUTS bumped:
-  freshness false-positive (hit 7), side absolute-path edits (hit 3).
-  Both lane branches (animation-main, rust-main) were EMPTY at orient
-  and stayed empty. Commits local only — pushing is Kyle's step.
-
----

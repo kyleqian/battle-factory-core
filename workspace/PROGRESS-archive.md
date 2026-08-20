@@ -1,3 +1,66 @@
+## 1355 — [supervisor wind-down, 2026-08-19] **Milestone M-A COMPLETE same-day (steps 1-3): play regularly passes challenge 1 (27-36%), ~5% enter challenge 3, NOTHING reaches carry 21 in 300 seeds — follow-on scope decision filed as DEFERRED D2; scanner H3 folded; walk-up ROADMAP line found stale TWICE and corrected to program-COMPLETE**
+
+- **Final gates (SUPERSEDED line below — rerun after #39 batch 9 landed
+  late-session; both runs supervisor-independent):** at the FINAL tree
+  (`0a9caeda` + this docs commit): full `npm test` **1,068 files /
+  10,126 passed / 223 skipped**; `npm run build` green; soak vanilla
+  0:20 **20/20 OK**; soak full 0:60 **60/60 OK** — and the full-0:60
+  depth block byte-matches the sweep doc's same-range numbers
+  (determinism cross-check). Batch 9 itself verified: scanner CANONICAL
+  76→75 + function-kind pool 0 (rerun live), test pins inspected
+  (absence + exact-0 pins, not vacuous), differential independently
+  rerun on 2 of 6 traces **438/438 byte-identical** (worker's own full
+  run: 1241/1241). NOTE: my brief stated the move direction backwards;
+  the worker correctly followed the established battleScene→canonical
+  direction (matches batches 5-8 and the acceptance numbers) — right
+  call. Earlier same-day gates at the pre-batch-9 tree (10,126 passed,
+  build green, sweep-satisfied soaks) stand in history. DEFERRED.md
+  carries **D2 (OPEN)** — the post-M-A scope decision, reserved to the
+  user by the M-A block itself.
+- **Did (4 worker rounds + 1 read-only scout, 2 lanes):** (1) M-A step 1
+  (entry 1354 below, supervisor-verified incl. a seed-0 diagnostics
+  trajectory audit). (2) Side: scanner **H3-let-write** hazard
+  (`e99c3511`, fold `79a0c6ad`) — batch-8's two hand-exclusions now
+  auto-blocked, `playerHealthboxHpOverlayForHp` correctly still eligible
+  (pool = 1 function-kind); union checks 26/26 + smoke 444/444; a stray
+  main-tree copy of the edit (absolute-path papercut, hit #3) was
+  byte-identical and discarded. (3) M-A steps 2-3 (`78f11bee`,
+  `a395d436`, `1e654c62`): winning 0:180 + vanilla 0:60 + full 0:60,
+  **all 300 seeds OK**, distributions + per-seed lines committed
+  (`docs/soak-depth-measure-2026-08-19.{md,log}`); supervisor recounted
+  winning carry≥7 from raw lines (64/180 exact match). Worker cap-killed
+  at 90min mid-OPTIONAL-extension (full toward 0:180) — nothing lost,
+  tree was clean and all goals committed. (4) Side scout on the
+  "fixture 03 brainMoving cadence" residual returned **premise
+  inverted**: the cadence was already derived and closed 256/256 by
+  entries 1280/1296/1307/1308 (walk-up program fully COMPLETE per 1317);
+  scout live-reverified 02+03 both 256/256, differential 563/563, full
+  suite green, and correctly committed nothing. ROADMAP walk-up line
+  corrected twice (`b1fd9734` — itself still stale-based — then
+  `477e7570` program-COMPLETE).
+- **The M-A number** (full table in the doc): winning 64/180 (35.6%)
+  carry≥7, 10/180 (5.6%) carry≥14, 0/180 carry≥21; vanilla 16/60 /
+  3/60 / 0/60, deepest anywhere = vanilla seed 24 at battle-depth 20
+  (= standing in ladder battle 21); full policy 0/60 ever complete a
+  round. ROADMAP M-A block updated with the result; the block's two
+  pre-recorded outcomes bracket it, so the scope call goes to D2.
+- **Next:** user resolves D2 (mechanically blocks the next supervisor
+  session). #39 batch 9 landed same-day (`2f8edef2` move+reconnect,
+  `dc89b145` test-pin fix): moved `playerHealthboxHpOverlayForHp`,
+  scanner CANONICAL 76→75, function-kind eligible pool 1→0 (none left).
+  Available filler regardless: the non-function/topological CANONICAL
+  remainder (5 eligible non-function symbols + the ~70 hazard-blocked
+  ones per the scanner's own summary), or decision (b).
+- **Notes:** process lesson recorded on top of 1353's rule — verifying a
+  queue item against the tree must grep for the artifact's NEWEST
+  archive mention, not stop at the first hit near the cited entry (my
+  scout brief and first ROADMAP "correction" both did the latter;
+  the scout's live verification caught it). PAPERCUTS bumped:
+  freshness false-positive (hit 7), side absolute-path edits (hit 3).
+  Both lane branches (animation-main, rust-main) were EMPTY at orient
+  and stayed empty. Commits local only — pushing is Kyle's step.
+
+---
 ## 1354 — [main worker, 2026-08-19] **M-A step 1 DONE: real max-depth tracking (maxCarriedWinStreak/maxBattleDepth) added to the soak driver and surfaced in the CLI, old carriedWinStreak snapshot's lying doc comment corrected**
 
 - **Supervisor verification + parallel side fold (same session):** step 1
