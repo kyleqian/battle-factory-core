@@ -2,6 +2,32 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_RAIN_DANCE",
+   "status": "partial",
+   "remaining": "Implement the source-relative reducer, typed presentation seam, production compositor/draw case, and twice-fresh zero-residual framebuffer acceptance for all 374 retained bilateral rows before exact promotion.",
+   "covered": [
+    "complete legal Level-50 Wooper versus Onix mechanicLab parties pass the full Move_RAIN_DANCE source-owned window twice fresh in both orientations: player-back frames 213-399 and opponent-front frames 211-397, 187 rows each and 374 total, through first inactive cleanup",
+    "the authoritative source interval is the half-open byte range 0x082d050a..0x082d0555; dense source/task/sprite/software+hardware OAM/matrix/unfaded+faded+hardware palette/tag/BG/register/audio/party/both-RNG state and raw RGB are retained, with observed command pointers of both even and odd parity",
+    "asset:ANIM_TAG_RAIN_DROPS, task:AnimTask_BlendBattleAnimPal, and task:AnimTask_CreateRaindrops are measured independently: 80 creations, 80 destructions, peak 14 drops, palette blend edges, audio start, allocator slots, callbacks, and cleanup are pinned in both orientations; Haze and Detect are regression controls only and Hail remains distinct unsupported source",
+    "the presentation reducer, typed seam, production compositor/draw case, zero-residual framebuffer acceptance, and exact promotion remain explicitly open; no gameplay/weather outcome, damage, RNG outcome, AI, controller, turn, round, or facility state is owned"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-rain-dance-player-wooper-opponent-onix.json",
+    "tools/battle-lab/mechanic-rain-dance-opponent-wooper-player-onix.json",
+    "tools/compare/fixtures/rain-dance-evidence.json",
+    "tools/compare/rainDanceSourceAudit.ts",
+    "tools/compare/rainDanceProbe.py",
+    "tools/compare/rainDanceEvidence.ts",
+    "tools/compare/evidence/rain-dance-player-dense-state.json.gz",
+    "tools/compare/evidence/rain-dance-opponent-dense-state.json.gz",
+    "tools/compare/evidence/rain-dance-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/rain-dance-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/rain-dance-changemap-player.txt",
+    "tools/compare/evidence/rain-dance-changemap-opponent.txt",
+    "tests/animation/rainDanceEvidence.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SOFT_BOILED",
    "status": "exact",
    "covered": [
@@ -5366,7 +5392,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_RAIN_DANCE"],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6296,6 +6322,17 @@
    ],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_PSYBEAM independently proves its complete player-back 160/160 and opponent-front 160/160 source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels through inactive cleanup, reproduced twice fresh. All eleven GoldRings, Psychic BG rotation/fades, target SwayMon and two-leg palette cycle, audio/resource lifecycle, bilateral geometry, and ordinary display transfers remain source-relative. Hypnosis, Shadow Ball, Confusion, and Psychic are exact regression controls only and confer no acceptance."
+  },
+  {
+   "id": "rain-drops-rain-dance",
+   "components": [
+    "asset:ANIM_TAG_RAIN_DROPS",
+    "task:AnimTask_BlendBattleAnimPal",
+    "task:AnimTask_CreateRaindrops"
+   ],
+   "representatives": ["MOVE_RAIN_DANCE"],
+   "fulfilled": false,
+   "goal": "PARTIAL EVIDENCE ONLY: MOVE_RAIN_DANCE is the representative for all three measured components, with complete twice-fresh bilateral source/task/sprite/OAM/matrix/palette/tag/BG/register/audio/party/RNG/raw-RGB evidence and explicit allocator/cleanup timing. The source-relative reducer, typed seam, production compositor/draw case, zero-residual framebuffer remainder, and exact promotion are not implemented; Haze and Detect are BlendBattleAnimPal regression controls only, Hail is a distinct unsupported body, and no sibling or component credit is awarded."
   },
   {
    "id": "task-animtask-rollout",
