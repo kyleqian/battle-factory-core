@@ -130,7 +130,7 @@ if (
   || JSON.stringify(supersonicComponents?.componentIds.filter((id: string) => expectedComponents.includes(id))) !== JSON.stringify(sharedWithSupersonic)
   || supersonicCoverage?.status !== "exact"
   || metalCoverage?.status !== "exact"
-  || coverage.entries.length !== 196
+  || coverage.entries.length !== 199
 ) {
   throw new Error("MOVE_METAL_SOUND source/carrier/component/control contract changed");
 }

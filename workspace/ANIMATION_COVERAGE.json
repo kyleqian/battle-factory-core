@@ -2,6 +2,70 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
+   "move": "MOVE_LOVELY_KISS",
+   "status": "partial",
+   "covered": [
+    "complete legal Level-50 challenge-3 FRONTIER_MON_JYNX_1 parties stage Lovely Kiss against Onix in both ordinary Battle Scene ON orientations; player-back and opponent-front each retain 153 consecutive source-owned rows through first inactive cleanup, and each orientation is replayed twice fresh with byte-identical dense state and raw RGB",
+    "the authoritative half-open source interval is 0x082d4035..0x082d407c (71 bytes, 604194e8a58c2a8e0aa8162e91983863ca464a43df99d593e720f991bcda66d3), with both even and odd command-pointer parity observed; the exact graph is ANIM_TAG_DEVIL, ANIM_TAG_PINK_HEART, gDevilSpriteTemplate, and gPinkHeartSpriteTemplate",
+    "source callbacks AnimDevil, AnimPinkHeart, and AnimPinkHeart_Step, source-identical Devil/Magenta Heart graphics and palettes, and target-panned SE_M_PSYBEAM2 (id 200) then SE_M_ATTRACT (id 226) are pinned; the lowest legal Level-50 carrier is set 377 FRONTIER_MON_JYNX_1 (species 124, Shell Bell 219, Modest, SpAttack+HP)",
+    "the retained dense rows include source cursor/wait/args, task and sprite creation/destruction/callback/OAM/affine state, animation RNG, software and hardware OAM/matrices, faded/unfaded/hardware palettes and tags, BG/register/audio, complete parties, battlers/engine/immutable state, gameplay RNG, raw RGB, normalized change maps, hardware latches, and first-inactive cleanup; visual-task topology stays empty and lifecycle is 1 Devil plus 4 Pink Hearts per orientation",
+    "the evidence-only verifier passes 306/306 dense rows and 306/306 raw-RGB rows; each preceding software-to-hardware OAM, matrix, and palette latch is 152/152 per orientation, gameplay RNG has zero transitions, animation RNG has 152 transitions per orientation, and cleanup is retained; Sweet Kiss, Attract, and sleep-animation bodies remain source-neighbor controls only"
+   ],
+   "remaining": "MOVE_LOVELY_KISS still has no source-relative reducer, typed Scene-ON seam, production compositor/draw wiring, or framebuffer equality. The four components and every move acceptance unit remain unfulfilled; do not infer sibling credit from Sweet Kiss, Attract, or sleep controls.",
+   "evidence": [
+    "tools/battle-lab/mechanic-lovely-kiss-player-jynx-opponent-onix.json",
+    "tools/battle-lab/mechanic-lovely-kiss-opponent-jynx-player-onix.json",
+    "tools/compare/fixtures/lovely-kiss-evidence.json",
+    "tools/compare/lovelyKissSourceAudit.ts",
+    "tools/compare/lovelyKissProbe.py",
+    "tools/compare/lovelyKissEvidence.ts",
+    "tools/compare/evidence/lovely-kiss-player-dense-state.json.gz",
+    "tools/compare/evidence/lovely-kiss-opponent-dense-state.json.gz",
+    "tools/compare/evidence/lovely-kiss-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/lovely-kiss-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/lovely-kiss-changemap-player.json",
+    "tools/compare/evidence/lovely-kiss-changemap-opponent.json",
+    "tests/animation/lovelyKissEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_RAIN_DANCE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Wooper versus Onix mechanicLab parties pass the full Move_RAIN_DANCE source-owned window twice fresh in both orientations: player-back frames 213-399 and opponent-front frames 211-397, 187 rows each and 374 total, through first inactive cleanup",
+    "the authoritative source interval is the half-open byte range 0x082d050a..0x082d0555; dense source/task/sprite/software+hardware OAM/matrix/unfaded+faded+hardware palette/tag/BG/register/audio/party/both-RNG state and raw RGB are retained, with observed command pointers of both even and odd parity",
+    "asset:ANIM_TAG_RAIN_DROPS, task:AnimTask_BlendBattleAnimPal, and task:AnimTask_CreateRaindrops are measured independently: 80 creations, 80 destructions, peak 14 drops, palette blend edges, audio start, allocator slots, callbacks, and cleanup are pinned in both orientations; Haze and Detect are regression controls only and Hail remains distinct unsupported source",
+    "the pure source-relative reducer and typed Scene-ON seam reproduce all 374 retained component-state rows: source cursor, both task lifecycles, Random2-derived allocator/drop state, sprite callback/animation/OAM attributes, the one-row OAM transfer contract, all 32 software/hardware matrices, all 512 unfaded/faded/hardware palette colors, tags, audio, task counts, and inactive cleanup",
+    "the ordinary production compositor uses source-extracted Rain Drops art/palette, the real 5-bit BlendPalette ramp over the live background and battler palette banks, source Random2 geometry, preceding software-OAM transfer, signed-y/OAM painter order, the post-CreateSprite blank outer row, battlers, healthboxes, text, and inactive cleanup; all 374 retained rows and twice-fresh bilateral reruns match raw RGB with zero residual pixels and framebufferCompared=true",
+    "no gameplay/weather outcome, damage, gameplay RNG, AI, controller, turn, round, or facility state is owned; Haze and Detect remain exact regression controls only, Hail remains independently unsupported, and no sibling credit is awarded"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-rain-dance-player-wooper-opponent-onix.json",
+    "tools/battle-lab/mechanic-rain-dance-opponent-wooper-player-onix.json",
+    "tools/compare/fixtures/rain-dance-evidence.json",
+    "tools/compare/rainDanceSourceAudit.ts",
+    "tools/compare/rainDanceProbe.py",
+    "tools/compare/rainDanceEvidence.ts",
+    "tools/compare/verifyRainDanceReducer.ts",
+    "tools/compare/rainDanceFramebuffer.ts",
+    "tools/compare/rainDanceFreshFramebuffer.ts",
+    "tools/compare/extractRainDanceAssets.ts",
+    "tools/compare/evidence/rain-dance-player-dense-state.json.gz",
+    "tools/compare/evidence/rain-dance-opponent-dense-state.json.gz",
+    "tools/compare/evidence/rain-dance-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/rain-dance-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/rain-dance-changemap-player.txt",
+    "tools/compare/evidence/rain-dance-changemap-opponent.txt",
+    "src/animation/rainDance.ts",
+    "src/animation/assets/rain-drops.json",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/rainDanceEvidence.test.ts",
+    "tests/animation/rainDance.test.ts",
+    "tests/animation/rainDanceFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SOFT_BOILED",
    "status": "exact",
    "covered": [
@@ -2223,7 +2287,7 @@
     "the pure source-relative reducer and typed Scene-ON seam port ANIM_TAG_GOLD_RING lifetime, all six staggered gGoldRingSpriteTemplate/TranslateAnimSpriteToTargetMonLocation 27-tick paths including DestroyAnimSprite handoff, side-relative geometry, both queued psychic-background palette/BLDY programs, RGB(31,18,31) target blend-task lifetime and 0-to-12-to-0 coefficients, three side-panned Supersonic sound triggers, script wait, and first inactive cleanup",
     "the production compositor ports GoldRing source OAM ordering and display latches in both orientations, Politoed and Onix idle/enemy-shadow latches, target palette tint, background palette rotation and darkening, immutable healthboxes, move windows/text, and cleanup without owning gameplay state",
     "reproducible extraction regenerates Politoed front/back and GoldRing assets byte-for-byte; hypnosisPortable.ts reruns both complete legal probes twice fresh and pins every source/component, typed-seam, software/hardware OAM and matrix, palette buffer/tag, register, audio trigger, unchanged HP/item/status, raw-RGB, and production shared-framebuffer frame",
-    "MOVE_PSYBEAM remains unsupported after an independent source/legal-carrier batch audit: its lowest carrier is set 145 FRONTIER_MON_SPINDA, and its distinct body adds eleven 13-tick GoldRing groups, Set/UnsetPsychicBackground, target SwayMon, a two-leg target blend_color_cycle, initial Psybeam audio, and SoundTask_LoopSEAdjustPanning 3/4/0/15; it has no complete dense both-orientation evidence",
+    "MOVE_PSYBEAM independently proves its distinct eleven 13-tick GoldRing groups, Set/UnsetPsychicBackground, target SwayMon, two-leg target blend_color_cycle, initial Psybeam audio, and SoundTask_LoopSEAdjustPanning 3/4/0/15 through complete twice-fresh bilateral source and production-framebuffer evidence; that move-specific acceptance awards no sibling credit",
     "presentation owns no sleep, damage, confusion, gameplay RNG, turn order, controller decision, or facility state; no animation-boundary list, unsupported barrier, or canonical-recording allowlist changed"
    ],
    "evidence": [
@@ -3201,6 +3265,44 @@
     "tools/compare/extractPsychicOpponentAsset.ts",
     "tests/animation/psychicOrientation.test.ts",
     "This session (mirrored fix, not independently re-probed - the family's own byte-identical script/argv already established every relative age transfers unchanged from CONFUSION): applied the identical window-1 creation-boundary fix (psychicAttackerShakeDisplayX2, src/animation/psychic.ts) used directly by sceneOnPsychicView, same mechanism as confusionAttackerShakeDisplayX2 (see MOVE_CONFUSION's own rung-14 entry for the full RAM derivation). Dense comparator (psychicPortable.ts): 137/140 -> 138/140, frame145 (this fixture's own window-1 creation tick, relative age 38 same as CONFUSION's frame119) closed - 1583px bbox eliminated. Window 2's own splice (frame174, relative age 95, same class as CONFUSION's frame176) is left unchanged: CONFUSION's own attempt to unify that splice was tried and empirically refuted this session (see its own rung-14 entry), so it was not re-attempted here either. New Tier-1 test (tests/animation/psychic.test.ts) pins the corrected boundary values. Regression gates rerun once each (time-capped): futureSightPortable.ts 114/114, growthPortable.ts 63/63, bindPortable.ts 45/45."
+   ]
+  },
+  {
+   "move": "MOVE_PSYBEAM",
+   "status": "exact",
+   "covered": [
+    "the source audit proves set 145 FRONTIER_MON_SPINDA is the lowest legal Level-50 carrier and pins the complete even-pointer Move_PSYBEAM/PsybeamRings interval, all eleven distinct 13-tick GoldRing groups, SetPsychicBackground/UnsetPsychicBackground, SwayMon, two-leg target blend_color_cycle, initial Psybeam sound, and LoopSEAdjustPanning 3/4/0/15",
+    "complete legal three-Pokemon mechanicLab scenarios stage SPINDA against ONIX in both Scene-ON orientations with ordinary controller input or stock AI constrained only by four legal move slots; all six party checksums remain valid and no transient battle state is injected",
+    "twice-fresh local-mGBA probes retain the complete first active source row through first inactive cleanup byte-for-byte at player-back frames 213-372 and opponent-front frames 213-372: 160 rows per orientation, 320 source/task/sprite/software+hardware-OAM/matrix/faded+unfaded+hardware-palette/tag/BG/register/audio/party/engine/both-RNG/raw-RGB rows total",
+    "banked normalized change maps and full-state receipts independently confirm eleven ring creations at ages 42/48/54/60/66/72/78/84/90/96/102; GoldRing lives ages 42-115, LoopSEAdjustPanning 42-88, SwayMon 54-116, target BlendColorCycle 54-112, and cleanup age 159",
+    "whole hardware OAM, matrices, and palettes equal the preceding software buffers on 159/159 comparable rows per orientation, confirming the existing RAM+1 script-create/x2/plain-OAM and faded-palette transfer classes; the psychic BLDY program has 65 edges and restores to zero at age 157; player-front ONIX contributes the species idle x2=1 draw hold while opponent-back ONIX is x2=0; measured orientation timing shift is 0",
+    "the pure source-relative reducer and typed Scene-ON seam replay all 320 retained bilateral rows: source owner/wait/args, SetPsychicBackground/Task_FadeToBg/SoundTask/SwayMon/BlendColorCycle payloads, all 11 GoldRing groups and OAM/matrix callbacks, BLDY/BLDCNT, task counts, target Sway x2, resource tags, and age-159 cleanup; the audit explicitly compares no framebuffer pixels",
+    "the source-derived production compositor reuses the extracted Psychic background, GoldRing art/palette, CRAWDAUNT staging picture/chrome, ONIX art/idle geometry, healthboxes, and ordinary OAM/palette/register infrastructure; target SwayMon composes its post-BuildOamBuffer live write with the established software-to-hardware transfer, while all eleven rings retain their measured source-relative RAM+1 display ages",
+    "the same ordinary shared framebuffer path matches all player-back 160/160 and opponent-front 160/160 raw RGB rows with zero residual pixels through age-159 inactive resource/register/task cleanup, and the complete 320/320 proof reproduces twice fresh via tools/run-mgba-probe.py",
+    "MOVE_HYPNOSIS remains an independent exact GoldRing/psychic-background control, MOVE_SHADOW_BALL remains an independent exact LoopSEAdjustPanning control, and MOVE_CONFUSION/MOVE_PSYCHIC remain independent exact psychic-background controls; no sibling or component inherits Psybeam acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-psybeam-player-spinda-opponent-onix.json",
+    "tools/battle-lab/mechanic-psybeam-opponent-spinda-player-onix.json",
+    "tools/compare/goldRingSourceAudit.ts",
+    "tools/compare/psybeamProbe.py",
+    "tools/compare/psybeamEvidence.ts",
+    "tools/compare/fixtures/psybeam-evidence.json",
+    "tools/compare/evidence/psybeam-player-dense-state.json.gz",
+    "tools/compare/evidence/psybeam-opponent-dense-state.json.gz",
+    "tools/compare/evidence/psybeam-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/psybeam-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/psybeam-changemap-player.txt",
+    "tools/compare/evidence/psybeam-changemap-opponent.txt",
+    "src/animation/psybeam.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/psybeamReducerAudit.ts",
+    "tests/animation/psybeam.test.ts",
+    "tests/animation/psybeamEvidenceCheckpoint.test.ts",
+    "tools/compare/psybeamFramebuffer.ts",
+    "tools/compare/psybeamFreshFramebuffer.ts",
+    "tests/animation/psybeamFramebuffer.test.ts",
+    "src/engine/battleScene.ts"
    ]
   },
   {
@@ -5328,7 +5430,7 @@
    ]
   }
  ],
- "queue": [],
+ "queue": ["MOVE_LOVELY_KISS"],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6236,6 +6338,41 @@
   "goal": "FULFILLED: MOVE_YAWN independently proves its complete legal Togetic/Gengar bilateral player-back 250..462 and opponent-front 254..466 windows at 426/426 source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels through first inactive cleanup, twice fresh. The source-relative pink-cloud/DeepInhale reducer and compositor follow picture offsets and BuildOamBuffer ordering; MOVE_HOWL remains an independent exact regression control and receives no Yawn credit."
   },
   {
+   "id": "gold-ring-psybeam",
+   "components": [
+    "asset:ANIM_TAG_GOLD_RING",
+    "sprite:gGoldRingSpriteTemplate",
+    "subroutine:PsybeamRings",
+    "subroutine:SetPsychicBackground",
+    "subroutine:UnsetPsychicBackground",
+    "task:AnimTask_SetPsychicBackground",
+    "task:AnimTask_SwayMon",
+    "soundTask:SoundTask_LoopSEAdjustPanning",
+    "visualCommand:blend_color_cycle",
+    "visualCommand:fadetobg",
+    "visualCommand:restorebg",
+    "visualCommand:setarg",
+    "visualCommand:waitbgfadein",
+    "visualCommand:waitbgfadeout"
+   ],
+   "representatives": [
+    "MOVE_PSYBEAM"
+   ],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_PSYBEAM independently proves its complete player-back 160/160 and opponent-front 160/160 source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels through inactive cleanup, reproduced twice fresh. All eleven GoldRings, Psychic BG rotation/fades, target SwayMon and two-leg palette cycle, audio/resource lifecycle, bilateral geometry, and ordinary display transfers remain source-relative. Hypnosis, Shadow Ball, Confusion, and Psychic are exact regression controls only and confer no acceptance."
+  },
+  {
+   "id": "rain-drops-rain-dance",
+   "components": [
+    "asset:ANIM_TAG_RAIN_DROPS",
+    "task:AnimTask_BlendBattleAnimPal",
+    "task:AnimTask_CreateRaindrops"
+   ],
+   "representatives": ["MOVE_RAIN_DANCE"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_RAIN_DANCE independently reproduces 187/187 player-back and 187/187 opponent-front source/component/reducer/typed-seam/raw-RGB/production-framebuffer rows through inactive cleanup with zero residual pixels and framebufferCompared=true, then repeats the same 374/374 proof twice fresh. The ordinary compositor uses source-extracted Rain Drops art/palette, the real 5-bit palette ramp, Random2-derived sprites, preceding OAM/palette transfer, signed-y painter order, battlers, field chrome, and cleanup. Haze and Detect remain exact BlendBattleAnimPal controls only, Hail remains independently unsupported, and no sibling credit is awarded."
+  },
+  {
    "id": "task-animtask-rollout",
    "components": [
     "task:AnimTask_Rollout"
@@ -6245,6 +6382,17 @@
    ],
    "fulfilled": true,
    "goal": "FULFILLED: task:AnimTask_Rollout is a singleton Level-50 component represented only by MOVE_ROLLOUT. Complete legal Voltorb/Onix Scene-ON lifecycles naturally progress all five counter bodies twice fresh in both orientations through first inactive cleanup. The source-relative reducer, typed seam, and shared production framebuffer pass player-back 793/793 plus opponent-front 793/793, 1,586/1,586 total with zero residual pixels. The five opponent pointer-entry rows use the source-extracted elevated enemy-shadow OAM layer and its preceding-hardware-buffer lifetime. MOVE_ROLLOUT alone is exact; MOVE_ICE_BALL remains independently unsupported. MOVE_SAND_ATTACK and MOVE_ANCIENT_POWER remain independent exact controls, and Defense Curl gameplay state receives no presentation ownership or unsupported visual claim."
+  },
+  {
+   "id": "devil-pink-heart-lovely-kiss",
+   "components": [
+    "asset:ANIM_TAG_DEVIL",
+    "asset:ANIM_TAG_PINK_HEART",
+    "sprite:gDevilSpriteTemplate",
+    "sprite:gPinkHeartSpriteTemplate"
+   ],
+   "representatives": ["MOVE_LOVELY_KISS"],
+   "goal": "PARTIAL: MOVE_LOVELY_KISS independently retains complete legal Scene-ON player-back and opponent-front source-owned dense/raw-RGB windows twice fresh through first inactive cleanup, with source interval, callbacks, assets, audio, OAM/matrix/palette/tag/register latches, complete parties, and gameplay/animation-RNG evidence. The source-relative reducer, typed seam, production compositor, framebuffer equality, and every move-specific acceptance unit remain open; no sibling credit is conveyed."
   }
  ],
  "variantAudits": {

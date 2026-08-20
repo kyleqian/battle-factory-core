@@ -1,0 +1,59 @@
+{
+  "schema": "psybeam-bilateral-evidence/v1",
+  "status": "exact",
+  "coverageCredit": true,
+  "acceptance": {
+    "sourceRows": 320,
+    "rawRgbRows": 320,
+    "freshRunsPerOrientation": 2,
+    "ringGroups": 11,
+    "ringSprites": 11,
+    "firstInactiveCleanupAge": 159,
+    "productionFramebufferRows": 320,
+    "freshProductionRunsPerOrientation": 2
+  },
+  "source": {
+    "audit": "tools/compare/goldRingSourceAudit.ts",
+    "auditSha256": "7d6501ee6822c87e58999f04e2f5853fc0fa4e408f7bb824fd1b964aeb40815f",
+    "probe": "tools/compare/psybeamProbe.py",
+    "probeSha256": "74a1f6df2bd1396e09f60e4659804f1d8a32797d5c00b21bf79099308dc366b3",
+    "verifier": "tools/compare/psybeamEvidence.ts",
+    "verifierSha256": "fa84171af32074c95c86be60291b26e4c84850d3ae15caa76eab2c0e8d46cecf",
+    "framebufferVerifier": "tools/compare/psybeamFramebuffer.ts",
+    "framebufferVerifierSha256": "1f4fed75bc5228f37bffc6ad1ed328fc203e247c38082d29034845e60fad005f",
+    "freshFramebufferVerifier": "tools/compare/psybeamFreshFramebuffer.ts",
+    "freshFramebufferVerifierSha256": "10c30fdcc5eb2c575a3090ee14bfb0360ba5b03b4360b928afd836bbb31ab1fc"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-psybeam-player-spinda-opponent-onix.json",
+      "scenarioSha256": "ee0be16f34a0e431327767f85678825a17afeb486e1afc49e2c45f6f06e8eabe",
+      "sourceWindow": {"startFrame":213,"endFrame":372,"frameCount":160},
+      "probeJsonSha256": "8c1969faba6024d42edb5d5f867c17bdae42d7fa9079d19a8acc58fd0b052bae",
+      "repeatProbeJsonSha256": "8c1969faba6024d42edb5d5f867c17bdae42d7fa9079d19a8acc58fd0b052bae",
+      "denseState": "tools/compare/evidence/psybeam-player-dense-state.json.gz",
+      "denseStateSha256": "2da6758fcafac559c53a33370ba5f2125c7aa1a968046d5939349d77d0825bd1",
+      "rawRgbArchive": "tools/compare/evidence/psybeam-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "ab3916a5416832a40c703730b8a9c170448b924a9be808a5a9f425900486cda2",
+      "rawRgbSha256": "63cea8ca6c32b71ac1510675516654d8c712b85d01541df50ac118027fe11104",
+      "changeMap": "tools/compare/evidence/psybeam-changemap-player.txt",
+      "changeMapSha256": "d341bd882977cae79a5eecc670e3e4c341649f209e5c1364a230a7a9b68c63b1"
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-psybeam-opponent-spinda-player-onix.json",
+      "scenarioSha256": "85f606b30a83b65ff6cff7e8cf0071f54af23c87ff0728958faab691d6b4c056",
+      "sourceWindow": {"startFrame":213,"endFrame":372,"frameCount":160},
+      "probeJsonSha256": "9e3f5f2e5bd94c5f4a438a28bdf554d5dee26c0399272731f0eae271fb75c903",
+      "repeatProbeJsonSha256": "9e3f5f2e5bd94c5f4a438a28bdf554d5dee26c0399272731f0eae271fb75c903",
+      "denseState": "tools/compare/evidence/psybeam-opponent-dense-state.json.gz",
+      "denseStateSha256": "4819e6f61ca37aad4438bd5ce4dfcf6dc074b1fbc6d0d19392508259bab4e89d",
+      "rawRgbArchive": "tools/compare/evidence/psybeam-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "bf578696a8e85d54c38a93545b44d28861b14fb13761e4f944f3930b68679181",
+      "rawRgbSha256": "2ffb82a8fc5f63293ef29c9bc79690e8e03ccf48785bdd122e6eec379794e6f4",
+      "changeMap": "tools/compare/evidence/psybeam-changemap-opponent.txt",
+      "changeMapSha256": "782f8e68f92fc82cdcbbb314e016337380d296f61062f8bceebed63e302f41f5"
+    }
+  },
+  "latchVerdict": "Psybeam independently confirms RAM+1 for script-created GoldRing OAM/x2, faded and hardware palette transfer including target BlendPalette ramps and psychic BG rotation, and the existing current-register BLDY program. Player-front Onix contributes its x2=1 species idle hold; opponent-back Onix contributes x2=0. Both source windows start and end together, so the measured orientation timing shift is 0.",
+  "exactAcceptance": "MOVE_PSYBEAM alone passes all 320 retained source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows with zero residual pixels and inactive cleanup, reproduced twice fresh. Hypnosis, Shadow Ball, Confusion, and Psychic remain independent exact controls and receive no Psybeam acceptance credit."
+}

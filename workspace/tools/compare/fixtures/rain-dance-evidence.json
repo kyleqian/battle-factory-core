@@ -1,0 +1,92 @@
+{
+  "schema": "rain-dance-bilateral-evidence/v1",
+  "move": "MOVE_RAIN_DANCE",
+  "status": "exact",
+  "coverageCredit": true,
+  "profile": "battle-scene-on",
+  "source": {
+    "audit": "tools/compare/rainDanceSourceAudit.ts",
+    "auditSha256": "46c786013413ce9b284fa658cbc07316443883a505f572d7f28993693184762c",
+    "probe": "tools/compare/rainDanceProbe.py",
+    "probeSha256": "c869e3e776b37819b6b9d4692029ff243fb9651ae63b904842c798a069561a93",
+    "evidenceReplay": "tools/compare/rainDanceEvidence.ts",
+    "reducerVerifier": "tools/compare/verifyRainDanceReducer.ts",
+    "framebufferVerifier": "tools/compare/rainDanceFramebuffer.ts",
+    "freshFramebufferVerifier": "tools/compare/rainDanceFreshFramebuffer.ts",
+    "assetExtractor": "tools/compare/extractRainDanceAssets.ts"
+  },
+  "components": [
+    "asset:ANIM_TAG_RAIN_DROPS",
+    "task:AnimTask_BlendBattleAnimPal",
+    "task:AnimTask_CreateRaindrops"
+  ],
+  "acceptance": {
+    "freshRunsPerOrientation": 2,
+    "sourceRows": 374,
+    "rawRgbRows": 374,
+    "reducerRows": 374,
+    "typedSeamRows": 374,
+    "productionFramebufferRows": 374,
+    "framebufferCompared": true,
+    "framebufferResidualPixels": 0,
+    "sourcePointerInterval": ["0x082d050a", "0x082d0555"],
+    "observedPointerParities": [0, 1],
+    "raindropCreatesPerOrientation": 80,
+    "raindropDestroysPerOrientation": 80,
+    "maximumLiveRaindrops": 14,
+    "gameplayRngDistinctRows": 1,
+    "animationRngDistinctRows": 187,
+    "firstInactiveCleanupAge": 186
+  },
+  "repeatability": {
+    "runsPerOrientation": 2,
+    "comparison": "byte-identical dense JSON and every raw RGB frame",
+    "allMatched": true
+  },
+  "productionAcceptance": {
+    "reducer": "374/374 retained component-state rows",
+    "typedSeam": "374/374 retained component-state rows",
+    "productionCompositor": "374/374 retained raw-RGB rows with zero residual pixels",
+    "freshProductionCompositor": "twice fresh per orientation, 748/748 raw-RGB rows with zero residual pixels and per-orientation deterministic evidence",
+    "manualQueue": "empty after exact promotion"
+  },
+  "controls": {
+    "haze": "exact BlendBattleAnimPal regression control only",
+    "detect": "exact BlendBattleAnimPal regression control only",
+    "hail": "distinct unsupported source body; no credit"
+  },
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-rain-dance-player-wooper-opponent-onix.json",
+      "scenarioSha256": "6f7ec0e7d18f784fc5e3f0935ca5f59e216fb4e9707e826aa4d95a646708c3ab",
+      "denseState": "tools/compare/evidence/rain-dance-player-dense-state.json.gz",
+      "denseStateSha256": "95b1154a592e97622a4d85db2caab9fc2aa33379a6219db9783adb821324ff77",
+      "probeJsonSha256": "2975ef535076e17d86f2ebcf664fa630f838d03d69a67d2ff8f513e02ce8cf44",
+      "repeatProbeJsonSha256": "2975ef535076e17d86f2ebcf664fa630f838d03d69a67d2ff8f513e02ce8cf44",
+      "rawRgbArchive": "tools/compare/evidence/rain-dance-player-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "49daf09113d1c5cb4c3abb1c743f681e0edd7e750daab5b247a9719bcdd5a11e",
+      "rawRgbSha256": "65e2a1763c590bd5746a4a0b31c96daadfc9dcd38e2a60b6ae61499901717f22",
+      "repeatRawRgbSha256": "65e2a1763c590bd5746a4a0b31c96daadfc9dcd38e2a60b6ae61499901717f22",
+      "changeMap": "tools/compare/evidence/rain-dance-changemap-player.txt",
+      "changeMapSha256": "f2237d5d2cbd09e7f9578661c4c2428cfc2b85244da02a1ad111e0f8e6712ce7",
+      "sourceWindow": {"startFrame": 213, "endFrame": 399, "frameCount": 187},
+      "orientationShiftFromPlayer": 0
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-rain-dance-opponent-wooper-player-onix.json",
+      "scenarioSha256": "b2f55c5f1b20156c517274b2133df78a5bd29b1dd3d86b4d4ca6e825abe962a8",
+      "denseState": "tools/compare/evidence/rain-dance-opponent-dense-state.json.gz",
+      "denseStateSha256": "4633c7a1a77753283ad229a242aa505a4ece24cd79fbfd69a68cf6a5da353d5a",
+      "probeJsonSha256": "5f88e64f26863a39e02dd48fd4359a89f3d00b3b8cfaf92acfe1b0424f1ea0d6",
+      "repeatProbeJsonSha256": "5f88e64f26863a39e02dd48fd4359a89f3d00b3b8cfaf92acfe1b0424f1ea0d6",
+      "rawRgbArchive": "tools/compare/evidence/rain-dance-opponent-raw-rgb.tar.gz",
+      "rawRgbArchiveSha256": "871062ac2bdbdedb8df8d18ad0250dd05b1b75bc68c55838082e9336fee7b9f8",
+      "rawRgbSha256": "a649fda68aed4da05efccbeb38c26c0a79af141099b4c92cef88f23f4bc63ccb",
+      "repeatRawRgbSha256": "a649fda68aed4da05efccbeb38c26c0a79af141099b4c92cef88f23f4bc63ccb",
+      "changeMap": "tools/compare/evidence/rain-dance-changemap-opponent.txt",
+      "changeMapSha256": "0b19594b203a7e07d851f392ff0febfe42927db94e4b1cee5dc63b18bf7c3df2",
+      "sourceWindow": {"startFrame": 211, "endFrame": 397, "frameCount": 187},
+      "orientationShiftFromPlayer": -2
+    }
+  }
+}

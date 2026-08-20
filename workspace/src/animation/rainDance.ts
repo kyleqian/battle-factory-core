@@ -1,0 +1,317 @@
+/**
+ * Pure source-relative reducer for Move_RAIN_DANCE.
+ *
+ * The reducer ports the two AnimTask_CreateRaindrops instances, Random2,
+ * AnimRainDrop/AnimRainDrop_Step, and the two BlendBattleAnimPal ramps.  It
+ * deliberately owns presentation state only: the caller supplies the
+ * animation-RNG value at source age zero and the already occupied OBJ slots.
+ * Gameplay RNG, weather, damage, turn order, and battle state are not inputs.
+ */
+
+export const RAIN_DANCE_WINDOW_ROWS = 187;
+export const RAIN_DROPS_TAG = 10115;
+export const RAIN_DANCE_SELECTED_PALETTES = 0x0003_000e;
+const NEUTRAL_MATRIX = [256, 0, 0, 256] as const;
+
+export interface RainDanceProfile {
+  /** gRng2Value in the first retained Move_RAIN_DANCE source row. */
+  readonly animationRngAtAge0: number;
+  /** Live non-rain OBJ slots at source entry; CreateSprite chooses the lowest free slot. */
+  readonly occupiedSpriteSlots: readonly number[];
+  /** Palette state before loadspritegfx executes. */
+  readonly unfadedPaletteBeforeLoad: readonly number[];
+  readonly fadedPaletteBeforeLoad: readonly number[];
+  readonly hardwarePaletteAtAge0: readonly number[];
+  /** Palette state after ANIM_TAG_RAIN_DROPS has loaded at source age 1. */
+  readonly unfadedPaletteAfterLoad: readonly number[];
+  readonly fadedPaletteAfterLoad: readonly number[];
+}
+
+export interface RainDanceTask {
+  readonly slot: 0 | 1;
+  readonly callback: "AnimTask_BlendSpriteColor_Step2" | "AnimTask_CreateRaindrops";
+  readonly data: readonly number[];
+}
+
+export interface RainDanceDrop {
+  readonly slot: number;
+  readonly template: "gRainDropSpriteTemplate";
+  readonly callback: "AnimRainDrop" | "AnimRainDrop_Step";
+  readonly x: number;
+  readonly y: number;
+  readonly x2: number;
+  readonly y2: number;
+  readonly animNum: 0;
+  readonly animCmdIndex: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  readonly animDelayCounter: number;
+  readonly subpriority: 4;
+  readonly invisible: false;
+  readonly matrix: readonly [256, 0, 0, 256];
+  readonly data: readonly [number, 0, 0, 0, 0, 0, 0, 0];
+  /** Software OAM attributes for the retained row. */
+  readonly attr: readonly [number, number, number];
+  readonly birthAge: number;
+  readonly sourcePass: number;
+}
+
+export interface RainDancePaletteState {
+  readonly selectedPalettes: 0x0003000e;
+  readonly coefficient: number;
+  readonly hardwareCoefficient: number;
+  readonly unfaded: readonly number[];
+  readonly faded: readonly number[];
+  readonly hardware: readonly number[];
+}
+
+export interface RainDanceState {
+  readonly age: number;
+  readonly active: boolean;
+  readonly source: Readonly<{
+    readonly owner: "Move_RAIN_DANCE";
+    readonly offset: 0 | 3 | 24 | 53 | 55 | 73 | 74;
+    readonly wait: number;
+  }>;
+  readonly animationRng: number;
+  readonly tasks: readonly RainDanceTask[];
+  readonly drops: readonly RainDanceDrop[];
+  /** Current software OAM and one-VBlank-behind hardware OAM for rain sprites. */
+  readonly oam: Readonly<{
+    readonly transferLagRows: 1;
+    readonly software: readonly Readonly<{ slot: number; attr: readonly [number, number, number] }>[];
+    readonly hardware: readonly Readonly<{ slot: number; attr: readonly [number, number, number] }>[];
+  }>;
+  readonly matrices: Readonly<{
+    readonly software: readonly (readonly [256, 0, 0, 256])[];
+    readonly hardware: readonly (readonly [256, 0, 0, 256])[];
+  }>;
+  readonly palette: RainDancePaletteState;
+  readonly resources: Readonly<{
+    readonly tileTags: readonly number[];
+    readonly paletteTags: readonly number[];
+    readonly loaded: boolean;
+  }>;
+  readonly audio: Readonly<{
+    readonly starts: readonly Readonly<{ sound: "SE_M_RAIN_DANCE"; id: 127; pan: "SOUND_PAN_ATTACKER" }>[];
+    readonly active: boolean;
+  }>;
+  readonly visualTaskCount: number;
+  readonly soundTaskCount: 0;
+}
+
+interface DropBirth {
+  readonly age: number;
+  readonly slot: number;
+  readonly x: number;
+  readonly y: number;
+}
+
+function random2(value: number): number {
+  return (Math.imul(value >>> 0, 1103515245) + 24691) >>> 0;
+}
+
+function isSpawnAge(age: number): boolean {
+  return age === 18 || (age >= 20 && age <= 134 && (age - 20) % 3 === 0);
+}
+
+function sourceAtAge(age: number): RainDanceState["source"] {
+  if (age <= 0) return { owner: "Move_RAIN_DANCE", offset: 0, wait: 0 };
+  if (age <= 3) return { owner: "Move_RAIN_DANCE", offset: 3, wait: age === 1 ? 1 : 0 };
+  if (age <= 17) return { owner: "Move_RAIN_DANCE", offset: 24, wait: 1 };
+  if (age <= 139) return { owner: "Move_RAIN_DANCE", offset: 53, wait: Math.max(0, 138 - age) };
+  if (age <= 171) return { owner: "Move_RAIN_DANCE", offset: 55, wait: Math.max(0, 170 - age) };
+  if (age <= 185) return { owner: "Move_RAIN_DANCE", offset: 73, wait: 1 };
+  return { owner: "Move_RAIN_DANCE", offset: 74, wait: 0 };
+}
+
+function blendTaskAtAge(age: number): RainDanceTask | null {
+  const down = age >= 172 && age <= 184;
+  if (!down && (age < 4 || age > 16)) return null;
+  const localAge = down ? age - 172 : age - 4;
+  const step = Math.floor((localAge + 2) / 3);
+  const coefficient = down ? Math.max(0, 4 - step) : Math.min(4, step);
+  return {
+    slot: 0,
+    callback: "AnimTask_BlendSpriteColor_Step2",
+    data: [14, 3, 2, down ? 4 : 0, down ? 0 : 4, 0, 0, 0, 0, (localAge + 2) % 3, coefficient, 0, 0, 0, 0, 0],
+  };
+}
+
+function rainTasksAtAge(age: number): readonly RainDanceTask[] {
+  if (age < 18 || age > 135) return [];
+  const data = [age - 16, 0, 3, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] as const;
+  return [
+    { slot: 0, callback: "AnimTask_CreateRaindrops", data },
+    { slot: 1, callback: "AnimTask_CreateRaindrops", data },
+  ];
+}
+
+function animationFrame(sourcePass: number): readonly [0 | 1 | 2 | 3 | 4 | 5 | 6, number] {
+  if (sourcePass <= 0) return [0, 0];
+  if (sourcePass <= 2) return [0, 2 - sourcePass];
+  if (sourcePass <= 4) return [1, 4 - sourcePass];
+  if (sourcePass <= 6) return [2, 6 - sourcePass];
+  if (sourcePass <= 12) return [3, 12 - sourcePass];
+  if (sourcePass <= 14) return [4, 14 - sourcePass];
+  if (sourcePass <= 16) return [5, 16 - sourcePass];
+  return [6, sourcePass === 17 ? 1 : 0];
+}
+
+function dropAtAge(birth: DropBirth, age: number): RainDanceDrop | null {
+  // The first two creates execute while the source interpreter is still in
+  // the sprite pass, so they enter AnimRainDrop one pass ahead of later task creates.
+  const sourcePass = age - birth.age + (birth.age === 18 ? 1 : 0);
+  if (sourcePass < 0 || sourcePass >= 20) return null;
+  const callbackAge = Math.max(0, Math.min(18, sourcePass - 1));
+  const x2 = Math.min(13, callbackAge);
+  const y2 = x2 * 4;
+  const [animCmdIndex, animDelayCounter] = animationFrame(sourcePass);
+  const oamReady = sourcePass > 0;
+  return {
+    slot: birth.slot,
+    template: "gRainDropSpriteTemplate",
+    callback: oamReady ? "AnimRainDrop_Step" : "AnimRainDrop",
+    x: birth.x,
+    y: birth.y,
+    x2,
+    y2,
+    animNum: 0,
+    animCmdIndex,
+    animDelayCounter,
+    subpriority: 4,
+    invisible: false,
+    matrix: NEUTRAL_MATRIX,
+    data: [callbackAge, 0, 0, 0, 0, 0, 0, 0],
+    attr: oamReady
+      ? [0x8000 | ((birth.y + y2 - 16) & 0xff), 0x8000 | ((birth.x + x2 - 8) & 0x1ff), 0x7931 + animCmdIndex * 8]
+      : [0x8000, 0x8000, 0x7931],
+    birthAge: birth.age,
+    sourcePass,
+  };
+}
+
+function simulate(age: number, profile: RainDanceProfile): Readonly<{
+  rng: number;
+  births: readonly DropBirth[];
+}> {
+  let rng = profile.animationRngAtAge0 >>> 0;
+  const births: DropBirth[] = [];
+  for (let currentAge = 1; currentAge <= age; currentAge += 1) {
+    rng = random2(rng); // presentation scheduler's per-frame Random2 advance
+    if (!isSpawnAge(currentAge)) continue;
+    const occupied = new Set(profile.occupiedSpriteSlots);
+    for (const birth of births) {
+      if (dropAtAge(birth, currentAge) !== null) occupied.add(birth.slot);
+    }
+    for (let task = 0; task < 2; task += 1) {
+      rng = random2(rng);
+      const x = (rng >>> 16) % 240;
+      rng = random2(rng);
+      const y = (rng >>> 16) % 80;
+      let slot = 0;
+      while (occupied.has(slot)) slot += 1;
+      occupied.add(slot);
+      births.push({ age: currentAge, slot, x, y });
+    }
+  }
+  return { rng, births };
+}
+
+export function rainDanceBlendCoefficientAtAge(age: number): number {
+  if (age < 8) return 0;
+  if (age < 11) return 1;
+  if (age < 14) return 2;
+  if (age < 17) return 3;
+  if (age < 176) return 4;
+  if (age < 179) return 3;
+  if (age < 182) return 2;
+  if (age < 185) return 1;
+  return 0;
+}
+
+export function blendRainDancePalette(
+  unfaded: readonly number[],
+  coefficient: number,
+  baseFaded: readonly number[] = unfaded,
+): number[] {
+  return unfaded.map((color, index) => {
+    if ((RAIN_DANCE_SELECTED_PALETTES & (1 << Math.floor(index / 16))) === 0) return baseFaded[index]!;
+    const blend = (component: number): number => component + ((-component * coefficient) >> 4);
+    return blend(color & 31)
+      | (blend((color >> 5) & 31) << 5)
+      | (blend((color >> 10) & 31) << 10);
+  });
+}
+
+function palettesAtAge(age: number, profile: RainDanceProfile): RainDancePaletteState {
+  const loaded = age >= 1;
+  const unfaded = loaded ? profile.unfadedPaletteAfterLoad : profile.unfadedPaletteBeforeLoad;
+  const coefficient = rainDanceBlendCoefficientAtAge(age);
+  const hardwareCoefficient = age > 0 ? rainDanceBlendCoefficientAtAge(age - 1) : 0;
+  const previousUnfaded = age > 1 ? profile.unfadedPaletteAfterLoad : profile.unfadedPaletteBeforeLoad;
+  return {
+    selectedPalettes: RAIN_DANCE_SELECTED_PALETTES,
+    coefficient,
+    hardwareCoefficient,
+    unfaded: [...unfaded],
+    faded: age === 0 ? [...profile.fadedPaletteBeforeLoad] : blendRainDancePalette(unfaded, coefficient, profile.fadedPaletteAfterLoad),
+    hardware: age === 0
+      ? [...profile.hardwarePaletteAtAge0]
+      : age === 1
+        ? [...profile.fadedPaletteBeforeLoad]
+        : blendRainDancePalette(previousUnfaded, hardwareCoefficient, profile.fadedPaletteAfterLoad),
+  };
+}
+
+/** age=0 is the first retained Move_RAIN_DANCE source row. */
+export function rainDanceAtAge(age: number, profile: RainDanceProfile): RainDanceState {
+  if (!Number.isInteger(age) || age < 0) throw new Error("Rain Dance age must be a nonnegative integer");
+  if (profile.unfadedPaletteBeforeLoad.length !== 512
+    || profile.fadedPaletteBeforeLoad.length !== 512
+    || profile.hardwarePaletteAtAge0.length !== 512
+    || profile.unfadedPaletteAfterLoad.length !== 512
+    || profile.fadedPaletteAfterLoad.length !== 512) {
+    throw new Error("Rain Dance palette profiles must contain 512 colors");
+  }
+  const current = simulate(age, profile);
+  const prior = age > 0 ? simulate(age - 1, profile) : null;
+  const drops = current.births.flatMap((birth) => {
+    const drop = dropAtAge(birth, age);
+    return drop === null ? [] : [drop];
+  }).sort((a, b) => a.slot - b.slot);
+  const priorDrops = prior === null ? [] : prior.births.flatMap((birth) => {
+    const drop = dropAtAge(birth, age - 1);
+    return drop === null ? [] : [drop];
+  }).sort((a, b) => a.slot - b.slot);
+  const blendTask = blendTaskAtAge(age);
+  const tasks = blendTask === null ? rainTasksAtAge(age) : [blendTask];
+  const resourceLoaded = age >= 1 && age <= 185;
+  return {
+    age,
+    active: age < RAIN_DANCE_WINDOW_ROWS - 1,
+    source: sourceAtAge(age),
+    animationRng: current.rng,
+    tasks,
+    drops,
+    oam: {
+      transferLagRows: 1,
+      software: drops.map(({ slot, attr }) => ({ slot, attr })),
+      hardware: priorDrops.map(({ slot, attr }) => ({ slot, attr })),
+    },
+    matrices: {
+      software: Array.from({ length: 32 }, () => NEUTRAL_MATRIX),
+      hardware: Array.from({ length: 32 }, () => NEUTRAL_MATRIX),
+    },
+    palette: palettesAtAge(age, profile),
+    resources: {
+      tileTags: resourceLoaded ? [RAIN_DROPS_TAG] : [],
+      paletteTags: resourceLoaded ? [RAIN_DROPS_TAG] : [],
+      loaded: resourceLoaded,
+    },
+    audio: {
+      starts: age === 4 ? [{ sound: "SE_M_RAIN_DANCE", id: 127, pan: "SOUND_PAN_ATTACKER" }] : [],
+      active: age >= 4 && age <= 120,
+    },
+    visualTaskCount: tasks.length,
+    soundTaskCount: 0,
+  };
+}
