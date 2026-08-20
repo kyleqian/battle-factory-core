@@ -313,9 +313,18 @@ describe("random round soak driver (green milestone pin)", () => {
       // trajectory, not a driver regression. It still earns all seven wins,
       // and both settled re-runs stay deterministic
       // (`expect(second).toEqual(first)` below).
-      frames: 59_656,
+      //
+      // ISSUES #99's driver fix (randomRoundSoakDriver.ts's onPostwin) then
+      // moved these counters a third time: strong-route is a non-exploring
+      // policy (same `explores` semantics as vanilla), so it always declines
+      // the swap offer -- but the pre-fix bug made every non-exploring
+      // policy accept every swap by accident (the frozen continuation-menu
+      // branch pressed A on the swap menu's default YES cursor). Fixed, this
+      // seed now genuinely declines every swap and skips the swap screen's
+      // extra frames entirely, settling into a shorter, different trajectory.
+      frames: 40_566,
       battle: 7,
-      turn: 18,
+      turn: 5,
       diagnostics: {
         roundPhase: "roundComplete",
         battleIndex: 6,
@@ -325,7 +334,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 4_397,
+        renderCalls: 2_953,
       },
     });
     expect(second).toEqual(first);
@@ -504,5 +513,57 @@ describe("real max-depth tracking (Milestone M-A step 1)", () => {
     expect(result.diagnostics?.carriedWinStreak).toBe(0);
     expect(result.maxCarriedWinStreak).toBeGreaterThanOrEqual(7);
     expect(result.maxBattleDepth).toBeGreaterThanOrEqual(7);
+  });
+});
+
+describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered by its own branch", () => {
+  // Regression pin for the fix in randomRoundSoakDriver.ts's onPostwin:
+  // the continuation-menu branch used to stay "live" (continuationCursorPos
+  // !== null) forever after GO ON was confirmed, so its A presses answered
+  // the dialoguePage-4 swap offer instead of the swap-offer branch below it
+  // -- vanilla accepted every swap despite its own "declined" doc comment,
+  // and full/winning accepted ~85% instead of a 50/50 roll.
+  it("vanilla policy always declines the swap offer and never enters the swap screen", () => {
+    const notes: string[] = [];
+    // Seed 0 wins battle 1 and reaches the swap-offer menu by frame ~28,645
+    // under this policy's always-GO-ON continuation; capped well short of
+    // vanilla's 600,000-frame default full-round budget.
+    runSeed(0, {
+      policy: "vanilla",
+      maxFrames: 32_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    const swapOfferNotes = notes.filter((note) => note.startsWith("swap offer:"));
+    expect(swapOfferNotes.length).toBeGreaterThan(0);
+    expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
+    expect(notes.some((note) => note.startsWith("swap screen:"))).toBe(false);
+  });
+
+  it("winning policy's swap-offer menu is reached and logs its own decision", () => {
+    const notes: string[] = [];
+    runSeed(0, {
+      policy: "winning",
+      maxFrames: 15_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    expect(notes.some((note) => note.startsWith("swap offer:"))).toBe(true);
+  });
+
+  it("both YES and NO swap-offer decisions occur across a small fixed seed set", () => {
+    const swapOfferNotes: string[] = [];
+    for (let seed = 0; seed < 7; seed += 1) {
+      runSeed(seed, {
+        policy: "winning",
+        maxFrames: 20_000,
+        renderEvery: 0,
+        onNote: (entry) => {
+          if (entry.what.startsWith("swap offer:")) swapOfferNotes.push(entry.what);
+        },
+      });
+    }
+    expect(swapOfferNotes).toContain("swap offer: YES");
+    expect(swapOfferNotes).toContain("swap offer: NO");
   });
 });

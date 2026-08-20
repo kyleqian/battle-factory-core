@@ -97,12 +97,15 @@ type ActionEntry = { frame: number; battle: number; turn: number; what: string }
 class ActionLog {
   private readonly entries: ActionEntry[] = [];
   private readonly verbose: boolean;
-  constructor(verbose: boolean) {
+  private readonly onNote?: (entry: ActionEntry) => void;
+  constructor(verbose: boolean, onNote?: (entry: ActionEntry) => void) {
     this.verbose = verbose;
+    this.onNote = onNote;
   }
   push(frame: number, battle: number, turn: number, what: string): void {
     this.entries.push({ frame, battle, turn, what });
     if (this.entries.length > 64) this.entries.shift();
+    this.onNote?.({ frame, battle, turn, what });
     if (this.verbose) {
       console.log(`  [f=${frame} b${battle} t${turn}] ${what}`);
     }
@@ -840,6 +843,8 @@ export type RunOptions = {
    * across arbitrarily many chained rounds does not.
    */
   stopAtFirstRoundDecision?: boolean;
+  /** Test-only opt-in observer for every action-log note, independent of `verbose`. */
+  onNote?: (entry: { frame: number; battle: number; turn: number; what: string }) => void;
 };
 
 export const DEFAULT_RUN_OPTIONS: RunOptions = {
@@ -896,7 +901,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const maxFrames = resolveMaxFrames(policy, optionsIn.maxFrames);
   const options: RunOptions = { ...DEFAULT_RUN_OPTIONS, ...optionsIn, maxFrames };
   const rng = new Rng(seed);
-  const log = new ActionLog(options.verbose);
+  const log = new ActionLog(options.verbose, options.onNote);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
   let state = options.stateFactory?.() ?? createInitialState();
   let frame = 0;
