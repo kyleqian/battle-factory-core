@@ -13,8 +13,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   OK = frame budget reached while still progressing / HANG = 30k frames of
   no progress); `winning` 0:60 depth (render off, `e3176a05`): **carry ≥ 7 60/60, ≥ 14 56/60, ≥ 21 13/60, ≥ 28 1/60 (seed 24, depth 28)**; 58 OK(budget) / 2 CRASH (seeds 40+50 = #105) / 0 HANG. Rust fold:
   cargo 75/75 result blocks ok, wasm rebuilt (`build-wasm.sh`, 492,691 B, sha 61f39cfe…), `POKEBENCH_ENGINE=wasm` parity suites **18 files / 803 tests green** (run from the workspace root — a core-rs cwd finds no tests). Animation fold `bcfa69d4` (10 commits, additive:
-  Psybeam + Rain Dance; their session was LIVE — later commits fold next
-  session).
+  Psybeam + Rain Dance; their session was LIVE — at 15:25 `animation-main`
+  is **+2 unfolded** again; fold next session). DEFERRED.md: none open.
 - **Did (9 main rounds + 7 side rounds, 2 cap-kills salvaged, 0 regressions
   folded):** M-B step 1 (1357, verdict (a)); #99 found (side scout) + fixed
   (1358); step 2 levers: type-aware move choice (1359), swap decline
