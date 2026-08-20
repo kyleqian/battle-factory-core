@@ -38,10 +38,10 @@ describe("MOVE_OCTAZOOKA bilateral dense evidence checkpoint", () => {
       });
     }
     expect(fixture).toMatchObject({
-      status: "partial", coverageCredit: false,
+      status: "exact", coverageCredit: true,
       evidenceScope: {
         productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true,
-        compositorAdded: false, framebufferCompared: false, coveragePromotion: false,
+        compositorAdded: true, framebufferCompared: true, coveragePromotion: true,
         boundaryOrBarrierChanged: false, gameplayStateOwned: false,
         fullDenseRowsRetained: true, twiceFreshByteIdentical: true,
       },
@@ -54,7 +54,7 @@ describe("MOVE_OCTAZOOKA bilateral dense evidence checkpoint", () => {
     });
   });
 
-  it("uses complete legal challenge-1 parties with unique held items and awards no sibling or compositor credit", () => {
+  it("uses complete legal challenge-1 parties with unique held items and awards no sibling credit", () => {
     for (const side of ["player-back", "opponent-front"] as const) {
       const scenario = JSON.parse(readFileSync(fixture.orientations[side].scenario, "utf8")) as Record<string, any>;
       expect(scenario).toMatchObject({ schemaVersion: 1, mode: "mechanicLab", profile: "battle-scene-on", level: 50, challengeNum: 1 });
@@ -75,6 +75,6 @@ describe("MOVE_OCTAZOOKA bilateral dense evidence checkpoint", () => {
       mist: "source-neighbor control only; no shared acceptance",
       smokescreen: "shared smoke-family control only; no shared acceptance",
     });
-    expect(fixture.productionAcceptance).toMatchObject({ reducerRows: "160/160", typedSeamRows: "160/160", productionFramebufferRows: "0/160" });
+    expect(fixture.productionAcceptance).toMatchObject({ reducerRows: "160/160", typedSeamRows: "160/160", productionFramebufferRows: "160/160", productionFramebufferResidualPixels: 0 });
   });
 });

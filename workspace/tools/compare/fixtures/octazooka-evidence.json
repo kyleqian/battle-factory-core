@@ -3,9 +3,9 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_OCTAZOOKA",
   "moveId": 190,
-  "status": "partial",
-  "coverageCredit": false,
-  "coverageCounts": "Level 50: 199/276 exact, 1 partial, 76 unsupported",
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 200/276 exact, 0 partial, 76 unsupported",
   "components": [
     "asset:ANIM_TAG_BLACK_BALL",
     "asset:ANIM_TAG_GRAY_SMOKE",
@@ -26,9 +26,9 @@
     "productionAnimationChanged": true,
     "reducerAdded": true,
     "typedSeamAdded": true,
-    "compositorAdded": false,
-    "framebufferCompared": false,
-    "coveragePromotion": false,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -85,7 +85,8 @@
   "productionAcceptance": {
     "reducerRows": "160/160",
     "typedSeamRows": "160/160",
-    "productionFramebufferRows": "0/160",
-    "manualQueue": "MOVE_OCTAZOOKA only, partial evidence checkpoint"
+    "productionFramebufferRows": "160/160",
+    "productionFramebufferResidualPixels": 0,
+    "manualQueue": "empty"
   }
 }

@@ -531,6 +531,7 @@ import poisonStingAsset from "../animation/assets/poisonSting.json" with { type:
 import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type: "json" };
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
+import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -991,6 +992,7 @@ import {
   sceneOnRoarView,
   sceneOnSweetKissView,
   sceneOnLovelyKissView,
+  sceneOnOctazookaView,
   sceneOnAttractView,
   sceneOnSporeView,
   sceneOnCottonSporeView,
@@ -1059,6 +1061,7 @@ import {
   type SceneOnRoarPresentationState,
   type SceneOnSweetKissPresentationState,
   type SceneOnLovelyKissPresentationState,
+  type SceneOnOctazookaPresentationState,
   type SceneOnAttractPresentationState,
   type SceneOnPresentPresentationState,
   type SceneOnSporePresentationState,
@@ -1654,6 +1657,10 @@ const smokescreenArt = smokescreenAsset as {
   impact: { tileset: Tileset; palette: RgbColor[] };
   koffingBack: { tileset: Tileset; palette: RgbColor[] };
   koffingFront: { tileset: Tileset; palette: RgbColor[] };
+};
+const octazookaArt = octazookaAsset as {
+  blackBall: { tileset: Tileset; palette: RgbColor[] };
+  graySmoke: { tileset: Tileset; palette: RgbColor[] };
 };
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -20251,6 +20258,144 @@ export function renderSceneOnMovePresentation(
       fb,
       playerToOpponent ? "KOFFING used" : "Foe KOFFING used",
       "SMOKESCREEN!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "OCTAZOOKA") {
+    const octazookaState = state as SceneOnOctazookaPresentationState;
+    const view = sceneOnOctazookaView(octazookaState);
+    // BuildOamBuffer precedes animation callbacks. The reducer exposes live
+    // software sprites, while scanout consumes the preceding row's OAM.
+    const displayed = sceneOnOctazookaView({
+      ...octazookaState,
+      age: octazookaState.age - 1,
+    });
+    const attackerIsPlayer = view.attacker.geometry.side === "player";
+    if (attackerIsPlayer === (view.target.geometry.side === "player")) {
+      throw new Error("OCTAZOOKA presentation requires battlers on opposite sides");
+    }
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+          battler.species
+        ];
+        if (!source) {
+          throw new Error(`OCTAZOOKA missing player-back art for ${battler.species}`);
+        }
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+        battler.species
+      ];
+      if (!source) {
+        throw new Error(`OCTAZOOKA missing opponent-front art for ${battler.species}`);
+      }
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerArt.tileset,
+      attackerArt.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetArt.tileset,
+      targetArt.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    const oamCoordinate = (value: number, wrap: number): number => {
+      const masked = value & (wrap - 1);
+      return masked >= wrap / 2 ? masked - wrap : masked;
+    };
+    const effects = displayed.sprites.slice().sort((left, right) =>
+      oamCoordinate(left.attr[0], 256) - oamCoordinate(right.attr[0], 256)
+      || right.slot - left.slot
+    );
+    const drawEffects = () => {
+      const smokeAttr2 = octazookaState.config.animationProfile.oam?.smokeAttr2
+        ?? 31257;
+      for (const sprite of effects) {
+        const smokeFrame = sprite.template === "gOctazookaSmokeSpriteTemplate"
+          ? Math.max(0, Math.trunc(
+              (sprite.attr[2] - smokeAttr2) / 16,
+            ))
+          : 0;
+        const art = sprite.template === "gOctazookaBallSpriteTemplate"
+          ? octazookaArt.blackBall
+          : {
+              tileset: subTileset(
+                octazookaArt.graySmoke.tileset,
+                smokeFrame * 4,
+                4,
+              ),
+              palette: octazookaArt.graySmoke.palette,
+            };
+        drawSpriteSheet(
+          fb,
+          art.tileset,
+          art.palette,
+          oamCoordinate(sprite.attr[1], 512),
+          oamCoordinate(sprite.attr[0], 256),
+        );
+      }
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Source subpriority places every effect immediately in front of the
+    // target and behind the opposing-side attacker in both orientations.
+    if (attackerIsPlayer) {
+      drawTarget();
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawEffects();
+    }
+
+    const profile = octazookaState.config.fieldProfile;
+    const playerBattler = attackerIsPlayer ? view.attacker : view.target;
+    const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentBattler.species,
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerBattler.species,
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      attackerIsPlayer
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "OCTAZOOKA!",
       99,
     );
     return;

@@ -3,7 +3,7 @@
  "entries": [
   {
    "move": "MOVE_OCTAZOOKA",
-   "status": "partial",
+   "status": "exact",
    "covered": [
     "complete legal challenge-1 set-256 FRONTIER_MON_OCTILLERY_1 parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 218-297 and opponent-front frames 217-296, 80 consecutive rows each and 160 total; each orientation repeats twice fresh with byte-identical dense state and raw RGB",
     "the authoritative half-open source interval is 0x082d2b83..0x082d2be9 (102 bytes, 1c86b2d6fc47a5825cd0e3f63d74c413d524eb025e09676de1e4d1851863c0a9), with even and odd command pointers observed; the exact graph is ANIM_TAG_BLACK_BALL, ANIM_TAG_GRAY_SMOKE, gOctazookaBallSpriteTemplate, and gOctazookaSmokeSpriteTemplate",
@@ -12,9 +12,9 @@
     "both orientations pass 80/80 dense plus 80/80 RGB rows; preceding OAM/matrix/palette latches are 79/79 each, gameplay RNG has zero transitions, animation RNG advances on all 79 edges, and SE_M_MEGA_KICK2 id 141 plus SE_M_SELF_DESTRUCT id 177 latch at their source boundaries",
     "the pure source-relative reducer and narrow typed Scene-ON seam reproduce all 80/80 player-back plus 80/80 opponent-front retained component rows: script cursor/waits/args, animation RNG, one 20-callback BLACK_BALL TranslateAnimSpriteToTargetMonLocation -> AnimTranslateLinear_WithFollowup lifecycle, four delayed 15-display GRAY_SMOKE AnimSpriteOnMonPos lifecycles, source allocator order, sprite OAM/neutral affine state, tag/palette transfers, audio, preceding hardware latches, and first inactive cleanup",
     "Mist and Smokescreen are explicit negative controls, while an ARON->GROVYLE reversed-side/altered-geometry control proves typed side and geometry activation without an Octillery/Onix pair gate; no sibling receives acceptance credit",
-    "no compositor/draw wiring, framebuffer equality, production recording import, gameplay/status/damage ownership, latch credit, sibling credit, or exact promotion is claimed"
+    "the ordinary shared Battle Scene ON compositor selects back/front art from typed live species and sides, consumes live OAM-derived battler geometry, source-extracted BLACK_BALL and GRAY_SMOKE tiles/palettes, the preceding software-OAM latch, source visibility, signed-y/allocation painter order, battle chrome, audio timing, and cleanup without recorded RGB/framebuffer lookup, an evidence-pair gate, absolute ticks, or gameplay/status/damage/RNG ownership",
+    "all 80 player-back plus 80 opponent-front component/seam/raw-RGB/shared-framebuffer rows match through first inactive cleanup with zero residual pixels; fresh post-implementation legal Scene ON probes reproduce player evidence/raw hashes 24a4ec804468438bbc6658cb085124ae33434d8a8a70b3a1a8507e6616226df2 / 5e0c83044e433bea1fde28029c0f713cf5efcea73018fa3217a7aa1b4efad12c and opponent 672941094f59f87eaa48fd2758fb6ffaf2fd4284f0292f0b6802d598db3d740a / 81ea0024cdde218d9c1f94689c8db7c715c5c4f50ee7c95d3eabfdf129c0f9db"
    ],
-   "remaining": "The sole remaining follow-up is ordinary source-derived compositor/draw wiring plus twice-fresh complete 160/160 production framebuffer equality before MOVE_OCTAZOOKA can promote. Shared BLACK_BALL/GRAY_SMOKE evidence transfers no move acceptance.",
    "evidence": [
     "tools/battle-lab/mechanic-octazooka-player-octillery-opponent-onix.json",
     "tools/battle-lab/mechanic-octazooka-opponent-octillery-player-onix.json",
@@ -23,6 +23,8 @@
     "tools/compare/octazookaProbe.py",
     "tools/compare/octazookaEvidence.ts",
     "tools/compare/octazookaReducerAudit.ts",
+    "tools/compare/octazookaFramebuffer.ts",
+    "tools/compare/extractOctazookaAssets.ts",
     "tools/compare/evidence/octazooka-player-dense-state.json.gz",
     "tools/compare/evidence/octazooka-opponent-dense-state.json.gz",
     "tools/compare/evidence/octazooka-player-raw-rgb.tar.gz",
@@ -30,9 +32,12 @@
     "tools/compare/evidence/octazooka-changemap-player.json",
     "tools/compare/evidence/octazooka-changemap-opponent.json",
     "src/animation/octazooka.ts",
+    "src/animation/assets/octazooka.json",
     "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
     "tests/animation/octazookaEvidence.test.ts",
-    "tests/animation/octazooka.test.ts"
+    "tests/animation/octazooka.test.ts",
+    "tests/animation/octazookaFramebuffer.test.ts"
    ]
   },
   {
@@ -5475,7 +5480,7 @@
    ]
   }
  ],
- "queue": ["MOVE_OCTAZOOKA"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6449,7 +6454,8 @@
     "sprite:gOctazookaSmokeSpriteTemplate"
    ],
    "representatives": ["MOVE_OCTAZOOKA"],
-   "goal": "REDUCER/SEAM PARTIAL: MOVE_OCTAZOOKA independently passes 80/80 player-back plus 80/80 opponent-front source/state/raw-RGB/change-map/reducer/typed-seam rows through first inactive cleanup, twice fresh. The source-relative reducer ports one BLACK_BALL translation and four delayed GRAY_SMOKE sprites, cursor/waits/args, source audio, tags/palette transfers, neutral affine/OAM state, allocator order, hardware latches, and animation RNG without gameplay ownership or an evidence-pair gate. Mist, Smokescreen, and every sibling receive no credit. The track remains unfulfilled pending only ordinary compositor/draw wiring and complete production framebuffer equality."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_OCTAZOOKA independently passes 80/80 player-back plus 80/80 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows through first inactive cleanup with zero residual pixels, then reproduces the same result in one fresh legal Scene ON probe per orientation. The ordinary compositor uses source-extracted BLACK_BALL and GRAY_SMOKE art/palettes, typed live battler species/sides/geometry, preceding OAM transfer, source visibility and allocation/painter order, battle chrome, audio timing, and cleanup without an evidence-pair gate or gameplay ownership. Mist, Smokescreen, and every sibling receive no credit."
   }
  ],
  "variantAudits": {
