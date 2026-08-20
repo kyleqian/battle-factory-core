@@ -17,6 +17,36 @@ backlog.
 
 # Open
 
+## #105 — `winning` soak seed 40 crashes at carry 21: STRINGID_PKMNCHANGEDTYPE references `{B_BUFF1}` with no resolver (Conversion / Conversion 2 / Color Change "transformed into the X type!")
+
+**Found 2026-08-20** (supervisor wind-down depth run on the post-#104 tree
+`7f50f4d0`, `winning --seeds 30:60 --render-every 0`): seed 40, battle 1
+turn 24 of the carry-21 round (`carry<=21 depth<=21`), frame 288,381,
+`[engine/tick] Error: battleStringResolver: STRINGID_PKMNCHANGEDTYPE
+references placeholder {B_BUFF1} with no resolver supplied`. Same class as
+#100/#101 (a `messageLines` case missing in
+`src/engine/battleResolutionPresentation.ts`), reached only now that play
+chains past carry 21 (#104 fixed).
+
+**Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts
+--seed 40 --policy winning --verbose --render-every 0` (~8 s to the crash).
+
+**Source:** `STRINGID_PKMNCHANGEDTYPE` = "{B_ATK_NAME_WITH_PREFIX} transformed\ninto the {B_BUFF1} type!"
+(`src/battle_message.c`); printed by `BattleScript_EffectConversion`
+(`data/battle_scripts_1.s`, after `settypetorandomresistance`/`settypetomove`
+— Conversion sets the user's type to its first move's type; Conversion 2 to
+a type resisting the last hit) and by the Color Change ability
+(`BattleScript_ColorChangeActivates`, `ABILITY_COLOR_CHANGE` in
+`battle_util.c` `AbilityBattleEffects` ABILITYEFFECT_MOVE_END). `B_BUFF1`
+holds a `PREPARE_TYPE_BUFFER(gBattleTextBuff1, type)` — resolve it to the
+type name (`gTypeNames`). Check which of the three emitters the seed hit and
+wire the resolver for all of them (the buffer shape is the same).
+
+**Fix shape:** a `messageLines` case with `B_ATK_NAME_WITH_PREFIX` +
+`B_BUFF1: () => typeName(actionSnapshot / the recorded type buffer)`, Tier-1
+pinned in the `presentationStringIssue10x.test.ts` style; rerun seed 40 to
+an honest outcome.
+
 ## #104 — Terminal record prompt's YES branch omits the real "battle was recorded" message (stub-only remainder)
 
 **Both the driver and engine halves that used to make this issue soft-lock
