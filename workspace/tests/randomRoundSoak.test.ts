@@ -677,30 +677,70 @@ describe("Milestone M-B step 2 part B, rung 1: winning declines every swap offer
   });
 });
 
-describe("Milestone M-B step 2 part C: winning switches out of a walled matchup", () => {
-  // MOVE_SURF (Water, power 95), MOVE_VINE_WHIP (Grass, power 35),
-  // MOVE_TACKLE (Normal, power 35) -- the same move ids the part 2a pins
-  // above already prove are 0.5x/2x/1x respectively against a Water
-  // defender, so this reuses proven multipliers instead of re-deriving them.
+describe("Milestone M-B step 2 part C (tightened by part C2): winning switches out of a truly-walled matchup", () => {
+  // MOVE_TACKLE (Normal, power 35) is 0x-immune against a Ghost defender;
+  // MOVE_LICK (Ghost, power 20) is 2x super-effective (with STAB) against
+  // that same Ghost defender -- confirmed against this repo's own
+  // type-effectiveness table, mirroring how the part 2a pins above prove
+  // the analogous Water/Grass combo. MOVE_SURF (Water, power 95) is only
+  // 0.5x resisted (NOT immune) against a Water defender -- part C2's
+  // tightening: a merely resisted active no longer counts as walled.
+  const GHOST: readonly [string, string] = ["TYPE_GHOST", "TYPE_GHOST"];
   const WATER: readonly [string, string] = ["TYPE_WATER", "TYPE_WATER"];
   const GRASS: readonly [string, string] = ["TYPE_GRASS", "TYPE_GRASS"];
-  const walledActive = { activeMoveIds: [57, 0, 0, 0], activeLegalSlots: [true, false, false, false] };
+  const walledActive = { activeMoveIds: [33, 0, 0, 0], activeLegalSlots: [true, false, false, false] };
   const qualifyingBench = [
-    { row: 1 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
+    { row: 1 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
   ];
 
-  it("(a) walled active + bench with a 2x move -> returns that row", () => {
+  it("(a) resisted-only active (0.5x, not immune) -> NO switch, even with a qualifying bench", () => {
+    const row = pickWinningSwitchRow({
+      activeMoveIds: [57, 0, 0, 0], // MOVE_SURF, 0.5x resisted vs Water -- not walled since part C2
+      activeLegalSlots: [true, false, false, false],
+      defenderTypes: WATER,
+      bench: [
+        { row: 1 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS, hp: 100, maxHp: 100 },
+      ],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("(b) all-immune active + qualifying bench at 80% HP -> switch", () => {
     const row = pickWinningSwitchRow({
       ...walledActive,
-      defenderTypes: WATER,
-      bench: qualifyingBench,
+      defenderTypes: GHOST,
+      bench: [{ ...qualifyingBench[0]!, hp: 80 }],
       healthyCount: 2,
       alreadySwitchedAgainstThisOpponent: false,
     });
     expect(row).toBe(1);
   });
 
-  it("(b) active has a >= 1x move (not walled) -> null even with a qualifying bench", () => {
+  it("(c) same all-immune active + qualifying bench but at 30% HP -> no switch", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: [{ ...qualifyingBench[0]!, hp: 30 }],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("bench at exactly 50% HP still switches (inclusive boundary)", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: [{ ...qualifyingBench[0]!, hp: 50 }],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBe(1);
+  });
+
+  it("active has a >= 1x move (not walled) -> null even with a qualifying bench", () => {
     const row = pickWinningSwitchRow({
       activeMoveIds: [33, 0, 0, 0], // MOVE_TACKLE, neutral 1x vs Water
       activeLegalSlots: [true, false, false, false],
@@ -712,10 +752,10 @@ describe("Milestone M-B step 2 part C: winning switches out of a walled matchup"
     expect(row).toBeNull();
   });
 
-  it("(c) only one healthy party member remains -> null", () => {
+  it("only one healthy party member remains -> null", () => {
     const row = pickWinningSwitchRow({
       ...walledActive,
-      defenderTypes: WATER,
+      defenderTypes: GHOST,
       bench: qualifyingBench,
       healthyCount: 1,
       alreadySwitchedAgainstThisOpponent: false,
@@ -723,10 +763,10 @@ describe("Milestone M-B step 2 part C: winning switches out of a walled matchup"
     expect(row).toBeNull();
   });
 
-  it("(d) already switched against this opponent this battle -> null (no ping-pong)", () => {
+  it("already switched against this opponent this battle -> null (no ping-pong)", () => {
     const row = pickWinningSwitchRow({
       ...walledActive,
-      defenderTypes: WATER,
+      defenderTypes: GHOST,
       bench: qualifyingBench,
       healthyCount: 2,
       alreadySwitchedAgainstThisOpponent: true,
@@ -735,15 +775,15 @@ describe("Milestone M-B step 2 part C: winning switches out of a walled matchup"
   });
 
   it("picks the best-scoring qualifying row, ties to the lower row regardless of bench order", () => {
-    // Row 2 and row 1 both carry VINE_WHIP -> the same 35 x 2 x 1.5(STAB) =
-    // 105 score. Row 2 is listed FIRST in `bench` to prove the tie-break is
+    // Row 2 and row 1 both carry LICK -> the same 20 x 2 x 1.5(STAB) = 60
+    // score. Row 2 is listed FIRST in `bench` to prove the tie-break is
     // an explicit lower-row rule, not an artifact of iteration order.
     const row = pickWinningSwitchRow({
       ...walledActive,
-      defenderTypes: WATER,
+      defenderTypes: GHOST,
       bench: [
-        { row: 2 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
-        { row: 1 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
+        { row: 2 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+        { row: 1 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
       ],
       healthyCount: 3,
       alreadySwitchedAgainstThisOpponent: false,
@@ -754,10 +794,10 @@ describe("Milestone M-B step 2 part C: winning switches out of a walled matchup"
   it("skips fainted and active bench candidates even when they'd qualify", () => {
     const row = pickWinningSwitchRow({
       ...walledActive,
-      defenderTypes: WATER,
+      defenderTypes: GHOST,
       bench: [
-        { row: 0 as const, fainted: false, active: true, moveIds: [22, 0, 0, 0], types: GRASS },
-        { row: 1 as const, fainted: true, active: false, moveIds: [22, 0, 0, 0], types: GRASS },
+        { row: 0 as const, fainted: false, active: true, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+        { row: 1 as const, fainted: true, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
       ],
       healthyCount: 2,
       alreadySwitchedAgainstThisOpponent: false,

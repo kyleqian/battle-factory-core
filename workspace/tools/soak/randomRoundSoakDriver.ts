@@ -119,7 +119,12 @@ export function pickWinningFightSlot(input: {
   return bestSlot >= 0 ? bestSlot : fallbackSlot;
 }
 
-/** True when every legal damaging move in `moveIds` is resisted/immune (<= 0.5x). */
+/**
+ * True when every legal move in `moveIds` is either non-damaging (power 0)
+ * or 0x-immune against `defenderTypes` -- i.e. the active cannot deal direct
+ * damage at all (Milestone M-B step 2 part C2: resisted-but-nonzero moves,
+ * e.g. 0.25x/0.5x, no longer count as walled -- only true immunity does).
+ */
 function isWalledActive(
   moveIds: readonly number[],
   legalSlots: readonly boolean[],
@@ -135,7 +140,7 @@ function isWalledActive(
       defenderTypes,
       TYPE_EFFECTIVENESS,
     );
-    if (multiplierTenths > 5) return false;
+    if (multiplierTenths > 0) return false;
   }
   return true;
 }
@@ -181,20 +186,25 @@ export type WinningSwitchBenchCandidate = Readonly<{
   moveIds: readonly number[];
   movePp?: readonly number[];
   types: readonly [string, string];
+  hp: number;
+  maxHp: number;
 }>;
 
 /**
- * "winning" policy voluntary-switch scorer (Milestone M-B step 2 part C):
- * when the active is "walled" (every legal damaging move <= 0.5x against the
- * opponent's live types, or every legal slot scores 0) AND a benched,
- * non-fainted party member has a damaging move that is super-effective
- * (>= 2x) against that same opponent, returns the best-scoring such bench
- * row (ties keep the lower row). Returns null (no switch -- behave exactly
- * like today's FIGHT-with-scored-move path) when the active isn't walled,
- * when no bench member qualifies, when only one healthy party member
- * remains, or when this same opponent party slot was already switched
- * against once this battle (`alreadySwitchedAgainstThisOpponent` -- the
- * ping-pong guard).
+ * "winning" policy voluntary-switch scorer (Milestone M-B step 2 part C,
+ * tightened in part C2): when the active is "walled" (every legal move is
+ * either non-damaging or 0x-immune against the opponent's live types -- see
+ * `isWalledActive`; a merely resisted move, e.g. 0.25x/0.5x, no longer
+ * counts) AND a benched, non-fainted party member has a damaging move that
+ * is super-effective (>= 2x) against that same opponent AND is at >= 50% of
+ * its max HP (`Math.floor((100 * hp) / maxHp) >= 50`, matching the engine's
+ * own HP-percent convention, e.g. `factoryAiCheckViability.ts`), returns the
+ * best-scoring such bench row (ties keep the lower row). Returns null (no
+ * switch -- behave exactly like today's FIGHT-with-scored-move path) when
+ * the active isn't walled, when no bench member qualifies, when only one
+ * healthy party member remains, or when this same opponent party slot was
+ * already switched against once this battle
+ * (`alreadySwitchedAgainstThisOpponent` -- the ping-pong guard).
  */
 export function pickWinningSwitchRow(input: {
   activeMoveIds: readonly number[];
@@ -211,6 +221,7 @@ export function pickWinningSwitchRow(input: {
   let bestScore = 0;
   for (const candidate of input.bench) {
     if (candidate.active || candidate.fainted) continue;
+    if (Math.floor((100 * candidate.hp) / candidate.maxHp) < 50) continue;
     const { score, qualifies } = bestBenchMoveScore(
       candidate.moveIds,
       candidate.types,
@@ -442,18 +453,20 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * keeping over an unscouted swap; (4) the draft screen rents the 3
  * highest-scoring offered rentals (see `pickWinningDraftPicks`) in score
  * order, in place of "full"'s random 3-of-6 shuffle; (5) at the action menu,
- * when the active is "walled" (every legal damaging move <= 0.5x, or every
- * legal move scores 0) and a benched, non-fainted party member has a
- * damaging move that is super-effective (>= 2x) against the opponent's live
- * types, the action-menu roll (still drawn, same as (3)) is overridden to
- * POKéMON and the committed bench row is sent out (see
- * `pickWinningSwitchRow`) instead of item (2)'s decline — guarded against
- * ping-pong (never re-switches against the same opponent party slot twice
- * in a battle) and against emptying the bench (never switches with only one
- * healthy party member left). Biased, not guaranteed-win — arbitrary-but-
- * legal play in spirit (a real player weighing type matchups, preferring
- * stronger rentals over an unscouted swap, and retreating a walled mon to a
- * teammate with a super-effective answer), not an AI oracle.
+ * when the active is "walled" (every legal move is non-damaging or 0x-immune
+ * against the opponent's live types -- a merely resisted move, e.g.
+ * 0.25x/0.5x, does NOT count as walled since part C2) and a benched,
+ * non-fainted party member has both a damaging move that is super-effective
+ * (>= 2x) against the opponent AND is at >= 50% of its max HP, the
+ * action-menu roll (still drawn, same as (3)) is overridden to POKéMON and
+ * the committed bench row is sent out (see `pickWinningSwitchRow`) instead
+ * of item (2)'s decline — guarded against ping-pong (never re-switches
+ * against the same opponent party slot twice in a battle) and against
+ * emptying the bench (never switches with only one healthy party member
+ * left). Biased, not guaranteed-win — arbitrary-but-legal play in spirit (a
+ * real player weighing type matchups, preferring stronger rentals over an
+ * unscouted swap, and retreating a truly walled mon to a healthy teammate
+ * with a super-effective answer), not an AI oracle.
  */
 export type SoakPolicy = "full" | "vanilla" | "winning";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
@@ -856,6 +869,8 @@ class RandomPlayer {
         moveIds: member.moves,
         movePp: member.pp,
         types: typesForSpecies(member.species),
+        hp: member.hp,
+        maxHp: member.maxHP,
       });
     }
     const row = pickWinningSwitchRow({

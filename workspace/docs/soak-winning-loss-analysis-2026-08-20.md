@@ -269,3 +269,66 @@ least at 60 seeds. Landing this as `winning`'s default is the supervisor's
 call, not this worker's; per the brief, it is committed test-pinned as
 measured, without seed-tuning the heuristic's thresholds to chase a better
 number here.
+
+## 5. Part C2: tighten "walled" to true 0x-immunity + a 50% HP bench gate (2026-08-20)
+
+Part C's "walled" test fired on any resisted-or-immune matchup (<= 0.5x),
+which turned out far too trigger-happy (153 switches across 52/60 seeds,
+every one spending a free opponent hit) and measured worse than declining
+every switch. This step tightens `isWalledActive`
+(`tools/soak/randomRoundSoakDriver.ts`) to require true immunity: every
+legal move must be either non-damaging (power 0) or exactly 0x against the
+opponent's live types — a merely resisted move (0.25x/0.5x) no longer
+qualifies. It also adds an HP gate to `pickWinningSwitchRow`'s bench
+candidate: the qualifying bench row must now be at >= 50% of its max HP
+(`Math.floor((100 * hp) / maxHp) >= 50`, the same integer-percent convention
+`factoryAiCheckViability.ts` already uses), not just carry a super-effective
+(>= 2x) move — a real player doesn't send a nearly-fainted teammate into a
+matchup it can't safely take a hit in. The ping-pong guard, the >= 2-healthy
+guard, and the drawn-but-overridden RNG stream are unchanged. Pins extended
+in `tests/randomRoundSoak.test.ts` (resisted-only no longer walled; an
+all-immune active with a qualifying bench switches at 80% HP and declines at
+30%; a new 50%-exactly boundary case; the existing ping-pong/healthy-count/
+tie-break/skip-fainted-or-active cases carry over against a genuinely
+all-immune scenario). `full`/`vanilla` byte-identical pins verified green
+unmodified; no `src/` change.
+
+**Like-for-like measurement, `--policy winning --seeds 0:60 --render-every
+0`, this worktree (based on side `0c60483b`, which sits on the same
+crash-fixed master as part C's own measurement — see note below):**
+
+| | OK | CRASH | HANG | carry>=7 | carry>=14 | carry>=21 | deepest carry | deepest depth | switches |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Rung-1 base (part B, decline-always) | 57/60 | 3 | 0 | 36/60 (60.0%) | 10/60 (16.7%) | 0/60 (0%) | 14 | 20 | 0 |
+| Part C (resisted-or-immune walled) | 60/60 | 0 | 0 | 25/60 (41.7%) | 6/60 (10.0%) | 1/60 (1.7%) | 21 | 21 | 153 / 52 seeds |
+| Part C2 (0x-immune + 50% HP gate) | 60/60 | 0 | 0 | 38/60 (63.3%) | 13/60 (21.7%) | 2/60 (3.3%) | 21 | 27 | 30 / 19 seeds |
+
+Switch counts were measured the same way as part C: a scratch script (not
+committed) counting the `winning switch: row N` note across the same 60
+seeds at `DEFAULT_MAX_FRAMES_BY_POLICY.winning`.
+
+**Read the rung-1 comparison with a caveat, the part C comparison without
+one.** The rung-1 base's 36/10/0 was measured *before* seeds 10/51/36's
+engine crashes were fixed on master (#100/#103); this worktree's base
+already includes those fixes (0/60 CRASH here, matching part C's own
+crash-free run), so part of the 36→38, 10→13, 0→2 delta versus rung-1 is
+those three seeds simply completing instead of crashing early, not the
+switch heuristic. Part C's own measurement, by contrast, was already made
+on this same crash-fixed base with the same seed set and the same 60/60 OK
+count, so the C→C2 comparison is clean: tightening "walled" to true
+immunity cut voluntary switches by roughly 5x (153→30) and switching seeds
+by more than half (52→19), and **carry>=7 recovered from part C's 25/60
+regression all the way past the rung-1 baseline to 38/60** — the best
+carry>=7, carry>=14, *and* deepest-battle-depth (27, versus 21 for both
+other rows) numbers of the three rows.
+
+**Plain verdict: at n=60, this tightened form of switching is a net win
+over part C's looser rule, and a small net win over declining every switch
+outright** — it no longer spends a turn retreating from a merely-resisted
+matchup, only from ones the active truly cannot damage, and only into a
+bench mon healthy enough to take the follow-up hit. The trigger rate is
+much lower than part C's (30 switches over 60 seeds vs. 153) but not zero,
+so this reads as "switch rarely, but correctly" rather than C's "switch
+often, often wrong." As with part C, this is committed test-pinned as
+measured, without seed-tuning the 50%/2x thresholds to chase a better
+number; landing it as `winning`'s default remains the supervisor's call.
