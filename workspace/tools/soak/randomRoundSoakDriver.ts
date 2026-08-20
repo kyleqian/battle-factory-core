@@ -38,6 +38,7 @@ import {
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
 import { applyTypeEffectiveness, type TypeEffectivenessEntry } from "../../src/engine/damageCalc.ts";
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
+import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
 import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------
@@ -56,6 +57,15 @@ const TYPE_EFFECTIVENESS =
 
 /** Materialized battler types default (matches battleScriptRulesContext.ts's own convention). */
 const DEFAULT_TYPES: readonly [string, string] = ["TYPE_NORMAL", "TYPE_NORMAL"];
+
+/** gSpeciesInfo[species].types -- species-types.json is indexed by (speciesId - 1). */
+const SPECIES_TYPES = speciesTypesData.species as unknown as readonly Readonly<{
+  types: readonly [string, string];
+}>[];
+
+function typesForSpecies(species: number): readonly [string, string] {
+  return SPECIES_TYPES[species - 1]?.types ?? DEFAULT_TYPES;
+}
 
 /**
  * "winning" policy fight-move scorer: for each legal slot,
@@ -107,6 +117,125 @@ export function pickWinningFightSlot(input: {
     }
   }
   return bestSlot >= 0 ? bestSlot : fallbackSlot;
+}
+
+/**
+ * True when every legal move in `moveIds` is either non-damaging (power 0)
+ * or 0x-immune against `defenderTypes` -- i.e. the active cannot deal direct
+ * damage at all (Milestone M-B step 2 part C2: resisted-but-nonzero moves,
+ * e.g. 0.25x/0.5x, no longer count as walled -- only true immunity does).
+ */
+function isWalledActive(
+  moveIds: readonly number[],
+  legalSlots: readonly boolean[],
+  defenderTypes: readonly [string, string],
+): boolean {
+  for (let slot = 0; slot < 4; slot += 1) {
+    if (!legalSlots[slot]) continue;
+    const move = MOVE_BY_ID.get(moveIds[slot]!);
+    if (!move || move.power <= 0) continue;
+    const { multiplierTenths } = applyTypeEffectiveness(
+      move.power,
+      move.type,
+      defenderTypes,
+      TYPE_EFFECTIVENESS,
+    );
+    if (multiplierTenths > 0) return false;
+  }
+  return true;
+}
+
+/**
+ * A benched party member's best score (same power x effectiveness x STAB
+ * formula as `pickWinningFightSlot`), plus whether it qualifies as a
+ * super-effective (>= 2x) answer to the opponent's live types. PP-zero moves
+ * are skipped when `movePp` is supplied (a real player wouldn't switch in on
+ * a move it can no longer use).
+ */
+function bestBenchMoveScore(
+  moveIds: readonly number[],
+  attackerTypes: readonly [string, string],
+  defenderTypes: readonly [string, string],
+  movePp: readonly number[] | undefined,
+): { score: number; qualifies: boolean } {
+  let bestScore = 0;
+  let qualifies = false;
+  for (let i = 0; i < moveIds.length; i += 1) {
+    if (movePp && movePp[i]! <= 0) continue;
+    const move = MOVE_BY_ID.get(moveIds[i]!);
+    if (!move || move.power <= 0) continue;
+    const { multiplierTenths } = applyTypeEffectiveness(
+      move.power,
+      move.type,
+      defenderTypes,
+      TYPE_EFFECTIVENESS,
+    );
+    if (multiplierTenths <= 0) continue;
+    if (multiplierTenths >= 20) qualifies = true;
+    const stab = attackerTypes[0] === move.type || attackerTypes[1] === move.type;
+    const score = move.power * (multiplierTenths / 10) * (stab ? 1.5 : 1);
+    if (score > bestScore) bestScore = score;
+  }
+  return { score: bestScore, qualifies };
+}
+
+export type WinningSwitchBenchCandidate = Readonly<{
+  row: 0 | 1 | 2;
+  fainted: boolean;
+  active: boolean;
+  moveIds: readonly number[];
+  movePp?: readonly number[];
+  types: readonly [string, string];
+  hp: number;
+  maxHp: number;
+}>;
+
+/**
+ * "winning" policy voluntary-switch scorer (Milestone M-B step 2 part C,
+ * tightened in part C2): when the active is "walled" (every legal move is
+ * either non-damaging or 0x-immune against the opponent's live types -- see
+ * `isWalledActive`; a merely resisted move, e.g. 0.25x/0.5x, no longer
+ * counts) AND a benched, non-fainted party member has a damaging move that
+ * is super-effective (>= 2x) against that same opponent AND is at >= 50% of
+ * its max HP (`Math.floor((100 * hp) / maxHp) >= 50`, matching the engine's
+ * own HP-percent convention, e.g. `factoryAiCheckViability.ts`), returns the
+ * best-scoring such bench row (ties keep the lower row). Returns null (no
+ * switch -- behave exactly like today's FIGHT-with-scored-move path) when
+ * the active isn't walled, when no bench member qualifies, when only one
+ * healthy party member remains, or when this same opponent party slot was
+ * already switched against once this battle
+ * (`alreadySwitchedAgainstThisOpponent` -- the ping-pong guard).
+ */
+export function pickWinningSwitchRow(input: {
+  activeMoveIds: readonly number[];
+  activeLegalSlots: readonly boolean[];
+  defenderTypes: readonly [string, string];
+  bench: readonly WinningSwitchBenchCandidate[];
+  healthyCount: number;
+  alreadySwitchedAgainstThisOpponent: boolean;
+}): 0 | 1 | 2 | null {
+  if (input.healthyCount <= 1) return null;
+  if (input.alreadySwitchedAgainstThisOpponent) return null;
+  if (!isWalledActive(input.activeMoveIds, input.activeLegalSlots, input.defenderTypes)) return null;
+  let bestRow: 0 | 1 | 2 | null = null;
+  let bestScore = 0;
+  for (const candidate of input.bench) {
+    if (candidate.active || candidate.fainted) continue;
+    if (Math.floor((100 * candidate.hp) / candidate.maxHp) < 50) continue;
+    const { score, qualifies } = bestBenchMoveScore(
+      candidate.moveIds,
+      candidate.types,
+      input.defenderTypes,
+      candidate.movePp,
+    );
+    if (!qualifies) continue;
+    // Ties keep the lower row regardless of `bench` iteration order.
+    if (bestRow === null || score > bestScore || (score === bestScore && candidate.row < bestRow)) {
+      bestScore = score;
+      bestRow = candidate.row;
+    }
+  }
+  return bestRow;
 }
 
 // ---------------------------------------------------------------------------
@@ -311,22 +440,33 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * biases toward winning, so a soak's natural chained depth almost never
  * strings together consecutive round wins). Reuses "full"'s menu/target
  * exploration verbatim (same summary/postwin-continuation/terminal rolls)
- * for every decision EXCEPT four (Milestone M-B step 2, parts a/b):
+ * for every decision EXCEPT five (Milestone M-B step 2, parts a/b/c):
  * (1) the fight-menu commits the legal move that scores highest on power x
  * type-effectiveness x STAB (see `pickWinningFightSlot`; falls back to
  * highest-power legal move if every legal move scores 0) instead of a
  * uniform-random slot; (2) a voluntary POKéMON party-select (forced
- * switches are unaffected — they're not voluntary) always declines rather
- * than "full"'s random target/cancel roll; (3) the postwin swap offer
- * always answers NO instead of "full"'s 50/50 roll (the roll is still
- * drawn from the shared RNG stream, matching "full"'s draw at that point,
- * just ignored) — a rental already scouted and played with is worth
+ * switches are unaffected — they're not voluntary) always declines UNLESS
+ * part (5) below has already committed to a row this turn; (3) the postwin
+ * swap offer always answers NO instead of "full"'s 50/50 roll (the roll is
+ * still drawn from the shared RNG stream, matching "full"'s draw at that
+ * point, just ignored) — a rental already scouted and played with is worth
  * keeping over an unscouted swap; (4) the draft screen rents the 3
  * highest-scoring offered rentals (see `pickWinningDraftPicks`) in score
- * order, in place of "full"'s random 3-of-6 shuffle. Biased, not
- * guaranteed-win — arbitrary-but-legal play in spirit (a real player
- * weighing type matchups and preferring stronger rentals over an
- * unscouted swap), not an AI oracle.
+ * order, in place of "full"'s random 3-of-6 shuffle; (5) at the action menu,
+ * when the active is "walled" (every legal move is non-damaging or 0x-immune
+ * against the opponent's live types -- a merely resisted move, e.g.
+ * 0.25x/0.5x, does NOT count as walled since part C2) and a benched,
+ * non-fainted party member has both a damaging move that is super-effective
+ * (>= 2x) against the opponent AND is at >= 50% of its max HP, the
+ * action-menu roll (still drawn, same as (3)) is overridden to POKéMON and
+ * the committed bench row is sent out (see `pickWinningSwitchRow`) instead
+ * of item (2)'s decline — guarded against ping-pong (never re-switches
+ * against the same opponent party slot twice in a battle) and against
+ * emptying the bench (never switches with only one healthy party member
+ * left). Biased, not guaranteed-win — arbitrary-but-legal play in spirit (a
+ * real player weighing type matchups, preferring stronger rentals over an
+ * unscouted swap, and retreating a truly walled mon to a healthy teammate
+ * with a super-effective answer), not an AI oracle.
  */
 export type SoakPolicy = "full" | "vanilla" | "winning";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
@@ -349,6 +489,12 @@ class RandomPlayer {
   private lastCommandKey = "";
   private turnsThisBattle = 0;
   private lastBattleIndex = 0;
+  /** "winning" only: the bench row the action-menu heuristic committed to, consumed by onVoluntaryParty. */
+  private pendingSwitchRow: 0 | 1 | 2 | null = null;
+  /** "winning" only: opponent partyIndexes already switched against this battle (ping-pong guard). */
+  private switchedAgainstOpponentIndices = new Set<number>();
+  /** "winning" only: count of voluntary switches the heuristic actually committed to (soak diagnostics). */
+  public switchCount = 0;
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
@@ -442,6 +588,7 @@ class RandomPlayer {
       this.lastBattleIndex = battleIndex;
       this.turnsThisBattle = 0;
       this.turn = 0;
+      this.switchedAgainstOpponentIndices.clear();
     }
     this.battle = battleIndex + 1;
     const presentation = orch.battleCommandPresentation;
@@ -573,11 +720,25 @@ class RandomPlayer {
       if (this.actionIntent === null || this.actionIntent.key !== this.lastCommandKey) {
         // FIGHT 0.60 / POKéMON 0.22 / BAG 0.06 / RUN 0.06 / re-roll wander 0.06
         const roll = this.rng.float();
-        const target = !this.explores
+        let target = !this.explores
           ? 0
           : roll < 0.60 ? 0 : roll < 0.82 ? 2 : roll < 0.88 ? 1 : roll < 0.94 ? 3 : this.rng.int(4);
+        // "winning" only (M-B step 2 part C): voluntarily switch out of a
+        // walled matchup instead of the rolled action. The roll above is
+        // still drawn (shared with "full") so its RNG stream is untouched;
+        // only the decision it feeds is overridden, like the swap-decline
+        // precedent (part B, rung 1).
+        this.pendingSwitchRow = this.policy === "winning"
+          ? this.computeSwitchRow(orch, presentation)
+          : null;
+        if (this.pendingSwitchRow !== null) target = 2;
         this.actionIntent = { key: this.lastCommandKey, target, futile: 0 };
-        this.note(state, `action menu intent: ${["FIGHT", "BAG", "POKEMON", "RUN"][target]}`);
+        this.note(
+          state,
+          this.pendingSwitchRow !== null
+            ? `action menu intent: POKEMON (winning switch: row ${this.pendingSwitchRow})`
+            : `action menu intent: ${["FIGHT", "BAG", "POKEMON", "RUN"][target]}`,
+        );
       }
       const intent = this.actionIntent;
       const cursor = presentation.actionCursor;
@@ -673,6 +834,60 @@ class RandomPlayer {
     return NO_BUTTONS;
   }
 
+  /**
+   * "winning" only (M-B step 2 part C): decides whether to voluntarily
+   * switch out of a walled matchup, reading only what a real player sees --
+   * the active's own legal moves, the opponent's live types, and the
+   * bench's known species/moves/PP/HP. Marks the ping-pong guard and bumps
+   * `switchCount` when it commits to a row.
+   */
+  private computeSwitchRow(
+    orch: NonNullable<EngineState["factoryRoundBattleOrchestrator"]>,
+    presentation: NonNullable<
+      NonNullable<EngineState["factoryRoundBattleOrchestrator"]>["battleCommandPresentation"]
+    >,
+  ): 0 | 1 | 2 | null {
+    const battle = orch.battle;
+    if (!battle) return null;
+    const battlers = battle.rules.rulesContext.battlers;
+    const activePartyIndex = battlers[0]?.partyIndex;
+    const opponentPartyIndex = battlers[1]?.partyIndex;
+    if (activePartyIndex === undefined || opponentPartyIndex === undefined) return null;
+    const defenderTypes = battlers[1]?.types ?? DEFAULT_TYPES;
+    const party = battle.rules.rulesContext.party.player;
+    let healthyCount = 0;
+    const bench: WinningSwitchBenchCandidate[] = [];
+    for (let partyIndex = 0; partyIndex < 3; partyIndex += 1) {
+      const member = party[partyIndex];
+      if (!member || member.hp <= 0) continue;
+      healthyCount += 1;
+      if (partyIndex === activePartyIndex) continue;
+      bench.push({
+        row: partyIndex as 0 | 1 | 2,
+        fainted: false,
+        active: false,
+        moveIds: member.moves,
+        movePp: member.pp,
+        types: typesForSpecies(member.species),
+        hp: member.hp,
+        maxHp: member.maxHP,
+      });
+    }
+    const row = pickWinningSwitchRow({
+      activeMoveIds: presentation.field.player.moveIds,
+      activeLegalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
+      defenderTypes,
+      bench,
+      healthyCount,
+      alreadySwitchedAgainstThisOpponent: this.switchedAgainstOpponentIndices.has(opponentPartyIndex),
+    });
+    if (row !== null) {
+      this.switchedAgainstOpponentIndices.add(opponentPartyIndex);
+      this.switchCount += 1;
+    }
+    return row;
+  }
+
   private onVoluntaryParty(state: EngineState): ReadonlySet<GbaButton> {
     const orch = state.factoryRoundBattleOrchestrator!;
     const selector = orch.battlePartySelect!;
@@ -682,11 +897,24 @@ class RandomPlayer {
     }
     if (this.partyIntent === null || this.partyIntent.key !== this.lastCommandKey) {
       // Any row the UI can cursor to, including fainted rows (their SEND OUT
-      // shows the no-energy message), plus cancel. "winning" always declines
-      // a voluntary switch (forced switches never route through here).
-      const target: 0 | 1 | 2 | "cancel" = this.policy === "winning"
-        ? "cancel"
+      // shows the no-energy message), plus cancel. "winning" (M-B step 2
+      // part C): send out the action-menu heuristic's committed row when one
+      // was set (a genuine walled-matchup switch), else decline like before
+      // -- forced switches never route through here. Other policies keep
+      // their random roll.
+      const rawTarget: 0 | 1 | 2 | "cancel" = this.policy === "winning"
+        ? (this.pendingSwitchRow ?? "cancel")
         : this.rng.float() < 0.25 ? "cancel" : ([0, 1, 2] as const)[this.rng.int(3)]!;
+      this.pendingSwitchRow = null;
+      // "winning" only: the UI enforces legality, so if the selector somehow
+      // rejects the heuristic's committed row (e.g. it's the active), fall
+      // back to cancel rather than press an illegal target. "full"/"vanilla"
+      // keep their prior random-roll behaviour verbatim (including rolling
+      // onto a fainted/active row, whose own no-energy message the generic
+      // press sequence below already handles) -- untouched by this guard.
+      const target = this.policy === "winning" && rawTarget !== "cancel" && !selector.rows[rawTarget]!.legal
+        ? "cancel"
+        : rawTarget;
       this.partyIntent = { key: this.lastCommandKey, target };
       this.note(state, `party intent: ${target === "cancel" ? "cancel" : `row ${target}`}`);
     }

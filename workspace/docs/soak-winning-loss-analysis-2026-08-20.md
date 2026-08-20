@@ -204,3 +204,131 @@ would need a much larger sweep (several hundred seeds) to observe carry >=
 whatever (2)/swap-policy turns out to help) to lift the per-round win
 probability enough to make it a non-rare event rather than a needle in a
 few-hundred-seed haystack.
+
+## 4. Part C landed: voluntary switch out of a walled matchup (2026-08-20, worker/side-20260820-120834)
+
+Implements the §3 loss-census finding that 22.0% of `winning` losses ended
+with a resisted/immune move and no better legal move in the active's
+moveset ("walled"). At the action menu, when the active's best legal fight
+score (`pickWinningFightSlot`'s own scoring) is walled AND a benched,
+non-fainted party member has a damaging move that is super-effective
+(>= 2x) against the opponent's live types, `winning` now overrides the
+drawn action-menu roll to POKéMON and sends out the best-scoring qualifying
+bench row (ties to the lower row) instead of part B's always-decline.
+Guarded against ping-pong (one voluntary switch per opponent party slot per
+battle) and against emptying the bench (never switches with only one
+healthy party member left). Pure decision function `pickWinningSwitchRow`
+(`tools/soak/randomRoundSoakDriver.ts`), pinned with 6 synthetic cases in
+`tests/randomRoundSoak.test.ts`. `full`/`vanilla` byte-identical pins
+verified green unmodified; no `src/` change.
+
+**Like-for-like measurement, `--policy winning --seeds 0:60 --render-every 0`,
+same worktree, before implementing part C vs. after:**
+
+| | OK | CRASH | HANG | carry>=7 (36/60 baseline) | carry>=14 | carry>=21 | deepest carry | deepest depth |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Before (base, part B) | 57/60 | 3 | 0 | 36/60 (60.0%) | 10/60 (16.7%) | 0/60 (0%) | 14 | 20 |
+| After (part C) | 60/60 | 0 | 0 | 25/60 (41.7%) | 6/60 (10.0%) | 1/60 (1.7%) | 21 | 21 |
+
+The before run reproduced the supervisor-reported baseline exactly (57
+OK / 3 CRASH — seeds 10, 51 `STRINGID_NATUREPOWERTURNEDINTO`, seed 36
+`factory-ai-check-viability: unknown last-used move 65535` — carry>=7
+36/60, carry>=14 10/60, carry>=21 0/60, deepest carry 14, deepest depth 20).
+
+**The heuristic measures WORSE on this seed set for the primary carry>=7
+metric: 25/60 (41.7%) vs. the 36/60 (60.0%) baseline, a clear regression,
+not noise.** carry>=14 also dropped (6/60 vs. 10/60). The only metrics that
+improved are the tail: deepest carry (21 vs. 14) and carry>=21 (1/60 vs.
+0/60) — plausibly because escaping a walled matchup occasionally survives a
+battle that would otherwise be an immediate loss, letting a handful of runs
+push one round further than baseline ever reached, at the cost of a lower
+overall clear rate (a switch spends a turn not attacking, and the bench
+mon it switches to is not vetted against what the opponent sends out next).
+All three baseline crashes (seeds 10/36/51) disappeared in the after run —
+not a fix (still unreached commits, base tree unchanged: no #100 fix, no
+draft heuristic) but a side effect of the heuristic changing play well
+before those frames, so those seeds' RNG-consumption/battle-state paths no
+longer reach the crashing conditions. Seeds 10 and 51 (STRINGID_NATURE...)
+and seed 36 (unknown last-used move) both switched at least once (7, 4, and
+6 switches respectively per the count below) before their prior crash point.
+
+**Voluntary switches actually committed:** counted via the `winning switch:
+row N` log note (added this session) across the same 60-seed set at
+`--max-frames 1_000_000` (matching `DEFAULT_MAX_FRAMES_BY_POLICY.winning`):
+**153 switches across 52/60 seeds** (min 1, max 12 in a single seed's
+chained rounds) — the heuristic engages often, not a rare edge case.
+
+**Interpretation:** the heuristic is real player behavior (a benched
+teammate with a clean super-effective answer beats grinding a walled
+attacker) but is not a net win-rate improvement on this seed set — spending
+an action-menu turn on POKéMON instead of FIGHT has an opportunity cost
+(no chip damage that turn, and the bench mon's own matchup against
+whatever the opponent sends out or does next isn't evaluated) that this
+20% of decisions apparently outweighs the walled-mon damage it avoids, at
+least at 60 seeds. Landing this as `winning`'s default is the supervisor's
+call, not this worker's; per the brief, it is committed test-pinned as
+measured, without seed-tuning the heuristic's thresholds to chase a better
+number here.
+
+## 5. Part C2: tighten "walled" to true 0x-immunity + a 50% HP bench gate (2026-08-20)
+
+Part C's "walled" test fired on any resisted-or-immune matchup (<= 0.5x),
+which turned out far too trigger-happy (153 switches across 52/60 seeds,
+every one spending a free opponent hit) and measured worse than declining
+every switch. This step tightens `isWalledActive`
+(`tools/soak/randomRoundSoakDriver.ts`) to require true immunity: every
+legal move must be either non-damaging (power 0) or exactly 0x against the
+opponent's live types — a merely resisted move (0.25x/0.5x) no longer
+qualifies. It also adds an HP gate to `pickWinningSwitchRow`'s bench
+candidate: the qualifying bench row must now be at >= 50% of its max HP
+(`Math.floor((100 * hp) / maxHp) >= 50`, the same integer-percent convention
+`factoryAiCheckViability.ts` already uses), not just carry a super-effective
+(>= 2x) move — a real player doesn't send a nearly-fainted teammate into a
+matchup it can't safely take a hit in. The ping-pong guard, the >= 2-healthy
+guard, and the drawn-but-overridden RNG stream are unchanged. Pins extended
+in `tests/randomRoundSoak.test.ts` (resisted-only no longer walled; an
+all-immune active with a qualifying bench switches at 80% HP and declines at
+30%; a new 50%-exactly boundary case; the existing ping-pong/healthy-count/
+tie-break/skip-fainted-or-active cases carry over against a genuinely
+all-immune scenario). `full`/`vanilla` byte-identical pins verified green
+unmodified; no `src/` change.
+
+**Like-for-like measurement, `--policy winning --seeds 0:60 --render-every
+0`, this worktree (based on side `0c60483b`, which sits on the same
+crash-fixed master as part C's own measurement — see note below):**
+
+| | OK | CRASH | HANG | carry>=7 | carry>=14 | carry>=21 | deepest carry | deepest depth | switches |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Rung-1 base (part B, decline-always) | 57/60 | 3 | 0 | 36/60 (60.0%) | 10/60 (16.7%) | 0/60 (0%) | 14 | 20 | 0 |
+| Part C (resisted-or-immune walled) | 60/60 | 0 | 0 | 25/60 (41.7%) | 6/60 (10.0%) | 1/60 (1.7%) | 21 | 21 | 153 / 52 seeds |
+| Part C2 (0x-immune + 50% HP gate) | 60/60 | 0 | 0 | 38/60 (63.3%) | 13/60 (21.7%) | 2/60 (3.3%) | 21 | 27 | 30 / 19 seeds |
+
+Switch counts were measured the same way as part C: a scratch script (not
+committed) counting the `winning switch: row N` note across the same 60
+seeds at `DEFAULT_MAX_FRAMES_BY_POLICY.winning`.
+
+**Read the rung-1 comparison with a caveat, the part C comparison without
+one.** The rung-1 base's 36/10/0 was measured *before* seeds 10/51/36's
+engine crashes were fixed on master (#100/#103); this worktree's base
+already includes those fixes (0/60 CRASH here, matching part C's own
+crash-free run), so part of the 36→38, 10→13, 0→2 delta versus rung-1 is
+those three seeds simply completing instead of crashing early, not the
+switch heuristic. Part C's own measurement, by contrast, was already made
+on this same crash-fixed base with the same seed set and the same 60/60 OK
+count, so the C→C2 comparison is clean: tightening "walled" to true
+immunity cut voluntary switches by roughly 5x (153→30) and switching seeds
+by more than half (52→19), and **carry>=7 recovered from part C's 25/60
+regression all the way past the rung-1 baseline to 38/60** — the best
+carry>=7, carry>=14, *and* deepest-battle-depth (27, versus 21 for both
+other rows) numbers of the three rows.
+
+**Plain verdict: at n=60, this tightened form of switching is a net win
+over part C's looser rule, and a small net win over declining every switch
+outright** — it no longer spends a turn retreating from a merely-resisted
+matchup, only from ones the active truly cannot damage, and only into a
+bench mon healthy enough to take the follow-up hit. The trigger rate is
+much lower than part C's (30 switches over 60 seeds vs. 153) but not zero,
+so this reads as "switch rarely, but correctly" rather than C's "switch
+often, often wrong." As with part C, this is committed test-pinned as
+measured, without seed-tuning the 50%/2x thresholds to chase a better
+number; landing it as `winning`'s default remains the supervisor's call.
