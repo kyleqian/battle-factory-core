@@ -5,6 +5,54 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1369 — [supervisor wind-down, 2026-08-20] **Milestone M-B bar AND stretch met: `winning` reaches carry ≥ 28 by play (seed 24, challenge-4 AI tier) once #104 (terminal record-YES dead end + cumulative soak grace) was found and fixed; soak OK/HANG redefined for continuous play; rust + animation lanes folded; #105 filed at the new depth**
+
+- **Final gates (supervisor-independent, at the FINAL tree `2f527dcb` (code) / this docs commit`):**
+  full `npm test` **1,079 files / 10,176 passed / 223 skipped** (at `bcfa69d4`-era tree incl. both lane folds; the later #105 fix `1df9dcb6` re-ran the suite itself: 1,080 files / 10,177 passed — PROGRESS 1368; supervisor reran its pin + census ratchet + seeds 40/50 → OK); `npm run build` green; soak vanilla 0:20
+  **20/20 OK** (all `budget`; carry ≥ 7 20/20, ≥ 14 0/20); soak full 0:60 **60/60 OK** (all `budget`; carry ≥ 7 3/60) — both with rendering on the pre-#105 tree `e3176a05` (#105 is a carry-21 string case `full`/`vanilla` never reach; NEW semantics:
+  OK = frame budget reached while still progressing / HANG = 30k frames of
+  no progress); `winning` 0:60 depth (render off, `e3176a05`): **carry ≥ 7 60/60, ≥ 14 56/60, ≥ 21 13/60, ≥ 28 1/60 (seed 24, depth 28)**; 58 OK(budget) / 2 CRASH (seeds 40+50 = #105) / 0 HANG. Rust fold:
+  cargo 75/75 result blocks ok, wasm rebuilt (`build-wasm.sh`, 492,691 B, sha 61f39cfe…), `POKEBENCH_ENGINE=wasm` parity suites **18 files / 803 tests green** (run from the workspace root — a core-rs cwd finds no tests). Animation fold `bcfa69d4` (10 commits, additive:
+  Psybeam + Rain Dance; their session was LIVE — later commits fold next
+  session).
+- **Did (9 main rounds + 7 side rounds, 2 cap-kills salvaged, 0 regressions
+  folded):** M-B step 1 (1357, verdict (a)); #99 found (side scout) + fixed
+  (1358); step 2 levers: type-aware move choice (1359), swap decline
+  (`781c8827`), true-immunity switch + HP gate (`3fa78a98`); withheld:
+  draft-by-strength (`wip/mb-step2b-draft-heuristic`) and the loose switch
+  rule (both measured worse at n=60); #100/#101/#103 fixed (1360/1363; #103
+  ROM-byte-verified by the supervisor); #102 non-repro, its end-turn lead
+  REFUTED by a pin; sweeps 0:240 (1361) and 0:480 (1365) reached carry ≥ 21
+  (seed 99 first; 5/480); supervisor probe then showed the carry-21 "wall"
+  was #104 (1366); #104 fixed in both halves (1367 driver, `fd30ee13`
+  engine) and the soak's OK/HANG semantics redefined for continuous play
+  (`f931241a`: stallFrames/--max-rounds; the pre-#104 "OK" was a cumulative-
+  grace artifact since M-A); #105 (Conversion/Camouflage type-name string,
+  surfaced at carry 21 by the supervisor's depth run) fixed same hour
+  (`1df9dcb6`, 1368).
+- **Next:** (1) re-measure depth at scale on the new semantics — `winning`
+  0:240+ with `--max-rounds` or the 1M budget — to learn whether carry ≥ 28
+  (challenge-4 AI tier) is reached by play; this is M-B step 3 re-run, the
+  honest number is still unknown; (2) the standing `full`/`vanilla` gate
+  definitions now mean "no stall/crash within the frame budget" — ROADMAP
+  soak-policy block should say so (supervisor TODO next session); (3) #104
+  remainder (YES-branch "battle was recorded" message needs an OFF trace);
+  note seeds 40/50 now play an 84-turn battle 1 at carry 21 — long but
+  progressing (PP → Struggle), not a stall; keep an eye on turn counts in
+  future sweeps;
+  (4) #102 stays open non-reproducing; (5) re-measure the withheld draft
+  heuristic at n ≥ 180 before deciding; (6) `full` still wins ~1/60 rounds —
+  its gate coverage of deep play stays thin by design.
+- **Notes:** PAPERCUTS bumped (absolute-path commit + reset --hard on master
+  by a side worker; pinned-line census citations incl. my own hit). Process
+  lessons: inspect the END SURFACE of a sweep's deepest seeds before
+  attributing depth to difficulty (three sweeps mis-attributed an instrument
+  cap); an instrument fix can legitimately flip every historical "OK" — say
+  so in the ledger rather than soften the instrument. DEFERRED.md: no new
+  entries; none open.
+
+---
+
 ## 1368 — [main worker, 2026-08-20] **#105 FIXED: STRINGID_PKMNCHANGEDTYPE `messageLines` case added (Conversion/Conversion 2/Camouflage); soak seed 40 now runs to an honest OK (`1df9dcb6`)**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` +
@@ -102,32 +150,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   rather than cut the investigation short and risk a dishonest pin.
 
 ---
-
-## 1366 — [supervisor fold, 2026-08-20] **Carry-21 "wall" is a driver-masked engine dead end (#104: terminal record-YES/cancel never continues; soak grace cumulative + expiry reported OK) — found by supervisor probe; switch lever C2 + #104-refutation test folded (`3fa78a98`)**
-
-- **State:** master = 1365 sweep docs + side C2 (`5b31b1ea`: `winning`
-  switches only out of a true-immunity wall with a ≥50%-HP bench answer;
-  38/13/2 of 60 vs 36/10/0 decline-only, 30 switches) + side refutation
-  pin (`bc8acc23`, end-turn skip claim REFUTED, later battler keeps its
-  tick). Union: soak file + new test 33/33, smoke 444/444. PAPERCUTS bumped
-  (`fdf46ebb`: absolute-path commit on master + reset --hard by a side
-  worker; pinned-line census citations, incl. the supervisor's own hit).
-- **Finding:** all three deepest 0:480 seeds (125/328/409) stop at
-  `roundComplete carry<=21`. Probe (scratch print at grace expiry, reverted):
-  `factoryTerminal.recordChoice:"yes"`, no `declineFarewellReleaseAge`, no
-  re-chain; grace 9k→90k changes only the frame count. Driver's
-  `terminalGrace` is set once and never re-armed → cumulative across
-  re-chains (~1k each) → expiry reported OK. Filed **#104** (engine + driver
-  halves). So "carry ≥ 28 not reached" (1365) is NOT evidence about the AI
-  tier; the depth instrument was capped at ~3 re-chains since M-A.
-- **Next:** main: driver half of #104 (per-round grace, HANG on stall) +
-  pin; side: engine half (stub continuation for YES/cancel per the RECORD
-  stub-only decision) + pin; then one more 0:480 sweep on the union for the
-  carry ≥ 28 tier. Withheld: draft-by-strength (`e9a415a7`) pending n≥180.
-- **Notes:** lesson banked — a sweep's "deepest seed stops at X" claim needs
-  the END SURFACE of those seeds inspected before it is attributed to game
-  difficulty; three sweeps attributed an instrument cap to the AI.
-
----
-
-Older entries: see `PROGRESS-archive.md`.
