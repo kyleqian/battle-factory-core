@@ -1666,6 +1666,21 @@ function messageLines(
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
     });
   }
+  if (messageId === "STRINGID_PKMNTOOKAIM") {
+    // BattleScript_EffectLockOn (data/battle_scripts_1.s:1286-1297,
+    // EFFECT_LOCK_ON/Lock-On/Mind Reader): attackcanceler + accuracycheck +
+    // setalwayshitflag (Cmd_setalwayshitflag is ported --
+    // battleScriptSetalwayshitflagOpcode.ts) all run before this printstring,
+    // none of which reassign gBattlerAttacker/gBattlerTarget -- same
+    // zero-TS-reference-outside-AI-scoring, unchanged-roles shape as
+    // STRINGID_PKMNIDENTIFIED above.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "took-aim message");
+    const defender = requireMoveDefender(lastMoveAttacker, "took-aim message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
   if (
     messageId === "STRINGID_PKMNSXINFATUATEDY"
     || messageId === "STRINGID_PKMNHURTSWITH"
