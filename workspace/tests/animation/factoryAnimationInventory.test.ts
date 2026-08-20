@@ -68,9 +68,9 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 80,
+        unsupported: 79,
         staged: 0,
-        partial: 0,
+        partial: 1,
         exact: 196,
       },
       {
@@ -94,9 +94,9 @@ describe("animation coverage ledger", () => {
 
   it("keeps the manual acceptance queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    // The prior Mega Drain acceptance queue is empty after its own complete
-    // bilateral promotion; component tracks remain non-exclusive discovery.
-    expect(queue).toEqual([]);
+    expect(queue.map(({ move, status }) => ({ move, status }))).toEqual([
+      { move: "MOVE_PSYBEAM", status: "partial" },
+    ]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,
