@@ -1,3 +1,10 @@
+# MOVE_OCTAZOOKA bilateral exact production presentation (2026-08-20 worker)
+
+- **State:** Coverage advances **199→200/276 Level-50 exact**, **1→0 partial**, and remains **76 unsupported**. MOVE_OCTAZOOKA alone promotes, the queue is empty, and `octazooka-ball-smoke` alone is fulfilled; Mist, Smokescreen, siblings, and latches receive no new credit.
+- **Did:** Added reproducible BLACK_BALL/GRAY_SMOKE source extraction and the ordinary shared Battle Scene ON compositor behind `sceneOnOctazookaView`. It uses typed live battler species/sides/OAM-derived geometry, generic back/front art lookup, preceding software OAM, source five-frame smoke animation, visibility and allocation/painter order, field chrome, audio timing, and cleanup without an Octillery/Onix gate, recorded RGB/framebuffer lookup, absolute ticks, or gameplay/status/damage/RNG/turn/round/facility ownership.
+- **Verified:** Complete equality is **80/80 player-back + 80/80 opponent-front = 160/160 component/seam/raw-RGB/shared-framebuffer rows**, zero residual pixels through first inactive cleanup. Fresh legal post-implementation Scene ON probes and fresh framebuffer comparisons reproduce player evidence/raw hashes `24a4ec80…` / `5e0c8304…` and opponent `67294109…` / `81ea0024…`, each **80/80 / residual 0**. The ARON→GROVYLE geometry control renders generically; Mist and Smokescreen remain negative/regression controls.
+- **Checks:** Source/evidence/reducer/framebuffer/asset validators, **28/28** focused move/control/ratchet tests, animation coverage/audit, boundary/forbidden-import ratchets, typecheck, full `npm test` (**1,080 files / 10,161 tests; 44 / 223 skipped**), `npm run build` (**698 modules**), and diff-check pass. `ANIMATION_LATCHES.md` and boundary lists remain unchanged.
+
 # MOVE_OCTAZOOKA reducer + typed Scene-ON seam — partial (2026-08-20 worker)
 
 - **State:** Coverage remains **199/276 Level-50 exact**, with **1 partial / 76 unsupported**. MOVE_OCTAZOOKA remains the sole queue item and `octazooka-ball-smoke` remains unfulfilled; no sibling or exact credit changes.
