@@ -51,7 +51,11 @@ export function createInitialFactoryCarry(playerTrainerId: number): FactoryCarry
  * a completed round banks exactly `STAGES_PER_CHALLENGE` (7) wins onto the
  * streak; a loss resets it to zero. Symbols and cumulative BP come straight
  * from the round's already-computed `applyFactoryBrainRoundOutcome` output;
- * rents count is whatever the just-finished round's facility state ended at.
+ * rents count is whatever the just-finished round's facility state ended at,
+ * unless the round was lost: source `InitFactoryChallenge`
+ * (`battle_factory.c:208-212`) zeroes both `factoryWinStreaks` and
+ * `factoryRentsCount` together whenever the win-streak-active flag is off
+ * (the loss lobby script clears it), so a loss carries neither forward.
  */
 export function advanceFactoryCarry(
   carry: FactoryCarry,
@@ -65,7 +69,7 @@ export function advanceFactoryCarry(
       : 0,
     factorySymbolsCount: roundOutcome.newSymbolsCount,
     battlePoints: Math.min(MAX_BATTLE_POINTS, carry.battlePoints + roundOutcome.battlePointsAwarded),
-    rentsCount: rentsCountAfterRound,
+    rentsCount: roundWon ? rentsCountAfterRound : 0,
     playerTrainerId: carry.playerTrainerId,
   });
 }
