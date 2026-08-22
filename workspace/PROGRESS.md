@@ -5,6 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1380 — [supervisor fold, 2026-08-22 14:35] **#115 FIXED + folded (`ade427f7`, salvaged: post-switch-in messages name the slot's CURRENT occupant); #110 + richer switch-in throws (1379); draft heuristic WITHHELD for good at n=180 (≥21: 40 vs 7); session depth number on the fixed tree: `winning` 0:180 → 180/180 OK, carry ≥ 28 in 4/180**
+
+- **State:** master = 1379 + merge of `worker/side-20260822-130450` (#115;
+  its cap-killed worker had run the full suite at 10,212 before the kill;
+  supervisor verified pins 99/99 + smoke 444 in the worktree) + the n=180
+  measurement doc (`docs/soak-draft-heuristic-n180-2026-08-22.md`, cherry-
+  picked from `wip/mb-step2b-draft-heuristic` @ `1f500a92`, baseline arm +
+  verdict appended). Merged-tree full suite: at wind-down.
+- **Decisions:** draft-by-strength heuristic stays WITHHELD (closed
+  experiment; the wip branch is the record) — it wins round 2 more often
+  (178 vs 163 at carry ≥ 14) but collapses at challenge 3+ (7 vs 40 at
+  ≥ 21, 0 vs 4 at ≥ 28). ROADMAP soak-policy block gained the #116 gate-
+  coverage note (vanilla is one trajectory); the gate itself unchanged.
+- **Next:** main = #71 Slice C (loud guards on the two back send-out
+  hand-fits); side = #117 (record-cursor frame) in flight; then wind-down
+  gates from ~18:15 (full suite, build, vanilla 0:20, full 0:60, plus a
+  `full` 0:240 + `winning` 0:240 on the final tree).
+
+---
+
 ## 1379 — [main worker, 2026-08-22] **ISSUES #110 fixed (Cmd_openpartyscreen always scores via the AI selector, no legal-count shortcut); PAPERCUTS "switchhandleorder/getswitchedmondata throws" closed (richer diagnostics)**
 
 - **State:** master `890a8593` + this docs commit. `npm test` **1,093
@@ -40,33 +60,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (PAPERCUTS); side after #115 = draft heuristic n ≥ 180 measurement; final
   `winning` 0:240 depth number on the fully-fixed tree + wind-down gates
   from ~18:15.
-
----
-
-## 1377 — [main worker, 2026-08-22] **ISSUES #104 CLOSED: YES branch now shows EventScript_SaveBattle's own "battle was recorded" message before the shared farewell**
-
-- **State:** `src/engine/factoryTerminalPresentation.ts` +
-  `src/engine/factoryTerminalRender.ts` (fix, `f04519bd`/`e72292fe`),
-  `tests/factoryTerminalRecordIssue104.test.ts` (YES sub-test rewritten, red
-  paste in the commit body), new trace
-  `tools/compare/traces/loss-terminal-record-yes-off.json` +
-  `tools/battle-lab/scratch-loss-record-yes-probe.json` (`fa7d5215`), new
-  doc `docs/factory-terminal-record-yes-ground-truth.md`. `npm test`
-  **10,208 passed / 223 skipped**, `npm run build` green, smoke 444/444,
-  `executableFrontierRatchet.test.ts` unchanged.
-- **Did:** oracle-derived the YES trace from the existing NO-path probe
-  (one appended UP + the same confirm A + two new dismiss A's; run via
-  `bin/oracle lab`, not `bin/oracle run`). `declineFarewellReleaseAge` still
-  arms on confirm for all three answers; for YES it doubles as the new
-  message's own edge (`recordSavedTextClearDelay=21`/`TextFirstDelay=22`/
-  `InputDelay=70`, oracle-measured — `frontier_savebattle`'s own latency)
-  until that message's own dismiss re-arms it, at which point the existing
-  farewell mechanics drive unmodified. `npm run compare --summary`:
-  **133/133** over the dense window. NO/B-cancel pins untouched.
-- **Next:** #110 cleanup as a small main step; draft heuristic n ≥ 180 if a
-  slot frees; `full`/`vanilla` soak re-sweeps still outstanding (carried).
-- **Notes:** PAPERCUT: the record-menu cursor-move (`UP`) renders 1 tick
-  earlier in the app than the oracle (`drawRecordPrompt`, pre-existing,
-  out of scope) — worth a future look, ~5 min lost isolating it from #104.
 
 ---

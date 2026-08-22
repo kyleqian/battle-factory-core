@@ -144,3 +144,28 @@ like-for-like n=180 baseline from the supervisor's parallel run is needed
 before this sample's carry>=14 (98.9%) / carry>=21 (3.9%) / carry>=28 (0%)
 figures can be read as better, worse, or neutral. **Fold decision remains
 the supervisor's call.**
+
+## Baseline arm + verdict (supervisor, 2026-08-22 14:20)
+
+Baseline = master `01ec975a` WITHOUT the heuristic, same seeds 0:180, same budgets, run in a
+clean worktree concurrently with the heuristic arm (4 × 45-seed chunks):
+
+| arm | OK | CRASH | HANG | carry ≥ 7 | ≥ 14 | ≥ 21 | ≥ 28 |
+|---|---|---|---|---|---|---|---|
+| baseline (`winning`, master) | 180/180 | 0 | 0 | 180 | **163** (90.6%) | **40** (22.2%) | **4** (2.2%) |
+| draft heuristic (this branch) | 180/180 | 0 | 0 | 180 | **178** (98.9%) | **7** (3.9%) | **0** |
+
+Per-chunk baseline (0:45 / 45:90 / 90:135 / 135:180): ≥ 14 = 41/40/43/39, ≥ 21 = 7/10/13/10,
+≥ 28 = 1/0/2/1.
+
+**Verdict: WITHHELD — do not fold.** The heuristic buys a second-round completion (+15 at ≥ 14)
+and loses the third and fourth (−33 at ≥ 21, −4 at ≥ 28); at n = 180 the ≥ 21 gap (40 vs 7) is
+far outside sampling noise (the 08-20 n=60 "worse" reading was right, the n=30 "neutral" one was
+underpowered). Drafting by raw base-stat/STAB-power picks rentals that the challenge-3+ opponents
+(opponent fixed IVs 9-12, `CHECK_BAD_MOVE` AI from challengeNum 2) beat. The branch
+`wip/mb-step2b-draft-heuristic` now points at this rebased measurement head (`1f500a92`) as the
+record; ISSUES carries no entry — this is a closed policy experiment, not debt.
+
+This baseline sweep doubles as the session's depth number on the fully-fixed tree (all of #102,
+#106-#108, #111-#113 folded): **winning 0:180 → 180/180 OK, 0 CRASH, 0 HANG; carry ≥ 28 in 4/180
+(2.2%)** — consistent with 1370's 7/240 (2.9%) on the 08-20 tree.

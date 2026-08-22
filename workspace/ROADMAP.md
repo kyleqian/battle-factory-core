@@ -1412,6 +1412,13 @@ The standing gates therefore read "no stall and no crash within the budget".
 Every pre-#104 sweep's "OK" was a cumulative-grace artifact (the run stopped
 after ~3 re-chains) — compare depth numbers only within one semantics era.
 
+**Gate coverage note (2026-08-22, ISSUES #116):** `vanilla` draws no RNG of
+its own and the engine RNG advances only on draws, so every `vanilla` seed
+replays ONE trajectory (240/240 identical end states,
+`docs/soak-full-vanilla-0-240-2026-08-22.md`); the "vanilla 0:20 = 20/20"
+gate is a single-trajectory smoke. `full` and `winning` are seed-diverse.
+Changing the gate's semantics is the user's call (options in #116).
+
 
 **Gate-6 evidence granularity + sequencing (user decision 2026-08-09):**
 the 561-item per-move hook-gap census (300 item + 261 ability) is NOT to be
