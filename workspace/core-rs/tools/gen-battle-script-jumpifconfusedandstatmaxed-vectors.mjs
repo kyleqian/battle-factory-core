@@ -1176,7 +1176,11 @@ const rustupBin = path.join(
 let formatted = false;
 for (const rustfmt of [path.join(rustupBin, "rustfmt"), "rustfmt"]) {
   try {
-    execFileSync(rustfmt, ["--edition", "2021", outputPath], { stdio: "inherit" });
+    execFileSync(
+      rustfmt,
+      ["--edition", "2021", "--config-path", path.join(workspaceRoot, "core-rs"), outputPath],
+      { stdio: "inherit" },
+    );
     formatted = true;
     break;
   } catch (error) {
