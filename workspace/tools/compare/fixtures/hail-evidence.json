@@ -1,18 +1,21 @@
 {
   "schema": "hail-bilateral-evidence/v1",
   "move": "MOVE_HAIL",
-  "status": "partial",
-  "coverageCredit": false,
+  "status": "exact",
+  "coverageCredit": true,
   "oracleProfile": "battle-scene-on",
   "components": ["asset:ANIM_TAG_HAIL", "asset:ANIM_TAG_ICE_CRYSTALS", "task:AnimTask_BlendBattleAnimPal", "task:AnimTask_Hail"],
   "source": {
     "audit": "tools/compare/hailSourceAudit.ts", "auditSha256": "f1334208fb44e7a5cefb9679773a34c067cfddf54fb22f81f21c53103ef33d0b",
     "probe": "tools/compare/hailProbe.py", "probeSha256": "a8deea64c0370941434de5259066bdbb4b7a5a394551443e0373c99df4488f71",
-    "evidenceReplay": "tools/compare/hailEvidence.ts"
+    "evidenceReplay": "tools/compare/hailEvidence.ts",
+    "assetExtractor": "tools/compare/extractHailAssets.ts", "assetExtractorSha256": "487792a828343cc9a5cf90b8af422027f69c81a416c74449fb1b28d90811691a",
+    "framebufferVerifier": "tools/compare/hailFramebuffer.ts", "framebufferVerifierSha256": "5ac255b717395f9081476fb343b01884e7da70d1cb0446e9997ed64fa93ff8f9",
+    "freshFramebufferVerifier": "tools/compare/hailFreshFramebuffer.ts", "freshFramebufferVerifierSha256": "67987566dda172186411e3ab0fd0a7f8e7371beade9d681d017d79887d1ac49c"
   },
   "evidenceScope": {
-    "productionAnimationChanged": false, "reducerAdded": false, "typedSeamAdded": false, "compositorAdded": false,
-    "framebufferCompared": false, "coveragePromotion": false, "boundaryOrBarrierChanged": false, "gameplayStateOwned": false,
+    "productionAnimationChanged": true, "reducerAdded": true, "typedSeamAdded": true, "compositorAdded": true,
+    "framebufferCompared": true, "coveragePromotion": true, "boundaryOrBarrierChanged": false, "gameplayStateOwned": false,
     "fullDenseRowsRetained": true, "twiceFreshByteIdentical": true
   },
   "acceptance": {
@@ -22,10 +25,10 @@
     "oamLatch": "157/157 preceding-software rows per orientation", "matrixLatch": "157/157 preceding-software rows per orientation",
     "paletteLatch": "157/157 preceding-faded rows per orientation", "gameplayRngTransitions": 0,
     "animationRngTransitions": 157, "firstInactiveCleanupAge": 157,
-    "reducerRows": 0, "typedSeamRows": 0, "productionFramebufferRows": 0, "framebufferCompared": false
+    "reducerRows": 316, "typedSeamRows": 316, "productionFramebufferRows": 316, "framebufferCompared": true
   },
   "repeatability": {"runsPerOrientation": 2, "comparison": "byte-identical dense JSON and every raw RGB frame", "allMatched": true},
-  "controls": {"rainDance": "exact weather-task control only; no Hail credit", "blizzard": "exact ice-crystal control only; no Hail credit", "icyWind": "exact ice-crystal control only; no Hail credit"},
+  "controls": {"rainDance": "exact weather-task control only; no Hail credit", "icePunch": "exact palette/crystal control only; no Hail credit", "blizzard": "exact ice-crystal control only; no Hail credit", "icyWind": "exact ice-crystal control only; no Hail credit", "crabhammer": "exact ice-crystal asset control only; no Hail credit", "haze": "exact palette-task control only; no Hail credit", "triAttack": "exact ice-crystal asset control only; no Hail credit"},
   "orientations": {
     "player-back": {
       "scenario": "tools/battle-lab/mechanic-hail-player-delibird-opponent-onix.json", "scenarioSha256": "995cdc2ce89c7c7c9e6e4027b9b0e1f7419bc67d65b399eca597813636615d99",

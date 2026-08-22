@@ -72,9 +72,9 @@ describe("MOVE_GLARE bilateral dense exact evidence", () => {
 
   it("keeps GLARE exact after the Lovely Kiss promotion", () => {
     expect(coverage.entries).toHaveLength(201);
-    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(200);
+    expect(coverage.entries.filter((entry) => entry.status === "exact")).toHaveLength(201);
     expect(coverage.entries.filter((entry) => entry.status === "partial"))
-      .toEqual([expect.objectContaining({ move: "MOVE_HAIL" })]);
+      .toEqual([]);
     expect(coverage.entries).toContainEqual(
       expect.objectContaining({ move: "MOVE_LOVELY_KISS", status: "exact" }),
     );

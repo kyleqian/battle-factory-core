@@ -431,6 +431,11 @@ import {
   type RainDanceState,
 } from "./rainDance.ts";
 import {
+  hailAtAge,
+  type HailProfile,
+  type HailState,
+} from "./hail.ts";
+import {
   supersonicEffectAtAge,
   type SupersonicRingSprite,
 } from "./supersonic.ts";
@@ -1847,6 +1852,15 @@ export interface SceneOnRainDanceConfig {
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   readonly animationProfile: Readonly<RainDanceProfile>;
+}
+
+/** Hail presentation only; weather and battle outcomes remain battle-owned. */
+export interface SceneOnHailConfig {
+  readonly move: "HAIL";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<HailProfile>;
 }
 
 export interface SceneOnSupersonicConfig {
@@ -3293,7 +3307,9 @@ export type SceneOnMoveConfig =
   | SceneOnFutureSightConfig
   | SceneOnConfusionConfig
   | SceneOnPsychicConfig
-  | SceneOnKnockOffConfig;
+  | SceneOnKnockOffConfig
+  | SceneOnRainDanceConfig
+  | SceneOnHailConfig;
 
 export interface SceneOnMovePresentationState<
   TConfig extends SceneOnMoveConfig | SceneOnScaryFaceConfig | SceneOnAbsorbConfig
@@ -4666,6 +4682,11 @@ export interface SceneOnRainDanceView extends RainDanceState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnHailView extends HailState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 export interface SceneOnMilkDrinkView {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
@@ -5945,6 +5966,20 @@ export function sceneOnRainDanceView(
     attacker: state.config.attacker,
     target: state.config.target,
     ...rainDanceAtAge(state.age, state.config.animationProfile),
+  };
+}
+
+/** `age=0` is the first retained Move_HAIL source-script row. */
+export function sceneOnHailView(
+  state: SceneOnMovePresentationState<SceneOnHailConfig>,
+): SceneOnHailView {
+  if (state.config.move !== "HAIL") {
+    throw new Error(`expected HAIL presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...hailAtAge(state.age, state.config.animationProfile),
   };
 }
 

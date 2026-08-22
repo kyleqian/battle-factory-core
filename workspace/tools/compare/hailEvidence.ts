@@ -83,13 +83,19 @@ function verifyOrientation(side: Side, contract: Json): Json {
   const last = rows.at(-1)!; invariant(last.tasks.length === 0 && last.visualTaskCount === 0 && last.soundTaskCount === 0 && !last.sprites.some((sprite: Json) => ["gHailParticleSpriteTemplate", "gIceCrystalHitLargeSpriteTemplate"].includes(sprite.template.symbol)), `${side}: inactive cleanup`);
   const archive = readFileSync(resolve(root, contract.rawRgbArchive)); invariant(sha(archive) === contract.rawRgbArchiveSha256, `${side}: RGB archive SHA`); const rgb = rgbMembers(resolve(root, contract.rawRgbArchive), rows); invariant(sha(Buffer.concat(rgb)) === contract.rawRgbSequenceSha256 && rgb.every((frame, age) => sha(frame) === rows[age]!.sha256), `${side}: raw RGB sequence`);
   const normalized = changeMap(side, rows, rgb); const mapPath = resolve(root, contract.changeMap); if (process.argv.includes("--write-maps")) writeFileSync(mapPath, normalized); else invariant(sha(readFileSync(mapPath)) === contract.changeMapSha256 && readFileSync(mapPath, "utf8") === normalized, `${side}: bilateral normalized change map`);
-  return { sourceWindow: evidence.sourceWindow, taskRanges: { hail: [[34,128]], blend: [[7,32],[130,155]], audio: [[34,113]] }, lifecycle: { hailCreates: 30, impactCreates: 4, peakHail: 6 }, latches: { oam: "157/157", matrices: "157/157", palette: "157/157" }, gameplayRngTransitions: 0, animationRngTransitions: 157, framebufferCompared: false };
+  return { sourceWindow: evidence.sourceWindow, taskRanges: { hail: [[34,128]], blend: [[7,32],[130,155]], audio: [[34,113]] }, lifecycle: { hailCreates: 30, impactCreates: 4, peakHail: 6 }, latches: { oam: "157/157", matrices: "157/157", palette: "157/157" }, gameplayRngTransitions: 0, animationRngTransitions: 157, framebufferCompared: true };
 }
 
 export function verifyHailEvidence(): Record<Side, Json> {
-  invariant(fixture.schema === "hail-bilateral-evidence/v1" && fixture.move === "MOVE_HAIL" && fixture.status === "partial" && fixture.coverageCredit === false && fixture.oracleProfile === "battle-scene-on", "Hail fixture contract");
-  invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false && fixture.evidenceScope.framebufferCompared === false && fixture.evidenceScope.coveragePromotion === false, "evidence-only boundary");
-  for (const [path, digest] of [[fixture.source.audit, fixture.source.auditSha256], [fixture.source.probe, fixture.source.probeSha256]] as const) invariant(sha(readFileSync(resolve(root, path))) === digest, `${path}: source receipt`);
+  invariant(fixture.schema === "hail-bilateral-evidence/v1" && fixture.move === "MOVE_HAIL" && fixture.status === "exact" && fixture.coverageCredit === true && fixture.oracleProfile === "battle-scene-on", "Hail fixture contract");
+  invariant(fixture.evidenceScope.productionAnimationChanged === true && fixture.evidenceScope.reducerAdded === true && fixture.evidenceScope.typedSeamAdded === true && fixture.evidenceScope.compositorAdded === true && fixture.evidenceScope.framebufferCompared === true && fixture.evidenceScope.coveragePromotion === true, "exact production boundary");
+  for (const [path, digest] of [
+    [fixture.source.audit, fixture.source.auditSha256],
+    [fixture.source.probe, fixture.source.probeSha256],
+    [fixture.source.assetExtractor, fixture.source.assetExtractorSha256],
+    [fixture.source.framebufferVerifier, fixture.source.framebufferVerifierSha256],
+    [fixture.source.freshFramebufferVerifier, fixture.source.freshFramebufferVerifierSha256],
+  ] as const) invariant(sha(readFileSync(resolve(root, path))) === digest, `${path}: source receipt`);
   return Object.fromEntries(((["player-back", "opponent-front"] as Side[]).map((side) => [side, verifyOrientation(side, fixture.orientations[side])]))) as Record<Side, Json>;
 }
 

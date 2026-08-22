@@ -532,6 +532,7 @@ import spikeCannonAsset from "../animation/assets/spike-cannon.json" with { type
 import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "json" };
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
+import hailAsset from "../animation/assets/hail.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -836,6 +837,7 @@ import {
   sceneOnFireBlastView,
   sceneOnRolloutView,
   sceneOnRainDanceView,
+  sceneOnHailView,
   sceneOnFlamethrowerView,
   sceneOnBlazeKickView,
   sceneOnFlameWheelView,
@@ -1074,6 +1076,7 @@ import {
   type SceneOnFireBlastConfig,
   type SceneOnRolloutConfig,
   type SceneOnRainDanceConfig,
+  type SceneOnHailConfig,
   type SceneOnHealBellConfig,
   type SceneOnSoftBoiledConfig,
   type SceneOnNeedleArmPresentationState,
@@ -1661,6 +1664,9 @@ const smokescreenArt = smokescreenAsset as {
 const octazookaArt = octazookaAsset as {
   blackBall: { tileset: Tileset; palette: RgbColor[] };
   graySmoke: { tileset: Tileset; palette: RgbColor[] };
+};
+const hailArt = hailAsset as {
+  particle: { tileset: Tileset; palette: RgbColor[] };
 };
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -27824,6 +27830,155 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used`
         : `Foe ${view.attacker.species} used`,
       "RAIN DANCE!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "HAIL") {
+    const hailState =
+      state as SceneOnMovePresentationState<SceneOnHailConfig>;
+    const view = sceneOnHailView(hailState);
+    // Both OBJ and affine DMA consume the preceding software row.  Age zero
+    // has no Hail effects; every later row can therefore use the reducer's
+    // immediately preceding complete sprite/matrix state directly.
+    const displayed = hailState.age === 0
+      ? null
+      : sceneOnHailView({ ...hailState, age: hailState.age - 1 });
+    const attackerIsPlayer = view.attacker.geometry.side === "player";
+    if (attackerIsPlayer === (view.target.geometry.side === "player")) {
+      throw new Error("HAIL presentation requires battlers on opposite sides");
+    }
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+          battler.species
+        ];
+        if (!source) throw new Error(`HAIL missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+        battler.species
+      ];
+      if (!source) throw new Error(`HAIL missing opponent-front art for ${battler.species}`);
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    // Move_HAIL passes F_PAL_BG, which resolves to the three allocated field
+    // background banks only. Battler/effect OBJ palettes and window bank 0
+    // remain unblended.
+    const backgroundPalettes = blendPaletteBanksToward(
+      battleBg.palette,
+      { r: 0, g: 0, b: 0 },
+      view.palette.hardwareCoefficient,
+    );
+    drawTileBg(
+      fb,
+      battleBg.static.tileset,
+      battleBg.static.tilemap,
+      backgroundPalettes,
+    );
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerArt.tileset,
+      attackerArt.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetArt.tileset,
+      targetArt.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    if (attackerIsPlayer) {
+      drawTarget();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+    }
+
+    const signedOam = (value: number, wrap: number): number => {
+      const masked = value & (wrap - 1);
+      return masked >= wrap / 2 ? masked - wrap : masked;
+    };
+    // All Hail objects share priority/subpriority. SortSprites resolves them
+    // by signed OAM y and allocation slot; paint in inverse hardware order.
+    const effects = (displayed?.sprites ?? [])
+      // CreateSprite occurs after this row's OAM build. The placeholder OAM
+      // attributes transfer one row later, before the requested affine/frame
+      // state has reached OBJ VRAM, so the creation row remains blank.
+      .filter((sprite) => sprite.kind === "crystal"
+        || sprite.birthAge < (displayed?.age ?? 0))
+      .slice().sort((left, right) =>
+      signedOam(left.attr[0], 256) - signedOam(right.attr[0], 256)
+      || left.slot - right.slot
+    );
+    for (const sprite of effects) {
+      const topLeftX = signedOam(sprite.attr[1], 512);
+      const topLeftY = signedOam(sprite.attr[0], 256);
+      const tileset = sprite.kind === "particle"
+        ? hailArt.particle.tileset
+        : battleAnimIceCrystalLarge;
+      const palette = sprite.kind === "particle"
+        ? hailArt.particle.palette
+        : battleAnimIceCrystals.palette;
+      const halfWidth = tileset.columns * 4;
+      const halfHeight = tileset.rows * 4;
+      drawSpriteSheetAffineRotate(
+        fb,
+        tileset,
+        palette,
+        topLeftX + halfWidth,
+        topLeftY + halfHeight,
+        sprite.matrix[0],
+        sprite.matrix[1],
+        sprite.matrix[2],
+        sprite.matrix[3],
+        undefined,
+        false,
+      );
+    }
+
+    const profile = hailState.config.fieldProfile;
+    const playerBattler = attackerIsPlayer ? view.attacker : view.target;
+    const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentBattler.species,
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerBattler.species,
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      attackerIsPlayer
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "HAIL!",
       99,
     );
     return;

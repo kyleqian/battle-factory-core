@@ -3,16 +3,18 @@
  "entries": [
   {
    "move": "MOVE_HAIL",
-   "status": "partial",
+   "status": "exact",
    "covered": [
     "complete legal Level-50 set-118 FRONTIER_MON_DELIBIRD parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 66-223 and opponent-front frames 70-227, 158 consecutive rows each and 316 total; each orientation repeats twice fresh with byte-identical dense state and raw RGB",
     "the authoritative half-open source interval is 0x082cdc76..0x082cdcae (56 bytes, 8a1e8e1583779dc1bd0dcacb4fbf64a923817a6a542beb2887ae9082481fd1bb), with even and odd command pointers observed; the exact graph is ANIM_TAG_HAIL, ANIM_TAG_ICE_CRYSTALS, AnimTask_BlendBattleAnimPal, and AnimTask_Hail",
     "the lowest legal Level-50 Factory carrier is set 118 Delibird (species 225, Never-Melt Ice 212, Docile, SpAttack+HP); both complete parties use unique species and held items, and the opposing Careful Onix has max HP/SpDef EVs without transient HP/status/stage/weather/outcome injection",
     "AnimTask_Hail is measured independently at ages 34-128: it source-schedules exactly 30 falling particles at ages 37/39/41 through 109/111/113 in ten three-affine groups, creates four impact crystals, peaks at six live falling particles, and cleans all task/sprite/matrix resources before inactive age 157 in both orientations",
     "all 316 retained rows pin source cursor/wait/args, task/sprite allocator and callback lifecycles, software/hardware OAM and matrices, unfaded/faded/hardware palettes and tags, BG/register/audio, complete parties, immutable engine/gameplay fields, gameplay versus animation RNG, raw RGB, bilateral normalized change maps, and first inactive cleanup; preceding OAM/matrix/palette latches are 157/157 per orientation and gameplay RNG has zero transitions",
-    "Rain Dance and Blizzard/Icy Wind remain independent controls only; no reducer, typed seam, compositor, framebuffer equality, production import, gameplay weather/status/damage/RNG ownership, latch credit, sibling credit, or exact promotion is claimed"
+    "the source-relative reducer and narrow Scene-ON seam now match all 158/158 player-back plus 158/158 opponent-front rows (316/316 total) for cursor/waits/args, animation RNG, both BlendBattleAnimPal ramps, task/sound loop data, particle/crystal allocation and callback lifecycles, software OAM, affine matrices, palettes/tags, audio, and inactive cleanup; verifier: tools/compare/verifyHailReducer.ts; test: tests/animation/hailReducer.test.ts",
+    "the ordinary shared Battle Scene ON compositor uses reproducibly extracted ANIM_TAG_HAIL art plus the existing source-composed ICE_CRYSTALS sheet, typed live species/sides and OAM-derived battler geometry, generic back/front art lookup, the exact preceding OAM/matrix/palette transfer, source allocation/painter order, F_PAL_BG-only hardware blending, field chrome, audio timing, and inactive cleanup without framebuffer/RGB lookup, evidence-pair gates, absolute ticks, or gameplay ownership",
+    "all 158 player-back plus 158 opponent-front component/seam/raw-RGB/shared-production-framebuffer rows match through first inactive cleanup with zero residual pixels; two fresh post-implementation legal Scene ON probes per orientation reproduce player evidence/raw hashes 266af0b2dfd81d8622e594759fff88d382e265cfb734195dee7785a0558c3c22 / 344ce985450a76c0fe6eca1fd051a8d1c31053be5283b533e03c3585189fcc51 and opponent 0f933dd980086b64056a7032a9b9edd21673afb172f71e6cceac35cc5ccf4372 / 2941da68e9301fc84e36cd9956a4cd3860e0d30d4208795e7379e9150f29ca3c",
+    "Rain Dance, Ice Punch, Blizzard/Icy Wind, Crabhammer, Haze, and Tri Attack remain independent controls only; no latch or sibling acceptance credit, production recording import, gameplay weather/status/damage/RNG ownership, boundary widening, or unsupported barrier is added"
    ],
-   "remaining": "MOVE_HAIL still needs a source-relative reducer, typed Scene-ON seam, ordinary source-derived compositor/draw wiring, and twice-fresh complete 316/316 production framebuffer equality before it can promote. Shared BlendBattleAnimPal and ICE_CRYSTALS evidence transfers no move acceptance.",
    "evidence": [
     "tools/battle-lab/mechanic-hail-player-delibird-opponent-onix.json",
     "tools/battle-lab/mechanic-hail-opponent-delibird-player-onix.json",
@@ -26,7 +28,15 @@
     "tools/compare/evidence/hail-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/hail-changemap-player.json",
     "tools/compare/evidence/hail-changemap-opponent.json",
-    "tests/animation/hailEvidence.test.ts"
+    "tests/animation/hailEvidence.test.ts",
+    "tools/compare/verifyHailReducer.ts",
+    "tests/animation/hailReducer.test.ts",
+    "tools/compare/extractHailAssets.ts",
+    "src/animation/assets/hail.json",
+    "tools/compare/hailFramebuffer.ts",
+    "tools/compare/hailFreshFramebuffer.ts",
+    "tests/animation/hailFramebuffer.test.ts",
+    "src/engine/battleScene.ts"
    ]
   },
   {
@@ -5508,7 +5518,7 @@
    ]
   }
  ],
- "queue": ["MOVE_HAIL"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6494,7 +6504,8 @@
     "task:AnimTask_Hail"
    ],
    "representatives": ["MOVE_HAIL"],
-   "goal": "EVIDENCE ONLY: MOVE_HAIL independently passes 158/158 player-back plus 158/158 opponent-front source/state/raw-RGB/bilateral-change-map rows through first inactive cleanup, twice fresh. Its exact two-palette-ramp, 30 falling-particle/four-impact-crystal, looped-audio, allocator/matrix/tag, immutable-state, and hardware-latch evidence is retained. The track remains unfulfilled pending reducer, typed seam, ordinary compositor, and complete production framebuffer equality. Rain Dance and Blizzard/Icy Wind are controls only and receive no credit."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_HAIL independently passes 158/158 player-back plus 158/158 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows (316/316 total) through first inactive cleanup with zero residual pixels, then reproduces both retained hashes in two fresh legal Scene ON probes per orientation. Its ordinary compositor uses source-extracted Hail and shared Ice Crystal art, typed live species/sides/OAM-derived geometry, generic back/front lookup, exact hardware palette/OAM/matrix timing, source allocation/painter order, field chrome, audio timing, and cleanup without replay lookup or gameplay ownership. Rain Dance, Ice Punch, Blizzard/Icy Wind, Crabhammer, Haze, Tri Attack, and every sibling receive no credit."
   }
  ],
  "variantAudits": {
