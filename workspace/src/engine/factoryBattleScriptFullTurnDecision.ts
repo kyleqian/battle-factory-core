@@ -80,7 +80,7 @@ import {
   describeIllegalMoveSelection,
   type BattleScriptSelectionRejection,
 } from "./battleScriptActionAdmission.ts";
-import { battleStringReferencesToken, resolveMoveName } from "./battleStringResolver.ts";
+import { battleStringReferencesToken, resolveBattleNameWithPrefix, resolveMoveName } from "./battleStringResolver.ts";
 import {
   HOLD_EFFECT_NAME_BY_ID,
   unsupportedBranch,
@@ -1249,7 +1249,34 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                                       ? (rules.selectorRoles.target === null
                                                                         ? []
                                                                         : [resolveMoveName(rules.futureSightMove[rules.selectorRoles.target])])
-                                                                      : [];
+                                                                      // ISSUES #106: BattleScript_BeatUpLoop's
+                                                                      // {B_BUFF1} -- Cmd_trydobeatup
+                                                                      // (battleScriptBeatUpOpcode.ts) already records
+                                                                      // the looping party member as
+                                                                      // battleTextBuff1MonNick {battler, partyIndex},
+                                                                      // the same general-purpose carrier
+                                                                      // STRINGID_PKMNTRACED uses -- but that member is
+                                                                      // not necessarily the active battler, so (unlike
+                                                                      // Trace) the name-with-prefix must be resolved
+                                                                      // here (full `rules.party` access), not via
+                                                                      // `field` at print time.
+                                                                      : operand.expression === "STRINGID_PKMNATTACK"
+                                                                        ? (rules.battleTextBuff1MonNick === null
+                                                                          ? []
+                                                                          : [resolveBattleNameWithPrefix({
+                                                                              side: rules.battlers[rules.battleTextBuff1MonNick.battler].side === 0
+                                                                                ? "player"
+                                                                                : "opponent",
+                                                                              isTrainerBattle: true,
+                                                                              nickname: battleCommandSpeciesDisplayName(
+                                                                                rules.party[
+                                                                                  rules.battlers[rules.battleTextBuff1MonNick.battler].side === 0
+                                                                                    ? "player"
+                                                                                    : "opponent"
+                                                                                ][rules.battleTextBuff1MonNick.partyIndex]!.species,
+                                                                              ),
+                                                                            })])
+                                                                        : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,

@@ -1,0 +1,49 @@
+{
+  "schema": "hail-bilateral-evidence/v1",
+  "move": "MOVE_HAIL",
+  "status": "partial",
+  "coverageCredit": false,
+  "oracleProfile": "battle-scene-on",
+  "components": ["asset:ANIM_TAG_HAIL", "asset:ANIM_TAG_ICE_CRYSTALS", "task:AnimTask_BlendBattleAnimPal", "task:AnimTask_Hail"],
+  "source": {
+    "audit": "tools/compare/hailSourceAudit.ts", "auditSha256": "f1334208fb44e7a5cefb9679773a34c067cfddf54fb22f81f21c53103ef33d0b",
+    "probe": "tools/compare/hailProbe.py", "probeSha256": "a8deea64c0370941434de5259066bdbb4b7a5a394551443e0373c99df4488f71",
+    "evidenceReplay": "tools/compare/hailEvidence.ts"
+  },
+  "evidenceScope": {
+    "productionAnimationChanged": false, "reducerAdded": false, "typedSeamAdded": false, "compositorAdded": false,
+    "framebufferCompared": false, "coveragePromotion": false, "boundaryOrBarrierChanged": false, "gameplayStateOwned": false,
+    "fullDenseRowsRetained": true, "twiceFreshByteIdentical": true
+  },
+  "acceptance": {
+    "freshRunsPerOrientation": 2, "sourceRows": "158/158 + 158/158", "rawRgbRows": "158/158 + 158/158",
+    "sourcePointerInterval": ["0x082cdc76", "0x082cdcae"], "observedPointerParities": [0, 1],
+    "hailParticleCreatesPerOrientation": 30, "impactCreatesPerOrientation": 4, "maximumLiveHailParticles": 6,
+    "oamLatch": "157/157 preceding-software rows per orientation", "matrixLatch": "157/157 preceding-software rows per orientation",
+    "paletteLatch": "157/157 preceding-faded rows per orientation", "gameplayRngTransitions": 0,
+    "animationRngTransitions": 157, "firstInactiveCleanupAge": 157,
+    "reducerRows": 0, "typedSeamRows": 0, "productionFramebufferRows": 0, "framebufferCompared": false
+  },
+  "repeatability": {"runsPerOrientation": 2, "comparison": "byte-identical dense JSON and every raw RGB frame", "allMatched": true},
+  "controls": {"rainDance": "exact weather-task control only; no Hail credit", "blizzard": "exact ice-crystal control only; no Hail credit", "icyWind": "exact ice-crystal control only; no Hail credit"},
+  "orientations": {
+    "player-back": {
+      "scenario": "tools/battle-lab/mechanic-hail-player-delibird-opponent-onix.json", "scenarioSha256": "995cdc2ce89c7c7c9e6e4027b9b0e1f7419bc67d65b399eca597813636615d99",
+      "denseState": "tools/compare/evidence/hail-player-dense-state.json.gz", "denseStateSha256": "a9ce94e72c7cc640fe320f0c7ecf1a1e633716a2296b5e715f4a4d8673ca8583",
+      "probeJsonSha256": "266af0b2dfd81d8622e594759fff88d382e265cfb734195dee7785a0558c3c22", "repeatProbeJsonSha256": "266af0b2dfd81d8622e594759fff88d382e265cfb734195dee7785a0558c3c22",
+      "rawRgbArchive": "tools/compare/evidence/hail-player-raw-rgb.tar.gz", "rawRgbArchiveSha256": "1a54cbc1b2158354b760739ef50aa910da949cf6ca434182bb53e22e9631710b",
+      "rawRgbSequenceSha256": "344ce985450a76c0fe6eca1fd051a8d1c31053be5283b533e03c3585189fcc51",
+      "changeMap": "tools/compare/evidence/hail-changemap-player.json", "changeMapSha256": "6d83ab75f1435a0333580e53cbaa2c5710a9c07d30a18dd091d314928e73d029",
+      "sourceWindow": {"startFrame":66,"endFrame":223,"frameCount":158}, "orientationShiftFromPlayer": 0
+    },
+    "opponent-front": {
+      "scenario": "tools/battle-lab/mechanic-hail-opponent-delibird-player-onix.json", "scenarioSha256": "440f3e155e8207a334aa1b7a7dbd20ace1531f3a67126c9192b78737105f1584",
+      "denseState": "tools/compare/evidence/hail-opponent-dense-state.json.gz", "denseStateSha256": "8cca560a7d5f88cf5d5002a6173a566b1af145757237ae4119bba410d765afe7",
+      "probeJsonSha256": "0f933dd980086b64056a7032a9b9edd21673afb172f71e6cceac35cc5ccf4372", "repeatProbeJsonSha256": "0f933dd980086b64056a7032a9b9edd21673afb172f71e6cceac35cc5ccf4372",
+      "rawRgbArchive": "tools/compare/evidence/hail-opponent-raw-rgb.tar.gz", "rawRgbArchiveSha256": "1ed1d12615e6322aefbe5a8f6e63da804f3549059af3975e419001b1c6aeb262",
+      "rawRgbSequenceSha256": "2941da68e9301fc84e36cd9956a4cd3860e0d30d4208795e7379e9150f29ca3c",
+      "changeMap": "tools/compare/evidence/hail-changemap-opponent.json", "changeMapSha256": "111a3d65ae0604d2cdff5f778096b3df075b9cfcfd2c30fc5f3bcf4c4ed5c530",
+      "sourceWindow": {"startFrame":70,"endFrame":227,"frameCount":158}, "orientationShiftFromPlayer": 4
+    }
+  }
+}

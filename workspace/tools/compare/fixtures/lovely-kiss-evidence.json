@@ -3,9 +3,9 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_LOVELY_KISS",
   "moveId": 142,
-  "status": "partial",
-  "coverageCredit": false,
-  "coverageCounts": "Level 50: 198/276 exact, 1 partial, 77 unsupported",
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 199/276 exact, 0 partial, 77 unsupported",
   "components": [
     "asset:ANIM_TAG_DEVIL",
     "asset:ANIM_TAG_PINK_HEART",
@@ -23,12 +23,12 @@
     "audio": {"first":{"soundEffect":"SE_M_PSYBEAM2","id":200,"pan":"SOUND_PAN_TARGET"},"hearts":{"soundEffect":"SE_M_ATTRACT","id":226,"pan":"SOUND_PAN_TARGET"}}
   },
   "evidenceScope": {
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "framebufferCompared": false,
-    "coveragePromotion": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -74,8 +74,10 @@
     "oamLatch": "152/152 preceding-software rows per orientation",
     "matrixLatch": "152/152 preceding-software rows per orientation",
     "paletteLatch": "152/152 preceding-faded rows per orientation",
-    "typedSeamRows": "not implemented by evidence-only checkpoint",
-    "productionFramebufferRows": "not compared by evidence-only checkpoint",
+    "reducerRows": "153/153 + 153/153",
+    "typedSeamRows": "153/153 + 153/153",
+    "productionFramebufferRows": "153/153 + 153/153",
+    "productionFramebufferResidualPixels": 0,
     "firstInactiveCleanupAge": 152
   },
   "controls": {
@@ -83,5 +85,10 @@
     "attract": "exact source-neighbor control only; no shared acceptance",
     "sleepAnimations": "Sleep Powder/Yawn/Dream Eater controls only; no status ownership"
   },
-  "next": "Derive a Lovely Kiss source-relative reducer, narrow typed Scene-ON seam, and source-derived compositor; then require complete dense seam/framebuffer equality twice fresh before any promotion. Do not award sibling credit."
+  "productionAcceptance": {
+    "componentAndTypedSeam": "306/306 retained rows",
+    "productionCompositor": "306/306 retained shared-framebuffer rows with zero residual pixels",
+    "freshProof": "one post-implementation legal probe per orientation reproduces the retained probe JSON and raw-RGB sequence hashes byte-for-byte",
+    "manualQueue": "empty after MOVE_LOVELY_KISS-only exact promotion"
+  }
 }

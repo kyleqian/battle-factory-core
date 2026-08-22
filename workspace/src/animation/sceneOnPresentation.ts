@@ -105,6 +105,11 @@ import {
   type SmokescreenEffect,
 } from "./smokescreen.ts";
 import {
+  octazookaAtAge,
+  type OctazookaProfile,
+  type OctazookaState,
+} from "./octazooka.ts";
+import {
   mudShotAtAge,
   type MudShotState,
 } from "./mudShot.ts";
@@ -870,6 +875,11 @@ import {
   type SweetKissState,
 } from "./sweetKiss.ts";
 import {
+  lovelyKissAtAge,
+  type LovelyKissProfile,
+  type LovelyKissState,
+} from "./lovelyKiss.ts";
+import {
   attractAtAge,
   type AttractState,
 } from "./attract.ts";
@@ -933,6 +943,7 @@ export interface SceneOnPresentationBattler {
     | "BUTTERFREE"
     | "CHINCHOU"
     | "SWINUB"
+    | "JYNX"
     | "ONIX"
     | "WOOPER"
     | "DROWZEE"
@@ -2120,6 +2131,15 @@ export interface SceneOnSmokescreenConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** Octazooka presentation only; blindness/status resolution remains battle-owned. */
+export interface SceneOnOctazookaConfig {
+  readonly move: "OCTAZOOKA";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<OctazookaProfile>;
+}
+
 export interface SceneOnMudShotConfig {
   readonly move: "MUD_SHOT";
   readonly attacker: SceneOnPresentationBattler;
@@ -2499,6 +2519,15 @@ export interface SceneOnSweetKissConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
+/** Lovely Kiss presentation only; sleep/status mutation remains battle-owned. */
+export interface SceneOnLovelyKissConfig {
+  readonly move: "LOVELY_KISS";
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+  readonly animationProfile: Readonly<LovelyKissProfile>;
 }
 
 export interface SceneOnAttractConfig {
@@ -3162,6 +3191,7 @@ export type SceneOnMoveConfig =
   | SceneOnPinMissileConfig
   | SceneOnSonicBoomConfig
   | SceneOnSmokescreenConfig
+  | SceneOnOctazookaConfig
   | SceneOnMudShotConfig
   | SceneOnHydroPumpConfig
   | SceneOnWhirlpoolConfig
@@ -3196,6 +3226,7 @@ export type SceneOnMoveConfig =
   | SceneOnYawnConfig
   | SceneOnRoarConfig
   | SceneOnSweetKissConfig
+  | SceneOnLovelyKissConfig
   | SceneOnAttractConfig
   | SceneOnSporeConfig
   | SceneOnCottonSporeConfig
@@ -3381,6 +3412,10 @@ export type SceneOnRoarPresentationState =
   SceneOnMovePresentationState<SceneOnRoarConfig>;
 export type SceneOnSweetKissPresentationState =
   SceneOnMovePresentationState<SceneOnSweetKissConfig>;
+export type SceneOnLovelyKissPresentationState =
+  SceneOnMovePresentationState<SceneOnLovelyKissConfig>;
+export type SceneOnOctazookaPresentationState =
+  SceneOnMovePresentationState<SceneOnOctazookaConfig>;
 export type SceneOnAttractPresentationState =
   SceneOnMovePresentationState<SceneOnAttractConfig>;
 export type SceneOnSporePresentationState =
@@ -3663,6 +3698,11 @@ export interface SceneOnSonicBoomView extends SonicBoomEffect {
 
 export interface SceneOnSmokescreenView extends SmokescreenEffect {
   readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnOctazookaView extends OctazookaState {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
 }
@@ -6668,6 +6708,27 @@ export function sceneOnSmokescreenView(
   };
 }
 
+/** `age=0` is Move_OCTAZOOKA's first retained active source row. */
+export function sceneOnOctazookaView(
+  state: SceneOnOctazookaPresentationState,
+): SceneOnOctazookaView {
+  if (state.config.move !== "OCTAZOOKA") {
+    throw new Error(`expected OCTAZOOKA presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...octazookaAtAge(
+      state.age,
+      state.config.attacker.geometry.side,
+      state.config.attacker.geometry.animationCenter,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.animationProfile,
+    ),
+  };
+}
+
 /** `age=0` is Move_MUD_SHOT's first BROWN_ORB load display. */
 export function sceneOnMudShotView(
   state: SceneOnMovePresentationState<SceneOnMudShotConfig>,
@@ -7361,6 +7422,11 @@ export interface SceneOnSweetKissView extends SweetKissState {
   readonly target: SceneOnPresentationBattler;
 }
 
+export interface SceneOnLovelyKissView extends LovelyKissState {
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
 /** `age=0` is Move_SWEET_KISS's first active source-script frame. */
 export function sceneOnSweetKissView(
   state: SceneOnSweetKissPresentationState,
@@ -7378,6 +7444,25 @@ export function sceneOnSweetKissView(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+    ),
+  };
+}
+
+/** `age=0` is Move_LOVELY_KISS's first retained active source row. */
+export function sceneOnLovelyKissView(
+  state: SceneOnLovelyKissPresentationState,
+): SceneOnLovelyKissView {
+  if (state.config.move !== "LOVELY_KISS") {
+    throw new Error(`expected LOVELY_KISS presentation, got ${state.config.move}`);
+  }
+  return {
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...lovelyKissAtAge(
+      state.age,
+      state.config.target.geometry.side,
+      state.config.target.geometry.animationCenter,
+      state.config.animationProfile,
     ),
   };
 }

@@ -2,16 +2,85 @@
  "schema": "factory-animation-coverage/v1",
  "entries": [
   {
-   "move": "MOVE_LOVELY_KISS",
+   "move": "MOVE_HAIL",
    "status": "partial",
+   "covered": [
+    "complete legal Level-50 set-118 FRONTIER_MON_DELIBIRD parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 66-223 and opponent-front frames 70-227, 158 consecutive rows each and 316 total; each orientation repeats twice fresh with byte-identical dense state and raw RGB",
+    "the authoritative half-open source interval is 0x082cdc76..0x082cdcae (56 bytes, 8a1e8e1583779dc1bd0dcacb4fbf64a923817a6a542beb2887ae9082481fd1bb), with even and odd command pointers observed; the exact graph is ANIM_TAG_HAIL, ANIM_TAG_ICE_CRYSTALS, AnimTask_BlendBattleAnimPal, and AnimTask_Hail",
+    "the lowest legal Level-50 Factory carrier is set 118 Delibird (species 225, Never-Melt Ice 212, Docile, SpAttack+HP); both complete parties use unique species and held items, and the opposing Careful Onix has max HP/SpDef EVs without transient HP/status/stage/weather/outcome injection",
+    "AnimTask_Hail is measured independently at ages 34-128: it source-schedules exactly 30 falling particles at ages 37/39/41 through 109/111/113 in ten three-affine groups, creates four impact crystals, peaks at six live falling particles, and cleans all task/sprite/matrix resources before inactive age 157 in both orientations",
+    "all 316 retained rows pin source cursor/wait/args, task/sprite allocator and callback lifecycles, software/hardware OAM and matrices, unfaded/faded/hardware palettes and tags, BG/register/audio, complete parties, immutable engine/gameplay fields, gameplay versus animation RNG, raw RGB, bilateral normalized change maps, and first inactive cleanup; preceding OAM/matrix/palette latches are 157/157 per orientation and gameplay RNG has zero transitions",
+    "Rain Dance and Blizzard/Icy Wind remain independent controls only; no reducer, typed seam, compositor, framebuffer equality, production import, gameplay weather/status/damage/RNG ownership, latch credit, sibling credit, or exact promotion is claimed"
+   ],
+   "remaining": "MOVE_HAIL still needs a source-relative reducer, typed Scene-ON seam, ordinary source-derived compositor/draw wiring, and twice-fresh complete 316/316 production framebuffer equality before it can promote. Shared BlendBattleAnimPal and ICE_CRYSTALS evidence transfers no move acceptance.",
+   "evidence": [
+    "tools/battle-lab/mechanic-hail-player-delibird-opponent-onix.json",
+    "tools/battle-lab/mechanic-hail-opponent-delibird-player-onix.json",
+    "tools/compare/fixtures/hail-evidence.json",
+    "tools/compare/hailSourceAudit.ts",
+    "tools/compare/hailProbe.py",
+    "tools/compare/hailEvidence.ts",
+    "tools/compare/evidence/hail-player-dense-state.json.gz",
+    "tools/compare/evidence/hail-opponent-dense-state.json.gz",
+    "tools/compare/evidence/hail-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/hail-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/hail-changemap-player.json",
+    "tools/compare/evidence/hail-changemap-opponent.json",
+    "tests/animation/hailEvidence.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_OCTAZOOKA",
+   "status": "exact",
+   "covered": [
+    "complete legal challenge-1 set-256 FRONTIER_MON_OCTILLERY_1 parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 218-297 and opponent-front frames 217-296, 80 consecutive rows each and 160 total; each orientation repeats twice fresh with byte-identical dense state and raw RGB",
+    "the authoritative half-open source interval is 0x082d2b83..0x082d2be9 (102 bytes, 1c86b2d6fc47a5825cd0e3f63d74c413d524eb025e09676de1e4d1851863c0a9), with even and odd command pointers observed; the exact graph is ANIM_TAG_BLACK_BALL, ANIM_TAG_GRAY_SMOKE, gOctazookaBallSpriteTemplate, and gOctazookaSmokeSpriteTemplate",
+    "the legal carrier is species 224 Octillery holding Shell Bell 219, Hardy with SpAttack+Attack EVs; both complete parties use unique species and held items, and the opposing Careful Onix has max HP/SpDef EVs without transient HP/status/stage/weather/outcome injection",
+    "the retained rows pin source cursor/wait/args, exact one-ball/four-smoke creation and destruction topology, AnimTranslateLinear_WithFollowup/AnimSpriteOnMonPos/DestroyAnimSprite callbacks, software/hardware OAM and matrices, unfaded/faded/hardware palettes and tags, registers, audio, complete parties, immutable gameplay fields, gameplay versus animation RNG, raw RGB/change maps, and first inactive cleanup",
+    "both orientations pass 80/80 dense plus 80/80 RGB rows; preceding OAM/matrix/palette latches are 79/79 each, gameplay RNG has zero transitions, animation RNG advances on all 79 edges, and SE_M_MEGA_KICK2 id 141 plus SE_M_SELF_DESTRUCT id 177 latch at their source boundaries",
+    "the pure source-relative reducer and narrow typed Scene-ON seam reproduce all 80/80 player-back plus 80/80 opponent-front retained component rows: script cursor/waits/args, animation RNG, one 20-callback BLACK_BALL TranslateAnimSpriteToTargetMonLocation -> AnimTranslateLinear_WithFollowup lifecycle, four delayed 15-display GRAY_SMOKE AnimSpriteOnMonPos lifecycles, source allocator order, sprite OAM/neutral affine state, tag/palette transfers, audio, preceding hardware latches, and first inactive cleanup",
+    "Mist and Smokescreen are explicit negative controls, while an ARON->GROVYLE reversed-side/altered-geometry control proves typed side and geometry activation without an Octillery/Onix pair gate; no sibling receives acceptance credit",
+    "the ordinary shared Battle Scene ON compositor selects back/front art from typed live species and sides, consumes live OAM-derived battler geometry, source-extracted BLACK_BALL and GRAY_SMOKE tiles/palettes, the preceding software-OAM latch, source visibility, signed-y/allocation painter order, battle chrome, audio timing, and cleanup without recorded RGB/framebuffer lookup, an evidence-pair gate, absolute ticks, or gameplay/status/damage/RNG ownership",
+    "all 80 player-back plus 80 opponent-front component/seam/raw-RGB/shared-framebuffer rows match through first inactive cleanup with zero residual pixels; fresh post-implementation legal Scene ON probes reproduce player evidence/raw hashes 24a4ec804468438bbc6658cb085124ae33434d8a8a70b3a1a8507e6616226df2 / 5e0c83044e433bea1fde28029c0f713cf5efcea73018fa3217a7aa1b4efad12c and opponent 672941094f59f87eaa48fd2758fb6ffaf2fd4284f0292f0b6802d598db3d740a / 81ea0024cdde218d9c1f94689c8db7c715c5c4f50ee7c95d3eabfdf129c0f9db"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-octazooka-player-octillery-opponent-onix.json",
+    "tools/battle-lab/mechanic-octazooka-opponent-octillery-player-onix.json",
+    "tools/compare/fixtures/octazooka-evidence.json",
+    "tools/compare/octazookaSourceAudit.ts",
+    "tools/compare/octazookaProbe.py",
+    "tools/compare/octazookaEvidence.ts",
+    "tools/compare/octazookaReducerAudit.ts",
+    "tools/compare/octazookaFramebuffer.ts",
+    "tools/compare/extractOctazookaAssets.ts",
+    "tools/compare/evidence/octazooka-player-dense-state.json.gz",
+    "tools/compare/evidence/octazooka-opponent-dense-state.json.gz",
+    "tools/compare/evidence/octazooka-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/octazooka-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/octazooka-changemap-player.json",
+    "tools/compare/evidence/octazooka-changemap-opponent.json",
+    "src/animation/octazooka.ts",
+    "src/animation/assets/octazooka.json",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/octazookaEvidence.test.ts",
+    "tests/animation/octazooka.test.ts",
+    "tests/animation/octazookaFramebuffer.test.ts"
+   ]
+  },
+  {
+   "move": "MOVE_LOVELY_KISS",
+   "status": "exact",
    "covered": [
     "complete legal Level-50 challenge-3 FRONTIER_MON_JYNX_1 parties stage Lovely Kiss against Onix in both ordinary Battle Scene ON orientations; player-back and opponent-front each retain 153 consecutive source-owned rows through first inactive cleanup, and each orientation is replayed twice fresh with byte-identical dense state and raw RGB",
     "the authoritative half-open source interval is 0x082d4035..0x082d407c (71 bytes, 604194e8a58c2a8e0aa8162e91983863ca464a43df99d593e720f991bcda66d3), with both even and odd command-pointer parity observed; the exact graph is ANIM_TAG_DEVIL, ANIM_TAG_PINK_HEART, gDevilSpriteTemplate, and gPinkHeartSpriteTemplate",
     "source callbacks AnimDevil, AnimPinkHeart, and AnimPinkHeart_Step, source-identical Devil/Magenta Heart graphics and palettes, and target-panned SE_M_PSYBEAM2 (id 200) then SE_M_ATTRACT (id 226) are pinned; the lowest legal Level-50 carrier is set 377 FRONTIER_MON_JYNX_1 (species 124, Shell Bell 219, Modest, SpAttack+HP)",
     "the retained dense rows include source cursor/wait/args, task and sprite creation/destruction/callback/OAM/affine state, animation RNG, software and hardware OAM/matrices, faded/unfaded/hardware palettes and tags, BG/register/audio, complete parties, battlers/engine/immutable state, gameplay RNG, raw RGB, normalized change maps, hardware latches, and first-inactive cleanup; visual-task topology stays empty and lifecycle is 1 Devil plus 4 Pink Hearts per orientation",
-    "the evidence-only verifier passes 306/306 dense rows and 306/306 raw-RGB rows; each preceding software-to-hardware OAM, matrix, and palette latch is 152/152 per orientation, gameplay RNG has zero transitions, animation RNG has 152 transitions per orientation, and cleanup is retained; Sweet Kiss, Attract, and sleep-animation bodies remain source-neighbor controls only"
+    "the evidence verifier passes 306/306 dense rows and 306/306 raw-RGB rows; each preceding software-to-hardware OAM, matrix, and palette latch is 152/152 per orientation, gameplay RNG has zero transitions, animation RNG has 152 transitions per orientation, and cleanup is retained",
+    "the pure source-relative reducer and typed Scene-ON seam reproduce all 306 retained component rows: script cursor/waits/args, one 91-pass AnimDevil lifecycle, four 24-pass Q8.8 AnimPinkHeart flights, four Random2-resolved 31-pass AnimPinkHeart_Step lifecycles, sprite callback/data/OAM/affine state, all 512 palette colors and transfer timing, tag/audio/animation-RNG behavior, and first inactive cleanup; Sweet Kiss, Attract, and sleep presentations are explicit negative controls",
+    "the ordinary production compositor selects back/front battler art from typed live species and sides, consumes supplied battler geometry, source-extracted Devil and Pink Heart tiles/palettes, the preceding software-OAM latch, source visibility, signed-y/allocation painter order, battle chrome, and inactive cleanup without a Jynx/Onix pair gate; all 153 player-back plus 153 opponent-front shared framebuffers match raw RGB with zero residual pixels, and fresh legal post-implementation probes reproduce evidence/raw hashes byte-for-byte",
+    "no gameplay sleep/status, damage, gameplay RNG, AI, controller, turn, round, facility, absolute-tick, species-pair, framebuffer lookup, recorded RGB, or sibling presentation ownership is added; Sweet Kiss, Attract, and sleep-family controls remain independently accepted only"
    ],
-   "remaining": "MOVE_LOVELY_KISS still has no source-relative reducer, typed Scene-ON seam, production compositor/draw wiring, or framebuffer equality. The four components and every move acceptance unit remain unfulfilled; do not infer sibling credit from Sweet Kiss, Attract, or sleep controls.",
    "evidence": [
     "tools/battle-lab/mechanic-lovely-kiss-player-jynx-opponent-onix.json",
     "tools/battle-lab/mechanic-lovely-kiss-opponent-jynx-player-onix.json",
@@ -19,13 +88,22 @@
     "tools/compare/lovelyKissSourceAudit.ts",
     "tools/compare/lovelyKissProbe.py",
     "tools/compare/lovelyKissEvidence.ts",
+    "tools/compare/lovelyKissReducerAudit.ts",
+    "tools/compare/lovelyKissFramebuffer.ts",
+    "tools/compare/extractLovelyKissAssets.ts",
     "tools/compare/evidence/lovely-kiss-player-dense-state.json.gz",
     "tools/compare/evidence/lovely-kiss-opponent-dense-state.json.gz",
     "tools/compare/evidence/lovely-kiss-player-raw-rgb.tar.gz",
     "tools/compare/evidence/lovely-kiss-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/lovely-kiss-changemap-player.json",
     "tools/compare/evidence/lovely-kiss-changemap-opponent.json",
-    "tests/animation/lovelyKissEvidence.test.ts"
+    "src/animation/lovelyKiss.ts",
+    "src/animation/assets/lovely-kiss.json",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/lovelyKissEvidence.test.ts",
+    "tests/animation/lovelyKiss.test.ts",
+    "tests/animation/lovelyKissFramebuffer.test.ts"
    ]
   },
   {
@@ -4001,7 +4079,7 @@
     "source topology is BLACK_BALL translation, dynamic four-part SmokescreenImpact tile/palette lifetime, twelve BLACK_SMOKE lifecycles, wait-for-visual completion, and first inactive cleanup; there is no task lifecycle or target ShakeMon2\u2014the prior audit crossed into the much later Move_BUBBLE block, while the corrected immediate Move_CONVERSION boundary and both dense probes prove an empty task topology",
     "the pure source-relative reducer and typed Scene-ON seam port the 35-callback horizontal arc, dynamic impact allocation/free boundary, all twelve 75-callback blinking translations, both panned audio displays, waits, and first inactive cleanup",
     "the shared compositor uses reproducibly extracted legal Koffing, BLACK_BALL, shared-palette BLACK_SMOKE, and impact art, reuses exact Onix/chrome and enemy-shadow primitives, and follows the source hardware OAM transfer order without battle/controller ownership",
-    "MOVE_OCTAZOOKA remains unsupported: its shared BLACK_BALL is followed by a distinct 20-frame ball translation and four delayed GRAY_SMOKE gOctazookaSmokeSpriteTemplate lifecycles with different audio and no independently dense acceptance"
+    "MOVE_OCTAZOOKA is now an independent partial evidence control: its distinct 20-frame ball translation and four delayed GRAY_SMOKE lifecycles pass complete bilateral dense evidence, but it receives no Smokescreen reducer, compositor, framebuffer, or exact acceptance"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-smokescreen-player-koffing-opponent-onix.json",
@@ -5430,7 +5508,7 @@
    ]
   }
  ],
- "queue": ["MOVE_LOVELY_KISS"],
+ "queue": ["MOVE_HAIL"],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6392,7 +6470,31 @@
     "sprite:gPinkHeartSpriteTemplate"
    ],
    "representatives": ["MOVE_LOVELY_KISS"],
-   "goal": "PARTIAL: MOVE_LOVELY_KISS independently retains complete legal Scene-ON player-back and opponent-front source-owned dense/raw-RGB windows twice fresh through first inactive cleanup, with source interval, callbacks, assets, audio, OAM/matrix/palette/tag/register latches, complete parties, and gameplay/animation-RNG evidence. The source-relative reducer, typed seam, production compositor, framebuffer equality, and every move-specific acceptance unit remain open; no sibling credit is conveyed."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_LOVELY_KISS independently passes 153/153 player-back plus 153/153 opponent-front source/component/reducer/typed-seam/raw-RGB/production-framebuffer rows through first inactive cleanup with zero residual pixels. The ordinary compositor uses typed live battler species/sides/geometry, source-extracted Devil and Pink Heart art/palettes, preceding OAM transfer, source visibility and painter order, chrome, and cleanup without an evidence-pair gate. Fresh legal post-implementation probes reproduce both evidence and raw-RGB hashes byte-for-byte. Sweet Kiss, Attract, and sleep-family moves remain independent controls with no sibling credit."
+  },
+  {
+   "id": "octazooka-ball-smoke",
+   "components": [
+    "asset:ANIM_TAG_BLACK_BALL",
+    "asset:ANIM_TAG_GRAY_SMOKE",
+    "sprite:gOctazookaBallSpriteTemplate",
+    "sprite:gOctazookaSmokeSpriteTemplate"
+   ],
+   "representatives": ["MOVE_OCTAZOOKA"],
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_OCTAZOOKA independently passes 80/80 player-back plus 80/80 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows through first inactive cleanup with zero residual pixels, then reproduces the same result in one fresh legal Scene ON probe per orientation. The ordinary compositor uses source-extracted BLACK_BALL and GRAY_SMOKE art/palettes, typed live battler species/sides/geometry, preceding OAM transfer, source visibility and allocation/painter order, battle chrome, audio timing, and cleanup without an evidence-pair gate or gameplay ownership. Mist, Smokescreen, and every sibling receive no credit."
+  },
+  {
+   "id": "hail-weather",
+   "components": [
+    "asset:ANIM_TAG_HAIL",
+    "asset:ANIM_TAG_ICE_CRYSTALS",
+    "task:AnimTask_BlendBattleAnimPal",
+    "task:AnimTask_Hail"
+   ],
+   "representatives": ["MOVE_HAIL"],
+   "goal": "EVIDENCE ONLY: MOVE_HAIL independently passes 158/158 player-back plus 158/158 opponent-front source/state/raw-RGB/bilateral-change-map rows through first inactive cleanup, twice fresh. Its exact two-palette-ramp, 30 falling-particle/four-impact-crystal, looped-audio, allocator/matrix/tag, immutable-state, and hardware-latch evidence is retained. The track remains unfulfilled pending reducer, typed seam, ordinary compositor, and complete production framebuffer equality. Rain Dance and Blizzard/Icy Wind are controls only and receive no credit."
   }
  ],
  "variantAudits": {
