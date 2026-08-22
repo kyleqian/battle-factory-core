@@ -5516,9 +5516,35 @@
     "tests/animation/rolloutReducer.test.ts",
     "tests/animation/rolloutFramebuffer.test.ts"
    ]
+  },
+  {
+   "move": "MOVE_SPIKES",
+   "status": "partial",
+   "covered": [
+    "complete legal Level-50 FRONTIER_MON_QWILFISH_1 set-211 versus ONIX parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 67-180 and opponent-front 71-184, 114 dense source/state/raw-RGB rows each, repeated twice fresh with byte-identical probe and raw-RGB sequence hashes",
+    "the half-open 0x082d18cd..0x082d1924 Move_SPIKES source body, even/odd pointer parities, three source creates at ages 7/19/31, target-arc args/callback/data/visibility lifecycles, affine-off OAM, tags, audio, monbg BG/register cleanup, complete OAM/matrix/palette rows, immutable engine/battler/party state, gameplay RNG=0 transitions, animation RNG=111 transitions, and first inactive cleanup are retained in independent source/evidence/change-map receipts",
+    "source entry explicitly measures predecessor outgoing hardware OAM/matrices/palette; ordinary rows have 113/113 preceding software OAM/matrix transfers and 112/113 preceding faded-palette transfers, with the age-4 monbg palette load measured as a same-row exception. No new general latch is claimed.",
+    "evidence-only checkpoint: no reducer, typed seam, compositor, production framebuffer comparison, animation boundary/barrier, canonical recording import, absolute-tick/species-pair gate, or Spikes side-condition gameplay ownership changed; MOVE_SPIKES alone is partial and all siblings retain independent acceptance"
+   ],
+   "evidence": [
+    "tools/battle-lab/mechanic-spikes-player-qwilfish-opponent-onix.json",
+    "tools/battle-lab/mechanic-spikes-opponent-qwilfish-player-onix.json",
+    "tools/compare/fixtures/spikes-evidence.json",
+    "tools/compare/spikesSourceAudit.ts",
+    "tools/compare/spikesProbe.py",
+    "tools/compare/spikesEvidence.ts",
+    "tools/compare/evidence/spikes-player-dense-state.json.gz",
+    "tools/compare/evidence/spikes-opponent-dense-state.json.gz",
+    "tools/compare/evidence/spikes-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/spikes-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/spikes-changemap-player.json",
+    "tools/compare/evidence/spikes-changemap-opponent.json",
+    "tests/animation/spikesEvidence.test.ts"
+   ],
+   "remaining": "Implement only a pure source-relative SPIKES target-arc reducer, then a narrow typed Scene-ON presentation seam and ordinary compositor. Require independent 114/114 player-back plus 114/114 opponent-front production framebuffer acceptance with zero residual pixels before exact promotion; do not claim hazard gameplay or sibling coverage."
   }
  ],
- "queue": [],
+ "queue": ["MOVE_SPIKES"],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6506,6 +6532,17 @@
    "representatives": ["MOVE_HAIL"],
    "fulfilled": true,
    "goal": "FULFILLED: MOVE_HAIL independently passes 158/158 player-back plus 158/158 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows (316/316 total) through first inactive cleanup with zero residual pixels, then reproduces both retained hashes in two fresh legal Scene ON probes per orientation. Its ordinary compositor uses source-extracted Hail and shared Ice Crystal art, typed live species/sides/OAM-derived geometry, generic back/front lookup, exact hardware palette/OAM/matrix timing, source allocation/painter order, field chrome, audio timing, and cleanup without replay lookup or gameplay ownership. Rain Dance, Ice Punch, Blizzard/Icy Wind, Crabhammer, Haze, Tri Attack, and every sibling receive no credit."
+  },
+  {
+   "id": "spikes-target-arc",
+   "components": [
+    "asset:ANIM_TAG_SPIKES",
+    "sprite:gSpikesSpriteTemplate",
+    "visualCommand:monbg",
+    "visualCommand:clearmonbg"
+   ],
+   "representatives": ["MOVE_SPIKES"],
+   "goal": "Evidence only: derive a source-relative target-arc reducer before any typed Scene-ON seam or compositor work."
   }
  ],
  "variantAudits": {
