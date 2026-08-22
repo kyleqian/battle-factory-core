@@ -2962,6 +2962,47 @@ function messageLines(
       B_BUFF1: () => memberName,
     });
   }
+  // STRINGID_PKMNMADEITRAIN/STRINGID_PKMNSXINTENSIFIEDSUN (Drizzle/Drought
+  // switch-in) are deliberately absent -- ISSUES #108's re-trace found both
+  // DEAD in Factory Level-50 singles: Kyogre/Groudon are the only Gen 3
+  // Drizzle/Drought carriers and neither is a `FRONTIER_MON_*` eligible
+  // rental (absent from every extracted frontier trainer mon set), so the
+  // completeness guard below stays fatal for them precisely because they
+  // should never actually be reached (same DEAD-carrier precedent as
+  // STRINGID_PKMNCANTUSEMOVESEALED above).
+  if (messageId === "STRINGID_PKMNRAGEBUILDING") {
+    // BattleScript_RageIsBuilding (data/battle_scripts_1.s:3349-3352):
+    // executeRage's own moveend check (battleScriptMoveEndOpcode.ts) calls
+    // this label with the current move's `target` (the STATUS2_RAGE holder
+    // just hit) still current -- the same plain requireMoveDefender idiom
+    // STRINGID_PKMNSUBSTITUTEFADED/STRINGID_PKMNFELLINLOVE already use.
+    const defender = requireMoveDefender(lastMoveAttacker, "rage-building message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNSNATCHEDMOVE") {
+    // BattleScript_SnatchedMove (data/battle_scripts_1.s:3677-3686):
+    // Cmd_snatchsetbattlers (battleScriptSnatchOpcode.ts) already reassigns
+    // scriptingBattler to the original attacker (the move's victim) and
+    // selectorRoles.target to the snatcher. NOT the requireMoveDefender
+    // idiom: for a self-targeted victim move, snatchsetbattlers *also*
+    // aliases selectorRoles.attacker to the snatcher (so
+    // actionSnapshot-derived lastMoveAttacker is the snatcher, not the
+    // victim, and requireMoveDefender's opposite-of-attacker would name the
+    // victim twice) -- selectorRoles.target is the only source that is
+    // uniformly the snatcher regardless of self-targeting, engine-supplied
+    // via prepareMessage's own targetBattler field (ISSUES #108).
+    if (event.payload.scriptingBattler === undefined || event.payload.targetBattler === undefined) {
+      throw new Error(`battle resolution ${messageId} message has no scripting/target battler`);
+    }
+    const victim = singlesBattler(event.payload.scriptingBattler, `${messageId} scripting battler`);
+    const snatcher = singlesBattler(event.payload.targetBattler, `${messageId} target battler`);
+    return resolveBattleStringLines(messageId, {
+      B_SCR_ACTIVE_NAME_WITH_PREFIX: nameWithPrefixResolver(field, victim),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, snatcher),
+    });
+  }
   if (messageId === "STRINGID_MAGNITUDESTRENGTH") {
     // BattleScript_EffectMagnitude (data/battle_scripts_1.s:1683-1692):
     // magnitudedamagecalculation runs (and prints) BEFORE the actual hit
