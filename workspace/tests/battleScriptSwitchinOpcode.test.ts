@@ -337,12 +337,30 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(result.state.haltReason).toMatchObject({ kind: "unsupported-branch" });
   });
 
+  it("switchhandleorder: undecided monToSwitchIntoId throws with the decided array, the selector's own side's party HP, and the current script label/pc (PAPERCUTS)", () => {
+    const rc = context({ monToSwitchIntoId: [6, 6, 6, 6] });
+    expect(() => stepAtProgramCounter(SWITCHHANDLEORDER_PC, rc)).toThrow(
+      "Cmd_switchhandleorder: battler 1 has no decided monToSwitchIntoId -- openpartyscreen must run first "
+        + `(monToSwitchIntoId=[6, 6, 6, 6], opponent party HP=[0, 0, 145, 0, 0, 0], `
+        + `at BattleScript_FaintedMonTryChoose:${SWITCHHANDLEORDER_PC})`,
+    );
+  });
+
   it("getswitchedmondata: commits gBattlerPartyIndexes[battler] = monToSwitchIntoId[battler] and marks the controller pending", () => {
     const { result } = stepAtProgramCounter(GETSWITCHEDMONDATA_PC, context());
     if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
     expect(result.state.programCounter).toBe(GETSWITCHEDMONDATA_PC + 1);
     expect(result.state.rulesContext.battlers[1].partyIndex).toBe(2);
     expect(result.state.scheduler.pendingControllerBattlers).toEqual([1]);
+  });
+
+  it("getswitchedmondata: undecided monToSwitchIntoId throws with the decided array, the selector's own side's party HP, and the current script label/pc (PAPERCUTS)", () => {
+    const rc = context({ monToSwitchIntoId: [6, 6, 6, 6] });
+    expect(() => stepAtProgramCounter(GETSWITCHEDMONDATA_PC, rc)).toThrow(
+      "Cmd_getswitchedmondata: battler 1 has no decided monToSwitchIntoId -- openpartyscreen must run first "
+        + `(monToSwitchIntoId=[6, 6, 6, 6], opponent party HP=[0, 0, 145, 0, 0, 0], `
+        + `at BattleScript_FaintedMonSendOutNew:${GETSWITCHEDMONDATA_PC})`,
+    );
   });
 
   it("switchindataupdate rebuilds the incoming BattlePokemon wholesale, so Role Play'd Levitate does not survive an ordinary switch", () => {

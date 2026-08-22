@@ -17,16 +17,6 @@ backlog.
 
 # Open
 
-## #110 — `Cmd_openpartyscreen`'s single-legal-bench shortcut bypasses `GetMostSuitableMonToSwitchInto`
-
-**Found 2026-08-22** (side worker, #102 fix). `battleScriptOpenPartyScreenOpcode.ts`'s
-`legalBenchIndexes.length === 1` shortcut skips the AI scorer entirely; it is
-redundant now that the #102 PARTY_SIZE fallback exists, and it filters eggs
-where source's fallback loop gates on `MON_DATA_HP != 0` only. Behaviourally
-inert in Factory singles (no eggs; one legal bench member is always the answer)
-— remove the shortcut so the opcode mirrors source's single path, with the
-existing open-party-screen tests as the guard.
-
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
 **Found 2026-08-22** (side worker, #102 fix). Source `GetMostSuitableMonToSwitchInto`

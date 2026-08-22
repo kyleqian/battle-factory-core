@@ -281,6 +281,27 @@ function resolveSwitchBattler(
 }
 
 /**
+ * PAPERCUTS "`switchhandleorder`/`getswitchedmondata` throws carry only the
+ * battler id": the "no decided monToSwitchIntoId" throw sites below name the
+ * battler but nothing else, so diagnosing what `openpartyscreen` actually
+ * decided (or failed to decide) needed a hand-rolled cross-file trace. This
+ * renders the decided array, the selector's own side's party HP list, and
+ * the current script label/program counter so the throw message alone is
+ * enough to diagnose -- fail-loud behaviour is unchanged, only the message.
+ */
+function describeUndecidedSwitchDiagnostics(
+  context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
+  rules: BattleScriptRulesContext,
+  battler: number,
+): string {
+  const side = rules.battlers[battler as 0 | 1 | 2 | 3].side === 0 ? "player" : "opponent";
+  const partyHp = rules.party[side].map((member) => member.hp);
+  return `monToSwitchIntoId=[${rules.monToSwitchIntoId.join(", ")}], `
+    + `${side} party HP=[${partyHp.join(", ")}], `
+    + `at ${context.instruction.source.label}:${context.state.programCounter}`;
+}
+
+/**
  * `Cmd_switchhandleorder` (`battle_script_commands.c:5152-5217`), cases 1/2/3
  * (the forced-switch script emits `switchhandleorder BS_FAINTED, 2`,
  * which falls through into case 3's body; case 3 alone is the same body
@@ -325,7 +346,8 @@ function createSwitchhandleorderOpcodeHandler(
     if (decided === BATTLE_SCRIPT_PARTY_SIZE) {
       throw new Error(
         `Cmd_switchhandleorder: battler ${battler} has no decided monToSwitchIntoId `
-          + "-- openpartyscreen must run first",
+          + "-- openpartyscreen must run first "
+          + `(${describeUndecidedSwitchDiagnostics(context, rules, battler)})`,
       );
     }
     if (caseValue === 1) {
@@ -364,7 +386,8 @@ function createGetswitchedmondataOpcodeHandler(
     if (decided === BATTLE_SCRIPT_PARTY_SIZE) {
       throw new Error(
         `Cmd_getswitchedmondata: battler ${battler} has no decided monToSwitchIntoId `
-          + "-- openpartyscreen must run first",
+          + "-- openpartyscreen must run first "
+          + `(${describeUndecidedSwitchDiagnostics(context, rules, battler)})`,
       );
     }
     const fromPartyIndex = rules.battlers[battler as 0 | 1 | 2 | 3].partyIndex;

@@ -42,17 +42,6 @@ history.
   file's own setup or an `npm run test:manifest` script), and say in AGENTS.md
   that adding a Tier-1 test means regenerating the manifest.
 
-## `switchhandleorder` / `getswitchedmondata` throws carry only the battler id
-
-- **What:** the engine's "no decided monToSwitchIntoId" throw names the
-  battler but not `monToSwitchIntoId`, party HP, or the script label, so the
-  #102 diagnosis needed a hand-rolled global ring buffer across three engine
-  files to see what `Cmd_openpartyscreen` had decided.
-- **Hits:** 1 (2026-08-22 side worker, ~10 min).
-- **Fix:** include the decided array, the selector's party HP list and the
-  current script label in the throw message (fail-loud stays; the message
-  just gets richer).
-
 ## `check-oracle-freshness.sh` compares against harness HEAD, not the last `oracle/` commit
 
 - **What:** the script FAILs (exit 1) whenever an oracle process started before
