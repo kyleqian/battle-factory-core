@@ -17,68 +17,76 @@ backlog.
 
 # Open
 
-## #107 — STRINGID_PKMNSUBSTITUTEFADED references `{B_DEF_NAME_WITH_PREFIX}` with no resolver (Substitute breaking: "{target}'s SUBSTITUTE faded!") — same class as #100/#101/#105
+## #108 — STRINGID_PKMNRAGEBUILDING/STRINGID_PLAYERPICKEDUPMONEY/STRINGID_PKMNMADEITRAIN/STRINGID_PKMNSXINTENSIFIEDSUN/STRINGID_PKMNSNATCHEDMOVE reference placeholders with no resolver (#106/#107 sibling-sweep census, confirmed reachable, not yet fixed)
 
-**Found 2026-08-20** (side re-measure of the withheld draft heuristic on the
-#104-fixed tree, `wip/mb-step2b-draft-heuristic` @ `18222b3a`; `winning`
-seeds 27 and 29, battle 3 turn 7) — a pre-existing engine gap reached via a
-different RNG path, not a heuristic defect. Not yet reproduced on master
-itself (different trajectories); repro on that branch:
-`node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 27
---policy winning --verbose --render-every 0`.
+**Found 2026-08-22** (the #106/#107 sibling census this session — a full
+census against `src/data/gen/battle-message-templates.json`'s placeholder
+table, `src/data/gen/battle-script-program.json`'s `printstring` sites, and
+`messageLines`' explicit-case coverage in
+`src/engine/battleResolutionPresentation.ts`, not soak-crash-driven). Each
+below is confirmed **reachable** in Factory Level-50 singles (the opcode
+chain that reaches its `printstring` is wired and exercised elsewhere in
+this engine) and confirmed **missing** a `messageLines` case — the exact
+#100/#101/#105/#106/#107 crash class, just not yet hit by a soak seed. Not
+fixed this session (time-boxed step; #106/#107 were the required fixes).
 
-**Mechanism:** `battleStringResolver: STRINGID_PKMNSUBSTITUTEFADED references
-placeholder {B_DEF_NAME_WITH_PREFIX} with no resolver supplied` — a
-`messageLines` case is missing in `src/engine/battleResolutionPresentation.ts`
-for the substitute-broken message (`sText_PkmnSubstituteFaded`,
-`src/battle_message.c`; emitted by `BattleScript_SubstituteFade` from
-`Cmd_datahpupdate`'s substitute-HP path, `battle_script_commands.c`). Fix
-shape = the #100/#101/#105 house pattern (defender name resolver from the
-action snapshot, Tier-1 pin in `tests/presentationStringIssue107.test.ts`,
-red-verified). Sibling check worth doing in the same step: every remaining
-`{B_DEF_NAME_WITH_PREFIX}`/`{B_ATK_NAME_WITH_PREFIX}` STRINGID reachable in
-Factory singles without a `messageLines` case (grep the string table against
-the resolver sites) — four of these gaps were found one at a time today.
+- **`STRINGID_PKMNRAGEBUILDING`** (`"{B_DEF_NAME_WITH_PREFIX}'s Rage is
+  building!"`, `BattleScript_RageIsBuilding`, `data/battle_scripts_1.s:3349`)
+  — reached from `battleScriptMoveEndOpcode.ts:365-366`, which resolves the
+  label live. No `messageLines` case; `B_DEF_NAME_WITH_PREFIX` is not
+  fallback-coverable (only `B_ATK_NAME_WITH_PREFIX` is).
+- **`STRINGID_PLAYERPICKEDUPMONEY`** (`"{B_PLAYER_NAME} picked up
+  ¥{B_BUFF1}!"`, `BattleScript_PrintPayDayMoneyString`,
+  `data/battle_scripts_1.s:3824-3825`) — reached from
+  `battleScriptGivepaydaymoneyOpcode.ts:36`. Pay Day's own accumulated-money
+  print, distinct from the already-unreachable `STRINGID_PLAYERGOTMONEY`
+  (Local-only trainer-defeat reward, `BattleScript_LocalBattleWonReward` —
+  Frontier's own win path, `BattleScript_FrontierTrainerBattleWon`, jumps
+  straight past it to `BattleScript_PayDayMoneyAndPickUpItems`).
+- **`STRINGID_PKMNMADEITRAIN`** (Drizzle's switch-in text,
+  `BattleScript_DrizzleActivates`) and **`STRINGID_PKMNSXINTENSIFIEDSUN`**
+  (Drought's, `BattleScript_DroughtActivates`) — both reached from
+  `battleScriptSwitchinOpcode.ts:1174,1194`; `B_SCR_ACTIVE_ABILITY` is not
+  fallback-coverable.
+- **`STRINGID_PKMNSNATCHEDMOVE`** (`"{B_SCR_ACTIVE_NAME_WITH_PREFIX} snatched
+  {B_DEF_NAME_WITH_PREFIX}'s move!"`, `BattleScript_SnatchedMove`,
+  `data/battle_scripts_1.s:3677`) — reached from
+  `battleScriptSnatchOpcode.ts`'s `Cmd_snatchsetbattlers` port, which already
+  reassigns the print-time roles per source. `B_SCR_ACTIVE_NAME_WITH_PREFIX`
+  is fallback-coverable when `scriptingBattler` is set; `B_DEF_NAME_WITH_PREFIX`
+  is not.
 
-## #106 — `winning`-policy soak seed 203 crashes: Beat Up's `STRINGID_PKMNATTACK` has no `B_BUFF1` resolver
+Fix shape for all five = the #100/#101/#105/#106/#107 house pattern: a
+`messageLines` case (plus a `prepareMessage` substitution wire in
+`factoryBattleScriptFullTurnDecision.ts` where the value isn't already
+`field`-derivable), each with a red-verified Tier-1 pin.
 
-**Found 2026-08-20** (M-B step-3 re-run, `docs/soak-deep-sweep-2026-08-20-semantics2.md`,
-`winning` policy seeds 0:240, new post-#104 OK/HANG semantics).
-
-**Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts
---seed 203 --policy winning --verbose --render-every 0`. Crashes at battle 1
-turn 13, frame 490300 (`carry<=14 depth<=18`), right after the player
-commits fight-menu slot 0 = move 118 (METRONOME). Error (`[engine/tick]`, an
-`src/engine/**` throw, not a driver bug):
-```
-Error: battleStringResolver: STRINGID_PKMNATTACK references placeholder {B_BUFF1} with no resolver supplied
-    at resolveBattleStringLines (src/engine/battleStringResolver.ts:170)
-    at messageLines (src/engine/battleResolutionPresentation.ts:3015)
-    at projectBattleResolutionCommands (src/engine/battleResolutionPresentation.ts:3188)
-```
-Last actions before the crash:
-```
-f=490240 b1 t12 resolution advance
-f=490263 b1 t12 resolution advance
-f=490281 b1 t12 resolution advance
-f=490294 b1 t13 action menu intent: FIGHT
-f=490294 b1 t13 action: FIGHT
-f=490300 b1 t13 fight menu intent: slot 0 (move 118)
-f=490300 b1 t13 fight: confirm slot 0
-```
-
-**Lead (source-traced, not yet fix-verified):** `STRINGID_PKMNATTACK` =
-`"{B_BUFF1}'s attack!"` (`reference/pokeemerald/src/battle_message.c:218,670`),
-printed only by `BattleScript_EffectBeatUp`'s `BattleScript_BeatUpLoop`
-(`reference/pokeemerald/data/battle_scripts_1.s:1946-1951`, immediately after
-`trydobeatup`) — Beat Up prints one "`<party member>`'s attack!" per
-participating party member, so `B_BUFF1` needs to be set to that member's
-nickname on each loop iteration. Move 118 is METRONOME, which calls a random
-move — Metronome likely called Beat Up here. Not yet confirmed whether this
-port's Beat Up path is missing a `B_BUFF1` resolver generally, or only when
-reached via Metronome's indirection; needs a direct Beat Up repro (not
-through Metronome) to isolate. Not fixed this session (docs-only step,
-`src/` off-limits).
+**Ruled unreachable in Factory Level-50 singles this same census** (recorded
+here only so the reasoning isn't re-derived): `STRINGID_PKMNREADYTOHELP`/
+`STRINGID_PKMNSXTOOKATTACK` (Helping Hand / Lightning-Rod-redirect text, both
+require a second ally-or-opponent battler that only exists in doubles);
+`STRINGID_PKMNLEARNEDMOVE2`/`STRINGID_PKMNSKETCHEDMOVE` (Mimic/Sketch —
+`mimicattackcopy` has no port yet, `EFFECT_MIMIC` unwired); `STRINGID_WILDPKMNFLED`/
+`STRINGID_PKMNFLEDUSING` (Run Away — wild-only, Factory is always a trainer
+battle); `STRINGID_TWOENEMIESDEFEATED`/`STRINGID_TRAINER2LOSETEXT`/
+`STRINGID_TRAINER2WINTEXT` (`BATTLE_TYPE_TWO_OPPONENTS` tag battles only);
+`STRINGID_PLAYERGOTMONEY`/`STRINGID_PLAYERWHITEOUT`/`STRINGID_PLAYERWHITEOUT2`
+(the `Local` non-Frontier win/lose scripts — Frontier's own
+`BattleScript_FrontierTrainerBattleWon`/`BattleScript_LocalBattleLostPrintTrainersWinText`
+branches around them, confirmed by reading `battle_scripts_1.s:2920-3048`);
+`STRINGID_FORFEITEDMATCH` (link-battle-forfeit only); `STRINGID_ENEMYABOUTTOSWITCHPKMN`
+(`BattleScript_FaintedMonTryChoose` — `jumpifbattletype BATTLE_TYPE_FRONTIER,
+BattleScript_FaintedMonSendOutNew` skips it entirely in Factory,
+`battle_scripts_1.s:2849`); the three `STRINGID_*BYREFEREE` Battle Arena
+strings (a different Frontier facility, not the Factory).
+`STRINGID_PKMNCANTUSEMOVESEALED` (Imprison) is separately already recorded
+dead-by-design at `battleResolutionPresentation.ts:812-816`.
+`STRINGID_PKMNCANTUSEMOVETORMENT`/`STRINGID_ITEMALLOWSONLYYMOVE`/
+`STRINGID_PKMNHASNOMOVESLEFT` looked like gaps against `messageLines`' own
+explicit-case list but are already resolved by a sibling function
+(`resolveMoveSelectionRejectionMessageLines`/`resolveNoMovesLeftMessageLines`,
+`battleResolutionPresentation.ts:818-890`) that a naive grep against
+`messageLines` alone misses.
 
 ## #104 — Terminal record prompt's YES branch omits the real "battle was recorded" message (stub-only remainder)
 

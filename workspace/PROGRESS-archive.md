@@ -1,3 +1,51 @@
+## 1370 — [main worker, 2026-08-20] **M-B step 3 re-run: honest `winning` 0:240 depth sweep on the new soak semantics — carry ≥ 28 reached at 7/240 (2.9%), 238 OK / 2 CRASH (both triaged) / 0 HANG**
+
+- **State:** docs-only. `docs/soak-deep-sweep-2026-08-20-semantics2.md` +
+  `.log` (new), `ISSUES.md` (#106 filed; #102 given a fresh live repro at
+  seed 138 instead of a new number, same exact signature), `PROGRESS.md`
+  (this entry; 1367 archived). No `src/`/`tools/` changes. `npm run
+  test:smoke` **444/444** green (docs-only step, no full suite/build
+  required per the brief).
+- **Did:** swept `winning --seeds 0:240 --render-every 0` as 3 sequential
+  batches of 4 parallel foreground processes (20-seed chunks, ≤4 concurrent
+  per the brief; ≈24.7 min wall-clock for all 240). Result: **238 OK
+  (all `budget`) / 2 CRASH / 0 HANG**. Depth: carry ≥7 240/240 (100%), ≥14
+  218/240 (90.8%), ≥21 48/240 (20.0%), **≥28 7/240 (2.9%) — seeds 24, 63,
+  78, 92, 190, 222, 233**; no seed reached carry 29+. Verbose-confirmed
+  seeds 24 and 63 (both carry 28, depth 28): genuine continuous play
+  (draft → 4 full round wins → into round 5, challengeNum
+  `floor(28/7)=4`, the "challenge-4" AI tier), still mid-resolution
+  (battle 3 of round 5) when the 1,000,000-frame instrument budget expired
+  — an instrument ceiling, not a crash/hang/wall. Table against the 08-19
+  0:180 sweep and the pre-#104 0:480 sweep is in the doc, flagged
+  explicitly as NOT apples-to-apples (both used the old grace-based OK);
+  only this sweep and the supervisor's 0:60 (PROGRESS 1369) share the new
+  semantics and are genuinely comparable (218/240=90.8% vs 56/60=93.3% at
+  carry≥14, 48/240=20.0% vs 13/60=21.7% at carry≥21, 7/240=2.9% vs
+  1/60=1.7% at carry≥28 — consistent, no regression).
+- **Triage:** seed 138 crash is the **exact** stack/message as the
+  existing ISSUES #102 (`Cmd_switchhandleorder`, no decided
+  `monToSwitchIntoId`, battler 1) — #102 was marked non-reproducing on
+  HEAD; updated it in place with this fresh live repro rather than opening
+  a new number. Seed 203 crash is new: Beat Up's `STRINGID_PKMNATTACK`
+  ("{B_BUFF1}'s attack!") has no `B_BUFF1` resolver, hit via move 118
+  (METRONOME) presumably calling Beat Up — filed **ISSUES #106** with the
+  source-traced lead (`battle_scripts_1.s:1946-1951`
+  `BattleScript_BeatUpLoop`). Neither fixed this session (docs-only step,
+  `src/` off-limits per the brief).
+- **Next:** (1) fix #106 (Beat Up `B_BUFF1` resolver — get a direct
+  non-Metronome Beat Up repro first to isolate the path); (2) #102 now has
+  a live seed (138) again — capture full `battlerOrder`/fainting context
+  from it before generalizing a fix, per its own standing "Next session"
+  item; (3) ROADMAP soak-policy block should record the new OK/HANG
+  definition (supervisor TODO, carried from 1369); (4) `full`/`vanilla`
+  0:240-scale re-sweeps on the new semantics are still outstanding (only
+  `winning` was in this step's scope).
+- **Notes:** no PAPERCUT. Landed inside the 45-min hard cap (~30 min used
+  through triage + docs; smoke run and commit still within budget).
+
+---
+
 ## 1368 — [main worker, 2026-08-20] **#105 FIXED: STRINGID_PKMNCHANGEDTYPE `messageLines` case added (Conversion/Conversion 2/Camouflage); soak seed 40 now runs to an honest OK (`1df9dcb6`)**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` +
