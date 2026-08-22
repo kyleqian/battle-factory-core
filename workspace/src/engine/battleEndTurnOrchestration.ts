@@ -2125,8 +2125,21 @@ function runPerishSongAfterFutureAttacks(
   let state = initialState;
   let completionKind = initialCompletionKind;
   const count = state.rulesContext.battleTopology.battlersCount;
-  for (let orderIndex = 0; orderIndex < count; orderIndex += 1) {
+  if (state.rulesContext.wishPerishSongState > 1) {
+    return finishWishPerishSong(state, completionKind);
+  }
+  // `HandleWishPerishSongOnTurnEnd` case 1 (`battle_util.c:1834-1861`) walks
+  // gBattlerByTurnOrder from the SAME `wishPerishSongBattlerId` the previous
+  // BattleTurnPassed pass left behind, and bumps it before firing each script.
+  // A Perish Song KO here blocks in HandleFaintedMonActions for the player's
+  // replacement; the resumed pass must not re-count an earlier battler.
+  for (
+    let orderIndex = state.rulesContext.wishPerishSongBattlerId;
+    orderIndex < count;
+    orderIndex += 1
+  ) {
     const battler = state.rulesContext.battlerByTurnOrder[orderIndex] as BattleScriptBattlerId;
+    state = withWishPerishSongCursor(state, 1, orderIndex + 1);
     if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
     const battlerState = state.rulesContext.battlers[battler];
     if ((battlerState.status3 & BATTLE_SCRIPT_STATUS3_PERISH_SONG) === 0) continue;
@@ -2207,6 +2220,18 @@ function runPerishSongAfterFutureAttacks(
     }
   }
 
+  return finishWishPerishSong(withWishPerishSongCursor(state, 2, 0), completionKind);
+}
+
+/**
+ * `HandleWishPerishSongOnTurnEnd` case 2 is Arena-only (`battle_util.c:1868-1882`),
+ * so once the Perish Song sweep is exhausted the Factory turn falls straight
+ * through to `BattleTurnPassed`'s closing cleanup (`battle_main.c:3974-3992`).
+ */
+function finishWishPerishSong(
+  state: MachineState,
+  completionKind: PostFaintKind,
+): BattleEndTurnResult {
   if (completionKind === "terminal") {
     return Object.freeze({
       kind: "terminal",
@@ -2238,8 +2263,16 @@ function runFutureAttacksAfterFaints(
 ): BattleEndTurnResult {
   let state = initialState;
   const count = state.rulesContext.battleTopology.battlersCount;
-  for (let index = 0; index < count; index += 1) {
+  if (state.rulesContext.wishPerishSongState !== 0) {
+    return runPerishSongAfterFutureAttacks(program, handlers, state, completionKind);
+  }
+  // Same persistent cursor as the Perish Song sweep below, case 0
+  // (`battle_util.c:1791-1830`): positional, bumped before the delayed hit
+  // fires, and carried across the BattleTurnPassed round-trip a delayed KO's
+  // HandleFaintedMonActions forces.
+  for (let index = state.rulesContext.wishPerishSongBattlerId; index < count; index += 1) {
     const battler = index as BattleScriptBattlerId;
+    state = withWishPerishSongCursor(state, 0, index + 1);
     if ((state.rulesContext.absentBattlerFlags & (1 << battler)) !== 0) continue;
     const oldCounter = state.rulesContext.futureSightCounter[battler];
     if (oldCounter === 0) continue;
@@ -2318,9 +2351,26 @@ function runFutureAttacksAfterFaints(
   return runPerishSongAfterFutureAttacks(
     program,
     handlers,
-    state,
+    withWishPerishSongCursor(state, 1, 0),
     completionKind,
   );
+}
+
+/** Writes source's `gBattleStruct->wishPerishSongState` / `wishPerishSongBattlerId` pair. */
+function withWishPerishSongCursor(
+  state: MachineState,
+  wishPerishSongState: number,
+  wishPerishSongBattlerId: number,
+): MachineState {
+  const rules = state.rulesContext;
+  if (rules.wishPerishSongState === wishPerishSongState
+    && rules.wishPerishSongBattlerId === wishPerishSongBattlerId) {
+    return state;
+  }
+  return Object.freeze({
+    ...state,
+    rulesContext: Object.freeze({ ...rules, wishPerishSongState, wishPerishSongBattlerId }),
+  });
 }
 
 function finishFaintedThenDelayed(
@@ -2386,12 +2436,20 @@ export function runBattleEndTurnOrchestration(
   handlers: Handlers,
   initialState: MachineState,
 ): BattleEndTurnResult {
-  let state = Object.freeze({
-    ...initialState,
-    rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
-      initialState.rulesContext,
-    ),
-  });
+  // Fresh turn: source zeroes wishPerishSongState/wishPerishSongBattlerId in the
+  // same closing block that zeroes turnEffectsTracker/turnEffectsBattlerId
+  // (`battle_main.c:3914-3917`, `3947-3949`). Only the fresh entry resets them;
+  // `resumeBattleEndTurnAfterFaintedActions` deliberately does not.
+  let state = withWishPerishSongCursor(
+    Object.freeze({
+      ...initialState,
+      rulesContext: clearFollowMeTimersForTurnValuesCleanUp(
+        initialState.rulesContext,
+      ),
+    }),
+    0,
+    0,
+  );
 
   if (state.rulesContext.battleOutcome === 0) {
     const battlerOrder = computeBattlerOrder(state.rulesContext);

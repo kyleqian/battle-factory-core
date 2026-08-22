@@ -239,6 +239,76 @@ describe("ISSUES #102 -- end-turn per-battler cursor across a fainted-actions pa
   );
 
   it(
+    "HandleWishPerishSongOnTurnEnd resumes at its own cursor: an EARLIER-ordered battler's "
+      + "Perish Song countdown and Future Sight counter must not tick twice when a LATER-ordered "
+      + "battler's Perish Song KO pauses for the player's replacement",
+    () => {
+      const rc = context({
+        battlers: [
+          // Player, ordered SECOND. Perish counter is already at 0, so its own
+          // BattleScript_PerishSongTakesLife faints it and -- with a live bench
+          // mon -- raises the forced-switch prompt.
+          battler({
+            side: 0,
+            hp: 100,
+            maxHP: 100,
+            partyIndex: 0,
+            status3: BATTLE_SCRIPT_STATUS3_PERISH_SONG,
+            perishSongTimer: 0,
+            perishSongTimerStartValue: 3,
+          }),
+          // Opponent, ordered FIRST: both its delayed-attack counter and its
+          // Perish Song countdown are consumed before the pause.
+          battler({
+            side: 1,
+            hp: 100,
+            maxHP: 100,
+            partyIndex: 2,
+            status3: BATTLE_SCRIPT_STATUS3_PERISH_SONG,
+            perishSongTimer: 2,
+            perishSongTimerStartValue: 3,
+          }),
+          battler({ side: 0 }),
+          battler({ side: 1 }),
+        ],
+        battlerByTurnOrder: [1, 0, 2, 3],
+        futureSightCounter: [0, 3, 0, 0],
+        futureSightMove: [0, 248, 0, 0],
+        futureSightAttacker: [0, 0, 0, 0],
+        futureSightDmg: [0, 40, 0, 0],
+        party: { player: sixSlots(100, 100), opponent: sixSlots(0, 0, 100) },
+      });
+      const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(0));
+      const paused = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 0));
+
+      expect(paused.kind).toBe("player-choice-required");
+      if (paused.kind !== "player-choice-required") throw new Error("unreachable");
+      expect(paused.battler).toBe(0);
+      expect(paused.state.rulesContext.battlers[0]!.hp).toBe(0);
+      // Both of the earlier-ordered battler's cursors advanced exactly once.
+      expect(paused.state.rulesContext.futureSightCounter[1]).toBe(2);
+      expect(paused.state.rulesContext.battlers[1]!.perishSongTimer).toBe(1);
+
+      const resumedFaints = resumeBattleScriptFaintedActionsAfterPlayerChoice(
+        program,
+        handlers,
+        paused.state,
+        1,
+      );
+      expect(resumedFaints.kind).toBe("resumed");
+      if (resumedFaints.kind !== "resumed") throw new Error("unreachable");
+
+      const finished = resumeBattleEndTurnAfterFaintedActions(program, handlers, resumedFaints.state);
+      expect(finished.kind).not.toBe("non-terminal-barrier");
+      // `wishPerishSongBattlerId` (battle_util.c:1785-1862) is incremented BEFORE
+      // each effect fires and survives the BattleTurnPassed round-trip that runs
+      // HandleFaintedMonActions, so neither loop revisits battler 1 this turn.
+      expect(finished.state.rulesContext.futureSightCounter[1]).toBe(2);
+      expect(finished.state.rulesContext.battlers[1]!.perishSongTimer).toBe(1);
+    },
+  );
+
+  it(
     "mirror: the LATER-ordered player battler still takes its own poison tick when the "
       + "EARLIER-ordered opponent battler's own poison tick faints it (AI replacement, no pause)",
     () => {

@@ -284,6 +284,11 @@ describe("source-shaped Battle Script rules context", () => {
       "weatherTimer",
       "wishCounter",
       "wishMonId",
+      // HandleWishPerishSongOnTurnEnd's persistent cursor pair
+      // (gBattleStruct->wishPerishSongState / wishPerishSongBattlerId,
+      // battle_util.c:1785-1888), added with the post-faint resume fix.
+      "wishPerishSongBattlerId",
+      "wishPerishSongState",
     ]);
     expect(created.battlers).toHaveLength(4);
     expect(Object.isFrozen(created)).toBe(true);
