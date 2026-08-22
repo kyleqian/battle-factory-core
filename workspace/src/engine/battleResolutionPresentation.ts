@@ -2936,6 +2936,32 @@ function messageLines(
       B_BUFF1: () => moveName,
     });
   }
+  if (messageId === "STRINGID_PKMNSUBSTITUTEFADED") {
+    // BattleScript_SubstituteFade (data/battle_scripts_1.s:4257-4260, `playanimation
+    // BS_TARGET`): reached from Cmd_datahpupdate's substitute-HP path, which
+    // never reassigns selectorRoles -- the move's own still-current defender
+    // (the Substitute holder) is BS_TARGET, the same plain idiom
+    // STRINGID_TARGETFAINTED/STRINGID_PKMNHUNGONWITHX already use.
+    const defender = requireMoveDefender(lastMoveAttacker, "substitute-faded message");
+    return resolveBattleStringLines(messageId, {
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNATTACK") {
+    // BattleScript_BeatUpLoop (data/battle_scripts_1.s:1946-1951): the
+    // looping party member's own name-with-prefix, already resolved
+    // presentation-side by prepareMessage (ISSUES #106 --
+    // factoryBattleScriptFullTurnDecision.ts's own STRINGID_PKMNATTACK case,
+    // full `rules.party` access needed since the member need not be the
+    // active battler).
+    if (event.payload.substitutions.length === 0) {
+      throw new Error(`battle resolution ${messageId} message has no beat-up party-member substitution`);
+    }
+    const memberName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_BUFF1: () => memberName,
+    });
+  }
   if (messageId === "STRINGID_MAGNITUDESTRENGTH") {
     // BattleScript_EffectMagnitude (data/battle_scripts_1.s:1683-1692):
     // magnitudedamagecalculation runs (and prints) BEFORE the actual hit
