@@ -2166,28 +2166,40 @@ export function advanceFactoryRoundBattleResolution(
     if (selectedSwitch === undefined) {
       return fail("switch-in lifecycle has no typed switch command");
     }
-    // One player confirmation can resume a fainted-actions scan that also
-    // completes an automatic opposing replacement. Every party identity
-    // change must cross its own typed switch-in command before the stable
-    // rules boundary is allowed to settle; consuming only the selector's
-    // command leaves a genuine opponent transition stranded at the fatal
-    // identity invariant.
-    const committedBoundaries = switchCommands.reduce(
-      (next, command) => commitCompletedResolutionCommand(next, resolution, command),
-      boundaries,
-    );
-    const lastSwitchCommandIndex = resolution.segments[resolution.segmentIndex]!.commands.reduce(
-      (last, command, index) => command.type === "switch-in" ? index : last,
-      -1,
-    );
-    const nextCommandIndex = lastSwitchCommandIndex + 1;
+    // The forced-party selector's own renderer owns exactly the prefix through
+    // the SELECTED battler's typed switch-in -- the party screen, the "Go!"
+    // text, and the send-out animation. Everything after that command is
+    // ordinary presentation again, so the resume point is the selected
+    // switch-in's own index, never the segment's last one: one player
+    // confirmation can resume a fainted-actions scan that goes on to run
+    // residual end-turn damage, faint the OPPOSING active, and complete an
+    // automatic opposing replacement, all in this same immutable receipt
+    // (ISSUES #112, soak seed 108 b1 t8: sandstorm damage on the incoming mon
+    // and the opponent's poison faint both sit BETWEEN the two switch-ins).
+    // Skipping to past the last switch-in silently dropped those commands
+    // from the display ledger and left the healthbox stale at the handoff.
+    // Every party identity change still crosses its own typed switch-in
+    // command before the stable rules boundary settles: an earlier opposing
+    // switch-in is inside this prefix, and a later one is committed by the
+    // ordinary lifecycle below.
+    const selectedSwitchCommandIndex = resolution.segments[resolution.segmentIndex]!.commands
+      .indexOf(selectedSwitch);
+    const committedBoundaries = switchCommands
+      .filter((command) =>
+        resolution.segments[resolution.segmentIndex]!.commands.indexOf(command)
+          <= selectedSwitchCommandIndex
+      )
+      .reduce(
+        (next, command) => commitCompletedResolutionCommand(next, resolution, command),
+        boundaries,
+      );
+    const nextCommandIndex = selectedSwitchCommandIndex + 1;
     if (nextCommandIndex < resolution.segments[resolution.segmentIndex]!.commands.length) {
       // The resumed fainted-actions scan can keep running after the selected
       // replacement enters. Weather damage is one source-generic example:
       // the incoming battler may faint and publish terminal commands in this
-      // same immutable reducer receipt. The forced-selector renderer consumed
-      // only the prefix through the final typed switch-in, so return the
-      // remaining commands to the ordinary presentation lifecycle.
+      // same immutable reducer receipt. Return every command the selector's
+      // renderer did not consume to the ordinary presentation lifecycle.
       const resumedResolution = Object.freeze({
         ...advancedResolution,
         commandIndex: nextCommandIndex,
