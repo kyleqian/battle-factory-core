@@ -27,6 +27,19 @@
  * correctly reassigns to the currently-processing fainted battler before
  * this runs (ISSUES #43, closed).
  *
+ * That selector read is also a WRITE: line 3264 is
+ * `gBattlerFainted = GetBattlerForBattleScript(gBattlescriptCurrInstr[1]);`,
+ * executed before the `gBattleScripting.getexpState` switch, so every getexp
+ * dispatch republishes the global from its own operand. It is the only thing
+ * that makes BattleScript_SpikesOnAttackerFainted / SpikesOnTargetFainted
+ * legal: both do `getexp BS_ATTACKER` / `getexp BS_TARGET` and then
+ * `goto BattleScript_HandleFaintedMon`, whose FaintedMonTryChoose fall-through
+ * runs `openpartyscreen BS_FAINTED` (data/battle_scripts_1.s:3396-3416,
+ * :2843-2844). Without the write, a mon that faints to Spikes during an
+ * ordinary voluntary-switch action -- outside the fainted-actions
+ * orchestration, the only other writer of this role -- reached that opcode
+ * with `selectorRoles.fainted` still null (ISSUES #113).
+ *
  * Unlike Cmd_moveend's own do-while loop, Cmd_getexp's states are plain
  * switch cases with a trailing `break` -- state 0 does not touch
  * `gBattlescriptCurrInstr` at all, so on real hardware this opcode is
@@ -118,6 +131,21 @@ function resolveGetexpBattlerOperand(
   return "unsupported";
 }
 
+/**
+ * battle_script_commands.c:3264's own global write --
+ * `gBattlerFainted = GetBattlerForBattleScript(gBattlescriptCurrInstr[1]);` --
+ * republished into this engine's distinct `selectorRoles.fainted` role. Runs
+ * ahead of the getexpState switch in source, so both modeled states (0 and 6)
+ * carry it.
+ */
+function publishedFaintedRole(
+  rules: BattleScriptRulesContext,
+  battlerFainted: BattleScriptBattlerId,
+): BattleScriptRulesContext["selectorRoles"] {
+  if (rules.selectorRoles.fainted === battlerFainted) return rules.selectorRoles;
+  return Object.freeze({ ...rules.selectorRoles, fainted: battlerFainted });
+}
+
 function controllerBusyBlock(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
 ): BattleScriptCommandTransition<BattleScriptRulesContext> {
@@ -191,7 +219,13 @@ function createGetexpOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRule
         return transitionBattleScriptCommand(
           context,
           Object.freeze({ kind: "jump", programCounter: context.state.programCounter }),
-          { rulesContext: Object.freeze({ ...rules, giveExpState: GETEXP_STATE_DONE }) },
+          {
+            rulesContext: Object.freeze({
+              ...rules,
+              selectorRoles: publishedFaintedRole(rules, battlerFainted),
+              giveExpState: GETEXP_STATE_DONE,
+            }),
+          },
         );
       }
       case GETEXP_STATE_DONE: {
@@ -206,6 +240,7 @@ function createGetexpOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRule
           {
             rulesContext: Object.freeze({
               ...rules,
+              selectorRoles: publishedFaintedRole(rules, battlerFainted),
               battlers: Object.freeze(nextBattlers),
               giveExpState: 0,
             }),

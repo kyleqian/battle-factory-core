@@ -1703,6 +1703,22 @@ function runVoluntarySwitchAction(
       instruction: run.instruction,
     });
   }
+  // The switch script's own `switchineffects BS_ATTACKER` can send the
+  // incoming mon straight into Spikes; when that KOs it,
+  // BattleScript_SpikesOnAttackerFainted abandons the pushed cursor and jumps
+  // to BattleScript_HandleFaintedMon, whose FaintedMonTryChoose runs
+  // `openpartyscreen BS_FAINTED` (data/battle_scripts_1.s:3396-3401,
+  // :2843-2844). On the player's side that is the same real, human-timescale
+  // halt runMoveAction already forwards (ISSUES #89's own shape, ISSUES #113).
+  if (run.kind === "player-choice") {
+    return Object.freeze({
+      kind: "player-choice",
+      state: run.state,
+      battler: run.battler,
+      faintedPartyIndex: run.faintedPartyIndex,
+      legalPartyIndexes: run.legalPartyIndexes,
+    });
+  }
   return Object.freeze({ kind: "complete", state: run.state });
 }
 
