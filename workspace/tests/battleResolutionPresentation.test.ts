@@ -1083,7 +1083,10 @@ describe("battle resolution presentation receipt ownership", () => {
       { type: "switch-out", battler: 1 },
       { type: "sprite-visibility", battler: 1, visible: false, recall: true },
       { type: "switch-in", battler: 1, toPartyIndex: 1 },
-      { type: "message", lines: ["Foe KABUTO was", "dragged out!"] },
+      // MACHOP (`incoming`, species 66) -- the switched-in replacement, not
+      // KABUTO (species 140, `context.party.opponent[0]`'s pre-switch
+      // occupant) -- ISSUES #115.
+      { type: "message", lines: ["Foe MACHOP was", "dragged out!"] },
       { type: "turn-end" },
     ]);
     const summaryState = atRenderClock(resolution, 0, 0);

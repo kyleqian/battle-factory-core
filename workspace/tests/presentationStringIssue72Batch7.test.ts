@@ -211,8 +211,10 @@ describe("presentation-string ISSUES #72 batch 7 -- Trace switch-in entry hook",
     const config = switchInConfig(ABILITY_RAIN_DISH, SPECIES_PORYGON);
     const { messageIds, lines, field } = runFullTurn(config, AT(0), { kind: "switch", partyIndex: 1 });
     expect(messageIds).toContain("STRINGID_PKMNTRACED");
+    // PORYGON (the switched-in Trace holder), not the pre-switch
+    // `field.opponent` (WOBBUFFET) -- ISSUES #115.
     expect(lines).toContainEqual([
-      `Foe ${field.opponent.name} TRACED`,
+      `Foe PORYGON TRACED`,
       `${field.player.name}’s RAIN DISH!`,
     ]);
   });

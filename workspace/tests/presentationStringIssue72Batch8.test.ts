@@ -161,9 +161,11 @@ describe("presentation-string ISSUES #72 batch 8 -- Sand Stream switch-in", () =
         spAttack: 40, spDefense: 100,
       }, undefined] as FactoryFullTurnConfig["trainerBenchOverride"],
     });
-    const { messageIds, lines, field } = runFullTurn(config, AT(0), { kind: "switch", partyIndex: 1 });
+    const { messageIds, lines } = runFullTurn(config, AT(0), { kind: "switch", partyIndex: 1 });
     expect(messageIds).toContain("STRINGID_PKMNSXWHIPPEDUPSANDSTORM");
-    expect(lines).toContainEqual([`Foe ${field.opponent.name}’s SAND STREAM`, "whipped up a sandstorm!"]);
+    // TYRANITAR (the switched-in Sand Stream holder), not the pre-switch
+    // `field.opponent` (WOBBUFFET) -- ISSUES #115.
+    expect(lines).toContainEqual([`Foe TYRANITAR’s SAND STREAM`, "whipped up a sandstorm!"]);
   });
 });
 

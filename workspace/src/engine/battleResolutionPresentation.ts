@@ -3198,6 +3198,16 @@ export function projectBattleResolutionCommands(
   let usedMoveInstructionExecution: number | null = null;
   const zeroHpBattlers = new Set<0 | 1>();
   const fieldArt = createBattleCommandFieldArtView(field);
+  // `gBattlerPartyIndexes[battler]` (battle_message.c's `BufferStringBattle`
+  // name source) updates at `Cmd_getswitchedmondata`, before the incoming
+  // mon's own STRINGID_SWITCHINMON print -- and stays updated for every later
+  // print in the same segment (a post-switch-in weather tick, ability
+  // activation, etc). `field` is this segment's pre-resolution snapshot;
+  // `currentField` tracks the same shape but is replaced per-battler at each
+  // switch-in below, so `messageLines` and the faint command always resolve
+  // the battler slot's CURRENT occupant, never a stale pre-switch one
+  // (ISSUES #115).
+  let currentField: BattleResolutionDisplayedField = field;
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -3256,7 +3266,7 @@ export function projectBattleResolutionCommands(
           event,
           index,
           events,
-          field,
+          currentField,
           switchInBattler,
           switchInIncoming,
           lastStatChange,
@@ -3538,7 +3548,7 @@ export function projectBattleResolutionCommands(
         type: "faint",
         eventSequence: event.sequence,
         battler,
-        partyIndex: fieldBattler(field, battler).partyIndex,
+        partyIndex: fieldBattler(currentField, battler).partyIndex,
         timing,
       }));
       lastFaintBattler = battler;
@@ -3601,6 +3611,12 @@ export function projectBattleResolutionCommands(
         switched.toPartyIndex,
       );
       pendingSwitch.delete(battler);
+      // This battler slot's occupant just committed (mirrors
+      // `gBattlerPartyIndexes[battler]`); every subsequent name resolution in
+      // this segment must see the incoming mon, not the one it replaced.
+      currentField = battler === 0
+        ? Object.freeze({ ...currentField, player: incoming.field })
+        : Object.freeze({ ...currentField, opponent: incoming.field });
       commands.push(Object.freeze({
         type: "switch-in",
         eventSequence: event.sequence,
