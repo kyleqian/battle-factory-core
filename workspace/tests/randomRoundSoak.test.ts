@@ -32,12 +32,15 @@ import {
 } from "../src/engine/factoryRoundChaining.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import type { FactoryRentalRoster } from "../src/engine/factorySwap.ts";
+import { getFactoryFrontierBrainStatus } from "../src/engine/frontierBrainStatus.ts";
 import {
   buildWinningSwapPlan,
+  createStartCarryState,
   pickWinningFightSlot,
   pickWinningSwitchRow,
   resolveMaxFrames,
   scoreFactorySwapCandidate,
+  validateStartCarry,
   RandomPlayer,
   Rng,
   runSeed,
@@ -1012,5 +1015,71 @@ describe("Papercuts: soak driver resets per-battle labels/policy state on round 
     expect(player.turn).toBe(1);
     expect((player as any).switchedAgainstOpponentIndices.has(5)).toBe(false);
     expect((player as any).switchedAgainstOpponentIndices.size).toBe(0);
+  });
+});
+
+describe("--start-carry (opt-in: boot the first chained round from a carried win streak)", () => {
+  it("0 (or omitted) is byte-identical to createInitialState()", () => {
+    expect(createStartCarryState(0)).toEqual(createInitialState());
+  });
+
+  it("rejects anything that isn't a multiple of 7 in 0..49", () => {
+    expect(() => validateStartCarry(28)).not.toThrow();
+    expect(() => validateStartCarry(49)).not.toThrow();
+    expect(() => validateStartCarry(1)).toThrow(/bad --start-carry/);
+    expect(() => validateStartCarry(-7)).toThrow(/bad --start-carry/);
+    expect(() => validateStartCarry(56)).toThrow(/bad --start-carry/);
+    expect(() => validateStartCarry(7.5)).toThrow(/bad --start-carry/);
+    expect(() => createStartCarryState(50)).toThrow(/bad --start-carry/);
+  });
+
+  it("28 boots the first orchestrator at factoryWinStreak 28, first opponent generated at challengeNum 4", () => {
+    const result = runSeed(0, {
+      policy: "winning",
+      stateFactory: () => createStartCarryState(28),
+      stopAtFirstActionMenu: true,
+      collectDiagnostics: true,
+      renderEvery: 0,
+    });
+    expect(result.outcome).toBe("OK");
+    expect(result.diagnostics?.carriedWinStreak).toBe(28);
+    expect(result.diagnostics?.firstOpponentChallengeNum).toBe(4);
+  });
+
+  it("42 boots the first orchestrator at factoryWinStreak 42 -- its OWN 7th battle is NOT the brain, precisely because gold was already earned crossing streak 41 inside the round that carries 35 -> 42, not the round that starts AT 42", () => {
+    const result = runSeed(0, {
+      policy: "winning",
+      stateFactory: () => createStartCarryState(42),
+      stopAtFirstActionMenu: true,
+      collectDiagnostics: true,
+      renderEvery: 0,
+    });
+    expect(result.outcome).toBe("OK");
+    expect(result.diagnostics?.carriedWinStreak).toBe(42);
+    expect(result.diagnostics?.firstOpponentChallengeNum).toBe(6);
+    // A round starting at carry 42 already has both symbols banked
+    // (factorySymbolsCountForStartCarry: >= 42 -> 2), so every one of its 7
+    // battles (battleIndex 0..6, winStreak 42..48) checks the gold-plus
+    // "streak-long" branch, which only trips at +21 multiples past 42 (63,
+    // 84, ...) -- none of which this round reaches.
+    for (let battleIndex = 0; battleIndex <= 6; battleIndex += 1) {
+      expect(
+        getFactoryFrontierBrainStatus({
+          battleMode: "singles",
+          winStreak: 42 + battleIndex,
+          symbolsCount: 2,
+        }),
+      ).toBe("not-ready");
+    }
+    // Contrast: the round that actually carries the streak from 35 up to 42
+    // hits gold on ITS OWN 7th battle (battleIndex 6, winStreak 41, only
+    // one symbol banked yet) -- that round is `--start-carry 35`, not 42.
+    expect(
+      getFactoryFrontierBrainStatus({
+        battleMode: "singles",
+        winStreak: 35 + 6,
+        symbolsCount: 1,
+      }),
+    ).toBe("gold");
   });
 });

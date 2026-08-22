@@ -38,6 +38,12 @@ import {
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
 import { applyTypeEffectiveness, type TypeEffectivenessEntry } from "../../src/engine/damageCalc.ts";
 import type { FactoryRentalRoster } from "../../src/engine/factorySwap.ts";
+import {
+  generateFactoryChallengeDraft,
+  type FactoryCarry,
+} from "../../src/engine/factoryRoundChaining.ts";
+import { ANCHOR_RNG_VALUE } from "../../src/engine/rng.ts";
+import { ANCHOR_FACTORY_METADATA } from "../../src/engine/factoryAnchorSession.ts";
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
 import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
@@ -499,6 +505,16 @@ export type RunDiagnostics = Readonly<{
    * every tick in `runSeed`), not this field.
    */
   carriedWinStreak: number | null;
+  /**
+   * `challengeNum` (`Math.floor(factoryWinStreak / 7)`,
+   * factoryOpponentGeneration.ts) the CURRENT orchestrator's first opponent
+   * was generated at, from `opponentGenerations[0].generation.challengeNum`
+   * -- null if no orchestrator exists yet or it hasn't generated an opponent
+   * yet. `--start-carry` pin surface: confirms a carried streak actually
+   * reaches the higher-tier generation branches (sFixedIVTable, rental
+   * ranges, brain fixed IV) keyed on this value, not just the carry field.
+   */
+  firstOpponentChallengeNum: number | null;
 }>;
 
 // ---------------------------------------------------------------------------
@@ -1359,6 +1375,82 @@ export class RandomPlayer {
 }
 
 // ---------------------------------------------------------------------------
+// `--start-carry` (opt-in): boot the FIRST chained round from a carried win
+// streak instead of the anchor's pinned battle-1 schedule, for crash
+// coverage of the higher-tier engine paths a soak's own natural chaining
+// (almost) never reaches on its own (no policy has ever won a round at carry
+// 28 -- docs/soak-deep-sweep-2026-08-22-4M.md). Drives the SAME chaining
+// entry core.ts's terminal-decline handoff uses when a real round completes
+// (`generateFactoryChallengeDraft`, factoryRoundChaining.ts) from the
+// anchor's own RNG cursor, so the resulting draft/rentals/opponents are
+// generated live exactly as a real chain would produce them -- no new engine
+// state, just an alternate `EngineState` this test-facing seam builds from
+// already-public engine exports.
+// ---------------------------------------------------------------------------
+
+/** The only legal `--start-carry` values: a multiple of 7 in 0..49 (challengeNum 0..7). */
+export const VALID_START_CARRY_VALUES = [0, 7, 14, 21, 28, 35, 42, 49] as const;
+
+export function validateStartCarry(value: number): void {
+  if (!(VALID_START_CARRY_VALUES as readonly number[]).includes(value)) {
+    throw new Error(
+      `bad --start-carry: ${value} (want a multiple of 7 in 0..49: ${VALID_START_CARRY_VALUES.join(", ")})`,
+    );
+  }
+}
+
+/**
+ * `GetPlayerSymbolCountForFacility` consistent with a carry of `startCarry`:
+ * silver is earned by winning the round that carries the streak from 14..20
+ * up past 21 (`getFactoryFrontierBrainStatus`'s silver check trips at
+ * battleIndex 6 when the round entered at carry 14), so any round that
+ * itself STARTS at carry >= 21 has silver already banked; likewise gold is
+ * earned crossing 42, so carry >= 42 has gold already banked too.
+ */
+function factorySymbolsCountForStartCarry(startCarry: number): 0 | 1 | 2 {
+  if (startCarry >= 42) return 2;
+  if (startCarry >= 21) return 1;
+  return 0;
+}
+
+/**
+ * Builds the initial `EngineState` for `--start-carry startCarry`: a fresh
+ * draft screen generated live from `{factoryWinStreak: startCarry, rentsCount:
+ * 0, battlePoints: 0, factorySymbolsCount: <see above>, playerTrainerId:
+ * ANCHOR_FACTORY_METADATA.playerTrainerId}` and the anchor's own RNG cursor
+ * (`ANCHOR_RNG_VALUE`) -- exactly the inputs `core.ts`'s terminal-decline
+ * chaining handoff feeds `generateFactoryChallengeDraft` when a real chain
+ * carries a completed round's streak into the next draft. `pendingGeneratedRound`
+ * is set the same way that handoff sets it, so the ordinary draft -> prebattle
+ * room -> battle room path (unmodified) later builds the round's orchestrator
+ * from this same carry, exactly like a real chain.
+ *
+ * `startCarry === 0` returns `createInitialState()` verbatim -- required to
+ * stay byte-identical to today's default/omitted behavior, and safer than
+ * relying on the generated path to coincidentally reproduce the anchor's own
+ * pinned battle-1 draft records bit-for-bit.
+ */
+export function createStartCarryState(startCarry: number): EngineState {
+  validateStartCarry(startCarry);
+  if (startCarry === 0) return createInitialState();
+  const carry: FactoryCarry = Object.freeze({
+    factoryWinStreak: startCarry,
+    factorySymbolsCount: factorySymbolsCountForStartCarry(startCarry),
+    battlePoints: 0,
+    rentsCount: 0,
+    playerTrainerId: ANCHOR_FACTORY_METADATA.playerTrainerId,
+  });
+  const { generation, draftScreen } = generateFactoryChallengeDraft(carry, ANCHOR_RNG_VALUE);
+  return {
+    ...createInitialState(),
+    draftScreen,
+    rngValue: generation.rngValue,
+    factoryCarry: carry,
+    pendingGeneratedRound: Object.freeze({ rngValueBefore: ANCHOR_RNG_VALUE, carry }),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Seed runner
 // ---------------------------------------------------------------------------
 
@@ -1561,6 +1653,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       terminalRecordChoice: state.factoryTerminal?.recordChoice ?? null,
       renderCalls,
       carriedWinStreak: orchestrator?.config.factoryWinStreak ?? null,
+      firstOpponentChallengeNum: orchestrator?.opponentGenerations[0]?.generation.challengeNum ?? null,
     });
   };
 

@@ -26,6 +26,12 @@
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
 //   --render-every N   call render() every N frames (0 disables; default 8)
+//   --start-carry N    opt-in: start the FIRST chained round from a carried
+//                      win streak of N instead of the anchor boot -- crash
+//                      coverage of the challengeNum >= 1 tiers a soak's own
+//                      natural chaining almost never reaches. N must be a
+//                      multiple of 7 in 0..49 (rejected otherwise); 0 or
+//                      omitted is byte-identical to today.
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
 //   --verbose          per-action log for a single-seed repro
@@ -33,9 +39,11 @@
 
 import { writeFileSync } from "node:fs";
 import {
+  createStartCarryState,
   DEFAULT_STALL_FRAMES,
   resolveMaxFrames,
   runSeed,
+  validateStartCarry,
   type RunOptions,
   type SeedOutcome,
   type SeedResult,
@@ -67,6 +75,14 @@ function main(): void {
   const stallFrames = stallFramesFlag !== null ? Number(stallFramesFlag) : DEFAULT_STALL_FRAMES;
   const maxRoundsFlag = getFlag("--max-rounds");
   const maxRounds = maxRoundsFlag !== null ? Number(maxRoundsFlag) : undefined;
+  const startCarryFlag = getFlag("--start-carry");
+  const startCarry = startCarryFlag !== null ? Number(startCarryFlag) : 0;
+  try {
+    validateStartCarry(startCarry);
+  } catch (error) {
+    console.error((error as Error).message);
+    process.exit(2);
+  }
 
   let seeds: number[];
   if (singleSeed !== null) {
@@ -89,6 +105,7 @@ function main(): void {
     stopAtFirstActionMenu: milestone,
     stallFrames,
     maxRounds,
+    ...(startCarry !== 0 ? { stateFactory: () => createStartCarryState(startCarry) } : {}),
   };
   const results: SeedResult[] = [];
   const startedAt = Date.now();
