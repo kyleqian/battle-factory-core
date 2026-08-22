@@ -92875,6 +92875,10 @@
             "kind": "source-state-symbol"
           },
           {
+            "path": "tests/endTurnResumeCursorIssue102.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/factoryAiSwitchPolicy.test.ts",
             "kind": "tier-1-test"
           }
