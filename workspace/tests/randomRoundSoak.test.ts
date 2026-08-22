@@ -35,6 +35,8 @@ import {
   pickWinningFightSlot,
   pickWinningSwitchRow,
   resolveMaxFrames,
+  RandomPlayer,
+  Rng,
   runSeed,
 } from "../tools/soak/randomRoundSoakDriver.ts";
 
@@ -880,5 +882,45 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     expect(result.outcome).toBe("OK");
     expect(result.endState).toBe("max-rounds");
     expect(result.maxCarriedWinStreak).toBeGreaterThanOrEqual(14);
+  });
+});
+
+// Fabricates only the fields RandomPlayer.trackProgress reads
+// (round.rules.battleIndex, config.id, battleCommandPresentation.request.
+// requestId) -- a mechanism-level probe of the driver's own bookkeeping, not
+// a claim the engine can reach this exact shape.
+function fakeOrchestratorState(
+  battleIndex: number,
+  roundId: string,
+  requestId: string,
+): EngineState {
+  return {
+    factoryRoundBattleOrchestrator: {
+      round: { rules: { battleIndex } },
+      config: { id: roundId },
+      battleCommandPresentation: { request: { requestId } },
+    },
+  } as unknown as EngineState;
+}
+
+describe("Papercuts: soak driver resets per-battle labels/policy state on round identity, not just battleIndex", () => {
+  it("a round lost at battle 1 followed by the next round's battle 1 resets the turn label to 1 and clears the switched-set", () => {
+    const player = new RandomPlayer(new Rng(1), undefined as any, "vanilla");
+
+    // Round 1, battle 1 (battleIndex 0): three distinct turns tick by, and
+    // the "winning" ping-pong guard records a switch against opponent 5.
+    (player as any).trackProgress(fakeOrchestratorState(0, "round-1", "r1-turn-a"));
+    (player as any).trackProgress(fakeOrchestratorState(0, "round-1", "r1-turn-b"));
+    (player as any).trackProgress(fakeOrchestratorState(0, "round-1", "r1-turn-c"));
+    expect(player.turn).toBe(3);
+    (player as any).switchedAgainstOpponentIndices.add(5);
+
+    // Round 2's battle 1 is ALSO battleIndex 0 -- the case a plain
+    // battleIndex-change check misses.
+    (player as any).trackProgress(fakeOrchestratorState(0, "round-2", "r2-turn-a"));
+
+    expect(player.turn).toBe(1);
+    expect((player as any).switchedAgainstOpponentIndices.has(5)).toBe(false);
+    expect((player as any).switchedAgainstOpponentIndices.size).toBe(0);
   });
 });
