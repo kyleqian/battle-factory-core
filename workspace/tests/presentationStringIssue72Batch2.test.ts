@@ -217,9 +217,14 @@ describe("presentation-string ISSUES #72 batch 2 -- trainer-battle force-out", (
         spAttack: 40, spDefense: 60,
       }, undefined] as FactoryFullTurnConfig["trainerBenchOverride"],
     });
-    const { messageIds, lines, field } = runFullTurn(config, AT(1), AT(1));
+    const { messageIds, lines } = runFullTurn(config, AT(1), AT(1));
     expect(messageIds).toContain("STRINGID_PKMNWASDRAGGEDOUT");
-    expect(lines).toContainEqual([`Foe ${field.opponent.name} was`, "dragged out!"]);
+    // BattleScript_TrainerBattleForceOut prints this AFTER
+    // getswitchedmondata/switchindataupdate/switchinanim (data/battle_scripts_1.s
+    // :3334-3339), so {B_DEF_NAME_WITH_PREFIX} names the replacement (MACHOP,
+    // species 66, trainerBenchOverride slot 0), not the dragged-out original
+    // (ISSUES #115).
+    expect(lines).toContainEqual([`Foe MACHOP was`, "dragged out!"]);
   });
 });
 
@@ -258,12 +263,11 @@ describe("presentation-string ISSUES #72 batch 2 -- Intimidate switch-in loop", 
       { kind: "switch", partyIndex: 1 },
     );
     expect(messageIds).toContain("STRINGID_PKMNCUTSATTACKWITH");
-    // {B_SCR_ACTIVE_NAME_WITH_PREFIX} resolves battler 1's identity (scriptingBattler,
-    // the switched-in Intimidate holder) against the presentation field
-    // snapshot frozen at the START of the turn (command.field, pre-switch) --
-    // same pre-existing characteristic the rest of this layer's mid-turn
-    // switch presentation already has, not something this fix changes.
-    expect(lines).toContainEqual([`Foe ${field.opponent.name}’s INTIMIDATE`, `cuts ${field.player.name}’s ATTACK!`]);
+    // {B_SCR_ACTIVE_NAME_WITH_PREFIX} resolves battler 1's identity
+    // (scriptingBattler, the switched-in Intimidate holder) against the
+    // battler slot's CURRENT occupant at print time (ISSUES #115) -- EKANS,
+    // not the pre-switch WOBBUFFET `field.opponent` still names.
+    expect(lines).toContainEqual([`Foe EKANS’s INTIMIDATE`, `cuts ${field.player.name}’s ATTACK!`]);
   });
 
   it("STRINGID_PREVENTEDFROMWORKING resolves the blocking ability holder and Intimidate's own holder", () => {
@@ -274,9 +278,11 @@ describe("presentation-string ISSUES #72 batch 2 -- Intimidate switch-in loop", 
       { kind: "switch", partyIndex: 1 },
     );
     expect(messageIds).toContain("STRINGID_PREVENTEDFROMWORKING");
+    // EKANS (the switched-in Intimidate holder), not the pre-switch
+    // `field.opponent` (WOBBUFFET) -- ISSUES #115.
     expect(lines).toContainEqual([
       `${field.player.name}’s CLEAR BODY`,
-      `prevented Foe ${field.opponent.name}’s`,
+      `prevented Foe EKANS’s`,
       "INTIMIDATE from working!",
     ]);
   });

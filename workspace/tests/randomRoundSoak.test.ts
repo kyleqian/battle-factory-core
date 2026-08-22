@@ -327,7 +327,14 @@ describe("random round soak driver (green milestone pin)", () => {
       // branch pressed A on the swap menu's default YES cursor). Fixed, this
       // seed now genuinely declines every swap and skips the swap screen's
       // extra frames entirely, settling into a shorter, different trajectory.
-      frames: 40_566,
+      //
+      // ISSUES #115's fix (battleResolutionPresentation.ts) then moved these
+      // counters a fourth time: a post-switch-in message now names the
+      // battler slot's CURRENT occupant instead of a stale pre-switch
+      // snapshot, and the typewriter print duration depends on the printed
+      // name's own length -- a genuinely different (correct) string, not a
+      // driver regression.
+      frames: 40_563,
       battle: 7,
       turn: 5,
       diagnostics: {
@@ -339,7 +346,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_953,
+        renderCalls: 2_956,
       },
     });
     expect(second).toEqual(first);
