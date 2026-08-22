@@ -33,6 +33,8 @@ pub mod battle_script_givepaydaymoney;
 pub mod battle_script_givepaydaymoney_vectors_gen;
 pub mod battle_script_incrementgamestat;
 pub mod battle_script_incrementgamestat_vectors_gen;
+pub mod battle_script_jumpifconfusedandstatmaxed;
+pub mod battle_script_jumpifconfusedandstatmaxed_vectors_gen;
 pub mod battle_script_jumpifnodamage;
 pub mod battle_script_jumpifnodamage_vectors_gen;
 pub mod battle_script_jumpifnotfirstturn;
