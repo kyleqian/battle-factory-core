@@ -23,6 +23,10 @@ import {
   createFactoryTerminalLossPresentation,
   factoryTerminalDeclineBoxGoneAge,
   factoryTerminalDeclineEdgeAge,
+  factoryTerminalDeclineTextFirstAge,
+  factoryTerminalRecordSavedBoxClearAge,
+  factoryTerminalRecordSavedMessageActive,
+  factoryTerminalRecordSavedTextFirstAge,
   FACTORY_LOSS_TERMINAL_PROFILE,
 } from "../src/engine/factoryTerminalPresentation.ts";
 
@@ -89,7 +93,7 @@ describe("ISSUES #104: record prompt reducer -- YES/B-cancel continue like NO", 
     expect(factoryTerminalDeclineEdgeAge(terminal)).toBe(1757);
   });
 
-  it("YES: same age-1757 decline edge as NO (cursor moved to slot 0 first, off the final tick)", () => {
+  it("YES: shows EventScript_SaveBattle's own message before falling into the shared farewell", () => {
     let terminal = terminalThroughPages();
     // Move the cursor onto YES well before the confirm tick, so the confirm
     // press still lands on age 1757 -- the same tick offset the NO pin uses.
@@ -104,17 +108,53 @@ describe("ISSUES #104: record prompt reducer -- YES/B-cancel continue like NO", 
       recordMenuCursor: 0,
       recordChoice: "yes",
       declineFarewellReleaseAge: 1757,
+      recordSavedDismissAge: null,
     });
-    expect(factoryTerminalDeclineEdgeAge(terminal)).toBe(1757);
 
-    // Downstream farewell dismiss/box-gone chain matches the NO pin's own
-    // offsets exactly (declinedTerminal's dismiss at edge+102, box-gone at
-    // dismiss+declineReleaseClearDelay).
-    let dismissed = advanceTo(terminal, 1858);
+    // The "battle was recorded" message (EventScript_SaveBattle's own msgbox,
+    // BattleFrontier_BattleTowerLobby/scripts.inc:132-138) is the active page
+    // -- not the shared farewell -- right after the confirm, showing the
+    // exact source text (`{PLAYER}` -> "MEMORY", the fixed save-name every
+    // other terminal message in this profile already uses).
+    expect(factoryTerminalRecordSavedMessageActive(terminal)).toBe(true);
+    expect(terminal.profile.recordSavedMessage).toEqual([
+      "MEMORY’s battle was recorded",
+      "on the FRONTIER PASS.",
+    ]);
+    expect(factoryTerminalRecordSavedBoxClearAge(terminal)).toBe(1757 + 21);
+    expect(factoryTerminalRecordSavedTextFirstAge(terminal)).toBe(1757 + 22);
+
+    // A press before the message's own input-ready gate (edge + 70, the
+    // "input accepted exactly on the tick the last glyph draws" rule this
+    // file's farewell already follows) does nothing -- the message is still
+    // the active page.
+    let held = advanceTo(terminal, 1825);
+    held = advanceFactoryTerminalPresentation(held, { pressedA: true });
+    expect(held.recordSavedDismissAge).toBeNull();
+    expect(factoryTerminalRecordSavedMessageActive(held)).toBe(true);
+
+    // Dismissing the message re-arms declineFarewellReleaseAge to THIS tick
+    // -- the farewell's own (unchanged) typing/dismiss mechanics now drive
+    // the real EndRecordBattle text starting here, one message-cycle later
+    // than NO/cancel's edge.
+    let recorded = advanceTo(held, 1826);
+    recorded = advanceFactoryTerminalPresentation(recorded, { pressedA: true });
+    expect(recorded).toMatchObject({
+      recordSavedDismissAge: 1827,
+      declineFarewellReleaseAge: 1827,
+    });
+    expect(factoryTerminalRecordSavedMessageActive(recorded)).toBe(false);
+    expect(factoryTerminalDeclineEdgeAge(recorded)).toBe(1827);
+    expect(factoryTerminalDeclineTextFirstAge(recorded)).toBe(1827 + 4);
+
+    // Farewell dismiss/box-gone chain uses the SAME declineInputDelay/
+    // declineReleaseClearDelay constants NO's own pin uses, just relative to
+    // this later (re-armed) edge instead of the original confirm tick.
+    let dismissed = advanceTo(recorded, 1865);
     dismissed = advanceFactoryTerminalPresentation(dismissed, { pressedA: true });
-    expect(dismissed.declineDismissAge).toBe(1859);
+    expect(dismissed.declineDismissAge).toBe(1866);
     expect(factoryTerminalDeclineBoxGoneAge(dismissed)).toBe(
-      1859 + FACTORY_LOSS_TERMINAL_PROFILE.declineReleaseClearDelay,
+      1866 + FACTORY_LOSS_TERMINAL_PROFILE.declineReleaseClearDelay,
     );
   });
 

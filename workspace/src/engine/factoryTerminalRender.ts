@@ -20,6 +20,9 @@ import {
   factoryTerminalRecordPromptFirstAge,
   factoryTerminalRecordPromptTextFirstAge,
   factoryTerminalRecordMenuVisible,
+  factoryTerminalRecordSavedBoxClearAge,
+  factoryTerminalRecordSavedMessageActive,
+  factoryTerminalRecordSavedTextFirstAge,
   factoryTerminalVisibleChars,
   isFactoryTerminalRoundWon,
   type FactoryTerminalLossPresentationState,
@@ -465,6 +468,50 @@ function drawRecordPrompt(
 }
 
 /**
+ * ISSUES #104: the YES-only "battle was recorded" page
+ * (`EventScript_SaveBattle`'s own msgbox) shown between the record-prompt
+ * multichoice and the shared `EndRecordBattle` farewell. Same menu-clear
+ * shape as `drawDeclineFarewell` below (the multichoice cursor vanishes
+ * `declineMenuClearDelay` ticks after the YES confirm), but the old
+ * record-question text lingers `recordSavedTextClearDelay` ticks (longer
+ * than the farewell's own `declineTextClearDelay` -- `frontier_savebattle`'s
+ * own processing time) before the box wipes and this message types in.
+ */
+function drawRecordSavedMessage(
+  fb: Uint8Array,
+  state: FactoryTerminalPresentationState,
+): void {
+  const lines = state.profile.recordSavedMessage;
+  if (state.recordSavedDismissAge !== null) {
+    // Dismissed, but still drawn (fully typed -- the dismiss only accepts
+    // once typing is long done) for a few more ticks until the farewell's
+    // own box-clear below takes over; declineFarewellReleaseAge has already
+    // re-armed to the dismiss tick, so this message's own edge-relative ages
+    // no longer apply here.
+    drawPageText(fb, lines, lines[0].length + lines[1].length);
+    return;
+  }
+  const menuClearAge = factoryTerminalDeclineMenuClearAge(state)!;
+  const boxClearAge = factoryTerminalRecordSavedBoxClearAge(state)!;
+  const textFirstAge = factoryTerminalRecordSavedTextFirstAge(state)!;
+  if (state.age < menuClearAge) {
+    drawRecordPrompt(fb, state);
+    return;
+  }
+  if (state.age < boxClearAge) {
+    drawRecordPrompt(fb, state, true);
+    return;
+  }
+  if (state.age >= textFirstAge) {
+    const chars = Math.min(
+      lines[0].length + lines[1].length,
+      state.age - textFirstAge + 1,
+    );
+    drawPageText(fb, lines, chars);
+  }
+}
+
+/**
  * The EndRecordBattle farewell span (any recordChoice -- YES, NO, or
  * B-cancel all reach it, ISSUES #104): the YES/NO multichoice vanishes
  * `declineMenuClearDelay` ticks after the decline edge
@@ -720,6 +767,11 @@ export function renderFactoryTerminalPresentation(
   // free-roam Lobby field: from the decline box-gone age onward the box frame
   // itself is no longer drawn, leaving the bare (already byte-exact) field.
   if (factoryTerminalDeclineEdgeAge(state) !== null) {
+    if (factoryTerminalRecordSavedMessageActive(state)) {
+      drawMessageBoxFrame(fb);
+      drawRecordSavedMessage(fb, state);
+      return fb;
+    }
     const boxGoneAge = factoryTerminalDeclineBoxGoneAge(state);
     if (boxGoneAge !== null && state.age >= boxGoneAge) return fb;
     drawMessageBoxFrame(fb);

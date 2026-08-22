@@ -42,6 +42,28 @@ export interface FactoryTerminalRecordProfile {
   readonly declineInputDelay: number;
   readonly declineReleaseClearDelay: number;
   readonly declineFarewell: readonly [string, string];
+  /**
+   * ISSUES #104's YES-only remainder: `case 0` calls
+   * `EventScript_RecordBattle` -> `EventScript_SaveBattle`
+   * (`BattleFrontier_BattleFactoryLobby/scripts.inc:87-88`,
+   * `BattleFrontier_BattleTowerLobby/scripts.inc:132-138`) before falling
+   * into the same `EndRecordBattle` farewell every answer shares. Oracle
+   * dense probe (`tools/battle-lab/scratch-loss-record-yes-probe.json`,
+   * `docs/factory-terminal-record-yes-ground-truth.md`) against the
+   * held YES/(NO) multichoice edge (the same tick `declineFarewellReleaseAge`
+   * arms for every answer): the multichoice cursor vanishes at edge+1 (same
+   * `declineMenuClearDelay` every answer shares) but the old record-question
+   * text lingers **20 ticks longer than NO's own transition** before the box
+   * wipes -- `frontier_savebattle`'s own processing time -- then the message
+   * types at the same 1-char/tick cadence. This message's own dismiss
+   * re-arms `declineFarewellReleaseAge` at the dismiss tick, so every
+   * existing decline-farewell constant/renderer below drives the real
+   * farewell from there unmodified.
+   */
+  readonly recordSavedTextClearDelay: number;
+  readonly recordSavedTextFirstDelay: number;
+  readonly recordSavedInputDelay: number;
+  readonly recordSavedMessage: readonly [string, string];
 }
 
 export interface FactoryTerminalLossProfile extends FactoryTerminalRecordProfile {
@@ -178,6 +200,13 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
       "We look forward to your next visit.",
       "",
     ] as const),
+    recordSavedTextClearDelay: 21,
+    recordSavedTextFirstDelay: 22,
+    recordSavedInputDelay: 70,
+    recordSavedMessage: Object.freeze([
+      "MEMORY’s battle was recorded",
+      "on the FRONTIER PASS.",
+    ] as const),
     pages: Object.freeze([
       Object.freeze(["Thank you for participating!", ""] as const),
       Object.freeze([
@@ -234,6 +263,13 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
       "We look forward to your next visit.",
       "",
     ] as const),
+    recordSavedTextClearDelay: 21,
+    recordSavedTextFirstDelay: 22,
+    recordSavedInputDelay: 70,
+    recordSavedMessage: Object.freeze([
+      "MEMORY’s battle was recorded",
+      "on the FRONTIER PASS.",
+    ] as const),
     congratulations: Object.freeze([
       "Congratulations! You’ve won seven",
       "straight Battle Swap matches!",
@@ -288,6 +324,13 @@ export interface FactoryTerminalLossPresentationState {
   readonly declineFarewellReleaseAge: number | null;
   /** Age the farewell message's own A dismiss is stored. */
   readonly declineDismissAge: number | null;
+  /**
+   * ISSUES #104: age the YES-only "battle was recorded" message's own A
+   * dismiss is stored; null for NO/cancel (never shown) and null for YES
+   * until that message's dismiss (`declineFarewellReleaseAge` re-arms to
+   * this same tick, so the shared farewell mechanics run from there).
+   */
+  readonly recordSavedDismissAge: number | null;
 }
 
 export interface FactoryTerminalRoundWonPresentationState {
@@ -318,6 +361,13 @@ export interface FactoryTerminalRoundWonPresentationState {
   readonly declineFarewellReleaseAge: number | null;
   /** Age the farewell message's own A dismiss is stored. */
   readonly declineDismissAge: number | null;
+  /**
+   * ISSUES #104: age the YES-only "battle was recorded" message's own A
+   * dismiss is stored; null for NO/cancel (never shown) and null for YES
+   * until that message's dismiss (`declineFarewellReleaseAge` re-arms to
+   * this same tick, so the shared farewell mechanics run from there).
+   */
+  readonly recordSavedDismissAge: number | null;
 }
 
 export type FactoryTerminalPresentationState =
@@ -351,6 +401,7 @@ export function createFactoryTerminalLossPresentation(
     recordChoice: null,
     declineFarewellReleaseAge: null,
     declineDismissAge: null,
+    recordSavedDismissAge: null,
   };
 }
 
@@ -383,6 +434,7 @@ export function createFactoryTerminalRoundWonPresentation(
     recordChoice: null,
     declineFarewellReleaseAge: null,
     declineDismissAge: null,
+    recordSavedDismissAge: null,
   };
 }
 
@@ -581,6 +633,44 @@ export function factoryTerminalDeclineTextFirstAge(
     : edge + state.profile.declineTextFirstDelay;
 }
 
+/** ISSUES #104: true while the YES-only "battle was recorded" message is
+ *  the active page -- before its own dismiss re-arms `declineFarewellReleaseAge`
+ *  for the shared farewell. Always false for NO/cancel. */
+export function factoryTerminalRecordSavedMessageActive(
+  state: FactoryTerminalPresentationState,
+): boolean {
+  if (state.recordChoice !== "yes" || state.declineFarewellReleaseAge === null) {
+    return false;
+  }
+  if (state.recordSavedDismissAge === null) return true;
+  // Oracle-measured (docs/factory-terminal-record-yes-ground-truth.md): the
+  // dismissed message stays drawn for `declineTextClearDelay` more ticks --
+  // the SAME box-wipe delay the farewell's own menu-to-text transition
+  // uses -- because `declineFarewellReleaseAge` re-armed to this dismiss
+  // tick above, and the farewell doesn't wipe the box until its own
+  // (unchanged) boxClearAge.
+  return state.age <
+    state.declineFarewellReleaseAge + state.profile.declineTextClearDelay;
+}
+
+export function factoryTerminalRecordSavedBoxClearAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const edge = state.declineFarewellReleaseAge;
+  return edge === null
+    ? null
+    : edge + state.profile.recordSavedTextClearDelay;
+}
+
+export function factoryTerminalRecordSavedTextFirstAge(
+  state: FactoryTerminalPresentationState,
+): number | null {
+  const edge = state.declineFarewellReleaseAge;
+  return edge === null
+    ? null
+    : edge + state.profile.recordSavedTextFirstDelay;
+}
+
 export function factoryTerminalDeclineBoxGoneAge(
   state: FactoryTerminalPresentationState,
 ): number | null {
@@ -657,12 +747,14 @@ function advanceFactoryTerminalRecordPrompt<
   | "recordChoice"
   | "declineFarewellReleaseAge"
   | "declineDismissAge"
+  | "recordSavedDismissAge"
 > {
   let recordPromptReleaseAge = state.recordPromptReleaseAge;
   let recordMenuCursor = state.recordMenuCursor;
   let recordChoice = state.recordChoice;
   let declineFarewellReleaseAge = state.declineFarewellReleaseAge;
   let declineDismissAge = state.declineDismissAge;
+  let recordSavedDismissAge = state.recordSavedDismissAge;
   const atNextAge = { ...state, age };
   if (
     recordPromptReleaseAge === null &&
@@ -690,20 +782,34 @@ function advanceFactoryTerminalRecordPrompt<
   // (YES) calls EventScript_RecordBattle -> EventScript_SaveBattle
   // (`frontier_savebattle` + msgbox "{PLAYER}'s battle was recorded on the
   // FRONTIER PASS.", scripts.inc:87-88 /
-  // BattleFrontier_BattleTowerBattleRoom/scripts.inc:472-474), which then
-  // falls into the same EndRecordBattle (`msgbox Text_LookForwardToNextVisit`
-  // + closemessage + releaseall). Standing decision 2026-08-05 (ISSUES.md
+  // BattleFrontier_BattleTowerLobby/scripts.inc:132-138), which then falls
+  // into the same EndRecordBattle (`msgbox Text_LookForwardToNextVisit` +
+  // closemessage + releaseall). Standing decision 2026-08-05 (ISSUES.md
   // ~1008, docs/factory-lobby-freeroam-ground-truth.md §4): RECORD is
   // stub-only, no real recording ever -- so this arms the SAME
-  // declineFarewellReleaseAge edge for all three answers (identical to NO's
-  // existing pinned timing) and deliberately omits the YES-branch's "battle
-  // was recorded" message, which is not yet ground-truthed (only the shared
-  // farewell is, docs/post-terminal-beyond-boundary-ground-truth.md rows
-  // 4990-5093). Open remainder: #104.
+  // declineFarewellReleaseAge edge for all three answers on confirm
+  // (identical to NO's existing pinned timing), and for YES that edge is
+  // reused as the "battle was recorded" message's own edge (below) until
+  // that message's own dismiss re-arms it to drive the real farewell.
   if (recordChoice !== null && declineFarewellReleaseAge === null) {
     declineFarewellReleaseAge = age;
   }
+  const awaitingRecordSavedDismiss =
+    recordChoice === "yes" && recordSavedDismissAge === null;
   if (
+    awaitingRecordSavedDismiss &&
+    declineFarewellReleaseAge !== null &&
+    input.pressedA &&
+    age >= declineFarewellReleaseAge + state.profile.recordSavedInputDelay
+  ) {
+    // Dismiss the YES-only "battle was recorded" message and re-arm
+    // declineFarewellReleaseAge to THIS tick -- every existing farewell
+    // constant/renderer below now drives the real EndRecordBattle text from
+    // here, unmodified, exactly mirroring NO/cancel's own single-edge shape.
+    recordSavedDismissAge = age;
+    declineFarewellReleaseAge = age;
+  } else if (
+    !awaitingRecordSavedDismiss &&
     declineFarewellReleaseAge !== null &&
     declineDismissAge === null &&
     input.pressedA &&
@@ -717,6 +823,7 @@ function advanceFactoryTerminalRecordPrompt<
     recordChoice,
     declineFarewellReleaseAge,
     declineDismissAge,
+    recordSavedDismissAge,
   };
 }
 
