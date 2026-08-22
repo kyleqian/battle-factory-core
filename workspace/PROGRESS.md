@@ -5,6 +5,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1376 — [supervisor fold, 2026-08-22 13:10] **End-turn cursor fix folded (`a6deb814`: Future Sight/Perish Song pass no longer rescans from 0 after a faint pause — timers were double-counted); #102 CLOSED (crash half fixed, end-turn lead refuted twice, adjacent cursor bug fixed); #111 fixed; driver round-identity reset salvaged; `full`/`vanilla` 0:240 re-swept — #112/#113 filed as ≤9 s live repros**
+
+- **State:** master = merge of `worker/side-20260822-114356` (end-turn
+  cursor, Opus) + `005d290f` (#111: loss zeroes `rentsCount`) + the salvaged
+  driver reset (cap-killed worker, Part B verified by the supervisor: pin
+  43/43, smoke 444, vanilla 0:20 below). **New shared-state fields
+  (recorded per the boundary rule):** `BattleScriptRulesContext.wishPerishSongState`
+  / `.wishPerishSongBattlerId` (source-named, default 0, optional on the
+  input; key-shape pin moved). Full `npm test` + `npm run build` on this
+  union: running in the background at this commit (result in the next entry).
+- **Sweeps (`docs/soak-full-vanilla-0-240-2026-08-22.md`):** vanilla 0:240
+  **240/240 OK**; full 0:240 **236/240** — seeds 110/230 are #102/#108 (now
+  OK on master), seeds **108** (`resolution handoff battler 0 display does
+  not match the genuine next boundary`, after a forced send-out) and **192**
+  (`Cmd_openpartyscreen: unresolved battler selector BS_FAINTED` on a switch
+  turn) are new → ISSUES #112/#113, side worker (Opus) on them now, based on
+  the end-turn branch.
+- **Docs:** ISSUES −#102 −#111 +#112 +#113 +#114 (doubles-era
+  FutureAttacks inline-loop note); PAPERCUTS −driver-reset +gate6-manifest
+  OOM. Cap lesson: a 35-min cap for two parts + a 0:60 before/after sweep was
+  too tight (worker killed mid-suite) — give measurement briefs ≥ 50 min or
+  drop the sweep.
+- **Next:** verify #112/#113 result and fold; then #104 remainder (needs an
+  OFF trace) or #110 cleanup as a small main step; draft heuristic n ≥ 180 if
+  a side slot frees; wind-down gates (full suite, build, vanilla 0:20, full
+  0:60) at ~18:30.
+
+---
+
 ## 1375 — [main worker, 2026-08-22] **ISSUES #108 CLOSED: 2/5 fixed (`STRINGID_PKMNRAGEBUILDING`, `STRINGID_PKMNSNATCHEDMOVE`), 3/5 reclassified DEAD on re-trace (Pay Day, Drizzle, Drought) — the #106/#107 census's reachability claims were wrong for all three**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` +
@@ -58,60 +87,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (clean `df60c00a` worktree, background); side = #102 end-turn cursor.
 - **Next:** ts = #108; then #111 (+ the driver papercut) as one small side
   step; #104 remainder; draft heuristic n ≥ 180 if time.
-
----
-
-## 1373 — [main worker, 2026-08-22] **#106 + #107 FIXED (`STRINGID_PKMNATTACK`/`STRINGID_PKMNSUBSTITUTEFADED`); soak seed 203 now runs to an honest OK; full sibling census done — 5 more confirmed-reachable gaps filed as #108, ~15 confirmed unreachable and recorded**
-
-- **State:** `src/engine/battleResolutionPresentation.ts` +
-  `src/engine/factoryBattleScriptFullTurnDecision.ts` (fix),
-  `tests/presentationStringIssue106.test.ts` +
-  `tests/presentationStringIssue107.test.ts` (new, both red-verified via
-  `git stash`), `ISSUES.md` (#106/#107 deleted; #108 filed with the sibling
-  census). Commits `e0995774`, `880a8bb8`. `npm test` **1,088 files / 10,198
-  passed / 223 skipped**, `npm run build` green (the build's `tsc -b` caught
-  two tuple-widening typecheck errors vitest's untyped run missed — fixed in
-  the second commit, no behavior change). `executableFrontierRatchet.test.ts`
-  pins unchanged (no new production import, no barrier-count change).
-- **Did:** census methodology (not soak-driven): cross `battle-message-
-  templates.json`'s placeholder table against every `printstring` site in
-  `battle-script-program.json`, then against `messageLines`' explicit-case
-  list plus its generic fallback (`B_LAST_ITEM`/`B_ATK_NAME_WITH_PREFIX`/
-  `B_EFF_NAME_WITH_PREFIX`/`B_SCR_ACTIVE_NAME_WITH_PREFIX` only — notably
-  **not** `B_DEF_NAME_WITH_PREFIX`, the single biggest gap source). 213
-  distinct printed STRINGIDs; 37 initial gap candidates; 5 already covered by
-  a sibling resolver function invisible to a `messageLines`-only grep
-  (`resolveMoveSelectionRejectionMessageLines`/`resolveNoMovesLeftMessageLines`,
-  Torment/Choice-item/no-moves-left selection rejections); ~15 ruled
-  unreachable in Factory L50 singles by reading the actual source branch
-  (doubles-only, wild-only, tag-battle-only, link-only, Local-not-Frontier,
-  Arena-not-Factory, or an unported effect); **7 confirmed reachable +
-  missing a resolver** — #106, #107 (both fixed this step) plus 5 more filed
-  as **#108** (Rage, Pay Day, Drizzle, Drought, Snatch — not fixed, time-
-  boxed). Full table (STRINGID / placeholders / reachable? / fixed? / pin)
-  is in the commit body and `ISSUES.md` #108's entry, not repeated here.
-  **#106** (`"{B_BUFF1}'s attack!"`, `BattleScript_BeatUpLoop`):
-  `Cmd_trydobeatup` (`battleScriptBeatUpOpcode.ts`) already recorded the
-  looping party member as `battleTextBuff1MonNick {battler, partyIndex}`
-  (the same carrier `STRINGID_PKMNTRACED` uses) — needed a
-  `prepareMessage` substitution (full `rules.party` access, since the
-  looping member need not be the active battler) plus a `messageLines`
-  case. Staged Beat Up **directly** (not via Metronome): a real 3-member
-  healthy player party, confirms all 3 conscious members print in turn.
-  **#107** (`"{B_DEF_NAME_WITH_PREFIX}'s SUBSTITUTE faded!"`,
-  `BattleScript_SubstituteFade`): plain `requireMoveDefender` idiom, no
-  `prepareMessage` change needed. Staged a real trainer Substitute (patched
-  to 1 HP directly on the constructed `rulesContext` — no config field
-  exposes `substituteHP` yet) broken by a real player attack.
-  **Seed 203** (original #106 repro): now **OK budget, 1,000,000f, 24.4s,
-  carry≤14 depth≤18** — no crash (previously crashed at frame 490300).
-- **Next:** fix #108's five siblings (same house pattern, no new
-  investigation needed — root cause and call sites are already documented
-  there); #102 (side lane, concurrent, not this lane's file set); the
-  `full`/`vanilla` 0:240 soak re-sweeps still outstanding (1370's note,
-  carried forward).
-- **Notes:** no PAPERCUT beyond the build-vs-vitest typecheck gap already
-  documented above (cost ~5 min, not a tooling defect — `npm test` alone
-  would have shipped a build-breaking test file).
 
 ---

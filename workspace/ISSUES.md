@@ -17,24 +17,6 @@ backlog.
 
 # Open
 
-## #111 — `rentsCount` is not reset after a loss (source divergence in `advanceFactoryCarry`)
-
-**Found 2026-08-22** (supervisor, reading the post-loss re-chain while
-inspecting the 4M-frame depth probe). Source `InitFactoryChallenge`
-(`battle_factory.c:208-212`) zeroes BOTH `factoryWinStreaks` and
-`factoryRentsCount` when the streak is inactive, i.e. at the first challenge
-after a loss (the loss lobby script sets `FACTORY_DATA_WIN_STREAK_ACTIVE`
-FALSE). The port's `advanceFactoryCarry` (`src/engine/factoryRoundChaining.ts:56-70`)
-zeroes only `factoryWinStreak` on a loss and carries `rentsCountAfterRound`
-through. Effect: after a loss, `getFactoryRentalRank`
-(`GetNumPastRentalsRank` thresholds 15/22/29/36/43) can stay elevated, so the
-next challenge's draft pool gets better-range rentals the real game would not
-grant. Reachable only by a player who swapped ≥ 15 times before losing (the
-soak's `winning` policy declines swaps, so no sweep number is affected). Fix
-shape: reset `rentsCount` to 0 on the loss branch + a Tier-1 pin on
-`advanceFactoryCarry` (win keeps, loss zeroes) — and check whether the
-`factoryRoundChaining` carry is the only consumer (`core.ts:846`).
-
 ## #110 — `Cmd_openpartyscreen`'s single-legal-bench shortcut bypasses `GetMostSuitableMonToSwitchInto`
 
 **Found 2026-08-22** (side worker, #102 fix). `battleScriptOpenPartyScreenOpcode.ts`'s
@@ -55,6 +37,61 @@ the only call site (one opponent battler), so this is an unmodelled source
 condition rather than a live bug — port it when doubles or a second consumer
 arrive, with a Tier-1 pin.
 
+## #113 — `full`-policy soak seed 192 crashes: `Cmd_openpartyscreen: unresolved battler selector BS_FAINTED at program counter 2046` on a player switch turn
+
+**Found 2026-08-22** (supervisor's `full` 0:240 re-sweep on the new soak
+semantics, `docs/soak-full-vanilla-0-240-2026-08-22.md`). Live on master
+`bc0078e2`, cheap (~9 s): `node --experimental-strip-types
+tools/soak/randomRoundSoak.ts --policy full --seed 192 --render-every 0
+--verbose`. Crashes at battle 1 turn 23, frame 362924 (`carry<=7 depth<=7`),
+after the player chose POKEMON → party row 1 on two consecutive turns (t22:
+row 2, t23: row 1). Stack (`[engine/tick]`, engine throw):
+```
+Error: Cmd_openpartyscreen: unresolved battler selector BS_FAINTED at program counter 2046
+    at <anon> (src/engine/battleScriptOpenPartyScreenOpcode.ts:170)
+    at stepBattleScriptMachine (src/engine/battleScriptMachine.ts:879)
+    at runScriptToOwnEnd (src/engine/factoryBattleScriptFullTurnDecision.ts:1408)
+```
+**Lead (untested):** `openpartyscreen BS_FAINTED` reached from the ordinary
+turn script runner (`factoryBattleScriptFullTurnDecision.ts:1408`), not from
+the fainted-actions orchestration that normally sets `selectorRoles.fainted`
+— i.e. a faint that happens INSIDE a switch turn's script (switch-in hazard
+damage such as Spikes, or Pursuit on the switching battler) rather than at
+the usual `HandleFaintedMon` pass. Capture which script owns pc 2046
+(`src/data/gen/battle-script-program.json`) and which battler fainted before
+generalising.
+
+## #112 — `full`-policy soak seed 108 crashes: `FactoryRoundOrchestratorError: resolution handoff battler 0 display does not match the genuine next boundary` right after a forced send-out
+
+**Found 2026-08-22** (same re-sweep). Live on master `bc0078e2`, ~9 s:
+`node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy full
+--seed 108 --render-every 0 --verbose`. Crashes at battle 1 turn 8, frame
+338124 (`carry<=0 depth<=2`), ~430 frames after the player's forced
+send-out (mon fainted at t8 → forced party → "confirm send-out" at f=337691),
+during the resolution-advance window. Stack:
+```
+FactoryRoundOrchestratorError: resolution handoff battler 0 display does not match the genuine next boundary
+    at fail (src/engine/factoryRoundBattleOrchestrator.ts:478)
+    at settledCommandForResolutionHandoff (src/engine/factoryRoundBattleOrchestrator.ts:1875)
+    at advanceFactoryRoundBattleResolution (src/engine/factoryRoundBattleOrchestrator.ts:2306)
+```
+This is the presentation seam's own consistency check (the displayed battler-0
+state vs the engine's genuine next boundary) firing — so it is either a real
+display/RAM divergence after a forced switch-in (player-visible) or an
+over-strict check. Determine which from the two compared values before
+fixing; do not loosen the check to make the soak pass.
+
+## #114 — `runFutureAttacksAfterFaints` fires a delayed hit inline and keeps looping where source returns per effect (doubles-era divergence)
+
+**Found 2026-08-22** (side worker, #102 end-turn cursor fix `a6deb814`). Source
+`HandleWishPerishSongOnTurnEnd` (`battle_util.c:1785-1888`) `return TRUE`s after
+each Future Sight/Perish Song script and re-enters via `BattleTurnPassed`,
+so a second delayed KO in the same turn takes its own `HandleFaintedMonActions`
+round-trip; the port runs the remaining battlers inline. Equivalent now that
+the `wishPerishSongState`/`wishPerishSongBattlerId` cursor persists
+(`tests/endTurnResumeCursorIssue102.test.ts`), and unreachable in singles
+(one delayed hit per side per turn) — pin it when doubles arrive.
+
 ## #104 — Terminal record prompt's YES branch omits the real "battle was recorded" message (stub-only remainder)
 
 **Both the driver and engine halves that used to make this issue soft-lock
@@ -74,58 +111,6 @@ ground-truthed (`docs/post-terminal-beyond-boundary-ground-truth.md` §rows
 4990-5093), not the YES-branch message. Standing decision (2026-08-05):
 RECORD is stub-only, so the real fix is ground-truthing and adding that one
 message string, not a real save. No player-visible soft-lock remains.
-
-## #102 — End-turn per-battler loop does not resume in place after a fainted-actions pause (missed-damage class); the original `Cmd_switchhandleorder` crash half is FIXED
-
-**Crash half FIXED 2026-08-22** (`5cc52595`, pin `tests/switchHandleOrderIssue102.test.ts`,
-red-verified on the live seed-138 throw): `GetMostSuitableMonToSwitchInto`
-legitimately returns PARTY_SIZE when no bench member can damage the opposing
-active (pass 2 only moves `bestMonId` on a strict damage improvement); source's
-`OpponentHandleChoosePokemon` (`battle_controller_opponent.c:1629-1660`) then
-takes the first alive non-active party slot, which the port did not do —
-`monToSwitchIntoId` stayed undecided and `switchhandleorder` threw. Seed 138
-now OK (budget); `winning` 130:150 20/20 OK. Both earlier repros (seeds 154,
-138, each right after a player FAINT ATTACK KO) were this shape.
-
-**Open half — in flight on the side lane (2026-08-22):**
-
-*Strongest remaining lead (confirmed by source reading, not yet tied to this
-exact crash message):* `runDoBattlerEndTurnEffects`
-(`battleEndTurnOrchestration.ts:1497-1600+`) loops `battlerOrder`, applying
-each battler's own end-turn ticks (ingrain/abilities/items1/leech
-seed/status damage/nightmare/curse/wrap/uproar/thrash/disable/encore/...),
-but returns `{kind:"outcome-decided"}` — bailing the *entire* loop, not just
-the fainted battler's own remaining ticks — the instant any single tick
-faints a battler. Its caller, `runBattleEndTurnOrchestration`
-(`:2420-2427`), does not distinguish "bailed early" from "all battlers
-completed": it takes `battlerResult.state` either way and immediately calls
-`runBattleScriptFaintedActionsOrchestration` (`:2431`). If that needs a
-player choice, the reducer tags the pause `resumeAt:
-"finish-end-turn-after-faints"` (`factoryBattleScriptFullTurnDecision.ts:2283`,
-the *only* end-turn resume tag that exists — checked via
-`grep -n resumeAt src/engine/*.ts`), and resuming
-(`resumeBattleEndTurnAfterFaintedActions`, `battleEndTurnOrchestration.ts:2357-2363`)
-unconditionally re-enters at `runFutureAttacksAfterFaints` — it never
-re-enters `runDoBattlerEndTurnEffects` for battlers `battlerOrder` had not
-yet reached. Net effect: any battler ordered after the one whose own
-end-turn tick triggered a fainted-actions pause silently loses its own
-end-turn residual effects for that turn — a real divergence from
-`DoBattlerEndTurnEffects`'s C-side per-battler cursor (`battle_util.c`),
-which resumes the same or next battler in place and never jumps ahead to
-Future Sight/Perish Song. No test currently exercises this (`grep -rn
-"finish-end-turn-after-faints\|resumeBattleEndTurnAfterFaintedActions"
-tests/*.ts` is empty). This produces a *missed-damage* class of bug on its
-own (a later battler survives a turn it shouldn't have); I could not derive
-a single clean hop from it to *this* crash's exact "no decided
-monToSwitchIntoId" symptom within this session's time, since the skipped
-battler simply doesn't faint this pass rather than reaching
-`switchhandleorder` undecided.
-
-**Next:** Tier-1 pin staging two battlers with pending per-battler end-turn
-ticks where the earlier-ordered battler's own tick faints it and needs a
-player-choice pause; confirm the later battler loses its residual; fix with a
-persisted per-battler loop cursor (source: `gBattleStruct->turnEffectsTracker`
-+ `turnEffectsBattlerId`, resumed in place).
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 

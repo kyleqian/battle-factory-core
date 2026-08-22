@@ -8,19 +8,17 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
-## Soak driver resets its per-battle labels/policy state only on a `battleIndex` CHANGE
+## `tests/gate6CoverageManifest.test.ts` OOM-crashes under bare `npx vitest`
 
-- **What:** `randomRoundSoakDriver.ts` `trackProgress` zeroes the verbose
-  `tN` turn label, `turnsThisBattle` and `switchedAgainstOpponentIndices`
-  only when `orch.round.rules.battleIndex` differs from the last tick. A round
-  lost at battle 1 followed by the next round's battle 1 keeps the old values:
-  verbose transcripts show `b1 t12` at a new battle's first turn, and the
-  `winning` policy's "already switched against this opponent index" set leaks
-  into the next round. Cost the 2026-08-22 supervisor ~10 min chasing a
-  phantom "stale engine turn counter" in the 4M-frame depth probe.
-- **Hits:** 1 (2026-08-22).
-- **Fix:** key the reset on the round identity (orchestrator instance /
-  `config.factoryWinStreak` + generation) as well as `battleIndex`.
+- **What:** the manifest test needs `npm test`'s `--max-old-space-size=8192`;
+  a targeted `npx vitest run tests/gate6CoverageManifest.test.ts` dies with a
+  heap OOM, so a worker that adds a Tier-1 test cannot cheaply re-check the
+  auto-discovered manifest and only learns of the content mismatch after a
+  ~3 min full run (then regenerates `docs/gate6-coverage-manifest.{json,md}`).
+- **Hits:** 1 (2026-08-22 side worker, ~8 min).
+- **Fix:** give the targeted invocation the heap (`NODE_OPTIONS` in the test
+  file's own setup or an `npm run test:manifest` script), and say in AGENTS.md
+  that adding a Tier-1 test means regenerating the manifest.
 
 ## `switchhandleorder` / `getswitchedmondata` throws carry only the battler id
 
