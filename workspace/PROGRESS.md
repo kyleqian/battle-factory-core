@@ -5,6 +5,36 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1381 — [main worker, 2026-08-22] **ISSUES #71 Slice C re-verified DONE, no code change needed (guards were already landed at entries 891/894-895) — stale "remainder" sentence trimmed**
+
+- **State:** master `adf633e9` + this docs-only commit. Read both back
+  hand-fits (`magbySendOut.ts` MAGBY/Docile, `battleMenu.ts` ONIX-back
+  `PLAYER_SETTLE_WOBBLE_Y2_TABLE`) and all their call sites: all 3
+  consumers already guarded — `drawPlayerMaterializeSettle` (legacy ONIX
+  back) throws for any encounter but destin/jenson;
+  `drawTurn15ForcedSwitchRelease` (MAGBY back) throws for any species but
+  MAGBY, and its only caller pre-gates on `name==="MAGBY"&&species===240`
+  so the throw never fires in play; `generatedPlayerMaterializeSettleY2`
+  (generated-route ONIX back) takes the documented generic `y2=0` fallback
+  for non-ONIX since KADABRA/others legitimately reach it — no throw, per
+  the brief's own fallback branch. All pinned:
+  `tests/battleScene.test.ts` 306/306,
+  `tests/generatedPlayerMaterializeSettleSpecies.test.ts` 7/7.
+- **Did:** no `src/`/`tests/` edit (confirmed `git diff --stat adf633e9 --
+  src/ tests/ tools/` empty). Trimmed ISSUES #71's stale
+  2026-08-07 "what remains is Slice C" sentence (pre-dated by the
+  2026-08-03 entries that closed it) to point at the completion instead.
+  Full verification re-run: `npm test` 1094 files/10220 passed/223 skipped,
+  `npm run build` green, smoke 444/444, ratchet unchanged (no src touched).
+  Soaks: `vanilla` 0:20 **20/20 OK**, `full` 0:40 **40/40 OK**. No
+  differential needed — HEAD == starting commit, tool refuses a self-diff.
+- **Next:** #71's only genuinely open main-lane share is the §1e 56/58
+  move-window pair-guard-throw sites (separate, larger effort) — filler
+  priority, pick up next if resuming this thread.
+- **Notes:** no new papercuts this session.
+
+---
+
 ## 1380 — [supervisor fold, 2026-08-22 14:35] **#115 FIXED + folded (`ade427f7`, salvaged: post-switch-in messages name the slot's CURRENT occupant); #110 + richer switch-in throws (1379); draft heuristic WITHHELD for good at n=180 (≥21: 40 vs 7); session depth number on the fixed tree: `winning` 0:180 → 180/180 OK, carry ≥ 28 in 4/180**
 
 - **State:** master = 1379 + merge of `worker/side-20260822-130450` (#115;
@@ -39,26 +69,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the decided array/party HP/script label+pc; two new pins; PAPERCUTS entry deleted.
 - **Next:** fold #115; draft heuristic n ≥ 180; final `winning` 0:240 depth.
 - **Notes:** no new papercuts this session.
-
----
-
-## 1378 — [supervisor fold, 2026-08-22 13:55] **#112 + #113 FIXED + folded (`3c6e192a` `Cmd_getexp` republishes `gBattlerFainted`; `6f810a51` forced send-out resumes at the SELECTED switch-in — 12 display commands were being dropped); #104 CLOSED (1377, YES-path trace 133/133 re-run by the supervisor); #116 filed: `vanilla` is seed-invariant**
-
-- **State:** master `4837a062`+docs. Merged-tree checks: #104 compare
-  **133/133**, pins 15/15, smoke 444 (union full suite at `05311bbf`:
-  **1,091 files / 10,208 passed / 223 skipped**, build green; the #104 and
-  #112/#113 workers each ran full suites at their commits — 10,208 / 10,211).
-  `full` seeds 108 + 192 now OK; `full` 100:120 20/20; vanilla 0:20 20/20.
-- **Findings recorded:** #116 — every `vanilla` seed replays ONE trajectory
-  (240/240 identical end states; the policy draws no RNG and the engine RNG
-  advances only on draws), so the standing "vanilla 0:20" gate is a
-  single-trajectory smoke ×20 — user-facing gate semantics, recorded with
-  options, not changed. #117 (1-frame record-cursor timing, from the #104
-  trace). #115 (post-forced-switch messages name the PRE-switch mon — side
-  worker on it now, base `6f810a51`). PAPERCUTS +2 (#104 worker).
-- **Next:** fold #115; main = #110 cleanup + richer switch-in throws
-  (PAPERCUTS); side after #115 = draft heuristic n ≥ 180 measurement; final
-  `winning` 0:240 depth number on the fully-fixed tree + wind-down gates
-  from ~18:15.
 
 ---

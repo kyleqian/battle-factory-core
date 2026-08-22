@@ -134,12 +134,16 @@ been a **361-px regression** over bbox (164,41)-(190,71), not an inert no-op.
 Independently corroborated: `mid-battle-switch-dense-a-off` is byte-exact
 with a settled RATTATA opponent front sprite on screen. Consequence: the
 front terminal-offset wiring is **ON-profile-only** work, and the main lane
-(whose oracle is OFF) has nothing to hook up for it. What remains genuinely
-main-lane here is Slice C of `docs/send-out-live-wiring-consumer-map.md` §5 —
-guarding the `src/engine/` back hand-fits so an uncovered species/nature
-fails loudly instead of silently drawing the wrong table. Per-tick playback
-(Slice D) is likewise ON-profile behaviour: OFF skips front and back send-out
-animations entirely.
+(whose oracle is OFF) has nothing to hook up for it. Slice C of
+`docs/send-out-live-wiring-consumer-map.md` §5 (guarding the `src/engine/`
+back hand-fits so an uncovered species/nature fails loudly instead of
+silently drawing the wrong table) was already DONE below (entries 891,
+894/895) by the time this paragraph was written — re-verified still green
+2026-08-22 (main worker, all three guard/fallback sites re-read + their
+Tier-1 pins re-run: `tests/battleScene.test.ts` 306/306,
+`tests/generatedPlayerMaterializeSettleSpecies.test.ts` 7/7). Per-tick
+playback (Slice D) is likewise ON-profile behaviour: OFF skips front and
+back send-out animations entirely.
 
 **Sequencing (updated 2026-08-03, mid-session user directive):** the hookup
 is the MAIN lane's job ("the animation supervisor works on implementing the

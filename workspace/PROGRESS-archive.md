@@ -1,3 +1,24 @@
+## 1378 — [supervisor fold, 2026-08-22 13:55] **#112 + #113 FIXED + folded (`3c6e192a` `Cmd_getexp` republishes `gBattlerFainted`; `6f810a51` forced send-out resumes at the SELECTED switch-in — 12 display commands were being dropped); #104 CLOSED (1377, YES-path trace 133/133 re-run by the supervisor); #116 filed: `vanilla` is seed-invariant**
+
+- **State:** master `4837a062`+docs. Merged-tree checks: #104 compare
+  **133/133**, pins 15/15, smoke 444 (union full suite at `05311bbf`:
+  **1,091 files / 10,208 passed / 223 skipped**, build green; the #104 and
+  #112/#113 workers each ran full suites at their commits — 10,208 / 10,211).
+  `full` seeds 108 + 192 now OK; `full` 100:120 20/20; vanilla 0:20 20/20.
+- **Findings recorded:** #116 — every `vanilla` seed replays ONE trajectory
+  (240/240 identical end states; the policy draws no RNG and the engine RNG
+  advances only on draws), so the standing "vanilla 0:20" gate is a
+  single-trajectory smoke ×20 — user-facing gate semantics, recorded with
+  options, not changed. #117 (1-frame record-cursor timing, from the #104
+  trace). #115 (post-forced-switch messages name the PRE-switch mon — side
+  worker on it now, base `6f810a51`). PAPERCUTS +2 (#104 worker).
+- **Next:** fold #115; main = #110 cleanup + richer switch-in throws
+  (PAPERCUTS); side after #115 = draft heuristic n ≥ 180 measurement; final
+  `winning` 0:240 depth number on the fully-fixed tree + wind-down gates
+  from ~18:15.
+
+---
+
 ## 1377 — [main worker, 2026-08-22] **ISSUES #104 CLOSED: YES branch now shows EventScript_SaveBattle's own "battle was recorded" message before the shared farewell**
 
 - **State:** `src/engine/factoryTerminalPresentation.ts` +
