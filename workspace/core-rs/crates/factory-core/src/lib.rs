@@ -31,6 +31,8 @@ pub mod battle_script_gender;
 pub mod battle_script_gender_vectors_gen;
 pub mod battle_script_givepaydaymoney;
 pub mod battle_script_givepaydaymoney_vectors_gen;
+pub mod battle_script_incrementgamestat;
+pub mod battle_script_incrementgamestat_vectors_gen;
 pub mod battle_script_jumpifnodamage;
 pub mod battle_script_jumpifnodamage_vectors_gen;
 pub mod battle_script_jumpifnotfirstturn;
