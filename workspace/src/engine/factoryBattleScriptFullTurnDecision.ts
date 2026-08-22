@@ -80,7 +80,7 @@ import {
   describeIllegalMoveSelection,
   type BattleScriptSelectionRejection,
 } from "./battleScriptActionAdmission.ts";
-import { battleStringReferencesToken, resolveMoveName } from "./battleStringResolver.ts";
+import { battleStringReferencesToken, resolveBattleNameWithPrefix, resolveMoveName } from "./battleStringResolver.ts";
 import {
   HOLD_EFFECT_NAME_BY_ID,
   unsupportedBranch,
@@ -1222,7 +1222,16 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                               // BattleScript_SandstreamActivates's {B_SCR_ACTIVE_ABILITY}
                                                               // -- Cmd_switchineffects's own Sand Stream branch sets
                                                               // scriptingBattler to the switching-in battler
-                                                              // (battleScriptSwitchinOpcode.ts:973-981).
+                                                              // (battleScriptSwitchinOpcode.ts:973-981). Drizzle/
+                                                              // Drought's own siblings (STRINGID_PKMNMADEITRAIN/
+                                                              // STRINGID_PKMNSXINTENSIFIEDSUN) are deliberately absent
+                                                              // here -- ISSUES #108's re-trace found both DEAD in
+                                                              // Factory Level-50 singles: Kyogre/Groudon are the only
+                                                              // Gen 3 Drizzle/Drought carriers and neither is a
+                                                              // `FRONTIER_MON_*` eligible rental, so their ability ids
+                                                              // aren't even in the Factory-rental-scoped
+                                                              // `summary-info.json` display-name table this resolver
+                                                              // reads.
                                                               : operand.expression === "STRINGID_PKMNSXWHIPPEDUPSANDSTORM"
                                                                 ? [resolveFactoryAbilityDisplayName(rules.battlers[rules.scriptingBattler].ability)]
                                                                 // BattleScript_PerishSongNotAffected's
@@ -1249,7 +1258,34 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
                                                                       ? (rules.selectorRoles.target === null
                                                                         ? []
                                                                         : [resolveMoveName(rules.futureSightMove[rules.selectorRoles.target])])
-                                                                      : [];
+                                                                      // ISSUES #106: BattleScript_BeatUpLoop's
+                                                                      // {B_BUFF1} -- Cmd_trydobeatup
+                                                                      // (battleScriptBeatUpOpcode.ts) already records
+                                                                      // the looping party member as
+                                                                      // battleTextBuff1MonNick {battler, partyIndex},
+                                                                      // the same general-purpose carrier
+                                                                      // STRINGID_PKMNTRACED uses -- but that member is
+                                                                      // not necessarily the active battler, so (unlike
+                                                                      // Trace) the name-with-prefix must be resolved
+                                                                      // here (full `rules.party` access), not via
+                                                                      // `field` at print time.
+                                                                      : operand.expression === "STRINGID_PKMNATTACK"
+                                                                        ? (rules.battleTextBuff1MonNick === null
+                                                                          ? []
+                                                                          : [resolveBattleNameWithPrefix({
+                                                                              side: rules.battlers[rules.battleTextBuff1MonNick.battler].side === 0
+                                                                                ? "player"
+                                                                                : "opponent",
+                                                                              isTrainerBattle: true,
+                                                                              nickname: battleCommandSpeciesDisplayName(
+                                                                                rules.party[
+                                                                                  rules.battlers[rules.battleTextBuff1MonNick.battler].side === 0
+                                                                                    ? "player"
+                                                                                    : "opponent"
+                                                                                ][rules.battleTextBuff1MonNick.partyIndex]!.species,
+                                                                              ),
+                                                                            })])
+                                                                        : [];
       return Object.freeze({
         kind: "message" as const,
         messageId: operand.expression,
@@ -1290,11 +1326,18 @@ function externalPorts(): BattleScriptStatusRulesExternalPorts {
           : {}),
         // Source gBattlerTarget at print time. The Intimidate pair cycles it
         // across opposing battlers; Cmd_tryexplosion re-points it to the Damp
-        // holder. Both differ from an ordinary move's opposite-side defender.
+        // holder. snatchsetbattlers (battleScriptSnatchOpcode.ts) always
+        // reassigns it to the snatcher itself, self-targeted victim move or
+        // not -- unlike selectorRoles.attacker (self-targeted case aliases
+        // it to the snatcher too, non-self-targeted case doesn't), so
+        // target is the only uniform source for {B_DEF_NAME_WITH_PREFIX}
+        // here (ISSUES #108). All four differ from an ordinary move's
+        // opposite-side defender.
         ...((
           operand.expression === "STRINGID_PKMNCUTSATTACKWITH"
           || operand.expression === "STRINGID_PREVENTEDFROMWORKING"
           || operand.expression === "STRINGID_PKMNPREVENTSUSAGE"
+          || operand.expression === "STRINGID_PKMNSNATCHEDMOVE"
         ) && rules.selectorRoles.target !== null
           ? { targetBattler: rules.selectorRoles.target }
           : {}),

@@ -486,7 +486,7 @@ type DraftPlan = {
   peekedSummary: boolean;
 };
 
-class RandomPlayer {
+export class RandomPlayer {
   private cooldown = 0;
   private draft: DraftPlan;
   // Sampled intents, keyed by decision surface identity so a new decision
@@ -497,6 +497,8 @@ class RandomPlayer {
   private lastCommandKey = "";
   private turnsThisBattle = 0;
   private lastBattleIndex = 0;
+  /** `factoryRoundBattleOrchestrator.config.id` as of the last tick, so a new round at the same `battleIndex` (e.g. battle 1 after a loss) still resets per-battle state. */
+  private lastRoundId: string | null = null;
   /** "winning" only: the bench row the action-menu heuristic committed to, consumed by onVoluntaryParty. */
   private pendingSwitchRow: 0 | 1 | 2 | null = null;
   /** "winning" only: opponent partyIndexes already switched against this battle (ping-pong guard). */
@@ -592,8 +594,10 @@ class RandomPlayer {
     const orch = state.factoryRoundBattleOrchestrator;
     if (!orch) return;
     const battleIndex = orch.round.rules.battleIndex;
-    if (battleIndex !== this.lastBattleIndex) {
+    const roundId = orch.config.id;
+    if (battleIndex !== this.lastBattleIndex || roundId !== this.lastRoundId) {
       this.lastBattleIndex = battleIndex;
+      this.lastRoundId = roundId;
       this.turnsThisBattle = 0;
       this.turn = 0;
       this.switchedAgainstOpponentIndices.clear();

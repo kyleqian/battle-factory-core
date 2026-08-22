@@ -202,7 +202,7 @@ describe("factoryRoundChaining (pure carry + generation)", () => {
     });
   });
 
-  it("resets the streak to zero but keeps symbols/BP/rents on a loss", () => {
+  it("resets the streak to zero and zeroes rentsCount on a loss (source InitFactoryChallenge:208-212), but keeps symbols/BP", () => {
     const carry: FactoryCarry = {
       factoryWinStreak: 21,
       factorySymbolsCount: 1,
@@ -220,7 +220,7 @@ describe("factoryRoundChaining (pure carry + generation)", () => {
       factoryWinStreak: 0,
       factorySymbolsCount: 1,
       battlePoints: 42,
-      rentsCount: 9,
+      rentsCount: 0,
       playerTrainerId: PLAYER_TRAINER_ID,
     });
   });
@@ -369,6 +369,7 @@ describe("factory round chaining (tick() scenario)", () => {
     const carry2 = chained2.factoryCarry;
 
     expect(carry2.factoryWinStreak).toBe(0);
+    expect(carry2.rentsCount).toBe(0);
     expect(carry2.battlePoints).toBe(carry1.battlePoints);
     expect(carry2.factorySymbolsCount).toBe(carry1.factorySymbolsCount);
     expect(chained2.pendingGeneratedRound).not.toBeNull();

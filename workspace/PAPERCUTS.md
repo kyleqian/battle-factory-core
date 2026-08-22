@@ -8,6 +8,51 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## `generated-orchestrator` compare traces re-chain the instant the record prompt is answered
+
+- **What:** since the 2026-08-14 continuous-play wiring, the default
+  `generated-orchestrator` appRoute re-chains into the next round as soon as
+  `recordChoice` is non-null (all three answers), so a compare trace that
+  wants the terminal farewell UI after the prompt sees the draft screen
+  instead. The #104 worker had to switch its trace to
+  `appRoute: "canonical-recorded"` to exercise the farewell at all.
+- **Hits:** 1 (2026-08-22, ~10 min).
+- **Fix:** document the route choice next to the terminal traces (or give
+  the generated route a "hold at terminal" option for compare runs).
+
+## Terminal-window probes must be derived with `bin/oracle lab`, not `bin/oracle run`
+
+- **What:** the terminal-seam traces are battle-lab scenarios; re-deriving a
+  YES-path probe from the NO-path one via `bin/oracle run` silently produces
+  the wrong frame model, and the mismatch only shows up as a non-matching
+  window. `bin/oracle lab tools/battle-lab/<probe>.json` is the right tool.
+- **Hits:** 1 (2026-08-22 #104 worker, "cost real time").
+- **Fix:** a one-line note in tools/compare/README (or the trace's own
+  header comment) naming the lab command.
+
+## `tests/gate6CoverageManifest.test.ts` OOM-crashes under bare `npx vitest`
+
+- **What:** the manifest test needs `npm test`'s `--max-old-space-size=8192`;
+  a targeted `npx vitest run tests/gate6CoverageManifest.test.ts` dies with a
+  heap OOM, so a worker that adds a Tier-1 test cannot cheaply re-check the
+  auto-discovered manifest and only learns of the content mismatch after a
+  ~3 min full run (then regenerates `docs/gate6-coverage-manifest.{json,md}`).
+- **Hits:** 1 (2026-08-22 side worker, ~8 min).
+- **Fix:** give the targeted invocation the heap (`NODE_OPTIONS` in the test
+  file's own setup or an `npm run test:manifest` script), and say in AGENTS.md
+  that adding a Tier-1 test means regenerating the manifest.
+
+## `switchhandleorder` / `getswitchedmondata` throws carry only the battler id
+
+- **What:** the engine's "no decided monToSwitchIntoId" throw names the
+  battler but not `monToSwitchIntoId`, party HP, or the script label, so the
+  #102 diagnosis needed a hand-rolled global ring buffer across three engine
+  files to see what `Cmd_openpartyscreen` had decided.
+- **Hits:** 1 (2026-08-22 side worker, ~10 min).
+- **Fix:** include the decided array, the selector's party HP list and the
+  current script label in the throw message (fail-loud stays; the message
+  just gets richer).
+
 ## `check-oracle-freshness.sh` compares against harness HEAD, not the last `oracle/` commit
 
 - **What:** the script FAILs (exit 1) whenever an oracle process started before
@@ -17,7 +62,7 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 7 (2026-08-19 supervisor orient: both ports FAILed again — same
+- **Hits:** 8 (2026-08-22 supervisor orient: same shape again, both ports; judged client-only in ~3 min and NOT restarted because the animation and rust supervisors were live on the shared services.) (2026-08-19 supervisor orient: both ports FAILed again — same
   09:45:59-vs-09:51:59 shape for 8014, zero `oracle/` commits since the 8012
   start; disproved in ~3 min via the commit-date check plus three sessions of
   walk-up staging evidence on the running 8014, kept both, no restart.)

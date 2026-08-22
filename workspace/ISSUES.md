@@ -17,211 +17,64 @@ backlog.
 
 # Open
 
-## #107 — STRINGID_PKMNSUBSTITUTEFADED references `{B_DEF_NAME_WITH_PREFIX}` with no resolver (Substitute breaking: "{target}'s SUBSTITUTE faded!") — same class as #100/#101/#105
+## #110 — `Cmd_openpartyscreen`'s single-legal-bench shortcut bypasses `GetMostSuitableMonToSwitchInto`
 
-**Found 2026-08-20** (side re-measure of the withheld draft heuristic on the
-#104-fixed tree, `wip/mb-step2b-draft-heuristic` @ `18222b3a`; `winning`
-seeds 27 and 29, battle 3 turn 7) — a pre-existing engine gap reached via a
-different RNG path, not a heuristic defect. Not yet reproduced on master
-itself (different trajectories); repro on that branch:
-`node --experimental-strip-types tools/soak/randomRoundSoak.ts --seed 27
---policy winning --verbose --render-every 0`.
+**Found 2026-08-22** (side worker, #102 fix). `battleScriptOpenPartyScreenOpcode.ts`'s
+`legalBenchIndexes.length === 1` shortcut skips the AI scorer entirely; it is
+redundant now that the #102 PARTY_SIZE fallback exists, and it filters eggs
+where source's fallback loop gates on `MON_DATA_HP != 0` only. Behaviourally
+inert in Factory singles (no eggs; one legal bench member is always the answer)
+— remove the shortcut so the opcode mirrors source's single path, with the
+existing open-party-screen tests as the guard.
 
-**Mechanism:** `battleStringResolver: STRINGID_PKMNSUBSTITUTEFADED references
-placeholder {B_DEF_NAME_WITH_PREFIX} with no resolver supplied` — a
-`messageLines` case is missing in `src/engine/battleResolutionPresentation.ts`
-for the substitute-broken message (`sText_PkmnSubstituteFaded`,
-`src/battle_message.c`; emitted by `BattleScript_SubstituteFade` from
-`Cmd_datahpupdate`'s substitute-HP path, `battle_script_commands.c`). Fix
-shape = the #100/#101/#105 house pattern (defender name resolver from the
-action snapshot, Tier-1 pin in `tests/presentationStringIssue107.test.ts`,
-red-verified). Sibling check worth doing in the same step: every remaining
-`{B_DEF_NAME_WITH_PREFIX}`/`{B_ATK_NAME_WITH_PREFIX}` STRINGID reachable in
-Factory singles without a `messageLines` case (grep the string table against
-the resolver sites) — four of these gaps were found one at a time today.
+## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
-## #106 — `winning`-policy soak seed 203 crashes: Beat Up's `STRINGID_PKMNATTACK` has no `B_BUFF1` resolver
+**Found 2026-08-22** (side worker, #102 fix). Source `GetMostSuitableMonToSwitchInto`
+(`battle_ai_switch_items.c`) skips a party slot already chosen for the other
+active battler in both its scoring passes; the port (`:702-703`, `:757-760`)
+does not. Unobservable in singles today because that slot is PARTY_SIZE at
+the only call site (one opponent battler), so this is an unmodelled source
+condition rather than a live bug — port it when doubles or a second consumer
+arrive, with a Tier-1 pin.
 
-**Found 2026-08-20** (M-B step-3 re-run, `docs/soak-deep-sweep-2026-08-20-semantics2.md`,
-`winning` policy seeds 0:240, new post-#104 OK/HANG semantics).
+## #116 — The `vanilla` soak policy is seed-invariant: the standing "vanilla 0:20 = 20/20" gate replays ONE trajectory twenty times
 
-**Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts
---seed 203 --policy winning --verbose --render-every 0`. Crashes at battle 1
-turn 13, frame 490300 (`carry<=14 depth<=18`), right after the player
-commits fight-menu slot 0 = move 118 (METRONOME). Error (`[engine/tick]`, an
-`src/engine/**` throw, not a driver bug):
-```
-Error: battleStringResolver: STRINGID_PKMNATTACK references placeholder {B_BUFF1} with no resolver supplied
-    at resolveBattleStringLines (src/engine/battleStringResolver.ts:170)
-    at messageLines (src/engine/battleResolutionPresentation.ts:3015)
-    at projectBattleResolutionCommands (src/engine/battleResolutionPresentation.ts:3188)
-```
-Last actions before the crash:
-```
-f=490240 b1 t12 resolution advance
-f=490263 b1 t12 resolution advance
-f=490281 b1 t12 resolution advance
-f=490294 b1 t13 action menu intent: FIGHT
-f=490294 b1 t13 action: FIGHT
-f=490300 b1 t13 fight menu intent: slot 0 (move 118)
-f=490300 b1 t13 fight: confirm slot 0
-```
+**Found 2026-08-22** (supervisor's `vanilla` 0:240 re-sweep,
+`docs/soak-full-vanilla-0-240-2026-08-22.md`): all 240 seeds end at exactly
+`b7 t11 600000f carry<=7 depth<=10`. Cause, by design: `vanilla` makes no
+RNG-backed choice (rent 0/1/2, first legal move, offered forced pick, swap NO,
+GO ON — `randomRoundSoakDriver.ts:443-446`); its only seed use is press-timing
+jitter, and the engine's RNG advances on draws, not per frame (ISSUES #55's
+parked ambient-VBlank contract), so timing never changes the game. `full`
+and `winning` are seed-diverse (240 distinct end states). Consequence: the
+user-directed wind-down gate "vanilla 0:20 must stay 20/20" is a
+single-trajectory smoke — real, but narrower than its seed range suggests,
+and it has been so since the policy was written. Not a defect in play.
+Options (user-facing gate semantics, so recorded rather than changed):
+(a) keep it and say so in the ROADMAP soak-policy block; (b) give `vanilla`
+one seed-backed choice that stays plain (e.g. rent a random 3-of-6 in slot
+order) so 0:20 covers 20 drafts; (c) switch the gate to `full` 0:60 + this
+note. Recommendation: (b) — smallest change that makes the seed range honest.
 
-**Lead (source-traced, not yet fix-verified):** `STRINGID_PKMNATTACK` =
-`"{B_BUFF1}'s attack!"` (`reference/pokeemerald/src/battle_message.c:218,670`),
-printed only by `BattleScript_EffectBeatUp`'s `BattleScript_BeatUpLoop`
-(`reference/pokeemerald/data/battle_scripts_1.s:1946-1951`, immediately after
-`trydobeatup`) — Beat Up prints one "`<party member>`'s attack!" per
-participating party member, so `B_BUFF1` needs to be set to that member's
-nickname on each loop iteration. Move 118 is METRONOME, which calls a random
-move — Metronome likely called Beat Up here. Not yet confirmed whether this
-port's Beat Up path is missing a `B_BUFF1` resolver generally, or only when
-reached via Metronome's indirection; needs a direct Beat Up repro (not
-through Metronome) to isolate. Not fixed this session (docs-only step,
-`src/` off-limits).
+## #117 — Record-prompt cursor move renders one frame off (`drawRecordPrompt`)
 
-## #104 — Terminal record prompt's YES branch omits the real "battle was recorded" message (stub-only remainder)
+**Found 2026-08-22** (#104 YES-path trace, `tools/compare/traces/loss-terminal-record-yes-off.json`):
+a 1-frame timing mismatch on the record-menu cursor move, pre-existing and
+unrelated to #104; excluded from that trace's capture window (4970-5102,
+133/133). Next: extend the capture list to the cursor-move frames, name the
+frame, fix in `factoryTerminalRender.ts`'s `drawRecordPrompt` against the
+existing NO-path ground truth (`docs/post-terminal-beyond-boundary-ground-truth.md`).
 
-**Both the driver and engine halves that used to make this issue soft-lock
-the whole run are FIXED** (`fd30ee13` engine: YES/B-cancel now continue like
-NO instead of dead-ending; `428ba1c4` + 2026-08-20 driver retune: continuous
-play now honestly reports `OK budget`/`OK max-rounds` while progressing and
-`HANG` only on a genuine stall, `tests/randomRoundSoak.test.ts` "ISSUES #104
-(driver)"). What remains is cosmetic only: `advanceFactoryTerminalRecordPrompt`
-(`src/engine/factoryTerminalPresentation.ts:~685-704`) deliberately arms the
-SAME `declineFarewellReleaseAge` continuation for all three answers (matching
-`case 1`/`MULTI_B_PRESSED` both `goto EndRecordBattle` in source), but the
-real `case 0` (YES) first shows `EventScript_RecordBattle` →
-`EventScript_SaveBattle`'s msgbox — "{PLAYER}'s battle was recorded on the
-FRONTIER PASS." (`scripts.inc:87-88`) — before falling into that same
-farewell, and this repo doesn't print it: only the shared farewell text is
-ground-truthed (`docs/post-terminal-beyond-boundary-ground-truth.md` §rows
-4990-5093), not the YES-branch message. Standing decision (2026-08-05):
-RECORD is stub-only, so the real fix is ground-truthing and adding that one
-message string, not a real save. No player-visible soft-lock remains.
+## #114 — `runFutureAttacksAfterFaints` fires a delayed hit inline and keeps looping where source returns per effect (doubles-era divergence)
 
-## #102 — `winning`-policy soak seed 154 crashes: `Cmd_switchhandleorder` sees no decided `monToSwitchIntoId` for battler 1 after a mid-round faint
-
-**Supervisor note 2026-08-20 (PROGRESS 1366):** the "end-turn effects skipped for later-ordered battlers" lead below was REFUTED by a staged Tier-1 scenario (`tests/endTurnFaintResumeIssue104.test.ts`, fold `3fa78a98`): the engine's bail is keyed on `battleOutcome !== 0`, matching `BattleTurnPassed`; the later battler keeps its tick (HP 100→88). Only the original non-reproducing crash remains open here.
-
-**Found 2026-08-20** (M-B step-3 sweep, `docs/soak-deep-sweep-2026-08-20.md`,
-`winning` policy seeds 0:240).
-
-**Repro:** `node --experimental-strip-types tools/soak/randomRoundSoak.ts
---seed 154 --policy winning --verbose --render-every 0`. Crashes at battle 4
-turn 10, frame 104070 (`carry<=7 depth<=10`), right after the player commits
-fight-menu slot 0 = move 185 (FAINT ATTACK). Error (`[engine/tick]`, an
-`src/engine/**` throw, not a driver bug):
-```
-Error: Cmd_switchhandleorder: battler 1 has no decided monToSwitchIntoId -- openpartyscreen must run first
-    at <anon> (src/engine/battleScriptSwitchinOpcode.ts:326)
-    at stepBattleScriptMachine (src/engine/battleScriptMachine.ts:879)
-    at runScriptToOwnEnd (src/engine/battleScriptFaintedActionsOrchestration.ts:285)
-```
-Last actions before the crash:
-```
-f=104012 b4 t9 resolution advance
-f=104015 b4 t9 resolution advance
-f=104029 b4 t9 resolution advance
-f=104032 b4 t9 resolution advance (B)
-f=104041 b4 t9 resolution advance
-f=104064 b4 t10 action menu intent: FIGHT
-f=104064 b4 t10 action: FIGHT
-f=104070 b4 t10 fight menu intent: slot 0 (move 185)
-f=104070 b4 t10 fight: confirm slot 0
-```
-
-**2026-08-20 M-B step-4 triage session — repro lost, one lead confirmed, no
-fix landed.** Seed 154 no longer reaches frame 104070 on HEAD (its RNG
-trajectory shifted after the #101/#103 fixes landed the same day); reran the
-brief's fallback `--seeds 150:160` (10/10 OK) and, since that also came up
-clean, the full original `--seeds 0:240` sweep too (240/240 OK, 0 CRASH,
-0 HANG) — the crash is not currently live-reproducible. Diagnosis below is
-from source tracing only, per the brief's explicit fallback.
-
-*Ruled out:* `BattleScript_HandleFaintedMon`'s own script
-(`reference/pokeemerald/data/battle_scripts_1.s:2830-2845`) is straight-line
-for Factory (trainer-type battles always take
-`jumpifbattletype BATTLE_TYPE_TRAINER, BattleScript_FaintedMonTryChoose`):
-`openpartyscreen BS_FAINTED, BattleScript_FaintedMonEnd` always immediately
-precedes `switchhandleorder BS_FAINTED, 2` with nothing between them, both
-resolve the identical `selectorRoles.fainted` battler
-(`battleScriptRulesContext.ts:2859-2860`, shared by both opcodes), and the
-opponent/AI branch of `Cmd_openpartyscreen`
-(`battleScriptOpenPartyScreenOpcode.ts:201-268`) unconditionally computes and
-writes `monToSwitchIntoId[battler]` — it never halts. A genuine same-action
-double-KO (e.g. Destiny Bond faints the attacker alongside the target) also
-checks out: `resumeBattleScriptFaintedActionsAfterPlayerChoice`'s
-`remainingFaintedBattlers` re-collection
-(`battleScriptFaintedActionsOrchestration.ts:629-638`) correctly hands the
-still-fainted opponent battler to a fresh `runFaintedBattlerHandlers` pass
-after the player's own replacement resumes, and this exact shape (both
-battlers faint together, player resumes first, opponent's own dance runs
-second) is already pinned green
-(`tests/battleScriptFaintedActionsOrchestration.test.ts:290-331`, "simultaneous
-Rough Skin double faint").
-
-*Strongest remaining lead (confirmed by source reading, not yet tied to this
-exact crash message):* `runDoBattlerEndTurnEffects`
-(`battleEndTurnOrchestration.ts:1497-1600+`) loops `battlerOrder`, applying
-each battler's own end-turn ticks (ingrain/abilities/items1/leech
-seed/status damage/nightmare/curse/wrap/uproar/thrash/disable/encore/...),
-but returns `{kind:"outcome-decided"}` — bailing the *entire* loop, not just
-the fainted battler's own remaining ticks — the instant any single tick
-faints a battler. Its caller, `runBattleEndTurnOrchestration`
-(`:2420-2427`), does not distinguish "bailed early" from "all battlers
-completed": it takes `battlerResult.state` either way and immediately calls
-`runBattleScriptFaintedActionsOrchestration` (`:2431`). If that needs a
-player choice, the reducer tags the pause `resumeAt:
-"finish-end-turn-after-faints"` (`factoryBattleScriptFullTurnDecision.ts:2283`,
-the *only* end-turn resume tag that exists — checked via
-`grep -n resumeAt src/engine/*.ts`), and resuming
-(`resumeBattleEndTurnAfterFaintedActions`, `battleEndTurnOrchestration.ts:2357-2363`)
-unconditionally re-enters at `runFutureAttacksAfterFaints` — it never
-re-enters `runDoBattlerEndTurnEffects` for battlers `battlerOrder` had not
-yet reached. Net effect: any battler ordered after the one whose own
-end-turn tick triggered a fainted-actions pause silently loses its own
-end-turn residual effects for that turn — a real divergence from
-`DoBattlerEndTurnEffects`'s C-side per-battler cursor (`battle_util.c`),
-which resumes the same or next battler in place and never jumps ahead to
-Future Sight/Perish Song. No test currently exercises this (`grep -rn
-"finish-end-turn-after-faints\|resumeBattleEndTurnAfterFaintedActions"
-tests/*.ts` is empty). This produces a *missed-damage* class of bug on its
-own (a later battler survives a turn it shouldn't have); I could not derive
-a single clean hop from it to *this* crash's exact "no decided
-monToSwitchIntoId" symptom within this session's time, since the skipped
-battler simply doesn't faint this pass rather than reaching
-`switchhandleorder` undecided.
-
-**2026-08-20 M-B step-3 re-run — repro found again, live, at seed 138.**
-`docs/soak-deep-sweep-2026-08-20-semantics2.md`'s honest `winning` 0:240
-sweep (new post-#104 OK/HANG semantics) turned up a fresh, currently-live
-repro with the identical stack and error string: `node
---experimental-strip-types tools/soak/randomRoundSoak.ts --seed 138 --policy
-winning --verbose --render-every 0` crashes at battle 5 turn 3, frame 976153
-(`carry<=14 depth<=15`), right after the player commits fight-menu slot 0 =
-move 185 (FAINT ATTACK) — same move, same crash site, different seed/depth
-than the original (now-stale) seed-154 repro above:
-```
-Error: Cmd_switchhandleorder: battler 1 has no decided monToSwitchIntoId -- openpartyscreen must run first
-    at <anon> (src/engine/battleScriptSwitchinOpcode.ts:326)
-    at stepBattleScriptMachine (src/engine/battleScriptMachine.ts:879)
-    at runScriptToOwnEnd (src/engine/battleScriptFaintedActionsOrchestration.ts:285)
-```
-Not investigated further this session (docs-only step, `src/` off-limits) —
-per this entry's own "Next session" item (2) below, the next session should
-capture full `battlerOrder`/fainting context from this seed before
-generalizing a fix, rather than starting from source tracing alone.
-
-**Next session:** (1) write a Tier-1 test staging two battlers with pending
-per-battler end-turn ticks (e.g. both poisoned) where the earlier-ordered
-battler's tick faints it and needs a player-choice pause, to confirm/refute
-the missed-damage skip above and fix it if confirmed (likely needs a
-persisted per-battler-loop resume cursor — a new shared boundary shape, not
-a small patch, so budget accordingly). (2) Independently, if a live seed
-reproducing the original crash message turns up, capture full context
-(`battlerOrder`, which battler faints from what, in what order) to pin the
-exact mechanism before generalizing a fix.
+**Found 2026-08-22** (side worker, #102 end-turn cursor fix `a6deb814`). Source
+`HandleWishPerishSongOnTurnEnd` (`battle_util.c:1785-1888`) `return TRUE`s after
+each Future Sight/Perish Song script and re-enters via `BattleTurnPassed`,
+so a second delayed KO in the same turn takes its own `HandleFaintedMonActions`
+round-trip; the port runs the remaining battlers inline. Equivalent now that
+the `wishPerishSongState`/`wishPerishSongBattlerId` cursor persists
+(`tests/endTurnResumeCursorIssue102.test.ts`), and unreachable in singles
+(one delayed hit per side per turn) — pin it when doubles arrive.
 
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
