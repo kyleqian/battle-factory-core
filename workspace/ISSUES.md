@@ -37,49 +37,33 @@ the only call site (one opponent battler), so this is an unmodelled source
 condition rather than a live bug — port it when doubles or a second consumer
 arrive, with a Tier-1 pin.
 
-## #113 — `full`-policy soak seed 192 crashes: `Cmd_openpartyscreen: unresolved battler selector BS_FAINTED at program counter 2046` on a player switch turn
+## #116 — The `vanilla` soak policy is seed-invariant: the standing "vanilla 0:20 = 20/20" gate replays ONE trajectory twenty times
 
-**Found 2026-08-22** (supervisor's `full` 0:240 re-sweep on the new soak
-semantics, `docs/soak-full-vanilla-0-240-2026-08-22.md`). Live on master
-`bc0078e2`, cheap (~9 s): `node --experimental-strip-types
-tools/soak/randomRoundSoak.ts --policy full --seed 192 --render-every 0
---verbose`. Crashes at battle 1 turn 23, frame 362924 (`carry<=7 depth<=7`),
-after the player chose POKEMON → party row 1 on two consecutive turns (t22:
-row 2, t23: row 1). Stack (`[engine/tick]`, engine throw):
-```
-Error: Cmd_openpartyscreen: unresolved battler selector BS_FAINTED at program counter 2046
-    at <anon> (src/engine/battleScriptOpenPartyScreenOpcode.ts:170)
-    at stepBattleScriptMachine (src/engine/battleScriptMachine.ts:879)
-    at runScriptToOwnEnd (src/engine/factoryBattleScriptFullTurnDecision.ts:1408)
-```
-**Lead (untested):** `openpartyscreen BS_FAINTED` reached from the ordinary
-turn script runner (`factoryBattleScriptFullTurnDecision.ts:1408`), not from
-the fainted-actions orchestration that normally sets `selectorRoles.fainted`
-— i.e. a faint that happens INSIDE a switch turn's script (switch-in hazard
-damage such as Spikes, or Pursuit on the switching battler) rather than at
-the usual `HandleFaintedMon` pass. Capture which script owns pc 2046
-(`src/data/gen/battle-script-program.json`) and which battler fainted before
-generalising.
+**Found 2026-08-22** (supervisor's `vanilla` 0:240 re-sweep,
+`docs/soak-full-vanilla-0-240-2026-08-22.md`): all 240 seeds end at exactly
+`b7 t11 600000f carry<=7 depth<=10`. Cause, by design: `vanilla` makes no
+RNG-backed choice (rent 0/1/2, first legal move, offered forced pick, swap NO,
+GO ON — `randomRoundSoakDriver.ts:443-446`); its only seed use is press-timing
+jitter, and the engine's RNG advances on draws, not per frame (ISSUES #55's
+parked ambient-VBlank contract), so timing never changes the game. `full`
+and `winning` are seed-diverse (240 distinct end states). Consequence: the
+user-directed wind-down gate "vanilla 0:20 must stay 20/20" is a
+single-trajectory smoke — real, but narrower than its seed range suggests,
+and it has been so since the policy was written. Not a defect in play.
+Options (user-facing gate semantics, so recorded rather than changed):
+(a) keep it and say so in the ROADMAP soak-policy block; (b) give `vanilla`
+one seed-backed choice that stays plain (e.g. rent a random 3-of-6 in slot
+order) so 0:20 covers 20 drafts; (c) switch the gate to `full` 0:60 + this
+note. Recommendation: (b) — smallest change that makes the seed range honest.
 
-## #112 — `full`-policy soak seed 108 crashes: `FactoryRoundOrchestratorError: resolution handoff battler 0 display does not match the genuine next boundary` right after a forced send-out
+## #117 — Record-prompt cursor move renders one frame off (`drawRecordPrompt`)
 
-**Found 2026-08-22** (same re-sweep). Live on master `bc0078e2`, ~9 s:
-`node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy full
---seed 108 --render-every 0 --verbose`. Crashes at battle 1 turn 8, frame
-338124 (`carry<=0 depth<=2`), ~430 frames after the player's forced
-send-out (mon fainted at t8 → forced party → "confirm send-out" at f=337691),
-during the resolution-advance window. Stack:
-```
-FactoryRoundOrchestratorError: resolution handoff battler 0 display does not match the genuine next boundary
-    at fail (src/engine/factoryRoundBattleOrchestrator.ts:478)
-    at settledCommandForResolutionHandoff (src/engine/factoryRoundBattleOrchestrator.ts:1875)
-    at advanceFactoryRoundBattleResolution (src/engine/factoryRoundBattleOrchestrator.ts:2306)
-```
-This is the presentation seam's own consistency check (the displayed battler-0
-state vs the engine's genuine next boundary) firing — so it is either a real
-display/RAM divergence after a forced switch-in (player-visible) or an
-over-strict check. Determine which from the two compared values before
-fixing; do not loosen the check to make the soak pass.
+**Found 2026-08-22** (#104 YES-path trace, `tools/compare/traces/loss-terminal-record-yes-off.json`):
+a 1-frame timing mismatch on the record-menu cursor move, pre-existing and
+unrelated to #104; excluded from that trace's capture window (4970-5102,
+133/133). Next: extend the capture list to the cursor-move frames, name the
+frame, fix in `factoryTerminalRender.ts`'s `drawRecordPrompt` against the
+existing NO-path ground truth (`docs/post-terminal-beyond-boundary-ground-truth.md`).
 
 ## #114 — `runFutureAttacksAfterFaints` fires a delayed hit inline and keeps looping where source returns per effect (doubles-era divergence)
 

@@ -8,6 +8,28 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## `generated-orchestrator` compare traces re-chain the instant the record prompt is answered
+
+- **What:** since the 2026-08-14 continuous-play wiring, the default
+  `generated-orchestrator` appRoute re-chains into the next round as soon as
+  `recordChoice` is non-null (all three answers), so a compare trace that
+  wants the terminal farewell UI after the prompt sees the draft screen
+  instead. The #104 worker had to switch its trace to
+  `appRoute: "canonical-recorded"` to exercise the farewell at all.
+- **Hits:** 1 (2026-08-22, ~10 min).
+- **Fix:** document the route choice next to the terminal traces (or give
+  the generated route a "hold at terminal" option for compare runs).
+
+## Terminal-window probes must be derived with `bin/oracle lab`, not `bin/oracle run`
+
+- **What:** the terminal-seam traces are battle-lab scenarios; re-deriving a
+  YES-path probe from the NO-path one via `bin/oracle run` silently produces
+  the wrong frame model, and the mismatch only shows up as a non-matching
+  window. `bin/oracle lab tools/battle-lab/<probe>.json` is the right tool.
+- **Hits:** 1 (2026-08-22 #104 worker, "cost real time").
+- **Fix:** a one-line note in tools/compare/README (or the trace's own
+  header comment) naming the lab command.
+
 ## `tests/gate6CoverageManifest.test.ts` OOM-crashes under bare `npx vitest`
 
 - **What:** the manifest test needs `npm test`'s `--max-old-space-size=8192`;
