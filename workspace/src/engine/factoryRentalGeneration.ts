@@ -31,6 +31,13 @@ import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 
 const SELECTABLE_MONS_COUNT = 6;
 const STAGES_PER_CHALLENGE = 7;
+/**
+ * `ARRAY_COUNT(sFixedIVTable)` (`battle_factory.c:157-166`). The policy
+ * artifact carries a ninth `retailOverread` row -- the two `.rodata` bytes
+ * the non-BUGFIX `GetFactoryMonFixedIV` reads one past this table -- which is
+ * deliberately never reached by plain array indexing.
+ */
+const DECLARED_FIXED_IV_ROWS = 8;
 
 type FrontierMonRow = Readonly<{
   index: number;
@@ -189,7 +196,9 @@ export function getLevel50InitialRentalFixedIv(
 ): number {
   requireNonnegativeInteger(challengeNum, "challengeNum");
   const ivIndex = challengeNum + (useBetterRange ? 1 : 0);
-  const row = POLICY.rentalSelection.fixedIvs[ivIndex];
+  const row = ivIndex < DECLARED_FIXED_IV_ROWS
+    ? POLICY.rentalSelection.fixedIvs[ivIndex]
+    : undefined;
   if (row === undefined) {
     throw new Error(
       `initial-rental fixed IV is undefined for challenge ${challengeNum}`

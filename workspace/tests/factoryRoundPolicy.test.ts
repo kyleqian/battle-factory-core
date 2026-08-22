@@ -17,6 +17,11 @@ describe("factory round-policy extraction", () => {
     expect(policy.rentalSelection.fixedIvs).toEqual([
       { regular: 3, lastBattle: 6 }, { regular: 6, lastBattle: 9 }, { regular: 9, lastBattle: 12 }, { regular: 12, lastBattle: 15 },
       { regular: 15, lastBattle: 18 }, { regular: 21, lastBattle: 31 }, { regular: 31, lastBattle: 31 }, { regular: 31, lastBattle: 31 },
+      // Row 8 is not declared C data: it is the retail one-past-the-end read
+      // GetFactoryMonFixedIV's non-BUGFIX `> ARRAY_COUNT` check lets through
+      // (battle_factory.c:748-752). ROM-byte receipt in
+      // tests/factoryFixedIvTableRomBytes.test.ts.
+      { regular: 110, lastBattle: 0, retailOverread: true },
     ]);
   });
 

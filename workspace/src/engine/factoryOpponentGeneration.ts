@@ -40,6 +40,11 @@ import { natureFromPersonality, randomU16 } from "./opponentGen.ts";
 const FRONTIER_PARTY_SIZE = 3;
 const SAVED_RENTAL_COUNT = 6;
 const STAGES_PER_CHALLENGE = 7;
+/**
+ * `ARRAY_COUNT(sFixedIVTable)` (`battle_factory.c:157-166`); the policy
+ * artifact's ninth `retailOverread` row is never reached by plain indexing.
+ */
+const DECLARED_FIXED_IV_ROWS = 8;
 
 type FrontierMonRow = Readonly<{
   index: number;
@@ -212,7 +217,9 @@ export function getLevel50FactoryOpponentFixedIv(
     throw new Error(`battleIndex must be an integer in [0, ${STAGES_PER_CHALLENGE - 1}]`);
   }
   const towerChallengeNum = Math.floor(battleTowerLevel50WinStreak / STAGES_PER_CHALLENGE);
-  const row = POLICY.rentalSelection.fixedIvs[towerChallengeNum];
+  const row = towerChallengeNum < DECLARED_FIXED_IV_ROWS
+    ? POLICY.rentalSelection.fixedIvs[towerChallengeNum]
+    : undefined;
   if (row === undefined) {
     throw new Error(
       `retail Factory opponent fixed IV is not portable for Battle Tower challenge ${towerChallengeNum}`,

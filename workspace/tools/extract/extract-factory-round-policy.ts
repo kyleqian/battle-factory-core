@@ -84,13 +84,42 @@ const trainerRanges = parseRanges(sourceTable(towerC, "sFrontierTrainerIdRanges"
 const hardTrainerRanges = parseRanges(sourceTable(towerC, "sFrontierTrainerIdRangesHard"), trainerValue);
 if (trainerRanges.length !== 8 || hardTrainerRanges.length !== 8) throw new Error("expected eight normal/hard trainer ranges");
 
+type FixedIvRow = { regular: number; lastBattle: number; retailOverread?: true };
+
 const fixedTableMatch = /static const u8 sFixedIVTable\[\]\[2\]\s*=\s*\{([\s\S]*?)\n\};/.exec(factoryC);
 if (!fixedTableMatch) throw new Error("could not locate sFixedIVTable");
-const fixedIvs = [...fixedTableMatch[1]!.matchAll(/\{\s*(\d+)\s*,\s*(\d+)\s*\}/g)].map((match) => ({
+const fixedIvs: FixedIvRow[] = [...fixedTableMatch[1]!.matchAll(/\{\s*(\d+)\s*,\s*(\d+)\s*\}/g)].map((match) => ({
   regular: Number(match[1]),
   lastBattle: Number(match[2]),
 }));
-if (fixedIvs.length !== 8) throw new Error(`expected eight fixed-IV rows, got ${fixedIvs.length}`);
+if (fixedIvs.length !== 8) throw new Error(`expected eight declared fixed-IV rows, got ${fixedIvs.length}`);
+
+// Row 8 is NOT declared C data -- it is the retail one-past-the-end read.
+// GetFactoryMonFixedIV's bound check is `challengeNum > ARRAY_COUNT(
+// sFixedIVTable)` outside `#ifdef BUGFIX` (battle_factory.c:748-752), and the
+// pinned build defines neither BUGFIX (include/config.h:48) nor MODERN, so an
+// IV argument of exactly 8 falls through unclamped to `sFixedIVTable[8]`.
+// That argument is reachable three ways: challengeNum 8 rentals, challengeNum
+// 7 elevated rentals (`challengeNum + 1`, battle_factory_screen.c:1762), and
+// challengeNum 6 Frontier Brain parties (`challengeNum + 2`,
+// battle_factory.c:772). Argument 9+ clamps to row 7.
+//
+// The two bytes it reads are whatever the linker placed after the 16-byte
+// table. In the pinned build that is `sInitialRentalMonRanges`'s first u16:
+// `nm pokeemerald.elf` gives `08612184 r sFixedIVTable` and
+// `08612194 r sInitialRentalMonRanges` (0x10 apart, both inside
+// `src/battle_factory.o(.rodata) 0x08611fc0 0x214`, pokeemerald.map:32072).
+// Little-endian FRONTIER_MON_GRIMER (110) therefore reads as {110, 0}.
+// `regular` 110 >= USE_RANDOM_IVS (32) so CreateBoxMon rolls random IVs
+// (pokemon.c); `lastBattle` 0 is a literal all-zero IV spread.
+// tests/factoryFixedIvTableRomBytes.test.ts pins these bytes against
+// pokeemerald.gba so this derived-from-adjacency row can never drift.
+const overreadU16 = rentalRanges[0]!.start;
+fixedIvs.push({
+  regular: overreadU16 & 0xff,
+  lastBattle: (overreadU16 >> 8) & 0xff,
+  retailOverread: true,
+});
 
 const policy = {
   schema: "factory-round-policy/v1",

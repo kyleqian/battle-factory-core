@@ -178,7 +178,9 @@ export function getLevel50FactoryBrainFixedIv(challengeNum: number): number {
   if (ivArg > FIXED_IV_TABLE_LENGTH) {
     return POLICY.rentalSelection.fixedIvs[FIXED_IV_TABLE_LENGTH - 1]!.regular;
   }
-  const row = POLICY.rentalSelection.fixedIvs[ivArg];
+  const row = ivArg < FIXED_IV_TABLE_LENGTH
+    ? POLICY.rentalSelection.fixedIvs[ivArg]
+    : undefined;
   if (row === undefined) {
     throw new Error(
       `retail Factory Brain fixed IV is not portable for challenge ${challengeNum} `
