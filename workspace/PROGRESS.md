@@ -5,6 +5,38 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1384 — [main worker, 2026-08-22] **new opt-in `--start-carry` soak option boots the first chained round at a carried win streak — 0:160 across 3 sweeps, ISSUES #118 filed (challengeNum 8 draft-generation throw, real 2-round-win-from-42 state)**
+
+- **State:** master `f04c6227` + this docs commit. `npm test` 1095/1139
+  files, 10231/10454 passed, build green, smoke 444/444, ratchet unchanged
+  (no `src/` touch — the carry is injected entirely from already-public
+  `src/engine` exports via the existing `stateFactory` seam).
+- **Did:** `createStartCarryState(N)` (`tools/soak/randomRoundSoakDriver.ts`)
+  drives `generateFactoryChallengeDraft` from the anchor RNG cursor with a
+  synthetic carry `{factoryWinStreak: N, rentsCount: 0, battlePoints: 0,
+  factorySymbolsCount: <21⇒1, 42⇒2>, playerTrainerId: anchor}` — the same
+  chaining entry a real round-win handoff uses. `--start-carry 0`/omitted ==
+  `createInitialState()` verbatim (stashed before/after `winning` 0:10 byte-
+  identical). 4 new pins (carry 28 boot ⇒ challengeNum 4; carry 42 boot ⇒
+  its OWN 7th battle is NOT the brain — gold was already earned crossing 41
+  inside the round that carries 35→42, confirmed via
+  `getFactoryFrontierBrainStatus`; invalid values rejected; carry 0
+  identity). Sweeps (8×20-seed chunks, parallel `&`+`wait`, 16 cores):
+  (a) `winning --start-carry 28` 0:60 **60/60 OK**, every seed caps at
+  carry 28 (matches the goal's premise at n=60); (b) `winning --start-carry
+  42` 0:60 **57/60 OK, 3 CRASH** (seeds 2/32/49, all the same signature —
+  `generateInitialFactoryRentals`'s `challengeNum > 7` guard, reached when
+  two round-wins from a 42 boot hit carry 56); (c) `winning-swap
+  --start-carry 35` 0:40 **40/40 OK**. Filed **ISSUES #118** (needs the
+  retail non-BUGFIX out-of-range table behavior, not just a raised guard).
+  `docs/soak-start-carry-2026-08-22.md` has every log + repro.
+- **Next:** #118 unfixed (main-lane engine change, out of this step's
+  scope) — pick up with the `battle_tower.c` non-BUGFIX `#else` lookup.
+  `--start-carry 7/14/21` (the mid tiers) unswept.
+- **Notes:** no new papercuts.
+
+---
+
 ## 1383 — [main worker, 2026-08-22] **new opt-in `winning-swap` soak policy exercises the Factory swap screen at real carried-streak depth for the first time — 0:120 sweep clean, 0 CRASH/HANG**
 
 - **State:** master `7f89b708` + this docs commit. `npm test` 1095/10227
@@ -36,35 +68,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   era (#109/#114 doubles, #116 user gate decision, #55/#39/#73 parked or
   #55-bounded, #71 filler). Remaining session = crash discovery + wind-down
   gates + lane folds.
-
----
-
-## 1381 — [main worker, 2026-08-22] **ISSUES #71 Slice C re-verified DONE, no code change needed (guards were already landed at entries 891/894-895) — stale "remainder" sentence trimmed**
-
-- **State:** master `adf633e9` + this docs-only commit. Read both back
-  hand-fits (`magbySendOut.ts` MAGBY/Docile, `battleMenu.ts` ONIX-back
-  `PLAYER_SETTLE_WOBBLE_Y2_TABLE`) and all their call sites: all 3
-  consumers already guarded — `drawPlayerMaterializeSettle` (legacy ONIX
-  back) throws for any encounter but destin/jenson;
-  `drawTurn15ForcedSwitchRelease` (MAGBY back) throws for any species but
-  MAGBY, and its only caller pre-gates on `name==="MAGBY"&&species===240`
-  so the throw never fires in play; `generatedPlayerMaterializeSettleY2`
-  (generated-route ONIX back) takes the documented generic `y2=0` fallback
-  for non-ONIX since KADABRA/others legitimately reach it — no throw, per
-  the brief's own fallback branch. All pinned:
-  `tests/battleScene.test.ts` 306/306,
-  `tests/generatedPlayerMaterializeSettleSpecies.test.ts` 7/7.
-- **Did:** no `src/`/`tests/` edit (confirmed `git diff --stat adf633e9 --
-  src/ tests/ tools/` empty). Trimmed ISSUES #71's stale
-  2026-08-07 "what remains is Slice C" sentence (pre-dated by the
-  2026-08-03 entries that closed it) to point at the completion instead.
-  Full verification re-run: `npm test` 1094 files/10220 passed/223 skipped,
-  `npm run build` green, smoke 444/444, ratchet unchanged (no src touched).
-  Soaks: `vanilla` 0:20 **20/20 OK**, `full` 0:40 **40/40 OK**. No
-  differential needed — HEAD == starting commit, tool refuses a self-diff.
-- **Next:** #71's only genuinely open main-lane share is the §1e 56/58
-  move-window pair-guard-throw sites (separate, larger effort) — filler
-  priority, pick up next if resuming this thread.
-- **Notes:** no new papercuts this session.
 
 ---

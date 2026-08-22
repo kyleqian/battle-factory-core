@@ -17,6 +17,40 @@ backlog.
 
 # Open
 
+## #118 — A chain that wins two rounds from a `--start-carry 42` boot reaches `challengeNum` 8 and crashes `generateInitialFactoryRentals`'s `challengeNum > 7` guard
+
+**Found 2026-08-22** (main worker, opt-in `--start-carry` soak option;
+`docs/soak-start-carry-2026-08-22.md`). `factoryRentalGeneration.ts:239-240`
+throws `Level-50 initial rental generation supports source challenges 0..7,
+got 8` whenever `Math.floor(factoryWinStreak / 7) > 7` — i.e. a fresh draft
+generated at `factoryWinStreak >= 56`. This is real, reachable engine state:
+winning a round carries the streak forward by 7 (`advanceFactoryCarry`), so
+two consecutive round wins from a carry-42 boot (challengeNum 6) reach
+carry 49 (challengeNum 7, still supported) then carry 56 (challengeNum 8,
+unsupported) on the THIRD round's draft generation. `--policy winning
+--start-carry 42 --seeds 0:60 --render-every 0`: **3/60** crashed this way
+(seeds 2, 32, 49; every other seed that reached carry 56 stayed on `budget`
+mid-battle before generating that far, or capped at carry 49). Deterministic
+single-seed repro: `--policy winning --start-carry 42 --seed 2 --render-every
+0 --verbose`:
+```
+Error: Level-50 initial rental generation supports source challenges 0..7, got 8
+    generateInitialFactoryRentals (src/engine/factoryRentalGeneration.ts:240)
+    generateFactoryChallengeDraft (src/engine/factoryRoundChaining.ts:97)
+    tick (src/engine/core.ts:859)
+```
+Source's `sFixedIVTable`/rental-range tables are indexed 0..7 in the port's
+model of the retail data (`factoryRentalGeneration.ts:228-240`'s own comment
+notes the non-BUGFIX clamp is `> ARRAY_COUNT`, i.e. should be `>=`, and that
+challengeNum 8 genuinely reads past the table in the `#else` branch) — this
+needs the real source table/clamp behavior at challengeNum 8, not just a
+raised guard number. Before this session, no soak had ever reached
+`factoryWinStreak >= 56` in-session (natural chaining rarely wins even one
+round back-to-back at this depth), so the branch was previously Tier-1-only
+coverage. Do not fix inline; needs the source's actual out-of-range behavior
+looked up first (`battle_tower.c`'s non-BUGFIX `#else` path per the existing
+code comment).
+
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
 **Found 2026-08-22** (side worker, #102 fix). Source `GetMostSuitableMonToSwitchInto`
