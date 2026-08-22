@@ -249,11 +249,11 @@ fn deterministic_corpus_counts_sizes_hashes_and_generation_provenance_are_pinned
     );
     assert_eq!(
         BATTLE_SCRIPT_JUMPIFCONFUSEDANDSTATMAXED_VECTOR_GENERATOR_SHA256,
-        "21ae43eec1ffaeb163a7f7a0bd2a7b80bed490e537ac50a9994dea3b825d53a1",
+        "6d18152d79f8ffeaf27082e8463da8129d4554fb9624643968b6209690d0fc61",
     );
     assert_eq!(
         BATTLE_SCRIPT_JUMPIFCONFUSEDANDSTATMAXED_VECTOR_GENERATOR_BYTES,
-        48_048,
+        48_127,
     );
     let generated =
         include_bytes!("../src/battle_script_jumpifconfusedandstatmaxed_vectors_gen.rs");
@@ -269,5 +269,5 @@ fn deterministic_corpus_counts_sizes_hashes_and_generation_provenance_are_pinned
     ));
     let generator =
         include_bytes!("../../../tools/gen-battle-script-jumpifconfusedandstatmaxed-vectors.mjs");
-    assert_eq!(generator.len(), 48_048);
+    assert_eq!(generator.len(), 48_127);
 }
