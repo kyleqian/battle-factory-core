@@ -29,7 +29,7 @@
     "smallEmberAsset": "src/assets/gen/battle-anim-small-ember.json",
     "smallEmberAssetSha256": "63f1fc4381673f60ccfd660d75089026e8df5113da4e8bba852f61b50d4262db",
     "stagingFixture": "tests/fixtures/fire-blast-animation-source-staging.json",
-    "stagingFixtureSha256": "7d7882bee8ca86612a15f2d4c7a44540f388966740186f3f70d3ccabb93e1749"
+    "stagingFixtureSha256": "d8280671891029a5bc83a0778981e53580fbaaa6dd924f3ab20f45405eff1365"
   },
   "orientations": {
     "player-back": {
