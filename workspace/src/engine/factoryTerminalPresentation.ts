@@ -318,6 +318,16 @@ export interface FactoryTerminalLossPresentationState {
   readonly completed: boolean;
   readonly recordPromptReleaseAge: number | null;
   readonly recordMenuCursor: 0 | 1;
+  /**
+   * ISSUES #117: age `recordMenuCursor` last flipped. The real ROM's cursor
+   * sprite redraw lags the input-processed value by one tick (measured via
+   * `tools/compare/traces/loss-terminal-record-cursor-off.json`, frames
+   * 4539/4561: `recordMenuCursor` itself must flip on the press-processed
+   * tick for confirm-choice correctness, but the rendered arrow stays at the
+   * OLD row through that same tick and only shows the new row starting the
+   * tick after). Null until the first UP/DOWN.
+   */
+  readonly recordMenuCursorChangedAge: number | null;
   readonly recordChoice: "yes" | "no" | "cancel" | null;
   /** Age the record menu's NO choice was stored -- the decline edge all
    *  EndRecordBattle clocks are relative to; null until the decline branch. */
@@ -355,6 +365,8 @@ export interface FactoryTerminalRoundWonPresentationState {
   readonly completed: boolean;
   readonly recordPromptReleaseAge: number | null;
   readonly recordMenuCursor: 0 | 1;
+  /** ISSUES #117: see the loss-side field of the same name for the mechanism. */
+  readonly recordMenuCursorChangedAge: number | null;
   readonly recordChoice: "yes" | "no" | "cancel" | null;
   /** Age the record menu's NO choice was stored -- the decline edge all
    *  EndRecordBattle clocks are relative to; null until the decline branch. */
@@ -398,6 +410,7 @@ export function createFactoryTerminalLossPresentation(
     completed: false,
     recordPromptReleaseAge: null,
     recordMenuCursor: 1,
+    recordMenuCursorChangedAge: null,
     recordChoice: null,
     declineFarewellReleaseAge: null,
     declineDismissAge: null,
@@ -431,6 +444,7 @@ export function createFactoryTerminalRoundWonPresentation(
     completed: false,
     recordPromptReleaseAge: null,
     recordMenuCursor: 1,
+    recordMenuCursorChangedAge: null,
     recordChoice: null,
     declineFarewellReleaseAge: null,
     declineDismissAge: null,
@@ -744,6 +758,7 @@ function advanceFactoryTerminalRecordPrompt<
   State,
   | "recordPromptReleaseAge"
   | "recordMenuCursor"
+  | "recordMenuCursorChangedAge"
   | "recordChoice"
   | "declineFarewellReleaseAge"
   | "declineDismissAge"
@@ -751,6 +766,7 @@ function advanceFactoryTerminalRecordPrompt<
 > {
   let recordPromptReleaseAge = state.recordPromptReleaseAge;
   let recordMenuCursor = state.recordMenuCursor;
+  let recordMenuCursorChangedAge = state.recordMenuCursorChangedAge;
   let recordChoice = state.recordChoice;
   let declineFarewellReleaseAge = state.declineFarewellReleaseAge;
   let declineDismissAge = state.declineDismissAge;
@@ -767,9 +783,13 @@ function advanceFactoryTerminalRecordPrompt<
     recordChoice === null &&
     age >= recordPromptReleaseAge + state.profile.recordMenuInputDelay
   ) {
-    if (input.pressedUp) recordMenuCursor = 0;
-    else if (input.pressedDown) recordMenuCursor = 1;
-    else if (input.pressedB) recordChoice = "cancel";
+    if (input.pressedUp) {
+      if (recordMenuCursor !== 0) recordMenuCursorChangedAge = age;
+      recordMenuCursor = 0;
+    } else if (input.pressedDown) {
+      if (recordMenuCursor !== 1) recordMenuCursorChangedAge = age;
+      recordMenuCursor = 1;
+    } else if (input.pressedB) recordChoice = "cancel";
     else if (input.pressedA) {
       recordChoice = recordMenuCursor === 0 ? "yes" : "no";
     }
@@ -820,6 +840,7 @@ function advanceFactoryTerminalRecordPrompt<
   return {
     recordPromptReleaseAge,
     recordMenuCursor,
+    recordMenuCursorChangedAge,
     recordChoice,
     declineFarewellReleaseAge,
     declineDismissAge,

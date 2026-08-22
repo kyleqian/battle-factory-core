@@ -458,11 +458,18 @@ function drawRecordPrompt(
     drawStandardWindowFrame(fb, 160, 64, 4, 4);
     drawStandardWindowText(fb, "YES", 176, 73);
     drawStandardWindowText(fb, "NO", 176, 89);
+    // ISSUES #117: `recordMenuCursor` itself must flip on the press-processed
+    // tick (the confirm choice below reads it), but the real ROM's arrow
+    // sprite redraw lags that by one tick -- on the exact tick the cursor
+    // changes, the drawn row is still the OLD one for this one frame.
+    const drawnCursor = state.recordMenuCursorChangedAge === state.age
+      ? ((1 - state.recordMenuCursor) as 0 | 1)
+      : state.recordMenuCursor;
     drawStandardWindowText(
       fb,
       "▶",
       168,
-      73 + state.recordMenuCursor * 16,
+      73 + drawnCursor * 16,
     );
   }
 }
