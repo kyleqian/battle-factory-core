@@ -620,7 +620,24 @@ export function resumeBattleScriptFaintedActionsAfterPlayerChoice(
 
   const run = runScriptToOwnEnd(program, handlers, resumedState);
   if (run.kind === "player-choice") {
-    throw new Error("forced-switch resume unexpectedly halted on a second player-choice-required opcode");
+    // ISSUES #119: one BattleScript_HandleFaintedMon run can ask the player
+    // TWICE. `Cmd_switchineffects` (battle_script_commands.c:5229-5256) pushes
+    // BattleScript_SpikesOnFaintedBattler when the replacement lands on its own
+    // side's Spikes; if that kills it, `tryfaintmon_spikes` jumps to
+    // BattleScript_SpikesOnFaintedBattlerFainted, whose tail is a plain
+    // `goto BattleScript_HandleFaintedMon` (data/battle_scripts_1.s:3427-3431)
+    // straight back into BattleScript_FaintedMonTryChoose's own
+    // `openpartyscreen BS_FAINTED` (:2843-2844). Source needs no second resume
+    // shape for that -- it is one jump inside one BattleScriptExecute -- so
+    // report the fresh halt with the SAME result kind the first pause used and
+    // let the caller re-issue its forced-switch boundary.
+    return Object.freeze({
+      kind: "player-choice-required",
+      state: run.state,
+      battler: run.battler,
+      faintedPartyIndex: run.faintedPartyIndex,
+      legalPartyIndexes: run.legalPartyIndexes,
+    });
   }
   if (run.kind === "barrier") {
     return Object.freeze({ kind: "non-terminal-barrier", state: run.state, instruction: run.instruction });

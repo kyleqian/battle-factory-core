@@ -2576,7 +2576,40 @@ function resumeFullTurnForcedSwitch(
     haltedState,
     ctx.decision.partyIndex,
   );
-  if (orchestration.kind === "player-choice-required" || orchestration.kind === "no-fainted-battlers") {
+  if (orchestration.kind === "player-choice-required") {
+    // ISSUES #119: the replacement the player just sent out fainted on entry
+    // (its own side's Spikes), so BattleScript_SpikesOnFaintedBattlerFainted's
+    // `goto BattleScript_HandleFaintedMon` (data/battle_scripts_1.s:3427-3431)
+    // re-entered `openpartyscreen BS_FAINTED` inside the SAME script run. That
+    // is an ordinary second forced-switch boundary, not a throw: re-publish the
+    // pending bundle at the new halt, keeping this pause's own `resumeAt` (and
+    // its banked second action) so the eventual completion still lands on the
+    // same tail.
+    return finishFullTurn(
+      ctx.rng, rngBefore.calls, orchestration.state,
+      buildForcedSwitchPendingRules(orchestration.state.rulesContext, {
+        programCounter: orchestration.state.programCounter,
+        callStack: orchestration.state.callStack,
+        scheduler: orchestration.state.scheduler,
+        resumeAt: pending.pendingScript.resumeAt,
+        ...(pending.pendingScript.pendingSecondAction !== undefined
+          ? { pendingSecondAction: pending.pendingScript.pendingSecondAction }
+          : {}),
+      }),
+      Object.freeze({
+        kind: "decision-required",
+        request: Object.freeze({
+          kind: "forced-switch",
+          requestId: ctx.request.requestId + 1,
+          side: orchestration.battler === 0 ? "player" as const : "trainer" as const,
+          battler: orchestration.battler as BattleSinglesBattler,
+          faintedPartyIndex: orchestration.faintedPartyIndex as BattlePartyIndex,
+          legalPartyIndexes: orchestration.legalPartyIndexes as readonly BattlePartyIndex[],
+        }),
+      }),
+    );
+  }
+  if (orchestration.kind === "no-fainted-battlers") {
     throw new Error(
       `factory full-turn decision forced-switch resume produced an unexpected ${orchestration.kind} result`,
     );
