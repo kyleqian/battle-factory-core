@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1374 — [supervisor fold, 2026-08-22 12:05] **#102 crash half FIXED + folded (`5cc52595`: `OpponentHandleChoosePokemon` PARTY_SIZE fallback; seed 138 OK); #106/#107 fixed (1373); 4M-frame depth probe: 7/7 OK, carry ceiling 28 = challenge-5 AI tier, NOT an instrument cap; #109–#111 filed**
+
+- **State:** master `41866a9c`+docs. Merged-tree checks: the four string/#102
+  pins 7/7, smoke 444/444 (full suite: worker-run 10,198 at `880a8bb8`
+  + side-run 10,200 at `5cc52595`; supervisor full suite at wind-down).
+  ISSUES: #102 trimmed to its open end-turn half (side lane, in flight on
+  Opus, base `5cc52595`); #108 (5 reachable string gaps) filed by 1373 →
+  next ts brief; #109/#110 (side worker findings) and #111 (`rentsCount`
+  not reset on loss — source `battle_factory.c:208-212`) filed. PAPERCUTS +2
+  (driver reset-on-battleIndex; thin switch-in throws) + freshness bump.
+- **Probe (`docs/soak-deep-sweep-2026-08-22-4M.md`):** the 7 carry-28 seeds
+  at `--max-frames 4000000` → 7/7 OK, 0 crash/hang, max carry 28 everywhere:
+  no seed wins even battle 1 at challengeNum 4 (full
+  CHECK_BAD_MOVE|TRY_TO_FAINT|CHECK_VIABILITY tier). End surface = ordinary
+  7- and 20-turn losses. 1370's "instrument ceiling" caveat withdrawn; the
+  `winning` ceiling is the AI tier. CAVEAT recorded: every seed's first round
+  drafts from the pinned anchor pool, so "carry ≥ 7 100%" is anchor-biased.
+  Determinism re-checked (seed 63, four ways, identical).
+- **In flight:** `full` + `vanilla` 0:240 re-sweeps on the new semantics
+  (clean `df60c00a` worktree, background); side = #102 end-turn cursor.
+- **Next:** ts = #108; then #111 (+ the driver papercut) as one small side
+  step; #104 remainder; draft heuristic n ≥ 180 if time.
+
+---
+
 ## 1373 — [main worker, 2026-08-22] **#106 + #107 FIXED (`STRINGID_PKMNATTACK`/`STRINGID_PKMNSUBSTITUTEFADED`); soak seed 203 now runs to an honest OK; full sibling census done — 5 more confirmed-reachable gaps filed as #108, ~15 confirmed unreachable and recorded**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` +
@@ -78,32 +103,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   census of every reachable placeholder gap); supervisor background = the 7
   carry-28 seeds from 1370 re-run at `--max-frames 4000000` to see what
   breaks past round 5.
-
----
-
-## 1371 — [supervisor close, 2026-08-20 16:00] **Bonus round folded: final-tree `winning` 0:240 (1370) reaches carry ≥ 28 in 7/240 (2.9%), ≥ 21 20.0%, ≥ 14 90.8% — deepest seeds hit the 1M-frame budget mid-round-5 (instrument ceiling, not a wall); draft heuristic re-measured n=30 (neutral, stays withheld on `wip/mb-step2b-draft-heuristic` @ `18222b3a`); #106 + #107 filed; #102 re-reproduced live (seed 138)**
-
-- **State:** docs-only since 1369's gates; tree clean. Cherry-picked the side
-  §6 measurement doc (`18222b3a` → `7b53b7a2`) onto master; ISSUES **#107**
-  filed (STRINGID_PKMNSUBSTITUTEFADED `{B_DEF_NAME_WITH_PREFIX}` resolver;
-  seeds 27/29 on the wip branch). `animation-main` is **+5 unfolded** at
-  close (sibling session live until 18:00) — fold at next orient;
-  `rust-main` 0.
-- **Next (in order):** (1) string-resolver sibling sweep as ONE step — #106
-  (Beat Up `STRINGID_PKMNATTACK` `{B_BUFF1}` via Metronome) + #107 + every
-  remaining `{B_ATK_NAME_WITH_PREFIX}`/`{B_DEF_NAME_WITH_PREFIX}`/`{B_BUFF1}`
-  STRINGID reachable in Factory singles without a `messageLines` case (five
-  were found one at a time today); (2) #102 now has a live repro (seed 138)
-  — diagnose + fix; (3) raise or parametrise the `winning` frame budget
-  (`--max-rounds` exists) so the challenge-4+ tier is swept for crashes
-  rather than truncated at 1,000,000 frames; (4) draft heuristic: n ≥ 180
-  before any fold; (5) #104 remainder (YES-branch "battle was recorded"
-  message needs an OFF trace). DEFERRED.md: none open.
-- **Notes:** the session's final numbers for the user: morning 35.6% / 5.6%
-  / 0% / 0% (carry ≥ 7/14/21/28, 08-19 semantics) → close 100% / 90.8% /
-  20.0% / 2.9% (new semantics, 1M-frame budget, 0:240). 11 main + 8 side
-  worker rounds, 3 cap-kill salvages, 0 regressions folded. Supervisor
-  papercut of its own: an unquoted heredoc mangled this entry's first draft
-  (backticks ran as commands) — always `<<'EOF'` for ledger text.
 
 ---

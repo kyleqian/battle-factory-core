@@ -8,6 +8,31 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Soak driver resets its per-battle labels/policy state only on a `battleIndex` CHANGE
+
+- **What:** `randomRoundSoakDriver.ts` `trackProgress` zeroes the verbose
+  `tN` turn label, `turnsThisBattle` and `switchedAgainstOpponentIndices`
+  only when `orch.round.rules.battleIndex` differs from the last tick. A round
+  lost at battle 1 followed by the next round's battle 1 keeps the old values:
+  verbose transcripts show `b1 t12` at a new battle's first turn, and the
+  `winning` policy's "already switched against this opponent index" set leaks
+  into the next round. Cost the 2026-08-22 supervisor ~10 min chasing a
+  phantom "stale engine turn counter" in the 4M-frame depth probe.
+- **Hits:** 1 (2026-08-22).
+- **Fix:** key the reset on the round identity (orchestrator instance /
+  `config.factoryWinStreak` + generation) as well as `battleIndex`.
+
+## `switchhandleorder` / `getswitchedmondata` throws carry only the battler id
+
+- **What:** the engine's "no decided monToSwitchIntoId" throw names the
+  battler but not `monToSwitchIntoId`, party HP, or the script label, so the
+  #102 diagnosis needed a hand-rolled global ring buffer across three engine
+  files to see what `Cmd_openpartyscreen` had decided.
+- **Hits:** 1 (2026-08-22 side worker, ~10 min).
+- **Fix:** include the decided array, the selector's party HP list and the
+  current script label in the throw message (fail-loud stays; the message
+  just gets richer).
+
 ## `check-oracle-freshness.sh` compares against harness HEAD, not the last `oracle/` commit
 
 - **What:** the script FAILs (exit 1) whenever an oracle process started before
@@ -17,7 +42,7 @@ history.
   **zero** commits touching `oracle/` since either process started, so both were
   serving byte-identical code. The check is a commit-date heuristic wearing the
   clothes of a schema check.
-- **Hits:** 7 (2026-08-19 supervisor orient: both ports FAILed again — same
+- **Hits:** 8 (2026-08-22 supervisor orient: same shape again, both ports; judged client-only in ~3 min and NOT restarted because the animation and rust supervisors were live on the shared services.) (2026-08-19 supervisor orient: both ports FAILed again — same
   09:45:59-vs-09:51:59 shape for 8014, zero `oracle/` commits since the 8012
   start; disproved in ~3 min via the commit-date check plus three sessions of
   walk-up staging evidence on the running 8014, kept both, no restart.)
