@@ -685,7 +685,40 @@ function resumeForcedSwitchDecision(
     haltedState,
     context.decision.partyIndex,
   );
-  if (orchestration.kind === "player-choice-required" || orchestration.kind === "no-fainted-battlers") {
+  if (orchestration.kind === "player-choice-required") {
+    // ISSUES #119: the replacement fainted on entry (its own side's Spikes), so
+    // BattleScript_SpikesOnFaintedBattlerFainted's `goto
+    // BattleScript_HandleFaintedMon` (data/battle_scripts_1.s:3427-3431)
+    // re-entered `openpartyscreen BS_FAINTED` in the SAME script run. Republish
+    // the same forced-switch-pending shape the fresh path already emits so the
+    // human is simply asked again.
+    reconcileRng(context.rng, rngBefore.calls, orchestration.state.rng);
+    return Object.freeze({
+      rules: Object.freeze({
+        adapter: ADAPTER,
+        phase: "forced-switch-pending",
+        rulesContext: orchestration.state.rulesContext,
+        pendingScript: Object.freeze({
+          programCounter: orchestration.state.programCounter,
+          callStack: orchestration.state.callStack,
+          scheduler: orchestration.state.scheduler,
+        }),
+      }) as FactoryTerminalDecisionRules,
+      events: eventPayloads(orchestration.state),
+      boundary: Object.freeze({
+        kind: "decision-required",
+        request: Object.freeze({
+          kind: "forced-switch",
+          requestId: context.request.requestId + 1,
+          side: orchestration.battler === 0 ? "player" as const : "trainer" as const,
+          battler: orchestration.battler as BattleSinglesBattler,
+          faintedPartyIndex: orchestration.faintedPartyIndex as BattlePartyIndex,
+          legalPartyIndexes: orchestration.legalPartyIndexes as readonly BattlePartyIndex[],
+        }),
+      }),
+    });
+  }
+  if (orchestration.kind === "no-fainted-battlers") {
     throw new Error(
       `factory terminal decision forced-switch resume produced an unexpected ${orchestration.kind} result`,
     );
