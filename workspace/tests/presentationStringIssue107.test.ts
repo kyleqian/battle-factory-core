@@ -6,7 +6,10 @@ import {
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import { createBattleResolutionPresentation } from "../src/engine/battleResolutionPresentation.ts";
-import { BATTLE_SCRIPT_STATUS2_SUBSTITUTE } from "../src/engine/battleScriptRulesContext.ts";
+import {
+  BATTLE_SCRIPT_STATUS2_SUBSTITUTE,
+  type BattleScriptRulesBattlers,
+} from "../src/engine/battleScriptRulesContext.ts";
 import type { BattleCommandDecision, BattleCommandRequest } from "../src/engine/battleDecisionBoundary.ts";
 
 /**
@@ -48,18 +51,22 @@ function runFullTurn(
   // Patch a real, persistent 1-HP Substitute onto the trainer (battler 1)
   // straight into the constructed rulesContext -- no config field exposes
   // `substituteHP` yet, and this is not a transient battle-flow value like
-  // an event.
+  // an event. Explicit 4-tuple reconstruction (not `.map`) keeps
+  // `BattleScriptRulesBattlers`' fixed-length type intact.
+  const [b0, b1, b2, b3] = built.rules.rulesContext.battlers;
   const initial = Object.freeze({
     ...built,
+    boundary: built.boundary,
     rules: Object.freeze({
       ...built.rules,
       rulesContext: Object.freeze({
         ...built.rules.rulesContext,
-        battlers: Object.freeze(
-          built.rules.rulesContext.battlers.map((battler, index) =>
-            index === 1 ? Object.freeze({ ...battler, substituteHP: 1 }) : battler
-          ),
-        ),
+        battlers: Object.freeze([
+          b0,
+          Object.freeze({ ...b1, substituteHP: 1 }),
+          b2,
+          b3,
+        ]) as BattleScriptRulesBattlers,
       }),
     }),
   });
