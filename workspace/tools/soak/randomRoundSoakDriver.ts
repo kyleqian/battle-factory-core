@@ -37,9 +37,12 @@ import {
 } from "../../src/engine/monPic.ts";
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
 import { applyTypeEffectiveness, type TypeEffectivenessEntry } from "../../src/engine/damageCalc.ts";
+import type { FactoryRentalRoster } from "../../src/engine/factorySwap.ts";
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
 import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
+import speciesStatsData from "../../src/data/gen/species-stats.json" with { type: "json" };
+import battleFrontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------
 // Move power/type lookup and type-effectiveness table (for the "winning"
@@ -236,6 +239,124 @@ export function pickWinningSwitchRow(input: {
     }
   }
   return bestRow;
+}
+
+// ---------------------------------------------------------------------------
+// "winning-swap" swap-screen scorer/planner: the swap screen's own SUMMARY
+// option (FactorySwapState "playerOptions"/"enemyPicker" cursor 0) shows a
+// real player every rental's species and moves before deciding, so weighing
+// them is arbitrary-but-legal play, not hidden-state reading. But unlike the
+// draft screen, `state.factorySwap.controller`'s parties (`FactorySwapMon`)
+// don't carry move data -- only `rentalMons[].monId`, the Frontier set index,
+// does. `battle-frontier-mons.json` (keyed by that same monId) is the
+// species+moveset source of truth for both the draft screen's own reveal and
+// this screen's SUMMARY, so scoring off it here is the same information a
+// draft-time score would use, just reached through the roster's monId
+// instead of the draft screen's already-resolved rental records.
+// ---------------------------------------------------------------------------
+
+const MOVE_BY_NAME = new Map<string, { power: number; type: string }>(
+  (movesData as { moves: { move: string; power: number; type: string }[] }).moves.map(
+    (move) => [move.move, { power: move.power, type: move.type }],
+  ),
+);
+
+const BASE_STAT_TOTAL_BY_SPECIES = new Map<string, number>(
+  (speciesStatsData as {
+    species: {
+      name: string;
+      baseHp: number;
+      baseAttack: number;
+      baseDefense: number;
+      baseSpeed: number;
+      baseSpAttack: number;
+      baseSpDefense: number;
+    }[];
+  }).species.map((s) => [
+    s.name,
+    s.baseHp + s.baseAttack + s.baseDefense + s.baseSpeed + s.baseSpAttack + s.baseSpDefense,
+  ]),
+);
+
+const TYPES_BY_SPECIES_NAME = new Map<string, readonly [string, string]>(
+  (speciesTypesData.species as unknown as readonly Readonly<{
+    name: string;
+    types: readonly [string, string];
+  }>[]).map((s) => [s.name, s.types]),
+);
+
+const FRONTIER_MON_SET_BY_INDEX = new Map<number, { species: string; moves: readonly string[] }>(
+  (battleFrontierMonsData as { entries: { index: number; species: string; moves: readonly string[] }[] })
+    .entries.map((entry) => [entry.index, { species: entry.species, moves: entry.moves }]),
+);
+
+/**
+ * "winning-swap" policy candidate scorer, for both the player's own rentals
+ * and the defeated opponent's party on the swap screen:
+ * `score = baseStatTotal(species) + 2 x bestDamagingMovePower x (STAB ?
+ * 1.5 : 1) + 5 x distinctDamagingMoveTypes`, reading the Frontier set's own
+ * species base stats and moveset (`battle-frontier-mons.json`, keyed by
+ * `monId`/`FactoryRentalMon.monId`) -- the same formula shape as the
+ * fight-move/switch scorers above, minus a type-effectiveness term (there is
+ * no fixed defender to weigh at swap time, only each candidate's own
+ * power/coverage, same as a draft-time rental judged on its own merits).
+ * Returns 0 for an unrecognized monId (never expected in practice; the
+ * generated roster always resolves).
+ */
+export function scoreFactorySwapCandidate(monId: number): number {
+  const set = FRONTIER_MON_SET_BY_INDEX.get(monId);
+  if (!set) return 0;
+  const baseStatTotal = BASE_STAT_TOTAL_BY_SPECIES.get(set.species) ?? 0;
+  const types = TYPES_BY_SPECIES_NAME.get(set.species) ?? DEFAULT_TYPES;
+  let bestMoveScore = 0;
+  const attackingTypes = new Set<string>();
+  for (const moveName of set.moves) {
+    const move = MOVE_BY_NAME.get(moveName);
+    if (!move || move.power <= 0) continue;
+    attackingTypes.add(move.type);
+    const stab = types[0] === move.type || types[1] === move.type;
+    const moveScore = move.power * (stab ? 1.5 : 1);
+    if (moveScore > bestMoveScore) bestMoveScore = moveScore;
+  }
+  return baseStatTotal + 2 * bestMoveScore + 5 * attackingTypes.size;
+}
+
+export type WinningSwapPlan = {
+  readonly worstPlayerRow: 0 | 1 | 2;
+  readonly worstPlayerScore: number;
+  /**
+   * Opponent rows that outscore `worstPlayerScore`, best first (ties keep
+   * the lower row). Mutable: `onWinningFactorySwap` shifts off a row the
+   * engine rejects as a duplicate species and retries the next one.
+   */
+  opponentQueue: (0 | 1 | 2)[];
+};
+
+/**
+ * "winning-swap" policy swap-screen plan: scores all 6 roster slots
+ * (`rentalMons[0..2]` player, `rentalMons[3..5]` opponent, `FactorySwapState`'s
+ * own layout) via `scoreFactorySwapCandidate` and identifies the player's
+ * lowest-scoring rental (ties keep the lower row) plus every opponent row
+ * that outscores it, ranked best first (ties keep the lower row). An empty
+ * `opponentQueue` means no opponent mon outscores the worst rental -- the
+ * swap screen should be declined outright.
+ */
+export function buildWinningSwapPlan(rentalMons: FactoryRentalRoster): WinningSwapPlan {
+  const playerScores = [0, 1, 2].map((row) => scoreFactorySwapCandidate(rentalMons[row]!.monId));
+  let worstPlayerRow: 0 | 1 | 2 = 0;
+  let worstPlayerScore = playerScores[0]!;
+  for (let row = 1; row <= 2; row += 1) {
+    if (playerScores[row]! < worstPlayerScore) {
+      worstPlayerScore = playerScores[row]!;
+      worstPlayerRow = row as 0 | 1 | 2;
+    }
+  }
+  const opponentQueue = ([0, 1, 2] as const)
+    .map((row) => ({ row, score: scoreFactorySwapCandidate(rentalMons[row + 3]!.monId) }))
+    .filter((candidate) => candidate.score > worstPlayerScore)
+    .sort((a, b) => (b.score !== a.score ? b.score - a.score : a.row - b.row))
+    .map((candidate) => candidate.row);
+  return { worstPlayerRow, worstPlayerScore, opponentQueue };
 }
 
 // ---------------------------------------------------------------------------
@@ -458,10 +579,14 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * swap offer always answers NO instead of "full"'s 50/50 roll (the roll is
  * still drawn from the shared RNG stream, matching "full"'s draw at that
  * point, just ignored) — a rental already scouted and played with is worth
- * keeping over an unscouted swap; (4) the draft screen rents the 3
- * highest-scoring offered rentals (see `pickWinningDraftPicks`) in score
- * order, in place of "full"'s random 3-of-6 shuffle; (5) at the action menu,
- * when the active is "walled" (every legal move is non-damaging or 0x-immune
+ * keeping over an unscouted swap; (4) the draft screen still shuffles the
+ * same as "full" — a base-stat+STAB-power+coverage draft-pick heuristic was
+ * built and measured (M-B step 2 part B, rung 2) but stays WITHHELD: it wins
+ * round 2 more often but collapses at challenge 3+ (7 vs 40 completions at
+ * carry >= 21, n=180 — docs/soak-draft-heuristic-n180-2026-08-22.md), so
+ * "winning"'s draft is unchanged from "full"'s random 3-of-6; (5) at the
+ * action menu, when the active is "walled" (every legal move is non-damaging
+ * or 0x-immune
  * against the opponent's live types -- a merely resisted move, e.g.
  * 0.25x/0.5x, does NOT count as walled since part C2) and a benched,
  * non-fainted party member has both a damaging move that is super-effective
@@ -475,8 +600,25 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * real player weighing type matchups, preferring stronger rentals over an
  * unscouted swap, and retreating a truly walled mon to a healthy teammate
  * with a super-effective answer), not an AI oracle.
+ * "winning-swap": opt-in, identical to "winning" in every respect EXCEPT the
+ * postwin swap offer and swap screen — neither "winning" (declines every
+ * swap) nor "full" (almost never wins a round at all) has ever exercised the
+ * Factory swap screen at meaningful carried-streak depth. Reuses "winning"'s
+ * draft/fight/switch/continuation decisions verbatim (same
+ * `explores`/winning-biased rolls, same shared-RNG-stream draws). Differs
+ * only at: the swap offer always answers YES (instead of "winning"'s always
+ * NO); on the swap screen itself, scores the player's 3 rentals and the
+ * defeated opponent's 3 party mons with `scoreFactorySwapCandidate` (same
+ * power x STAB + base-stat-total + coverage formula shape as the fight/switch
+ * scorers above, reading `battle-frontier-mons.json` by `monId` since the
+ * swap screen's own party data carries no move info) via `buildWinningSwapPlan`,
+ * then navigates real button presses to swap out the LOWEST-scoring rental
+ * for the defeated opponent's HIGHEST-scoring mon that outscores it —
+ * retrying the next-best candidate if the engine rejects one as a duplicate
+ * species, and declining the whole screen (quit prompt, KEEP CURRENT POKéMON)
+ * if no opponent mon outscores the worst rental at all.
  */
-export type SoakPolicy = "full" | "vanilla" | "winning";
+export type SoakPolicy = "full" | "vanilla" | "winning" | "winning-swap";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
 type PlayerPolicy = SoakPolicy | "strong-route";
 
@@ -505,15 +647,22 @@ export class RandomPlayer {
   private switchedAgainstOpponentIndices = new Set<number>();
   /** "winning" only: count of voluntary switches the heuristic actually committed to (soak diagnostics). */
   public switchCount = 0;
+  /** "winning-swap" only: the current swap screen's row plan, built once per swap occurrence. */
+  private swapPlan: WinningSwapPlan | null = null;
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
 
-  /** "full" and "winning" share the same menu/target exploration rolls. */
+  /** "full", "winning", and "winning-swap" share the same menu/target exploration rolls. */
   private get explores(): boolean {
-    return this.policy === "full" || this.policy === "winning";
+    return this.policy === "full" || this.policy === "winning" || this.policy === "winning-swap";
+  }
+
+  /** "winning" and "winning-swap" share every winning-biased decision except the swap offer/screen. */
+  private get winningLike(): boolean {
+    return this.policy === "winning" || this.policy === "winning-swap";
   }
 
   constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
@@ -735,12 +884,12 @@ export class RandomPlayer {
         let target = !this.explores
           ? 0
           : roll < 0.60 ? 0 : roll < 0.82 ? 2 : roll < 0.88 ? 1 : roll < 0.94 ? 3 : this.rng.int(4);
-        // "winning" only (M-B step 2 part C): voluntarily switch out of a
-        // walled matchup instead of the rolled action. The roll above is
-        // still drawn (shared with "full") so its RNG stream is untouched;
-        // only the decision it feeds is overridden, like the swap-decline
-        // precedent (part B, rung 1).
-        this.pendingSwitchRow = this.policy === "winning"
+        // "winning"/"winning-swap" only (M-B step 2 part C): voluntarily
+        // switch out of a walled matchup instead of the rolled action. The
+        // roll above is still drawn (shared with "full") so its RNG stream
+        // is untouched; only the decision it feeds is overridden, like the
+        // swap-decline precedent (part B, rung 1).
+        this.pendingSwitchRow = this.winningLike
           ? this.computeSwitchRow(orch, presentation)
           : null;
         if (this.pendingSwitchRow !== null) target = 2;
@@ -799,7 +948,7 @@ export class RandomPlayer {
           ? 3
           : this.policy === "vanilla" || this.policy === "strong-route"
             ? firstLegal
-            : this.policy === "winning"
+            : this.winningLike
               ? bestEffectivenessSlot()
               : this.rng.int(4);
         this.fightIntent = {
@@ -909,22 +1058,23 @@ export class RandomPlayer {
     }
     if (this.partyIntent === null || this.partyIntent.key !== this.lastCommandKey) {
       // Any row the UI can cursor to, including fainted rows (their SEND OUT
-      // shows the no-energy message), plus cancel. "winning" (M-B step 2
-      // part C): send out the action-menu heuristic's committed row when one
-      // was set (a genuine walled-matchup switch), else decline like before
-      // -- forced switches never route through here. Other policies keep
-      // their random roll.
-      const rawTarget: 0 | 1 | 2 | "cancel" = this.policy === "winning"
+      // shows the no-energy message), plus cancel. "winning"/"winning-swap"
+      // (M-B step 2 part C): send out the action-menu heuristic's committed
+      // row when one was set (a genuine walled-matchup switch), else decline
+      // like before -- forced switches never route through here. Other
+      // policies keep their random roll.
+      const rawTarget: 0 | 1 | 2 | "cancel" = this.winningLike
         ? (this.pendingSwitchRow ?? "cancel")
         : this.rng.float() < 0.25 ? "cancel" : ([0, 1, 2] as const)[this.rng.int(3)]!;
       this.pendingSwitchRow = null;
-      // "winning" only: the UI enforces legality, so if the selector somehow
-      // rejects the heuristic's committed row (e.g. it's the active), fall
-      // back to cancel rather than press an illegal target. "full"/"vanilla"
-      // keep their prior random-roll behaviour verbatim (including rolling
-      // onto a fainted/active row, whose own no-energy message the generic
-      // press sequence below already handles) -- untouched by this guard.
-      const target = this.policy === "winning" && rawTarget !== "cancel" && !selector.rows[rawTarget]!.legal
+      // "winning"/"winning-swap" only: the UI enforces legality, so if the
+      // selector somehow rejects the heuristic's committed row (e.g. it's
+      // the active), fall back to cancel rather than press an illegal
+      // target. "full"/"vanilla" keep their prior random-roll behaviour
+      // verbatim (including rolling onto a fainted/active row, whose own
+      // no-energy message the generic press sequence below already
+      // handles) -- untouched by this guard.
+      const target = this.winningLike && rawTarget !== "cancel" && !selector.rows[rawTarget]!.legal
         ? "cancel"
         : rawTarget;
       this.partyIntent = { key: this.lastCommandKey, target };
@@ -992,6 +1142,10 @@ export class RandomPlayer {
   private onPostwin(state: EngineState): ReadonlySet<GbaButton> {
     const postwin = state.postwin!;
     if (state.factorySwap) return this.onFactorySwap(state);
+    // "winning-swap" only: clear the last swap screen's plan once we're back
+    // in ordinary postwin flow, so the next swap occurrence (a later battle)
+    // rebuilds it from that battle's own roster instead of reusing this one's.
+    if (this.policy === "winning-swap" && this.swapPlan !== null) this.swapPlan = null;
     if (state.battleRoom || state.prebattleRoom) {
       return this.pressAdvance(state, "postwin room advance");
     }
@@ -1038,12 +1192,19 @@ export class RandomPlayer {
       && postwin.swapCursorPos !== null
     ) {
       // "winning" (M-B step 2 part B, rung 1): always decline -- a rental
-      // it already chose (now by the draft heuristic below) and has played
-      // with is worth keeping over an unscouted swap. The roll is still
-      // drawn (this.explores covers both "full" and "winning") so "full"'s
-      // own draw here is untouched; only the decision it feeds is overridden.
+      // it already chose and has played with is worth keeping over an
+      // unscouted swap. "winning-swap" (opt-in coverage instrument) is the
+      // opposite: always accept, then pick deliberately on the swap screen
+      // itself (see onWinningFactorySwap). The roll is still drawn
+      // (this.explores covers "full"/"winning"/"winning-swap" alike) so
+      // "full"'s own draw here is untouched; only the decision it feeds is
+      // overridden.
       const rolledAccept = this.explores && this.rng.chance(0.5);
-      const accept = this.policy === "winning" ? false : rolledAccept;
+      const accept = this.policy === "winning"
+        ? false
+        : this.policy === "winning-swap"
+          ? true
+          : rolledAccept;
       const targetPos = accept ? 0 : 1;
       if (postwin.swapCursorPos !== targetPos) {
         return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
@@ -1090,6 +1251,7 @@ export class RandomPlayer {
   }
 
   private onFactorySwap(state: EngineState): ReadonlySet<GbaButton> {
+    if (this.policy === "winning-swap") return this.onWinningFactorySwap(state);
     // The swap controller enforces legality internally, so random legal-button
     // exploration (a real player's inputs) covers pickers, quit prompts, the
     // duplicate-species rejection, and the summary detour.
@@ -1101,6 +1263,81 @@ export class RandomPlayer {
         : this.rng.pick(["UP", "DOWN", "LEFT", "RIGHT"] as const);
     this.note(state, `swap screen: ${button} (${state.factorySwap!.controller.phase})`);
     return this.press(button, 14);
+  }
+
+  /**
+   * "winning-swap" only: navigates real button presses through the swap
+   * screen's own state machine (src/engine/factorySwap.ts) to swap out the
+   * player's lowest-scoring rental for the defeated opponent's
+   * highest-scoring mon that outscores it (`buildWinningSwapPlan`), retrying
+   * the next-best opponent candidate whenever the engine's own
+   * duplicate-species rejection (`factorySwapAlreadyHasSpecies`) blocks one,
+   * and declining outright (quit prompt, KEEP CURRENT POKéMON) once the plan
+   * has no remaining candidate. Every step is a legal button a real player
+   * could press -- the engine enforces its own legality (cursor bounds,
+   * duplicate species) exactly as it does for the generic exploring policies.
+   */
+  private onWinningFactorySwap(state: EngineState): ReadonlySet<GbaButton> {
+    const controller = state.factorySwap!.controller;
+    if (this.swapPlan === null) {
+      this.swapPlan = buildWinningSwapPlan(controller.rentalMons);
+      this.note(
+        state,
+        `swap screen (winning): plan worst row ${this.swapPlan.worstPlayerRow} `
+          + `(score ${this.swapPlan.worstPlayerScore}) vs opponent queue [${this.swapPlan.opponentQueue.join(",")}]`,
+      );
+    }
+    const plan = this.swapPlan;
+    if (!controller.inputReady) return NO_BUTTONS;
+    switch (controller.phase) {
+      case "playerPicker": {
+        if (plan.opponentQueue.length === 0) {
+          this.note(state, "swap screen (winning): decline, no opponent outscores worst rental");
+          return this.press("B", 10);
+        }
+        if (controller.cursor !== plan.worstPlayerRow) {
+          return this.press("RIGHT", 8);
+        }
+        this.note(state, `swap screen (winning): select worst rental row ${plan.worstPlayerRow}`);
+        return this.press("A", 10);
+      }
+      case "playerOptions": {
+        if (controller.playerOptionCursor !== 1) {
+          return this.press("DOWN", 8);
+        }
+        this.note(state, "swap screen (winning): SWITCH");
+        return this.press("A", 10);
+      }
+      case "enemyPicker": {
+        const target = plan.opponentQueue[0];
+        if (target === undefined) {
+          this.note(state, "swap screen (winning): decline, remaining candidates all rejected");
+          return this.press("B", 10);
+        }
+        if (controller.cursor !== target) {
+          return this.press("RIGHT", 8);
+        }
+        this.note(state, `swap screen (winning): select opponent row ${target}`);
+        return this.press("A", 10);
+      }
+      case "duplicateSpecies": {
+        this.note(state, `swap screen (winning): row ${plan.opponentQueue[0]} is a duplicate species, next candidate`);
+        plan.opponentQueue.shift();
+        return this.press("B", 10);
+      }
+      case "acceptPrompt": {
+        if (controller.yesNoCursor !== 0) return this.press("UP", 8);
+        this.note(state, "swap screen (winning): confirm swap");
+        return this.press("A", 10);
+      }
+      case "quitPrompt": {
+        if (controller.yesNoCursor !== 0) return this.press("UP", 8);
+        this.note(state, "swap screen (winning): confirm decline");
+        return this.press("A", 10);
+      }
+      default:
+        return NO_BUTTONS;
+    }
   }
 
   private onTerminal(state: EngineState): ReadonlySet<GbaButton> {
@@ -1206,11 +1443,15 @@ export const DEFAULT_RUN_OPTIONS: RunOptions = {
  * observed completion was seed 49 at frame 693,051. 1_000_000 keeps ~44%
  * headroom over that observed max, matching the proportional margin
  * DEFAULT_RUN_OPTIONS.maxFrames used for "full" (~51% over its 398,088 max).
+ * "winning-swap" shares "winning"'s budget verbatim: it chains rounds the
+ * same way and the swap screen itself only adds a handful of frames per
+ * occurrence, well inside "winning"'s existing headroom.
  */
 export const DEFAULT_MAX_FRAMES_BY_POLICY: Record<SoakPolicy, number> = {
   full: 600_000,
   vanilla: 600_000,
   winning: 1_000_000,
+  "winning-swap": 1_000_000,
 };
 
 /** An explicit `maxFrames` always wins; otherwise resolve per policy. */

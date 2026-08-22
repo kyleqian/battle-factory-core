@@ -13,10 +13,15 @@
 //   --seed N           run a single seed
 //   --policy P         "full" (default: arbitrary-but-legal play), "vanilla"
 //                      (plainest play: FIGHT first legal move, decline
-//                      swaps, GO ON), or "winning" (opt-in: full's
+//                      swaps, GO ON), "winning" (opt-in: full's
 //                      exploration, but biases fight-move selection to the
 //                      highest-power legal damaging move and declines
-//                      voluntary switches, for deep-streak crash coverage)
+//                      voluntary switches, for deep-streak crash coverage),
+//                      or "winning-swap" (opt-in: identical to "winning"
+//                      except it accepts every postwin swap offer and, on
+//                      the swap screen, swaps its lowest-scoring rental for
+//                      the defeated opponent's highest-scoring mon -- covers
+//                      the Factory swap screen at real carried-streak depth)
 //   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
@@ -50,8 +55,10 @@ function main(): void {
   const renderEvery = Number(getFlag("--render-every") ?? 8);
   const policy = (getFlag("--policy") ?? "full") as SoakPolicy;
   const jsonPath = getFlag("--json");
-  if (policy !== "full" && policy !== "vanilla" && policy !== "winning") {
-    console.error(`bad --policy: ${policy} (want full|vanilla|winning)`);
+  if (
+    policy !== "full" && policy !== "vanilla" && policy !== "winning" && policy !== "winning-swap"
+  ) {
+    console.error(`bad --policy: ${policy} (want full|vanilla|winning|winning-swap)`);
     process.exit(2);
   }
   const maxFramesFlag = getFlag("--max-frames");

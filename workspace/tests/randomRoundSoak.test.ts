@@ -31,10 +31,13 @@ import {
   type FactoryCarry,
 } from "../src/engine/factoryRoundChaining.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
+import type { FactoryRentalRoster } from "../src/engine/factorySwap.ts";
 import {
+  buildWinningSwapPlan,
   pickWinningFightSlot,
   pickWinningSwitchRow,
   resolveMaxFrames,
+  scoreFactorySwapCandidate,
   RandomPlayer,
   Rng,
   runSeed,
@@ -701,6 +704,86 @@ describe("Milestone M-B step 2 part B, rung 1: winning declines every swap offer
     expect(swapOfferNotes.length).toBeGreaterThan(0);
     expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
     expect(notes.some((note) => note.startsWith("swap screen:"))).toBe(false);
+  });
+});
+
+describe("winning-swap policy (opt-in swap-screen coverage instrument)", () => {
+  it("(a) answers the swap offer YES and reaches the swap screen's input-ready state", () => {
+    const notes: string[] = [];
+    // Same seed 0 as the "winning declines" pin above: winning-swap reuses
+    // "winning"'s exploration/decision rolls verbatim up to the swap offer,
+    // so it reaches the same offer at essentially the same frame.
+    runSeed(0, {
+      policy: "winning-swap",
+      maxFrames: 25_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    const swapOfferNotes = notes.filter((note) => note.startsWith("swap offer:"));
+    expect(swapOfferNotes.length).toBeGreaterThan(0);
+    expect(swapOfferNotes.every((note) => note === "swap offer: YES")).toBe(true);
+    // The swap screen only logs a decision once inputReady, so any
+    // "swap screen (winning):" note is direct proof the screen was reached
+    // and became interactive.
+    expect(notes.some((note) => note.startsWith("swap screen (winning):"))).toBe(true);
+  });
+
+  // Real Factory Frontier-set scores (battle-frontier-mons.json x
+  // species-stats.json x species-types.json x moves.json), hand-verified:
+  // KAKUNA/SILCOON (Harden only) = 205, MAGIKARP (Flail) = 207,
+  // REGISTEEL (best move Ancient Power, no STAB) = 1095,
+  // REGIROCK #762 (best move Earthquake, STAB) = 1100,
+  // METAGROSS #835 (best move Meteor Mash, STAB) = 1120.
+  it("(b1) scores real Frontier sets with the documented formula", () => {
+    expect(scoreFactorySwapCandidate(9)).toBe(205); // KAKUNA
+    expect(scoreFactorySwapCandidate(11)).toBe(205); // SILCOON
+    expect(scoreFactorySwapCandidate(6)).toBe(207); // MAGIKARP
+    expect(scoreFactorySwapCandidate(786)).toBe(1095); // REGISTEEL
+    expect(scoreFactorySwapCandidate(762)).toBe(1100); // REGIROCK
+    expect(scoreFactorySwapCandidate(835)).toBe(1120); // METAGROSS
+  });
+
+  it("(b2) selects the lowest-scoring rental row and ranks outscoring opponents best-first (staged known scores)", () => {
+    const rentalMons = [
+      { monId: 9, personality: 0, ivs: 0, abilityNum: 0 }, // player row 0: KAKUNA, 205 -- worst
+      { monId: 6, personality: 0, ivs: 0, abilityNum: 0 }, // player row 1: MAGIKARP, 207
+      { monId: 786, personality: 0, ivs: 0, abilityNum: 0 }, // player row 2: REGISTEEL, 1095
+      { monId: 11, personality: 0, ivs: 0, abilityNum: 0 }, // opponent row 0: SILCOON, 205 -- ties worst, does not outscore
+      { monId: 835, personality: 0, ivs: 0, abilityNum: 0 }, // opponent row 1: METAGROSS, 1120 -- best
+      { monId: 762, personality: 0, ivs: 0, abilityNum: 0 }, // opponent row 2: REGIROCK, 1100
+    ] as unknown as FactoryRentalRoster;
+    const plan = buildWinningSwapPlan(rentalMons);
+    expect(plan.worstPlayerRow).toBe(0);
+    expect(plan.worstPlayerScore).toBe(205);
+    expect(plan.opponentQueue).toEqual([1, 2]);
+  });
+
+  it("(b3) declines when no opponent mon outscores the worst rental", () => {
+    const rentalMons = [
+      { monId: 786, personality: 0, ivs: 0, abilityNum: 0 }, // player row 0: REGISTEEL, 1095 -- worst
+      { monId: 835, personality: 0, ivs: 0, abilityNum: 0 }, // player row 1: METAGROSS, 1120
+      { monId: 762, personality: 0, ivs: 0, abilityNum: 0 }, // player row 2: REGIROCK, 1100
+      { monId: 9, personality: 0, ivs: 0, abilityNum: 0 }, // opponent row 0: KAKUNA, 205
+      { monId: 6, personality: 0, ivs: 0, abilityNum: 0 }, // opponent row 1: MAGIKARP, 207
+      { monId: 11, personality: 0, ivs: 0, abilityNum: 0 }, // opponent row 2: SILCOON, 205
+    ] as unknown as FactoryRentalRoster;
+    const plan = buildWinningSwapPlan(rentalMons);
+    expect(plan.worstPlayerRow).toBe(0);
+    expect(plan.opponentQueue).toEqual([]);
+  });
+
+  it("(c) \"winning\" is unaffected -- still declines every swap offer and never enters the swap screen", () => {
+    const notes: string[] = [];
+    runSeed(0, {
+      policy: "winning",
+      maxFrames: 20_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    const swapOfferNotes = notes.filter((note) => note.startsWith("swap offer:"));
+    expect(swapOfferNotes.length).toBeGreaterThan(0);
+    expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
+    expect(notes.some((note) => note.startsWith("swap screen"))).toBe(false);
   });
 });
 
