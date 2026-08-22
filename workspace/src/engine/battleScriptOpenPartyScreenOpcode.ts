@@ -242,7 +242,6 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       );
     }
 
-    const legalBenchIndexes = legalSwitchPartyIndexes(rules.party.opponent, activePartyIndex);
     const damageRules = Object.freeze({
       ...rules,
       selectorRoles: Object.freeze({
@@ -255,9 +254,13 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       critMultiplier: 1,
       dmgMultiplier: 1,
     });
-    let scored = legalBenchIndexes.length === 1
-      ? Object.freeze({ kind: "resolved" as const, partyIndex: legalBenchIndexes[0]! })
-      : getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes);
+    // ISSUES #110: no legal-bench-count special case here, mirroring source exactly --
+    // Cmd_openpartyscreen's own plain-battler branch (battle_script_commands.c:5113-5148)
+    // unconditionally emits BtlController_EmitChoosePokemon regardless of candidate count,
+    // and OpponentHandleChoosePokemon (battle_controller_opponent.c:1621-1675) unconditionally
+    // calls GetMostSuitableMonToSwitchInto() at line 1627 -- always the scorer, then the
+    // PARTY_SIZE fallback below, never a shortcut on how many slots are legal.
+    let scored = getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes);
     if (scored.kind === "damage-fallback-needed") {
       let baseDamage = calculateBattleScriptBaseDamageForCurrentMove(damageRules);
       const active = rules.battlers[battler];

@@ -304,4 +304,41 @@ describe("production openpartyscreen (Cmd_openpartyscreen) dispatch, BS_FAINTED 
       expect(result.kind).toBe("advanced");
     });
   });
+
+  describe("ISSUES #110: single-legal-bench still routes through the AI scorer, not a legal-count shortcut", () => {
+    it(
+      "an egg outscores the sole non-egg legal bench member -- a `legalBenchIndexes.length === 1` "
+        + "shortcut (egg-filtered, like the player branch's own selector) would pick the non-egg member "
+        + "directly; source's GetMostSuitableMonToSwitchInto gates only on species/hp/active-slot, "
+        + "so it correctly picks the egg via its pass-1 super-effective check",
+      () => {
+        const rc = context({
+          battlers: [
+            battler({ side: 0, species: SUNKERN, types: ["TYPE_GRASS", "TYPE_GRASS"] }),
+            battler({ side: 1, species: SUNKERN, hp: 0, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0 }),
+            battler({ side: 0 }),
+            battler({ side: 1 }),
+          ],
+          party: {
+            player: [EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT, EMPTY_SLOT],
+            opponent: [
+              { species: SUNKERN, hp: 0, moves: [TACKLE, 0, 0, 0] },
+              // SQUIRTLE (WATER/WATER): takes 4x from GRASS, so pass 1 scores it above PIDGEY
+              // regardless of iteration order, and EMBER is super-effective against GRASS --
+              // pass 1 resolves to it immediately, matching source's egg-blind scoring.
+              { species: 7 /* SQUIRTLE */, hp: 100, isEgg: true, moves: [52 /* EMBER */, 0, 0, 0] },
+              { species: PIDGEY, hp: 100, moves: [TACKLE, 0, 0, 0] },
+              EMPTY_SLOT,
+              EMPTY_SLOT,
+              EMPTY_SLOT,
+            ],
+          },
+        });
+        const { result } = stepAtProgramCounter(OPEN_PARTY_SCREEN_PC, rc);
+        if (result.kind !== "advanced") throw new Error(`expected advance, got ${result.kind}`);
+        expect(result.state.rulesContext.monToSwitchIntoId[1]).toBe(1); // SQUIRTLE, not PIDGEY (index 2)
+        expect(result.state.rng.calls).toBe(0);
+      },
+    );
+  });
 });
