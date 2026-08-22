@@ -31,7 +31,12 @@ import {
   type FactoryCarry,
 } from "../src/engine/factoryRoundChaining.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
-import { resolveMaxFrames, runSeed } from "../tools/soak/randomRoundSoakDriver.ts";
+import {
+  pickWinningFightSlot,
+  pickWinningSwitchRow,
+  resolveMaxFrames,
+  runSeed,
+} from "../tools/soak/randomRoundSoakDriver.ts";
 
 const PIN_SEEDS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
@@ -313,9 +318,18 @@ describe("random round soak driver (green milestone pin)", () => {
       // trajectory, not a driver regression. It still earns all seven wins,
       // and both settled re-runs stay deterministic
       // (`expect(second).toEqual(first)` below).
-      frames: 59_656,
+      //
+      // ISSUES #99's driver fix (randomRoundSoakDriver.ts's onPostwin) then
+      // moved these counters a third time: strong-route is a non-exploring
+      // policy (same `explores` semantics as vanilla), so it always declines
+      // the swap offer -- but the pre-fix bug made every non-exploring
+      // policy accept every swap by accident (the frozen continuation-menu
+      // branch pressed A on the swap menu's default YES cursor). Fixed, this
+      // seed now genuinely declines every swap and skips the swap screen's
+      // extra frames entirely, settling into a shorter, different trajectory.
+      frames: 40_566,
       battle: 7,
-      turn: 18,
+      turn: 5,
       diagnostics: {
         roundPhase: "roundComplete",
         battleIndex: 6,
@@ -325,7 +339,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 4_397,
+        renderCalls: 2_953,
       },
     });
     expect(second).toEqual(first);
@@ -418,8 +432,17 @@ describe("random round soak driver (green milestone pin)", () => {
     // whole round plays out to a genuine finish. Pin the meaningful outcome
     // shape (progressed past the old crash point, no throw, real endState),
     // not the exact settling frame/turn — those drift with unrelated
-    // downstream RNG-consumption changes.
-    const result = runSeed(27, { maxFrames: 80_000, renderEvery: 0 });
+    // downstream RNG-consumption changes. `stopAtFirstRoundDecision` snapshots
+    // THIS round's own decided outcome regardless of what the terminal does
+    // afterward — this seed's terminal happens to dead-end on ISSUES #104
+    // (ISSUES #104 driver fix, PROGRESS ~1367), an unrelated open defect this
+    // pin has no stake in; without the flag the honest driver now reports
+    // that dead-end as HANG instead of this seed's own genuine roundLost.
+    const result = runSeed(27, {
+      maxFrames: 80_000,
+      renderEvery: 0,
+      stopAtFirstRoundDecision: true,
+    });
     expect(result.errorMessage ?? "").not.toMatch(/openpartyscreen|machine-barrier/i);
     expect(result.frames).toBeGreaterThan(30_798);
     expect(result).toMatchObject({ outcome: "OK", endState: "roundLost" });
@@ -504,5 +527,358 @@ describe("real max-depth tracking (Milestone M-A step 1)", () => {
     expect(result.diagnostics?.carriedWinStreak).toBe(0);
     expect(result.maxCarriedWinStreak).toBeGreaterThanOrEqual(7);
     expect(result.maxBattleDepth).toBeGreaterThanOrEqual(7);
+  });
+});
+
+describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered by its own branch", () => {
+  // Regression pin for the fix in randomRoundSoakDriver.ts's onPostwin:
+  // the continuation-menu branch used to stay "live" (continuationCursorPos
+  // !== null) forever after GO ON was confirmed, so its A presses answered
+  // the dialoguePage-4 swap offer instead of the swap-offer branch below it
+  // -- vanilla accepted every swap despite its own "declined" doc comment,
+  // and full/winning accepted ~85% instead of a 50/50 roll.
+  it("vanilla policy always declines the swap offer and never enters the swap screen", () => {
+    const notes: string[] = [];
+    // Seed 0 wins battle 1 and reaches the swap-offer menu by frame ~28,645
+    // under this policy's always-GO-ON continuation; capped well short of
+    // vanilla's 600,000-frame default full-round budget.
+    runSeed(0, {
+      policy: "vanilla",
+      maxFrames: 32_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    const swapOfferNotes = notes.filter((note) => note.startsWith("swap offer:"));
+    expect(swapOfferNotes.length).toBeGreaterThan(0);
+    expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
+    expect(notes.some((note) => note.startsWith("swap screen:"))).toBe(false);
+  });
+
+  it("winning policy's swap-offer menu is reached and logs its own decision", () => {
+    const notes: string[] = [];
+    runSeed(0, {
+      policy: "winning",
+      maxFrames: 15_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    expect(notes.some((note) => note.startsWith("swap offer:"))).toBe(true);
+  });
+
+  it("both YES and NO swap-offer decisions occur across a small fixed seed set (full policy)", () => {
+    // Moved from "winning" to "full" by M-B step 2 part B, rung 1: "winning"
+    // now always declines (see the describe block below), so "full" is the
+    // policy that still exercises both branches of this menu.
+    const swapOfferNotes: string[] = [];
+    for (let seed = 0; seed < 7; seed += 1) {
+      runSeed(seed, {
+        policy: "full",
+        maxFrames: 20_000,
+        renderEvery: 0,
+        onNote: (entry) => {
+          if (entry.what.startsWith("swap offer:")) swapOfferNotes.push(entry.what);
+        },
+      });
+    }
+    expect(swapOfferNotes).toContain("swap offer: YES");
+    expect(swapOfferNotes).toContain("swap offer: NO");
+  });
+});
+
+describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
+  it("(a) picks the type-effectiveness winner over raw higher power (SURF resisted vs VINE_WHIP super-effective+STAB)", () => {
+    // SURF (Water, power 95) vs a Water defender: resisted 0.5x, no STAB
+    // (attacker is Grass) -> score 47.5. VINE_WHIP (Grass, power 35) vs the
+    // same Water defender: super-effective 2x and STAB (attacker is Grass)
+    // -> score 105. The lower-power, on-type move should win.
+    const slot = pickWinningFightSlot({
+      legalSlots: [true, true, false, false],
+      moveIds: [57, 22, 0, 0], // MOVE_SURF, MOVE_VINE_WHIP
+      attackerTypes: ["TYPE_GRASS", "TYPE_GRASS"],
+      defenderTypes: ["TYPE_WATER", "TYPE_WATER"],
+    });
+    expect(slot).toBe(1);
+  });
+
+  it("(b) falls back to highest-power/lowest-slot when every legal move scores 0 (immune or non-damaging)", () => {
+    // GROWL (Normal, power 0) is non-damaging -> score 0. TACKLE (Normal,
+    // power 35) and HYPER_BEAM (Normal, power 150) are both immune (0x)
+    // against a Ghost defender -> score 0. Every legal slot scores 0, so
+    // the fallback rule (highest power, ties to the lower slot) applies:
+    // HYPER_BEAM's 150 beats TACKLE's 35 and GROWL's 0.
+    const slot = pickWinningFightSlot({
+      legalSlots: [true, true, true, false],
+      moveIds: [45, 33, 63, 0], // MOVE_GROWL, MOVE_TACKLE, MOVE_HYPER_BEAM
+      attackerTypes: ["TYPE_NORMAL", "TYPE_NORMAL"],
+      defenderTypes: ["TYPE_GHOST", "TYPE_GHOST"],
+    });
+    expect(slot).toBe(2);
+  });
+
+  it("(c) leaves \"full\" byte-identical for two seeds (winning-only change)", () => {
+    const options = {
+      maxFrames: 600_000,
+      renderEvery: 0,
+      policy: "full" as const,
+      stopAtFirstRoundDecision: true,
+    };
+    // Recorded on the pre-change tree (this milestone's step 2 commit).
+    expect(runSeed(0, options)).toMatchObject({
+      frames: 11955,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 20,
+    });
+    expect(runSeed(1, options)).toMatchObject({
+      frames: 14345,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 29,
+    });
+  });
+
+  it("(c) leaves \"vanilla\" byte-identical for two seeds (winning-only change)", () => {
+    const options = {
+      maxFrames: 600_000,
+      renderEvery: 0,
+      policy: "vanilla" as const,
+      stopAtFirstRoundDecision: true,
+    };
+    // Recorded on the pre-change tree (this milestone's step 2 commit).
+    expect(runSeed(0, options)).toMatchObject({
+      frames: 8499,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 16,
+    });
+    // ISSUES #104 (engine half, fixed): the old 16970 pin was a grace-expiry
+    // artifact -- seed 1's random terminal presses landed on the record
+    // prompt's YES/cancel answer, which used to dead-end forever (no
+    // declineFarewellReleaseAge, no re-chain), so the driver's 9000-frame
+    // grace window ran out before the snapshot ever refreshed past the
+    // dead-end tick. Now that YES/cancel arm the same continuation as NO
+    // (factoryTerminalPresentation.ts's advanceFactoryTerminalRecordPrompt),
+    // the round genuinely re-chains right after the answer is given, so the
+    // frozen last-pre-chain snapshot lands much earlier, at the real frame.
+    expect(runSeed(1, options)).toMatchObject({
+      frames: 8550,
+      outcome: "OK",
+      endState: "roundLost",
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 16,
+    });
+  });
+});
+
+describe("Milestone M-B step 2 part B, rung 1: winning declines every swap offer", () => {
+  it("never enters the swap screen and every swap-offer note reads NO", () => {
+    const notes: string[] = [];
+    // Seed 0 reaches the swap-offer menu under "winning" well within 20,000
+    // frames (the pre-fix ISSUES #99 pin above confirms this for seed 0).
+    runSeed(0, {
+      policy: "winning",
+      maxFrames: 20_000,
+      renderEvery: 0,
+      onNote: (entry) => notes.push(entry.what),
+    });
+    const swapOfferNotes = notes.filter((note) => note.startsWith("swap offer:"));
+    expect(swapOfferNotes.length).toBeGreaterThan(0);
+    expect(swapOfferNotes.every((note) => note === "swap offer: NO")).toBe(true);
+    expect(notes.some((note) => note.startsWith("swap screen:"))).toBe(false);
+  });
+});
+
+describe("Milestone M-B step 2 part C (tightened by part C2): winning switches out of a truly-walled matchup", () => {
+  // MOVE_TACKLE (Normal, power 35) is 0x-immune against a Ghost defender;
+  // MOVE_LICK (Ghost, power 20) is 2x super-effective (with STAB) against
+  // that same Ghost defender -- confirmed against this repo's own
+  // type-effectiveness table, mirroring how the part 2a pins above prove
+  // the analogous Water/Grass combo. MOVE_SURF (Water, power 95) is only
+  // 0.5x resisted (NOT immune) against a Water defender -- part C2's
+  // tightening: a merely resisted active no longer counts as walled.
+  const GHOST: readonly [string, string] = ["TYPE_GHOST", "TYPE_GHOST"];
+  const WATER: readonly [string, string] = ["TYPE_WATER", "TYPE_WATER"];
+  const GRASS: readonly [string, string] = ["TYPE_GRASS", "TYPE_GRASS"];
+  const walledActive = { activeMoveIds: [33, 0, 0, 0], activeLegalSlots: [true, false, false, false] };
+  const qualifyingBench = [
+    { row: 1 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+  ];
+
+  it("(a) resisted-only active (0.5x, not immune) -> NO switch, even with a qualifying bench", () => {
+    const row = pickWinningSwitchRow({
+      activeMoveIds: [57, 0, 0, 0], // MOVE_SURF, 0.5x resisted vs Water -- not walled since part C2
+      activeLegalSlots: [true, false, false, false],
+      defenderTypes: WATER,
+      bench: [
+        { row: 1 as const, fainted: false, active: false, moveIds: [22, 0, 0, 0], types: GRASS, hp: 100, maxHp: 100 },
+      ],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("(b) all-immune active + qualifying bench at 80% HP -> switch", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: [{ ...qualifyingBench[0]!, hp: 80 }],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBe(1);
+  });
+
+  it("(c) same all-immune active + qualifying bench but at 30% HP -> no switch", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: [{ ...qualifyingBench[0]!, hp: 30 }],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("bench at exactly 50% HP still switches (inclusive boundary)", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: [{ ...qualifyingBench[0]!, hp: 50 }],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBe(1);
+  });
+
+  it("active has a >= 1x move (not walled) -> null even with a qualifying bench", () => {
+    const row = pickWinningSwitchRow({
+      activeMoveIds: [33, 0, 0, 0], // MOVE_TACKLE, neutral 1x vs Water
+      activeLegalSlots: [true, false, false, false],
+      defenderTypes: WATER,
+      bench: qualifyingBench,
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("only one healthy party member remains -> null", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: qualifyingBench,
+      healthyCount: 1,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("already switched against this opponent this battle -> null (no ping-pong)", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: qualifyingBench,
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: true,
+    });
+    expect(row).toBeNull();
+  });
+
+  it("picks the best-scoring qualifying row, ties to the lower row regardless of bench order", () => {
+    // Row 2 and row 1 both carry LICK -> the same 20 x 2 x 1.5(STAB) = 60
+    // score. Row 2 is listed FIRST in `bench` to prove the tie-break is
+    // an explicit lower-row rule, not an artifact of iteration order.
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: [
+        { row: 2 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+        { row: 1 as const, fainted: false, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+      ],
+      healthyCount: 3,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBe(1);
+  });
+
+  it("skips fainted and active bench candidates even when they'd qualify", () => {
+    const row = pickWinningSwitchRow({
+      ...walledActive,
+      defenderTypes: GHOST,
+      bench: [
+        { row: 0 as const, fainted: false, active: true, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+        { row: 1 as const, fainted: true, active: false, moveIds: [122, 0, 0, 0], types: GHOST, hp: 100, maxHp: 100 },
+      ],
+      healthyCount: 2,
+      alreadySwitchedAgainstThisOpponent: false,
+    });
+    expect(row).toBeNull();
+  });
+});
+
+describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK = frame budget reached while progressing, HANG = no progress for stallFrames", () => {
+  // The engine half (fd30ee13) made the terminal record prompt's YES and
+  // B-cancel answers continue exactly like NO, so a decided round now
+  // ALWAYS re-chains into a fresh draft almost immediately -- the old
+  // per-round grace timer's own expiry-HANG branch (PROGRESS ~1367's
+  // seeds 328/34 pins, now retargeted below) is dead: master's own
+  // consequence is that a continuous-play run never stops on its own
+  // (`lobbyFreeRoam` is unreachable under the generated-orchestrator
+  // route), so every seed used to run to `maxFrames` and get reported HANG
+  // even while actively, honestly playing the whole time. Generic stall
+  // detection (any of round identity, `battleIndex`, the player's turn
+  // counter, the input-owning surface, or the decided-round phase going
+  // `stallFrames` frames without moving) replaces it.
+  it("(a) stall detection fires on the first frame with zero progress, and does not false-positive at the default window", () => {
+    // stallFrames: 1 is the cheapest exact trip: frame 1 always "progresses"
+    // (the surface baseline starts empty), so frame 2 -- the first frame
+    // whose progress signals are unchanged from frame 1 -- is caught
+    // immediately, deterministically, regardless of seed/policy.
+    const stalled = runSeed(0, {
+      policy: "winning",
+      stallFrames: 1,
+      maxFrames: 5_000,
+      renderEvery: 0,
+    });
+    expect(stalled.outcome).toBe("HANG");
+    expect(stalled.hangSurface).toBeTruthy();
+    expect(stalled.frames).toBeLessThanOrEqual(3);
+
+    // Positive control: the same seed at the DEFAULT stall window
+    // (30_000) never gets close to stalling within a much smaller budget --
+    // ordinary draft/battle/postwin play moves at least one progress
+    // signal many times a second.
+    const control = runSeed(0, {
+      policy: "winning",
+      maxFrames: 10_000,
+      renderEvery: 0,
+    });
+    expect(control.outcome).not.toBe("HANG");
+  });
+
+  it("(b) a winning seed genuinely chains through >= 2 full round wins (carry >= 14), reported OK once --max-rounds is reached", () => {
+    // Seed 34 winning: PROGRESS ~1367 found this seed reaches carry 14 --
+    // TWO chained round wins, i.e. two separate decide -> continue ->
+    // re-chain cycles -- well before its own eventual terminal dead-end
+    // (now fixed). `maxRounds: 3` is a cheap, deterministic bound: it stops
+    // right after the 3rd round decision instead of running to a multi-
+    // hundred-thousand-frame budget, and is comfortably past the 2 wins
+    // needed to prove carry >= 14 was genuinely reached, not just claimed.
+    const result = runSeed(34, {
+      policy: "winning",
+      maxRounds: 3,
+      renderEvery: 0,
+    });
+    expect(result.outcome).toBe("OK");
+    expect(result.endState).toBe("max-rounds");
+    expect(result.maxCarriedWinStreak).toBeGreaterThanOrEqual(14);
   });
 });

@@ -1281,6 +1281,49 @@ Ordered:
    everything else is filed in ISSUES.md. The soak driver still never
    fixes engine behavior.
 
+**M-B STATUS (2026-08-20, supervisor): bar REACHED same-day, step 4 in
+progress.** Step 1 DONE (PROGRESS 1357: verdict (a), `full` is honest bad
+play). Driver defect ISSUES #99 found+fixed on the way (1358: the swap
+offer was never answered by its own branch; every policy accepted swaps).
+Step 2 landed opt-in in `winning`: type-effectiveness × STAB move choice
+(1359) and swap-offer decline (fold `781c8827`); draft-by-strength measured
+worse on 60 seeds and is WITHHELD on branch `worker/side-20260820-113153`
+(`e9a415a7`) pending a larger sample; a walled-matchup switch heuristic is
+in flight. Step 3 sweep `docs/soak-deep-sweep-2026-08-20.{md,log}`:
+`winning` 0:240 → carry ≥ 7 105/240, ≥ 14 33/240, **≥ 21 1/240 (seed 99,
+verified chained 0→7→14→21, battle-depth 25 = ladder battle 26)**, ≥ 28
+0/240, 238 OK / 2 CRASH / 0 HANG. Step 4 triage: #100 fixed (1360); #101
+(Lock-On string), #102 (switchhandleorder after a mid-round faint), #103
+(CheckViability 0xFFFF sentinel) filed — fixes are the current main-lane
+queue, then a re-sweep with every lever for the carry ≥ 28 stretch.
+
+**M-B STATUS UPDATE (2026-08-20 afternoon, supervisor):** the final 0:480
+sweep (`docs/soak-deep-sweep-2026-08-20-final.{md,log}`, PROGRESS 1365) is
+480/480 OK with carry ≥ 21 in 5/480 (1.04%) — bar reconfirmed at 2× range —
+but its "carry ≥ 28 not reached; wall at battle 7 of the carry-21 round"
+reading is WITHDRAWN: the three deepest seeds stopped in the round-end
+terminal with the record prompt answered YES, which the engine never
+continues (ISSUES #104, engine half), and the soak driver's cumulative
+post-round grace then reported them OK (#104, driver half). The depth
+instrument had therefore been capped at ~3 re-chains since M-A; whether the
+challenge-4 AI tier (carry ≥ 28) is reachable by play is UNMEASURED until
+both halves land and a sweep is re-run. Levers folded into `winning` today:
+type-effectiveness × STAB move choice (1359), swap-offer decline
+(`781c8827`), true-immunity walled-matchup switch with a ≥50%-HP bench gate
+(`3fa78a98`). Withheld on `wip/mb-step2b-draft-heuristic` (`e9a415a7`):
+draft-by-strength (measured worse at n=60; re-measure at n ≥ 180 on the
+fixed tree before deciding). Refuted and pinned: the #102-derived
+end-turn-skip lead (`tests/endTurnFaintResumeIssue104.test.ts`).
+
+**M-B RESULT on the #104-fixed tree (2026-08-20 15:05, supervisor's own
+run, `winning` 0:60 `--render-every 0`, master `e3176a05`):** carry ≥ 7
+**60/60**, ≥ 14 **56/60**, ≥ 21 **13/60**, **≥ 28 1/60 (seed 24, battle-depth
+28 = challenge 4, the full `CHECK_BAD_MOVE`+triad AI tier, reached by
+play)**; 58 OK (`budget`) / 2 CRASH (seeds 40 + 50, both ISSUES #105, the
+Conversion/Color-Change type-name string — being fixed) / 0 HANG. Compare
+the same morning: 35.6% / 5.6% / 0% / 0%. The milestone's bar AND its
+stretch target are met; step 4 continues as crash triage at the new depth.
+
 Acceptance: a committed sweep log showing carry ≥ 21 reached by play,
 with the crash outcome at that depth stated honestly (including "we got
 there and it broke, here is the issue number"). Explicitly NOT in scope:
@@ -1357,6 +1400,18 @@ not): prefer committing the staged scenario + probe/verify script +
 compact assertion block; a dump that is expensive to regenerate MAY be
 committed as-is. Never spend a worker step regenerating or slimming an
 existing receipt for hygiene alone.
+
+**Semantics update (2026-08-20, ISSUES #104 retune, PROGRESS 1368):** under
+continuous play a soak run never ends by itself (every round re-chains), so
+the per-seed outcome is now: **OK** = the frame budget (`DEFAULT_MAX_FRAMES_BY_POLICY`)
+is reached while the run is still progressing (`endState: "budget"`), or
+`--max-rounds N` round decisions were observed, or the lobby was reached;
+**HANG** = no progress (round identity / battle index / turn / input surface /
+round phase) for `--stall-frames` (default 30,000) frames; **CRASH** unchanged.
+The standing gates therefore read "no stall and no crash within the budget".
+Every pre-#104 sweep's "OK" was a cumulative-grace artifact (the run stopped
+after ~3 re-chains) — compare depth numbers only within one semantics era.
+
 
 **Gate-6 evidence granularity + sequencing (user decision 2026-08-09):**
 the 561-item per-move hook-gap census (300 item + 261 ability) is NOT to be

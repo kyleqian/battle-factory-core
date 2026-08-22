@@ -3670,10 +3670,28 @@ function runCvDefenseUp(input: Readonly<{
   }
 
   // Gates E/F: the TARGET's own last-used move power/type -- ALWAYS written from here on.
-  const lastMove = MOVES_BY_ID.get(input.targetLastUsedMoveId);
-  if (!lastMove) {
-    throw new Error(`factory-ai-check-viability: unknown last-used move ${input.targetLastUsedMoveId}`);
-  }
+  // ISSUES #103: `input.targetLastUsedMoveId` mirrors gLastMoves[gBattlerTarget]
+  // (battleScriptRulesContext.ts's MOVEEND_UPDATE_LAST_MOVES port), which the
+  // real ROM sets to MOVE_UNAVAILABLE (0xFFFF, moves.h) whenever the target's
+  // move was blocked last turn (flinch/full paralysis/frozen/still-asleep/
+  // recharge/Truant loafing -- battle_script_commands.c:4405-4412's own
+  // `!(gHitMarker & HITMARKER_OBEYS)` branch). On hardware,
+  // `Cmd_get_move_power_from_result` then indexes `gBattleMoves[0xFFFF]`, an
+  // out-of-bounds read of whatever ROM bytes happen to sit past the move
+  // table. Supervisor verification (2026-08-20, PROGRESS 1363): in the pinned
+  // pokeemerald.gba, gBattleMoves = 0x0831c898 with a 12-byte stride, so
+  // gBattleMoves[0xFFFF] is ROM 0x083dc88c whose bytes are
+  // `00 00 00 00 6b 72 e9 72 ...` -- the power byte (+1) IS 0, so the
+  // hardware takes `if_equal 0, AI_CV_DefenseUp5` and never reads the type
+  // byte. The power-0 model below is therefore byte-faithful to the shipped
+  // ROM, not merely a convention. Degrade exactly like this file's other
+  // CV handlers already treat an unresolved `target.lastUsedMoveId` (e.g. the
+  // MirrorCoat handler's `MOVES_BY_ID.get(...) ?? 0`-shaped power read):
+  // treat it as power 0, which is also this script's own least-consequential
+  // branch (skips the type read/physical-type gate entirely, same as any
+  // other real power-0 move).
+  const lastMove = MOVES_BY_ID.get(input.targetLastUsedMoveId)
+    ?? { id: input.targetLastUsedMoveId, power: 0, type: "TYPE_NORMAL", effect: "EFFECT_HIT" };
   const funcResultAfter = statUpLastMoveFuncResultAfter(lastMove);
 
   if (lastMove.power === 0) {
@@ -3828,10 +3846,12 @@ function runCvSpDefUp(input: Readonly<{
   }
 
   // Gates E/F: the TARGET's own last-used move power/type -- ALWAYS written from here on.
-  const lastMove = MOVES_BY_ID.get(input.targetLastUsedMoveId);
-  if (!lastMove) {
-    throw new Error(`factory-ai-check-viability: unknown last-used move ${input.targetLastUsedMoveId}`);
-  }
+  // ISSUES #103: see runCvDefenseUp's identical gate above -- same MOVE_UNAVAILABLE
+  // (0xFFFF) degrade, same reasoning (gBattleMoves[0xFFFF] is an out-of-bounds
+  // ROM read with no byte-faithful value to port; power 0 is this script's
+  // own least-consequential branch).
+  const lastMove = MOVES_BY_ID.get(input.targetLastUsedMoveId)
+    ?? { id: input.targetLastUsedMoveId, power: 0, type: "TYPE_NORMAL", effect: "EFFECT_HIT" };
   const funcResultAfter = statUpLastMoveFuncResultAfter(lastMove);
 
   if (lastMove.power === 0) {

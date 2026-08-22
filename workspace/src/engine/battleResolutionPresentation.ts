@@ -1272,6 +1272,28 @@ function messageLines(
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
     });
   }
+  if (messageId === "STRINGID_PKMNWASDEFROSTEDBY") {
+    // BattleScript_MoveUsedUnfroze (data/battle_scripts_1.s:3761-3765):
+    // Cmd_attackcanceler's own frozen+EFFECT_THAW_HIT branch
+    // (battleScriptActionAdmission.ts:3790-3850) hands off here -- before
+    // attackstring ever runs -- when the attacker itself is frozen and
+    // self-thaws by using a Thaw Hit move (Flame Wheel/Sacred Fire); distinct
+    // from STRINGID_PKMNWASDEFROSTED above, which is the *target* thawed by
+    // an ordinary Fire-type hit. gGotDefrostedStringIds' sibling row,
+    // STRINGID_PKMNWASDEFROSTED2 (the plain 20%-roll natural thaw, no move
+    // named), needs no dedicated case: its only placeholder,
+    // {B_ATK_NAME_WITH_PREFIX}, is already supplied correctly by this
+    // function's generic tail fallback below, sourced from the same
+    // actionSnapshot-derived `lastMoveAttacker`.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    const attacker = singlesBattler(actionSnapshot.attacker, `${messageId} action snapshot`);
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
   if (messageId === "STRINGID_PKMNFELLINLOVE") {
     // BattleScript_EffectAttract's own success tail, right after
     // Cmd_tryinfatuating's success branch (battleScriptTryinfatuatingOpcode.ts)
@@ -1639,6 +1661,21 @@ function messageLines(
     // roles.
     const attacker = requireMoveAttacker(lastMoveAttacker, "identified message");
     const defender = requireMoveDefender(lastMoveAttacker, "identified message");
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  if (messageId === "STRINGID_PKMNTOOKAIM") {
+    // BattleScript_EffectLockOn (data/battle_scripts_1.s:1286-1297,
+    // EFFECT_LOCK_ON/Lock-On/Mind Reader): attackcanceler + accuracycheck +
+    // setalwayshitflag (Cmd_setalwayshitflag is ported --
+    // battleScriptSetalwayshitflagOpcode.ts) all run before this printstring,
+    // none of which reassign gBattlerAttacker/gBattlerTarget -- same
+    // zero-TS-reference-outside-AI-scoring, unchanged-roles shape as
+    // STRINGID_PKMNIDENTIFIED above.
+    const attacker = requireMoveAttacker(lastMoveAttacker, "took-aim message");
+    const defender = requireMoveDefender(lastMoveAttacker, "took-aim message");
     return resolveBattleStringLines(messageId, {
       B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
@@ -2561,6 +2598,22 @@ function messageLines(
       B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
     });
   }
+  if (messageId === "STRINGID_NATUREPOWERTURNEDINTO") {
+    // BattleScript_EffectNaturePower (data/battle_scripts_1.s:2286-2293):
+    // callenvironmentattack overwrites gCurrentMove to the terrain-selected
+    // move (Cmd_callenvironmentattack, battle_script_commands.c:9108-9115)
+    // and continues straight into this printstring in the same script frame
+    // (battleScriptEnvironmentAttackOpcode.ts's call-stack transition defers
+    // the *called* move's effect script until the trailing `return`), so
+    // {B_CURRENT_MOVE} names the called move (e.g. SWIFT in the Factory's
+    // BATTLE_ENVIRONMENT_BUILDING), never NATURE POWER itself.
+    if (actionSnapshot === null) {
+      throw new Error(`battle resolution ${messageId} message has no preceding action snapshot`);
+    }
+    return resolveBattleStringLines(messageId, {
+      B_CURRENT_MOVE: () => resolveMoveName(actionSnapshot.currentMove),
+    });
+  }
   if (messageId === "STRINGID_PKMNRAISEDSPEED") {
     // BattleScript_SpeedBoostActivates: runAbilitiesTick's own Speed Boost
     // branch now sets scriptingBattler the same way Shed Skin's own tick
@@ -2611,6 +2664,23 @@ function messageLines(
     const defender = requireMoveDefender(lastMoveAttacker, "healed-paralysis message");
     return resolveBattleStringLines(messageId, {
       B_DEF_NAME_WITH_PREFIX: nameWithPrefixResolver(field, defender),
+    });
+  }
+  // ISSUES #105: BattleScript_EffectConversion/Conversion2/Camouflage all
+  // print this same STRINGID after tryconversiontypechange/
+  // settypetorandomresistance/settypetoenvironment (battle_scripts_1.s:664,
+  // 1282, 2805) -- none of the three reassign selectorRoles, so BS_ATTACKER
+  // stays the move's own still-current user, the same battler whose types[]
+  // just changed.
+  if (messageId === "STRINGID_PKMNCHANGEDTYPE") {
+    if (event.payload.substitutions.length < 1) {
+      throw new Error(`battle resolution ${messageId} message has no type substitution`);
+    }
+    const attacker = requireMoveAttacker(lastMoveAttacker, "changed-type message");
+    const typeName = event.payload.substitutions[0]!;
+    return resolveBattleStringLines(messageId, {
+      B_ATK_NAME_WITH_PREFIX: nameWithPrefixResolver(field, attacker),
+      B_BUFF1: () => typeName,
     });
   }
   // ISSUES #72 batch 7: the small-plumbing + known-staging cluster of the

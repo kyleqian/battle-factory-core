@@ -2443,6 +2443,22 @@ describe("AI_CV_DefenseUp (docs/factory-ai-checkviability-ground-truth.md §18.1
       expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
     });
 
+    it("ISSUES #103: target's last move MOVE_UNAVAILABLE (0xFFFF, real ROM state after the target flinched/was paralyzed/frozen/asleep/recharging/loafing last turn) degrades to power 0 -- same DefenseUp5/DRAW SITE 5 branch as Splash, not a crash", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_HARDEN_DEFENSE_UP,
+        attacker: defenseUpAttacker(6, 50),
+        target: defenseUpTarget(0xffff),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "defense-up-roll-5", succeeded: false });
+    });
+
     // DRAW SITE 4 and DRAW SITE 5 are a CHAINED pair, not two independent
     // alternatives (docs/factory-ai-draw-discrepancy-probe.md §4): DRAW SITE
     // 4's own failure (roll >= 60) falls straight through into DRAW SITE 5's
@@ -3347,6 +3363,22 @@ describe("AI_CV_SpDefUp (docs/factory-ai-checkviability-ground-truth.md §22.1)"
         moveId: MOVE_COSMIC_POWER_SPDEF_UP,
         attacker: spDefUpAttacker(6, 50),
         target: spDefUpTarget(MOVE_SPLASH_ZERO_POWER),
+        drawOrdinalStart: 1,
+        reasonPrefix: "test",
+      });
+      expect(result.kind).toBe("scored");
+      if (result.kind !== "scored") throw new Error("unreachable");
+      expect(result.scoreDelta).toBe(0);
+      expect(result.draws).toHaveLength(1);
+      expect(result.draws[0]).toMatchObject({ kind: "sp-def-up-roll-5", succeeded: false });
+    });
+
+    it("ISSUES #103: target's last move MOVE_UNAVAILABLE (0xFFFF, real ROM state after the target flinched/was paralyzed/frozen/asleep/recharging/loafing last turn) degrades to power 0 -- same SpDefUp5/DRAW SITE 5 branch as Splash, not a crash (the original repro: soak seed 36, battle 7 turn 3)", () => {
+      const result = runCheckViability({
+        rng: { value: 4, calls: 0 },
+        moveId: MOVE_COSMIC_POWER_SPDEF_UP,
+        attacker: spDefUpAttacker(6, 50),
+        target: spDefUpTarget(0xffff),
         drawOrdinalStart: 1,
         reasonPrefix: "test",
       });

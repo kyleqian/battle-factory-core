@@ -1,0 +1,744 @@
+seed    0  OK     b1 t13  415462f  10.4s  roundLost  carry<=14 depth<=16
+seed    1  OK     b5 t19   53467f  1.1s  roundLost  carry<=0 depth<=4
+seed    2  OK     b4 t17  143471f  3.1s  roundLost  carry<=0 depth<=6
+seed    3  OK     b1 t15  200390f  4.6s  roundLost  carry<=14 depth<=14
+seed    4  OK     b1 t21  142942f  3.3s  roundLost  carry<=0 depth<=5
+seed    5  OK     b7 t10   83473f  1.9s  roundComplete  carry<=0 depth<=6
+seed    6  OK     b4 t11  105979f  2.3s  roundLost  carry<=7 depth<=10
+seed    7  OK     b3 t29  262460f  6.1s  roundLost  carry<=7 depth<=13
+seed    8  OK     b7 t15  107359f  2.7s  roundComplete  carry<=0 depth<=6
+seed    9  OK     b1 t16  149879f  3.6s  roundLost  carry<=7 depth<=7
+seed   10  OK     b1 t19  260723f  5.7s  roundLost  carry<=7 depth<=13
+seed   11  OK     b3 t22  218615f  4.9s  roundLost  carry<=14 depth<=16
+seed   12  OK     b7 t12  206719f  5.1s  roundComplete  carry<=0 depth<=6
+seed   13  OK     b2 t15  520920f  11.2s  roundLost  carry<=14 depth<=20
+seed   14  OK     b7 t10  470410f  10.9s  roundComplete  carry<=14 depth<=15
+seed   15  OK     b7 t16  139002f  3.1s  roundComplete  carry<=7 depth<=13
+seed   16  OK     b4 t36   46052f  1.0s  roundLost  carry<=0 depth<=3
+seed   17  OK     b7 t13   71199f  1.4s  roundComplete  carry<=0 depth<=6
+seed   18  OK     b2 t26  434475f  10.0s  roundLost  carry<=14 depth<=14
+seed   19  OK     b3 t24   36803f  0.7s  roundLost  carry<=0 depth<=2
+
+=== soak summary: 20 seeds (policy winning) in 93.2s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 11/20
+carry >= 14 (challengeNum >= 2): 6/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 20
+
+seed   20  OK     b6 t13   95818f  2.3s  roundLost  carry<=0 depth<=5
+seed   21  OK     b7 t14  250791f  6.3s  roundComplete  carry<=7 depth<=11
+seed   22  OK     b3 t14   33587f  0.6s  roundLost  carry<=0 depth<=2
+seed   23  OK     b7 t34   91303f  2.2s  roundLost  carry<=0 depth<=6
+seed   24  OK     b7 t8  147141f  3.4s  roundComplete  carry<=7 depth<=7
+seed   25  OK     b7 t12  215251f  4.7s  roundComplete  carry<=7 depth<=13
+seed   26  OK     b1 t32   88051f  2.0s  roundLost  carry<=7 depth<=7
+seed   27  OK     b1 t46  184634f  4.2s  roundLost  carry<=7 depth<=7
+seed   28  OK     b2 t14  268389f  6.2s  roundLost  carry<=7 depth<=9
+seed   29  OK     b7 t19  105404f  2.6s  roundComplete  carry<=0 depth<=6
+seed   30  OK     b7 t7  164137f  3.8s  roundComplete  carry<=7 depth<=7
+seed   31  OK     b6 t17  400829f  9.4s  roundLost  carry<=14 depth<=15
+seed   32  OK     b4 t12   39591f  0.7s  roundLost  carry<=0 depth<=3
+seed   33  OK     b5 t26   72943f  1.8s  roundLost  carry<=0 depth<=4
+seed   34  OK     b7 t11  383463f  8.8s  roundComplete  carry<=14 depth<=15
+seed   35  OK     b1 t28  102152f  2.4s  roundLost  carry<=7 depth<=7
+seed   36  OK     b7 t7  376863f  8.4s  roundComplete  carry<=14 depth<=20
+seed   37  OK     b3 t8   27909f  0.4s  roundLost  carry<=0 depth<=2
+seed   38  OK     b7 t19   71013f  1.4s  roundComplete  carry<=0 depth<=6
+seed   39  OK     b7 t10  210401f  4.6s  roundComplete  carry<=7 depth<=7
+
+=== soak summary: 20 seeds (policy winning) in 76.2s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 12/20
+carry >= 14 (challengeNum >= 2): 3/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 20
+
+seed   40  OK     b7 t27  232180f  5.6s  roundComplete  carry<=7 depth<=13
+seed   41  OK     b4 t17  282582f  6.3s  roundLost  carry<=7 depth<=8
+seed   42  OK     b7 t11   68725f  1.4s  roundComplete  carry<=0 depth<=6
+seed   43  OK     b2 t9  164499f  3.7s  roundLost  carry<=7 depth<=8
+seed   44  OK     b7 t16  272048f  6.7s  roundComplete  carry<=7 depth<=13
+seed   45  OK     b7 t9  212444f  4.7s  roundComplete  carry<=0 depth<=6
+seed   46  OK     b7 t11  521042f  12.4s  roundComplete  carry<=14 depth<=20
+seed   47  OK     b7 t9  114373f  2.5s  roundComplete  carry<=7 depth<=13
+seed   48  OK     b7 t17  240434f  5.9s  roundComplete  carry<=7 depth<=9
+seed   49  OK     b4 t20   73135f  1.5s  roundLost  carry<=0 depth<=3
+seed   50  OK     b4 t26  109755f  2.5s  roundLost  carry<=7 depth<=10
+seed   51  OK     b2 t13  416618f  9.0s  roundLost  carry<=14 depth<=15
+seed   52  OK     b7 t15  188047f  4.6s  roundLost  carry<=7 depth<=7
+seed   53  OK     b1 t26   20836f  0.4s  roundLost  carry<=0 depth<=0
+seed   54  OK     b7 t11   77025f  1.6s  roundComplete  carry<=0 depth<=6
+seed   55  OK     b7 t10   63128f  1.1s  roundComplete  carry<=0 depth<=6
+seed   56  OK     b7 t7  102441f  2.0s  roundComplete  carry<=0 depth<=6
+seed   57  OK     b2 t19  179970f  4.8s  roundLost  carry<=7 depth<=10
+seed   58  OK     b3 t21  143259f  3.4s  roundLost  carry<=7 depth<=9
+seed   59  OK     b1 t30  111651f  2.6s  roundLost  carry<=7 depth<=7
+
+=== soak summary: 20 seeds (policy winning) in 82.5s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 13/20
+carry >= 14 (challengeNum >= 2): 2/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 20
+
+seed   60  OK     b3 t15   66730f  1.5s  roundLost  carry<=0 depth<=2
+seed   61  OK     b7 t8  147326f  3.7s  roundComplete  carry<=7 depth<=13
+seed   62  OK     b2 t16  486864f  11.5s  roundLost  carry<=14 depth<=15
+seed   63  OK     b1 t7  139896f  3.1s  roundLost  carry<=7 depth<=7
+seed   64  OK     b1 t18   18847f  0.3s  roundLost  carry<=0 depth<=0
+seed   65  OK     b7 t16  322690f  8.4s  roundComplete  carry<=7 depth<=13
+seed   66  OK     b7 t22  117248f  3.0s  roundComplete  carry<=0 depth<=6
+seed   67  OK     b7 t11  426953f  10.0s  roundLost  carry<=7 depth<=8
+seed   68  OK     b7 t8   77341f  1.6s  roundComplete  carry<=0 depth<=6
+seed   69  OK     b4 t21  150843f  3.4s  roundLost  carry<=0 depth<=3
+seed   70  OK     b2 t19   81415f  1.6s  roundLost  carry<=7 depth<=8
+seed   71  OK     b7 t8  147227f  3.7s  roundComplete  carry<=7 depth<=13
+seed   72  OK     b6 t15   91169f  1.9s  roundLost  carry<=0 depth<=5
+seed   73  OK     b2 t18   87348f  2.1s  roundLost  carry<=0 depth<=2
+seed   74  OK     b6 t25   85620f  2.0s  roundLost  carry<=0 depth<=5
+seed   75  OK     b7 t13   66921f  1.3s  roundComplete  carry<=0 depth<=6
+seed   76  OK     b7 t12  146247f  3.0s  roundComplete  carry<=0 depth<=6
+seed   77  OK     b7 t35  267556f  6.2s  roundComplete  carry<=7 depth<=13
+seed   78  OK     b7 t10   76385f  1.6s  roundComplete  carry<=0 depth<=6
+seed   79  OK     b7 t7  110931f  2.5s  roundComplete  carry<=0 depth<=6
+
+=== soak summary: 20 seeds (policy winning) in 72.6s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 8/20
+carry >= 14 (challengeNum >= 2): 1/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 15
+
+seed   80  OK     b5 t9  151915f  3.6s  roundLost  carry<=7 depth<=11
+seed   81  OK     b3 t12  255173f  6.3s  roundLost  carry<=7 depth<=7
+seed   82  OK     b6 t23   96989f  2.2s  roundLost  carry<=0 depth<=5
+seed   83  OK     b7 t6  124001f  2.9s  roundComplete  carry<=0 depth<=6
+seed   84  OK     b3 t11   35465f  0.6s  roundLost  carry<=0 depth<=2
+seed   85  OK     b7 t10  307782f  7.7s  roundLost  carry<=7 depth<=12
+seed   86  OK     b7 t9  143297f  3.6s  roundComplete  carry<=0 depth<=6
+seed   87  OK     b7 t22  176722f  4.4s  roundComplete  carry<=0 depth<=6
+seed   88  OK     b7 t22  221254f  5.2s  roundComplete  carry<=0 depth<=6
+seed   89  OK     b7 t5   67232f  1.4s  roundComplete  carry<=0 depth<=6
+seed   90  OK     b4 t36   46170f  1.0s  roundLost  carry<=0 depth<=3
+seed   91  OK     b1 t20   19607f  0.3s  roundLost  carry<=0 depth<=0
+seed   92  OK     b6 t9  140440f  3.1s  roundLost  carry<=0 depth<=5
+seed   93  OK     b7 t10  155201f  3.3s  roundComplete  carry<=7 depth<=8
+seed   94  OK     b7 t9  114589f  2.4s  roundComplete  carry<=7 depth<=13
+seed   95  OK     b7 t12  100548f  2.5s  roundComplete  carry<=0 depth<=6
+seed   96  OK     b5 t18  202818f  4.8s  roundLost  carry<=7 depth<=11
+seed   97  OK     b1 t18  267617f  5.3s  roundLost  carry<=14 depth<=20
+seed   98  OK     b1 t32  412232f  8.5s  roundLost  carry<=14 depth<=18
+seed   99  OK     b4 t11   44556f  0.9s  roundLost  carry<=0 depth<=3
+
+=== soak summary: 20 seeds (policy winning) in 70.1s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 8/20
+carry >= 14 (challengeNum >= 2): 2/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 20
+
+seed  100  OK     b3 t14   47831f  1.3s  roundLost  carry<=0 depth<=2
+seed  101  OK     b3 t14   47998f  1.2s  roundLost  carry<=0 depth<=2
+seed  102  OK     b4 t7  180340f  4.4s  roundLost  carry<=14 depth<=17
+seed  103  OK     b7 t14  336944f  7.3s  roundComplete  carry<=7 depth<=11
+seed  104  OK     b3 t15   66828f  1.4s  roundLost  carry<=0 depth<=2
+seed  105  OK     b3 t17   31884f  0.5s  roundLost  carry<=0 depth<=2
+seed  106  OK     b2 t50  120949f  3.0s  roundLost  carry<=0 depth<=5
+seed  107  OK     b3 t12  162980f  3.7s  roundLost  carry<=7 depth<=11
+seed  108  OK     b5 t26  159425f  3.4s  roundLost  carry<=7 depth<=11
+seed  109  OK     b5 t25   72079f  1.7s  roundLost  carry<=0 depth<=4
+seed  110  OK     b6 t15   71750f  1.6s  roundLost  carry<=0 depth<=5
+seed  111  OK     b1 t54   34792f  0.8s  roundLost  carry<=0 depth<=0
+seed  112  OK     b4 t32  107691f  2.6s  roundLost  carry<=0 depth<=3
+seed  113  OK     b7 t8  268118f  6.0s  roundComplete  carry<=7 depth<=13
+seed  114  OK     b6 t25   85588f  2.1s  roundLost  carry<=0 depth<=5
+seed  115  OK     b4 t26  109784f  2.4s  roundLost  carry<=7 depth<=10
+seed  116  OK     b1 t25  283303f  6.4s  roundLost  carry<=7 depth<=10
+seed  117  OK     b7 t23   96860f  1.9s  roundLost  carry<=0 depth<=6
+seed  118  OK     b7 t20  144419f  3.1s  roundComplete  carry<=7 depth<=13
+seed  119  OK     b7 t6  122921f  2.9s  roundComplete  carry<=0 depth<=6
+
+=== soak summary: 20 seeds (policy winning) in 57.5s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 8/20
+carry >= 14 (challengeNum >= 2): 1/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 17
+
+seed  120  OK     b1 t26   20714f  0.4s  roundLost  carry<=0 depth<=0
+seed  121  OK     b4 t36   45973f  1.0s  roundLost  carry<=0 depth<=3
+seed  122  OK     b3 t28   35196f  0.7s  roundLost  carry<=0 depth<=2
+seed  123  OK     b7 t15  141937f  3.0s  roundComplete  carry<=7 depth<=13
+seed  124  OK     b4 t13  229742f  5.0s  roundLost  carry<=7 depth<=10
+seed  125  OK     b7 t15  445055f  9.5s  roundComplete  carry<=21 depth<=27
+seed  126  OK     b1 t17  103839f  2.2s  roundLost  carry<=7 depth<=7
+seed  127  OK     b4 t11   45063f  0.9s  roundLost  carry<=0 depth<=3
+seed  128  OK     b2 t21   28285f  0.5s  roundLost  carry<=0 depth<=1
+seed  129  OK     b7 t5  256219f  5.9s  roundLost  carry<=14 depth<=20
+seed  130  OK     b1 t19  148295f  3.5s  roundLost  carry<=0 depth<=5
+seed  131  OK     b1 t15   18099f  0.3s  roundLost  carry<=0 depth<=0
+seed  132  OK     b5 t14  166038f  3.6s  roundLost  carry<=7 depth<=10
+seed  133  OK     b4 t12   39864f  0.7s  roundLost  carry<=0 depth<=3
+seed  134  OK     b5 t15   64758f  1.5s  roundLost  carry<=0 depth<=4
+seed  135  OK     b1 t10   96274f  2.3s  roundLost  carry<=7 depth<=7
+seed  136  OK     b3 t16  240081f  5.3s  roundLost  carry<=14 depth<=20
+seed  137  OK     b4 t11  118184f  2.6s  roundLost  carry<=7 depth<=10
+seed  138  OK     b2 t19  180798f  4.7s  roundLost  carry<=7 depth<=10
+seed  139  OK     b2 t26  191829f  4.3s  roundLost  carry<=7 depth<=11
+
+=== soak summary: 20 seeds (policy winning) in 58.1s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 11/20
+carry >= 14 (challengeNum >= 2): 3/20
+carry >= 21 (challengeNum >= 3): 1/20
+deepest carry anywhere: 21
+deepest battle-depth anywhere: 27
+
+seed  140  OK     b7 t15   97887f  2.4s  roundComplete  carry<=0 depth<=6
+seed  141  OK     b1 t10   15999f  0.2s  roundLost  carry<=0 depth<=0
+seed  142  OK     b7 t9  143873f  3.6s  roundComplete  carry<=0 depth<=6
+seed  143  OK     b7 t13  132503f  2.9s  roundComplete  carry<=0 depth<=6
+seed  144  OK     b7 t12   68790f  1.3s  roundComplete  carry<=0 depth<=6
+seed  145  OK     b1 t13  272180f  6.3s  roundLost  carry<=7 depth<=11
+seed  146  OK     b7 t3  204120f  4.1s  roundComplete  carry<=7 depth<=13
+seed  147  OK     b7 t13  112349f  2.4s  roundComplete  carry<=0 depth<=6
+seed  148  OK     b1 t29   22192f  0.4s  roundLost  carry<=0 depth<=0
+seed  149  OK     b5 t9   47921f  0.9s  roundLost  carry<=0 depth<=4
+seed  150  OK     b7 t13   66891f  1.3s  roundComplete  carry<=0 depth<=6
+seed  151  OK     b1 t18  111231f  2.5s  roundLost  carry<=0 depth<=3
+seed  152  OK     b2 t21   27919f  0.5s  roundLost  carry<=0 depth<=1
+seed  153  OK     b7 t13  144290f  3.2s  roundComplete  carry<=0 depth<=6
+seed  154  OK     b6 t11   57780f  1.0s  roundLost  carry<=0 depth<=5
+seed  155  OK     b3 t11   29137f  0.5s  roundLost  carry<=0 depth<=2
+seed  156  OK     b1 t63  116699f  2.9s  roundLost  carry<=7 depth<=7
+seed  157  OK     b7 t19   67440f  1.5s  roundComplete  carry<=0 depth<=6
+seed  158  OK     b7 t13   66429f  1.2s  roundComplete  carry<=0 depth<=6
+seed  159  OK     b7 t11  188948f  4.3s  roundComplete  carry<=7 depth<=13
+
+=== soak summary: 20 seeds (policy winning) in 43.6s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 4/20
+carry >= 14 (challengeNum >= 2): 0/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 7
+deepest battle-depth anywhere: 13
+
+seed  160  OK     b3 t11   34969f  0.7s  roundLost  carry<=0 depth<=2
+seed  161  OK     b2 t19  180752f  4.9s  roundLost  carry<=7 depth<=10
+seed  162  OK     b7 t15  117400f  2.8s  roundComplete  carry<=0 depth<=6
+seed  163  OK     b3 t9  294676f  6.9s  roundLost  carry<=7 depth<=8
+seed  164  OK     b2 t18   86223f  2.1s  roundLost  carry<=0 depth<=2
+seed  165  OK     b4 t27   43643f  0.9s  roundLost  carry<=0 depth<=3
+seed  166  OK     b3 t23  268160f  6.3s  roundLost  carry<=7 depth<=13
+seed  167  OK     b7 t17  145175f  3.1s  roundComplete  carry<=7 depth<=13
+seed  168  OK     b6 t12  316631f  7.5s  roundLost  carry<=7 depth<=13
+seed  169  OK     b7 t21   64493f  1.2s  roundComplete  carry<=0 depth<=6
+seed  170  OK     b7 t16   66230f  1.3s  roundComplete  carry<=0 depth<=6
+seed  171  OK     b7 t10   83633f  1.9s  roundComplete  carry<=0 depth<=6
+seed  172  OK     b1 t19  189807f  4.5s  roundLost  carry<=7 depth<=9
+seed  173  OK     b1 t18   18596f  0.3s  roundLost  carry<=0 depth<=0
+seed  174  OK     b7 t11  283858f  6.1s  roundComplete  carry<=7 depth<=8
+seed  175  OK     b1 t17  351952f  7.7s  roundLost  carry<=14 depth<=14
+seed  176  OK     b1 t15   18075f  0.2s  roundLost  carry<=0 depth<=0
+seed  177  OK     b1 t19   40407f  0.7s  roundLost  carry<=0 depth<=2
+seed  178  OK     b2 t18  205140f  4.1s  roundLost  carry<=14 depth<=18
+seed  179  OK     b1 t20   19183f  0.3s  roundLost  carry<=0 depth<=0
+
+=== soak summary: 20 seeds (policy winning) in 63.5s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 9/20
+carry >= 14 (challengeNum >= 2): 2/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 18
+
+seed  180  OK     b6 t13   94696f  2.3s  roundLost  carry<=0 depth<=5
+seed  181  OK     b1 t30   80036f  2.0s  roundLost  carry<=0 depth<=4
+seed  182  OK     b1 t17  143978f  3.3s  roundLost  carry<=0 depth<=5
+seed  183  OK     b3 t19   44455f  0.9s  roundLost  carry<=0 depth<=2
+seed  184  OK     b4 t12   40125f  0.6s  roundLost  carry<=0 depth<=3
+seed  185  OK     b1 t42  277479f  7.0s  roundLost  carry<=7 depth<=11
+seed  186  OK     b7 t20  290921f  6.5s  roundComplete  carry<=7 depth<=9
+seed  187  OK     b7 t13   71423f  1.4s  roundComplete  carry<=0 depth<=6
+seed  188  OK     b7 t21  143816f  3.3s  roundComplete  carry<=7 depth<=13
+seed  189  OK     b2 t18  204385f  4.3s  roundLost  carry<=14 depth<=18
+seed  190  OK     b7 t10   76843f  1.6s  roundComplete  carry<=0 depth<=6
+seed  191  OK     b3 t26   55427f  1.2s  roundLost  carry<=0 depth<=2
+seed  192  OK     b5 t26   72186f  1.7s  roundLost  carry<=0 depth<=4
+seed  193  OK     b7 t23  122262f  2.7s  roundLost  carry<=0 depth<=6
+seed  194  OK     b1 t14  126695f  3.1s  roundLost  carry<=0 depth<=2
+seed  195  OK     b3 t22  148234f  3.6s  roundLost  carry<=7 depth<=10
+seed  196  OK     b7 t7  275319f  6.6s  roundComplete  carry<=7 depth<=8
+seed  197  OK     b7 t11  386845f  8.9s  roundLost  carry<=7 depth<=12
+seed  198  OK     b7 t13   66955f  1.2s  roundComplete  carry<=0 depth<=6
+seed  199  OK     b1 t22   92979f  2.4s  roundLost  carry<=0 depth<=2
+
+=== soak summary: 20 seeds (policy winning) in 64.6s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 7/20
+carry >= 14 (challengeNum >= 2): 1/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 18
+
+seed  200  OK     b7 t14  167846f  4.2s  roundComplete  carry<=0 depth<=6
+seed  201  OK     b5 t10  136081f  2.9s  roundLost  carry<=7 depth<=11
+seed  202  OK     b6 t12  315911f  7.5s  roundLost  carry<=7 depth<=13
+seed  203  OK     b1 t17   17768f  0.3s  roundLost  carry<=0 depth<=0
+seed  204  OK     b1 t24   20323f  0.4s  roundLost  carry<=0 depth<=0
+seed  205  OK     b7 t22  220645f  5.2s  roundComplete  carry<=0 depth<=6
+seed  206  OK     b1 t20   19299f  0.3s  roundLost  carry<=0 depth<=0
+seed  207  OK     b2 t18  519618f  12.1s  roundLost  carry<=14 depth<=14
+seed  208  OK     b1 t31   36647f  0.7s  roundLost  carry<=0 depth<=1
+seed  209  OK     b1 t46  121413f  2.9s  roundLost  carry<=7 depth<=7
+seed  210  OK     b5 t25   71862f  1.8s  roundLost  carry<=0 depth<=4
+seed  211  OK     b1 t30   79623f  2.0s  roundLost  carry<=0 depth<=4
+seed  212  OK     b5 t9  173538f  3.7s  roundLost  carry<=7 depth<=11
+seed  213  OK     b3 t14  251348f  5.9s  roundLost  carry<=0 depth<=6
+seed  214  OK     b3 t30   42017f  0.9s  roundLost  carry<=0 depth<=2
+seed  215  OK     b1 t19   18278f  0.3s  roundLost  carry<=0 depth<=0
+seed  216  OK     b7 t6   99787f  2.0s  roundComplete  carry<=0 depth<=6
+seed  217  OK     b7 t13   67128f  1.4s  roundComplete  carry<=0 depth<=6
+seed  218  OK     b7 t7  163838f  3.6s  roundComplete  carry<=7 depth<=7
+seed  219  OK     b3 t22  148959f  3.4s  roundLost  carry<=7 depth<=10
+
+=== soak summary: 20 seeds (policy winning) in 61.4s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 7/20
+carry >= 14 (challengeNum >= 2): 1/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 14
+
+seed  220  OK     b7 t9  256280f  6.2s  roundComplete  carry<=7 depth<=13
+seed  221  OK     b7 t25  138696f  3.0s  roundComplete  carry<=7 depth<=13
+seed  222  OK     b2 t15   90753f  2.0s  roundLost  carry<=0 depth<=2
+seed  223  OK     b5 t25  311317f  7.3s  roundLost  carry<=7 depth<=13
+seed  224  OK     b1 t20   19496f  0.3s  roundLost  carry<=0 depth<=0
+seed  225  OK     b1 t24   19773f  0.4s  roundLost  carry<=0 depth<=0
+seed  226  OK     b1 t8  191670f  4.3s  roundLost  carry<=0 depth<=5
+seed  227  OK     b2 t29  384179f  8.7s  roundLost  carry<=14 depth<=15
+seed  228  OK     b3 t11   34870f  0.6s  roundLost  carry<=0 depth<=2
+seed  229  OK     b3 t14  117085f  2.8s  roundLost  carry<=7 depth<=9
+seed  230  OK     b7 t10  619271f  14.8s  roundComplete  carry<=14 depth<=17
+seed  231  OK     b1 t18  186811f  4.1s  roundLost  carry<=14 depth<=14
+seed  232  OK     b1 t12  468659f  10.5s  roundLost  carry<=14 depth<=14
+seed  233  OK     b1 t15   87173f  1.8s  roundLost  carry<=7 depth<=7
+seed  234  OK     b5 t14  445587f  10.1s  roundLost  carry<=14 depth<=16
+seed  235  OK     b3 t26   79959f  2.7s  roundLost  carry<=0 depth<=2
+seed  236  OK     b6 t17  172225f  4.6s  roundLost  carry<=7 depth<=7
+seed  237  OK     b1 t18  233643f  5.7s  roundLost  carry<=7 depth<=10
+seed  238  OK     b7 t18   97459f  2.2s  roundComplete  carry<=0 depth<=6
+seed  239  OK     b5 t16  135310f  2.9s  roundLost  carry<=7 depth<=7
+
+=== soak summary: 20 seeds (policy winning) in 95.2s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 13/20
+carry >= 14 (challengeNum >= 2): 5/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 17
+
+seed  240  OK     b5 t7  279061f  8.4s  roundLost  carry<=7 depth<=7
+seed  241  OK     b7 t10  132875f  3.4s  roundLost  carry<=7 depth<=13
+seed  242  OK     b7 t11   86166f  2.1s  roundComplete  carry<=0 depth<=6
+seed  243  OK     b7 t11   68537f  1.4s  roundComplete  carry<=0 depth<=6
+seed  244  OK     b3 t20  352125f  8.5s  roundLost  carry<=14 depth<=14
+seed  245  OK     b2 t17   26442f  0.5s  roundLost  carry<=0 depth<=1
+seed  246  OK     b7 t28  214791f  5.3s  roundComplete  carry<=7 depth<=11
+seed  247  OK     b7 t20  113389f  2.4s  roundComplete  carry<=0 depth<=6
+seed  248  OK     b7 t17   85759f  1.9s  roundComplete  carry<=0 depth<=6
+seed  249  OK     b4 t12   39828f  0.6s  roundLost  carry<=0 depth<=3
+seed  250  OK     b3 t14  116781f  2.8s  roundLost  carry<=7 depth<=9
+seed  251  OK     b1 t35  210520f  4.7s  roundLost  carry<=14 depth<=20
+seed  252  OK     b6 t20  149315f  3.7s  roundLost  carry<=0 depth<=5
+seed  253  OK     b3 t14  197952f  4.3s  roundLost  carry<=14 depth<=19
+seed  254  OK     b3 t14   48142f  1.2s  roundLost  carry<=0 depth<=2
+seed  255  OK     b2 t15   90305f  2.1s  roundLost  carry<=0 depth<=2
+seed  256  OK     b3 t33   42558f  0.9s  roundLost  carry<=0 depth<=2
+seed  257  OK     b2 t20   68820f  1.6s  roundLost  carry<=0 depth<=2
+seed  258  OK     b1 t19  147927f  3.5s  roundLost  carry<=0 depth<=5
+seed  259  OK     b2 t17   80165f  1.5s  roundLost  carry<=7 depth<=8
+
+=== soak summary: 20 seeds (policy winning) in 61.0s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 8/20
+carry >= 14 (challengeNum >= 2): 3/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 20
+
+seed  260  OK     b7 t14  168221f  5.1s  roundComplete  carry<=0 depth<=6
+seed  261  OK     b3 t5  142815f  3.9s  roundLost  carry<=0 depth<=6
+seed  262  OK     b7 t10  132959f  3.3s  roundLost  carry<=7 depth<=13
+seed  263  OK     b1 t18   18850f  0.3s  roundLost  carry<=0 depth<=0
+seed  264  OK     b2 t19   80828f  1.6s  roundLost  carry<=7 depth<=8
+seed  265  OK     b2 t23   65892f  1.5s  roundLost  carry<=0 depth<=2
+seed  266  OK     b7 t11  109652f  2.5s  roundLost  carry<=0 depth<=6
+seed  267  OK     b7 t13  102937f  2.4s  roundComplete  carry<=0 depth<=6
+seed  268  OK     b6 t25   84928f  2.1s  roundLost  carry<=0 depth<=5
+seed  269  OK     b7 t21   64656f  1.3s  roundComplete  carry<=0 depth<=6
+seed  270  OK     b1 t13  106232f  2.5s  roundLost  carry<=0 depth<=5
+seed  271  OK     b7 t11  382457f  8.7s  roundLost  carry<=21 depth<=21
+seed  272  OK     b3 t14   45731f  1.1s  roundLost  carry<=0 depth<=2
+seed  273  OK     b5 t18  149117f  3.7s  roundLost  carry<=7 depth<=11
+seed  274  OK     b5 t19   66062f  1.5s  roundLost  carry<=0 depth<=4
+seed  275  OK     b7 t12   99913f  2.6s  roundComplete  carry<=0 depth<=6
+seed  276  OK     b7 t18   79528f  1.8s  roundComplete  carry<=0 depth<=6
+seed  277  OK     b6 t11  137689f  3.2s  roundLost  carry<=0 depth<=5
+seed  278  OK     b1 t19   18462f  0.3s  roundLost  carry<=0 depth<=0
+seed  279  OK     b5 t18  149722f  3.7s  roundLost  carry<=7 depth<=11
+
+=== soak summary: 20 seeds (policy winning) in 52.9s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 5/20
+carry >= 14 (challengeNum >= 2): 1/20
+carry >= 21 (challengeNum >= 3): 1/20
+deepest carry anywhere: 21
+deepest battle-depth anywhere: 21
+
+seed  280  OK     b3 t14  117065f  3.0s  roundLost  carry<=7 depth<=9
+seed  281  OK     b5 t16  135619f  4.4s  roundLost  carry<=7 depth<=7
+seed  282  OK     b2 t12  144340f  3.5s  roundLost  carry<=7 depth<=8
+seed  283  OK     b3 t22   41112f  0.9s  roundLost  carry<=0 depth<=2
+seed  284  OK     b7 t15  243448f  6.3s  roundLost  carry<=7 depth<=11
+seed  285  OK     b2 t56  109985f  2.9s  roundLost  carry<=0 depth<=4
+seed  286  OK     b7 t17   93028f  2.4s  roundComplete  carry<=0 depth<=6
+seed  287  OK     b7 t13  132351f  3.0s  roundComplete  carry<=0 depth<=6
+seed  288  OK     b6 t11  138009f  3.3s  roundLost  carry<=0 depth<=5
+seed  289  OK     b1 t19   18923f  0.3s  roundLost  carry<=0 depth<=0
+seed  290  OK     b7 t9  212438f  4.7s  roundComplete  carry<=7 depth<=7
+seed  291  OK     b2 t28  129324f  3.2s  roundLost  carry<=0 depth<=6
+seed  292  OK     b7 t8   95017f  2.1s  roundComplete  carry<=0 depth<=6
+seed  293  OK     b3 t23   35454f  0.6s  roundLost  carry<=0 depth<=2
+seed  294  OK     b4 t20   73393f  1.4s  roundLost  carry<=0 depth<=3
+seed  295  OK     b1 t11  338781f  8.1s  roundLost  carry<=7 depth<=11
+seed  296  OK     b1 t10  316883f  7.2s  roundLost  carry<=14 depth<=14
+seed  297  OK     b3 t12   36390f  0.7s  roundLost  carry<=0 depth<=2
+seed  298  OK     b7 t11   76591f  1.5s  roundComplete  carry<=0 depth<=6
+seed  299  OK     b1 t19   19048f  0.3s  roundLost  carry<=0 depth<=0
+
+=== soak summary: 20 seeds (policy winning) in 59.9s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 7/20
+carry >= 14 (challengeNum >= 2): 1/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 14
+
+seed  300  OK     b7 t16  176402f  5.0s  roundComplete  carry<=7 depth<=13
+seed  301  OK     b1 t11  338711f  9.1s  roundLost  carry<=7 depth<=11
+seed  302  OK     b3 t12   36205f  0.8s  roundLost  carry<=0 depth<=2
+seed  303  OK     b2 t12   84834f  2.0s  roundLost  carry<=0 depth<=2
+seed  304  OK     b7 t7  278797f  6.5s  roundComplete  carry<=7 depth<=13
+seed  305  OK     b4 t18  123883f  3.0s  roundLost  carry<=7 depth<=10
+seed  306  OK     b1 t19   40496f  0.7s  roundLost  carry<=0 depth<=2
+seed  307  OK     b3 t9   28320f  0.4s  roundLost  carry<=0 depth<=2
+seed  308  OK     b3 t21   61577f  1.5s  roundLost  carry<=0 depth<=2
+seed  309  OK     b7 t10  151978f  3.5s  roundComplete  carry<=7 depth<=7
+seed  310  OK     b3 t10   30811f  0.5s  roundLost  carry<=0 depth<=2
+seed  311  OK     b1 t18   18842f  0.3s  roundLost  carry<=0 depth<=0
+seed  312  OK     b3 t33   42336f  0.9s  roundLost  carry<=0 depth<=2
+seed  313  OK     b7 t19  303812f  7.1s  roundComplete  carry<=7 depth<=13
+seed  314  OK     b6 t15   72097f  1.6s  roundLost  carry<=0 depth<=5
+seed  315  OK     b7 t59   96404f  2.5s  roundLost  carry<=0 depth<=6
+seed  316  OK     b7 t9  263460f  5.5s  roundComplete  carry<=7 depth<=9
+seed  317  OK     b7 t17   86287f  1.9s  roundComplete  carry<=0 depth<=6
+seed  318  OK     b7 t12  215405f  4.6s  roundComplete  carry<=7 depth<=13
+seed  319  OK     b7 t22  219718f  4.9s  roundComplete  carry<=0 depth<=6
+
+=== soak summary: 20 seeds (policy winning) in 62.3s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 8/20
+carry >= 14 (challengeNum >= 2): 0/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 7
+deepest battle-depth anywhere: 13
+
+seed  320  OK     b5 t16  475623f  11.0s  roundLost  carry<=14 depth<=15
+seed  321  OK     b7 t15  107539f  2.2s  roundComplete  carry<=0 depth<=6
+seed  322  OK     b7 t13   66744f  1.3s  roundComplete  carry<=0 depth<=6
+seed  323  OK     b1 t16   89077f  2.0s  roundLost  carry<=7 depth<=7
+seed  324  OK     b3 t12  215570f  5.4s  roundLost  carry<=7 depth<=7
+seed  325  OK     b3 t19  183250f  4.3s  roundLost  carry<=0 depth<=6
+seed  326  OK     b7 t62   85108f  2.1s  roundComplete  carry<=0 depth<=6
+seed  327  OK     b1 t16  220826f  6.4s  roundLost  carry<=7 depth<=10
+seed  328  OK     b7 t14  249367f  5.5s  roundComplete  carry<=21 depth<=27
+seed  329  OK     b7 t11  234998f  5.8s  roundComplete  carry<=14 depth<=20
+seed  330  OK     b1 t34   27923f  0.5s  roundLost  carry<=0 depth<=0
+seed  331  OK     b7 t15  106657f  2.6s  roundComplete  carry<=0 depth<=6
+seed  332  OK     b1 t20   22104f  0.3s  roundLost  carry<=0 depth<=0
+seed  333  OK     b7 t17  161998f  3.4s  roundComplete  carry<=7 depth<=13
+seed  334  OK     b3 t14   46123f  1.0s  roundLost  carry<=0 depth<=2
+seed  335  OK     b1 t22  210253f  4.7s  roundLost  carry<=7 depth<=11
+seed  336  OK     b3 t20   35042f  0.6s  roundLost  carry<=0 depth<=2
+seed  337  OK     b1 t11   91855f  1.9s  roundLost  carry<=7 depth<=8
+seed  338  OK     b1 t28  102275f  2.4s  roundLost  carry<=7 depth<=7
+seed  339  OK     b5 t11  182580f  3.6s  roundLost  carry<=14 depth<=18
+
+=== soak summary: 20 seeds (policy winning) in 66.8s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 11/20
+carry >= 14 (challengeNum >= 2): 4/20
+carry >= 21 (challengeNum >= 3): 1/20
+deepest carry anywhere: 21
+deepest battle-depth anywhere: 27
+
+seed  340  OK     b3 t20  324119f  7.7s  roundLost  carry<=7 depth<=11
+seed  341  OK     b6 t17  173702f  4.3s  roundLost  carry<=7 depth<=7
+seed  342  OK     b1 t12  201945f  4.7s  roundLost  carry<=7 depth<=11
+seed  343  OK     b2 t12   97940f  2.1s  roundLost  carry<=0 depth<=5
+seed  344  OK     b3 t16  238292f  5.4s  roundLost  carry<=14 depth<=20
+seed  345  OK     b6 t23   96992f  2.2s  roundLost  carry<=0 depth<=5
+seed  346  OK     b7 t6   74654f  1.5s  roundComplete  carry<=0 depth<=6
+seed  347  OK     b6 t33  148609f  4.7s  roundLost  carry<=0 depth<=5
+seed  348  OK     b4 t23  152063f  3.8s  roundLost  carry<=7 depth<=9
+seed  349  OK     b1 t14  169636f  4.1s  roundLost  carry<=7 depth<=9
+seed  350  OK     b7 t4  320648f  7.7s  roundComplete  carry<=7 depth<=9
+seed  351  OK     b1 t38  103244f  2.9s  roundLost  carry<=0 depth<=2
+seed  352  OK     b7 t13   70821f  1.5s  roundComplete  carry<=0 depth<=6
+seed  353  OK     b3 t11  124329f  2.8s  roundLost  carry<=0 depth<=5
+seed  354  OK     b5 t15  261919f  5.6s  roundLost  carry<=7 depth<=9
+seed  355  OK     b1 t19  109472f  2.5s  roundLost  carry<=7 depth<=7
+seed  356  OK     b6 t10  405687f  9.5s  roundLost  carry<=14 depth<=19
+seed  357  OK     b7 t34   93142f  2.1s  roundLost  carry<=0 depth<=6
+seed  358  OK     b1 t21  142399f  3.2s  roundLost  carry<=0 depth<=5
+seed  359  OK     b3 t11   29005f  0.4s  roundLost  carry<=0 depth<=2
+
+=== soak summary: 20 seeds (policy winning) in 78.5s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 10/20
+carry >= 14 (challengeNum >= 2): 2/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 20
+
+seed  360  OK     b7 t5   70676f  1.5s  roundComplete  carry<=0 depth<=6
+seed  361  OK     b1 t27   21080f  0.4s  roundLost  carry<=0 depth<=0
+seed  362  OK     b7 t62   85243f  2.2s  roundComplete  carry<=0 depth<=6
+seed  363  OK     b7 t11  202980f  4.6s  roundComplete  carry<=14 depth<=15
+seed  364  OK     b4 t20  510262f  11.5s  roundLost  carry<=14 depth<=20
+seed  365  OK     b1 t24  113747f  2.6s  roundLost  carry<=0 depth<=3
+seed  366  OK     b2 t21  214251f  4.9s  roundLost  carry<=7 depth<=7
+seed  367  OK     b3 t7  284527f  7.8s  roundLost  carry<=7 depth<=10
+seed  368  OK     b1 t15   17972f  0.3s  roundLost  carry<=0 depth<=0
+seed  369  OK     b4 t38  100007f  2.3s  roundLost  carry<=0 depth<=3
+seed  370  OK     b2 t18   87951f  1.9s  roundLost  carry<=7 depth<=8
+seed  371  OK     b4 t13  126335f  3.0s  roundLost  carry<=0 depth<=4
+seed  372  OK     b7 t6  122664f  3.0s  roundComplete  carry<=0 depth<=6
+seed  373  OK     b4 t26  109581f  2.5s  roundLost  carry<=7 depth<=10
+seed  374  OK     b7 t17   85869f  1.9s  roundComplete  carry<=0 depth<=6
+seed  375  OK     b7 t34   92408f  2.2s  roundLost  carry<=0 depth<=6
+seed  376  OK     b2 t5   22147f  0.3s  roundLost  carry<=0 depth<=1
+seed  377  OK     b7 t3  202586f  4.1s  roundComplete  carry<=7 depth<=13
+seed  378  OK     b2 t21   27270f  0.5s  roundLost  carry<=0 depth<=1
+seed  379  OK     b7 t12   99503f  2.5s  roundComplete  carry<=0 depth<=6
+
+=== soak summary: 20 seeds (policy winning) in 59.9s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 7/20
+carry >= 14 (challengeNum >= 2): 2/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 20
+
+seed  380  OK     b1 t17   17627f  0.3s  roundLost  carry<=0 depth<=0
+seed  381  OK     b6 t17  136292f  3.3s  roundLost  carry<=0 depth<=5
+seed  382  OK     b1 t11   15854f  0.2s  roundLost  carry<=0 depth<=0
+seed  383  OK     b3 t25   39509f  0.8s  roundLost  carry<=0 depth<=2
+seed  384  OK     b2 t14   34978f  0.7s  roundLost  carry<=0 depth<=1
+seed  385  OK     b3 t10  258597f  5.9s  roundLost  carry<=14 depth<=15
+seed  386  OK     b6 t22   60849f  1.3s  roundLost  carry<=0 depth<=5
+seed  387  OK     b7 t15  164890f  3.3s  roundComplete  carry<=0 depth<=6
+seed  388  OK     b2 t56  110138f  2.8s  roundLost  carry<=0 depth<=4
+seed  389  OK     b3 t17   31953f  0.5s  roundLost  carry<=0 depth<=2
+seed  390  OK     b1 t13  449154f  11.1s  roundLost  carry<=14 depth<=15
+seed  391  OK     b1 t15   44965f  1.3s  roundLost  carry<=0 depth<=2
+seed  392  OK     b7 t17   86038f  2.2s  roundComplete  carry<=0 depth<=6
+seed  393  OK     b1 t25   21020f  0.4s  roundLost  carry<=0 depth<=0
+seed  394  OK     b3 t16  288020f  7.0s  roundLost  carry<=7 depth<=13
+seed  395  OK     b4 t19  146596f  3.8s  roundLost  carry<=7 depth<=10
+seed  396  OK     b3 t24   41234f  0.9s  roundLost  carry<=0 depth<=2
+seed  397  OK     b1 t19   18449f  0.3s  roundLost  carry<=0 depth<=0
+seed  398  OK     b1 t11   91821f  1.9s  roundLost  carry<=7 depth<=8
+seed  399  OK     b7 t8   77193f  1.6s  roundComplete  carry<=0 depth<=6
+
+=== soak summary: 20 seeds (policy winning) in 49.7s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 5/20
+carry >= 14 (challengeNum >= 2): 2/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 15
+
+seed  400  OK     b2 t30  151302f  3.6s  roundLost  carry<=0 depth<=5
+seed  401  OK     b2 t14   58133f  1.3s  roundLost  carry<=0 depth<=2
+seed  402  OK     b7 t11  114512f  3.1s  roundComplete  carry<=0 depth<=6
+seed  403  OK     b4 t16  343355f  9.5s  roundLost  carry<=14 depth<=14
+seed  404  OK     b7 t21   64892f  1.3s  roundComplete  carry<=0 depth<=6
+seed  405  OK     b1 t14  325366f  8.0s  roundLost  carry<=7 depth<=12
+seed  406  OK     b2 t13  307401f  7.2s  roundLost  carry<=21 depth<=22
+seed  407  OK     b4 t14  165814f  3.5s  roundLost  carry<=7 depth<=7
+seed  408  OK     b2 t18  328112f  7.9s  roundLost  carry<=14 depth<=17
+seed  409  OK     b3 t11  561000f  12.3s  roundLost  carry<=21 depth<=27
+seed  410  OK     b6 t6   63230f  1.3s  roundLost  carry<=0 depth<=5
+seed  411  OK     b4 t22  128381f  3.0s  roundLost  carry<=0 depth<=5
+seed  412  OK     b7 t12  192172f  4.3s  roundComplete  carry<=0 depth<=6
+seed  413  OK     b7 t11  204472f  5.0s  roundComplete  carry<=0 depth<=6
+seed  414  OK     b3 t42  381225f  9.0s  roundLost  carry<=7 depth<=13
+seed  415  OK     b2 t16  126298f  2.8s  roundLost  carry<=7 depth<=8
+seed  416  OK     b3 t18   43438f  0.9s  roundLost  carry<=0 depth<=2
+seed  417  OK     b7 t18  269907f  6.1s  roundComplete  carry<=7 depth<=10
+seed  418  OK     b1 t17   17795f  0.3s  roundLost  carry<=0 depth<=0
+seed  419  OK     b1 t13   66802f  1.1s  roundLost  carry<=0 depth<=5
+
+=== soak summary: 20 seeds (policy winning) in 91.4s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 9/20
+carry >= 14 (challengeNum >= 2): 4/20
+carry >= 21 (challengeNum >= 3): 2/20
+deepest carry anywhere: 21
+deepest battle-depth anywhere: 27
+
+seed  420  OK     b7 t17  546489f  14.9s  roundComplete  carry<=14 depth<=15
+seed  421  OK     b1 t20   22418f  0.4s  roundLost  carry<=0 depth<=0
+seed  422  OK     b3 t22  219593f  5.1s  roundLost  carry<=14 depth<=16
+seed  423  OK     b7 t17  270260f  6.6s  roundComplete  carry<=7 depth<=13
+seed  424  OK     b7 t12   69893f  1.4s  roundComplete  carry<=0 depth<=6
+seed  425  OK     b1 t11   15905f  0.2s  roundLost  carry<=0 depth<=0
+seed  426  OK     b3 t9   34563f  0.6s  roundLost  carry<=0 depth<=2
+seed  427  OK     b7 t11  328816f  7.6s  roundComplete  carry<=14 depth<=14
+seed  428  OK     b3 t17  138394f  2.9s  roundLost  carry<=7 depth<=8
+seed  429  OK     b7 t15   97850f  2.3s  roundComplete  carry<=0 depth<=6
+seed  430  OK     b2 t27  160664f  3.9s  roundLost  carry<=0 depth<=6
+seed  431  OK     b7 t18  103041f  2.5s  roundLost  carry<=0 depth<=6
+seed  432  OK     b3 t11  386195f  9.1s  roundLost  carry<=7 depth<=13
+seed  433  OK     b5 t23  113984f  2.4s  roundLost  carry<=7 depth<=11
+seed  434  OK     b7 t13   67128f  1.3s  roundComplete  carry<=0 depth<=6
+seed  435  OK     b6 t16  147144f  3.3s  roundLost  carry<=0 depth<=6
+seed  436  OK     b7 t19  190075f  4.4s  roundComplete  carry<=0 depth<=6
+seed  437  OK     b3 t14  350636f  8.2s  roundLost  carry<=7 depth<=9
+seed  438  OK     b4 t18  199563f  4.9s  roundLost  carry<=7 depth<=11
+seed  439  OK     b7 t11  310176f  7.8s  roundComplete  carry<=7 depth<=12
+
+=== soak summary: 20 seeds (policy winning) in 89.7s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 10/20
+carry >= 14 (challengeNum >= 2): 3/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 16
+
+seed  440  OK     b7 t21  287472f  6.7s  roundComplete  carry<=14 depth<=14
+seed  441  OK     b3 t19   87013f  2.8s  roundLost  carry<=0 depth<=3
+seed  442  OK     b7 t8   94926f  2.5s  roundComplete  carry<=0 depth<=6
+seed  443  OK     b2 t13   25005f  0.4s  roundLost  carry<=0 depth<=1
+seed  444  OK     b3 t16   69826f  1.6s  roundLost  carry<=0 depth<=2
+seed  445  OK     b1 t11   15860f  0.2s  roundLost  carry<=0 depth<=0
+seed  446  OK     b7 t19   67172f  1.5s  roundComplete  carry<=0 depth<=6
+seed  447  OK     b7 t20  144547f  3.3s  roundComplete  carry<=7 depth<=13
+seed  448  OK     b7 t16   66917f  1.5s  roundComplete  carry<=0 depth<=6
+seed  449  OK     b6 t22   61398f  1.4s  roundLost  carry<=0 depth<=5
+seed  450  OK     b4 t12   39837f  0.7s  roundLost  carry<=0 depth<=3
+seed  451  OK     b1 t19   19052f  0.3s  roundLost  carry<=0 depth<=0
+seed  452  OK     b7 t13  111669f  2.5s  roundComplete  carry<=0 depth<=6
+seed  453  OK     b7 t16  138455f  3.2s  roundComplete  carry<=7 depth<=13
+seed  454  OK     b7 t13   71200f  1.5s  roundComplete  carry<=0 depth<=6
+seed  455  OK     b6 t6   63665f  1.3s  roundLost  carry<=0 depth<=5
+seed  456  OK     b3 t15   55260f  1.2s  roundLost  carry<=0 depth<=2
+seed  457  OK     b3 t11   99128f  2.2s  roundLost  carry<=0 depth<=3
+seed  458  OK     b1 t16   17200f  0.3s  roundLost  carry<=0 depth<=0
+seed  459  OK     b7 t34   92037f  2.2s  roundLost  carry<=0 depth<=6
+
+=== soak summary: 20 seeds (policy winning) in 37.1s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 3/20
+carry >= 14 (challengeNum >= 2): 1/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 14
+
+seed  460  OK     b4 t19  243948f  5.4s  roundLost  carry<=14 depth<=16
+seed  461  OK     b2 t30  173174f  5.3s  roundLost  carry<=7 depth<=8
+seed  462  OK     b3 t14   33771f  0.7s  roundLost  carry<=0 depth<=2
+seed  463  OK     b1 t23   19347f  0.4s  roundLost  carry<=0 depth<=0
+seed  464  OK     b1 t23   19356f  0.4s  roundLost  carry<=0 depth<=0
+seed  465  OK     b1 t20   22262f  0.4s  roundLost  carry<=0 depth<=0
+seed  466  OK     b6 t10  222022f  5.5s  roundLost  carry<=14 depth<=19
+seed  467  OK     b2 t15   66719f  1.5s  roundLost  carry<=0 depth<=2
+seed  468  OK     b7 t20  113066f  2.6s  roundComplete  carry<=0 depth<=6
+seed  469  OK     b7 t11   68899f  1.5s  roundLost  carry<=0 depth<=6
+seed  470  OK     b1 t12  235623f  5.2s  roundLost  carry<=7 depth<=7
+seed  471  OK     b3 t14   48373f  1.2s  roundLost  carry<=0 depth<=2
+seed  472  OK     b4 t5   56590f  1.1s  roundLost  carry<=0 depth<=3
+seed  473  OK     b1 t39  109265f  2.6s  roundLost  carry<=7 depth<=7
+seed  474  OK     b3 t19  336410f  8.6s  roundLost  carry<=7 depth<=10
+seed  475  OK     b3 t18  389110f  8.5s  roundLost  carry<=14 depth<=17
+seed  476  OK     b2 t14   79040f  1.5s  roundLost  carry<=7 depth<=8
+seed  477  OK     b7 t19  305528f  6.9s  roundComplete  carry<=7 depth<=13
+seed  478  OK     b3 t10  294958f  7.0s  roundLost  carry<=14 depth<=16
+seed  479  OK     b7 t9  555460f  12.7s  roundComplete  carry<=7 depth<=8
+
+=== soak summary: 20 seeds (policy winning) in 78.8s ===
+OK 20  CRASH 0  HANG 0
+
+=== depth distribution ===
+carry >= 7  (challengeNum >= 1): 11/20
+carry >= 14 (challengeNum >= 2): 4/20
+carry >= 21 (challengeNum >= 3): 0/20
+deepest carry anywhere: 14
+deepest battle-depth anywhere: 19
+

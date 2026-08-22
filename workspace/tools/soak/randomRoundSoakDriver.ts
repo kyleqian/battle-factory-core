@@ -36,17 +36,207 @@ import {
   isMonPicInputReady,
 } from "../../src/engine/monPic.ts";
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
+import { applyTypeEffectiveness, type TypeEffectivenessEntry } from "../../src/engine/damageCalc.ts";
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
+import speciesTypesData from "../../src/data/gen/species-types.json" with { type: "json" };
+import typeEffectivenessData from "../../src/data/gen/type-effectiveness.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------
-// Move power lookup (for the "winning" policy's fight-move bias only)
+// Move power/type lookup and type-effectiveness table (for the "winning"
+// policy's fight-move bias only)
 // ---------------------------------------------------------------------------
 
-const MOVE_POWER_BY_ID = new Map<number, number>(
-  (movesData as { moves: { id: number; power: number }[] }).moves.map(
-    (move) => [move.id, move.power],
+const MOVE_BY_ID = new Map<number, { power: number; type: string }>(
+  (movesData as { moves: { id: number; power: number; type: string }[] }).moves.map(
+    (move) => [move.id, { power: move.power, type: move.type }],
   ),
 );
+
+const TYPE_EFFECTIVENESS =
+  typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
+
+/** Materialized battler types default (matches battleScriptRulesContext.ts's own convention). */
+const DEFAULT_TYPES: readonly [string, string] = ["TYPE_NORMAL", "TYPE_NORMAL"];
+
+/** gSpeciesInfo[species].types -- species-types.json is indexed by (speciesId - 1). */
+const SPECIES_TYPES = speciesTypesData.species as unknown as readonly Readonly<{
+  types: readonly [string, string];
+}>[];
+
+function typesForSpecies(species: number): readonly [string, string] {
+  return SPECIES_TYPES[species - 1]?.types ?? DEFAULT_TYPES;
+}
+
+/**
+ * "winning" policy fight-move scorer: for each legal slot,
+ * `score = basePower x effectivenessMultiplier(moveType vs defenderTypes) x
+ * (STAB ? 1.5 : 1)`, using the engine's own `applyTypeEffectiveness` +
+ * type-effectiveness table. A 0x-immune or non-damaging (power 0) slot
+ * scores 0. Ties keep the lower slot (strict `>` never overwrites an equal
+ * score). If every legal slot scores 0, falls back to the highest-power
+ * legal slot (ties to the lower slot again), matching the policy's prior
+ * behaviour.
+ */
+export function pickWinningFightSlot(input: {
+  legalSlots: readonly boolean[];
+  moveIds: readonly number[];
+  attackerTypes: readonly [string, string];
+  defenderTypes: readonly [string, string];
+}): number {
+  const { legalSlots, moveIds, attackerTypes, defenderTypes } = input;
+  let fallbackSlot = 0;
+  let fallbackFound = false;
+  let fallbackPower = -1;
+  let bestSlot = -1;
+  let bestScore = 0;
+  for (let slot = 0; slot < 4; slot += 1) {
+    if (!legalSlots[slot]) continue;
+    if (!fallbackFound) {
+      fallbackSlot = slot;
+      fallbackFound = true;
+    }
+    const move = MOVE_BY_ID.get(moveIds[slot]!);
+    const power = move?.power ?? 0;
+    if (power > fallbackPower) {
+      fallbackPower = power;
+      fallbackSlot = slot;
+    }
+    if (!move || power <= 0) continue;
+    const { multiplierTenths } = applyTypeEffectiveness(
+      power,
+      move.type,
+      defenderTypes,
+      TYPE_EFFECTIVENESS,
+    );
+    if (multiplierTenths <= 0) continue;
+    const stab = attackerTypes[0] === move.type || attackerTypes[1] === move.type;
+    const score = power * (multiplierTenths / 10) * (stab ? 1.5 : 1);
+    if (score > bestScore) {
+      bestScore = score;
+      bestSlot = slot;
+    }
+  }
+  return bestSlot >= 0 ? bestSlot : fallbackSlot;
+}
+
+/**
+ * True when every legal move in `moveIds` is either non-damaging (power 0)
+ * or 0x-immune against `defenderTypes` -- i.e. the active cannot deal direct
+ * damage at all (Milestone M-B step 2 part C2: resisted-but-nonzero moves,
+ * e.g. 0.25x/0.5x, no longer count as walled -- only true immunity does).
+ */
+function isWalledActive(
+  moveIds: readonly number[],
+  legalSlots: readonly boolean[],
+  defenderTypes: readonly [string, string],
+): boolean {
+  for (let slot = 0; slot < 4; slot += 1) {
+    if (!legalSlots[slot]) continue;
+    const move = MOVE_BY_ID.get(moveIds[slot]!);
+    if (!move || move.power <= 0) continue;
+    const { multiplierTenths } = applyTypeEffectiveness(
+      move.power,
+      move.type,
+      defenderTypes,
+      TYPE_EFFECTIVENESS,
+    );
+    if (multiplierTenths > 0) return false;
+  }
+  return true;
+}
+
+/**
+ * A benched party member's best score (same power x effectiveness x STAB
+ * formula as `pickWinningFightSlot`), plus whether it qualifies as a
+ * super-effective (>= 2x) answer to the opponent's live types. PP-zero moves
+ * are skipped when `movePp` is supplied (a real player wouldn't switch in on
+ * a move it can no longer use).
+ */
+function bestBenchMoveScore(
+  moveIds: readonly number[],
+  attackerTypes: readonly [string, string],
+  defenderTypes: readonly [string, string],
+  movePp: readonly number[] | undefined,
+): { score: number; qualifies: boolean } {
+  let bestScore = 0;
+  let qualifies = false;
+  for (let i = 0; i < moveIds.length; i += 1) {
+    if (movePp && movePp[i]! <= 0) continue;
+    const move = MOVE_BY_ID.get(moveIds[i]!);
+    if (!move || move.power <= 0) continue;
+    const { multiplierTenths } = applyTypeEffectiveness(
+      move.power,
+      move.type,
+      defenderTypes,
+      TYPE_EFFECTIVENESS,
+    );
+    if (multiplierTenths <= 0) continue;
+    if (multiplierTenths >= 20) qualifies = true;
+    const stab = attackerTypes[0] === move.type || attackerTypes[1] === move.type;
+    const score = move.power * (multiplierTenths / 10) * (stab ? 1.5 : 1);
+    if (score > bestScore) bestScore = score;
+  }
+  return { score: bestScore, qualifies };
+}
+
+export type WinningSwitchBenchCandidate = Readonly<{
+  row: 0 | 1 | 2;
+  fainted: boolean;
+  active: boolean;
+  moveIds: readonly number[];
+  movePp?: readonly number[];
+  types: readonly [string, string];
+  hp: number;
+  maxHp: number;
+}>;
+
+/**
+ * "winning" policy voluntary-switch scorer (Milestone M-B step 2 part C,
+ * tightened in part C2): when the active is "walled" (every legal move is
+ * either non-damaging or 0x-immune against the opponent's live types -- see
+ * `isWalledActive`; a merely resisted move, e.g. 0.25x/0.5x, no longer
+ * counts) AND a benched, non-fainted party member has a damaging move that
+ * is super-effective (>= 2x) against that same opponent AND is at >= 50% of
+ * its max HP (`Math.floor((100 * hp) / maxHp) >= 50`, matching the engine's
+ * own HP-percent convention, e.g. `factoryAiCheckViability.ts`), returns the
+ * best-scoring such bench row (ties keep the lower row). Returns null (no
+ * switch -- behave exactly like today's FIGHT-with-scored-move path) when
+ * the active isn't walled, when no bench member qualifies, when only one
+ * healthy party member remains, or when this same opponent party slot was
+ * already switched against once this battle
+ * (`alreadySwitchedAgainstThisOpponent` -- the ping-pong guard).
+ */
+export function pickWinningSwitchRow(input: {
+  activeMoveIds: readonly number[];
+  activeLegalSlots: readonly boolean[];
+  defenderTypes: readonly [string, string];
+  bench: readonly WinningSwitchBenchCandidate[];
+  healthyCount: number;
+  alreadySwitchedAgainstThisOpponent: boolean;
+}): 0 | 1 | 2 | null {
+  if (input.healthyCount <= 1) return null;
+  if (input.alreadySwitchedAgainstThisOpponent) return null;
+  if (!isWalledActive(input.activeMoveIds, input.activeLegalSlots, input.defenderTypes)) return null;
+  let bestRow: 0 | 1 | 2 | null = null;
+  let bestScore = 0;
+  for (const candidate of input.bench) {
+    if (candidate.active || candidate.fainted) continue;
+    if (Math.floor((100 * candidate.hp) / candidate.maxHp) < 50) continue;
+    const { score, qualifies } = bestBenchMoveScore(
+      candidate.moveIds,
+      candidate.types,
+      input.defenderTypes,
+      candidate.movePp,
+    );
+    if (!qualifies) continue;
+    // Ties keep the lower row regardless of `bench` iteration order.
+    if (bestRow === null || score > bestScore || (score === bestScore && candidate.row < bestRow)) {
+      bestScore = score;
+      bestRow = candidate.row;
+    }
+  }
+  return bestRow;
+}
 
 // ---------------------------------------------------------------------------
 // Seeded PRNG (mulberry32)
@@ -97,12 +287,15 @@ type ActionEntry = { frame: number; battle: number; turn: number; what: string }
 class ActionLog {
   private readonly entries: ActionEntry[] = [];
   private readonly verbose: boolean;
-  constructor(verbose: boolean) {
+  private readonly onNote?: (entry: ActionEntry) => void;
+  constructor(verbose: boolean, onNote?: (entry: ActionEntry) => void) {
     this.verbose = verbose;
+    this.onNote = onNote;
   }
   push(frame: number, battle: number, turn: number, what: string): void {
     this.entries.push({ frame, battle, turn, what });
     if (this.entries.length > 64) this.entries.shift();
+    this.onNote?.({ frame, battle, turn, what });
     if (this.verbose) {
       console.log(`  [f=${frame} b${battle} t${turn}] ${what}`);
     }
@@ -121,7 +314,15 @@ export type SeedOutcome = "OK" | "CRASH" | "HANG";
 export type SeedResult = {
   seed: number;
   outcome: SeedOutcome;
-  /** OK sub-outcome: roundComplete | roundLost | milestone:first-action-menu */
+  /**
+   * OK sub-outcome: "budget" (frame budget reached while still making
+   * progress — ISSUES #104 retune), "max-rounds" (`--max-rounds` reached),
+   * roundComplete | roundLost | milestone:first-action-menu. Also set on a
+   * HANG that stalled with some round already decided — the decided
+   * round's own outcome (roundComplete | roundLost), so the CLI/summary
+   * line reads like a post-decision stall instead of looking like a
+   * mid-round one.
+   */
   endState?: string;
   frames: number;
   battle: number;
@@ -246,12 +447,34 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * parity plan §4 step 3, addressing gap 3 — neither "full" nor "vanilla"
  * biases toward winning, so a soak's natural chained depth almost never
  * strings together consecutive round wins). Reuses "full"'s menu/target
- * exploration verbatim (same draft/summary/postwin/swap/terminal rolls) for
- * every decision EXCEPT two: the fight-menu commits the highest-power legal
- * damaging move instead of a uniform-random slot, and a voluntary POKéMON
- * party-select (forced switches are unaffected — they're not voluntary)
- * always declines rather than "full"'s random target/cancel roll. Biased,
- * not guaranteed-win — arbitrary-but-legal play in spirit, not an AI oracle.
+ * exploration verbatim (same summary/postwin-continuation/terminal rolls)
+ * for every decision EXCEPT five (Milestone M-B step 2, parts a/b/c):
+ * (1) the fight-menu commits the legal move that scores highest on power x
+ * type-effectiveness x STAB (see `pickWinningFightSlot`; falls back to
+ * highest-power legal move if every legal move scores 0) instead of a
+ * uniform-random slot; (2) a voluntary POKéMON party-select (forced
+ * switches are unaffected — they're not voluntary) always declines UNLESS
+ * part (5) below has already committed to a row this turn; (3) the postwin
+ * swap offer always answers NO instead of "full"'s 50/50 roll (the roll is
+ * still drawn from the shared RNG stream, matching "full"'s draw at that
+ * point, just ignored) — a rental already scouted and played with is worth
+ * keeping over an unscouted swap; (4) the draft screen rents the 3
+ * highest-scoring offered rentals (see `pickWinningDraftPicks`) in score
+ * order, in place of "full"'s random 3-of-6 shuffle; (5) at the action menu,
+ * when the active is "walled" (every legal move is non-damaging or 0x-immune
+ * against the opponent's live types -- a merely resisted move, e.g.
+ * 0.25x/0.5x, does NOT count as walled since part C2) and a benched,
+ * non-fainted party member has both a damaging move that is super-effective
+ * (>= 2x) against the opponent AND is at >= 50% of its max HP, the
+ * action-menu roll (still drawn, same as (3)) is overridden to POKéMON and
+ * the committed bench row is sent out (see `pickWinningSwitchRow`) instead
+ * of item (2)'s decline — guarded against ping-pong (never re-switches
+ * against the same opponent party slot twice in a battle) and against
+ * emptying the bench (never switches with only one healthy party member
+ * left). Biased, not guaranteed-win — arbitrary-but-legal play in spirit (a
+ * real player weighing type matchups, preferring stronger rentals over an
+ * unscouted swap, and retreating a truly walled mon to a healthy teammate
+ * with a super-effective answer), not an AI oracle.
  */
 export type SoakPolicy = "full" | "vanilla" | "winning";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
@@ -274,6 +497,12 @@ class RandomPlayer {
   private lastCommandKey = "";
   private turnsThisBattle = 0;
   private lastBattleIndex = 0;
+  /** "winning" only: the bench row the action-menu heuristic committed to, consumed by onVoluntaryParty. */
+  private pendingSwitchRow: 0 | 1 | 2 | null = null;
+  /** "winning" only: opponent partyIndexes already switched against this battle (ping-pong guard). */
+  private switchedAgainstOpponentIndices = new Set<number>();
+  /** "winning" only: count of voluntary switches the heuristic actually committed to (soak diagnostics). */
+  public switchCount = 0;
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
@@ -367,6 +596,7 @@ class RandomPlayer {
       this.lastBattleIndex = battleIndex;
       this.turnsThisBattle = 0;
       this.turn = 0;
+      this.switchedAgainstOpponentIndices.clear();
     }
     this.battle = battleIndex + 1;
     const presentation = orch.battleCommandPresentation;
@@ -498,11 +728,25 @@ class RandomPlayer {
       if (this.actionIntent === null || this.actionIntent.key !== this.lastCommandKey) {
         // FIGHT 0.60 / POKéMON 0.22 / BAG 0.06 / RUN 0.06 / re-roll wander 0.06
         const roll = this.rng.float();
-        const target = !this.explores
+        let target = !this.explores
           ? 0
           : roll < 0.60 ? 0 : roll < 0.82 ? 2 : roll < 0.88 ? 1 : roll < 0.94 ? 3 : this.rng.int(4);
+        // "winning" only (M-B step 2 part C): voluntarily switch out of a
+        // walled matchup instead of the rolled action. The roll above is
+        // still drawn (shared with "full") so its RNG stream is untouched;
+        // only the decision it feeds is overridden, like the swap-decline
+        // precedent (part B, rung 1).
+        this.pendingSwitchRow = this.policy === "winning"
+          ? this.computeSwitchRow(orch, presentation)
+          : null;
+        if (this.pendingSwitchRow !== null) target = 2;
         this.actionIntent = { key: this.lastCommandKey, target, futile: 0 };
-        this.note(state, `action menu intent: ${["FIGHT", "BAG", "POKEMON", "RUN"][target]}`);
+        this.note(
+          state,
+          this.pendingSwitchRow !== null
+            ? `action menu intent: POKEMON (winning switch: row ${this.pendingSwitchRow})`
+            : `action menu intent: ${["FIGHT", "BAG", "POKEMON", "RUN"][target]}`,
+        );
       }
       const intent = this.actionIntent;
       const cursor = presentation.actionCursor;
@@ -533,19 +777,16 @@ class RandomPlayer {
           0,
           presentation.legalMoveBySlot.findIndex((slot) => slot !== null),
         );
-        // "winning" only: highest-power LEGAL move, ties toward the lower slot.
-        const bestDamagingSlot = (): number => {
-          let bestSlot = firstLegal;
-          let bestPower = -1;
-          for (let slot = 0; slot < 4; slot += 1) {
-            if (presentation.legalMoveBySlot[slot] === null) continue;
-            const power = MOVE_POWER_BY_ID.get(presentation.field.player.moveIds[slot]) ?? 0;
-            if (power > bestPower) {
-              bestPower = power;
-              bestSlot = slot;
-            }
-          }
-          return bestSlot;
+        // "winning" only: type-effectiveness-aware LEGAL move (see
+        // pickWinningFightSlot); falls back to highest-power/lowest-slot.
+        const bestEffectivenessSlot = (): number => {
+          const battlers = orch.battle?.rules.rulesContext.battlers;
+          return pickWinningFightSlot({
+            legalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
+            moveIds: presentation.field.player.moveIds,
+            attackerTypes: battlers?.[0]?.types ?? DEFAULT_TYPES,
+            defenderTypes: battlers?.[1]?.types ?? DEFAULT_TYPES,
+          });
         };
         const target = this.policy === "strong-route"
           && active?.partyIndex === 1
@@ -555,7 +796,7 @@ class RandomPlayer {
           : this.policy === "vanilla" || this.policy === "strong-route"
             ? firstLegal
             : this.policy === "winning"
-              ? bestDamagingSlot()
+              ? bestEffectivenessSlot()
               : this.rng.int(4);
         this.fightIntent = {
           key,
@@ -601,6 +842,60 @@ class RandomPlayer {
     return NO_BUTTONS;
   }
 
+  /**
+   * "winning" only (M-B step 2 part C): decides whether to voluntarily
+   * switch out of a walled matchup, reading only what a real player sees --
+   * the active's own legal moves, the opponent's live types, and the
+   * bench's known species/moves/PP/HP. Marks the ping-pong guard and bumps
+   * `switchCount` when it commits to a row.
+   */
+  private computeSwitchRow(
+    orch: NonNullable<EngineState["factoryRoundBattleOrchestrator"]>,
+    presentation: NonNullable<
+      NonNullable<EngineState["factoryRoundBattleOrchestrator"]>["battleCommandPresentation"]
+    >,
+  ): 0 | 1 | 2 | null {
+    const battle = orch.battle;
+    if (!battle) return null;
+    const battlers = battle.rules.rulesContext.battlers;
+    const activePartyIndex = battlers[0]?.partyIndex;
+    const opponentPartyIndex = battlers[1]?.partyIndex;
+    if (activePartyIndex === undefined || opponentPartyIndex === undefined) return null;
+    const defenderTypes = battlers[1]?.types ?? DEFAULT_TYPES;
+    const party = battle.rules.rulesContext.party.player;
+    let healthyCount = 0;
+    const bench: WinningSwitchBenchCandidate[] = [];
+    for (let partyIndex = 0; partyIndex < 3; partyIndex += 1) {
+      const member = party[partyIndex];
+      if (!member || member.hp <= 0) continue;
+      healthyCount += 1;
+      if (partyIndex === activePartyIndex) continue;
+      bench.push({
+        row: partyIndex as 0 | 1 | 2,
+        fainted: false,
+        active: false,
+        moveIds: member.moves,
+        movePp: member.pp,
+        types: typesForSpecies(member.species),
+        hp: member.hp,
+        maxHp: member.maxHP,
+      });
+    }
+    const row = pickWinningSwitchRow({
+      activeMoveIds: presentation.field.player.moveIds,
+      activeLegalSlots: presentation.legalMoveBySlot.map((slot) => slot !== null),
+      defenderTypes,
+      bench,
+      healthyCount,
+      alreadySwitchedAgainstThisOpponent: this.switchedAgainstOpponentIndices.has(opponentPartyIndex),
+    });
+    if (row !== null) {
+      this.switchedAgainstOpponentIndices.add(opponentPartyIndex);
+      this.switchCount += 1;
+    }
+    return row;
+  }
+
   private onVoluntaryParty(state: EngineState): ReadonlySet<GbaButton> {
     const orch = state.factoryRoundBattleOrchestrator!;
     const selector = orch.battlePartySelect!;
@@ -610,11 +905,24 @@ class RandomPlayer {
     }
     if (this.partyIntent === null || this.partyIntent.key !== this.lastCommandKey) {
       // Any row the UI can cursor to, including fainted rows (their SEND OUT
-      // shows the no-energy message), plus cancel. "winning" always declines
-      // a voluntary switch (forced switches never route through here).
-      const target: 0 | 1 | 2 | "cancel" = this.policy === "winning"
-        ? "cancel"
+      // shows the no-energy message), plus cancel. "winning" (M-B step 2
+      // part C): send out the action-menu heuristic's committed row when one
+      // was set (a genuine walled-matchup switch), else decline like before
+      // -- forced switches never route through here. Other policies keep
+      // their random roll.
+      const rawTarget: 0 | 1 | 2 | "cancel" = this.policy === "winning"
+        ? (this.pendingSwitchRow ?? "cancel")
         : this.rng.float() < 0.25 ? "cancel" : ([0, 1, 2] as const)[this.rng.int(3)]!;
+      this.pendingSwitchRow = null;
+      // "winning" only: the UI enforces legality, so if the selector somehow
+      // rejects the heuristic's committed row (e.g. it's the active), fall
+      // back to cancel rather than press an illegal target. "full"/"vanilla"
+      // keep their prior random-roll behaviour verbatim (including rolling
+      // onto a fainted/active row, whose own no-energy message the generic
+      // press sequence below already handles) -- untouched by this guard.
+      const target = this.policy === "winning" && rawTarget !== "cancel" && !selector.rows[rawTarget]!.legal
+        ? "cancel"
+        : rawTarget;
       this.partyIntent = { key: this.lastCommandKey, target };
       this.note(state, `party intent: ${target === "cancel" ? "cancel" : `row ${target}`}`);
     }
@@ -713,12 +1021,53 @@ class RandomPlayer {
       this.note(state, `postwin ${postwin.question.kind}: ${wantYes ? "YES" : "NO"}`);
       return this.press("A", 10);
     }
+    // Swap offer YES/NO menu (dialogue page 4) -- shared for both routes
+    // (brain's short path lands here directly from dialoguePage 1). Checked
+    // before the continuation branch below: `acceptPostwinContinuation`
+    // (src/engine/postwin.ts:1558-1573) never clears `continuationCursorPos`
+    // once GO ON is confirmed, only advances `dialoguePage` away from 0, so
+    // without an explicit page gate the continuation branch's condition
+    // would still read true here and answer this menu instead (ISSUES #99).
+    if (
+      postwin.dialoguePage === 4
+      && postwin.swapDeclineElapsed === null
+      && postwin.swapCursorPos !== null
+    ) {
+      // "winning" (M-B step 2 part B, rung 1): always decline -- a rental
+      // it already chose (now by the draft heuristic below) and has played
+      // with is worth keeping over an unscouted swap. The roll is still
+      // drawn (this.explores covers both "full" and "winning") so "full"'s
+      // own draw here is untouched; only the decision it feeds is overridden.
+      const rolledAccept = this.explores && this.rng.chance(0.5);
+      const accept = this.policy === "winning" ? false : rolledAccept;
+      const targetPos = accept ? 0 : 1;
+      if (postwin.swapCursorPos !== targetPos) {
+        return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
+      }
+      this.note(state, `swap offer: ${accept ? "YES" : "NO"}`);
+      return this.press("A", 10);
+    }
+    // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead one-liner
+    // (dialoguePage 1) has no scouting pages to cycle through -- it advances
+    // generically (the fallback `pressAdvance` below) then jumps straight to
+    // the swap prompt (dialoguePage 4, handled above).
+    if (postwin.frontierBrain && postwin.dialoguePage === 1) {
+      return this.pressAdvance(state, "postwin brain one-liner (AskSwapBeforeHead)");
+    }
     // Continuation menu (GO ON / RECORD / REST / RETIRE) -- shared machinery
     // for both the ordinary AskReadyForOpponent menu and brain's own
     // AskReadyForHead (walk-up build step A, Brief 1): the same GO ON/
     // RECORD/REST/RETIRE random exploration already exercises brain's menu
     // too whenever continuationCursorPos is live, no separate branch needed.
-    if (postwin.question === null && postwin.continuationCursorPos !== null) {
+    // Gated on `dialoguePage === 0` -- the engine's own live-menu condition
+    // (`acceptPostwinContinuation`'s guard) -- so this branch stops matching
+    // once GO ON is confirmed and later pages (incl. the swap offer above)
+    // take over; see the comment on that branch (ISSUES #99).
+    if (
+      postwin.question === null
+      && postwin.dialoguePage === 0
+      && postwin.continuationCursorPos !== null
+    ) {
       const roll = this.rng.float();
       const target = !this.explores
         ? 0
@@ -732,29 +1081,6 @@ class RandomPlayer {
           + `${["GO ON", "RECORD", "REST", "RETIRE"][target]}`,
       );
       return this.press("A", 12);
-    }
-    // Walk-up build step A, Brief 2: brain's AskSwapBeforeHead one-liner
-    // (dialoguePage 1) has no scouting pages to cycle through -- it advances
-    // generically (the fallback `pressAdvance` below) then jumps straight to
-    // the swap prompt (dialoguePage 4, handled next). Explicit branch only
-    // for a clearer soak-log label.
-    if (postwin.frontierBrain && postwin.dialoguePage === 1) {
-      return this.pressAdvance(state, "postwin brain one-liner (AskSwapBeforeHead)");
-    }
-    // Swap offer YES/NO menu (dialogue page 4) -- shared for both routes
-    // (brain's short path lands here directly from dialoguePage 1).
-    if (
-      postwin.dialoguePage === 4
-      && postwin.swapDeclineElapsed === null
-      && postwin.swapCursorPos !== null
-    ) {
-      const accept = this.explores && this.rng.chance(0.5);
-      const targetPos = accept ? 0 : 1;
-      if (postwin.swapCursorPos !== targetPos) {
-        return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
-      }
-      this.note(state, `swap offer: ${accept ? "YES" : "NO"}`);
-      return this.press("A", 10);
     }
     return this.pressAdvance(state, "postwin advance");
   }
@@ -828,6 +1154,22 @@ export type RunOptions = {
    * across arbitrarily many chained rounds does not.
    */
   stopAtFirstRoundDecision?: boolean;
+  /**
+   * Frames of zero observed progress (see `DEFAULT_STALL_FRAMES`) before a
+   * run reports HANG. Ignored under `stopAtFirstRoundDecision`, which keeps
+   * its own bounded post-decision grace window instead (ISSUES #104 driver
+   * retune, PROGRESS ~1368).
+   */
+  stallFrames?: number;
+  /**
+   * Finish OK ("max-rounds") once this many round decisions
+   * (roundComplete/roundLost) have been observed, regardless of frame
+   * budget — a cheap run-length control for gates and tests that only want
+   * a bounded number of chained rounds. Default unlimited.
+   */
+  maxRounds?: number;
+  /** Test-only opt-in observer for every action-log note, independent of `verbose`. */
+  onNote?: (entry: { frame: number; battle: number; turn: number; what: string }) => void;
 };
 
 export const DEFAULT_RUN_OPTIONS: RunOptions = {
@@ -872,6 +1214,21 @@ export function resolveMaxFrames(policy: SoakPolicy, explicit?: number): number 
   return explicit ?? DEFAULT_MAX_FRAMES_BY_POLICY[policy] ?? DEFAULT_RUN_OPTIONS.maxFrames;
 }
 
+/**
+ * Frames of zero observed progress before a run reports HANG (ISSUES #104
+ * driver retune). "Progress" is any change in round identity (a fresh
+ * generated round committing, `factoryRoundBattleOrchestrator.config.id` or
+ * `pendingGeneratedRound`), `round.rules.battleIndex`, the player's own turn
+ * counter, the surface the player currently reads input from
+ * (`RandomPlayer.surface`), or `endStateOf(state)`. A stall this long with
+ * every one of those signals frozen is a genuine dead lock: a whole live
+ * battle turn, a chained round's terminal walk, or a draft/postwin screen
+ * all move several of these signals many times a second under real play, so
+ * 30,000 frozen frames (~8.3 real-time minutes at 60fps) is generous
+ * headroom over any legitimate single dwell, not a tight trip wire.
+ */
+export const DEFAULT_STALL_FRAMES = 30_000;
+
 function endStateOf(state: EngineState): string | null {
   const phase = state.factoryRoundBattleOrchestrator?.round.rules.phase;
   if (phase === "roundComplete") return "roundComplete";
@@ -883,23 +1240,48 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const policy = optionsIn.policy ?? DEFAULT_RUN_OPTIONS.policy;
   const maxFrames = resolveMaxFrames(policy, optionsIn.maxFrames);
   const options: RunOptions = { ...DEFAULT_RUN_OPTIONS, ...optionsIn, maxFrames };
+  const stallFrames = options.stallFrames ?? DEFAULT_STALL_FRAMES;
   const rng = new Rng(seed);
-  const log = new ActionLog(options.verbose);
+  const log = new ActionLog(options.verbose, options.onNote);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
   let state = options.stateFactory?.() ?? createInitialState();
   let frame = 0;
-  let terminalGrace = -1;
   let firstEndState: string | null = null;
   let chainingCommitted = false;
   let firstDecisionSnapshot:
     | { frames: number; battle: number; turn: number; diagnostics: RunDiagnostics }
     | null = null;
+  // `stopAtFirstRoundDecision` keeps its own small post-decision grace
+  // window, independent of the general stall/budget semantics below, so the
+  // FIRST round's own terminal/lobby presentation gets a bounded chance to
+  // run before freezing that round's snapshot as the result. `firstEndState`
+  // is sticky (set once, never cleared) for this mode, so this window never
+  // needs to re-arm.
+  let roundDecisionGrace = -1;
   let lastSurface = "";
+  let surfaceChangedThisTick = false;
   let renderCalls = 0;
   let terminalRecordMenuInputReadyReached = false;
   let terminalOutcome: RunDiagnostics["terminalOutcome"] = null;
   let maxCarriedWinStreak: number | null = null;
   let maxBattleDepth: number | null = null;
+
+  // ISSUES #104 driver retune: generic stall detection (see
+  // DEFAULT_STALL_FRAMES) replaces the old single-purpose post-round-
+  // decision grace timer for ordinary runs. With the engine half of #104
+  // also fixed, a decided round now always re-chains almost immediately, so
+  // the old timer's own expiry-HANG branch was already dead in practice;
+  // the real failure mode it never caught was a run that stays busy
+  // chaining forever and simply outlives its frame budget, which the old
+  // code always reported as HANG regardless of whether it was actually
+  // stuck (PROGRESS ~1367's "every seed HANGs" finding).
+  let lastProgressFrame = 0;
+  let roundDecisions = 0;
+  let prevRoundId: string | null = null;
+  let prevPendingGenerated = false;
+  let prevBattleIndex: number | null = null;
+  let prevPlayerTurn = player.turn;
+  let prevEnd: string | null = null;
 
   const observe = (): void => {
     if (state.factoryTerminal !== null) {
@@ -966,11 +1348,11 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       frame += 1;
       observe();
       const surface = player.surface(state);
-      const surfaceChanged = surface !== lastSurface;
+      surfaceChangedThisTick = surface !== lastSurface;
       lastSurface = surface;
       if (
         options.renderEvery > 0
-        && (surfaceChanged || frame % options.renderEvery === 0)
+        && (surfaceChangedThisTick || frame % options.renderEvery === 0)
       ) {
         phase = "render";
         render(state);
@@ -995,9 +1377,14 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       return finish("OK", { endState: "milestone:first-action-menu" });
     }
 
+    const orch = state.factoryRoundBattleOrchestrator;
+    const roundId = orch?.config.id ?? null;
+    const pendingGenerated = state.pendingGeneratedRound !== null;
+    const battleIndex = orch?.round.rules.battleIndex ?? null;
     const end = endStateOf(state);
     if (end !== null && firstEndState === null) firstEndState = end;
-    if (state.pendingGeneratedRound !== null) chainingCommitted = true;
+    if (end !== null && prevEnd === null) roundDecisions += 1;
+    if (pendingGenerated) chainingCommitted = true;
     if (options.stopAtFirstRoundDecision === true && firstEndState !== null && !chainingCommitted) {
       // Keep refreshing the snapshot every tick the FIRST round's own
       // terminal dialogue still runs (factoryRoundBattleOrchestrator gets
@@ -1013,20 +1400,57 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
         diagnostics: diagnostics(),
       };
     }
-    const graceActive = options.stopAtFirstRoundDecision === true
-      ? firstEndState !== null
-      : (end !== null || state.lobbyFreeRoam !== null);
-    if (graceActive) {
-      // Round decided. Keep ticking a grace window so the terminal/lobby
-      // presentations (their own crash surface) still run, then stop.
-      if (terminalGrace < 0) terminalGrace = 9_000;
-      terminalGrace -= 1;
-      if (terminalGrace === 0 || state.lobbyFreeRoam !== null) {
-        return options.stopAtFirstRoundDecision === true
-          ? finish("OK", { endState: firstEndState!, ...firstDecisionSnapshot! })
-          : finish("OK", { endState: end ?? "roundLost" });
+
+    // Progress signals (see DEFAULT_STALL_FRAMES doc): any change resets
+    // the stall clock.
+    const progressed =
+      roundId !== prevRoundId
+      || pendingGenerated !== prevPendingGenerated
+      || battleIndex !== prevBattleIndex
+      || player.turn !== prevPlayerTurn
+      || surfaceChangedThisTick
+      || end !== prevEnd;
+    if (progressed) lastProgressFrame = frame;
+    prevRoundId = roundId;
+    prevPendingGenerated = pendingGenerated;
+    prevBattleIndex = battleIndex;
+    prevPlayerTurn = player.turn;
+    prevEnd = end;
+
+    if (options.stopAtFirstRoundDecision === true) {
+      // `firstEndState` is sticky, so once set this branch is taken every
+      // remaining tick regardless of later chaining — see the field doc.
+      if (firstEndState !== null) {
+        if (roundDecisionGrace < 0) roundDecisionGrace = 9_000;
+        roundDecisionGrace -= 1;
+        if (state.lobbyFreeRoam !== null || roundDecisionGrace === 0) {
+          return finish("OK", { endState: firstEndState, ...firstDecisionSnapshot! });
+        }
       }
+      continue;
+    }
+
+    if (state.lobbyFreeRoam !== null) {
+      return finish("OK", { endState: end ?? "roundLost" });
+    }
+    if (options.maxRounds !== undefined && roundDecisions >= options.maxRounds) {
+      return finish("OK", { endState: "max-rounds" });
+    }
+    if (frame - lastProgressFrame >= stallFrames) {
+      // Genuine stall: no round identity, battle index, turn, input
+      // surface, or decided-round phase has moved in `stallFrames` frames.
+      return finish("HANG", { hangSurface: player.surface(state), endState: end ?? undefined });
     }
   }
-  return finish("HANG", { hangSurface: player.surface(state) });
+  // Budget exhausted. Every earlier iteration already checked for a stall
+  // (and would have returned HANG), so reaching here means the run was
+  // still making genuine progress right up to the frame budget — report OK,
+  // not HANG (ISSUES #104 retune: a run that keeps chaining rounds forever
+  // is not "stuck", it simply outlived its budget).
+  if (options.stopAtFirstRoundDecision === true || options.stopAtFirstActionMenu === true) {
+    // Neither milestone was ever reached within budget — a genuine failure
+    // to reach the surface this run mode exists to observe.
+    return finish("HANG", { hangSurface: player.surface(state) });
+  }
+  return finish("OK", { endState: "budget" });
 }

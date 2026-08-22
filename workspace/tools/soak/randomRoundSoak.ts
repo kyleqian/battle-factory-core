@@ -18,6 +18,8 @@
 //                      highest-power legal damaging move and declines
 //                      voluntary switches, for deep-streak crash coverage)
 //   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
+//   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
+//   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
 //   --render-every N   call render() every N frames (0 disables; default 8)
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
@@ -26,6 +28,7 @@
 
 import { writeFileSync } from "node:fs";
 import {
+  DEFAULT_STALL_FRAMES,
   resolveMaxFrames,
   runSeed,
   type RunOptions,
@@ -53,6 +56,10 @@ function main(): void {
   }
   const maxFramesFlag = getFlag("--max-frames");
   const maxFrames = resolveMaxFrames(policy, maxFramesFlag !== null ? Number(maxFramesFlag) : undefined);
+  const stallFramesFlag = getFlag("--stall-frames");
+  const stallFrames = stallFramesFlag !== null ? Number(stallFramesFlag) : DEFAULT_STALL_FRAMES;
+  const maxRoundsFlag = getFlag("--max-rounds");
+  const maxRounds = maxRoundsFlag !== null ? Number(maxRoundsFlag) : undefined;
 
   let seeds: number[];
   if (singleSeed !== null) {
@@ -73,6 +80,8 @@ function main(): void {
     verbose,
     policy,
     stopAtFirstActionMenu: milestone,
+    stallFrames,
+    maxRounds,
   };
   const results: SeedResult[] = [];
   const startedAt = Date.now();
@@ -94,7 +103,8 @@ function main(): void {
         for (const action of result.lastActions ?? []) console.log(`    ${action}`);
       }
     } else {
-      console.log(`${head}  stuck at ${result.hangSurface}${depthSuffix}`);
+      const decidedSuffix = result.endState ? ` (decided: ${result.endState})` : "";
+      console.log(`${head}  stuck at ${result.hangSurface}${decidedSuffix}${depthSuffix}`);
       if (verbose) {
         for (const action of result.lastActions ?? []) console.log(`    ${action}`);
       }
@@ -143,8 +153,27 @@ function main(): void {
   console.log(`carry >= 7  (challengeNum >= 1): ${reachedCarry(7)}/${results.length}`);
   console.log(`carry >= 14 (challengeNum >= 2): ${reachedCarry(14)}/${results.length}`);
   console.log(`carry >= 21 (challengeNum >= 3): ${reachedCarry(21)}/${results.length}`);
+  console.log(`carry >= 28 (challengeNum >= 4): ${reachedCarry(28)}/${results.length}`);
   console.log(`deepest carry anywhere: ${deepestCarry >= 0 ? deepestCarry : "n/a"}`);
   console.log(`deepest battle-depth anywhere: ${deepestBattleDepth >= 0 ? deepestBattleDepth : "n/a"}`);
+
+  // OK breakdown: "budget" (frame budget reached while still progressing)
+  // vs. "max-rounds" vs. a genuine round/milestone outcome (ISSUES #104
+  // retune, PROGRESS ~1368) — cheap since it only re-groups results already
+  // in memory.
+  const okByEndState = new Map<string, number>();
+  for (const result of results) {
+    if (result.outcome !== "OK") continue;
+    const key = result.endState ?? "unknown";
+    okByEndState.set(key, (okByEndState.get(key) ?? 0) + 1);
+  }
+  if (okByEndState.size > 0) {
+    console.log("");
+    console.log("=== OK breakdown ===");
+    for (const [key, count] of [...okByEndState.entries()].sort((a, b) => b[1] - a[1])) {
+      console.log(`  ${key}: ${count}`);
+    }
+  }
 
   const ranked = [...bySignature.entries()].sort((a, b) => b[1].length - a[1].length);
   for (const [signature, list] of ranked) {

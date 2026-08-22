@@ -5,6 +5,46 @@ full history regardless.
 
 ---
 
+## R48 — [supervised session, 2026-08-15] **M47 Battle Script Pain Split leaf + green checkpoint**
+
+- **State:** `rust-main` = current master `d23e6e3a` plus verified Pain Split
+  worker `4aa27ce8` and metadata-ratchet repair `d69b464d`. The complete pure
+  `battleScriptPainSplitOpcode.ts` registration/state/control projection is
+  native and wasm32-compilable; no ABI or adapter surface was widened. The
+  session reached a committed green checkpoint and then continued.
+- **Did:** ported exact singleton registration and instruction-shape checks,
+  instruction-before-attacker-before-target error order, target-Substitute
+  no-write failure with late label resolution, and the successful u16 HP
+  average. Success writes only `painSplitHp = targetHP - average`,
+  `battleMoveDamage = attackerHP - average`, and target
+  `specialStatus.shellBellDmg = 0xffff`. Canonical TypeScript execution
+  supplies **922 cases**: the complete **625** optional-selector matrix,
+  **196** endpoint/parity/sign arithmetic pairs, packed Substitute edges,
+  ordered errors, full signed scratch/status siblings, repetitions, and
+  **13** exact registration cases. Corpus sha256
+  `636cff5a1ac7934a7e9aea36eabe93d69092a54648665dfc5791d91f03dc8f3a`.
+- **Next:** at the next session, merge current master, recheck active work, and
+  select another conflict-free pure Battle Script leaf. M7c opponent
+  generation still waits on canonical TS live generation; main walk-up and
+  animation moving targets remain excluded.
+- **Notes:** Terra/max implementation worker plus one Sol/high audit-repair
+  commit. Supervisor found and closed the initially missing independent corpus
+  metadata ratchet, audited decomp/dispatch/macro/single script site, widths,
+  shape and role ordering, substitute write set, signed averaging, sibling
+  preservation, and repetitions; regenerated twice byte-identically
+  (canonical corpus **5,351,849 bytes**; generated file **12,583,953 bytes**,
+  sha256
+  `beaff9112bc43ec7f0821bc0c3eee40c4b72dea9391d1c9755ebbdc61771f1fb`;
+  generator **50,220 bytes**, sha256
+  `585a963bbb61adc0cce3c0879ecda9c64af15b176b7cfc1ae73cdb1480468aef`).
+  Final cargo is **973/973**, fmt and strict Clippy pass, and wasm32 release is
+  **497,717 bytes**, sha256
+  `e9f227f2162fddfc8592cff07629856837ce5661f4f6efe5e3dc90c400a20c37`.
+  Final npm is green at **1,029 files / 9,870 passed / 223 skipped**; build is
+  green at **677 modules**. Wind-down soaks are vanilla **20/20 OK** and full
+  policy **60/60 OK**, both with zero crashes and zero hangs. Scope stayed
+  inside `core-rs/**`; no unsupported barrier or Rust deferral was added.
+
 ## R47 — [supervised session, 2026-08-15] **M46 Battle Script half-health heal setup leaf**
 
 - **State:** verified `Cmd_tryhealhalfhealth` worker `341caa2b`; the complete

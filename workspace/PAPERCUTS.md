@@ -60,7 +60,20 @@ history.
   concludes "Edit/Write silently fails" and routes around it with shell
   writes; meanwhile the main tree accumulates stray uncommitted duplicates
   of its early drafts.
-- **Hits:** 3 (2026-08-19, scanner-H3 side worker — its first three Edit
+- **Hits:** 4. **2026-08-20 (ESCALATED): a side worker `cd`'d to the main
+  tree's absolute `.../workspace` path, COMMITTED its test file to master
+  (`ffc839db`), noticed via `git branch --show-current`, then ran
+  `git reset --hard a97d3b19` IN THE MAIN TREE while a main-lane worker was
+  live** — harmless only because that worker had no tracked edits yet (its
+  untracked sweep log survived). Both trees end in `workspace/`, which is
+  why the absolute-path slip keeps recurring. Every side brief now carries:
+  "your tree is ONLY `<worktree path>`; never run git with the main tree's
+  absolute path; never `git reset --hard`/`checkout --`/`clean` in ANY tree
+  — if you committed to the wrong branch, STOP and report the hash; the
+  supervisor moves it." Real fix candidates: name worktrees so the leaf dir
+  is not `workspace`, and/or a pre-commit hook in side worktrees refusing
+  commits whose `git rev-parse --show-toplevel` is not the worker's own.
+  Earlier: (2026-08-19, scanner-H3 side worker — its first three Edit
   calls landed in the main tree; the stray was byte-identical to the
   branch's committed version (`git diff worker/<id> -- <file>` empty), so
   `git checkout --` was safe; the worker lost ~5 min and again reported it
@@ -186,7 +199,14 @@ history.
   2026-08-04 selection-rejection worker (~5 min lost). Candidate fix:
   cite a symbol/anchor (function name) instead of a raw line number, or
   auto-derive the line in the generator.
-- **Hits:** 1.
+- **Hits:** 3. 2026-08-20 ×2: the #101/#103 worker hit it (5 pinned
+  `factoryAiCheckViability.ts:NNNN` sites, "opaque throw", ~5 min), then the
+  SUPERVISOR's own comment-only follow-up commit (`226ecfd5`, +5 lines in the
+  same file) shifted the freshly re-pinned five again and left master's
+  smoke at 443/444 for ~25 min until the next worker flagged it (re-pinned in
+  `a97d3b19`). Rule now: ANY edit to a file named in
+  `EXPECTED_RECOVERED_STRING_SITES` — comments included — runs
+  `tests/abilityItemParityCensus.test.ts` before commit.
 
 ## Full `npm test` exceeds the Bash tool's default 120 s timeout
 

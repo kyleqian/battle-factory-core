@@ -1,3 +1,819 @@
+## 1368 — [main worker, 2026-08-20] **#105 FIXED: STRINGID_PKMNCHANGEDTYPE `messageLines` case added (Conversion/Conversion 2/Camouflage); soak seed 40 now runs to an honest OK (`1df9dcb6`)**
+
+- **State:** `src/engine/battleResolutionPresentation.ts` +
+  `src/engine/factoryBattleScriptFullTurnDecision.ts` (fix),
+  `tests/presentationStringIssue105.test.ts` (new), `ISSUES.md` (#105
+  deleted, fully fixed). Commit `1df9dcb6`. `npm test` 1080 files/10177
+  passed (44/223 skipped, unchanged), `npm run build` and `npm run
+  typecheck` green.
+- **Did:** `BattleScript_EffectConversion`/`Conversion2`/`Camouflage`
+  (`data/battle_scripts_1.s:664,1282,2805`) all print
+  `STRINGID_PKMNCHANGEDTYPE` ("{B_ATK_NAME_WITH_PREFIX} transformed\ninto
+  the {B_BUFF1} type!") after their own already-ported type-change opcode
+  (`battleScriptTypeChangeOpcode.ts`, which already records the chosen type
+  into `rulesContext.battleTextBuff1Type`); none reassign selectorRoles, so
+  BS_ATTACKER stays the move's own still-current user. Wired the
+  substitution in `factoryBattleScriptFullTurnDecision.ts`'s `prepareMessage`
+  ternary (`TYPE_DISPLAY_NAMES[battleTextBuff1Type]`, the same
+  `gTypeNames`-derived table `STRINGID_PKMNCHANGEDTYPEWITH`/Color Change
+  already uses) and added the `messageLines` case. Pinned in
+  `presentationStringIssue105.test.ts` (real player CONVERSION,
+  red-verified via `git stash` — reproduced the exact soak crash string
+  pre-fix). **Seed 40 (original repro): OK budget, 1,000,000f, 24.9s,
+  carry<=21 depth<=21** — no crash. Neighbourhood `winning --seeds 38:44`:
+  **OK 6, CRASH 0, HANG 0**.
+- **Sibling check:** grepped all 4 real-source `PREPARE_TYPE_BUFFER(gBattleTextBuff1,
+  ...)` call sites — `Cmd_tryconversiontypechange`,
+  `Cmd_settypetorandomresistance` (2 sites), `Cmd_settypetoenvironment` all
+  feed `STRINGID_PKMNCHANGEDTYPE` (now fixed); Color Change's
+  `ABILITYEFFECT_ON_DAMAGE` branch (`battle_util.c:2761`) feeds
+  `STRINGID_PKMNCHANGEDTYPEWITH`, which already had a resolver. No
+  remaining gaps.
+- **Emitter seed 40 hit:** verified in a throwaway worktree at the pre-fix
+  parent commit — turn 24 crashes right after the player confirms FIRE
+  BLAST (move 126); the type-change move that actually triggers
+  `STRINGID_PKMNCHANGEDTYPE` belongs to the AI-controlled opposing trainer
+  battler for that same turn, which the driver's verbose log does not name
+  (it only echoes the player's own FIGHT confirmations). Not distinguished
+  between Conversion/Conversion2/Camouflage specifically, but immaterial —
+  all three funnel through the identical opcode + STRINGID + fix, confirmed
+  by the seed rerunning clean.
+- **Next:** #104 (engine half: stub continuation for terminal
+  YES/cancel) is the next highest-value open item per 1367. A full honest
+  0:60/0:20/0:60 gate re-sweep is still owed once that lands.
+- **Notes:** no PAPERCUT. Landed inside the 30-min cap.
+
+---
+
+## 1367 — [main worker, 2026-08-20] **#104 driver half FIXED: per-round grace re-arm + honest HANG reporting; unmasked finding — the terminal record-YES/cancel dead end is near-universal, not a deep-chain rarity (`428ba1c4`)**
+
+- **State:** `tools/soak/randomRoundSoakDriver.ts`/`randomRoundSoak.ts` +
+  `tests/randomRoundSoak.test.ts` changed (`428ba1c4`); no `src/`. `npm test`
+  10152/10152 (223 skipped), `npm run build`, `npm run typecheck` all green.
+- **Did:** `terminalGrace` now re-arms on every `graceActive` falling edge (a
+  genuine re-chain) instead of counting down a single cumulative 9,000-frame
+  budget shared across every chained round; expiry with no lobby reached and
+  no re-chain now returns `HANG` + `hangSurface: "factoryTerminal"` + the
+  decided round's own `endState`, instead of a false `OK`. New describe
+  "ISSUES #104 (driver)": (a) seed 328 `winning` @ 260k frames now honestly
+  reports HANG (was the silent-OK carry-21 "wall" of PROGRESS 1365/1366); (b)
+  seed 34 `winning` reaches carry 14 (2 full chained round wins) before its
+  own dead end, proving re-arming doesn't cap chaining depth. Retargeted the
+  pre-existing ISSUES #89 seed-27 pin to `stopAtFirstRoundDecision: true` —
+  it now also hits a #104 dead end at its old 80k budget, unrelated to its
+  own (Baton Pass) concern.
+- **Finding (big):** brief's own pin-(b) premise (seed 4/5 "finish OK" per
+  `docs/soak-depth-measure-2026-08-19.md`) was FALSE once measured honestly —
+  BOTH dead-end on `recordChoice` (`"cancel"`/`"yes"`) with carry 0. Widened
+  to small honest samples post-fix: **`winning` 15/15 HANG@factoryTerminal
+  (seeds 0:15), `vanilla` 10/10 (seeds 0:10), `full` 10/10 (seeds 0:10)** —
+  reduced ranges, not the brief's full 0:60/0:20/0:60, given the 40-min cap
+  (each seed now runs to ITS OWN genuine dead end or the frame budget, not a
+  quick artificial cutoff). The dead end is NOT winning-policy-specific or
+  win-only: `advanceFactoryTerminalRecordPrompt` is shared machinery for
+  lost rounds too (loss presentation carries the same `recordChoice` field),
+  and the terminal's random A/B/UP/DOWN walk (shared across all 3 policies)
+  lands on YES/cancel with near certainty given enough presses across enough
+  rounds. Also confirmed structurally: `lobbyFreeRoam` is architecturally
+  unreachable via decline under the driver's default `generated-orchestrator`
+  route (continuous-play chaining always re-chains a "no" straight into a
+  fresh draft, `core.ts:~837-843`) — so every historical non-milestone,
+  non-`stopAtFirstRoundDecision` "OK" sweep result, at ANY policy, was always
+  a grace-expiry artifact, never a genuine reach of the Lobby. ISSUES #104
+  trimmed to its (now clearly-scoped, high-value) engine-half remainder.
+- **Next:** engine half of #104 (stub continuation for YES/cancel, RECORD is
+  stub-only per the 2026-08-05 decision) is now the highest-value open item —
+  fixing it should turn most of the sample above into genuine OKs at the
+  Lobby (well, still capped by continuous-play chaining re-entering a draft
+  instead — the decline path is unaffected, only yes/cancel gain a
+  continuation). A full honest 0:60/0:20/0:60 gate re-sweep is still owed
+  once that lands; today's reduced samples are real numbers, not a stand-in.
+- **Notes:** no PAPERCUT. Time ran over the 40-min soft cap (~55 min) — the
+  brief's pin-(b) seeds turned out to require live investigation (a wrong
+  premise, not a typo) before an honest alternative could be written, and
+  the full `npm test` run alone took ~3.3 min; landed everything green
+  rather than cut the investigation short and risk a dishonest pin.
+
+---
+
+---
+
+## 1366 — [supervisor fold, 2026-08-20] **Carry-21 "wall" is a driver-masked engine dead end (#104: terminal record-YES/cancel never continues; soak grace cumulative + expiry reported OK) — found by supervisor probe; switch lever C2 + #104-refutation test folded (`3fa78a98`)**
+
+- **State:** master = 1365 sweep docs + side C2 (`5b31b1ea`: `winning`
+  switches only out of a true-immunity wall with a ≥50%-HP bench answer;
+  38/13/2 of 60 vs 36/10/0 decline-only, 30 switches) + side refutation
+  pin (`bc8acc23`, end-turn skip claim REFUTED, later battler keeps its
+  tick). Union: soak file + new test 33/33, smoke 444/444. PAPERCUTS bumped
+  (`fdf46ebb`: absolute-path commit on master + reset --hard by a side
+  worker; pinned-line census citations, incl. the supervisor's own hit).
+- **Finding:** all three deepest 0:480 seeds (125/328/409) stop at
+  `roundComplete carry<=21`. Probe (scratch print at grace expiry, reverted):
+  `factoryTerminal.recordChoice:"yes"`, no `declineFarewellReleaseAge`, no
+  re-chain; grace 9k→90k changes only the frame count. Driver's
+  `terminalGrace` is set once and never re-armed → cumulative across
+  re-chains (~1k each) → expiry reported OK. Filed **#104** (engine + driver
+  halves). So "carry ≥ 28 not reached" (1365) is NOT evidence about the AI
+  tier; the depth instrument was capped at ~3 re-chains since M-A.
+- **Next:** main: driver half of #104 (per-round grace, HANG on stall) +
+  pin; side: engine half (stub continuation for YES/cancel per the RECORD
+  stub-only decision) + pin; then one more 0:480 sweep on the union for the
+  carry ≥ 28 tier. Withheld: draft-by-strength (`e9a415a7`) pending n≥180.
+- **Notes:** lesson banked — a sweep's "deepest seed stops at X" claim needs
+  the END SURFACE of those seeds inspected before it is attributed to game
+  difficulty; three sweeps attributed an instrument cap to the AI.
+
+---
+
+Older entries: see `PROGRESS-archive.md`.
+
+## 1365 — [main worker, 2026-08-20] **M-B FINAL RE-SWEEP DONE: `winning` 0:480, 0 CRASH/0 HANG across the doubled range — 3 seeds reach the full width of the carry-21 challenge (depth 27, new deepest), carry ≥ 28 not yet reached; #90/#154/#36 all confirmed clean**
+
+- **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20-final.{md,log}`
+  (new — the milestone's final acceptance artefact), `PROGRESS.md`/
+  `PROGRESS-archive.md` (this entry; 1360/1362 archived to keep the ledger
+  at ~3). No `src/`/`tests/`/`tools/soak/` change — the sweep found zero new
+  crash/hang signatures, so there was nothing to triage or fix.
+- **Did:** swept `winning` seeds 0:480 (24×20-seed chunks, `--render-every
+  0`, six batches of 4 parallel foreground processes) at master HEAD
+  `a97d3b19` — the completed M-B tree (step 2a, swap-decline `781c8827`,
+  #99/#100/#101/#103 fixes all folded). **480/480 OK, 0 CRASH, 0 HANG** (vs.
+  238/240 OK, 2 CRASH in the 0:240 sweep that found #101/#103 — both fixes
+  hold at double the range). carry≥7 205/480 (42.71%), carry≥14 54/480
+  (11.25%), **carry≥21 5/480 (1.04%) — seeds 125, 271, 328, 406, 409**
+  (vs. 1/240 (0.4%) previously — more than double the rate). carry≥28
+  0/480 — not reached.
+- **Deepest:** carry 21 (5 seeds, tied), battle-depth **27** (seeds 125,
+  328, 409 — beats the prior deepest of 25 by two battles: the **full
+  7-battle width** of the carry-21 challenge, not just partway). Verbose-
+  traced all three via each seed's `draft confirm: YES` markers (a more
+  reliable round-boundary marker than the prior doc's "open menu on slot 1"
+  shorthand, which doesn't fire for every seed). Seed 328 is unambiguous —
+  its own final `roundComplete` directly is the carry-21 round's result: it
+  **wins the entire challenge outright** (first seed ever observed to do
+  so). Seeds 125 and 409 hit the same 21/27 ceiling but *lose* battle 7 of
+  that round instead (inferred from the ceiling itself: a win there would
+  read `factoryWinStreak=28`/depth≥28 for the remainder of that seed's run,
+  which never appears in either). **Headline: carry ≥ 28 — the full
+  `CHECK_BAD_MOVE` + AI-triad tier — is not reached in this sweep; the
+  closest approach is exact and three-seeds-deep: battle 7, the last battle,
+  of the carry-21 challenge**, won once and lost twice.
+- **Named-seed check:** #101 (seed 90), #102 (seed 154), #103 (seed 36) all
+  in-range and clean — `roundLost carry<=0 depth<=3`, `roundLost carry<=0
+  depth<=5`, `roundComplete carry<=14 depth<=20` respectively. #102 still
+  does not reproduce (consistent with 1364's diagnosis-only finding); left
+  open in `ISSUES.md` as-is (out of this step's scope).
+- **Gates:** docs-only change, so `npm run test:smoke` run instead of full
+  `npm test` per the brief's own rule; 444/444 green (baseline check before
+  the sweep and unchanged after, since nothing under `src/`/`tests/`
+  changed). No `npm run build` needed.
+- **Next:** M-B's own queue is now empty from this worker's side — bar
+  reached and reconfirmed at 2x range, zero live crashes, #102 diagnosis-
+  only and out of scope. Supervisor closes M-B per ROADMAP.md convention
+  (this worker does not edit ROADMAP.md). If a future step wants to chase
+  carry≥28, the 328/125/409 chain above is the exact jumping-off point —
+  battle 7 of the carry-21 round is the wall to push past.
+- **Notes:** no PAPERCUT. Time discipline: 24-chunk sweep (6 parallel
+  batches) landed by ~minute 22; the round-chain forensics for the
+  deepest-2 write-up (goal 2) took longer than planned (~15 min) working
+  out that `maxCarriedWinStreak`/`maxBattleDepth` are independent
+  whole-run peaks, not paired to the same instant, and that "open menu on
+  slot 1" isn't a reliable round-boundary marker — landed the doc inside
+  the 45-min cap but with less slack than the brief's own 32-min
+  chunk-launch cutoff implied.
+
+---
+
+## 1363 — [main worker, 2026-08-20] **M-B step 4 triage DONE: ISSUES #101 and #103 both fixed + pinned; both soak repros now reach honest terminals; neighbourhood sweeps clean**
+
+- **State:** `src/engine/battleResolutionPresentation.ts` (#101 fix),
+  `src/engine/factoryAiCheckViability.ts` (#103 fix),
+  `tests/presentationStringIssue101.test.ts` (new),
+  `tests/factoryAiCheckViability.test.ts` (2 new cases),
+  `tools/report/ability-item-parity-census.ts` (5-line-citation ratchet
+  moved +15 to track #103's inserted comments — doc output unchanged, diffed
+  byte-identical), `ISSUES.md` (#101, #103 deleted, fully fixed, no
+  remainder), this entry. Commits `ed66e000` (#101), `1403f462` (#103).
+- **Did — #101:** `STRINGID_PKMNTOOKAIM` (`BattleScript_EffectLockOn`,
+  `data/battle_scripts_1.s:1286-1297`) had no `messageLines` case.
+  Confirmed `Cmd_setalwayshitflag` is already ported
+  (`battleScriptSetalwayshitflagOpcode.ts`) and its always-hit flag is
+  consumed by the accuracy chain, so `EFFECT_LOCK_ON` is fully executable —
+  this was a pure missing-case gap (same shape as `STRINGID_PKMNIDENTIFIED`/
+  `BattleScript_EffectForesight`), not an unmodeled effect; the ISSUES
+  entry's "zero references" claim was about the string only. Added the case
+  (`B_ATK_NAME_WITH_PREFIX`/`B_DEF_NAME_WITH_PREFIX`, unchanged roles).
+  Red-verified via `git stash`. Soak seed 90 no longer reaches the original
+  crash frame at all (the intervening `781c8827`/`db5b2b27` swap-decline
+  fold diverged its RNG path before that point) — pinned directly with a
+  real LOCK ON turn instead; fix is unconditional regardless of seed 90's
+  new trajectory.
+- **Did — #103:** `runCvDefenseUp`/`runCvSpDefUp` (`AI_CV_DefenseUp`/
+  `AI_CV_SpDefUp`, `data/battle_ai_scripts.s:915-942/986-1013`) threw on the
+  target's last-used move id `0xFFFF` (`MOVE_UNAVAILABLE`). Traced the real
+  mechanism: `gLastMoves[gBattlerTarget]` becomes `MOVE_UNAVAILABLE` when the
+  target's move was *blocked* last turn (flinch/full paralysis/frozen/
+  still-asleep/recharge/Truant loafing — `battle_script_commands.c:4405-
+  4412`'s `!HITMARKER_OBEYS` branch), confirmed disobedience itself never
+  fires in the Factory (`IsMonDisobedient` short-circuits on
+  `BATTLE_TYPE_FRONTIER`) so the blocked-move paths are the only route. On
+  hardware `Cmd_get_move_power_from_result` then indexes
+  `gBattleMoves[0xFFFF]`, an out-of-bounds ROM read with no byte-faithful
+  value pokeemerald's own source computes — degraded it the same way this
+  file's other CV handlers already treat an unresolved
+  `target.lastUsedMoveId` (`AI_CV_MirrorCoat`'s `?? 0` power read): power 0,
+  the script's own least-consequential branch. Red-verified via `git
+  stash`. Soak seed 36 now runs to `roundComplete carry<=14 depth<=20`
+  (was a crash at battle 7 turn 3).
+- **Neighbourhood:** `--seeds 30:40` **10/10 OK**, 0 CRASH, 0 HANG (deepest
+  carry 14, depth 20); `--seeds 85:95` **10/10 OK**, 0 CRASH, 0 HANG
+  (deepest carry 7, depth 13).
+- **Gates:** full `npm test` **1,070 files (44 skipped) / 10,140 tests
+  passed (223 skipped)**; `npm run build` green (7.48s vite stage);
+  `npm run typecheck` clean at each edit; `npm run test:smoke` 444/444
+  (caught the census-ratchet line shift, fixed in the same commit).
+- **Next:** #102 (`Cmd_switchhandleorder` no decided `monToSwitchIntoId`,
+  seed 154) is the one remaining M-B step-4 queue item — separate step per
+  the brief's scope. After that, a final 0:240 `winning` re-sweep with
+  every folded lever (2a, swap-decline, #99/#100/#101/#103 fixes) to
+  re-measure the carry≥21/28 rate against 1361's baseline.
+- **Notes:** no PAPERCUT. Time discipline: #101 investigation+fix+pin
+  ~12 min, #103 investigation+fix+pin ~20 min (the ROM-mechanism trace —
+  disobedience vs. blocked-move paths — took longer than expected), census
+  ratchet fix ~3 min, neighbourhood+full-suite+build+docs ~15 min;
+  landed inside the 50-min cap.
+
+---
+
+## 1364 — [main worker, 2026-08-20] **M-B step 4 triage on #102: no fix, diagnosis-only landed — repro is gone on HEAD, one strong lead found and written up, one path ruled out**
+
+- **State:** docs-only session. `ISSUES.md` #102 rewritten (root-cause
+  paragraph replaced with today's findings; entry kept open, not deleted).
+  No `src/`/`tests/` change. This entry.
+- **Did:** seed 154 no longer reaches the original crash frame post-#101/#103
+  (RNG trajectory shifted); reran the brief's fallback `--seeds 150:160`
+  (10/10 OK), then the full original `--seeds 0:240` (240/240 OK, 0 CRASH,
+  0 HANG) — not currently live-reproducible. Traced
+  `BattleScript_HandleFaintedMon`'s script and the TS opcode ports and
+  **ruled out** the straightforward paths: `openpartyscreen`/`switchhandleorder`
+  are adjacent with nothing between them and share the same
+  `selectorRoles.fainted` resolution; the opponent/AI branch of
+  `Cmd_openpartyscreen` (`battleScriptOpenPartyScreenOpcode.ts:201-268`)
+  never halts; the same-action double-KO + player-resume shape (Destiny
+  Bond-class) is already pinned green
+  (`tests/battleScriptFaintedActionsOrchestration.test.ts:290-331`).
+  **Strongest remaining lead** (source-confirmed, not yet tied to this exact
+  crash): `runDoBattlerEndTurnEffects` (`battleEndTurnOrchestration.ts:1497+`)
+  bails its *entire* per-battler loop (not just the fainted battler's own
+  remaining ticks) on the first battler that faints from an end-turn tick;
+  the sole end-turn resume tag `"finish-end-turn-after-faints"`
+  (`factoryBattleScriptFullTurnDecision.ts:2283`) always resumes at
+  `runFutureAttacksAfterFaints`, never re-entering
+  `runDoBattlerEndTurnEffects` for battlers it hadn't reached yet — a real,
+  untested (`grep` for its resume tag/function across `tests/*.ts` is empty)
+  divergence that silently skips a later battler's own end-turn residual
+  effects for that turn. This explains a missed-damage class of bug on its
+  own; I could not derive a clean single hop from it to the *specific*
+  "no decided monToSwitchIntoId" crash message within this session's time.
+- **Neighbourhood:** `--seeds 150:160` **10/10 OK**, 0 CRASH, 0 HANG.
+- **Gates:** docs-only change, so `npm run test:smoke` run instead of full
+  `npm test` per the brief's own rule; 444/444 green. No `npm run build`
+  needed (no `src/`/`tests/` edits).
+- **Next:** (1) write a Tier-1 test staging two battlers with pending
+  end-turn ticks (both poisoned, earlier-ordered one faints and pauses) to
+  confirm/fix the `runDoBattlerEndTurnEffects` skip above — likely needs a
+  persisted per-battler-loop resume cursor (new shared boundary shape, not a
+  small patch). (2) If a live seed reproducing #102's exact message turns
+  up, capture full context (battler order, fault cause/order) before
+  generalizing a fix. (3) M-B step-4 queue is otherwise empty (#101/#103
+  done, #102 now diagnosis-only) — next up per 1363 is the final 0:240
+  `winning` re-sweep with every folded lever, unless the supervisor
+  redirects.
+- **Notes:** no PAPERCUT. Spent longer than the 15-min diagnose budget
+  (~40 min) because the brief's live-repro path was exhausted first (its own
+  fallback instruction), then the source trace went deep enough to rule out
+  the obvious mechanisms and find a real secondary bug before time ran out —
+  landed the docs-only deliverable rather than rush an unverified `src/` fix.
+
+---
+
+## 1362 — [supervisor fold, 2026-08-20] **M-B bar REACHED (sweep 1361: carry ≥ 21 by play, seed 99); swap-decline lever folded (`781c8827`); draft heuristic WITHHELD; #103 filed; ROADMAP M-B status written**
+
+- **State:** master = sweep docs (1361) + side part-B rung 1 (`db5b2b27`,
+  `winning` declines every swap; union soak file 23/23, smoke 444/444).
+  Supervisor independently reran seed 99 at HEAD: `roundLost carry<=21
+  depth<=25` — the milestone's acceptance seed reproduces.
+- **Did:** verified the side part-B worker (26/26 pins in its worktree):
+  rung 1 = 36/10/0 of 60 vs 34/10/0 baseline → folded; rung 2 (draft by
+  BST+STAB-power+coverage, `e9a415a7`) = 25/9/0 → **withheld** (no evidence
+  for it at n=60; branch `worker/side-20260820-113153` kept for a larger-
+  sample re-measure, not orphaned by accident). Its swap-decline run exposed
+  `factory-ai-check-viability: unknown last-used move 65535` (seed 36,
+  carry 14 / depth 20) — re-reproduced at HEAD, filed **#103** (0xFFFF =
+  MOVE_UNAVAILABLE sentinel lead). ROADMAP M-B block now carries a status
+  paragraph (bar reached; step 4 queue #101/#102/#103; carry ≥ 28 stretch).
+- **Next:** main: fix #101 + #103 (both small, source-cited, pinned), then
+  #102 (diagnostic), then a final 0:240 re-sweep with every folded lever.
+  Side (in flight): walled-matchup switch heuristic on the rung-1 base.
+- **Notes:** host load ~18 on 16 cores with three supervisors live — side
+  briefs now cap parallel soaks at 2. Issue numbering: the sweep worker took
+  #101/#102 while the sentinel crash was drafted as #101 → renumbered #103.
+
+---
+
+## 1360 — [main worker, 2026-08-20] **ISSUES #100 FIXED: STRINGID_NATUREPOWERTURNEDINTO's missing `{B_CURRENT_MOVE}` resolver added; sibling-gap sweep found + fixed one more (STRINGID_PKMNWASDEFROSTEDBY), soak seed 15 now runs to an honest terminal**
+
+- **State:** `src/engine/battleResolutionPresentation.ts` (two new
+  `messageLines` cases), `tests/presentationStringIssue100.test.ts` (new, 3
+  tests), `ISSUES.md` (#100 deleted), `PROGRESS.md`/`PROGRESS-archive.md`
+  (this entry; 1356 archived to keep the ledger at ~3). No `tools/soak/`
+  change (side lane owns it this round, per the brief).
+- **Did:** `Cmd_callenvironmentattack` (`battle_script_commands.c:9108-9115`)
+  overwrites `gCurrentMove` to the terrain-selected move (SWIFT in the
+  Factory's `BATTLE_ENVIRONMENT_BUILDING`) and falls straight into
+  `printstring STRINGID_NATUREPOWERTURNEDINTO` in the same script frame
+  (confirmed the TS `callenvironmentattack` handler's `call-stack` transition
+  already mirrors this exactly) — `messageLines` had no case wiring that
+  placeholder. Added one, sourced from `actionSnapshot.currentMove`, mirroring
+  the ~14 existing `B_CURRENT_MOVE` sites. Swept every STRINGID referencing
+  `{B_CURRENT_MOVE}` (18 total) for the same gap: `STRINGID_PKMNCANTUSEMOVE-
+  SEALED` is the already-documented Imprison DEAD-carrier exclusion (ISSUES
+  #72) — left alone; the other 16 already had cases. Found one genuine
+  second gap outside that grep, by inspection of `BattleScript_MoveUsedUnfroze`
+  (`gGotDefrostedStringIds`): `STRINGID_PKMNWASDEFROSTEDBY` (frozen attacker
+  self-thaws via a Thaw Hit move, e.g. Flame Wheel) had no case either —
+  fixed the same way. Its row-0 sibling `STRINGID_PKMNWASDEFROSTED2` (plain
+  20%-roll natural thaw, no move named) turned out to already resolve
+  correctly via `messageLines`' generic tail fallback (`lastMoveAttacker` is
+  updated from the current event's own `actionSnapshot` before the fallback
+  runs, so it's not stale) — no fix needed there; pinned anyway as a
+  regression check, and the redundant explicit case was deliberately *not*
+  added, matching the file's own convention of leaving generically-covered
+  IDs alone.
+- **Pin:** `tests/presentationStringIssue100.test.ts`, 3 tests, real staged
+  full-turn kernel scenarios (`createFactoryFullTurnBattleState` +
+  `submitFactoryFullTurnDecision`, the `presentationStringIssue72Batch8`
+  pattern) — NATURE POWER reached directly (no METRONOME roll needed, same
+  `EFFECT_NATURE_POWER` script runs either way); Flame Wheel-while-frozen for
+  the defrost-by-move fix; Splash-while-frozen at `rngSeed 3` for the
+  natural-thaw regression check. Red-verified against pre-fix code via
+  `git stash` — exactly the 2 fix-needing tests failed with the placeholder
+  error, the regression-check test passed both before and after, as
+  expected. `npm run test:smoke` 444/444 green.
+- **Seed 15 reproved:** `node --experimental-strip-types
+  tools/soak/randomRoundSoak.ts --seed 15 --policy winning --verbose
+  --render-every 0` → `seed 15 OK b7 t20 222002f 5.0s roundComplete
+  carry<=7 depth<=7` (was a crash at battle 5 turn 5 pre-fix). Neighbourhood
+  check `npm run soak -- --policy winning --seeds 10:20 --render-every 0`:
+  **10/10 OK**, 0 CRASH, 0 HANG (39.7s wall; carry>=7 7/10, carry>=14 2/10,
+  deepest carry 14).
+- **Gates:** full `npm test` **1,069 files (44 skipped) / 10,136 tests
+  passed (223 skipped)**; `npm run build` green (`tsc -b && vite build`,
+  7.80s vite stage). `npm run typecheck` clean at each edit.
+- **Next:** M-B step 2 (raise `winning`'s win rate toward carry>=21) can
+  proceed from a clean baseline — no known engine crashes block it as of
+  this entry. The side lane's soak-driver work continues independently.
+- **Notes:** no PAPERCUT this session. Time discipline: investigation +
+  both fixes + pin landed ~30 min in; seed-15 reproof + 10:20 neighbourhood
+  check ~6 min; full-suite (backgrounded past the 120s foreground cap,
+  polled to completion in the same turn, ~2:48 wall) + build (~1:31 wall) +
+  docs ~10 min.
+
+---
+
+## 1361 — [main worker, 2026-08-20] **M-B step 3 DONE: `winning` 0:240 deep sweep — first-ever carry >= 21 seed on the post-#99/#100-fix + 2a tree (depth 25, seed 99), confirmed genuine chained play; two new engine crashes filed (#101, #102), no HANG/budget issue**
+
+- **State:** docs-only session. `docs/soak-deep-sweep-2026-08-20.{md,log}`
+  (new), `ISSUES.md` (#101, #102 filed), `PROGRESS.md`/`PROGRESS-archive.md`
+  (this entry; 1358/1357 archived to keep the ledger at ~3). No `src/`,
+  `tools/`, or `tests/` change — both crashes found are genuine `src/engine`
+  gaps, filed per the standing convention rather than fixed same-step.
+- **Did:** swept `winning` seeds 0:240 (12×20-seed chunks, `--render-every 0`,
+  3 batches of 4 parallel foreground processes) over the union of ISSUES #99
+  (soak driver swap-offer fix), #100 (NATURE POWER string resolver), and
+  M-B step 2a (type-aware fight-move choice) — the first sweep of that union.
+- **Result:** **238/240 OK, 2 CRASH, 0 HANG.** carry>=7 105/240 (43.75%),
+  carry>=14 33/240 (13.75%), **carry>=21 1/240 (0.4%) — seed 99**, carry>=28
+  0/240. Deepest carry 21, deepest battle-depth **25** (seed 99, new
+  all-time deepest) — one battle past 1359's pre-#99-fix 2a-only measure
+  (24). `--verbose` on seed 99 confirms genuine chained play, not an
+  artefact: 3 clean 7-battle round wins (carry 0→7→14→21), then the carry-21
+  round reaches battle 5 before an honest loss re-chains to 0; challengeNum
+  at carry 21 is `floor(21/7)=3`, the `CHECK_BAD_MOVE`-only AI tier
+  (`factoryAiMaskSelection.ts`'s `challengeBelow4` branch) — full AI triad
+  (challengeNum>=4, carry>=28) not reached. Zero HANGs anywhere; highest
+  frame count was 649,579 of the 1,000,000 `winning` budget, so no budget
+  question this round. Since carry>=21 *was* observed in 0:240, the brief's
+  240:360 fallback extension did not apply and was not run.
+- **Triage:** two new, distinct, low-frequency (1/120 each) genuine
+  `[engine/tick]` crashes, neither small/engine-local enough to pin
+  same-step — filed as **ISSUES #101** (seed 90: `STRINGID_PKMNTOOKAIM`,
+  Lock-On/Mind Reader's only printstring, has **no** `messageLines` case at
+  all, and `EFFECT_LOCK_ON` has zero execution-path references anywhere in
+  `src/engine/*.ts` outside AI viability scoring — wider than #100's
+  single-missing-resolver pattern) and **ISSUES #102** (seed 154:
+  `Cmd_switchhandleorder` finds no decided `monToSwitchIntoId` for battler 1
+  after a mid-round forced switch — root cause not narrowed: AI switch-in
+  skip vs. ordering bug vs. the file's own documented unmodeled
+  multi-battler case). No STOP RULE trigger.
+- **Gates:** no `src/`/`tests/` change this session, so `npm run test:smoke`
+  once is the finish requirement per the brief — 444/444 green (run at
+  session start as the baseline check; nothing changed engine-side since).
+- **Next:** M-B step 4 (triage/fix #101 and #102, or continue widening
+  `winning`'s reach) — the side lane's two more `winning` levers (decline
+  swaps, draft by strength) are still in flight for a second sweep to
+  compare against this one's baseline numbers.
+- **Notes:** no PAPERCUT this session. Time discipline: all 12 chunks
+  (3 batches of 4 parallel foreground processes) landed by ~20 min; seed 99
+  verbose confirmation + both crash triages by ~35 min; docs + ISSUES +
+  PROGRESS by ~45 min, comfortably inside the 55-min cap.
+
+---
+
+## 1359 — [supervisor fold, 2026-08-20] **M-B step 2a folded: `winning` picks fight moves by power × type-effectiveness × STAB (side `ff5e84d6`, merge `82580f0f`) — first-ever carry ≥ 21 seed observed**
+
+- **State:** union of the #99 fix (1358) + side step 2a. Both-sides-additive
+  conflict in `tests/randomRoundSoak.test.ts` resolved by keeping both
+  describes; union checks: soak test file 22/22, smoke 444/444, build green.
+- **Did:** side worker (Sonnet, 26 min) landed `pickWinningFightSlot` (engine's
+  own `applyTypeEffectiveness` + `type-effectiveness.json`; immune/0-power
+  score 0; fallback = old highest-power rule) with 4 Tier-1 pins incl.
+  `full`/`vanilla` byte-identical seeds. Supervisor independently reran its
+  measurement in the worktree (pre-#99-fix tree, like-for-like): `winning`
+  0:60 **25/9/1** at carry ≥ 7/14/21, deepest battle-depth **24** — exact
+  match to the worker's table (before: 26/2/0, deepest 6). Scout doc
+  `docs/soak-winning-loss-analysis-2026-08-20.md` (fold `7f5a9b66`) holds
+  the loss census that motivated it (48.4% of losses ended on a
+  resisted/immune move).
+- **Next:** the union (#99 + #100 + 2a) has not been swept yet — M-B step 3
+  sweep next on main; side lane is landing two more `winning` levers
+  (decline swaps, draft by strength) for a second sweep after.
+- **Notes:** no PAPERCUT. Parallel-lane note: side round 2 launched mid-main-
+  round on `--base 0dd3f36c` and merged only after the main worker exited
+  (code branches never merge under a live main worker).
+
+---
+
+## 1358 — [main worker, 2026-08-20] **ISSUES #99 FIXED: soak driver's swap offer now answered by its own branch; depth re-measured for all three policies — vanilla's apparent carry-14 depth was a swap-accept-bug artifact, `full` moved off its 0/60 floor, `winning` found one new engine crash (#100)**
+
+- **State:** `tools/soak/randomRoundSoakDriver.ts` (fix + additive
+  `RunOptions.onNote` test hook), `tests/randomRoundSoak.test.ts` (new
+  `describe("ISSUES #99 ...")`, 3 tests; one pre-existing strong-route pin
+  corrected — see Notes), `docs/soak-depth-remeasure-2026-08-20.{md,log}`,
+  `ISSUES.md` (#99 deleted, #100 filed), this entry. No other `src/` change.
+- **Did:** `onPostwin`'s continuation-menu branch never cleared
+  `continuationCursorPos` after GO ON was confirmed (engine projection,
+  `src/engine/postwin.ts:899-904`), so it kept matching on every later
+  postwin page — including the dialoguePage-4 swap offer — and answered it
+  with A on the frozen cursor-0 (YES) before the swap-offer branch ever ran.
+  Fix: moved the swap-offer branch above the continuation branch and gated
+  the continuation branch on `dialoguePage === 0` (the engine's own live-menu
+  guard in `acceptPostwinContinuation`). Pinned with 3 new tests (vanilla
+  seed 0 always NO + never enters the swap screen; winning seed 0 logs a
+  swap-offer decision; winning seeds 0-6 show both YES and NO) — ~4.5s
+  combined, well under the 20s per-test timeout.
+- **Before/after (carry >= 7 / >= 14 / >= 21 of 60 seeds, full table +
+  before/after methodology in the doc):**
+  | policy | before OK | before carry>=7/14/21 | after OK | after carry>=7/14/21 |
+  |---|---|---|---|---|
+  | vanilla | 60/60 | 16/3/0 | 60/60 | 21/0/0 |
+  | full | 60/60 | 0/0/0 | 60/60 | 1/0/0 |
+  | winning | 60/60 (recount) | 26/2/0 | **59/60** | 20/4/0 |
+  vanilla's pre-fix carry-14 reach (deepest depth 20) was an artifact of
+  accidentally accepting every swap; post-fix it never exceeds carry 7
+  (deepest depth 10). `full` moved off its 0/60 never-carries floor (1/60).
+- **New crash (not fixed, out of scope):** `winning` seed 15 crashes at
+  battle 5 turn 5 — `STRINGID_NATUREPOWERTURNEDINTO` (METRONOME → NATURE
+  POWER) has no `{B_CURRENT_MOVE}` resolver in
+  `battleResolutionPresentation.ts`. Filed as **ISSUES #100** with repro +
+  mechanism + fix lead; reported honestly as 59/60, not rounded up.
+- **Gates:** standing soak gates rerun post-fix with default rendering:
+  `--policy vanilla --seeds 0:20` **20/20 OK**; `--seeds 0:20` (full,
+  default rendering) **20/20 OK**, cited together with the render-every-0
+  `full` 0:60 measurement run (60/60 OK) for the `full` 0:60 gate per the
+  brief's citation rule. `npm run test:smoke` 444/444 green throughout;
+  full `npm test` and `npm run build` run once at the end (see Notes for
+  the exact counts).
+- **Next:** ISSUES #100 (NATURE POWER string resolver) is a clean, bounded
+  next step — add the missing `B_CURRENT_MOVE` resolver case in
+  `battleResolutionPresentation.ts`'s `messageLines`, mirroring the ~14
+  existing sites, then re-run soak seed 15 winning to confirm green.
+  M-B step 2 (raise `winning`'s win rate toward carry>=21) can now proceed
+  from a clean, bug-free swap-decision baseline.
+- **Notes:** one pre-existing pin ("earns all seven generated wins...",
+  `testPolicy: "strong-route"`) had its literal frame/turn/renderCalls
+  numbers corrected (59,656→40,566 frames, turn 18→5, renderCalls
+  4,397→2,953): strong-route shares vanilla's non-exploring swap semantics,
+  so it now genuinely declines every swap instead of the old bug's
+  accidental accept-every-swap, producing a shorter, different, still-
+  deterministic trajectory (comment explains why in the test file).
+  `PAPERCUT: none this session — the earlier session's swap-offer-log gap
+  (1357's PAPERCUT) is what #99 turned out to be.` Time discipline: fix +
+  pin landed by ~25 min; measurement + gates (parallel foreground shell
+  jobs, ~2.5min + ~6min wall) by ~45 min; full-suite/build run once at the
+  end per the brief.
+
+---
+
+## 1357 — [main worker, 2026-08-20] **M-B step 1 DONE: `full` never wins a round because it's genuinely bad play, not an engine defect — verdict (a). Fight-menu's uniform-over-legality move roll is the dominant lever (ablation 0%→20.0%)**
+
+- **State:** docs-only session (`docs/soak-full-policy-diagnosis-2026-08-20.md`,
+  this entry). Zero `src`/`tools`/`tests` change: `git diff master@{u}..HEAD
+  --stat` for this commit touches only `docs/` + `PROGRESS.md`. Scratch
+  instrumentation (env-var-gated ablation toggles + an opt-in
+  `collectRoundCensus` hook in `randomRoundSoakDriver.ts`, plus a scratch
+  `_scratch_census.ts`) was added, run, then fully reverted
+  (`git checkout -- tools/soak/randomRoundSoakDriver.ts` + `rm` the scratch
+  script) — verified clean before this commit. `npm run test:smoke` 444/444
+  green (confirms the scratch edits were behavior-neutral before revert).
+- **Did:** read `roundController.ts`/`postwin.ts`/`core.ts`/
+  `factoryRoundBattleOrchestrator.ts` first to establish that only a genuine
+  in-battle result sets `round.rules.phase` to `roundLost`/`roundComplete`
+  (RETIRE never touches it — confirmed zero `retire` hits in the
+  orchestrator file), so the census's two watched edges are exhaustive. Then
+  instrumented a per-round-attempt termination census (`full`, seeds 0:30,
+  time-capped down from the brief's 0:60) and a 4-way single-knob ablation
+  (`full`, seeds 0:30 each, draw-count-parity overrides so only the
+  overridden decision's outcome changes, not the RNG stream length).
+- **Result — verdict (a):** census = **108/108 round-attempts (30 seeds)
+  ended in a genuine, fully-fainted honest loss** (`roundLost`,
+  `faintedCount:3`, `hp:[0,0,0]`, every time); RETIRE was never once the
+  actual end cause (rolled+accepted 0/108); zero `roundLost`-with-healthy-
+  party and zero silent-stall cases — no candidate-(b) defect, no ISSUES
+  entry filed. Ablation: **B (fight-menu picks `winning`'s highest-power
+  legal slot instead of a uniform-over-*all 4*-slots roll, legal or not)
+  moves carry>=7 from 0%→20.0% (6/30)** alone — more than a third of the way
+  to `vanilla`'s established 26.7% — while A (no voluntary switches) only
+  reaches 3.3% (1/30), and C (no swap accept) / D (no fight cancel) show
+  **zero** effect (0/30 each). Ablation E (all four combined) **did not run**
+  — time cap; said so explicitly in the doc. One `--seed 21 --verbose`
+  spot-check cross-checked the census tabulation against the raw action log
+  byte-for-byte (battle 3 loss → terminal → fresh draft, matching the
+  `battleIndex:2`/`roundLost` record exactly).
+- **Next:** M-B step 2 ("raise the win rate until carry >= 21 is observed")
+  — ablation B's mechanism (`bestDamagingSlot()`, already implemented for
+  `winning`) is a concrete, cheap, already-measured starting lever, though
+  step 2 owns its own design. Dispatch as the next worker step.
+- **Notes:** `PAPERCUT: seed 21's swap-screen entry (frame 11903) has no
+  preceding "swap offer: YES" ActionLog line even though state.factorySwap
+  was genuinely non-null by then (didn't affect this session's
+  engine-state-based census, which doesn't read that log text; not chased
+  further under the time cap), ~5 min lost confirming it was cosmetic.` Time
+  discipline: the 50-minute cap forced seed ranges down to 0:30 (not 0:60)
+  and dropped ablation E — an honest partial per the brief's own allowance,
+  not a silent shortcut.
+- **Supervisor salvage + correction (same session):** worker cap-killed at
+  50 min (exit 143) after everything was written and the scratch reverted;
+  supervisor re-checked every number against the raw `/tmp/mb-*.log`
+  files (match) and committed. **Correction:** ablation C was a no-op, not
+  a null — the PAPERCUT above IS a driver defect, filed as **ISSUES #99**
+  (swap-offer YES/NO never answered by its own branch; every policy incl.
+  `vanilla` accepts the swap and random-mashes the swap screen). So "swap
+  accept not responsible" is withdrawn; re-measured post-fix in 1358.
+  Side scout (`9b538b73`, folded) independently found #99 and measured
+  `winning`'s losses: 48.4% end on a resisted/immune move; type-aware move
+  choice moved carry>=14 4%→15% (60 seeds) — M-B step 2's first lever.
+
+---
+
+## 1356 — [planning session, 2026-08-19] **DEFERRED D2 ANSWERED: user picks option (b) — make deep play REACHABLE. Milestone M-B authored; supervisor launcher unblocked**
+
+- **State:** planning-layer session, docs only. `ROADMAP.md` (M-B block),
+  `DEFERRED.md` (D2 removed → **zero** `^## D<n> ... OPEN:` headings, verified
+  against `run-supervisor.sh:264`'s exact regex — the launcher will start
+  again), `PROGRESS.md` (this entry). No `src/`/`tools/`/test change; no
+  suites required.
+- **Did:** presented M-A's measured numbers to the user in plain terms and put
+  D2's scope call to them directly. Offered three bounded options: accept and
+  close; make deep play reachable; or first investigate `full`'s 0/60
+  never-wins result. **User picked "make deep play reachable"** — the
+  supervisor's own leaning, and the bounded option, not the open-ended one.
+- **Result — milestone M-B, "the late game gets reached by playing, and
+  survives it."** Bar: a sweep observes carry ≥ 21 (a genuine third
+  consecutive round win, ladder battle 22+) under still-arbitrary-but-legal
+  play, and the depth that opens is swept for crashes. Four ordered steps:
+  (1) **why does `full` never win a round?** — folded in from the user's third
+  option because it is cheap and load-bearing: `full` is the DEFAULT policy
+  and the standing `full` 0:180 gate's policy, so that gate has never once
+  observed a won round; the lead is that plainer `vanilla` wins 27% while
+  `full` wins 0%, so `full`'s extra exploration is actively harmful — report
+  before changing anything; (2) raise the win rate until carry ≥ 21 is
+  observed, opt-in only, standing gates and `DEFAULT_RUN_OPTIONS` untouched,
+  and it stays arbitrary-but-legal play (never an AI oracle, never a
+  scenario-tied win script — that is `strong-route`'s job); (3) sweep the
+  newly-reachable depth, target carry ≥ 28 (challenge 4+, where the full
+  `CHECK_BAD_MOVE`+triad AI switches on); (4) triage by the standing
+  convention — fix crashes that block going deeper, file the rest.
+  Acceptance is a committed sweep log showing carry ≥ 21 reached by play,
+  with the crash outcome stated honestly including "we got there and it
+  broke." Out of scope, named: parity plan C5 (oracle evidence for a
+  genuinely-chained deep arrival, still gated on trace cost), cross-session
+  saving, the Open level rule set.
+- **Next:** dispatch M-B step 1 (read-only diagnosis of `full`'s win path) as
+  the next supervisor session's opening step; steps 2-4 follow from what it
+  finds. #39's split (batch 9 landed, function-kind pool now 0) and ladder
+  Slice 3 remain demoted filler.
+- **Notes:** no PAPERCUT. Process note that held up well: 1353 wrote M-A's
+  falsifiability clause *before* the measurement, and the result landed
+  between its two branches (35.6% past challenge 1 is not "shallow"; 5.6% at
+  challenge 2 is not "routinely ≥ 2") — which is exactly why the supervisor
+  correctly refused to self-authorize and filed D2 instead of picking a
+  branch. Pre-committing both outcomes did its job; keep doing it.
+
+---
+## 1355 — [supervisor wind-down, 2026-08-19] **Milestone M-A COMPLETE same-day (steps 1-3): play regularly passes challenge 1 (27-36%), ~5% enter challenge 3, NOTHING reaches carry 21 in 300 seeds — follow-on scope decision filed as DEFERRED D2; scanner H3 folded; walk-up ROADMAP line found stale TWICE and corrected to program-COMPLETE**
+
+- **Final gates (SUPERSEDED line below — rerun after #39 batch 9 landed
+  late-session; both runs supervisor-independent):** at the FINAL tree
+  (`0a9caeda` + this docs commit): full `npm test` **1,068 files /
+  10,126 passed / 223 skipped**; `npm run build` green; soak vanilla
+  0:20 **20/20 OK**; soak full 0:60 **60/60 OK** — and the full-0:60
+  depth block byte-matches the sweep doc's same-range numbers
+  (determinism cross-check). Batch 9 itself verified: scanner CANONICAL
+  76→75 + function-kind pool 0 (rerun live), test pins inspected
+  (absence + exact-0 pins, not vacuous), differential independently
+  rerun on 2 of 6 traces **438/438 byte-identical** (worker's own full
+  run: 1241/1241). NOTE: my brief stated the move direction backwards;
+  the worker correctly followed the established battleScene→canonical
+  direction (matches batches 5-8 and the acceptance numbers) — right
+  call. Earlier same-day gates at the pre-batch-9 tree (10,126 passed,
+  build green, sweep-satisfied soaks) stand in history. DEFERRED.md
+  carries **D2 (OPEN)** — the post-M-A scope decision, reserved to the
+  user by the M-A block itself.
+- **Did (4 worker rounds + 1 read-only scout, 2 lanes):** (1) M-A step 1
+  (entry 1354 below, supervisor-verified incl. a seed-0 diagnostics
+  trajectory audit). (2) Side: scanner **H3-let-write** hazard
+  (`e99c3511`, fold `79a0c6ad`) — batch-8's two hand-exclusions now
+  auto-blocked, `playerHealthboxHpOverlayForHp` correctly still eligible
+  (pool = 1 function-kind); union checks 26/26 + smoke 444/444; a stray
+  main-tree copy of the edit (absolute-path papercut, hit #3) was
+  byte-identical and discarded. (3) M-A steps 2-3 (`78f11bee`,
+  `a395d436`, `1e654c62`): winning 0:180 + vanilla 0:60 + full 0:60,
+  **all 300 seeds OK**, distributions + per-seed lines committed
+  (`docs/soak-depth-measure-2026-08-19.{md,log}`); supervisor recounted
+  winning carry≥7 from raw lines (64/180 exact match). Worker cap-killed
+  at 90min mid-OPTIONAL-extension (full toward 0:180) — nothing lost,
+  tree was clean and all goals committed. (4) Side scout on the
+  "fixture 03 brainMoving cadence" residual returned **premise
+  inverted**: the cadence was already derived and closed 256/256 by
+  entries 1280/1296/1307/1308 (walk-up program fully COMPLETE per 1317);
+  scout live-reverified 02+03 both 256/256, differential 563/563, full
+  suite green, and correctly committed nothing. ROADMAP walk-up line
+  corrected twice (`b1fd9734` — itself still stale-based — then
+  `477e7570` program-COMPLETE).
+- **The M-A number** (full table in the doc): winning 64/180 (35.6%)
+  carry≥7, 10/180 (5.6%) carry≥14, 0/180 carry≥21; vanilla 16/60 /
+  3/60 / 0/60, deepest anywhere = vanilla seed 24 at battle-depth 20
+  (= standing in ladder battle 21); full policy 0/60 ever complete a
+  round. ROADMAP M-A block updated with the result; the block's two
+  pre-recorded outcomes bracket it, so the scope call goes to D2.
+- **Next:** user resolves D2 (mechanically blocks the next supervisor
+  session). #39 batch 9 landed same-day (`2f8edef2` move+reconnect,
+  `dc89b145` test-pin fix): moved `playerHealthboxHpOverlayForHp`,
+  scanner CANONICAL 76→75, function-kind eligible pool 1→0 (none left).
+  Available filler regardless: the non-function/topological CANONICAL
+  remainder (5 eligible non-function symbols + the ~70 hazard-blocked
+  ones per the scanner's own summary), or decision (b).
+- **Notes:** process lesson recorded on top of 1353's rule — verifying a
+  queue item against the tree must grep for the artifact's NEWEST
+  archive mention, not stop at the first hit near the cited entry (my
+  scout brief and first ROADMAP "correction" both did the latter;
+  the scout's live verification caught it). PAPERCUTS bumped:
+  freshness false-positive (hit 7), side absolute-path edits (hit 3).
+  Both lane branches (animation-main, rust-main) were EMPTY at orient
+  and stayed empty. Commits local only — pushing is Kyle's step.
+
+---
+## 1354 — [main worker, 2026-08-19] **M-A step 1 DONE: real max-depth tracking (maxCarriedWinStreak/maxBattleDepth) added to the soak driver and surfaced in the CLI, old carriedWinStreak snapshot's lying doc comment corrected**
+
+- **Supervisor verification + parallel side fold (same session):** step 1
+  independently verified — test file rerun green, tracking hook read, live
+  vanilla 0:3 run, and a seed-0 `winning` diagnostics probe reconciling the
+  pasted `b2 / carry<=7 / depth<=7` line (round 1 complete at carry 0 →
+  carry-7 round lost its FIRST battle, the true depth-7 point → post-loss
+  re-chained carry-0 round lost at battle 2, which is where `b2` comes
+  from; `opponentGenerationCount 2` confirms). Depth convention for step 3
+  reports: during battle N of a carry-C round, `maxBattleDepth` = C+(N-1)
+  (0-based ladder position). **Side-lane fold `79a0c6ad`:** scanner
+  H3-let-write hazard (`e99c3511`) — both batch-8 hand-exclusions now
+  auto-blocked, `playerHealthboxHpOverlayForHp` stays eligible (pool = 1);
+  verified in-worktree (11/11 + live scanner run) and on the union
+  (26/26 touched tests + smoke 444/444). A stray main-tree copy of the
+  scanner edit (absolute-path papercut, hit #3) was byte-identical to the
+  committed version and discarded. Freshness FAIL at orient =
+  false-positive #7. PAPERCUTS bumped ×2, ISSUES #39 scanner-gap note
+  trimmed to CLOSED.
+
+- **State:** two green commits (`4570aa11` driver+test, `ecb2e5de` CLI).
+  Full `npm test` **1,068 files / 10,124 passed / 223 skipped**; `npm run
+  build`/`npm run typecheck` clean.
+- **Did:** added `SeedResult.maxCarriedWinStreak` (max over the run of
+  `orchestrator.config.factoryWinStreak`) and `maxBattleDepth` (max of
+  `factoryWinStreak + battleIndex`, the internal depth formula at
+  `factoryRoundBattleOrchestrator.ts:559`) to
+  `tools/soak/randomRoundSoakDriver.ts`, tracked every tick in `observe()`
+  (including the initial pre-loop call) and always populated — not gated
+  behind `collectDiagnostics`. Left `RunDiagnostics.carriedWinStreak`'s
+  value semantics untouched but fixed its false doc comment (it claimed
+  to already be "the deepest ... value this run reached"; it is a
+  snapshot that a later re-chain can reset to 0) and pointed it at the
+  new max fields. `tools/soak/randomRoundSoak.ts`: appended the two new
+  fields to each seed's existing OK/CRASH/HANG line, and added a "depth
+  distribution" block to the summary (seeds reaching carry >= 7/14/21,
+  labeled with the live-derived `challengeNum = floor(factoryWinStreak /
+  7)` mapping from `factoryRentalGeneration.ts`/`factoryTrainerSchedule.ts`
+  — not guessed — plus the deepest carry/battle-depth anywhere).
+- **Result:** new Tier-1 test in `tests/randomRoundSoak.test.ts`
+  (`describe("real max-depth tracking (Milestone M-A step 1)")`) pins the
+  exact lying-field scenario: round 1 wins (carry → 7, scripted-strong
+  664/678/527 trio), round 2 loses (arbitrary "weak" rentals, same recipe
+  as `factoryRoundChaining.test.ts`'s "(c)" case), the run re-chains into
+  round 3 within ~2,000 frames — `diagnostics().carriedWinStreak` reads
+  **0** while `maxCarriedWinStreak`/`maxBattleDepth` correctly read **7**.
+  RED-VERIFIED: `git stash`ed just the driver change (keeping the new
+  test), reran — `maxCarriedWinStreak` was `undefined` and the assertion
+  threw `TypeError: actual value must be number or bigint, received
+  "undefined"`; restored via `git stash pop` before committing. Live spot
+  checks pasted below.
+- **Next:** M-A steps 2-3 (re-sweep `winning` 0:180 + `vanilla`/`full` for
+  contrast using the now-real depth fields, report the distribution) —
+  dispatch as the next worker step.
+- **Notes:** no PAPERCUT. Spot-check output —
+  `npm run soak -- --policy winning --seeds 0:3`:
+  ```
+  seed    0  OK     b2 t30  152641f  22.7s  roundLost  carry<=7 depth<=7
+  seed    1  OK     b7 t26  151729f  22.2s  roundComplete  carry<=0 depth<=6
+  seed    2  OK     b5 t14  161852f  24.3s  roundLost  carry<=0 depth<=4
+
+  === soak summary: 3 seeds (policy winning) in 69.2s ===
+  OK 3  CRASH 0  HANG 0
+
+  === depth distribution ===
+  carry >= 7  (challengeNum >= 1): 1/3
+  carry >= 14 (challengeNum >= 2): 0/3
+  carry >= 21 (challengeNum >= 3): 0/3
+  deepest carry anywhere: 7
+  deepest battle-depth anywhere: 7
+  ```
+
+---
+
+## 1353 — [planning session, 2026-08-19] **Next-milestone reset: the chained-round distribution-parity program is COMPLETE (all 3 steps landed 08-16/17; the queue line was stale), #39 split + ladder Slice 3 DEMOTED, new milestone M-A = measure how deep play actually gets**
+
+- **State:** planning/audit session at the TOP layer. No `src/`, `tools/`, or
+  test change. Three docs edited: `ROADMAP.md` (new 2026-08-19 user-decision
+  block), `docs/chained-round-distribution-parity-plan.md` (STATUS header),
+  `PROGRESS.md` (this entry, plus archiving 1349/1350). Docs-only — no suites
+  required per the standing judicious-cadence rule.
+- **Did:** the user asked, in plain terms, how the last run went and what was
+  next; then asked to reorganize so the substantive program — not the
+  housekeeping — became the next milestone. Auditing what that program
+  actually *is* inverted the premise twice:
+  1. **The queue line was stale.** ROADMAP's "chained-round
+     distribution-parity breadth" had been carried as unstarted since
+     2026-08-14 and was reported to the user that way. All three dispatchable
+     steps of `docs/chained-round-distribution-parity-plan.md` §4 had in fact
+     landed on 2026-08-16/17 — step 1 `96e1dd4b` (4-hop chaining test,
+     silver Brain reached at hop 3 by real carry), step 2
+     `factoryRentalGeneration.ts:229-239` (challengeNum-8 retail-OOB
+     rationale), step 3 `6366ee33` + sweeps `6d92ddf1` (`winning` policy;
+     standing coverage `vanilla` 0:60 / `full` 0:180 / `winning` 0:180, all
+     green) — with step 4 already marked SATISFIED inline. Corrected to the
+     user in-session.
+  2. **The program's own completion hid a bigger gap.** Every one of those
+     sweeps proves *crash-freedom*; none measures *depth*.
+     `randomRoundSoakDriver.ts:163` declares `carriedWinStreak` with a doc
+     comment naming it "the deepest chained-streak value this run reached ...
+     used by the soak depth report", `:907` populates it on every result, and
+     `rg carriedWinStreak` (run live) shows **nothing in the tree reads it** —
+     no CLI output, no test, no sweep doc. So whether play ever gets past
+     challengeNum 1 is unmeasured: it is fully consistent with all 420 clean
+     seeds that every one lost in round 1, leaving the escalated rental
+     tiers/IVs, the challenge-2+/4+ AI tiers, and the battle-21 silver Brain
+     touched only by step 1's scripted test.
+- **Result:** ROADMAP carries a new user-decision block recording the
+  correction and **milestone M-A ("how deep does play actually get?")**, user
+  pick *measure first, then scope*: (1) print `carriedWinStreak` per seed and
+  as a distribution in the sweep summary — report layer only; (2) re-run over
+  already-swept, known-green ranges; (3) report how many seeds reach streak
+  7/14/21 and the deepest anywhere. The follow-on scope decision explicitly
+  returns to the user *with the measurement in hand*. ISSUES #39's canonical
+  split (76 of 226 symbols left) and ladder Slice 3 are demoted in writing to
+  filler — not the next objective, and not to be reported as such again.
+- **Next:** dispatch M-A step 1 to a workspace worker (report-layer change to
+  `tools/soak/randomRoundSoak.ts` + the driver's summary; no engine, no
+  policy, no new standing gate), then steps 2-3 as one evidence step.
+- **Notes:** PAPERCUT-adjacent process finding, recorded rather than fixed:
+  the stale queue line survived ~5 supervisor sessions because a ROADMAP
+  "next runs" order is written once and never re-validated against the tree,
+  while the work that satisfies it lands under a different heading (soak
+  sweeps). Both prior stale-doc catches this month (the seam ladder's §0
+  correction; this one) were found the same way — re-running the doc's own
+  claims live. Cheap rule: any session that reports a queue item's status to
+  the user verifies it against the tree first, at least by `git log -S` on the
+  item's named artifact.
+
+---
 ## 1352 — [main worker, 2026-08-19] **ladder Slice 2 batch 8: canonical split 123→76 under decision (a), scanner gap found (functions writing to a let-cache elsewhere)**
 
 - **Supervisor final-gates RERUN at this final tree (`82122cc3` + this
