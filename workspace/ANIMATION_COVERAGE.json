@@ -10,9 +10,10 @@
     "the lowest legal Level-50 Factory carrier is set 118 Delibird (species 225, Never-Melt Ice 212, Docile, SpAttack+HP); both complete parties use unique species and held items, and the opposing Careful Onix has max HP/SpDef EVs without transient HP/status/stage/weather/outcome injection",
     "AnimTask_Hail is measured independently at ages 34-128: it source-schedules exactly 30 falling particles at ages 37/39/41 through 109/111/113 in ten three-affine groups, creates four impact crystals, peaks at six live falling particles, and cleans all task/sprite/matrix resources before inactive age 157 in both orientations",
     "all 316 retained rows pin source cursor/wait/args, task/sprite allocator and callback lifecycles, software/hardware OAM and matrices, unfaded/faded/hardware palettes and tags, BG/register/audio, complete parties, immutable engine/gameplay fields, gameplay versus animation RNG, raw RGB, bilateral normalized change maps, and first inactive cleanup; preceding OAM/matrix/palette latches are 157/157 per orientation and gameplay RNG has zero transitions",
-    "Rain Dance and Blizzard/Icy Wind remain independent controls only; no reducer, typed seam, compositor, framebuffer equality, production import, gameplay weather/status/damage/RNG ownership, latch credit, sibling credit, or exact promotion is claimed"
+    "the source-relative reducer and narrow Scene-ON seam now match all 158/158 player-back plus 158/158 opponent-front rows (316/316 total) for cursor/waits/args, animation RNG, both BlendBattleAnimPal ramps, task/sound loop data, particle/crystal allocation and callback lifecycles, software OAM, affine matrices, palettes/tags, audio, and inactive cleanup; verifier: tools/compare/verifyHailReducer.ts; test: tests/animation/hailReducer.test.ts",
+    "Rain Dance and Blizzard/Icy Wind remain independent controls only; ordinary compositor/draw wiring and twice-fresh production framebuffer equality remain unimplemented, framebufferCompared stays false, and no production import, gameplay weather/status/damage/RNG ownership, latch credit, sibling credit, or exact promotion is claimed"
    ],
-   "remaining": "MOVE_HAIL still needs a source-relative reducer, typed Scene-ON seam, ordinary source-derived compositor/draw wiring, and twice-fresh complete 316/316 production framebuffer equality before it can promote. Shared BlendBattleAnimPal and ICE_CRYSTALS evidence transfers no move acceptance.",
+   "remaining": "MOVE_HAIL still needs ordinary source-derived compositor/draw wiring and twice-fresh complete 316/316 production framebuffer equality before it can promote. Reducer/seam acceptance is 316/316; framebufferCompared remains false. Shared BlendBattleAnimPal and ICE_CRYSTALS evidence transfers no move acceptance.",
    "evidence": [
     "tools/battle-lab/mechanic-hail-player-delibird-opponent-onix.json",
     "tools/battle-lab/mechanic-hail-opponent-delibird-player-onix.json",
@@ -26,7 +27,9 @@
     "tools/compare/evidence/hail-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/hail-changemap-player.json",
     "tools/compare/evidence/hail-changemap-opponent.json",
-    "tests/animation/hailEvidence.test.ts"
+    "tests/animation/hailEvidence.test.ts",
+    "tools/compare/verifyHailReducer.ts",
+    "tests/animation/hailReducer.test.ts"
    ]
   },
   {
@@ -6494,7 +6497,7 @@
     "task:AnimTask_Hail"
    ],
    "representatives": ["MOVE_HAIL"],
-   "goal": "EVIDENCE ONLY: MOVE_HAIL independently passes 158/158 player-back plus 158/158 opponent-front source/state/raw-RGB/bilateral-change-map rows through first inactive cleanup, twice fresh. Its exact two-palette-ramp, 30 falling-particle/four-impact-crystal, looped-audio, allocator/matrix/tag, immutable-state, and hardware-latch evidence is retained. The track remains unfulfilled pending reducer, typed seam, ordinary compositor, and complete production framebuffer equality. Rain Dance and Blizzard/Icy Wind are controls only and receive no credit."
+   "goal": "PARTIAL: MOVE_HAIL independently passes 158/158 player-back plus 158/158 opponent-front reducer and typed Scene-ON seam rows (316/316 total) through first inactive cleanup, including its two palette ramps, 30 falling particles, four impact crystals, looped audio, allocator/matrix/tag state, animation RNG, and cleanup. The track remains unfulfilled pending ordinary compositor/draw wiring and twice-fresh complete production framebuffer equality; framebufferCompared stays false. Rain Dance and Blizzard/Icy Wind are controls only and receive no credit."
   }
  ],
  "variantAudits": {
