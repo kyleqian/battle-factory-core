@@ -46,15 +46,6 @@ one seed-backed choice that stays plain (e.g. rent a random 3-of-6 in slot
 order) so 0:20 covers 20 drafts; (c) switch the gate to `full` 0:60 + this
 note. Recommendation: (b) — smallest change that makes the seed range honest.
 
-## #117 — Record-prompt cursor move renders one frame off (`drawRecordPrompt`)
-
-**Found 2026-08-22** (#104 YES-path trace, `tools/compare/traces/loss-terminal-record-yes-off.json`):
-a 1-frame timing mismatch on the record-menu cursor move, pre-existing and
-unrelated to #104; excluded from that trace's capture window (4970-5102,
-133/133). Next: extend the capture list to the cursor-move frames, name the
-frame, fix in `factoryTerminalRender.ts`'s `drawRecordPrompt` against the
-existing NO-path ground truth (`docs/post-terminal-beyond-boundary-ground-truth.md`).
-
 ## #114 — `runFutureAttacksAfterFaints` fires a delayed hit inline and keeps looping where source returns per effect (doubles-era divergence)
 
 **Found 2026-08-22** (side worker, #102 end-turn cursor fix `a6deb814`). Source

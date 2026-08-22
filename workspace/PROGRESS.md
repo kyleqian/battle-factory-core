@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1382 — [supervisor fold, 2026-08-22 15:00] **#117 FIXED + folded (`521ae499`: record-menu arrow redraw lags the cursor flip by one tick; `loss-terminal-record-cursor-off` 80/80, yes-path 133/133 re-run by the supervisor); #71 Slice C found already done (1381, stale ISSUES text); final-tree `full` 0:240 → 240/240 OK**
+
+- **State:** master = 1381 + merge of `worker/side-20260822-141940`. Merged-
+  tree checks: both terminal compares exact, pins 7/7+, smoke 444. ISSUES −#117.
+  PAPERCUTS +1 (obsolete `loss-terminal-decline-continuation-off` trace,
+  50/155 by design since entry 1313 — bisected across the #104 commits
+  before the archive answered; not a regression).
+- **Sweeps on the final engine (`adf633e9`, clean worktree):** `full` 0:240
+  **240/240 OK, 0 CRASH, 0 HANG** (session start: 236/240); `winning`
+  0:240 in flight (0 crashes at 30%); `full` 240:480 crash-discovery next.
+- **Queue state:** every bounded ISSUES item is closed or filed for a later
+  era (#109/#114 doubles, #116 user gate decision, #55/#39/#73 parked or
+  #55-bounded, #71 filler). Remaining session = crash discovery + wind-down
+  gates + lane folds.
+
+---
+
 ## 1381 — [main worker, 2026-08-22] **ISSUES #71 Slice C re-verified DONE, no code change needed (guards were already landed at entries 891/894-895) — stale "remainder" sentence trimmed**
 
 - **State:** master `adf633e9` + this docs-only commit. Read both back
@@ -52,22 +69,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   hand-fits); side = #117 (record-cursor frame) in flight; then wind-down
   gates from ~18:15 (full suite, build, vanilla 0:20, full 0:60, plus a
   `full` 0:240 + `winning` 0:240 on the final tree).
-
----
-
-## 1379 — [main worker, 2026-08-22] **ISSUES #110 fixed (Cmd_openpartyscreen always scores via the AI selector, no legal-count shortcut); PAPERCUTS "switchhandleorder/getswitchedmondata throws" closed (richer diagnostics)**
-
-- **State:** master `890a8593` + this docs commit. `npm test` **1,093
-  files / 10,219 passed / 223 skipped**, `npm run build` green, smoke
-  444/444, `executableFrontierRatchet.test.ts` unchanged.
-- **Did:** removed the `legalBenchIndexes.length === 1` shortcut (source:
-  `battle_script_commands.c:5113-5148` + `battle_controller_opponent.c:
-  1621-1675`, both unconditional); new pin: an egg now correctly outscores
-  the shortcut's non-egg answer (verified red with the shortcut restored).
-  Soaks: `full` 100:140 **40/40 OK**, `winning` 130:150 **20/20 OK**.
-  Enriched both switchin-opcode "undecided monToSwitchIntoId" throws with
-  the decided array/party HP/script label+pc; two new pins; PAPERCUTS entry deleted.
-- **Next:** fold #115; draft heuristic n ≥ 180; final `winning` 0:240 depth.
-- **Notes:** no new papercuts this session.
 
 ---

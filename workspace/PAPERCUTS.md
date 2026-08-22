@@ -8,6 +8,21 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Obsolete compare traces still sit in `tools/compare/traces/` with no marker
+
+- **What:** `loss-terminal-decline-continuation-off.json` matches 50/155 on
+  every tree since the 2026-08-14 continuous-play wiring, and PROGRESS 1313
+  (2026-08-17) recorded its 155/155 bar as OBSOLETE on purpose — but nothing
+  in the trace file or `tools/compare/` says so. The 2026-08-22 #117 worker
+  rediscovered it as "pre-existing ~96% mismatch, worth a supervisor look",
+  and the supervisor spent ~10 min bisecting it across the #104 commits
+  (50/155 at every one) before finding entry 1313 in the archive.
+- **Hits:** 1 (2026-08-22, ~10 min supervisor + worker time).
+- **Fix:** either delete the trace (git keeps it) or give `tools/compare/`
+  a `traces/OBSOLETE.md` list the runner prints a one-line notice from;
+  the `appRoute: "canonical-recorded"` variant is the live way to exercise
+  the decline farewell (see the #104 PAPERCUTS entry above).
+
 ## `generated-orchestrator` compare traces re-chain the instant the record prompt is answered
 
 - **What:** since the 2026-08-14 continuous-play wiring, the default

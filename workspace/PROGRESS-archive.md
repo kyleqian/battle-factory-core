@@ -1,3 +1,22 @@
+## 1379 — [main worker, 2026-08-22] **ISSUES #110 fixed (Cmd_openpartyscreen always scores via the AI selector, no legal-count shortcut); PAPERCUTS "switchhandleorder/getswitchedmondata throws" closed (richer diagnostics)**
+
+- **State:** master `890a8593` + this docs commit. `npm test` **1,093
+  files / 10,219 passed / 223 skipped**, `npm run build` green, smoke
+  444/444, `executableFrontierRatchet.test.ts` unchanged.
+- **Did:** removed the `legalBenchIndexes.length === 1` shortcut (source:
+  `battle_script_commands.c:5113-5148` + `battle_controller_opponent.c:
+  1621-1675`, both unconditional); new pin: an egg now correctly outscores
+  the shortcut's non-egg answer (verified red with the shortcut restored).
+  Soaks: `full` 100:140 **40/40 OK**, `winning` 130:150 **20/20 OK**.
+  Enriched both switchin-opcode "undecided monToSwitchIntoId" throws with
+  the decided array/party HP/script label+pc; two new pins; PAPERCUTS entry deleted.
+- **Next:** fold #115; draft heuristic n ≥ 180; final `winning` 0:240 depth.
+- **Notes:** no new papercuts this session.
+
+---
+
+---
+
 ## 1378 — [supervisor fold, 2026-08-22 13:55] **#112 + #113 FIXED + folded (`3c6e192a` `Cmd_getexp` republishes `gBattlerFainted`; `6f810a51` forced send-out resumes at the SELECTED switch-in — 12 display commands were being dropped); #104 CLOSED (1377, YES-path trace 133/133 re-run by the supervisor); #116 filed: `vanilla` is seed-invariant**
 
 - **State:** master `4837a062`+docs. Merged-tree checks: #104 compare
