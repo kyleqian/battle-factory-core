@@ -116,8 +116,8 @@ describe("presentation-string ISSUES #106 -- Beat Up's STRINGID_PKMNATTACK", () 
       rngSeed: 1,
       player: wobbuffetConfig(BEAT_UP, { speed: 200 }),
       trainer: wobbuffetConfig(SPLASH, { speed: 1 }),
-      playerBenchHp: [200, 200],
-      playerBenchOverride: [BENCH_MEMBER, BENCH_MEMBER],
+      playerBenchHp: [200, 200] as const,
+      playerBenchOverride: [BENCH_MEMBER, BENCH_MEMBER] as const,
     });
     const { messageIds, lines } = runFullTurn(config, AT(1), AT(1));
     const beatUpMessages = messageIds.filter((id) => id === "STRINGID_PKMNATTACK");
