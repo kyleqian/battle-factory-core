@@ -44,7 +44,7 @@
     "src/data/gen/factory-animation-inventory.json":"60c3d2e0a78511bcc97b48bad011590fc4f06b3fa1661a6075042e7b794f3418",
     "src/data/gen/battle-animation-components.json":"aa5890455d932c35aa1ea80cb9e6c79ea278571cc445c8661f64379a0846af1a",
     "src/data/gen/battle-frontier-mons.json":"6f7e9b57201ca8d513dab853c53aa7e23d35329ea52df6a464e7fe311d9fe21c",
-    "src/data/gen/factory-round-policy.json":"0e62d9a116210cf43bd5b024f8f6ff02334624f9fed107112403dfbe9ef0ce6b"
+    "src/data/gen/factory-round-policy.json":"9b56b0addf6b88657a53f9c55b55466cd8d3e3e19e1254083cb7a7ee3b1ce301"
   },
   "scripts": {
     "Move_ROLLOUT": [

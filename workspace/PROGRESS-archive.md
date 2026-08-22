@@ -1,3 +1,20 @@
+## 1382 — [supervisor fold, 2026-08-22 15:00] **#117 FIXED + folded (`521ae499`: record-menu arrow redraw lags the cursor flip by one tick; `loss-terminal-record-cursor-off` 80/80, yes-path 133/133 re-run by the supervisor); #71 Slice C found already done (1381, stale ISSUES text); final-tree `full` 0:240 → 240/240 OK**
+
+- **State:** master = 1381 + merge of `worker/side-20260822-141940`. Merged-
+  tree checks: both terminal compares exact, pins 7/7+, smoke 444. ISSUES −#117.
+  PAPERCUTS +1 (obsolete `loss-terminal-decline-continuation-off` trace,
+  50/155 by design since entry 1313 — bisected across the #104 commits
+  before the archive answered; not a regression).
+- **Sweeps on the final engine (`adf633e9`, clean worktree):** `full` 0:240
+  **240/240 OK, 0 CRASH, 0 HANG** (session start: 236/240); `winning`
+  0:240 in flight (0 crashes at 30%); `full` 240:480 crash-discovery next.
+- **Queue state:** every bounded ISSUES item is closed or filed for a later
+  era (#109/#114 doubles, #116 user gate decision, #55/#39/#73 parked or
+  #55-bounded, #71 filler). Remaining session = crash discovery + wind-down
+  gates + lane folds.
+
+---
+
 ## 1381 — [main worker, 2026-08-22] **ISSUES #71 Slice C re-verified DONE, no code change needed (guards were already landed at entries 891/894-895) — stale "remainder" sentence trimmed**
 
 - **State:** master `adf633e9` + this docs-only commit. Read both back

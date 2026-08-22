@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1385 — [main worker, 2026-08-22] **ISSUES #118 half-landed: `sFixedIVTable`'s retail one-past-the-end row is now pinned ROM data (`{110, 0}`); the engine port itself is blocked on a core-rs/factory-wasm lockstep change and is NOT in**
+
+- **State:** master `9aaf1997` + this docs commit. `npm test` 1093/1140
+  files, 10232/10458 passed (3 animation source-staging fixtures re-pinned
+  to the new policy-JSON sha256), build green, smoke 444/444, frontier
+  ratchet unchanged (no pin moved).
+- **Did:** `nm pokeemerald.elf` -> `08612184 r sFixedIVTable`,
+  `08612194 r sInitialRentalMonRanges`; ROM bytes at 0x612184 are the known
+  16-byte table followed by `6e 00` = little-endian FRONTIER_MON_GRIMER.
+  `GetFactoryMonFixedIV`'s non-BUGFIX bound check is STRICTLY `>`, so IV
+  argument 8 reads that pair: row 8 = `{regular: 110, lastBattle: 0}`. The
+  extractor now emits it as a ninth `fixedIvs` row flagged `retailOverread`;
+  `tests/factoryFixedIvTableRomBytes.test.ts` (new, 4 pins) reads the 18 ROM
+  bytes back. The three engine readers are bounded to the 8 *declared* rows,
+  so the commit is behaviour-neutral.
+- **Next:** land the port — the rewritten **ISSUES #118** now carries the
+  full resolved semantics (clamp, three reachable call sites, CreateBoxMon's
+  two-`Random()` split, `RentalMon.ivs` == ATK IV) plus the exact
+  core-rs/factory-wasm surface that must move with it. The TS-only version
+  was written and reverted this session: it turns 64 of
+  `factoryRentalParity.test.ts`'s 288 configs red, because both engines
+  currently agree *by throwing* at IV argument 8.
+- **Notes:** step 3's `--start-carry` sweeps were NOT run (cap). No
+  `unsupported-branch` pin moved. `PAPERCUT:` none.
+
 ## 1384 — [main worker, 2026-08-22] **new opt-in `--start-carry` soak option boots the first chained round at a carried win streak — 0:160 across 3 sweeps, ISSUES #118 filed (challengeNum 8 draft-generation throw, real 2-round-win-from-42 state)**
 
 - **State:** master `f04c6227` + this docs commit. `npm test` 1095/1139
@@ -54,19 +79,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 1382 — [supervisor fold, 2026-08-22 15:00] **#117 FIXED + folded (`521ae499`: record-menu arrow redraw lags the cursor flip by one tick; `loss-terminal-record-cursor-off` 80/80, yes-path 133/133 re-run by the supervisor); #71 Slice C found already done (1381, stale ISSUES text); final-tree `full` 0:240 → 240/240 OK**
-
-- **State:** master = 1381 + merge of `worker/side-20260822-141940`. Merged-
-  tree checks: both terminal compares exact, pins 7/7+, smoke 444. ISSUES −#117.
-  PAPERCUTS +1 (obsolete `loss-terminal-decline-continuation-off` trace,
-  50/155 by design since entry 1313 — bisected across the #104 commits
-  before the archive answered; not a regression).
-- **Sweeps on the final engine (`adf633e9`, clean worktree):** `full` 0:240
-  **240/240 OK, 0 CRASH, 0 HANG** (session start: 236/240); `winning`
-  0:240 in flight (0 crashes at 30%); `full` 240:480 crash-discovery next.
-- **Queue state:** every bounded ISSUES item is closed or filed for a later
-  era (#109/#114 doubles, #116 user gate decision, #55/#39/#73 parked or
-  #55-bounded, #71 filler). Remaining session = crash discovery + wind-down
-  gates + lane folds.
-
----

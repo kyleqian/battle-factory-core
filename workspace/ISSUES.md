@@ -17,39 +17,64 @@ backlog.
 
 # Open
 
-## #118 — A chain that wins two rounds from a `--start-carry 42` boot reaches `challengeNum` 8 and crashes `generateInitialFactoryRentals`'s `challengeNum > 7` guard
+## #118 — challengeNum 8 rental generation still throws: the retail `sFixedIVTable` overread is now pinned data, but the engine port has not landed
 
-**Found 2026-08-22** (main worker, opt-in `--start-carry` soak option;
-`docs/soak-start-carry-2026-08-22.md`). `factoryRentalGeneration.ts:239-240`
-throws `Level-50 initial rental generation supports source challenges 0..7,
-got 8` whenever `Math.floor(factoryWinStreak / 7) > 7` — i.e. a fresh draft
-generated at `factoryWinStreak >= 56`. This is real, reachable engine state:
-winning a round carries the streak forward by 7 (`advanceFactoryCarry`), so
-two consecutive round wins from a carry-42 boot (challengeNum 6) reach
-carry 49 (challengeNum 7, still supported) then carry 56 (challengeNum 8,
-unsupported) on the THIRD round's draft generation. `--policy winning
---start-carry 42 --seeds 0:60 --render-every 0`: **3/60** crashed this way
-(seeds 2, 32, 49; every other seed that reached carry 56 stayed on `budget`
-mid-battle before generating that far, or capped at carry 49). Deterministic
-single-seed repro: `--policy winning --start-carry 42 --seed 2 --render-every
-0 --verbose`:
-```
-Error: Level-50 initial rental generation supports source challenges 0..7, got 8
-    generateInitialFactoryRentals (src/engine/factoryRentalGeneration.ts:240)
-    generateFactoryChallengeDraft (src/engine/factoryRoundChaining.ts:97)
-    tick (src/engine/core.ts:859)
-```
-Source's `sFixedIVTable`/rental-range tables are indexed 0..7 in the port's
-model of the retail data (`factoryRentalGeneration.ts:228-240`'s own comment
-notes the non-BUGFIX clamp is `> ARRAY_COUNT`, i.e. should be `>=`, and that
-challengeNum 8 genuinely reads past the table in the `#else` branch) — this
-needs the real source table/clamp behavior at challengeNum 8, not just a
-raised guard number. Before this session, no soak had ever reached
-`factoryWinStreak >= 56` in-session (natural chaining rarely wins even one
-round back-to-back at this depth), so the branch was previously Tier-1-only
-coverage. Do not fix inline; needs the source's actual out-of-range behavior
-looked up first (`battle_tower.c`'s non-BUGFIX `#else` path per the existing
-code comment).
+**Found 2026-08-22**, ROM evidence landed 2026-08-22 (`9aaf1997`). A player
+who wins an 8th consecutive round (`factoryWinStreak >= 56`) reaches
+challengeNum 8 and hits `factoryRentalGeneration.ts`'s
+`challengeNum > 7` throw. Reachable in ~5% of `--policy winning
+--start-carry 42` seeds (3/60: 2, 32, 49; `docs/soak-start-carry-2026-08-22.md`).
+Deterministic repro: `--policy winning --start-carry 42 --seed 2
+--render-every 0`.
+
+**Resolved — what retail actually does** (all of this is now pinned; no
+research left):
+- `GetFactoryMonId` (`battle_factory.c:829-866`) clamps every challenge
+  `>= 7` to range row 7 and *ignores* `useBetterRange` there, so there is no
+  out-of-bounds range read. `getLevel50FactoryRentalRange` already mirrors
+  this exactly.
+- `GetFactoryMonFixedIV` (`:739-757`) is the only OOB. Its non-BUGFIX bound
+  check is `challengeNum > ARRAY_COUNT(sFixedIVTable)` — STRICTLY greater —
+  so IV argument exactly 8 is unclamped and reads `sFixedIVTable[8]`, while
+  9+ clamps to row 7 (`{31, 31}`). Argument 8 is reachable three ways:
+  challengeNum 8 rentals, challengeNum 7 *elevated* rentals (`challengeNum +
+  1`, `battle_factory_screen.c:1762`, i.e. any `rentsCount >= 15`), and
+  challengeNum 6 Frontier Brain parties (`challengeNum + 2`, `:772`).
+- Row 8 is **`{regular: 110, lastBattle: 0}`** — the two `.rodata` bytes
+  after the table, which are `sInitialRentalMonRanges[0][0]` (little-endian
+  FRONTIER_MON_GRIMER). Committed as
+  `factory-round-policy.json`'s ninth `fixedIvs` row with
+  `"retailOverread": true`; ROM-byte receipt in
+  `tests/factoryFixedIvTableRomBytes.test.ts`. 110 >= `USE_RANDOM_IVS` (32)
+  so `CreateBoxMon` rolls random IVs; `lastBattle` 0 means the *last*
+  trainer of such a round gets an all-zero IV spread.
+- Random-IV branch order (`CreateBoxMon`, `pokemon.c`): personality
+  (`Random32`, already ported) → OT (no draw for `OT_ID_PRESET`) → two
+  `Random()` calls, the first supplying HP/ATK/DEF and the second
+  SPEED/SPATK/SPDEF as consecutive 5-bit fields of the u16.
+- `RentalMon.ivs` is the saved **ATK IV**, not the fixedIV argument
+  (`battle_factory_screen.c:1824`, `battle_factory.c:396`), so the port's
+  `fixedIv` field keeps its meaning under a random spread.
+
+**Still open — the port, which must land in lockstep with core-rs.** A TS-only
+fix is not committable: `tests/factoryRentalParity.test.ts` compares the full
+`drawLedger` and RNG cursor against `factory-wasm`, and 64 of its 288 configs
+(`winStreak=49`, `rentsCount` 20/100 → better-range → IV argument 8) currently
+expect *both* engines to throw. The port therefore needs, in one commit:
+`get_level50_initial_rental_fixed_iv`'s retail clamp + the two IV draws in
+`core-rs/crates/factory-core/src/rental_generation.rs`, new
+`Phase::RandomIvs` / `Purpose::RandomIvsLow|High` discriminants, whatever the
+`factory-wasm` binary record/ledger layout needs
+(`core-rs/crates/factory-wasm/src/lib.rs:169-263` documents the byte offsets;
+its snapshot tests assert them), the matching decode in
+`core-rs/adapter/factoryEngine.ts`, and a `core-rs/build-wasm.sh` rebuild —
+alongside the TS changes (remove the throw, retail clamp in
+`getLevel50InitialRentalFixedIv`, six real IVs threaded through
+`FactoryCorpusPartyInstance` so `factoryCorpusParty.ts`'s
+`uniformBattleScriptIvs(fixedIv)` is not asked to describe a random spread).
+The three engine readers of `fixedIvs` are currently bounded to the 8
+*declared* rows (`DECLARED_FIXED_IV_ROWS`) so the new data row is inert until
+that lands. Sized at more than one bounded worker step.
 
 ## #109 — `battleAiSwitchInto.ts` omits the `i != monToSwitchIntoId[battlerIn1/2]` exclusion in both passes
 
