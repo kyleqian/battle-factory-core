@@ -1,3 +1,24 @@
+## 1372 — [supervisor orient, 2026-08-22 11:25] **`animation-main` folded (fast-forward to `df60c00a`, +16: Lovely Kiss + Octazooka exact, Hail evidence; coverage 200/276 Level-50 exact); baseline green on the union; `rust-main` 0 ahead**
+
+- **State:** master = `df60c00a` = `animation-main` tip (their supervisor had
+  just merged master, so the fold was a fast-forward; no net change to
+  `src/engine/**`). Supervisor-independent baseline on the union: full
+  `npm test` **1,086 files / 10,196 passed / 223 skipped**, `npm run build`
+  green. Both sibling supervisors (animation, rust) are LIVE this session —
+  fold again at wind-down. `check-oracle-freshness.sh` FAILs both ports, but
+  the only oracle-side commit since 8014 started (`3e29880b`, 08-15 09:51,
+  walk-up staging) was committed 6 min after that process started from the
+  same working tree and the walk-up program has run against it since —
+  judged client-only (same verdict as entry 821); not restarting shared
+  oracles under two live sibling sessions.
+- **Next (in flight):** side lane = ISSUES #102 from its live seed-138 repro
+  (Opus, diagnostic); ts lane = string-resolver sibling sweep (#106 + #107 +
+  census of every reachable placeholder gap); supervisor background = the 7
+  carry-28 seeds from 1370 re-run at `--max-frames 4000000` to see what
+  breaks past round 5.
+
+---
+
 ## 1371 — [supervisor close, 2026-08-20 16:00] **Bonus round folded: final-tree `winning` 0:240 (1370) reaches carry ≥ 28 in 7/240 (2.9%), ≥ 21 20.0%, ≥ 14 90.8% — deepest seeds hit the 1M-frame budget mid-round-5 (instrument ceiling, not a wall); draft heuristic re-measured n=30 (neutral, stays withheld on `wip/mb-step2b-draft-heuristic` @ `18222b3a`); #106 + #107 filed; #102 re-reproduced live (seed 138)**
 
 - **State:** docs-only since 1369's gates; tree clean. Cherry-picked the side

@@ -5,6 +5,37 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1375 — [main worker, 2026-08-22] **ISSUES #108 CLOSED: 2/5 fixed (`STRINGID_PKMNRAGEBUILDING`, `STRINGID_PKMNSNATCHEDMOVE`), 3/5 reclassified DEAD on re-trace (Pay Day, Drizzle, Drought) — the #106/#107 census's reachability claims were wrong for all three**
+
+- **State:** `src/engine/battleResolutionPresentation.ts` +
+  `src/engine/factoryBattleScriptFullTurnDecision.ts` (fix),
+  `tests/presentationStringIssue108.test.ts` (new, both pins red-verified via
+  `git stash`), `ISSUES.md` (#108 deleted). `npm test` **10,204 passed / 223
+  skipped**, `npm run build` green, smoke 444/444,
+  `executableFrontierRatchet.test.ts` unchanged (no new production import,
+  no barrier-count change).
+- **Did:** **Rage**: plain `requireMoveDefender`, no plumbing —
+  `executeRage`'s own `target` is already the hit Rage-holder. **Snatch**:
+  `requireMoveDefender` is WRONG here (a self-targeted victim move makes
+  `snatchsetbattlers` alias `selectorRoles.attacker` to the snatcher too) —
+  added `targetBattler` (`selectorRoles.target`, uniformly the snatcher) to
+  `prepareMessage`'s Intimidate-family allowlist instead. **Pay Day**:
+  re-traced `Cmd_givepaydaymoney`'s only call site — its
+  `jumpifnotbattletype BATTLE_TYPE_TRAINER` guard (`battle_scripts_1.s:
+  3027-3028`) is dead on every path that reaches it (`battle_main.c:
+  4967-4972` only enters with that flag SET) — prior census misread the
+  jump polarity. **Drizzle/Drought**: Kyogre/Groudon are the sole Gen 3
+  carriers and neither is a `FRONTIER_MON_*` rental — confirmed by
+  `summary-info.json`'s ability table having no entry for either id. All
+  three left OUT of `messageLines` (DEAD-carrier precedent, same as
+  `STRINGID_PKMNCANTUSEMOVESEALED`).
+- **Next:** #111 (+ driver papercut) as one small side step; #104 remainder;
+  #109/#110 (side findings, unclaimed); `full`/`vanilla` 0:240 soak
+  re-sweeps still outstanding (1370's note, carried forward).
+- **Notes:** no PAPERCUT this step.
+
+---
+
 ## 1374 — [supervisor fold, 2026-08-22 12:05] **#102 crash half FIXED + folded (`5cc52595`: `OpponentHandleChoosePokemon` PARTY_SIZE fallback; seed 138 OK); #106/#107 fixed (1373); 4M-frame depth probe: 7/7 OK, carry ceiling 28 = challenge-5 AI tier, NOT an instrument cap; #109–#111 filed**
 
 - **State:** master `41866a9c`+docs. Merged-tree checks: the four string/#102
@@ -82,26 +113,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no PAPERCUT beyond the build-vs-vitest typecheck gap already
   documented above (cost ~5 min, not a tooling defect — `npm test` alone
   would have shipped a build-breaking test file).
-
----
-
-## 1372 — [supervisor orient, 2026-08-22 11:25] **`animation-main` folded (fast-forward to `df60c00a`, +16: Lovely Kiss + Octazooka exact, Hail evidence; coverage 200/276 Level-50 exact); baseline green on the union; `rust-main` 0 ahead**
-
-- **State:** master = `df60c00a` = `animation-main` tip (their supervisor had
-  just merged master, so the fold was a fast-forward; no net change to
-  `src/engine/**`). Supervisor-independent baseline on the union: full
-  `npm test` **1,086 files / 10,196 passed / 223 skipped**, `npm run build`
-  green. Both sibling supervisors (animation, rust) are LIVE this session —
-  fold again at wind-down. `check-oracle-freshness.sh` FAILs both ports, but
-  the only oracle-side commit since 8014 started (`3e29880b`, 08-15 09:51,
-  walk-up staging) was committed 6 min after that process started from the
-  same working tree and the walk-up program has run against it since —
-  judged client-only (same verdict as entry 821); not restarting shared
-  oracles under two live sibling sessions.
-- **Next (in flight):** side lane = ISSUES #102 from its live seed-138 repro
-  (Opus, diagnostic); ts lane = string-resolver sibling sweep (#106 + #107 +
-  census of every reachable placeholder gap); supervisor background = the 7
-  carry-28 seeds from 1370 re-run at `--max-frames 4000000` to see what
-  breaks past round 5.
 
 ---
