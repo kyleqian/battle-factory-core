@@ -832,6 +832,18 @@ export type BattleScriptRulesContext = Readonly<
     futureSightMove: readonly [number, number, number, number];
     futureSightAttacker: readonly [number, number, number, number];
     futureSightDmg: readonly [number, number, number, number];
+    /**
+     * Source `gBattleStruct->wishPerishSongState` / `wishPerishSongBattlerId`
+     * (`battle_util.c` `HandleWishPerishSongOnTurnEnd`, 1785-1888): the
+     * persistent cursor for the post-faint delayed-attack (state 0) and Perish
+     * Song (state 1) sweeps. `BattleTurnPassed` re-enters that function once
+     * per fired script -- and once more after `HandleFaintedMonActions` blocks
+     * for a Perish Song KO's replacement -- so the cursor, not a fresh scan,
+     * is what stops a battler being swept twice in one turn. Both reset to 0
+     * at the turn boundary (`battle_main.c:3916-3917`, `3948-3949`).
+     */
+    wishPerishSongState: number;
+    wishPerishSongBattlerId: number;
     /** Typed form of PREPARE_MON_NICK_WITH_PREFIX_BUFFER(gBattleTextBuff1, battler, partyIndex). */
     battleTextBuff1MonNick: BattleScriptPreparedMonNick | null;
     /** Typed form of PREPARE_BYTE_NUMBER_BUFFER(gBattleTextBuff1, 1, value). */
@@ -996,6 +1008,8 @@ export type BattleScriptRulesContextInput = Readonly<{
   futureSightMove?: readonly number[];
   futureSightAttacker?: readonly number[];
   futureSightDmg?: readonly number[];
+  wishPerishSongState?: number;
+  wishPerishSongBattlerId?: number;
   battleTextBuff1MonNick?: BattleScriptPreparedMonNick | null;
   battleTextBuff1ByteNumber?: number | null;
   battleTextBuff1PaydayMoney?: number | null;
@@ -2759,6 +2773,8 @@ export function createBattleScriptRulesContext(
       requireSigned32(input.futureSightDmg?.[2] ?? 0, "futureSightDmg[2]"),
       requireSigned32(input.futureSightDmg?.[3] ?? 0, "futureSightDmg[3]"),
     ]) as unknown as readonly [number, number, number, number],
+    wishPerishSongState: requireUnsigned(input.wishPerishSongState ?? 0, 3, "wishPerishSongState"),
+    wishPerishSongBattlerId: requireUnsigned(input.wishPerishSongBattlerId ?? 0, 4, "wishPerishSongBattlerId"),
     battleTextBuff1MonNick: input.battleTextBuff1MonNick === null
       || input.battleTextBuff1MonNick === undefined
       ? null
