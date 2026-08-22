@@ -101,6 +101,34 @@ function legalSwitchPartyIndexes(
   return Object.freeze(legal);
 }
 
+/**
+ * `OpponentHandleChoosePokemon`'s own `chosenMonId == PARTY_SIZE` fallback
+ * (`src/battle_controller_opponent.c`): `GetMostSuitableMonToSwitchInto`
+ * genuinely returns PARTY_SIZE whenever neither of its passes finds a
+ * candidate -- pass 2 initializes `bestMonId = PARTY_SIZE` and only a strict
+ * `bestDmg < gBattleMoveDamage` ever moves it, so a bench that cannot damage
+ * the opposing active at all (an all-Normal bench facing a GHOST, say) leaves
+ * the sentinel in place. The *controller*, not the opcode, resolves that:
+ * scan the party in slot order for the first mon with HP left that is not an
+ * opposing-side battler's own active slot, then write that. Singles collapses
+ * source's `battler1`/`battler2` to the same battler, and the loop checks only
+ * `MON_DATA_HP != 0` (no species/egg gate -- empty slots hold zero HP anyway),
+ * so this mirrors it exactly. If nothing qualifies the loop falls out at
+ * `lastId`, i.e. PARTY_SIZE again -- source's own `HasNoMonsToSwitch`
+ * territory, which `checkteamslost` has already ruled out upstream on every
+ * path that reaches here.
+ */
+function firstAlivePartyIndexInSlotOrder(
+  party: BattleScriptPartyState,
+  activePartyIndex: number,
+): number {
+  for (let index = 0; index < BATTLE_SCRIPT_PARTY_SIZE; index += 1) {
+    const member = party[index];
+    if (member && member.hp !== 0 && index !== activePartyIndex) return index;
+  }
+  return BATTLE_SCRIPT_PARTY_SIZE;
+}
+
 function unsupportedBranch(
   context: BattleScriptOpcodeHandlerContext<BattleScriptRulesContext>,
   sourceConstruct: string,
@@ -257,8 +285,12 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       throw new Error("Cmd_openpartyscreen: damage fallback context was supplied but selector did not resolve");
     }
 
+    const chosenPartyIndex = scored.partyIndex === BATTLE_SCRIPT_PARTY_SIZE
+      ? firstAlivePartyIndexInSlotOrder(rules.party.opponent, activePartyIndex)
+      : scored.partyIndex;
+
     const monToSwitchIntoId = Object.freeze(
-      rules.monToSwitchIntoId.map((value, index) => (index === battler ? scored.partyIndex : value)),
+      rules.monToSwitchIntoId.map((value, index) => (index === battler ? chosenPartyIndex : value)),
     ) as unknown as BattleScriptRulesContext["monToSwitchIntoId"];
 
     return transitionBattleScriptCommand(
