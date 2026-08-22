@@ -92,26 +92,6 @@ the `wishPerishSongState`/`wishPerishSongBattlerId` cursor persists
 (`tests/endTurnResumeCursorIssue102.test.ts`), and unreachable in singles
 (one delayed hit per side per turn) — pin it when doubles arrive.
 
-## #104 — Terminal record prompt's YES branch omits the real "battle was recorded" message (stub-only remainder)
-
-**Both the driver and engine halves that used to make this issue soft-lock
-the whole run are FIXED** (`fd30ee13` engine: YES/B-cancel now continue like
-NO instead of dead-ending; `428ba1c4` + 2026-08-20 driver retune: continuous
-play now honestly reports `OK budget`/`OK max-rounds` while progressing and
-`HANG` only on a genuine stall, `tests/randomRoundSoak.test.ts` "ISSUES #104
-(driver)"). What remains is cosmetic only: `advanceFactoryTerminalRecordPrompt`
-(`src/engine/factoryTerminalPresentation.ts:~685-704`) deliberately arms the
-SAME `declineFarewellReleaseAge` continuation for all three answers (matching
-`case 1`/`MULTI_B_PRESSED` both `goto EndRecordBattle` in source), but the
-real `case 0` (YES) first shows `EventScript_RecordBattle` →
-`EventScript_SaveBattle`'s msgbox — "{PLAYER}'s battle was recorded on the
-FRONTIER PASS." (`scripts.inc:87-88`) — before falling into that same
-farewell, and this repo doesn't print it: only the shared farewell text is
-ground-truthed (`docs/post-terminal-beyond-boundary-ground-truth.md` §rows
-4990-5093), not the YES-branch message. Standing decision (2026-08-05):
-RECORD is stub-only, so the real fix is ground-truthing and adding that one
-message string, not a real save. No player-visible soft-lock remains.
-
 ## #71 — Send-out intro animations: banked front reducers are not wired into the live send-out seam; main-lane share of the dispatcher work
 
 **User decision (2026-08-10): the playable path stays FAITHFUL — no

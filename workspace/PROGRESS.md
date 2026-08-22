@@ -5,6 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 1377 — [main worker, 2026-08-22] **ISSUES #104 CLOSED: YES branch now shows EventScript_SaveBattle's own "battle was recorded" message before the shared farewell**
+
+- **State:** `src/engine/factoryTerminalPresentation.ts` +
+  `src/engine/factoryTerminalRender.ts` (fix, `f04519bd`/`e72292fe`),
+  `tests/factoryTerminalRecordIssue104.test.ts` (YES sub-test rewritten, red
+  paste in the commit body), new trace
+  `tools/compare/traces/loss-terminal-record-yes-off.json` +
+  `tools/battle-lab/scratch-loss-record-yes-probe.json` (`fa7d5215`), new
+  doc `docs/factory-terminal-record-yes-ground-truth.md`. `npm test`
+  **10,208 passed / 223 skipped**, `npm run build` green, smoke 444/444,
+  `executableFrontierRatchet.test.ts` unchanged.
+- **Did:** oracle-derived the YES trace from the existing NO-path probe
+  (one appended UP + the same confirm A + two new dismiss A's; run via
+  `bin/oracle lab`, not `bin/oracle run`). `declineFarewellReleaseAge` still
+  arms on confirm for all three answers; for YES it doubles as the new
+  message's own edge (`recordSavedTextClearDelay=21`/`TextFirstDelay=22`/
+  `InputDelay=70`, oracle-measured — `frontier_savebattle`'s own latency)
+  until that message's own dismiss re-arms it, at which point the existing
+  farewell mechanics drive unmodified. `npm run compare --summary`:
+  **133/133** over the dense window. NO/B-cancel pins untouched.
+- **Next:** #110 cleanup as a small main step; draft heuristic n ≥ 180 if a
+  slot frees; `full`/`vanilla` soak re-sweeps still outstanding (carried).
+- **Notes:** PAPERCUT: the record-menu cursor-move (`UP`) renders 1 tick
+  earlier in the app than the oracle (`drawRecordPrompt`, pre-existing,
+  out of scope) — worth a future look, ~5 min lost isolating it from #104.
+
+---
+
 ## 1376 — [supervisor fold, 2026-08-22 13:10] **End-turn cursor fix folded (`a6deb814`: Future Sight/Perish Song pass no longer rescans from 0 after a faint pause — timers were double-counted); #102 CLOSED (crash half fixed, end-turn lead refuted twice, adjacent cursor bug fixed); #111 fixed; driver round-identity reset salvaged; `full`/`vanilla` 0:240 re-swept — #112/#113 filed as ≤9 s live repros**
 
 - **State:** master = merge of `worker/side-20260822-114356` (end-turn
@@ -62,30 +90,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   #109/#110 (side findings, unclaimed); `full`/`vanilla` 0:240 soak
   re-sweeps still outstanding (1370's note, carried forward).
 - **Notes:** no PAPERCUT this step.
-
----
-
-## 1374 — [supervisor fold, 2026-08-22 12:05] **#102 crash half FIXED + folded (`5cc52595`: `OpponentHandleChoosePokemon` PARTY_SIZE fallback; seed 138 OK); #106/#107 fixed (1373); 4M-frame depth probe: 7/7 OK, carry ceiling 28 = challenge-5 AI tier, NOT an instrument cap; #109–#111 filed**
-
-- **State:** master `41866a9c`+docs. Merged-tree checks: the four string/#102
-  pins 7/7, smoke 444/444 (full suite: worker-run 10,198 at `880a8bb8`
-  + side-run 10,200 at `5cc52595`; supervisor full suite at wind-down).
-  ISSUES: #102 trimmed to its open end-turn half (side lane, in flight on
-  Opus, base `5cc52595`); #108 (5 reachable string gaps) filed by 1373 →
-  next ts brief; #109/#110 (side worker findings) and #111 (`rentsCount`
-  not reset on loss — source `battle_factory.c:208-212`) filed. PAPERCUTS +2
-  (driver reset-on-battleIndex; thin switch-in throws) + freshness bump.
-- **Probe (`docs/soak-deep-sweep-2026-08-22-4M.md`):** the 7 carry-28 seeds
-  at `--max-frames 4000000` → 7/7 OK, 0 crash/hang, max carry 28 everywhere:
-  no seed wins even battle 1 at challengeNum 4 (full
-  CHECK_BAD_MOVE|TRY_TO_FAINT|CHECK_VIABILITY tier). End surface = ordinary
-  7- and 20-turn losses. 1370's "instrument ceiling" caveat withdrawn; the
-  `winning` ceiling is the AI tier. CAVEAT recorded: every seed's first round
-  drafts from the pinned anchor pool, so "carry ≥ 7 100%" is anchor-biased.
-  Determinism re-checked (seed 63, four ways, identical).
-- **In flight:** `full` + `vanilla` 0:240 re-sweeps on the new semantics
-  (clean `df60c00a` worktree, background); side = #102 end-turn cursor.
-- **Next:** ts = #108; then #111 (+ the driver papercut) as one small side
-  step; #104 remainder; draft heuristic n ≥ 180 if time.
-
----

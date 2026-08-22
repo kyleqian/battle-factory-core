@@ -1,3 +1,28 @@
+## 1374 — [supervisor fold, 2026-08-22 12:05] **#102 crash half FIXED + folded (`5cc52595`: `OpponentHandleChoosePokemon` PARTY_SIZE fallback; seed 138 OK); #106/#107 fixed (1373); 4M-frame depth probe: 7/7 OK, carry ceiling 28 = challenge-5 AI tier, NOT an instrument cap; #109–#111 filed**
+
+- **State:** master `41866a9c`+docs. Merged-tree checks: the four string/#102
+  pins 7/7, smoke 444/444 (full suite: worker-run 10,198 at `880a8bb8`
+  + side-run 10,200 at `5cc52595`; supervisor full suite at wind-down).
+  ISSUES: #102 trimmed to its open end-turn half (side lane, in flight on
+  Opus, base `5cc52595`); #108 (5 reachable string gaps) filed by 1373 →
+  next ts brief; #109/#110 (side worker findings) and #111 (`rentsCount`
+  not reset on loss — source `battle_factory.c:208-212`) filed. PAPERCUTS +2
+  (driver reset-on-battleIndex; thin switch-in throws) + freshness bump.
+- **Probe (`docs/soak-deep-sweep-2026-08-22-4M.md`):** the 7 carry-28 seeds
+  at `--max-frames 4000000` → 7/7 OK, 0 crash/hang, max carry 28 everywhere:
+  no seed wins even battle 1 at challengeNum 4 (full
+  CHECK_BAD_MOVE|TRY_TO_FAINT|CHECK_VIABILITY tier). End surface = ordinary
+  7- and 20-turn losses. 1370's "instrument ceiling" caveat withdrawn; the
+  `winning` ceiling is the AI tier. CAVEAT recorded: every seed's first round
+  drafts from the pinned anchor pool, so "carry ≥ 7 100%" is anchor-biased.
+  Determinism re-checked (seed 63, four ways, identical).
+- **In flight:** `full` + `vanilla` 0:240 re-sweeps on the new semantics
+  (clean `df60c00a` worktree, background); side = #102 end-turn cursor.
+- **Next:** ts = #108; then #111 (+ the driver papercut) as one small side
+  step; #104 remainder; draft heuristic n ≥ 180 if time.
+
+---
+
 ## 1373 — [main worker, 2026-08-22] **#106 + #107 FIXED (`STRINGID_PKMNATTACK`/`STRINGID_PKMNSUBSTITUTEFADED`); soak seed 203 now runs to an honest OK; full sibling census done — 5 more confirmed-reachable gaps filed as #108, ~15 confirmed unreachable and recorded**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` +
