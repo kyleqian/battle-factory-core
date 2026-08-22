@@ -143,7 +143,15 @@ describe("ISSUES #104: record prompt reducer -- YES/B-cancel continue like NO", 
       recordSavedDismissAge: 1827,
       declineFarewellReleaseAge: 1827,
     });
-    expect(factoryTerminalRecordSavedMessageActive(recorded)).toBe(false);
+    // The dismissed message stays the active page for declineTextClearDelay
+    // more ticks (oracle-measured: the farewell's own box-clear, not an
+    // instant swap) -- becoming inactive only once the farewell's own box
+    // wipes.
+    expect(factoryTerminalRecordSavedMessageActive(recorded)).toBe(true);
+    const farewellBoxClearAge =
+      1827 + FACTORY_LOSS_TERMINAL_PROFILE.declineTextClearDelay;
+    let atFarewellBoxClear = advanceTo(recorded, farewellBoxClearAge);
+    expect(factoryTerminalRecordSavedMessageActive(atFarewellBoxClear)).toBe(false);
     expect(factoryTerminalDeclineEdgeAge(recorded)).toBe(1827);
     expect(factoryTerminalDeclineTextFirstAge(recorded)).toBe(1827 + 4);
 
