@@ -68,9 +68,9 @@ describe("animation coverage ledger", () => {
       {
         tier: "level50",
         total: 276,
-        unsupported: 75,
+        unsupported: 74,
         staged: 0,
-        partial: 0,
+        partial: 1,
         exact: 201,
       },
       {
@@ -94,7 +94,9 @@ describe("animation coverage ledger", () => {
 
   it("keeps the manual acceptance queue inside Level 50 coverage", () => {
     const queue = queuedAnimationMoves();
-    expect(queue.map(({ move, status }) => ({ move, status }))).toEqual([]);
+    expect(queue.map(({ move, status }) => ({ move, status }))).toEqual([
+      { move: "MOVE_SPIKES", status: "partial" },
+    ]);
     expect(openLevelVariantAudit()).toEqual({
       monSets: 32,
       species: 8,
