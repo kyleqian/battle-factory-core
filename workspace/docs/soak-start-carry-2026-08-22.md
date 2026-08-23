@@ -269,3 +269,28 @@ sweep would reach that same challengeNum-8 boundary on its FIRST generated round
 needing two round wins to get there), for faster/denser repro once someone picks the fix up.
 `--start-carry 21`/`14`/`7` (challengeNum 3/2/1, the mid tiers between the anchor boot and this
 session's 28/35/42) remain unswept.
+
+## Post-#118 re-sweeps (2026-08-22 night → 2026-08-23, supervisor)
+
+Tree: master `0cabb82b` (`#118` closed end to end — `5b51eac5` Rust, `0cb8aa26` lockstep TS +
+wasm, `47a8db42` wire format; `#120` rentsCount fix `64ad9f4e`). Same command shape as above,
+run as single serial processes (~24 s/seed). The three #118 crash seeds from sweep (b) above
+(carry 42: seeds 2, 32, 49) all go clean; challengeNum-8 drafts are now generated for real
+(`deepest carry 56` in every sweep below; the former throw sat exactly there).
+
+| sweep | policy | `--start-carry` | seeds | OK | CRASH | HANG | deepest carry | deepest depth |
+|---|---|---|---|---|---|---|---|---|
+| (b') | winning | 42 | 0:60 | **60** | 0 | 0 | 56 | 57 |
+| (d) | winning | 49 | 0:60 | **60** | 0 | 0 | 56 | 62 |
+| (d') | winning | 49 | 60:180 | **120** | 0 | 0 | 56 | 62 |
+| (e) | winning-swap | 49 | 0:60 | **60** | 0 | 0 | 56 | 57 |
+| **all** | | | **300** | **300** | **0** | **0** | | |
+
+Every OK sub-outcome is `budget`. Sweep (e) is the first time the swap screen ran with
+challenge-8 rentals carrying a genuine random six-IV spread (`FactoryCorpusPartyInstance.ivs`).
+
+Reading: with the rental path fixed, nothing at challengeNum 7-8 crashes in 300 seeds. Note the
+Frontier Brain's argument-8 branch (`challengeNum + 2 == 8`) is NOT exercised by any of these —
+Brain-eligible banked streaks are 20/41/62/… (`sFrontierBrainStreakAppearances[FACTORY] =
+{21, 42, 21, 1}` + the `+1` modifier, `frontier_util.c:91,1662`), i.e. challengeNum 2/5/8, never 6;
+that call site is retail-correct code that natural play cannot reach (audit, 2026-08-23).
