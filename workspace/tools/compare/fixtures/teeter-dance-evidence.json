@@ -1,0 +1,71 @@
+{
+  "schema": "teeter-dance-dense-evidence-manifest/v1",
+  "move": "MOVE_TEETER_DANCE",
+  "moveId": 298,
+  "oracleProfile": "battle-scene-on",
+  "source": {
+    "start": "0x082ce78d",
+    "endExclusive": "0x082ce7f8",
+    "byteLength": 107,
+    "sha256": "5dd532744b7f9bff1f8a88567122573d7da66e956961db734f56119247b21572",
+    "components": [
+      "asset:ANIM_TAG_DUCK",
+      "asset:ANIM_TAG_MUSIC_NOTES",
+      "sprite:gFastFlyingMusicNotesSpriteTemplate",
+      "task:AnimTask_TeeterDanceMovement"
+    ],
+    "carrier": {
+      "frontierMon": "FRONTIER_MON_SPINDA",
+      "setId": 145,
+      "speciesId": 308,
+      "nature": "NATURE_RELAXED",
+      "evs": ["ATTACK", "HP"]
+    }
+  },
+  "orientations": {
+    "player-back": {
+      "frames": 169,
+      "sourceFrames": "227..395",
+      "firstInactiveAge": 168,
+      "componentRows": "169/169",
+      "noteRows": "169/169",
+      "taskRows": "169/169",
+      "oamLatch": "235/235 relevant note sprites",
+      "matrixLatch": "235/235 relevant note sprites",
+      "paletteLatch": "168/168 full palette rows",
+      "evidenceSha256": "933ed0c5aa08f1928567de50aca7ef0ebc4997ca3992f4fd2cdffb7c84223573",
+      "rawRgbSequenceSha256": "ccd393f0b8c688125c32da60338ddd9d283aed81257e868005d6aef55257664c",
+      "freshEvidenceSha256": "933ed0c5aa08f1928567de50aca7ef0ebc4997ca3992f4fd2cdffb7c84223573",
+      "freshRawRgbSequenceSha256": "ccd393f0b8c688125c32da60338ddd9d283aed81257e868005d6aef55257664c",
+      "denseState": "tools/compare/evidence/teeter-dance-player-dense-state.json.gz",
+      "rawRgb": "tools/compare/evidence/teeter-dance-player-raw-rgb.tar.gz",
+      "changeMap": "tools/compare/evidence/teeter-dance-changemap-player.txt"
+    },
+    "opponent-front": {
+      "frames": 169,
+      "sourceFrames": "222..390",
+      "firstInactiveAge": 168,
+      "componentRows": "169/169",
+      "noteRows": "169/169",
+      "taskRows": "169/169",
+      "oamLatch": "235/235 relevant note sprites",
+      "matrixLatch": "235/235 relevant note sprites",
+      "paletteLatch": "168/168 full palette rows",
+      "evidenceSha256": "e37d72474695866a9af4beca0f9e64058616fb05527734610bd2e4ec217e6f6b",
+      "rawRgbSequenceSha256": "8fd824fa7b5e071231c63b9af94e565a66665aa9bf35f609db4c70d6c16e005d",
+      "freshEvidenceSha256": "e37d72474695866a9af4beca0f9e64058616fb05527734610bd2e4ec217e6f6b",
+      "freshRawRgbSequenceSha256": "8fd824fa7b5e071231c63b9af94e565a66665aa9bf35f609db4c70d6c16e005d",
+      "denseState": "tools/compare/evidence/teeter-dance-opponent-dense-state.json.gz",
+      "rawRgb": "tools/compare/evidence/teeter-dance-opponent-raw-rgb.tar.gz",
+      "changeMap": "tools/compare/evidence/teeter-dance-changemap-opponent.txt"
+    }
+  },
+  "reducer": {
+    "module": "src/animation/teeterDance.ts",
+    "sourceRows": "338/338 component rows",
+    "rawFramebufferResidual": "338/338 shared production rows exact; zero residual pixels"
+  },
+  "assetExtractor": "tools/compare/extractTeeterDanceAssets.ts",
+  "assetSha256": "1be83e760b6d6fb063e4eef594bfd860493d023485beb5f129dcb54ff2259a43",
+  "probe": "tools/compare/teeterDanceProbe.py"
+}

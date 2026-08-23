@@ -1211,7 +1211,7 @@
     "source extraction byte-pins SPINDA front/back, ONIX/shared field art, ANIM_TAG_HANDS_AND_FEET, ANIM_TAG_IMPACT, and ANIM_TAG_DUCK; the narrow compositor ports prior-software hardware transfer and ordering, front-only personality-dependent DRAW_SPINDA_SPOTS with the source 1bpp bit order, target monbg, affine alpha IMPACT, field chrome, both healthboxes, move text, and teardown",
     "dizzyPunchProbe.py records every currentMove=146 frame through tools/run-mgba-probe.py, and dizzyPunchPortable.ts proves every reducer/component, software sprite/task, hardware OAM/matrix/palette/register, audio, raw-RGB, and shared-framebuffer receipt twice fresh; independent outputs are byte-identical with player digest 5a69e0ff69f67fd13136174afc4d5ed7a102fb4160063e35cc2d0569c2486976 and opponent digest c475b845dcb0d300fc3a36866feed850943fe3b322e2aaf9fd95853307db064c",
     "the committed source audit proves exactly twelve gDizzyPunchDuckSpriteTemplate instances and zero gFallingFeatherSpriteTemplate or ANIM_TAG_WHITE_FEATHER commands; falling feathers belong to MOVE_FEATHER_DANCE and were not invented for DIZZY_PUNCH",
-    "MOVE_TEETER_DANCE remains unsupported: it has AnimTask_TeeterDanceMovement, five distinct gFastFlyingMusicNotesSpriteTemplate paths, five sounds, and requires independent complete dense acceptance",
+    "MOVE_TEETER_DANCE was accepted independently after this DIZZY_PUNCH proof: its distinct AnimTask_TeeterDanceMovement, five gFastFlyingMusicNotesSpriteTemplate paths, five sounds, and complete bilateral dense window receive no credit from DIZZY_PUNCH",
     "MOVE_SIGNAL_BEAM remains unsupported: it has a distinct red/green orb stream, sinus timer, shakes, pan sweep, and target palette cycle and requires independent complete dense acceptance"
    ],
    "evidence": [
@@ -3967,6 +3967,39 @@
    ]
   },
   {
+   "move": "MOVE_TEETER_DANCE",
+   "status": "exact",
+   "covered": [
+    "complete legal Level-50 Scene-ON mechanicLab parties use the lowest legal carrier FRONTIER_MON_SPINDA set 145 (SPECIES_SPINDA 308, MOVE_TEETER_DANCE 298, Relaxed Attack+HP spread) against complete legal Onix/Spinda reverse-orientation parties; player-back frames 227..395 and opponent-front frames 222..390 retain 169 consecutive rows each through the first inactive cleanup row",
+    "the authoritative half-open source interval is 0x082ce78d..0x082ce7f8 (107 bytes, 5dd532744b7f9bff1f8a88567122573d7da66e956961db734f56119247b21572); the generated graph is exactly ANIM_TAG_DUCK, ANIM_TAG_MUSIC_NOTES, gFastFlyingMusicNotesSpriteTemplate, and AnimTask_TeeterDanceMovement",
+    "the independent source-relative reducer matches 169/169 player-back plus 169/169 opponent-front component rows: five fast-note fixed-point paths with source offsets 16,0,-16,-8,8 and signed opponent reversal, affine scale/matrices, two-slot allocation reuse, five SE_M_TEETER_DANCE cues, the live-battler TeeterDance task's case-0/case-1/case-2 phases, and first inactive cleanup",
+    "the retained dense rows measure the ordinary preceding-row transfer at all five note lifecycles: relevant note OAM and matrices are 235/235 per orientation and full faded-to-hardware palette rows are 168/168; no gameplay RNG, battle HP/status, turn, facility, controller, or outcome field changes",
+    "the corrected legal Spinda probes reproduce twice fresh byte-identically per orientation; dense-state hashes are 933ed0c5aa08f1928567de50aca7ef0ebc4997ca3992f4fd2cdffb7c84223573 and e37d72474695866a9af4beca0f9e64058616fb05527734610bd2e4ec217e6f6b, raw-RGB sequence hashes are ccd393f0b8c688125c32da60338ddd9d283aed81257e868005d6aef55257664c and 8fd824fa7b5e071231c63b9af94e565a66665aa9bf35f609db4c70d6c16e005d, and normalized change maps are banked and replayed for both orientations",
+    "the strict reusable production comparator verifies every raw-row SHA, both sequence hashes, both normalized change maps, typed seam, source age-2 live-battler task latch, source OAM note priority, personality-derived front-only Spinda spots, chrome, and inactive cleanup at 169/169 player-back plus 169/169 opponent-front with zero residual pixels; both fresh run pairs rerun the same comparator at 338/338 residual 0"
+   ],
+   "evidence": [
+    "tools/compare/fixtures/teeter-dance-player-spinda-opponent-onix.json",
+    "tools/compare/fixtures/teeter-dance-player-onix-opponent-spinda.json",
+    "tools/compare/fixtures/teeter-dance-evidence.json",
+    "tools/compare/teeterDanceProbe.py",
+    "tools/compare/teeterDanceSourceAudit.ts",
+    "tools/compare/teeterDanceFramebuffer.ts",
+    "tools/compare/extractTeeterDanceAssets.ts",
+    "tools/compare/evidence/teeter-dance-player-dense-state.json.gz",
+    "tools/compare/evidence/teeter-dance-opponent-dense-state.json.gz",
+    "tools/compare/evidence/teeter-dance-player-raw-rgb.tar.gz",
+    "tools/compare/evidence/teeter-dance-opponent-raw-rgb.tar.gz",
+    "tools/compare/evidence/teeter-dance-changemap-player.txt",
+    "tools/compare/evidence/teeter-dance-changemap-opponent.txt",
+    "src/animation/assets/teeter-dance.json",
+    "src/animation/teeterDance.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/teeterDance.test.ts",
+    "tests/animation/teeterDanceFramebuffer.test.ts"
+   ]
+  },
+  {
    "move": "MOVE_SLASH",
    "status": "exact",
    "covered": [
@@ -5986,7 +6019,8 @@
     "MOVE_FAKE_TEARS",
     "MOVE_GRASS_WHISTLE"
    ],
-   "goal": "MOVE_SING is exact: its complete first animation-script block is 245/245 player-back and 248/248 opponent-front for strengthened component/OAM/matrix/palette/monbg and raw-RGB/shared-seam framebuffer evidence, reproduced twice. No sibling is promoted. BELLY DRUM has six alternating purple-hand hits, six ShakeMon tasks, six gSlowFlyingMusicNotesSpriteTemplate arcs with distinct animation/palette/phase argv, attacker-pan sounds, and rainbow cleanup. TEETER DANCE has AnimTask_TeeterDanceMovement, five gFastFlyingMusicNotesSpriteTemplate paths at three signed offsets, five attacker-pan sounds, and ANIM_TAG_DUCK. FAKE TEARS only loads MUSIC_NOTES for its distinct thought-bubble/music-note tear macro body and additionally needs SMALL_BUBBLES BlendParticle, RockMonBackAndForth, four looped tail-whip sounds, and eight type-varied tear sprites. GRASS WHISTLE shares the 12 wavy-note geometry but fixes every initial palette to index 1 with no cycling, uses a green whole-BG blend/restore instead of monbg, and has its distinct grass-whistle pan sweep. Every sibling remains unsupported pending its own complete dense evidence."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SING remains exact at 245/245 player-back and 248/248 opponent-front. MOVE_TEETER_DANCE independently passes its corrected legal bilateral source/component/OAM/matrix/palette/raw-RGB/typed-seam/shared-production-framebuffer evidence at 169/169 per orientation, reproduced twice fresh with zero residual pixels through inactive cleanup. BELLY DRUM, FAKE TEARS, and GRASS WHISTLE retain their independent pre-existing statuses and receive no Teeter Dance acceptance credit."
   },
   {
    "id": "music-notes-2",
