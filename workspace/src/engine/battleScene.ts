@@ -2119,8 +2119,6 @@ const singArt = singAsset as {
 const teeterDanceArt = teeterDanceAsset as {
   musicNotes: { tileset: Tileset; palette: RgbColor[] };
   duck: { tileset: Tileset; palette: RgbColor[] };
-  spindaBack: { tileset: Tileset; palette: RgbColor[] };
-  spindaFront: { tileset: Tileset; palette: RgbColor[] };
 };
 
 
@@ -32442,9 +32440,10 @@ export function renderSceneOnMovePresentation(
     const backAsset = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
       view.attacker.species
     ];
-    const attackerSource = view.attacker.species === "SPINDA"
-      ? (playerAttacker ? teeterDanceArt.spindaBack : teeterDanceArt.spindaFront)
-      : (playerAttacker ? backAsset : frontAsset) ?? onixBackSprite;
+    const attackerSource = playerAttacker ? backAsset : frontAsset;
+    if (!attackerSource) {
+      throw new Error(`TEETER_DANCE missing ${view.attacker.species} attacker art`);
+    }
     const attackerSprite = playerAttacker
       ? attackerSource
       : {
@@ -32458,8 +32457,11 @@ export function renderSceneOnMovePresentation(
       view.target.species
     ];
     const targetSource = view.target.geometry.side === "opponent"
-      ? targetFrontAsset ?? onixFrontSprite
-      : targetBackAsset ?? onixBackSprite;
+      ? targetFrontAsset
+      : targetBackAsset;
+    if (!targetSource) {
+      throw new Error(`TEETER_DANCE missing ${view.target.species} target art`);
+    }
     const targetIdle = view.target.geometry.side === "opponent"
       ? speciesFrontIdleRestOffsetOrZero(view.target.species)
       : { x2: 0, y2: 0 };

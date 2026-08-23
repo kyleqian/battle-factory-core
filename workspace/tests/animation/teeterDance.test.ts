@@ -14,6 +14,7 @@ import {
   createSceneOnMovePresentation,
   sceneOnTeeterDanceView,
 } from "../../src/animation/sceneOnPresentation.ts";
+import { auditTeeterDanceReducer } from "../../tools/compare/teeterDanceReducerAudit.ts";
 
 const playerNoteOrigin = { x: 72, y: 93 };
 const playerBattlerOrigin = { x: 72, y: 85 };
@@ -21,6 +22,22 @@ const opponentNoteOrigin = { x: 176, y: 41 };
 const opponentBattlerOrigin = { x: 176, y: 41 };
 
 describe("MOVE_TEETER_DANCE source-relative reducer", () => {
+  it.each(["player-back", "opponent-front"] as const)(
+    "matches every retained component row and display latch: %s",
+    (orientation) => {
+      expect(auditTeeterDanceReducer(orientation)).toEqual({
+        orientation,
+        rows: 169,
+        noteRows: 169,
+        taskRows: 169,
+        noteSprites: 235,
+        oamLatches: 235,
+        matrixLatches: 235,
+        paletteLatches: 168,
+      });
+    },
+  );
+
   it("retains the five source-created fast-note paths and their one-row latch", () => {
     expect(TEETER_DANCE_NOTE_SPAWN_AGES).toEqual([7, 33, 59, 85, 111]);
     expect(teeterDanceNoteAtAge(7, 0, playerNoteOrigin, "player"))
