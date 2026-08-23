@@ -109,7 +109,11 @@ history.
   concludes "Edit/Write silently fails" and routes around it with shell
   writes; meanwhile the main tree accumulates stray uncommitted duplicates
   of its early drafts.
-- **Hits:** 4. **2026-08-20 (ESCALATED): a side worker `cd`'d to the main
+- **Hits:** 5 (2026-08-22: the #120 side worker's first Edit calls landed in
+  the main tree's `tests/factoryRoundBattleOrchestrator.test.ts` — the live
+  main-lane worker saw the file "flap" modified/clean twice; self-healed,
+  but the side brief had omitted the standing clause below — supervisor
+  brief error). **2026-08-20 (ESCALATED): a side worker `cd`'d to the main
   tree's absolute `.../workspace` path, COMMITTED its test file to master
   (`ffc839db`), noticed via `git branch --show-current`, then ran
   `git reset --hard a97d3b19` IN THE MAIN TREE while a main-lane worker was
@@ -1241,3 +1245,56 @@ current app stage should be rejected before replay.
   `tools/probe/probe-opponent-healthbox-hp1-vs-hp0.ts` — zero TDZ risk).
 - **Real fix:** break the cycle (ISSUES #39's program) or a shared probe
   bootstrap helper under `tools/probe/` that encodes the safe order once.
+
+## Supervisor ledger commits landed mid-worker get clobbered by the main-lane worker's stale-snapshot rewrite
+
+- **What:** the supervisor committed ISSUES #120/#121 (pathspec commit, a
+  file the live main-lane worker had not yet modified) while that worker
+  was mid-step; the worker's later ISSUES trim was written from a snapshot
+  read before the commit and silently dropped both entries. The worker
+  caught it via `git log`, verified against the supervisor's commit, and
+  restored them byte-identically — ~8 min of a 60-min cap.
+- **Hits:** 1 (2026-08-22, #118 commit-2 worker).
+- **Fix:** the pathspec-commit rule (entry above) protects the INDEX, not
+  the worker's in-context copy of a file it will edit later. Supervisors
+  queue ISSUES/PROGRESS edits until the main lane frees (side-lane folds
+  already wait); briefs that edit a shared ledger carry "re-read the file
+  immediately before editing; never rewrite it from an earlier snapshot".
+
+## git pathspecs are relative to the repo root one level ABOVE `workspace/` — a bare `src/...` pathspec silently returns an empty diff
+
+- **What:** the git root is `pokeemerald-factory-core/`, so from the
+  `workspace/` cwd (main tree or any worktree) `git show <hash> -- src/x.ts`
+  and `git diff A..B -- tests/` match nothing and print NOTHING — no error.
+  Two read-only audit workers and the supervisor each burned a round trip
+  of empty diffs before noticing; the fix is `-- workspace/src/x.ts`.
+- **Hits:** 3 (2026-08-22: audit R ~5 min, audit E ~2 min, supervisor ~2 min).
+- **Fix:** brief line "prefix pathspecs with `workspace/`"; durable fix is a
+  `git` alias or a `tools/gitw` wrapper that rewrites relative pathspecs.
+
+## macOS has no `timeout(1)` — briefs suggesting `timeout 600 npx vitest …` fail outright
+
+- **What:** no GNU coreutils on this host; `timeout` is "command not found".
+  Workers that follow a brief's guarded-vitest idiom lose a minute each.
+- **Hits:** 2 (2026-08-22: scout S ~1 min, audit R ~2 min).
+- **Fix:** never write `timeout` into a brief; rely on the Bash tool's own
+  per-call timeout.
+
+## A side worktree created between two lockstep commits inherits a wasm artifact that mismatches its adapter
+
+- **What:** the wasm artifact is gitignored and rebuilt per checkout. A
+  side worktree based on ISSUES #118's commit 1 (Rust record layout
+  changed, TS adapter not yet) built a 29-byte-record wasm against a
+  23-byte-record decoder, so every wasm parity suite went red for a worker
+  whose step never touched either. It repaired it via a throwaway worktree
+  at the pre-commit-1 Rust (~10 min). Related: cargo is not on the login
+  PATH (only `build-wasm.sh` exports the toolchain dir) — ~2 min per worker
+  that needs it.
+- **Hits:** 2 (2026-08-22: #120 side worker ~10 min; #118 commit-2 worker
+  ~2 min on PATH).
+- **Fix:** record the artifact's source commit in a sidecar
+  (`artifacts/wasm/factory_wasm.wasm.commit`) that the parity suites'
+  `wasmAvailable` check compares against `git log -1 -- core-rs/crates`,
+  skipping (with a one-line notice) instead of failing on a mismatch; put
+  the cargo PATH export in `tools/run-subagent.sh`'s worker environment.
+
