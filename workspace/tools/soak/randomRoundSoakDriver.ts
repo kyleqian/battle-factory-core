@@ -401,6 +401,210 @@ export function buildWinningSwapPlan(rentalMons: FactoryRentalRoster): WinningSw
 }
 
 // ---------------------------------------------------------------------------
+// "winning-coverage" draft scorer: a COVERAGE-FIRST 3-of-6 rental pick
+// (docs/soak-policy-strength-scout-2026-08-23.md lever 4', the last open
+// challenge-4 lever after the withheld bulk+STAB draft heuristic and the
+// oracle-strength move chooser both measured negative). It reads only what
+// the draft screen's own SUMMARY peek already shows a real player before
+// renting -- the six offered rentals' species, types and full movesets --
+// so weighing them is arbitrary-but-legal play, not hidden-state reading.
+// ---------------------------------------------------------------------------
+
+/**
+ * The 17 real Gen-3 types, in `type-effectiveness.json`'s own
+ * `attackingType`/`defendingType` spelling. `TYPE_FORESIGHT` (like
+ * `TYPE_MYSTERY`) is a pseudo-type row of that table, never a party's type,
+ * so it is not a coverage target.
+ */
+export const GEN3_TYPES = [
+  "TYPE_NORMAL",
+  "TYPE_FIGHTING",
+  "TYPE_FLYING",
+  "TYPE_POISON",
+  "TYPE_GROUND",
+  "TYPE_ROCK",
+  "TYPE_BUG",
+  "TYPE_GHOST",
+  "TYPE_STEEL",
+  "TYPE_FIRE",
+  "TYPE_WATER",
+  "TYPE_GRASS",
+  "TYPE_ELECTRIC",
+  "TYPE_PSYCHIC",
+  "TYPE_ICE",
+  "TYPE_DRAGON",
+  "TYPE_DARK",
+] as const;
+
+/** One offered rental, structurally satisfied by `DraftScreenState.rentals[i]`. */
+export type CoverageDraftRental = Readonly<{
+  species: string;
+  types: readonly string[];
+  moves: readonly Readonly<{ power: number; type: string }>[];
+}>;
+
+/** Lexicographic score of a candidate trio: offensive, then defensive, then bulk. */
+export type CoverageDraftScore = Readonly<{
+  /**
+   * Offensive coverage: for each of the 17 defending types, 1 point (times
+   * that type's pool weight) when at least one damaging move (power > 0)
+   * anywhere in the trio is super-effective (> 1x) against it.
+   */
+  offensive: number;
+  /**
+   * Defensive diversity: distinct primary/secondary types across the trio
+   * (0..6) minus the count of SHARED 4x weaknesses -- attacking types that
+   * two or more of the three take >= 4x from, i.e. one attacker that sweeps
+   * most of the party.
+   */
+  defensive: number;
+  /** Tiebreak only: sum of the trio's species base-stat totals. */
+  bst: number;
+}>;
+
+/** Distinct types of one rental (mono-types repeat the same string twice). */
+function coverageRentalTypes(rental: CoverageDraftRental): string[] {
+  return [...new Set(rental.types)];
+}
+
+/** The rental's own types as a defender pair for `applyTypeEffectiveness`. */
+function coverageDefenderPair(rental: CoverageDraftRental): readonly [string, string] {
+  const first = rental.types[0] ?? DEFAULT_TYPES[0];
+  return [first, rental.types[1] ?? first];
+}
+
+/** Type multiplier in tenths (10 = 1x), independent of the damage argument. */
+function coverageMultiplierTenths(
+  moveType: string,
+  defenderTypes: readonly [string, string],
+): number {
+  return applyTypeEffectiveness(1, moveType, defenderTypes, TYPE_EFFECTIVENESS).multiplierTenths;
+}
+
+/**
+ * Pool weight per defending type for the offensive term. The rental ranges
+ * `sInitialRentalMonRanges` are symmetric -- the opponent's party is drawn
+ * from the SAME species row as the player's offers
+ * (`battle_factory.c:334`/`:560`; scout doc §2) -- so the types present
+ * among the six offered rentals are a free, cheap sample of the tier's
+ * opponent pool. Weight is `1 + occurrences` (never 0): the six offers are
+ * only a sample of a ~96-species row, so a type absent from them still
+ * counts for its base 1, it just doesn't get the observed-commonness bonus.
+ */
+export function coverageDraftTypeWeights(
+  rentals: readonly CoverageDraftRental[],
+): ReadonlyMap<string, number> {
+  const weights = new Map<string, number>(GEN3_TYPES.map((type) => [type, 1]));
+  for (const rental of rentals) {
+    for (const type of coverageRentalTypes(rental)) {
+      const current = weights.get(type);
+      if (current !== undefined) weights.set(type, current + 1);
+    }
+  }
+  return weights;
+}
+
+/**
+ * Scores one candidate trio. Deterministic and RNG-free: the same six
+ * offered rentals always produce the same score for the same trio.
+ */
+export function scoreCoverageDraftTrio(
+  trio: readonly CoverageDraftRental[],
+  weights: ReadonlyMap<string, number>,
+): CoverageDraftScore {
+  let offensive = 0;
+  for (const defendingType of GEN3_TYPES) {
+    let hits = false;
+    for (const rental of trio) {
+      for (const move of rental.moves) {
+        if (move.power <= 0) continue;
+        if (coverageMultiplierTenths(move.type, [defendingType, defendingType]) > 10) {
+          hits = true;
+          break;
+        }
+      }
+      if (hits) break;
+    }
+    if (hits) offensive += weights.get(defendingType) ?? 1;
+  }
+  const distinctTypes = new Set<string>();
+  for (const rental of trio) {
+    for (const type of coverageRentalTypes(rental)) distinctTypes.add(type);
+  }
+  let shared4x = 0;
+  for (const attackingType of GEN3_TYPES) {
+    let quadCount = 0;
+    for (const rental of trio) {
+      if (coverageMultiplierTenths(attackingType, coverageDefenderPair(rental)) >= 40) {
+        quadCount += 1;
+      }
+    }
+    if (quadCount >= 2) shared4x += 1;
+  }
+  let bst = 0;
+  for (const rental of trio) bst += BASE_STAT_TOTAL_BY_SPECIES.get(rental.species) ?? 0;
+  return { offensive, defensive: distinctTypes.size - shared4x, bst };
+}
+
+/** Lexicographic (offensive, defensive, bst) comparison; > 0 means `a` is better. */
+function compareCoverageScore(a: CoverageDraftScore, b: CoverageDraftScore): number {
+  if (a.offensive !== b.offensive) return a.offensive - b.offensive;
+  if (a.defensive !== b.defensive) return a.defensive - b.defensive;
+  return a.bst - b.bst;
+}
+
+export type CoverageDraftPick = Readonly<{
+  /** Slots 0..5 in rent order (bulkiest first). */
+  picks: readonly number[];
+  /** The winning trio's score, for the verbose transcript. */
+  score: CoverageDraftScore;
+}>;
+
+/**
+ * "winning-coverage" policy draft pick: enumerates all 20 three-of-six
+ * combinations in ascending slot order and keeps the best by
+ * `compareCoverageScore` (strict `>` never overwrites an equal score, so
+ * ties keep the earliest combination). No RNG at all -- the same six offers
+ * always yield the same trio. Rent ORDER inside the chosen trio is
+ * descending base-stat total (ties keep the lower slot) so the bulkiest of
+ * the three leads battle 1; the trio ITSELF is chosen by coverage.
+ */
+export function pickCoverageDraftPicks(
+  rentals: readonly CoverageDraftRental[],
+): CoverageDraftPick {
+  const weights = coverageDraftTypeWeights(rentals);
+  let bestSlots: number[] | null = null;
+  let bestScore: CoverageDraftScore | null = null;
+  for (let a = 0; a < rentals.length; a += 1) {
+    for (let b = a + 1; b < rentals.length; b += 1) {
+      for (let c = b + 1; c < rentals.length; c += 1) {
+        const slots = [a, b, c];
+        const score = scoreCoverageDraftTrio(
+          slots.map((slot) => rentals[slot]!),
+          weights,
+        );
+        if (bestScore === null || compareCoverageScore(score, bestScore) > 0) {
+          bestScore = score;
+          bestSlots = slots;
+        }
+      }
+    }
+  }
+  if (bestSlots === null || bestScore === null) {
+    // Fewer than three rentals offered -- never happens in play (the draft
+    // screen always offers six); rent whatever is there, in slot order.
+    const slots = rentals.map((_, slot) => slot);
+    return { picks: slots, score: scoreCoverageDraftTrio(rentals, weights) };
+  }
+  const bstOf = (slot: number): number =>
+    BASE_STAT_TOTAL_BY_SPECIES.get(rentals[slot]!.species) ?? 0;
+  const picks = [...bestSlots].sort((x, y) =>
+    bstOf(y) !== bstOf(x) ? bstOf(y) - bstOf(x) : x - y,
+  );
+  return { picks, score: bestScore };
+}
+
+// ---------------------------------------------------------------------------
 // "oracle-strength" policy: the ENGINE'S OWN source-derived Factory AI move
 // scorer, run for the PLAYER's side.
 //
@@ -935,7 +1139,9 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * built and measured (M-B step 2 part B, rung 2) but stays WITHHELD: it wins
  * round 2 more often but collapses at challenge 3+ (7 vs 40 completions at
  * carry >= 21, n=180 — docs/soak-draft-heuristic-n180-2026-08-22.md), so
- * "winning"'s draft is unchanged from "full"'s random 3-of-6; (5) at the
+ * "winning"'s draft is unchanged from "full"'s random 3-of-6 (a
+ * coverage-first draft is available opt-in as "winning-coverage" below);
+ * (5) at the
  * action menu, when the active is "walled" (every legal move is non-damaging
  * or 0x-immune
  * against the opponent's live types -- a merely resisted move, e.g.
@@ -985,8 +1191,32 @@ const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
  * barrier, the policy falls back to "winning"'s own
  * `pickWinningFightSlot` choice and logs `oracle-strength fallback:
  * <reason>` (counted in `SeedResult.oracleStrengthFallbacks`).
+ *
+ * "winning-coverage": opt-in, identical to "winning" in every respect (same
+ * fight/switch/swap-decline/continuation decisions, the same
+ * exploration/timing rolls, the same shared-RNG-stream draws -- the
+ * constructor's draft shuffle is still DRAWN and then overwritten) EXCEPT
+ * the draft, which picks the 3-of-6 rentals maximising a COVERAGE-FIRST
+ * lexicographic score instead of a random 3-of-6 (see
+ * `pickCoverageDraftPicks`): (offensive, defensive, bst), where offensive =
+ * the number of the 17 Gen-3 defending types some damaging move in the trio
+ * hits super-effectively, each weighted `1 + occurrences among the six
+ * offered rentals' own types` (the rental ranges are symmetric, so the
+ * offers sample the tier's opponent pool -- scout doc §2); defensive =
+ * distinct trio types minus shared 4x weaknesses; bst = the trio's summed
+ * base-stat total, the WITHHELD bulk+STAB heuristic's own axis demoted to a
+ * pure tiebreak because it starves type coverage (scout doc §3 lever 4).
+ * Deterministic given the six offers -- no RNG in the pick. The measurement
+ * instrument for that doc's lever 4' (the last open challenge-4 lever);
+ * results in its "Result -- lever 4'" section.
  */
-export type SoakPolicy = "full" | "vanilla" | "winning" | "winning-swap" | "oracle-strength";
+export type SoakPolicy =
+  | "full"
+  | "vanilla"
+  | "winning"
+  | "winning-swap"
+  | "oracle-strength"
+  | "winning-coverage";
 /** Test-only deterministic policy for the source-proven seven-win carrier. */
 type PlayerPolicy = SoakPolicy | "strong-route";
 
@@ -1019,22 +1249,25 @@ export class RandomPlayer {
   public oracleStrengthFallbacks = 0;
   /** "winning-swap" only: the current swap screen's row plan, built once per swap occurrence. */
   private swapPlan: WinningSwapPlan | null = null;
+  /** "winning-coverage" only: identity of the offer the current draft plan was scored from, so each fresh round's draft re-scores. */
+  private coverageDraftOfferKey: string | null = null;
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
 
-  /** "full", "winning", "winning-swap", and "oracle-strength" share the same menu/target exploration rolls. */
+  /** "full", "winning", "winning-swap", "oracle-strength", and "winning-coverage" share the same menu/target exploration rolls. */
   private get explores(): boolean {
     return this.policy === "full" || this.policy === "winning"
-      || this.policy === "winning-swap" || this.policy === "oracle-strength";
+      || this.policy === "winning-swap" || this.policy === "oracle-strength"
+      || this.policy === "winning-coverage";
   }
 
-  /** "winning", "winning-swap", and "oracle-strength" share every winning-biased decision except the swap offer/screen and (for "oracle-strength") the fight slot. */
+  /** "winning", "winning-swap", "oracle-strength", and "winning-coverage" share every winning-biased decision except the swap offer/screen, (for "oracle-strength") the fight slot, and (for "winning-coverage") the draft. */
   private get winningLike(): boolean {
     return this.policy === "winning" || this.policy === "winning-swap"
-      || this.policy === "oracle-strength";
+      || this.policy === "oracle-strength" || this.policy === "winning-coverage";
   }
 
   constructor(rng: Rng, log: ActionLog, policy: PlayerPolicy) {
@@ -1160,6 +1393,7 @@ export class RandomPlayer {
 
   private onDraft(state: EngineState): ReadonlySet<GbaButton> {
     const draft = state.draftScreen;
+    if (this.policy === "winning-coverage") this.planCoverageDraft(state, draft);
     const reveal = draft.confirmReveal;
     if (reveal) {
       if (reveal.phase !== "shown") return NO_BUTTONS;
@@ -1175,7 +1409,11 @@ export class RandomPlayer {
       }
       this.note(state, "draft confirm: A on NO (decline)");
       this.draft.rented = 2; // the 3rd pick is dropped; re-rent below
-      this.draft.picks[2] = this.rng.int(6);
+      // "winning-coverage" re-rents the SAME third slot its coverage score
+      // chose (the trio is the policy); the roll is still drawn so its RNG
+      // stream stays aligned with "winning"'s at every later decision.
+      const rerolledThirdPick = this.rng.int(6);
+      if (this.policy !== "winning-coverage") this.draft.picks[2] = rerolledThirdPick;
       return this.press("A", 8);
     }
     if (draft.mode === "cursor") {
@@ -1208,6 +1446,31 @@ export class RandomPlayer {
     this.note(state, `draft: RENT slot ${draft.cursorPos}`);
     this.draft.rented += 1;
     return this.press("A", 10);
+  }
+
+  /**
+   * "winning-coverage" only: score the six offered rentals and replace the
+   * constructor's random plan with the coverage-first trio. Keyed on the
+   * offer itself (species + personality of all six), so a NEW round's draft
+   * re-scores while every frame of the SAME draft reuses the decision --
+   * including after a NO decline, which re-rents the same third pick.
+   */
+  private planCoverageDraft(state: EngineState, draft: EngineState["draftScreen"]): void {
+    if (draft.rentals.length < 3) return;
+    const key = draft.rentals.map((rental) => `${rental.species}#${rental.personality}`).join("|");
+    if (key === this.coverageDraftOfferKey) return;
+    this.coverageDraftOfferKey = key;
+    const chosen = pickCoverageDraftPicks(draft.rentals);
+    // `draft.rented` is deliberately NOT reset: it gates only the one-shot
+    // SUMMARY peek, and resetting it would draw an extra `rng.chance` on a
+    // later round's draft that "winning" never draws.
+    this.draft.picks = [...chosen.picks];
+    this.note(
+      state,
+      `draft: coverage trio ${chosen.picks.join(",")} `
+        + `(off ${chosen.score.offensive} def ${chosen.score.defensive} bst ${chosen.score.bst}) `
+        + chosen.picks.map((slot) => draft.rentals[slot]!.species).join(" "),
+    );
   }
 
   private nextDraftTarget(selectedIds: readonly number[]): number | null {
@@ -1934,6 +2197,7 @@ export const DEFAULT_MAX_FRAMES_BY_POLICY: Record<SoakPolicy, number> = {
   winning: 1_000_000,
   "winning-swap": 1_000_000,
   "oracle-strength": 1_000_000,
+  "winning-coverage": 1_000_000,
 };
 
 /** An explicit `maxFrames` always wins; otherwise resolve per policy. */

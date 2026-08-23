@@ -28,6 +28,12 @@
 //                      running for the player's side under the full mask 7
 //                      -- the lever-2 measurement instrument of
 //                      docs/soak-policy-strength-scout-2026-08-23.md)
+//                      or "winning-coverage" (opt-in: identical to
+//                      "winning" except the draft, which rents the 3-of-6
+//                      offered rentals maximising a coverage-first
+//                      (offensive coverage, defensive diversity, base-stat
+//                      total) score instead of a random 3-of-6 -- the
+//                      lever-4' measurement instrument of the same doc)
 //   --max-frames N     per-seed tick budget before reporting HANG (default: resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
@@ -72,9 +78,11 @@ function main(): void {
   if (
     policy !== "full" && policy !== "vanilla" && policy !== "winning"
     && policy !== "winning-swap" && policy !== "oracle-strength"
+    && policy !== "winning-coverage"
   ) {
     console.error(
-      `bad --policy: ${policy} (want full|vanilla|winning|winning-swap|oracle-strength)`,
+      `bad --policy: ${policy} `
+        + `(want full|vanilla|winning|winning-swap|oracle-strength|winning-coverage)`,
     );
     process.exit(2);
   }
