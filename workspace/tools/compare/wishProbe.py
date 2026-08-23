@@ -48,6 +48,10 @@ def main() -> None:
     software = names["gMain"] + 0x38
     battler_ids = sy["gBattlerSpriteIds"]
     rng2 = sy["gRng2Value"]
+    bg_names = tuple(name for name in (
+        "gBattle_BG0_X", "gBattle_BG0_Y", "gBattle_BG1_X", "gBattle_BG1_Y",
+        "gBattle_BG2_X", "gBattle_BG2_Y", "gBattle_BG3_X", "gBattle_BG3_Y",
+    ) if name in names)
     RGB.mkdir(parents=True, exist_ok=True)
 
     def u16(address):
@@ -86,6 +90,7 @@ def main() -> None:
         info, track = sy[f"gMPlayInfo_{name}"], sy[f"gMPlayTrack_{name}"]
         return {
             "rawInfo": raw(info, 0x40), "songHeader": u32(info),
+            "songHeaderIdentity": ident(u32(info)),
             "status": u32(info + 4),
             "tracks": [
                 {
@@ -93,13 +98,20 @@ def main() -> None:
                     "panX": s8(track + i * 0x50 + 0x15),
                     "raw": raw(track + i * 0x50, 0x50),
                 }
-                for i in range(3)
+                for i in range(4)
             ],
         }
     regs = {
         "dispcnt": 0x04000000, "bg0cnt": 0x04000008,
         "bg1cnt": 0x0400000A, "bg2cnt": 0x0400000C,
-        "bg3cnt": 0x0400000E, "bldcnt": 0x04000050,
+        "bg3cnt": 0x0400000E,
+        "bg0hofs": 0x04000010, "bg0vofs": 0x04000012,
+        "bg1hofs": 0x04000014, "bg1vofs": 0x04000016,
+        "bg2hofs": 0x04000018, "bg2vofs": 0x0400001A,
+        "bg3hofs": 0x0400001C, "bg3vofs": 0x0400001E,
+        "win0h": 0x04000040, "win0v": 0x04000044,
+        "winin": 0x04000048, "winout": 0x0400004A,
+        "mosaic": 0x0400004C, "bldcnt": 0x04000050,
         "bldalpha": 0x04000052, "bldy": 0x04000054,
     }
     rows, frame, started, done = [], 0, False, False
@@ -108,10 +120,11 @@ def main() -> None:
         nonlocal started, done
         if done:
             return
+        snapshot = lab.snapshot()
         script = u32(ptr)
         if not started:
             if (
-                lab.snapshot()["engine"]["currentMove"] != 273
+                snapshot["engine"]["currentMove"] != 273
                 or not oracle.read_u8(active)
                 or not (start <= script < end)
             ):
@@ -134,21 +147,45 @@ def main() -> None:
             for i in range(16)
             if oracle.read_u8((base := tasks + i * 0x28) + 4)
         ]
+        attacker = oracle.read_u8(names["gBattleAnimAttacker"])
+        target = oracle.read_u8(names["gBattleAnimTarget"])
+        ids = [oracle.read_u8(battler_ids + index) for index in range(4)]
         rows.append({
             "frame": frame, "sha256": hashlib.sha256(rgb).hexdigest(),
+            "animScriptActive": bool(oracle.read_u8(active)),
             "gAnimScriptActive": oracle.read_u8(active),
             "script": ident(script),
+            "scriptPtr": script, "scriptPtrParity": script & 1,
+            "scriptOwner": "Move_WISH" if start <= script < end else None,
             "scriptOffset": script - start if start <= script < end else None,
             "scriptWait": s8(wait),
+            "animArgs": [s16(names["gBattleAnimArgs"] + i * 2) for i in range(8)],
             "visualTaskCount": oracle.read_u8(sy["gAnimVisualTaskCount"]),
             "soundTaskCount": oracle.read_u8(sy["gAnimSoundTaskCount"]),
             "rng2Value": u32(rng2),
+            "animationRng": u32(rng2),
             "tasks": live_tasks, "sprites": live,
-            "battlers": lab.snapshot()["battlers"],
+            "spriteFlags": [oracle.read_u8(sprites + i * 0x44 + 0x3e) for i in range(64)],
+            "spriteOrder": [oracle.read_u8(names["sSpriteOrder"] + i) for i in range(64)],
+            "animationBattlers": {"attacker": attacker, "target": target, "spriteIds": ids},
+            "battlerSprites": {"attacker": sprite(ids[attacker]), "target": sprite(ids[target])},
+            "battlers": snapshot["battlers"],
+            "parties": snapshot["parties"],
+            "engine": snapshot["engine"],
+            "immutableState": {
+                key: snapshot[key] for key in (
+                    "rngValue", "battleOutcome", "weather", "weatherTurns",
+                    "sideStatuses", "sideConditions",
+                )
+            },
             "playerSprite": sprite(oracle.read_u8(battler_ids)),
             "opponentSprite": sprite(oracle.read_u8(battler_ids + 1)),
             "softwareOam": [raw(software + i * 8, 8) for i in range(128)],
             "hardwareOam": [raw(0x07000000 + i * 8, 8) for i in range(128)],
+            "softwareMatrices": [
+                [s16(matrices + i * 8 + offset) for offset in (0, 2, 4, 6)]
+                for i in range(32)
+            ],
             "hardwareMatrices": [
                 [s16(0x07000006 + i * 0x20 + j) for j in (0, 8, 16, 24)]
                 for i in range(32)
@@ -163,6 +200,8 @@ def main() -> None:
             "paletteTags": [u16(tags + i * 2) for i in range(16)],
             "tileTags": [u16(tile_tags + i * 2) for i in range(128)],
             "registers": {name: u16(address) for name, address in regs.items()},
+            "battleBg": {name: s16(names[name]) for name in bg_names},
+            "audio": {"SE1": player("SE1"), "SE2": player("SE2")},
             "se1": player("SE1"), "se2": player("SE2"),
         })
 
@@ -205,12 +244,22 @@ def main() -> None:
             prior = current
         lifecycle[template] = starts
     result = {
-        "schema": "wish-dense-evidence/v1", "setup": setup,
+        "schema": "wish-dense-evidence/v2", "profile": "battle-scene-on",
+        "move": 273, "setup": setup,
         "sourceWindow": {
             "startFrame": rows[0]["frame"], "endFrame": rows[-1]["frame"],
             "frameCount": len(rows),
         },
         "sourceSymbols": {"Move_WISH": start, "Move_STOCKPILE": end},
+        "sourcePointerContract": {
+            "start": start, "endExclusive": end,
+            "observedAddresses": sorted({row["scriptPtr"] for row in rows}),
+            "observedParities": sorted({
+                row["scriptPtrParity"] for row in rows
+                if row["scriptOwner"] == "Move_WISH"
+            }),
+        },
+        "bgSymbols": list(bg_names),
         "lifecycleCounts": lifecycle, "topology": topology, "frames": rows,
     }
     OUTPUT.write_text(json.dumps(result, separators=(",", ":")) + "\n")

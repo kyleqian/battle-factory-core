@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { readFileSync, realpathSync } from "node:fs";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import {
   createSceneOnMovePresentation,
@@ -16,6 +16,7 @@ type Fixture = SceneOnWishConfig & {
   appStage: { presentationAge: number };
   sourceWindow: { startFrame: number; endFrame: number; frameCount: number };
   evidenceSha256: string; rawRgbSha256: string;
+  changeMap?: string; changeMapSha256?: string;
   lifecycleCounts: Record<string, number>;
   topology: Record<string, string[]>;
 };
@@ -28,10 +29,13 @@ type Frame = {
   frame: number; sha256: string; scriptOffset: number | null;
   gAnimScriptActive: number; visualTaskCount: number; soundTaskCount: number;
   sprites: Sprite[]; softwareOam: string[]; hardwareOam: string[];
-  hardwareMatrices: number[][]; fadedPalette: number[];
+  softwareMatrices: number[][]; hardwareMatrices: number[][]; fadedPalette: number[];
   unfadedPalette: number[]; hardwarePalette: number[];
   paletteTags: number[]; tileTags: number[]; registers: Record<string, number>;
   tasks: { func: { symbol: string | null } }[]; se1: unknown; se2: unknown;
+  battlers: unknown; parties: unknown; engine: unknown;
+  immutableState: { rngValue: number }; animationRng: number;
+  animScriptActive: boolean;
 };
 type Probe = {
   schema: string; sourceWindow: Fixture["sourceWindow"];
@@ -40,7 +44,8 @@ type Probe = {
 };
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), "../..");
-const paths = process.argv.slice(2);
+const writeMaps = process.argv.includes("--write-maps");
+const paths = process.argv.slice(2).filter((path) => path !== "--write-maps");
 if (paths.length !== 2) {
   throw new Error("usage: wishPortable.ts <player fixture> <opponent fixture>");
 }
@@ -79,15 +84,16 @@ function verify(path: string, runNumber: number): void {
   const fields = probe.frames.every((frame) =>
     (frame.scriptOffset === null || typeof frame.scriptOffset === "number")
     && frame.softwareOam.length === 128 && frame.hardwareOam.length === 128
-    && frame.hardwareMatrices.length === 32 && frame.fadedPalette.length === 512
+    && frame.softwareMatrices.length === 32 && frame.hardwareMatrices.length === 32
+    && frame.fadedPalette.length === 512
     && frame.unfadedPalette.length === 512 && frame.hardwarePalette.length === 512
     && frame.paletteTags.length === 16 && frame.tileTags.length === 128
-    && Object.keys(frame.registers).length === 8
+    && Object.keys(frame.registers).length === 21
     && frame.se1 !== null && frame.se2 !== null
   );
   if (
     fixture.schema !== "wish-portable-evidence/v1"
-    || probe.schema !== "wish-dense-evidence/v1"
+    || probe.schema !== "wish-dense-evidence/v2"
     || !same(probe.sourceWindow, fixture.sourceWindow)
     || !same(probe.lifecycleCounts, fixture.lifecycleCounts)
     || !same(probe.topology, fixture.topology)
@@ -101,6 +107,8 @@ function verify(path: string, runNumber: number): void {
   });
   const raw = createHash("sha256");
   const failures: string[] = [];
+  const changeRows: Array<Record<string, unknown>> = [];
+  let previousRgb: Buffer | null = null;
   const firstWish = probe.frames.flatMap((frame) => frame.sprites)
     .find((sprite) => sprite.template.symbol === "gWishStarSpriteTemplate");
   if (!firstWish) throw new Error("Wish receipt omitted gWishStarSpriteTemplate");
@@ -144,6 +152,30 @@ function verify(path: string, runNumber: number): void {
       rgbDir, `${String(oracle.frame).padStart(5, "0")}.rgb`,
     ));
     raw.update(rgb);
+    let changedPixels = 0;
+    let minX = 240; let minY = 160; let maxX = -1; let maxY = -1;
+    if (previousRgb) {
+      for (let pixel = 0; pixel < 240 * 160; pixel += 1) {
+        const offset = pixel * 3;
+        if (rgb[offset] === previousRgb[offset]
+          && rgb[offset + 1] === previousRgb[offset + 1]
+          && rgb[offset + 2] === previousRgb[offset + 2]) continue;
+        changedPixels += 1;
+        const x = pixel % 240; const y = Math.floor(pixel / 240);
+        minX = Math.min(minX, x); minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+      }
+    }
+    previousRgb = rgb;
+    changeRows.push({
+      age, frame: oracle.frame, scriptOffset: oracle.scriptOffset,
+      active: oracle.animScriptActive, changedPixels,
+      bounds: changedPixels ? [minX, minY, maxX, maxY] : null,
+      backgroundBlackCoeff: component.backgroundBlackCoeff,
+      effects: expected,
+      taskSymbols: oracle.tasks.map((task) => task.func.symbol).filter(Boolean),
+      paletteTags: oracle.paletteTags, tileTags: oracle.tileTags,
+    });
     const engine: EngineState = {
       ...createInitialState(), rngMode: "frontierBattle",
       sceneOnPresentation: { ...stage, age },
@@ -157,19 +189,59 @@ function verify(path: string, runNumber: number): void {
         || app[pixel * 4 + 2] !== rgb[pixel * 3 + 2]
       ) diff += 1;
     }
-    const cleanup = index !== WISH_FRAME_COUNT - 1
-      || (!component.active && !oracle.gAnimScriptActive
-        && oracle.visualTaskCount === 0);
+    const immutable = same(oracle.battlers, probe.frames[0]!.battlers)
+      && same(oracle.parties, probe.frames[0]!.parties)
+      && same(oracle.engine, probe.frames[0]!.engine)
+      && same(oracle.immutableState, probe.frames[0]!.immutableState);
+    const latch = index === 0 || (
+      same(oracle.hardwareOam, probe.frames[index - 1]!.softwareOam)
+      && same(oracle.hardwareMatrices, probe.frames[index - 1]!.softwareMatrices)
+      && same(oracle.hardwarePalette, probe.frames[index - 1]!.fadedPalette)
+    );
+    const cleanup = index !== WISH_FRAME_COUNT - 1 || (
+      !component.active && !oracle.animScriptActive
+      && oracle.visualTaskCount === 0 && oracle.soundTaskCount === 0
+      && !oracle.sprites.some((sprite) => tracked.has(sprite.template.symbol ?? ""))
+      && oracle.tasks.length === 0
+    );
     if (
       createHash("sha256").update(rgb).digest("hex") !== oracle.sha256
-      || !seamMatch || !componentMatch || diff !== 0 || !cleanup
+      || !seamMatch || !componentMatch || diff !== 0
+      || !immutable || !latch || !cleanup
     ) failures.push(
       `frame ${oracle.frame}/age ${age}: seam=${seamMatch} `
-      + `component=${componentMatch} diff=${diff} cleanup=${cleanup}`,
+      + `component=${componentMatch} diff=${diff} immutable=${immutable} `
+      + `latch=${latch} cleanup=${cleanup}`,
     );
   }
   const rawDigest = raw.digest("hex");
   if (rawDigest !== fixture.rawRgbSha256) failures.push(`raw digest ${rawDigest}`);
+  const normalizedMap = `${JSON.stringify({
+    schema: "wish-normalized-change-map/v1",
+    orientation: fixture.orientation,
+    sourceWindow: probe.sourceWindow,
+    latches: {
+      hardwareOamEqualsPrecedingSoftware: "270/270",
+      hardwareMatricesEqualsPrecedingSoftware: "270/270",
+      hardwarePaletteEqualsPrecedingFaded: "270/270",
+    },
+    gameplayRngTransitions: new Set(
+      probe.frames.map((frame) => frame.immutableState.rngValue),
+    ).size - 1,
+    animationRngTransitions: probe.frames.slice(1).filter(
+      (frame, index) => frame.animationRng !== probe.frames[index]!.animationRng,
+    ).length,
+    rows: changeRows,
+  }, null, 2)}\n`;
+  const mapDigest = createHash("sha256").update(normalizedMap).digest("hex");
+  if (writeMaps) {
+    if (!fixture.changeMap) throw new Error(`${fixture.orientation}: missing changeMap path`);
+    writeFileSync(resolve(fixture.changeMap), normalizedMap);
+  } else if (!fixture.changeMap || !fixture.changeMapSha256
+    || readFileSync(resolve(fixture.changeMap), "utf8") !== normalizedMap
+    || fixture.changeMapSha256 !== mapDigest) {
+    failures.push(`normalized change map ${mapDigest}`);
+  }
   if (failures.length) throw new Error(failures.slice(0, 200).join("\n"));
   const prior = fresh.get(fixture.orientation);
   if (prior && !same(prior, { evidence, raw: rawDigest })) {
@@ -178,7 +250,7 @@ function verify(path: string, runNumber: number): void {
   fresh.set(fixture.orientation, { evidence, raw: rawDigest });
   console.log(
     `${fixture.orientation} run ${runNumber}: `
-    + `${probe.frames.length}/${WISH_FRAME_COUNT} exact`,
+    + `${probe.frames.length}/${WISH_FRAME_COUNT} exact map=${mapDigest}`,
   );
 }
 

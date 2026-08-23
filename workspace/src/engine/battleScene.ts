@@ -1796,8 +1796,6 @@ const moonlightArt = moonlightAsset as {
 const wishArt = wishAsset as {
   goldStars: { tileset: Tileset; palette: RgbColor[] };
   sparkle2: { tileset: Tileset; palette: RgbColor[] };
-  illumiseBack: { tileset: Tileset; palette: RgbColor[] };
-  illumiseFront: { tileset: Tileset; palette: RgbColor[] };
 };
 const milkDrinkArt = milkDrinkAsset as {
   milkBottle: { tileset: Tileset; palette: RgbColor[] };
@@ -35011,34 +35009,29 @@ export function renderSceneOnMovePresentation(
   if (state.config.move === "WISH") {
     const view = sceneOnWishView(state);
     const displayed = sceneOnWishView({ ...state, age: state.age - 1 });
-    const playerToOpponent =
-      view.attacker.species === "ILLUMISE"
-      && view.attacker.geometry.side === "player"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "opponent";
-    const opponentToPlayer =
-      view.attacker.species === "ILLUMISE"
-      && view.attacker.geometry.side === "opponent"
-      && view.target.species === "ONIX"
-      && view.target.geometry.side === "player";
-    if (!playerToOpponent && !opponentToPlayer) {
-      throw new Error(
-        `unsupported staged WISH pair ${view.attacker.species}->${view.target.species}`,
-      );
+    const attackerIsPlayer = view.attacker.geometry.side === "player";
+    if (attackerIsPlayer === (view.target.geometry.side === "player")) {
+      throw new Error("WISH presentation requires battlers on opposite sides");
     }
-    const attackerSource = playerToOpponent
-      ? wishArt.illumiseBack : wishArt.illumiseFront;
-    const attackerSprite = playerToOpponent
-      ? attackerSource
-      : {
-          ...attackerSource,
-          tileset: {
-            columns: 8,
-            rows: 8,
-            tiles: attackerSource.tileset.tiles.slice(0, 64),
-          },
-        };
-    const targetSprite = playerToOpponent ? onixFrontSprite : onixBackSprite;
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+          battler.species
+        ];
+        if (!source) throw new Error(`WISH missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+        battler.species
+      ];
+      if (!source) throw new Error(`WISH missing opponent-front art for ${battler.species}`);
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const attackerSprite = battlerArt(view.attacker);
+    const targetSprite = battlerArt(view.target);
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -35114,13 +35107,13 @@ export function renderSceneOnMovePresentation(
         );
       }
     }
-    const opponentSpecies = playerToOpponent ? "ONIX" : "ILLUMISE";
-    const playerSpecies = playerToOpponent ? "ILLUMISE" : "ONIX";
+    const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
+    const playerBattler = attackerIsPlayer ? view.attacker : view.target;
     drawSendOutHealthbox(
       fb,
       0,
       composeOpponentHealthbox(healthboxAssemblyAssets, {
-        name: opponentSpecies,
+        name: opponentBattler.species,
         level: 50,
         gender: state.config.fieldProfile.opponentGender ?? "male",
         hpFraction: state.config.fieldProfile.opponentHp
@@ -35131,7 +35124,7 @@ export function renderSceneOnMovePresentation(
     drawComposedPlayerHealthbox(
       fb,
       composePlayerHealthbox(playerHealthboxAssets, {
-        name: playerSpecies,
+        name: playerBattler.species,
         level: 50,
         gender: state.config.fieldProfile.playerGender ?? "male",
         hpFraction: state.config.fieldProfile.playerHp
@@ -35149,7 +35142,9 @@ export function renderSceneOnMovePresentation(
     );
     drawMessageTextLines(
       fb,
-      playerToOpponent ? "ILLUMISE used" : "Foe ILLUMISE used",
+      attackerIsPlayer
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
       "WISH!",
       99,
     );
