@@ -15,7 +15,7 @@ const fixture = JSON.parse(readFileSync(
 
 function readRows(orientation: "player-back" | "opponent-front"): any[] {
   const path = fixture.orientations[orientation].denseState as string;
-  return JSON.parse(gunzipSync(readFileSync(path))).frames;
+  return JSON.parse(gunzipSync(readFileSync(path)).toString("utf8")).frames;
 }
 
 function sha256(path: string): string {

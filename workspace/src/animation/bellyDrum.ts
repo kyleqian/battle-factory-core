@@ -119,7 +119,7 @@ function noteSlotForIndex(index: number): number {
 }
 
 function sourceOffsetAtAge(age: number): number {
-  let selected = BELLY_DRUM_SOURCE_OFFSETS[0]!;
+  let selected: number = BELLY_DRUM_SOURCE_OFFSETS[0]!;
   for (let index = 0; index < BELLY_DRUM_SOURCE_OFFSET_FIRST_AGES.length; index += 1) {
     if (age >= BELLY_DRUM_SOURCE_OFFSET_FIRST_AGES[index]!) {
       selected = BELLY_DRUM_SOURCE_OFFSETS[index]!;
