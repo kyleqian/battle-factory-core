@@ -20,6 +20,7 @@ import {
   Rng,
   combinedDraftBstFloor,
   coverageDraftTypeWeights,
+  createStartCarryState,
   pickCombinedDraftPicks,
   pickCoverageDraftPicks,
   runSeed,
@@ -186,5 +187,43 @@ describe("winning-combined soak policy: coverage draft with a strength floor", (
         .map((entry) => entry.slot);
       expect(rentedInOrder, `seed ${seed}`).toEqual([...expected.picks]);
     }
+  });
+});
+
+describe("createStartCarryState rngWalk: the per-seed variance instrument (--vary-rng)", () => {
+  // The engine is seed-invariant, so a policy whose decisions never consume
+  // the player RNG (the deterministic coverage drafts) collapses every seed
+  // into ONE trajectory -- the 2026-08-23 winning-combined carry-28 sweep
+  // returned 30 identical chronologies. The walk gives each seed its own
+  // boot RNG cursor, exactly as real players' cursors differ by arrival
+  // frame.
+  const offerKey = (state: ReturnType<typeof createStartCarryState>): string =>
+    state.draftScreen.rentals
+      .map((rental) => `${rental.species}#${rental.personality}`)
+      .join("|");
+
+  it("walk 0 stays byte-identical to today's unwalked state", () => {
+    expect(createStartCarryState(28, 0)).toEqual(createStartCarryState(28));
+    expect(createStartCarryState(0, 0)).toEqual(createStartCarryState(0));
+  });
+
+  it("distinct walks generate distinct legal six-offer drafts at the same carry", () => {
+    const keys = [0, 1, 2, 7].map((walk) => {
+      const state = createStartCarryState(28, walk);
+      expect(state.draftScreen.rentals.length).toBe(6);
+      expect(state.factoryCarry?.factoryWinStreak).toBe(28);
+      return offerKey(state);
+    });
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("a walked carry-0 boot takes the generated path, not the pinned anchor snapshot", () => {
+    const walked = createStartCarryState(0, 5);
+    expect(walked.draftScreen.rentals.length).toBe(6);
+    expect(offerKey(walked)).not.toBe(offerKey(createStartCarryState(0)));
+  });
+
+  it("the same walk is deterministic", () => {
+    expect(offerKey(createStartCarryState(28, 3))).toBe(offerKey(createStartCarryState(28, 3)));
   });
 });

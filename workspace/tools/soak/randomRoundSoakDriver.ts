@@ -42,7 +42,7 @@ import {
   generateFactoryChallengeDraft,
   type FactoryCarry,
 } from "../../src/engine/factoryRoundChaining.ts";
-import { ANCHOR_RNG_VALUE } from "../../src/engine/rng.ts";
+import { ANCHOR_RNG_VALUE, advanceRngValue } from "../../src/engine/rng.ts";
 import { ANCHOR_FACTORY_METADATA } from "../../src/engine/factoryAnchorSession.ts";
 import {
   chooseFactoryAiScoredDecision,
@@ -2149,14 +2149,33 @@ function factorySymbolsCountForStartCarry(startCarry: number): 0 | 1 | 2 {
  * room -> battle room path (unmodified) later builds the round's orchestrator
  * from this same carry, exactly like a real chain.
  *
- * `startCarry === 0` returns `createInitialState()` verbatim -- required to
- * stay byte-identical to today's default/omitted behavior, and safer than
- * relying on the generated path to coincidentally reproduce the anchor's own
- * pinned battle-1 draft records bit-for-bit.
+ * `startCarry === 0` (with no `rngWalk`) returns `createInitialState()`
+ * verbatim -- required to stay byte-identical to today's default/omitted
+ * behavior, and safer than relying on the generated path to coincidentally
+ * reproduce the anchor's own pinned battle-1 draft records bit-for-bit.
+ *
+ * `rngWalk` (opt-in, default 0 = today's behavior, byte-identical) advances
+ * the boot RNG cursor `rngWalk` LCG steps past `ANCHOR_RNG_VALUE` before
+ * generating the draft -- the exact mechanism by which two real players'
+ * draft offers differ (the GBA RNG advances every idle frame, so the cursor
+ * at draft time is arrival-timing-dependent). THE VARIANCE INSTRUMENT for
+ * deterministic-draft policies: the engine itself is seed-invariant, so
+ * without a walk every seed of a policy whose decisions don't consume the
+ * player RNG (winning-coverage / winning-combined drafts) collapses into
+ * essentially ONE trajectory -- 30 seeds, one sample (found 2026-08-23; the
+ * winning-combined carry-28 sweep returned 30 identical chronologies).
+ * A nonzero walk with `startCarry === 0` takes the generated carry-0 path
+ * (a legal fresh challenge-0 draft off the walked cursor) instead of the
+ * pinned anchor snapshot, so anchor-style sweeps can be varied too.
  */
-export function createStartCarryState(startCarry: number): EngineState {
+export function createStartCarryState(startCarry: number, rngWalk = 0): EngineState {
   validateStartCarry(startCarry);
-  if (startCarry === 0) return createInitialState();
+  if (!Number.isInteger(rngWalk) || rngWalk < 0) {
+    throw new Error(`bad rngWalk: ${rngWalk} (want a non-negative integer)`);
+  }
+  if (startCarry === 0 && rngWalk === 0) return createInitialState();
+  let bootRngValue = ANCHOR_RNG_VALUE;
+  for (let step = 0; step < rngWalk; step += 1) bootRngValue = advanceRngValue(bootRngValue);
   const carry: FactoryCarry = Object.freeze({
     factoryWinStreak: startCarry,
     factorySymbolsCount: factorySymbolsCountForStartCarry(startCarry),
@@ -2164,13 +2183,13 @@ export function createStartCarryState(startCarry: number): EngineState {
     rentsCount: 0,
     playerTrainerId: ANCHOR_FACTORY_METADATA.playerTrainerId,
   });
-  const { generation, draftScreen } = generateFactoryChallengeDraft(carry, ANCHOR_RNG_VALUE);
+  const { generation, draftScreen } = generateFactoryChallengeDraft(carry, bootRngValue);
   return {
     ...createInitialState(),
     draftScreen,
     rngValue: generation.rngValue,
     factoryCarry: carry,
-    pendingGeneratedRound: Object.freeze({ rngValueBefore: ANCHOR_RNG_VALUE, carry }),
+    pendingGeneratedRound: Object.freeze({ rngValueBefore: bootRngValue, carry }),
   };
 }
 
@@ -2186,10 +2205,13 @@ export type RunOptions = {
   /** Test-only override; intentionally unavailable from the CLI policy flag. */
   testPolicy?: "strong-route";
   /**
-   * Test-only initial-state seam. The default is exactly the production
-   * draft anchor returned by createInitialState(); the CLI never supplies it.
+   * Initial-state seam. The default is exactly the production draft anchor
+   * returned by createInitialState(); the CLI supplies it for `--start-carry`
+   * / `--vary-rng` (via `createStartCarryState`), tests for staged states.
+   * Receives the running seed so a factory can vary the boot per seed
+   * (`--vary-rng`'s per-seed RNG walk); ignore it for a fixed state.
    */
-  stateFactory?: () => EngineState;
+  stateFactory?: (seed: number) => EngineState;
   /** Opt into read-only route diagnostics without changing ordinary results. */
   collectDiagnostics?: boolean;
   /**
@@ -2308,7 +2330,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const rng = new Rng(seed);
   const log = new ActionLog(options.verbose, options.onNote);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy);
-  let state = options.stateFactory?.() ?? createInitialState();
+  let state = options.stateFactory?.(seed) ?? createInitialState();
   let frame = 0;
   let firstEndState: string | null = null;
   let chainingCommitted = false;

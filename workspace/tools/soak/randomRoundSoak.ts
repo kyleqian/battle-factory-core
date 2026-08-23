@@ -49,6 +49,20 @@
 //                      natural chaining almost never reaches. N must be a
 //                      multiple of 7 in 0..49 (rejected otherwise); 0 or
 //                      omitted is byte-identical to today.
+//   --vary-rng         opt-in: advance the boot RNG cursor by the seed (one
+//                      LCG step per seed unit) before generating the
+//                      start-carry draft, so every seed opens on different
+//                      offers. THE VARIANCE INSTRUMENT for deterministic-
+//                      draft policies (winning-coverage/winning-combined),
+//                      whose seeds otherwise collapse into one trajectory
+//                      because the engine itself is seed-invariant. Works
+//                      with --start-carry 0/omitted too (generated carry-0
+//                      draft off the walked cursor instead of the pinned
+//                      anchor snapshot).
+//   --first-round      stop each seed at its FIRST round's own decided
+//                      outcome (endState roundComplete/roundLost) instead of
+//                      chaining to the frame budget -- the direct
+//                      rounds-won-at-boot measurement
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
 //   --verbose          per-action log for a single-seed repro
@@ -75,6 +89,8 @@ function main(): void {
   };
   const verbose = args.includes("--verbose");
   const milestone = args.includes("--milestone");
+  const varyRng = args.includes("--vary-rng");
+  const firstRound = args.includes("--first-round");
   const singleSeed = getFlag("--seed");
   const seedsRange = getFlag("--seeds") ?? "0:50";
   const renderEvery = Number(getFlag("--render-every") ?? 8);
@@ -125,9 +141,12 @@ function main(): void {
     verbose,
     policy,
     stopAtFirstActionMenu: milestone,
+    stopAtFirstRoundDecision: firstRound,
     stallFrames,
     maxRounds,
-    ...(startCarry !== 0 ? { stateFactory: () => createStartCarryState(startCarry) } : {}),
+    ...(startCarry !== 0 || varyRng
+      ? { stateFactory: (seed: number) => createStartCarryState(startCarry, varyRng ? seed : 0) }
+      : {}),
   };
   const results: SeedResult[] = [];
   const startedAt = Date.now();
