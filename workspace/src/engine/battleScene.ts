@@ -3588,8 +3588,11 @@ function subTileset(tileset: Tileset, tileRowOffset: number, rows: number): Tile
 }
 
 /** Source port of `DRAW_SPINDA_SPOTS`, applied only to the front frame. */
-function spindaFrontTilesetAtPersonality(personality: number): Tileset {
-  const source = subTileset(dizzyPunchArt.spindaFront.tileset, 0, 8);
+function spindaFrontTilesetAtPersonality(
+  personality: number,
+  frontTileset: Tileset = dizzyPunchArt.spindaFront.tileset,
+): Tileset {
+  const source = subTileset(frontTileset, 0, 8);
   const tiles = source.tiles.map((tile) => tile.slice());
   let bytes = personality >>> 0;
   for (const spot of dizzyPunchArt.spindaSpots) {
@@ -32433,6 +32436,14 @@ export function renderSceneOnMovePresentation(
       ...teeterState,
       age: teeterState.age - 1,
     });
+    // AnimTask_TeeterDanceMovement mutates the live battler after that row's
+    // OAM build. Together with the ordinary software-to-hardware transfer,
+    // its x/x2 displacement reaches scanout from source age - 2. The note
+    // sprites above remain the plain age - 1 OAM class.
+    const displayedAttacker = sceneOnTeeterDanceView({
+      ...teeterState,
+      age: teeterState.age - 2,
+    });
     const playerAttacker = view.attacker.geometry.side === "player";
     const frontAsset = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
       view.attacker.species
@@ -32448,7 +32459,12 @@ export function renderSceneOnMovePresentation(
       ? attackerSource
       : {
           ...attackerSource,
-          tileset: subTileset(attackerSource.tileset, 0, 8),
+          tileset: view.attacker.species === "SPINDA"
+            ? spindaFrontTilesetAtPersonality(
+                teeterState.config.attackerPersonality,
+                attackerSource.tileset,
+              )
+            : subTileset(attackerSource.tileset, 0, 8),
         };
     const targetFrontAsset = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
       view.target.species
@@ -32478,14 +32494,14 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.x + targetIdle.x2,
       view.target.geometry.spriteCorner.y + targetIdle.y2,
     );
-    const attackerDeltaX = displayed.battlerX
+    const attackerDeltaX = displayedAttacker.battlerX
       - teeterState.config.attackerSpriteCenter.x;
     const drawAttacker = () => drawSpriteSheet(
       fb,
       attackerSprite.tileset,
       attackerSprite.palette,
       view.attacker.geometry.spriteCorner.x
-        + attackerDeltaX + displayed.battlerX2,
+        + attackerDeltaX + displayedAttacker.battlerX2,
       view.attacker.geometry.spriteCorner.y,
     );
     const drawNotes = () => {
@@ -32512,13 +32528,11 @@ export function renderSceneOnMovePresentation(
         );
       }
     };
-    if (playerAttacker) {
-      drawNotes();
-      drawAttacker();
-    } else {
-      drawAttacker();
-      drawNotes();
-    }
+    // gFastFlyingMusicNotesSpriteTemplate is created at subpriority 2,
+    // ahead of either live attacker (30 player / 40 opponent). Keep the
+    // source OAM priority in both orientations, including note/mon overlap.
+    drawAttacker();
+    drawNotes();
     const opponentSpecies = view.target.geometry.side === "opponent"
       ? view.target.species : view.attacker.species;
     const playerSpecies = view.target.geometry.side === "player"

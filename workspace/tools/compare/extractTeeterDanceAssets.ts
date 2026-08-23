@@ -27,7 +27,7 @@ function sprite(path: string, palettePath?: string) {
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify({
   source: {
-    carrier: "FRONTIER_MON_SPINDA set 145; SPECIES_SPINDA 327; MOVE_TEETER_DANCE 298",
+    carrier: "FRONTIER_MON_SPINDA set 145; SPECIES_SPINDA 308; MOVE_TEETER_DANCE 298",
     musicNotes:
       "graphics/battle_anims/sprites/music_notes.png; ANIM_TAG_MUSIC_NOTES; gFastFlyingMusicNotesSpriteTemplate",
     duck:

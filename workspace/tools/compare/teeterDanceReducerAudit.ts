@@ -97,11 +97,11 @@ export function auditTeeterDanceReducer(
   invariant(frames.length === receipt.frames, `${orientation}: frame count`);
   const side: TeeterDanceSide = orientation === "player-back" ? "player" : "opponent";
   const noteOrigin: TeeterDancePoint = orientation === "player-back"
-    ? { x: 72, y: 93 }
-    : { x: 176, y: 41 };
+    ? { x: 72, y: 92 }
+    : { x: 176, y: 48 };
   const battlerOrigin: TeeterDancePoint = orientation === "player-back"
-    ? { x: 72, y: 85 }
-    : { x: 176, y: 41 };
+    ? { x: 72, y: 84 }
+    : { x: 176, y: 48 };
   const battlerSlot = orientation === "player-back" ? 6 : 8;
   const sign = side === "player" ? 1 : -1;
   let noteSprites = 0;

@@ -86,7 +86,7 @@ console.log(JSON.stringify({
   move: "MOVE_TEETER_DANCE", moveId: 298,
   sourceBounds: { start: "0x082ce78d", endExclusive: "0x082ce7f8", byteLength: bytes.length, sha256: digest, pointerContract: "half-open-byte-interval" },
   graph: { blocks: graphEntry.blocks, components },
-  carrier: { frontierMon: "FRONTIER_MON_SPINDA", setId: 145, speciesId: 327, item: "BATTLE_FRONTIER_ITEM_SITRUS_BERRY", nature: "NATURE_RELAXED", evs: ["ATTACK", "HP"] },
+  carrier: { frontierMon: "FRONTIER_MON_SPINDA", setId: 145, speciesId: 308, item: "BATTLE_FRONTIER_ITEM_SITRUS_BERRY", nature: "NATURE_RELAXED", evs: ["ATTACK", "HP"] },
   callbacks: ["AnimFlyingMusicNotes", "AnimFlyingMusicNotes_Step", "AnimTask_TeeterDanceMovement", "AnimTask_TeeterDanceMovement_Step"],
   template: "gFastFlyingMusicNotesSpriteTemplate", loadedAssets: ["ANIM_TAG_DUCK", "ANIM_TAG_MUSIC_NOTES"],
   audio: { soundEffect: "SE_M_TEETER_DANCE", pan: "SOUND_PAN_ATTACKER", id: 244, sourceCues: 5 },

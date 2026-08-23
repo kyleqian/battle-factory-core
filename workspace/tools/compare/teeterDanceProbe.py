@@ -108,7 +108,9 @@ def main() -> None:
     def battle_mon(slot: int) -> dict:
         base = battle_mons + slot * 0x58
         return {"species": u16(base), "hp": u16(base + 0x28),
-                "maxHp": u16(base + 0x2c), "status1": oracle.read_u32(base + 0x4c)}
+                "maxHp": u16(base + 0x2c),
+                "personality": oracle.read_u32(base + 0x48),
+                "status1": oracle.read_u32(base + 0x4c)}
 
     rows = []
     finished = False

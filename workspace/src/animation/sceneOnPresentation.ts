@@ -3093,6 +3093,8 @@ export interface SceneOnTeeterDanceConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Source `gSprites[gBattlerSpriteIds[attacker]]` x/y before the task. */
   readonly attackerSpriteCenter: Readonly<TeeterDancePoint>;
+  /** Live personality used by source-derived species art such as Spinda spots. */
+  readonly attackerPersonality: number;
 }
 
 export interface SceneOnDetectConfig {

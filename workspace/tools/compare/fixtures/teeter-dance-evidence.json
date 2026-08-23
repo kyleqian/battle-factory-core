@@ -17,7 +17,7 @@
     "carrier": {
       "frontierMon": "FRONTIER_MON_SPINDA",
       "setId": 145,
-      "speciesId": 327,
+      "speciesId": 308,
       "nature": "NATURE_RELAXED",
       "evs": ["ATTACK", "HP"]
     }
@@ -33,10 +33,10 @@
       "oamLatch": "235/235 relevant note sprites",
       "matrixLatch": "235/235 relevant note sprites",
       "paletteLatch": "168/168 full palette rows",
-      "evidenceSha256": "2054b48b52a001b343f9242b7a934a9355dbd06838f517afc31236e7712814eb",
-      "rawRgbSequenceSha256": "5087f54b63fb70b9a999a99e805382d06b89e5deaad2e9cde8d86353f218fff0",
-      "freshEvidenceSha256": "2054b48b52a001b343f9242b7a934a9355dbd06838f517afc31236e7712814eb",
-      "freshRawRgbSequenceSha256": "5087f54b63fb70b9a999a99e805382d06b89e5deaad2e9cde8d86353f218fff0",
+      "evidenceSha256": "933ed0c5aa08f1928567de50aca7ef0ebc4997ca3992f4fd2cdffb7c84223573",
+      "rawRgbSequenceSha256": "ccd393f0b8c688125c32da60338ddd9d283aed81257e868005d6aef55257664c",
+      "freshEvidenceSha256": "933ed0c5aa08f1928567de50aca7ef0ebc4997ca3992f4fd2cdffb7c84223573",
+      "freshRawRgbSequenceSha256": "ccd393f0b8c688125c32da60338ddd9d283aed81257e868005d6aef55257664c",
       "denseState": "tools/compare/evidence/teeter-dance-player-dense-state.json.gz",
       "rawRgb": "tools/compare/evidence/teeter-dance-player-raw-rgb.tar.gz",
       "changeMap": "tools/compare/evidence/teeter-dance-changemap-player.txt"
@@ -51,10 +51,10 @@
       "oamLatch": "235/235 relevant note sprites",
       "matrixLatch": "235/235 relevant note sprites",
       "paletteLatch": "168/168 full palette rows",
-      "evidenceSha256": "b9ce33a2acb0c6b54b249e0350c67b95e39c32f8545cf05314042696ef35a581",
-      "rawRgbSequenceSha256": "8e25beb6e55a3c278f6f382d8eb665a443352e4b37026d02088514ef37ca3341",
-      "freshEvidenceSha256": "b9ce33a2acb0c6b54b249e0350c67b95e39c32f8545cf05314042696ef35a581",
-      "freshRawRgbSequenceSha256": "8e25beb6e55a3c278f6f382d8eb665a443352e4b37026d02088514ef37ca3341",
+      "evidenceSha256": "e37d72474695866a9af4beca0f9e64058616fb05527734610bd2e4ec217e6f6b",
+      "rawRgbSequenceSha256": "8fd824fa7b5e071231c63b9af94e565a66665aa9bf35f609db4c70d6c16e005d",
+      "freshEvidenceSha256": "e37d72474695866a9af4beca0f9e64058616fb05527734610bd2e4ec217e6f6b",
+      "freshRawRgbSequenceSha256": "8fd824fa7b5e071231c63b9af94e565a66665aa9bf35f609db4c70d6c16e005d",
       "denseState": "tools/compare/evidence/teeter-dance-opponent-dense-state.json.gz",
       "rawRgb": "tools/compare/evidence/teeter-dance-opponent-raw-rgb.tar.gz",
       "changeMap": "tools/compare/evidence/teeter-dance-changemap-opponent.txt"
@@ -66,6 +66,6 @@
     "rawFramebufferResidual": "not yet accepted as exact; generic seam is wired for follow-up framebuffer verification"
   },
   "assetExtractor": "tools/compare/extractTeeterDanceAssets.ts",
-  "assetSha256": "79e97da52aec7cf0988b48470861bd6e10af33a1174fa28c3437d33bdbb28581",
+  "assetSha256": "1be83e760b6d6fb063e4eef594bfd860493d023485beb5f129dcb54ff2259a43",
   "probe": "tools/compare/teeterDanceProbe.py"
 }
