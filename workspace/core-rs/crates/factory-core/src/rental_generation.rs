@@ -14,6 +14,18 @@
 //!    Each personality attempt is one `Random32()`
 //!    (`reference/pokeemerald/src/pokemon.c:2569-2575`), i.e. two ordered
 //!    `Random()` calls (`reference/pokeemerald/include/random.h:7-16`).
+//! 3. Immediately after a rental's personality is ACCEPTED, that same
+//!    `CreateMonWithEVSpreadNatureOTID` call runs
+//!    `CreateMon` -> `CreateBoxMon` with the slot's fixed IV
+//!    (`reference/pokeemerald/src/pokemon.c:2562-2575`, `:2195-2204`). The
+//!    fixed personality draws nothing and `OT_ID_PRESET` draws nothing
+//!    (`:2205-2231`), so when the fixed IV is >= `USE_RANDOM_IVS` (32) the
+//!    next two `Random()` calls in the same stream are that rental's IV
+//!    words (`:2265-2295`) — the first supplying HP/ATK/DEF and the second
+//!    SPEED/SPATK/SPDEF as consecutive 5-bit fields. They land between this
+//!    rental's accepted personality pair and the next rental's first
+//!    personality attempt. A fixed IV below 32 draws nothing and gives all
+//!    six stats that same value.
 //!
 //! In the ROM those phases are separated by presentation time; callers may
 //! provide `construction_rng_value` to reconcile a live receipt. Omitting
@@ -30,6 +42,15 @@ use crate::rng::advance_rng_value;
 const SELECTABLE_MONS_COUNT: usize = 6;
 const STAGES_PER_CHALLENGE: u32 = 7;
 
+/// `USE_RANDOM_IVS` (`reference/pokeemerald/include/constants/pokemon.h:202`,
+/// `MAX_PER_STAT_IVS + 1`): a fixed-IV argument at or above this makes
+/// `CreateBoxMon` roll the two random IV words instead
+/// (`reference/pokeemerald/src/pokemon.c:2265-2295`).
+const USE_RANDOM_IVS: u8 = 32;
+
+/// `MAX_IV_MASK` (`reference/pokeemerald/include/constants/pokemon.h:201`).
+const MAX_IV_MASK: u16 = 31;
+
 /// One Random() call: advances gRngValue, returns it plus its upper 16
 /// bits. Mirrors `randomU16` (`src/engine/opponentGen.ts`).
 fn random_u16(rng_value: u32) -> (u32, u16) {
@@ -42,6 +63,10 @@ fn random_u16(rng_value: u32) -> (u32, u16) {
 pub enum Phase {
     SetSelection = 0,
     Personality = 1,
+    /// `CreateBoxMon`'s two random-IV words
+    /// (`reference/pokeemerald/src/pokemon.c:2277-2294`), drawn only when
+    /// the slot's fixed IV is >= `USE_RANDOM_IVS`.
+    RandomIvs = 2,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -50,6 +75,12 @@ pub enum Purpose {
     SetCandidate = 0,
     PersonalityLow = 1,
     PersonalityHigh = 2,
+    /// First `Random()` of the random-IV branch: HP, ATK, DEF
+    /// (`reference/pokeemerald/src/pokemon.c:2277-2284`).
+    RandomIvsLow = 3,
+    /// Second `Random()` of the random-IV branch: SPEED, SPATK, SPDEF
+    /// (`reference/pokeemerald/src/pokemon.c:2286-2293`).
+    RandomIvsHigh = 4,
 }
 
 /// Mirrors `FactoryRentalSelectionRejection` plus the accepted case
@@ -75,8 +106,10 @@ pub enum PersonalityOutcome {
 /// selection draws populate `range`/`better_range`/`candidate_set_id`/
 /// `selection_outcome` and leave the personality fields `None`;
 /// personality draws populate `personality`/`personality_outcome` and
-/// leave the selection fields `None` — exactly the TS type's
-/// optional-field split (present-or-absent, not zero-filled).
+/// leave the selection fields `None`; random-IV draws populate NEITHER
+/// group (every optional field is `None` — the drawn word itself is the
+/// whole payload) — exactly the TS type's optional-field split
+/// (present-or-absent, not zero-filled).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DrawLedgerEntry {
     pub position: u32,
@@ -105,7 +138,16 @@ pub struct DrawLedgerEntry {
 pub struct RentalRecord {
     pub set_id: u16,
     pub personality: u32,
+    /// The saved `RentalMon.ivs`, which retail reads back as the ATK IV of
+    /// the constructed mon, not as the fixed-IV argument
+    /// (`reference/pokeemerald/src/battle_factory_screen.c:1824`
+    /// `MON_DATA_ATK_IV`). Always equal to `ivs[1]`; identical to the
+    /// fixed-IV argument whenever that argument is < `USE_RANDOM_IVS`,
+    /// because then all six IVs are that value.
     pub fixed_iv: u8,
+    /// `[hp, attack, defense, speed, sp_attack, sp_defense]` — the spread
+    /// `CreateBoxMon` actually wrote (`reference/pokeemerald/src/pokemon.c:2265-2295`).
+    pub ivs: [u8; 6],
     pub ability_slot: u8,
     pub ot_id: u32,
     pub species_id: u16,
@@ -142,46 +184,6 @@ pub struct GenerationInput {
     pub construction_rng_value: Option<u32>,
 }
 
-/// Mirrors the two `Error` throws in `generateInitialFactoryRentals`
-/// (`src/engine/factoryRentalGeneration.ts`). Set/item table lookups are
-/// impossible-by-construction against the generated tables (see
-/// `gen_tables.rs` / `core-rs/tools/gen-data.mjs`) and panic via `.expect`
-/// instead of returning an error variant here.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum GenerationError {
-    /// `challenge_num = factory_win_streak / 7` exceeded the source-defined
-    /// 0..=7 row range (`battle_factory.c:829-866`).
-    ChallengeOutOfRange { challenge_num: u32 },
-    /// `get_level50_initial_rental_fixed_iv` has no row for
-    /// `challenge_num + better_range`
-    /// (`battle_factory_screen.c:1757-1771`). Reachable at
-    /// `challenge_num == 7` whenever the accepted rental's positional
-    /// `better_range` is true (i.e. `rental_rank > 0`) — this is a genuine
-    /// TS-engine throw, not a data-table gap; confirmed against the TS
-    /// engine via `node --experimental-strip-types` (see
-    /// `tests/factoryRentalParity.test.ts`).
-    FixedIvUndefined {
-        challenge_num: u32,
-        better_range: bool,
-    },
-}
-
-impl std::fmt::Display for GenerationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            GenerationError::ChallengeOutOfRange { challenge_num } => write!(
-                f,
-                "Level-50 initial rental generation supports source challenges 0..7, got {challenge_num}"
-            ),
-            GenerationError::FixedIvUndefined { challenge_num, better_range } => write!(
-                f,
-                "initial-rental fixed IV is undefined for challenge {challenge_num}{}",
-                if *better_range { " better range" } else { "" }
-            ),
-        }
-    }
-}
-
 struct SelectedRental {
     set_id: u16,
     species_id: u16,
@@ -192,16 +194,15 @@ struct SelectedRental {
 
 /// Ports `generateInitialFactoryRentals`
 /// (`src/engine/factoryRentalGeneration.ts`).
-pub fn generate_initial_factory_rentals(
-    input: GenerationInput,
-) -> Result<GenerationResult, GenerationError> {
+///
+/// Total: every `factory_win_streak` generates. Range selection pins
+/// challenge >= 7 to range row 7 (`battle_factory.c:829-866`) and fixed-IV
+/// selection carries retail's own clamp including the
+/// `sFixedIVTable[8]` overread (`get_level50_initial_rental_fixed_iv`), so
+/// there is no challenge this function cannot answer for.
+pub fn generate_initial_factory_rentals(input: GenerationInput) -> GenerationResult {
     let mut rng_value = input.rng_value;
     let challenge_num = input.factory_win_streak / STAGES_PER_CHALLENGE;
-    // See get_level50_initial_rental_fixed_iv's doc comment: avoid
-    // pretending the retail OOB read for challenge 8+ is a stable rule.
-    if challenge_num > 7 {
-        return Err(GenerationError::ChallengeOutOfRange { challenge_num });
-    }
     let rental_rank = get_factory_rental_rank(input.rents_count);
     let ot_id = input.player_trainer_id;
     let mut ledger: Vec<DrawLedgerEntry> = Vec::new();
@@ -367,15 +368,70 @@ pub fn generate_initial_factory_rentals(
             }
         }
 
+        // battle_factory_screen.c:1762-1764: slots below the rental rank use
+        // GetFactoryMonFixedIV(challengeNum + 1), the rest challengeNum.
         let fixed_iv = get_level50_initial_rental_fixed_iv(challenge_num, selection.better_range)
-            .ok_or(GenerationError::FixedIvUndefined {
-            challenge_num,
-            better_range: selection.better_range,
-        })?;
+            .expect("get_level50_initial_rental_fixed_iv is total (retail clamp + overread row)");
+        let ivs = if fixed_iv < USE_RANDOM_IVS {
+            [fixed_iv; 6]
+        } else {
+            // pokemon.c:2277-2293. The accepted personality is passed in
+            // (no draw) and OT_ID_PRESET reads fixedOtId (no draw), so
+            // these two words follow the accepted personality pair
+            // immediately in the same stream.
+            let low_iv_position = ledger.len() as u32;
+            let low_iv_before = rng_value;
+            let (next_low_iv, low_iv_word) = random_u16(rng_value);
+            rng_value = next_low_iv;
+            ledger.push(DrawLedgerEntry {
+                position: low_iv_position,
+                phase: Phase::RandomIvs,
+                rental_index: rental_index as u8,
+                purpose: Purpose::RandomIvsLow,
+                rng_before: low_iv_before,
+                rng_after: next_low_iv,
+                random_u16: low_iv_word,
+                range: None,
+                better_range: None,
+                candidate_set_id: None,
+                selection_outcome: None,
+                personality: None,
+                personality_outcome: None,
+            });
+            let high_iv_position = ledger.len() as u32;
+            let high_iv_before = rng_value;
+            let (next_high_iv, high_iv_word) = random_u16(rng_value);
+            rng_value = next_high_iv;
+            ledger.push(DrawLedgerEntry {
+                position: high_iv_position,
+                phase: Phase::RandomIvs,
+                rental_index: rental_index as u8,
+                purpose: Purpose::RandomIvsHigh,
+                rng_before: high_iv_before,
+                rng_after: next_high_iv,
+                random_u16: high_iv_word,
+                range: None,
+                better_range: None,
+                candidate_set_id: None,
+                selection_outcome: None,
+                personality: None,
+                personality_outcome: None,
+            });
+            [
+                (low_iv_word & MAX_IV_MASK) as u8,
+                ((low_iv_word >> 5) & MAX_IV_MASK) as u8,
+                ((low_iv_word >> 10) & MAX_IV_MASK) as u8,
+                (high_iv_word & MAX_IV_MASK) as u8,
+                ((high_iv_word >> 5) & MAX_IV_MASK) as u8,
+                ((high_iv_word >> 10) & MAX_IV_MASK) as u8,
+            ]
+        };
         rentals.push(RentalRecord {
             set_id: selection.set_id,
             personality,
-            fixed_iv,
+            // battle_factory_screen.c:1824 saves MON_DATA_ATK_IV.
+            fixed_iv: ivs[1],
+            ivs,
             ability_slot: ability_slot_for_personality(selection.species_id, personality),
             ot_id,
             species_id: selection.species_id,
@@ -386,7 +442,7 @@ pub fn generate_initial_factory_rentals(
         });
     }
 
-    Ok(GenerationResult {
+    GenerationResult {
         challenge_num,
         rental_rank,
         rentals: rentals.try_into().expect(
@@ -395,7 +451,7 @@ pub fn generate_initial_factory_rentals(
         selection_rng_value,
         rng_value,
         draw_ledger: ledger,
-    })
+    }
 }
 
 #[cfg(test)]
@@ -443,6 +499,7 @@ mod tests {
         set_id: u16,
         personality: u32,
         fixed_iv: u8,
+        ivs: [u8; 6],
         ability_slot: u8,
         species_id: u16,
         item_id: u16,
@@ -462,6 +519,13 @@ mod tests {
                 "rental {i} personality"
             );
             assert_eq!(actual.fixed_iv, exp.fixed_iv, "rental {i} fixed_iv");
+            assert_eq!(actual.ivs, exp.ivs, "rental {i} ivs");
+            // battle_factory_screen.c:1824 — the saved RentalMon.ivs is the
+            // constructed mon's ATK IV, for every rental, always.
+            assert_eq!(
+                actual.fixed_iv, actual.ivs[1],
+                "rental {i} fixed_iv == ivs[1]"
+            );
             assert_eq!(
                 actual.ability_slot, exp.ability_slot,
                 "rental {i} ability_slot"
@@ -494,8 +558,7 @@ mod tests {
             rents_count: 0,
             player_trainer_id: PLAYER_TRAINER_ID,
             construction_rng_value: None,
-        })
-        .expect("challenge 0 with rank 0 never reaches FixedIvUndefined");
+        });
 
         assert_eq!(result.challenge_num, 0);
         assert_eq!(result.rental_rank, 0);
@@ -516,6 +579,7 @@ mod tests {
                 set_id: 110,
                 personality: 813_709_149,
                 fixed_iv: 3,
+                ivs: [3; 6],
                 ability_slot: 1,
                 species_id: 88,
                 item_id: 135,
@@ -527,6 +591,7 @@ mod tests {
                 set_id: 155,
                 personality: 4_276_564_499,
                 fixed_iv: 3,
+                ivs: [3; 6],
                 ability_slot: 1,
                 species_id: 61,
                 item_id: 171,
@@ -538,6 +603,7 @@ mod tests {
                 set_id: 140,
                 personality: 3_187_899_706,
                 fixed_iv: 3,
+                ivs: [3; 6],
                 ability_slot: 0,
                 species_id: 388,
                 item_id: 221,
@@ -549,6 +615,7 @@ mod tests {
                 set_id: 168,
                 personality: 2_276_043_732,
                 fixed_iv: 3,
+                ivs: [3; 6],
                 ability_slot: 0,
                 species_id: 137,
                 item_id: 142,
@@ -560,6 +627,7 @@ mod tests {
                 set_id: 197,
                 personality: 4_249_714_839,
                 fixed_iv: 3,
+                ivs: [3; 6],
                 ability_slot: 1,
                 species_id: 20,
                 item_id: 217,
@@ -571,6 +639,7 @@ mod tests {
                 set_id: 147,
                 personality: 4_158_934_324,
                 fixed_iv: 3,
+                ivs: [3; 6],
                 ability_slot: 0,
                 species_id: 33,
                 item_id: 196,
@@ -609,8 +678,7 @@ mod tests {
             rents_count: 43,
             player_trainer_id: PLAYER_TRAINER_ID,
             construction_rng_value: Some(0x7399_e3ae),
-        })
-        .expect("challenge 3 rank 5 never reaches FixedIvUndefined (only challenge 7 does)");
+        });
 
         assert_eq!(result.challenge_num, 3);
         assert_eq!(result.rental_rank, 5);
@@ -631,6 +699,7 @@ mod tests {
                 set_id: 560,
                 personality: 270_079_256,
                 fixed_iv: 15,
+                ivs: [15; 6],
                 ability_slot: 0,
                 species_id: 59,
                 item_id: 141,
@@ -642,6 +711,7 @@ mod tests {
                 set_id: 474,
                 personality: 1_634_387_542,
                 fixed_iv: 15,
+                ivs: [15; 6],
                 ability_slot: 0,
                 species_id: 210,
                 item_id: 180,
@@ -653,6 +723,7 @@ mod tests {
                 set_id: 486,
                 personality: 1_676_140_992,
                 fixed_iv: 15,
+                ivs: [15; 6],
                 ability_slot: 0,
                 species_id: 336,
                 item_id: 183,
@@ -664,6 +735,7 @@ mod tests {
                 set_id: 494,
                 personality: 2_793_715_033,
                 fixed_iv: 15,
+                ivs: [15; 6],
                 ability_slot: 1,
                 species_id: 300,
                 item_id: 134,
@@ -675,6 +747,7 @@ mod tests {
                 set_id: 553,
                 personality: 198_810_745,
                 fixed_iv: 15,
+                ivs: [15; 6],
                 ability_slot: 0,
                 species_id: 169,
                 item_id: 200,
@@ -686,6 +759,7 @@ mod tests {
                 set_id: 423,
                 personality: 197_613_828,
                 fixed_iv: 12,
+                ivs: [12; 6],
                 ability_slot: 0,
                 species_id: 212,
                 item_id: 196,
@@ -698,54 +772,248 @@ mod tests {
         assert_contiguous_random_ledger(&result);
     }
 
+    /// Every rental's ledger tail, for a rental whose fixed IV rolled
+    /// random: the accepted personality pair is immediately followed by the
+    /// two random-IV words, in low-then-high order (pokemon.c:2277-2293).
+    fn construction_purposes_for(result: &GenerationResult, rental_index: u8) -> Vec<Purpose> {
+        result
+            .draw_ledger
+            .iter()
+            .filter(|d| d.phase != Phase::SetSelection && d.rental_index == rental_index)
+            .map(|d| d.purpose)
+            .collect()
+    }
+
+    fn random_iv_words(result: &GenerationResult, rental_index: u8) -> Vec<(u32, Purpose, u16)> {
+        result
+            .draw_ledger
+            .iter()
+            .filter(|d| d.phase == Phase::RandomIvs && d.rental_index == rental_index)
+            .map(|d| (d.position, d.purpose, d.random_u16))
+            .collect()
+    }
+
     #[test]
-    fn rejects_challenge_8_with_the_0_7_rationale() {
-        // factoryWinStreak 56 / 7 == 8; mirrors
-        // src/engine/factoryRentalGeneration.ts's `challengeNum > 7` throw.
-        let err = generate_initial_factory_rentals(GenerationInput {
+    fn challenge_8_rolls_random_ivs_for_all_six_rentals() {
+        // factoryWinStreak 56 / 7 == 8. IV argument 8 for every ordinary
+        // slot (rentsCount 0 -> rank 0 -> better_range false everywhere),
+        // which retail's strictly-greater bound check leaves UNCLAMPED:
+        // it reads sFixedIVTable[8] == {110, 0} (battle_factory.c:739-757,
+        // non-BUGFIX branch; FIXED_IVS' ninth row). 110 >= USE_RANDOM_IVS
+        // (32), so CreateBoxMon rolls two Random() words per rental
+        // (pokemon.c:2265-2295). This used to be the
+        // GenerationError::ChallengeOutOfRange case.
+        let result = generate_initial_factory_rentals(GenerationInput {
             rng_value: 0,
             factory_win_streak: 56,
             rents_count: 0,
             player_trainer_id: PLAYER_TRAINER_ID,
             construction_rng_value: None,
-        })
-        .unwrap_err();
+        });
+
+        assert_eq!(result.challenge_num, 8);
+        assert_eq!(result.rental_rank, 0);
         assert_eq!(
-            err,
-            GenerationError::ChallengeOutOfRange { challenge_num: 8 }
+            get_level50_initial_rental_fixed_iv(8, false),
+            Some(110),
+            "IV argument 8 is the retail overread row"
+        );
+
+        // Total draw count: 7 set-selection draws, 286 personality draws
+        // (143 Random32 attempts across the six slots), 12 random-IV draws
+        // (2 per rental x 6).
+        assert_eq!(result.draw_ledger.len(), 305, "total Random() calls");
+        assert_eq!(
+            result
+                .draw_ledger
+                .iter()
+                .filter(|d| d.phase == Phase::SetSelection)
+                .count(),
+            7
         );
         assert_eq!(
-            err.to_string(),
-            "Level-50 initial rental generation supports source challenges 0..7, got 8"
+            result
+                .draw_ledger
+                .iter()
+                .filter(|d| d.phase == Phase::Personality)
+                .count(),
+            286
         );
+        assert_eq!(
+            result
+                .draw_ledger
+                .iter()
+                .filter(|d| d.phase == Phase::RandomIvs)
+                .count(),
+            12,
+            "two random-IV words per rental, all six rentals"
+        );
+        assert_eq!(result.selection_rng_value, 2_948_958_921);
+        assert_eq!(result.rng_value, 926_855_395);
+
+        // Per-rental ledger ordering: rental 0 spends 41 rejected
+        // Random32 personality attempts (low, high) before its accepted
+        // 42nd, then the two IV words -- 86 construction draws in slot
+        // order, with nothing interleaved from another rental.
+        let purposes = construction_purposes_for(&result, 0);
+        assert_eq!(purposes.len(), 86);
+        let mut expected_purposes: Vec<Purpose> = Vec::with_capacity(86);
+        for _ in 0..42 {
+            expected_purposes.push(Purpose::PersonalityLow);
+            expected_purposes.push(Purpose::PersonalityHigh);
+        }
+        expected_purposes.push(Purpose::RandomIvsLow);
+        expected_purposes.push(Purpose::RandomIvsHigh);
+        assert_eq!(purposes, expected_purposes);
+
+        // ...and the two IV words sit immediately after every rental's
+        // ACCEPTED personality pair, for all six rentals.
+        for (index, rental) in result.rentals.iter().enumerate() {
+            let words = random_iv_words(&result, index as u8);
+            let accepted_high = u32::from(rental.personality_draw_positions[1]);
+            assert_eq!(
+                words
+                    .iter()
+                    .map(|&(position, purpose, _)| (position, purpose))
+                    .collect::<Vec<_>>(),
+                vec![
+                    (accepted_high + 1, Purpose::RandomIvsLow),
+                    (accepted_high + 2, Purpose::RandomIvsHigh),
+                ],
+                "rental {index} random-IV draws follow its accepted personality pair"
+            );
+            assert_eq!(
+                rental.fixed_iv, rental.ivs[1],
+                "rental {index} fixed_iv == ivs[1]"
+            );
+        }
+
+        // Every random-IV ledger entry carries the drawn word and nothing
+        // else -- the selection AND personality option groups are absent.
+        for entry in result
+            .draw_ledger
+            .iter()
+            .filter(|d| d.phase == Phase::RandomIvs)
+        {
+            assert_eq!(entry.range, None);
+            assert_eq!(entry.better_range, None);
+            assert_eq!(entry.candidate_set_id, None);
+            assert_eq!(entry.selection_outcome, None);
+            assert_eq!(entry.personality, None);
+            assert_eq!(entry.personality_outcome, None);
+        }
+
+        // Rental 0's spread, derived BY HAND from its two drawn words
+        // (pokemon.c:2277-2293 -- MAX_IV_MASK is 31, i.e. five bits):
+        //   low  word 41538 = 0b1010_0010_0100_0010
+        //     hp      =  41538        & 31 = 41538 - 32*1298 =  2
+        //     attack  = (41538 >>  5) & 31 =  1298 - 32*40   = 18
+        //     defense = (41538 >> 10) & 31 =    40 - 32*1    =  8
+        //   high word 34362 = 0b1000_0110_0011_1010
+        //     speed      =  34362        & 31 = 34362 - 32*1073 = 26
+        //     sp_attack  = (34362 >>  5) & 31 =  1073 - 32*33   = 17
+        //     sp_defense = (34362 >> 10) & 31 =    33 - 32*1    =  1
+        let rental0_words = random_iv_words(&result, 0);
+        assert_eq!(
+            rental0_words
+                .iter()
+                .map(|&(_, _, word)| word)
+                .collect::<Vec<_>>(),
+            vec![41538, 34362],
+            "rental 0 random-IV words"
+        );
+        assert_eq!(result.rentals[0].ivs, [2, 18, 8, 26, 17, 1]);
+        assert_eq!(result.rentals[0].fixed_iv, 18, "the ATK IV, not 110");
+
+        assert_contiguous_random_ledger(&result);
     }
 
     #[test]
-    fn rejects_challenge_7_with_a_better_range_slot() {
-        // Not called out by the porting brief, but confirmed against the TS
-        // engine (2026-08-11): factoryWinStreak 49 -> challengeNum 7, and
-        // any rentsCount giving rentalRank > 0 puts betterRange=true on the
-        // first accepted slot, which getLevel50InitialRentalFixedIv(7, true)
-        // has no row for (fixedIvs has only 8 rows, index 0..7). The TS
-        // engine itself throws here — this is a genuine reachable error
-        // state, not a data gap, so it must round-trip as Err rather than
-        // panic. See tests/factoryRentalParity.test.ts for the differential
-        // coverage this induces across the matrix.
-        let err = generate_initial_factory_rentals(GenerationInput {
+    fn challenge_7_better_range_slots_take_the_overread_row() {
+        // Was GenerationError::FixedIvUndefined. factoryWinStreak 49 ->
+        // challengeNum 7; rentsCount 100 -> rank 5, so slots 0..4 are the
+        // "elevated" rentals that ask for GetFactoryMonFixedIV(challengeNum
+        // + 1) == argument 8 (battle_factory_screen.c:1762-1764) and get the
+        // overread row's 110 -> random IVs. Slot 5 asks for argument 7 and
+        // gets the ordinary 31 -> a uniform spread and no draws at all.
+        let result = generate_initial_factory_rentals(GenerationInput {
             rng_value: 0,
             factory_win_streak: 49,
             rents_count: 100,
             player_trainer_id: PLAYER_TRAINER_ID,
             construction_rng_value: None,
-        })
-        .unwrap_err();
+        });
+
+        assert_eq!(result.challenge_num, 7);
+        assert_eq!(result.rental_rank, 5);
+        assert_eq!(get_level50_initial_rental_fixed_iv(7, true), Some(110));
+        assert_eq!(get_level50_initial_rental_fixed_iv(7, false), Some(31));
+        assert_eq!(result.draw_ledger.len(), 303);
         assert_eq!(
-            err,
-            GenerationError::FixedIvUndefined { challenge_num: 7, better_range: true }
+            result
+                .draw_ledger
+                .iter()
+                .filter(|d| d.phase == Phase::RandomIvs)
+                .count(),
+            10,
+            "2 random-IV draws per better-range rental, 5 of them"
+        );
+
+        for index in 0..5u8 {
+            assert_eq!(
+                random_iv_words(&result, index).len(),
+                2,
+                "better-range rental {index} draws exactly 2 random-IV words"
+            );
+            let rental = &result.rentals[index as usize];
+            assert_eq!(
+                rental.fixed_iv, rental.ivs[1],
+                "rental {index} fixed_iv == ivs[1]"
+            );
+        }
+        assert_eq!(
+            random_iv_words(&result, 5).len(),
+            0,
+            "the ordinary rental draws no random-IV words"
         );
         assert_eq!(
-            err.to_string(),
-            "initial-rental fixed IV is undefined for challenge 7 better range"
+            result.rentals[5].ivs, [31; 6],
+            "ordinary rental is uniform 31"
         );
+        assert_eq!(result.rentals[5].fixed_iv, 31);
+
+        // Same seed, same challenge, same stream position as
+        // challenge_8_rolls_random_ivs_for_all_six_rentals' rentals 0..4:
+        // the set-selection loop pins challenge >= 7 to range row 7
+        // regardless of better_range (battle_factory.c:829-866), so only the
+        // IV argument differs between the two cases.
+        assert_eq!(result.rentals[0].ivs, [2, 18, 8, 26, 17, 1]);
+        assert_contiguous_random_ledger(&result);
+    }
+
+    #[test]
+    fn challenge_7_without_better_range_slots_draws_no_random_ivs() {
+        // rentsCount 0 -> rank 0 -> every slot asks for IV argument 7 -> 31.
+        let result = generate_initial_factory_rentals(GenerationInput {
+            rng_value: 0,
+            factory_win_streak: 49,
+            rents_count: 0,
+            player_trainer_id: PLAYER_TRAINER_ID,
+            construction_rng_value: None,
+        });
+        assert_eq!(result.challenge_num, 7);
+        assert_eq!(result.rental_rank, 0);
+        assert!(result
+            .draw_ledger
+            .iter()
+            .all(|d| d.phase != Phase::RandomIvs));
+        for (index, rental) in result.rentals.iter().enumerate() {
+            assert_eq!(rental.ivs, [31; 6], "rental {index} ivs");
+            assert_eq!(
+                rental.fixed_iv, rental.ivs[1],
+                "rental {index} fixed_iv == ivs[1]"
+            );
+        }
+        assert_contiguous_random_ledger(&result);
     }
 }

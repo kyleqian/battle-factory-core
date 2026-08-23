@@ -110,9 +110,12 @@ pub struct FactoryCorpusPartyMemberState {
     pub ability_num: u8,
     pub ability_slot: u8,
     pub ability: u16,
-    /// `[hp, attack, defense, speed, sp_attack, sp_defense]`, all six equal
-    /// to the instance's `fixed_iv` (`uniformBattleScriptIvs`,
-    /// `src/engine/battleScriptRulesContext.ts:188-199`).
+    /// `[hp, attack, defense, speed, sp_attack, sp_defense]`. All six equal
+    /// the instance's `fixed_iv` when the member came from
+    /// `create_factory_corpus_party_member` (`uniformBattleScriptIvs`,
+    /// `src/engine/battleScriptRulesContext.ts:188-199`); an arbitrary
+    /// per-stat spread when it came from
+    /// `create_factory_corpus_party_member_with_ivs`.
     pub ivs: [u8; 6],
     pub personality: u32,
     pub experience: u32,
@@ -196,9 +199,46 @@ impl std::fmt::Display for PartyMemberError {
     }
 }
 
+/// How the six IVs of a member reach `create_member`: either the uniform
+/// `fixed_iv` of the ordinary entry point (validated as `0..=31` exactly
+/// where the TS `uniformBattleScriptIvs` validates it) or an explicit
+/// per-stat spread from `CreateBoxMon`'s random-IV branch.
+#[derive(Debug, Clone, Copy)]
+enum IvSpec {
+    Uniform(u32),
+    Spread([u8; 6]),
+}
+
 /// Ports `createFactoryCorpusPartyMember` (`src/engine/factoryCorpusParty.ts:179-289`).
+///
+/// All six IVs are `instance.fixed_iv`; this is the
+/// `fixedIV < USE_RANDOM_IVS` shape of `CreateBoxMon`
+/// (`reference/pokeemerald/src/pokemon.c:2265-2272`). For the random-IV
+/// shape use `create_factory_corpus_party_member_with_ivs`.
 pub fn create_factory_corpus_party_member(
     instance: FactoryCorpusPartyInstance,
+) -> Result<FactoryCorpusPartyMemberState, PartyMemberError> {
+    create_member(instance, IvSpec::Uniform(instance.fixed_iv))
+}
+
+/// `create_factory_corpus_party_member` with an explicit per-stat IV
+/// spread, `[hp, attack, defense, speed, sp_attack, sp_defense]` — the
+/// order `CreateBoxMon`'s random-IV branch writes them in
+/// (`reference/pokeemerald/src/pokemon.c:2273-2294`) and the order
+/// `CalculateMonStats` reads them back in (`:3316-3341`). `instance`'s own
+/// `fixed_iv` is ignored: the spread is the whole IV input. Each entry must
+/// be `0..=31` (`MAX_IV_MASK`); the two random words can never produce
+/// anything else, but callers that build a spread by hand can.
+pub fn create_factory_corpus_party_member_with_ivs(
+    instance: FactoryCorpusPartyInstance,
+    ivs: [u8; 6],
+) -> Result<FactoryCorpusPartyMemberState, PartyMemberError> {
+    create_member(instance, IvSpec::Spread(ivs))
+}
+
+fn create_member(
+    instance: FactoryCorpusPartyInstance,
+    iv_spec: IvSpec,
 ) -> Result<FactoryCorpusPartyMemberState, PartyMemberError> {
     let frontier_len = gen_tables::FRONTIER_MONS.len();
     if instance.set_id as usize >= frontier_len {
@@ -226,11 +266,23 @@ pub fn create_factory_corpus_party_member(
         });
     }
 
-    if instance.fixed_iv > 31 {
-        return Err(PartyMemberError::InvalidFixedIv { fixed_iv: instance.fixed_iv });
-    }
-    let iv = instance.fixed_iv as u8;
-    let ivs = [iv; 6];
+    // Validated here, after the set-id and nature checks, so the error
+    // precedence matches the TS function's statement order exactly
+    // (factoryCorpusParty.ts:182-200 then battleScriptRulesContext.ts:188-199).
+    let ivs = match iv_spec {
+        IvSpec::Uniform(fixed_iv) => {
+            if fixed_iv > 31 {
+                return Err(PartyMemberError::InvalidFixedIv { fixed_iv });
+            }
+            [fixed_iv as u8; 6]
+        }
+        IvSpec::Spread(ivs) => {
+            if let Some(&bad) = ivs.iter().find(|&&iv| iv > 31) {
+                return Err(PartyMemberError::InvalidFixedIv { fixed_iv: u32::from(bad) });
+            }
+            ivs
+        }
+    };
 
     let evs = derive_evs(set.ev_flags).expect(
         "every real FRONTIER_MONS row flags at least one EV stat (core-rs/tools/gen-data.mjs)",
@@ -261,41 +313,41 @@ pub fn create_factory_corpus_party_member(
     let nature_mods = gen_tables::NATURE_MODIFIERS[set.nature as usize];
     let max_hp = calculate_hp_stat(
         u32::from(species.base_hp),
-        u32::from(iv),
+        u32::from(ivs[0]),
         u32::from(evs[0]),
         FACTORY_LEVEL_50,
     );
     let attack = calculate_other_stat(
         u32::from(species.base_attack),
-        u32::from(iv),
+        u32::from(ivs[1]),
         u32::from(evs[1]),
         FACTORY_LEVEL_50,
         nature_mods.attack,
     );
     let defense = calculate_other_stat(
         u32::from(species.base_defense),
-        u32::from(iv),
+        u32::from(ivs[2]),
         u32::from(evs[2]),
         FACTORY_LEVEL_50,
         nature_mods.defense,
     );
     let speed = calculate_other_stat(
         u32::from(species.base_speed),
-        u32::from(iv),
+        u32::from(ivs[3]),
         u32::from(evs[3]),
         FACTORY_LEVEL_50,
         nature_mods.speed,
     );
     let sp_attack = calculate_other_stat(
         u32::from(species.base_sp_attack),
-        u32::from(iv),
+        u32::from(ivs[4]),
         u32::from(evs[4]),
         FACTORY_LEVEL_50,
         nature_mods.sp_attack,
     );
     let sp_defense = calculate_other_stat(
         u32::from(species.base_sp_defense),
-        u32::from(iv),
+        u32::from(ivs[5]),
         u32::from(evs[5]),
         FACTORY_LEVEL_50,
         nature_mods.sp_defense,
@@ -718,6 +770,93 @@ mod tests {
             err.to_string(),
             "uniform IV must be an integer in 0..31, got 32"
         );
+    }
+
+    #[test]
+    fn six_distinct_ivs_produce_calculate_mon_stats_values() {
+        // Same GRIMER set as grimer_dual_ability_slot1_matches_ts (set 110,
+        // species 88, nature 24 QUIRKY = neutral, derived EVs
+        // [170, 0, 170, 0, 0, 170]), but with six DISTINCT IVs instead of a
+        // uniform spread -- the shape CreateBoxMon's random-IV branch
+        // produces (pokemon.c:2273-2294).
+        //
+        // Expected stats derived BY HAND from CalculateMonStats /
+        // CALC_STAT (pokemon.c:2814-2821, :2823-2856) at level 50, with
+        // SPECIES_GRIMER's base stats from src/data/gen/species-stats.json
+        // (hp 80, atk 80, def 50, speed 25, spatk 40, spdef 50). Every
+        // division is integer division, and QUIRKY applies no nature
+        // modifier:
+        //   HP    = (2*base + iv + ev/4) * level / 100 + level + 10
+        //         = (160 +  1 + 170/4=42) * 50 / 100 + 50 + 10
+        //         = 203 * 50 / 100 + 60 = 101 + 60           = 161
+        //   ATK   = (2*base + iv + ev/4) * level / 100 + 5
+        //         = (160 +  7 +  0) * 50 / 100 + 5 =  83 + 5 =  88
+        //   DEF   = (100 + 13 + 42) * 50 / 100 + 5 =  77 + 5 =  82
+        //   SPEED = ( 50 + 19 +  0) * 50 / 100 + 5 =  34 + 5 =  39
+        //   SPATK = ( 80 + 25 +  0) * 50 / 100 + 5 =  52 + 5 =  57
+        //   SPDEF = (100 + 31 + 42) * 50 / 100 + 5 =  86 + 5 =  91
+        let ivs = [1, 7, 13, 19, 25, 31];
+        let member = create_factory_corpus_party_member_with_ivs(
+            FactoryCorpusPartyInstance {
+                set_id: 110,
+                personality: 813_709_149,
+                // Ignored by the spread entry point; 110 is the retail
+                // overread row's value, i.e. exactly what the caller that
+                // needs this entry point has in hand.
+                fixed_iv: 110,
+                ability_slot: 1,
+                ot_id: 0x1234_5678,
+            },
+            ivs,
+        )
+        .expect("set 110 / nature 24 / in-range spread");
+
+        assert_eq!(member.ivs, ivs);
+        assert_eq!(member.max_hp, 161, "hp");
+        assert_eq!(member.attack, 88, "attack");
+        assert_eq!(member.defense, 82, "defense");
+        assert_eq!(member.speed, 39, "speed");
+        assert_eq!(member.sp_attack, 57, "sp_attack");
+        assert_eq!(member.sp_defense, 91, "sp_defense");
+        assert_eq!(member.hp, member.max_hp);
+        // Everything the IVs do not feed is identical to the uniform build.
+        assert_eq!(member.evs, [170, 0, 170, 0, 0, 170]);
+        assert_eq!(member.nature, 24);
+        assert_eq!(member.ability_slot, 1);
+        assert_eq!(member.level, 50);
+    }
+
+    #[test]
+    fn uniform_entry_point_is_the_spread_entry_point_with_six_equal_ivs() {
+        let instance = FactoryCorpusPartyInstance {
+            set_id: 110,
+            personality: 813_709_149,
+            fixed_iv: 3,
+            ability_slot: 1,
+            ot_id: 0x1234_5678,
+        };
+        assert_eq!(
+            create_factory_corpus_party_member(instance),
+            create_factory_corpus_party_member_with_ivs(instance, [3; 6])
+        );
+    }
+
+    #[test]
+    fn spread_entry_point_rejects_an_out_of_range_stat() {
+        // MAX_IV_MASK is 31 (constants/pokemon.h:201); the two random words
+        // can never exceed it, hand-built spreads can.
+        let err = create_factory_corpus_party_member_with_ivs(
+            FactoryCorpusPartyInstance {
+                set_id: 110,
+                personality: 813_709_149,
+                fixed_iv: 0,
+                ability_slot: 0,
+                ot_id: 0,
+            },
+            [1, 7, 32, 19, 25, 31],
+        )
+        .unwrap_err();
+        assert_eq!(err, PartyMemberError::InvalidFixedIv { fixed_iv: 32 });
     }
 
     #[test]
