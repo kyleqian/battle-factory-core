@@ -38,18 +38,19 @@ describe("MOVE_SPIKES bilateral dense evidence checkpoint", () => {
         sourceWindow: { ...window, frameCount: 114 },
         lifecycle: { creates: "7/19/31", destroys: "84/96/108", sprites: 3 },
         latches: { oam: "113/113", matrices: "113/113", palette: "112/113 + same-row age 4 monbg" },
-        sourceRows: 114, rawRgbRows: 114, gameplayRngTransitions: 0, animationRngTransitions: 111, framebufferCompared: false,
+        sourceRows: 114, rawRgbRows: 114, gameplayRngTransitions: 0, animationRngTransitions: 111, framebufferCompared: true,
       });
       const orientation = fixture.orientations[side];
       expect(orientation.probeJsonSha256).toBe(orientation.repeatProbeJsonSha256);
       expect(orientation.changeMapSha256).toMatch(/^[a-f0-9]{64}$/);
     }
     expect(fixture).toMatchObject({
-      status: "partial", coverageCredit: false,
+      status: "exact", coverageCredit: true,
       components: ["asset:ANIM_TAG_SPIKES", "sprite:gSpikesSpriteTemplate", "visualCommand:monbg", "visualCommand:clearmonbg"],
-      acceptance: { observedPointerParities: [0, 1], sourceCreationAges: [7, 19, 31], sourceDestroyAges: [84, 96, 108], firstInactiveCleanupAge: 113, affine: "off-only; no fresh-affine credit" },
-      evidenceScope: { productionAnimationChanged: false, reducerAdded: false, typedSeamAdded: false, compositorAdded: false, framebufferCompared: false, coveragePromotion: false, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
-      productionAcceptance: { reducerRows: "0/228", typedSeamRows: "0/228", productionFramebufferRows: "0/228", productionFramebufferResidualPixels: null, manualQueue: "MOVE_SPIKES" },
+      acceptance: { observedPointerParities: [0, 1], sourceCreationAges: [7, 19, 31], sourceDestroyAges: [84, 96, 108], firstInactiveCleanupAge: 113, affine: "off-only; no fresh-affine credit", reducerRows: 228, typedSeamRows: 228, productionFramebufferRows: 228, framebufferCompared: true },
+      evidenceScope: { productionAnimationChanged: true, reducerAdded: true, typedSeamAdded: true, compositorAdded: true, framebufferCompared: true, coveragePromotion: true, boundaryOrBarrierChanged: false, gameplayStateOwned: false, fullDenseRowsRetained: true, twiceFreshByteIdentical: true },
+      repeatability: { runsPerOrientation: 2, allMatched: true },
+      productionAcceptance: { reducerRows: "114/114 + 114/114", typedSeamRows: "114/114 + 114/114", productionFramebufferRows: "114/114 + 114/114", productionFramebufferResidualPixels: 0, manualQueue: null },
     });
   });
 
@@ -82,16 +83,17 @@ describe("MOVE_SPIKES bilateral dense evidence checkpoint", () => {
     });
   });
 
-  it("records exactly one unfulfilled non-exclusive component track and one partial move", () => {
+  it("records MOVE_SPIKES alone as exact and fulfills its non-exclusive component track", () => {
     const coverage = JSON.parse(readFileSync("ANIMATION_COVERAGE.json", "utf8")) as Record<string, any>;
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(201);
-    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial").map((entry: { move: string }) => entry.move)).toEqual(["MOVE_SPIKES"]);
-    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPIKES")).toMatchObject({ status: "partial" });
-    expect(coverage.queue).toEqual(["MOVE_SPIKES"]);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "exact")).toHaveLength(202);
+    expect(coverage.entries.filter((entry: { status: string }) => entry.status === "partial")).toEqual([]);
+    expect(coverage.entries.find((entry: { move: string }) => entry.move === "MOVE_SPIKES")).toMatchObject({ status: "exact" });
+    expect(coverage.queue).toEqual([]);
     expect(coverage.componentTracks.find((track: { id: string }) => track.id === "spikes-target-arc")).toEqual({
       id: "spikes-target-arc", representatives: ["MOVE_SPIKES"],
       components: ["asset:ANIM_TAG_SPIKES", "sprite:gSpikesSpriteTemplate", "visualCommand:monbg", "visualCommand:clearmonbg"],
-      goal: "Evidence only: derive a source-relative target-arc reducer before any typed Scene-ON seam or compositor work.",
+      fulfilled: true,
+      goal: "FULFILLED: MOVE_SPIKES independently passes 114/114 player-back plus 114/114 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows (228/228 total) through first inactive cleanup with zero residual pixels. The source-relative compositor uses extracted ANIM_TAG_SPIKES art, typed live species/sides/geometry, generic back/front art, predecessor OAM/matrix latches, the age-4 monbg palette handoff, source painter order, chrome, audio timing, and cleanup without RGB/framebuffer replay or hazard gameplay ownership. MOVE_MEGAHORN and MOVE_SPIKE_CANNON remain independent controls only.",
     });
   });
 });

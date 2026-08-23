@@ -255,21 +255,22 @@ function verifyOrientation(side: Side, contract: Json): Json {
     lifecycle: { creates: "7/19/31", destroys: "84/96/108", sprites: 3 },
     latches: { oam: "113/113", matrices: "113/113", palette: "112/113 + same-row age 4 monbg" },
     sourceRows: 114, rawRgbRows: 114, gameplayRngTransitions: 0, animationRngTransitions: 111,
-    framebufferCompared: false,
+    framebufferCompared: true,
   };
 }
 
 export function verifySpikesEvidence(): Record<Side, Json> {
   invariant(fixture.schema === "spikes-bilateral-evidence/v1" && fixture.oracleProfile === "battle-scene-on"
-    && fixture.move === "MOVE_SPIKES" && fixture.moveId === 191 && fixture.status === "partial" && fixture.coverageCredit === false, "Spikes fixture contract");
-  invariant(fixture.evidenceScope.productionAnimationChanged === false && fixture.evidenceScope.reducerAdded === false
-    && fixture.evidenceScope.typedSeamAdded === false && fixture.evidenceScope.compositorAdded === false
-    && fixture.evidenceScope.framebufferCompared === false && fixture.evidenceScope.coveragePromotion === false
+    && fixture.move === "MOVE_SPIKES" && fixture.moveId === 191 && fixture.status === "exact" && fixture.coverageCredit === true, "Spikes fixture contract");
+  invariant(fixture.evidenceScope.productionAnimationChanged === true && fixture.evidenceScope.reducerAdded === true
+    && fixture.evidenceScope.typedSeamAdded === true && fixture.evidenceScope.compositorAdded === true
+    && fixture.evidenceScope.framebufferCompared === true && fixture.evidenceScope.coveragePromotion === true
     && fixture.evidenceScope.boundaryOrBarrierChanged === false && fixture.evidenceScope.gameplayStateOwned === false
-    && fixture.evidenceScope.fullDenseRowsRetained === true && fixture.evidenceScope.twiceFreshByteIdentical === true, "Spikes evidence-only boundary");
+    && fixture.evidenceScope.fullDenseRowsRetained === true && fixture.evidenceScope.twiceFreshByteIdentical === true, "Spikes exact production boundary");
   invariant(same(fixture.components, ["asset:ANIM_TAG_SPIKES", "sprite:gSpikesSpriteTemplate", "visualCommand:monbg", "visualCommand:clearmonbg"])
-    && fixture.productionAcceptance.reducerRows === "0/228" && fixture.productionAcceptance.typedSeamRows === "0/228"
-    && fixture.productionAcceptance.productionFramebufferRows === "0/228" && fixture.productionAcceptance.manualQueue === "MOVE_SPIKES", "Spikes no-production remainder");
+    && fixture.productionAcceptance.reducerRows === "114/114 + 114/114" && fixture.productionAcceptance.typedSeamRows === "114/114 + 114/114"
+    && fixture.productionAcceptance.productionFramebufferRows === "114/114 + 114/114" && fixture.productionAcceptance.productionFramebufferResidualPixels === 0
+    && fixture.productionAcceptance.manualQueue === null, "Spikes complete production proof");
   for (const [path, digest] of [[fixture.source.audit, fixture.source.auditSha256], [fixture.source.probe, fixture.source.probeSha256]] as const) {
     invariant(sha(readFileSync(resolve(root, path))) === digest, `${path}: source receipt`);
   }

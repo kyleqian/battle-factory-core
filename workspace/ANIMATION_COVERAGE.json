@@ -5521,12 +5521,14 @@
   },
   {
    "move": "MOVE_SPIKES",
-   "status": "partial",
+   "status": "exact",
    "covered": [
     "complete legal Level-50 FRONTIER_MON_QWILFISH_1 set-211 versus ONIX parties retain both ordinary Battle Scene ON orientations through first inactive cleanup: player-back frames 67-180 and opponent-front 71-184, 114 dense source/state/raw-RGB rows each, repeated twice fresh with byte-identical probe and raw-RGB sequence hashes",
     "the half-open 0x082d18cd..0x082d1924 Move_SPIKES source body, even/odd pointer parities, three source creates at ages 7/19/31, target-arc args/callback/data/visibility lifecycles, affine-off OAM, tags, audio, monbg BG/register cleanup, complete OAM/matrix/palette rows, immutable engine/battler/party state, gameplay RNG=0 transitions, animation RNG=111 transitions, and first inactive cleanup are retained in independent source/evidence/change-map receipts",
     "source entry explicitly measures predecessor outgoing hardware OAM/matrices/palette; ordinary rows have 113/113 preceding software OAM/matrix transfers and 112/113 preceding faded-palette transfers, with the age-4 monbg palette load measured as a same-row exception. No new general latch is claimed.",
-    "evidence-only checkpoint: no reducer, typed seam, compositor, production framebuffer comparison, animation boundary/barrier, canonical recording import, absolute-tick/species-pair gate, or Spikes side-condition gameplay ownership changed; MOVE_SPIKES alone is partial and all siblings retain independent acceptance"
+    "the pure source-relative reducer and narrow typed Scene-ON seam reproduce all 114/114 player-back plus 114/114 opponent-front retained rows: cursor/waits/args, animation RNG, three 30-callback target arcs, affine-off OAM/neutral matrices, allocator slots, blink/destroy lifecycle, tags/palette handoffs, monbg/update/cleanup task data, delayed audio, and first inactive cleanup without side-condition gameplay, damage, battle RNG, turn, or facility ownership",
+    "the ordinary shared Battle Scene ON compositor uses reproducibly extracted ANIM_TAG_SPIKES art, typed live species/sides/geometry, generic back/front art lookup, preceding OAM/matrix transfer, the measured age-4 monbg palette handoff, source signed-y/equal-Y painter order, field chrome, audio timing, and cleanup without recorded RGB/framebuffer lookup, an evidence-pair gate, or absolute ticks",
+    "all 114 player-back plus 114 opponent-front component/seam/raw-RGB/shared-production-framebuffer rows match through first inactive cleanup with zero residual pixels; the committed two-fresh Scene-ON probes remain byte-identical per orientation; MOVE_MEGAHORN and MOVE_SPIKE_CANNON retain independent regression control only and the Spikes side condition remains out of scope"
    ],
    "evidence": [
     "tools/battle-lab/mechanic-spikes-player-qwilfish-opponent-onix.json",
@@ -5541,12 +5543,20 @@
     "tools/compare/evidence/spikes-opponent-raw-rgb.tar.gz",
     "tools/compare/evidence/spikes-changemap-player.json",
     "tools/compare/evidence/spikes-changemap-opponent.json",
-    "tests/animation/spikesEvidence.test.ts"
-   ],
-   "remaining": "Implement only a pure source-relative SPIKES target-arc reducer, then a narrow typed Scene-ON presentation seam and ordinary compositor. Require independent 114/114 player-back plus 114/114 opponent-front production framebuffer acceptance with zero residual pixels before exact promotion; do not claim hazard gameplay or sibling coverage."
+    "src/animation/spikes.ts",
+    "src/animation/sceneOnPresentation.ts",
+    "tools/compare/spikesReducerAudit.ts",
+    "tools/compare/extractSpikesAssets.ts",
+    "src/animation/assets/spikes.json",
+    "tools/compare/spikesFramebuffer.ts",
+    "src/engine/battleScene.ts",
+    "tests/animation/spikesEvidence.test.ts",
+    "tests/animation/spikes.test.ts",
+    "tests/animation/spikesFramebuffer.test.ts"
+   ]
   }
  ],
- "queue": ["MOVE_SPIKES"],
+ "queue": [],
  "componentTracks": [
   {
    "id": "seed-projectile-leech-seed",
@@ -6544,7 +6554,8 @@
     "visualCommand:clearmonbg"
    ],
    "representatives": ["MOVE_SPIKES"],
-   "goal": "Evidence only: derive a source-relative target-arc reducer before any typed Scene-ON seam or compositor work."
+   "fulfilled": true,
+   "goal": "FULFILLED: MOVE_SPIKES independently passes 114/114 player-back plus 114/114 opponent-front source/component/reducer/typed-seam/raw-RGB/shared-production-framebuffer rows (228/228 total) through first inactive cleanup with zero residual pixels. The source-relative compositor uses extracted ANIM_TAG_SPIKES art, typed live species/sides/geometry, generic back/front art, predecessor OAM/matrix latches, the age-4 monbg palette handoff, source painter order, chrome, audio timing, and cleanup without RGB/framebuffer replay or hazard gameplay ownership. MOVE_MEGAHORN and MOVE_SPIKE_CANNON remain independent controls only."
   }
  ],
  "variantAudits": {

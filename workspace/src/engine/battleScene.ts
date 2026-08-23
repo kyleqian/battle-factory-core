@@ -533,6 +533,7 @@ import sonicBoomAsset from "../animation/assets/sonic-boom.json" with { type: "j
 import smokescreenAsset from "../animation/assets/smokescreen.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import hailAsset from "../animation/assets/hail.json" with { type: "json" };
+import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
 import mudShotAsset from "../animation/assets/mud-shot.json" with { type: "json" };
 import waterOrbAsset from "../animation/assets/water-orb.json" with { type: "json" };
 import bubbleBeamAsset from "../animation/assets/bubble-beam.json" with { type: "json" };
@@ -995,6 +996,7 @@ import {
   sceneOnSweetKissView,
   sceneOnLovelyKissView,
   sceneOnOctazookaView,
+  sceneOnSpikesView,
   sceneOnAttractView,
   sceneOnSporeView,
   sceneOnCottonSporeView,
@@ -1064,6 +1066,7 @@ import {
   type SceneOnSweetKissPresentationState,
   type SceneOnLovelyKissPresentationState,
   type SceneOnOctazookaPresentationState,
+  type SceneOnSpikesPresentationState,
   type SceneOnAttractPresentationState,
   type SceneOnPresentPresentationState,
   type SceneOnSporePresentationState,
@@ -1667,6 +1670,9 @@ const octazookaArt = octazookaAsset as {
 };
 const hailArt = hailAsset as {
   particle: { tileset: Tileset; palette: RgbColor[] };
+};
+const spikesArt = spikesAsset as {
+  spike: { tileset: Tileset; palette: RgbColor[] };
 };
 const mudShotArt = mudShotAsset as {
   brownOrb: { tileset: Tileset; palette: RgbColor[] };
@@ -27977,6 +27983,129 @@ export function renderSceneOnMovePresentation(
         ? `${view.attacker.species} used`
         : `Foe ${view.attacker.species} used`,
       "HAIL!",
+      99,
+    );
+    return;
+  }
+
+  if (state.config.move === "SPIKES") {
+    const spikesState = state as SceneOnSpikesPresentationState;
+    const view = sceneOnSpikesView(spikesState);
+    // BuildOamBuffer and palette/matrix DMA scan out the preceding software
+    // row. `monbg` is the only measured palette exception (source age 4),
+    // and its target copy is otherwise at the same native coordinates.
+    const displayed = spikesState.age === 0
+      ? null
+      : sceneOnSpikesView({ ...spikesState, age: spikesState.age - 1 });
+    const attackerIsPlayer = view.attacker.geometry.side === "player";
+    if (attackerIsPlayer === (view.target.geometry.side === "player")) {
+      throw new Error("SPIKES presentation requires battlers on opposite sides");
+    }
+    const battlerArt = (battler: typeof view.attacker): {
+      readonly tileset: Tileset;
+      readonly palette: RgbColor[];
+    } => {
+      if (battler.geometry.side === "player") {
+        const source = (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[
+          battler.species
+        ];
+        if (!source) throw new Error(`SPIKES missing player-back art for ${battler.species}`);
+        return source;
+      }
+      const source = (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[
+        battler.species
+      ];
+      if (!source) throw new Error(`SPIKES missing opponent-front art for ${battler.species}`);
+      return { tileset: subTileset(source.tileset, 0, 8), palette: source.palette };
+    };
+    const attackerArt = battlerArt(view.attacker);
+    const targetArt = battlerArt(view.target);
+    const drawAttacker = () => drawSpriteSheet(
+      fb,
+      attackerArt.tileset,
+      attackerArt.palette,
+      view.attacker.geometry.spriteCorner.x,
+      view.attacker.geometry.spriteCorner.y,
+    );
+    const drawTarget = () => drawSpriteSheet(
+      fb,
+      targetArt.tileset,
+      targetArt.palette,
+      view.target.geometry.spriteCorner.x,
+      view.target.geometry.spriteCorner.y,
+    );
+    const oamCoordinate = (value: number, wrap: number): number => {
+      const masked = value & (wrap - 1);
+      return masked >= wrap / 2 ? masked - wrap : masked;
+    };
+    // SortSprites uses signed OAM y. Its equal-Y list preserves the newer
+    // Spike before the older one (the source `sSpriteOrder` rows show 5,4),
+    // so reverse that hardware list for direct raster writes: ascending slot
+    // is painted first and the lower hardware entry remains visible.
+    const effects = (displayed?.sprites ?? [])
+      .filter((sprite) => !sprite.invisible)
+      .slice().sort((left, right) =>
+        oamCoordinate(left.attr[0], 256) - oamCoordinate(right.attr[0], 256)
+        || left.slot - right.slot
+      );
+    const drawEffects = () => {
+      for (const sprite of effects) drawSpriteSheet(
+        fb,
+        spikesArt.spike.tileset,
+        spikesArt.spike.palette,
+        oamCoordinate(sprite.attr[1], 512),
+        oamCoordinate(sprite.attr[0], 256),
+      );
+    };
+
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // `monbg ANIM_DEF_PARTNER` copies the target to BG1/BG2, under the
+    // target-relative spikes. The copy is visually identical at its native
+    // position; retaining this painter order covers both the pre-copy and
+    // copied rows without move-specific species staging.
+    if (attackerIsPlayer) {
+      drawTarget();
+      drawEffects();
+      drawAttacker();
+    } else {
+      drawAttacker();
+      drawTarget();
+      drawEffects();
+    }
+
+    const profile = spikesState.config.fieldProfile;
+    const playerBattler = attackerIsPlayer ? view.attacker : view.target;
+    const opponentBattler = attackerIsPlayer ? view.target : view.attacker;
+    drawSendOutHealthbox(
+      fb,
+      0,
+      composeOpponentHealthbox(healthboxAssemblyAssets, {
+        name: opponentBattler.species,
+        level: 50,
+        gender: profile.opponentGender ?? "male",
+        hpFraction: profile.opponentHp / profile.opponentMaxHp,
+        status: "none",
+      }),
+    );
+    drawComposedPlayerHealthbox(
+      fb,
+      composePlayerHealthbox(playerHealthboxAssets, {
+        name: playerBattler.species,
+        level: 50,
+        gender: profile.playerGender ?? "male",
+        hpFraction: profile.playerHp / profile.playerMaxHp,
+        status: "none",
+        currentHp: profile.playerHp,
+        maxHp: profile.playerMaxHp,
+      }),
+    );
+    drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    drawMessageTextLines(
+      fb,
+      attackerIsPlayer
+        ? `${view.attacker.species} used`
+        : `Foe ${view.attacker.species} used`,
+      "SPIKES!",
       99,
     );
     return;

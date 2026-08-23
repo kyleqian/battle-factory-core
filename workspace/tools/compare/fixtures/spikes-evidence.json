@@ -3,9 +3,9 @@
   "oracleProfile": "battle-scene-on",
   "move": "MOVE_SPIKES",
   "moveId": 191,
-  "status": "partial",
-  "coverageCredit": false,
-  "coverageCounts": "Level 50: 201/276 exact, 1 partial, 74 unsupported",
+  "status": "exact",
+  "coverageCredit": true,
+  "coverageCounts": "Level 50: 202/276 exact, 0 partial, 74 unsupported",
   "components": [
     "asset:ANIM_TAG_SPIKES",
     "sprite:gSpikesSpriteTemplate",
@@ -50,12 +50,12 @@
     }
   },
   "evidenceScope": {
-    "productionAnimationChanged": false,
-    "reducerAdded": false,
-    "typedSeamAdded": false,
-    "compositorAdded": false,
-    "framebufferCompared": false,
-    "coveragePromotion": false,
+    "productionAnimationChanged": true,
+    "reducerAdded": true,
+    "typedSeamAdded": true,
+    "compositorAdded": true,
+    "framebufferCompared": true,
+    "coveragePromotion": true,
     "boundaryOrBarrierChanged": false,
     "gameplayStateOwned": false,
     "fullDenseRowsRetained": true,
@@ -105,7 +105,16 @@
     "gameplayRngTransitions": 0,
     "animationRngTransitions": 111,
     "firstInactiveCleanupAge": 113,
-    "affine": "off-only; no fresh-affine credit"
+    "affine": "off-only; no fresh-affine credit",
+    "reducerRows": 228,
+    "typedSeamRows": 228,
+    "productionFramebufferRows": 228,
+    "framebufferCompared": true
+  },
+  "repeatability": {
+    "runsPerOrientation": 2,
+    "comparison": "byte-identical dense JSON and every raw RGB frame",
+    "allMatched": true
   },
   "controls": {
     "megahorn": "adjacent source-boundary control only; no shared acceptance",
@@ -113,10 +122,10 @@
     "hazardOwnership": "Spikes side-condition gameplay remains outside this animation evidence checkpoint"
   },
   "productionAcceptance": {
-    "reducerRows": "0/228",
-    "typedSeamRows": "0/228",
-    "productionFramebufferRows": "0/228",
-    "productionFramebufferResidualPixels": null,
-    "manualQueue": "MOVE_SPIKES"
+    "reducerRows": "114/114 + 114/114",
+    "typedSeamRows": "114/114 + 114/114",
+    "productionFramebufferRows": "114/114 + 114/114",
+    "productionFramebufferResidualPixels": 0,
+    "manualQueue": null
   }
 }
