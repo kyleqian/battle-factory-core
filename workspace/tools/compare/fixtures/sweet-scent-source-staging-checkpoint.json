@@ -29,11 +29,11 @@
   "orientations": [
     {
       "orientation": "player-back",
-      "scenario": "tools/battle-lab/mechanic-sweet-scent-player-surskit-opponent-onix.json"
+      "scenario": "tools/battle-lab/mechanic-sweet-scent-player-weepinbell-opponent-onix.json"
     },
     {
       "orientation": "opponent-front",
-      "scenario": "tools/battle-lab/mechanic-sweet-scent-opponent-surskit-player-onix.json"
+      "scenario": "tools/battle-lab/mechanic-sweet-scent-opponent-weepinbell-player-onix.json"
     }
   ],
   "reducer": {
